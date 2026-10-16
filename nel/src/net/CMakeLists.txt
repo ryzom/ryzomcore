@@ -4,7 +4,8 @@ FILE(GLOB NET_MANAGER "net_manager.*")
 LIST(REMOVE_ITEM SRC ${NET_MANAGER})
 
 NL_TARGET_LIB(nelnet ${HEADERS} ${SRC})
-add_project_library_alias(nelnet net)
+add_library(NeL::net ALIAS nelnet)
+set_target_properties(nelnet PROPERTIES EXPORT_NAME net)
 
 IF(WITH_GTK)
   IF(GTK2_FOUND)
@@ -13,7 +14,10 @@ IF(WITH_GTK)
   ENDIF()
 ENDIF()
 
-TARGET_LINK_LIBRARIES(nelnet nelmisc)
+TARGET_LINK_LIBRARIES(nelnet
+        PUBLIC
+        NeL::misc
+)
 NL_DEFAULT_PROPS(nelnet "NeL, Library: NeL Net")
 NL_ADD_RUNTIME_FLAGS(nelnet)
 

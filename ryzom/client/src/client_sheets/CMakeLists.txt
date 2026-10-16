@@ -4,8 +4,9 @@ FILE(GLOB PRIV_H *.h)
 SOURCE_GROUP(headers FILES ${PRIV_H} ${PUB_H})
 
 NL_TARGET_LIB(ryzom_clientsheets ${SRC} ${PRIV_H})
+add_library(Ryzom::clientsheets ALIAS ryzom_clientsheets)
 
-TARGET_LINK_LIBRARIES(ryzom_clientsheets ryzom_gameshare NeL::misc)
+TARGET_LINK_LIBRARIES(ryzom_clientsheets Ryzom::gameshare NeL::misc)
 NL_DEFAULT_PROPS(ryzom_clientsheets "Ryzom, Library: Client Sheets")
 NL_ADD_LIB_SUFFIX(ryzom_clientsheets)
 

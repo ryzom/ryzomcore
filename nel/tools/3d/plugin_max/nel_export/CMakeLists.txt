@@ -9,9 +9,9 @@ ADD_LIBRARY(nel_export SHARED ${SRC} nel_export.rc)
 TARGET_INCLUDE_DIRECTORIES(nel_export PRIVATE ${MAXSDK_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel_export
-							nelmisc 
-							nelpacs
-							nel3d
+							NeL::misc
+							NeL::pacs
+							NeL::3d
 							nel_mesh_lib 
 							nel_patch_lib
 							nel_3dsmax_shared 

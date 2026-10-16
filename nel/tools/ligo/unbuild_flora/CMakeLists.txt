@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(nl_unbuild_flora ${SRC})
 
-TARGET_LINK_LIBRARIES(nl_unbuild_flora nel3d nelmisc nelligo nelgeorges)
+TARGET_LINK_LIBRARIES(nl_unbuild_flora PRIVATE NeL::3d NeL::misc NeL::ligo NeL::georges)
 NL_DEFAULT_PROPS(nl_unbuild_flora "NeL, Tools, Ligo: Unbuild Flora")
 NL_ADD_RUNTIME_FLAGS(nl_unbuild_flora)
 

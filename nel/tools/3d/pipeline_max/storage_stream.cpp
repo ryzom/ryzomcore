@@ -3,6 +3,7 @@
  * \brief CStorageStream
  * \date 2012-08-16 22:06GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8 (1M context)
  * CStorageStream
  */
 
@@ -29,121 +30,96 @@
 #include "storage_stream.h"
 
 // STL includes
-
-// 3rd Party includes
-#include <gsf/gsf-input-stdio.h>
-#include <gsf/gsf-output-stdio.h>
+#include <cstring>
 
 // NeL includes
 // #include <nel/misc/debug.h>
 
 // Project includes
 
-// using namespace std;
-// using namespace NLMISC;
-
 // #define NL_DEBUG_STORAGE
 
 namespace PIPELINE {
 namespace MAX {
 
-CStorageStream::CStorageStream(GsfInput *input) : NLMISC::IStream(true), m_Input(input), m_Output(NULL)
+CStorageStream::CStorageStream(const uint8 *data, size_t size)
+    : NLMISC::IStream(true), m_ReadData(data), m_ReadSize(size), m_Pos(0)
 {
 
 }
 
-CStorageStream::CStorageStream(GsfOutput *output) : NLMISC::IStream(false), m_Input(NULL), m_Output(output)
+CStorageStream::CStorageStream(const std::vector<uint8> &data)
+    : NLMISC::IStream(true), m_ReadData(data.empty() ? NULL : &data[0]), m_ReadSize(data.size()), m_Pos(0)
+{
+
+}
+
+CStorageStream::CStorageStream()
+    : NLMISC::IStream(false), m_ReadData(NULL), m_ReadSize(0), m_Pos(0)
 {
 
 }
 
 CStorageStream::~CStorageStream()
 {
-	if (m_Output)
-	{
-		gsf_output_seek(m_Output, 0, G_SEEK_END);
-	}
+
 }
 
 bool CStorageStream::seek(sint32 offset, NLMISC::IStream::TSeekOrigin origin) const
 {
-	if (m_Input)
+	// Size limit for the cursor: the buffer we can seek within. In write mode the cursor may only
+	// land inside the already-written span (CStorageChunks back-patches sizes it has written, then
+	// returns to the end) — seeking past the end is not how the chunk layer grows the stream
+	// (serialBuffer does that).
+	size_t limit = isReading() ? m_ReadSize : m_WriteBuffer.size();
+	sint64 target;
+	switch (origin)
 	{
-		switch (origin)
-		{
-		case begin:
-			return gsf_input_seek(m_Input, offset, G_SEEK_SET);
-		case current:
-			return gsf_input_seek(m_Input, offset, G_SEEK_CUR);
-		case end:
-			return gsf_input_seek(m_Input, offset, G_SEEK_END);
-		}
+	case begin:
+		target = (sint64)offset;
+		break;
+	case current:
+		target = (sint64)m_Pos + (sint64)offset;
+		break;
+	case end:
+		target = (sint64)limit + (sint64)offset;
+		break;
+	default:
+		return false;
 	}
-	else if (m_Output)
-	{
-		switch (origin)
-		{
-		case begin:
-			return gsf_output_seek(m_Output, offset, G_SEEK_SET);
-		case current:
-			return gsf_output_seek(m_Output, offset, G_SEEK_CUR);
-		case end:
-			return gsf_output_seek(m_Output, offset, G_SEEK_END);
-		}
-	}
-	return NLMISC::IStream::seek(offset, origin);
+	if (target < 0 || target > (sint64)limit)
+		return false;
+	m_Pos = (size_t)target;
+	return true;
 }
 
 sint32 CStorageStream::getPos() const
 {
-	if (m_Input)
-	{
-		gsf_off_t res = gsf_input_tell(m_Input);
-		if (res < 2147483647L) // exception when larger
-			return (sint32)res;
-	}
-	else if (m_Output)
-	{
-		gsf_off_t res = gsf_output_tell(m_Output);
-		if (res < 2147483647L) // exception when larger
-			return (sint32)res;
-	}
-	return NLMISC::IStream::getPos();
+	return (sint32)m_Pos;
 }
 
 void CStorageStream::serialBuffer(uint8 *buf, uint len)
 {
 	if (!len)
-	{
-#ifdef NL_DEBUG_STORAGE
-		nldebug("Serial 0 size buffer");
-#endif
 		return;
-	}
-	if (m_Input)
+	if (isReading())
 	{
-		if (!gsf_input_read(m_Input, len, buf))
+		if (m_Pos + len > m_ReadSize)
 		{
 #ifdef NL_DEBUG_STORAGE
-			nldebug("Cannot read from input, throw exception");
+			nldebug("Read past end of storage stream, throw exception");
 #endif
 			throw NLMISC::EStream();
 		}
-	}
-	else if (m_Output)
-	{
-		if (!gsf_output_write(m_Output, len, buf))
-		{
-			nlwarning("Cannot write %i bytes to output at pos %i, throw exception", len, getPos());
-			throw NLMISC::EStream();
-		}
+		memcpy(buf, m_ReadData + m_Pos, len);
+		m_Pos += len;
 	}
 	else
 	{
-#ifdef NL_DEBUG_STORAGE
-		nldebug("No input or output, should not happen, throw exception");
-#endif
-		throw NLMISC::EStream();
+		if (m_Pos + len > m_WriteBuffer.size())
+			m_WriteBuffer.resize(m_Pos + len);
+		memcpy(&m_WriteBuffer[m_Pos], buf, len);
+		m_Pos += len;
 	}
 }
 
@@ -156,35 +132,22 @@ void CStorageStream::serialBit(bool &bit)
 
 bool CStorageStream::eof()
 {
-	if (m_Input)
-	{
-		return gsf_input_eof(m_Input);
-	}
-	else
-	{
-#ifdef NL_DEBUG_STORAGE
-		nldebug("No input, this function cannot output, throw exception");
-#endif
-		throw NLMISC::EStream();
-	}
+	if (isReading())
+		return m_Pos >= m_ReadSize;
+	return false;
 }
 
 sint32 CStorageStream::size()
 {
-	if (m_Input)
-	{
-		gsf_off_t res = gsf_input_size(m_Input);
-		if (res < 2147483647L) // exception when larger
-			return (sint32)res;
-	}
-	else
-	{
-#ifdef NL_DEBUG_STORAGE
-		nldebug("No input, this function cannot output, throw exception");
-#endif
-		throw NLMISC::EStream();
-	}
-	throw NLMISC::EStream();
+	return (sint32)(isReading() ? m_ReadSize : m_WriteBuffer.size());
+}
+
+void CStorageStream::swapBuffer(std::vector<uint8> &out)
+{
+	nlassert(!isReading());
+	out.swap(m_WriteBuffer);
+	m_WriteBuffer.clear();
+	m_Pos = 0;
 }
 
 } /* namespace MAX */

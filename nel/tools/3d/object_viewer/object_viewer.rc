@@ -2773,6 +2773,8 @@ BEGIN
         MENUITEM "Show FX user matrix",         IDM_SHOW_FX_USER_MATRIX
         MENUITEM SEPARATOR
         MENUITEM "Show occlusion test meshs",   iDM_SHOW_OCCLUSION_TEST_MESHS
+        MENUITEM SEPARATOR
+        MENUITEM "Force water reflections",     IDM_FORCE_WATER_REFLECTIONS
 
     END
     POPUP "&Scene"

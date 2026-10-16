@@ -50,6 +50,7 @@
 
 #include "nel/sound/u_audio_mixer.h"
 #include "nel/3d/water_pool_manager.h"
+#include "nel/3d/water_reflection_manager.h"
 #include "nel/3d/landscape_model.h"
 #include "nel/3d/visual_collision_manager.h"
 #include "nel/3d/visual_collision_entity.h"
@@ -1227,11 +1228,33 @@ void CObjectViewer::go ()
 					(*it)->goPreRender();
 				}
 			}
+			// Render realtime water reflection passes into their render
+			// targets (replicated scene renders through the reflected
+			// camera, same pattern as the client and the water sample)
+			{
+				CWaterReflectionManager &wrm = CNELU::Scene->getWaterReflectionManager();
+				uint numReflPasses = wrm.beginPasses();
+				for (uint reflPass = 0; reflPass < numReflPasses; ++reflPass)
+				{
+					CWaterReflectionManager::CActiveReflection refl;
+					wrm.beginPass(reflPass, refl);
+					CNELU::Scene->beginPartRender();
+					// doHrcPass on (replicated renders must match the main
+					// render), no shadow map generation inside reflections,
+					// keep traversals so the main render below still
+					// consumes the frame's ellapsed time
+					CNELU::Scene->renderPart(UScene::RenderAll, true, false, true);
+					CNELU::Scene->endPartRender(true);
+					wrm.endPass(reflPass);
+				}
+				wrm.endPasses();
+			}
+
 			// Render the CS
-			if (_CS) _CS->render ();			
-			
-			// Draw the scene		
-			CNELU::Scene->render();	
+			if (_CS) _CS->render ();
+
+			// Draw the scene
+			CNELU::Scene->render();
 			
 			// call of callback list
 			{
@@ -1520,6 +1543,20 @@ void CObjectViewer::go ()
 	}
 	while (!CNELU::AsyncListener.isKeyPushed(KeyESCAPE)&&CNELU::Driver->isActive());
 	_InstanceRunning = false;
+}
+
+// ***************************************************************************
+
+void CObjectViewer::setForceWaterReflections(bool force)
+{
+	CNELU::Scene->getWaterReflectionManager().setForceReflections(force);
+}
+
+// ***************************************************************************
+
+bool CObjectViewer::getForceWaterReflections() const
+{
+	return CNELU::Scene->getWaterReflectionManager().getForceReflections();
 }
 
 // ***************************************************************************

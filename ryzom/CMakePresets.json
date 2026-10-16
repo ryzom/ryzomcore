@@ -63,9 +63,10 @@
     {
       "name": "ci-linux-ryzom-static",
       "inherits": [
-        "linux",
         "ci-ryzom",
-        "ryzom"
+        "ccache",
+        "ryzom",
+        "linux"
       ],
       "cacheVariables": {
         "WITH_STATIC": true
@@ -74,20 +75,14 @@
     {
       "name": "ci-linux-ryzom-dynamic",
       "inherits": [
-        "linux",
         "ci-ryzom",
-        "ryzom"
+        "ccache",
+        "ryzom",
+        "linux"
       ],
       "cacheVariables": {
         "WITH_STATIC": false
       }
-    },
-    {
-      "name": "windows-ryzom",
-      "inherits": [
-        "windows",
-        "ryzom"
-      ]
     },
     {
       "name": "ci-linux-ryzom-client-hunter",
@@ -96,6 +91,21 @@
         "ccache",
         "ryzom-client",
         "linux"
+      ]
+    },
+    {
+      "name": "ci-linux-ryzom-client-vcpkg",
+      "inherits": [
+        "vcpkg",
+        "ryzom-client",
+        "linux"
+      ]
+    },
+    {
+      "name": "windows-ryzom",
+      "inherits": [
+        "windows",
+        "ryzom"
       ]
     },
     {

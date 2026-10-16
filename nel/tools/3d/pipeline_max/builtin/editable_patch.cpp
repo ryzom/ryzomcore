@@ -55,7 +55,7 @@ CEditablePatch::~CEditablePatch()
 const ucstring CEditablePatch::DisplayName = ucstring("EditablePatch");
 const char *CEditablePatch::InternalName = "EditablePatch";
 const NLMISC::CClassId CEditablePatch::ClassId = NLMISC::CClassId(0x00001030, 0x00000000);
-const TSClassId CEditablePatch::SuperClassId = CPatchObject::SuperClassId;
+const TSClassId CEditablePatch::SuperClassId = 0x00000010; // GeomObject (== CPatchObject::SuperClassId); literal to avoid cross-TU static-init-order dependency
 const CEditablePatchClassDesc EditablePatchClassDesc(&DllPluginDescBuiltin);
 
 void CEditablePatch::parse(uint16 version, uint filter)

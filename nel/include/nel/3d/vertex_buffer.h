@@ -337,6 +337,13 @@ public:
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
+	/** Serial write-compatibility switch for export tools: when true, serialHeader() writes
+	  * the pre-TBufferUsage header version 3 (the old TPreferredMemory enum values), matching
+	  * streams produced before the buffer-usage refactor. Read code accepts both, always.
+	  * Global, not thread-safe: set once at tool startup (asset export pipelines only).
+	  */
+	static bool				SerialOldPreferredMemory;
+
 	/**
 	  * Default constructor. Make an empty vertex buffer. No value, no vertex. Vertex color format is set to TRGBA.
 	  */

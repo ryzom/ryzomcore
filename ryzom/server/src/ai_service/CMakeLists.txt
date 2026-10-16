@@ -23,10 +23,10 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_ai_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL
 
 TARGET_LINK_LIBRARIES(ryzom_ai_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ryzom_servershare
-        ryzom_aishare
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::servershare
+        Ryzom::aishare
         NeL::misc
         NeL::net
         NeL::georges

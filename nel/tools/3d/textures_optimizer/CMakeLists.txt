@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(textures_optimizer ${SRC})
 
-TARGET_LINK_LIBRARIES(textures_optimizer nelmisc)
+TARGET_LINK_LIBRARIES(textures_optimizer PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(textures_optimizer "NeL, Tools, 3D: Textures optimizer")
 NL_ADD_RUNTIME_FLAGS(textures_optimizer)
 

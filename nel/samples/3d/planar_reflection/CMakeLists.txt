@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_planar_reflection WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(nl_sample_planar_reflection nelmisc nel3d)
+TARGET_LINK_LIBRARIES(nl_sample_planar_reflection NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(nl_sample_planar_reflection "NeL, Samples, 3D: Planar Reflection")
 NL_ADD_RUNTIME_FLAGS(nl_sample_planar_reflection)
 

@@ -27,6 +27,7 @@ copy "%RC_ROOT%\build_win32\plugin_max\2022_x64\bin\nel_patch_edit_r.dlm" "neled
 copy "%RC_ROOT%\build_win32\plugin_max\2022_x64\bin\tile_utility_r.dlu" "neltileutility_r.dlu"
 copy "%RC_ROOT%\build_win32\plugin_max\2022_x64\bin\nel_vertex_tree_paint_r.dlm" "nel_vertex_tree_paint_r.dlm"
 copy "%RC_ROOT%\build_win32\plugin_max\2022_x64\bin\ligoscape_utility_r.dlx" "nelligoscapeutility_r.dlx"
+copy "%RC_ROOT%\build_win32\plugin_max\2022_x64\bin\mapext198m3.dlm" "mapext198m3.dlm"
 "C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /t http://timestamp.comodoca.com/authenticode "*.*"
 copy "%RC_ROOT%\code\nel\tools\3d\plugin_max\nel_patch_paint\keys.cfg" "keys.cfg"
 copy "%RC_ROOT%\code\nel\tools\3d\ligo\ligoscape.cfg" "ligoscape.cfg"

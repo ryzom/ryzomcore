@@ -4,9 +4,10 @@ FILE(GLOB HEADERS ../../include/nel/pipeline/*.h)
 SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
 
 NL_TARGET_LIB(nelpipeline ${HEADERS} ${SRC})
-add_project_library_alias(nelpipeline pipeline)
+add_library(NeL::pipeline ALIAS nelpipeline)
+set_target_properties(nelpipeline PROPERTIES EXPORT_NAME pipeline)
 
-TARGET_LINK_LIBRARIES(nelpipeline nelmisc)
+TARGET_LINK_LIBRARIES(nelpipeline NeL::misc)
 NL_DEFAULT_PROPS(nelpipeline "NeL, Library: NeL Pipeline")
 NL_ADD_RUNTIME_FLAGS(nelpipeline)
 

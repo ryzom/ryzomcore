@@ -12,13 +12,11 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ryzom_frontend_service WIN32 ${SRC})
 
-TARGET_INCLUDE_DIRECTORIES(ryzom_frontend_service PRIVATE ${MYSQL_INCLUDE_DIR})
-
 TARGET_LINK_LIBRARIES(ryzom_frontend_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ${MYSQL_LIBRARIES}
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        MySQL::MySQL
         NeL::misc
         NeL::net
         NeL::georges

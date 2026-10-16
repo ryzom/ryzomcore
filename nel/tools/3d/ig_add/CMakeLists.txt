@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ig_add ${SRC})
 
-TARGET_LINK_LIBRARIES(ig_add nel3d nelmisc)
+TARGET_LINK_LIBRARIES(ig_add PRIVATE NeL::3d NeL::misc)
 NL_DEFAULT_PROPS(ig_add "NeL, Tools, 3D: ig_add")
 NL_ADD_RUNTIME_FLAGS(ig_add)
 

@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(file_info ${SRC})
 
-TARGET_LINK_LIBRARIES(file_info nel3d nelmisc)
+TARGET_LINK_LIBRARIES(file_info PRIVATE NeL::3d NeL::misc)
 NL_DEFAULT_PROPS(file_info "NeL, Tools, 3D: file_info")
 NL_ADD_RUNTIME_FLAGS(file_info)
 

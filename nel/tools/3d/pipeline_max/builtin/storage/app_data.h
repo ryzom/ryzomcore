@@ -3,6 +3,8 @@
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
  * CAppData
  */
 
@@ -54,6 +56,7 @@ class CAppDataEntry;
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * This implements the AppData chunk in the storage
  */
 class CAppData : public CStorageContainer
@@ -87,18 +90,6 @@ public:
 	/// Initialize a new instance of this chunk
 	void init();
 
-	// public // TODO: Simplify using templates and returning a specialized storage object, auto-converted to the requested type.
-	/*/// Gets a pointer to an appdata chunk buffer. Returns NULL if it does not exist. Size is returned in the size parameter.
-	const uint8 *read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const;
-	/// Locks a pointer to an appdata chunk buffer for writing to with specified capacity. May return NULL if this chunk is unparsable or no memory can be allocated.
-	uint8 *lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 capacity);
-	/// Unlocks a pointer to an appdata chunk buffer, setting the final written size.
-	void unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size);
-	/// Fills an appdata chunk buffer with specified data, which will be copied.
-	void fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint8 *buffer, uint32 size);
-	/// Erases an appdata chunk.
-	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);*/
-
 	// public
 	/// Gets an appdata chunk storage object, returns NULL if it does not exist
 	template <typename T>
@@ -109,6 +100,25 @@ public:
 	/// Erases an appdata chunk.
 	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
 
+	//! \name NeL export script AppData entries
+	//! Every `NEL3D_APPDATA_*` entry the NeL export scripts store is keyed
+	//! (ScriptClassId, ScriptSuperClassId, subId) with a null-terminated string payload
+	//! (booleans/enums as decimal-string text — see plugin_max/nel_mesh_lib/export_appdata.h
+	//! for the key catalog).
+	//@{
+	/// The MAXSCRIPT utility key the NeL export script entries are stored under.
+	static const NLMISC::CClassId ScriptClassId;   // (0x04d64858, 0x16d1751d)
+	static const TSClassId ScriptSuperClassId;     // 4128
+	/// Read a script entry's string value. Returns false when the entry is absent or the
+	/// payload lacks the trailing NUL the convention requires.
+	bool getScriptString(uint32 subId, std::string &out);
+	/// Create-or-overwrite a script entry with the null-terminated string convention — the
+	/// write half of programmatic export-flag editing (e.g. toggling DONOTEXPORT). The entry
+	/// value re-serializes through the normal entry build, so the rewrite stays byte-exact for
+	/// an unchanged value and byte-local for a changed one.
+	bool setScriptString(uint32 subId, const std::string &value);
+	//@}
+
 	// read access
 	/// Return the entries map, do not modify directly
 	inline const TMap &entries() const { return m_Entries; }
@@ -118,6 +128,10 @@ protected:
 
 private:
 	TMap m_Entries;
+	/// Entries in original file order (or creation order for authored entries). build() writes
+	/// entries in this order, not m_Entries' key-sorted order, so files whose exporter didn't
+	/// insert entries in (ClassId,SuperClassId,SubId) order still round-trip byte-identically.
+	std::vector<CAppDataEntry *> m_EntryOrder;
 
 }; /* class CAppData */
 
@@ -125,6 +139,7 @@ private:
  * \brief CAppDataEntryKey
  * \date 2012-08-18 18:01GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * CAppDataEntryKey
  */
 class CAppDataEntryKey : public IStorageObject
@@ -150,6 +165,7 @@ public:
  * \brief CAppDataEntry
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
  * This implements an entry in the AppData chunk in the storage
  */
 class CAppDataEntry : public CStorageContainer
@@ -254,6 +270,7 @@ T *CAppData::getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint3
 		appDataEntry = new CAppDataEntry();
 		appDataEntry->init();
 		m_Entries[key] = appDataEntry;
+		m_EntryOrder.push_back(appDataEntry);
 		appDataEntry->key()->ClassId = classId;
 		appDataEntry->key()->SuperClassId = superClassId;
 		appDataEntry->key()->SubId = subId;

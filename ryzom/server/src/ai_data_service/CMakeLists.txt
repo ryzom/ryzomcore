@@ -9,7 +9,7 @@ TARGET_INCLUDE_DIRECTORIES(ai_data_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_
 TARGET_LINK_LIBRARIES(ai_data_service
 		PRIVATE
         admin_modules
-        ryzom_gameshare
+        Ryzom::gameshare
         server_share
         ai_share
         NeL::misc

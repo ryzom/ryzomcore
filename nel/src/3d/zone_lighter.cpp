@@ -1149,6 +1149,34 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	// Number of patch
 	uint patchCount=(uint)_PatchInfo.size();
 
+	// Debug: dump the exact per-lumel positions/normals the lighting pass will use
+	// (per patch: u32 count, then count * 6 floats pos.xyz normal.xyz). Lets external
+	// tooling fit lighting parameters (e.g. recover a lost sun_direction) in closed
+	// form against reference lumels instead of searching by whole lighter runs.
+	if (const char *dumpPath = getenv ("NL3D_ZONE_LIGHTER_DUMP_LUMELS"))
+	{
+		FILE *dumpFile = fopen (dumpPath, "wb");
+		if (dumpFile)
+		{
+			uint32 dumpPatchCount = (uint32)patchCount;
+			fwrite (&dumpPatchCount, 4, 1, dumpFile);
+			for (uint dp = 0; dp < patchCount; ++dp)
+			{
+				const std::vector<CLumelDescriptor> &dl = _Lumels[dp];
+				uint32 dumpLumelCount = (uint32)dl.size ();
+				fwrite (&dumpLumelCount, 4, 1, dumpFile);
+				for (uint dlIdx = 0; dlIdx < dl.size (); ++dlIdx)
+				{
+					fwrite (&dl[dlIdx].Position.x, 4, 3, dumpFile);
+					fwrite (&dl[dlIdx].Normal.x, 4, 3, dumpFile);
+				}
+			}
+			fclose (dumpFile);
+		}
+		else
+			nlwarning ("NL3D_ZONE_LIGHTER_DUMP_LUMELS: cannot write %s", dumpPath);
+	}
+
 	// Reset patch count
 	{
 		CSynchronized<std::vector<bool> >::CAccessor access (&_PatchComputed);

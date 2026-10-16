@@ -6,7 +6,7 @@ SOURCE_GROUP("" FILES ${SRCS} ${HDRS} ${RECS})
 
 ADD_EXECUTABLE(mesh_export ${SRCS} ${HDRS} ${RECS})
 
-TARGET_LINK_LIBRARIES(mesh_export mesh_utils nel3d nelmisc)
+TARGET_LINK_LIBRARIES(mesh_export PRIVATE mesh_utils NeL::3d NeL::misc)
 NL_DEFAULT_PROPS(mesh_export "NeL, Tools, 3D: Mesh Export")
 NL_ADD_RUNTIME_FLAGS(mesh_export)
 

@@ -198,6 +198,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(IDM_SHOW_FX_MATRIX, OnUpdateShowFXMatrix)
 	ON_UPDATE_COMMAND_UI(IDM_SHOW_FX_USER_MATRIX, OnUpdateShowFXUserMatrix)
 	ON_UPDATE_COMMAND_UI(iDM_SHOW_OCCLUSION_TEST_MESHS, OnUpdateShowOcclusionTestMeshs)
+	ON_COMMAND(IDM_FORCE_WATER_REFLECTIONS, OnForceWaterReflections)
+	ON_UPDATE_COMMAND_UI(IDM_FORCE_WATER_REFLECTIONS, OnUpdateForceWaterReflections)
 	ON_WM_CREATE()
 	ON_WM_ERASEBKGND()
 	ON_UPDATE_COMMAND_UI(ID_WINDOW_ANIMATION, OnUpdateWindowAnimation)
@@ -911,6 +913,16 @@ void CMainFrame::OnUpdateShowFXUserMatrix(CCmdUI* pCmdUI)
 void CMainFrame::OnUpdateShowOcclusionTestMeshs(CCmdUI* pCmdUI)
 {
 	pCmdUI->SetCheck(ObjView->getOcclusionTestMeshsVisible());
+}
+
+void CMainFrame::OnForceWaterReflections()
+{
+	ObjView->setForceWaterReflections(!ObjView->getForceWaterReflections());
+}
+
+void CMainFrame::OnUpdateForceWaterReflections(CCmdUI* pCmdUI)
+{
+	pCmdUI->SetCheck(ObjView->getForceWaterReflections());
 }
 
 

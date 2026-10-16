@@ -3,6 +3,8 @@
  * \brief CStorageObject
  * \date 2012-08-18 09:02GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CStorageObject
  */
 
@@ -31,6 +33,7 @@
 
 // STL includes
 #include <sstream>
+#include <vector>
 
 // NeL includes
 #include <nel/misc/stream.h>
@@ -41,6 +44,13 @@ namespace PIPELINE {
 namespace MAX {
 
 class CStorageChunks;
+
+// Portable replacement for std::vector<T>::data() — absent in MSVC 9.0 (VS2008, used for the
+// Max-2010-matching x87 reference build). Null-safe like data(), so an empty vector yields NULL
+// rather than the undefined &v[0]. Kept as a plain helper (not the C++11 member) so the whole
+// library compiles under both the modern x64 toolchain and VS2008.
+template <typename T> inline T *nlVectorData(std::vector<T> &v) { return v.empty() ? (T *)0 : &v[0]; }
+template <typename T> inline const T *nlVectorData(const std::vector<T> &v) { return v.empty() ? (const T *)0 : &v[0]; }
 
 struct EStorage : public NLMISC::Exception
 {
@@ -84,6 +94,28 @@ public: // should be protected but that doesn't compile, nice c++!
 	virtual bool getSize(sint32 &size) const;
 	// Only true when inherting from CStorageContainer
 	virtual bool isContainer() const;
+	// Which chunk-header container bit to write for this object. Defaults to isContainer(), but
+	// e.g. CSceneClass overrides this to reproduce a chunk that was read with the container bit
+	// unset even though the object type is always a CStorageContainer (see CSceneClass::m_ReadAsLeaf).
+	virtual bool writeAsContainer() const { return isContainer(); }
+
+	// Whether THIS specific chunk was read with a 64-bit header (6- vs 14-byte chunk header; see
+	// CStorageChunks). Set by CStorageContainer::serial(CStorageChunks&) right after the chunk is
+	// entered, consulted on write so a stream with a genuine mix of 32-bit and 64-bit chunks
+	// round-trips each chunk at its original width instead of the writer upgrading everything to
+	// whatever width the outermost chunk happened to use (see pipeline_max_design.md defect list).
+	// Tri-state (known/unknown, not just true/false): typed classes commonly rebuild their own
+	// sub-chunks as brand new objects during build() (putChunk/putChunkValue), which never went
+	// through a read, so they have no original width of their own — wasWas64BitChunkKnown() is
+	// false for those, and the container's own build() falls back to its aggregate m_Was64Bit
+	// default for them instead of silently treating "never read" as "was 32-bit".
+	inline void setWas64BitChunk(bool was64Bit) { m_Was64BitChunk = was64Bit; m_Was64BitChunkKnown = true; }
+	inline bool wasRead64BitChunk() const { return m_Was64BitChunk; }
+	inline bool wasRead64BitChunkKnown() const { return m_Was64BitChunkKnown; }
+
+private:
+	bool m_Was64BitChunk;
+	bool m_Was64BitChunkKnown;
 };
 
 // CStorageContainer : serializes a container chunk
@@ -100,6 +132,11 @@ protected:
 	// protected data
 	TStorageObjectContainer m_Chunks;
 	bool m_ChunksOwnsPointers;
+	// True if the source stream used 64-bit chunk headers (any chunk with size32==0 marker).
+	// Set on read; consumed on write to preserve per-stream byte identity. Nested containers
+	// share the top-level's CStorageChunks so this flag is only load-bearing on the top-level
+	// container passed to serial(stream, size).
+	bool m_Was64Bit;
 
 public:
 	CStorageContainer();

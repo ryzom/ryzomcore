@@ -33,6 +33,7 @@
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/db_manager.h"
 #include "nel/gui/interface_factory.h"
+#include "nel/gui/action_handler.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1250,6 +1251,37 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	bool CGroupEditBox::handleEventKeyDown(const NLGUI::CEventDescriptorKey &rEDK)
+	{
+		// Standard clipboard / selection shortcuts. Fired at the widget level so
+		// every embedder gets them without an external key-binding layer.
+		if (!rEDK.getKeyCtrl() || rEDK.getKeyAlt())
+			return false;
+		bool hasSel = (_CurrSelection == this) && (_SelectCursorPos != _CursorPos);
+		switch (rEDK.getKey())
+		{
+			case NLMISC::KeyA:
+				setSelectionAll();
+				return true;
+			case NLMISC::KeyC:
+				if (hasSel) copy();
+				return true;
+			case NLMISC::KeyX:
+				if (hasSel)
+				{
+					copy();
+					cutSelection();
+				}
+				return true;
+			case NLMISC::KeyV:
+				paste();
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	// ----------------------------------------------------------------------------
 	bool CGroupEditBox::undo()
 	{
 		if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
@@ -1372,17 +1404,22 @@ namespace NLGUI
 			// KEY EVENT //
 			///////////////
 			const NLGUI::CEventDescriptorKey &rEDK = (const NLGUI::CEventDescriptorKey&)event;
+			bool keyDownHandled = false;
 			switch(rEDK.getKeyEventType())
 			{
 				case NLGUI::CEventDescriptorKey::keychar: handleEventChar(rEDK); break;
 				case NLGUI::CEventDescriptorKey::keystring: handleEventString(rEDK); break;
+				case NLGUI::CEventDescriptorKey::keydown: keyDownHandled = handleEventKeyDown(rEDK); break;
 				default: break;
 			}
 			// update the text
 			setInputStringRef(_InputString);
 
-			// if event of type char or string, consider handle all of them
+			// if event of type char or string, consider handle all of them; a
+			// keydown is only consumed when a shortcut actually fired
 			if( rEDK.getKeyEventType()==NLGUI::CEventDescriptorKey::keychar || rEDK.getKeyEventType()==NLGUI::CEventDescriptorKey::keystring )
+				return true;
+			if( keyDownHandled )
 				return true;
 			// Else filter the EventKeyDown AND EventKeyUp.
 			else
@@ -2083,5 +2120,49 @@ namespace NLGUI
 			}
 		}
 	}
+
+	// Right-click menu handlers. Operate on the edit box that opened the menu
+	// (tracked by _MenuFather in the right-click branch of handleEvent).
+	class CAHEditboxCopy : public IActionHandler
+	{
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		{
+			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
+			if (eb) eb->copy();
+		}
+	};
+	REGISTER_ACTION_HANDLER(CAHEditboxCopy, "editbox_copy");
+
+	class CAHEditboxCut : public IActionHandler
+	{
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		{
+			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
+			if (!eb) return;
+			eb->copy();
+			eb->cutSelection();
+		}
+	};
+	REGISTER_ACTION_HANDLER(CAHEditboxCut, "editbox_cut");
+
+	class CAHEditboxPaste : public IActionHandler
+	{
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		{
+			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
+			if (eb) eb->paste();
+		}
+	};
+	REGISTER_ACTION_HANDLER(CAHEditboxPaste, "editbox_paste");
+
+	class CAHEditboxSelectAll : public IActionHandler
+	{
+		virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+		{
+			CGroupEditBox *eb = CGroupEditBox::getMenuFather();
+			if (eb) eb->setSelectionAll();
+		}
+	};
+	REGISTER_ACTION_HANDLER(CAHEditboxSelectAll, "editbox_select_all");
 }
 

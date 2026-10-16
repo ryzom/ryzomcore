@@ -19,7 +19,7 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
         NeL::misc
         NeL::web
         NeL::net
-        ryzom_gameshare
+        Ryzom::gameshare
         NeL::sevenzip
         CURL::libcurl
         ZLIB::ZLIB

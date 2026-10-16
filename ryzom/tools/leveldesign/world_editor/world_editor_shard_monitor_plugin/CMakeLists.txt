@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(world_editor_shard_monitor_plugin
         NeL::3d
         NeL::sound
         NeL::snd_lowlevel
-        ryzom_gameshare
+        Ryzom::gameshare
 )
 
 NL_DEFAULT_PROPS(world_editor_shard_monitor_plugin "Ryzom, Tools, World: World Editor Shard Monitor Plugin")

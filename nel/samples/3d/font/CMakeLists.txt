@@ -5,8 +5,8 @@ ADD_EXECUTABLE(nl_sample_font WIN32 ${SRC})
 # TODO: hunter TARGET_LINK_LIBRARIES(nl_sample_font PRIVATE nelmisc nel3d)
 IF(EMSCRIPTEN)
   TARGET_COMPILE_DEFINITIONS(nl_sample_font PRIVATE "FONT_DIR=\"/share/nl_sample_font/\"")
-  TARGET_LINK_LIBRARIES(nl_sample_font
-    -Wl,--whole-archive nelmisc nel3d nel_drv_opengles3 -Wl,--no-whole-archive
+  TARGET_LINK_LIBRARIES(nl_sample_font PRIVATE
+    -Wl,--whole-archive NeL::misc NeL::3d nel_drv_opengles3 -Wl,--no-whole-archive
   )
   SET_TARGET_PROPERTIES(nl_sample_font PROPERTIES
     SUFFIX ".js"
@@ -14,7 +14,7 @@ IF(EMSCRIPTEN)
   )
 ELSE()
   TARGET_COMPILE_DEFINITIONS(nl_sample_font PRIVATE "FONT_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_font/\"")
-  TARGET_LINK_LIBRARIES(nl_sample_font nelmisc nel3d)
+  TARGET_LINK_LIBRARIES(nl_sample_font PRIVATE NeL::misc NeL::3d)
 ENDIF()
 NL_DEFAULT_PROPS(nl_sample_font "NeL, Samples, 3D: Font")
 NL_ADD_RUNTIME_FLAGS(nl_sample_font)

@@ -185,11 +185,44 @@ void	CLandscapeModel::clipAndRenderLandscape()
 	else
 		refineCenter= _RefineCenterUser;
 
+	// Water reflection renders: refine, clip and geomorph from the REAL
+	// eye position (the clip traversal's cluster visibility override),
+	// not the mirrored below-ground camera. The tessellation and its
+	// geomorphs are computed and calibrated for the eye; evaluating the
+	// geomorph from the mirrored center renders nearby patches at wildly
+	// wrong morph factors — huge stretched terrain shapes in the
+	// reflection while the camera moves.
+	clipTrav.getClusterVisibilityPosOverride(refineCenter);
+
 	Landscape.lockBuffers ();
 
 	// Use the Clustered pyramid for Patch, but Frustum pyramid for TessBlocks.
 	// We are sure that pyramid has normalized plane normals.
-	Landscape.clip(refineCenter, ClusteredPyramid);
+	// Water reflection renders: the landscape vertex program does not
+	// implement the water clip plane (nelvp-converted programs emit no
+	// clip distances), so underwater terrain renders into the reflection
+	// as a huge dark shape (the mirrored camera sits below the surface,
+	// close to the lake bed). Cull it at patch level: append the water
+	// plane to the clip pyramid so fully submerged patches are dropped.
+	// Patches straddling the waterline keep their submerged part
+	// (TessBlock clipping has a fixed plane count).
+	float reflPlaneZ;
+	if (getOwnerScene()->getWaterReflectionManager().getRenderingReflectionPlaneZ(reflPlaneZ))
+	{
+		static std::vector<CPlane> reflPyramid;
+		reflPyramid = ClusteredPyramid;
+		CPlane waterPlane;
+		// cull below the FAR clip bias, not the surface: the far passes
+		// keep a deep underwater band (see CLandscape::render), so patches
+		// within it must survive the patch-level cull
+		waterPlane.make(CVector(0.f, 0.f, -1.f), CVector(0.f, 0.f, reflPlaneZ - CWaterReflectionManager::getFarClipBias()));
+		reflPyramid.push_back(waterPlane);
+		Landscape.clip(refineCenter, reflPyramid);
+	}
+	else
+	{
+		Landscape.clip(refineCenter, ClusteredPyramid);
+	}
 
 
 	// Render
@@ -239,14 +272,33 @@ void	CLandscapeModel::clipAndRenderLandscape()
 		}
 	}
 
-	// First, refine.
-	H_BEFORE( NL3D_Landscape_Refine );
-	Landscape.refine(refineCenter);
-	H_AFTER( NL3D_Landscape_Refine );
+	const bool inReflection = getOwnerScene()->getWaterReflectionManager().isRenderingReflection();
+
+	// First, refine. NOT in water reflection renders: refine() mutates the
+	// tessellation incrementally toward the given center, so refining
+	// toward the mirrored camera would (a) thrash the tessellation between
+	// the real and mirrored centers every frame and (b) leave each of the
+	// frame's replicated reflection passes rendering a different
+	// intermediate state (visible as per-eye reflection mismatch in the
+	// stereo debugger). The main render's tessellation shares the mirrored
+	// camera's XY position and serves the reflection by symmetry.
+	if (!inReflection)
+	{
+		H_BEFORE( NL3D_Landscape_Refine );
+		Landscape.refine(refineCenter);
+		H_AFTER( NL3D_Landscape_Refine );
+	}
 
 	// then render.
 	H_BEFORE( NL3D_Landscape_Render );
-	Landscape.render(refineCenter, renderTrav.CamLook, CurrentPyramid, isAdditive ());
+	// In reflection renders the far passes select the deeper water clip
+	// bias (fills the void bleed at water horizons with distant terrain)
+	Landscape.setWaterReflectionClip(inReflection ? &getOwnerScene()->getWaterReflectionManager() : NULL);
+	// Vegetation is excluded from water reflection renders: its vertex
+	// program does not implement the reflection clip plane (underwater
+	// vegetation would show), and the contribution is not worth the cost
+	bool doVegetables = !inReflection;
+	Landscape.render(refineCenter, renderTrav.CamLook, CurrentPyramid, isAdditive (), doVegetables);
 	H_AFTER( NL3D_Landscape_Render );
 
 	// Should be unlocked by render
@@ -261,8 +313,10 @@ void	CLandscapeModel::traverseRender()
 	// No-Op. But delay the clip and render to the end of Opaque Rendering. For VBLock optim
 	renderTRav.addRenderLandscape(this);
 
-	// If the landscape receive shadow, then add it.
-	if(canReceiveShadowMap())
+	// If the landscape receive shadow, then add it. Not during water
+	// reflection renders (shadow projection is skipped there; see
+	// CClipTrav shadow caster registration).
+	if(canReceiveShadowMap() && !getOwnerScene()->getWaterReflectionManager().isRenderingReflection())
 		renderTRav.getShadowMapManager().addShadowReceiver(this);
 }
 

@@ -4,7 +4,8 @@ FILE(GLOB HEADERS ../../include/nel/gui/*.h)
 SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
 
 NL_TARGET_LIB(nelgui ${SRC} ${HEADERS})
-add_project_library_alias(nelgui gui)
+add_library(NeL::gui ALIAS nelgui)
+set_target_properties(nelgui PROPERTIES EXPORT_NAME gui)
 
 TARGET_INCLUDE_DIRECTORIES(nelgui
         PRIVATE

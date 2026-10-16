@@ -55,7 +55,7 @@ CTriObject::~CTriObject()
 const ucstring CTriObject::DisplayName = ucstring("TriObject");
 const char *CTriObject::InternalName = "TriObject";
 const NLMISC::CClassId CTriObject::ClassId = NLMISC::CClassId(0x4553fa6, 0x30f8421e); /* Not official, please correct */
-const TSClassId CTriObject::SuperClassId = CGeomObject::SuperClassId;
+const TSClassId CTriObject::SuperClassId = 0x00000010; // GeomObject; literal to avoid cross-TU static-init-order dependency
 const CTriObjectClassDesc TriObjectClassDesc(&DllPluginDescBuiltin);
 
 void CTriObject::parse(uint16 version, uint filter)

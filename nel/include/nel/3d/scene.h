@@ -36,6 +36,7 @@
 #include "nel/3d/light_trav.h"
 #include "nel/3d/render_trav.h"
 #include "nel/3d/flare_model.h"
+#include "nel/3d/water_reflection_manager.h"
 
 #include "nel/3d/viewport.h"
 #include "nel/3d/u_scene.h"
@@ -508,6 +509,9 @@ public:
 
 	//@}
 
+	/// Realtime planar water reflections
+	CWaterReflectionManager			&getWaterReflectionManager() {return _WaterReflectionManager;}
+	const CWaterReflectionManager	&getWaterReflectionManager() const {return _WaterReflectionManager;}
 
 	/// Get a ref. to the particle system manager. You shouldn't call this (has methods for private processing)
 	CParticleSystemManager &getParticleSystemManager();
@@ -582,10 +586,13 @@ public:
 	  * Several contexts allow to deal with a flare rendered from several points of view.
 	  * There's a limited number of contexts (MaxNumFlareContexts).
 	  * Context allocation:
-	  *   0 - Main scene (default)
+	  *   0 - Main scene (default) / stereo left eye
 	  *   1 - Interface 3D scenes (character/item previews)
 	  *   2 - Stereo right eye (via IStereoDisplay::getFlareContext)
 	  *   3 - Reserved
+	  *   4 - Water reflection pass, left eye (via IStereoDisplay::getFlareContext)
+	  *   5 - Water reflection pass, right eye
+	  *   6, 7 - Free
 	  */
 	// @{
 		// The max number of contexts for flares
@@ -701,6 +708,9 @@ private:
 	CLoadBalancingTrav	LoadBalancingTrav;
 	CRenderTrav			RenderTrav;
 	//@}
+
+	// Realtime planar water reflections
+	CWaterReflectionManager	_WaterReflectionManager;
 
 	// The root models (will be deleted by CScene).
 	CTransform			*Root;

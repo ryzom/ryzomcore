@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(shape2obj ${SRC})
 
-TARGET_LINK_LIBRARIES(shape2obj nelmisc nel3d)
+TARGET_LINK_LIBRARIES(shape2obj PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(shape2obj "NeL, Tools, 3D: shape2obj")
 NL_ADD_RUNTIME_FLAGS(shape2obj)
 

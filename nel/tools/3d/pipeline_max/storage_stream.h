@@ -3,6 +3,7 @@
  * \brief CStorageStream
  * \date 2012-08-16 22:06GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.8 (1M context)
  * CStorageStream
  */
 
@@ -30,11 +31,7 @@
 #include <nel/misc/types_nl.h>
 
 // STL includes
-#include <map>
-
-// 3rd Party includes
-#include <gsf/gsf-infile.h>
-#include <gsf/gsf-outfile.h>
+#include <vector>
 
 // NeL includes
 #include <nel/misc/stream.h>
@@ -48,31 +45,58 @@ namespace MAX {
  * \brief CStorageStream
  * \date 2012-08-16 22:06GMT
  * \author Jan Boon (Kaetemi)
- * CStorageStream
+ * \author Claude Opus 4.8 (1M context)
+ * A random-access, in-memory NLMISC::IStream over a single OLE stream's bytes.
+ *
+ * Historically this was a thin adapter onto a libgsf GsfInput/GsfOutput. The OLE container access
+ * moved into the self-contained CStorageOle layer (storage_ole.h) so the whole library is
+ * cross-platform and deterministic without a third-party dependency; this stream is now purely a
+ * byte-buffer view with the seek semantics the chunk layer needs.
+ *
+ * Two modes:
+ * - Read: constructed over an external, immutable byte buffer (the caller owns it and must keep it
+ *   alive for the stream's lifetime). serial() consumes forward; seek() moves the cursor freely.
+ * - Write: constructed empty; serial() appends into a growable internal buffer. CStorageChunks
+ *   back-patches chunk sizes by seeking to an earlier offset, writing, then seeking back to the
+ *   end — this buffer supports that (unlike NLMISC::CMemStream, whose length()==write-position
+ *   makes the seek-back-then-restore fail, which is why the tools used temp files before). Retrieve
+ *   the accumulated bytes with buffer() / swapBuffer() once serialization is done.
  */
 class CStorageStream : public NLMISC::IStream
 {
 public:
-	CStorageStream(GsfInput *input);
-	CStorageStream(GsfOutput *output);
+	/// Read mode over an external buffer (not copied, not owned — must outlive this stream).
+	CStorageStream(const uint8 *data, size_t size);
+	/// Read mode over an external buffer (not copied, not owned — must outlive this stream).
+	explicit CStorageStream(const std::vector<uint8> &data);
+	/// Write mode into a fresh internal growable buffer.
+	CStorageStream();
 	virtual ~CStorageStream();
 
 	virtual bool seek(sint32 offset, TSeekOrigin origin) const;
 	virtual sint32 getPos() const;
-	// virtual std::string getStreamName() const; // char const   *      gsf_input_name                      (GsfInput *input);
+	// virtual std::string getStreamName() const;
 	virtual void serialBuffer(uint8 *buf, uint len);
 	virtual void serialBit(bool &bit);
 
 	sint32 size();
 	bool eof();
 
-private:
-	GsfInput *m_Input;
-	GsfOutput *m_Output;
+	/// Write mode only: the bytes written so far.
+	const std::vector<uint8> &buffer() const { return m_WriteBuffer; }
+	/// Write mode only: move the accumulated bytes out into \a out (leaves this stream empty).
+	void swapBuffer(std::vector<uint8> &out);
 
-/* there exist compressed max files, so maybe we will need this at some point
-GsfInput *          gsf_input_uncompress                (GsfInput *src);
-*/
+private:
+	// Read mode: external buffer view.
+	const uint8 *m_ReadData;
+	size_t m_ReadSize;
+
+	// Write mode: owned growable buffer.
+	std::vector<uint8> m_WriteBuffer;
+
+	// Cursor (mutable because IStream::seek()/getPos() are const).
+	mutable size_t m_Pos;
 
 }; /* class CStorageStream */
 

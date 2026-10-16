@@ -1,0 +1,32 @@
+<interface_config>
+
+<!-- ******************************************************* -->
+<!-- * Lua console                                         * -->
+<!-- * A REPL / UI inspector in interface data: the log is * -->
+<!-- * a <vector> stack of text views, the input a stock   * -->
+<!-- * edit box, and console.lua evaluates each line with  * -->
+<!-- * loadstring against the live widget tree.            * -->
+<!-- ******************************************************* -->
+
+<template name="console_line" keep="true" id="" posparent="parent" posref="TL TL" x="0" y="0">
+	<view type="text" id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" fontsize="12" shadow="true" global_color="false" color="255 255 255 255" hardtext="" />
+</template>
+
+<group type="container" id="console" w="700" pop_min_w="400" pop_max_w="900" h="176" pop_min_h="120" pop_max_h="360"
+	title="Lua console" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="true" x="272" y="180">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<group id="log" posref="TL TL" x="12" y="-8" sizeref="w" w="-24" h="122">
+			<vector template="console_line" _size="8" _firstindex="0" _firstpos="TL TL" _xfirst="0" _yfirst="0" _nextpos="BL TL" id="l$i" x="0" y="0" />
+		</group>
+		<instance template="edit_box_widget" id="input" posref="BL BL" x="12" y="6" w="676" prompt="&gt; " entry_type="text" max_num_chars="192" max_historic="32" onenter="lua" params="console.enter()" clear_on_escape="true" enter_loose_focus="false" />
+	</group>
+</group>
+<tree node="console"></tree>
+
+<lua file="console.lua" />
+
+</interface_config>

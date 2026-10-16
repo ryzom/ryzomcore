@@ -137,6 +137,7 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 	AnimDetailTrav.Scene= this;
 	LoadBalancingTrav.Scene= this;
 	RenderTrav.Scene= this;
+	_WaterReflectionManager.setScene(this);
 
 	_ShapeBank = NULL;
 
@@ -209,6 +210,9 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 // ***************************************************************************
 void	CScene::release()
 {
+	// release water reflection targets and camera (before model deletion below)
+	_WaterReflectionManager.release();
+
 	// reset the _QuadGridClipManager, => unlink models, and delete clusters.
 	if( _QuadGridClipManager )
 		_QuadGridClipManager->reset();

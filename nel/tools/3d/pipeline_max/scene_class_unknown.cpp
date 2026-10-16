@@ -3,6 +3,7 @@
  * \brief CSceneClassUnknown
  * \date 2012-08-20 13:23GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * CSceneClassUnknown
  */
 
@@ -71,7 +72,10 @@ CSceneClassUnknownDesc::CSceneClassUnknownDesc(const NLMISC::CClassId classId, c
 
 CSceneClass *CSceneClassUnknownDesc::create(CScene *scene) const
 {
+	// Unknown classes are only created through createUnknown() on the superclass desc; this
+	// path should be unreachable. Return NULL after the assert so we don't fall off the end.
 	nlassert(false);
+	return NULL;
 }
 
 void CSceneClassUnknownDesc::destroy(CSceneClass *sc) const

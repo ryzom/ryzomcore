@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(zone_elevation ${SRC})
 
-TARGET_LINK_LIBRARIES(zone_elevation nel3d nelmisc nelligo)
+TARGET_LINK_LIBRARIES(zone_elevation PRIVATE NeL::3d NeL::misc NeL::ligo)
 NL_DEFAULT_PROPS(zone_elevation "NeL, Tools, 3D: Zone Elevation")
 NL_ADD_RUNTIME_FLAGS(zone_elevation)
 

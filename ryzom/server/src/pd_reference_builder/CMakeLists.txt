@@ -6,8 +6,8 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_reference_builder_service PRIVATE ${RZ_SERVER_S
 
 TARGET_LINK_LIBRARIES(ryzom_reference_builder_service
         PRIVATE
-        ryzom_gameshare
-        ryzom_pd
+        Ryzom::gameshare
+        Ryzom::pd
         NeL::misc
         NeL::net
         NeL::georges

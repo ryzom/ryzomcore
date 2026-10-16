@@ -6,11 +6,11 @@ SET(NL_LS_CFG "NL_LS_CFG=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_login_system/\"
 TARGET_COMPILE_DEFINITIONS(nl_sample_ls_client PRIVATE ${NL_LS_CFG})
 TARGET_COMPILE_DEFINITIONS(nl_sample_ls_fes PRIVATE ${NL_LS_CFG})
 
-TARGET_LINK_LIBRARIES(nl_sample_ls_client nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_ls_client PRIVATE NeL::misc NeL::net)
 NL_DEFAULT_PROPS(nl_sample_ls_client "NeL, Samples, Net, Login Service: LS Client")
 NL_ADD_RUNTIME_FLAGS(nl_sample_ls_client)
 
-TARGET_LINK_LIBRARIES(nl_sample_ls_fes nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_ls_fes PRIVATE NeL::misc NeL::net)
 NL_DEFAULT_PROPS(nl_sample_ls_fes "NeL, Samples, Net, Login Service: LS Frontend")
 NL_ADD_RUNTIME_FLAGS(nl_sample_ls_fes)
 

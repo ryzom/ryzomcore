@@ -6,6 +6,7 @@ ADD_SUBDIRECTORY(nel_export)
 ADD_SUBDIRECTORY(nel_patch_edit)
 ADD_SUBDIRECTORY(nel_patch_paint)
 ADD_SUBDIRECTORY(nel_vertex_tree_paint)
+ADD_SUBDIRECTORY(map_extender)
 ADD_SUBDIRECTORY(tile_utility)
 
 INSTALL(FILES 

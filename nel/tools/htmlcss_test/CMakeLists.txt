@@ -5,8 +5,8 @@ ADD_EXECUTABLE(htmlcss_test ${SRC})
 TARGET_INCLUDE_DIRECTORIES(htmlcss_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${LUA_INCLUDE_DIR} )
 TARGET_LINK_LIBRARIES(htmlcss_test
         PRIVATE
-        nelmisc
-        nelgui
+        NeL::misc
+        NeL::gui
         ${LUA_LIBRARIES}
         LibXml2::LibXml2
 )

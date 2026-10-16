@@ -6,9 +6,9 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_persistant_data_service PRIVATE ${RZ_SERVER_SRC
 
 TARGET_LINK_LIBRARIES(ryzom_persistant_data_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ryzom_pd
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::pd
         NeL::misc
         NeL::net
 )

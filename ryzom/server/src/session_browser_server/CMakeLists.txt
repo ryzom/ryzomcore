@@ -6,9 +6,9 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_session_browser_service PRIVATE ${RZ_SERVER_SRC
 
 TARGET_LINK_LIBRARIES(ryzom_session_browser_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ryzom_servershare
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::servershare
         NeL::misc
         NeL::net
         NeL::georges

@@ -1003,6 +1003,7 @@
 #define ID_WINDOW_SKELETON_SCALE        32984
 #define ID_WINDOW_TUNE_MRM              32985
 #define IDM_SNAPSHOT_TOOL               32986
+#define IDM_FORCE_WATER_REFLECTIONS     32987
 #define ID_PS_EDITOR_STATUS             36111
 
 // Next default values for new objects
@@ -1010,7 +1011,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        1151
-#define _APS_NEXT_COMMAND_VALUE         32987
+#define _APS_NEXT_COMMAND_VALUE         32988
 #define _APS_NEXT_CONTROL_VALUE         1460
 #define _APS_NEXT_SYMED_VALUE           1001
 #endif

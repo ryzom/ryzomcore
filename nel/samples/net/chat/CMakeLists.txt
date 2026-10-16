@@ -6,11 +6,11 @@ SET(CHAT_DIR "CHAT_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_chat/\"")
 TARGET_COMPILE_DEFINITIONS(nl_sample_chatclient PRIVATE ${CHAT_DIR})
 TARGET_COMPILE_DEFINITIONS(nl_sample_chatserver PRIVATE ${CHAT_DIR})
 
-TARGET_LINK_LIBRARIES(nl_sample_chatclient nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_chatclient PRIVATE NeL::misc NeL::net)
 NL_DEFAULT_PROPS(nl_sample_chatclient "NeL, Samples, Net, Chat: Chat Client")
 NL_ADD_RUNTIME_FLAGS(nl_sample_chatclient)
 
-TARGET_LINK_LIBRARIES(nl_sample_chatserver nelmisc nelnet)
+TARGET_LINK_LIBRARIES(nl_sample_chatserver PRIVATE NeL::misc NeL::net)
 NL_DEFAULT_PROPS(nl_sample_chatserver "NeL, Samples, Net, Chat: Chat Server")
 NL_ADD_RUNTIME_FLAGS(nl_sample_chatserver)
 

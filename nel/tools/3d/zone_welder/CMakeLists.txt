@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(zone_welder ${SRC})
 
-TARGET_LINK_LIBRARIES(zone_welder nel3d nelmisc)
+TARGET_LINK_LIBRARIES(zone_welder PRIVATE NeL::3d NeL::misc)
 NL_DEFAULT_PROPS(zone_welder "NeL, Tools, 3D: zone_welder")
 NL_ADD_RUNTIME_FLAGS(zone_welder)
 

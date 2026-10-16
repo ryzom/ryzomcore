@@ -1,0 +1,60 @@
+<interface_config>
+
+<!-- ******************************************************* -->
+<!-- * Inventory                                           * -->
+<!-- * Drag-and-drop in interface data: slots are plain    * -->
+<!-- * groups, the dragged item a ghost bitmap, and        * -->
+<!-- * inventory.lua polls getMousePos/getMouseDown (the   * -->
+<!-- * embedder hooks) every frame to run the gesture.     * -->
+<!-- ******************************************************* -->
+
+<!-- A 44x44 bag slot: w_slot_item floor, item icon, drop-target glow -->
+<template name="inv_slot" keep="true" id="" posparent="parent" posref="TL TL" x="0" y="0">
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="44" h="44">
+		<view type="bitmap" id="back" posref="MM MM" texture="w_slot_item.tga" global_color="false" />
+		<view type="bitmap" id="icon" posref="MM MM" texture="w_ar_helmet.tga" global_color="false" active="false" />
+		<view type="bitmap" id="hl" posref="MM MM" texture="item_selection.tga" global_color="false" active="false" render_layer="1" />
+	</group>
+</template>
+
+<!-- An equip slot: same anatomy plus its label underneath -->
+<template name="eq_slot" keep="true" id="" label="" posparent="parent" posref="TL TL" x="0" y="0">
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="44" h="58">
+		<view type="bitmap" id="back" posref="TM TM" y="-1" texture="w_slot_item.tga" global_color="false" />
+		<view type="bitmap" id="icon" posparent="back" posref="MM MM" texture="w_ar_helmet.tga" global_color="false" active="false" />
+		<view type="bitmap" id="hl" posparent="back" posref="MM MM" texture="item_selection.tga" global_color="false" active="false" render_layer="1" />
+		<view type="text" id="label" posref="BM BM" y="0" fontsize="10" shadow="true" global_color="false" color="255 255 255 160" hardtext="#label" />
+	</group>
+</template>
+
+<group type="container" id="inventory" w="288" pop_min_w="288" pop_max_w="288" h="204" pop_min_h="204" pop_max_h="204"
+	title="Inventory" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="true" x="946" y="204">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<!-- paper-doll strip: one typed slot per armor piece -->
+		<group id="equip" posref="TL TL" x="12" y="-6" w="264" h="58">
+			<instance template="eq_slot" id="eq_head" x="0" label="Head" />
+			<instance template="eq_slot" id="eq_chest" posparent="eq_head" posref="TR TL" label="Chest" />
+			<instance template="eq_slot" id="eq_hands" posparent="eq_chest" posref="TR TL" label="Hands" />
+			<instance template="eq_slot" id="eq_arms" posparent="eq_hands" posref="TR TL" label="Arms" />
+			<instance template="eq_slot" id="eq_legs" posparent="eq_arms" posref="TR TL" label="Legs" />
+			<instance template="eq_slot" id="eq_feet" posparent="eq_legs" posref="TR TL" label="Feet" />
+		</group>
+		<group id="bag" posref="TL TL" x="12" y="-70" w="264" h="88">
+			<vector template="inv_slot" _size="6" _firstindex="0" _firstpos="TL TL" _xfirst="0" _yfirst="0"   _nextpos="TR TL" id="b$i" x="0" y="0" />
+			<vector template="inv_slot" _size="6" _firstindex="6" _firstpos="TL TL" _xfirst="0" _yfirst="-44" _nextpos="TR TL" id="b$i" x="0" y="0" />
+		</group>
+		<view type="text" id="status" posref="BL BL" x="12" y="6" fontsize="12" shadow="true" global_color="false" color="255 255 255 200" hardtext="Drag armor onto its slot." />
+		<ctrl style="text_button_16" id="bt_reset" posref="BR BR" x="-12" y="4" onclick_l="lua" params_l="inv.reset()" hardtext="Reset" />
+		<!-- the dragged item, moved under the cursor by inv.tick() -->
+		<view type="bitmap" id="ghost" posref="BL BL" x="0" y="0" texture="w_ar_helmet.tga" global_color="false" active="false" render_layer="4" />
+	</group>
+</group>
+<tree node="inventory"></tree>
+
+<lua file="inventory.lua" />
+
+</interface_config>

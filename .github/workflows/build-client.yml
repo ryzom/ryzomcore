@@ -63,12 +63,15 @@ jobs:
             ubuntu_version: 24.04
             cmake_preset: ci-linux-ryzom-client-hunter
             ccache: true
+          - os: ubuntu-24.04
+            cmake_preset: ci-linux-ryzom-client-vcpkg
+            vcpkg: true
           - os: macos-15
             cmake_preset: ci-macos-ryzom-client-vcpkg
             vcpkg: true
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Set reusable strings
       id: strings
       shell: bash
@@ -83,21 +86,21 @@ jobs:
     - uses: lukka/run-vcpkg@v11
       if: matrix.vcpkg == true
 
-    - uses: actions/cache/restore@v5
+    - uses: actions/cache/restore@v6
       if: matrix.vcpkg == true
       with:
         path: ${{ github.workspace }}/.vcpkg
         key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
 
     - name: Dependencies Linux
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.vcpkg != true
       run: |
         wget --quiet https://packages.microsoft.com/config/ubuntu/${{ matrix.ubuntu_version }}/packages-microsoft-prod.deb
         sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt remove --yes man-db
         sudo apt update
-        sudo apt install -y --no-install-recommends \
+        sudo apt install --yes --no-install-recommends \
           ccache \
           libasound2-dev \
           libgl1-mesa-dev \
@@ -112,12 +115,19 @@ jobs:
         wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
+    - name: Dependencies Linux
+      if: runner.os == 'Linux' && matrix.vcpkg == true
+      run: |
+        sudo apt update
+        sudo apt install --yes --no-install-recommends \
+          autoconf autoconf-archive automake libtool nasm libltdl-dev libgl1-mesa-dev
+
     - name: Dependencies macOS
       if: runner.os == 'macOS'
       run: |
         brew install autoconf autoconf-archive automake libtool
 
-    - uses: actions/cache@v5
+    - uses: actions/cache@v6
       if: matrix.ccache == true
       with:
         path: ${{ env.CCACHE_DIR }}
@@ -131,13 +141,13 @@ jobs:
         ccache --set-config=compression=true
         ccache -z
 
-    - uses: actions/cache/restore@v5
+    - uses: actions/cache/restore@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
         restore-keys: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-
 
-    - uses: actions/cache@v5
+    - uses: actions/cache@v6
       if: runner.os == 'Windows'
       with:
         path: C:\DXSDK
@@ -153,7 +163,7 @@ jobs:
           del DXSDK_Jun10.exe
         )
 
-    - uses: actions/cache@v5
+    - uses: actions/cache@v6
       if: runner.os == 'Windows'
       with:
         path: ${{ env.CHOCOLATEY_CACHE }}
@@ -168,12 +178,12 @@ jobs:
       run: |
         cmake --preset ${{ matrix.cmake_preset }}
 
-    - uses: actions/cache/save@v5
+    - uses: actions/cache/save@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
         key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
 
-    - uses: actions/cache/save@v5
+    - uses: actions/cache/save@v6
       if: (matrix.vcpkg == true)
       with:
         path: ${{ github.workspace }}/.vcpkg

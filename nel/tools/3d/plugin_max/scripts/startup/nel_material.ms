@@ -328,7 +328,7 @@ plugin material NelMaterial
     classID:#(0x64c75fec, 0x222b9eb9)
     extends:standard 
 	replaceUI:true
-	version:14.0
+	version:15.0
 (
 	local loadShader
 	local globalUpdateUI
@@ -385,7 +385,14 @@ plugin material NelMaterial
 
 		-- new in version 10
 		bEnableWaterSplash         	type:#boolean default:true ui:cbEnableWaterSplash
-		
+
+		-- new in version 15
+		bWaterRealtimeReflection		type:#boolean default:false ui:cbWaterRealtimeReflection
+		bWaterEnvMapCalcReflectivity	type:#boolean default:false ui:cbWaterEnvMapCalcReflectivity
+		fWaterFresnelBias		type:#float default: 0.15 ui:cfWaterFresnelBias
+		fWaterFresnelScale		type:#float default: 0.85 ui:cfWaterFresnelScale
+		fWaterFresnelPower		type:#float default: 2.0  ui:cfWaterFresnelPower
+
 	
 		-- New in version 3
 		bColorVertex	type:#boolean default:false ui:cbColorVertex
@@ -728,6 +735,14 @@ plugin material NelMaterial
 
 			CheckBox cbCalcWaterLightmap "Compute water lightmap" across:2
 			CheckBox cbEnableWaterSplash "Enable water splash"
+
+			CheckBox cbWaterRealtimeReflection "Realtime planar reflection" across:2
+			CheckBox cbWaterEnvMapCalcReflectivity "Calc reflectivity on envmap"
+
+			Label	lbWaterFresnel "Reflectivity fresnel (bias/scale/power)" align:#left across:4
+			Spinner	cfWaterFresnelBias   "" range:[0,1,0.15] type:#float scale:0.01 align:#right width:70
+			Spinner	cfWaterFresnelScale  "" range:[0,2,0.85] type:#float scale:0.01 align:#right width:70
+			Spinner	cfWaterFresnelPower  "" range:[0.1,8,2]  type:#float scale:0.1  align:#right width:70
 		)
 		group "Extended"
 		(
@@ -807,6 +822,12 @@ plugin material NelMaterial
 				cfDisplaceMapVSpeed.enabled = bWater and (not bLightMap)				
 				ciWaterPoolID.enabled = bWater and (not bLightMap)
 				cfWaterHeightFactor.enabled = bWater and (not bLightMap)
+
+				cbWaterRealtimeReflection.enabled = bWater and (not bLightMap)
+				cbWaterEnvMapCalcReflectivity.enabled = bWater and (not bLightMap)
+				cfWaterFresnelBias.enabled = bWater and (not bLightMap)
+				cfWaterFresnelScale.enabled = bWater and (not bLightMap)
+				cfWaterFresnelPower.enabled = bWater and (not bLightMap)
 
 				if (bWater == true) then
 				(

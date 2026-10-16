@@ -8,7 +8,7 @@ target_sources(message_box_qt
         main.cpp
         main.rc
 )
-TARGET_LINK_LIBRARIES(message_box_qt Qt::Core Qt::Widgets nelmisc)
+TARGET_LINK_LIBRARIES(message_box_qt PRIVATE Qt::Core Qt::Widgets NeL::misc)
 NL_DEFAULT_PROPS(message_box_qt "NeL, Tools, Misc: Qt Message Box")
 NL_ADD_RUNTIME_FLAGS(message_box_qt)
 

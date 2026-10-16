@@ -200,18 +200,51 @@ IF(HUNTER_ENABLED)
   SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
 ELSE()
 IF(EMSCRIPTEN)
-  # For Emscripten builds, zlib/libpng/libxml2 are not required for the sample demos.
-  # Create stub ZLIB::ZLIB imported target so nelmisc's TARGET_LINK_LIBRARIES doesn't
-  # error out. No actual zlib is linked; the stub is intentionally empty.
+  # For Emscripten builds, zlib and libpng come from Emscripten ports
+  # (-sUSE_ZLIB=1 / -sUSE_LIBPNG=1), same pattern as the FreeType port in
+  # nel/CMakeLists.txt. The options must be present at both compile time
+  # (port headers) and link time (port libraries); INTERFACE options on the
+  # imported targets propagate to consumers of nelmisc. libxml2 stays
+  # unavailable; XML-dependent code is compiled out.
   ADD_LIBRARY(ZLIB::ZLIB INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(ZLIB::ZLIB PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1")
   SET(ZLIB_FOUND TRUE)
   SET(ZLIB_INCLUDE_DIRS "")
   SET(ZLIB_LIBRARIES "")
-  # Do NOT create PNG::PNG - no libpng available, bitmap_png.cpp will be compiled out
-  SET(PNG_FOUND FALSE)
-  SET(LIBXML2_FOUND FALSE)
-  SET(LIBXML2_INCLUDE_DIR "")
-  SET(LIBXML2_LIBRARIES "")
+  ADD_LIBRARY(PNG::PNG INTERFACE IMPORTED)
+  SET_TARGET_PROPERTIES(PNG::PNG PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1"
+    INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1")
+  SET(PNG_FOUND TRUE)
+  # libxml2 becomes available when a cross-built static libxml2 is provided
+  # (e.g. -DLibXml2_DIR=<prefix>/lib/cmake/libxml2-<version>); without one,
+  # XML-dependent code is compiled out as before.
+  FIND_PACKAGE(LibXml2 QUIET CONFIG)
+  IF(TARGET LibXml2::LibXml2)
+    SET(LIBXML2_FOUND TRUE)
+  ELSE()
+    SET(LIBXML2_FOUND FALSE)
+    SET(LIBXML2_INCLUDE_DIR "")
+    SET(LIBXML2_LIBRARIES "")
+  ENDIF()
+  # OpenSSL only when provided (stub or cross-built) via OPENSSL_* variables.
+  # Same emscripten find_library-mode-ONLY caveat as CURL below: publish the
+  # imported targets from the -D cache vars if find_package couldn't build them.
+  FIND_PACKAGE(OpenSSL QUIET)
+  IF(NOT TARGET OpenSSL::SSL AND OPENSSL_INCLUDE_DIR AND OPENSSL_SSL_LIBRARY)
+    ADD_LIBRARY(OpenSSL::SSL STATIC IMPORTED)
+    SET_TARGET_PROPERTIES(OpenSSL::SSL PROPERTIES
+      IMPORTED_LOCATION "${OPENSSL_SSL_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  IF(NOT TARGET OpenSSL::Crypto AND OPENSSL_INCLUDE_DIR AND OPENSSL_CRYPTO_LIBRARY)
+    ADD_LIBRARY(OpenSSL::Crypto STATIC IMPORTED)
+    SET_TARGET_PROPERTIES(OpenSSL::Crypto PROPERTIES
+      IMPORTED_LOCATION "${OPENSSL_CRYPTO_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
 ELSE()
   FIND_PACKAGE(ZLIB REQUIRED)
   FIND_PACKAGE(LibXml2 REQUIRED)
@@ -323,8 +356,6 @@ IF(WITH_MSQUIC)
 ENDIF()
 
 IF(WITH_NEL_TESTS OR WITH_TESTING)
-  FIND_PACKAGE(CppTest)
-
   ENABLE_TESTING()
   # GoogleTest requires at least C++17 not the whole project depends on google test though
   # set(CMAKE_CXX_STANDARD 17)
@@ -332,7 +363,7 @@ IF(WITH_NEL_TESTS OR WITH_TESTING)
   include(FetchContent)
   FetchContent_Declare(
           googletest
-          URL https://github.com/google/googletest/archive/54915d462bb64e9b2bd1a3f0e70c00e6f5d817fb.zip
+          URL https://github.com/google/googletest/archive/52eb8108c5bdec04579160ae17225d66034bd723.zip
           EXCLUDE_FROM_ALL
   )
   SET(INSTALL_GTEST OFF)
@@ -357,7 +388,19 @@ IF(WITH_NEL)
     ENDIF()
 
     IF(EMSCRIPTEN)
-      # CURL not needed for Emscripten builds
+      # CURL only when a cross-built (or stub) curl is provided via
+      # -DCURL_INCLUDE_DIR/-DCURL_LIBRARY; requests fail gracefully with a stub.
+      # find_package(CURL) can silently fail here because CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
+      # rejects any cache path outside the emsdk sysroot; when that happens,
+      # manually publish the imported target from the -D cache vars so
+      # nelweb/nelgui still see curl headers and stub archives.
+      FIND_PACKAGE(CURL QUIET)
+      IF(NOT TARGET CURL::libcurl AND CURL_INCLUDE_DIR AND CURL_LIBRARY)
+        ADD_LIBRARY(CURL::libcurl STATIC IMPORTED)
+        SET_TARGET_PROPERTIES(CURL::libcurl PROPERTIES
+          IMPORTED_LOCATION "${CURL_LIBRARY}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
+      ENDIF()
     ELSE()
     FIND_PACKAGE(CURL REQUIRED)
     ENDIF() # !EMSCRIPTEN
@@ -371,7 +414,6 @@ IF(WITH_NEL)
 ELSE()
 #  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
   FIND_PACKAGE(NeL REQUIRED)
-  INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIRS})
 ENDIF()
 
 IF(WITH_RYZOM)

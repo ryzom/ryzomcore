@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(ig_elevation ${SRC})
 
-TARGET_LINK_LIBRARIES(ig_elevation nelmisc nel3d nelligo)
+TARGET_LINK_LIBRARIES(ig_elevation PRIVATE NeL::misc NeL::3d NeL::ligo)
 NL_DEFAULT_PROPS(ig_elevation "NeL, Tools, 3D: IG Elevation")
 NL_ADD_RUNTIME_FLAGS(ig_elevation)
 

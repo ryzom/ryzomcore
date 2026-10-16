@@ -2,10 +2,11 @@ FILE(GLOB SRC *.cpp )
 FILE(GLOB PRIV_H *.h)
 
 NL_TARGET_LIB(ryzom_landexport ${PRIV_H} ${SRC})
+add_library(Ryzom::landexport ALIAS ryzom_landexport)
 
 TARGET_LINK_LIBRARIES(ryzom_landexport
         PUBLIC
-        ryzom_export
+        Ryzom::landexport
         NeL::misc
         NeL::ligo
         NeL::georges

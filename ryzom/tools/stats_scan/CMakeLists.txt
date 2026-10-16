@@ -4,7 +4,7 @@ ADD_EXECUTABLE(stats_scan WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(stats_scan
         PRIVATE
-        ryzom_gameshare
+        Ryzom::gameshare
         NeL::misc
         NeL::net
         NeL::ligo

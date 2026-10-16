@@ -9,9 +9,9 @@ ADD_LIBRARY(nel_patch_paint SHARED ${SRC})
 TARGET_INCLUDE_DIRECTORIES(nel_patch_paint PRIVATE ${MAXSDK_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel_patch_paint 
-							nelmisc
-							nelligo
-							nel3d
+							NeL::misc
+							NeL::ligo
+							NeL::3d
 							nel_mesh_lib 
 							nel_patch_lib 
 							nel_3dsmax_shared 

@@ -21,6 +21,10 @@
 #include "nel/misc/system_utils.h"
 #include "nel/misc/utf_string_view.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #ifdef NL_OS_WINDOWS
 #define INITGUID
 #include <ddraw.h>
@@ -160,6 +164,30 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 	if (text.empty()) return false;
 
 	bool res = false;
+
+#ifdef __EMSCRIPTEN__
+	// Browser clipboard: navigator.clipboard.writeText() returns a Promise;
+	// fire-and-forget. Requires a secure context (HTTPS or localhost).
+	// Fallback to the legacy execCommand path if the async API is unavailable.
+	res = EM_ASM_INT({
+		try {
+			var s = UTF8ToString($0);
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				navigator.clipboard.writeText(s);
+				return 1;
+			}
+			var ta = document.createElement('textarea');
+			ta.value = s;
+			ta.style.position = 'fixed';
+			ta.style.opacity = '0';
+			document.body.appendChild(ta);
+			ta.select();
+			var ok = document.execCommand('copy');
+			document.body.removeChild(ta);
+			return ok ? 1 : 0;
+		} catch (e) { return 0; }
+	}, text.c_str()) != 0;
+#endif
 
 #ifdef NL_OS_WINDOWS
 	if (OpenClipboard(NULL))

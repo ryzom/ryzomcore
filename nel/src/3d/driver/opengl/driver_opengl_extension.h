@@ -59,6 +59,9 @@ struct	CGlExtensions
 	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
 	bool	NVVertexProgram;
+	// GL_NV_vertex_program2_option: ARBvp1.0 with NV extras, notably
+	// result.clip[] user clip plane distances (GeForce6+ era drivers).
+	bool	NVVertexProgram2Option;
 	bool	EXTVertexShader;
 	bool	NVTextureShader;
 	bool	NVOcclusionQuery;
@@ -161,6 +164,7 @@ public:
 		ARBTextureCubeMap= false;
 		NVTextureShader= false;
 		NVVertexProgram= false;
+		NVVertexProgram2Option= false;
 		NVVertexProgramEmulated= false;
 		EXTSecondaryColor= false;
 		WGLARBPBuffer= false;
@@ -243,6 +247,7 @@ public:
 		result += NVFragmentProgram2 ? "NVFragmentProgram2 " : "";
 		result += ARBVertexProgram ? "ARBVertexProgram " : "";
 		result += NVVertexProgram ? "NVVertexProgram " : "";
+		result += NVVertexProgram2Option ? "NVVertexProgram2Option " : "";
 		result += EXTVertexShader ? "EXTVertexShader " : "";
 		result += NVVertexProgramEmulated ? "NVVertexProgramEmulated " : "";
 

@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(anim_builder ${SRC})
 
-TARGET_LINK_LIBRARIES(anim_builder nelmisc nel3d)
+TARGET_LINK_LIBRARIES(anim_builder PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(anim_builder "NeL, Tools, 3D: anim_builder")
 NL_ADD_RUNTIME_FLAGS(anim_builder)
 

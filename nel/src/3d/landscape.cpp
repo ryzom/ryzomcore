@@ -568,6 +568,7 @@ void			CLandscape::clear()
 
 	// reset driver.
 	_Driver= NULL;
+	_WaterReflectionClip= NULL;
 }
 
 // ***************************************************************************
@@ -1037,7 +1038,7 @@ static inline uint32 countNumWantedIndexFar1(CPatch	*patch)
 
 
 // ***************************************************************************
-void			CLandscape::render(const CVector &refineCenter, const CVector &frontVector, const CPlane	pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool doTileAddPass)
+void			CLandscape::render(const CVector &refineCenter, const CVector &frontVector, const CPlane	pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool	doTileAddPass, bool doVegetables)
 {
 	IDriver *driver= _Driver;
 	nlassert(driver);
@@ -1581,6 +1582,13 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	// 2. Far0Render pass.
 	//====================
 
+	// Water reflection renders: the far passes clip deeper below the water
+	// surface than the static bias — at the horizon the thin static band
+	// still leaves a void bleed where perturbed lookups cross the
+	// waterline, and distant underwater terrain fills it correctly
+	if (_WaterReflectionClip)
+		_WaterReflectionClip->selectClipBias(driver, CWaterReflectionManager::ClipBiasFar);
+
 	// Yoyo: profile
 	NL3D_PROFILE_LAND_SET(ProfNFar0SetupMaterial, driver->profileSetupedMaterials() );
 	H_BEFORE( NL3D_Landscape_Render_DLM );
@@ -1726,6 +1734,10 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	H_AFTER( NL3D_Landscape_Render_Far1 );
 
 
+	// Restore the static-geometry water clip bias after the far passes
+	if (_WaterReflectionClip)
+		_WaterReflectionClip->selectClipBias(driver, CWaterReflectionManager::ClipBiasStatic);
+
 	// 4. "Release" texture materials.
 	//================================
 	FarMaterial.setTexture(0, NULL);
@@ -1754,7 +1766,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 	// First, update Dynamic Lighting for Vegetable, ie just copy.
 	// ==================
-	if(isVegetableActive())
+	if(doVegetables && isVegetableActive())
 	{
 		/* Actually we modulate the DLM with an arbitrary constant for this reason:
 			Color of vegetable (ie their material) are NOT modulated with DLM.
@@ -1805,7 +1817,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 	// render all vegetables, only if driver support VertexProgram.
 	// ==================
-	if(isVegetableActive())
+	if(doVegetables && isVegetableActive())
 	{
 		// Use same plane as TessBlock for faster clipping.
 		vector<CPlane>		vegetablePyramid;

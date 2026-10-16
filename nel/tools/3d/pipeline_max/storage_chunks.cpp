@@ -3,6 +3,8 @@
  * \brief CStorageChunks
  * \date 2012-08-18 09:20GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CStorageChunks
  */
 
@@ -125,7 +127,7 @@ bool CStorageChunks::enterChunk()
 	}
 }
 
-bool CStorageChunks::enterChunk(uint16 id, bool container)
+bool CStorageChunks::enterChunk(uint16 id, bool container, bool as64Bit)
 {
 	if (!m_Stream.isReading())
 	{
@@ -133,19 +135,27 @@ bool CStorageChunks::enterChunk(uint16 id, bool container)
 		nldebug("Writing, enter chunk");
 #endif
 
-		if (m_Is64Bit)
-			throw NLMISC::EStream("64bit chunks not supported");
-
 		// enter the new chunk
 		m_Chunks.resize(m_Chunks.size() + 1);
 		CChunk *chunk = currentChunk();
-		uint32 sizeDummy = 0xFFFFFFFF;
-		chunk->Id = container ? 1 : 0;
+		chunk->Id = container ? 1 : 0; // reused: bit indicates container-flag for leaveChunk
 		chunk->OffsetBegin = m_Stream.getPos(); // store current pos
+		chunk->HeaderSize = as64Bit ? 14 : 6; // per-chunk width, patched in leaveChunk
 
 		// write header
 		m_Stream.serial(id); // write the id
-		m_Stream.serial(sizeDummy); // write 32 bit size placeholder
+		if (as64Bit)
+		{
+			uint32 zero = 0;
+			uint64 sizeDummy64 = 0xFFFFFFFFFFFFFFFFULL;
+			m_Stream.serial(zero); // marker: size32==0 means read the size64 next
+			m_Stream.serial(sizeDummy64); // 8-byte size placeholder
+		}
+		else
+		{
+			uint32 sizeDummy = 0xFFFFFFFF;
+			m_Stream.serial(sizeDummy); // 4-byte size placeholder
+		}
 		return true;
 	}
 	else // input or exception
@@ -183,14 +193,28 @@ sint32 CStorageChunks::leaveChunk()
 #endif
 		sint32 pos = m_Stream.getPos();
 		sint32 sizeWithHeader = pos - currentChunk()->OffsetBegin;
-		sint32 sizePos = currentChunk()->OffsetBegin + 2;
-		m_Stream.seek(sizePos, NLMISC::IStream::begin); // hopefully this correctly overwrites!!!
-		uint32 sizeField = (uint32)sizeWithHeader | (uint32)currentChunk()->Id << 31; // add container flag
-		m_Stream.serial(sizeField);
-		m_Stream.seek(pos, NLMISC::IStream::begin);
+		bool isContainer = currentChunk()->Id != 0;
+		if (currentChunk()->HeaderSize == 14)
+		{
+			// 64-bit header: id(2) + zero32(4) + size64(8)
+			sint32 sizePos = currentChunk()->OffsetBegin + 6;
+			m_Stream.seek(sizePos, NLMISC::IStream::begin);
+			uint64 sizeField64 = (uint64)sizeWithHeader | (isContainer ? 0x8000000000000000ULL : 0);
+			m_Stream.serial(sizeField64);
+			m_Stream.seek(pos, NLMISC::IStream::begin);
+		}
+		else
+		{
+			// 32-bit header: id(2) + size32(4)
+			sint32 sizePos = currentChunk()->OffsetBegin + 2;
+			m_Stream.seek(sizePos, NLMISC::IStream::begin);
+			uint32 sizeField = (uint32)sizeWithHeader | (isContainer ? 0x80000000u : 0);
+			m_Stream.serial(sizeField);
+			m_Stream.seek(pos, NLMISC::IStream::begin);
+		}
 		m_Chunks.resize(m_Chunks.size() - 1);
 #ifdef NL_DEBUG_STORAGE
-		nldebug("Size: %i, Field: %x", sizeWithHeader, sizeField);
+		nldebug("Size: %i", sizeWithHeader);
 #endif
 		return sizeWithHeader;
 	}

@@ -31,7 +31,7 @@ NL_TARGET_DRIVER(nel_drv_direct3d_win ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_drv_direct3d_win BEFORE PRIVATE ${DXSDK_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(nel_drv_direct3d_win nel3d nelmisc ${DXSDK_D3DX9_LIBRARY} ${DXSDK_D3D9_LIBRARY})
+TARGET_LINK_LIBRARIES(nel_drv_direct3d_win NeL::3d NeL::misc ${DXSDK_D3DX9_LIBRARY} ${DXSDK_D3D9_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_direct3d_win "NeL, Driver, Video: Direct3D")
 NL_ADD_RUNTIME_FLAGS(nel_drv_direct3d_win)

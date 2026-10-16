@@ -59,6 +59,7 @@ class	CTileVegetableDesc;
 class	CScene;
 class	CTextureFar;
 class	CTextureDLM;
+class	CWaterReflectionManager;
 class	CPatchDLMContextList;
 class	CShadowMap;
 
@@ -220,6 +221,10 @@ public:
 	 *	call setDriver() before any clip().
 	 */
 	void			setDriver(IDriver *drv);
+	/** Set by CLandscapeModel during water reflection renders (NULL
+	  * otherwise): the far passes then select the deeper water clip bias,
+	  * filling the void bleed at water horizons with distant terrain. */
+	void			setWaterReflectionClip(CWaterReflectionManager *manager) { _WaterReflectionClip = manager; }
 	/** Clip the landscape according to frustum.
 	 *	Planes must be normalized.
 	 */
@@ -233,7 +238,7 @@ public:
 	 *	\param refineCenter should be the position of the camera
 	 *	\param frontVector should be the J vector of the camera
 	 */
-	void			render(const CVector &refineCenter, const CVector &frontVector, const CPlane pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool doTileAddPass=false);
+	void			render(const CVector &refineCenter, const CVector &frontVector, const CPlane pyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE], bool doTileAddPass=false, bool doVegetables=true);
 
 	/// Refine/Geomorph ALL the tesselation of the landscape, from the view point refineCenter. Even if !RefineMode.
 	void			refineAll(const CVector &refineCenter);
@@ -721,6 +726,9 @@ private:
 	uint			_TileMaxSubdivision;
 	// For VertexProgram. true if change has occurred in threshold since the last render().
 	float			_VPThresholdChange;
+
+	// during water reflection renders: far passes select the deeper clip bias
+	CWaterReflectionManager		*_WaterReflectionClip;
 
 	/// \name VertexBuffer mgt.
 	// @{

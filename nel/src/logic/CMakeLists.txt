@@ -2,12 +2,13 @@ FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../include/nel/logic/*.h)
 
 NL_TARGET_LIB(nellogic ${HEADERS} ${SRC})
-add_project_library_alias(nellogic logic)
+add_library(NeL::logic ALIAS nellogic)
+set_target_properties(nellogic PROPERTIES EXPORT_NAME logic)
 
 TARGET_LINK_LIBRARIES(nellogic
         PUBLIC
-        nelmisc
-        nelnet
+        NeL::misc
+        NeL::net
         PRIVATE
         LibXml2::LibXml2
 )

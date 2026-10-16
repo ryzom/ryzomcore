@@ -3,6 +3,7 @@
  * \brief CStorageValue
  * \date 2012-08-18 15:00GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
  * CStorageValue
  */
 
@@ -44,12 +45,14 @@ namespace MAX {
 template <>
 void CStorageValue<std::string>::serial(NLMISC::IStream &stream)
 {
+	if (Value.empty()) return;
 	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size());
 }
 
 template <>
 void CStorageValue<ucstring>::serial(NLMISC::IStream &stream)
 {
+	if (Value.empty()) return;
 	stream.serialBuffer(static_cast<uint8 *>(static_cast<void *>(&Value[0])), Value.size() * 2);
 }
 
@@ -74,13 +77,15 @@ void CStorageValue<ucstring>::setSize(sint32 size)
 template <>
 bool CStorageValue<std::string>::getSize(sint32 &size) const
 {
-	return Value.size();
+	size = (sint32)Value.size();
+	return true;
 }
 
 template <>
 bool CStorageValue<ucstring>::getSize(sint32 &size) const
 {
-	return Value.size() * 2;
+	size = (sint32)(Value.size() * 2);
+	return true;
 }
 
 } /* namespace MAX */

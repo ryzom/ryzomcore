@@ -47,6 +47,15 @@ namespace NLGUI
 		server->addListener( NLMISC::EventMouseWheelId,	 this );
 		server->addListener( NLMISC::EventMouseDblClkId, this );
 
+		// Keyboard events: CInputHandler already routes these into the
+		// widget manager (CEventDescriptorKey), they were just never
+		// subscribed here, leaving edit boxes deaf in standalone use.
+		server->addListener( NLMISC::EventKeyDownId,	 this );
+		server->addListener( NLMISC::EventKeyUpId,		 this );
+		server->addListener( NLMISC::EventCharId,		 this );
+		server->addListener( NLMISC::EventStringId,		 this );
+		server->addListener( NLMISC::EventSetFocusId,	 this );
+
 		eventServer = server;
 	}
 
@@ -57,6 +66,12 @@ namespace NLGUI
 		eventServer->removeListener( NLMISC::EventMouseUpId,     this );
 		eventServer->removeListener( NLMISC::EventMouseWheelId,  this );
 		eventServer->removeListener( NLMISC::EventMouseDblClkId, this );
+
+		eventServer->removeListener( NLMISC::EventKeyDownId,	 this );
+		eventServer->removeListener( NLMISC::EventKeyUpId,		 this );
+		eventServer->removeListener( NLMISC::EventCharId,		 this );
+		eventServer->removeListener( NLMISC::EventStringId,		 this );
+		eventServer->removeListener( NLMISC::EventSetFocusId,	 this );
 
 		eventServer = NULL;
 	}

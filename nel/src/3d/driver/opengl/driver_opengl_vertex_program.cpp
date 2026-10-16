@@ -59,8 +59,12 @@ CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL(CDriverGL *drv, ItGPUPrgDrvInfo
 			  || drv->_Extensions.ARBVertexProgram
 		     );
 
+	ClipID = 0;
+
 #ifndef USE_OPENGLES
-	if (drv->_Extensions.NVVertexProgram) // NVIDIA implemntation
+	// NB: gen function choice must match the compile/activation dispatch
+	// (see CDriverGL::preferARBVertexProgram)
+	if (drv->_Extensions.NVVertexProgram && !drv->preferARBVertexProgram()) // NVIDIA implemntation
 	{
 		// Generate a program
 		nglGenProgramsNV (1, &ID);
@@ -1383,7 +1387,56 @@ static void ARBVertexProgramDumpInstr(const CVPInstruction &instr, std::string &
 }
 
 // ***************************************************************************
-bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgram, GLuint id, bool &specularWritten)
+#ifndef USE_OPENGLES
+/** Build the user-clip-plane variant of an ARBvp1.0 program text
+  * (requires GL_NV_vertex_program2_option): redirect the position output to
+  * a temporary, then write the 6 clip distances from the clip-space plane
+  * equations that CDriverGL::setClipPlane stores at program.env[96..101].
+  * A clip distance only takes effect when the matching user clip plane is
+  * enabled, so writing all 6 is correct for any enable combination.
+  * Outputs are write-only in vp1.0 assembly, so the plain text substitution
+  * of "result.position" is safe. Returns false if the source doesn't have
+  * the expected header/END shape.
+  */
+static bool buildARBVertexProgramClipVariant(const std::string &inCode, std::string &outCode)
+{
+	// insert right after the "!!ARBvp1.0" header line
+	std::string::size_type headerPos = inCode.find("!!ARBvp1.0");
+	if (headerPos == std::string::npos) return false;
+	std::string::size_type insertPos = inCode.find('\n', headerPos);
+	if (insertPos == std::string::npos) return false;
+	++insertPos;
+	// epilogue goes just before the final END
+	std::string::size_type endPos = inCode.rfind("\nEND");
+	if (endPos == std::string::npos || endPos < insertPos) return false;
+	++endPos; // keep the newline with the body
+	outCode = inCode.substr(0, insertPos);
+	outCode += "OPTION NV_vertex_program2;\n";
+	outCode += "TEMP NLPOS;\n";
+	// redirect the position output (write masks like ".z" survive the
+	// substitution: "result.position.z" -> "NLPOS.z")
+	std::string body = inCode.substr(insertPos, endPos - insertPos);
+	static const char *posOutput = "result.position";
+	static const char *posTemp = "NLPOS";
+	std::string::size_type pos = 0;
+	while ((pos = body.find(posOutput, pos)) != std::string::npos)
+	{
+		body.replace(pos, strlen(posOutput), posTemp);
+		pos += strlen(posTemp);
+	}
+	outCode += body;
+	for (uint k = 0; k < 6; ++k)
+	{
+		outCode += toString("DP4 result.clip[%d], program.env[%d], NLPOS;\n", (int) k, (int) (96 + k));
+	}
+	outCode += "MOV result.position, NLPOS;\n";
+	outCode += inCode.substr(endPos); // "END..."
+	return true;
+}
+#endif
+
+// ***************************************************************************
+bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgram, GLuint id, bool &specularWritten, bool clip)
 {
 	H_AUTO_OGL(CDriverGL_setupARBVertexProgram);
 
@@ -1457,6 +1510,13 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 		code += instr + "\r\n";
 	}
 	code += "END\n";
+	if (clip)
+	{
+		std::string clipCode;
+		if (!buildARBVertexProgramClipVariant(code, clipCode))
+			return false;
+		code = clipCode;
+	}
 	//
 	/*
 	static COFile output;
@@ -1510,7 +1570,10 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 			nlassert((const char *) errorMsg);
 			nlwarning((const char *) errorMsg);
 		}
-		nlassert(0);
+		// the clip variant is optional: the caller falls back to the base
+		// program (geometry then ignores user clip planes)
+		if (!clip)
+			nlassert(0);
 		return false;
 	}
 
@@ -1588,6 +1651,42 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 			// Determine SpecularWritten by scanning for secondary color output
 			drvInfo->SpecularWritten = (strstr(arbSource->SourcePtr, "result.color.secondary") != NULL);
 
+			// User-clip-plane variant, by text transform of the arbvp1
+			// source. Optional: on failure the base program is used and
+			// this program's geometry ignores user clip planes.
+			if (_Extensions.NVVertexProgram2Option)
+			{
+				std::string clipCode;
+				if (buildARBVertexProgramClipVariant(std::string(arbSource->SourcePtr, arbSource->SourceLen), clipCode))
+				{
+					GLuint clipId = 0;
+					nglGenProgramsARB(1, &clipId);
+					if (clipId)
+					{
+						nglBindProgramARB(GL_VERTEX_PROGRAM_ARB, clipId);
+						glGetError();
+						nglProgramStringARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)clipCode.size(), clipCode.c_str());
+						if (glGetError() == GL_NO_ERROR)
+						{
+#ifdef NL_OS_MAC
+							glFinish();
+#endif
+							drvInfo->ClipID = clipId;
+						}
+						else
+						{
+							const GLubyte *errorMsg = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+							nlwarning("arbvp1 clip variant load failed (user clip planes will not clip this program): %s", errorMsg ? (const char *)errorMsg : "");
+							nglDeleteProgramsARB(1, &clipId);
+						}
+					}
+				}
+				else
+				{
+					nlwarning("Unable to build clip variant of arbvp1 program");
+				}
+			}
+
 			// Set parameters for assembly programs
 			drvInfo->ParamIndices = arbSource->ParamIndices;
 
@@ -1636,12 +1735,29 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	// Set the pointer
 	program->m_DrvInfo = drvInfo;
 
-	if (!setupARBVertexProgram(parsedProgram, drvInfo->ID, drvInfo->SpecularWritten))
+	if (!setupARBVertexProgram(parsedProgram, drvInfo->ID, drvInfo->SpecularWritten, false))
 	{
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
 		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
+	}
+
+	// User-clip-plane variant. Optional: on failure the base program is
+	// used and this program's geometry ignores user clip planes.
+	if (_Extensions.NVVertexProgram2Option)
+	{
+		GLuint clipId = 0;
+		nglGenProgramsARB(1, &clipId);
+		bool specularWrittenClip;
+		if (clipId && setupARBVertexProgram(parsedProgram, clipId, specularWrittenClip, true))
+		{
+			drvInfo->ClipID = clipId;
+		}
+		else if (clipId)
+		{
+			nglDeleteProgramsARB(1, &clipId);
+		}
 	}
 
 	// Set parameters for assembly programs
@@ -1676,7 +1792,15 @@ bool CDriverGL::activeARBVertexProgram(CVertexProgram *program)
 
 		glEnable( GL_VERTEX_PROGRAM_ARB );
 		_VertexProgramEnabled = true;
-		nglBindProgramARB(GL_VERTEX_PROGRAM_ARB, drvInfo->ID);
+		// Bind the clip variant while user clip planes are enabled: it
+		// writes the clip distances that plain vp1.0 assembly bypasses.
+		// (Enable clip planes before activating the program, as the engine
+		// does per pass; this function has no early-out so per-pass
+		// activation always re-selects the right variant.)
+		if (drvInfo->ClipID && _UserClipPlaneEnableMask)
+			nglBindProgramARB(GL_VERTEX_PROGRAM_ARB, drvInfo->ClipID);
+		else
+			nglBindProgramARB(GL_VERTEX_PROGRAM_ARB, drvInfo->ID);
 		if (drvInfo->SpecularWritten)
 		{
 			glEnable(GL_COLOR_SUM_ARB);
@@ -1846,8 +1970,13 @@ bool CDriverGL::compileVertexProgram(NL3D::CVertexProgram *program)
 			}
 		}
 
-		// Extension-priority dispatch (nelvp only)
-		if (_Extensions.NVVertexProgram)
+		// Extension-priority dispatch (nelvp only). NV-first is deliberate;
+		// see preferARBVertexProgram for when ARB takes precedence.
+		if (preferARBVertexProgram())
+		{
+			result = compileARBVertexProgram(program);
+		}
+		else if (_Extensions.NVVertexProgram)
 		{
 			result = compileNVVertexProgram(program);
 		}
@@ -1883,8 +2012,11 @@ bool CDriverGL::activeVertexProgram(CVertexProgram *program)
 		if (program->profile() == CVertexProgram::arbvp1)
 			return activeARBVertexProgram(program);
 
-		// Extension-priority dispatch
-		if (_Extensions.NVVertexProgram)
+		// Extension-priority dispatch. NV-first is deliberate; see
+		// preferARBVertexProgram for when ARB takes precedence.
+		if (preferARBVertexProgram())
+			return activeARBVertexProgram(program);
+		else if (_Extensions.NVVertexProgram)
 			return activeNVVertexProgram(program);
 		else if (_Extensions.ARBVertexProgram)
 			return activeARBVertexProgram(program);

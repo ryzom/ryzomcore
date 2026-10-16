@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_LIBRARY(georges_plugin_sound SHARED ${SRC})
 
-TARGET_INCLUDE_DIRECTORIES(georges_plugin_sound PRIVATE ${NEL_INCLUDE_DIR} ${DXSDK_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(georges_plugin_sound PRIVATE ${DXSDK_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(georges_plugin_sound
         PUBLIC

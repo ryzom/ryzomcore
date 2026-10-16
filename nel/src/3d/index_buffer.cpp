@@ -29,6 +29,10 @@ using namespace NLMISC;
 
 namespace NL3D
 {
+
+// --------------------------------------------------
+
+bool CIndexBuffer::SerialOldPreferredMemory = false;
 // ***************************************************************************
 // IIBDrvInfos
 // ***************************************************************************
@@ -368,7 +372,7 @@ void CIndexBuffer::serial(NLMISC::IStream &f)
 	  * Version 0 : primitive block
 	  */
 
-	sint ver = f.serialVersion(3);
+	sint ver = f.serialVersion(SerialOldPreferredMemory ? 2 : 3);
 
 	// Primitive block?
 	if (ver < 1)
@@ -439,8 +443,23 @@ void CIndexBuffer::serial(NLMISC::IStream &f)
 			}
 			else
 			{
-				// Should not write old format
-				nlstop;
+				// Write the old format (SerialOldPreferredMemory compatibility mode; the
+				// version byte above is 2 in that mode): TBufferUsage mapped back to
+				// TPreferredMemory.
+				nlassert(SerialOldPreferredMemory);
+				sint32 oldPref;
+				switch (_BufferUsage)
+				{
+				case CpuReadWrite: oldPref = 0; break;         // RAMPreferred
+				case FullRewrite:
+				case PartialWrite:
+				case UnsynchronizedWrite: oldPref = 1; break;  // AGPPreferred
+				case Immutable: oldPref = 2; break;            // StaticPreferred
+				case SmallStream: oldPref = 3; break;          // RAMVolatile
+				case FullStream: oldPref = 4; break;           // AGPVolatile
+				default: oldPref = 0; break;
+				}
+				f.serial(oldPref);
 			}
 		}
 

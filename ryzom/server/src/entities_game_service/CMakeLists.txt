@@ -93,12 +93,12 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_S
 
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 		                PRIVATE
-						ryzom_adminmodules
-						ryzom_gameshare
-						ryzom_servershare
-						ryzom_aishare
-						ryzom_pd
-						ryzom_gameplaymodule
+						Ryzom::adminmodules
+						Ryzom::gameshare
+						Ryzom::servershare
+						Ryzom::aishare
+						Ryzom::pd
+						Ryzom::gameplaymodule
 						NeL::misc
 						NeL::net
 						NeL::web

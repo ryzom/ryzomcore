@@ -43,8 +43,7 @@
     }
   ],
   "default-features": [
-    "pipeline-max",
-    "testing"
+    "pipeline-max"
   ],
   "features": {
     "pipeline-max": {
@@ -56,13 +55,13 @@
     "qt": {
       "description": "Builds with QT",
       "dependencies": [
-        "qt"
+        "qt5"
       ]
     },
-    "testing": {
-      "description": "Builds tests",
+    "mysql": {
+      "description": "Builds with MySQL",
       "dependencies": [
-        "cpptest"
+        "libmariadb"
       ]
     }
   }

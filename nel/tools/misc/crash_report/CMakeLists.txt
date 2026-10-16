@@ -22,7 +22,7 @@ target_sources(crash_report
 TARGET_INCLUDE_DIRECTORIES(crash_report PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 TARGET_LINK_LIBRARIES(crash_report
         PRIVATE
-        nelmisc
+        NeL::misc
         Qt::Core
         Qt::Network
         Qt::Widgets

@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Set reusable strings
       id: strings
       shell: bash
@@ -64,7 +64,7 @@ jobs:
         nsis \
         ninja-build
 
-    - uses: actions/cache/restore@v5
+    - uses: actions/cache/restore@v6
       id: openssl
       with:
         path: ${{ github.workspace }}/build/openssl
@@ -78,7 +78,7 @@ jobs:
         ./Configure mingw --cross-compile-prefix=i686-w64-mingw32- --prefix=/usr/i686-w64-mingw32
         make
 
-    - uses: actions/cache/save@v5
+    - uses: actions/cache/save@v6
       if: steps.openssl.outputs.cache-hit != 'true'
       with:
         path: ${{ github.workspace }}/build/openssl
@@ -90,7 +90,7 @@ jobs:
         sudo make install
 
     - name: Set up ccache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ env.CCACHE_DIR }}
         key: ccache-cross-mingw-${{ steps.strings.outputs.week }}-${{ github.sha }}
@@ -103,7 +103,7 @@ jobs:
         ccache -z
 
     - name: Cache Hunter Dependencies
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
         key: hunter-ubuntu-24.04-mingw-${{ steps.strings.outputs.week }}-${{ github.sha }}

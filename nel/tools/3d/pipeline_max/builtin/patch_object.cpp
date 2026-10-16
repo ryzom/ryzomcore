@@ -55,7 +55,7 @@ CPatchObject::~CPatchObject()
 const ucstring CPatchObject::DisplayName = ucstring("PatchObject");
 const char *CPatchObject::InternalName = "PatchObject";
 const NLMISC::CClassId CPatchObject::ClassId = NLMISC::CClassId(0xd0a6b36, 0x7dce4b64); /* Not official, please correct */
-const TSClassId CPatchObject::SuperClassId = CGeomObject::SuperClassId;
+const TSClassId CPatchObject::SuperClassId = 0x00000010; // GeomObject; literal to avoid cross-TU static-init-order dependency
 const CPatchObjectClassDesc PatchObjectClassDesc(&DllPluginDescBuiltin);
 
 void CPatchObject::parse(uint16 version, uint filter)

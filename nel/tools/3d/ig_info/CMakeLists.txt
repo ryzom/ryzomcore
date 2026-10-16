@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ig_info ${SRC})
 
-TARGET_LINK_LIBRARIES(ig_info nel3d nelmisc)
+TARGET_LINK_LIBRARIES(ig_info PRIVATE NeL::3d NeL::misc)
 NL_DEFAULT_PROPS(ig_info "NeL, Tools, 3D: ig_info")
 NL_ADD_RUNTIME_FLAGS(ig_info)
 

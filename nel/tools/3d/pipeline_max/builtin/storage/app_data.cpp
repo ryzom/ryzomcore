@@ -3,6 +3,8 @@
  * \brief CAppData
  * \date 2012-08-21 11:47GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Sonnet 5
+ * \author Claude Fable 5
  * CAppData
  */
 
@@ -29,6 +31,7 @@
 #include "app_data.h"
 
 // STL includes
+#include <cstring>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -181,6 +184,7 @@ void CAppData::parse(uint16 version, uint filter)
 		TKey key(entry->key()->ClassId, entry->key()->SuperClassId, entry->key()->SubId);
 		if (m_Entries.find(key) != m_Entries.end()) { nlwarning("Duplicate entry"); disown(); return; }
 		m_Entries[key] = entry;
+		m_EntryOrder.push_back(entry);
 	}
 
 	// Verify or fail
@@ -223,9 +227,13 @@ void CAppData::build(uint16 version, uint filter)
 	headerSize->Value = m_Entries.size();
 	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_HEADER_CHUNK_ID, headerSize));
 
-	// Set up the entries
-	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
-		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, it->second));
+	// Set up the entries in original file order (or creation order), NOT m_Entries' key-sorted
+	// order — the source exporter does not insert entries sorted by (ClassId,SuperClassId,SubId),
+	// so iterating the map here would silently reorder chunks and break byte-identity (see the
+	// m_EntryOrder comment in the header).
+	nlassert(m_EntryOrder.size() == m_Entries.size());
+	for (std::vector<CAppDataEntry *>::iterator it = m_EntryOrder.begin(), end = m_EntryOrder.end(); it != end; ++it)
+		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, *it));
 
 	// Rebuild raw storage
 	CStorageContainer::build(version);
@@ -243,6 +251,7 @@ void CAppData::disown()
 
 	// Disown locally
 	m_Entries.clear();
+	m_EntryOrder.clear();
 
 	// Give ownership back
 	m_ChunksOwnsPointers = true;
@@ -318,12 +327,49 @@ void CAppData::fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 sub
 	// unlock(classId, superClassId, subId, size);
 }
 */
+const NLMISC::CClassId CAppData::ScriptClassId = NLMISC::CClassId(0x04d64858, 0x16d1751d);
+const TSClassId CAppData::ScriptSuperClassId = 4128;
+
+bool CAppData::getScriptString(uint32 subId, std::string &out)
+{
+	// Deliberately NOT get<T>: absent sub-ids are the NORM on this read path (every exporter
+	// queries dozens of optional flags per node), and get<T>'s miss-path nldebug is not free —
+	// beyond the volume, the colored std displayer leaves its ANSI reset leading the NEXT
+	// stdout line, which corrupted the exporters' machine-readable tag lines (LIGHTMAP/MAPEXT
+	// et al) and silently broke the corpus drivers' startswith parsing. Quiet miss, like the
+	// pre-typed readers.
+	if (m_ChunksOwnsPointers) return false; // not parsed
+	TMap::const_iterator it = m_Entries.find(TKey(ScriptClassId, ScriptSuperClassId, subId));
+	if (it == m_Entries.end()) return false;
+	CStorageRaw *raw = it->second->value<CStorageRaw>();
+	if (!raw) return false;
+	// Script AppData strings are null-terminated; require the trailing NUL like every reader of
+	// this convention (skel/anim/swt/ig/shape).
+	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
+	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
+	return true;
+}
+
+bool CAppData::setScriptString(uint32 subId, const std::string &value)
+{
+	CStorageRaw *raw = getOrCreate<CStorageRaw>(ScriptClassId, ScriptSuperClassId, subId);
+	if (!raw) return false;
+	raw->Value.resize(value.size() + 1);
+	if (!value.empty()) memcpy(&raw->Value[0], value.c_str(), value.size());
+	raw->Value[value.size()] = '\0';
+	return true;
+}
+
 void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
 	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	if (it == m_Entries.end()) { nldebug("Trying to erase non-existant key, this is allowed, doing nothing"); return; }
+	for (std::vector<CAppDataEntry *>::iterator oit = m_EntryOrder.begin(), oend = m_EntryOrder.end(); oit != oend; ++oit)
+	{
+		if (*oit == it->second) { m_EntryOrder.erase(oit); break; }
+	}
 	m_Entries.erase(key);
 }
 

@@ -471,8 +471,26 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 			// Not loaded ?
 			if (tileNoise._TileNoiseMap==NULL)
 			{
-				// Load a bitmap
-				CTextureFile texture (getAbsPath()+tileNoise._FileName);
+				// Load a bitmap. Banks authored on the original build machines carry
+				// absolute Windows paths ("R:/graphics/..." roots, backslash-separated
+				// "displace\foo.png" filenames). When the authored path does not resolve
+				// on this machine, fall back to a CPath lookup of the bare filename so
+				// the displacement maps load from the registered search paths - the same
+				// convention the client applies through makeAllPathRelative(). Without
+				// this, offline lighting silently substitutes the placeholder pattern
+				// below for every displacement map and every lumel normal is wrong.
+				string noisePath = getAbsPath()+tileNoise._FileName;
+				if (!tileNoise._FileName.empty() && !CFile::fileExists(noisePath))
+				{
+					string noiseFile = tileNoise._FileName;
+					for (uint c=0; c<noiseFile.size(); c++)
+						if (noiseFile[c]=='\\') noiseFile[c]='/';
+					noiseFile = CFile::getFilename(noiseFile);
+					string looked = CPath::lookup(noiseFile, false, false);
+					if (!looked.empty())
+						noisePath = looked;
+				}
+				CTextureFile texture (noisePath);
 				texture.loadGrayscaleAsAlpha (false);
 				texture.generate ();
 				texture.convertToType (CBitmap::Luminance);
@@ -497,11 +515,10 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 				else
 				{
 					// This is not a normal behaviour.
-					string	pathname= getAbsPath()+tileNoise._FileName;
 					if( texture.getWidth ()==0 || texture.getHeight ()==0 )
-						nlwarning("TileNoiseMap not found: %s.", pathname.c_str());
+						nlwarning("TileNoiseMap not found: %s.", noisePath.c_str());
 					else
-						nlwarning("Bad TileNoiseMap size: %s.", pathname.c_str());
+						nlwarning("Bad TileNoiseMap size: %s.", noisePath.c_str());
 
 					// Not good size, copy a static map
 					sint8 notGoodSizeForm[NL3D_TILE_NOISE_MAP_SIZE*NL3D_TILE_NOISE_MAP_SIZE]=

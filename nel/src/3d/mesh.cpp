@@ -2439,7 +2439,6 @@ CMesh::CCorner::CCorner()
 // ***************************************************************************
 void CMesh::CCorner::serial(NLMISC::IStream &f)
 {
-	nlassert(0); // not used
 	f.serial(Vertex);
 	f.serial(Normal);
 	for(int i=0;i<CVertexBuffer::MaxStage;++i) f.serial(Uvws[i]);
@@ -2467,21 +2466,70 @@ void CMesh::CSkinWeight::serial(NLMISC::IStream &f)
 }
 
 // ***************************************************************************
-/* Serialization is not used.
+void CMesh::CVertLink::serial(NLMISC::IStream &f)
+{
+	f.serial(nFace);
+	f.serial(nCorner);
+	f.serial(VertVB);
+}
+
+// ***************************************************************************
+void CMesh::CInterfaceVertex::serial(NLMISC::IStream &f)
+{
+	f.serial(Pos);
+	f.serial(Normal);
+}
+
+// ***************************************************************************
+void CMesh::CInterface::serial(NLMISC::IStream &f)
+{
+	f.serialCont(Vertices);
+}
+
+// ***************************************************************************
+void CMesh::CInterfaceLink::serial(NLMISC::IStream &f)
+{
+	f.serial(InterfaceId);
+	f.serial(InterfaceVertexId);
+}
+
+// ***************************************************************************
 void CMesh::CMeshBuild::serial(NLMISC::IStream &f)
 {
-	sint	ver= f.serialVersion(0);
+	/* Versioned pre-build mesh state — the 1_export -> standalone-lightmapper scene-graph
+	 * contract (never serialized before that; see mesh.h). Bump the version and keep old
+	 * readers working when fields change. */
+	(void)f.serialVersion(0);
 
-	// Serial mesh base (material info).
-	CMeshBaseBuild::serial(f);
+	f.serial(VertexFlags);
+	for(uint i=0;i<CVertexBuffer::MaxStage;++i) f.serial(NumCoords[i]);
+	for(uint i=0;i<CVertexBuffer::MaxStage;++i) f.serial(UVRouting[i]);
+	f.serialCont(Vertices);
+	f.serialCont(SkinWeights);
+	f.serialCont(BonesNames);
+	f.serialCont(Faces);
+	f.serialCont(BlendShapes);
+	f.serialCont(VertLink);
 
-	// Serial Geometry.
-	f.serial( VertexFlags );
-	f.serialCont( Vertices );
-	f.serialCont( SkinWeights );
-	f.serialCont( Faces );
+	// MeshVertexProgram: polymorphic smart pointer (same discipline as CMeshGeom::serial)
+	{
+		IMeshVertexProgram *mvp;
+		if (f.isReading())
+		{
+			f.serialPolyPtr(mvp);
+			MeshVertexProgram = mvp;
+		}
+		else
+		{
+			mvp = MeshVertexProgram;
+			f.serialPolyPtr(mvp);
+		}
+	}
 
-}*/
+	f.serialCont(Interfaces);
+	f.serialCont(InterfaceLinks);
+	f.serial(InterfaceVertexFlag);
+}
 
 
 // ************************************

@@ -245,6 +245,12 @@ public:
 	/// Cache is keyed by both target and id per unit.
 	void bindTexture(GLenum target, GLuint id);
 	void forceBindTexture(GLenum target, GLuint id);
+	/** Unbind whatever texture is bound on the given unit (no-op when the
+	  * unit is already unbound). Uses this cache as the source of truth for
+	  * the actual GL binding, unlike the driver's higher-level per-stage
+	  * texture cache which can be null while a texture is still GL-bound
+	  * (e.g. after texture setup/upload paths). */
+	void unbindTexture(uint stage);
 
 	/// @}
 

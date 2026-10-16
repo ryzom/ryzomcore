@@ -60,7 +60,9 @@ SOURCE_GROUP(window FILES
 		driver_opengl3_window.cpp
 		driver_opengl3_inputs.cpp
 		unix_event_emitter.cpp
-		unix_event_emitter.h)
+		unix_event_emitter.h
+		emscripten_event_emitter.cpp
+		emscripten_event_emitter.h)
 
 IF(APPLE)
   FILE(GLOB MAC_SRC mac/*.h mac/*.m mac/*.mm mac/*.cpp)
@@ -79,7 +81,7 @@ NL_TARGET_DRIVER(${NLDRV_OGL_LIB} ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(${NLDRV_OGL_LIB} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} nel3d nelmisc OpenGL::GL)
+TARGET_LINK_LIBRARIES(${NLDRV_OGL_LIB} NeL::3d NeL::misc OpenGL::GL)
 NL_DEFAULT_PROPS(${NLDRV_OGL_LIB} "NeL, Driver, Video: OpenGL3")
 NL_ADD_LIB_SUFFIX(${NLDRV_OGL_LIB})
 NL_ADD_RUNTIME_FLAGS(${NLDRV_OGL_LIB})

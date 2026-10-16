@@ -284,6 +284,13 @@ public:
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
+	/** Serial write-compatibility switch for export tools: when true, serial() writes the
+	  * pre-TBufferUsage version 2 (the old TPreferredMemory enum values), matching streams
+	  * produced before the buffer-usage refactor. Read code accepts both, always.
+	  * Global, not thread-safe: set once at tool startup (asset export pipelines only).
+	  */
+	static bool				SerialOldPreferredMemory;
+
 	/**
 	  * Default constructor. Make an empty index buffer. No value, no index. Index color format is set to TRGBA.
 	  */

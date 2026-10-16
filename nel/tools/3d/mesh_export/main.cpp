@@ -32,8 +32,14 @@ int main(int argc, char *argv[])
 	NLMISC::CCmdArgs args;
 
 	args.addArg("d", "dst", "destination", "Destination directory path");
+	args.addArg("", "coarse-dst", "destination", "With-coarse-mesh shape destination directory (nel-extras glTF import; defaults to dst)");
+	args.addArg("", "ig-dst", "destination", "Instance-group (.ig) destination directory (nel-extras glTF import; defaults to dst)");
+	args.addArg("", "anim-dst", "destination", "Animation (.anim) destination directory (nel-extras glTF import; defaults to dst)");
+	args.addArg("", "zone-dst", "destination", "Ligo zone destination root (zones/ + zoneligos/ under it; nel-extras glTF import; defaults to dst)");
+	args.addArg("m", "materials", "sidecar", "Materials sidecar .gltf (assimp route; nel_* materials bound by name; repeatable, later files override earlier — shared library first, per-asset second)", false);
 	args.addArg("", "dependlog", "log", "Dependencies log path");
 	args.addArg("", "errorlog", "log", "Errors log path");
+	args.addArg("", "no-nel-extras", "", "Ignore nel_* per-node glTF extras; use Decompose(mTransformation) instead. Validation flag — see wiki: nel_gltf_extras.md.");
 	args.addAdditionalArg("input", "Filename of 3D model to convert", false);
 
 	if (!args.parse(argc, argv)) return EXIT_SUCCESS;
@@ -66,6 +72,21 @@ int main(int argc, char *argv[])
 
 		settings.DestinationDirectoryPath = NLMISC::CPath::standardizePath(settings.DestinationDirectoryPath);
 
+		if (args.haveLongArg("coarse-dst"))
+			settings.ShapeCoarseDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("coarse-dst").front());
+
+		if (args.haveLongArg("ig-dst"))
+			settings.IGDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("ig-dst").front());
+
+		if (args.haveLongArg("anim-dst"))
+			settings.AnimDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("anim-dst").front());
+
+		if (args.haveLongArg("zone-dst"))
+			settings.ZoneDirectoryPath = NLMISC::CPath::standardizePath(args.getLongArg("zone-dst").front());
+
+		if (args.haveArg("m"))
+			settings.MaterialSidecarPaths = args.getArg("m");
+
 		if (args.haveLongArg("dependlog"))
 			settings.ToolDependLog = args.getLongArg("dependlog").front();
 
@@ -77,6 +98,9 @@ int main(int argc, char *argv[])
 
 		if (settings.ToolErrorLog.empty())
 			settings.ToolErrorLog = settings.DestinationDirectoryPath + "error.log";
+
+		if (args.haveLongArg("no-nel-extras"))
+			settings.IgnoreNelExtras = true;
 
 		res = exportScene(settings);
 

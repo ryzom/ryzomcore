@@ -479,6 +479,15 @@ namespace NLGUI
 			type = (const char*) prop;
 		}
 		
+		// "pushed" must be read before the radio_button branch below, which seeds
+		// the group's shared RBRef from _Pushed — parsing it after left every
+		// pushed="true" on a radio_button silently ignored (group always started
+		// with nothing selected, since _Pushed was still its false default here).
+		prop= (char*) xmlGetProp (cur, (xmlChar*)"pushed");
+		_Pushed = false;
+		if (prop)
+			_Pushed = convertBool(prop);
+
 		if (type.empty() || type == "toggle_button")
 		{
                 _Type = ToggleButton;
@@ -499,11 +508,6 @@ namespace NLGUI
         {
                 nlinfo(("cannot parse button type for button " + getId()).c_str());
         }
-
-		prop= (char*) xmlGetProp (cur, (xmlChar*)"pushed");
-		_Pushed = false;
-		if (prop)
-			_Pushed = convertBool(prop);
 
 		prop= (char*) xmlGetProp (cur, (xmlChar*)"over_when_pushed");
 		_OverWhenPushed = true;

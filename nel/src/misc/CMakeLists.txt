@@ -174,7 +174,8 @@ SOURCE_GROUP("crypt" FILES ${NLMISC_CRYPT})
 SOURCE_GROUP("string" FILES ${NLMISC_STRING})
 
 NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC})
-add_project_library_alias(nelmisc misc)
+add_library(NeL::misc ALIAS nelmisc)
+set_target_properties(nelmisc PROPERTIES EXPORT_NAME misc)
 
 target_sources(nelmisc
 		PUBLIC
@@ -264,6 +265,8 @@ ELSEIF(LIBXML2_FOUND)
 ELSE()
   TARGET_COMPILE_DEFINITIONS(nelmisc PUBLIC NL_NO_LIBXML2)
 ENDIF()
+
+target_compile_definitions(nelmisc PUBLIC $<$<CONFIG:Debug>:NL_DEBUG> $<$<CONFIG:Release>:NL_RELEASE>)
 
 NL_DEFAULT_PROPS(nelmisc "NeL, Library: NeL Misc")
 NL_ADD_RUNTIME_FLAGS(nelmisc)

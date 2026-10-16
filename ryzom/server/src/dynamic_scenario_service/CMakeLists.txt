@@ -8,10 +8,10 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_dynamic_scenario_service PRIVATE ${RZ_SERVER_SR
 
 TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ryzom_servershare
-        ryzom_aishare
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::servershare
+        Ryzom::aishare
         NeL::misc
         NeL::net
         NeL::georges

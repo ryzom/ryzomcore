@@ -78,19 +78,22 @@ void	CVegetableBlendLayerModel::render(IDriver *driver)
 	if(SortBlocks.empty())
 		return;
 
-	// Setup VegetableManager renderState (like pre-setuped material)
-	//==================
-	VegetableManager->setupRenderStateForBlendLayerModel(driver);
-
-
 	// Render SortBlocks of this layer
 	//==================
 	uint	rdrPass= NL3D_VEGETABLE_RDRPASS_UNLIT_2SIDED_ZSORT;
 
-	// first time, activate the hard VB.
+	// first time, activate the hard VB. Done before the render state: the
+	// material setup requires an active vertex buffer on some drivers
+	// (the GL3 driver selects programs from its vertex format), and the
+	// previously active buffer may just have been destroyed (e.g. the
+	// shared water vertex buffer reallocating on a format change).
 	bool	precVBHardMode= true;
 	CVegetableVBAllocator	*vbAllocator= &VegetableManager->getVBAllocatorForRdrPassAndVBHardMode(rdrPass, 1);
 	vbAllocator->activate();
+
+	// Setup VegetableManager renderState (like pre-setuped material)
+	//==================
+	VegetableManager->setupRenderStateForBlendLayerModel(driver);
 
 	// profile
 	CPrimitiveProfile	ppIn, ppOut;
@@ -150,6 +153,10 @@ void	CVegetableBlendLayerModel::render(IDriver *driver)
 // ***************************************************************************
 void	CVegetableBlendLayerModel::traverseRender()
 {
+	// Vegetation is excluded from water reflection renders (see
+	// CLandscapeModel::traverseRender)
+	if (getOwnerScene()->getWaterReflectionManager().isRenderingReflection())
+		return;
 	CRenderTrav		&rTrav= getOwnerScene()->getRenderTrav();
 	render(rTrav.getDriver());
 }

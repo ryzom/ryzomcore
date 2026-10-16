@@ -3,6 +3,8 @@
  * \brief CSceneClass
  * \date 2012-08-20 09:07GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CSceneClass
  */
 
@@ -61,7 +63,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClass::CSceneClass(CScene *scene) : m_Scene(scene)
+CSceneClass::CSceneClass(CScene *scene) : m_Scene(scene), m_ReadAsLeaf(false)
 {
 
 }
@@ -239,7 +241,11 @@ void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad, u
 
 IStorageObject *CSceneClass::getChunk(uint16 id)
 {
-	if (m_OrphanedChunks.begin()->first == id)
+	// Guard the empty-list case: dereferencing begin() of an empty std::list is UB (glibc happens
+	// to read a harmless sentinel and fall through to the loop below; MSVC's checked iterators —
+	// _SECURE_SCL, on by default in VS2008 — raise 0xC0000417 and abort). A class parsing a chunk
+	// after it has already drained all its orphans hits this.
+	if (!m_OrphanedChunks.empty() && m_OrphanedChunks.begin()->first == id)
 	{
 		IStorageObject *result = m_OrphanedChunks.begin()->second;
 		m_OrphanedChunks.pop_front();
@@ -268,7 +274,11 @@ void CSceneClass::putChunk(uint16 id, IStorageObject *storageObject)
 	{
 		static_cast<CStorageContainer *>(storageObject)->build(VersionUnknown); // FIXME
 	}
-	m_OrphanedChunks.insert(m_PutChunkInsert, TStorageObjectWithId(id, storageObject));
+	// m_PutChunkInsert is a m_Chunks iterator (set by build()); insert into m_Chunks so
+	// m_Chunks.size() stays consistent with the list's actual length (an insert into
+	// m_OrphanedChunks would splice through the iterator's list — same effect on this list,
+	// but leaves the orphan list's size counter wrong).
+	m_Chunks.insert(m_PutChunkInsert, TStorageObjectWithId(id, storageObject));
 }
 
 uint16 CSceneClass::peekChunk()

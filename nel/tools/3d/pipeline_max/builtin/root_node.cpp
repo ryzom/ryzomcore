@@ -55,7 +55,7 @@ CRootNode::~CRootNode()
 const ucstring CRootNode::DisplayName = ucstring("RootNode");
 const char *CRootNode::InternalName = "RootNode";
 const NLMISC::CClassId CRootNode::ClassId = NLMISC::CClassId(0x00000002, 0x00000000);
-const TSClassId CRootNode::SuperClassId = INode::SuperClassId;
+const TSClassId CRootNode::SuperClassId = 0x00000001; // Node; literal to avoid cross-TU static-init-order dependency
 const CRootNodeClassDesc RootNodeClassDesc(&DllPluginDescBuiltin);
 
 void CRootNode::parse(uint16 version, uint filter)

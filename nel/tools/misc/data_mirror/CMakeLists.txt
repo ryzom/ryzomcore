@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(data_mirror WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(data_mirror nelmisc)
+TARGET_LINK_LIBRARIES(data_mirror PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(data_mirror "NeL, Tools, Misc: data_mirror")
 NL_ADD_RUNTIME_FLAGS(data_mirror)
 

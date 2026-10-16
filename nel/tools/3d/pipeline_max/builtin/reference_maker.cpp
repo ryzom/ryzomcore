@@ -3,6 +3,8 @@
  * \brief CReferenceMaker
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Opus 4.8
  * CReferenceMaker
  */
 
@@ -67,7 +69,7 @@ namespace BUILTIN {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_204B_Equals_2E(NULL), m_References2035Value0(0), m_Unknown2045(NULL), m_Unknown2047(NULL), m_Unknown21B0(NULL)
+CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_HasReferencesChunk(false), m_204B_Equals_2E(NULL), m_References2035Value0(0), m_References2034Count(0), m_Unknown2045(NULL), m_Unknown2047(NULL), m_Unknown21B0(NULL)
 {
 
 }
@@ -111,10 +113,20 @@ void CReferenceMaker::parse(uint16 version, uint filter)
 		if (references2034)
 		{
 			m_ReferenceMap = false; // NOTE: Plugins may check after parse if they parsed with the correct type, to find a pattern
+			m_HasReferencesChunk = true;
 			m_ArchivedChunks.push_back(references2034);
+			// Preserve the source array's length (including trailing -1 empty slots) by resizing
+			// m_References upfront, so build re-emits the same count of entries. m_References2034Count
+			// additionally carries that length for subclasses that route references into their own
+			// vector (which grows only up to the last non-empty slot) so build re-emits the trailing
+			// empties too.
+			m_References2034Count = (uint32)references2034->Value.size();
+			m_References.resize(references2034->Value.size());
 			for (std::vector<sint32>::size_type i = 0; i < references2034->Value.size(); ++i)
 			{
-				if (references2034->Value[i] > 0)
+				// Value >= 0 is a valid storage index (index 0 is the first scene class).
+				// Value < 0 (typically -1) is an empty slot — leave m_References[i] NULL.
+				if (references2034->Value[i] >= 0)
 				{
 					CReferenceMaker *referenceMaker = dynamic_cast<CReferenceMaker *>(container()->getByStorageIndex(references2034->Value[i]));
 					if (!referenceMaker) nlerror("Reference maker %s %s, 0x%x is not a reference maker", ucstring(container()->getByStorageIndex(references2034->Value[i])->classDesc()->displayName()).toUtf8().c_str(), container()->getByStorageIndex(references2034->Value[i])->classDesc()->classId().toString().c_str(), container()->getByStorageIndex(references2034->Value[i])->classDesc()->superClassId());
@@ -125,6 +137,7 @@ void CReferenceMaker::parse(uint16 version, uint filter)
 		if (references2035)
 		{
 			m_ReferenceMap = true;
+			m_HasReferencesChunk = true;
 			m_ArchivedChunks.push_back(references2035);
 			std::vector<sint32>::iterator it = references2035->Value.begin();
 			m_References2035Value0 = (*it);
@@ -142,9 +155,9 @@ void CReferenceMaker::parse(uint16 version, uint filter)
 			}
 		}
 
-		m_Unknown2045 = static_cast<CStorageRaw *>(getChunk(PMB_UNKNOWN2045_CHUNK_ID)); // not sure if this is part of maker or target
-		m_Unknown2047 = static_cast<CStorageRaw *>(getChunk(PMB_UNKNOWN2047_CHUNK_ID)); // not sure if this is part of maker or target
-		m_Unknown21B0 = static_cast<CStorageRaw *>(getChunk(PMB_UNKNOWN21B0_CHUNK_ID)); // not sure if this is part of maker or target
+		m_Unknown2045 = getChunk(PMB_UNKNOWN2045_CHUNK_ID); // not sure if this is part of maker or target
+		m_Unknown2047 = getChunk(PMB_UNKNOWN2047_CHUNK_ID); // not sure if this is part of maker or target
+		m_Unknown21B0 = getChunk(PMB_UNKNOWN21B0_CHUNK_ID); // not sure if this is part of maker or target
 	}
 }
 
@@ -156,39 +169,45 @@ void CReferenceMaker::clean()
 void CReferenceMaker::build(uint16 version, uint filter)
 {
 	CAnimatable::build(version);
-	// TODO: Build contents
-	//if (m_References2034) putChunk(PMB_REFERENCES_2034_CHUNK_ID, m_References2034);
-	//if (m_References2035) putChunk(PMB_REFERENCES_2035_CHUNK_ID, m_References2035);
-	if (!m_ReferenceMap)
+	// Only re-emit the reference chunk if the source had one, or if references have been
+	// authored. Unconditional emission was breaking byte-identity for classes (many
+	// CSceneClassUnknown<CReferenceTarget>) whose source had no reference chunk at all.
+	if (m_HasReferencesChunk || nbReferences() > 0)
 	{
-		CStorageArray<sint32> *references2034 = new CStorageArray<sint32>();
-		uint nb = nbReferences();
-		references2034->Value.resize(nb);
-		for (uint i = 0; i < nb; ++i)
+		if (!m_ReferenceMap)
 		{
-			CReferenceMaker *referenceMaker = getReference(i);
-			if (referenceMaker) references2034->Value[i] = container()->getOrCreateStorageIndex(referenceMaker);
-			else references2034->Value[i] = -1;
-		}
-		putChunk(PMB_REFERENCES_2034_CHUNK_ID, references2034);
-		m_ArchivedChunks.push_back(references2034);
-	}
-	else
-	{
-		CStorageArray<sint32> *references2035 = new CStorageArray<sint32>();
-		uint nb = nbReferences();
-		references2035->Value.push_back(m_References2035Value0);
-		for (uint i = 0; i < nb; ++i)
-		{
-			CReferenceMaker *referenceMaker = getReference(i);
-			if (referenceMaker)
+			CStorageArray<sint32> *references2034 = new CStorageArray<sint32>();
+			uint nb = nbReferences();
+			// Re-emit at least the source array length so trailing empty (-1) slots survive when a
+			// subclass's nbReferences() reflects only its populated slots (see m_References2034Count).
+			if (m_References2034Count > nb) nb = m_References2034Count;
+			references2034->Value.resize(nb);
+			for (uint i = 0; i < nb; ++i)
 			{
-				references2035->Value.push_back(i);
-				references2035->Value.push_back(container()->getOrCreateStorageIndex(referenceMaker));
+				CReferenceMaker *referenceMaker = getReference(i);
+				if (referenceMaker) references2034->Value[i] = container()->getOrCreateStorageIndex(referenceMaker);
+				else references2034->Value[i] = -1;
 			}
+			putChunk(PMB_REFERENCES_2034_CHUNK_ID, references2034);
+			m_ArchivedChunks.push_back(references2034);
 		}
-		putChunk(PMB_REFERENCES_2035_CHUNK_ID, references2035);
-		m_ArchivedChunks.push_back(references2035);
+		else
+		{
+			CStorageArray<sint32> *references2035 = new CStorageArray<sint32>();
+			uint nb = nbReferences();
+			references2035->Value.push_back(m_References2035Value0);
+			for (uint i = 0; i < nb; ++i)
+			{
+				CReferenceMaker *referenceMaker = getReference(i);
+				if (referenceMaker)
+				{
+					references2035->Value.push_back(i);
+					references2035->Value.push_back(container()->getOrCreateStorageIndex(referenceMaker));
+				}
+			}
+			putChunk(PMB_REFERENCES_2035_CHUNK_ID, references2035);
+			m_ArchivedChunks.push_back(references2035);
+		}
 	}
 	if (m_204B_Equals_2E) putChunk(PMB_204B_EQUALS_2E_CHUNK_ID, m_204B_Equals_2E);
 	if (m_Unknown2045) putChunk(PMB_UNKNOWN2045_CHUNK_ID, m_Unknown2045);
@@ -200,7 +219,9 @@ void CReferenceMaker::disown()
 {
 	m_References.clear();
 	m_ReferenceMap = false;
+	m_HasReferencesChunk = false;
 	m_References2035Value0 = 0;
+	m_References2034Count = 0;
 	m_204B_Equals_2E = NULL;
 	m_Unknown2045 = NULL;
 	m_Unknown2047 = NULL;
@@ -303,9 +324,9 @@ IStorageObject *CReferenceMaker::createChunkById(uint16 id, bool container)
 		return new CStorageArray<sint32>();
 	case PMB_204B_EQUALS_2E_CHUNK_ID:
 		return new CStorageValue<uint8>();
-	case PMB_UNKNOWN21B0_CHUNK_ID:
-		return new CStorageRaw();
 	}
+	// 0x2045, 0x2047, 0x21B0: unknown, defer to default (CStorageContainer for containers,
+	// CStorageRaw for leaves — the source is authoritative on which shape).
 	return CAnimatable::createChunkById(id, container);
 }
 

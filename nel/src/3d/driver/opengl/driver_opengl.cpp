@@ -295,6 +295,8 @@ CDriverGL::CDriverGL()
 
 	_NVTextureShaderEnabled = false;
 
+	_UserClipPlaneEnableMask = 0;
+
 	_AnisotropicFilter = 0.f;
 
 	// Compute the Flag which say if one texture has been changed in CMaterial.
@@ -329,7 +331,8 @@ CDriverGL::CDriverGL()
 	_ATIDriverVersion = 0;
 	_ATIFogRangeFixed = true;
 
-	std::fill(ARBWaterShader, ARBWaterShader + 4, 0);
+	std::fill(ARBWaterShader, ARBWaterShader + 8, 0);
+	_CurWaterPassIsARB = false;
 
 ///	buildCausticCubeMapTex();
 
@@ -1985,6 +1988,100 @@ static const char *WaterCodeForARBFragmentProgram =
 "MUL result.color, R0, R1;\n"
 "END\n";
 
+// Calculated reflectivity variants: texture 2 is a reflection (realtime
+// planar RT or artist envmap, alpha channel ignored); the
+// blend alpha is the per-vertex reflectivity base (fragment.texcoord[2].z,
+// the shape's stylized fresnel) boosted by the reflection's gamma-space
+// luma, reproducing the original assets' luminance-derived envmap alpha.
+
+// Calculated reflectivity, no diffuse, no fog
+static const char *WaterCodeCalcNoDiffuseForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[3] = { program.env[0..1], { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"ADD R1.x, -fragment.texcoord[2].z, c[2].w;\n"
+"DP3 R0.w, R0, c[2];\n"
+"MAD R0.w, R0, R1.x, fragment.texcoord[2].z;\n"
+"MOV result.color, R0;\n"
+"END\n";
+
+// Calculated reflectivity, no diffuse, with fog
+static const char *WaterCodeCalcNoDiffuseWithFogForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[5] = { program.env[0..2], state.fog.color, { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"ADD R1.x, -fragment.texcoord[2].z, c[4].w;\n"
+"DP3 R0.w, R0, c[4];\n"
+"MAD R0.w, R0, R1.x, fragment.texcoord[2].z;\n"
+"ADD R0, R0, -c[3];\n"
+"MAD_SAT R1.x, fragment.fogcoord, c[2], c[2].y;\n"
+"MAD result.color, R1.x, R0, c[3];\n"
+"END\n";
+
+// Calculated reflectivity, with diffuse, no fog
+static const char *WaterCodeCalcForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[3] = { program.env[0..1], { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEMP R2;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"TEX R1, fragment.texcoord[3], texture[3], 2D;\n"
+"ADD R2.x, -fragment.texcoord[2].z, c[2].w;\n"
+"DP3 R0.w, R0, c[2];\n"
+"MAD R0.w, R0, R2.x, fragment.texcoord[2].z;\n"
+"MUL result.color, R0, R1;\n"
+"END\n";
+
+// Calculated reflectivity, with diffuse, with fog
+static const char *WaterCodeCalcWithFogForARBFragmentProgram =
+"!!ARBfp1.0\n"
+"OPTION ARB_precision_hint_nicest;\n"
+"PARAM c[5] = { program.env[0..2], state.fog.color, { 0.2126, 0.7152, 0.0722, 1 } };\n"
+"TEMP R0;\n"
+"TEMP R1;\n"
+"TEMP R2;\n"
+"TEX R0.xy, fragment.texcoord[0], texture[0], 2D;\n"
+"MAD R0.xy, R0, c[0].x, c[0].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[1];\n"
+"TEX R0.xy, R0, texture[1], 2D;\n"
+"MAD R0.xy, R0, c[1].x, c[1].y;\n"
+"ADD R0.xy, R0, fragment.texcoord[2];\n"
+"TEX R0.xyz, R0, texture[2], 2D;\n"
+"DP3 R0.w, R0, c[4];\n"
+"ADD R2.x, -fragment.texcoord[2].z, c[4].w;\n"
+"TEX R1, fragment.texcoord[3], texture[3], 2D;\n"
+"MAD R0.w, R0, R2.x, fragment.texcoord[2].z;\n"
+"MAD R1, R0, R1, -c[3];\n"
+"MAD_SAT R0.x, fragment.fogcoord, c[2], c[2].y;\n"
+"MAD result.color, R0.x, R1, c[3];\n"
+"END\n";
+
 // With diffuse, with fog (11 instructions, 2 R-regs)
 static const char *WaterCodeWithFogForARBFragmentProgram =
 "!!ARBfp1.0\n"
@@ -2110,6 +2207,29 @@ void CDriverGL::initFragmentShaders()
 		if (ok)
 		{
 			nlinfo("WATER: ARB_fragment_program OK, Use it");
+			// Calculated reflectivity variants (optional: such draws fall
+			// back to the flat reflection alpha if unavailable)
+			ARBWaterShader[4] = loadARBFragmentProgramStringNative(WaterCodeCalcNoDiffuseForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[5] = loadARBFragmentProgramStringNative(WaterCodeCalcNoDiffuseWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[6] = loadARBFragmentProgramStringNative(WaterCodeCalcForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			ARBWaterShader[7] = loadARBFragmentProgramStringNative(WaterCodeCalcWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
+			for (uint k = 4; k < 8; ++k)
+			{
+				if (!ARBWaterShader[k])
+				{
+					nlwarning("WATER: calculated reflectivity fragment %d not loaded, keeping the flat reflection alpha", k);
+					for (uint l = 4; l < 8; ++l)
+					{
+						if (ARBWaterShader[l])
+						{
+							GLuint progId = ARBWaterShader[l];
+							nglDeleteProgramsARB(1, &progId);
+							ARBWaterShader[l] = 0;
+						}
+					}
+					break;
+				}
+			}
 			return;
 		}
 	}
@@ -2201,7 +2321,7 @@ void CDriverGL::deleteARBFragmentPrograms()
 	H_AUTO_OGL(CDriverGL_deleteARBFragmentPrograms);
 
 #ifndef USE_OPENGLES
-	for(uint k = 0; k < 4; ++k)
+	for(uint k = 0; k < 8; ++k)
 	{
 		if (ARBWaterShader[k])
 		{
@@ -3025,6 +3145,15 @@ void CDriverGL::enableClipPlane(uint index, bool enable)
 {
 	H_AUTO_OGL(CDriverGL_enableClipPlane)
 
+	nlassert(index < CDriverGLStates::MaxClipPlanes);
+
+	// Mirror the enable mask: activeARBVertexProgram binds the clip variant
+	// of vertex programs while any user clip plane is enabled.
+	if (enable)
+		_UserClipPlaneEnableMask |= (1 << index);
+	else
+		_UserClipPlaneEnableMask &= ~(1u << index);
+
 	_DriverGLStates.enableClipPlane(index, enable);
 }
 
@@ -3055,6 +3184,53 @@ void CDriverGL::setClipPlane(uint index, const NLMISC::CPlane &plane)
 	glLoadMatrixf((const GLfloat *)_ViewMtx.get());
 	glClipPlane(GL_CLIP_PLANE0 + index, equation);
 	glPopMatrix();
+
+	// When vertex programs run through the ARB path with
+	// NV_vertex_program2_option (see preferARBVertexProgram), their clip
+	// variant computes the clip distances itself, from the CLIP-SPACE plane
+	// equation stored at program.env[96+index] (the equation applies to the
+	// program's output position): p_clip = transpose(inverse(Proj*View)) * p_world.
+	// Same snapshot-at-set-time semantics as glClipPlane above; the
+	// projection and view matrices are set before the plane for each pass.
+	if (preferARBVertexProgram())
+	{
+		refreshProjMatrixFromGL();
+		CMatrix invViewProj = _GLProjMat * _ViewMtx;
+		invViewProj.invert();
+		const float *m = invViewProj.get();	// column major
+		float pc[4];
+		for (uint r = 0; r < 4; ++r)
+		{
+			// row r of the transpose = column r of the inverse
+			pc[r] = (float)(m[4*r+0] * equation[0] + m[4*r+1] * equation[1]
+			              + m[4*r+2] * equation[2] + m[4*r+3] * equation[3]);
+		}
+		nglProgramEnvParameter4fvARB(GL_VERTEX_PROGRAM_ARB, 96 + index, pc);
+	}
+#endif
+}
+
+// ***************************************************************************
+bool CDriverGL::supportVertexProgramClipPlanes() const
+{
+	H_AUTO_OGL(CDriverGL_supportVertexProgramClipPlanes)
+
+#ifdef USE_OPENGLES
+	// no user clip plane support at all in this driver
+	return false;
+#else
+	// The NV_vertex_program (VP1.0) path ignores user clip planes by spec,
+	// and without NV_vertex_program2_option there is no clip variant either
+	// (see preferARBVertexProgram). EXT_vertex_shader clip behaviour is
+	// unspecified; that R200-era hardware gets the envmap fallback too.
+	// The ARB path clips (natively on Mesa/AMD, via the clip variant with
+	// NV_vertex_program2_option), and without any vertex program support
+	// the fixed function pipeline clips everything through glClipPlane.
+	if (_Extensions.NVVertexProgram)
+		return preferARBVertexProgram();
+	if (_Extensions.EXTVertexShader && !_Extensions.ARBVertexProgram)
+		return false;
+	return true;
 #endif
 }
 

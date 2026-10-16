@@ -2,10 +2,13 @@ FILE(GLOB SRC *.cpp *.h)
 
 NL_TARGET_LIB(ryzom_aishare ${SRC})
 
+add_library(Ryzom::aishare ALIAS ryzom_aishare)
+set_target_properties(ryzom_aishare PROPERTIES EXPORT_NAME aishare)
+
 TARGET_LINK_LIBRARIES(ryzom_aishare
         PUBLIC
-        ryzom_gameshare
-        ryzom_servershare
+        Ryzom::gameshare
+        Ryzom::servershare
         NeL::misc
         NeL::net
         NeL::georges

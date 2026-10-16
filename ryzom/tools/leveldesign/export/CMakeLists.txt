@@ -2,6 +2,7 @@ FILE(GLOB SRC *.cpp )
 FILE(GLOB PRIV_H *.h)
 
 NL_TARGET_LIB(ryzom_export ${PRIV_H} ${SRC})
+add_library(Ryzom::export ALIAS ryzom_export)
 
 TARGET_LINK_LIBRARIES(ryzom_export
         PUBLIC

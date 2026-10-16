@@ -6,9 +6,9 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_log_analyser_service PRIVATE ${RZ_SERVER_SRC_DI
 
 TARGET_LINK_LIBRARIES(ryzom_log_analyser_service
         PRIVATE
-        ryzom_adminmodules
-        ryzom_gameshare
-        ryzom_pd
+        Ryzom::adminmodules
+        Ryzom::gameshare
+        Ryzom::pd
         NeL::misc
         NeL::net
         NeL::georges

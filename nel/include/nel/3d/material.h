@@ -97,6 +97,15 @@ const uint32 IDRV_MAT_USER_TEX_MAT_ALL  =   0x0FF00000;
 
 const uint32 IDRV_MAT_USER_TEX_FIRST_BIT = 20;
 
+/* Water shader draw with calculated reflectivity: the vertex buffer carries
+   a per-vertex reflectivity base (TexCoord0.z, the shape's stylized fresnel)
+   and the water fragment shader derives the blend alpha from it and the
+   luminance of the stage 2 reflection sample, instead of the legacy
+   texture-alpha semantics. Works with either a realtime planar reflection
+   or an artist envmap at stage 2. Runtime-only flag (set on the water
+   render material, never present in streamed content). */
+const uint32 IDRV_MAT_WATER_CALC_REFLECTIVITY	=	0x10000000;
+
 // For TexCoordGen
 const uint32 IDRV_MAT_TEX_GEN_SHIFT  =   2;
 const uint32 IDRV_MAT_TEX_GEN_MASK  =   0x03;
@@ -732,6 +741,10 @@ public:
 	uint32					getFlags() const {return _Flags;}
 	uint32					getTouched(void)  const { return(_Touched); }
 	void					clearTouched(uint32 flag) { _Touched&=~flag; }
+
+	/// Calculated water reflectivity semantics for this draw (see IDRV_MAT_WATER_CALC_REFLECTIVITY)
+	void					setWaterCalcReflectivity(bool on) { if (on) _Flags|=IDRV_MAT_WATER_CALC_REFLECTIVITY; else _Flags&=~IDRV_MAT_WATER_CALC_REFLECTIVITY; }
+	bool					isWaterCalcReflectivity() const { return (_Flags&IDRV_MAT_WATER_CALC_REFLECTIVITY)!=0; }
 
 
 

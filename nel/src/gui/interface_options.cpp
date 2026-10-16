@@ -185,6 +185,7 @@ namespace NLGUI
 		Tile_M_Header = Tile_M_Scrollbar = 0;
 		Tile_T = Tile_B = Tile_L = Tile_R = 0;
 		Tile_B_Open = Tile_EM_Open = Tile_M_Open = 0;
+		FrameCoversOpenList = true;
 		Scrollbar_Offset_X = 4;
 		Scrollbar_W = 8;
 	}
@@ -223,6 +224,8 @@ namespace NLGUI
 		Tile_B_Open = getValSInt32("tile_b_open");
 		Tile_EM_Open = getValSInt32("tile_em_open");
 		Tile_M_Open = getValSInt32("tile_m_open");
+		if (!getValue("frame_covers_open_list").getValStr().empty())
+			FrameCoversOpenList = getValBool("frame_covers_open_list");
 
 		Scrollbar_Offset_X = getValSInt32("scrollbar_offset_x");
 		Scrollbar_W = getValSInt32("scrollbar_size_w");

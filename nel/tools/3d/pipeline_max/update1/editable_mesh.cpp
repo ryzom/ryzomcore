@@ -62,7 +62,7 @@ CEditableMesh::~CEditableMesh()
 const ucstring CEditableMesh::DisplayName = ucstring("EditableMesh");
 const char *CEditableMesh::InternalName = "EditableMesh";
 const NLMISC::CClassId CEditableMesh::ClassId = NLMISC::CClassId(0xe44f10b3, 0x00000000);
-const TSClassId CEditableMesh::SuperClassId = CTriObject::SuperClassId;
+const TSClassId CEditableMesh::SuperClassId = 0x00000010; // GeomObject (== CTriObject::SuperClassId); literal to avoid cross-TU static-init-order dependency
 const CEditableMeshClassDesc EditableMeshClassDesc(&DllPluginDescUpdate1);
 
 void CEditableMesh::parse(uint16 version, uint filter)

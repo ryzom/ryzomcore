@@ -7,7 +7,6 @@ ADD_LIBRARY(georges_dll SHARED ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(georges_dll
         PRIVATE
-        ${NEL_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

@@ -51,6 +51,7 @@ static const uint	VPLightConstantStart = 24;
 // ***************************************************************************
 NLMISC::CSmartPtr<CVertexProgramWindTree> CMeshVPWindTree::_VertexProgram[CMeshVPWindTree::NumVp];
 NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> CMeshVPWindTree::_VertexProgramUBO;
+NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> CMeshVPWindTree::_VertexProgramUBOClip;
 NLMISC::CSmartPtr<CUniformBuffer> CMeshVPWindTree::_WindTreeUB;
 CMeshVPWindTree::CWindTreeUBOOffsets CMeshVPWindTree::_UBOOffsets;
 NLMISC::CSmartPtr<CUniformBufferFormat> CMeshVPWindTree::_WindTreeUBFormat;
@@ -358,6 +359,18 @@ static const char* WindTreeVPCodeGLSL_UBO_Body =
 	"  diffuseColor = clamp(diffuseVertex, 0.0, 1.0);\n"
 	"  specularColor = clamp(vec4(specularVertex.rgb, 0.0), 0.0, 1.0);\n"
 	"  texCoord0 = vtexCoord0;\n"
+	"#ifdef USE_CLIP\n"
+	"  // Clip variant (native gl_ClipDistance, desktop linked mode): camera\n"
+	"  // UBO planes dotted with the eye-space position, folded on the UBO\n"
+	"  // mask like the mega VP's hwClip variant. GL ignores distances whose\n"
+	"  // GL_CLIP_DISTANCEi enable is off.\n"
+	"  if ((nlClipPlaneMask & 1) != 0) gl_ClipDistance[0] = dot(clipPlane0, ecPos4); else gl_ClipDistance[0] = 1.0;\n"
+	"  if ((nlClipPlaneMask & 2) != 0) gl_ClipDistance[1] = dot(clipPlane1, ecPos4); else gl_ClipDistance[1] = 1.0;\n"
+	"  if ((nlClipPlaneMask & 4) != 0) gl_ClipDistance[2] = dot(clipPlane2, ecPos4); else gl_ClipDistance[2] = 1.0;\n"
+	"  if ((nlClipPlaneMask & 8) != 0) gl_ClipDistance[3] = dot(clipPlane3, ecPos4); else gl_ClipDistance[3] = 1.0;\n"
+	"  if ((nlClipPlaneMask & 16) != 0) gl_ClipDistance[4] = dot(clipPlane4, ecPos4); else gl_ClipDistance[4] = 1.0;\n"
+	"  if ((nlClipPlaneMask & 32) != 0) gl_ClipDistance[5] = dot(clipPlane5, ecPos4); else gl_ClipDistance[5] = 1.0;\n"
+	"#endif\n"
 	"}\n";
 
 static const char*	WindTreeVPCodeWave=
@@ -434,7 +447,7 @@ class CVertexProgramWindTreeUBO : public CVertexProgram
 {
 public:
 	typedef CWindTreeVPIdx CIdx;
-	CVertexProgramWindTreeUBO();
+	CVertexProgramWindTreeUBO(bool clip);
 	virtual ~CVertexProgramWindTreeUBO() { };
 	virtual void buildInfo();
 	const CIdx &idx() const { return m_Idx; }
@@ -563,7 +576,7 @@ void CVertexProgramWindTree::buildInfo()
 }
 
 #ifdef NL_WINDTREE_VP_UBO
-CVertexProgramWindTreeUBO::CVertexProgramWindTreeUBO()
+CVertexProgramWindTreeUBO::CVertexProgramWindTreeUBO(bool clip)
 {
 	// Build UBO format (static, shared across all wind tree instances)
 	if (!CMeshVPWindTree::_WindTreeUBFormat)
@@ -588,9 +601,25 @@ CVertexProgramWindTreeUBO::CVertexProgramWindTreeUBO()
 		source->Features.UsesCameraUBO = true;
 		source->Features.UsesObjectUBO = true;
 		source->UniformBufferFormats[UBBindingVertexProgram] = CMeshVPWindTree::_WindTreeUBFormat;
-		source->DisplayName = "glsl300esv/MeshVPWindTree/UBO";
+		source->DisplayName = clip ? "glsl300esv/MeshVPWindTree/UBO/clip" : "glsl300esv/MeshVPWindTree/UBO";
 		source->Profile = CVertexProgram::glsl300esv;
-		source->setSource(std::string(WindTreeVPCodeGLSL_ES_Header) + WindTreeVPCodeGLSL_UBO_VaryingsLinked + WindTreeVPCodeGLSL_UBO_Body);
+		std::string src;
+		if (clip)
+		{
+			// #extension must precede the precision statements
+			src += "#version 300 es\n";
+			src += "#extension GL_EXT_clip_cull_distance : enable\n";
+			src += "precision highp float;\n";
+			src += "precision highp int;\n";
+			src += "#define USE_CLIP\n";
+		}
+		else
+		{
+			src += WindTreeVPCodeGLSL_ES_Header;
+		}
+		src += WindTreeVPCodeGLSL_UBO_VaryingsLinked;
+		src += WindTreeVPCodeGLSL_UBO_Body;
+		source->setSource(src);
 		addSource(source);
 	}
 
@@ -603,9 +632,21 @@ CVertexProgramWindTreeUBO::CVertexProgramWindTreeUBO()
 		source->Features.UsesCameraUBO = true;
 		source->Features.UsesObjectUBO = true;
 		source->UniformBufferFormats[UBBindingVertexProgram] = CMeshVPWindTree::_WindTreeUBFormat;
-		source->DisplayName = "glsl330v/MeshVPWindTree/UBO";
+		source->DisplayName = clip ? "glsl330v/MeshVPWindTree/UBO/clip" : "glsl330v/MeshVPWindTree/UBO";
 		source->Profile = CVertexProgram::glsl330v;
-		source->setSource(std::string(WindTreeVPCodeGLSL_Header) + WindTreeVPCodeGLSL_UBO_PerVertex + WindTreeVPCodeGLSL_UBO_VaryingsSSO + WindTreeVPCodeGLSL_UBO_Body);
+		std::string src = WindTreeVPCodeGLSL_Header;
+		if (clip)
+		{
+			src += "out gl_PerVertex { vec4 gl_Position; float gl_ClipDistance[6]; };\n";
+			src += "#define USE_CLIP\n";
+		}
+		else
+		{
+			src += WindTreeVPCodeGLSL_UBO_PerVertex;
+		}
+		src += WindTreeVPCodeGLSL_UBO_VaryingsSSO;
+		src += WindTreeVPCodeGLSL_UBO_Body;
+		source->setSource(src);
 		addSource(source);
 	}
 }
@@ -718,7 +759,11 @@ void CMeshVPWindTree::initVertexPrograms()
 
 #ifdef NL_WINDTREE_VP_UBO
 		// Single UBO-based VP (all light/specular/normalize folded, GL3-only)
-		_VertexProgramUBO = new CVertexProgramWindTreeUBO();
+		_VertexProgramUBO = new CVertexProgramWindTreeUBO(false);
+		// Clip-writing twin, activated instead of the base program while
+		// the driver clips vertex program geometry in the vertex stage and
+		// user clip planes are enabled (water reflection passes)
+		_VertexProgramUBOClip = new CVertexProgramWindTreeUBO(true);
 
 		// Shared UBO for wind + material data (set-and-discard per draw call)
 		if (_WindTreeUBFormat)
@@ -886,10 +931,17 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	//===============
 
 	// Try UBO program first (single program for all variants)
-	if (_VertexProgramUBO && driver->supportBuiltinUBO()
-		&& driver->activeVertexProgram(_VertexProgramUBO))
+	// Clip axis is an engine-side variant selection like the light
+	// count/specular variants; needVertexProgramClipVariant() is true only
+	// while user clip planes are enabled on a driver that clips through
+	// vertex-stage clip distances (desktop GL3 during reflection passes)
+	CVertexProgramWindTreeUBO *progUBO =
+		(_VertexProgramUBOClip && driver->needVertexProgramClipVariant())
+		? _VertexProgramUBOClip : _VertexProgramUBO;
+	if (progUBO && driver->supportBuiltinUBO()
+		&& driver->activeVertexProgram(progUBO))
 	{
-		_ActiveVertexProgramUBO = _VertexProgramUBO;
+		_ActiveVertexProgramUBO = progUBO;
 		_ActiveVertexProgram = NULL;
 		driver->bindUniformBuffer(UBBindingVertexProgram, _WindTreeUB);
 	}
@@ -1013,11 +1065,14 @@ bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 	// Try to compile UBO program
 	if (_VertexProgramUBO)
 	{
+		// only log on the first real compile attempt; afterwards
+		// compileVertexProgram returns the cached failure
+		bool firstAttempt = !_VertexProgramUBO->m_CompileFailed;
 		if (driver->compileVertexProgram(_VertexProgramUBO))
 		{
 			res = true;
 		}
-		else
+		else if (firstAttempt)
 		{
 			nldebug("GL3 WindTree: UBO vertex program not available, using variant path");
 		}
@@ -1040,10 +1095,17 @@ bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 {
 	// Try UBO program first (single program for all variants, skip variant switching entirely)
-	if (_VertexProgramUBO && driver->supportBuiltinUBO()
-		&& driver->activeVertexProgram(_VertexProgramUBO))
+	// Clip axis is an engine-side variant selection like the light
+	// count/specular variants; needVertexProgramClipVariant() is true only
+	// while user clip planes are enabled on a driver that clips through
+	// vertex-stage clip distances (desktop GL3 during reflection passes)
+	CVertexProgramWindTreeUBO *progUBO =
+		(_VertexProgramUBOClip && driver->needVertexProgramClipVariant())
+		? _VertexProgramUBOClip : _VertexProgramUBO;
+	if (progUBO && driver->supportBuiltinUBO()
+		&& driver->activeVertexProgram(progUBO))
 	{
-		_ActiveVertexProgramUBO = _VertexProgramUBO;
+		_ActiveVertexProgramUBO = progUBO;
 		_ActiveVertexProgram = NULL;
 		_LastMBRIdVP = ~0u; // Sentinel: UBO path active, no variant switching
 		driver->bindUniformBuffer(UBBindingVertexProgram, _WindTreeUB);

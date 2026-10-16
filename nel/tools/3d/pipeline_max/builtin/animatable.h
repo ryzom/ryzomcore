@@ -3,6 +3,7 @@
  * \brief CAnimatable
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * CAnimatable
  */
 
@@ -51,6 +52,7 @@ class CAppData;
  * \brief CAnimatable
  * \date 2012-08-22 08:52GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Fable 5
  * This scene class owns the AppData chunk
  */
 class CAnimatable : public CSceneClass
@@ -77,7 +79,19 @@ public:
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
 
 	// public
+	/// The AppData container, CREATED (empty, parsed-state) when the object has none — the
+	/// authoring accessor. Readers should use existingAppData() instead: creating an empty
+	/// container as a side effect of a read is wasteful, and before the clean() guard below it
+	/// aborted any subsequent scene clean/build (the fresh container is indistinguishable from
+	/// a double-cleaned one to CAppData::clean's coding-error check).
 	STORAGE::CAppData *appData();
+	/// The AppData container if the source carried one (or authoring created one), else NULL.
+	inline STORAGE::CAppData *existingAppData() const { return m_AppData; }
+	/// Read access to the 0x2140 chunk: Max's note-track attachment on the Animatable
+	/// (container of 0x0130 note-track count + per note key 0x0100 time / 0x0110 flags /
+	/// 0x0120 UTF-16 note string). Kept verbatim for roundtrip; NULL when the source has no
+	/// note tracks. Only valid between parse and clean/disown.
+	inline IStorageObject *noteTracks() const { return m_Unknown2140; }
 
 protected:
 	// inherited

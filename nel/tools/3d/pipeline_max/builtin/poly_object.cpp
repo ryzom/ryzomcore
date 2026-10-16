@@ -55,7 +55,7 @@ CPolyObject::~CPolyObject()
 const ucstring CPolyObject::DisplayName = ucstring("PolyObject");
 const char *CPolyObject::InternalName = "PolyObject";
 const NLMISC::CClassId CPolyObject::ClassId = NLMISC::CClassId(0x59772461, 0x6e1141e8); /* Not official, please correct */
-const TSClassId CPolyObject::SuperClassId = CGeomObject::SuperClassId;
+const TSClassId CPolyObject::SuperClassId = 0x00000010; // GeomObject; literal to avoid cross-TU static-init-order dependency
 const CPolyObjectClassDesc PolyObjectClassDesc(&DllPluginDescBuiltin);
 
 void CPolyObject::parse(uint16 version, uint filter)

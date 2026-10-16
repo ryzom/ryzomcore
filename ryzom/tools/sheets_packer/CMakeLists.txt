@@ -12,8 +12,8 @@ TARGET_INCLUDE_DIRECTORIES(sheets_packer PRIVATE ${CMAKE_SOURCE_DIR}/ryzom/clien
 
 TARGET_LINK_LIBRARIES(sheets_packer
         PRIVATE
-        ryzom_clientsheets
-        ryzom_gameshare
+        Ryzom::clientsheets
+        Ryzom::gameshare
         NeL::misc
         NeL::georges
         NeL::net

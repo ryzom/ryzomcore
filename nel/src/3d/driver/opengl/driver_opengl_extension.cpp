@@ -961,6 +961,14 @@ static bool	setupNVVertexProgram(const char	*glext)
 }
 
 // *********************************
+static bool	setupNVVertexProgram2Option(const char	*glext)
+{
+	H_AUTO_OGL(setupNVVertexProgram2Option);
+	CHECK_EXT("GL_NV_vertex_program2_option");
+	return true;
+}
+
+// *********************************
 static bool	setupEXTVertexShader(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTVertexShader);
@@ -1692,12 +1700,14 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.NVVertexProgram = setupNVVertexProgram(glext);
 		ext.EXTVertexShader = setupEXTVertexShader(glext);
 		ext.ARBVertexProgram = setupARBVertexProgram(glext);
+		ext.NVVertexProgram2Option = setupNVVertexProgram2Option(glext);
 	}
 	else
 	{
 		ext.NVVertexProgram = false;
 		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
+		ext.NVVertexProgram2Option = false;
 	}
 
 	// Check pixel program

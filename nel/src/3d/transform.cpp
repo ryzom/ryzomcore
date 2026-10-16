@@ -1001,6 +1001,27 @@ void			CTransform::traverseAnimDetailWithoutUpdateWorldMatrix()
 	{
 		// eval detail!!
 		chanmix->eval(true, getOwnerScene()->getAnimDetailTrav().CurrentDate);
+
+		/* If the eval changed this transform's pos/rot values, commit the
+		  world matrix NOW for this traversal's render. The deferred path
+		  (update()/Hrc) only applies evaluated values at the NEXT
+		  traversal, so the frame's first render pass would show the
+		  previous evaluation: animated props lag one frame in the first
+		  pass (water reflections) and mismatch between the frame's
+		  replicated renders (visible per eye in the stereo debugger).
+		  Deliberately does NOT consume the matrix date or dirty flags:
+		  the normal update()/Hrc path re-applies the same values at the
+		  next traversal, keeping date and son propagation intact (sons of
+		  animated parents keep the deferred one-traversal latency). */
+		if (ITransformable::compareMatrixDate(_LastTransformableMatrixDate))
+		{
+			const CMatrix	&localMatrix= getMatrix();
+			CTransform		*father= hrcGetParent();
+			if (father)
+				_WorldMatrix= father->_WorldMatrix * localMatrix;
+			else
+				_WorldMatrix= localMatrix;
+		}
 	}
 }
 

@@ -262,6 +262,14 @@ public:
 
 	/// Render the ShadowSkin (SkinGroup like)
 	bool			supportShadowSkinGrouping() const {return _SupportShadowSkinGrouping;}
+
+	/** True iff compileRunTime completed successfully after build (i.e. the mesh fits in the
+	 *  skin-manager fixed VB — post-MRM vertex count < NL3D_MESH_SKIN_MANAGER_MAXVERTICES).
+	 *  Callers of build() should check this and, if false, discard the CMeshMRMSkinned and
+	 *  re-build the mesh through CMeshMRM instead (or ask the artist to author LOD_MRM=0 /
+	 *  split the geometry). Not for engine render-time gating — this class assumes the check
+	 *  passes; the accessor exists for pipeline tools that need to react before shipping. */
+	bool			isRuntimeCompiled() const { return _RuntimeCompiled; }
 	sint			renderShadowSkinGeom(CMeshMRMSkinnedInstance	*mi, uint remainingVertices, uint8 *vbDest);
 	void			renderShadowSkinPrimitives(CMeshMRMSkinnedInstance	*mi, CMaterial &castMat, IDriver *drv, uint baseVertex);
 
@@ -551,6 +559,11 @@ private:
 	bool							_SupportShadowSkinGrouping;
 	// @}
 
+	/// Set by compileRunTime; false iff the post-MRM VB exceeds NL3D_MESH_SKIN_MANAGER_MAXVERTICES
+	/// (which would break skin-grouping at render time). See isRuntimeCompiled() on the outer
+	/// CMeshMRMSkinned for how the pipeline uses this. Defaults to false pre-build.
+	bool							_RuntimeCompiled;
+
 	/// \name GPU Skinning
 	// @{
 
@@ -685,6 +698,12 @@ public:
 	 */
 	void			optimizeMaterialUsage(std::vector<sint> &remap);
 
+	/** True iff build() completed the runtime compilation step (the post-MRM VB fits in the
+	 *  skin-manager fixed VB, NL3D_MESH_SKIN_MANAGER_MAXVERTICES). If false the mesh cannot
+	 *  ship as CMeshMRMSkinned — the caller should discard and re-build through CMeshMRM.
+	 *  isCompatible() is a pre-flight input-size check; MRM growth can violate the invariant
+	 *  after a passing pre-check, so callers must consult this flag AFTER build(). */
+	bool			isRuntimeCompiled() const { return _MeshMRMGeom.isRuntimeCompiled(); }
 
 	/// Compute skinning id
 	void			computeBonesId (CSkeletonModel *skeleton);

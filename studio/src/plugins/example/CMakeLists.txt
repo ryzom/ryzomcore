@@ -19,17 +19,33 @@ SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
 QT5_WRAP_CPP(OVQT_PLUG_EXAMPLE_MOC_SRC ${OVQT_PLUG_EXAMPLE_HDR})
-QT5_WRAP_UI(OVQT_PLUG_EXAMPLE_UI_HDRS ${OVQT_PLUG_EXAMPLE_UIS})
 
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUG_EXAMPLE_UIS})
-SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUG_EXAMPLE_UI_HDRS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_PLUG_EXAMPLE_MOC_SRC})
 SOURCE_GROUP("Example Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(studio_plugin_example MODULE ${SRC} ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_EXAMPLE_UI_HDRS})
+ADD_LIBRARY(studio_plugin_example MODULE ${OVQT_PLUG_EXAMPLE_MOC_SRC} ${OVQT_EXT_SYS_SRC})
 
-TARGET_LINK_LIBRARIES(studio_plugin_example studio_plugin_core NeL::misc NeL::3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+target_sources(studio_plugin_example
+        PRIVATE
+        example_plugin.cpp
+        example_settings_page.cpp
+        qnel_widget.cpp
+        simple_viewer.cpp
+        example_settings_page.ui
+)
+
+TARGET_LINK_LIBRARIES(studio_plugin_example
+        PRIVATE
+        Studio::plugin::core
+        NeL::misc
+        NeL::3d
+        Qt::Core
+        Qt::Gui
+        Qt::OpenGL
+        Qt::Widgets
+)
 
 NL_DEFAULT_PROPS(studio_plugin_example "Tools: Studio Plugin: Example")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_example)

@@ -3,6 +3,8 @@
  * \brief CStorageObject
  * \date 2012-08-18 09:02GMT
  * \author Jan Boon (Kaetemi)
+ * \author Claude Opus 4.7
+ * \author Claude Sonnet 5
  * CStorageObject
  */
 
@@ -50,7 +52,7 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-IStorageObject::IStorageObject()
+IStorageObject::IStorageObject() : m_Was64BitChunk(false), m_Was64BitChunkKnown(false)
 {
 
 }
@@ -86,7 +88,7 @@ bool IStorageObject::isContainer() const
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CStorageContainer::CStorageContainer() : m_ChunksOwnsPointers(true)
+CStorageContainer::CStorageContainer() : m_ChunksOwnsPointers(true), m_Was64Bit(false)
 {
 
 }
@@ -124,7 +126,9 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 			nldebug("Implicitly assume the entire stream is the container");
 #endif
 			CStorageChunks chunks(stream, stream.isReading() ? storageStream->size() : 0);
+			if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
 			serial(chunks);
+			if (stream.isReading()) m_Was64Bit = chunks.is64Bit();
 			return;
 		}
 	}
@@ -134,17 +138,21 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 	{
 		// Use dummy size value so the system can at least read the header
 		CStorageChunks chunks(stream, stream.isReading() ? 0xFF : 0);
-		bool ok = chunks.enterChunk(0x4352, true);
+		if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
+		bool ok = chunks.enterChunk(0x4352, true, m_Was64Bit);
 		nlassert(ok);
 		serial(chunks);
 		chunks.leaveChunk();
+		if (stream.isReading()) m_Was64Bit = chunks.is64Bit();
 	}
 }
 
 void CStorageContainer::serial(NLMISC::IStream &stream, uint size)
 {
 	CStorageChunks chunks(stream, size);
+	if (!stream.isReading()) chunks.set64Bit(m_Was64Bit);
 	serial(chunks);
+	if (stream.isReading()) m_Was64Bit = chunks.is64Bit();
 	return;
 }
 
@@ -261,6 +269,13 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 			uint16 id = chunks.getChunkId();
 			bool cont = chunks.isChunkContainer();
 			IStorageObject *storageObject = createChunkById(id, cont);
+			bool childWas64Bit = chunks.isCurrentChunk64Bit();
+			storageObject->setWas64BitChunk(childWas64Bit);
+			// Track this container's own aggregate width preference (did ANY direct child use a
+			// 64-bit header) so build() can default brand-new sub-chunks (freshly created by typed
+			// classes, e.g. CNodeImpl's version/parent/name — see wasRead64BitChunkKnown()) to the
+			// width the rest of this container actually uses, rather than always 32-bit.
+			if (childWas64Bit) m_Was64Bit = true;
 			storageObject->setSize(chunks.getChunkSize());
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());
@@ -279,7 +294,8 @@ void CStorageContainer::serial(CStorageChunks &chunks)
 #endif
 		for (TStorageObjectContainer::iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
 		{
-			chunks.enterChunk(it->first, it->second->isContainer());
+			bool as64Bit = it->second->wasRead64BitChunkKnown() ? it->second->wasRead64BitChunk() : m_Was64Bit;
+			chunks.enterChunk(it->first, it->second->writeAsContainer(), as64Bit);
 			IStorageObject *storageObject = it->second;
 			if (storageObject->isContainer()) static_cast<CStorageContainer *>(storageObject)->serial(chunks);
 			else storageObject->serial(chunks.stream());
@@ -321,6 +337,7 @@ std::string CStorageRaw::className() const
 
 void CStorageRaw::serial(NLMISC::IStream &stream)
 {
+	if (Value.empty()) return;
 	stream.serialBuffer(&Value[0], Value.size());
 }
 

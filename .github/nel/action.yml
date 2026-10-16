@@ -31,13 +31,14 @@ runs:
 
     - uses: lukka/run-vcpkg@v11
 
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       id: vcpkg-cache
       with:
         path: ${{ inputs.vcpkg-cache-dir}}
         key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        restore-keys: vcpkg-${{ inputs.os }}-
 
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       id: hunter-cache
       with:
         path: ${{ inputs.hunter-cache-dir}}
@@ -55,7 +56,7 @@ runs:
           libjpeg-dev \
           libgif-dev libfreetype-dev \
           freeglut3-dev \
-          liblua5.2-dev libluabind-dev libcpptest-dev \
+          liblua5.2-dev libluabind-dev \
           libogg-dev libvorbis-dev libopenal-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \
@@ -82,7 +83,7 @@ runs:
           del DXSDK_Jun10.exe
         )
 
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       if: runner.os == 'Windows'
       id: chocolatey-cache
       with:
@@ -94,7 +95,7 @@ runs:
       shell: powershell
       run: choco install chocolatey.config --cache-location=${{ inputs.chocolatey-cache-dir }}
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       if: runner.os == 'Windows'
       with:
         path: ${{ inputs.chocolatey-cache-dir }}
@@ -123,13 +124,13 @@ runs:
       shell: powershell
       run: cmake --preset ${{ inputs.cmake-preset }}
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       if: ( ! cancelled() )
       with:
         path: ${{ inputs.vcpkg-cache-dir }}
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       if: ( ! cancelled() )
       with:
         path: ${{ inputs.hunter-cache-dir }}
@@ -164,7 +165,13 @@ runs:
         path: build/reports/*.xml
 
     - name: Package
+      if: runner.os != 'Windows'
       shell: bash
+      run: cpack --preset nel -R "${{ inputs.build-version }}"
+
+    - name: Package
+      if: runner.os == 'Windows'
+      shell: powershell
       run: cpack --preset nel -R "${{ inputs.build-version }}"
 
     - if: ( failure() )

@@ -176,6 +176,16 @@ void	CFlareModel::traverseRender()
 	// We can't use the scene frame counter because a flare can be rendered in several viewport during the same frame
 	// The swapBuffer counter is called only once per frame
 	uint64 currFrame = drv->getSwapBufferCounter();
+	// Several renders can hit the same flare context within a single frame:
+	// the water reflection passes of one eye all share that eye's reflection
+	// context. Only the frame's first render in the context runs the
+	// occlusion query and fade update (for reflections that is the largest
+	// admitted surface, rendered first); re-renders just draw with the
+	// intensity it computed. Without this guard a second same-frame render
+	// trips the render-interval reset below (fade zeroed every frame, query
+	// ring double-shifted so results are never harvested) and would
+	// integrate the fade more than once with the pass-kept ellapsed time.
+	const bool firstRenderThisFrame = _LastRenderIntervalEnd[flareContext] != currFrame;
 	//
 	bool visibilityRetrieved = false;
 	float visibilityRatio = 0.f;
@@ -185,7 +195,7 @@ void	CFlareModel::traverseRender()
 	{
 		occlusionTestMesh = fs->getOcclusionTestMesh(*_Scene->getShapeBank());
 	}
-	if (drv->supportOcclusionQuery())
+	if (firstRenderThisFrame && drv->supportOcclusionQuery())
 	{
 		bool issueNewQuery = true;
 		IOcclusionQuery *lastOQ = _OcclusionQuery[flareContext][OcclusionTestFrameDelay - 1];
@@ -260,7 +270,7 @@ void	CFlareModel::traverseRender()
 			}
 		}
 	}
-	else
+	else if (firstRenderThisFrame)
 	{
 		_NumFrameForOcclusionQuery[flareContext] = 1;
 		visibilityRetrieved = true;
@@ -289,13 +299,16 @@ void	CFlareModel::traverseRender()
 	}
 	// Update render interval
 //	nlwarning("frame = %d, last frame = %d", (int) currFrame, (int) _LastRenderIntervalEnd[flareContext]);
-	if (_LastRenderIntervalEnd[flareContext] + 1 != currFrame)
+	if (firstRenderThisFrame)
 	{
-		//nlwarning("*");
-		_Intensity[flareContext] = 0.f;
-		_LastRenderIntervalBegin[flareContext] = currFrame;
+		if (_LastRenderIntervalEnd[flareContext] + 1 != currFrame)
+		{
+			//nlwarning("*");
+			_Intensity[flareContext] = 0.f;
+			_LastRenderIntervalBegin[flareContext] = currFrame;
+		}
+		_LastRenderIntervalEnd[flareContext] = currFrame;
 	}
-	_LastRenderIntervalEnd[flareContext] = currFrame;
 	// Update intensity depending on visibility
 	if (visibilityRetrieved)
 	{
@@ -585,7 +598,12 @@ void CFlareModel::updateOcclusionQueryBegin(IDriver *drv)
 // ********************************************************************************************************************
 void CFlareModel::updateOcclusionQueryEnd(IDriver *drv)
 {
-	drv->setColorMask(true, true, true, true);
+	// Restore color writes. Alpha writes stay masked inside water
+	// reflection passes: the pass cleared the render target alpha as the
+	// water's reflectivity, and a blind all-true restore here let the
+	// flare quads (e.g. the sky scene's sun flare) stamp garbage alpha
+	// into the reflection (visible as an opaque square around the sun).
+	drv->setColorMask(true, true, true, !CWaterReflectionManager::isAnyRenderingReflection());
 }
 
 // ********************************************************************************************************************
@@ -686,7 +704,7 @@ void CFlareModel::occlusionTest(CMesh &mesh, IDriver &drv)
 	dq->begin();
 	renderOcclusionMeshPrimitives(mesh, drv);
 	dq->end();
-	drv.setColorMask(true, true, true, true); // restore pixel writes
+	drv.setColorMask(true, true, true, !CWaterReflectionManager::isAnyRenderingReflection()); // restore pixel writes (alpha stays masked in reflection passes)
 }
 
 // ********************************************************************************************************************

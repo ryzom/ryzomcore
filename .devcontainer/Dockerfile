@@ -14,7 +14,6 @@ RUN apt update && \
         libavcodec-dev \
         libavdevice-dev \
         libavformat-dev \
-        libcpptest-dev \
         libcurl4-openssl-dev \
         libfreetype6-dev \
         libgif-dev \
@@ -60,9 +59,6 @@ RUN apt install --yes \
 # vcpkg
 RUN apt install --yes \
         curl zip unzip tar
-
-# work arround as there is no debug version available
-RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
 
 # install msquic
 RUN wget --output-document=/tmp/microsoft.deb https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb \

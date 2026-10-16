@@ -460,6 +460,11 @@ int main(int argc, char* argv[])
 				CLandscape *landscape=new CLandscape;
 				landscape->init();
 
+				// Debug/archaeology: disable procedural tessellation noise so lumel
+				// normals come from the smooth surface only (era-reproduction probes).
+				if (getenv ("NL_ZONE_LIGHTER_NO_NOISE"))
+					landscape->setNoiseMode (false);
+
 				// A zone lighter
 				CMyZoneLighter lighter;
 				lighter.init ();
