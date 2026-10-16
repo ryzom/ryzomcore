@@ -53,6 +53,11 @@
 
 #include "nel/misc/debug.h"
 
+#if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+// Kept as a pointer so changeLogDirectory() can move the dump directory along with the logs.
+static google_breakpad::ExceptionHandler *DumpHandler = NULL;
+#endif
+
 #ifdef HAVE_NELCONFIG_H
 #  include "nelconfig.h"
 #endif // HAVE_NELCONFIG_H
@@ -398,9 +403,18 @@ typedef enum _NEL_MINIDUMP_TYPE
   MiniDumpWithCodeSegs = 0x00002000
 } NEL_MINIDUMP_TYPE;
 
-static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
-{
 #ifdef NL_HAVE_BREAKPAD
+// Persistent handler (HANDLER_NONE: we keep our own SE translator / EDebug flow as the
+// primary crash detection, we don't let Breakpad install its own automatic filters).
+// Even with HANDLER_NONE, Breakpad unconditionally creates its own internal dedicated
+// handler thread + semaphores, used by WriteMinidumpForException() below: it captures the
+// requesting thread ID on the calling (crashed) thread, wakes its own handler thread to
+// actually write the dump there (not on the crashed thread, whose stack may be corrupted),
+// then blocks the crashed thread until done.
+static google_breakpad::ExceptionHandler *DumpHandler = NULL;
+
+static void WriteMiniDumpNow()
+{
 	string dumpPath = getLogDirectory();
 
 	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
@@ -412,6 +426,70 @@ static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 		google_breakpad::ExceptionHandler::HANDLER_NONE
 	);
 	handler.WriteMinidump();
+}
+
+// Refreshes DumpHandler's dump path from the current getLogDirectory() right before use:
+// it can change after startup (eg. changeLogDirectory() from a -logsdir arg), well after
+// ensureDumpHandler() created the persistent handler, so the path can't just be baked in once.
+static void refreshDumpHandlerPath()
+{
+	string dumpPath = getLogDirectory();
+	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
+	DumpHandler->set_dump_path(wpath);
+}
+
+// Last-resort, process-wide filter: catches anything that falls through
+// _set_se_translator (eg. a fault on a thread that never installed it, such as a raw
+// CreateThread()'d thread elsewhere in the codebase). Attributes the dump to the actual
+// faulting thread via WriteMinidumpForException(), called here on that same thread.
+static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *excpInfo)
+{
+	if (DumpHandler)
+	{
+		refreshDumpHandlerPath();
+		DumpHandler->WriteMinidumpForException(excpInfo);
+	}
+	else
+		WriteMiniDumpNow();
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// Pre-creates the persistent Breakpad handler used by DumpMiniDump()/unhandledExceptionFilter,
+// so nothing needs to allocate while handling an actual crash. Safe to call more than once.
+static void ensureDumpHandler()
+{
+	if (DumpHandler)
+		return;
+
+	SetUnhandledExceptionFilter(unhandledExceptionFilter);
+
+	// Reserve stack headroom so DumpMiniDump() still has room to run
+	// if the crash being handled is itself a stack overflow
+	ULONG stackGuaranteeBytes = 64 * 1024;
+	SetThreadStackGuarantee(&stackGuaranteeBytes);
+
+	string dumpPath = getLogDirectory();
+	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
+	DumpHandler = new google_breakpad::ExceptionHandler(
+		wpath,
+		NULL,
+		NULL,
+		NULL,
+		google_breakpad::ExceptionHandler::HANDLER_NONE
+	);
+}
+#endif // NL_HAVE_BREAKPAD
+
+static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
+{
+#ifdef NL_HAVE_BREAKPAD
+	if (DumpHandler)
+	{
+		refreshDumpHandlerPath();
+		DumpHandler->WriteMinidumpForException(excpInfo);
+	}
+	else
+		WriteMiniDumpNow();
 #else
 	HANDLE file = CreateFileA (NL_CRASH_DUMP_FILE, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file)
@@ -1143,6 +1221,12 @@ void getCallStackAndLog (string &result, sint skipNFirst)
 void changeLogDirectory(const std::string &dir)
 {
 	LogPath = CPath::standardizePath(dir);
+#if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	if (DumpHandler)
+	{
+		DumpHandler->set_minidump_descriptor(google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath));
+	}
+#endif
 	if (fd == NULL) return;
 	string p = LogPath + "log.log";
 	fd->setParam(p);
@@ -1181,6 +1265,9 @@ void attachExceptionHandler()
 #ifndef NL_COMP_MINGW
 #	ifdef NL_OS_WINDOWS
 	_set_se_translator(exceptionTranslator);
+#		ifdef NL_HAVE_BREAKPAD
+	ensureDumpHandler();
+#		endif
 #	endif // NL_OS_WINDOWS
 #endif //!NL_COMP_MINGW
 }
@@ -1213,6 +1300,9 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 				_set_se_translator(exceptionTranslator);
 				SetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, "1" );
 			}
+#			ifdef NL_HAVE_BREAKPAD
+			ensureDumpHandler();
+#			endif
 		}
 #	endif // NL_OS_WINDOWS
 #endif //!NL_COMP_MINGW
@@ -1264,11 +1354,12 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		initDebug2(logInFile);
 
 #if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		string path = LogPath.empty() ? "." : LogPath;
-		static google_breakpad::MinidumpDescriptor descriptor(path);
-		static google_breakpad::ExceptionHandler handler(
-			descriptor, NULL, NULL, NULL, true, -1
-		);
+		if (!DumpHandler)
+		{
+			DumpHandler = new google_breakpad::ExceptionHandler(
+				google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath), NULL, NULL, NULL, true, -1
+			);
+		}
 #endif
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);
@@ -1781,5 +1872,39 @@ NLMISC_CATEGORISED_COMMAND(nel, readaccess, "read a uint8 value in an invalid ad
 }
 
 #endif // FINAL_VERSION
+
+#ifdef NL_HAVE_BREAKPAD
+// Always available, even in FINAL_VERSION: crash-dump handler self-tests.
+NLMISC_CATEGORISED_COMMAND(nel, crashtest, "generate a real crash, to test that the minidump/crash handler produces a single clean report", "")
+{
+	if (args.size() != 0) return false;
+	uint8 *adr = (uint8*)0;
+	*adr = 123;
+	return true;
+}
+
+#ifdef NL_OS_WINDOWS
+// Test-only helper for crashtestreal: faults on its own thread, with no SE translator
+// installed on it, so the fault reaches the client outside of any command/Lua call stack
+// (unlike crashtest, which faults inside ICommand::execute() and gets its EDebug exception
+// swallowed by that function's own catch(const exception&)).
+static DWORD WINAPI DeferredCrashThreadProc(LPVOID /* param */)
+{
+	Sleep(500); // let the crashtestreal command already return before faulting
+	uint8 *adr = (uint8*)0;
+	*adr = 123;
+	return 0;
+}
+#endif
+
+NLMISC_CATEGORISED_COMMAND(nel, crashtestreal, "generate a real crash on its own thread, outside any command/Lua call stack, to verify the client actually closes with a clean dump", "")
+{
+	if (args.size() != 0) return false;
+#ifdef NL_OS_WINDOWS
+	CreateThread(NULL, 0, DeferredCrashThreadProc, NULL, 0, NULL);
+#endif
+	return true;
+}
+#endif // NL_HAVE_BREAKPAD
 
 } // NLMISC
