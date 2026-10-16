@@ -31,6 +31,7 @@
 #include <queue>
 #endif
 
+#include <functional>
 #include <vector>
 
 
@@ -43,7 +44,7 @@ class CCallbackNetBase;
  * msgin contains parameters of the message
  * from is the SockId of the connection, for a client, from is always the same value
  */
-typedef void (*TMsgCallback) (CMessage &msgin, TSockId from, CCallbackNetBase &netbase);
+typedef std::function<void(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)> TMsgCallback;
 
 
 /// Callback items. See CMsgSocket::update() for an explanation on how the callbacks are called.

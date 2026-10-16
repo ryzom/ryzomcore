@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.27)
+
+project(Snowballs VERSION 2.0.0 LANGUAGES CXX)
+
 IF(WIN32)
   SET(SNOWBALLS_CONFIG_FILE "." CACHE FILEPATH "Snowballs config file location")
 ELSE()

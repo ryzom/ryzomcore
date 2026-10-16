@@ -9,4 +9,5 @@ INSTALL(DIRECTORY data/
 	COMPONENT snowballsdata
         PATTERN "CVS" EXCLUDE
         PATTERN ".svn" EXCLUDE
+        PATTERN ".gitkeep" EXCLUDE
         PATTERN "Makefile*" EXCLUDE)

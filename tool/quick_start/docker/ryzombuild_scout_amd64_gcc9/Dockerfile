@@ -1,5 +1,5 @@
 FROM --platform=linux/amd64 steamrt_scout_amd64:latest
-MAINTAINER Ryzom Core <https://wiki.ryzom.dev/>
+LABEL org.opencontainers.image.authors="Ryzom Core <https://wiki.ryzom.dev/>"
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 \
   && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 90 \

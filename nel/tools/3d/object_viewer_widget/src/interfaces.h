@@ -78,6 +78,7 @@ namespace NLQT
 
 } /* namespace NLQT */
 
-Q_DECLARE_INTERFACE(NLQT::IObjectViewer,"com.ryzom.dev.IObjectViewer/0.1")
+#define IObjectViewer_iid "com.ryzom.dev.IObjectViewer/0.1"
+Q_DECLARE_INTERFACE(NLQT::IObjectViewer,IObjectViewer_iid)
 
 #endif 

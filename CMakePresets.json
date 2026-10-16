@@ -1,0 +1,168 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "inherits": "base",
+      "name": "linux",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "macos",
+      "hidden": true,
+      "generator": "Xcode",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "default",
+      "cacheVariables": {
+        "WITH_STATIC": true,
+        "WITH_NEL_TESTS": true,
+        "WITH_NEL_SAMPLES": true,
+        "WITH_LUA51": false,
+        "WITH_LUA52": true,
+        "WITH_RYZOM": true,
+        "WITH_RYZOM_SERVER": true,
+        "WITH_RYZOM_CLIENT": true,
+        "WITH_RYZOM_TOOLS": true,
+        "WITH_NEL_TOOLS": true,
+        "WITH_NELNS": true,
+        "WITH_NELNS_LOGIN_SYSTEM": true,
+        "WITH_NELNS_SERVER": true,
+        "WITH_QT5": true,
+        "WITH_LIBGSF": true
+      }
+    },
+    {
+      "inherits": [
+        "default"
+      ],
+      "name": "default-coverage",
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "--coverage",
+        "CMAKE_CXX_FLAGS": "--coverage"
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "default"
+      ],
+      "name": "linux-default"
+    },
+    {
+      "inherits": "base",
+      "name": "client",
+      "cacheVariables": {
+        "FINAL_VERSION": false,
+        "WITH_DRIVER_OPENAL": true,
+        "WITH_DRIVER_OPENGL": true,
+        "WITH_INSTALL_LIBRARIES": false,
+        "WITH_NEL_SAMPLES": false,
+        "WITH_NEL_TESTS": false,
+        "WITH_NEL_TOOLS": false,
+        "WITH_RYZOM_CLIENT": true,
+        "WITH_RYZOM_SERVER": false,
+        "WITH_RYZOM_TOOLS": false
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "client"
+      ],
+      "name": "linux-client"
+    },
+    {
+      "inherits": [
+        "windows",
+        "client"
+      ],
+      "name": "windows-client",
+      "cacheVariables": {
+        "WITH_DRIVER_DIRECT3D": true,
+        "WITH_DRIVER_XAUDIO2": true
+      }
+    },
+    {
+      "inherits": [
+        "macos",
+        "client"
+      ],
+      "name": "macos-client",
+      "cacheVariables": {
+        "WITH_LIBXML2_ICONV": false
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "default",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "default",
+      "configuration": "Release"
+    },
+    {
+      "name": "client",
+      "configurePreset": "client",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      },
+      "environment": {
+        "GTEST_OUTPUT": "xml:${sourceDir}/build/reports/"
+      }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "client",
+      "configurePreset": "client"
+    }
+  ]
+}
