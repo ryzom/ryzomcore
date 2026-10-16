@@ -39,7 +39,7 @@ public:
 
 	// Constructor
 	CGroupQuickHelp(const TCtorParam &param);
-	~CGroupQuickHelp();
+	~CGroupQuickHelp() NL_OVERRIDE;
 
 	// Submit an event
 	bool submitEvent (const char *event);
@@ -47,13 +47,13 @@ public:
 private:
 
 	// CInterfaceGroup Interface
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void updateCoords();
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+	virtual void updateCoords() NL_OVERRIDE;
 
 	// From CGroupHTML
-	virtual void beginElement (NLGUI::CHtmlElement &elm);
-	virtual void endBuild ();
-	virtual void browse (const char *url);
+	virtual void beginElement (NLGUI::CHtmlElement &elm) NL_OVERRIDE;
+	virtual void endBuild () NL_OVERRIDE;
+	virtual void browse (const char *url) NL_OVERRIDE;
 	virtual std::string	home() const NL_OVERRIDE;
 
 	// Modify uri with '.html' or '_??.html' ending to have current user language,

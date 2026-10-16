@@ -18,12 +18,12 @@ public:
 	/////////////////////////////////////////
 	/// Web interface callback imp
 	/////////////////////////////////////////
-	virtual void on_CTestInterfaceWeb_Connection(NLNET::TSockId from)
+	virtual void on_CTestInterfaceWeb_Connection(NLNET::TSockId from) NL_OVERRIDE
 	{
 		nlinfo("Connect from %s, %s", from->asString().c_str(), from->getTcpSock()->remoteAddr().asString().c_str());
 	}
 
-	virtual void on_CTestInterfaceWeb_Disconnection(NLNET::TSockId from)
+	virtual void on_CTestInterfaceWeb_Disconnection(NLNET::TSockId from) NL_OVERRIDE
 	{
 		nlinfo("Disconnect from %s, %s", from->asString().c_str(), from->getTcpSock()->remoteAddr().asString().c_str());
 		
@@ -49,12 +49,12 @@ public:
 //			_TestState++;
 	}
 
-	virtual void on_beginTest(NLNET::TSockId from)\
+	virtual void on_beginTest(NLNET::TSockId from) NL_OVERRIDE\
 	{
 		_TestState = 0;
 	}
 
-	virtual void on_sendUInt32(NLNET::TSockId from, uint32 i32)
+	virtual void on_sendUInt32(NLNET::TSockId from, uint32 i32) NL_OVERRIDE
 	{
 		if (_TestState == 0)
 		{
@@ -93,7 +93,7 @@ public:
 		_TestState++;
 	}
 
-	virtual void on_sendUInt8(NLNET::TSockId from, uint8 i8)
+	virtual void on_sendUInt8(NLNET::TSockId from, uint8 i8) NL_OVERRIDE
 	{
 		if (_TestState == 1)
 		{
@@ -114,7 +114,7 @@ public:
 		_TestState++;
 	}
 
-	virtual void on_sendString(NLNET::TSockId from, const std::string &str)
+	virtual void on_sendString(NLNET::TSockId from, const std::string &str) NL_OVERRIDE
 	{
 		if (_TestState == 2)
 		{
@@ -135,7 +135,7 @@ public:
 		_TestState++;
 	}
 
-	virtual void on_composite1(NLNET::TSockId from, uint32 i32, uint8 i8, const std::string &str)
+	virtual void on_composite1(NLNET::TSockId from, uint32 i32, uint8 i8, const std::string &str) NL_OVERRIDE
 	{
 		if (_TestState == 6)
 		{
@@ -153,7 +153,7 @@ public:
 		_TestState++;
 	}
 
-	virtual void on_composite2(NLNET::TSockId from, const std::string &str1, const std::string &str2, const std::string &str3, const std::string &str4)
+	virtual void on_composite2(NLNET::TSockId from, const std::string &str1, const std::string &str2, const std::string &str3, const std::string &str4) NL_OVERRIDE
 	{
 		if (_TestState == 7)
 		{
@@ -172,7 +172,7 @@ public:
 		_TestState++;
 	}
 
-	virtual void on_composite3(NLNET::TSockId from, uint8 i81, uint32 i321, const std::string &str1, uint8 i82, uint32 i322, const std::string &str2, uint8 i83, uint32 i323, const std::string &str3, uint8 i84, uint32 i324, const std::string &str4, uint32 i325, uint8 i85)
+	virtual void on_composite3(NLNET::TSockId from, uint8 i81, uint32 i321, const std::string &str1, uint8 i82, uint32 i322, const std::string &str2, uint8 i83, uint32 i323, const std::string &str3, uint8 i84, uint32 i324, const std::string &str4, uint32 i325, uint8 i85) NL_OVERRIDE
 	{
 		if (_TestState == 8)
 		{
@@ -210,52 +210,52 @@ public:
 	// Wel interface 2 impl
 	//////////////////////////////////
 	/// Connection callback : a new interface client connect
-	virtual void on_CTestInterfaceWeb2_Connection(NLNET::TSockId from)
+	virtual void on_CTestInterfaceWeb2_Connection(NLNET::TSockId from) NL_OVERRIDE
 	{
 	}
 	/// Disconnection callback : one of the interface client disconnect
-	virtual void on_CTestInterfaceWeb2_Disconnection(NLNET::TSockId from)
+	virtual void on_CTestInterfaceWeb2_Disconnection(NLNET::TSockId from) NL_OVERRIDE
 	{
 	}
 
 
-	virtual void on_sendVectorUInt32(NLNET::TSockId from, const std::vector<uint32> &vi32)
+	virtual void on_sendVectorUInt32(NLNET::TSockId from, const std::vector<uint32> &vi32) NL_OVERRIDE
 	{
 		returnVectorUInt32(from, vi32);
 	}
 
-	virtual void on_sendVectorString(NLNET::TSockId from, const std::vector<std::string> &vstr)
+	virtual void on_sendVectorString(NLNET::TSockId from, const std::vector<std::string> &vstr) NL_OVERRIDE
 	{
 		returnVectorString(from, vstr);
 	}
 
 
-	virtual std::string on_twoWayCall(NLNET::TSockId from, const std::string &param)
+	virtual std::string on_twoWayCall(NLNET::TSockId from, const std::string &param) NL_OVERRIDE
 	{
 		return param;
 	}
 
-	virtual uint32 on_twoWayCallInt(NLNET::TSockId from, uint32 param)
+	virtual uint32 on_twoWayCallInt(NLNET::TSockId from, uint32 param) NL_OVERRIDE
 	{
 		return param;
 	}
 
-	virtual TEnum on_twoWayCallEnum(NLNET::TSockId from, TEnum param)
+	virtual TEnum on_twoWayCallEnum(NLNET::TSockId from, TEnum param) NL_OVERRIDE
 	{
 		return param;
 	}
 	
-	virtual std::vector<uint32> on_twoWayCallVector(NLNET::TSockId from, const std::vector<uint32> &param)
+	virtual std::vector<uint32> on_twoWayCallVector(NLNET::TSockId from, const std::vector<uint32> &param) NL_OVERRIDE
 	{
 		return param;
 	}
 
-	virtual void on_mixedVector(NLNET::TSockId from, uint32 param1, const std::vector<std::string> &vstr, const std::vector<uint32> &vi32)
+	virtual void on_mixedVector(NLNET::TSockId from, uint32 param1, const std::vector<std::string> &vstr, const std::vector<uint32> &vi32) NL_OVERRIDE
 	{
 		returnMixedVector(from, param1, vstr, vi32);
 	}
 
-	virtual uint32 on_mixedTwoWayVector(NLNET::TSockId from, uint32 param1, const std::vector<std::string> &vstr, const std::vector<uint32> &vi32)
+	virtual uint32 on_mixedTwoWayVector(NLNET::TSockId from, uint32 param1, const std::vector<std::string> &vstr, const std::vector<uint32> &vi32) NL_OVERRIDE
 	{
 		return param1;
 	}
@@ -269,13 +269,13 @@ class CTestWebInterfaceService
 
 	CTestWebInterfaceServiceImpl *_WebItf;
 public:
-	void init () 
+	void init () NL_OVERRIDE 
 	{ 
 		_WebItf = new CTestWebInterfaceServiceImpl;
 		_WebItf->CTestInterfaceWebItf::openItf(8061);
 		_WebItf->CTestInterfaceWeb2Itf::openItf(8062);
 	}
-	bool update () 
+	bool update () NL_OVERRIDE 
 	{ 
 		// update the web interface
 		_WebItf->CTestInterfaceWebItf::update();
@@ -283,7 +283,7 @@ public:
 		
 		return true; 
 	}
-	void release () 
+	void release () NL_OVERRIDE 
 	{ 
 		delete _WebItf;
 	}

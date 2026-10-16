@@ -316,7 +316,7 @@ namespace NLGUI
 	class CSNUp : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CDBGroupSelectNumber *pSN = dynamic_cast<CDBGroupSelectNumber*>(pCaller->getParent());
 			if (pSN == NULL) return;
@@ -329,7 +329,7 @@ namespace NLGUI
 	class CSNDown : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CDBGroupSelectNumber *pSN = dynamic_cast<CDBGroupSelectNumber*>(pCaller->getParent());
 			if (pSN == NULL) return;

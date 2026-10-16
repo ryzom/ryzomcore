@@ -38,16 +38,16 @@ namespace NLGUI
 		CInterfaceGroup(const TCtorParam &param);
 
 		/// Destructor
-		virtual ~CInterfaceGroup();
+		virtual ~CInterfaceGroup() NL_OVERRIDE;
 
-		virtual void setIdRecurse(const std::string &id);
+		virtual void setIdRecurse(const std::string &id) NL_OVERRIDE;
 
 		/// Coming from CInterfaceElement
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 		xmlNodePtr serializeGroup( xmlNodePtr parentNode, const char *type ) const;
 		xmlNodePtr serializeSubGroups( xmlNodePtr parentNode ) const;
 		xmlNodePtr serializeControls( xmlNodePtr parentNode ) const;
@@ -55,7 +55,7 @@ namespace NLGUI
 		virtual xmlNodePtr serializeTreeData( xmlNodePtr parentNode ) const;
 		bool serializeLinks( xmlNodePtr parentNode ) const;
 
-		virtual uint32 getMemory ();
+		virtual uint32 getMemory () NL_OVERRIDE;
 
 		virtual CInterfaceElement* getElement (const std::string &id);
 		CInterfaceElement* findFromShortId(const std::string &id);
@@ -90,11 +90,11 @@ namespace NLGUI
 		uint getNumGroup() const { return (uint)_ChildrenGroups.size(); }
 		CInterfaceGroup *getGroup(uint index) const;
 
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
 
 		/// Coming from CCtrlBase
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 		void executeControl (const std::string &sControlName);
 
@@ -114,7 +114,7 @@ namespace NLGUI
 		void absoluteToRelative (sint32 &x, sint32 &y);
 
 		/// Coming from CViewBase
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 		// Draw with no clip (if clip is done by parent)
 		virtual void drawNoClip();
 
@@ -125,8 +125,8 @@ namespace NLGUI
 		/**
 		 * update the elements coords
 		 */
-		virtual void checkCoords();
-		virtual void updateCoords();
+		virtual void checkCoords() NL_OVERRIDE;
+		virtual void updateCoords() NL_OVERRIDE;
 
 		/// remove all views
 		virtual void clearViews();
@@ -168,7 +168,7 @@ namespace NLGUI
 		sint32 getMaxH () const { return _MaxH; }
 		sint32 getMaxWReal () const { return _Active ? _MaxWReal : 0; }
 		sint32 getMaxHReal () const { return _Active ? _MaxHReal : 0; }
-		sint32 getInnerWidth () const;
+		sint32 getInnerWidth () const NL_OVERRIDE;
 		sint32 getOfsX () const { return _OffsetX; }
 		sint32 getOfsY () const { return _OffsetY; }
 		bool   getResizeFromChildW() const { return _ResizeFromChildW; }
@@ -179,12 +179,12 @@ namespace NLGUI
 		void   setResizeFromChildHMargin(sint32 margin) { _ResizeFromChildHMargin = margin; }
 		bool   getOverlappable() const { return _Overlappable; }
 
-		virtual void setActive (bool state);
+		virtual void setActive (bool state) NL_OVERRIDE;
 
 		// eval dimension of children bbox
 		void evalChildrenBBox(bool resizeFromChildW, bool resizeFromChildH, sint &width, sint &height) const;
 
-		virtual void	launch ();
+		virtual void	launch () NL_OVERRIDE;
 
 
 		// right & left clicks handler
@@ -264,13 +264,13 @@ namespace NLGUI
 
 
 		// From CCtrlBase
-		virtual void updateAllLinks();
+		virtual void updateAllLinks() NL_OVERRIDE;
 
 		/// return true for some containers. false by default
 		virtual bool	isMovable() const {return false;}
 
-		virtual sint32 getAlpha() const;
-		virtual void setAlpha (sint32 a);
+		virtual sint32 getAlpha() const NL_OVERRIDE;
+		virtual void setAlpha (sint32 a) NL_OVERRIDE;
 
 		/// Eval current clip coords. This is not incremental as with makeNewClip, and thus more slow. This also doesn't change the current clip window.
 		void getClip(sint32 &x, sint32 &y, sint32 &w, sint32 &h) const;
@@ -289,19 +289,19 @@ namespace NLGUI
 		void dumpGroups() const;
 		void dumpEltsOrder() const;
 
-		virtual void renderWiredQuads(CInterfaceElement::TRenderWired type, const std::string &uiFilter);
+		virtual void renderWiredQuads(CInterfaceElement::TRenderWired type, const std::string &uiFilter) NL_OVERRIDE;
 
-		virtual bool isGroup() const { return true; }
+		virtual bool isGroup() const NL_OVERRIDE { return true; }
 
 		// clear all edit box in the ui
 		virtual void    clearAllEditBox();
 		// restore all backuped positions for containers
 		virtual void    restoreAllContainersBackupPosition();
 
-		virtual void	dumpSize(uint depth = 0) const;
+		virtual void	dumpSize(uint depth = 0) const NL_OVERRIDE;
 
 		// From CInterfaceElement
-		virtual void visit(CInterfaceElementVisitor *visitor);
+		virtual void visit(CInterfaceElementVisitor *visitor) NL_OVERRIDE;
 
 		/// Visits only this group's sub-groups and then the group itself
 		virtual void visitGroupAndChildren( CInterfaceElementVisitor *visitor );
@@ -312,7 +312,7 @@ namespace NLGUI
 
 
 		// From CInterfaceElement
-		virtual void	onFrameUpdateWindowPos(sint dx, sint dy);
+		virtual void	onFrameUpdateWindowPos(sint dx, sint dy) NL_OVERRIDE;
 		// true for CGroupInScene for instance
 		bool	isNeedFrameUpdatePos() const {return _NeedFrameUpdatePos;}
 
@@ -335,15 +335,15 @@ namespace NLGUI
 		void	removeLuaScriptOnDBChange(const std::string &dbList);
 		// @}
 
-		virtual CInterfaceElement *clone();
-		virtual void serial(NLMISC::IStream &f);
+		virtual CInterfaceElement *clone() NL_OVERRIDE;
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		// Return the current Depth, with no ZBias applied.
 		float getDepthForZSort() const { return _DepthForZSort; }
 
-		void onWidgetDeleted( CInterfaceElement *e );
+		void onWidgetDeleted( CInterfaceElement *e ) NL_OVERRIDE;
 
-		void moveBy( sint32 x, sint32 y );
+		void moveBy( sint32 x, sint32 y ) NL_OVERRIDE;
 
 		// Blows up the group, moves it's children to it's parent
 		bool explode();

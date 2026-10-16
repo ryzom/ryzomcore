@@ -38,10 +38,10 @@ class CGroupSkills : public CInterfaceGroup
 public:
 
 	CGroupSkills( const TCtorParam &param );
-	virtual ~CGroupSkills();
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void checkCoords();
-	virtual void clearGroups();
+	virtual ~CGroupSkills() NL_OVERRIDE;
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+	virtual void checkCoords() NL_OVERRIDE;
+	virtual void clearGroups() NL_OVERRIDE;
 
 	static bool InhibitSkillUpFX;
 
@@ -57,7 +57,7 @@ private:
 	struct CSkillsObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 		CGroupSkills *Owner;
-		virtual void update (NLMISC::ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node) NL_OVERRIDE;
 	} _SkillsObs;
 	friend struct CSkillsObs;
 

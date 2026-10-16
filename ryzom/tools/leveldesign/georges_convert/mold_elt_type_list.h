@@ -32,20 +32,20 @@ protected:
 
 public:
 	CMoldEltTypeList( CLoader* const _pl, CMoldEltType* const _pmet );
-	virtual ~CMoldEltTypeList();
+	virtual ~CMoldEltTypeList() NL_OVERRIDE;
 
-	virtual void Load( const CStringEx _sxfullname );
-	virtual void Load( const CStringEx _sxfullname, const CStringEx _sxdate );
+	virtual void Load( const CStringEx _sxfullname ) NL_OVERRIDE;
+	virtual void Load( const CStringEx _sxfullname, const CStringEx _sxdate ) NL_OVERRIDE;
 
-	virtual CMoldElt* GetMold(); 
-	virtual CStringEx	GetDefaultValue() const;															// Give the default value of the type
-	virtual CStringEx	CalculateResult( const CStringEx _sxvalue, const CStringEx _sxbasevalue ) const;	// Calculate the final result
-	virtual CStringEx	Format( const CStringEx _sxvalue ) const;											// Transform any value in the good format					
-	virtual CStringEx	GetPredefSubstitute( const CStringEx _sxdesignation ) const;
-	virtual CStringEx	GetPredefDesignation( const CStringEx _sxdesignation ) const;						// Give the value corresponding to the string
-	virtual CStringEx	GetPredefDesignation( const unsigned int _index ) const;
-	virtual	CStringEx	GetFormula();																		// Give the formula of the type : int(0,100)
-	virtual unsigned int GetType() const;																	// Give the type ( typ or dfn or nothing )	
+	virtual CMoldElt* GetMold() NL_OVERRIDE; 
+	virtual CStringEx	GetDefaultValue() const NL_OVERRIDE;															// Give the default value of the type
+	virtual CStringEx	CalculateResult( const CStringEx _sxvalue, const CStringEx _sxbasevalue ) const NL_OVERRIDE;	// Calculate the final result
+	virtual CStringEx	Format( const CStringEx _sxvalue ) const NL_OVERRIDE;											// Transform any value in the good format					
+	virtual CStringEx	GetPredefSubstitute( const CStringEx _sxdesignation ) const NL_OVERRIDE;
+	virtual CStringEx	GetPredefDesignation( const CStringEx _sxdesignation ) const NL_OVERRIDE;						// Give the value corresponding to the string
+	virtual CStringEx	GetPredefDesignation( const unsigned int _index ) const NL_OVERRIDE;
+	virtual	CStringEx	GetFormula() NL_OVERRIDE;																		// Give the formula of the type : int(0,100)
+	virtual unsigned int GetType() const NL_OVERRIDE;																	// Give the type ( typ or dfn or nothing )	
 };
 
 } // NLGEORGES

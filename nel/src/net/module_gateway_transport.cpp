@@ -64,7 +64,7 @@ namespace NLNET
 		{
 		}
 
-		void sendMessage(const CMessage &message) const;
+		void sendMessage(const CMessage &message) const NL_OVERRIDE;
 	};
 
 #define LAYER3_SERVER_CLASS_NAME "L3Server"
@@ -92,7 +92,7 @@ namespace NLNET
 		{
 		}
 
-		~CGatewayL3ServerTransport()
+		~CGatewayL3ServerTransport() NL_OVERRIDE
 		{
 			if (_CallbackServer.get() != NULL)
 			{
@@ -101,13 +101,13 @@ namespace NLNET
 			}
 		}
 
-		const std::string &getClassName() const
+		const std::string &getClassName() const NL_OVERRIDE
 		{
 			static string className(LAYER3_SERVER_CLASS_NAME);
 			return className;
 		}
 
-		virtual void update()
+		virtual void update() NL_OVERRIDE
 		{
 			H_AUTO(L3S_update);
 			// update the callback server
@@ -139,12 +139,12 @@ namespace NLNET
 
 		}
 
-		virtual uint32 getRouteCount() const
+		virtual uint32 getRouteCount() const NL_OVERRIDE
 		{
 			return (uint32)_Routes.size();
 		}
 
-		void dump(NLMISC::CLog &log) const
+		void dump(NLMISC::CLog &log) const NL_OVERRIDE
 		{
 			IModuleManager &mm = IModuleManager::getInstance();
 			log.displayNL("  NeL Net layer 3 transport, SERVER mode");
@@ -187,13 +187,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */)
+		void onCommand(const CMessage &/* command */) NL_OVERRIDE
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command)
+		bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();
@@ -418,7 +418,7 @@ namespace NLNET
 		{
 		}
 
-		void sendMessage(const CMessage &message) const
+		void sendMessage(const CMessage &message) const NL_OVERRIDE
 		{
 			NLNET_AUTO_DELTE_ASSERT;
 			H_AUTO(L3CRoute_sendMessage);
@@ -476,7 +476,7 @@ namespace NLNET
 		{
 		}
 
-		~CGatewayL3ClientTransport()
+		~CGatewayL3ClientTransport() NL_OVERRIDE
 		{
 			deletePendingRoute();
 
@@ -508,13 +508,13 @@ namespace NLNET
 			}
 		}
 
-		const std::string &getClassName() const
+		const std::string &getClassName() const NL_OVERRIDE
 		{
 			static string className(LAYER3_CLIENT_CLASS_NAME);
 			return className;
 		}
 
-		virtual void update()
+		virtual void update() NL_OVERRIDE
 		{
 			H_AUTO(L3C_update);
 			// delete any route pending
@@ -570,12 +570,12 @@ namespace NLNET
 			}
 		}
 
-		virtual uint32 getRouteCount() const
+		virtual uint32 getRouteCount() const NL_OVERRIDE
 		{
 			return (uint32)_Routes.size();
 		}
 
-		void dump(NLMISC::CLog &log) const
+		void dump(NLMISC::CLog &log) const NL_OVERRIDE
 		{
 			IModuleManager &mm = IModuleManager::getInstance();
 			log.displayNL("  NeL Net layer 3 transport, CLIENT mode");
@@ -610,13 +610,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */)
+		void onCommand(const CMessage &/* command */) NL_OVERRIDE
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command)
+		bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();

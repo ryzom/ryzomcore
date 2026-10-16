@@ -48,8 +48,8 @@ public:
 	std::vector<CAttackListSheetEntry> Attacks; // sorted list of attack
 public:
 	CAttackListSheet();
-	virtual void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(NLMISC::IStream &f);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 

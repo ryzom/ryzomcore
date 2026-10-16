@@ -68,10 +68,10 @@ public:
 
 public:
 
-	virtual void	run();
+	virtual void	run() NL_OVERRIDE;
 
 	IRefTask() : State(NotRunning), _Thread(NULL), ExecutionSuccess(true), AskedToStop(false)	{ }
-	virtual ~IRefTask()														{ if (_Thread != NULL)	delete _Thread; }
+	virtual ~IRefTask() NL_OVERRIDE														{ if (_Thread != NULL)	delete _Thread; }
 
 private:
 
@@ -96,13 +96,13 @@ public:
 
 
 	/// Initialization
-	virtual void	init();
+	virtual void	init() NL_OVERRIDE;
 
 	/// Release
-	virtual void	release();
+	virtual void	release() NL_OVERRIDE;
 
 	/// Update
-	virtual bool	update();
+	virtual bool	update() NL_OVERRIDE;
 
 
 

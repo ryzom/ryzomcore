@@ -23,7 +23,7 @@
 
 class CDummyProgress : public NLMISC::IProgressCallback
 {
-	void progress (float /* value */) {}
+	void progress (float /* value */) NL_OVERRIDE {}
 };
 
 

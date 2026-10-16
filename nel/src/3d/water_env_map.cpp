@@ -92,13 +92,13 @@ void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimatio
 	class CTextureCubeUnshared : public CTextureCube
 	{
 	public:
-		virtual bool supportSharing() const {return false;}
-		virtual uint32 getWidth(uint32 numMipMap = 0) const
+		virtual bool supportSharing() const NL_OVERRIDE {return false;}
+		virtual uint32 getWidth(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
 		}
-		virtual uint32 getHeight(uint32 numMipMap = 0) const
+		virtual uint32 getHeight(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
@@ -109,13 +109,13 @@ void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimatio
 	class CTexture2DUnshared : public CTextureBlank
 	{
 	public:
-		virtual bool supportSharing() const {return false;}
-		virtual uint32 getWidth(uint32 numMipMap = 0) const
+		virtual bool supportSharing() const NL_OVERRIDE {return false;}
+		virtual uint32 getWidth(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
 		}
-		virtual uint32 getHeight(uint32 numMipMap = 0) const
+		virtual uint32 getHeight(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;

@@ -54,7 +54,7 @@ public:
 
 protected:
 	/// Put the string into the file.
-    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 
 	bool						_NeedHeader;
 
@@ -80,7 +80,7 @@ public:
 
 protected:
 	/// Put the string into the file.
-    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 };
 
 

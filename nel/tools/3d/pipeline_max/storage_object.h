@@ -56,14 +56,14 @@ struct EStorage : public NLMISC::Exception
 {
 	EStorage() : NLMISC::Exception("PIPELINE::MAX::EStorage") { }
 	EStorage(const char *msg) : NLMISC::Exception(msg) { }
-	virtual ~EStorage() throw() { }
+	virtual ~EStorage() throw() NL_OVERRIDE { }
 };
 
 struct EStorageParse : public EStorage
 {
 	EStorageParse() : EStorage("PIPELINE::MAX::EStorageParse") { }
 	EStorageParse(const char *msg) : EStorage(msg) { }
-	virtual ~EStorageParse() throw() { }
+	virtual ~EStorageParse() throw() NL_OVERRIDE { }
 };
 
 enum TParseLevel
@@ -79,9 +79,9 @@ class IStorageObject : public NLMISC::IStreamable
 {
 public:
 	IStorageObject();
-	virtual ~IStorageObject();
+	virtual ~IStorageObject() NL_OVERRIDE;
 
-	virtual std::string getClassName() { return className(); } // inherited from NLMISC::IClassable through NLMISC::IStreamable
+	virtual std::string getClassName() NL_OVERRIDE { return className(); } // inherited from NLMISC::IClassable through NLMISC::IStreamable
 	virtual std::string className() const = 0; // renamed for constness
 	// virtual void serial(NLMISC::IStream &stream); // inherited from NLMISC::IStreamable
 	std::string toString();
@@ -140,12 +140,12 @@ protected:
 
 public:
 	CStorageContainer();
-	virtual ~CStorageContainer();
+	virtual ~CStorageContainer() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void serial(NLMISC::IStream &stream); // only used to wrap a container inside another stream
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &stream) NL_OVERRIDE; // only used to wrap a container inside another stream
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
 
 	// utility
 	void serial(NLMISC::IStream &stream, uint size); // without wrapping, known size
@@ -168,7 +168,7 @@ public:
 
 public: // should be protected but that doesn't compile, nice c++!
 	// inherited
-	virtual bool isContainer() const;
+	virtual bool isContainer() const NL_OVERRIDE;
 
 protected:
 	// override in subclasses, default to parent if not handled
@@ -188,18 +188,18 @@ public:
 
 public:
 	CStorageRaw();
-	virtual ~CStorageRaw();
+	virtual ~CStorageRaw() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &stream) NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// Sets size when reading
-	virtual void setSize(sint32 size);
+	virtual void setSize(sint32 size) NL_OVERRIDE;
 	// Gets the size when writing, return false if unknown
-	virtual bool getSize(sint32 &size) const;
+	virtual bool getSize(sint32 &size) const NL_OVERRIDE;
 
 };
 

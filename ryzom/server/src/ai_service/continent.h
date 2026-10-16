@@ -243,7 +243,7 @@ class CFaunaZone
 {
 public:
 	CFaunaZone(CCell *owner, CAIAliasDescriptionNode *adn);
-	~CFaunaZone();
+	~CFaunaZone() NL_OVERRIDE;
 	
 	CCell* getOwner() const;
 
@@ -254,13 +254,13 @@ public:
 	AITYPES::CPropertySet& initialActivities() { return _InitialActivities; }
 	AITYPES::CPropertySet const& initialActivities() const { return _InitialActivities; }
 	
-	virtual AITYPES::CPropertySet& additionalActivities() { return _AdditionalActivities; }
-	virtual AITYPES::CPropertySet const& additionalActivities () const { return _AdditionalActivities; }
+	virtual AITYPES::CPropertySet& additionalActivities() NL_OVERRIDE { return _AdditionalActivities; }
+	virtual AITYPES::CPropertySet const& additionalActivities () const NL_OVERRIDE { return _AdditionalActivities; }
 		
 
-	virtual TZoneType getZoneType() const { return CTmpPropertyZone::Fauna; }
+	virtual TZoneType getZoneType() const NL_OVERRIDE { return CTmpPropertyZone::Fauna; }
 
-	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const { return CAIPlaceXYR::worldValidPos(); }
+	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE { return CAIPlaceXYR::worldValidPos(); }
 
 private:
 	uint32 getNbUse() const;
@@ -281,16 +281,16 @@ public:
 	operator CAIPlace const*() const;
 	
 	NLMISC::CSmartPtr<CAIPlace const> const& getZone() const { return _Zone; }
-	CAIPos const& midPos() const { return _Zone->midPos(); }
-	RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const { return _Zone->worldValidPos(); }
-	float getRadius() const { return _Zone->getRadius(); }
+	CAIPos const& midPos() const NL_OVERRIDE { return _Zone->midPos(); }
+	RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE { return _Zone->worldValidPos(); }
+	float getRadius() const NL_OVERRIDE { return _Zone->getRadius(); }
 	
-	bool atPlace(CAIVectorMirror const& pos) const { return _Zone->atPlace(pos); }
-	bool atPlace(CAIVector const& pos) const { return _Zone->atPlace(pos); }
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
-	void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const { _Zone->getRandomPos(pos); }
-	AITYPES::TVerticalPos getVerticalPos() const { return _Zone->getVerticalPos(); }
-	void display(CStringWriter& stringWriter) const { _Zone->display(stringWriter); }
+	bool atPlace(CAIVectorMirror const& pos) const NL_OVERRIDE { return _Zone->atPlace(pos); }
+	bool atPlace(CAIVector const& pos) const NL_OVERRIDE { return _Zone->atPlace(pos); }
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
+	void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const NL_OVERRIDE { _Zone->getRandomPos(pos); }
+	AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE { return _Zone->getVerticalPos(); }
+	void display(CStringWriter& stringWriter) const NL_OVERRIDE { _Zone->display(stringWriter); }
 	
 private:
 	NLMISC::CSmartPtr<CAIPlace const> _Zone;
@@ -322,7 +322,7 @@ class CNpcZone
 , public virtual NLMISC::CVirtualRefCount
 {
 public:
-	virtual ~CNpcZone();
+	virtual ~CNpcZone() NL_OVERRIDE;
 	void unlinkNpcZone();
 
 	/// @name Abstract interface
@@ -361,10 +361,10 @@ public:
 	std::vector<NLMISC::CDbgPtr<CRoad> >& roads();
 	//@}
 
-	virtual TZoneType getZoneType() const { return CTmpPropertyZone::Npc; }
+	virtual TZoneType getZoneType() const NL_OVERRIDE { return CTmpPropertyZone::Npc; }
 
-	virtual AITYPES::CPropertySet& additionalActivities() { return _Properties; }
-	virtual AITYPES::CPropertySet const& additionalActivities () const { return _Properties; }
+	virtual AITYPES::CPropertySet& additionalActivities() NL_OVERRIDE { return _Properties; }
+	virtual AITYPES::CPropertySet const& additionalActivities () const NL_OVERRIDE { return _Properties; }
 	
 private:
 	AITYPES::CPropertySet _Properties;
@@ -386,40 +386,40 @@ class CNpcZonePlace
 {
 public:
 	CNpcZonePlace(CCell* owner, CAIAliasDescriptionNode* adn);
-	~CNpcZonePlace();
+	~CNpcZonePlace() NL_OVERRIDE;
 
 	/// @name CNpcZone implementation
 	//@{
-	CCell* getOwner() const;
-	CAliasTreeOwner const& getAliasTreeOwner() const;
-	uint32	getIndex()	const;
+	CCell* getOwner() const NL_OVERRIDE;
+	CAliasTreeOwner const& getAliasTreeOwner() const NL_OVERRIDE;
+	uint32	getIndex()	const NL_OVERRIDE;
 
-	CPlaceRandomPos& getPlaceRandomPos();
-	CPlaceRandomPos const& getPlaceRandomPos() const;
+	CPlaceRandomPos& getPlaceRandomPos() NL_OVERRIDE;
+	CPlaceRandomPos const& getPlaceRandomPos() const NL_OVERRIDE;
 	
-	virtual bool atPlace(const CAIVector &pos) const;
-	virtual bool atPlace(const CAIVectorMirror &pos) const;
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
+	virtual bool atPlace(const CAIVector &pos) const NL_OVERRIDE;
+	virtual bool atPlace(const CAIVectorMirror &pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
 	
-	virtual CAIPos const& midPos() const;
+	virtual CAIPos const& midPos() const NL_OVERRIDE;
 	
-	virtual float getArea() const;
+	virtual float getArea() const NL_OVERRIDE;
 	
-	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const;
+	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE;
 	
-	virtual float getRadius() const;
+	virtual float getRadius() const NL_OVERRIDE;
 	
-	virtual void display(CStringWriter	&stringWriter) const;
+	virtual void display(CStringWriter	&stringWriter) const NL_OVERRIDE;
 	
-	virtual AITYPES::TVerticalPos getVerticalPos() const;
-	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const;
+	virtual AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE;
+	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const NL_OVERRIDE;
 	//@}
 	
 	void setPosAndRadius(AITYPES::TVerticalPos verticalPos, const CAIPos& pos, uint32 radius);
 	
 private:
 	
-	bool calcRandomPos(CAIPos& pos) const;
+	bool calcRandomPos(CAIPos& pos) const NL_OVERRIDE;
 	
 private:
 	RYAI_MAP_CRUNCH::CWorldPosition	_worldValidPos;
@@ -436,7 +436,7 @@ class CNpcZonePlaceNoPrim
 {
 public:
 	CNpcZonePlaceNoPrim();
-	~CNpcZonePlaceNoPrim();
+	~CNpcZonePlaceNoPrim() NL_OVERRIDE;
 	
 	/// @name CNpcZone implementation
 	//@{
@@ -482,32 +482,32 @@ class CNpcZoneShape
 {
 public:
 	CNpcZoneShape(CCell* owner, CAIAliasDescriptionNode* adn);
-	~CNpcZoneShape();
+	~CNpcZoneShape() NL_OVERRIDE;
 	
 	/// @name CNpcZone implementation
 	//@{
-	virtual CCell* getOwner() const;
-	virtual CAliasTreeOwner const& getAliasTreeOwner() const;
-	virtual uint32 getIndex() const;
+	virtual CCell* getOwner() const NL_OVERRIDE;
+	virtual CAliasTreeOwner const& getAliasTreeOwner() const NL_OVERRIDE;
+	virtual uint32 getIndex() const NL_OVERRIDE;
 	
-	virtual CPlaceRandomPos& getPlaceRandomPos();
-	virtual CPlaceRandomPos const& getPlaceRandomPos() const;
+	virtual CPlaceRandomPos& getPlaceRandomPos() NL_OVERRIDE;
+	virtual CPlaceRandomPos const& getPlaceRandomPos() const NL_OVERRIDE;
 	
-	virtual bool atPlace(const CAIVector& pos) const;
-	virtual bool atPlace(const CAIVectorMirror &pos) const;
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
-	virtual CAIPos const& midPos() const;
+	virtual bool atPlace(const CAIVector& pos) const NL_OVERRIDE;
+	virtual bool atPlace(const CAIVectorMirror &pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
+	virtual CAIPos const& midPos() const NL_OVERRIDE;
 	
-	virtual float getArea() const;
+	virtual float getArea() const NL_OVERRIDE;
 	
-	virtual const RYAI_MAP_CRUNCH::CWorldPosition& worldValidPos() const;
+	virtual const RYAI_MAP_CRUNCH::CWorldPosition& worldValidPos() const NL_OVERRIDE;
 	
-	virtual float getRadius() const;
+	virtual float getRadius() const NL_OVERRIDE;
 	
-	virtual void display(CStringWriter	&stringWriter) const;
+	virtual void display(CStringWriter	&stringWriter) const NL_OVERRIDE;
 	
-	virtual AITYPES::TVerticalPos getVerticalPos() const;
-	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const;
+	virtual AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE;
+	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition &pos) const NL_OVERRIDE;
 	//@}
 	
 	void setPatat(AITYPES::TVerticalPos verticalPos, const std::vector<CAIVector>& points);
@@ -547,8 +547,8 @@ public:
 	CRebuildContinentAndOutPost(CContinent* continent);
 	
 protected:
-	void update () const;
-	bool absorb(CLazyProcess const& lazyProcess) const;
+	void update () const NL_OVERRIDE;
+	bool absorb(CLazyProcess const& lazyProcess) const NL_OVERRIDE;
 	bool operator==(CRebuildContinentAndOutPost const& other) const;
 	
 private:
@@ -570,9 +570,9 @@ class CContinent
 public:
 	CContinent(CAIInstance* owner);
 	
-	virtual ~CContinent();
+	virtual ~CContinent() NL_OVERRIDE;
 	
-	CAIInstance* getAIInstance() const { return getOwner(); }
+	CAIInstance* getAIInstance() const NL_OVERRIDE { return getOwner(); }
 
 	CAliasCont<CRegion>& regions() { return _Regions;}
 	CAliasCont<COutpost>& outposts() { return _Outposts;}
@@ -593,15 +593,15 @@ public:
 	void updateLazyProcess();
 	
 	// Some service are up, need to send them data?
-	void serviceEvent(CServiceEvent	const& info);
+	void serviceEvent(CServiceEvent	const& info) NL_OVERRIDE;
 	
 	bool spawn();
 	bool despawn();
 	
 	std::string getFullName() const { return getName(); }	
 	std::string getIndexString() const;
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	
 	void setName(std::string const& name) { _ContinentName = name; }
 	
@@ -641,17 +641,17 @@ class CRegion
 {
 public:
 	CRegion(CContinent* owner, uint32 alias, std::string const& name, std::string const& filename);
-	virtual ~CRegion();
+	virtual ~CRegion() NL_OVERRIDE;
 	
-	CAIInstance* getAIInstance() const { return getOwner()->getAIInstance(); }
+	CAIInstance* getAIInstance() const NL_OVERRIDE { return getOwner()->getAIInstance(); }
 	
 	CAliasCont<CCellZone>& cellZones() { return _CellZones; }
 	
 	CAliasCont<CGroupFamily>& groupFamilies() { return _GroupFamilies; }
 	
 	virtual std::string getIndexString() const;
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	virtual std::string getFullName() const;
 	
 	/// Rebuild the bounding box
@@ -661,7 +661,7 @@ public:
 	
 	/// Update the region
 	void update();
-	void serviceEvent(CServiceEvent	const& info);
+	void serviceEvent(CServiceEvent	const& info) NL_OVERRIDE;
 	
 	bool spawn();
 	bool despawn();
@@ -678,8 +678,8 @@ private:
 	CAliasCont<CGroupFamily> _GroupFamilies;
 	//@}
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -694,7 +694,7 @@ class CRoad
 {
 public:
 	CRoad(CCell* owner, uint32 alias, std::string const& name);
-	~CRoad();
+	~CRoad() NL_OVERRIDE;
 	
 	std::string getIndexString() const;
 	
@@ -738,8 +738,8 @@ private:
 	CAliasCont<CRoadTrigger> _RoadTriggers;
 	//@}
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
 	/// The vertical pos
 	AITYPES::TVerticalPos _VerticalPos;
@@ -809,22 +809,22 @@ class CCellZone
 {
 public:
 	CCellZone(CRegion* owner, uint32 alias, std::string const& name);
-	~CCellZone();
+	~CCellZone() NL_OVERRIDE;
 	
-	CAIInstance* getAIInstance() const { return getOwner()->getAIInstance(); }
+	CAIInstance* getAIInstance() const NL_OVERRIDE { return getOwner()->getAIInstance(); }
 	
 	CAliasCont<CCell>& cells() { return _Cells; }
 	
 	void unrefZoneInRoads();
 	
 	std::string getIndexString() const;
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	virtual std::string getFullName() const;
 	
 	void rebuildEnergyLevels();
 	void update();
-	void serviceEvent(CServiceEvent const& info);
+	void serviceEvent(CServiceEvent const& info) NL_OVERRIDE;
 	
 	bool findRestAndFoodFaunaZoneInCellList(CFaunaZone const*& zoneRest, AITYPES::CPropertySet const& rest, CFaunaZone const*& zoneFood, AITYPES::CPropertySet const& food, std::vector<CCell*> const& cells, RYAI_MAP_CRUNCH::TAStarFlag denyflags);
 		
@@ -854,8 +854,8 @@ private:
 	
 private:
 	// overloads for CAliasChild virtuals
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -876,7 +876,7 @@ class CCell
 {
 public:
 	CCell(CCellZone* owner, uint32 alias, std::string const& name);
-	~CCell();
+	~CCell() NL_OVERRIDE;
 	
 	void unlinkCell();
 	
@@ -903,8 +903,8 @@ public:
 	
 	void unrefZoneInRoads();
 
-	virtual std::string getIndexString() const;
-	virtual std::string getFullName() const;
+	virtual std::string getIndexString() const NL_OVERRIDE;
+	virtual std::string getFullName() const NL_OVERRIDE;
 	
 	/// The coordinate of the polygon surounding the cell
 	std::vector<CAIVector> _Coords;
@@ -929,8 +929,8 @@ private:
 	TAliasZonePlaceList _NpcZonePlaces;
 	TAliasZoneShapeList _NpcZoneShapes;
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
 //	std::string	getPlaceOwnerFullName()	const { return getFullName(); }
 //	std::string	getPlaceOwnerIndexString() const { return getIndexString(); }
@@ -962,7 +962,7 @@ class CGroupFamily
 {
 public:	    	
 	CGroupFamily(CAliasTreeOwner *owner, uint32 alias, std::string const& name);
-	virtual	~CGroupFamily();
+	virtual	~CGroupFamily() NL_OVERRIDE;
 
 	CAliasTreeOwner *getOwner() const { return _Owner; } 
 	
@@ -1001,8 +1001,8 @@ public:
 		return _Index;
 	}
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
 	CGroupDesc<CGroupFamily> const* getProportionalGroupDesc(CFamilyBehavior const* const familyBehavior, AITYPES::CPropertySet const& needActFlag, AITYPES::CPropertySet const& maskActFlag);
 	
@@ -1079,14 +1079,14 @@ public:
 	CAliasCont<CBotDesc<FamilyT> >& botDescs() { return _BotDescs; }
 	CAliasCont<CBotDesc<FamilyT> > const& botDescs() const { return	_BotDescs; }
 	
-	virtual std::string getFullName() const { return std::string(this->getOwner()->getFullName() +":"+ this->getName()); }
+	virtual std::string getFullName() const NL_OVERRIDE { return std::string(this->getOwner()->getFullName() +":"+ this->getName()); }
 	
-	virtual bool isValidForSeason(EGSPD::CSeason::TSeason const& season) const { return	_SeasonFlags[season]; }
+	virtual bool isValidForSeason(EGSPD::CSeason::TSeason const& season) const NL_OVERRIDE { return	_SeasonFlags[season]; }
 	
 	bool isValidForDayOrNight(bool const& isDay) const;
 	
-	virtual AITYPES::CPropertySet& properties() { return _Properties; }
-	virtual AITYPES::CPropertySet const& properties() const { return _Properties; }
+	virtual AITYPES::CPropertySet& properties() NL_OVERRIDE { return _Properties; }
+	virtual AITYPES::CPropertySet const& properties() const NL_OVERRIDE { return _Properties; }
 	
 	void setSheet(AISHEETS::ICreatureCPtr const& sheetPtr);
 	
@@ -1094,7 +1094,7 @@ public:
 	
 	AISHEETS::ICreatureCPtr sheet(sint32 baseLevel = -1) const;
 	
-	virtual uint32 groupEnergyValue() const { return _GroupEnergyValue; }
+	virtual uint32 groupEnergyValue() const NL_OVERRIDE { return _GroupEnergyValue; }
 	
 	uint32 calcTotalEnergyValue() const;
 	
@@ -1111,7 +1111,7 @@ public:
 	uint32 getRealBotCount() const;
 	
 	void setCountMultiplierFlag(bool countMultiplier) { _CountMultiplier = countMultiplier; }
-	virtual bool getCountMultiplierFlag() const { return _CountMultiplier; }
+	virtual bool getCountMultiplierFlag() const NL_OVERRIDE { return _CountMultiplier; }
 	std::vector<std::string> const& grpParameters() const { return _GrpParameters; }
 	std::vector<std::string>& grpParameters() { return _GrpParameters; }
 	std::vector<std::string> const& botEquipment() const { return _BotEquipment; }
@@ -1124,13 +1124,13 @@ public:
 	
 	void setGroupEnergyCoef(float coef) { _EnergyCoef = coef; }
 	
-	virtual float groupEnergyCoef() const { return _EnergyCoef; }
+	virtual float groupEnergyCoef() const NL_OVERRIDE { return _EnergyCoef; }
 	
 	CGrpFauna* createFaunaGroup(CFamilyBehavior* familyBehavior) const;
 	
 	CGroupNpc* createNpcGroup(CMgrNpc* mgr, CAIVector const& pos, double dispersionRadius = 0., sint32 baseLevel = -1, bool spawnBots = true) const;
 	
-	virtual uint32 getWeightForEnergy(size_t levelIndex) const { return _WeightLevel[levelIndex]; }
+	virtual uint32 getWeightForEnergy(size_t levelIndex) const NL_OVERRIDE { return _WeightLevel[levelIndex]; }
 
 	std::vector<CPopulationRecord>& populationRecords() { return _PopulationRecords; }
 
@@ -1154,8 +1154,8 @@ private:
 	CAliasCont<CBotDesc<FamilyT> > _BotDescs;
 	//@}
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
 	/// The number of bot (for unamed bots)
 	uint32 _BotCount;

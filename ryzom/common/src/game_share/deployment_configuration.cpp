@@ -240,23 +240,23 @@ namespace DEPCFG
 	class CDeploymentConfigurationImplementation: public CSingleton<CDeploymentConfigurationImplementation>, public CDeploymentConfiguration
 	{
 	public:
-		bool read(const NLMISC::CSString& fileName);
-		void write(const NLMISC::CSString& fileName);
-		void serial(NLMISC::IStream& stream);
+		bool read(const NLMISC::CSString& fileName) NL_OVERRIDE;
+		void write(const NLMISC::CSString& fileName) NL_OVERRIDE;
+		void serial(NLMISC::IStream& stream) NL_OVERRIDE;
 
-		void getHostNames(THostNames& result) const;
-		void getDomainNames(TDomainNames& result) const;
-		void getShardNames(const TDomainName& domainName,TShardNames& result) const;
-		void getAppNames(const THostName& hostName,const TDomainName& domainName,TAppNames& result) const;
-		void getAppNames(const THostName& hostName,const TDomainName& domainName,const TShardName& shardName,TAppNames& result) const;
+		void getHostNames(THostNames& result) const NL_OVERRIDE;
+		void getDomainNames(TDomainNames& result) const NL_OVERRIDE;
+		void getShardNames(const TDomainName& domainName,TShardNames& result) const NL_OVERRIDE;
+		void getAppNames(const THostName& hostName,const TDomainName& domainName,TAppNames& result) const NL_OVERRIDE;
+		void getAppNames(const THostName& hostName,const TDomainName& domainName,const TShardName& shardName,TAppNames& result) const NL_OVERRIDE;
 
-		void getHost(const THostName& hostName,SHostDescription& result) const;
-		void getDomain(const TDomainName& domainName, SDomainDescription& result) const;
-		void getShard(const TDomainName& domainName,const TShardName& shardName,SShardDescription& result) const;
-		void getApp(const TDomainName& domainName,const TAppName& appName,SAppDescription& result) const;
+		void getHost(const THostName& hostName,SHostDescription& result) const NL_OVERRIDE;
+		void getDomain(const TDomainName& domainName, SDomainDescription& result) const NL_OVERRIDE;
+		void getShard(const TDomainName& domainName,const TShardName& shardName,SShardDescription& result) const NL_OVERRIDE;
+		void getApp(const TDomainName& domainName,const TAppName& appName,SAppDescription& result) const NL_OVERRIDE;
 
-		void dumpInfoBlocks(NLMISC::CLog& log) const;
-		void dumpDomains(NLMISC::CLog& log) const;
+		void dumpInfoBlocks(NLMISC::CLog& log) const NL_OVERRIDE;
+		void dumpDomains(NLMISC::CLog& log) const NL_OVERRIDE;
 
 	private:
 		CInfoContainer _InfoContainer;
@@ -1257,7 +1257,7 @@ namespace DEPCFG
 		{
 		public:
 			NLMISC::CSString Data;
-			void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+			void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 			{
 				Data += message;
 			}

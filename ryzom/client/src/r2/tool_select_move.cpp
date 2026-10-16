@@ -718,7 +718,7 @@ void CToolSelectMove::updateBeforeRender()
   */
 class CAHSelectMove : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().setCurrentTool(new CToolSelectMove);
 	}

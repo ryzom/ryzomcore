@@ -373,54 +373,54 @@ public:
 public:
 	///@name IStaticCreatures interface
 	//@{
-	virtual EGSPD::CPeople::TPeople			getRace() const { return _Sheet->getRace(); }
-	virtual uint8							getGender() const { return _Sheet->getGender(); }
-	virtual uint8							getSize() const { return _Sheet->getSize(); }
-	virtual uint16							getLevel() const { return _Sheet->getLevel(); }
-	virtual uint16							getAttackLevel() const { return _Sheet->getAttackLevel(); }
-	virtual uint16							getDefenseLevel() const { return _Sheet->getDefenseLevel(); }
-	virtual uint16							getXPLevel() const { return _Sheet->getXPLevel(); }
-	virtual float							getXPGainOnCreature() const { return _Sheet->getXPGainOnCreature(); }
-	virtual uint16							getTauntLevel() const { return _Sheet->getTauntLevel(); }
-	virtual uint8							getNbPlayers() const { return _Sheet->getNbPlayers(); }
-	virtual sint32							getCharacteristics(size_t index) const { return _Sheet->getCharacteristics(index); }
-	virtual sint32							getScores(size_t index) const { return _Sheet->getScores(index); }
-	virtual float							getRegen(size_t index) const { return _Sheet->getRegen(index); }
-	virtual SMirrorEquipment const&			getItems(size_t index) const { return _Sheet->getItems(index); }
-	virtual std::string						getLootTable(uint i) const { return _Sheet->getLootTable(i); }
-	virtual uint8							getMeleeReachValue() const { return _Sheet->getMeleeReachValue(); }
+	virtual EGSPD::CPeople::TPeople			getRace() const NL_OVERRIDE { return _Sheet->getRace(); }
+	virtual uint8							getGender() const NL_OVERRIDE { return _Sheet->getGender(); }
+	virtual uint8							getSize() const NL_OVERRIDE { return _Sheet->getSize(); }
+	virtual uint16							getLevel() const NL_OVERRIDE { return _Sheet->getLevel(); }
+	virtual uint16							getAttackLevel() const NL_OVERRIDE { return _Sheet->getAttackLevel(); }
+	virtual uint16							getDefenseLevel() const NL_OVERRIDE { return _Sheet->getDefenseLevel(); }
+	virtual uint16							getXPLevel() const NL_OVERRIDE { return _Sheet->getXPLevel(); }
+	virtual float							getXPGainOnCreature() const NL_OVERRIDE { return _Sheet->getXPGainOnCreature(); }
+	virtual uint16							getTauntLevel() const NL_OVERRIDE { return _Sheet->getTauntLevel(); }
+	virtual uint8							getNbPlayers() const NL_OVERRIDE { return _Sheet->getNbPlayers(); }
+	virtual sint32							getCharacteristics(size_t index) const NL_OVERRIDE { return _Sheet->getCharacteristics(index); }
+	virtual sint32							getScores(size_t index) const NL_OVERRIDE { return _Sheet->getScores(index); }
+	virtual float							getRegen(size_t index) const NL_OVERRIDE { return _Sheet->getRegen(index); }
+	virtual SMirrorEquipment const&			getItems(size_t index) const NL_OVERRIDE { return _Sheet->getItems(index); }
+	virtual std::string						getLootTable(uint i) const NL_OVERRIDE { return _Sheet->getLootTable(i); }
+	virtual uint8							getMeleeReachValue() const NL_OVERRIDE { return _Sheet->getMeleeReachValue(); }
 	
-	virtual bool							getDodgeAsDefense() const { return _Sheet->getDodgeAsDefense(); }
+	virtual bool							getDodgeAsDefense() const NL_OVERRIDE { return _Sheet->getDodgeAsDefense(); }
 	
-	virtual CCreatureResists const&			getResists() const { return _Sheet->getResists(); }
+	virtual CCreatureResists const&			getResists() const NL_OVERRIDE { return _Sheet->getResists(); }
 	
-	virtual NLMISC::CSheetId const&			getActionOnDeath() const { return _Sheet->getActionOnDeath(); }
+	virtual NLMISC::CSheetId const&			getActionOnDeath() const NL_OVERRIDE { return _Sheet->getActionOnDeath(); }
 	
-	virtual float							getWalkSpeed() const { return _Sheet->getWalkSpeed(); }
-	virtual float							getRunSpeed() const { return _Sheet->getRunSpeed(); }
-	virtual CProperties const&				getProperties() const { return _Sheet->getProperties(); }
-	virtual ECOSYSTEM::EECosystem			getEcosystem() const { return _Sheet->getEcosystem(); }
-	virtual std::string						getBagInventorySheet() const { return _Sheet->getBagInventorySheet(); }
+	virtual float							getWalkSpeed() const NL_OVERRIDE { return _Sheet->getWalkSpeed(); }
+	virtual float							getRunSpeed() const NL_OVERRIDE { return _Sheet->getRunSpeed(); }
+	virtual CProperties const&				getProperties() const NL_OVERRIDE { return _Sheet->getProperties(); }
+	virtual ECOSYSTEM::EECosystem			getEcosystem() const NL_OVERRIDE { return _Sheet->getEcosystem(); }
+	virtual std::string						getBagInventorySheet() const NL_OVERRIDE { return _Sheet->getBagInventorySheet(); }
 	
-	virtual uint32							getCreatureDamagePerHit() const { return _Sheet->getCreatureDamagePerHit(); }
-	virtual uint32							getCreatureDamagePerHitWithoutAverageDodge() const { return _Sheet->getCreatureDamagePerHitWithoutAverageDodge(); }
-	virtual NLMISC::TGameCycle				getAttackLatency() const { return _Sheet->getAttackLatency(); }
+	virtual uint32							getCreatureDamagePerHit() const NL_OVERRIDE { return _Sheet->getCreatureDamagePerHit(); }
+	virtual uint32							getCreatureDamagePerHitWithoutAverageDodge() const NL_OVERRIDE { return _Sheet->getCreatureDamagePerHitWithoutAverageDodge(); }
+	virtual NLMISC::TGameCycle				getAttackLatency() const NL_OVERRIDE { return _Sheet->getAttackLatency(); }
 	
-	virtual std::vector<SProtection> const&	getProtections() const { return _Sheet->getProtections(); }
+	virtual std::vector<SProtection> const&	getProtections() const NL_OVERRIDE { return _Sheet->getProtections(); }
 	
-	virtual uint32							getFaction() const { return _Sheet->getFaction(); }
-	virtual bool							getFameByKillValid() const { return _Sheet->getFameByKillValid(); }
-	virtual sint32							getFameByKill() const { return _Sheet->getFameByKill(); }
-	virtual float							getColRadius() const { return _Sheet->getColRadius(); }
-	virtual float							getColLength() const { return _Sheet->getColLength(); }
-	virtual float							getColWidth() const { return _Sheet->getColWidth(); }
+	virtual uint32							getFaction() const NL_OVERRIDE { return _Sheet->getFaction(); }
+	virtual bool							getFameByKillValid() const NL_OVERRIDE { return _Sheet->getFameByKillValid(); }
+	virtual sint32							getFameByKill() const NL_OVERRIDE { return _Sheet->getFameByKill(); }
+	virtual float							getColRadius() const NL_OVERRIDE { return _Sheet->getColRadius(); }
+	virtual float							getColLength() const NL_OVERRIDE { return _Sheet->getColLength(); }
+	virtual float							getColWidth() const NL_OVERRIDE { return _Sheet->getColWidth(); }
 
-	virtual uint16							getDamageShieldDamage() const { return _Sheet->getDamageShieldDamage(); }
-	virtual uint16							getDamageShieldHpDrain() const { return _Sheet->getDamageShieldHpDrain(); }
+	virtual uint16							getDamageShieldDamage() const NL_OVERRIDE { return _Sheet->getDamageShieldDamage(); }
+	virtual uint16							getDamageShieldHpDrain() const NL_OVERRIDE { return _Sheet->getDamageShieldHpDrain(); }
 	
-	virtual std::vector<CStaticCreatureRawMaterial> const&	getMps() const { return _Sheet->getMps(); }
+	virtual std::vector<CStaticCreatureRawMaterial> const&	getMps() const NL_OVERRIDE { return _Sheet->getMps(); }
 	
-	virtual std::vector<NLMISC::CSheetId> const&	getItemsForMissions() const { return _Sheet->getItemsForMissions(); }
+	virtual std::vector<NLMISC::CSheetId> const&	getItemsForMissions() const NL_OVERRIDE { return _Sheet->getItemsForMissions(); }
 	//@}
 	
 protected:
@@ -518,62 +518,62 @@ public:
 	{
 	}
 	/// destructor
-	virtual ~CStaticCreatures() { }
+	virtual ~CStaticCreatures() NL_OVERRIDE { }
 	
 public:
 	///@name IStaticCreatures implementation
 	//@{
-	virtual EGSPD::CPeople::TPeople			getRace() const { return _Race; }
+	virtual EGSPD::CPeople::TPeople			getRace() const NL_OVERRIDE { return _Race; }
 	virtual void							setRace(EGSPD::CPeople::TPeople race) {_Race = race;};
-	virtual uint8							getGender() const { return _Gender; }
-	virtual uint8							getSize() const { return _Size; }
-	virtual uint16							getLevel() const { return _Level; }
-	virtual uint16							getAttackLevel() const { return _AttackLevel; }
-	virtual uint16							getDefenseLevel() const { return _DefenseLevel; }
-	virtual uint16							getXPLevel() const { return _XPLevel; }
-	virtual float							getXPGainOnCreature() const { return _XPGainOnCreature; }
-	virtual uint16							getTauntLevel() const { return _TauntLevel; }
-	virtual uint8							getNbPlayers() const { return _NbPlayers; }
-	virtual sint32							getCharacteristics(size_t index) const { return _Characteristics[index]; }
-	virtual sint32							getScores(size_t index) const { return _Scores[index]; }
-	virtual float							getRegen(size_t index) const { return _Regen[index]; }
-	virtual SMirrorEquipment const&			getItems(size_t index) const { return _Items[index]; }
-	virtual std::string						getLootTable(uint i) const { if (i<_LootTables.size()) return _LootTables[i]; else return ""; }
+	virtual uint8							getGender() const NL_OVERRIDE { return _Gender; }
+	virtual uint8							getSize() const NL_OVERRIDE { return _Size; }
+	virtual uint16							getLevel() const NL_OVERRIDE { return _Level; }
+	virtual uint16							getAttackLevel() const NL_OVERRIDE { return _AttackLevel; }
+	virtual uint16							getDefenseLevel() const NL_OVERRIDE { return _DefenseLevel; }
+	virtual uint16							getXPLevel() const NL_OVERRIDE { return _XPLevel; }
+	virtual float							getXPGainOnCreature() const NL_OVERRIDE { return _XPGainOnCreature; }
+	virtual uint16							getTauntLevel() const NL_OVERRIDE { return _TauntLevel; }
+	virtual uint8							getNbPlayers() const NL_OVERRIDE { return _NbPlayers; }
+	virtual sint32							getCharacteristics(size_t index) const NL_OVERRIDE { return _Characteristics[index]; }
+	virtual sint32							getScores(size_t index) const NL_OVERRIDE { return _Scores[index]; }
+	virtual float							getRegen(size_t index) const NL_OVERRIDE { return _Regen[index]; }
+	virtual SMirrorEquipment const&			getItems(size_t index) const NL_OVERRIDE { return _Items[index]; }
+	virtual std::string						getLootTable(uint i) const NL_OVERRIDE { if (i<_LootTables.size()) return _LootTables[i]; else return ""; }
 	virtual uint							getLootTableCount() const { return (uint)_LootTables.size(); }
-	virtual uint8							getMeleeReachValue() const { return _MeleeReachValue; }
+	virtual uint8							getMeleeReachValue() const NL_OVERRIDE { return _MeleeReachValue; }
 	
-	virtual bool							getDodgeAsDefense() const { return _DodgeAsDefense; }
+	virtual bool							getDodgeAsDefense() const NL_OVERRIDE { return _DodgeAsDefense; }
 	
-	virtual CCreatureResists const&			getResists() const { return _Resists; }
+	virtual CCreatureResists const&			getResists() const NL_OVERRIDE { return _Resists; }
 	
-	virtual NLMISC::CSheetId const&			getActionOnDeath() const { return _ActionOnDeath; }
+	virtual NLMISC::CSheetId const&			getActionOnDeath() const NL_OVERRIDE { return _ActionOnDeath; }
 	
-	virtual float							getWalkSpeed() const { return _WalkSpeed; }
-	virtual float							getRunSpeed() const { return _RunSpeed; }
-	virtual CProperties const&				getProperties() const { return _Properties; }
-	virtual ECOSYSTEM::EECosystem			getEcosystem() const { return _Ecosystem; }
-	virtual std::string						getBagInventorySheet() const { return _BagInventorySheet; }
+	virtual float							getWalkSpeed() const NL_OVERRIDE { return _WalkSpeed; }
+	virtual float							getRunSpeed() const NL_OVERRIDE { return _RunSpeed; }
+	virtual CProperties const&				getProperties() const NL_OVERRIDE { return _Properties; }
+	virtual ECOSYSTEM::EECosystem			getEcosystem() const NL_OVERRIDE { return _Ecosystem; }
+	virtual std::string						getBagInventorySheet() const NL_OVERRIDE { return _BagInventorySheet; }
 	
-	virtual uint32							getCreatureDamagePerHit() const { return _CreatureDamagePerHit; }
-	virtual uint32							getCreatureDamagePerHitWithoutAverageDodge() const { return _CreatureDamagePerHitWithoutAverageDodge; }
-	virtual NLMISC::TGameCycle				getAttackLatency() const { return _AttackLatency; }
+	virtual uint32							getCreatureDamagePerHit() const NL_OVERRIDE { return _CreatureDamagePerHit; }
+	virtual uint32							getCreatureDamagePerHitWithoutAverageDodge() const NL_OVERRIDE { return _CreatureDamagePerHitWithoutAverageDodge; }
+	virtual NLMISC::TGameCycle				getAttackLatency() const NL_OVERRIDE { return _AttackLatency; }
 	
-	virtual std::vector<SProtection> const&	getProtections() const { return _Protections; }
+	virtual std::vector<SProtection> const&	getProtections() const NL_OVERRIDE { return _Protections; }
 	
-	virtual uint32							getFaction() const { return _Faction; }
-	virtual bool							getFameByKillValid() const { return _FameByKillValid; }
-	virtual sint32							getFameByKill() const { return _FameByKill; }
-	virtual float							getColRadius() const { return _ColRadius; }
+	virtual uint32							getFaction() const NL_OVERRIDE { return _Faction; }
+	virtual bool							getFameByKillValid() const NL_OVERRIDE { return _FameByKillValid; }
+	virtual sint32							getFameByKill() const NL_OVERRIDE { return _FameByKill; }
+	virtual float							getColRadius() const NL_OVERRIDE { return _ColRadius; }
 	virtual float							getScale() const { return _Scale; }
-	virtual float							getColLength() const { return _ColLength; }
-	virtual float							getColWidth() const { return _ColWidth; }
+	virtual float							getColLength() const NL_OVERRIDE { return _ColLength; }
+	virtual float							getColWidth() const NL_OVERRIDE { return _ColWidth; }
 
-	virtual uint16							getDamageShieldDamage() const { return _DamageShieldDamage; }
-	virtual uint16							getDamageShieldHpDrain() const { return _DamageShieldHpDrain; }
+	virtual uint16							getDamageShieldDamage() const NL_OVERRIDE { return _DamageShieldDamage; }
+	virtual uint16							getDamageShieldHpDrain() const NL_OVERRIDE { return _DamageShieldHpDrain; }
 
-	virtual std::vector<CStaticCreatureRawMaterial> const& getMps() const { return CStaticHarvestable::getMps(); }
+	virtual std::vector<CStaticCreatureRawMaterial> const& getMps() const NL_OVERRIDE { return CStaticHarvestable::getMps(); }
 	
-	virtual std::vector<NLMISC::CSheetId> const& getItemsForMissions() const { return CStaticHarvestable::getItemsForMissions(); }
+	virtual std::vector<NLMISC::CSheetId> const& getItemsForMissions() const NL_OVERRIDE { return CStaticHarvestable::getItemsForMissions(); }
 	//@}
 	
 private:

@@ -50,7 +50,7 @@ Factories->push_back(std::make_pair( std::string(_type_) ,this));
 
 #define END_MAGIC_ACTION_FACTORY(_class_) \
 	};\
-	IMagicAction * build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, uint & brickIndex, CMagicPhrase * phrase )\
+	IMagicAction * build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, uint & brickIndex, CMagicPhrase * phrase ) NL_OVERRIDE\
 	{\
 		_class_ *inst = new _class_;\
 		if ( !inst->build( actorRowId, bricks, brickIndex, phrase  ) ){delete inst;return NULL;} \

@@ -328,7 +328,7 @@ vector<string>	OutpostFiles;
 
 struct TOupostFileClassCallback : public IBackupFileClassReceiveCallback
 {
-	virtual void callback(const CFileDescriptionContainer& fileList)
+	virtual void callback(const CFileDescriptionContainer& fileList) NL_OVERRIDE
 	{
 		// store the list of oupost file
 		for (uint i=0; i<fileList.size(); ++i)
@@ -338,7 +338,7 @@ struct TOupostFileClassCallback : public IBackupFileClassReceiveCallback
 
 struct TOupostFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		// forward to outpost manager
 		COutpostManager::getInstance().outpostFileCallback(fileDescription, dataStream);

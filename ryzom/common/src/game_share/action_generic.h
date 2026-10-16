@@ -36,19 +36,19 @@ class CActionGeneric : public CActionImpulsion
 {
 public:
 
-	virtual ~CActionGeneric() {}
+	virtual ~CActionGeneric() NL_OVERRIDE {}
 
 	/** This function creates initializes its fields using the buffer.
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	virtual void unpack (NLMISC::CBitMemStream &message);
+	virtual void unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE;
 
 	/// This functions is used when you want to transform an action into an IStream.
-	virtual void serial (NLMISC::IStream &f);
+	virtual void serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// Returns the size of this action when will be send to the UDP connection (in number of bits.)
-	virtual uint32 size ();
+	virtual uint32 size () NL_OVERRIDE;
 
 	virtual void set (NLMISC::CBitMemStream &message);
 
@@ -71,10 +71,10 @@ protected:
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	virtual void pack (NLMISC::CBitMemStream &message);
+	virtual void pack (NLMISC::CBitMemStream &message) NL_OVERRIDE;
 
 	/// This method intialises the action with a default state
-	virtual void reset()
+	virtual void reset() NL_OVERRIDE
 	{
 		AllowExceedingMaxSize = false;
 	}

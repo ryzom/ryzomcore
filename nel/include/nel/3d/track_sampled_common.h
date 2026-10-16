@@ -39,13 +39,13 @@ public:
 
 	/// Constructor
 	CTrackSampledCommon();
-	virtual ~CTrackSampledCommon();
+	virtual ~CTrackSampledCommon() NL_OVERRIDE;
 
 	/// From UTrack/ITrack.
 	// @{
-	virtual bool					getLoopMode() const;
-	virtual TAnimationTime			getBeginTime () const;
-	virtual TAnimationTime			getEndTime () const;
+	virtual bool					getLoopMode() const NL_OVERRIDE;
+	virtual TAnimationTime			getBeginTime () const NL_OVERRIDE;
+	virtual TAnimationTime			getEndTime () const NL_OVERRIDE;
 	// @}
 
 	/// Change the loop mode. true default

@@ -59,33 +59,33 @@ protected:
 	CMeshInstance();
 
 	/// Destructor
-	virtual ~CMeshInstance();
+	virtual ~CMeshInstance() NL_OVERRIDE;
 
 	/// \name Skinning Behavior.
 	// @{
 	/// I can be skinned if the mesh is.
-	virtual	bool	isSkinnable() const;
+	virtual	bool	isSkinnable() const NL_OVERRIDE;
 
 	/// Call when the skin is applied on the skeleton
-	virtual	void	setApplySkin(bool state);
+	virtual	void	setApplySkin(bool state) NL_OVERRIDE;
 
 	/// Called for lod character coloring.
-	virtual const std::vector<sint32>	*getSkinBoneUsage() const;
+	virtual const std::vector<sint32>	*getSkinBoneUsage() const NL_OVERRIDE;
 
 	/// Called for more precise clipping.
-	virtual const std::vector<NLMISC::CBSphere>	*getSkinBoneSphere() const;
+	virtual const std::vector<NLMISC::CBSphere>	*getSkinBoneSphere() const NL_OVERRIDE;
 
 	/// Implementation of the renderSkin
-	virtual void	renderSkin(float alphaMRM);
+	virtual void	renderSkin(float alphaMRM) NL_OVERRIDE;
 
 	/// GPU Skinning
-	virtual	bool			supportGPUSkinning() const;
-	virtual	void			renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton);
-	virtual	CVertexProgram	*getGPUSkinVP() const;
+	virtual	bool			supportGPUSkinning() const NL_OVERRIDE;
+	virtual	void			renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton) NL_OVERRIDE;
+	virtual	CVertexProgram	*getGPUSkinVP() const NL_OVERRIDE;
 
 	/// Skin intersection?
-	virtual	bool			supportIntersectSkin() const;
-	virtual	bool			intersectSkin(const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D);
+	virtual	bool			supportIntersectSkin() const NL_OVERRIDE;
+	virtual	bool			intersectSkin(const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D) NL_OVERRIDE;
 
 	// @}
 
@@ -98,10 +98,10 @@ protected:
 
 	/// \name ShadowMap Behavior.
 	// @{
-	virtual	void		generateShadowMap(const CVector &lightDir);
-	virtual	CShadowMap	*getShadowMap();
-	virtual bool		computeWorldBBoxForShadow(NLMISC::CAABBox &worldBB);
-	virtual void		renderIntoSkeletonShadowMap(CSkeletonModel *rootSkeleton, CMaterial	&castMat);
+	virtual	void		generateShadowMap(const CVector &lightDir) NL_OVERRIDE;
+	virtual	CShadowMap	*getShadowMap() NL_OVERRIDE;
+	virtual bool		computeWorldBBoxForShadow(NLMISC::CAABBox &worldBB) NL_OVERRIDE;
+	virtual void		renderIntoSkeletonShadowMap(CSkeletonModel *rootSkeleton, CMaterial	&castMat) NL_OVERRIDE;
 	// @}
 
 private:
@@ -113,8 +113,8 @@ private:
 
 	void			updateShadowMap(IDriver *driver);
 protected:
-	virtual void			createShadowMap();
-	virtual void			deleteShadowMap();
+	virtual void			createShadowMap() NL_OVERRIDE;
+	virtual void			deleteShadowMap() NL_OVERRIDE;
 };
 
 

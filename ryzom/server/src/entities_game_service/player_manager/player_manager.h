@@ -82,7 +82,7 @@ void broadcastMessageOfTheDay(NLMISC::IVariable &var);
 class CPetSpawnConfirmationImp : public CPetSpawnConfirmationMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -186,7 +186,7 @@ public :
 	uint32 getNumberPlayers() { return (uint32)_Players.size(); }
 
 	/// get a reference on player in manager
-	const IPlayerManager::TMapPlayers& getPlayers() { return _Players; }
+	const IPlayerManager::TMapPlayers& getPlayers() NL_OVERRIDE { return _Players; }
 
 	/**
 	 * Add callback for client & characters management
@@ -263,10 +263,10 @@ public :
 	void addPlayer( uint32 userId, CPlayer * player );
 
 	/// A player entity have been removed from eid translator, check all guild member list
-	virtual void checkContactLists();
+	virtual void checkContactLists() NL_OVERRIDE;
 
 	/// A player entity have been removed from eid translator, check all contact list
-	virtual void playerEntityRemoved(const NLMISC::CEntityId &eid);
+	virtual void playerEntityRemoved(const NLMISC::CEntityId &eid) NL_OVERRIDE;
 
 	/**
 	 * Get player
@@ -315,7 +315,7 @@ public :
 	 * \param index is the index of the character
 	 * \return pointer on asked CCharacter
 	 */
-	CCharacter * getChar( uint32 userId, uint32 index );
+	CCharacter * getChar( uint32 userId, uint32 index ) NL_OVERRIDE;
 
 	/**
 	 * Get the character
@@ -351,7 +351,7 @@ public :
 	 * \param userId is the unique id of the user
 	 * \return the character
 	 */
-	CCharacter * getActiveChar( uint32 userId );
+	CCharacter * getActiveChar( uint32 userId ) NL_OVERRIDE;
 
 	/**
 	 * Set the active character for the specified player
@@ -565,7 +565,7 @@ public :
 		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length()); \
 		NLNET::CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(id.getDynamicId()), msgout );
 
-	void sendImpulseToClient(const NLMISC::CEntityId & id,const std::string & msgName )
+	void sendImpulseToClient(const NLMISC::CEntityId & id,const std::string & msgName ) NL_OVERRIDE
 	{
 		RY_SEND_IMPULSE_TO_CLIENT_BEGIN
 		RY_SEND_IMPULSE_TO_CLIENT_END
@@ -647,7 +647,7 @@ public :
 	void userDisconnected( uint32 userId );
 
 	// The name unifier as renamed a character
-	void characterRenamed(uint32 charId, const std::string &newName);
+	void characterRenamed(uint32 charId, const std::string &newName) NL_OVERRIDE;
 
 	/// ClientNPCIconRefreshTimerDelay has changed
 	static void onNPCIconTimerChanged(NLMISC::IVariable &var);

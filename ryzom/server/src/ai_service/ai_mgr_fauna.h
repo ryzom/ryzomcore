@@ -34,11 +34,11 @@ class CMgrFauna
 {
 public:	
 	CMgrFauna(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename);
-	virtual ~CMgrFauna();
+	virtual ~CMgrFauna() NL_OVERRIDE;
 	
-	CStateMachine* getStateMachine() { return &_StateMachine; }
+	CStateMachine* getStateMachine() NL_OVERRIDE { return &_StateMachine; }
 	
-	virtual std::string getOneLineInfoString() const;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//	CStateMachine
@@ -51,11 +51,11 @@ public:
 	
 	//////////////////////////////////////////////////////////////////////////	
 	//	Methods inherited from IManager.
-	void init();
-	void update();
-	void release() { CManager::release(); }
+	void init() NL_OVERRIDE;
+	void update() NL_OVERRIDE;
+	void release() NL_OVERRIDE { CManager::release(); }
 	
-	AITYPES::TMgrType type() const { return AITYPES::MgrTypeFauna; }
+	AITYPES::TMgrType type() const NL_OVERRIDE { return AITYPES::MgrTypeFauna; }
 	// event managers --------------------------------------------------
 	CAIEvent EventDestinationReachedFirst;
 	CAIEvent EventDestinationReachedAll;
@@ -69,8 +69,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////	
 	//	Alias Tree related Methods.
 	
-	IAliasCont*			getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner*	createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont*			getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner*	createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
 	/// @name CAIEntity public implementation
 	//@{

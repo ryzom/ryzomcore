@@ -119,7 +119,7 @@ class CMissionTargetObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -260,7 +260,7 @@ class CTeamUIDObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -294,7 +294,7 @@ class CTeamPresentObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -330,7 +330,7 @@ class CAnimalUIDObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -364,7 +364,7 @@ class CAnimalStatusObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)

@@ -406,10 +406,10 @@ public:
 	// @{
 
 	/// Task ran successfully
-	virtual void			taskSuccessful(void* arg);
+	virtual void			taskSuccessful(void* arg) NL_OVERRIDE;
 
 	/// Task failed!
-	virtual void			taskFailed(void* arg);
+	virtual void			taskFailed(void* arg) NL_OVERRIDE;
 
 	// @}
 
@@ -417,16 +417,16 @@ public:
 	// @{
 
 	/// Get Table Index from name
-	virtual RY_PDS::TTableIndex	getTableIndex(const std::string& tableName) const;
+	virtual RY_PDS::TTableIndex	getTableIndex(const std::string& tableName) const NL_OVERRIDE;
 
 	/// Get Table Index from name
-	virtual std::string			getTableName(RY_PDS::TTableIndex index) const;
+	virtual std::string			getTableName(RY_PDS::TTableIndex index) const NL_OVERRIDE;
 
 	// @}
 
 protected:
 
-	virtual std::string	getLoggerIdentifier() const	{ return NLMISC::toString("db:%s", (_State.Name.empty() ? "<unnamed>" : _State.Name.c_str())); }
+	virtual std::string	getLoggerIdentifier() const NL_OVERRIDE	{ return NLMISC::toString("db:%s", (_State.Name.empty() ? "<unnamed>" : _State.Name.c_str())); }
 
 public:
 

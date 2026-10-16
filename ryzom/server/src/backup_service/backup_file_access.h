@@ -241,7 +241,7 @@ public:
 	};
 
 	/// Execute file loading
-	virtual TReturnCode		execute(CFileAccessManager& manager);
+	virtual TReturnCode		execute(CFileAccessManager& manager) NL_OVERRIDE;
 };
 
 
@@ -273,7 +273,7 @@ public:
 	bool					CreateDir;
 
 	/// Execute file writing
-	virtual TReturnCode		execute(CFileAccessManager& manager);
+	virtual TReturnCode		execute(CFileAccessManager& manager) NL_OVERRIDE;
 
 };
 
@@ -298,7 +298,7 @@ public:
 	};
 
 	/// Execute file writing
-	virtual TReturnCode		execute(CFileAccessManager& manager);
+	virtual TReturnCode		execute(CFileAccessManager& manager) NL_OVERRIDE;
 
 	bool					BackupFile;
 };

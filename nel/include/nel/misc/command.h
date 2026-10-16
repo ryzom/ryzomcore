@@ -78,7 +78,7 @@ namespace NLMISC {
 struct __category##_##__name##Class: public NLMISC::ICommand \
 { \
 	__category##_##__name##Class() : NLMISC::ICommand(#__category,#__name,__help,__args) { } \
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human); \
+	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE; \
 }; \
 __category##_##__name##Class __category##_##__name##Instance; \
 bool __category##_##__name##Class::execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
@@ -383,7 +383,7 @@ struct TCommandHandler : public TCommandHandlerInfo
 	/** Typedef for a container for command handler table. */	\
 	typedef std::map<std::string, NLMISC::TCommandHandler<className> >	TCommandsTable;	\
 	\
-	virtual const std::string &getCommandHandlerClassName()	const\
+	virtual const std::string &getCommandHandlerClassName()	const NL_OVERRIDE\
 	{	\
 		static std::string className(#className);	\
 		return className;	\
@@ -401,7 +401,7 @@ struct TCommandHandler : public TCommandHandlerInfo
 		else	\
 			return NULL;	\
 	}	\
-	virtual bool execute(const std::string &rawCommandString, const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
+	virtual bool execute(const std::string &rawCommandString, const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE \
 	{ \
 		TCommand cmd = className##_getCommandHandler(commandName); \
 		if (cmd != NULL) \
@@ -418,7 +418,7 @@ struct TCommandHandler : public TCommandHandlerInfo
 			return false; \
 		} \
 	} \
-	virtual void fillCommandsHandlerList(NLMISC::TCommandHandlerClassInfo::TCommandsInfo &commandList)	\
+	virtual void fillCommandsHandlerList(NLMISC::TCommandHandlerClassInfo::TCommandsInfo &commandList) NL_OVERRIDE	\
 	{	\
 		const TCommandsTable	&commandTable = className##_getCommandsHandlerTable();	\
 		TCommandsTable::const_iterator first(commandTable.begin()), last(commandTable.end());	\
@@ -473,7 +473,7 @@ struct TCommandHandler : public TCommandHandlerInfo
 #define NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(className, baseClassName)	\
 	typedef bool (className::*TCommand)(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human);	\
 	typedef std::map<std::string, NLMISC::TCommandHandler<className> >	TCommandsTable;	\
-	virtual const std::string &getCommandHandlerClassName()	const\
+	virtual const std::string &getCommandHandlerClassName()	const NL_OVERRIDE\
 	{	\
 		static std::string className(#className);	\
 		return className;	\
@@ -493,7 +493,7 @@ struct TCommandHandler : public TCommandHandlerInfo
 			return NULL;\
 		} \
 	}	\
-	virtual bool execute(const std::string &rawCommandString, const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
+	virtual bool execute(const std::string &rawCommandString, const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE \
 	{ \
 		TCommand cmd = className##_getCommandHandler(commandName); \
 		if (cmd != NULL) \
@@ -506,7 +506,7 @@ struct TCommandHandler : public TCommandHandlerInfo
 			return baseClassName::execute(rawCommandString, commandName, args, log, quiet, human);\
 		} \
 	} \
-	virtual void fillCommandsHandlerList(NLMISC::TCommandHandlerClassInfo::TCommandsInfo &commandList)	\
+	virtual void fillCommandsHandlerList(NLMISC::TCommandHandlerClassInfo::TCommandsInfo &commandList) NL_OVERRIDE	\
 	{	\
 		const TCommandsTable	&commandTable = className##_getCommandsHandlerTable();	\
 		TCommandsTable::const_iterator first(commandTable.begin()), last(commandTable.end());	\

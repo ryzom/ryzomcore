@@ -36,7 +36,7 @@ class CEventEmitterMulti : public IEventEmitter
 {
 public:
 	/// dtor
-	virtual ~CEventEmitterMulti();
+	virtual ~CEventEmitterMulti() NL_OVERRIDE;
 	/// add an emitter
 	void	addEmitter(IEventEmitter *e, bool mustDelete);
 	/// remove an emitter (and delete it if necessary)
@@ -49,7 +49,7 @@ public:
 	IEventEmitter *getEmitter(uint index);
 	const IEventEmitter *getEmitter(uint index) const;
 	/// From IEventEmitter. This call submitEvents on all the emitters
-	virtual void submitEvents(CEventServer &server, bool allWindows);
+	virtual void submitEvents(CEventServer &server, bool allWindows) NL_OVERRIDE;
 
 	virtual bool copyTextToClipboard(const std::string &text);
 	virtual bool pasteTextFromClipboard(std::string &text);

@@ -82,7 +82,7 @@ private:
 	void clearSendQueue();
 
 	// the comm thread entry point
-	void run();
+	void run() NL_OVERRIDE;
 
 	// called before each message is dispatched
 	void on_preDispatchMessage(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
@@ -93,7 +93,7 @@ protected:
 	CSessionBrowser();
 public:
 
-	virtual ~CSessionBrowser();
+	virtual ~CSessionBrowser() NL_OVERRIDE;
 
 	/** Set auth info */
 	void setAuthInfo(const NLNET::CLoginCookie &cookie);
@@ -109,7 +109,7 @@ public:
 	virtual void connectItf(NLNET::CInetHost address);
 
 	// call update each frame
-	void update();
+	void update() NL_OVERRIDE;
 
 
 	// the connection attempt to the server has failed

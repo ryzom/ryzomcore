@@ -224,7 +224,7 @@ public:
 	/// @name Constructor and destructor
 	//@{
 	CAIEntityPhysical(CPersistentOfPhysical &owner, TDataSetRow const& entityIndex, NLMISC::CEntityId const& id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag const& AStarFlags);
-	virtual ~CAIEntityPhysical();
+	virtual ~CAIEntityPhysical() NL_OVERRIDE;
 	//@}
 	
 	/// @name Accessors
@@ -402,10 +402,10 @@ public:
 	
 	/// @name Targeting overrides
 	//@{
-	virtual void targetDied() { _targetRow = TDataSetRow(); }
-	virtual void setTarget(CAIEntityPhysical* target);
-	virtual void setVisualTarget(CAIEntityPhysical* target);
-	virtual void setUnreachableTarget(CAIEntityPhysical* target);
+	virtual void targetDied() NL_OVERRIDE { _targetRow = TDataSetRow(); }
+	virtual void setTarget(CAIEntityPhysical* target) NL_OVERRIDE;
+	virtual void setVisualTarget(CAIEntityPhysical* target) NL_OVERRIDE;
+	virtual void setUnreachableTarget(CAIEntityPhysical* target) NL_OVERRIDE;
 	//@}
 	
 	/// @name Movement

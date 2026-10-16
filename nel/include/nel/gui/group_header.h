@@ -47,12 +47,12 @@ namespace NLGUI
 
 		CGroupHeader(const TCtorParam &param);
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// from CInterfaceGroup
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 		sint32	getHeaderMaxSize() const { return _HeaderMaxSize; }
 		// get the entries in this header
 		void getEntries(std::vector<CGroupHeaderEntry *> &dest);
@@ -75,11 +75,11 @@ namespace NLGUI
         DECLARE_UI_CLASS( CGroupHeaderEntry )
 
 		CGroupHeaderEntry(const TCtorParam &param);
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 		// from CInterfaceGroup
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 		sint32 getMinSize() const { return _MinSize; }
-		virtual void updateCoords();
+		virtual void updateCoords() NL_OVERRIDE;
 		CInterfaceGroup *getTargetColumn() const;
 
 		const	std::string &getAHOnResize() const { return _AHOnResize; }

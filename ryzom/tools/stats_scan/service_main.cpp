@@ -48,7 +48,7 @@ public :
 	/*
 	 * Initialise the service
 	 */
-	void init()
+	void init() NL_OVERRIDE
 	{
 		setVersion (RYZOM_VERSION);
 
@@ -65,7 +65,7 @@ public :
 	/*
 	 * Service Update
 	 */
-	bool update()
+	bool update() NL_OVERRIDE
 	{
 		CSingletonRegistry::getInstance()->serviceUpdate();
 		return true;
@@ -82,7 +82,7 @@ public :
 	/*
 	 * Release
 	 */
-	void release()
+	void release() NL_OVERRIDE
 	{
 		CSingletonRegistry::getInstance()->release();
 	}

@@ -99,8 +99,8 @@ public:
 		uint CtStartNeLVP;
 	};
 	CVertexProgramLighted() { }
-	virtual ~CVertexProgramLighted() { }
-	virtual void buildInfo();
+	virtual ~CVertexProgramLighted() NL_OVERRIDE { }
+	virtual void buildInfo() NL_OVERRIDE;
 	const CIdxLighted &idxLighted() const { return m_IdxLighted; }
 	const CFeaturesLighted &featuresLighted() const { return m_FeaturesLighted; }
 

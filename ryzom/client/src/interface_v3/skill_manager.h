@@ -201,7 +201,7 @@ private:
 	// CallBack set for skill changes
 	struct CSkillChangeObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
-		virtual void update (NLMISC::ICDBNode * /* node */)
+		virtual void update (NLMISC::ICDBNode * /* node */) NL_OVERRIDE
 		{
 			CSkillManager	*pSM= CSkillManager::getInstance();
 			pSM->onSkillChange();
@@ -254,7 +254,7 @@ private:
 	class CBrickLearnedCB : public IBrickLearnedCallback
 	{
 	public:
-		virtual	void onBrickLearned()
+		virtual	void onBrickLearned() NL_OVERRIDE
 		{
 			CSkillManager::getInstance()->tryToUnblockTitleFromBricks();
 		}

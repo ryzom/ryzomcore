@@ -126,11 +126,11 @@ public:
 		}
 		// TODO_VP_GLSL
 	}
-	~CVertexProgramDecalAttenuation()
+	~CVertexProgramDecalAttenuation() NL_OVERRIDE
 	{
 		
 	}
-	virtual void buildInfo()
+	virtual void buildInfo() NL_OVERRIDE
 	{
 		m_Idx.WorldToUV0 = getUniformIndex("worldToUV0");
 		nlassert(m_Idx.WorldToUV0 != std::numeric_limits<uint>::max());

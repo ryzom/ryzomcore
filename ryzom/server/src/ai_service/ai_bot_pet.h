@@ -42,19 +42,19 @@ class CSpawnBotPet
 public:
 	CSpawnBotPet(TDataSetRow const& row, CBot& owner, NLMISC::CEntityId const& id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
 	
-	void processEvent(CCombatInterface::CEvent const& event) { }
+	void processEvent(CCombatInterface::CEvent const& event) NL_OVERRIDE { }
 	
-	RYZOMID::TTypeId getRyzomType() const { return RYZOMID::pack_animal; }
+	RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::pack_animal; }
 	
 	CBotPet& getPersistent	();
 	CBotPet const& getPersistent() const;
 	
 	CSpawnGroupPet& spawnGrp();
 	
-	void sendInfoToEGS() const { }
+	void sendInfoToEGS() const NL_OVERRIDE { }
 	
 	// pets are always attackable by bots
-	virtual	bool isBotAttackable() const { return true; }
+	virtual	bool isBotAttackable() const NL_OVERRIDE { return true; }
 	
 	// Take position from mirror
 	void updatePos();
@@ -66,7 +66,7 @@ public:
 	
 	uint32 _DeathTime;
 
-	void setVisualPropertiesName();
+	void setVisualPropertiesName() NL_OVERRIDE;
 	
 private:
 
@@ -82,9 +82,9 @@ class CBotPet
 {
 public:
 	CBotPet(CGroup* owner, CAIAliasDescriptionNode* alias = NULL);
-	~CBotPet();
+	~CBotPet() NL_OVERRIDE;
 	
-	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& spawnPos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta);
+	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& spawnPos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta) NL_OVERRIDE;
 	void setSpawnPos(CAIPos const& spawnPos) { _SpawnPos = spawnPos; }
 	CGrpPet& getPetGroup();
 	
@@ -92,21 +92,21 @@ public:
 	
 	CSpawnBotPet* getSpawn() { return static_cast<CSpawnBotPet*>(getSpawnObj()); }
 	
-	CAIS::CCounter& getSpawnCounter();
+	CAIS::CCounter& getSpawnCounter() NL_OVERRIDE;
 	
 	void setDespawn() { _MustDespawn = true; }
 	bool haveToDespawn() const { return _MustDespawn; }
 	
 	void changeOwner(NLMISC::CEntityId const& newOwner);
 	
-	virtual std::string	getOneLineInfoString() const { return std::string("Pet bot '") + getName() + "'"; }
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE { return std::string("Pet bot '") + getName() + "'"; }
 	
-	virtual void triggerSetSheet(AISHEETS::ICreatureCPtr const& sheet);
+	virtual void triggerSetSheet(AISHEETS::ICreatureCPtr const& sheet) NL_OVERRIDE;
 	
 protected:
-	RYZOMID::TTypeId getRyzomType() const { return RYZOMID::pack_animal; }
+	RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::pack_animal; }
 	
-	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius)
+	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius) NL_OVERRIDE
 	{
 		return new CSpawnBotPet(row, *this, id, radius, getSheet()->Level(), getGroup().getAStarFlag());
 	}

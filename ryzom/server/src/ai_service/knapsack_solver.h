@@ -107,9 +107,9 @@ class CKnapsackContext
 	float* _Values;
 public:
 	CKnapsackContext(size_t size, float* weights, float* values);
-	virtual float weight(size_t i);
-	virtual float value(size_t i);
-	virtual size_t size();
+	virtual float weight(size_t i) NL_OVERRIDE;
+	virtual float value(size_t i) NL_OVERRIDE;
+	virtual size_t size() NL_OVERRIDE;
 };
 
 #endif

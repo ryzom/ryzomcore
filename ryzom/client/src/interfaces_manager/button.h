@@ -88,16 +88,16 @@ public:
 	void pen(const CPen &pen);
 
 	/// unSelect the button.
-	virtual void unSelect();
+	virtual void unSelect() NL_OVERRIDE;
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/// Manage the click of the mouse for the Button.
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// Manage the right click of the mouse for the Button.
-	virtual void clickRight(float x, float y, bool &taken);
+	virtual void clickRight(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// get the state of the button (clicked, released (unselected), etc...)
 	TState	getState() const { return _State; }

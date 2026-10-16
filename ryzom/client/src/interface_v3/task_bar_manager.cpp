@@ -140,7 +140,7 @@ void CGroupContainerWindows::update(bool updatePos)
 class CHandlerTaskbarExpandOnOff: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainerWindows *pGCW = dynamic_cast<CGroupContainerWindows*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:windows"));
@@ -157,7 +157,7 @@ REGISTER_ACTION_HANDLER( CHandlerTaskbarExpandOnOff, "taskbar_expand_on_off");
 class CHandlerGWUpdateKeys: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));

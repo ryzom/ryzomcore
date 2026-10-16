@@ -261,7 +261,7 @@ namespace R2
 	public:
 		CTaskUpdateScenarioVision(NLMISC::TTime now, CServerEditionModule* module, TSessionId sessionId)
 			:CTask<NLMISC::TTime>(now), _SessionId(sessionId), _Module(module){}
-		virtual void doOperation()
+		virtual void doOperation() NL_OVERRIDE
 		{
 			_Module->updateScenarioVision(_SessionId);
 		}
@@ -279,7 +279,7 @@ namespace R2
 		CTaskGetStartParamsWhenLoaded(CServerEditionModule* module, TCharId charId, TSessionId sessionId)
 			:_Module(module), _CharId(charId), _SessionId(sessionId){}
 
-		virtual void doOperation()
+		virtual void doOperation() NL_OVERRIDE
 		{
 			_Module->getStartParamsImpl(_CharId, _SessionId);
 		}
@@ -326,7 +326,7 @@ namespace R2
 			:CTask<NLMISC::TTime>(0)
 			,_ServerEditionModule(serverEditionModule), _CharId(charId){}
 
-		virtual void doOperation()
+		virtual void doOperation() NL_OVERRIDE
 		{
 			_ServerEditionModule->tryCharConnection(_CharId);
 		}
@@ -348,7 +348,7 @@ namespace R2
 		{
 		}
 
-		virtual void doOperation()
+		virtual void doOperation() NL_OVERRIDE
 		{
 			// The player has return to main land (or quit) So do not disconnect him
 			if ( _ServerEditionModule->getSessionIdByCharId(_CharId) == _SessionId)
@@ -382,7 +382,7 @@ namespace R2
 		{
 		}
 
-		virtual void doOperation()
+		virtual void doOperation() NL_OVERRIDE
 		{
 			CEditionSession* session = _ServerEditionModule->getSession(_SessionId);
 			if (session)
@@ -416,7 +416,7 @@ namespace R2
 		CTestIfMustWakeUpSession(CServerEditionModule* module, TSessionId sessionId, TCharId ownerId)
 			:_Module(module), _SessionId(sessionId), _OwnerId(ownerId){}
 
-		void	callback(const CFileDescriptionContainer& fileList)
+		void	callback(const CFileDescriptionContainer& fileList) NL_OVERRIDE
 		{
 			if (fileList.empty())
 			{
@@ -1050,7 +1050,7 @@ public:
 	COverrideRingAccessCallback(CServerEditionModule* editionModule) :_EditionModule(editionModule){}
 
 	// call back for bs file asynchronous read
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		nldebug("BSIcb COverrideRingAccessCallback::callback() for file: %s",fileDescription.FileName.c_str());
 		CServerEditionModule::TOverrideRingAccess access;
@@ -5077,7 +5077,7 @@ public:
 	CWakeUpHibernatingSessionCallback(CServerEditionModule* editionModule) :_EditionModule(editionModule){}
 
 	// call back for bs file asynchronous read
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		nldebug("BSIcb CWakeUpHibernatingSessionCallback::callback() for file: %s",fileDescription.FileName.c_str());
 

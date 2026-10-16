@@ -44,7 +44,7 @@ public:
 	 * apply the effects of the... effect
 	 * \return true if the effect must be removed
 	 */
-	bool update(uint32 & updateFlag);
+	bool update(uint32 & updateFlag) NL_OVERRIDE;
 
 protected:
 	void applyOnScore( CEntityBase * caster, CEntityBase * target,SCORES::TScores scoreType, sint32 value );

@@ -40,11 +40,11 @@ namespace EC
 	{
 	public:
 		// IModule specialisation implementation
-		bool initialiseModule(const NLMISC::CSString& rawArgs);
-		NLMISC::CSString getState() const;
-		NLMISC::CSString getName() const;
-		NLMISC::CSString getParameters() const;
-		void displayModule() const;
+		bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+		NLMISC::CSString getState() const NL_OVERRIDE;
+		NLMISC::CSString getName() const NL_OVERRIDE;
+		NLMISC::CSString getParameters() const NL_OVERRIDE;
+		void displayModule() const NL_OVERRIDE;
 
 		// management of the set of faction channels
 		bool addFactionChannel(const NLMISC::CSString& channelName,const NLMISC::CSString& channelTitle);

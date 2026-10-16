@@ -691,10 +691,10 @@ class CMirrorService : public NLNET::IService
 public:
 
 	/// Initialization
-	virtual void	init();
+	virtual void	init() NL_OVERRIDE;
 
 	/// Release
-	virtual void	release();
+	virtual void	release() NL_OVERRIDE;
 
 	/// Constructor
 	CMirrorService() :

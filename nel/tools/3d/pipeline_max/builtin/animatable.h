@@ -59,7 +59,7 @@ class CAnimatable : public CSceneClass
 {
 public:
 	CAnimatable(CScene *scene);
-	virtual ~CAnimatable();
+	virtual ~CAnimatable() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -69,14 +69,14 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	// public
 	/// The AppData container, CREATED (empty, parsed-state) when the object has none — the
@@ -95,7 +95,7 @@ public:
 
 protected:
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	IStorageObject *m_Unknown2140;

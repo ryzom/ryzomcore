@@ -128,17 +128,17 @@ public:
 		}
 
 		/// serialisation of the object. Derivers MUST call this, (if they use the attribute of this class at least)
-		virtual void serial(NLMISC::IStream &f)
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 		{
 			f.serialVersion(1);
 			f.serial(_NbCycles);
 		}
 
 		/// inherited from CPSAttribMakerBase. Template specialization will do the job
-		virtual const char *getType() { return "UNKNOWN"; }
+		virtual const char *getType() NL_OVERRIDE { return "UNKNOWN"; }
 
 		/// dtor
-		virtual ~CPSAttribMaker() {}
+		virtual ~CPSAttribMaker() NL_OVERRIDE {}
 	//@}
 
 	/// \name Production of attribute

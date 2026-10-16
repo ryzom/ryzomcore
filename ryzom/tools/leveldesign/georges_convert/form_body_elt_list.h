@@ -37,18 +37,18 @@ public:
 	NLMISC_DECLARE_CLASS( CFormBodyEltList );
 	CFormBodyEltList();
 	CFormBodyEltList( const CFormBodyEltList& _fbel );
-	virtual ~CFormBodyEltList();
-	virtual void serial( NLMISC::IStream& s );
+	virtual ~CFormBodyEltList() NL_OVERRIDE;
+	virtual void serial( NLMISC::IStream& s ) NL_OVERRIDE;
 
-	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe );
-	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe );
-	virtual CFormBodyElt&	operator -=( const CFormBodyElt& _fbe );
-	virtual bool			operator ==( const CFormBodyElt& _fbe ) const;
+	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual CFormBodyElt&	operator -=( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual bool			operator ==( const CFormBodyElt& _fbe ) const NL_OVERRIDE;
 
-	virtual CFormBodyElt* Clone() const;
-	virtual bool Empty() const;
-	virtual CFormBodyElt* GetElt( const unsigned int _index ) const;
-	virtual CFormBodyElt* GetElt( const CStringEx _sxname ) const;
+	virtual CFormBodyElt* Clone() const NL_OVERRIDE;
+	virtual bool Empty() const NL_OVERRIDE;
+	virtual CFormBodyElt* GetElt( const unsigned int _index ) const NL_OVERRIDE;
+	virtual CFormBodyElt* GetElt( const CStringEx _sxname ) const NL_OVERRIDE;
 
 	void AddElt( CFormBodyElt* const pfbe );
 	void Clear();

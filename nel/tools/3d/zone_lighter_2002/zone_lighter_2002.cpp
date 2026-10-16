@@ -209,7 +209,7 @@ public:
 	}
 
 	// Run method
-	void run()
+	void run() NL_OVERRIDE
 	{
 		// Set the processor mask
 		uint64 mask = IProcess::getCurrentProcess()->getCPUMask ();
@@ -264,7 +264,7 @@ public:
 		  _Process(process)
 	{
 	}
-	void run()
+	void run() NL_OVERRIDE
 	{
 		_ZoneLighter->processLightableShapeCalc(_Process, _ShapesToLit, _FirstShape, _LastShape, *_Description);
 		_ZoneLighter->_ProcessExited++;

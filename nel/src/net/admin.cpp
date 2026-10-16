@@ -125,7 +125,7 @@ static void cbExecCommand (CMessage &msgin, const std::string &/* serviceName */
 		}
 
 	protected:
-		virtual void doDisplay( const CLog::TDisplayInfo& /* args */, const char *message)
+		virtual void doDisplay( const CLog::TDisplayInfo& /* args */, const char *message) NL_OVERRIDE
 		{
 			_Data += message;
 		}

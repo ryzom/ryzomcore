@@ -288,7 +288,7 @@ struct CStatThread : public NLMISC::IRunnable
 		get("http://ryzom.com.woopra-ns.com/ping/"+params);
 	}
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		//nlinfo("run CStatThread");
 		bool connected = false;

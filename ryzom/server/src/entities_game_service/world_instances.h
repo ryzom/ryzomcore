@@ -25,21 +25,21 @@
 class CReportAICollisionAvailableMsgImp : public CReportAICollisionAvailableMsg
 {
 	// overload the callback
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /// Message from AIS to EGS to report static continent instance
 class CReportStaticAIInstanceMsgImp : public CReportStaticAIInstanceMsg
 {
 	// overload the callback
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /// Message from AIS to EGS to report ai instance despawn
 class CReportAIInstanceDespawnMsgImp : public CReportAIInstanceDespawnMsg
 {
 	// overload the callback
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

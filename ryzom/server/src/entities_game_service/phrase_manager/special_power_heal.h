@@ -57,13 +57,13 @@ public:
 	}
 
 	/// validate the power utilisation
-	virtual bool validate(std::string &errorCode);
+	virtual bool validate(std::string &errorCode) NL_OVERRIDE;
 	
 	/// set affected score
 	inline void setAffectedScore( SCORES::TScores score ) { _AffectedScore = score; }
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 protected:
 	/// affected score (Hp, sap, sta)

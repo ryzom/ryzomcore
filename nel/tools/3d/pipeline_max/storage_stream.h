@@ -71,13 +71,13 @@ public:
 	explicit CStorageStream(const std::vector<uint8> &data);
 	/// Write mode into a fresh internal growable buffer.
 	CStorageStream();
-	virtual ~CStorageStream();
+	virtual ~CStorageStream() NL_OVERRIDE;
 
-	virtual bool seek(sint32 offset, TSeekOrigin origin) const;
-	virtual sint32 getPos() const;
+	virtual bool seek(sint32 offset, TSeekOrigin origin) const NL_OVERRIDE;
+	virtual sint32 getPos() const NL_OVERRIDE;
 	// virtual std::string getStreamName() const;
-	virtual void serialBuffer(uint8 *buf, uint len);
-	virtual void serialBit(bool &bit);
+	virtual void serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
+	virtual void serialBit(bool &bit) NL_OVERRIDE;
 
 	sint32 size();
 	bool eof();

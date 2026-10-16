@@ -140,14 +140,14 @@ struct CCharacterBotChatBeginEnd : public CMirrorTransportClass
 	std::vector< TDataSetRow > BotChatStart;
 	std::vector< TDataSetRow > BotChatEnd;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCharacterBotChatBeginEnd");
 		propertyCont ("botChatStart",	PropUInt32, BotChatStart);
 		propertyCont ("botChatEnd",		PropUInt32, BotChatEnd);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) { }
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE { }
 };
 
 struct CCharacterDynChatBeginEnd : public CMirrorTransportClass
@@ -156,14 +156,14 @@ struct CCharacterDynChatBeginEnd : public CMirrorTransportClass
 	std::vector< TDataSetRow > DynChatStart;
 	std::vector< TDataSetRow > DynChatEnd;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CCharacterDynChatBeginEnd");
 		propertyCont ("dnChatStart",	PropUInt32, DynChatStart);
 		propertyCont ("dnChatEnd",		PropUInt32, DynChatEnd);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) { }
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE { }
 };
 
 struct CCustomElementId

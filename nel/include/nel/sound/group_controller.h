@@ -69,8 +69,8 @@ public:
 
 	/// \name UGroupController
 	//@{
-	virtual void setGain(float gain) { NLMISC::clamp(gain, 0.0f, 1.0f); if (m_Gain != gain) { m_Gain = gain; updateSourceGain(); } }
-	virtual float getGain() { return m_Gain; }
+	virtual void setGain(float gain) NL_OVERRIDE { NLMISC::clamp(gain, 0.0f, 1.0f); if (m_Gain != gain) { m_Gain = gain; updateSourceGain(); } }
+	virtual float getGain() NL_OVERRIDE { return m_Gain; }
 	//@}
 	
 	inline float getFinalGain() const { return m_FinalGain; }
@@ -81,7 +81,7 @@ public:
 	virtual std::string getPath();
 	
 protected:
-	virtual ~CGroupController(); // subnodes can only be deleted by the root
+	virtual ~CGroupController() NL_OVERRIDE; // subnodes can only be deleted by the root
 
 private:
 	inline float calculateTotalGain() { return m_Gain; }

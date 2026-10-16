@@ -78,23 +78,23 @@ public:
 
 	CServerAdminModule();
 
-	~CServerAdminModule();
+	~CServerAdminModule() NL_OVERRIDE;
 
 
-	virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy);
+	virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-	virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy);
+	virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-	virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message);
+	virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE;
 
-	virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy);
+	virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 
-	bool getPosition(TSessionId sessionId, double&x, double&y, double& orient, uint8& season, uint32 locationIndex = 0);
+	bool getPosition(TSessionId sessionId, double&x, double&y, double& orient, uint8& season, uint32 locationIndex = 0) NL_OVERRIDE;
 
-	TSessionId getSessionIdByCharId(uint32 charId) const;
+	TSessionId getSessionIdByCharId(uint32 charId) const NL_OVERRIDE;
 
 
-	virtual bool isImmediateDispatchingSupported() const { return false; }
+	virtual bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 	static CServerAdminModule& getInstance() ;
 
 

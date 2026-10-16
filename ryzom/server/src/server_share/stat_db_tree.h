@@ -93,15 +93,15 @@ public:
 class CStatDBLeaf : public IStatDBNode
 {
 public:
-	virtual ~CStatDBLeaf() {}
+	virtual ~CStatDBLeaf() NL_OVERRIDE {}
 
-	bool setNode(const std::string & /* path */, IStatDBNodePtr  /* node */) { return false; }
-	IStatDBNodePtr getNode(const std::string & /* path */) { return NULL; }
+	bool setNode(const std::string & /* path */, IStatDBNodePtr  /* node */) NL_OVERRIDE { return false; }
+	IStatDBNodePtr getNode(const std::string & /* path */) NL_OVERRIDE { return NULL; }
 	void getNodes(const std::string & /* pathPattern */, std::vector<CMatchingNode> & /* matchingNodes */,
-		const std::string & /* currentPath */) {}
-	IStatDBNodePtr removeNode(const std::string & /* path */) { return NULL; }
+		const std::string & /* currentPath */) NL_OVERRIDE {}
+	IStatDBNodePtr removeNode(const std::string & /* path */) NL_OVERRIDE { return NULL; }
 	
-	virtual void acceptVisitor(CStatDBNodeVisitor & /* visitor */, const std::string & /* currentPath */) {}
+	virtual void acceptVisitor(CStatDBNodeVisitor & /* visitor */, const std::string & /* currentPath */) NL_OVERRIDE {}
 };
 
 /**
@@ -125,7 +125,7 @@ public:
 	/// add value
 	void addValue(sint32 val) { _Value += val; }
 
-	void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath)
+	void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath) NL_OVERRIDE
 	{
 		visitor.visitValueLeaf(this, currentPath);
 	}
@@ -187,7 +187,7 @@ public:
 	/// remove a guild from the table
 	void removeGuild(EGSPD::TGuildId guildId);
 
-	void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath)
+	void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath) NL_OVERRIDE
 	{
 		visitor.visitTableLeaf(this, currentPath);
 	}
@@ -209,13 +209,13 @@ private:
 class CStatDBBranch : public IStatDBNode
 {
 public:
-	bool setNode(const std::string & path, IStatDBNodePtr node);
-	IStatDBNodePtr getNode(const std::string & path);
+	bool setNode(const std::string & path, IStatDBNodePtr node) NL_OVERRIDE;
+	IStatDBNodePtr getNode(const std::string & path) NL_OVERRIDE;
 	void getNodes(const std::string & pathPattern, std::vector<CMatchingNode> & matchingNodes,
-		const std::string & currentPath);
-	IStatDBNodePtr removeNode(const std::string & path);
+		const std::string & currentPath) NL_OVERRIDE;
+	IStatDBNodePtr removeNode(const std::string & path) NL_OVERRIDE;
 
-	void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath);
+	void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath) NL_OVERRIDE;
 
 private:
 	bool isValidToken(const std::string & token) const;
@@ -245,7 +245,7 @@ public:
 	void processRemoval(IStatDBNodePtr root);
 
 private:
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path);
+	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) NL_OVERRIDE;
 
 private:
 	std::vector<NLMISC::CEntityId>	_PlayersToRemove;

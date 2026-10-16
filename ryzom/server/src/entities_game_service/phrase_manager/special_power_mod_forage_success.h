@@ -40,7 +40,7 @@ public:
 		const std::string& ecosystem, float modifier1, float modifier2 );
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 
 protected:

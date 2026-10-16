@@ -44,7 +44,7 @@ class CCDBNodeLeaf;
 class CPositionState : public NLMISC::CRefCount, public NLMISC::IStreamable
 {
 public:
-	virtual ~CPositionState() {}
+	virtual ~CPositionState() NL_OVERRIDE {}
 
 
 	/** From DB/EntityMngr, get the accurate entity position (*1000).
@@ -78,21 +78,21 @@ class CUIDEntityPositionState : public CPositionState
 {
 public:
 	CUIDEntityPositionState();
-	virtual bool	dbOk() {return _DBPos && _Uid;}
+	virtual bool	dbOk() NL_OVERRIDE {return _DBPos && _Uid;}
 	/// get the DB states related to the animal
 	void			build(const std::string &baseDB);
 	// try to retrieve current tracked pos
 	bool			getPos(sint32 &px, sint32 &py);
 	//
-	virtual			void serial(NLMISC::IStream &f);
+	virtual			void serial(NLMISC::IStream &f) NL_OVERRIDE;
 protected:
 	// Database infos
 	NLMISC::CCDBNodeLeaf				*_DBPos;
 	NLMISC::CCDBNodeLeaf				*_Uid;
 	// The slot of the entity that may be used to get more precise position
 	CLFECOMMON::TCLEntityId		_EntitySlot;
-	virtual CEntityCL	*getEntity();
-	virtual bool		 getDbPos(sint32 &px, sint32 &py);
+	virtual CEntityCL	*getEntity() NL_OVERRIDE;
+	virtual bool		 getDbPos(sint32 &px, sint32 &py) NL_OVERRIDE;
 };
 
 
@@ -107,21 +107,21 @@ class CNamedEntityPositionState : public CPositionState
 {
 public:
 	NLMISC_DECLARE_CLASS(CNamedEntityPositionState)
-	virtual bool	dbOk() {return _Name && _X && _Y;}
+	virtual bool	dbOk() NL_OVERRIDE {return _Name && _X && _Y;}
 	void			build(NLMISC::CCDBNodeLeaf *name, NLMISC::CCDBNodeLeaf *x, NLMISC::CCDBNodeLeaf *y);
 	NLMISC::CCDBNodeLeaf	*getNameNode() const { return _Name; }
 	NLMISC::CCDBNodeLeaf	*getXNode() const { return _X; }
 	NLMISC::CCDBNodeLeaf	*getYNode() const { return _X; }
 	//
-	virtual bool	canSave() const { return true; }
-	virtual	void	serial(NLMISC::IStream &f);
+	virtual bool	canSave() const NL_OVERRIDE { return true; }
+	virtual	void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 protected:
 	// Database infos
 	NLMISC::CCDBNodeLeaf				*_Name;
 	NLMISC::CCDBNodeLeaf				*_X;
 	NLMISC::CCDBNodeLeaf				*_Y;
-	virtual CEntityCL	*getEntity();
-	virtual bool		 getDbPos(sint32 &px, sint32 &py);
+	virtual CEntityCL	*getEntity() NL_OVERRIDE;
+	virtual bool		 getDbPos(sint32 &px, sint32 &py) NL_OVERRIDE;
 };
 
 
@@ -148,14 +148,14 @@ public:
 	 */
 	bool			getPos(sint32 &px, sint32 &py);
 
-	virtual bool	canSave() const { return false; }
+	virtual bool	canSave() const NL_OVERRIDE { return false; }
 
-	virtual	void	serial(NLMISC::IStream &/* f */) { nlassert(0); /* notsavable */ }
+	virtual	void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE { nlassert(0); /* notsavable */ }
 protected:
 	// Database infos
 	NLMISC::CCDBNodeLeaf				*_Present;
 	// DB ok.
-	bool						dbOk() {return _DBPos && _Present && _Uid;}
+	bool						dbOk() NL_OVERRIDE {return _DBPos && _Present && _Uid;}
 
 };
 
@@ -182,14 +182,14 @@ public:
 	 */
 	bool			getPos(sint32 &px, sint32 &py);
 
-	virtual bool	canSave() const { return true; }
-	virtual	void	serial(NLMISC::IStream &f);
+	virtual bool	canSave() const NL_OVERRIDE { return true; }
+	virtual	void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 private:
 	// Animal Database infos
 	NLMISC::CCDBNodeLeaf				*_Status;
 	// DB ok.
-	bool						dbOk() {return _DBPos && _Status && _Uid;}
+	bool						dbOk() NL_OVERRIDE {return _DBPos && _Status && _Uid;}
 
 };
 
@@ -208,16 +208,16 @@ public:
 	NLMISC_DECLARE_CLASS(CDialogEntityPositionState)
 	CDialogEntityPositionState(uint dialogIndex = 0)
 		:CPositionState(),_DialogIndex(dialogIndex){}
-	virtual bool	dbOk() {return true;}
+	virtual bool	dbOk() NL_OVERRIDE {return true;}
 
-	virtual bool canSave() const { return false; }
+	virtual bool canSave() const NL_OVERRIDE { return false; }
 
-	virtual	void	serial(NLMISC::IStream &/* f */) { nlassert(0); /* notsavable */ }
+	virtual	void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE { nlassert(0); /* notsavable */ }
 
 protected:
 	uint				_DialogIndex;
-	virtual CEntityCL	*getEntity();
-	virtual bool		 getDbPos(sint32 &px, sint32 &py);
+	virtual CEntityCL	*getEntity() NL_OVERRIDE;
+	virtual bool		 getDbPos(sint32 &px, sint32 &py) NL_OVERRIDE;
 };
 #endif // NL_ANIMAL_POSITION_STATE_H
 

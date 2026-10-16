@@ -36,9 +36,9 @@ public:
 	// ctor
 	CBotChatPageMission();
 	// from CBotChatPage
-	virtual void begin();
-	virtual void end();
-	virtual void init();
+	virtual void begin() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
 	// a mission has been selected -> popup the confirmation dialog
 	void selectMission(CDBCtrlSheet *missionSheet);
 	// current selected mission has been accepted

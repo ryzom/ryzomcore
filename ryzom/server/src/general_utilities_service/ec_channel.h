@@ -161,9 +161,9 @@ namespace EC
 		//-----------------------------------------------------------------------------
 		// IChatCallback Specialisation
 
-		virtual void receiveMessage(GUS::TClientId clientId,const ucstring& txt);
-		virtual void clientReadyInChannel(GUS::CChatChannel* chatChannel, GUS::TClientId clientId);
-		virtual bool isClientAllowedInChatChannel(GUS::TClientId clientId, GUS::CChatChannel *chatChannel);
+		virtual void receiveMessage(GUS::TClientId clientId,const ucstring& txt) NL_OVERRIDE;
+		virtual void clientReadyInChannel(GUS::CChatChannel* chatChannel, GUS::TClientId clientId) NL_OVERRIDE;
+		virtual bool isClientAllowedInChatChannel(GUS::TClientId clientId, GUS::CChatChannel *chatChannel) NL_OVERRIDE;
 
 
 	private:

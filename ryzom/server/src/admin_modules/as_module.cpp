@@ -121,7 +121,7 @@ namespace ADMIN
 			_AESTracker.init(this, this);
 		}
 
-		~CAdminService()
+		~CAdminService() NL_OVERRIDE
 		{}
 
 		void setShardOrders(const std::string &shardName, TShardOrders newOrders)
@@ -185,7 +185,7 @@ namespace ADMIN
 		}
 
 
-		bool initModule(const TParsedCommandLine &pcl)
+		bool initModule(const TParsedCommandLine &pcl) NL_OVERRIDE
 		{
 			CModuleBase::initModule(pcl);
 
@@ -234,7 +234,7 @@ namespace ADMIN
 			return true;
 		}
 
-		void onModuleUpdate()
+		void onModuleUpdate() NL_OVERRIDE
 		{
 			H_AUTO(CAdminService_onModuleUpdate);
 
@@ -316,7 +316,7 @@ namespace ADMIN
 		//// Virtuals from IModuleTrackerCb
 		///////////////////////////////////////////////////////////////////////
 
-		virtual void onTrackedModuleUp(IModuleProxy *moduleProxy)
+		virtual void onTrackedModuleUp(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			nldebug("AES module '%s' UP", moduleProxy->getModuleName().c_str());
 			
@@ -329,7 +329,7 @@ namespace ADMIN
 				aes.setShardOrders(this, first->first, first->second);
 			}
 		}
-		virtual void onTrackedModuleDown(IModuleProxy *moduleProxy)
+		virtual void onTrackedModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			nldebug("AES module '%s' DOWN", moduleProxy->getModuleName().c_str());
 
@@ -369,7 +369,7 @@ retry_pending_command:
 		///////////////////////////////////////////////////////////////////////
 
 		// An AES send an update of the list of service up
-		virtual void upServiceUpdate(NLNET::IModuleProxy *sender, const std::vector < TServiceStatus > &serviceStatus)
+		virtual void upServiceUpdate(NLNET::IModuleProxy *sender, const std::vector < TServiceStatus > &serviceStatus) NL_OVERRIDE
 		{
 			if (_AESTracker.getTrackedModules().find(sender) == _AESTracker.getTrackedModules().end())
 			{
@@ -394,7 +394,7 @@ retry_pending_command:
 		}
 
 		// An AES send graph data update
-		virtual void graphUpdate(NLNET::IModuleProxy *sender, const TGraphDatas &graphDatas)
+		virtual void graphUpdate(NLNET::IModuleProxy *sender, const TGraphDatas &graphDatas) NL_OVERRIDE
 		{
 			// dump the datas
 //			nldebug("Received graph data for time %u", 
@@ -502,7 +502,7 @@ retry_pending_command:
 		}
 
 		// An AES send high rez graph data update
-		virtual void highRezGraphUpdate(NLNET::IModuleProxy *sender, const THighRezDatas &graphDatas)
+		virtual void highRezGraphUpdate(NLNET::IModuleProxy *sender, const THighRezDatas &graphDatas) NL_OVERRIDE
 		{
 			// dump the datas
 //			nldebug("Received high rez graph info for var %s from service %s", 
@@ -573,7 +573,7 @@ retry_pending_command:
 		}
 
 		// AES send back the result of execution of a command
-		virtual void commandResult(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceName, const std::string &result)
+		virtual void commandResult(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceName, const std::string &result) NL_OVERRIDE
 		{
 			TPendingWebCommands::iterator it(_PendingWebCommands.find(commandId));
 
@@ -613,11 +613,11 @@ retry_pending_command:
 		///////////////////////////////////////////////////////////////////////
 
 		/// Connection callback : a new interface client connect
-		virtual void on_CAdminServiceWeb_Connection(NLNET::TSockId from)
+		virtual void on_CAdminServiceWeb_Connection(NLNET::TSockId from) NL_OVERRIDE
 		{
 		}
 		/// Disconnection callback : one of the interface client disconnect
-		virtual void on_CAdminServiceWeb_Disconnection(NLNET::TSockId from)
+		virtual void on_CAdminServiceWeb_Disconnection(NLNET::TSockId from) NL_OVERRIDE
 		{
 		}
 
@@ -625,13 +625,13 @@ retry_pending_command:
 		// This is used to issue global commands like 'as.allStart' or 'as.allStop'.
 		// The result is returned by the return message
 		// serviceCmdResult.
-		virtual void on_globalCmd(NLNET::TSockId from, const std::string &command)
+		virtual void on_globalCmd(NLNET::TSockId from, const std::string &command) NL_OVERRIDE
 		{
 			// create a displayer to gather the output of the command
 			class CStringDisplayer: public IDisplayer
 			{
 			public:
-				virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+				virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 				{
 					_Data += message;
 				}
@@ -664,7 +664,7 @@ retry_pending_command:
 		// (not to the controled service)
 		// The return value is a string containing the content
 		// returned by the command.
-		virtual void on_controlCmd(NLNET::TSockId from, const std::string &serviceAlias, const std::string &command)
+		virtual void on_controlCmd(NLNET::TSockId from, const std::string &serviceAlias, const std::string &command) NL_OVERRIDE
 		{
 			// push the request info
 			TPendingWebCommand	pwc;
@@ -683,7 +683,7 @@ retry_pending_command:
 		// Send a command to the AS.
 		// Send a command to a service.
 		// The return value is a string containing the content returned by the
-		virtual void on_serviceCmd(NLNET::TSockId from, const std::string &serviceAlias, const std::string &command)
+		virtual void on_serviceCmd(NLNET::TSockId from, const std::string &serviceAlias, const std::string &command) NL_OVERRIDE
 		{
 			// push the request info
 			TPendingWebCommand	pwc;
@@ -702,7 +702,7 @@ retry_pending_command:
 
 		// Get the orders of each known shard.
 		// The return value is a vector of string, one entry by shard
-		virtual std::vector<std::string> on_getShardOrders(NLNET::TSockId from)
+		virtual std::vector<std::string> on_getShardOrders(NLNET::TSockId from) NL_OVERRIDE
 		{
 			vector<string> ret;
 
@@ -723,7 +723,7 @@ retry_pending_command:
 
 		// Get the last known state of all services.
 		// The return value is a vector of string, one entry by service
-		virtual std::vector<std::string> on_getStates(NLNET::TSockId from)
+		virtual std::vector<std::string> on_getStates(NLNET::TSockId from) NL_OVERRIDE
 		{
 			uint32 now = NLMISC::CTime::getSecondsSince1970();
 			vector<string> ret;
@@ -773,7 +773,7 @@ retry_pending_command:
 		// period as two unix date (start dans end)
 		// and the number of samples available
 		// If the var is not found, an empty array is returned
-		virtual std::vector<std::string> on_getHighRezGraphInfo(NLNET::TSockId from, const std::string &varAddr)
+		virtual std::vector<std::string> on_getHighRezGraphInfo(NLNET::TSockId from, const std::string &varAddr) NL_OVERRIDE
 		{
 			vector<string> ret;
 			THighRezBuffers::iterator it(_HighRezBuffers.find(varAddr));
@@ -805,7 +805,7 @@ retry_pending_command:
 		// Get the data for a high resolution graph.
 		// The return is a string array, each
 		// string containing 'time:milliOffset:value
-		virtual std::vector<std::string> on_getHighRezGraph(NLNET::TSockId from, const std::string &varAddr, uint32 startDate, uint32 endDate, uint32 milliStep)
+		virtual std::vector<std::string> on_getHighRezGraph(NLNET::TSockId from, const std::string &varAddr, uint32 startDate, uint32 endDate, uint32 milliStep) NL_OVERRIDE
 		{
 			vector<string> ret;
 			THighRezBuffers::iterator it(_HighRezBuffers.find(varAddr));

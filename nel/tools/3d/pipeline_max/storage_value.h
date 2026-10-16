@@ -50,15 +50,15 @@ public:
 	TType Value;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &stream) NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// Sets size when reading
-	virtual void setSize(sint32 size);
+	virtual void setSize(sint32 size) NL_OVERRIDE;
 	// Gets the size when writing, return false if unknown
-	virtual bool getSize(sint32 &size) const;
+	virtual bool getSize(sint32 &size) const NL_OVERRIDE;
 };
 
 template <typename T>

@@ -33,11 +33,11 @@ namespace NLGUI
 	{
 	public:
 		CRootGroup(const TCtorParam &param);
-		virtual ~CRootGroup();
+		virtual ~CRootGroup() NL_OVERRIDE;
 
-		virtual CInterfaceElement* getElement (const std::string &id);
-		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1);
-		virtual bool delGroup (CInterfaceGroup *child, bool dontDelete = false);
+		virtual CInterfaceElement* getElement (const std::string &id) NL_OVERRIDE;
+		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1) NL_OVERRIDE;
+		virtual bool delGroup (CInterfaceGroup *child, bool dontDelete = false) NL_OVERRIDE;
 
 	private:
 		std::map< std::string, CInterfaceGroup* > _Accel;

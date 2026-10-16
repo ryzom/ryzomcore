@@ -116,7 +116,7 @@ bool CStringManager::CParameterTraits::eval(CStringManager::TLanguages lang,cons
 class CParameterTraitsEntity : public CStringManager::CParameterTraits
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsEntity(STRING_MANAGER::entity, "entity");
 	}
@@ -124,7 +124,7 @@ public:
 	CParameterTraitsEntity(STRING_MANAGER::TParamType type, const std::string &typeName)
 		: CParameterTraits(type, typeName)
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -140,7 +140,7 @@ public:
 			return false;
 		}
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		static std::string empty;
 		// special case for fauna entity 
@@ -161,7 +161,7 @@ public:
 		return empty;
 	}
 	// just a wrapper to base class
-	bool eval(CStringManager::TLanguages lang,const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang,const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		// Test unknown entity
 		if ((cond.ReferenceInt == 0) && (cond.Property.empty()))
@@ -224,7 +224,7 @@ public:
 		return CParameterTraits::eval(lang, charInfo, cond);
 	}
 
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		if ( EId == CEntityId::Unknown && _AIAlias != 0)
 		{							
@@ -321,7 +321,7 @@ public:
 		bms.serial(index);
 	}
 
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		EId = NLMISC::CEntityId::Unknown;
 		_AIAlias = 0;
@@ -334,7 +334,7 @@ public:
 	CParameterTraitsEnum(STRING_MANAGER::TParamType type, const std::string &typeName)
 		: CParameterTraits(type, typeName)
 	{} 
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -356,7 +356,7 @@ public:
 	CParameterTraitsIdentifier(STRING_MANAGER::TParamType type, const std::string &typeName)
 		: CParameterTraits(type, typeName)
 	{} 
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -371,12 +371,12 @@ public:
 		}
 	}
 
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return Identifier;
 	}
 
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Identifier.clear();
 	}
@@ -388,7 +388,7 @@ public:
 	CParameterTraitsSheet(STRING_MANAGER::TParamType type, const std::string &typeName)
 		: CParameterTraits(type, typeName)
 	{} 
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -404,7 +404,7 @@ public:
 //		message.serial(SheetId);
 	}
 
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 //		const CStringManager::TSheetInfo &si = SM->getSheetInfo(SheetId);
 
@@ -415,7 +415,7 @@ public:
 		return sheetName;
 	}
 
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		SheetId = NLMISC::CSheetId::Unknown;
 	}
@@ -429,13 +429,13 @@ public:
 	CParameterTraitsItem() : CParameterTraitsSheet(STRING_MANAGER::item, "item")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsItem();
 	}
 
 	/// fill overloaded to deals with ring user defined item with custom names
-	void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		// check if SheetId if in the table or user item
 		const CStringManager::TRingUserItemInfos &itemInfos = SM->getUserItems();
@@ -485,7 +485,7 @@ public:
 	CParameterTraitsSPhrase() : CParameterTraitsSheet(STRING_MANAGER::sphrase, "sphrase")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsSPhrase();
 	}
@@ -497,12 +497,12 @@ public:
 	CParameterTraitsBotName() : CParameterTraitsIdentifier(STRING_MANAGER::bot_name, "bot_name")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsBotName();
 	}
 
-	void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 
 		uint32 nameId1 = SM->storeString(Identifier);
@@ -527,7 +527,7 @@ public:
 	CParameterTraitsPlace() : CParameterTraitsIdentifier(STRING_MANAGER::place, "place")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsPlace();
 	}
@@ -537,14 +537,14 @@ public:
 class CParameterTraitsCreature : public CParameterTraitsEntity
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsCreature();
 	}
 
 	CParameterTraitsCreature() : CParameterTraitsEntity(STRING_MANAGER::creature, "creature")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		const NLMISC::CSheetId &sheetId = SM->getSheetId(EId);
 		if (sheetId == NLMISC::CSheetId::Unknown)
@@ -561,7 +561,7 @@ public:
 //		return si.Race;
 
 	}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		// Test unknown entity
 		if ((cond.ReferenceInt == 0) && (cond.Property.empty()))
@@ -644,17 +644,17 @@ public:
 class CParameterTraitsSkill : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsSkill();
 	}
 	CParameterTraitsSkill() : CParameterTraitsEnum(STRING_MANAGER::skill, "skill")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return SKILLS::toString(SKILLS::ESkills(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = SKILLS::unknown;
 	}
@@ -663,17 +663,17 @@ public:
 class CParameterTraitsBodyPart : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsBodyPart();
 	}
 	CParameterTraitsBodyPart() : CParameterTraitsEnum(STRING_MANAGER::body_part, "bodypart")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return BODY::toString(BODY::TBodyPart(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = BODY::UnknownBodyPart;
 	}
@@ -682,17 +682,17 @@ public:
 class CParameterTraitsScore : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsScore();
 	}
 	CParameterTraitsScore() : CParameterTraitsEnum(STRING_MANAGER::score, "score")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return SCORES::toString(SCORES::TScores(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = SCORES::unknown;
 	}
@@ -701,17 +701,17 @@ public:
 class CParameterTraitsCharacteristic : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsCharacteristic();
 	}
 	CParameterTraitsCharacteristic() : CParameterTraitsEnum(STRING_MANAGER::characteristic, "characteristic")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return CHARACTERISTICS::toString(CHARACTERISTICS::TCharacteristics(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = CHARACTERISTICS::Unknown;
 	}
@@ -720,17 +720,17 @@ public:
 class CParameterTraitsDamageType : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsDamageType();
 	}
 	CParameterTraitsDamageType() : CParameterTraitsEnum(STRING_MANAGER::damage_type, "damagetype")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return DMGTYPE::toString(DMGTYPE::EDamageType(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = DMGTYPE::UNDEFINED;
 	}
@@ -739,17 +739,17 @@ public:
 class CParameterTraitsClassificationType : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsClassificationType ();
 	}
 	CParameterTraitsClassificationType () : CParameterTraitsEnum(STRING_MANAGER::classification_type, "classificationtype")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return DMGTYPE::toString(DMGTYPE::EDamageType(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = EGSPD::CClassificationType::Unknown;
 	}
@@ -759,17 +759,17 @@ public:
 class CParameterTraitsPowerType : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsPowerType();
 	}
 	CParameterTraitsPowerType() : CParameterTraitsEnum(STRING_MANAGER::power_type, "powertype")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return POWERS::toString(POWERS::TPowerType(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = POWERS::UnknownType;
 	}
@@ -778,17 +778,17 @@ public:
 class CParameterTraitsRole : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsRole();
 	}
 	CParameterTraitsRole() : CParameterTraitsEnum(STRING_MANAGER::role, "role")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return ROLES::toString(ROLES::ERole(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		// TODO : set a default value
 		Enum = ROLES::role_unknown;
@@ -839,17 +839,17 @@ public:
 class CParameterTraitsEcosystem : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsEcosystem();
 	}
 	CParameterTraitsEcosystem() : CParameterTraitsEnum(STRING_MANAGER::ecosystem, "ecosystem")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return ECOSYSTEM::toString(ECOSYSTEM::EECosystem(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = ECOSYSTEM::unknown;
 	}
@@ -857,17 +857,17 @@ public:
 class CParameterTraitsRace : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsRace();
 	}
 	CParameterTraitsRace() : CParameterTraitsEnum(STRING_MANAGER::race, "race")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return EGSPD::CPeople::toString(EGSPD::CPeople::TPeople(Enum));
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Enum = EGSPD::CPeople::EndPeople;
 	}
@@ -879,7 +879,7 @@ public:
 	CParameterTraitsBrick() : CParameterTraitsSheet(STRING_MANAGER::sbrick, "sbrick")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsBrick();
 	}
@@ -891,11 +891,11 @@ public:
 	CParameterTraitsOutpostWord() : CParameterTraitsSheet(STRING_MANAGER::outpost, "outpost")
 	{}
 	
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsOutpostWord();
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		static string sheetName;
 		sheetName = SheetId.toString();
@@ -927,17 +927,17 @@ public:
 class CParameterTraitsFaction : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsFaction();
 	}
 	CParameterTraitsFaction() : CParameterTraitsEnum(STRING_MANAGER::faction, "faction")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		return CStaticFames::getInstance().getFactionName(Enum);
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		// TODO : set a default value
 		Enum = 0;
@@ -946,7 +946,7 @@ public:
 class CParameterTraitsGuild : public CParameterTraitsEntity
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsGuild();
 	}
@@ -957,14 +957,14 @@ public:
 class CParameterTraitsPlayer : public CParameterTraitsEntity
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsPlayer();
 	}
 	CParameterTraitsPlayer() : CParameterTraitsEntity(STRING_MANAGER::player, "player")
 	{}
 
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		// Test unknown entity
 		if ((cond.ReferenceInt == 0) && (cond.Property.empty()))
@@ -1026,7 +1026,7 @@ public:
 		}
 		nlerror("This point of code can never be reach !");
 	}
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		ucstring temp;
 
@@ -1047,13 +1047,13 @@ public:
 class CParameterTraitsBot : public CParameterTraitsEntity
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsBot();
 	}
 	CParameterTraitsBot() : CParameterTraitsEntity(STRING_MANAGER::bot, "bot")
 	{}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		// Test unknown entity
 		if ((cond.ReferenceInt == 0) && (cond.Property.empty()))
@@ -1125,7 +1125,7 @@ public:
 		nlerror("This point of code can never be reach !");
 	}
 
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		// need to evaluate the name of the bot : should be in the charinfo
 		ucstring temp;
@@ -1153,13 +1153,13 @@ public:
 class CParameterTraitsInteger : public CStringManager::CParameterTraits
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsInteger();
 	}
 	CParameterTraitsInteger() : CParameterTraits(STRING_MANAGER::integer, "integer")
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -1175,19 +1175,19 @@ public:
 //		message.serial(Int);
 	}
 
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		bms.serial(Int);
 	}
 
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		nlstopex(("Never call this !"));
 		static std::string temp = "";
 		return temp;
 	}
 
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		switch(cond.Operator)
 		{
@@ -1208,7 +1208,7 @@ public:
 			return false;
 		}
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Int = 0;
 	}
@@ -1216,13 +1216,13 @@ public:
 class CParameterTraitsTime : public CStringManager::CParameterTraits
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsTime();
 	}
 	CParameterTraitsTime() : CParameterTraits(STRING_MANAGER::time, "time")
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -1237,22 +1237,22 @@ public:
 		}
 //		message.serial(Time);
 	}
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		bms.serial(Time);
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		nlstopex(("Never call this !"));
 		static std::string temp = "";
 		return temp;
 	}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		nlwarning("Time parameter can't be conditional");
 		return false;
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Time = 0;
 	}
@@ -1260,13 +1260,13 @@ public:
 class CParameterTraitsMoney : public CStringManager::CParameterTraits
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsMoney();
 	}
 	CParameterTraitsMoney() : CParameterTraits(STRING_MANAGER::money, "money")
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -1281,23 +1281,23 @@ public:
 		}
 //		message.serial(Money);
 	}
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		// TODO : serial only 48 bits
 		bms.serial(Money);
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		nlstopex(("Never call this !"));
 		static std::string temp = "";
 		return temp;
 	}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		nlwarning("Money parameter can't be conditional");
 		return false;
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		Money = 0;
 	}
@@ -1305,19 +1305,19 @@ public:
 class CParameterTraitsCompass : public CParameterTraitsEnum
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsCompass();
 	}
 	CParameterTraitsCompass() : CParameterTraitsEnum(STRING_MANAGER::compass, "compass")
 	{}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		// TODO : add an enum for compass dir in game_share
 		static std::string temp = "";
 		return temp;
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		// TODO : set a default value
 		Enum = 0;
@@ -1326,13 +1326,13 @@ public:
 class CParameterTraitsStringId : public CStringManager::CParameterTraits
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsStringId();
 	}
 	CParameterTraitsStringId() : CParameterTraits(STRING_MANAGER::string_id, "string_id")
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -1347,17 +1347,17 @@ public:
 		}
 //		message.serial(StringId);
 	}
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		bms.serial(StringId);
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		nlstop;
 		static std::string temp = "";
 		return temp;
 	}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		switch(cond.Operator)
 		{
@@ -1370,7 +1370,7 @@ public:
 			return false;
 		}
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		StringId = 0;
 	}
@@ -1378,13 +1378,13 @@ public:
 class CParameterTraitsdyn_string_id : public CStringManager::CParameterTraits
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsdyn_string_id();
 	}
 	CParameterTraitsdyn_string_id() : CParameterTraits(STRING_MANAGER::dyn_string_id, "dyn_string_id")
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -1399,17 +1399,17 @@ public:
 		}
 //		message.serial(StringId);
 	}
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		bms.serial(StringId);
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		nlstop;
 		static std::string temp = "";
 		return temp;
 	}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		switch(cond.Operator)
 		{
@@ -1422,7 +1422,7 @@ public:
 			return false;
 		}
 	}
-	void setDefaultValue()
+	void setDefaultValue() NL_OVERRIDE
 	{
 		StringId = 0;
 	}
@@ -1430,24 +1430,24 @@ public:
 class CParameterTraitsSelf : public CParameterTraitsEntity
 {
 public:
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsSelf();
 	}
 	CParameterTraitsSelf() : CParameterTraitsEntity(STRING_MANAGER::self, "self")
 	{}
-	bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		nlwarning("CParameterTraitsSelf can't be received !");
 		return false;
 	}
-	const std::string &getParameterId() const
+	const std::string &getParameterId() const NL_OVERRIDE
 	{
 		// TODO : retreive the entity name...
 		static std::string temp = "";
 		return temp;
 	}
-	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const
+	bool eval(CStringManager::TLanguages lang, const CCharacterInfos *charInfo, const CStringManager::TCondition &cond) const NL_OVERRIDE
 	{
 		if ( !charInfo )
 			return false;
@@ -1488,7 +1488,7 @@ public:
 			return false;
 		}
 	}
-	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo,CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		// need to evaluate the name of the bot : should be in the charinfo
 		ucstring temp;
@@ -1513,7 +1513,7 @@ public:
 	CParameterTraitsCreatureModel() : CParameterTraitsSheet(STRING_MANAGER::creature_model, "creature")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsItem();
 	}
@@ -1525,20 +1525,20 @@ public:
 	CParameterTraitsLiteral() : CParameterTraits(STRING_MANAGER::literal, "literal")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsLiteral();
 	}
 
 	/// Return parameter id, ie, the name that is use to identity the data row in the csv file.
-	virtual const std::string &getParameterId() const
+	virtual const std::string &getParameterId() const NL_OVERRIDE
 	{
 		nlstop;
 		static const string s;
 		return s;
 	}
 	/// Extract the parameter value from a message.
-	virtual bool extractFromMessage(NLNET::CMessage &message, bool debug)
+	virtual bool extractFromMessage(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		TParam	param;
 		if (param.serialParam(debug, message, ParamId.Type))
@@ -1553,7 +1553,7 @@ public:
 		}
 	}
 	/// Fill a bitmem strean with the parameter value.
-	virtual void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	virtual void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		uint32 id = SM->storeString(Literal);
 		bms.serial(id);
@@ -1561,7 +1561,7 @@ public:
 	/// Eval a condition with this parameter.
 //	virtual bool eval(TLanguages lang, const CCharacterInfos *charInfo, const TCondition &cond) const;
 	/// set a default value
-	virtual void setDefaultValue()
+	virtual void setDefaultValue() NL_OVERRIDE
 	{
 		Literal = ucstring();
 	}
@@ -1574,7 +1574,7 @@ public:
 	CParameterTraitsTitle() : CParameterTraitsIdentifier(STRING_MANAGER::title, "title")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsTitle();
 	}
@@ -1587,12 +1587,12 @@ public:
 	CParameterTraitsEventFaction() : CParameterTraitsIdentifier(STRING_MANAGER::event_faction, "event_faction")
 	{}
 
-	CStringManager::CParameterTraits *clone()
+	CStringManager::CParameterTraits *clone() NL_OVERRIDE
 	{
 		return new CParameterTraitsEventFaction();
 	}
 
-	void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms)
+	void fillBitMemStream( const CCharacterInfos *charInfo, CStringManager::TLanguages language, const CStringManager::TReplacement &rep, NLMISC::CBitMemStream &bms) NL_OVERRIDE
 	{
 		uint32 eventFactionId = SM->translateEventFaction(Identifier);
 

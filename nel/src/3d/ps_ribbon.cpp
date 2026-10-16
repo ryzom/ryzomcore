@@ -132,7 +132,7 @@ const uint CPSRibbon::NbVerticesInPentagram = sizeof(CPSRibbon::Pentagram) / siz
 
 struct CDummy2DAngle : CPSRotated2DParticle
 {
-	CPSLocated *getAngle2DOwner(void) { return NULL; }
+	CPSLocated *getAngle2DOwner(void) NL_OVERRIDE { return NULL; }
 };
 
 ///==================================================================================================================

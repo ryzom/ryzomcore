@@ -211,7 +211,7 @@ const char *a_ps_2_0 =
 class CStereoDebuggerFactory : public IStereoDeviceFactory
 {
 public:
-	IStereoDisplay *createDevice() const
+	IStereoDisplay *createDevice() const NL_OVERRIDE
 	{
 		return new CStereoDebugger();
 	}

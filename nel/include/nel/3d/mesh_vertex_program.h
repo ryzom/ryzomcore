@@ -52,7 +52,7 @@ public:
 
 	/// Constructor
 	IMeshVertexProgram() {}
-	virtual ~IMeshVertexProgram() {}
+	virtual ~IMeshVertexProgram() NL_OVERRIDE {}
 
 	/** Called at creation of an instance, to setup some information directly in the CMeshBaseInstance
 	 */

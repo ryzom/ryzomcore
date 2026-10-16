@@ -160,7 +160,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	virtual ~CEntityBase();
+	virtual ~CEntityBase() NL_OVERRIDE;
 
 	// clear() method used by apply() method
 	void clear();

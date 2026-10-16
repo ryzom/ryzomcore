@@ -27,7 +27,7 @@ OPENSSL_VER=3.0.13
 CURL_VER=8.5.0
 LUABIND_REV=0ae9bd6   # ryzom/luabind
 
-mkdir -p "$PREFIX/lib" "$PREFIX/include" "$PREFIX/../boost-headers" "$PREFIX/../openssl-headers"
+mkdir -p "$PREFIX/lib" "$PREFIX/include"
 
 echo "== emcc" && emcc --version | head -1
 
@@ -115,17 +115,27 @@ if [ ! -f "$PREFIX/lib/libluabind09.a" ]; then
 fi
 
 # ---- openssl 3 + curl HEADERS (real headers, stub archives) ----------------
-if [ ! -d "$PREFIX/../openssl-headers/openssl" ]; then
+if [ ! -f "$PREFIX/../openssl-headers/openssl/x509.h" ]; then
 	echo "== openssl $OPENSSL_VER (headers only)"
 	cd "$WORK"
 	curl -L --fail --retry 3 -O "https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz"
 	tar xf "openssl-${OPENSSL_VER}.tar.gz"
-	# Openssl needs a Configure pass to synthesize opensslv.h / opensslconf.h;
-	# we do NOT actually build the library — everything is stubbed.
+	# In OpenSSL 3.x a good chunk of the public headers ship only as
+	# templates (x509.h.in, ssl.h.in, safestack.h.in, ...). Configure alone
+	# just writes configdata.pm/Makefile — the headers themselves are
+	# materialized by the "build_generated" make target, which runs perl
+	# and takes under a second. We do NOT build the library itself;
+	# everything link-side is stubbed.
 	cd "openssl-${OPENSSL_VER}"
 	./Configure no-shared no-asm no-tests linux-generic32 >/dev/null
+	make -j"$(nproc)" build_generated >/dev/null
 	mkdir -p "$PREFIX/../openssl-headers/openssl"
 	cp -r include/openssl/. "$PREFIX/../openssl-headers/openssl/"
+	# Fail here rather than 20 minutes later in nelweb's stdweb.h.
+	test -f "$PREFIX/../openssl-headers/openssl/x509.h" || {
+		echo "!! openssl headers incomplete: x509.h was not generated" >&2
+		exit 1
+	}
 fi
 
 if [ ! -f "$PREFIX/include/curl/curl.h" ]; then

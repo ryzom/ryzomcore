@@ -34,7 +34,7 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CViewPointerBase )
 
 		CViewPointerBase( const TCtorParam &param );
-		virtual ~CViewPointerBase();
+		virtual ~CViewPointerBase() NL_OVERRIDE;
 
 		// Set the pointer position.
 		void setPointerPos (sint32 x, sint32 y);
@@ -59,7 +59,7 @@ namespace NLGUI
 		/// Is the pointer visible ?
 		bool show() const {return _PointerVisible;}
 
-		void draw(){}
+		void draw() NL_OVERRIDE{}
 
 		/// set button state
 		void setButtonState(NLMISC::TMouseButton state) { _Buttons = state; }

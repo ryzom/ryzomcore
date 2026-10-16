@@ -138,7 +138,7 @@ private:
 	class CSkillObserver : public ISkillChangeCallback
 	{
 	public:
-		virtual void onSkillChange();
+		virtual void onSkillChange() NL_OVERRIDE;
 	};
 	CSkillObserver          _SkillObserver;
 	friend class CSkillObserver;
@@ -162,7 +162,7 @@ private:
 	class CDBInventoryObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	CDBInventoryObs			_DBInventoryObs;
 	friend class			CDBInventoryObs;
@@ -170,7 +170,7 @@ private:
 	class CDBAnimalObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	CDBAnimalObs			_DBAnimalObs;
 	friend class			CDBAnimalObs;

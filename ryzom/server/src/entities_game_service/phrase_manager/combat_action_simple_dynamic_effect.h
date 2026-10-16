@@ -60,17 +60,17 @@ public:
 	}
 
 	/// validate the combat action
-	inline virtual bool validate(CCombatPhrase *phrase, std::string &errorCode) 
+	inline virtual bool validate(CCombatPhrase *phrase, std::string &errorCode) NL_OVERRIDE 
 	{ return true; }
 
 	/// apply combat action effects
-	virtual void apply(CCombatPhrase *phrase);
+	virtual void apply(CCombatPhrase *phrase) NL_OVERRIDE;
 
 	/// set use Phrase Latency as duration flag
 	inline void usePhraseLatencyAsDuration(bool b) { _UsePhraseLatencyAsDuration = b; }
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float succesFactor );
+	virtual void applyOnEntity( CEntityBase *entity, float succesFactor ) NL_OVERRIDE;
 
 private:
 	/// total duration (in ticks)

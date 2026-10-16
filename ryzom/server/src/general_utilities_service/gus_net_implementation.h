@@ -50,12 +50,12 @@ namespace GUSNET
 
 	public:
 		// CGusNet interface
-		virtual void registerModule(GUS::TModulePtr module);
-		virtual void unregisterModule(GUS::TModulePtr module);
-		virtual void sendMessage(const NLMISC::CSString& msgName, const TRawMsgBodyPtr& msgBody,uint32 destinationModuleId,uint32 senderModuleId);
-		virtual void sendMessage(const NLMISC::CSString& msgName, const TRawMsgBodyPtr& msgBody,const TModuleIdVector& destinationModuleIds,uint32 senderModuleId);
-		virtual void broadcastMessage(const NLMISC::CSString& msgName, const TRawMsgBodyPtr& msgBody,uint32 senderModuleId);
-		virtual void display() const;
+		virtual void registerModule(GUS::TModulePtr module) NL_OVERRIDE;
+		virtual void unregisterModule(GUS::TModulePtr module) NL_OVERRIDE;
+		virtual void sendMessage(const NLMISC::CSString& msgName, const TRawMsgBodyPtr& msgBody,uint32 destinationModuleId,uint32 senderModuleId) NL_OVERRIDE;
+		virtual void sendMessage(const NLMISC::CSString& msgName, const TRawMsgBodyPtr& msgBody,const TModuleIdVector& destinationModuleIds,uint32 senderModuleId) NL_OVERRIDE;
+		virtual void broadcastMessage(const NLMISC::CSString& msgName, const TRawMsgBodyPtr& msgBody,uint32 senderModuleId) NL_OVERRIDE;
+		virtual void display() const NL_OVERRIDE;
 
 	public:
 		// method used to register / unregister CModule objects with this singleton
@@ -79,7 +79,7 @@ namespace GUSNET
 		// remote modules accessors
 		void registerRemoteModule(IRemoteModule* module);
 		void unregisterRemoteModule(IRemoteModule* module);
-		TRemoteModulePtr lookupRemoteModule(uint32 uniqueId);
+		TRemoteModulePtr lookupRemoteModule(uint32 uniqueId) NL_OVERRIDE;
 
 
 	private:

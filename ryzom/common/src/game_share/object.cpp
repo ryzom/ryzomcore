@@ -2286,7 +2286,7 @@ class CClassSerializer;
 class CObjectSerializerImpl : public NLMISC::CSingleton<CObjectSerializerImpl>
 {
 public:
-	~CObjectSerializerImpl();
+	~CObjectSerializerImpl() NL_OVERRIDE;
 
 	CObjectSerializerImpl();
 
@@ -2595,7 +2595,7 @@ class CNpcSerializer : public CClassSerializer
 public:
 	CNpcSerializer();
 
-	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer);
+	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE;
 };
 
 
@@ -2629,7 +2629,7 @@ class CNpcCustomSerializer : public CClassSerializer
 public:
 	CNpcCustomSerializer();
 
-	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer);
+	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE;
 };
 
 
@@ -2727,7 +2727,7 @@ class CPositionSerializer : public CClassSerializer
 public:
 	CPositionSerializer();
 
-	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer);
+	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE;
 };
 
 
@@ -2842,7 +2842,7 @@ class CRtSerializer : public CClassSerializer
 {
 public:
 
-	void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer)
+	void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE
 	{
 		if (key == "Id")  { serialRtId(stream, data); return; }
 		this->CClassSerializer::onSerial(stream, key, data, serializer);

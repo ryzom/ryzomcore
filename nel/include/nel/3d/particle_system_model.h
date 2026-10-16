@@ -59,7 +59,7 @@ public:
 		/// ctor
 		CParticleSystemModel();
 		/// dtor
-		~CParticleSystemModel();
+		~CParticleSystemModel() NL_OVERRIDE;
 
 		/// register the basic models
 		static	void				registerBasic();
@@ -209,12 +209,12 @@ public:
 			PSTrigger, // trigger the instanciation of the system
 			AnimValueLast,
 		};
-		virtual IAnimatedValue		*getValue (uint valueId);
-		virtual const char			*getValueName (uint valueId) const;
+		virtual IAnimatedValue		*getValue (uint valueId) NL_OVERRIDE;
+		virtual const char			*getValueName (uint valueId) const NL_OVERRIDE;
 		static const char			*getPSParamName (uint valueId);
-		virtual ITrack				*getDefaultTrack (uint valueId);
+		virtual ITrack				*getDefaultTrack (uint valueId) NL_OVERRIDE;
 		virtual	void				registerToChannelMixer(CChannelMixer *chanMixer,
-														   const std::string &prefix = "");
+														   const std::string &prefix = "") NL_OVERRIDE;
 		// Bypass a global user param.
 		void  bypassGlobalUserParamValue(uint userParamIndex, bool byPass = true);
 		bool  isGlobalUserParamValueBypassed(uint userParamIndex) const;
@@ -227,9 +227,9 @@ public:
 	// Update the lighted/not lighted flag of the system
 	void						updateLightingInfos(void);
 
-	virtual void				getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual void				getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 	/// inherited from CTransformShape. Returns the number of triangles wanted depeneding on the distance
-	virtual float				getNumTriangles (float distance);
+	virtual float				getNumTriangles (float distance) NL_OVERRIDE;
 	/// create an instance of this class
 	static CTransform				*creator()
 	{
@@ -241,16 +241,16 @@ public:
 	// @{
 	/** Very special clip for Particle System (because of the complexity of not rendered, but still detail-animated...)
 	 */
-	virtual void	traverseClip();
+	virtual void	traverseClip() NL_OVERRIDE;
 	// no-op clip() because all done in special traverse()
-	virtual	bool	clip();
+	virtual	bool	clip() NL_OVERRIDE;
 	/**
 	 *	 - call CTransformShape::traverseAnimDetail()
 	 *	 - Detail animation for a particle system. It perform motion of the particles
 	 *		(so, motion occurs only when the system has not be clipped)
      */
-	virtual void	traverseAnimDetail();
-	virtual void	traverseRender();
+	virtual void	traverseAnimDetail() NL_OVERRIDE;
+	virtual void	traverseRender() NL_OVERRIDE;
 	// @}
 
 	// activate / deactivate all emitters
@@ -285,7 +285,7 @@ public:
 	void reactivateSound();
 
 	// from CTransform
-	virtual void update();
+	virtual void update() NL_OVERRIDE;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

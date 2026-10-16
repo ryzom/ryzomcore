@@ -41,9 +41,9 @@ public:
 	/// Constructor
 	CGroupModalGetKey(const TCtorParam &param);
 
-	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
-	virtual void setActive(bool state);
+	virtual void setActive(bool state) NL_OVERRIDE;
 
 public:
 	CCombo		Combo;

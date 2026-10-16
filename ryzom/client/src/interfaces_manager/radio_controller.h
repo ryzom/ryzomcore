@@ -44,18 +44,18 @@ public:
 	/// Constructor.
 	CRadioController(uint id);
 	/// Destructor.
-	~CRadioController();
+	~CRadioController() NL_OVERRIDE;
 
 	/// Do nothing
-	virtual void display() {}
+	virtual void display() NL_OVERRIDE {}
 
 	/// Manage the click of the mouse for the control
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// does nothing
-	virtual void resize(uint32 width, uint32 height) {}
+	virtual void resize(uint32 width, uint32 height) NL_OVERRIDE {}
 	/// does nothing
-	virtual void ref(float x, float y, float width, float height) {}
+	virtual void ref(float x, float y, float width, float height) NL_OVERRIDE {}
 
 	/// Add a button to the group; Return true if the button have been inserted.
 	bool add(CRadioButton *button);

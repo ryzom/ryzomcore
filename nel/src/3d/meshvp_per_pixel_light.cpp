@@ -371,8 +371,8 @@ public:
 		uint ViewerPos;
 	};
 	CVertexProgramPerPixelLight(uint vp);
-	virtual ~CVertexProgramPerPixelLight() { };
-	virtual void buildInfo();
+	virtual ~CVertexProgramPerPixelLight() NL_OVERRIDE { };
+	virtual void buildInfo() NL_OVERRIDE;
 	const CIdx &idx() const { return m_Idx; }
 
 private:

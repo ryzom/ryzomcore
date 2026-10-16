@@ -140,7 +140,7 @@ private:
 			  * NB:
 			  * -This release move primitives from the move container
 			  */
-			~CIGInstance();
+			~CIGInstance() NL_OVERRIDE;
 			/// force this instance to be added
 			void forceAdd() { instanceGroupAdded(); }
 			void numZC(sint num) {_NumZC = num;}
@@ -159,16 +159,16 @@ private:
 			void releaseMovePrimitives();
 			///\name from NL3D::IAddRemoveInstance
 			//@{
-				virtual void instanceGroupAdded();
-				virtual void instanceGroupRemoved();
+				virtual void instanceGroupAdded() NL_OVERRIDE;
+				virtual void instanceGroupRemoved() NL_OVERRIDE;
 			//@}
 			///\name from NL3D::ITransformName
 			//@{
-				virtual std::string transformName (uint index, const std::string &instanceName, const std::string &shapeName);
+				virtual std::string transformName (uint index, const std::string &instanceName, const std::string &shapeName) NL_OVERRIDE;
 			//@}
 			///\name from NL3D::IIGAddBegin
 			//@{
-				virtual void startAddingIG(uint numInstances);
+				virtual void startAddingIG(uint numInstances) NL_OVERRIDE;
 			//@}
 			/** Called after all instance have been added, and when their sheets have been retrieved.
 			  * This is the place to setup parameters from sheets

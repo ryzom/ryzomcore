@@ -42,7 +42,7 @@ public:
 		CAisControlItfSkel::init(this);
 	}
 
-	void onModuleUp(IModuleProxy *module)
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "ServerAnimationModule")
 		{
@@ -57,7 +57,7 @@ public:
 		
 	}
 
-	void onModuleDown(IModuleProxy *module)
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module == _ServerAnimationProxy)
 		{
@@ -86,7 +86,7 @@ public:
 
 
 	// activate a scenario generated easter egg
-	virtual void activateEasterEgg(uint32 easterEggId, TSessionId scenarioId, uint32 actId, const std::string & items, float x, float y, float z, float heading, const std::string& grpCtrl, const std::string& name, const std::string & clientSheet)
+	virtual void activateEasterEgg(uint32 easterEggId, TSessionId scenarioId, uint32 actId, const std::string & items, float x, float y, float z, float heading, const std::string& grpCtrl, const std::string& name, const std::string & clientSheet) NL_OVERRIDE
 	{
 		DROP_IF( !_ServerAnimationProxy, "ServerAnimation module not present", return );
 		CServerAnimationItfProxy ServerAnimation( _ServerAnimationProxy );
@@ -94,7 +94,7 @@ public:
 	}
 	
 	// deactivate a scenario generated easter egg
-	virtual void deactivateEasterEgg(uint32 easterEggId, TSessionId scenarioId, uint32 actId)
+	virtual void deactivateEasterEgg(uint32 easterEggId, TSessionId scenarioId, uint32 actId) NL_OVERRIDE
 	{
 		//DROP_IF( !_CharacterControlProxy, "CharacterControl module not present", return );
 		//CharacterControlItfProxy CharacterControl( _CharacterControlProxy );
@@ -104,7 +104,7 @@ public:
 		ServerAnimation.deactivateEasterEgg(this, easterEggId, scenarioId, actId);
 	}
 
-	virtual void dssMessage(TSessionId sessionId, const std::string& mode, const std::string& who, const std::string &msg) 
+	virtual void dssMessage(TSessionId sessionId, const std::string& mode, const std::string& who, const std::string &msg) NL_OVERRIDE 
 	{
 		DROP_IF( !_ServerAnimationProxy, "ServerAnimation module not present", return );
 		CServerAnimationItfProxy ServerAnimation( _ServerAnimationProxy );
@@ -115,7 +115,7 @@ public:
 								const std::string& rewardText,
 								const std::string& rareRewardText,
 								const std::string& inventoryFullText,
-								const std::string& notEnoughPointsText)
+								const std::string& notEnoughPointsText) NL_OVERRIDE
 	{
 		DROP_IF( !_CharacterControlProxy, "_CharacterControlProxy module not present", return );
 		CCharacterControlItfProxy  module( _CharacterControlProxy );
@@ -123,7 +123,7 @@ public:
 			rewardText, rareRewardText, inventoryFullText, notEnoughPointsText);
 	}
 
-	virtual void teleportNearMessage(const NLMISC::CEntityId& entity, float x, float y, float z) 
+	virtual void teleportNearMessage(const NLMISC::CEntityId& entity, float x, float y, float z) NL_OVERRIDE 
 	{
 
 		DROP_IF( !_ServerAnimationProxy, "ServerAnimation module not present", return );
@@ -131,35 +131,35 @@ public:
 		serverAnimation.teleportCharacter(this, entity, x, y, z);
 	}
 
-	virtual void reportNpcControl(const NLMISC::CEntityId& playerEntityId, const NLMISC::CEntityId& botEntityId)
+	virtual void reportNpcControl(const NLMISC::CEntityId& playerEntityId, const NLMISC::CEntityId& botEntityId) NL_OVERRIDE
 	{
 		DROP_IF( !_CharacterControlProxy, "_CharacterControlProxy module not present", return );
 		CCharacterControlItfProxy  module( _CharacterControlProxy );
 		module.reportNpcControl(this, playerEntityId, botEntityId);
 	}
 
-	virtual void reportStopNpcControl(const NLMISC::CEntityId& playerEntityId, const NLMISC::CEntityId& botEntityId)
+	virtual void reportStopNpcControl(const NLMISC::CEntityId& playerEntityId, const NLMISC::CEntityId& botEntityId) NL_OVERRIDE
 	{
 		DROP_IF( !_CharacterControlProxy, "_CharacterControlProxy module not present", return );
 		CCharacterControlItfProxy  module( _CharacterControlProxy );
 		module.reportStopNpcControl(this, playerEntityId, botEntityId);
 	}
 
-	virtual void setScenarioPoints(TSessionId sessionId, float scenarioPoints) 
+	virtual void setScenarioPoints(TSessionId sessionId, float scenarioPoints) NL_OVERRIDE 
 	{
 		DROP_IF( !_ServerAnimationProxy, "ServerAnimation module not present", return );
 		CServerAnimationItfProxy ServerAnimation( _ServerAnimationProxy );
 		ServerAnimation.setScenarioPoints(this, sessionId, scenarioPoints);
 	}
 
-	virtual void startScenarioTiming(TSessionId sessionId) 
+	virtual void startScenarioTiming(TSessionId sessionId) NL_OVERRIDE 
 	{
 		DROP_IF( !_ServerAnimationProxy, "ServerAnimation module not present", return );
 		CServerAnimationItfProxy ServerAnimation( _ServerAnimationProxy );
 		ServerAnimation.startScenarioTiming(this, sessionId);
 	}
  
-	virtual void endScenarioTiming(TSessionId sessionId) 
+	virtual void endScenarioTiming(TSessionId sessionId) NL_OVERRIDE 
 	{
 		DROP_IF( !_ServerAnimationProxy, "ServerAnimation module not present", return );
 		CServerAnimationItfProxy ServerAnimation( _ServerAnimationProxy );

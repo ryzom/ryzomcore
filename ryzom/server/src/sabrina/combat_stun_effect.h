@@ -41,17 +41,17 @@ public:
 	/**
 	 *  return true if it is time to update the effect. It modifies the next update of the effect
 	 */
-	virtual bool isTimeToUpdate();
+	virtual bool isTimeToUpdate() NL_OVERRIDE;
 
 	/**
 	 * apply the effects of the... effect
 	 * \param updateFlag is a flag telling which effect type has been already processed for an entity. An effect shoud set to 1 the bit corresponding to its effect family
 	 * \return true if the effect ends and must be removed
 	 */
-	virtual bool update( uint32 & updateFlag );
+	virtual bool update( uint32 & updateFlag ) NL_OVERRIDE;
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// set stunned entity
 	inline void stunnedEntity(CEntityBase *entity) { _StunnedEntity = entity; }

@@ -224,7 +224,7 @@ void connectionRestoreVideoMode ()
 // Called to reload the start test page in test browser mode
 class CAHOnReloadTestPage: public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// need to reset password and current screen
@@ -1304,7 +1304,7 @@ REGISTER_ACTION_HANDLER (CAHDebugOutgameReloadUI, "debug_outgame_reload_ui");
 class CAHNetInitCharSel : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sPath = getParam(Params, "slottexts");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1388,7 +1388,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, uint32 value)
 class CAHGetSlot: public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sProp = getParam(Params, "prop");
 		string sTarget = getParam(Params, "target");
@@ -1478,7 +1478,7 @@ REGISTER_ACTION_HANDLER (CAHGetSlot, "get_slot");
 class CAHSetDBFromSlot : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sDBLink = getParam(Params, "dblink");
 		string sSlot = getParam(Params, "slot");
@@ -1508,7 +1508,7 @@ REGISTER_ACTION_HANDLER (CAHSetDBFromSlot, "set_db_from_slot");
 class CAHResetPushed: public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sDBLink = getParam(Params, "dblink");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1538,7 +1538,7 @@ REGISTER_ACTION_HANDLER (CAHResetPushed, "reset_pushed");
 class CAHLaunchGame : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// Get the edit/play mode
 		string sEditMode = getParam(Params, "edit_mode");
@@ -1666,7 +1666,7 @@ REGISTER_ACTION_HANDLER (CAHLaunchGame, "launch_game");
 class CAHAskCreateChar : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1773,7 +1773,7 @@ REGISTER_ACTION_HANDLER (CAHAskCreateChar, "ask_create_char");
 class CAHAskDeleteChar : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// Create the message for the server to create the character.
 		CBitMemStream out;
@@ -1938,7 +1938,7 @@ REGISTER_ACTION_HANDLER (CAHAskRenameChar, "ask_rename_char");
 class CAHAskValidName : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sTarget = getParam(Params, "target");
 		string sDBLink = getParam(Params, "dblink");
@@ -2038,7 +2038,7 @@ REGISTER_ACTION_HANDLER (CAHAskValidName, "ask_valid_name");
 class CAHPlaySound : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sName = getParam(Params, "name");
 		TStringId id = CStringMapper::map(sName);
@@ -2052,7 +2052,7 @@ REGISTER_ACTION_HANDLER (CAHPlaySound, "play_sound");
 class CAHPlayMusicOutgame : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// get the name of the wanted music
 		string	sName = getParam(Params, "name");
@@ -2073,7 +2073,7 @@ REGISTER_ACTION_HANDLER (CAHPlayMusicOutgame, "play_music_outgame");
 class CAHRepeatUntil : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sProc = getParam(Params, "proc");
 		string sCond = getParam(Params, "cond");
@@ -2106,7 +2106,7 @@ REGISTER_ACTION_HANDLER (CAHRepeatUntil, "repeatuntil");
 class CAHDispInfo : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sStr = getParam(Params, "str");
 		string sVal = getParam(Params, "val");
@@ -2140,7 +2140,7 @@ class CAHInitMainlandList : public IActionHandler
 {
 public:
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -2219,7 +2219,7 @@ class CAHResetMainlandList : public IActionHandler
 {
 public:
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
@@ -2232,7 +2232,7 @@ REGISTER_ACTION_HANDLER (CAHResetMainlandList, "reset_mainland_list");
 // ***************************************************************************
 class CAHMainlandSelect : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params) NL_OVERRIDE
 	{
 		//nlinfo("CAHMainlandSelect called");
 		struct CUnpush : public CInterfaceElementVisitor
@@ -2351,7 +2351,7 @@ public:
 		}
 	}
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		NewKeysCharNameWanted.clear();
 		NewKeysCharNameValidated.clear();
@@ -2484,7 +2484,7 @@ class CAHResetKeysetList : public IActionHandler
 {
 public:
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
@@ -2506,13 +2506,13 @@ class CAHResetKeysetSelect : public IActionHandler
 		return "";
 	}
 
-	virtual void execute(CCtrlBase *pCaller, const std::string &Params)
+	virtual void execute(CCtrlBase *pCaller, const std::string &Params) NL_OVERRIDE
 	{
 		// 'unpush' all groups but the caller
 		struct CUnpush : public CInterfaceElementVisitor
 		{
 			CCtrlBase *Ref;
-			virtual void visitCtrl(CCtrlBase *ctrl)
+			virtual void visitCtrl(CCtrlBase *ctrl) NL_OVERRIDE
 			{
 				if (ctrl == Ref) return;
 				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
@@ -2683,7 +2683,7 @@ inline void setToggleButton(CInterfaceGroup* scenarioWnd, const string & buttonN
 
 class CAHScenarioControl : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHScenarioControl called");
 
@@ -2894,7 +2894,7 @@ REGISTER_ACTION_HANDLER (CAHScenarioControl, "init_scenario_control");
 // ***************************************************************************
 class CAHScenarioInformation : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		nlinfo("CAHScenarioDescription called");
 
@@ -2938,7 +2938,7 @@ REGISTER_ACTION_HANDLER (CAHScenarioInformation, "scenario_information");
 // ***************************************************************************
 class CAHHideCharsFilters : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHHideCharsFilters called");
 
@@ -2985,7 +2985,7 @@ REGISTER_ACTION_HANDLER (CAHHideCharsFilters, "hide_chars_filters");
 // ***************************************************************************
 class CAHLoadScenario : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		nlinfo("CAHLoadScenario called");
 
@@ -3454,7 +3454,7 @@ REGISTER_ACTION_HANDLER (CAHLoadScenario, "load_scenario");
 // ***************************************************************************
 class CAHOpenRingSessions : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if(!R2::getEditor().isInitialized())
 		{
@@ -3470,7 +3470,7 @@ REGISTER_ACTION_HANDLER (CAHOpenRingSessions, "open_ring_sessions");
 // ***************************************************************************
 class CAHInitImportCharacter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
 		if (!list)
@@ -3537,7 +3537,7 @@ REGISTER_ACTION_HANDLER( CAHInitImportCharacter, "import_char_init" );
 // ***************************************************************************
 class CAHResetImportCharacter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceGroup *list = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CHARACTER));
 		if (list)
@@ -3552,12 +3552,12 @@ REGISTER_ACTION_HANDLER( CAHResetImportCharacter, "import_char_reset" );
 // ***************************************************************************
 class CAHSelectImportCharacter : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const std::string &Params)
+	virtual void execute (CCtrlBase *pCaller, const std::string &Params) NL_OVERRIDE
 	{
 		struct CUnpush : public CInterfaceElementVisitor
 		{
 			CCtrlBase *Ref;
-			virtual void visitCtrl(CCtrlBase *ctrl)
+			virtual void visitCtrl(CCtrlBase *ctrl) NL_OVERRIDE
 			{
 				if (ctrl == Ref) return;
 				CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton*>(ctrl);
@@ -3610,7 +3610,7 @@ REGISTER_ACTION_HANDLER( CAHSelectImportCharacter, "import_char_select" );
 // ***************************************************************************
 class CAHImportCharacter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (ImportCharacter.empty())
 			return;
@@ -3655,7 +3655,7 @@ REGISTER_ACTION_HANDLER( CAHImportCharacter, "import_char" );
 // ***************************************************************************
 class CAHExportCharacter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 	{
 		if (Params.empty())
 			return;

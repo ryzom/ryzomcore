@@ -77,8 +77,8 @@ public:
 class CDllPluginDescBiped : public IDllPluginDescInternal
 {
 public:
-	virtual const ucchar *displayName() const;
-	virtual const ucchar *internalName() const;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
+	virtual const ucchar *internalName() const NL_OVERRIDE;
 }; /* class CDllPluginDescBiped */
 
 extern const CDllPluginDescBiped DllPluginDescBiped;

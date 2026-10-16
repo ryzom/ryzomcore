@@ -199,7 +199,7 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 		CCtrlMapPolygon( CViewBase::TCtorParam &param ) : CCtrlPolygon( param ){}
 	protected:
 		// from CCtrlPolygon
-		void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
+		void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src) NL_OVERRIDE
 		{
 			CGroupMap *gm = CTool::getWorldMap();
 			if (!gm) dest = CVector::Null;

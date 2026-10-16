@@ -65,7 +65,7 @@ public:
 
 	/** Get the untransformed AABBox of the mesh. NULL (gtSize()==0) if no mesh.
 	 */
-	virtual void		getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual void		getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 
 	/** Get the count of material in this transform shape
 	 */
@@ -130,14 +130,14 @@ public:
 
 	/// \name CTransform traverse specialisation
 	// @{
-	virtual	bool	clip();
-	virtual void	traverseLoadBalancing();
-	virtual void	traverseRender();
-	virtual	void	profileRender();
+	virtual	bool	clip() NL_OVERRIDE;
+	virtual void	traverseLoadBalancing() NL_OVERRIDE;
+	virtual void	traverseRender() NL_OVERRIDE;
+	virtual	void	profileRender() NL_OVERRIDE;
 	// @}
 
 	// Lighting: get the center of the AABBox of the model by default
-	virtual	void		getLightHotSpotInWorld(CVector &modelPos, float &modelRadius) const;
+	virtual	void		getLightHotSpotInWorld(CVector &modelPos, float &modelRadius) const NL_OVERRIDE;
 	// return the contribution of lights (for traverseRender()).
 	CLightContribution	&getLightContribution() { return _LightContribution;}
 
@@ -146,7 +146,7 @@ protected:
 	/// Constructor
 	CTransformShape();
 	/// Destructor
-	virtual ~CTransformShape() {}
+	virtual ~CTransformShape() NL_OVERRIDE {}
 
 	/** For deriver who wants to setup their own current lightContribution setup (as skeleton).
 	 *	Must call changeLightSetup() so change are effectively made in driver
@@ -154,7 +154,7 @@ protected:
 	void			setupCurrentLightContribution(CLightContribution *lightContrib, bool useLocalAtt);
 
 	/// special feature for CQuadGridClipManager. remove from it.
-	virtual	void	unlinkFromQuadCluster();
+	virtual	void	unlinkFromQuadCluster() NL_OVERRIDE;
 
 private:
 	static CTransform	*creator() {return new CTransformShape;}

@@ -122,40 +122,40 @@ namespace R2
 	public:
 
 		CServerEditionModule();
-		~CServerEditionModule();
+		~CServerEditionModule() NL_OVERRIDE;
 
 		void init(NLNET::IModuleSocket* gateway, CDynamicMapService* server);
 
 		/////////////////////////////////////////////////////
 		//// CModuleBase API
 		///////////////////////////////////////////////
-		virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy);
-		virtual void onModuleUpdate();
-		virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy);
-		virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message);
-		virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy);
-		virtual bool isImmediateDispatchingSupported() const { return false; }
-		virtual void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId);
-		virtual void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId);
+		virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		virtual void onModuleUpdate() NL_OVERRIDE;
+		virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE;
+		virtual void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		virtual bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
+		virtual void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE;
+		virtual void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE;
 
 
 		/////////////////////////////////////////////////////
 		//// RingSessionManagerClient callbacks
 		/////////////////////////////////////////////////////
 		// Ask the client to create a new session modules
-		virtual void createSession(NLNET::IModuleProxy *sender, TCharId ownerCharId, TSessionId sessionId, const RSMGR::TSessionType &type);
+		virtual void createSession(NLNET::IModuleProxy *sender, TCharId ownerCharId, TSessionId sessionId, const RSMGR::TSessionType &type) NL_OVERRIDE;
 		// Ask the client allow a character in the session
-		virtual void addCharacterInSession(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId, const WS::TUserRole &connectedAs, const std::string &ringAccess, bool newcomer);
+		virtual void addCharacterInSession(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId, const WS::TUserRole &connectedAs, const std::string &ringAccess, bool newcomer) NL_OVERRIDE;
 		// Ask the client to close a running session
-		virtual void closeSession(NLNET::IModuleProxy *sender, TSessionId sessionId);
+		virtual void closeSession(NLNET::IModuleProxy *sender, TSessionId sessionId) NL_OVERRIDE;
 		// Ask the client stop the hibernation for the
 		// specified character. This mean to remove any
 		// hibernated scenario file from the backup.
-		virtual void stopHibernation(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId ownerId);
+		virtual void stopHibernation(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId ownerId) NL_OVERRIDE;
 		// Ask the client to hibernate a running session
-		virtual void hibernateSession(NLNET::IModuleProxy *sender, TSessionId sessionId);
+		virtual void hibernateSession(NLNET::IModuleProxy *sender, TSessionId sessionId) NL_OVERRIDE;
 		// Specify the start param of a session
-		virtual void setSessionStartParams(NLNET::IModuleProxy *sender, TCharId charId, TSessionId sessionId, const std::string& initialIslandLocation, const std::string& initialEntryPoint, const std::string& initialSeason);
+		virtual void setSessionStartParams(NLNET::IModuleProxy *sender, TCharId charId, TSessionId sessionId, const std::string& initialIslandLocation, const std::string& initialEntryPoint, const std::string& initialSeason) NL_OVERRIDE;
 		void setSessionStartParams(TSessionId, sint32 x, sint32 y, uint8 season);
 
 
@@ -163,24 +163,24 @@ namespace R2
 		// destroy the current scenario without closing the session
 		virtual void resetSession(NLNET::IModuleProxy *sender, TSessionId sessionId, bool reconnect);
 		// Session manager report that a character has been kicked by the web
-		virtual void characterKicked(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId);
-		virtual void characterUnkicked(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId);
+		virtual void characterKicked(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId) NL_OVERRIDE;
+		virtual void characterUnkicked(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId charId) NL_OVERRIDE;
 
 		// Session manager report that a character must be teleport to another location
-		virtual void teleportOneCharacterToAnother(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId sourceCharId, TCharId destCharId);
-		virtual void teleportWhileUploadingScenario(NLNET::IModuleProxy *sender, const std::string& island, const std::string& entryPoint, const std::string& season);
+		virtual void teleportOneCharacterToAnother(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId sourceCharId, TCharId destCharId) NL_OVERRIDE;
+		virtual void teleportWhileUploadingScenario(NLNET::IModuleProxy *sender, const std::string& island, const std::string& entryPoint, const std::string& season) NL_OVERRIDE;
 
 		/////////////////////////////////////////////////////
 		//// Connection, Upload, Start (messages from Client)
 		/////////////////////////////////////////////////////
 		// a Client ask to start a scenario (the ask is broadcast to all connected users)
-		virtual void startingScenario(NLNET::IModuleProxy *sender);
+		virtual void startingScenario(NLNET::IModuleProxy *sender) NL_OVERRIDE;
 		// a Client is uploading a rtScenario in order to start the test session
-		virtual void startScenario(NLNET::IModuleProxy *sender, bool ok, const TScenarioHeaderSerializer& header, const CObjectSerializerServer &data, uint32 startingAct);
+		virtual void startScenario(NLNET::IModuleProxy *sender, bool ok, const TScenarioHeaderSerializer& header, const CObjectSerializerServer &data, uint32 startingAct) NL_OVERRIDE;
 		// Call by the client after a connection to a scenario in edition sesssion (is fallowed by a tp)
-		virtual void advConnACK(NLNET::IModuleProxy *sender);
+		virtual void advConnACK(NLNET::IModuleProxy *sender) NL_OVERRIDE;
 		// Call by the client in order to download its current scenario (and tp)
-		virtual void onMapConnectionAsked(NLNET::IModuleProxy * clientEditionProxy, TSessionId scenarioId, bool  updateHighLevel = true, bool mustTp = false, TUserRole role = TUserRole::ur_editor);
+		virtual void onMapConnectionAsked(NLNET::IModuleProxy * clientEditionProxy, TSessionId scenarioId, bool  updateHighLevel = true, bool mustTp = false, TUserRole role = TUserRole::ur_editor) NL_OVERRIDE;
 		//  Call by the client in order to update the real time tree of the current session.
 		virtual void rtScenarioUpdateRequested(NLNET::IModuleProxy *senderModuleProxy, TCharId charId, CObject* rtScenario);
 		// Call by client that is developer to generate a primitive use for
@@ -188,46 +188,46 @@ namespace R2
 		// Call by the client in order to stop the test and comme back to edition mode
 		virtual void stopTestRequested(NLNET::IModuleProxy *senderModuleProxy, TCharId charId);
 		// a client message to validate a file waiting to be saved
-		virtual void saveScenarioFile(NLNET::IModuleProxy *sender, const std::string &md5, const TScenarioHeaderSerializer &header);
+		virtual void saveScenarioFile(NLNET::IModuleProxy *sender, const std::string &md5, const TScenarioHeaderSerializer &header) NL_OVERRIDE;
 		// a client message to validate a file waiting to be loaded
-		virtual void loadScenarioFile(NLNET::IModuleProxy *sender, const std::string &md5, const std::string &signature);
+		virtual void loadScenarioFile(NLNET::IModuleProxy *sender, const std::string &md5, const std::string &signature) NL_OVERRIDE;
 		// test if a session is hibernating if true return the "start position" of the session
 
 
-		virtual void saveUserComponentFile(NLNET::IModuleProxy *sender, const std::string &md5, const TScenarioHeaderSerializer &header);
-		virtual void loadUserComponentFile(NLNET::IModuleProxy *senderModuleProxy, const std::string &md5, const std::string &signature);
+		virtual void saveUserComponentFile(NLNET::IModuleProxy *sender, const std::string &md5, const TScenarioHeaderSerializer &header) NL_OVERRIDE;
+		virtual void loadUserComponentFile(NLNET::IModuleProxy *senderModuleProxy, const std::string &md5, const std::string &signature) NL_OVERRIDE;
 
 		/////////////////////////////////////////////////////
 		//// Message forwarded by the SBS
 		/////////////////////////////////////////////////////
 		// then the header of the multipart message
-		virtual void multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 charId, const std::string &msgName, uint32 nbPacket, uint32 size);
+		virtual void multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 charId, const std::string &msgName, uint32 nbPacket, uint32 size) NL_OVERRIDE;
 		//send a part of a multi-pat message
-		virtual void multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 charId, uint32 partId, const std::vector<uint8> &data);
+		virtual void multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 charId, uint32 partId, const std::vector<uint8> &data) NL_OVERRIDE;
 		//send a footer of a mutlipart Message
-		virtual void multiPartMsgFoot(NLNET::IModuleProxy *sbs, uint32 charId);
+		virtual void multiPartMsgFoot(NLNET::IModuleProxy *sbs, uint32 charId) NL_OVERRIDE;
 		// simulate the SBS. (Some message can be send to SBS that forward to DSS)
-		virtual void forwardToDss(NLNET::IModuleProxy *senderModuleProxy, uint32 charId, const NLNET::CMessage& msg);
+		virtual void forwardToDss(NLNET::IModuleProxy *senderModuleProxy, uint32 charId, const NLNET::CMessage& msg) NL_OVERRIDE;
 
 		/////////////////////////////////////////////////////
 		//// Data tree modification (messages from Client)
 		/////////////////////////////////////////////////////
 		virtual void onScenarioUploadAsked(NLNET::IModuleProxy *senderModuleProxy, uint32 messageId,
-			const CObjectSerializerServer& hlScenario, bool mustBroadCast);
+			const CObjectSerializerServer& hlScenario, bool mustBroadCast) NL_OVERRIDE;
 
 		virtual void onNodeSetAsked(NLNET::IModuleProxy *senderModuleProxy, uint32 messageId,
-			const std::string&  instanceId, const std::string & attrName, const CObjectSerializerServer& value2);
+			const std::string&  instanceId, const std::string & attrName, const CObjectSerializerServer& value2) NL_OVERRIDE;
 
 		virtual void onNodeInsertAsked(NLNET::IModuleProxy *senderModuleProxy, uint32 messageId,
 			const std::string&  instanceId, const std::string & attrName, sint32 position,
-			const std::string& key, const CObjectSerializerServer& value2);
+			const std::string& key, const CObjectSerializerServer& value2) NL_OVERRIDE;
 
 		virtual void onNodeEraseAsked(NLNET::IModuleProxy *senderModuleProxy,  uint32 messageId,
-			const std::string& instanceId, const std::string& attrName, sint32 position);
+			const std::string& instanceId, const std::string& attrName, sint32 position) NL_OVERRIDE;
 
 		virtual void onNodeMoveAsked(NLNET::IModuleProxy *senderModuleProxy,  uint32 messageId,
 			const std::string& instanceId1, const std::string& attrName1, sint32 position1,
-			const std::string& instanceId2, const std::string& attrName2, sint32 position2);
+			const std::string& instanceId2, const std::string& attrName2, sint32 position2) NL_OVERRIDE;
 
 
 		/////////////////////////////////////////////////////
@@ -235,16 +235,16 @@ namespace R2
 		/////////////////////////////////////////////////////
 		// getEditing position (use AdminModule::getPosition for having a position in editing and animation mode)
 		// Tp the user (senderModuleProxy) to the entry point of its scenario
-		virtual void tpToEntryPoint(NLNET::IModuleProxy *senderModuleProxy, uint32 actId);
+		virtual void tpToEntryPoint(NLNET::IModuleProxy *senderModuleProxy, uint32 actId) NL_OVERRIDE;
 		// Set current Act( when go test start from this act and when reco restart in this act)
-		virtual void setStartingAct(  NLNET::IModuleProxy *senderModuleProxy, uint32 actId);
+		virtual void setStartingAct(  NLNET::IModuleProxy *senderModuleProxy, uint32 actId) NL_OVERRIDE;
 		// The client senderModuleProxy ask to be tp at x,y (the season is correctly setted)
-		virtual void onTpPositionAsked( NLNET::IModuleProxy *senderModuleProxy, float x, float y, float z);
+		virtual void onTpPositionAsked( NLNET::IModuleProxy *senderModuleProxy, float x, float y, float z) NL_OVERRIDE;
 		// Ask the teleporatation of entitiy clientEid
 		virtual void tpPosition(  NLNET::IModuleProxy *senderModuleProxy, const NLMISC::CEntityId & clientEid, float x, float y, float z, uint8 season, const R2::TR2TpInfos& tpInfos);
 		void getTpContext(TCharId charId, std::string& tpCancelTextId, R2::TTeleportContext& tpContext);
 
-		void returnToPreviousSession(TCharId charId);
+		void returnToPreviousSession(TCharId charId) NL_OVERRIDE;
 
 
 		/////////////////////////////////////////////////////
@@ -270,35 +270,35 @@ namespace R2
 		// The client update the ring points needed by the current scenario
 		// ringAcess the ring points of the current scenario
 		// ok true if the Pioneer has enought points false otherwise
-		virtual void onScenarioRingAccessUpdated(NLNET::IModuleProxy *client, bool ok,const std::string & ringAccess, const std::string& errMsg);
+		virtual void onScenarioRingAccessUpdated(NLNET::IModuleProxy *client, bool ok,const std::string & ringAccess, const std::string& errMsg) NL_OVERRIDE;
 
 
 		/////////////////////////////////////////////////////
 		//// Management of userComponent (Not finished)
 		/////////////////////////////////////////////////////
 		// The client ask add a new UserComponent (if not present ask the user to upload)
-		virtual void onUserComponentRegistered(NLNET::IModuleProxy *sender, const NLMISC::CHashKeyMD5& md5 );
+		virtual void onUserComponentRegistered(NLNET::IModuleProxy *sender, const NLMISC::CHashKeyMD5& md5 ) NL_OVERRIDE;
 		// The client was asked to upload an user component (that was not present on the server during the call of onUserComponentRegister)
 		virtual void  onUserComponentUploaded(NLNET::IModuleProxy *senderModuleProxy, CUserComponent* component);
 		// The client was asked to upload an user component (that was not present on the server during the call of onUserComponentRegister)
-		virtual void  onUserComponentDownloading(NLNET::IModuleProxy *senderModuleProxy, const NLMISC::CHashKeyMD5& md5);
+		virtual void  onUserComponentDownloading(NLNET::IModuleProxy *senderModuleProxy, const NLMISC::CHashKeyMD5& md5) NL_OVERRIDE;
 		// Gets an User Component by its md5
 		CUserComponent* getUserComponent( const NLMISC::CHashKeyMD5& md5) const;
-		virtual void onCharModeUpdateAsked(NLNET::IModuleProxy *sender, TCharMode mode);
+		virtual void onCharModeUpdateAsked(NLNET::IModuleProxy *sender, TCharMode mode) NL_OVERRIDE;
 
 		/////////////////////////////////////////////////////
 		//// IServerEditionModule virtuals (ahem, some of them)
 		/////////////////////////////////////////////////////
 
 
-		virtual void updateCharPioneerRight(TCharId charId);
-		virtual void characterReady(TCharId charId);
+		virtual void updateCharPioneerRight(TCharId charId) NL_OVERRIDE;
+		virtual void characterReady(TCharId charId) NL_OVERRIDE;
 
 		/////////////////////////////////////////////////////
 		//// Task && Callback implementation
 		/////////////////////////////////////////////////////
 		CEditionSession* getSession(TSessionId sessionId) const;
-		TSessionId getSessionIdByCharId(TCharId charId) const;
+		TSessionId getSessionIdByCharId(TCharId charId) const NL_OVERRIDE;
 		// implement private task CTaskConnectPlayer
 		void connectChar(TSessionId sessionId, TCharId charId, TUserRole userRole, const std::string& ringAccess, bool newcomer);
 		// implement private task CTaskTryConnectPlayer
@@ -316,10 +316,10 @@ namespace R2
 		// wakeUp a session
 		void wakeUpSessionImpl(CEditionSession* session);
 
-		void getStartParams(uint32 charId, TSessionId lastStoredSessionId);
+		void getStartParams(uint32 charId, TSessionId lastStoredSessionId) NL_OVERRIDE;
 		void getStartParamsImpl(uint32 charId, TSessionId lastStoredSessionId);
 		// wakup a session (load session from BS), start animation, connect waiting clients
-		bool wakeUpSession(TSessionId sessionId, TCharId ownerId, std::string& msg);
+		bool wakeUpSession(TSessionId sessionId, TCharId ownerId, std::string& msg) NL_OVERRIDE;
 		// The file has been loadded from file (or no file exist)
 		void setLoaded(TSessionId sessionId);
 		// update the vision of every person in the current session
@@ -425,7 +425,7 @@ namespace R2
 		// register a session
 		void registerSession(TSessionId sessionId,  CEditionSession* session);
 		// return a 0 if not linked
-		TSessionId  getLinkedSessionId(TSessionId sessionId) const;
+		TSessionId  getLinkedSessionId(TSessionId sessionId) const NL_OVERRIDE;
 
 		/////////////////////////////////////////////////////
 		//// Communication
@@ -449,18 +449,18 @@ namespace R2
 		bool isInitialized() const;
 
 			// disconnect a player by its char Id
-		virtual void disconnectChar(TCharId charId);
+		virtual void disconnectChar(TCharId charId) NL_OVERRIDE;
 
 
-		bool isClientAuthorized(TCharId charId) const;
+		bool isClientAuthorized(TCharId charId) const NL_OVERRIDE;
 
 
-		virtual bool isSessionHibernating(TSessionId sessionId, RSMGR::TSessionType& sessionType, double& x, double& y, double& orient, uint8& season);
+		virtual bool isSessionHibernating(TSessionId sessionId, RSMGR::TSessionType& sessionType, double& x, double& y, double& orient, uint8& season) NL_OVERRIDE;
 
 		// stop the session
 		void stopTest(TSessionId sessionId);
 		// Simulate autoConnection without SU
-		virtual void createSessionWithoutSu(TCharId charId, NLMISC::CEntityId clientEid);
+		virtual void createSessionWithoutSu(TCharId charId, NLMISC::CEntityId clientEid) NL_OVERRIDE;
 		// Simulate Set Start AiInstance by SU
 		virtual void simulateSU(NLMISC::CEntityId clientEid);
 
@@ -472,23 +472,23 @@ namespace R2
 		/////////////////////////////////////////////////////
 
 		// get a scenario by the sessionId
-		CScenario* getScenarioById(TSessionId sessionId) const;
+		CScenario* getScenarioById(TSessionId sessionId) const NL_OVERRIDE;
 		// get the current session (available from the moment when the client module is connected)
 		TUserRole getRoleByCharId(TCharId charId) const;
 
 		// get the session that is about to be joined by a client, or NULL if not found
-		TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const;
+		TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const NL_OVERRIDE;
 		// get the scenario use by the user
 
 		CScenario*  getScenarioByCharId(TCharId charId) const;
 		CEditionSession* getSessionByCharId(TCharId charId) const;
 
 		IServerAnimationModule* getAnimationModule() const;
-		const NLNET::TModuleProxyPtr * getClientProxyPtr(TCharId charId) const;
+		const NLNET::TModuleProxyPtr * getClientProxyPtr(TCharId charId) const NL_OVERRIDE;
 
 
-		bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 locationIndex = 0);
-		bool isEditingSession(TSessionId sessionId) const;
+		bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 locationIndex = 0) NL_OVERRIDE;
+		bool isEditingSession(TSessionId sessionId) const NL_OVERRIDE;
 		// return the linked session (eg an animation session linked to an edition session ) or NULL
 		TSessionId getLinkedSession(CEditionSession* session) const;
 

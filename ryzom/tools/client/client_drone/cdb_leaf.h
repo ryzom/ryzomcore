@@ -77,32 +77,32 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false );
+	void init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false ) NL_OVERRIDE;
 
 	/**
 	 * Get a node
 	 * \param ids is the list of property index
 	 * \param idx is the property index of the current node(updated by the method)
 	 */
-	ICDBNode * getNode( std::vector<uint16>& ids, uint idx );
+	ICDBNode * getNode( std::vector<uint16>& ids, uint idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node
 	 * \param idx is the node index
 	 */
-	ICDBNode * getNode( uint16 idx );
+	ICDBNode * getNode( uint16 idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node . Create it if it does not exist yet
 	 * \param id : the CTextId identifying the node
 	 */
-	ICDBNode * getNode (const CTextId& id, bool bCreate);
+	ICDBNode * getNode (const CTextId& id, bool bCreate) NL_OVERRIDE;
 
 	/**
 	 * Get a node index
 	 * \param node is a pointer to the node
 	 */
-	virtual bool getNodeIndex( ICDBNode* node , uint& index)
+	virtual bool getNodeIndex( ICDBNode* node , uint& index) NL_OVERRIDE
 	{
 		return false;
 	}
@@ -118,7 +118,7 @@ public:
 	 * Update the database from a stream coming from the FE
 	 * \param f : the stream.
 	 */
-	void readDelta(NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f );
+	void readDelta(NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f ) NL_OVERRIDE;
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -126,7 +126,7 @@ public:
 	 * \param name is the name of the property
 	 * \return the structure of the property
 	 */
-	sint64 getProp( CTextId& id ); 
+	sint64 getProp( CTextId& id ) NL_OVERRIDE; 
 	
 	/**
 	 * Set the value of a property (the update flag is set to true)
@@ -135,7 +135,7 @@ public:
 	 * \param value is the value of the property
 	 * \return bool : 'false' if id is too long.
 	 */
-	bool setProp( CTextId& id, sint64 value ); 
+	bool setProp( CTextId& id, sint64 value ) NL_OVERRIDE; 
 
 	/**
 	 * Set the value of a property, only if gc>=_LastChangeGC
@@ -143,31 +143,31 @@ public:
 	//void setPropCheckGC(NLMISC::TGameCycle gc, sint64 value);
 
 	/// Reset all leaf data from this point
-	void resetData(NLMISC::TGameCycle gc);
+	void resetData(NLMISC::TGameCycle gc) NL_OVERRIDE;
 
 	/**
 	 * Clear the node and his children
 	 */
-	void clear(); 
+	void clear() NL_OVERRIDE; 
 	
 
 	// the parent node for a branch (NULL by default)
-	virtual void setParent(CCDBNodeBranch* parent) { _Parent=parent; }
+	virtual void setParent(CCDBNodeBranch* parent) NL_OVERRIDE { _Parent=parent; }
 
 	//get the node parent
-	virtual CCDBNodeBranch	*getParent()
+	virtual CCDBNodeBranch	*getParent() NL_OVERRIDE
 	{
 		return _Parent;
 	}
 
 	/// Count the leaves
-	virtual uint			countLeaves() const
+	virtual uint			countLeaves() const NL_OVERRIDE
 	{
 		return 1;
 	}
 
 	/// Find the leaf which count is specified (if found, the returned value is non-null and count is 0)
-	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count )
+	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count ) NL_OVERRIDE
 	{
 		if ( count == 0 )
 			return this;
@@ -179,10 +179,10 @@ public:
 	}
 
 	/// Debug purpose
-	virtual void display(const std::string &prefix);
+	virtual void display(const std::string &prefix) NL_OVERRIDE;
 	
 
-	virtual bool isLeaf() const { return true; }
+	virtual bool isLeaf() const NL_OVERRIDE { return true; }
 
 	/**
 	* add an observer to a property

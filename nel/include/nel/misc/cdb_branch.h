@@ -66,7 +66,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL );
+	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL ) NL_OVERRIDE;
 
 	/**
 	 * Add a new sub node
@@ -79,19 +79,19 @@ public:
 	 * Get a node . Create it if it does not exist yet
 	 * \param id : the CTextId identifying the node
 	 */
-	ICDBNode * getNode (const CTextId& id, bool bCreate=true);
+	ICDBNode * getNode (const CTextId& id, bool bCreate=true) NL_OVERRIDE;
 
 	/**
 	 * Get a node. Return NULL if out of bounds (no warning)
 	 * \param idx is the node index
 	 */
-	ICDBNode * getNode( uint16 idx );
+	ICDBNode * getNode( uint16 idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node index
 	 * \param node is a pointer to the node
 	 */
-	virtual bool getNodeIndex( ICDBNode* node , uint& index)
+	virtual bool getNodeIndex( ICDBNode* node , uint& index) NL_OVERRIDE
 	{
 		index=0;
 		for ( std::vector<ICDBNode*>::const_iterator it = _Nodes.begin(); it != _Nodes.end(); it++)
@@ -112,13 +112,13 @@ public:
 	 * \param id is the text id of the property/grp
 	 * \param f is the stream
 	 */
-	void write( CTextId& id, FILE * f);
+	void write( CTextId& id, FILE * f) NL_OVERRIDE;
 
 	/// Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
 	void readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank, CCDBBankHandler *bankHandler );
 
 	/// Update the database from a stream coming from the FE
-	void readDelta( TGameCycle gc, CBitMemStream & f );
+	void readDelta( TGameCycle gc, CBitMemStream & f ) NL_OVERRIDE;
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -126,7 +126,7 @@ public:
 	 * \param name is the name of the property
 	 * \return the value of the property
 	 */
-	sint64 getProp( CTextId& id );
+	sint64 getProp( CTextId& id ) NL_OVERRIDE;
 
 	/**
 	 * Set the value of a property (the update flag is set to true)
@@ -135,10 +135,10 @@ public:
 	 * \param value is the value of the property
 	 * \return bool : 'true' if property found.
 	 */
-	bool setProp( CTextId& id, sint64 value );
+	bool setProp( CTextId& id, sint64 value ) NL_OVERRIDE;
 
 	/// Clear the node and his children
-	void clear();
+	void clear() NL_OVERRIDE;
 
 	void resetNode( TGameCycle gc, uint node )
 	{
@@ -149,7 +149,7 @@ public:
 	}
 
 	/// Reset all leaf data from this point
-	void resetData(TGameCycle gc, bool forceReset=false)
+	void resetData(TGameCycle gc, bool forceReset=false) NL_OVERRIDE
 	{
 		for ( uint i=0; i!=_Nodes.size(); ++i )
 		{
@@ -160,12 +160,12 @@ public:
 	/**
 	 *	Destructor
 	 */
-	virtual ~CCDBNodeBranch() { clear(); }
+	virtual ~CCDBNodeBranch() NL_OVERRIDE { clear(); }
 
 	// the parent node for a branch (NULL by default)
-	virtual void setParent(CCDBNodeBranch *parent) { _Parent=parent; }
+	virtual void setParent(CCDBNodeBranch *parent) NL_OVERRIDE { _Parent=parent; }
 
-	virtual CCDBNodeBranch*  getParent()
+	virtual CCDBNodeBranch*  getParent() NL_OVERRIDE
 	{
 		return _Parent;
 	}
@@ -177,12 +177,12 @@ public:
 	}
 
 	/// Count the leaves
-	virtual uint	countLeaves() const;
+	virtual uint	countLeaves() const NL_OVERRIDE;
 
 	/// Find the leaf which count is specified (if found, the returned value is non-null and count is 0)
-	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count );
+	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count ) NL_OVERRIDE;
 
-	virtual void display (const std::string &prefix);
+	virtual void display (const std::string &prefix) NL_OVERRIDE;
 
 	void removeNode (const CTextId& id);
 
@@ -192,13 +192,13 @@ public:
 	* \param id text id identifying the property
 	* \return false if the node doen t exist
 	*/
-	virtual bool addObserver(IPropertyObserver* observer, CTextId& id);
+	virtual bool addObserver(IPropertyObserver* observer, CTextId& id) NL_OVERRIDE;
 
 	/** remove an obsever
 	 * \param observer : pointer to an observer
 	 * \return false if the node or observer doesn t exist
 	 */
-	virtual bool removeObserver(IPropertyObserver* observer, CTextId& id);
+	virtual bool removeObserver(IPropertyObserver* observer, CTextId& id) NL_OVERRIDE;
 
 	// Add an observer to this branch. It will be notified of any change in the sub-leaves
 
@@ -225,7 +225,7 @@ public:
 	/// Easy version of removeBranchObserver() (see above and see easy version of addBranchObserver())
 	void removeBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer);
 
-	virtual bool isLeaf() const { return false; }
+	virtual bool isLeaf() const NL_OVERRIDE { return false; }
 
 	// mark this branch and parent branch as 'modified'. This is usually called by sub-leaves
 	void onLeafChanged( TStringId leafName );

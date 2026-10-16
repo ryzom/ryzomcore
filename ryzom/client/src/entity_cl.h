@@ -118,7 +118,7 @@ public:
 public:
 	/// retrieve light information for the entity skeleton
 	virtual	void		getStaticLightSetup(NLMISC::CRGBA sunAmbient, std::vector<NL3D::CPointLightInfluence> &pointLightList,
-		uint8 &sunContribution, NLMISC::CRGBA &localAmbient);
+		uint8 &sunContribution, NLMISC::CRGBA &localAmbient) NL_OVERRIDE;
 };
 
 
@@ -215,7 +215,7 @@ public:
 	/// Constructor.
 	CEntityCL();
 	/// Destructor.
-	virtual ~CEntityCL();
+	virtual ~CEntityCL() NL_OVERRIDE;
 
 	/// Primitive type
 	enum TType
@@ -656,7 +656,7 @@ public:
 
 
 	/// Serialize entity.
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	// return vector of ground fxs sorted by ground type, or NULL is ground fxs are not supported for the entity
 	virtual const std::vector<CGroundFXSheet> *getGroundFX() const { return NULL; }
@@ -1222,7 +1222,7 @@ public:
 private:
 
 	// Override for string reception callback
-	virtual void onStringAvailable(uint stringId, const std::string &value);
+	virtual void onStringAvailable(uint stringId, const std::string &value) NL_OVERRIDE;
 
 };
 

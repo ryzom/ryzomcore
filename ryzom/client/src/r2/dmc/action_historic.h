@@ -145,8 +145,8 @@ private:
 	public:
 		CRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		std::string			_InstanceId;
 		std::string			_AttrName;
@@ -159,8 +159,8 @@ private:
 	public:
 		CRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		// point of deletion
 		std::string			_InstanceId;
@@ -178,8 +178,8 @@ private:
 	public:
 		CRequestInsertNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& key, CObject* value);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		std::string			_InstanceId;
 		std::string			_AttrName;
@@ -198,8 +198,8 @@ private:
 						const std::string& destAttrName,
 						sint32 destPosition);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		std::string			_SrcInstanceId;
 		std::string			_SrcAttrName;

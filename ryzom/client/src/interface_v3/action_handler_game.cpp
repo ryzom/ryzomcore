@@ -158,7 +158,7 @@ static	bool	playerKnowSkill( SKILLS::ESkills e)
 class CHandlerActiveGameContextMenu : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Invalidate all lines
 		CGroupMenu *pGM = dynamic_cast<CGroupMenu*>(pCaller);
@@ -189,7 +189,7 @@ REGISTER_ACTION_HANDLER( CHandlerActiveGameContextMenu, "active_game_context_men
 class CHandlerContextTalk : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
@@ -234,7 +234,7 @@ static void sendBotChatStart(const string &msgName)
 // ***************************************************************************
 class CHandlerContextRingSessions : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		//	do not send start message to server here (not really a bot chage page, but should dissapear
 		// when player go away)
@@ -282,7 +282,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextRingSessions, "context_ring_sessions");
 class CHandlerContextTradeItem : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_ITEM");
 		BotChatPageAll->Trade->setBuyOnly(false);
@@ -302,7 +302,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeItem, "context_trade_item");
 class CHandlerContextTradeTeleport : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_TELEPORT");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -321,7 +321,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeTeleport, "context_trade_teleport")
 class CHandlerContextTradeFaction : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_FACTION");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -340,7 +340,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeFaction, "context_trade_faction");
 class CHandlerContextTradeCosmetic : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_ITEM");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -359,7 +359,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeCosmetic, "context_trade_cosmetic")
 class CHandlerContextTradeGuildOptions : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_GUILD_OPTIONS");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -378,7 +378,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeGuildOptions, "context_trade_guild_
 class CHandlerContextTradeOutpostBuilding : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_GUILD_OPTIONS");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -397,7 +397,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeOutpostBuilding, "context_trade_out
 class CHandlerContextTradeGuildRoleMaster : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_GUILD_RESEARCH");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -416,7 +416,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextTradeGuildRoleMaster, "context_trade_gui
 class CHandlerContextTradeSkill  : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_SKILL");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -433,7 +433,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextTradeSkill, "context_trade_skill");
 class CHandlerContextTradePact  : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_PACT");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -450,7 +450,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextTradePact, "context_trade_pact");
 class CHandlerContextTradePhrase  : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_TRADE_ACTION");
 		BotChatPageAll->Trade->setBuyOnly(true);
@@ -467,7 +467,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextTradePhrase, "context_trade_phrase");
 class CHandlerContextChooseMission : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_CHOOSE_MISSION");
 		BotChatPageAll->ChooseMission->setMissionClientType(MISSION_DESC::Mission);
@@ -482,7 +482,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextChooseMission, "context_choose_mission");
 class CHandlerContextCreateGuild : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CBotChatManager::getInstance()->incrementSessionID();
 
@@ -503,7 +503,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextCreateGuild, "context_create_guild");
 class CHandlerContextOpenMissionOption : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		std::string id = getParam(sParams, "id");
 		sint intId;
@@ -636,7 +636,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextFinishMissions, "context_finish_missions"
 class CHandlerContextAttack : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 
 		if( !UserEntity->canEngageCombat() )
@@ -656,7 +656,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextAttack, "context_attack");
 class CHandlerContextDuel : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("DUEL:ASK");
 	}
@@ -670,7 +670,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextDuel, "context_duel");
 class CHandlerContextUnDuel : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("DUEL:ABANDON");
 	}
@@ -684,7 +684,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextUnDuel, "context_unduel");
 class CHandlerContextPVPChallenge : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("PVP_CHALLENGE:ASK");
 	}
@@ -698,7 +698,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextPVPChallenge, "context_pvp_challenge");
 class CHandlerContextUnPVPChallenge : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("PVP_CHALLENGE:ABANDON");
 	}
@@ -712,7 +712,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextUnPVPChallenge, "context_unpvp_challenge
 class CHandlerContextInvit : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Game Specific Code
 		sendMsgToServer("TEAM:JOIN_PROPOSAL");
@@ -728,7 +728,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextInvit, "context_invit");
 class CHandlerContextGuildInvit : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Game Specific Code
 		sendMsgToServer("GUILD:INVITATION");
@@ -743,7 +743,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextGuildInvit, "context_guild_invit");
 class CHandlerContextAddToFriendList : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CLFECOMMON::TCLEntityId trader = UserEntity->selection();
 		if (trader != CLFECOMMON::INVALID_SLOT)
@@ -839,7 +839,7 @@ static void chooseSheath (ITEMFAMILY::EItemFamily eIF, string sAllSkills)
 class CHandlerContextExchange : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Game Specific Code
 		sendMsgToServer("EXCHANGE:PROPOSAL");
@@ -854,7 +854,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextExchange, "context_exchange");
 class CHandlerContextFreeLook : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Free Look Mode Activated.
 		UserControls.startFreeLook();
@@ -883,7 +883,7 @@ REGISTER_ACTION_HANDLER( CHandlerToggleFreeLook, "toggle_free_look");
 class CHandlerMove : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Autowalk Mode Activated.
 		UserControls.autowalkState(true);
@@ -898,7 +898,7 @@ REGISTER_ACTION_HANDLER( CHandlerMove, "context_move");
 class CHandlerStop : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Autowalk Mode Activated.
 		UserControls.autowalkState(false);
@@ -911,7 +911,7 @@ REGISTER_ACTION_HANDLER( CHandlerStop, "context_stop");
 class CHandlerExitFreeLook : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Deactivate free look mode
 		UserControls.stopFreeLook();
@@ -926,7 +926,7 @@ REGISTER_ACTION_HANDLER( CHandlerExitFreeLook, "exit_free_look");
 class CHandlerContextLootAction : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		NetMngr.pushPickup(UserEntity->selection(), LHSTATE::LOOTABLE);
 
@@ -943,7 +943,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextLootAction, "context_loot");
 class CHandlerContextHarvestAction : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		NetMngr.pushPickup(UserEntity->selection(), LHSTATE::HARVESTABLE);
 		// For quartering and forage open directly temporary inventory
@@ -959,7 +959,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextHarvestAction, "context_quartering");
 class	CHandlerContextForageExtract : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (UserEntity->selection())
 		{
@@ -980,7 +980,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextForageExtract, "context_extract_rm");
 class CHandlerContextQuitTeam : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		// directly launch the quit_team AH.
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
@@ -998,7 +998,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextQuitTeam, "context_quit_team");
 class CHandlerContextQuitGuild : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1014,7 +1014,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextQuitGuild, "context_quit_guild");
 class CHandlerDoQuitGuild : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Create the message for the server to execute a phrase.
 		sendMsgToServer("GUILD:QUIT");
@@ -1034,7 +1034,7 @@ REGISTER_ACTION_HANDLER( CHandlerDoQuitGuild, "do_quit_guild");
 class CHandlerContextDisengage : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Disengage
 		UserEntity->disengage();
@@ -1051,7 +1051,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextDisengage, "context_disengage");
 class CHandlerContextMount : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CEntityCL *sel = EntitiesMngr.entity(UserEntity->selection());
 		if (sel == NULL) return;
@@ -1083,7 +1083,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextMount, "context_mount");
 class CHandlerContextUnseat : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Game Specific Code
 		beastOrder("unmount", "0");
@@ -1117,7 +1117,7 @@ REGISTER_ACTION_HANDLER( CHandlerContextUnseat, "context_unseat");
 class CHandlerContextWebPage : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1150,7 +1150,7 @@ REGISTER_ACTION_HANDLER( CHandlerFullMap, "fullmap");
 class CHandlerContextMissionRing : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		std::string id = getParam(sParams, "id");
 		sint idInDb;
@@ -1183,7 +1183,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextMissionRing, "mission_ring");
 class CAHQuitGame : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		/* todo game_exit
 		game_exit = true;
@@ -1198,7 +1198,7 @@ REGISTER_ACTION_HANDLER( CAHQuitGame, "quit_game");
 class CAHQuitRyzom : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// If we are not connected, quit now
 		if((!ConnectionReadySent) && (!FarTP.isLeavingEGS()))
@@ -1231,7 +1231,7 @@ REGISTER_ACTION_HANDLER( CAHQuitRyzom, "quit_ryzom");
 class CAHPayingAccount : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
     {
 		paying_account_request = FreeTrial;
 		if(!FreeTrial)
@@ -1248,7 +1248,7 @@ REGISTER_ACTION_HANDLER( CAHPayingAccount, "paying_account");
 class CAHQuitRyzomNow : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if(!paying_account_already_request && FreeTrial)
 		{
@@ -1276,7 +1276,7 @@ REGISTER_ACTION_HANDLER( CAHQuitRyzomNow, "quit_ryzom_now");
 class CAHQuitRyzomAbort : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if(ClientCfg.Local)
 		{
@@ -1301,7 +1301,7 @@ REGISTER_ACTION_HANDLER( CAHQuitRyzomAbort, "quit_ryzom_abort");
 class CAHCloseFreeTrialQuitting : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1330,7 +1330,7 @@ REGISTER_ACTION_HANDLER( CAHCloseFreeTrialQuitting, "close_free_trial_game_quitt
 class CAHReturnToMainland : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		FarTP.requestReturnToPreviousSession();
 	}
@@ -1342,7 +1342,7 @@ REGISTER_ACTION_HANDLER( CAHReturnToMainland, "return_to_mainland");
 class CAHReselectCharacter : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		nlinfo("User request to reselect character");
 		FarTP.requestReconnection();
@@ -1355,7 +1355,7 @@ REGISTER_ACTION_HANDLER( CAHReselectCharacter, "reselect_character");
   */
 class CSelectItemSheet : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		if (!ctrlSheet) return;
@@ -1455,7 +1455,7 @@ void CSelectItemSheet::showItemFlags(CInterfaceManager *im,bool canUse,bool canB
   */
 class CSetPriceInDB : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		std::string ls = getParam(Params, "ls");
 		std::string ms = getParam(Params, "ms");
@@ -1555,7 +1555,7 @@ void beastOrder (const std::string &orderStr, const std::string &beastIndexStr, 
 class CHandlerBeastOrder : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string orderStr = getParam(Params,"order");
 		if( orderStr == "mount" )
@@ -1585,7 +1585,7 @@ REGISTER_ACTION_HANDLER( CHandlerBeastOrder, "beast_order")
 class CHandlerDoBeastFree : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// free with no confirm
 		if (!UserEntity->isBusy())
@@ -1600,7 +1600,7 @@ REGISTER_ACTION_HANDLER( CHandlerDoBeastFree, "do_beast_free")
 class CHandlerAnimalMenuOption : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup	  *pMenu= dynamic_cast<CInterfaceGroup*>(pCaller);
@@ -1666,7 +1666,7 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalMenuOption, "animal_menu_option")
 // Target an animal
 class CHandlerAnimalTarget : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1715,7 +1715,7 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalTarget, "animal_target" );
 // Open an animal inventory
 class CHandlerAnimalOpenInventory : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1763,7 +1763,7 @@ static void closeGroup(const string &groupName)
 class CHandlerAcceptTeamInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		closeGroup("ui:interface:join_team_proposal");
 		sendMsgToServer("TEAM:JOIN");
@@ -1780,7 +1780,7 @@ REGISTER_ACTION_HANDLER( CHandlerAcceptTeamInvitation, "accept_team_invitation")
 class CHandlerRefuseTeamInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		closeGroup("ui:interface:join_team_proposal");
 		sendMsgToServer("TEAM:JOIN_PROPOSAL_DECLINE");
@@ -1797,7 +1797,7 @@ REGISTER_ACTION_HANDLER( CHandlerRefuseTeamInvitation, "refuse_team_invitation")
 class CHandlerAcceptGuildInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgToServer("GUILD:ACCEPT_INVITATION");
 		CGuildManager::getInstance()->quitJoinProposal();
@@ -1813,7 +1813,7 @@ REGISTER_ACTION_HANDLER( CHandlerAcceptGuildInvitation, "accept_guild_invitation
 class CHandlerRefuseGuildInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgToServer("GUILD:REFUSE_INVITATION");
 		CGuildManager::getInstance()->quitJoinProposal();
@@ -1828,7 +1828,7 @@ REGISTER_ACTION_HANDLER( CHandlerRefuseGuildInvitation, "refuse_guild_invitation
 class CHandlerAcceptDuelInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		closeGroup("ui:interface:join_duel_proposal");
 		sendMsgToServer("DUEL:ACCEPT");
@@ -1844,7 +1844,7 @@ REGISTER_ACTION_HANDLER( CHandlerAcceptDuelInvitation, "accept_duel_invitation")
 class CHandlerRefuseDuelInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		closeGroup("ui:interface:join_duel_proposal");
 		sendMsgToServer("DUEL:REFUSE");
@@ -1859,7 +1859,7 @@ REGISTER_ACTION_HANDLER( CHandlerRefuseDuelInvitation, "refuse_duel_invitation")
 class CHandlerAcceptPVPChallengeInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		closeGroup("ui:interface:join_pvp_challenge_proposal");
 		sendMsgToServer("PVP_CHALLENGE:ACCEPT");
@@ -1875,7 +1875,7 @@ REGISTER_ACTION_HANDLER( CHandlerAcceptPVPChallengeInvitation, "accept_pvp_chall
 class CHandlerRefusePVPChallengeInvitation : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		closeGroup("ui:interface:join_pvp_challenge_proposal");
 		sendMsgToServer("PVP_CHALLENGE:REFUSE");
@@ -1915,7 +1915,7 @@ REGISTER_ACTION_HANDLER( CHandlerChoosePVPClan, "pvp_clan_join");
 class CAHLaunchBugReport : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (ClientCfg.Light)
 		{
@@ -1937,7 +1937,7 @@ class CAHLaunchHelp : public IActionHandler
 {
 public:
 
-    virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+    virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
     {
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
@@ -1994,7 +1994,7 @@ public:
 
 	sint32 Slot;
 
-	bool cbIDStringReceived(string &inout)
+	bool cbIDStringReceived(string &inout) NL_OVERRIDE
 	{
 		if (UserEntity != NULL)
 		{
@@ -2038,7 +2038,7 @@ public:
 
 	sint32 Slot;
 
-	bool cbIDStringReceived(string &inout)
+	bool cbIDStringReceived(string &inout) NL_OVERRIDE
 	{
 		if (UserEntity != NULL)
 		{
@@ -2073,7 +2073,7 @@ public:
 // *** called when target change or target name change
 class CActionHandlerSetTargetName : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sSlot = getParam(Params,"slot");
 		string sNameTarget = getParam(Params,"target");
@@ -2137,7 +2137,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerSetTargetName, "set_target_name");
 // ***************************************************************************
 class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sSlot = getParam(Params,"slot");
 		string sTargetRegion = getParam(Params,"targetRegion");
@@ -2287,7 +2287,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerSetTargetForceRegionLevel, "set_force_reg
 // ***************************************************************************
 class CAHUpdateCurrentMode : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sValue = getParam(Params,"value");
 		string sDBLink = getParam(Params,"dblink");
@@ -2426,7 +2426,7 @@ REGISTER_ACTION_HANDLER (CAHUpdateCurrentMode, "update_current_mode");
 // ***************************************************************************
 class CAHToggleChat : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		ShowInterface = !ShowInterface;
 	}
@@ -2436,7 +2436,7 @@ REGISTER_ACTION_HANDLER (CAHToggleChat, "toggle_chat");
 // ***************************************************************************
 class CAHToggleHelp : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 #if FINAL_VERSION
 		if( ClientCfg.Local || hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() )
@@ -2451,7 +2451,7 @@ REGISTER_ACTION_HANDLER (CAHToggleHelp, "toggle_help");
 // ***************************************************************************
 class CAHSelfTarget : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Select the entity
 		UserEntity->selection(0);
@@ -2462,7 +2462,7 @@ REGISTER_ACTION_HANDLER (CAHSelfTarget, "self_target");
 // ***************************************************************************
 class CAHNoTarget : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Select the entity
 		UserEntity->selection(CLFECOMMON::INVALID_SLOT);
@@ -2473,7 +2473,7 @@ REGISTER_ACTION_HANDLER (CAHNoTarget, "no_target");
 // ***************************************************************************
 class CAHTarget : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string entityName = getParam(Params, "entity");
 		if (entityName.empty()) return;
@@ -2556,7 +2556,7 @@ REGISTER_ACTION_HANDLER (CAHTarget, "target");
 // ***************************************************************************
 class CAHTargetLandmark : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string search = getParam(Params, "search");
 		if (search.empty()) return;
@@ -2584,7 +2584,7 @@ REGISTER_ACTION_HANDLER (CAHTargetLandmark, "target_landmark");
 
 class CAHAddShape : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sShape = getParam(Params, "shape");
 
@@ -2753,7 +2753,7 @@ REGISTER_ACTION_HANDLER (CAHAddShape, "add_shape");
 
 class CAHRemoveShapes : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		EntitiesMngr.removeInstances();
 	}
@@ -2764,7 +2764,7 @@ REGISTER_ACTION_HANDLER (CAHRemoveShapes, "remove_shapes");
 // See also CHandlerTeamTarget
 class CAHTargetTeammateShortcut : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// Get shortcut parameter
 		uint indexInTeam;
@@ -2805,7 +2805,7 @@ REGISTER_ACTION_HANDLER(CAHTargetTeammateShortcut, "target_teammate_shortcut");
 // ***************************************************************************
 class CAHAssist : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// Get the entity name to target
 		string entityName = getParam (Params, "entity");
@@ -2831,7 +2831,7 @@ REGISTER_ACTION_HANDLER (CAHAssist, "assist");
 // ***************************************************************************
 class CAHAssistTarget : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Select the entity
 		UserEntity->assist();
@@ -2842,7 +2842,7 @@ REGISTER_ACTION_HANDLER (CAHAssistTarget, "assist_target");
 // ***************************************************************************
 class CAHToggleCombat : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Toggle from Combat to Disengage
 		if(UserEntity->isFighting())
@@ -2869,7 +2869,7 @@ public:
 		_FirstTime = true;
 	}
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
@@ -2924,7 +2924,7 @@ class CAHCopyToDesktop : public IActionHandler
 {
 public:
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		uint8 newMode;
@@ -2941,7 +2941,7 @@ REGISTER_ACTION_HANDLER (CAHCopyToDesktop, "copy_to_desktop");
 // ***************************************************************************
 class CHandlerCloseAllLabosBut : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -3172,7 +3172,7 @@ public:
 	// Value used to restore the screen AR in case of a cancel
 	static float	BkupScreenAspectRatio;
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (Driver == NULL) return;
 
@@ -3351,7 +3351,7 @@ float	CHandlerGameConfigInit::BkupScreenAspectRatio= 1.3333f;
 // ***************************************************************************
 class CHandlerGameConfigMode : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -3425,7 +3425,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigMode, "game_config_change_vid_mode");
 // ***************************************************************************
 class CHandlerGameConfigLanguage : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -3451,7 +3451,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigLanguage, "game_config_change_languag
 // ***************************************************************************
 class CHandlerGameConfigFreq : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		sint	oldFreq= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getOldValue32();
@@ -3474,7 +3474,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigFreq, "game_config_change_vid_freq");
 class CHandlerGameConfigTextureMode : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCalller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCalller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		sint	oldTMode= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->getOldValue32();
@@ -3496,7 +3496,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigTextureMode, "game_config_change_text
 // ***************************************************************************
 class CHandlerGameConfigFullscreen : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		bool bFullscreen = false;
@@ -3542,7 +3542,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigFullscreen, "game_config_change_vid_f
 // ***************************************************************************
 class CHandlerGameConfigVREnable : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		// VR_CONFIG
 
@@ -3567,7 +3567,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigVREnable, "game_config_change_vr_enab
 // ***************************************************************************
 class CHandlerGameConfigVRDevice : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		// VR_CONFIG
 
@@ -3590,7 +3590,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigVRDevice, "game_config_change_vr_devi
 // ***************************************************************************
 class CHandlerGameConfigSoundDriver : public IActionHandler
 {
-	virtual void execute (CCtrlBase * pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase * pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		sint oldDriver = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->getOldValue32();
 		sint newDriver = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_SOUND_DRIVER_DB)->getValue32();
@@ -3616,7 +3616,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigSoundDriver, "game_config_change_soun
 // ***************************************************************************
 class CHandlerGameConfigApply : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -3821,7 +3821,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigApply, "game_config_apply");
 // ***************************************************************************
 class CHandlerGameConfigCancel: public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Has something special to do only with screen aspect ratio:
 		//	- Video Modes changes are only really validated at apply times so cancel => noop
@@ -3839,7 +3839,7 @@ REGISTER_ACTION_HANDLER(CHandlerGameConfigCancel, "game_config_cancel");
 // ***************************************************************************
 class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (CInterfaceLink::isUpdatingAllLinks()) return; // don't want to trash the value in client.cfg at init, due to 'updateAllLinks' being called
 
@@ -3902,7 +3902,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeScreenRatioMode, "game_config_c
 // ***************************************************************************
 class CHandlerGameConfigChangeAnisotropic : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (CInterfaceLink::isUpdatingAllLinks()) return; // don't want to trash the value in client.cfg at init, due to 'updateAllLinks' being called
 
@@ -3929,7 +3929,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeAnisotropic, "game_config_chang
 // ***************************************************************************
 class CHandlerGameConfigChangeScreenRatioCustom : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		sint	mode= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SCREEN_RATIO_MODE")->getValue32();
@@ -3966,7 +3966,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeScreenRatioCustom, "game_config
 // ***************************************************************************
 class CHandlerSetInterfaceScale : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		std::string s;
 		s = getParam(Params, "scale");
@@ -4053,7 +4053,7 @@ REGISTER_ACTION_HANDLER (CHandlerSetMouseScale, "set_mouse_scale");
 // ***************************************************************************
 class CHandlerGameMissionAbandon : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		uint8 nMissionNb;
 		fromString(Params, nMissionNb);
@@ -4070,7 +4070,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameMissionAbandon, "mission_abandon");
 // ***************************************************************************
 class CHandlerGameGroupMissionAbandon : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		uint8 nMissionNb;
 		fromString(Params, nMissionNb);
@@ -4097,7 +4097,7 @@ REGISTER_ACTION_HANDLER (CHandlerGameGroupMissionAbandon, "group_mission_abandon
 class CHandlerContextChooseZoneCharge : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendBotChatStart("START_CHOOSE_DUTY");
 		BotChatPageAll->ChooseMission->setMissionClientType(MISSION_DESC::ZCCharge);
@@ -4113,7 +4113,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextChooseZoneCharge, "context_choose_zc_char
 class CHandlerContextChooseBuilding : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Choose a building is like choose a mission
 		sendBotChatStart("START_CHOOSE_MISSION");
@@ -4129,7 +4129,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextChooseBuilding, "context_choose_building"
 class CHandlerContextBuyRM : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Buy RM is like choose a mission
 		sendBotChatStart("START_CHOOSE_MISSION");
@@ -4145,7 +4145,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextBuyRM, "context_buy_rm");
 class CHandlerContextUpgradeRM : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Upgrde RM is like choose a mission
 		sendBotChatStart("START_CHOOSE_MISSION");
@@ -4162,7 +4162,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextUpgradeRM, "context_upgrade_rm");
 class CHandlerContextCancelZoneCharge : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -4177,7 +4177,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextCancelZoneCharge, "context_cancel_zc_char
 class CHandlerDoCancelZoneCharge : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("BOTCHAT:DUTY_CANCEL_APPLY");
 	}
@@ -4191,7 +4191,7 @@ REGISTER_ACTION_HANDLER(CHandlerDoCancelZoneCharge, "do_cancel_zc_charge");
 class CHandlerContextDestroyBuilding : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -4206,7 +4206,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextDestroyBuilding, "context_destroy_buildin
 class CHandlerDoDestroyBuilding : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("BOTCHAT:DESTROY_BUILDING");
 	}
@@ -4221,7 +4221,7 @@ REGISTER_ACTION_HANDLER(CHandlerDoDestroyBuilding, "do_destroy_building");
 class CHandlerSelectParry : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("COMBAT:PARRY");
 
@@ -4238,7 +4238,7 @@ REGISTER_ACTION_HANDLER(CHandlerSelectParry, "parry");
 class CHandlerSelectDodge : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		sendMsgToServer("COMBAT:DODGE");
 
@@ -4255,7 +4255,7 @@ REGISTER_ACTION_HANDLER(CHandlerSelectDodge, "dodge");
 class CHandlerSelectProtectedSlot : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		uint8 slot = (uint8)SLOT_EQUIPMENT::stringToSlotEquipment(sParams);
 		sendMsgToServer("COMBAT:PROTECTED_SLOT", slot);
@@ -4297,7 +4297,7 @@ static	void	fillPlayerBarText(std::string &str, const string &dbScore, SCORES::T
 class CHandlerPlayerTTLife : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -4314,7 +4314,7 @@ REGISTER_ACTION_HANDLER(CHandlerPlayerTTLife, "player_tt_life");
 class CHandlerPlayerTTStamina : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -4331,7 +4331,7 @@ REGISTER_ACTION_HANDLER(CHandlerPlayerTTStamina, "player_tt_stamina");
 class CHandlerPlayerTTSap : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -4348,7 +4348,7 @@ REGISTER_ACTION_HANDLER(CHandlerPlayerTTSap, "player_tt_sap");
 class CHandlerPlayerTTFocus : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -4365,7 +4365,7 @@ REGISTER_ACTION_HANDLER(CHandlerPlayerTTFocus, "player_tt_focus");
 class CHandlerGetTTBulk : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string	dbBranch= getParam(sParams, "dbbranch");
@@ -4457,7 +4457,7 @@ void runMissionProc(sint32 nSelected)
 class CHandlerMissionChooseNextValid : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		sint32 nSelected = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MISSION_SELECTED")->getValue32();
@@ -4513,7 +4513,7 @@ REGISTER_ACTION_HANDLER(CHandlerMissionChooseNextValid, "mission_choose_next_val
 class CHandlerEntityFlyingText : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		string	text = getParam(sParams, "text");
 
@@ -4533,7 +4533,7 @@ REGISTER_ACTION_HANDLER(CHandlerEntityFlyingText, "entity_flying_text");
 class CHandlerPlayEventMusic : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		bool loop = getParam(sParams, "loop")=="1";
 
@@ -4557,7 +4557,7 @@ REGISTER_ACTION_HANDLER(CHandlerPlayEventMusic, "play_event_music");
 class CHandlerStopEventMusic : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		uint xFade;
 		fromString(getParam(sParams, "xfade"), xFade);
@@ -4578,7 +4578,7 @@ REGISTER_ACTION_HANDLER(CHandlerStopEventMusic, "stop_event_music");
 class CEnterCRZone: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// hide interface
 		CInterfaceManager* pIM = CInterfaceManager::getInstance();
@@ -4609,7 +4609,7 @@ REGISTER_ACTION_HANDLER(CEnterCRZone, "enter_crzone");
 class CWakeForMission : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		uint8 nMissionNb;
 		fromString(sParams, nMissionNb);
@@ -4627,7 +4627,7 @@ REGISTER_ACTION_HANDLER(CWakeForMission, "mission_wake");
 class CWakeForGroupMission : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		uint8 nMissionNb;
 		fromString(sParams, nMissionNb);
@@ -4652,7 +4652,7 @@ REGISTER_ACTION_HANDLER(CWakeForGroupMission, "group_mission_wake");
 class CBuildTotem : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (UserEntity->selection())
 		{
@@ -4669,7 +4669,7 @@ REGISTER_ACTION_HANDLER(CBuildTotem, "build_totem");
 class CHandlerFameSetNeutral : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		if( IngameDbMngr.initInProgress() ) return;
 
@@ -4719,7 +4719,7 @@ REGISTER_ACTION_HANDLER(CHandlerFameSetNeutral, "fame_set_neutral");
 class CHandlerConfigureQuitDialogBox : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager::getInstance()->configureQuitDialogBox();
 	}
@@ -4756,7 +4756,7 @@ static bool isDead()
 class CHandlerEmote : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// An emote is 2 things : a phrase and an animation
 		// Phrase is the phrase that server returns in chat system
@@ -4851,7 +4851,7 @@ REGISTER_ACTION_HANDLER( CHandlerEmote, "emote");
 class CHandlerSortTribeFame : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CGroupList * list = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:tribes:list"));
 		if (list && list->getNumChildren() > 1)

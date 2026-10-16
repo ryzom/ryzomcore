@@ -48,7 +48,7 @@ public:
 	/**
 	 * observer update
 	 */
-	virtual void update (NLMISC::ICDBNode* leaf)=0;
+	virtual void update (NLMISC::ICDBNode* leaf) NL_OVERRIDE=0;
 
 
 };

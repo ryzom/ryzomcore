@@ -40,7 +40,7 @@ public:
 //	CWeaponDamageTable();
 
 	/// Destructor
-	virtual ~CWeaponDamageTable() {}
+	virtual ~CWeaponDamageTable() NL_OVERRIDE {}
 
 	/**
 	 * get reference damage for given entity skill and weapon quality (=recommended skill)

@@ -60,10 +60,10 @@ public:
 	NLMISC_DECLARE_CLASS(CAccessibilityTexture);
 	//
 	CAccessibilityTexture();
-	~CAccessibilityTexture();
+	~CAccessibilityTexture() NL_OVERRIDE;
 	CAccessibilityTexture(CIslandCollision *islandCol);
 	//
-	virtual void doGenerate(bool /* async */ = false)
+	virtual void doGenerate(bool /* async */ = false) NL_OVERRIDE
 	{
 		const NLMISC::CArray2D<sint16> &hm = _IslandCol->getHeightMap();
 		if (hm.empty())

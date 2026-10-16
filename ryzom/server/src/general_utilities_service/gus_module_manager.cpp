@@ -63,22 +63,22 @@ namespace GUS
 
 	public:
 		// CModuleManager interface
-		uint32 addModule(const NLMISC::CSString& name,const NLMISC::CSString& rawArgs);
-		void removeModule(uint32 moduleId);
-		void displayModules() const;
-		uint32 getModuleId(const IModule* module) const;
-		TModulePtr lookupModuleById(uint32 id) const;
-		void getModules(TModuleVector& result) const;
+		uint32 addModule(const NLMISC::CSString& name,const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+		void removeModule(uint32 moduleId) NL_OVERRIDE;
+		void displayModules() const NL_OVERRIDE;
+		uint32 getModuleId(const IModule* module) const NL_OVERRIDE;
+		TModulePtr lookupModuleById(uint32 id) const NL_OVERRIDE;
+		void getModules(TModuleVector& result) const NL_OVERRIDE;
 		
 		// service up and servise down callback managers
 		void serviceUp(NLNET::TServiceId serviceId,const std::string& serviceName);
 		void serviceDown(NLNET::TServiceId serviceId,const std::string& serviceName);
 
 		// IServiceSingleton interface
-		void init();
-		void serviceUpdate();
-		void tickUpdate();
-		void release();
+		void init() NL_OVERRIDE;
+		void serviceUpdate() NL_OVERRIDE;
+		void tickUpdate() NL_OVERRIDE;
+		void release() NL_OVERRIDE;
 
 	private:
 		// private data

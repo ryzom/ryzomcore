@@ -29,8 +29,8 @@
 class CBotChatPageCreateGuild : public CBotChatPage
 {
 public:
-	virtual void begin();
-	virtual void end();
+	virtual void begin() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
 };
 
 

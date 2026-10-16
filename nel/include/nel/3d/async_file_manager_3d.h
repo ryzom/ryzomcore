@@ -92,8 +92,8 @@ private:
 		std::string MeshName;
 	public:
 		CMeshLoad (const std::string &meshName, IShape **ppShp, IDriver *pDriver, const NLMISC::CVector &position, uint selectedTexture);
-		void run (void);
-		void getName (std::string &result) const;
+		void run (void) NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 	// Load a .ig
@@ -103,8 +103,8 @@ private:
 		CInstanceGroup **_ppIG;
 	public:
 		CIGLoad (const std::string& meshName, CInstanceGroup **ppIG);
-		void run (void);
-		void getName (std::string &result) const;
+		void run (void) NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 	// Load a .ig User Interface
@@ -114,8 +114,8 @@ private:
 		UInstanceGroup **_ppIG;
 	public:
 		CIGLoadUser (const std::string& meshName, UInstanceGroup **ppIG);
-		void run (void);
-		void getName (std::string &result) const;
+		void run (void) NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 	// Load a texture
@@ -131,8 +131,8 @@ private:
 			Position = position;
 		}
 
-		void run();
-		void getName (std::string &result) const;
+		void run() NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 };

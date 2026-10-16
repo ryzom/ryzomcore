@@ -73,7 +73,7 @@ public:
 		uint ModelViewProjection;
 	};
 
-	virtual void buildInfo()
+	virtual void buildInfo() NL_OVERRIDE
 	{
 		CVertexProgram::buildInfo();
 		if (source() && source()->Features.OnlyUBOs)
@@ -105,7 +105,7 @@ public:
 		uint EdgeThresholdMin;
 	};
 
-	virtual void buildInfo()
+	virtual void buildInfo() NL_OVERRIDE
 	{
 		CPixelProgram::buildInfo();
 		if (source() && source()->Features.OnlyUBOs)

@@ -33,32 +33,32 @@ class CMgrNpc
 {
 public:
 	CMgrNpc(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename);
-	virtual ~CMgrNpc();
+	virtual ~CMgrNpc() NL_OVERRIDE;
 	
-	void update();
+	void update() NL_OVERRIDE;
 	
-	CStateMachine* getStateMachine() { return &_StateMachine; }
+	CStateMachine* getStateMachine() NL_OVERRIDE { return &_StateMachine; }
 	
 	uint32 getAlias() const { return CManager::getAlias(); }
 	CAIAliasDescriptionNode* getAliasNode() const { return CManager::getAliasNode(); }
 	
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	
 	//////////////////////////////////////////////////////////////////////////
 	
 	//	Methods inherited from IManager.
-	void init() { }
-	void release() { }
+	void init() NL_OVERRIDE { }
+	void release() NL_OVERRIDE { }
 	
 	void serviceDown(uint32	sid, std::string const& name) { }
 	
-	AITYPES::TMgrType type() const { return AITYPES::MgrTypeNpc; }
+	AITYPES::TMgrType type() const NL_OVERRIDE { return AITYPES::MgrTypeNpc; }
 	
 	// instantiate the bot population
-	virtual void spawn();
+	virtual void spawn() NL_OVERRIDE;
 	// clear the bot population
-	virtual void despawnMgr();
+	virtual void despawnMgr() NL_OVERRIDE;
 	
 	// event managers --------------------------------------------------
 	CAIEvent EventDestinationReachedFirst;
@@ -72,8 +72,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////	
 	//	Alias Tree related Methods.
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
 	
 	//////////////////////////////////////////////////////////////////////////
 	CStateMachine _StateMachine;

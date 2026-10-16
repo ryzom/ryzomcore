@@ -118,8 +118,8 @@ private:
 	// prevent construction from outside
 	CMicroLifeManager();
 	// from NL3D::ULandscapeTileCallback
-	virtual void tileAdded(const NL3D::CTileAddedInfo &infos);
-	virtual void tileRemoved(uint64 id);
+	virtual void tileAdded(const NL3D::CTileAddedInfo &infos) NL_OVERRIDE;
+	virtual void tileRemoved(uint64 id) NL_OVERRIDE;
 	// add / remove a poly of a zone to a build grid. Poly coordinates are in world.
 	void drawPolyInBuildGrid(const std::vector<NLLIGO::CPrimVector> &primPoly,
 							 uint primitiveIndex,

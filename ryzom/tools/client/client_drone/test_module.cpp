@@ -55,7 +55,7 @@ public:
 	{
 	}
 
-	virtual void				onModuleUp(IModuleProxy *moduleProxy)
+	virtual void				onModuleUp(IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		if (moduleProxy->getModuleClassName() == "FEServerModuleTest")
 		{
@@ -73,7 +73,7 @@ public:
 			TestState = ts_wait_start;
 		}
 	}
-	virtual void				onModuleDown(IModuleProxy *moduleProxy)
+	virtual void				onModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		if (moduleProxy == Server)
 		{
@@ -82,7 +82,7 @@ public:
 			Server = NULL;
 		}
 	}
-	virtual bool			onProcessModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message)
+	virtual bool			onProcessModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message) NL_OVERRIDE
 	{
 		string msgName = message.getName();
 		if (msgName == "START")
@@ -168,13 +168,13 @@ public:
 		return true;
 	}
 
-	virtual void	onModuleSecurityChange(IModuleProxy *moduleProxy)
+	virtual void	onModuleSecurityChange(IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		// glop
 	}
 
 
-	virtual void	onModuleUpdate()
+	virtual void	onModuleUpdate() NL_OVERRIDE
 	{
 		if (TestState == ts_send_recv_part2)
 		{

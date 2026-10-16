@@ -145,7 +145,7 @@ public:
 
 	CVertexProgramTextureOffset(const char *nelvp) : CVertexProgram(nelvp) { }
 
-	virtual void buildInfo()
+	virtual void buildInfo() NL_OVERRIDE
 	{
 		CVertexProgram::buildInfo();
 		if (source() && source()->Features.OnlyUBOs)

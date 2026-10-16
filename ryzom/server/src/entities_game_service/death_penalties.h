@@ -116,7 +116,7 @@ class CDeathPenaltiesTimerEvent:public CTimerEvent
 {
 public:
 	CDeathPenaltiesTimerEvent(CCharacter *parent);
-	void timerCallback(CTimer *owner);
+	void timerCallback(CTimer *owner) NL_OVERRIDE;
 private:
 	CCharacter *_Parent;
 };

@@ -46,11 +46,11 @@ public:
 	/**
 	 *  return true if it is time to update the effect. It modifies the next update of the effect
 	 */
-	bool isTimeToUpdate();
+	bool isTimeToUpdate() NL_OVERRIDE;
 
-	bool update(uint32 & updateFlag);
+	bool update(uint32 & updateFlag) NL_OVERRIDE;
 	
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 	
 	inline static double getUpdatePeriod(){return _UpdatePeriod;}
 	
@@ -78,7 +78,7 @@ public:
 	{
 	}
 	
-	bool update(uint32 & updateFlag);
+	bool update(uint32 & updateFlag) NL_OVERRIDE;
 	
 protected:
 	float	_ResistFactor;

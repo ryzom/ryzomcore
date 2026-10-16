@@ -42,14 +42,14 @@ public:
 			);
 
 	// from CTool
-	virtual const char *getToolUIName() const { return ""; } // by default, no associated icon in the ui
-	virtual bool  isCreationTool() const { return false; }
-	virtual bool  isPickTool() const { return true; }
-	virtual void updateAfterRender();
-	virtual bool onMouseRightButtonClicked();
-	virtual bool onMouseLeftButtonDown();
-	virtual bool onMouseLeftButtonClicked();
-	virtual void cancel() {}
+	virtual const char *getToolUIName() const NL_OVERRIDE { return ""; } // by default, no associated icon in the ui
+	virtual bool  isCreationTool() const NL_OVERRIDE { return false; }
+	virtual bool  isPickTool() const NL_OVERRIDE { return true; }
+	virtual void updateAfterRender() NL_OVERRIDE;
+	virtual bool onMouseRightButtonClicked() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonDown() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonClicked() NL_OVERRIDE;
+	virtual void cancel() NL_OVERRIDE {}
 
 	void setIgnoreInstances(const std::string & ignoreInstances);
 

@@ -50,7 +50,7 @@ class CBitmapTex : public CTexmap
 {
 public:
 	CBitmapTex(CScene *scene);
-	virtual ~CBitmapTex();
+	virtual ~CBitmapTex() NL_OVERRIDE;
 
 }; /* class CBitmapTex */
 

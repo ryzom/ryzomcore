@@ -28,7 +28,7 @@
 class CEGSExecuteMsgImp : public CEGSExecuteMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId sid);
+	virtual void callback (const std::string &name, NLNET::TServiceId sid) NL_OVERRIDE;
 };
 
 /**
@@ -37,7 +37,7 @@ public:
 class CEGSExecuteAiActionMsgImp : public CEGSExecuteAiActionMsg
 {
 public:
-	virtual void callback(const std::string &serviceName, NLNET::TServiceId sid);
+	virtual void callback(const std::string &serviceName, NLNET::TServiceId sid) NL_OVERRIDE;
 };
 
 /// register a service for event reports

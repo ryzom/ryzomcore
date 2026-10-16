@@ -49,21 +49,21 @@ namespace NLGUI
 
 		void setAlignFromString( const std::string &s );
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// Init part
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-		virtual void updateCoords();
+		virtual void updateCoords() NL_OVERRIDE;
 
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
-		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */);
+		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) NL_OVERRIDE;
 
 		// Display part
-		virtual void draw();
+		virtual void draw() NL_OVERRIDE;
 
 		void setTexture (const std::string&name);
 		void setTexturePushed (const std::string&name);
@@ -83,8 +83,8 @@ namespace NLGUI
 
 
 		/// \from CInterfaceElement
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
 
 		REFLECT_EXPORT_START(CCtrlButton, CCtrlBaseButton)
 			REFLECT_STRING("texture", getTexture, setTexture);

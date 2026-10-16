@@ -193,13 +193,13 @@ public:
 	};
 
 	/// From IAnimatable
-	virtual IAnimatedValue* getValue (uint valueId);
+	virtual IAnimatedValue* getValue (uint valueId) NL_OVERRIDE;
 	/// From IAnimatable
-	virtual const char *getValueName (uint valueId) const;
+	virtual const char *getValueName (uint valueId) const NL_OVERRIDE;
 	/// Default Track Values for are identity (roll= 0, target= CVector::Null, fov=Pi/2).
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 	/// register camera channels (in global anim mode).
-	virtual void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	virtual void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 
 	// @}
 
@@ -219,14 +219,14 @@ protected:
 	/// Constructor
 	CCamera();
 	/// Destructor
-	virtual ~CCamera() {}
+	virtual ~CCamera() NL_OVERRIDE {}
 
 	// NB: znear and zfar are be >0 (if perspective).
 	CFrustum	_Frustum;
 
 
 	/// Implement the update method.
-	virtual void	update();
+	virtual void	update() NL_OVERRIDE;
 
 
 private:

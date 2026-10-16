@@ -51,10 +51,10 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect) { return false; }
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE { return false; }
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// get drain factor
 	inline float getDrainFactor() const { return _DrainFactor; }

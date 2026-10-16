@@ -188,8 +188,8 @@ public:
 	 */
 	//void serial(NLMISC::IStream &f);
 
-	virtual void write (xmlNodePtr node) const;
-	virtual void read (xmlNodePtr node);
+	virtual void write (xmlNodePtr node) const NL_OVERRIDE;
+	virtual void read (xmlNodePtr node) NL_OVERRIDE;
 };
 
 } // NLLOGIC

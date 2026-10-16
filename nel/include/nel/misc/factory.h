@@ -126,7 +126,7 @@ public:
 	/** Create an instance of the factorable class.
 	 *	Implements IFactoryRegister::createObject
 	 */
-	BaseClass *createObject(const typename BaseClass::TCtorParam &ctorParam)
+	BaseClass *createObject(const typename BaseClass::TCtorParam &ctorParam) NL_OVERRIDE
 	{
 		return new FactoredClass(ctorParam);
 	}
@@ -225,7 +225,7 @@ public:
 		IndirectFactoryClass::instance().registerClass(key, this);
 	}
 
-	BaseFactoryClass *getFactory()
+	BaseFactoryClass *getFactory() NL_OVERRIDE
 	{
 		return &_FactoryClass;
 	}

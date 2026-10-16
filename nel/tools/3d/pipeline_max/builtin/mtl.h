@@ -50,7 +50,7 @@ class CMtl : public CMtlBase
 {
 public:
 	CMtl(CScene *scene);
-	virtual ~CMtl();
+	virtual ~CMtl() NL_OVERRIDE;
 
 }; /* class CMtl */
 

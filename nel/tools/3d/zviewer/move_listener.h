@@ -56,7 +56,7 @@ public :
 private:
 	
 	/// Internal use
-	virtual void operator()(const NLMISC::CEvent& event);
+	virtual void operator()(const NLMISC::CEvent& event) NL_OVERRIDE;
 
 	/// moving mode
 	TMoveMode _Mode;

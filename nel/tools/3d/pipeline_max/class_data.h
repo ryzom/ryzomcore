@@ -51,18 +51,18 @@ class CClassData : public CStorageContainer
 {
 public:
 	CClassData();
-	virtual ~CClassData();
+	virtual ~CClassData() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 }; /* class CClassData */
 
@@ -76,18 +76,18 @@ class CClassDataEntry : public CStorageContainer
 {
 public:
 	CClassDataEntry();
-	virtual ~CClassDataEntry();
+	virtual ~CClassDataEntry() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 }; /* class CClassDataEntry */
 
@@ -101,16 +101,16 @@ class CClassDataHeader : public IStorageObject
 {
 public:
 	CClassDataHeader();
-	virtual ~CClassDataHeader();
+	virtual ~CClassDataHeader() NL_OVERRIDE;
 
 	// public data
 	NLMISC::CClassId ClassID;
 	uint32 SuperClassID;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &stream) NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
 
 }; /* class CClassDataHeader */
 

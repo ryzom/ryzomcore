@@ -110,7 +110,7 @@ public:
 	 * \author Stephane Coutelas
 	 * \date 2000
 	 */
-	virtual void doGenerate(bool /* async */)
+	virtual void doGenerate(bool /* async */) NL_OVERRIDE
 	{
 		// Resize
 		resize (16, 16);
@@ -142,7 +142,7 @@ public:
 	}
 
 	// Dummy serial...
-	virtual void	serial(NLMISC::IStream &/* f */) { nlstop; }
+	virtual void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE { nlstop; }
 	NLMISC_DECLARE_CLASS(CTextureCross);
 };
 

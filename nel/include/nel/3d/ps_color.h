@@ -55,14 +55,14 @@ public:
 	// ctor
 	CPSValueBlendFuncRGBA() : _ColorType(CVertexBuffer::TRGBA) {}
 	//
-	void getValues(NLMISC::CRGBA &startValue, NLMISC::CRGBA &endValue) const
+	void getValues(NLMISC::CRGBA &startValue, NLMISC::CRGBA &endValue) const NL_OVERRIDE
 	{
 		CPSValueBlendFunc<NLMISC::CRGBA>::getValues(startValue, endValue);
 		startValue = convertVBColor(startValue, _ColorType);
 		endValue = convertVBColor(endValue, _ColorType);
 
 	}
-	virtual void setValues(NLMISC::CRGBA startValue, NLMISC::CRGBA endValue)
+	virtual void setValues(NLMISC::CRGBA startValue, NLMISC::CRGBA endValue) NL_OVERRIDE
 	{
 		CPSValueBlendFunc<NLMISC::CRGBA>::setValues(convertVBColor(startValue, _ColorType), convertVBColor(endValue, _ColorType));
 	}
@@ -89,14 +89,14 @@ public:
 	// ctor
 	CPSValueBlendSampleFuncRGBA() : _ColorType(CVertexBuffer::TRGBA) {}
 	//
-	void getValues(NLMISC::CRGBA &startValue, NLMISC::CRGBA &endValue) const
+	void getValues(NLMISC::CRGBA &startValue, NLMISC::CRGBA &endValue) const NL_OVERRIDE
 	{
 		CPSValueBlendSampleFunc<NLMISC::CRGBA, RGBA_BLENDER_NUM_VALUES>::getValues(startValue, endValue);
 		startValue = convertVBColor(startValue, _ColorType);
 		endValue = convertVBColor(endValue, _ColorType);
 
 	}
-	virtual void setValues(NLMISC::CRGBA startValue, NLMISC::CRGBA endValue)
+	virtual void setValues(NLMISC::CRGBA startValue, NLMISC::CRGBA endValue) NL_OVERRIDE
 	{
 		CPSValueBlendSampleFunc<NLMISC::CRGBA, RGBA_BLENDER_NUM_VALUES>::setValues(convertVBColor(startValue, _ColorType), convertVBColor(endValue, _ColorType));
 	}
@@ -120,11 +120,11 @@ public:
 	// ctor
 	CPSValueGradientFuncRGBA() : _ColorType(CVertexBuffer::TRGBA) {}
 	//
-	void getValues(NLMISC::CRGBA *tab) const;
-	NLMISC::CRGBA getValue(uint index)	const;
-	void setValues(const NLMISC::CRGBA *valueTab, uint32 numValues, uint32 nbStages);
-	void setValuesUnpacked(const NLMISC::CRGBA *valueTab, uint32 numValues, uint32 nbStages);
-	void serial(NLMISC::IStream &f)
+	void getValues(NLMISC::CRGBA *tab) const NL_OVERRIDE;
+	NLMISC::CRGBA getValue(uint index)	const NL_OVERRIDE;
+	void setValues(const NLMISC::CRGBA *valueTab, uint32 numValues, uint32 nbStages) NL_OVERRIDE;
+	void setValuesUnpacked(const NLMISC::CRGBA *valueTab, uint32 numValues, uint32 nbStages) NL_OVERRIDE;
+	void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		setColorType(CVertexBuffer::TRGBA);
 		CPSValueGradientFunc<NLMISC::CRGBA>::serial(f);
@@ -148,12 +148,12 @@ public:
 	// ctor
 	CPSAttribMakerRGBA(float nbCycles) : CPSAttribMakerT<NLMISC::CRGBA, F>(nbCycles) {}
 	// helps to change internal color representation
-	virtual void setColorType(CVertexBuffer::TVertexColorType colorType)
+	virtual void setColorType(CVertexBuffer::TVertexColorType colorType) NL_OVERRIDE
 	{
 		this->_F.setColorType(colorType);
 	}
 	// serialisation should always be done in RGBA mode, so enforce that
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		setColorType(CVertexBuffer::TRGBA);
 		CPSAttribMakerT<NLMISC::CRGBA, F>::serial(f);
@@ -170,7 +170,7 @@ public:
 	{
 		_F.setValues(startColor, endColor);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSColorBlenderExact(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSColorBlenderExact(*this); }
 
 };
 
@@ -185,7 +185,7 @@ public:
 	{
 		_F.setValues(startColor, endColor);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSColorBlender(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSColorBlender(*this); }
 };
 
 
@@ -211,7 +211,7 @@ public:
 
 	CPSColorGradient(const NLMISC::CRGBA *colorTab, uint32 nbValues, uint32 nbStages, float nbCycles = 1.0f);
 	static NLMISC::CRGBA _DefaultGradient[];
-	CPSAttribMakerBase *clone() const { return new CPSColorGradient(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSColorGradient(*this); }
 };
 
 
@@ -225,11 +225,11 @@ class CPSColorMemory : public CPSAttribMakerMemory<NLMISC::CRGBA>
 public:
 	CPSColorMemory() : _ColorType(CVertexBuffer::TRGBA) { setDefaultValue(NLMISC::CRGBA::White); }
 	NLMISC_DECLARE_CLASS(CPSColorMemory);
-	CPSAttribMakerBase *clone() const { return new CPSColorMemory(*this); }
-	virtual void setColorType(CVertexBuffer::TVertexColorType colorType);
-	virtual void setDefaultValue(NLMISC::CRGBA defaultValue);
-	virtual NLMISC::CRGBA getDefaultValue(void) const;
-	virtual void serial(NLMISC::IStream &f);
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSColorMemory(*this); }
+	virtual void setColorType(CVertexBuffer::TVertexColorType colorType) NL_OVERRIDE;
+	virtual void setDefaultValue(NLMISC::CRGBA defaultValue) NL_OVERRIDE;
+	virtual NLMISC::CRGBA getDefaultValue(void) const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 protected:
 	CVertexBuffer::TVertexColorType _ColorType;
 };
@@ -242,9 +242,9 @@ class CPSColorBinOp : public CPSAttribMakerBinOp<NLMISC::CRGBA>
 {
 public:
 	NLMISC_DECLARE_CLASS(CPSColorBinOp);
-	CPSAttribMakerBase *clone() const { return new CPSColorBinOp(*this); }
-	virtual void setColorType(CVertexBuffer::TVertexColorType colorType);
-	virtual void serial(NLMISC::IStream &f);
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSColorBinOp(*this); }
+	virtual void setColorType(CVertexBuffer::TVertexColorType colorType) NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 

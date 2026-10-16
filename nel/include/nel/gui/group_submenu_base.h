@@ -31,7 +31,7 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CGroupSubMenuBase )
 
 		CGroupSubMenuBase( const TCtorParam &param );
-		~CGroupSubMenuBase();
+		~CGroupSubMenuBase() NL_OVERRIDE;
 
 		virtual void openSubMenu( sint32 nb );
 		virtual void hideSubMenus();

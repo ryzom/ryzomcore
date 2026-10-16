@@ -56,11 +56,11 @@ public:
 		:IFamilyProfile(ctorParam)
 	{
 	}
-	virtual	~CFamilyProfileKitin()
+	virtual	~CFamilyProfileKitin() NL_OVERRIDE
 	{
 	}
 
-	void	spawnGroup()
+	void	spawnGroup() NL_OVERRIDE
 	{
 		H_AUTO(FamilySpawnKitin)
 
@@ -77,7 +77,7 @@ public:
 	}
 
 	/// The main update for the profile. Called aprox every 10 s (100 ticks)
-	void update()
+	void update() NL_OVERRIDE
 	{
 	}
 
@@ -91,11 +91,11 @@ public:
 		:IFamilyProfile(ctorParam)
 	{
 	}
-	virtual	~CFamilyProfileFauna()
+	virtual	~CFamilyProfileFauna() NL_OVERRIDE
 	{
 	}
 
-	void	spawnGroup()
+	void	spawnGroup() NL_OVERRIDE
 	{
 		H_AUTO(FamilySpawnFauna)
 
@@ -112,7 +112,7 @@ public:
 	}
 
 	/// The main update for the profile. Called aprox every 10 s (100 ticks)
-	void update()
+	void update() NL_OVERRIDE
 	{
 	}
 
@@ -126,11 +126,11 @@ public:
 		:IFamilyProfile(ctorParam)
 	{
 	}
-	virtual	~CFamilyProfileNpc()
+	virtual	~CFamilyProfileNpc() NL_OVERRIDE
 	{
 	}
 
-	void	spawnGroup()
+	void	spawnGroup() NL_OVERRIDE
 	{
 		H_AUTO(FamilySpawnNpc)	
 		
@@ -154,7 +154,7 @@ public:
 	}
 
 	/// The main update for the profile. Called aprox every 10 s (100 ticks)
-	void update()
+	void update() NL_OVERRIDE
 	{
 	}
 

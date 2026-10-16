@@ -84,27 +84,27 @@ private:
 
 public:
 	// GUS::IModule methods
-	bool initialiseModule(const NLMISC::CSString& rawArgs);
-	void release();
-	void serviceUpdate(NLMISC::TTime localTime);
-	void receiveModuleMessage(GUSNET::CModuleMessage& msg);
-	NLMISC::CSString getState() const;
-	NLMISC::CSString getName() const;
-	NLMISC::CSString getParameters() const;
-	void displayModule() const;
-	void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule);
-	void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule);
+	bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+	void release() NL_OVERRIDE;
+	void serviceUpdate(NLMISC::TTime localTime) NL_OVERRIDE;
+	void receiveModuleMessage(GUSNET::CModuleMessage& msg) NL_OVERRIDE;
+	NLMISC::CSString getState() const NL_OVERRIDE;
+	NLMISC::CSString getName() const NL_OVERRIDE;
+	NLMISC::CSString getParameters() const NL_OVERRIDE;
+	void displayModule() const NL_OVERRIDE;
+	void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
+	void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
 
 public:
 	// CContestCtrlScript methods
 	void registerExecutor(uint32 executorId,const CSString& name);
 	void recordWinner(uint32 executorId,const CSString& characterName);
-	void load(const CSString& fileName);
-	void start();
-	void setDelay(uint32 duration);
-	void stop();
-	void list();
-	void display();
+	void load(const CSString& fileName) NL_OVERRIDE;
+	void start() NL_OVERRIDE;
+	void setDelay(uint32 duration) NL_OVERRIDE;
+	void stop() NL_OVERRIDE;
+	void list() NL_OVERRIDE;
+	void display() NL_OVERRIDE;
 
 
 public:
@@ -155,10 +155,10 @@ private:
 class CScriptLineTitle: public IScriptLine
 {
 public:
-	bool init(const CSString& rawArgs);
-	bool executeLocalCode(CContestCtrlScriptImplementation* context);
-	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context);
-	CSString toString();
+	bool init(const CSString& rawArgs) NL_OVERRIDE;
+	bool executeLocalCode(CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	CSString toString() NL_OVERRIDE;
 
 private:
 	CSString _Lang;	// the language
@@ -168,10 +168,10 @@ private:
 class CScriptLineSay: public IScriptLine
 {
 public:
-	bool init(const CSString& rawArgs);
-	bool executeLocalCode(CContestCtrlScriptImplementation* context);
-	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context);
-	CSString toString();
+	bool init(const CSString& rawArgs) NL_OVERRIDE;
+	bool executeLocalCode(CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	CSString toString() NL_OVERRIDE;
 
 private:
 	CSString _Lang;	// the language
@@ -182,10 +182,10 @@ private:
 class CScriptLineWait: public IScriptLine
 {
 public:
-	bool init(const CSString& rawArgs);
-	bool executeLocalCode(CContestCtrlScriptImplementation* context);
-	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context);
-	CSString toString();
+	bool init(const CSString& rawArgs) NL_OVERRIDE;
+	bool executeLocalCode(CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	CSString toString() NL_OVERRIDE;
 
 private:
 	uint32 _Duration;
@@ -194,10 +194,10 @@ private:
 class CScriptLineAnswer: public IScriptLine
 {
 public:
-	bool init(const CSString& rawArgs);
-	bool executeLocalCode(CContestCtrlScriptImplementation* context);
-	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context);
-	CSString toString();
+	bool init(const CSString& rawArgs) NL_OVERRIDE;
+	bool executeLocalCode(CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	CSString toString() NL_OVERRIDE;
 
 private:
 	CSString _Answer;
@@ -206,10 +206,10 @@ private:
 class CScriptLineWaitAnswer: public IScriptLine
 {
 public:
-	bool init(const CSString& rawArgs);
-	bool executeLocalCode(CContestCtrlScriptImplementation* context);
-	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context);
-	CSString toString();
+	bool init(const CSString& rawArgs) NL_OVERRIDE;
+	bool executeLocalCode(CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	CSString toString() NL_OVERRIDE;
 
 private:
 	uint32 _Duration;
@@ -218,10 +218,10 @@ private:
 class CScriptLineDisplayWinners: public IScriptLine
 {
 public:
-	bool init(const CSString& rawArgs);
-	bool executeLocalCode(CContestCtrlScriptImplementation* context);
-	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context);
-	CSString toString();
+	bool init(const CSString& rawArgs) NL_OVERRIDE;
+	bool executeLocalCode(CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	bool executeRemoteCode(uint32 executorModuleId,CContestCtrlScriptImplementation* context) NL_OVERRIDE;
+	CSString toString() NL_OVERRIDE;
 };
 
 

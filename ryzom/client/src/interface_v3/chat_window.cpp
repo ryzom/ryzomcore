@@ -1309,7 +1309,7 @@ CChatWindow *CChatWindowManager::getChatWindowByIndex(uint index)
 class CHandlerChatBoxEntry : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
 		if (pEB == NULL) return;
@@ -1400,7 +1400,7 @@ static string getFreeTellerName(CInterfaceElement *pCaller)
 class CHandlerAddTellerToFriendList : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())
@@ -1425,7 +1425,7 @@ REGISTER_ACTION_HANDLER(CHandlerAddTellerToFriendList, "add_teller_to_friend_lis
 class CHandlerAddTellerToIgnoreList : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		std::string callerId = getParam(sParams, "id");
@@ -1460,7 +1460,7 @@ REGISTER_ACTION_HANDLER(CHandlerAddTellerToIgnoreList, "add_teller_to_ignore_lis
 class CHandlerInviteToRingSession : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())

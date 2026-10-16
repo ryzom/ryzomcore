@@ -52,7 +52,7 @@ public:
 		sendRawMessage("MODULE_GATEWAY:FEOPEN", msg);
 	}
 
-	~CFEServerRoute()
+	~CFEServerRoute() NL_OVERRIDE
 	{
 		// warn the client that the transport is closed
 		CMessage msg;
@@ -64,7 +64,7 @@ public:
 	}
 
 
-	void sendMessage(const CMessage &message) const
+	void sendMessage(const CMessage &message) const NL_OVERRIDE
 	{
 		sendRawMessage("MODULE_GATEWAY:GATEWAY_MSG", message);
 	}
@@ -119,7 +119,7 @@ public:
 	{
 	}
 
-	~CGatewayFEServerTransport()
+	~CGatewayFEServerTransport() NL_OVERRIDE
 	{
 		if (OpenTransport() == this)
 		{
@@ -128,22 +128,22 @@ public:
 		}
 	}
 
-	const std::string &getClassName() const
+	const std::string &getClassName() const NL_OVERRIDE
 	{
 		static string className(FE_SERVER_CLASS_NAME);
 		return className;
 	}
 
-	virtual void update()
+	virtual void update() NL_OVERRIDE
 	{
 	}
 
-	virtual uint32 getRouteCount() const
+	virtual uint32 getRouteCount() const NL_OVERRIDE
 	{
 		return (uint32)_Routes.size();
 	}
 
-	void dump(NLMISC::CLog &log) const
+	void dump(NLMISC::CLog &log) const NL_OVERRIDE
 	{
 		IModuleManager &mm = IModuleManager::getInstance();
 		log.displayNL("  Frontend service transport, SERVER part");
@@ -179,13 +179,13 @@ public:
 		}
 	}
 
-	void onCommand(const CMessage &command)
+	void onCommand(const CMessage &command) NL_OVERRIDE
 	{
 		// nothing done for now
 		throw EInvalidCommand();
 	}
 	/// The gateway send a textual command to the transport
-	bool onCommand(const TParsedCommandLine &command)
+	bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 	{
 		if (command.SubParams.size() < 1)
 			throw  EInvalidCommand();
@@ -508,13 +508,13 @@ public:
 		Instance = this;
 	}
 
-	~CFESecurity()
+	~CFESecurity() NL_OVERRIDE
 	{
 		Instance = NULL;
 	}
 
 	/** A new proxy is available, the security plug-in can add security data */
-	void onNewProxy(IModuleProxy *proxy)
+	void onNewProxy(IModuleProxy *proxy) NL_OVERRIDE
 	{
 		if (proxy->getGatewayRoute() == NULL)
 			return;
@@ -550,7 +550,7 @@ public:
 		}
 	}
 
-	void onNewSecurityData(CGatewayRoute *from, IModuleProxy *proxy, TSecurityData *firstSecurityData)
+	void onNewSecurityData(CGatewayRoute *from, IModuleProxy *proxy, TSecurityData *firstSecurityData) NL_OVERRIDE
 	{
 		CFEServerRoute *route = dynamic_cast<CFEServerRoute *>(from);
 		if (route != NULL)
@@ -567,7 +567,7 @@ public:
 	}
 
 
-	void onDelete()
+	void onDelete() NL_OVERRIDE
 	{
 		// remove any client security info
 		vector<IModuleProxy*> proxies;

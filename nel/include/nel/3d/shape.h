@@ -71,7 +71,7 @@ public:
 	/// Constructor
 	IShape();
 	/// Dtor.
-	virtual ~IShape() {}
+	virtual ~IShape() NL_OVERRIDE {}
 
 	/** create an instance of this shape. The instance may be a CTransformShape, or a specialized version of it.
 	 * The default behavior is to createModel() a CTransformShape, and just assign to it the Shape.

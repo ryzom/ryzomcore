@@ -133,7 +133,7 @@ public:
 	static void destroy ();
 
 	/// Destructor
-	~CInterfaceManager();
+	~CInterfaceManager() NL_OVERRIDE;
 
 	/**
 	 * High level
@@ -280,7 +280,7 @@ public:
 
 
 	/// Handle The Event. return true if the interfaceManager catch it and if must not send to the Game Action Manager
-	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
 	// InGame ContextMenu
 	void launchContextMenuInGame (const std::string &nameOfCM);
@@ -300,7 +300,7 @@ public:
 	void		  displaySystemInfo(const std::string &str, const std::string &Category = "SYS");
 	NLMISC::CRGBA getSystemInfoColor(const std::string &Category = "SYS");
 
-	void setupOptions();
+	void setupOptions() NL_OVERRIDE;
 
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
@@ -476,14 +476,14 @@ private:
 		public:
 			CServerToLocalAutoCopy	&_Owner;
 			CLocalDBObserver(CServerToLocalAutoCopy	&owner) : _Owner(owner) {}
-			virtual void	update(NLMISC::ICDBNode *node)	{_Owner.onLocalChange(node);}
+			virtual void	update(NLMISC::ICDBNode *node) NL_OVERRIDE	{_Owner.onLocalChange(node);}
 		};
 		class CServerDBObserver : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
 			CServerToLocalAutoCopy	&_Owner;
 			CServerDBObserver(CServerToLocalAutoCopy	&owner) : _Owner(owner) {}
-			virtual void	update(NLMISC::ICDBNode *node)	{_Owner.onServerChange(node);}
+			virtual void	update(NLMISC::ICDBNode *node) NL_OVERRIDE	{_Owner.onServerChange(node);}
 		};
 
 		// A node here is a pair Server<->Local
@@ -538,7 +538,7 @@ private:
 	class CDBLandmarkObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode *node);
+		virtual void update(NLMISC::ICDBNode *node) NL_OVERRIDE;
 	};
 
 	// EMOTES
@@ -551,7 +551,7 @@ private:
 		{
 		}
 
-		bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human=true);
+		bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human=true) NL_OVERRIDE;
 
 		uint32 Behaviour; // State id from list.emot
 		uint32 EmoteNb;

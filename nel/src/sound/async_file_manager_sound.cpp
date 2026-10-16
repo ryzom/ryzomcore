@@ -64,7 +64,7 @@ class CCancelLoadWavFile : public CAsyncFileManager::ICancelCallback
 {
 	std::string	_Filename;
 
-	bool callback(const NLMISC::IRunnable *prunnable) const
+	bool callback(const NLMISC::IRunnable *prunnable) const NL_OVERRIDE
 	{
 		const CAsyncFileManagerSound::CLoadWavFile *pLWF = dynamic_cast<const CAsyncFileManagerSound::CLoadWavFile*>(prunnable);
 

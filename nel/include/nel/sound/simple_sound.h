@@ -43,7 +43,7 @@ public:
 	/// Constructor
 	CSimpleSound();
 	/// Destructor
-	virtual ~CSimpleSound();
+	virtual ~CSimpleSound() NL_OVERRIDE;
 	/** Allow to load sound files when corresponding wave file is missing
 	 * (default: false, i.e. an input serial or a load throws an exception ESoundFileNotFound)
 	 */
@@ -51,7 +51,7 @@ public:
 	/// Serialize
 //	void				serial( NLMISC::IStream& s );
 	/// Load the sound parameters from georges' form
-	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
+	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot) NL_OVERRIDE;
 
 	/// Return the buffer and the buffername if not null
 	IBuffer*			getBuffer();
@@ -60,7 +60,7 @@ public:
 	/// Return the alpha attenuation value.
 	float				getAlpha() const					{ return float(_Alpha); }
 	/// Return the length of the sound in ms
-	uint32				getDuration();
+	uint32				getDuration() NL_OVERRIDE;
 	/// Return the filename
 	const NLMISC::TStringId&	getFilename() const					{ return _Filename; }
 	/// Return the name of the buffer (must be unique)
@@ -72,9 +72,9 @@ public:
 	/// Change the buffer.
 	void				setBuffer(IBuffer *buffer);
 
-	void				getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const;
+	void				getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE;
 
-	void				serial(NLMISC::IStream &s);
+	void				serial(NLMISC::IStream &s) NL_OVERRIDE;
 
 
 	void setAlpha(float alpha)
@@ -83,7 +83,7 @@ public:
 	}
 
 private:
-	TSOUND_TYPE getSoundType() {return SOUND_SIMPLE;};
+	TSOUND_TYPE getSoundType() NL_OVERRIDE {return SOUND_SIMPLE;};
 
 	// Allow to load sound files when corresponding wave file is missing ?
 //	static bool			_AllowMissingWave;

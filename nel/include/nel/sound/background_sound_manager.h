@@ -136,7 +136,7 @@ public:
 private:
 
 	// called by mixer when update registered.
-	void onUpdate();
+	void onUpdate() NL_OVERRIDE;
 
 	// CAudioMixerUser will call private constructor and destructor, so, it is our friend ;)
 	friend class CAudioMixerUser;
@@ -144,7 +144,7 @@ private:
 	/// Constructor
 	CBackgroundSoundManager();
 	/// Destructor
-	virtual					~CBackgroundSoundManager();
+	virtual					~CBackgroundSoundManager() NL_OVERRIDE;
 
 	/** Load the sounds from primitive */
 	void		loadSoundsFromPrimitives(const NLLIGO::IPrimitive &soundRoot);

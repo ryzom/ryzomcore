@@ -436,12 +436,12 @@ public:
 		differ.makeDiff(this, context);
 	}
 
-	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		// nothing to do
 	}
 
-	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 			TStringInfo si = context.Addition[addIndex];
 			char temp[1024];
@@ -452,7 +452,7 @@ public:
 			context.Diff.push_back(si);
 	}
 
-	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		TStringInfo si = context.Reference[refIndex];
 		char temp[1024];
@@ -464,7 +464,7 @@ public:
 		context.Diff.push_back(si);
 	}
 
-	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		TStringInfo si = context.Addition[addIndex];
 		char temp[1024];
@@ -476,7 +476,7 @@ public:
 		context.Diff.push_back(si);
 	}
 
-	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context)
+	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		TStringInfo si;
 		char temp[1024];
@@ -948,11 +948,11 @@ public:
 		differ.makeDiff(this, context);
 	}
 
-	void onEquivalent(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onEquivalent(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		// nothing to do
 	}
-	void onAdd(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onAdd(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		TPhrase phrase = context.Addition[addIndex];
 		char temp[1024];
@@ -962,7 +962,7 @@ public:
 		nlinfo("Added %s at %u", phrase.Identifier.c_str(), addIndex);
 		context.Diff.push_back(phrase);
 	}
-	void onRemove(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onRemove(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		TPhrase phrase = context.Reference[refIndex];
 		char temp[1024];
@@ -975,7 +975,7 @@ public:
 		nlinfo("Removed %s at %u", phrase.Identifier.c_str(), addIndex);
 		context.Diff.push_back(phrase);
 	}
-	void onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		ucstring chg;
 		// check what is changed.
@@ -1016,7 +1016,7 @@ public:
 		context.Diff.push_back(phrase);
 	}
 
-	void onSwap(uint newIndex, uint refIndex, TPhraseDiffContext &context)
+	void onSwap(uint newIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		TPhrase phrase;
 		char temp[1024];
@@ -1513,11 +1513,11 @@ public:
 		differ.makeDiff(this, context, true);
 	}
 
-	void onEquivalent(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onEquivalent(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		// nothing to do
 	}
-	void onAdd(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onAdd(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		TWorksheet::TRow row(context.Reference.ColCount+1);
 		for (uint j=0; j<context.Addition.ColCount; ++j)
@@ -1535,7 +1535,7 @@ public:
 		nlinfo("Added %s at %u", row[2].toString().c_str(), addIndex);
 		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
-	void onRemove(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onRemove(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		TWorksheet::TRow row(context.Reference.ColCount+1);
 		for (uint j=0; j<context.Reference.ColCount; ++j)
@@ -1553,7 +1553,7 @@ public:
 		nlinfo("Removed %s at %u", row[2].toString().c_str(), refIndex);
 		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
-	void onChanged(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onChanged(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		TWorksheet::TRow row; //(context.Reference.ColCount+1);
 		// copy the old content (this fill data in column that don't exist in addition worksheet)
@@ -1578,7 +1578,7 @@ public:
 		context.Diff.insertRow((uint)context.Diff.Data.size(), row);
 	}
 
-	void onSwap(uint newIndex, uint refIndex, TWordsDiffContext &context)
+	void onSwap(uint newIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		TWorksheet::TRow row(context.Reference.ColCount+1);
 		// swap

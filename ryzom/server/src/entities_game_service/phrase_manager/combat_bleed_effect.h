@@ -64,7 +64,7 @@ public:
 	virtual bool update( uint32 & updateFlag );
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// set bleeding entity
 	inline void bleedingEntity(CEntityBase *entity) { _BleedingEntity = entity; }

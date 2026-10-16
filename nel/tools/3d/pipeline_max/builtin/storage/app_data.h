@@ -76,15 +76,15 @@ public:
 
 public:
 	CAppData();
-	virtual ~CAppData();
+	virtual ~CAppData() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// init
 	/// Initialize a new instance of this chunk
@@ -124,7 +124,7 @@ public:
 	inline const TMap &entries() const { return m_Entries; }
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	TMap m_Entries;
@@ -146,7 +146,7 @@ class CAppDataEntryKey : public IStorageObject
 {
 public:
 	CAppDataEntryKey();
-	virtual ~CAppDataEntryKey();
+	virtual ~CAppDataEntryKey() NL_OVERRIDE;
 
 	// public data
 	NLMISC::CClassId ClassId;
@@ -155,9 +155,9 @@ public:
 	uint32 Size;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &stream) NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
 
 }; /* class CAppDataEntryKey */
 
@@ -175,15 +175,15 @@ public:
 
 public:
 	CAppDataEntry();
-	virtual ~CAppDataEntry();
+	virtual ~CAppDataEntry() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// public
 	// Initializes a new entry
@@ -195,7 +195,7 @@ public:
 	T *value();
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	CAppDataEntryKey *m_Key;

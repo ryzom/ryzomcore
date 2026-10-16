@@ -139,7 +139,7 @@ public:
 	 * \param userData is quality of evaluated item
      * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError if it has been parsed.
      */
-	NLMISC::CEvalNumExpr::TReturnState evalValue (const char *value, double &result, uint32 userData);
+	NLMISC::CEvalNumExpr::TReturnState evalValue (const char *value, double &result, uint32 userData) NL_OVERRIDE;
 
 	/// compute the sell price of a raw material
 	static uint32 computeRawMaterialBasePrice( uint16 level )

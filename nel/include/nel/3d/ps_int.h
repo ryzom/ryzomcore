@@ -40,7 +40,7 @@ public:
 	{
 		_F.setValues(startInt, endInt);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSIntBlender(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSIntBlender(*this); }
 };
 
 class CPSUIntBlender : public CPSValueBlender<uint32>
@@ -51,7 +51,7 @@ public:
 	{
 		_F.setValues(startInt, endInt);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSUIntBlender(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSUIntBlender(*this); }
 };
 
 
@@ -69,7 +69,7 @@ public:
 
 	CPSIntGradient(const sint32 *intTab = CPSIntGradient::_DefaultGradient
 						, uint32 nbValues = 2, uint32 nbStages = 10, float nbCycles = 1.0f);
-	CPSAttribMakerBase *clone() const { return new CPSIntGradient(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSIntGradient(*this); }
 	static sint32 _DefaultGradient[];
 };
 
@@ -86,7 +86,7 @@ public:
 
 	CPSUIntGradient(const uint32 *intTab = CPSUIntGradient::_DefaultGradient
 						, uint32 nbValues = 2, uint32 nbStages = 10, float nbCycles = 1.0f);
-	CPSAttribMakerBase *clone() const { return new CPSUIntGradient(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSUIntGradient(*this); }
 	static uint32 _DefaultGradient[];
 };
 
@@ -99,7 +99,7 @@ class CPSIntMemory : public CPSAttribMakerMemory<sint32>
 public:
 	NLMISC_DECLARE_CLASS(CPSIntMemory);
 	CPSIntMemory() { setDefaultValue(0); }
-	CPSAttribMakerBase *clone() const { return new CPSIntMemory(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSIntMemory(*this); }
 };
 
 
@@ -112,7 +112,7 @@ class CPSUIntMemory : public CPSAttribMakerMemory<uint32>
 public:
 	CPSUIntMemory() { setDefaultValue(0); }
 	NLMISC_DECLARE_CLASS(CPSUIntMemory);
-	CPSAttribMakerBase *clone() const { return new CPSUIntMemory(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSUIntMemory(*this); }
 };
 
 
@@ -123,7 +123,7 @@ class CPSIntBinOp : public CPSAttribMakerBinOp<sint32>
 {
 public:
 	NLMISC_DECLARE_CLASS(CPSIntBinOp);
-	CPSAttribMakerBase *clone() const { return new CPSIntBinOp(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSIntBinOp(*this); }
 };
 
 
@@ -134,7 +134,7 @@ class CPSUIntBinOp : public CPSAttribMakerBinOp<uint32>
 {
 public:
 	NLMISC_DECLARE_CLASS(CPSUIntBinOp);
-	CPSAttribMakerBase *clone() const { return new CPSUIntBinOp(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSUIntBinOp(*this); }
 };
 
 

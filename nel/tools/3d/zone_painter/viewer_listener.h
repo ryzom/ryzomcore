@@ -47,7 +47,7 @@ class CWindowCloseListener : public NLMISC::IEventListener
 public:
 	bool WindowActive;
 	CWindowCloseListener() : WindowActive(true) { }
-	virtual void operator()(const NLMISC::CEvent &event)
+	virtual void operator()(const NLMISC::CEvent &event) NL_OVERRIDE
 	{
 		if (event == NLMISC::EventDestroyWindowId || event == NLMISC::EventCloseWindowId)
 			WindowActive = false;
@@ -87,7 +87,7 @@ public:
 	bool guiWantsMouse() const;
 	void paintAtHover(bool cont);
 	void updateHover();
-	virtual void operator()(const NLMISC::CEvent &event);
+	virtual void operator()(const NLMISC::CEvent &event) NL_OVERRIDE;
 };
 
 #endif

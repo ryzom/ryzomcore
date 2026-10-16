@@ -66,9 +66,9 @@ protected:
 	UTextContext::CStringInfo _Info;
 
 	/// Calculate the Display X, Y, Width, Height.
-	virtual void calculateDisplay();
+	virtual void calculateDisplay() NL_OVERRIDE;
 	/// Calculate the display position of the control in relation to the position of the control (Hot Spot).
-	virtual void calculateHS();
+	virtual void calculateHS() NL_OVERRIDE;
 
 public:
 	/// Constructor
@@ -77,7 +77,7 @@ public:
 	CText(uint id, float x, float y, float x_pixel, float y_pixel, const ucstring &text, uint32 fontSize, CRGBA color, bool shadow);
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/// Get the Text.
 	ucstring text();

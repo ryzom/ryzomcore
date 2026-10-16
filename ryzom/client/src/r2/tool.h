@@ -98,7 +98,7 @@ public:
 	typedef NLMISC::CSmartPtr<CTool> TSmartPtr;
 	//
 	CTool();
-	virtual ~CTool() {}
+	virtual ~CTool() NL_OVERRIDE {}
 	//
 	// Init parameters from script
 	virtual bool init(const CLuaObject &/* parameters */) { return true; }

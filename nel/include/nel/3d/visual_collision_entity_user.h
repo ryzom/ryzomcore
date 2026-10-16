@@ -44,33 +44,33 @@ public:
 		_Entity= _Manager->createEntity();
 	}
 	/// dtor, delete the entity.
-	~CVisualCollisionEntityUser()
+	~CVisualCollisionEntityUser() NL_OVERRIDE
 	{
 		_Manager->deleteEntity(_Entity);
 	}
 
 
-	virtual bool	snapToGround(CVector &pos);
-	virtual bool	snapToGround(CVector &pos, CVector &normal);
+	virtual bool	snapToGround(CVector &pos) NL_OVERRIDE;
+	virtual bool	snapToGround(CVector &pos, CVector &normal) NL_OVERRIDE;
 
 
 
-	virtual void	setGroundMode(bool groundMode);
-	virtual void	setCeilMode(bool ceilMode);
-	virtual bool	getGroundMode() const;
-	virtual bool	getCeilMode() const;
+	virtual void	setGroundMode(bool groundMode) NL_OVERRIDE;
+	virtual void	setCeilMode(bool ceilMode) NL_OVERRIDE;
+	virtual bool	getGroundMode() const NL_OVERRIDE;
+	virtual bool	getCeilMode() const NL_OVERRIDE;
 
 
-	virtual void	setSnapToRenderedTesselation(bool snapMode);
-	virtual bool	getSnapToRenderedTesselation() const;
+	virtual void	setSnapToRenderedTesselation(bool snapMode) NL_OVERRIDE;
+	virtual bool	getSnapToRenderedTesselation() const NL_OVERRIDE;
 
-	virtual bool	getSurfaceInfo(const CVector &pos, CSurfaceInfo &surfaceInfo);
+	virtual bool	getSurfaceInfo(const CVector &pos, CSurfaceInfo &surfaceInfo) NL_OVERRIDE;
 
 	virtual bool	getStaticLightSetup(NLMISC::CRGBA sunAmbient, const CVector &pos, std::vector<CPointLightInfluence> &pointLightList,
-		uint8 &sunContribution, NLMISC::CRGBA &localAmbient);
+		uint8 &sunContribution, NLMISC::CRGBA &localAmbient) NL_OVERRIDE;
 
 
-	virtual void	displayDebugGrid(UDriver &drv) const;
+	virtual void	displayDebugGrid(UDriver &drv) const NL_OVERRIDE;
 
 
 private:

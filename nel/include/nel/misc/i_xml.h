@@ -99,7 +99,7 @@ public:
 
 	/** Dtor. Call release().
 	  */
-	virtual ~CIXml ();
+	virtual ~CIXml () NL_OVERRIDE;
 
 	/** Stream initialisation. The stream must be an input stream.
 	  * init() will load the XML tree. So init() can raise read error exceptions.
@@ -189,31 +189,31 @@ public:
 private:
 
 	/// From IStream
-	virtual void	serial(uint8 &b);
-	virtual void	serial(sint8 &b);
-	virtual void	serial(uint16 &b);
-	virtual void	serial(sint16 &b);
-	virtual void	serial(uint32 &b);
-	virtual void	serial(sint32 &b);
-	virtual void	serial(uint64 &b);
-	virtual void	serial(sint64 &b);
-	virtual void	serial(float &b);
-	virtual void	serial(double &b);
-	virtual void	serial(bool &b);
+	virtual void	serial(uint8 &b) NL_OVERRIDE;
+	virtual void	serial(sint8 &b) NL_OVERRIDE;
+	virtual void	serial(uint16 &b) NL_OVERRIDE;
+	virtual void	serial(sint16 &b) NL_OVERRIDE;
+	virtual void	serial(uint32 &b) NL_OVERRIDE;
+	virtual void	serial(sint32 &b) NL_OVERRIDE;
+	virtual void	serial(uint64 &b) NL_OVERRIDE;
+	virtual void	serial(sint64 &b) NL_OVERRIDE;
+	virtual void	serial(float &b) NL_OVERRIDE;
+	virtual void	serial(double &b) NL_OVERRIDE;
+	virtual void	serial(bool &b) NL_OVERRIDE;
 #ifndef NL_OS_CYGWIN
-	virtual void	serial(char &b);
+	virtual void	serial(char &b) NL_OVERRIDE;
 #endif
-	virtual void	serial(std::string &b);
-	virtual void	serial(ucstring &b);
-	virtual void	serialBuffer(uint8 *buf, uint len);
-	virtual void	serialBit(bool &bit);
+	virtual void	serial(std::string &b) NL_OVERRIDE;
+	virtual void	serial(ucstring &b) NL_OVERRIDE;
+	virtual void	serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
+	virtual void	serialBit(bool &bit) NL_OVERRIDE;
 
-	virtual bool	xmlPushBeginInternal (const std::string &nodeName);
-	virtual bool	xmlPushEndInternal ();
-	virtual bool	xmlPopInternal ();
-	virtual bool	xmlSetAttribInternal (const std::string &attribName);
-	virtual bool	xmlBreakLineInternal ();
-	virtual bool	xmlCommentInternal (const std::string &comment);
+	virtual bool	xmlPushBeginInternal (const std::string &nodeName) NL_OVERRIDE;
+	virtual bool	xmlPushEndInternal () NL_OVERRIDE;
+	virtual bool	xmlPopInternal () NL_OVERRIDE;
+	virtual bool	xmlSetAttribInternal (const std::string &attribName) NL_OVERRIDE;
+	virtual bool	xmlBreakLineInternal () NL_OVERRIDE;
+	virtual bool	xmlCommentInternal (const std::string &comment) NL_OVERRIDE;
 
 	// Internal functions
 	void			serialSeparatedBufferIn ( std::string &value, bool checkSeparator = true );

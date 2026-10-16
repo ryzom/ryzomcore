@@ -112,9 +112,9 @@ namespace NLGUI
 		CViewBitmapCombo(const TCtorParam &param);
 
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 
 		/**
@@ -124,12 +124,12 @@ namespace NLGUI
 		 * \partam id : a refence to the string that will receive the view ID
 		 * \return true if success
 		 */
-		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 		/**
 		 * draw the view
 		 */
-		void draw();
+		void draw() NL_OVERRIDE;
 
 		// access to texture & colors
 		const TStringArray &getTexs() const { return _Texs; }
@@ -176,7 +176,7 @@ namespace NLGUI
 		void	setupSize();
 		void	getDimensions(uint &numRow, uint &numCol);
 		// From ICDBNode::IPropertyObserver
-		void update(NLMISC::ICDBNode *leaf);
+		void update(NLMISC::ICDBNode *leaf) NL_OVERRIDE;
 		// Return a color from the array, or white if it is empty
 		static NLMISC::CRGBA getCol(const TColorArray &array, uint index);
 		static const std::string   *getTex(const TStringArray &array, uint index);

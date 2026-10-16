@@ -36,17 +36,17 @@ public:
 			
 	/// @name CAIBaseProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_CAMPING; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_CAMPING; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 	/// @name CSlaveSpawnProfile implementation
 	//@{
-	void addBot(CBot* bot) { }
-	void removeBot(CBot* bot) { }
+	void addBot(CBot* bot) NL_OVERRIDE { }
+	void removeBot(CBot* bot) NL_OVERRIDE { }
 	//@}
 	
 	bool timeOut() const;
@@ -90,11 +90,11 @@ public:
 	
 	/// @name CAIBaseProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ZONE_WAIT; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ZONE_WAIT; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 	CNpcZone const* currentZone() const;
@@ -131,26 +131,26 @@ class CGrpProfileDynFollowPath
 public:
 	CGrpProfileDynFollowPath(CProfileOwner* owner);
 	CGrpProfileDynFollowPath(CProfileOwner* owner, CNpcZone const* const start, CNpcZone const* const end, AITYPES::CPropertySet const& zoneFilter);
-	virtual ~CGrpProfileDynFollowPath();
+	virtual ~CGrpProfileDynFollowPath() NL_OVERRIDE;
 	
 	/// @name CAIBaseProfile implementation
 	//@{
-	virtual	void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::MOVE_DYN_FOLLOW_PATH; }
-	virtual std::string getOneLineInfoString() const;
+	virtual	void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual	void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::MOVE_DYN_FOLLOW_PATH; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 	/// @name CSlaveSpawnProfile implementation
 	//@{
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot* bot) NL_OVERRIDE;
+	void removeBot(CBot* bot) NL_OVERRIDE;
 	//@}
 	
 	/// @name CMoveSpawnProfile implementation
 	//@{
-	virtual	CPathCont* getPathCont(CBot const* bot);
+	virtual	CPathCont* getPathCont(CBot const* bot) NL_OVERRIDE;
 	//@}
 	
 	/// Overload for IDynFollowPath interface

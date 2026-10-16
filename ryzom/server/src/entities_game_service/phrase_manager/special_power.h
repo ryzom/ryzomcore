@@ -92,7 +92,7 @@ public:
 	}
 
 	/// validate the power utilisation
-	virtual bool validate(std::string &errorCode);
+	virtual bool validate(std::string &errorCode) NL_OVERRIDE;
 
 	// getRadius
 	inline float getRadius() const { return _AuraRadius; }

@@ -44,48 +44,48 @@ public:
 	}
 
 
-	virtual void					setLandscape(ULandscape *landscape)
+	virtual void					setLandscape(ULandscape *landscape) NL_OVERRIDE
 	{
 		_Manager.setLandscape(&(dynamic_cast<CLandscapeUser*>(landscape)->getLandscape()->Landscape));
 	}
 
-	virtual UVisualCollisionEntity	*createEntity()
+	virtual UVisualCollisionEntity	*createEntity() NL_OVERRIDE
 	{
 		return _Entities.insert(new CVisualCollisionEntityUser(&_Manager));
 	}
 
-	virtual void					deleteEntity(UVisualCollisionEntity	*entity)
+	virtual void					deleteEntity(UVisualCollisionEntity	*entity) NL_OVERRIDE
 	{
 		_Entities.erase(dynamic_cast<CVisualCollisionEntityUser*>(entity));
 	}
 
-	virtual void					setSunContributionPower (float power, float maxThreshold)
+	virtual void					setSunContributionPower (float power, float maxThreshold) NL_OVERRIDE
 	{
 		_Manager.setSunContributionPower (power, maxThreshold);
 	}
 
-	virtual void					setPlayerInside(bool state)
+	virtual void					setPlayerInside(bool state) NL_OVERRIDE
 	{
 		_Manager.setPlayerInside(state);
 	}
 
-	virtual float					getCameraCollision(const CVector &start, const CVector &end, float radius, bool cone)
+	virtual float					getCameraCollision(const CVector &start, const CVector &end, float radius, bool cone) NL_OVERRIDE
 	{
 		return _Manager.getCameraCollision (start, end, radius, cone);
 	}
 
-	virtual bool					getRayCollision(const NLMISC::CVector &start, const NLMISC::CVector &end, bool landscapeOnly)
+	virtual bool					getRayCollision(const NLMISC::CVector &start, const NLMISC::CVector &end, bool landscapeOnly) NL_OVERRIDE
 	{
 		return _Manager.getRayCollision (start, end, landscapeOnly);
 	}
 
-	virtual uint					addMeshInstanceCollision(const UVisualCollisionMesh &mesh, const NLMISC::CMatrix &instanceMatrix, bool avoidCollisionWhenInside, bool avoidCollisionWhenOutside);
+	virtual uint					addMeshInstanceCollision(const UVisualCollisionMesh &mesh, const NLMISC::CMatrix &instanceMatrix, bool avoidCollisionWhenInside, bool avoidCollisionWhenOutside) NL_OVERRIDE;
 
-	virtual void					removeMeshCollision(uint id)
+	virtual void					removeMeshCollision(uint id) NL_OVERRIDE
 	{
 		_Manager.removeMeshCollision(id);
 	}
-	virtual	void					getMeshs(const NLMISC::CAABBox &aabbox, std::vector<CMeshInstanceColInfo> &dest);
+	virtual	void					getMeshs(const NLMISC::CAABBox &aabbox, std::vector<CMeshInstanceColInfo> &dest) NL_OVERRIDE;
 
 
 public:

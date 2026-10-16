@@ -179,10 +179,10 @@ public:
 	std::string		toString( bool hexFormat=false ) const;
 
 	/// Method inherited from IStream
-	virtual void	serialBuffer(uint8 *buf, uint len);
+	virtual void	serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
 
 	/// Method inherited from IStream
-	virtual void	serialBit(bool &bit);
+	virtual void	serialBit(bool &bit) NL_OVERRIDE;
 
 	/**
 	 * Moves the stream pointer to a specified location.
@@ -200,7 +200,7 @@ public:
 	 * \return true if seek sucessfull.
 	 * \see ESeekNotSupported SeekOrigin getPos
 	 */
-	virtual bool	seek (sint32 offset, TSeekOrigin origin) const;
+	virtual bool	seek (sint32 offset, TSeekOrigin origin) const NL_OVERRIDE;
 
 	/**
 	 * Get the location of the stream pointer.
@@ -213,7 +213,7 @@ public:
 	 * \return the new offset regarding from the origin.
 	 * \see ESeekNotSupported SeekOrigin seek
 	 */
-	virtual sint32	getPos () const
+	virtual sint32	getPos () const NL_OVERRIDE
 	{
 		return sint32(_Buffer.Pos);
 	}
@@ -472,11 +472,11 @@ public:
 	template<class K, class T>
 	void			serialCont(std::multimap<K, T> &cont) 	{IStream::serialCont(cont);}
 	/// Specialisation of serialCont() for vector<uint8>
-	virtual void			serialCont(std::vector<uint8> &cont) {IStream::serialCont(cont);}
+	virtual void			serialCont(std::vector<uint8> &cont) NL_OVERRIDE {IStream::serialCont(cont);}
 	/// Specialisation of serialCont() for vector<sint8>
-	virtual void			serialCont(std::vector<sint8> &cont) {IStream::serialCont(cont);}
+	virtual void			serialCont(std::vector<sint8> &cont) NL_OVERRIDE {IStream::serialCont(cont);}
 	/// Specialisation of serialCont() for vector<bool>
-	virtual void			serialCont(std::vector<bool> &cont) {IStream::serialCont(cont);}
+	virtual void			serialCont(std::vector<bool> &cont) NL_OVERRIDE {IStream::serialCont(cont);}
 
 
 
@@ -500,22 +500,22 @@ public:
 	 * Those method are a specialisation of template method "void serial(T&)".
 	 */
 	//@{
-	virtual void	serial(uint8 &b) ;
-	virtual void	serial(sint8 &b) ;
-	virtual void	serial(uint16 &b) ;
-	virtual void	serial(sint16 &b) ;
-	virtual void	serial(uint32 &b) ;
-	virtual void	serial(sint32 &b) ;
-	virtual void	serial(uint64 &b) ;
-	virtual void	serial(sint64 &b) ;
-	virtual void	serial(float &b) ;
-	virtual void	serial(double &b) ;
-	virtual void	serial(bool &b) ;
+	virtual void	serial(uint8 &b) NL_OVERRIDE ;
+	virtual void	serial(sint8 &b) NL_OVERRIDE ;
+	virtual void	serial(uint16 &b) NL_OVERRIDE ;
+	virtual void	serial(sint16 &b) NL_OVERRIDE ;
+	virtual void	serial(uint32 &b) NL_OVERRIDE ;
+	virtual void	serial(sint32 &b) NL_OVERRIDE ;
+	virtual void	serial(uint64 &b) NL_OVERRIDE ;
+	virtual void	serial(sint64 &b) NL_OVERRIDE ;
+	virtual void	serial(float &b) NL_OVERRIDE ;
+	virtual void	serial(double &b) NL_OVERRIDE ;
+	virtual void	serial(bool &b) NL_OVERRIDE ;
 #ifndef NL_OS_CYGWIN
-	virtual void	serial(char &b) ;
+	virtual void	serial(char &b) NL_OVERRIDE ;
 #endif
-	virtual void	serial(std::string &b) ;
-	virtual void	serial(ucstring &b) ;
+	virtual void	serial(std::string &b) NL_OVERRIDE ;
+	virtual void	serial(ucstring &b) NL_OVERRIDE ;
 	//@}
 
 
@@ -553,7 +553,7 @@ protected:
 	/** Get the size for this stream. return 0 by default. Only implemented for input stream that know their size.
 	 *	Used internally to detect OverFlow with vector<> for instance
 	 */
-	virtual uint			getDbgStreamSize() const;
+	virtual uint			getDbgStreamSize() const NL_OVERRIDE;
 
 	CMemStreamBuffer			_Buffer;
 

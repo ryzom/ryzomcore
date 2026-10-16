@@ -222,60 +222,60 @@ public:
 //		_Ammos = _Character->getAmmoItem();
 	}
 
-	virtual ~CCombatAttackerPlayer()
+	virtual ~CCombatAttackerPlayer() NL_OVERRIDE
 	{}
 
-inline void lockRightItem() 
+inline void lockRightItem() NL_OVERRIDE 
 	{
 /*		CCharacter *player = PlayerManager.getChar(_RowId);
 		if(!player) return;
 		if (player->getRightHandItem() != NULL) player->getRightHandItem()->setLockState(player->getRightHandItem()->getLockState() + 1 ); 
 */	}
 
-	inline void lockLeftItem() 
+	inline void lockLeftItem() NL_OVERRIDE 
 	{
 /*		CCharacter *player = PlayerManager.getChar(_RowId);
 		if(!player) return;
 		if (player->getLeftHandItem() != NULL) player->getLeftHandItem()->setLockState(player->getLeftHandItem()->getLockState() + 1 ); 
 */	}
 
-	inline void lockAmmos(uint16 nb = 1) 
+	inline void lockAmmos(uint16 nb = 1) NL_OVERRIDE 
 	{
 /*		CCharacter *player = PlayerManager.getChar(_RowId);
 		if(!player) return;
 		if (player->getAmmoItem() != NULL) player->getAmmoItem()->setLockState(player->getAmmoItem()->getLockState() + nb ); 
 */	}
 
-	inline void unlockRightItem() 
+	inline void unlockRightItem() NL_OVERRIDE 
 	{
 /*		CCharacter *player = PlayerManager.getChar(_RowId);
 		if(!player) return;
 		if (player->getRightHandItem() != NULL) player->getRightHandItem()->setLockState(player->getRightHandItem()->getLockState() - 1); 
 */	}
 
-	inline void unlockLeftItem() 
+	inline void unlockLeftItem() NL_OVERRIDE 
 	{
 /*		CCharacter *player = PlayerManager.getChar(_RowId);
 		if(!player) return;
 		if (player->getLeftHandItem() != NULL) player->getLeftHandItem()->setLockState(player->getLeftHandItem()->getLockState() - 1); 
 */	}
 
-	inline void unlockAmmos(uint16 nb = 1) 
+	inline void unlockAmmos(uint16 nb = 1) NL_OVERRIDE 
 	{ 
 /*		CCharacter *player = PlayerManager.getChar(_RowId);
 		if(!player) return;
 		if (player->getAmmoItem() != NULL) player->getAmmoItem()->setLockState(player->getAmmoItem()->getLockState() - nb); 
 */	}
 
-	virtual bool checkAmmoAmount( uint32 qty = 1) const;
+	virtual bool checkAmmoAmount( uint32 qty = 1) const NL_OVERRIDE;
 
-	virtual void consumeAmmos( uint32 qty = 1) 
+	virtual void consumeAmmos( uint32 qty = 1) NL_OVERRIDE 
 	{
 		if(!_Character) return;
 		_Character->consumeAmmo(qty);
 	}
 
-	virtual void damageItem(double hpLost, bool right = true) 
+	virtual void damageItem(double hpLost, bool right = true) NL_OVERRIDE 
 	{
 		if (_Character == NULL)
 			return;
@@ -290,9 +290,9 @@ inline void lockRightItem()
 			item->removeHp(hpLost);
 	}
 	
-	virtual bool getItem( TAttackerItem item, CCombatWeapon &weaponItem) const;
+	virtual bool getItem( TAttackerItem item, CCombatWeapon &weaponItem) const NL_OVERRIDE;
 
-	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople targetRace ) const
+	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople targetRace ) const NL_OVERRIDE
 	{
 		if (!_Character || skill >= SKILLS::NUM_SKILLS || skill<0) 
 			return 0;
@@ -301,7 +301,7 @@ inline void lockRightItem()
 		return _Character->getSkillValue(skill) + _Character->getSkillModifierForRace(targetRace);
 	}
 
-	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const
+	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const NL_OVERRIDE
 	{
 		if (!_Character || skill >= SKILLS::NUM_SKILLS || skill<0) 
 			return 0;
@@ -309,7 +309,7 @@ inline void lockRightItem()
 		return _Character->getSkillBaseValue(skill);
 	}
 
-	inline sint32 adversaryDodgeModifier() const
+	inline sint32 adversaryDodgeModifier() const NL_OVERRIDE
 	{
 		if (_Character)
 			return _Character->adversaryDodgeModifier();
@@ -317,7 +317,7 @@ inline void lockRightItem()
 			return 0;
 	}
 	
-	inline sint32 adversaryParryModifier() const
+	inline sint32 adversaryParryModifier() const NL_OVERRIDE
 	{
 		if (_Character)
 			return _Character->adversaryParryModifier();
@@ -350,24 +350,24 @@ public:
 		initFromRowId(rowId);
 	}
 
-	virtual ~CCombatAttackerAI()
+	virtual ~CCombatAttackerAI() NL_OVERRIDE
 	{}
 
-	inline void consumeAmmos( uint32 qty = 1) {}
-	inline void damageItem(double, bool = true) {}
-	inline void lockRightItem() {}
-	inline void lockLeftItem() {}
-	inline void lockAmmos(uint16 nb = 1) {}
-	inline void unlockRightItem() {}
-	inline void unlockLeftItem() {}
-	inline void unlockAmmos(uint16 nb = 1) {}
+	inline void consumeAmmos( uint32 qty = 1) NL_OVERRIDE {}
+	inline void damageItem(double, bool = true) NL_OVERRIDE {}
+	inline void lockRightItem() NL_OVERRIDE {}
+	inline void lockLeftItem() NL_OVERRIDE {}
+	inline void lockAmmos(uint16 nb = 1) NL_OVERRIDE {}
+	inline void unlockRightItem() NL_OVERRIDE {}
+	inline void unlockLeftItem() NL_OVERRIDE {}
+	inline void unlockAmmos(uint16 nb = 1) NL_OVERRIDE {}
 
-	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople) const { return _SkillValue; }
-	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const { return _SkillValue; }
+	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople) const NL_OVERRIDE { return _SkillValue; }
+	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const NL_OVERRIDE { return _SkillValue; }
 	
-	inline bool checkAmmoAmount( uint32 qty = 1) const { return true; }
+	inline bool checkAmmoAmount( uint32 qty = 1) const NL_OVERRIDE { return true; }
 
-	virtual bool getItem( TAttackerItem item, CCombatWeapon &weaponItem) const;	
+	virtual bool getItem( TAttackerItem item, CCombatWeapon &weaponItem) const NL_OVERRIDE;	
 
 protected:
 	// init from rowId
@@ -406,12 +406,12 @@ public:
 		initFromRowId(rowId);
 	}
 
-	virtual ~CCombatAttackerNpc()
+	virtual ~CCombatAttackerNpc() NL_OVERRIDE
 	{}
 
 protected:
 	// init from rowId
-	virtual void initFromRowId(const TDataSetRow &rowId);	
+	virtual void initFromRowId(const TDataSetRow &rowId) NL_OVERRIDE;	
 };
 
 #endif // RY_COMBAT_ATTACKER_H

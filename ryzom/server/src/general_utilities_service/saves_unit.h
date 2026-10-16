@@ -93,7 +93,7 @@ namespace SAVES
 		void getFileList(CFileDescriptionContainer &result) const;
 
 		// add an element to the module (an element is typically a directory that may contain files or other directories)
-		void addElement(ISavesUnitElement* newChild);
+		void addElement(ISavesUnitElement* newChild) NL_OVERRIDE;
 
 		// get the current change description message and provoke flush of change set in the saves unit
 		TMsgRSUpdatePtr popNextChangeSet();
@@ -103,9 +103,9 @@ namespace SAVES
 		// Interface for element objects to use during their scan to signal file
 		// additions, changes or deletions
 
-		void addNew(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size);
-		void addChange(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size);
-		void addDeleted(const NLMISC::CSString& fileName);
+		void addNew(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size) NL_OVERRIDE;
+		void addChange(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size) NL_OVERRIDE;
+		void addDeleted(const NLMISC::CSString& fileName) NL_OVERRIDE;
 
 
 	private:

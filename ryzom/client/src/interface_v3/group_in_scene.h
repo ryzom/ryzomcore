@@ -42,14 +42,14 @@ public:
 	DECLARE_UI_CLASS(CGroupInScene)
 	// Constructor
 	CGroupInScene(const TCtorParam &param);
-	~CGroupInScene();
+	~CGroupInScene() NL_OVERRIDE;
 
 	// From CInterfaceElement
-	virtual void updateCoords();
-	virtual void draw();
-	virtual bool parse (xmlNodePtr cur,  CInterfaceGroup *parent);
+	virtual void updateCoords() NL_OVERRIDE;
+	virtual void draw() NL_OVERRIDE;
+	virtual bool parse (xmlNodePtr cur,  CInterfaceGroup *parent) NL_OVERRIDE;
 	// Called each frame to just move X/Y positions.
-	virtual void onFrameUpdateWindowPos (sint dx, sint dy);
+	virtual void onFrameUpdateWindowPos (sint dx, sint dy) NL_OVERRIDE;
 
 	// Position of the group in world space
 	NLMISC::CVector	Position;
@@ -73,7 +73,7 @@ public:
 	void	setZBias(float zbias) {_ZBias= zbias;}
 	float	getZBias() const {return _ZBias;}
 
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 protected:
 

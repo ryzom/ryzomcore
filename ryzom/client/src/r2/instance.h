@@ -227,8 +227,8 @@ private:
 	public:
 		CLuaObject							   _LuaProjection; // projection in lua of this instance properties & methods
 		mutable CLuaObject					   _Class; // shortcut to class definition of this instance
-		virtual CLuaState *getLua();
-		virtual void executeHandler(const CLuaString &eventName, int numArgs);
+		virtual CLuaState *getLua() NL_OVERRIDE;
+		virtual void executeHandler(const CLuaString &eventName, int numArgs) NL_OVERRIDE;
 	};
 	CToLua									   _ToLua;
 	CObject::TSmartPtr						   _ObjectTable;	// the real datas for that object
@@ -254,7 +254,7 @@ private:
 	//
 	void refreshDisplayNameHandle();
 public:
-	~CInstance();
+	~CInstance() NL_OVERRIDE;
 };
 
 } // R2

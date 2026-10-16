@@ -52,12 +52,12 @@ private:
 	// This method is called before landscape render to modify stencil operation.
 	// The eighth bit will be written with a 1 during next render. Thus we will differentiate stencil buffer parts
 	// which will support Shadow Volume algorithm (landscape) and the other parts (veget...)
-	virtual void beginPolyDrawing();
+	virtual void beginPolyDrawing() NL_OVERRIDE;
 
 	// from NL3D::ILandscapePolyDrawingCallback
 	// This method is called after landscape render and before veget render to modify back stencil operation.
 	// The eighth bit will be again written with a 0 during next render.
-	virtual void endPolyDrawing();
+	virtual void endPolyDrawing() NL_OVERRIDE;
 };
 
 
@@ -80,7 +80,7 @@ public:
 	CLandscapePolyDrawer();
 
 	// Destructor
-	~CLandscapePolyDrawer();
+	~CLandscapePolyDrawer() NL_OVERRIDE;
 
 	// At every frame, polygons list is intialized and filled with addPloy calls.
 	void addPoly(const NLMISC::CPolygon2D &poly, const NLMISC::CRGBA & color, const NLMISC::CAABBox & bBox);

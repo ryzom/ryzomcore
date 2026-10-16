@@ -118,10 +118,10 @@ public:
 	 * Default constructor
 	 */
 	CTextureFont();
-	virtual ~CTextureFont();
+	virtual ~CTextureFont() NL_OVERRIDE;
 
 	// Generate the texture
-	void doGenerate (bool async = false);
+	void doGenerate (bool async = false) NL_OVERRIDE;
 
 	// This function manage the cache if the letter wanted does not exist
 	// \param render Set to true if letter is currently visible on screen
@@ -197,7 +197,7 @@ private:
 
 	/// Todo: serialize a font texture.
 public:
-	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureFont);
 
 };

@@ -84,13 +84,13 @@ public:
 
 	// Constructor
 	CGroupCompas(const TCtorParam &param);
-	~CGroupCompas();
+	~CGroupCompas() NL_OVERRIDE;
 
 	// From CInterfaceElement
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void updateCoords();
-	virtual void draw();
-	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+	virtual void updateCoords() NL_OVERRIDE;
+	virtual void draw() NL_OVERRIDE;
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
 	void setTarget(const CCompassTarget &target);
 	const CCompassTarget &getTarget() const { return _Target; }
@@ -99,9 +99,9 @@ public:
 	void blink();
 
 
-	virtual bool wantSerialConfig() const;
+	virtual bool wantSerialConfig() const NL_OVERRIDE;
 	// config serialization will save the current compass direction
-	virtual void serialConfig(NLMISC::IStream &f);
+	virtual void serialConfig(NLMISC::IStream &f) NL_OVERRIDE;
 
 	bool			isSavedTargetValid() const { return _SavedTargetValid; }
 	CCompassTarget &getSavedTarget() { return _SavedTarget; }
@@ -142,7 +142,7 @@ private:
 	public:
 		CDBUseCameraObs():_useCamera(false),_changed(false)
 		{ }
-		virtual void update( NLMISC::ICDBNode *node);
+		virtual void update( NLMISC::ICDBNode *node) NL_OVERRIDE;
 		bool _useCamera;
 		bool _changed;
 	};
@@ -161,13 +161,13 @@ public:
 
 	// Constructor
 	CGroupCompasMenu(const TCtorParam &param);
-	~CGroupCompasMenu();
+	~CGroupCompasMenu() NL_OVERRIDE;
 
 	// parse
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent=NULL);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent=NULL) NL_OVERRIDE;
 
 	// From CInterfaceElement
-	virtual void setActive (bool state);
+	virtual void setActive (bool state) NL_OVERRIDE;
 
 	// name of the target compass for that menu
 	std::string _TargetCompass;

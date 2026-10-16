@@ -50,7 +50,7 @@ class CStdMat : public CMtl
 {
 public:
 	CStdMat(CScene *scene);
-	virtual ~CStdMat();
+	virtual ~CStdMat() NL_OVERRIDE;
 
 }; /* class CStdMat */
 

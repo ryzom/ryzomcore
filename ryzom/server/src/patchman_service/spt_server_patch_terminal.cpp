@@ -141,27 +141,27 @@ public:
 	CServerPatchTerminal();
 
 	// CModuleBase specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	std::string buildModuleManifest() const;
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
-	void onModuleUpdate();
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleUpdate() NL_OVERRIDE;
 // 	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg);
 
 	// dissable immediate message dispatching to allow modules on same service to send eachother messages on module up
-	bool isImmediateDispatchingSupported() const { return false; }
+	bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 	// CServerPatchTerminalSkel specialisation
-	void declareState(NLNET::IModuleProxy *sender, const NLMISC::CSString &moduleName, const NLMISC::CSString &state);
-	void declareModuleDown(NLNET::IModuleProxy *sender, const NLMISC::CSString &moduleName);
-	void declareVersionName(NLNET::IModuleProxy *sender, const NLMISC::CSString &versionName, uint32 clientVersion, uint32 serverVersion);
-	void declareDomainInfo(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, uint32 installVersion, uint32 launchVersion);
-	void ackVersionChange(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, bool success, const NLMISC::CSString &comment);
-	void setInstallVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, uint32 version);
-	void setLaunchVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, uint32 version);
-	void executedCommandAck(NLNET::IModuleProxy *sender, const NLMISC::CSString &result);
-	void executedCommandResult(NLNET::IModuleProxy *sender, const NLMISC::CSString &originator, const NLMISC::CSString &commandline, const NLMISC::CSString &result);
+	void declareState(NLNET::IModuleProxy *sender, const NLMISC::CSString &moduleName, const NLMISC::CSString &state) NL_OVERRIDE;
+	void declareModuleDown(NLNET::IModuleProxy *sender, const NLMISC::CSString &moduleName) NL_OVERRIDE;
+	void declareVersionName(NLNET::IModuleProxy *sender, const NLMISC::CSString &versionName, uint32 clientVersion, uint32 serverVersion) NL_OVERRIDE;
+	void declareDomainInfo(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, uint32 installVersion, uint32 launchVersion) NL_OVERRIDE;
+	void ackVersionChange(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, bool success, const NLMISC::CSString &comment) NL_OVERRIDE;
+	void setInstallVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, uint32 version) NL_OVERRIDE;
+	void setLaunchVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString &domainName, uint32 version) NL_OVERRIDE;
+	void executedCommandAck(NLNET::IModuleProxy *sender, const NLMISC::CSString &result) NL_OVERRIDE;
+	void executedCommandResult(NLNET::IModuleProxy *sender, const NLMISC::CSString &originator, const NLMISC::CSString &commandline, const NLMISC::CSString &result) NL_OVERRIDE;
 
 private:
 	// private data

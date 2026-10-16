@@ -210,8 +210,8 @@ public:
 	std::set<std::string>		Implemented;
 
 	///
-	virtual bool	prolog();
-	virtual bool	epilog();
+	virtual bool	prolog() NL_OVERRIDE;
+	virtual bool	epilog() NL_OVERRIDE;
 
 	void			pass1();
 	void			pass2();
@@ -265,8 +265,8 @@ public:
 							  std::vector<CFileNode*> &filesOrder);
 
 	///
-	virtual bool	prolog();
-	virtual bool	epilog();
+	virtual bool	prolog() NL_OVERRIDE;
+	virtual bool	epilog() NL_OVERRIDE;
 
 	//
 	virtual bool	generateProlog();
@@ -287,7 +287,7 @@ class CIncludeNode : public CParseNode
 public:
 
 	///
-	virtual bool	prolog();
+	virtual bool	prolog() NL_OVERRIDE;
 };
 
 //
@@ -298,7 +298,7 @@ class CUsePchNode : public CParseNode
 public:
 
 	///
-	virtual bool	prolog();
+	virtual bool	prolog() NL_OVERRIDE;
 };
 
 //
@@ -311,7 +311,7 @@ public:
 	std::string		RawCode;
 
 	///
-	virtual bool	prolog();
+	virtual bool	prolog() NL_OVERRIDE;
 };
 
 //
@@ -487,7 +487,7 @@ public:
 
 
 	///
-	virtual bool	prolog();
+	virtual bool	prolog() NL_OVERRIDE;
 
 	///
 	virtual bool	generateContent();
@@ -610,8 +610,8 @@ public:
 	std::set<CClassNode*>		Legacy;
 
 	///
-	virtual bool	prolog();
-	virtual bool	epilog();
+	virtual bool	prolog() NL_OVERRIDE;
+	virtual bool	epilog() NL_OVERRIDE;
 
 	CDeclarationNode*	getDeclarationNode(const std::string &name);
 	CDeclarationNode*	getKey();
@@ -754,8 +754,8 @@ public:
 	CClassNode*		getParentClass()	{ return dynamic_cast<CClassNode*>(Parent); }
 
 	///
-	virtual bool	prolog();
-	virtual bool	epilog();
+	virtual bool	prolog() NL_OVERRIDE;
+	virtual bool	epilog() NL_OVERRIDE;
 
 	//
 	std::string		getFunc() const		{ return lcFirst(getFunctionPrefix+Name); }
@@ -809,7 +809,7 @@ public:
 		StorageType = "uint32";
 	}
 
-	virtual bool		isIndex()		{ return true; }
+	virtual bool		isIndex() NL_OVERRIDE		{ return true; }
 
 	virtual std::string	getSizeName()	{ return Name+"Size"; }
 	virtual uint		getSize() = 0;
@@ -829,7 +829,7 @@ public:
 		return "atoi("+var+")";
 	}
 
-	virtual std::string	checkCode(const std::string& var)	{ return "nlassert("+var+"<"+getSizeName()+");"; }
+	virtual std::string	checkCode(const std::string& var) NL_OVERRIDE	{ return "nlassert("+var+"<"+getSizeName()+");"; }
 };
 
 
@@ -853,22 +853,22 @@ public:
 	std::vector<std::pair<std::string, uint32> >	Values;
 	std::string		EndRange;
 
-	virtual bool		isEnum()		{ return true; }
-	virtual std::string	getName()
+	virtual bool		isEnum() NL_OVERRIDE		{ return true; }
+	virtual std::string	getName() NL_OVERRIDE
 	{
 		std::string	trunc = Name.substr(1);
 		return "C"+trunc+"::"+(DisplayName.empty() ? Name : DisplayName);
 	}
 
-	virtual uint		getSize()		{ return MaxValue-MinValue; }
+	virtual uint		getSize() NL_OVERRIDE		{ return MaxValue-MinValue; }
 
-	bool	prolog();
-	bool	epilog();
+	bool	prolog() NL_OVERRIDE;
+	bool	epilog() NL_OVERRIDE;
 
 	///
-	virtual bool	generateContent();
+	virtual bool	generateContent() NL_OVERRIDE;
 
-	std::string		getIndexName(uint32 value) const
+	std::string		getIndexName(uint32 value) const NL_OVERRIDE
 	{
 		std::string	result;
 
@@ -896,25 +896,25 @@ public:
 		return "C"+trunc+"::"+getUnscopedUseSize();
 	}
 
-	std::string		getSizeName()
+	std::string		getSizeName() NL_OVERRIDE
 	{
 		std::string	trunc = Name.substr(1);
 		return "C"+trunc+"::"+getUnscopedUseSize();
 	}
 
-	virtual std::string	getToStringCode(const std::string& var) const
+	virtual std::string	getToStringCode(const std::string& var) const NL_OVERRIDE
 	{
 		std::string	trunc = Name.substr(1);
 		return "C"+trunc+"::toString("+var+")";
 	}
 
-	virtual std::string	getFromStringCode(const std::string& var) const
+	virtual std::string	getFromStringCode(const std::string& var) const NL_OVERRIDE
 	{
 		std::string	trunc = Name.substr(1);
 		return "C"+trunc+"::fromString("+var+")";
 	}
 
-	virtual void	generateApplyCode(CClassGenerator::SMethodId& method, const std::string& token, const std::string& value)
+	virtual void	generateApplyCode(CClassGenerator::SMethodId& method, const std::string& token, const std::string& value) NL_OVERRIDE
 	{
 		method.add("{");
 		method.add("std::string\tvaluename;");
@@ -923,7 +923,7 @@ public:
 		method.add("}");
 	}
 
-	virtual void	generateStoreCode(CClassGenerator::SMethodId& method, const std::string& token, const std::string& value)
+	virtual void	generateStoreCode(CClassGenerator::SMethodId& method, const std::string& token, const std::string& value) NL_OVERRIDE
 	{
 		method.add("{");
 		method.add("std::string\tvaluename = "+getToStringCode(value)+";");
@@ -938,16 +938,16 @@ public:
 
 	std::vector<std::string>	Names;
 
-	bool	prolog();
-	bool	epilog();
+	bool	prolog() NL_OVERRIDE;
+	bool	epilog() NL_OVERRIDE;
 };
 
 class CEnumRangeNode : public CEnumNode
 {
 public:
 
-	bool	prolog();
-	bool	epilog();
+	bool	prolog() NL_OVERRIDE;
+	bool	epilog() NL_OVERRIDE;
 };
 
 
@@ -965,18 +965,18 @@ public:
 	{
 	}
 
-	virtual bool		isDimension()	{ return true; }
-	std::string			getSizeName()	{ return Name+"Size"; }
+	virtual bool		isDimension() NL_OVERRIDE	{ return true; }
+	std::string			getSizeName() NL_OVERRIDE	{ return Name+"Size"; }
 
-	bool	prolog();
-	bool	epilog();
+	bool	prolog() NL_OVERRIDE;
+	bool	epilog() NL_OVERRIDE;
 
 	sint	Dimension;
 
-	virtual uint		getSize()		{ return Dimension; }
+	virtual uint		getSize() NL_OVERRIDE		{ return Dimension; }
 
 	///
-	virtual bool	generateContent();
+	virtual bool	generateContent() NL_OVERRIDE;
 };
 
 
@@ -991,8 +991,8 @@ public:
 	{
 	}
 
-	bool	prolog();
-	bool	epilog()
+	bool	prolog() NL_OVERRIDE;
+	bool	epilog() NL_OVERRIDE
 	{
 		return true;
 	}

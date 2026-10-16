@@ -46,7 +46,7 @@ public:
 		_Parent = parent;
 	}
 	
-	void timerCallback(CTimer* owner);
+	void timerCallback(CTimer* owner) NL_OVERRIDE;
 
 private:
 	/// Use smart pointer because an effect can remove itself (if it kills a creature)
@@ -71,7 +71,7 @@ public:
 		_Parent = parent;
 	}
 	
-	void timerCallback(CTimer* owner);
+	void timerCallback(CTimer* owner) NL_OVERRIDE;
 
 private:
 	/// Use smart pointer because an effect can remove itself (if it kills a creature)

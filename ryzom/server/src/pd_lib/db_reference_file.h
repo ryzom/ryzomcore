@@ -41,7 +41,7 @@ public:
 	CDBReferenceFile();
 
 	/// Destructor
-	~CDBReferenceFile();
+	~CDBReferenceFile() NL_OVERRIDE;
 
 	/// Setup file name and path
 	void		setup(const std::string& name, const std::string& path, uint32 baseIndex, uint32 overIndex, uint32 rowSize);
@@ -53,7 +53,7 @@ public:
 	bool		initialised() const						{ return _Init; }
 
 	/// close file
-	void		close();
+	void		close() NL_OVERRIDE;
 
 
 	/**

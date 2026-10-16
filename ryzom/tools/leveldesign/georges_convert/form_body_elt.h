@@ -33,8 +33,8 @@ public:
 	NLMISC_DECLARE_CLASS( CFormBodyElt );
 	CFormBodyElt();
 	CFormBodyElt( const CFormBodyElt& _fbe );
-	virtual ~CFormBodyElt();
-	virtual void serial( NLMISC::IStream& s );
+	virtual ~CFormBodyElt() NL_OVERRIDE;
+	virtual void serial( NLMISC::IStream& s ) NL_OVERRIDE;
 
 	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe );
 	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe );

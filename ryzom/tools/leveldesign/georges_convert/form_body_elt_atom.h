@@ -35,17 +35,17 @@ public:
 	NLMISC_DECLARE_CLASS( CFormBodyEltAtom );
 	CFormBodyEltAtom();
 	CFormBodyEltAtom( const CFormBodyEltAtom& _fbea );
-	virtual ~CFormBodyEltAtom();
-	virtual void serial( NLMISC::IStream& s );
+	virtual ~CFormBodyEltAtom() NL_OVERRIDE;
+	virtual void serial( NLMISC::IStream& s ) NL_OVERRIDE;
 
-	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe );
-	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe );
-	virtual CFormBodyElt&	operator -=( const CFormBodyElt& _fbe );
-	virtual bool			operator ==( const CFormBodyElt& _fbe ) const;
+	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual CFormBodyElt&	operator -=( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual bool			operator ==( const CFormBodyElt& _fbe ) const NL_OVERRIDE;
 
-	virtual CFormBodyElt* Clone() const;
-	virtual bool Empty() const;
-	virtual CStringEx GetValue() const;
+	virtual CFormBodyElt* Clone() const NL_OVERRIDE;
+	virtual bool Empty() const NL_OVERRIDE;
+	virtual CStringEx GetValue() const NL_OVERRIDE;
 
 	void SetValue( const CStringEx _sxvalue );
 };

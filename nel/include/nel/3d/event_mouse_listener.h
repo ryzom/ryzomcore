@@ -79,7 +79,7 @@ public:
 	  * and the viewport is fullscreen. The mouse mode is set to the NelStyle.
 	  */
 	CEvent3dMouseListener();
-	virtual ~CEvent3dMouseListener() {}
+	virtual ~CEvent3dMouseListener() NL_OVERRIDE {}
 
 	/// \name Setup
 
@@ -88,7 +88,7 @@ public:
 	  * \param matrix is the matrix to set.
 	  * \see getViewMatrix()
 	  */
-	void setMatrix (const NLMISC::CMatrix& matrix)
+	void setMatrix (const NLMISC::CMatrix& matrix) NL_OVERRIDE
 	{
 		_Matrix=matrix;
 	}
@@ -107,7 +107,7 @@ public:
 	  * Set the current frustrum to use.
 	  * \param frustrum is the frustrum.
 	  */
-	void setFrustrum (const CFrustum& frustrum)
+	void setFrustrum (const CFrustum& frustrum) NL_OVERRIDE
 	{
 		_Frustrum=frustrum;
 	}
@@ -116,7 +116,7 @@ public:
 	  * Set the viewport in use in the window. By default, the viewport is fullwindow.
 	  * \param viewport is the viewport to use. All events outside the viewport are ignored.
 	  */
-	void setViewport (const NL3D::CViewport& viewport)
+	void setViewport (const NL3D::CViewport& viewport) NL_OVERRIDE
 	{
 		_Viewport=viewport;
 	}
@@ -127,7 +127,7 @@ public:
 	  * of the selected object. The hotspot is not modified by mouse events.
 	  * \see getViewMatrix()
 	  */
-	void setHotSpot (const CVector& hotSpot)
+	void setHotSpot (const CVector& hotSpot) NL_OVERRIDE
 	{
 		_HotSpot=hotSpot;
 	}
@@ -137,7 +137,7 @@ public:
 	  * \param mouseMode is the mode you want to use.
 	  * \see TMouseMode
 	  */
-	void setMouseMode(TMouseMode mouseMode)
+	void setMouseMode(TMouseMode mouseMode) NL_OVERRIDE
 	{
 		_MouseMode=mouseMode;
 	}
@@ -193,7 +193,7 @@ public:
 	  * \param speed is in unit per second.
 	  * \see TMouseMode
 	  */
-	void setSpeed (float speed)
+	void setSpeed (float speed) NL_OVERRIDE
 	{
 		_Speed=speed;
 	}
@@ -205,7 +205,7 @@ public:
 	  * \return The current view matrix.
 	  * \see setMatrix()
 	  */
-	const NLMISC::CMatrix& getViewMatrix () ;
+	const NLMISC::CMatrix& getViewMatrix () NL_OVERRIDE ;
 
 
 	/**
@@ -226,7 +226,7 @@ public:
 	  * of the selected object. The hotspot is not modified by mouse events.
 	  * \see getViewMatrix()
 	  */
-	CVector getHotSpot () const
+	CVector getHotSpot () const NL_OVERRIDE
 	{
 		return _HotSpot;
 	}
@@ -243,7 +243,7 @@ public:
 
 private:
 	/// Internal use
-	virtual void operator ()(const NLMISC::CEvent& event);
+	virtual void operator ()(const NLMISC::CEvent& event) NL_OVERRIDE;
 
 
 
@@ -276,7 +276,7 @@ private:
 	  */
 	void truncateVect(CVector &v);
 
-	virtual NLMISC::IEventListener &getEventListenerInterface() { return *this; }
+	virtual NLMISC::IEventListener &getEventListenerInterface() NL_OVERRIDE { return *this; }
 
 
 }; // NL3D

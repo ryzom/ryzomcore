@@ -52,7 +52,7 @@ Factories->push_back(std::make_pair( std::string(_type_) ,this));
 
 #define END_MAGIC_ACTION_FACTORY(_class_) \
 	};\
-	IMagicAction * build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, uint & brickIndex, CBuildParameters &buildParams, CMagicPhrase * phrase )\
+	IMagicAction * build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, uint & brickIndex, CBuildParameters &buildParams, CMagicPhrase * phrase ) NL_OVERRIDE\
 	{\
 		_class_ *inst = new _class_;\
 		if ( !inst->build( actorRowId, bricks, brickIndex, buildParams, phrase ) ){delete inst;return NULL;} \
@@ -382,7 +382,7 @@ public:
 	};
 
 	/// buildFromAiAction method
-	IMagicAction * buildFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase)
+	IMagicAction * buildFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase) NL_OVERRIDE
 	{
 		T *instance = new T;
 		if (!instance)
@@ -428,7 +428,7 @@ public:
 	};
 
 	/// buildFromAiAction method
-	IMagicAction * buildFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase)
+	IMagicAction * buildFromAiAction(const CStaticAiAction *aiAction, CMagicPhrase *phrase) NL_OVERRIDE
 	{
 		T *instance = new T;
 		if (!instance)

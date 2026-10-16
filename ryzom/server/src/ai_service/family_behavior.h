@@ -91,12 +91,12 @@ class CFamilyBehavior
 , public CAIEntity
 {
  public:
-	std::string getIndexString() const;
-	std::string getManagerIndexString(const CManager *child) const;
+	std::string getIndexString() const NL_OVERRIDE;
+	std::string getManagerIndexString(const CManager *child) const NL_OVERRIDE;
 
 	CFamilyBehavior(CCellZone *owner, const	CGroupFamily	*grpFamily);	//	;const	std::string	&name, const	NLMISC::TStringId	&profileName)
 
-	virtual	~CFamilyBehavior()
+	virtual	~CFamilyBehavior() NL_OVERRIDE
 	{
 		_FamilyProfile	=	NULL;
 		_ManagerNpc		=	NULL;
@@ -145,7 +145,7 @@ class CFamilyBehavior
 		return _FamilyTag;
 	}
 
-	void	serviceEvent	(const	CServiceEvent	&info);
+	void	serviceEvent	(const	CServiceEvent	&info) NL_OVERRIDE;
 
 	uint	getStaticFameIndex()
 	{
@@ -245,21 +245,21 @@ class CFamilyBehavior
 	bool spawn();
 	bool despawn();
 
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 
 private:
 
- 	CAIInstance *getAIInstance() const;
-	virtual	void	addEnergy		(uint32	energy);
-	virtual	void	removeEnergy	(uint32	energy);
+ 	CAIInstance *getAIInstance() const NL_OVERRIDE;
+	virtual	void	addEnergy		(uint32	energy) NL_OVERRIDE;
+	virtual	void	removeEnergy	(uint32	energy) NL_OVERRIDE;
 
-	void	groupDead(CGroup *grp);
+	void	groupDead(CGroup *grp) NL_OVERRIDE;
 
 	 // overloads for IManagerParent virtuals
 	 CAIInstance	&getAiInstance() const;
 
-	 inline	CCellZone	*getCellZone()
+	 inline	CCellZone	*getCellZone() NL_OVERRIDE
 	 {
 		 return		getOwner();
 	 }

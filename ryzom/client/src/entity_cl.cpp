@@ -2454,7 +2454,7 @@ std::string CEntityCL::removeTitleAndShardFromName(const std::string &name)
 class CUpdateEntitiesColor : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 

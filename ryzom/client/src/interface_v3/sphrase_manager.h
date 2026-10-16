@@ -635,12 +635,12 @@ private:
 	class CProgressionUpdate : public IBrickLearnedCallback, public ISkillChangeCallback
 	{
 	public:
-		virtual	void	onBrickLearned()
+		virtual	void	onBrickLearned() NL_OVERRIDE
 		{
 			CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 			pPM->updatePhraseProgressionDB();
 		}
-		virtual	void	onSkillChange()
+		virtual	void	onSkillChange() NL_OVERRIDE
 		{
 			CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 			pPM->updatePhraseProgressionDB();

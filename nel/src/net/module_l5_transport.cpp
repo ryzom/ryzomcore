@@ -64,7 +64,7 @@ namespace NLNET
 		{
 		}
 
-		void sendMessage(const CMessage &message) const;
+		void sendMessage(const CMessage &message) const NL_OVERRIDE;
 	};
 
 	/** Utility class that generate 8bits unique transport id.
@@ -150,7 +150,7 @@ namespace NLNET
 			PeerInvisible = true;
 		}
 
-		~CGatewayL5Transport()
+		~CGatewayL5Transport() NL_OVERRIDE
 		{
 			if (_Open)
 			{
@@ -165,22 +165,22 @@ namespace NLNET
 			CTransportIdAllocator::getInstance().releaseId(_TransportId);
 		}
 
-		const std::string &getClassName() const
+		const std::string &getClassName() const NL_OVERRIDE
 		{
 			static string className(LAYER5_CLASS_NAME);
 			return className;
 		}
 
-		virtual void update()
+		virtual void update() NL_OVERRIDE
 		{
 		}
 
-		virtual uint32 getRouteCount() const
+		virtual uint32 getRouteCount() const NL_OVERRIDE
 		{
 			return (uint32)_Routes.size();
 		}
 
-		void dump(NLMISC::CLog &log) const
+		void dump(NLMISC::CLog &log) const NL_OVERRIDE
 		{
 			IModuleManager &mm = IModuleManager::getInstance();
 			log.displayNL("  NeL Net layer 5 transport");
@@ -218,13 +218,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */)
+		void onCommand(const CMessage &/* command */) NL_OVERRIDE
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command)
+		bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();

@@ -112,15 +112,15 @@ class CGeomBuffers : public CStorageContainer
 {
 public:
 	CGeomBuffers();
-	virtual ~CGeomBuffers();
+	virtual ~CGeomBuffers() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	//! \name Typed geometry access (valid when the typed leaf serializers are enabled — the
 	//! PMBS_GEOM_BUFFERS_PARSE default). NULL when the chunk is absent or rode through raw.
@@ -172,7 +172,7 @@ public:
 	//@}
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 }; /* class CGeomBuffers */
 

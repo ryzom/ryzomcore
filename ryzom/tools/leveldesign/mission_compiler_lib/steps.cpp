@@ -263,7 +263,7 @@ public:
 	{
 	}
 
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_HideObj = md.getProperty(prim, _Prefix + "hide_obj", true, false) == "true";
 		_OverloadObj = md.getPropertyArray(prim, _Prefix + "overload_objective", false, false);
@@ -278,7 +278,7 @@ public:
 	
 	virtual bool isAction() { return true; }
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		if (_HideObj)
@@ -295,7 +295,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 		ret += _OverloadPhrase.genPhrase();
@@ -322,7 +322,7 @@ class CStepDynChatTalkTo : public CStepObjective
 	TCompilerVarName	_BotName;
 	CPhrase		_Phrase;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 		predef.resize(1);
@@ -339,7 +339,7 @@ public:
 	{
 	}
 
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_BotName.init("npc", STRING_MANAGER::bot, md, prim, "npc_name");
 //		_BotNameVar = md.getProperty(prim, "npc_name", false, false);
@@ -370,7 +370,7 @@ public:
 		CStepObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CStepObjective::genCode(md);
@@ -384,7 +384,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 		ret = CStepObjective::genPhrase();
@@ -403,12 +403,12 @@ public:
 		_StepName = md.getProperty(prim, "target", true, false);
 	}
 
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		jumpPoints.insert(TJumpInfo(_StepName, "", false));
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -417,7 +417,7 @@ public:
 		return ret;
 	}
 
-	bool isAJump()
+	bool isAJump() NL_OVERRIDE
 	{
 		return true;
 	}
@@ -435,7 +435,7 @@ public:
 	{
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -444,7 +444,7 @@ public:
 		return ret;
 	}
 
-	bool isEnd() { return true; }
+	bool isEnd() NL_OVERRIDE { return true; }
 
 };
 REGISTER_STEP_INDIRECT(CStepEnd, "end");
@@ -491,7 +491,7 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -512,7 +512,7 @@ public:
 		return ret;
 	}
 
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		IStep::fillJump(md, jumpPoints);
 		if (!_JumpTo.empty())
@@ -579,7 +579,7 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -611,7 +611,7 @@ public:
 		return ret;
 	}
 
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		IStep::fillJump(md, jumpPoints);
 		if (!_JumpTo.empty())
@@ -777,12 +777,12 @@ public:
 		}
 		_TalkToObjective = talkToObjective.release(); // commit result
 	}
-	~CStepDynChat()
+	~CStepDynChat() NL_OVERRIDE
 	{
 		delete _TalkToObjective;
 	}
 	
-	TPrimitiveSet	getSubBranchs() 
+	TPrimitiveSet	getSubBranchs() NL_OVERRIDE 
 	{
 		TPrimitiveSet vStepsToReturn;
 		for (uint i = 0; i < _SubBranchs.size(); ++i)
@@ -798,7 +798,7 @@ public:
 		return vStepsToReturn;
 	}
 	
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		for (uint i=0; i<_SubBranchs.size(); ++i)
 		{
@@ -817,7 +817,7 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -850,7 +850,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret; /* = CStepObjective::genPhrase();*/
 
@@ -934,7 +934,7 @@ public:
 		_PhraseYes.initPhrase(md, prim, phraseYes);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -960,7 +960,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 //		ret = CStepObjective::genPhrase();
@@ -1346,7 +1346,7 @@ public:
 	}
 
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1378,7 +1378,7 @@ public:
 	{
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 

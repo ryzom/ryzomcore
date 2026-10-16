@@ -47,14 +47,14 @@ public:
 
 	/// Constructor
 	CTrackSampledVector();
-	virtual ~CTrackSampledVector();
+	virtual ~CTrackSampledVector() NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS (CTrackSampledVector);
 
 	/// From UTrack/ITrack.
 	// @{
-	virtual const IAnimatedValue	&eval (const TAnimationTime& date, CAnimatedValueBlock &avBlock);
-	virtual void					serial(NLMISC::IStream &f);
-	virtual void					applySampleDivisor(uint sampleDivisor);
+	virtual const IAnimatedValue	&eval (const TAnimationTime& date, CAnimatedValueBlock &avBlock) NL_OVERRIDE;
+	virtual void					serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual void					applySampleDivisor(uint sampleDivisor) NL_OVERRIDE;
 	// @}
 
 	/** Build the track from a list of keys

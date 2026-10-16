@@ -89,8 +89,8 @@ private:
 		uint8 **_ppFile;
 	public:
 		CFileLoad (const std::string& sFileName, uint8 **ppFile);
-		void run (void);
-		void getName (std::string &result) const;
+		void run (void) NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 	// Load multiple files
@@ -100,8 +100,8 @@ private:
 		std::vector<uint8**> _Ptrs;
 	public:
 		CMultipleFileLoad (const std::vector<std::string> &vFileNames, const std::vector<uint8**> &vPtrs);
-		void run (void);
-		void getName (std::string &result) const;
+		void run (void) NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 	// Signal
@@ -111,8 +111,8 @@ private:
 		bool *Sgn;
 	public:
 		CSignal (bool *pSgn);
-		void run (void);
-		void getName (std::string &result) const;
+		void run (void) NL_OVERRIDE;
+		void getName (std::string &result) const NL_OVERRIDE;
 	};
 
 };

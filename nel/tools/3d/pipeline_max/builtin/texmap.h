@@ -50,7 +50,7 @@ class CTexmap : public CMtlBase
 {
 public:
 	CTexmap(CScene *scene);
-	virtual ~CTexmap();
+	virtual ~CTexmap() NL_OVERRIDE;
 
 }; /* class CTexmap */
 

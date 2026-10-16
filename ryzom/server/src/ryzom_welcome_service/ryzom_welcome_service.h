@@ -47,17 +47,17 @@ namespace WS
 		/// the login service module (if any)
 		NLNET::TModuleProxyPtr		_LoginService;
 
-		void onModuleUp(NLNET::IModuleProxy *proxy);
-		void onModuleDown(NLNET::IModuleProxy *proxy);
+		void onModuleUp(NLNET::IModuleProxy *proxy) NL_OVERRIDE;
+		void onModuleDown(NLNET::IModuleProxy *proxy) NL_OVERRIDE;
 
 
 		////// CWelcomeServiceSkel implementation 
 
 		// ask the welcome service to welcome a user
-		virtual void welcomeUser(NLNET::IModuleProxy *sender, uint32 userId, const std::string &userName, const NLNET::CLoginCookie &cookie, const std::string &priviledge, const std::string &exPriviledge, WS::TUserRole mode, uint32 instanceId);
+		virtual void welcomeUser(NLNET::IModuleProxy *sender, uint32 userId, const std::string &userName, const NLNET::CLoginCookie &cookie, const std::string &priviledge, const std::string &exPriviledge, WS::TUserRole mode, uint32 instanceId) NL_OVERRIDE;
 
 		// ask the welcome service to disconnect a user
-		virtual void disconnectUser(NLNET::IModuleProxy *sender, uint32 userId)
+		virtual void disconnectUser(NLNET::IModuleProxy *sender, uint32 userId) NL_OVERRIDE
 		{
 			disconnectClient(userId);
 		}

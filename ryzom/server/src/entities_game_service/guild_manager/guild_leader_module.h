@@ -33,10 +33,10 @@ public:
 	CGuildLeaderModule( CGuildCharProxy & proxy, CGuildMember* guildMember)
 		:CGuildHighOfficerModule(proxy,guildMember){}	
 	
-	virtual void setLeader( uint16 index,uint8 session);
-	virtual void quitGuild();
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade)const;
-	virtual bool canInvite()const;
+	virtual void setLeader( uint16 index,uint8 session) NL_OVERRIDE;
+	virtual void quitGuild() NL_OVERRIDE;
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade)const NL_OVERRIDE;
+	virtual bool canInvite()const NL_OVERRIDE;
 };
 
 

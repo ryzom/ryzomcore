@@ -121,9 +121,9 @@ class	CTrashStringWriter
 public:
 	CTrashStringWriter(NLMISC::CLog *log=NLMISC::InfoLog)
 	{}
-	virtual ~CTrashStringWriter()
+	virtual ~CTrashStringWriter() NL_OVERRIDE
 	{}
-	void	append(const std::string	&str)
+	void	append(const std::string	&str) NL_OVERRIDE
 	{}
 };
 
@@ -134,9 +134,9 @@ public:
 	CLogStringWriter(NLMISC::CLog *log=NLMISC::InfoLog)
 		:_Log(log)
 	{}
-	virtual ~CLogStringWriter()
+	virtual ~CLogStringWriter() NL_OVERRIDE
 	{}
-	void	append(const std::string	&str)
+	void	append(const std::string	&str) NL_OVERRIDE
 	{
 #if !FINAL_VERSION
 		nlassert(_Log);
@@ -155,9 +155,9 @@ public:
 	CArrayStringWriter(std::vector<std::string>	&stringVector)
 		:_StringVector(stringVector)
 	{}
-	virtual ~CArrayStringWriter()
+	virtual ~CArrayStringWriter() NL_OVERRIDE
 	{}
-	void	append(const std::string	&str)
+	void	append(const std::string	&str) NL_OVERRIDE
 	{
 		_StringVector.push_back(str);
 	}

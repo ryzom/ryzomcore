@@ -33,28 +33,28 @@ public:
 	NLMISC_DECLARE_CLASS(R2::CDisplayerLua);
 	CDisplayerLua();
 	// expected parameter is a ctor function
-	virtual bool init(const CLuaObject &parameters);
-	virtual void pushLuaAccess(CLuaState &ls);
+	virtual bool init(const CLuaObject &parameters) NL_OVERRIDE;
+	virtual void pushLuaAccess(CLuaState &ls) NL_OVERRIDE;
 	// from CDisplayerBase
-	virtual void onActChanged();
-	virtual void onContinentChanged();
-	virtual void onPostCreate();
-	virtual void onCreate();
-	virtual void onErase();
-	virtual void onPreHrcMove();	// instance is about to move in the hierarchy of object
-	virtual void onPostHrcMove();  // instance has moved in the hierarchy of objects
-	virtual void onFocus(bool focused);
-	virtual void onSelect(bool selected);
-	virtual void onAttrModified(const std::string &attrName, sint32 index);
+	virtual void onActChanged() NL_OVERRIDE;
+	virtual void onContinentChanged() NL_OVERRIDE;
+	virtual void onPostCreate() NL_OVERRIDE;
+	virtual void onCreate() NL_OVERRIDE;
+	virtual void onErase() NL_OVERRIDE;
+	virtual void onPreHrcMove() NL_OVERRIDE;	// instance is about to move in the hierarchy of object
+	virtual void onPostHrcMove() NL_OVERRIDE;  // instance has moved in the hierarchy of objects
+	virtual void onFocus(bool focused) NL_OVERRIDE;
+	virtual void onSelect(bool selected) NL_OVERRIDE;
+	virtual void onAttrModified(const std::string &attrName, sint32 index) NL_OVERRIDE;
 	//virtual void onTableModified(const std::string &tableName, const std::string &keyInTable, sint32 indexInTable);
 	// from CDisplayerBase : event from targeted instances
-	virtual void onTargetInstancePreHrcMove(const std::string &refMakerAttr, sint32 refMakerAttrIndex);
-	virtual void onTargetInstancePostHrcMove(const std::string &refMakerAttr, sint32 refMakerAttrIndex);
-	virtual void onTargetInstanceCreated(const std::string &refMakerAttr, sint32 refMakerAttrIndex);
-	virtual void onTargetInstanceErased(const std::string &refMakerAttr, sint32 refMakerAttrIndex);
-	virtual void onTargetInstanceEraseRequested(const std::string &refMakerAttr, sint32 refMakerAttrIndex);
+	virtual void onTargetInstancePreHrcMove(const std::string &refMakerAttr, sint32 refMakerAttrIndex) NL_OVERRIDE;
+	virtual void onTargetInstancePostHrcMove(const std::string &refMakerAttr, sint32 refMakerAttrIndex) NL_OVERRIDE;
+	virtual void onTargetInstanceCreated(const std::string &refMakerAttr, sint32 refMakerAttrIndex) NL_OVERRIDE;
+	virtual void onTargetInstanceErased(const std::string &refMakerAttr, sint32 refMakerAttrIndex) NL_OVERRIDE;
+	virtual void onTargetInstanceEraseRequested(const std::string &refMakerAttr, sint32 refMakerAttrIndex) NL_OVERRIDE;
 	virtual void onTargetInstanceAttrModified(	const std::string &refMakerAttr, sint32 refMakerAttrIndex,
-													const std::string &targetAttrName, sint32 targetAttrIndex);
+													const std::string &targetAttrName, sint32 targetAttrIndex) NL_OVERRIDE;
 private:
 	class CToLua : public CLuaEventForwarder
 	{
@@ -62,8 +62,8 @@ private:
 		CToLua();
 		CLuaObject _LuaTable; // reference to lua version of the displayer
 		CDisplayerLua *_Displayer;
-		virtual CLuaState *getLua();
-		virtual void executeHandler(const CLuaString &eventName, int numArgs);
+		virtual CLuaState *getLua() NL_OVERRIDE;
+		virtual void executeHandler(const CLuaString &eventName, int numArgs) NL_OVERRIDE;
 		void pushLuaAccess(CLuaState &ls);
 		CDisplayerLua* getEnclosing();
 	};

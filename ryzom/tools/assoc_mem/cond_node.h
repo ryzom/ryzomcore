@@ -17,6 +17,8 @@
 #ifndef NL_COND_NODE_H_
 #define NL_COND_NODE_H_
 
+#include "nel/misc/types_nl.h"
+
 #include <iostream>
 
 #include "field.h"
@@ -32,7 +34,7 @@ class ICondNode : public INode
 	public:
 		ICondNode();
 		ICondNode(CField *, int);
-		~ICondNode();
+		~ICondNode() NL_OVERRIDE;
 
 		void setKey(int);
 		void addNode(INode *);
@@ -44,9 +46,9 @@ template<class T> class CEqualNode : public ICondNode {
 	public:
 		CEqualNode();
 		CEqualNode(CField *, int);
-		~CEqualNode();
+		~CEqualNode() NL_OVERRIDE;
 
-		virtual bool propagRecord(CRecord *);
+		virtual bool propagRecord(CRecord *) NL_OVERRIDE;
 };
 
 template<class T> CEqualNode<T>::CEqualNode() : ICondNode()

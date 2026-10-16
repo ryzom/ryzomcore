@@ -119,14 +119,14 @@ class CRepositoryEmitter :
 {
 public:
 	// IModule specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
-	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg);
-	void onModuleUpdate();
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
+	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg) NL_OVERRIDE;
+	void onModuleUpdate() NL_OVERRIDE;
 	NLMISC::CSString getState() const;
 	NLMISC::CSString getName() const;
-	std::string buildModuleManifest() const;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 	void displayModule() const;
 
 	static const std::string &getHelperString()
@@ -135,7 +135,7 @@ public:
 		return help;
 	}
 
-	virtual bool isImmediateDispatchingSupported() const { return false; }
+	virtual bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 public:
 	// remaining public interface
@@ -145,11 +145,11 @@ public:
 private:
 	// pivate methods
 	// 
-	virtual void requestFile(NLNET::IModuleProxy *sender, const std::string &fileName);
+	virtual void requestFile(NLNET::IModuleProxy *sender, const std::string &fileName) NL_OVERRIDE;
 	// 
-	virtual void fileDataAck(NLNET::IModuleProxy *sender, const std::string &fileName, bool status);
+	virtual void fileDataAck(NLNET::IModuleProxy *sender, const std::string &fileName, bool status) NL_OVERRIDE;
 	// 
-	virtual void duplicateModuleError(NLNET::IModuleProxy *sender);
+	virtual void duplicateModuleError(NLNET::IModuleProxy *sender) NL_OVERRIDE;
 
 private:
 	// private data

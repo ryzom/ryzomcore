@@ -1078,7 +1078,7 @@ NLMISC_CATEGORISED_COMMAND(utils,txtEditSet,"change a line in a loaded text file
 class CForSheetId: public IServiceSingleton
 {
 public:
-	void init()
+	void init() NL_OVERRIDE
 	{
 //		NLMISC::CSheetId::init(false);
 	}

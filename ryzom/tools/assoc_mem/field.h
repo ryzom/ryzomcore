@@ -17,6 +17,8 @@
 #ifndef NL_FIELD_H_
 #define NL_FIELD_H_
 
+#include "nel/misc/types_nl.h"
+
 #include <vector>
 
 #include "value.h"
@@ -45,7 +47,7 @@ class CBoolField : public CField {
 	public:
 		CBoolField();
 		CBoolField(std::string);
-		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &);
+		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &) NL_OVERRIDE;
 };
 
 
@@ -55,7 +57,7 @@ class CStringField : public CField {
 	public:
 		CStringField();
 		CStringField(std::string, std::vector<std::string> &);
-		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &);
+		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &) NL_OVERRIDE;
 };
 
 
@@ -65,7 +67,7 @@ class CIntField : public CField {
 	public:
 		CIntField();
 		CIntField(std::string, std::vector<int> &);
-		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &);
+		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &) NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -77,7 +79,7 @@ class CRealField : public CField {
 	public:
 		CRealField();
 		CRealField(std::string, std::vector<double> &);
-		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &);
+		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &) NL_OVERRIDE;
 };
 
 #endif

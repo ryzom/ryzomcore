@@ -75,16 +75,16 @@ public:
 	typedef sint32 TRequestId;
 
 	// GUS::IModule methods
-	bool initialiseModule(const NLMISC::CSString& rawArgs);
-	void release();
-	NLMISC::CSString getState() const;
-	NLMISC::CSString getName() const;
-	NLMISC::CSString getParameters() const;
-	void displayModule() const;
+	bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+	void release() NL_OVERRIDE;
+	NLMISC::CSString getState() const NL_OVERRIDE;
+	NLMISC::CSString getName() const NL_OVERRIDE;
+	NLMISC::CSString getParameters() const NL_OVERRIDE;
+	void displayModule() const NL_OVERRIDE;
 
 	// methods used for network callbacks
-	void serviceUp(NLNET::TServiceId serviceId,const std::string& serviceName);
-	void serviceDown(NLNET::TServiceId serviceId,const std::string& serviceName);
+	void serviceUp(NLNET::TServiceId serviceId,const std::string& serviceName) NL_OVERRIDE;
+	void serviceDown(NLNET::TServiceId serviceId,const std::string& serviceName) NL_OVERRIDE;
 	static void cbView(CMessage &msgin, const string &serviceName, NLNET::TServiceId sid);
 
 	// methods for treating 'VIEW' messages
@@ -94,8 +94,8 @@ public:
 	void treatReplyToVariableLookupGetView(CMessage &msgin, const string &serviceName, NLNET::TServiceId sid,const CSString& cmdTxt);
 
 	// public interface exposed via CServiceManager class
-	void execute(const string& serviceNameWildcard,const string& cmdLine);
-	void display(CLog* log=InfoLog);
+	void execute(const string& serviceNameWildcard,const string& cmdLine) NL_OVERRIDE;
+	void display(CLog* log=InfoLog) NL_OVERRIDE;
 
 private:
 	// private data

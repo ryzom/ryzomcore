@@ -101,17 +101,17 @@ public:
 	/**
 	 * sharing system.
 	 */
-	virtual bool			supportSharing() const;
-	virtual std::string		getShareName() const;
+	virtual bool			supportSharing() const NL_OVERRIDE;
+	virtual std::string		getShareName() const NL_OVERRIDE;
 
 
 	/**
 	 * Generate the texture.
 	 */
-	void doGenerate(bool async = false);
+	void doGenerate(bool async = false) NL_OVERRIDE;
 
 	/// serialization
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	/// a group of 4 uvs
@@ -144,7 +144,7 @@ public:
 	}
 
 
-	virtual void release();
+	virtual void release() NL_OVERRIDE;
 
 
 	NLMISC_DECLARE_CLASS(CTextureGrouped);

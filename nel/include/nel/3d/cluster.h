@@ -66,7 +66,7 @@ public:
 
 	CCluster();
 
-	~CCluster();
+	~CCluster() NL_OVERRIDE;
 
 	/**
 	 * Make the cluster volume from a plane made with 3 points
@@ -137,9 +137,9 @@ public:
 
 	/// \name CTransform Specialisation
 	// @{
-	virtual void	traverseHrc();
-	virtual void	traverseClip();
-	virtual	bool	clip();
+	virtual void	traverseHrc() NL_OVERRIDE;
+	virtual void	traverseClip() NL_OVERRIDE;
+	virtual	bool	clip() NL_OVERRIDE;
 	// For ClipTrav only.
 	void			setCameraIn(bool state) {_CameraIn= state;}
 	bool			isCameraIn() const {return _CameraIn;}

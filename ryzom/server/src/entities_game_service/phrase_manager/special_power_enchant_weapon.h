@@ -67,7 +67,7 @@ public:
 //	void setDamagePerUpdate(float damage) { _DamagePerUpdate = damage; }
 	
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 	
 	/// set effect family
 	void setEffectFamily(EFFECT_FAMILIES::TEffectFamily family) { _EffectFamily = family; }

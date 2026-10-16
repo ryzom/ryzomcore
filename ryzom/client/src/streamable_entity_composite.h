@@ -28,7 +28,7 @@ class CStreamableEntityComposite : public IStreamableEntity
 {
 public:
 	// dtor
-	~CStreamableEntityComposite();
+	~CStreamableEntityComposite() NL_OVERRIDE;
 	/// Add an entity. it is then owned by this obj.
 	void			  add(IStreamableEntity *entity);
 	/// optimisation : make room for further adds
@@ -46,12 +46,12 @@ public:
 		/** Given a pos, test whether one entity needs to be loaded now.
 		  * It it returns true, the next call to update will return only when the loading of an entity is completed.
 		  */
-		virtual bool		needCompleteLoading(const NLMISC::CVector &pos) const;
+		virtual bool		needCompleteLoading(const NLMISC::CVector &pos) const NL_OVERRIDE;
 		/// Load / Unload entity depeneding on the player position
-		virtual void		 update(const NLMISC::CVector &pos);
-		virtual	void		 forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress);
+		virtual void		 update(const NLMISC::CVector &pos) NL_OVERRIDE;
+		virtual	void		 forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress) NL_OVERRIDE;
 		/// Force unloading of all entitie
-		virtual void		 forceUnload();
+		virtual void		 forceUnload() NL_OVERRIDE;
 	//@}
 private:
 	typedef std::vector<IStreamableEntity *>	TStreambleEntities;

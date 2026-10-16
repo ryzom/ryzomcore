@@ -43,9 +43,9 @@ public:
 						const CStaticItem & form
 						);
 
-	virtual bool update(CTimerEvent * event, bool applyEffect){ return false; }
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE{ return false; }
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 private:
 	const CStaticItem & _Form;

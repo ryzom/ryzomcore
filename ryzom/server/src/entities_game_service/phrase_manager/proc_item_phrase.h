@@ -32,45 +32,45 @@ class CProcItemPhrase : public CSPhrase
 {
 public:
 	
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool execution = true )
+	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool execution = true ) NL_OVERRIDE
 	{
 		// nothing to do there
 		return true;
 	}
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId )
+	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) NL_OVERRIDE
 	{
 		nlerror("Invalid overload");
 		return;
 	}
-	virtual bool evaluate()
+	virtual bool evaluate() NL_OVERRIDE
 	{
 		return true;
 	}
-	virtual bool validate()
+	virtual bool validate() NL_OVERRIDE
 	{
 		return true;
 	}
-	virtual bool update()
+	virtual bool update() NL_OVERRIDE
 	{
 		nlerror("Invalid overload");
 		return false;
 	}
-	virtual void execute()
+	virtual void execute() NL_OVERRIDE
 	{
 		nlerror("Invalid overload");
 		return;
 	}
-	virtual bool launch()
+	virtual bool launch() NL_OVERRIDE
 	{
 		nlerror("Invalid overload");
 		return false;
 	}
-	virtual void apply()
+	virtual void apply() NL_OVERRIDE
 	{
 		nlerror("Invalid overload");
 		return;
 	}
-	virtual void end()
+	virtual void end() NL_OVERRIDE
 	{
 		nlerror("Invalid overload");
 		return;

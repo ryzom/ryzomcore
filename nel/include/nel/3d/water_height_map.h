@@ -97,7 +97,7 @@ public:
 
 	/** Inherited from UWaterHeightMap. This version takes a location in world space
 	  */
-	virtual void	perturbate(const NLMISC::CVector2f &pos, float strenght, float radius) ;
+	virtual void	perturbate(const NLMISC::CVector2f &pos, float strenght, float radius) NL_OVERRIDE ;
 
 
 	/// create a point perturbation in the height map.
@@ -105,11 +105,11 @@ public:
 
 	/** Inherited from UWaterHeightMap. This version takes a location in world space
 	  */
-	virtual void	perturbatePoint(const NLMISC::CVector2f &pos, float strenght);
+	virtual void	perturbatePoint(const NLMISC::CVector2f &pos, float strenght) NL_OVERRIDE;
 
 	/** Inherited from UWaterHeightMap. Get the height of water at the given location.
 	  */
-	virtual float	getHeight(const NLMISC::CVector2f &pos);
+	virtual float	getHeight(const NLMISC::CVector2f &pos) NL_OVERRIDE;
 
 
 	/// get a pointer on the current buffer.
@@ -162,7 +162,7 @@ public:
 
 	/// water unit size
 	void					setUnitSize(float unitSize) { _UnitSize = unitSize; }
-	float					getUnitSize() const { return _UnitSize; }
+	float					getUnitSize() const NL_OVERRIDE { return _UnitSize; }
 
 	/// the last update date
 	sint64					Date;
@@ -179,7 +179,7 @@ public:
 	// ctor (use the water pool manager instead)
 	CWaterHeightMap();
 	// dtor
-	virtual ~CWaterHeightMap() {}
+	virtual ~CWaterHeightMap() NL_OVERRIDE {}
 
 	/// Set the propagation time. This is the time needed to go from one unit to one other in the height map
 	void					setPropagationTime(float time);

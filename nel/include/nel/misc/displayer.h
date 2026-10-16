@@ -98,7 +98,7 @@ public:
 protected:
 
 	/// Display the string to stdout and OutputDebugString on Windows
-	virtual void doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+	virtual void doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 
 };
 
@@ -119,14 +119,14 @@ public:
 
 	CFileDisplayer ();
 
-	~CFileDisplayer ();
+	~CFileDisplayer () NL_OVERRIDE;
 
 	/// Set Parameter of the displayer if not set at the ctor time
 	void setParam (const std::string &filename, bool eraseLastLog = false);
 
 protected:
 	/// Put the string into the file.
-    virtual void doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+    virtual void doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 
 private:
 	std::string _FileName;
@@ -156,7 +156,7 @@ public:
 
 protected:
 	/// Put the string into the file.
-    virtual void doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+    virtual void doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 };
 
 

@@ -47,22 +47,22 @@ public:
 	NLMISC_DECLARE_CLASS(R2::CToolDrawPrim);
 	// ctor
 	CToolDrawPrim(TPrimType primType = Road, CInstance *extending = NULL);
-	virtual bool init(const CLuaObject &parameters);
-	virtual const char *getToolUIName() const;
-	virtual bool  isCreationTool() const { return true; }
-	virtual void cancel();
-	virtual void updateAfterRender();
-	virtual void updateBeforeRender();
-	virtual bool onMouseLeftButtonClicked();
-	virtual bool onMouseRightButtonClicked();
-	virtual bool onMouseLeftButtonDown();
-	virtual bool onDeleteCmd();
+	virtual bool init(const CLuaObject &parameters) NL_OVERRIDE;
+	virtual const char *getToolUIName() const NL_OVERRIDE;
+	virtual bool  isCreationTool() const NL_OVERRIDE { return true; }
+	virtual void cancel() NL_OVERRIDE;
+	virtual void updateAfterRender() NL_OVERRIDE;
+	virtual void updateBeforeRender() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonClicked() NL_OVERRIDE;
+	virtual bool onMouseRightButtonClicked() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonDown() NL_OVERRIDE;
+	virtual bool onDeleteCmd() NL_OVERRIDE;
 
 	// update the look of an inaccessible primitive
 	static void updateInaccessiblePrimRenderLook(CPrimRender &dest);
 
 protected:
-	virtual void onActivate();
+	virtual void onActivate() NL_OVERRIDE;
 private:
 	CPrimRender			 _Prim;					// the primitive being drawn
 	CPrimRender			 _InaccessiblePrim;		// inaccessible parts for the primitive being drawn (on an invalid pos on heightmap)

@@ -50,32 +50,32 @@ public:
 	// ctor
 	CDisplayerVisualShape(const std::string &shapeName = "", float scale = 1.f, bool worldMapDisplay = true);
 	// dtor
-	~CDisplayerVisualShape();
+	~CDisplayerVisualShape() NL_OVERRIDE;
 	// Init from a lua table. Parms should contain 'ShapeName' as a string
-	virtual bool init(const CLuaObject &parameters);
+	virtual bool init(const CLuaObject &parameters) NL_OVERRIDE;
 	////////////
 	// EVENTS //
 	////////////
-	virtual void onPreRender();
-	virtual void onPostRender();
-	virtual void onAttrModified(const std::string &name, sint32 index);
-	virtual void onFocus(bool focused);
-	virtual void onSelect(bool selected);
+	virtual void onPreRender() NL_OVERRIDE;
+	virtual void onPostRender() NL_OVERRIDE;
+	virtual void onAttrModified(const std::string &name, sint32 index) NL_OVERRIDE;
+	virtual void onFocus(bool focused) NL_OVERRIDE;
+	virtual void onSelect(bool selected) NL_OVERRIDE;
 	//
-	virtual void onParentDisplayModeChanged();
+	virtual void onParentDisplayModeChanged() NL_OVERRIDE;
 
 
 	// From ISelectableObject
-	virtual bool			getLastClip() const;
-	virtual NLMISC::CAABBox getSelectBox() const;
-	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const;
-	const NLMISC::CMatrix	&getInvertedMatrix() const;
-	virtual void			snapToGround();
+	virtual bool			getLastClip() const NL_OVERRIDE;
+	virtual NLMISC::CAABBox getSelectBox() const NL_OVERRIDE;
+	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const NL_OVERRIDE;
+	const NLMISC::CMatrix	&getInvertedMatrix() const NL_OVERRIDE;
+	virtual void			snapToGround() NL_OVERRIDE;
 
-	virtual NLMISC::CVector evalLinkPoint(bool leader = false);
+	virtual NLMISC::CVector evalLinkPoint(bool leader = false) NL_OVERRIDE;
 
 	// from CDisplayerVisual
-	void setDisplayMode(sint32 mode);
+	void setDisplayMode(sint32 mode) NL_OVERRIDE;
 
 	// get current instance being displayed
 	NL3D::UInstance &getMesh() { return _Instance; }
@@ -100,14 +100,14 @@ private:
 	void					deleteShape();
 protected:
 	// from CDisplayerVisual
-	virtual void setActive(bool active);
-	virtual bool getActive() const;
-	virtual void updateWorldPos();
+	virtual void setActive(bool active) NL_OVERRIDE;
+	virtual bool getActive() const NL_OVERRIDE;
+	virtual void updateWorldPos() NL_OVERRIDE;
 	// from CGroupMap::IDeco
-	virtual void onAdd(CGroupMap &owner);
-	virtual void onRemove(CGroupMap &owner);
-	virtual void onPreRender(CGroupMap &owner);
-	virtual void onUpdate(CGroupMap &owner);
+	virtual void onAdd(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onRemove(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onPreRender(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onUpdate(CGroupMap &owner) NL_OVERRIDE;
 private:
 	void visualSnapToGround();
 	void updateMapDeco();

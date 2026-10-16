@@ -415,7 +415,7 @@ private:
 	// The stream where datas are written
 	NLMISC::IStream &Stream;
 	// From CInterfaceElementVisitor
-	void visit(CInterfaceElement *elem)
+	void visit(CInterfaceElement *elem) NL_OVERRIDE
 	{
  		if (!elem) return;
 		nlassert(!Stream.isReading());
@@ -448,7 +448,7 @@ public:
 	CCountUIElemWithConfigVisitor() : Count(0) {}
 	uint32 Count;
 	// From CInterfaceElementVisitor
-	void visit(CInterfaceElement *elem)
+	void visit(CInterfaceElement *elem) NL_OVERRIDE
 	{
 		if (elem->wantSerialConfig()) ++ Count;
 	}
@@ -458,7 +458,7 @@ public:
 // visitor to send the 'onLoadConfig' msg
 class COnLoadConfigVisitor : public CInterfaceElementVisitor
 {
-	void visit(CInterfaceElement *elem) { elem->onLoadConfig(); }
+	void visit(CInterfaceElement *elem) NL_OVERRIDE { elem->onLoadConfig(); }
 };
 
 // ***************************************************************************

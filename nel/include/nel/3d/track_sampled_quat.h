@@ -93,14 +93,14 @@ public:
 
 	/// Constructor
 	CTrackSampledQuat();
-	virtual ~CTrackSampledQuat();
+	virtual ~CTrackSampledQuat() NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS (CTrackSampledQuat);
 
 	/// From UTrack/ITrack.
 	// @{
-	virtual const IAnimatedValue	&eval (const TAnimationTime& date, CAnimatedValueBlock &avBlock);
-	virtual void					serial(NLMISC::IStream &f);
-	virtual void applySampleDivisor(uint sampleDivisor);
+	virtual const IAnimatedValue	&eval (const TAnimationTime& date, CAnimatedValueBlock &avBlock) NL_OVERRIDE;
+	virtual void					serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual void applySampleDivisor(uint sampleDivisor) NL_OVERRIDE;
 	// @}
 
 	/** Build the track from a list of CKey.
@@ -116,8 +116,8 @@ public:
 
 	/// For Quat Track Header Compression
 	// @{
-	virtual bool	applyTrackQuatHeaderCompressionPass0(CTrackSampleCounter &quatCounter);
-	virtual ITrack	*applyTrackQuatHeaderCompressionPass1(uint &globalKeyOffset, CTrackSamplePack &quatPacker);
+	virtual bool	applyTrackQuatHeaderCompressionPass0(CTrackSampleCounter &quatCounter) NL_OVERRIDE;
+	virtual ITrack	*applyTrackQuatHeaderCompressionPass1(uint &globalKeyOffset, CTrackSamplePack &quatPacker) NL_OVERRIDE;
 	// @}
 
 // **********************

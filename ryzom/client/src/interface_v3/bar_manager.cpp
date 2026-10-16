@@ -716,7 +716,7 @@ DECLARE_INTERFACE_CONSTANT(getMaxTeamMember, CBarManager::MaxTeamMember);
 class CAHBarManagerOnTarget : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CBarManager::getInstance()->updateTargetFromDB();
 	}
@@ -727,7 +727,7 @@ REGISTER_ACTION_HANDLER(CAHBarManagerOnTarget, "bar_manager_on_target");
 class CAHBarManagerOnTeam : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		uint	index;
 		fromString(Params, index);
@@ -741,7 +741,7 @@ REGISTER_ACTION_HANDLER(CAHBarManagerOnTeam, "bar_manager_on_team");
 class CAHBarManagerOnAnimal : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		uint	index;
 		fromString(Params, index);
@@ -755,7 +755,7 @@ REGISTER_ACTION_HANDLER(CAHBarManagerOnAnimal, "bar_manager_on_animal");
 class CAHBarManagerOnUserScores : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CBarManager::getInstance()->updateUserBars();
 	}

@@ -55,7 +55,7 @@ public:
 	/**
 	  * Virtual destructor.
 	  */
-	virtual ~ITrack() {}
+	virtual ~ITrack() NL_OVERRIDE {}
 
 	/**
 	  * Evaluation of the value of the track for this time.
@@ -84,13 +84,13 @@ public:
 	/// \name From UTrack
 	// @{
 
-	virtual bool interpolate (TAnimationTime time, float& res);
-	virtual bool interpolate (TAnimationTime time, sint32& res);
-	virtual bool interpolate (TAnimationTime time, NLMISC::CRGBA& res);
-	virtual bool interpolate (TAnimationTime time, NLMISC::CVector& res);
-	virtual bool interpolate (TAnimationTime time, NLMISC::CQuat& res);
-	virtual bool interpolate (TAnimationTime time, std::string& res);
-	virtual bool interpolate (TAnimationTime time, bool& res);
+	virtual bool interpolate (TAnimationTime time, float& res) NL_OVERRIDE;
+	virtual bool interpolate (TAnimationTime time, sint32& res) NL_OVERRIDE;
+	virtual bool interpolate (TAnimationTime time, NLMISC::CRGBA& res) NL_OVERRIDE;
+	virtual bool interpolate (TAnimationTime time, NLMISC::CVector& res) NL_OVERRIDE;
+	virtual bool interpolate (TAnimationTime time, NLMISC::CQuat& res) NL_OVERRIDE;
+	virtual bool interpolate (TAnimationTime time, std::string& res) NL_OVERRIDE;
+	virtual bool interpolate (TAnimationTime time, bool& res) NL_OVERRIDE;
 
 	// @}
 };
@@ -109,15 +109,15 @@ public:
 class ITrackDefault : public ITrack
 {
 public:
-	TAnimationTime getBeginTime () const
+	TAnimationTime getBeginTime () const NL_OVERRIDE
 	{
 		return 0.f;
 	}
-	TAnimationTime getEndTime () const
+	TAnimationTime getEndTime () const NL_OVERRIDE
 	{
 		return 0.f;
 	}
-	virtual bool getLoopMode() const {return true;}
+	virtual bool getLoopMode() const NL_OVERRIDE {return true;}
 };
 
 
@@ -166,7 +166,7 @@ public:
 
 
 	/// Serial the template
-	virtual void serial (NLMISC::IStream& f)
+	virtual void serial (NLMISC::IStream& f) NL_OVERRIDE
 	{
 		// Serial version
 		(void)f.serialVersion (0);
@@ -217,7 +217,7 @@ public:
 
 
 	/// Serial the template
-	virtual void serial (NLMISC::IStream& f)
+	virtual void serial (NLMISC::IStream& f) NL_OVERRIDE
 	{
 		// Serial version
 		(void)f.serialVersion (0);
@@ -238,7 +238,7 @@ protected:
 	_Son(const _T &v) : _Father<_T>(v) {}
 
 #define	NL3D_TRACKDEF_EVAL(_Val_)	\
-	virtual const IAnimatedValue &eval (const TAnimationTime& /* date */, CAnimatedValueBlock &avBlock)	\
+	virtual const IAnimatedValue &eval (const TAnimationTime& /* date */, CAnimatedValueBlock &avBlock) NL_OVERRIDE	\
 	{																								\
 		avBlock._Val_.Value= _Value;																\
 		return avBlock._Val_;																		\

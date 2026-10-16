@@ -821,7 +821,7 @@ bool CToolCreateEntity::stopAfterCommit() const
 // ***************************************************************
 class CAHR2EDToggleDrawArray : public IActionHandler
 {
-	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(pCaller);

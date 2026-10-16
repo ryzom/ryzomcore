@@ -122,14 +122,14 @@ public:
 
 	CInstListNode() : NextToRun(0) {}
 
-	~CInstListNode()
+	~CInstListNode() NL_OVERRIDE
 	{
 		uint	i;
 		for (i=0; i<Nodes.size(); ++i)
 			delete Nodes[i];
 	}
 
-	EState execute(CCommandEventManager::CEnvironment &env)
+	EState execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		for (; NextToRun<Nodes.size(); ++NextToRun)
 		{
@@ -152,7 +152,7 @@ public:
 				*FalseStatement;
 
 	CIfNode() : TrueStatement(NULL), FalseStatement(NULL) {}
-	~CIfNode()
+	~CIfNode() NL_OVERRIDE
 	{
 		if (TrueStatement)
 			delete TrueStatement;
@@ -160,7 +160,7 @@ public:
 			delete FalseStatement;
 	}
 
-	EState execute(CCommandEventManager::CEnvironment &env)
+	EState execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (CurrentRun)
 			return goOnCurrentRun(env);
@@ -202,13 +202,13 @@ public:
 	CCommandEventManager::CScriptNode	*Statement;
 
 	CWhileNode() : Statement(NULL) {}
-	~CWhileNode()
+	~CWhileNode() NL_OVERRIDE
 	{
 		if (Statement)
 			delete Statement;
 	}
 
-	EState execute(CCommandEventManager::CEnvironment &env)
+	EState execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (CurrentRun)
 		{
@@ -257,7 +257,7 @@ class CCmdNode : public CCommandEventManager::CScriptNode
 public:
 	string		Command;
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (Root->Verbose)
 			nldebug("[%s:%d:DEBUG] cmd %s", Root->Name.c_str(), Line, Command.c_str());
@@ -275,7 +275,7 @@ public:
 	string		Variable;
 	string		Text;
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (Root->Verbose)
 			nldebug("[%s:%d:DEBUG] set$ %s %s", Root->Name.c_str(), Line, Variable.c_str(), Text.c_str());
@@ -293,7 +293,7 @@ public:
 	string		Variable;
 	string		Text;
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (Root->Verbose)
 			nldebug("[%s:%d:DEBUG] set# %s %s", Root->Name.c_str(), Line, Variable.c_str(), Text.c_str());
@@ -319,7 +319,7 @@ class CEraseNode : public CCommandEventManager::CScriptNode
 public:
 	string		Variable;
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (Root->Verbose)
 			nldebug("[%s:%d:DEBUG] erase %s", Root->Name.c_str(), Line, Variable.c_str());
@@ -339,7 +339,7 @@ public:
 
 	CWaitNode() : Wait(0), StartCycle(0) {}
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (!StartCycle)
 		{
@@ -368,7 +368,7 @@ class CDisplayNode : public CCommandEventManager::CScriptNode
 public:
 	string		Text;
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (Root->Verbose)
 			nldebug("[%s:%d:DEBUG] ? %s", Root->Name.c_str(), Line, Text.c_str());
@@ -388,7 +388,7 @@ public:
 
 	CReceiveNode() : Waiting(false) {}
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (!Waiting)
 		{
@@ -425,7 +425,7 @@ public:
 	string		Variable;
 	string		Text;
 
-	EState	execute(CCommandEventManager::CEnvironment &env)
+	EState	execute(CCommandEventManager::CEnvironment &env) NL_OVERRIDE
 	{
 		if (Root->Verbose)
 			nldebug("[%s:%d:DEBUG] send %s %s", Root->Name.c_str(), Line, Variable.c_str(), Text.c_str());

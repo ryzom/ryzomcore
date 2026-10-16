@@ -69,7 +69,7 @@ class CAHCommand : public IActionHandler
 {
 public:
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		ICommand::execute(Params, g_log);
 	}
@@ -287,7 +287,7 @@ void	CActionHandlerLeaveModal::execute(CCtrlBase * /* pCaller */, const std::str
 class CActionHandlerProc : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params)
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 	{
 		// split the parameters
 		vector<string>		paramList;
@@ -307,7 +307,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerProc, "proc");
 class CActionHandlerConfirmCanDeactivate : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		CGroupContainer::validateCanDeactivate(true);
 	}
@@ -319,7 +319,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerConfirmCanDeactivate, "confirm_can_deacti
 class CActionHandlerCancelCanDeactivate : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		CGroupContainer::validateCanDeactivate(false);
 	}
@@ -341,7 +341,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerCancelCanDeactivate, "cancel_can_deactiva
 class CActionHandlerEditBoxNumber : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params)
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 	{
 		CGroupEditBox		*pEditBox= dynamic_cast<CGroupEditBox*>(pCaller);
 		if(!pEditBox)
@@ -406,7 +406,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerEditBoxNumber, "editbox_number");
   */
 class CActionHandlerAddLink : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const std::string &params)
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 	{
 		std::string expr	= getParam(params, "expr");
 		std::string targets = getParam(params, "target");
@@ -446,7 +446,7 @@ REGISTER_ACTION_HANDLER (CActionHandlerAddLink, "add_link");
   */
 class CActionHandlerRemoveLink : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		std::string id     = getParam(params, "id");
 		if (id.empty())
@@ -760,7 +760,7 @@ void screenShotJPG()
 
 class CAHScreenShot : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		// if custom screenshot size is asked, then do it right now
 		if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
@@ -782,7 +782,7 @@ REGISTER_ACTION_HANDLER (CAHScreenShot, "screen_shot");
 // ***************************************************************************
 class CAHScreenShotJPG : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		// if custom screenshot size is asked, then do it right now
 		if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
@@ -802,7 +802,7 @@ REGISTER_ACTION_HANDLER (CAHScreenShotJPG, "screen_shot_jpg");
 // ***************************************************************************
 class CAHScreenShotPNG : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		// if custom screenshot size is asked, then do it right now
 		if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
@@ -824,7 +824,7 @@ REGISTER_ACTION_HANDLER (CAHScreenShotPNG, "screen_shot_png");
 // Reply to the last people who talked in the chat -> this change the target of the main chat to the name of the last teller
 class CAHReplyTeller : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		if (!PeopleInterraction.LastSenderName.empty())
 		{
@@ -850,7 +850,7 @@ REGISTER_ACTION_HANDLER (CAHReplyTeller, "reply_teller")
 // Reply to the last people who talked in the chat only once (display '/tell name' in the last activated chat window)
 class CAHReplyTellerOnce : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		// display a /tell command in the main chat
 		if (!PeopleInterraction.LastSenderName.empty())
@@ -878,7 +878,7 @@ REGISTER_ACTION_HANDLER (CAHReplyTellerOnce, "reply_teller_once")
   */
 class CAHCycleTell : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (!im->isInGame()) return;
@@ -963,7 +963,7 @@ bool CStringPostProcessNPCRemoveTitle::cbIDStringReceived(string &inOut)
 class CAHAnimStart : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 	{
 		string sAnim = getParam(Params, "anim");
 		CWidgetManager::getInstance()->startAnim(sAnim);
@@ -975,7 +975,7 @@ REGISTER_ACTION_HANDLER (CAHAnimStart, "anim_start");
 class CAHAnimStop : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 	{
 		string sAnim = getParam(Params, "anim");
 		CWidgetManager::getInstance()->stopAnim(sAnim);

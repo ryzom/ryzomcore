@@ -97,7 +97,7 @@ namespace NLMISC
 		{
 		}
 
-		virtual ~TCoTaskData()
+		virtual ~TCoTaskData() NL_OVERRIDE
 		{
 			NL_CT_DEBUG("CoTaskData : ~TCoTaskData %p : deleting cotask data", this);
 			if (_TaskThread != NULL)
@@ -112,7 +112,7 @@ namespace NLMISC
 			}
 		}
 
-		void run();
+		void run() NL_OVERRIDE;
 
 #else //NL_USE_THREAD_COTASK
 #if defined (NL_OS_WINDOWS)

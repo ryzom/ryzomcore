@@ -196,7 +196,7 @@ public:
 
 private:
 
-	void run();
+	void run() NL_OVERRIDE;
 };
 
 extern CLoginStateMachine LoginSM;

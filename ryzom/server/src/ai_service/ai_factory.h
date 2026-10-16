@@ -88,7 +88,7 @@ public:
 	{
 	}
 
-	BaseClass *createObject(const	typename BaseClass::CtorParam&	ctorParam)
+	BaseClass *createObject(const	typename BaseClass::CtorParam&	ctorParam) NL_OVERRIDE
 	{
 		return new SpecializedClass(ctorParam);
 	}
@@ -152,7 +152,7 @@ public:
 		IndirectFactoryClass::instance().registerClass(key, this);
 	}
 
-	BaseFactoryClass *getFactory()
+	BaseFactoryClass *getFactory() NL_OVERRIDE
 	{
 		return &_FactoryClass;
 	}

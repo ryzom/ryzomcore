@@ -50,7 +50,7 @@ public:
 	CFormElm (CForm *form, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex);
 
 	// Destructor
-	virtual ~CFormElm ();
+	virtual ~CFormElm () NL_OVERRIDE;
 
 	/// Reset contents
 	virtual void	clean() {}
@@ -65,68 +65,68 @@ public:
 	virtual void	getFormName (std::string &result, const CFormElm *child=NULL) const = 0;
 
 	// From UFormElm
-	virtual bool	getNodeByName (const UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0) const;
-	virtual bool	getNodeByName (UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0);
-	virtual bool	getValueByName (std::string &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (sint8 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (uint8 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (sint16 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (uint16 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (sint32 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (uint32 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (float &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (double &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (bool &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	getValueByName (NLMISC::CRGBA &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const;
-	virtual bool	setValueByName (const std::string &value, const std::string &name, bool *created);
-	virtual bool	setValueByName (sint8 value, const std::string &name, bool *created);
-	virtual bool	setValueByName (uint8 value, const std::string &name, bool *created);
-	virtual bool	setValueByName (sint16 value, const std::string &name, bool *created);
-	virtual bool	setValueByName (uint16 value, const std::string &name, bool *created);
-	virtual bool	setValueByName (sint32 value, const std::string &name, bool *created);
-	virtual bool	setValueByName (uint32 value, const std::string &name, bool *created);
-	virtual bool	setValueByName (float value, const std::string &name, bool *created);
-	virtual bool	setValueByName (double value, const std::string &name, bool *created);
-	virtual bool	setValueByName (bool value, const std::string &name, bool *created);
-	virtual bool	setValueByName (NLMISC::CRGBA value, const std::string &name, bool *created);
+	virtual bool	getNodeByName (const UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getNodeByName (UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round=0) NL_OVERRIDE;
+	virtual bool	getValueByName (std::string &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (sint8 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (uint8 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (sint16 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (uint16 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (sint32 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (uint32 &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (float &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (double &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (bool &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	getValueByName (NLMISC::CRGBA &result, const std::string &name, TEval evaluate, TWhereIsValue *where, uint32 round=0) const NL_OVERRIDE;
+	virtual bool	setValueByName (const std::string &value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (sint8 value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (uint8 value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (sint16 value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (uint16 value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (sint32 value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (uint32 value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (float value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (double value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (bool value, const std::string &name, bool *created) NL_OVERRIDE;
+	virtual bool	setValueByName (NLMISC::CRGBA value, const std::string &name, bool *created) NL_OVERRIDE;
 	virtual UFormElm	*getParent () const;
-	virtual const CType *getType ();
-	virtual bool	isArray () const;
-	virtual bool	getArraySize (uint &size) const;
-	virtual bool	getArrayNode (const UFormElm **result, uint arrayIndex) const;
-	virtual bool	getArrayNode (UFormElm **result, uint arrayIndex);
-	virtual bool	getArrayNodeName (std::string &result, uint arrayIndex) const;
-	virtual bool	getArrayValue (std::string &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (sint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (uint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (sint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (uint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (sint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (uint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (float &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (double &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (bool &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	virtual bool	isStruct () const;
-	virtual bool	isVirtualStruct () const;
-	virtual bool	getDfnName (std::string &dfnName ) const;
-	virtual bool	getStructSize (uint &size) const;
-	virtual bool	getStructNodeName (uint element, std::string &result) const;
-	virtual bool	getStructNode (uint element, const UFormElm **result) const;
-	virtual bool	getStructNode (uint element, UFormElm **result);
-	virtual bool	isAtom () const;
-	virtual bool	getValue (std::string &resultname, TEval evaluate) const;
-	virtual bool	getValue (sint8 &resultname, TEval evaluate) const;
-	virtual bool	getValue (uint8 &resultname, TEval evaluate) const;
-	virtual bool	getValue (sint16 &resultname, TEval evaluate) const;
-	virtual bool	getValue (uint16 &resultname, TEval evaluate) const;
-	virtual bool	getValue (sint32 &resultname, TEval evaluate) const;
-	virtual bool	getValue (uint32 &resultname, TEval evaluate) const;
-	virtual bool	getValue (float &resultname, TEval evaluate) const;
-	virtual bool	getValue (double &resultname, TEval evaluate) const;
-	virtual bool	getValue (bool &resultname, TEval evaluate) const;
-	virtual bool	getValue (NLMISC::CRGBA &resultname, TEval evaluate) const;
-	virtual UFormDfn	*getStructDfn () { return NULL; }
+	virtual const CType *getType () NL_OVERRIDE;
+	virtual bool	isArray () const NL_OVERRIDE;
+	virtual bool	getArraySize (uint &size) const NL_OVERRIDE;
+	virtual bool	getArrayNode (const UFormElm **result, uint arrayIndex) const NL_OVERRIDE;
+	virtual bool	getArrayNode (UFormElm **result, uint arrayIndex) NL_OVERRIDE;
+	virtual bool	getArrayNodeName (std::string &result, uint arrayIndex) const NL_OVERRIDE;
+	virtual bool	getArrayValue (std::string &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (sint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (uint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (sint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (uint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (sint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (uint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (float &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (double &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (bool &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	virtual bool	isStruct () const NL_OVERRIDE;
+	virtual bool	isVirtualStruct () const NL_OVERRIDE;
+	virtual bool	getDfnName (std::string &dfnName ) const NL_OVERRIDE;
+	virtual bool	getStructSize (uint &size) const NL_OVERRIDE;
+	virtual bool	getStructNodeName (uint element, std::string &result) const NL_OVERRIDE;
+	virtual bool	getStructNode (uint element, const UFormElm **result) const NL_OVERRIDE;
+	virtual bool	getStructNode (uint element, UFormElm **result) NL_OVERRIDE;
+	virtual bool	isAtom () const NL_OVERRIDE;
+	virtual bool	getValue (std::string &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (sint8 &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (uint8 &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (sint16 &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (uint16 &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (sint32 &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (uint32 &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (float &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (double &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (bool &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual bool	getValue (NLMISC::CRGBA &resultname, TEval evaluate) const NL_OVERRIDE;
+	virtual UFormDfn	*getStructDfn () NL_OVERRIDE { return NULL; }
 
 	// ** Convert functions
 
@@ -263,10 +263,10 @@ class CFormElmStruct : public CFormElm
 public:
 	// Default constructor
 	CFormElmStruct (CForm *form, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex);
-	virtual ~CFormElmStruct ();
+	virtual ~CFormElmStruct () NL_OVERRIDE;
 
 	// Clear sub elements
-	void clean ();
+	void clean () NL_OVERRIDE;
 
 	// Smart pointer on the form definition for this structure
 	NLMISC::CSmartPtr<CFormDfn>	FormDfn;
@@ -296,19 +296,19 @@ public:
 	void				build (const CFormDfn *dfn);
 
 	// From UFormElm
-	bool				isStruct () const;
-	bool				getStructSize (uint &size) const;
-	bool				getStructNodeName (uint element, std::string &result) const;
-	bool				getStructNode (uint element, const UFormElm **result) const;
-	bool				getStructNode (uint element, UFormElm **result);
-	UFormDfn			*getStructDfn ();
+	bool				isStruct () const NL_OVERRIDE;
+	bool				getStructSize (uint &size) const NL_OVERRIDE;
+	bool				getStructNodeName (uint element, std::string &result) const NL_OVERRIDE;
+	bool				getStructNode (uint element, const UFormElm **result) const NL_OVERRIDE;
+	bool				getStructNode (uint element, UFormElm **result) NL_OVERRIDE;
+	UFormDfn			*getStructDfn () NL_OVERRIDE;
 
 	// From CFormElm
-	bool				isUsed (const CForm *form) const;
-	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
-	void				unlink (CFormElm *child);
-	void				getFormName (std::string &result, const CFormElm *child) const;
-	void				getDependencies (std::set<std::string> &dependencies) const;
+	bool				isUsed (const CForm *form) const NL_OVERRIDE;
+	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const NL_OVERRIDE;
+	void				unlink (CFormElm *child) NL_OVERRIDE;
+	void				getFormName (std::string &result, const CFormElm *child) const NL_OVERRIDE;
+	void				getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
 
 	// Call by CFormLoader
 	void				read (xmlNodePtr node, CFormLoader &loader, const CFormDfn *dfn, CForm *form);
@@ -317,7 +317,7 @@ public:
 	std::vector<CFormElmStructElm>		Elements;
 
 	// Error handling
-	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const NL_OVERRIDE;
 };
 
 /**
@@ -328,24 +328,24 @@ class CFormElmVirtualStruct : public CFormElmStruct
 public:
 
 	CFormElmVirtualStruct (CForm *form, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex);
-	virtual ~CFormElmVirtualStruct() { }
+	virtual ~CFormElmVirtualStruct() NL_OVERRIDE { }
 
 	// The Dfn filename used by this struct
 	std::string			DfnFilename;
 
 	// From UFormElm
-	bool				isVirtualStruct () const;
-	bool				getDfnName (std::string &dfnName ) const;
+	bool				isVirtualStruct () const NL_OVERRIDE;
+	bool				getDfnName (std::string &dfnName ) const NL_OVERRIDE;
 
 	// From CFormElm
-	bool				isUsed (const CForm *form) const;
-	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
+	bool				isUsed (const CForm *form) const NL_OVERRIDE;
+	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const NL_OVERRIDE;
 
 	// Call by CFormLoader
 	void				read (xmlNodePtr node, CFormLoader &loader, CForm *form);
 
 	// Error handling
-	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const NL_OVERRIDE;
 };
 
 /**
@@ -356,8 +356,8 @@ class CFormElmArray : public CFormElm
 public:
 	// Default constructor
 	CFormElmArray (CForm *form, const CFormDfn *formDfn, const CType *type, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex);
-	virtual ~CFormElmArray ();
-	void clean ();
+	virtual ~CFormElmArray () NL_OVERRIDE;
+	void clean () NL_OVERRIDE;
 
 	// Smart pointer on the form definition for this structure
 	NLMISC::CSmartPtr<CFormDfn>	FormDfn;
@@ -366,30 +366,30 @@ public:
 	const CType			*Type;
 
 	// From UFormElm
-	bool				isArray () const;
-	bool				getArraySize (uint &size) const;
-	bool				getArrayNode (const UFormElm **result, uint arrayIndex) const;
-	bool				getArrayNode (UFormElm **result, uint arrayIndex);
-	bool				getArrayNodeName (std::string &result, uint arrayIndex) const;
-	bool				getArrayValue (std::string &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (sint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (uint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (sint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (uint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (sint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (uint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (float &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (double &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (bool &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
-	bool				getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const;
+	bool				isArray () const NL_OVERRIDE;
+	bool				getArraySize (uint &size) const NL_OVERRIDE;
+	bool				getArrayNode (const UFormElm **result, uint arrayIndex) const NL_OVERRIDE;
+	bool				getArrayNode (UFormElm **result, uint arrayIndex) NL_OVERRIDE;
+	bool				getArrayNodeName (std::string &result, uint arrayIndex) const NL_OVERRIDE;
+	bool				getArrayValue (std::string &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (sint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (uint8 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (sint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (uint16 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (sint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (uint32 &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (float &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (double &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (bool &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
+	bool				getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate, TWhereIsValue *where) const NL_OVERRIDE;
 
 	// From CFormElm
-	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
+	xmlNodePtr			write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const NL_OVERRIDE;
 	bool				setParent (CFormElm *parent);
-	void				unlink (CFormElm *child);
-	bool				isUsed (const CForm *form) const;
-	void				getFormName (std::string &result, const CFormElm *child) const;
-	void				getDependencies (std::set<std::string> &dependencies) const;
+	void				unlink (CFormElm *child) NL_OVERRIDE;
+	bool				isUsed (const CForm *form) const NL_OVERRIDE;
+	void				getFormName (std::string &result, const CFormElm *child) const NL_OVERRIDE;
+	void				getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
 
 	// Call by CFormLoader
 
@@ -417,7 +417,7 @@ public:
 	std::vector<CElement>		Elements;
 
 	// Error handling
-	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const NL_OVERRIDE;
 };
 
 /**
@@ -431,7 +431,7 @@ class CFormElmAtom : public CFormElm
 public:
 	// Default constructor
 	CFormElmAtom (CForm *form, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex);
-	virtual ~CFormElmAtom() { }
+	virtual ~CFormElmAtom() NL_OVERRIDE { }
 
 	// Pointer on the parent element
 	//CFormElmAtom				*Parent;
@@ -440,28 +440,28 @@ public:
 	const CType					*Type;
 
 	// From CFormElm
-	xmlNodePtr					write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const;
+	xmlNodePtr					write (xmlNodePtr node, const CForm *form, const std::string &structName, bool forceWrite = false) const NL_OVERRIDE;
 	bool						setParent (CFormElm *parent);
-	void						getFormName (std::string &result, const CFormElm *child) const;
-	void						getDependencies (std::set<std::string> &dependencies) const;
-	const CType*                      getType ();
+	void						getFormName (std::string &result, const CFormElm *child) const NL_OVERRIDE;
+	void						getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
+	const CType*                      getType () NL_OVERRIDE;
 
 	// Call by CFormLoader
 	void						read (xmlNodePtr node, CFormLoader &loader, const CType *type, CForm *form);
 
 	// From UFormElm
-	bool						isAtom () const;
-	bool						getValue (std::string &result, TEval evaluate) const;
-	bool						getValue (sint8 &result, TEval evaluate) const;
-	bool						getValue (uint8 &result, TEval evaluate) const;
-	bool						getValue (sint16 &result, TEval evaluate) const;
-	bool						getValue (uint16 &result, TEval evaluate) const;
-	bool						getValue (sint32 &result, TEval evaluate) const;
-	bool						getValue (uint32 &result, TEval evaluate) const;
-	bool						getValue (float &result, TEval evaluate) const;
-	bool						getValue (double &result, TEval evaluate) const;
-	bool						getValue (bool &result, TEval evaluate) const;
-	bool						getValue (NLMISC::CRGBA &result, TEval evaluate) const;
+	bool						isAtom () const NL_OVERRIDE;
+	bool						getValue (std::string &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (sint8 &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (uint8 &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (sint16 &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (uint16 &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (sint32 &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (uint32 &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (float &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (double &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (bool &result, TEval evaluate) const NL_OVERRIDE;
+	bool						getValue (NLMISC::CRGBA &result, TEval evaluate) const NL_OVERRIDE;
 
 	// Set the value, the elt been used
 	void						setValue (const std::string &value);
@@ -474,7 +474,7 @@ private:
 	std::string					Value;
 
 	// Error handling
-	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const;
+	virtual void		warning (bool exception, const std::string &function, const char *format, ... ) const NL_OVERRIDE;
 };
 
 // ***************************************************************************

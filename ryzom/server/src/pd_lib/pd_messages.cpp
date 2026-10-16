@@ -1108,7 +1108,7 @@ public:
 
 	NLMISC::CEntityId	Id;
 
-	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description)
+	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description) NL_OVERRIDE
 	{
 		return log.selectMessages(description, Id);
 	}
@@ -1153,7 +1153,7 @@ public:
 	NLMISC::CEntityId	Id;
 	std::string			Val;
 
-	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description)
+	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description) NL_OVERRIDE
 	{
 		return log.selectMessages(description, Id, Val);
 	}
@@ -1185,7 +1185,7 @@ public:
 
 	std::vector<NLMISC::CEntityId>	Ids;
 
-	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description)
+	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description) NL_OVERRIDE
 	{
 		return log.selectMessages(description, Ids);
 	}
@@ -1215,7 +1215,7 @@ public:
 
 	std::string	Str;
 
-	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description)
+	virtual bool	processLog(CUpdateLog& log, const CDBDescriptionParser& description) NL_OVERRIDE
 	{
 		return log.selectMessages(description, Str);
 	}

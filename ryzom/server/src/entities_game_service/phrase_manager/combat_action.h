@@ -166,7 +166,7 @@ public:
 	};
 
 	/// build method
-	CCombatAction *build(const CStaticAiAction *aiAction, CCombatPhrase * phrase)
+	CCombatAction *build(const CStaticAiAction *aiAction, CCombatPhrase * phrase) NL_OVERRIDE
 	{
 		T *instance = new T;
 		if (!instance)

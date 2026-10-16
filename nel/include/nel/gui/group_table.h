@@ -45,7 +45,7 @@ namespace NLGUI
         DECLARE_UI_CLASS( CGroupCell )
 
 		CGroupCell(const TCtorParam &param);
-		~CGroupCell();
+		~CGroupCell() NL_OVERRIDE;
 
 		enum TAlign
 		{
@@ -62,13 +62,13 @@ namespace NLGUI
 		};
 
 		/// \from CInterfaceElement
-		virtual void draw();
-		virtual sint32 getMaxUsedW() const;
-		virtual sint32 getMinUsedW() const;
+		virtual void draw() NL_OVERRIDE;
+		virtual sint32 getMaxUsedW() const NL_OVERRIDE;
+		virtual sint32 getMinUsedW() const NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// to be called by CGroupTable
 		bool parseCell (xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex);
@@ -118,7 +118,7 @@ namespace NLGUI
 		uint32 getPaddingLeftRight() const { return PaddingLeft + PaddingRight; };
 		uint32 getPaddingTopBottom() const { return PaddingTop + PaddingBottom; };
 
-		virtual void updateCoords();
+		virtual void updateCoords() NL_OVERRIDE;
 
 		static void setDebugUICell( bool d ){ DebugUICell = d; }
 		static bool getDebugUICell(){ return DebugUICell; }
@@ -140,7 +140,7 @@ namespace NLGUI
 		CGroupTable(const TCtorParam &param);
 
 		// dtor
-		~CGroupTable();
+		~CGroupTable() NL_OVERRIDE;
 
 		// Add a cell in the table
 		void addChild (CGroupCell* child);
@@ -169,25 +169,25 @@ namespace NLGUI
 		void setTextureScale(bool scaled);
 
 		std::string getProperties( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 	protected:
 
 		/// \from CInterfaceElement
-		void onInvalidateContent();
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
-		void draw ();
+		void onInvalidateContent() NL_OVERRIDE;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
+		void draw () NL_OVERRIDE;
 
 		/**
 		 * init  or reset the children element coords. Orverloaded from CInterfaceGroup because we begin with the last inserted element here
 		 */
-		virtual void updateCoords();
+		virtual void updateCoords() NL_OVERRIDE;
 
-		virtual void checkCoords();
+		virtual void checkCoords() NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
 		// Content validated
 		bool	_ContentValidated;

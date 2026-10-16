@@ -203,7 +203,7 @@ public:
 	////////////
 
 	CEditor();
-	~CEditor();
+	~CEditor() NL_OVERRIDE;
 
 	// Init what's need to be initialized depending on the configuration
 	void autoConfigInit(bool serverIsRingSession);

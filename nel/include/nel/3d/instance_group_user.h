@@ -51,7 +51,7 @@ class CInstanceGroupUser : public UInstanceGroup
 
 public:
 	CInstanceGroupUser ();
-	virtual ~CInstanceGroupUser ();
+	virtual ~CInstanceGroupUser () NL_OVERRIDE;
 	// Init with a scene.
 	//bool load (const std::string &instanceGroup);
 
@@ -60,56 +60,56 @@ public:
 
 private:
 	// From UInstanceGroup
-	void setTransformNameCallback (ITransformName *pTN);
-	void setAddRemoveInstanceCallback(IAddRemoveInstance *callback);
-	void setIGAddBeginCallback(IIGAddBegin *callback);
+	void setTransformNameCallback (ITransformName *pTN) NL_OVERRIDE;
+	void setAddRemoveInstanceCallback(IAddRemoveInstance *callback) NL_OVERRIDE;
+	void setIGAddBeginCallback(IIGAddBegin *callback) NL_OVERRIDE;
 
 
-	void addToScene (class UScene& scene, UDriver *driver, uint selectedTexture);
+	void addToScene (class UScene& scene, UDriver *driver, uint selectedTexture) NL_OVERRIDE;
 	void addToScene (class CScene& scene, IDriver *driver, uint selectedTexture);
 
-	void addToSceneAsync (class UScene& scene, UDriver *driver, uint selectedTexture);
-	TState getAddToSceneState ();
-	void stopAddToSceneAsync ();
+	void addToSceneAsync (class UScene& scene, UDriver *driver, uint selectedTexture) NL_OVERRIDE;
+	TState getAddToSceneState () NL_OVERRIDE;
+	void stopAddToSceneAsync () NL_OVERRIDE;
 
-	virtual UInstance		getInstance (uint instanceNb) const;
-	virtual void			setDistMax(uint instance, float dist);
-	virtual float			getDistMax(uint instance) const;
-	virtual void		    setCoarseMeshDist(uint instance, float dist);
-	virtual float           getCoarseMeshDist(uint instance) const;
-
-
-	void removeFromScene (class UScene& scene);
-	uint getNumInstance () const;
-	const std::string& getShapeName (uint instanceNb) const;
-	const std::string& getInstanceName (uint instanceNb) const;
-	virtual void				getInstanceMatrix(uint instanceNb, NLMISC::CMatrix &dest) const;
-	const NLMISC::CVector& getInstancePos (uint instanceNb) const;
-	const NLMISC::CQuat& getInstanceRot (uint instanceNb) const;
-	const NLMISC::CVector& getInstanceScale (uint instanceNb) const;
-	UInstance getByName (const std::string& name) const;
-	sint	  getIndexByName(const std::string &name) const;
+	virtual UInstance		getInstance (uint instanceNb) const NL_OVERRIDE;
+	virtual void			setDistMax(uint instance, float dist) NL_OVERRIDE;
+	virtual float			getDistMax(uint instance) const NL_OVERRIDE;
+	virtual void		    setCoarseMeshDist(uint instance, float dist) NL_OVERRIDE;
+	virtual float           getCoarseMeshDist(uint instance) const NL_OVERRIDE;
 
 
-	void setBlendShapeFactor (const std::string &bsName, float rFactor);
+	void removeFromScene (class UScene& scene) NL_OVERRIDE;
+	uint getNumInstance () const NL_OVERRIDE;
+	const std::string& getShapeName (uint instanceNb) const NL_OVERRIDE;
+	const std::string& getInstanceName (uint instanceNb) const NL_OVERRIDE;
+	virtual void				getInstanceMatrix(uint instanceNb, NLMISC::CMatrix &dest) const NL_OVERRIDE;
+	const NLMISC::CVector& getInstancePos (uint instanceNb) const NL_OVERRIDE;
+	const NLMISC::CQuat& getInstanceRot (uint instanceNb) const NL_OVERRIDE;
+	const NLMISC::CVector& getInstanceScale (uint instanceNb) const NL_OVERRIDE;
+	UInstance getByName (const std::string& name) const NL_OVERRIDE;
+	sint	  getIndexByName(const std::string &name) const NL_OVERRIDE;
 
-	void createRoot (UScene &scene);
-	void setClusterSystemForInstances (UInstanceGroup *pClusterSystem);
-	bool linkToParentCluster(UInstanceGroup *father);
-	UInstanceGroup *getParentCluster() const;
-	void getDynamicPortals (std::vector<std::string> &names);
-	void setDynamicPortal (std::string& name, bool opened);
-	bool getDynamicPortal (std::string& name);
+
+	void setBlendShapeFactor (const std::string &bsName, float rFactor) NL_OVERRIDE;
+
+	void createRoot (UScene &scene) NL_OVERRIDE;
+	void setClusterSystemForInstances (UInstanceGroup *pClusterSystem) NL_OVERRIDE;
+	bool linkToParentCluster(UInstanceGroup *father) NL_OVERRIDE;
+	UInstanceGroup *getParentCluster() const NL_OVERRIDE;
+	void getDynamicPortals (std::vector<std::string> &names) NL_OVERRIDE;
+	void setDynamicPortal (std::string& name, bool opened) NL_OVERRIDE;
+	bool getDynamicPortal (std::string& name) NL_OVERRIDE;
 
 
-	void setPos (const NLMISC::CVector &pos);
-	void setRotQuat (const NLMISC::CQuat &q);
+	void setPos (const NLMISC::CVector &pos) NL_OVERRIDE;
+	void setRotQuat (const NLMISC::CQuat &q) NL_OVERRIDE;
 
 	bool getStaticLightSetup(NLMISC::CRGBA sunAmbient, uint retrieverIdentifier, sint surfaceId, const NLMISC::CVector &localPos,
-		std::vector<CPointLightInfluence> &pointLightList, uint8 &sunContribution, NLMISC::CRGBA &localAmbient);
+		std::vector<CPointLightInfluence> &pointLightList, uint8 &sunContribution, NLMISC::CRGBA &localAmbient) NL_OVERRIDE;
 
-	NLMISC::CVector getPos ();
-	NLMISC::CQuat	getRotQuat ();
+	NLMISC::CVector getPos () NL_OVERRIDE;
+	NLMISC::CQuat	getRotQuat () NL_OVERRIDE;
 
 	// The real instance group
 	CInstanceGroup	_InstanceGroup;
@@ -120,13 +120,13 @@ private:
 	UScene *_AddToSceneTempScene;
 	UDriver *_AddToSceneTempDriver;
 
-	virtual void			freezeHRC();
-	virtual void			unfreezeHRC();
+	virtual void			freezeHRC() NL_OVERRIDE;
+	virtual void			unfreezeHRC() NL_OVERRIDE;
 
-	virtual void			displayDebugClusters(UDriver *drv, UTextContext *txtCtx);
+	virtual void			displayDebugClusters(UDriver *drv, UTextContext *txtCtx) NL_OVERRIDE;
 
-	virtual bool			dontCastShadowForInterior(uint instance) const;
-	virtual bool			dontCastShadowForExterior(uint instance) const;
+	virtual bool			dontCastShadowForInterior(uint instance) const NL_OVERRIDE;
+	virtual bool			dontCastShadowForExterior(uint instance) const NL_OVERRIDE;
 
 	friend class CTransformUser;
 	friend class CSceneUser;

@@ -320,7 +320,7 @@ namespace NLGUI
 	class CAHSet : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const string &Params)
+		virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 		{
 			string dblink   = getParam (Params, "dblink");
 			string property = getParam (Params, "target_property");
@@ -419,7 +419,7 @@ namespace NLGUI
 	class CAHCopy : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+		virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 		{
 			string dbdst = getParam (Params, "dbdst");
 			string dbsrc = getParam (Params, "dbsrc");
@@ -488,7 +488,7 @@ namespace NLGUI
 	class CAHResizeW : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const string &Params)
+		virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 		{
 			string elt = getParam (Params, "elt");
 
@@ -538,7 +538,7 @@ namespace NLGUI
 		bool		 On;
 		enum TTargetAlpha { ContentAlpha = 0, BgAlpha, RolloverAlphaContent, RolloverAlphaBG };
 		TTargetAlpha Target;
-		virtual void update(ICDBNode *node)
+		virtual void update(ICDBNode *node) NL_OVERRIDE
 		{
 			if (!On) return;
 			if (!AlphaChooserTarget) return;
@@ -559,7 +559,7 @@ namespace NLGUI
 	class CAHChooseUIAlpha : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CGroupContainerBase *gc = NULL;
 			CCtrlBase *cb = pCaller;
@@ -644,7 +644,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHCancelChooseUIAlpha : public IActionHandler
 	{
-		virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* Params */)
+		virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* Params */) NL_OVERRIDE
 		{
 			if (AlphaChooserTarget)
 			{
@@ -661,7 +661,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHUseGlobalAlphaSettings : public IActionHandler
 	{
-		virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* Params */)
+		virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* Params */) NL_OVERRIDE
 		{
 			if (AlphaChooserTarget)
 			{
@@ -676,7 +676,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHLockUnlock : public IActionHandler
 	{
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CGroupContainerBase *gc = NULL;
 			CCtrlBase *cb = pCaller;
@@ -696,7 +696,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHSetTransparent : public IActionHandler
 	{
-		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 		{
 			CGroupContainerBase *pGC = dynamic_cast< CGroupContainerBase* >(CWidgetManager::getInstance()->getElementFromId(Params));
 			if (pGC != NULL)
@@ -714,7 +714,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHSetAlpha : public IActionHandler
 	{
-		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+		virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 		{
 			string ui	= getParam (Params, "target");
 
@@ -737,7 +737,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHUnlockAllContainer : public IActionHandler
 	{
-		virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+		virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 		{
 			const vector<CWidgetManager::SMasterGroup> &rVMG = CWidgetManager::getInstance()->getAllMasterGroup();
 			for (uint32 nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
@@ -752,7 +752,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	class CAHCopyToClipboard : public IActionHandler
 	{
-		virtual void execute (CCtrlBase *pCaller, const std::string &params)
+		virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE
 		{
 			if (!CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(params))
 			{

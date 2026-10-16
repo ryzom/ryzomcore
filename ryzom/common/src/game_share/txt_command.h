@@ -61,8 +61,8 @@ struct __CTxtCommand_##cmdName##CONTEXT_CLASS: public ITxtCommand<CONTEXT_CLASS>
 		if (p==NULL) p= new __CTxtCommand_##cmdName##CONTEXT_CLASS;\
 		return p;\
 	}\
-	virtual const char* getName() const {return #cmdName;}\
-	virtual CTxtCommandResult execute(CONTEXT_CLASS& context,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& fullCmdLine);\
+	virtual const char* getName() const NL_OVERRIDE {return #cmdName;}\
+	virtual CTxtCommandResult execute(CONTEXT_CLASS& context,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& fullCmdLine) NL_OVERRIDE;\
 private:\
 	__CTxtCommand_##cmdName##CONTEXT_CLASS() {}\
 };\

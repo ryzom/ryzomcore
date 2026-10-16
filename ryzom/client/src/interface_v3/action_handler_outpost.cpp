@@ -69,7 +69,7 @@ uint32 getOutpostSheet()
 class COutpostGiveup : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -86,7 +86,7 @@ REGISTER_ACTION_HANDLER(COutpostGiveup, "outpost_giveup");
 class COutpostDoGiveup : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// retrieve the sheet of this outpost
 		uint32	sheet= 0;
@@ -110,7 +110,7 @@ REGISTER_ACTION_HANDLER(COutpostDoGiveup, "outpost_do_giveup");
 class COutpostCancelGiveup : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// reset confirm dialog flag
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
@@ -124,7 +124,7 @@ REGISTER_ACTION_HANDLER(COutpostCancelGiveup, "outpost_cancel_giveup");
 class COutpostSetSquad : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -155,7 +155,7 @@ REGISTER_ACTION_HANDLER(COutpostSetSquad, "outpost_set_squad");
 class COutpostRemoveSquad : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -173,7 +173,7 @@ REGISTER_ACTION_HANDLER(COutpostRemoveSquad, "outpost_remove_squad");
 class COutpostInsertSquad : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -208,7 +208,7 @@ uint8 getOutpostSquadSpawnIndex()
 class COutpostInitSquadMap : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
@@ -314,7 +314,7 @@ REGISTER_ACTION_HANDLER(COutpostInitSquadMap, "outpost_init_squad_map");
 class COutpostSquadMapSend : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
@@ -334,7 +334,7 @@ REGISTER_ACTION_HANDLER(COutpostSquadMapSend, "outpost_squad_map_send");
 class COutpostSelectSquadCapital : public IActionHandler
 {
 public:
-	void execute(CCtrlBase * /* pCaller */, const std::string &params)
+	void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
 	{
 		uint32	capital;
 		fromString(params, capital);
@@ -375,7 +375,7 @@ static sint		gmtToLocal(sint hour)
 class CAHOutpostSelectDefPeriod : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// The user change the defense period (edited in LOCAL TimeZone)
 		sint defPeriod;
@@ -391,7 +391,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostSelectDefPeriod, "outpost_select_def_period");
 class CAHOutpostSelectAttPeriod : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -414,7 +414,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostSelectAttPeriod, "outpost_select_att_period");
 class CAHOutpostDeclareWarStart : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -440,7 +440,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostDeclareWarStart, "outpost_declare_war_start");
 class CAHOutpostDeclareWarValidate : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -486,7 +486,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostDeclareWarValidate, "outpost_declare_war_valid
 class CAHOutpostSelectFromBC : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -522,7 +522,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostSelectFromBC, "outpost_select_from_bc");
 class CAHOutpostUnSelect : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// Called when the Outpost State window (the one opened from BotChat) is closed
 
@@ -537,7 +537,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostUnSelect, "outpost_unselect");
 class CAHOutpostPVPJoin : public IActionHandler
 {
 public:
-	void	execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	void	execute (CCtrlBase * /* pCaller */, const std::string &Params) NL_OVERRIDE
 	{
 		// parse AH
 		bool	bNeutral= true;
@@ -563,7 +563,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostPVPJoin, "outpost_pvp_join");
 class CAHOutpostBanPlayer : public IActionHandler
 {
 public:
-	void	execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void	execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -578,7 +578,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostBanPlayer, "outpost_ban_player");
 class CAHOutpostBanGuild : public IActionHandler
 {
 public:
-	void	execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void	execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -625,7 +625,7 @@ void	outpostTestUserCanBan(CCDBNodeLeaf *dbBanRight, bool &okForBanPlayer, bool 
 class CAHOutpostDoBanPlayer : public IActionHandler
 {
 public:
-	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CCDBNodeLeaf	*dbBan = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
@@ -648,7 +648,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostDoBanPlayer, "outpost_do_ban_player");
 class CAHOutpostDoBanGuild : public IActionHandler
 {
 public:
-	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CCDBNodeLeaf	*dbBan = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
@@ -671,7 +671,7 @@ REGISTER_ACTION_HANDLER(CAHOutpostDoBanGuild, "outpost_do_ban_guild");
 class CAHOutpostUpdateTimeZoneAuto : public IActionHandler
 {
 public:
-	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CCDBNodeLeaf	*dbTZ = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);

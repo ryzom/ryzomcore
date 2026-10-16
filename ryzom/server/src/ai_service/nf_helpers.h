@@ -36,7 +36,7 @@ public:
 	{
 	}
 	
-	float getScore(CNpcZone const& zone) const
+	float getScore(CNpcZone const& zone) const NL_OVERRIDE
 	{
 		if (&zone==_zone)
 			return -1.f;
@@ -68,7 +68,7 @@ public:
 	{
 	}
 	
-	float getScore(CNpcZone const& zone) const
+	float getScore(CNpcZone const& zone) const NL_OVERRIDE
 	{
 		if (!zone.properties().containsPartOfNotStrict(_oneOfSet))
 			return	-1.f;
@@ -78,7 +78,7 @@ public:
 			return	-1.f;
 		return 1.f/getDist(zone);
 	}
-	virtual float getParam(CNpcZone	const& zone) const { return getDist(zone); };
+	virtual float getParam(CNpcZone	const& zone) const NL_OVERRIDE { return getDist(zone); };
 private:
 	float getDist(CNpcZone const& zone) const
 	{
@@ -99,7 +99,7 @@ public:
 	{
 	}
 	
-	float getScore(CNpcZone const& zone) const
+	float getScore(CNpcZone const& zone) const NL_OVERRIDE
 	{
 		return (float)(zone.getFreeAreaScore()*CZoneScorerMandatoryAndOneOfAndDist::getScore(zone));
 	}
@@ -133,12 +133,12 @@ public:
 		nlassert(_IndexSrc<4 && _IndexDest<4);
 	}
 	
-	void doOnFamily(CFamilyBehavior* fb) const
+	void doOnFamily(CFamilyBehavior* fb) const NL_OVERRIDE
 	{
 		float value = fb->getModifier((uint32)_IndexSrc);
 		fb->setModifier(value, (uint32)_IndexDest);
 	}
-	void doOnCellZone(CCellZone* cz) const { }
+	void doOnCellZone(CCellZone* cz) const NL_OVERRIDE { }
 	
 private:
 	size_t _IndexSrc;
@@ -156,7 +156,7 @@ public:
 		_value=value;
 	}
 	
-	void	doOnFamily(CFamilyBehavior	*fb)	const
+	void	doOnFamily(CFamilyBehavior	*fb)	const NL_OVERRIDE
 	{
 		if	(_value==-1)	//	not for affectation.
 			return;
@@ -169,7 +169,7 @@ public:
 		}
 		fb->setModifier	(_value, (uint32)_index);
 	}
-	void doOnCellZone(CCellZone *cz) const { }
+	void doOnCellZone(CCellZone *cz) const NL_OVERRIDE { }
 	
 private:
 	size_t _index;

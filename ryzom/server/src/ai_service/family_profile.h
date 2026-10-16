@@ -114,7 +114,7 @@ public:
 	
 	static CAiFactoryContainer<IFamilyProfile, NLMISC::TStringId> &instance();
 	
-	virtual	~CFamilyProfileFactory();
+	virtual	~CFamilyProfileFactory() NL_OVERRIDE;
 
 	static	IFamilyProfile*	createFamilyProfile(const NLMISC::TStringId	&keyWord, const	IFamilyProfile::CtorParam&	ctorParam);
 };

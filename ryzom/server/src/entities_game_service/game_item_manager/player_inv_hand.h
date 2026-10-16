@@ -28,7 +28,7 @@ public:
 	//@{
 	//@name Overloads from inventory base
 	/// Return the max slot for equipment
-	uint32 getMaxSlot() const;
+	uint32 getMaxSlot() const NL_OVERRIDE;
 
 	float getWearMalus();
 
@@ -44,15 +44,15 @@ public:
 class CHandlingInvView : public CCharacterInvView
 {
 public:
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE;
 	/// The inventory information has changed (like total bulk or weight)
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE;
 
 protected:
 	/** Update the given slot on the client with item infos.
 	 *  If item is NULL, slot is updated as empty on the client.
 	 */
-	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item);
+	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item) NL_OVERRIDE;
 };
 
 #endif

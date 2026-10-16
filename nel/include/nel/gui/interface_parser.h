@@ -111,7 +111,7 @@ namespace NLGUI
 		};
 
 		CInterfaceParser();
-		virtual ~CInterfaceParser();
+		virtual ~CInterfaceParser() NL_OVERRIDE;
 
 	public:
 
@@ -123,7 +123,7 @@ namespace NLGUI
 		  * \param isFilename true if xmlFileNames array contains the names of the xml file, false, if each
 		  *                   array is a script itself
 		  */
-		bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true, bool checkInData = false);
+		bool parseInterface (const std::vector<std::string> &xmlFileNames, bool reload, bool isFilename = true, bool checkInData = false) NL_OVERRIDE;
 
 		bool parseXMLDocument (xmlNodePtr root, bool reload);
 		bool parseTemplateNode (xmlNodePtr node,xmlNodePtr instance,xmlNodePtr templ);
@@ -132,7 +132,7 @@ namespace NLGUI
 		bool parseVariable (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		bool parseOptions (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		bool parseGroup (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
-		bool parseGroupChildren(xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
+		bool parseGroupChildren(xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload) NL_OVERRIDE;
 		bool parseControl (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
 		bool parseLink (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 		bool parseView (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload);
@@ -159,7 +159,7 @@ namespace NLGUI
 		bool solveStyle(xmlNodePtr cur);
 
 		// Solve All define in a string. return false if some define not founs (defError contains this define)
-		bool solveDefine(const std::string &propVal, std::string &newPropVal, std::string &defError);
+		bool solveDefine(const std::string &propVal, std::string &newPropVal, std::string &defError) NL_OVERRIDE;
 
 		// Called after template & options parsing
 		void setupOptions();
@@ -172,27 +172,27 @@ namespace NLGUI
 
 		/// Association builders : associate an element of the interface with the string ID of
 		/// another element used as reference for position values
-		void addParentPositionAssociation (CInterfaceElement *element, const std::string &parentID);
-		std::string getParentPosAssociation( CInterfaceElement *element ) const;
-		void addParentSizeAssociation (CInterfaceElement *element, const std::string &parentID);
-		std::string getParentSizeAssociation( CInterfaceElement *element ) const;
-		void addParentSizeMaxAssociation (CInterfaceElement *element, const std::string &parentID);
-		std::string getParentSizeMaxAssociation( CInterfaceElement *element ) const;
+		void addParentPositionAssociation (CInterfaceElement *element, const std::string &parentID) NL_OVERRIDE;
+		std::string getParentPosAssociation( CInterfaceElement *element ) const NL_OVERRIDE;
+		void addParentSizeAssociation (CInterfaceElement *element, const std::string &parentID) NL_OVERRIDE;
+		std::string getParentSizeAssociation( CInterfaceElement *element ) const NL_OVERRIDE;
+		void addParentSizeMaxAssociation (CInterfaceElement *element, const std::string &parentID) NL_OVERRIDE;
+		std::string getParentSizeMaxAssociation( CInterfaceElement *element ) const NL_OVERRIDE;
 
 		/// LUA Class Association builder :  associate a lua script to a group (called for each group after every document parsed)
-		void addLuaClassAssociation(CInterfaceGroup *group, const std::string &luaScript);
-		std::string getLuaClassAssociation( CInterfaceGroup *group ) const;
+		void addLuaClassAssociation(CInterfaceGroup *group, const std::string &luaScript) NL_OVERRIDE;
+		std::string getLuaClassAssociation( CInterfaceGroup *group ) const NL_OVERRIDE;
 
 		/**
 		 * Accessors
 		 */
 		// access to control sheet selection
-		CCtrlSheetSelection	&getCtrlSheetSelection() { return _CtrlSheetSelection; }
+		CCtrlSheetSelection	&getCtrlSheetSelection() NL_OVERRIDE { return _CtrlSheetSelection; }
 
 		/// \name Parameter variable
 		// @{
-		const std::string&  getDefine(const std::string &id) const;
-		bool isDefineExist(const std::string &id) const;
+		const std::string&  getDefine(const std::string &id) const NL_OVERRIDE;
+		bool isDefineExist(const std::string &id) const NL_OVERRIDE;
 		void setDefine(const std::string &id, const std::string &value);
 		// @}
 
@@ -201,11 +201,11 @@ namespace NLGUI
 			/** Associate the given dynamic link with an ID
 			  * \return true if succesful
 			  */
-			bool addLink(CInterfaceLink *link, const std::string &id);
+			bool addLink(CInterfaceLink *link, const std::string &id) NL_OVERRIDE;
 			/** remove the given link from its ID
 			  * \return true if succesful
 			  */
-			bool removeLink(const std::string &id);
+			bool removeLink(const std::string &id) NL_OVERRIDE;
 		// @}
 
 		/** create a template from an instance consisting of a single group
@@ -213,8 +213,8 @@ namespace NLGUI
 		  * \param templateParams array containing each template parameter and its name
 		  * \param number of template parameters in the array
 		  */
-		CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, const std::pair<std::string, std::string> *templateParams, uint numParams, bool updateLinks = true);
-		CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true)
+		CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, const std::pair<std::string, std::string> *templateParams, uint numParams, bool updateLinks = true) NL_OVERRIDE;
+		CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true) NL_OVERRIDE
 		{
 			if (!templateParams.empty())
 				return createGroupInstance(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
@@ -227,8 +227,8 @@ namespace NLGUI
 		  * \param templateParams array containing each template parameter and its name
 		  * \param number of template parameters in the array
 		  */
-		CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, const std::pair<std::string,std::string> *templateParams, uint numParams, bool updateLinks /* = true */);
-		CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true)
+		CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, const std::pair<std::string,std::string> *templateParams, uint numParams, bool updateLinks /* = true */) NL_OVERRIDE;
+		CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true) NL_OVERRIDE
 		{
 			if (!templateParams.empty())
 				return createUIElement(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
@@ -246,9 +246,9 @@ namespace NLGUI
 			void removeAllLinks();
 			void removeAllProcedures();
 			void removeAllDefines();
-			void removeAllTemplates();
+			void removeAllTemplates() NL_OVERRIDE;
 			void removeAllAnims();
-			void removeAll();
+			void removeAll() NL_OVERRIDE;
 		// @}
 
 	protected:
@@ -261,18 +261,18 @@ namespace NLGUI
 
 
 		// get info on procedure. return 0 if procedure not found
-		uint getProcedureNumActions( const std::string &procName ) const;
+		uint getProcedureNumActions( const std::string &procName ) const NL_OVERRIDE;
 
 		// return false if procedure not found, or if bad action index. return false if has some param variable (@0...)
-		bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const;
+		bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const NL_OVERRIDE;
 
 		void setCacheUIParsing( bool b ){ cacheUIParsing = b; }
 
-		CInterfaceAnim* getAnim( const std::string &name ) const;
+		CInterfaceAnim* getAnim( const std::string &name ) const NL_OVERRIDE;
 
-		CProcedure* getProc( const std::string &name );
+		CProcedure* getProc( const std::string &name ) NL_OVERRIDE;
 
-		const TProcedureMap& getProcMap() const{ return _ProcedureMap; }
+		const TProcedureMap& getProcMap() const NL_OVERRIDE{ return _ProcedureMap; }
 
 	protected:
 
@@ -305,8 +305,8 @@ namespace NLGUI
 		bool	validDefineChar(char c) const;
 
 	public:
-		inline void clearFeatureFlags() { m_FeatureFlags.clear(); }
-		inline void addFeatureFlag(const std::string &flag) { m_FeatureFlags.insert(flag); }
+		inline void clearFeatureFlags() NL_OVERRIDE { m_FeatureFlags.clear(); }
+		inline void addFeatureFlag(const std::string &flag) NL_OVERRIDE { m_FeatureFlags.insert(flag); }
 
 	private:
 		bool checkFeatureFlags(const char *str, ptrdiff_t len = 0) const;
@@ -368,41 +368,41 @@ namespace NLGUI
 
 	public:
 		/// Sets the working directory, where files should be looked for
-		void setWorkDir( const std::string &workdir ){ _WorkDir = workdir; }
+		void setWorkDir( const std::string &workdir ) NL_OVERRIDE{ _WorkDir = workdir; }
 
 		/// Looks up a file in either the working directory or using CPath::lookup
 		std::string lookup( const std::string &file );
 
-		void initLUA();
-		void uninitLUA();
-		bool isLuaInitialized() const{ return luaInitialized; }
+		void initLUA() NL_OVERRIDE;
+		void uninitLUA() NL_OVERRIDE;
+		bool isLuaInitialized() const NL_OVERRIDE{ return luaInitialized; }
 
 		/// Load A .lua. false if parse error. string 'error' contains the eventual error desc (but warning still displayed)
-		bool loadLUA( const std::string &luaFile, std::string &error );
+		bool loadLUA( const std::string &luaFile, std::string &error ) NL_OVERRIDE;
 
 		/// Reload all LUA scripts inserted through <lua>
-		void reloadAllLuaFileScripts();
+		void reloadAllLuaFileScripts() NL_OVERRIDE;
 
 		void setSetupOptionsCallback( ISetupOptionCallbackClass *cb ){ setupCallback = cb; }
 
-		bool hasProc( const std::string &name ) const;
-		bool addProc( const std::string &name );
-		bool removeProc( const std::string &name );
+		bool hasProc( const std::string &name ) const NL_OVERRIDE;
+		bool addProc( const std::string &name ) NL_OVERRIDE;
+		bool removeProc( const std::string &name ) NL_OVERRIDE;
 
-		const std::map< uint32, SLinkData >& getLinkMap() const{ return links; }
-		uint32 addLinkData( SLinkData &linkData );
-		void removeLinkData( uint32 id );
-		bool getLinkData( uint32 id, SLinkData &linkData );
-		void updateLinkData( uint32 id, const SLinkData &linkData );
+		const std::map< uint32, SLinkData >& getLinkMap() const NL_OVERRIDE{ return links; }
+		uint32 addLinkData( SLinkData &linkData ) NL_OVERRIDE;
+		void removeLinkData( uint32 id ) NL_OVERRIDE;
+		bool getLinkData( uint32 id, SLinkData &linkData ) NL_OVERRIDE;
+		void updateLinkData( uint32 id, const SLinkData &linkData ) NL_OVERRIDE;
 
-		void setEditorMode( bool b ){ editorMode = b; }
+		void setEditorMode( bool b ) NL_OVERRIDE{ editorMode = b; }
 
-		void setVariable( const VariableData &v );
-		bool serializeVariables( xmlNodePtr parentNode ) const;
-		bool serializeProcs( xmlNodePtr parentNode ) const;
-		bool serializePointerSettings( xmlNodePtr parentNode ) const;
-		bool serializeKeySettings( xmlNodePtr parentNode ) const;
-		CViewBase* createClass( const std::string &name );
+		void setVariable( const VariableData &v ) NL_OVERRIDE;
+		bool serializeVariables( xmlNodePtr parentNode ) const NL_OVERRIDE;
+		bool serializeProcs( xmlNodePtr parentNode ) const NL_OVERRIDE;
+		bool serializePointerSettings( xmlNodePtr parentNode ) const NL_OVERRIDE;
+		bool serializeKeySettings( xmlNodePtr parentNode ) const NL_OVERRIDE;
+		CViewBase* createClass( const std::string &name ) NL_OVERRIDE;
 	};
 
 }

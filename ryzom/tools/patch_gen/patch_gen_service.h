@@ -28,16 +28,16 @@ class CPatchGenService : public NLNET::IService
 public :
 
 	/// Initialise the service
-	void init();
+	void init() NL_OVERRIDE;
 
 	/// Update
-	bool update();
+	bool update() NL_OVERRIDE;
 
 	/// Tick Update
 	static void tickUpdate();
 
 	/// Release
-	void release();
+	void release() NL_OVERRIDE;
 };
 
 

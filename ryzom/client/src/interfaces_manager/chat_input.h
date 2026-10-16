@@ -40,7 +40,7 @@ public:
 	CChatInput(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint numFunc, uint32 fontSize, CRGBA color, bool shadow);
 
 	/// Destructor.
-	~CChatInput();
+	~CChatInput() NL_OVERRIDE;
 
 	/// do like a 'RETURN' keypressed : force the analysis of the line and send the message/execute the command
 	void execute();
@@ -49,7 +49,7 @@ private:
 	/// Initialize the control (1 function called for all constructors -> easier).
 	inline void init();
 	/// callback
-	virtual void operator () (const CEvent& event);
+	virtual void operator () (const CEvent& event) NL_OVERRIDE;
 };
 
 

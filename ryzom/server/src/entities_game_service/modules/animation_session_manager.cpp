@@ -67,11 +67,11 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	// implementation if IModuleTrackerCb
 	///////////////////////////////////////////////////////////////////////////
-	virtual void onTrackedModuleUp(IModuleProxy *moduleProxy)
+	virtual void onTrackedModuleUp(IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		// nothing
 	}
-	virtual void onTrackedModuleDown(IModuleProxy *moduleProxy)
+	virtual void onTrackedModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		// as we attached only to the server animation module tracker callbacks,
 		// we can remove all session data we stored here
@@ -82,7 +82,7 @@ public:
 	// implementation if IAnimSessionMgr
 	///////////////////////////////////////////////////////////////////////////
 	/// An animation session is started, init the necessary storage for it.
-	void animSessionStarted(uint32 sessionId, const R2::TRunningScenarioInfo &scenarioInfo)
+	void animSessionStarted(uint32 sessionId, const R2::TRunningScenarioInfo &scenarioInfo) NL_OVERRIDE
 	{
 		nldebug("animSessionStarted : session %u started with scenario '%s', desc '%s', md5 '%s', owner %u, author '%s'",
 			sessionId,
@@ -100,7 +100,7 @@ public:
 	/** An animation session is ended, report the RRP gained to SU and release 
 	 *	session resources.
 	 */
-	void animSessionEnded(uint32 sessionId, uint32 scenarioScore, NLMISC::TTime timeTaken)
+	void animSessionEnded(uint32 sessionId, uint32 scenarioScore, NLMISC::TTime timeTaken) NL_OVERRIDE
 	{
 		nldebug("animSessionEnded : session %u ended", sessionId);
 
@@ -127,7 +127,7 @@ public:
 	/** A character enter an animation session as player, start accumulating point
 	 *	for it.
 	 */
-	void characterEnterAnimSession(uint32 sessionId, uint32 charId)
+	void characterEnterAnimSession(uint32 sessionId, uint32 charId) NL_OVERRIDE
 	{
 		nldebug("characterEnterAnimSession : character %u enter anim session %u", charId, sessionId);
 		// remember the current session for this char (in order to cumulate points in the right scenario)
@@ -155,7 +155,7 @@ public:
 	 *	for it but keep the gained point for the report (or for later if the
 	 *	character re-enter the session).
 	 */
-	void characterLeaveAnimSession(uint32 sessionId, uint32 charId)
+	void characterLeaveAnimSession(uint32 sessionId, uint32 charId) NL_OVERRIDE
 	{
 		nldebug("characterLeaveAnimSession : character %u leave anim session %u", charId, sessionId);
 		// remove the current session (if already stored with this session)
@@ -171,7 +171,7 @@ public:
 
 	/** A character has done something 'active' so update their last activity timestamp
 	 */
-	virtual void flagCharAsActive(uint32 charId,uint32 level)
+	virtual void flagCharAsActive(uint32 charId,uint32 level) NL_OVERRIDE
 	{
 		/// retrieve the session this character belong to
 		TAnimSessionInfo *sessionInfo = getAnimSessionForChar(charId);
@@ -184,7 +184,7 @@ public:
 
 	/** A character has gained some ring points, add them to their curent anim session
 	 */
-	virtual void addRRPForChar(uint32 charId, uint32 nbRingPoints)
+	virtual void addRRPForChar(uint32 charId, uint32 nbRingPoints) NL_OVERRIDE
 	{
 		/// retrieve the session this character belong to
 		TAnimSessionInfo *sessionInfo = getAnimSessionForChar(charId);
@@ -224,7 +224,7 @@ public:
 		return &(it2->second);
 	}
 
-	virtual const TAnimSessionInfo *getAnimSessionForChar(uint32 charId) const
+	virtual const TAnimSessionInfo *getAnimSessionForChar(uint32 charId) const NL_OVERRIDE
 	{
 		return const_cast<CAnimSessionMgr*>(this)->getAnimSessionForChar(charId);
 	}

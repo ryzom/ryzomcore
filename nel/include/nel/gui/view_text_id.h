@@ -94,13 +94,13 @@ namespace NLGUI
 					 bool Shadow=false);
 
 
-		~CViewTextID();
+		~CViewTextID() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
-		virtual void checkCoords();
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual void checkCoords() NL_OVERRIDE;
 
 		bool	parseTextIdOptions(xmlNodePtr cur);
 

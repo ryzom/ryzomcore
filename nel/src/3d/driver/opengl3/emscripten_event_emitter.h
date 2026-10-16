@@ -45,7 +45,7 @@ class CEmscriptenEventEmitter : public IEventEmitter
 {
 public:
 	CEmscriptenEventEmitter();
-	virtual ~CEmscriptenEventEmitter();
+	virtual ~CEmscriptenEventEmitter() NL_OVERRIDE;
 
 	/// Register HTML5 callbacks on the given canvas selector (e.g. "#canvas").
 	void init(const char *canvasSelector);
@@ -53,7 +53,7 @@ public:
 	/// Unregister the HTML5 callbacks and drop pending events.
 	void release();
 
-	virtual void submitEvents(CEventServer &server, bool allWindows);
+	virtual void submitEvents(CEventServer &server, bool allWindows) NL_OVERRIDE;
 
 private:
 	static EM_BOOL mouseCallback(int eventType, const EmscriptenMouseEvent *e, void *userData);

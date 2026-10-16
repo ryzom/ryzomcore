@@ -376,7 +376,7 @@ public:
 	}
 
 	// Run method
-	void run()
+	void run() NL_OVERRIDE
 	{
 		// Set the CPU mask
 		// setCPUMask (Thread, _Process);
@@ -419,7 +419,7 @@ public:
 	}
 
 	// Run method
-	virtual void run ();
+	virtual void run () NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -679,7 +679,7 @@ public:
 		  _Process(process)
 	{
 	}
-	void run()
+	void run() NL_OVERRIDE
 	{
 		_ZoneLighter->processLightableShapeCalc(_Process, _ShapesToLit, _FirstShape, _LastShape, *_Description);
 		_ZoneLighter->_ProcessExited++;

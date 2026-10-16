@@ -50,11 +50,11 @@ public:
 
 public:
 	CBotChatPageTrade();
-	virtual void begin();
-	virtual void init();
+	virtual void begin() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
 	// update displayed prices
-	virtual void update();
-	virtual void end();
+	virtual void update() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
 	// start the 'buy' dialog window for the given sheet (the player has clicked on an item to buy)
 	void		 startBuyDialog(CDBCtrlSheet *item, CCtrlBase *pCaller);
 	// start the 'sell' dialog (the player has clicked on an item to sell)

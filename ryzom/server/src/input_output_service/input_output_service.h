@@ -242,17 +242,17 @@ public:
 	/**
 	 * init the service
 	 */
-	void init();
+	void init() NL_OVERRIDE;
 
 	/// Init after the mirror init
 	void initMirror();
 
-	void release();
+	void release() NL_OVERRIDE;
 
 	/**
 	 * main loop
 	 */
-	bool update();
+	bool update() NL_OVERRIDE;
 
 	/**
 	 *	get the alias manager

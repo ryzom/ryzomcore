@@ -54,9 +54,9 @@ public:
 		ShowInAPOnlyIfLearnt= false;
 	}
 
-	virtual void build (const NLGEORGES::UFormElm &root);
+	virtual void build (const NLGEORGES::UFormElm &root) NL_OVERRIDE;
 
-	virtual void serial (NLMISC::IStream &s)
+	virtual void serial (NLMISC::IStream &s) NL_OVERRIDE
 	{
 		s.serialCont (Bricks);
 		s.serial(Castable);

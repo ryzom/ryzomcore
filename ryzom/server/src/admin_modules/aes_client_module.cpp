@@ -143,7 +143,7 @@ namespace ADMIN
 			return serviceAlias;
 		}
 
-		string getModuleManifest() const
+		string getModuleManifest() const NL_OVERRIDE
 		{
 			uint32 pid = getpid ();
 
@@ -160,7 +160,7 @@ namespace ADMIN
 			return manifest;
 		}
 
-		bool initModule(const TParsedCommandLine &pcl)
+		bool initModule(const TParsedCommandLine &pcl) NL_OVERRIDE
 		{
 			if (!CModuleBase::initModule(pcl))
 				return false;
@@ -200,7 +200,7 @@ namespace ADMIN
 		}
 
 
-		void onModuleUp(IModuleProxy *proxy)
+		void onModuleUp(IModuleProxy *proxy) NL_OVERRIDE
 		{
 			if (proxy->getModuleClassName() == "AdminExecutorService")
 			{
@@ -232,7 +232,7 @@ namespace ADMIN
 			}
 		}
 
-		void onModuleDown(IModuleProxy *proxy)
+		void onModuleDown(IModuleProxy *proxy) NL_OVERRIDE
 		{
 			if (proxy == _AdminExecutorService)
 			{
@@ -242,7 +242,7 @@ namespace ADMIN
 			}
 		}
 
-		void onModuleUpdate()
+		void onModuleUpdate() NL_OVERRIDE
 		{
 			H_AUTO(CAdminExecutorServiceClient_onModuleUpdate);
 
@@ -441,13 +441,13 @@ namespace ADMIN
 		///////////////////////////////////////////////////////////////
 
 		// execute a command and return the result.
-		virtual void serviceCmd(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &command)
+		virtual void serviceCmd(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &command) NL_OVERRIDE
 		{
 			// create a displayer to gather the output of the command
 			class CStringDisplayer: public IDisplayer
 			{
 			public:
-				virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+				virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 				{
 					_Data += message;
 				}
@@ -474,7 +474,7 @@ namespace ADMIN
 		}
 
 		// execute a command without result
-		virtual void serviceCmdNoReturn(NLNET::IModuleProxy *sender, const std::string &command)
+		virtual void serviceCmdNoReturn(NLNET::IModuleProxy *sender, const std::string &command) NL_OVERRIDE
 		{
 			// retrieve the command from the input message and execute it
 			ADMINCMDLOG("'%s'", command.c_str());

@@ -82,10 +82,10 @@ namespace NLNET
 		friend class CModuleBase;
 
 		CModuleSocket();
-		~CModuleSocket();
+		~CModuleSocket() NL_OVERRIDE;
 
-		virtual void registerSocket();
-		virtual void unregisterSocket();
+		virtual void registerSocket() NL_OVERRIDE;
+		virtual void unregisterSocket() NL_OVERRIDE;
 
 
 		virtual void _onModulePlugged(const TModulePtr &pluggedModule);
@@ -95,11 +95,11 @@ namespace NLNET
 
 		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message) =0;
 
-		virtual void sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message);
+		virtual void sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message) NL_OVERRIDE;
 		/** A plugged module send a message to all the module reachable
 		 *	with this socket.
 		 */
-		virtual void broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message);
+		virtual void broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message) NL_OVERRIDE;
 
 	};
 

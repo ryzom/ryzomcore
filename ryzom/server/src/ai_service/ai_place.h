@@ -140,7 +140,7 @@ public:
 	{
 	}
 
-	virtual ~CAIPlace()
+	virtual ~CAIPlace() NL_OVERRIDE
 	{
 	}
 

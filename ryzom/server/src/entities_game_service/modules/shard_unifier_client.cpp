@@ -133,7 +133,7 @@ public:
 		_Instance = this;
 	}
 
-	~CShardUnifierClient()
+	~CShardUnifierClient() NL_OVERRIDE
 	{
 		if (_Instance == this)
 			_Instance = NULL;
@@ -148,13 +148,13 @@ public:
 		return _Instance;
 	}
 
-	std::string buildModuleManifest() const
+	std::string buildModuleManifest() const NL_OVERRIDE
 	{
 		// return the manifest of this module
 		return "locatorClient(shardId="+toString(IService::getInstance()->getShardId())+")";
 	}
 
-	void onModuleUpdate()
+	void onModuleUpdate() NL_OVERRIDE
 	{
 		H_AUTO(CShardUnifier_onModuleUpdate);
 
@@ -190,7 +190,7 @@ public:
 
 	}
 
-	void onModuleUp(IModuleProxy *module)
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "CharacterSynchronisation")
 		{
@@ -254,7 +254,7 @@ public:
 		}
 	}
 
-	void onModuleDown(IModuleProxy *module)
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module == _CharacterSynch)
 		{
@@ -472,7 +472,7 @@ public:
 //		}
 //	}
 //
-	bool initModule(const TParsedCommandLine &initInfo)
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE
 	{
 		bool ret = CModuleBase::initModule(initInfo);
 		// start the name unifier coroutine
@@ -485,13 +485,13 @@ public:
 	/////////// IShardUnifierEvent implementation
 	/////////////////////////////////////////////////////////////
 
-	virtual bool isEidTranslatorInitilazed()
+	virtual bool isEidTranslatorInitilazed() NL_OVERRIDE
 	{
 		return _EIdTranslatorInitialized;
 	}
 
 
-	virtual void onNewChar(const CHARSYNC::TCharInfo &charInfo) 
+	virtual void onNewChar(const CHARSYNC::TCharInfo &charInfo) NL_OVERRIDE 
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -501,7 +501,7 @@ public:
 		cs.addCharacter(this, charInfo);
 	}
 
-	virtual void onDeleteChar(uint32 charId)
+	virtual void onDeleteChar(uint32 charId) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -521,7 +521,7 @@ public:
 //		cs.updateCharName(this, eid, name);
 //	}
 
-	virtual void onUpdateCharGuild(const NLMISC::CEntityId &eid, uint32 guildId)
+	virtual void onUpdateCharGuild(const NLMISC::CEntityId &eid, uint32 guildId) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -532,7 +532,7 @@ public:
 
 	}
 
-	virtual void onUpdateCharNewbieFlag	(const NLMISC::CEntityId &eid, bool newbie)
+	virtual void onUpdateCharNewbieFlag	(const NLMISC::CEntityId &eid, bool newbie) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -542,12 +542,12 @@ public:
 		cs.updateCharNewbieFlag(this, eid, newbie);
 	}
 
-	virtual void onUpdateCharBestCombatLevel(const CEntityId &eid, uint32 bestCombatLevel)
+	virtual void onUpdateCharBestCombatLevel(const CEntityId &eid, uint32 bestCombatLevel) NL_OVERRIDE
 	{
 		_BestCombatLevels.insert(make_pair(eid, bestCombatLevel));
 	}
 
-	virtual void onUpdateCharAllegiance(const NLMISC::CEntityId &eid, PVP_CLAN::TPVPClan cult, PVP_CLAN::TPVPClan civ)
+	virtual void onUpdateCharAllegiance(const NLMISC::CEntityId &eid, PVP_CLAN::TPVPClan cult, PVP_CLAN::TPVPClan civ) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -560,7 +560,7 @@ public:
 	}
 
 
-	virtual void onUpdateCharHomeMainland(const CEntityId &eid, TSessionId homeMainland)
+	virtual void onUpdateCharHomeMainland(const CEntityId &eid, TSessionId homeMainland) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -570,7 +570,7 @@ public:
 		cs.updateCharHomeMainlandSessionId(this, eid, homeMainland);
 	}
 
-	virtual void onUpdateCharRespawnPoints(const NLMISC::CEntityId &eid, const CONTINENT::TRespawnPointCounters &respawnPoints)
+	virtual void onUpdateCharRespawnPoints(const NLMISC::CEntityId &eid, const CONTINENT::TRespawnPointCounters &respawnPoints) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -581,7 +581,7 @@ public:
 	}
 
 
-	virtual void onUpdateCharacters(uint32 userId, const std::vector<CHARSYNC::TCharInfo> &charInfos)
+	virtual void onUpdateCharacters(uint32 userId, const std::vector<CHARSYNC::TCharInfo> &charInfos) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 		{
@@ -607,7 +607,7 @@ public:
 		cs.syncUserChars(this, userId, charInfos);
 	}
 
-	virtual void renameCharacter(const NLMISC::CEntityId &eid)
+	virtual void renameCharacter(const NLMISC::CEntityId &eid) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -617,7 +617,7 @@ public:
 		nu.renameCharacter(this, uint32(eid.getShortId()));
 	}
 
-	virtual void validateGuildName(uint32 guildId, const ucstring &guildName)
+	virtual void validateGuildName(uint32 guildId, const ucstring &guildName) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 		{
@@ -632,7 +632,7 @@ public:
 
 	}
 
-	virtual void registerLoadedGuildNames(const std::vector<CHARSYNC::CGuildInfo> &guildInfos)
+	virtual void registerLoadedGuildNames(const std::vector<CHARSYNC::CGuildInfo> &guildInfos) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -642,7 +642,7 @@ public:
 		nu.registerLoadedGuildNames(this, IService::getInstance()->getShardId(), guildInfos);
 	}
 
-	virtual void addGuild						(uint32 guildId, const ucstring &guildName)
+	virtual void addGuild						(uint32 guildId, const ucstring &guildName) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -651,7 +651,7 @@ public:
 		nu.addGuild(this, IService::getInstance()->getShardId(), guildId, guildName);
 	}
 
-	virtual void removeGuild					(uint32 guildId)
+	virtual void removeGuild					(uint32 guildId) NL_OVERRIDE
 	{
 		if (_CharacterSynch == NULL)
 			return;
@@ -660,7 +660,7 @@ public:
 		nu.removeGuild(this, IService::getInstance()->getShardId(), guildId);
 	}
 
-	virtual void validateCharacterNameBeforeCreate(uint32 userId, uint8 charIndex, const ucstring &name, uint32 homeSessionId)
+	virtual void validateCharacterNameBeforeCreate(uint32 userId, uint8 charIndex, const ucstring &name, uint32 homeSessionId) NL_OVERRIDE
 	{
 		if (DontUseSU.get() == 1)
 		{
@@ -692,7 +692,7 @@ public:
 		}
 	}
 
-	virtual bool validateCharacterCreation	(uint32 userId, uint8 charIndex, const CCreateCharMsg &createCharMsg)
+	virtual bool validateCharacterCreation	(uint32 userId, uint8 charIndex, const CCreateCharMsg &createCharMsg) NL_OVERRIDE
 	{
 		if (DontUseSU.get() == 1)
 		{
@@ -725,7 +725,7 @@ public:
 	}
 
 
-	void playerConnected(uint32 playerId)
+	void playerConnected(uint32 playerId) NL_OVERRIDE
 	{
 		if (_EntityLocator == NULL)
 			return;
@@ -735,7 +735,7 @@ public:
 		el.playerConnected(this, playerId);
 	}
 
-	void playerDisconnected(uint32 playerId)
+	void playerDisconnected(uint32 playerId) NL_OVERRIDE
 	{
 		if (_EntityLocator == NULL)
 			return;
@@ -745,7 +745,7 @@ public:
 		el.playerDisconnected(this, playerId);
 	}
 
-	void charConnected(const NLMISC::CEntityId &charId, uint32 lastDisconnectionDate)
+	void charConnected(const NLMISC::CEntityId &charId, uint32 lastDisconnectionDate) NL_OVERRIDE
 	{
 		if (_EntityLocator == NULL)
 			return;
@@ -755,7 +755,7 @@ public:
 		el.charConnected(this, charId, lastDisconnectionDate);
 	}
 
-	void charDisconnected(const NLMISC::CEntityId &charId)
+	void charDisconnected(const NLMISC::CEntityId &charId) NL_OVERRIDE
 	{
 		if (_EntityLocator == NULL)
 			return;
@@ -766,13 +766,13 @@ public:
 	}
 
 	// interface for entity locator
-	virtual bool isCharacterOnlineAbroad(const CEntityId &charEid) const
+	virtual bool isCharacterOnlineAbroad(const CEntityId &charEid) const NL_OVERRIDE
 	{
 		TOnlineEntities::const_iterator it(_OnlineEntities.find(charEid));
 		return it != _OnlineEntities.end();
 	}
 
-	const set<CEntityId> &getSpecialEntityOnlineAbroad(const std::string &privilege) const
+	const set<CEntityId> &getSpecialEntityOnlineAbroad(const std::string &privilege) const NL_OVERRIDE
 	{
 		static set<CEntityId>	emptySet;
 
@@ -788,7 +788,7 @@ public:
 	///////// 	Mail forum notifier interface implementation
 	////////////////////////////////////////////////////////////////
 	// A character have received a mail
-	void notifyMail(NLNET::IModuleProxy *sender, uint32 charId)
+	void notifyMail(NLNET::IModuleProxy *sender, uint32 charId) NL_OVERRIDE
 	{
 		uint32 userId = charId >> 4;
 		uint32 charIndex = charId & 0xf;
@@ -805,7 +805,7 @@ public:
 
 	// A new message have been posted in a guild forum
 	// the notifier client send a notification for each member character
-	void notifyForumMessage(NLNET::IModuleProxy *sender, uint32 charId, uint32 guildId, uint32 threadId) 
+	void notifyForumMessage(NLNET::IModuleProxy *sender, uint32 charId, uint32 guildId, uint32 threadId) NL_OVERRIDE 
 	{
 		uint32 userId = charId >> 4;
 		uint32 charIndex = charId & 0xf;
@@ -826,7 +826,7 @@ public:
 	// The name unifier send the initial content for the Eid translator.
 	// EGS need to wait until it receive this message before continuing
 	// it's startup sequence in order to have coherent name in guild.
-	virtual void initEIdTranslator(NLNET::IModuleProxy *sender, bool firstPacket, bool lastPacket, const std::vector < TNameEntry > &nameEntries)
+	virtual void initEIdTranslator(NLNET::IModuleProxy *sender, bool firstPacket, bool lastPacket, const std::vector < TNameEntry > &nameEntries) NL_OVERRIDE
 	{
 		H_AUTO(initEidTranslator);
 
@@ -863,7 +863,7 @@ public:
 	// The name unifier send an update for the EID translator.
 	// releasedNames contains a list of charId whose names have been released
 	// changedNames contains a list of add or update entries
-	virtual void updateEIdTranslator(NLNET::IModuleProxy *sender, const std::vector < uint32 > &releasedNames, const std::vector < TNameEntry > &changedNames)
+	virtual void updateEIdTranslator(NLNET::IModuleProxy *sender, const std::vector < uint32 > &releasedNames, const std::vector < TNameEntry > &changedNames) NL_OVERRIDE
 	{
 		CEntityIdTranslator *eidt = CEntityIdTranslator::getInstance();
 
@@ -900,7 +900,7 @@ public:
 
 	// The name unifier send the result for validation
 	// of a character name before creation.
-	virtual void validateCharacterNameResult(NLNET::IModuleProxy *sender, const CValidateNameResult &nameResult)
+	virtual void validateCharacterNameResult(NLNET::IModuleProxy *sender, const CValidateNameResult &nameResult) NL_OVERRIDE
 	{
 		// retrieve the name in the validation queue
 		TCharId charId = (nameResult.getUserId()<<4)+nameResult.getCharIndex();
@@ -919,7 +919,7 @@ public:
 
 	// The name unifier send the result for name assignment
 	// of a new character name during creation.
-	virtual void assignCharacterNameResult(NLNET::IModuleProxy *sender, const CValidateNameResult &nameResult)
+	virtual void assignCharacterNameResult(NLNET::IModuleProxy *sender, const CValidateNameResult &nameResult) NL_OVERRIDE
 	{
 		TCharId charId = (nameResult.getUserId()<<4)+nameResult.getCharIndex();
 		TCreateCharPending::iterator it(_CreateCharPending.find(charId));
@@ -939,7 +939,7 @@ public:
 
 	// The name unifier has renamed a character
 	// EGS must do what it need to take the new name into account
-	void characterRenamed(NLNET::IModuleProxy *sender, uint32 charId, const std::string &newName, bool sendSummary)
+	void characterRenamed(NLNET::IModuleProxy *sender, uint32 charId, const std::string &newName, bool sendSummary) NL_OVERRIDE
 	{
 		ICharacter *ich = ICharacter::getInterface(charId, false);
 
@@ -962,7 +962,7 @@ public:
 	// The name unifier has updated/validated/eventualy renamed
 	// all the characters send by EGS for a user.
 	// EGS can proceed to send the characters summary to client
-	void userCharUpdatedAndValidated(NLNET::IModuleProxy *sender, uint32 userId, const vector<TCharSyncResultEntry> &charInfos)
+	void userCharUpdatedAndValidated(NLNET::IModuleProxy *sender, uint32 userId, const vector<TCharSyncResultEntry> &charInfos) NL_OVERRIDE
 	{
 		IPlayerManager::TMapPlayers::const_iterator it(IPlayerManager::getInstance().getPlayers().find(userId));
 
@@ -994,7 +994,7 @@ public:
 	// all the characters send by EGS for a user.
 	// EGS can proceed to send the characters summary to client
 	// but the character names are perhaps not good ?
-	virtual void userCharSyncFailed(NLNET::IModuleProxy *sender, uint32 userId)
+	virtual void userCharSyncFailed(NLNET::IModuleProxy *sender, uint32 userId) NL_OVERRIDE
 	{
 		IPlayerManager::TMapPlayers::const_iterator it(IPlayerManager::getInstance().getPlayers().find(userId));
 
@@ -1009,7 +1009,7 @@ public:
 
 
 	// The name unifier has renamed a guild to resolve a name conflict
-	virtual void guildRenamed(NLNET::IModuleProxy *sender, uint32 guildId, const ucstring &newName)
+	virtual void guildRenamed(NLNET::IModuleProxy *sender, uint32 guildId, const ucstring &newName) NL_OVERRIDE
 	{
 		IGuild *guild = IGuild::getGuildInterface(IGuildManager::getInstance().getGuildFromId(guildId));
 
@@ -1026,7 +1026,7 @@ public:
 	}
 
 	// The name unifier respond to EGS about guild name validation request
-	virtual void validateGuildNameResult(NLNET::IModuleProxy *sender, uint32 guildId, const ucstring &guildName, TCharacterNameResult result)
+	virtual void validateGuildNameResult(NLNET::IModuleProxy *sender, uint32 guildId, const ucstring &guildName, TCharacterNameResult result) NL_OVERRIDE
 	{
 		// callback the guild manager
 
@@ -1035,7 +1035,7 @@ public:
 
 	// The unifier has detected an invalid guild/character association
 	// and ask to the EGS to remove the character from the guild
-	virtual void removeCharFromGuild(NLNET::IModuleProxy *sender, uint32 charId, uint32 guildId)
+	virtual void removeCharFromGuild(NLNET::IModuleProxy *sender, uint32 charId, uint32 guildId) NL_OVERRIDE
 	{
 		nldebug("CShardUnifierClient::removeCharFromGuild : removing char %u from guild %u", charId, guildId);
 		CGuild *guild = IGuildManager::getInstance().getGuildFromId(guildId);
@@ -1076,7 +1076,7 @@ public:
 	/////////////////////////////////////////////////////////////////
 
 	// The entity locator send a list of connection event to EGS
-	virtual void connectionEvents(NLNET::IModuleProxy *sender, const std::vector < TCharConnectionEvent > &events)
+	virtual void connectionEvents(NLNET::IModuleProxy *sender, const std::vector < TCharConnectionEvent > &events) NL_OVERRIDE
 	{
 		nldebug("Uni : connectionEvents: receive %u connection event", events.size());
 		// update the list of 'foreign online' character

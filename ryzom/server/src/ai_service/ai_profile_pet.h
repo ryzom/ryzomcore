@@ -40,13 +40,13 @@ class CAIPetProfileStand
 public:
 	CAIPetProfileStand(CSpawnBotPet* bot);
 	
-	virtual void beginProfile() { }
-	virtual	void updateProfile(uint ticksSinceLastUpdate) { }
-	virtual void endProfile() { }
+	virtual void beginProfile() NL_OVERRIDE { }
+	virtual	void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE { }
+	virtual void endProfile() NL_OVERRIDE { }
 	
-	virtual std::string getOneLineInfoString() const { return std::string("stand pet profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return std::string("stand pet profile"); }
 	
-	AITYPES::TProfiles getAIProfileType() const { return AITYPES::PET_STAND; }
+	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::PET_STAND; }
 	
 private:
 	NLMISC::CDbgPtr<CSpawnBotPet> _Bot;
@@ -62,13 +62,13 @@ class CAIPetProfileFollowPlayer
 public:
 	CAIPetProfileFollowPlayer(CSpawnBotPet* bot, TDataSetRow const& playerRow);
 	
-	virtual void beginProfile() { }
-	virtual	void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile() { }
+	virtual void beginProfile() NL_OVERRIDE { }
+	virtual	void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE { }
 	
-	virtual std::string getOneLineInfoString() const { return std::string("follow_player pet profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return std::string("follow_player pet profile"); }
 	
-	AITYPES::TProfiles getAIProfileType() const { return AITYPES::PET_FOLLOW; }
+	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::PET_FOLLOW; }
 	
 protected:
 private:
@@ -88,13 +88,13 @@ public:
 	
 	bool isValid() const { return _Valid; }
 	
-	virtual void beginProfile() { }
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile() { }
+	virtual void beginProfile() NL_OVERRIDE { }
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE { }
 	
-	virtual std::string getOneLineInfoString() const { return std::string("goto_point pet profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return std::string("goto_point pet profile"); }
 	
-	AITYPES::TProfiles getAIProfileType() const;
+	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE;
 	
 private:
 	NLMISC::CDbgPtr<CSpawnBotPet> _Bot;

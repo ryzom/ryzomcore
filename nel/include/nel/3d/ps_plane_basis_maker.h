@@ -44,7 +44,7 @@ public:
 	{
 		_F.setValues(startBasis, endBasis);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSPlaneBasisBlender(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSPlaneBasisBlender(*this); }
 };
 
 
@@ -65,7 +65,7 @@ public:
 	{
 		_F.setValues(basisTab, nbValues, nbStages);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSPlaneBasisGradient(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSPlaneBasisGradient(*this); }
 	static CPlaneBasis DefaultPlaneBasisTab[];
 };
 
@@ -83,8 +83,8 @@ class CPSPlaneBasisFollowSpeed : public CPSAttribMaker<CPlaneBasis>
 		CPSPlaneBasisFollowSpeed() : CPSAttribMaker<CPlaneBasis>(1), _ProjectionPlane(NoProjection) {}
 
 		/// compute one value of the attribute for the given index
-		virtual CPlaneBasis get(CPSLocated *loc, uint32 index);
-		virtual CPlaneBasis get(const CPSEmitterInfo &infos);
+		virtual CPlaneBasis get(CPSLocated *loc, uint32 index) NL_OVERRIDE;
+		virtual CPlaneBasis get(const CPSEmitterInfo &infos) NL_OVERRIDE;
 
 		/** Fill tab with an attribute by using the given stride. It fills numAttrib attributes.
 		 *  \param loc the 'located' that hold the 'located bindable' that need an attribute to be filled
@@ -99,7 +99,7 @@ class CPSPlaneBasisFollowSpeed : public CPSAttribMaker<CPlaneBasis>
 						   bool enableNoCopy = false,
 						   uint32 srcStep = (1 << 16),
 						   bool forceClampEntry = false
-						  ) const;
+						  ) const NL_OVERRIDE;
 
 		/** The same as make, but it replicate each attribute 4 times, thus filling 4*numAttrib. Useful for facelookat and the like
 		 *  \see make()
@@ -110,7 +110,7 @@ class CPSPlaneBasisFollowSpeed : public CPSAttribMaker<CPlaneBasis>
 						   uint32 stride,
 						   uint32 numAttrib,
 						   uint32 srcStep = (1 << 16)
-						  ) const;
+						  ) const NL_OVERRIDE;
 
 
 		/** the same as make4, but with nbReplicate replication isntead of 4
@@ -123,12 +123,12 @@ class CPSPlaneBasisFollowSpeed : public CPSAttribMaker<CPlaneBasis>
 						   uint32 numAttrib,
 						   uint32 nbReplicate,
 						   uint32 srcStep = (1 << 16)
-						  ) const;
+						  ) const NL_OVERRIDE;
 
 		NLMISC_DECLARE_CLASS(CPSPlaneBasisFollowSpeed);
 
 		/// serialization
-		virtual void serial(NLMISC::IStream &f)
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 		{
 			// version 2 : added projection plane
 			// version 1 : nothing to save here
@@ -142,7 +142,7 @@ class CPSPlaneBasisFollowSpeed : public CPSAttribMaker<CPlaneBasis>
 				_ProjectionPlane = NoProjection;
 			}
 		}
-		CPSAttribMakerBase *clone() const { return new CPSPlaneBasisFollowSpeed(*this); }
+		CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSPlaneBasisFollowSpeed(*this); }
 		//
 		TProjectionPlane getProjectionPlane() const { return _ProjectionPlane; }
 		void			 setProjectionPlane(TProjectionPlane pp) { _ProjectionPlane = pp; }
@@ -162,7 +162,7 @@ class CPSPlaneBasisMemory : public CPSAttribMakerMemory<CPlaneBasis>
 public:
 	CPSPlaneBasisMemory() { setDefaultValue(CPlaneBasis(NLMISC::CVector::K)); }
 	NLMISC_DECLARE_CLASS(CPSPlaneBasisMemory);
-	CPSAttribMakerBase *clone() const { return new CPSPlaneBasisMemory(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSPlaneBasisMemory(*this); }
 };
 
 
@@ -173,7 +173,7 @@ class CPSPlaneBasisBinOp : public CPSAttribMakerBinOp<CPlaneBasis>
 {
 public:
 	NLMISC_DECLARE_CLASS(CPSPlaneBasisBinOp);
-	CPSAttribMakerBase *clone() const { return new CPSPlaneBasisBinOp(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSPlaneBasisBinOp(*this); }
 };
 
 
@@ -210,7 +210,7 @@ class CPSBasisSpinner : public CPSAttribMakerT<CPlaneBasis, CSpinnerFunctor>
 public:
 	CPSBasisSpinner() : CPSAttribMakerT<CPlaneBasis, CSpinnerFunctor>(1) {}
 	NLMISC_DECLARE_CLASS(CPSBasisSpinner);
-	CPSAttribMakerBase *clone() const { return new CPSBasisSpinner(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSBasisSpinner(*this); }
 };
 
 

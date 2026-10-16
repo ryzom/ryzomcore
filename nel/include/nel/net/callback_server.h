@@ -40,18 +40,18 @@ public:
 	CCallbackServer( TRecordingState rec=Off, const std::string& recfilename="", bool recordall=true, bool initPipeForDataAvailable=true );
 
 	/// Sends a message to the specified host
-	void	send (const CMessage &buffer, TSockId hostid, bool log = true);
+	void	send (const CMessage &buffer, TSockId hostid, bool log = true) NL_OVERRIDE;
 
 	/// Force to send all data pending in the send queue. See comment in CCallbackNetBase.
-	bool	flush (TSockId destid, uint *nbBytesRemaining=NULL) { nlassert( destid != InvalidSockId ); return CBufServer::flush(destid, nbBytesRemaining); }
+	bool	flush (TSockId destid, uint *nbBytesRemaining=NULL) NL_OVERRIDE { nlassert( destid != InvalidSockId ); return CBufServer::flush(destid, nbBytesRemaining); }
 
 	/** Updates the network (call this method evenly).
 	 * More info about timeout and mintime in the code of CCallbackNetBase::baseUpdate().
 	 */
-	void	update2 (sint32 timeout=-1, sint32 mintime=0);
+	void	update2 (sint32 timeout=-1, sint32 mintime=0) NL_OVERRIDE;
 
 	/// Updates the network (call this method evenly) (legacy)
-	void	update (sint32 timeout=0);
+	void	update (sint32 timeout=0) NL_OVERRIDE;
 
 	/// Sets callback for incoming connections (or NULL to disable callback)
 	void	setConnectionCallback (TNetCallback cb, void *arg) { _ConnectionCallback = cb; _ConnectionCbArg = arg; }
@@ -60,38 +60,38 @@ public:
 	void	setDisconnectionCallback (TNetCallback cb, void *arg) { CCallbackNetBase::setDisconnectionCallback (cb, arg); }
 
 	/// Returns true if the connection is still connected. on server, we always "connected"
-	bool	connected () const { return true; }
+	bool	connected () const NL_OVERRIDE { return true; }
 
 	/** Disconnect a connection
 	 * Set hostid to InvalidSockId to disconnect all connections.
 	 * If hostid is not InvalidSockId and the socket is not connected, the method does nothing.
 	 * Before disconnecting, any pending data is actually sent.
 	 */
-	void	disconnect (TSockId hostid);
+	void	disconnect (TSockId hostid) NL_OVERRIDE;
 
 	/// Returns the address of the specified host
-	const CInetAddress& hostAddress (TSockId hostid) { nlassert(hostid!=InvalidSockId); return CBufServer::hostAddress (hostid); }
+	const CInetAddress& hostAddress (TSockId hostid) NL_OVERRIDE { nlassert(hostid!=InvalidSockId); return CBufServer::hostAddress (hostid); }
 
 	/// Returns the sockid (cf. CCallbackClient)
-	virtual TSockId	getSockId (TSockId hostid = InvalidSockId);
+	virtual TSockId	getSockId (TSockId hostid = InvalidSockId) NL_OVERRIDE;
 
-	uint64	getReceiveQueueSize () { return CBufServer::getReceiveQueueSize(); }
-	uint64	getSendQueueSize () { return CBufServer::getSendQueueSize(0); }
+	uint64	getReceiveQueueSize () NL_OVERRIDE { return CBufServer::getReceiveQueueSize(); }
+	uint64	getSendQueueSize () NL_OVERRIDE { return CBufServer::getSendQueueSize(0); }
 
-	void displayReceiveQueueStat (NLMISC::CLog *log = NLMISC::InfoLog) { CBufServer::displayReceiveQueueStat(log); }
-	void displaySendQueueStat (NLMISC::CLog *log = NLMISC::InfoLog, TSockId destid = InvalidSockId) { CBufServer::displaySendQueueStat(log, destid); }
+	void displayReceiveQueueStat (NLMISC::CLog *log = NLMISC::InfoLog) NL_OVERRIDE { CBufServer::displayReceiveQueueStat(log); }
+	void displaySendQueueStat (NLMISC::CLog *log = NLMISC::InfoLog, TSockId destid = InvalidSockId) NL_OVERRIDE { CBufServer::displaySendQueueStat(log, destid); }
 
-	void displayThreadStat (NLMISC::CLog *log = NLMISC::InfoLog) { CBufServer::displayThreadStat(log); }
+	void displayThreadStat (NLMISC::CLog *log = NLMISC::InfoLog) NL_OVERRIDE { CBufServer::displayThreadStat(log); }
 
 private:
 
 	/// This function is public in the base class and put it private here because user cannot use it in layer 2
 	void			send (const NLMISC::CMemStream &/* buffer */, TSockId /* hostid */) { nlstop; }
 
-	bool			dataAvailable ();
-	virtual bool	getDataAvailableFlagV() const { return dataAvailableFlag(); }
+	bool			dataAvailable () NL_OVERRIDE;
+	virtual bool	getDataAvailableFlagV() const NL_OVERRIDE { return dataAvailableFlag(); }
 
-	void			receive (CMessage &buffer, TSockId *hostid);
+	void			receive (CMessage &buffer, TSockId *hostid) NL_OVERRIDE;
 
 	void			sendAllMyAssociations (TSockId to);
 

@@ -37,26 +37,26 @@ public:
 	/// Constructor
 	CDBGroupListSheetTextBrickComposition(const TCtorParam &param);
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
 	// A child node
 	class	CSheetChildBrick : public CDBGroupListSheetText::CSheetChild
 	{
 	public:
 		CSheetChildBrick();
-		virtual ~CSheetChildBrick();
-		virtual void init(CDBGroupListSheetText *pFather, uint index);
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
-		virtual void update(CDBGroupListSheetText *pFather);
-		virtual void updateViewText(CDBGroupListSheetText *pFather);
-		virtual void hide(CDBGroupListSheetText *pFather);
-		virtual	sint getDeltaX(CDBGroupListSheetText *pFather) const;
+		virtual ~CSheetChildBrick() NL_OVERRIDE;
+		virtual void init(CDBGroupListSheetText *pFather, uint index) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void hide(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual	sint getDeltaX(CDBGroupListSheetText *pFather) const NL_OVERRIDE;
 
 		// The special costView for this child
 		CViewText	*CostView;
 	};
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildBrick; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildBrick; }
 
 	sint32		getXCost() const {return _XCost;}
 	sint32		getYCost() const {return _YCost;}

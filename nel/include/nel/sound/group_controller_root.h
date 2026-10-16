@@ -46,16 +46,16 @@ class CGroupControllerRoot : public CGroupController, public NLMISC::CManualSing
 {
 public:
 	CGroupControllerRoot();
-	virtual ~CGroupControllerRoot();
+	virtual ~CGroupControllerRoot() NL_OVERRIDE;
 
 	/// Gets the group controller in a certain path with separator '/', if it doesn't exist yet it will be created.
 	CGroupController *getGroupController(const std::string &path);
 
 protected:
-	virtual std::string getPath();
-	virtual void calculateFinalGain();
-	virtual void increaseSources();
-	virtual void decreaseSources();
+	virtual std::string getPath() NL_OVERRIDE;
+	virtual void calculateFinalGain() NL_OVERRIDE;
+	virtual void increaseSources() NL_OVERRIDE;
+	virtual void decreaseSources() NL_OVERRIDE;
 	static bool isReservedName(const std::string &nodeName);
 
 }; /* class CGroupControllerRoot */

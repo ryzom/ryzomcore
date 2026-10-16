@@ -79,7 +79,7 @@ void CBotChatPagePlayerGift::end()
 class CHandlerValidPlayerGift : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		NLMISC::CBitMemStream out;
 		if (GenericMsgHeaderMngr.pushNameToStream("BOTCHAT:VALIDATE_PLAYER_GIFT", out))

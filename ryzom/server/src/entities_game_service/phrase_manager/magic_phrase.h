@@ -99,9 +99,9 @@ public:
 	}
 
 	/// dtor
-	virtual ~CMagicPhrase();
+	virtual ~CMagicPhrase() NL_OVERRIDE;
 
-	inline void setEnchantMode(bool mode) { _EnchantPhrase = mode; }
+	inline void setEnchantMode(bool mode) NL_OVERRIDE { _EnchantPhrase = mode; }
 	inline bool getEnchantMode() const { return _EnchantPhrase; }
 
 	/// build the phrase from an ai action
@@ -136,17 +136,17 @@ public:
 	///\name Overriden methods from CSPhrase
 	//@{
 	/// \warning The bricks vector MUST NOT be EMPTY.
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
-	virtual bool evaluate();
-	virtual bool validate();
-	virtual bool update();
-	virtual void execute();
-	virtual bool launch();
-	virtual void apply();
-	virtual void stop();
-	virtual void end();
+	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true ) NL_OVERRIDE;
+	virtual bool evaluate() NL_OVERRIDE;
+	virtual bool validate() NL_OVERRIDE;
+	virtual bool update() NL_OVERRIDE;
+	virtual void execute() NL_OVERRIDE;
+	virtual bool launch() NL_OVERRIDE;
+	virtual void apply() NL_OVERRIDE;
+	virtual void stop() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
 	/// Change the primary target (if not a self only spell).
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId );
+	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) NL_OVERRIDE;
 	//@}
 
 	inline uint16 currentFxPower() const { return _CurrentFxPower; }
@@ -164,7 +164,7 @@ public:
 	///\return the area effect
 	inline const CAreaEffect* getArea(){ return _Area;}
 
-	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & bricks)
+	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & bricks) NL_OVERRIDE
 	{
 		_BrickSheets = bricks;
 	}

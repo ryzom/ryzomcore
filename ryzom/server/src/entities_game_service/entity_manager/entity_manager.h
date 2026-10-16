@@ -35,7 +35,7 @@ class CEntityBase;
 class CAIInfosOnEntityMsgImp : public CAIInfosOnEntityMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -43,7 +43,7 @@ public:
  */
 class CQueryEgsImp : public CQueryEgs
 {
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**

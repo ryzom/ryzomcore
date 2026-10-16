@@ -157,7 +157,7 @@ namespace GUS
 	{
 	public:
 		CChatBroadcastDisplayer(CChatChannel* channel);
-		void doDisplay(const NLMISC::CLog::TDisplayInfo& args,const char *message);
+		void doDisplay(const NLMISC::CLog::TDisplayInfo& args,const char *message) NL_OVERRIDE;
 	private:
 		TChatChannelPtr _Channel;
 	};
@@ -172,7 +172,7 @@ namespace GUS
 	{
 	public:
 		CChatDisplayer(CChatChannel* channel,TClientId clientId);
-		void doDisplay(const NLMISC::CLog::TDisplayInfo& args,const char *message);
+		void doDisplay(const NLMISC::CLog::TDisplayInfo& args,const char *message) NL_OVERRIDE;
 	private:
 		TChatChannelPtr _Channel;
 		TClientId _ClientId;

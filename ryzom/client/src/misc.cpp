@@ -499,7 +499,7 @@ void loadDump(const std::string &name)
 	// Select the closest continent from the new position.
 	class CDummyProgress : public IProgressCallback
 	{
-		void progress (float /* value */) {}
+		void progress (float /* value */) NL_OVERRIDE {}
 	};
 	CDummyProgress dummy;
 	ContinentMngr.select(currentPos, dummy);

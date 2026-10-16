@@ -13,14 +13,14 @@
 class CSingletonTest: public IServiceSingleton
 {
 public:
-	void init() 
+	void init() NL_OVERRIDE 
 	{
 		nlinfo("CSingletonTest::init()");
 		serviceCounter=0;
 		tickCounter=0;
 	}
 
-	void serviceUpdate()
+	void serviceUpdate() NL_OVERRIDE
 	{
 		++serviceCounter;
 		if (serviceCounter>=50)
@@ -30,7 +30,7 @@ public:
 		}	
 	}
 
-	void tickUpdate()
+	void tickUpdate() NL_OVERRIDE
 	{
 		++tickCounter;
 		if (tickCounter>=25)
@@ -40,7 +40,7 @@ public:
 		}	
 	}
 
-	void release()
+	void release() NL_OVERRIDE
 	{
 		nlinfo("CSingletonTest::release()");
 	}

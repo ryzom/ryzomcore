@@ -2777,7 +2777,7 @@ bool CDBGroupListSheetFilterExchangeable::parse(xmlNodePtr cur, CInterfaceGroup 
 // ***************************************************************************
 class CHandlerInvCanDrag : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCSSrc == NULL) return;
@@ -2806,7 +2806,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvCanDrag, "inv_can_drag" );
 // ***************************************************************************
 class CHandlerInvDrag : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCS == NULL) return;
@@ -2826,7 +2826,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvDrag, "inv_drag" );
 // show/hide edit box, set keyboard focus if 'show'
 class CHandlerInvSearchButton : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &sParams)
+	virtual void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		if (sParams.empty())
 		{
@@ -2871,7 +2871,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvSearchButton, "inv_search_button" );
 // if :eb is empty then hide edit box, unpush search button
 class CHandlerInvSearchUnfocus : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &sParams)
+	virtual void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		if (!pCaller) return;
 
@@ -2896,7 +2896,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvSearchUnfocus, "inv_search_unfocus" );
 // set inventory search string
 class CHandlerInvSetSearch : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
 		if (!eb) return;
@@ -2917,7 +2917,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );
 // COMMON INVENTORIES Test if we can drop an item to a slot or a list
 class CHandlerInvCanDropTo : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		// pCSSrc is the current dragged item
 		// pCSDst is a slot or a list
@@ -3049,7 +3049,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvCanDropTo, "inv_can_drop" );
 // ***************************************************************************
 class CHandlerInvDropTo : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -3220,7 +3220,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvDropTo, "inv_drop" );
 // EQUIPMENT
 class CHandlerInvCannotDrop : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		// Is the dragged sheet comes from a slot
 		if (!getInventory().isDraggingFromTextList())
@@ -3263,7 +3263,7 @@ REGISTER_ACTION_HANDLER (CCanDropToHotbar, "can_drop_to_hotbar");
 class CHandlerInvAutoEquip : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if(cs)
@@ -3280,7 +3280,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvAutoEquip, "inv_auto_equip" );
 // **********************************************************************************************************
 class CHandlerLockInvItem : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		// get the calling item
 		CDBCtrlSheet *item = CDBCtrlSheet::getCurrSelSheet();
@@ -3316,7 +3316,7 @@ REGISTER_ACTION_HANDLER( CHandlerLockInvItem, "lock_inv_item" );
 // ***************************************************************************
 class CHandlerInvTempToBag : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -3365,7 +3365,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvTempToBag, "inv_temp_to_bag" );
 // ***************************************************************************
 class CHandlerInvTempAll : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (!CTempInvManager::getInstance()->isOpened()) return;
 		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP_INV:ALL_EMPTY")->getValue32() != 0) return;
@@ -3446,7 +3446,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvTempAll, "inv_temp_all" );
 // ***************************************************************************
 class CHandlerInvTempNone : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CBitMemStream out;
 		if (!GenericMsgHeaderMngr.pushNameToStream("ITEM:NO_TEMP", out))

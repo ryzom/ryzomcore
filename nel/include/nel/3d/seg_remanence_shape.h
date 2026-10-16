@@ -64,13 +64,13 @@ public:
 		  */
 		CSegRemanenceShape();
 		//
-		~CSegRemanenceShape();
+		~CSegRemanenceShape() NL_OVERRIDE;
 		// copy ctor
 		CSegRemanenceShape(const CSegRemanenceShape &other);
 		// assignement
 		CSegRemanenceShape &operator = (const CSegRemanenceShape &other);
 
-		virtual void	serial(NLMISC::IStream &f);
+		virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 		NLMISC_DECLARE_CLASS(CSegRemanenceShape);
 	//@}
 
@@ -116,7 +116,7 @@ public:
 	bool				getTextureShifting() const { return _TextureShifting; }
 
 	/// from IShape
-	virtual	void		getAABBox(NLMISC::CAABBox &bbox) const { bbox = _BBox.getAABBox(); }
+	virtual	void		getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE { bbox = _BBox.getAABBox(); }
 
 	/// Force animated material. This can be called only once
 	void				setAnimatedMaterial(const std::string &name);
@@ -133,7 +133,7 @@ public:
 	float				getRollupRatio() const { return _RollUpRatio; }
 
 	// from IShape
-	virtual bool		clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix);
+	virtual bool		clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) NL_OVERRIDE;
 
 	/// \name access default tracks.
 	// @{
@@ -148,10 +148,10 @@ public:
 protected:
 	///\name from IShape
 	//@{
-		virtual void				render(IDriver *drv, CTransformShape *trans, bool opaquePass);
-		virtual void				flushTextures (IDriver &driver, uint selectedTexture);
-		virtual	CTransformShape		*createInstance(CScene &scene);
-		virtual float				getNumTriangles (float distance);
+		virtual void				render(IDriver *drv, CTransformShape *trans, bool opaquePass) NL_OVERRIDE;
+		virtual void				flushTextures (IDriver &driver, uint selectedTexture) NL_OVERRIDE;
+		virtual	CTransformShape		*createInstance(CScene &scene) NL_OVERRIDE;
+		virtual float				getNumTriangles (float distance) NL_OVERRIDE;
 	//@}
 private:
 	typedef std::vector<CVector>	TCornerVect;

@@ -162,29 +162,29 @@ namespace PATCHMAN
 	{
 	public:
 		// clear everything
-		void clear();
+		void clear() NL_OVERRIDE;
 
 		// clear loaded script(s) but leave state intact
-		void clearScript();
+		void clearScript() NL_OVERRIDE;
 
 		// clear state variables but leave scripts intact
-		void clearState();
+		void clearState() NL_OVERRIDE;
 
 		// load a script file
-		void loadScript(const NLMISC::CSString& fileName);
+		void loadScript(const NLMISC::CSString& fileName) NL_OVERRIDE;
 
 		// set a state variable
-		void set(const NLMISC::CSString& variableName,const NLMISC::CSString& value);
-		void set(const NLMISC::CSString& variableName,sint32 value);
+		void set(const NLMISC::CSString& variableName,const NLMISC::CSString& value) NL_OVERRIDE;
+		void set(const NLMISC::CSString& variableName,sint32 value) NL_OVERRIDE;
 
 		// trigger an event
-		void trigger(const NLMISC::CSString& eventName);
+		void trigger(const NLMISC::CSString& eventName) NL_OVERRIDE;
 
 		// debug routine - display internal state info
-		void dump(NLMISC::CLog& log);
+		void dump(NLMISC::CLog& log) NL_OVERRIDE;
 
 		// debugging routine - displays the syntax help for the patchtest script files
-		void help(NLMISC::CLog& log);
+		void help(NLMISC::CLog& log) NL_OVERRIDE;
 
 	private:
 		// private methods

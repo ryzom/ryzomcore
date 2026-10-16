@@ -54,24 +54,24 @@ public:
 	/// Constructor
 	CPlayerR2CL();
 	/// Destructor
-	virtual ~CPlayerR2CL();
+	virtual ~CPlayerR2CL() NL_OVERRIDE;
 
 	/// Build the entity from a sheet.
-	virtual bool build(const CEntitySheet *sheet);
+	virtual bool build(const CEntitySheet *sheet) NL_OVERRIDE;
 
 	/// Method to return the attack radius of an entity
-	virtual double attackRadius() const;
+	virtual double attackRadius() const NL_OVERRIDE;
 	/** Return the position the attacker should have to combat according to the attack angle.
 	 * \param ang : 0 = the front, >0 and <Pi = left side, <0 and >-Pi = right side.
 	 */
-	virtual NLMISC::CVectorD getAttackerPos(double ang, double dist) const;
+	virtual NLMISC::CVectorD getAttackerPos(double ang, double dist) const NL_OVERRIDE;
 
 	/** \name DEBUG
 	 * Methods only here for the debug.
 	 */
 	//@{
 	/// Display Debug Information.
-	virtual void displayDebug(float x, float &y, float lineStep);
+	virtual void displayDebug(float x, float &y, float lineStep) NL_OVERRIDE;
 	//@}
 
 	/// Return the People for the entity.
@@ -82,10 +82,10 @@ public:
 	//const CRaceStatsSheet *playerSheet() const {return _PlayerSheet;}
 
 	/// Return the entity scale. (return 1.0 if there is any problem).
-	virtual float getScale() const;
+	virtual float getScale() const NL_OVERRIDE;
 	// return vector of ground fxs sorted by ground type, or NULL is ground fxs are not supported for the entity
 	//virtual const std::vector<CGroundFXSheet> *getGroundFX() const;
-	virtual bool supportGroundFX() const { return true; }
+	virtual bool supportGroundFX() const NL_OVERRIDE { return true; }
 
 	/// Return true if this player is in the same faction as the user's (except if neutral)
 	bool isFromSameNonNeutralPvpClanAsUser() const;
@@ -94,16 +94,16 @@ public:
 	//const char *getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide side) const;
 
 	// retrieve right hand item sheet
-	virtual const CItemSheet *getRightHandItemSheet() const;
-	virtual const CItemSheet *getLeftHandItemSheet() const;
+	virtual const CItemSheet *getRightHandItemSheet() const NL_OVERRIDE;
+	virtual const CItemSheet *getLeftHandItemSheet() const NL_OVERRIDE;
 
 	//virtual const CAttack *getAttack(const CAttackIDSheet &id) const;
 
-	virtual float getScaleRef() const;
+	virtual float getScaleRef() const NL_OVERRIDE;
 
 	// from CEntityCL
-	void makeTransparent(bool t);
-	virtual void setDiffuse(bool onOff, NLMISC::CRGBA diffuse);
+	void makeTransparent(bool t) NL_OVERRIDE;
+	virtual void setDiffuse(bool onOff, NLMISC::CRGBA diffuse) NL_OVERRIDE;
 
 protected:
 	/// Pointer on the Sheet with basic parameters.
@@ -140,7 +140,7 @@ protected:
 	void init3d();
 
 	/// Initialize properties of the entity (according to the class).
-	virtual void initProperties();
+	virtual void initProperties() NL_OVERRIDE;
 
 	/// Set the equipmenent worn.
 	void equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item = 0);
@@ -148,19 +148,19 @@ protected:
 	void equip(SLOTTYPE::EVisualSlot slot, uint index, uint color);
 
 	/// Update the Visual Property A
-	virtual void updateVisualPropertyVpa(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVpa(const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update the Visual Property B
-	virtual void updateVisualPropertyVpb(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVpb(const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update the Visual Property C
-	virtual void updateVisualPropertyVpc(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVpc(const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	// Get The Entity Skin
 	//virtual sint skin() const;
 
 	/// Update blink
-	virtual SInstanceCL *getFace ();
+	virtual SInstanceCL *getFace () NL_OVERRIDE;
 
 	// Draw the name.
-	virtual void drawName(const NLMISC::CMatrix &mat);
+	virtual void drawName(const NLMISC::CMatrix &mat) NL_OVERRIDE;
 
 	/** \name 3D System
 	 * Methods to manage basics 3D systems
@@ -170,24 +170,24 @@ protected:
 	 *	Deriver: See CPlayerCL implementation
 	 *	\return distance from entity to camera computed (helper for deriver)
 	 */
-	virtual	float		updateAsyncTexture();
+	virtual	float		updateAsyncTexture() NL_OVERRIDE;
 
 	/// Update the Lod Texture When needed
-	virtual	void		updateLodTexture();
+	virtual	void		updateLodTexture() NL_OVERRIDE;
 	//@}
 	/// Return the basic max speed for the entity in meter per sec
-	virtual double getMaxSpeed() const;
+	virtual double getMaxSpeed() const NL_OVERRIDE;
 
 	// Read/Write Variables from/to the stream.
-	virtual void readWrite(NLMISC::IStream &f);
+	virtual void readWrite(NLMISC::IStream &f) NL_OVERRIDE;
 	// To call after a read from a stream to re-initialize the entity.
-	virtual void load();
+	virtual void load() NL_OVERRIDE;
 
 	/// Return name position on Z axis defined in sheet
 	//virtual float getNamePosZ() const;
 
 	// virtual for special PlayerCL _Face mgt
-	virtual void doSetVisualSelectionBlink(bool bOnOff, NLMISC::CRGBA emitColor);
+	virtual void doSetVisualSelectionBlink(bool bOnOff, NLMISC::CRGBA emitColor) NL_OVERRIDE;
 
 	CGenderInfo * getGenderInfo();
 

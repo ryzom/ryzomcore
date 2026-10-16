@@ -203,7 +203,7 @@ public:\
 		}\
 		(*Entries).push_back( std::make_pair( str, this ) );\
 	}\
-	IMissionStepTemplate * instanciate()\
+	IMissionStepTemplate * instanciate() NL_OVERRIDE\
 	{ \
 		return new _class_; \
 	} \
@@ -211,7 +211,7 @@ public:\
 _class_##StepTemplateFactory* _class_##StepTemplateFactoryInstance = new _class_##StepTemplateFactory;
 
 #define MISSION_STEP_GETNEWPTR(_class_) \
-IMissionStepTemplate* getNewPtr()\
+IMissionStepTemplate* getNewPtr() NL_OVERRIDE\
 { \
 	_class_ * ptr = new _class_;\
 	*ptr = *this;\
@@ -234,12 +234,12 @@ extern void logMissionStep(uint32 line, const TDataSetRow & userRow, uint32 subS
 class CMissionStepDynChat : public IMissionStepTemplate
 {
 public:
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
-	virtual bool	solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  );
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
-	void getInitState( std::vector<uint32>& ret );
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
-	void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList);
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
+	virtual bool	solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  ) NL_OVERRIDE;
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE;
+	void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
 
 	struct CAnswer
 	{
@@ -276,8 +276,8 @@ public:
 
 protected:
 
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
-	void			getInitState( std::vector<uint32>& ret );
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
+	void			getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
 	void			getTextParams(uint & nbSubSteps, TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
 
 	std::vector< CSubStep > _SubSteps;
@@ -289,8 +289,8 @@ protected:
  */
 class CMissionStepLootRm : public IMissionStepItem
 {
-	uint					processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
-	virtual void			getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
+	uint					processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
+	virtual void			getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE;
 
 	MISSION_STEP_GETNEWPTR(CMissionStepLootRm)
 };
@@ -304,7 +304,7 @@ class CMissionStepVisit : public IMissionStepTemplate
 	std::vector<NLMISC::CSheetId>	_WornItems;
 	uint16							_PlaceId;
 
-	virtual bool		buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	virtual bool		buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
 
 	/*
 	 * When the mission step is activated (after a character takes it or when he is back in game), 
@@ -312,17 +312,17 @@ class CMissionStepVisit : public IMissionStepTemplate
 	 * if they are in the place at the right time. stepIndex starts at 0 here.
 	 * events can be generated in onActivation and pushed in eventList
 	 */
-	virtual void		onActivation(CMission* inst, uint32 stepIndex, std::list< CMissionEvent * > & eventList);
+	virtual void		onActivation(CMission* inst, uint32 stepIndex, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
 
 	/// When the mission step is removed when not successfully processed (e.g. aborted by user). stepIndex starts at 0 here.
-	virtual void		onFailure(CMission *inst, uint32 stepIndex)
+	virtual void		onFailure(CMission *inst, uint32 stepIndex) NL_OVERRIDE
 	{
 		IMissionStepTemplate::onFailure( inst, stepIndex );
 		onDeleteStepPrematurely( inst, stepIndex );
 	}
 
 	/// When the mission step has type 'any' and is removed because another one was successfully processed. stepIndex starts at 0 here.
-	virtual void		onCancelStepAny(CMission *inst, uint32 stepIndex)
+	virtual void		onCancelStepAny(CMission *inst, uint32 stepIndex) NL_OVERRIDE
 	{
 		IMissionStepTemplate::onCancelStepAny( inst, stepIndex );
 		onDeleteStepPrematurely( inst, stepIndex );
@@ -335,10 +335,10 @@ class CMissionStepVisit : public IMissionStepTemplate
 	 * Process an event.
 	 * See also testMatchEvent()
 	 */
-	uint				processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	uint				processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
 
-	void				getInitState( std::vector<uint32>& ret );
-	virtual void		getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
+	void				getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
+	virtual void		getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE;
 
 	MISSION_STEP_GETNEWPTR(CMissionStepVisit)
 

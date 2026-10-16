@@ -90,25 +90,25 @@ class CBSIINonModule: public IBackupServiceInterfaceImplementation, public NLMIS
 {
 public:
 	CBSIINonModule();
-	void serviceUpdate();
+	void serviceUpdate() NL_OVERRIDE;
 
-	void release();
+	void release() NL_OVERRIDE;
 
-	void activate();
-	void deactivate();
+	void activate() NL_OVERRIDE;
+	void deactivate() NL_OVERRIDE;
 
-	void dispatchRequestFileClass(const std::string& bsiname,uint32 requestId,const std::string& directory, const std::vector<CBackupFileClass>& classes);
-	void dispatchSyncLoadFileClass(const std::string& bsiname,uint32 requestId,const std::string& directory, const std::vector<CBackupFileClass>& classes);
-	void dispatchRequestFile(const std::string& bsiname,uint32 requestId,const std::string& fileName);
-	void dispatchSyncLoadFile(const std::string& bsiname,uint32 requestId,const std::string& fileName, bool notBlocking);
-	void terminateSyncLoads();
-	void dispatchSendFile(const std::string& bsiname,uint32 requestId,const CBackupMsgSaveFile& msg);
-	void dispatchAppendData(const std::string& bsiname,uint32 requestId,const CBackupMsgSaveFile& msg);
-	void dispatchAppendText(const std::string& bsiname,uint32 requestId,const std::string& filename, const std::string& line);
-	void dispatchDeleteFile(const std::string& bsiname,uint32 requestId,const std::string& fileToDelete, bool keepBackupOfFile);
+	void dispatchRequestFileClass(const std::string& bsiname,uint32 requestId,const std::string& directory, const std::vector<CBackupFileClass>& classes) NL_OVERRIDE;
+	void dispatchSyncLoadFileClass(const std::string& bsiname,uint32 requestId,const std::string& directory, const std::vector<CBackupFileClass>& classes) NL_OVERRIDE;
+	void dispatchRequestFile(const std::string& bsiname,uint32 requestId,const std::string& fileName) NL_OVERRIDE;
+	void dispatchSyncLoadFile(const std::string& bsiname,uint32 requestId,const std::string& fileName, bool notBlocking) NL_OVERRIDE;
+	void terminateSyncLoads() NL_OVERRIDE;
+	void dispatchSendFile(const std::string& bsiname,uint32 requestId,const CBackupMsgSaveFile& msg) NL_OVERRIDE;
+	void dispatchAppendData(const std::string& bsiname,uint32 requestId,const CBackupMsgSaveFile& msg) NL_OVERRIDE;
+	void dispatchAppendText(const std::string& bsiname,uint32 requestId,const std::string& filename, const std::string& line) NL_OVERRIDE;
+	void dispatchDeleteFile(const std::string& bsiname,uint32 requestId,const std::string& fileToDelete, bool keepBackupOfFile) NL_OVERRIDE;
 
-	NLMISC::TTime getLastAckTime() const;
-	NLMISC::TTime getLastAckDelay() const;
+	NLMISC::TTime getLastAckTime() const NL_OVERRIDE;
+	NLMISC::TTime getLastAckDelay() const NL_OVERRIDE;
 
 private:
 	// establish or reestablish the layer 3 connection to the BS

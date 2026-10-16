@@ -17,6 +17,8 @@
 #ifndef NL_BRAIN_H_
 #define NL_BRAIN_H_
 
+#include "nel/misc/types_nl.h"
+
 #include "mood.h"
 #include "attribute.h"
 #include "tree.h"
@@ -50,11 +52,11 @@ class CBrain : public CMood
 
 		void setUpdateEvery(int);
 
-		virtual float getFear();
-		virtual float getAgressivity();
-		virtual float getEmpathy();
-		virtual float getHappiness();
-		virtual float getHunger();
+		virtual float getFear() NL_OVERRIDE;
+		virtual float getAgressivity() NL_OVERRIDE;
+		virtual float getEmpathy() NL_OVERRIDE;
+		virtual float getHappiness() NL_OVERRIDE;
+		virtual float getHunger() NL_OVERRIDE;
 
 
 		void addRecord(CRecord *);

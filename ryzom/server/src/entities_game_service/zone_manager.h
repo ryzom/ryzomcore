@@ -214,7 +214,7 @@ public:
 	/// ctor
 	CRegion() : _Continent(CONTINENT::UNKNOWN) { }
 	/// dtor
-	~CRegion();
+	~CRegion() NL_OVERRIDE;
 
 	/**
 	 * add a place in that region
@@ -293,7 +293,7 @@ public:
 	bool build(const NLLIGO::CPrimZone * zone);
 
 	/// dtor
-	~CContinent();
+	~CContinent() NL_OVERRIDE;
 
 	/**
 	 * add a region in that continent
@@ -334,7 +334,7 @@ public:
 	// default constructor
 	CZoneManager() 	: DepositSearchTime(50) {maxGooBorderAlias = 0;}
 
-	~CZoneManager();
+	~CZoneManager() NL_OVERRIDE;
 
 	/// init the manager
 	void init();

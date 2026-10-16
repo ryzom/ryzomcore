@@ -262,7 +262,7 @@ class CTimerManager: public IServiceSingleton
 public:
 	// update called each tick in service update
 	// updates events and cleans out event vectors
-	virtual void tickUpdate();
+	virtual void tickUpdate() NL_OVERRIDE;
 
 	// get the singleton instance...
 	static CTimerManager* getInstance();

@@ -51,7 +51,7 @@ public:
 	{
 		_CurrCanopyCamPos = CVector::Null;
 	}
-	virtual void doRender(const NLMISC::CMatrix &camMatrix, NL3D::TGlobalAnimationTime time, NL3D::UDriver &drv);
+	virtual void doRender(const NLMISC::CMatrix &camMatrix, NL3D::TGlobalAnimationTime time, NL3D::UDriver &drv) NL_OVERRIDE;
 private:
 	CClientDate				   _DateForRender;
 	CClientDate				   _AnimationDateForRender;

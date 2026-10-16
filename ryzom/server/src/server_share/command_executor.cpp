@@ -55,7 +55,7 @@ public:
 //		return false;
 //	}
 
-	std::string buildModuleManifest() const
+	std::string buildModuleManifest() const NL_OVERRIDE
 	{
 		string ret("ServiceName=");
 		ret += IService::getInstance()->getServiceShortName();
@@ -68,7 +68,7 @@ public:
 	///////// CCommandExecutorSkel implementation  ////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////
 
-	void sendCommand(NLNET::IModuleProxy *sender, const std::string &commandName, const NLMISC::CEntityId &senderEId, bool haveTarget, const NLMISC::CEntityId &targetEId, const std::string &arg)
+	void sendCommand(NLNET::IModuleProxy *sender, const std::string &commandName, const NLMISC::CEntityId &senderEId, bool haveTarget, const NLMISC::CEntityId &targetEId, const std::string &arg) NL_OVERRIDE
 	{
 		// rebuild the command line
 		string cmdLine = commandName+" "+senderEId.toString();

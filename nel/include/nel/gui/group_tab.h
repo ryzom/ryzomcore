@@ -51,12 +51,12 @@ namespace NLGUI
 		/// Constructor
 		CGroupTab(const TCtorParam &param);
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-		virtual void updateCoords ();
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void updateCoords () NL_OVERRIDE;
 
 		// select the ctrl tab. -1 will invalidate all.
 		void	select(sint index);
@@ -161,15 +161,15 @@ namespace NLGUI
 
 		CCtrlTabButton(const TCtorParam &param);
 
-		void setProperty( const std::string &name, const std::string &value );
-		std::string getProperty( const std::string &name ) const;
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
-		virtual void setActive(bool state);
+		virtual void setActive(bool state) NL_OVERRIDE;
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 		void setBlink (bool b);
 

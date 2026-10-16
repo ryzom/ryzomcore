@@ -54,7 +54,7 @@ public:
 	CBloomEffect();
 
 	// Destructor
-	~CBloomEffect();
+	~CBloomEffect() NL_OVERRIDE;
 
 	// Called after the Driver initialization.
 	void init();

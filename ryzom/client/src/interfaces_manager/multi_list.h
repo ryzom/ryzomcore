@@ -60,7 +60,7 @@ public:
 	virtual void add(const std::list<ucstring> &str);
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/**
 	* set the auto scroll mode of the list, default mode is 'on' (true)
@@ -86,10 +86,10 @@ public:
 	uint32 getHistorySize() const { return _HistorySize; }
 
 	/// scroll horizontaly by 'scroll' units in either direction (right if scroll >0 and left is scroll<0 for example) (implementation dependent)
-	virtual void scrollH(sint32 scroll);
+	virtual void scrollH(sint32 scroll) NL_OVERRIDE;
 
 	/// scroll verticaly by 'scroll' units in either direction
-	virtual void scrollV(sint32 scroll);
+	virtual void scrollV(sint32 scroll) NL_OVERRIDE;
 
 	/**
 	* \return the number of columns in the list

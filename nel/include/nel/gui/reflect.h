@@ -391,7 +391,7 @@ namespace NLGUI
 	class CReflectableRefPtrTarget : public CReflectable, public NLMISC::CRefCount
 	{
 	public:
-		virtual ~CReflectableRefPtrTarget();
+		virtual ~CReflectableRefPtrTarget() NL_OVERRIDE;
 	};
 
 

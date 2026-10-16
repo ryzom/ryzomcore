@@ -41,7 +41,7 @@ public:
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	virtual void	unpack (NLMISC::CBitMemStream &message)
+	virtual void	unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE
 	{
 		message.serial(IsNewAssociation);
 		if (IsNewAssociation)
@@ -52,15 +52,15 @@ public:
 	}
 
 	/// This functions is used when you want to transform an action into an IStream.
-	virtual void	serial (NLMISC::IStream &f) { f.serial(IsNewAssociation, SheetId, Replace); }
+	virtual void	serial (NLMISC::IStream &f) NL_OVERRIDE { f.serial(IsNewAssociation, SheetId, Replace); }
 
 	/** Returns the size of this action when it will be send to the UDP connection:
 	 * the size is IN BITS, not in bytes (the actual size is this one plus the header size)
 	 */
-	virtual uint32	size () { return IsNewAssociation ? 8*sizeof(CLFECOMMON::TSheetId)+2 : 1; }
+	virtual uint32	size () NL_OVERRIDE { return IsNewAssociation ? 8*sizeof(CLFECOMMON::TSheetId)+2 : 1; }
 
 	/// Sets the value of the action
-	virtual TValue	getValue() const { return (CAction::TValue)SheetId; }
+	virtual TValue	getValue() const NL_OVERRIDE { return (CAction::TValue)SheetId; }
 
 	static CAction	*create () { return new CActionAssociation(); }
 
@@ -73,7 +73,7 @@ protected:
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	virtual void	pack (NLMISC::CBitMemStream &message)
+	virtual void	pack (NLMISC::CBitMemStream &message) NL_OVERRIDE
 	{
 		message.serial(IsNewAssociation);
 		if (IsNewAssociation)

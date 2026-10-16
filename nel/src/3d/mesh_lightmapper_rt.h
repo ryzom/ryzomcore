@@ -202,17 +202,17 @@ public:
 
 	// Creation
 	CRTLightAccelDir();
-	virtual ~CRTLightAccelDir();
+	virtual ~CRTLightAccelDir() NL_OVERRIDE;
 
 	void		create (int nSize, float rRadius, NLMISC::CVector &vDirection);
-	void		insert (NLMISC::CTriangle &tri, SGridCell &cell);
+	void		insert (NLMISC::CTriangle &tri, SGridCell &cell) NL_OVERRIDE;
 
 	// Selection
-	void		select (NLMISC::CVector &v);
-	void		select (NLMISC::CVector &v, float rRadius);
-	SGridCell	getSel ();
-	void		nextSel ();
-	bool		isEndSel ();
+	void		select (NLMISC::CVector &v) NL_OVERRIDE;
+	void		select (NLMISC::CVector &v, float rRadius) NL_OVERRIDE;
+	SGridCell	getSel () NL_OVERRIDE;
+	void		nextSel () NL_OVERRIDE;
+	bool		isEndSel () NL_OVERRIDE;
 
 private:
 
@@ -231,17 +231,17 @@ public :
 
 	// Creation
 	CRTLightAccelPoint ();
-	virtual ~CRTLightAccelPoint ();
+	virtual ~CRTLightAccelPoint () NL_OVERRIDE;
 
 	void		create (int nSize);
-	void		insert (NLMISC::CTriangle &tri, SGridCell &cell);
+	void		insert (NLMISC::CTriangle &tri, SGridCell &cell) NL_OVERRIDE;
 
 	// Selection
-	void		select (NLMISC::CVector &v);
-	void		select (NLMISC::CVector &v, float rRadius);
-	SGridCell	getSel ();
-	void		nextSel ();
-	bool		isEndSel ();
+	void		select (NLMISC::CVector &v) NL_OVERRIDE;
+	void		select (NLMISC::CVector &v, float rRadius) NL_OVERRIDE;
+	SGridCell	getSel () NL_OVERRIDE;
+	void		nextSel () NL_OVERRIDE;
+	bool		isEndSel () NL_OVERRIDE;
 
 private:
 

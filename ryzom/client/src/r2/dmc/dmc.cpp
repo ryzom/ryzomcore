@@ -63,11 +63,11 @@ class CClientInstantActionFeedBack : public IDynamicMapClient
 {
 public:
 	CClientInstantActionFeedBack(CDynamicMapClient &dmc) : _DMC(dmc) {}
-	virtual void doRequestInsertNode(const std::string& instanceId, const std::string& name, sint32 position, const std::string& key, CObject* value);
-	virtual void doRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value);
-	virtual void doRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position);
-	virtual void doRequestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
-	virtual CObject *find(const std::string& /* instanceId */, const std::string& /* attrName */ = "", sint32 /* position */ = -1, const std::string &/* key */ ="")
+	virtual void doRequestInsertNode(const std::string& instanceId, const std::string& name, sint32 position, const std::string& key, CObject* value) NL_OVERRIDE;
+	virtual void doRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value) NL_OVERRIDE;
+	virtual void doRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position) NL_OVERRIDE;
+	virtual void doRequestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition) NL_OVERRIDE;
+	virtual CObject *find(const std::string& /* instanceId */, const std::string& /* attrName */ = "", sint32 /* position */ = -1, const std::string &/* key */ ="") NL_OVERRIDE
 	{
 		nlassert(0);
 		return NULL;
@@ -129,11 +129,11 @@ class CFrameActionsRecorder : public IDynamicMapClient
 public:
 	CFrameActionsRecorder(CDynamicMapClient &dmc) : _DMC(dmc), _Flushing(false) { _FrameActions.newSingleAction(ucstring()); }
 	// from IDynamicMapClient
-	virtual void doRequestInsertNode(const std::string& instanceId, const std::string& name, sint32 position, const std::string& key, CObject* value);
-	virtual void doRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value);
-	virtual void doRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position);
-	virtual void doRequestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
-	virtual CObject *find(const std::string& instanceId, const std::string& attrName = "", sint32 position = -1, const std::string &key ="")
+	virtual void doRequestInsertNode(const std::string& instanceId, const std::string& name, sint32 position, const std::string& key, CObject* value) NL_OVERRIDE;
+	virtual void doRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value) NL_OVERRIDE;
+	virtual void doRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position) NL_OVERRIDE;
+	virtual void doRequestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition) NL_OVERRIDE;
+	virtual CObject *find(const std::string& instanceId, const std::string& attrName = "", sint32 position = -1, const std::string &key ="") NL_OVERRIDE
 	{
 		return _DMC.find(instanceId, attrName, position, key);
 	}
@@ -560,13 +560,13 @@ void CDynamicMapClient::requestSetNode(const std::string& instanceId, const std:
 class CNotifySonDeletion : public CEditor::IObserverAction
 {
 public:
-	virtual ~CNotifySonDeletion()
+	virtual ~CNotifySonDeletion() NL_OVERRIDE
 	{
 	}
 
 	CInstance &ErasedInstance;
 	CNotifySonDeletion(CInstance &erasedInstance) : ErasedInstance(erasedInstance) {}
-	virtual void doAction(CEditor::IInstanceObserver &obs)
+	virtual void doAction(CEditor::IInstanceObserver &obs) NL_OVERRIDE
 	{
 		obs.onInstanceEraseRequest(ErasedInstance);
 	}
@@ -580,7 +580,7 @@ public:
 	{
 	}
 
-	virtual void visit(CInstance &inst)
+	virtual void visit(CInstance &inst) NL_OVERRIDE
 	{
 		CNotifySonDeletion notifySonDeletion(inst);
 		getEditor().triggerInstanceObserver(inst.getId(), notifySonDeletion);

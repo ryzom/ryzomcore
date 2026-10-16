@@ -83,7 +83,7 @@ protected:
 			}\
 			(*Entries).push_back( std::make_pair( str, this ) );\
 		}\
-		IMissionAction * instanciate()\
+		IMissionAction * instanciate() NL_OVERRIDE\
 		{ \
 			return new _class_;\
 		} \
@@ -97,13 +97,13 @@ class CMissionActionSetFailureIndex : public IMissionAction
 public:
 	inline void setIndex(uint32 index){ _Index = index; }
 protected:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList);
-	IMissionAction* getNewPtr()
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
+	IMissionAction* getNewPtr() NL_OVERRIDE
 	{ 
 		CMissionActionSetFailureIndex * ptr = new CMissionActionSetFailureIndex;
 		*ptr = *this; 
@@ -118,13 +118,13 @@ class CMissionActionSetPlayerReconnectHandlerIndex : public IMissionAction
 public:
 	inline void setIndex(uint32 index){ _Index = index; }
 protected:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList);
-	IMissionAction* getNewPtr()
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
+	IMissionAction* getNewPtr() NL_OVERRIDE
 	{ 
 		CMissionActionSetPlayerReconnectHandlerIndex * ptr = new CMissionActionSetPlayerReconnectHandlerIndex;
 		*ptr = *this;
@@ -139,13 +139,13 @@ class CMissionActionSetCrashHandlerIndex : public IMissionAction
 public:
 	inline void setIndex(uint32 index){ _Index = index; }
 protected:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		return true;
 	}
-	void launch(CMission* instance, std::list< CMissionEvent * > & eventList);
-	IMissionAction* getNewPtr()
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
+	IMissionAction* getNewPtr() NL_OVERRIDE
 	{ 
 		CMissionActionSetCrashHandlerIndex * ptr = new CMissionActionSetCrashHandlerIndex;
 		*ptr = *this;
@@ -168,25 +168,25 @@ public:
 	uint32								Index;
 
 private:
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData);
-	void launch(CMission* instance,std::list< CMissionEvent * > & eventList);
-	IMissionAction* getNewPtr()
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE;
+	void launch(CMission* instance,std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
+	IMissionAction* getNewPtr() NL_OVERRIDE
 	{ 
 		CMissionActionSetTeleport * ptr = new CMissionActionSetTeleport;
 		*ptr = *this;
 		return ptr; 
 	}
-	bool solveTextsParams( CMissionSpecificParsingData & missionData );
+	bool solveTextsParams( CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
 };
 
 
 /// jump
 class CMissionActionJump : public IMissionAction
 {
-	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData);
+	bool buildAction ( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData) NL_OVERRIDE;
 protected:
-	void launch(CMission* instance,std::list< CMissionEvent * > & eventList);
-	IMissionAction* getNewPtr();
+	void launch(CMission* instance,std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
+	IMissionAction* getNewPtr() NL_OVERRIDE;
 
 	std::string Label;
 };

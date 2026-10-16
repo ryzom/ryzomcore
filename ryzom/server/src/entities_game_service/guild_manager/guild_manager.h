@@ -60,7 +60,7 @@ class CGuildManager :
 	CGuildManager();
 public:
 
-	virtual const std::string &getCommandHandlerName() const;
+	virtual const std::string &getCommandHandlerName() const NL_OVERRIDE;
 	
 	///\name Low level/basic features management, interaction with the shard
 	//@{
@@ -100,7 +100,7 @@ public:
 	///\name guild management
 	//@{
 	/// Check if all the guild have been loaded from the BS.
-	bool guildLoaded()	{ return _GuildLoaded; }
+	bool guildLoaded() NL_OVERRIDE	{ return _GuildLoaded; }
 
 	/// Return a valid free guild id for new guild creation
 	uint32 getFreeGuildId();
@@ -109,7 +109,7 @@ public:
 	/// get a guild from its name
 	CGuild * getGuildByName( const ucstring & name );
 	/// get a guild from its id
-	CGuild * getGuildFromId( EGSPD::TGuildId id );
+	CGuild * getGuildFromId( EGSPD::TGuildId id ) NL_OVERRIDE;
 	/// update the guild strings. This method checks if a guild was awaiting for the string id corresponding to the param str. If yes, it updates the guild string id
 //	bool updateGuildStringIds( const ucstring & str );
 	/// check coherency between character and guild data
@@ -129,31 +129,31 @@ public:
 	/// guild creation user query
 	void createGuild(CGuildCharProxy & proxy,const ucstring & guildName,const uint64& icon, const ucstring & description);
 	/// Guild creation step 2, executed when SU return name validation
-	void createGuildStep2(uint32 guildId, const ucstring &guildName, CHARSYNC::TCharacterNameResult result);
+	void createGuildStep2(uint32 guildId, const ucstring &guildName, CHARSYNC::TCharacterNameResult result) NL_OVERRIDE;
 
 	/// guild deletion
 	void deleteGuild(uint32 id);
 	/// a player deletes one of his character
 	void characterDeleted( CCharacter & user );
 	/// update all guild members string ids in guild database
-	void updateGuildMembersStringIds();
+	void updateGuildMembersStringIds() NL_OVERRIDE;
 	/// Rebuild all guild client db
 //	void rebuildCliendDB();
 
 	// fill guild info descriptor with all local guilds
-	void fillGuildInfos(std::vector<CHARSYNC::CGuildInfo> &guildInfos);
+	void fillGuildInfos(std::vector<CHARSYNC::CGuildInfo> &guildInfos) NL_OVERRIDE;
 
 	/// Check all guild member lists against the entity translator
-	void checkGuildMemberLists();
+	void checkGuildMemberLists() NL_OVERRIDE;
 
 	// A character connect/disconnect on another shard, update the online tags
-	void	characterConnectionEvent(const NLMISC::CEntityId &eid, bool online);
+	void	characterConnectionEvent(const NLMISC::CEntityId &eid, bool online) NL_OVERRIDE;
 
 	/// get raw acces to the guild list
-	const EGSPD::CGuildContainerPD *getGuildContainer() const;
+	const EGSPD::CGuildContainerPD *getGuildContainer() const NL_OVERRIDE;
 
 	/// A player entity have been removed from eid translator, check all guild member list
-	virtual void playerEntityRemoved(const NLMISC::CEntityId &eid);
+	virtual void playerEntityRemoved(const NLMISC::CEntityId &eid) NL_OVERRIDE;
 	//@}
 
 	// PDLIB factory for guild members
@@ -189,9 +189,9 @@ private:
 	void saveGuild( CGuild* guild );
 
 	/// A member have been changed in some way
-	void guildMemberChanged(EGSPD::CGuildMemberPD *guildMemberPd);
+	void guildMemberChanged(EGSPD::CGuildMemberPD *guildMemberPd) NL_OVERRIDE;
 	/// the member list has been changed (ether add/replace or delete)
-	void guildMemberListChanged(EGSPD::CGuildPD *guildPd);
+	void guildMemberListChanged(EGSPD::CGuildPD *guildPd) NL_OVERRIDE;
 
 	/// callback from client database when guild name id changed in db (i.e when we set the IOS mapping)
 	static void cb_guildNameIdAvailable(CCDBSynchronised *syncDb, ICDBStructNode *node);

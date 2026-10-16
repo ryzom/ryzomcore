@@ -85,19 +85,19 @@ public:
 	CTPTimedAction() {}
 	
 	/// \dtor
-	virtual ~CTPTimedAction() {}
+	virtual ~CTPTimedAction() NL_OVERRIDE {}
 
 	/// validate action
-	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 	
 	/// apply action
-	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action
-	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) { stopAction(phrase,actor); }
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE { stopAction(phrase,actor); }
 
 private:
 	/// get and unlock TP item
@@ -118,19 +118,19 @@ public:
 	CDisconnectTimedAction() {}
 	
 	/// \dtor
-	virtual ~CDisconnectTimedAction() {}
+	virtual ~CDisconnectTimedAction() NL_OVERRIDE {}
 
 	/// validate action
-	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 	
 	/// apply action
-	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action
-	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 };
 
 
@@ -147,19 +147,19 @@ public:
 	CMountTimedAction() {}
 	
 	/// \dtor
-	virtual ~CMountTimedAction() {}
+	virtual ~CMountTimedAction() NL_OVERRIDE {}
 
 	/// validate action
-	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 	
 	/// apply action
-	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action
-	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 private:
 	// entity to mount
@@ -179,22 +179,22 @@ public:
 	CUnmountTimedAction() {}
 	
 	/// \dtor
-	virtual ~CUnmountTimedAction() {}
+	virtual ~CUnmountTimedAction() NL_OVERRIDE {}
 
 	/// validate action
-	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 	
 	/// apply action
-	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action
-	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// test if action is canceled when actor is being hit, return true if canceled
-	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender) { return false; }
+	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender) NL_OVERRIDE { return false; }
 };
 
 
@@ -211,22 +211,22 @@ public:
 	CConsumeItemTimedAction() { _Form = 0; }
 	
 	/// \dtor
-	virtual ~CConsumeItemTimedAction() {}
+	virtual ~CConsumeItemTimedAction() NL_OVERRIDE {}
 
 	/// validate action
-	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual bool validate(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 	
 	/// apply action
-	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void applyAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action
-	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopAction(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// stop action before execution of the phrase
-	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor);
+	virtual void stopBeforeExecution(CTimedActionPhrase *phrase, CEntityBase *actor) NL_OVERRIDE;
 
 	/// test if action is canceled when actor is being hit, return true if canceled
-	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender);
+	virtual bool testCancelOnHit( sint32 attackSkillValue, CEntityBase * attacker, CEntityBase * defender) NL_OVERRIDE;
 
 private:
 	const CStaticItem *_Form;

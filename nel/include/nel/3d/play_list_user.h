@@ -64,42 +64,42 @@ public:
 
 	/// \name Animatable Link.
 	// @{
-	virtual	void	registerTransform(UTransform object, const char* prefix);
-	virtual	void	resetAllChannels();
+	virtual	void	registerTransform(UTransform object, const char* prefix) NL_OVERRIDE;
+	virtual	void	resetAllChannels() NL_OVERRIDE;
 	// @}
 
 
 	/// \name Animation Setup.
 	// @{
-	virtual	void emptyPlayList ();
-	virtual	void setAnimation (uint8 slot, uint animation);
-	virtual	uint getAnimation (uint8 slot) const;
+	virtual	void emptyPlayList () NL_OVERRIDE;
+	virtual	void setAnimation (uint8 slot, uint animation) NL_OVERRIDE;
+	virtual	uint getAnimation (uint8 slot) const NL_OVERRIDE;
 	// @}
 
 
 	/// \name Animation Time Setup.
 	// @{
-	virtual	void setTimeOrigin (uint8 slot, TGlobalAnimationTime timeOrigin);
-	virtual	TGlobalAnimationTime getTimeOrigin (uint8 slot) const;
-	virtual	void setSpeedFactor (uint8 slot, float speedFactor);
-	virtual	float getSpeedFactor (uint8 slot) const;
-	virtual	void setWrapMode (uint8 slot, TWrapMode wrapMode);
-	virtual	TWrapMode getWrapMode (uint8 slot) const;
+	virtual	void setTimeOrigin (uint8 slot, TGlobalAnimationTime timeOrigin) NL_OVERRIDE;
+	virtual	TGlobalAnimationTime getTimeOrigin (uint8 slot) const NL_OVERRIDE;
+	virtual	void setSpeedFactor (uint8 slot, float speedFactor) NL_OVERRIDE;
+	virtual	float getSpeedFactor (uint8 slot) const NL_OVERRIDE;
+	virtual	void setWrapMode (uint8 slot, TWrapMode wrapMode) NL_OVERRIDE;
+	virtual	TWrapMode getWrapMode (uint8 slot) const NL_OVERRIDE;
 	// @}
 
 
 	/// \name Animation Weight Setup.
 	// @{
-	virtual	void setStartWeight (uint8 slot, float startWeight, TGlobalAnimationTime time);
-	virtual	float getStartWeight (uint8 slot, TGlobalAnimationTime& time) const;
-	virtual	void setEndWeight (uint8 slot, float endWeight, TGlobalAnimationTime time);
-	virtual	float getEndWeight (uint8 slot, TGlobalAnimationTime& time) const;
-	virtual	void setWeightSmoothness (uint8 slot, float smoothness);
-	virtual	float getWeightSmoothness (uint8 slot) const;
-	virtual	void setWeight (uint8 slot, float weight);
+	virtual	void setStartWeight (uint8 slot, float startWeight, TGlobalAnimationTime time) NL_OVERRIDE;
+	virtual	float getStartWeight (uint8 slot, TGlobalAnimationTime& time) const NL_OVERRIDE;
+	virtual	void setEndWeight (uint8 slot, float endWeight, TGlobalAnimationTime time) NL_OVERRIDE;
+	virtual	float getEndWeight (uint8 slot, TGlobalAnimationTime& time) const NL_OVERRIDE;
+	virtual	void setWeightSmoothness (uint8 slot, float smoothness) NL_OVERRIDE;
+	virtual	float getWeightSmoothness (uint8 slot) const NL_OVERRIDE;
+	virtual	void setWeight (uint8 slot, float weight) NL_OVERRIDE;
 
-	virtual TAnimationTime getLocalTime (uint8 slot, TGlobalAnimationTime globalTime, const UAnimationSet& animSet) const;
-	virtual float getLocalWeight (uint8 slot, TGlobalAnimationTime globalTime) const;
+	virtual TAnimationTime getLocalTime (uint8 slot, TGlobalAnimationTime globalTime, const UAnimationSet& animSet) const NL_OVERRIDE;
+	virtual float getLocalWeight (uint8 slot, TGlobalAnimationTime globalTime) const NL_OVERRIDE;
 
 	// @}
 
@@ -107,15 +107,15 @@ public:
 
 	/// \name Skeleton Weight Setup.
 	// @{
-	virtual	void setSkeletonWeight (uint8 slot, uint skeletonId, bool inverted=false);
-	virtual	uint getSkeletonWeight (uint8 slot, bool &inverted) const;
+	virtual	void setSkeletonWeight (uint8 slot, uint skeletonId, bool inverted=false) NL_OVERRIDE;
+	virtual	uint getSkeletonWeight (uint8 slot, bool &inverted) const NL_OVERRIDE;
 	// @}
 
 
 	/// \name Special channel operation.
 	// @{
-	virtual	void enableChannel (uint channelId, bool enable);
-	virtual	bool isChannelEnabled (uint channelId) const;
+	virtual	void enableChannel (uint channelId, bool enable) NL_OVERRIDE;
+	virtual	bool isChannelEnabled (uint channelId) const NL_OVERRIDE;
 	// @}
 
 public:

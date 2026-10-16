@@ -50,12 +50,12 @@ public:
 	/// Constructor
 	CViewRadar(const TCtorParam &param);
 
-	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
+	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-	virtual void updateCoords ();
+	virtual void updateCoords () NL_OVERRIDE;
 
 	/// Draw the view
-	virtual void draw ();
+	virtual void draw () NL_OVERRIDE;
 
 	REFLECT_EXPORT_START(CViewRadar, CViewBase)
 		REFLECT_FLOAT ("world_size", getWorldSize, setWorldSize);
@@ -90,7 +90,7 @@ private:
 	class CDBMissionIconqObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update( NLMISC::ICDBNode *node);
+		virtual void update( NLMISC::ICDBNode *node) NL_OVERRIDE;
 		bool _displayMissionSpots;
 	};
 	CDBMissionIconqObs _MissionIconsObs;
@@ -98,7 +98,7 @@ private:
 	class CDBMiniMissionSpotsObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update( NLMISC::ICDBNode *node);
+		virtual void update( NLMISC::ICDBNode *node) NL_OVERRIDE;
 		bool _displayMiniMissionSpots;
 
 	};

@@ -17,6 +17,8 @@
 #ifndef NL_RESULT_NODE_H_
 #define NL_RESULT_NODE_H_
 
+#include "nel/misc/types_nl.h"
+
 #include "node.h"
 
 class CResultNode : public INode {
@@ -25,8 +27,8 @@ class CResultNode : public INode {
 	public:
 		CResultNode();
 		CResultNode(bool);
-		~CResultNode();
-		virtual bool propagRecord(CRecord *);
+		~CResultNode() NL_OVERRIDE;
+		virtual bool propagRecord(CRecord *) NL_OVERRIDE;
 };
 
 #endif

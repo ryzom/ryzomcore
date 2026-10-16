@@ -1108,7 +1108,7 @@ namespace NLGUI
 		{}
 
 	private:
-		void updateCoords()
+		void updateCoords() NL_OVERRIDE
 		{
 			if (_Parent)
 			{
@@ -3352,7 +3352,7 @@ namespace NLGUI
 
 	struct CButtonFreezer : public CInterfaceElementVisitor
 	{
-		virtual void visitCtrl(CCtrlBase *ctrl)
+		virtual void visitCtrl(CCtrlBase *ctrl) NL_OVERRIDE
 		{
 			CCtrlBaseButton		*textButt = dynamic_cast<CCtrlTextButton *>(ctrl);
 			if (textButt)

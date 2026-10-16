@@ -162,7 +162,7 @@ public:
 
 	/// Constructor
 	CMeshBase();
-	virtual ~CMeshBase();
+	virtual ~CMeshBase() NL_OVERRIDE;
 
 	/// \name animated material mgt. do it after CMesh::build(), or CMeshMRM::build()
 	// @{
@@ -207,14 +207,14 @@ public:
 	void	serialMeshBase(NLMISC::IStream &f);
 
 	/// Flush textures
-	void	flushTextures (IDriver &driver, uint selectedTexture);
+	void	flushTextures (IDriver &driver, uint selectedTexture) NL_OVERRIDE;
 
 
 	/// Is this mesh lightable? true if one of his materials is not a lightmap. NB: result stored in file.
 	bool	isLightable() const {return _IsLightable;}
 
 	/// tells if the shape wants LocalAttenuation for RealTime lighting.  Default is false
-	virtual bool		useLightingLocalAttenuation () const;
+	virtual bool		useLightingLocalAttenuation () const NL_OVERRIDE;
 
 	/// \name Automatic animation
 	// @{

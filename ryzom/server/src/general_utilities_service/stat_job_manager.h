@@ -70,7 +70,7 @@ public:
 	void promoteJob(uint32 idx);
 
 	// the update method used to call job updates
-	void serviceUpdate();
+	void serviceUpdate() NL_OVERRIDE;
 
 	// do nothing during the service updates until 'resume()'
 	void pause();

@@ -38,9 +38,9 @@ public:
 
 	CTempInventory();
 
-	uint32 getMaxSlot() const;
+	uint32 getMaxSlot() const NL_OVERRIDE;
 
-	virtual void bindView(CInventoryViewPtr inventoryView);
+	virtual void bindView(CInventoryViewPtr inventoryView) NL_OVERRIDE;
 
 	// Inventory Mode
 
@@ -88,15 +88,15 @@ public:
 
 	void init();
 
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE;
 
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE;
 
-	virtual void updateItemPrerequisit(uint32 slot) { /* TODO */ }
+	virtual void updateItemPrerequisit(uint32 slot) NL_OVERRIDE { /* TODO */ }
 
 protected:
 
-	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item);
+	virtual void updateClientSlot(uint32 clientSlot, const CGameItemPtr item) NL_OVERRIDE;
 
 	std::vector<uint8> _LastInfoVersion;
 };

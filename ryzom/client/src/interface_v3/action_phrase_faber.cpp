@@ -1273,7 +1273,7 @@ DECLARE_INTERFACE_CONSTANT(getPhraseMPSelectionMax, MAX_MP_SELECTION_ENTRIES)
 class	CHandlerPhraseFaberSelectMP : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if(!ctrl)
@@ -1296,7 +1296,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseFaberSelectMP, "phrase_faber_select_mp");
 class	CHandlerPhraseFaberValidateMP : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if(!ctrl)
@@ -1320,7 +1320,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseFaberValidateMP, "phrase_faber_validate_m
 class	CHandlerPhraseFaberValidate : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->validateExecution();
@@ -1333,7 +1333,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseFaberValidate, "phrase_faber_validate");
 class	CHandlerPhraseFaberValidateOnEnter : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// get the button
 		CInterfaceManager		*pIM= CInterfaceManager::getInstance();
@@ -1354,7 +1354,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseFaberValidateOnEnter, "phrase_faber_valid
 class	CHandlerPhraseFaberSelectMpQuantity : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->validateMpSelectQuantity();
@@ -1399,7 +1399,7 @@ void		closeFaberCastWindow()
 class	CHandlerPhraseFaberOnClose : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (ActionPhraseFaber == NULL) ActionPhraseFaber = new CActionPhraseFaber;
 		ActionPhraseFaber->onCloseFaberCastWindow();

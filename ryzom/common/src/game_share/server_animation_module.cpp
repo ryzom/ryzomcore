@@ -749,7 +749,7 @@ public:
 	CTaskStopTest(CServerAnimationModule*  animationModule, TSessionId sessionId)
 		:_AnimationModule(animationModule), _SessionId(sessionId) { }
 
-	void doOperation()
+	void doOperation() NL_OVERRIDE
 	{
 		uint32 unused;
 		_AnimationModule->stopTestImpl(_SessionId, unused);
@@ -768,7 +768,7 @@ public:
 	CTaskBroadcast(CServerAnimationModule*  animationModule, TSessionId sessionId, CMessage& msg)
 		:_AnimationModule(animationModule), _SessionId(sessionId) { _Msg.swap(msg); }
 
-	void doOperation()
+	void doOperation() NL_OVERRIDE
 	{
 		_AnimationModule->broadcastMsg(_SessionId, _Msg);
 
@@ -789,7 +789,7 @@ public:
 		: CTask<NLMISC::TTime>(t),
 		_AnimationModule(animationModule),
 		_SessionId(sessionId),_ActId(actId), _MustTp(mustTp){}
-	void doOperation()
+	void doOperation() NL_OVERRIDE
 	{
 		CAnimationSession* session = _AnimationModule->getSession(_SessionId);
 		if (session && session->StartingAct)
@@ -828,7 +828,7 @@ public:
 		:_AnimationModule(animationModule), _Msg(msg)
 		{}
 
-	void doOperation()
+	void doOperation() NL_OVERRIDE
 	{
 		_AnimationModule->scheduleStartSessionImpl(_Msg);
 	}

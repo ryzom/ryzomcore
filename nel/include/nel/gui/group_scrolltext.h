@@ -46,19 +46,19 @@ namespace NLGUI
 
 		/// Constructor
 		CGroupScrollText(const TCtorParam &param);
-		~CGroupScrollText();
+		~CGroupScrollText() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		/// CInterfaceGroup Interface
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-		virtual void updateCoords ();
-		virtual void checkCoords ();
-		virtual void draw ();
-		virtual void clearViews ();
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void updateCoords () NL_OVERRIDE;
+		virtual void checkCoords () NL_OVERRIDE;
+		virtual void draw () NL_OVERRIDE;
+		virtual void clearViews () NL_OVERRIDE;
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc) NL_OVERRIDE;
 
 		// get the list associated to this group
 		CGroupList	*getList() const { return _List; }
@@ -67,7 +67,7 @@ namespace NLGUI
 		CCtrlScroll	 *getScrollBar() const { return	_ScrollBar; }
 
 		// from CCtrlBase
-		virtual	void		elementCaptured(CCtrlBase *capturedElement);
+		virtual	void		elementCaptured(CCtrlBase *capturedElement) NL_OVERRIDE;
 
 		// setup vertical scrolling event
 		void	smoothScrollY (sint32 dy);

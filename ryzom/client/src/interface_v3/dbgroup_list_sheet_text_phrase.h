@@ -44,22 +44,22 @@ public:
 	struct	CSheetChildPhrase : public CDBGroupListSheetText::CSheetChild
 	{
 		CSheetChildPhrase();
-		virtual void init(CDBGroupListSheetText *pFather, uint index);
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
-		virtual void update(CDBGroupListSheetText *pFather);
-		virtual void updateViewText(CDBGroupListSheetText *pFather);
-		virtual sint getSectionId() const;
+		virtual void init(CDBGroupListSheetText *pFather, uint index) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual sint getSectionId() const NL_OVERRIDE;
 		NLMISC::CCDBNodeLeaf	*LevelDB;
 		uint			LevelCache;
 	};
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildPhrase; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildPhrase; }
 
 	// for section mgt
-	virtual	void				getCurrentBoundSectionId(sint &minSectionId, sint &maxSectionId);
-	virtual	CInterfaceGroup		*createSectionGroup(const std::string &igName);
-	virtual	void				deleteSectionGroup(CInterfaceGroup	*group);
-	virtual	void				setSectionGroupId(CInterfaceGroup	*, uint sectionId);
+	virtual	void				getCurrentBoundSectionId(sint &minSectionId, sint &maxSectionId) NL_OVERRIDE;
+	virtual	CInterfaceGroup		*createSectionGroup(const std::string &igName) NL_OVERRIDE;
+	virtual	void				deleteSectionGroup(CInterfaceGroup	*group) NL_OVERRIDE;
+	virtual	void				setSectionGroupId(CInterfaceGroup	*, uint sectionId) NL_OVERRIDE;
 
 };
 

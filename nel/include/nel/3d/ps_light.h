@@ -39,17 +39,17 @@ public:
 	/// ctor
 	CPSLight();
 	// dtor
-	~CPSLight();
+	~CPSLight() NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CPSLight);
 	/// Serialisation. Derivers must override this, and call their parent version
-	virtual void			serial(NLMISC::IStream &f);
+	virtual void			serial(NLMISC::IStream &f) NL_OVERRIDE;
 	//@}
-	virtual uint32			getType(void) const;
-	virtual uint32			getPriority(void) const { return 600; }
+	virtual uint32			getType(void) const NL_OVERRIDE;
+	virtual uint32			getPriority(void) const NL_OVERRIDE { return 600; }
 	/** From CPSLocatedBindable.
 	  * For lights, this update their pos, colors and attenuation distances in the engine
 	  */
-	virtual void			step(TPSProcessPass pass);
+	virtual void			step(TPSProcessPass pass) NL_OVERRIDE;
 	///\name Attributes
 	//@{
 		// Set a constant color, this removes any previous color scheme.
@@ -78,12 +78,12 @@ public:
 		CPSAttribMaker<float>  *getAttenEndScheme() const { return _AttenEndScheme; }
 	//@}
 	// from CPSLocatedBindable
-	virtual void onShow(bool shown);
+	virtual void onShow(bool shown) NL_OVERRIDE;
 protected:
-	virtual void				newElement(const CPSEmitterInfo &info);
-	virtual void				deleteElement(uint32 index);
-	virtual void				resize(uint32 size);
-	virtual void				releaseAllRef();
+	virtual void				newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void				deleteElement(uint32 index) NL_OVERRIDE;
+	virtual void				resize(uint32 size) NL_OVERRIDE;
+	virtual void				releaseAllRef() NL_OVERRIDE;
 	/// Show the lights (edition mode)
 	void						show();
 private:

@@ -68,7 +68,7 @@ namespace R2
 
 		void loadFeatures();
 
-		virtual ~CDynamicMapClient();
+		virtual ~CDynamicMapClient() NL_OVERRIDE;
 
 		void loadDefaultPalette();
 
@@ -102,10 +102,10 @@ namespace R2
 		CActionHistoric &getActionHistoric() { return _ActionHistoric; }
 
 		// request commands -> send commands for real (not buffered)
-		virtual void doRequestInsertNode(const std::string& instanceId, const std::string& name, sint32 position, const std::string& key, CObject* value);
-		virtual void doRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value);
-		virtual void doRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position);
-		virtual void doRequestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
+		virtual void doRequestInsertNode(const std::string& instanceId, const std::string& name, sint32 position, const std::string& key, CObject* value) NL_OVERRIDE;
+		virtual void doRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value) NL_OVERRIDE;
+		virtual void doRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position) NL_OVERRIDE;
+		virtual void doRequestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition) NL_OVERRIDE;
 
 		// access to action historic
 
@@ -161,7 +161,7 @@ namespace R2
 		void runLuaScript(const std::string& filename);
 
 		// find an object in the scenario from its instance ID
-		CObject *find(const std::string& instanceId, const std::string& attrName = "", sint32 position = -1, const std::string &key ="");
+		CObject *find(const std::string& instanceId, const std::string& attrName = "", sint32 position = -1, const std::string &key ="") NL_OVERRIDE;
 		virtual void disconnect();
 		CObject *getHighLevel() const;
 

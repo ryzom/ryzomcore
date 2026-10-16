@@ -1154,7 +1154,7 @@ void CDBGroupListSheetText::setStartDbIndex(sint index)
 // Selection of the trade
 class	CHandlerListSheetTextSelect : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1191,7 +1191,7 @@ REGISTER_ACTION_HANDLER( CHandlerListSheetTextSelect, "lst_select" );
 // RightClick on the trade
 class	CHandlerListSheetTextRightClick : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1234,7 +1234,7 @@ REGISTER_ACTION_HANDLER( CHandlerListSheetTextRightClick, "lst_rclick" );
 // RightClick on the trade
 class	CHandlerListSheetTextResetSelection : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 

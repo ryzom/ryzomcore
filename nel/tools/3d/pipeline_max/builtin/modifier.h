@@ -50,7 +50,7 @@ class CModifier : public CBaseObject
 {
 public:
 	CModifier(CScene *scene);
-	virtual ~CModifier();
+	virtual ~CModifier() NL_OVERRIDE;
 
 }; /* class CModifier */
 

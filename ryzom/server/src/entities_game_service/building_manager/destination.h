@@ -106,11 +106,11 @@ public:
 
 	CTPDestination( const std::string & name )
 		:IDescribedDestination(name){}
-	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData );
+	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData ) NL_OVERRIDE;
 private:
-	virtual bool arePetsAllowed()const; 
-	virtual uint16 getSpawnZoneId(const CCharacter * user)const;
-	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
+	virtual bool arePetsAllowed()const NL_OVERRIDE; 
+	virtual uint16 getSpawnZoneId(const CCharacter * user)const NL_OVERRIDE;
+	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE;
 
 	/// id of the spawn zone
 	uint16						_ArrivalSpawn;
@@ -135,13 +135,13 @@ public:
 		:IDestination(name){}
 protected:
 
-	virtual uint16 getStateCounter()const;
-	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
-	virtual uint16 getSpawnZoneId(const CCharacter * user)const;
-	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData );
-	virtual bool addUser(CCharacter * user,uint16 ownerIdx, sint32 & cellId);
-	virtual uint16 getEntryCount() const;
-	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx);
+	virtual uint16 getStateCounter()const NL_OVERRIDE;
+	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE;
+	virtual uint16 getSpawnZoneId(const CCharacter * user)const NL_OVERRIDE;
+	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData ) NL_OVERRIDE;
+	virtual bool addUser(CCharacter * user,uint16 ownerIdx, sint32 & cellId) NL_OVERRIDE;
+	virtual uint16 getEntryCount() const NL_OVERRIDE;
+	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx) NL_OVERRIDE;
 	
 
 	/// id of the arrival spawn zone
@@ -167,12 +167,12 @@ public:
 		:IDestination(name){}
 	
 private:
-	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
-	virtual uint16 getSpawnZoneId(const CCharacter * user)const;
-	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData );
-	virtual bool addUser(CCharacter * user,uint16 ownerIdx, sint32 & cellId);
-	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx);
-	virtual bool isGuildRoomDestination();
+	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE;
+	virtual uint16 getSpawnZoneId(const CCharacter * user)const NL_OVERRIDE;
+	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData ) NL_OVERRIDE;
+	virtual bool addUser(CCharacter * user,uint16 ownerIdx, sint32 & cellId) NL_OVERRIDE;
+	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx) NL_OVERRIDE;
+	virtual bool isGuildRoomDestination() NL_OVERRIDE;
 
 	/// index of the entry room, in the building template ( the room where the player must be to have access to this destination )
 	uint16						_StartRoomIndex;
@@ -199,10 +199,10 @@ public:
 	CExitDestination(const std::string & name)
 		:IDestination(name){}
 private:
-	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const ;
-	virtual uint16 getSpawnZoneId(const CCharacter * user)const;
-	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData );
-	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx);
+	virtual void getClientDescription( uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE ;
+	virtual uint16 getSpawnZoneId(const CCharacter * user)const NL_OVERRIDE;
+	virtual bool build( const NLLIGO::IPrimitive* prim, const NLLIGO::IPrimitive* roomPrim, const CBuildingParseData & parseData ) NL_OVERRIDE;
+	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx) NL_OVERRIDE;
 
 	/// index of the exit among the building exits
 	uint8				_ExitIndex;

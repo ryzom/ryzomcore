@@ -3476,7 +3476,7 @@ NLMISC_COMMAND(setWeatherValue, "Set weather value", "")
 
 class CHandlerDebugUIGroup : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		DebugUIGroup = !DebugUIGroup;
 	}
@@ -3485,7 +3485,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUIGroup, "debug_ui_group");
 
 class CHandlerDebugUICtrl : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		DebugUICtrl = !DebugUICtrl;
 	}
@@ -3494,7 +3494,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUICtrl, "debug_ui_ctrl");
 
 class CHandlerDebugUIView : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		DebugUIView = !DebugUIView;
 	}
@@ -3504,7 +3504,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUIView, "debug_ui_view");
 
 class CAHShowTimedFX : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		if (ShowTimedFX)
 		{

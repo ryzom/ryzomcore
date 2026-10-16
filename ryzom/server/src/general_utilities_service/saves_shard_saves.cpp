@@ -58,14 +58,14 @@ namespace SAVES
 	{
 	public:
 		// IModule specialisation implementation
-		bool initialiseModule(const NLMISC::CSString& rawArgs);
-		void serviceUpdate(NLMISC::TTime localTime);
-		void receiveModuleMessage(GUSNET::CModuleMessage& msg);
+		bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+		void serviceUpdate(NLMISC::TTime localTime) NL_OVERRIDE;
+		void receiveModuleMessage(GUSNET::CModuleMessage& msg) NL_OVERRIDE;
 
-		NLMISC::CSString getState() const;
-		NLMISC::CSString getName() const;
-		NLMISC::CSString getParameters() const;
-		void displayModule() const;
+		NLMISC::CSString getState() const NL_OVERRIDE;
+		NLMISC::CSString getName() const NL_OVERRIDE;
+		NLMISC::CSString getParameters() const NL_OVERRIDE;
+		void displayModule() const NL_OVERRIDE;
 
 	public:
 

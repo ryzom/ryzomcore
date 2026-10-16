@@ -85,19 +85,19 @@ public:
 	CPropertyString () {}
 	CPropertyString (const std::string &str);
 	CPropertyString (const std::string &str, bool _default);
-	virtual ~CPropertyString () {}
+	virtual ~CPropertyString () NL_OVERRIDE {}
 	std::string			String;
 
 	NLMISC_DECLARE_CLASS (CPropertyString)
 
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Default);
 		f.serial(String);
 	}
 
 	// Force class to be polymorphic
-	virtual void foo () const {}
+	virtual void foo () const NL_OVERRIDE {}
 };
 
 // ***************************************************************************
@@ -110,20 +110,20 @@ class CPropertyStringArray : public IProperty
 {
 public:
 	CPropertyStringArray () {}
-	virtual ~CPropertyStringArray () {}
+	virtual ~CPropertyStringArray () NL_OVERRIDE {}
 	CPropertyStringArray (const std::vector<std::string> &stringArray);
 	CPropertyStringArray (const std::vector<std::string> &stringArray, bool _default);
 	std::vector<std::string>	StringArray;
 
 	NLMISC_DECLARE_CLASS (CPropertyStringArray)
 
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Default);
 		f.serialCont(StringArray);
 	}
 	// Force class to be polymorphic
-	virtual void foo () const {}
+	virtual void foo () const NL_OVERRIDE {}
 };
 
 // ***************************************************************************
@@ -139,13 +139,13 @@ public:
 
 	NLMISC_DECLARE_CLASS (CPropertyColor)
 
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Default);
 		f.serial(Color);
 	}
 	// Force class to be polymorphic
-	virtual void foo () const {}
+	virtual void foo () const NL_OVERRIDE {}
 
 	// ctors
 	CPropertyColor() {}
@@ -206,7 +206,7 @@ public:
 	/// \name Hierarchy
 	IPrimitive ();
 
-	virtual ~IPrimitive ();
+	virtual ~IPrimitive () NL_OVERRIDE;
 
 	IPrimitive (const IPrimitive &node);
 
@@ -360,7 +360,7 @@ public:
 	virtual IPrimitive *copy () const = 0;
 
 	// used for fast binary save/load (exploitation mode)
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	// shortcut to getPropertyByName("name", ret); return ret;
 	std::string					getName() const;
@@ -429,15 +429,15 @@ protected:
 
 
 	// Get the vertices
-	virtual uint				getNumVector () const;
-	virtual const CPrimVector	*getPrimVector () const;
-	virtual CPrimVector			*getPrimVector ();
+	virtual uint				getNumVector () const NL_OVERRIDE;
+	virtual const CPrimVector	*getPrimVector () const NL_OVERRIDE;
+	virtual CPrimVector			*getPrimVector () NL_OVERRIDE;
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config) NL_OVERRIDE;
 
 	// \name From IPrimitive
-	virtual IPrimitive *copy () const;
+	virtual IPrimitive *copy () const NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -458,7 +458,7 @@ public:
 
 public:
 
-	void serial (NLMISC::IStream &f);
+	void serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 	// void operator= (const CPrimPoint &node);
 
@@ -468,18 +468,18 @@ public:
 protected:
 
 	// Get the vertices
-	virtual uint				getNumVector () const;
-	virtual const CPrimVector	*getPrimVector () const;
-	virtual CPrimVector			*getPrimVector ();
+	virtual uint				getNumVector () const NL_OVERRIDE;
+	virtual const CPrimVector	*getPrimVector () const NL_OVERRIDE;
+	virtual CPrimVector			*getPrimVector () NL_OVERRIDE;
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config) NL_OVERRIDE;
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const NL_OVERRIDE;
 
 	// \name From IPrimitive
-	virtual IPrimitive *copy () const;
+	virtual IPrimitive *copy () const NL_OVERRIDE;
 };
 
 
@@ -493,7 +493,7 @@ public:
 
 public:
 
-	void serial (NLMISC::IStream &f);
+	void serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 	// void operator= (const CPrimPath &node);
 
@@ -503,18 +503,18 @@ public:
 protected:
 
 	// Get the vertices
-	virtual uint				getNumVector () const;
-	virtual const CPrimVector	*getPrimVector () const;
-	virtual CPrimVector			*getPrimVector ();
+	virtual uint				getNumVector () const NL_OVERRIDE;
+	virtual const CPrimVector	*getPrimVector () const NL_OVERRIDE;
+	virtual CPrimVector			*getPrimVector () NL_OVERRIDE;
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config) NL_OVERRIDE;
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const NL_OVERRIDE;
 
 	// \name From IPrimitive
-	virtual IPrimitive *copy () const;
+	virtual IPrimitive *copy () const NL_OVERRIDE;
 };
 
 
@@ -536,7 +536,7 @@ public:
 
 	// void operator= (const CPrimZone &node);
 
-	void serial (NLMISC::IStream &f);
+	void serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 	// Returns true if the vector v is inside of the patatoid
 	static bool contains (const NLMISC::CVector &v, const std::vector<NLMISC::CVector> &points);
@@ -562,18 +562,18 @@ public:
 protected:
 
 	// Get the vertices
-	virtual uint				getNumVector () const;
-	virtual const CPrimVector	*getPrimVector () const;
-	virtual CPrimVector			*getPrimVector ();
+	virtual uint				getNumVector () const NL_OVERRIDE;
+	virtual const CPrimVector	*getPrimVector () const NL_OVERRIDE;
+	virtual CPrimVector			*getPrimVector () NL_OVERRIDE;
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config) NL_OVERRIDE;
 
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const NL_OVERRIDE;
 
 	// \name From IPrimitive
-	virtual IPrimitive *copy () const;
+	virtual IPrimitive *copy () const NL_OVERRIDE;
 };
 
 
@@ -593,23 +593,23 @@ class CPrimAlias : public IPrimitive
 	class CPrimitives	*_Container;
 
 	// Needed overloads (not used)
-	virtual uint				getNumVector () const
+	virtual uint				getNumVector () const NL_OVERRIDE
 	{
 		return 0;
 	};
-	virtual const CPrimVector	*getPrimVector () const
+	virtual const CPrimVector	*getPrimVector () const NL_OVERRIDE
 	{
 		return NULL;
 	}
-	virtual CPrimVector			*getPrimVector ()
+	virtual CPrimVector			*getPrimVector () NL_OVERRIDE
 	{
 		return NULL;
 	}
 
 
-	virtual void onBranchLink();
+	virtual void onBranchLink() NL_OVERRIDE;
 	// callback called just before the node is removed from it's parent
-	virtual void onBranchUnlink();
+	virtual void onBranchUnlink() NL_OVERRIDE;
 
 	void regenAlias();
 
@@ -622,7 +622,7 @@ public:
 	// copy constructor needed
 	CPrimAlias(const CPrimAlias &other);
 
-	~CPrimAlias();
+	~CPrimAlias() NL_OVERRIDE;
 
 	// return the dynamic part of the alias
 	uint32	getAlias() const;
@@ -631,13 +631,13 @@ public:
 	uint32	getFullAlias() const;
 
 	// Read the primitive
-	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config);
+	virtual bool read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config) NL_OVERRIDE;
 	// Write the primitive
-	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const;
+	virtual void write (xmlNodePtr xmlNode, const std::string &filename) const NL_OVERRIDE;
 	// Create a copy of this primitive
-	virtual IPrimitive *copy () const;
+	virtual IPrimitive *copy () const NL_OVERRIDE;
 	// serial for binary save
-	virtual void serial (NLMISC::IStream &f);
+	virtual void serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 };
 

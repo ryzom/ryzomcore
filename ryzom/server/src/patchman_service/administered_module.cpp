@@ -115,7 +115,7 @@ void CAdministeredModuleBase::executeCommand(NLNET::IModuleProxy *sender, const 
 	{
 	public:
 		CSString Data;
-		void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+		void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 		{
 			Data += message;
 		}

@@ -94,7 +94,7 @@ public:
 		_File = nlfopen(_TmpFileName,"wb");
 	}
 	
-	~CSimpleFileDisplayer()
+	~CSimpleFileDisplayer() NL_OVERRIDE
 	{
 		fclose(_File);
 
@@ -112,7 +112,7 @@ public:
 
 protected:
 
-	virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+	virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 	{
 		if (isOK())
 		{

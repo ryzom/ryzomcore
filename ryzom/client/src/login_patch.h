@@ -355,7 +355,7 @@ private:
 		std::string patchFilename;
 		std::string srcFilename;
 
-		virtual void progress(float f);
+		virtual void progress(float f) NL_OVERRIDE;
 	};
 	friend class CPatchManager::MyPatchingCB;
 
@@ -504,7 +504,7 @@ public:
 
 private:
 
-	void run();
+	void run() NL_OVERRIDE;
 
 };
 
@@ -550,7 +550,7 @@ private:
 	friend class CPatchThreadDownloadProgress;
 private:
 
-	void run();
+	void run() NL_OVERRIDE;
 	void processFile (CPatchManager::SFileToPatch &rFTP);
 	bool xDeltaPatch(const std::string &patch, const std::string &src, const std::string &out);
 
@@ -565,7 +565,7 @@ class CInstallThread : public NLMISC::IRunnable
 {
 public:
 	CInstallThread(const std::vector<CInstallThreadEntry> entries):_Entries(entries){}
-	void run();
+	void run() NL_OVERRIDE;
 	std::vector<CInstallThreadEntry> _Entries;
 };
 
@@ -573,7 +573,7 @@ class CDownloadThread : public NLMISC::IRunnable
 {
 public:
 	CDownloadThread(const std::vector<CInstallThreadEntry> entries):_Entries(entries){}
-	void run();
+	void run() NL_OVERRIDE;
 	std::vector<CInstallThreadEntry> _Entries;
 };
 
@@ -603,7 +603,7 @@ public:
 
 private:
 
-	void run();
+	void run() NL_OVERRIDE;
 
 };
 

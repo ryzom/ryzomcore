@@ -46,7 +46,7 @@ public:
 	/// Constructor
 	CSimpleSource(CSimpleSound *simpleSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
 	/// Destructor
-	virtual ~CSimpleSource();
+	virtual ~CSimpleSource() NL_OVERRIDE;
 	
 /*	/// Static init (call at the very beginning)
 	static void						init()
@@ -56,24 +56,24 @@ public:
 */
 	
 	/// Return the sound binded to the source (or NULL if there is no sound)
-	virtual TSoundId				getSound()									{ return _SimpleSound; }
+	virtual TSoundId				getSound() NL_OVERRIDE									{ return _SimpleSound; }
 	/// Return the simple sound bound to the source (or NULL).
 	CSimpleSound					*getSimpleSound()							{ return _SimpleSound; }
 	
 	/// \name Playback control
 	//@{
 	/// Set looping on/off for future playbacks (default: off)
-	virtual void					setLooping(bool l);
+	virtual void					setLooping(bool l) NL_OVERRIDE;
 	/// Play
-	virtual void					play();
+	virtual void					play() NL_OVERRIDE;
 	/// Stop playing
-	virtual void					stop();
+	virtual void					stop() NL_OVERRIDE;
 	/// Get playing state. Return false even if the source has stopped on its own.
-	virtual bool					isPlaying();
+	virtual bool					isPlaying() NL_OVERRIDE;
 	///
 	virtual NLMISC::TTicks			getPlayTime()								{ return getTime(); }
 	/// Returns the number of milliseconds the source has been playing
-	virtual uint32					getTime();
+	virtual uint32					getTime() NL_OVERRIDE;
 	//@}
 
 	/// \name Source properties
@@ -82,7 +82,7 @@ public:
 	 * 3D mode -> 3D position
 	 * st mode -> x is the pan value (from left (-1) to right (1)), set y and z to 0
 	 */
-	virtual void					setPos( const NLMISC::CVector& pos );
+	virtual void					setPos( const NLMISC::CVector& pos ) NL_OVERRIDE;
 	/** Get the position vector.
 	 * If the source is stereo, return the position vector which reference was passed to set3DPositionVector()
 	 */
@@ -92,19 +92,19 @@ public:
 	 */
 	NLMISC::CVector					getVirtualPos() const;
 	/// Set the velocity vector (3D mode only, ignored in stereo mode) (default: (0,0,0))
-	virtual void					setVelocity( const NLMISC::CVector& vel );
+	virtual void					setVelocity( const NLMISC::CVector& vel ) NL_OVERRIDE;
 	/// Set the direction vector (3D mode only, ignored in stereo mode) (default: (0,0,0) as non-directional)
-	virtual void					setDirection( const NLMISC::CVector& dir );
+	virtual void					setDirection( const NLMISC::CVector& dir ) NL_OVERRIDE;
 	/** Set the gain (volume value inside [0 , 1]). (default: 1)
 	 * 0.0 -> silence
 	 * 0.5 -> -6dB
 	 * 1.0 -> no attenuation
 	 * values > 1 (amplification) not supported by most drivers
 	 */
-	virtual void					updateFinalGain();
-	virtual void					setPitch( float pitch );
+	virtual void					updateFinalGain() NL_OVERRIDE;
+	virtual void					setPitch( float pitch ) NL_OVERRIDE;
 	/// Set the source relative mode. If true, positions are interpreted relative to the listener position (default: false)
-	virtual void					setSourceRelativeMode( bool mode );
+	virtual void					setSourceRelativeMode( bool mode ) NL_OVERRIDE;
 
 
 	/// Return the track
@@ -118,9 +118,9 @@ public:
 
 private:
 	// Mixer event call when doing muted play
-	virtual void					onEvent();
+	virtual void					onEvent() NL_OVERRIDE;
 
-	TSOURCE_TYPE					getType() const								{ return SOURCE_SIMPLE; }
+	TSOURCE_TYPE					getType() const NL_OVERRIDE								{ return SOURCE_SIMPLE; }
 	
 	/// Returns if this logical source has a physical source attached to it.
 	inline bool						hasPhysicalSource() const					{ return _Track != NULL; }

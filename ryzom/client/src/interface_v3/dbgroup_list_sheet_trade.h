@@ -64,14 +64,14 @@ public:
 
 	/// Constructor
 	CDBGroupListSheetTrade(const TCtorParam &param);
-	~CDBGroupListSheetTrade();
+	~CDBGroupListSheetTrade() NL_OVERRIDE;
 
 	/// CInterfaceGroup Interface
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
-	virtual void checkCoords ();
+	virtual void checkCoords () NL_OVERRIDE;
 
-	virtual bool needCheckAllItems();
+	virtual bool needCheckAllItems() NL_OVERRIDE;
 
 	//////////////////////////////////////////////////////////////////////////
 
@@ -99,11 +99,11 @@ public:
 		CInterfaceProperty	CurrentFactionPointPrice;
 		std::string			VendorNameString;
 
-		virtual void init(CDBGroupListSheetText *pFather, uint index);
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
-		virtual void update(CDBGroupListSheetText *pFather);
-		virtual void updateViewText(CDBGroupListSheetText *pFather);
-		virtual bool isSheetValid(CDBGroupListSheetText *pFather);
+		virtual void init(CDBGroupListSheetText *pFather, uint index) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual bool isSheetValid(CDBGroupListSheetText *pFather) NL_OVERRIDE;
 
 		CSheetChildTrade() : CSheetChild()
 		{
@@ -117,7 +117,7 @@ public:
 		}
 	};
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildTrade; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildTrade; }
 
 	bool priceWanted() { return _WantPrice; }
 
@@ -131,7 +131,7 @@ public:
 
 	TSellerTypeFilter		getSellerTypeFilter() const {return _SellerTypeFilter;}
 
-	virtual void sort();
+	virtual void sort() NL_OVERRIDE;
 
 	std::set< CSheetChildTrade * > VendorNameIdToUpdate;
 

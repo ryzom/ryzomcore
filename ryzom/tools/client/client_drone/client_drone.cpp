@@ -34,7 +34,7 @@ class CClientDrone : public NLNET::IService
 public:
 
 	//
-	void init(/* uint nbConnections*/ )
+	void init(/* uint nbConnections*/ ) NL_OVERRIDE
 	{
 		ClientCfg.init( "client_drone.cfg" );
 		
@@ -49,7 +49,7 @@ public:
 	}
 
 	//
-	bool update()
+	bool update() NL_OVERRIDE
 	{
 		static uint nbQuit = 0;
 		if ( nbQuit == Clients.size() )
@@ -105,7 +105,7 @@ public:
 	}
 
 	//
-	void release()
+	void release() NL_OVERRIDE
 	{
 		// Request disconnection
 		nlinfo("Requesting disconnection...");

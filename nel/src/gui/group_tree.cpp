@@ -1622,7 +1622,7 @@ namespace NLGUI
 	class CHandlerTreeReset : public IActionHandler
 	{
 	public:
-		void execute (CCtrlBase * /* pCaller */,  const std::string &sParams)
+		void execute (CCtrlBase * /* pCaller */,  const std::string &sParams) NL_OVERRIDE
 		{
 			CGroupTree *pTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 			if (pTree != NULL)

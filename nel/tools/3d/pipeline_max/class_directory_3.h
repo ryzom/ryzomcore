@@ -61,15 +61,15 @@ class CClassDirectory3 : public CStorageContainer
 {
 public:
 	CClassDirectory3(CDllDirectory *dllDirectory);
-	virtual ~CClassDirectory3();
+	virtual ~CClassDirectory3() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// public
 	// Get a class entry corresponding to a chunk index, pointers become invalid after reset
@@ -80,7 +80,7 @@ public:
 	uint16 getOrCreateIndex(const ISceneClassDesc *sceneClassDesc);
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	TStorageObjectContainer m_ChunkCache;
@@ -101,7 +101,7 @@ class CClassEntryHeader : public IStorageObject
 {
 public:
 	CClassEntryHeader();
-	virtual ~CClassEntryHeader();
+	virtual ~CClassEntryHeader() NL_OVERRIDE;
 
 	// public data
 	sint32 DllIndex;
@@ -109,9 +109,9 @@ public:
 	uint32 SuperClassId;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void serial(NLMISC::IStream &stream);
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &stream) NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
 
 }; /* class CClassEntryHeader */
 
@@ -126,15 +126,15 @@ class CClassEntry : public CStorageContainer
 public:
 	CClassEntry();
 	CClassEntry(CDllDirectory *dllDirectory, const ISceneClassDesc *sceneClassDesc);
-	virtual ~CClassEntry();
+	virtual ~CClassEntry() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// read access
 	const ucstring &displayName() const { return m_Name->Value; }
@@ -146,7 +146,7 @@ public:
 	void overrideClassId(NLMISC::CClassId classId) { m_Header->ClassId = classId; }
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 	CClassEntryHeader *m_Header;
 	CStorageValue<ucstring> *m_Name;
 

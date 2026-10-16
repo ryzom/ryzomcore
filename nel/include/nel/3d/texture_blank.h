@@ -37,9 +37,9 @@ NLMISC_DECLARE_CLASS(CTextureBlank);
 protected:
 
 	/// inherited from ITexture. Does nothing ...
-	void doGenerate(bool async) ;
+	void doGenerate(bool async) NL_OVERRIDE ;
 public:
-	virtual ~CTextureBlank() {}
+	virtual ~CTextureBlank() NL_OVERRIDE {}
 };
 
 

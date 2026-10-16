@@ -934,7 +934,7 @@ namespace NLGUI
 	class CHandlerTabSelect : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 		{
 			CCtrlTabButton	*but= dynamic_cast<CCtrlTabButton*>(pCaller);
 

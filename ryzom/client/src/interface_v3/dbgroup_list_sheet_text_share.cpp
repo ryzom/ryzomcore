@@ -264,7 +264,7 @@ void CDBGroupListSheetTextShare::CSheetChildShare::update(CDBGroupListSheetText 
 // ***************************************************************************
 class CHandlerTeamShareChoose : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CBitMemStream out;
@@ -316,7 +316,7 @@ REGISTER_ACTION_HANDLER( CHandlerTeamShareChoose, "team_share_choose" );
 // ***************************************************************************
 class CHandlerTeamShareValid : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CBitMemStream out;

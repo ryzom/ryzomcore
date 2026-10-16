@@ -66,22 +66,22 @@ class CScene : public CStorageContainer
 {
 public:
 	CScene(const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3);
-	virtual ~CScene();
+	virtual ~CScene() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	// public
 	uint16 version();
 	CSceneClassContainer *container();
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	const CSceneClassRegistry *m_SceneClassRegistry;
@@ -100,15 +100,15 @@ class CSceneClassContainer : public CStorageContainer
 {
 public:
 	CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3);
-	virtual ~CSceneClassContainer();
+	virtual ~CSceneClassContainer() NL_OVERRIDE;
 
 	// inherited
-	virtual std::string className() const;
-	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
+	virtual std::string className() const NL_OVERRIDE;
+	virtual void toString(std::ostream &ostream, const std::string &pad = "") const NL_OVERRIDE;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
 
 	/// Use while parsing to get an object by it's index
 	CSceneClass *getByStorageIndex(uint32 index) const;
@@ -118,7 +118,7 @@ public:
 	/// TODO: Evaluate the references tree to build new indexes.
 
 protected:
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 public:
 	/// Return the single instance of the builtin scene class

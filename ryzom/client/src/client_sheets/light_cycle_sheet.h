@@ -37,8 +37,8 @@ public:
 	// ctor
 	CLightCycleSheet();
 	// from CEntitySheet
-	virtual void build(const NLGEORGES::UFormElm &item);
-	virtual void serial(NLMISC::IStream &f);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 };
 

@@ -57,10 +57,10 @@ public:
 	CSoldItem( const std::string& command );
 
 	// apply
-	bool apply(bool offline);
+	bool apply(bool offline) NL_OVERRIDE;
 
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
+	const NLMISC::CEntityId& getEntityId() NL_OVERRIDE { return _EntityId; }
 
 	// make string command
 	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const NLMISC::CSheetId& item, uint32 quantity, uint32 unitPrice, uint32 unitBasePrice, uint32 identifier, const NLMISC::CEntityId& buyer );
@@ -89,10 +89,10 @@ public:
 	CMaximumShopStoreTimeReached( const std::string& command );
 	
 	// apply
-	bool apply(bool offline);
+	bool apply(bool offline) NL_OVERRIDE;
 	
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
+	const NLMISC::CEntityId& getEntityId() NL_OVERRIDE { return _EntityId; }
 	
 	// make string command
 	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const NLMISC::CSheetId& item, uint32 quantity, uint32 identifier );
@@ -116,10 +116,10 @@ public:
 	CAdminOfflineCommand( const std::string& command );
 
 	// apply
-	bool apply(bool offline);
+	bool apply(bool offline) NL_OVERRIDE;
 
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
+	const NLMISC::CEntityId& getEntityId() NL_OVERRIDE { return _EntityId; }
 	
 	// make string command
 	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const std::string& adminCommand );
@@ -143,10 +143,10 @@ public:
 	CModifyContactCommand( const std::string& command );
 
 	// apply
-	bool apply(bool offline);
+	bool apply(bool offline) NL_OVERRIDE;
 
 	// return character id of concerned character
-	const NLMISC::CEntityId& getEntityId() { return _EntityId; }
+	const NLMISC::CEntityId& getEntityId() NL_OVERRIDE { return _EntityId; }
 
 	// make string command
 	static void makeStringCommande( std::string& command, const NLMISC::CEntityId& id, const std::string &contactOperation, const NLMISC::CEntityId& other );
@@ -194,7 +194,7 @@ public:
 		COfflineCommandFileCallback(const NLMISC::CEntityId& id);
 
 		// call back for bs file asynchronous read
-		void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream);
+		void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE;
 
 		// get line from IStream
 		void getLine( std::string& line, NLMISC::IStream& dataStream );

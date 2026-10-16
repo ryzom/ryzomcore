@@ -125,7 +125,7 @@ class CAIVarUpdateCallback: public IBackupFileReceiveCallback
 {
 public:
 	CAIVarUpdateCallback() {}
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream);
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE;
 };
 
 

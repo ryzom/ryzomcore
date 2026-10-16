@@ -72,7 +72,7 @@ class CAnimatedValueBlendable : public IAnimatedValue
 public:
 	// NOT TESTED, JUST COMPILED. FOR PURPOSE ONLY.
 	/// A default blend method. Doesn't work for all type.
-	virtual void blend (const IAnimatedValue& value, float blendFactor)
+	virtual void blend (const IAnimatedValue& value, float blendFactor) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -91,7 +91,7 @@ public:
 	  *
 	  * \param value is the new value.
 	  */
-	virtual void affect (const IAnimatedValue& value)
+	virtual void affect (const IAnimatedValue& value) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -122,7 +122,7 @@ template<> class CAnimatedValueBlendable<NLMISC::CQuat> : public IAnimatedValue
 {
 public:
 	/// A quat blend method.
-	virtual void blend (const IAnimatedValue& value, float blendFactor)
+	virtual void blend (const IAnimatedValue& value, float blendFactor) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -144,7 +144,7 @@ public:
 	  *
 	  * \param value is the new value.
 	  */
-	virtual void affect (const IAnimatedValue& value)
+	virtual void affect (const IAnimatedValue& value) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -174,7 +174,7 @@ template<> class CAnimatedValueBlendable<NLMISC::CRGBA> : public IAnimatedValue
 {
 public:
 	/// A quat blend method.
-	virtual void blend (const IAnimatedValue& value, float blendFactor)
+	virtual void blend (const IAnimatedValue& value, float blendFactor) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -193,7 +193,7 @@ public:
 	  *
 	  * \param value is the new value.
 	  */
-	virtual void affect (const IAnimatedValue& value)
+	virtual void affect (const IAnimatedValue& value) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -224,7 +224,7 @@ class CAnimatedValueNotBlendable : public IAnimatedValue
 {
 public:
 	/// A default blend method. Doesn't work for all type.
-	virtual void blend (const IAnimatedValue& value, float blendFactor)
+	virtual void blend (const IAnimatedValue& value, float blendFactor) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG
@@ -244,7 +244,7 @@ public:
 	  *
 	  * \param value is the new value.
 	  */
-	virtual void affect (const IAnimatedValue& value)
+	virtual void affect (const IAnimatedValue& value) NL_OVERRIDE
 	{
 		// Check types of value. typeid is slow, assert only in debug
 #ifdef NL_DEBUG

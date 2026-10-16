@@ -91,7 +91,7 @@ public:
 	void			init( uint16 port, sint32 maxExpectedBlockSize );
 
 	/// Run (exits when the listening socket disconnects)
-	virtual void	run();
+	virtual void	run() NL_OVERRIDE;
 
 	/// Close listening socket
 	void			close();
@@ -166,7 +166,7 @@ public:
 				bool nodelay=true, bool replaymode=false, bool initPipeForDataAvailable=true );
 
 	/// Destructor
-	virtual ~CBufServer();
+	virtual ~CBufServer() NL_OVERRIDE;
 
 	/// Listens on the specified port
 	void	init( uint16 port );
@@ -415,7 +415,7 @@ public:
 	CServerReceiveTask( CBufServer *server ) : CServerTask(), _Server(server), _Connections("CServerReceiveTask::_Connections"), _RemoveSet("CServerReceiveTask::_RemoveSet") {}
 
 	/// Run
-	virtual void run();
+	virtual void run() NL_OVERRIDE;
 
 	/// Returns the number of connections handled by the thread (mutexed on _Connections)
 	uint	numberOfConnections()

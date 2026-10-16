@@ -185,7 +185,7 @@ public:
 
 	// Constructor
 	CGroupInSceneBubble(const TCtorParam &param);
-	~CGroupInSceneBubble();
+	~CGroupInSceneBubble() NL_OVERRIDE;
 
 	// Timeout ?
 	bool timeOut () const;

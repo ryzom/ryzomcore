@@ -35,9 +35,9 @@ public:
 NLMISC_DECLARE_CLASS(CTextureOffscreen);
 
 	CTextureOffscreen() { m_NeedsDepthStencil = true; }
-	virtual ~CTextureOffscreen() {}
+	virtual ~CTextureOffscreen() NL_OVERRIDE {}
 
-	virtual bool isOffscreenTexture() const { return true; }
+	virtual bool isOffscreenTexture() const NL_OVERRIDE { return true; }
 
 	void setNeedsDepthStencil(bool b) { m_NeedsDepthStencil = b; }
 	bool needsDepthStencil() const { return m_NeedsDepthStencil; }

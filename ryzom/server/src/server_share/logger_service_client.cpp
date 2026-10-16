@@ -79,7 +79,7 @@ namespace LGS
 			forceLinkOfAllLogs();
 		}
 
-		void onModuleUpdate()
+		void onModuleUpdate() NL_OVERRIDE
 		{
 			if (getGlobal_CommStarted())
 			{
@@ -138,7 +138,7 @@ namespace LGS
 		///////////////////////////////////////////////////////////////////////
 		// Implementation of IModuleTrackerCB
 		///////////////////////////////////////////////////////////////////////
-		void onTrackedModuleUp(IModuleProxy *moduleProxy)
+		void onTrackedModuleUp(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			// if comm started, send our log definition
 			if (getGlobal_CommStarted())
@@ -146,7 +146,7 @@ namespace LGS
 				registerWithLogger(moduleProxy);
 			}
 		}
-		void onTrackedModuleDown(IModuleProxy *moduleProxy)
+		void onTrackedModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			// nothing
 		}
@@ -172,7 +172,7 @@ namespace LGS
 		}
 
 		/// Send a log to the logger service (actual send granularity is handled by CLoggerServiceClient)
-		void sendLog(const TLogInfo &logInfo)
+		void sendLog(const TLogInfo &logInfo) NL_OVERRIDE
 		{
 			TLogDefinitions::iterator it(getLogDefinitions().find(logInfo.getLogName()));
 			BOMB_IF(it == getLogDefinitions().end(), "sendLog : Unknow log or log context named '"<<logInfo.getLogName()<<"'", return);
@@ -197,7 +197,7 @@ namespace LGS
 		}
 
 		/// Push a new log context (any following logs will be stored inside this context)
-		void pushLogContext(const std::string &contextName)
+		void pushLogContext(const std::string &contextName) NL_OVERRIDE
 		{
 			// check the context name
 			TLogDefinitions::iterator it(getLogDefinitions().find(contextName));
@@ -217,7 +217,7 @@ namespace LGS
 		}
 
 		/// Pop a log context
-		void popLogContext(const std::string &contextName)
+		void popLogContext(const std::string &contextName) NL_OVERRIDE
 		{
 			// advance to the previous opening log context
 			TLogInfos::reverse_iterator it=_LogInfos.rbegin();

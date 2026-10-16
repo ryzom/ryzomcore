@@ -86,7 +86,7 @@ public:
 	 *	EventServer
 	 * \param event : the event received
 	 */
-	void operator ()(const NLMISC::CEvent& event);
+	void operator ()(const NLMISC::CEvent& event) NL_OVERRIDE;
 
 
 	/**
@@ -102,7 +102,7 @@ public:
 	 *	Basics events such as KeyA, KeyB etc.. should be in this config file.
 	 *	Combo Keys like Ctrl+A (select all) should be in this config file too.
 	 */
-	bool	isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const;
+	bool	isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const NL_OVERRIDE;
 
 
 	/** Pump The Events of The setuped EventServer (ie Driver->EventServer).
@@ -130,7 +130,7 @@ private:
 	CInputHandlerManager();
 
 	// destructor
-	~CInputHandlerManager();
+	~CInputHandlerManager() NL_OVERRIDE;
 
 	///the singleton's instance
 	static CInputHandlerManager* _Instance;

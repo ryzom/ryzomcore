@@ -31,8 +31,8 @@ class CBotChatPageMissionEnd : public CBotChatPage
 {
 public:
 	// from CBotChatPage
-	virtual void begin();
-	virtual void end();
+	virtual void begin() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
 };
 
 
