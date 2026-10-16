@@ -117,12 +117,12 @@ NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Ser
 NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 
 IF(WITH_MONGODB)
-  TARGET_LINK_LIBRARIES(ryzom_entities_game_service ${MONGO_LIBRARIES})
+  TARGET_LINK_LIBRARIES(ryzom_entities_game_service PRIVATE ${MONGO_LIBRARIES})
   ADD_DEFINITIONS(${MONGO_DEFINITIONS})
 ENDIF()
 
 IF(WITH_MEMCACHED)
-  TARGET_LINK_LIBRARIES(ryzom_entities_game_service ${MEMCACHED_LIBRARIES})
+  TARGET_LINK_LIBRARIES(ryzom_entities_game_service PRIVATE ${MEMCACHED_LIBRARIES})
   ADD_DEFINITIONS(${MEMCACHED_DEFINITIONS})
 ENDIF()
 
