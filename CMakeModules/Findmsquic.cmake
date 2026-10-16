@@ -1,10 +1,11 @@
 # Findmsquic.cmake - MsQuic, Microsoft's QUIC library (https://github.com/microsoft/msquic)
 #
-# Provides the imported target msquic::msquic, the same target that msquic's own package
+# Provides the imported target msquic::msquic, the target that msquic's own package
 # configuration (msquic-config.cmake, installed by vcpkg and by the msquic CMake build)
-# defines. The presets set CMAKE_FIND_PACKAGE_PREFER_CONFIG, so whenever that configuration
-# is present it is used instead of this module; consumers must therefore link the target
-# and not the variables below, which only exist for compatibility and are not set in that case.
+# defines (as plain "msquic" up to 2.4.x; the top-level CMakeLists.txt aliases that). The
+# presets set CMAKE_FIND_PACKAGE_PREFER_CONFIG, so whenever that configuration is present it
+# is used instead of this module; consumers must therefore link the target and not the
+# variables below, which only exist for compatibility and are not set in that case.
 #
 #   msquic_FOUND        - true when the header and the library were found
 #   msquic_INCLUDE_DIRS - directory holding msquic.h
