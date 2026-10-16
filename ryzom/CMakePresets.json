@@ -70,7 +70,8 @@
         "linux"
       ],
       "cacheVariables": {
-        "WITH_STATIC": true
+        "WITH_STATIC": true,
+        "WITH_MSQUIC": true
       }
     },
     {
@@ -82,7 +83,8 @@
         "linux"
       ],
       "cacheVariables": {
-        "WITH_STATIC": false
+        "WITH_STATIC": false,
+        "WITH_MSQUIC": true
       }
     },
     {
@@ -92,7 +94,10 @@
         "ccache",
         "ryzom-client",
         "linux"
-      ]
+      ],
+      "cacheVariables": {
+        "WITH_MSQUIC": true
+      }
     },
     {
       "name": "ci-linux-ryzom-client-vcpkg",
@@ -100,7 +105,10 @@
         "vcpkg",
         "ryzom-client",
         "linux"
-      ]
+      ],
+      "cacheVariables": {
+        "WITH_MSQUIC": true
+      }
     },
     {
       "name": "windows-ryzom",
@@ -119,7 +127,10 @@
       "cacheVariables": {
         "WITH_DRIVER_DIRECT3D": true,
         "WITH_DRIVER_XAUDIO2": true,
-        "DXSDK_DIR": "C:/DXSDK"
+        "DXSDK_DIR": "C:/DXSDK",
+        "WITH_MSQUIC": true,
+        "msquic_INCLUDE_DIRS": "C:/msquic/build/native/include",
+        "msquic_LIBRARY_RELEASE": "C:/msquic/build/native/lib/x64/msquic.lib"
       }
     },
     {
@@ -134,6 +145,7 @@
         "WITH_DRIVER_XAUDIO2": true,
         "WITH_STATIC_LIBXML2": false,
         "VCPKG_MANIFEST_NO_DEFAULT_FEATURES": true,
+        "WITH_MSQUIC": true,
         "DXSDK_DIR": "C:/DXSDK"
       }
     },
@@ -149,6 +161,7 @@
         "WITH_SSE2": false,
         "WITH_SSE3": false,
         "WITH_DRIVER_OPENGL3": false,
+        "WITH_MSQUIC": true,
         "CMAKE_THREAD_LIBS_INIT": "-lpthread",
         "CMAKE_HAVE_THREADS_LIBRARY": true,
         "CMAKE_USE_WIN32_THREADS_INIT": false,
