@@ -216,7 +216,7 @@ public :
 	/**
 	 * Transmit a chat message to the receiver
 	 */
-	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr);
+	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr   );
 	void farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &receiver, const CChatMessage &message);
 	void echoTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &receiver, const CChatMessage &message);
 	/**

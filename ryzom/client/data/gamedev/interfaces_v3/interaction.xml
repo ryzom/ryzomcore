@@ -340,7 +340,7 @@
                                 <link expr="not(%canWriteToMainChat)" target="cant_write_ebw:active" />
                         </group>
                 </group>
-            </template>
+        </template>
             <!-- ***************** -->
             <!-- *  EMOJI PICKER  * -->
             <!-- ***************** -->
@@ -1104,7 +1104,7 @@
                 <action id="react" name="uiChatReact" handler="chat_react" params="from_modal" />
                 <action id="tell" name="uimTell" handler="enter_tell" params="from_chat_message" />
                 <action id="add_friend" name="uimGcmAddToFriendList" handler="chat_add_friend" params="from_modal" />
-            </group>
+        </group>
 
             <template name="chat_quote_preview" keep="true" edit_box="">
                 <group id="#id" posref="BL BL" sizeref="w" w="0" h="44" active="false">

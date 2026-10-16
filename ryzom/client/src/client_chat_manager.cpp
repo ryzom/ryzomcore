@@ -253,8 +253,8 @@ CClientChatManager::CClientChatManager()
 	// default to NULL
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
-		_DynamicChannelNameLeaf[i]= nullptr;
-		_DynamicChannelIdLeaf[i]= nullptr;
+		_DynamicChannelNameLeaf[i] = nullptr;
+		_DynamicChannelIdLeaf[i] = nullptr;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 	}
 }
@@ -1285,8 +1285,8 @@ void	CClientChatManager::initInGame()
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
 		// default
-		_DynamicChannelNameLeaf[i]= nullptr;
-		_DynamicChannelIdLeaf[i]= nullptr;
+		_DynamicChannelNameLeaf[i] = nullptr;
+		_DynamicChannelIdLeaf[i] = nullptr;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 		// get
 		CCDBNodeLeaf	*name= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:DYN_CHAT:CHANNEL%d:NAME", i), false);
@@ -1304,8 +1304,8 @@ void	CClientChatManager::releaseInGame()
 {
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
-		_DynamicChannelNameLeaf[i]= nullptr;
-		_DynamicChannelIdLeaf[i]= nullptr;
+		_DynamicChannelNameLeaf[i] = nullptr;
+		_DynamicChannelIdLeaf[i] = nullptr;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 	}
 }
@@ -1313,7 +1313,7 @@ void	CClientChatManager::releaseInGame()
 // ***************************************************************************
 TChanID	CClientChatManager::getDynamicChannelIdFromDbIndex(uint32 dbIndex)
 {
-	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelIdLeaf[dbIndex]==nullptr)
+	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelIdLeaf[dbIndex] == nullptr)
 		return CEntityId::Unknown;
 	else
 		return TChanID(uint64(_DynamicChannelIdLeaf[dbIndex]->getValue64()));
@@ -1324,7 +1324,7 @@ sint32	CClientChatManager::getDynamicChannelDbIndexFromId(TChanID channelId)
 {
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
-		if(_DynamicChannelIdLeaf[i]!= nullptr)
+		if(_DynamicChannelIdLeaf[i] != nullptr)
 		{
 			if(uint64(_DynamicChannelIdLeaf[i]->getValue64()) == channelId.getRawId())
 				return i;
@@ -1344,7 +1344,7 @@ bool	CClientChatManager::isDynamicChannelExist(TChanID channelId)
 // ***************************************************************************
 uint32	CClientChatManager::getDynamicChannelNameFromDbIndex(uint32 dbIndex)
 {
-	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelNameLeaf[dbIndex]==nullptr)
+	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelNameLeaf[dbIndex] == nullptr)
 		return 0;
 	else
 		return _DynamicChannelNameLeaf[dbIndex]->getValue32();
@@ -1395,7 +1395,7 @@ class CHandlerTell : public IActionHandler
 
 		// Get the chat window (if any)
 		CChatWindow *cw = nullptr;
-		CGroupEditBox *eb = pCaller?dynamic_cast<CGroupEditBox *>(pCaller):nullptr;
+		CGroupEditBox *eb = pCaller?dynamic_cast<CGroupEditBox *>(pCaller) : nullptr;
 		if (eb)
 			cw = getChatWndMgr().getChatWindowFromCaller(eb);
 

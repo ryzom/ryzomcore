@@ -84,7 +84,7 @@ namespace NLGUI
 	xmlNodePtr CGroupScrollText::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == nullptr )
+		if( node == nullptr)
 			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "scroll_text" );

@@ -351,7 +351,7 @@ public:
 
 		// get the selected brick
 		const CSBrickSheet		*brick= pCSSrc->asSBrickSheet();
-		if(brick==nullptr)
+		if(brick == nullptr)
 			return;
 
 		// and validate the composition
@@ -389,7 +389,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseValidateBrick, "phrase_validate_brick" );
 CHandlerPhraseValidateBrick::TType	CHandlerPhraseValidateBrick::BrickType;
 uint						CHandlerPhraseValidateBrick::Index;
 uint						CHandlerPhraseValidateBrick::ParamIndex;
-CDBGroupBuildPhrase			*CHandlerPhraseValidateBrick::BuildPhraseGroup= nullptr;
+CDBGroupBuildPhrase			*CHandlerPhraseValidateBrick::BuildPhraseGroup = nullptr;
 
 
 // ***************************************************************************
@@ -584,7 +584,7 @@ public:
 		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection, getRightHandCraftToolType());
 
 		// setup the validation
-		CHandlerPhraseValidateBrick::BuildPhraseGroup= nullptr;
+		CHandlerPhraseValidateBrick::BuildPhraseGroup = nullptr;
 		CHandlerPhraseValidateBrick::BrickType= CHandlerPhraseValidateBrick::FaberPlan;
 
 		// launch the modal
@@ -1439,7 +1439,7 @@ public:
 		{
 			string	menu= pCSDst->getListMenuRightEmptySlot();
 			// opens only if no dragged sheet
-			if( !menu.empty() && CDBCtrlSheet::getDraggedSheet()==nullptr )
+			if( !menu.empty() && CDBCtrlSheet::getDraggedSheet() == nullptr)
 			{
 				// opens the menu
 				CDBCtrlSheet::setCurrSelSheet(pCSDst);

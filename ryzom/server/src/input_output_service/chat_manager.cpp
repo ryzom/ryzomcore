@@ -3670,7 +3670,7 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 			else if (_SharedMessage)
 				logSharedMessage(*_SharedMessage, "tell:" + receiver, _SharedMessage->SourceLanguage);
 			else
-				_Log.displayNL("tell:%s|%s|%d|%s|%s", receiverIn.c_str(), senderName.c_str(), 1, "*", ucstr.toUtf8().c_str() );
+			_Log.displayNL("tell:%s|%s|%d|%s|%s", receiverIn.c_str(), senderName.c_str(), 1, "*", ucstr.toUtf8().c_str() );
 			return true;
 		}
 		else
