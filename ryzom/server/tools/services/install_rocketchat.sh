@@ -32,7 +32,7 @@ rm -rf $BUILD_PATH/RocketChat/Rocket.Chat.old
 mv Rocket.Chat Rocket.Chat.old
 
 cd ~/builds/RocketChat/
-if [[ ! -d "megacorp" ]]
+if [[ ! -d "megacorp" ]]; then
 	echo "Missing megacorp. Cloning it.."
 	hg clone ssh://hg@bitbucket.org/ryzom/megacorp
 fi

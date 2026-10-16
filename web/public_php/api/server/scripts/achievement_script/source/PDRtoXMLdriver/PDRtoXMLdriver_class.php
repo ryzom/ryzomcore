@@ -683,7 +683,7 @@
 					return null;
 				}
 				if($name == '_SHEETID') {
-					if($attrs['VALUE']{0} == '#') {
+					if($attrs['VALUE'][0] == '#') {
 						$tmp = str_replace("#","",$attrs['VALUE']);
 						$res = $DBc->sendSQL("SELECT * FROM ryzom_nimetu_sheets WHERE nsh_numid='".$tmp."'","ARRAY");
 						$attrs['VALUE'] = $res[0]['nsh_name']."".$res[0]['nsh_suffix'];

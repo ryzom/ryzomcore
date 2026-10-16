@@ -1,0 +1,24 @@
+# Files skipped by tool/ci/syntax_check.py: one shell glob per line, relative to the repository
+# root, * also matches /. Keep every entry justified; the goal is a short list.
+
+# Deliberately not XML: the first line is "#error deprecated" so nothing can include them.
+ryzom/server/src/patchman_service/re_module_itf.xml
+ryzom/server/src/patchman_service/rr_module_itf.xml
+
+# Primitive class fragments meant to be pasted into world_editor_classes.xml; no root element.
+ryzom/tools/leveldesign/world_editor/world_editor_plugin/world_editor_scriptPLAYER.xml
+ryzom/tools/leveldesign/world_editor/world_editor_shard_monitor_plugin/world_editor_shard_monitor_plugin.xml
+
+# Parser test fixtures with intentionally unusual markup.
+nel/tools/htmlcss_test/tests/*
+
+# Python 2 remnants of the old build_gamedata pipeline (the rest of the pipeline is Python 3).
+nel/tools/build_gamedata/[0-3]_*.py
+nel/tools/build_gamedata/configuration/scripts.py
+nel/tools/build_gamedata/generators/*
+nel/tools/build_gamedata/processes/[0-3]_*.py
+nel/tools/build_gamedata/processes/rbank/2_build.py
+nel/tools/build_gamedata/translation/*
+
+# Atys trees carried on the merge branches: the CakePHP 1.x translation tool is PHP 5 only.
+web/public_php/webtt/*

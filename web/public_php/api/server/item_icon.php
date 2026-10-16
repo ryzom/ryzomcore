@@ -103,7 +103,7 @@ function ryzom_item_icon_image_typo_width($txt){
 	global $ryzom_item_icon_path;
 	$x=0;
 	for($i=0;$i<strlen($txt);$i++){
-		if($txt{$i}=='?') $t='question'; else $t=strtolower(substr($txt, $i, 1));
+		if($txt[$i]=='?') $t='question'; else $t=strtolower(substr($txt, $i, 1));
 		
 		$typo_file=$ryzom_item_icon_path.'typo/typo_'.$t.'.png';
 
@@ -121,7 +121,7 @@ function ryzom_item_icon_image_typo($bg, $txt, $x, $y, $use_numbers=true) {
 	global $ryzom_item_icon_path;
 
 	for($i=0;$i<strlen($txt);$i++) {
-		if($txt{$i}=='?') $t='question'; else $t=strtolower(substr($txt, $i, 1));
+		if($txt[$i]=='?') $t='question'; else $t=strtolower(substr($txt, $i, 1));
 		// use_numbers is used for sap/stack/quality display 
 		// sbrick uses numbers from type_X.png files
 		if($use_numbers && is_numeric($t)){

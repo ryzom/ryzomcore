@@ -64,42 +64,52 @@
             <type>string</type>
             <default></default>
         </property>
+        <property>
             <name>onscrollend</name>
             <type>string</type>
             <default></default>
         </property>
+        <property>
             <name>end_params</name>
             <type>string</type>
             <default></default>
         </property>
+        <property>
             <name>onscrollcancel</name>
             <type>string</type>
             <default></default>
         </property>
+        <property>
             <name>cancel_params</name>
             <type>string</type>
             <default></default>
         </property>
+        <property>
             <name>target</name>
             <type>string</type>
             <default></default>
         </property>
+        <property>
             <name>target_stepx</name>
             <type>int</type>
             <default>1</default>
         </property>
+        <property>
             <name>target_stepy</name>
             <type>int</type>
             <default>1</default>
         </property>
+        <property>
             <name>stepvalue</name>
             <type>int</type>
             <default>0</default>
         </property>
+        <property>
             <name>cancelable</name>
             <type>bool</type>
             <default>false</default>
         </property>
+        <property>
             <name>frozen</name>
             <type>bool</type>
             <default>false</default>

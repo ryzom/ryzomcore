@@ -36,7 +36,7 @@
         </property>
         <property>
             <name>ultra_mini</name>
-            <type>bool</typef>
+            <type>bool</type>
             <default>false</default>
         </property>
         <property>
