@@ -44,6 +44,7 @@ runs:
           libogg-dev libvorbis-dev libopenal-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \
+          libmongoclient-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev libboost-regex-dev \
           libcurl4-openssl-dev libssl-dev \
           libsquish-dev \
           libgsf-1-dev \
