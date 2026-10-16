@@ -1494,9 +1494,10 @@ void CGuild::deleteMember( CGuildMember* member )
 	nlassert(member);
 	nlassert( uint(member->getGrade()) < _GradeCounts.size() );
 
+	CCharacter *character = PlayerManager.getChar(member->getIngameEId());
+
 #ifdef HAVE_MEMCACHED
 	ucstring charName;
-	CCharacter *character = PlayerManager.getChar(member->getIngameEId());
 	if (character != NULL)
 	{
 		charName = character->getName().toUtf8();
