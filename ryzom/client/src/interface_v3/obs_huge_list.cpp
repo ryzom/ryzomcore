@@ -205,7 +205,6 @@ bool CHugeListObs::init()
 				_Items[k].Weight = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:WEIGHT").c_str(), (int) k), false);
 				_Items[k].NameId = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:NAMEID").c_str(), (int) k), false);
 				_Items[k].UserColor = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:USER_COLOR").c_str(), (int) k), false);
-				_Items[k].CharacBuffs = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:CHARAC_BUFFS").c_str(), (int) k), false);
 				_Items[k].Enchant = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ENCHANT").c_str(), (int) k), false);
 				_Items[k].RMClassType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_CLASS_TYPE").c_str(), (int) k), false);
 				_Items[k].RMFaberStatType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_FABER_STAT_TYPE").c_str(), (int) k), false);

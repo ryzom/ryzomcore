@@ -3038,9 +3038,6 @@ public:
 		return (_EntityState.X() != _OldPosX || _EntityState.Y() != _OldPosY);
 	}
 
-	/// apply regenerate and clip currents value
-	void applyRegenAndClipCurrentValue();
-
 	/// Kill the player
 	void killMe();
 

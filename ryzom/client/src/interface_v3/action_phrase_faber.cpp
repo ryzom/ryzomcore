@@ -99,7 +99,6 @@ void			CActionPhraseFaber::fillDBWithMP(const std::string &sheetBase, const CIte
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
-	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":CHARAC_BUFFS")->setValue32(item.CharacBuffs);
 	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
 }
 

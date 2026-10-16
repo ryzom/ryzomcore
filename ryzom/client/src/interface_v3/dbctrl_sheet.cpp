@@ -309,7 +309,6 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 	_InterfaceColor= true;
 	_SheetSelectionGroup = -1;
 	_UseQuality = true;
-	_DisplayItemQuality = true;
 	_UseQuantity = true;
 	_DuplicateOnDrag = false;
 	_ItemSlot= SLOTTYPE::UNDEFINED;
@@ -4041,10 +4040,6 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		// copy color for items
 		sint col = getItemColor();
 		if (col != -1) dest->setItemColor(col);
-		// copy charac buffs
-		dest->setItemCharacBuffs(getItemCharacBuffs());
-		// copy access
-		dest->setItemAccess(getItemAccess());
 		// copy weight
 		dest->setItemWeight(getItemWeight());
 		// copy nameId
