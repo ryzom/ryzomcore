@@ -2284,6 +2284,26 @@ void CCharacter::mount(TDataSetRow PetRowId, bool fromArk, bool skipDistance)
 		return;
 	}
 
+	// refuse while already mounted: the client never asks for it, but callers that bypass the action system
+	// (web commands) would otherwise take over _EntityMounted and the GPMS control while the first mount
+	// keeps its rider set and stays non-mountable until the player relogs
+	if( TheDataset.isAccessible( _EntityMounted() ) )
+	{
+		nlwarning("<CCharacter::mount> %d Entity %s is already mounted on %s, refusing to mount %s", CTickEventHandler::getGameCycle(), _Id.toString().c_str(), TheDataset.getEntityId( _EntityMounted() ).toString().c_str(), TheDataset.getEntityId( PetRowId ).toString().c_str() );
+
+		CMessage msgout( "IMPULSION_ID" );
+		msgout.serial( _Id );
+		CBitMemStream bms;
+		if ( ! GenericMsgManager.pushNameToStream( "ANIMALS:MOUNT_ABORT", bms) )
+		{
+			nlwarning("<CCharacter::mount> Msg name ANIMALS:MOUNT_ABORT not found");
+			return;
+		}
+		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+		CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(_Id.getDynamicId()), msgout );
+		return;
+	}
+
 	CEntityBase * e = CEntityBaseManager::getEntityBasePtr( PetRowId );
 	if( e )
 	{
