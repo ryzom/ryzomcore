@@ -110,6 +110,10 @@ void CBankAccessor_GUILD::TGUILD::init(ICDBStructNode *parent)
 	nlassert(node != NULL);
 	_MEMBERS.init(node);
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("CHEST"), false );
+	nlassert(node != NULL);
+	_CHEST.init(node);
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("INVENTORY"), false );
 	nlassert(node != NULL);
 	_INVENTORY.init(node);
@@ -220,6 +224,61 @@ void CBankAccessor_GUILD::TGUILD::TMEMBERS::TArray::init(ICDBStructNode *parent,
 	node  = parent->getNode( ICDBStructNode::CTextId("ENTER_DATE"), false );
 	nlassert(node != NULL);
 	_ENTER_DATE = node;
+	
+
+	// branch init
+	
+}
+
+
+void CBankAccessor_GUILD::TGUILD::TCHEST::init(ICDBStructNode *parent)
+{
+	ICDBStructNode *node = parent;
+
+	_BranchNode = node;
+
+	// leaf init
+	
+
+	// branch init
+	
+	for (uint i=0; i<20; ++i)
+	{
+		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
+		nlassert(node != NULL);
+		_Array[i].init(node, i);
+	}
+	
+}
+
+
+void CBankAccessor_GUILD::TGUILD::TCHEST::TArray::init(ICDBStructNode *parent, uint index)
+{
+	ICDBStructNode *node = parent;
+
+	_BranchNode = node;
+
+	// leaf init
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("NAME"), false );
+	nlassert(node != NULL);
+	_NAME = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("VIEW_GRADE"), false );
+	nlassert(node != NULL);
+	_VIEW_GRADE = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("PUT_GRADE"), false );
+	nlassert(node != NULL);
+	_PUT_GRADE = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("GET_GRADE"), false );
+	nlassert(node != NULL);
+	_GET_GRADE = node;
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("BULK_MAX"), false );
+	nlassert(node != NULL);
+	_BULK_MAX = node;
 	
 
 	// branch init
