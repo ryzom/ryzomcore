@@ -3038,6 +3038,9 @@ public:
 		return (_EntityState.X() != _OldPosX || _EntityState.Y() != _OldPosY);
 	}
 
+	/// apply regenerate and clip currents value
+	void applyRegenAndClipCurrentValue();
+
 	/// Kill the player
 	void killMe();
 
@@ -3092,9 +3095,6 @@ private:
 
 	/// recompute all Max value
 	void computeMaxValue();
-
-	/// apply regenerate and clip currents value
-	void applyRegenAndClipCurrentValue();
 
 	/// character is dead
 	void deathOccurs( void ) NL_OVERRIDE;
