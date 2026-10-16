@@ -52,13 +52,13 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_georges_editor MODULE ${SRC} ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS} ${OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_georges_editor studio_plugin_core nelmisc nelgeorges qtpropertybrowser ${QtPropertyBrowser_LIBRARY} ${QT_LIBRARIES} ${LIBXML2_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_georges_editor studio_plugin_core NeL::misc NeL::georges qtpropertybrowser ${QtPropertyBrowser_LIBRARY} ${QT_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 NL_DEFAULT_PROPS(studio_plugin_georges_editor "Tools: Studio Plugin: Georges Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_georges_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_georges_editor)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_georges_editor PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 
 IF(WITH_PCH)

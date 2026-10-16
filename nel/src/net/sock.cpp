@@ -276,6 +276,7 @@ CSock::CSock(SOCKET sock, const CInetAddress &remoteaddr)
     , _MaxReceiveTime(0)
     , _MaxSendTime(0)
     , _AddressFamily(AF_UNSPEC)
+	, _Blocking(false)
 {
 	nlassert(s_Initialized);
 	/*{

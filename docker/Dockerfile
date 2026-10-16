@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
 ARG USERNAME=ryzom
 ARG USER_UID=1000
@@ -7,8 +8,6 @@ ARG APP_HOME=/app
 
 RUN groupadd --gid $USER_GID $USERNAME \
  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
-
-ENV LD_LIBRARY_PATH=/usr/local/lib
 
 # install dependencies
 RUN apt update; \
@@ -29,11 +28,16 @@ RUN apt update; \
         libxml2
 
 
-COPY build/ryzomcore-*.sh /tmp/ryzomcore.sh
+COPY build/ryzomcore-*.sh /tmp/install.sh
 
-RUN mkdir --parent "$APP_HOME" \
- && sh /tmp/ryzomcore.sh --skip-license
+RUN mkdir --parent "$APP_HOME/ryzomcore" \
+ && sh /tmp/install.sh --skip-license --prefix="$APP_HOME/ryzomcore"
 
+ENV LD_LIBRARY_PATH=$APP_HOME/ryzomcore/lib
+ENV PATH=$APP_HOME/ryzomcore/sbin:$APP_HOME/ryzomcore/bin:$PATH
+
+RUN mkdir --parent "$APP_HOME/logs" \
+    && chown $USERNAME:$USERNAME "$APP_HOME/logs"
 
 USER $USERNAME
 WORKDIR $APP_HOME

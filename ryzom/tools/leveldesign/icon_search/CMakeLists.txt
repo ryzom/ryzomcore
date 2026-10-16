@@ -1,8 +1,9 @@
-FILE(GLOB SRC *.cpp *.h)
+ADD_EXECUTABLE(icon_search icon_search.cpp)
 
-ADD_EXECUTABLE(icon_search ${SRC})
-
-TARGET_LINK_LIBRARIES(icon_search nelmisc)
+TARGET_LINK_LIBRARIES(icon_search
+        PRIVATE
+        NeL::misc
+)
 NL_DEFAULT_PROPS(icon_search "Ryzom, Tools, Misc: Icon Search")
 NL_ADD_RUNTIME_FLAGS(icon_search)
 

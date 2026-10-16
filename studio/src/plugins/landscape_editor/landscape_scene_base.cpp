@@ -78,7 +78,7 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 		return 0;
 
 	// Rotate the image counter clockwise
-	QMatrix matrix;
+	QTransform matrix;
 	matrix.rotate(-data.rot * 90.0);
 
 	QGraphicsPixmapItem *item;

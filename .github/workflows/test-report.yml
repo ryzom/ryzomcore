@@ -1,7 +1,7 @@
 name: "Test Report"
 on:
   workflow_run:
-    workflows: ["CMake on multiple platforms"]
+    workflows: ["CMake on multiple platforms", "Ryzom Core: CI / CD"]
     types:
       - completed
 permissions:
@@ -12,9 +12,9 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps:
-      - uses: dorny/test-reporter@v1
+      - uses: dorny/test-reporter@v2
         with:
-          artifact: test-results
           name: GTests
+          artifact: "/.*test-results/"
           path: '**/*.xml'
           reporter: java-junit

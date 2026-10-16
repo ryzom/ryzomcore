@@ -1,10 +1,9 @@
-FILE(GLOB SRC *.cpp *.h)
-
 ADD_EXECUTABLE(nel_unit_test
         nel_unit_test.cpp
 )
+ADD_TEST(NAME nel_unit_test COMMAND nel_unit_test)
 
-INCLUDE_DIRECTORIES(${CPPTEST_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nel_unit_test PRIVATE ${CPPTEST_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel_unit_test ${CPPTEST_LIBRARIES} nelmisc nelnet nelligo)
 NL_DEFAULT_PROPS(nel_unit_test "Unit Tests")
@@ -22,9 +21,19 @@ add_test_executable(nel_misc_config_file_test
         ut_misc_config_file.test.cpp
 )
 target_link_libraries(nel_misc_config_file_test
+        PRIVATE
         nelmisc
 )
 target_compile_definitions(nel_misc_config_file_test
         PUBLIC
         NEL_UNIT_BASE="${CMAKE_CURRENT_SOURCE_DIR}/"
+)
+
+
+add_test_executable(nel_net_module_test
+        ut_net_module.test.cpp
+)
+target_link_libraries(nel_net_module_test
+        PRIVATE
+        nelmisc nelnet
 )

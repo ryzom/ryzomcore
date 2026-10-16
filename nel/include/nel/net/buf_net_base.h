@@ -20,6 +20,8 @@
 #ifndef NL_BUF_NET_BASE_H
 #define NL_BUF_NET_BASE_H
 
+#include <functional>
+
 #include "nel/misc/types_nl.h"
 #include "nel/misc/mutex.h"
 #include "nel/misc/atomic.h"
@@ -39,7 +41,7 @@ typedef CBufSock *TSockId;
 static const TSockId InvalidSockId = (TSockId) NULL;
 
 /// Callback function for message processing
-typedef void (*TNetCallback) ( TSockId from, void *arg );
+typedef std::function<void( TSockId from, void *arg )> TNetCallback;
 
 /// Storing a TNetCallback call for future call
 typedef std::pair<TNetCallback,TSockId> TStoredNetCallback;

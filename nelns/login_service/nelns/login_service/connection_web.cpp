@@ -26,17 +26,18 @@
 #include <vector>
 #include <map>
 
-#include "nel/misc/debug.h"
-#include "nel/misc/config_file.h"
-#include "nel/misc/displayer.h"
-#include "nel/misc/log.h"
+#include <nel/misc/debug.h>
+#include <nel/misc/config_file.h>
+#include <nel/misc/displayer.h>
+#include <nel/misc/log.h>
 
-#include "nel/net/buf_server.h"
-#include "nel/net/login_cookie.h"
+#include <nel/net/buf_server.h>
+#include <nel/net/login_cookie.h>
 
-#include "login_service.h"
-#include "connection_ws.h"
-
+#include <nelns/login_service/connection_ws.h>
+#include <nelns/login_service/functions.h>
+#include <nelns/login_service/login_service.h>
+#include <nelns/login_service/variables.h>
 
 //
 // Namespaces

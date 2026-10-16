@@ -27,7 +27,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_disp_sheet_id MODULE ${SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_DISP_SHEET_ID_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id studio_plugin_core nelmisc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id studio_plugin_core NeL::misc ${QT_LIBRARIES})
 
 IF(WITH_STLPORT)
   TARGET_LINK_LIBRARIES(studio_plugin_disp_sheet_id ${CMAKE_THREAD_LIBS_INIT})
@@ -37,7 +37,7 @@ NL_DEFAULT_PROPS(studio_plugin_disp_sheet_id "Tools: Studio Plugin: Display shee
 NL_ADD_RUNTIME_FLAGS(studio_plugin_disp_sheet_id)
 NL_ADD_LIB_SUFFIX(studio_plugin_disp_sheet_id)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_disp_sheet_id PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 
 IF(WIN32)

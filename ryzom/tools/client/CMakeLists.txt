@@ -4,7 +4,7 @@ IF(WITH_RYZOM_CLIENT)
     ADD_SUBDIRECTORY(client_patcher)
   ENDIF()
 
-  IF(WITH_QT OR WITH_QT5)
+  IF(WITH_QT5)
     ADD_SUBDIRECTORY(client_config_qt)
   ENDIF()
 

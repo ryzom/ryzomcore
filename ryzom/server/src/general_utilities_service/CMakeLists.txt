@@ -126,17 +126,19 @@ SOURCE_GROUP("GUS Core" FILES	gus_chat.cpp
 
 ADD_EXECUTABLE(ryzom_general_utilities_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(ryzom_general_utilities_service PRIVATE ${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_general_utilities_service
+						PRIVATE
 						ryzom_adminmodules
 						ryzom_gameshare
 						ryzom_servershare
 						ryzom_aishare
-						nelmisc
-						nelnet
-						nelgeorges
-						nelligo)
+						NeL::misc
+						NeL::net
+						NeL::georges
+						NeL::ligo
+)
 
 NL_DEFAULT_PROPS(ryzom_general_utilities_service "Ryzom, Services: General Utilities Service (GUS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_general_utilities_service)

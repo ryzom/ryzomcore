@@ -238,23 +238,23 @@ void CMainWindow::translateActions()
 
 void CMainWindow::createMenus()
 {
-	m_FileMenu = menuBar()->addMenu(QString::null);
+	m_FileMenu = menuBar()->addMenu(QString());
 	//m_FileMenu->addAction(saveAct);
 	//m_FileMenu->addSeparator();
 	m_FileMenu->addAction(m_QuitAct);
 
-	m_EditMenu = menuBar()->addMenu(QString::null);
+	m_EditMenu = menuBar()->addMenu(QString());
 	m_EditMenu->addAction(m_UndoAct);
 	m_EditMenu->addAction(m_RedoAct);
 
-	m_ViewportMenu = menuBar()->addMenu(QString::null);
+	m_ViewportMenu = menuBar()->addMenu(QString());
 	m_ViewportMenu->addAction(m_SaveScreenshotAct);
 	
-	m_WidgetsMenu = menuBar()->addMenu(QString::null);
+	m_WidgetsMenu = menuBar()->addMenu(QString());
 	
 	menuBar()->addSeparator();
 	
-	m_HelpMenu = menuBar()->addMenu(QString::null);
+	m_HelpMenu = menuBar()->addMenu(QString());
 	m_HelpMenu->addAction(m_AboutAct);
 }
 
@@ -269,11 +269,11 @@ void CMainWindow::translateMenus()
 
 void CMainWindow::createToolBars()
 {
-	m_FileToolBar = addToolBar(QString::null);
+	m_FileToolBar = addToolBar(QString());
 	m_FileToolBar->addAction(m_QuitAct);
 	m_FileToolBar->addAction(m_PrintDebugAct);
 
-	m_EditToolBar = addToolBar(QString::null);
+	m_EditToolBar = addToolBar(QString());
 	m_EditToolBar->addAction(m_AboutAct);
 }
 

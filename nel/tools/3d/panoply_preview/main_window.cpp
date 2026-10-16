@@ -95,9 +95,9 @@ void CMainWindow::createActions()
 
 void CMainWindow::createMenus()
 {
-	m_WidgetsMenu = menuBar()->addMenu(QString::null);
+	m_WidgetsMenu = menuBar()->addMenu(QString());
 	
-	m_HelpMenu = menuBar()->addMenu(QString::null);
+	m_HelpMenu = menuBar()->addMenu(QString());
 	m_HelpMenu->addAction(m_AboutAct);
 
 	m_WidgetsMenu->setTitle(tr("Widgets"));

@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_LIBRARY(nel_vertex_tree_paint SHARED ${SRC})
 
-INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
+TARGET_INCLUDE_DIRECTORIES(nel_vertex_tree_paint PRIVATE ${MAXSDK_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(nel_vertex_tree_paint 
 							nelmisc
@@ -21,6 +21,6 @@ NL_DEFAULT_PROPS(nel_vertex_tree_paint "MAX Plugin: NeL Vertex Tree Painter")
 NL_ADD_RUNTIME_FLAGS(nel_vertex_tree_paint)
 NL_ADD_LIB_SUFFIX(nel_vertex_tree_paint)
 
-ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(nel_vertex_tree_paint PRIVATE ${MAXSDK_DEFINITIONS})
 
 INSTALL(TARGETS nel_vertex_tree_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

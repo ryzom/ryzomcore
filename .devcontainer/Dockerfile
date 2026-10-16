@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel --remove ubuntu
 
 RUN apt update; \
     DEBIAN_FRONTEND=noninteractive \
@@ -57,7 +58,7 @@ RUN apt install --yes \
 RUN cp /lib/x86_64-linux-gnu/libcpptest.so /lib/x86_64-linux-gnu/libcpptestd.so
 
 
-ARG CMAKE_VERSION=3.27.9
+ARG CMAKE_VERSION=3.29.5
 ARG CMAKE_INSTALL_DIR=/opt/cmake-$CMAKE_VERSION
 ARG USERNAME=ryzom
 ARG USER_UID=1000

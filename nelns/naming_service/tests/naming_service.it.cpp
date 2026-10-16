@@ -183,32 +183,27 @@ TEST_F(CNamingServiceIT, shouldAnswerToRegistration)
 	CMessage msgout("RG");
 	msgout.serial(request);
 
-	std::promise<RGResponse> response_promise;
-	std::future<RGResponse> response = response_promise.get_future();
-	TCallbackItem callbackArray[] = {
-		{ "RG", [&response_promise](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
-		     RGResponse response;
-		     msgin.serial(response);
-		     response_promise.set_value(response);
-		 } }
-	};
-	client.addCallbackArray(callbackArray, sizeof(callbackArray) / sizeof(callbackArray[0]));
+	auto response = std::async(std::launch::async, [=]() {
+		bool pending = true;
+		RGResponse messageResponse;
+		TCallbackItem callbackArray[] = {
+			{ "RG", [&messageResponse, &pending](CMessage &msgin, TSockId from, CCallbackNetBase &netbase) {
+			     msgin.serial(messageResponse);
+			     pending = false;
+			 } }
+		};
+		client.addCallbackArray(callbackArray, std::size(callbackArray));
 
-	client.send(msgout);
-	auto updateClient = std::async(std::launch::async, [=, &response]() {
-		while (response.valid())
+		while (pending)
 		{
 			client.update();
-			nlSleep(1);
-		}
-	});
-	auto updateNamingService = std::async(std::launch::async, [=, &response]() {
-		while (response.valid())
-		{
 			namingService.update();
 			nlSleep(1);
 		}
+
+		return messageResponse;
 	});
+	client.send(msgout);
 
 	auto state = response.wait_for(defaultTimeout);
 	ASSERT_THAT(state, Eq(std::future_status::ready));

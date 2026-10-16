@@ -75,7 +75,7 @@ SettingsDialog::SettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 
 		QTreeWidgetItem *item = new QTreeWidgetItem;
 		item->setText(0, page->trName());
-		item->setData(0, Qt::UserRole, qVariantFromValue(pageData));
+		item->setData(0, Qt::UserRole, QVariant::fromValue(pageData));
 
 		QStringList categoriesId = page->category().split(QLatin1Char('|'));
 		QStringList trCategories = page->trCategory().split(QLatin1Char('|'));
@@ -86,7 +86,7 @@ SettingsDialog::SettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 		{
 			treeitem = new QTreeWidgetItem(m_ui.pageTree);
 			treeitem->setText(0, trCategories.at(0));
-			treeitem->setData(0, Qt::UserRole, qVariantFromValue(pageData));
+			treeitem->setData(0, Qt::UserRole, QVariant::fromValue(pageData));
 			categories.insert(currentCategory, treeitem);
 		}
 
@@ -98,7 +98,7 @@ SettingsDialog::SettingsDialog(ExtensionSystem::IPluginManager *pluginManager,
 				treeitem = new QTreeWidgetItem(categories.value(currentCategory));
 				currentCategory +=  QLatin1Char('|') + categoriesId.at(catCount);
 				treeitem->setText(0, trCategories.at(catCount));
-				treeitem->setData(0, Qt::UserRole, qVariantFromValue(pageData));
+				treeitem->setData(0, Qt::UserRole, QVariant::fromValue(pageData));
 				categories.insert(currentCategory, treeitem);
 			}
 			else

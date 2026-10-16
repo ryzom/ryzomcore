@@ -33,7 +33,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_tile_editor MODULE ${SRC} ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_PLUG_TILE_EDITOR_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_TILE_EDITOR_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_tile_editor studio_plugin_core nelmisc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_tile_editor studio_plugin_core NeL::misc ${QT_LIBRARIES})
 
 IF(WITH_STLPORT)
   TARGET_LINK_LIBRARIES(studio_plugin_tile_editor ${CMAKE_THREAD_LIBS_INIT})
@@ -43,7 +43,7 @@ NL_DEFAULT_PROPS(studio_plugin_tile_editor "Tools: Studio Plugin: Tile Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_tile_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_tile_editor)
 
-ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_tile_editor PRIVATE QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 IF(WIN32)
   IF(WITH_INSTALL_LIBRARIES)

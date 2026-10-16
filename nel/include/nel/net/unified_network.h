@@ -22,6 +22,7 @@
 
 #include "nel/misc/types_nl.h"
 
+#include <functional>
 #include <vector>
 #include <string>
 
@@ -182,14 +183,35 @@ public:
  * \param serviceName name of the service that is un/registered to the naming service
  * \param arg a pointer initialized by the user
  */
-typedef void (*TUnifiedNetCallback) (const std::string &serviceName, TServiceId sid, void *arg);
+typedef std::function<void(const std::string &serviceName, TServiceId sid, void *arg)> TUnifiedNetCallback;
 
 /** Callback function type for message processing
  * \param msgin message received
  * \param serviceName name of the service that sent the message
  * \param sid id of the service that sent the message
  */
-typedef void (*TUnifiedMsgCallback) (CMessage &msgin, const std::string &serviceName, TServiceId sid);
+typedef std::function<void(CMessage &msgin, const std::string &serviceName, TServiceId sid)> TUnifiedMsgCallback;
+
+/** Helper to get the address of a function in order to compare two callbacks
+ *
+ * \tparam R return type of the callback
+ * \tparam Args arguments type of the callback
+ * \param callback the callback
+ * \return address of the callback
+ */
+template <typename R, typename... Args>
+size_t getAddress(std::function<R(Args...)> callback) {
+	typedef R(functionType)(Args...);
+	auto ** functionPointer = callback.template target<functionType*>();
+
+	return reinterpret_cast<size_t>(*functionPointer);
+}
+
+inline bool
+operator==(const TUnifiedNetCallback& a, const TUnifiedNetCallback& b) noexcept {
+	return getAddress(a) == getAddress(b);
+}
+
 
 /// Callback items. See CMsgSocket::update() for an explanation on how the callbacks are called.
 struct TUnifiedCallbackItem

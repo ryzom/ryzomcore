@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.27..4.1.1)
 
 project(Snowballs VERSION 2.0.0 LANGUAGES CXX)
+
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS 3d misc net pacs)
 
 IF(WIN32)
   SET(SNOWBALLS_CONFIG_FILE "." CACHE FILEPATH "Snowballs config file location")
@@ -30,6 +32,8 @@ IF(WITH_SNOWBALLS_SERVER)
 ENDIF()
 
 IF(WITH_SNOWBALLS_PACKAGE)
+  include(GNUInstallDirs)
+  include(CMakePackageConfigHelpers)
   INCLUDE(CMakePackaging.txt)
 ENDIF()
 

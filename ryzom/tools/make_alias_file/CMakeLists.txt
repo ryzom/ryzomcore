@@ -1,8 +1,9 @@
-FILE(GLOB SRC *.cpp *.h)
+ADD_EXECUTABLE(make_alias_file make_alias_file.cpp)
 
-ADD_EXECUTABLE(make_alias_file ${SRC})
-
-TARGET_LINK_LIBRARIES(make_alias_file nelmisc nelgeorges)
+TARGET_LINK_LIBRARIES(make_alias_file PRIVATE
+        NeL::misc
+        NeL::georges
+)
 
 NL_DEFAULT_PROPS(make_alias_file "Ryzom, Tools, Misc: Make Alias File")
 NL_ADD_RUNTIME_FLAGS(make_alias_file)

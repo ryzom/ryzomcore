@@ -77,7 +77,7 @@ class CMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 	virtual ~CMainWindow();
 
 	virtual void setVisible(bool visible);

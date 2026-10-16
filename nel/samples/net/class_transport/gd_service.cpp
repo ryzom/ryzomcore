@@ -103,11 +103,11 @@ static CSharedClass SharedClass;
 // Functions
 //
 
-static void cbUpService (const std::string &serviceName, uint16 sid, void *arg)
+static void cbUpService (const std::string &serviceName, TServiceId sid, void *arg)
 {
 	// When a service comes, send the new class
 	CSharedClass foo;
-	foo.send((TServiceId)sid);
+	foo.send(sid);
 }
 
 //
@@ -119,7 +119,7 @@ struct CGDService : public IService
 	void init()
 	{
 		// callback when a new service comes
-		CUnifiedNetwork::getInstance()->setServiceUpCallback("*", (TUnifiedNetCallback)cbUpService, NULL);
+		CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbUpService, NULL);
 
 		// init the class transport system
 		CTransportClass::init ();

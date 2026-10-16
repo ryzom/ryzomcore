@@ -1,2 +1,1 @@
-SET(SEVENZIP_LIBRARY "nel_sevenzip")
 ADD_SUBDIRECTORY(seven_zip)

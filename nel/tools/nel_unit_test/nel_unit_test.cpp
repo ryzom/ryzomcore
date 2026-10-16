@@ -134,19 +134,19 @@ int main(int argc, char *argv[])
 	{
 		Test::Suite ts;
 
-		ts.add(std::auto_ptr<Test::Suite>(new CUTMisc));
-		ts.add(std::auto_ptr<Test::Suite>(new CUTNet));
-		ts.add(std::auto_ptr<Test::Suite>(new CUTLigo));
+		ts.add(std::unique_ptr<Test::Suite>(new CUTMisc));
+		ts.add(std::unique_ptr<Test::Suite>(new CUTNet));
+		ts.add(std::unique_ptr<Test::Suite>(new CUTLigo));
 		// Add a line here when adding a new test MODULE
 
 		CUniquePtr<Test::Output> output(cmdline(argc, argv));
 		noerrors = ts.run(*output);
 
-		Test::HtmlOutput* const html = dynamic_cast<Test::HtmlOutput*>(output.get());
+		auto* const html = dynamic_cast<Test::HtmlOutput*>(output.get());
 		if (html)
 		{
-			std::ofstream fout(outputFileName);
-			html->generate(fout, true, "NeL");
+			std::ofstream outputStream(outputFileName);
+			html->generate(outputStream, true, "NeL");
 		}
 	}
 	catch (...)

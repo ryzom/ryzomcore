@@ -1,0 +1,87 @@
+{
+  "version": 6,
+  "include": [
+    "../cmake/CMakePresets.base.json",
+    "../cmake/CMakePresets.os.json"
+  ],
+  "configurePresets": [
+    {
+      "binaryDir": "${sourceDir}/build/studio",
+      "installDir": "${sourceDir}/build/install/studio",
+      "name": "studio",
+      "cacheVariables": {
+        "WITH_STUDIO": true,
+        "WITH_TESTING": true,
+        "WITH_NEL": true,
+        "WITH_NEL_TESTS": false,
+        "WITH_NELNS": false,
+        "WITH_RYZOM": false,
+        "WITH_SNOWBALLS": false,
+        "WITH_TOOLS": false,
+        "WITH_QT5": true,
+        "CPACK_PACKAGE_NAME": "studio"
+      }
+    },
+    {
+      "name": "ci-studio",
+      "hidden": true,
+      "cacheVariables": {
+        "WITH_NEL": false,
+        "CMAKE_PREFIX_PATH": "${sourceDir}/build/install"
+      }
+    },
+    {
+      "inherits": [
+        "linux",
+        "studio"
+      ],
+      "name": "linux-studio"
+    },
+    {
+      "inherits": [
+        "linux",
+        "ci-studio",
+        "studio"
+      ],
+      "name": "ci-linux-studio"
+    },
+    {
+      "inherits": [
+        "linux",
+        "ci-studio",
+        "studio"
+      ],
+      "name": "ci-linux-studio-static",
+      "cacheVariables": {
+        "WITH_STATIC": true
+      }
+    },
+    {
+      "inherits": [
+        "windows",
+        "studio"
+      ],
+      "name": "windows-studio"
+    }
+  ],
+  "buildPresets": [
+    {
+      "inherits": "release",
+      "name": "studio",
+      "configurePreset": "studio"
+    }
+  ],
+  "testPresets": [
+    {
+      "inherits": "default",
+      "name": "studio",
+      "configurePreset": "studio"
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "studio",
+      "configurePreset": "studio"
+    }
+  ]
+}

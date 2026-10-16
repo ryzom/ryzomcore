@@ -6,7 +6,17 @@ ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 ADD_EXECUTABLE(georges WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(georges nelmisc nelgeorges georges_dll)
+TARGET_LINK_LIBRARIES(georges
+        PRIVATE
+        NeL::misc
+        NeL::georges
+        georges_dll
+)
+
+target_compile_definitions(georges
+        PRIVATE
+        ${MFC_DEFINITIONS}
+)
 
 NL_DEFAULT_PROPS(georges "Ryzom, Tools, Georges: Georges Exe")
 NL_ADD_RUNTIME_FLAGS(georges)

@@ -175,21 +175,22 @@ ADD_LIBRARY(studio_plugin_object_viewer MODULE ${SRC}
                                              ${OBJECT_VIEWER_PLUGIN_RC_SRCS})
 
 TARGET_LINK_LIBRARIES(studio_plugin_object_viewer 
-			studio_plugin_core 
-			nelmisc 
-			nel3d
-			nelsound
-			nelligo
-			nelgeorges
-			${QT_LIBRARIES}
-			${QT_QTOPENGL_LIBRARY})
+		studio_plugin_core
+		NeL::misc
+		NeL::3d
+		NeL::sound
+		NeL::ligo
+		NeL::georges
+		${QT_LIBRARIES}
+		${QT_QTOPENGL_LIBRARY}
+)
 
 NL_DEFAULT_PROPS(studio_plugin_object_viewer "Tools: Studio Plugin: Object Viewer")
 
 NL_ADD_RUNTIME_FLAGS(studio_plugin_object_viewer)
 NL_ADD_LIB_SUFFIX(studio_plugin_object_viewer)
 
-ADD_DEFINITIONS(-DQT_NO_KEYWORDS -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_object_viewer PRIVATE QT_NO_KEYWORDS QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(studio_plugin_object_viewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)

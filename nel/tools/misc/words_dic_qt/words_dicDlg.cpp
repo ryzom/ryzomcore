@@ -1,5 +1,6 @@
 #include "words_dicDlg.h"
 
+#include <algorithm>
 #include <QtGui>
 #include <QString>
 #include <QListWidgetItem>
@@ -94,7 +95,7 @@ void CWords_dicDlg::lookUp( const std::string& inputStr, const bool showAll )
 				lvlRemoved = true;
 		}
 
-		qSort(list.begin(), list.end(), caseInsensitiveLessThan);
+		std::sort(list.begin(), list.end(), caseInsensitiveLessThan);
 		//list.sort();
 		ui.resultsListWidget->addItems(list);
 

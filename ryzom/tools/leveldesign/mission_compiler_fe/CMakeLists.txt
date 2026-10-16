@@ -6,7 +6,12 @@ ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 ADD_EXECUTABLE(ryzom_mission_compiler_fe WIN32 ${SRC})
 
-TARGET_LINK_LIBRARIES(ryzom_mission_compiler_fe nelmisc nelligo ryzom_mission_compiler_lib)
+TARGET_LINK_LIBRARIES(ryzom_mission_compiler_fe
+        PRIVATE
+        NeL::misc
+        NeL::ligo
+        ryzom_mission_compiler_lib
+)
 
 NL_DEFAULT_PROPS(ryzom_mission_compiler_fe "Ryzom, Tools, Misc: Mission Compiler Frontend")
 NL_ADD_RUNTIME_FLAGS(ryzom_mission_compiler_fe)

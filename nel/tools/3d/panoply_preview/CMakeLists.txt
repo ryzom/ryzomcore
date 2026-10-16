@@ -11,15 +11,12 @@ FILE(GLOB PANOPLY_MAKER ../panoply_maker/color_modifier.cpp ../panoply_maker/col
 SOURCE_GROUP("" FILES ${SRCS} ${HDRS} ${RSRC} ${RESOURCES})
 SOURCE_GROUP("panoply_maker" FILES ${PANOPLY_MAKER})
 
-SET(CMAKE_AUTOMOC ON)
-
-QT5_ADD_RESOURCES(RESOURCE_ADDED ${RESOURCES})
 
 ADD_EXECUTABLE(nl_panoply_preview WIN32 ${SRC}
 	${SRCS}
 	${HDRS}
 	${RSRC}
-	${RESOURCE_ADDED}
+	${RESOURCES}
 	${PANOPLY_MAKER}
 	)
 

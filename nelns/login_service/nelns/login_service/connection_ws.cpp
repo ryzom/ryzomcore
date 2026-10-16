@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
+#include <nelns/login_service/connection_ws.h>
 
 #include <cstdio>
 #include <ctype.h>
@@ -23,17 +23,18 @@
 #include <vector>
 #include <map>
 
-#include "nel/misc/debug.h"
-#include "nel/misc/config_file.h"
-#include "nel/misc/displayer.h"
-#include "nel/misc/log.h"
+#include <nel/misc/debug.h>
+#include <nel/misc/config_file.h>
+#include <nel/misc/displayer.h>
+#include <nel/misc/log.h>
 
-#include "nel/net/service.h"
-#include "nel/net/login_cookie.h"
+#include <nel/net/service.h>
+#include <nel/net/login_cookie.h>
 
-#include "login_service.h"
-#include "mysql_helper.h"
-
+#include <nelns/login_service/functions.h>
+#include <nelns/login_service/login_service.h>
+#include <nelns/login_service/mysql_helper.h>
+#include <nelns/login_service/variables.h>
 
 //
 // Namespaces
@@ -42,15 +43,6 @@
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
-
-
-//
-// Variables
-//
-
-static uint RecordNbPlayers = 0;
-uint NbPlayers = 0;
-
 
 //
 // Functions
@@ -66,7 +58,7 @@ void refuseShard (TServiceId sid, const char *format, ...)
 	CUnifiedNetwork::getInstance ()->send (sid, msgout);
 }
 
-static void cbWSConnection (const std::string &serviceName, TServiceId sid, void *arg)
+void ConnectionWS::cbWSConnection(const std::string &serviceName, TServiceId sid, void *arg)
 {
 	TSockId from;
 	CCallbackNetBase *cnb = CUnifiedNetwork::getInstance ()->getNetBase (sid, from);
@@ -100,7 +92,7 @@ static void cbWSConnection (const std::string &serviceName, TServiceId sid, void
 	}
 }
 
-static void cbWSDisconnection (const std::string &serviceName, TServiceId sid, void *arg)
+void ConnectionWS::cbWSDisconnection (const std::string &serviceName, TServiceId sid, void *arg)
 {
 	TSockId from;
 	CCallbackNetBase *cnb = CUnifiedNetwork::getInstance ()->getNetBase (sid, from);
@@ -233,8 +225,9 @@ void cbShardComesIn (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 }
 */
 
-// 
-static void cbWSIdentification (CMessage &msgin, const std::string &serviceName, TServiceId sid)
+//
+
+void ConnectionWS::cbWSIdentification (CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	TSockId from;
 	CCallbackNetBase *cnb = CUnifiedNetwork::getInstance ()->getNetBase (sid, from);
@@ -333,7 +326,7 @@ static void cbWSIdentification (CMessage &msgin, const std::string &serviceName,
 	nlstop;
 }
 
-static void cbWSClientConnected (CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSClientConnected (CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	//
 	// S16: Receive "CC" message from WS
@@ -449,7 +442,7 @@ static void cbWSClientConnected (CMessage &msgin, const std::string &serviceName
 }
 
 
-static void	cbWSReportFSState(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSReportFSState(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	sint	shardPos = findShardWithSId (sid);
 
@@ -540,7 +533,7 @@ static void	cbWSReportFSState(CMessage &msgin, const std::string &serviceName, T
 	}
 }
 
-static void	cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	sint	shardPos = findShardWithSId (sid);
 
@@ -567,7 +560,7 @@ static void	cbWSReportNoPatch(CMessage &msgin, const std::string &serviceName, T
 	}
 }
 
-static void	cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TServiceId sid)
+void ConnectionWS::cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
 	sint	shardPos = findShardWithSId (sid);
 
@@ -592,34 +585,34 @@ static void	cbWSSetShardOpen(CMessage &msgin, const std::string &serviceName, TS
 }
 
 
-static const TUnifiedCallbackItem WSCallbackArray[] =
-{
-	{ "CC",					cbWSClientConnected },
-	{ "WS_IDENT",			cbWSIdentification },
-
-	{ "REPORT_FS_STATE",	cbWSReportFSState },
-	{ "REPORT_NO_PATCH",	cbWSReportNoPatch },
-	{ "SET_SHARD_OPEN",		cbWSSetShardOpen },
-};
-
-
 //
 // Functions
 //
 
-void connectionWSInit ()
+ConnectionWS::ConnectionWS()
+    : NbPlayers(0)
+    , RecordNbPlayers(0)
 {
-	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, sizeof(WSCallbackArray)/sizeof(WSCallbackArray[0]));
-	
-	CUnifiedNetwork::getInstance ()->setServiceUpCallback ("WS", cbWSConnection);
-	CUnifiedNetwork::getInstance ()->setServiceDownCallback ("WS", cbWSDisconnection);
+	const TUnifiedCallbackItem WSCallbackArray[] =
+	{
+		{ "CC",					[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSClientConnected(msgin, serviceName, sid); } },
+		{ "WS_IDENT",			[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSIdentification(msgin, serviceName, sid); } },
+
+		{ "REPORT_FS_STATE",	[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSReportFSState(msgin, serviceName, sid); } },
+		{ "REPORT_NO_PATCH",	[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSReportNoPatch(msgin, serviceName, sid); } },
+		{ "SET_SHARD_OPEN",		[=](auto &msgin, auto& serviceName, const auto& sid) { cbWSSetShardOpen(msgin, serviceName, sid); } },
+	};
+	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, std::size(WSCallbackArray));
+
+	CUnifiedNetwork::getInstance ()->setServiceUpCallback ("WS", [=](auto &serviceName, const auto& sid, auto *arg) { cbWSConnection(serviceName, sid, arg); });
+	CUnifiedNetwork::getInstance ()->setServiceDownCallback ("WS", [=](auto &serviceName, const auto& sid, auto *arg) { cbWSDisconnection(serviceName, sid, arg); });
 }
 
-void connectionWSUpdate ()
+void ConnectionWS::update()
 {
 }
 
-void connectionWSRelease ()
+ConnectionWS::~ConnectionWS()
 {
 	nlinfo ("I'm going down, clean the database");
 

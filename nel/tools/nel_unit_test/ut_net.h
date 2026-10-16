@@ -32,10 +32,10 @@ struct CUTNet : public Test::Suite
 {
 	CUTNet()
 	{
-		add(std::auto_ptr<Test::Suite>(new CUTNetLayer3));
-		add(std::auto_ptr<Test::Suite>(new CUTNetMessage));
-		add(std::auto_ptr<Test::Suite>(new CUTNetModule));
-		add(std::auto_ptr<Test::Suite>(new CUTNetAddress));
+		add(std::unique_ptr<Test::Suite>(new CUTNetLayer3));
+		add(std::unique_ptr<Test::Suite>(new CUTNetMessage));
+		add(std::unique_ptr<Test::Suite>(new CUTNetModule));
+		add(std::unique_ptr<Test::Suite>(new CUTNetAddress));
 		// Add a line here when adding a new test CLASS
 	}
 };

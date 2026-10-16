@@ -46,13 +46,13 @@ ADD_LIBRARY(studio_plugin_landscape_editor SHARED ${SRC}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_UI_HDRS}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_landscape_editor studio_plugin_core nelmisc nel3d nelgeorges nelligo ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(studio_plugin_landscape_editor studio_plugin_core NeL::misc NeL::3d NeL::georges NeL::ligo ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(studio_plugin_landscape_editor "Tools: Studio Plugin: Landscape Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_landscape_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_landscape_editor)
 
-ADD_DEFINITIONS(-DLANDSCAPE_EDITOR_LIBRARY -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_landscape_editor PRIVATE LANDSCAPE_EDITOR_LIBRARY QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 
 

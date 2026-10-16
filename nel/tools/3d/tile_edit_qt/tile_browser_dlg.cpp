@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
+#include <algorithm>
 
 #include "tile_browser_dlg.h"
 #include "tile_rotation_dlg.h"
@@ -212,7 +213,7 @@ void CTile_browser_dlg::on_actionAddTile_triggered(bool checked)
 	QString selectedFilter;
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "All supported files (*.png;*.tga);;PNG Bitmap (*.png);;Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 
-	qSort(fileNames.begin(), fileNames.end());
+	std::sort(fileNames.begin(), fileNames.end());
 
 	if (!fileNames.isEmpty())
 	{
