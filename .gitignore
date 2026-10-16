@@ -168,8 +168,11 @@ nel/build/*
 nelns/build/*
 snowballs/build/*
 ryzom/build/*
+build/*
 build-2010/*
 install/*
+build_*
+install_*
 nel/tools/build_gamedata/configuration/buildsite.py
 cmake-build-*
 
