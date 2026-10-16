@@ -1,6 +1,19 @@
-IF(msquic_FIND_REQUIRED)
-  SET(msquic_FIND_REQUIRED ON)
-ENDIF()
+# Findmsquic.cmake - MsQuic, Microsoft's QUIC library (https://github.com/microsoft/msquic)
+#
+# Provides the imported target msquic::msquic, the same target that msquic's own package
+# configuration (msquic-config.cmake, installed by vcpkg and by the msquic CMake build)
+# defines. The presets set CMAKE_FIND_PACKAGE_PREFER_CONFIG, so whenever that configuration
+# is present it is used instead of this module; consumers must therefore link the target
+# and not the variables below, which only exist for compatibility and are not set in that case.
+#
+#   msquic_FOUND        - true when the header and the library were found
+#   msquic_INCLUDE_DIRS - directory holding msquic.h
+#   msquic_LIBRARIES    - the library, with optimized/debug keywords when both were found
+#
+# Cache entries that may be preset to point at an unpacked release or NuGet package:
+#   msquic_INCLUDE_DIRS, msquic_LIBRARY_RELEASE, msquic_LIBRARY_DEBUG
+#
+# The Ubuntu libmsquic package ships only the versioned libmsquic.so.2, hence that name.
 
 FIND_PATH(
 	msquic_INCLUDE_DIRS
@@ -20,23 +33,25 @@ FIND_LIBRARY(
 	PATHS /usr/lib/x86_64-linux-gnu /usr/local/lib /usr/lib /opt/local
 )
 
-IF (msquic_INCLUDE_DIRS)
-  IF(msquic_LIBRARY_RELEASE AND msquic_LIBRARY_DEBUG)
-    SET(msquic_FOUND TRUE)
-    SET(msquic_LIBRARIES ${msquic_LIBRARIES} optimized ${msquic_LIBRARY_RELEASE})
-    SET(msquic_LIBRARIES ${msquic_LIBRARIES} debug ${msquic_LIBRARY_DEBUG})
-  ELSEIF(msquic_LIBRARY_RELEASE)
-    SET(msquic_FOUND TRUE)
-    SET(msquic_LIBRARIES ${msquic_LIBRARIES} ${msquic_LIBRARY_RELEASE})
+INCLUDE(SelectLibraryConfigurations)
+SELECT_LIBRARY_CONFIGURATIONS(msquic)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(msquic REQUIRED_VARS msquic_LIBRARY msquic_INCLUDE_DIRS)
+
+IF(msquic_FOUND AND NOT TARGET msquic::msquic)
+  ADD_LIBRARY(msquic::msquic UNKNOWN IMPORTED)
+  SET_TARGET_PROPERTIES(msquic::msquic PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${msquic_INCLUDE_DIRS}")
+  IF(msquic_LIBRARY_RELEASE)
+    SET_PROPERTY(TARGET msquic::msquic APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+    SET_TARGET_PROPERTIES(msquic::msquic PROPERTIES IMPORTED_LOCATION_RELEASE "${msquic_LIBRARY_RELEASE}")
   ENDIF()
+  IF(msquic_LIBRARY_DEBUG)
+    SET_PROPERTY(TARGET msquic::msquic APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+    SET_TARGET_PROPERTIES(msquic::msquic PROPERTIES IMPORTED_LOCATION_DEBUG "${msquic_LIBRARY_DEBUG}")
+  ENDIF()
+  # configurations without a matching entry (RelWithDebInfo, MinSizeRel) fall back to this
+  SET_TARGET_PROPERTIES(msquic::msquic PROPERTIES IMPORTED_LOCATION "${msquic_LIBRARY}")
 ENDIF()
 
-IF (msquic_FOUND)
-    IF (NOT msquic_FIND_QUIETLY)
-        MESSAGE(STATUS "Found msquic library: ${msquic_LIBRARIES}")
-    ENDIF ()
-ELSE (msquic_FOUND)
-    IF (msquic_FIND_REQUIRED)
-        MESSAGE(FATAL_ERROR "Could not find msquic library")
-    ENDIF ()
-ENDIF ()
+MARK_AS_ADVANCED(msquic_INCLUDE_DIRS msquic_LIBRARY_RELEASE msquic_LIBRARY_DEBUG)
