@@ -47,13 +47,13 @@ namespace NLGUI
 		/// Constructor
 		CInterfaceProperty()
 		{
-			_VolatileValue = NULL;
+			_VolatileValue = nullptr;
 		}
 
 		/// Tells if this property has a value
 		bool hasValue() const
 		{
-			if( _VolatileValue != NULL )
+			if( _VolatileValue != nullptr)
 				return true;
 			else
 				return false;
@@ -72,7 +72,7 @@ namespace NLGUI
 
 		bool link (const char *DBProp);
 		bool link( NLMISC::CCDBNodeLeaf *dbNode );
-		bool link( NLMISC::CCDBNodeBranch *dbNode, const std::string &leafId, NLMISC::CCDBNodeLeaf *defaultLeaf = NULL  );
+		bool link( NLMISC::CCDBNodeBranch *dbNode, const std::string &leafId, NLMISC::CCDBNodeLeaf *defaultLeaf = nullptr);
 
 		/// float operations
 		void setDouble(double value);

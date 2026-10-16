@@ -51,7 +51,7 @@ private:
 	/// Initialize the button (1 function called for all constructors -> easier).
 	inline void init(uint numFunc);
 	/// callback
-	virtual void operator () (const CEvent& event);
+	virtual void operator () (const CEvent& event) NL_OVERRIDE;
 
 protected:
 	uint		_NumFunc;
@@ -71,12 +71,12 @@ public:
 	CCapture(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint numFunc, uint32 fontSize, CRGBA color, bool shadow);
 
 	/// Destructor.
-	~CCapture();
+	~CCapture() NL_OVERRIDE;
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 	/// Manage the click of the mouse for the Bitmap.
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 
 	/// set the string contained in the class : _Str.

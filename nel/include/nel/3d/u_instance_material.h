@@ -183,7 +183,7 @@ public:
 	/// Constructors
 	UInstanceMaterial()
 	{
-		_Object = NULL;
+		_Object = nullptr;
 	}
 	UInstanceMaterial(class CMeshBaseInstance	*mbi, class CMaterial *object, class CAsyncTextureBlock *asyncTextureBlock)
 	{
@@ -201,12 +201,12 @@ public:
 	/// Detach the object
 	void			detach()
 	{
-		_MBI = NULL;
-		_Object = NULL;
-		_AsyncTextureBlock = NULL;
+		_MBI = nullptr;
+		_Object = nullptr;
+		_AsyncTextureBlock = nullptr;
 	}
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const {return _Object == nullptr; }
 	/// For advanced usage, get the internal object ptr
 	class CMaterial	*getObjectPtr() const {return (CMaterial*)_Object;}
 private:

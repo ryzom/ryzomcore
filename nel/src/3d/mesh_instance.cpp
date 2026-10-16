@@ -37,7 +37,7 @@ namespace NL3D
 // ***************************************************************************
 CMeshInstance::CMeshInstance()
 {
-	_ShadowMap= NULL;
+	_ShadowMap = nullptr;
 
 	// LoadBalancing is not useful for Mesh, because meshs cannot be reduced in faces.
 	// Override CTransformShape state.
@@ -121,7 +121,7 @@ const std::vector<NLMISC::CBSphere>	*CMeshInstance::getSkinBoneSphere() const
 // ***************************************************************************
 bool	CMeshInstance::isSkinnable() const
 {
-	if(Shape==NULL)
+	if(Shape == nullptr)
 		return false;
 
 	// Get a pointer on the shape
@@ -312,7 +312,7 @@ void		CMeshInstance::deleteShadowMap()
 	if(_ShadowMap)
 	{
 		delete _ShadowMap;
-		_ShadowMap= NULL;
+		_ShadowMap = nullptr;
 		getOwnerScene()->unregisterShadowCasterToList(this);
 	}
 }

@@ -115,7 +115,7 @@ namespace NLGUI
 		{
 			SMasterGroup()
 			{
-				Group = NULL;
+				Group = nullptr;
 				LastTopWindowPriority = WIN_PRIORITY_NORMAL;
 			}
 
@@ -156,8 +156,8 @@ namespace NLGUI
 
 			SModalWndInfo()
 			{
-				ModalWindow = NULL;
-				CtrlLaunchingModal = NULL;
+				ModalWindow = nullptr;
+				CtrlLaunchingModal = nullptr;
 				ModalExitClickOut = false;
 				ModalExitClickL = false;
 				ModalExitClickR = false;
@@ -248,13 +248,13 @@ namespace NLGUI
 
 		CCtrlBase *getCtrlLaunchingModal ()
 		{
-			if (_ModalStack.empty()) return NULL;
+			if (_ModalStack.empty()) return nullptr;
 			return _ModalStack.back().CtrlLaunchingModal;
 		}
 		/// get the currently active modal window, or NULL if none
 		CInterfaceGroup *getModalWindow() const
 		{
-			if (_ModalStack.empty()) return NULL;
+			if (_ModalStack.empty()) return nullptr;
 			return _ModalStack.back().ModalWindow;
 		}
 
@@ -359,7 +359,7 @@ namespace NLGUI
 
 		void drawViews( NL3D::UCamera camera );
 
-		bool handleEvent( const CEventDescriptor &evnt );
+		bool handleEvent( const CEventDescriptor &evnt ) NL_OVERRIDE;
 
 		bool handleSystemEvent( const CEventDescriptor &evnt );
 
@@ -398,7 +398,7 @@ namespace NLGUI
 		void resetCaptureKeyboard();
 
 		// True if the keyboard is captured
-		bool isKeyboardCaptured() const {return _CaptureKeyboard!=NULL;}
+		bool isKeyboardCaptured() const {return _CaptureKeyboard != nullptr; }
 
 		// register a view that wants to be notified at each frame (receive the msg 'clocktick')
 		void registerClockMsgTarget(CCtrlBase *vb);
@@ -557,7 +557,7 @@ namespace NLGUI
 				
 	private:
 		CWidgetManager();
-		~CWidgetManager();
+		~CWidgetManager() NL_OVERRIDE;
 
 		IParser *_Parser;
 

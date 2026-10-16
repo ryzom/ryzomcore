@@ -13,6 +13,7 @@
 #       * NL_SBIN_PREFIX  (default: $CMAKE_INSTALL_PREFIX/sbin)
 #       * NL_LIB_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib)
 #       * NL_DRIVER_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib (windows) or $CMAKE_INSTALL_PREFIX/lib/nel)
+#   * Enable building of documentation: add -DBUILD_DOCUMENTATION:BOOL=ON - new make target: DoxygenDoc
 #   * Updating version: update header (above) but also update NL_VERSION below.
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
@@ -29,8 +30,10 @@ IF(HUNTER_ENABLED)
 
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
-    SHA1 "e41ac7a18c49b35ebac99ff2b5244317b2638a65"
+    # v0.26.7+ carries the Visual Studio 2026 MSVC_VERSION mapping
+    # (0.26.1 dies with "Unexpected MSVC_VERSION: '1951'" on VS2026 runners)
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.10.tar.gz"
+    SHA1 "3d904b93ba684f0e671a2d44969a1a127abe3e66"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
@@ -42,7 +45,7 @@ IF(HUNTER_ENABLED)
   SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
  
  # Workaround for PCH compilation issue, from curl intsizeof depencency
-  ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  ADD_COMPILE_DEFINITIONS(__STDC_LIMIT_MACROS)
   # TODO: Still applicable after switching to CMake's builtin precompiled header support?
 ENDIF()
 
@@ -72,6 +75,10 @@ SET(NL_VERSION_PATCH ${RyzomCore_VERSION_PATCH} CACHE STRING "Patch version")
 SET(NL_VERSION_BUILD ${RyzomCore_VERSION_TWEAK} CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
+
+SET(RYZOM_VERSION_MAJOR 3)
+SET(RYZOM_VERSION_MINOR 6)
+SET(RYZOM_VERSION_PATCH 0)
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -116,7 +123,6 @@ SET(RYZOM_CLIENT_APP_NAME               "core4")
 
 SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
-
 SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")
 
 #-----------------------------------------------------------------------------
@@ -129,8 +135,11 @@ IF(WITH_RYZOM_LIVE)
   SET(RYZOM_CLIENT_PATCH_URL           "http://dl.ryzom.com/patch_live")
   SET(RYZOM_CLIENT_APP_NAME            "ryzom_live")
 
-  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/app_releasenotes/index.php")
-  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/app_releasenotes/index.php")
+  SET(RYZOM_WEBIG_MAIN_URL             "https://app.ryzom.com/")
+  SET(RYZOM_WEBIG_TRUSTED_DOMAIN       "app.ryzom.com")
+
+  SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
+  SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
 
   SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
 ENDIF()
@@ -149,14 +158,6 @@ IF(WIN32)
 ENDIF()
 
 IF(HUNTER_ENABLED)
-  # This fix is for compiling OpenSSL in Azure Pipeline linux agent where ENV{SYSTEM} == "build"
-  IF(DEFINED ENV{SYSTEM} AND UNIX AND NOT APPLE)
-    STRING(TOUPPER "$ENV{SYSTEM}" _tmp)
-    IF (_tmp STREQUAL "BUILD")
-      UNSET(ENV{SYSTEM})
-    ENDIF()
-    UNSET(_tmp)
-  ENDIF()
   ## TODO: hack for freetype hunter package
   SET(ON 1)
   ##
@@ -211,9 +212,47 @@ IF(EMSCRIPTEN)
     INTERFACE_COMPILE_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1"
     INTERFACE_LINK_OPTIONS "-sUSE_ZLIB=1;-sUSE_LIBPNG=1")
   SET(PNG_FOUND TRUE)
-  SET(LIBXML2_FOUND FALSE)
-  SET(LIBXML2_INCLUDE_DIR "")
-  SET(LIBXML2_LIBRARIES "")
+  # libxml2 becomes available when a cross-built static libxml2 is provided
+  # (e.g. -DLibXml2_DIR=<prefix>/lib/cmake/libxml2-<version>); without one,
+  # XML-dependent code is compiled out as before.
+  FIND_PACKAGE(LibXml2 QUIET CONFIG)
+  IF(TARGET LibXml2::LibXml2)
+    SET(LIBXML2_FOUND TRUE)
+  ELSE()
+    SET(LIBXML2_FOUND FALSE)
+    SET(LIBXML2_INCLUDE_DIR "")
+    SET(LIBXML2_LIBRARIES "")
+  ENDIF()
+  # OpenSSL only when provided (stub or cross-built) via OPENSSL_* variables.
+  # Same emscripten find_library-mode-ONLY caveat as CURL below: build the
+  # imported targets directly from the -D cache vars. Skipping find_package
+  # entirely — when it does run under the emscripten toolchain it can create
+  # the OpenSSL::SSL/Crypto targets with an empty or host-side INCLUDE_DIR
+  # (find_path is subject to the same ROOT_PATH restriction as find_library),
+  # and then our -D INCLUDE_DIR never reaches consumers of nelweb/nelmisc.
+  IF(OPENSSL_INCLUDE_DIR AND OPENSSL_SSL_LIBRARY AND NOT TARGET OpenSSL::SSL)
+    ADD_LIBRARY(OpenSSL::SSL STATIC IMPORTED)
+    SET_TARGET_PROPERTIES(OpenSSL::SSL PROPERTIES
+      IMPORTED_LOCATION "${OPENSSL_SSL_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  IF(OPENSSL_INCLUDE_DIR AND OPENSSL_CRYPTO_LIBRARY AND NOT TARGET OpenSSL::Crypto)
+    ADD_LIBRARY(OpenSSL::Crypto STATIC IMPORTED)
+    SET_TARGET_PROPERTIES(OpenSSL::Crypto PROPERTIES
+      IMPORTED_LOCATION "${OPENSSL_CRYPTO_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  # If someone else already published the imported target (find_package that
+  # ran earlier via a different path) but with an empty include dir, forcibly
+  # append ours so consumers still see the headers.
+  IF(TARGET OpenSSL::SSL AND OPENSSL_INCLUDE_DIR)
+    SET_PROPERTY(TARGET OpenSSL::SSL APPEND PROPERTY
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
+  IF(TARGET OpenSSL::Crypto AND OPENSSL_INCLUDE_DIR)
+    SET_PROPERTY(TARGET OpenSSL::Crypto APPEND PROPERTY
+      INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_INCLUDE_DIR}")
+  ENDIF()
 ELSE()
   FIND_PACKAGE(ZLIB REQUIRED)
   FIND_PACKAGE(LibXml2 REQUIRED)
@@ -264,14 +303,15 @@ IF(Iconv_FOUND)
   endif ()
 ENDIF()
 
+
 IF(FINAL_VERSION)
-  ADD_DEFINITIONS(-DFINAL_VERSION=1)
+  ADD_COMPILE_DEFINITIONS(FINAL_VERSION=1)
 ENDIF()
 
 IF(WITH_SSE2)
-  ADD_DEFINITIONS(-DNL_HAS_SSE2)
+  ADD_COMPILE_DEFINITIONS(NL_HAS_SSE2)
   IF(WITH_SSE3)
-    ADD_DEFINITIONS(-DNL_HAS_SSE3)
+    ADD_COMPILE_DEFINITIONS(NL_HAS_SSE3)
   ENDIF()
 ENDIF()
 
@@ -321,6 +361,11 @@ ENDIF()
 
 IF(WITH_MSQUIC)
   FIND_PACKAGE(msquic REQUIRED)
+  # msquic's own package configuration exports the target as plain "msquic" up to 2.4.x
+  # (what vcpkg ships) and as msquic::msquic since; Findmsquic.cmake provides the latter
+  IF(TARGET msquic AND NOT TARGET msquic::msquic)
+    ADD_LIBRARY(msquic::msquic ALIAS msquic)
+  ENDIF()
 ENDIF()
 
 IF(WITH_NEL_TESTS OR WITH_TESTING)
@@ -345,22 +390,49 @@ IF(WITH_NEL)
   IF(HUNTER_ENABLED)
     IF(WITH_GUI)
       HUNTER_ADD_PACKAGE(luabind)
-      FIND_PACKAGE(Luabind REQUIRED)
     ENDIF()
 
     HUNTER_ADD_PACKAGE(CURL)
     FIND_PACKAGE(CURL CONFIG REQUIRED)
   ELSE()
-    IF(WITH_GUI)
-      FIND_PACKAGE(Luabind REQUIRED)
-    ENDIF()
-
     IF(EMSCRIPTEN)
-      # CURL not needed for Emscripten builds
+      # CURL only when a cross-built (or stub) curl is provided via
+      # -DCURL_INCLUDE_DIR/-DCURL_LIBRARY; requests fail gracefully with a stub.
+      # find_package(CURL) can silently fail here because CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
+      # rejects any cache path outside the emsdk sysroot; when that happens,
+      # manually publish the imported target from the -D cache vars so
+      # nelweb/nelgui still see curl headers and stub archives.
+      FIND_PACKAGE(CURL QUIET)
+      IF(NOT TARGET CURL::libcurl AND CURL_INCLUDE_DIR AND CURL_LIBRARY)
+        ADD_LIBRARY(CURL::libcurl STATIC IMPORTED)
+        SET_TARGET_PROPERTIES(CURL::libcurl PROPERTIES
+          IMPORTED_LOCATION "${CURL_LIBRARY}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
+      ENDIF()
+      # Same "empty include dir on the imported target" defense as OpenSSL below.
+      IF(TARGET CURL::libcurl AND CURL_INCLUDE_DIR)
+        SET_PROPERTY(TARGET CURL::libcurl APPEND PROPERTY
+          INTERFACE_INCLUDE_DIRECTORIES "${CURL_INCLUDE_DIR}")
+      ENDIF()
     ELSE()
-    FIND_PACKAGE(CURL REQUIRED)
+      FIND_PACKAGE(CURL REQUIRED)
     ENDIF() # !EMSCRIPTEN
   ENDIF() #hunter
+
+  IF(WITH_GUI)
+    find_package(Luabind REQUIRED)
+    find_package(Lua REQUIRED)
+
+    if(Lua_FOUND AND NOT TARGET Lua::Lua)
+      add_library(Lua::Lua INTERFACE IMPORTED)
+      set_target_properties(
+              Lua::Lua
+              PROPERTIES
+              INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
+              INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
+      )
+    endif()
+  ENDIF()
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)
@@ -394,6 +466,21 @@ ENDIF()
 
 IF(WITH_PERSONAL)
   ADD_SUBDIRECTORY(personal)
+ENDIF()
+
+# To build the documention, you will have to enable it
+# and then do the equivalent of "make DoxygenDoc".
+IF(BUILD_DOCUMENTATION)
+    IF(DOT)
+        SET(HAVE_DOT YES)
+    ELSE()
+        SET(HAVE_DOT NO)
+    ENDIF()
+    # This processes our Doxyfile.in and substitutes paths to generate
+    # a final Doxyfile
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
+
+    ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN} ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 ENDIF()
 
 IF(WITH_NEL_TESTS)

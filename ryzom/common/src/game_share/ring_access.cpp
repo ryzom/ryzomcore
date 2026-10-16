@@ -147,7 +147,7 @@ void CRingAccess::init()
 		xmlNodePtr entitiesAccess = input.getRootNode();
 		xmlNodePtr entityAccess = input.getFirstChildNode(entitiesAccess, "entityAccess");
 
-		while (entityAccess != 0)
+		while (entityAccess != nullptr)
 		{
 
 			// island name

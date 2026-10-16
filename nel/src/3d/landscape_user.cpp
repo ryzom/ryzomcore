@@ -48,7 +48,7 @@ CLandscapeUser::~CLandscapeUser()
 
 	// then delete
 	_Scene->deleteModel(_Landscape);
-	_Landscape= NULL;
+	_Landscape = nullptr;
 }
 
 

@@ -31,18 +31,18 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CGroupEditBoxDecor )
 
 		CGroupEditBoxDecor( const TCtorParam &param );
-		~CGroupEditBoxDecor();
+		~CGroupEditBoxDecor() NL_OVERRIDE;
 
-		void moveBy( sint32 x, sint32 y );
+		void moveBy( sint32 x, sint32 y ) NL_OVERRIDE;
 
-		void setIdRecurse( const std::string &newID );
+		void setIdRecurse( const std::string &newID ) NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		bool parse( xmlNodePtr cur, CInterfaceGroup *parent );
-		void draw();
-		void updateCoords();
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		bool parse( xmlNodePtr cur, CInterfaceGroup *parent ) NL_OVERRIDE;
+		void draw() NL_OVERRIDE;
+		void updateCoords() NL_OVERRIDE;
 
 		static void forceLink();
 

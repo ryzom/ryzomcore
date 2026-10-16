@@ -60,7 +60,7 @@ public:
 /// A named attack, to be inserted in an attack list
 struct CAttackListEntry
 {
-	CAttackListEntry() : ID(0) { }
+	CAttackListEntry() : ID(nullptr) { }
 	CAttackListEntry(const CAttackIDSheet *id) : ID(id) { }
 	const CAttackIDSheet *ID;
 	CAttack				  Attack;

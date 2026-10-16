@@ -282,7 +282,7 @@ public:
 	~CTessFace();
 
 	// Utilities.
-	bool			isLeaf() const {return SonLeft==NULL;}
+	bool			isLeaf() const {return SonLeft == nullptr; }
 	bool			isRectangular() const;
 	bool			hasVertex(CTessVertex *v) const {return VBase==v || VLeft==v || VRight==v;}
 	bool			hasEdge(CTessVertex *v0, CTessVertex *v1) const {return hasVertex(v0) && hasVertex(v1);}

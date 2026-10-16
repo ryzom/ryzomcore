@@ -1,14 +1,14 @@
 if not SearchCommand then
-	--global SearchCommand class
+    --global SearchCommand class
 	SearchCommand = {
-		identifier_found = {},
-		command_self = "",
-		command_parameter_list = {},
-		valid_commands_list = {},
-		commands_list = {},
-		key_tab_down = 0,
-		modal_open_list = {},
-		process_list = {},
+	    identifier_found = {},
+	    command_self = "",
+	    command_parameter_list = {},
+	    valid_commands_list = {},
+	    commands_list = {},
+	    key_tab_down = 0,
+	    modal_open_list = {},
+	    process_list = {},
 		player_list = {},
 		player_list_already_filled = 0,
 		player_name_local = "",
@@ -323,9 +323,9 @@ end
 
 
 function SearchCommand:find(tbl, value)
-	for k, v in pairs(tbl) do
-		if v == value then
-			return k
+    for k, v in pairs(tbl) do
+        if v == value then
+            return k
 		end
 	end
 	return nil
@@ -392,8 +392,8 @@ function SearchCommand:build_emote_preview(emote_id)
 	
 	local final_emote_text = ""
 
-	local target_name_ui = "[".. i18n.get("uihTarget") .."]"
-	local play_name_ui = "[".. i18n.get("uimPlayer") .."]"
+	local target_name_ui = "[".. i18n.get("uihTarget"):toUtf8() .."]"
+	local play_name_ui = "[".. i18n.get("uimPlayer"):toUtf8() .."]"
 	
 	local target_name_local = "no_target"
 	local player_name = SearchCommand:firstToUpper(self.player_name_local)
@@ -433,15 +433,15 @@ function SearchCommand:build_emote_preview(emote_id)
 		local build_search_emotid_gender_m = build_search_emotid.."_m"
 		
 		if(self.ryzom_emotes_text_list[build_search_emotid] ~= nil)then
-			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i]))..": "..self.ryzom_emotes_text_list[build_search_emotid].."</td></tr>"
+			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8()..": "..self.ryzom_emotes_text_list[build_search_emotid].."</td></tr>"
 		end
 		
 		if(self.ryzom_emotes_text_list[build_search_emotid_gender_f] ~= nil)then
-			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Female")..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_f].."</td></tr>"
+			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Female"):toUtf8()..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_f].."</td></tr>"
 		end
 		
 		if(self.ryzom_emotes_text_list[build_search_emotid_gender_m] ~= nil)then
-			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Male")..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_m].."</td></tr>"
+			final_emote_text = final_emote_text .."<tr><td>"..i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Male"):toUtf8()..": ".. self.ryzom_emotes_text_list[build_search_emotid_gender_m].."</td></tr>"
 		end
 		
 		
@@ -449,18 +449,18 @@ function SearchCommand:build_emote_preview(emote_id)
 			if(player_gender == "m")then
 				if(self.ryzom_emotes_text_list[build_search_emotid_gender_m] ~= nil)then
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid_gender_m]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Male")
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Male"):toUtf8()
 				else
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i]))
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8()
 				end
 			else
 				if(self.ryzom_emotes_text_list[build_search_emotid_gender_f] ~= nil)then
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid_gender_f]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])).."-"..i18n.get("uiCP_Sex_Female")
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8().."-"..i18n.get("uiCP_Sex_Female"):toUtf8()
 				else
 					current_emote_art_text=self.ryzom_emotes_text_list[build_search_emotid]
-					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i]))
+					current_action=i18n.get("uiEM_Emotes_"..tostring(possible_mode[i])):toUtf8()
 				end
 			end
 			
@@ -486,8 +486,8 @@ function SearchCommand:build_emote_preview(emote_id)
 	
 	
 		
-	build_current_emote = i18n.get("uiCurrentAction")..": "..current_action
-	build_current_emote = build_current_emote.."<br>"..i18n.get("uiFaberItemResultHeader")..": "..current_emote_art_text
+	build_current_emote = i18n.get("uiCurrentAction"):toUtf8()..": "..current_action
+	build_current_emote = build_current_emote.."<br>"..i18n.get("uiFaberItemResultHeader"):toUtf8()..": "..current_emote_art_text
 
 	SearchCommand:htmlentities(build_current_emote)
 	
@@ -534,147 +534,147 @@ function SearchCommand:check_prvis(command_privs)
 end
 
 function SearchCommand:htmlentities(text)
-	local html_help_content=""
+    local html_help_content=""
 
-	html_help_content = text:gsub("<", "&lt;")
-	
-	return html_help_content
+    html_help_content = text:gsub("<", "&lt;")
+    
+    return html_help_content
 end
 
 function SearchCommand:pars_command_parameter(command_parameter)
-	local finish_translation_text = ""
-	
-	--debug("param: "..command_parameter)
+    local finish_translation_text = ""
+    
+    --debug("param: "..command_parameter)
 	
 	if(string.find(string.lower(command_parameter), ":") ~= nil and string.find(string.lower(command_parameter), ":") < 20 and command_parameter ~= ":")then
-		--split text to commands
-		for substring in string.gmatch(command_parameter, "([^:]+)") do
-			--debug(substring)
-			if(string.find(string.lower(substring), "<"))then
-			--debug(substring:match("<(.*)>"))
-				finish_translation_text=finish_translation_text..""..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")))..">"
-			else
-				finish_translation_text="<"..finish_translation_text..""..i18n.get("uiSearchCommand"..substring)..":"
-			end
-		end
-	else
-		finish_translation_text = command_parameter
-	end
-	
-	--debug("trans: "..finish_translation_text)
-	
-	return finish_translation_text
+        --split text to commands
+        for substring in string.gmatch(command_parameter, "([^:]+)") do
+            --debug(substring)
+            if(string.find(string.lower(substring), "<"))then
+            --debug(substring:match("<(.*)>"))
+                finish_translation_text=finish_translation_text..""..substring:gsub("<(.-)>", i18n.get("uiSearchCommand"..substring:match("<(.*)>")):toUtf8())..">"
+            else
+                finish_translation_text="<"..finish_translation_text..""..i18n.get("uiSearchCommand"..substring):toUtf8()..":"
+            end
+        end
+    else
+        finish_translation_text = command_parameter
+    end
+    
+    --debug("trans: "..finish_translation_text)
+    
+    return finish_translation_text
 end
 
 
 function SearchCommand:pars_help_on_window(content_of_window,height)
-	local whm = getUI("ui:interface:web_transactions")
-	local whm_html = getUI("ui:interface:web_transactions:content:html")
-	
-	local html_help_content=""
-	html_help_content=[[<table width="100%" border="0"><tr><td>]]..content_of_window..[[</td></tr></table>]]
-	
-	whm.title = i18n.get("uiSearchCommandHelp")
-	whm.active = true
-	whm.w = 750
-	whm.h = height
-	whm_html:renderHtml(html_help_content)
+    local whm = getUI("ui:interface:web_transactions")
+    local whm_html = getUI("ui:interface:web_transactions:content:html")
+    
+    local html_help_content=""
+    html_help_content=[[<table width="100%" border="0"><tr><td>]]..content_of_window..[[</td></tr></table>]]
+    
+    whm.title = i18n.get("uiSearchCommandHelp"):toUtf8()
+    whm.active = true
+    whm.w = 750
+    whm.h = height
+    whm_html:renderHtml(html_help_content)
 end
 
 function SearchCommand:help_show_all(parameter)
     --debug("SearchCommand:help_show_all")
-	local count = 0
-	local build_content = ""
-	
-	--debug("help parameter: "..parameter)
-	build_content=build_content.."<table width='100%' border=0>"
+    local count = 0
+    local build_content = ""
+    
+    --debug("help parameter: "..parameter)
+    build_content=build_content.."<table width='100%' border=0>"
 	
 	if(parameter ~= "eScript" and parameter ~= "client" and parameter ~= "emotes" and parameter ~= "shard" and parameter ~= "all")then
-		parameter = "all"
-	end
-	
-	if(parameter == "all")then
-		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp").." <font size=14><strong>'"..i18n.get("uiSearchCommandAll").."'</strong></font> #######################</td></tr>"
-	else
-		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp").." <font size=14><strong>'"..i18n.get("uiSearchCommandAll").."'</strong></font> / "..i18n.get("uiSearchCommandFilter").." <font size=14><strong>'"..SearchCommand:htmlentities(parameter).."'</strong></font> #######################</td></tr>"
-	end
-	
-	for c = 1, #self.commands_list do
-		local command_are_allowed = 0
-		if(self.commands_list[c][2] == "player")then
-			command_are_allowed = 1
-		else
-			if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
-				command_are_allowed = 1
-			end
-		end
-		
-		if(command_are_allowed == 1)then
-			if(self.commands_list[c][1] == parameter or parameter == "all")then
-				local arg_display=""
-				build_content=build_content.."<tr><td><table width='100%' border=0>"
-				build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
+        parameter = "all"
+    end
+    
+    if(parameter == "all")then
+		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..i18n.get("uiSearchCommandAll"):toUtf8().."'</strong></font> #######################</td></tr>"
+    else
+		build_content=build_content.."<tr><td colspan=4>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..i18n.get("uiSearchCommandAll"):toUtf8().."'</strong></font> / "..i18n.get("uiSearchCommandFilter"):toUtf8().." <font size=14><strong>'"..SearchCommand:htmlentities(parameter).."'</strong></font> #######################</td></tr>"
+    end
+    
+    for c = 1, #self.commands_list do
+        local command_are_allowed = 0
+        if(self.commands_list[c][2] == "player")then
+            command_are_allowed = 1
+        else
+            if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
+                command_are_allowed = 1
+            end
+        end
+        
+        if(command_are_allowed == 1)then
+            if(self.commands_list[c][1] == parameter or parameter == "all")then
+                local arg_display=""
+                build_content=build_content.."<tr><td><table width='100%' border=0>"
+                build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
 				
 				max_arguments = #self.commands_list[c] - 5
 				
-				if(self.commands_list[c][1] ~= "eScript")then
-					for ad = 1, max_arguments do
-						if(ad > 1)then
-							arg_display=arg_display.." [arg"..ad.."]"
-						else
-							arg_display="[arg"..ad.."]"
-						end
-					end
-				else
-					arg_display = ""
-				end
-				
-				count=count+1
+                if(self.commands_list[c][1] ~= "eScript")then
+                    for ad = 1, max_arguments do
+                        if(ad > 1)then
+                            arg_display=arg_display.." [arg"..ad.."]"
+                        else
+                            arg_display="[arg"..ad.."]"
+                        end
+                    end
+                else
+                    arg_display = ""
+                end
+                
+                count=count+1
 				
 				build_content=build_content.."<tr><td width='10px'>"..count..".</td><td colspan=3><font size=13><strong>"..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</strong></font></td></tr>"
 				if(self.commands_list[c][1] == "emotes")then
 					local path_parts = SearchCommand:split(self.commands_list[c][3], "|")
-					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes")..": '"..i18n.get("uiEM_Emotes").. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
+					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes"):toUtf8()..": '"..i18n.get("uiEM_Emotes"):toUtf8().. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
 					build_content=build_content.."<tr><td>&nbsp;</td><td>".. SearchCommand:build_emote_preview(path_parts[4]).."</td></tr>"
-				else
-					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription")..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
-				end
+                        else
+                build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription"):toUtf8()..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
+                        end
 				
-				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType")..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
-				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv")..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
-				
-				for ac = 1, max_arguments do
-					build_content=build_content.."<tr><td>&nbsp;</td><td>arg"..ac.." :</td></tr>"
+                build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
+                build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
+                
+                for ac = 1, max_arguments do
+                    build_content=build_content.."<tr><td>&nbsp;</td><td>arg"..ac.." :</td></tr>"
 					for pc = 1, #self.commands_list[c][5+ac] do
 					
 						local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[c][5+ac][pc][1])
 						
 						if(self.commands_list[c][5+ac][pc][2] == "")then
-							build_content=build_content.."<tr><td>&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"..SearchCommand:htmlentities(translation_parm).."</td></tr>"
-						else
+                            build_content=build_content.."<tr><td>&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"..SearchCommand:htmlentities(translation_parm).."</td></tr>"
+                        else
 							build_content=build_content.."<tr><td>&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"..SearchCommand:htmlentities(translation_parm).." '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][5+ac][pc][2]))).."'</td></tr>"
-						end
-					end
-				end
-				if(self.commands_list[c][4] ~= "a" and self.commands_list[c][4] ~= "b" and self.commands_list[c][4] ~= "c")then
-					if(self.commands_list[c][1] == "shard")then
-						if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
-							build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.." | /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
-						else
-							build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
-						end
+                    end
+                end
+                        end
+                if(self.commands_list[c][4] ~= "a" and self.commands_list[c][4] ~= "b" and self.commands_list[c][4] ~= "c")then
+                    if(self.commands_list[c][1] == "shard")then
+                        if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
+                            build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.." | /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
+                        else
+                            build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
+                    end
 						
-					end
-				end
-			end
-			build_content=build_content.."</table></td></tr>"
-		end
+                end
+            end
+        end
+            build_content=build_content.."</table></td></tr>"
+    end
 	end
 	
-	build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
-	build_content=build_content.."<tr><td colspan=3>################################################################################</td></tr>"
-	build_content=build_content.."</table>"
-	SearchCommand:pars_help_on_window(build_content, 600)
+    build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
+    build_content=build_content.."<tr><td colspan=3>################################################################################</td></tr>"
+    build_content=build_content.."</table>"
+    SearchCommand:pars_help_on_window(build_content, 600)
 end
 
 function SearchCommand:help(uiId,input)
@@ -685,7 +685,7 @@ function SearchCommand:help(uiId,input)
 	if(used_searchcommand_by_config == 0)then
 		SearchCommand:write_command_help_clear(uiId)
 		do return end
-	end
+        end
 	--##end checking on/off via settings
 
 	--debug("search_input: "..input)
@@ -693,35 +693,35 @@ function SearchCommand:help(uiId,input)
 	local count = 0
 	local command_split = {}
 
-	if(input ~= "all")then
-		for substring in input:gmatch("%S+") do
-			table.insert(command_split, substring)
-		end
-	else
-	   command_split[1]="all"
-	   command_split[2]=""
-	end
-	
-	if(command_split[1] == "all")then
-		if(command_split[2] == "")then
-			SearchCommand:help_show_all(command_split[1])
-		else
-			SearchCommand:help_show_all(command_split[2])
-		end
-	else
+    if(input ~= "all")then
+        for substring in input:gmatch("%S+") do
+            table.insert(command_split, substring)
+        end
+    else
+       command_split[1]="all"
+       command_split[2]=""
+    end
+    
+    if(command_split[1] == "all")then
+        if(command_split[2] == "")then
+            SearchCommand:help_show_all(command_split[1])
+        else
+            SearchCommand:help_show_all(command_split[2])
+        end
+    else
 	
 	--debug("check_parent")
 	
 	local found_command_for_help = {}
 	
 	if(command_split[1]:match("^%**$") ~= nil)then
-		displaySystemInfo(command_split[1].." : "..i18n.get("uiCommandNotExists"), "SYS")
+            displaySystemInfo(ucstring(command_split[1].." : "..i18n.get("uiCommandNotExists"):toUtf8()), "SYS")
 		do return end
-	else
+                else
 	    --debug("here_inside")
 		found_command_for_help = SearchCommand:search_string(command_split[1], self.commands_list)
 		
-		for c = 1, #self.commands_list do
+        for c = 1, #self.commands_list do
 			--check if command have a parent to show
 			if(SearchCommand:contains(found_command_for_help, self.commands_list[c][4]))then
 				if(self.commands_list[c][5] ~= "")then
@@ -730,50 +730,50 @@ function SearchCommand:help(uiId,input)
     					for i, command_name_child_parent in ipairs(child_parents) do
     						if not (SearchCommand:contains(found_command_for_help, command_name_child_parent))then
     						table.insert(found_command_for_help, command_name_child_parent) 
-    					end
-					end
-				end
-			end
-		end
-	end
+                end
+                            end
+                        end
+                    end
+                            end
+                        end
 	
 	--debug("build_html")
 	
-		build_content=build_content.."<table width='100%' border=0>"
-		build_content=build_content.."<tr><td colspan=3>######################## "..i18n.get("uiSearchCommandHelp").." <font size=14><strong>'"..command_split[1].."'</strong></font> / "..#found_command_for_help.." #######################</td></tr>"
-		--show help for command input
-		local command_found = 0
-		for c = 1, #self.commands_list do
-			local command_are_allowed = 0
+        build_content=build_content.."<table width='100%' border=0>"
+		build_content=build_content.."<tr><td colspan=3>######################## "..i18n.get("uiSearchCommandHelp"):toUtf8().." <font size=14><strong>'"..command_split[1].."'</strong></font> / "..#found_command_for_help.." #######################</td></tr>"
+        --show help for command input
+        local command_found = 0
+        for c = 1, #self.commands_list do
+            local command_are_allowed = 0
 			if(SearchCommand:contains(found_command_for_help, self.commands_list[c][4]))then
-				command_found = 1
+                command_found = 1
 				
-				if(self.commands_list[c][2] == "player")then
-					command_are_allowed = 1
-				else
-					if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
-						command_are_allowed = 1
-					end
-				end
-				
-				if(command_are_allowed == 1)then
-				    local arg_display=""
-					build_content=build_content.."<tr><td>&nbsp;</td></tr>"
-					build_content=build_content.."<tr><td><table width='100%' border=0>"
+                if(self.commands_list[c][2] == "player")then
+                    command_are_allowed = 1
+                else
+                    if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
+                        command_are_allowed = 1
+                    end
+                end
+                
+                if(command_are_allowed == 1)then
+                    local arg_display=""
+                    build_content=build_content.."<tr><td>&nbsp;</td></tr>"
+                    build_content=build_content.."<tr><td><table width='100%' border=0>"
 					
 					max_arguments = #self.commands_list[c] - 5
 					
-					if(self.commands_list[c][1] ~= "eScript")then
-						for ad = 1, max_arguments do
-							if(ad > 1)then
-								arg_display=arg_display.." [arg"..ad.."]"
-							else
-								arg_display="[arg"..ad.."]"
-							end
-						end
-					else
-						arg_display = ""
-					end
+                    if(self.commands_list[c][1] ~= "eScript")then
+                        for ad = 1, max_arguments do
+                            if(ad > 1)then
+                                arg_display=arg_display.." [arg"..ad.."]"
+                    else
+                                arg_display="[arg"..ad.."]"
+                    end
+                end
+                            else
+                        arg_display = ""
+            end
 					
 					count=count+1
 					
@@ -781,16 +781,16 @@ function SearchCommand:help(uiId,input)
     				if(self.commands_list[c][1] == "emotes")then
     				    --debug("self.commands_list[c][3]"..self.commands_list[c][3])
     					local path_parts = SearchCommand:split(self.commands_list[c][3], "|")
-    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes")..": '"..i18n.get("uiEM_Emotes").. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
+    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiEM_Emotes"):toUtf8()..": '"..i18n.get("uiEM_Emotes"):toUtf8().. " > " ..SearchCommand:htmlentities(tostring(i18n.get(path_parts[2]))).." > ".. SearchCommand:htmlentities(SearchCommand:firstToUpper(self.commands_list[c][4])) .."'</td></tr>"
     					build_content=build_content.."<tr><td>&nbsp;</td><td>".. SearchCommand:build_emote_preview(path_parts[4]).."</td></tr>"
-    				else
-    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription")..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
-    				end
+        else
+    					build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiR2EDScenarioDescription"):toUtf8()..": '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][3]))).."'</td></tr>"
+        end
     				
-    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType")..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
-    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv")..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
+    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiFrontSelectionType"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][1]).."</td></tr>"
+    				build_content=build_content.."<tr><td>&nbsp;</td><td>"..i18n.get("uiSearchCommandPriv"):toUtf8()..": "..SearchCommand:htmlentities(self.commands_list[c][2]).."</td></tr>"
     				
-    				for ac = 1, max_arguments do
+                    for ac = 1, max_arguments do
     					build_content=build_content.."<tr><td>&nbsp;</td><td>arg"..ac.." :</td></tr>"
     					for pc = 1, #self.commands_list[c][5+ac] do
     					
@@ -800,11 +800,11 @@ function SearchCommand:help(uiId,input)
     							build_content=build_content.."<tr><td>&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"..SearchCommand:htmlentities(translation_parm).."</td></tr>"
     						else
     							build_content=build_content.."<tr><td>&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"..SearchCommand:htmlentities(translation_parm).." '"..SearchCommand:htmlentities(tostring(i18n.get(self.commands_list[c][5+ac][pc][2]))).."'</td></tr>"
-    						end
-    					end
+        end
+    end
     				end
-    				if(self.commands_list[c][4] ~= "a" and self.commands_list[c][4] ~= "b" and self.commands_list[c][4] ~= "c")then
-    					if(self.commands_list[c][1] == "shard")then
+                    if(self.commands_list[c][4] ~= "a" and self.commands_list[c][4] ~= "b" and self.commands_list[c][4] ~= "c")then
+                        if(self.commands_list[c][1] == "shard")then
     						if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
     							build_content=build_content.."<tr><td>&nbsp;</td><td colspan=3>example: /a "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.." | /c riasan "..SearchCommand:htmlentities(self.commands_list[c][4]).." "..arg_display.."</td></tr>"
     						else
@@ -814,35 +814,35 @@ function SearchCommand:help(uiId,input)
     					end
     				end
     			end
-    			build_content=build_content.."</table></td></tr>"
-			end
-		end
-		
-		build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
-		build_content=build_content.."<tr><td colspan=3>######################################################################</td></tr>"
-		
-		if(command_found == 0)then
-			displaySystemInfo(command_split[1].." : "..i18n.get("uiCommandNotExists"), "SYS")
-		else
-			--debug("pars_help")
-			SearchCommand:pars_help_on_window(build_content, 350)
-		end
-	end
+                build_content=build_content.."</table></td></tr>"
+            end
+        end
+        
+        build_content=build_content.."<tr><td colspan=3>&nbsp;</td></tr>"
+        build_content=build_content.."<tr><td colspan=3>######################################################################</td></tr>"
+        
+        if(command_found == 0)then
+            displaySystemInfo(ucstring(command_split[1].." : "..i18n.get("uiCommandNotExists"):toUtf8()), "SYS")
+        else
+            --debug("pars_help")
+            SearchCommand:pars_help_on_window(build_content, 350)
+        end
+    end
 end
 
 function SearchCommand:check_autocomplet(uiId)
-	local modal_open_list = SearchCommand:read_modal_open_list(uiId)
-	local menu = getUI("ui:interface:search_command_add_menu")
-	
-	if (menu.active) then
-		--debug("try_autocomplte: "..uiId.." modal_open_list: "..modal_open_list)
-		if(modal_open_list == 1)then
-			if next(self.valid_commands_list)then
-				--debug("check_autocomplet"..self.valid_commands_list[1])
-				SearchCommand:finish_commands(self.valid_commands_list[1],uiId)
-			end
-		end
-	end
+    local modal_open_list = SearchCommand:read_modal_open_list(uiId)
+    local menu = getUI("ui:interface:search_command_add_menu")
+    
+    if (menu.active) then
+        --debug("try_autocomplte: "..uiId.." modal_open_list: "..modal_open_list)
+        if(modal_open_list == 1)then
+            if next(self.valid_commands_list)then
+                --debug("check_autocomplet"..self.valid_commands_list[1])
+                SearchCommand:finish_commands(self.valid_commands_list[1],uiId)
+            end
+        end
+    end
 end
 
 function SearchCommand:check_autocomplet_click(uiId, valid_command_number)
@@ -861,120 +861,120 @@ function SearchCommand:check_autocomplet_click(uiId, valid_command_number)
 end
 
 function SearchCommand:check_autocomplet_number(uiId)
-	local modal_open_list = SearchCommand:read_modal_open_list(uiId)
-	local menu = getUI("ui:interface:search_command_add_menu")
-	local text_from_input = getUI(uiId)
-	local input_text = text_from_input.input_string
+    local modal_open_list = SearchCommand:read_modal_open_list(uiId)
+    local menu = getUI("ui:interface:search_command_add_menu")
+    local text_from_input = getUI(uiId)
+    local input_text = text_from_input.input_string
 	
 	local max_string_count = string.len(input_text)
 		
-	local get_last_char_from_input = tonumber(string.sub(input_text, (max_string_count), -1))
-	if(type(get_last_char_from_input) == "number")then
-		--debug("last_input_is_a_Number: "..get_last_char_from_input)
-		
-		if(get_last_char_from_input <= #self.valid_commands_list)then
-			if (menu.active) then
-				--debug("try_autocomplte: "..uiId.." modal_open_list: "..modal_open_list)
-				if(modal_open_list == 1)then
-					if next(self.valid_commands_list)then
-						--debug("check_autocomplet"..self.valid_commands_list[get_last_char_from_input])
-						SearchCommand:finish_commands(self.valid_commands_list[get_last_char_from_input],uiId)
-					end
-				end
-			end
-		end
-	end
+    local get_last_char_from_input = tonumber(string.sub(input_text, (max_string_count), -1))
+    if(type(get_last_char_from_input) == "number")then
+        --debug("last_input_is_a_Number: "..get_last_char_from_input)
+        
+        if(get_last_char_from_input <= #self.valid_commands_list)then
+            if (menu.active) then
+                --debug("try_autocomplte: "..uiId.." modal_open_list: "..modal_open_list)
+                if(modal_open_list == 1)then
+                    if next(self.valid_commands_list)then
+                        --debug("check_autocomplet"..self.valid_commands_list[get_last_char_from_input])
+                        SearchCommand:finish_commands(self.valid_commands_list[get_last_char_from_input],uiId)
+                    end
+                end
+            end
+        end
+    end
 end
 
 function SearchCommand:key_trigger(uiId)
-	base_window_id = string.sub(uiId,0,string.len(uiId)-15);
-	local check_window = getUI(base_window_id)
-	
-	if(check_window.active == false)then
-		--debug("window closed")
-		local timer_function_on_ui_window = getUI(uiId)
-		removeOnDbChange(timer_function_on_ui_window,"@UI:VARIABLES:CURRENT_SERVER_TICK")
-	end
-	
-	--check is input are empty if yes cancel all stuff
-	local text_from_input = getUI(uiId)
-	if(text_from_input.input_string == "")then
-		SearchCommand:search(uiId)
-	end
+    base_window_id = string.sub(uiId,0,string.len(uiId)-15);
+    local check_window = getUI(base_window_id)
+    
+    if(check_window.active == false)then
+        --debug("window closed")
+        local timer_function_on_ui_window = getUI(uiId)
+        removeOnDbChange(timer_function_on_ui_window,"@UI:VARIABLES:CURRENT_SERVER_TICK")
+    end
+    
+    --check is input are empty if yes cancel all stuff
+    local text_from_input = getUI(uiId)
+    if(text_from_input.input_string == "")then
+        SearchCommand:search(uiId)
+    end
 end
 
 function SearchCommand:update_modal_open_list(uiId,p_status)
-	local found_modal_open=0
-	
-	--check if we already have a process status for this window
-	if next(self.modal_open_list)then
-		for pc = 1, #self.modal_open_list do
-			if(self.modal_open_list[pc][1] == uiId)then
-				found_modal_open=1
-			end
-		end
-	end
-	
-	if(found_modal_open == 0)then
-		table.insert(self.modal_open_list,{uiId, p_status})
-	else
-		if next(self.modal_open_list)then
-			for mc = 1, #self.modal_open_list do
-				if(self.modal_open_list[mc][1] == uiId)then
-					self.modal_open_list[mc][2]=p_status
-				end
-			end
-		end  
-	end
+    local found_modal_open=0
+    
+    --check if we already have a process status for this window
+    if next(self.modal_open_list)then
+        for pc = 1, #self.modal_open_list do
+            if(self.modal_open_list[pc][1] == uiId)then
+                found_modal_open=1
+            end
+        end
+    end
+    
+    if(found_modal_open == 0)then
+        table.insert(self.modal_open_list,{uiId, p_status})
+    else
+        if next(self.modal_open_list)then
+            for mc = 1, #self.modal_open_list do
+                if(self.modal_open_list[mc][1] == uiId)then
+                    self.modal_open_list[mc][2]=p_status
+                end
+            end
+        end  
+    end
 end
 
 function SearchCommand:read_modal_open_list(uiId)
-	local found_modal_open = 0
-	if next(self.process_list)then
-		for mc = 1, #self.modal_open_list do
-			if(self.modal_open_list[mc][1] == uiId)then
-				found_modal_open=self.modal_open_list[mc][2]
-			end
-		end
-	end
-	return found_modal_open
+    local found_modal_open = 0
+    if next(self.process_list)then
+        for mc = 1, #self.modal_open_list do
+            if(self.modal_open_list[mc][1] == uiId)then
+                found_modal_open=self.modal_open_list[mc][2]
+            end
+        end
+    end
+    return found_modal_open
 end
 
 function SearchCommand:update_process_list(uiId,p_status)
-	local found_process_status=0
-	
-	--check if we already have a process status for this window
-	if next(self.process_list)then
-		for pc = 1, #self.process_list do
-			if(self.process_list[pc][1] == uiId)then
-				found_process_status=1
-			end
-		end
-	end
-	
-	if(found_process_status == 0)then
-		table.insert(self.process_list,{uiId, p_status})
-	else
-		if next(self.process_list)then
-			for pc = 1, #self.process_list do
-				if(self.process_list[pc][1] == uiId)then
-					self.process_list[pc][2]=p_status
-				end
-			end
-		end  
-	end
+    local found_process_status=0
+    
+    --check if we already have a process status for this window
+    if next(self.process_list)then
+        for pc = 1, #self.process_list do
+            if(self.process_list[pc][1] == uiId)then
+                found_process_status=1
+            end
+        end
+    end
+    
+    if(found_process_status == 0)then
+        table.insert(self.process_list,{uiId, p_status})
+    else
+        if next(self.process_list)then
+            for pc = 1, #self.process_list do
+                if(self.process_list[pc][1] == uiId)then
+                    self.process_list[pc][2]=p_status
+                end
+            end
+        end  
+    end
 end
 
 function SearchCommand:read_process_status(uiId)
-	local process_status = 0
-	if next(self.process_list)then
-		for pc = 1, #self.process_list do
-			if(self.process_list[pc][1] == uiId)then
-				process_status=self.process_list[pc][2]
-			end
-		end
-	end
-	return process_status
+    local process_status = 0
+    if next(self.process_list)then
+        for pc = 1, #self.process_list do
+            if(self.process_list[pc][1] == uiId)then
+                process_status=self.process_list[pc][2]
+            end
+        end
+    end
+    return process_status
 end
 
 function SearchCommand:search(uiId)
@@ -982,794 +982,794 @@ function SearchCommand:search(uiId)
 	--##check if player turn off using auto complate by settings
 	local used_searchcommand_by_config = getDbProp("UI:SAVE:CHAT:CHAT_AUTOCOMPLETE")
 	if(used_searchcommand_by_config == 0)then
-		SearchCommand:write_command_help_clear(uiId)
+                SearchCommand:write_command_help_clear(uiId)
 		do return end
-	end
+    end
 	--##end checking on/off via settings
 	--##########################################################
 	
-	--debug("now_onchange "..uiId)
-	is_tab_down = isTabDown()
-	if(is_tab_down)then
-		--debug("key_tab_down")
-		SearchCommand:check_autocomplet(uiId)
-	end
-	--trigger command by onchange a singel input
-	SearchCommand:check_autocomplet_number(uiId)
-	local text_from_input = getUI(uiId)
-	local input_text = text_from_input.input_string
-	command_identifier = string.sub(input_text, 0, 1)
-	
-	--check if first char are a "/" from text_from_input
-	if(command_identifier == "/")then
-		--debug("identifier found")
-		if(SearchCommand:find(self.identifier_found, uiId) == nil)then
-			table.insert(self.identifier_found, uiId)
-			
-			local timer_str = "@UI:VARIABLES:CURRENT_SERVER_TICK"
-			local timer_function_on_ui_window = getUI(uiId)
-			addOnDbChange(timer_function_on_ui_window, timer_str, "SearchCommand:key_trigger('"..uiId.."')")
-		end
-		
-		--reset command_parameter_list for fresh input
-		self.command_parameter_list = {}
-		--END reset command_parameter_list for fresh input
+    --debug("now_onchange "..uiId)
+    is_tab_down = isTabDown()
+    if(is_tab_down)then
+        --debug("key_tab_down")
+        SearchCommand:check_autocomplet(uiId)
+    end
+    --trigger command by onchange a singel input
+    SearchCommand:check_autocomplet_number(uiId)
+    local text_from_input = getUI(uiId)
+    local input_text = text_from_input.input_string
+    command_identifier = string.sub(input_text, 0, 1)
+
+    --check if first char are a "/" from text_from_input
+    if(command_identifier == "/")then
+        --debug("identifier found")
+        if(SearchCommand:find(self.identifier_found, uiId) == nil)then
+            table.insert(self.identifier_found, uiId)
+            
+            local timer_str = "@UI:VARIABLES:CURRENT_SERVER_TICK"
+            local timer_function_on_ui_window = getUI(uiId)
+            addOnDbChange(timer_function_on_ui_window, timer_str, "SearchCommand:key_trigger('"..uiId.."')")
+        end
+        
+        --reset command_parameter_list for fresh input
+        self.command_parameter_list = {}
+        --END reset command_parameter_list for fresh input
 		
 		local max_string_count = string.len(input_text)
-		if(max_string_count == 1)then
-			self.command_self=""
-			SearchCommand:write_command_help(uiId,i18n.get("uiSearchCommandInitDialog"))
-			SearchCommand:close_modal(uiId)
-			
-			--update process_status
-			SearchCommand:update_process_list(uiId,0)
-		else
-			SearchCommand:close_modal(uiId)
-			
-			--if we found 2 space cancel all action
-			if(string.find(string.lower(input_text), "  "))then
-				--debug("found_two_spaces")
-				SearchCommand:write_command_help_clear(uiId)
-				return 0
-			end
+        if(max_string_count == 1)then
+            self.command_self=""
+            SearchCommand:write_command_help(uiId,i18n.get("uiSearchCommandInitDialog"):toUtf8())
+            SearchCommand:close_modal(uiId)
+            
+            --update process_status
+            SearchCommand:update_process_list(uiId,0)
+        else
+            SearchCommand:close_modal(uiId)
+            
+            --if we found 2 space cancel all action
+            if(string.find(string.lower(input_text), "  "))then
+                --debug("found_two_spaces")
+                SearchCommand:write_command_help_clear(uiId)
+                return 0
+            end
 			
 			local command_first = string.sub(input_text, 2, max_string_count)
-			--split text to commands
-			for substring in command_first:gmatch("%S+") do
-				table.insert(self.command_parameter_list, substring)
-			end
-			
-			self.command_self=self.command_parameter_list[1]
-			
-			--update process_status
-			SearchCommand:update_process_list(uiId,#self.command_parameter_list)
-			
-			--go and search we found a mathing command
+            --split text to commands
+            for substring in command_first:gmatch("%S+") do
+                table.insert(self.command_parameter_list, substring)
+            end
+            
+            self.command_self=self.command_parameter_list[1]
+            
+            --update process_status
+            SearchCommand:update_process_list(uiId,#self.command_parameter_list)
+            
+            --go and search we found a mathing command
+            SearchCommand:write_command_help_clear(uiId)
+            SearchCommand:build_command_helper(uiId)
+            
+            --check last string is a space
+            local last_string = string.sub(input_text, -1, -1)
+            if(last_string == " ")then
+                SearchCommand:close_modal(uiId)
+            end
+        end
+    else
+        --check if we found the identifier
+        if(SearchCommand:find(self.identifier_found, uiId) ~= nil)then
+            --debug("clear all")
+            --run clear functions here
+            
+            table.remove(self.identifier_found, SearchCommand:find(self.identifier_found, uiId))
+            local timer_function_on_ui_window = getUI(uiId)
+            removeOnDbChange(timer_function_on_ui_window,"@UI:VARIABLES:CURRENT_SERVER_TICK")
+            
+            SearchCommand:close_modal()
 			SearchCommand:write_command_help_clear(uiId)
-			SearchCommand:build_command_helper(uiId)
-			
-			--check last string is a space
-			local last_string = string.sub(input_text, -1, -1)
-			if(last_string == " ")then
-				SearchCommand:close_modal(uiId)
-			end
-		end
-	else
-		--check if we found the identifier
-		if(SearchCommand:find(self.identifier_found, uiId) ~= nil)then
-			--debug("clear all")
-			--run clear functions here
-			
-			table.remove(self.identifier_found, SearchCommand:find(self.identifier_found, uiId))
-			local timer_function_on_ui_window = getUI(uiId)
-			removeOnDbChange(timer_function_on_ui_window,"@UI:VARIABLES:CURRENT_SERVER_TICK")
-			
-			SearchCommand:close_modal()
-			SearchCommand:write_command_help_clear(uiId)
-		end
+    end
 	end
 end
 
 function SearchCommand:get_command_type(command)
-	local command_type = ""
-	
-	for c = 1, #self.commands_list do
-		if(self.commands_list[c][4] == command) then
-			command_type = self.commands_list[c][1]
-		end
-	end
-	
-	return command_type
+    local command_type = ""
+    
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command) then
+            command_type = self.commands_list[c][1]
+        end
+    end
+    
+    return command_type
 end
 
 function SearchCommand:get_command_argument_count(command)
-	local max_arguments = 0
-	
-	for c = 1, #self.commands_list do
-		if(self.commands_list[c][4] == command) then
+    local max_arguments = 0
+    
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command) then
 			max_arguments = #self.commands_list[c] - 5
-		end
-	end
-	
-	return max_arguments
+        end
+    end
+    
+    return max_arguments
 end
 
 function SearchCommand:build_valid_command_list(command_input,uiId)
-	self.valid_commands_list = {}
-	local count_found=0
-	local found_command=0
-	local input_lengh=0
-	local first_char_commandname=""
-	local found_command_name=""
-	
-	for c = 1, #self.commands_list do
-		local command_are_allowed = 0
-		local command_display = 0
-		
-		if(#self.command_parameter_list <= 1)then
-			if(command_input == "a" or command_input == "b" or command_input == "c")then
+    self.valid_commands_list = {}
+    local count_found=0
+    local found_command=0
+    local input_lengh=0
+    local first_char_commandname=""
+    local found_command_name=""
+    
+    for c = 1, #self.commands_list do
+        local command_are_allowed = 0
+        local command_display = 0
+        
+        if(#self.command_parameter_list <= 1)then
+            if(command_input == "a" or command_input == "b" or command_input == "c")then
 				if(self.commands_list[c][1] == "client" or self.commands_list[c][1] == "emotes" or self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
-					command_display = 1
-				else
-					command_display = 0
-				end
-			else
-				if(self.commands_list[c][1] == "shard")then
-					if(self.command_self == "?")then
-						command_display = 1
-					else
-						command_display = 0
-					end
-				elseif(self.commands_list[c][1] == "eScript")then
-					if(self.command_self == "?")then
-						command_display = 1
-					else
-						command_display = 0
-					end
-				else
-					command_display = 1
-				end
-			end
-		else
-			--check if we want used a client or shared command
-			if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
-				--debug(self.commands_list[c][1])
-				if(self.commands_list[c][1] == "shard" and self.command_parameter_list[2] ~= "eScript")then
-					command_display = 1
-				elseif(self.commands_list[c][1] == "eScript")then
-					if(self.command_parameter_list[2] == "eScript")then
-						command_display = 1
-					else
-						command_display = 0
-					end
-				else
-					command_display = 0
-				end
-			else
-				if(self.commands_list[c][1] == "shard")then
-					if(self.command_self == "?")then
-						command_display = 1
-					else
-						command_display = 0
-					end
-				elseif(self.commands_list[c][1] == "eScript")then
-					if(self.command_self == "?")then
-						command_display = 1
-					else
-						command_display = 0
-					end
-				else
-					command_display = 1
-				end
-			end
-		end
-		
-		if(self.commands_list[c][2] == "player")then
-			command_are_allowed = 1
-		else
-			if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
-				command_are_allowed = 1
-			end
-		end
-		
-		--debug("self.commands_list[c][4]: "..self.commands_list[c][4].." self.command_self: '"..self.command_self.."' command_input: '"..command_input.."' #self.command_parameter_list: "..#self.command_parameter_list)
-		
-		if(#self.command_parameter_list >= 2)then
-			if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
-				if(string.lower(command_input) == "a" or string.lower(command_input) == "b" or string.lower(command_input) == "c")then
-					if(self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
-						command_display = 0
-					end
-				end
-			end
-		end
-		
-		--debug("command_are_allowed: "..command_are_allowed.." command_display: "..command_display)
-		
-		if(command_are_allowed == 1 and command_display == 1)then
-			if(command_input ~= "")then
-				if(string.lower(self.commands_list[c][4]) == string.lower(command_input))then
-					found_command=c
-					found_command_name=self.commands_list[c][4]
-					count_found=count_found+1
-				else
-					command_input_lengh = string.len(command_input)
-		
-					if(command_input_lengh == 1)then
-						--its the first char only search all command whats beginn with this char
-						first_char_commandname = string.sub(self.commands_list[c][4],1,1)
-						
-						if (string.lower(first_char_commandname) == string.lower(command_input))then
-							--debug("found_command: "..self.commands_list[c][4])
-							table.insert(self.valid_commands_list,self.commands_list[c][4])
-							count_found=count_found+1
-						end
-					else
-						--input is longer as 1 char, go to full search mode, add every result where the input string are anywhere in the command name
-						if string.find(string.lower(self.commands_list[c][4]), string.lower(command_input))then
-							table.insert(self.valid_commands_list,self.commands_list[c][4])
-							count_found=count_found+1
-						end
-					end
-				end
-			end
-		end
-	end
-	
-	if(count_found == 0)then
-		--debug("no_command_found_close_modal")
-		SearchCommand:close_modal(uiId)
-	end
-	
-	--sort the command table
-	SearchCommand:sort_valid_command_list(found_command_name)
-	--end
+                    command_display = 1
+                else
+                    command_display = 0
+                end
+            else
+                if(self.commands_list[c][1] == "shard")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                else
+                    command_display = 1
+                end
+            end
+        else
+            --check if we want used a client or shared command
+            if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
+                --debug(self.commands_list[c][1])
+                if(self.commands_list[c][1] == "shard" and self.command_parameter_list[2] ~= "eScript")then
+                    command_display = 1
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_parameter_list[2] == "eScript")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                else
+                    command_display = 0
+                end
+            else
+                if(self.commands_list[c][1] == "shard")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_self == "?")then
+                        command_display = 1
+                    else
+                        command_display = 0
+                    end
+                else
+                    command_display = 1
+                end
+            end
+        end
+        
+        if(self.commands_list[c][2] == "player")then
+            command_are_allowed = 1
+        else
+            if(SearchCommand:check_prvis(self.commands_list[c][2]) == "true")then
+                command_are_allowed = 1
+            end
+        end
+        
+        --debug("self.commands_list[c][4]: "..self.commands_list[c][4].." self.command_self: '"..self.command_self.."' command_input: '"..command_input.."' #self.command_parameter_list: "..#self.command_parameter_list)
+        
+        if(#self.command_parameter_list >= 2)then
+            if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
+                if(string.lower(command_input) == "a" or string.lower(command_input) == "b" or string.lower(command_input) == "c")then
+                    if(self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
+                        command_display = 0
+                    end
+                end
+            end
+        end
+        
+        --debug("command_are_allowed: "..command_are_allowed.." command_display: "..command_display)
+        
+        if(command_are_allowed == 1 and command_display == 1)then
+            if(command_input ~= "")then
+                if(string.lower(self.commands_list[c][4]) == string.lower(command_input))then
+                    found_command=c
+                    found_command_name=self.commands_list[c][4]
+                    count_found=count_found+1
+                else
+                    command_input_lengh = string.len(command_input)
+        
+                    if(command_input_lengh == 1)then
+                        --its the first char only search all command whats beginn with this char
+                        first_char_commandname = string.sub(self.commands_list[c][4],1,1)
+                        
+                        if (string.lower(first_char_commandname) == string.lower(command_input))then
+                            --debug("found_command: "..self.commands_list[c][4])
+                            table.insert(self.valid_commands_list,self.commands_list[c][4])
+                            count_found=count_found+1
+                        end
+                    else
+                        --input is longer as 1 char, go to full search mode, add every result where the input string are anywhere in the command name
+                        if string.find(string.lower(self.commands_list[c][4]), string.lower(command_input))then
+                            table.insert(self.valid_commands_list,self.commands_list[c][4])
+                            count_found=count_found+1
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    if(count_found == 0)then
+        --debug("no_command_found_close_modal")
+        SearchCommand:close_modal(uiId)
+    end
+    
+    --sort the command table
+    SearchCommand:sort_valid_command_list(found_command_name)
+    --end
 
-	return found_command,count_found
+    return found_command,count_found
 end
 
 function SearchCommand:sort_valid_command_list(found_command_name)
-	local temp_sort_list={}
-	--sort valid command list
-	table.sort(self.valid_commands_list)
-	
-	--debug("found_command_name: "..found_command_name)
-	
-	if(found_command_name ~= "")then
-		table.insert(temp_sort_list,found_command_name)
-	end
-	
-	for c = 1, #self.valid_commands_list do
-		table.insert(temp_sort_list,self.valid_commands_list[c])
-	end
-	
-	self.valid_commands_list={}
-	self.valid_commands_list = temp_sort_list
+    local temp_sort_list={}
+    --sort valid command list
+    table.sort(self.valid_commands_list)
+    
+    --debug("found_command_name: "..found_command_name)
+    
+    if(found_command_name ~= "")then
+        table.insert(temp_sort_list,found_command_name)
+    end
+    
+    for c = 1, #self.valid_commands_list do
+        table.insert(temp_sort_list,self.valid_commands_list[c])
+    end
+    
+    self.valid_commands_list={}
+    self.valid_commands_list = temp_sort_list
 end
 
 function SearchCommand:get_server_name()
-	local server_name = "ERROR"
-	local application = getClientCfgVar("Application")
-	--debug(application["0"])
-	
-	if(application["0"] == "ryzom_test")then
-		server_name="Gingo"
-	elseif(application["0"] == "ryzom_dev")then
-		server_name="Yubo"
-	elseif(application["0"] == "ryzom_live")then
-		server_name="Atys"
-	elseif(application["0"] == "ryzom_beta")then
-		server_name="Atys"
-	elseif(application["0"] == "ryzom_staging")then
-		server_name="Rendor"
-	else
-		server_name="Unknow"
-	end
-	
-	return server_name
+    local server_name = "ERROR"
+    local application = getClientCfgVar("Application")
+    --debug(application["0"])
+    
+    if(application["0"] == "ryzom_test")then
+        server_name="Gingo"
+    elseif(application["0"] == "ryzom_dev")then
+        server_name="Yubo"
+    elseif(application["0"] == "ryzom_live")then
+        server_name="Atys"
+    elseif(application["0"] == "ryzom_beta")then
+        server_name="Atys"
+    elseif(application["0"] == "ryzom_staging")then
+        server_name="Rendor"
+    else
+        server_name="Unknow"
+    end
+    
+    return server_name
 end
 
 function SearchCommand:build_valid_player_list(playername_input,uiId,add_targetname_prefix)
-	self.valid_commands_list = {}
-	local count_found=0
-	local found_playername=0
-	
-	if(self.player_list ~= nil)then
-		for c = 1, #self.player_list do
-			if(playername_input ~= "")then
-				if(string.lower(self.player_list[c]) == string.lower(playername_input))then
-					found_playername=c
-					count_found=1
-				else
-					if string.find(string.lower(self.player_list[c]), string.lower(playername_input))then
-						if(add_targetname_prefix == 1)then
-							local server_name=SearchCommand:get_server_name()
-							table.insert(self.valid_commands_list,self.player_list[c].."("..server_name..")")
-						else
-							table.insert(self.valid_commands_list,self.player_list[c])
-						end
-						count_found=count_found+1
-					end
-				end
-			end
-		end
-	else
-		debug("Error")
-	end
-	
-	if(count_found == 0)then
-		SearchCommand:close_modal(uiId)
-	end
-	
-	--sort found player list
-	table.sort(self.valid_commands_list)
-	
-	return found_playername
+    self.valid_commands_list = {}
+    local count_found=0
+    local found_playername=0
+    
+    if(self.player_list ~= nil)then
+        for c = 1, #self.player_list do
+            if(playername_input ~= "")then
+                if(string.lower(self.player_list[c]) == string.lower(playername_input))then
+                    found_playername=c
+                    count_found=1
+                else
+                    if string.find(string.lower(self.player_list[c]), string.lower(playername_input))then
+                        if(add_targetname_prefix == 1)then
+                            local server_name=SearchCommand:get_server_name()
+                            table.insert(self.valid_commands_list,self.player_list[c].."("..server_name..")")
+                        else
+                            table.insert(self.valid_commands_list,self.player_list[c])
+                        end
+                        count_found=count_found+1
+                    end
+                end
+            end
+        end
+    else
+        debug("Error")
+    end
+    
+    if(count_found == 0)then
+        SearchCommand:close_modal(uiId)
+    end
+    
+    --sort found player list
+    table.sort(self.valid_commands_list)
+    
+    return found_playername
 end
 
 function SearchCommand:search_build_player_list(uiId,playername,add_targetname_prefix)
-	local found_player=0
-	local found_command=0
-	found_player=SearchCommand:build_valid_player_list(playername,uiId,add_targetname_prefix)
-	
-	SearchCommand:search_build_argument_list(uiId,self.command_self)
-	
-	if(found_player ~= 0)then
-		SearchCommand:close_modal(uiId)
-	else
-		if next(self.valid_commands_list) ~= nil then
-			SearchCommand:show_more_options(uiId)
-		end
-	end
+    local found_player=0
+    local found_command=0
+    found_player=SearchCommand:build_valid_player_list(playername,uiId,add_targetname_prefix)
+    
+    SearchCommand:search_build_argument_list(uiId,self.command_self)
+    
+    if(found_player ~= 0)then
+        SearchCommand:close_modal(uiId)
+    else
+        if next(self.valid_commands_list) ~= nil then
+            SearchCommand:show_more_options(uiId)
+        end
+    end
 end
 
 function SearchCommand:search_build_command_list(uiId,command,show_argument_help)
-	local found_command_id=0
-	local found_more_possible=0
-	--debug("search_build_command_list")
-	
-	found_command_id,found_more_possible=SearchCommand:build_valid_command_list(command,uiId)
-	
-	if(found_command_id ~= 0)then
-		if(found_more_possible > 1)then
-			if next(self.valid_commands_list) then
-				SearchCommand:show_more_options(uiId)
-			end
-		else
-			SearchCommand:close_modal(uiId)
-		end
-	else
-		if next(self.valid_commands_list) then
-			SearchCommand:show_more_options(uiId)
-		end
-	end
-	
-	if(show_argument_help)then
-		if(found_command_id ~= 0)then
-			SearchCommand:search_build_argument_list(uiId,command)
-		end
-	else
-		SearchCommand:search_build_argument_list(uiId,self.command_self)
-	end
+    local found_command_id=0
+    local found_more_possible=0
+    --debug("search_build_command_list")
+    
+    found_command_id,found_more_possible=SearchCommand:build_valid_command_list(command,uiId)
+    
+    if(found_command_id ~= 0)then
+        if(found_more_possible > 1)then
+            if next(self.valid_commands_list) then
+                SearchCommand:show_more_options(uiId)
+            end
+        else
+            SearchCommand:close_modal(uiId)
+        end
+    else
+        if next(self.valid_commands_list) then
+            SearchCommand:show_more_options(uiId)
+        end
+    end
+    
+    if(show_argument_help)then
+        if(found_command_id ~= 0)then
+            SearchCommand:search_build_argument_list(uiId,command)
+        end
+    else
+        SearchCommand:search_build_argument_list(uiId,self.command_self)
+    end
 end
 
 function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
-	--debug("search_build_argument_list")
-	local argument_help=""
-	local command_index=0
-	local max_arguments=0
-	local current_args=0
-	local special_offset=0
-	local command_to_show_argument_new=""
-	
-	command_to_show_argument_new = command_to_show_argument
-	
-	if(command_to_show_argument == "a")then
-		if(#self.command_parameter_list >= 2)then
-			command_to_show_argument_new=self.command_parameter_list[2]
-			special_offset=1
-		end
-	end
-	
-	if(command_to_show_argument == "b")then
-		if(#self.command_parameter_list >= 2)then
-			command_to_show_argument_new=self.command_parameter_list[2]
-			special_offset=1
-		end
-	end
-	
-	if(command_to_show_argument == "c")then
-		if(#self.command_parameter_list >= 3)then
-			command_to_show_argument_new=self.command_parameter_list[3]
-			special_offset=2
-		end
-	end
-	
-	--debug("default: "..command_to_show_argument.." new: "..command_to_show_argument_new)
-	
-	for c = 1, #self.commands_list do
-		if(self.commands_list[c][4] == command_to_show_argument_new)then
-			--check now if we want display the argument for this command
-			
-			if(command_to_show_argument == "a" or command_to_show_argument == "b" or command_to_show_argument == "c")then
-				if(command_to_show_argument == command_to_show_argument_new)then
-					if(#self.command_parameter_list >= 2)then
-						--debug("here: "..#self.command_parameter_list.." "..command_to_show_argument_new)
-						if(command_to_show_argument_new ~= "a" and #self.command_parameter_list == 2)then
-							command_index=c
-						elseif(command_to_show_argument_new ~= "b" and #self.command_parameter_list == 2)then
-							command_index=c
-						elseif(command_to_show_argument_new ~= "c" and #self.command_parameter_list == 3)then
-							command_index=c
-						end
-					else
-						command_index=c
-					end
-				else
-					if(self.commands_list[c][1] == "shard")then
-						if(command_to_show_argument_new ~= "a" and command_to_show_argument_new ~= "b" and command_to_show_argument_new ~= "c")then
-							command_index=c
-						end
-					end
-				end
-			else
-				if(self.commands_list[c][1] == "shard")then
-					if(self.command_self == "?")then
-						command_index=c
-					end
-				elseif(self.commands_list[c][1] == "eScript")then
-					if(self.command_self == "?")then
-						command_index=c
-					end
-				else
-					command_index=c
-				end
-			end
-			
-			--end
-		end
-	end
-	
-	--debug("command_index: "..command_index)
-	
-	if(command_index ~= 0)then
+    --debug("search_build_argument_list")
+    local argument_help=""
+    local command_index=0
+    local max_arguments=0
+    local current_args=0
+    local special_offset=0
+    local command_to_show_argument_new=""
+    
+    command_to_show_argument_new = command_to_show_argument
+    
+    if(command_to_show_argument == "a")then
+        if(#self.command_parameter_list >= 2)then
+            command_to_show_argument_new=self.command_parameter_list[2]
+            special_offset=1
+        end
+    end
+    
+    if(command_to_show_argument == "b")then
+        if(#self.command_parameter_list >= 2)then
+            command_to_show_argument_new=self.command_parameter_list[2]
+            special_offset=1
+        end
+    end
+    
+    if(command_to_show_argument == "c")then
+        if(#self.command_parameter_list >= 3)then
+            command_to_show_argument_new=self.command_parameter_list[3]
+            special_offset=2
+        end
+    end
+    
+    --debug("default: "..command_to_show_argument.." new: "..command_to_show_argument_new)
+    
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command_to_show_argument_new)then
+            --check now if we want display the argument for this command
+            
+            if(command_to_show_argument == "a" or command_to_show_argument == "b" or command_to_show_argument == "c")then
+                if(command_to_show_argument == command_to_show_argument_new)then
+                    if(#self.command_parameter_list >= 2)then
+                        --debug("here: "..#self.command_parameter_list.." "..command_to_show_argument_new)
+                        if(command_to_show_argument_new ~= "a" and #self.command_parameter_list == 2)then
+                            command_index=c
+                        elseif(command_to_show_argument_new ~= "b" and #self.command_parameter_list == 2)then
+                            command_index=c
+                        elseif(command_to_show_argument_new ~= "c" and #self.command_parameter_list == 3)then
+                            command_index=c
+                        end
+                    else
+                        command_index=c
+                    end
+                else
+                    if(self.commands_list[c][1] == "shard")then
+                        if(command_to_show_argument_new ~= "a" and command_to_show_argument_new ~= "b" and command_to_show_argument_new ~= "c")then
+                            command_index=c
+                        end
+                    end
+                end
+            else
+                if(self.commands_list[c][1] == "shard")then
+                    if(self.command_self == "?")then
+                        command_index=c
+                    end
+                elseif(self.commands_list[c][1] == "eScript")then
+                    if(self.command_self == "?")then
+                        command_index=c
+                    end
+                else
+                    command_index=c
+                end
+            end
+            
+            --end
+        end
+    end
+    
+    --debug("command_index: "..command_index)
+    
+    if(command_index ~= 0)then
 		max_arguments = #self.commands_list[command_index] - 5
 		
-		max_args=#self.command_parameter_list
-		current_args=max_args - 1
-		
-		if(special_offset ~= 0)then
-			max_args=max_args - special_offset
-			current_args=max_args - 1
-		end
-		
-		for ac = 1, max_arguments do
-			if(ac > current_args)then
+        max_args=#self.command_parameter_list
+        current_args=max_args - 1
+        
+        if(special_offset ~= 0)then
+            max_args=max_args - special_offset
+            current_args=max_args - 1
+        end
+        
+        for ac = 1, max_arguments do
+            if(ac > current_args)then
 				for pc = 1, #self.commands_list[command_index][5+ac] do
 					local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[command_index][5+ac][pc][1])
 					
-					if(pc > 1)then
-						argument_help=argument_help.."/"..translation_parm
-					else
-						argument_help=argument_help.." "..translation_parm
-					end
-				end
-			else
-				argument_help=argument_help.." "..self.command_parameter_list[ac+1+special_offset]
-			end
-			
-		end
-		
-		if(current_args > max_arguments)then
-			diff=current_args-max_arguments
-			
-			for ma = 1, diff do
-				if(self.command_self == "a")then
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+2+ma]
-				elseif(self.command_self == "b")then
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+2+ma]
-				elseif(self.command_self == "c")then
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+3+ma]
-				else
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+1+ma]
-				end
-			end
-			argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter")
-		end
-		
-		if(self.command_self == "a" and #self.command_parameter_list >= 2)then
-			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
-		elseif(self.command_self == "b" and #self.command_parameter_list >= 2)then
-			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
-		elseif(self.command_self == "c" and #self.command_parameter_list >= 3)then
-			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2].." "..self.command_parameter_list[3]..""..argument_help)
-		else
-			SearchCommand:write_command_help(uiId,"/"..self.commands_list[command_index][4]..""..argument_help)
-		end
-	end
+                    if(pc > 1)then
+                        argument_help=argument_help.."/"..translation_parm
+                    else
+                        argument_help=argument_help.." "..translation_parm
+                    end
+                end
+            else
+                argument_help=argument_help.." "..self.command_parameter_list[ac+1+special_offset]
+            end
+            
+        end
+        
+        if(current_args > max_arguments)then
+            diff=current_args-max_arguments
+            
+            for ma = 1, diff do
+                if(self.command_self == "a")then
+                    argument_help=argument_help.." "..self.command_parameter_list[max_arguments+2+ma]
+                elseif(self.command_self == "b")then
+                    argument_help=argument_help.." "..self.command_parameter_list[max_arguments+2+ma]
+                elseif(self.command_self == "c")then
+                    argument_help=argument_help.." "..self.command_parameter_list[max_arguments+3+ma]
+                else
+                    argument_help=argument_help.." "..self.command_parameter_list[max_arguments+1+ma]
+                end
+            end
+            argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
+        end
+        
+        if(self.command_self == "a" and #self.command_parameter_list >= 2)then
+            SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
+        elseif(self.command_self == "b" and #self.command_parameter_list >= 2)then
+            SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
+        elseif(self.command_self == "c" and #self.command_parameter_list >= 3)then
+            SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2].." "..self.command_parameter_list[3]..""..argument_help)
+        else
+            SearchCommand:write_command_help(uiId,"/"..self.commands_list[command_index][4]..""..argument_help)
+        end
+    end
 end
 
 function SearchCommand:find_argument(command,uiId)
-	--debug("find_argument")
-	local argument_name = ""
-	local special_offset = 0
-	local current_parm = 0
-	local max_command_args = 0
-	
-	if(command == "a")then
-		if(#self.command_parameter_list > 2)then
-			command=self.command_parameter_list[2]
-			special_offset=2
-		end
-	end
-	
-	if(command == "b")then
-		if(#self.command_parameter_list > 2)then
-			command=self.command_parameter_list[2]
-			special_offset=2
-		end
-	end
-	
-	if(command == "c")then
-		if(#self.command_parameter_list > 3)then
-			command=self.command_parameter_list[3]
-			special_offset=3
-		end
-	end
-	
-	--debug("special_offset: "..special_offset.." command: "..command)
-	
-	for c = 1, #self.commands_list do
-		if(self.commands_list[c][4] == command)then
-			if(special_offset ~= 0)then
-				current_parm=SearchCommand:read_process_status(uiId) - special_offset
-			else
-				current_parm=SearchCommand:read_process_status(uiId) - 1
-			end
+    --debug("find_argument")
+    local argument_name = ""
+    local special_offset = 0
+    local current_parm = 0
+    local max_command_args = 0
+    
+    if(command == "a")then
+        if(#self.command_parameter_list > 2)then
+            command=self.command_parameter_list[2]
+            special_offset=2
+        end
+    end
+    
+    if(command == "b")then
+        if(#self.command_parameter_list > 2)then
+            command=self.command_parameter_list[2]
+            special_offset=2
+        end
+    end
+    
+    if(command == "c")then
+        if(#self.command_parameter_list > 3)then
+            command=self.command_parameter_list[3]
+            special_offset=3
+        end
+    end
+    
+    --debug("special_offset: "..special_offset.." command: "..command)
+    
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command)then
+            if(special_offset ~= 0)then
+                current_parm=SearchCommand:read_process_status(uiId) - special_offset
+            else
+                current_parm=SearchCommand:read_process_status(uiId) - 1
+            end
 		
 			max_command_args = #self.commands_list[c] - 5
 			
-			if(current_parm <= max_command_args)then
+            if(current_parm <= max_command_args)then
 				for pc = 1, #self.commands_list[c][5+current_parm] do
 					argument_name=argument_name..","..self.commands_list[c][5+current_parm][pc][1]
-				end
-			end
-		end
-	end
-	return argument_name
+                end
+            end
+        end
+    end
+    return argument_name
 end
 
 function SearchCommand:add_player_to_list(online_player_list)
-	for online = 1, #online_player_list do
-		--only insert a playername once
-		if(SearchCommand:find(self.player_list, online_player_list[online]) == nil)then
-			table.insert(self.player_list, online_player_list[online])
-		end
-	end
+    for online = 1, #online_player_list do
+        --only insert a playername once
+        if(SearchCommand:find(self.player_list, online_player_list[online]) == nil)then
+            table.insert(self.player_list, online_player_list[online])
+        end
+    end
 end
 
 function SearchCommand:search_build_local_player_list()
-	local online_player_list = {}
+    local online_player_list = {}
 
-	--debug("Friends online:")
+    --debug("Friends online:")
 	for i=0,1000 do
-		local ui = getUI("ui:interface:friend_list_"..tostring(i))
-		if ui then
-			local online = getUI("ui:interface:friend_list_"..tostring(i)..":header_closed:online")
-			if online.texture == "w_online.tga" then
-				if(SearchCommand:find(online_player_list, ui.title) == nil)then
-					table.insert(online_player_list, ui.title)
-				end
-			end
-		end
-	end
-	
-	--debug("Teammembers:")
-	for i=0,5 do
-		local ui = getUI("ui:interface:team_list_"..tostring(i))
-		if ui then
-			if(SearchCommand:find(online_player_list, ui.title) == nil)then
-				table.insert(online_player_list, ui.title)
-			end
-		end
-	end
-	
-	--debug("Guildmember online:")
+    	local ui = getUI("ui:interface:friend_list_"..tostring(i))
+    	if ui then
+    		local online = getUI("ui:interface:friend_list_"..tostring(i)..":header_closed:online")
+    		if online.texture == "w_online.tga" then
+    		    if(SearchCommand:find(online_player_list, ui.title) == nil)then
+                    table.insert(online_player_list, ui.title)
+                end
+    		end
+    	end
+    end
+    
+    --debug("Teammembers:")
+    for i=0,5 do
+    	local ui = getUI("ui:interface:team_list_"..tostring(i))
+    	if ui then
+    	    if(SearchCommand:find(online_player_list, ui.title) == nil)then
+                table.insert(online_player_list, ui.title)
+            end
+    	end
+    end
+    
+    --debug("Guildmember online:")
 	for i=0,1000 do
-		local ui = getUI("ui:interface:guild:content:tab_guild:list_member:guild_members:ui:interface:guild:content:tab_guild:list_member:guild_members:m"..tostring(i))
-		if ui then
-			local online = getUI("ui:interface:guild:content:tab_guild:list_member:guild_members:ui:interface:guild:content:tab_guild:list_member:guild_members:m"..tostring(i)..":online")
-			if online.texture == "w_online.tga" then
-				if(SearchCommand:find(online_player_list, ui.name.hardtext) == nil)then
-					table.insert(online_player_list, ui.name.hardtext)
-				end
-			end
-		end
-	end
-	
-	--now check and update player_list
-	SearchCommand:add_player_to_list(online_player_list)
+    	local ui = getUI("ui:interface:guild:content:tab_guild:list_member:guild_members:ui:interface:guild:content:tab_guild:list_member:guild_members:m"..tostring(i))
+    	if ui then
+    		local online = getUI("ui:interface:guild:content:tab_guild:list_member:guild_members:ui:interface:guild:content:tab_guild:list_member:guild_members:m"..tostring(i)..":online")
+    		if online.texture == "w_online.tga" then
+    		    if(SearchCommand:find(online_player_list, ui.name.hardtext) == nil)then
+                    table.insert(online_player_list, ui.name.hardtext)
+                end
+    		end
+    	end
+    end
+    
+    --now check and update player_list
+    SearchCommand:add_player_to_list(online_player_list)
 end
 
 function SearchCommand:build_command_helper(uiId)
-	--read process_list
+    --read process_list
 	--debug("SearchCommand:build_command_helper 1")
-	local player_priv = isPlayerPrivilege()
-	local argu_name = ""
-	local process_status=SearchCommand:read_process_status(uiId)
-	local add_targetname_prefix=0
-	
-	--debug("process_status: "..process_status)
-	--process_status == 0 only / identifyer found
-	--process_status == 1 try for command
-	--process_status > 1 try for parameter
-	
-	if(process_status == 1)then
-		--initlial command
-		SearchCommand:search_build_command_list(uiId,self.command_self,true)
+    local player_priv = isPlayerPrivilege()
+    local argu_name = ""
+    local process_status=SearchCommand:read_process_status(uiId)
+    local add_targetname_prefix=0
+    
+    --debug("process_status: "..process_status)
+    --process_status == 0 only / identifyer found
+    --process_status == 1 try for command
+    --process_status > 1 try for parameter
+    
+    if(process_status == 1)then
+        --initlial command
+        SearchCommand:search_build_command_list(uiId,self.command_self,true)
 		self.player_list_already_filled=0
-	else
-		--debug("process_args")
-		argu_name = SearchCommand:find_argument(self.command_self,uiId)
-		--debug("argu_name: "..argu_name)
-		
-		
-		--check if argument can be a command or a playername
-		if(string.find(string.lower(argu_name), string.lower("<Command>")))then
-			--debug("parm is a command")
-			SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
-		elseif(string.find(string.lower(argu_name), string.lower("<PlayerName>")) or string.find(string.lower(argu_name), string.lower("<TargetName>")))then 
+    else
+        --debug("process_args")
+        argu_name = SearchCommand:find_argument(self.command_self,uiId)
+        --debug("argu_name: "..argu_name)
+        
+        
+        --check if argument can be a command or a playername
+        if(string.find(string.lower(argu_name), string.lower("<Command>")))then
+            --debug("parm is a command")
+            SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
+        elseif(string.find(string.lower(argu_name), string.lower("<PlayerName>")) or string.find(string.lower(argu_name), string.lower("<TargetName>")))then 
 			
 				--player_priv=False
-				if(player_priv)then
-					--load_current_active_player_name
+            if(player_priv)then
+                --load_current_active_player_name
 					if(self.player_list_already_filled == 0) then
-						webig:openUrlInBg("https://app.ryzom.com/get_playername_online/index.php")
+                webig:openUrlInBg("https://app.ryzom.com/get_playername_online/index.php")
 						self.player_list_already_filled=1
 						--debug("parm is a playername priv")
-					end
-				else
-					--read local playername
-					--friendslist
-					--guildlist
-					--teammember
+            end
+            else
+                --read local playername
+                --friendslist
+                --guildlist
+                --teammember
 					if(self.player_list_already_filled == 0) then
-						SearchCommand:search_build_local_player_list()
+                SearchCommand:search_build_local_player_list()
 						self.player_list_already_filled=1
-						--debug("parm is a playername")
-					end
-				end
+            --debug("parm is a playername")
+            end
+        end
 				
-				if(string.find(string.lower(argu_name), string.lower("<TargetName>")))then
-					--its TargetName so we need add the ServerName after the player name
-					add_targetname_prefix=1
-				end
-				
-				SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status],add_targetname_prefix)
-		elseif(string.find(string.lower(argu_name), string.lower("<ScriptCommand>")))then
-			SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
-		else
-			SearchCommand:search_build_argument_list(uiId,self.command_self)
-		end
-	end
+            if(string.find(string.lower(argu_name), string.lower("<TargetName>")))then
+                --its TargetName so we need add the ServerName after the player name
+                add_targetname_prefix=1
+            end
+            
+            SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status],add_targetname_prefix)
+        elseif(string.find(string.lower(argu_name), string.lower("<ScriptCommand>")))then
+            SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
+        else
+            SearchCommand:search_build_argument_list(uiId,self.command_self)
+        end
+    end
 end
 
 function SearchCommand:write_command_help(uiId,text)
-	local main_chat_input =  getUI(uiId)
-	local read_prompt = main_chat_input.prompt
-	--debug("write_command_help: "..text)
-	local behind_help_text = getUI(uiId.."h")
-	
-	behind_help_text.prompt=read_prompt
-	behind_help_text.input_string = text
+    local main_chat_input =  getUI(uiId)
+    local read_prompt = main_chat_input.prompt
+    --debug("write_command_help: "..text)
+    local behind_help_text = getUI(uiId.."h")
+    
+    behind_help_text.prompt=read_prompt
+    behind_help_text.input_string = text
 end
 
 function SearchCommand:write_command_help_clear(uiId)
-	local behind_help_text = getUI(uiId.."h")
-	behind_help_text.input_string = ""
-	behind_help_text.prompt = ""
+    local behind_help_text = getUI(uiId.."h")
+    behind_help_text.input_string = ""
+    behind_help_text.prompt = ""
 end
 
 function SearchCommand:close_modal(uiId)
-	--debug("close_modal")
+    --debug("close_modal")
 	local modal_open_list = SearchCommand:read_modal_open_list(uiId)
 	local menu = getUI("ui:interface:search_command_add_menu")
 	
 	if(modal_open_list == 1)then
-		SearchCommand:update_modal_open_list(uiId,0)
+    SearchCommand:update_modal_open_list(uiId,0)
 	end
 	
 	--debug("Menu Active: "..menu.active)
 	
 	if(menu.active) then
 		--debug("Menu Active: "..menu.active)
-		runAH(nil, "leave_modal", "group=ui:interface:search_command_add_menu")
+    runAH(nil, "leave_modal", "group=ui:interface:search_command_add_menu")
 	end
 end
 
 function SearchCommand:show_more_options(uiId)
-	SearchCommand:update_modal_open_list(uiId,1)
-	--debug("build_menu")
-	local display_max_found = 0
-	local calc_manu_hight = 0
-	local up_ok = 0
-	local down_ok = 0
-	
-	base_main_chat_id = string.sub(uiId,0,string.len(uiId)-3)
-	local check_main_window = getUI(base_main_chat_id)
+    SearchCommand:update_modal_open_list(uiId,1)
+    --debug("build_menu")
+    local display_max_found = 0
+    local calc_manu_hight = 0
+    local up_ok = 0
+    local down_ok = 0
+    
+    base_main_chat_id = string.sub(uiId,0,string.len(uiId)-3)
+    local check_main_window = getUI(base_main_chat_id)
 
-	base_window_id = string.sub(uiId,0,string.len(uiId)-15)
-	local check_window = getUI(base_window_id)
-	
-	local interface_window = getUI("ui:interface")
-	local interface_window_h = interface_window.h
-	local interface_window_w = interface_window.w
+    base_window_id = string.sub(uiId,0,string.len(uiId)-15)
+    local check_window = getUI(base_window_id)
+    
+    local interface_window = getUI("ui:interface")
+    local interface_window_h = interface_window.h
+    local interface_window_w = interface_window.w
 	
 	local offset_h_down = 15
-	local offset_h_up = 35
-	local offest_x = 0
+    local offset_h_up = 35
+    local offest_x = 0
 	
 	local model_content = ""
 	
-	if(check_main_window.x == 0)then
-		offest_x = 18
-	else
-		offest_x = check_main_window.x + 10
-	end
-	
-	local new_modal_pos_x = check_window.x + offest_x
-	local new_modal_pos_y = check_window.y - check_window.h
-	
-	if(#self.valid_commands_list > 9)then
-		display_max_found = 9
-		calc_manu_hight = (display_max_found * 16) + 39
-	else
-		display_max_found = #self.valid_commands_list
-		calc_manu_hight = (display_max_found * 16) + 23
-	end
-	
-	--check we need spawn menu up or down
-	local cal_needed_space_up = (check_window.y - check_window.h) + calc_manu_hight + offset_h_up
-	local cal_needed_space_down = (check_window.y - check_window.h) - calc_manu_hight - offset_h_down
+    if(check_main_window.x == 0)then
+        offest_x = 18
+    else
+        offest_x = check_main_window.x + 10
+    end
+    
+    local new_modal_pos_x = check_window.x + offest_x
+    local new_modal_pos_y = check_window.y - check_window.h
+    
+    if(#self.valid_commands_list > 9)then
+        display_max_found = 9
+        calc_manu_hight = (display_max_found * 16) + 39
+    else
+        display_max_found = #self.valid_commands_list
+        calc_manu_hight = (display_max_found * 16) + 23
+    end
+    
+    --check we need spawn menu up or down
+    local cal_needed_space_up = (check_window.y - check_window.h) + calc_manu_hight + offset_h_up
+    local cal_needed_space_down = (check_window.y - check_window.h) - calc_manu_hight - offset_h_down
 
-	if(cal_needed_space_up > interface_window_h)then
-		up_ok = 0
-	else
-		up_ok = 1
-	end
-	
-	if(cal_needed_space_down < 0)then
-		down_ok = 0
-	else
-		down_ok = 1
-	end
-	
-	if(down_ok == 1 and up_ok == 1)then
-		if(cal_needed_space_up < cal_needed_space_down)then
-			up_ok = 1
-			down_ok = 0
-		else
-			up_ok = 0
-			down_ok = 1
-		end
-	end
-	if(up_ok == 1)then
-		new_modal_pos_y = (check_window.y - check_window.h) + offset_h_up
-	end
-	if(down_ok == 1)then
+    if(cal_needed_space_up > interface_window_h)then
+        up_ok = 0
+    else
+        up_ok = 1
+    end
+    
+    if(cal_needed_space_down < 0)then
+        down_ok = 0
+    else
+        down_ok = 1
+    end
+    
+    if(down_ok == 1 and up_ok == 1)then
+        if(cal_needed_space_up < cal_needed_space_down)then
+            up_ok = 1
+            down_ok = 0
+        else
+            up_ok = 0
+            down_ok = 1
+        end
+    end
+    if(up_ok == 1)then
+        new_modal_pos_y = (check_window.y - check_window.h) + offset_h_up
+    end
+    if(down_ok == 1)then
 		new_modal_pos_y = (check_window.y - check_window.h) - (calc_manu_hight + offset_h_down)
-	end
+    end
 	
 	local found_emotes=0
 	local found_commands=0
 	
-	for c = 1, display_max_found do
+    for c = 1, display_max_found do
 		if(SearchCommand:get_command_type(self.valid_commands_list[c]) ~= "emotes")then
 			found_commands=1
 		else
 			found_emotes=1
-		end
-	end
+    end
+    end
 	
 	if(found_commands == 0 or found_emotes == 0)then
 	    if(down_ok == 1)then
@@ -1777,20 +1777,20 @@ function SearchCommand:show_more_options(uiId)
 	   end
 	end
 
-	--setup menu window
-	menu = getUI("ui:interface:search_command_add_menu")
-	menu.active = true
-	menu.y = new_modal_pos_y
-	menu.x = new_modal_pos_x
-	menu:updateCoords()
-	menu = menu:getRootMenu()
-	menu:reset()
-	--END setup menu window
-	
-	--fill menu window
+    --setup menu window
+    menu = getUI("ui:interface:search_command_add_menu")
+    menu.active = true
+    menu.y = new_modal_pos_y
+    menu.x = new_modal_pos_x
+    menu:updateCoords()
+    menu = menu:getRootMenu()
+    menu:reset()
+    --END setup menu window
+    
+    --fill menu window
 	
 	if(found_commands == 1)then
-		menu:addLine(i18n.get("uiSearchCommandFound")..": "..#self.valid_commands_list, "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
+		menu:addLine(ucstring(i18n.get("uiSearchCommandFound"):toUtf8()..": "..#self.valid_commands_list), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		for c = 1, display_max_found do
 			if(SearchCommand:get_command_type(self.valid_commands_list[c]) ~= "emotes")then
 				menu:addLine(getUCtf8(c..". "..self.valid_commands_list[c]), "lua", "SearchCommand:check_autocomplet_click(\""..uiId.."\","..c..")", "")
@@ -1800,9 +1800,9 @@ function SearchCommand:show_more_options(uiId)
 	
 	if(found_emotes == 1)then
 		if(found_commands == 0)then
-			menu:addLine(i18n.get("uiSearchEmotesFound")..": "..#self.valid_commands_list, "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
+			menu:addLine(ucstring(i18n.get("uiSearchEmotesFound"):toUtf8()..": "..#self.valid_commands_list), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		else
-			menu:addLine(i18n.get("uiEM_Emotes")..":", "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
+			menu:addLine(ucstring(i18n.get("uiEM_Emotes"):toUtf8()..":"), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		end
 		
 		for c = 1, display_max_found do
@@ -1812,109 +1812,109 @@ function SearchCommand:show_more_options(uiId)
 		end
 	end
 	
-	if(#self.valid_commands_list > 9)then
+    if(#self.valid_commands_list > 9)then
 		menu:addLine(getUCtf8("..."), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 	end
-	--END fill menu window
-	
-	--launche menu window
-	launchContextMenuInGame("ui:interface:search_command_add_menu")
-	--END launche menu window
+    --END fill menu window
+    
+    --launche menu window
+    launchContextMenuInGame("ui:interface:search_command_add_menu")
+    --END launche menu window
 end
 
 function SearchCommand:replace_escript_param(command_name)
-	local command_index = 0
-	local temp_command = ""
+    local command_index = 0
+    local temp_command = ""
 
-	for c = 1, #self.commands_list do
-		if(self.commands_list[c][4] == command_name)then
-			command_index=c
-		end
-	end
-	
-	if(command_index ~= 0)then
-		temp_command = command_name
+    for c = 1, #self.commands_list do
+        if(self.commands_list[c][4] == command_name)then
+            command_index=c
+        end
+    end
+    
+    if(command_index ~= 0)then
+        temp_command = command_name
 		max_arguments = #self.commands_list[command_index] - 5
 		
-		for ac = 1, max_arguments do
-			
-			local load_all_param = ""
+        for ac = 1, max_arguments do
+            
+            local load_all_param = ""
 			for pc = 1, #self.commands_list[command_index][5+ac] do
 				local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[command_index][5+ac][pc][1])
-				if(pc > 1)then
-					load_all_param=load_all_param.."/"..translation_parm
-				else
-					load_all_param=translation_parm
-				end
-			end
-			temp_command = temp_command:gsub("arg"..ac,load_all_param)
-		end
-	end
-	
-	--debug("final_temp: "..temp_command)
-	return temp_command
+                if(pc > 1)then
+                    load_all_param=load_all_param.."/"..translation_parm
+                else
+                    load_all_param=translation_parm
+                end
+            end
+            temp_command = temp_command:gsub("arg"..ac,load_all_param)
+        end
+    end
+    
+    --debug("final_temp: "..temp_command)
+    return temp_command
 end
 
 function SearchCommand:finish_commands(command_name,uiId)
-	local process_status = SearchCommand:read_process_status(uiId)
-	local input_search_string = getUI(uiId)
-	local final_command = ""
-	local new_command_par = ""
-	local argument_count = 0
-	local max_aruments = 0
-	
-	--debug("process_status: "..process_status)
-	
-	for fc = 1, process_status do
-		if(fc == process_status)then
-			self.command_parameter_list[fc] = command_name
-		end
-	end
-	
-	for pc = 1, #self.command_parameter_list do
-		local add_escript_prefix=""
-		if(SearchCommand:get_command_type(self.command_parameter_list[pc]) == "eScript")then
-			add_escript_prefix="()"
-			new_command_par = SearchCommand:replace_escript_param(self.command_parameter_list[pc])
-			self.command_parameter_list[pc] = new_command_par
-		end
-		
-		if(final_command == "")then
-			final_command = add_escript_prefix..""..self.command_parameter_list[pc]
-		else
-			final_command = final_command.." "..add_escript_prefix..""..self.command_parameter_list[pc]
-		end
-	end
-	
-	--debug("/"..final_command)
-	
-	if(self.command_parameter_list[1] == "a" and process_status > 1)then
-		max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
-		argument_count = #self.command_parameter_list - 2
-	elseif(self.command_parameter_list[1] == "b" and process_status > 1)then
-		max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
-		argument_count = #self.command_parameter_list - 2
-	elseif(self.command_parameter_list[1] == "c" and process_status > 1)then
-		max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
-		argument_count = #self.command_parameter_list - 2
-	else
-		max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[1])
-		argument_count = #self.command_parameter_list - 1
-	end
-	
-	--debug("process_status"..process_status)
-	--debug("argument_count: "..argument_count)
-	--debug("name:"..self.command_parameter_list[1].." max:"..max_aruments)
-	
-	if(argument_count < max_aruments)then
-		input_search_string.input_string = "/"..final_command.." "
-	else
-		input_search_string.input_string = "/"..final_command
-	end
-	
-	input_search_string:setFocusOnText()
-	SearchCommand:close_modal(uiId)
-	SearchCommand:search(uiId)
+    local process_status = SearchCommand:read_process_status(uiId)
+    local input_search_string = getUI(uiId)
+    local final_command = ""
+    local new_command_par = ""
+    local argument_count = 0
+    local max_aruments = 0
+    
+    --debug("process_status: "..process_status)
+    
+    for fc = 1, process_status do
+        if(fc == process_status)then
+            self.command_parameter_list[fc] = command_name
+        end
+    end
+    
+    for pc = 1, #self.command_parameter_list do
+        local add_escript_prefix=""
+        if(SearchCommand:get_command_type(self.command_parameter_list[pc]) == "eScript")then
+            add_escript_prefix="()"
+            new_command_par = SearchCommand:replace_escript_param(self.command_parameter_list[pc])
+            self.command_parameter_list[pc] = new_command_par
+        end
+        
+        if(final_command == "")then
+            final_command = add_escript_prefix..""..self.command_parameter_list[pc]
+        else
+            final_command = final_command.." "..add_escript_prefix..""..self.command_parameter_list[pc]
+        end
+    end
+    
+    --debug("/"..final_command)
+    
+    if(self.command_parameter_list[1] == "a" and process_status > 1)then
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
+        argument_count = #self.command_parameter_list - 2
+    elseif(self.command_parameter_list[1] == "b" and process_status > 1)then
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
+        argument_count = #self.command_parameter_list - 2
+    elseif(self.command_parameter_list[1] == "c" and process_status > 1)then
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
+        argument_count = #self.command_parameter_list - 2
+    else
+        max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[1])
+        argument_count = #self.command_parameter_list - 1
+    end
+    
+    --debug("process_status"..process_status)
+    --debug("argument_count: "..argument_count)
+    --debug("name:"..self.command_parameter_list[1].." max:"..max_aruments)
+    
+    if(argument_count < max_aruments)then
+        input_search_string.input_string = "/"..final_command.." "
+    else
+        input_search_string.input_string = "/"..final_command
+    end
+    
+    input_search_string:setFocusOnText()
+    SearchCommand:close_modal(uiId)
+    SearchCommand:search(uiId)
 end
 
 --##############Pars now all Emotes and add it to command table

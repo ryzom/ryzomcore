@@ -37,7 +37,7 @@ public:
 	CDeltaBuilderTask();
 
 	/// Destructor
-	~CDeltaBuilderTask();
+	~CDeltaBuilderTask() NL_OVERRIDE;
 
 	/// Setup Task
 	void		setup(const std::string& outputPath,
@@ -52,7 +52,7 @@ public:
 
 
 	/// Run task
-	virtual bool	execute();
+	virtual bool	execute() NL_OVERRIDE;
 
 
 private:

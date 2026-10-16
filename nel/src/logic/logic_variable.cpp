@@ -131,7 +131,7 @@ void CLogicVariable::processLogic()
 
 void CLogicVariable::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"VARIABLE", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"VARIABLE", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Name", (const xmlChar*)_Name.c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"Value", (const xmlChar*)toString(_Value).c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"Verbose", (const xmlChar*)toString(_Verbose).c_str());
@@ -364,7 +364,7 @@ void CLogicCounter::manageRunningMode()
 
 void CLogicCounter::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"COUNTER", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"COUNTER", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Name", (const xmlChar*)_Name.c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"Value", (const xmlChar*)toString(_Value).c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"Verbose", (const xmlChar*)toString(_Verbose).c_str());

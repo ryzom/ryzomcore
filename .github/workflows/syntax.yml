@@ -1,0 +1,33 @@
+name: "Syntax checks"
+
+# Every PHP, Lua, XML, HTML, CSS, JavaScript, JSON, YAML, Python and shell file in the tree
+# must parse with its language's own tooling. See tool/ci/syntax_check.py.
+
+on:
+  push:
+    branches: [ "core4", "feature/*", "bugfix/*" ]
+  pull_request:
+    branches: [ "core4", "feature/core4-*" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    name: "Parse all data and script files"
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install checkers
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends php-cli lua5.4 libxml2-utils tidy python3-yaml
+          npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/css" postcss@8
+          echo "php $(php -v | head -1 | cut -d' ' -f2), $(luac5.4 -v 2>&1), $(tidy -v), node $(node -v), $(xmllint --version 2>&1 | head -1)"
+
+      - name: Check
+        env:
+          NODE_PATH: ${{ runner.temp }}/css/node_modules
+        run: python3 tool/ci/syntax_check.py --jobs 4

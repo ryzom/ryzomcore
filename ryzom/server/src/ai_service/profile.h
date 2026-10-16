@@ -70,7 +70,7 @@ class CAIGenericProfileFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 		return new TProfile(owner);
 	}
@@ -112,12 +112,12 @@ class CAIBaseProfile
 : public IAIProfile
 {
 public:
-	virtual ~CAIBaseProfile() { }
+	virtual ~CAIBaseProfile() NL_OVERRIDE { }
 	
 	/// @name IAIProfile base implementation
 	//@{
-	virtual void stateChangeProfile() { beginProfile(); }
-	virtual void resumeProfile() { }
+	virtual void stateChangeProfile() NL_OVERRIDE { beginProfile(); }
+	virtual void resumeProfile() NL_OVERRIDE { }
 	//@}
 };
 

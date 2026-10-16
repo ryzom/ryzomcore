@@ -32,7 +32,7 @@ class CCharacter;
  * \date 2003
  */
 class CCharacterVersionAdapter
-{
+{	
 	NL_INSTANCE_COUNTER_DECL(CCharacterVersionAdapter);
 public:
 
@@ -41,10 +41,10 @@ public:
 	{
 		if (_Instance == NULL)
 			_Instance = new CCharacterVersionAdapter();
-
+		
 		return _Instance;
 	}
-
+	
 	/// Destructor
 	virtual ~CCharacterVersionAdapter() {}
 
@@ -58,7 +58,7 @@ public:
 	void updateInventoryToVersion6 ( CInventoryBase *inventory, INVENTORIES::TInventory inventoryType, CCharacter * character )const;
 
 	void setToolsToMaxHP(CInventoryBase * pInv) const;
-
+	
 private:
 	/// adapter methods
 	void adaptToVersion1(CCharacter &character) const;
@@ -93,7 +93,7 @@ private:
 private:
 	/// unique instance
 	static CCharacterVersionAdapter*			_Instance;
-
+	
 };
 
 #endif // CHARACTER_VERSION_ADAPTER_H

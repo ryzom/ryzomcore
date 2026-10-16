@@ -140,7 +140,7 @@ std::string CTools::normalizePath (const std::string &path)
 bool CTools::fileExist (const std::string &sFileName)
 {
 #ifdef NL_OS_WINDOWS
-	HANDLE hFile = CreateFile (sFileName.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
+	HANDLE hFile = CreateFile (sFileName.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 		return false;
@@ -155,9 +155,9 @@ bool CTools::fileExist (const std::string &sFileName)
 int CTools::fileDateCmp (const std::string &file1, const std::string &file2)
 {
 #ifdef NL_OS_WINDOWS
-	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
+	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	HANDLE hFile2 = CreateFile (file2.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
+	HANDLE hFile2 = CreateFile (file2.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if ((hFile1 == INVALID_HANDLE_VALUE) && (hFile2 == INVALID_HANDLE_VALUE))
 		return 0;
@@ -207,7 +207,7 @@ int CTools::fileDateCmp (const std::string &file1, const std::string &file2)
 int CTools::fileDateCmp (const std::string &file1, uint32 nDateLow, uint32 nDateHigh)
 {
 #ifdef NL_OS_WINDOWS
-	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
+	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile1 == INVALID_HANDLE_VALUE)
 	{
@@ -251,7 +251,7 @@ void CTools::dir (const std::string &sFilter, std::vector<std::string> &sAllFile
 	char sCurDir[MAX_PATH];
 	sAllFiles.clear ();
 	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile (sFilter.c_str(), &findData);
+	hFind = FindFirstFile (sFilter.c_str(), &findData);	
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		if (!(GetFileAttributes(findData.cFileName)&FILE_ATTRIBUTE_DIRECTORY))
@@ -329,7 +329,7 @@ void CTools::throwError (const char *message)
 #ifdef NL_OS_WINDOWS
 	LPVOID lpMsgBuf;
 	FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER |
-					FORMAT_MESSAGE_FROM_SYSTEM |
+					FORMAT_MESSAGE_FROM_SYSTEM | 
 					FORMAT_MESSAGE_IGNORE_INSERTS,
 					NULL,
 					GetLastError(),
@@ -356,7 +356,7 @@ void CTools::dirSubRecurse (const std::string &sFilter, std::vector<std::string>
 	char sCurDir[MAX_PATH];
 
 	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile ("*.*", &findData);
+	hFind = FindFirstFile ("*.*", &findData);	
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		if (!(GetFileAttributes(findData.cFileName)&FILE_ATTRIBUTE_DIRECTORY))

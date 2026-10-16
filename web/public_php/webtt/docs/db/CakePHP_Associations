@@ -1,0 +1,69 @@
+Name:       Language
+DB Table:   `languages`
+Associations:
+        Language hasMany TranslationFile
+
+Name:       TranslationFile
+DB Table:   `translation_files`
+Associations:
+        TranslationFile belongsTo Language
+        TranslationFile hasMany ImportedTranslationFile
+	TranslationFile hasMany Identifier
+
+Name:       ImportedTranslationFile
+DB Table:   `imported_translation_files`
+Associations:
+        TranslationFile belongsTo TranslationFile
+        TranslationFile hasMany FileIdentifier
+
+Name:       Identifier
+DB Table:   `identifiers`
+Associations:
+        Identifier belongsTo TranslationFile
+        Identifier hasMany Translation
+	Identifier hasMany Comment
+	Identifier hasMany FileIdentifier
+	Identifier hasMany IdentifierColumn
+	Identifier hasOne BestTranslation
+
+Name:       IdentifierColumn
+DB Table:   `identifier_columns`
+Associations:
+	IdentifierColumn belongsTo Identifier
+	IdentifierColumn hasMany Translation
+
+Name:       FileIdentifier
+DB Table:   `file_identifiers`
+Associations:
+        FileIdentifier belongsTo ImportedTranslationFile
+        FileIdentifier belongsTo Identifier
+
+Name:       Translation
+DB Table:   `translations`
+Associations:
+        Translation belongsTo Identifier
+	Translation belongsTo IdentifierColumn
+        Translation belongsTo User
+	Translation belongsTo ParentTranslation
+        Translation hasMany Vote
+	Translation hasMany ChildTranslation
+
+Name:       User
+DB Table:   `users`
+Associations:
+        User hasMany Translation
+        User hasMany Vote
+	User hasMany Comment
+
+Name:       Vote
+DB Table:   `votes`
+Associations:
+        Vote belongsTo Translation
+        Vote belongsTo User
+
+Name:       Comment
+DB Table:   `comments`
+Associations:
+        Comment belongsTo Identifier
+        Comment belongsTo User
+

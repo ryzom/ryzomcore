@@ -28,9 +28,9 @@ namespace NLMISC
 // *********************************************************************************************************
 CContiguousBlockAllocator::CContiguousBlockAllocator()
 {
-	_BlockStart = NULL;
-	_NextAvailablePos = NULL;
-	_BlockEnd = 0;
+	_BlockStart = nullptr;
+	_NextAvailablePos = nullptr;
+	_BlockEnd = nullptr;
 	_NumAllocatedBytes = 0;
 	#ifdef NL_DEBUG
 		_NumAlloc = 0;
@@ -48,10 +48,10 @@ CContiguousBlockAllocator::~CContiguousBlockAllocator()
 void CContiguousBlockAllocator::init(uint numBytes /*=0*/)
 {
 	if (_BlockStart) _DefaultAlloc.deallocate(_BlockStart, _BlockEnd - _BlockStart);
-	_BlockEnd =  NULL;
-	_BlockStart = NULL;
+	_BlockEnd = nullptr;
+	_BlockStart = nullptr;
 	_NumAllocatedBytes = 0;
-	_NextAvailablePos = NULL;
+	_NextAvailablePos = nullptr;
 	if (numBytes != 0)
 	{
 		_BlockStart = _DefaultAlloc.allocate(numBytes);
@@ -68,7 +68,7 @@ void CContiguousBlockAllocator::init(uint numBytes /*=0*/)
 // *********************************************************************************************************
 void *CContiguousBlockAllocator::alloc(uint numBytes)
 {
-	if (numBytes == 0) return NULL;
+	if (numBytes == 0) return nullptr;
 	_NumAllocatedBytes += numBytes;
 	if (_BlockStart)
 	{

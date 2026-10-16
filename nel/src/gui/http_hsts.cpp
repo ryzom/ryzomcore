@@ -28,7 +28,7 @@ using namespace NLMISC;
 #endif
 
 namespace NLGUI {
-	CStrictTransportSecurity* CStrictTransportSecurity::instance = NULL;
+	CStrictTransportSecurity* CStrictTransportSecurity::instance = nullptr;
 	CStrictTransportSecurity* CStrictTransportSecurity::getInstance()
 	{
 		if (!instance)
@@ -41,7 +41,7 @@ namespace NLGUI {
 	void CStrictTransportSecurity::release()
 	{
 		delete instance;
-		instance = NULL;
+		instance = nullptr;
 	}
 
 	CStrictTransportSecurity::~CStrictTransportSecurity()

@@ -38,7 +38,7 @@ public:
 	CControlList(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint16 spacing);
 
 	/// Destructor
-	~CControlList();
+	~CControlList() NL_OVERRIDE;
 
 
 	/**
@@ -49,22 +49,22 @@ public:
 	virtual void add( CControl *pCtrl, bool pushFront = false);
 
 	/// Display the list.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/// Manage the click for the control.
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// Manage the right click for the control.
-	virtual void clickRight(float x, float y, bool &taken);
+	virtual void clickRight(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// scroll horizontaly by 'scroll' units in either direction (right if scroll >0 and left is scroll<0 for example) (implementation dependent)
-	virtual void scrollH(sint32 scroll);
+	virtual void scrollH(sint32 scroll) NL_OVERRIDE;
 
 	/// scroll verticaly by 'scroll' units in either direction
-	virtual void scrollV(sint32 scroll);
+	virtual void scrollV(sint32 scroll) NL_OVERRIDE;
 
 	/// Set some references for the display.
-	virtual void ref(float x, float y, float w, float h);
+	virtual void ref(float x, float y, float w, float h) NL_OVERRIDE;
 
 	/// remove all items from list, delete them if specified
 	virtual void clear(bool deleteElts = true);

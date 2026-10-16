@@ -86,8 +86,8 @@ using namespace STRING_MANAGER;
 // /////// //
 // STATICS //
 // /////// //
-static CGroupMap   *LastClickedMap = NULL;
-static CCtrlButton *LastSelectedLandMark = NULL;
+static CGroupMap   *LastClickedMap = nullptr;
+static CCtrlButton *LastSelectedLandMark = nullptr;
 static bool		   UseUserPositionForLandMark = false;
 static const char  *WIN_LANDMARK_NAME="ui:interface:enter_landmark_name";
 
@@ -173,7 +173,7 @@ NL3D::UMaterial CGroupMap::CPolyButton::LineMat;
 CGroupMap::CPolyButton::CPolyButton()
 : CCtrlBase(TCtorParam())
 {
-	if (Driver != NULL)
+	if (Driver != nullptr)
 	{
 		// create material for displaying the button
 		if (LineMat.empty())
@@ -223,7 +223,7 @@ bool CGroupMap::CPolyButton::handleEvent (const NLGUI::CEventDescriptor &event)
 					}
 				}
 
-				CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+				CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
 				if (bFound)
 					Map->setMap(Map->getCurMap()->Children[i].Name);
 				return true;
@@ -415,10 +415,10 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_MinH = 50;
 	_MaxH = 2000;
 	//_MinW = 50;
-	_MapTF = NULL;
+	_MapTF = nullptr;
 	_MapTexture.clear();
-	_PlayerPosMaterial = NULL;
-	_PlayerPosTF = NULL;
+	_PlayerPosMaterial = nullptr;
+	_PlayerPosTF = nullptr;
 	_MapTexW = 0;
 	_MapTexH = 0;
 	_PlayerPosTexW = 0;
@@ -426,20 +426,20 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_MapLoadFailure = false;
 	_PlayerPosLoadFailure = false;
 	_WorldSheet = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
-	_CurMap = NULL;
-	_CurContinent = NULL;
+	_CurMap = nullptr;
+	_CurContinent = nullptr;
 	_Panning = false;
 	_HasMoved = false;
 	_RightClickLastPos.set(0.f, 0.f);
 	// make room for mission targets
-	_MissionLM.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, 0);
+	_MissionLM.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, nullptr);
 	_MissionTargetTextIDs.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, 0);
 	_MissionTargetTextReceived.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, false);
 	_OldPlayerPos.set(0.f, 0.f);
 	_PlayerPos.set(0.f, 0.f);
 	//
-	_TargetLM = NULL;
-	_HomeLM = NULL;
+	_TargetLM = nullptr;
+	_HomeLM = nullptr;
 	_LandmarkFilter.clear();
 	_MatchedLandmarks.clear();
 	_UserLandMarkVisible = true;
@@ -447,15 +447,15 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_ScaleMax = 8.f;
 	_ScaleMaxR2 = 8.f;
 	//
-	_TargetPos = NULL;
-	_HomePos = NULL;
+	_TargetPos = nullptr;
+	_HomePos = nullptr;
 	//
 	_MapX = 0;
 	_MapY = 0;
 	//
 	_MapMode = MapMode_Normal;
 	_RespawnSelected = 0;
-	_RespawnSelectedBitmap = NULL;
+	_RespawnSelectedBitmap = nullptr;
 	//
 	_WorldToMapDeltaX = 0.f;
 	_WorldToMapDeltaY = 0.f;
@@ -464,13 +464,13 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_VisibleWorldMax.set(0.f, 0.f);
 	//
 	_MeterPerPixel = 0.f;
-	_FrustumView = NULL;
+	_FrustumView = nullptr;
 	_FrustumViewColor = CRGBA(255, 255, 255, 255);
 	_FrustumViewColorOver = CRGBA(255, 255, 255, 127);
 	_FrustumOverBlendFactor = 0.f;
 	_FrustumViewBlendTimeInMs = 300;
-	_SelectionAxisH = NULL;
-	_SelectionAxisV = NULL;
+	_SelectionAxisH = nullptr;
+	_SelectionAxisV = nullptr;
 	//
 	_IsIsland = false;
 	//
@@ -1135,7 +1135,7 @@ void CGroupMap::checkCoords()
 
 	// **** retrieve pos of respawn and update it, or hide it if there's no target
 	uint offset = 0;
-
+	
 	if (!_ArkPoints.empty())
 	{
 		offset = _ArkPoints.size();
@@ -1234,16 +1234,16 @@ void CGroupMap::checkCoords()
 			_MissionTargetTextIDs[k] = nameID;
 			if (_MissionTargetTextIDs[k] == 0)
 			{
-				if (_MissionLM[k] != NULL)
+				if (_MissionLM[k] != nullptr)
 				{
 					delCtrl(_MissionLM[k]);
-					_MissionLM[k] = NULL;
+					_MissionLM[k] = nullptr;
 				}
 			}
 			else
 			{
 				// create a new button if necessary
-				if (_MissionLM[k] == NULL)
+				if (_MissionLM[k] == nullptr)
 				{
 					_MissionLM[k] = createLandMarkButton(_MissionLMOptions);
 					_MissionLM[k]->setParent(this);
@@ -1600,7 +1600,7 @@ void CGroupMap::draw()
 			mapToWorld(worldMin, CVector2f(minU,minV));
 			mapToWorld(worldMax, CVector2f(maxU,maxV));
 
-			if (_CurContinent != NULL)
+			if (_CurContinent != nullptr)
 			{
 				// Convert world coordinate to map coordinate in the fog of war map
 				CFogOfWar &rFOW = _CurContinent->FoW;
@@ -1726,10 +1726,10 @@ void CGroupMap::draw()
 				quv.V0 = center - 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
 				quv.V1 = center + 0.5f * (float) _PlayerPosTexW * right - 0.5f * (float) _PlayerPosTexH * front;
 				quv.V2 = center + 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-				quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
-				quv.Uv0.set(0.f, 1.f);
-				quv.Uv1.set(1.f, 1.f);
-				quv.Uv2.set(1.f, 0.f);
+			quv.V3 = center - 0.5f * (float) _PlayerPosTexW * right + 0.5f * (float) _PlayerPosTexH * front;
+			quv.Uv0.set(0.f, 1.f);
+			quv.Uv1.set(1.f, 1.f);
+			quv.Uv2.set(1.f, 0.f);
 				quv.Uv3.set(0.f, 0.f);
 				quv.Color0 = quv.Color1 = quv.Color2 = quv.Color3 = CRGBA(255, 255, 255, alpha);
 				quv.V0.x /= (float) sw;
@@ -1831,7 +1831,7 @@ bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 							if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 							{
 								// unselected unless tool has been changed before last mouse left up (happens when one's finish a route using double click -> should not unselect then)
-								R2::getEditor().setSelectedInstance(NULL);
+								R2::getEditor().setSelectedInstance(nullptr);
 							}
 						}
 					}
@@ -2140,7 +2140,7 @@ void CGroupMap::reload()
 	if (!_CurMap || !getActive()) return;
 
 	SMap* current = _CurMap;
-	_CurMap = NULL;
+	_CurMap = nullptr;
 
 	setMap(current);
 }
@@ -2255,11 +2255,11 @@ void CGroupMap::unloadMap()
 {
 	// remove texture from the material
 	if (_MapTF) Driver->deleteTextureFile(_MapTF);
-	_MapTF = NULL;
+	_MapTF = nullptr;
 	if (_PlayerPosTF) Driver->deleteTextureFile(_PlayerPosTF);
-	_PlayerPosTF = NULL;
-	_MapMaterial.setTexture(0,NULL);
-	_MapMaterial.setTexture(1,NULL);
+	_PlayerPosTF = nullptr;
+	_MapMaterial.setTexture(0, nullptr);
+	_MapMaterial.setTexture(1, nullptr);
 	_MapTexW = 0;
 	_MapTexH = 0;
 	_MapLoadFailure = false;
@@ -2276,7 +2276,7 @@ void CGroupMap::updateContinentInfo()
 void CGroupMap::setMap(SMap *map)
 {
 	nlassert(map);
-	if ((_CurMap != NULL) && (_CurMap->Name == map->Name)) return;
+	if ((_CurMap != nullptr) && (_CurMap->Name == map->Name)) return;
 
 	// Unload and reset all stuff
 	unloadMap();
@@ -2305,10 +2305,10 @@ void CGroupMap::setMap(SMap *map)
 	}
 
 
-	if (_CurContinent != NULL)
+	if (_CurContinent != nullptr)
 		_MapMaterial.setTexture(1, _CurContinent->FoW.Tx);
 	else
-		_MapMaterial.setTexture(1, NULL);
+		_MapMaterial.setTexture(1, nullptr);
 
 	// disable the map_back button for islands (islands can't be seen on the world map)
 	CInterfaceGroup *gc = getParentContainer();
@@ -2324,7 +2324,7 @@ void CGroupMap::setMap(SMap *map)
 
 void CGroupMap::setMap(const string &mapName)
 {
-	if ((_CurMap != NULL) && (_CurMap->Name == mapName)) return;
+	if ((_CurMap != nullptr) && (_CurMap->Name == mapName)) return;
 
 	// Unload and reset all stuff
 	unloadMap();
@@ -2435,7 +2435,7 @@ void CGroupMap::updateLandMarkTextList(TLandMarkTextVect &lmVect)
 	for(uint k = 0; k < numLM; ++k)
 	{
 		CLandMarkText *lmt = lmVect[k];
-		if (lmt != NULL)
+		if (lmt != nullptr)
 		{
 			sint32 x, y;
 			mapToWindowSnapped(x, y, lmt->Pos);
@@ -2605,7 +2605,7 @@ void CGroupMap::createContinentLandMarks()
 	_MatchedLandmarks.clear();
 
 	if (_MapMode != MapMode_Normal) return;
-	if (_CurMap == NULL) return;
+	if (_CurMap == nullptr) return;
 
 	// Remove all
 	removeLandMarks(_ContinentLM);
@@ -2697,7 +2697,7 @@ void CGroupMap::updateUserLandMarks()
 	uint32 k;
 
 	if (_MapMode != MapMode_Normal) return;
-	if (_CurMap == NULL || _CurMap->Name == "world" || _CurContinent == NULL) return;
+	if (_CurMap == nullptr || _CurMap->Name == "world" || _CurContinent == nullptr) return;
 
 	// Remove all
 	removeUserLandMarks();
@@ -2831,13 +2831,13 @@ void CGroupMap::addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector
 void CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color)
 {
 	if (_CurContinent == NULL) return;
-	
+
 	CUserLandMark ulm;
 	mapToWorld(ulm.Pos, pos);
 	ulm.Title = title;
 	ulm.Type = 5;
 	_CurContinent->UserLandMarks.push_back(ulm);
-	
+
 	CLandMarkOptions options(_UserLMOptions);
 	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
 	// create a new button and add it to the list
@@ -2874,7 +2874,7 @@ void CGroupMap::addUserRespawnPoint(const NLMISC::CVector2f &pos)
 //============================================================================================================
 CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType)
 {
-	if (_CurContinent == NULL) return NULL;
+	if (_CurContinent == nullptr) return nullptr;
 	nlassert(_CurContinent->UserLandMarks.size() == _UserLM.size());
 	// add the landmark in the current continent (for later save)
 	// keep pos in world
@@ -2896,7 +2896,7 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 //============================================================================================================
 CCtrlButton* CGroupMap::getLandmarkCtrl(const std::string &lmType, uint lmIndex) const
 {
-	CCtrlButton *ctrl = NULL;
+	CCtrlButton *ctrl = nullptr;
 	if (lmType == "user")
 	{
 		if (lmIndex < _UserLM.size())
@@ -2913,7 +2913,7 @@ CCtrlButton* CGroupMap::getLandmarkCtrl(const std::string &lmType, uint lmIndex)
 //============================================================================================================
 void CGroupMap::removeUserLandMark(CCtrlButton *button)
 {
-	if (_CurContinent == NULL) return;
+	if (_CurContinent == nullptr) return;
 	nlassert(_CurContinent->UserLandMarks.size() >= _UserLM.size());
 	for(uint k = 0; k < _UserLM.size(); ++k)
 	{
@@ -2938,7 +2938,7 @@ void CGroupMap::removeUserLandMark(CCtrlButton *button)
 //============================================================================================================
 void CGroupMap::updateUserLandMark(CCtrlButton *button, const ucstring &newTitle, const CUserLandMark::EUserLandMarkType lmType)
 {
-	if (_CurContinent == NULL) return;
+	if (_CurContinent == nullptr) return;
 	nlassert(_CurContinent->UserLandMarks.size() >= _UserLM.size());
 	for(uint k = 0; k < _UserLM.size(); ++k)
 	{
@@ -2960,7 +2960,7 @@ void CGroupMap::updateUserLandMark(CCtrlButton *button, const ucstring &newTitle
 CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 {
 	CUserLandMark ulm;
-	if (_CurContinent == NULL) return ulm;
+	if (_CurContinent == nullptr) return ulm;
 	nlassert(_CurContinent->UserLandMarks.size() >= _UserLM.size());
 	for(uint k = 0; k < _UserLM.size(); ++k)
 	{
@@ -2977,13 +2977,13 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 //============================================================================================================
 uint CGroupMap::getNumUserLandMarks() const
 {
-	if (_CurContinent == NULL) return 0;
+	if (_CurContinent == nullptr) return 0;
 	return (uint)_CurContinent->UserLandMarks.size();
 }
 //============================================================================================================
 CLandMarkOptions CGroupMap::getUserLandMarkOptions(uint32 lmindex) const
 {
-	if (_CurContinent == NULL || _CurContinent->UserLandMarks.size() < lmindex)
+	if (_CurContinent == nullptr || _CurContinent->UserLandMarks.size() < lmindex)
 		return _UserLMOptions;
 
 	CLandMarkOptions clmo(_UserLMOptions);
@@ -3293,7 +3293,7 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 						NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
 						// Close window containing the map
 						CInterfaceGroup *pGrp = CWidgetManager::getInstance()->getWindow(this);
-						if (pGrp != NULL) pGrp->setActive(false);
+						if (pGrp != nullptr) pGrp->setActive(false);
 					}
 					invalidateCoords();
 				}
@@ -3388,7 +3388,7 @@ void CGroupMap::targetLandmarkResult(uint32 index)
 //=========================================================================================================
 CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkButtonVect &landmarks, float &closest) const
 {
-	CLandMarkButton *ret = NULL;
+	CLandMarkButton *ret = nullptr;
 
 	std::vector<ucstring> keywords;
 	if (startsWith)
@@ -3420,7 +3420,7 @@ CGroupMap::CLandMarkButton* CGroupMap::findClosestLandmark(const CVector2f &cent
 //=========================================================================================================
 CGroupMap::CLandMarkText* CGroupMap::findClosestLandmark(const CVector2f &center, const ucstring &search, bool startsWith, const TLandMarkTextVect &landmarks, float &closest) const
 {
-	CLandMarkText *ret = NULL;
+	CLandMarkText *ret = nullptr;
 
 	std::vector<ucstring> keywords;
 	if (startsWith)
@@ -3579,10 +3579,10 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 	if (_RespawnPos.empty()) return;
 
 	CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
-	if (pWS == NULL) return;
+	if (pWS == nullptr) return;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (pIM == NULL) return;
+	if (pIM == nullptr) return;
 
 	NLMISC::CVector2f rpWorldPos(_RespawnPos[0].x * 0.001f, _RespawnPos[0].y * 0.001f);
 
@@ -3678,12 +3678,12 @@ void CGroupMap::serialConfig(NLMISC::IStream &f)
 sint32 CGroupMap::getRespawnSelected() const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL = NULL;
+	CCDBNodeLeaf *pNL = nullptr;
 	if (_MapMode == MapMode_Death)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT",false);
 	else if (_MapMode == MapMode_SpawnSquad)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT",false);
-	if (pNL != NULL)
+	if (pNL != nullptr)
 		return pNL->getValue32();
 	return 0;
 }
@@ -3695,12 +3695,12 @@ void CGroupMap::setRespawnSelected(sint32 nSpawnPointIndex)
 	if (nSpawnPointIndex < 0) return;
 	if ((uint32)nSpawnPointIndex >= _RespawnPos.size()) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL = NULL;
+	CCDBNodeLeaf *pNL = nullptr;
 	if (_MapMode == MapMode_Death)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT",false);
 	else if (_MapMode == MapMode_SpawnSquad)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT",false);
-	if (pNL != NULL)
+	if (pNL != nullptr)
 		pNL->setValue32(nSpawnPointIndex);
 	_RespawnSelected = nSpawnPointIndex;
 	_RespawnPosReseted = false;
@@ -3710,7 +3710,7 @@ void CGroupMap::setRespawnSelected(sint32 nSpawnPointIndex)
 //=========================================================================================================
 SMap *CGroupMap::getParentMap(SMap *map)
 {
-	if (map == NULL) return NULL;
+	if (map == nullptr) return nullptr;
 
 	for (uint32 i = 0; i < _WorldSheet->Maps.size(); ++i)
 	{
@@ -3727,13 +3727,13 @@ SMap *CGroupMap::getParentMap(SMap *map)
 		if (bFound)
 			return pM;
 	}
-	return NULL;
+	return nullptr;
 }
 
 //=========================================================================================================
 std::string CGroupMap::getContinentName() const
 {
-	if (_CurMap == NULL) return "";
+	if (_CurMap == nullptr) return "";
 
 	return toLowerAscii(_CurMap->ContinentName);
 }
@@ -3871,7 +3871,7 @@ void CGroupMap::updateClosestLandMarkMenu(const std::string &menu, const NLMISC:
 // remap caller with landmark using index/type and call popup menu or set compass target if no menu is set
 class CAHMapLandmarkByIndex : public IActionHandler
 {
-	virtual void execute (CCtrlBase* pCaller, const string &params )
+	virtual void execute (CCtrlBase* pCaller, const string &params ) NL_OVERRIDE
 	{
 		const std::string mapName = getParam(params, "map");
 		const std::string lmType = getParam(params, "type");
@@ -3898,7 +3898,7 @@ REGISTER_ACTION_HANDLER(CAHMapLandmarkByIndex, "map_landmark_by_index");
 // Set landmark filter
 class CAHLandMarkFilter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params )
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params ) NL_OVERRIDE
 	{
 		string id = getParam(params, "map");
 
@@ -3924,7 +3924,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkFilter, "land_mark_filter");
 // Landmark selected from result list
 class CAHLandMarkResultSelected : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		string id = getParam(params, "map");
 		CGroupMap* map = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(id));
@@ -3943,7 +3943,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkResultSelected, "land_mark_result_selected");
 // A land mark button has been pushed
 class CAHLandMarkSelected : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!button) return;
@@ -3959,7 +3959,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkSelected, "land_mark_selected");
 // Remove a user landmark
 class CAHRemoveUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		CCtrlButton *button = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (!button) return;
@@ -3979,7 +3979,7 @@ REGISTER_ACTION_HANDLER(CAHRemoveUserLandMark, "remove_user_landmark");
 // Rename a user land mark
 class CAHRenameUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		LastSelectedLandMark = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!LastSelectedLandMark) return;
@@ -3994,7 +3994,7 @@ REGISTER_ACTION_HANDLER(CAHRenameUserLandMark, "rename_user_landmark");
 // Validate user landmark name
 class CAHValidateUserLandMarkName : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
@@ -4047,14 +4047,14 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 	// pop the rename dialog
 	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (LastClickedMap->isInDeathMode()) return;
-	LastSelectedLandMark = NULL;
+	LastSelectedLandMark = nullptr;
 	popupLandMarkNameDialog();
 }
 
 // create a new landmark after giving its name
 class CAHCreateUserLandMark : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &params)
+	virtual void execute (CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		UseUserPositionForLandMark = false;
 		createUserLandMark(pCaller,params);
@@ -4065,7 +4065,7 @@ REGISTER_ACTION_HANDLER(CAHCreateUserLandMark, "create_user_landmark");
 // create a new landmark at user position after giving its name
 class CAHCreateUserLandMarkAtUserPos: public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &params)
+	virtual void execute (CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		UseUserPositionForLandMark = true;
 		createUserLandMark(pCaller,params);
@@ -4078,7 +4078,7 @@ REGISTER_ACTION_HANDLER(CAHCreateUserLandMarkAtUserPos, "create_user_landmark_at
 // zoom in the map
 class CAHMapZoomIn : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -4095,7 +4095,7 @@ REGISTER_ACTION_HANDLER(CAHMapZoomIn, "map_zoom_in");
 // zoom out the map
 class CAHMapZoomOut : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -4112,7 +4112,7 @@ REGISTER_ACTION_HANDLER(CAHMapZoomOut, "map_zoom_out");
 // center map on the player
 class CAHMapCenter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -4127,14 +4127,14 @@ REGISTER_ACTION_HANDLER(CAHMapCenter, "map_center");
 // return to the parent map
 class CAHMapBack : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
-		if (pGM == NULL) return;
+		if (pGM == nullptr) return;
 		SMap *pMap = pGM->getParentMap(pGM->getCurMap());
-		if (pMap != NULL)
+		if (pMap != nullptr)
 			pGM->setMap(pMap->Name);
 	}
 };
@@ -4144,7 +4144,7 @@ REGISTER_ACTION_HANDLER(CAHMapBack, "map_back");
 // valid the respawn location selected
 class CAHRespawnMapValid : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -4197,7 +4197,7 @@ REGISTER_ACTION_HANDLER(CAHRespawnMapValid, "respawn_map_valid");
 // right click on the map
 class CAHWorldMapRightClick : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &params)
+	virtual void execute (CCtrlBase *pCaller, const string &params) NL_OVERRIDE
 	{
 		std::string map = getParam(params, "map");
 		std::string menu = getParam(params, "menu");
@@ -4243,7 +4243,7 @@ REGISTER_ACTION_HANDLER(CAHWorldMapRightClick, "world_map_right_click")
 // A land mark button has been pushed
 class CAHLandMarkTeleport : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CCtrlButton *button = dynamic_cast<CCtrlButton *>(pCaller);
 		if (!button) return;
@@ -4273,7 +4273,7 @@ REGISTER_ACTION_HANDLER(CAHLandMarkTeleport, "land_mark_teleport");
 // Teleport player to the given location
 class CAHMapTeleport : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
@@ -4294,7 +4294,7 @@ REGISTER_ACTION_HANDLER(CAHMapTeleport, "map_teleport");
 
 //=========================================================================================================
 // update LandMarks Colors
-class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -4332,7 +4332,7 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 
 
 	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-	if (pGM == NULL) return;
+	if (pGM == nullptr) return;
 	pGM->updateUserLandMarks();
 
 }};

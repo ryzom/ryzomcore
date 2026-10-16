@@ -73,7 +73,7 @@ CVariable<std::string> QuicLetsEncryptLive("fs", "QuicLetsEncryptLive", "", "/ho
 CAtomicInt s_UserContextCount;
 #endif
 
-CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers("QuicTransceivers");
+CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers;
 
 } /* anonymous namespace */
 
@@ -834,7 +834,7 @@ public:
 };
 
 CQuicTransceiver::CQuicTransceiver(uint32 msgsize)
-    : m(new CQuicTransceiverImpl())
+    : m(std::make_unique<CQuicTransceiverImpl>())
     , m_MsgSize(msgsize)
 {
 }

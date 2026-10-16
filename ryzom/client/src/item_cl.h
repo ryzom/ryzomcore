@@ -36,7 +36,7 @@ class CItemCL : public CEntityCL
 {
 protected:
 	/// Update the item position.
-	virtual void updateVisualPropertyPos(const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI);
+	virtual void updateVisualPropertyPos(const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI) NL_OVERRIDE;
 
 public:
 	NLMISC_DECLARE_CLASS(CItemCL);
@@ -48,18 +48,18 @@ public:
 	CItemCL( const std::string &fileName );
 
 	/// Destructor
-	~CItemCL();
+	~CItemCL() NL_OVERRIDE;
 
 	/**
 	 * Build the entity from a sheet.
 	 */
-	virtual bool build(const CEntitySheet *sheet);
+	virtual bool build(const CEntitySheet *sheet) NL_OVERRIDE;
 
 	/// Initialize properties for an item.
-	virtual void initProperties();
+	virtual void initProperties() NL_OVERRIDE;
 
 	/// Draw the selection Box
-	virtual void drawBox();
+	virtual void drawBox() NL_OVERRIDE;
 
 private :
 

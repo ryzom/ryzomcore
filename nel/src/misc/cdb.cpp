@@ -37,7 +37,7 @@ using namespace std;
 
 namespace NLMISC{
 
-CStringMapper *ICDBNode::_DBSM = NULL;
+CStringMapper *ICDBNode::_DBSM = nullptr;
 bool ICDBNode::verboseDatabase = false;
 
 
@@ -73,7 +73,7 @@ std::string ICDBNode::getFullName()
 void ICDBNode::_buildFullName(CSString &fullName)
 {
 	// we do not want to recurse up to the ROOT node - we stop 1 level down from the root
-	if (getParent() != NULL && getParent()->getParent() != NULL)
+	if (getParent() != nullptr && getParent()->getParent() != nullptr)
 	{
 		getParent()->_buildFullName(fullName);
 		fullName << ":" << _DBSM->localUnmap(_Name);
@@ -86,7 +86,7 @@ void ICDBNode::releaseStringMapper()
 {
 	if( _DBSM )
 		delete _DBSM;
-	_DBSM = NULL;
+	_DBSM = nullptr;
 }
 
 }

@@ -170,7 +170,7 @@ void	displayMeshBase(FILE *logStream, CMeshBase *meshBase)
 /// Dispaly info for file in stdout
 void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<string> &options, bool displayShortFileName)
 {
-	if(fileName==NULL)
+	if(fileName == nullptr)
 		return;
 
 	bool ms = options.find ("-ms") != options.end();
@@ -203,7 +203,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 
 			// release
 			delete shapeStream.getShapePointer();
-			shapeStream.setShapePointer(NULL);
+			shapeStream.setShapePointer(nullptr);
 		}
 	}
 	// Std Way.
@@ -442,7 +442,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 
 			// release
 			delete shapeStream.getShapePointer();
-			shapeStream.setShapePointer(NULL);
+			shapeStream.setShapePointer(nullptr);
 		}
 		else if(strstr(fileName, ".shape"))
 		{
@@ -500,7 +500,7 @@ void	displayInfoFileInStream(FILE *logStream, const char *fileName, const set<st
 
 			// release
 			delete shapeStream.getShapePointer();
-			shapeStream.setShapePointer(NULL);
+			shapeStream.setShapePointer(nullptr);
 		}
 		else if(strstr(fileName, ".anim"))
 		{

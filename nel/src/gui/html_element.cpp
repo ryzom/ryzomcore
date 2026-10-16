@@ -34,7 +34,10 @@ namespace NLGUI
 {
 	// ***************************************************************************
 	CHtmlElement::CHtmlElement(ENodeType type, std::string value)
-		: ID(0), Type(type), Value(value), parent(NULL), previousSibling(NULL), nextSibling(NULL), childIndex(0)
+		: ID(0), Type(type), Value(value), parent(nullptr)
+    , previousSibling(nullptr)
+    , nextSibling(nullptr)
+    , childIndex(0)
 	{}
 
 	// ***************************************************************************
@@ -66,7 +69,7 @@ namespace NLGUI
 	void CHtmlElement::reindexChilds()
 	{
 		uint index = 0;
-		CHtmlElement *prev = NULL;
+		CHtmlElement *prev = nullptr;
 		std::list<CHtmlElement>::iterator it;
 		for(it = Children.begin(); it != Children.end(); ++it)
 		{
@@ -74,7 +77,7 @@ namespace NLGUI
 			{
 				it->parent = this;
 				it->previousSibling = prev;
-				it->nextSibling = NULL;
+				it->nextSibling = nullptr;
 				if (prev)
 				{
 					prev->nextSibling = &(*it);

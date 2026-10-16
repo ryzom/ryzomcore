@@ -70,7 +70,7 @@ const char *progressbar[BAR_LENGTH]=
 class CMyIgZoneLighter : public CInstanceLighter
 {
 	// Progress bar
-	virtual void progress (const char *message, float progress)
+	virtual void progress (const char *message, float progress) NL_OVERRIDE
 	{
 		// Progress bar
 		char msg[512];
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 				bool zoneIgLoaded;
 
 				// Try to open the file
-				CInstanceGroup *centerInstanceGroup= NULL;
+				CInstanceGroup *centerInstanceGroup = nullptr;
 				if (inputFile.open (igName))
 				{
 					// load the center ig

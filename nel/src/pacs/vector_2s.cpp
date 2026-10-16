@@ -49,9 +49,9 @@ bool	CVector2s::intersect(const CVector2s& a0, const CVector2s& a1, const CVecto
 	double		a = (bx*cy - by*cx) / d;
 	double		b = (ax*cy - ay*cx) / d;
 
-	if (pa != NULL)
+	if (pa != nullptr)
 		*pa = a;
-	if (pb != NULL)
+	if (pb != nullptr)
 		*pb = b;
 
 	return d != 0.0 && a >= 0.0 && a <= 1.0 && b >= 0.0 && b <= 1.0;

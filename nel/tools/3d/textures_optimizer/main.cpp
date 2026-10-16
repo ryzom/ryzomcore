@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 				uint32 *data = (uint32*)bitmap.getPixels().getPtr();
 				uint32 *endData = (uint32*)((uint8*)data + size);
 
-				NLMISC::CRGBA *color = NULL;
+				NLMISC::CRGBA *color = nullptr;
 
 				// process all pixels
 				while(data < endData)

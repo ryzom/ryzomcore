@@ -217,7 +217,7 @@ PARSE_START(Type, CTypeNode)
 			{
 				PARSE_IDENTIFIER(Temp)
 				PARSE_MARK
-				if (main->Temp == main->CppType && main->ToCppType == NULL)
+				if (main->Temp == main->CppType && main->ToCppType == nullptr)
 				{
 					PARSE_MARK
 					PARSE_KEYWORD(OpenParenthesis)
@@ -231,7 +231,7 @@ PARSE_START(Type, CTypeNode)
 					PARSE_NODE(CppCode, ToCppType)
 					PARSE_MARK
 				}
-				else if (main->Temp == main->StorageType && main->ToStorageType == NULL)
+				else if (main->Temp == main->StorageType && main->ToStorageType == nullptr)
 				{
 					PARSE_MARK
 					PARSE_KEYWORD(OpenParenthesis)

@@ -310,7 +310,7 @@ inline void CPSFanLight::setupMaterial()
 	NL_PS_FUNC(CPSFanLight_setupMaterial)
 	CParticleSystem &ps = *(_Owner->getOwner());
 	/// update material color
-	if (_Tex == NULL)
+	if (_Tex == nullptr)
 	{
 		forceTexturedMaterialStages(1);
 		SetupModulatedStage(_Mat, 0, CMaterial::Diffuse, CMaterial::Constant);
@@ -342,7 +342,7 @@ inline void CPSFanLight::setupMaterial()
 		{
 			col.modulateFromColor(ps.getGlobalColorLighted(), _Color);
 		}
-		else if (ps.getColorAttenuationScheme() != NULL || ps.isUserColorUsed())
+		else if (ps.getColorAttenuationScheme() != nullptr || ps.isUserColorUsed())
 		{
 			col.modulateFromColor(ps.getGlobalColor(), _Color);
 		}
@@ -429,7 +429,8 @@ bool CPSFanLight::completeBBox(NLMISC::CAABBox &box) const
 CPSFanLight::CPSFanLight(uint32 nbFans) : _NbFans(nbFans),
 										  _PhaseSmoothness(0),
 										  _MoveIntensity(1.5f),
-										  _Tex(NULL),
+										  _Tex(nullptr)
+    ,
 										  _PhaseSpeed(256)
 {
 	NL_PS_FUNC(CPSFanLight_CPSFanLight)
@@ -491,11 +492,11 @@ void CPSFanLight::updateMatAndVbForColor(void)
 void CPSFanLight::getVBnIB(CVertexBuffer *&retVb, CIndexBuffer *&retIb)
 {
 	NL_PS_FUNC(CPSFanLight_getVBnIB)
-	TVBMap &vbMap = _ColorScheme ? (_Tex == NULL  ? _ColoredVBMap : _ColoredTexVBMap)
-								 : (_Tex == NULL  ? _VBMap : _TexVBMap);
+	TVBMap &vbMap = _ColorScheme ? (_Tex == nullptr ? _ColoredVBMap : _ColoredTexVBMap)
+								 : (_Tex == nullptr ? _VBMap : _TexVBMap);
 	#ifdef NL_NAMED_INDEX_BUFFER
-		const char *ibName = _ColorScheme ? (_Tex == NULL  ? "_ColoredVBMap" : "_ColoredTexVBMap")
-					                    : (_Tex == NULL  ? "_VBMap" : "_TexVBMap");
+		const char *ibName = _ColorScheme ? (_Tex == nullptr ? "_ColoredVBMap" : "_ColoredTexVBMap")
+					                    : (_Tex == nullptr ? "_VBMap" : "_TexVBMap");
 	#endif
 	TVBMap::iterator vbIt = vbMap.find(_NbFans);
 	if (vbIt != vbMap.end())
@@ -516,7 +517,7 @@ void CPSFanLight::getVBnIB(CVertexBuffer *&retVb, CIndexBuffer *&retIb)
 		const uint32 size = getNumFanlightsInVB();
 		vb.setVertexFormat(CVertexBuffer::PositionFlag |
 						   CVertexBuffer::PrimaryColorFlag |
-						   (_Tex != NULL ?  CVertexBuffer::TexCoord0Flag : 0)
+						   (_Tex != nullptr ?  CVertexBuffer::TexCoord0Flag : 0)
 						  );
 		vb.setNumVertices(size * (2 + _NbFans));
 		vb.setBufferUsage(CVertexBuffer::FullStream, true); // keep local memory because of interleaved format

@@ -65,9 +65,9 @@ public:
 public:
 	
 	CSpawnBot(TDataSetRow const& entityIndex, CBot& owner, NLMISC::CEntityId const& id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
-	virtual ~CSpawnBot();
+	virtual ~CSpawnBot() NL_OVERRIDE;
 	
-	virtual void setTheta(CAngle theta);
+	virtual void setTheta(CAngle theta) NL_OVERRIDE;
 	
 	virtual void sendInfoToEGS() const;
 	
@@ -77,22 +77,22 @@ public:
 	
 	/// @name CBotAggroOwner implementation
 	//@{
-	virtual void aggroLost(TDataSetRow const& aggroBot) const;
-	virtual void aggroGain(TDataSetRow const& aggroBot) const;
+	virtual void aggroLost(TDataSetRow const& aggroBot) const NL_OVERRIDE;
+	virtual void aggroGain(TDataSetRow const& aggroBot) const NL_OVERRIDE;
 	
-	virtual NLMISC::CEntityId getAggroOwnerEid() const { return getEntityId(); }
-	virtual RYAI_MAP_CRUNCH::CWorldPosition getAggroPos() const { return wpos(); }
-	virtual NLMISC::CSmartPtr<CAIPlace const> buildFirstHitPlace(TDataSetRow const& aggroBot) const;
-	virtual std::set<CBotAggroOwner*> getAggroGroup(bool primary) const;
+	virtual NLMISC::CEntityId getAggroOwnerEid() const NL_OVERRIDE { return getEntityId(); }
+	virtual RYAI_MAP_CRUNCH::CWorldPosition getAggroPos() const NL_OVERRIDE { return wpos(); }
+	virtual NLMISC::CSmartPtr<CAIPlace const> buildFirstHitPlace(TDataSetRow const& aggroBot) const NL_OVERRIDE;
+	virtual std::set<CBotAggroOwner*> getAggroGroup(bool primary) const NL_OVERRIDE;
 	
-	virtual float getReturnDistCheck() const;
-	virtual float getD1Radius() const;
-	virtual float getD2Radius() const;
-	virtual float getPrimaryGroupAggroDist() const;
-	virtual float getPrimaryGroupAggroCoef() const;
-	virtual float getSecondaryGroupAggroDist() const;
-	virtual float getSecondaryGroupAggroCoef() const;
-	virtual float getAggroPropagationRadius() const;
+	virtual float getReturnDistCheck() const NL_OVERRIDE;
+	virtual float getD1Radius() const NL_OVERRIDE;
+	virtual float getD2Radius() const NL_OVERRIDE;
+	virtual float getPrimaryGroupAggroDist() const NL_OVERRIDE;
+	virtual float getPrimaryGroupAggroCoef() const NL_OVERRIDE;
+	virtual float getSecondaryGroupAggroDist() const NL_OVERRIDE;
+	virtual float getSecondaryGroupAggroCoef() const NL_OVERRIDE;
+	virtual float getAggroPropagationRadius() const NL_OVERRIDE;
 	//@}
 	
 	virtual void setVisualPropertiesName();
@@ -101,11 +101,11 @@ public:
 	bool getProp(size_t Id, uint32& value) const;
 	void setProp(size_t Id, uint32 value);
 	
-	virtual float fightWeight() const;
-	virtual float fightValue() const;
+	virtual float fightWeight() const NL_OVERRIDE;
+	virtual float fightValue() const NL_OVERRIDE;
 	
-	CAIInstance* getAIInstance() const;
-	std::vector<std::string> getMultiLineInfoString() const;
+	CAIInstance* getAIInstance() const NL_OVERRIDE;
+	std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 		
 	void setSpawnGroup(CSpawnGroup* spawnGroup) { _SpawnGroup = spawnGroup; }
 	
@@ -118,7 +118,7 @@ public:
 	void healTriggered();
 	void selfHealTriggered();
 	
-	virtual float getSpeedFactor() const { return _SpeedFactor; }
+	virtual float getSpeedFactor() const NL_OVERRIDE { return _SpeedFactor; }
 	virtual void setSpeedFactor(float value) { _SpeedFactor = value; }
 	
 public:
@@ -157,15 +157,15 @@ public:
 	//@{
 	CBot(CGroup* owner, CAIAliasDescriptionNode* alias = NULL);
 	CBot(CGroup* owner, uint32 alias, std::string const& name);
-	virtual ~CBot();
+	virtual ~CBot() NL_OVERRIDE;
 	//@}
 	
 	/// @name CChild implementation
 	//@{
 	virtual std::string getIndexString() const;
 	virtual std::string getEntityIdString() const;
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	virtual std::string getFullName() const;
 	//@}
 	
@@ -180,7 +180,7 @@ public:
 	
 	/// @name AI objects hierarchy access
 	//@{
-	CAIInstance* getAIInstance() const;
+	CAIInstance* getAIInstance() const NL_OVERRIDE;
 
 	AISHEETS::ICreatureCPtr getClientCSheet() const
 	{
@@ -201,8 +201,8 @@ public:
 	
 	/// @name CDynBot stuff
 	//@{
-	void addEnergy() const;
-	void removeEnergy() const;
+	void addEnergy() const NL_OVERRIDE;
+	void removeEnergy() const NL_OVERRIDE;
 	CDynBot const& getDynBot() const { return *this; };
 	void initEnergy(float energyCoef);
 	//@}
@@ -227,7 +227,7 @@ public:
 	/// Debugging stuff
 	CDebugHistory* getDebugHistory() { return this; }
 	
-	void serviceEvent(CServiceEvent const& info);
+	void serviceEvent(CServiceEvent const& info) NL_OVERRIDE;
 	
 	virtual AITYPES::TFaunaType type() const { return AITYPES::FaunaTypeBadType; }
 	virtual	RYZOMID::TTypeId getRyzomType() const = 0;

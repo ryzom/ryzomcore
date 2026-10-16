@@ -3,8 +3,9 @@
 <root id="outgame" x="0" y="0" w="800" h="600" active="false" />
 
 <lua file="out_v2_select.lua" />
-<!-- <lua file="bg_downloader.lua" /> -->
-
+<!--
+<lua file="bg_downloader.lua" />
+-->
 <!-- *********************** -->
 <!-- * CHARACTER SELECTION * -->
 <!-- *********************** -->
@@ -144,7 +145,7 @@
 	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:posz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
 	<action handler="set" params="target_property=ui:outgame:charsel:slot@0:cam:tgtz|value=add(0.06,getprop('ui:outgame:charsel:slot@0:char:headz'))" />
 
-	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:hardtext|slot=@0" />
+	<action handler="get_slot" cond="not(isCharSelSlotEmpty(@0))" params="prop=name|target=ui:outgame:charsel:but_slot@0:uc_hardtext|slot=@0" />
 </proc>
 
 <proc id="proc_charsel_initslot_empty">
@@ -184,9 +185,8 @@
 			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 'outgame_fyros.ig', 'outgame_matis.ig', 'outgame_tryker.ig', 'outgame_zorai.ig')" />
 	<action handler="set" params="target_property=ui:outgame:charsel:char3d:cam:fov |
 			value=switch(@UI:TEMP:CHAR3D:PEOPLE, 60, 60, 60, 60)" />
-	<action handler="set" params="target_property=ui:outgame:charsel:3d_select:y |
-								value=switch(@0, 0, -153, -306, -459, -612)" />	
-								
+			<action handler="set" params="target_property=ui:outgame:charsel:3d_select:y | value=switch(@0, 0, -153, -306, -459, -612)" />
+	
 	<action handler="proc" params="proc_charsel_infos2" />
 </proc>
 
@@ -534,9 +534,9 @@
 			onover="play_sound" params_over="name=specie_but_over"
 			onclick_l="proc" params_l="proc_charsel_clickslot|4" />
 
-<!--
-	<group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">
-		<instance template="outgame_black_back" id="border"/>
+			<!--
+			<group id="bgd_progress" posref="BM BM" w="430" h="75" x="85" y="65" active="true">
+		<instance template="outgame_black_back" id="border"/>		
 		<view type="text" id="text"	active="true" y="-10" posref="TM TM"	hardtext="" fontsize="13" color="255 255 255 255"/>
 		<view type="bitmap" id="bm" active="false" y="1" x="-1" texture="W_answer_16_valid.tga" posparent="text" posref="ML MR"/>
 		<view type="text" id="ellipsis"	active="true" y="0" posref="BR BL"	posparent="text" hardtext="" fontsize="13" color="255 255 255 255"/>
@@ -544,16 +544,17 @@
 
 		<group type="combo_box" id="prio" sizeref="w" w="64" x="0" y="-8" child_resize_h="true" child_resize_hmargin="6" linked_to_db="false" 
 		 posparent="progress"
-		 posref="BM TM"	
+		 posref="BM TM"		 
 		 on_change="lua:bgdownloader:onChangePriority()" on_change_params=""
 		 tooltip="uiBGD_PriorityTooltip"
 		 global_color="false"
-		>
-			<instance template="combo_box_def1" tooltip="uiBGD_PriorityTooltip"/>
+		>		
+			<instance template="combo_box_def1" tooltip="uiBGD_PriorityTooltip"/>						
 			<combo_text name="uiBGD_Paused" />
 			<combo_text name="uiBGD_LowPriority" />
-			<combo_text name="uiBGD_NormalPriority" />
+			<combo_text name="uiBGD_NormalPriority" />			
 		</group>
+
 	</group>
 -->
 
@@ -580,13 +581,7 @@
 					onclick_l="proc" params_l="proc_charsel_play"/>
 	-->
 
-	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="76" hardtext="uiCharSel_Play"
-					onover="play_sound" params_over="name=specie_but_over"
-					onclick_l="lua" params_l="outgame:launchGame()"/>
-
-	<ctrl style="valid_txt_button" id="edit_session_but" posref="BR BM" x="-112" y="36" hardtext="uiLaunchEditor"
-					onover="play_sound" params_over="name=specie_but_over"
-					onclick_l="proc" params_l="proc_charsel_edit_menu"/>
+	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_Play" onover="play_sound" params_over="name=specie_but_over" onclick_l="lua" params_l="outgame:launchGame()"/>
 
 	<ctrl style="valid_txt_button" id="del_but" posref="BR BL" x="-794" y="56" hardtext="uiCharSel_Del"
 					onover="play_sound" params_over="name=specie_but_over"
@@ -780,19 +775,7 @@
 </options>
 
 
-<group type="menu" id="r2ed_editor_menu"
-	options="menu_back"  
-	text_y="0"
-	color="255 255 255 255"
-	fontsize="16"
-	shadow="true"
-	shadow_color="0 0 0 255"
-	shadow_color_over="0 0 0 255"
-	color_over="0 0 0 255"
-	color_grayed="255 255 255 128"
-	shadow_color_grayed="0 0 0 255"
-	highlight_over="255 255 255 128"
-	mouse_pos="false">
+<group type="menu" id="r2ed_editor_menu" options="menu_back" text_y="0" color="255 255 255 255" fontsize="16" shadow="true" shadow_color="0 0 0 255" shadow_color_over="0 0 0 255" color_over="0 0 0 255" color_grayed="255 255 255 128" shadow_color_grayed="0 0 0 255" highlight_over="255 255 255 128" mouse_pos="false">
 
 	<action id="new_scenario" name="uiR2EDNewScenario" handler="proc" params="proc_charsel_new_scenario_warning" />
 	<action id="new_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario"/>

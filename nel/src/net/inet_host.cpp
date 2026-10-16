@@ -79,7 +79,7 @@ std::string findHostname(const CInetAddress &address)
 #if defined(NL_OS_WINDOWS) && defined(GetNameInfo)
 		res = GetNameInfoW((SOCKADDR *)&storage, sizeof(TSockAddrIn), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
 #else
-		res = getnameinfo((struct sockaddr *)&storage, sizeof(TSockAddrIn), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
+		res = getnameinfo((struct sockaddr *)&storage, sizeof(TSockAddrIn), host, NI_MAXHOST, nullptr, 0, NI_NAMEREQD);
 #endif
 	}
 	else if (storage.ss_family == AF_INET6)
@@ -88,7 +88,7 @@ std::string findHostname(const CInetAddress &address)
 #if defined(NL_OS_WINDOWS) && defined(GetNameInfo)
 		res = GetNameInfoW((SOCKADDR *)&storage, sizeof(TSockAddrIn6), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
 #else
-		res = getnameinfo((struct sockaddr *)&storage, sizeof(TSockAddrIn6), host, NI_MAXHOST, NULL, 0, NI_NAMEREQD);
+		res = getnameinfo((struct sockaddr *)&storage, sizeof(TSockAddrIn6), host, NI_MAXHOST, nullptr, 0, NI_NAMEREQD);
 #endif
 	}
 
@@ -180,7 +180,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 	ADDRINFOW *res = NULL;
 	ADDRINFOW hints;
 #else
-	struct addrinfo *res = NULL;
+	struct addrinfo *res = nullptr;
 	struct addrinfo hints;
 #endif
 	memset(&hints, 0, sizeof(hints));
@@ -194,7 +194,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 	INT status = getaddrinfo(nlUtf8ToMbcs(hostname), NULL, &hints, &res);
 #endif
 #else
-	sint status = getaddrinfo(hostname.c_str(), NULL, &hints, &res);
+	sint status = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
 #endif
 
 	if (status)
@@ -214,7 +214,7 @@ void CInetHost::set(const std::string &hostname, uint16 port)
 #endif
 
 	// process all addresses
-	while (p != NULL)
+	while (p != nullptr)
 	{
 		// check address family
 		if (p->ai_family == AF_INET)
@@ -334,7 +334,7 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	std::vector<CInetAddress> skipLoopback;
 	host.m_Addresses.clear();
 
-	addrinfo *result = NULL;
+	addrinfo *result = nullptr;
 	addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
@@ -345,9 +345,9 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	std::string loopbackHostname;
 	bool haveLoopback = false;
 	bool haveLoopback6 = false;
-	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
+	if (getaddrinfo(nullptr, nullptr, &hints, &result) == 0)
 	{
-		for (addrinfo *ptr = result; ptr != NULL; ptr = ptr->ai_next)
+		for (addrinfo *ptr = result; ptr != nullptr; ptr = ptr->ai_next)
 		{
 			if (ptr->ai_family == AF_INET)
 			{
@@ -399,16 +399,16 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	{
 		// Save hostname as UTF-8, from locale
 		host.m_Hostname = NLMISC::mbcsToUtf8(localhost);
-		result = NULL;
+		result = nullptr;
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 		hints.ai_family = AF_UNSPEC;
 
 		// Get all addresses, and add them all
-		if (getaddrinfo(localhost, NULL, &hints, &result) == 0)
+		if (getaddrinfo(localhost, nullptr, &hints, &result) == 0)
 		{
-			for (addrinfo *ptr = result; ptr != NULL; ptr = ptr->ai_next)
+			for (addrinfo *ptr = result; ptr != nullptr; ptr = ptr->ai_next)
 			{
 				if (ptr->ai_family == AF_INET)
 				{
@@ -489,9 +489,9 @@ CInetHost CInetHost::localAddresses(uint16 port, bool sort, bool loopback)
 	struct ifaddrs *ifaddr, *ifa;
 	if (getifaddrs(&ifaddr) == 0)
 	{
-		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+		for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next)
 		{
-			if (ifa->ifa_addr == NULL)
+			if (ifa->ifa_addr == nullptr)
 				continue;
 			if (ifa->ifa_addr->sa_family == AF_INET)
 			{

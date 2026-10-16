@@ -31,7 +31,7 @@ class CCreatureTickUpdateTimerEvent:public CTimerEvent
 public:
 
 	CCreatureTickUpdateTimerEvent(CCreature *parent);
-	void timerCallback(CTimer *owner);
+	void timerCallback(CTimer *owner) NL_OVERRIDE;
 private:
 	CCreature *_Parent;
 };

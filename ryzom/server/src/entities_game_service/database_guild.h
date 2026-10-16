@@ -20,8 +20,8 @@
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_DATABASE_database_GUILD_H
-#define INCLUDED_DATABASE_database_GUILD_H
+#ifndef INCLUDED_DATABASE__GUILD_H
+#define INCLUDED_DATABASE__GUILD_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -2028,4 +2028,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE_database_GUILD_H
+#endif // INCLUDED_DATABASE__GUILD_H

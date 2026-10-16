@@ -98,7 +98,7 @@ NLMISC_REGISTER_OBJECT(CInterfaceOptions, COptionsAnimationSet, std::string, "an
 COptionsAnimationSet::COptionsAnimationSet( const TCtorParam &param ) :
 CInterfaceOptions( param )
 {
-	AnimationSet= NULL;
+	AnimationSet = nullptr;
 }
 
 // ***************************************************************************
@@ -111,7 +111,7 @@ COptionsAnimationSet::~COptionsAnimationSet()
 			(see deleteAnimationSet() doc)
 		 */
 		CViewRenderer::getInstance()->getDriver()->deleteAnimationSet(AnimationSet);
-		AnimationSet= NULL;
+		AnimationSet = nullptr;
 	}
 }
 

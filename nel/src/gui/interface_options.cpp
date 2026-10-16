@@ -95,15 +95,15 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceOptions::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
-		if( parentNode == NULL )
-			return NULL;
+		if( parentNode == nullptr)
+			return nullptr;
 
 		if( name.empty() )
-			return NULL;
+			return nullptr;
 
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "options" );
-		if( node == NULL )
-			return NULL;
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "options" );
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "name", BAD_CAST name.c_str() );
 		xmlAddChild( parentNode, node );
@@ -111,11 +111,11 @@ namespace NLGUI
 		std::map< std::string, CInterfaceOptionValue >::const_iterator itr;
 		for( itr = _ParamValue.begin(); itr != _ParamValue.end(); ++itr )
 		{
-			xmlNodePtr n = xmlNewNode( NULL, BAD_CAST "param" );
-			if( n == NULL )
+			xmlNodePtr n = xmlNewNode(nullptr, BAD_CAST "param" );
+			if( n == nullptr)
 			{
 				xmlFreeNode( node );
-				return NULL;
+				return nullptr;
 			}
 			
 			xmlSetProp( n, BAD_CAST "name", BAD_CAST itr->first.c_str() );
@@ -185,6 +185,7 @@ namespace NLGUI
 		Tile_M_Header = Tile_M_Scrollbar = 0;
 		Tile_T = Tile_B = Tile_L = Tile_R = 0;
 		Tile_B_Open = Tile_EM_Open = Tile_M_Open = 0;
+		FrameCoversOpenList = true;
 		Scrollbar_Offset_X = 4;
 		Scrollbar_W = 8;
 	}
@@ -197,8 +198,8 @@ namespace NLGUI
 	xmlNodePtr COptionsLayer::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
 		xmlNodePtr node = CInterfaceOptions::serialize( parentNode, name );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 		
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "layer" );
 
@@ -223,6 +224,8 @@ namespace NLGUI
 		Tile_B_Open = getValSInt32("tile_b_open");
 		Tile_EM_Open = getValSInt32("tile_em_open");
 		Tile_M_Open = getValSInt32("tile_m_open");
+		if (!getValue("frame_covers_open_list").getValStr().empty())
+			FrameCoversOpenList = getValBool("frame_covers_open_list");
 
 		Scrollbar_Offset_X = getValSInt32("scrollbar_offset_x");
 		Scrollbar_W = getValSInt32("scrollbar_size_w");
@@ -316,8 +319,8 @@ namespace NLGUI
 	xmlNodePtr COptionsContainerInsertion::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
 		xmlNodePtr node = CInterfaceOptions::serialize( parentNode, name );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "container_insertion_opt" );
 
@@ -357,8 +360,8 @@ namespace NLGUI
 	xmlNodePtr COptionsContainerMove::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
 		xmlNodePtr node = CInterfaceOptions::serialize( parentNode, name );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "container_move_opt" );
 
@@ -390,15 +393,15 @@ namespace NLGUI
 
 	xmlNodePtr COptionsList::serialize( xmlNodePtr parentNode, const std::string &name ) const
 	{
-		if( parentNode == NULL )
-			return NULL;
+		if( parentNode == nullptr)
+			return nullptr;
 
 		if( name.empty() )
-			return NULL;
+			return nullptr;
 
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "options" );
-		if( node == NULL )
-			return NULL;
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "options" );
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "name", BAD_CAST name.c_str() );
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "list" );
@@ -407,11 +410,11 @@ namespace NLGUI
 		std::map< std::string, CInterfaceOptionValue >::const_iterator itr;
 		for( itr = _ParamValue.begin(); itr != _ParamValue.end(); ++itr )
 		{
-			xmlNodePtr n = xmlNewNode( NULL, BAD_CAST "param" );
-			if( n == NULL )
+			xmlNodePtr n = xmlNewNode(nullptr, BAD_CAST "param" );
+			if( n == nullptr)
 			{
 				xmlFreeNode( node );
-				return NULL;
+				return nullptr;
 			}
 			xmlSetProp( n, BAD_CAST "value", BAD_CAST itr->second.getValStr().c_str() );
 			xmlAddChild( node, n );

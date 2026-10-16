@@ -68,7 +68,7 @@ CTileMaterial::CTileMaterial()
 	// By default, all pass are NULL.
 	for(uint i=0; i<NL3D_MAX_TILE_FACE; i++)
 	{
-		TileFaceVectors[i]= NULL;
+		TileFaceVectors[i] = nullptr;
 	}
 }
 
@@ -80,7 +80,7 @@ void		CTileMaterial::appendTileToEachRenderPass(uint patchNumRenderableFaces)
 	{
 		// If RdrPass exist, add this Material Id
 		CPatchRdrPass	*rdrPass= Pass[i].PatchRdrPass;
-		if(rdrPass!=NULL)
+		if(rdrPass != nullptr)
 		{
 			/* enlarge the capacity of the pass so it can renders the tile faces of this patch.
 			 *	NumRenderableFaces is really too big since the tile-material surely doesn't use all
@@ -157,19 +157,19 @@ CTessFace::CTessFace()
 	// Don't modify any of it!!
 	// Patch, SonLeft and SonRight nullity are very useful for MultiplePatch faces, and CantMergeFace.
 
-	Patch= NULL;
-	VBase=VLeft=VRight= NULL;
-	FBase=FLeft=FRight= NULL;
-	Father=SonLeft=SonRight= NULL;
+	Patch = nullptr;
+	VBase=VLeft=VRight = nullptr;
+	FBase=FLeft=FRight = nullptr;
+	Father=SonLeft=SonRight = nullptr;
 	Level=0;
 	ErrorMetricDate= 0;
 	// Size, Center, paramcoord undetermined.
 
-	TileMaterial= NULL;
+	TileMaterial = nullptr;
 	// Very important (for split reasons). Init Tilefaces to NULL.
 	for(sint i=0;i<NL3D_MAX_TILE_FACE;i++)
 	{
-		TileFaces[i]=NULL;
+		TileFaces[i] = nullptr;
 	}
 
 	RecursMarkCanMerge=false;
@@ -375,7 +375,7 @@ void	CTessFace::allocTileUv(TTileUvId id)
 		case IdUvBase: vertexSrc= VBase; break;
 		case IdUvLeft: vertexSrc= VLeft; break;
 		case IdUvRight: vertexSrc= VRight; break;
-		default: vertexSrc = 0; nlstop; break;
+		default: vertexSrc = nullptr; nlstop; break;
 	};
 
 	// Do it for all possible pass
@@ -446,7 +446,7 @@ void	CTessFace::deleteTileUv(TTileUvId id)
 		{
 			CTessNearVertex		*oldNear;
 			oldNear= TileFaces[i]->V[id];
-			TileFaces[i]->V[id]=NULL;
+			TileFaces[i]->V[id] = nullptr;
 
 			// May delete this vertex from VB.
 			Patch->checkDeleteVertexVBNear(oldNear);
@@ -512,9 +512,9 @@ void		CTessFace::buildTileFaces()
 		if(TileMaterial->Pass[i].PatchRdrPass)
 		{
 			TileFaces[i]= Patch->getLandscape()->newTileFace();
-			TileFaces[i]->V[IdUvBase]= NULL;
-			TileFaces[i]->V[IdUvLeft]= NULL;
-			TileFaces[i]->V[IdUvRight]= NULL;
+			TileFaces[i]->V[IdUvBase] = nullptr;
+			TileFaces[i]->V[IdUvLeft] = nullptr;
+			TileFaces[i]->V[IdUvRight] = nullptr;
 		}
 	}
 }
@@ -530,7 +530,7 @@ void		CTessFace::deleteTileFaces()
 		{
 			nlassert(TileFaces[i]);
 			Patch->getLandscape()->deleteTileFace(TileFaces[i]);
-			TileFaces[i]= NULL;
+			TileFaces[i] = nullptr;
 		}
 		else
 		{
@@ -697,7 +697,7 @@ void		CTessFace::computeTileMaterial()
 	nlassert(!FBase || FBase->Patch!=Patch || FBase->Level<=Patch->TileLimitLevel);
 	bool	copyFromBase;
 	copyFromBase= (FBase && FBase->Patch==Patch);
-	copyFromBase= copyFromBase && (FBase->Level==Patch->TileLimitLevel && FBase->TileMaterial!=NULL);
+	copyFromBase= copyFromBase && (FBase->Level==Patch->TileLimitLevel && FBase->TileMaterial != nullptr);
 	// NB: because of delete/recreateTileUvs(), FBase->TileMaterial may be NULL, even if face is at good TileLimitLevel.
 	if(copyFromBase)
 	{
@@ -832,13 +832,13 @@ void	CTessFace::releaseTileMaterial()
 	deleteTileUv(IdUvBase);
 
 	nlassert(!FBase || FBase->Level<=Patch->TileLimitLevel);
-	if(FBase && FBase->Level==Patch->TileLimitLevel && FBase->TileMaterial!=NULL)
+	if(FBase && FBase->Level==Patch->TileLimitLevel && FBase->TileMaterial != nullptr)
 	{
 		// Do not release Uvs, since neighbor need it...
 		// But release faces.
 		deleteTileFaces();
 		// Do not release TileMaterial, since neighbor need it...
-		TileMaterial= NULL;
+		TileMaterial = nullptr;
 	}
 	else
 	{
@@ -857,7 +857,7 @@ void	CTessFace::releaseTileMaterial()
 		Patch->removeTileMaterialFromRenderList(TileMaterial);
 
 		Patch->getLandscape()->deleteTileMaterial(TileMaterial);
-		TileMaterial= NULL;
+		TileMaterial = nullptr;
 	}
 }
 
@@ -949,10 +949,10 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 	// Create splitted vertices.
 	CParamCoord		pctop(f1->PVBase, f1->PVLeft);
 	CParamCoord		pcbot(f0->PVBase, f0->PVLeft);
-	CTessVertex		*vtop= NULL;
-	CTessVertex		*vbot= NULL;
+	CTessVertex		*vtop = nullptr;
+	CTessVertex		*vbot = nullptr;
 	// Compute top.
-	if(f1->FLeft==NULL || f1->FLeft->isLeaf())
+	if(f1->FLeft == nullptr || f1->FLeft->isLeaf())
 	{
 		// The base neighbor is a leaf or NULL. So must create the new vertex.
 		vtop= Patch->getLandscape()->newTessVertex();
@@ -979,7 +979,7 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 		vtop->MaxNearLimit= max( vtop->MaxNearLimit, f1->computeNearLimit());
 	}
 	// Compute bot.
-	if(f0->FLeft==NULL || f0->FLeft->isLeaf())
+	if(f0->FLeft == nullptr || f0->FLeft->isLeaf())
 	{
 		// The base neighbor is a leaf or NULL. So must create the new vertex.
 		vbot= Patch->getLandscape()->newTessVertex();
@@ -1027,10 +1027,10 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 	if( CLandscapeGlobals::VertexProgramEnabled )
 	{
 		// f0
-		if( ! (f0->FLeft==NULL || f0->FLeft->isLeaf()) )
+		if( ! (f0->FLeft == nullptr || f0->FLeft->isLeaf()) )
 			f0->FLeft->Patch->checkFillVertexVBFar(f0->FLeft->SonLeft->FVBase);
 		// f1
-		if( ! (f1->FLeft==NULL || f1->FLeft->isLeaf()) )
+		if( ! (f1->FLeft == nullptr || f1->FLeft->isLeaf()) )
 			f1->FLeft->Patch->checkFillVertexVBFar(f1->FLeft->SonLeft->FVBase);
 	}
 
@@ -1127,10 +1127,10 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 	if(f1->FRight)
 		f1->FRight->changeNeighbor(f1, f1r);
 	// 4 links (all FLeft sons ) are stil invalid here.
-	f0l->FLeft= NULL;
-	f0r->FLeft= NULL;
-	f1l->FLeft= NULL;
-	f1r->FLeft= NULL;
+	f0l->FLeft = nullptr;
+	f0r->FLeft = nullptr;
+	f1l->FLeft = nullptr;
+	f1r->FLeft = nullptr;
 
 	// Neigbors pointers of undetermined splitted face are not changed. Must Doesn't change this.
 	// Used and Updated in section 5. ...
@@ -1146,7 +1146,7 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 	{
 		// if neighbor face splitted, and if 2 different patchs, we must update the Tile vertices
 		// because MaxFaceSize and MaxNearLimit may have changed.
-		if( f0->FLeft!=NULL && !f0->FLeft->isLeaf() && f0->FLeft->Patch!=Patch )
+		if( f0->FLeft != nullptr && !f0->FLeft->isLeaf() && f0->FLeft->Patch!=Patch )
 		{
 			// If neighbors sons at tile level, must update their Tile vertices.
 			if( f0->FLeft->SonLeft->Level >= f0->FLeft->Patch->TileLimitLevel )
@@ -1156,7 +1156,7 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 			}
 		}
 		// idem for f1.
-		if( f1->FLeft!=NULL && !f1->FLeft->isLeaf() && f1->FLeft->Patch!=Patch )
+		if( f1->FLeft != nullptr && !f1->FLeft->isLeaf() && f1->FLeft->Patch!=Patch )
 		{
 			// If neighbors sons at tile level, must update their Tile vertices.
 			if( f1->FLeft->SonLeft->Level >= f1->FLeft->Patch->TileLimitLevel )
@@ -1197,11 +1197,11 @@ void		CTessFace::splitRectangular(bool propagateSplit)
 		}
 
 		// If current face and FBase has sons, just links.
-		if(f->FLeft==NULL)
+		if(f->FLeft == nullptr)
 		{
 			// Just update sons neighbors.
-			fl->FLeft= NULL;
-			fr->FLeft= NULL;
+			fl->FLeft = nullptr;
+			fr->FLeft = nullptr;
 		}
 		else if(!f->FLeft->isLeaf())
 		{
@@ -1321,7 +1321,7 @@ void		CTessFace::split(bool propagateSplit)
 	SonLeft->FBase= FLeft;
 	if(FLeft)	FLeft->changeNeighbor(this, SonLeft);
 	SonLeft->FLeft= SonRight;
-	SonLeft->FRight= NULL;		// Temporary. updated later.
+	SonLeft->FRight = nullptr;		// Temporary. updated later.
 	// link neighbor vertex.
 	SonLeft->VLeft= VBase;
 	SonLeft->VRight= VLeft;
@@ -1337,7 +1337,7 @@ void		CTessFace::split(bool propagateSplit)
 	// link neighbor face.
 	SonRight->FBase= FRight;
 	if(FRight)	FRight->changeNeighbor(this, SonRight);
-	SonRight->FLeft= NULL;		// Temporary. updated later.
+	SonRight->FLeft = nullptr;		// Temporary. updated later.
 	SonRight->FRight= SonLeft;
 	// link neighbor vertex.
 	SonRight->VLeft= VRight;
@@ -1358,7 +1358,7 @@ void		CTessFace::split(bool propagateSplit)
 	//-------------------------------
 
 	// Must create/link *->VBase.
-	if(FBase==NULL || FBase->isLeaf())
+	if(FBase == nullptr || FBase->isLeaf())
 	{
 		// The base neighbor is a leaf or NULL. So must create the new vertex.
 		CTessVertex	*newVertex= Patch->getLandscape()->newTessVertex();
@@ -1392,7 +1392,7 @@ void		CTessFace::split(bool propagateSplit)
 
 	// Must create/link *->FVBase.
 	// HERE, we must create a FarVertex too if the neighbor is not of the same patch as me.
-	if(FBase==NULL || FBase->isLeaf() || FBase->Patch!=Patch)
+	if(FBase == nullptr || FBase->isLeaf() || FBase->Patch!=Patch)
 	{
 		// The base neighbor is a leaf or NULL. So must create the new far vertex.
 		CTessFarVertex	*newFar= Patch->getLandscape()->newTessFarVertex();
@@ -1413,7 +1413,7 @@ void		CTessFace::split(bool propagateSplit)
 
 		// For VertexProgram only, must refill the Far vertex of neighbor,
 		// because MaxFaceSize, and MaxNearLimit may have change.
-		if( CLandscapeGlobals::VertexProgramEnabled && ! (FBase==NULL || FBase->isLeaf()) )
+		if( CLandscapeGlobals::VertexProgramEnabled && ! (FBase == nullptr || FBase->isLeaf()) )
 			FBase->Patch->checkFillVertexVBFar(FBase->SonLeft->FVBase);
 	}
 	else
@@ -1451,7 +1451,7 @@ void		CTessFace::split(bool propagateSplit)
 	{
 		// if neighbor face splitted, and if 2 different patchs, we must update the Tile vertices
 		// because MaxFaceSize and MaxNearLimit may have changed.
-		if( FBase!=NULL && !FBase->isLeaf() && FBase->Patch!=Patch )
+		if( FBase != nullptr && !FBase->isLeaf() && FBase->Patch!=Patch )
 		{
 			// If neighbors sons at tile level, must update their Tile vertices.
 			if( FBase->SonLeft->Level >= FBase->Patch->TileLimitLevel )
@@ -1472,11 +1472,11 @@ void		CTessFace::split(bool propagateSplit)
 	// 5. Propagate, or link sons of base.
 	//------------------------------------
 	// If current face and FBase has sons, just links.
-	if(FBase==NULL)
+	if(FBase == nullptr)
 	{
 		// Just update sons neighbors.
-		SonLeft->FRight= NULL;
-		SonRight->FLeft= NULL;
+		SonLeft->FRight = nullptr;
+		SonRight->FLeft = nullptr;
 	}
 	else if(!FBase->isLeaf())
 	{
@@ -1667,11 +1667,11 @@ void		CTessFace::doMerge()
 		// delete sons.
 		Patch->getLandscape()->deleteTessFace(SonLeft);
 		Patch->getLandscape()->deleteTessFace(SonRight);
-		SonLeft=NULL;
-		SonRight=NULL;
+		SonLeft = nullptr;
+		SonRight = nullptr;
 
 		// If not already done, merge the neighbor.
-		if(FBase!=NULL && !FBase->isLeaf())
+		if(FBase != nullptr && !FBase->isLeaf())
 		{
 			FBase->doMerge();
 		}
@@ -1716,8 +1716,8 @@ void		CTessFace::doMerge()
 		// delete sons.
 		Patch->getLandscape()->deleteTessFace(SonLeft);
 		Patch->getLandscape()->deleteTessFace(SonRight);
-		SonLeft=NULL;
-		SonRight=NULL;
+		SonLeft = nullptr;
+		SonRight = nullptr;
 
 		// First, do it for my rectangular co-worker FBase (if not already done).
 		if(!FBase->isLeaf())
@@ -1725,7 +1725,7 @@ void		CTessFace::doMerge()
 			FBase->doMerge();
 		}
 		// If not already done, merge the neighbor.
-		if(FLeft!=NULL && !FLeft->isLeaf())
+		if(FLeft != nullptr && !FLeft->isLeaf())
 		{
 			FLeft->doMerge();
 		}
@@ -2279,13 +2279,13 @@ void		CTessFace::unbind()
 			// FLeft and FRight pointers are only valid in Leaves nodes.
 			if(FLeft && FLeft->Patch!=Patch)
 			{
-				FLeft->changeNeighbor(this, NULL);
-				FLeft= NULL;
+				FLeft->changeNeighbor(this, nullptr);
+				FLeft = nullptr;
 			}
 			if(FRight && FRight->Patch!=Patch)
 			{
-				FRight->changeNeighbor(this, NULL);
-				FRight= NULL;
+				FRight->changeNeighbor(this, nullptr);
+				FRight = nullptr;
 			}
 		}
 		// Change Base neighbors.
@@ -2293,8 +2293,8 @@ void		CTessFace::unbind()
 		{
 			CTessFace	*oldNeigbhorFace= FBase;
 
-			FBase->changeNeighbor(this, NULL);
-			FBase= NULL;
+			FBase->changeNeighbor(this, nullptr);
+			FBase = nullptr;
 			if(!isLeaf())
 			{
 				// Duplicate the VBase of sons, so the unbind is correct and no vertices are shared.
@@ -2326,8 +2326,8 @@ void		CTessFace::unbind()
 		{
 			CTessFace	*oldNeigbhorFace= FLeft;
 
-			FLeft->changeNeighbor(this, NULL);
-			FLeft= NULL;
+			FLeft->changeNeighbor(this, nullptr);
+			FLeft = nullptr;
 			if(!isLeaf())
 			{
 				// Duplicate the VBase of sons, so the unbind is correct and no vertices are shared.
@@ -2359,8 +2359,8 @@ void		CTessFace::unbind()
 		{
 			if(FRight && FRight->Patch!=Patch)
 			{
-				FRight->changeNeighbor(this, NULL);
-				FRight= NULL;
+				FRight->changeNeighbor(this, nullptr);
+				FRight = nullptr;
 			}
 		}
 	}
@@ -2487,7 +2487,7 @@ void		CTessFace::averageTesselationVertices()
 		- if neighbor is bind 1/N (CantMergeFace), no-op too, because the vertex is a BaseVertex, so don't modify.
 		- if my patch is same than my neighbor, then we are on a same patch :), and so no need to average.
 	*/
-	if(neighbor!=NULL && neighbor!=&CantMergeFace && Patch!= neighbor->Patch)
+	if(neighbor != nullptr && neighbor!=&CantMergeFace && Patch!= neighbor->Patch)
 	{
 		nlassert(neighbor->Patch);
 		nlassert(!neighbor->isLeaf());
@@ -2540,7 +2540,7 @@ bool		CTessFace::updateBindEdge(CTessFace	*&edgeFace, bool &splitWanted)
 	// Return true, when the bind should be Ok, or if a split has occurred.
 	// Return false only if pointers are updated, without splits.
 
-	if(edgeFace==NULL)
+	if(edgeFace == nullptr)
 		return true;
 
 	if(edgeFace->isLeaf())
@@ -2554,7 +2554,7 @@ bool		CTessFace::updateBindEdge(CTessFace	*&edgeFace, bool &splitWanted)
 	// MultiPatch face case.
 	//======================
 	// If neighbor is a multiple face.
-	if(edgeFace->Patch==NULL && edgeFace->FBase==this)
+	if(edgeFace->Patch == nullptr && edgeFace->FBase==this)
 	{
 		splitWanted= true;
 		return true;
@@ -2637,8 +2637,8 @@ bool		CTessFace::updateBindEdge(CTessFace	*&edgeFace, bool &splitWanted)
 void		CTessFace::updateBindAndSplit()
 {
 	bool	splitWanted= false;
-	CTessFace	*f0= NULL;
-	CTessFace	*f1= NULL;
+	CTessFace	*f0 = nullptr;
+	CTessFace	*f1 = nullptr;
 	/*
 		Look at the callers, and you'll see that "this" is always a leaf.
 		Therefore, FBase, FLeft and FRight are good pointers, and *FLeft and *FRight should be Ok too.
@@ -2664,19 +2664,19 @@ void		CTessFace::updateBindAndSplit()
 
 
 
-	CTessFace	*fmult= NULL;
-	CTessFace	*fmult0= NULL;
-	CTessFace	*fmult1= NULL;
+	CTessFace	*fmult = nullptr;
+	CTessFace	*fmult0 = nullptr;
+	CTessFace	*fmult1 = nullptr;
 	// If multipatch face case.
 	//=========================
 	if(!isRectangular())
 	{
 		// multipatch face case are detected when face->Patch==NULL !!!
-		if(FBase && FBase->Patch==NULL)
+		if(FBase && FBase->Patch == nullptr)
 		{
 			fmult= FBase;
 			// First, trick: FBase is NULL, so during the split. => no ptr problem.
-			FBase= NULL;
+			FBase = nullptr;
 		}
 	}
 	else
@@ -2684,18 +2684,18 @@ void		CTessFace::updateBindAndSplit()
 		nlassert(f0);
 		nlassert(f1);
 		// multipatch face case are detected when face->Patch==NULL !!!
-		if(f0->FLeft && f0->FLeft->Patch==NULL)
+		if(f0->FLeft && f0->FLeft->Patch == nullptr)
 		{
 			fmult0= f0->FLeft;
 			// First, trick: neighbor is NULL, so during the split. => no ptr problem.
-			f0->FLeft= NULL;
+			f0->FLeft = nullptr;
 		}
 		// multipatch face case are detected when face->Patch==NULL !!!
-		if(f1->FLeft && f1->FLeft->Patch==NULL)
+		if(f1->FLeft && f1->FLeft->Patch == nullptr)
 		{
 			fmult1= f1->FLeft;
 			// First, trick: neighbor is NULL, so during the split. => no ptr problem.
-			f1->FLeft= NULL;
+			f1->FLeft = nullptr;
 		}
 	}
 
@@ -2936,7 +2936,7 @@ CTessFace		*CTessFace::linkTessFaceWithEdge(const CVector2f &uv0, const CVector2
 
 
 	// If not found here, recurs to children
-	CTessFace	*ret= NULL;
+	CTessFace	*ret = nullptr;
 	if( !isLeaf() )
 	{
 		ret= SonLeft->linkTessFaceWithEdge(uv0, uv1, linkTo);
@@ -2998,8 +2998,8 @@ void		CTessFace::deleteTileUvs()
 			SonLeft->deleteTileFaces();
 			SonRight->deleteTileFaces();
 			// For createTileUvs, it is important to mark those faces as NO TileMaterial.
-			SonLeft->TileMaterial= NULL;
-			SonRight->TileMaterial= NULL;
+			SonLeft->TileMaterial = nullptr;
+			SonRight->TileMaterial = nullptr;
 		}
 	}
 	else
@@ -3067,7 +3067,7 @@ void		CTessFace::heritTileMaterial()
 	// Create, or link to the tileUv.
 	// Try to link to a neighbor TileUv.
 	// Can only work iff exist, and iff FBase is same patch, and same TileId.
-	if(FBase!=NULL && !FBase->isLeaf() && FBase->SonLeft->TileMaterial!=NULL && sameTile(this, FBase) )
+	if(FBase != nullptr && !FBase->isLeaf() && FBase->SonLeft->TileMaterial != nullptr && sameTile(this, FBase) )
 	{
 		// Ok!! link to the (existing) TileUv.
 		// FBase->SonLeft!=NULL since FBase->isLeaf()==false.

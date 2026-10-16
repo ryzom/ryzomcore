@@ -35,25 +35,25 @@ protected:
 
 public:
 	CItemEltStruct( CLoader* const _pl );
-	virtual ~CItemEltStruct();
+	virtual ~CItemEltStruct() NL_OVERRIDE;
 	
 	void BuildItem( CMoldElt* const _pme );
 	
-	virtual CStringEx GetFormula() const;
-	virtual void FillParent( const CFormBodyElt* const _pfbe );
-	virtual void FillCurrent(const  CFormBodyElt* const _pfbe );
-	virtual CItemElt* Clone();
-	virtual CFormBodyElt* BuildForm();
+	virtual CStringEx GetFormula() const NL_OVERRIDE;
+	virtual void FillParent( const CFormBodyElt* const _pfbe ) NL_OVERRIDE;
+	virtual void FillCurrent(const  CFormBodyElt* const _pfbe ) NL_OVERRIDE;
+	virtual CItemElt* Clone() NL_OVERRIDE;
+	virtual CFormBodyElt* BuildForm() NL_OVERRIDE;
 	void BuildForm( CFormBodyEltStruct* const _pfbes );
 	void BuildForm( CFormBodyEltStruct* const _pfbes, const std::vector< std::pair< CStringEx, CStringEx > >& _vsxparents );
-	virtual unsigned int GetNbElt() const;
-	virtual CItemElt* GetElt( const unsigned int _index ) const;
-	virtual CItemElt* GetElt( const CStringEx sxname ) const;
-	virtual bool SetModified( const unsigned int _index );
-	virtual void SetModified( const bool _b );
+	virtual unsigned int GetNbElt() const NL_OVERRIDE;
+	virtual CItemElt* GetElt( const unsigned int _index ) const NL_OVERRIDE;
+	virtual CItemElt* GetElt( const CStringEx sxname ) const NL_OVERRIDE;
+	virtual bool SetModified( const unsigned int _index ) NL_OVERRIDE;
+	virtual void SetModified( const bool _b ) NL_OVERRIDE;
 
-	virtual unsigned int GetNbChild ();
-	virtual CItemElt* GetChild (unsigned int _index);
+	virtual unsigned int GetNbChild () NL_OVERRIDE;
+	virtual CItemElt* GetChild (unsigned int _index) NL_OVERRIDE;
 	unsigned int GetNbStructElt ();
 	CItemElt* GetStructElt (unsigned int _index);
 };

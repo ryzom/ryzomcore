@@ -31,7 +31,6 @@
     <!-- BACKGROUND -->
     <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-1" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="1024" h="768" color="0 0 0 0"/>
-
     <!--
     <view type="bitmap" id="jena" posparent="window" posref="MR MR" x="-64" texture="log_jena.tga" global_color="false" render_layer="-1" />
     -->
@@ -53,7 +52,6 @@
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="60" color="135 243 28 255" />
 
     <ctrl style="log_std_but" id="but_log" posparent="eb_password" posref="TM TM" y="-32" onclick_l="on_login" hardtext="uiOnConnect" />
-
 
     <!-- Boxes Web Shortcuts
     <instance template="server_box" id="web_win" posparent="eb_login" posref="BL TL" w="568" h="202" y="-24" /> -->
@@ -82,7 +80,6 @@
     <!-- Login Support -->
     <ctrl style="log_std_but" id="but_login_support" posparent="but_forget_pwd" posref="BM TM" y="-8"
     onclick_l="open_url" params_l="cfg_LoginSupportURL" hardtext="uiLoginSupport" />
-
     <!-- Scan Data -->
 <!--
     <ctrl style="log_spe_but" id="but_scan_data" posparent="but_login_support" posref="BL TL" y="-8"
@@ -770,7 +767,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 -->
     <!-- BACKGROUND -->
 <!--
-    <view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
+<view type="bitmap" posref="TL TL" id="bl" texture="new_launcher_bg.tga" global_color="false" render_layer="-2" />
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
 	<instance template="html_text_button" id="back_to_login" text="BACK TO LOGIN" posparent="parent" posref="TL TL" y="-15"

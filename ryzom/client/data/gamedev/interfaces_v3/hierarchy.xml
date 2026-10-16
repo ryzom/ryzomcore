@@ -31,7 +31,7 @@
 <!-- ************************** -->
 <!-- 2nd List Menu : BEAST -->
 <tree node="animal_global">
-
+	
 	<!-- MAX_INVENTORY_ANIMAL -->
 	<tree node="userpa1"/>
 	<tree node="userpa2"/>
@@ -49,7 +49,7 @@
 	<tree node="JungleExoticRawMaterialKnowledge" />
 	<tree node="LakeExoticRawMaterialKnowledge" />
 </tree>-->
-<!--
+<!-- 
 <tree node="faber_create">
 	<tree node="faber_plan_selection" />
 </tree>

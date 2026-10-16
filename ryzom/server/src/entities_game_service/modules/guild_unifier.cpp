@@ -311,7 +311,7 @@ public:
 	/* IModule virtual overloads											 */
 	/*************************************************************************/
 
-	void onModuleUp(NLNET::IModuleProxy *module)
+	void onModuleUp(NLNET::IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "GuildUnifier")
 		{
@@ -327,7 +327,7 @@ public:
 		}
 	}
 
-	void onModuleDown(NLNET::IModuleProxy *module)
+	void onModuleDown(NLNET::IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "GuildUnifier")
 		{
@@ -374,7 +374,7 @@ public:
 //		return false;
 //	}
 
-	void onModuleUpdate()
+	void onModuleUpdate() NL_OVERRIDE
 	{
 		H_AUTO(CGuildUnifier_onModuleUpdate);
 		// each frame, check for guild member and member list modification to broadcast
@@ -443,7 +443,7 @@ public:
 	/*************************************************************************/
 
 	/// The guild manager ask to send all guild info a all known clients
-	void broadcastAllGuilds()
+	void broadcastAllGuilds() NL_OVERRIDE
 	{
 		nlassert(!_GuildsReady);
 
@@ -467,7 +467,7 @@ public:
 	}
 
 	/// A guild has been added
-	void guildCreated(const CGuild *guild)
+	void guildCreated(const CGuild *guild) NL_OVERRIDE
 	{
 		vector<CGuildDesc> guilds(1);
 		CGuildDesc &gd = guilds[0];
@@ -482,13 +482,13 @@ public:
 	}
 
 
-	void guildDeleted(uint32 guildId)
+	void guildDeleted(uint32 guildId) NL_OVERRIDE
 	{
 		CGuildUnifierClientProxy::broadcast_guildDeleted(_Broadcast.begin(), _Broadcast.end(), this, guildId);
 	}
 
 	/// Broadcast a guild update (guild base data and fames values)
-	void broadcastGuildUpdate(IGuild *ig)
+	void broadcastGuildUpdate(IGuild *ig) NL_OVERRIDE
 	{
 		// ok, we need to rebuild a descriptor with base guild info and fames values
 		CGuildDesc gd;
@@ -503,7 +503,7 @@ public:
 
 
 	/// Broadcast a guild message
-	void sendMessageToGuildMembers( const CGuild *guild, const std::string &  msg, const TVectorParamCheck & params ) 
+	void sendMessageToGuildMembers( const CGuild *guild, const std::string &  msg, const TVectorParamCheck & params ) NL_OVERRIDE 
 	{
 		if (guild->isProxy())
 			return;
@@ -511,7 +511,7 @@ public:
 		CGuildUnifierClientProxy::broadcast_messageToGuildMembers(_Broadcast.begin(), _Broadcast.end(), this, guild->getId(), msg, params);
 	}
 
-	void guildManagerReleased()
+	void guildManagerReleased() NL_OVERRIDE
 	{
 		// clear all foreign guild list
 		TPeerModules::iterator first(_Peers.begin()), last(_Peers.end());
@@ -528,7 +528,7 @@ public:
 	/*************************************************************************/
 
 	// A client says to others clients that it is ready to send/receive guild data
-	virtual void guildReady(NLNET::IModuleProxy *sender)
+	virtual void guildReady(NLNET::IModuleProxy *sender) NL_OVERRIDE
 	{
 		// this peer is ready, insert him to the broadcast list
 		_Broadcast.insert(sender);
@@ -547,7 +547,7 @@ public:
 	}
 
 	// The server send it local guilds to the client
-	virtual void receiveForeignGuild(NLNET::IModuleProxy *sender, const std::vector < CGuildDesc > &guilds) 
+	virtual void receiveForeignGuild(NLNET::IModuleProxy *sender, const std::vector < CGuildDesc > &guilds) NL_OVERRIDE 
 	{
 		H_AUTO(receiveForeignGuild);
 		// iterate over the received guild and add them in the guild manager
@@ -579,7 +579,7 @@ public:
 	}
 
 	// The member list have changed, each guild unifier receive a copy of the new list
-	virtual void updateMemberList(NLNET::IModuleProxy *sender, uint32 guildId, const std::vector < CGuildMemberDesc > &members) 
+	virtual void updateMemberList(NLNET::IModuleProxy *sender, uint32 guildId, const std::vector < CGuildMemberDesc > &members) NL_OVERRIDE 
 	{
 		CGuildManager *gm = CGuildManager::getInstance();
 		// 1st, retrieve the guild
@@ -633,7 +633,7 @@ public:
 
 	}
 	// A member in the guild has changed, update it's info
-	virtual void updateMemberInfo(NLNET::IModuleProxy *sender, uint32 guildId, const CGuildMemberDesc &memberInfo)
+	virtual void updateMemberInfo(NLNET::IModuleProxy *sender, uint32 guildId, const CGuildMemberDesc &memberInfo) NL_OVERRIDE
 	{
 		// 1st, retrieve the guild
 		CGuild *guild = CGuildManager::getInstance()->getGuildFromId(guildId);
@@ -647,7 +647,7 @@ public:
 		member->setMemberGrade(memberInfo.getMemberGrade());
 	}
 	// The guild has been saved, the guild host send an update of the guild status (with fames, but no members)
-	virtual void updateGuild(NLNET::IModuleProxy *sender, const CGuildDesc &guildInfo)
+	virtual void updateGuild(NLNET::IModuleProxy *sender, const CGuildDesc &guildInfo) NL_OVERRIDE
 	{
 		// 1st, retrieve the guild
 		CGuild *guild = CGuildManager::getInstance()->getGuildFromId(guildInfo.getGuildId());
@@ -660,13 +660,13 @@ public:
 		setGuildFames(guild, guildInfo);
 	}
 
-	virtual void guildDeleted(NLNET::IModuleProxy *sender, uint32 guildId)
+	virtual void guildDeleted(NLNET::IModuleProxy *sender, uint32 guildId) NL_OVERRIDE
 	{
 		deleteGuild(sender, guildId);
 	}
 
 	// Send a message to all the guild members
-	virtual void messageToGuildMembers(NLNET::IModuleProxy *sender, uint32 guildId, const std::string &messageName, const TVectorParamCheck &params)
+	virtual void messageToGuildMembers(NLNET::IModuleProxy *sender, uint32 guildId, const std::string &messageName, const TVectorParamCheck &params) NL_OVERRIDE
 	{
 		// retrieve the guild
 		CGuild *guild = CGuildManager::getInstance()->getGuildFromId(guildId);

@@ -63,7 +63,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainerBase::triggerAlphaSettingsChangedAH()
 	{
-		if (_AHOnAlphaSettingsChanged != NULL)
+		if (_AHOnAlphaSettingsChanged != nullptr)
 			CAHManager::getInstance()->runActionHandler(_AHOnAlphaSettingsChanged, this, _AHOnAlphaSettingsChangedParams);
 	}
 

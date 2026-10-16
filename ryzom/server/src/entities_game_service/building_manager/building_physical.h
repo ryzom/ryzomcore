@@ -131,14 +131,14 @@ public:
 	/// reset a room of this building
 	inline void resetRoomCell( uint16 roomIdx );
 	
-	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
-	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx){ return true; }
+	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE;
+	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx) NL_OVERRIDE{ return true; }
 
-	virtual void dumpBuilding(NLMISC::CLog & log) const;
+	virtual void dumpBuilding(NLMISC::CLog & log) const NL_OVERRIDE;
 
 protected:
 	/// overridable helper used to init the room vector
-	virtual void initRooms();
+	virtual void initRooms() NL_OVERRIDE;
 };
 
 
@@ -159,15 +159,15 @@ public:
 	// get the id of an owner guild
 	inline EGSPD::TGuildId getOwnerGuildId(uint idx);
 
-	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
-	virtual void onGuildDeletion( uint32 guild );
-	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx);
-	virtual uint16 getOwnerCount();
+	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE;
+	virtual void onGuildDeletion( uint32 guild ) NL_OVERRIDE;
+	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx) NL_OVERRIDE;
+	virtual uint16 getOwnerCount() NL_OVERRIDE;
 
-	virtual void dumpBuilding(NLMISC::CLog & log) const;
+	virtual void dumpBuilding(NLMISC::CLog & log) const NL_OVERRIDE;
 
 private:
-	virtual void initRooms();
+	virtual void initRooms() NL_OVERRIDE;
 	std::vector<EGSPD::TGuildId> _Guilds;
 };
 
@@ -189,15 +189,15 @@ public:
 	/// get the index of a owner player
 	inline uint16 getOwnerIdx( const NLMISC::CEntityId & userId );
 	
-	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const;
-	virtual void onPlayerDeletion( const NLMISC::CEntityId & userId );
-	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx);
-	virtual uint16 getOwnerCount();
+	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const NL_OVERRIDE;
+	virtual void onPlayerDeletion( const NLMISC::CEntityId & userId ) NL_OVERRIDE;
+	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx) NL_OVERRIDE;
+	virtual uint16 getOwnerCount() NL_OVERRIDE;
 
-	virtual void dumpBuilding(NLMISC::CLog & log) const;
+	virtual void dumpBuilding(NLMISC::CLog & log) const NL_OVERRIDE;
 	
 private:
-	virtual void initRooms();
+	virtual void initRooms() NL_OVERRIDE;
 
 };
 

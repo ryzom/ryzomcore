@@ -4,7 +4,7 @@ SOURCE_GROUP("" FILES ${SRC})
 
 ADD_EXECUTABLE(build_rbank ${SRC})
 
-ADD_DEFINITIONS(-DNL_BRB_CFG="${NL_ETC_PREFIX}/")
+target_compile_definitions(build_rbank PRIVATE NL_BRB_CFG="${NL_ETC_PREFIX}/")
 
 TARGET_LINK_LIBRARIES(build_rbank PRIVATE NeL::pacs NeL::3d NeL::ligo NeL::misc)
 NL_DEFAULT_PROPS(build_rbank "NeL, Tools, PACS: build_rbank")

@@ -55,10 +55,10 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	// set disable time for targets
 	inline void setTargetDisableTime(NLMISC::TGameCycle time) { _TargetDisableTime = time; }
@@ -70,7 +70,7 @@ public:
 	inline PROTECTION_TYPE::TProtectionType getAffectedProtection() const { return _AffectedProtection; }
 
 	// re-activate a magic protection modifier loaded with character
-	void activate();
+	void activate() NL_OVERRIDE;
 
 private:
 	// disableTime for targets

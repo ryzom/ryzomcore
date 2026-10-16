@@ -136,7 +136,7 @@ string CLoginClient::authenticateBegin(const string &loginServiceAddr, const ucs
 	// S01: connect to the LS
 	try
 	{
-		if(_LSCallbackClient == 0)
+		if(_LSCallbackClient == nullptr)
 		{
 			_LSCallbackClient = new CCallbackClient();
 			_LSCallbackClient->addCallbackArray(LSCallbackArray, sizeof(LSCallbackArray) / sizeof(LSCallbackArray[0]));
@@ -152,7 +152,7 @@ string CLoginClient::authenticateBegin(const string &loginServiceAddr, const ucs
 	catch (const ESocket &e)
 	{
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		nlwarning("Connection refused to LS (addr:%s): %s", loginServiceAddr.c_str(), e.what());
 		return toString("Connection refused to LS (addr:%s): %s", loginServiceAddr.c_str(), e.what());
 	}
@@ -182,7 +182,7 @@ bool CLoginClient::authenticateUpdate(string &error)
 		error = "Disconnected from LS";
 		nlwarning("CLoginClient::authenticateUpdate(): %s", error.c_str());
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		return false;
 	}
 	_LSCallbackClient->update();
@@ -194,7 +194,7 @@ bool CLoginClient::authenticateUpdate(string &error)
 			nlwarning("CLoginClient::authenticateUpdate(): %s", error.c_str());
 			_LSCallbackClient->disconnect ();
 			delete _LSCallbackClient;
-			_LSCallbackClient = 0;
+			_LSCallbackClient = nullptr;
 		}
 		return false;
 	}
@@ -285,7 +285,7 @@ string CLoginClient::connectToShard (const std::string &addr, CUdpSimSock &cnx)
 
 string CLoginClient::confirmConnection(sint32 shardId)
 {
-	nlassert(_LSCallbackClient != 0 && _LSCallbackClient->connected());
+	nlassert(_LSCallbackClient != nullptr && _LSCallbackClient->connected());
 
 	//
 	// S05: create and send the "CS" message with the shardid choice to the LS
@@ -321,14 +321,14 @@ string CLoginClient::confirmConnection(sint32 shardId)
 	if (!ShardChooseShard)
 	{
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		return "CLoginClientMtp::confirmConnection(): LS disconnects me";
 	}
 	else
 	{
 		_LSCallbackClient->disconnect ();
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 	}
 
 	if (!ShardChooseShardReason.empty())
@@ -356,7 +356,7 @@ string CLoginClient::wantToConnectToShard(sint32 shardId, string &ip, string &co
 
 string CLoginClient::selectShardBegin(sint32 shardId)
 {
-	nlassert(_LSCallbackClient != 0 && _LSCallbackClient->connected());
+	nlassert(_LSCallbackClient != nullptr && _LSCallbackClient->connected());
 	
 	ShardChooseShardReason.clear();
 	ShardChooseShard = false;
@@ -365,7 +365,7 @@ string CLoginClient::selectShardBegin(sint32 shardId)
 	{
 		_LSCallbackClient->disconnect();
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		return "No shard available";
 	}	
 	CLoginClient::CShardEntry *s = getShard(shardId);
@@ -373,7 +373,7 @@ string CLoginClient::selectShardBegin(sint32 shardId)
 	{
 		_LSCallbackClient->disconnect();
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		return "Invalid shard selected";
 	}
 
@@ -398,7 +398,7 @@ bool CLoginClient::selectShardUpdate(string &error, string &ip, string &cookie)
 		error = "Disconnected from LS";
 		nlwarning("CLoginClient::selectShardUpdate(): %s", error.c_str());
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		return false;
 	}
 	_LSCallbackClient->update();
@@ -411,7 +411,7 @@ bool CLoginClient::selectShardUpdate(string &error, string &ip, string &cookie)
 		else nlinfo("addr: '%s' cookie: %s", ShardChooseShardAddr.c_str(), ShardChooseShardCookie.c_str());
 		_LSCallbackClient->disconnect ();
 		delete _LSCallbackClient;
-		_LSCallbackClient = 0;
+		_LSCallbackClient = nullptr;
 		return false;
 	}
 	return true;
@@ -424,7 +424,7 @@ CLoginClient::CShardEntry *CLoginClient::getShard (sint32 shardId)
 		if((*it).Id == shardId)
 			return &(*it);
 	}
-	return 0;
+	return nullptr;
 }
 
 

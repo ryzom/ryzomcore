@@ -248,8 +248,8 @@ namespace NLGUI
 	xmlNodePtr CDBViewBar3::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewBitmap::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bar3" );
 		xmlSetProp( node, BAD_CAST "value1", BAD_CAST getValProp( _Value[ 0 ], _ValueInt[ 0 ] ).c_str() );
@@ -352,7 +352,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CDBViewBar3::updateCoords ()
 	{
-		if (_ParentPos == NULL)
+		if (_ParentPos == nullptr)
 			_Slot.setParentPos (_Parent);
 		else
 			_Slot.setParentPos (_ParentPos);
@@ -378,7 +378,7 @@ namespace NLGUI
 
 	std::string CDBViewBar3::getValProp( const CInterfaceProperty &prop, sint32 intProp ) const
 	{
-		if( prop.getNodePtr() != NULL )
+		if( prop.getNodePtr() != nullptr)
 			return prop.getNodePtr()->getFullName();
 		else
 			return toString( intProp );

@@ -38,7 +38,7 @@ namespace NL3D
 	public:
 		void setDefaults()
 		{
-			Loc = NULL;
+			Loc = nullptr;
 			Pos = NLMISC::CVector::Null;
 			Speed = NLMISC::CVector::Null;
 			InvMass = 1.f;

@@ -736,7 +736,7 @@ extern	CStringManager *SM;
 // Local sender
 class CIosLocalSender : public STRING_MANAGER::ISender
 {
-	void send(NLNET::CMessage &message, bool debug)
+	void send(NLNET::CMessage &message, bool debug) NL_OVERRIDE
 	{
 		if (SM)
 		{

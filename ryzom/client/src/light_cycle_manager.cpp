@@ -259,7 +259,7 @@ void CLightCycleManager::updateState()
 			CInterfaceManager * pIM = CInterfaceManager::getInstance();
 			if( pIM )
 			{
-				CAHManager::getInstance()->runActionHandler("set",NULL,"dblink=UI:VARIABLES:NIGHT_WARNING_WANTED|value=1");
+				CAHManager::getInstance()->runActionHandler("set", nullptr, "dblink=UI:VARIABLES:NIGHT_WARNING_WANTED|value=1");
 			}
 		}
 		_State = Night;
@@ -497,7 +497,7 @@ float CLightCycleManager::getLandscapePatchUpdateFreq() const
 	if(!_ValidDesc)
 		return 0.f;
 
-	if(ContinentMngr.cur() == 0)
+	if(ContinentMngr.cur() == nullptr)
 		return 0.f;
 
 	// transition duration in seconds

@@ -73,9 +73,10 @@ CCallbackNetBase::CCallbackNetBase(  TRecordingState /* rec */, const string& /*
 		_DefaultCallback(),
 		_PreDispatchCallback(),
 		_FirstUpdate (true),
-		_UserData(NULL),
+		_UserData(nullptr)
+    ,
 		_DisconnectionCallback(),
-		_DisconnectionCbArg(NULL)
+		_DisconnectionCbArg(nullptr)
 #ifdef USE_MESSAGE_RECORDER
 		, _MR_RecordingState(rec), _MR_UpdateCounter(0)
 #endif
@@ -450,7 +451,7 @@ void	CCallbackNetBase::authorizeOnly (const char *callbackName, TSockId hostid)
 
 	nlassert (hostid != InvalidSockId);
 
-	hostid->AuthorizedCallback = (callbackName == NULL)?"":callbackName;
+	hostid->AuthorizedCallback = (callbackName == nullptr) ?"":callbackName;
 }
 
 

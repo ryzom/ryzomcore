@@ -157,7 +157,7 @@ inline void IMissionStepItem::getTextParams(uint & nbSubSteps, TVectorParamCheck
 
 				if (params.size() > 2)
 					NLMISC::fromString(params[2], quantity);
-
+						
 				if (status.size() > 0) // Use saved step quantity
 					NLMISC::fromString(status[0], quantity);
 
@@ -196,11 +196,11 @@ inline void IMissionStepItem::getTextParams(uint & nbSubSteps, TVectorParamCheck
 class CMissionStepForage : public IMissionStepItem
 {
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		string webAppUrl;
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
-
+		
 		if ( event.Type == CMissionEvent::Forage )
 		{
 			CMissionEventForage & eventSpe = (CMissionEventForage&)event;
@@ -208,7 +208,7 @@ class CMissionStepForage : public IMissionStepItem
 			uint16 quality;
 			uint32 quantity;
 
-
+			
 			if (_SubSteps[subStepIndex].Dynamic.empty()) {
 				itemSheet = _SubSteps[subStepIndex].Sheet;
 				quality = _SubSteps[subStepIndex].Quality;
@@ -253,7 +253,7 @@ class CMissionStepForage : public IMissionStepItem
 		return 0;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
 		static const std::string stepText = "MIS_FORAGE_";
@@ -270,14 +270,14 @@ MISSION_REGISTER_STEP(CMissionStepForage,"forage")
 // ----------------------------------------------------------------------------
 class CMissionStepLootItem : public IMissionStepItem
 {
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		string webAppUrl;
 		uint16 quantity = 1;
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
 
 		nlinfo("ok");
-
+		
 		if ( event.Type == CMissionEvent::LootItem )
 		{
 			nlinfo("ok");
@@ -309,14 +309,14 @@ class CMissionStepLootItem : public IMissionStepItem
 
 				if (status.size() == 0) // If no saved quantity => use mission param
 					status.push_back(params[2]);
-
+				
 				NLMISC::fromString(status[0], quantity); // Use saved quantity
 
 				if (params.size() > 3)
 					NLMISC::fromString(params[3], quality);
 			}
 
-
+		
 			CMissionEventLootItem & eventSpe = (CMissionEventLootItem&)event;
 			nlinfo("Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
 			if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
@@ -336,7 +336,7 @@ class CMissionStepLootItem : public IMissionStepItem
 							_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-eventSpe.Quantity));
 						}
 					}
-
+				
 				LOGMISSIONSTEPSUCCESS("loot_item");
 				return eventSpe.Quantity;
 			}
@@ -344,7 +344,7 @@ class CMissionStepLootItem : public IMissionStepItem
 		return 0;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
 		static const std::string stepText = "MIS_LOOT_ITEM_";
@@ -394,13 +394,13 @@ uint CMissionStepLootRm::processEvent( const TDataSetRow & userRow, const CMissi
 
 			if (status.size() == 0) // If no saved quantity => use mission param
 				status.push_back(params[2]);
-
+			
 			NLMISC::fromString(status[0], quantity); // Use saved quantity
 
 			if (params.size() > 3)
 				NLMISC::fromString(params[3], quality);
 		}
-
+		
 		CMissionEventLootRm & eventSpe = (CMissionEventLootRm&)event;
 		nlinfo("Loot RM : Sheet : %s, Quality : %d / %d, Quantity: %d / %d", eventSpe.Sheet.toString().c_str(), eventSpe.Quality, quality, eventSpe.Quantity, quantity);
 		if ( eventSpe.Sheet == itemSheet && eventSpe.Quality >= quality )
@@ -420,7 +420,7 @@ uint CMissionStepLootRm::processEvent( const TDataSetRow & userRow, const CMissi
 						_User->setCustomMissionParams(_SubSteps[subStepIndex].Dynamic+"_STATUS", NLMISC::toString("%d", quantity-eventSpe.Quantity));
 					}
 				}
-
+			
 			LOGMISSIONSTEPSUCCESS("loot_mp");
 			return eventSpe.Quantity;
 		}
@@ -440,7 +440,7 @@ MISSION_REGISTER_STEP(CMissionStepLootRm,"loot_mp")
 // ----------------------------------------------------------------------------
 class CMissionStepCraft : public IMissionStepItem
 {
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::Craft )
 		{
@@ -455,7 +455,7 @@ class CMissionStepCraft : public IMissionStepItem
 		return 0;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
 		static const std::string stepText = "MIS_CRAFT_";
@@ -470,7 +470,7 @@ MISSION_REGISTER_STEP(CMissionStepCraft,"craft")
 // ----------------------------------------------------------------------------
 class CMissionStepBuyItem : public IMissionStepItem
 {
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_HasBot = false;
@@ -486,7 +486,7 @@ class CMissionStepBuyItem : public IMissionStepItem
 		return true;
 	}
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::BuyItem )
 		{
@@ -519,7 +519,7 @@ class CMissionStepBuyItem : public IMissionStepItem
 		return 0;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		IMissionStepItem::getTextParams(nbSubSteps, retParams, subStepStates);
 		static const std::string stepText = "MIS_BUY_";
@@ -540,7 +540,7 @@ class CMissionStepBuyItem : public IMissionStepItem
 			textPtr = &stepText;
 	}
 
-	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
+	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE { invalidIsGiver=true; return _Bot; }
 
 	bool _HasBot;
 	TAIAlias _Bot;
@@ -553,7 +553,7 @@ MISSION_REGISTER_STEP(CMissionStepBuyItem,"buy")
 // ----------------------------------------------------------------------------
 class CMissionStepSellItem : public IMissionStepItem
 {
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_HasBot = false;
@@ -569,7 +569,7 @@ class CMissionStepSellItem : public IMissionStepItem
 		return true;
 	}
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::SellItem )
 		{
@@ -602,7 +602,7 @@ class CMissionStepSellItem : public IMissionStepItem
 		return 0;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		IMissionStepItem::getTextParams(nbSubSteps,retParams, subStepStates);
 		static const std::string stepText = "MIS_SELL_";
@@ -624,7 +624,7 @@ class CMissionStepSellItem : public IMissionStepItem
 			textPtr = &stepText;
 	}
 
-	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
+	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE { invalidIsGiver=true; return _Bot; }
 
 	bool _HasBot;
 	TAIAlias _Bot;

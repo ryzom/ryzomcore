@@ -302,7 +302,7 @@ public:
 		ReachValue = 0;
 	}
 
-	virtual ~SMeleeWeapon() {}
+	virtual ~SMeleeWeapon() NL_OVERRIDE {}
 
 	// rate of fire in seconds
 	float	RateOfFire;
@@ -313,7 +313,7 @@ public:
 	/// 'length' value of the weapon (french 'allonge')
 	uint8	ReachValue;
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(class NLMISC::IStream &f) NL_OVERRIDE
 	{
 		SWeapon::serial( f );
 		f.serial( RateOfFire );
@@ -327,9 +327,9 @@ struct SRangeWeapon : public SWeapon
 	NL_INSTANCE_COUNTER_DECL(SRangeWeapon);
 public:
 
-	virtual ~SRangeWeapon() {}
+	virtual ~SRangeWeapon() NL_OVERRIDE {}
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(class NLMISC::IStream &f) NL_OVERRIDE
 	{
 		SWeapon::serial( f );
 		f.serialEnum(AreaType);
@@ -381,7 +381,7 @@ public:
 		AmmoType = 1;
 	}
 
-	virtual ~SAmmo() {}
+	virtual ~SAmmo() NL_OVERRIDE {}
 
 	// short range (max) in meters
 	float	ShortRangeLimit;
@@ -401,7 +401,7 @@ public:
 	// ammo type (1 or 2)
 	uint8	AmmoType;
 
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(class NLMISC::IStream &f) NL_OVERRIDE
 	{
 		SWeapon::serial( f );
 		f.serial( ShortRangeLimit );
@@ -443,7 +443,7 @@ public:
 
 	inline SShield() : SArmor(),ShieldType(SHIELDTYPE::NONE),Unbreakable(false){}
 	
-	virtual void serial(class NLMISC::IStream &f)
+	virtual void serial(class NLMISC::IStream &f) NL_OVERRIDE
 	{
 		SArmor::serial(f);
 		f.serialEnum( ShieldType );
@@ -813,12 +813,12 @@ struct CSpeedUpDPLossData : public IItemServiceData
 		DurationInDays = 0.f;
 	}
 
-	virtual void serial(NLMISC::IStream & f)
+	virtual void serial(NLMISC::IStream & f) NL_OVERRIDE
 	{
 		f.serial(DurationInDays);
 	}
 
-	IItemServiceData * clone()	{ CSpeedUpDPLossData * ptr = new CSpeedUpDPLossData(); *ptr = *this; return ptr; }
+	IItemServiceData * clone() NL_OVERRIDE	{ CSpeedUpDPLossData * ptr = new CSpeedUpDPLossData(); *ptr = *this; return ptr; }
 
 	float DurationInDays;
 };
@@ -863,13 +863,13 @@ public:
 	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticItem &o);
 
-#ifndef NO_EGS_VARS
 	/** Get the base weigth for an item.
 	 *	This weight must be multiplied by the craft parameter weight value
 	 *	to obtain the real item weight.
+	 *	Defined in the EGS (egs_sheets_impl.cpp), not in the sheets library:
+	 *	it reads the craft parameter variables.
 	 */
 	float getBaseWeight() const;
-#endif
 	
 	std::vector<SItemSpecialEffect> lookForEffects(ITEM_SPECIAL_EFFECT::TItemSpecialEffect effectType) const;
 

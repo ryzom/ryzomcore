@@ -221,13 +221,13 @@ public:
 public:
 	/// Constructor
 	CAutomatonListSheet();
-	virtual ~CAutomatonListSheet();
+	virtual ~CAutomatonListSheet() NL_OVERRIDE;
 
 	/// Build the sheet from an external script.
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 
 	/// Serialize sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// Tool to read a dfn composed with an array of string
 	static void readDfnStringArray(std::vector<std::string> &states, const std::string &dfnName);

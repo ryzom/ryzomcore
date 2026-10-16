@@ -116,7 +116,7 @@ public:
 	class SMethodId
 	{
 	public:
-		SMethodId(sint section=-1, sint method=-1, CClassGenerator *generator=NULL) : Section(section), Method(method), Generator(generator)	{}
+		SMethodId(sint section=-1, sint method=-1, CClassGenerator *generator = nullptr) : Section(section), Method(method), Generator(generator)	{}
 
 		sint					Section;
 		sint					Method;
@@ -386,7 +386,7 @@ class CCppOutput
 public:
 
 	/// Constructor
-	CCppOutput(bool cppmode = true) :	_CppMode(cppmode),
+	CCppOutput(bool cppmode = true) :	_CppMode(cppmode), 
 										_XmlMode(false), _NewLine(true), _Indent(0), _DescriptionMode(false), _Clean(true),
 										_XmlInNode(false), _XmlLastSlash(false), _XmlGetNodeName(false), _XmlCloseNode(false), _XmlRootNode(false) {}
 

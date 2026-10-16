@@ -113,20 +113,19 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 
 	uint16 equippedInventory, equippedSlot, bagSlot;
 	CEntityId id;
-
 	try
 	{
-		msgin.serial( id );
-		msgin.serial( equippedInventory );
-		msgin.serial( equippedSlot );
-		msgin.serial( bagSlot );
+
+	msgin.serial( id );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
+	msgin.serial( bagSlot );
 	}
 	catch(const Exception &e)
 	{
 		nlwarning("Bad cbClientItemEquip serialisation '%s'", e.what());
 		return;
 	}
-
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
 	if( c )
@@ -150,9 +149,10 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 	CEntityId id;
 	try
 	{
-		msgin.serial( id );
-		msgin.serial( equippedInventory );
-		msgin.serial( equippedSlot );
+
+	msgin.serial( id );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
 	}
 	catch(const Exception &e)
 	{
@@ -184,13 +184,13 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 
 	CEntityId user;
 	uint16 inventory,slot,quantity;
-
 	try
 		{
-		msgin.serial(user);
-		msgin.serial(inventory);
-		msgin.serial(slot);
-		msgin.serial(quantity);
+
+	msgin.serial(user);
+	msgin.serial(inventory);
+	msgin.serial(slot);
+	msgin.serial(quantity);
 	}
 	catch(const Exception &e)
 	{
@@ -223,11 +223,11 @@ void cbClientItemTempToBag( CMessage& msgin, const std::string &serviceName, NLN
 
 	CEntityId user;
 	uint16 slot;
-
 	try
 	{
-		msgin.serial(user);
-		msgin.serial(slot);
+
+	msgin.serial(user);
+	msgin.serial(slot);
 	}
 	catch(const Exception &e)
 	{
@@ -267,7 +267,7 @@ void cbClientItemAllTemp( CMessage& msgin, const std::string &serviceName, NLNET
 	CEntityId user;
 	try
 	{
-		msgin.serial(user);
+	msgin.serial(user);
 	}
 	catch(const Exception &e)
 	{
@@ -306,7 +306,7 @@ void cbClientItemNoTemp( CMessage& msgin, const std::string &serviceName, NLNET:
 	CEntityId user;
 	try
 	{
-		msgin.serial(user);
+	msgin.serial(user);
 	}
 	catch(const Exception &e)
 	{
@@ -351,7 +351,7 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 	try
 	{
 		msgin.serial(user);
-		msgin.serial(inv, slot);
+	msgin.serial(inv, slot);
 	}
 	catch(const Exception &e)
 	{
@@ -371,11 +371,9 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbClientItemEnchant> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
-
 	// if player is dead or stunned don't reload or enchant
 	if (character->isDead() || character->isStunned())
 		return;
-
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );
 	character->setAfkState(false);
 }
@@ -1531,6 +1529,7 @@ void cbClientExchangeAdd( NLNET::CMessage& msgin, const std::string &serviceName
 	uint16 quantity;
 
 	msgin.serial(invSrc);
+
 	msgin.serial(slotSrc);
 	msgin.serial(slotDest);
 	msgin.serial(quantity);
@@ -1826,7 +1825,7 @@ void cbClientBotChatTradeDestroy( NLNET::CMessage& msgin, const std::string &ser
 	CEntityId userId;
 	try
 	{
-		msgin.serial(userId,idx,quantity);
+	msgin.serial(userId,idx,quantity);
 	}
 	catch(const Exception &e)
 	{
@@ -1860,17 +1859,15 @@ void cbClientBotChatTradeSell( NLNET::CMessage& msgin, const std::string &servic
 	uint16 quantity;
 	uint32 price;
 	CEntityId userId;
-
 	try
 	{
-		msgin.serial(userId,inv,idx,quantity,price);
+	msgin.serial(userId,inv,idx,quantity,price);
 	}
 	catch(const Exception &e)
 	{
 		nlwarning("Bad cbClientBotChatTradeSell serialisation '%s'", e.what());
 		return;
 	}
-
 	CCharacter * user = PlayerManager.getChar(userId);
 	if ( !user )
 	{
@@ -2030,6 +2027,7 @@ void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, 
 		msgin.serial( id );
 		msgin.serialEnum( behaviour );
 		msgin.serial( emoteTextId );
+
 	}
 	catch(const Exception &e)
 	{
@@ -2074,6 +2072,7 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		msgin.serial( id );
 		msgin.serialEnum( behaviour );
 		msgin.serial( emoteCustomText );
+
 	}
 	catch(const Exception &e)
 	{
@@ -3187,6 +3186,11 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 		if( guild )
 		{
 			CGuildMember * gm = guild->getMemberFromEId(charId);
+			if( gm == NULL )
+			{
+				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s is not a member of his guild", charId.toString().c_str());
+				return;
+			}
 			if( gm->getGrade() == EGSPD::CGuildGrade::Leader )
 			{
 				guild->setAllegianceFromIndeterminedStatus(allegiance);
@@ -3314,6 +3318,10 @@ sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInvento
 		return -1;
 	}
 	CInventoryPtr invent = character->getInventory(inventory);
+	if (invent == NULL)
+	{
+		return -1;
+	}
 	if (slot >= invent->getSlotCount())
 	{
 		return -2;
@@ -3352,6 +3360,7 @@ void cbClientEventSetItemCustomText( NLNET::CMessage& msgin, const std::string &
 		// it should be the crafter of the item, check
 		if (inventory==INVENTORIES::UNDEFINED) return;
 		CInventoryPtr invent = character->getInventory(inventory);
+		if (invent == NULL) return;
 		if (slot >= invent->getSlotCount()) return;
 		if (invent->getItem(slot) == NULL) return;
 		CGameItemPtr item = invent->getItem(slot);
@@ -3673,8 +3682,7 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:COMMAND:REMOTE_ADMIN_ANSWER",	cbClientRemoteAdmin },
 	{ "CLIENT:COMMAND:SIT",					cbClientSit },
 	{ "CLIENT:COMMAND:AFK",					cbClientSendAfk },
-	{ "CLIENT:COMMAND:SELFKILL",			cbClientSelfKill },
-	{ "CLIENT:COMMAND:RANDOM",				cbClientRollDice },
+	{ "CLIENT:COMMAND:SELFKILL",			cbClientSelfKill }, { "CLIENT:COMMAND:RANDOM",				cbClientRollDice },
 	{ "CLIENT:COMMAND:GUILDMOTD",			cbClientGuildMotd },
 	{ "CLIENT:COMMAND:AUTOPACT",			cbClientAutoPact },
 

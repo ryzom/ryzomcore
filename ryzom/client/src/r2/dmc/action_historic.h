@@ -69,11 +69,11 @@ public:
 	bool isPendingActionInProgress() const { return _NewActionIsPending; }
 	// get number of completed actions (do not include the new action being built)
 	uint getNumActions() const { return _Actions.getSize(); }
-	bool isNewActionBeingRecorded() const { return _NewAction != NULL; }
+	bool isNewActionBeingRecorded() const { return _NewAction != nullptr; }
 	uint getMaxNumActions() const { return _Actions.getMaxSize(); }
 	void setMaxNumActions(uint count);
 	// clear
-	void clear(CObject *newScenario = NULL);
+	void clear(CObject *newScenario = nullptr);
 	// get name of next action that can be redone
 	const ucstring *getNextActionName() const;
 	// get name of previous action that can be undone
@@ -93,7 +93,7 @@ public:
 	void requestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
 	//Uundo supported only if 'clear' was called with a scenario pointer
 	//Only 'redo' supported else
-	bool isUndoSupported() const { return _Scenario.getHighLevel() != NULL; }
+	bool isUndoSupported() const { return _Scenario.getHighLevel() != nullptr; }
 private:
 	// base for all requests
 	class CRequestBase : public NLMISC::CRefCount
@@ -145,8 +145,8 @@ private:
 	public:
 		CRequestSetNode(const std::string& instanceId, const std::string& attrName, CObject* value);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		std::string			_InstanceId;
 		std::string			_AttrName;
@@ -159,8 +159,8 @@ private:
 	public:
 		CRequestEraseNode(const std::string& instanceId, const std::string& attrName, sint32 position);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		// point of deletion
 		std::string			_InstanceId;
@@ -178,8 +178,8 @@ private:
 	public:
 		CRequestInsertNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& key, CObject* value);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		std::string			_InstanceId;
 		std::string			_AttrName;
@@ -198,8 +198,8 @@ private:
 						const std::string& destAttrName,
 						sint32 destPosition);
 		// from CRequestBase
-		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario);
-		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario);
+		virtual void redo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
+		virtual void undo(IDynamicMapClient *dmc, CScenario &scenario) NL_OVERRIDE;
 	private:
 		std::string			_SrcInstanceId;
 		std::string			_SrcAttrName;

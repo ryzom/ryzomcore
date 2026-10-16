@@ -472,7 +472,7 @@ void			CShadowMapManager::renderGenerate(CScene *scene)
 						driverForShadowGeneration->renderRawQuads (_CopyMaterial, 0, 1);
 
 						// Set default render target
-						driverForShadowGeneration->setRenderTarget (NULL);
+						driverForShadowGeneration->setRenderTarget (nullptr);
 					}
 
 					// Indicate to the ShadowMap that we have updated his Texture
@@ -918,13 +918,13 @@ void			CShadowMapManager::updateBlurTexture(IDriver &drv, uint w, uint h)
 	uint i, j;
 	for (i=0; i<2; i++)
 	{
-		_BlurMaterial[i].setTexture(0, NULL);
-		_BlurMaterial[i].setTexture(1, NULL);
-		_BlurMaterial[i].setTexture(2, NULL);
-		_BlurMaterial[i].setTexture(3, NULL);
+		_BlurMaterial[i].setTexture(0, nullptr);
+		_BlurMaterial[i].setTexture(1, nullptr);
+		_BlurMaterial[i].setTexture(2, nullptr);
+		_BlurMaterial[i].setTexture(3, nullptr);
 	}
-	_BlurTexture[0]= NULL;
-	_BlurTexture[1]= NULL;
+	_BlurTexture[0] = nullptr;
+	_BlurTexture[1] = nullptr;
 	_BlurTextureW= w;
 	_BlurTextureH= h;
 	// NB: the format must be RGBA; else slow copyFrameBufferToTexture()

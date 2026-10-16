@@ -51,7 +51,7 @@ public:
 	{
 	}
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		uint32 lastCounter;
 		while(_Control != QUIT)

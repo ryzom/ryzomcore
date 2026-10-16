@@ -29,63 +29,63 @@ class CIF3DSceneParser : public CInterfaceParser::IParserModule
 {
 public:
 	CIF3DSceneParser();
-	~CIF3DSceneParser();
+	~CIF3DSceneParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 class CIFDDXParser : public CInterfaceParser::IParserModule
 {
 public:
 	CIFDDXParser();
-	~CIFDDXParser();
+	~CIFDDXParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 class CActionCategoryParser : public CInterfaceParser::IParserModule
 {
 public:
 	CActionCategoryParser();
-	~CActionCategoryParser();
+	~CActionCategoryParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 class CCommandParser : public CInterfaceParser::IParserModule
 {
 public:
 	CCommandParser();
-	~CCommandParser();
+	~CCommandParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 class CKeyParser : public CInterfaceParser::IParserModule
 {
 public:
 	CKeyParser();
-	~CKeyParser();
+	~CKeyParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 class CMacroParser : public CInterfaceParser::IParserModule
 {
 public:
 	CMacroParser();
-	~CMacroParser();
+	~CMacroParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 class CLandmarkParser : public CInterfaceParser::IParserModule
 {
 public:
 	CLandmarkParser();
-	~CLandmarkParser();
+	~CLandmarkParser() NL_OVERRIDE;
 
-	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup );
+	bool parse( xmlNodePtr cur, CInterfaceGroup *parentGroup ) NL_OVERRIDE;
 };
 
 #endif

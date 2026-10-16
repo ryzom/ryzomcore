@@ -42,17 +42,17 @@ namespace NLGUI
         DECLARE_UI_CLASS( CCtrlColPick )
 
 		CCtrlColPick(const TCtorParam &param);
-		~CCtrlColPick();
+		~CCtrlColPick() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-		virtual void updateCoords();
-		virtual void draw();
-		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 		sint32 getColorR () const { return _ColorSelect.R; }
 		sint32 getColorG () const { return _ColorSelect.G; }

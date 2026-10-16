@@ -83,7 +83,7 @@ TCreatureInfo *getCreature(const std::string &sheetName)
 	if (Creatures.find(id) != Creatures.end())
 		return &(Creatures.find(id)->second);
 	else
-		return NULL;
+		return nullptr;
 }
 
 string cleanupName(const std::string &name)

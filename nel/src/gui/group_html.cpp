@@ -110,7 +110,7 @@ namespace NLGUI
 	{
 		public:
 			CCurlWWWData(CURL *curl, const std::string &url)
-				: Request(curl), Url(url), Content(""), HeadersSent(NULL)
+				: Request(curl), Url(url), Content(""), HeadersSent(nullptr)
 			{
 			}
 			~CCurlWWWData()
@@ -158,7 +158,7 @@ namespace NLGUI
 			{
 				time_t ret = 0;
 				if (HeadersRecv.count("expires") > 0)
-					ret = curl_getdate(HeadersRecv["expires"].c_str(), NULL);
+					ret = curl_getdate(HeadersRecv["expires"].c_str(), nullptr);
 
 				return ret > -1 ? ret : 0;
 			}
@@ -264,7 +264,7 @@ namespace NLGUI
 	CGroupHTML::CDataDownload::~CDataDownload()
 	{
 		delete data;
-		data = NULL;
+		data = nullptr;
 	}
 
 	void CGroupHTML::StylesheetDownloadCB::finish()
@@ -636,7 +636,7 @@ namespace NLGUI
 			std::list<CDataDownload*>::iterator it=Curls.begin();
 			while(it != Curls.end() && RunningCurls < options.curlMaxConnections)
 			{
-				if ((*it)->data == NULL)
+				if ((*it)->data == nullptr)
 				{
 					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
 					if (!startCurlDownload(*it))
@@ -689,7 +689,7 @@ namespace NLGUI
 		}
 
 		FILE *fp = nlfopen (download->tmpdest, "wb");
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			nlwarning("Can't open file '%s' for writing: code=%d '%s'", download->tmpdest.c_str (), errno, strerror(errno));
 			return false;
@@ -783,7 +783,7 @@ namespace NLGUI
 		if (startsWith(url, "data:image/"))
 		{
 			texId = rVR.createTextureFromDataURL(url, false);
-			return NULL;
+			return nullptr;
 		}
 
 		std::string finalUrl;
@@ -791,7 +791,7 @@ namespace NLGUI
 		if (lookupLocalFile(finalUrl, std::string(CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga").c_str(), false))
 		{
 			texId = rVR.createTexture(finalUrl, 0, 0, -1, -1, false);
-			return NULL;
+			return nullptr;
 		}
 
 		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
@@ -842,7 +842,7 @@ namespace NLGUI
 		{
 			setImage(img, decodeURIComponent(url), type);
 			setImageSize(img, style);
-			return NULL;
+			return nullptr;
 		}
 
 		// load the image from local files/bnp
@@ -851,7 +851,7 @@ namespace NLGUI
 		{
 			setImage(img, image, type);
 			setImageSize(img, style);
-			return NULL;
+			return nullptr;
 		}
 
 		finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
@@ -999,7 +999,7 @@ namespace NLGUI
 	{
 		//nlassert(_CrtCheckMemory());
 
-		if(Curls.empty() && _CurlWWW == NULL)
+		if(Curls.empty() && _CurlWWW == nullptr)
 		{
 			return;
 		}
@@ -1070,7 +1070,7 @@ namespace NLGUI
 				curl_multi_remove_handle(MultiCurl, _CurlWWW->Request);
 
 			delete _CurlWWW;
-			_CurlWWW = NULL;
+			_CurlWWW = nullptr;
 		}
 
 		releaseDataDownloads();
@@ -1122,7 +1122,7 @@ namespace NLGUI
 		{}
 
 	private:
-		void updateCoords()
+		void updateCoords() NL_OVERRIDE
 		{
 			if (_Parent)
 			{
@@ -1568,7 +1568,7 @@ namespace NLGUI
 	:	CGroupScrollText(param),
 		_TimeoutValue(DEFAULT_RYZOM_CONNECTION_TIMEOUT),
 		_RedirectsRemaining(DEFAULT_RYZOM_REDIRECT_LIMIT),
-		_CurrentHTMLElement(NULL)
+		_CurrentHTMLElement(nullptr)
 	{
 		// add it to map of group html created
 		_GroupHtmlUID= ++_GroupHtmlUIDPool; // valid assigned Id begin to 1!
@@ -1583,12 +1583,12 @@ namespace NLGUI
 		_BrowseNextTime = false;
 		_PostNextTime = false;
 		_Browsing = false;
-		_CurrentViewLink = NULL;
-		_CurrentViewImage = NULL;
+		_CurrentViewLink = nullptr;
+		_CurrentViewImage = nullptr;
 		_Indent.clear();
 		_LI = false;
 		_SelectOption = false;
-		_GroupListAdaptor = NULL;
+		_GroupListAdaptor = nullptr;
 		_UrlFragment.clear();
 		_RefreshUrl.clear();
 		_NextRefreshTime = 0.0;
@@ -1636,7 +1636,7 @@ namespace NLGUI
 		}
 #endif
 		RunningCurls = 0;
-		_CurlWWW = NULL;
+		_CurlWWW = nullptr;
 
 		initImageDownload();
 		initBnpDownload();
@@ -2063,8 +2063,8 @@ namespace NLGUI
 	xmlNodePtr CGroupHTML::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CGroupScrollText::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html" );
 		xmlSetProp( node, BAD_CAST "url", BAD_CAST _URL.c_str() );
@@ -2285,7 +2285,7 @@ namespace NLGUI
 
 	void CGroupHTML::endParagraph()
 	{
-		_Paragraph = NULL;
+		_Paragraph = nullptr;
 
 		paragraphChange ();
 	}
@@ -2480,7 +2480,7 @@ namespace NLGUI
 
 		// char is between table elements
 		// TODO: only whitespace is handled, text is added to either TD, or after TABLE (should be before)
-		bool tableWhitespace = getTable() && (_Cells.empty() || _Cells.back() == NULL);
+		bool tableWhitespace = getTable() && (_Cells.empty() || _Cells.back() == nullptr);
 
 		switch (input)
 		{
@@ -2586,8 +2586,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::newTextButton(const std::string &text, const std::string &tpl)
 	{
-		_CurrentViewLink = NULL;
-		_CurrentViewImage = NULL;
+		_CurrentViewLink = nullptr;
+		_CurrentViewImage = nullptr;
 
 		// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
 		string param = "name=" + this->_Id + "|url=" + getLink();
@@ -2662,7 +2662,7 @@ namespace NLGUI
 			getParagraph()->addChild(newLink);
 
 		_CurrentViewLink = newLink;
-		_CurrentViewImage = NULL;
+		_CurrentViewImage = nullptr;
 	}
 
 	// ***************************************************************************
@@ -2767,7 +2767,7 @@ namespace NLGUI
 		}
 
 		// No more text in this text view
-		_CurrentViewLink = NULL;
+		_CurrentViewLink = nullptr;
 
 		// Not added ?
 		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
@@ -2794,7 +2794,7 @@ namespace NLGUI
 		}
 
 		// No more text in this text view
-		_CurrentViewLink = NULL;
+		_CurrentViewLink = nullptr;
 
 		CStyleParams &style = _Style.Current;
 		{
@@ -2831,7 +2831,7 @@ namespace NLGUI
 			}
 
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
-				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+				getParagraph()->getId(), templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 
 			// Group created ?
 			if (textArea)
@@ -2861,7 +2861,7 @@ namespace NLGUI
 		}
 
 		// Not group created
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -2880,7 +2880,7 @@ namespace NLGUI
 			std::vector<std::pair<std::string,std::string> > templateParams;
 			templateParams.push_back (std::pair<std::string,std::string> ("id", name));
 			CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
-				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
+				getParagraph()->getId(), templateParams.empty() ? nullptr : &(templateParams[0]), (uint)templateParams.size());
 
 			// Group created ?
 			if (group)
@@ -2891,7 +2891,7 @@ namespace NLGUI
 				{
 					nlwarning("'%s' template has bad type, combo box expected", templateName.c_str());
 					delete cb;
-					return NULL;
+					return nullptr;
 				}
 				else
 				{
@@ -2903,7 +2903,7 @@ namespace NLGUI
 		}
 
 		// Not group created
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -2931,7 +2931,7 @@ namespace NLGUI
 			{
 				nlwarning("'%s' template has bad type, CGroupMenu expected", templateName.c_str());
 				delete sb;
-				return NULL;
+				return nullptr;
 			}
 			else
 			{
@@ -2942,7 +2942,7 @@ namespace NLGUI
 		}
 
 		// No group created
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -3072,14 +3072,14 @@ namespace NLGUI
 
 	void CGroupHTML::flushString()
 	{
-		_CurrentViewLink = NULL;
+		_CurrentViewLink = nullptr;
 	}
 
 	// ***************************************************************************
 
 	void CGroupHTML::clearContext()
 	{
-		_Paragraph = NULL;
+		_Paragraph = nullptr;
 		_PRE.clear();
 		_Indent.clear();
 		_LI = false;
@@ -3129,8 +3129,8 @@ namespace NLGUI
 
 	void CGroupHTML::paragraphChange ()
 	{
-		_CurrentViewLink = NULL;
-		_CurrentViewImage = NULL;
+		_CurrentViewLink = nullptr;
+		_CurrentViewImage = nullptr;
 		CGroupParagraph *paragraph = getParagraph();
 		if (paragraph)
 		{
@@ -3366,7 +3366,7 @@ namespace NLGUI
 
 	struct CButtonFreezer : public CInterfaceElementVisitor
 	{
-		virtual void visitCtrl(CCtrlBase *ctrl)
+		virtual void visitCtrl(CCtrlBase *ctrl) NL_OVERRIDE
 		{
 			CCtrlBaseButton		*textButt = dynamic_cast<CCtrlTextButton *>(ctrl);
 			if (textButt)
@@ -3539,8 +3539,8 @@ namespace NLGUI
 				{
 					if (form.Entries[i].SelectValues.size() > 0)
 					{
-						entryData = form.Entries[i].SelectValues[cb->getSelection()];
-						addEntry = true;
+				entryData = form.Entries[i].SelectValues[cb->getSelection()];
+				addEntry = true;
 					}
 				}
 			}
@@ -3852,7 +3852,7 @@ namespace NLGUI
 		char *ch;
 		std::string contentType;
 		CURLcode res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);
-		if (res == CURLE_OK && ch != NULL)
+		if (res == CURLE_OK && ch != nullptr)
 		{
 			contentType = ch;
 		}
@@ -3866,7 +3866,7 @@ namespace NLGUI
 		}
 
 		delete _CurlWWW;
-		_CurlWWW = NULL;
+		_CurlWWW = nullptr;
 
 		// refresh button uses _CurlWWW. refresh button may stay disabled if
 		// there is no css files to download and page is rendered before _CurlWWW is freed
@@ -3927,8 +3927,8 @@ namespace NLGUI
 
 						// clear old request state, and curl easy handle
 						delete data->data;
-						data->data = NULL;
-						data->fp = NULL;
+						data->data = nullptr;
+						data->fp = nullptr;
 						data->url = location;
 						data->redirects++;
 
@@ -4116,7 +4116,7 @@ namespace NLGUI
 
 			// start new rendering
 			_HtmlDOM = CHtmlElement(CHtmlElement::NONE, "<root>");
-			_CurrentHTMLElement = NULL;
+			_CurrentHTMLElement = nullptr;
 			success = parseHtml(html);
 			if (success)
 			{
@@ -4430,8 +4430,8 @@ namespace NLGUI
 	xmlNodePtr CGroupHTMLInputOffset::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "html_input_offset" );
 		xmlSetProp( node, BAD_CAST "y_offset", BAD_CAST toString( Offset ).c_str() );
@@ -4694,7 +4694,7 @@ namespace NLGUI
 	bool CGroupHTML::parseHtml(const std::string &htmlString)
 	{
 		CHtmlElement *parsedDOM;
-		if (_CurrentHTMLElement == NULL)
+		if (_CurrentHTMLElement == nullptr)
 		{
 			// parse under <root> element (clean dom)
 			parsedDOM = &_HtmlDOM;
@@ -4711,11 +4711,11 @@ namespace NLGUI
 		parser.getDOM(htmlString, *parsedDOM, _HtmlStyles, links);
 
 		// <link> elements inserted from lua::parseHtml are ignored
-		if (_CurrentHTMLElement == NULL && !links.empty())
+		if (_CurrentHTMLElement == nullptr && !links.empty())
 		{
 			addStylesheetDownload(links);
 		}
-		else if (_CurrentHTMLElement != NULL)
+		else if (_CurrentHTMLElement != nullptr)
 		{
 			// Called from active element (lua)
 			// <style> order is not preserved as document is already being rendered
@@ -4755,7 +4755,7 @@ namespace NLGUI
 				else
 				{
 					// remove link to <root> (html->parent == '<root>') or css selector matching will break
-					it->parent = NULL;
+					it->parent = nullptr;
 					++it;
 				}
 				continue;
@@ -4787,7 +4787,7 @@ namespace NLGUI
 
 		// where fragment should be moved
 		std::list<CHtmlElement>::iterator insertBefore;
-		if (_CurrentHTMLNextSibling == NULL)
+		if (_CurrentHTMLNextSibling == nullptr)
 		{
 			insertBefore = _CurrentHTMLElement->parent->Children.end();
 		} else {
@@ -4798,13 +4798,13 @@ namespace NLGUI
 		_CurrentHTMLElement->parent->Children.splice(insertBefore, src->Children);
 
 		// reindex moved elements
-		CHtmlElement *prev = NULL;
+		CHtmlElement *prev = nullptr;
 		uint childIndex = _CurrentHTMLElement->childIndex;
 		while(currentElement != _CurrentHTMLElement->parent->Children.end())
 		{
 			if (currentElement->Type == CHtmlElement::ELEMENT_NODE)
 			{
-				if (prev != NULL)
+				if (prev != nullptr)
 				{
 					currentElement->parent = _CurrentHTMLElement->parent;
 					currentElement->childIndex = childIndex;
@@ -5559,7 +5559,7 @@ namespace NLGUI
 			if (!templateName.empty())
 			{
 				string parentId;
-				bool haveParentDiv = getDiv() != NULL;
+				bool haveParentDiv = getDiv() != nullptr;
 				if (haveParentDiv)
 					parentId = getDiv()->getId();
 				else
@@ -5765,7 +5765,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlHR(const CHtmlElement &elm)
 	{
-		CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
+		CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", nullptr, 0);
 		if (sep)
 		{
 			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
@@ -6329,7 +6329,7 @@ namespace NLGUI
 				else
 				{
 					// create option line checkbox, CGroupMenu is taking ownership of the checbox
-					CInterfaceGroup *ig = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_checkbox", "", NULL, 0);
+					CInterfaceGroup *ig = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_checkbox", "", nullptr, 0);
 					if (ig)
 					{
 						CCtrlButton *cb = dynamic_cast<CCtrlButton *>(ig->getCtrl("b"));
@@ -6349,7 +6349,7 @@ namespace NLGUI
 								cb->setTexturePushed(DefaultRadioButtonBitmapPushed);
 								cb->setTextureOver(DefaultRadioButtonBitmapOver);
 
-								if (_Forms.back().Entries.back().sbRBRef == NULL)
+								if (_Forms.back().Entries.back().sbRBRef == nullptr)
 									_Forms.back().Entries.back().sbRBRef = cb;
 
 								cb->initRBRefFromRadioButton(_Forms.back().Entries.back().sbRBRef);
@@ -6643,7 +6643,7 @@ namespace NLGUI
 		_Tables.push_back(table);
 
 		// Add a cell pointer
-		_Cells.push_back(NULL);
+		_Cells.push_back(nullptr);
 		_TR.push_back(false);
 		_Indent.push_back(0);
 	}
@@ -6796,7 +6796,7 @@ namespace NLGUI
 
 		popIfNotEmpty(_CellParams);
 		if (!_Cells.empty())
-			_Cells.back() = NULL;
+			_Cells.back() = nullptr;
 	}
 
 	// ***************************************************************************

@@ -166,7 +166,7 @@ private:
 class CActionImpulsion : public CAction
 {
 public:
-	virtual ~CActionImpulsion()	{}
+	virtual ~CActionImpulsion() NL_OVERRIDE	{}
 	bool	AllowExceedingMaxSize;
 };
 

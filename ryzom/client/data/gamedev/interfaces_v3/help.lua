@@ -7,14 +7,14 @@ if (help==nil) then
 end
 
 ------------------------------------------------------------------------------------------------------------
---
+-- 
 function help:closeCSBrowserHeader()
 	local ui = getUI('ui:interface:cs_browser')
-
+	
 	-- save size
 	ui_cs_browser_h = ui.h
 	ui_cs_browser_w = ui.w
-
+	
 	-- reduce window size
 	ui.pop_min_h = 32
 	ui.h = 0
@@ -22,7 +22,7 @@ function help:closeCSBrowserHeader()
 end
 
 ------------------------------------------------------------------------------------------------------------
---
+-- 
 function help:openCSBrowserHeader()
 	local ui = getUI('ui:interface:cs_browser')
 	ui.pop_min_h = 96
@@ -31,12 +31,11 @@ function help:openCSBrowserHeader()
 	if (ui_cs_browser_h ~= nil) then
 		ui.h = ui_cs_browser_h
 	end
-
+	
 	 if (ui_cs_browser_w ~= nil) then
 		ui.w = ui_cs_browser_w
 	end
 end
-
 function help:skipTutorial()
 	WebQueue:push("https://app.ryzom.com/app_arcc/outgame_rpbg.php?action=skip")
 	setDbProp("UI:SAVE:SKIP_TUTORIAL", 1)
@@ -59,7 +58,6 @@ function help:continueLesson(id, url)
 	getUI("ui:interface:ArkLessonWin"..id).active = true
 	webig:checkUrl(url)
 end
-
 function help:checkSkipTutorial()
 	local skip_tutorial = getDbProp("UI:SAVE:SKIP_TUTORIAL")
 	if skip_tutorial == 0 then
@@ -92,7 +90,5 @@ function help:checkTutorialMilkoPad()
 		addOnDbChange(getUI("ui:interface"), "@UI:SAVE:MK_MODE", "game:resizeMilkoPad()")
 	end
 end
-
-
 -- VERSION --
 FILE_HELP_VERSION = 182

@@ -46,23 +46,23 @@ class CToolCreateEntity : public CToolChoosePos
 public:
 	NLMISC_DECLARE_CLASS(R2::CToolCreateEntity);
 	CToolCreateEntity() { nlassert(0); }
-	~CToolCreateEntity();
+	~CToolCreateEntity() NL_OVERRIDE;
 	//
 	CToolCreateEntity(uint ghostSlot, const std::string &paletteId, bool arrayMode);
 	const std::string &getPaletteId() const { return _PaletteId; }
 protected:
 	// from CTool
-	virtual void onActivate();
+	virtual void onActivate() NL_OVERRIDE;
 	//
-	virtual void updateBeforeRender();
-	virtual void updateAfterRender();
-	virtual bool onMouseLeftButtonClicked();
-	virtual bool onMouseRightButtonClicked();
+	virtual void updateBeforeRender() NL_OVERRIDE;
+	virtual void updateAfterRender() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonClicked() NL_OVERRIDE;
+	virtual bool onMouseRightButtonClicked() NL_OVERRIDE;
 	// from CToolChoosePos
-	virtual void commit(const NLMISC::CVector &createPosition, float createAngle);
-	virtual void updateInvalidCursorOnUI();
-	virtual bool stopAfterCommit() const;
-	virtual void cancel();
+	virtual void commit(const NLMISC::CVector &createPosition, float createAngle) NL_OVERRIDE;
+	virtual void updateInvalidCursorOnUI() NL_OVERRIDE;
+	virtual bool stopAfterCommit() const NL_OVERRIDE;
+	virtual void cancel() NL_OVERRIDE;
 private:
 	enum TCreateState
 	{

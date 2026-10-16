@@ -14,7 +14,7 @@ TARGET_LINK_LIBRARIES(pipeline_max_rewrite_assets
 	Boost::boost
 )
 
-NL_DEFAULT_PROPS(pipeline_max_dump "NeL, Tools, 3D: Pipeline Max Rewrite Assets")
+NL_DEFAULT_PROPS(pipeline_max_rewrite_assets "NeL, Tools, 3D: Pipeline Max Rewrite Assets")
 NL_ADD_RUNTIME_FLAGS(pipeline_max_rewrite_assets)
 
 INSTALL(TARGETS pipeline_max_rewrite_assets RUNTIME DESTINATION bin COMPONENT toolsmisc)

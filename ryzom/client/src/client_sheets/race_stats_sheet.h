@@ -102,9 +102,9 @@ public:
 	// ctor
 	CRaceStatsSheet();
 	//
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 	/// Serialize rce_stats sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 private:
 	void buildGroundFXs(const NLGEORGES::UFormElm &item, const std::string &name, std::vector<CGroundFXSheet> &dest);
 };

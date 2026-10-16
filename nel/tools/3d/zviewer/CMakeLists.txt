@@ -6,7 +6,7 @@ ELSE()
   ADD_EXECUTABLE(zviewer ${SRC})
 ENDIF()
 
-ADD_DEFINITIONS(-DNL_ZVIEWER_CFG="${NL_ETC_PREFIX}/")
+target_compile_definitions(zviewer PRIVATE NL_ZVIEWER_CFG="${NL_ETC_PREFIX}/")
 
 TARGET_LINK_LIBRARIES(zviewer PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(zviewer "NeL, Tools, 3D: Zone Viewer")

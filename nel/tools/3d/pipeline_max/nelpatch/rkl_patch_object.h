@@ -48,19 +48,18 @@ namespace NELPATCH {
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
  * The Rykol Patch Object ("RklPatch", nelconvertpatch_r.dlm), ClassId (0x368c679f, 0x711c22ee),
- * superclass 0x10 (GeomObject) — the NeL landscape patch grid inside .max files. The original
+ * superclass 0x10 (GeomObject): the NeL landscape patch grid inside .max files. The original
  * RPO::Save writes chunk 0x08FD (uint32 rpoVersion + the RPatchMesh blob), then the Max
  * PatchMesh stream, then the cached Mesh stream, all as flat siblings (it deliberately skips
  * PatchObject::Save). This class claims those chunks head-first in file order and re-emits
- * them verbatim (raw bytes stay authoritative — no authoring direction yet), exposing typed
- * read access through the rpo_data.h decoders. See wiki drafts/max_geometry_formats.md Part A
- * and drafts/pipeline_max_design.md §10h.
+ * them verbatim (raw bytes stay authoritative; no authoring direction yet), exposing typed
+ * read access through the rpo_data.h decoders.
  */
 class CRklPatchObject : public BUILTIN::CPatchObject
 {
 public:
 	CRklPatchObject(CScene *scene);
-	virtual ~CRklPatchObject();
+	virtual ~CRklPatchObject() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -69,14 +68,14 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	// read access (valid between parse and clean/disown)
 	/// The claimed chunk run (0x08FD + PatchMesh + Mesh chunks, in file order)
@@ -88,9 +87,19 @@ public:
 	/// Decode the PatchMesh stream chunks
 	bool decodePatch(SPatchMesh &out, std::string &err) const;
 
+	// write access (valid between parse and clean/disown; the geometry chunks stay verbatim)
+	/// Replace the 0x08FD payload with the re-encoded blob (rpoVersion 0 + encodeRPatchMesh).
+	/// Returns false when the object has no 0x08FD chunk. Decode-encode is byte-identity, so
+	/// writing back an unmodified decode leaves the file byte-exact.
+	bool setRPatch(const SRPatchMesh &in);
+	/// Rewrite the PatchMesh stream chunks in place from `in` (element streams, selection
+	/// BitArrays, hooks, map channel; every other claimed chunk untouched - the cached Mesh
+	/// stream stays verbatim by policy). Decode-encode is byte-identity on Max 4+ streams.
+	bool setPatchMesh(const SPatchMesh &in, std::string &err);
+
 protected:
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	bool isKnownChunkId(uint16 id) const;

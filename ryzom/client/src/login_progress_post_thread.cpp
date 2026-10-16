@@ -161,7 +161,7 @@ public:
 	}
 
 	//============================================================================================
-	virtual void run()
+	virtual void run() NL_OVERRIDE
 	{
 		try
 		{
@@ -282,8 +282,8 @@ public:
 CLoginProgressPostThread::CLoginProgressPostThread()
 {
 	// Construct
-	_Thread = NULL;
-	_Task = NULL;
+	_Thread = nullptr;
+	_Task = nullptr;
 }
 
 //===========================================================================================
@@ -320,8 +320,8 @@ void CLoginProgressPostThread::release()
 	if (_Thread && _Thread->isRunning()) _Thread->wait();
 	delete _Task;
 	delete _Thread;
-	_Task = NULL;
-	_Thread = NULL;
+	_Task = nullptr;
+	_Thread = nullptr;
 }
 
 //===========================================================================================
@@ -341,22 +341,27 @@ void CLoginProgressPostThread::init(NLMISC::CConfigFile &configFile)
 {
 	std::string installStartupPage;
 	std::string installStartupHost;
-	static std::string httpStr = "http://";
 
 	if (configFile.getVarPtr("InstallStatsUrl") )
 	{
-
-		static std::string httpStr = "http://";
-		static std::string::size_type httpStrSize = httpStr.size();
+		// The host half keeps its scheme: the request is sent to
+		// StartupHost + StartupPage, and a scheme-less url would make curl
+		// fall back to plain http. The old parser also only accepted the
+		// literal prefix "http://", so the https default in
+		// client_default.cfg silently disabled this thread altogether.
 		std::string tmp = configFile.getVarPtr("InstallStatsUrl")->asString(0);
-		std::string::size_type it= tmp.find(httpStr);
-		if (it == std::string::npos) return;
+		static const std::string schemeSep = "://";
+		std::string::size_type schemePos = tmp.find(schemeSep);
+		if (schemePos == std::string::npos) return;
+		std::string scheme = NLMISC::toLowerAscii(tmp.substr(0, schemePos));
+		if (scheme != "http" && scheme != "https") return;
 
-		std::string::size_type hostPageSeparator = tmp.find("/", httpStrSize);
+		std::string::size_type hostStart = schemePos + schemeSep.size();
+		std::string::size_type hostPageSeparator = tmp.find("/", hostStart);
 		if (hostPageSeparator == std::string::npos) return;
 
 		installStartupPage = tmp.substr(hostPageSeparator); //keep the leading slash
-		installStartupHost = tmp.substr(httpStrSize, hostPageSeparator  - httpStrSize); // dont keep the last slah
+		installStartupHost = tmp.substr(0, hostPageSeparator); // scheme + host, no trailing slash
 
 		init(installStartupHost, installStartupPage);
 	}

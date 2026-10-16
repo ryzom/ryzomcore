@@ -62,7 +62,7 @@ CAnimation::CAnimation()
 	_SoundAnim	= -1;
 	_Animation	= UnknownAnim;
 	_Rot		= 0.0;
-	_Sheet		= NULL;
+	_Sheet		= nullptr;
 
 }// CAnimation //
 
@@ -94,7 +94,7 @@ void CAnimation::init(CAnimationSheet *sheet, NL3D::UAnimationSet *animationSet)
 void CAnimation::computeAnimation(NL3D::UAnimationSet *animationSet, const std::string &animName)
 {
 	// Check animationSet.
-	if(animationSet == 0)
+	if(animationSet == nullptr)
 	{
 		nlwarning("CAnimation:computeAnimation: Animation Set is NULL.");
 		return;

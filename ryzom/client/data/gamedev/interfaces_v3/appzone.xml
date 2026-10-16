@@ -73,17 +73,17 @@
     <action id="settings"
             name="uiBrowseHome"
             handler="lua"
-            params="AppZone:onButtonHome()"
+            params="AppZone:onButtonHome()" 
             icon="building_state2.tga" />
     <action id="reload"
             name="uiBrowseRefresh"
             handler="lua"
-            params="AppZone:reload()"
+            params="AppZone:reload()" 
             icon="curs_rotate.tga" />
     <action id="hide"
             name="uiHide"
             handler="lua"
-            params="AppZone:setActive(false)"
+            params="AppZone:setActive(false)" 
             icon="r2_icon_stop_possess.tga" />
     <separator />
   </group>
@@ -253,15 +253,12 @@
 
   <tree node="appzone" />
 
+<group id="webqueue" active="true" x="0" y="0" w="1" h="1" posref="TL TL">
+    <instance template="webig_html"/>
+</group>
+<tree node="webqueue"/>
+<lua file="web_queue.lua" />
 
-	<group id="webqueue" active="true" x="0" y="0" w="1" h="1" posref="TL TL">
-		<instance template="webig_html"/>
-	</group>
-	<tree node="webqueue"/>
-  <lua file="web_queue.lua" />
-
-  <command name="appzone"
-           action="lua"
-           params="AppZone:handle('$')" />
+<command name="appzone" action="lua" params="AppZone:handle('$')" />
 
 </interface_config>

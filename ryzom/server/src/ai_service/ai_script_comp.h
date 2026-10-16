@@ -17,30 +17,11 @@
 #ifndef _SCRIPT_COMP_H_
 #define _SCRIPT_COMP_H_
 
+#include "ai_script_comp_base.h"
 
 struct ReadFightActionException	:public	NLMISC::Exception
 {
 	ReadFightActionException(const	std::string	&reason):NLMISC::Exception(reason){}
-};
-
-class	CSpawnBot;
-
-class	CFightScriptComp
-		:public	NLMISC::CRefCount
-{
-public:
-	CFightScriptComp()
-	{}
-	virtual ~CFightScriptComp()
-	{}
-	virtual	std::string	toString() const = 0;
-
-	virtual	bool	update(CSpawnBot	&bot)	const = 0;	//	returns true if it behaves normally, false if there a problem and callers may not consider it behaves normally.
-																	//	for instance ONCE may not consider that this call happened.
-	virtual	void	remove(CFightScriptComp	*child)
-	{}
-protected:
-private:
 };
 
 class CFightScriptCompReader
@@ -88,15 +69,15 @@ public:
 		,_Param(param)
 	{}
 
-	virtual ~CFightSelectFilter()
+	virtual ~CFightSelectFilter() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const;
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE;
 	const	std::string	&getParam()	const
 	{
 		return	_Param;
 	}
 
-	std::string	toString() const;
+	std::string	toString() const NL_OVERRIDE;
 
 protected:
 private:
@@ -110,10 +91,10 @@ class	CFightSelectFilterReader
 {
 public:
 	CFightSelectFilterReader()			{}
-	virtual ~CFightSelectFilterReader()	{}
+	virtual ~CFightSelectFilterReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create(const	std::string	&inStr);
-	std::string	getName	()	const
+	CFightScriptComp	*create(const	std::string	&inStr) NL_OVERRIDE;
+	std::string	getName	()	const NL_OVERRIDE
 	{
 		return	std::string("SELECT");
 	}

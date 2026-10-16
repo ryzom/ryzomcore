@@ -560,7 +560,6 @@ function r2.events:updateElementEditor()
 	if instanceEvent.Event.ValueString and instanceEvent.Event.ValueString~="" then
 		eventType = eventType .. " '" .. instanceEvent.Event.ValueString .. "'"
 	end
-
 	local uc_when_text = ucstring()	
 	uc_when_text:fromUtf8(eventType)
 	whenMenuText.uc_hardtext_single_line_format = uc_when_text 
@@ -618,7 +617,6 @@ function r2.events:updateElementEditor()
 						actionType = actionType .. " '" .. tostring(actionInst.Action.ValueString).. "'"
 					end
 				end
-
 				local uc_action_text = ucstring()
 				uc_action_text:fromUtf8(actionType)
 				actionMenuText.uc_hardtext_single_line_format = uc_action_text 
@@ -665,7 +663,6 @@ function r2.events:updateElementEditor()
 				assert(instance)
 				conditionType = conditionType .. " '" .. instance:getShortName() .."'"
 			end
-
 			local uc_condition_text = ucstring()
 			uc_condition_text:fromUtf8(conditionType)
 			conditionMenuText.uc_hardtext_single_line_format = uc_condition_text

@@ -39,7 +39,7 @@ public:
 	// ctor & dtor ------------------------------------------------------
 	CAIStateProfile(CAIState* state, CAIAliasDescriptionNode *aliasDescription): CAliasChild<CAIState>(state,aliasDescription)
 	{}
-	virtual ~CAIStateProfile()
+	virtual ~CAIStateProfile() NL_OVERRIDE
 	{}
 
 	virtual	std::string	getIndexString	()	const;

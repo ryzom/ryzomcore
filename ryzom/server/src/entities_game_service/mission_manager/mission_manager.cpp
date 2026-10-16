@@ -582,8 +582,8 @@ void CMissionManager::checkVisitPlaceMissions()
 					if (! (step && missionInstance))
 					{
 						++its;
-						continue;
-					}
+						continue;	
+					} 
 
 					// Test if the iterated "visit place" steps match the current places with contraints
 					bool placeProcessed = false;
@@ -862,7 +862,7 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 			MISDBG("%s user not in a guild", sDebugPrefix.c_str());
 			return 8;
 		}
-		/* /// This is already checked in the prerequisites
+		/* /// This is already checked in the prerequisites 
 		if (!module->pickMission( templ->Alias ))
 		{
 			/// Todo : error message for the member
@@ -955,7 +955,6 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 		MISDBG("%s invalid mission instance", sDebugPrefix.c_str());
 		return 13;
 	}
-
 	inst->setGiver( giver );
 	inst->setMainMissionTemplateId(mainMission);
 
@@ -1539,7 +1538,6 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
 
 					// Send to AIS (to stop the bot). Important: there must be the same number of items pushed in DynChatEnd that in DynChatStart for the bot to resume.
 					CharacterDynChatBeginEnd.DynChatEnd.push_back( botRow );
-
                     switch ( inst->getProcessingState() )
                     {
 	                    case CMission::Failed:

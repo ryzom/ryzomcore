@@ -62,7 +62,7 @@ public:
 	virtual bool update( uint32 & updateFlag );
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// set the effect name
 	inline void effectName(const std::string &str) { _EffectName = str; }

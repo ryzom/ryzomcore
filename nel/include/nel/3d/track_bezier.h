@@ -52,7 +52,7 @@ protected:
 	/// evalKey (runtime).
 	virtual void evalKey (	const CKeyT* previous, const CKeyT* next,
 							TAnimationTime datePrevious, TAnimationTime dateNext,
-							TAnimationTime date, IAnimatedValue &result )
+							TAnimationTime date, IAnimatedValue &result ) NL_OVERRIDE
 	{
 		CAnimatedValueBlendable<T>	&resultVal= static_cast<CAnimatedValueBlendable<T>&>(result);
 
@@ -92,7 +92,7 @@ protected:
 	}
 
 	/// compile (precalc).
-	virtual void compile()
+	virtual void compile() NL_OVERRIDE
 	{
 		ITrackKeyFramer<CKeyT>::compile();
 
@@ -125,7 +125,7 @@ protected:
 	/// evalKey (runtime).
 	virtual void evalKey (	const CKeyBezierQuat* previous, const CKeyBezierQuat* next,
 							TAnimationTime datePrevious, TAnimationTime /* dateNext */,
-							TAnimationTime date, IAnimatedValue &result )
+							TAnimationTime date, IAnimatedValue &result ) NL_OVERRIDE
 	{
 		CAnimatedValueQuat	&resultVal= static_cast<CAnimatedValueQuat&>(result);
 
@@ -150,7 +150,7 @@ protected:
 	}
 
 	/// compile (precalc).
-	virtual void compile()
+	virtual void compile() NL_OVERRIDE
 	{
 		ITrackKeyFramer<CKeyBezierQuat>::compile();
 

@@ -131,7 +131,7 @@ float getHeight(float x, float y)
 	sint32 sizeX = s_ZoneMaxX - s_ZoneMinX + 1;
 	sint32 sizeY = s_ZoneMaxY - s_ZoneMinY + 1;
 
-	if (s_HeightMap != NULL)
+	if (s_HeightMap != nullptr)
 	{
 		float xc = (x - s_CellSize * s_ZoneMinX) / (s_CellSize * sizeX);
 		float yc = 1.0f - ((y - s_CellSize * s_ZoneMinY) / (s_CellSize * sizeY));
@@ -150,7 +150,7 @@ float getHeight(float x, float y)
 		deltaZ *= s_ZFactor;
 	}
 
-	if (s_HeightMap2 != NULL)
+	if (s_HeightMap2 != nullptr)
 	{
 		float xc = (x - s_CellSize * s_ZoneMinX) / (s_CellSize * sizeX);
 		float yc = 1.0f - ((y - s_CellSize * s_ZoneMinY) / (s_CellSize * sizeY));
@@ -179,12 +179,12 @@ NLMISC::CVector getHeightNormal(float x, float y)
 	sint32 bmpW, bmpH;
 
 	// get width/height of the bitmap
-	if (s_HeightMap != NULL)
+	if (s_HeightMap != nullptr)
 	{
 		bmpW = s_HeightMap->getWidth();
 		bmpH = s_HeightMap->getHeight();
 	}
-	else if (s_HeightMap2 != NULL)
+	else if (s_HeightMap2 != nullptr)
 	{
 		bmpW = s_HeightMap2->getWidth();
 		bmpH = s_HeightMap2->getHeight();
@@ -553,14 +553,14 @@ int main(int argc, char **argv)
 			{
 				nldebug("Cant load height map: %s", args.getLongArg("heightmap")[0].c_str());
 				delete s_HeightMap;
-				s_HeightMap = NULL;
+				s_HeightMap = nullptr;
 			}
 		}
 		catch (const Exception &)
 		{
 			nldebug("Cant load height map: %s", args.getLongArg("heightmap")[0].c_str());
 			delete s_HeightMap;
-			s_HeightMap = NULL;
+			s_HeightMap = nullptr;
 		}
 	}
 
@@ -579,14 +579,14 @@ int main(int argc, char **argv)
 			{
 				nldebug("Cant load height map: %s", args.getLongArg("heightmap2")[0].c_str());
 				delete s_HeightMap2;
-				s_HeightMap2 = NULL;
+				s_HeightMap2 = nullptr;
 			}
 		}
 		catch (const Exception &)
 		{
 			nldebug("Cant load height map: %s", args.getLongArg("heightmap2")[0].c_str());
 			delete s_HeightMap2;
-			s_HeightMap2 = NULL;
+			s_HeightMap2 = nullptr;
 		}
 	}
 

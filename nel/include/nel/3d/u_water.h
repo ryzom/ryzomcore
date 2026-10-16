@@ -68,14 +68,14 @@ public:
 	/// Proxy interface
 
 	/// Constructors
-	UWaterInstance() { _Object = NULL; }
+	UWaterInstance() { _Object = nullptr; }
 	UWaterInstance(class CWaterModel *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CWaterModel *object) { _Object = (ITransformable*)object; };
 	/// Detach the object
-	void			detach() { _Object = NULL; }
+	void			detach() { _Object = nullptr; }
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const {return _Object == nullptr; }
 	/// For advanced usage, get the internal object ptr
 	class CWaterModel	*getObjectPtr() const {return (CWaterModel*)_Object;}
 };

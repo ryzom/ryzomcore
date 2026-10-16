@@ -112,7 +112,7 @@ public:
 	sint32	getLCTImpact() const {return _LCTImpact;}
 
 	/// Serialize entities.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 /**
@@ -145,7 +145,7 @@ public:
 	CStage *addStage(NLMISC::TGameCycle gameCycle, uint property, sint64 value, NLMISC::TGameCycle predictedI);
 
 	/// Serialize entities.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	/// Remove Positions except for those with a mode.
 	void removePosWithNoMode();
 };

@@ -48,7 +48,7 @@ CTDS::CTDS ()
 //	nldebug("CTDS::CTDS...");
 	nlverify(pthread_key_create (&_Key, NULL) == 0);
 //	nldebug("CTDS::CTDS : create a new key %u", _Key);
-	pthread_setspecific(_Key, NULL);
+	pthread_setspecific(_Key, nullptr);
 #endif // NL_OS_WINDOWS
 }
 

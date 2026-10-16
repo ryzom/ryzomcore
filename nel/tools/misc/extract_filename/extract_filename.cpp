@@ -164,7 +164,7 @@ bool filterExtension (const char *str, const vector<string> &extensions)
 bool validateFilename (const char *str)
 {
 	// Look for space
-	return (strchr (str, ' ') == NULL);
+	return (strchr (str, ' ') == nullptr);
 }
 
 const char *getExtension (const char *filename)

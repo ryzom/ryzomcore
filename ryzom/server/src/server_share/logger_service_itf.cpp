@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "logger_service_itf.h"
 
 namespace LGS
@@ -28,7 +28,7 @@ namespace LGS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CLoggerServiceSkel::TMessageHandlerMap &CLoggerServiceSkel::getMessageHandlers() const
 	{
@@ -38,19 +38,19 @@ namespace LGS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("RC"), &CLoggerServiceSkel::registerClient_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("LG"), &CLoggerServiceSkel::reportLog_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CLoggerServiceSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -69,7 +69,7 @@ namespace LGS
 		return true;
 	}
 
-	
+
 	void CLoggerServiceSkel::registerClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CLoggerServiceSkel_registerClient_RC);
@@ -99,9 +99,9 @@ namespace LGS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_registerClient(__message, shardId, logDef);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -117,9 +117,9 @@ namespace LGS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_reportLog(__message, logInfos);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

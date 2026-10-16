@@ -35,7 +35,8 @@ static const float DEFAUT_PRECIPITATION_TIMEOUT = 10.f; // at most 10 second bef
 
 
 //============================================================
-CPrecipitation::CPrecipitation() : _ClipGrid(NULL), _Strenght(0), _TimeOut(0.f), _XSize(0), _YSize(0), _OldX(0), _OldY(0), _Touched(false)
+CPrecipitation::CPrecipitation() : _ClipGrid(nullptr)
+    , _Strenght(0), _TimeOut(0.f), _XSize(0), _YSize(0), _OldX(0), _OldY(0), _Touched(false)
 {
 	H_AUTO_USE(RZ_Precipitation)
 }
@@ -53,7 +54,7 @@ void CPrecipitation::init(const CPrecipitationDesc &desc)
 		allocateFXs(); // keep fxs allocated;
 		forceSetStrenght(0); // no precipitation is the default
 	}
-	_ClipGrid = NULL;
+	_ClipGrid = nullptr;
 	_Touched = true;
 }
 

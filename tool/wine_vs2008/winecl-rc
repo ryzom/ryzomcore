@@ -1,0 +1,4 @@
+#!/bin/bash
+. "$(dirname "$0")/winecl-env"
+translate_args "$@"
+exec wine "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\RC.Exe" "${ARGS[@]}"

@@ -124,7 +124,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CServerEditionItfSkel::TInterceptor *interceptor = NULL;
+				CServerEditionItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -132,7 +132,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CServerEditionItfProxy()
@@ -279,7 +279,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CServerAnimationItfSkel::TInterceptor *interceptor = NULL;
+				CServerAnimationItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -287,7 +287,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CServerAnimationItfProxy()
@@ -554,7 +554,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CCharacterControlItfSkel::TInterceptor *interceptor = NULL;
+				CCharacterControlItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -562,7 +562,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CCharacterControlItfProxy()
@@ -792,7 +792,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CAisControlItfSkel::TInterceptor *interceptor = NULL;
+				CAisControlItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -800,7 +800,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CAisControlItfProxy()
@@ -837,11 +837,9 @@ namespace R2
 
 		void setSessionId(TSessionId value)
 		{
-
 				_SessionId = value;
-
 		}
-			// the date of last disconnection of the last character
+		// the date of last disconnection of the last character
 		uint32 getDateEmpty() const
 		{
 			return _DateEmpty;
@@ -849,9 +847,7 @@ namespace R2
 
 		void setDateEmpty(uint32 value)
 		{
-
 				_DateEmpty = value;
-
 		}
 
 		bool operator == (const TR2SbmSessionInfo &other) const
@@ -864,14 +860,12 @@ namespace R2
 		// constructor
 		TR2SbmSessionInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_SessionId);
 			s.serial(_DateEmpty);
-
 		}
 
 
@@ -976,7 +970,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CR2SessionBackupModuleItfSkel::TInterceptor *interceptor = NULL;
+				CR2SessionBackupModuleItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -984,7 +978,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CR2SessionBackupModuleItfProxy()

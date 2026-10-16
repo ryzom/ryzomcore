@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2021  Winch Gate Property Limited
 //
@@ -2233,8 +2234,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -2370,8 +2370,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3734,8 +3733,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -3871,8 +3869,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4005,8 +4002,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4139,8 +4135,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4279,8 +4274,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -4996,8 +4990,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -5130,8 +5123,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -5912,24 +5904,7 @@ namespace RSMGR
 			_SessionId(NOPE::INVALID_OBJECT_ID)
 		{
 			// Default initialisation
-			_SessionType = TSessionType::st_edit;
-			_OwnerId = 0;
-			_PlanDate = 0;
-			_StartDate = 0;
-			_Orientation = TSessionOrientation::so_other;
-			_Level = R2::TSessionLevel::sl_a;
-			_RuleType = TRuleType::rt_strict;
 			_AccessType = TAccessType::at_private;
-			_State = TSessionState::ss_planned;
-			_HostShardId = 0;
-			_SubscriptionSlots = 0;
-			_ReservedSlots = 0;
-			_EstimatedDuration = TEstimatedDuration::et_short;
-			_FinalDuration = 0;
-			_FolderId = 0;
-			_AnimMode = TAnimMode::am_dm;
-			_GuildFilter = TGuildFilter::gf_only_my_guild;
-			_SubscriptionClosed = 0;
 			_Newcomer = 1;
 			_SessionParticipants = NULL;
 			_GuildInvites = NULL;
@@ -6157,8 +6132,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -7401,8 +7375,7 @@ namespace RSMGR
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}

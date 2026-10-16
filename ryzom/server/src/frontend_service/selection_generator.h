@@ -66,13 +66,13 @@ public:
 	CP2CGenerator( TSelectionLevel ceiling );
 
 	/// Initialization of a selection cycle
-	virtual void					init( TSelectionLevel nblevels );
+	virtual void					init( TSelectionLevel nblevels ) NL_OVERRIDE;
 
 	/// Change the number of levels without restarting the cycle
-	virtual void					changeNbLevels( TSelectionLevel nblevels );
+	virtual void					changeNbLevels( TSelectionLevel nblevels ) NL_OVERRIDE;
 
 	/// Return the next level to select
-	virtual TSelectionLevel			getNext();
+	virtual TSelectionLevel			getNext() NL_OVERRIDE;
 
 	/// Resursive function that fills _LevelSequence
 	static void						generateLevels( std::vector<TSelectionLevel>::iterator& iter, TSelectionLevel level );
@@ -109,13 +109,13 @@ class CScoringGenerator : public ISelectionGenerator
 public:
 
 	/// Initialization of a selection cycle
-	virtual void					init( TSelectionLevel nblevels );
+	virtual void					init( TSelectionLevel nblevels ) NL_OVERRIDE;
 
 	/// Change the number of levels without restarting the cycle
-	virtual void					changeNbLevels( TSelectionLevel nblevels );
+	virtual void					changeNbLevels( TSelectionLevel nblevels ) NL_OVERRIDE;
 
 	/// Return the next level to select
-	virtual TSelectionLevel			getNext();
+	virtual TSelectionLevel			getNext() NL_OVERRIDE;
 
 	/// Display the scores (debugging)
 	void							printScores();

@@ -36,7 +36,7 @@ namespace R2
 uint CDisplayerBase::ObjCount = 0;
 
 // *********************************************************************************************************
-CDisplayerBase::CDisplayerBase() : _DisplayedInstance(NULL)
+CDisplayerBase::CDisplayerBase() : _DisplayedInstance(nullptr)
 {
 	++ ObjCount;
 }

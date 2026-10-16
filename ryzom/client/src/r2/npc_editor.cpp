@@ -72,20 +72,20 @@ void CNPCEditor::updateNPCView(uint slot)
 			nlwarning("<CNPCEditor::updateNPCView> can't retrieve character 3d view, or bad type");
 		}
 
-		CInterface3DCharacter *char3DI = NULL;
+		CInterface3DCharacter *char3DI = nullptr;
 		if (sceneI->getCharacter3DCount() != 0)
 		{
 			char3DI = sceneI->getCharacter3D(0);
 		}
-		if (char3DI == NULL)
+		if (char3DI == nullptr)
 		{
 			nlwarning("<CNPCEditor::updateNPCView> Can't retrieve char 3D Interface");
 		}
 		else
 		{
-			CCharacter3D * char3D = NULL;
+			CCharacter3D * char3D = nullptr;
 			char3D = char3DI->getCharacter3D();
-			if (char3D == NULL)
+			if (char3D == nullptr)
 			{
 				nlwarning("<CNPCEditor::updateNPCView> Can't retrieve char3D");
 			}

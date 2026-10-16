@@ -59,7 +59,7 @@ struct CSheetWordListBuilder : public IWordListBuilder
 	string		SheetExt;
 	string		SheetPath;
 
-	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName)
+	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName) NL_OVERRIDE
 	{
 		SheetExt= toLowerAscii(SheetExt);
 
@@ -73,7 +73,7 @@ struct CSheetWordListBuilder : public IWordListBuilder
 		// list all files.
 		std::vector<string>		allFiles;
 		allFiles.reserve(100000);
-		CPath::getPathContent(SheetPath, true, false, true, allFiles, NULL);
+		CPath::getPathContent(SheetPath, true, false, true, allFiles, nullptr);
 
 		// Keep only the extension we want, and remove "_" (parent)
 		allWords.clear();
@@ -107,7 +107,7 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 	string			PrimPath;
 	vector<string>	PrimFilter;
 
-	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName)
+	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName) NL_OVERRIDE
 	{
 		// verify the directory is correct
 		if(!CFile::isDirectory(PrimPath))
@@ -119,7 +119,7 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 		// list all files.
 		std::vector<string>		allFiles;
 		allFiles.reserve(100000);
-		CPath::getPathContent(PrimPath, true, false, true, allFiles, NULL);
+		CPath::getPathContent(PrimPath, true, false, true, allFiles, nullptr);
 
 		// parse all primitive that match the filter
 		allWords.clear();
@@ -145,10 +145,10 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 			if (!loadXmlPrimitiveFile(PrimDoc, allFiles[i], LigoConfig))
 			{
 				nlwarning("Error: cannot open file '%s'. '%s' Aborted", allFiles[i].c_str(), workSheetFileName.c_str());
-				CPrimitiveContext::instance().CurrentPrimitive = NULL;
+				CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 				return false;
 			}
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 			// For all primitives of interest
 			const char	*listClass[]= {"continent", "region", "place", "stable",

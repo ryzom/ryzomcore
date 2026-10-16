@@ -37,7 +37,7 @@ public:
 	CDBDeltaFile();
 
 	/// Destructor
-	~CDBDeltaFile();
+	~CDBDeltaFile() NL_OVERRIDE;
 
 
 	/// Setup file name and path

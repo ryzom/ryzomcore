@@ -133,23 +133,23 @@ public:
 
 	/// @name IScriptContext implementation
 	//@{
-	virtual std::string getContextName();
-	virtual void interpretCodeOnChildren(AIVM::CByteCodeEntry const& codeScriptEntry);
+	virtual std::string getContextName() NL_OVERRIDE;
+	virtual void interpretCodeOnChildren(AIVM::CByteCodeEntry const& codeScriptEntry) NL_OVERRIDE;
 
-	float getLogicVar(NLMISC::TStringId	varId);
-	void setLogicVar(NLMISC::TStringId varId, float value);
-	std::string getStrLogicVar(NLMISC::TStringId varId);
-	void setStrLogicVar(NLMISC::TStringId varId, std::string const& value);
-	AIVM::IScriptContext* getCtxLogicVar(NLMISC::TStringId varId);
-	void setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext* value);
+	float getLogicVar(NLMISC::TStringId	varId) NL_OVERRIDE;
+	void setLogicVar(NLMISC::TStringId varId, float value) NL_OVERRIDE;
+	std::string getStrLogicVar(NLMISC::TStringId varId) NL_OVERRIDE;
+	void setStrLogicVar(NLMISC::TStringId varId, std::string const& value) NL_OVERRIDE;
+	AIVM::IScriptContext* getCtxLogicVar(NLMISC::TStringId varId) NL_OVERRIDE;
+	void setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext* value) NL_OVERRIDE;
 	void setFirstBotSpawned();
 
-	virtual AIVM::IScriptContext* findContext(NLMISC::TStringId const strId);
+	virtual AIVM::IScriptContext* findContext(NLMISC::TStringId const strId) NL_OVERRIDE;
 
-	virtual void setScriptCallBack(NLMISC::TStringId const& eventName, AIVM::CByteCodeEntry const& codeScriptEntry);
-	virtual AIVM::CByteCodeEntry const* getScriptCallBackPtr(NLMISC::TStringId const& eventName) const;
-	virtual void callScriptCallBack(AIVM::IScriptContext* caller, NLMISC::TStringId const& funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL);
-	virtual void callNativeCallBack(AIVM::IScriptContext* caller, std::string const&       funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL);
+	virtual void setScriptCallBack(NLMISC::TStringId const& eventName, AIVM::CByteCodeEntry const& codeScriptEntry) NL_OVERRIDE;
+	virtual AIVM::CByteCodeEntry const* getScriptCallBackPtr(NLMISC::TStringId const& eventName) const NL_OVERRIDE;
+	virtual void callScriptCallBack(AIVM::IScriptContext* caller, NLMISC::TStringId const& funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL) NL_OVERRIDE;
+	virtual void callNativeCallBack(AIVM::IScriptContext* caller, std::string const&       funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL) NL_OVERRIDE;
 
 	void blockUserEvent(uint32 eventId);
 	void unblockUserEvent(uint32 eventId);
@@ -215,7 +215,7 @@ class CPersistentStateInstance
 {
 public:
 	CPersistentStateInstance(CStateMachine& reactionContainer);
-	virtual	~CPersistentStateInstance();
+	virtual	~CPersistentStateInstance() NL_OVERRIDE;
 
 	typedef	std::vector<NLMISC::CDbgPtr<CPersistentStateInstance> >	TChildList;
 
@@ -241,7 +241,7 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	//	CStateInstance
-	CPersistentStateInstance* getPersistentStateInstance() { return this; }
+	CPersistentStateInstance* getPersistentStateInstance() NL_OVERRIDE { return this; }
 
 	//////////////////////////////////////////////////////////////////////////
 

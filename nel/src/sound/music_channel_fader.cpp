@@ -31,7 +31,8 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CMusicChannelFader::CMusicChannelFader() : _SoundDriver(NULL), _ActiveMusicFader(0), _Gain(1.0f), _LastTime(0)
+CMusicChannelFader::CMusicChannelFader() : _SoundDriver(nullptr)
+    , _ActiveMusicFader(0), _Gain(1.0f), _LastTime(0)
 {
 
 }
@@ -75,9 +76,9 @@ void CMusicChannelFader::release()
 		for (uint i = 0; i < _MaxMusicFader; ++i) if (_MusicFader[i].MusicChannel) 
 		{
 			delete _MusicFader[i].MusicChannel;
-			_MusicFader[i].MusicChannel = NULL;
+			_MusicFader[i].MusicChannel = nullptr;
 		}
-		_SoundDriver = NULL;
+		_SoundDriver = nullptr;
 	}
 }
 

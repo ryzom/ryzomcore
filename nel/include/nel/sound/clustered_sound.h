@@ -135,7 +135,7 @@ public:
 				Direction1(NLMISC::CVector::Null),
 				Direction2(NLMISC::CVector::Null),
 				Direction(NLMISC::CVector::Null),
-				PreviousCluster(0),
+				PreviousCluster(nullptr),
 				PreviousVector(NLMISC::CVector::Null),
 				ListenerPos(listenerPos)
 		{}

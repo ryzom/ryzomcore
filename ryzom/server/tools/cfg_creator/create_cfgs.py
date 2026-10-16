@@ -48,5 +48,5 @@ for f in os.listdir(templatepath):
 			for k, v in config_vars.items():
 				content = content.replace("#"+k+"#", v)
 			with open(finalpath+f, "w") as fd:
-				fd.write(content)
+						fd.write(content)
 			print(f)

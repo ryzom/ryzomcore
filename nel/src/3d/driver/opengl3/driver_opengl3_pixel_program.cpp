@@ -827,7 +827,7 @@ void CDriverGL3::generateBuiltinPixelProgram(CMaterial &mat)
 		nlwarning("GL3: Builtin PP compilation failed (shader=%d, fmt=0x%x, fog=%d)",
 			(int)matDrv->PPBuiltin.Shader, matDrv->PPBuiltin.VertexFormat, (int)matDrv->PPBuiltin.Fog);
 		delete program;
-		program = NULL;
+		program = nullptr;
 	}
 
 	matDrv->PPBuiltin.PixelProgram = program;

@@ -226,7 +226,7 @@ public:
 	/// Constructor.
 	CEntityManager();
 	/// Destructor.
-	~CEntityManager();
+	~CEntityManager() NL_OVERRIDE;
 
 	/**
 	 * Initialize some dynamic parameters.
@@ -408,7 +408,7 @@ public:
 	sint64 getLogStageChangeStartLocalTime() const;
 
 	/// Serialize entities.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	// remove all attached fx of all entities (so that they can be reloaded)
 	virtual void removeAllAttachedFX();

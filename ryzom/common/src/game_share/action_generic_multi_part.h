@@ -37,13 +37,13 @@ class CActionGenericMultiPart: public CActionImpulsion
 {
 public:
 
-	virtual ~CActionGenericMultiPart() {}
+	virtual ~CActionGenericMultiPart() NL_OVERRIDE {}
 
 	/** This function creates initializes its fields using the buffer.
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	virtual void unpack (NLMISC::CBitMemStream &message)
+	virtual void unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE
 	{
 		message.serial (Number);
 		message.serial (Part);
@@ -65,7 +65,7 @@ public:
 	/** Returns the size of this action when it will be send to the UDP connection:
 	 * the size is IN BITS, not in bytes (the actual size is this one plus the header size)
 	 */
-	virtual uint32	size ()
+	virtual uint32	size () NL_OVERRIDE
 	{
 		uint32	bytesize = 1 + 2 + 2 + 4;	// header
 		bytesize += (uint32)PartCont.size();
@@ -122,7 +122,7 @@ protected:
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	virtual void pack (NLMISC::CBitMemStream &message)
+	virtual void pack (NLMISC::CBitMemStream &message) NL_OVERRIDE
 	{
 		message.serial (Number);
 		message.serial (Part);
@@ -130,7 +130,7 @@ protected:
 		message.serialCont (PartCont);
 	}
 
-	virtual void	reset()
+	virtual void	reset() NL_OVERRIDE
 	{
 		PartCont.clear ();
 		AllowExceedingMaxSize = false;

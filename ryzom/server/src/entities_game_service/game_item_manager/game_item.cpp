@@ -675,7 +675,6 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 {
 	if (item1 == NULL || item2 == NULL)
 		return false;
-
 	if (item1->getLockedByOwner() != item2->getLockedByOwner())
 		return false;
 
@@ -730,7 +729,7 @@ bool CGameItem::areStackable(const CGameItemPtr item1, const CGameItemPtr item2)
 	for (uint i = 0; i < item1->_Enchantment.size(); i++)
 	{
 		if (item1->_Enchantment[i] != item2->_Enchantment[i])
-			return false;
+				return false;
 	}
 
 	return true;
@@ -1277,7 +1276,7 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_CreatorId = _CreatorId;
 	item->_LockCount = 0;
 	if (_HP == 0)
-		item->_HP = item->maxDurability();
+	item->_HP = item->maxDurability();
 	else
 		item->_HP = _HP;
 

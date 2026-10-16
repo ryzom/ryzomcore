@@ -333,7 +333,7 @@ void CInputOutputService::init()
 	CStringManager::CParameterTraits::init();
 
 	setVersion (RYZOM_PRODUCT_VERSION);
-
+	
 	IOS = this;
 	setUpdateTimeout(100);
 
@@ -713,8 +713,7 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 				chId.getIndex());
 		else
 			nldebug("IOS: addCharacterName Adding name '%s' translated as '%s' for entity %s:%x",
-				ucname.toUtf8().c_str(),
-				charInfos->Name.toUtf8().c_str(),
+				ucname.toUtf8().c_str(), charInfos->Name.toUtf8().c_str(),
 				TheDataset.getEntityId(chId).toString().c_str(),
 				chId.getIndex());
 	}

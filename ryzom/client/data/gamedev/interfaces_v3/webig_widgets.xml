@@ -1,5 +1,5 @@
 <!-- ****************************************** -->
-<!-- *				WEBIG WIDGETS					* -->
+<!-- *            WEBIG WIDGETS               * -->
 <!-- ****************************************** -->
 <interface_config>
 	<root id="interface" x="0" y="0" w="800" h="600" active="true" />
@@ -104,9 +104,9 @@
 	</template>
 
  <!-- //////////// TEMPLATE : webig_frame_borderless /////////// -->
-	<template name="webig_frame_borderless" keep="true" w="200" h="200" x="0" y="0" movable="true" params_l="" params_r="" header_active="true">
-		<group title="" id="content" type="container" posref="MM MM" movable="#movable" pop_max_h="#h" pop_min_h="#h" pop_min_w="#w" pop_max_w="#w" opened="false" openable="false" options="compass" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" header_active="#header_active" right_button="false">
-			<group id="html" type="html" posref="TL TL" url="" title_prefix="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+<template name="webig_frame_borderless" keep="true" w="200" h="200" x="0" y="0" movable="true" params_l="" params_r="" header_active="true">
+    <group title="" id="content" type="container" posref="MM MM" movable="#movable" pop_max_h="#h" pop_min_h="#h" pop_min_w="#w" pop_max_w="#w" opened="false" openable="false" options="compass" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" header_active="#header_active" right_button="false">
+                <group id="html" type="html" posref="TL TL" url="" title_prefix="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
 				<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true"/>
 				<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
 				<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
@@ -117,9 +117,9 @@
 
 <!-- //////////// TEMPLATE : webig_frame_skin_modal /////////// -->
 	<template name="webig_frame_skin_modal" keep="true"  w="200" h="200" x="0" y="0">
-		<group id="group" type="container" active="true" w="#w" h="#h" x="#x" y="#y" posref="MM MM" options="skin_modal"  opened="true" openable="false" movable="true" header_color="UI:SAVE:WIN:COLORS:COM">
+			<group id="group" type="container" active="true" w="#w" h="#h" x="#x" y="#y" posref="MM MM" options="skin_modal"  opened="true" openable="false" movable="true" header_color="UI:SAVE:WIN:COLORS:COM">
 			<group id="content" x="0" y="0" w="0" h="0" posref="TL TL ">
-				<group id="html" type="html" posref="MM MM" url="" title_prefix="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+					<group id="html" type="html" posref="MM MM" url="" title_prefix="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
 					<group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
 					<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
 					<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
@@ -130,19 +130,19 @@
 	</template>
 
 <template name="money_tmpl" keep="true" posparent="parent" x="0" y="0" w="110" h="32" posref="TL TL" id="" value="?" icon="money_32.tga" tooltip="uittPlayerMoney">
-	 <group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y">
-		  <view type="bitmap" id="icone" posref="ML ML" texture="#icon" scale="true" w="32" global_color="false" />
-		  <instance template="box_widget" id="box1" posref="ML ML" sizeref="w" w="-18" h="16" x="18" />
-		  <view type="text_number" id="val1" posparent="box1" posref="MR MR" x="-3" y="0" color="135 243 28 255" shadow="true" fontsize="10" value="#value" global_color="false" positive="true" format="true" />
-		  <ctrl type="tooltip" id="tt" posparent="box1" posref="TL TL" sizeref="wh" w="0" h="0" tooltip="#tooltip" />
-	 </group>
+    <group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y">
+        <view type="bitmap" id="icone" posref="ML ML" texture="#icon" scale="true" w="32" global_color="false" />
+        <instance template="box_widget" id="box1" posref="ML ML" sizeref="w" w="-18" h="16" x="18" />
+        <view type="text_number" id="val1" posparent="box1" posref="MR MR" x="-3" y="0" color="135 243 28 255" shadow="true" fontsize="10" value="#value" global_color="false" positive="true" format="true" />
+        <ctrl type="tooltip" id="tt" posparent="box1" posref="TL TL" sizeref="wh" w="0" h="0" tooltip="#tooltip" />
+    </group>
 </template>
 
 <!-- //////////// TEMPLATE : webig_bot_chat_buy /////////// -->
 <template name="webig_bot_chat_buy" keep="true" title="uiBuy" tooltip="Dappers" icon_points="money_seve.tga" buyto_text="uiBuyFrom" buyto_name="?">
-	<group id="#id" type="container" openable="false" opened="true" movable="true" resizer="false" savable="false" header_color="UI:SAVE:WIN:COLORS:BOT" global_color="false" escapable="true" posref="BL TL" pop_min_w="550" pop_max_w="550" min_h="700" w="550" x="352" y="200" pop_min_h="700" pop_max_h="700" active="true" title="#title">
-		<group id="header_opened" child_resize_h="true" x="0" y="0" posref="TL TL">
-			<instance template="bc_border_text" id="intro" posref="TL TL"/>
+			<group id="#id" type="container" openable="false" opened="true" movable="true" resizer="false" savable="false" header_color="UI:SAVE:WIN:COLORS:BOT" global_color="false" escapable="true" posref="BL TL" pop_min_w="550" pop_max_w="550" min_h="700" w="550" x="352" y="200" pop_min_h="700" pop_max_h="700" active="true" title="#title">
+				<group id="header_opened" child_resize_h="true" x="0" y="0" posref="TL TL">
+					<instance template="bc_border_text" id="intro" posref="TL TL"/>
 			<group id="trade_content" sizeref="w" w="0" child_resize_h="true" child_resize_hmargin="30" posref="BL TL" posparent="intro" y="0">
 				<view type="text" id="buy_title" multi_line="1" posparent="buy_back" posref="TL BL" x="0" y="35" color="255 255 255 255" fontsize="10" shadow="true"  hardtext="#buyto_text" />
 				<view type="text" id="vendor_name" multi_line="1" posparent="buy_back" posref="TL BL" x="10" y="18" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" hardtext="#buyto_name" />
@@ -162,7 +162,7 @@
 </template>
 
 <!-- //////////// TEMPLATE : webig_bot_chat_buy_item /////////// -->
-	<template name="webig_bot_chat_buy_item" id="" money_tooltip="uiDappers" money_icon="money_seve.tga" onclick="" infosclick="" infos_text="uiTS_Items" ok_text="uiBuy" tooltip_ok="" keep="true" x="0" y="0">
+ <template name="webig_bot_chat_buy_item" id="" money_tooltip="uiDappers" money_icon="money_seve.tga" onclick="" infosclick="" infos_text="uiTS_Items" ok_text="uiBuy" tooltip_ok="" keep="true" x="0" y="0">
 	<group id="#id" type="container" posref="TL TL" min_w="240" w="408" x="#x" y="#y" pop_min_h="320" pop_max_h="420" min_h="320" max_h="420" active="true" openable="false" opened="true" movable="true" resizer="false" savable="false" title="uiBotChatMissions" escapable="true" header_color="UI:SAVE:WIN:COLORS:BOT" global_color="false">
 		<group id="header_opened" h="400" w="600" x="0" y="0" posref="TL TL">
 			<group id="top" posref="TL TL" sizeref="wh" x="2" y="-2">
@@ -211,24 +211,24 @@
 </template>
 
 <!-- //////////// TEMPLATE : webig_inv_item /////////// -->
-	<template name="webig_inv_item" line_maxw="40" ql0="" ql1="" ql2="" ql3="" q0="" q1="" q2="" q3="" q4="" q5="" q6="" q7="" o0="" o1="" o2="" o3="" o4="" o5="" o6="" o7="" render_layer1="1" render_layer2="2" render_layer3="3" render_layer4="4" w="43" keep="true" img1="token_basic.tga" img2="" img3="" img4="" tooltip="" quality="" quantity="" overlay="" text="" text2="" color="255 255 255 255" gc1="true" gc2="true" color2="255 255 255 255" slotbg="w_slot_item.tga" slotbg_gc="true" bg="blank2.tga" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" ctrl_color="0 0 0 0" col_over="255 255 255 50" col_pushed="255 255 255 0" params_over="" params_l="" params_r="" x="0" y="0">
-		<group id="#id" posref="MM MM" w="#w" h="43" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
-			<view type="bitmap" id="back" posref="ML ML" x="3" y="0" h="42" w="42" scale="true" render_layer="#render_layer1" texture="#slotbg" color="255 255 255 255" global_color="#slotbg_gc" />
-			<view type="bitmap" id="bg" posparent="back" posref="MM MM" x="" y="0" w="40" h="40" render_layer="#render_layer2" scale="false" texture="#bg"  global_color="false" />
-			<view type="bitmap" id="img1" posparent="back" posref="MM MM" x="0" y="0" w="40" h="40" scale="false" render_layer="#render_layer3" texture="#img1" global_color="false" />
-			<view type="bitmap" id="img2" posparent="back" posref="MM MM" render_layer="#render_layer3" x="0" y="0" texture="#img2" global_color="false" />
-			<view type="bitmap" id="img3" posparent="back" posref="MM MM"  render_layer="#render_layer4" x="0" y="0" texture="#img3" global_color="false" />
-			<view type="bitmap" id="img4" posparent="back" posref="MM MM"  render_layer="#render_layer4" x="0" y="0" texture="#img4" global_color="false" />
-			<instance id="over" template="typo_ryzom" posref="TL TL" render_layer="6" x="4" y="-2" t0="#o0" t1="#o1" t2="#o2" t3="#o3" t4="#o4" t5="#o5" t6="#o6" t7="#o7" />
+<template name="webig_inv_item" line_maxw="40" ql0="" ql1="" ql2="" ql3="" q0="" q1="" q2="" q3="" q4="" q5="" q6="" q7="" o0="" o1="" o2="" o3="" o4="" o5="" o6="" o7="" render_layer1="1" render_layer2="2" render_layer3="3" render_layer4="4" w="43" keep="true" img1="token_basic.tga" img2="" img3="" img4="" tooltip="" quality="" quantity="" overlay="" text="" text2="" color="255 255 255 255" gc1="true" gc2="true" color2="255 255 255 255" slotbg="w_slot_item.tga" slotbg_gc="true" bg="blank2.tga" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" ctrl_color="0 0 0 0" col_over="255 255 255 50" col_pushed="255 255 255 0" params_over="" params_l="" params_r="" x="0" y="0">
+	<group id="#id" posref="MM MM" w="#w" h="43" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+		<view type="bitmap" id="back" posref="ML ML" x="3" y="0" h="42" w="42" scale="true" render_layer="#render_layer1" texture="#slotbg" color="255 255 255 255" global_color="#slotbg_gc" />
+		<view type="bitmap" id="bg" posparent="back" posref="MM MM" x="" y="0" w="40" h="40" render_layer="#render_layer2" scale="false" texture="#bg"  global_color="false" />
+		<view type="bitmap" id="img1" posparent="back" posref="MM MM" x="0" y="0" w="40" h="40" scale="false" render_layer="#render_layer3" texture="#img1" global_color="false" />
+		<view type="bitmap" id="img2" posparent="back" posref="MM MM" render_layer="#render_layer3" x="0" y="0" texture="#img2" global_color="false" />
+		<view type="bitmap" id="img3" posparent="back" posref="MM MM"  render_layer="#render_layer4" x="0" y="0" texture="#img3" global_color="false" />
+		<view type="bitmap" id="img4" posparent="back" posref="MM MM"  render_layer="#render_layer4" x="0" y="0" texture="#img4" global_color="false" />
+		<instance id="over" template="typo_ryzom" posref="TL TL" render_layer="6" x="4" y="-2" t0="#o0" t1="#o1" t2="#o2" t3="#o3" t4="#o4" t5="#o5" t6="#o6" t7="#o7" />
 
-			<instance id="quantity" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="" x="5" y="1" t0="#q0" t1="#q1" t2="#q2" t3="#q3" t4="#q4" t5="#q5" t6="#q6" t7="#q7" />
-			<instance id="quality" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="back" x="24" y="1" t0="#ql0" t1="#ql1" t2="#ql2" t3="#ql3" gc="true"/>
-			<view type="bitmap" id="numbers_back" posparent="" posref="BL BL" render_layer="4" x="3" y="0" h="10" w="42" scale="true" texture="blank.tga" color="0 0 0 150" global_color="false" />
+		<instance id="quantity" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="" x="5" y="1" t0="#q0" t1="#q1" t2="#q2" t3="#q3" t4="#q4" t5="#q5" t6="#q6" t7="#q7" />
+		<instance id="quality" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="back" x="24" y="1" t0="#ql0" t1="#ql1" t2="#ql2" t3="#ql3" gc="true"/>
+		<view type="bitmap" id="numbers_back" posparent="" posref="BL BL" render_layer="4" x="3" y="0" h="10" w="42" scale="true" texture="blank.tga" color="0 0 0 150" global_color="false" />
 
-			<view type="text" id="text1" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="TR TL" posparent="back" x="3" y="1" fontsize="8" hardtext_format="#text" color="#color1" shadow="true" global_color="#gc1" />
-			<view type="text" id="text2" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="BL TL" posparent="text1" x="0" y="-2" fontsize="8" hardtext_format="#text2" color="#color2" shadow="true" global_color="#gc2" />
-			<ctrl type="button" id="tooltip" posparent="back" scale="true" posref="MM MM" x="0" y="0" h="40" w="40" tooltip="#tooltip" instant_help="false" tooltip_posref="TR BL" />
-			<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="MM MM"  posparent="" x="2" y="0" tx_normal="#tx_normal" tx_pushed="#tx_pushed" tx_over="#tx_over" scale="true" w="0" sizeref="w" h="45" color="#ctrl_color" col_over="#col_over" col_pushed="#col_pushed" render_layer="#render_layer2" onover="lua" params_over="#params_over" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
+		<view type="text" id="text1" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="TR TL" posparent="back" x="3" y="1" fontsize="8" hardtext_format="#text" color="#color1" shadow="true" global_color="#gc1" />
+		<view type="text" id="text2" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="BL TL" posparent="text1" x="0" y="-2" fontsize="8" hardtext_format="#text2" color="#color2" shadow="true" global_color="#gc2" />
+		<ctrl type="button" id="tooltip" posparent="back" scale="true" posref="MM MM" x="0" y="0" h="40" w="40" tooltip="#tooltip" instant_help="false" tooltip_posref="TR BL" />
+		<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="MM MM"  posparent="" x="2" y="0" tx_normal="#tx_normal" tx_pushed="#tx_pushed" tx_over="#tx_over" scale="true" w="0" sizeref="w" h="45" color="#ctrl_color" col_over="#col_over" col_pushed="#col_pushed" render_layer="#render_layer2" onover="lua" params_over="#params_over" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
 		</group>
 	</template>
 
@@ -275,11 +275,7 @@
 		<group id="content" posref="TL TL"  w="#w" h="#h" x="0" y="0">
 			<view type="bitmap" color="#bg_color" id="black" posref="MM MM" w="#w" h="#h" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" />
 			<ctrl type="tooltip" id="ttselect" tooltip="#tooltip" color="255 255 255 255" tooltip_parent="content" posref="TM TM" x="0" y="0" w="#w" h="#h" />
-			<scene3d id="scene" x="0" y="0" w="#w" h="#h" posref="TR TR" curcam="cam" curcs="env" render_layer="-2"
-				user_interaction="true" rotz_factor="#rotz"
-				roty_factor="#roty" roty_limit_min="#roty_min" roty_limit_max="#roty_max"
-				dist_factor="#dist" dist_limit_min="#dist_min" dist_limit_max="#dist_max"
-				ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="0 -5 0" >
+			<scene3d id="scene" x="0" y="0" w="#w" h="#h" posref="TR TR" curcam="cam" curcs="env" render_layer="-2" user_interaction="true" rotz_factor="#rotz" roty_factor="#roty" roty_limit_min="#roty_min" roty_limit_max="#roty_max" dist_factor="#dist" dist_limit_min="#dist_min" dist_limit_max="#dist_max" ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="0 -5 0" >
 				<light id="back" pos="-1.0 0.0 -1.0" color="255 128 0" near="2.5" far="4.0" />
 				<light id="lgt" pos="1.0 0.0 1.0" color="255 255 255" near="2.0" far="2.5" />
 				<camera id="cam" fov="80" pos="#cam_pos" target="0 0 0" roll="0" />
@@ -294,8 +290,7 @@
 	<template name="ark_empty_slot_view" posparent="parent" posref="TL TL" id="" cam_pos="0 24.5 -0.2" cam_tar="0.0 26.5 0.0" shape_pos="0 26 0.1" shape2_pos="0 25.5 0.1" shape_rot="0 0 0" shape2_rot="0 0 0"  keep="true" h="150" w="150" x="0" y="0" shape="empty.shape" shape2="" tooltip="" params_l="" params_over="">
 		<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="">
 			<ctrl type="button" id="selection" button_type="push_button" tx_normal="blank.tga" render_layer="-5" tx_pushed="blank.tga" tx_over="blank.tga" color="50 50 50 0" col_over="50 50 50 0" col_pushed="50 50 50 200"  global_color_normal="false" global_color="false" scale="true" posref="MM MM" x="0" y="0" w="#w" h="#h" tooltip="#tooltip" tooltip_posref="BM TM" onclick_l="lua" params_l="#params_l" onover="lua" params_over="#params_over"/>
-			<scene3d id="scene" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env"  user_interaction="false"
-								ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+			<scene3d id="scene" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env"  user_interaction="false" ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
 				<camera id="cam" fov="80" pos="#cam_pos" target="#cam_tar" roll="0" />
 				<light id="back" pos="0.0 28.2 1.6" color="96 64 32 255" near="2.5" far="4.0" />
 				<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
@@ -321,10 +316,10 @@
 
 	<template name="webig_browser_no_header" keep="true" home="" w="480" h="400" pop_max_w="2000" pop_max_h="2000" pop_min_w="64" pop_min_h="32" browse_redo="" browse_undo="" browse_refresh="" resizer="true" global_color="true" global_color_over="true">
 		<group id="browser" options="" type="container" w="#w" h="#h" x="0" y="0" right_button="true" pop_max_w="#pop_max_w" pop_max_h="#pop_max_h" pop_min_w="#pop_min_w" pop_min_h="#pop_min_h" posref="TL TL" title="" global_color="#global_color" global_color_over="#global_color_over" movable="true" lockable="true" active="true" openable="true" opened="true" resizer="#resizer" on_active="lua" on_active_params="WebBrowser:onActive()">
-		 <group id="html" type="webig_html" posref="TL TL" home="#home" title_prefix="" sizeref="wh" x="2" y="-2" w="0" h="0" background_color="#bg_color" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
-			<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true" />
-			<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
-		</group>
+			<group id="html" type="webig_html" posref="TL TL" home="#home" title_prefix="" sizeref="wh" x="2" y="-2" w="0" h="0" background_color="#bg_color" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
+				<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true" />
+				<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
+			</group>
 		</group>
 	</template>
 
@@ -335,6 +330,8 @@
 			<ctrl id="scroll_bar" active="#scrollbar" style="skin_scroll" />
 		</group>
 	</template>
+
+
 
 	<template name="ark_stage_webig_html" id="html" w="390" h="65" keep="true" home="" browse_redo="" browse_undo="" browse_refresh="" bg_color="0 0 0 255">
 		<group id="#id" type="html" posref="ML ML" url="//app.ryzom.com" title_prefix="" sizeref="h" x="4" y="0" w="#w" h="#h" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
@@ -362,15 +359,15 @@
 
 	<template name="ark_char3d_preview" id="ark_char3d_preview" keep="true" w="800" h="600" db="ARK_LESSON_CHAR3D" ig="" interact="true">
 		<group id="#id" w="#w" h="#h">
-		<scene3d id="scene" w="#w" h="#h" posref="TL TL" x="1" curcam="cam" user_interaction="#interact" ambient="128 96 64" sun_ambient="70 70 70" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" rotz_factor="0.017" roty_factor="0.00" dist_factor="0.2" camz="10" dist_limit_min="20.0" dist_limit_max="20.0">
-			<character3d id="char" dblink="UI:TEMP:#db" pos="0.0 26.5 1" rot="0.0 0.0 0.0" />
-			<camera id="cam" fov="30" pos="0.0 24.0 1.9" target="0.0 26.5 1.9" roll="0" />
-			<light id="back" pos="0.0 28.5 2.4" color="255 128 0" near="2.5" far="4.0" />
-			<light id="lgt_m" pos="1.36 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
-			<light id="lgt_f" pos="-1.36 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
-			<shape id="shadow" name="shadow.shape" pos="0 26.5 1" rot="0.0 0.0 0.0" />
-			<ig id="env" name="#ig" pos="0 0 0" />
-		</scene3d>
+			<scene3d id="scene" w="#w" h="#h" posref="TL TL" x="1" curcam="cam" user_interaction="#interact" ambient="128 96 64" sun_ambient="70 70 70" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" rotz_factor="0.017" roty_factor="0.00" dist_factor="0.2" camz="10" dist_limit_min="20.0" dist_limit_max="20.0">
+				<character3d id="char" dblink="UI:TEMP:#db" pos="0.0 26.5 1" rot="0.0 0.0 0.0" />
+				<camera id="cam" fov="30" pos="0.0 24.0 1.9" target="0.0 26.5 1.9" roll="0" />
+				<light id="back" pos="0.0 28.5 2.4" color="255 128 0" near="2.5" far="4.0" />
+				<light id="lgt_m" pos="1.36 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
+				<light id="lgt_f" pos="-1.36 25.3 2.48" color="255 255 255" near="2.0" far="2.5" />
+				<shape id="shadow" name="shadow.shape" pos="0 26.5 1" rot="0.0 0.0 0.0" />
+				<ig id="env" name="#ig" pos="0 0 0" />
+			</scene3d>
 		</group>
 	</template>
 

@@ -5,10 +5,11 @@
  * @package    Smarty
  * @subpackage PluginsModifierCompiler
  */
+
 /**
  * Smarty upper modifier plugin
- * Type:     modifier
- * Name:     lower
+ * Type:     modifier<br>
+ * Name:     lower<br>
  * Purpose:  convert string to uppercase
  *
  * @link   http://smarty.php.net/manual/en/language.modifier.upper.php lower (Smarty online manual)
@@ -21,8 +22,8 @@
 function smarty_modifiercompiler_upper($params)
 {
     if (Smarty::$_MBSTRING) {
-        return 'mb_strtoupper(' . $params[ 0 ] . ', \'' . addslashes(Smarty::$_CHARSET) . '\')';
+        return 'mb_strtoupper(' . $params[0] . ', \'' . addslashes(Smarty::$_CHARSET) . '\')';
     }
     // no MBString fallback
-    return 'strtoupper(' . $params[ 0 ] . ')';
+    return 'strtoupper(' . $params[0] . ')';
 }

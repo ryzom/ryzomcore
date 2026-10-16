@@ -391,14 +391,14 @@ namespace NLGUI
 	class CReflectableRefPtrTarget : public CReflectable, public NLMISC::CRefCount
 	{
 	public:
-		virtual ~CReflectableRefPtrTarget();
+		virtual ~CReflectableRefPtrTarget() NL_OVERRIDE;
 	};
 
 
 	class CReflectableLuaRef
 	{
 	public:
-		CReflectableLuaRef(CReflectableRefPtrTarget *ptr = NULL) : Ptr(ptr), _ClassInfo(NULL) {}
+		CReflectableLuaRef(CReflectableRefPtrTarget *ptr = nullptr) : Ptr(ptr), _ClassInfo(nullptr) {}
 		NLMISC::CRefPtr<CReflectableRefPtrTarget> Ptr;
 		const CClassInfo						  &getClassInfo() const;
 		// IMPORTANT : luaStringPtr should have been obtained from lua, see remark in CClassInfo

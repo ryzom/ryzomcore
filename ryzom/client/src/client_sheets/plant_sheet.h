@@ -103,9 +103,9 @@ public:
 		/// ctor
 		CPlantSheet();
 		/// Build the sheet from an external script.
-		virtual void build(const NLGEORGES::UFormElm &item);
+		virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 		/// Serialize plant sheet into binary data file.
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	//@}
 
 	// Get the shape name of this plant

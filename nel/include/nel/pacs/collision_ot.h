@@ -49,8 +49,8 @@ public:
 	/// Clear the element
 	void			clear ()
 	{
-		_Next=NULL;
-		_Previous=NULL;
+		_Next = nullptr;
+		_Previous = nullptr;
 	}
 
 	/// Link in the ot
@@ -73,8 +73,8 @@ public:
 			_Previous->_Next=_Next;
 		if (_Next)
 			_Next->_Previous=_Previous;
-		_Next=NULL;
-		_Previous=NULL;
+		_Next = nullptr;
+		_Previous = nullptr;
 	}
 
 	/// Return true if it an info collision else false;
@@ -236,7 +236,7 @@ public:
 	}
 
 	// Link in the primitive
-	void				primitiveLink (CMovePrimitive *primitive, CCollisionOTInfo *other)
+	void				primitiveLink (CMovePrimitive *primitive, CCollisionOTInfo *other) NL_OVERRIDE
 	{
 		// First primitive ?
 		if (primitive==_FirstPrimitive)
@@ -258,7 +258,7 @@ public:
 	}
 
 	// Link in the primitive
-	CCollisionOTInfo	*getNext (CMovePrimitive *primitive) const
+	CCollisionOTInfo	*getNext (CMovePrimitive *primitive) const NL_OVERRIDE
 	{
 		// First primitive ?
 		if (primitive==_FirstPrimitive)
@@ -280,22 +280,22 @@ public:
 	}
 
 	// Return false for dynamic collision, true for static collision
-	bool				isCollisionAgainstStatic () const
+	bool				isCollisionAgainstStatic () const NL_OVERRIDE
 	{
 		return false;
 	}
 
 	// Return collision time
-	double				getCollisionTime () const
+	double				getCollisionTime () const NL_OVERRIDE
 	{
 		return _Desc.ContactTime;
 	}
 
 	// Remove the collision from the primitives
-	void				removeFromPrimitives ();
+	void				removeFromPrimitives () NL_OVERRIDE;
 
 	// Get second primitive
-	CMovePrimitive		*getOtherPrimitive (CMovePrimitive *primitive) const
+	CMovePrimitive		*getOtherPrimitive (CMovePrimitive *primitive) const NL_OVERRIDE
 	{
 		if (_FirstPrimitive==primitive)
 			return _SecondPrimitive;
@@ -392,37 +392,37 @@ public:
 	}
 
 	// Link in the primitive
-	void				primitiveLink (CMovePrimitive * /* primitive */, CCollisionOTInfo *other)
+	void				primitiveLink (CMovePrimitive * /* primitive */, CCollisionOTInfo *other) NL_OVERRIDE
 	{
 		// Link
 		_Next=other;
 	}
 
 	// Link in the primitive
-	CCollisionOTInfo	*getNext (CMovePrimitive * /* primitive */) const
+	CCollisionOTInfo	*getNext (CMovePrimitive * /* primitive */) const NL_OVERRIDE
 	{
 		// return next
 		return _Next;
 	}
 
 	// Return false for dynamic collision, true for static collision
-	bool				isCollisionAgainstStatic () const
+	bool				isCollisionAgainstStatic () const NL_OVERRIDE
 	{
 		return true;
 	}
 
 	// Return collision time
-	double				getCollisionTime () const
+	double				getCollisionTime () const NL_OVERRIDE
 	{
 		return _StaticDesc.ContactTime;
 	}
 
 	// Remove the collision from the primitives
-	void				removeFromPrimitives ();
+	void				removeFromPrimitives () NL_OVERRIDE;
 
-	CMovePrimitive		*getOtherPrimitive (CMovePrimitive * /* primitive */) const
+	CMovePrimitive		*getOtherPrimitive (CMovePrimitive * /* primitive */) const NL_OVERRIDE
 	{
-		return NULL;
+		return nullptr;
 	}
 private:
 	// The first primitive

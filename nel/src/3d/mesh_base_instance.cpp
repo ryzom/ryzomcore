@@ -113,7 +113,7 @@ ITrack*		CMeshBaseInstance::getDefaultTrack (uint valueId)
 		// Problem, new values ?
 		nlstop;
 	};
-	return NULL;
+	return nullptr;
 }
 
 

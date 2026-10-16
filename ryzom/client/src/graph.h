@@ -72,7 +72,7 @@ public:
 	/// release material
 	virtual ~CGraph()
 	{
-		if (_Graphs != NULL)
+		if (_Graphs != nullptr)
 		{
 			for (uint i = 0; i < _Graphs->size(); i++)
 			{
@@ -96,7 +96,7 @@ public:
 		: Name(name), X(x), Y(y), Width(width), Height(height), BackColor(backColor), MaxValue(maxValue),
 		  Peak(0.0f), LineMode(lineMode), PrevY(y), Page(page), Quantum(quantum), CurrentQuantumStart(ryzomGetLocalTime ())
 	{
-		if (_Graphs == NULL)
+		if (_Graphs == nullptr)
 		{
 			_Graphs = new std::vector<CGraph*>;
 		}

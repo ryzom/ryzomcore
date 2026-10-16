@@ -79,21 +79,21 @@ namespace SAVES
 	{
 	public:
 		// virtual dtor
-		virtual ~ISavesFileListCallback() {}
+		virtual ~ISavesFileListCallback() NL_OVERRIDE {}
 
 		// callback when the file list is first received - this happens only once at the start
-		virtual void cbInit(const CFileDescriptionContainer& fdc) =0;
+		virtual void cbInit(const CFileDescriptionContainer& fdc) NL_OVERRIDE =0;
 
 		// callback whenever a file change list is received
 		virtual void cbFileListChanged(	const CFileDescriptionContainer& newFiles,
 										const CFileDescriptionContainer& modifiedFiles,
 										const NLMISC::CVectorSString&	 deletedFile,
 										const CFileDescriptionContainer& oldFileList,
-										const CFileDescriptionContainer& newFileList) =0;
+										const CFileDescriptionContainer& newFileList) NL_OVERRIDE =0;
 
 		// empty implementations for unwanted callbacks
-		virtual void cbFileReceived(uint32 requestId,const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody) {}
-		virtual void cbGenericReply(uint32 requestId,bool successFlag,const NLMISC::CSString& explanation) {}
+		virtual void cbFileReceived(uint32 requestId,const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody) NL_OVERRIDE {}
+		virtual void cbGenericReply(uint32 requestId,bool successFlag,const NLMISC::CSString& explanation) NL_OVERRIDE {}
 	};
 
 
@@ -105,21 +105,21 @@ namespace SAVES
 	{
 	public:
 		// virtual dtor
-		virtual ~ISavesFileReceiveCallback() {}
+		virtual ~ISavesFileReceiveCallback() NL_OVERRIDE {}
 
 		// empty implementations for unwanted callbacks
-		void cbInit(const CFileDescriptionContainer& fdc) {}
+		void cbInit(const CFileDescriptionContainer& fdc) NL_OVERRIDE {}
 		void cbFileListChanged(	const CFileDescriptionContainer& newFiles,
 								const CFileDescriptionContainer& modifiedFiles,
 								const NLMISC::CVectorSString&	 deletedFile,
 								const CFileDescriptionContainer& oldFileList,
-								const CFileDescriptionContainer& newFileList) {}
+								const CFileDescriptionContainer& newFileList) NL_OVERRIDE {}
 
 		// callback when the body of a file is received
-		virtual void cbFileReceived(uint32 requestId,const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody) =0;
+		virtual void cbFileReceived(uint32 requestId,const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody) NL_OVERRIDE =0;
 
 		// callback that receives generic replies for diferent messages that are sent to SAVES module
-		virtual void cbGenericReply(uint32 requestId,bool successFlag,const NLMISC::CSString& explanation) =0;
+		virtual void cbGenericReply(uint32 requestId,bool successFlag,const NLMISC::CSString& explanation) NL_OVERRIDE =0;
 	};
 
 

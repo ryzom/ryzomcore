@@ -49,7 +49,7 @@ IStep::IStep(CMissionData &md, NLLIGO::IPrimitive *prim)
 	EndOfBranch(false),
 	JumpPoint(false)
 {
-	if (prim == NULL)
+	if (prim == nullptr)
 		return;
 
 	prim->getPropertyByName("class", _StepType);
@@ -140,7 +140,7 @@ void IStep::fillStepJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints)
 	fillJump(md, jumpPoints);
 
 	for (i = 0; i < _SubSteps.size(); ++i)
-		if (_SubSteps[i] != NULL)
+		if (_SubSteps[i] != nullptr)
 			_SubSteps[i]->fillStepJump(md, jumpPoints);
 }
 
@@ -263,7 +263,7 @@ public:
 	{
 	}
 
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_HideObj = md.getProperty(prim, _Prefix + "hide_obj", true, false) == "true";
 		_OverloadObj = md.getPropertyArray(prim, _Prefix + "overload_objective", false, false);
@@ -278,7 +278,7 @@ public:
 	
 	virtual bool isAction() { return true; }
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		if (_HideObj)
@@ -295,7 +295,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 		ret += _OverloadPhrase.genPhrase();
@@ -322,7 +322,7 @@ class CStepDynChatTalkTo : public CStepObjective
 	TCompilerVarName	_BotName;
 	CPhrase		_Phrase;
 
-	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef) NL_OVERRIDE
 	{
 		numEntry = 0;
 		predef.resize(1);
@@ -339,7 +339,7 @@ public:
 	{
 	}
 
-	void init(CMissionData &md, IPrimitive *prim)
+	void init(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		_BotName.init("npc", STRING_MANAGER::bot, md, prim, "npc_name");
 //		_BotNameVar = md.getProperty(prim, "npc_name", false, false);
@@ -370,7 +370,7 @@ public:
 		CStepObjective::init(md, prim);
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 		ret = CStepObjective::genCode(md);
@@ -384,7 +384,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 		ret = CStepObjective::genPhrase();
@@ -403,12 +403,12 @@ public:
 		_StepName = md.getProperty(prim, "target", true, false);
 	}
 
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		jumpPoints.insert(TJumpInfo(_StepName, "", false));
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -417,7 +417,7 @@ public:
 		return ret;
 	}
 
-	bool isAJump()
+	bool isAJump() NL_OVERRIDE
 	{
 		return true;
 	}
@@ -435,7 +435,7 @@ public:
 	{
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -444,7 +444,7 @@ public:
 		return ret;
 	}
 
-	bool isEnd() { return true; }
+	bool isEnd() NL_OVERRIDE { return true; }
 
 };
 REGISTER_STEP_INDIRECT(CStepEnd, "end");
@@ -491,7 +491,7 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -512,7 +512,7 @@ public:
 		return ret;
 	}
 
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		IStep::fillJump(md, jumpPoints);
 		if (!_JumpTo.empty())
@@ -579,7 +579,7 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -611,7 +611,7 @@ public:
 		return ret;
 	}
 
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		IStep::fillJump(md, jumpPoints);
 		if (!_JumpTo.empty())
@@ -710,14 +710,14 @@ REGISTER_STEP_INDIRECT(CStepPlayerReconnect, "step_player_reconnect");
 static std::string *getJumpTarget(IPrimitive *child)
 {
 	if(!child)
-		return NULL;
+		return nullptr;
 
 	// default: jump to the node
-	string *s= NULL;
+	string *s = nullptr;
 	child->getPropertyByName("name", s);
 
 	// if the node is a jump itself
-	string *className= NULL;
+	string *className = nullptr;
 	child->getPropertyByName("class", className);
 	if (className && *className == "jump_to")
 	{
@@ -743,7 +743,7 @@ public:
 		temp = md.getPropertyArray(prim, "talk_to_menu", false, false);
 //		_TalkToMenu.initPhrase(md, prim, temp);
 
-		_TalkToObjective = NULL;
+		_TalkToObjective = nullptr;
 		CUniquePtr<CStepDynChatTalkTo> talkToObjective; // next calls could throw exceptions, so take care...
 		if (!temp.empty())
 		{
@@ -777,12 +777,12 @@ public:
 		}
 		_TalkToObjective = talkToObjective.release(); // commit result
 	}
-	~CStepDynChat()
+	~CStepDynChat() NL_OVERRIDE
 	{
 		delete _TalkToObjective;
 	}
 	
-	TPrimitiveSet	getSubBranchs() 
+	TPrimitiveSet	getSubBranchs() NL_OVERRIDE 
 	{
 		TPrimitiveSet vStepsToReturn;
 		for (uint i = 0; i < _SubBranchs.size(); ++i)
@@ -798,7 +798,7 @@ public:
 		return vStepsToReturn;
 	}
 	
-	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints)
+	void fillJump(CMissionData &md, set<TJumpInfo> &jumpPoints) NL_OVERRIDE
 	{
 		for (uint i=0; i<_SubBranchs.size(); ++i)
 		{
@@ -817,13 +817,13 @@ public:
 		}
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
 		// if there's a talk_to menu, add it
 //		if (!_TalkToMenu.isEmpty())
-		if (_TalkToObjective != NULL)
+		if (_TalkToObjective != nullptr)
 		{			
 			ret += _TalkToObjective->genCode(md);
 //			ret += "talk_to : "+_BotName;	
@@ -850,12 +850,12 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret; /* = CStepObjective::genPhrase();*/
 
 //		if (!_TalkToMenu.isEmpty())
-		if (_TalkToObjective != NULL)
+		if (_TalkToObjective != nullptr)
 		{			
 			ret += _TalkToObjective->genPhrase();
 //			ret += _TalkToMenu.genPhrase();
@@ -934,7 +934,7 @@ public:
 		_PhraseYes.initPhrase(md, prim, phraseYes);
 	}
 	
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -960,7 +960,7 @@ public:
 		return ret;
 	}
 
-	string genPhrase()
+	string genPhrase() NL_OVERRIDE
 	{
 		string ret;
 //		ret = CStepObjective::genPhrase();
@@ -992,9 +992,9 @@ CStepIf::CStepIf(CMissionData &md, IPrimitive *prim) : IStep(md, prim)
 	IPrimitive *ok = const_cast<IPrimitive *>(prim->getPrimitive("result_yes"));
 	//prim->getChild(ok, 1);
 	
-	if (notOk == NULL)
+	if (notOk == nullptr)
 		throw EParseException(prim, "Can't find 'not ok' step branch");
-	if (ok == NULL)
+	if (ok == nullptr)
 		throw EParseException(prim, "Can't find 'ok' step branch");
 
 	string name;
@@ -1346,7 +1346,7 @@ public:
 	}
 
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 
@@ -1378,7 +1378,7 @@ public:
 	{
 	}
 
-	string genCode(CMissionData &md)
+	string genCode(CMissionData &md) NL_OVERRIDE
 	{
 		string ret;
 

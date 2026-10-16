@@ -94,8 +94,8 @@ public:
 	{
 	public:
 		CPosValidatorDefault()		{}
-		virtual	~CPosValidatorDefault()		{}
-		virtual	bool	check(const RYAI_MAP_CRUNCH::CWorldPosition& wpos) const
+		virtual	~CPosValidatorDefault() NL_OVERRIDE		{}
+		virtual	bool	check(const RYAI_MAP_CRUNCH::CWorldPosition& wpos) const NL_OVERRIDE
 		{	return	true;	}
 	protected:		
 	private:

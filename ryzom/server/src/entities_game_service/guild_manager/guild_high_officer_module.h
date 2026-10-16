@@ -34,21 +34,21 @@ public:
 	
 	CGuildHighOfficerModule( CGuildCharProxy & proxy, CGuildMember* guildMember)
 		:CGuildOfficerModule(proxy,guildMember){}	
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const;
-	virtual bool canInvite()const;
-	virtual void buyGuildOption( const CStaticItem * form );
-	virtual bool canTakeGuildItem()const;
-	virtual bool canBuyOutpostBuilding() const;
-	virtual void buyOutpostBuilding(NLMISC::CSheetId sid);
-	virtual bool isOutpostAdmin() const;
-	virtual COutpost::TChallengeOutpostErrors challengeOutpost(NLMISC::CSheetId outpostSheet, bool simulate);
-	virtual void giveupOutpost(NLMISC::CSheetId outpostSheet);
-	virtual void outpostSetSquad(NLMISC::CSheetId outpostSheet, uint32 squadSlot, uint32 shopSquadIndex);
-	virtual void outpostSetSquadSpawnZone(NLMISC::CSheetId outpostSheet, uint32 squadSlot, uint32 spawnZoneIndex);
-	virtual void outpostInsertSquad(NLMISC::CSheetId outpostSheet, uint32 squadSlot);
-	virtual void outpostRemoveSquad(NLMISC::CSheetId outpostSheet, uint32 squadSlot);
-	virtual void outpostSetExpenseLimit(NLMISC::CSheetId outpostSheet, uint32 expenseLimit);
-	virtual void outpostSetDefensePeriod(NLMISC::CSheetId outpostSheet, uint8 hour);
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const NL_OVERRIDE;
+	virtual bool canInvite()const NL_OVERRIDE;
+	virtual void buyGuildOption( const CStaticItem * form ) NL_OVERRIDE;
+	virtual bool canTakeGuildItem()const NL_OVERRIDE;
+	virtual bool canBuyOutpostBuilding() const NL_OVERRIDE;
+	virtual void buyOutpostBuilding(NLMISC::CSheetId sid) NL_OVERRIDE;
+	virtual bool isOutpostAdmin() const NL_OVERRIDE;
+	virtual COutpost::TChallengeOutpostErrors challengeOutpost(NLMISC::CSheetId outpostSheet, bool simulate) NL_OVERRIDE;
+	virtual void giveupOutpost(NLMISC::CSheetId outpostSheet) NL_OVERRIDE;
+	virtual void outpostSetSquad(NLMISC::CSheetId outpostSheet, uint32 squadSlot, uint32 shopSquadIndex) NL_OVERRIDE;
+	virtual void outpostSetSquadSpawnZone(NLMISC::CSheetId outpostSheet, uint32 squadSlot, uint32 spawnZoneIndex) NL_OVERRIDE;
+	virtual void outpostInsertSquad(NLMISC::CSheetId outpostSheet, uint32 squadSlot) NL_OVERRIDE;
+	virtual void outpostRemoveSquad(NLMISC::CSheetId outpostSheet, uint32 squadSlot) NL_OVERRIDE;
+	virtual void outpostSetExpenseLimit(NLMISC::CSheetId outpostSheet, uint32 expenseLimit) NL_OVERRIDE;
+	virtual void outpostSetDefensePeriod(NLMISC::CSheetId outpostSheet, uint8 hour) NL_OVERRIDE;
 };
 
 #endif // RY_GUILD_HIGH_OFFICER_MODULE_H

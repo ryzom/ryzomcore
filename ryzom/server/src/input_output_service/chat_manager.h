@@ -191,7 +191,7 @@ public :
 	/**
 	 * Transmit a chat message to the receiver
 	 */
-	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr);
+	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr   );
 	/**
 	 * Transmit a chat message to the receiver
 	 * \param sender is the id of the speaking char

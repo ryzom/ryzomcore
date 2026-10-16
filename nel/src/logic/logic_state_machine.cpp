@@ -36,14 +36,14 @@ bool testNameWithFilter( sint8 filter, string motif, string varName );
 void xmlCheckNodeName (xmlNodePtr &node, const char *nodeName)
 {
 	// Check node name
-	if ( node == NULL || ((const char*)node->name == NULL) || (strcmp ((const char*)node->name, nodeName) != 0) )
+	if ( node == nullptr || ((const char*)node->name == nullptr) || (strcmp ((const char*)node->name, nodeName) != 0) )
 	{
 
 		// try to find a child
-		if (node != NULL)
+		if (node != nullptr)
 		{
 			node = CIXml::getFirstChildNode (node, nodeName);
-			if ( node != NULL && ((const char*)node->name != NULL) && (strcmp ((const char*)node->name, nodeName) == 0) )
+			if ( node != nullptr && ((const char*)node->name != nullptr) && (strcmp ((const char*)node->name, nodeName) == 0) )
 			{
 				nlinfo ("check node %s ok in the child", nodeName);
 				return;
@@ -536,7 +536,7 @@ bool testNameWithFilter( sint8 filter, string motif, string varName )
 void CLogicStateMachine::write (xmlDocPtr doc) const
 {
 	// Create the first node
-	xmlNodePtr node = xmlNewDocNode (doc, NULL, (const xmlChar*)"STATE_MACHINE", NULL);
+	xmlNodePtr node = xmlNewDocNode (doc, nullptr, (const xmlChar*)"STATE_MACHINE", nullptr);
 	xmlDocSetRootElement (doc, node);
 	xmlSetProp (node, (const xmlChar*)"Name", (const xmlChar*)_Name.c_str());
 	xmlSetProp (node, (const xmlChar*)"CurrentState", (const xmlChar*)_CurrentState.c_str());

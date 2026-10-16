@@ -20,7 +20,7 @@
 
 namespace EGSPD
 {
-
+	
 /* -----------------------------------------
 * Static Implementation of CGuildMemberPD
 * ----------------------------------------- */
@@ -37,7 +37,7 @@ void							CGuildMemberPD::setGrade(CGuildGrade::TGuildGrade __v, bool forceWrit
 	nlassert(__v<CGuildGrade::___TGuildGrade_useSize);
 	if (_Grade != __v)
 	{
-		// callback the manager
+		// callback the manager 
 		IGuildManager::getInstance().guildMemberChanged(this);
 	}
 	if ((_Grade != __v) || forceWrite)
@@ -259,5 +259,5 @@ void							CGuildMemberPD::pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS
 }
 // End of static implementation of CGuildMemberPD
 
-
+	
 } // End of EGSPD

@@ -1538,10 +1538,9 @@ bool CMagicPhrase::launch()
 	NLMISC::CBitSet resists(nbTargets);
 	resists.setAll();
 	CBitSet affectedTargets(nbTargets);
-	
 	// prefill target info
 	std::vector<sint16> targetDeltaHp(nbTargets, 0);
-
+	
 	for ( uint i = 0; i < _Actions.size(); i++ )
 	{
 		_Actions[i]->launch(this,deltaLvl,skillValue, successFactor,behav,_ApplyParams.TargetPowerFactor,affectedTargets, targetDeltaHp, invulnerabilityOffensive,invulnerabilityAll,isMad,resists,report);
@@ -1552,6 +1551,7 @@ bool CMagicPhrase::launch()
 	CMirrorPropValueList<uint32>	targetList(TheDataset, _ActorRowId, DSPropertyTARGET_LIST);
 	targetList.clear();
 	
+
 	if ( _Area )
 	{
 		const sint size = (sint)_Targets.size();		
@@ -1578,11 +1578,11 @@ bool CMagicPhrase::launch()
 			PHRASE_UTILITIES::updateMirrorTargetList( targetList, _Targets[0].getId(), (float)PHRASE_UTILITIES::getDistance( _Targets[0].getId(),_ActorRowId),resists[0], targetDeltaHp[0]);
 		//targetList.testList( 1*2 ); // wrong now because of the if
 	}
-
+	
 	// update caster behaviour (must be done after target list)
 	if ( behav.Behaviour != MBEHAV::UNKNOWN_BEHAVIOUR )
 		PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
-
+	
 	// add post cast latency, only for non instant cast
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 	if (_DivineInterventionOccured||_ShootAgainOccured?_BaseCastingTime:_CastingTime)

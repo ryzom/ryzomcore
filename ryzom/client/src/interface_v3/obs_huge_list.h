@@ -3,7 +3,6 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -94,7 +93,7 @@ public:
 	};
 
 	CHugeListObs(ListType category = ListTypeCount);
-	~CHugeListObs();
+	~CHugeListObs() NL_OVERRIDE;
 
 	// Init the category. This must be called (no more that once) before any other method (or the ctor must provide the category)
 	void setListType(ListType listType);
@@ -190,7 +189,7 @@ private:
 		{}
 	};
 	//
-	virtual void update(NLMISC::ICDBNode *node);
+	virtual void update(NLMISC::ICDBNode *node) NL_OVERRIDE;
 
 	void updateUIItemPage(uint index);
 

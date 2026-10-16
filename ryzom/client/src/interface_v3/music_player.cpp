@@ -64,24 +64,24 @@ private:
 	std::vector<std::string> _Files;
 
 public:
-	CMusicPlayerWorker(): _Running(false), _Thread(NULL)
+	CMusicPlayerWorker(): _Running(false), _Thread(nullptr)
 	{
 	}
 
-	~CMusicPlayerWorker()
+	~CMusicPlayerWorker() NL_OVERRIDE
 	{
 		_Running = false;
 		if (_Thread)
 		{
 			_Thread->terminate();
 			delete _Thread;
-			_Thread = NULL;
+			_Thread = nullptr;
 		}
 	}
 
 	bool isRunning() const { return _Running; }
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		_Running = true;
 
@@ -128,7 +128,7 @@ public:
 		{
 			_Thread->wait();
 			delete _Thread;
-			_Thread = NULL;
+			_Thread = nullptr;
 		}
 	}
 };
@@ -697,7 +697,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 class CMusicPlayerPlaySongs: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		if(!SoundMngr)
 		{

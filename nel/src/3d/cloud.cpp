@@ -45,7 +45,7 @@ CCloud::CCloud (CCloudScape *pCloudScape)
 	_WaitState = 0;
 	_BillSize = 0;
 	_OldBillSize = 0;
-	_UStart = _VStart = _WStart = NULL;
+	_UStart = _VStart = _WStart = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ CCloud::~CCloud()
 // ------------------------------------------------------------------------------------------------
 void CCloud::init (uint32 nVoxelW, uint32 nVoxelH, uint32 nVoxelD, float rBaseFreq, uint32 nNbOctave)
 {
-	if (_UStart != NULL)
+	if (_UStart != nullptr)
 		return;
 
 	_BaseFreq = rBaseFreq;
@@ -89,8 +89,8 @@ void CCloud::init (uint32 nVoxelW, uint32 nVoxelH, uint32 nVoxelD, float rBaseFr
 	else
 		_NbH = 1 << (vdpo2 / 2);
 
-	_MemBill = NULL;
-	_MemOldBill = NULL;
+	_MemBill = nullptr;
+	_MemOldBill = nullptr;
 
 	float scale = 20.0f + 10.0f*((float)rand())/RAND_MAX;;
 	_Size.x = scale * _Width/_Depth;
@@ -183,7 +183,7 @@ void CCloud::generate (CNoise3d &noise)
 	_Driver->renderRawQuads (_CloudTexClamp->ToClamp, 0, 1);
 
 	// Restore render target
-	_Driver->setRenderTarget (NULL);
+	_Driver->setRenderTarget (nullptr);
 
 	_CloudTexTmp->Tex->setFilterMode (ITexture::Nearest, ITexture::NearestMipMapOff);
 }
@@ -304,7 +304,7 @@ void CCloud::light ()
 			prevj = j;
 		}
 	}
-	_Driver->setRenderTarget (NULL);
+	_Driver->setRenderTarget (nullptr);
 
 	_CloudTexTmp->Tex->setFilterMode (ITexture::Linear, ITexture::LinearMipMapOff);
 }
@@ -360,7 +360,7 @@ void CCloud::reset (NL3D::CCamera *pViewer)
 	_Driver->setRenderTarget (_TexOldBill, 0, 0, 4, 4);
 	setMode2D ();
 	_Driver->renderRawQuads (_CloudScape->_MatClear, 0, 1);
-	_Driver->setRenderTarget (NULL);
+	_Driver->setRenderTarget (nullptr);
 
 //	CMatrix CamMat = pViewer->getMatrix();
 //	CVector Viewer = CamMat.getPos();
@@ -429,8 +429,8 @@ void CCloud::disp ()
 	qc.V1 = CVector(w/800.0f,		0.0f/600.0f,	0.0f);
 	qc.V2 = CVector(w/800.0f,		h/600.0f,		0.0f);
 	qc.V3 = CVector(0.0f/800.0f,	h/600.0f,		0.0f);
-	static CMaterial *dispMat = NULL; // STATIC GPU RESOURCE: Blocks multiple driver instances
-	if (dispMat == NULL)
+	static CMaterial *dispMat = nullptr; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	if (dispMat == nullptr)
 	{
 		dispMat = new CMaterial;
 		dispMat->initUnlit();
@@ -477,7 +477,7 @@ void CCloud::dispXYZ (CMaterial *pMat)
 	CUV *pUV;
 	_Driver->activeVertexBuffer (rVB);
 
-	if (pMat == NULL)
+	if (pMat == nullptr)
 		return;
 
 	for (j = 0; j < _NbH; ++j)
@@ -690,7 +690,7 @@ void CCloud::genBill (CCamera *pCam, uint32 nBillSize)
 	dispXYZ (&_CloudTexTmp->ToBill);
 
 	// Restore render target
-	_Driver->setRenderTarget (NULL);
+	_Driver->setRenderTarget (nullptr);
 
 	// This is the end of render to texture like so reset all stuff
 	_Driver->setupViewport (viewportOLD);
@@ -721,7 +721,7 @@ void CCloud::dispBill (CCamera *pCam)
 	CVector I, J, K;
 	float Left, Right, Top, Bottom, Near, Far;
 
-	if ((_MemBill == NULL) || (_MemOldBill == NULL))
+	if ((_MemBill == nullptr) || (_MemOldBill == nullptr))
 		return;
 
 	if (_WaitState > 0)
@@ -814,8 +814,8 @@ void CCloud::dispBill (CCamera *pCam)
 	// Debug
 	if (_CloudScape->isDebugQuadEnabled())
 	{
-		static CMaterial *mTmp = NULL; // STATIC GPU RESOURCE: Blocks multiple driver instances
-		if (mTmp == NULL)
+		static CMaterial *mTmp = nullptr; // STATIC GPU RESOURCE: Blocks multiple driver instances
+		if (mTmp == nullptr)
 		{
 			mTmp = new CMaterial();
 			mTmp->setBlend(false);

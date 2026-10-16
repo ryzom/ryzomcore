@@ -43,7 +43,7 @@ void updateBufferizedPackets ();
 void setSimlagValues (sint32 lag, sint8 packetLoss, sint8 packetDuplication, sint8 packetDisordering);
 
 // Send a message using UDP connection with sim lag
-void sendUDP (NLNET::CUdpSock *client, const uint8 *packet, uint32 packetSize, const NLNET::CInetAddress *addr = NULL);
+void sendUDP (NLNET::CUdpSock *client, const uint8 *packet, uint32 packetSize, const NLNET::CInetAddress *addr = nullptr);
 
 
 #endif // NL_SIMLAG_H

@@ -87,34 +87,56 @@ CVertexBuffer    * const CPSQuad::_VbTab[] =
 {
   // tex1 only
   &_VBPos, &_VBPosCol, &_VBPosTex1,  &_VBPosTex1Col,
-  NULL,   NULL,		 &_VBPosTex1Anim, &_VBPosTex1AnimCol,
+	nullptr,
+	nullptr,		 &_VBPosTex1Anim, &_VBPosTex1AnimCol,
   // tex1 & tex2
-  NULL, NULL, &_VBPosTex1Tex2, &_VBPosTex1ColTex2,
-  NULL,   NULL,		 &_VBPosTex1AnimTex2, &_VBPosTex1AnimColTex2,
+	nullptr,
+	nullptr, &_VBPosTex1Tex2, &_VBPosTex1ColTex2,
+	nullptr,
+	nullptr,		 &_VBPosTex1AnimTex2, &_VBPosTex1AnimColTex2,
   // tex2 & !tex1 (invalid)
-  NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
   // tex2 & !tex1 (invalid)
   // tex1 & tex2
-  NULL, NULL, &_VBPosTex1Tex2Anim, &_VBPosTex1ColTex2Anim,
-  NULL,   NULL,		 &_VBPosTex1AnimTex2Anim, &_VBPosTex1AnimColTex2Anim,
+	nullptr,
+	nullptr, &_VBPosTex1Tex2Anim, &_VBPosTex1ColTex2Anim,
+	nullptr,
+	nullptr,		 &_VBPosTex1AnimTex2Anim, &_VBPosTex1AnimColTex2Anim,
 };
 
 CVertexBuffer    * const RAMVbTab[] =
 {
 	// tex1 only
 		&RAMVBPos, &RAMVBPosCol, &RAMVBPosTex1,  &RAMVBPosTex1Col,
-		NULL,   NULL,		 &RAMVBPosTex1Anim, &RAMVBPosTex1AnimCol,
+	nullptr,
+	nullptr,		 &RAMVBPosTex1Anim, &RAMVBPosTex1AnimCol,
 		// tex1 & tex2
-		NULL, NULL, &RAMVBPosTex1Tex2, &RAMVBPosTex1ColTex2,
-		NULL,   NULL,		 &RAMVBPosTex1AnimTex2, &RAMVBPosTex1AnimColTex2,
+	nullptr,
+	nullptr, &RAMVBPosTex1Tex2, &RAMVBPosTex1ColTex2,
+	nullptr,
+	nullptr,		 &RAMVBPosTex1AnimTex2, &RAMVBPosTex1AnimColTex2,
 		// tex2 & !tex1 (invalid)
-		NULL, NULL, NULL, NULL,
-		NULL, NULL, NULL, NULL,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
 		// tex2 & !tex1 (invalid)
 		// tex1 & tex2
-		NULL, NULL, &RAMVBPosTex1Tex2Anim, &RAMVBPosTex1ColTex2Anim,
-		NULL,   NULL,		 &RAMVBPosTex1AnimTex2Anim, &RAMVBPosTex1AnimColTex2Anim,
+	nullptr,
+	nullptr, &RAMVBPosTex1Tex2Anim, &RAMVBPosTex1ColTex2Anim,
+	nullptr,
+	nullptr,		 &RAMVBPosTex1AnimTex2Anim, &RAMVBPosTex1AnimColTex2Anim,
 };
 
 
@@ -632,8 +654,8 @@ void CPSQuad::updateMatBeforeRendering(IDriver *drv, CVertexBuffer &vb)
 	else
 	{
 		/// update the material if the global color of the system is variable
-		if (_ColorScheme != NULL &&
-			(ps.getColorAttenuationScheme() != NULL ||
+		if (_ColorScheme != nullptr &&
+			(ps.getColorAttenuationScheme() != nullptr ||
 			 ps.isUserColorUsed() ||
 			 ps.getForceGlobalColorLightingFlag() ||
 			 usesGlobalColorLighting()
@@ -657,7 +679,7 @@ void CPSQuad::updateMatBeforeRendering(IDriver *drv, CVertexBuffer &vb)
 			{
 				col.modulateFromColor(ps.getGlobalColorLighted(), _Color);
 			}
-			else if (ps.getColorAttenuationScheme() != NULL || ps.isUserColorUsed())
+			else if (ps.getColorAttenuationScheme() != nullptr || ps.isUserColorUsed())
 			{
 				col.modulateFromColor(ps.getGlobalColor(), _Color);
 			}

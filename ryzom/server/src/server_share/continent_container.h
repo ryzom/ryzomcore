@@ -68,7 +68,9 @@ protected:
 		bool									AllowAutoSpawn;
 	};
 
-	///
+public:
+	/// The georges sheet content, public so sheets_dump_shard can read the
+	/// container back out of continents.packed_sheets.
 	class CSheet
 	{
 	public:
@@ -120,10 +122,11 @@ protected:
 		}
 
 		static uint getVersion () { return 1; }
-		
+
 		void removed() {}
 	};
 
+protected:
 	/// The global continent container
 	typedef std::vector<CContinentMoveContainer>	TContinentContainer;
 

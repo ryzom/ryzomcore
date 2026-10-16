@@ -219,7 +219,28 @@ void assimpMaterials(CMeshUtilsContext &context)
 				"Material name '%s' used more than once", amname.C_Str());
 			continue;
 		}
-		
+
+		// Sidecar binding first (exact NeL material by name; see material_sidecar.h)
+		TMaterialMap::const_iterator sit = context.SidecarMaterials.find(amname.C_Str());
+		if (sit != context.SidecarMaterials.end())
+		{
+			if (context.SceneMeta.Materials.find(amname.C_Str())
+				!= context.SceneMeta.Materials.end())
+			{
+				tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+					"Material '%s' from scene meta overridden by materials sidecar", amname.C_Str());
+			}
+			nlinfo("Material '%s' bound from materials sidecar", amname.C_Str());
+			materialNames.insert(amname.C_Str());
+			context.SceneMeta.Materials[amname.C_Str()] = sit->second;
+			continue;
+		}
+		if (!context.SidecarMaterials.empty())
+		{
+			tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Material '%s' not found in materials sidecar(s); falling back to source material conversion", amname.C_Str());
+		}
+
 		if (context.SceneMeta.Materials.find(amname.C_Str())
 			== context.SceneMeta.Materials.end())
 		{

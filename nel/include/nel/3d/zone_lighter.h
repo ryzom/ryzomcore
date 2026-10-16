@@ -212,7 +212,7 @@ public:
 			Flags = Landscape;
 
 			// Texture
-			Texture = NULL;
+			Texture = nullptr;
 		}
 
 		// The triangle

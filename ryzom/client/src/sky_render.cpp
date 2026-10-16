@@ -41,10 +41,10 @@ H_AUTO_DECL(RZ_SkyRender)
 using namespace NL3D;
 using namespace NLMISC;
 
-UScene    *SkyScene = NULL;
-UInstance Sky = NULL;
-UInstance   Sky2ndPass = NULL;
-NL3D::UInstance SkyFogPart = NULL;
+UScene    *SkyScene = nullptr;
+UInstance Sky = nullptr;
+UInstance   Sky2ndPass = nullptr;
+NL3D::UInstance SkyFogPart = nullptr;
 
 /////////////
 // GLOBALS //
@@ -74,7 +74,7 @@ void deleteSkyScene()
 {
 	if (!SkyScene) return;
 	Driver->deleteScene(SkyScene);
-	SkyScene = NULL;
+	SkyScene = nullptr;
 }
 
 //===================================================================================================
@@ -85,7 +85,7 @@ static void applySkyMaterialSetup(UInstance instance, bool isNight, uint stage, 
 		return;
 
 	// Return if there is no continent selected.
-	if(ContinentMngr.cur() == 0)
+	if(ContinentMngr.cur() == nullptr)
 		return;
 
 	if(!isNight)

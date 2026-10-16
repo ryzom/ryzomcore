@@ -43,10 +43,10 @@ public:
 	/// Constructor
 	CFxCL();
 	/// Destructor
-	virtual ~CFxCL();
+	virtual ~CFxCL() NL_OVERRIDE;
 
 	/// Build the entity from a sheet.
-	virtual bool build( const CEntitySheet *sheet );
+	virtual bool build( const CEntitySheet *sheet ) NL_OVERRIDE;
 
 	/// Load a FX object (.ps file) (delete the previous object)
 	bool setFx( const std::string &fileName );
@@ -54,10 +54,10 @@ public:
 protected:
 
 	/// Initialize properties of the entity (according to the class).
-	virtual void initProperties() { properties().selectable( false ); }
+	virtual void initProperties() NL_OVERRIDE { properties().selectable( false ); }
 
 	/// Update the item position.
-	virtual void updateVisualPropertyPos(const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI);
+	virtual void updateVisualPropertyPos(const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI) NL_OVERRIDE;
 
 	// Update the position of the entity after the motion.
 	//virtual void updatePos(const NLMISC::TTime &time, CEntityCL *target);
@@ -66,7 +66,7 @@ protected:
 	//virtual void updateVisible(const NLMISC::TTime &time, CEntityCL *target);
 
 	/// Draw the selection Box
-	virtual void drawBox();
+	virtual void drawBox() NL_OVERRIDE;
 
 private:
 

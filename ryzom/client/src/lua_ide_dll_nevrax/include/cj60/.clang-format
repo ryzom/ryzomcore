@@ -1,0 +1,5 @@
+# Third-party or generated code: keep it byte-for-byte as upstream ships it.
+---
+DisableFormat: true
+SortIncludes: false
+...

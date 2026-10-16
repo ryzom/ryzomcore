@@ -43,7 +43,7 @@
     }
   ],
   "default-features": [
-    "pipeline-max"
+    "pipeline-max", "xslt"
   ],
   "features": {
     "pipeline-max": {
@@ -62,6 +62,16 @@
       "description": "Builds with MySQL",
       "dependencies": [
         "libmariadb"
+      ]
+    },
+    "xslt": {
+      "description": "Generate sources",
+      "dependencies": [
+        {
+          "name": "libxslt",
+          "version>=": "1.1.45",
+          "features": ["tools"]
+        }
       ]
     }
   }

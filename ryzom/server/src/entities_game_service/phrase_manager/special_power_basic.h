@@ -54,7 +54,7 @@ public:
 	}
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 	/// set param value
 	inline void setParamValue(sint32 value) { _ParamValue = value; }

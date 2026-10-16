@@ -30,10 +30,10 @@ namespace NLGUI
 	{
 	public:
 		CEventListener();
-		~CEventListener();
+		~CEventListener() NL_OVERRIDE;
 		void addToServer( NLMISC::CEventServer *server );
 		void removeFromServer();
-		void operator()( const NLMISC::CEvent &evnt );
+		void operator()( const NLMISC::CEvent &evnt ) NL_OVERRIDE;
 
 	private:
 		NLGUI::CInputHandler inputHandler;

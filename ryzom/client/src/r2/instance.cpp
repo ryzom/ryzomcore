@@ -82,7 +82,7 @@ CInstance::CInstance(CObjectTable *objectTable, CLuaState &ls)
 	}
 	_Selectable = true;
 	_LastParentOk = false;
-	_LastParent = NULL;
+	_LastParent = nullptr;
 	_RegisteredInDispNameList = false;
 	_ClassIndex = getEditor().classToIndex(getClassName());
 	if (_ClassIndex < 0)
@@ -144,7 +144,7 @@ void CInstance::visit(IInstanceVisitor &visitor)
 	struct CInstanceVisitor : public IObjectVisitor
 	{
 		IInstanceVisitor *Visitor;
-		virtual void visit(CObjectTable &obj)
+		virtual void visit(CObjectTable &obj) NL_OVERRIDE
 		{
 			CInstance *inst = getEditor().getInstanceFromObject(&obj);
 			if (inst)
@@ -167,7 +167,7 @@ void CInstance::setDisplayerVisual(CDisplayerVisual *displayer)
 	TEST_LUA_PROJ;
 	if (_DisplayerVisual)
 	{
-		setDisplayedInstance(_DisplayerVisual, NULL);
+		setDisplayedInstance(_DisplayerVisual, nullptr);
 	}
 	if (displayer)
 	{
@@ -182,7 +182,7 @@ CDisplayerVisual *CInstance::getDisplayerVisual() const
 {
 	//H_AUTO(R2_CInstance_getDisplayerVisual)
 	TEST_LUA_PROJ;
-	if (!_DisplayerVisual) return NULL;
+	if (!_DisplayerVisual) return nullptr;
 	return NLMISC::safe_cast<CDisplayerVisual *>((CDisplayerBase *)_DisplayerVisual);
 }
 
@@ -194,7 +194,7 @@ void CInstance::setDisplayerUI(CDisplayerBase *displayer)
 	TEST_LUA_PROJ;
 	if (_DisplayerUI)
 	{
-		setDisplayedInstance(_DisplayerUI, NULL);
+		setDisplayedInstance(_DisplayerUI, nullptr);
 	}
 	if (displayer)
 	{
@@ -210,7 +210,7 @@ void CInstance::setDisplayerProperties(CDisplayerBase *displayer)
 	TEST_LUA_PROJ;
 	if (_DisplayerProperties)
 	{
-		setDisplayedInstance(_DisplayerProperties, NULL);
+		setDisplayedInstance(_DisplayerProperties, nullptr);
 	}
 	if (displayer)
 	{
@@ -223,9 +223,9 @@ void CInstance::setDisplayerProperties(CDisplayerBase *displayer)
 CInstance::~CInstance()
 {
 	TEST_LUA_PROJ;
-	setDisplayerVisual(NULL);
-	setDisplayerUI(NULL);
-	setDisplayerProperties(NULL);
+	setDisplayerVisual(nullptr);
+	setDisplayerUI(nullptr);
+	setDisplayerProperties(nullptr);
 	TEST_LUA_PROJ;
 }
 
@@ -545,7 +545,7 @@ CEntityCL *CInstance::getEntity() const
 	{
 		return dve->getEntity();
 	}
-	return NULL;
+	return nullptr;
 }
 
 // *********************************************************************************************************
@@ -572,7 +572,7 @@ CInstance *CInstance::getParent() const
 			return _LastParent;
 		}
 	}
-	CInstance *result = NULL;
+	CInstance *result = nullptr;
 	CObject *currParent = _ObjectTable->getParent();
 	while (currParent)
 	{
@@ -622,7 +622,7 @@ CInstance *CInstance::getParentAct() const
 		if (curr->isKindOf("Act")) return curr;
 		curr = curr->getParent();
 	}
-	return NULL;
+	return nullptr;
 }
 
 // *********************************************************************************************************
@@ -687,7 +687,7 @@ void CInstance::setSelectable(bool selectable)
 	{
 		if (selInstance && (selInstance == this || selInstance->isSonOf(this)))
 		{
-			getEditor().setSelectedInstance(NULL);
+			getEditor().setSelectedInstance(nullptr);
 		}
 	}
 	onAttrModified("Selectable");
@@ -747,7 +747,7 @@ CInstance *CInstance::getParentGroup()
 const CInstance *CInstance::getParentGroupLeader() const
 {
 	//H_AUTO(R2_CInstance_getParentGroupLeader)
-	const CObjectTable *props = NULL;
+	const CObjectTable *props = nullptr;
 	if (isKindOf("NpcGrpFeature"))
 	{
 		props = getObjectTable();
@@ -760,12 +760,12 @@ const CInstance *CInstance::getParentGroupLeader() const
 	{
 		return this;
 	}
-	if (!props) return NULL;
+	if (!props) return nullptr;
 	// this is a group
 	const CObject *components = props->findAttr("Components");
 	if (!components || components->getSize() == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 	return getEditor().getInstanceFromObject(components->getValueAtPos(0));
 }
@@ -795,7 +795,7 @@ CObject *CInstance::getGroupSelectedSequence() const
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -828,11 +828,11 @@ std::string CInstance::getPosInstanceId() const
 // Select an instance from its id
 class CAHSelectInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// retrieve instance from its Id
 		CInstance *instance = getEditor().getInstanceFromId(sParams);
-		if(instance != NULL)
+		if(instance != nullptr)
 		{
 			getEditor().setSelectedInstance(instance);
 		}
@@ -845,7 +845,7 @@ REGISTER_ACTION_HANDLER(CAHSelectInstance, "r2ed_select_instance");
 // Delete selected instance
 class CAHDeleteSelectedInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInstance *selectedInstance = getEditor().getSelectedInstance();
 		if (selectedInstance)
@@ -861,7 +861,7 @@ REGISTER_ACTION_HANDLER(CAHDeleteSelectedInstance, "r2ed_delete_selected_instanc
 class CAHPickerLua : public IActionHandler
 {
 	//	 TODO nico : replace this action handler by a CTool (in the same way that CToolChoosePosLua derives from CToolChoosePos)
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// TODO : put this class in a separate file
 		class CToolPickLua : public CToolPick
@@ -882,25 +882,25 @@ class CAHPickerLua : public IActionHandler
 			{}
 
 			NLMISC_DECLARE_CLASS(CToolPickLua);
-			void pick(CInstance &instance)
+			void pick(CInstance &instance) NL_OVERRIDE
 			{
 				CTool::TSmartPtr holdThis(this); // prevent 'setCurrentTool' from deleting 'this'
-				getEditor().setCurrentTool(NULL);
+				getEditor().setCurrentTool(nullptr);
 				if (!LuaPickFunc.empty())
 				{
 					getEditor().getLua().executeScriptNoThrow(LuaPickFunc + "('" + instance.getId() + "')");
 				}
 			}
-			void pick(const CVector &pos)
+			void pick(const CVector &pos) NL_OVERRIDE
 			{
 				CTool::TSmartPtr holdThis(this); // prevent 'setCurrentTool' from deleting 'this'
-				getEditor().setCurrentTool(NULL);
+				getEditor().setCurrentTool(nullptr);
 				if (!LuaPickPosFunc.empty())
 				{
 					getEditor().getLua().executeScriptNoThrow(NLMISC::toString("%s(%f, %f, %f)", LuaPickPosFunc.c_str(), pos.x, pos.y, pos.z));
 				}
 			}
-			bool canPick(const CInstance &instance) const
+			bool canPick(const CInstance &instance) const NL_OVERRIDE
 			{
 				if (LuaPickFunc.empty()) return true;
 				CLuaState &lua = getEditor().getLua();
@@ -946,7 +946,7 @@ REGISTER_ACTION_HANDLER(CAHPickerLua, "r2ed_picker_lua");
 // rotate
 class CAHRotateInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().setCurrentTool(new CToolSelectRotate);
 	}
@@ -957,7 +957,7 @@ REGISTER_ACTION_HANDLER(CAHRotateInstance, "r2ed_rotate");
 // move
 class CAHMoveInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().setCurrentTool(new CToolSelectMove);
 	}
@@ -970,7 +970,7 @@ REGISTER_ACTION_HANDLER(CAHMoveInstance, "r2ed_move");
 // Debug : dump the lua table for current instance
 class CAHDumpLuaTable : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		if (!getEditor().getSelectedInstance()) return;
 		std::string maxDepthStr = getParam(sParams, "depth");

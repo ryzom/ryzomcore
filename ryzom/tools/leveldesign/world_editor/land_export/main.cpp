@@ -47,14 +47,14 @@ class CExportCB : public IExportCB
 	int _NiouLine;
 public:
 
-	bool isCanceled ()
+	bool isCanceled () NL_OVERRIDE
 	{
 		return false; // Never ending story
 	}
 
 	// Display callbacks
 
-	void dispPass (const std::string &Text)
+	void dispPass (const std::string &Text) NL_OVERRIDE
 	{
 		/* string sTmp = string("PASS : ") + Text + "\n";
 		outString (sTmp); */
@@ -62,7 +62,7 @@ public:
 		_NiouLine = 0;
 	}
 
-	void dispPassProgress (float percentage)
+	void dispPassProgress (float percentage) NL_OVERRIDE
 	{
 		if (_PassProgress != (int)(percentage*100.0f))
 		{
@@ -78,19 +78,19 @@ public:
 		}
 	}
 
-	void dispInfo (const std::string &Text)
+	void dispInfo (const std::string &Text) NL_OVERRIDE
 	{
 		/* string sTmp = string("INFO : ") + Text + "\n";
 		outString (sTmp); */
 	}
 
-	void dispWarning (const std::string &Text)
+	void dispWarning (const std::string &Text) NL_OVERRIDE
 	{
 		string sTmp = string("WARNING : ") + Text + "\n";
 		outString (sTmp);
 	}
 
-	void dispError (const std::string &Text)
+	void dispError (const std::string &Text) NL_OVERRIDE
 	{
 		string sTmp = string("ERROR : ") + Text + "\n";
 		outString (sTmp);

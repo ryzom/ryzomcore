@@ -79,7 +79,7 @@ void CBotChatPagePlayerGift::end()
 class CHandlerValidPlayerGift : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		NLMISC::CBitMemStream out;
 		if (GenericMsgHeaderMngr.pushNameToStream("BOTCHAT:VALIDATE_PLAYER_GIFT", out))
@@ -98,7 +98,7 @@ public:
 
 		// go to the end mission screen
 		// CBotChatManager::getInstance().setCurrPage(BotChatPageAll->MissionEnd);
-		CBotChatManager::getInstance()->setCurrPage(NULL);
+		CBotChatManager::getInstance()->setCurrPage(nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerValidPlayerGift, "valid_player_gift");

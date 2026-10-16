@@ -14,13 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-#include "stdpch.h"
-
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
+
+#include "stdpch.h"
 
 #include "welcome_service_itf.h"
 
@@ -30,7 +28,7 @@ namespace WS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CWelcomeServiceSkel::TMessageHandlerMap &CWelcomeServiceSkel::getMessageHandlers() const
 	{
@@ -40,19 +38,19 @@ namespace WS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("WU"), &CWelcomeServiceSkel::welcomeUser_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("DU"), &CWelcomeServiceSkel::disconnectUser_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CWelcomeServiceSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -71,7 +69,7 @@ namespace WS
 		return true;
 	}
 
-	
+
 	void CWelcomeServiceSkel::welcomeUser_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CWelcomeServiceSkel_welcomeUser_WU);
@@ -109,9 +107,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_welcomeUser(__message, charId, userName, cookie, priviledge, exPriviledge, mode, instanceId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -127,9 +125,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_disconnectUser(__message, userId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -165,7 +163,7 @@ namespace WS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CLoginServiceSkel::TMessageHandlerMap &CLoginServiceSkel::getMessageHandlers() const
 	{
@@ -175,15 +173,15 @@ namespace WS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("PUL"), &CLoginServiceSkel::pendingUserLost_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CLoginServiceSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -202,7 +200,7 @@ namespace WS
 		return true;
 	}
 
-	
+
 	void CLoginServiceSkel::pendingUserLost_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CLoginServiceSkel_pendingUserLost_PUL);
@@ -220,9 +218,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_pendingUserLost(__message, cookie);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -242,7 +240,7 @@ namespace WS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CWelcomeServiceClientSkel::TMessageHandlerMap &CWelcomeServiceClientSkel::getMessageHandlers() const
 	{
@@ -252,27 +250,27 @@ namespace WS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("RWS"), &CWelcomeServiceClientSkel::registerWS_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("RWSOS"), &CWelcomeServiceClientSkel::reportWSOpenState_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("WUR"), &CWelcomeServiceClientSkel::welcomeUserResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("UCP"), &CWelcomeServiceClientSkel::updateConnectedPlayerCount_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CWelcomeServiceClientSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -291,7 +289,7 @@ namespace WS
 		return true;
 	}
 
-	
+
 	void CWelcomeServiceClientSkel::registerWS_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CWelcomeServiceClientSkel_registerWS_RWS);
@@ -346,9 +344,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_registerWS(__message, shardId, fixedSessionId, isOnline);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -364,9 +362,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_reportWSOpenState(__message, isOnline);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -382,9 +380,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_welcomeUserResult(__message, userId, ok, shardAddr, errorMsg);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -400,9 +398,9 @@ namespace WS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_updateConnectedPlayerCount(__message, nbOnlinePlayers, nbPendingPlayers);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

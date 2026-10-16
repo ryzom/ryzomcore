@@ -58,19 +58,19 @@ public:
 	/**
 	*  Gives the type for this bindable.
 	*/
-	virtual uint32 getType(void) const { return PSZone; }
+	virtual uint32 getType(void) const NL_OVERRIDE { return PSZone; }
 
 	/**
 	* Get the priority of the bindable
 	* The more high it is, the earlier it is dealt with
 	*/
-	virtual uint32 getPriority(void) const { return 3500; }
+	virtual uint32 getPriority(void) const NL_OVERRIDE { return 3500; }
 
 	/**
 	 * Process one pass for the zone
 	 * The default behaviour call performMotion or show depending on the pass being processed
 	 */
-	virtual void step(TPSProcessPass pass);
+	virtual void step(TPSProcessPass pass) NL_OVERRIDE;
 
 
 	/// Show the zone (edition mode).
@@ -78,18 +78,18 @@ public:
 
 
 	/// Add a new type of located for this zone to apply on. nlassert if already present
-	virtual void attachTarget(CPSLocated *ptr);
+	virtual void attachTarget(CPSLocated *ptr) NL_OVERRIDE;
 
 
 	/// serialization, DERIVER must override this, and call the parent version
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	/** Inherited from CPSTargetLocatedBindable. It's called when one of the targets has been detroyed or detached
 	 *  The default behaviour, release collision infos from the located
 	 */
 
-	virtual void releaseTargetRsc(CPSLocated *target);
+	virtual void releaseTargetRsc(CPSLocated *target) NL_OVERRIDE;
 
 
 	/// set the bounce factor. It has meaning only if the behaviour is set to bounce...
@@ -141,31 +141,31 @@ protected:
 class CPSZonePlane : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
-		virtual void show();
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter) NL_OVERRIDE;
+		virtual void show() NL_OVERRIDE;
 
 
 		NLMISC_DECLARE_CLASS(CPSZonePlane);
 
 
 
-		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-		virtual bool onlyStoreNormal(void) const { return true; }
-		virtual NLMISC::CVector getNormal(uint32 index);
-		virtual void setNormal(uint32 index, NLMISC::CVector n);
+		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+		virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+		virtual bool onlyStoreNormal(void) const NL_OVERRIDE { return true; }
+		virtual NLMISC::CVector getNormal(uint32 index) NL_OVERRIDE;
+		virtual void setNormal(uint32 index, NLMISC::CVector n) NL_OVERRIDE;
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	protected:
 		TPSAttribVector _Normal;
 		NLMISC::CMatrix buildBasis(uint32 index) const;
 
-		virtual void resize(uint32 size);
+		virtual void resize(uint32 size) NL_OVERRIDE;
 
-		virtual void newElement(const CPSEmitterInfo &info);
+		virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
-		virtual void deleteElement(uint32 index);
+		virtual void deleteElement(uint32 index) NL_OVERRIDE;
 };
 
 
@@ -192,8 +192,8 @@ typedef CPSAttrib<CRadiusPair> TPSAttribRadiusPair;
 class CPSZoneSphere : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
-		virtual void show();
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter) NL_OVERRIDE;
+		virtual void show() NL_OVERRIDE;
 
 
 		NLMISC_DECLARE_CLASS(CPSZoneSphere);
@@ -205,15 +205,15 @@ class CPSZoneSphere : public CPSZone, public IPSMover
 
 
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 		// inherited from IPSMover
-		virtual bool supportUniformScaling(void) const { return true; }
-		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-		virtual void setScale(uint32 k, float scale);
-		virtual NLMISC::CVector getScale(uint32 k) const;
+		virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+		virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+		virtual void setScale(uint32 k, float scale) NL_OVERRIDE;
+		virtual NLMISC::CVector getScale(uint32 k) const NL_OVERRIDE;
 
 
 	protected:
@@ -224,11 +224,11 @@ class CPSZoneSphere : public CPSZone, public IPSMover
 
 		NLMISC::CMatrix buildBasis(uint32 index) const;
 
-		virtual void resize(uint32 size);
+		virtual void resize(uint32 size) NL_OVERRIDE;
 
-		virtual void newElement(const CPSEmitterInfo &info);
+		virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
-		virtual void deleteElement(uint32 index);
+		virtual void deleteElement(uint32 index) NL_OVERRIDE;
 };
 
 /// a disc
@@ -236,8 +236,8 @@ class CPSZoneSphere : public CPSZone, public IPSMover
 class CPSZoneDisc : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
-		virtual void show();
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter) NL_OVERRIDE;
+		virtual void show() NL_OVERRIDE;
 
 		CPSZoneDisc()
 		{
@@ -248,16 +248,16 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 
 
 		// inherited from IPSMover
-		virtual bool supportUniformScaling(void) const { return true; }
-		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-		virtual void setScale(uint32 k, float scale);
-		virtual NLMISC::CVector getScale(uint32 k) const;
-		virtual bool onlyStoreNormal(void) const { return true; }
-		virtual NLMISC::CVector getNormal(uint32 index);
-		virtual void setNormal(uint32 index, NLMISC::CVector n);
+		virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+		virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+		virtual void setScale(uint32 k, float scale) NL_OVERRIDE;
+		virtual NLMISC::CVector getScale(uint32 k) const NL_OVERRIDE;
+		virtual bool onlyStoreNormal(void) const NL_OVERRIDE { return true; }
+		virtual NLMISC::CVector getNormal(uint32 index) NL_OVERRIDE;
+		virtual void setNormal(uint32 index, NLMISC::CVector n) NL_OVERRIDE;
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 
@@ -267,11 +267,11 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 
 		NLMISC::CMatrix buildBasis(uint32 index) const;
 
-		virtual void resize(uint32 size);
+		virtual void resize(uint32 size) NL_OVERRIDE;
 
-		virtual void newElement(const CPSEmitterInfo &info);
+		virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
-		virtual void deleteElement(uint32 index);
+		virtual void deleteElement(uint32 index) NL_OVERRIDE;
 
 };
 
@@ -283,8 +283,8 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 class CPSZoneCylinder : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
-		virtual void show();
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter) NL_OVERRIDE;
+		virtual void show() NL_OVERRIDE;
 
 		CPSZoneCylinder()
 		{
@@ -294,16 +294,16 @@ class CPSZoneCylinder : public CPSZone, public IPSMover
 		NLMISC_DECLARE_CLASS(CPSZoneCylinder);
 
 		// inherited from IPSMover
-		virtual bool supportUniformScaling(void) const { return true; }
-		virtual bool supportNonUniformScaling(void) const { return true; }
-		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-		virtual void setScale(uint32 k, float scale);
-		virtual void setScale(uint32 k, const NLMISC::CVector &s);
-		virtual NLMISC::CVector getScale(uint32 k) const;
+		virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual bool supportNonUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+		virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+		virtual void setScale(uint32 k, float scale) NL_OVERRIDE;
+		virtual void setScale(uint32 k, const NLMISC::CVector &s) NL_OVERRIDE;
+		virtual NLMISC::CVector getScale(uint32 k) const NL_OVERRIDE;
 
 		// serialization
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 
@@ -319,11 +319,11 @@ class CPSZoneCylinder : public CPSZone, public IPSMover
 
 		NLMISC::CMatrix buildBasis(uint32 index) const;
 
-		virtual void resize(uint32 size);
+		virtual void resize(uint32 size) NL_OVERRIDE;
 
-		virtual void newElement(const CPSEmitterInfo &info);
+		virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
-		virtual void deleteElement(uint32 index);
+		virtual void deleteElement(uint32 index) NL_OVERRIDE;
 };
 
 
@@ -335,8 +335,8 @@ class CPSZoneCylinder : public CPSZone, public IPSMover
 class CPSZoneRectangle : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
-		virtual void show();
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter) NL_OVERRIDE;
+		virtual void show() NL_OVERRIDE;
 
 		CPSZoneRectangle()
 		{
@@ -350,16 +350,16 @@ class CPSZoneRectangle : public CPSZone, public IPSMover
 
 
 		// serialization
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		// inherited from IPSMover
-		virtual bool supportUniformScaling(void) const { return true; }
-		virtual bool supportNonUniformScaling(void) const { return true; }
-		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-		virtual void setScale(uint32 index, float scale);
-		virtual void setScale(uint32 index, const NLMISC::CVector &s);
-		virtual NLMISC::CVector getScale(uint32 index) const;
+		virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual bool supportNonUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+		virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+		virtual void setScale(uint32 index, float scale) NL_OVERRIDE;
+		virtual void setScale(uint32 index, const NLMISC::CVector &s) NL_OVERRIDE;
+		virtual NLMISC::CVector getScale(uint32 index) const NL_OVERRIDE;
 
 	protected:
 
@@ -375,11 +375,11 @@ class CPSZoneRectangle : public CPSZone, public IPSMover
 
 		NLMISC::CMatrix buildBasis(uint32 index) const;
 
-		virtual void resize(uint32 size);
+		virtual void resize(uint32 size) NL_OVERRIDE;
 
-		virtual void newElement(const CPSEmitterInfo &info);
+		virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
-		virtual void deleteElement(uint32 index);
+		virtual void deleteElement(uint32 index) NL_OVERRIDE;
 
 };
 

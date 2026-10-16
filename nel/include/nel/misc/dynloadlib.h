@@ -225,7 +225,7 @@ public:
 
 	INelLibrary()
 		: _LoadingCounter(0),
-		_LibContext(NULL)
+		_LibContext(nullptr)
 	{}
 
 	virtual ~INelLibrary();

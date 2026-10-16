@@ -33,9 +33,9 @@ namespace NL3D {
 // ------------------------------------------------------------------------------------------------
 CTextContext::CTextContext()
 {
-	_Driver = NULL;
-	_FontManager = NULL;
-	_FontGen = NULL;
+	_Driver = nullptr;
+	_FontManager = nullptr;
+	_FontGen = nullptr;
 
 	_FontSize = 12;
 	_Embolden = false;

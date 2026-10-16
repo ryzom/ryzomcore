@@ -40,15 +40,15 @@ public:
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	virtual void unpack (NLMISC::CBitMemStream &message) { message.serial( Dummy1 ); message.serial( Dummy2 ); }
+	virtual void unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE { message.serial( Dummy1 ); message.serial( Dummy2 ); }
 
 	/// This functions is used when you want to transform an action into an IStream.
-	virtual void serial (NLMISC::IStream &f) { f.serial( Dummy1 ); f.serial( Dummy2 ); }
+	virtual void serial (NLMISC::IStream &f) NL_OVERRIDE { f.serial( Dummy1 ); f.serial( Dummy2 ); }
 
 	/** Returns the size of this action when it will be send to the UDP connection:
 	 * the size is IN BITS, not in bytes (the actual size is this one plus the header size)
 	 */
-	virtual uint32 size () { return sizeof(Dummy1)*8 + sizeof(Dummy2)*8; }
+	virtual uint32 size () NL_OVERRIDE { return sizeof(Dummy1)*8 + sizeof(Dummy2)*8; }
 
 	static CAction *create () { return new CActionDummy(); }
 
@@ -61,7 +61,7 @@ protected:
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	virtual void pack (NLMISC::CBitMemStream &message) { message.serial( Dummy1 ); message.serial( Dummy2 ); }
+	virtual void pack (NLMISC::CBitMemStream &message) NL_OVERRIDE { message.serial( Dummy1 ); message.serial( Dummy2 ); }
 
 	friend class CActionFactory;
 };

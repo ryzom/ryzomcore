@@ -86,7 +86,6 @@ void CMagicAiActionHoT::launch( CMagicPhrase * phrase, sint deltaLevel, sint ski
 
 	// targetDeltaHp must be prefilled
 	nlassertex( targets.size() == targetDeltaHp.size(), ("%d %d", targets.size(), targetDeltaHp.size() ) );
-
 	for (uint i = 0 ; i < nbTargets ; ++i)
 	{
 		if (!TheDataset.isAccessible(targets[i].getId()))

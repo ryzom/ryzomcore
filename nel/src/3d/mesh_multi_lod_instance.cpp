@@ -39,7 +39,7 @@ namespace NL3D
 	// No flags
 	Flags=0;
 	_CoarseMeshDistance = -1.f;
-	_LastCoarseMesh= NULL;
+	_LastCoarseMesh = nullptr;
 	_LastCoarseMeshNumVertices= 0;
 }
 
@@ -128,7 +128,7 @@ void		CMeshMultiLodInstance::traverseLoadBalancing()
 		Lod1=0xffffffff;
 
 		// The next slot
-		CMeshMultiLod::CMeshSlot	*nextSlot=NULL;
+		CMeshMultiLod::CMeshSlot	*nextSlot = nullptr;
 
 		// Next slot exist ?
 		if (Lod0!=meshCount-1)

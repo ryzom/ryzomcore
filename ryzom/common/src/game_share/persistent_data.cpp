@@ -44,7 +44,7 @@
 using namespace NLMISC;
 using namespace std;
 
-CPdrTokenRegistry *CPdrTokenRegistry::_Instance = NULL;
+CPdrTokenRegistry *CPdrTokenRegistry::_Instance = nullptr;
 
 
 //-------------------------------------------------------------------------
@@ -342,7 +342,7 @@ void CPersistentDataRecord::skipData()
 
 CPDRLookupTbl* CPersistentDataRecord::getLookupTbl(uint32 id) const
 {
-	return (id>=_LookupTbls.size())? NULL: _LookupTbls[id];
+	return (id>=_LookupTbls.size()) ? nullptr : _LookupTbls[id];
 }
 
 void CPersistentDataRecord::setLookupTbl(uint32 id, CPDRLookupTbl* tbl)
@@ -353,7 +353,7 @@ void CPersistentDataRecord::setLookupTbl(uint32 id, CPDRLookupTbl* tbl)
 		// make sure the lookup table id is valid
 		nlassert(id<CPDRLookupTbl::getNumLookupTableClasses());
 		// grow the container
-		_LookupTbls.resize(CPDRLookupTbl::getNumLookupTableClasses(),NULL);
+		_LookupTbls.resize(CPDRLookupTbl::getNumLookupTableClasses(), nullptr);
 	}
 
 	// make sure we don't already have a lookup table allocated for this slot
@@ -1098,13 +1098,13 @@ bool CPersistentDataRecord::fromBuffer(NLMISC::IStream& stream)
 
 	// try with a CMemStream
 	CMemStream *memStream = dynamic_cast<CMemStream*>(&stream);
-	if (memStream != NULL)
+	if (memStream != nullptr)
 	{
 		return fromBuffer((const char *)(memStream->buffer()+memStream->getPos()), memStream->length()-memStream->getPos());
 	}
 	// try with a IFile
 	NLMISC::CIFile *fileStream = dynamic_cast<NLMISC::CIFile*>(&stream);
-	if (fileStream != NULL)
+	if (fileStream != nullptr)
 	{
 		return fromStream(*fileStream, fileStream->getFileSize());
 	}
@@ -1259,7 +1259,7 @@ uint32 CPDRLookupTbl::getNumLookupTableClasses()
 CPdrTokenRegistry* CPdrTokenRegistry::getInstance()
 {
 	// first time the method is called instantiate the singleton object
-	if (_Instance==NULL)
+	if (_Instance == nullptr)
 		_Instance= new CPdrTokenRegistry;
 
 	// return the pointer to our singleton
@@ -1270,7 +1270,7 @@ void CPdrTokenRegistry::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 

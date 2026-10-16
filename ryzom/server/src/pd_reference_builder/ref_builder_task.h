@@ -36,7 +36,7 @@ public:
 	CRefBuilderTask();
 
 	/// Destructor
-	~CRefBuilderTask();
+	~CRefBuilderTask() NL_OVERRIDE;
 
 
 	/// Setup Task
@@ -54,7 +54,7 @@ public:
 
 
 	/// Run task
-	virtual bool	execute();
+	virtual bool	execute() NL_OVERRIDE;
 
 
 private:

@@ -79,7 +79,7 @@ public:
 	*/
 	void instanciateDynamicSheet(CCustomElementId modelId, std::vector<std::string> scriptData, NLNET::TServiceId serviceId, bool update);
 	void removeDynamicSheet(CCustomElementId modelId);
-
+	
 	/** Returns the modified CStaticCreature associated to a UserModel
 	* @param userModelId the id of the user model
 	*/

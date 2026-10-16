@@ -41,8 +41,8 @@ public:
 	// the instantiated class interface
 
 	// specialisation of IServiceSingleton
-	void init();
-	void serviceUpdate();
+	void init() NL_OVERRIDE;
+	void serviceUpdate() NL_OVERRIDE;
 
 	// methods for registering callbacks associated with given requests
 	uint32		pushFileCallback(NLMISC::CSmartPtr<IBackupFileReceiveCallback>& callback, CBackupServiceInterface* itf );
@@ -60,7 +60,7 @@ public:
 	bool		genericCallbackDone(uint32 requestId);
 
 	// routine used to react to changes in key configuration variables
-	void		onVariableChanged( NLMISC::IVariable& var );
+	void		onVariableChanged( NLMISC::IVariable& var ) NL_OVERRIDE;
 
 	// setup a callback to be invoked on connection of backup system (modules or services)
 	void		pushBSConnectCallback(IBackupServiceConnection*);

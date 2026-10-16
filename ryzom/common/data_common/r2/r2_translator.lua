@@ -34,7 +34,7 @@ r2.Translator.MultilineBc = {}
 function Translator.updateEachSecond()
 	if table.getn( Translator.MultilineBc ) > 0 then
 		local msg=table.remove(Translator.MultilineBc, 1)
-		if msg then 
+		if msg then
 			local ucStringMsg = ucstring()
 			ucStringMsg:fromUtf8(msg)	
 			displaySystemInfo(ucStringMsg, "BC")
@@ -3963,14 +3963,12 @@ function Translator.translateDialog(entity, context)
 
 			rtAction = Translator.createAction("chat_step", rtNpcGrp.Id, param)
 			table.insert(rtDialogOk.Children, rtAction)
-
 			table.insert(endParam.Indexs, param.Index)
 			table.insert(endParam.Grps, param.WhoGrp)
 			table.insert(endParam.Whos, param.Who)
 			table.insert(endParam.Emotes, param.Emote)
 			table.insert(endParam.Says, param.Says)
-			table.insert(endParam.WhoNoEntitys, param.WhoNoEntity)			
-		
+			table.insert(endParam.WhoNoEntitys, param.WhoNoEntity)
 
 		else -- !if isKindOf("ChatStep")
 			componentIndex, component = next(entity.Components, componentIndex)

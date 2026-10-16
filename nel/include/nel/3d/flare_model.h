@@ -41,16 +41,16 @@ public:
 	/// Constructor
 	CFlareModel();
 	// dtor
-	~CFlareModel();
+	~CFlareModel() NL_OVERRIDE;
 	// register this model
 	static void registerBasic();
 	static CTransform *creator() { return new CFlareModel; }
 	/// \name CTransform traverse specialisation
 	// @{
-	virtual void	traverseRender();
+	virtual void	traverseRender() NL_OVERRIDE;
 	// @}
 	// From CTransform
-	virtual	bool isFlare() const { return true; }
+	virtual	bool isFlare() const NL_OVERRIDE { return true; }
 	// Debugging aid : if an occlusion test mesh is used, display it using the current material
 	void renderOcclusionTestMesh(IDriver &drv);
 private:

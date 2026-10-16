@@ -31,14 +31,14 @@ protected:
 
 public:
 	CMoldEltDefineList( CLoader* const _pl, CMoldEltDefine* const _pmed );
-	virtual ~CMoldEltDefineList();
+	virtual ~CMoldEltDefineList() NL_OVERRIDE;
 
-	virtual CMoldElt* GetMold(); 
-	virtual void Load( const CStringEx _sxfullname );
-	virtual void Load( const CStringEx _sxfullname, const CStringEx _sxdate );
-	virtual CStringEx GetEltName( const unsigned int _index ) const;
-	virtual CMoldElt* GetEltPtr( const unsigned int _index ) const;
-	virtual unsigned int GetType() const; 
+	virtual CMoldElt* GetMold() NL_OVERRIDE; 
+	virtual void Load( const CStringEx _sxfullname ) NL_OVERRIDE;
+	virtual void Load( const CStringEx _sxfullname, const CStringEx _sxdate ) NL_OVERRIDE;
+	virtual CStringEx GetEltName( const unsigned int _index ) const NL_OVERRIDE;
+	virtual CMoldElt* GetEltPtr( const unsigned int _index ) const NL_OVERRIDE;
+	virtual unsigned int GetType() const NL_OVERRIDE; 
 };
 
 } // NLGEORGES

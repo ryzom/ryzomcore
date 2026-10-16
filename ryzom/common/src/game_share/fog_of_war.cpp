@@ -35,7 +35,7 @@ IFogOfWar::~IFogOfWar()
 void IFogOfWar::explore(float worldPosX, float worldPosY)
 {
 	uint8 *pData = getData();
-	if (pData == NULL)
+	if (pData == nullptr)
 		return;
 
 	if ((worldPosX < MinX) ||
@@ -76,7 +76,7 @@ void IFogOfWar::serial(NLMISC::IStream &f)
 		if ((MapWidth != 0) && (MapHeight != 0))
 			createData(MapWidth, MapHeight);
 
-	if (getData() == NULL)
+	if (getData() == nullptr)
 	{
 		nlwarning("cannot save fog of war texture");
 		return;

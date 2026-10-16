@@ -148,7 +148,7 @@ CIPv6Address CIPv6Address::loopback()
 	// Check if the IPv6 loopback address is available
 	// If not, use a IPv4 loopback address, or the standard IPv4 loopback address
 
-	addrinfo *result = NULL;
+	addrinfo *result = nullptr;
 	addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
@@ -157,7 +157,7 @@ CIPv6Address CIPv6Address::loopback()
 	CSock::initNetwork();
 
 	hints.ai_family = AF_INET6;
-	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
+	if (getaddrinfo(nullptr, nullptr, &hints, &result) == 0)
 	{
 		// IPv6
 		CIPv6Address addr;
@@ -168,7 +168,7 @@ CIPv6Address CIPv6Address::loopback()
 	}
 
 	hints.ai_family = AF_INET;
-	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
+	if (getaddrinfo(nullptr, nullptr, &hints, &result) == 0)
 	{
 		// IPv4
 		CIPv6Address addr;
@@ -222,7 +222,7 @@ CIPv6Address CIPv6Address::loopbackIPv4()
 // Constructs an address suitable for listening on any interface
 CIPv6Address CIPv6Address::any()
 {
-	addrinfo *result = NULL;
+	addrinfo *result = nullptr;
 	addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_STREAM;
@@ -232,7 +232,7 @@ CIPv6Address CIPv6Address::any()
 	CSock::initNetwork();
 
 	hints.ai_family = AF_INET6;
-	if (getaddrinfo(NULL, NULL, &hints, &result) == 0)
+	if (getaddrinfo(nullptr, nullptr, &hints, &result) == 0)
 	{
 		// IPv6
 		CIPv6Address addr;
@@ -329,7 +329,7 @@ std::string CIPv6Address::toIPv4String() const
 
 	// Use inet_ntop
 	char addressStr[INET_ADDRSTRLEN];
-	if (inet_ntop(AF_INET, &m_Address[12], addressStr, sizeof(addressStr)) == NULL)
+	if (inet_ntop(AF_INET, &m_Address[12], addressStr, sizeof(addressStr)) == nullptr)
 	{
 		// Failed to convert
 		return nlstr("null");
@@ -367,7 +367,7 @@ std::string CIPv6Address::toIPv6String() const
 
 	// Use inet_ntop
 	char addressStr[INET6_ADDRSTRLEN];
-	if (inet_ntop(AF_INET6, m_Address, addressStr, sizeof(addressStr)) == NULL)
+	if (inet_ntop(AF_INET6, m_Address, addressStr, sizeof(addressStr)) == nullptr)
 	{
 		// Failed to convert
 		return nlstr("null");

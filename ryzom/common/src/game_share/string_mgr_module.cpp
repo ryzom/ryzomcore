@@ -639,7 +639,7 @@ void CStringManagerModule::sendIdList(TSessionId scenarioId,NLNET::IModuleProxy*
 {
 	TLocalTable* localTable = getLocalTable(scenarioId.asInt());
 
-	if(localTable != NULL)
+	if(localTable != nullptr)
 	{
 		TLocalTable::const_iterator first(localTable->begin()),last(localTable->end());
 		CMessage msg("idList");
@@ -668,7 +668,7 @@ void CStringManagerModule::sendStringValue(TSessionId scenarioId,NLNET::IModuleP
 void CStringManagerModule::sendTable(TSessionId scenarioId,IModuleProxy *moduleProxy)
 {
 	TLocalTable* localTable = getLocalTable(scenarioId.asInt());
-	if (localTable != NULL)
+	if (localTable != nullptr)
 	{
 		uint32 nb = (uint32)localTable->size();
 		if(nb==0)return;

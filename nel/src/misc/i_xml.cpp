@@ -70,13 +70,13 @@ inline void CIXml::flushContentString ()
 CIXml::CIXml () : IStream (true /* Input mode */)
 {
 	// Not initialized
-	_Parser = NULL;
-	_CurrentElement = NULL;
-	_CurrentNode = NULL;
+	_Parser = nullptr;
+	_CurrentElement = nullptr;
+	_CurrentNode = nullptr;
 	_PushBegin = false;
 	_AttribPresent = false;
 	_TryBinaryMode = false;
-	_BinaryStream = NULL;
+	_BinaryStream = nullptr;
 }
 
 // ***************************************************************************
@@ -84,13 +84,13 @@ CIXml::CIXml () : IStream (true /* Input mode */)
 CIXml::CIXml (bool tryBinaryMode) : IStream (true /* Input mode */)
 {
 	// Not initialized
-	_Parser = NULL;
-	_CurrentElement = NULL;
-	_CurrentNode = NULL;
+	_Parser = nullptr;
+	_CurrentElement = nullptr;
+	_CurrentNode = nullptr;
 	_PushBegin = false;
 	_AttribPresent = false;
 	_TryBinaryMode = tryBinaryMode;
-	_BinaryStream = NULL;
+	_BinaryStream = nullptr;
 }
 
 // ***************************************************************************
@@ -112,12 +112,12 @@ void CIXml::release ()
 		xmlClearParserCtxt (_Parser);
 		xmlFreeParserCtxt (_Parser);
 
-		_Parser = NULL;
+		_Parser = nullptr;
 	}
 
 	// Not initialized
-	_CurrentElement = NULL;
-	_CurrentNode = NULL;
+	_CurrentElement = nullptr;
+	_CurrentNode = nullptr;
 	_PushBegin = false;
 	_AttribPresent = false;
 	_ErrorString.clear();
@@ -145,7 +145,7 @@ bool CIXml::init (IStream &stream)
 	initLibXml();
 
 	// Default : XML mode
-	_BinaryStream = NULL;
+	_BinaryStream = nullptr;
 
 	// Input stream ?
 	if (stream.isReading())
@@ -201,7 +201,7 @@ bool CIXml::init (IStream &stream)
 		_ErrorString.clear();
 
 		// The parser context
-        _Parser = xmlCreatePushParserCtxt(NULL, NULL, buffer, 4, NULL);
+        _Parser = xmlCreatePushParserCtxt(nullptr, nullptr, buffer, 4, nullptr);
 		nlassert (_Parser);
 
 		// For all the file
@@ -316,7 +316,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 					do
 					{
 						// If no more node, empty string
-						if (_CurrentNode == NULL)
+						if (_CurrentNode == nullptr)
 						{
 							value.clear();
 							_ContentStringIndex = 0;
@@ -337,7 +337,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 					while (_CurrentNode);
 
 					// Not found ?
-					if (_CurrentNode != NULL)
+					if (_CurrentNode != nullptr)
 					{
 						// Read the content
 						const char *content = (const char*)xmlNodeGetContent (_CurrentNode);
@@ -478,7 +478,7 @@ void CIXml::serial(sint16 &b)
 
 inline uint32 atoui( const char *ident)
 {
-	return (uint32) strtoul (ident, NULL, 10);
+	return (uint32) strtoul (ident, nullptr, 10);
 }
 
 void CIXml::serial(uint32 &b)
@@ -735,7 +735,7 @@ bool CIXml::xmlPushBeginInternal (const std::string &nodeName)
 			if ( ! _PushBegin )
 			{
 				// Current node exist ?
-				if (_CurrentNode==NULL)
+				if (_CurrentNode == nullptr)
 				{
 					// Get the first node
 					_CurrentNode = xmlDocGetRootElement (_Parser->myDoc);
@@ -787,7 +787,7 @@ bool CIXml::xmlPushBeginInternal (const std::string &nodeName)
 				while (_CurrentNode);
 
 				// Not found ?
-				if (_CurrentNode == NULL)
+				if (_CurrentNode == nullptr)
 				{
 					// Make an error message
 					char tmp[512];
@@ -971,7 +971,7 @@ xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const std::string &child
 			return child;
 		child = child->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -985,7 +985,7 @@ xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const std::string &childNam
 			return last;
 		last = last->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -999,7 +999,7 @@ xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, sint /* xmlElementType *
 			return child;
 		child = child->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1013,7 +1013,7 @@ xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, sint /* xmlElementType */ t
 			return last;
 		last = last->next;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1051,7 +1051,7 @@ xmlNodePtr CIXml::getRootNode () const
 	if (_Parser)
 		if (_Parser->myDoc)
 			return xmlDocGetRootElement (_Parser->myDoc);
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1166,7 +1166,7 @@ void CIXml::initLibXml()
 	_ErrorString.clear();
 	
 	// Set error handler
-	xmlSetGenericErrorFunc	(NULL, xmlGenericErrorFuncRead);
+	xmlSetGenericErrorFunc	(nullptr, xmlGenericErrorFuncRead);
 
 	LIBXML_TEST_VERSION
 	

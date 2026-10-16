@@ -1390,8 +1390,9 @@ private:
 	_RefInventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;\
 	uint32 RefInventoryId = INVENTORIES::NUM_INVENTORY;\
 	uint16 slotImage = 0xffff;\
+// TODO: add hotbar 
 
-// TODO: add hotbar
+
 #define PERSISTENT_POST_APPLY\
 	if ( slotImage != 0xFFFF )\
 	{\

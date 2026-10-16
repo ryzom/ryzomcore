@@ -63,7 +63,7 @@ static const char *entryTypeToStr(CBarManager::TEntryType et)
 
 
 // ***************************************************************************
-CBarManager		*CBarManager::_Instance= NULL;
+CBarManager		*CBarManager::_Instance = nullptr;
 
 
 // ***************************************************************************
@@ -89,12 +89,12 @@ void	CBarManager::CBarDataEntry::clear()
 // ***************************************************************************
 void	CBarManager::CBarDataEntry::resetDB()
 {
-	UIDIn= NULL;
-	PresentIn= NULL;
-	for(uint sc=0;sc< (int)SCORES::NUM_SCORES;sc++)
+	UIDIn = nullptr;
+	PresentIn = nullptr;
+	for(uint sc=0;sc<(int)SCORES::NUM_SCORES;sc++)
 	{
-		ScoreIn[sc]= NULL;
-		ScoreOut[sc]= NULL;
+		ScoreIn[sc] = nullptr;
+		ScoreOut[sc] = nullptr;
 	}
 }
 
@@ -187,7 +187,7 @@ void CBarManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -493,7 +493,7 @@ void		CBarManager::updateEntryFromDB(TEntryType type, uint entryId)
 	CBarDataEntry	&bde= entryArray[entryId];
 
 	// if the UID db was not found, can't do nothing... => abort
-	if(bde.UIDIn==NULL)
+	if(bde.UIDIn == nullptr)
 		return;
 
 	// get the new UID from the SERVER DB
@@ -543,7 +543,7 @@ void		CBarManager::updateTargetFromDB()
 	CBarDataEntry	&bde= _EntryBars[TargetType][0];
 
 	// if the UID db was not found, can't do nothing... => abort
-	if(bde.UIDIn==NULL)
+	if(bde.UIDIn == nullptr)
 		return;
 
 	// get the new UID from the SERVER DB
@@ -716,7 +716,7 @@ DECLARE_INTERFACE_CONSTANT(getMaxTeamMember, CBarManager::MaxTeamMember);
 class CAHBarManagerOnTarget : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CBarManager::getInstance()->updateTargetFromDB();
 	}
@@ -727,7 +727,7 @@ REGISTER_ACTION_HANDLER(CAHBarManagerOnTarget, "bar_manager_on_target");
 class CAHBarManagerOnTeam : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		uint	index;
 		fromString(Params, index);
@@ -741,7 +741,7 @@ REGISTER_ACTION_HANDLER(CAHBarManagerOnTeam, "bar_manager_on_team");
 class CAHBarManagerOnAnimal : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		uint	index;
 		fromString(Params, index);
@@ -755,7 +755,7 @@ REGISTER_ACTION_HANDLER(CAHBarManagerOnAnimal, "bar_manager_on_animal");
 class CAHBarManagerOnUserScores : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CBarManager::getInstance()->updateUserBars();
 	}

@@ -35,11 +35,12 @@ namespace NLSOUND {
 CSimpleSource::CSimpleSource(CSimpleSound *simpleSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
 	: CSourceCommon(simpleSound, spawn, cb, cbUserParam, cluster, groupController), 
 	_SimpleSound(simpleSound),
-	_Track(NULL), 
+	_Track(nullptr)
+    , 
 	_PlayMuted(false),
 	_WaitingForPlay(false)
 {
-	nlassert(_SimpleSound != 0);
+	nlassert(_SimpleSound != nullptr);
 
 	// get a local copy of the simple sound parameter
 	_Alpha = _SimpleSound->getAlpha();
@@ -59,7 +60,7 @@ void CSimpleSource::initPhysicalSource()
 {
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	CTrack *track = mixer->getFreeTrack(this);
-	if (track != NULL)
+	if (track != nullptr)
 	{
 		nlassert(track->hasPhysicalSource());
 		_Track = track;
@@ -76,9 +77,9 @@ void CSimpleSource::releasePhysicalSource()
 
 		// free the track
 		pSource->stop();
-		pSource->setStaticBuffer(NULL);
+		pSource->setStaticBuffer(nullptr);
 		mixer->freeTrack(_Track);
-		_Track = NULL;
+		_Track = nullptr;
 	}
 }
 
@@ -105,11 +106,11 @@ void CSimpleSource::setLooping(bool l)
 
 CVector CSimpleSource::getVirtualPos() const
 {
-	if (getCluster() != 0)
+	if (getCluster() != nullptr)
 	{
 		// need to check the cluster status
 		const CClusteredSound::CClusterSoundStatus *css = CAudioMixerUser::instance()->getClusteredSound()->getClusterSoundStatus(getCluster());
-		if (css != 0)
+		if (css != nullptr)
 		{
 			// there is some data here, update the virtual position of the sound.
 			float dist = (css->Position - getPos()).norm();
@@ -132,7 +133,7 @@ void CSimpleSource::play()
 	// -- Some test to check if we can play the source
 
 	// Check if sample buffer is available and if the sound source is not too far
-	if (_SimpleSound->getBuffer() == 0
+	if (_SimpleSound->getBuffer() == nullptr
 		|| !_SimpleSound->getBuffer()->isBufferLoaded()
 		//|| (mixer->getListenPosVector() - _Position).sqrnorm() > _SimpleSound->getMaxDistance() * _SimpleSound->getMaxDistance())
 		|| (_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > _SimpleSound->getMaxDistance() * _SimpleSound->getMaxDistance())
@@ -141,7 +142,7 @@ void CSimpleSource::play()
 		_WaitingForPlay = false;
 		if (_Spawn)
 		{
-			if (_SpawnEndCb != 0)
+			if (_SpawnEndCb != nullptr)
 				_SpawnEndCb(this, _CbUserParam);
 			
 			delete this;
@@ -260,7 +261,7 @@ void CSimpleSource::stop()
 
 	if (_Spawn)
 	{
-		if (_SpawnEndCb != NULL)
+		if (_SpawnEndCb != nullptr)
 		{
 			_SpawnEndCb(this, _CbUserParam);
 		}

@@ -200,8 +200,8 @@ public:
 		uint PZBModelPosition;
 	};
 	CVertexProgramLandscape(CLandscapeVBAllocator::TType type, bool lightMap = false);
-	virtual ~CVertexProgramLandscape() { }
-	virtual void buildInfo();
+	virtual ~CVertexProgramLandscape() NL_OVERRIDE { }
+	virtual void buildInfo() NL_OVERRIDE;
 public:
 	const CIdx &idx() const { return m_Idx; }
 	CIdx m_Idx;

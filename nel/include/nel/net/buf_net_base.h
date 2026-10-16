@@ -43,7 +43,7 @@ class CBufSock;
 /// Socket identifier
 typedef CBufSock *TSockId;
 
-static const TSockId InvalidSockId = (TSockId) NULL;
+static const TSockId InvalidSockId = (TSockId) nullptr;
 
 /// Callback function for message processing
 #if defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100

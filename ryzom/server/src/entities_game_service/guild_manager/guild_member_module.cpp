@@ -107,6 +107,7 @@ void CGuildMemberModule::quitGuild()
 	params[0].setEIdAIAlias( _GuildMemberCore->getIngameEId(), CAIAliasTranslator::getInstance()->getAIAlias(_GuildMemberCore->getIngameEId()) );
 
 	CFameManager::getInstance().clearPlayerGuild( _GuildMemberCore->getIngameEId() );
+
 	CGuildCharProxy proxy;
 	getProxy(proxy);
 	proxy.cancelAFK();
@@ -132,7 +133,6 @@ void CGuildMemberModule::quitGuild()
 				c->setLastGuildId(guild->getId());
 			}
 		}
-
 		guild->sendMessageToGuildMembers("GUILD_QUIT", params);
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::string_id);
 		params[0].StringId = guild->getNameId();
@@ -366,7 +366,7 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 		invitor.sendSystemMessage("GUILD_INCOMPATIBLE_ALLEGIANCE",params);
 		return;
 	}
-
+	
 	// check marauders case (character is neutral/neutral)
 	if (invitedAllegiance.first == PVP_CLAN::Neutral && invitedAllegiance.second == PVP_CLAN::Neutral && invitedChar->getOrganization() == 5)
 	{

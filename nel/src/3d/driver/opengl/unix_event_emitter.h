@@ -51,7 +51,7 @@ public:
 	/**
 	 * initialize CUnixEventEmitter
 	 */
-	void init(Display *dpy, Window win, NL3D::IDriver *driver = NULL);
+	void init(Display *dpy, Window win, NL3D::IDriver *driver = nullptr);
 
 	/**
 	 * sends all events to server
@@ -62,7 +62,7 @@ public:
 	/**
 	 * process input-related events (mouse and keyboard)
 	 */
-	bool processMessage(XEvent &event, CEventServer *server = NULL);
+	bool processMessage(XEvent &event, CEventServer *server = nullptr);
 
 	/**
 	 * Copy a string to system clipboard.

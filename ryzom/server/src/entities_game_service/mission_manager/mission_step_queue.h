@@ -37,17 +37,17 @@ Steps linked with waiting queues
 class CMissionStepQueueStart : public IMissionStepTemplate, public NLMISC::CRefCount
 {
 public:
-	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
 	
-	void getInitState( std::vector<uint32>& ret );
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE;
 
-	virtual uint32	sendStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver);
+	virtual uint32	sendStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver) NL_OVERRIDE;
 	
-	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList);
+	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
 
 	MISSION_STEP_GETNEWPTR(CMissionStepQueueStart)
 
@@ -72,16 +72,16 @@ class CMissionStepQueueEnd : public IMissionStepTemplate
 {
 public:
 
-	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
 	
-	void getInitState( std::vector<uint32>& ret );
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{}
 	
-	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList);
+	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
 
 	virtual bool isDisplayed() const { return false; }
 

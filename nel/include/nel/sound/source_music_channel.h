@@ -47,7 +47,7 @@ class CSourceMusicChannel : public IMusicChannel
 {
 public:
 	CSourceMusicChannel();
-	virtual ~CSourceMusicChannel();
+	virtual ~CSourceMusicChannel() NL_OVERRIDE;
 
 	/** Play some music (.ogg etc...)
 	 *	NB: if an old music was played, it is first stop with stopMusic()
@@ -55,33 +55,33 @@ public:
 	 *  \param async stream music from hard disk, preload in memory if false
 	 *	\param loop must be true to play the music in loop. 
 	 */
-	virtual bool play(const std::string &filepath, bool async, bool loop); 
+	virtual bool play(const std::string &filepath, bool async, bool loop) NL_OVERRIDE; 
 	
 	/// Stop the music previously loaded and played (the Memory is also freed)
-	virtual void stop();
+	virtual void stop() NL_OVERRIDE;
 
 	/// Makes sure any resources are freed, but keeps available for next play call
-	virtual void reset();
+	virtual void reset() NL_OVERRIDE;
 	
 	/// Pause the music previously loaded and played (the Memory is not freed)
-	virtual void pause();
+	virtual void pause() NL_OVERRIDE;
 	
 	/// Resume the music previously paused
-	virtual void resume();
+	virtual void resume() NL_OVERRIDE;
 	
 	/// Return true if a song is finished.
-	virtual bool isEnded();
+	virtual bool isEnded() NL_OVERRIDE;
 	
 	/// Return true if the song is still loading asynchronously and hasn't started playing yet (false if not async), used to delay fading
-	virtual bool isLoadingAsync();
+	virtual bool isLoadingAsync() NL_OVERRIDE;
 	
 	/// Return the total length (in second) of the music currently played
-	virtual float getLength();
+	virtual float getLength() NL_OVERRIDE;
 	
 	/** Set the music volume (if any music played). (volume value inside [0 , 1]) (default: 1)
 	 *	NB: the volume of music is NOT affected by IListener::setGain()
 	 */
-	virtual void setVolume(float gain);
+	virtual void setVolume(float gain) NL_OVERRIDE;
 	
 private:
 	CStreamFileSound m_Sound;

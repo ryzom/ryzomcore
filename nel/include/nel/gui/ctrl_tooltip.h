@@ -42,13 +42,13 @@ namespace NLGUI
 		/// Constructor
 		CCtrlToolTip(const TCtorParam &param) : CCtrlBase(param) {}
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
-		virtual void draw();
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc) NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		virtual bool		parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 		// Can do nothing with tooltip (but display it :) )
-		virtual	bool		isCapturable() const {return false;}
-		virtual void        serial(NLMISC::IStream &f);
+		virtual	bool		isCapturable() const NL_OVERRIDE {return false;}
+		virtual void        serial(NLMISC::IStream &f) NL_OVERRIDE;
 	public:
 
 	};

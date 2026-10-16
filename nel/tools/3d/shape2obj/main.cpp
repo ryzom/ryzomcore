@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	registerSerial3d();
 	CScene::registerBasics();
 
-	IShape *shapeMesh = NULL;
+	IShape *shapeMesh = nullptr;
 
 	CIFile ifile;
 

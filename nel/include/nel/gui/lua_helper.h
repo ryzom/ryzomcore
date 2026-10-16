@@ -20,10 +20,10 @@
 
 #ifndef RZ_LUA_HELPER_H
 #define RZ_LUA_HELPER_H
-
 #ifdef _WIN32
 		#include <windows.h>
 #endif
+
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
@@ -142,7 +142,7 @@ namespace NLGUI
 		ELuaBadCast() {}
 		ELuaBadCast(const std::string &reason) : ELuaError(reason) {}
 		// what(), plus append the Reason
-		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaBadCast: %s", what());}
+		virtual std::string luaWhat() const throw() NL_OVERRIDE {return NLMISC::toString("ELuaBadCast: %s", what());}
 	};
 
 	// Error when trying to indexate an object that is not a table
@@ -152,7 +152,7 @@ namespace NLGUI
 		ELuaNotATable() {}
 		ELuaNotATable(const std::string &reason) : ELuaError(reason) {}
 		// what(), plus append the Reason
-		virtual std::string luaWhat() const throw() {return NLMISC::toString("ELuaNotATable: %s", what());}
+		virtual std::string luaWhat() const throw() NL_OVERRIDE {return NLMISC::toString("ELuaNotATable: %s", what());}
 	};
 
 
@@ -224,7 +224,7 @@ namespace NLGUI
 		void				clear() { setTop(0); }
 		int					getTop();
 		bool				empty() { return getTop() == 0; }
-		void				pushGlobalTable();
+		void				pushGlobalTable();		
 		void				pushValue(int index);  // copie nth element of stack to the top of the stack
 		void				remove(int index);     // remove nth element of stack
 		void				insert(int index);     // insert last element of the stack before the given position
@@ -270,7 +270,7 @@ namespace NLGUI
 		bool				getTableBooleanValue(const char *name, bool        defaultValue= false);
 		double				getTableNumberValue(const char *name,  double      defaultValue= 0.0);
 		sint64				getTableIntegerValue(const char *name,  sint64     defaultValue= 0);
-		const char			*getTableStringValue(const char *name, const char *defaultValue= NULL);
+		const char			*getTableStringValue(const char *name, const char *defaultValue = nullptr);
 		// pushing value onto the stack
 		void				push(bool value);
 		void				push(float value);
@@ -383,7 +383,9 @@ namespace NLGUI
 		static const char *			_NELSmallScriptTableName;
 
 #ifdef _WIN32
+#ifdef NL_DEBUG
 		HINSTANCE m_LuaSocket;
+#endif
 #endif
 
 	private:

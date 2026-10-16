@@ -45,14 +45,14 @@ struct CBufferizedOutPacket
 		Packet = new uint8[packetSize];
 		memcpy (Packet, packet, packetSize);
 
-		if (addr != NULL)
+		if (addr != nullptr)
 		{
 			Addr = new CInetAddress;
 			*Addr = *addr;
 		}
 		else
 		{
-			Addr = NULL;
+			Addr = nullptr;
 		}
 	}
 
@@ -60,11 +60,11 @@ struct CBufferizedOutPacket
 	{
 		nlassert (Packet != NULL);
 		delete [] Packet;
-		Packet = NULL;
-		Client = NULL;
+		Packet = nullptr;
+		Client = nullptr;
 		PacketSize = 0;
 		Time = 0;
-		if (Addr != NULL)
+		if (Addr != nullptr)
 			delete Addr;
 	}
 
@@ -97,7 +97,7 @@ uint8	CUdpSimSock::_OutPacketDisordering = 0;
 
 void CUdpSimSock::sendUDPNow (const uint8 *buffer, uint32 len, const CInetAddress *addr)
 {
-	if (addr == NULL)
+	if (addr == nullptr)
 		UdpSock.send (buffer, len);
 	else
 		UdpSock.sendTo (buffer, len, *addr);

@@ -36,8 +36,8 @@ namespace NLGUI
 	// *****************************************************************************************************************
 	CInterfaceGroupWheel::CInterfaceGroupWheel(const TCtorParam &param) : CInterfaceGroup(param)
 	{
-		_AHWheelUp = NULL;
-		_AHWheelDown = NULL;
+		_AHWheelUp = nullptr;
+		_AHWheelDown = nullptr;
 	}
 
 	std::string CInterfaceGroupWheel::getProperty( const std::string &name ) const
@@ -102,8 +102,8 @@ namespace NLGUI
 	xmlNodePtr CInterfaceGroupWheel::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "group_wheel" );
 

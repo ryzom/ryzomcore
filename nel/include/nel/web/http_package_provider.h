@@ -46,7 +46,7 @@ class CHttpPackageProvider : public NLMISC::IStreamedPackageProvider
 {
 public:
 	CHttpPackageProvider();
-	virtual ~CHttpPackageProvider();
+	virtual ~CHttpPackageProvider() NL_OVERRIDE;
 
 	/// Download a file. This call is blocking
 	/// filePath: [out] ex. /games/nel/stream/00/00/000000000..

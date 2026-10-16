@@ -33,7 +33,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewTextFormated, std::string, "text_formated
 namespace NLGUI
 {
 
-	CViewTextFormated::IViewTextFormatter *CViewTextFormated::textFormatter = NULL;
+	CViewTextFormated::IViewTextFormatter *CViewTextFormated::textFormatter = nullptr;
 
 	std::string CViewTextFormated::getProperty(const std::string &name) const
     {
@@ -59,13 +59,13 @@ namespace NLGUI
 	xmlNodePtr CViewTextFormated::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewText::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_formated" );
 		xmlSetProp( node, BAD_CAST "format", BAD_CAST getFormatString().c_str() );
 
-		return NULL;
+		return nullptr;
 	}
 
 	// ****************************************************************************
@@ -106,7 +106,7 @@ namespace NLGUI
 	{
 		std::string formatedResult;
 
-		if( textFormatter == NULL )
+		if( textFormatter == nullptr)
 			formatedResult = inputString;
 		else
 			formatedResult = CViewTextFormated::textFormatter->formatString( inputString, paramString );

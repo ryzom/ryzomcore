@@ -1,7 +1,7 @@
 name: "Test Report"
 on:
   workflow_run:
-    workflows: ["CMake on multiple platforms", "Ryzom Core: CI / CD"]
+    workflows: ["Ryzom Core: CI / CD"]
     types:
       - completed
 permissions:

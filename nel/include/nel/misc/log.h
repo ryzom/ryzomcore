@@ -51,7 +51,8 @@ public:
 	// Debug information
 	struct TDisplayInfo
 	{
-		TDisplayInfo() : Date(0), LogType(CLog::LOG_NO), ThreadId(0), FileName(NULL), Line(-1), FuncName(NULL) {}
+		TDisplayInfo() : Date(0), LogType(CLog::LOG_NO), ThreadId(0), FileName(nullptr)
+		    , Line(-1), FuncName(nullptr) {}
 
 		time_t				Date;
 		TLogType			LogType;
@@ -178,7 +179,7 @@ public:
 	void resetFilters();
 
 	/// Removes a filter by name (in both filters).
-	void removeFilter( const char *filterstr = NULL);
+	void removeFilter( const char *filterstr = nullptr);
 
 	/// Displays the list of filter into a log
 	void displayFilter( CLog &log );
@@ -193,7 +194,7 @@ private:
 	friend class CSetLogPosition;
 	
 	/// If !noDisplayer(), sets line and file parameters, and enters the mutex. If !noDisplayer(), don't forget to call display...() after, to release the mutex.
-	void setPosition (sint line, const char *fileName, const char *funcName = NULL);
+	void setPosition (sint line, const char *fileName, const char *funcName = nullptr);
 
 	/// Symetric to setPosition(). Automatically called CSetLogPosition
 	void unsetPosition();

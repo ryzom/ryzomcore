@@ -40,14 +40,15 @@ namespace NLSOUND {
  */
 CSimpleSound::CSimpleSound() :
 	_Registered(false),
-	_Buffer(NULL),
+	_Buffer(nullptr)
+    ,
 	// _Detailed(false), // not used?
 	_Alpha(1.0),
 	_NeedContext(false)
 {
 	// init with NULL in case of unexecpted access
-	_Filename= NULL;
-	_Buffername= NULL;
+	_Filename = nullptr;
+	_Buffername = nullptr;
 }
 
 
@@ -56,19 +57,19 @@ CSimpleSound::CSimpleSound() :
  */
 CSimpleSound::~CSimpleSound()
 {
-	if (_Buffer != NULL)
+	if (_Buffer != nullptr)
 		CAudioMixerUser::getInstance()->getSoundBank()->unregisterBufferAssoc(this, _Buffer);
 }
 
 void CSimpleSound::setBuffer(IBuffer *buffer)
 {
-	if (_Buffer != NULL && buffer != NULL && _Buffer->getName() != buffer->getName())
+	if (_Buffer != nullptr && buffer != nullptr && _Buffer->getName() != buffer->getName())
 	{
 		// if buffer name change, update the registration/
 		CAudioMixerUser::getInstance()->getSoundBank()->unregisterBufferAssoc(this, _Buffer);
 		CAudioMixerUser::getInstance()->getSoundBank()->registerBufferAssoc(this, buffer);
 	}
-	else if (!_Registered && buffer != NULL)
+	else if (!_Registered && buffer != nullptr)
 	{
 		// creater initial registration.
 		CAudioMixerUser::getInstance()->getSoundBank()->registerBufferAssoc(this, buffer);
@@ -81,8 +82,8 @@ void CSimpleSound::setBuffer(IBuffer *buffer)
 void				CSimpleSound::getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const
 {
 	// A little hack, we use the reference vector to tag unavailable sample.
-	if (!(_Buffername == CStringMapper::emptyId()) && const_cast<CSimpleSound*>(this)->getBuffer() == 0)
-		subsounds.push_back(pair<string, CSound*>(CStringMapper::unmap(_Buffername)+" (sample)", (CSound*)NULL));
+	if (!(_Buffername == CStringMapper::emptyId()) && const_cast<CSimpleSound*>(this)->getBuffer() == nullptr)
+		subsounds.push_back(pair<string, CSound*>(CStringMapper::unmap(_Buffername)+" (sample)", (CSound*)nullptr));
 }
 
 
@@ -91,7 +92,7 @@ void				CSimpleSound::getSubSoundList(std::vector<std::pair<std::string, CSound*
  */
 IBuffer*			CSimpleSound::getBuffer()
 {
-	if (_Buffer == 0)
+	if (_Buffer == nullptr)
 	{
 		// try to find the sample buffer in the sample bank.
 		CAudioMixerUser *audioMixer = CAudioMixerUser::instance();
@@ -110,7 +111,7 @@ uint32				CSimpleSound::getDuration()
 {
 	IBuffer* buffer = getBuffer();
 
-	if ( buffer == NULL )
+	if ( buffer == nullptr)
 	{
 		return 0;
 	}
@@ -133,7 +134,7 @@ void				CSimpleSound::serial(NLMISC::IStream &s)
 	{
 		s.serial(bufferName);
 		_Buffername = CStringMapper::map(bufferName);
-		setBuffer(NULL);
+		setBuffer(nullptr);
 
 		// contain % so it need a context to play
 		if (bufferName.find ("%") != string::npos)
@@ -175,7 +176,7 @@ void				CSimpleSound::importForm(const std::string& filename, NLGEORGES::UFormEl
 	bufferName = CFile::getFilenameWithoutExtension(bufferName);
 	_Buffername = CStringMapper::map(bufferName);
 
-	setBuffer(NULL);
+	setBuffer(nullptr);
 
 	// contain % so it need a context to play
 	if (bufferName.find ("%") != string::npos)

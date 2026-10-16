@@ -30,13 +30,13 @@ namespace NLMISC
 
 
 // ======================================================================================================
-CClassRegistry::TClassMap		*CClassRegistry::RegistredClasses = NULL;
+CClassRegistry::TClassMap		*CClassRegistry::RegistredClasses = nullptr;
 
 
 // ======================================================================================================
 void		CClassRegistry::init()
 {
-	if (RegistredClasses == NULL)
+	if (RegistredClasses == nullptr)
 		RegistredClasses = new TClassMap;
 }
 
@@ -45,7 +45,7 @@ void		CClassRegistry::release()
 {
 	if( RegistredClasses )
 		delete RegistredClasses;
-	RegistredClasses = NULL;
+	RegistredClasses = nullptr;
 }
 
 // ======================================================================================================
@@ -58,7 +58,7 @@ IClassable	*CClassRegistry::create(const string &className)
 	it=RegistredClasses->find(className);
 
 	if(it==RegistredClasses->end())
-		return NULL;
+		return nullptr;
 	else
 	{
 		IClassable	*ptr;

@@ -23,10 +23,10 @@ end
 
 
 function misc:nilToEmpty(value)
-	if value == nil then
-		return ""
-	end
-	return value
+    if value == nil then
+        return ""
+    end
+    return value
 end
 
 --
@@ -134,6 +134,5 @@ function misc:initInvObserver(
     end
     return setmetatable(misc, self.invObserver)
 end
-
 -- VERSION --
 FILE_MISC_VERSION = 31

@@ -32,13 +32,13 @@ public:
 
 	CGuildOfficerModule( CGuildCharProxy & proxy, CGuildMember* guildMember)
 		:CGuildMemberModule(proxy,guildMember){}	
-	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const;
-	virtual bool canInvite()const;
+	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade grade)const NL_OVERRIDE;
+	virtual bool canInvite()const NL_OVERRIDE;
 
 	// Function to check if the member can pick a mission.
 	// By default only Officers and above can pick a guild mission.
 	// So we don't need to implement this function for the other grades
-	virtual bool canPickMission(TAIAlias alias)
+	virtual bool canPickMission(TAIAlias alias) NL_OVERRIDE
 	{
 		return true;
 	}

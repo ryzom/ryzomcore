@@ -118,7 +118,7 @@ public:
 public:
 	/// retrieve light information for the entity skeleton
 	virtual	void		getStaticLightSetup(NLMISC::CRGBA sunAmbient, std::vector<NL3D::CPointLightInfluence> &pointLightList,
-		uint8 &sunContribution, NLMISC::CRGBA &localAmbient);
+		uint8 &sunContribution, NLMISC::CRGBA &localAmbient) NL_OVERRIDE;
 };
 
 
@@ -154,8 +154,8 @@ public:
 		// ------------------------------------------------------------------------
 		SInstanceCL()
 		{
-			Current = Loading = NULL;
-			FXItemSheet = NULL;
+			Current = Loading = nullptr;
+			FXItemSheet = nullptr;
 			TextureSet = -1;
 			ApplyColor = false;
 			KeepHiddenWhenLoaded = false;
@@ -215,7 +215,7 @@ public:
 	/// Constructor.
 	CEntityCL();
 	/// Destructor.
-	virtual ~CEntityCL();
+	virtual ~CEntityCL() NL_OVERRIDE;
 
 	/// Primitive type
 	enum TType
@@ -380,7 +380,7 @@ public:
 	 * \return USkeleton * : pointer on the skeleton handle or NULL.
 	 */
 	NL3D::USkeleton *skeleton(const std::string &filename);
-	NL3D::USkeleton *skeleton() {return _Skeleton.empty()?NULL:&_Skeleton;}
+	NL3D::USkeleton *skeleton() {return _Skeleton.empty() ? nullptr : &_Skeleton;}
 
 	void setStateFx(const std::string &name);
 	void removeStateFx();
@@ -460,7 +460,7 @@ public:
 	 */
 	virtual void pacsFinalizeMove();
 	/// Get the entity position and set all visual stuff with it.
-	virtual void updateDisplay(CEntityCL *parent = 0);
+	virtual void updateDisplay(CEntityCL *parent = nullptr);
 	/// Set the cluster system for the current entity and all of its chidren.
 	void setClusterSystem(NL3D::UInstanceGroup *cluster);
 	// Get the current cluster system
@@ -656,10 +656,10 @@ public:
 
 
 	/// Serialize entity.
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	// return vector of ground fxs sorted by ground type, or NULL is ground fxs are not supported for the entity
-	virtual const std::vector<CGroundFXSheet> *getGroundFX() const { return NULL; }
+	virtual const std::vector<CGroundFXSheet> *getGroundFX() const { return nullptr; }
 
 	// are ground fx supported by entity ?
 	virtual bool supportGroundFX() const { return false; }
@@ -1222,7 +1222,7 @@ public:
 private:
 
 	// Override for string reception callback
-	virtual void onStringAvailable(uint stringId, const std::string &value);
+	virtual void onStringAvailable(uint stringId, const std::string &value) NL_OVERRIDE;
 
 };
 

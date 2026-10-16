@@ -10,10 +10,10 @@ r2.SelectBar =
    LastMenuHideTrigger = nil, -- last element that triggered the disparition of the select bar menu   
    InstancesType = "",
    InstancesTypes = {
-						{["type"]=i18n.get("uiR2EDScene"):toUtf8(),				["icon"]="r2_palette_entities.tga" },
-						{["type"]=i18n.get("uiR2EDMacroComponents"):toUtf8(),	["icon"]="r2_palette_components.tga" },
-						{["type"]=i18n.get("uiR2EDbotObjects"):toUtf8(),		["icon"]="r2_palette_objets.tga" },
-						{["type"]=i18n.get("uiR2EDPlotItems"):toUtf8(),			["icon"]="ICO_mission_purse.tga" }
+                            {["type"]=i18n.get("uiR2EDScene"):toUtf8(),				["icon"]="r2_palette_entities.tga" },
+                            {["type"]=i18n.get("uiR2EDMacroComponents"):toUtf8(),	["icon"]="r2_palette_components.tga" },
+                            {["type"]=i18n.get("uiR2EDbotObjects"):toUtf8(),		["icon"]="r2_palette_objets.tga" },
+                            {["type"]=i18n.get("uiR2EDPlotItems"):toUtf8(),			["icon"]="ICO_mission_purse.tga" }
 					},
 }
 

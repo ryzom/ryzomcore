@@ -100,7 +100,7 @@ long vorbisTellFunc(void *datasource)
 static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
   (size_t (*)(void *, size_t, size_t, void *))  vorbisReadFunc,
   (int (*)(void *, ogg_int64_t, int))		  vorbisSeekFunc,
-  (int (*)(void *))							 NULL, //vorbisCloseFunc,
+  (int (*)(void *)) nullptr, //vorbisCloseFunc,
   (long (*)(void *))							vorbisTellFunc
 };
 
@@ -111,7 +111,7 @@ CAudioDecoderVorbis::CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop)
 	stream->seek(0, NLMISC::IStream::end);
 	_StreamSize = stream->getPos();
 	stream->seek(_StreamOffset, NLMISC::IStream::begin);
-	ov_open_callbacks(this, &_OggVorbisFile, NULL, 0, OV_CALLBACKS_NLMISC_STREAM);
+	ov_open_callbacks(this, &_OggVorbisFile, nullptr, 0, OV_CALLBACKS_NLMISC_STREAM);
 }
 
 CAudioDecoderVorbis::~CAudioDecoderVorbis()

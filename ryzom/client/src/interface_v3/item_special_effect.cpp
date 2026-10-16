@@ -42,8 +42,8 @@ CItemSpecialEffectHelper::CItemSpecialEffectHelper()
 CItemSpecialEffectHelper* CItemSpecialEffectHelper::getInstance()
 {
 	// Singleton
-	static CItemSpecialEffectHelper* instance = NULL;
-	if (instance == NULL)
+	static CItemSpecialEffectHelper* instance = nullptr;
+	if (instance == nullptr)
 		instance = new CItemSpecialEffectHelper;
 	return instance;
 }

@@ -60,21 +60,21 @@ namespace NLGUI
 		}
 
 		/// Destructor
-		virtual ~CCtrlBase();
+		virtual ~CCtrlBase() NL_OVERRIDE;
 
 		static std::string tooltipParentToString( TToolTipParentType type );
 		static TToolTipParentType stringToToolTipParent( const std::string &str );
 
-		std::string getProperty( const std::string &name ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
 
-		void setProperty( const std::string &name, const std::string &value );
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
 
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// special parse
-		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
-		bool handleEvent (const NLGUI::CEventDescriptor &event);
+		bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 		sint32 getEventX() { return _EventX; }
 		sint32 getEventY() { return _EventY; }
@@ -82,7 +82,7 @@ namespace NLGUI
 		virtual CCtrlBase	*getSubCtrl (sint32 /* x */, sint32 /* y */) { return this; }
 
 		/// Debug
-		virtual uint32		getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual uint32		getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
 
 		/// Get the ContextHelp for this control. Default is to return _ContextHelp
@@ -141,7 +141,7 @@ namespace NLGUI
 		// called when this element or a son has been captured
 		virtual	void		elementCaptured(CCtrlBase * /* capturedElement */) {}
 
-		virtual bool isCtrl() const { return true; }
+		virtual bool isCtrl() const NL_OVERRIDE { return true; }
 
 		// Made for CtrlResizer to take the precedence over son controls.
 		virtual uint		getDeltaDepth() const { return 0; }
@@ -152,7 +152,7 @@ namespace NLGUI
 		bool isResizer() const{ return resizer; }
 
 		// from CInterfaceElement
-		virtual void		visit(CInterfaceElementVisitor *visitor);
+		virtual void		visit(CInterfaceElementVisitor *visitor) NL_OVERRIDE;
 
 		/** test if virtual desktop change is possible while this element is captured by the mouse
 		  * Useful for resizers
@@ -177,9 +177,9 @@ namespace NLGUI
 		REFLECT_EXPORT_END
 
 		// special for mouse over : return true and fill the name of the cursor to display
-		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }
+		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) NL_OVERRIDE { return false; }
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		uint32 getDepth( CInterfaceGroup *group );
 

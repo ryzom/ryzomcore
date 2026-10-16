@@ -239,7 +239,7 @@ bool CFormElm::isAtom () const
 const CType* CFormElm::getType ()
 {
 	warning (false, "getType", "This node is not an atom.");
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -366,7 +366,7 @@ CForm *CFormElm::getForm () const
 
 bool CFormElm::getNodeByName (UFormElm **result, const std::string &name, TWhereIsNode *where, bool verbose, uint32 round)
 {
-	const UFormElm *resultConst = NULL;
+	const UFormElm *resultConst = nullptr;
 	if (((const UFormElm*)this)->getNodeByName (&resultConst, name, where, verbose, round))
 	{
 		*result = const_cast<UFormElm*> (resultConst);
@@ -429,7 +429,7 @@ bool CFormElm::getValueByName (string& result, const std::string &name, TEval ev
 		if (type == UFormDfn::EntryType)
 		{
 			// The atom
-			const CFormElmAtom *atom = node ? safe_cast<const CFormElmAtom*> (node) : NULL;
+			const CFormElmAtom *atom = node ? safe_cast<const CFormElmAtom*> (node) : nullptr;
 
 			// Evale
 			nlassert (nodeType);
@@ -607,8 +607,8 @@ bool CFormElm::createNodeByName (const std::string &name, const CFormDfn **paren
 {
 	*parentDfn = ParentDfn;
 	indexDfn = ParentIndex;
-	*nodeDfn = NULL;
-	*nodeType = NULL;
+	*nodeDfn = nullptr;
+	*nodeType = nullptr;
 	*node = this;
 	bool parentVDfnArray;
 	return getInternalNodeByName (Form, name, parentDfn, indexDfn, nodeDfn, nodeType, node, type, array, Create, created, parentVDfnArray, true, NLGEORGES_FIRST_ROUND);
@@ -623,8 +623,8 @@ bool CFormElm::deleteNodeByName (const std::string &name, const CFormDfn **paren
 {
 	*parentDfn = ParentDfn;
 	indexDfn = ParentIndex;
-	*nodeDfn = NULL;
-	*nodeType = NULL;
+	*nodeDfn = nullptr;
+	*nodeType = nullptr;
 	*node = this;
 	bool created;
 	bool parentVDfnArray;
@@ -640,8 +640,8 @@ bool CFormElm::getNodeByName (const std::string &name, const CFormDfn **parentDf
 {
 	*parentDfn = ParentDfn;
 	indexDfn = ParentIndex;
-	*nodeDfn = NULL;
-	*nodeType = NULL;
+	*nodeDfn = nullptr;
+	*nodeType = nullptr;
 	*node = (CFormElm*)this;
 	bool created;
 	return getInternalNodeByName (Form, name, parentDfn, indexDfn, nodeDfn, nodeType, node, type, array, Return, created, parentVDfnArray, verbose, round);
@@ -657,8 +657,8 @@ bool CFormElm::arrayInsertNodeByName (const std::string &name, const CFormDfn **
 	// Get the node by name
 	*parentDfn = ParentDfn;
 	indexDfn = ParentIndex;
-	*nodeDfn = NULL;
-	*nodeType = NULL;
+	*nodeDfn = nullptr;
+	*nodeType = nullptr;
 	*node = (CFormElm*)this;
 	bool created;
 	bool parentVDfnArray;
@@ -683,7 +683,7 @@ bool CFormElm::arrayInsertNodeByName (const std::string &name, const CFormDfn **
 				// Create a new element
 
 				// The new element
-				CFormElm *newelm = NULL;
+				CFormElm *newelm = nullptr;
 				switch (type)
 				{
 				case UFormDfn::EntryType:
@@ -731,8 +731,8 @@ bool CFormElm::arrayDeleteNodeByName (const std::string &name, const CFormDfn **
 	// Get the node by name
 	*parentDfn = ParentDfn;
 	indexDfn = ParentIndex;
-	*nodeDfn = NULL;
-	*nodeType = NULL;
+	*nodeDfn = nullptr;
+	*nodeType = nullptr;
 	*node = (CFormElm*)this;
 	bool created;
 	bool parentVDfnArray;
@@ -794,7 +794,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 			if (*node)
 				*nodeDfn = safe_cast <CFormElmVirtualStruct*> (*node)->FormDfn;
 			else
-				*nodeDfn = NULL;
+				*nodeDfn = nullptr;
 		}
 		else
 			*nodeDfn = theEntry.getDfnPtr ();
@@ -804,8 +804,8 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 	{
 		nlassert (!(*node)->isArray ());
 		indexDfn = 0xffffffff;
-		*nodeType = (*node)->isAtom () ? safe_cast<CFormElmAtom*>(*node)->Type : NULL;
-		*nodeDfn = (*node)->isStruct () ? (const CFormDfn *)(safe_cast<CFormElmStruct*>(*node)->FormDfn) : NULL;
+		*nodeType = (*node)->isAtom () ? safe_cast<CFormElmAtom*>(*node)->Type : nullptr;
+		*nodeDfn = (*node)->isStruct () ? (const CFormDfn *)(safe_cast<CFormElmStruct*>(*node)->FormDfn) : nullptr;
 		type = (*node)->isAtom () ? UFormDfn::EntryType : (*node)->isVirtualStruct () ? UFormDfn::EntryVirtualDfn : UFormDfn::EntryDfn;
 		array = false;
 	}
@@ -850,7 +850,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 	bool wantArrayIndex = false;
 
 	// Last struct elm
-	CFormElmStruct *lastStructElm = ((*node)->ParentNode && (*node)->ParentNode->isStruct ()) ? safe_cast<CFormElmStruct*> ((*node)->ParentNode) : NULL;
+	CFormElmStruct *lastStructElm = ((*node)->ParentNode && (*node)->ParentNode->isStruct ()) ? safe_cast<CFormElmStruct*> ((*node)->ParentNode) : nullptr;
 	uint lastStructIndex = 0;
 	if (lastStructElm)
 	{
@@ -889,10 +889,10 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 					if ( ((type == UFormDfn::EntryDfn) || (type == UFormDfn::EntryVirtualDfn)) /*&& (!array)*/ )
 					{
 						// Check the virtual DFN is not empty..
-						if ( (type == UFormDfn::EntryVirtualDfn) && (*nodeDfn == NULL) )
+						if ( (type == UFormDfn::EntryVirtualDfn) && (*nodeDfn == nullptr) )
 						{
 							// Is it a parent virtual DFN ?
-							if ( (type == UFormDfn::EntryVirtualDfn) && (*node == NULL) )
+							if ( (type == UFormDfn::EntryVirtualDfn) && (*node == nullptr) )
 								parentVDfnArray = true;
 
 							// Create mode ?
@@ -906,7 +906,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 
 								// Get the form name of the current node
 								string formName;
-								vStruct->getFormName (formName, NULL);
+								vStruct->getFormName (formName, nullptr);
 
 								// Get the parent node if available
 								for (uint parent=0; parent<form->getParentCount (); parent++)
@@ -917,7 +917,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 
 									// Get the virtual node by name
 									UFormElm *uelm;
-									if (parentPtr->getRootNode ().getNodeByName (&uelm, formName, NULL, verbose, round+1) && uelm)
+									if (parentPtr->getRootNode ().getNodeByName (&uelm, formName, nullptr, verbose, round+1) && uelm)
 									{
 										// Value node ?
 										if (uelm->isVirtualStruct ())
@@ -948,7 +948,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 							}
 
 							// Still no DFN ?
-							if (*nodeDfn == NULL)
+							if (*nodeDfn == nullptr)
 							{
 								// Error message
 								smprintf (error, 512, "Empty virtual struct element. Can't look into it while it is not defined.");
@@ -1002,7 +1002,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 										*node = nextElt;
 
 										// Create node
-										if ( (action == Create) && (*node == NULL) )
+										if ( (action == Create) && (*node == nullptr) )
 										{
 											// Is an array ?
 											if (array)
@@ -1065,7 +1065,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 									  //										CFormElmStruct *lastStructElm = NULL;
 									  //uint lastStructIndex = 0xffffffff;
 
-										*node = NULL;
+										*node = nullptr;
 									}
 
 									break;
@@ -1150,7 +1150,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 					}
 
 					// Is it a parent virtual DFN ?
-					if (*node == NULL)
+					if (*node == nullptr)
 						parentVDfnArray = true;
 
 					// Should have an array defined
@@ -1177,7 +1177,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 								for (i=oldSize; i<array->Elements.size (); i++)
 								{
 									// The new element
-									CFormElm *newelm = NULL;
+									CFormElm *newelm = nullptr;
 									switch (type)
 									{
 									case UFormDfn::EntryType:
@@ -1265,7 +1265,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 						inArrayIndex = false;
 
 						// What kind of node ?
-						if ( (action == Create) && ( *node == NULL) )
+						if ( (action == Create) && ( *node == nullptr) )
 						{
 							switch (type)
 							{
@@ -1328,7 +1328,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 exit:;
 
 	// Error ?
-	bool errorAppend = endToken != NULL;
+	bool errorAppend = endToken != nullptr;
 
 	// Continue ?
 	if (!errorAppend)
@@ -1363,13 +1363,13 @@ exit:;
 				}
 
 				// No more node
-				*node = NULL;
+				*node = nullptr;
 			}
 		}
 	}
 
 	// Node not found in get node ? Look in parents !
-	if ( ((*node) == NULL) && (action == Return) && backupFirstElm )
+	if ( ((*node) == nullptr) && (action == Return) && backupFirstElm )
 	{
 		// Get the path name
 		string formName;
@@ -1381,11 +1381,11 @@ exit:;
 
 		// Backup first parent default value
 		bool defaultValue = false;
-		const CFormDfn *defaultParentDfnParent=0;
+		const CFormDfn *defaultParentDfnParent=nullptr;
 		uint defaultIndexDfnParent=0;
-		const CFormDfn *defaultNodeDfnParent=0;
-		const CType *defaultNodeTypeParent=0;
-		CFormElm *defaultNodeParent=0;
+		const CFormDfn *defaultNodeDfnParent=nullptr;
+		const CType *defaultNodeTypeParent=nullptr;
+		CFormElm *defaultNodeParent=nullptr;
 		UFormDfn::TEntryType defaultTypeParent = UFormDfn::EntryType;
 		bool defaultArrayParent=false;
 		bool defaultCreatedParent=false;
@@ -1405,10 +1405,10 @@ exit:;
 			}
 
 			// Get the node by name in the parent
-			const CFormDfn *parentDfnParent = NULL;
+			const CFormDfn *parentDfnParent = nullptr;
 			uint indexDfnParent = 0xffffffff;
-			const CFormDfn *nodeDfnParent = NULL;
-			const CType *nodeTypeParent = NULL;
+			const CFormDfn *nodeDfnParent = nullptr;
+			const CType *nodeTypeParent = nullptr;
 			CFormElm *nodeParent = (CFormElm*)&parentPtr->getRootNode ();
 			UFormDfn::TEntryType typeParent;
 			bool arrayParent;
@@ -1496,7 +1496,7 @@ const char* CFormElm::tokenize (const char *name, string &str, uint &/* errorInd
 {
 	if (*name == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	if (*name == '[')
@@ -1561,7 +1561,7 @@ bool CFormElm::setValueByName(const std::string &value, const std::string &name,
 		if (type == UFormDfn::EntryType)
 		{
 			// The atom
-			CFormElmAtom *atom = node ? safe_cast<CFormElmAtom*> (node) : NULL;
+			CFormElmAtom *atom = node ? safe_cast<CFormElmAtom*> (node) : nullptr;
 
 			// Evale
 			nlassert (nodeType);
@@ -1699,7 +1699,7 @@ void CFormElm::warning (bool exception, const std::string &function, const char 
 
 CFormElmStruct::CFormElmStruct (CForm *form, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex) : CFormElm (form, parentNode, parentDfn, parentIndex)
 {
-	FormDfn = NULL;
+	FormDfn = nullptr;
 }
 
 // ***************************************************************************
@@ -1719,7 +1719,7 @@ void CFormElmStruct::clean ()
 	for (elm =0; elm<Elements.size(); elm++)
 	{
 		delete Elements[elm].Element;
-		Elements[elm].Element = NULL;
+		Elements[elm].Element = nullptr;
 	}
 	Elements.clear();
 }
@@ -1802,7 +1802,7 @@ xmlNodePtr  CFormElmStruct::write (xmlNodePtr root, const CForm *form, const std
 	if (isUsed (form) || forceWrite)
 	{
 		// *** Header
-		xmlNodePtr node = xmlNewChild ( root, NULL, (const xmlChar*)"STRUCT", NULL);
+		xmlNodePtr node = xmlNewChild ( root, nullptr, (const xmlChar*)"STRUCT", nullptr);
 
 		// Element name
 		if (!structName.empty())
@@ -1823,7 +1823,7 @@ xmlNodePtr  CFormElmStruct::write (xmlNodePtr root, const CForm *form, const std
 		// Return the new node
 		return node;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1857,7 +1857,7 @@ void CFormElmStruct::read (xmlNodePtr node, CFormLoader &loader, const CFormDfn 
 		  //			bool found = false;
 
 			// Read the struct
-			xmlNodePtr child = NULL;
+			xmlNodePtr child = nullptr;
 
 			// Node can be NULL
 			if (node)
@@ -1949,16 +1949,16 @@ void CFormElmStruct::read (xmlNodePtr node, CFormLoader &loader, const CFormDfn 
 				if (dfnArray[dfnId]->Entries[elm].getArrayFlag ())
 				{
 					// Array of type
-					CFormElmArray *newElm = NULL;
+					CFormElmArray *newElm = nullptr;
 					if (dfnArray[dfnId]->Entries[elm].getType () == UFormDfn::EntryType)
 					{
 						// Load the new element
-						newElm = new CFormElmArray (form, NULL, dfnArray[dfnId]->Entries[elm].getTypePtr (), this, dfnArray[dfnId], elm);
+						newElm = new CFormElmArray (form, nullptr, dfnArray[dfnId]->Entries[elm].getTypePtr (), this, dfnArray[dfnId], elm);
 					}
 					// Array of struct
 					else if (dfnArray[dfnId]->Entries[elm].getType () == UFormDfn::EntryDfn)
 					{
-						newElm = new CFormElmArray (form, dfnArray[dfnId]->Entries[elm].getDfnPtr (), NULL, this, dfnArray[dfnId], elm);
+						newElm = new CFormElmArray (form, dfnArray[dfnId]->Entries[elm].getDfnPtr (), nullptr, this, dfnArray[dfnId], elm);
 					}
 
 					// Should be created
@@ -1992,7 +1992,7 @@ void CFormElmStruct::read (xmlNodePtr node, CFormLoader &loader, const CFormDfn 
 				}
 			}
 			else
-				Elements[elmIndex].Element = NULL;
+				Elements[elmIndex].Element = nullptr;
 
 			elmIndex++;
 		}
@@ -2059,7 +2059,7 @@ void CFormElmStruct::unlink (CFormElm *child)
 	{
 		if (Elements[i].Element == child)
 		{
-			Elements[i].Element = NULL;
+			Elements[i].Element = nullptr;
 			break;
 		}
 	}
@@ -2073,7 +2073,7 @@ void CFormElmStruct::unlink (CFormElm *child)
 void CFormElmStruct::getFormName (std::string &result, const CFormElm *child) const
 {
 	// Reset the result
-	if (child == NULL)
+	if (child == nullptr)
 	{
 		result.clear();
 		result.reserve (50);
@@ -2121,7 +2121,7 @@ void CFormElmStruct::warning (bool exception, const std::string &function, const
 
 	// Set the warning
 	string formName;
-	getFormName (formName, NULL);
+	getFormName (formName, nullptr);
 	NLGEORGES::warning (exception, "(CFormElmStruct::%s) on node (%s) in form (%s) : %s", function.c_str(), formName.c_str (), Form->getFilename ().c_str (), buffer);
 }
 
@@ -2157,7 +2157,7 @@ xmlNodePtr  CFormElmVirtualStruct::write (xmlNodePtr root, const CForm *form, co
 	if (isUsed (form) || forceWrite)
 	{
 		// *** Header
-		xmlNodePtr node = xmlNewChild ( root, NULL, (const xmlChar*)"VSTRUCT", NULL);
+		xmlNodePtr node = xmlNewChild ( root, nullptr, (const xmlChar*)"VSTRUCT", nullptr);
 
 		// Write the DFN filename in the node
 		xmlSetProp (node, (const xmlChar*)"DfnName", (const xmlChar*)DfnFilename.c_str());
@@ -2181,7 +2181,7 @@ xmlNodePtr  CFormElmVirtualStruct::write (xmlNodePtr root, const CForm *form, co
 		// Return the new node
 		return node;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -2252,7 +2252,7 @@ void CFormElmVirtualStruct::warning (bool exception, const std::string &function
 
 	// Set the warning
 	string formName;
-	getFormName (formName, NULL);
+	getFormName (formName, nullptr);
 	NLGEORGES::warning (exception, "(CFormElmVirtualStruct::%s) on node (%s) in form (%s) : %s", function.c_str(), formName.c_str (), Form->getFilename ().c_str (), buffer);
 }
 
@@ -2283,7 +2283,7 @@ void CFormElmArray::clean ()
 	for (elm =0; elm<Elements.size(); elm++)
 	{
 		delete Elements[elm].Element;
-		Elements[elm].Element = NULL;
+		Elements[elm].Element = nullptr;
 	}
 	Elements.clear ();
 }
@@ -2583,7 +2583,7 @@ xmlNodePtr CFormElmArray::write (xmlNodePtr root, const CForm *form, const std::
 	if (isUsed (form) || forceWrite)
 	{
 		// *** Header
-		xmlNodePtr node = xmlNewChild ( root, NULL, (const xmlChar*)"ARRAY", NULL);
+		xmlNodePtr node = xmlNewChild ( root, nullptr, (const xmlChar*)"ARRAY", nullptr);
 
 		// Element name
 		if (!structName.empty())
@@ -2605,7 +2605,7 @@ xmlNodePtr CFormElmArray::write (xmlNodePtr root, const CForm *form, const std::
 		return node;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -2705,7 +2705,7 @@ void CFormElmArray::unlink (CFormElm *child)
 	{
 		if (Elements[i].Element == child)
 		{
-			Elements[i].Element = NULL;
+			Elements[i].Element = nullptr;
 			break;
 		}
 	}
@@ -2731,7 +2731,7 @@ bool CFormElmArray::isUsed (const CForm *form) const
 void CFormElmArray::getFormName (std::string &result, const CFormElm *child) const
 {
 	// Reset the result
-	if (child == NULL)
+	if (child == nullptr)
 	{
 		result.clear();
 		result.reserve (50);
@@ -2781,7 +2781,7 @@ void CFormElmArray::warning (bool exception, const std::string &function, const 
 
 	// Set the warning
 	string formName;
-	getFormName (formName, NULL);
+	getFormName (formName, nullptr);
 	NLGEORGES::warning (exception, "(CFormElmArray::%s) on node (%s) in form (%s) : %s", function.c_str(), formName.c_str (), Form->getFilename ().c_str (), buffer);
 }
 
@@ -2814,7 +2814,7 @@ void CFormElmArray::getDependencies (std::set<std::string> &dependencies) const
 
 CFormElmAtom::CFormElmAtom (CForm *form, CFormElm *parentNode, const CFormDfn *parentDfn, uint parentIndex) : CFormElm (form, parentNode, parentDfn, parentIndex)
 {
-	Type = NULL;
+	Type = nullptr;
 }
 
 // ***************************************************************************
@@ -2844,7 +2844,7 @@ bool CFormElmAtom::getValue (string &result, TEval evaluate) const
 	nlassert (Type);
 
 	// Evale
-	return Type->getValue (result, Form, this, *ParentDfn, ParentIndex, evaluate, NULL, NLGEORGES_FIRST_ROUND, "");
+	return Type->getValue (result, Form, this, *ParentDfn, ParentIndex, evaluate, nullptr, NLGEORGES_FIRST_ROUND, "");
 }
 
 // ***************************************************************************
@@ -2995,7 +2995,7 @@ xmlNodePtr  CFormElmAtom::write (xmlNodePtr root, const CForm *form, const std::
 	if (isUsed (form) || forceWrite)
 	{
 		// *** Header
-		xmlNodePtr node = xmlNewChild ( root, NULL, (const xmlChar*)"ATOM", NULL);
+		xmlNodePtr node = xmlNewChild ( root, nullptr, (const xmlChar*)"ATOM", nullptr);
 
 		// Element name
 		if (!structName.empty())
@@ -3019,7 +3019,7 @@ xmlNodePtr  CFormElmAtom::write (xmlNodePtr root, const CForm *form, const std::
 		// Return the new node
 		return node;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -3098,7 +3098,7 @@ void CFormElmAtom::warning (bool exception, const std::string &function, const c
 
 	// Set the warning
 	string formName;
-	getFormName (formName, NULL);
+	getFormName (formName, nullptr);
 	NLGEORGES::warning (exception, "(CFormElmAtom::%s) on node (%s) in form (%s) : %s", function.c_str(), formName.c_str (), Form->getFilename ().c_str (), buffer);
 }
 

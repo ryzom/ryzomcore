@@ -684,7 +684,7 @@ class CShaderProgram : public IProgram
 {
 public:
 	CShaderProgram();
-	virtual ~CShaderProgram();
+	virtual ~CShaderProgram() NL_OVERRIDE;
 
 	/// VP-side features (for per-stage UBO flag queries)
 	CProgramFeatures VPFeatures;

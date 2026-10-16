@@ -119,17 +119,17 @@ class CFileList_##name: public IFileListBuilder\
 {\
 public:\
 	CFileList_##name(const std::string& rawArgs) {_RawArgs=rawArgs;}\
-	virtual std::string toString() const {return std::string(#name)+" "+_RawArgs;}\
-	virtual bool execute(CFileDescriptionContainer &fdc);\
+	virtual std::string toString() const NL_OVERRIDE {return std::string(#name)+" "+_RawArgs;}\
+	virtual bool execute(CFileDescriptionContainer &fdc) NL_OVERRIDE;\
 private:\
 	NLMISC::CSString _RawArgs;\
 };\
 class CFileListBuilder_##name: public IFileListBuilderBuilder\
 {\
 public:\
-	virtual const char* getName()			{return #name;}\
-	virtual const char* getDescription()	{return description;}\
-	virtual IFileListBuilder* build(const std::string& rawArgs)	{return new CFileList_##name(rawArgs);}\
+	virtual const char* getName() NL_OVERRIDE			{return #name;}\
+	virtual const char* getDescription() NL_OVERRIDE	{return description;}\
+	virtual IFileListBuilder* build(const std::string& rawArgs) NL_OVERRIDE	{return new CFileList_##name(rawArgs);}\
 };\
 CFileListRegisterer<CFileListBuilder_##name> __Registerer_CFileList_##name;\
 bool CFileList_##name::execute(CFileDescriptionContainer &fdc)

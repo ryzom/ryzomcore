@@ -28,7 +28,7 @@
 namespace NLGUI
 {
 
-	CCtrlDraggable* CCtrlDraggable::_LastDraggedSheet = NULL;
+	CCtrlDraggable* CCtrlDraggable::_LastDraggedSheet = nullptr;
 
 	CCtrlDraggable::CCtrlDraggable(const TCtorParam &param) :
 	CCtrlBase( param )

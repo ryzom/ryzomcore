@@ -1145,7 +1145,7 @@ void handleFile(const std::string &path)
 
 				// Find map extender in the modifier stack
 				uint mapExtenderIndex = 0;
-				CReferenceMaker *mapExtender = NULL;
+				CReferenceMaker *mapExtender = nullptr;
 				for (uint i = 0; i < derivedObject->nbReferences(); ++i)
 				{
 					if (derivedObject->getReference(i) && derivedObject->getReference(i)->classDesc()->classId() == fromClassId)
@@ -1270,7 +1270,7 @@ void handleFile(const std::string &path)
 				if (mapExtender)
 				{
 					uint editMeshIndex;
-					CReferenceMaker *editMesh = NULL;
+					CReferenceMaker *editMesh = nullptr;
 					for (uint i = 0; i < derivedObject->nbReferences(); ++i)
 					{
 						if (derivedObject->getReference(i) && derivedObject->getReference(i)->classDesc()->classId() == editMeshClassId)
@@ -1307,7 +1307,7 @@ void handleFile(const std::string &path)
 					}
 
 					uint editableMeshIndex;
-					CReferenceMaker *editableMesh = NULL;
+					CReferenceMaker *editableMesh = nullptr;
 					for (uint i = 0; i < derivedObject->nbReferences(); ++i)
 					{
 						if (derivedObject->getReference(i) && derivedObject->getReference(i)->classDesc()->classId() == editableMeshClassId)

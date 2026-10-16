@@ -48,7 +48,7 @@ public:
 
 
 	/// the click method, does nothing if linked to a radio controller, calls radioClick otherwise
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/**
 	* method called by the radio controller of the radio button,, do like the click method for regular buttons
@@ -61,7 +61,7 @@ public:
 	/**
 	* select this radio button (call unselectAll on the radio controller before calling the CButton::select method)
 	*/
-	virtual void select();
+	virtual void select() NL_OVERRIDE;
 
 	/**
 	* set the radio controller which controls this radio button

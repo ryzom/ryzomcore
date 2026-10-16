@@ -213,7 +213,7 @@ public:
 	void close()
 	{
 		fclose(_File);
-		_File = NULL;
+		_File = nullptr;
 	}
 
 

@@ -56,7 +56,7 @@ CViewText *CDBGroupListSheetMission::CSheetChildMission::createViewText() const
 	// create a view text id because mission text is send by the server
 	CViewTextIDFormated *vti = new CViewTextIDFormated(CViewBase::TCtorParam());
 	if (Ctrl) vti->setDBLeaf(dynamic_cast<CCDBNodeLeaf *>(Ctrl->getRootBranch()->getNode(ICDBNode::CTextId("TEXT"))));
-	else vti->setDBLeaf(NULL);
+	else vti->setDBLeaf(nullptr);
 	vti->setFormatString("$t");
 	return vti;
 }
@@ -87,7 +87,7 @@ void CDBGroupListSheetMission::CSheetChildMission::updateViewText(CDBGroupListSh
 {
 	CSheetChild::updateViewText(pFather);
 
-	if ((Ctrl == NULL) || (Text == NULL)) return;
+	if ((Ctrl == nullptr) || (Text == nullptr)) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	if (CachePreReqState == MISSION_DESC::PreReqFail)

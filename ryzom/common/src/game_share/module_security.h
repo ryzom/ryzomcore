@@ -39,7 +39,7 @@ struct TClientInfo : public NLNET::TSecurityData
 	std::string			UserPriv;
 	std::string			ExtendedPriv;
 
-	void serial(NLMISC::CMemStream &s)
+	void serial(NLMISC::CMemStream &s) NL_OVERRIDE
 	{
 		s.serial(UserId);
 		s.serial(ClientEid);

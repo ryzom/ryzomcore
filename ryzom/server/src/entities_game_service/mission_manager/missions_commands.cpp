@@ -38,7 +38,6 @@
 #include "weather_everywhere.h"
 #include "death_penalties.h"
 #include "harvest_source.h"
-
 #include "mission_manager/mission_team.h"
 #include "mission_manager/mission_step_ai.h"
 #include "mission_manager/mission_guild.h"
@@ -563,8 +562,7 @@ CInventoryPtr getInventory(CCharacter *c, const string &inv)
 			case INVENTORIES::bag:
 			case INVENTORIES::equipment:
 			case INVENTORIES::handling:
-			case INVENTORIES::hotbar:
-			case INVENTORIES::pet_animal1:
+			case INVENTORIES::hotbar: case INVENTORIES::pet_animal1:
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
 			case INVENTORIES::pet_animal4:
@@ -624,9 +622,9 @@ NLMISC_COMMAND(getEid, "get entitiy id of entity", "<uid>")
 NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <sheetid> <quality> <drop=0|1> [<phraseid>|<param>=<value>,*]")
 {
 
+
 	if (args.size() < 6)
 		return false;
-
 	GET_ACTIVE_CHARACTER
 
 	string selected_inv = args[1];
@@ -669,7 +667,6 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 					NLMISC::fromString(quality_params[1], recommended);
 					item->recommended(recommended);
 				}
-
 				const CStaticItem* form = CSheets::getForm(sheet);
 				if (form != NULL && form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
 					item->setSapLoad(quality);
@@ -703,25 +700,23 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 		if (finalItem != NULL)
 		{
 			if (quality_params.size() > 1)
-			{
-				uint16 recommended;
-				NLMISC::fromString(quality_params[1], recommended);
-				finalItem->recommended(recommended);
-			}
-
+				{
+					uint16 recommended;
+					NLMISC::fromString(quality_params[1], recommended);
+					finalItem->recommended(recommended);
+				}
 			const CStaticItem* form = finalItem->getStaticForm();
 
 			if (form != NULL) {
 				if (form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE)
 					finalItem->setSapLoad(finalItem->quality());
 			}
-
 			if (c->addItemToInventory(getTInventory(selected_inv), finalItem))
 			{
+
 				log.displayNL("OK");
 				return true;
 			}
-
 			finalItem.deleteItem();
 		}
 	}
@@ -733,9 +728,9 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 
 NLMISC_COMMAND(spawnNamedItem, "Spawn a named Item", "<uid> <inv> <quantity> <named_item>")
 {
+
 	if (args.size() < 4)
 		return false;
-
 	GET_ACTIVE_CHARACTER
 
 	string selected_inv = args[1];
@@ -813,17 +808,16 @@ NLMISC_COMMAND(spawnCrystalItem, "Spawn a crystalized spell or allegory", "<uid>
 		{
 			item->recommended(sap_charge);
 			item->applyEnchantment(sheets);
-
 			log.displayNL("OK");
 			return true;
 		}
+
 		item.deleteItem();
 	}
 
 	log.displayNL("ERR: adding item");
 	return true;
 }
-
 
 
 //----------------------------------------------------------------------------
@@ -1480,10 +1474,9 @@ NLMISC_COMMAND(getPlayerPosition, "get position of an user", "<player name>")
 	}
 
 	log.displayNL("%s", player->getPositionInfos().c_str());
+
 	return true;
 }
-
-
 
 
 //----------------------------------------------------------------------------
@@ -2191,7 +2184,6 @@ NLMISC_COMMAND(getPlayersInPowos, "get list of players in a powo", "[onlyPowoId]
 
 	if (args.size() >= 1)
 		fromString(args[0], onlyPowoId);
-
 	CPlayerManager::TMapPlayers::const_iterator itPlayer = PlayerManager.getPlayers().begin();
 
 	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer)
@@ -2539,7 +2531,6 @@ NLMISC_COMMAND(setAuraFx, "setAuraFx", "<uid> aura")
 
 	if (args[1] == "marauder")
 		fx.Aura = MAGICFX::TeleportMarauder;
-
 	if (args[1] == "levelup")
 		fx.Aura = MAGICFX::LevelUp;
 
@@ -2830,7 +2821,6 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 	CEntityId playerId;
 	if (isChar)
 		playerId = c->getId();
-
 	// Replace an existing entity (e.g. a temporary mount) instead of spawning at x,y,z
 	CEntityId targetEntityId;
 	if (args.size() >= 13)
@@ -2899,14 +2889,14 @@ NLMISC_COMMAND(grpScript, "executes a script on an event npc group", "<uid> <gro
 	else
 	{
 		msgout = CMessage("EVENT_NPC_GROUP_SCRIPT");
-		uint32 messageVersion = 1;
-		msgout.serial(messageVersion);
-		msgout.serial(nbString);
-		msgout.serial(playerEid);
-		msgout.serial(botsName);
-	}
+	uint32 messageVersion = 1;
+	msgout.serial(messageVersion);
+	msgout.serial(nbString);
 
-	for (uint32 i = 2; i < nbString; ++i)
+	msgout.serial(playerEid);
+	msgout.serial(botsName);
+	}
+	for (uint32 i=2; i<nbString; ++i)
 	{
 		string arg = args[i]+";";
 
@@ -2966,13 +2956,13 @@ NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid|@_ai_instance> <groupna
 		// try to find the bot name
 		vector<TAIAlias> aliases;
 
-		log.displayNL("NAME: %s", groupname.c_str());
-		CAIAliasTranslator::getInstance()->getNPCAliasesFromName(groupname, aliases);
-		if (aliases.empty())
-		{
-			log.displayNL("ERR: INVALID_BOT");
+	log.displayNL("NAME: %s", groupname.c_str());
+	CAIAliasTranslator::getInstance()->getNPCAliasesFromName(groupname, aliases);
+	if (aliases.empty())
+	{
+		log.displayNL("ERR: INVALID_BOT");
 			return true;
-		}
+	}
 
 		TAIAlias alias = aliases[0];
 
@@ -2989,16 +2979,16 @@ NLMISC_COMMAND(setUrl, "changes the url of a bot", "<uid|@_ai_instance> <groupna
 			uint32 program = creature->getBotChatProgram();
 			if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
 			{
-				program |= 1 << BOTCHATTYPE::WebPageFlag;
-				creature->setBotChatProgram(program);
-			}
+			program |= 1 << BOTCHATTYPE::WebPageFlag;
+			creature->setBotChatProgram(program);
+		}
 
-			const string &wp = creature->getWebPage();
-			if (args.size() < 3)
-			{
-				(string &)wp = "";
-				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
-				creature->setBotChatProgram(program);
+		const string &wp = creature->getWebPage();
+		if (args.size() < 3)
+		{
+			(string &)wp = "";
+			program &= ~(1 << BOTCHATTYPE::WebPageFlag);
+			creature->setBotChatProgram(program);
 			}
 			else
 			{
@@ -3082,8 +3072,8 @@ NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 	sendMessageViaMirror("IOS", msgout);
 	return true;
 }
-
 //setTag 2 pvpA pvp_ally_6.tga
+
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setTag, "set player tags", "<uid> <tag> <value>")
 {
@@ -3329,11 +3319,13 @@ NLMISC_COMMAND(spawnArkMission,"spawn Mission","<uid> <bot_name> <mission_name>"
 	uint8 result = CMissionManager::getInstance()->instanciateMission(c, missionAlias, giverAlias, eventList);
 	if (!result)
 	{
-	c->processMissionEventList(eventList,true, CAIAliasTranslator::Invalid);
+		c->processMissionEventList(eventList,true, CAIAliasTranslator::Invalid);
 		log.displayNL("OK");
 	}
 	else
+	{
 		log.displayNL("ERR: %d", result);
+	}
 
 	return true;
 }
@@ -3544,7 +3536,6 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 	if ( c->getRiderEntity().isNull() )
 	{
 		CEntityId e;
-
 		if (args.size() > 1)
 		{
 			e = CEntityId(args[1]);
@@ -3553,7 +3544,6 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 		{
 			e = c->getTarget();
 		}
-
 		if( e.getType() == RYZOMID::creature || e.getType() == RYZOMID::npc )
 		{
 			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( e );
@@ -3674,6 +3664,7 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 		log.displayNL("OK");
 		return true;
 	}
+
 
 	CContinent * continent = CZoneManager::getInstance().getContinent(msg.Coordinate_X, msg.Coordinate_Y);
 	if (!continent)
@@ -4080,7 +4071,6 @@ NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInvento
 
 	if (index >= MAX_INVENTORY_ANIMAL)
 	{
-
 		if (args.size() > 2)
 		{
 			CEntityId entityId(args[2]);
@@ -4159,7 +4149,6 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 
 
 	uint32 i=0;
-
 	if (args.size() == 3 && props.size() != prop_args.size())
 	{
 		log.displayNL("ERR: bad number of args");
@@ -4179,7 +4168,6 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 					c->setHairColor(c->getDefaultHairColor(), false, false);
 					continue;
 				}
-
 				CSheetId sheetId(prop_args[i]);
 				if (sheetId == CSheetId::Unknown)
 				{
@@ -4219,6 +4207,7 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 			{
 				uint32 color;
 				fromString(prop_args[i], color);
+
 
 				if (!c->setHairColor(color, props[i] == "wigcolor", false))
 					log.displayNL("ERR: same color");
@@ -4701,7 +4690,6 @@ NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<ui
 {
 	if (args.size() != 2) return false;
 	GET_ACTIVE_CHARACTER
-
 	std::vector< std::string > bricks;
 	NLMISC::splitString(args[1], ",", bricks);
 	bool res = true;
@@ -4729,7 +4717,7 @@ NLMISC_COMMAND(addBricks, "Specified player learns given brick", "<uid> <brick1,
 	{
 		CSheetId brickId(bricks[i]);
 		if (!c->haveBrick(brickId))
-			c->addKnownBrick(brickId);
+		c->addKnownBrick(brickId);
 	}
 	return true;
 }
@@ -5582,14 +5570,14 @@ NLMISC_COMMAND(addEntitiesTrigger, "add an Entity as RP points trigger", "<uid> 
 	{
 		vector<TAIAlias> aliases;
 		CAIAliasTranslator::getInstance()->getNPCAliasesFromName( e, aliases );
-		if (aliases.empty())
+		if ( aliases.empty() )
 			id.fromString(args[1].c_str());
 		else
 			id = CAIAliasTranslator::getInstance()->getEntityId(aliases[0]);
 	}
-
 	if (id == CEntityId::Unknown)
 		return "ERR: no entity";
+
 	uint16 distance;
 	fromString(args[2], distance);
 	string url = args[3];
@@ -5668,7 +5656,6 @@ NLMISC_COMMAND(executePhrase,"execute a sabrina phrase","uid cyclic? [<brick ids
 	}
 	return true;
 }
-
 NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 {
 	if (args.size() < 3)
@@ -5676,13 +5663,12 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 
 	GET_ACTIVE_CHARACTER
 
-	if (args[1] == "speedswimbonus")
-	{
+
+	if (args[1] == "speedswimbonus") {
 		uint32 value;
 		NLMISC::fromString(args[2], value);
 		c->setCurrentSpeedSwimBonus(value);
 	}
-
 	if (args[1] == "invisible")
 	{
 		if (args[2] == "1" || strlwr(args[2]) == "on" || strlwr(args[2]) == "true")
@@ -5702,7 +5688,7 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 				c->setAggroableSave(false);
 				//c->setAfkState(true);
 				log.displayNL("OK");
-			}
+}
 			else
 				log.displayNL("ERR:INVU");
 		}
@@ -5718,8 +5704,3 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 	}
 	return true;
 }
-
-
-
-
-

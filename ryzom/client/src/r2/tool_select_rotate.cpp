@@ -115,7 +115,7 @@ bool CToolSelectRotate::isActionPossibleOn(const CInstance &instance) const
 	{
 		return false;
 	}
-	if (instance.getEntity() != NULL)
+	if (instance.getEntity() != nullptr)
 	{
 		return !instance.getClass()["NameToProp"]["Angle"].isNil();
 	}
@@ -149,7 +149,7 @@ bool CToolSelectRotate::onMouseLeftButtonDown()
   */
 class CAHSelectRotate : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().setCurrentTool(new CToolSelectRotate);
 	}

@@ -132,9 +132,10 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgScenarioUploaded( const R2::CObject* value)
-			:_Value( value?value->clone():NULL){}
+			:_Value( value?value->clone() : nullptr)
+	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onScenarioUploaded(server, _Value.getPtr());
 		}
@@ -146,9 +147,10 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgSet(const std::string &instanceId, const std::string &attrName, const R2::CObject* value)
-			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone():NULL){}
+			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone() : nullptr)
+	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeSet(server, _InstanceId, _AttrName, _Value.getPtr());
 		}
@@ -162,9 +164,10 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject* value)
-			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone():NULL){}
+			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone() : nullptr)
+	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeInserted(server, _InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
 		}
@@ -182,7 +185,7 @@ namespace R2 {
 		CServerAnswerMsgErased(const std::string &instanceId, const std::string &attrName, sint32 position)
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeErased(server, _InstanceId, _AttrName, _Position);
 		}
@@ -200,7 +203,7 @@ namespace R2 {
 			:_InstanceId1(instanceId1), _AttrName1(attrName1), _Position1(position1),
 			_InstanceId2(instanceId2), _AttrName2(attrName2), _Position2(position2){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeMoved(server, _InstanceId1, _AttrName1, _Position1, _InstanceId2, _AttrName2, _Position2);
 		}
@@ -397,7 +400,7 @@ CClientEditionModule::CClientEditionModule()
 	_ChannelId = TChanID::Unknown;
 	_Mute = false;
 
-	_ServerAnswerForseener = 0;
+	_ServerAnswerForseener = nullptr;
 }
 
 CClientEditionModule::~CClientEditionModule()
@@ -413,7 +416,7 @@ void CClientEditionModule::init(NLNET::IModuleSocket* clientGw, CDynamicMapClien
 //	_ClientGw = clientGw;
 
 	_Eid = "Client0";
-	_TranslationModule = 0;
+	_TranslationModule = nullptr;
 	_SessionId = TSessionId(0);
 
 
@@ -428,7 +431,7 @@ void CClientEditionModule::init()
 		return;
 	_Emotes.reset( new CEmoteBehavior() );
 	_Palette = new CPalette();
-	_Scenario = new CScenario(0);
+	_Scenario = new CScenario(nullptr);
 	_Factory = new CObjectFactoryClient(_Eid);
 	_PropertyAccessor = new CPropertyAccessor(_Client, _Factory);
 //	CObjectSerializer::Factory = _Factory;
@@ -466,11 +469,11 @@ void CClientEditionModule::init()
 void CClientEditionModule::release()
 {
 	//H_AUTO(R2_CClientEditionModule_release)
-	delete _ServerAnswerForseener; _ServerAnswerForseener = 0;
-	delete _Palette; _Palette = 0;
-	delete _Scenario;  _Scenario = 0;
-	delete _Factory; _Factory = 0;
-	delete _PropertyAccessor;	_PropertyAccessor = 0;
+	delete _ServerAnswerForseener; _ServerAnswerForseener = nullptr;
+	delete _Palette; _Palette = nullptr;
+	delete _Scenario;  _Scenario = nullptr;
+	delete _Factory; _Factory = nullptr;
+	delete _PropertyAccessor;	_PropertyAccessor = nullptr;
 	_Initialized = false;
 	_Emotes.reset();
 }
@@ -504,11 +507,11 @@ void CClientEditionModule::onModuleDown(NLNET::IModuleProxy *moduleProxy)
 
 	if (moduleClassName == "ServerEditionModule")
 	{
-		_ServerEditionProxy = NULL;
+		_ServerEditionProxy = nullptr;
 	}
 	else if ( moduleClassName == "ServerAnimationModule")
 	{
-		_ServerAnimationProxy = NULL;
+		_ServerAnimationProxy = nullptr;
 	}
 	else
 		return;
@@ -549,7 +552,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 		CEditor::connectionMsg("");
 		CClientMessageAdventureUserConnection  bodyConnection;
 		nlRead(message,serial,bodyConnection);
-		onRingAccessUpdated(0, bodyConnection.RingAccess);
+		onRingAccessUpdated(nullptr, bodyConnection.RingAccess);
 
 		nlinfo("R2CED: user Connected as Client %d In Mode %d", bodyConnection.EditSlotId, bodyConnection.Mode);
 		_SessionId = bodyConnection.SessionId;
@@ -720,7 +723,7 @@ void CClientEditionModule::requestCreateScenario(CObject* scenario)
 bool CClientEditionModule::requestTeleportOneCharacterToAnother(uint32 sessionId, uint32 sourceCharId, uint32 destCharId)
 {
 	//H_AUTO(R2_CClientEditionModule_requestTeleportOneCharacterToAnother)
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.teleportOneCharacterToAnother(this, (TSessionId)sessionId, sourceCharId, destCharId);
@@ -733,7 +736,7 @@ void CClientEditionModule::requestUpdateRtScenario( CObject* scenario)
 	//H_AUTO(R2_CClientEditionModule_requestUpdateRtScenario)
 	//	CSerialFactoryBackup fb;
 	CMessage message ("requestUpdateRtScenario");
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CObjectSerializerServer obj(scenario);
 	obj.compress();
 	message.serial(obj);
@@ -747,7 +750,7 @@ void CClientEditionModule::requestCreatePrimitives()
 {
 	//H_AUTO(R2_CClientEditionModule_requestCreatePrimitives)
 	CMessage message ("DBG_CREATE_PRIMITIVES");
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	_ServerEditionProxy->sendModuleMessage(this, message );
 }
 
@@ -756,7 +759,7 @@ void CClientEditionModule::requestStopTest()
 {
 	//H_AUTO(R2_CClientEditionModule_requestStopTest)
 	CMessage message ("STOP_TEST");
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	_ServerEditionProxy->sendModuleMessage(this, message );
 }
 
@@ -767,7 +770,7 @@ bool CClientEditionModule::requestUploadScenario(CObject* scenario)
 {
 	//H_AUTO(R2_CClientEditionModule_requestUploadScenario)
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	CObjectSerializerServer body(scenario);
@@ -824,7 +827,7 @@ void CClientEditionModule::requestSetNodeNoTest(const std::string& instanceId, c
 {
 	//H_AUTO(R2_CClientEditionModule_requestSetNodeNoTest)
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	CObjectSerializerServer value2(value);
 	value2.compress();
@@ -845,7 +848,7 @@ void CClientEditionModule::requestEraseNode( const std::string& instanceId, cons
 	}
 
 //	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	uint32 messageId = _ServerAnswerForseener->onNodeErased(instanceId, attrName, position);
 	proxy.onNodeEraseAsked(this, messageId, instanceId, attrName, position);
@@ -870,7 +873,7 @@ void CClientEditionModule::requestInsertNode(const std::string& instanceId, cons
 		}
 	}
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	CObjectSerializerServer value2(value);
 	value2.compress();
@@ -901,7 +904,7 @@ void CClientEditionModule::requestMoveNode(
 	if (dest) nlassert(!dest->getGhost());
 //	CSerialFactoryBackup fb;
 
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	uint32 messageId = _ServerAnswerForseener->onNodeMoved(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
 	proxy.onNodeMoveAsked(this, messageId, instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
@@ -912,7 +915,7 @@ void CClientEditionModule::requestMapConnection( uint32 scenarioId, bool mustTp,
 {
 	//H_AUTO(R2_CClientEditionModule_requestMapConnection)
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.onMapConnectionAsked(this, (TSessionId)scenarioId, mustTp, mustUpdateHighLevel,  R2::TUserRole::ur_editor);
 }
@@ -953,7 +956,7 @@ CObject* CClientEditionModule::getPropertyValue(const std::string& instanceId, c
 {
 	//H_AUTO(R2_CClientEditionModule_getPropertyValue)
 	CObject* component = _Scenario->find(instanceId);
-	if (!component) return 0;
+	if (!component) return nullptr;
 	return _PropertyAccessor->getPropertyValue(component, attrName);
 }
 
@@ -1020,7 +1023,7 @@ bool CClientEditionModule::askUpdateCharMode(R2::TCharMode mode)
 {
 	//H_AUTO(R2_CClientEditionModule_askUpdateCharMode)
 	//	CSerialFactoryBackup fb;
-	if (_ServerEditionProxy == NULL) { return false; };
+	if (_ServerEditionProxy == nullptr) { return false; };
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.onCharModeUpdateAsked(this, mode);
@@ -1213,7 +1216,7 @@ bool CClientEditionModule::requestStartScenario()
 {
 	//H_AUTO(R2_CClientEditionModule_	)
 
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
@@ -1266,7 +1269,7 @@ CUserComponent* CClientEditionModule::getUserComponentByHashMd5( const NLMISC::C
 	if (first == last)
 	{
 		nlwarning("Error: try to upload unknown component '%s'", md5.toString().c_str() );
-		return 0;
+		return nullptr;
 	}
 
 	return  first->second;
@@ -1368,9 +1371,9 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 
 
 	uint32 uncompressedFileLength = 0;
-	uint8* uncompressedFile=0;
+	uint8* uncompressedFile=nullptr;
 	uint32 compressedFileLength = 0;
-	uint8* compressedFile=0;
+	uint8* compressedFile=nullptr;
 	bool compressed = false;
 	bool ok = false;
 
@@ -1566,7 +1569,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 
 	}
 
-	delete  [] compressedFile; compressedFile = 0;
+	delete  [] compressedFile; compressedFile = nullptr;
 
 	//size of the destination buffer, which must be at least 0.1% larger than sourceLen plus 12 bytes
 
@@ -1625,7 +1628,7 @@ CUserComponent* CClientEditionModule::getUserComponentByFilename(const std::stri
 	{
 		return found->second;
 	}
-	return 0;
+	return nullptr;
 }
 
 void CClientEditionModule::saveUserComponentFile(const std::string& filename, bool mustCompress)
@@ -1780,7 +1783,7 @@ void CClientEditionModule::onQuotaUpdated(NLNET::IModuleProxy * /* senderModuleP
 uint32 CClientEditionModule::getCurrentMaxId()
 {
 	//H_AUTO(R2_CClientEditionModule_getCurrentMaxId)
-	if (_Scenario == NULL)
+	if (_Scenario == nullptr)
 		return 1000;
 	std::string eid = getEid();
 	sint32 currentId = _Factory->getMaxId(eid);
@@ -2378,7 +2381,7 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 	if (!ok)
 	{
 		nlwarning("The server has refuse the client to load the a file"); //should (can) not happen
-		this->systemMsg(0, "ERR", "", "The server has refuse the client to load the a file");
+		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
 		return;
 	}
 
@@ -2465,12 +2468,12 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 
 	}
 
-	if (ClientCfg.CheckR2ScenarioMD5 && !modifiedByMD5.empty() && !locked.empty() && locked == "RunOnly")
+	if (!modifiedByMD5.empty() && !locked.empty() && locked == "RunOnly")
 	{
 		bool ok = hasCharacterSameCharacterIdMd5(modifiedByMD5);
 		if (!ok)
 		{
-			this->systemMsg(0, "ERR", "", "uiR2EDLoadingLockedScenario");
+			this->systemMsg(nullptr, "ERR", "", "uiR2EDLoadingLockedScenario");
 			return;
 		}
 	}
@@ -2525,7 +2528,7 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 	if (!ok)
 	{
 		nlwarning("The server has refuse the client to load the a file"); //should (can) not append
-		this->systemMsg(0, "ERR", "", "The server has refuse the client to load the a file");
+		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
 		return;
 	}
 
@@ -2624,7 +2627,7 @@ class CModuleMessageSender : public R2::IMessageSender
 public:
 	CModuleMessageSender(const NLNET::TModuleProxyPtr& proxy, NLNET::IModule* senderModule):_Proxy(proxy), _Sender(senderModule){}
 
-	void operator()(const NLNET::CMessage & msg)
+	void operator()(const NLNET::CMessage & msg) NL_OVERRIDE
 	{
 		if (!_Proxy)
 		{

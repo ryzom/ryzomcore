@@ -30,7 +30,8 @@
 namespace NL3D {
 
 
-CMotionBlur::CMotionBlur() : _Tex(NULL), _X(0), _Y(0), _W(0), _H(0)
+CMotionBlur::CMotionBlur() : _Tex(nullptr)
+    , _X(0), _Y(0), _W(0), _H(0)
 {
 }
 
@@ -49,7 +50,7 @@ void CMotionBlur::startMotionBlur(uint x, uint y, uint width, uint height)
 
 void CMotionBlur::releaseMotionBlur()
 {
-	_Tex = NULL ;
+	_Tex = nullptr;
 	_X = _Y = _W = _H = 0 ;
 }
 

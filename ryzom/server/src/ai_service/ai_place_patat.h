@@ -52,20 +52,20 @@ public:
 	
 	/// @name CAIPlace implementation
 	//@{
-	virtual bool atPlace(CAIVector const& pos) const;
-	virtual bool atPlace(const CAIVectorMirror &pos) const;
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
-	virtual CAIPos const& midPos() const;
-	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const;
-	virtual float getRadius() const;
-	virtual void display(CStringWriter& stringWriter) const { }
-	virtual AITYPES::TVerticalPos getVerticalPos() const;
-	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const;
+	virtual bool atPlace(CAIVector const& pos) const NL_OVERRIDE;
+	virtual bool atPlace(const CAIVectorMirror &pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
+	virtual CAIPos const& midPos() const NL_OVERRIDE;
+	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE;
+	virtual float getRadius() const NL_OVERRIDE;
+	virtual void display(CStringWriter& stringWriter) const NL_OVERRIDE { }
+	virtual AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE;
+	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const NL_OVERRIDE;
 	//@}
 	
 	/// @name CPlaceRandomPos implementation
 	//@{
-	virtual bool calcRandomPos(CAIPos& pos) const;
+	virtual bool calcRandomPos(CAIPos& pos) const NL_OVERRIDE;
 	//@}
 	
 	bool setPatat(AITYPES::TVerticalPos verticalPos, std::vector<CAIVector> const& points);
@@ -90,7 +90,7 @@ public:
 	
 	/// @name CAIPlace implementation
 	//@{
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
 	//@}
 
 	void setOutpostAlias(uint32 outpostAlias);
@@ -115,20 +115,20 @@ public:
 	
 	/// @name CAIPlace implementation
 	//@{
-	virtual bool atPlace(CAIVector const& pos) const;
-	virtual bool atPlace(const CAIVectorMirror &pos) const;
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
-	virtual CAIPos const& midPos() const;
-	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const;
-	virtual float getRadius() const;
-	virtual void display(CStringWriter& stringWriter) const { }
-	virtual AITYPES::TVerticalPos getVerticalPos() const;
-	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const;
+	virtual bool atPlace(CAIVector const& pos) const NL_OVERRIDE;
+	virtual bool atPlace(const CAIVectorMirror &pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
+	virtual CAIPos const& midPos() const NL_OVERRIDE;
+	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE;
+	virtual float getRadius() const NL_OVERRIDE;
+	virtual void display(CStringWriter& stringWriter) const NL_OVERRIDE { }
+	virtual AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE;
+	virtual void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const NL_OVERRIDE;
 	//@}
 	
 	/// @name CPlaceRandomPos implementation
 	//@{
-	virtual bool calcRandomPos(CAIPos& pos) const;
+	virtual bool calcRandomPos(CAIPos& pos) const NL_OVERRIDE;
 	//@}
 	
 	void setPlace1(NLMISC::CSmartPtr<CAIPlace const> const& place);

@@ -76,7 +76,7 @@ public:
 	{
 		if( _Instance )
 			delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 
 private:
@@ -87,7 +87,7 @@ private:
 	}
 	static CPSTextureCategory	*_Instance;
 };
-CPSTextureCategory	*CPSTextureCategory::_Instance= NULL;
+CPSTextureCategory	*CPSTextureCategory::_Instance = nullptr;
 
 ///===========================================================================
 void CParticleSystemShape::releaseInstance()
@@ -226,7 +226,7 @@ void	CParticleSystemShape::getAABBox(NLMISC::CAABBox &bbox) const
 ///===========================================================================
 CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CContiguousBlockAllocator *blockAllocator /*= NULL*/)
 {
-	if (_Sharing && _SharedSystem != NULL) // is sharing enabled, and is a system already instanciated
+	if (_Sharing && _SharedSystem != nullptr) // is sharing enabled, and is a system already instanciated
 	{
 		return _SharedSystem;
 	}
@@ -247,7 +247,7 @@ CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CCon
 
 	//NLMISC::TTicks start = NLMISC::CTime::getPerformanceTime();
 	// copy the datas
-	CParticleSystem *myInstance = NULL;
+	CParticleSystem *myInstance = nullptr;
 
 	// serialize from the memory stream
 	if (!_ParticleSystemProto.isReading()) // we must be sure that we are reading the stream
@@ -401,7 +401,7 @@ void CParticleSystemShape::flushTextures(IDriver &driver, uint selectedTexture)
 		NLMISC::CAutoMutex<NLMISC::CMutex> lock(s_PSSMutex);
 
 		// must create an instance just to flush the textures
-		CParticleSystem *myInstance = NULL;
+		CParticleSystem *myInstance = nullptr;
 
 		#ifdef PS_FAST_ALLOC
 			nlassert(PSBlockAllocator == NULL);

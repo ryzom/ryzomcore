@@ -28,7 +28,7 @@ using namespace std;
 using namespace NLMISC;
 
 /////////////
-// GLOBALS
+// GLOBALS 
 /////////////
 CGuildVersionAdapter	*CGuildVersionAdapter::_Instance = NULL;
 
@@ -41,7 +41,7 @@ uint32 CGuildVersionAdapter::currentVersionNumber() const
 {
 	////////////////////////////////////
 	// VERSION History
-	// 0 :
+	// 0 : 
 	// 1 : (25/11/2004) saves must be updated because events mps dont have the right sheet... So we have to replace them
 	// 2 : (03/12/2004) creation dates where not saved...
 	// 3 : (01/11/2004) guild allegiance of previous existing guild setted to undefined...

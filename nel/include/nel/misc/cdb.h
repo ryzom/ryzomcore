@@ -3,7 +3,6 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -68,7 +67,7 @@ public:
 		S17, S18, S19, S20, S21, S22, S23, S24, S25, S26, S27, S28, S29, S30, S31, S32,
 		S33, S34, S35, S36, S37, S38, S39, S40, S41, S42, S43, S44, S45, S46, S47, S48,
 		S49, S50, S51, S52, S53, S54, S55, S56, S57, S58, S59, S60, S61, S62, S63, S64,
-		TEXT, PACKED, Nb_Prop_Type
+		TEXT, Nb_Prop_Type
 	};
 
 
@@ -198,7 +197,7 @@ public :
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL ) = 0;
+	virtual void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = nullptr) = 0;
 
 	/**
 	 * Save a backup of the database
@@ -282,7 +281,7 @@ public :
 	/**
 	 * get the parent of a node
 	 */
-	virtual CCDBNodeBranch* getParent() { nlassertex(0,("getParent() not overloaded for given node type!")); return NULL; }
+	virtual CCDBNodeBranch* getParent() { nlassertex(0,("getParent() not overloaded for given node type!")); return nullptr; }
 
 	/**
 	 * get the name of this node
@@ -316,14 +315,14 @@ public :
 	/// Return the string id corresponding to the argument
 	static TStringId getStringId(const std::string& nodeName)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		return _DBSM->localMap(nodeName);
 	}
 
 	/// Return a pointer to the string corresponding to the argument
 	static const std::string *getStringFromId(TStringId nodeStringId)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		return &_DBSM->localUnmap(nodeStringId);
 	}
 
@@ -338,14 +337,14 @@ protected:
 	/// Constructor
 	ICDBNode() : _AtomicFlag(false)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		_Name = CStringMapper::emptyId();
 	}
 
 	/// Constructor
 	ICDBNode (const std::string &name) : _AtomicFlag(false)
 	{
-		if (_DBSM == NULL) _DBSM = CStringMapper::createLocalMapper();
+		if (_DBSM == nullptr) _DBSM = CStringMapper::createLocalMapper();
 		_Name = _DBSM->localMap(name);
 		//_NameDbg = name;
 	}

@@ -47,7 +47,8 @@ public:
 	/**
 	 * Default constructor
 	 */
-	CTextureMem() : _Data(NULL),
+	CTextureMem() : _Data(nullptr)
+	    ,
 					_Delete(false),
 					_AllowDegradation(false),
 					_TexType(CBitmap::RGBA)
@@ -58,7 +59,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	virtual ~CTextureMem()
+	virtual ~CTextureMem() NL_OVERRIDE
 	{
 		if (_Data && _Delete)
 			delete [] _Data;
@@ -80,7 +81,7 @@ public:
 	CTextureMem(uint8 *data, uint32 length, bool _delete, bool isFile = true, uint width = 0, uint height = 0, CBitmap::TType texType = CBitmap::RGBA)
 	{
 		_AllowDegradation=false;
-		_Data=NULL;
+		_Data = nullptr;
 		_Delete=false;
 		setPointer(data, length, _delete, isFile, width, height, texType);
 	}
@@ -133,16 +134,16 @@ public:
 	/**
 	 * Generate the texture
 	 */
-	void doGenerate(bool async = false);
+	void doGenerate(bool async = false) NL_OVERRIDE;
 
 	/// inherited from ITexture.
-	virtual bool			supportSharing() const
+	virtual bool			supportSharing() const NL_OVERRIDE
 	{
 		return !_ShareName.empty();
 	}
 
 	/// inherited from ITexture.
-	virtual std::string		getShareName() const
+	virtual std::string		getShareName() const NL_OVERRIDE
 	{
 		nlassert(!_ShareName.empty());
 		return _ShareName;
@@ -155,12 +156,12 @@ public:
 	}
 
 	/// texture file may allow the driver to degrade (default is true).
-	virtual bool	allowDegradation() const { return _AllowDegradation; }
+	virtual bool	allowDegradation() const NL_OVERRIDE { return _AllowDegradation; }
 	/// Change the degradation mode. NB: this does not touch() the ITexture...
 	void			setAllowDegradation(bool allow);
 
 	/// Todo: serialize a mem texture.
-	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureMem);
 
 	/** This create a white square texture of 1x1

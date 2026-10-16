@@ -51,13 +51,13 @@ public:
 	}
 
 	/// validate the power utilisation
-	virtual bool validate(std::string &errorCode);
+	virtual bool validate(std::string &errorCode) NL_OVERRIDE;
 	
 	/// set affected score
 	inline void setAffectedScore( SCORES::TScores score ) { _AffectedScore = score; }
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 protected:
 	/// loss factor on total value (1 = 100%, 0.5 = 50%, 0.3 = 30%)

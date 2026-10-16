@@ -71,15 +71,15 @@ public:
 
 
 	// {}
-	~CToolChoosePos();
+	~CToolChoosePos() NL_OVERRIDE;
 	// from CTool
-	virtual const char *getToolUIName() const { return ""; }
-	virtual bool  isCreationTool() const { return true; }
-	virtual void updateAfterRender();
-	virtual void updateBeforeRender();
-	virtual bool onMouseLeftButtonClicked();
-	virtual bool onMouseRightButtonClicked();
-	virtual void cancel();
+	virtual const char *getToolUIName() const NL_OVERRIDE { return ""; }
+	virtual bool  isCreationTool() const NL_OVERRIDE { return true; }
+	virtual void updateAfterRender() NL_OVERRIDE;
+	virtual void updateBeforeRender() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonClicked() NL_OVERRIDE;
+	virtual bool onMouseRightButtonClicked() NL_OVERRIDE;
+	virtual void cancel() NL_OVERRIDE;
 	/** Update the cursor on the ui. Depending on the context the cursor
       * may take different shapes (for example, it wouldn't show a 'stop' cursor when
 	  * the palette is under and one has just selected an object to drop)

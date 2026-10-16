@@ -90,9 +90,9 @@ public:
 	void displayNode(IStatDBNodePtr node, const std::string & currentPath, NLMISC::CLog & log, const CStatDBNameManager & nameManager);
 
 private:
-	void visitBranch(CStatDBBranch * branch, const std::string & path);
-	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path);
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path);
+	void visitBranch(CStatDBBranch * branch, const std::string & path) NL_OVERRIDE;
+	void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path) NL_OVERRIDE;
+	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) NL_OVERRIDE;
 
 	void displayOneNode(IStatDBNodePtr node, const std::string & currentPath);
 

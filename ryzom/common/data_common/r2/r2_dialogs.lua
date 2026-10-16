@@ -244,8 +244,8 @@ function r2.dialogs:initDialogsMenu()
 
 	local allDialogs = {}
 	r2:getCurrentAct():appendInstancesByType(allDialogs, "ChatSequence")
-
 	local uc_dialog = ucstring()
+
 	for k, dialog in pairs(allDialogs) do
 		uc_dialog:fromUtf8(dialog.Name)
 		dialogMenu:addLine(uc_dialog, "lua", "r2:setSelectedInstanceId('" .. dialog.InstanceId .."')", dialog.InstanceId)
@@ -771,8 +771,8 @@ function r2.dialogs:initWhoMenu(whoFunction, towho)
 		whoMenu:addLine(i18n.get("uiR2EdSystem"), "lua", whoFunction.."('_System')", "System")
 		whoMenu:addLine(i18n.get("uiR2EdDonjonMaster"), "lua", whoFunction.."('_DM')", "DonjonMaster")	
 	end
-	
 	local uc_who = ucstring()
+	
 	for key, npc in pairs(npcTable) do
 		local addLine = true
 

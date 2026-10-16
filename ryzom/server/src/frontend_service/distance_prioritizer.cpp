@@ -1118,7 +1118,6 @@ void		fillTARGET_LIST( TOutBox& outbox, TPropIndex )
 
 		// distance to target (in 1/127 of 100m)
 		uint32	dt = *(&((*it)()));
-
 		++it;
 		if (it == targets.end())
 			break;

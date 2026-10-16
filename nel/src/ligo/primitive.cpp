@@ -39,7 +39,7 @@ const uint32 NLLIGO_PRIMITIVE_VERSION = 1;
 namespace NLLIGO
 {
 
-CPrimitiveContext	*CPrimitiveContext::_Instance = NULL;
+CPrimitiveContext	*CPrimitiveContext::_Instance = nullptr;
 
 
 // ***************************************************************************
@@ -81,7 +81,7 @@ xmlNodePtr GetFirstChildNode (xmlNodePtr xmlNode, const std::string &filename, c
 
 	// Output a formated error
 	XMLError (xmlNode, filename.c_str(), "Can't find XML node named (%s)", childName.c_str());
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -126,7 +126,7 @@ bool ReadUInt (const std::string &propName, uint &result, const std::string &fil
 	string value;
 	if (GetPropertyString (value, filename, xmlNode, propName))
 	{
-		result = strtoul (value.c_str (), NULL, 10);
+		result = strtoul (value.c_str (), nullptr, 10);
 		return true;
 	}
 	return false;
@@ -405,14 +405,14 @@ uint CPrimNode::getNumVector () const
 
 const CPrimVector *CPrimNode::getPrimVector () const
 {
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
 
 CPrimVector	*CPrimNode::getPrimVector ()
 {
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -520,13 +520,13 @@ bool CPrimPoint::read(xmlNodePtr xmlNode, const std::string &filename, uint vers
 void CPrimPoint::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Save the point
-	xmlNodePtr ptNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"PT", NULL);
+	xmlNodePtr ptNode = xmlNewChild ( xmlNode, nullptr, (const xmlChar*)"PT", nullptr);
 	WriteVector (Point, ptNode);
 
 	// Save the angle
 	if (Angle != 0)
 	{
-		xmlNodePtr ptNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"ANGLE", NULL);
+		xmlNodePtr ptNode = xmlNewChild ( xmlNode, nullptr, (const xmlChar*)"ANGLE", nullptr);
 		WriteFloat ("VALUE", Angle, ptNode);
 	}
 
@@ -547,7 +547,7 @@ uint CPrimPath::getNumVector () const
 const CPrimVector *CPrimPath::getPrimVector () const
 {
 	if (VPoints.empty())
-		return NULL;
+		return nullptr;
 	return &(VPoints[0]);
 }
 
@@ -563,7 +563,7 @@ NLLIGO::IPrimitive *CPrimPath::copy () const
 CPrimVector	*CPrimPath::getPrimVector ()
 {
 	if (VPoints.empty())
-		return NULL;
+		return nullptr;
 	return &(VPoints[0]);
 }
 
@@ -599,7 +599,7 @@ void CPrimPath::write (xmlNodePtr xmlNode, const std::string &filename) const
 	// Save the points
 	for (uint i=0; i<VPoints.size (); i++)
 	{
-		xmlNodePtr ptNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"PT", NULL);
+		xmlNodePtr ptNode = xmlNewChild ( xmlNode, nullptr, (const xmlChar*)"PT", nullptr);
 		WriteVector (VPoints[i], ptNode);
 	}
 
@@ -620,7 +620,7 @@ uint CPrimZone::getNumVector () const
 const CPrimVector *CPrimZone::getPrimVector () const
 {
 	if (VPoints.empty())
-		return NULL;
+		return nullptr;
 	return &(VPoints[0]);
 }
 
@@ -635,7 +635,7 @@ NLLIGO::IPrimitive *CPrimZone::copy () const
 
 CPrimVector	*CPrimZone::getPrimVector ()
 {
-	if(VPoints.empty()) return 0;
+	if(VPoints.empty()) return nullptr;
 	return &(VPoints[0]);
 }
 
@@ -671,7 +671,7 @@ void CPrimZone::write (xmlNodePtr xmlNode, const std::string &filename) const
 	// Save the points
 	for (uint i=0; i<VPoints.size (); i++)
 	{
-		xmlNodePtr ptNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"PT", NULL);
+		xmlNodePtr ptNode = xmlNewChild ( xmlNode, nullptr, (const xmlChar*)"PT", nullptr);
 		WriteVector (VPoints[i], ptNode);
 	}
 
@@ -1022,13 +1022,13 @@ void CPrimRegion::serial (NLMISC::IStream &f)
 
 IPrimitive::IPrimitive ()
 {
-	_Parent = NULL;
+	_Parent = nullptr;
 }
 
 
 IPrimitive::IPrimitive (const IPrimitive &node) : IStreamable()
 {
-	_Parent = NULL;
+	_Parent = nullptr;
 	IPrimitive::operator= (node);
 }
 
@@ -1232,7 +1232,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 		{
 			cursor=cursor->getParent();
 			if	(!cursor)
-				return	NULL;
+				return nullptr;
 
 			path.erase(0,2);
 			continue;
@@ -1251,7 +1251,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 			path.erase(0, indexStr);
 		}
 		childName=toUpperAscii(childName);
-		const	IPrimitive*child=NULL;
+		const	IPrimitive*child = nullptr;
 		uint	childIndex;
 		for	(childIndex=0;childIndex<cursor->getNumChildren();childIndex++)
 		{
@@ -1263,7 +1263,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 				break;
 		}
 		if	(childIndex>=cursor->getNumChildren())
-			return	NULL;
+			return nullptr;
 
 		cursor=child;
 	}
@@ -1586,7 +1586,7 @@ bool IPrimitive::unlinkChild(IPrimitive *child)
 		child->branchUnlink();
 		_Children.erase (_Children.begin()+childId);
 		updateChildId (childId);
-		child->_Parent = NULL;
+		child->_Parent = nullptr;
 		child->_ChildId = 0;
 		return true;
 	}
@@ -1693,7 +1693,7 @@ bool IPrimitive::read (xmlNodePtr xmlNode, const std::string &filename, uint ver
 				if (GetPropertyString (type, filename, propNode, "TYPE"))
 				{
 					// The property
-					IProperty *property = NULL;
+					IProperty *property = nullptr;
 
 					// Check the type
 					if (type == "string")
@@ -1766,7 +1766,7 @@ bool IPrimitive::read (xmlNodePtr xmlNode, const std::string &filename, uint ver
 					}
 
 					// Property found ?
-					if (property == NULL)
+					if (property == nullptr)
 					{
 						XMLError (propNode, filename, "IPrimitive::read : Unknown property type (%s)", type.c_str ());
 						return false;
@@ -1818,7 +1818,7 @@ bool IPrimitive::read (xmlNodePtr xmlNode, const std::string &filename, uint ver
 				IPrimitive *primitive = static_cast<IPrimitive *> (CClassRegistry::create (type));
 
 				// Primitive type not found ?
-				if (primitive == NULL)
+				if (primitive == nullptr)
 				{
 					XMLError (childNode, filename, "IPrimitive::read : Unknown primitive type (%s)", type.c_str ());
 					return false;
@@ -1883,8 +1883,8 @@ void IPrimitive::initDefaultValues (CLigoConfig &config)
 		{
 			const CPrimitiveClass::CParameter &parameter = primitiveClass->Parameters[i];
 
-			CPropertyString *pString = NULL;
-			CPropertyStringArray *pStringArray = NULL;
+			CPropertyString *pString = nullptr;
+			CPropertyStringArray *pStringArray = nullptr;
 
 			IProperty *result;
 			nlverify (getPropertyByName (parameter.Name.c_str(), result));
@@ -1944,8 +1944,8 @@ void IPrimitive::write (xmlNodePtr xmlNode, const std::string &filename) const
 		if (!ite->second->Default)
 		{
 			// Create new nodes
-			xmlNodePtr propNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"PROPERTY", NULL);
-			xmlNodePtr nameNode = xmlNewChild ( propNode, NULL, (const xmlChar*)"NAME", NULL);
+			xmlNodePtr propNode = xmlNewChild ( xmlNode, nullptr, (const xmlChar*)"PROPERTY", nullptr);
+			xmlNodePtr nameNode = xmlNewChild ( propNode, nullptr, (const xmlChar*)"NAME", nullptr);
 			xmlNodePtr textNode = xmlNewText ((const xmlChar *)(ite->first.c_str ()));
 			xmlAddChild (nameNode, textNode);
 
@@ -1957,7 +1957,7 @@ void IPrimitive::write (xmlNodePtr xmlNode, const std::string &filename) const
 				xmlSetProp (propNode, (const xmlChar*)"TYPE", (const xmlChar*)"string");
 
 				// Create new nodes
-				xmlNodePtr stringNode = xmlNewChild ( propNode, NULL, (const xmlChar*)"STRING", NULL);
+				xmlNodePtr stringNode = xmlNewChild ( propNode, nullptr, (const xmlChar*)"STRING", nullptr);
 				xmlNodePtr textNode = xmlNewText ((const xmlChar *)(str->String.c_str ()));
 				xmlAddChild (stringNode, textNode);
 			}
@@ -1974,7 +1974,7 @@ void IPrimitive::write (xmlNodePtr xmlNode, const std::string &filename) const
 					for (uint i=0; i<array->StringArray.size (); i++)
 					{
 						// Create new nodes
-						xmlNodePtr stringNode = xmlNewChild ( propNode, NULL, (const xmlChar*)"STRING", NULL);
+						xmlNodePtr stringNode = xmlNewChild ( propNode, nullptr, (const xmlChar*)"STRING", nullptr);
 						xmlNodePtr textNode = xmlNewText ((const xmlChar *)(array->StringArray[i].c_str ()));
 						xmlAddChild (stringNode, textNode);
 					}
@@ -1988,7 +1988,7 @@ void IPrimitive::write (xmlNodePtr xmlNode, const std::string &filename) const
 					xmlSetProp (propNode, (const xmlChar*)"TYPE", (const xmlChar*)"color");
 
 					// Create new nodes
-					xmlNodePtr colorNode = xmlNewChild ( propNode, NULL, (const xmlChar*)"COLOR", NULL);
+					xmlNodePtr colorNode = xmlNewChild ( propNode, nullptr, (const xmlChar*)"COLOR", nullptr);
 					xmlSetProp (colorNode, (const xmlChar*)"R", (const xmlChar*)toString (color->Color.R).c_str ());
 					xmlSetProp (colorNode, (const xmlChar*)"G", (const xmlChar*)toString (color->Color.G).c_str ());
 					xmlSetProp (colorNode, (const xmlChar*)"B", (const xmlChar*)toString (color->Color.B).c_str ());
@@ -2004,7 +2004,7 @@ void IPrimitive::write (xmlNodePtr xmlNode, const std::string &filename) const
 	for (uint i=0; i<_Children.size (); i++)
 	{
 		// New node
-		xmlNodePtr childNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"CHILD", NULL);
+		xmlNodePtr childNode = xmlNewChild ( xmlNode, nullptr, (const xmlChar*)"CHILD", nullptr);
 
 		// Write it
 		_Children[i]->write (childNode, filename);
@@ -2055,7 +2055,7 @@ void IPrimitive::setUnparsedProperties(const std::string &unparsedProperties) co
 
 CPrimAlias::CPrimAlias() :
 	_Alias(0),
-	_Container(NULL)
+	_Container(nullptr)
 {
 }
 
@@ -2063,7 +2063,7 @@ CPrimAlias::CPrimAlias(const CPrimAlias &other)
 	: IPrimitive(other)
 {
 	// clear the container reference and alias
-	_Container = NULL;
+	_Container = nullptr;
 	_Alias = other._Alias;
 }
 
@@ -2090,7 +2090,7 @@ void CPrimAlias::onBranchUnlink()
 {
 	nlassert(_Container !=  NULL);
 	_Container->releaseAlias(this, _Alias);
-	_Container = NULL;
+	_Container = nullptr;
 
 	// NB : we keep the alias value for next linkage
 }
@@ -2153,7 +2153,7 @@ bool CPrimAlias::read (xmlNodePtr xmlNode, const std::string &filename, uint ver
 void CPrimAlias::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Write alias
-	xmlNodePtr ptNode = xmlNewChild(xmlNode, NULL, (const xmlChar*)"ALIAS", NULL);
+	xmlNodePtr ptNode = xmlNewChild(xmlNode, nullptr, (const xmlChar*)"ALIAS", nullptr);
 	WriteInt("VALUE", int(_Alias), ptNode);
 
 	IPrimitive::write (xmlNode, filename);
@@ -2191,7 +2191,7 @@ void CPrimAlias::serial (NLMISC::IStream &f)
 // ***************************************************************************
 
 CPrimitives::CPrimitives () :
-	_LigoConfig(NULL)
+	_LigoConfig(nullptr)
 {
 	// init the alias generator
 	_LastGeneratedAlias = 0;
@@ -2411,7 +2411,7 @@ IPrimitive		*CPrimitives::getPrimitiveByAlias(uint32 primAlias)
 	uint32 staticAlias = _LigoConfig->getStaticAliasMask() & primAlias;
 	staticAlias = staticAlias >> _LigoConfig->getDynamicAliasSize();
 	if (staticAlias != _AliasStaticPart)
-		return NULL;
+		return nullptr;
 
 	// clear the static part before searching
 	primAlias &= _LigoConfig->getDynamicAliasMask();
@@ -2421,7 +2421,7 @@ IPrimitive		*CPrimitives::getPrimitiveByAlias(uint32 primAlias)
 	if (it != _AliasInUse.end())
 		return it->second->getParent();
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
@@ -2540,7 +2540,7 @@ void CPrimitives::write (xmlDocPtr doc, const std::string &filename) const
 	nlassert (doc);
 
 	// Primitive node
-	xmlNodePtr primNode = xmlNewDocNode (doc, NULL, (const xmlChar*)"PRIMITIVES", NULL);
+	xmlNodePtr primNode = xmlNewDocNode (doc, nullptr, (const xmlChar*)"PRIMITIVES", nullptr);
 	xmlDocSetRootElement (doc, primNode);
 
 	write (primNode, filename);
@@ -2556,8 +2556,8 @@ void CPrimitives::write (xmlNodePtr root, const std::string &filename) const
 	xmlSetProp (root, (const xmlChar*)"VERSION", (const xmlChar*)toString (NLLIGO_PRIMITIVE_VERSION).c_str ());
 
 	// The primitive root node
-	xmlNodePtr nameNode = xmlNewChild ( root, NULL, (const xmlChar*)"ROOT_PRIMITIVE", NULL);
-	xmlNodePtr subNode = xmlNewChild ( nameNode, NULL, (const xmlChar*)"ALIAS", NULL);
+	xmlNodePtr nameNode = xmlNewChild ( root, nullptr, (const xmlChar*)"ROOT_PRIMITIVE", nullptr);
+	xmlNodePtr subNode = xmlNewChild ( nameNode, nullptr, (const xmlChar*)"ALIAS", nullptr);
 	WriteUInt("LAST_GENERATED", _LastGeneratedAlias, subNode);
 
 	// Write the primitive tree
@@ -2594,7 +2594,7 @@ void CPrimitives::serial(NLMISC::IStream &f)
 void CPrimitives::convertAddPrimitive (IPrimitive *child, const IPrimitive *prim, bool hidden)
 {
 	// The primitve
-	IPrimitive *primitive = NULL;
+	IPrimitive *primitive = nullptr;
 
 	// What kind of primitive ?
 	const CPrimPoint *oldPoint = dynamic_cast<const CPrimPoint *>(prim);
@@ -2736,8 +2736,9 @@ void CPrimitives::convert (const CPrimRegion &region)
 // ***************************************************************************
 
 CPrimitiveContext::CPrimitiveContext():
-	CurrentLigoConfig(NULL),
-	CurrentPrimitive(NULL)
+	CurrentLigoConfig(nullptr)
+    ,
+	CurrentPrimitive(nullptr)
 {
 }
 

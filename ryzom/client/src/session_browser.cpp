@@ -62,13 +62,13 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 		return _CallbackClient;
 	}
 
-	virtual void connect( const NLNET::CInetHost& /* addr */ )
+	virtual void connect( const NLNET::CInetHost& /* addr */ ) NL_OVERRIDE
 	{
 		// do not connect now
 	}
 
 
-	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true)
+	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true) NL_OVERRIDE
 	{
 		if (!_PassThrue)
 		{
@@ -88,7 +88,7 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 	static void cb_preDispatchMessage(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 	{
 		CNelCallbackClientAdaptor *adaptor = static_cast<CNelCallbackClientAdaptor*>(netbase.getUserData());
-		if (adaptor != NULL)
+		if (adaptor != nullptr)
 		{
 			CSessionBrowser *sb = static_cast<CSessionBrowser*>(adaptor->getContainerClass());
 

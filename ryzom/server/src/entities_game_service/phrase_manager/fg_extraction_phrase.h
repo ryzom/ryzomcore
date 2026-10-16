@@ -37,24 +37,24 @@ public:
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true ) NL_OVERRIDE;
 
 	/**
 	 * evaluate phrase
 	 * \param evalReturnInfos struct that will receive evaluation results
 	 * \return true if eval has been made without errors
 	 */
-	virtual bool evaluate();
+	virtual bool evaluate() NL_OVERRIDE;
 	
 	/**
 	 * validate phrase
 	 * \return true if phrase is valide
 	 */
-	virtual bool validate();
-	virtual bool update();
-	virtual void execute();
-	virtual bool launch();
-	virtual void apply();
+	virtual bool validate() NL_OVERRIDE;
+	virtual bool update() NL_OVERRIDE;
+	virtual void execute() NL_OVERRIDE;
+	virtual bool launch() NL_OVERRIDE;
+	virtual void apply() NL_OVERRIDE;
 	//@}
 	
 	/**
@@ -65,25 +65,25 @@ public:
 	/**
 	 * called at the end of the latency time
 	 */
-	virtual void end();
+	virtual void end() NL_OVERRIDE;
 	//@}
 
 	/**
 	 * called when the action is interrupted
 	 */
-	virtual void stop();
+	virtual void stop() NL_OVERRIDE;
 	//@}
 
 	///\unused basic methods from CSPhrase
 	//@{
-	virtual void setPrimaryTarget( const TDataSetRow& ) {}
+	virtual void setPrimaryTarget( const TDataSetRow& ) NL_OVERRIDE {}
 	//@}
 
 	/// Return the number of extractions or cares since the build()
 	uint16 nbExtractions() const { return _NbExtractions; }
 
 	/// Return true if a cancellation of the phrase due to character's movement must be ignored at the moment
-	virtual bool mustOverrideCancelStaticAction() const { return _NbExtractions==0; }
+	virtual bool mustOverrideCancelStaticAction() const NL_OVERRIDE { return _NbExtractions==0; }
 
 protected:
 

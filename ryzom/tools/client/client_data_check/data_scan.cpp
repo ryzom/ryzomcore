@@ -55,7 +55,7 @@ struct EPatchDownloadException : public Exception
 {
 	EPatchDownloadException() : Exception( "Download Error" ) {}
 	EPatchDownloadException( const std::string& str ) : Exception( str ) {}
-	virtual ~EPatchDownloadException() throw() {}
+	virtual ~EPatchDownloadException() throw() NL_OVERRIDE {}
 };
 
 CPatchManager *CPatchManager::_Instance = NULL;

@@ -184,7 +184,7 @@ namespace STRING_MANAGER
 				return 0xFFFFFFFF;
 		}
 
-		if (sender == NULL)
+		if (sender == nullptr)
 		{
 			// send the message through network.
 //			NLNET::CUnifiedNetwork::getInstance()->send("IOS", msg);

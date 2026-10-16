@@ -26,7 +26,7 @@ namespace PATCHMAN
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CFileReceiverSkel::TMessageHandlerMap &CFileReceiverSkel::getMessageHandlers() const
 	{
@@ -36,27 +36,27 @@ namespace PATCHMAN
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_SETUP_SUBS"), &CFileReceiverSkel::setupSubscriptions_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_FILE_INFO"), &CFileReceiverSkel::cbFileInfo_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_FILE_DATA"), &CFileReceiverSkel::cbFileData_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_FILE_ERR"), &CFileReceiverSkel::cbFileDataFailure_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CFileReceiverSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -75,8 +75,8 @@ namespace PATCHMAN
 		return true;
 	}
 
-	
-	void CFileReceiverSkel::setupSubscriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+
+	void CFileReceiverSkel::setupSubscriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CFileReceiverSkel_setupSubscriptions_FR_SETUP_SUBS);
 		setupSubscriptions(sender);
@@ -119,9 +119,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_setupSubscriptions(__message);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -137,9 +137,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_cbFileInfo(__message, files);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -155,9 +155,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_cbFileData(__message, fileName, startOffset, data);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -173,9 +173,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_cbFileDataFailure(__message, fileName);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -226,7 +226,7 @@ namespace PATCHMAN
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CFileRepositorySkel::TMessageHandlerMap &CFileRepositorySkel::getMessageHandlers() const
 	{
@@ -236,35 +236,35 @@ namespace PATCHMAN
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_REQUEST_INFO"), &CFileRepositorySkel::requestFileInfo_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_REQUEST_DATA"), &CFileRepositorySkel::requestFileData_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_GET_INFO"), &CFileRepositorySkel::getInfo_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_SUBSCRIBE"), &CFileRepositorySkel::subscribe_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_UNSUBSCRIBE"), &CFileRepositorySkel::unsubscribe_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("FR_UNSUBSCRIBE_ALL"), &CFileRepositorySkel::unsubscribeAll_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CFileRepositorySkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -283,7 +283,7 @@ namespace PATCHMAN
 		return true;
 	}
 
-	
+
 	void CFileRepositorySkel::requestFileInfo_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CFileRepositorySkel_requestFileInfo_FR_REQUEST_INFO);
@@ -328,7 +328,7 @@ namespace PATCHMAN
 		unsubscribe(sender, fileSpec);
 	}
 
-	void CFileRepositorySkel::unsubscribeAll_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CFileRepositorySkel::unsubscribeAll_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CFileRepositorySkel_unsubscribeAll_FR_UNSUBSCRIBE_ALL);
 		unsubscribeAll(sender);
@@ -343,9 +343,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_requestFileInfo(__message, fileName);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -361,9 +361,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_requestFileData(__message, fileName, startOffset, numBytes);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -379,9 +379,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_getInfo(__message, fileSpec);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -398,9 +398,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_subscribe(__message, fileSpec);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -416,9 +416,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_unsubscribe(__message, fileSpec);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -434,9 +434,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_unsubscribeAll(__message);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -507,7 +507,7 @@ namespace PATCHMAN
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CAdministeredModuleBaseSkel::TMessageHandlerMap &CAdministeredModuleBaseSkel::getMessageHandlers() const
 	{
@@ -517,23 +517,23 @@ namespace PATCHMAN
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("ADMIN_EXEC"), &CAdministeredModuleBaseSkel::executeCommand_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("ADMIN_SETNEXT"), &CAdministeredModuleBaseSkel::installVersion_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("ADMIN_SETLIVE"), &CAdministeredModuleBaseSkel::launchVersion_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CAdministeredModuleBaseSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -552,7 +552,7 @@ namespace PATCHMAN
 		return true;
 	}
 
-	
+
 	void CAdministeredModuleBaseSkel::executeCommand_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CAdministeredModuleBaseSkel_executeCommand_ADMIN_EXEC);
@@ -593,9 +593,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_executeCommand(__message, originator, cmdline);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -611,9 +611,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_installVersion(__message, domainName, version);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -629,9 +629,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_launchVersion(__message, domainName, version);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -674,7 +674,7 @@ namespace PATCHMAN
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CServerPatchTerminalSkel::TMessageHandlerMap &CServerPatchTerminalSkel::getMessageHandlers() const
 	{
@@ -684,47 +684,47 @@ namespace PATCHMAN
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_STATE"), &CServerPatchTerminalSkel::declareState_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_MODULEDOWN"), &CServerPatchTerminalSkel::declareModuleDown_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_VERSION_NAME"), &CServerPatchTerminalSkel::declareVersionName_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_DOMAIN_INFO"), &CServerPatchTerminalSkel::declareDomainInfo_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_VERSION_ACK"), &CServerPatchTerminalSkel::ackVersionChange_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_SETNEXT"), &CServerPatchTerminalSkel::setInstallVersion_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_SETLIVE"), &CServerPatchTerminalSkel::setLaunchVersion_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_EXEC_ACK"), &CServerPatchTerminalSkel::executedCommandAck_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPT_EXEC_RESULT"), &CServerPatchTerminalSkel::executedCommandResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CServerPatchTerminalSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -743,7 +743,7 @@ namespace PATCHMAN
 		return true;
 	}
 
-	
+
 	void CServerPatchTerminalSkel::declareState_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CServerPatchTerminalSkel_declareState_SPT_STATE);
@@ -850,9 +850,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_declareState(__message, moduleName, state);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -869,9 +869,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_declareModuleDown(__message, moduleName);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -888,9 +888,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_declareVersionName(__message, versionName, clientVersion, serverVersion);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -907,9 +907,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_declareDomainInfo(__message, domainName, installVersion, launchVersion);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -926,9 +926,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_ackVersionChange(__message, domainName, success, comment);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -945,9 +945,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_setInstallVersion(__message, domain, version);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -964,9 +964,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_setLaunchVersion(__message, domain, version);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -983,9 +983,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_executedCommandAck(__message, result);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1002,9 +1002,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_executedCommandResult(__message, originator, commandline, result);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1115,7 +1115,7 @@ namespace PATCHMAN
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CServerPatchManagerSkel::TMessageHandlerMap &CServerPatchManagerSkel::getMessageHandlers() const
 	{
@@ -1125,43 +1125,43 @@ namespace PATCHMAN
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_REGISTER"), &CServerPatchManagerSkel::registerAdministeredModule_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_REFRESH"), &CServerPatchManagerSkel::requestRefresh_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_SETNEXT"), &CServerPatchManagerSkel::setInstallVersion_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_SETLIVE"), &CServerPatchManagerSkel::setLaunchVersion_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_STATE"), &CServerPatchManagerSkel::declareState_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_VERSION_NAME"), &CServerPatchManagerSkel::declareVersionName_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_EXEC"), &CServerPatchManagerSkel::executeCommandOnModules_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SPM_EXEC_RESULT"), &CServerPatchManagerSkel::executedCommandResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CServerPatchManagerSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -1180,7 +1180,7 @@ namespace PATCHMAN
 		return true;
 	}
 
-	
+
 	void CServerPatchManagerSkel::registerAdministeredModule_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CServerPatchManagerSkel_registerAdministeredModule_SPM_REGISTER);
@@ -1195,7 +1195,7 @@ namespace PATCHMAN
 		registerAdministeredModule(sender, requireApplierUpdates, requireTerminalUpdates, requireDepCfgUpdates, isAdministered);
 	}
 
-	void CServerPatchManagerSkel::requestRefresh_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CServerPatchManagerSkel::requestRefresh_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CServerPatchManagerSkel_requestRefresh_SPM_REFRESH);
 		requestRefresh(sender);
@@ -1273,9 +1273,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_registerAdministeredModule(__message, requireApplierUpdates, requireTerminalUpdates, requireDepCfgUpdates, isAdministered);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1292,9 +1292,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_requestRefresh(__message);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1312,9 +1312,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_setInstallVersion(__message, domain, version);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1332,9 +1332,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_setLaunchVersion(__message, domain, version);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1352,9 +1352,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_declareState(__message, state);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1371,9 +1371,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_declareVersionName(__message, versionName, clientVersion, serverVersion);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1391,9 +1391,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_executeCommandOnModules(__message, target, commandline);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1410,9 +1410,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_executedCommandResult(__message, originator, commandline, result);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1511,7 +1511,7 @@ namespace PATCHMAN
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CDeploymentConfigurationSynchroniserSkel::TMessageHandlerMap &CDeploymentConfigurationSynchroniserSkel::getMessageHandlers() const
 	{
@@ -1521,19 +1521,19 @@ namespace PATCHMAN
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("DEPCFG_REQUEST"), &CDeploymentConfigurationSynchroniserSkel::requestSync_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("DEPCFG_SYNC"), &CDeploymentConfigurationSynchroniserSkel::sync_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CDeploymentConfigurationSynchroniserSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -1552,8 +1552,8 @@ namespace PATCHMAN
 		return true;
 	}
 
-	
-	void CDeploymentConfigurationSynchroniserSkel::requestSync_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+
+	void CDeploymentConfigurationSynchroniserSkel::requestSync_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CDeploymentConfigurationSynchroniserSkel_requestSync_DEPCFG_REQUEST);
 		requestSync(sender);
@@ -1577,9 +1577,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_requestSync(__message);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -1596,9 +1596,9 @@ namespace PATCHMAN
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_sync(__message, dataBlob);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

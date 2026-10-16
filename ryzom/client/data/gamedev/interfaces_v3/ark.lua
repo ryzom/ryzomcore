@@ -1,5 +1,6 @@
 if Ark == nil then
-	Ark = {}
+	Ark = {
+	}
 end
 
 function print_r(arr, indentLevel)
@@ -24,6 +25,7 @@ function print_r(arr, indentLevel)
 	end
 	return str
 end
+
 
 function tablelength(T)
 	if T == nil then
@@ -65,8 +67,8 @@ function broadcast(text, t)
 	if t == nil then
 		t = "AMB"
 	end
-	local message = tostring(text)
-	text = message
+	local message  = ucstring()
+	text = message:fromUtf8(tostring(text))
 	displaySystemInfo(message, t)
 end
 
@@ -97,7 +99,6 @@ function getArkScript(id, selected)
 	end
 	return url
 end
-
 function ArkUpdateItemVariant(db, id, vp, val, skin)
 	local item
 	if db then
@@ -119,7 +120,7 @@ function ArkUpdateItemVariant(db, id, vp, val, skin)
 	item:find("resell").active = false
 	item:find("apply").active = false
 	item:find("v").hardtext = id
-	item:find("infos").hardtext = i18n.get("uiPhraseTotal").." = 0"
+	item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = 0"
 
 	if db ~= nil then
 		if ArkItemVariantQuantities[db] ~= nil and ArkItemVariantQuantities[db][id] ~= nil then
@@ -129,7 +130,7 @@ function ArkUpdateItemVariant(db, id, vp, val, skin)
 					item:find("apply").active = true
 				end
 				if item:find("infos") ~= nil then
-					item:find("infos").hardtext = i18n.get("uiPhraseTotal").." = "..tostring(ArkItemVariantQuantities[db][id])
+					item:find("infos").hardtext = i18n.get("uiPhraseTotal"):toUtf8().." = "..tostring(ArkItemVariantQuantities[db][id])
 				end
 			end
 			if ArkItemVariantQuantities[db][id] >= ArkItemVariantMinToSell[db] and ArkItemExchange[db] == true then
@@ -146,131 +147,131 @@ end
 --------------------------------------------------------------------------------
 
 if ArkItems == nil then
-	ArkItems = {}
+				ArkItems = {}
 end
 
 function ArkItemOpenUrl(db, url)
-	if ArkSelectedItemVariant[db] ~= nil then
-		webig:openUrl(url.."%26variant%3D"..tostring(ArkSelectedItemVariant[db]).."&variant="..tostring(ArkSelectedItemVariant[db]).."&rand="..tostring(math.random(10000000)).."#$SelectedPathC")
-	else
-		webig:openUrl(url)
-	end
+				if ArkSelectedItemVariant[db] ~= nil then
+								webig:openUrl(url.."%26variant%3D"..tostring(ArkSelectedItemVariant[db]).."&variant="..tostring(ArkSelectedItemVariant[db]).."&rand="..tostring(math.random(10000000)).."#$SelectedPathC")
+				else
+								webig:openUrl(url)
+				end
 end
 
 function ArkItemApply(db, url)
-	if ArkSelectedItemVariant[db] ~= nil then
-		url = url.."&variant="..tostring(ArkSelectedItemVariant[db])
-	end
-	webig:openUrl(url)
+				if ArkSelectedItemVariant[db] ~= nil then
+								url = url.."&variant="..tostring(ArkSelectedItemVariant[db])
+				end
+				webig:openUrl(url)
 end
 
 function ArkFixItemPosition(id, textures, preview_params, skeleton, anim)
-	local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
-	local shape = scene:getElement("shape#0")
-	local shape2 = scene:getElement("shape#1")
-	local camera = scene:getElement("camera#0")
-	local params = preview_params:split(" ")
-	shape_offset_posx[id] = camera.posx
-	shape_offset_posy[id] = camera.posy
-	shape_offset_posz[id] = camera.posz
-	shape_offset_posr[id] = shape.rotx
-	if shape then
-		shape.posy = 0.5
-		camera.tgty = 0.5
+				local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
+				local shape = scene:getElement("shape#0")
+				local shape2 = scene:getElement("shape#1")
+				local camera = scene:getElement("camera#0")
+				local params = preview_params:split(" ")
+				shape_offset_posx[id] = camera.posx
+				shape_offset_posy[id] = camera.posy
+				shape_offset_posz[id] = camera.posz
+				shape_offset_posr[id] = shape.rotx
+				if shape then
+								shape.posy = 0.5
+								camera.tgty = 0.5
 
-		-- Camera posz must be set before camera dist
-		if params[4] ~= nil and params[4] ~= "" then
-			camera.posz = camera.posz - tonumber(params[4])
-			camera.tgtz = camera.tgtz - tonumber(params[4])
-			shape_offset_posz[id] = tonumber(params[4])
-		end
-		 -- Camera posy must be set before camera dist
-		if params[5] ~= nil and params[5] ~= "" then
-			camera.posy = camera.posy - tonumber(params[5])
-			camera.tgty = camera.tgty - tonumber(params[5])
-			shape_offset_posy[id] = tonumber(params[5])
-		end
-		 -- Camera posy must be set before camera dist
-		if params[6] ~= nil and params[6] ~= "" then
-			camera.posx = camera.posx - tonumber(params[6])
-			camera.tgtx = camera.tgtx - tonumber(params[6])
-			shape_offset_posx[id] = tonumber(params[6])
-		end
+								-- Camera posz must be set before camera dist
+								if params[4] ~= nil and params[4] ~= "" then
+												camera.posz = camera.posz - tonumber(params[4])
+												camera.tgtz = camera.tgtz - tonumber(params[4])
+												shape_offset_posz[id] = tonumber(params[4])
+								end
+									-- Camera posy must be set before camera dist
+								if params[5] ~= nil and params[5] ~= "" then
+												camera.posy = camera.posy - tonumber(params[5])
+												camera.tgty = camera.tgty - tonumber(params[5])
+												shape_offset_posy[id] = tonumber(params[5])
+								end
+									-- Camera posy must be set before camera dist
+								if params[6] ~= nil and params[6] ~= "" then
+												camera.posx = camera.posx - tonumber(params[6])
+												camera.tgtx = camera.tgtx - tonumber(params[6])
+												shape_offset_posx[id] = tonumber(params[6])
+								end
 
-		if params[7] ~= nil and params[7] ~= "" then
-			camera.roll = camera.roll - tonumber(params[7])
-			shape_offset_posr[id] = tonumber(params[7])
-		end
+								if params[7] ~= nil and params[7] ~= "" then
+												camera.roll = camera.roll - tonumber(params[7])
+												shape_offset_posr[id] = tonumber(params[7])
+								end
 
-		if params[1] ~= nil and params[1] ~= "" then
-			camera.roty = tonumber(params[1])
-		end
-		if params[2] ~= nil then
-			camera.rotz = tonumber(params[2])
-		end
-		if params[3] ~= nil then
-			camera.dist = tonumber(params[3])
-		end
+								if params[1] ~= nil and params[1] ~= "" then
+												camera.roty = tonumber(params[1])
+								end
+								if params[2] ~= nil then
+												camera.rotz = tonumber(params[2])
+								end
+								if params[3] ~= nil then
+												camera.dist = tonumber(params[3])
+								end
 
 
-		scene.distlimitmin = camera.dist - (camera.dist / 1.5)
-		scene.distlimitmax = camera.dist +  100*(camera.dist / 1.5)
-		shape.textures = textures
-		if shape2 then
-			shape2.posy = shape.posy
-			shape2.posz = shape.posz
-		end
-	end
-	if skeleton and shape.skeleton then
-		shape.skeleton = skeleton
-		shape.anim = string.gsub(anim, ".anim", "")
-	end
+								scene.distlimitmin = camera.dist - (camera.dist / 1.5)
+								scene.distlimitmax = camera.dist +  100*(camera.dist / 1.5)
+								shape.textures = textures
+								if shape2 then
+												shape2.posy = shape.posy
+												shape2.posz = shape.posz
+								end
+				end
+				if skeleton and shape.skeleton then
+								shape.skeleton = skeleton
+								shape.anim = string.gsub(anim, ".anim", "")
+				end
 end
 
 function ArkUpdateItemZ(id, x, y, z, r)
-	if r == nil then
-		r = 0
-	end
-	local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
-	local camera = scene:getElement("camera#0")
-	local shape = scene:getElement("shape#0")
-	local dist = camera.dist
+				if r == nil then
+								r = 0
+				end
+				local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
+				local camera = scene:getElement("camera#0")
+				local shape = scene:getElement("shape#0")
+				local dist = camera.dist
 
-	camera.posx = camera.posx - x
-	camera.tgtx = camera.tgtx - x
-	camera.posy = camera.posy - y
-	camera.tgty = camera.tgty - y
-	camera.posz = camera.posz - z
-	camera.tgtz = camera.tgtz - z
-	camera.roll = camera.roll - 100*r
+				camera.posx = camera.posx - x
+				camera.tgtx = camera.tgtx - x
+				camera.posy = camera.posy - y
+				camera.tgty = camera.tgty - y
+				camera.posz = camera.posz - z
+				camera.tgtz = camera.tgtz - z
+				camera.roll = camera.roll - 100*r
 
-	camera.dist = dist
-	shape_offset_posx[id] = shape_offset_posx[id] + x
-	shape_offset_posy[id] = shape_offset_posy[id] + y
-	shape_offset_posz[id] = shape_offset_posz[id] + z
-	shape_offset_posr[id] = shape_offset_posr[id] + 100*r
+				camera.dist = dist
+				shape_offset_posx[id] = shape_offset_posx[id] + x
+				shape_offset_posy[id] = shape_offset_posy[id] + y
+				shape_offset_posz[id] = shape_offset_posz[id] + z
+				shape_offset_posr[id] = shape_offset_posr[id] + 100*r
 end
 
 function ArkUpdateItemView(id, script)
-	local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
-	local camera = scene:getElement("camera#0")
-	local url = "https://app.ryzom.com/app_arcc/index.php?action=mRyzhome_SetPreviewParams&script="..tostring(script).."&params="..string.format("%.5f", camera.roty).."%20"..string.format("%.5f", camera.rotz).."%20"..string.format("%.5f", camera.dist).."%20"..string.format("%.5f", shape_offset_posz[id]).."%20"..string.format("%.5f", shape_offset_posy[id]).."%20"..string.format("%.5f", shape_offset_posx[id]).."%20"..string.format("%.5f", shape_offset_posr[id])
-	webig:openUrl(url)
+				local scene = getUI("ui:interface:encyclopedia:content:htmlC"):find("div_item_"..id):find("scene")
+				local camera = scene:getElement("camera#0")
+				local url = "https://app.ryzom.com/app_arcc/index.php?action=mRyzhome_SetPreviewParams&script="..tostring(script).."&params="..string.format("%.5f", camera.roty).."%20"..string.format("%.5f", camera.rotz).."%20"..string.format("%.5f", camera.dist).."%20"..string.format("%.5f", shape_offset_posz[id]).."%20"..string.format("%.5f", shape_offset_posy[id]).."%20"..string.format("%.5f", shape_offset_posx[id]).."%20"..string.format("%.5f", shape_offset_posr[id])
+				webig:openUrl(url)
 end
 
 function ArkRenderContent(ui, text)
-	getUI(ui):renderHtml([[
-	<style>* {
-		background-color: #0009;
-		color: orange;
-	}
-	 body, tr,td,table,button {
-		background-color: #0000;
-	}
-	</style>
-	<table width="100%"><tr>
-		<td height="100px" align="center" valign="middle">]]..text..[[</td>
-	</tr><table>]])
+				getUI(ui):renderHtml([[
+				<style>* {
+								background-color: #0009;
+								color: orange;
+				}
+					body, tr,td,table,button {
+								background-color: #0000;
+				}
+				</style>
+				<table width="100%"><tr>
+								<td height="100px" align="center" valign="middle">]]..text..[[</td>
+				</tr><table>]])
 end
 
 ---------------------------------------------------------------------------
@@ -328,7 +329,6 @@ function DynE:UpdateMapWindow()
 	end
 end
 
-
 --------------------------------------------------------------------------------
 --- ARK MISSION CATALOG ---
 --------------------------------------------------------------------------------
@@ -359,22 +359,23 @@ function openRykea(folder, event)
 	getUI(ArkMissionCatalog.window_id).active = true
 end
 
-
 function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
 	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
 	if dont_active ~= true then
-		winframe.active=true
-	end
+	winframe.active=true
+end
 
 	ArkMissionCatalog.window = winframe
 
 	getUI("ui:interface:encyclopedia:content:htmlA"):browse(urlA)
 
 	local htmlb = getUI("ui:interface:encyclopedia:content:htmlB")
-	htmlb.home = urlB
+		htmlb.home = urlB
 	htmlb:browse("home")
+
 end
+
 
 function ArkMissionCatalog:OpenCat(cat, url)
 	local ency = getUI("ui:interface:encyclopedia")
@@ -412,11 +413,11 @@ end
 
 function ArkMissionCatalog:UpdateMissionTexts(win, id, text1, text2)
 	local w = win:find("ark_mission_"..id)
-	local text = ""
-	text = text1
-	w:find("text1").hardtext = text
-	text = text2
-	w:find("text2").hardtext = text
+	local text = ucstring()
+	text:fromUtf8(text1)
+	w:find("text1").uc_hardtext = text
+	text:fromUtf8(text2)
+	w:find("text2").uc_hardtext = text
 end
 
 function ArkMissionCatalog:startResize()
@@ -438,40 +439,41 @@ function ArkMissionCatalog:autoResize()
 	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
 
 	if htmlC == nil or htmlC.active == false then
-		if ArkMissionCatalog.cat == "storyline" then
-			if ui.w < 784 then
+
+	if ArkMissionCatalog.cat == "storyline" then
+		if ui.w < 784 then
 				local td30 = htmlB:find("storyline_content")
 				if td30 ~= nil then
 					td30.x = math.max(0, 200-784+ui.w)
 					ArkMissionCatalog.need_restore_td30 = true
-				end
-			else
-				if ArkMissionCatalog.need_restore_td30 then
-					local td30 = htmlB:find("storyline_content")
-					if td30 ~= nil then
-						td30.x = 200
-						ArkMissionCatalog.need_restore_td30 = false
-					end
-				end
 			end
-		end
-
-		if ui.w < 950 then
-			htmlA.w = math.max(68, 220-950+ui.w)
-			htmlB.x = math.max(35, 190-950+ui.w)
-			ArkMissionCatalog.need_restore = true
 		else
-			if ArkMissionCatalog.need_restore then
-				htmlA.w = 220
-				htmlB.x = 180
-				ArkMissionCatalog.need_restore = false
+			if ArkMissionCatalog.need_restore_td30 then
+				local td30 = htmlB:find("storyline_content")
+				if td30 ~= nil then
+					td30.x = 200
+					ArkMissionCatalog.need_restore_td30 = false
+				end
 			end
 		end
-	else
+	end
+
+	if ui.w < 950 then
 		htmlA.w = math.max(68, 220-950+ui.w)
-		htmlB.x = math.max(35, ArkMissionCatalog.posxB-950+ui.w)
-		htmlC.x = math.max(75, ui.w-htmlC.w-16)
-		htmlB.w = math.max(55, htmlC.x-htmlB.x+16)
+		htmlB.x = math.max(35, 190-950+ui.w)
+		ArkMissionCatalog.need_restore = true
+	else
+		if ArkMissionCatalog.need_restore then
+			htmlA.w = 220
+			htmlB.x = 180
+			ArkMissionCatalog.need_restore = false
+		end
+	end
+else
+	htmlA.w = math.max(68, 220-950+ui.w)
+	htmlB.x = math.max(35, ArkMissionCatalog.posxB-950+ui.w)
+	htmlC.x = math.max(75, ui.w-htmlC.w-16)
+	htmlB.w = math.max(55, htmlC.x-htmlB.x+16)
 	end
 end
 
@@ -572,7 +574,6 @@ function ArkSendForm(name)
 	ArkGetStageEdit(ui):find("send:b"):runLeftClickAction()
 end
 
-
 function ArkGetStageEdit(curwin)
 	local sid = string.split(curwin, ":")
 	local eid = sid[#sid]
@@ -589,17 +590,17 @@ function ArkFindUI(name)
 	local ui = getUICaller()
 	while true do
 		if ui then
-			local found = ui:find(name)
-			if found ~= nil then
-				return found
-			else
-				ui = ui.parent
-			end
-			i = i +1
-			if i >= 100 then
-				return nil
-			end
+		local found = ui:find(name)
+		if found ~= nil then
+			return found
 		else
+			ui  = ui.parent
+		end
+		i = i +1
+		if i >= 100 then
+			return nil
+		end
+	else
 			return nil
 		end
 	end
@@ -609,7 +610,6 @@ function ArkOnSelectChanged(name)
 	local text = ArkRyformV5[name][getUICaller().selection+1]
 	ArkFindUI(name..":eb").input_string = text
 end
-
 function ArkV5GetSelectEntity(prefix, input)
 	name = getTargetName()
 	if name == "" then
@@ -630,6 +630,7 @@ function getVpx(vpx)
 	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
 	return nvpx
 end
+
 
 function openUrlInBg(url)
 	getUI("ui:interface:web_transactions"):find("html"):browse(fixUrl(url))
@@ -653,6 +654,9 @@ function game:displayWhatsUp()
 end
 
 -- S2E1 STUFF --
+
+
+
 
 
 if S2E1 == nil then
@@ -794,8 +798,8 @@ S2E1.texts["ru"][5] = {"Из коры доносится грохот.",
 "Ты снова встаешь."}
 
 function utf8decode(text)
-	local utext = ""
-	utext = text
+	local utext = ucstring()
+	utext:fromUtf8(text)
 	return utext
 end
 
@@ -1073,8 +1077,6 @@ function S2E1:newQuake(timer)
 
 
 end
-
-
 function arkRpMessageShowCapPopup(timer)
 	local ui = getUI("ui:interface:cap_popup")
 	ui:updateCoords()
@@ -1122,6 +1124,8 @@ function game:autoHideCapPopup()
 		end
 	end
 end
+
+
 
 -- VERSION --
 FILE_ARK_VERSION = 184

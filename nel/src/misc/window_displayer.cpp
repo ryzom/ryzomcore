@@ -50,7 +50,7 @@ public:
 	{
 	}
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		Disp->open (WindowNameEx, Iconified, X, Y, W, H, HS, FS, FN, WW, Log);
 		Disp->display_main ();
@@ -143,7 +143,7 @@ std::string CWindowDisplayer::stringifyMessage(const NLMISC::CLog::TDisplayInfo 
 		needSpace = true;
 	}
 
-	if (args.FileName != NULL)
+	if (args.FileName != nullptr)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += NLMISC::toString("%20s", CFile::getFilename(args.FileName).c_str());
@@ -158,7 +158,7 @@ std::string CWindowDisplayer::stringifyMessage(const NLMISC::CLog::TDisplayInfo 
 		needSpace = true;
 	}
 
-	if (args.FuncName != NULL)
+	if (args.FuncName != nullptr)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += NLMISC::toString("%20s", args.FuncName);

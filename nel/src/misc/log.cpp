@@ -41,9 +41,11 @@ using namespace std;
 namespace NLMISC
 {
 
-string *CLog::_ProcessName = NULL;
+string *CLog::_ProcessName = nullptr;
 
-CLog::CLog( TLogType logType) : _LogType (logType), _FileName(NULL), _Line(-1), _FuncName(NULL), _Mutex("LOG"+toString((uint)logType)), _PosSet(false)
+CLog::CLog( TLogType logType) : _LogType (logType), _FileName(nullptr)
+    , _Line(-1), _FuncName(nullptr)
+    , _Mutex("LOG"+toString((uint)logType)), _PosSet(false)
 {
 }
 
@@ -66,10 +68,10 @@ CLog::CLog(const CLog &other)
 
 void CLog::setDefaultProcessName ()
 {
-	if (_ProcessName == NULL)
+	if (_ProcessName == nullptr)
 	{
 		_ProcessName = (string *)INelContext::getInstance().getSingletonPointer("NLMISC::CLog::_ProcessName");
-		if (_ProcessName == NULL)
+		if (_ProcessName == nullptr)
 		{
 			_ProcessName = new string;
 			INelContext::getInstance().setSingletonPointer("NLMISC::CLog::_ProcessName", _ProcessName);
@@ -93,10 +95,10 @@ void CLog::setDefaultProcessName ()
 
 void CLog::setProcessName (const std::string &processName)
 {
-	if (_ProcessName == NULL)
+	if (_ProcessName == nullptr)
 	{
 		_ProcessName = (string *)INelContext::getInstance().getSingletonPointer("NLMISC::CLog::_ProcessName");
-		if (_ProcessName == NULL)
+		if (_ProcessName == nullptr)
 		{
 			_ProcessName = new string;
 			INelContext::getInstance().setSingletonPointer("NLMISC::CLog::_ProcessName", _ProcessName);
@@ -126,9 +128,9 @@ void CLog::unsetPosition()
 
 	if ( _PosSet > 0 )
 	{
-		_FileName = NULL;
+		_FileName = nullptr;
 		_Line = -1;
-		_FuncName = NULL;
+		_FuncName = nullptr;
 		_PosSet--;
 		_Mutex.leave(); // needs setPosition() to have been called
 	}
@@ -137,7 +139,7 @@ void CLog::unsetPosition()
 
 void CLog::addDisplayer (IDisplayer *displayer, bool bypassFilter)
 {
-	if (displayer == NULL)
+	if (displayer == nullptr)
 	{
 		// Can't nlwarning because recursive call
 		printf ("Trying to add a NULL displayer\n");
@@ -172,7 +174,7 @@ void CLog::addDisplayer (IDisplayer *displayer, bool bypassFilter)
 
 void CLog::removeDisplayer (IDisplayer *displayer)
 {
-	if (displayer == NULL)
+	if (displayer == nullptr)
 	{
 		nlwarning ("LOG: Trying to remove a NULL displayer");
 		return;
@@ -194,7 +196,7 @@ void CLog::removeDisplayer (IDisplayer *displayer)
 
 void CLog::removeDisplayer (const char *displayerName)
 {
-	if (displayerName == NULL || displayerName[0] == '\0')
+	if (displayerName == nullptr || displayerName[0] == '\0')
 	{
 		nlwarning ("LOG: Trying to remove an empty displayer name");
 		return;
@@ -228,10 +230,10 @@ void CLog::removeDisplayer (const char *displayerName)
 
 IDisplayer *CLog::getDisplayer (const char *displayerName)
 {
-	if (displayerName == NULL || displayerName[0] == '\0')
+	if (displayerName == nullptr || displayerName[0] == '\0')
 	{
 		nlwarning ("LOG: Trying to get an empty displayer name");
-		return NULL;
+		return nullptr;
 	}
 
 	CDisplayers::iterator idi;
@@ -249,7 +251,7 @@ IDisplayer *CLog::getDisplayer (const char *displayerName)
 			return *idi;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -264,12 +266,12 @@ bool CLog::attached(IDisplayer *displayer) const
 
 void CLog::displayString (const char *str)
 {
-	const char *disp = NULL;
-	TDisplayInfo localargs, *args = NULL;
+	const char *disp = nullptr;
+	TDisplayInfo localargs, *args = nullptr;
 
 	setDefaultProcessName ();
 
-	if(strchr(str,'\n') == NULL)
+	if(strchr(str,'\n') == nullptr)
 	{
 		if (TempString.empty())
 		{
@@ -386,12 +388,12 @@ void CLog::display (const char *format, ...)
 
 void CLog::displayRawString (const char *str)
 {
-	const char *disp = NULL;
-	TDisplayInfo localargs, *args = NULL;
+	const char *disp = nullptr;
+	TDisplayInfo localargs, *args = nullptr;
 
 	setDefaultProcessName ();
 
-	if(strchr(str,'\n') == NULL)
+	if(strchr(str,'\n') == nullptr)
 	{
 		if (TempString.empty())
 		{
@@ -399,7 +401,7 @@ void CLog::displayRawString (const char *str)
 			localargs.LogType = CLog::LOG_NO;
 			localargs.ProcessName.clear();
 			localargs.ThreadId = 0;
-			localargs.FileName = NULL;
+			localargs.FileName = nullptr;
 			localargs.Line = -1;
 			localargs.CallstackAndLog.clear();
 
@@ -419,7 +421,7 @@ void CLog::displayRawString (const char *str)
 			localargs.LogType = CLog::LOG_NO;
 			localargs.ProcessName.clear();
 			localargs.ThreadId = 0;
-			localargs.FileName = NULL;
+			localargs.FileName = nullptr;
 			localargs.Line = -1;
 			localargs.CallstackAndLog.clear();
 
@@ -549,7 +551,7 @@ bool CLog::passFilter( const char *filter )
 	// 1. Positive filter
 	for ( ilf=_PositiveFilter.begin(); ilf!=_PositiveFilter.end(); ++ilf )
 	{
-		found = ( strstr( filter, (*ilf).c_str() ) != NULL );
+		found = ( strstr( filter, (*ilf).c_str() ) != nullptr);
 		if ( found )
 		{
 			yes = true; // positive filter passed (no need to check another one)
@@ -565,7 +567,7 @@ bool CLog::passFilter( const char *filter )
 	// 2. Negative filter
 	for ( ilf=_NegativeFilter.begin(); ilf!=_NegativeFilter.end(); ++ilf )
 	{
-		found = ( strstr( filter, (*ilf).c_str() ) != NULL );
+		found = ( strstr( filter, (*ilf).c_str() ) != nullptr);
 		if ( found )
 		{
 			return false; // negative filter not passed (no need to check another one)
@@ -580,7 +582,7 @@ bool CLog::passFilter( const char *filter )
  */
 void CLog::removeFilter( const char *filterstr )
 {
-	if (filterstr == NULL)
+	if (filterstr == nullptr)
 	{
 		_PositiveFilter.clear();
 		_NegativeFilter.clear();
@@ -639,7 +641,7 @@ void CLog::releaseProcessName()
 	if (_ProcessName)
 	{
 		delete _ProcessName;
-		_ProcessName = NULL;
+		_ProcessName = nullptr;
 	}
 }
 

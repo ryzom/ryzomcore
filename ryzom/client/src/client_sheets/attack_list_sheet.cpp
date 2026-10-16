@@ -46,7 +46,7 @@ void CAttackListSheetEntry::serial(NLMISC::IStream &f)
 // *******************************************************************************************
 void CAttackListSheet::build(const NLGEORGES::UFormElm &item)
 {
-	const UFormElm *attacks = NULL;
+	const UFormElm *attacks = nullptr;
 	if (item.getNodeByName(&attacks, "Attacks") && attacks)
 	{
 		uint numAttacks;
@@ -54,7 +54,7 @@ void CAttackListSheet::build(const NLGEORGES::UFormElm &item)
 		Attacks.reserve(numAttacks);
 		for(uint k = 0; k < numAttacks; ++k)
 		{
-			const UFormElm *attackNode = NULL;
+			const UFormElm *attackNode = nullptr;
 			if (attacks->getArrayNode(&attackNode, k) && attackNode)
 			{
 				Attacks.push_back(CAttackListSheetEntry());

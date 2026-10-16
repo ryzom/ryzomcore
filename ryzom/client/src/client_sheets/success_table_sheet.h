@@ -60,12 +60,12 @@ public:
 	}
 
 	/// destructor
-	virtual ~CSuccessTableSheet() {}
+	virtual ~CSuccessTableSheet() NL_OVERRIDE {}
 
-	virtual void build(const NLGEORGES::UFormElm &root);
+	virtual void build(const NLGEORGES::UFormElm &root) NL_OVERRIDE;
 
 	/// serialize
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serialCont(SuccessTable);
 	}

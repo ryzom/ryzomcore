@@ -56,7 +56,7 @@ protected:
 	// ...
 public:
 	CStdMat2(CScene *scene);
-	virtual ~CStdMat2();
+	virtual ~CStdMat2() NL_OVERRIDE;
 }; /* class CStdMat2 */
 
 } /* namespace BUILTIN */

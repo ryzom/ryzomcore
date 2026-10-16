@@ -49,16 +49,16 @@ public:
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	void	unpack (NLMISC::CBitMemStream &message);
+	void	unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE;
 
 	/** This function transform the internal field and transform them into a buffer for the UDP connection.
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	void	pack (NLMISC::CBitMemStream &message);
+	void	pack (NLMISC::CBitMemStream &message) NL_OVERRIDE;
 
 	/// This functions is used when you want to transform an action into an IStream.
-	void	serial (NLMISC::IStream &f);
+	void	serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 	/** Returns the size of this action when it will be send to the UDP connection:
 	 * the size is IN BITS, not in bytes (the actual size is this one plus the header size)
@@ -67,7 +67,7 @@ public:
 #pragma message (NL_LOC_MSG "TEST_POSITION_CORRECTNESS")
 	uint32	size () { return 3*16 + 2*32; }
 #else
-	uint32	size () { return 3*16; } // See also CActionFactory::sizeFast()
+	uint32	size () NL_OVERRIDE { return 3*16; } // See also CActionFactory::sizeFast()
 #endif
 
 	/// Returns the maximum size of this action (INCLUDING the header size handled by CActionFactory!)
@@ -180,14 +180,14 @@ public:
 	//
 
 	///
-	virtual CAction::TValue	getValue() const
+	virtual CAction::TValue	getValue() const NL_OVERRIDE
 	{
 		nlwarning("CActionPosition: forbidden call to getValue()");
 		return (CAction::TValue)0;
 	}
 
 	///
-	virtual void	setValue(const CAction::TValue &value)
+	virtual void	setValue(const CAction::TValue &value) NL_OVERRIDE
 	{
 		nlwarning("CActionPosition: forbidden call to setValue()");
 	}
@@ -204,7 +204,7 @@ public:
 
 	CActionPosition () {}
 
-	void	reset() { /*IsDelta = false; Garanty = false;*/ /*TickDate = 0;*/ }
+	void	reset() NL_OVERRIDE { /*IsDelta = false; Garanty = false;*/ /*TickDate = 0;*/ }
 };
 
 }

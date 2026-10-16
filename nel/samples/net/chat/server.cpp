@@ -101,8 +101,8 @@ public:
 		// Init the server on port 3333
 		Server = new CCallbackServer();
 		Server->init (3333);
-		Server->setConnectionCallback (clientWantsToConnect, NULL);
-		Server->setDisconnectionCallback (clientWantsToDisconnect, NULL);
+		Server->setConnectionCallback (clientWantsToConnect, nullptr);
+		Server->setDisconnectionCallback (clientWantsToDisconnect, nullptr);
 		Server->addCallbackArray (CallbackArray, NB_CB);
 	}
 

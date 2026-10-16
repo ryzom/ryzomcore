@@ -178,35 +178,35 @@
 
 inline uint64 saveGameCycleToSecond(NLMISC::TGameCycle tick)
 {
-	// Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
-	// NB: result should be positive since no event should have been launched before 1970!
-	if (tick < CTickEventHandler::getGameCycle())
-	{
-		NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle() - tick;
-		uint32 s_dt = tick_dt / 10;
+    // Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
+    // NB: result should be positive since no event should have been launched before 1970!
+    if (tick < CTickEventHandler::getGameCycle())
+    {
+        NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle() - tick;
+        uint32 s_dt = tick_dt / 10;
 		return NLMISC::CTime::getSeconds64bSince1970() - s_dt;
-	}
-	else
-	{
-		NLMISC::TGameCycle tick_dt = tick - CTickEventHandler::getGameCycle();
-		uint32 s_dt = tick_dt / 10;
+    }
+    else
+    {
+        NLMISC::TGameCycle tick_dt = tick - CTickEventHandler::getGameCycle();
+        uint32 s_dt = tick_dt / 10;
 		return NLMISC::CTime::getSeconds64bSince1970() + s_dt;
-	}
+    }
 }
 
 inline NLMISC::TGameCycle loadSecondToGameCycle(uint64 second, bool default_to_zero=true)
 {
 	if (second < NLMISC::CTime::getSeconds64bSince1970())
-	{
+    {
 		if (NLMISC::CTime::getSeconds64bSince1970() - second < 0xFFFFFFFF)
-		{
+    {
 			uint32 s_dt = static_cast<uint32>(NLMISC::CTime::getSeconds64bSince1970() - second);
-			NLMISC::TGameCycle tick_dt = s_dt * 10;
+        NLMISC::TGameCycle tick_dt = s_dt * 10;
 			if (CTickEventHandler::getGameCycle() - tick_dt <= CTickEventHandler::getGameCycle())
 			{
-				return CTickEventHandler::getGameCycle() - tick_dt;
-			}
-		}
+        return CTickEventHandler::getGameCycle() - tick_dt;
+    }
+    }
 		if (default_to_zero)
 		{
 			return 0;
@@ -214,15 +214,15 @@ inline NLMISC::TGameCycle loadSecondToGameCycle(uint64 second, bool default_to_z
 			return CTickEventHandler::getGameCycle();
 		}
 	}
-	else
+    else
 	{
 		uint32 s_dt = 0;
 		if (second - NLMISC::CTime::getSeconds64bSince1970() < 0xFFFFFFFF) {
 			s_dt = second - NLMISC::CTime::getSeconds64bSince1970();
 		}
-		NLMISC::TGameCycle tick_dt = s_dt * 10;
+        NLMISC::TGameCycle tick_dt = s_dt * 10;
 		if (CTickEventHandler::getGameCycle() + tick_dt >= CTickEventHandler::getGameCycle()) {
-			return CTickEventHandler::getGameCycle() + tick_dt;
+        return CTickEventHandler::getGameCycle() + tick_dt;
 		}
 
 		if (default_to_zero)

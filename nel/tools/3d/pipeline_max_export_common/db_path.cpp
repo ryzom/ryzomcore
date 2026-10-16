@@ -118,7 +118,7 @@ bool resolve(const std::string &authoredPath, std::string &out)
 	std::string normLower = NLMISC::toLowerAscii(norm);
 
 	// Longest matching registered alias wins.
-	const SAlias *best = NULL;
+	const SAlias *best = nullptr;
 	for (uint i = 0; i < g_aliases.size(); ++i)
 	{
 		const SAlias &a = g_aliases[i];

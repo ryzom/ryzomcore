@@ -40,13 +40,13 @@ public:
 	struct	CSheetChildMission : public CDBGroupListSheetText::CSheetChild
 	{
 		//virtual void updateText(CDBGroupListSheetText * /* pFather */, std::string &/* text */) {}
-		virtual CViewText *createViewText() const;
-		virtual void updateViewText(CDBGroupListSheetText *pFather);
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
+		virtual CViewText *createViewText() const NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
 		// the sheet is valid if its text is not NULL
-		virtual bool isSheetValid(CDBGroupListSheetText *pFather);
-		virtual void update(CDBGroupListSheetText *pFather);
-		virtual void init(CDBGroupListSheetText *pFather, uint index);
+		virtual bool isSheetValid(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void init(CDBGroupListSheetText *pFather, uint index) NL_OVERRIDE;
 
 		CInterfaceProperty	CurrentPreReqState;
 		uint8				CachePreReqState;
@@ -56,7 +56,7 @@ public:
 		: CDBGroupListSheetText(param)
 	{}
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildMission; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildMission; }
 };
 
 

@@ -54,7 +54,7 @@ public:
 	// Main controls
 	static void initNetwork(); // init network (call only once)
 	CSimulatedClient( uint id=DISABLED_CLIENT );
-	virtual ~CSimulatedClient();
+	virtual ~CSimulatedClient() NL_OVERRIDE;
 	bool start();
 	bool update();
 	void requestQuit(); // can be called several times
@@ -62,7 +62,7 @@ public:
 	// Utilities
 	static CSimulatedClient *const currentContext() { return _CurrentContext; } // context for non-OO functions (callbacks...)
 	std::string name() const;
-	virtual const std::string &getCommandHandlerName() const { return _Name; }
+	virtual const std::string &getCommandHandlerName() const NL_OVERRIDE { return _Name; }
 	void setCurrentLoginState( TLoginState ls ) { if ( _CurrentLoginState < LSQuitRequested) _CurrentLoginState = ls; }
 	void requestCreateChar();
 	void requestCommandA( const std::string& arg );

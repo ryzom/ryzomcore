@@ -83,21 +83,21 @@ public:
 	};
 
 
-	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 
 	// @}
 
 	/// \name Derived from CTransformShape.
 	// @{
-	virtual uint		getNumMaterial () const;
-	virtual const CMaterial	*getMaterial (uint materialId) const;
-	virtual CMaterial	*getMaterial (uint materialId);
+	virtual uint		getNumMaterial () const NL_OVERRIDE;
+	virtual const CMaterial	*getMaterial (uint materialId) const NL_OVERRIDE;
+	virtual CMaterial	*getMaterial (uint materialId) NL_OVERRIDE;
 	// @}
 
 	/// \name Derived from ITransformable.
 	// @{
 	/// Default Track Values.
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 	// @}
 
 	/// \name LightMap properties
@@ -191,26 +191,26 @@ public:
 	 *	- animate channel mixer for pos, rot, scale etc..
 	 *	- call standard CTransform::traverseHrc()
 	 */
-	virtual void	traverseHrc();
+	virtual void	traverseHrc() NL_OVERRIDE;
 	/** this do :
 	 *  - call CTransformShape::traverseAnimDetail()
 	 *  - update animated materials.
 	 */
-	virtual void	traverseAnimDetail();
+	virtual void	traverseAnimDetail() NL_OVERRIDE;
 	// @}
 
 
 	/// \name Misc
 	// @{
 	/// see CTransform::fastIntersect()
-	virtual bool		fastIntersect(const NLMISC::CVector &p0, const NLMISC::CVector &dir, float &dist2D, float &distZ, bool computeDist2D);
+	virtual bool		fastIntersect(const NLMISC::CVector &p0, const NLMISC::CVector &dir, float &dist2D, float &distZ, bool computeDist2D) NL_OVERRIDE;
 	// @}
 
 protected:
 	/// Constructor
 	CMeshBaseInstance();
 	/// Destructor
-	virtual ~CMeshBaseInstance();
+	virtual ~CMeshBaseInstance() NL_OVERRIDE;
 
 
 private:

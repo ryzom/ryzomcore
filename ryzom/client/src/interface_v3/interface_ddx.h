@@ -38,10 +38,10 @@ public:
 	enum	{NumPreset= 4, CustomPreset=NumPreset};
 
 public:
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
 	CInterfaceDDX();
-	virtual ~CInterfaceDDX();
+	virtual ~CInterfaceDDX() NL_OVERRIDE;
 
 	// DB -> Parameters
 	void init();
@@ -101,7 +101,7 @@ private:
 		{
 			ResultDecimal= 0;
 			RoundMode= false;
-			PresetDB= NULL;
+			PresetDB = nullptr;
 			RealTimeMode= RTModeFalse;
 		}
 		void DBToWidget();
@@ -135,10 +135,10 @@ private:
 	class CPresetObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 		CInterfaceDDX		*Owner;
 
-		CPresetObs() : Owner(NULL) {}
+		CPresetObs() : Owner(nullptr) {}
 	};
 	CPresetObs					_PresetObs;
 	std::set<NLMISC::CCDBNodeLeaf*>		_PresetNodes;
@@ -157,7 +157,7 @@ public:
 
 	static CDDXManager *getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CDDXManager;
 		return _Instance;
 	}

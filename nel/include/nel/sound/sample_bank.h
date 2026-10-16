@@ -62,7 +62,7 @@ public:
 	CSampleBank(NLMISC::TStringId name, CSampleBankManager *sampleBankManager);
 
 	/// Destructor
-	virtual ~CSampleBank();
+	virtual ~CSampleBank() NL_OVERRIDE;
 
 	/** Load all the samples.
 	 *
@@ -94,7 +94,7 @@ public:
 	
 private:
 	/// The update method. Used when waiting for async sample loading.
-	void onUpdate();
+	void onUpdate() NL_OVERRIDE;
 
 	// Sample bank manager
 	CSampleBankManager	*_SampleBankManager;

@@ -59,14 +59,10 @@ CSheets CSheets::_StaticSheets;		// the singleton instance
 bool CSheets::_Initialised=false;	// - set true by constructor
 bool CSheets::_Destroyed=false;		// - set true by destructor
 
-#ifndef NO_EGS_VARS
-static std::string writeDirectory()
-{
-	return IService::getInstance()->WriteFilesDirectory.toString();
-}
-#else
+// Provided by the linking application: the EGS returns its
+// WriteFilesDirectory (egs_sheets_impl.cpp), sheets_packer_shard its output
+// directory. A consumer that forgets the definition gets a link error.
 extern std::string writeDirectory();
-#endif
 
 //---------------------------------------------------
 // scanDirectoriesForFiles : utility routine for init()

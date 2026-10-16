@@ -676,7 +676,6 @@ void finalizeClientReady( uint32 userId, uint32 index )
 		}
 	}
 
-
 	CPVPManager2::getInstance()->updateFactionChannel( c );
 	CPVPManager2::getInstance()->setPVPModeInMirror( c );
 	c->updatePVPClanVP();
@@ -1212,7 +1211,7 @@ void cbDeleteChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 		CEntityIdTranslator::removeShardFromName(charName);
 #ifdef HAVE_MEMCACHED
 		CMemC::setWithIndex("Shard-Command", toString("cbDeleteChar:%s", charName.toUtf8().c_str()));
-#endif
+	#endif
 	}
 
 	sint32 index = characterIndex;
@@ -1641,7 +1640,7 @@ void cbJoinTeamProposal( NLNET::CMessage& msgin, const std::string &serviceName,
 void cbJoinLeague( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbJoinLeague);
-
+	
 	CEntityId charId;
 	msgin.serial( charId );
 	TeamManager.joinLeagueAccept( charId );
@@ -1653,7 +1652,7 @@ void cbJoinLeague( NLNET::CMessage& msgin, const std::string &serviceName, NLNET
 void cbJoinLeagueDecline( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbJoinLeagueDecline);
-
+	
 	CEntityId charId;
 	msgin.serial( charId );
 	TeamManager.joinLeagueDecline( charId );
@@ -1666,7 +1665,7 @@ void cbJoinLeagueDecline( NLNET::CMessage& msgin, const std::string &serviceName
 void cbJoinLeagueProposal( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbJoinLeagueProposal);
-
+	
 	CEntityId charId;
 	msgin.serial( charId );
 
@@ -1790,6 +1789,12 @@ void cbHarvestDeposit( NLNET::CMessage& msgin, const std::string &serviceName, N
 		return;
 	}
 	character->setAfkState(false);
+
+	// DEAD CODE: deposit harvesting is no longer implemented (the official client does not send this message anymore).
+	// Everything below this return is unreachable on purpose: it ends in nlerror(), which aborts the whole service,
+	// so a modified client must never be able to reach it.
+	nlwarning("<cbHarvestDeposit> player Id %s asked a deposit harvest, which is not implemented", charId.toString().c_str() );
+	return;
 
 	// check this harvester can use the given skill
 /*	if ( skill >= SKILLS::NUM_SKILLS || character->getSkills()._Skills[skill].Base <= 0 )
@@ -2677,7 +2682,7 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 		if (inventoryDst == (uint16) INVENTORIES::guild) // possible???
 			character->moveItem(inventorySrc, slotSrc, inventoryDst, slotDst, quantity);
 		else
-			character->moveItem(inventorySrc, slotSrc, inventoryDst, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, quantity);
+		character->moveItem(inventorySrc, slotSrc, inventoryDst, INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, quantity);
 	}
 }
 

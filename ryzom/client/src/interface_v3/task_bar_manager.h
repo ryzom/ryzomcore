@@ -98,9 +98,9 @@ public:
 		_ShowDesktops = true;
 	}
 
-	virtual bool wantSerialConfig() const { return true; }
+	virtual bool wantSerialConfig() const NL_OVERRIDE { return true; }
 
-	virtual void serialConfig(NLMISC::IStream &f);
+	virtual void serialConfig(NLMISC::IStream &f) NL_OVERRIDE;
 
 	void update(bool updatePos=false);
 

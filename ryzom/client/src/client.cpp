@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 #endif
 
 	// don't create log.log anymore because client.log is used
-	createDebug(NULL, false);
+	createDebug(nullptr, false);
 
 	INelContext::getInstance().setWindowedApplication(true);
 
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
 	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
 		LoginShardId = std::numeric_limits<uint32>::max();
 
-// if client_default.cfg is not in current directory, use application default directory
+	// if client_default.cfg is not in current directory, use application default directory
 	if (Args.haveArg("p") || Args.haveLongArg("profile") || !CFile::isExists("client_default.cfg"))
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");

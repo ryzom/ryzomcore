@@ -92,7 +92,7 @@ void CGuildLeaderModule::quitGuild()
 
 	// the leader quits : find a successor
 	CGuildMember * successor = NULL;
-	// best successor is the member with best grade. If more than 1 user fits, take the older in the guild
+	// best successor is the member with best grade. If more than 1 user fits, take the older in the guild 
 	for (map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = _GuildMemberCore->getGuild()->getMembersBegin();
 		it != _GuildMemberCore->getGuild()->getMembersEnd();
 		++it  )
@@ -111,7 +111,7 @@ void CGuildLeaderModule::quitGuild()
 			successor = member;
 		}
 	}
-
+		
 	// if the guild is still valid, set the successor as leader
 	if ( successor )
 	{
@@ -142,7 +142,7 @@ void CGuildLeaderModule::quitGuild()
 	_GuildMemberCore->setMemberGrade(EGSPD::CGuildGrade::Member);
 	guild->incGradeCount( EGSPD::CGuildGrade::Member );
 	guild->decGradeCount( EGSPD::CGuildGrade::Leader );
-	// quit the guild
+	// quit the guild 
 	CGuildMemberModule::quitGuild();
 }
 

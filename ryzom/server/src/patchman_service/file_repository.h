@@ -101,18 +101,18 @@ namespace PATCHMAN
 
 	protected:
 		// treatment of incoming file requests
-		void requestFileInfo(NLNET::IModuleProxy *sender,const NLMISC::CSString& fileSpec);
-		void requestFileData(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileName, uint32 startOffset, uint32 numBytes);
+		void requestFileInfo(NLNET::IModuleProxy *sender,const NLMISC::CSString& fileSpec) NL_OVERRIDE;
+		void requestFileData(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileName, uint32 startOffset, uint32 numBytes) NL_OVERRIDE;
 
 		// treatment of subscriptions and unsubscriptions
-		void subscribe(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileSpec);
-		void unsubscribe(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileSpec);
-		void unsubscribeAll(NLNET::IModuleProxy *sender);
-		void getInfo(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileSpec);
+		void subscribe(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileSpec) NL_OVERRIDE;
+		void unsubscribe(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileSpec) NL_OVERRIDE;
+		void unsubscribeAll(NLNET::IModuleProxy *sender) NL_OVERRIDE;
+		void getInfo(NLNET::IModuleProxy *sender, const NLMISC::CSString &fileSpec) NL_OVERRIDE;
 
 		// IFileInfoUpdateListener specialisation implementation
-		void cbFileInfoUpdate(const SFileInfo& fileInfo);
-		void cbFileInfoErased(const NLMISC::CSString& fileName);
+		void cbFileInfoUpdate(const SFileInfo& fileInfo) NL_OVERRIDE;
+		void cbFileInfoErased(const NLMISC::CSString& fileName) NL_OVERRIDE;
 
 		// broadcast a set of file info changes to all subscribers
 		void _broadcastFileInfoChanges(const TFileInfoVector& fileInfoChanges);

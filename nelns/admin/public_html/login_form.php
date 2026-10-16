@@ -19,11 +19,11 @@
 	{
 		global $command, $admlogin, $admpassword;
 
-		htmlProlog($_SERVER['PHP_SELF'], "Administration", false);
+		htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Administration", false);
 		
 		?>
 
-		<form method="post" action="<?php echo basename($_SERVER['PHP_SELF']); ?>" name=loginform>
+		<form method="post" action="<?php echo htmlspecialchars(basename($_SERVER['PHP_SELF']), ENT_QUOTES); ?>" name=loginform>
 		<table frame=void rules=none WIDTH="300">
 		<tr>
 		<td align="left"> login: </td>

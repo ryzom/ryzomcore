@@ -119,18 +119,18 @@ static const SPB2Param *fp(const std::vector<SPB2Block> &blocks, uint16 id)
 NL3D::IShape *buildFlareShape(INode &node, SNodeTMCache &tmCache)
 {
 	std::string nodeName = SCENELIB::nodeName(node);
-	CSceneClass *base = baseObjectOf(node, NULL, NULL);
+	CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
 	if (!base)
 	{
 		fprintf(stderr, "WARNING: flare '%s': no base object\n", nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 	std::vector<SPB2Block> blocks;
 	readObjectPB2Blocks(base, blocks);
 	if (blocks.empty())
 	{
 		fprintf(stderr, "WARNING: flare '%s': no ParamBlock2 on base object\n", nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	// Build the shape and populate its state. Match the reference's ordering (`nlwarning FAILED
@@ -217,12 +217,12 @@ NL3D::IShape *buildFlareShape(INode &node, SNodeTMCache &tmCache)
 			}
 			else
 			{
-				fshape->setTexture(k, NULL);
+				fshape->setTexture(k, nullptr);
 			}
 		}
 		else
 		{
-			fshape->setTexture(k, NULL);
+			fshape->setTexture(k, nullptr);
 		}
 	}
 	// Occlusion test mesh — a shape file name (basename only) + inherit-scale-rot flag

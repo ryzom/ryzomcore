@@ -126,7 +126,7 @@ UPrimitiveBlock *UPrimitiveBlock::createPrimitiveBlockFromFile(const std::string
 			throw NLMISC::Exception(std::string("Unable to init an xml input file from ") + fileName);
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 

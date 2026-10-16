@@ -131,7 +131,7 @@ public:
 	/// Globaly helper to serial a string id. ** This method IS Thread-Safe **
 	static void serialString(NLMISC::IStream &f, TStringId &id) { s_GlobalMapper.localSerialString(f, id); }
 	/// Return the global id for the empty string (helper function). NB: Works with every instance of CStringMapper
-	static TStringId emptyId() { return NULL; }
+	static TStringId emptyId() { return nullptr; }
 
 	// ** This method IS Thread-Safe **
 	static void clear() { s_GlobalMapper.localClear(); }
@@ -151,7 +151,7 @@ public:
 	TStringId localMap(const char *str);
 #endif
 	/// Localy unmap a string
-	const std::string &localUnmap(const TStringId &stringId) const { return (stringId == NULL) ? *m_EmptyId : *((const std::string *)stringId); }
+	const std::string &localUnmap(const TStringId &stringId) const { return (stringId == nullptr) ? *m_EmptyId : *((const std::string *)stringId); }
 	/// Localy helper to serial a string id
 	void localSerialString(NLMISC::IStream &f, TStringId &id);
 
@@ -184,7 +184,7 @@ public:
 	CStaticStringMapper()
 	{
 		_IdCounter = 0;
-		_AllStrings = NULL;
+		_AllStrings = nullptr;
 		_MemoryCompressed = false;
 		add("");
 	}

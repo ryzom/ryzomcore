@@ -47,16 +47,16 @@ namespace NLGUI
 
 		/// Constructor
 		CDBGroupComboBox(const TCtorParam &param);
-		~CDBGroupComboBox();
+		~CDBGroupComboBox() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		/// CInterfaceGroup Interface
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-		virtual void updateCoords ();
-		virtual void checkCoords ();
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void updateCoords () NL_OVERRIDE;
+		virtual void checkCoords () NL_OVERRIDE;
 
 		// Combo Texts
 		void			resetTexts();

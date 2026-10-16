@@ -43,7 +43,7 @@ public:
 	void			setParam (uint32 maxStrings = 50);
 
 	/// Write N last line into a displayer (InfoLog by default)
-	void			write (CLog *log = NULL, bool quiet=true);
+	void			write (CLog *log = nullptr, bool quiet=true);
 	void			write (std::string &str, bool crLf=false);
 
 	const std::deque<std::string>	&lockStrings () { _CanUseStrings = false; return _Strings; }
@@ -54,7 +54,7 @@ public:
 
 protected:
 	/// Put the string into the file.
-    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 
 	bool						_NeedHeader;
 
@@ -80,7 +80,7 @@ public:
 
 protected:
 	/// Put the string into the file.
-    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message );
+    virtual void	doDisplay ( const CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE;
 };
 
 

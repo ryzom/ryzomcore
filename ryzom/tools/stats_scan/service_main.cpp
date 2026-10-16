@@ -48,7 +48,7 @@ public :
 	/*
 	 * Initialise the service
 	 */
-	void init()
+	void init() NL_OVERRIDE
 	{
 		setVersion (RYZOM_VERSION);
 
@@ -56,7 +56,7 @@ public :
 		CSheetId::init(false);
 
 		// if we are connecting to a shard then start by initializing the tick interface
-		if (IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")==NULL || IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")->asInt()==0)
+		if (IService::getInstance()->ConfigFile.getVarPtr("DontUseTS") == nullptr || IService::getInstance()->ConfigFile.getVarPtr("DontUseTS")->asInt()==0)
 			CTickEventHandler::init(CStatsScanServiceSingleton::tickUpdate);
 
 		CSingletonRegistry::getInstance()->init();
@@ -65,7 +65,7 @@ public :
 	/*
 	 * Service Update
 	 */
-	bool update()
+	bool update() NL_OVERRIDE
 	{
 		CSingletonRegistry::getInstance()->serviceUpdate();
 		return true;
@@ -82,7 +82,7 @@ public :
 	/*
 	 * Release
 	 */
-	void release()
+	void release() NL_OVERRIDE
 	{
 		CSingletonRegistry::getInstance()->release();
 	}

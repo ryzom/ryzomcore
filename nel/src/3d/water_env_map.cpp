@@ -92,13 +92,13 @@ void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimatio
 	class CTextureCubeUnshared : public CTextureCube
 	{
 	public:
-		virtual bool supportSharing() const {return false;}
-		virtual uint32 getWidth(uint32 numMipMap = 0) const
+		virtual bool supportSharing() const NL_OVERRIDE {return false;}
+		virtual uint32 getWidth(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
 		}
-		virtual uint32 getHeight(uint32 numMipMap = 0) const
+		virtual uint32 getHeight(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
@@ -109,13 +109,13 @@ void CWaterEnvMap::init(uint cubeMapSize, uint projection2DSize, TGlobalAnimatio
 	class CTexture2DUnshared : public CTextureBlank
 	{
 	public:
-		virtual bool supportSharing() const {return false;}
-		virtual uint32 getWidth(uint32 numMipMap = 0) const
+		virtual bool supportSharing() const NL_OVERRIDE {return false;}
+		virtual uint32 getWidth(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
 		}
-		virtual uint32 getHeight(uint32 numMipMap = 0) const
+		virtual uint32 getHeight(uint32 numMipMap = 0) const NL_OVERRIDE
 		{
 			nlassert(numMipMap == 0);
 			return Size;
@@ -211,7 +211,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 		driver.setRenderTarget(_Env2D, 0, 0, _Env2DSize, _Env2DSize);
 		doInit();
 		//
-		driver.activeVertexProgram(NULL);
+		driver.activeVertexProgram(nullptr);
 		driver.activeVertexBuffer(_FlattenVB);
 		driver.activeIndexBuffer(_FlattenIB);
 		driver.setFrustum(-1.f, 1.f, -1.f, 1.f, 0.f, 1.f, false);
@@ -224,7 +224,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 		driver.renderTriangles(_MaterialPassThru, 0, FVB_NUM_TRIS);
 		_NumRenderedFaces = 0; // start to render again
 	}
-	driver.setRenderTarget(NULL);
+	driver.setRenderTarget(nullptr);
 }
 
 // *******************************************************************************

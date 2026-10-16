@@ -37,7 +37,7 @@ public:\
 		Factories->push_back(std::make_pair(_type_,this));\
 	};\
 protected:\
-	CSPhrasePtr buildPhrase( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool execution )\
+	CSPhrasePtr buildPhrase( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool execution ) NL_OVERRIDE\
 	{\
 		_class_ *inst = new _class_;\
 		if ( !inst->build( actorRowId, bricks, execution ) ){delete inst;return NULL;} \

@@ -21,9 +21,7 @@
 #ifndef BACKUP_SERVICE_ITF
 #define BACKUP_SERVICE_ITF
 #include "nel/misc/types_nl.h"
-#ifdef NL_COMP_VC8
-  #include <memory>
-#endif
+#include <memory>
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/string_conversion.h"
 #include "nel/net/message.h"
@@ -33,10 +31,10 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 namespace BS
 {
-	
+
 
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -61,12 +59,12 @@ namespace BS
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -76,7 +74,7 @@ namespace BS
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void saveFile_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void loadFile_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -124,7 +122,7 @@ namespace BS
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CBackupServiceSkel::TInterceptor *interceptor = NULL;
+				CBackupServiceSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -132,7 +130,7 @@ namespace BS
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CBackupServiceProxy()
@@ -151,10 +149,10 @@ namespace BS
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_saveFile(NLNET::CMessage &__message, const std::string &fileName, const NLNET::TBinBuffer &data);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_loadFile(NLNET::CMessage &__message, const std::string &fileName, uint32 requestId);
-	
+
 
 
 
@@ -183,12 +181,12 @@ namespace BS
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -198,7 +196,7 @@ namespace BS
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void loadFileResult_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void fileUpdate_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -246,7 +244,7 @@ namespace BS
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CBackupServiceClientSkel::TInterceptor *interceptor = NULL;
+				CBackupServiceClientSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -254,7 +252,7 @@ namespace BS
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CBackupServiceClientProxy()
@@ -273,15 +271,15 @@ namespace BS
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_loadFileResult(NLNET::CMessage &__message, uint32 requestId, const std::string &fileName, uint32 fileTimeStamp, const NLNET::TBinBuffer &data);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_fileUpdate(NLNET::CMessage &__message, const std::string &fileName, const std::vector < std::string > &content);
-	
+
 
 
 
 	};
 
 }
-	
+
 #endif

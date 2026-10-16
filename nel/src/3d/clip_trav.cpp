@@ -54,7 +54,7 @@ CClipTrav::CClipTrav() : ViewPyramid(6), WorldPyramid(6)
 	Accel.create (64, 16.0f);
 
 	ForceNoFrustumClip= false;
-	_QuadGridClipManager= NULL;
+	_QuadGridClipManager = nullptr;
 	_TrackClusterVisibility= false;
 	_LastShadowFadeFrameId= 0;
 	_UseClusterVisibilityPosOverride= false;
@@ -614,7 +614,7 @@ void	CClipTrav::clipShadowCasters()
 
 		// Binded to an Ancestor skeleton?? If so, don't render since the Ancestor Skeleton render all of his sons
 		// Additionally, no-op if this caster is hidden in HRC!!
-		if( sc->_AncestorSkeletonModel==NULL && sc->isHrcVisible() )
+		if( sc->_AncestorSkeletonModel == nullptr && sc->isHrcVisible() )
 		{
 			bool	visible= false;
 			// if we are already visible, then its ok, we either don't need to test.

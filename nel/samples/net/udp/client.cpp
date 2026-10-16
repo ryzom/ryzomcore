@@ -75,7 +75,7 @@ uint16		TCPPort = 45456;
 
 uint32		MaxUDPPacketSize = 1000;
 
-CUdpSimSock	*UdpSock = NULL;
+CUdpSimSock	*UdpSock = nullptr;
 
 uint8		Mode = 0;
 
@@ -114,7 +114,7 @@ void exit (const string &reason)
 void createConfigFile()
 {
 	FILE *fp = nlfopen ("client.cfg", "wt");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		InfoLog->displayRawNL ("Can't create client.cfg");
 	}
@@ -161,7 +161,7 @@ void checkConnectionName ()
 void loadConfigFile ()
 {
 	FILE *fp = nlfopen ("client.cfg", "rt");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		createConfigFile();
 	}
@@ -186,7 +186,7 @@ void loadConfigFile ()
 		InfoLog->displayRawNL ("For example enter your name and/or your location (ie: \"AceHome\"),");
 		InfoLog->displayRawNL ("It'll be use to find your stat file easier:");
 		char cn[128];
-		if (fgets (cn, 127, stdin) == NULL)
+		if (fgets (cn, 127, stdin) == nullptr)
 		{
 			exit ("Error during the keyboard scanning");
 		}
@@ -278,7 +278,7 @@ int main( int argc, char **argv )
 	CCallbackClient *cc = new CCallbackClient;
 	
 	cc->addCallbackArray (CallbackArray, sizeof(CallbackArray)/sizeof(CallbackArray[0]));
-	cc->setDisconnectionCallback (cbDisconnect, NULL);
+	cc->setDisconnectionCallback (cbDisconnect, nullptr);
 
 	try
 	{
@@ -355,7 +355,7 @@ int main( int argc, char **argv )
 		cc->update ();
 
 		// update UDP connection
-		if (UdpSock != NULL)
+		if (UdpSock != nullptr)
 		{
 			if (Mode == 0)
 			{

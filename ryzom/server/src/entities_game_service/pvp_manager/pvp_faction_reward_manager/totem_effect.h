@@ -42,10 +42,10 @@ public :
 	 * apply the effects of the... effect
 	 * \return true if effects ends
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 	
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// change the parameter value
 	inline void setParamValue( sint32 value ) { _Value = value; } 
@@ -76,10 +76,10 @@ public:
 	 * apply the effects of the... effect
 	 * \return true if effects ends
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 	
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 };
 
 #endif // TOTEM_EFFECT_H

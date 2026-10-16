@@ -3,7 +3,7 @@
 
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
-if (game == nil) then
+if (game==nil) then
 	game={}
 end
 
@@ -113,6 +113,7 @@ function game:switchChatTab(dbEntry)
 	else
 		setDbProp(db, 0)
 	end
+
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -253,8 +254,6 @@ local function twIsTargetInPVPMode()
 		return isTargetInPVPMode()
 	end
 end
-
-
 game.updateRpItemsUrl = nil
 game.wantedRpLeftItem = ""
 game.wantedRpRightItem = ""
@@ -359,14 +358,16 @@ function game:checkRpItemsPosition()
 	end
 end
 
+
+
 ------------------------------------------------------------------------------------------------------------
 -- This function is called when a new target is selected, it should update the 'consider' widget
 -- Level of the creature
 -- Is its level known (not too high ...)
 -- Boss/Mini-bosses/Names colored ring
-
 function game:updateTargetConsiderUI()
 	game:updateRpItems(game.usedRpLeftItem, game.usedRpRightItem)
+
 	local targetWindow = getUI("ui:interface:target")
 	--
 	local wgTargetSlotForce = targetWindow:find("slot_force")
@@ -526,7 +527,7 @@ function game:updateTargetConsiderUI()
 	end
 
 	if impossible then
-		wgToolTip.tooltip = (wgToolTip.tooltip .. "\n" .. i18n.get("uittConsiderUnknownLevel"))
+		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
 	end
 end
 
@@ -750,20 +751,20 @@ end
 function game:openWindowHeader()
 	local ui = getUICaller().parent;
 	local id = ui.id;
-
 	if ui ~= nil and game.ui_props[id] ~= nil then
-		-- set size from saved values
-		if game.ui_props[id].pop_min_h ~= nil then
-			ui.pop_min_h = game.ui_props[id].pop_min_h
-		end
 
-		if game.ui_props[id].h ~= nil then
-			ui.h = game.ui_props[id].h
-		end
+	-- set size from saved values
+	if game.ui_props[id].pop_min_h ~= nil then
+		ui.pop_min_h = game.ui_props[id].pop_min_h
+	end
 
-		 if ui_webig_browser_w ~= nil then
-			ui.w = game.ui_props[id].w;
-		end
+	if game.ui_props[id].h ~= nil then
+		ui.h = game.ui_props[id].h
+	end
+
+	 if ui_webig_browser_w ~= nil then
+		ui.w = game.ui_props[id].w;
+end
 	end
 end
 
@@ -784,12 +785,10 @@ function game:openGuildIsland(url_island)
 	getUI("ui:interface:guild:content:tab_island:props:html"):browse(url_island.."params="..params);
 	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_island:inv:html")
 end
-
 function game:openGuildSpecialBag()
 	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_special_bag:inv:html")
 	getUI("ui:interface:guild:content:tab_special_bag:inv:html"):renderHtml("<table width='100%'><td height='100px'><tr></td></tr><tr><td align='center' style='font-size: 18px; font-color: lightgreen'>"..tostring(i18n.get("uiPleaseWait")).."</td></tr></table>")
 end
-
 
 
 ------------------------------------------------------------------------------------------------------------
@@ -838,7 +837,7 @@ function game:openChannels()
 					if getDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT"..i) == 1 then
 						local cname = getDbProp("SERVER:DYN_CHAT:CHANNEL"..i..":NAME")
 						if isDynStringAvailable(cname) then
-							local chan = getDynString(cname)
+							local chan = getDynString(cname):toUtf8()
 							-- already opened?
 							if channels[id].name == chan then found = true end
 						end
@@ -894,7 +893,7 @@ function game:saveChannel(verbose)
 		if getDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT"..i) == 1 then
 			local cname = getDbProp("SERVER:DYN_CHAT:CHANNEL"..i..":NAME")
 			if isDynStringAvailable(cname) then
-				local chan = getDynString(cname)
+				local chan = getDynString(cname):toUtf8()
 				local found = false
 				-- avoid empty cvar case
 				if getClientCfgVar("ChannelIgnoreFilter") then
@@ -940,7 +939,7 @@ function game:chatWelcomeMsg(input)
 		if type(input) == "number" then
 			local id = getDbProp("SERVER:DYN_CHAT:CHANNEL"..input..":NAME")
 			if isDynStringAvailable(id) then
-				name = getDynString(id)
+				name = getDynString(id):toUtf8()
 				-- variable for this session
 				if getDbProp(temp..name) == 0 then
 					-- faction, nation and organization
@@ -954,9 +953,9 @@ function game:chatWelcomeMsg(input)
 						marauder = i18n.get("uiFameMarauders"),
 						ranger = i18n.get("uiOrganization_7")
 					}) do
-						if name == v then
+						if name == v:toUtf8() then
 							msg = i18n.get("uiWelcome_"..k)
-							name = v
+							name = v:toUtf8()
 						end
 					end
 				end

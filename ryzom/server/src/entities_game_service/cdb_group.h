@@ -92,7 +92,7 @@ public:
 
 	/// Init (the singleton of CCDBStructBanks must have been initialized before)
 	void				init( TCDBBank bank ) { Database.init( bank, true ); }
-
+	
 	/**
 	 * Add a recipient.
 	 * - recipient must be ready for writing (e.g. at state 1 of above tutorial), because it will
@@ -121,7 +121,7 @@ public:
 		CFakeDataProvider dp;
 		sendDeltas( maxBitSize, dp, sendFlags );
 	}
-
+	
 
 private:
 

@@ -38,9 +38,9 @@ namespace NL3D
 // ***************************************************************************
 CLodCharacterBuilder::CLodCharacterBuilder()
 {
-	_SkeletonShape= NULL;
-	_LodBuild= NULL;
-	_TmpScene= NULL;
+	_SkeletonShape = nullptr;
+	_LodBuild = nullptr;
+	_TmpScene = nullptr;
 }
 // ***************************************************************************
 CLodCharacterBuilder::~CLodCharacterBuilder()
@@ -50,7 +50,7 @@ CLodCharacterBuilder::~CLodCharacterBuilder()
 	{
 		_TmpScene->release();
 		delete _TmpScene;
-		_TmpScene= NULL;
+		_TmpScene = nullptr;
 	}
 }
 

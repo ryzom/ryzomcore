@@ -48,15 +48,15 @@ NL_INSTANCE_COUNTER_IMPL(CCharacterShoppingList);
 
 //-----------------------------------------------------------------------------
 CCharacterShoppingList::CCharacterShoppingList( CSmartPtr<CMerchant>& merchant, CCharacter& character, float fameFactor )
-{
-	_CurrentMerchant = merchant;
+{ 
+	_CurrentMerchant = merchant; 
 	_Character = & character;
 /*	if( _CurrentMerchant )
 	{
 		_CurrentMerchant->addCharacterShowingTradeList( *this );
 	}
 */	_FameFactor = fameFactor;
-}
+} 
 
 //-----------------------------------------------------------------------------
 CCharacterShoppingList::~CCharacterShoppingList()
@@ -100,7 +100,7 @@ void CCharacterShoppingList::mountShoppingList( CONTINENT::TContinent continent 
 		typedef std::vector< TItemTradePtr > TTradeList;
 
 		const vector< const IShopUnit * >& merchantTradeList = _CurrentMerchant->getMerchantTradeList();
-
+		
 		for( uint32 shopIdx = 0; shopIdx < merchantTradeList.size(); ++shopIdx )
 		{
 			const IShopUnit * shop = merchantTradeList [ shopIdx ];
@@ -279,7 +279,7 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 			form->Family != ITEMFAMILY::CRAFTING_TOOL &&
 			form->Family != ITEMFAMILY::COSMETIC &&
 			form->Family != ITEMFAMILY::TELEPORT &&
-			form->Family != ITEMFAMILY::SERVICE &&
+			form->Family != ITEMFAMILY::SERVICE && 
 			form->Family != ITEMFAMILY::GENERIC_ITEM &&
 			form->Family != ITEMFAMILY::CONSUMABLE
 			)
@@ -333,7 +333,7 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 					break;
 				}
 			}
-
+	
 			if( _Character->getMinQualityFilter() > itemTrade->getLevel() )
 				return false;
 			if( _Character->getMaxQualityFilter() < itemTrade->getLevel() )
@@ -349,7 +349,7 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 				return false;
 		}
 	}
-
+	
 	return true;
 }
 
@@ -369,7 +369,7 @@ bool CCharacterShoppingList::checkAltarRestriction()
 
 		}
 	}
-
+	
 	uint32 altarFameRestriction = _CurrentMerchant->getAltarFameRestriction();
 	if( altarFameRestriction != CStaticFames::INVALID_FACTION_INDEX )
 	{
@@ -414,7 +414,7 @@ uint32 CCharacterShoppingList::getSellPrice( const TItemTradePtr itemTrade, bool
 				break;
 			}
 		}
-	}
+	}	
 	return (uint32) (itemTrade->getPriceInfo().getAmount() * priceFactor);
 }
 
@@ -424,7 +424,7 @@ void CCharacterShoppingList::initPageToUpdate( uint32 nbSlotPerPage )
 	_NbSlotPerPage = nbSlotPerPage;
 
 	const uint nbPages = (uint)(_CurrentTradeListNpc.size() + _CurrentTradeListPlayer.size() + _CurrentTradeListYours.size() + nbSlotPerPage-1) / nbSlotPerPage ;
-
+	
 	// Yoyo: to avoid "my YOURS list is refreshing too late"
 	/*for (uint i = 0 ; i < nbPages ; ++i)
 		_TradePagesToUpdate.push_back(i);*/
@@ -524,7 +524,7 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 		{
 			trade = &_CurrentTradeListYours[ i - _CurrentTradeListNpc.size() - _CurrentTradeListPlayer.size() ];
 		}
-
+		
 		BOTCHATTYPE::TBotChatSellerType sellerType = BOTCHATTYPE::NPC;
 
 		if( trade->ShopUnit == 0 )
@@ -544,11 +544,11 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 			{
 				if( trade->Retirable )
 				{
-					sellerType = BOTCHATTYPE::ResaleAndUserRetirable;
+					sellerType = BOTCHATTYPE::ResaleAndUserRetirable;				
 				}
 				else
 				{
-					sellerType = BOTCHATTYPE::ResaleAndUser;
+					sellerType = BOTCHATTYPE::ResaleAndUser;				
 				}
 			}
 			else
@@ -591,7 +591,7 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 		tradeElem.setPRICE_RETIRE(_Character->_PropertyDatabase, trade->ItemTrade->getRetirePrice());
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:RESALE_TIME_LEFT",index  ), (uint32)( trade->ItemTrade->getGameCycleLeft() * CTickEventHandler::getGameTimeStep() / 3600 ) );
 		tradeElem.setRESALE_TIME_LEFT(_Character->_PropertyDatabase, uint16( trade->ItemTrade->getGameCycleLeft() * CTickEventHandler::getGameTimeStep() / 3600 ));
-
+		
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:SLOT_TYPE",index  ), 0 );
 		tradeElem.setSLOT_TYPE(_Character->_PropertyDatabase, 0);
 //		_Character->_PropertyDatabase.setProp( NLMISC::toString("TRADING:%u:INFO_VERSION",index  ), 0 );
@@ -600,7 +600,7 @@ void CCharacterShoppingList::fillTradePage( uint16 session )
 //		_Character->_PropertyDatabase.setPropString( NLMISC::toString("TRADING:%u:VENDOR_NAMEID", index), vendorName );
 		tradeElem.setVENDOR_NAMEID(_Character->_PropertyDatabase, vendorName);
 
-		if( trade->ItemTrade->getItemPtr() != 0 )
+		if( trade->ItemTrade->getItemPtr() != 0 ) 
 		{
 			const INVENTORIES::TItemId &itemId = trade->ItemTrade->getItemPtr()->getItemId();
 			trade->ItemTrade->getItemPtr()->recommended( trade->ItemTrade->getLevel() );
@@ -703,7 +703,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 		nlwarning("<CCharacterShoppingList::buyItem> itemNumber not exist...");
 		return;
 	}
-
+	
 	TShopStruct * shop;
 	if( itemNumber < _CurrentTradeListNpc.size() )
 	{
@@ -756,6 +756,11 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 			PVP_CLAN::TPVPClan clan = shop->ItemTrade->getPriceInfo().getFaction();
 			if ((clan >= PVP_CLAN::BeginClans) && (clan <= PVP_CLAN::EndClans))
 			{
+				if( shop->ShopUnit == 0 )
+				{
+					nlwarning("<CCharacterShoppingList::buyItem> ShopUnit ptr is NULL for a faction points item");
+					return;
+				}
 				factionPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
 				if (_Character->getFactionPoint(clan) < (factionPrice*quantity))
 				{
@@ -789,7 +794,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 			sint16 slot = -1;
 			item = GameItemManager.createItem( sheet, level, true, true );
 		}
-		else
+		else 
 		{
 			item = shop->ItemTrade->getItemPtr()->getItemCopy();
 			nlassert( item != 0 );
@@ -1014,7 +1019,7 @@ void CCharacterShoppingList::destroyItem( uint16 itemNumber, uint32 quantity )
 		nlwarning("<CCharacterShoppingList::buyItem> itemNumber not exist...");
 		return;
 	}
-
+	
 	TShopStruct * shop;
 	if( itemNumber < _CurrentTradeListNpc.size() )
 	{
@@ -1029,7 +1034,7 @@ void CCharacterShoppingList::destroyItem( uint16 itemNumber, uint32 quantity )
 	{
 		shop = &_CurrentTradeListYours[ itemNumber - _CurrentTradeListNpc.size() - _CurrentTradeListPlayer.size() ];
 	}
-
+	
 	if( shop->ItemTrade->getOwner() != _Character->getId() )
 	{
 		nlwarning("Client ask destroy item, but gived index are not a same owner item");
@@ -1041,9 +1046,9 @@ void CCharacterShoppingList::destroyItem( uint16 itemNumber, uint32 quantity )
 		_Character->sendDynamicSystemMessage( _Character->getId() ,"ITEM_NOT_AVAILABLE" );
 		return;
 	}
-
+	
 	uint32 destroyQuantity = 0;
-
+	
 	static CSheetId sheetId("stack.sitem");
 
 	for( uint i = 0; i < quantity; ++i )

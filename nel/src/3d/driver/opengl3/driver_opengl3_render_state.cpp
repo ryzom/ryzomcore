@@ -429,7 +429,7 @@ void CDriverGL3::uploadCameraUBO()
 	}
 	else
 	{
-		nglBufferData(GL_UNIFORM_BUFFER, _CameraUBOCapacity, NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, _CameraUBOCapacity, nullptr, GL_STREAM_DRAW);
 		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, &_CameraUBOData);
 	}
 
@@ -573,7 +573,7 @@ void CDriverGL3::uploadObjectUBO()
 	else
 	{
 		// Orphan + rewrite
-		nglBufferData(GL_UNIFORM_BUFFER, _ObjectUBOCapacity, NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, _ObjectUBOCapacity, nullptr, GL_STREAM_DRAW);
 		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, &data);
 	}
 

@@ -309,8 +309,8 @@ r2.initBaseScenario = function()
 		end	
 		
 
-		act.Name = i18n.get("uiR2EDAct1")	
-		act.Title = i18n.get("uiR2EDAct1") -- obsolete	
+		act.Name = i18n.get("uiR2EDAct1"):toUtf8()	
+		act.Title = i18n.get("uiR2EDAct1"):toUtf8() -- obsolete	
 	
 		local features = act.Features
 		local tmpDefault = r2.newComponent("DefaultFeature")	
@@ -347,7 +347,7 @@ end
 --			local features = act.Features
 --			local tmpDefault = r2.newComponent("DefaultFeature")
 --			r2.ActUIDisplayer.LastSelfCreatedActInstanceId = act.InstanceId
---			act.Title = i18n.get("uiR2EDAct1")		
+--			act.Title = i18n.get("uiR2EDAct1"):toUtf8()		
 --			table.insert(features, tmpDefault)
 --			table.insert(acts, act)
 --			-- table.insert(scenario.Acts, act)
@@ -364,13 +364,13 @@ end
 function r2.onScheduleStartAct(errorId, actId, nbSeconds)
 	if (r2.Mode == "DM" or r2.Mode == "AnimationModeDm") then
 		if errorId == 0 then
-			local ucStringMsg = ""	
-					 
+			local ucStringMsg = ucstring()	
+
 			local str = "Act " .. actId 
 			if nbSeconds ~= 0 then
 				str = str .. " will start in " .. nbSeconds .. " seconds"
 			end
-			ucStringMsg = str		
+			ucStringMsg:fromUtf8(str)		
 			displaySystemInfo(ucStringMsg, "BC")
 		elseif errorId == 1 then
 			messageBox("Act ".. actId .." can not be started because another act is already starting.")
@@ -382,9 +382,9 @@ end
 
 function r2.onDisconnected()
 	local str = "You have been disconnected by the server."
-	local ucStringMsg = ""	
-	messageBox(str)		
-	ucStringMsg = str				
+	local ucStringMsg = ucstring()	
+	messageBox(str)
+	ucStringMsg:fromUtf8(str)				
 	displaySystemInfo(ucStringMsg, "BC")
 end
 
@@ -392,15 +392,15 @@ function r2.onKicked(timeBeforeDisconnection, kicked)
 	if kicked then
 		local str = "You have been kicked. You must come back to mainland or leave this session otherwise you will be disconnected in "
 			.. tostring(timeBeforeDisconnection) .. " secondes."
-		local ucStringMsg = ""	
-		messageBox(str)		
-		ucStringMsg = str				
+		local ucStringMsg = ucstring()	
+		messageBox(str)
+		ucStringMsg:fromUtf8(str)				
 		displaySystemInfo(ucStringMsg, "BC")
 	else
-		local str = "You have been unkicked."		
-		local ucStringMsg = ""	
-		messageBox(str)		
-		ucStringMsg = str				
+		local str = "You have been unkicked."
+		local ucStringMsg = ucstring()	
+		messageBox(str)
+		ucStringMsg:fromUtf8(str)				
 		displaySystemInfo(ucStringMsg, "BC")
 	end
 
@@ -437,9 +437,8 @@ function r2.onScenarioHeaderUpdated(scenario)
 end
 
 function r2.onSystemMessageReceived(msgType, msgWho, msg)
-
-	local ucStringMsg = ""
-	ucStringMsg = msg
+	local ucStringMsg = ucstring()
+	ucStringMsg:fromUtf8(msg)
 	if string.len(msg) > 2 and string.sub(msg, 1, 2) == "ui" then
 		ucStringMsg = i18n.get(msg)	
 		msg = ucStringMsg:toString()
@@ -1055,10 +1054,10 @@ r2.displayFeatureHelp = function(className)
 	uiInfo:invalidateCoords()
 	uiInfo:updateCoords()
 	uiInfo.title = title
-	uiInfo.Env.title = title	
+	uiInfo.Env.uc_title = title	
 	local uiText = getUI("ui:interface:feature_help:content:enclosing:help_text_enclosed:help_text")
 	assert(uiText)
-	uiText.hardtext_format = i18n.get(help)	
+	uiText.uc_hardtext_format = ucstring(i18n.get(help))	
 	uiInfo:invalidateCoords()
 	uiInfo:updateCoords()	
 	
@@ -1087,11 +1086,11 @@ function r2.setFeatureDisplayHelp()
 	debugInfo("checked: " ..tostring(isChecked))
 
 	local ui = getUI("ui:interface:feature_help")
-	local name = ui.Env.title
+	local name = ui.Env.uc_title
 	local len = string.len(name) - 10 - 6
 	local className = string.sub(name, -10-len, 6+len) --removing uiR2Ed and _HelpTitle
 	--formName = formName .."Form"
-	
+
 	assert(className)
 	--debugInfo("Form name: " ..formName)
 

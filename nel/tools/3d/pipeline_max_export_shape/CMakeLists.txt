@@ -9,6 +9,7 @@ ADD_EXECUTABLE(pipeline_max_export_shape
 TARGET_LINK_LIBRARIES(pipeline_max_export_shape
 	pipeline_max
 	pipeline_max_export_common
+	nel_gltf
 	NeL::misc
 	NeL::3d
 )

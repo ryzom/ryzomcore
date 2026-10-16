@@ -48,9 +48,9 @@ namespace NLGUI
 	public:
         DECLARE_UI_CLASS( CCtrlPolygon )
         CCtrlPolygon( const TCtorParam &param );
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
-		virtual void updateCoords();
-		virtual void draw();
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
 		/** Change the vertices. This is costly because concav / complex polys are split in a list of triangles
 		  */
 		void	setVertices(const std::vector<NLMISC::CVector> &vertices);
@@ -61,8 +61,8 @@ namespace NLGUI
 		void			setColorRGBA(NLMISC::CRGBA col) { _Color = col; }
 		NLMISC::CRGBA	getColorRGBA() const { return _Color; }
 		// from CViewBase
-		virtual sint32  getAlpha() const { return (sint32) _Color.A; }
-		virtual void	setAlpha(sint32 a);
+		virtual sint32  getAlpha() const NL_OVERRIDE { return (sint32) _Color.A; }
+		virtual void	setAlpha(sint32 a) NL_OVERRIDE;
 		/** Change the matrix for this poly. Changing the matrix is usually cheaper than changing
 		  * The vertices because complex poly do not have to be split again
 		  */
@@ -70,10 +70,10 @@ namespace NLGUI
 		//const NLMISC::CMatrix &getMatrix() const { return _Matrix; }
 		// test if last call to 'setVertices' was for a valid poly (e.g one that doesn't overlapp itself)
 		bool isValid() const { return _Valid; }
-		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 		// no capturable by default (just tooltip capability wanted)
-		virtual	bool		isCapturable() const { return false; }
+		virtual	bool		isCapturable() const NL_OVERRIDE { return false; }
 	private:
 		NLMISC::CPolygon _Poly;
 		NLMISC::CPolygon2D _XFormPoly;

@@ -33,9 +33,9 @@ class CServiceClass : public NLNET::IService
 {
 public:
 	// service basics
-	void init();
-	bool update();
-	void release();
+	void init() NL_OVERRIDE;
+	bool update() NL_OVERRIDE;
+	void release() NL_OVERRIDE;
 
 private:
 	// private data

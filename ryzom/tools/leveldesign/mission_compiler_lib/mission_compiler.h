@@ -456,7 +456,7 @@ public:
 	bool parsePreRequisite(CMissionData &md, NLLIGO::IPrimitive *preReq);
 
 	/// Parse the steps of a missions.
-	bool parseSteps(CMissionData &md, NLLIGO::IPrimitive *steps, IStep *parent=NULL);
+	bool parseSteps(CMissionData &md, NLLIGO::IPrimitive *steps, IStep *parent = nullptr);
 	bool parseOneStep(CMissionData &md, NLLIGO::IPrimitive *stepToParse, IStep *parent, bool bEndOfBranch);
 
 	/// Helper to retrive a property in a primitive node.
@@ -496,7 +496,7 @@ private:
 		std::string			FullFileName;
 
 		TLoadedPrimitive()
-			: PrimDoc(NULL)
+			: PrimDoc(nullptr)
 		{}
 		
 		TLoadedPrimitive(NLLIGO::CPrimitives *primDoc, const std::string &fullFileName)

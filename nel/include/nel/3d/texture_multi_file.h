@@ -60,17 +60,17 @@ public:
 
 
 
-	virtual bool			supportSharing() const { return true; }
-	virtual std::string		getShareName() const;
-	virtual void			selectTexture(uint index);
-	virtual bool			isSelectable() const { return true; }
-	virtual ITexture		*buildNonSelectableVersion(uint index);
+	virtual bool			supportSharing() const NL_OVERRIDE { return true; }
+	virtual std::string		getShareName() const NL_OVERRIDE;
+	virtual void			selectTexture(uint index) NL_OVERRIDE;
+	virtual bool			isSelectable() const NL_OVERRIDE { return true; }
+	virtual ITexture		*buildNonSelectableVersion(uint index) NL_OVERRIDE;
 
 
 	/// Generate the current selected texture, looking in CPath if necessary.
-	virtual void			doGenerate(bool async = false);
+	virtual void			doGenerate(bool async = false) NL_OVERRIDE;
 	/// Serial this object
-	virtual void			serial(NLMISC::IStream &f);
+	virtual void			serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CTextureMultiFile);
 
 private:

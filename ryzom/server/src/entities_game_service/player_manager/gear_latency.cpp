@@ -24,7 +24,6 @@ using namespace std;
 using namespace NLMISC;
 
 NL_INSTANCE_COUNTER_IMPL(CGearLatency);
-
 CGearLatency::CGearLatency()
 {
 	_LastLatencyUpdate = 0;
@@ -70,19 +69,17 @@ CVariable<uint32> EquipTimeHotbar("egs", "EquipTimeHotbar", "", 10, 0, true);
 void CGearLatency::setSlot( INVENTORIES::TInventory inventory, uint32 slot, const CStaticItem * form, CCharacter * user )
 {
 	static NLMISC::CSheetId equipSheet("big_equip_item.sbrick");
-
 	if (_LastLatencyUpdate != CTickEventHandler::getGameCycle())
 	{
 		_MaxEquipTime = 0;
 		_LastLatencyUpdate = CTickEventHandler::getGameCycle();
 	}
-
+	
 	// checks must be done by the caller
 	nlassert(form);
 	nlassert(user);
-
 	NLMISC::TGameCycle equipTime = form->TimeToEquip;
-
+	
 	// build a new entry
 	CGearSlot gear;
 	if (inventory == INVENTORIES::equipment)
@@ -108,13 +105,11 @@ void CGearLatency::setSlot( INVENTORIES::TInventory inventory, uint32 slot, cons
 
 	if (equipTime > _MaxEquipTime)
 		_MaxEquipTime = equipTime;
-
 	gear.Slot = slot;
-
 	// added _GearLatencies.size() to increment the gear.LatencyEndDate when server 2 or more equip at same tick
 	// without that, client don't display the progress bar
 	gear.LatencyEndDate = CTickEventHandler::getGameCycle() + (_MaxEquipTime * EquipTimeFactor.get()) + _GearLatencies.size();
-
+	
 	// add it in our sorted list
 	std::list<CGearSlot>::iterator it = _GearLatencies.begin();
 	for (; it != _GearLatencies.end(); ++it)
@@ -152,7 +147,7 @@ void CGearLatency::unsetSlot( INVENTORIES::TInventory inventory, uint32 slot, CC
 		nlerror("unsetSlot : Invalid inventory %u ('%s') : must be handling or hotbar or equipment ",inventory,INVENTORIES::toString(inventory).c_str() );
 		return;
 	}
-
+	
 	std::list<CGearSlot>::iterator it = _GearLatencies.begin();
 	for (; it != _GearLatencies.end(); ++it)
 	{

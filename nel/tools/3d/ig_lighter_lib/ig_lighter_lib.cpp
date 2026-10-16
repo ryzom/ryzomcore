@@ -252,7 +252,7 @@ void	CIgLighterLib::lightIg(CInstanceLighter &instanceLighter,
 
 	// Setup a CIGSurfaceLightBuild if needed.
 	//=======
-	CIGSurfaceLightBuild	*igSurfaceLightBuild= NULL;
+	CIGSurfaceLightBuild	*igSurfaceLightBuild = nullptr;
 	CGlobalRetriever		*globalRetriever= slInfo.GlobalRetriever;
 	CRetrieverBank			*retrieverBank= slInfo.RetrieverBank;
 	float	cellSurfaceLightSize= slInfo.CellSurfaceLightSize;
@@ -407,7 +407,7 @@ void	CIgLighterLib::lightIg(CInstanceLighter &instanceLighter,
 
 	// Run.
 	//=======
-	instanceLighter.light(igIn, igOut, lightDesc, obstacles, NULL, igSurfaceLightBuild);
+	instanceLighter.light(igIn, igOut, lightDesc, obstacles, nullptr, igSurfaceLightBuild);
 
 	// Output a debug mesh??
 	if(igSurfaceLightBuild && slInfo.BuildDebugSurfaceShape && !igSurfaceLightBuild->RetrieverGridMap.empty() )

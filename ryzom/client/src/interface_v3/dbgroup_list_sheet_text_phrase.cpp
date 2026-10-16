@@ -57,7 +57,7 @@ CDBGroupListSheetTextPhrase::CDBGroupListSheetTextPhrase(const TCtorParam &param
 // ***************************************************************************
 CDBGroupListSheetTextPhrase::CSheetChildPhrase::CSheetChildPhrase()
 {
-	LevelDB= NULL;
+	LevelDB = nullptr;
 }
 
 // ***************************************************************************
@@ -166,7 +166,7 @@ void				CDBGroupListSheetTextPhrase::setSectionGroupId(CInterfaceGroup	*pIG, uin
 
 	// Set Name
 	CViewText *name = dynamic_cast<CViewText*>(pIG->getView("name"));
-	if (name != NULL)
+	if (name != nullptr)
 	{
 		string	sectionText= CI18N::get("uiPhraseSectionFmt");
 		uint32	minLevel, maxLevel;

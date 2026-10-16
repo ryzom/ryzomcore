@@ -344,7 +344,6 @@ extern const float BIPED_EPS_TWIST;
 
 // Chunk access + node helpers
 PIPELINE::MAX::IStorageObject *findChunkAnywhere(PIPELINE::MAX::CSceneClass *sc, uint16 id);
-bool readRawBytes(PIPELINE::MAX::CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes);
 bool readCtrlDefault(PIPELINE::MAX::CSceneClass *sc, uint16 chunkId, void *dst, size_t nBytes);
 bool isBipedBoneNode(PIPELINE::MAX::BUILTIN::INode *node);
 bool isBipedComNode(PIPELINE::MAX::BUILTIN::INode *node);
@@ -358,8 +357,8 @@ NLMISC::CMatrix makeLocalTM(const NLMISC::CVector &pos, const NLMISC::CQuat &rot
 std::vector<PIPELINE::MAX::BUILTIN::INode *> orderedChildrenOf(PIPELINE::MAX::BUILTIN::INode *parent, PIPELINE::MAX::CSceneClassContainer *ssc);
 
 // Rig chunk readers (through g_rig)
-const float *bipedChunkFloats(uint16 chunkId, size_t minFloats, size_t *countOut = NULL);
-const float *bipedSideHalf(uint16 chunkId, bool leftSide, size_t minFloats, size_t *halfOut = NULL);
+const float *bipedChunkFloats(uint16 chunkId, size_t minFloats, size_t *countOut = nullptr);
+const float *bipedSideHalf(uint16 chunkId, bool leftSide, size_t minFloats, size_t *halfOut = nullptr);
 NLMISC::CQuat chainAngleQuat(const NLMISC::CVector &a);
 NLMISC::CQuat mirrorQuatLR(const NLMISC::CQuat &q);
 uint32 floatBitsAsUint(float f);

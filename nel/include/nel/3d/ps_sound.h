@@ -50,20 +50,20 @@ public:
 	/// ctor
 								CPSSound();
 	/// dtor
-								~CPSSound();
+								~CPSSound() NL_OVERRIDE;
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void				serial(NLMISC::IStream &f);
+	virtual void				serial(NLMISC::IStream &f) NL_OVERRIDE;
 	//@}
 
 	/// return this bindable type
-	uint32						getType(void) const;
+	uint32						getType(void) const NL_OVERRIDE;
 	/// return priority
-	virtual uint32				getPriority(void) const { return 500; }
+	virtual uint32				getPriority(void) const NL_OVERRIDE { return 500; }
 
 	/**
 	  * process one pass for the sound. This is usually done during the motion pass
 	  */
-	virtual void				step(TPSProcessPass pass);
+	virtual void				step(TPSProcessPass pass) NL_OVERRIDE;
 
 	/// set the name of the sound
 	void						setSoundName(const NLMISC::TStringId &soundName)
@@ -158,9 +158,9 @@ public:
 	bool						getUseOriginalPitchFlag() const { return _UseOriginalPitch; }
 
 protected:
-	virtual void			newElement(const CPSEmitterInfo &info);
-	virtual void			deleteElement(uint32 index);
-	virtual void			resize(uint32 size);
+	virtual void			newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void			deleteElement(uint32 index) NL_OVERRIDE;
+	virtual void			resize(uint32 size) NL_OVERRIDE;
 	void					removeAllSources();
 
 	CPSAttrib<UPSSoundInstance *>	_Sounds;

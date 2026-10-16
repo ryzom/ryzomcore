@@ -49,16 +49,16 @@ void foo()
 class CServiceClass : public NLNET::IService
 {
 public :
-	void init()
+	void init() NL_OVERRIDE
 	{
 	}
 
-	bool update()
+	bool update() NL_OVERRIDE
 	{
 		return true;
 	}
 
-	void release()
+	void release() NL_OVERRIDE
 	{
 	}
 };

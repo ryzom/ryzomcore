@@ -20,8 +20,8 @@
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_DATABASE_database_PLR_H
-#define INCLUDED_DATABASE_database_PLR_H
+#ifndef INCLUDED_DATABASE__PLR_H
+#define INCLUDED_DATABASE__PLR_H
 
 #include "nel/misc/string_common.h"
 #include "cdb_group.h"
@@ -3793,14 +3793,12 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	public:
 		
 
-	private:
-		ICDBStructNode	*_BranchNode;
+	private: ICDBStructNode	*_BranchNode;
 
 		ICDBStructNode	*_INDEX_IN_BAG;
 		
 
-	public:
-		void init(ICDBStructNode *parent, uint index);
+	public: void init(ICDBStructNode *parent, uint index);
 
 		// accessor to branch node
 		ICDBStructNode *getCDBNode()
@@ -3835,14 +3833,12 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 		
 
-	private:
-		ICDBStructNode	*_BranchNode;
+	private: ICDBStructNode	*_BranchNode;
 
 		TArray _Array[5];
 		
 
-	public:
-		void init(ICDBStructNode *parent);
+	public: void init(ICDBStructNode *parent);
 
 		// accessor to branch node
 		ICDBStructNode *getCDBNode()
@@ -10795,4 +10791,4 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 	};
 	
 
-#endif // INCLUDED_DATABASE_database_PLR_H
+#endif // INCLUDED_DATABASE__PLR_H

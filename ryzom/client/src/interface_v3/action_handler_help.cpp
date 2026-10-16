@@ -281,7 +281,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				{
 					// then don't neet to open a new window, but make the older top.
 					CWidgetManager::getInstance()->setTopWindow(group);
-					return NULL;
+					return nullptr;
 				}
 			}
 		}
@@ -332,7 +332,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 			}
 			// Fail?
 			if( newIndexWindow==-1 )
-				return NULL;
+				return nullptr;
 			// success to take a "keep" one?
 			if(newIndexWindowKeep!=-1)
 				newIndexWindow= newIndexWindowKeep;
@@ -565,7 +565,7 @@ void			CInterfaceHelp::updateWindowSPhraseTexts()
  */
 class CHandlerCloseHelp : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CInterfaceHelp::closeAll();
 	}
@@ -578,10 +578,10 @@ REGISTER_ACTION_HANDLER( CHandlerCloseHelp, "close_help");
  */
 class CHandlerOpenItemHelp : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (cs != NULL && cs->getSheetId()!=0 )
+		if (cs != nullptr && cs->getSheetId()!=0 )
 		{
 			// get the forceKeep param (for Building info)
 			sint	forceKeepWindow= -1;
@@ -609,10 +609,10 @@ REGISTER_ACTION_HANDLER( CHandlerOpenItemHelp, "open_item_help");
  */
 class CHandlerOpenPactHelp : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (cs != NULL && cs->getSheetId()!=0 )
+		if (cs != nullptr && cs->getSheetId()!=0 )
 		{
 			CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(cs);
 			if (!group) return;
@@ -633,7 +633,7 @@ REGISTER_ACTION_HANDLER( CHandlerOpenPactHelp, "open_pact_help");
  */
 class CHandlerOpenTitleHelp : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		// display web profile if necessary
 		if (getParam(sParams, "from") == "contact")
@@ -724,7 +724,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		{
 			// Require info on the target
 			CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-			if (selection == NULL) return;
+			if (selection == nullptr) return;
 			name = CEntityCL::removeTitleAndShardFromName(selection->getEntityName());
 			title = selection->getTitle();
 			reservedTitle = selection->hasReservedTitle();
@@ -741,7 +741,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		// Get Title info (bricks and skills needed)
 		// -----------------------------------------
 		CUnblockTitlesSheet *pUTS = dynamic_cast<CUnblockTitlesSheet*>(SheetMngr.get(CSheetId("unblock.titles")));
-		if (pUTS == NULL)
+		if (pUTS == nullptr)
 		{
 			nlwarning("cant find unblock.titles");
 			return;
@@ -757,7 +757,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		}
 
 		// Retrieve all infos about the title
-		const CUnblockTitlesSheet::STitleUnblock *pTU = NULL;
+		const CUnblockTitlesSheet::STitleUnblock *pTU = nullptr;
 		if (titleIDnb != CHARACTER_TITLE::NB_CHARACTER_TITLE)
 			pTU = &pUTS->TitlesUnblock[titleIDnb];
 
@@ -779,10 +779,10 @@ class CHandlerOpenTitleHelp : public IActionHandler
 
 		// Display all skills needed to obtain this title
 		string sSkillsNeeded;
-		if (!title.empty() && pTU == NULL)
+		if (!title.empty() && pTU == nullptr)
 			sSkillsNeeded = CI18N::get("uiTitleCantObtain");
 
-		if (pTU != NULL)
+		if (pTU != nullptr)
 		{
 			sSkillsNeeded = CI18N::get("uiTitleSkillHeader");
 			if (pTU->SkillsNeeded.empty() || reservedTitle)
@@ -823,7 +823,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 
 		// Display all bricks needed to obtain this title
 		string sBricksNeeded;
-		if (pTU != NULL)
+		if (pTU != nullptr)
 		{
 			sBricksNeeded = CI18N::get("uiTitleBrickHeader");
 			if (pTU->BricksNeeded.empty() || reservedTitle)
@@ -861,10 +861,10 @@ REGISTER_ACTION_HANDLER( CHandlerOpenTitleHelp, "open_title_help");
  */
 class CHandlerOpenSkillToTradeHelp : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (cs != NULL)
+		if (cs != nullptr)
 		{
 			CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(cs);
 			if (!group) return;
@@ -884,7 +884,7 @@ REGISTER_ACTION_HANDLER( CHandlerOpenSkillToTradeHelp, "open_skill_to_trade_help
  */
 class CHandlerOpenHelpAuto : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (!cs)
@@ -914,7 +914,7 @@ REGISTER_ACTION_HANDLER( CHandlerOpenHelpAuto, "open_help_auto");
  */
 class CHandlerBrowse : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		string container = getParam (sParams, "name");
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
@@ -1037,7 +1037,7 @@ class CHandlerBrowse : public IActionHandler
 					groupHtml->browse(urls.c_str());
 					// Set top of the page
 					CCtrlScroll *pScroll = groupHtml->getScrollBar();
-					if (pScroll != NULL)
+					if (pScroll != nullptr)
 						pScroll->moveTrackY(10000);
 				}
 			}
@@ -1052,7 +1052,7 @@ REGISTER_ACTION_HANDLER( CHandlerBrowse, "browse");
 class CHandlerBrowseUndo : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
@@ -1071,7 +1071,7 @@ REGISTER_ACTION_HANDLER( CHandlerBrowseUndo, "browse_undo");
 class CHandlerBrowseRedo : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
@@ -1090,7 +1090,7 @@ REGISTER_ACTION_HANDLER( CHandlerBrowseRedo, "browse_redo");
 class CHandlerBrowseRefresh : public IActionHandler
 {
 public:
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
@@ -1108,7 +1108,7 @@ REGISTER_ACTION_HANDLER( CHandlerBrowseRefresh, "browse_refresh");
 // ***************************************************************************
 class CHandlerHTMLSubmitForm : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams) NL_OVERRIDE
 	{
 		string container = getParam (sParams, "name");
 
@@ -1851,7 +1851,7 @@ void getArmorBonus(CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 // ***************************************************************************
 void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 {
-	if ((item == NULL) || (pIS == NULL))
+	if ((item == nullptr) || (pIS == nullptr))
 		return;
 
 	// *** Select the correct format according to item family.
@@ -1918,7 +1918,7 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 				strFindReplace(itemText, "%custom_text", CStringManagerClient::getLocalizedName(luaCode[0]) );
 			}
 			else
-				strFindReplace(itemText, "%custom_text", string() );
+			strFindReplace(itemText, "%custom_text", string() );
 		}
 		else
 		{
@@ -2365,7 +2365,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 
 
 	CInterfaceElement *elt = setup.HelpWindow->getElement(setup.HelpWindow->getId()+setup.PrefixForExtra+INFO_ITEM_PREVIEW);
-	if (elt == NULL)
+	if (elt == nullptr)
 		return;
 
 	CInterfaceGroup	*ig = dynamic_cast<CInterfaceGroup*>(elt);
@@ -2401,11 +2401,11 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 		return;
 	}
 
-	CInterface3DCharacter *char3DI = NULL;
+	CInterface3DCharacter *char3DI = nullptr;
 	if (sceneI->getCharacter3DCount() != 0)
 		char3DI = sceneI->getCharacter3D(0);
 
-	if (char3DI == NULL)
+	if (char3DI == nullptr)
 	{
 		nlwarning("Can't retrieve char 3D Interface");
 		ig->setActive(false);
@@ -2413,7 +2413,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	}
 
 	CInterface3DCamera *camera = sceneI->getCamera(0);
-	if (camera == NULL)
+	if (camera == nullptr)
 	{
 		nlwarning("Can't retrieve camera");
 		ig->setActive(false);
@@ -2502,7 +2502,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	else
 		nlwarning("<setupItemPreview> Invalid armour or weapon item type '%s'", ITEM_TYPE::toString( pIS->ItemType ).c_str() );
 
-	if (camera == NULL)
+	if (camera == nullptr)
 		return;
 
 	camera->setTgtZ(camHeight);
@@ -2518,7 +2518,7 @@ void refreshItemHelp(CSheetHelpSetup &setup)
 	// **** setup the item Text info
 	string	itemText;
 	CEntitySheet *pES = SheetMngr.get ( CSheetId(setup.SrcSheet->getSheetId()) );
-	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	if ((pES != nullptr) && (pES->type() == CEntitySheet::ITEM))
 	{
 		CItemSheet *pIS = (CItemSheet*)pES;
 
@@ -2672,10 +2672,10 @@ static void setupMissionHelp(CSheetHelpSetup &setup)
 	setHelpTextID(setup, detailTextLeaf->getValue32());
 
 	CViewTextID	*viewTextTitleID = dynamic_cast<CViewTextID *>(setup.HelpWindow->getView("text_title_id"));
-	if (viewTextTitleID != NULL)
+	if (viewTextTitleID != nullptr)
 	{
 		CCDBNodeLeaf *titleTextLeaf = dynamic_cast<CCDBNodeLeaf*>(setup.SrcSheet->getRootBranch()->getNode(ICDBNode::CTextId("TEXT")));
-		if (titleTextLeaf == NULL) return;
+		if (titleTextLeaf == nullptr) return;
 		viewTextTitleID->setTextId(titleTextLeaf->getValue32());
 	}
 
@@ -2776,7 +2776,7 @@ void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos)
 // ***************************************************************************
 class CPlayerShardNameRemover : public IOnReceiveTextId
 {
-	virtual	void	onReceiveTextId(std::string &str)
+	virtual	void	onReceiveTextId(std::string &str) NL_OVERRIDE
 	{
 		str= CEntityCL::removeShardFromName(str);
 	}
@@ -2789,7 +2789,7 @@ void setupCreatorName(CSheetHelpSetup &setup)
 	if (!setup.HelpWindow) return;
 	CViewTextID *vtid = dynamic_cast<CViewTextID*>(setup.HelpWindow->getView(setup.CreatorViewTextID));
 	CViewText	*vthd = dynamic_cast<CViewText*>(setup.HelpWindow->getView("creator_header"));
-	if (vtid != NULL)
+	if (vtid != nullptr)
 	{
 		bool bIsRM = false;
 		if (setup.SrcSheet)
@@ -2881,7 +2881,7 @@ void setupOutpostBuildingHelp(CSheetHelpSetup &setup)
 	}
 
 	const COutpostBuildingSheet *pOBS = setup.SrcSheet->asOutpostBuildingSheet();
-	if (pOBS == NULL)
+	if (pOBS == nullptr)
 	{
 		nlwarning("<setupOutpostBuildingHelp> can't get outpost building sheet.");
 		return;
@@ -3343,10 +3343,10 @@ void setupSheetHelp(CSheetHelpSetup &setup)
 class CHandlerOpenPhraseIdHelp : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (cs != NULL && cs->getType()==CCtrlSheetInfo::SheetType_SPhraseId)
+		if (cs != nullptr && cs->getType()==CCtrlSheetInfo::SheetType_SPhraseId)
 		{
 			// Get the CSPhraseCom pointed.
 			sint32	id= cs->getSPhraseId();
@@ -3372,7 +3372,7 @@ REGISTER_ACTION_HANDLER( CHandlerOpenPhraseIdHelp, "open_phraseid_help");
 class CHandlerOpenSBrickHelp : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		CDBCtrlSheet	*cs = dynamic_cast<CDBCtrlSheet*>(pCaller);
@@ -3431,7 +3431,7 @@ REGISTER_ACTION_HANDLER( CHandlerOpenSBrickHelp, "open_sbrick_help");
 class CHandlerOnCloseHelp : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		// Remove the waiter for special ItemInfo
 		uint index;
@@ -3450,7 +3450,7 @@ REGISTER_ACTION_HANDLER( CHandlerOnCloseHelp, "on_close_help");
 class CHandlerHelpKeep : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		// flag
 		uint index;
@@ -3465,7 +3465,7 @@ REGISTER_ACTION_HANDLER( CHandlerHelpKeep, "help_keep");
 class CHandlerHelpResetPos : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		sint y;
 		fromString(getParam(Params, "y"), y);
@@ -3487,7 +3487,7 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 
 	CInterfaceManager * pIM = CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf * nodeSM = NULL;
+	CCDBNodeLeaf * nodeSM = nullptr;
 	string ustr;
 	if( CSheetId(cs->getSheetId()).toString() == "mod_melee_success.sbrick" )
 	{
@@ -3578,7 +3578,7 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 class CHandlerAuraModifierTooltip : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CDBCtrlSheet *cs= dynamic_cast<CDBCtrlSheet*>(pCaller);
@@ -3629,7 +3629,7 @@ REGISTER_ACTION_HANDLER( CHandlerAuraModifierTooltip, "aura_modifier_tooltip");
 class CHandlerUserPaToolTip : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -3655,7 +3655,7 @@ REGISTER_ACTION_HANDLER( CHandlerUserPaToolTip, "userpa_name_tooltip");
 class CHandlerAnimalDeadPopupTooltip : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		// Find the mount's db leaf
@@ -3715,10 +3715,10 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tool
 class CAHMilkoKick: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-		if (selection != NULL)
+		if (selection != nullptr)
 		{
 			sint n = PeopleInterraction.TeamList.getIndexFromName(selection->getEntityName());
 			if (n >= 0)
@@ -3869,7 +3869,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 class CAHItemHelpMpChangeItemPart : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		// get the info window associated
 		uint infoWindowIndex;
@@ -3897,7 +3897,7 @@ REGISTER_ACTION_HANDLER( CAHItemHelpMpChangeItemPart, "item_help_mp_change_item_
 class CAHItemBotChatMpChangeItemPart : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -3936,7 +3936,7 @@ void updateStatReport ()
 	if ((ingameTime0 () <= time4StatReport) && (ingameTime1 () > time4StatReport))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CAHManager::getInstance()->runActionHandler ("proc", NULL, "proc_stat_report");
+		CAHManager::getInstance()->runActionHandler ("proc", nullptr, "proc_stat_report");
 	}
 }
 
@@ -3947,7 +3947,7 @@ class CAHSendStatReport : public IActionHandler
 {
 public:
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		pIM->displaySystemInfo(CI18N::get ("uiSendingStatReport"));
@@ -3980,7 +3980,7 @@ REGISTER_ACTION_HANDLER (CAHSendStatReport, "send_stat_report");
 class CHandlerMkInMode : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -4000,7 +4000,7 @@ REGISTER_ACTION_HANDLER( CHandlerMkInMode, "mk_inc_mode");
 class CHandlerBrowseFAQ : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		#ifdef NL_OS_WINDOWS
 			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();

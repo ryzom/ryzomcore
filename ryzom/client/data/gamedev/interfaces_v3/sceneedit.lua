@@ -275,8 +275,8 @@ end
 
 function SceneEditor:set_modified(id)
 	if self.Shapes[id] then
-		self.Groups[self.Shapes[id].group].props.modified=true
-		self.Shapes[id].modified = "modified"
+	self.Groups[self.Shapes[id].group].props.modified=true
+	self.Shapes[id].modified = "modified"
 	end
 	self.HaveUpdate = true
 	if self.repeatAdd ~= nil then
@@ -450,7 +450,6 @@ function SceneEditor:doSpawnShape(shape, setup, x, y, z, rotx, roty, rotz, angle
 	setupShape(id, setup)
 	return id
 end
-
 
 function SceneEditor:removeGroup(group, no_get_html)
 	if self.Groups[group] == nil then

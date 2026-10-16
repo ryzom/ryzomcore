@@ -103,7 +103,7 @@ namespace NLGUI
 		/// Constructor
 		CInterfaceElement()
 		{
-			_Parent = NULL;
+			_Parent = nullptr;
 
 			_XReal = _YReal = _WReal = _HReal = 0;
 			_X = _Y = _W = _H = 0;
@@ -112,14 +112,14 @@ namespace NLGUI
 
 			_PosRef = Hotspot_BL;
 			_ParentPosRef = Hotspot_BL;
-			_ParentPos = NULL;
+			_ParentPos = nullptr;
 
 			_SizeRef = 0;
 			_SizeDivW = 10;
 			_SizeDivH = 10;
-			_ParentSize = NULL;
+			_ParentSize = nullptr;
 
-			_Links = NULL;
+			_Links = nullptr;
 			_Active= true;
 			// default to 3 pass
 			_InvalidCoords= 3;
@@ -136,7 +136,7 @@ namespace NLGUI
 		}
 
 		// dtor
-		virtual ~CInterfaceElement();
+		virtual ~CInterfaceElement() NL_OVERRIDE;
 
 		/** Cloning
 		  * Cloning is actually performed using a serial / unserial in a memory stream
@@ -162,7 +162,7 @@ namespace NLGUI
 		virtual uint32 getMemory () { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		/// helper: display a parse error with the id of the lement
-		void parseError (CInterfaceGroup *parentGroup, const char *reason = NULL);
+		void parseError (CInterfaceGroup *parentGroup, const char *reason = nullptr);
 
 		/// Accessors : GET
 		const std::string& getId() const { return _Id; }
@@ -426,7 +426,7 @@ namespace NLGUI
 
 		/* Element UI scale change event callback
 		 */
-		virtual void	onInterfaceScaleChanged() {}
+		virtual void	onInterfaceScaleChanged() NL_OVERRIDE {}
 
 		// called by interfaceManager for master window only
 		void			resetInvalidCoords();
@@ -504,7 +504,7 @@ namespace NLGUI
 		bool	avoidResizeParent() const {return _AvoidResizeParent;}
 		void	setAvoidResizeParent(bool state) {_AvoidResizeParent= state;}
 
-		virtual std::string	getClassName()
+		virtual std::string	getClassName() NL_OVERRIDE
 		{
 			nlassert(0); // forgot to implement serial & to register the class ?
 			return "";
@@ -623,7 +623,7 @@ namespace NLGUI
 		bool		_AvoidResizeParent;
 
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		void parseSizeRef(const char *sizeRef);
 		void parseSizeRef(const char *sizeRefStr, sint32 &sizeref, sint32 &sizeDivW, sint32 &sizeDivH);

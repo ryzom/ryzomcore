@@ -49,19 +49,19 @@ public:
 	
 	/// @name CAIPlace implementation
 	//@{
-	virtual bool atPlace(CAIVector const& pos) const;
-	virtual bool atPlace(CAIVectorMirror const& pos) const;
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
-	virtual CAIPos const& midPos() const { return _pos; }
+	virtual bool atPlace(CAIVector const& pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIVectorMirror const& pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
+	virtual CAIPos const& midPos() const NL_OVERRIDE { return _pos; }
 	
-	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const { return _worldValidPos; }
+	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE { return _worldValidPos; }
 	
-	virtual float getRadius() const { return _radius; }
+	virtual float getRadius() const NL_OVERRIDE { return _radius; }
 	
-	virtual void display(CStringWriter& stringWriter) const;
+	virtual void display(CStringWriter& stringWriter) const NL_OVERRIDE;
 	
-	AITYPES::TVerticalPos getVerticalPos() const;
-	void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const;
+	AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE;
+	void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const NL_OVERRIDE;
 	//@}
 	
 	/// radius in mm
@@ -72,7 +72,7 @@ public:
 	std::string getFullName() const { return std::string(getOwner()->getFullName() +":"+ getName()); }
 	
 private:
-	bool calcRandomPos(CAIPos& pos) const;
+	bool calcRandomPos(CAIPos& pos) const NL_OVERRIDE;
 	
 	RYAI_MAP_CRUNCH::CWorldPosition _worldValidPos;
 	CAIPos _pos;
@@ -147,7 +147,7 @@ class CAIPlaceXYRFauna : public CAIPlaceXYR,
 {
 public:	
 	CAIPlaceXYRFauna(CPlaceOwner* owner, CAIAliasDescriptionNode* aliasDescription = NULL);		
-	virtual std::string	getOneLineInfoString() const;	
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;	
 	std::string getFullName() const { return std::string(getOwner()->getFullName() +":"+ getName()); }
 };
 
@@ -167,19 +167,19 @@ public:
 	
 	/// @name CAIPlace implementation
 	//@{
-	virtual bool atPlace(CAIVector const& pos) const;
-	virtual bool atPlace(CAIVectorMirror const& pos) const;
-	virtual bool atPlace(CAIEntityPhysical const* entity) const;
-	virtual CAIPos const& midPos() const { return _Pos; }
+	virtual bool atPlace(CAIVector const& pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIVectorMirror const& pos) const NL_OVERRIDE;
+	virtual bool atPlace(CAIEntityPhysical const* entity) const NL_OVERRIDE;
+	virtual CAIPos const& midPos() const NL_OVERRIDE { return _Pos; }
 	
-	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const;
+	virtual RYAI_MAP_CRUNCH::CWorldPosition const& worldValidPos() const NL_OVERRIDE;
 	
-	virtual float getRadius() const { return _Radius; }
+	virtual float getRadius() const NL_OVERRIDE { return _Radius; }
 	
-	virtual void display(CStringWriter& stringWriter) const;
+	virtual void display(CStringWriter& stringWriter) const NL_OVERRIDE;
 	
-	AITYPES::TVerticalPos getVerticalPos() const;
-	void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const;
+	AITYPES::TVerticalPos getVerticalPos() const NL_OVERRIDE;
+	void getRandomPos(RYAI_MAP_CRUNCH::CWorldPosition& pos) const NL_OVERRIDE;
 	//@}
 	
 	/// radius in mm

@@ -79,9 +79,9 @@ public:
 		_AnimationSet->serial(f);
 	}
 
-	virtual void setAnimationSampleDivisor(uint sampleDivisor);
+	virtual void setAnimationSampleDivisor(uint sampleDivisor) NL_OVERRIDE;
 
-	virtual uint getAnimationSampleDivisor() const;
+	virtual uint getAnimationSampleDivisor() const NL_OVERRIDE;
 
 	/**
 	  *  Add an animation in the animation set. After adding all your animations, call build().
@@ -90,7 +90,7 @@ public:
 	  * \param animName is the name of the animation in the animation set.
 	  * \return NotFound if the file is not found.
 	  */
-	uint addAnimation (const char* fileName, const char* animName, bool displayMissingFileWarning  = true)
+	uint addAnimation (const char* fileName, const char* animName, bool displayMissingFileWarning  = true) NL_OVERRIDE
 	{
 		// Allocate an animation
 		CUniquePtr<CAnimation> anim (new CAnimation);
@@ -117,7 +117,7 @@ public:
 	/**
 	  *  Build the animation set. Call build after adding all your animations.
 	  */
-	virtual	void build ();
+	virtual	void build () NL_OVERRIDE;
 
 	/**
 	  *  Add a skeleton weight in the animation set.
@@ -127,7 +127,7 @@ public:
 	  * \param animName is the name of the skeleton weight in the animation set.
 	  * \return the id of the new skeleton or NotFound if the file is not found.
 	  */
-	virtual uint addSkeletonWeight (const char* fileName, const char* skelName)
+	virtual uint addSkeletonWeight (const char* fileName, const char* skelName) NL_OVERRIDE
 	{
 		// Allocate an animation
 		CUniquePtr<CSkeletonWeight> skeletonWeight (new CSkeletonWeight);
@@ -153,7 +153,7 @@ public:
 	/**
 	  * Get animations count.
 	  */
-	virtual	uint getNumAnimation () const
+	virtual	uint getNumAnimation () const NL_OVERRIDE
 	{
 		return _AnimationSet->getNumAnimation();
 	}
@@ -161,7 +161,7 @@ public:
 	/**
 	  * Get an animation ID by name. If no animation is found, method returns NotFound.
 	  */
-	virtual	uint getAnimationIdByName (const std::string& name) const
+	virtual	uint getAnimationIdByName (const std::string& name) const NL_OVERRIDE
 	{
 		return _AnimationSet->getAnimationIdByName(name);
 	}
@@ -169,7 +169,7 @@ public:
 	/**
 	  * Get animation name.
 	  */
-	virtual	const std::string& getAnimationName (uint animationId) const
+	virtual	const std::string& getAnimationName (uint animationId) const NL_OVERRIDE
 	{
 		if(animationId>=getNumAnimation())
 			nlerror("getAnimation*(): bad animation Id");
@@ -181,7 +181,7 @@ public:
 	  *
 	  * \return the end time.
 	  */
-	virtual UAnimation* getAnimation (uint animationId);
+	virtual UAnimation* getAnimation (uint animationId) NL_OVERRIDE;
 
 	// @}
 
@@ -191,7 +191,7 @@ public:
 	/**
 	  * Get skeleton weight count.
 	  */
-	virtual	uint getNumSkeletonWeight () const
+	virtual	uint getNumSkeletonWeight () const NL_OVERRIDE
 	{
 		return _AnimationSet->getNumSkeletonWeight();
 	}
@@ -199,7 +199,7 @@ public:
 	/**
 	  * Get a SkeletonWeight ID by name. If no SkeletonWeight is found, method returns NotFound.
 	  */
-	virtual	uint getSkeletonWeightIdByName (const std::string& name) const
+	virtual	uint getSkeletonWeightIdByName (const std::string& name) const NL_OVERRIDE
 	{
 		return _AnimationSet->getSkeletonWeightIdByName(name);
 	}
@@ -207,7 +207,7 @@ public:
 	/**
 	  * Get skeleton template name.
 	  */
-	virtual	const std::string& getSkeletonWeightName (uint skeletonId) const
+	virtual	const std::string& getSkeletonWeightName (uint skeletonId) const NL_OVERRIDE
 	{
 		if(skeletonId>=getNumSkeletonWeight())
 			nlerror("getSkeletonWeight*(): bad SkeletonWeight Id");
@@ -220,7 +220,7 @@ public:
 	/// \name Channel mgt.
 	// @{
 
-	virtual	uint getChannelIdByName (const std::string& name) const
+	virtual	uint getChannelIdByName (const std::string& name) const NL_OVERRIDE
 	{
 		return _AnimationSet->getChannelIdByName(name);
 	}

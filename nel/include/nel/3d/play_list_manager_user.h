@@ -53,22 +53,22 @@ public:
 
 	/** Create a playlist, instance of an animation set. nlerror if(animSet==NULL).
 	 */
-	virtual	UPlayList	*createPlayList(UAnimationSet	*animSet);
+	virtual	UPlayList	*createPlayList(UAnimationSet	*animSet) NL_OVERRIDE;
 	/** Delete a playlist. nlerror if not found. no-op if playList==NULL.
 	 */
-	virtual	void		deletePlayList(UPlayList *playList);
+	virtual	void		deletePlayList(UPlayList *playList) NL_OVERRIDE;
 
 
 	/** Animate all the playlist. Only the globals channels are animated.
 	 * NB: all AnimationTime are in second.
 	 */
-	virtual	void		animate(TGlobalAnimationTime	time);
+	virtual	void		animate(TGlobalAnimationTime	time) NL_OVERRIDE;
 
 
 	/** Setup all the playlist.
 	 * NB: all AnimationTime are in second.
 	 */
-	virtual	void		setup(TGlobalAnimationTime	time);
+	virtual	void		setup(TGlobalAnimationTime	time) NL_OVERRIDE;
 
 };
 

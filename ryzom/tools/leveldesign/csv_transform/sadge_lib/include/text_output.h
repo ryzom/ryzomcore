@@ -59,7 +59,7 @@ public:
 	enum { NUL=0, ECHO_STDOUT=1, ECHO_STDERR=2, RECORD=4 };
 	enum TSpecialCodes { HEX };
 
-	CTextOutput(uint flags=ECHO_STDOUT, NLMISC::CLog* log=NULL)
+	CTextOutput(uint flags=ECHO_STDOUT, NLMISC::CLog* log = nullptr)
 	{
 		_initData();
 		_Echo=			(flags&ECHO_STDOUT)!=0;
@@ -81,25 +81,25 @@ public:
 
 	bool empty()
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return true;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 			return _Indirect->empty();
 
 		return _RecordBuff.empty();
 	}
 
-	void clear(CTextOutput *warnChannel=NULL,bool warnNotEmpty=false)
+	void clear(CTextOutput *warnChannel = nullptr, bool warnNotEmpty=false)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->clear(warnChannel,warnNotEmpty);
 			return;
 		}
 
-		if (warnNotEmpty && warnChannel != NULL && !(_RecordBuff.empty()))
+		if (warnNotEmpty && warnChannel != nullptr && !(_RecordBuff.empty()))
 			*warnChannel<<"WARNING: CTextOutput::clear(): some content in channel was lost...\n";
 
 		_RecordBuff.clear();
@@ -107,9 +107,9 @@ public:
 
 	void write(FILE *outf,bool resetAfterWrite=true)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->write(outf,resetAfterWrite);
 			return;
@@ -125,9 +125,9 @@ public:
 
 	void write(const NLMISC::CSString& fileName,bool resetAfterWrite=true)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->write(fileName,resetAfterWrite);
 			return;
@@ -135,7 +135,7 @@ public:
 
 		// open the output file
 		FILE *outf=fopen(fileName.c_str(),"wt");
-		if (outf==NULL)
+		if (outf == nullptr)
 		{
 			fprintf(stderr,"Failed to open file for output: %s\n",fileName.c_str());
 			return;
@@ -148,9 +148,9 @@ public:
 
 	void display(bool resetAfterDisplay=false)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->display(resetAfterDisplay);
 			return;
@@ -162,9 +162,9 @@ public:
 
 	void setEchoStdOut(bool echo)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->setEchoStdOut(echo);
 			return;
@@ -175,9 +175,9 @@ public:
 
 	void setEchoStdErr(bool echo)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->setEchoStdErr(echo);
 			return;
@@ -188,9 +188,9 @@ public:
 
 	void setRecord(bool record,bool clearBuffer=false)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->setRecord(record,clearBuffer);
 			return;
@@ -204,9 +204,9 @@ public:
 
 	void setMiscLog(NLMISC::CLog* log)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return;
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			_Indirect->setMiscLog(log);
 			return;
@@ -217,10 +217,10 @@ public:
 
 	template <class C> CTextOutput &operator<<(const C& code)
 	{
-		if (this==NULL)
+		if (this == nullptr)
 			return *this;
 
-		if (_Indirect!=NULL)
+		if (_Indirect != nullptr)
 		{
 			return *_Indirect<<code;
 		}
@@ -371,7 +371,7 @@ private:
 		if (_Echo) 			printf(fmt,val);
 		if (_EchoStdErr)	fprintf(stderr,fmt,val);
 		if (_Record)		_RecordBuff+=NLMISC::toString(fmt,val);
-		if (_MiscLog!=NULL)
+		if (_MiscLog != nullptr)
 		{
 			_MiscLogString+=NLMISC::toString(fmt,val);
 			while (_MiscLogString.contains("\n"))
@@ -388,8 +388,8 @@ private:
 		_EchoStdErr=false;
 		_Record=false;
 
-		_MiscLog=NULL;
-		_Indirect=NULL;
+		_MiscLog = nullptr;
+		_Indirect = nullptr;
 
 		_ModeHex=false;
 	}

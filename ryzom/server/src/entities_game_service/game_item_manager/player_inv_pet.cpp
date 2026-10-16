@@ -88,7 +88,7 @@ void CPetInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags chang
 
 void CPetInvView::onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags)
 {
-
+	
 }
 
 

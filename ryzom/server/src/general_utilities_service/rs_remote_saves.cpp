@@ -57,24 +57,24 @@ namespace SAVES
 	{
 	public:
 		// IRemoteSavesConnection specialisation implementation
-		const CFileDescriptionContainer& getFileList() const;
-		uint32 requestFile(const NLMISC::CSString& fileName,CRemoteSavesInterface* requestor);
-		uint32 uploadFile(const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody,CRemoteSavesInterface* requestor);
-		uint32 deleteFile(const NLMISC::CSString& fileName,CRemoteSavesInterface* requestor);
-		uint32 moveFile(const NLMISC::CSString& fileName,const NLMISC::CSString& destination,CRemoteSavesInterface* requestor);
-		bool isConnected() const;
+		const CFileDescriptionContainer& getFileList() const NL_OVERRIDE;
+		uint32 requestFile(const NLMISC::CSString& fileName,CRemoteSavesInterface* requestor) NL_OVERRIDE;
+		uint32 uploadFile(const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody,CRemoteSavesInterface* requestor) NL_OVERRIDE;
+		uint32 deleteFile(const NLMISC::CSString& fileName,CRemoteSavesInterface* requestor) NL_OVERRIDE;
+		uint32 moveFile(const NLMISC::CSString& fileName,const NLMISC::CSString& destination,CRemoteSavesInterface* requestor) NL_OVERRIDE;
+		bool isConnected() const NL_OVERRIDE;
 
 	public:
 		// IModule specialisation implementation
-		bool initialiseModule(const NLMISC::CSString& rawArgs);
-		void release();
-		void receiveModuleMessage(GUSNET::CModuleMessage& msg);
-		NLMISC::CSString getState() const;
-		NLMISC::CSString getName() const;
-		NLMISC::CSString getParameters() const;
-		void displayModule() const;
-		void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule);
-		void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule);
+		bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
+		void release() NL_OVERRIDE;
+		void receiveModuleMessage(GUSNET::CModuleMessage& msg) NL_OVERRIDE;
+		NLMISC::CSString getState() const NL_OVERRIDE;
+		NLMISC::CSString getName() const NL_OVERRIDE;
+		NLMISC::CSString getParameters() const NL_OVERRIDE;
+		void displayModule() const NL_OVERRIDE;
+		void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
+		void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
 
 	public:
 		// remaining public interface
@@ -566,11 +566,11 @@ namespace SAVES
 
 	public:
 		// CRemoteSavesManager implementation
-		void registerSavesInterface(TRemoteSavesInterfacePtr si);
-		void unregisterSavesInterface(CRemoteSavesInterface* si);
-		void registerRemoteSavesConnectionModule(TRemoteSavesConnectionPtr connection);
-		void unregisterRemoteSavesConnectionModule(TRemoteSavesConnectionPtr connection);
-		IRemoteSavesConnection* getConnection(const NLMISC::CSString& shardName,const NLMISC::CSString& type) const;
+		void registerSavesInterface(TRemoteSavesInterfacePtr si) NL_OVERRIDE;
+		void unregisterSavesInterface(CRemoteSavesInterface* si) NL_OVERRIDE;
+		void registerRemoteSavesConnectionModule(TRemoteSavesConnectionPtr connection) NL_OVERRIDE;
+		void unregisterRemoteSavesConnectionModule(TRemoteSavesConnectionPtr connection) NL_OVERRIDE;
+		IRemoteSavesConnection* getConnection(const NLMISC::CSString& shardName,const NLMISC::CSString& type) const NL_OVERRIDE;
 
 	private:
 		// this is a singleton so prohibit instantiation

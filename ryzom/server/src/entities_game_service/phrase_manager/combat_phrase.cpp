@@ -1750,6 +1750,7 @@ bool CCombatPhrase::launch()
 	_Behaviour.Data = 0;
 	_Behaviour.Data2 = 0;
 	_Behaviour.DeltaHP = 0;
+
 	// delta per-target
 	std::vector<sint16> targetDeltaHp;
 
@@ -3299,7 +3300,7 @@ void CCombatPhrase::applyAction(TApplyAction & action, std::vector<TReportAction
 					// TODO: flying hp from enchant damage?
 					_Behaviour.DeltaHP -= (sint16)targetInfos.DmgHp;
 					if ( _Behaviour.Behaviour != MBEHAV::UNKNOWN_BEHAVIOUR )
-						PHRASE_UTILITIES::sendUpdateBehaviour(actingEntity->getEntityRowId(), _Behaviour);
+						PHRASE_UTILITIES::sendUpdateBehaviour( actingEntity->getEntityRowId(), _Behaviour );
 				}
 			}
 		}

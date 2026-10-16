@@ -35,7 +35,7 @@ CPlane	CTessBlock::CurrentPyramid[NL3D_TESSBLOCK_NUM_CLIP_PLANE];
 // ***************************************************************************
 CTessBlock::CTessBlock()
 {
-	_Patch= NULL;
+	_Patch = nullptr;
 
 	// init bounding info.
 	Empty= true;
@@ -47,23 +47,23 @@ CTessBlock::CTessBlock()
 	// init vert/face list.
 	for(sint i=0;i<NL3D_TESSBLOCK_TILESIZE;i++)
 	{
-		RdrTileRoot[i]=NULL;
+		RdrTileRoot[i] = nullptr;
 	}
 
 	// init LightMap.
 	LightMapRefCount= 0;
 
-	Far0FaceVector= NULL;
-	Far1FaceVector= NULL;
+	Far0FaceVector = nullptr;
+	Far1FaceVector = nullptr;
 
-	_PrecToModify= NULL;
-	_NextToModify= NULL;
+	_PrecToModify = nullptr;
+	_NextToModify = nullptr;
 
 	FaceTileMaterialRefCount= 0;
 	TileMaterialRefCount= 0;
 
 	// Micro-vegetation.
-	VegetableBlock= NULL;
+	VegetableBlock = nullptr;
 }
 
 
@@ -214,7 +214,7 @@ void			CTessBlock::deleteFaceVectorFar0(CLandscapeFaceVectorManager &mgr)
 	if(Far0FaceVector)
 	{
 		mgr.deleteFaceVector(Far0FaceVector);
-		Far0FaceVector= NULL;
+		Far0FaceVector = nullptr;
 	}
 }
 
@@ -262,7 +262,7 @@ void			CTessBlock::deleteFaceVectorFar1(CLandscapeFaceVectorManager &mgr)
 	if(Far1FaceVector)
 	{
 		mgr.deleteFaceVector(Far1FaceVector);
-		Far1FaceVector= NULL;
+		Far1FaceVector = nullptr;
 	}
 }
 
@@ -351,7 +351,7 @@ void			CTessBlock::deleteFaceVectorTile(CLandscapeFaceVectorManager &mgr)
 				if(faceVector)
 				{
 					mgr.deleteFaceVector(faceVector);
-					faceVector= NULL;
+					faceVector = nullptr;
 				}
 			}
 		}
@@ -390,8 +390,8 @@ void			CTessBlock::removeFromModifyList()
 	_PrecToModify->_NextToModify= _NextToModify;
 	if(_NextToModify)
 		_NextToModify->_PrecToModify= _PrecToModify;
-	_PrecToModify= NULL;
-	_NextToModify= NULL;
+	_PrecToModify = nullptr;
+	_NextToModify = nullptr;
 }
 
 

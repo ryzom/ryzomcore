@@ -187,7 +187,7 @@ void updateCameraRecorder()
 // ***************************************************************************
 class CAHToggleCameraRecorder : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (State == Recording)
 		{
@@ -205,7 +205,7 @@ REGISTER_ACTION_HANDLER (CAHToggleCameraRecorder, "toggle_camera_recorder");
 // ***************************************************************************
 class CAHCameraRecorderPlayback : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		if (State == PlayBack)
 		{
@@ -222,7 +222,7 @@ REGISTER_ACTION_HANDLER (CAHCameraRecorderPlayback, "camera_recorder_playback");
 // ***************************************************************************
 class CAHSaveCameraRecord : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		try
 		{

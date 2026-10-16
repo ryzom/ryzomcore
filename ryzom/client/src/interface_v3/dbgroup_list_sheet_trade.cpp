@@ -266,7 +266,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 	if(Ctrl->getType() == CCtrlSheetInfo::SheetType_OutpostBuilding)
 	{
 		const COutpostBuildingSheet *pOBS = Ctrl->asOutpostBuildingSheet();
-		if (pOBS != NULL)
+		if (pOBS != nullptr)
 		{
 			STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 			text += string("\n") + pSMC->getOutpostBuildingLocalizedDescription(CSheetId(Ctrl->getSheetId()));
@@ -473,10 +473,10 @@ bool CDBGroupListSheetTrade::CSheetChildTrade::isSheetValid(CDBGroupListSheetTex
 	if(father->testDropOrSell())
 	{
 		const CItemSheet *pIS = Ctrl->asItemSheet();
-		if ((pIS != NULL) && (!pIS->DropOrSell))
+		if ((pIS != nullptr) && (!pIS->DropOrSell))
 			return false;
 		// test if this whole family of items can be sold
-		if((pIS != NULL) && !ITEMFAMILY::isSellableByPlayer(pIS->Family) )
+		if((pIS != nullptr) && !ITEMFAMILY::isSellableByPlayer(pIS->Family) )
 			return false;
 	}
 

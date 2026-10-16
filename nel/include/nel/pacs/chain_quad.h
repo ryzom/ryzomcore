@@ -96,7 +96,7 @@ public:
 		_X = 0;
 		_Y = 0;
 		delete [] _QuadData;
-		_QuadData = NULL;
+		_QuadData = nullptr;
 		_QuadDataLen = 0;
 	}
 

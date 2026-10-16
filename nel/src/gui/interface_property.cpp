@@ -37,7 +37,7 @@ namespace NLGUI
 	bool CInterfaceProperty::link( CCDBNodeLeaf *dbNode )
 	{
 		_VolatileValue = dbNode;
-		return (dbNode != NULL);
+		return (dbNode != nullptr);
 	}
 
 	bool CInterfaceProperty::link( CCDBNodeBranch *dbNode, const string &leafId, CCDBNodeLeaf *defaultLeaf )
@@ -62,7 +62,7 @@ namespace NLGUI
 	bool CInterfaceProperty::link (const char *DBProp)
 	{
 		_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(DBProp, false);
-		if (_VolatileValue == NULL)
+		if (_VolatileValue == nullptr)
 		{
 
 			nlinfo("prop not created : %s", DBProp);

@@ -39,42 +39,42 @@ public:
 	CTimedActionPhrase();
 
 	/// dtor
-	virtual ~CTimedActionPhrase();
+	virtual ~CTimedActionPhrase() NL_OVERRIDE;
 
 	/// \name Override methods from CSPhrase
 	//@{
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true ) NL_OVERRIDE;
 
 	/**
 	 * evaluate phrase
 	 * \return true if eval has been made without errors
 	 */
-	virtual bool evaluate();
+	virtual bool evaluate() NL_OVERRIDE;
 	
 	/**
 	 * validate phrase
 	 * \return true if phrase is valid
 	 */
-	virtual bool validate();
-	virtual bool update();
-	virtual void execute();
-	virtual bool launch();
-	virtual void apply();
+	virtual bool validate() NL_OVERRIDE;
+	virtual bool update() NL_OVERRIDE;
+	virtual void execute() NL_OVERRIDE;
+	virtual bool launch() NL_OVERRIDE;
+	virtual void apply() NL_OVERRIDE;
 	
 	/**
 	 * called at the end of the latency time
 	 */
-	virtual void end();
+	virtual void end() NL_OVERRIDE;
 
 	/**
 	 * called when brutally stop the phrase
 	 */
-	virtual void stop();
+	virtual void stop() NL_OVERRIDE;
 
 	/**
 	 * called for brutal stop of the phrase before it's execution
 	 */
-	virtual void stopBeforeExecution();
+	virtual void stopBeforeExecution() NL_OVERRIDE;
 	//@}
 
 	/// test if action is canceled when actor is being hit, return true if canceled
@@ -84,7 +84,7 @@ public:
 	 * set the primary target
 	 * \param entityId id of the primary target
 	 */
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) { _TargetRowId = entityRowId; }
+	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) NL_OVERRIDE { _TargetRowId = entityRowId; }
 
 	/// get target
 	inline const TDataSetRow &getTarget() const { return _TargetRowId; }

@@ -49,13 +49,14 @@ CStorageStream::CStorageStream(const uint8 *data, size_t size)
 }
 
 CStorageStream::CStorageStream(const std::vector<uint8> &data)
-    : NLMISC::IStream(true), m_ReadData(data.empty() ? NULL : &data[0]), m_ReadSize(data.size()), m_Pos(0)
+    : NLMISC::IStream(true), m_ReadData(data.empty() ? nullptr : &data[0]), m_ReadSize(data.size()), m_Pos(0)
 {
 
 }
 
 CStorageStream::CStorageStream()
-    : NLMISC::IStream(false), m_ReadData(NULL), m_ReadSize(0), m_Pos(0)
+    : NLMISC::IStream(false), m_ReadData(nullptr)
+    , m_ReadSize(0), m_Pos(0)
 {
 
 }

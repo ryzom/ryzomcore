@@ -19,7 +19,7 @@
 #ifndef RY_HARVESTABLE_H
 #define RY_HARVESTABLE_H
 
-//
+// 
 #include "mp.h"
 #include "player_manager/cdb_synchronised.h"
 //Nel georges
@@ -39,7 +39,7 @@ class CCharacter;
  * \date 2002
  */
 struct CCreatureRawMaterial
-{
+{	
 	/**
 	 *	Default constructor
 	 */
@@ -60,7 +60,7 @@ struct CCreatureRawMaterial
 
 	/// struc used by the br
 	CRawMaterial				MpCommon;
-
+	
 	/// the associated item sheet id
 	NLMISC::CSheetId			ItemId;
 	/// the quantity
@@ -104,7 +104,7 @@ public:
 			nlwarning("<CHarvestable::removeMp> Invalid mp index %u, there is only %u mps", mpIndex, _Mps.size() );
 			return 0;
 		}
-
+		
 		return _Mps[ mpIndex ].Quantity;
 	}
 
@@ -122,7 +122,7 @@ public:
 	void removeMp( uint32 mpIndex, uint16 quantity );
 
 	/**
-	 * get the mp of specified index
+	 * get the mp of specified index 
 	 * \param index index of the mp to retrieve
 	 * \return pointer on the raw material object or NULL if invalid index
 	 */
@@ -138,7 +138,7 @@ public:
 	}
 
 	/**
-	 * get the creature mp of specified index
+	 * get the creature mp of specified index 
 	 * \param index index of the mp to retrieve
 	 * \return pointer on the raw material object or NULL if invalid index
 	 */
@@ -183,7 +183,7 @@ public:
 	/// get harvestable flag
 	inline bool harvestable() const { return _Harvestable; }
 
-	/// get skill used to harvest
+	/// get skill used to harvest 
 	inline SKILLS::ESkills getHarvestSkill() const { return _HarvestSkill; }
 
 	/// set Harvestable Mp with static information

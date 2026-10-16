@@ -29,8 +29,8 @@
 class CBotChatPagePlayerGift : public CBotChatPage
 {
 public:
-	virtual void begin();
-	virtual void end();
+	virtual void begin() NL_OVERRIDE;
+	virtual void end() NL_OVERRIDE;
 
 	// if true, the player gift was validated. => end() must not restoreAllItems()
 	bool	PlayerGiftValidated;

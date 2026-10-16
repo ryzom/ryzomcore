@@ -56,9 +56,9 @@ public:
 		setSkill(skill);
 	}
 
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 	
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 	
 	/// method called when the link is broken
 	inline void breakLink(float factorOnSurvivalTime = 1.0f) 
@@ -136,7 +136,7 @@ public:
 		_Report.ActionNature = ACTNATURE::OFFENSIVE_MAGIC;
 	}
 	
-	virtual bool update(CTimerEvent * event, bool)
+	virtual bool update(CTimerEvent * event, bool) NL_OVERRIDE
 	{
 		return updateOffensive(event, true);
 	}

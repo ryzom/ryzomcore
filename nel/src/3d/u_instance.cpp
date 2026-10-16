@@ -43,7 +43,7 @@ void UInstance::getShapeAABBox(NLMISC::CAABBox &bbox) const
 {
 	CTransformShape	*object = getObjectPtr();
 	if (object)
-		object->getAABBox(bbox);
+	object->getAABBox(bbox);
 }
 
 // ***************************************************************************

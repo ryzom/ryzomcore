@@ -49,22 +49,22 @@ public:
 
 public:
 	CStreamFileSound();
-	virtual ~CStreamFileSound();
+	virtual ~CStreamFileSound() NL_OVERRIDE;
 
 	/// Get the type of the sound.
-	virtual TSOUND_TYPE getSoundType()						{ return SOUND_STREAM_FILE; }
+	virtual TSOUND_TYPE getSoundType() NL_OVERRIDE						{ return SOUND_STREAM_FILE; }
 
 	/// Load the sound parameters from georges' form
-	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
+	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot) NL_OVERRIDE;
 
 	/// Used by the george sound plugin to check sound recursion (ie sound 'toto' use sound 'titi' witch also use sound 'toto' ...).
-	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &/* subsounds */) const { }
+	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &/* subsounds */) const NL_OVERRIDE { }
 
 	/// Serialize the sound data.
-	virtual void		serial(NLMISC::IStream &s);
+	virtual void		serial(NLMISC::IStream &s) NL_OVERRIDE;
 
 	/// Return the length of the sound in ms
-	virtual uint32		getDuration()						{ return 0; }
+	virtual uint32		getDuration() NL_OVERRIDE						{ return 0; }
 
 	inline bool			getAsync()							{ return m_Async; }
 

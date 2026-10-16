@@ -36,8 +36,8 @@ using namespace NLMISC;
 
 CCharFilterFactory* CCharFilterFactory::getInstance()
 {
-	static CCharFilterFactory* ptr=NULL;
-	if (ptr==NULL)
+	static CCharFilterFactory* ptr = nullptr;
+	if (ptr == nullptr)
 		ptr=new CCharFilterFactory;
 	return ptr;
 }
@@ -100,5 +100,5 @@ ICharFilter* CCharFilterFactory::build(const NLMISC::CSString& cmdLine)
 	}
 
 	nlwarning("Unknown filter '%s' in line: %s",cmd.c_str(),cmdLine.c_str());
-	return NULL;
+	return nullptr;
 }

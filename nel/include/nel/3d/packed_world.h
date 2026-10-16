@@ -52,7 +52,7 @@ public:
 public:
 	// build world from a set of packed zones
 	void build(std::vector<TPackedZoneBaseSPtr> &packesZones);
-	bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL);
+	bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = nullptr, NLMISC::CVector *normal = nullptr);
 	void getZones(std::vector<TPackedZoneBaseSPtr> &zones);
 	void serial(NLMISC::IStream &f);
 	// just serialize the header, containing name of the zones this CPackedWorld was built from

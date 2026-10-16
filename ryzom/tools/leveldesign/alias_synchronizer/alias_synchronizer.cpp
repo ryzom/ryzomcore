@@ -79,7 +79,7 @@ void syncFile(const string &srcPath, const string &dstPath)
 	// load the dst primitive
 	CPrimitiveContext::instance().CurrentPrimitive = &dstDoc;
 	loadXmlPrimitiveFile(dstDoc, dstPath, LigoConfig);
-	CPrimitiveContext::instance().CurrentPrimitive = NULL;
+	CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 	// retrieve ALL the alias node in the src doc
 	TPrimitiveClassPredicate pred("alias");
@@ -92,7 +92,7 @@ void syncFile(const string &srcPath, const string &dstPath)
 	for (uint i=0; i<primAlias.size(); ++i)
 	{
 		CPrimAlias *srcPa = dynamic_cast<CPrimAlias*>(primAlias[i]);
-		if (srcPa == NULL)
+		if (srcPa == nullptr)
 			continue;
 
 		// build a ascii path to the prim
@@ -106,7 +106,7 @@ void syncFile(const string &srcPath, const string &dstPath)
 		{
 			// yeah ! we found a match
 			CPrimAlias *pa = dynamic_cast<CPrimAlias*>(dstAlias.front());
-			if (pa != NULL && pa->getAlias() != srcPa->getAlias())
+			if (pa != nullptr && pa->getAlias() != srcPa->getAlias())
 			{
 //				nldebug("%s : forcing alias %u", primPath.c_str(), srcPa->getAlias());
 				dstDoc.forceAlias(pa, srcPa->getAlias());
@@ -203,7 +203,7 @@ void syncFile(const string &srcPath, const string &dstPath)
 				{
 					CPrimAlias *pa = dynamic_cast<CPrimAlias*>(dstAlias[i]);
 					CPrimAlias *srcPa = dynamic_cast<CPrimAlias*>(srcAlias[i]);
-					if (pa != NULL && pa->getAlias() != srcPa->getAlias())
+					if (pa != nullptr && pa->getAlias() != srcPa->getAlias())
 					{
 //						nldebug("%s : forcing alias %u", primPath.c_str(), srcPa->getAlias());
 						dstDoc.forceAlias(pa, srcPa->getAlias());
@@ -229,7 +229,7 @@ void syncFile(const string &srcPath, const string &dstPath)
 		CPrimitiveEnumerator<TAllPrimitivePredicate> pe(dstDoc.RootNode, pred);
 		IPrimitive *prim;
 
-		while ((prim = pe.getNextMatch()) != NULL)
+		while ((prim = pe.getNextMatch()) != nullptr)
 		{
 			const CPrimitiveClass *pc = LigoConfig.getPrimitiveClass(*prim);
 			if (pc)

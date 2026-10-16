@@ -433,7 +433,7 @@ static void uploadLightUBOData(CDriverGLStates3 &glStates, const CLightTableUBOE
 	else
 	{
 		// Orphan + rewrite (avoids GPU sync)
-		nglBufferData(GL_UNIFORM_BUFFER, uboCapacity * sizeof(CLightTableUBOEntry), NULL, GL_STREAM_DRAW);
+		nglBufferData(GL_UNIFORM_BUFFER, uboCapacity * sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
 		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, entries);
 	}
 

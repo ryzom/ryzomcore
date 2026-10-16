@@ -37,11 +37,11 @@ end
 -------------------------------------------------------------------------------------
 -- get translation id for a property, as an ucstring
 function r2:getPropertyTranslation(prop)
-	local translationId = r2:getPropertyTranslationId(prop)		
+	local translationId = r2:getPropertyTranslationId(prop)
 	if (i18n.hasTranslation(translationId)) then
 		return i18n.get(translationId)
 	else
-		return translationId
+		return ucstring(translationId)
 	end
 end
 
@@ -153,7 +153,7 @@ end
 -- MISC GLOBALS --
 ------------------
 
-r2.ScratchUCStr = "" -- scratch ucstring, useful to do call from utf8 without to create a new object
+r2.ScratchUCStr = ucstring() -- scratch ucstring, useful to do call from utf8 without to create a new object
 
 ---------------------
 -- EDITION GLOBALS --

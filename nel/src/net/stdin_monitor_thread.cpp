@@ -46,7 +46,7 @@ namespace NLNET
 		CStdinMonitorThread();
 
 		// main routine executed when the thread is started
-		void run();
+		void run() NL_OVERRIDE;
 
 		// interface for adding commands, retrieving commands and verifying whether there are commands waiting
 		void pushCommand(std::string nextCommand);
@@ -150,9 +150,9 @@ namespace NLNET
 		static CStdinMonitorSingleton* getInstance();
 
 		// methods required by IStdinMonitorSingleton
-		void init();
-		void update();
-		void release();
+		void init() NL_OVERRIDE;
+		void update() NL_OVERRIDE;
+		void release() NL_OVERRIDE;
 
 	private:
 		// this is a singleton so dissallow construction from outside...
@@ -183,8 +183,8 @@ namespace NLNET
 
 	CStdinMonitorSingleton* CStdinMonitorSingleton::getInstance()
 	{
-		static CStdinMonitorSingleton* instance= NULL;
-		if (instance==NULL)
+		static CStdinMonitorSingleton* instance = nullptr;
+		if (instance == nullptr)
 			instance= new CStdinMonitorSingleton;
 		return instance;
 	}
@@ -199,7 +199,7 @@ namespace NLNET
 	void CStdinMonitorSingleton::update()
 	{
 		// if we're not initialised yet then return
-		if (_StdinMonitorThreadInstance== NULL)
+		if (_StdinMonitorThreadInstance == nullptr)
 			return;
 
 		// if there's a command waiting then treat it (not more than one command per visit)
@@ -216,7 +216,7 @@ namespace NLNET
 	void CStdinMonitorSingleton::release()
 	{
 		// if we've never been initialised or we've already been released thent there's nothing more to do...
-		if (_StdinMonitorThreadInstance== NULL)
+		if (_StdinMonitorThreadInstance == nullptr)
 			return;
 
 		// terminate the thread and wait for it to finish
@@ -225,19 +225,19 @@ namespace NLNET
 
 		// destroy the thread object instance and reset the pointer to NULL to mark as 'uninitialised'
 		delete _StdinMonitorThreadInstance;
-		_StdinMonitorThreadInstance= NULL;
+		_StdinMonitorThreadInstance = nullptr;
 	}
 
 	CStdinMonitorSingleton::CStdinMonitorSingleton()
 	{
-		_StdinMonitorThreadHandle= NULL;
-		_StdinMonitorThreadInstance= NULL;
+		_StdinMonitorThreadHandle = nullptr;
+		_StdinMonitorThreadInstance = nullptr;
 	}
 
 	CStdinMonitorSingleton::CStdinMonitorSingleton(const CStdinMonitorSingleton&)
 	{
-		_StdinMonitorThreadHandle= NULL;
-		_StdinMonitorThreadInstance= NULL;
+		_StdinMonitorThreadHandle = nullptr;
+		_StdinMonitorThreadInstance = nullptr;
 	}
 
 	CStdinMonitorSingleton& CStdinMonitorSingleton::operator =(const CStdinMonitorSingleton&)

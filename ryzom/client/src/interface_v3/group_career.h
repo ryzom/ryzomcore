@@ -42,7 +42,7 @@ public:
 		_ActiveSavable= false;
 	}
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -61,7 +61,7 @@ public:
 		_ActiveSavable= false;
 	}
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 };
 
 

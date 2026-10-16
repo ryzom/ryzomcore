@@ -79,8 +79,8 @@ void CDynChatSession::unlink()
 		nlassert(_NextClientSession->_PrevClientSession = &_NextClientSession);
 		_NextClientSession->_PrevClientSession = _PrevClientSession;
 	}
-	_PrevClientSession = NULL;
-	_NextClientSession = NULL;
+	_PrevClientSession = nullptr;
+	_NextClientSession = nullptr;
 	// channel
 	*_PrevChannelSession = _NextChannelSession;
 	if (_NextChannelSession)
@@ -88,10 +88,10 @@ void CDynChatSession::unlink()
 		nlassert(_NextChannelSession->_PrevChannelSession = &_NextChannelSession);
 		_NextChannelSession->_PrevChannelSession = _PrevChannelSession;
 	}
-	_PrevChannelSession = NULL;
-	_NextChannelSession = NULL;
-	_Client = NULL;
-	_Channel = NULL;
+	_PrevChannelSession = nullptr;
+	_NextChannelSession = nullptr;
+	_Client = nullptr;
+	_Channel = nullptr;
 }
 
 //================================================================
@@ -109,7 +109,8 @@ CDynChatSession::~CDynChatSession()
 // CDynChatClient //
 ////////////////////
 //================================================================
-CDynChatClient::CDynChatClient(const TDataSetRow &client) : _FirstSession(NULL), _ID(client)
+CDynChatClient::CDynChatClient(const TDataSetRow &client) : _FirstSession(nullptr)
+    , _ID(client)
 {
 }
 
@@ -146,7 +147,8 @@ CDynChatChan::CDynChatChan()
 	:	HistoricSize(0),
 		HideBubble(false),
 		UniversalChannel(false),
-		_FirstSession(NULL),
+		_FirstSession(nullptr)
+    ,
 		_ID(CEntityId::Unknown),
 		_DontBroadcastPlayerInputs(false),
 		_ForwardPlayerIntputToOwnerService(false),
@@ -160,7 +162,8 @@ CDynChatChan::CDynChatChan(TChanID id, bool noBroadcast, bool forwardInput, bool
 	:	HistoricSize(0),
 		HideBubble(false),
 		UniversalChannel(false),
-		_FirstSession(NULL),
+		_FirstSession(nullptr)
+    ,
 		_ID(id),
 		_DontBroadcastPlayerInputs(noBroadcast),
 		_ForwardPlayerIntputToOwnerService(forwardInput),
@@ -252,16 +255,16 @@ CDynChatSession *CDynChat::addSession(TChanID chanID, const TDataSetRow &clientI
 {
 	CDynChatChan *chan = getChan(chanID);
 	if (!chan)
-		return NULL;
+		return nullptr;
 	CDynChatClient *client = getClient(clientID);
 	if (!client)
-		return NULL;
+		return nullptr;
 	// look for channel in session (faster because there are few channels used by a single player)
 	CDynChatSession *session = client->getSession(chanID);
 	if (session)
 	{
 		nlwarning("Session already created for player %s in channel %p", clientID.toString().c_str(), chan);
-		return NULL;
+		return nullptr;
 	}
 	CDynChatSession *newSession = new CDynChatSession(client, chan);
 	return newSession;
@@ -293,7 +296,7 @@ CDynChatChan *CDynChat::getChan(TChanID chan)
 {
 	TChanMap::iterator it = _Chans.find(chan);
 	if (it != _Chans.end()) return &(it->second);
-	return NULL;
+	return nullptr;
 }
 
 //================================================================
@@ -301,7 +304,7 @@ CDynChatClient *CDynChat::getClient(const TDataSetRow &client)
 {
 	TClientMap::iterator it = _Clients.find(client);
 	if (it != _Clients.end()) return &(it->second);
-	return NULL;
+	return nullptr;
 }
 
 //================================================================
@@ -320,7 +323,7 @@ CDynChat::~CDynChat()
 CDynChatSession *CDynChat::getSession(TChanID chan, const TDataSetRow &client)
 {
 	CDynChatClient *clientPtr = getClient(client);
-	if (!clientPtr) return NULL;
+	if (!clientPtr) return nullptr;
 	return clientPtr->getSession(chan);
 }
 

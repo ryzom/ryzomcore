@@ -58,11 +58,11 @@ namespace NLMISC
 			}
 		}
 
-		void registerListener	(IListener *listener)
+		void registerListener	(IListener *listener) NL_OVERRIDE
 		{
 			_Listeners.insert(listener);
 		}
-		void unregisterListener	(IListener *listener)
+		void unregisterListener	(IListener *listener) NL_OVERRIDE
 		{
 			_Listeners.erase(listener);
 		}
@@ -92,7 +92,7 @@ namespace NLMISC
 	{
 		ISpeaker	*_Speaker;
 
-		void speakerIsDead(ISpeaker *speaker)
+		void speakerIsDead(ISpeaker *speaker) NL_OVERRIDE
 		{
 			nlassert(speaker == _Speaker);
 			_Speaker = NULL;

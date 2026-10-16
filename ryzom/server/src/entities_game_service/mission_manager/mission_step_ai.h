@@ -33,21 +33,21 @@ class CMissionStepEscort : public IMissionStepTemplate
 	std::vector<TAIAlias>	Aliases;
 	bool					SaveAll;
 		
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
 
-	void getInitState( std::vector<uint32>& ret );
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates);
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE;
 
-	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList);
+	virtual void onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList) NL_OVERRIDE;
 
-	virtual void getEscortGroups( std::vector< TAIAlias > & groups );
+	virtual void getEscortGroups( std::vector< TAIAlias > & groups ) NL_OVERRIDE;
 	
-	virtual bool checkEscortFailure( bool groupWiped );
+	virtual bool checkEscortFailure( bool groupWiped ) NL_OVERRIDE;
 
-	bool checkTextConsistency();
+	bool checkTextConsistency() NL_OVERRIDE;
 
 	MISSION_STEP_GETNEWPTR(CMissionStepEscort)
 	
@@ -58,16 +58,16 @@ class CMissionStepAIMsg : public IMissionStepTemplate
 {
 	std::string _Msg;
 
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData );
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE;
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow );
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE;
 
-	void getInitState( std::vector<uint32>& ret );
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE;
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{}
 
-	bool checkTextConsistency();
+	bool checkTextConsistency() NL_OVERRIDE;
 
 	MISSION_STEP_GETNEWPTR(CMissionStepAIMsg)
 };

@@ -48,7 +48,7 @@ inline CRefCount::~CRefCount()
 	if(!pinfo->IsNullPtrInfo)
 	{
 		// inform them of my destruction.
-		pinfo->Ptr= NULL;
+		pinfo->Ptr = nullptr;
 	}
 }
 
@@ -459,7 +459,7 @@ template <class T> inline CVirtualRefPtr<T>::operator T*()	const
 
 	// Refresh Ptr if necessary.
 	// NB: It is preferable (faster) here to test if NULL and set NULL if necessary, than dynamic_casting the ptr.
-	if (pinfo->Ptr == NULL)
+	if (pinfo->Ptr == nullptr)
 		Ptr = NULL;
 	return Ptr;
 }

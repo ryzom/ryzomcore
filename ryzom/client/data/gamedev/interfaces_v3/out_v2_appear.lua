@@ -230,6 +230,8 @@ function outgame:procUpdateNameRaceLabel()
 	uiNameRaceText.hardtext = tostring(nameRaceType[tonumber(dbNameRace)])
 end
 
+
+
 function outgame:procUpdateNameSubRaceFirstNameLabel()
 	local nameSubRaceFirstNameType = { "uiCP_Specie_Fyros", "uiCP_Specie_Matis", "uiCP_Specie_Tryker", "uiCP_Specie_Zorai" }
 	local uiNameSubRaceFirstNameText = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider:name_race")
@@ -284,7 +286,6 @@ function outgame:buildActionPack()
 
 	getUI("ui:outgame:appear:finish_but").frozen = false
 	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/app_arcc/outgame_rpbg.php?lang="..lang.."&login="..login.."&slot="..tostring(slot).."&sex="..sex)
-
 
 	local uiDesc = getUI("ui:outgame:appear:job_options:options:desc")
 	if (uiDesc==nil) then
@@ -365,7 +366,7 @@ end
 --	local text = self:getProgressGroup():find("text")
 --	local ellipsisTxt = self:getProgressGroup():find("ellipsis")
 --	text.color = color
---	text.hardtext = ucstr
+--	text.uc_hardtext = ucstr
 --	if ellipsis then
 --		ellipsisTxt.hardtext = ellipsis
 --	else
@@ -390,7 +391,7 @@ end
 --	local progressDate = nltime.getLocalTime() / 500
 --	local colValue = math.floor(230 + 24 * math.sin(progressDate))
 --	local color = string.format("%d %d 	%d %d", colValue, colValue, colValue, 255)
---	self:setProgressText((i18n.get("uiBGD_Progress") .. progressPercentText), color, progress, progressSymbol[progressPostfix + 1])
+--	self:setProgressText(concatUCString(i18n.get("uiBGD_Progress"), ucstring(progressPercentText)), color, progress, progressSymbol[progressPostfix + 1])
 --end
 --
 --function outgame:setPatchSuccess()
@@ -426,7 +427,6 @@ function outgame:launchGame()
 	-- reset webig
 	getUI("ui:outgame:appear:job_options:rpbg:html"):browse("https://app.ryzom.com/index.php?reset_webig=1")
 end
-
 function outgame:loadRPBGPage()
 	local slot = getDbProp("UI:TEMP:CHARSELSLOT")
 	local lang = getClientCfg("LanguageCode")

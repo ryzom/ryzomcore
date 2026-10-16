@@ -45,10 +45,10 @@ public:
 	CWindowDisplayer (const char *displayerName = "") :
 	  IDisplayer(displayerName),
 		_Buffer("CWindowDisplayer::_Buffer"), _Labels("CWindowDisplayer::_Labels"), _CommandsToExecute("CWindowDisplayer::_CommandsToExecute"),
-		_Continue(true), _PosInHistory(0), _Init(false), _HistorySize(0), _ToolBarHeight(22), _InputEditHeight(25), _Thread(0), Log(0)
+		_Continue(true), _PosInHistory(0), _Init(false), _HistorySize(0), _ToolBarHeight(22), _InputEditHeight(25), _Thread(nullptr), Log(nullptr)
 	  { }
 
-	virtual ~CWindowDisplayer ();
+	virtual ~CWindowDisplayer () NL_OVERRIDE;
 
 	// open the window and run the display thread (MT)
 	void	create (std::string titleBar = "", bool iconified = false, sint x = -1, sint y = -1, sint w = -1, sint h = -1, sint hs = -1, sint fs = 0, const std::string &fn = "", bool ww = false, CLog *log = InfoLog);
@@ -72,14 +72,15 @@ public:
 protected:
 
 	// display a string (MT)
-	virtual void doDisplay (const NLMISC::CLog::TDisplayInfo &args, const char *message);
+	virtual void doDisplay (const NLMISC::CLog::TDisplayInfo &args, const char *message) NL_OVERRIDE;
 
 	// true for windows
 	bool needSlashR;
 
 	struct CLabelEntry
 	{
-		CLabelEntry (const std::string &value) : Hwnd(NULL), Value(value), NeedUpdate(true) { }
+		CLabelEntry (const std::string &value) : Hwnd(nullptr)
+		    , Value(value), NeedUpdate(true) { }
 		void		*Hwnd;
 		std::string	 Value;
 		bool		 NeedUpdate;

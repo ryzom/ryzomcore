@@ -42,21 +42,21 @@ class CGuild;
 class CCAisActionMsgImp : public CCAisActionMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /// Implementation (called when a Handled AI Group is spawned)
 class CHandledAIGroupSpawnedMsgImp : public CHandledAIGroupSpawnedMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /// Implementation (called when a Handled AI Group is despawned)
 class CHandledAIGroupDespawnedMsgImp : public CHandledAIGroupDespawnedMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

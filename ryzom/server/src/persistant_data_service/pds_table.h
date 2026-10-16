@@ -571,7 +571,7 @@ public:
 
 protected:
 
-	virtual std::string	getLoggerIdentifier() const		{ return NLMISC::toString("tab:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
+	virtual std::string	getLoggerIdentifier() const NL_OVERRIDE		{ return NLMISC::toString("tab:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
 
 public:
 
@@ -658,7 +658,7 @@ public:
 	/**
 	 * Process Row
 	 */
-	virtual bool		processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& accessor);
+	virtual bool		processRow(RY_PDS::TTableIndex table, CTableBuffer::CAccessor& accessor) NL_OVERRIDE;
 
 	/**
 	 * Fix broken forward refs

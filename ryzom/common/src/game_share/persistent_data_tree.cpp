@@ -122,7 +122,7 @@ static CSString cleanQuotes(CSString src)
 CPersistentDataTreeNode::CPersistentDataTreeNode(const NLMISC::CSString& name,CPersistentDataTreeNode* parent)
 {
 	_Name= name;
-	_Parent=NULL;
+	_Parent = nullptr;
 	_IsMap= false;
 	_IsValue= false;
 	attachToParent(parent);
@@ -131,7 +131,7 @@ CPersistentDataTreeNode::CPersistentDataTreeNode(const NLMISC::CSString& name,CP
 CPersistentDataTreeNode::CPersistentDataTreeNode(const NLMISC::CSString& name,CPersistentDataTreeNode* parent,uint32 idx)
 {
 	_Name= name;
-	_Parent=NULL;
+	_Parent = nullptr;
 	_IsMap= false;
 	_IsValue= false;
 	attachToParent(parent,idx);
@@ -139,7 +139,7 @@ CPersistentDataTreeNode::CPersistentDataTreeNode(const NLMISC::CSString& name,CP
 
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent)
 {
-	return attachToParent(parent,parent==NULL?std::numeric_limits<uint32>::max():(uint32)parent->_Children.size());
+	return attachToParent(parent,parent == nullptr ? std::numeric_limits<uint32>::max():(uint32)parent->_Children.size());
 }
 
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uint32 idx)
@@ -162,7 +162,7 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uin
 	}
 
 	// add self to parent's children
-	if (parent!=NULL)
+	if (parent != nullptr)
 	{
 		// check parent isn't a value
 		BOMB_IF(parent->_IsValue, "Attempting to attach a persistent data node to parent that has a value '" + parent->getNodeName() + "' = " + parent->_Value.c_str(), return false);
@@ -459,7 +459,7 @@ CSString CPersistentDataTreeNode::getNodeName() const
 	CSString name=_Name.splitToSeparator('#');
 
 	// if we have no parent then our name is obviously just the 'name' value
-	if (_Parent==NULL)
+	if (_Parent == nullptr)
 		return name;
 
 	// check to see whether there are more then one child in our parent that match our base name
@@ -499,7 +499,7 @@ const  CPersistentDataTreeNode::TValue&  CPersistentDataTreeNode::getValue(const
 	// check whether the node exists
 	static TValue nullValue;
 //	DROP_IF(node==NULL,"Failed to locate node in getValue("+nameList+")",return nullValue);
-	if(node==NULL)
+	if(node == nullptr)
 		return nullValue;
 
 	// return the node's value
@@ -508,7 +508,7 @@ const  CPersistentDataTreeNode::TValue&  CPersistentDataTreeNode::getValue(const
 
 bool CPersistentDataTreeNode::isMapEntry() const
 {
-	return (_Parent!=NULL) && (_Parent->_IsMap);
+	return (_Parent != nullptr) && (_Parent->_IsMap);
 }
 
 bool CPersistentDataTreeNode::flagAsMap()
@@ -532,7 +532,7 @@ const  CPersistentDataTreeNode* CPersistentDataTreeNode::getChild(const NLMISC::
 CPersistentDataTreeNode* CPersistentDataTreeNode::getChild(const NLMISC::CSString& name)
 {
 	TChildIndex::iterator it= _ChildIndex.find(name);
-	return (it==_ChildIndex.end())? NULL: (*it).second;
+	return (it==_ChildIndex.end()) ? nullptr : (*it).second;
 }
 
 const  CPersistentDataTreeNode::TChildren& CPersistentDataTreeNode::getChildren() const
@@ -595,8 +595,8 @@ CPersistentDataTreeNode* CPersistentDataTreeNode::getDescendant(const NLMISC::CS
 		// this is a true map entry so it's composed of 2 parts ... we treat the first part here and drop through to the
 		// normal code to treat the second part
 		container= getDescendant(mapName.strip(),createIfNotExist);
-		if (container==NULL || !container->flagAsMap())
-			return NULL;
+		if (container == nullptr || !container->flagAsMap())
+			return nullptr;
 	}
 
 	// compose the chunk name
@@ -609,11 +609,11 @@ CPersistentDataTreeNode* CPersistentDataTreeNode::getDescendant(const NLMISC::CS
 	CPersistentDataTreeNode* nextNode= container->getChild(nextChunk);
 
 	// if the node didn't exist...
-	if (nextNode==NULL)
+	if (nextNode == nullptr)
 	{
 		// if we're not allowed to create non-existant nodes then return NULL
 		if (createIfNotExist==false)
-			return NULL;
+			return nullptr;
 
 		// create a new node...
 		nextNode= new CPersistentDataTreeNode(nextChunk,container);
@@ -846,7 +846,7 @@ const  CPersistentDataTree::TValue&  CPersistentDataTree::getValue(const CSStrin
 
 CPersistentDataTreeNode* CPersistentDataTree::getNode(const NLMISC::CSString& nodeName)
 {
-	return (_Child==NULL)? NULL: _Child->getDescendant(nodeName,false);
+	return (_Child == nullptr) ? nullptr : _Child->getDescendant(nodeName,false);
 }
 
 bool CPersistentDataTree::operator==(const CPersistentDataTree& other) const

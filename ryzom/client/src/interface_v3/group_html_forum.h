@@ -41,13 +41,13 @@ public:
 
 	// Constructor
 	CGroupHTMLForum(const TCtorParam &param);
-	~CGroupHTMLForum();
+	~CGroupHTMLForum() NL_OVERRIDE;
 
 	// From CGroupHTML
-	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
-	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain) NL_OVERRIDE;
+	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain) NL_OVERRIDE;
 	virtual std::string	home() const NL_OVERRIDE;
-	virtual void handle ();
+	virtual void handle () NL_OVERRIDE;
 
 private:
 

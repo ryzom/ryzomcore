@@ -48,10 +48,10 @@ void UTransform::setClusterSystem (UInstanceGroup *pIG)
 		nlwarning("Transform has been flagged to be glued to the root, and thus can't be clusterized. See UTransform::setForceClipRoot(bool).");
 		return;
 	}
-	if ((pIG == NULL) || (pIG == (UInstanceGroup*)-1))
+	if ((pIG == nullptr) || (pIG == (UInstanceGroup*)-1))
 	{
-		if (pIG == NULL)
-			object->setClusterSystem (NULL);
+		if (pIG == nullptr)
+			object->setClusterSystem (nullptr);
 		else
 			object->setClusterSystem ((CInstanceGroup*)-1);
 	}
@@ -66,8 +66,8 @@ UInstanceGroup *UTransform::getClusterSystem () const
 	CInstanceGroup	*ig= object->getClusterSystem();
 	if(ig==((CInstanceGroup*)-1))
 		return ((UInstanceGroup*)-1);
-	else if(ig==NULL)
-		return NULL;
+	else if(ig == nullptr)
+		return nullptr;
 	else
 		return ig->getUserInterface();
 }
@@ -78,7 +78,7 @@ void			UTransform::getLastParentClusters(std::vector<CCluster*> &clusters) const
 	CTransform	*object = getObjectPtr();
 	CScene *scene = object->getOwnerScene();
 	// look in the list of parent of the transform object and extract the CCluster parents
-	if (scene == NULL)
+	if (scene == nullptr)
 		return;
 
 	CClipTrav	&clipTrav= scene->getClipTrav();
@@ -87,7 +87,7 @@ void			UTransform::getLastParentClusters(std::vector<CCluster*> &clusters) const
 	for(uint i=0;i<num;i++)
 	{
 		CCluster *pcluster = dynamic_cast<CCluster*>(object->clipGetParent(i));
-		if (pcluster != NULL)
+		if (pcluster != nullptr)
 			clusters.push_back(pcluster);
 	}
 

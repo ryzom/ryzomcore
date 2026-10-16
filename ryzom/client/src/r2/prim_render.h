@@ -246,10 +246,10 @@ private:
 	void updateWorldMapDisplay();
 protected:
 	// from CGroupMap::IDeco
-	virtual void onAdd(CGroupMap &owner);
-	virtual void onRemove(CGroupMap &owner);
-	virtual void onPreRender(CGroupMap &owner);
-	virtual void onUpdate(CGroupMap &owner);
+	virtual void onAdd(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onRemove(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onPreRender(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onUpdate(CGroupMap &owner) NL_OVERRIDE;
 private:
 	bool						_AddedToWorldMap;
 	std::vector<CViewBitmap *>	_WorldMapVertices;

@@ -133,7 +133,7 @@ int	main(int argc, char *argv[])
 				iFile.close();
 
 				// Get the pointer, check it's a skeleton
-				if(dynamic_cast<CSkeletonShape*>(strShape.getShapePointer()) == NULL)
+				if(dynamic_cast<CSkeletonShape*>(strShape.getShapePointer()) == nullptr)
 					throw Exception("%s is not a Skeleton", skeletonName.c_str());
 				skeletonShape= (CSkeletonShape*)strShape.getShapePointer();
 

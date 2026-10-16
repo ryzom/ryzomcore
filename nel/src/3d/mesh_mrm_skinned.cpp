@@ -683,8 +683,8 @@ void	CMeshMRMSkinnedGeom::render(IDriver *drv, CTransformShape *trans, float pol
 			}
 		}
 
-		drv->bindUniformBuffer(UBBindingVertexProgram, NULL);
-		drv->activeVertexProgram(NULL);
+		drv->bindUniformBuffer(UBBindingVertexProgram, nullptr);
+		drv->activeVertexProgram(nullptr);
 		drv->forceNormalize(bkupNorm);
 		return;
 	}
@@ -1697,7 +1697,7 @@ void	CMeshMRMSkinned::changeMRMDistanceSetup(float distanceFinest, float distanc
 // ***************************************************************************
 IMeshGeom	*CMeshMRMSkinned::supportMeshBlockRendering (CTransformShape *trans, float &polygonCount ) const
 {
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -1741,7 +1741,7 @@ void		CMeshMRMSkinnedGeom::updateRawSkinNormal(bool enabled, CMeshMRMSkinnedInst
 	else
 	{
 		// If the instance has no RawSkin, or has a too old RawSkin cache, must delete it, and recreate
-		if ((mi->_RawSkinCache == NULL) || (mi->_RawSkinCache->MeshDataId!=_MeshDataId))
+		if ((mi->_RawSkinCache == nullptr) || (mi->_RawSkinCache->MeshDataId!=_MeshDataId))
 		{
 			// first delete if too old.
 			mi->clearRawSkinCache();
@@ -2562,7 +2562,7 @@ void CMeshMRMSkinnedGeom::renderGPUSkin(CMeshMRMSkinnedInstance *mi, float alpha
 	}
 
 	// Unbind UBO
-	drv->bindUniformBuffer(UBBindingVertexProgram, NULL);
+	drv->bindUniformBuffer(UBBindingVertexProgram, nullptr);
 }
 
 // ***************************************************************************

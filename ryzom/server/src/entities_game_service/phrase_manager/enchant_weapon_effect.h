@@ -69,10 +69,10 @@ public:
 	}
 	
 	/// apply the effect
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 	
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 	
 	/// if true effect ends at caster death 
 	void endsAtCasterDeath(bool flag) { _EndsAtCasterDeath = flag; }
@@ -87,14 +87,14 @@ public:
 	
 	DMGTYPE::EDamageType getDmgType() const { return _DamageType; }
 
-	virtual NLMISC::CSheetId getAssociatedSheetId() const;
+	virtual NLMISC::CSheetId getAssociatedSheetId() const NL_OVERRIDE;
 
-	virtual bool automaticallyReplaceFamily() const { return true; }
+	virtual bool automaticallyReplaceFamily() const NL_OVERRIDE { return true; }
 	
-	virtual bool canBeInactive() const { return false; }
+	virtual bool canBeInactive() const NL_OVERRIDE { return false; }
 
 	// re-activate a magic protection modifier loaded with character
-	void activate();
+	void activate() NL_OVERRIDE;
 	
 private:
 	/// DPS bonus

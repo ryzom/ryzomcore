@@ -165,9 +165,9 @@ void		CPatchDLMPointLight::compile(const CPointLight &pl, NLMISC::CRGBA landDiff
 // ***************************************************************************
 CPatchDLMContext::CPatchDLMContext()
 {
-	_Patch= NULL;
-	_DLMTexture= NULL;
-	_DLMContextList= NULL;
+	_Patch = nullptr;
+	_DLMTexture = nullptr;
+	_DLMContextList = nullptr;
 	OldPointLightCount= 0;
 	CurPointLightCount= 0;
 	// By default there is crash in textures
@@ -185,8 +185,8 @@ CPatchDLMContext::~CPatchDLMContext()
 		_DLMTexture->releaseLightMap(TextPosX, TextPosY);
 	}
 	// exit
-	_Patch= NULL;
-	_DLMTexture= NULL;
+	_Patch = nullptr;
+	_DLMTexture = nullptr;
 
 	// remove it from list.
 	if(_DLMContextList)
@@ -235,7 +235,7 @@ bool			CPatchDLMContext::generate(CPatch *patch, CTextureDLM *textureDLM, CPatch
 	{
 		// Mark as not allocated.
 		// NB: the context still work with NULL _DLMTexture, but do nothing (excpetionnal case)
-		_DLMTexture= NULL;
+		_DLMTexture = nullptr;
 	}
 
 	// If the lightmap is correclty allocated in the global texture, compute UVBias.

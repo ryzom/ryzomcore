@@ -26,6 +26,7 @@
 #include "guild_manager/guild_manager.h"
 #include "guild_manager/guild_member_module.h"
 
+
 using namespace NLMISC;
 using namespace std;
 
@@ -35,7 +36,7 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 
 const uint32 CExchangeView::NbExchangeSlots = 10;
-extern NLMISC::CVariable<uint32> GuildChestSlots;
+extern NLMISC::CVariable<sint32> GuildChestSlots;
 
 // ****************************************************************************
 CExchangeView::CExchangeView()
@@ -70,10 +71,11 @@ void CExchangeView::setInterlocutorView(CExchangeView * interlocutorView)
 // ****************************************************************************
 bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exchangeSlot, uint32 quantity)
 {
-	nlassert(invSlot < getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getSlotCount());
-	nlassert(exchangeSlot < NbExchangeSlots);
 	CCharacter * c = getCharacter();
-	CGameItemPtr item = c->getInventory(INVENTORIES::TInventory(invSrc))->getItem(invSlot);
+	CInventoryPtr inv = c->getInventory(INVENTORIES::TInventory(invSrc));
+	if (inv == NULL || invSlot >= inv->getSlotCount() || exchangeSlot >= NbExchangeSlots)
+		return false;
+	CGameItemPtr item = inv->getItem(invSlot);
 	if (item == NULL)
 		return false;
 
@@ -99,9 +101,9 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 		uint8 chest = floor((float)invSlot / (float)GuildChestSlots);
 
 		if (!guild->haveChestViewGrade(chest, member->getGrade()) || !guild->haveChestGetGrade(chest, member->getGrade()))
-		{
-			CCharacter::sendDynamicSystemMessage( c->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
-			return false;
+	{
+		CCharacter::sendDynamicSystemMessage(c->getId(), "GUILD_ITEM_DONT_HAVE_RIGHTS");
+		return false;
 		}
 	}
 
@@ -157,7 +159,6 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 				CCharacter::sendDynamicSystemMessage(c->getId(), "ANIMAL_MOUNTED");
 				return false;
 			}
-
 			if (c->getPlayerPets()[petIndex].PetSheetId != form->PetSheet && c->getPlayerPets()[petIndex].PetStatus != CPetAnimal::stable)
 			{
 				CCharacter::sendDynamicSystemMessage(c->getId(), "ANIMAL_CUSTOM_MUST_BE_IN_STABLE");
@@ -187,7 +188,9 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 // ****************************************************************************
 bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 invSrc, uint32 invSlot, uint32 quantity)
 {
-	nlassert(invSlot < getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getSlotCount());
+	CInventoryPtr inv = getCharacter()->getInventory(INVENTORIES::TInventory(invSrc));
+	if (inv == NULL || invSlot >= inv->getSlotCount())
+		return false;
 
 	bool foundSlot;
 	uint32 exchangeSlot;
@@ -529,7 +532,6 @@ uint32 * CExchangeView::getPetTicketCount(ITEM_TYPE::TItemType itemType)
 
 	if (itemType == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
 		return &_MountTicketCount;
-
 	if (itemType == ITEM_TYPE::ANIMAL_TICKET)
 		return &_ZigTicketCount;
 

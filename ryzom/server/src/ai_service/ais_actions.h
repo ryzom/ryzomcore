@@ -163,13 +163,13 @@ public:
 	//----------------------------------------------------------------------------
 	// inheritted virtual interface
 
-	virtual void openFile(const std::string &fileName);
-	virtual void closeFile(const std::string &fileName);
+	virtual void openFile(const std::string &fileName) NL_OVERRIDE;
+	virtual void closeFile(const std::string &fileName) NL_OVERRIDE;
 
-	virtual void execute(uint64 action,const std::vector <CAIActions::CArg> &args);
+	virtual void execute(uint64 action,const std::vector <CAIActions::CArg> &args) NL_OVERRIDE;
 
-	virtual void begin(uint32 contextAlias);
-	virtual void end(uint32 contextAlias);
+	virtual void begin(uint32 contextAlias) NL_OVERRIDE;
+	virtual void end(uint32 contextAlias) NL_OVERRIDE;
 
 
 
@@ -211,8 +211,8 @@ public:
 		{																					\
 			CActionHandler_##context##_##cmdName()											\
 			: CAISActions::IActionHandler(CAISActionEnums::context, #cmdName) { }			\
-			virtual char const* name() { return #cmdName; }									\
-			virtual void operator()(std::vector<CAIActions::CArg> const& args);				\
+			virtual char const* name() NL_OVERRIDE { return #cmdName; }									\
+			virtual void operator()(std::vector<CAIActions::CArg> const& args) NL_OVERRIDE;				\
 		};																					\
 		static CActionHandler_##context##_##cmdName ActionHandler_##context##_##cmdName;	\
 		void CActionHandler_##context##_##cmdName::operator()(std::vector<CAIActions::CArg> const& args)
@@ -224,8 +224,8 @@ public:
 			char const* _Name;																\
 			CActionHandler_##context##_##cmdName(char const* name)							\
 			: CAISActions::IActionHandler(CAISActionEnums::context, name), _Name(name) { }	\
-			virtual char const* name() { return _Name; }									\
-			virtual void operator()(std::vector<CAIActions::CArg> const& args);				\
+			virtual char const* name() NL_OVERRIDE { return _Name; }									\
+			virtual void operator()(std::vector<CAIActions::CArg> const& args) NL_OVERRIDE;				\
 		};																					\
 		template <typename templateTypeName1>												\
 		void CActionHandler_##context##_##cmdName<templateTypeName1>::operator()(std::vector<CAIActions::CArg> const& args)

@@ -60,7 +60,7 @@ void CCommandRegistry::initVariables(NLMISC::CConfigFile &configFile)
 			{
 				configFile.setCallback(var->_CommandName, cbVarChanged);
 				CConfigFile::CVar *cvar = configFile.getVarPtr(var->_CommandName);
-				if (cvar != 0)
+				if (cvar != nullptr)
 				{
 					string val = cvar->asString();
 					//nldebug("VAR: Setting variable '%s' with value '%s' from config file '%s'", var->_CommandName.c_str(), val.c_str(), configFile.getFilename().c_str());

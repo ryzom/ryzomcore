@@ -56,7 +56,7 @@ void CDeathPenalties::addDeath(CCharacter& user, float deathPenaltyFactor )
 
 	const double maxMalus = maxXP * user.getSkillBaseValue(expSkill);
 	double xpMalus = ((double)deathPenaltyFactor) * DeathXPFactor * maxMalus;
-
+	
 	if ( xpMalus + _DeathXPToGain <= maxMalus )
 		_DeathXPToGain += xpMalus;
 	else
@@ -72,7 +72,7 @@ void CDeathPenalties::addDeath(CCharacter& user, float deathPenaltyFactor )
 			_CurrentDeathXP = 0.0;
 	}
 	updataDb(user);
-
+	
 	if( _CurrentDeathXP || _DeathXPToGain )
 	{
 		SM_STATIC_PARAMS_2(params,STRING_MANAGER::integer,STRING_MANAGER::integer);
@@ -95,12 +95,12 @@ uint32 CDeathPenalties::updateResorption( CCharacter& user )
 	{
 		SKILLS::ESkills expSkill;
 		double maxXP = user.getSkills().getMaxXPToGain(expSkill);
-
+		
 		double timeFactor = (double)(currentTime - _BonusUpdateTime) / (60.*60.*24. * user.getDPLossDuration());
-
+		
 		const double maxMalus = maxXP * user.getSkillBaseValue(expSkill);
 		double xpBonus = ((double)timeFactor) * maxMalus;
-
+		
 		addXP(user, SKILLS::unknown, xpBonus, xpBonus);
 	}
 	_BonusUpdateTime = currentTime;
@@ -136,7 +136,6 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 		SSkill* skill = user.getSkills().getSkillStruct(usedSkill);
 		if (skill->MaxLvlReached < 250)
 			xpUsedForDeathPenalty *= 0.5f;
-
 		xp -= xpUsedForDeathPenalty;
 
 		double tempXp = xpUsedForDeathPenalty * skillBaseValue;
@@ -156,15 +155,15 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 	}
 
 	_CurrentDeathXP += xp;
-
+	
 	if ( _CurrentDeathXP >= _DeathXPToGain )
 	{
 		// no more death penalties, only keep the xp surplus
 		xp = _CurrentDeathXP - _DeathXPToGain;
 
 		reset(user);
-
-		PHRASE_UTILITIES::sendDynamicSystemMessage(user.getEntityRowId(), "PROGRESS_DEATH_PENALTY_COMPLETE");
+		
+			PHRASE_UTILITIES::sendDynamicSystemMessage(user.getEntityRowId(), "PROGRESS_DEATH_PENALTY_COMPLETE");
 
 		// consume SpeedUpDPLoss services
 		while (1)
@@ -190,7 +189,7 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 			params[3].Int = sint32(10*(_DeathXPToGain-_CurrentDeathXP) );
 			PHRASE_UTILITIES::sendDynamicSystemMessage(user.getEntityRowId(), "PROGRESS_DEATH_PENALTY_PAYBACK", params);
 		}
-
+		
 		xp = 0.0;
 		updataDb(user);
 	}
@@ -204,7 +203,7 @@ CDeathPenaltiesTimerEvent::CDeathPenaltiesTimerEvent(CCharacter *parent)
 void CDeathPenaltiesTimerEvent::timerCallback(CTimer* owner)
 {
 	H_AUTO(CDeathPenaltiesTimerEvent);
-
+	
 	uint32 nextUpdate = _Parent->updateDeathPenaltyResorption();
 	owner->setRemaining(nextUpdate, this);
 }

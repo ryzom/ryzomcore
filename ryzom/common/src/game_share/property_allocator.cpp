@@ -32,7 +32,7 @@ void		*CPropertyAllocator::getPropertySegment( const std::string& propName ) con
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 

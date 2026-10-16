@@ -54,16 +54,16 @@ public:
 	}
 	
 	/// apply the effect
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 	
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 	
-	virtual NLMISC::CSheetId getAssociatedSheetId() const;
+	virtual NLMISC::CSheetId getAssociatedSheetId() const NL_OVERRIDE;
 
-	virtual bool automaticallyReplaceFamily() const { return true; }
+	virtual bool automaticallyReplaceFamily() const NL_OVERRIDE { return true; }
 	
-	virtual bool canBeInactive() const { return false; }
+	virtual bool canBeInactive() const NL_OVERRIDE { return false; }
 
 private:
 	// private ctor for use in NLMISC class registry

@@ -15,7 +15,7 @@
 static class CUtilsAssertTest: public IServiceSingleton
 {
 public:
-	void init() 
+	void init() NL_OVERRIDE 
 	{
 		// warning system tests
 		WARN("WARN");

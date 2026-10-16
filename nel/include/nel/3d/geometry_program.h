@@ -38,7 +38,7 @@ public:
 	/// Constructor
 	CGeometryProgram();
 	/// Destructor
-	virtual ~CGeometryProgram ();
+	virtual ~CGeometryProgram () NL_OVERRIDE;
 };
 
 } // NL3D

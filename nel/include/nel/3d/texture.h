@@ -186,7 +186,7 @@ public:
 	/// see operator=.
 	ITexture(const ITexture &tex) : CBitmap(), CRefCount(), IStreamable() {operator=(tex);}
 	/// Need a virtual dtor.
-	virtual ~ITexture();
+	virtual ~ITexture() NL_OVERRIDE;
 	/// The operator= do not copy drv info, and set touched=true. _Releasable, WrapMode and UploadFormat are copied.
 	ITexture &operator=(const ITexture &tex);
 	// @}
@@ -353,7 +353,7 @@ public:
 	 */
 	bool	setupedIntoDriver() const
 	{
-		return TextureDrvShare!=NULL;
+		return TextureDrvShare != nullptr;
 	}
 
 	/// Release the Driver info for this texture (if any). Call it with care.
@@ -363,7 +363,7 @@ public:
 	virtual bool allowDegradation() const { return false; }
 
 	/// serial ITexture basic infos (clamp ...).
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/** Select a texture among several other (if this texture is a set of texture such as CTextureMultiFile)
 	  * The default does nothing

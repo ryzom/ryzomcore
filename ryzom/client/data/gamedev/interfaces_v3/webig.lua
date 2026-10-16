@@ -13,9 +13,9 @@ if (webig.urls==nil) then
 end
 
 function getUCtf8(text)
-	local uctext = ""
+	local uctext = ucstring()
 	if type(text) == "string" then
-		uctext = text
+		uctext:fromUtf8(text)
 		return uctext
 	end
 	return text
@@ -38,6 +38,7 @@ function game:openUrlOnWebig(url, noblink, close_if_open)
 		end
 	end
 end
+
 
 
 function webig:addSheet(dst, sheet, quality, quantity, worned, user_color, rm_class_type, rm_faber_stat_type)
@@ -230,24 +231,25 @@ end
 
 function webig:openUrl(url, ui)
 	if ui == nil then
-		getUI("ui:interface:web_transactions"):find("html"):browse(url)
-	else
-		getUI("ui:interface:"..ui):find("html"):browse(url)
-	end
+	getUI("ui:interface:web_transactions"):find("html"):browse(url)
+else
+	getUI("ui:interface:"..ui):find("html"):browse(url)
+end
 end
 
 function webig:openUrlInBg(url)
-	if webig.urls[url] ~= nil then
-		WebQueue:push(webig.urls[url])
-	else
-		WebQueue:push(url)
-	end
+if webig.urls[url] ~= nil then
+	WebQueue:push(webig.urls[url])
+else
+	WebQueue:push(url)
 end
-
-
-
-
-
-
+end
 -- VERSION --
 FILE_WEBIG_VERSION = 31
+
+
+
+
+
+
+

@@ -153,7 +153,7 @@ namespace NLWEB
 			X509_NAME *subject = X509_get_subject_name(cert);
 
 			std::string name;
-			unsigned char *tmp = NULL;
+			unsigned char *tmp = nullptr;
 
 			// construct a multiline string with name
 			for (int j = 0, jlen = X509_NAME_entry_count(subject); j < jlen; ++j)
@@ -224,7 +224,7 @@ namespace NLWEB
 			{
 				// use it to read the PEM formatted certificate from memory into an X509
 				// structure that SSL can use
-				STACK_OF(X509_INFO) *info = PEM_X509_INFO_read_bio(bio, NULL, NULL, NULL);
+				STACK_OF(X509_INFO) *info = PEM_X509_INFO_read_bio(bio, nullptr, nullptr, nullptr);
 
 				if (info)
 				{

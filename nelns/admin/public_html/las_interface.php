@@ -40,7 +40,7 @@
 			unset($GLOBALS[$var]);
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Log Analysis");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Log Analysis");
 
 	// look for LAS
 	$las_query = "*.*.LAS.State";
@@ -105,7 +105,7 @@
 	echo "<br>";
 
 	echo "<table border=0>\n";
-	echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>\n";
+	echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 
 	echo "<tr valign=top>\n";
 
@@ -124,11 +124,11 @@
 			if ($las_address == $las['address'])
 			{
 				$selectedLAS = $las;
-				echo "<option value='".$las['address']."' selected>".$las['shard']." ".$las['server']." ".$las['service']."\n";
+				echo "<option value='".htmlspecialchars($las['address'], ENT_QUOTES)."' selected>".htmlspecialchars($las['shard']." ".$las['server']." ".$las['service'], ENT_QUOTES)."\n";
 			}
 			else
 			{
-				echo "<option value='".$las['address']."'>".$las['shard']." ".$las['server']." ".$las['service']."\n";
+				echo "<option value='".htmlspecialchars($las['address'], ENT_QUOTES)."'>".htmlspecialchars($las['shard']." ".$las['server']." ".$las['service'], ENT_QUOTES)."\n";
 			}
 		}
 	}
@@ -143,11 +143,11 @@
 	echo "</select>\n";
 	echo "</td></tr>";
 	echo "<tr><th align=left>Database</th></tr>\n";
-	echo "<tr><td><input type='text' name='database' size=10 maxlength=10 value='$database'></td></tr>";
+	echo "<tr><td><input type='text' name='database' size=10 maxlength=10 value='".htmlspecialchars($database, ENT_QUOTES)."'></td></tr>";
 	echo "<tr><th align=left>Start Date</th></tr>\n";
-	echo "<tr><td><input type='text' name='start_date' size=30 maxlength=20 value='$start_date'></td></tr>";
+	echo "<tr><td><input type='text' name='start_date' size=30 maxlength=20 value='".htmlspecialchars($start_date, ENT_QUOTES)."'></td></tr>";
 	echo "<tr><th align=left>End Date</th></tr>\n";
-	echo "<tr><td><input type='text' name='end_date' size=30 maxlength=20 value='$end_date'></td></tr>";
+	echo "<tr><td><input type='text' name='end_date' size=30 maxlength=20 value='".htmlspecialchars($end_date, ENT_QUOTES)."'></td></tr>";
 	echo "</table>\n";
 	echo "</td>\n";
 
@@ -157,7 +157,7 @@
 	echo "<tr><th align=left>EntityIds</th></tr>\n";
 	echo "<tr><td>\n";
 	for ($i=0; $i<10; ++$i)
-		echo "<input id='eid_$i' type='text' name='eid_$i' size=30 maxlength=25 value='".$GLOBALS["eid_$i"]."'><br>\n";
+		echo "<input id='eid_$i' type='text' name='eid_$i' size=30 maxlength=25 value='".htmlspecialchars($GLOBALS["eid_$i"], ENT_QUOTES)."'><br>\n";
 	echo "</td></tr>\n";
 	echo "</table>\n";
 	echo "</td>\n";
@@ -200,7 +200,7 @@
 	echo "<td>\n";
 	echo "<table>\n";
 	echo "<tr><th align=left>String</th></tr>\n";
-	echo "<tr><td><input type='text' name='string' size=100 maxlength=40 value='$string'></td></tr>";
+	echo "<tr><td><input type='text' name='string' size=100 maxlength=40 value='".htmlspecialchars($string, ENT_QUOTES)."'></td></tr>";
 	echo "</table>\n";
 	echo "</td>\n";
 
@@ -228,43 +228,89 @@
 	echo "<br>\n";
 
 
+	// Database name, dates and eids become bare words on the LAS wire;
+	// the free-text search is quoted. Refuse anything that would reframe
+	// the command (spaces, quotes, control characters).
+	$las_db_ok = is_string($database) && preg_match('/^[A-Za-z0-9_]{1,64}$/', $database);
+	$las_date_ok = function ($d) {
+		return $d === '' || (is_string($d) && preg_match('/^[0-9]{4}[-.\\/][0-9]{1,2}[-.\\/][0-9]{1,2}([ T][0-9:]+)?$/', $d));
+	};
+	$las_eid_ok = function ($e) {
+		return is_string($e) && preg_match('/^[A-Za-z0-9():._-]{1,64}$/', $e);
+	};
+
 	if ($build_eid_query || $build_display_query)
 	{
-		$eids = array();
-		for ($i=0; $i<10; ++$i)
-			if ($GLOBALS["eid_$i"] != '')
-				$eids[] = $GLOBALS["eid_$i"];
-
-		if (count($eids) == 0 || $build_display_query)
+		if (!$las_db_ok || !$las_date_ok($start_date) || !$las_date_ok($end_date))
 		{
-			$query = "displayLogs $database $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
-		}
-		else if (count($eids) > 1)
-		{
-			$query = "searchEIds $database ".join(' ', $eids)." - $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
+			echo "<b>Invalid database name or date for LAS query.</b><br>\n";
 		}
 		else
 		{
-			$query = "searchEId $database ".$eids[0]." $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
+			$eids = array();
+			$eids_valid = true;
+			for ($i=0; $i<10; ++$i)
+			{
+				if (!isset($GLOBALS["eid_$i"]) || $GLOBALS["eid_$i"] == '')
+					continue;
+				if (!$las_eid_ok($GLOBALS["eid_$i"]))
+				{
+					$eids_valid = false;
+					break;
+				}
+				$eids[] = $GLOBALS["eid_$i"];
+			}
+
+			if (!$eids_valid)
+			{
+				echo "<b>Invalid entity id for LAS query.</b><br>\n";
+			}
+			else if (count($eids) == 0 || $build_display_query)
+			{
+				$query = "displayLogs $database $start_date";
+				if ($end_date != '')
+					$query .= " $end_date";
+				$exec_query = true;
+			}
+			else if (count($eids) > 1)
+			{
+				$query = "searchEIds $database ".join(' ', $eids)." - $start_date";
+				if ($end_date != '')
+					$query .= " $end_date";
+				$exec_query = true;
+			}
+			else
+			{
+				$query = "searchEId $database ".$eids[0]." $start_date";
+				if ($end_date != '')
+					$query .= " $end_date";
+				$exec_query = true;
+			}
 		}
 	}
 	else if ($build_string_query)
 	{
 		if ($string != '')
 		{
-			$query = "searchString $database \"$string\" $start_date";
-			if ($end_date != '')
-				$query .= " $end_date";
-			$exec_query = true;
+			if (!$las_db_ok || !$las_date_ok($start_date) || !$las_date_ok($end_date))
+			{
+				echo "<b>Invalid database name or date for LAS query.</b><br>\n";
+			}
+			else
+			{
+				// Keep the search inside the quoted argument.
+				$string_safe = str_replace(array("\r", "\n", "\0", '"', '\\'), ' ', (string)$string);
+				$string_safe = trim($string_safe);
+				if (strlen($string_safe) > 256)
+					$string_safe = substr($string_safe, 0, 256);
+				if ($string_safe !== '')
+				{
+					$query = "searchString $database \"$string_safe\" $start_date";
+					if ($end_date != '')
+						$query .= " $end_date";
+					$exec_query = true;
+				}
+			}
 		}
 	}
 
@@ -274,14 +320,14 @@
 	echo "<form method='post' action='$_SERVER['PHP_SELF']'>\n";
 	echo "<tr>\n";
 	echo 	"<td>Query</td>";
-	echo 	"<td><input type=text name='query' value='$query' size=128 maxlength=255></td>";
+	echo 	"<td><input type=text name='query' value='".htmlspecialchars($query, ENT_QUOTES)."' size=128 maxlength=255></td>";
 	echo 	"<td><input type=submit name='exec_query' value='Submit Query'></td>\n";
 	echo "</tr>\n";
-	echo "<input type='hidden' name='database' value='$database'>\n";
+	echo "<input type='hidden' name='database' value='".htmlspecialchars($database, ENT_QUOTES)."'>\n";
 	for ($i=0; $i<10; ++$i)
-		echo "<input type='hidden' name='eid_$i' value='".$GLOBALS["eid_$i"]."'>\n";
-	echo "<input type='hidden' name='start_date' value='$start_date'>\n";
-	echo "<input type='hidden' name='end_date' value='$end_date'>\n";
+		echo "<input type='hidden' name='eid_$i' value='".htmlspecialchars($GLOBALS["eid_$i"], ENT_QUOTES)."'>\n";
+	echo "<input type='hidden' name='start_date' value='".htmlspecialchars($start_date, ENT_QUOTES)."'>\n";
+	echo "<input type='hidden' name='end_date' value='".htmlspecialchars($end_date, ENT_QUOTES)."'>\n";
 	echo "</form>\n";
 	echo "</table>\n";
 */
@@ -308,24 +354,35 @@
 					$bg = (($i & 1) == 0 ? '#F8F8FF' : '#F0F0F8');
 					++$i;
 					echo "<tr bgcolor=$bg>";
+					// LAS returns these strings; escape before HTML.
+					$qa0 = isset($qa[0]) ? htmlspecialchars($qa[0], ENT_QUOTES) : '';
+					$qa2 = isset($qa[2]) ? htmlspecialchars($qa[2], ENT_QUOTES) : '';
+					$qa3 = isset($qa[3]) ? htmlspecialchars($qa[3], ENT_QUOTES) : '';
 					if ($qa[1] == 2)
 					{
-						echo "<td>".$qa[0]."</td>";
-						$refstr = $_SERVER['PHP_SELF']."?refresh_result=1&las_address=".$selectedLAS['address']."&query_id=".$qa[0]."&query=".$qa[2]."&database=$database&string=$string&start_date=$start_date&end_date=$end_date";
+						echo "<td>".$qa0."</td>";
+						$refstr = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?refresh_result=1"
+							."&las_address=".rawurlencode($selectedLAS['address'])
+							."&query_id=".rawurlencode($qa[0])
+							."&query=".rawurlencode($qa[2])
+							."&database=".rawurlencode($database)
+							."&string=".rawurlencode($string)
+							."&start_date=".rawurlencode($start_date)
+							."&end_date=".rawurlencode($end_date);
 						echo "<td><a href='$refstr'>Display</a></td>";
-						echo "<td>".$qa[3]."</td>";
+						echo "<td>".$qa3."</td>";
 					}
 					else if ($qa[1] == 1)
 					{
-						echo "<td>".$qa[0]."</td>";
-						echo "<td>Processing ".$qa[2]."%</td>";
-						echo "<td>".$qa[3]."</td>";
+						echo "<td>".$qa0."</td>";
+						echo "<td>Processing ".$qa2."%</td>";
+						echo "<td>".$qa3."</td>";
 					}
 					else
 					{
-						echo "<td>".$qa[0]."</td>";
+						echo "<td>".$qa0."</td>";
 						echo "<td>Cancel</td>";
-						echo "<td>".$qa[3]."</td>";
+						echo "<td>".$qa3."</td>";
 					}
 					echo "</tr>\n";
 				}
@@ -342,24 +399,24 @@
 		
 		if ($success)
 		{
-			echo "<b>Query '$query' successfully executed ($result)</b><br>\n";
+			echo "<b>Query '".htmlspecialchars($query, ENT_QUOTES)."' successfully executed (".htmlspecialchars($result, ENT_QUOTES).")</b><br>\n";
 			echo "Please wait while result is being computed and click 'Refresh result' to display query result.<br>\n";
-			echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>\n";
+			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
-			echo "<input type=hidden name='las_address' value='".$selectedLAS['address']."'>\n";
-			echo "<input type=hidden name='query_id' value='$query_id'>\n";
-			echo "<input type=hidden name='query' value='$query'>\n";
-			echo "<input type='hidden' name='database' value='$database'>\n";
+			echo "<input type=hidden name='las_address' value='".htmlspecialchars($selectedLAS['address'], ENT_QUOTES)."'>\n";
+			echo "<input type=hidden name='query_id' value='".htmlspecialchars($query_id, ENT_QUOTES)."'>\n";
+			echo "<input type=hidden name='query' value='".htmlspecialchars($query, ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='database' value='".htmlspecialchars($database, ENT_QUOTES)."'>\n";
 			for ($i=0; $i<10; ++$i)
-				echo "<input type='hidden' name='eid_$i' value='".$GLOBALS["eid_$i"]."'>\n";
-			echo "<input type='hidden' name='string' value='$string'>\n";
-			echo "<input type='hidden' name='start_date' value='$start_date'>\n";
-			echo "<input type='hidden' name='end_date' value='$end_date'>\n";
+				echo "<input type='hidden' name='eid_$i' value='".htmlspecialchars($GLOBALS["eid_$i"], ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='string' value='".htmlspecialchars($string, ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='start_date' value='".htmlspecialchars($start_date, ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='end_date' value='".htmlspecialchars($end_date, ENT_QUOTES)."'>\n";
 			echo "</form>\n";
 		}
 		else
 		{
-			echo "<b>Query '$query' failed</b>: '$result'<br>\n";
+			echo "<b>Query '".htmlspecialchars($query, ENT_QUOTES)."' failed</b>: '".htmlspecialchars($result, ENT_QUOTES)."'<br>\n";
 		}
 	}
 	else if ($refresh_result && isset($query_id) && $selectedLAS['address'])
@@ -370,14 +427,21 @@
 		
 		if ($success)
 		{
-			echo "<b>Query '$query' result</b>:<br>\n";
+			echo "<b>Query '".htmlspecialchars($query, ENT_QUOTES)."' result</b>:<br>\n";
 			
 			echo "<b>";
 
-			$refstr = $_SERVER['PHP_SELF']."?refresh_result=1&las_address=".$selectedLAS['address']."&query_id=$query_id&query=$query&database=$database&string=$string&start_date=$start_date&end_date=$end_date";
+			$refstr = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?refresh_result=1"
+				."&las_address=".rawurlencode($selectedLAS['address'])
+				."&query_id=".rawurlencode($query_id)
+				."&query=".rawurlencode($query)
+				."&database=".rawurlencode($database)
+				."&string=".rawurlencode($string)
+				."&start_date=".rawurlencode($start_date)
+				."&end_date=".rawurlencode($end_date);
 			for ($i=0; $i<10; ++$i)
 				if ($GLOBALS["eid_$i"] != '')
-					$refstr .= "&eid_$i=".$GLOBALS["eid_$i"];
+					$refstr .= "&eid_$i=".rawurlencode($GLOBALS["eid_$i"]);
 
 			if ($page > 0)
 				echo "<a href='$refstr&page=0'>&lt;&lt;</a>\n ";
@@ -474,7 +538,7 @@
 					
 					$d = str_repeat('-&nbsp;', $al[1]).$al[3];
 					
-					$d = ereg_replace('(\(0x[0-9a-fA-F]{10}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\))', '<a onClick="return selectEId('."'".'\\1'."'".')">\\1</a>', $d);
+					$d = preg_replace('#(\(0x[0-9a-fA-F]{10}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\))#', '<a onClick="return selectEId('."'".'\\1'."'".')">\\1</a>', $d);
 					//$d = ereg_replace('(\(0x[0-9a-fA-F]{10}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\))', '<a onClick="return alert('."'".'tamere'."'".')">\\1</a>', $d);
 
 					echo "<td>$d</td>";
@@ -491,18 +555,19 @@
 		}
 		else
 		{
-			echo "<b>Failed to get query result</b>: '$result'<br>\n";
-			echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>\n";
+			// the log service answer lands in the page
+			echo "<b>Failed to get query result</b>: '".htmlspecialchars($result, ENT_QUOTES)."'<br>\n";
+			echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 			echo "<input type=submit name='refresh_result' value='Refresh result'>\n";
-			echo "<input type=hidden name='las_address' value='".$selectedLAS['address']."'>\n";
-			echo "<input type=hidden name='query_id' value='$query_id'>\n";
-			echo "<input type=hidden name='query' value='$query'>\n";
-			echo "<input type='hidden' name='database' value='$database'>\n";
+			echo "<input type=hidden name='las_address' value='".htmlspecialchars($selectedLAS['address'], ENT_QUOTES)."'>\n";
+			echo "<input type=hidden name='query_id' value='".htmlspecialchars($query_id, ENT_QUOTES)."'>\n";
+			echo "<input type=hidden name='query' value='".htmlspecialchars($query, ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='database' value='".htmlspecialchars($database, ENT_QUOTES)."'>\n";
 			for ($i=0; $i<10; ++$i)
-				echo "<input type='hidden' name='eid_$i' value='".$GLOBALS["eid_$i"]."'>\n";
-			echo "<input type='hidden' name='string' value='$string'>\n";
-			echo "<input type='hidden' name='start_date' value='$start_date'>\n";
-			echo "<input type='hidden' name='end_date' value='$end_date'>\n";
+				echo "<input type='hidden' name='eid_$i' value='".htmlspecialchars($GLOBALS["eid_$i"], ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='string' value='".htmlspecialchars($string, ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='start_date' value='".htmlspecialchars($start_date, ENT_QUOTES)."'>\n";
+			echo "<input type='hidden' name='end_date' value='".htmlspecialchars($end_date, ENT_QUOTES)."'>\n";
 			echo "</form>\n";
 		}
 	}

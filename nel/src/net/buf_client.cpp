@@ -66,8 +66,9 @@ CBufClient::CBufClient( bool nodelay, bool replaymode, bool ) :
 	_NoDelay( nodelay ),
 	_PrevBytesDownloaded( 0 ),
 	_PrevBytesUploaded( 0 ),
-	_RecvTask( NULL ),
-	_RecvThread( NULL )
+	_RecvTask(nullptr)
+    ,
+	_RecvThread(nullptr)
 	/*_PrevBytesReceived( 0 ),
 	_PrevBytesSent( 0 )*/
 {
@@ -80,7 +81,7 @@ CBufClient::CBufClient( bool nodelay, bool replaymode, bool ) :
 	else
 	{
 
-		_BufSock = new CNonBlockingBufSock( NULL, CBufNetBase::DefaultMaxExpectedBlockSize );
+		_BufSock = new CNonBlockingBufSock(nullptr, CBufNetBase::DefaultMaxExpectedBlockSize );
 		_RecvTask = new CClientReceiveTask( this, _BufSock );
 	}
 }
@@ -102,7 +103,7 @@ void CBufClient::connect(const CInetHost &addrs)
 	_PrevBytesSent = 0;*/
 
 	// Allow reconnection
-	if ( _RecvThread != NULL )
+	if ( _RecvThread != nullptr)
 	{
 		delete _RecvThread;
 	}
@@ -136,7 +137,7 @@ void CBufClient::send( const NLMISC::CMemStream& buffer )
 	if ( ! _BufSock->pushBuffer( buffer ) )
 	{
 		// Disconnection event if disconnected
-		_BufSock->advertiseDisconnection( this, NULL );
+		_BufSock->advertiseDisconnection( this, nullptr);
 	}
 }
 
@@ -183,7 +184,7 @@ bool CBufClient::dataAvailable()
 				_BufSock->setConnectedState( false );
 
 				// Call callback if needed
-				if ( disconnectionCallback() != NULL )
+				if ( disconnectionCallback() != nullptr)
 				{
 					disconnectionCallback()( id(), argOfDisconnectionCallback() );
 				}
@@ -238,7 +239,7 @@ void	CBufClient::sleepUntilDataAvailable( uint usecMax )
 		FD_SET( _DataAvailablePipeHandle[PipeRead], &readers );
 		tv.tv_sec = 0;
 		tv.tv_usec = usecMax;
-		int res = ::select( _DataAvailablePipeHandle[PipeRead]+1, &readers, NULL, NULL, &tv );
+		int res = ::select( _DataAvailablePipeHandle[PipeRead]+1, &readers, nullptr, nullptr, &tv );
 		if ( res == -1 )
 			nlerror( "LNETL1: Select failed in sleepUntilDataAvailable (code %u)", CSock::getLastError() );
 	}
@@ -289,7 +290,7 @@ void CBufClient::update()
 		{
 			_BufSock->Sock->disconnect();
 		}
-		_BufSock->advertiseDisconnection( this, NULL );
+		_BufSock->advertiseDisconnection( this, nullptr);
 	}
 }
 
@@ -389,19 +390,19 @@ CBufClient::~CBufClient()
 	}
 
 	// Clean thread termination
-	if ( _RecvThread != NULL )
+	if ( _RecvThread != nullptr)
 	{
 		LNETL1_DEBUG( "LNETL1: Waiting for the end of the receive thread..." );
 		_RecvThread->wait();
 	}
 
-	if ( _RecvTask != NULL )
+	if ( _RecvTask != nullptr)
 		delete _RecvTask;
 
-	if ( _RecvThread != NULL )
+	if ( _RecvThread != nullptr)
 		delete _RecvThread;
 
-	if ( _BufSock != NULL )
+	if ( _BufSock != nullptr)
 		delete _BufSock;
 
 	nlnettrace( "Exiting CBufClient::~CBufClient" );

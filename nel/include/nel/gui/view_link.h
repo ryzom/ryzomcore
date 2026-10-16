@@ -51,7 +51,7 @@ namespace NLGUI
 
 		// Set the main group
 		void	setHTMLView( CGroupHTML *html);
-		bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col);
+		bool	getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col) NL_OVERRIDE;
 
 		void setActionOnLeftClick(const std::string &actionHandler) { _AHOnLeftClick = actionHandler; };
 		void setParamsOnLeftClick(const std::string &actionParams) { _AHOnLeftClickParams = actionParams; };

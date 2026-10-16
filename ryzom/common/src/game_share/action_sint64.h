@@ -51,21 +51,21 @@ public:
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	virtual void	unpack (NLMISC::CBitMemStream &message);
+	virtual void	unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE;
 
 	/// This functions is used when you want to transform an action into an IStream.
-	virtual void	serial (NLMISC::IStream &f);
+	virtual void	serial (NLMISC::IStream &f) NL_OVERRIDE;
 
 	/** Returns the size of this action when it will be send to the UDP connection:
 	 * the size is IN BITS, not in bytes (the actual size is this one plus the header size)
 	 */
-	virtual uint32	size () { return _NbBits; }
+	virtual uint32	size () NL_OVERRIDE { return _NbBits; }
 
 	/// Returns the maximum size of this action (INCLUDING the header size handled by CActionFactory!)
 	static uint32	getMaxSizeInBit() { return 64; }
 
 	/// Sets the value of the action
-	virtual void	setValue(const TValue &value ) { _Value = value; }
+	virtual void	setValue(const TValue &value ) NL_OVERRIDE { _Value = value; }
 
 	/// Same, but avoids virtual
 	void			setValue64(const TValue &value ) { _Value = value; }
@@ -79,12 +79,12 @@ public:
 	}
 
 	/// Sets the value of the action
-	virtual TValue	getValue() const { return _Value; }
+	virtual TValue	getValue() const NL_OVERRIDE { return _Value; }
 
 	/** Returns false because the action is not a "continuous action".
 	 * BUT the property may be continuous, without using the benefits of CContinuousAction (deltas).
 	 */
-	virtual bool	isContinuous() const { return false; }
+	virtual bool	isContinuous() const NL_OVERRIDE { return false; }
 
 
 	void			setAndPackValue( const TValue& value, NLMISC::CBitMemStream& outMsg )
@@ -116,10 +116,10 @@ private:
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	virtual void pack (NLMISC::CBitMemStream &message);
+	virtual void pack (NLMISC::CBitMemStream &message) NL_OVERRIDE;
 
 	/** This method intialises the action with a default state */
-	virtual void reset()			{ _Value = 0; _NbBits = 0; };
+	virtual void reset() NL_OVERRIDE			{ _Value = 0; _NbBits = 0; };
 
 	friend class CActionFactory;
 

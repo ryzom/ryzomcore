@@ -64,7 +64,8 @@ static void attachPeopleContainer(CGroupContainer *parent, CGroupContainer *chil
 }
 
 //==================================================================
-CPeopleList::CPeopleList() : _ChatWindow(NULL),
+CPeopleList::CPeopleList() : _ChatWindow(nullptr)
+    ,
 			     _ContactType(CPeopleListDesc::Unknown),
 			     _CurrPeopleID(0),
 			     _Savable(false)
@@ -79,7 +80,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	reset();
 	// get father group
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *fatherContainer = NULL;
+	CGroupContainer *fatherContainer = nullptr;
 	if (!desc.FatherContainer.empty())
 	{
 		fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
@@ -94,7 +95,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	vector< pair<string, string> > baseContainerParams;
 	baseContainerParams.push_back(pair<string, string>("id", desc.Id));
 	std::string baseId;
-	if (fatherContainer == NULL)
+	if (fatherContainer == nullptr)
 	{
 		baseContainerParams.push_back(pair<string, string>("movable","true"));
 		baseContainerParams.push_back(pair<string, string>("active","false"));
@@ -109,7 +110,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	// must attach group to hierarchy before we can use it
 	CGroupContainer *gc = dynamic_cast<CGroupContainer  *>(mainIg);
 	if (!gc) return false;
-	if (fatherContainer != NULL)
+	if (fatherContainer != nullptr)
 	{
 		fatherContainer->attachContainer(gc, desc.InsertPosition);
 		fatherContainer->setup();
@@ -144,9 +145,9 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	_BaseContainer->setLocalize(desc.Localize);
 	_BaseContainer->setTitle(desc.PeopleListTitle);
 	if (_BaseContainer->getTitleOpenedViewText() != NULL)
-		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	if (_BaseContainer->getTitleClosedViewText() != NULL)
-		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -208,7 +209,7 @@ sint CPeopleList::getIndexFromContainerID(const std::string &id) const
 //==================================================================
 bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 {
-	return (a.ContactId < b.ContactId);
+		return (a.ContactId < b.ContactId);
 }
 
 //==================================================================
@@ -221,9 +222,9 @@ bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 {
-	// We want order: online/alpha, offworld/alpha, offline/alpha
-	if (a.Online == b.Online)
-	{
+		// We want order: online/alpha, offworld/alpha, offline/alpha
+		if (a.Online == b.Online)
+		{
 		return sortExByName(a, b);
 	}
 	else
@@ -259,7 +260,7 @@ void CPeopleList::sortEx(TSortOrder order)
 	{
 		CGroupContainer *parentContainer = _Peoples[k].Container->getProprietaryContainer();
 		if (parentContainer != NULL)
-			parentContainer->detachContainer(_Peoples[k].Container);
+		parentContainer->detachContainer(_Peoples[k].Container);
 	}
 	// Destroy group containers
 	for (k = 0; k < _GroupContainers.size(); ++k)
@@ -291,10 +292,10 @@ void CPeopleList::sortEx(TSortOrder order)
 	{
 		if (_Peoples[k].Group != "")
 			severalGroups = true;
-	}
+		}
 
 	if (severalGroups)
-	{
+		{
 		for(cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
 		{
 			group = _GroupContainers[cptContainers].second;
@@ -347,7 +348,7 @@ bool CPeopleList::isPeopleChatVisible(uint index) const
 		nlwarning("Bad index");
 		return false;
 	}
-	return (_Peoples[index].Chat != NULL);
+	return (_Peoples[index].Chat != nullptr);
 }
 /*
   bool CPeopleList::isPeopleWindowVisible(uint index) const
@@ -452,9 +453,9 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 	if (_ContactType != CPeopleListDesc::Team)
 	{
 		if (_BaseContainer->getTitleOpenedViewText() != NULL)
-			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 		if (_BaseContainer->getTitleClosedViewText() != NULL)
-			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	}
 
 	return (sint) _Peoples.size() - 1;
@@ -489,9 +490,9 @@ void CPeopleList::removePeople(uint index)
 	if (_ContactType != CPeopleListDesc::Team)
 	{
 		if (_BaseContainer->getTitleOpenedViewText() != NULL)
-			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 		if (_BaseContainer->getTitleClosedViewText() != NULL)
-			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	}
 }
 
@@ -520,7 +521,7 @@ void CPeopleList::setContactId(uint index, uint32 contactId)
 //==================================================================
 void CPeopleList::changeGroup(uint index, const std::string &groupName)
 {
-    if (index >= _Peoples.size())
+        if (index >= _Peoples.size())
 	{
 		nlwarning("<CPeopleList::changeGroup> bad index.");
 		return;
@@ -572,7 +573,7 @@ void CPeopleList::readContactGroups()
 	properties.push_back(make_pair(string("title"), "General"));
 	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
-	gc->setTitle(std::string("General"));
+	gc->setUCTitle(ucstring("General"));
 	gc->setSavable(false);
 	
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
@@ -628,9 +629,9 @@ void CPeopleList::readContactGroups()
 							CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance("people_list_group_header", "ui:interface", properties, false);
 							CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
 							if (propGroup == "")
-								gc->setTitle(std::string("General"));
+								gc->setUCTitle(ucstring("General"));
 							else
-								gc->setTitle(propGroup);
+								gc->setUCTitle(propGroup);
 							gc->setSavable(false);
 
 							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
@@ -657,7 +658,7 @@ void CPeopleList::readContactGroups()
 //==================================================================
 void CPeopleList::saveContactGroups()
 {
-    const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("contactgroups", "xml");
+        const std::string filename = CInterfaceManager::getInstance()->getSaveFileName("contactgroups", "xml");
 	try
 	{
 		COFile fd;
@@ -703,7 +704,7 @@ void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, con
 	}
 	// get the chat box inside the container
 	CGroupContainer *gc = _Peoples[index].Chat;
-	if (gc == NULL)
+	if (gc == nullptr)
 		return;
 	CGroupList *gl = dynamic_cast<CGroupList *>(gc->getGroup("text_list"));
 	if (!gl)
@@ -756,19 +757,19 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 	// get the chat box inside the container
 	CGroupContainer *gcChat = _Peoples[index].Chat;
 	CGroupContainer *gcName = _Peoples[index].Container;
-	if (gcName == NULL)
+	if (gcName == nullptr)
 	{
 		nlwarning("<CPeopleList::displayMessage> can't get group list.");
 		return;
 	}
 
 	// if the group is closed, open it
-	if (gcChat == NULL)
+	if (gcChat == nullptr)
 	{
 		openCloseChat(index, true);
 		gcChat = _Peoples[index].Chat;
 	}
-	if (gcChat == NULL)
+	if (gcChat == nullptr)
 	{
 		nlwarning("<CPeopleList::displayMessage> cannot open chat.");
 		return;
@@ -779,7 +780,7 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
-	if (gl == NULL)
+	if (gl == nullptr)
 	{
 		nlwarning("<CPeopleList::displayMessage> can't get text_list.");
 		return;
@@ -814,12 +815,12 @@ void CPeopleList::reset()
 	if (_ChatWindow)
 	{
 		getChatWndMgr().removeChatWindow(_ChatWindow);
-		_ChatWindow = NULL;
+		_ChatWindow = nullptr;
 	}
 	if (_BaseContainer)
 	{
 		removeAllPeoples();
-		_BaseContainer->setContent(NULL);
+		_BaseContainer->setContent(nullptr);
 
 		CGroupContainer *father = static_cast<CGroupContainer *>(_BaseContainer->getParent()->getEnclosingContainer());
 		if (father)
@@ -998,10 +999,10 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 	if (!gc) return;
 
 	CInterfaceGroup *hc = gc->getHeaderClosed();
-	if (hc != NULL)
+	if (hc != nullptr)
 	{
 		CViewBitmap *onlineView = dynamic_cast<CViewBitmap*>(hc->getView("online"));
-		if (onlineView != NULL)
+		if (onlineView != nullptr)
 		{
 			CCtrlBase *toolTip = hc->getCtrl("tt_online");
 
@@ -1026,11 +1027,11 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 		}
 
 		CCtrlBase *chatButton = hc->getCtrl("chat_button");
-		if (chatButton != NULL)
+		if (chatButton != nullptr)
 			chatButton->setActive(online != ccs_offline);
 
 		CCtrlBase *inviteButton = hc->getCtrl("invite_button");
-		if (inviteButton != NULL)
+		if (inviteButton != nullptr)
 			inviteButton->setActive(online != ccs_offline);
 	}
 
@@ -1115,7 +1116,7 @@ void CPeopleList::openCloseChat(sint index, bool bOpen)
 	else
 		_Peoples[index].Chat = pCGW->createFreeTeller(_Peoples[index].getName(), "UI:SAVE:WIN:COLORS:COM");
 
-	if (_Peoples[index].Chat == NULL)
+	if (_Peoples[index].Chat == nullptr)
 		return;
 	_Peoples[index].Chat->setActive(bOpen);
 }
@@ -1123,10 +1124,10 @@ void CPeopleList::openCloseChat(sint index, bool bOpen)
 //==================================================================
 class CHandlerContactEntry : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
-		if (pEB == NULL) return;
+		if (pEB == nullptr) return;
 		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())
@@ -1142,7 +1143,7 @@ class CHandlerContactEntry : public IActionHandler
 		// is it a command ?
 		if(text[0] == '/')
 		{
-			CChatWindow::_ChatWindowLaunchingCommand = NULL; // no CChatWindow instance there ..
+			CChatWindow::_ChatWindowLaunchingCommand = nullptr; // no CChatWindow instance there ..
 			std::string str = text.substr(1);
 			NLMISC::ICommand::execute( str, g_log );
 			pEB->setInputString (std::string());

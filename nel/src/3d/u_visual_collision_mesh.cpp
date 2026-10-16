@@ -28,7 +28,7 @@ namespace NL3D
 
 
 // ***************************************************************************
-UVisualCollisionMesh::UVisualCollisionMesh() : _Mesh(NULL)
+UVisualCollisionMesh::UVisualCollisionMesh() : _Mesh(nullptr)
 {
 }
 

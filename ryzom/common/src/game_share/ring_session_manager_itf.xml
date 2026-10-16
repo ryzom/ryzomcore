@@ -715,7 +715,8 @@
 					<param type="uint32"		name="result"/>
 					<param type="std::string"	name="shardAddr" php_serial="String" byref="true"/>
 					<param type="TSessionPartStatus"	name="participantStatus" byref="true" enum="smart"/>
-					<param type="CSecurityCode"	name="securityCheckForFastDisconnection" byref="true"/>
+					<!-- CSecurityCode serializes as a uint16 (security_check.h) -->
+					<param type="CSecurityCode"	name="securityCheckForFastDisconnection" byref="true" php_serial="UInt16"/>
 				</return>
 
 

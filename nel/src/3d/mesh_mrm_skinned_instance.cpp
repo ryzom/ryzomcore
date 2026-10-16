@@ -64,14 +64,14 @@ void		CMeshMRMSkinnedInstance::registerBasic()
 void		CMeshMRMSkinnedInstance::clearRawSkinCache()
 {
 	delete	_RawSkinCache;
-	_RawSkinCache= NULL;
+	_RawSkinCache = nullptr;
 }
 
 // ***************************************************************************
 void		CMeshMRMSkinnedInstance::clearShiftedTriangleCache()
 {
 	delete	_ShiftedTriangleCache;
-	_ShiftedTriangleCache= NULL;
+	_ShiftedTriangleCache = nullptr;
 }
 
 // ***************************************************************************
@@ -190,7 +190,7 @@ const	CMRMLevelDetail		*CMeshMRMSkinnedInstance::getMRMLevelDetail() const
 		return &meshMrm->getMeshGeom().getLevelDetail();
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************

@@ -242,7 +242,7 @@ inline T* CLayeredOrderingTable<T>::get()
 			nlassert(0);
 		break;
 	}
-	return NULL; // avoid warning
+	return nullptr; // avoid warning
 }
 
 //==================================================================

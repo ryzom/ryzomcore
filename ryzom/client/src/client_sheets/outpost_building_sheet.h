@@ -71,10 +71,10 @@ public:
 	COutpostBuildingSheet();
 
 	/// From CEntitySheet
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 
 	/// From CEntitySheet  : serialize sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	std::string getIconBack() const { return ClientSheetsStrings.get(IdIconBack); }
 	std::string getIconMain() const { return ClientSheetsStrings.get(IdIconMain); }

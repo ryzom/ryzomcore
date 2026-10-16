@@ -42,8 +42,8 @@ using namespace std;
 
 bool			CGraph::Display = true;
 bool			CGraph::DisplayAverageValue = true;
-UDriver			*CGraph::_Driver = NULL;
-vector<CGraph*> *CGraph::_Graphs = NULL;
+UDriver			*CGraph::_Driver = nullptr;
+vector<CGraph*> *CGraph::_Graphs = nullptr;
 
 
 //
@@ -54,8 +54,8 @@ void CGraph::render (uint page)
 {
 	if (!Display) return;
 
-	if (_Driver == NULL) return;
-	if (_Graphs == NULL) return;
+	if (_Driver == nullptr) return;
+	if (_Graphs == nullptr) return;
 
 	for (uint i = 0; i < _Graphs->size(); i++)
 	{
@@ -67,7 +67,7 @@ void CGraph::render (uint page)
 
 void CGraph::renderGraph ()
 {
-	if (_Driver == NULL)
+	if (_Driver == nullptr)
 		return;
 
 	// Display the background
@@ -134,7 +134,7 @@ void CGraph::renderGraph ()
 	float avrval = Y+value;
 	_Driver->drawLine (X, avrval, X+Width, avrval, frontCol);
 
-	if (TextContext != NULL)
+	if (TextContext != nullptr)
 	{
 		TextContext->setShaded (false);
 		TextContext->setShadeOutline(false);

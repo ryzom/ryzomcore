@@ -1,3 +1,4 @@
+// clang-format off
 /*
 MP3 audio decoder. Choice of public domain or MIT-0. See license statements at the end of this file.
 dr_mp3 - v0.4.4 - 2019-05-06

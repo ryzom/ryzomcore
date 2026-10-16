@@ -503,7 +503,7 @@ public:
 				{
 					// Construct object.
 					ptr= new T;
-					if(ptr==NULL)
+					if(ptr == nullptr)
 						throw EStream();
 
 					// Insert the node.
@@ -518,7 +518,7 @@ public:
 		}
 		else
 		{
-			if(ptr==NULL)
+			if(ptr == nullptr)
 			{
 				node= 0;
 				serial(node);

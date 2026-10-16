@@ -53,12 +53,12 @@ class CProgress : public NLMISC::IProgressCallback,
 public:
 
 	CProgress ();
-	virtual ~CProgress();
+	virtual ~CProgress() NL_OVERRIDE;
 
 	void release();
 
 	// Update the progress bar
-	virtual void	progress (float value);
+	virtual void	progress (float value) NL_OVERRIDE;
 
 	// Reset the root progress bar
 	void			reset (uint rootNodeCount);
@@ -102,7 +102,7 @@ private:
 
 protected:
 	// from IEventListener
-	virtual void operator ()(const NLMISC::CEvent& event);
+	virtual void operator ()(const NLMISC::CEvent& event) NL_OVERRIDE;
 };
 
 

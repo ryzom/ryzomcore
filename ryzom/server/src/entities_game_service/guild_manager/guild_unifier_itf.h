@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+// Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -120,7 +120,7 @@ namespace GU
 		{
 
 		}
-
+		
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_MemberId);
@@ -214,7 +214,7 @@ namespace GU
 		{
 
 		}
-
+		
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_FactionSheetId);
@@ -306,11 +306,7 @@ namespace GU
 
 		void setGuildDesc(const ucstring &value)
 		{
-
-
 				_GuildDesc = value;
-
-				
 		}
 			// 
 		uint64 getGuildMoney() const
@@ -320,9 +316,7 @@ namespace GU
 
 		void setGuildMoney(uint64 value)
 		{
-
 				_GuildMoney = value;
-
 		}
 			// 
 		uint32 getGuildCreationDate() const
@@ -446,7 +440,7 @@ namespace GU
 		{
 
 		}
-
+		
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_GuildId);
@@ -494,12 +488,12 @@ namespace GU
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors
+		// unused interceptors 
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
 		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
 		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
 		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-
+	
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -618,7 +612,7 @@ namespace GU
 		static void broadcast_guildReady(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_guildReady(message );
 
@@ -637,7 +631,7 @@ namespace GU
 		static void broadcast_receiveForeignGuild(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const std::vector < CGuildDesc > &guilds)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_receiveForeignGuild(message , guilds);
 
@@ -656,7 +650,7 @@ namespace GU
 		static void broadcast_updateMemberList(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, uint32 guildId, const std::vector < CGuildMemberDesc > &members)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_updateMemberList(message , guildId, members);
 
@@ -675,7 +669,7 @@ namespace GU
 		static void broadcast_updateMemberInfo(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, uint32 guildId, const CGuildMemberDesc &membersInfo)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_updateMemberInfo(message , guildId, membersInfo);
 
@@ -694,7 +688,7 @@ namespace GU
 		static void broadcast_updateGuild(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const CGuildDesc &guildInfo)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_updateGuild(message , guildInfo);
 
@@ -713,7 +707,7 @@ namespace GU
 		static void broadcast_guildDeleted(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, uint32 guildId)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_guildDeleted(message , guildId);
 
@@ -732,7 +726,7 @@ namespace GU
 		static void broadcast_messageToGuildMembers(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, uint32 guildId, const std::string &messageName, const TVectorParamCheck &params)
 		{
 			NLNET::CMessage message;
-
+			
 			// create the message to send to multiple dest
 			buildMessageFor_messageToGuildMembers(message , guildId, messageName, params);
 

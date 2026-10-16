@@ -84,7 +84,7 @@ public:
 	{
 		typename TRegisterCont::iterator it (_FactoryRegisters.find(key));
 		if (it == _FactoryRegisters.end())
-			return NULL;
+			return nullptr;
 		else
 			return it->second->createObject(ctorParam);
 	}
@@ -126,7 +126,7 @@ public:
 	/** Create an instance of the factorable class.
 	 *	Implements IFactoryRegister::createObject
 	 */
-	BaseClass *createObject(const typename BaseClass::TCtorParam &ctorParam)
+	BaseClass *createObject(const typename BaseClass::TCtorParam &ctorParam) NL_OVERRIDE
 	{
 		return new FactoredClass(ctorParam);
 	}
@@ -195,7 +195,7 @@ public:
 	{
 		typename TRegisterCont::const_iterator it (_FactoryRegisters.find(key));
 		if (it == _FactoryRegisters.end())
-			return NULL;
+			return nullptr;
 		else
 			return it->second->getFactory();
 	}
@@ -225,7 +225,7 @@ public:
 		IndirectFactoryClass::instance().registerClass(key, this);
 	}
 
-	BaseFactoryClass *getFactory()
+	BaseFactoryClass *getFactory() NL_OVERRIDE
 	{
 		return &_FactoryClass;
 	}

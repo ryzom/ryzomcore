@@ -26,14 +26,15 @@
 
 namespace NL3D {
 
-CStereoPassthrough::CStereoPassthrough() : m_Driver(NULL), m_Stage(0), m_ReflPass(0)
+CStereoPassthrough::CStereoPassthrough() : m_Driver(nullptr)
+    , m_Stage(0), m_ReflPass(0)
 {
 
 }
 
 CStereoPassthrough::~CStereoPassthrough()
 {
-	m_Driver = NULL;
+	m_Driver = nullptr;
 }
 
 void CStereoPassthrough::setDriver(NL3D::UDriver *driver)

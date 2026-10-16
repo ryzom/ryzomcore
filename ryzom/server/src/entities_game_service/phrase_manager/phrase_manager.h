@@ -285,7 +285,7 @@ public:
 	}
 */
 	/// Destructor
-	virtual ~CPhraseManager() {}
+	virtual ~CPhraseManager() NL_OVERRIDE {}
 
 	/// updatePhrases
 	void updatePhrases();

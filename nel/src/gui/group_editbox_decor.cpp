@@ -178,7 +178,7 @@ namespace NLGUI
 	CGroupEditBoxDecor::~CGroupEditBoxDecor()
 	{
 		delete _Pvt;
-		_Pvt = NULL;
+		_Pvt = nullptr;
 	}
 
 	void CGroupEditBoxDecor::moveBy( sint32 x, sint32 y )
@@ -297,8 +297,8 @@ namespace NLGUI
 	xmlNodePtr CGroupEditBoxDecor::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CGroupEditBox::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "edit_box_decor" );
 		xmlSetProp( node, BAD_CAST "tx_tl", BAD_CAST _Pvt->_Textures[ EBDPrivate::TL ]->getTexture().c_str() );

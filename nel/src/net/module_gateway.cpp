@@ -38,7 +38,7 @@ namespace NLNET
 		TSecurityData	*SecurityData;
 
 		TSecurityDataDesc()
-			: SecurityData(NULL)
+			: SecurityData(nullptr)
 		{
 		}
 
@@ -51,7 +51,7 @@ namespace NLNET
 
 				uint32 nbSecBlock = 0;
 				sint32 tagCountPos = s.reserve(4);
-				while (sd != NULL)
+				while (sd != nullptr)
 				{
 					if (sd->DataTag == 0xff)
 					{
@@ -85,7 +85,7 @@ namespace NLNET
 				s.serial(nbSecBlock);
 
 				if (nbSecBlock == 0)
-					SecurityData = NULL;
+					SecurityData = nullptr;
 
 				for (uint i=0; i<nbSecBlock; ++i)
 				{
@@ -101,7 +101,7 @@ namespace NLNET
 						TSecurityData::TCtorParam param(dataTag);
 						sd = NLMISC_GET_FACTORY(TSecurityData, uint8).createObject(dataTag, param);
 
-						if (sd == NULL)
+						if (sd == nullptr)
 						{
 							// we don't know this type, create an unknow security block
 							sd = new TUnknownSecurityData(dataTag, blockSize);
@@ -299,12 +299,13 @@ namespace NLNET
 	public:
 
 		CStandardGateway()
-			:	_SecurityPlugin(NULL),
+			:	_SecurityPlugin(nullptr)
+	        ,
 				_PingCounter(0)
 		{
 		}
 
-		~CStandardGateway()
+		~CStandardGateway() NL_OVERRIDE
 		{
 			// we need to unplug any plugged module
 			while (!_PluggedModules.getAToBMap().empty())
@@ -319,7 +320,7 @@ namespace NLNET
 			}
 
 			// delete security plug-in
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin != nullptr)
 				removeSecurityPlugin();
 
 			// must be done before the other destructors are called
@@ -331,24 +332,24 @@ namespace NLNET
 		{
 			TModuleProxies::iterator it(_ModuleProxies.find(proxyId));
 			if (it == _ModuleProxies.end())
-				return NULL;
+				return nullptr;
 			return static_cast<CModuleProxy*>(it->second.getPtr());
 		}
 
 		/***********************************************************
 		 ** Gateway methods
 		 ***********************************************************/
-		virtual const std::string &getGatewayName() const
+		virtual const std::string &getGatewayName() const NL_OVERRIDE
 		{
 			return getModuleName();
 		}
-		virtual const std::string &getFullyQualifiedGatewayName() const
+		virtual const std::string &getFullyQualifiedGatewayName() const NL_OVERRIDE
 		{
 			return getModuleFullyQualifiedName();
 		}
 
 		/// Create and bind to this gateway a new transport
-		virtual void createTransport(const std::string &transportClass, const std::string &instanceName)
+		virtual void createTransport(const std::string &transportClass, const std::string &instanceName) NL_OVERRIDE
 		{
 			if (_Transports.find(instanceName) != _Transports.end())
 			{
@@ -360,7 +361,7 @@ namespace NLNET
 			param.Gateway = this;
 			IGatewayTransport *transport = NLMISC_GET_FACTORY(IGatewayTransport, std::string).createObject(transportClass, param);
 
-			if (transport == NULL)
+			if (transport == nullptr)
 			{
 				nlwarning("Failed to create a transport with the class '%s'", transportClass.c_str());
 				return;
@@ -375,7 +376,7 @@ namespace NLNET
 		}
 
 		/// Delete a transport (this will close any open route)
-		virtual void deleteTransport(const std::string &instanceName)
+		virtual void deleteTransport(const std::string &instanceName) NL_OVERRIDE
 		{
 			TTransportList::iterator it(_Transports.find(instanceName));
 			if (it == _Transports.end())
@@ -395,7 +396,7 @@ namespace NLNET
 		}
 
 		/// Activate/stop peer invisible mode on a transport
-		virtual void	setTransportPeerInvisible(const std::string &transportInstanceName, bool peerInvisible)
+		virtual void	setTransportPeerInvisible(const std::string &transportInstanceName, bool peerInvisible) NL_OVERRIDE
 		{
 			TTransportList::iterator it(_Transports.find(transportInstanceName));
 			if (it == _Transports.end())
@@ -429,8 +430,8 @@ namespace NLNET
 					for (; first != last; ++first)
 					{
 						IModuleProxy *proxy = first->second;
-						if (proxy->getGatewayRoute() != NULL
-							&& proxy->getGatewayRoute() != route
+						if (proxy->getGatewayRoute() != nullptr
+					        && proxy->getGatewayRoute() != route
 							&& proxy->getGatewayRoute()->getTransport() == transport)
 						{
 							// this module is on the same transport, but another route, remove/add it from the
@@ -450,7 +451,7 @@ namespace NLNET
 		}
 
 		/// Activate/stop firewalling mode on a transport
-		virtual void	setTransportFirewallMode(const std::string &transportInstanceName, bool firewalled)
+		virtual void	setTransportFirewallMode(const std::string &transportInstanceName, bool firewalled) NL_OVERRIDE
 		{
 			TTransportList::iterator it(_Transports.find(transportInstanceName));
 			if (it == _Transports.end())
@@ -488,7 +489,7 @@ namespace NLNET
 						for (; first != last; ++first)
 						{
 							IModuleProxy *proxy = first->second;
-							if (proxy->getGatewayRoute() == NULL || (proxy->getGatewayRoute() != route ))
+							if (proxy->getGatewayRoute() == nullptr || (proxy->getGatewayRoute() != route ))
 							{
 								// this module is on another route, disclose it if needed
 								if (route->FirewallDisclosed.find(proxy->getModuleProxyId()) == route->FirewallDisclosed.end())
@@ -503,7 +504,7 @@ namespace NLNET
 		}
 
 		/// Send a command to a transport
-		virtual void transportCommand(const TParsedCommandLine &commandLine)
+		virtual void transportCommand(const TParsedCommandLine &commandLine) NL_OVERRIDE
 		{
 			for (uint i=1; i<commandLine.SubParams.size(); ++i)
 			{
@@ -530,32 +531,32 @@ namespace NLNET
 			}
 		}
 
-		virtual IGatewayTransport *getGatewayTransport(const std::string &transportName) const
+		virtual IGatewayTransport *getGatewayTransport(const std::string &transportName) const NL_OVERRIDE
 		{
 			TTransportList::const_iterator it(_Transports.find(transportName));
 
 			if (it == _Transports.end())
-				return NULL;
+				return nullptr;
 			else
 				return it->second;
 		}
 
-		virtual uint32	getTransportCount() const
+		virtual uint32	getTransportCount() const NL_OVERRIDE
 		{
 			return (uint32)_Transports.size();
 		}
 
-		virtual uint32	getRouteCount() const
+		virtual uint32	getRouteCount() const NL_OVERRIDE
 		{
 			return (uint32)_Routes.size();
 		}
 
-		virtual uint32 getReceivedPingCount() const
+		virtual uint32 getReceivedPingCount() const NL_OVERRIDE
 		{
 			return _PingCounter;
 		}
 
-		virtual void onRouteAdded(CGatewayRoute *route)
+		virtual void onRouteAdded(CGatewayRoute *route) NL_OVERRIDE
 		{
 			nlassert(route != NULL);
 			// Remember the new route
@@ -580,7 +581,7 @@ namespace NLNET
 		}
 
 		/// A route is removed by a transport
-		virtual void onRouteRemoved(CGatewayRoute *route)
+		virtual void onRouteRemoved(CGatewayRoute *route) NL_OVERRIDE
 		{
 			nlassert(route != NULL);
 			nlassert(_Routes.find(route) != _Routes.end());
@@ -622,7 +623,7 @@ namespace NLNET
 		}
 
 		/// A transport have received a message
-		virtual void onReceiveMessage(CGatewayRoute *from, const CMessage &msgin)
+		virtual void onReceiveMessage(CGatewayRoute *from, const CMessage &msgin) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_onReceiveMessage);
 			// dispatch the message
@@ -661,9 +662,9 @@ namespace NLNET
 		/** create a security plug-in.
 		 *	There must be no security plug-in currently created.
 		 */
-		virtual void createSecurityPlugin(const std::string &className)
+		virtual void createSecurityPlugin(const std::string &className) NL_OVERRIDE
 		{
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin != nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::createSecurityPlugin : plug-in already created ");
 				return;
@@ -672,7 +673,7 @@ namespace NLNET
 			CGatewaySecurity::TCtorParam params;
 			params.Gateway = this;
 			CGatewaySecurity *gs = NLMISC_GET_FACTORY(CGatewaySecurity, std::string).createObject(className, params);
-			if (gs == NULL)
+			if (gs == nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::createSecurityPlugin : can't create a security plug-in for class '%s'", className.c_str());
 				return;
@@ -690,9 +691,9 @@ namespace NLNET
 			}
 		}
 		/** Send a command to the security plug-in */
-		virtual void sendSecurityCommand(const TParsedCommandLine &command)
+		virtual void sendSecurityCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::sendSecurityCommand : plug-in NOT created ");
 				return;
@@ -703,9 +704,9 @@ namespace NLNET
 
 		/** Remove the security plug-in.
 		 */
-		virtual void removeSecurityPlugin()
+		virtual void removeSecurityPlugin() NL_OVERRIDE
 		{
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::removeSecurityPlugin : plug-in not created");
 				return;
@@ -714,7 +715,7 @@ namespace NLNET
 			// delete the plug-in (this can remove some security data)
 			_SecurityPlugin->onDelete();
 			delete _SecurityPlugin;
-			_SecurityPlugin = NULL;
+			_SecurityPlugin = nullptr;
 		}
 
 		/** Set a security data block. If a bloc of the same type
@@ -750,20 +751,20 @@ namespace NLNET
 			nlassert(modProx != NULL);
 
 			bool ret = false;
-			TSecurityData *prevSec = NULL;
+			TSecurityData *prevSec = nullptr;
 			TSecurityData *currentSec = modProx->_SecurityData;
-			while (currentSec != NULL)
+			while (currentSec != nullptr)
 			{
 				if (currentSec->DataTag == dataTag)
 				{
-					if (prevSec != NULL)
+					if (prevSec != nullptr)
 						prevSec->NextItem = currentSec->NextItem;
 					else
 						modProx->_SecurityData = currentSec->NextItem;
 
 					TSecurityData *toDelete = currentSec;
 					currentSec = currentSec->NextItem;
-					toDelete->NextItem = NULL;
+					toDelete->NextItem = nullptr;
 					delete toDelete;
 					ret = true;
 				}
@@ -785,7 +786,7 @@ namespace NLNET
 			nlassert(modProx != NULL);
 			nlassert(modProx->_SecurityData != securityData);
 
-			if (modProx->_SecurityData != NULL)
+			if (modProx->_SecurityData != nullptr)
 				delete modProx->_SecurityData;
 
 			modProx->_SecurityData = securityData;
@@ -867,7 +868,7 @@ namespace NLNET
 
 			// translate sender id
 			const TModuleId *pmoduleId = from->ForeignToLocalIdx.getB(from->NextSenderProxyId);
-			if (pmoduleId  == NULL)
+			if (pmoduleId  == nullptr)
 			{
 				nlwarning("The sender proxy %u is unknown in the translation table, can't dispatch the message !", from->NextSenderProxyId);
 				from->NextMessageType = CModuleMessageHeaderCodec::mt_invalid;
@@ -941,7 +942,7 @@ namespace NLNET
 			// Store module information
 			_KnownModules.insert(make_pair(modNameId, modInfo));
 
-			if (_NameToProxyIdx.getB(modNameId) != NULL)
+			if (_NameToProxyIdx.getB(modNameId) != nullptr)
 			{
 				// a proxy for this module already exist,
 				IModuleProxy *modProx = *(_NameToProxyIdx.getB(modNameId));
@@ -969,17 +970,16 @@ namespace NLNET
 				}
 
 				// update the security if needed
-				if (modDesc.SecDesc.SecurityData != NULL)
+				if (modDesc.SecDesc.SecurityData != nullptr)
 				{
 					CModuleProxy *proxy = static_cast<CModuleProxy *>(modProx);
-					if (_SecurityPlugin != NULL)
+					if (_SecurityPlugin != nullptr)
 					{
 						_SecurityPlugin->onNewSecurityData(from, proxy, modDesc.SecDesc.SecurityData);
 					}
 					else
 					{
-						if (proxy->_SecurityData != NULL)
-							delete proxy->_SecurityData;
+						delete proxy->_SecurityData;
 						proxy->_SecurityData = modDesc.SecDesc.SecurityData;
 					}
 				}
@@ -992,7 +992,7 @@ namespace NLNET
 					this,
 					from,
 					modDesc.ModuleDistance,
-					NULL,
+			        nullptr,
 					modDesc.ModuleClass,
 					modDesc.ModuleFullName,
 					modDesc.ModuleManifest,
@@ -1002,7 +1002,7 @@ namespace NLNET
 				CModuleProxy *proxy = static_cast<CModuleProxy *>(modProx);
 				proxy->_SecurityData = modDesc.SecDesc.SecurityData;
 				// let the security plug-in add/remove security data
-				if (_SecurityPlugin != NULL)
+				if (_SecurityPlugin != nullptr)
 					_SecurityPlugin->onNewProxy(proxy);
 
 				// store the proxy in the proxy list
@@ -1038,7 +1038,7 @@ namespace NLNET
 
 			// translate the module id
 			const TModuleId *pModuleId = from->ForeignToLocalIdx.getB(moduleId);
-			if (pModuleId == NULL)
+			if (pModuleId == nullptr)
 			{
 				nlwarning("Receive a module distance update for foreign module %u, but no translation available", moduleId);
 				return;
@@ -1140,7 +1140,7 @@ namespace NLNET
 //			msgin.serialPolyPtr(modSec);
 
 			const TModuleId *pModuleId = from->ForeignToLocalIdx.getB(secChg.ModuleId);
-			if (pModuleId == NULL)
+			if (pModuleId == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module foreign proxy %u", secChg.ModuleId);
 				return;
@@ -1149,14 +1149,14 @@ namespace NLNET
 			TModuleId moduleId = *pModuleId;
 
 			CModuleProxy *modProx = getModuleProxy(moduleId);
-			if (modProx == NULL)
+			if (modProx == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module proxy %u, foreign %u", moduleId, secChg.ModuleId);
 				return;
 			}
 
 			// allow the security plug-in to affect the data
-			if( _SecurityPlugin != NULL)
+			if( _SecurityPlugin != nullptr)
 			{
 				// let the plug-in update the security data
 				_SecurityPlugin->onNewSecurityData(from, modProx, secChg.SecDesc.SecurityData);
@@ -1193,7 +1193,7 @@ namespace NLNET
 		}
 
 
-		virtual void onAddModuleProxy(IModuleProxy *addedModule)
+		virtual void onAddModuleProxy(IModuleProxy *addedModule) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_onAddmoduleProxy);
 			// disclose module to local modules
@@ -1214,7 +1214,7 @@ namespace NLNET
 			}
 		}
 
-		virtual void onRemoveModuleProxy(IModuleProxy *removedModule)
+		virtual void onRemoveModuleProxy(IModuleProxy *removedModule) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_onRemoveModuleProxy);
 			// for each route
@@ -1238,7 +1238,7 @@ namespace NLNET
 				for (; first != last; ++first)
 				{
 					IModule *module = first->second;
-					if (removedModule->getGatewayRoute() != NULL
+					if (removedModule->getGatewayRoute() != nullptr
 						|| module->getModuleId() != removedModule->getForeignModuleId())
 					{
 						module->_onModuleDown(removedModule);
@@ -1247,7 +1247,7 @@ namespace NLNET
 			}
 		}
 
-		virtual void discloseModule(IModuleProxy *moduleProxy)
+		virtual void discloseModule(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			nlassert(moduleProxy->getModuleGateway() == this);
 
@@ -1256,20 +1256,20 @@ namespace NLNET
 			for (; first != last; ++first)
 			{
 				IModule *module = first->second;
-				if (moduleProxy->getGatewayRoute() != NULL
-					|| module->getModuleId() != moduleProxy->getForeignModuleId())
+				if (moduleProxy->getGatewayRoute() != nullptr
+			        || module->getModuleId() != moduleProxy->getForeignModuleId())
 				{
 					module->_onModuleUp(moduleProxy);
 				}
 			}
 		}
 
-		virtual IModuleProxy *getPluggedModuleProxy(IModule *pluggedModule)
+		virtual IModuleProxy *getPluggedModuleProxy(IModule *pluggedModule) NL_OVERRIDE
 		{
 			TLocalModuleIndex::iterator it(_LocalModuleIndex.find(pluggedModule->getModuleId()));
 
 			if (it == _LocalModuleIndex.end())
-				return NULL;
+				return nullptr;
 			else
 			{
 				TModuleProxies::iterator it2(_ModuleProxies.find(it->second));
@@ -1278,13 +1278,13 @@ namespace NLNET
 			}
 		}
 
-		virtual uint32	getProxyCount() const
+		virtual uint32	getProxyCount() const NL_OVERRIDE
 		{
 			return (uint32)_ModuleProxies.size();
 		}
 
 		/// Fill a vector with the list of proxies managed here. The module are filled in ascending proxy id order.
-		virtual void	getModuleProxyList(std::vector<IModuleProxy*> &resultList) const
+		virtual void	getModuleProxyList(std::vector<IModuleProxy*> &resultList) const NL_OVERRIDE
 		{
 			TModuleProxies::const_iterator first(_ModuleProxies.begin()), last(_ModuleProxies.end());
 			for (; first != last; ++first)
@@ -1294,7 +1294,7 @@ namespace NLNET
 		}
 
 
-		virtual void sendModuleProxyMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message)
+		virtual void sendModuleProxyMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_sendModuleMessage);
 			// manage firewall
@@ -1322,10 +1322,10 @@ namespace NLNET
 				return;
 			}
 
-			if (addresseeProxy->getGatewayRoute() == NULL)
+			if (addresseeProxy->getGatewayRoute() == nullptr)
 			{
 				// the module is local, just forward the call to the dispatcher
-				nlassert(senderProxy != NULL);
+				nlassert(senderProxy != nullptr);
 				nlassert(_ModuleProxies.find(senderProxy->getModuleProxyId()) != _ModuleProxies.end());
 
 				// invert the message for immediate dispatching if needed
@@ -1336,7 +1336,7 @@ namespace NLNET
 				TModuleId addresseeModId = addresseeProxy->getForeignModuleId();
 
 				const TModulePtr *adrcp = _PluggedModules.getB(addresseeModId);
-				if (adrcp == NULL)
+				if (adrcp == nullptr)
 				{
 					nlwarning("sendModuleMessage : can't find addressee module %u that is not plugged here !", addresseeModId);
 					return;
@@ -1394,7 +1394,7 @@ namespace NLNET
 				addresseeProxy->getGatewayRoute()->sendMessage(message);
 			}
 		}
-		virtual void dispatchModuleMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const CMessage &message)
+		virtual void dispatchModuleMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const CMessage &message) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_dispatchModuleMessage);
 			CMessage::TMessageType msgType = message.getType();
@@ -1404,7 +1404,7 @@ namespace NLNET
 			TModuleId addresseeModId = addresseeProxy->getForeignModuleId();
 
 			const TModulePtr *adrcp = _PluggedModules.getB(addresseeModId);
-			if (adrcp == NULL)
+			if (adrcp == nullptr)
 			{
 				nlwarning("dispatchModuleMessage : dispatching a message to module %u that is not plugged here !", addresseeModId);
 				return;
@@ -1437,7 +1437,7 @@ namespace NLNET
 		/***********************************************************
 		 ** Module methods
 		 ***********************************************************/
-		bool	initModule(const TParsedCommandLine &initInfo)
+		bool	initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE
 		{
 			bool ret = CModuleBase::initModule(initInfo);
 
@@ -1449,19 +1449,19 @@ namespace NLNET
 			return ret;
 		}
 
-		std::string			buildModuleManifest() const
+		std::string			buildModuleManifest() const NL_OVERRIDE
 		{
 			return string();
 		}
 
 
-		void				onServiceUp(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */)
+		void				onServiceUp(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */) NL_OVERRIDE
 		{
 		}
-		void				onServiceDown(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */)
+		void				onServiceDown(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */) NL_OVERRIDE
 		{
 		}
-		void				onModuleUpdate()
+		void				onModuleUpdate() NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_onModuleUpdate);
 			// send waiting local messages
@@ -1472,14 +1472,14 @@ namespace NLNET
 				IModuleProxy *senderProx = getModuleProxy(lm.SenderProxyId);
 				IModuleProxy *addresseeProx = getModuleProxy(lm.AddresseProxyId);
 
-				if (senderProx == NULL)
+				if (senderProx == nullptr)
 				{
 					nlwarning("CStandardGateway : local message dispatching : Failed to retrieve proxy for sender module %u while dispatching message '%s' to %u",
 						lm.SenderProxyId,
 						lm.Message.getName().c_str(),
 						lm.AddresseProxyId);
 				}
-				else if (addresseeProx == NULL)
+				else if (addresseeProx == nullptr)
 				{
 					nlwarning("CStandardGateway : local message dispatching : Failed to retrieve proxy for addressee module %u while dispatching message '%s' from %u",
 						lm.AddresseProxyId,
@@ -1516,7 +1516,7 @@ namespace NLNET
 			}
 		}
 
-		void				onApplicationExit()
+		void				onApplicationExit() NL_OVERRIDE
 		{
 			// delete all transport
 			while (!_Transports.empty())
@@ -1525,13 +1525,13 @@ namespace NLNET
 			}
 		}
 
-		void				onModuleUp(IModuleProxy * /* moduleProxy */)
+		void				onModuleUp(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{
 		}
-		void				onModuleDown(IModuleProxy * /* moduleProxy */)
+		void				onModuleDown(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{
 		}
-		bool				onProcessModuleMessage(IModuleProxy * /* senderModuleProxy */, const CMessage &message)
+		bool				onProcessModuleMessage(IModuleProxy * /* senderModuleProxy */, const CMessage &message) NL_OVERRIDE
 		{
 			// simple message for debug and unit testing
 			if (message.getName() == "DEBUG_MOD_PING")
@@ -1544,11 +1544,11 @@ namespace NLNET
 			return false;
 		}
 
-		void				onModuleSecurityChange(IModuleProxy * /* moduleProxy */)
+		void				onModuleSecurityChange(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{
 		}
 
-		void	onModuleSocketEvent(IModuleSocket * /* moduleSocket */, TModuleSocketEvent /* eventType */)
+		void	onModuleSocketEvent(IModuleSocket * /* moduleSocket */, TModuleSocketEvent /* eventType */) NL_OVERRIDE
 		{
 		}
 
@@ -1556,12 +1556,12 @@ namespace NLNET
 		 ** Socket methods
 		 ***********************************************************/
 
-		const std::string &getSocketName()
+		const std::string &getSocketName() NL_OVERRIDE
 		{
 			return getModuleName();
 		}
 
-		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
+		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message) NL_OVERRIDE
 		{
 			// the socket implementation already checked that the module is plugged here
 			// just check that the destination module effectively from here
@@ -1584,7 +1584,7 @@ namespace NLNET
 			sendModuleProxyMessage(senderProx, destProx, message);
 		}
 
-		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
+		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway__broadcastModuleMessage);
 			// send the message to all proxies (except the sender module)
@@ -1600,7 +1600,7 @@ namespace NLNET
 			}
 		}
 
-		void onModulePlugged(IModule *pluggedModule)
+		void onModulePlugged(IModule *pluggedModule) NL_OVERRIDE
 		{
 			nldebug("NETL6: Gateway %s : plugging module '%s' id=%u",
 				getModuleName().c_str(),
@@ -1613,7 +1613,7 @@ namespace NLNET
 			// create a proxy for this module
 			IModuleProxy *modProx = IModuleManager::getInstance().createModuleProxy(
 					this,
-					NULL,	// the module is local, so there is no route
+		        nullptr,	// the module is local, so there is no route
 					0,		// the module is local, distance is 0
 					pluggedModule,	// the module is local, so store the module pointer
 					pluggedModule->getModuleClassName(),
@@ -1646,7 +1646,7 @@ namespace NLNET
 					// either the gateway is non null (distant module), or the
 					// foreign module id is different of the local module (for local proxy,
 					// the foreign module id store the local module id).
-					if (modProx->getGatewayRoute() != NULL || modProx->getForeignModuleId() != pluggedModule->getModuleId())
+					if (modProx->getGatewayRoute() != nullptr || modProx->getForeignModuleId() != pluggedModule->getModuleId())
 					{
 						pluggedModule->_onModuleUp(modProx);
 					}
@@ -1656,7 +1656,7 @@ namespace NLNET
 
 		}
 		/// Called just after a module as been effectively unplugged from a socket
-		void				onModuleUnplugged(IModule *unpluggedModule)
+		void				onModuleUnplugged(IModule *unpluggedModule) NL_OVERRIDE
 		{
 			nldebug("NETL6: Gateway %s : unplugging module '%s' id=%u",
 				getModuleName().c_str(),
@@ -1678,8 +1678,8 @@ namespace NLNET
 				{
 					IModuleProxy *modProx = first->second;
 
-					if (modProx->getGatewayRoute() != NULL
-						|| modProx->getForeignModuleId() != unpluggedModule->getModuleId())
+					if (modProx->getGatewayRoute() != nullptr
+				        || modProx->getForeignModuleId() != unpluggedModule->getModuleId())
 					{
 						unpluggedModule->_onModuleDown(modProx);
 					}
@@ -1739,7 +1739,7 @@ namespace NLNET
 		{
 			// translate the module id
 			const TModuleId *pModuleId = route->ForeignToLocalIdx.getB(foreignModuleId);
-			if (pModuleId == NULL)
+			if (pModuleId == nullptr)
 			{
 				// oups !
 				nlwarning("removeForeignModule : unknown foreign module id %u", foreignModuleId);
@@ -1832,7 +1832,7 @@ namespace NLNET
 			else
 			{
 				// do not remove proxy for local module from her !
-				if (modProx->_Route != NULL)
+				if (modProx->_Route != nullptr)
 				{
 					// this module is no longer reachable, remove the proxy
 
@@ -1882,7 +1882,7 @@ namespace NLNET
 		/// Check if a module can be seen by a route
 		bool isModuleProxyVisible(IModuleProxy *proxy, CGatewayRoute *route)
 		{
-			if (route == NULL)
+			if (route == nullptr)
 			{
 				// no route, we can see the proxy
 				return true;
@@ -1895,7 +1895,7 @@ namespace NLNET
 			}
 
 			// if the module is local, then, it can be seen
-			if (proxy->getGatewayRoute() == NULL)
+			if (proxy->getGatewayRoute() == nullptr)
 				return true;
 
 			// if the module is on the same route, it can't be seen (it is seen by the route outbound)
@@ -1908,7 +1908,7 @@ namespace NLNET
 			{
 				// we also need to check if this module is known in this route
 //				CGatewayRoute::TForeignToLocalIdx::iterator it(route->ForeignToLocalIdx.find(proxy->getForeignModuleId()));
-				if (route->ForeignToLocalIdx.getA(proxy->getModuleProxyId()) != NULL)
+				if (route->ForeignToLocalIdx.getA(proxy->getModuleProxyId()) != nullptr)
 					// this module is known in this route, so not invisible
 					return false;
 
@@ -1973,7 +1973,7 @@ namespace NLNET
 
 			CMessage updateMsg("MOD_UPD");
 
-			// compil all update in a single message
+			// compile all updates in a single message
 			while (!route->PendingEvents.empty())
 			{
 				CGatewayRoute::TPendingEvent &pe = route->PendingEvents.front();
@@ -1982,7 +1982,7 @@ namespace NLNET
 				case CGatewayRoute::pet_disclose_module:
 					{
 						IModuleProxy *proxy = getModuleProxy(pe.ModuleId);
-						if (proxy == NULL)
+						if (proxy == nullptr)
 							break;
 
 						// store the update type
@@ -2008,7 +2008,7 @@ namespace NLNET
 				case CGatewayRoute::pet_update_distance:
 					{
 						IModuleProxy *proxy = getModuleProxy(pe.ModuleId);
-						if (proxy == NULL)
+						if (proxy == nullptr)
 							break;
 
 						// store the update type
@@ -2023,7 +2023,7 @@ namespace NLNET
 				case CGatewayRoute::pet_update_security:
 					{
 						IModuleProxy *proxy = getModuleProxy(pe.ModuleId);
-						if (proxy == NULL)
+						if (proxy == nullptr)
 							break;
 
 						// store the update type
@@ -2089,7 +2089,7 @@ namespace NLNET
 //			}
 		}
 
-		void getModuleList(std::vector<IModuleProxy*> &resultList)
+		void getModuleList(std::vector<IModuleProxy*> &resultList) NL_OVERRIDE
 		{
 			TModuleProxies::iterator first(_ModuleProxies.begin()), last(_ModuleProxies.end());
 			for (; first != last; ++first)
@@ -2119,7 +2119,7 @@ namespace NLNET
 			nlunreferenced(quiet);
 			nlunreferenced(human);
 
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				log.displayNL("No security plug-in !");
 				return true;
@@ -2150,7 +2150,7 @@ namespace NLNET
 				return false;
 			}
 
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				log.displayNL("No security plug-in !");
 				return true;
@@ -2170,7 +2170,7 @@ namespace NLNET
 			if (args.size() != 1)
 				return false;
 
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin != nullptr)
 			{
 				log.displayNL("The gateway already have a security plug-in ! Remove it first");
 				return true;

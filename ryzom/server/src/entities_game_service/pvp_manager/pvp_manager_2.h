@@ -46,7 +46,7 @@ struct ci_less
 	{
 		bool operator() (const unsigned char& c1, const unsigned char& c2) const
 		{
-			return tolower (c1) < tolower (c2);
+			return tolower (c1) < tolower (c2); 
 		}
 	};
 	bool operator() (const std::string & s1, const std::string & s2) const

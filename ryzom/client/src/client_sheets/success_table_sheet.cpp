@@ -29,7 +29,7 @@ using namespace NLGEORGES;
 // ***************************************************************************
 void CSuccessTableSheet::build(const NLGEORGES::UFormElm &root)
 {
-	const UFormElm *array = NULL;
+	const UFormElm *array = nullptr;
 	if (root.getNodeByName (&array, "Chances") && array)
 	{
 		// Get array size
@@ -41,7 +41,7 @@ void CSuccessTableSheet::build(const NLGEORGES::UFormElm &root)
 		// Get a array value
 		for (uint i=0; i<size; ++i)
 		{
-			const UFormElm *line = NULL;
+			const UFormElm *line = nullptr;
 			if ( array->getArrayNode( &line, i) && line)
 			{
 				line->getValueByName( SuccessTable[ i ].RelativeLevel, "RelativeLevel" );

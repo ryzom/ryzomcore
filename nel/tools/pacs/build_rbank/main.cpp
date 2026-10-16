@@ -181,9 +181,8 @@ void	initMoulinette()
 		// against an unconditionally lowercased query string, silently
 		// failing to find any real file whose name isn't already
 		// all-lowercase (zone/ig names are always "<row>_<UPPERCASE
-		// LETTERS>") -- confirmed root cause, project-todos/forgery/
-		// lowercase_pipeline_convention.md.
-		for (i=0; cvPathes != NULL && i<cvPathes->size(); ++i)
+		// LETTERS>").
+		for (i=0; cvPathes != nullptr && i<cvPathes->size(); ++i)
 			CPath::addSearchPath(cvPathes->asString(i), false, false);
 
 		ProcessAllPasses = getBool(cf, "ProcessAllPasses", false);
@@ -269,7 +268,7 @@ void	initMoulinette()
 		else
 		{
 			CConfigFile::CVar *cvZones = cf.getVarPtr("Zones");
-			for (i=0; cvZones != NULL && i<cvZones->size(); i++)
+			for (i=0; cvZones != nullptr && i<cvZones->size(); i++)
 				ZoneNames.push_back(cvZones->asString(i));
 		}
 	}

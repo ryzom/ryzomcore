@@ -40,9 +40,9 @@ class CGroupPhraseSkillFilter : public CInterfaceGroup
 public:
 	CGroupPhraseSkillFilter(const TCtorParam &param);
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
-	virtual void checkCoords();
+	virtual void checkCoords() NL_OVERRIDE;
 
 	void touch()
 	{
@@ -61,7 +61,7 @@ private:
 		CGroupPhraseSkillFilter			*Owner;
 		BRICK_FAMILIES::TBrickFamily	BrickFamily;
 
-		virtual void update (NLMISC::ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node) NL_OVERRIDE;
 	};
 	friend struct CBrickFamilyObs;
 	CBrickFamilyObs		_BrickFamilyObs[BRICK_FAMILIES::NbFamilies];

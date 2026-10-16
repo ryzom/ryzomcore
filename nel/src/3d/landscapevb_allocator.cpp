@@ -61,11 +61,11 @@ CLandscapeVBAllocator::CLandscapeVBAllocator(TType type, const std::string &vbNa
 	_NumVerticesAllocated= 0;
 	_UnsynchronizedMode= false;
 	_BufferLocked= false;
-	_LastFarVB = NULL;
-	_LastNearVB = NULL;
+	_LastFarVB = nullptr;
+	_LastNearVB = nullptr;
 
 	for(uint i=0;i<MaxVertexProgram;i++)
-		_VertexProgram[i]= NULL;
+		_VertexProgram[i] = nullptr;
 }
 
 // ***************************************************************************
@@ -80,7 +80,7 @@ void			CLandscapeVBAllocator::updateDriver(IDriver *driver)
 {
 	// test change of driver.
 	nlassert(driver);
-	if( _Driver==NULL || driver!=_Driver )
+	if( _Driver == nullptr || driver!=_Driver )
 	{
 		deleteVertexBuffer();
 		_Driver= driver;
@@ -119,7 +119,7 @@ void			CLandscapeVBAllocator::clear()
 	// clear other states.
 	_ReallocationOccur= false;
 	_UnsynchronizedMode= false;
-	_Driver= NULL;
+	_Driver = nullptr;
 }
 
 
@@ -257,7 +257,7 @@ void			CLandscapeVBAllocator::lockBuffer(CFarVertexBufferInfo &farVB)
 
 	_LastFarVB = &farVB;
 
-	farVB.setupVertexBuffer(_VB, _VertexProgram[0]!=NULL );
+	farVB.setupVertexBuffer(_VB, _VertexProgram[0] != nullptr);
 
 	_BufferLocked= true;
 }
@@ -271,7 +271,7 @@ void			CLandscapeVBAllocator::lockBuffer(CNearVertexBufferInfo &tileVB)
 
 	_LastNearVB = &tileVB;
 
-	tileVB.setupVertexBuffer(_VB, _VertexProgram[0]!=NULL );
+	tileVB.setupVertexBuffer(_VB, _VertexProgram[0] != nullptr);
 
 	_BufferLocked= true;
 }
@@ -282,10 +282,10 @@ void			CLandscapeVBAllocator::unlockBuffer()
 	{
 		if (_LastFarVB)
 			_LastFarVB->setupNullPointers();
-		_LastFarVB = NULL;
+		_LastFarVB = nullptr;
 		if (_LastNearVB)
 			_LastNearVB->setupNullPointers();
-		_LastNearVB = NULL;
+		_LastNearVB = nullptr;
 		_BufferLocked= false;
 	}
 }
@@ -589,7 +589,7 @@ void			CLandscapeVBAllocator::deleteVertexProgram()
 	{
 		if (_VertexProgram[i])
 		{
-			_VertexProgram[i] = NULL; // smartptr
+			_VertexProgram[i] = nullptr; // smartptr
 		}
 	}
 }

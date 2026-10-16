@@ -45,7 +45,7 @@ class CClientCommandForwader : public CEmptyModuleServiceBehav<CEmptyModuleCommB
 
 public:
 
-	void onModuleUp(IModuleProxy *module)
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "CommandExecutor")
 		{
@@ -61,7 +61,7 @@ public:
 		}
 	}
 
-	void onModuleDown(IModuleProxy *module)
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "CommandExecutor")
 		{
@@ -79,7 +79,7 @@ public:
 
 	}
 
-	bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message)
+	bool onProcessModuleMessage(IModuleProxy *sender, const CMessage &message) NL_OVERRIDE
 	{
 		nlwarning("CRingSessionManager : Unknown message '%s' received", message.getName().c_str());
 
@@ -92,7 +92,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////////
 
 
-	void sendCommand(const std::string &service, const std::string &commandName, const NLMISC::CEntityId &senderEId, bool haveTarget, const NLMISC::CEntityId &targetEId, const std::string &arg)
+	void sendCommand(const std::string &service, const std::string &commandName, const NLMISC::CEntityId &senderEId, bool haveTarget, const NLMISC::CEntityId &targetEId, const std::string &arg) NL_OVERRIDE
 	{
 		TCommandExecutors::iterator it(_CommandExecutors.find(service));
 

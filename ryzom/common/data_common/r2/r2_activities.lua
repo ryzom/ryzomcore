@@ -260,7 +260,6 @@ function r2.activities:openSequenceEditor()
 			end
 		end
 	end
-
 	local uc_sequ = ucstring()
 	uc_sequ:fromUtf8(tabName)
 	editName.uc_input_string = uc_sequ
@@ -432,7 +431,6 @@ function r2.activities:newSequenceUI(activitySequence)
 		else
 			sequName = self.sequenceInitialName .. (i+1)
 		end
-
 		local uc_name = ucstring()
 		uc_name:fromUtf8(sequName)
 		tabButton.uc_hardtext = uc_name
@@ -543,7 +541,6 @@ function r2.activities:updateSequenceUI(instance, attributeName)
 		if tabId then
 			local buttonTab = tab:find("tab"..tabId)
 			assert(buttonTab)
-			
 			local uc_name = ucstring()
 			uc_name:fromUtf8(name)
 			buttonTab.uc_hardtext = uc_name
@@ -1049,6 +1046,7 @@ function r2.activities:initActivityMenu()
 	local activityMenu = activityMenu:getRootMenu()
 	assert(activityMenu)
 	activityMenu:reset()
+
 	local uc_activity = ucstring()
 
 	local activitiesTable = {}

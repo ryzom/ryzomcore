@@ -42,28 +42,28 @@ protected:
 	friend class	CDriverUser;
 
 public:
-	virtual ~CLightUser() {}
+	virtual ~CLightUser() NL_OVERRIDE {}
 
 	/// \name Quick setup.
 	//@{
 
 	/// Quick setup a directional light
 	void setupDirectional (const NLMISC::CRGBA& ambiant, const NLMISC::CRGBA& diffuse, const NLMISC::CRGBA& specular, const NLMISC::CVector& direction,
-							float constant=1, float linear=0, float quadratic=0)
+							float constant=1, float linear=0, float quadratic=0) NL_OVERRIDE
 	{
 		_Light.setupDirectional (ambiant, diffuse, specular, direction, constant, linear, quadratic);
 	}
 
 	/// Quick setup a point light
 	void setupPointLight (const NLMISC::CRGBA& ambiant, const NLMISC::CRGBA& diffuse, const NLMISC::CRGBA& specular, const NLMISC::CVector& position,
-						const NLMISC::CVector& direction, float constant=1, float linear=0, float quadratic=0)
+						const NLMISC::CVector& direction, float constant=1, float linear=0, float quadratic=0) NL_OVERRIDE
 	{
 		_Light.setupPointLight (ambiant, diffuse, specular, position, direction, constant, linear, quadratic);
 	}
 
 	/// Quick setup a spotlight
 	void setupSpotLight (const NLMISC::CRGBA& ambiant, const NLMISC::CRGBA& diffuse, const NLMISC::CRGBA& specular, const NLMISC::CVector& position,
-						const NLMISC::CVector& direction, float exponent, float cutoff, float constant=1, float linear=0, float quadratic=0)
+						const NLMISC::CVector& direction, float exponent, float cutoff, float constant=1, float linear=0, float quadratic=0) NL_OVERRIDE
 	{
 		_Light.setupSpotLight (ambiant, diffuse, specular, position, direction, exponent, cutoff, constant, linear, quadratic);
 	}
@@ -74,7 +74,7 @@ public:
 	  * \param farAttenuationBegin is the distance of the begin of the attenuation (attenuation == 0.9f)
 	  * \param farAttenuationEnd is the distance of the end of the attenuation (attenuation == 0.1f)
 	  */
-	void setupAttenuation (float farAttenuationBegin, float farAttenuationEnd)
+	void setupAttenuation (float farAttenuationBegin, float farAttenuationEnd) NL_OVERRIDE
 	{
 		_Light.setupAttenuation (farAttenuationBegin, farAttenuationEnd);
 	}
@@ -85,7 +85,7 @@ public:
 	  * The light will not use attenuation.
 	  *
 	  */
-	void setNoAttenuation ()
+	void setNoAttenuation () NL_OVERRIDE
 	{
 		_Light.setNoAttenuation ();
 	}
@@ -96,7 +96,7 @@ public:
 	  * \param hotSpotAngle is the angle in radian between the axis of the spot and the vector from light
 	  * where attenuation is == 0.9.
 	  */
-	void setupSpotExponent (float hotSpotAngle)
+	void setupSpotExponent (float hotSpotAngle) NL_OVERRIDE
 	{
 		_Light.setupSpotExponent (hotSpotAngle);
 	}
@@ -110,7 +110,7 @@ public:
 	/**
 	  * Set the light mode.
 	  */
-	void setMode (ULight::TLightMode mode)
+	void setMode (ULight::TLightMode mode) NL_OVERRIDE
 	{
 		_Light.setMode ((CLight::TLightMode)(uint32)mode);
 	}
@@ -118,7 +118,7 @@ public:
 	/**
 	  * Set the ambiant color of the light.
 	  */
-	void setAmbiant (const NLMISC::CRGBA& ambiant)
+	void setAmbiant (const NLMISC::CRGBA& ambiant) NL_OVERRIDE
 	{
 		_Light.setAmbiant (ambiant);
 	}
@@ -126,7 +126,7 @@ public:
 	/**
 	  * Set the diffuse color of the light.
 	  */
-	void setDiffuse (const NLMISC::CRGBA& diffuse)
+	void setDiffuse (const NLMISC::CRGBA& diffuse) NL_OVERRIDE
 	{
 		_Light.setDiffuse (diffuse);
 	}
@@ -134,7 +134,7 @@ public:
 	/**
 	  * Set the specular color of the light.
 	  */
-	void setSpecular (const NLMISC::CRGBA& specular)
+	void setSpecular (const NLMISC::CRGBA& specular) NL_OVERRIDE
 	{
 		_Light.setSpecular (specular);
 	}
@@ -142,7 +142,7 @@ public:
 	/**
 	  * Set the position of the light. Used only for SpotLight and PointLight.
 	  */
-	void setPosition (const NLMISC::CVector& position)
+	void setPosition (const NLMISC::CVector& position) NL_OVERRIDE
 	{
 		_Light.setPosition (position);
 	}
@@ -150,7 +150,7 @@ public:
 	/**
 	  * Set the direction of the light. Used only for DirectionalLight and SpotLight.
 	  */
-	void setDirection (const NLMISC::CVector& direction)
+	void setDirection (const NLMISC::CVector& direction) NL_OVERRIDE
 	{
 		_Light.setDirection (direction);
 	}
@@ -158,7 +158,7 @@ public:
 	/**
 	  * Set the Intensity distribution of the light. Should be between [0, 1]. Used only for SpotLight.
 	  */
-	void setExponent (float exponent)
+	void setExponent (float exponent) NL_OVERRIDE
 	{
 		_Light.setExponent (exponent);
 	}
@@ -166,7 +166,7 @@ public:
 	/**
 	  * Set the cutoff of the light in radian. Should be between [0, Pi/2]. Used only for SpotLight.
 	  */
-	void setCutoff (float cutoff)
+	void setCutoff (float cutoff) NL_OVERRIDE
 	{
 		_Light.setCutoff (cutoff);
 	}
@@ -178,7 +178,7 @@ public:
 	  * light_intensity = light_intensity / ( CONSTANT_ATTENUATION + vertex_light_distance * LINEAR_ATTENUATION +
 	  *	vertex_light_distance * vertex_light_distance * QUADRATIC_ATTENUATION );
 	  */
-	void setConstantAttenuation (float constant)
+	void setConstantAttenuation (float constant) NL_OVERRIDE
 	{
 		_Light.setConstantAttenuation (constant);
 	}
@@ -190,7 +190,7 @@ public:
 	  * light_intensity = light_intensity / ( CONSTANT_ATTENUATION + vertex_light_distance * LINEAR_ATTENUATION +
 	  *	vertex_light_distance * vertex_light_distance * QUADRATIC_ATTENUATION );
 	  */
-	void setLinearAttenuation (float linear)
+	void setLinearAttenuation (float linear) NL_OVERRIDE
 	{
 		_Light.setLinearAttenuation (linear);
 	}
@@ -202,7 +202,7 @@ public:
 	  * light_intensity = light_intensity / ( CONSTANT_ATTENUATION + vertex_light_distance * LINEAR_ATTENUATION +
 	  *	vertex_light_distance * vertex_light_distance * QUADRATIC_ATTENUATION );
 	  */
-	void setQuadraticAttenuation (float quadratic)
+	void setQuadraticAttenuation (float quadratic) NL_OVERRIDE
 	{
 		_Light.setQuadraticAttenuation (quadratic);
 	}
@@ -215,7 +215,7 @@ public:
 	/**
 	  * Get the light mode.
 	  */
-	ULight::TLightMode getMode () const
+	ULight::TLightMode getMode () const NL_OVERRIDE
 	{
 		return (ULight::TLightMode)(uint32)_Light.getMode ();
 	}
@@ -223,7 +223,7 @@ public:
 	/**
 	  * Get the ambiant color of the light.
 	  */
-	NLMISC::CRGBA getAmbiant () const
+	NLMISC::CRGBA getAmbiant () const NL_OVERRIDE
 	{
 		return _Light.getAmbiant ();
 	}
@@ -231,7 +231,7 @@ public:
 	/**
 	  * Get the diffuse color of the light.
 	  */
-	NLMISC::CRGBA getDiffuse () const
+	NLMISC::CRGBA getDiffuse () const NL_OVERRIDE
 	{
 		return _Light.getDiffuse ();
 	}
@@ -239,7 +239,7 @@ public:
 	/**
 	  * Get the specular color of the light.
 	  */
-	NLMISC::CRGBA getSpecular () const
+	NLMISC::CRGBA getSpecular () const NL_OVERRIDE
 	{
 		return _Light.getSpecular ();
 	}
@@ -247,7 +247,7 @@ public:
 	/**
 	  * Get the position of the light. Used only for SpotLight and PointLight.
 	  */
-	NLMISC::CVector getPosition () const
+	NLMISC::CVector getPosition () const NL_OVERRIDE
 	{
 		return _Light.getPosition ();
 	}
@@ -255,7 +255,7 @@ public:
 	/**
 	  * Get the direction of the light. Used only for DirectionalLight and SpotLight.
 	  */
-	NLMISC::CVector getDirection () const
+	NLMISC::CVector getDirection () const NL_OVERRIDE
 	{
 		return _Light.getDirection ();
 	}
@@ -263,7 +263,7 @@ public:
 	/**
 	  * Get the exponent of the light. Used only for SpotLight.
 	  */
-	float getExponent () const
+	float getExponent () const NL_OVERRIDE
 	{
 		return _Light.getExponent ();
 	}
@@ -271,7 +271,7 @@ public:
 	/**
 	  * Get the cutoff of the light in radian. Should be between [0, Pi/2]. Used only for SpotLight.
 	  */
-	float getCutoff () const
+	float getCutoff () const NL_OVERRIDE
 	{
 		return _Light.getCutoff ();
 	}
@@ -283,7 +283,7 @@ public:
 	  * light_intensity = light_intensity / ( CONSTANT_ATTENUATION + vertex_light_distance * LINEAR_ATTENUATION +
 	  *	vertex_light_distance * vertex_light_distance * QUADRATIC_ATTENUATION );
 	  */
-	float getConstantAttenuation () const
+	float getConstantAttenuation () const NL_OVERRIDE
 	{
 		return _Light.getConstantAttenuation ();
 	}
@@ -295,7 +295,7 @@ public:
 	  * light_intensity = light_intensity / ( CONSTANT_ATTENUATION + vertex_light_distance * LINEAR_ATTENUATION +
 	  *	vertex_light_distance * vertex_light_distance * QUADRATIC_ATTENUATION );
 	  */
-	float getLinearAttenuation () const
+	float getLinearAttenuation () const NL_OVERRIDE
 	{
 		return _Light.getLinearAttenuation ();
 	}
@@ -307,7 +307,7 @@ public:
 	  * light_intensity = light_intensity / ( CONSTANT_ATTENUATION + vertex_light_distance * LINEAR_ATTENUATION +
 	  *	vertex_light_distance * vertex_light_distance * QUADRATIC_ATTENUATION );
 	  */
-	float getQuadraticAttenuation () const
+	float getQuadraticAttenuation () const NL_OVERRIDE
 	{
 		return _Light.getQuadraticAttenuation ();
 	}

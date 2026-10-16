@@ -168,7 +168,7 @@ void CPSForceIntensity::setIntensity(float value)
 	if (_IntensityScheme)
 	{
 		delete _IntensityScheme;
-		_IntensityScheme = NULL;
+		_IntensityScheme = nullptr;
 	}
 	_K = value;
 
@@ -315,7 +315,7 @@ void CPSDirectionnalForce::show()
 	// for each element, see if it is the selected element, and if yes, display in red
 	for (uint k = 0; k < _Owner->getSize(); ++k)
 	{
-		const CRGBA col = (((lb == NULL || this == lb) && loc == _Owner && index == k)  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = (((lb == nullptr || this == lb) && loc == _Owner && index == k)  ? CRGBA::Red : CRGBA(127, 127, 127));
 		CPSUtil::displayArrow(getDriver(), _Owner->getPos()[k], dir, 1.f, col, CRGBA(80, 80, 0));
 	}
 }
@@ -499,7 +499,7 @@ void CPSGravity::serial(NLMISC::IStream &f)
 bool	CPSGravity::isIntegrable(void) const
 {
 	NL_PS_FUNC(CPSGravity_isIntegrable)
-	return _IntensityScheme == NULL;
+	return _IntensityScheme == nullptr;
 }
 
 void CPSGravity::integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos, NLMISC::CVector *destSpeed,
@@ -892,7 +892,7 @@ void CPSCylindricVortex::show()
 
 	for (uint k = 0; k < _Owner->getSize(); ++k)
 	{
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 		CMatrix m;
 		CPSUtil::buildSchmidtBasis(_Normal[k], m);
 		CPSUtil::displayDisc(*getDriver(), _Radius[k], _Owner->getPos()[k], m, 32, col);
@@ -1026,7 +1026,7 @@ CPSBrownianForce::CPSBrownianForce(float intensity /* = 1.f*/) : _ParametricFact
 bool	CPSBrownianForce::isIntegrable(void) const
 {
 	NL_PS_FUNC(CPSBrownianForce_isIntegrable)
-	return _IntensityScheme == NULL;
+	return _IntensityScheme == nullptr;
 }
 
 

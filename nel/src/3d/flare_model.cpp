@@ -60,7 +60,7 @@ CFlareModel::CFlareModel()
 	std::fill(_LastRenderIntervalBegin, _LastRenderIntervalBegin + MaxNumContext, (uint64) -2);
 	std::fill(_LastRenderIntervalEnd, _LastRenderIntervalEnd + MaxNumContext, (uint64) -2);
 	std::fill(_NumFrameForOcclusionQuery, _NumFrameForOcclusionQuery + MaxNumContext, 1);
-	Next = NULL;
+	Next = nullptr;
 }
 
 // ********************************************************************************************************************
@@ -70,8 +70,8 @@ void CFlareModel::resetOcclusionQuerries()
 	{
 		for(uint l = 0; l < OcclusionTestFrameDelay; ++l)
 		{
-			_OcclusionQuery[k][l] =  NULL;
-			_DrawQuery[k][l] =  NULL;
+			_OcclusionQuery[k][l] = nullptr;
+			_DrawQuery[k][l] = nullptr;
 		}
 	}
 }
@@ -190,7 +190,7 @@ void	CFlareModel::traverseRender()
 	bool visibilityRetrieved = false;
 	float visibilityRatio = 0.f;
 	// if driver support occlusion query mechanism, use it
-	CMesh *occlusionTestMesh = NULL;
+	CMesh *occlusionTestMesh = nullptr;
 	if (_Scene->getShapeBank())
 	{
 		occlusionTestMesh = fs->getOcclusionTestMesh(*_Scene->getShapeBank());
@@ -382,9 +382,9 @@ void	CFlareModel::traverseRender()
 		setupDone = true;
 	}
 	// setup driver
-	drv->activeVertexProgram(NULL);
-	drv->activePixelProgram(NULL);
-	drv->activeGeometryProgram(NULL);
+	drv->activeVertexProgram(nullptr);
+	drv->activePixelProgram(nullptr);
+	drv->activeGeometryProgram(nullptr);
 	drv->setupModelMatrix(fs->getLookAtMode() ? CMatrix::Identity : getWorldMatrix());
 	// we don't change the fustrum to draw 2d shapes : it is costly, and we need to restore it after the drawing has been done
 	// we setup Z to be (near + far) / 2, and setup x and y to get the screen coordinates we want
@@ -586,9 +586,9 @@ void CFlareModel::initStatics()
 void CFlareModel::updateOcclusionQueryBegin(IDriver *drv)
 {
 	nlassert(drv);
-	drv->activeVertexProgram(NULL);
-	drv->activePixelProgram(NULL);
-	drv->activeGeometryProgram(NULL);
+	drv->activeVertexProgram(nullptr);
+	drv->activePixelProgram(nullptr);
+	drv->activeGeometryProgram(nullptr);
 	drv->setupModelMatrix(CMatrix::Identity);
 	initStatics();
 	drv->setColorMask(false, false, false, false); // don't write any pixel during the test
@@ -689,9 +689,9 @@ void CFlareModel::occlusionTest(CMesh &mesh, IDriver &drv)
 		_DrawQuery[_Scene->getFlareContext()][0] = dq;
 	}
 	drv.setColorMask(false, false, false, false); // don't write any pixel during the test
-	drv.activeVertexProgram(NULL);
-	drv.activePixelProgram(NULL);
-	drv.activeGeometryProgram(NULL);
+	drv.activeVertexProgram(nullptr);
+	drv.activePixelProgram(nullptr);
+	drv.activeGeometryProgram(nullptr);
 	setupOcclusionMeshMatrix(drv, *_Scene);
 	drv.activeVertexBuffer(const_cast<CVertexBuffer &>(mesh.getVertexBuffer()));
 	// query drawn count

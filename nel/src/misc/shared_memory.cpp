@@ -78,13 +78,13 @@ void			*CSharedMemory::createSharedMemory( TSharedMemId sharedMemId, uint32 size
 	// Create a shared memory segment
 	sint shmid = shmget( sharedMemId, size, IPC_CREAT | IPC_EXCL | 0666 );
 	if ( shmid == -1 )
-		return NULL;
+		return nullptr;
 	SharedMemIdsToShmids.insert( make_pair( sharedMemId, shmid ) );
 
 	// Map the segment into memory address space
-	void *accessAddress = (void*)shmat( shmid, 0, 0 );
+	void *accessAddress = (void*)shmat( shmid, nullptr, 0 );
 	if ( accessAddress == (void*)-1 )
-		return NULL;
+		return nullptr;
 	else
 		return accessAddress;
 
@@ -115,12 +115,12 @@ void			*CSharedMemory::accessSharedMemory( TSharedMemId sharedMemId )
 	// Open an existing shared memory segment
 	int shmid = shmget( sharedMemId, 0, 0666 );
 	if ( shmid == -1 )
-		return NULL;
+		return nullptr;
 
 	// Map the segment into memory address space
-	void *accessAddress = (void*)shmat( shmid, 0, 0 );
+	void *accessAddress = (void*)shmat( shmid, nullptr, 0 );
 	if ( accessAddress == (void*)-1 )
-		return NULL;
+		return nullptr;
 	else
 		return accessAddress;
 
@@ -188,7 +188,7 @@ void        CSharedMemory::destroySharedMemory( TSharedMemId sharedMemId, bool f
   if ( im != SharedMemIdsToShmids.end() )
 	{
 	  // Destroy the segment created before
-	  shmctl( (*im).second, IPC_RMID, 0 );
+	  shmctl( (*im).second, IPC_RMID, nullptr );
 	  SharedMemIdsToShmids.erase( im );
 	}
   else if ( force )
@@ -198,7 +198,7 @@ void        CSharedMemory::destroySharedMemory( TSharedMemId sharedMemId, bool f
 	  if ( shmid != -1 )
 		{
 		  // Destroy the segment
-		  shmctl( shmid, IPC_RMID, 0 );
+		  shmctl( shmid, IPC_RMID, nullptr );
 		}
 	}
 #endif

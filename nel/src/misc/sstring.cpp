@@ -189,8 +189,8 @@ namespace NLMISC
 	bool CSString::isValidText()
 	{
 		// setup a handy static lookup table for differentiating valid and invalid text characters
-		static bool* tbl=NULL;
-		if (tbl==NULL)
+		static bool* tbl = nullptr;
+		if (tbl == nullptr)
 		{
 			tbl= new bool[256];
 			for (uint32 i=0;i<256;++i)
@@ -1337,7 +1337,7 @@ namespace NLMISC
 	CSString CSString::replace(const char *toFind,const char *replacement) const
 	{
 		// just bypass the problems that can cause a crash...
-		if (toFind==NULL || *toFind==0)
+		if (toFind == nullptr || *toFind==0)
 			return *this;
 
 		std::string::size_type i,j;
@@ -1351,7 +1351,7 @@ namespace NLMISC
 			// if strings were identical then j reffers to ASCIIZ terminator at end of 'toFind'
 			if (toFind[j]==0)
 			{
-				if (replacement!=NULL)
+				if (replacement != nullptr)
 					result+=replacement;
 				i+=j;
 			}
@@ -1369,7 +1369,7 @@ namespace NLMISC
 	//	const char *constStr = c_str();
 
 		// just bypass the problems that can cause a crash...
-		if (toFind==NULL || *toFind==0 || startLocation>=size())
+		if (toFind == nullptr || *toFind==0 || startLocation>=size())
 			return std::string::npos;
 
 		std::string::size_type i,j;
@@ -1392,7 +1392,7 @@ namespace NLMISC
 		const char *constStr = c_str();
 
 		// just bypass the problems that can cause a crash...
-		if (toFind==NULL || *toFind==0 || startLocation>=size())
+		if (toFind == nullptr || *toFind==0 || startLocation>=size())
 			return std::string::npos;
 
 		std::string::size_type i,j;
@@ -1744,7 +1744,7 @@ namespace NLMISC
 	{
 		FILE* file;
 		file = nlfopen(fileName, "rb");
-		if (file==NULL)
+		if (file == nullptr)
 		{
 			clear();
 			// There was previously a warning displayed here but that was incorrect as it is defined that refaFromFile returns an empty result if the file is not found
@@ -1767,7 +1767,7 @@ namespace NLMISC
 	{
 		FILE* file;
 		file = nlfopen(fileName, "wb");
-		if (file==NULL)
+		if (file == nullptr)
 		{
 			nlwarning("Failed to open file for writing: %s",fileName.c_str());
 			return false;

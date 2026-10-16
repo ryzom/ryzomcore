@@ -50,7 +50,7 @@ public:
 	CBitm(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint texture, const CRGBA &rgba);
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 };
 
 

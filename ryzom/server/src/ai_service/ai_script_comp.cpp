@@ -17,6 +17,7 @@
 #include "stdpch.h"
 #include "ai_generic_fight.h"
 #include "ai_script_comp.h"
+#include "sheets.h"
 #include "server_share/msg_brick_service.h"
 
 using	namespace	std;
@@ -118,9 +119,9 @@ public:
 		nlassert(customComp);	//	the creature is hitting, we cannot do anything ..
 	}
 
-	virtual ~CFightOnce()
+	virtual ~CFightOnce() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		uint32	dummy;
 		if (bot.getProp((size_t)this,dummy))	// check if we already go there (for once).
@@ -133,7 +134,7 @@ public:
 		return	true;
 	}
 
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"ONCE("+_CustomComp->toString()+")";
 	}
@@ -149,9 +150,9 @@ class	CFightOnceReader
 {
 public:
 	CFightOnceReader()			{}
-	virtual ~CFightOnceReader()	{}
+	virtual ~CFightOnceReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -170,7 +171,7 @@ public:
 		}
 		return	new	CFightOnce(scriptComp);
 	}
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("ONCE");
 	}
@@ -194,9 +195,9 @@ public:
 		nlassert(customComp);	//	the creature is hitting, we cannot do anything ..
 	}
 
-	virtual ~CFightTimedFilter()
+	virtual ~CFightTimedFilter() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		uint32	decTime=0;
 		if	(bot.getProp((size_t)this, decTime))
@@ -210,7 +211,7 @@ public:
 		return	true;
 	}
 
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"EVERY_SEC("+NLMISC::toString(_DeltaTime/10)+","+_CustomComp->toString()+")";
 	}
@@ -227,9 +228,9 @@ class	CFightTimedFilterReader
 {
 public:
 	CFightTimedFilterReader()			{}
-	virtual ~CFightTimedFilterReader()	{}
+	virtual ~CFightTimedFilterReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -252,7 +253,7 @@ public:
 		}
 		return	new	CFightTimedFilter(scriptComp, time);
 	}
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("EVERY_SEC");
 	}
@@ -274,16 +275,16 @@ public:
 		nlassert(customComp);	//	comportment needed.
 	}
 
-	virtual ~CFightHPLessFilter()
+	virtual ~CFightHPLessFilter() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		if	(bot.hpPercentage()>=_HPLimit)
 			return	true;		
 		return	_CustomComp->update(bot);
 	}
 
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"HP%LESS("+NLMISC::toString(_HPLimit)+","+_CustomComp->toString()+")";
 	}
@@ -300,9 +301,9 @@ class	CFightHPLessFilterReader
 {
 public:
 	CFightHPLessFilterReader()			{}
-	virtual ~CFightHPLessFilterReader()	{}
+	virtual ~CFightHPLessFilterReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -323,7 +324,7 @@ public:
 		}
 		return	new	CFightHPLessFilter(scriptComp, hpLimit);
 	}
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("HP%LESS");
 	}
@@ -344,16 +345,16 @@ public:
 		nlassert(customComp);	//	comportment needed.
 	}
 
-	virtual ~CFightHPMoreFilter()
+	virtual ~CFightHPMoreFilter() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		if	(bot.hpPercentage()<=_HPLimit)
 			return	true;
 		return	_CustomComp->update(bot);
 	}
 
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"HP%MORE("+NLMISC::toString(_HPLimit)+","+_CustomComp->toString()+")";
 	}
@@ -370,9 +371,9 @@ class	CFightHPMoreFilterReader
 {
 public:
 	CFightHPMoreFilterReader()			{}
-	virtual ~CFightHPMoreFilterReader()	{}
+	virtual ~CFightHPMoreFilterReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -393,7 +394,7 @@ public:
 		}
 		return	new	CFightHPMoreFilter(scriptComp, hpLimit);
 	}
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("HP%MORE");
 	}
@@ -415,16 +416,16 @@ public:
 		nlassert(customComp);	//	comportment needed.
 	}
 
-	virtual ~CFightRandomFilter()
+	virtual ~CFightRandomFilter() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		if	(CAIS::rand16(32767)>=(_Random*32767))
 			return	true;
 		return	_CustomComp->update(bot);
 	}
 
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"RANDOM("+NLMISC::toString(_Random)+","+_CustomComp->toString()+")";
 	}
@@ -441,9 +442,9 @@ class	CFightRandomFilterReader
 {
 public:
 	CFightRandomFilterReader()			{}
-	virtual ~CFightRandomFilterReader()	{}
+	virtual ~CFightRandomFilterReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -464,7 +465,7 @@ public:
 		}
 		return	new	CFightRandomFilter(scriptComp, random);
 	}
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("RANDOM");
 	}
@@ -484,8 +485,8 @@ public:
 	{
 	}
 
-	virtual ~CFightSendAction() { }
-	bool	update(CSpawnBot	&bot)	const
+	virtual ~CFightSendAction() NL_OVERRIDE { }
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		if	(!bot.getAIProfile())
 			return	true;
@@ -506,7 +507,7 @@ public:
 		bot.setActionFlags(RYZOMACTIONFLAGS::Attacks);
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"SEND_ACTION("+_ActionName+")";
 	}
@@ -521,9 +522,9 @@ class	CFightSendActionReader
 {
 public:
 	CFightSendActionReader()			{}
-	virtual ~CFightSendActionReader()	{}
+	virtual ~CFightSendActionReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -542,7 +543,7 @@ public:
 		return	new	CFightSendAction(action, strings[0]);
 	}
 
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("SEND_ACTION");
 	}
@@ -563,15 +564,15 @@ public:
 	{
 	}
 	
-	virtual ~CFightSendSelfAction() { }
-	bool	update(CSpawnBot	&bot)	const
+	virtual ~CFightSendSelfAction() NL_OVERRIDE { }
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		CEGSExecuteAiActionMsg	msg(bot.dataSetRow(), bot.dataSetRow(), _Action->SheetId(), bot._DamageCoef, bot._DamageSpeedCoef);
 		msg.send(egsString);
 		bot.setActionFlags(RYZOMACTIONFLAGS::Attacks);
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"SEND_SELF_ACTION("+_ActionName+")";
 	}
@@ -586,9 +587,9 @@ class	CFightSendSelfActionReader
 {
 public:
 	CFightSendSelfActionReader()			{}
-	virtual ~CFightSendSelfActionReader()	{}
+	virtual ~CFightSendSelfActionReader() NL_OVERRIDE	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -607,7 +608,7 @@ public:
 		return	new	CFightSendSelfAction(action, strings[0]);
 	}
 	
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("SEND_SELF_ACTION");
 	}
@@ -624,14 +625,14 @@ public:
 	CFightAggroBlock(const	uint32 time):_Time(time)
 	{}
 
-	virtual ~CFightAggroBlock()
+	virtual ~CFightAggroBlock() NL_OVERRIDE
 	{}
-	bool	update(CSpawnBot	&bot)	const
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		bot.blockAggro(_Time);
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"AGGRO_BLOCK("+NLMISC::toString(_Time/10)+")";
 	}
@@ -645,9 +646,9 @@ class	CFightAggroBlockReader
 {
 public:
 	CFightAggroBlockReader()			{}
-	virtual ~CFightAggroBlockReader()	{}
+	virtual ~CFightAggroBlockReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -661,7 +662,7 @@ public:
 		return	new	CFightAggroBlock(time);
 	}
 
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("AGGRO_BLOCK");
 	}
@@ -679,9 +680,9 @@ public:
 	CFightAggroChange()
 	{}
 
-	virtual ~CFightAggroChange()
+	virtual ~CFightAggroChange() NL_OVERRIDE
 	{}
-	bool	update(CSpawnBot	&bot)	const
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		CAIEntityPhysical	*target=bot.getTarget();
 		if	(!target)
@@ -690,7 +691,7 @@ public:
 		bot.minimizeAggroFor(target->dataSetRow());
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"AGGRO_CHANGE()";
 	}
@@ -703,14 +704,14 @@ class	CFightAggroChangeReader
 {
 public:
 	CFightAggroChangeReader()			{}
-	virtual ~CFightAggroChangeReader()	{}
+	virtual ~CFightAggroChangeReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		return	new	CFightAggroChange();
 	}
 
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("AGGRO_CHANGE");
 	}
@@ -728,14 +729,14 @@ public:
 	CFightDamageCoef(const	float coef)	:_Coef(coef)
 	{}
 
-	virtual ~CFightDamageCoef()
+	virtual ~CFightDamageCoef() NL_OVERRIDE
 	{}
-	bool	update(CSpawnBot	&bot)	const
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		bot._DamageCoef=_Coef;
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"DAMAGE_COEF("+NLMISC::toString(_Coef)+")";
 	}
@@ -749,9 +750,9 @@ class	CFightDamageCoefReader
 {
 public:
 	CFightDamageCoefReader()			{}
-	virtual ~CFightDamageCoefReader()	{}
+	virtual ~CFightDamageCoefReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -763,7 +764,7 @@ public:
 		return	new	CFightDamageCoef(coef);
 	}
 
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("DAMAGE_COEF");
 	}
@@ -782,9 +783,9 @@ public:
 	CFightGroupDamageCoef(const	float coef)	:_Coef(coef)
 	{}
 	
-	virtual ~CFightGroupDamageCoef()
+	virtual ~CFightGroupDamageCoef() NL_OVERRIDE
 	{}
-	bool	update(CSpawnBot	&bot)	const
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		CSpawnGroup			&spawnGroup=bot.spawnGrp();
 		CAliasCont<CBot>	&bots=spawnGroup.getPersistent().bots();
@@ -802,7 +803,7 @@ public:
 
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"UPDATE_GROUP_DAMAGE_COEF("+NLMISC::toString(_Coef)+")";
 	}
@@ -816,9 +817,9 @@ class	CFightGroupDamageCoefReader
 {
 public:
 	CFightGroupDamageCoefReader()			{}
-	virtual ~CFightGroupDamageCoefReader()	{}
+	virtual ~CFightGroupDamageCoefReader() NL_OVERRIDE	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -830,7 +831,7 @@ public:
 		return	new	CFightGroupDamageCoef(coef);
 	}
 	
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("UPDATE_GROUP_DAMAGE_COEF");
 	}
@@ -848,14 +849,14 @@ public:
 	CFightDamageSpeedCoef(const	float coef)	:_Coef(coef)
 	{}
 
-	virtual ~CFightDamageSpeedCoef()
+	virtual ~CFightDamageSpeedCoef() NL_OVERRIDE
 	{}
-	bool	update(CSpawnBot	&bot)	const
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		bot._DamageSpeedCoef=_Coef;
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"DAMAGE_SPEED_COEF("+NLMISC::toString(_Coef)+")";
 	}
@@ -869,9 +870,9 @@ class	CFightDamageSpeedCoefReader
 {
 public:
 	CFightDamageSpeedCoefReader()			{}
-	virtual ~CFightDamageSpeedCoefReader()	{}
+	virtual ~CFightDamageSpeedCoefReader() NL_OVERRIDE	{}
 
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -883,7 +884,7 @@ public:
 		return	new	CFightDamageSpeedCoef(coef);
 	}
 
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("DAMAGE_SPEED_COEF");
 	}
@@ -900,9 +901,9 @@ public:
 	CFightSetRandomTarget(const	float coef)	:_Coef(coef)
 	{}
 	
-	virtual ~CFightSetRandomTarget()
+	virtual ~CFightSetRandomTarget() NL_OVERRIDE
 	{}
-	bool	update(CSpawnBot	&bot)	const
+	bool	update(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		const	CBotAggroOwner::TBotAggroList	&list=bot.getBotAggroList();
 		size_t size = list.size();
@@ -917,7 +918,7 @@ public:
 		
 		return	true;
 	}
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		return	"SET_RANDOM_TARGET()";
 	}
@@ -931,9 +932,9 @@ class	CFightSetRandomTargetReader
 {
 public:
 	CFightSetRandomTargetReader()			{}
-	virtual ~CFightSetRandomTargetReader()	{}
+	virtual ~CFightSetRandomTargetReader() NL_OVERRIDE	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	strings;
 		explodeSubStrings(inStr, strings, -1);
@@ -946,7 +947,7 @@ public:
 		return	new	CFightSetRandomTarget(coef);
 	}
 	
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("SET_RANDOM_TARGET");
 	}
@@ -967,16 +968,16 @@ public:
 	{
 	}
 	
-	virtual ~CFightMult()
+	virtual ~CFightMult() NL_OVERRIDE
 	{}
-	bool	update	(CSpawnBot	&bot)	const
+	bool	update	(CSpawnBot	&bot)	const NL_OVERRIDE
 	{
 		for	(uint32	i=0;i<_CustomComps.size();i++)
 			_CustomComps[i]->update(bot);
 		return	true;
 	}
 	
-	string	toString() const
+	string	toString() const NL_OVERRIDE
 	{
 		string	outputString="MULT(";
 
@@ -1001,9 +1002,9 @@ class	CFightMultReader
 {
 public:
 	CFightMultReader()			{}
-	virtual ~CFightMultReader()	{}
+	virtual ~CFightMultReader() NL_OVERRIDE	{}
 	
-	CFightScriptComp	*create	(const	std::string	&inStr)
+	CFightScriptComp	*create	(const	std::string	&inStr) NL_OVERRIDE
 	{
 		vector<string>	params;
 		explodeSubStrings(inStr, params, -1);
@@ -1022,7 +1023,7 @@ public:
 		}
 		return	new	CFightMult(scriptComps);
 	}
-	std::string	getName	() const
+	std::string	getName	() const NL_OVERRIDE
 	{
 		return	std::string("MULT");
 	}
@@ -1094,4 +1095,40 @@ CFightScriptComp	*CFightScriptCompReader::createScriptComp	(const string &str)
 		throw	ReadFightActionException(string("ScriptComp creation failed : ")+string(e.what()));
 	}
 
+}
+
+//////////////////////////////////////////////////////////////////////////
+//	Sheets library seam
+
+//	The ai sheets library (ryzom_aissheets) compiles without the fight
+//	script machinery in this file; creature script components reach the AI
+//	service through readCreatureScriptComp, declared in sheets.h.
+
+void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
+{
+	_ScriptCompList.push_back(scriptComp);
+	
+	CFightSelectFilter* filter = dynamic_cast<CFightSelectFilter*>(scriptComp);
+	if (!filter)
+		return;
+	
+	std::string const& param = filter->getParam();
+	if (param=="ON_UPDATE")
+		_UpdateScriptList.push_back(scriptComp);
+	if (param=="ON_DEATH")
+		_DeathScriptList.push_back(scriptComp);
+	if (param=="ON_BIRTH")
+		_BirthScriptList.push_back(scriptComp);
+}
+
+void AISHEETS::readCreatureScriptComp(AISHEETS::CCreature &creature, std::string const &scriptCompStr)
+{
+	try
+	{
+		creature.registerScriptComp(CFightScriptCompReader::createScriptComp(scriptCompStr));
+	}
+	catch (const ReadFightActionException& ex)
+	{
+		nlwarning("script read error (ignored): %s", ex.what());
+	}
 }

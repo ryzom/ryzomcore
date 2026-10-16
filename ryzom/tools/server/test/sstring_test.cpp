@@ -235,7 +235,7 @@ static void loadAndSaveTest()
 class CSStringTest: public IServiceSingleton
 {
 public:
-	void init()
+	void init() NL_OVERRIDE
 	{
 		xmlTestSet();
 		quoteTestSet();

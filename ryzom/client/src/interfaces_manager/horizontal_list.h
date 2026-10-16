@@ -42,7 +42,7 @@ public:
 	CHorizontalList(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint16 spacing = 3, uint texture = 0, NLMISC::CRGBA rgba = CRGBA(255,255,255,255) );
 
 	/// Destructor
-	~CHorizontalList();
+	~CHorizontalList() NL_OVERRIDE;
 
 	/**
 	 * set the bitmap to use to scroll left
@@ -64,13 +64,13 @@ public:
 
 
 	/// Display the control.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/// Manage the click for the control.
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// Manage the right click for the control.
-	virtual void clickRight(float x, float y, bool &taken);
+	virtual void clickRight(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/**
 	 * add a control to the list
@@ -85,7 +85,7 @@ public:
 	void setSpacing(uint16 spacing) { _Spacing = spacing; }
 
 	/// Set some references for the display.
-	virtual void ref(float x, float y, float w, float h);
+	virtual void ref(float x, float y, float w, float h) NL_OVERRIDE;
 
 	/**
 	 * clear the control - erase all controls
@@ -100,7 +100,7 @@ public:
 	bool center() const { return _Centered; }
 
 	/// Change the Hot Spot.
-	virtual void hotSpot(THotSpot hs);
+	virtual void hotSpot(THotSpot hs) NL_OVERRIDE;
 
 protected:
 	/// the objects (controls) in the list

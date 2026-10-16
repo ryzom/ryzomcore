@@ -370,12 +370,12 @@ class CLoggerServiceMod
 		{
 		}
 
-		virtual void getName (std::string &result) const
+		virtual void getName (std::string &result) const NL_OVERRIDE
 		{
 			result = "QueryThread";
 		}
 
-		virtual void run()
+		virtual void run() NL_OVERRIDE
 		{
 			while (true)
 			{
@@ -413,7 +413,7 @@ public:
 		CLoggerServiceSkel::init(this);
 	}
 
-	~CLoggerServiceMod()
+	~CLoggerServiceMod() NL_OVERRIDE
 	{
 		// stop the query thread
 		TThreadCommand tc;
@@ -429,7 +429,7 @@ public:
 		doHourlyProcess();
 	}
 
-	bool initModule(const TParsedCommandLine &initInfo)
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE
 	{
 		CModuleBase::initModule(initInfo);
 		// Check and eventually process the hourly output of the preceding minute run
@@ -442,7 +442,7 @@ public:
 		return true;
 	}
 	
-	void onModuleDown(IModuleProxy *moduleProxy)
+	void onModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		// check if this is one of our client
 		TLogClients::iterator it(_Clients.find(moduleProxy));
@@ -455,7 +455,7 @@ public:
 		}
 	}
 
-	void onModuleUpdate()
+	void onModuleUpdate() NL_OVERRIDE
 	{
 		uint32 now = CTime::getSecondsSince1970();
 
@@ -641,7 +641,7 @@ public:
 	// A logger client register itself wy providing it's definition of 
 	// the log content. It is mandatory that ALL client share
 	// Exactly the same definition of log.
-	virtual void registerClient(NLNET::IModuleProxy *sender, uint32 shardId, const std::vector < TLogDefinition > &logDef)
+	virtual void registerClient(NLNET::IModuleProxy *sender, uint32 shardId, const std::vector < TLogDefinition > &logDef) NL_OVERRIDE
 	{
 		CAutoMutex<CMutex> lock(_LogMutex);
 		// check that the client use the correct log format
@@ -685,7 +685,7 @@ public:
 	}
 
 	// A client send a log
-	virtual void reportLog(NLNET::IModuleProxy *sender, const std::vector < TLogInfo > &logInfos)
+	virtual void reportLog(NLNET::IModuleProxy *sender, const std::vector < TLogInfo > &logInfos) NL_OVERRIDE
 	{
 		CAutoMutex<CMutex> lock(_LogMutex);
 		// 1st check that the client is allowed
@@ -1905,7 +1905,7 @@ public:
 	/**
 	 * Init
 	 */
-	void init()
+	void init() NL_OVERRIDE
 	{
 		// init the sheet manager without worying about aving the sheet_id.bin file
 //		CSheetId::initWithoutSheet();
@@ -1919,20 +1919,20 @@ public:
 	/**
 	 * Update
 	 */
-	bool update ()
+	bool update () NL_OVERRIDE
 	{
 		CSingletonRegistry::getInstance()->tickUpdate();
 
 		return true;
 	}
 
-	void release()
+	void release() NL_OVERRIDE
 	{
 		CSingletonRegistry::getInstance()->release();
 
 	}
 
-	virtual std::string					getServiceStatusString() const
+	virtual std::string					getServiceStatusString() const NL_OVERRIDE
 	{
 		return toString("LQLState=%s LastFinishedQuery=%u", LQLState.c_str(), LastFinishedQuery.get());
 	}

@@ -35,7 +35,7 @@ public:
 
 	/// set the index of the member in the guild
 	inline void setMemberIndex(uint16 idx );
-	/// get the index of the member in the guild
+	/// get the index of the member in the guild 
 	inline uint16 getMemberIndex()const;
 	/// set the grade of the member
 	inline void setMemberGrade( EGSPD::CGuildGrade::TGuildGrade grade );
@@ -51,7 +51,7 @@ public:
 		return _IngameEId;
 	}
 	/// set the dynamic (ingame id of the member )
-	void setDynamicId(uint8 id)
+	void setDynamicId(uint8 id) 
 	{
 		_IngameEId = getId();
 		_IngameEId.setDynamicId( id );

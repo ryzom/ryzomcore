@@ -363,7 +363,7 @@ extern NLMISC::CVariable<bool>					PDRSave;
 extern NLMISC::CVariable<bool>					PDRLoad;
 extern NLMISC::CVariable<bool>					SerialSave;
 
-/// TRADE
+/// TRADE 
 extern NLMISC::CVariable<float>					ItemPriceCoeff0;
 extern NLMISC::CVariable<float>					ItemPriceCoeff1;
 extern NLMISC::CVariable<float>					ItemPriceCoeff2;
@@ -479,7 +479,7 @@ extern NLMISC::CVariable<bool>					UseFemaleTitles;
 // - NPC Icons
 extern NLMISC::CVariable<uint32>				ClientNPCIconRefreshTimerDelay;
 
-// - Ring
+// - Ring 
 extern NLMISC::CVariable<uint32>				TickFrequencyNpcControlUpdate;
 
 // scores

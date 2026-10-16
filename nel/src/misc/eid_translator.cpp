@@ -288,7 +288,7 @@ void CEntityIdTranslator::registerEntity (const CEntityId &eid, const ucstring &
 		return;
 	}
 
-	nlinfo ("EIT: Register EId %s EntityName '%s' UId %d UserName '%s'", reid.toString().c_str(), entityName.toString().c_str(), uid, userName.c_str());
+	//nlinfo ("EIT: Register EId %s EntityName '%s' UId %d UserName '%s'", reid.toString().c_str(), entityName.toString().c_str(), uid, userName.c_str());
 	RegisteredEntities.insert (make_pair(reid, CEntityIdTranslator::CEntity(entityName, uid, userName, entitySlot, shardId)));
 	NameIndex.insert(make_pair(toLower(entityName), reid));
 }
@@ -449,7 +449,7 @@ void cbInvalidEntityNamesFilename(const std::string &invalidEntityNamesFilename)
 	}
 
 	FILE *fp = nlfopen (fn, "r");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		nlwarning ("EIT: Can't load filename '%s' for invalid entity names filename", fn.c_str());
 		return;
@@ -583,7 +583,7 @@ void CEntityIdTranslator::getEntityIdInfo (const CEntityId &eid, ucstring &entit
 	reid.setCreatorId(0);
 	reid.setDynamicId(0);
 
-	if (additional != NULL)
+	if (additional != nullptr)
 		additional->clear();
 
 	TEntityCont::iterator it = RegisteredEntities.find (reid);
@@ -605,7 +605,7 @@ void CEntityIdTranslator::getEntityIdInfo (const CEntityId &eid, ucstring &entit
 		userName = entity.UserName;
 		online = entity.Online;
 
-		if (EntityInfoCallback != NULL && additional != NULL)
+		if (EntityInfoCallback != nullptr && additional != nullptr)
 			*additional = EntityInfoCallback(eid);
 	}
 }

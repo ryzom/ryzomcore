@@ -20,7 +20,7 @@
 
 namespace EGSPD
 {
-
+	
 /* -----------------------------------------
 * Static Implementation of CGuildPD
 * ----------------------------------------- */
@@ -668,5 +668,5 @@ void							CGuildPD::pds_static__fetch(RY_PDS::IPDBaseData *object, RY_PDS::CPDa
 }
 // End of static implementation of CGuildPD
 
-
+	
 } // End of EGSPD

@@ -266,7 +266,7 @@ bool CLigoConfig::reloadIndexFile(const std::string &indexFileName)
 
 	// get the variable
 	CConfigFile::CVar *files = cf.getVarPtr("Files");
-	if (files != NULL)
+	if (files != nullptr)
 	{
 		for (uint i=0; i<files->size()/2; ++i)
 		{
@@ -365,7 +365,7 @@ const NLLIGO::IPrimitive *CLigoConfig::getLinkedPrimitive (const NLLIGO::IPrimit
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -404,7 +404,7 @@ const NLLIGO::IPrimitive *CLigoConfig::getPreviousLinkedPrimitive (const NLLIGO:
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -469,7 +469,7 @@ bool CLigoConfig::canBeChild (const NLLIGO::IPrimitive &child, const NLLIGO::IPr
 	{
 		// Only if it is a root node or parent class doesn't exist
 		string parentClassName;
-		return ( (parent.getParent () == NULL) || (!parent.getPropertyByName ("class", parentClassName) ) );
+		return ( (parent.getParent () == nullptr) || (!parent.getPropertyByName ("class", parentClassName) ) );
 	}
 }
 
@@ -558,7 +558,7 @@ const std::vector<std::string> &CLigoConfig::getContextString () const
 
 const CPrimitiveClass *CLigoConfig::getPrimitiveClass (const IPrimitive &primitive) const
 {
-	const CPrimitiveClass *primClass = NULL;
+	const CPrimitiveClass *primClass = nullptr;
 
 	// Get property class
 	string className;
@@ -596,7 +596,7 @@ const CPrimitiveClass *CLigoConfig::getPrimitiveClass(const std::string &classNa
 	{
 		return &(ite->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************

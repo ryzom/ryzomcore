@@ -136,7 +136,7 @@ CToolChoosePos::~CToolChoosePos()
 CEntityCL *CToolChoosePos::getGhost()
 {
 	//H_AUTO(R2_CToolChoosePos_getGhost)
-	if (_GhostSlot == -1) return NULL;
+	if (_GhostSlot == -1) return nullptr;
 	return EntitiesMngr.entity(_GhostSlot);
 }
 
@@ -282,8 +282,8 @@ void CToolChoosePos::updateBeforeRender()
 		{
 			entity->show(true);
 			//
-			entity->updateVisible(T1,  NULL);
-			entity->updatePos(T1,  NULL);
+			entity->updateVisible(T1, nullptr);
+			entity->updatePos(T1, nullptr);
 
 			/*
 			CMatrix skelMatrix = entity->skeleton()->getMatrix();
@@ -467,7 +467,7 @@ void CToolChoosePos::updateAfterRender()
 							ghost->show(false);
 						}
 					}
-					getEditor().setCurrentTool(NULL);
+					getEditor().setCurrentTool(nullptr);
 				}
 				else
 				{
@@ -479,7 +479,7 @@ void CToolChoosePos::updateAfterRender()
 		case Cancel:
 		{
 			cancel();
-			getEditor().setCurrentTool(NULL);
+			getEditor().setCurrentTool(nullptr);
 		}
 		break;
 		case NoAction:

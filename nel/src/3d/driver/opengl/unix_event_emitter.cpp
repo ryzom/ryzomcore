@@ -45,7 +45,10 @@ static Atom XA_WM_DELETE_WINDOW = 0;
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _im(NULL), _ic(NULL), _driver(NULL)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(nullptr)
+    , _win(0), _im(nullptr)
+    , _ic(nullptr)
+    , _driver(nullptr)
 {
 	_SelectionOwned = false;
 }
@@ -88,21 +91,21 @@ void CUnixEventEmitter::createIM()
 {
 #ifdef X_HAVE_UTF8_STRING
 
-	_im = XOpenIM(_dpy, NULL, NULL, NULL);
+	_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
 
-	if (_im == NULL)
+	if (_im == nullptr)
 	{
 		XSetLocaleModifiers("@im=local");
  
-		_im = XOpenIM(_dpy, NULL, NULL, NULL);
+		_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
 
-		if (_im == NULL)
+		if (_im == nullptr)
 		{
 			XSetLocaleModifiers("@im=");
 
-			_im = XOpenIM(_dpy, NULL, NULL, NULL);
+			_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
 
-			if (_im == NULL)
+			if (_im == nullptr)
 			{
 				nlwarning("XOpenIM failed");
 			}
@@ -127,13 +130,13 @@ void CUnixEventEmitter::closeIM()
 	if (_ic)
 	{
 		XDestroyIC(_ic);
-		_ic = 0;
+		_ic = nullptr;
 	}
 
 	if (_im)
 	{
 		XCloseIM(_im);
-		_im = 0;
+		_im = nullptr;
 	}
 #endif
 }
@@ -506,7 +509,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 #endif
 
 			if (status == XLookupNone)
-				c = XLookupString(&event.xkey, Text, sizeof(Text), &k, NULL);
+				c = XLookupString(&event.xkey, Text, sizeof(Text), &k, nullptr);
 		}
 		else
 		{
@@ -567,7 +570,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		{
 			KeySym k;
 			// only need to get correct KeySym
-			int c = XLookupString(&event.xkey, NULL, 0, &k, NULL);
+			int c = XLookupString(&event.xkey, nullptr, 0, &k, nullptr);
 
 			TKey key = getKeyFromKeySym(k);
 			if(key == KeyNOKEY)
@@ -644,7 +647,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		// some applications are sending ATOM and other TARGETS
 		if (target == XA_TARGETS || target == XA_ATOM)
 		{
-			Atom *supportedTargets = NULL;
+			Atom *supportedTargets = nullptr;
 
 			// list NeL selection properties
 			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&supportedTargets) != Success)
@@ -693,7 +696,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		}
 		else if (target == XA_UTF8_STRING || target == XA_STRING)
 		{
-			uint8 *data = NULL;
+			uint8 *data = nullptr;
 
 			// get selection
 			if (XGetWindowProperty(_dpy, _win, XA_NEL_SEL, 0, XMaxRequestSize(_dpy), False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, (unsigned char**)&data) != Success)

@@ -57,13 +57,13 @@ public:
 	/// get a member of the challenge
 	const CMember * getMember( const TDataSetRow & userRow, uint16 &teamIdx, uint16 &memberIdx )const;
 
-	PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpChallenge; }
+	PVP_MODE::TPVPMode getPVPMode() const NL_OVERRIDE { return PVP_MODE::PvpChallenge; }
 
 	/// return pvp relation between the two players
-	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const NL_OVERRIDE;
 	
 private:
-	bool leavePVP( CCharacter * user, IPVP::TEndType type );
+	bool leavePVP( CCharacter * user, IPVP::TEndType type ) NL_OVERRIDE;
 
 	/// Return true for players in the challenge, from a different team, false for anyone else (including non-players) ('attackable' will be used instead)
 	bool canUserHurtTarget(CCharacter * user, CEntityBase * target) const;
@@ -74,7 +74,7 @@ private:
 	/// Return true for ennemy players and for non-players (if offensive)
 	bool canApplyAreaEffect(CCharacter * caster, CEntityBase * areaTarget, bool offensive, bool ignoreMainTarget) const;
 
-	virtual bool doCancelRespawn() const { return true; }
+	virtual bool doCancelRespawn() const NL_OVERRIDE { return true; }
 
 	/// add a user team
 	void addUserTeam(CCharacter *user);

@@ -56,7 +56,7 @@ namespace NL3D {
 
 
 std::vector<CPSCollisionInfo> CPSLocated::_Collisions;
-CPSCollisionInfo *CPSLocated::_FirstCollision = NULL;
+CPSCollisionInfo *CPSLocated::_FirstCollision = nullptr;
 
 
 
@@ -68,11 +68,14 @@ CPSLocated::CPSLocated() : /*_MaxNumFaces(0),*/
 						   _Size(0),
 						   _MaxSize(DefaultMaxLocatedInstance),
 						   _CollisionInfoNbRef(0),
-						   _CollisionNextPos(NULL),
+						   _CollisionNextPos(nullptr)
+    ,
 						   _InitialLife(1.f),
-						   _LifeScheme(NULL),
+						   _LifeScheme(nullptr)
+    ,
 						   _InitialMass(1.f),
-						   _MassScheme(NULL),
+						   _MassScheme(nullptr)
+    ,
 						   _LODDegradation(false),
 						   _ParametricMotion(false),
 						   _TriggerOnDeath(false),
@@ -550,7 +553,7 @@ void CPSLocated::setInitialLife(TAnimationTime lifeTime)
 	_LastForever = false;
 	_InitialLife = lifeTime;
 	delete _LifeScheme;
-	_LifeScheme = NULL;
+	_LifeScheme = nullptr;
 
 	/** Reset all particles current date to 0. This is needed because we do not check
 	  * if particle life is over when the date of the system has not gone beyond the life duration of particles
@@ -592,7 +595,7 @@ void CPSLocated::setInitialMass(float mass)
 	CHECK_PS_INTEGRITY
 	_InitialMass = mass;
 	delete _MassScheme;
-	_MassScheme = NULL;
+	_MassScheme = nullptr;
 	CHECK_PS_INTEGRITY
 }
 
@@ -1519,7 +1522,7 @@ void CPSLocated::serial(NLMISC::IStream &f)
 		else
 		{
 			f.serial(_InitialLife);
-			_LifeScheme = NULL;
+			_LifeScheme = nullptr;
 		}
 
 		f.serial(useScheme);
@@ -1531,7 +1534,7 @@ void CPSLocated::serial(NLMISC::IStream &f)
 		{
 			f.serial(_InitialMass);
 			nlassert(_InitialMass > 0);
-			_MassScheme = NULL;
+			_MassScheme = nullptr;
 		}
 	}
 	else
@@ -1820,7 +1823,7 @@ void CPSLocated::resetCollisions(uint numInstances)
 		currCollision->Dist = -1.f;
 		currCollision = currCollision->Next;
 	}
-	_FirstCollision = NULL;
+	_FirstCollision = nullptr;
 	if (numInstances > _Collisions.size())
 	{
 		uint oldSize = (uint) _Collisions.size();
@@ -2001,7 +2004,7 @@ void CPSLocated::updateLife()
 	if (!_Size) return;
 	if (! _LastForever)
 	{
-		if (_LifeScheme != NULL)
+		if (_LifeScheme != nullptr)
 		{
 			TPSAttribTime::iterator itTime = _Time.begin(), itTimeInc = _TimeIncrement.begin();
 			for (uint32 k = 0; k < _Size; ++k)
@@ -2524,7 +2527,7 @@ void CPSLocated::releaseCollisionInfo(void)
 	if (_CollisionInfoNbRef == 0)
 	{
 		delete _CollisionNextPos;
-		_CollisionNextPos = NULL;
+		_CollisionNextPos = nullptr;
 	}
 	CHECK_PS_INTEGRITY
 }
@@ -2609,7 +2612,7 @@ CPSLocatedBindable *CPSLocated::unbind(uint index)
 	CHECK_PS_INTEGRITY
 	nlassert(index < _LocatedBoundCont.size());
 	CPSLocatedBindable *lb = _LocatedBoundCont[index];
-	lb->setOwner(NULL);
+	lb->setOwner(nullptr);
 	_LocatedBoundCont.erase(_LocatedBoundCont.begin() + index);
 	CHECK_PS_INTEGRITY
 	return lb;
@@ -2645,10 +2648,11 @@ uint CPSLocated::getIndexOf(const CPSLocatedBindable *lb) const
 
 
 /// ***************************************************************************************
-CPSLocatedBindable::CPSLocatedBindable() : _Owner(NULL), _ExternID(0), _LOD(PSLod1n2), _Active(true)
+CPSLocatedBindable::CPSLocatedBindable() : _Owner(nullptr)
+    , _ExternID(0), _LOD(PSLod1n2), _Active(true)
 {
 	NL_PS_FUNC(CPSLocatedBindable_CPSLocatedBindable)
-	_Owner = NULL;
+	_Owner = nullptr;
 }
 
 /// ***************************************************************************************
@@ -2656,7 +2660,7 @@ void CPSLocatedBindable::setOwner(CPSLocated *psl)
 {
 	NL_PS_FUNC(CPSLocatedBindable_setOwner)
 	if (psl == _Owner) return;
-	if (psl == NULL)
+	if (psl == nullptr)
 	{
 		releaseAllRef();
 		if (_Owner)
@@ -2792,7 +2796,7 @@ void CPSLocatedBindable::displayIcon2d(const CVector tab[], uint nbSegs, float s
 		CPSLocatedBindable *lb;
 		_Owner->getOwner()->getCurrentEditedElement(loc, index, lb);
 
-		mat.setColor((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		mat.setColor((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 
 
 		CDRU::drawLinesUnlit(lines, mat, *getDriver() );
@@ -2870,7 +2874,7 @@ void	CPSLocatedBindable::setExternID(uint32 id)
 {
 	NL_PS_FUNC(CPSLocatedBindable_setExternID)
 	if (id == _ExternID) return;
-	CParticleSystem *ps = NULL;
+	CParticleSystem *ps = nullptr;
 	if (_Owner && _Owner->getOwner())
 	{
 		ps = _Owner->getOwner();

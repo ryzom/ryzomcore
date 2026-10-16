@@ -333,7 +333,7 @@ class htmlMimeMail
 	function _findHtmlImages($images_dir)
 	{
 		// Build the list of image extensions
-		foreach(array_keys($this->image_types) as $key) {
+		while (list($key,) = each($this->image_types)) {
 			$extensions[] = $key;
 		}
 
@@ -504,7 +504,7 @@ class htmlMimeMail
 	function buildMessage($params = array())
 	{
 		if (!empty($params)) {
-			foreach($params as $key => $value) {
+			while (list($key, $value) = each($params)) {
 				$this->build_params[$key] = $value;
 			}
 		}

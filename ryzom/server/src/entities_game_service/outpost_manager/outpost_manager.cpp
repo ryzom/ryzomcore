@@ -127,11 +127,7 @@ static void cbOutpostSquadLeaderDied( NLNET::CMessage& msgin, const std::string 
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-COutpostManager::COutpostManager():
-	_NextOutpostToSave(0),
-	_OutpostUpdateCursor(0),
-	_OutpostPrimitivesLoaded(false),
-	_OutpostSaveFilesLoaded(false)
+COutpostManager::COutpostManager(): _NextOutpostToSave(0), _OutpostUpdateCursor(0), _OutpostPrimitivesLoaded(false), _OutpostSaveFilesLoaded(false)
 {
 
 	OutpostDbgLog.addDisplayer( &OutpostDisplayer );
@@ -332,7 +328,7 @@ vector<string>	OutpostFiles;
 
 struct TOupostFileClassCallback : public IBackupFileClassReceiveCallback
 {
-	virtual void callback(const CFileDescriptionContainer& fileList)
+	virtual void callback(const CFileDescriptionContainer& fileList) NL_OVERRIDE
 	{
 		// store the list of oupost file
 		for (uint i=0; i<fileList.size(); ++i)
@@ -342,7 +338,7 @@ struct TOupostFileClassCallback : public IBackupFileClassReceiveCallback
 
 struct TOupostFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		// forward to outpost manager
 		COutpostManager::getInstance().outpostFileCallback(fileDescription, dataStream);
@@ -680,7 +676,7 @@ void COutpostManager::tickUpdate()
 				_Outposts[i]->updateOutpost(currentTime);
 			}
 
-			_OutpostUpdateCursor = 0;
+				_OutpostUpdateCursor = 0;
 		}
 		else
 		{

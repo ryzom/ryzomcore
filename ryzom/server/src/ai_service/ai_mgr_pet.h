@@ -36,24 +36,24 @@ class CMgrPet
 public:
 	CMgrPet(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename)	;
 	
-	void init() { }
-	void update();
-	void release() { }
+	void init() NL_OVERRIDE { }
+	void update() NL_OVERRIDE;
+	void release() NL_OVERRIDE { }
 	
-	virtual void spawn() { CManager::spawn(); }
-	void despawnMgr() { CManager::despawnMgr(); }
+	virtual void spawn() NL_OVERRIDE { CManager::spawn(); }
+	void despawnMgr() NL_OVERRIDE { CManager::despawnMgr(); }
 	
-	CStateMachine* getStateMachine() { return NULL; }
+	CStateMachine* getStateMachine() NL_OVERRIDE { return NULL; }
 	
 	void createPetGroup(NLMISC::CEntityId const& petOwnerId);
 	CGrpPet* getPetGroup(NLMISC::CEntityId const& petOwnerId);
 	void removePetGroup(NLMISC::CEntityId const& petOwnerId);
 	
-	AITYPES::TMgrType type() const { return AITYPES::MgrTypePet; }
+	AITYPES::TMgrType type() const NL_OVERRIDE { return AITYPES::MgrTypePet; }
 	
-	void serviceEvent(CServiceEvent const& info);	
+	void serviceEvent(CServiceEvent const& info) NL_OVERRIDE;	
 	
-	virtual std::string	getOneLineInfoString() const { return std::string("Pet manager '") + getName() + "'"; }
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE { return std::string("Pet manager '") + getName() + "'"; }
 	
 private:
 	TEntityIdMapUint32 _EntityIdToIndex;
@@ -66,7 +66,7 @@ private:
 class CPetSpawnMsgImp
 : public CPetSpawnMsg
 {
-	virtual void callback(std::string const& name, NLNET::TServiceId id);
+	virtual void callback(std::string const& name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ class CPetSpawnMsgImp
 class CPetSetOwnerImp
 : public CPetSetOwner
 {
-	virtual void callback(std::string const& name, NLNET::TServiceId id);
+	virtual void callback(std::string const& name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ class CPetSetOwnerImp
 class CPetCommandMsgImp
 : public CPetCommandMsg
 {
-	virtual void callback(std::string const& name, NLNET::TServiceId id);
+	virtual void callback(std::string const& name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /****************************************************************************/

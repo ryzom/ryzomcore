@@ -83,7 +83,7 @@ public:
 	// constructor
 	CR2GiveItem() {}
 	// destructor
-	~CR2GiveItem() {}
+	~CR2GiveItem() NL_OVERRIDE {}
 
 	// AIS send a give item request
 	void giveItemRequest( const CGiveItemRequestMsg &msg );
@@ -117,12 +117,12 @@ private:
 
 class CGiveItemRequestMsgImp : public CGiveItemRequestMsg
 {
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 class CReceiveItemRequestMsgImp : public CReceiveItemRequestMsg
 {
-	void callback (const std::string &name, NLNET::TServiceId id);
+	void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

@@ -153,7 +153,7 @@ template <class contentClass>
 class CStepContentFactory : public IStepContentFactory
 {
 public:
-	IStepContent *createStepContent(CMissionData &md, NLLIGO::IPrimitive *prim)
+	IStepContent *createStepContent(CMissionData &md, NLLIGO::IPrimitive *prim) NL_OVERRIDE
 	{
 		IStepContent *ret = new contentClass;
 		ret->init(md, prim);
@@ -176,7 +176,7 @@ public:
 template <class StepClass>
 class CStepFactory : public IStepFactory
 {
-	IStep *createStep(CMissionData &md, NLLIGO::IPrimitive *prim)
+	IStep *createStep(CMissionData &md, NLLIGO::IPrimitive *prim) NL_OVERRIDE
 	{
 		return new StepClass(md, prim);
 	}
@@ -202,11 +202,11 @@ protected:
 	std::string genNbGuildMembersNeededOption(CMissionData &md);*/
 	
 public:
-	void init(CMissionData &md, NLLIGO::IPrimitive *prim);
+	void init(CMissionData &md, NLLIGO::IPrimitive *prim) NL_OVERRIDE;
 	
-	std::string genCode(CMissionData &md);
+	std::string genCode(CMissionData &md) NL_OVERRIDE;
 	
-	std::string genPhrase();
+	std::string genPhrase() NL_OVERRIDE;
 };
 
 /** special case for step if **/
@@ -235,11 +235,11 @@ public:
 
 	CStepIf(CMissionData &md, NLLIGO::IPrimitive *prim);
 	
-	NLLIGO::TPrimitiveSet getSubBranchs();
+	NLLIGO::TPrimitiveSet getSubBranchs() NL_OVERRIDE;
 
-	void fillJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints);
+	void fillJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints) NL_OVERRIDE;
 
-	std::string genCode(CMissionData &md);
+	std::string genCode(CMissionData &md) NL_OVERRIDE;
 	
 	/// type of test
 	TIfType						_IfType;
@@ -261,11 +261,11 @@ class CStepPlayerReconnect : public IStep
 public:
 	CStepPlayerReconnect(CMissionData &md, NLLIGO::IPrimitive *prim);
 
-	NLLIGO::TPrimitiveSet getSubBranchs();
+	NLLIGO::TPrimitiveSet getSubBranchs() NL_OVERRIDE;
 
-	std::string genCode(CMissionData &md);
+	std::string genCode(CMissionData &md) NL_OVERRIDE;
 
-	void fillJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints);
+	void fillJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints) NL_OVERRIDE;
 };
 
 #endif // __STEP_H__

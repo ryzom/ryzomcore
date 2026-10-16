@@ -85,7 +85,7 @@ void CCharaterStatisticsRecorderRecord::build(const CCharaterStatisticsRecorderR
 	FLAG0(CLEAR,clear())\
 	PROP_GAME_CYCLE_OR_CURRENT(_TicksInGame)\
 	PROP(sint32,_TotalXP)\
-
+	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 
@@ -144,7 +144,7 @@ void CCharaterStatisticsRecorderContainer::add(CCharacter* character)
 	STRUCT_INDEXED_VECT(_Sessions1)\
 	STRUCT_INDEXED_VECT(_Sessions10)\
 	STRUCT_INDEXED_VECT(_Sessions100)\
-
+	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

@@ -371,8 +371,8 @@ public:
 		nlassert(animalClientPos >= 1 && animalClientPos <= MAX_INVENTORY_ANIMAL);
 	}
 
-	bool serviceIsAvailable(CCharacter * client);
-	void provideService(CCharacter * client);
+	bool serviceIsAvailable(CCharacter * client) NL_OVERRIDE;
+	void provideService(CCharacter * client) NL_OVERRIDE;
 
 private:
 	/// get animal index on the server for the given client, return false if animal is not present
@@ -448,8 +448,8 @@ class CISPFeedAllAnimals : public IItemServiceProvider
 public:
 	CISPFeedAllAnimals() : IItemServiceProvider(ITEM_SERVICE_TYPE::StableFeedAllAnimals) {}
 
-	bool serviceIsAvailable(CCharacter * client);
-	void provideService(CCharacter * client);
+	bool serviceIsAvailable(CCharacter * client) NL_OVERRIDE;
+	void provideService(CCharacter * client) NL_OVERRIDE;
 };
 
 //-----------------------------------------------------------------------------
@@ -492,16 +492,16 @@ class CISPSpeedUpDPLoss : public IItemServiceProvider
 	class CPersistent : public IPersistentISP
 	{
 	public:
-		bool replacesService(const CStaticItem * form) const;
+		bool replacesService(const CStaticItem * form) const NL_OVERRIDE;
 	};
 
 public:
 	CISPSpeedUpDPLoss() : IItemServiceProvider(ITEM_SERVICE_TYPE::SpeedUpDPLoss, new CPersistent) {}
 
-	bool serviceIsAvailable(CCharacter * client);
-	uint32 getServicePrice(uint32 basePrice, CCharacter * client);
-	void provideService(CCharacter * client);
-	void removeService(CCharacter * client);
+	bool serviceIsAvailable(CCharacter * client) NL_OVERRIDE;
+	uint32 getServicePrice(uint32 basePrice, CCharacter * client) NL_OVERRIDE;
+	void provideService(CCharacter * client) NL_OVERRIDE;
+	void removeService(CCharacter * client) NL_OVERRIDE;
 };
 
 //-----------------------------------------------------------------------------

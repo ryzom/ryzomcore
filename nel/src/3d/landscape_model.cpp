@@ -293,7 +293,7 @@ void	CLandscapeModel::clipAndRenderLandscape()
 	H_BEFORE( NL3D_Landscape_Render );
 	// In reflection renders the far passes select the deeper water clip
 	// bias (fills the void bleed at water horizons with distant terrain)
-	Landscape.setWaterReflectionClip(inReflection ? &getOwnerScene()->getWaterReflectionManager() : NULL);
+	Landscape.setWaterReflectionClip(inReflection ? &getOwnerScene()->getWaterReflectionManager() : nullptr);
 	// Vegetation is excluded from water reflection renders: its vertex
 	// program does not implement the reflection clip plane (underwater
 	// vegetation would show), and the contribution is not worth the cost

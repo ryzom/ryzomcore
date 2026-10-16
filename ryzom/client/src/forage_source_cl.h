@@ -41,22 +41,22 @@ public:
 	CForageSourceCL();
 
 	/// Destructor
-	virtual ~CForageSourceCL();
+	virtual ~CForageSourceCL() NL_OVERRIDE;
 
 	/// Build the entity from a sheet.
-	virtual bool build( const CEntitySheet *sheet );
+	virtual bool build( const CEntitySheet *sheet ) NL_OVERRIDE;
 
 	/// Rebuild in scene interfaces
-	virtual void buildInSceneInterface ();
+	virtual void buildInSceneInterface () NL_OVERRIDE;
 
 	/// Called when clipped out
-	virtual void updateClipped (const NLMISC::TTime &currentTimeInMs, CEntityCL *target);
+	virtual void updateClipped (const NLMISC::TTime &currentTimeInMs, CEntityCL *target) NL_OVERRIDE;
 
 	/// Method called each frame to manage the entity after the clipping test if the primitive is visible.
-	virtual void updateVisible(const NLMISC::TTime &time, CEntityCL *target);
+	virtual void updateVisible(const NLMISC::TTime &time, CEntityCL *target) NL_OVERRIDE;
 
 	/// Update the entity after all positions done.
-	virtual void updateVisiblePostPos(const NLMISC::TTime &time, CEntityCL *target);
+	virtual void updateVisiblePostPos(const NLMISC::TTime &time, CEntityCL *target) NL_OVERRIDE;
 
 	/// Return true if at least an extraction is in progress
 	bool	isExtractionInProgress() const { return _IsExtractionInProgress; }
@@ -94,24 +94,24 @@ public:
 protected:
 
 	/// Initialize properties of the entity (according to the class).
-	virtual void initProperties();
+	virtual void initProperties() NL_OVERRIDE;
 
 	// Update Entity Visual Property B
 	//virtual void updateVisualPropertyVpb(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
 
 	/// Update Entity Bars
-	virtual void updateVisualPropertyBars(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyBars(const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Visual FX
-	virtual void updateVisualPropertyVisualFX(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVisualFX(const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Name.
-	virtual void updateVisualPropertyName         (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyName         (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Target.
-	virtual void updateVisualPropertyTarget       (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyTarget       (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Orientation.
-	virtual void updateVisualPropertyOrient       (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyOrient       (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 
 	/// Display the modifiers
-	virtual void displayModifiers();
+	virtual void displayModifiers() NL_OVERRIDE;
 
 	/// Destroy inscene interfaces
 	void releaseInSceneInterfaces();

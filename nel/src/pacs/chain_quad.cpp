@@ -33,20 +33,20 @@ const	float	CChainQuad::_QuadElementSize= 4;	// = 4 meters.
 // ***************************************************************************
 CChainQuad::CChainQuad()
 {
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 }
 // ***************************************************************************
 CChainQuad::~CChainQuad()
 {
 	delete [] _QuadData;
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 }
 // ***************************************************************************
 CChainQuad::CChainQuad(const CChainQuad &o)
 {
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 	*this= o;
 }
@@ -63,7 +63,7 @@ CChainQuad	&CChainQuad::operator=(const CChainQuad &o)
 		memcpy(_QuadData, o._QuadData, _QuadDataLen);
 	}
 	else
-		_QuadData= NULL;
+		_QuadData = nullptr;
 
 	// copy infos.
 	_Width= o._Width;
@@ -73,7 +73,7 @@ CChainQuad	&CChainQuad::operator=(const CChainQuad &o)
 
 	// copy good pointers.
 	_Quad.clear();
-	_Quad.resize(o._Quad.size(), NULL);
+	_Quad.resize(o._Quad.size(), nullptr);
 	for(sint i=0; i<(sint)_Quad.size(); i++)
 	{
 		if(o._Quad[i])
@@ -118,7 +118,7 @@ void			CChainQuad::build(const std::vector<COrderedChain> &ochains)
 	// first, clear any pr-build.
 	contReset(_Quad);
 	delete [] _QuadData;
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 
 
@@ -149,7 +149,7 @@ void			CChainQuad::build(const std::vector<COrderedChain> &ochains)
 	_Height= (sint32)ceil(chainquadBBox.getMax().y / _QuadElementSize) - _Y;
 
 	tempQuad.resize(_Width*_Height);
-	_Quad.resize(_Width*_Height, NULL);
+	_Quad.resize(_Width*_Height, nullptr);
 
 
 	// 1. For each edge, add them to the quadgrid.
@@ -481,7 +481,7 @@ void		CChainQuad::serial(NLMISC::IStream &f)
 		if(_QuadDataLen>0)
 			_QuadData= (uint8*)new uint8[_QuadDataLen];
 		else
-			_QuadData= NULL;
+			_QuadData = nullptr;
 	}
 	// Since we have only uint16 (see CEdgeChainEntry), serial them in a single block.
 	uint16	*ptrQData= (uint16*)_QuadData;
@@ -508,7 +508,7 @@ void		CChainQuad::serial(NLMISC::IStream &f)
 		{
 			f.serial(val);
 			if(val== 0xFFFFFFFF)
-				_Quad[i]= NULL;
+				_Quad[i] = nullptr;
 			else
 				_Quad[i]= _QuadData+val;
 		}
@@ -523,7 +523,7 @@ void		CChainQuad::serial(NLMISC::IStream &f)
 		for(i=0; i<len; i++)
 		{
 			uint8	*ptr= _Quad[i];
-			if(ptr==NULL)
+			if(ptr == nullptr)
 				val= 0xFFFFFFFF;
 			else
 				val= (uint32)(ptr-_QuadData);

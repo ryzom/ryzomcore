@@ -106,7 +106,7 @@ public:
 	 * will the number of bytes that still remain in the sending queue after the
 	 * non-blocking flush attempt.
 	 */
-	virtual bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining=NULL) = 0;
+	virtual bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining = nullptr) = 0;
 
 	/**	Appends callback array with the specified array. You can add callback only *after* adding the server or the client.
 	 * \param arraysize is the number of callback items.

@@ -141,7 +141,7 @@ public:
 
 protected:
 
-	virtual std::string	getLoggerIdentifier() const	{ return NLMISC::toString("typ:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
+	virtual std::string	getLoggerIdentifier() const NL_OVERRIDE	{ return NLMISC::toString("typ:%s", (_Name.empty() ? "<unnamed>" : _Name.c_str())); }
 
 private:
 

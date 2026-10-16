@@ -150,7 +150,8 @@ typedef std::vector< TBMSSerialInfo > TBMSSerialInfoList;
 struct TBMSDbgInfoData
 {
 	/// Constructor
-	TBMSDbgInfoData() : List(), CurrentBrowsedItem(0), NextSymbol(NULL), AddEventIsEnabled(true) {}
+	TBMSDbgInfoData() : List(), CurrentBrowsedItem(0), NextSymbol(nullptr)
+	    , AddEventIsEnabled(true) {}
 
 	/// Vector of serial items
 	TBMSSerialInfoList				List;
@@ -176,7 +177,7 @@ public:
 
 #ifdef NL_DEBUG
 	/// Constructor
-	CBMSDbgInfo() : _DbgData(NULL) { init(); }
+	CBMSDbgInfo() : _DbgData(nullptr) { init(); }
 #else
 	/// Constructor
 	CBMSDbgInfo() {}
@@ -184,7 +185,7 @@ public:
 
 #ifdef NL_DEBUG
 	/// Copy constructor
-	CBMSDbgInfo( const CBMSDbgInfo& src ) : _DbgData(NULL)
+	CBMSDbgInfo( const CBMSDbgInfo& src ) : _DbgData(nullptr)
 	{
 		init();
 		operator=( src );
@@ -201,7 +202,7 @@ public:
 	~CBMSDbgInfo()
 	{
 		delete _DbgData;
-		_DbgData = NULL;
+		_DbgData = nullptr;
 	}
 
 #endif
@@ -220,13 +221,13 @@ public:
 #ifdef NL_DEBUG
 		if ( ! _DbgData->AddEventIsEnabled )
 		{
-			_DbgData->NextSymbol = NULL;
+			_DbgData->NextSymbol = nullptr;
 			return;
 		}
 
 		TBMSSerialInfo serialItem( bitpos, size, type, _DbgData->NextSymbol );
 		_DbgData->List.push_back( serialItem );
-		_DbgData->NextSymbol = NULL;
+		_DbgData->NextSymbol = nullptr;
 #else
 		nlunreferenced(bitpos);
 		nlunreferenced(size);
@@ -240,7 +241,7 @@ public:
 #ifdef NL_DEBUG
 		if ( ! _DbgData->AddEventIsEnabled )
 		{
-			_DbgData->NextSymbol = NULL;
+			_DbgData->NextSymbol = nullptr;
 			return;
 		}
 
@@ -263,7 +264,7 @@ public:
 		{
 			nlwarning( "Missing reserve() corresponding to poke()" );
 		}
-		_DbgData->NextSymbol = NULL;
+		_DbgData->NextSymbol = nullptr;
 #else
 		nlunreferenced(bitpos);
 		nlunreferenced(size);
@@ -394,7 +395,7 @@ public:
 	 * If you are using the stream only in output mode, you can use this method as a faster version
 	 * of clear() *if you don't serialize pointers*.
 	 */
-	virtual void		resetBufPos()
+	virtual void		resetBufPos() NL_OVERRIDE
 	{
 		// This is ensured in CMemStream::CMemStream() and CMemStream::clear()
 		//if ( (!isReading()) && _Buffer.empty() )
@@ -415,7 +416,7 @@ public:
 	 * (the last byte may not be full, it may have free bits, see
 	 * also getPosInBit()).
 	 */
-	virtual uint32	length() const
+	virtual uint32	length() const NL_OVERRIDE
 	{
 		if ( isReading() )
 		{
@@ -431,7 +432,7 @@ public:
 	}
 
 	/// Transforms the message from input to output or from output to input
-	virtual void	invert()
+	virtual void	invert() NL_OVERRIDE
 	{
 		if ( ! isReading() )
 		{
@@ -452,7 +453,7 @@ public:
 	}
 
 	/// Clears the message
-	virtual void	clear()
+	virtual void	clear() NL_OVERRIDE
 	{
 		CMemStream::clear();
 		resetBufPos();
@@ -477,7 +478,7 @@ public:
 	}
 
 	/// See doc in CMemStream::bufferToFill()
-	virtual uint8		*bufferToFill( uint32 msgsize )
+	virtual uint8		*bufferToFill( uint32 msgsize ) NL_OVERRIDE
 	{
 		_FreeBits = 8;
 		_DbgInfo.clear();
@@ -488,10 +489,10 @@ public:
 	void			append( const CBitMemStream& newBits );
 
 	/// Serialize a buffer
-	virtual void	serialBuffer(uint8 *buf, uint len);
+	virtual void	serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
 
 	/// Serialize one bit
-	virtual void	serialBit( bool& bit );
+	virtual void	serialBit( bool& bit ) NL_OVERRIDE;
 
 #ifdef LOG_ALL_TRAFFIC
 	void			_serialAndLog( const char *argstr, uint32& value, uint nbits );
@@ -635,36 +636,36 @@ public:
 #endif
 #endif
 
-	virtual void	serial(uint8 &b) { serialAdapt( b, uint8 ); }
-	virtual void	serial(sint8 &b) { serialAdapt( b, sint8 ); }
-	virtual void	serial(uint16 &b) { serialAdapt( b, uint16 ); }
-	virtual void	serial(sint16 &b) { serialAdapt( b, sint16 ); }
-	virtual void	serial(uint32 &b) { serialAdapt( b, uint32 ); }
-	virtual void	serial(sint32 &b) { serialAdapt( b, sint32 ); }
-	virtual void	serial(uint64 &b) { serialAdapt64( b ); }
-	virtual void	serial(sint64 &b) { serialAdapt64( b ); }
-	virtual void	serial(float &b);
-	virtual void	serial(double &b) { serialAdapt64( b ); }
-	virtual void	serial(bool &b) { serialBit( b ); }
+	virtual void	serial(uint8 &b) NL_OVERRIDE { serialAdapt( b, uint8 ); }
+	virtual void	serial(sint8 &b) NL_OVERRIDE { serialAdapt( b, sint8 ); }
+	virtual void	serial(uint16 &b) NL_OVERRIDE { serialAdapt( b, uint16 ); }
+	virtual void	serial(sint16 &b) NL_OVERRIDE { serialAdapt( b, sint16 ); }
+	virtual void	serial(uint32 &b) NL_OVERRIDE { serialAdapt( b, uint32 ); }
+	virtual void	serial(sint32 &b) NL_OVERRIDE { serialAdapt( b, sint32 ); }
+	virtual void	serial(uint64 &b) NL_OVERRIDE { serialAdapt64( b ); }
+	virtual void	serial(sint64 &b) NL_OVERRIDE { serialAdapt64( b ); }
+	virtual void	serial(float &b) NL_OVERRIDE;
+	virtual void	serial(double &b) NL_OVERRIDE { serialAdapt64( b ); }
+	virtual void	serial(bool &b) NL_OVERRIDE { serialBit( b ); }
 #ifndef NL_OS_CYGWIN
-	virtual void	serial(char &b) { serialAdapt( b, char ); }
+	virtual void	serial(char &b) NL_OVERRIDE { serialAdapt( b, char ); }
 #endif
 
-	virtual void	serial(std::string &b);
-	virtual void	serial(ucstring &b);
+	virtual void	serial(std::string &b) NL_OVERRIDE;
+	virtual void	serial(ucstring &b) NL_OVERRIDE;
 
 	virtual void	serial(CBitMemStream &b) { serialMemStream(b); }
-	virtual void	serialMemStream(CMemStream &b);
+	virtual void	serialMemStream(CMemStream &b) NL_OVERRIDE;
 
 
 	//@}
 
 	/// Specialisation of serialCont() for vector<uint8>
-	virtual void			serialCont(std::vector<uint8> &cont) { serialVector(cont); }
+	virtual void			serialCont(std::vector<uint8> &cont) NL_OVERRIDE { serialVector(cont); }
 	/// Specialisation of serialCont() for vector<sint8>
-	virtual void			serialCont(std::vector<sint8> &cont) { serialVector(cont); }
+	virtual void			serialCont(std::vector<sint8> &cont) NL_OVERRIDE { serialVector(cont); }
 	/// Specialisation of serialCont() for vector<bool>
-	virtual void			serialCont(std::vector<bool> &cont);
+	virtual void			serialCont(std::vector<bool> &cont) NL_OVERRIDE;
 
 protected:
 
@@ -807,7 +808,7 @@ inline std::string CBMSDbgInfo::getEventLegendAtBitPos( CBitMemStream& bms, sint
 		TBMSSerialInfo& serialItem = _DbgData->List[eventId]; // works only with a vector!
 		return toString( "(%d) BitPos %3u Type %s BitSize %2u Value %s %s\n",
 					eventId, serialItem.BitPos, SerialTypeToCStr[serialItem.Type], serialItem.BitSize,
-					bms.getSerialItem( serialItem ).c_str(), (serialItem.Symbol!=NULL)?serialItem.Symbol:"" );
+					bms.getSerialItem( serialItem ).c_str(), (serialItem.Symbol != nullptr) ?serialItem.Symbol:"" );
 	}
 #else
 	nlunreferenced(bms);

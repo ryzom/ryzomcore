@@ -329,13 +329,13 @@ struct CClientConfig
 	// NEW PATCHING SYSTEM //
 	bool			PatchWanted;
 	std::string		PatchUrl;
-	std::string		PatchVersion;
 	std::string		PatchletUrl;
+	std::string		PatchVersion;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
 
-	std::string     WebIgMainDomain;
+	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
 	uint			WebIgNotifInterval; // value in minutes for notification thread
 

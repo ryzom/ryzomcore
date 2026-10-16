@@ -32,7 +32,7 @@ extern NL3D::UScene *Scene;
 // *********************************************************************
 CAnimationFXIDArray::CAnimationFXIDArray()
 {
-	_AnimSet = NULL;
+	_AnimSet = nullptr;
 }
 
 // *********************************************************************
@@ -43,7 +43,7 @@ void CAnimationFXIDArray::release()
 	{
 		Driver->deleteAnimationSet(_AnimSet);
 	}
-	_AnimSet = NULL;
+	_AnimSet = nullptr;
 }
 
 // *********************************************************************
@@ -88,7 +88,7 @@ const CAnimationFX *CAnimationFXIDArray::getFX(uint32 id) const
 	CIDToFX comp;
 	comp.ID = id;
 	std::vector<CIDToFX>::const_iterator it = std::lower_bound(_IDToFXArray.begin(), _IDToFXArray.end(), comp);
-	if (it == _IDToFXArray.end()) return NULL;
-	if (it->ID != id) return NULL;
+	if (it == _IDToFXArray.end()) return nullptr;
+	if (it->ID != id) return nullptr;
 	return &(it->FX);
 }

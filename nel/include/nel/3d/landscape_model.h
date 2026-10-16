@@ -96,16 +96,16 @@ public:
 
 	/** Override CTransform::initModel(), to create CLandscape's VegetableManager's BlendLayer models in the scene.
 	 */
-	virtual void	initModel();
+	virtual void	initModel() NL_OVERRIDE;
 	/// special traverseHRC.
-	virtual void	traverseHrc();
+	virtual void	traverseHrc() NL_OVERRIDE;
 	/// special clip(). NB: the real landscape clip is done in traverseRender()
-	virtual void	traverseClip();
-	virtual bool	clip() {return true;}
+	virtual void	traverseClip() NL_OVERRIDE;
+	virtual bool	clip() NL_OVERRIDE {return true;}
 	/// traverseRender()
-	virtual void	traverseRender();
+	virtual void	traverseRender() NL_OVERRIDE;
 	/// Some prof infos
-	virtual	void	profileRender();
+	virtual	void	profileRender() NL_OVERRIDE;
 
 	/// Actual Clip and Render!! See Implementation for Why this scheme
 	void			clipAndRenderLandscape();
@@ -113,14 +113,14 @@ public:
 
 	/// \name ShadowMap Behavior. Receive only
 	// @{
-	virtual void		getReceiverBBox(CAABBox &bbox);
-	virtual void		receiveShadowMap(CShadowMap *shadowMap, const CVector &casterPos, const CMaterial &shadowMat);
-	virtual const CMatrix	&getReceiverRenderWorldMatrix() const {return _RenderWorldMatrix;}
+	virtual void		getReceiverBBox(CAABBox &bbox) NL_OVERRIDE;
+	virtual void		receiveShadowMap(CShadowMap *shadowMap, const CVector &casterPos, const CMaterial &shadowMat) NL_OVERRIDE;
+	virtual const CMatrix	&getReceiverRenderWorldMatrix() const NL_OVERRIDE {return _RenderWorldMatrix;}
 	// @}
 
 protected:
 	CLandscapeModel();
-	virtual ~CLandscapeModel() {}
+	virtual ~CLandscapeModel() NL_OVERRIDE {}
 
 private:
 	static CTransform	*creator() {return new CLandscapeModel;}

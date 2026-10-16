@@ -74,7 +74,7 @@ void			CLandscapeCollisionGrid::clear()
 		}
 
 		// reset root.
-		_Grid[i]= NULL;
+		_Grid[i] = nullptr;
 	}
 
 	_Cleared= true;

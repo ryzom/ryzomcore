@@ -67,7 +67,7 @@ sint32						CLodCharacterShapeBank::getShapeIdByName(const std::string &name) co
 const CLodCharacterShape	*CLodCharacterShapeBank::getShape(uint32 shapeId) const
 {
 	if(shapeId >= _ShapeArray.size())
-		return NULL;
+		return nullptr;
 	else
 		return &_ShapeArray[shapeId];
 }
@@ -76,7 +76,7 @@ const CLodCharacterShape	*CLodCharacterShapeBank::getShape(uint32 shapeId) const
 CLodCharacterShape			*CLodCharacterShapeBank::getShapeFullAcces(uint32 shapeId)
 {
 	if(shapeId >= _ShapeArray.size())
-		return NULL;
+		return nullptr;
 	else
 		return &_ShapeArray[shapeId];
 }

@@ -273,7 +273,7 @@ private:
 		CUserScore()
 		{
 			Score= 0;
-			DBInMax= DBOutVal= DBOutRatio= NULL;
+			DBInMax= DBOutVal= DBOutRatio = nullptr;
 		}
 	};
 	CUserScore		_UserScores[SCORES::NUM_SCORES];

@@ -76,15 +76,15 @@ public:
 	CMovePrimitive (CMoveContainer* container, uint8 firstWorldImage, uint8 numWorldImage);
 
 	/// Destructor
-	virtual ~CMovePrimitive ();
+	virtual ~CMovePrimitive () NL_OVERRIDE;
 	//
-	virtual	void	setDontSnapToGround(bool dont)
+	virtual	void	setDontSnapToGround(bool dont) NL_OVERRIDE
 	{
 		if (dont) _StaticFlags |= DontSnapToGroundFlag;
 		else _StaticFlags &= ~DontSnapToGroundFlag;
 	}
 	//
-	bool	getDontSnapToGround() const
+	bool	getDontSnapToGround() const NL_OVERRIDE
 	{
 		return (_StaticFlags & DontSnapToGroundFlag) != 0;
 	}
@@ -126,8 +126,8 @@ public:
 			return false;
 	}
 
-	virtual uint8				getFirstWorldImageV () const;
-	virtual uint8				getNumWorldImageV () const;
+	virtual uint8				getFirstWorldImageV () const NL_OVERRIDE;
+	virtual uint8				getNumWorldImageV () const NL_OVERRIDE;
 
 	// Get first world image used
 	uint8	getFirstWorldImage () const
@@ -159,7 +159,7 @@ public:
 	  *
 	  * \param type is the new primitive type.
 	  */
-	void	setPrimitiveType (TType type)
+	void	setPrimitiveType (TType type) NL_OVERRIDE
 	{
 		// New position
 		_StaticFlags&=~(uint32)PrimitiveMask;
@@ -171,7 +171,7 @@ public:
 	  *
 	  * \param type is the new reaction type.
 	  */
-	void	setReactionType (TReaction type)
+	void	setReactionType (TReaction type) NL_OVERRIDE
 	{
 		// New position
 		_StaticFlags&=~(uint32)ReactionMask;
@@ -183,7 +183,7 @@ public:
 	  *
 	  * \param type is the new trigger type.
 	  */
-	void	setTriggerType (TTrigger type)
+	void	setTriggerType (TTrigger type) NL_OVERRIDE
 	{
 		// New position
 		_StaticFlags&=~(uint32)TriggerMask;
@@ -195,7 +195,7 @@ public:
 	  *
 	  * \param mask is the new collision mask.
 	  */
-	void	setCollisionMask (TCollisionMask mask)
+	void	setCollisionMask (TCollisionMask mask) NL_OVERRIDE
 	{
 		_CollisionMask=mask;
 	}
@@ -205,7 +205,7 @@ public:
 	  *
 	  * \param mask is the new occlusion mask.
 	  */
-	void	setOcclusionMask (TCollisionMask mask)
+	void	setOcclusionMask (TCollisionMask mask) NL_OVERRIDE
 	{
 		_OcclusionMask=mask;
 	}
@@ -215,7 +215,7 @@ public:
 	  *
 	  * \param obstacle is true if this primitive is an obstacle, else false.
 	  */
-	void	setObstacle (bool obstacle)
+	void	setObstacle (bool obstacle) NL_OVERRIDE
 	{
 		// New flag
 		if (obstacle)
@@ -230,7 +230,7 @@ public:
 	  * \param width is the new width size of the box. It the size of the sides aligned on OX.
 	  * \param depth is the new depth size of the box. It the size of the sides aligned on OY.
 	  */
-	void	setSize (float width, float depth)
+	void	setSize (float width, float depth) NL_OVERRIDE
 	{
 		// Checks
 		nlassert ((((uint32)_StaticFlags)&PrimitiveMask)==_2DOrientedBox);
@@ -245,7 +245,7 @@ public:
 	  *
 	  * \param height is the new height size of the box. It the size of the sides aligned on OZ.
 	  */
-	void	setHeight (float height)
+	void	setHeight (float height) NL_OVERRIDE
 	{
 		// New size
 		_Height=height;
@@ -256,7 +256,7 @@ public:
 	  *
 	  * \param radius is the new radius size of the cylinder.
 	  */
-	void	setRadius (float radius)
+	void	setRadius (float radius) NL_OVERRIDE
 	{
 		// Checks
 		nlassert ((((uint32)_StaticFlags)&PrimitiveMask)==_2DOrientedCylinder);
@@ -331,7 +331,7 @@ public:
 	}
 
 	/// Is collisionable
-	bool	isCollisionable() const
+	bool	isCollisionable() const NL_OVERRIDE
 	{
 		return !isNonCollisionable();
 	}
@@ -358,27 +358,27 @@ public:
 
 	/// \name From UMovePrimitive
 
-	void					setAbsorbtion (float attenuation);
-	void					setOrientation (double rot, uint8 worldImage);
-	void					setGlobalPosition (const NLMISC::CVectorD& pos, uint8 worldImage, UGlobalPosition::TType type = UGlobalPosition::Unspecified);
-	void					setGlobalPosition (const UGlobalPosition& pos, uint8 worldImage);
-	void					move (const NLMISC::CVectorD& speed, uint8 worldImage);
-	NLMISC::CVectorD		getFinalPosition (uint8 worldImage)  const;
-	const NLMISC::CVectorD&	getSpeed (uint8 worldImage) const;
-	void					insertInWorldImage (uint8 worldImage);
-	void					removeFromWorldImage (uint8 worldImage);
-	TType					getPrimitiveType () const;
-	TReaction				getReactionType () const;
-	TTrigger				getTriggerType () const;
-	TCollisionMask			getCollisionMask () const;
-	TCollisionMask			getOcclusionMask () const;
-	bool					getObstacle () const;
-	float					getAbsorbtion () const;
-	void					getSize (float& width, float& depth) const;
-	float					getHeight () const;
-	float					getRadius () const;
-	double					getOrientation (uint8 worldImage) const;
-	void					getGlobalPosition (UGlobalPosition& pos, uint8 worldImage) const;
+	void					setAbsorbtion (float attenuation) NL_OVERRIDE;
+	void					setOrientation (double rot, uint8 worldImage) NL_OVERRIDE;
+	void					setGlobalPosition (const NLMISC::CVectorD& pos, uint8 worldImage, UGlobalPosition::TType type = UGlobalPosition::Unspecified) NL_OVERRIDE;
+	void					setGlobalPosition (const UGlobalPosition& pos, uint8 worldImage) NL_OVERRIDE;
+	void					move (const NLMISC::CVectorD& speed, uint8 worldImage) NL_OVERRIDE;
+	NLMISC::CVectorD		getFinalPosition (uint8 worldImage)  const NL_OVERRIDE;
+	const NLMISC::CVectorD&	getSpeed (uint8 worldImage) const NL_OVERRIDE;
+	void					insertInWorldImage (uint8 worldImage) NL_OVERRIDE;
+	void					removeFromWorldImage (uint8 worldImage) NL_OVERRIDE;
+	TType					getPrimitiveType () const NL_OVERRIDE;
+	TReaction				getReactionType () const NL_OVERRIDE;
+	TTrigger				getTriggerType () const NL_OVERRIDE;
+	TCollisionMask			getCollisionMask () const NL_OVERRIDE;
+	TCollisionMask			getOcclusionMask () const NL_OVERRIDE;
+	bool					getObstacle () const NL_OVERRIDE;
+	float					getAbsorbtion () const NL_OVERRIDE;
+	void					getSize (float& width, float& depth) const NL_OVERRIDE;
+	float					getHeight () const NL_OVERRIDE;
+	float					getRadius () const NL_OVERRIDE;
+	double					getOrientation (uint8 worldImage) const NL_OVERRIDE;
+	void					getGlobalPosition (UGlobalPosition& pos, uint8 worldImage) const NL_OVERRIDE;
 
 	// Test time. Return true if tetst can be perform, false if too many test have been computed for this primitive
 	bool checkTestTime (uint32 testTime, uint32 maxTestIteration)

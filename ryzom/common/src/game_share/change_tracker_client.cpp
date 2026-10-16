@@ -114,11 +114,11 @@ void		CChangeTrackerClient::clean()
  */
 void		CChangeTrackerClient::release()
 {
-	if ( (_Header != NULL) && (! isPointingToGroupTracker()) )
+	if ( (_Header != nullptr) && (! isPointingToGroupTracker()) )
 	{
 		NLMISC::CSharedMemory::closeSharedMemory( _Header );
-		_Header = NULL;
-		_Array = NULL;
+		_Header = nullptr;
+		_Array = nullptr;
 		_SMId = -1;
 
 #ifndef USE_FAST_MUTEX

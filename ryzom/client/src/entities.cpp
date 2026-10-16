@@ -120,7 +120,7 @@ class CMissionTargetObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -130,13 +130,13 @@ public :
 			uint32 target = leaf->getValue32();
 
 			// Scan all entities
-			CEntityCL *entity = NULL;
+			CEntityCL *entity = nullptr;
 			if (oldTarget)
 				entity = EntitiesMngr.getEntityByName(oldTarget);
 			if (entity)
 				entity->updateMissionTarget();
 
-			entity = NULL;
+			entity = nullptr;
 			if (target)
 				entity = EntitiesMngr.getEntityByName(target);
 			if (entity)
@@ -171,7 +171,7 @@ public :
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CGroupCompas *pGC = dynamic_cast<CGroupCompas*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
-				if (pGC == NULL)
+				if (pGC == nullptr)
 				{
 					nlwarning("Can't retrieve compass group");
 					return;
@@ -261,7 +261,7 @@ class CTeamUIDObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -295,7 +295,7 @@ class CTeamPresentObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -331,7 +331,7 @@ class CAnimalUIDObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -365,7 +365,7 @@ class CAnimalStatusObserver : public ICDBNode::IPropertyObserver
 public :
 
 	// From ICDBNode::IPropertyObserver
-	virtual void update(ICDBNode* node )
+	virtual void update(ICDBNode* node ) NL_OVERRIDE
 	{
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf*>(node);
 		if (leaf)
@@ -410,7 +410,7 @@ CEntityManager::CEntityManager()
 	_NbUser				= 0;
 	_NbPlayer			= 0;
 	_NbChar				= 0;
-	_LastEntityUnderPos= NULL;
+	_LastEntityUnderPos = nullptr;
 	_LastRemovedInstance = -1;
 }// CEntityManager //
 
@@ -435,7 +435,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 	// if
 	if(_NbMaxEntity)
 	{
-		_Entities.resize(_NbMaxEntity, 0);
+		_Entities.resize(_NbMaxEntity, nullptr);
 		_EntityGroundFXHandle.resize(_NbMaxEntity);
 	}
 
@@ -462,7 +462,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamUIDObserver, textId );
 		_GroupMemberUidDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_GroupMemberUidDB[i]);
-
+		
 		text = toString(TEAM_DB_PATH ":%d:NAME", i);
 		textId = ICDBNode::CTextId(text);
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamPresentObserver, textId );
@@ -478,13 +478,13 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalUIDObserver, textId);
 		_BeastUidDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_BeastUidDB[i]);
-
+		
 		text = toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS", i);
 		textId = ICDBNode::CTextId(text);
 		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalStatusObserver, textId);
 		_BeastStatusDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_BeastStatusDB[i]);
-
+		
 		text = toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i);
 		_BeastTypeDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
 		nlassert(_BeastTypeDB[i]);
@@ -499,7 +499,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 //-----------------------------------------------
 void CEntityManager::release()
 {
-	_LastEntityUnderPos= NULL;
+	_LastEntityUnderPos = nullptr;
 
 	// Remove all entities.
 	for(uint i=0; i<_Entities.size(); ++i)
@@ -512,11 +512,11 @@ void CEntityManager::release()
 				_GroundFXManager.remove(_EntityGroundFXHandle[i]);
 			}
 			delete _Entities[i];
-			_Entities[i] = 0;
+			_Entities[i] = nullptr;
 		}
 	}
 
-	UserEntity = NULL;
+	UserEntity = nullptr;
 
 	// Clear the list.
 	_Entities.clear();
@@ -552,14 +552,14 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 
 	if(!instance.empty())
 	{
-		UMovePrimitive *primitive = NULL;
+		UMovePrimitive *primitive = nullptr;
 
 		if (PACS && haveCollisions)
 		{
 			primitive = PACS->addCollisionablePrimitive(dynamicWI, 1);
 			primitive->setDontSnapToGround(false);
 		}
-
+	
 		// Put instance in last deleted position if found
 		if (_LastRemovedInstance != -1)
 		{
@@ -574,7 +574,7 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 			_ShapeInstances[idx].BboxActive = !text.empty() || !url.empty();
 			_ShapeInstances[idx].Deleted = false;
 			_ShapeInstances[idx].InIGZone = inIgZone > 0;
-
+			
 			_LastRemovedInstance = _ShapeInstances[idx].LastDeleted;
 			_ShapeInstances[idx].LastDeleted = -1;
 			TIGZoneShapes::iterator it = _IgZoneShapes.find(inIgZone);
@@ -667,7 +667,7 @@ CVector CEntityManager::getInstancePos(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-
+	
 	return instance.getPos();
 }
 
@@ -675,17 +675,17 @@ bool CEntityManager::setInstancePos(uint32 idx, CVector pos)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
-
+	
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return false;
-
+	
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (primitive)
 	{
 		primitive->setGlobalPosition(_ShapeInstances[idx].PrimRelativePos + pos, dynamicWI);
 	}
-
+		
 	instance.setPos(pos);
 	return true;
 }
@@ -694,11 +694,11 @@ CVector CEntityManager::getInstanceRot(uint32 idx)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return CVector(0,0,0);
-
+	
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-
+		
 	return instance.getRotEuler();
 }
 
@@ -706,13 +706,13 @@ bool CEntityManager::setInstanceRot(uint32 idx, CVector rot)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
-
+	
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return false;
-
+	
 	instance.setRotEuler(rot);
-
+	
 	return true;
 }
 
@@ -724,7 +724,7 @@ CVector CEntityManager::getInstanceScale(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-
+	
 	return instance.getScale();
 }
 
@@ -732,7 +732,7 @@ CVector CEntityManager::getInstanceColPos(uint32 idx)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return CVector(0,0,0);
-
+	
 	return _ShapeInstances[idx].PrimRelativePos;
 }
 
@@ -744,11 +744,11 @@ CVector CEntityManager::getInstanceColScale(uint32 idx)
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (!primitive)
 		return CVector(0,0,0);
-
+	
 	float width, depth;
 	primitive->getSize(width, depth);
 	float height = primitive->getHeight();
-
+	
 	return CVector(width, depth, height);
 }
 
@@ -756,11 +756,11 @@ double CEntityManager::getInstanceColOrient(uint32 idx)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return 0.f;
-
+	
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
 	if (!primitive)
 		return 0.f;
-
+	
 	return primitive->getOrientation(dynamicWI);
 }
 
@@ -772,21 +772,21 @@ CVector CEntityManager::getInstanceBBoxMin(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if (instance.empty())
 		return  CVector(0,0,0);
-
+		
 	NLMISC::CAABBox bbox;
 	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
-
+	
 	CVector bbox_min;
-
+	
 	if (bbox.getCenter() == CVector::Null)
 		bbox_min = CVector(-0.5f, -0.5f, -0.5f);
 	else
 		bbox_min = bbox.getMin();
-
+	
 	bbox_min.x *= _ShapeInstances[idx].Instance.getScale().x;
 	bbox_min.y *= _ShapeInstances[idx].Instance.getScale().y;
 	bbox_min.z *= _ShapeInstances[idx].Instance.getScale().z;
-
+	
 	return bbox_min+_ShapeInstances[idx].Instance.getPos();
 }
 
@@ -798,28 +798,28 @@ CVector CEntityManager::getInstanceBBoxMax(uint32 idx)
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return  CVector(0,0,0);
-
+	
 	NLMISC::CAABBox bbox;
 	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
-
+	
 	CVector bbox_max;
-
+	
 	if (bbox.getCenter() == CVector::Null)
 		bbox_max = CVector(-0.5f, -0.5f, -0.5f);
 	else
 		bbox_max = bbox.getMax();
-
+	
 	bbox_max.x *= _ShapeInstances[idx].Instance.getScale().x;
 	bbox_max.y *= _ShapeInstances[idx].Instance.getScale().y;
 	bbox_max.z *= _ShapeInstances[idx].Instance.getScale().z;
-
+	
 	return bbox_max+_ShapeInstances[idx].Instance.getPos();
 }
 
 bool CEntityManager::removeInstances()
 {
 	if (!Scene) return false;
-
+	
 	for(uint i=0; i<_ShapeInstances.size(); ++i)
 	{
 		if (!_ShapeInstances[i].InIGZone)
@@ -827,7 +827,6 @@ bool CEntityManager::removeInstances()
 	}
 	return true;
 }
-
 void CEntityManager::removeShapePrimitives()
 {
 	for(uint i=0; i<_ShapeInstances.size(); ++i)
@@ -845,13 +844,13 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
-
+	
 	UInstance instance = _ShapeInstances[idx].Instance;
 	if(instance.empty())
 		return false;
-
+	
 	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
-
+	
 	for (uint32 i=0; i < keys.size(); i++)
 	{
 		string param = keys[i];
@@ -943,7 +942,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			float v;
 			CVector pos = getInstancePos(idx);
-
+			
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, pos, v, true);
@@ -956,10 +955,10 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		}
 		else if (param == "rot x" || param == "rot y" || param == "rot z")
 		{
-
+			
 			float v;
 			CVector rot = getInstanceRot(idx);
-
+			
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, rot, v, true);
@@ -974,7 +973,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			float v;
 			CVector scale = instance.getScale();
-
+			
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, scale, v, true);
@@ -985,17 +984,17 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			}
 			instance.setScale(scale);
 		}
-
+		
 		// Primitive colissions setups
-
+		
 		if (!primitive) continue;
-
+		
 		if (param == "col size x" || param == "col size y" || param == "col size z")
 		{
 			float width, depth;
 			primitive->getSize(width, depth);
 			float height = primitive->getHeight();
-
+			
 			CVector size = CVector(width, depth, height);
 			float v;
 			if (getRelativeFloatFromString(values[i], v))
@@ -1013,7 +1012,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			CVector pos = instance.getPos();
 			float v;
-
+			
 			if (getRelativeFloatFromString(values[i], v))
 			{
 				updateVector(param, _ShapeInstances[idx].PrimRelativePos, v, false);
@@ -1033,10 +1032,10 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		{
 			double orient = primitive->getOrientation(dynamicWI);
 			double v = 0.f;
-
+			
 			if (values[i].empty())
 				continue;
-
+			
 			if (values[i][0] == '+')
 			{
 				fromString(values[i].substr(1), v);
@@ -1047,7 +1046,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 				fromString(values[i], v);
 				orient = v;
 			}
-
+			
 			primitive->setOrientation(orient, dynamicWI);
 		}
 		else if (param == "col mask player")
@@ -1078,7 +1077,7 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		}
 		else if (param == "col obstacle")
 		{
-
+			
 		}
 	}
 
@@ -1089,9 +1088,9 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float y, sint32 &idx)
 {
 	CShapeInstanceReference selectedInstance(UInstance(), string(""), string(""));
-	_LastInstanceUnderPos= NULL;
+	_LastInstanceUnderPos = nullptr;
 	idx = -1;
-
+	
 	// If not initialised, return
 	if (_ShapeInstances.empty())
 		return selectedInstance;
@@ -1196,9 +1195,7 @@ CEntityCL *CEntityManager::buildEntity(uint slot, uint32 form)
 
 	switch(entitySheet->type())
 	{
-	case CEntitySheet::RACE_STATS:
-	case CEntitySheet::CHAR:
-		if (slot == 0)
+	case CEntitySheet::RACE_STATS: case CEntitySheet::CHAR: if (slot == 0)
 		{
 			nlassert (UserEntity == NULL);
 			UserEntity = new CUserEntity;
@@ -1210,31 +1207,25 @@ CEntityCL *CEntityManager::buildEntity(uint slot, uint32 form)
 		}
 		break;
 
-	case CEntitySheet::FAUNA:
-	{
+	case CEntitySheet::FAUNA: {
 		CCharacterSheet *sheet = NLMISC::safe_cast<CCharacterSheet *>(entitySheet);
 		if (!sheet->R2Npc) newEntity = new CCharacterCL;
 		else newEntity = new CPlayerR2CL;
 	}
 	break;
-	case CEntitySheet::FLORA:
-		newEntity = new CCharacterCL;
+	case CEntitySheet::FLORA: newEntity = new CCharacterCL;
 		break;
 
-	case CEntitySheet::FX:
-		newEntity = new CFxCL;
+	case CEntitySheet::FX: newEntity = new CFxCL;
 		break;
 
-	case CEntitySheet::ITEM:
-		newEntity = new CItemCL;
+	case CEntitySheet::ITEM: newEntity = new CItemCL;
 		break;
 
-	case CEntitySheet::FORAGE_SOURCE:
-		newEntity = new CForageSourceCL;
+	case CEntitySheet::FORAGE_SOURCE: newEntity = new CForageSourceCL;
 		break;
 
-	default:
-		pushDebugStr(NLMISC::toString("Unknown Form Type '%d' -> entity not created.", entitySheet->type()));
+	default: pushDebugStr(NLMISC::toString("Unknown Form Type '%d' -> entity not created.", entitySheet->type()));
 		break;
 	}
 
@@ -1313,13 +1304,13 @@ void CEntityManager::destroyEntityInSlot(uint slot)
 CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& newEntityInfo)
 {
 	// DEBUG
-	if(verboseVP(NULL, form))
+	if(verboseVP(nullptr, form))
 		nlinfo("(%05d,%03d) EM:create: slot '%u': %s", sint32(T1%100000), NetMngr.getCurrentServerTick(), slot, CSheetId(form).toString().c_str());
 	// Check parameter : slot.
 	if(slot >= _NbMaxEntity)
 	{
 		nlwarning("EM:create: Cannot create the entity, the slot '%u' is invalid.", slot);
-		return 0;
+		return nullptr;
 	}
 	else
 	{
@@ -1333,7 +1324,7 @@ CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& 
 			}
 			// Store the alias (although there should not be one for the slot 0!)
 			_Entities[0]->npcAlias(newEntityInfo.Alias);
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -1371,8 +1362,7 @@ void CEntityManager::changeEntitySheet(uint slot, uint32 form, const TNewEntityI
 		return;
 	}
 
-	if(newEntityInfo.DataSetIndex == CLFECOMMON::INVALID_CLIENT_DATASET_INDEX ||
-	   _Entities[slot]->dataSetId() != newEntityInfo.DataSetIndex)
+	if(newEntityInfo.DataSetIndex == CLFECOMMON::INVALID_CLIENT_DATASET_INDEX || _Entities[slot]->dataSetId() != newEntityInfo.DataSetIndex)
 	{
 		// Not the same underlying entity: this slot is genuinely being
 		// reassigned, do the full teardown.
@@ -1468,7 +1458,7 @@ void CEntityManager::updatePendingSheetChanges()
 bool CEntityManager::remove(uint slot, bool warning)
 {
 	// DEBUG
-	if(verboseVP(NULL))
+	if(verboseVP(nullptr))
 		nlinfo("EM:remove: slot '%u'.", slot);
 	// Check parameter : slot.
 	if(slot >= _NbMaxEntity)
@@ -1485,7 +1475,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 	}
 
 	// Slot not allocated.
-	if(_Entities[slot] == 0)
+	if(_Entities[slot] == nullptr)
 	{
 		if(warning)
 		{
@@ -1498,7 +1488,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 	for(uint i=0; i<_Entities.size(); ++i)
 	{
 		// This entity is not allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Inform about the slot of the entity that will be removed.
@@ -1506,7 +1496,7 @@ bool CEntityManager::remove(uint slot, bool warning)
 	}
 
 	// remove ground fx
-	if(_Entities[slot] != 0)
+	if(_Entities[slot] != nullptr)
 	{
 		if (_Entities[slot]->supportGroundFX())
 		{
@@ -1523,11 +1513,11 @@ bool CEntityManager::remove(uint slot, bool warning)
 
 	// previous UnderPos?
 	if(_LastEntityUnderPos==_Entities[slot])
-		_LastEntityUnderPos= NULL;
+		_LastEntityUnderPos = nullptr;
 
 	// Free the slot.
 	delete _Entities[slot];
-	_Entities[slot] = 0;
+	_Entities[slot] = nullptr;
 
 	// Done.
 	return true;
@@ -1544,7 +1534,7 @@ void CEntityManager::removeCollision()
 	for(uint i=0; i<nbEntities; ++i)
 	{
 		// Is the entity allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Remove the entity primitive.
@@ -1584,14 +1574,14 @@ CEntityCL *CEntityManager::entity(uint slot)
 {
 	// Return 0 if the slot is the INVALID_SLOT
 	if(slot==CLFECOMMON::INVALID_SLOT)
-		return 0;
+		return nullptr;
 	// Check parameter : slot.
 	if(slot >= _Entities.size())
 	{
 		nlwarning("EM:entity: slot '%u' is invalid.", slot);
 		if(ClientCfg.Check)
 			nlstop;
-		return 0;
+		return nullptr;
 	}
 	// Return the entity pointer.
 	return _Entities[slot];
@@ -1610,7 +1600,7 @@ bool CEntityManager::entitiesNearDoors(float openingDist, const CVector& posDoor
 	for(uint i=0; i<_NbMaxEntity; ++i)
 	{
 		// Is the entity allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Get a reference on the current entity.
@@ -1637,7 +1627,7 @@ void	CEntityManager::getEntityListForSelection(std::vector<CEntityCL*> &entities
 	for(uint i=firstEntity; i<_NbMaxEntity; ++i)
 	{
 		// Is the entity allocated and not user mount.
-		if(_Entities[i] == 0 || i==UserEntity->mount())
+		if(_Entities[i] == nullptr || i==UserEntity->mount())
 			continue;
 		// If entity unselectable, skip
 		if(!_Entities[i]->properties().selectable())
@@ -1687,11 +1677,11 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 
 	// reset result
 	isPlayerUnderCursor= false;
-	_LastEntityUnderPos= NULL;
+	_LastEntityUnderPos = nullptr;
 
 	// If not initialised, return
 	if (_Entities.empty())
-		return NULL;
+		return nullptr;
 
 
 	// **** list of valid entities to test
@@ -1740,7 +1730,7 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 
 	// if no intersected entities, quit
 	if(intersectedEntities.empty())
-		return NULL;
+		return nullptr;
 
 	// Compute startDistBox: nearest entity distance, but the user
 	float	startDistBox;
@@ -1750,7 +1740,7 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 		isPlayerUnderCursor= true;
 		// if only player intersected, return NULL!
 		if(intersectedEntities.size()==1)
-			return NULL;
+			return nullptr;
 		// so take the second for startDistBox
 		startDistBox= intersectedEntities[1].Depth;
 	}
@@ -1762,7 +1752,7 @@ CEntityCL *CEntityManager::getEntityUnderPos(float x, float y, float distSelecti
 
 
 	// **** get best entity according to distance face-camera or box-ray if no face intersection
-	CEntityCL	*entitySelected= NULL;
+	CEntityCL	*entitySelected = nullptr;
 	float		bestDistBox= FLT_MAX;
 	float		bestDistZ= FLT_MAX;
 	for(i=0;i<intersectedEntities.size();i++)
@@ -1909,7 +1899,7 @@ CEntityCL *CEntityManager::getEntityInCamera(uint flags, float distSelection, CL
 
 	// If not initialised, return
 	if (_Entities.empty())
-		return NULL;
+		return nullptr;
 
 	// list of valid entities
 	static	vector<CEntityCL*>		validEntitiesTmp, validEntities;
@@ -1921,7 +1911,7 @@ CEntityCL *CEntityManager::getEntityInCamera(uint flags, float distSelection, CL
 	for (i=0 ; i<validEntitiesTmp.size() ; i++)
 	{
 		CCharacterCL *entity = dynamic_cast<CCharacterCL*>(validEntitiesTmp[i]);
-		if ((entity == NULL) || (entity && entity->isSelectableBySpace()))
+		if ((entity == nullptr) || (entity && entity->isSelectableBySpace()))
 			validEntities.push_back(entity);
 	}
 
@@ -1982,7 +1972,7 @@ CEntityCL *CEntityManager::getEntityInCamera(uint flags, float distSelection, CL
 
 	// No one in screen?
 	if(screenEntities.empty())
-		return NULL;
+		return nullptr;
 
 	// sort them increasingly
 	sort(screenEntities.begin(), screenEntities.end());
@@ -2019,7 +2009,7 @@ void CEntityManager::changeContinent()
 	for(uint i=0; i<_NbMaxEntity; ++i)
 	{
 		// Is the entity allocated.
-		if(_Entities[i] == 0)
+		if(_Entities[i] == nullptr)
 			continue;
 
 		// Compute the new primitive.
@@ -2039,10 +2029,8 @@ void CEntityManager::changeContinent()
 void CEntityManager::updatePreCamera()
 {
 	H_AUTO ( RZ_Client_Entity_Mngr_Update_Pre_Cam )
-
 	// Swap in entities whose sheet/appearance changed (see changeEntitySheet()).
 	updatePendingSheetChanges();
-
 	uint i;
 	// Build an entity list..
 	_ActiveEntities.reserve (_Entities.size ());
@@ -2054,7 +2042,7 @@ void CEntityManager::updatePreCamera()
 	{
 		// Is the entity allocated.
 		CEntityCL *entity = _Entities[i];
-		if(entity == 0)
+		if(entity == nullptr)
 			continue;
 		// Count Entities
 		++_EntitiesAllocated;
@@ -2272,7 +2260,7 @@ void CEntityManager::updatePostRender()
 void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, const uint &slot, const uint &prop, const NLMISC::TGameCycle &predictedInterval)
 {
 	// INFO : log some debug information about visual properties.
-	if(verboseVP(NULL))
+	if(verboseVP(nullptr))
 		nlinfo("EM:updateVP: received prop '%d' for the slot '%d'.", prop, slot);
 
 	// Check parameter : slot.
@@ -2283,10 +2271,10 @@ void CEntityManager::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, c
 	}
 
 	// Entity still not allocated -> backup values received for the entity.
-	if(_Entities[slot] == 0)
+	if(_Entities[slot] == nullptr)
 	{
 		// INFO : log some debug information about visual properties.
-		if(verboseVP(NULL))
+		if(verboseVP(nullptr))
 			nlinfo("EM:updateVP: backup the property as long as the entity is not allocated.", prop, slot);
 
 		string propName = toString("SERVER:Entities:E%d:P%d", slot, prop);
@@ -2549,13 +2537,13 @@ CEntityCL *CEntityManager::getEntityByName (uint32 stringId) const
 					return _Entities[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------
 CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywords, bool onlySelectable) const
 {
-	if (keywords.empty()) return NULL;
+	if (keywords.empty()) return nullptr;
 
 	std::vector<string> lcKeywords;
 	lcKeywords.resize(keywords.size());
@@ -2607,7 +2595,7 @@ CEntityCL *CEntityManager::getEntityByKeywords (const std::vector<string> &keywo
 	if (selectedEntityDist != FLT_MAX)
 		return _Entities[selectedEntityId];
 	else
-		return NULL;
+		return nullptr;
 }
 
 //-----------------------------------------------
@@ -2659,7 +2647,7 @@ CEntityCL *CEntityManager::getEntityByName (const string &name, bool caseSensiti
 	if (selectedEntityDist != FLT_MAX) // Entity found
 		return _Entities[selectedEntityId];
 	else
-		return NULL;
+		return nullptr;
 }
 
 //-----------------------------------------------
@@ -2677,7 +2665,7 @@ CEntityCL *CEntityManager::getEntityByCompressedIndex(TDataSetIndex compressedIn
 					return _Entities[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 //-----------------------------------------------
 // getEntityBySheetName :
@@ -2697,7 +2685,7 @@ CEntityCL *CEntityManager::getEntityBySheetName (const std::string &sheet) const
 					return _Entities[i];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 //-----------------------------------------------
 // managePACSTriggers :

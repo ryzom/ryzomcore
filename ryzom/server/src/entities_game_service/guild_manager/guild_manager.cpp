@@ -67,7 +67,7 @@ class CGuildFileClassCb : public IBackupFileClassReceiveCallback
 {
 public:
 	/// Callback from BSI for file class list
-	virtual void callback(const CFileDescriptionContainer& fileList)
+	virtual void callback(const CFileDescriptionContainer& fileList) NL_OVERRIDE
 	{
 		CGuildManager::getInstance()->callback(fileList);
 	}
@@ -77,7 +77,7 @@ class CGuildFileCb : public IBackupFileReceiveCallback
 {
 public:
 	/// Callback from BSI for one guild file
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		CGuildManager::getInstance()->callback(fileDescription, dataStream);
 	}

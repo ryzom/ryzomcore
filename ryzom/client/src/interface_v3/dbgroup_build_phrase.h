@@ -84,8 +84,8 @@ public:
 
 		CSlot()
 		{
-			Brick= NULL;
-			Back= NULL;
+			Brick = nullptr;
+			Back = nullptr;
 			Valid= false;
 		}
 	};
@@ -121,9 +121,9 @@ public:
 		{
 			NumTotalParams= 0;
 			ParamError= false;
-			CostView= NULL;
-			CreditView= NULL;
-			InfoView= NULL;
+			CostView = nullptr;
+			CreditView = nullptr;
+			InfoView = nullptr;
 		}
 	};
 
@@ -131,12 +131,12 @@ public:
 
 	/// Constructor
 	CDBGroupBuildPhrase(const TCtorParam &param);
-	virtual ~CDBGroupBuildPhrase();
+	virtual ~CDBGroupBuildPhrase() NL_OVERRIDE;
 
 	/// CInterfaceGroup Interface
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-	virtual void updateCoords ();
-	virtual void draw ();
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+	virtual void updateCoords () NL_OVERRIDE;
+	virtual void draw () NL_OVERRIDE;
 
 	// Get the Validate Button if possible
 	CCtrlBaseButton		*getValidateButton() const {return _ValidateButton;}

@@ -403,7 +403,7 @@ void CMemDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		needSpace = true;
 	}
 
-	if (args.FileName != NULL)
+	if (args.FileName != nullptr)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += CFile::getFilename(args.FileName);
@@ -432,7 +432,7 @@ void CMemDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 
 void CMemDisplayer::write (CLog *log, bool quiet)
 {
-	if (log == NULL)
+	if (log == nullptr)
 		log = InfoLog;
 
 	if ( ! quiet )

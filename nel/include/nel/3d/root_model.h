@@ -45,12 +45,12 @@ public:
 
 	/// \name CTransform traverse specialisation
 	// @{
-	virtual void	traverseHrc();
-	virtual void	traverseClip();
-	virtual void	traverseAnimDetail();
-	virtual void	traverseLoadBalancing();
-	virtual void	traverseLight();
-	virtual void	traverseRender();
+	virtual void	traverseHrc() NL_OVERRIDE;
+	virtual void	traverseClip() NL_OVERRIDE;
+	virtual void	traverseAnimDetail() NL_OVERRIDE;
+	virtual void	traverseLoadBalancing() NL_OVERRIDE;
+	virtual void	traverseLight() NL_OVERRIDE;
+	virtual void	traverseRender() NL_OVERRIDE;
 	// @}
 
 
@@ -58,7 +58,7 @@ protected:
 	/// Constructor
 	CRootModel() {}
 	/// Destructor
-	virtual ~CRootModel() {}
+	virtual ~CRootModel() NL_OVERRIDE {}
 
 private:
 	static CTransform	*creator() {return new CRootModel;}

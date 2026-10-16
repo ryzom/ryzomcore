@@ -31,7 +31,7 @@ class CHttpPostTask : public NLMISC::IRunnable
 {
 public:
 	CHttpPostTask(const std::string &host, const std::string &page, const std::string &params);
-	void run(void);
+	void run(void) NL_OVERRIDE;
 
 private:
 	std::string m_Host;

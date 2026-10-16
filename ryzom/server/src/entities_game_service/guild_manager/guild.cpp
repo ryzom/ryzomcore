@@ -59,7 +59,7 @@ CVariable<uint32> GuildMaxOutpostCount("egs", "GuildMaxOutpostCount", "max numbe
 extern std::string guildIdToString(uint32 guildId);
 // utility to parse a human readable string into a guild id
 extern uint32 parseGuildId(const std::string &str);
-extern NLMISC::CVariable<uint32> GuildChestSlots;
+extern NLMISC::CVariable<sint32> GuildChestSlots;
 
 extern bool IOSIsUp;
 
@@ -1025,6 +1025,7 @@ bool CGuild::canAccessToGuildInventory( CCharacter * user )
 
 	// TODO ULU : add here position check of GH on atys
 
+
 	return false;
 }
 
@@ -1494,6 +1495,7 @@ void CGuild::deleteMember( CGuildMember* member )
 	nlassert( uint(member->getGrade()) < _GradeCounts.size() );
 
 	CCharacter *character = PlayerManager.getChar(member->getIngameEId());
+
 #ifdef HAVE_MEMCACHED
 	ucstring charName;
 	if (character != NULL)
@@ -1916,6 +1918,8 @@ uint8 CGuild::getAndSyncItemInfoVersion( uint32 slot, const NLMISC::CEntityId& c
 {
 	uint8 infoVersion = _GuildInventoryView->getItemInfoVersion( slot );
 	CGuildMember* member = EGS_PD_CAST<CGuildMember*>(getMembers( characterId ));
+	if ( member == NULL )
+		return infoVersion;
 	CGuildMemberModule *onlineMember = NULL;
 	if ( member->getReferencingModule( onlineMember ) ) // contains slow dynamic cast :(
 		onlineMember->setLastSentInfoVersion( slot, infoVersion );

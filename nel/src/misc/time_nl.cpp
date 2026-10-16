@@ -305,7 +305,7 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
  */
 uint32 CTime::getSecondsSince1970 ()
 {
-	return uint32(time(NULL));
+	return uint32(time(nullptr));
 }
 
 
@@ -412,7 +412,7 @@ TTime CTime::getLocalTime ()
 
 	// This is affected by system time changes.
 	struct timeval tv;
-	if ( gettimeofday( &tv, NULL) != 0 )
+	if ( gettimeofday( &tv, nullptr) != 0 )
 		nlerror ("Can't get time of day");
 	return (TTime)tv.tv_sec * (TTime)1000 + (TTime)tv.tv_usec / (TTime)1000;
 
@@ -447,6 +447,11 @@ TTicks CTime::getPerformanceTime ()
 	uint64 x;
 	// RDTSC - Read time-stamp counter into EDX:EAX.
 	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
+	return x;
+#elif defined(HAVE_AARCH64)
+	uint64 x;
+	// reads Counter-timer Virtual Count Register
+	__asm__ volatile ("mrs %0, cntvct_el0" : "=r" (x));
 	return x;
 #elif defined(__EMSCRIPTEN__)
 	struct timespec ts;

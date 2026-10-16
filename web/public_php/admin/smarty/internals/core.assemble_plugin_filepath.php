@@ -14,9 +14,11 @@
  */
 function smarty_core_assemble_plugin_filepath($params, &$smarty)
 {
+    static $_filepaths_cache = array();
+
     $_plugin_filename = $params['type'] . '.' . $params['name'] . '.php';
-    if (isset($smarty->_filepaths_cache[$_plugin_filename])) {
-        return $smarty->_filepaths_cache[$_plugin_filename];
+    if (isset($_filepaths_cache[$_plugin_filename])) {
+        return $_filepaths_cache[$_plugin_filename];
     }
     $_return = false;
 
@@ -56,7 +58,7 @@ function smarty_core_assemble_plugin_filepath($params, &$smarty)
             }
         }
     }
-    $smarty->_filepaths_cache[$_plugin_filename] = $_return;
+    $_filepaths_cache[$_plugin_filename] = $_return;
     return $_return;
 }
 

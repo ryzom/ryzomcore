@@ -446,7 +446,6 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 		_AggroPropagationRadius = -1.f;
 	
 	item.getValueByName(_AssistDist,"Combat.AssistDist");
-	
 	if (!item.getValueByName(_Scale, "3d data.Scale"))
 		_Scale = 1.f;
 	{
@@ -629,18 +628,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 		{
 			std::string	scriptCompStr;
 			scriptCompNode->getArrayValue(scriptCompStr, arrayIndex);
-#ifndef NO_AI_COMP
-			CFightScriptComp* scriptComp;
-			try
-			{
-				scriptComp = CFightScriptCompReader::createScriptComp(scriptCompStr);
-				registerScriptComp(scriptComp);
-			}
-			catch (const ReadFightActionException& ex)
-			{
-				nlwarning("script read error (ignored): %s", ex.what());
-			}
-#endif
+			readCreatureScriptComp(*this, scriptCompStr);
 		}
 	}
 	// Creature race
@@ -654,25 +642,9 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 	}
 }
 
-void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
-{
-#ifndef NO_AI_COMP
-	_ScriptCompList.push_back(scriptComp);
-
-	CFightSelectFilter* filter = dynamic_cast<CFightSelectFilter*>(scriptComp);
-	if (!filter)
-		return;
-
-	std::string const& param = filter->getParam();
-	if (param=="ON_UPDATE")
-		_UpdateScriptList.push_back(scriptComp);
-	if (param=="ON_DEATH")
-		_DeathScriptList.push_back(scriptComp);
-	if (param=="ON_BIRTH")
-		_BirthScriptList.push_back(scriptComp);
-#endif
-}
-
+// CCreature::registerScriptComp lives in ai_script_comp.cpp with the rest of
+// the fight script machinery; its dynamic_cast on CFightSelectFilter needs
+// typeinfo the sheets library deliberately does not pull in.
 
 uint AISHEETS::CCreature::getVersion()
 { 
@@ -769,19 +741,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 		{
 			string scriptCompStr;
 			s.serial(scriptCompStr);
-			
-#ifndef NO_AI_COMP
-			CFightScriptComp* scriptComp;
-			try
-			{
-				scriptComp = CFightScriptCompReader::createScriptComp(scriptCompStr);
-				registerScriptComp(scriptComp);
-			}
-			catch (const ReadFightActionException& ex)
-			{
-				nlwarning("script read error (ignored): %s", ex.what());
-			}
-#endif
+			readCreatureScriptComp(*this, scriptCompStr);
 		}
 	}
 	else

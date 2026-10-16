@@ -38,7 +38,7 @@ void traceTest()
 class CUtilsTest: public IServiceSingleton
 {
 public:
-	void init() 
+	void init() NL_OVERRIDE 
 	{
 		// nel info, warning and debug redirectrion tests
 		nldebug("debug"); nlinfo("info"); nlwarning("warning");

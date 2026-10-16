@@ -579,7 +579,7 @@ void displayDebugUIUnderMouse()
 		}
 		else
 		{
-			HighlightedDebugUI = NULL;
+			HighlightedDebugUI = nullptr;
 		}
 	}
 	//
@@ -637,7 +637,7 @@ static void getElementsUnderMouse(std::vector<CInterfaceElement *> &ielem)
 
 class CHandlerDebugUiPrevElementUnderMouse : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		std::vector<CInterfaceElement *> ielem;
 		getElementsUnderMouse(ielem);
@@ -655,7 +655,7 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUiPrevElementUnderMouse, "debug_ui_prev_el
 
 class CHandlerDebugUiNextElementUnderMouse : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		std::vector<CInterfaceElement *> ielem;
 		getElementsUnderMouse(ielem);
@@ -673,9 +673,9 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUiNextElementUnderMouse, "debug_ui_next_el
 
 class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
-		if (HighlightedDebugUI == NULL) return;
+		if (HighlightedDebugUI == nullptr) return;
 		CLuaState *lua = CLuaManager::getInstance().getLuaState();
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);

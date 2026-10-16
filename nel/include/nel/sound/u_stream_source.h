@@ -44,7 +44,7 @@ namespace NLSOUND {
 class UStreamSource : public USource
 {
 public:
-	virtual ~UStreamSource() { }
+	virtual ~UStreamSource() NL_OVERRIDE { }
 
 	/// Cast this to a USource
 	inline USource					*asUSource() { return static_cast<USource *>(this); }

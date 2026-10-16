@@ -247,7 +247,7 @@ inline void				CPropLocationUnpacked::init( CMirroredDataSet& dataSet, TProperty
 /// Go back to default state (deinit)
 inline void				CPropLocationUnpacked::reset()
 {
-	_DataSet = NULL;
+	_DataSet = nullptr;
 	/*_PropIndex = 0; // no need to reset other things than _DataSet
 	_DataSetRow = 0;*/ // this would not compile anyway
 }
@@ -405,7 +405,7 @@ void						CMirrorPropValue<T,CPropLocationClass>::init( CMirroredDataSet& dataSe
 template <class T>
 bool						CMirrorPropValueBase<T>::isReadable() const
 {
-	return (_Pt != NULL);
+	return (_Pt != nullptr);
 }
 
 template <class T, class CPropLocationClass> bool CMirrorPropValue<T,CPropLocationClass>::isReadable() const
@@ -1146,7 +1146,7 @@ CMirrorPropValueList<T,CPropLocationClass>::CMirrorPropValueList NL_TMPL_PARAM_O
 	//}
 	nlassert( (uint32)_PropLocation.dataSetRow().getIndex() < dataSet.maxNbRows() );
 #endif
-	dataSet.getPropPointerForList( &_PtFront, propIndex, entityIndex, (T*)NULL );
+	dataSet.getPropPointerForList( &_PtFront, propIndex, entityIndex, (T*)nullptr);
 	_Container = (TSharedListCell*)(dataSet.getListCellContainer( propIndex ));
 }
 
@@ -1161,7 +1161,7 @@ CMirrorPropValueList<T,CPropLocationClass>::CMirrorPropValueList NL_TMPL_PARAM_O
 #ifdef NL_DEBUG
 	nlassert( dataSet.propIsList( _PropLocation.propIndex() ) );
 #endif
-	dataSet.getPropPointerForList( &_PtFront, _PropLocation.propIndex(), _PropLocation.dataSetRow(), (T*)NULL );
+	dataSet.getPropPointerForList( &_PtFront, _PropLocation.propIndex(), _PropLocation.dataSetRow(), (T*)nullptr);
 	_Container = (TSharedListCell*)(dataSet.getListCellContainer( _PropLocation.propIndex() ));
 }
 

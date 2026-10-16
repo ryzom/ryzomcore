@@ -2,15 +2,15 @@
  * \file old_param_block.h
  * \brief Reader for the pre-ParamBlock2 "old" Max ParamBlock (superclass 0x8) — the format Max's
  * own built-in parametric primitives (Box, Cylinder, Sphere, ...) still use for their dimension
- * parameters. Byte layout: chunk 0x0002 containers, one per parameter, holding a 0x0003 index
- * (sint32) plus a 0x0100 (float) / 0x0101 (int) / 0x0102 (Point3) value chunk (0x0004 is some
- * other per-param marker, never a value — skipped). Previously duplicated verbatim in
- * pipeline_max_export_ig/main.cpp (readPBlockParams, used for lights and the parametric-mesh
- * builder) and pipeline_max_export_shape/scene_lib.cpp; consolidated here for the pacs_prim tool
- * rather than adding a third copy — see pipeline_max_design.md's note on this reader feeding
- * "the primitive pblocks" (§10g).
+ * parameters. The decode itself lives in the library's typed BUILTIN::CParamBlock (every
+ * superclass-0x8 object parses through it; see pipeline_max/builtin/param_block.h for the chunk
+ * layout); readOldParamBlock is a thin copy onto the legacy per-index map shape the exporters
+ * consume. Previously the decode was duplicated verbatim here, in pipeline_max_export_ig/main.cpp
+ * (readPBlockParams, used for lights and the parametric-mesh builder) and in
+ * pipeline_max_export_shape/scene_lib.cpp.
  * \author Jan Boon (Kaetemi)
  * \author Claude Sonnet 5
+ * \author Claude Fable 5
  */
 
 /*

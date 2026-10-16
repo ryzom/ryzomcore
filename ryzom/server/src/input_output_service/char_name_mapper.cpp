@@ -42,7 +42,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	// Virtual overrides from char name mapper
 	////////////////////////////////////////////////////////////////
-	virtual void mapCharNames(NLNET::IModuleProxy *sender, const std::vector < TCharNameInfo > &charNameInfos)
+	virtual void mapCharNames(NLNET::IModuleProxy *sender, const std::vector < TCharNameInfo > &charNameInfos) NL_OVERRIDE
 	{
 		// we receive a list of character name, map them in the IOS string table
 

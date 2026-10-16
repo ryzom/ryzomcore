@@ -52,7 +52,7 @@ end
 
 function game:delMapArkPoint(section, name)
 	if game.mapArkPoints[section] ~= nil then
-		game.mapArkPoints[section][name] = nil
+	game.mapArkPoints[section][name] = nil
 	end
 end
 
@@ -82,7 +82,7 @@ function game:openMapArkPointHelp(url, h)
 		if game.mapArkPointsCachedHelp[url] == nil then
 			if whm_html ~= nil then
 				game.mapMapArkPointHelpUrl = url
-				whm_html:renderHtml("<body style:'background-color: #ffffff00'>...</body>")
+			whm_html:renderHtml("<body style:'background-color: #ffffff00'>...</body>")
 				whm_html:browse(url)
 			end
 		else
@@ -99,7 +99,6 @@ function game:updateMapArkPointHelp()
 	if whm_html.html ~= "<body style:'background-color: #ffffff00'>...</body>" and game.mapArkPointsCachedHelp[game.mapMapArkPointHelpUrl] == nil then
 		game.mapArkPointsCachedHelp[game.mapMapArkPointHelpUrl] = whm_html.html
 	end
-
 	local x, y = getMousePos()
 	x0 = game.mapArkPointHelpMousePosX
 	if caller.x ~= 0 or caller.y ~= 0 then
@@ -127,7 +126,6 @@ function game:onLoadMap(map)
 		texture = game.currentMapTexture
 	end
 
-
 	delArkPoints()
 	game.mapMapArkPointHelpUrl = ""
 	for section, points in pairs(game.mapArkPoints) do
@@ -144,24 +142,25 @@ function game:onLoadMap(map)
 
 		if game.mapHideSections[section] == nil then
 			if game.mapRegionSections[map_section] == nil or game.mapRegionSections[map_section][texture] == true then
-				for name, point in pairs(points) do
-					addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
-				end
-			end
+		for name, point in pairs(points) do
+			addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
 		end
 	end
+end
+end
 
 	-- if alt view not enabled
 	if getDbProp("UI:VARIABLES:SHOW_ALT_MAP") == 0 or map:isIsland() then
 		return
 	end
 
-
 	if self.mapTextures[texture] ~= nil then
 		-- debugInfo("-- using ".. self.mapTextures[texture] .." for " .. texture)
 		return self.mapTextures[texture]
 	end
+
 end
+
 
 function game:openFullMap()
 	local ui = getUI("ui:interface:map")
@@ -219,7 +218,7 @@ function game:addSpawnShapesByZone(zone, continent, name, displayIcon, setup, fi
 	game.spawnShapesByZone[continent][name][8] = Json.decode(setup[8])
 
 	if not text then
-		text =  i18n.get("uiWisdomChest")
+		text =  i18n.get("uiWisdomChest"):toUtf8()
 	end
 
 	if not icon then

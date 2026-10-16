@@ -40,7 +40,8 @@ extern CContinentManager ContinentMngr;
 H_AUTO_DECL(RZ_StremableIG)
 
 //=================================================================================
-CStreamableIG::CStreamableIG()	: _Scene(NULL), _Linked(false), _IGMap(NULL)
+CStreamableIG::CStreamableIG()	: _Scene(nullptr)
+    , _Linked(false), _IGMap(nullptr)
 {
 	H_AUTO_USE(RZ_StremableIG)
 }
@@ -84,7 +85,7 @@ CStreamableIG::~CStreamableIG()
 			{
 				_IGs[k].IG->removeFromScene(*_Scene);
 				_Scene->deleteInstanceGroup(_IGs[k].IG);
-				_IGs[k].IG= NULL;
+				_IGs[k].IG = nullptr;
 			}
 		}
 	}
@@ -244,7 +245,7 @@ CStreamableIG::~CStreamableIG()
 				_Scene->stopCreatingAndAddingIG(&_IGs[k].IG);
 			}
 			_IGs[k].Loading = false;
-			_IGs[k].IG = NULL;
+			_IGs[k].IG = nullptr;
 		}
 		else
 		{
@@ -256,7 +257,7 @@ CStreamableIG::~CStreamableIG()
 				_Scene->deleteInstanceGroup (_IGs[k].IG);
 				this->notifyIGRemoved(_IGs[k].IG);
 			}
-			_IGs[k].IG = NULL;
+			_IGs[k].IG = nullptr;
 		}
 	}
 	_Linked = false;
@@ -284,7 +285,7 @@ bool CStreamableIG::setIG(uint ig, const std::string &name, const std::string &p
 				_Scene->stopCreatingAndAddingIG(&_IGs[ig].IG);
 				this->notifyIGRemoved(_IGs[ig].IG);
 				_IGs[ig].Loading = false;
-				_IGs[ig].IG = NULL;
+				_IGs[ig].IG = nullptr;
 			}
 		}
 		else
@@ -296,13 +297,13 @@ bool CStreamableIG::setIG(uint ig, const std::string &name, const std::string &p
 				_Scene->deleteInstanceGroup (_IGs[ig].IG);
 				this->notifyIGRemoved(_IGs[ig].IG);
 			}
-			_IGs[ig].IG = NULL;
+			_IGs[ig].IG = nullptr;
 		}
 
 		// Load this IG
 		_IGs[ig].Name = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(name));
 		_IGs[ig].ParentName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(parentName));
-		_IGs[ig].IG = NULL;
+		_IGs[ig].IG = nullptr;
 		_IGs[ig].Loading = false;
 		_Linked = false;
 		return true;
@@ -317,7 +318,7 @@ void CStreamableIG::addIG(const std::string &name,const std::string &parentName,
 	_IGs.push_back(CIGNode ());
 	_IGs.back().Name = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(name));
 	_IGs.back().ParentName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(parentName));
-	_IGs.back().IG = NULL;
+	_IGs.back().IG = nullptr;
 	_IGs.back().Loading = false;
 	_IGs.back().Pos = pos;
 	_IGs.back().Rot = rot;

@@ -268,7 +268,7 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 			size_t size;
 
 			FILE *src_stream = nlfopen (attachedFile, "rb");
-			if (src_stream == NULL)
+			if (src_stream == nullptr)
 			{
 				nlwarning ("EMAIL: Can't attach file '%s' to the email because the file can't be open", attachedFile.c_str());
 			}

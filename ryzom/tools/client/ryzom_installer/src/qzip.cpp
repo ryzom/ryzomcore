@@ -1,3 +1,4 @@
+// clang-format off
 /****************************************************************************
 **
 ** Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).

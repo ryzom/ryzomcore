@@ -218,7 +218,7 @@ void CTransportClass::unregisterClass ()
 			delete (*it).second.Instance->Prop[j];
 		}
 		(*it).second.Instance->Prop.clear ();
-		(*it).second.Instance = NULL;
+		(*it).second.Instance = nullptr;
 	}
 	LocalRegisteredClass.clear ();
 }
@@ -358,7 +358,7 @@ void CTransportClass::init ()
 	nlassert (PropUCString < PropUKN); DummyProp[PropUCString] = new CTransportClass::CRegisteredProp<ucstring>;
 
 	// we have to know when a service comes, so add callback (put the callback before all other one because we have to send this message first)
-	CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbTCUpService, NULL, false);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbTCUpService, nullptr, false);
 
 	Init = true;
 }

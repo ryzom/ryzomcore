@@ -53,10 +53,10 @@ using namespace NLSOUND;
 
 namespace NLSAMPLE {
 
-static UAudioMixer *s_AudioMixer = NULL;
-static USource *s_Source = NULL;
-static CStreamFileSource *s_StreamFileSource = NULL;
-static UGroupController *s_GroupController = NULL;
+static UAudioMixer *s_AudioMixer = nullptr;
+static USource *s_Source = nullptr;
+static CStreamFileSource *s_StreamFileSource = nullptr;
+static UGroupController *s_GroupController = nullptr;
 
 static void initSample()
 {
@@ -84,7 +84,7 @@ static void initSample()
 	printf("\n");
 	
 	// init with 8 tracks, EAX enabled, no ADPCM, and automatic sample bank loading
-	s_AudioMixer->init(8, true, false, NULL, true, (UAudioMixer::TDriver)(selection - '0'));
+	s_AudioMixer->init(8, true, false, nullptr, true, (UAudioMixer::TDriver)(selection - '0'));
 	s_AudioMixer->setLowWaterMark(1);
 	
 	CVector initpos(0.0f, 0.0f, 0.0f);
@@ -161,10 +161,10 @@ static void runSample()
 static void releaseSample()
 {
 	//NLMISC::CHTimer::clear();
-	s_GroupController = NULL;
-	s_StreamFileSource = NULL;
-	delete s_Source; s_Source = NULL;
-	delete s_AudioMixer; s_AudioMixer = NULL;
+	s_GroupController = nullptr;
+	s_StreamFileSource = nullptr;
+	delete s_Source; s_Source = nullptr;
+	delete s_AudioMixer; s_AudioMixer = nullptr;
 }
 
 

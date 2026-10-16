@@ -67,7 +67,7 @@ public:
 	 * \param names the igs to load
 	 * \param dest if not NUL, pointer to the created igs
 	 */
-	void	loadArrayZoneIG(const std::vector<std::string> &names, std::vector<UInstanceGroup *> *dest = NULL);
+	void	loadArrayZoneIG(const std::vector<std::string> &names, std::vector<UInstanceGroup *> *dest = nullptr);
 
 	/** unload of an instanceGroup of a zone. name is like "150_EM". no-op if "".
 	 *	If exist (see initIG), The instanceGroup is removed from the scene.
@@ -108,7 +108,7 @@ private:
 		bool			AddedToScene;
 		std::string		FileName;
 
-		CInstanceGroupElement(UInstanceGroup	*ig= NULL, const char *fileName= NULL);
+		CInstanceGroupElement(UInstanceGroup	*ig = nullptr, const char *fileName = nullptr);
 
 		// delete the ig.
 		void	release();

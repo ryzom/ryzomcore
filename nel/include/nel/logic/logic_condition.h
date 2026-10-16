@@ -56,7 +56,7 @@ public:
 	 */
 	CLogicComparisonBlock()
 	{
-		_LogicStateMachine = 0;
+		_LogicStateMachine = nullptr;
 		VariableName = "no_name";
 		Operator = ">";
 		Comparand = 0;
@@ -204,7 +204,7 @@ public:
 	 */
 	CLogicConditionNode()
 	{
-		_LogicStateMachine = 0;
+		_LogicStateMachine = nullptr;
 		Type = TERMINATOR;
 	}
 

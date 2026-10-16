@@ -53,7 +53,7 @@ public:
 	/// Constructor
 	CEventsListener();
 	/// Destructor
-	~CEventsListener();
+	~CEventsListener() NL_OVERRIDE;
 
 
 	/**
@@ -148,7 +148,7 @@ protected:
 	 * Call back of the listener.
 	 * \param event is the event send to the listener
 	 */
-	virtual void operator ()(const CEvent& event);
+	virtual void operator ()(const CEvent& event) NL_OVERRIDE;
 
 
 	// update cursor pos

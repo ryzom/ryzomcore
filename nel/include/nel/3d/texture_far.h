@@ -78,7 +78,7 @@ class CTextureFar : public ITexture
 public:
 	/// Constructor
 	CTextureFar();
-	virtual ~CTextureFar();
+	virtual ~CTextureFar() NL_OVERRIDE;
 
 
 	/** Try to allocate a patch.
@@ -111,7 +111,7 @@ public:
 	 *
 	 *  \see ITexture::doGenerate()
 	 */
-	virtual void				doGenerate(bool async = false);
+	virtual void				doGenerate(bool async = false) NL_OVERRIDE;
 
 	/**
 	 *	Touch a patch (call touchRect()) and iterate to next .
@@ -185,7 +185,7 @@ private:
 	void rebuildPatch  (const CVector2s texturePos, const CPatchIdent &pid);
 
 	/// From IStreamable
-	virtual void	serial(NLMISC::IStream &/* f */) {}
+	virtual void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE {}
 
 	// Some static buffers
 	static NLMISC::CRGBA	_LightmapExpanded[];

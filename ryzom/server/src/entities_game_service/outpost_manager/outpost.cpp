@@ -852,13 +852,11 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 			}
 		}
 	}
-
 	if ((getName().substr(0, 14) != "outpost_nexus_") && (attackerGuild->getLastFailedGVE() > CTickEventHandler::getGameCycle() - (NumberDaysGuildNeedWaitAfterGVEFail / CTickEventHandler::getGameTimeStep())))
 		return COutpost::FailedGVE;
 
 	if (_CurrentOutpostLevel >= computeRoundCount())
 		return COutpost::NeedWaitToAttack;
-
 	if(!guildAttackerValid)
 	{
 		return COutpost::BadGuildMemberLevel;
@@ -2129,7 +2127,6 @@ void COutpost::actionBuySquadsB(uint32 squadIndex, OUTPOSTENUMS::TPVPSide side)
 	if (!_DefaultSquads.empty())
 		return;
 
-
 	EGSPD::TGuildId guildId;
 	uint32 * expenseLimit;
 	uint32 * spentMoney;
@@ -2447,6 +2444,7 @@ uint32 COutpost::computeSpawnDelay(uint32 roundLevel) const
 //----------------------------------------------------------------------------
 uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 {
+
 	float coef = OutpostFullFightSquadCount.get();
 
 	if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
@@ -3172,9 +3170,7 @@ std::string COutpost::toString() const
 		_Sheet.toString().c_str(),
 		OUTPOSTENUMS::toString( _State ).c_str(),
 		_CurrentOutpostLevel,
-		ownerName.c_str(),
-		OUTPOSTENUMS::toString( _PVPType ).c_str(),
-		product.c_str()
+		ownerName.c_str(), OUTPOSTENUMS::toString( _PVPType ).c_str(), product.c_str()
 		);
 
 	return desc;

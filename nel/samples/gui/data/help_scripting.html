@@ -1,0 +1,22 @@
+<html>
+<head><title>Lua scripting</title></head>
+<body>
+<h1>Lua scripting</h1>
+<p>Three of the showcase windows are complete applications written in
+interface data alone, with no game code in the sample binary:</p>
+<ul>
+<li><b>Minesweeper</b> - 81 template-stamped cells driven through
+reflected widget properties.</li>
+<li><b>Lua console</b> - a REPL over the live widget tree; pairs() walks
+reflected widgets like tables.</li>
+<li><b>Inventory</b> - real drag-and-drop gestures polled from a
+per-frame tick via getMousePos/getMouseDown.</li>
+</ul>
+<h2>The embedding contract</h2>
+<p>The embedder calls initLUA before parsing so stock bindings exist at
+parse time, and registers the environment hooks the client would
+normally provide: getUI, the mouse pollers, and the browse action
+handlers this very window uses.</p>
+<p><a href="help_index.html">Back to the index</a></p>
+</body>
+</html>

@@ -100,8 +100,8 @@ IDriver		*CDRU::createGlDriver()
 
 #else
 
-	IDRV_CREATE_PROC	createDriver = NULL;
-	IDRV_VERSION_PROC	versionDriver = NULL;
+	IDRV_CREATE_PROC	createDriver = nullptr;
+	IDRV_VERSION_PROC	versionDriver = nullptr;
 
 	CLibrary	driverLib;
 
@@ -117,13 +117,13 @@ IDriver		*CDRU::createGlDriver()
 	nlinfo ("Using the library '" NL3D_GL_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
 
 	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
-	if (createDriver == NULL)
+	if (createDriver == nullptr)
 	{
 		throw EDruOpenglDriverCorrupted();
 	}
 
 	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
-	if (versionDriver != NULL)
+	if (versionDriver != nullptr)
 	{
 		if (versionDriver()<IDriver::InterfaceVersion)
 			throw EDruOpenglDriverOldVersion();
@@ -132,7 +132,7 @@ IDriver		*CDRU::createGlDriver()
 	}
 
 	IDriver		*ret= createDriver();
-	if (ret == NULL)
+	if (ret == nullptr)
 	{
 		throw EDruOpenglDriverCantCreateDriver();
 	}
@@ -154,8 +154,8 @@ IDriver		*CDRU::createGl3Driver()
 
 #else
 
-	IDRV_CREATE_PROC	createDriver = NULL;
-	IDRV_VERSION_PROC	versionDriver = NULL;
+	IDRV_CREATE_PROC	createDriver = nullptr;
+	IDRV_VERSION_PROC	versionDriver = nullptr;
 
 	CLibrary	driverLib;
 
@@ -171,13 +171,13 @@ IDriver		*CDRU::createGl3Driver()
 	nlinfo ("Using the library '" NL3D_GL3_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
 
 	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
-	if (createDriver == NULL)
+	if (createDriver == nullptr)
 	{
 		throw EDruOpengl3DriverCorrupted();
 	}
 
 	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
-	if (versionDriver != NULL)
+	if (versionDriver != nullptr)
 	{
 		if (versionDriver()<IDriver::InterfaceVersion)
 			throw EDruOpengl3DriverOldVersion();
@@ -186,7 +186,7 @@ IDriver		*CDRU::createGl3Driver()
 	}
 
 	IDriver		*ret= createDriver();
-	if (ret == NULL)
+	if (ret == nullptr)
 	{
 		throw EDruOpengl3DriverCantCreateDriver();
 	}
@@ -208,8 +208,8 @@ IDriver		*CDRU::createGlEsDriver()
 
 #else
 
-	IDRV_CREATE_PROC	createDriver = NULL;
-	IDRV_VERSION_PROC	versionDriver = NULL;
+	IDRV_CREATE_PROC	createDriver = nullptr;
+	IDRV_VERSION_PROC	versionDriver = nullptr;
 
 	CLibrary	driverLib;
 
@@ -225,13 +225,13 @@ IDriver		*CDRU::createGlEsDriver()
 	nlinfo ("Using the library '" NL3D_GLES_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
 
 	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
-	if (createDriver == NULL)
+	if (createDriver == nullptr)
 	{
 		throw EDruOpenglDriverCorrupted();
 	}
 
 	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
-	if (versionDriver != NULL)
+	if (versionDriver != nullptr)
 	{
 		if (versionDriver()<IDriver::InterfaceVersion)
 			throw EDruOpenglDriverOldVersion();
@@ -240,7 +240,7 @@ IDriver		*CDRU::createGlEsDriver()
 	}
 
 	IDriver		*ret= createDriver();
-	if (ret == NULL)
+	if (ret == nullptr)
 	{
 		throw EDruOpenglEsDriverCantCreateDriver();
 	}
@@ -262,8 +262,8 @@ IDriver		*CDRU::createGlEs3Driver()
 
 #else
 
-	IDRV_CREATE_PROC	createDriver = NULL;
-	IDRV_VERSION_PROC	versionDriver = NULL;
+	IDRV_CREATE_PROC	createDriver = nullptr;
+	IDRV_VERSION_PROC	versionDriver = nullptr;
 
 	CLibrary	driverLib;
 
@@ -279,13 +279,13 @@ IDriver		*CDRU::createGlEs3Driver()
 	nlinfo ("Using the library '" NL3D_GLES3_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
 
 	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
-	if (createDriver == NULL)
+	if (createDriver == nullptr)
 	{
 		throw EDruOpenglDriverCorrupted();
 	}
 
 	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
-	if (versionDriver != NULL)
+	if (versionDriver != nullptr)
 	{
 		if (versionDriver()<IDriver::InterfaceVersion)
 			throw EDruOpenglDriverOldVersion();
@@ -294,7 +294,7 @@ IDriver		*CDRU::createGlEs3Driver()
 	}
 
 	IDriver		*ret= createDriver();
-	if (ret == NULL)
+	if (ret == nullptr)
 	{
 		throw EDruOpenglEsDriverCantCreateDriver();
 	}

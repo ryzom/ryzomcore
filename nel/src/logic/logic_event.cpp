@@ -51,7 +51,7 @@ namespace NLLOGIC
 
 void CLogicEventMessage::write (xmlNodePtr node, const char *subName) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)string(string(subName)+string("EVENT_MESSAGE")).c_str(), NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)string(string(subName)+string("EVENT_MESSAGE")).c_str(), nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Destination", (const xmlChar*)Destination.c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"DestinationId", (const xmlChar*)toString(DestinationId).c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"MessageId", (const xmlChar*)toString(MessageId).c_str());
@@ -110,7 +110,7 @@ void CLogicEventAction::enableSendMessage()
 
 void CLogicEventAction::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"EVENT_ACTION", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"EVENT_ACTION", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"IsStateChange", (const xmlChar*)toString(IsStateChange).c_str());
 	if (IsStateChange)
 	{
@@ -167,7 +167,7 @@ void CLogicEvent::reset()
 //-------------------------------------------------
 void CLogicEvent::setLogicStateMachine( CLogicStateMachine * logicStateMachine )
 {
-	if( logicStateMachine == 0 )
+	if( logicStateMachine == nullptr )
 	{
 		nlwarning("(LOGIC)<CLogicEvent::setLogicStateMachine> The state machine is null");
 	}
@@ -235,7 +235,7 @@ bool CLogicEvent::testCondition()
 
 void CLogicEvent::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"EVENT", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"EVENT", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"ConditionName", (const xmlChar*)ConditionName.c_str());
 	EventAction.write(elmPtr);
 }

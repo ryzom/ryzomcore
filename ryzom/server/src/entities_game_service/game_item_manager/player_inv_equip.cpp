@@ -126,8 +126,8 @@ void CEquipInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags cha
 	// Update jewels enchants
 	if (getInventory()->getInventoryId() == INVENTORIES::equipment)
 	{
-		getCharacter()->updateJewelsTags(false);
-		getCharacter()->updateJewelsModifiers();
+	getCharacter()->updateJewelsTags(false);
+	getCharacter()->updateJewelsModifiers();
 	}
 }
 

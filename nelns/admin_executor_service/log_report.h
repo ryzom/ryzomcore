@@ -38,7 +38,7 @@ public:
 	CMakeLogTask() : _Stopping(false), _Complete(false), _Thread(NULL), _OutputLogReport(NULL) {}
 
 	/// Destructor
-	~CMakeLogTask();
+	~CMakeLogTask() NL_OVERRIDE;
 
 	/// Start (called in main thread)
 	void	start();
@@ -55,7 +55,7 @@ public:
 	///
 	bool	isComplete() const { return _Complete; }
 
-	virtual void run();
+	virtual void run() NL_OVERRIDE;
 
 	/// Set the path of logfile directory. 
 	void setLogPath(const std::string & logPath);
@@ -149,13 +149,13 @@ public:
 
 	std::string		service() { return _Service; }
 
-	virtual uint	getNbDistinctLines() const { return (uint)_LogLineInfo.size(); }
+	virtual uint	getNbDistinctLines() const NL_OVERRIDE { return (uint)_LogLineInfo.size(); }
 
-	virtual uint	getNbTotalLines( NLMISC::CLog::TLogType logType );
+	virtual uint	getNbTotalLines( NLMISC::CLog::TLogType logType ) NL_OVERRIDE;
 
-	virtual void	storeLine( const std::vector<std::string>& lineTokens, bool mainCountOnly );
+	virtual void	storeLine( const std::vector<std::string>& lineTokens, bool mainCountOnly ) NL_OVERRIDE;
 
-	virtual void	report( NLMISC::CLog *targetLog, bool detailed );
+	virtual void	report( NLMISC::CLog *targetLog, bool detailed ) NL_OVERRIDE;
 
 	uint			reportPart( uint beginIndex, uint maxNbLines, NLMISC::CLog *targetLog );
 
@@ -184,7 +184,7 @@ public:
 	CLogReportNode() {}
 
 	/// Destructor
-	~CLogReportNode() { reset(); }
+	~CLogReportNode() NL_OVERRIDE { reset(); }
 
 	/// Clear all
 	void	reset()
@@ -196,7 +196,7 @@ public:
 
 protected:
 
-	virtual void				storeLine( const std::vector<std::string>& lineTokens, bool mainCountOnly=false );
+	virtual void				storeLine( const std::vector<std::string>& lineTokens, bool mainCountOnly=false ) NL_OVERRIDE;
 
 	CLogReportLeaf*				getChild( const std::string& service )
 	{
@@ -215,9 +215,9 @@ protected:
 		return child;
 	}
 
-	virtual void	report( NLMISC::CLog *targetLog, bool displayDetailsPerService );
+	virtual void	report( NLMISC::CLog *targetLog, bool displayDetailsPerService ) NL_OVERRIDE;
 
-	virtual uint	getNbDistinctLines() const
+	virtual uint	getNbDistinctLines() const NL_OVERRIDE
 	{
 		uint n = 0;
 		for ( std::vector<CLogReportLeaf*>::const_iterator it=_Children.begin(); it!=_Children.end(); ++it )
@@ -225,7 +225,7 @@ protected:
 		return n;
 	}
 
-	virtual uint	getNbTotalLines( NLMISC::CLog::TLogType logType=NLMISC::CLog::LOG_UNKNOWN )
+	virtual uint	getNbTotalLines( NLMISC::CLog::TLogType logType=NLMISC::CLog::LOG_UNKNOWN ) NL_OVERRIDE
 	{
 		uint n = 0;
 		for ( std::vector<CLogReportLeaf*>::const_iterator it=_Children.begin(); it!=_Children.end(); ++it )
@@ -277,7 +277,7 @@ public:
 	void	reportPage( uint pageNum, NLMISC::CLog *targetLog ) { CLogReportNode::reportPage( pageNum, targetLog ); }
 
 	/// Get summary of results
-	virtual void report( NLMISC::CLog *targetLog, bool displayDetailsPerService=false ) { CLogReportNode::report( targetLog, displayDetailsPerService ); }
+	virtual void report( NLMISC::CLog *targetLog, bool displayDetailsPerService=false ) NL_OVERRIDE { CLogReportNode::report( targetLog, displayDetailsPerService ); }
 
 private:
 

@@ -58,17 +58,17 @@ const CBipedAnimTrack::SDesc *CBipedAnimTrack::descByDataId(uint16 id)
 {
 	for (int i = 0; i < TrackCount; ++i)
 		if (Descs[i].DataId == id) return &Descs[i];
-	return NULL;
+	return nullptr;
 }
 
 const CBipedAnimTrack::SDesc *CBipedAnimTrack::descByTimeId(uint16 id)
 {
 	for (int i = 0; i < TrackCount; ++i)
 		if (Descs[i].TimeId == id) return &Descs[i];
-	return NULL;
+	return nullptr;
 }
 
-CBipedAnimTrack::CBipedAnimTrack() : m_Desc(NULL)
+CBipedAnimTrack::CBipedAnimTrack() : m_Desc(nullptr)
 {
 
 }
@@ -78,7 +78,7 @@ static inline const uint32 *dwords(const std::vector<uint8> &v) { return reinter
 
 bool CBipedAnimTrack::decode(const SDesc &desc, const std::vector<uint8> &data, const std::vector<uint8> &time)
 {
-	m_Desc = NULL;
+	m_Desc = nullptr;
 	DataHdrExtra.clear();
 	TimeHdrExtra.clear();
 	Keys.clear();

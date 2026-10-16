@@ -86,19 +86,19 @@ public:
 
 	/// Constructor
 	CTrackSampledQuatSmallHeader(CTrackSamplePack *pack, uint8 headerIndex, uint8 numKeys, uint16 keyIndex);
-	virtual ~CTrackSampledQuatSmallHeader();
+	virtual ~CTrackSampledQuatSmallHeader() NL_OVERRIDE;
 	// not designed to be serialized
 	CTrackSampledQuatSmallHeader() {nlstop;}
 	NLMISC_DECLARE_CLASS (CTrackSampledQuatSmallHeader);
 
 	/// From UTrack/ITrack.
 	// @{
-	virtual bool					getLoopMode() const;
-	virtual TAnimationTime			getBeginTime () const;
-	virtual TAnimationTime			getEndTime () const;
-	virtual const IAnimatedValue	&eval (const TAnimationTime& date, CAnimatedValueBlock &avBlock);
+	virtual bool					getLoopMode() const NL_OVERRIDE;
+	virtual TAnimationTime			getBeginTime () const NL_OVERRIDE;
+	virtual TAnimationTime			getEndTime () const NL_OVERRIDE;
+	virtual const IAnimatedValue	&eval (const TAnimationTime& date, CAnimatedValueBlock &avBlock) NL_OVERRIDE;
 	// NB: serial assert cause not serialised but compiled at runtime
-	virtual void					serial(NLMISC::IStream &f);
+	virtual void					serial(NLMISC::IStream &f) NL_OVERRIDE;
 	// NB: do not support sample division: it must be applied before compression
 	// @}
 

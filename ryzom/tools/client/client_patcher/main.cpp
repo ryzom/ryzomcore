@@ -226,12 +226,15 @@ int main(int argc, char *argv[])
 		return ar;
 	}
 
+	// initialize patch manager and set the ryzom full path, before it's used
+	CPatchManager *pPM = CPatchManager::getInstance();
+
 	if (Args.haveArg("u") && Args.haveArg("d"))
 	{
 		string	bnpName = Args.getArg("u").front();
 		string	destinationName = Args.getArg("d").front();
 		vector<string> vFilenames;
-		if (CPatchManager::getInstance()->bnpUnpack(bnpName, destinationName, vFilenames))
+		if (pPM->bnpUnpack(bnpName, destinationName, vFilenames))
 			return 0;
 		return 1;
 	}
@@ -294,7 +297,7 @@ int main(int argc, char *argv[])
 	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 	printf("Using '%s/%s.version'\n", ClientCfg.ConfigFile.getVar("PatchUrl").asString().c_str(),
-		ClientCfg.ConfigFile.getVar("Application").asString().c_str());
+	ClientCfg.ConfigFile.getVar("Application").asString().c_str());
 
 	// FIXME: On Ryzom Core 4, the patch url and version are retrieved from the login server
 	// using StartupHost, StartupPage, and Application[0], as different domains 
@@ -305,9 +308,6 @@ int main(int argc, char *argv[])
 	// defaults to the current build in case version file is not used
 	int versionNumbers[] = { RYZOM_VERSION_RC, 0, 0 };
 	VersionName = NLMISC::toString(versionNumbers[2]);
-
-	// initialize patch manager and set the ryzom full path, before it's used
-	CPatchManager *pPM = CPatchManager::getInstance();
 
 	// use PatchUrl
 	vector<string> patchURLs;

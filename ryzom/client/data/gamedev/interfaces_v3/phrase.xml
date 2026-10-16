@@ -297,9 +297,11 @@
 		</group>
 </group>
 
+
 <!-- ******************************** -->
 <!-- * PHRASE COMPOSITION           * -->
 <!-- ******************************** -->
+
 
 <!-- Max Slots for phrase composition -->
 <define	id="phrase_max_brick" value="64" />
@@ -315,29 +317,29 @@
 	<action handler="leave_modal"/>
 </proc>
 <template name="ctrl_phrase_select_icon" posparent="parent" posref="" x="0" y="0" index="" id="" >
-	<ctrl type="sheet" id="#id" nature="sbrick" value="UI:PHRASE:BUILD:ICON:#index" posparent="#posparent" posref="#posref"
-		x="#x" y="#y" auto_grayed="true" onclick_l="proc" params_l="proc_phrase_set_icon|#index"/>
+	<ctrl type="sheet" id="#id" nature="sbrick" value="UI:PHRASE:BUILD:ICON:#index" posparent="#posparent" posref="#posref" x="#x" y="#y" auto_grayed="true" onclick_l="proc" params_l="proc_phrase_set_icon|#index"/>
 	<link expr="ne(@UI:PHRASE:BUILD:ICON:#index:SHEET,0)" target="#id:active" />
 </template>
 
 <group type="modal" id="build_phrase_select_icon" x="0" y="0" w="0" h="0" posref="BL TL" child_resize_w="true" child_resize_wmargin="8" child_resize_h="true" child_resize_hmargin="8" options="skin_modal" >
-		<!-- This group is here only to ensure that the modal is not too small -->
-		<group id="fake_minh" posref="TL TL" sizeref="w" w="0" h="30" />
+	<!-- This group is here only to ensure that the modal is not too small -->
+	<group id="fake_minh" posref="TL TL" sizeref="w" w="0" h="30" />
 
-		<!-- this depends on phrase_max_brick values -->
-		<vector template="ctrl_phrase_select_icon" _firstindex="0"  _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-4" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="8"  _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-30" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="16" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-56" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="24" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-82" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="32" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-108" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="40" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-134" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="48" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-160" _nextpos="TR TL" />
-		<vector template="ctrl_phrase_select_icon" _firstindex="56" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-186" _nextpos="TR TL" />
+	<!-- this depends on phrase_max_brick values -->
+	<vector template="ctrl_phrase_select_icon" _firstindex="0"  _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-4" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="8"  _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-30" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="16" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-56" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="24" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-82" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="32" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-108" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="40" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-134" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="48" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-160" _nextpos="TR TL" />
+	<vector template="ctrl_phrase_select_icon" _firstindex="56" _size="8" id="brick$i" index="$i" _firstpos="TL TL" _xfirst="4" _yfirst="-186" _nextpos="TR TL" />
 </group>
 
 <!-- ******************************** -->
 <!-- * PHRASE COMPOSITION ELEMENTS  * -->
 <!-- ******************************** -->
+
 
 <!-- Ctrls for a Parameter -->
 <template name="ctrl_phrase_param" id="" index="" paramindex="" posparent="" x="4" y="0" >
@@ -419,8 +421,8 @@
 		<!-- BACK -->
 		<group id="back" posref="TM TM" w="256" h="0" x="0" y="-74">
 			<instance template="box_widget" id="back_root" posref="TL TL" w="256" h="0" x="0" y="0" />
-			<view type="bitmap" id="col1" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-51" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
-			<view type="bitmap" id="col2" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-7" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
+				<view type="bitmap" id="col1" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-51" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
+				<view type="bitmap" id="col2" scale="true" posparent="back_root" posref="TR TR" h="278" w="40" x="-7" y="-34" texture="W_box_blank.tga" color="0 0 0 64" inherit_gc_alpha="true"/>
 			<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="col1:active" />
 			<link expr="ne(@UI:PHRASE:BUILD:MAIN:0:SHEET,0)" target="col2:active" />
 		</group>
@@ -601,7 +603,7 @@
  posref="TL TL" w="185" h="100" x="-35" y="85"
  on_enter="phrase_faber_select_mp_quantity" options="skin_modal"
 >
-	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
+<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
 	<ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="UI:PHRASE:FABER:STACK_SELECT" posref="MM MM" x="-26" y="0" use_quantity="false" />
 	<view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
 	<instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="-1" fontsize="12"
@@ -712,6 +714,7 @@
 			multi_line="true" line_maxw="350" multi_line_space="0" hardtext="" />
 		<link expr="ne(@UI:PHRASE:FABER:FABER_PLAN:SHEET, 0)" target="success_text:active" />
 
+
 		<!-- The 10 item_req (itemParts and specific Formula items) -->
 		<group id="back_slots" x="16" y="-56" posparent="back" posref="TL TL" w="368" h="312" >
 			<instance template="inner_thin_border" inherit_gc_alpha="true" />
@@ -723,7 +726,7 @@
 
 		<!-- RESULT ITEM -->
 		<group id="item_result" posparent="back" posref="TR TR" x="-10" y="-6" w="390" child_resize_h="true" max_h="375" >
-			<instance template="inner_thin_border"  inherit_gc_alpha="true" />
+			<instance template="inner_thin_border" inherit_gc_alpha="true" />
 
 			<!-- Text Header -->
 			<view type="text" id="header" posref="TL TL" x="5" y="-2" hardtext="uiFaberItemResultHeader"/> <!-- for item, pacts, .. -->
@@ -789,7 +792,7 @@
 			<!-- NAME. Get the Name spell -->
 			<view type="text" id="spell_name" posref="TL TL" y="-1" w="120" h="10" shadow="true" fontsize="10"
 				global_color="false" />
-			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:hardtext" />
+				<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:uc_hardtext" />
 
 			<!-- COSTS (HP, SAP, STA) -->
 			<!--

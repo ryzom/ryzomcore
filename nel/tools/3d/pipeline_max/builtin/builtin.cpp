@@ -53,18 +53,23 @@
 
 #include "base_object.h"
 #include "object.h"
+#include "derived_object.h"
+#include "wsm_derived_object.h"
+#include "shape_object.h"
 #include "geom_object.h"
 #include "tri_object.h"
 #include "poly_object.h"
 #include "patch_object.h"
 #include "editable_patch.h"
 
+#include "param_block.h"
 #include "param_block_2.h"
 
 #include "mtl_base.h"
 #include "multi_mtl.h"
 
 #include "control_keyframer.h"
+#include "control_transform.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -88,9 +93,12 @@ const CControlFloatSuperClassDesc ControlFloatSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00009009> CControlColorSuperClassDesc;
 const CControlColorSuperClassDesc ControlColorSuperClassDesc(&ReferenceTargetClassDesc, "ControlColorSuperClassUnknown");
 
-// 0x8 param block, under reftarget directly
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000008> CParamBlockSuperClassDesc;
-const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ReferenceTargetClassDesc, "ParamBlockSuperClassUnknown");
+// 0x8 old param block, under reftarget directly — typed: every old-style ParamBlock object
+// parses through CParamBlock (per-parameter entry decode incl. the animated compact
+// reference-slot mapping; raw chunks stay authoritative so roundtrip is byte-exact). Unknown
+// ParamBlock class ids fall through to CSceneClassUnknown<CParamBlock>.
+typedef CSuperClassDescUnknown<CParamBlock, 0x00000008> CParamBlockSuperClassDesc;
+const CParamBlockSuperClassDesc ParamBlockSuperClassDesc(&ParamBlockClassDesc, "ParamBlockSuperClassUnknown");
 
 // 0xc20 uv gen, sub of mtlbase
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c20> CUVGenSuperClassDesc;
@@ -212,8 +220,7 @@ typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001160> CCustAttribSuperCla
 const CCustAttribSuperClassDesc CustAttribSuperClassDesc(&ReferenceTargetClassDesc, "CustAttribSuperClassUnknown");
 
 // 0x1190 - camera effect (e.g. "Depth of Field (mental ray)"), directly under ref target;
-// observed in the *_fp.max (first-person hand) corpus files, which crashed the exporter with an
-// unregistered-superclass nlerror before this entry was added.
+// occurs on *_fp.max (first-person hand) corpus files.
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00001190> CCameraEffectSuperClassDesc;
 const CCameraEffectSuperClassDesc CameraEffectSuperClassDesc(&ReferenceTargetClassDesc, "CameraEffectSuperClassUnknown");
 
@@ -229,9 +236,14 @@ const CUserDataTypeSuperClassDesc UserDataTypeSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900f> CUserTypeSuperClassDesc;
 const CUserTypeSuperClassDesc UserTypeSuperClassDesc(&ReferenceTargetClassDesc, "UserTypeSuperClassUnknown");
 
-// 0x40 - shape object (text, ...)
-typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000040> CShapeObjectSuperClassDesc;
-const CShapeObjectSuperClassDesc ShapeObjectSuperClassDesc(&GeomObjectClassDesc, "ShapeObjectSuperClassUnknown");
+// 0x40 - shape object (SplineShape, Line, Text, and the parametric spline primitives) — typed:
+// every Shape-superclass object parses through CShapeObject (BezierShape/Spline3D overlay decode;
+// raw chunks stay authoritative so roundtrip is byte-exact). Sits under CObject, NOT CGeomObject:
+// shape objects carry none of the geom-buffer chunks (0x08fe/0x0900) corpus-wide, and the export
+// consumers key mesh detection on dynamic_cast<CGeomObject>. Unknown shape class ids fall through
+// to CSceneClassUnknown<CShapeObject>.
+typedef CSuperClassDescUnknown<CShapeObject, 0x00000040> CShapeObjectSuperClassDesc;
+const CShapeObjectSuperClassDesc ShapeObjectSuperClassDesc(&ShapeObjectClassDesc, "ShapeObjectSuperClassUnknown");
 
 // 0x30 - light object (omni, ...)
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000030> CLightObjectSuperClassDesc;
@@ -293,6 +305,12 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	// tvnode (inh ReferenceTarget)
 	registry->add(&TrackViewNodeClassDesc);
 
+	// derived-object wrappers (inh ReferenceTarget) — the modifier-stack holders. NOT resolved
+	// through ClassDirectory3: CSceneClassContainer::createChunkById maps their fixed chunk ids
+	// 0x2032/0x2033 to these registrations directly (superclass 0x0 — the file stores none).
+	registry->add(&DerivedObjectClassDesc);
+	registry->add(&WSMDerivedObjectClassDesc);
+
 	// materials (inh MtlBase, superclass 0xc00 typed through CMtlBase below): the Multi/Sub-Object
 	// material is the one that needs its own type (sub-material list); the rest ride the CMtlBase
 	// superclass fallback with just the material-base name decode.
@@ -313,6 +331,12 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&CControlRotTCBDesc);
 	registry->add(&CControlScaleTCBDesc);
 	registry->add(&CControlPoint3TCBDesc);
+
+	// node-transform controllers (inh ReferenceTarget; typed sub-controller slots, see
+	// control_transform.h — exact classes under the 0x9008 ControlTransform superclass, the
+	// CBipedDriven registration pattern)
+	registry->add(&ControlPRSClassDesc);
+	registry->add(&ControlLookAtClassDesc);
 
 	// object (inh ReferenceMaker)
 	registry->add(&BaseObjectClassDesc);

@@ -117,14 +117,14 @@ public:
 	/// \Name Values that are blended
 	//@{
 		/// Retrieve the start and end Value
-		virtual void getValues(T &startValue, T &endValue) const
+		virtual void getValues(T &startValue, T &endValue) const NL_OVERRIDE
 		{
 			startValue = (*this)(0);
 			endValue = (*this)(1);
 		}
 
 		/// Set the Values between which to blend.
-		virtual void setValues(T startValue, T endValue)
+		virtual void setValues(T startValue, T endValue) NL_OVERRIDE
 		{
 			_StartValue = startValue;
 			_EndValue = endValue;
@@ -167,8 +167,8 @@ public:
 	{
 	}
 
-	virtual T getMaxValue(void) const { return this->_F.getMaxValue(); }
-	virtual T getMinValue(void) const { return this->_F.getMinValue(); }
+	virtual T getMaxValue(void) const NL_OVERRIDE { return this->_F.getMaxValue(); }
+	virtual T getMinValue(void) const NL_OVERRIDE { return this->_F.getMinValue(); }
 
 	// serialization is done by CPSAttribMakerT
 };
@@ -204,7 +204,7 @@ public:
 
 	/// restrieve the start and end Value
 
-	virtual void getValues(T &startValue, T &endValue) const
+	virtual void getValues(T &startValue, T &endValue) const NL_OVERRIDE
 	{
 		startValue = _Values[0];
 		endValue = _Values[n];
@@ -212,7 +212,7 @@ public:
 
 	/// set the Values
 
-	virtual void setValues(T startValue, T endValue)
+	virtual void setValues(T startValue, T endValue) NL_OVERRIDE
 	{
 		float step = 1.f / n;
 		float alpha = 0.0f;
@@ -411,8 +411,8 @@ public:
 	CPSValueGradient(float nbCycles) : CPSAttribMakerT<T, CPSValueGradientFunc<T> >(nbCycles)
 	{
 	}
-	virtual T getMaxValue(void) const { return this->_F.getMaxValue(); }
-	virtual T getMinValue(void) const { return this->_F.getMinValue(); }
+	virtual T getMaxValue(void) const NL_OVERRIDE { return this->_F.getMaxValue(); }
+	virtual T getMinValue(void) const NL_OVERRIDE { return this->_F.getMinValue(); }
 };
 
 
@@ -482,11 +482,7 @@ void CPSValueGradientFunc<T>::setValuesUnpacked(const T *valueTab, uint32 numVal
 	_MaxValue = _MinValue = valueTab[0];
 	_NbValues = (numValues - 1) * nbStages;
 	_Tab.resize(_NbValues + 1);
-#ifdef NL_COMP_VC14
-	std::copy(valueTab, valueTab + _NbValues + 1, stdext::make_checked_array_iterator(&_Tab[0], _Tab.size()));
-#else
 	std::copy(valueTab, valueTab + _NbValues + 1, &_Tab[0]);
-#endif
 }
 
 

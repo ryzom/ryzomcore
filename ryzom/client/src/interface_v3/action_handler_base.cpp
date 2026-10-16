@@ -41,12 +41,12 @@ using namespace NLMISC;
 // ------------------------------------------------------------------------------------------------
 class CAHActiveMenu : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 
 		// get the parent container
-		CGroupContainer *gc = NULL;
+		CGroupContainer *gc = nullptr;
 		CCtrlBase *cb = pCaller;
 		while (cb)
 		{
@@ -76,7 +76,7 @@ class CAHActiveMenu : public IActionHandler
 		}
 
 		// open the menu
-		if (CDBCtrlSheet::getDraggedSheet() == NULL)
+		if (CDBCtrlSheet::getDraggedSheet() == nullptr)
 		{
 			std::string menuId = getParam(Params, "menu");
 			CGroupMenu *groupMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId(menuId));
@@ -112,16 +112,16 @@ REGISTER_ACTION_HANDLER (CAHActiveMenu, "active_menu");
 class CAHSetKeyboardFocus : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string target = getParam (Params, "target");
 		CGroupEditBox *geb;
-		if (pCaller == NULL)
+		if (pCaller == nullptr)
 			geb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId (target));
 		else
 			geb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId (pCaller->getId(), target));
-		if (geb == NULL)
+		if (geb == nullptr)
 		{
 			nlwarning("<CAHSetKeyboardFocus::execute> Can't get target edit box %s, or bad type", target.c_str());
 			return;
@@ -141,7 +141,7 @@ REGISTER_ACTION_HANDLER (CAHSetKeyboardFocus, "set_keyboard_focus");
 class CAHResetKeyboardFocus : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CWidgetManager::getInstance()->resetCaptureKeyboard();
 	}
@@ -151,7 +151,7 @@ REGISTER_ACTION_HANDLER (CAHResetKeyboardFocus, "reset_keyboard_focus");
 // ------------------------------------------------------------------------------------------------
 class CAHSetEditBoxCommand : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CGroupEditBox *menuEB = CGroupEditBox::getMenuFather();
 		if (menuEB) menuEB->setCommand(getParam(Params, "value"), nlstricmp(getParam(Params, "execute"), "true") ? true : false);
@@ -162,7 +162,7 @@ REGISTER_ACTION_HANDLER (CAHSetEditBoxCommand, "set_edit_box_command");
 // ------------------------------------------------------------------------------------------------
 class CAHSetServerString : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sValue = getParam(Params,"value");
 		string sTarget = getParam(Params,"target");
@@ -171,7 +171,7 @@ class CAHSetServerString : public IActionHandler
 
 		if (sTarget.rfind(':') == string::npos)
 		{
-			if (pCaller == NULL) return;
+			if (pCaller == nullptr) return;
 			sTarget = pCaller->getId() + ":" + sTarget;
 		}
 		else
@@ -179,16 +179,16 @@ class CAHSetServerString : public IActionHandler
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			string elt = sTarget.substr(0,sTarget.rfind(':'));
 			CInterfaceElement *pIE;
-			if (pCaller != NULL)
+			if (pCaller != nullptr)
 				pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), elt);
 			else
 				pIE = CWidgetManager::getInstance()->getElementFromId(elt);
-			if (pIE == NULL) return;
+			if (pIE == nullptr) return;
 			sTarget = pIE->getId() + ":" + sTarget.substr(sTarget.rfind(':')+1,sTarget.size());
 		}
 
 		CInterfaceExprValue evValue;
-		if (CInterfaceExpr::eval(sValue, evValue, NULL))
+		if (CInterfaceExpr::eval(sValue, evValue, nullptr))
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if (evValue.toInteger())
@@ -201,7 +201,7 @@ REGISTER_ACTION_HANDLER (CAHSetServerString, "set_server_string");
 // ------------------------------------------------------------------------------------------------
 class CAHSetServerID : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sValue = getParam(Params,"value");
 		string sTarget = getParam(Params,"target");
@@ -211,7 +211,7 @@ class CAHSetServerID : public IActionHandler
 
 		if (sTarget.rfind(':') == string::npos)
 		{
-			if (pCaller == NULL) return;
+			if (pCaller == nullptr) return;
 			sTarget = pCaller->getId() + ":" + sTarget;
 		}
 		else
@@ -219,16 +219,16 @@ class CAHSetServerID : public IActionHandler
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			string elt = sTarget.substr(0,sTarget.rfind(':'));
 			CInterfaceElement *pIE;
-			if (pCaller != NULL)
+			if (pCaller != nullptr)
 				pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), elt);
 			else
 				pIE = CWidgetManager::getInstance()->getElementFromId(elt);
-			if (pIE == NULL) return;
+			if (pIE == nullptr) return;
 			sTarget = pIE->getId() + ":" + sTarget.substr(sTarget.rfind(':')+1,sTarget.size());
 		}
 
 		CInterfaceExprValue evValue;
-		if (CInterfaceExpr::eval(sValue, evValue, NULL))
+		if (CInterfaceExpr::eval(sValue, evValue, nullptr))
 		{
 			bool bRemoveTitle = false;
 			if (!sRemoveTitle.empty())
@@ -246,7 +246,7 @@ class CAHSetServerID : public IActionHandler
 			else
 			{
 				if (evValue.toInteger())
-					pIM->addServerID (sTarget, (uint32)evValue.getInteger(), NULL);
+					pIM->addServerID (sTarget, (uint32)evValue.getInteger(), nullptr);
 			}
 		}
 	}
@@ -256,7 +256,7 @@ REGISTER_ACTION_HANDLER (CAHSetServerID, "set_server_id");
 // ------------------------------------------------------------------------------------------------
 class CAHResetCamera : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		string sTarget = getParam(Params,"target");
 
@@ -264,12 +264,12 @@ class CAHResetCamera : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceElement *pIE;
-		if (pCaller != NULL)
+		if (pCaller != nullptr)
 			pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), sTarget);
 		else
 			pIE = CWidgetManager::getInstance()->getElementFromId(sTarget);
 		CInterface3DCamera *pCam = dynamic_cast<CInterface3DCamera*>(pIE);
-		if (pCam == NULL) return;
+		if (pCam == nullptr) return;
 		pCam->reset();
 	}
 };
@@ -283,7 +283,7 @@ REGISTER_ACTION_HANDLER (CAHResetCamera, "reset_camera");
 // ------------------------------------------------------------------------------------------------
 class CAHSetVirtualDesktop : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sVDesk = getParam(Params,"vdesk");
 
@@ -302,7 +302,7 @@ REGISTER_ACTION_HANDLER (CAHSetVirtualDesktop, "set_virtual_desktop");
 // ------------------------------------------------------------------------------------------------
 class CAHResetVirtualDesktop : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sVDesk = getParam(Params,"vdesk");
 
@@ -321,7 +321,7 @@ REGISTER_ACTION_HANDLER (CAHResetVirtualDesktop, "reset_virtual_desktop");
 // ------------------------------------------------------------------------------------------------
 class CAHMilkoMenuResetInterface : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sParam("mode=");
@@ -336,7 +336,7 @@ REGISTER_ACTION_HANDLER (CAHMilkoMenuResetInterface, "milko_menu_reset_interface
 // ------------------------------------------------------------------------------------------------
 class CAHMilkoMenuDoResetInterface : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string& Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string& Params) NL_OVERRIDE
 	{
 		// get param
 		string mode = getParam(Params, "mode");
@@ -344,9 +344,9 @@ class CAHMilkoMenuDoResetInterface : public IActionHandler
 		// run procedure
 		vector<string> v;
 		if (mode == "R2TestMode")
-			CWidgetManager::getInstance()->runProcedure ("proc_reset_r2ed_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_r2ed_interface", nullptr, v);
 		else
-			CWidgetManager::getInstance()->runProcedure("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure("proc_reset_interface", nullptr, v);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHMilkoMenuDoResetInterface, "milko_menu_do_reset_interface");
@@ -354,7 +354,7 @@ REGISTER_ACTION_HANDLER(CAHMilkoMenuDoResetInterface, "milko_menu_do_reset_inter
 // ------------------------------------------------------------------------------------------------
 class CAHResetInterface : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		uint32 i;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -367,7 +367,7 @@ class CAHResetInterface : public IActionHandler
 			for (i = 0; i < rV.size(); ++i)
 			{
 				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(rV[i]);
-				if (pGC == NULL) continue;
+				if (pGC == nullptr) continue;
 				if (pGC->isSavable())
 				{
 					// Yoyo: DO NOT force activation of containers who don't want to save their Active state.
@@ -384,7 +384,7 @@ class CAHResetInterface : public IActionHandler
 			for (i = 0; i < rV.size(); ++i)
 			{
 				CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(rV[i]);
-				if (pGC == NULL) continue;
+				if (pGC == nullptr) continue;
 				if (pGC->isSavable())
 				{
 					if (pGC->isPopable()&&pGC->isPopuped())
@@ -405,7 +405,7 @@ REGISTER_ACTION_HANDLER (CAHResetInterface, "reset_interface");
 // ------------------------------------------------------------------------------------------------
 class CAHConvertServerEntities : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		string sDstPath = getParam(Params, "dest");
 		if (sDstPath.empty()) return;

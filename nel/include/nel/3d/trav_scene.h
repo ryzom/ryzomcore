@@ -46,7 +46,7 @@ public:
 	CScene	*Scene; // the scene owning this traversal (if any)
 public:
 	/// ctor
-	CTraversal() : Scene(NULL) {}
+	CTraversal() : Scene(nullptr) {}
 };
 
 

@@ -33,13 +33,13 @@
 class CXMLAutoPtr
 {
 public:
-	CXMLAutoPtr(const char *value = NULL) : _Value(value) {}
+	CXMLAutoPtr(const char *value = nullptr) : _Value(value) {}
 	CXMLAutoPtr(const unsigned char *value) : _Value((const char *) value) {}
 	~CXMLAutoPtr();
 	operator const char *() const { return _Value; }
-	operator bool() const { return _Value != NULL; }
+	operator bool() const { return _Value != nullptr; }
 	inline std::string str() const { return _Value; }
-	bool operator ! () const { return _Value == NULL; }
+	bool operator ! () const { return _Value == nullptr; }
 	operator const unsigned char *() const { return (const unsigned char *)  _Value; }
 	char operator * ()  const { nlassert(_Value); return *_Value; }
 	/// NB : This remove previous owned pointer with xmlFree

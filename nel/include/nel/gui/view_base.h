@@ -44,19 +44,19 @@ namespace NLGUI
 		}
 
 		/// Destructor
-		virtual ~CViewBase();
+		virtual ~CViewBase() NL_OVERRIDE;
 
 		// Returns 'true' if that element can be downcasted to a view
-		virtual bool isView() const { return true; }
+		virtual bool isView() const NL_OVERRIDE { return true; }
 
 		/// Draw the view from XReal, YReal, WReal, HReal (implemented by derived classes)
 		/// this coordinates are relative to the screen bottom left and begins the bottom left of the view
 		virtual void draw () = 0;
 
-		virtual void updateCoords() { CInterfaceElement::updateCoords(); }
+		virtual void updateCoords() NL_OVERRIDE { CInterfaceElement::updateCoords(); }
 
 		/// Debug
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		/// Reflection
 		virtual sint32 getAlpha() const  { return -1; }	// Not obliged to implement this
@@ -76,7 +76,7 @@ namespace NLGUI
 		virtual void	dumpSize(uint depth = 0) const;
 
 		// from CInterfaceElement
-		virtual void visit(CInterfaceElementVisitor *visitor);
+		virtual void visit(CInterfaceElementVisitor *visitor) NL_OVERRIDE;
 
 		// special for mouse over : return true and fill the name of the cursor to display
 		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }

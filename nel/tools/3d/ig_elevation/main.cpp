@@ -72,7 +72,7 @@ struct SExportOptions
 	bool load (const string &sFilename)
 	{
 		FILE * f = fopen (sFilename.c_str(), "rt");
-		if (f == NULL)
+		if (f == nullptr)
 			return false;
 		else 
 			fclose (f);
@@ -134,7 +134,7 @@ struct CZoneLimits
 // ---------------------------------------------------------------------------
 CZoneRegion *loadLand (const string &filename)
 {
-	CZoneRegion *ZoneRegion = NULL;
+	CZoneRegion *ZoneRegion = nullptr;
 	try
 	{
 		CIFile fileIn;
@@ -176,13 +176,13 @@ CInstanceGroup* LoadInstanceGroup (const std::string &sFilename)
 		{
 			// Cannot save the file
 			delete newIG;
-			return NULL;
+			return nullptr;
 		}
 	}
 	else
 	{
 		delete newIG;
-		return NULL;
+		return nullptr;
 	}
 	return newIG;
 }
@@ -218,7 +218,7 @@ static float  getHeightMapZ(float x, float y, const CZoneLimits &zl, const SExpo
 	sint32 SizeX = zl._ZoneMaxX - zl._ZoneMinX + 1;
 	sint32 SizeY = zl._ZoneMaxY - zl._ZoneMinY + 1;
 
-	if (heightMap1 != NULL)
+	if (heightMap1 != nullptr)
 	{
 		float xc = (x - options.CellSize * zl._ZoneMinX) / (options.CellSize * SizeX);
 		float yc = 1.0f - ((y - options.CellSize * zl._ZoneMinY) / (options.CellSize * SizeY));
@@ -237,7 +237,7 @@ static float  getHeightMapZ(float x, float y, const CZoneLimits &zl, const SExpo
 		deltaZ *= options.ZFactor1;
 	}
 
-	if (heightMap2 != NULL)
+	if (heightMap2 != nullptr)
 	{
 		float xc = (x - options.CellSize * zl._ZoneMinX) / (options.CellSize * SizeX);
 		float yc = 1.0f - ((y - options.CellSize * zl._ZoneMinY) / (options.CellSize * SizeY));
@@ -314,7 +314,7 @@ int main(int nNbArg, char**ppArgs)
 	}
 
 	// Load the 2 height maps
-	CBitmap *HeightMap1 = NULL;
+	CBitmap *HeightMap1 = nullptr;
 	if (!options.HeightMapFile1.empty())
 	{
 		HeightMap1 = new CBitmap;
@@ -329,17 +329,17 @@ int main(int nNbArg, char**ppArgs)
 			{
 				outString(toString("Couldn't not open %s: heightmap 1 map ignored", options.HeightMapFile1.c_str()));
 				delete HeightMap1;
-				HeightMap1 = NULL;
+				HeightMap1 = nullptr;
 			}
 		}
 		catch (const Exception &e)
 		{
 			outString(toString("Cant load height map : %s : %s", options.HeightMapFile1.c_str(), e.what()));
 			delete HeightMap1;
-			HeightMap1 = NULL;
+			HeightMap1 = nullptr;
 		}
 	}
-	CBitmap *HeightMap2 = NULL;
+	CBitmap *HeightMap2 = nullptr;
 	if (!options.HeightMapFile2.empty())
 	{
 		HeightMap2 = new CBitmap;
@@ -354,14 +354,14 @@ int main(int nNbArg, char**ppArgs)
 			{
 				outString(toString("Couldn't not open %s: heightmap 2 map ignored", options.HeightMapFile2.c_str()));
 				delete HeightMap2;
-				HeightMap2 = NULL;
+				HeightMap2 = nullptr;
 			}
 		}
 		catch (const Exception &e)
 		{
 			outString (string("Cant load height map : ") + options.HeightMapFile2 + " : " + e.what() + "\n");
 			delete HeightMap2;
-			HeightMap1 = NULL;
+			HeightMap1 = nullptr;
 		}
 	}
 
@@ -383,7 +383,7 @@ int main(int nNbArg, char**ppArgs)
 	{
 		CInstanceGroup *pIG = LoadInstanceGroup (vAllFiles[i]);
 
-		if (pIG != NULL)
+		if (pIG != nullptr)
 		{
 			bool realTimeSunContribution = pIG->getRealTimeSunContribution();
 			// For all instances !!!

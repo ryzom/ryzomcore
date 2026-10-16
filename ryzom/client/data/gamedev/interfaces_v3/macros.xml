@@ -181,6 +181,7 @@
 		 group_onclick_r="active_menu"
 		 group_params_r="menu=ui:interface:base_menu_with_color" >
 
+					
 		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewKeyShortcut"
 				 onclick_l="keys_new" />
 
@@ -235,7 +236,7 @@
 <!-- ++++++++++++++++ -->
 
 <group type="menu" id="options_macro" exit_click_b="true" extends="base_menu" >
-	<action name="uimMacroExec" handler="macros_exec" icon="r2ed_tool_start.tga" />
+	<action name="uimMacroExec" handler="macros_exec"  icon="r2ed_tool_start.tga"/>
 	<action name="uimMacroEdit" handler="macros_edit" icon="r2ed_edit_dialog_small.tga" />
 	<action name="uimMacroCopy" handler="macros_copy" icon="r2ed_tool_copy.tga" />
 	<action name="uimMacroUnassign"	handler="macros_unassign" icon="" />
@@ -331,7 +332,7 @@
 <!-- +++++++++++++ -->
 
 <group type="menu" id="options_macro_command" exit_click_b="true" extends="base_menu" >
-	<action name="uimMCMoveUp"		handler="new_macro_cmd_move_up" icon="w_arrow_up_0.tga" />
+	<action name="uimMCMoveUp"		handler="new_macro_cmd_move_up"  icon="w_arrow_up_0.tga"/>
 	<action name="uimMCMoveDown"	handler="new_macro_cmd_move_down" icon="w_arrow_down_0.tga" />
 	<action name="uimMCEdit"		handler="new_macro_cmd_edit" icon="r2ed_edit_dialog_small.tga" />
 	<action name="uimMCCopy"		handler="new_macro_cmd_copy" icon="r2ed_tool_copy.tga" />

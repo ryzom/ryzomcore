@@ -48,7 +48,7 @@ public:
 		CZoneInfo()
 		{
 			ZoneId= 0;
-			Patchs= NULL;
+			Patchs = nullptr;
 		}
 	};
 

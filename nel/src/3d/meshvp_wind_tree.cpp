@@ -430,8 +430,8 @@ class CVertexProgramWindTree : public CVertexProgramLighted
 public:
 	typedef CWindTreeVPIdx CIdx;
 	CVertexProgramWindTree(uint numPls, bool specular, bool normalize);
-	virtual ~CVertexProgramWindTree() { };
-	virtual void buildInfo();
+	virtual ~CVertexProgramWindTree() NL_OVERRIDE { };
+	virtual void buildInfo() NL_OVERRIDE;
 	const CIdx &idx() const { return m_Idx; }
 
 	bool PerMeshSetup;
@@ -448,8 +448,8 @@ class CVertexProgramWindTreeUBO : public CVertexProgram
 public:
 	typedef CWindTreeVPIdx CIdx;
 	CVertexProgramWindTreeUBO(bool clip);
-	virtual ~CVertexProgramWindTreeUBO() { };
-	virtual void buildInfo();
+	virtual ~CVertexProgramWindTreeUBO() NL_OVERRIDE { };
+	virtual void buildInfo() NL_OVERRIDE;
 	const CIdx &idx() const { return m_Idx; }
 
 private:
@@ -713,7 +713,7 @@ const CWindTreeVPIdx &CMeshVPWindTree::activeIdx() const
 
 bool CMeshVPWindTree::isUBOActive() const
 {
-	return _ActiveVertexProgramUBO != NULL;
+	return _ActiveVertexProgramUBO != nullptr;
 }
 
 
@@ -942,12 +942,12 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 		&& driver->activeVertexProgram(progUBO))
 	{
 		_ActiveVertexProgramUBO = progUBO;
-		_ActiveVertexProgram = NULL;
+		_ActiveVertexProgram = nullptr;
 		driver->bindUniformBuffer(UBBindingVertexProgram, _WindTreeUB);
 	}
 	else
 	{
-		_ActiveVertexProgramUBO = NULL;
+		_ActiveVertexProgramUBO = nullptr;
 
 		// Legacy: select from 16 variants based on numPls/specular/normalize
 		nlassert(scene != NULL);
@@ -968,7 +968,7 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 		else
 		{
 			// vertex program not supported
-			_ActiveVertexProgram = NULL;
+			_ActiveVertexProgram = nullptr;
 			return false;
 		}
 	}
@@ -987,11 +987,11 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 void	CMeshVPWindTree::end(IDriver *driver)
 {
 	// Disable the VertexProgram
-	driver->activeVertexProgram(NULL);
+	driver->activeVertexProgram(nullptr);
 	if (_ActiveVertexProgramUBO)
-		driver->bindUniformBuffer(UBBindingVertexProgram, NULL);
-	_ActiveVertexProgram = NULL;
-	_ActiveVertexProgramUBO = NULL;
+		driver->bindUniformBuffer(UBBindingVertexProgram, nullptr);
+	_ActiveVertexProgram = nullptr;
+	_ActiveVertexProgramUBO = nullptr;
 }
 
 // ***************************************************************************
@@ -1106,13 +1106,13 @@ void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 		&& driver->activeVertexProgram(progUBO))
 	{
 		_ActiveVertexProgramUBO = progUBO;
-		_ActiveVertexProgram = NULL;
+		_ActiveVertexProgram = nullptr;
 		_LastMBRIdVP = ~0u; // Sentinel: UBO path active, no variant switching
 		driver->bindUniformBuffer(UBBindingVertexProgram, _WindTreeUB);
 	}
 	else
 	{
-		_ActiveVertexProgramUBO = NULL;
+		_ActiveVertexProgramUBO = nullptr;
 
 		/* Since need a VertexProgram Activation before activeVBHard, activate a default one
 			bet the common one will be "NoPointLight, NoSpecular, No ForceNormalize" => 0.
@@ -1175,11 +1175,11 @@ void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBase
 void	CMeshVPWindTree::endMBRMesh(IDriver *driver)
 {
 	// Disable the VertexProgram
-	driver->activeVertexProgram(NULL);
+	driver->activeVertexProgram(nullptr);
 	if (_ActiveVertexProgramUBO)
-		driver->bindUniformBuffer(UBBindingVertexProgram, NULL);
-	_ActiveVertexProgram = NULL;
-	_ActiveVertexProgramUBO = NULL;
+		driver->bindUniformBuffer(UBBindingVertexProgram, nullptr);
+	_ActiveVertexProgram = nullptr;
+	_ActiveVertexProgramUBO = nullptr;
 }
 
 // ***************************************************************************

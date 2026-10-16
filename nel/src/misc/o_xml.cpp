@@ -128,16 +128,16 @@ COXml::COXml () : IStream (false /* Output mode */)
 	setXMLMode (true);
 
 	// Set the stream
-	_InternalStream = NULL;
+	_InternalStream = nullptr;
 
 	// Set the version
 	_Version = "1.0";
 
 	// Initialise the document
-	_Document = NULL;
+	_Document = nullptr;
 
 	// Current node
-	_CurrentNode = NULL;
+	_CurrentNode = nullptr;
 
 	// Content string
 	_ContentString.clear();
@@ -167,10 +167,10 @@ bool COXml::init (IStream *stream, const std::string &version)
 		_Version = version;
 
 		// Initialise the document
-		_Document = NULL;
+		_Document = nullptr;
 
 		// Current node
-		_CurrentNode = NULL;
+		_CurrentNode = nullptr;
 
 		// Content string
 		_ContentString.clear();
@@ -421,10 +421,10 @@ bool COXml::xmlPushBeginInternal (const std::string &nodeName)
 		if ( ! _PushBegin )
 		{
 			// Current node exist ?
-			if (_CurrentNode==NULL)
+			if (_CurrentNode == nullptr)
 			{
 				// No document ?
-				if (_Document == NULL)
+				if (_Document == nullptr)
 				{
 					// Initialise the document
 					_Document = xmlNewDoc ((const xmlChar *)_Version.c_str());
@@ -434,7 +434,7 @@ bool COXml::xmlPushBeginInternal (const std::string &nodeName)
 				}
 
 				// Create the first node
-				_CurrentNode=xmlNewDocNode (_Document, NULL, (const xmlChar*)nodeName.c_str(), NULL);
+				_CurrentNode=xmlNewDocNode (_Document, nullptr, (const xmlChar*)nodeName.c_str(), nullptr);
 				xmlDocSetRootElement (_Document, _CurrentNode);
 
 				// Return NULL if error
@@ -446,7 +446,7 @@ bool COXml::xmlPushBeginInternal (const std::string &nodeName)
 				flushContentString ();
 
 				// Create a new node
-				_CurrentNode=xmlNewChild (_CurrentNode, NULL, (const xmlChar*)nodeName.c_str(), NULL);
+				_CurrentNode=xmlNewChild (_CurrentNode, nullptr, (const xmlChar*)nodeName.c_str(), nullptr);
 
 				// Return NULL if error
 				nlassert (_CurrentNode);
@@ -611,7 +611,7 @@ bool COXml::xmlCommentInternal (const std::string &comment)
 	if ( _InternalStream )
 	{
 		// Not in the push mode ?
-		if ( _CurrentNode != NULL)
+		if ( _CurrentNode != nullptr)
 		{
 			// Add a comment node
 			xmlNodePtr commentPtr = xmlNewComment ((const xmlChar *)comment.c_str());
@@ -644,17 +644,17 @@ void COXml::flush ()
 		xmlKeepBlanksDefault (0);
 
 		// Create a output context
-		xmlOutputBufferPtr outputBuffer = xmlOutputBufferCreateIO  ( xmlOutputWriteCallbackForNeL, xmlOutputCloseCallbackForNeL, this, NULL );
+		xmlOutputBufferPtr outputBuffer = xmlOutputBufferCreateIO  ( xmlOutputWriteCallbackForNeL, xmlOutputCloseCallbackForNeL, this, nullptr);
 
 		// Save the file
-		int res = xmlSaveFormatFileTo (outputBuffer, _Document, NULL, 1);
+		int res = xmlSaveFormatFileTo (outputBuffer, _Document, nullptr, 1);
 
 		// No error should be returned because, exception should be raised by the internal stream
 		nlassert (res!=-1);
 
 		// Free the document
 		xmlFreeDoc (_Document);
-		_Document = NULL;
+		_Document = nullptr;
 	}
 }
 

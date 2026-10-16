@@ -15,13 +15,37 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	$publicAccess = true;
+	// Character backup pull/push talks to every BS. Restrict to root/nevrax
+	// the same way commands.php and las_interface do for free AES power.
+	$publicAccess = false;
 	include('authenticate.php');
 	include('request_interface.php');
-	
+
 	$error = '';
-	
-	if ($allowDownload && $download)
+
+	// $file arrives with the request and becomes one word of the backup
+	// service command below, so a space in it appends arguments of the
+	// caller's choosing; it also ends up in a Content-Disposition header and
+	// in the error messages this page prints. Keep it to a save file name.
+	if (!isset($file))
+		$file = '';
+	if (!is_string($file) || !preg_match('/^[A-Za-z0-9._-]{0,255}$/', $file))
+	{
+		$error = "<font color=#ff0000>ERROR:</font> file name must be a plain name (letters, digits, ._- only).";
+		$file = '';
+		$download = false;
+		$upload = false;
+	}
+
+	// same for the service address the upload is aimed at: it is the head of
+	// the command, and the form only ever offers the addresses listed below
+	if (!isset($shard_addr) || !is_string($shard_addr) || !preg_match('/^[A-Za-z0-9._-]{1,255}$/', $shard_addr))
+	{
+		$shard_addr = '';
+		$upload = false;
+	}
+
+	if ($allowDownload && $download && $file !== '')
 	{
 		// query file to BSs
 		$query = "*.*.BS.getFileBase64Content $file";
@@ -56,7 +80,7 @@
 				
 				if ($originalMD5 != '' && $originalMD5 != $decodedMD5)
 				{
-					$error = "<font color=#ff0000>ERROR:</font> failed to download file '$file', MD5 signature indicates file is corrupted.";
+					$error = "<font color=#ff0000>ERROR:</font> failed to download file '".htmlspecialchars($file, ENT_QUOTES)."', MD5 signature indicates file is corrupted.";
 				}
 				else
 				{
@@ -70,22 +94,29 @@
 		}
 		
 		if (!$error)
-			$error = "<font color=#ff0000>ERROR:</font> failed to download file '$file', file may not exist on any server.";
+			$error = "<font color=#ff0000>ERROR:</font> failed to download file '".htmlspecialchars($file, ENT_QUOTES)."', file may not exist on any server.";
 	}
 
-	if ($allowUpload && $upload)
+	if ($allowUpload && $upload && $file !== '' && $shard_addr !== '')
 	{
-		$f = fopen($upld_file, "rb");
-		if ($f)
+		// The form posts the content as a file, so read it from the upload
+		// itself. $upld_file used to be taken from the request globals, which
+		// meant a caller could name any path on the web server here and have
+		// its content shipped to the backup service instead.
+		if (isset($_FILES['upld_file']) && is_uploaded_file($_FILES['upld_file']['tmp_name']))
 		{
-			$content = base64_encode(fread($f, $upld_file_size));
+			$content = base64_encode(file_get_contents($_FILES['upld_file']['tmp_name']));
 			$query = $shard_addr.".putFileBase64Content $file $content";
 
 			$qstate = nel_query($query, $commandResult);
 		}
+		else
+		{
+			$error = "<font color=#ff0000>ERROR:</font> no file was uploaded.";
+		}
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Backup Interface (Character Up/Download)");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Backup Interface (Character Up/Download)");
 
 	// input variables :
 	// - $charid : character id to upload/download
@@ -130,10 +161,10 @@
 	if ($allowDownload)
 	{
 		echo "<table border=1>";
-		echo "<form method='post' action='".$_SERVER['PHP_SELF']."'>";
+		echo "<form method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>";
 		echo "<tr><td bgcolor=#DDDDEE>Download file</td><tr>";
 		echo "<td>";
-		echo "<input type=text name='file' size=40 maxlength=255 value='$file'/>";
+		echo "<input type=text name='file' size=40 maxlength=255 value='".htmlspecialchars($file, ENT_QUOTES)."'/>";
 		echo "<input type=submit name='download' value='Download'/>";
 		echo "</td>";
 		echo "</tr>";
@@ -146,7 +177,7 @@
 	if ($allowUpload)
 	{
 		echo "<table border=1>";
-		echo "<form enctype='multipart/form-data' method='post' action='".$_SERVER['PHP_SELF']."'>";
+		echo "<form enctype='multipart/form-data' method='post' action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>";
 		echo "<tr><td bgcolor=#DDDDEE>Upload file</td><tr>";
 		echo "<td>";
 		echo "<input type=file name='upld_file' size=40 maxlength=255/><br>";
@@ -154,10 +185,10 @@
 		foreach ($shards as $shard)
 		{
 			$addr = $shard['shard'].".".$shard['server'].".".$shard['service'];
-			echo "<option value='$addr'".($shard_addr == $addr ? " selected" : "").">$addr</option>";
+			echo "<option value='".htmlspecialchars($addr, ENT_QUOTES)."'".($shard_addr == $addr ? " selected" : "").">".htmlspecialchars($addr, ENT_QUOTES)."</option>";
 		}
 		echo "</select>\n";
-		echo "<input type=text name='file' size=40 maxlength=255 value='$file'/>";
+		echo "<input type=text name='file' size=40 maxlength=255 value='".htmlspecialchars($file, ENT_QUOTES)."'/>";
 		echo "<input type=submit name='upload' value='Upload'/>";
 		echo "</td>";
 		echo "</tr>";

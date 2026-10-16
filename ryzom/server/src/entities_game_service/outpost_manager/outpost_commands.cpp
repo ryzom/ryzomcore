@@ -139,7 +139,6 @@ NLMISC_COMMAND(outpostGetCurrentTime, "", "")
 	log.displayNL("Current time is %d", CTime::getSecondsSince1970());
 	return true;
 }
-
 //outpostSetAttackDefenseDate primes_outpost_01.outpost -1
 //outpostSetState primes_outpost_01.outpost Attackbefore
 
@@ -148,7 +147,6 @@ NLMISC_COMMAND(outpostGetCurrentTime, "", "")
 //outpostSetAttackDefenseHour primes_outpost_01.outpost 0 0
 //outpostSimulateTimer0End primes_outpost_01.outpost 1620316800
 //outpostSetFightData primes_outpost_01.outpost 1 6
-
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(outpostSimulateTimer0End, "", "<outpost_id> [<absolute end time> | +<time to end>]")
@@ -798,7 +796,6 @@ NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryC
 		log.displayNL("GuildMember not found for guild Id '%d' for character '%s'", c->getGuildId(), eid.toString().c_str());
 		return true;
 	}
-
 	if (args.size() == 1)
 	{
 		log.displayNL("%" NL_I64 "u", guild->getMemberFromEId(eid)->getRealEnterTime());
@@ -811,6 +808,7 @@ NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryC
 	}
 
 	NLMISC::fromString(args[1], cycleEntryDate);
+
 	guild->getMemberFromEId(eid)->setEnterTime(cycleEntryDate);
 	guild->getMemberFromEId(eid)->setEnterEra(cycleEntryEra);
 

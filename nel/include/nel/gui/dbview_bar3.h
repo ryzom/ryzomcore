@@ -42,16 +42,16 @@ namespace NLGUI
 		/// Constructor
 		CDBViewBar3(const TCtorParam &param);
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
-		virtual void updateCoords ();
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual void updateCoords () NL_OVERRIDE;
 
 		void setMini (bool mini);
 
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 
 		/// Nbs: Values by Int are not used if the Links are setuped
 		void setValue0 (sint32 r) { _ValueInt[0] = r; }

@@ -15,13 +15,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	echo "<html><head><title>Ta mère en slibard</title></head><body>\n";
-	
-	echo "GLOBALS[] = <br>\n";
-	echo "<pre>";
-	print_r($GLOBALS);
-	echo "</pre>\n";
-	
-	echo "</body></html>\n";
+	// Dumped every global, including session and config, with no login. Kept
+	// as a stub so any old link fails closed instead of reopening the dump.
+	header('HTTP/1.1 403 Forbidden');
+	echo "Access denied\n";
 
 ?>

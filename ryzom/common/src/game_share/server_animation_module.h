@@ -80,7 +80,7 @@ namespace R2
 
 	public:
 		CServerAnimationModule();
-		~CServerAnimationModule();
+		~CServerAnimationModule() NL_OVERRIDE;
 		void init(NLNET::IModuleSocket* gateway, CDynamicMapService* server);
 
 
@@ -88,13 +88,13 @@ namespace R2
 		//// CModuleBase API
 		/////////////////////////////////////////////////////
 
-		virtual void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId);
-		virtual void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId);
-		virtual void onModuleUpdate();
-		virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy);
-		virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy);
-		virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message);
-		virtual bool isImmediateDispatchingSupported() const { return false; }
+		virtual void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE;
+		virtual void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE;
+		virtual void onModuleUpdate() NL_OVERRIDE;
+		virtual void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		virtual void onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		virtual bool onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE;
+		virtual bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 
 		/////////////////////////////////////////////////////
@@ -104,18 +104,18 @@ namespace R2
 		/// schedule the start of an act (the act will begin 30 seconds after)
 		void scheduleStartAct(TSessionId sessionId, uint32 actId);
 		/// Called by the client when he connect to play mode in an animation session
-		virtual void connectAnimationModePlay(NLNET::IModuleProxy*);
+		virtual void connectAnimationModePlay(NLNET::IModuleProxy*) NL_OVERRIDE;
 		// Called by EGS to set the start position of a player
-		virtual void getStartParams(NLNET::IModuleProxy *sender, uint32 charId, TSessionId lastStoredSessionId);
+		virtual void getStartParams(NLNET::IModuleProxy *sender, uint32 charId, TSessionId lastStoredSessionId) NL_OVERRIDE;
 		/// launch the start of a new Act (is launch by AIS or by DM bia dmc)
 		void startAct(TSessionId sessionId, uint32 actId);
-		void scheduleStartSession(const CAnimationMessageAnimationStart &msg);
+		void scheduleStartSession(const CAnimationMessageAnimationStart &msg) NL_OVERRIDE;
 		void scheduleStartSessionImpl(const CAnimationMessageAnimationStart &msg);
 		// Remove a char from a session, remove its module
-		void disconnectChar(TCharId charId);
-		virtual bool getConnectedChars(TSessionId sessionId, std::vector<TCharId>& chars) const;
-		virtual void setSessionStartParams(TSessionId sessionId, sint32 x, sint32 y, uint8 season);
-		virtual void teleportCharacter(NLNET::IModuleProxy *ais, const NLMISC::CEntityId& eid, float x, float y, float z);
+		void disconnectChar(TCharId charId) NL_OVERRIDE;
+		virtual bool getConnectedChars(TSessionId sessionId, std::vector<TCharId>& chars) const NL_OVERRIDE;
+		virtual void setSessionStartParams(TSessionId sessionId, sint32 x, sint32 y, uint8 season) NL_OVERRIDE;
+		virtual void teleportCharacter(NLNET::IModuleProxy *ais, const NLMISC::CEntityId& eid, float x, float y, float z) NL_OVERRIDE;
 		void broadcastMsg(TSessionId sessionId, const NLNET::CMessage& msg);
 
 		/////////////////////////////////////////////////////
@@ -124,47 +124,47 @@ namespace R2
 
 		IServerEditionModule* getEditionModule() const;
 		CAnimationSession* getSession(TSessionId sessionId) const;
-		TSessionId getSessionIdByCharId(TCharId charId) const;
+		TSessionId getSessionIdByCharId(TCharId charId) const NL_OVERRIDE;
 		CAnimationSession* getSessionByCharId(TCharId charId) const;
-		virtual NLNET::IModule* getModule() const;
+		virtual NLNET::IModule* getModule() const NL_OVERRIDE;
 		// Called by EditionModule to add a character
-		virtual void addPioneer( TSessionId sessionId, TCharId charId) ;
+		virtual void addPioneer( TSessionId sessionId, TCharId charId) NL_OVERRIDE ;
 		// from client (the module will upload mission item description to dm that will store it to its db)
-		virtual void askMissionItemsDescription(NLNET::IModuleProxy *client);
+		virtual void askMissionItemsDescription(NLNET::IModuleProxy *client) NL_OVERRIDE;
 		// from client (the module will upload Acts Position Description to client)
-		virtual void askActPositionDescriptions(NLNET::IModuleProxy *client);
+		virtual void askActPositionDescriptions(NLNET::IModuleProxy *client) NL_OVERRIDE;
 		// from client (the module will upload Acts Position Description to client)
-		virtual void askUserTriggerDescriptions(NLNET::IModuleProxy *client);
+		virtual void askUserTriggerDescriptions(NLNET::IModuleProxy *client) NL_OVERRIDE;
 		// from client (the module will upload Acts Position Description to client)
 		virtual void askIncarnatingListUpdate(NLNET::IModuleProxy *client);
 		virtual void askTalkingAsListUpdate(NLNET::IModuleProxy *client);
 		virtual void askUpdateScenarioHeader(NLNET::IModuleProxy *clientProxyPtr);
-		virtual bool getHeaderInfo(TSessionId sessionId, TScenarioHeaderSerializer::TValueType& values) const;
+		virtual bool getHeaderInfo(TSessionId sessionId, TScenarioHeaderSerializer::TValueType& values) const NL_OVERRIDE;
 
 
 		/////////////////////////////////////////////////////
 		//// DM
 		/////////////////////////////////////////////////////
-		virtual void activateEasterEgg(class NLNET::IModuleProxy *aisControl, uint32 easterEggId, TSessionId scenarioId, uint32 actId, const std::string & items, float x, float y, float z, float heading, const std::string& grpControler, const std::string& name, const std::string& look);
-		virtual void deactivateEasterEgg(class NLNET::IModuleProxy *aisControl, uint32 easterEggId, TSessionId scenarioId, uint32 actId);
+		virtual void activateEasterEgg(class NLNET::IModuleProxy *aisControl, uint32 easterEggId, TSessionId scenarioId, uint32 actId, const std::string & items, float x, float y, float z, float heading, const std::string& grpControler, const std::string& name, const std::string& look) NL_OVERRIDE;
+		virtual void deactivateEasterEgg(class NLNET::IModuleProxy *aisControl, uint32 easterEggId, TSessionId scenarioId, uint32 actId) NL_OVERRIDE;
 		virtual void deactivateEasterEggsFromAct(TSessionId scenarioId, uint32 actId);
-		virtual void onEasterEggLooted(class NLNET::IModuleProxy *egs, uint32 easterEggId, TSessionId scenarioId);
-		virtual void dssMessage(class NLNET::IModuleProxy *ais, TSessionId sessionId, const std::string & msgType, const std::string& who, const std::string& msg);
+		virtual void onEasterEggLooted(class NLNET::IModuleProxy *egs, uint32 easterEggId, TSessionId scenarioId) NL_OVERRIDE;
+		virtual void dssMessage(class NLNET::IModuleProxy *ais, TSessionId sessionId, const std::string & msgType, const std::string& who, const std::string& msg) NL_OVERRIDE;
 		// a dm target a npc and want to know what et can do on it (control, kill) and execute dm action (kill, heal...)
-		virtual void onDssTarget( NLNET::IModuleProxy *senderModuleProxy, const std::vector<std::string> & params);
+		virtual void onDssTarget( NLNET::IModuleProxy *senderModuleProxy, const std::vector<std::string> & params) NL_OVERRIDE;
 		// EGS gives infos to d
 		virtual void onCharTargetReceived( NLNET::IModuleProxy *senderModuleProxy,
 				const NLMISC::CEntityId& eid, const NLMISC::CEntityId&creatureId,
 				TAIAlias alias, TDataSetRow entityRowId,
 				const ucstring& ucName, uint32 nameId,
 				const std::vector<std::string> & params,
-				bool alived);
+				bool alived) NL_OVERRIDE;
 		// EGS message to indicates that a character is ready in mirror
-		virtual void characterReady(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &charEid);
-		virtual void setScenarioPoints(NLNET::IModuleProxy *ais, TSessionId sessionId, float scenarioPoints);
-		virtual void startScenarioTiming(NLNET::IModuleProxy *ais, TSessionId sessionId);
-		virtual void endScenarioTiming(NLNET::IModuleProxy *ais, TSessionId sessionId);
-		bool getScore(TSessionId sessionId, uint32 &score, NLMISC::TTime &timeTaken);
+		virtual void characterReady(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &charEid) NL_OVERRIDE;
+		virtual void setScenarioPoints(NLNET::IModuleProxy *ais, TSessionId sessionId, float scenarioPoints) NL_OVERRIDE;
+		virtual void startScenarioTiming(NLNET::IModuleProxy *ais, TSessionId sessionId) NL_OVERRIDE;
+		virtual void endScenarioTiming(NLNET::IModuleProxy *ais, TSessionId sessionId) NL_OVERRIDE;
+		bool getScore(TSessionId sessionId, uint32 &score, NLMISC::TTime &timeTaken) NL_OVERRIDE;
 
 
 		/////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ namespace R2
 		/////////////////////////////////////////////////////
 
 		void triggerUserTrigger(TSessionId sessionId, uint32 actId, uint32 triggerId);
-		virtual void onUserTriggerTriggered(NLNET::IModuleProxy *client, uint32 actId, uint32 triggerId);
+		virtual void onUserTriggerTriggered(NLNET::IModuleProxy *client, uint32 actId, uint32 triggerId) NL_OVERRIDE;
 
 		//////////////////////////////////////////////////////
 		// NPC Control & talk methods
@@ -197,7 +197,7 @@ namespace R2
 		* stop the control of all Npc controlled by the player(incarn or talk as) clientProxyPtr
 		* (use when client Go from DM -> Player)
 		*/
-		virtual void stopControlNpcs(TCharId charId);
+		virtual void stopControlNpcs(TCharId charId) NL_OVERRIDE;
 
 		/*
 		* When a bot is despawned, this method checks if it was controlled and "talked as" by a DM.
@@ -216,13 +216,13 @@ namespace R2
 		/////////////////////////////////////////////////////
 
 
-		virtual void askSetUserCharActPosition( NLNET::IModuleProxy *sender, uint32 charId );
-		bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 actIndex = 0);
+		virtual void askSetUserCharActPosition( NLNET::IModuleProxy *sender, uint32 charId ) NL_OVERRIDE;
+		bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 actIndex = 0) NL_OVERRIDE;
 
-		virtual bool isSessionRunning(TSessionId sessionId) const;
+		virtual bool isSessionRunning(TSessionId sessionId) const NL_OVERRIDE;
 
-		virtual uint32 getCurrentAct(TSessionId sessionId) const;
-		virtual bool mustReloadPosition(TSessionId sessionId, TCharId charId) const;
+		virtual uint32 getCurrentAct(TSessionId sessionId) const NL_OVERRIDE;
+		virtual bool mustReloadPosition(TSessionId sessionId, TCharId charId) const NL_OVERRIDE;
 
 		virtual bool stopTestImpl(TSessionId sessionId, uint32& lastAct);
 
@@ -355,7 +355,7 @@ namespace R2
 		/// start a test mode (send message to AIS)
 		bool startTest(CAnimationSession* session, bool runTest = true);
 		/// stop a test (send message to AIS to unload Primitives)
-		virtual bool stopTest(TSessionId sessionId, uint32& lastAct);
+		virtual bool stopTest(TSessionId sessionId, uint32& lastAct) NL_OVERRIDE;
 
 
 		/// stop the act

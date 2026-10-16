@@ -496,7 +496,7 @@ void	NLPACS::CComputableSurface::followBorder(CZoneTessellation *zoneTessel, CSu
 	current->EdgeFlag[edge] = true;
 
 	const sint32	currentSurfId = current->SurfaceId;
-	const sint32	oppositeSurfId = (next != NULL) ? next->SurfaceId : UnaffectedSurfaceId;
+	const sint32	oppositeSurfId = (next != nullptr) ? next->SurfaceId : UnaffectedSurfaceId;
 	const sint32	oppositeZid = current->getZoneIdOnEdge(edge);
 	sint			oedge;
 
@@ -516,8 +516,8 @@ void	NLPACS::CComputableSurface::followBorder(CZoneTessellation *zoneTessel, CSu
 
 		current->IsBorder = true;
 
-		if (((oppositeSurfId != UnaffectedSurfaceId) && (next == NULL || (next->SurfaceId != oppositeSurfId && next->SurfaceId != currentSurfId))) ||
-			((oppositeSurfId == UnaffectedSurfaceId) && ((next != NULL && next->SurfaceId != currentSurfId) || (next == NULL && current->getZoneIdOnEdge(nextEdge) != oppositeZid))) ||
+		if (((oppositeSurfId != UnaffectedSurfaceId) && (next == nullptr || (next->SurfaceId != oppositeSurfId && next->SurfaceId != currentSurfId))) ||
+			((oppositeSurfId == UnaffectedSurfaceId) && ((next != nullptr && next->SurfaceId != currentSurfId) || (next == nullptr && current->getZoneIdOnEdge(nextEdge) != oppositeZid))) ||
 			((current->EdgeFlag[nextEdge] || (zoneTessel->VerticesFlags[current->Tri[pivot]]!=0)) && !allowThis))
 		{
 			// if reaches the end of the border, then quits.
@@ -525,7 +525,7 @@ void	NLPACS::CComputableSurface::followBorder(CZoneTessellation *zoneTessel, CSu
 			break;
 		}
 		else if ((oppositeSurfId != UnaffectedSurfaceId && next->SurfaceId == oppositeSurfId) ||
-				 (oppositeSurfId == UnaffectedSurfaceId && next == NULL))
+				 (oppositeSurfId == UnaffectedSurfaceId && next == nullptr))
 		{
 			// if the next edge belongs to the border, then go on the same element
 			current->EdgeFlag[nextEdge] = true;
@@ -577,7 +577,7 @@ void	NLPACS::CComputableSurface::buildBorders(CZoneTessellation *zoneTessel)
 		for (edge=0; edge<3; ++edge)
 		{
 
-			if ((Elements[elem]->EdgeLinks[edge] == NULL || Elements[elem]->EdgeLinks[edge]->SurfaceId != SurfaceId) &&
+			if ((Elements[elem]->EdgeLinks[edge] == nullptr || Elements[elem]->EdgeLinks[edge]->SurfaceId != SurfaceId) &&
 				!Elements[elem]->EdgeFlag[edge])
 			{
 				BorderIds.push_back((uint16)BorderKeeper->size());
@@ -590,12 +590,12 @@ void	NLPACS::CComputableSurface::buildBorders(CZoneTessellation *zoneTessel)
 				// ????
 				//border.DontSmooth = (Elements[elem]->EdgeLinks[edge] != NULL && Elements[elem]->NoLevelSurfaceId == Elements[elem]->EdgeLinks[edge]->SurfaceId);
 
-				if (Elements[elem]->EdgeLinks[edge] != NULL && Elements[elem]->EdgeLinks[edge]->ZoneId != Elements[elem]->ZoneId)
+				if (Elements[elem]->EdgeLinks[edge] != nullptr && Elements[elem]->EdgeLinks[edge]->ZoneId != Elements[elem]->ZoneId)
 				{
 					// link on a neighbor zone
 					border.Right = -2;
 				}
-				if (Elements[elem]->EdgeLinks[edge] == NULL || Elements[elem]->EdgeLinks[edge]->SurfaceId == UnaffectedSurfaceId)
+				if (Elements[elem]->EdgeLinks[edge] == nullptr || Elements[elem]->EdgeLinks[edge]->SurfaceId == UnaffectedSurfaceId)
 				{
 					// no link at all
 					border.Right = -1;
@@ -805,10 +805,10 @@ void	NLPACS::CZoneTessellation::checkSameLandscapeHmBinds(const NL3D::CLandscape
 		const CZone *zone= landscape.getZone(zoneId);
 		const CZone *zoneNoHm= landscapeNoHm.getZone(zoneId);
 		// Check that both are valid, or both are not
-		if( (zone==NULL) != (zoneNoHm==NULL) ) 
+		if( (zone == nullptr) != (zoneNoHm == nullptr) ) 
 		{
 			nlwarning("ERROR: The zone %s is %s in the landscape while it is %s in the landscape_with_No_Heightmap", 
-				zoneName.c_str(), zone==NULL?"not present":"present", zoneNoHm==NULL?"not present":"present");
+				zoneName.c_str(), zone == nullptr ? "not present":"present", zoneNoHm == nullptr ? "not present":"present");
 			exit(0);
 		}
 		// else if both are valid
@@ -1207,7 +1207,7 @@ void	NLPACS::CZoneTessellation::build()
 		for (i=0; i<3; ++i)
 		{
 			fremapit = fremap.find(edge[i]);
-			element.EdgeLinks[i] = (fremapit != fremap.end() ? fremapit->second : NULL);
+			element.EdgeLinks[i] = (fremapit != fremap.end() ? fremapit->second : nullptr);
 		}
 	}
 
@@ -1328,7 +1328,7 @@ void	NLPACS::CZoneTessellation::compile()
 								&e1 = *e.EdgeLinks[1],
 								&e2 = *e.EdgeLinks[2];
 
-				if (e.IsMergable && &e0 != NULL && &e1 != NULL && &e2 != NULL &&
+				if (e.IsMergable && &e0 != nullptr && &e1 != nullptr && &e2 != nullptr &&
 					e.ZoneId == e0.ZoneId &&
 					e.ZoneId == e1.ZoneId &&
 					e.ZoneId == e2.ZoneId &&
@@ -1371,7 +1371,7 @@ void	NLPACS::CZoneTessellation::compile()
 							&e1 = *e.EdgeLinks[1],
 							&e2 = *e.EdgeLinks[2];
 
-			if (&e != NULL && &e0 != NULL && &e1 != NULL && &e2 != NULL &&
+			if (&e != nullptr && &e0 != nullptr && &e1 != nullptr && &e2 != nullptr &&
 				e.IsValid && e0.IsValid && e1.IsValid && e2.IsValid &&
 				!e.IsUnderWater && e0.IsUnderWater && e1.IsUnderWater && e2.IsUnderWater)
 			{
@@ -1469,8 +1469,8 @@ void	NLPACS::CZoneTessellation::compile()
 		element.SurfaceId = UnaffectedSurfaceId;
 		uint	i;
 		for (i=0; i<3; ++i)
-			if (element.EdgeLinks[i] != NULL && !element.EdgeLinks[i]->IsValid)
-				element.EdgeLinks[i] = NULL;
+			if (element.EdgeLinks[i] != nullptr && !element.EdgeLinks[i]->IsValid)
+				element.EdgeLinks[i] = nullptr;
 	}
 
 	//
@@ -1526,9 +1526,9 @@ void	NLPACS::CZoneTessellation::compile()
 		CSurfElement	*elem = Elements[p];
 
 		sint32		s = elem->SurfaceId;
-		sint32		s0 = (elem->EdgeLinks[0] != NULL ? elem->EdgeLinks[0]->SurfaceId : UnaffectedSurfaceId);
-		sint32		s1 = (elem->EdgeLinks[1] != NULL ? elem->EdgeLinks[1]->SurfaceId : UnaffectedSurfaceId);
-		sint32		s2 = (elem->EdgeLinks[2] != NULL ? elem->EdgeLinks[2]->SurfaceId : UnaffectedSurfaceId);
+		sint32		s0 = (elem->EdgeLinks[0] != nullptr ? elem->EdgeLinks[0]->SurfaceId : UnaffectedSurfaceId);
+		sint32		s1 = (elem->EdgeLinks[1] != nullptr ? elem->EdgeLinks[1]->SurfaceId : UnaffectedSurfaceId);
+		sint32		s2 = (elem->EdgeLinks[2] != nullptr ? elem->EdgeLinks[2]->SurfaceId : UnaffectedSurfaceId);
 
 		if (s != s0 && s != s1 && s0 != s1)
 		{

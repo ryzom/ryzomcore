@@ -54,7 +54,7 @@ public:
 		sendRawMessage(bms);
 	}
 
-	~CFEClientRoute()
+	~CFEClientRoute() NL_OVERRIDE
 	{
 		// warn the server that the transport is closed
 		CBitMemStream bms;
@@ -64,7 +64,7 @@ public:
 	}
 
 
-	void sendMessage(const CMessage &message) const
+	void sendMessage(const CMessage &message) const NL_OVERRIDE
 	{
 		// wrap the message in a transport message
 		CBitMemStream wrapper;
@@ -129,7 +129,7 @@ public:
 	// store the unique active transport (only one transport of this type can be activated at a time)
 	static CGatewayFEClientTransport *&OpenTransport()
 	{
-		static CGatewayFEClientTransport *openTransport = NULL;
+		static CGatewayFEClientTransport *openTransport = nullptr;
 
 		return openTransport;
 	}
@@ -140,7 +140,8 @@ public:
 	/// Constructor
 	CGatewayFEClientTransport(const IGatewayTransport::TCtorParam &param)
 		: IGatewayTransport(param),
-		_Route(NULL),
+		_Route(nullptr)
+	    ,
 		_Open(false),
 		_FirstMessageReceived(false),
 		_NextAwaitedMessage(0)
@@ -150,7 +151,7 @@ public:
 #endif
 	}
 
-	~CGatewayFEClientTransport()
+	~CGatewayFEClientTransport() NL_OVERRIDE
 	{
 #if !defined(RZ_CLIENT_DRONE)
 		if (OpenTransport() == this)
@@ -164,22 +165,22 @@ public:
 #endif
 	}
 
-	const std::string &getClassName() const
+	const std::string &getClassName() const NL_OVERRIDE
 	{
 		static string className(FE_CLIENT_CLASS_NAME);
 		return className;
 	}
 
-	virtual void update()
+	virtual void update() NL_OVERRIDE
 	{
 	}
 
-	virtual uint32 getRouteCount() const
+	virtual uint32 getRouteCount() const NL_OVERRIDE
 	{
-		return _Route != NULL ? 1 : 0;
+		return _Route != nullptr ? 1 : 0;
 	}
 
-	void dump(NLMISC::CLog &log) const
+	void dump(NLMISC::CLog &log) const NL_OVERRIDE
 	{
 		IModuleManager &mm = IModuleManager::getInstance();
 		log.displayNL("  Frontend service transport, client part");
@@ -191,7 +192,7 @@ public:
 		{
 			log.displayNL("  The connection is open :");
 
-			if (_Route == NULL)
+			if (_Route == nullptr)
 			{
 				log.displayNL("    There is no route.");
 			}
@@ -207,7 +208,7 @@ public:
 						IModuleProxy *modProx = mm.getModuleProxy(first->second);
 
 						log.displayNL("      - Proxy '%s' : local proxy id %u => foreign module id %u",
-							modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
+							modProx != nullptr ? modProx->getModuleName().c_str() : "ERROR, invalid module",
 							first->second,
 							first->first);
 					}
@@ -216,13 +217,13 @@ public:
 		}
 	}
 
-	void onCommand(const CMessage &/* command */)
+	void onCommand(const CMessage &/* command */) NL_OVERRIDE
 	{
 		// nothing done for now
 		throw EInvalidCommand();
 	}
 	/// The gateway send a textual command to the transport
-	bool onCommand(const TParsedCommandLine &command)
+	bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 	{
 		if (command.SubParams.size() < 1)
 			throw  EInvalidCommand();
@@ -236,7 +237,7 @@ public:
 				return false;
 			}
 #if !defined(RZ_CLIENT_DRONE)
-			if (OpenTransport() != NULL)
+			if (OpenTransport() != nullptr)
 			{
 				nlwarning("A transport is already open, only one transport can be open at a time");
 				return false;
@@ -264,7 +265,7 @@ public:
 			return;
 		}
 #if !defined(RZ_CLIENT_DRONE)
-		if (OpenTransport() != NULL)
+		if (OpenTransport() != nullptr)
 			throw ETransportError("connect : a transport is already connected !");
 
 		// set this transport as the open transport
@@ -297,7 +298,7 @@ public:
 		SimClient->setGatewayTransport(NULL);
 #endif
 
-		if( _Route != NULL)
+		if( _Route != nullptr)
 			onDisconnection();
 
 		_Open = false;
@@ -305,7 +306,7 @@ public:
 
 #if !defined(RZ_CLIENT_DRONE)
 		// this transport is no longer open
-		OpenTransport() = NULL;
+		OpenTransport() = nullptr;
 #endif
 	}
 
@@ -317,7 +318,7 @@ public:
 	// handle the connection of the client
 	void onConnection ( )
 	{
-		if (_Route != NULL)
+		if (_Route != nullptr)
 		{
 			nlwarning("onConnection : route already created !");
 			return;
@@ -339,7 +340,7 @@ public:
 	// handle the deconnection of a new client on the client
 	void onDisconnection ()
 	{
-		if (_Route == NULL)
+		if (_Route == nullptr)
 		{
 			nlwarning("onDisconnection : route not created !");
 			return;
@@ -350,13 +351,13 @@ public:
 
 		// delete the route
 		delete _Route;
-		_Route = NULL;
+		_Route = nullptr;
 	}
 
 	// Called to dispatch an incoming message to the gateway
 	void onDispatchMessage(NLMISC::CBitMemStream &bms)
 	{
-		if (_Route == NULL)
+		if (_Route == nullptr)
 		{
 			nlwarning("onDispatchMessage : no route created, message will be discarded");
 			return;
@@ -434,14 +435,14 @@ public:
 		// advance to next message for next reception
 		++_NextAwaitedMessage;
 
-		if (_Route != NULL && _FirstMessageReceived)
+		if (_Route != nullptr && _FirstMessageReceived)
 		{
 			// there is already a route here, and it have received some message,
 			// we need to delete it
 			onDisconnection();
 		}
 
-		if (_Route == NULL)
+		if (_Route == nullptr)
 			// if there is no route, create one
 			onConnection();
 
@@ -503,7 +504,7 @@ public:
 		// advance to next message for next reception
 		++_NextAwaitedMessage;
 
-		if (_Route == NULL)
+		if (_Route == nullptr)
 		{
 			// there is no route open
 			return;
@@ -540,7 +541,7 @@ public:
 
 void cbImpulsionGatewayOpen(NLMISC::CBitMemStream &bms)
 {
-	if (CGatewayFEClientTransport::getCurrentTransport() != NULL)
+	if (CGatewayFEClientTransport::getCurrentTransport() != nullptr)
 		CGatewayFEClientTransport::getCurrentTransport()->impulsionGatewayOpen(bms, true);
 }
 
@@ -548,14 +549,14 @@ void cbImpulsionGatewayOpen(NLMISC::CBitMemStream &bms)
 // impulsion gateway message callback handler
 void cbImpulsionGatewayMessage(NLMISC::CBitMemStream &bms)
 {
-	if (CGatewayFEClientTransport::getCurrentTransport() != NULL)
+	if (CGatewayFEClientTransport::getCurrentTransport() != nullptr)
 		CGatewayFEClientTransport::getCurrentTransport()->impulsionGatewayMessage(bms, true);
 }
 
 // impulsion gateway close callback handler
 void cbImpulsionGatewayClose(NLMISC::CBitMemStream &bms)
 {
-	if (CGatewayFEClientTransport::getCurrentTransport() != NULL)
+	if (CGatewayFEClientTransport::getCurrentTransport() != nullptr)
 		CGatewayFEClientTransport::getCurrentTransport()->impulsionGatewayClose(bms, true);
 }
 

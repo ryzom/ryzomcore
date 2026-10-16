@@ -28,7 +28,7 @@
 				<param type="std::string"	name="str" php_serial="String" byref="true"/>
 			</invoke>
 				<return name="returnString" msg="RS">
-					<param type="std::string"	name="str" byref="true" php_serial="String" byref="true"/>
+					<param type="std::string"	name="str" byref="true" php_serial="String"/>
 				</return>
 
 			<!-- now, some composite request -->

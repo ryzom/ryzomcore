@@ -41,7 +41,7 @@ public:
 
 protected:
 	/// add brick
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
+	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams ) NL_OVERRIDE
 	{
 		for ( uint i=0 ; i< brick.Params.size() ; ++i)
 		{
@@ -56,7 +56,7 @@ protected:
 			case TBrickParam::MA_RECHARGE:
 				_SapLoad = ((CSBrickParamMagicRecharge *)param)->SapLoad;
 				INFOLOG("MA_RECHARGE: %u",_SapLoad);
-				break;
+				break;					
 			default:
 				// unused param, can be useful in the phrase
 				phrase->applyBrickParam( param, brick, buildParams );
@@ -65,14 +65,13 @@ protected:
 		}
 		return true;
 	}
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode)
+	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode) NL_OVERRIDE
 	{
 		CCharacter * user = PlayerManager.getChar(phrase->getActor());
 		if ( !user )
 			return false;
 		if ( user->forageProgress() ) // can't be extracting into temp inventory
 			return false; // for now, gives the message "target missing or invalid"
-
 		/*
 		 * Ulukyn : Removed Money cost
 		 *
@@ -90,21 +89,20 @@ protected:
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
 						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, std::vector<sint16> &targetDeltaHp, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport ) NL_OVERRIDE
 	{
 	}
 
 	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
 						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
 						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp )
+						sint32 vamp, float vampRatio, bool reportXp ) NL_OVERRIDE
 	{
 		H_AUTO(CMagicActionItemCharge_apply);
 
 		CCharacter * user = PlayerManager.getChar(phrase->getActor());
 		if ( !user )
 			return;
-
 		/*
 		 * Ulukyn : Removed Money cost
 		 * uint moneyCost = uint( phrase->getSabrinaCost() * RechargeMoneyFactor );
@@ -124,6 +122,6 @@ protected:
 };
 
 BEGIN_MAGIC_ACTION_FACTORY(CMagicActionItemCharge)
-	ADD_MAGIC_ACTION_TYPE( "reload" )
+	ADD_MAGIC_ACTION_TYPE( "reload" )	
 END_MAGIC_ACTION_FACTORY(CMagicActionItemCharge)
 

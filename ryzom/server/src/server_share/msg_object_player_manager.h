@@ -80,7 +80,7 @@ public:
 	COPSAddEffectModifier() 
 	{}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("COPSAddEffectModifier");
 
@@ -109,7 +109,7 @@ public:
 		property ("EndImpulsionName", PropString, std::string(""), EndImpulsionName);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -144,7 +144,7 @@ public:
 		Z = 0;
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("COPSCreateItem");
 
@@ -158,7 +158,7 @@ public:
 		property ("Z", PropSInt32, sint32(0), Z);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -178,14 +178,14 @@ public:
 	COPSDestroyItem() 
 	{}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("COPSDestroyItem");
 
 		property ("Id", PropDataSetRow, TDataSetRow(), Id);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -216,7 +216,7 @@ public:
 		Z = 0;
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("COPSMoveItem");
 
@@ -228,7 +228,7 @@ public:
 		property ("Z", PropSInt32, sint32(0), Z);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

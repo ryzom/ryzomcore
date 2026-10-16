@@ -63,7 +63,7 @@ CInstanceLighter::CLightDesc::CLightDesc ()
 // ***************************************************************************
 CInstanceLighter::CInstanceLighter()
 {
-	_IGSurfaceLightBuild= NULL;
+	_IGSurfaceLightBuild = nullptr;
 }
 
 // ***************************************************************************
@@ -649,8 +649,8 @@ void	CInstanceLighter::computeSunContribution(const CLightDesc &lightDesc, std::
 {
 	sint	i;
 	// Use precoputed landscape SunContribution
-	CVisualCollisionManager		*VCM= NULL;
-	CVisualCollisionEntity		*VCE= NULL;
+	CVisualCollisionManager		*VCM = nullptr;
+	CVisualCollisionEntity		*VCE = nullptr;
 	if(landscape)
 	{
 		// create a CVisualCollisionManager and a CVisualCollisionEntity
@@ -1202,7 +1202,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 		CVector		pos= inst.CenterPos;
 
 		// Default: takes no LocalAmbientLight;
-		inst.LocalAmbientLight= NULL;
+		inst.LocalAmbientLight = nullptr;
 		float	furtherAmbLight= 0;
 
 		// Compute Which light influences him.
@@ -1273,7 +1273,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 		// Reset any empty slot to NULL.
 		for(; lightInfId<CInstanceGroup::NumStaticLightPerInstance; lightInfId++)
 		{
-			inst.Light[lightInfId]= NULL;
+			inst.Light[lightInfId] = nullptr;
 		}
 
 	}
@@ -1305,7 +1305,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 				CVector		pos= cellInfo.CenterPos;
 
 				// Default: takes no LocalAmbientLight;
-				cellInfo.LocalAmbientLight= NULL;
+				cellInfo.LocalAmbientLight = nullptr;
 				float	furtherAmbLight= 0;
 
 				// Compute Which light influences him.
@@ -1377,7 +1377,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 				// Reset any empty slot to NULL.
 				for(; lightInfId<CSurfaceLightGrid::NumLightPerCorner; lightInfId++)
 				{
-					cellInfo.LightInfo[lightInfId]= NULL;
+					cellInfo.LightInfo[lightInfId] = nullptr;
 				}
 
 			}
@@ -1430,7 +1430,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 		// Do it for PointLights
 		for(uint lightId= 0; lightId<CInstanceGroup::NumStaticLightPerInstance; lightId++)
 		{
-			if(instSrc.Light[lightId] == NULL)
+			if(instSrc.Light[lightId] == nullptr)
 			{
 				// Mark as unused.
 				instDst.Light[lightId]= 0xFF;
@@ -1448,7 +1448,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 		if(instDst.Light[0] == 0xFF)	swap(instDst.Light[0], instDst.Light[1]);
 
 		// Do it for Ambientlight
-		if(instSrc.LocalAmbientLight == NULL)
+		if(instSrc.LocalAmbientLight == nullptr)
 			instDst.LocalAmbientId= 0xFF;
 		else
 			// NB: may still be 0xFF if 'Too many static light' bug.
@@ -1472,7 +1472,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 				// Do it for PointLights
 				for(uint lightId= 0; lightId<CSurfaceLightGrid::NumLightPerCorner; lightId++)
 				{
-					if(cellInfo.LightInfo[lightId] == NULL)
+					if(cellInfo.LightInfo[lightId] == nullptr)
 					{
 						// Mark as unused.
 						cell.Light[lightId]= 0xFF;
@@ -1490,7 +1490,7 @@ void			CInstanceLighter::processIGPointLightRT(std::vector<CPointLightNamed> &li
 				if(cell.Light[0] == 0xFF)	swap(cell.Light[0], cell.Light[1]);
 
 				// Do it for Ambientlight
-				if(cellInfo.LocalAmbientLight == NULL)
+				if(cellInfo.LocalAmbientLight == nullptr)
 					cell.LocalAmbientId= 0xFF;
 				else
 					// NB: may still be 0xFF if 'Too many static light' bug.

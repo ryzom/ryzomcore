@@ -50,7 +50,7 @@
 	opened="true"
 	openable="false"
 	resizer="false">
-
+	
 	<group id="header_closed" x="0" y="0" w="0" h="0" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" w="0" h="0" wmin="5" sizeref="w" posref="TL TL"></group>
 
@@ -66,7 +66,7 @@
 			shadow="true"
 			global_color="false"
 			hardtext="Ryzhome" />
-
+		
 		<ctrl id="close"
 			type="button"
 			style="button_close"
@@ -172,7 +172,7 @@
 <style style="button_over"
 	id="over"
 	posref="TL TL"
-	render_layer="-1"
+	render_layer="-1" 
 	y="1" w="600" h="44" scale="true"
 	button_type="push_button"
 	tx_normal="blank.tga"
@@ -369,7 +369,7 @@
        opened="true"
        openable="false"
        resizer="false">
-
+       
     <group id="header_closed" x="0" y="0" w="0" h="0" posref="TL TL"></group>
     <group id="header_opened" x="0" y="0" w="0" h="0" wmin="5" sizeref="w" posref="TL TL"></group>
 
@@ -384,7 +384,7 @@
 			global_color="false"
 			fontsize="10"
 			hardtext="" />
-
+			
 		<ctrl style="text_button_16"
 			id="quit"
 			posref="TR TR"
@@ -393,33 +393,32 @@
 			hardtext="uiClose"
 			onclick_l="lua"
 			params_l="RyzhomePlace:close()" />
-
-		<group id="movers" x="0" y="-4" w="182" h="140" posref="MM MM">
-			<instance template="t_webig_ryzhome_button" id="previous_x2" rot="2" x="2" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.1, 0, 0)"	/>
-			<instance template="t_webig_ryzhome_button" id="previous_x" rot="2" x="32" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.01, 0, 0)"	/>
+			<group id="movers" x="0" y="-4" w="182" h="140" posref="MM MM">
+			<instance template="t_webig_ryzhome_button" id="previous_x2" rot="2" x="2" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.1, 0, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_x" rot="2" x="32" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.01, 0, 0)"	/>		
 			<view type="text" id="x" posref="TL TL"	x="76" y="-20" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe X" />
-			<instance template="t_webig_ryzhome_button" id="next_x" rot="0" x="130" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0.01, 0, 0)"	/>
-			<instance template="t_webig_ryzhome_button" id="next_x2" rot="0" x="160" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0.1, 0, 0)"	/>
-
-			<instance template="t_webig_ryzhome_button" id="previous_y2" rot="2" x="2" y="-34" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, -0.1, 0)"	/>
-			<instance template="t_webig_ryzhome_button" id="previous_y" rot="2" x="32" y="-34" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, -0.01, 0)"	/>
+			<instance template="t_webig_ryzhome_button" id="next_x" rot="0" x="130" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0.01, 0, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_x2" rot="0" x="160" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0.1, 0, 0)"	/>		
+		
+			<instance template="t_webig_ryzhome_button" id="previous_y2" rot="2" x="2" y="-34" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, -0.1, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_y" rot="2" x="32" y="-34" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, -0.01, 0)"	/>		
 			<view type="text" id="y" posref="TL TL"	x="76" y="-38" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe Y" />
-			<instance template="t_webig_ryzhome_button" id="next_y" rot="0" x="130" y="-34" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0.01, 0)"	/>
-			<instance template="t_webig_ryzhome_button" id="next_y2" rot="0" x="160" y="-34" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0.1, 0)"	/>
+			<instance template="t_webig_ryzhome_button" id="next_y" rot="0" x="130" y="-34" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0.01, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_y2" rot="0" x="160" y="-34" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0.1, 0)"	/>		
 
-			<instance template="t_webig_ryzhome_button" id="previous_z2" rot="2" x="2" y="-52" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, -0.1, 0)"	/>
-			<instance template="t_webig_ryzhome_button" id="previous_z" rot="2" x="32" y="-52" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, -0.01, 0)"	/>
+			<instance template="t_webig_ryzhome_button" id="previous_z2" rot="2" x="2" y="-52" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, -0.1, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_z" rot="2" x="32" y="-52" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, -0.01, 0)"	/>		
 			<view type="text" id="z"  posref="TL TL"	x="76" y="-58" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe Z" />
-			<instance template="t_webig_ryzhome_button" id="next_z" rot="0" x="130" y="-52" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, 0.01, 0)"	/>
-			<instance template="t_webig_ryzhome_button" id="next_z2" rot="0" x="160" y="-52" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, 0.1, 0)"	/>
+			<instance template="t_webig_ryzhome_button" id="next_z" rot="0" x="130" y="-52" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, 0.01, 0)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_z2" rot="0" x="160" y="-52" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(0, 0, 0.1, 0)"	/>		
 
-			<instance template="t_webig_ryzhome_button" id="previous_a2" rot="2" x="2" y="-70" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(-0.1)"	/>
-			<instance template="t_webig_ryzhome_button" id="previous_a" rot="2" x="32" y="-70" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(-0.01)"	/>
+			<instance template="t_webig_ryzhome_button" id="previous_a2" rot="2" x="2" y="-70" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(-0.1)"	/>		
+			<instance template="t_webig_ryzhome_button" id="previous_a" rot="2" x="32" y="-70" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(-0.01)"	/>		
 			<view type="text" id="a"  posref="TL TL"	x="76" y="-76" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Angle" />
-			<instance template="t_webig_ryzhome_button" id="next_a" rot="0" x="130" y="-70" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(0.01)"	/>
-			<instance template="t_webig_ryzhome_button" id="next_a2" rot="0" x="160" y="-70" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(0.1)"	/>
+			<instance template="t_webig_ryzhome_button" id="next_a" rot="0" x="130" y="-70" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(0.01)"	/>		
+			<instance template="t_webig_ryzhome_button" id="next_a2" rot="0" x="160" y="-70" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:rot(0.1)"	/>		
 		</group>
-
+		
 		<ctrl style="text_button_16"
 			id="validate"
 			posref="BR BR"
@@ -428,7 +427,7 @@
 			hardtext="reset"
 			onclick_l="lua"
 			params_l="RyzhomePlace:apply()" />
-
+			
 		<ctrl style="text_button_16"
 			id="reset"
 			posref="ML MR"
@@ -437,7 +436,7 @@
 			y="0"
 			hardtext="reset"
 			onclick_l="lua"
-			params_l="RyzhomePlace:reset()" />
+			params_l="RyzhomePlace:reset()" />		
 	</group>
 </group>
 

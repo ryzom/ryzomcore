@@ -96,7 +96,7 @@ class __name##Class : public NLMISC::IVariable \
 public: \
 	__name##Class () : IVariable(#__category, #__name, __help) { } \
 	 \
-	virtual bool fromString(const std::string &val, bool human=false) \
+	virtual bool fromString(const std::string &val, bool human=false) NL_OVERRIDE \
 	{ \
 		/*std::stringstream ss (val);*/ \
 		__type p; \
@@ -106,7 +106,7 @@ public: \
 		return ret; \
 	} \
 	 \
-	virtual std::string toString(bool human) const \
+	virtual std::string toString(bool human) const NL_OVERRIDE \
 	{ \
 		__type p; \
 		ptr (&p, true, human); \
@@ -138,7 +138,7 @@ class IVariable : public ICommand
 	friend class CCommandRegistry;
 public:
 
-	IVariable(const char *categoryName, const char *commandName, const char *commandHelp, const char *commandArgs = "[<value>]", bool useConfigFile = false, void (*cc)(IVariable &var)=NULL) :
+	IVariable(const char *categoryName, const char *commandName, const char *commandHelp, const char *commandArgs = "[<value>]", bool useConfigFile = false, void (*cc)(IVariable &var) = nullptr) :
 		ICommand(categoryName,commandName, commandHelp, commandArgs), _UseConfigFile(useConfigFile), ChangeCallback(cc)
 	{
 		Type = Variable;
@@ -148,7 +148,7 @@ public:
 
 	virtual std::string toString(bool human=false) const = 0;
 
-	virtual bool execute(const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
+	virtual bool execute(const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE
 	{
 		if (args.size() > 1)
 			return false;
@@ -192,12 +192,12 @@ class CVariablePtr : public IVariable
 {
 public:
 
-	CVariablePtr (const char *categoryName, const char *commandName, const char *commandHelp, T *valueptr, bool useConfigFile = false, void (*cc)(IVariable &var)=NULL) :
+	CVariablePtr (const char *categoryName, const char *commandName, const char *commandHelp, T *valueptr, bool useConfigFile = false, void (*cc)(IVariable &var) = nullptr) :
 		IVariable (categoryName, commandName, commandHelp, "[<value>]", useConfigFile, cc), _ValuePtr(valueptr)
 	{
 	}
 
-	virtual bool fromString (const std::string &val, bool /* human */=false)
+	virtual bool fromString (const std::string &val, bool /* human */=false) NL_OVERRIDE
 	{
 		//std::stringstream ss (val);
 		//ss >> *_ValuePtr;
@@ -206,7 +206,7 @@ public:
 		return ret;
 	}
 
-	virtual std::string toString (bool /* human */) const
+	virtual std::string toString (bool /* human */) const NL_OVERRIDE
 	{
 		//std::stringstream ss;
 		//ss << *_ValuePtr;
@@ -231,14 +231,14 @@ public:
 				const T &defaultValue,
 				uint nbMeanValue = 0,
 				bool useConfigFile = false,
-				void (*cc)(IVariable &var)=NULL,
+				void (*cc)(IVariable &var) = nullptr,
 				bool executeCallbackForDefaultValue=false ) :
 		IVariable (categoryName, commandName, commandHelp, "[<value>|stat|mean|min|max]", useConfigFile, cc), _Mean(nbMeanValue), _First(true)
 	{
 		set (defaultValue, executeCallbackForDefaultValue);
 	}
 
-	virtual bool fromString (const std::string &val, bool /* human */=false)
+	virtual bool fromString (const std::string &val, bool /* human */=false) NL_OVERRIDE
 	{
 		T v;
 		bool ret = NLMISC::fromString(val, v);
@@ -246,7 +246,7 @@ public:
 		return ret;
 	}
 
-	virtual std::string toString (bool /* human */) const
+	virtual std::string toString (bool /* human */) const NL_OVERRIDE
 	{
 		return NLMISC::toString(_Value);
 	}
@@ -327,7 +327,7 @@ public:
 		return str;
 	}
 
-	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
+	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE
 	{
 		if (args.size() > 1)
 			return false;
@@ -401,19 +401,19 @@ template<> class CVariable<std::string> : public IVariable
 {
 public:
 
-	CVariable (const char *categoryName, const char *commandName, const char *commandHelp, const std::string &defaultValue, uint /* nbMeanValue */ = 0, bool useConfigFile = false, void (*cc)(IVariable &/* var */)=NULL, bool executeCallbackForDefaultValue=false) :
+	CVariable (const char *categoryName, const char *commandName, const char *commandHelp, const std::string &defaultValue, uint /* nbMeanValue */ = 0, bool useConfigFile = false, void (*cc)(IVariable &/* var */) = nullptr, bool executeCallbackForDefaultValue=false) :
 		IVariable (categoryName, commandName, commandHelp, "[<value>]", useConfigFile, cc)
 	{
 		set (defaultValue, executeCallbackForDefaultValue);
 	}
 
-	virtual bool fromString (const std::string &val, bool /* human */=false)
+	virtual bool fromString (const std::string &val, bool /* human */=false) NL_OVERRIDE
 	{
 		set (val);
 		return true;
 	}
 
-	virtual std::string toString (bool /* human */=false) const
+	virtual std::string toString (bool /* human */=false) const NL_OVERRIDE
 	{
 		return _Value;
 	}
@@ -456,7 +456,7 @@ public:
 		return _Value;
 	}
 
-	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
+	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE
 	{
 		if (args.size () > 1)
 			return false;

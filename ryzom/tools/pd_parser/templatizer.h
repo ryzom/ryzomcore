@@ -48,7 +48,7 @@ public:
 	CTemplatizerEnv(CTemplatizerEnv* parent) : Parent(parent), CurrentArrayNode(0)	{ }
 
 	/// Destructor
-	virtual ~CTemplatizerEnv();
+	virtual ~CTemplatizerEnv() NL_OVERRIDE;
 
 	/// Clear Env
 	virtual void		clear();
@@ -91,7 +91,7 @@ public:
 	{
 		TValueMap::const_iterator	it = Values.find(name);
 		if (it == Values.end())
-			return (Parent == NULL ? false : Parent->exists(name));
+			return (Parent == nullptr ? false : Parent->exists(name));
 		return true;
 	}
 
@@ -120,7 +120,7 @@ public:
 		if (child.empty())
 			return this;
 
-		CTemplatizerEnv*	env = NULL;
+		CTemplatizerEnv*	env = nullptr;
 
 		if (child == ".")
 		{
@@ -128,7 +128,7 @@ public:
 		}
 		else if (child == "..")
 		{
-			env = (Parent != NULL ? Parent : this);
+			env = (Parent != nullptr ? Parent : this);
 		}
 		else if (child == "...")
 		{
@@ -167,7 +167,7 @@ public:
 		}
 		else if (child == "..")
 		{
-			CTemplatizerEnv*	env = (Parent != NULL ? Parent : this);
+			CTemplatizerEnv*	env = (Parent != nullptr ? Parent : this);
 			return (dotpos == std::string::npos) ? env : env->getSubEnv(name.substr(dotpos+1));
 		}
 		else if (child == "...")
@@ -184,7 +184,7 @@ public:
 			}
 			else
 			{
-				return Parent != NULL ? Parent->getEnv(name) : getSubEnv(name);
+				return Parent != nullptr ? Parent->getEnv(name) : getSubEnv(name);
 			}
 		}
 	}
@@ -236,7 +236,7 @@ public:
 	virtual CTemplatizerEnv*	getRootEnv()
 	{
 		CTemplatizerEnv*	root = this;
-		while (root->getParent() != NULL)
+		while (root->getParent() != nullptr)
 			root = root->getParent();
 
 		return root;
@@ -257,9 +257,9 @@ public:
 	/// Get Value Node
 	virtual ITemplatizerBloc*	getValueNode(const std::string& name)
 	{
-		ITemplatizerBloc*	node = NULL;
-		CTemplatizerEnv*	env = NULL;
-		return getValueNodeAndEnv(name, node, env) ? node : NULL;
+		ITemplatizerBloc*	node = nullptr;
+		CTemplatizerEnv*	env = nullptr;
+		return getValueNodeAndEnv(name, node, env) ? node : nullptr;
 	}
 
 	/// Get Value Node
@@ -270,30 +270,30 @@ public:
 		{
 			node = getNode(name);
 			env = this;
-			while (node == NULL && env != NULL)
+			while (node == nullptr && env != nullptr)
 			{
 				env = env->getParent();
-				if (env != NULL)
+				if (env != nullptr)
 					node = env->getNode(name);
 			}
 		}
 		else
 		{
 			env = getEnv(name.substr(0, pos));
-			if (env != NULL)
+			if (env != nullptr)
 				node = env->getNode(name.substr(pos+1));
 		}
 
-		return node != NULL && env != NULL;
+		return node != nullptr && env != nullptr;
 	}
 
 	virtual ITemplatizerBloc*	getNode(const std::string& name)
 	{
 		TValueMap::iterator	it = Values.find(name);
-		return it == Values.end() ? NULL : (*it).second;
+		return it == Values.end() ? nullptr : (*it).second;
 	}
 
-	virtual NLMISC::CEvalNumExpr::TReturnState	evalValue (const char *value, double &result, uint32 userData);
+	virtual NLMISC::CEvalNumExpr::TReturnState	evalValue (const char *value, double &result, uint32 userData) NL_OVERRIDE;
 };
 
 
@@ -305,52 +305,53 @@ class CTemplatizerRefEnv : public CTemplatizerEnv
 public:
 
 	/// Constructor
-	CTemplatizerRefEnv(CTemplatizerEnv* ref) : CTemplatizerEnv(NULL), Reference(ref)	{ }
+	CTemplatizerRefEnv(CTemplatizerEnv* ref) : CTemplatizerEnv(nullptr)
+	    , Reference(ref)	{ }
 
 	/// Clear Env
-	virtual void		clear()
+	virtual void		clear() NL_OVERRIDE
 	{
-		Reference = NULL;
+		Reference = nullptr;
 	}
 
 	/// Get value
-	virtual std::string	get(const std::string& name)
+	virtual std::string	get(const std::string& name) NL_OVERRIDE
 	{
 		return Reference->get(name);
 	}
 
 	/// Does Variable exist?
-	virtual bool		exists(const std::string& name) const
+	virtual bool		exists(const std::string& name) const NL_OVERRIDE
 	{
 		return Reference->exists(name);
 	}
 
 	/// Does Sub Environment exist?
-	virtual bool		envExists(const std::string& name) const
+	virtual bool		envExists(const std::string& name) const NL_OVERRIDE
 	{
 		return Reference->envExists(name);
 	}
 
 	/// Get Sub Env
-	virtual CTemplatizerEnv*	getEnv(const std::string& name)
+	virtual CTemplatizerEnv*	getEnv(const std::string& name) NL_OVERRIDE
 	{
 		return Reference->getEnv(name);
 	}
 
 	/// Evaluate string (string replacement)
-	virtual std::string			eval(const std::string& text)
+	virtual std::string			eval(const std::string& text) NL_OVERRIDE
 	{
 		return Reference->eval(text);
 	}
 
 	/// Enter Sub Env, like getEnv() but it doesn't look in parent, and always goes in current env
-	virtual CTemplatizerEnv*	getSubEnv(const std::string& name)
+	virtual CTemplatizerEnv*	getSubEnv(const std::string& name) NL_OVERRIDE
 	{
 		return Reference->getSubEnv(name);
 	}
 
 	/// Get Parent Env
-	virtual CTemplatizerEnv*	getParent()
+	virtual CTemplatizerEnv*	getParent() NL_OVERRIDE
 	{
 		return Reference->getParent();
 	}
@@ -359,36 +360,36 @@ public:
 	CTemplatizerEnv*	Reference;
 
 	/// Get Root Env
-	virtual CTemplatizerEnv*	getRootEnv()
+	virtual CTemplatizerEnv*	getRootEnv() NL_OVERRIDE
 	{
 		return Reference->getRootEnv();
 	}
 
 	/// Set As Raw Text
-	virtual void		setAsRawText(const std::string& name, const std::string& text)
+	virtual void		setAsRawText(const std::string& name, const std::string& text) NL_OVERRIDE
 	{
 		Reference->setAsRawText(name, text);
 	}
 
 	/// Set Value Node
-	virtual void		setValueNode(const std::string& name, ITemplatizerBloc* bloc)
+	virtual void		setValueNode(const std::string& name, ITemplatizerBloc* bloc) NL_OVERRIDE
 	{
 		Reference->setValueNode(name, bloc);
 	}
 
 	/// Get Value Node
-	virtual ITemplatizerBloc*	getValueNode(const std::string& name)
+	virtual ITemplatizerBloc*	getValueNode(const std::string& name) NL_OVERRIDE
 	{
 		return Reference->getValueNode(name);
 	}
 
 	/// Get Value Node
-	virtual bool	getValueNodeAndEnv(const std::string& name, ITemplatizerBloc*& node, CTemplatizerEnv*& env)
+	virtual bool	getValueNodeAndEnv(const std::string& name, ITemplatizerBloc*& node, CTemplatizerEnv*& env) NL_OVERRIDE
 	{
 		return Reference->getValueNodeAndEnv(name, node, env);
 	}
 
-	virtual ITemplatizerBloc*	getNode(const std::string& name)
+	virtual ITemplatizerBloc*	getNode(const std::string& name) NL_OVERRIDE
 	{
 		return Reference->getNode(name);
 	}
@@ -431,7 +432,7 @@ public:
 	template<typename T>
 	void		set(const std::string& var, const T& value)
 	{
-		if (RootEnv == NULL)
+		if (RootEnv == nullptr)
 			return;
 
 		std::string::size_type pos = var.find_last_of(EnvSeparator);
@@ -460,9 +461,10 @@ class CTemplatizerParser
 {
 public:
 
-	CTemplatizerParser() : _Buffer(NULL), _Line(0), _Valid(false)	{ }
+	CTemplatizerParser() : _Buffer(nullptr)
+	    , _Line(0), _Valid(false)	{ }
 	CTemplatizerParser(const CTemplatizerParser& ptr) : _Buffer(ptr._Buffer), _Line(ptr._Line), _Valid(ptr._Valid)	{ }
-	CTemplatizerParser(const char*	buffer, uint linestart = 1) : _Buffer(buffer), _Line(linestart), _Valid(_Buffer != NULL)	{ }
+	CTemplatizerParser(const char*	buffer, uint linestart = 1) : _Buffer(buffer), _Line(linestart), _Valid(_Buffer != nullptr)	{ }
 
 	char	operator * () const			{ return *_Buffer; }
 	char	operator [] (int i) const	{ return _Buffer[i]; }
@@ -546,7 +548,7 @@ public:
 	/// Get Param list
 	virtual const char**	getDefParamList()
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	/// Get Actual Bloc (not a reference)
@@ -618,21 +620,21 @@ public:
 	ITemplatizerBloc*	Reference;
 
 	/// Constructor
-	CTemplatizerReferenceBloc(ITemplatizerBloc* ref = NULL) : Reference(ref)	{}
+	CTemplatizerReferenceBloc(ITemplatizerBloc* ref = nullptr) : Reference(ref)	{}
 
 	/// Destructor
-	virtual ~CTemplatizerReferenceBloc()
+	virtual ~CTemplatizerReferenceBloc() NL_OVERRIDE
 	{
-		Reference = NULL;
+		Reference = nullptr;
 	}
 
 	/// Evaluate node
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			name = evalParam("name", env);
 		std::string			ref = evalParam("ref", env);
 		ITemplatizerBloc*	refnode = env->getValueNode(ref);
-		if (refnode != NULL)
+		if (refnode != nullptr)
 			env->setValueNode(name, new CTemplatizerReferenceBloc(refnode));
 		else
 			nlwarning("Failed to create reference on '%s', not found", name.c_str());
@@ -640,26 +642,26 @@ public:
 	}
 
 	/// Get Text (assuming this is a raw text bloc)
-	virtual std::string	getText(CTemplatizerEnv* env)
+	virtual std::string	getText(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return Reference->getText(env);
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name", "ref" };
 		return (const char**)args;
 	}
 
 	/// Get Actual Bloc (not a reference)
-	virtual ITemplatizerBloc*	getActualBloc()
+	virtual ITemplatizerBloc*	getActualBloc() NL_OVERRIDE
 	{
 		return Reference->getActualBloc();
 	}
 
 	/// Has A Internal Bloc of data
-	virtual bool		hasInternal() const	{ return false; }
+	virtual bool		hasInternal() const NL_OVERRIDE	{ return false; }
 };
 
 
@@ -669,13 +671,13 @@ class CTemplatizerRefEnvBloc : public ITemplatizerBloc
 public:
 
 	/// Evaluate node
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			name = evalParam("name", env);
 		std::string			ref = evalParam("ref", env);
 
 		CTemplatizerEnv*	refenv = env->getEnv(ref);
-		if (refenv != NULL)
+		if (refenv != nullptr)
 			env->setSubEnv(name, new CTemplatizerRefEnv(refenv));
 		else
 			nlwarning("Failed to create reference on env '%s', not found", name.c_str());
@@ -683,14 +685,14 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name", "ref" };
 		return (const char**)args;
 	}
 
 	/// Has A Internal Bloc of data
-	virtual bool		hasInternal() const	{ return false; }
+	virtual bool		hasInternal() const NL_OVERRIDE	{ return false; }
 };
 
 
@@ -704,13 +706,13 @@ class CTemplatizerCommentBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return "";
 	}
 
 	/// Parse bloc internal data
-	virtual CTemplatizerParser	parseInternal(CTemplatizerParser ptr);
+	virtual CTemplatizerParser	parseInternal(CTemplatizerParser ptr) NL_OVERRIDE;
 
 };
 
@@ -724,12 +726,12 @@ public:
 
 	std::string		Text;
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return Text;
 	}
 
-	virtual std::string	getText(CTemplatizerEnv* env)
+	virtual std::string	getText(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return Text;
 	}
@@ -748,7 +750,7 @@ inline std::string	CTemplatizerEnv::get(const std::string& name)
 {
 	ITemplatizerBloc*	bloc = getValueNode(name);
 
-	return (bloc == NULL) ? std::string("") : bloc->getText(this);
+	return (bloc == nullptr) ? std::string("") : bloc->getText(this);
 }
 
 // eval num expr override
@@ -780,18 +782,18 @@ public:
 
 	std::string		Text;
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return env->eval(Text);
 	}
 
-	virtual std::string	getText(CTemplatizerEnv* env)
+	virtual std::string	getText(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return env->eval(Text);
 	}
 
 	/// Parse bloc internal data
-	virtual CTemplatizerParser	parseInternal(CTemplatizerParser ptr);
+	virtual CTemplatizerParser	parseInternal(CTemplatizerParser ptr) NL_OVERRIDE;
 };
 
 
@@ -804,7 +806,7 @@ class CTemplatizerSubBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			subname = evalParam("name", env);
 		CTemplatizerEnv*	subenv = env->getSubEnv(subname);
@@ -813,7 +815,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -828,7 +830,7 @@ class CTemplatizerLoopBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			subname = evalParam("name", env);
 		CTemplatizerEnv*	subenv = env->getSubEnv(subname);
@@ -843,7 +845,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -858,7 +860,7 @@ class CTemplatizerIfDefEnvBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			subname = evalParam("name", env);
 		std::string			evalinsub = evalParam("evalinsub", env);
@@ -875,7 +877,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name", "evalinsub" };
 		return (const char**)args;
@@ -890,7 +892,7 @@ class CTemplatizerIfDefBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			varname = evalParam("name", env);
 
@@ -903,7 +905,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -918,7 +920,7 @@ class CTemplatizerIfNotDefEnvBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			subname = evalParam("name", env);
 
@@ -931,7 +933,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -946,7 +948,7 @@ class CTemplatizerIfNotDefBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			varname = evalParam("name", env);
 
@@ -959,7 +961,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -974,7 +976,7 @@ class CTemplatizerSwitchBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string			switchvalue = evalParam("value", env);
 
@@ -987,7 +989,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "value" };
 		return (const char**)args;
@@ -1001,7 +1003,7 @@ class CTemplatizerFileBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	clearfile = evalParam("clear", env);
 		std::string	filename = evalParam("name", env);
@@ -1010,7 +1012,7 @@ public:
 
 		FILE*	f;
 		f = NLMISC::nlfopen(filename, (clearfile == "true" ? "w" : "a"));
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			fwrite(result.c_str(), 1, result.size(), f);
 			fclose(f);
@@ -1020,7 +1022,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -1034,7 +1036,7 @@ class CTemplatizerSetBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	var = evalParam("name", env);
 		std::string	result = ITemplatizerBloc::eval(env);
@@ -1045,7 +1047,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -1059,17 +1061,17 @@ class CTemplatizerAppendBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	var = evalParam("name", env);
 		std::string	result = ITemplatizerBloc::eval(env);
 
 		ITemplatizerBloc*	bloc = env->getValueNode(var);
-		if (bloc == NULL)
+		if (bloc == nullptr)
 			return "";
 
 		CTemplatizerRawTextBloc*	text = dynamic_cast<CTemplatizerRawTextBloc*>(bloc->getActualBloc());
-		if (text == NULL)
+		if (text == nullptr)
 			return "";
 
 		text->Text += result;
@@ -1078,7 +1080,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -1092,20 +1094,20 @@ class CTemplatizerDefineBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	name = evalParam("name", env);
 		env->setValueNode(name, new CTemplatizerReferenceBloc(this));
 		return "";
 	}
 
-	virtual std::string	getText(CTemplatizerEnv* env)
+	virtual std::string	getText(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		return ITemplatizerBloc::eval(env);
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -1119,11 +1121,11 @@ class CTemplatizerIfBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	value = evalParam("cond", env);
 		double		result;
-		NLMISC::CEvalNumExpr::TReturnState	res = env->evalExpression(value.c_str(), result, NULL);
+		NLMISC::CEvalNumExpr::TReturnState	res = env->evalExpression(value.c_str(), result, nullptr);
 
 		if (res == NLMISC::CEvalNumExpr::NoError && result != 0.0)
 		{
@@ -1136,7 +1138,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "cond" };
 		return (const char**)args;
@@ -1150,7 +1152,7 @@ class CTemplatizerIfNotBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	value = evalParam("cond", env);
 
@@ -1165,7 +1167,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "cond" };
 		return (const char**)args;
@@ -1179,7 +1181,7 @@ class CTemplatizerJoinBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	sep = evalParam("separator", env);
 
@@ -1201,7 +1203,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "separator" };
 		return (const char**)args;
@@ -1219,10 +1221,10 @@ public:
 
 	std::string		Name;
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
-		ITemplatizerBloc*	func = NULL;
-		CTemplatizerEnv*	fenv = NULL;
+		ITemplatizerBloc*	func = nullptr;
+		CTemplatizerEnv*	fenv = nullptr;
 		if (!env->getValueNodeAndEnv(Name, func, fenv))
 		{
 			nlwarning("Unknown user function '%s'", Name.c_str());
@@ -1247,13 +1249,13 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	/// Has A Internal Bloc of data
-	virtual bool		hasInternal() const
+	virtual bool		hasInternal() const NL_OVERRIDE
 	{
 		return false;
 	}
@@ -1266,7 +1268,7 @@ class CTemplatizerClassBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	name = evalParam("name", env);
 		env->setValueNode(name, new CTemplatizerReferenceBloc(this));
@@ -1279,7 +1281,7 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;
@@ -1293,20 +1295,20 @@ class CTemplatizerObjectBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	classname = evalParam("class", env);
 		std::string	name = evalParam("name", env);
 
 		ITemplatizerBloc*	bloc = env->getValueNode(classname);
-		if (bloc == NULL)
+		if (bloc == nullptr)
 		{
 			nlwarning("Unknown class '%s'", classname.c_str());
 			return "";
 		}
 
 		CTemplatizerClassBloc*	classbloc = dynamic_cast<CTemplatizerClassBloc*>(bloc->getActualBloc());
-		if (classbloc == NULL)
+		if (classbloc == nullptr)
 		{
 			nlwarning("object '%s' is not a class", classname.c_str());
 			return "";
@@ -1319,14 +1321,14 @@ public:
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "class", "name" };
 		return (const char**)args;
 	}
 
 	/// Has A Internal Bloc of data
-	virtual bool		hasInternal() const	{ return false;	}
+	virtual bool		hasInternal() const NL_OVERRIDE	{ return false;	}
 };
 
 
@@ -1337,14 +1339,14 @@ class CTemplatizerBreakpointBloc : public ITemplatizerBloc
 {
 public:
 
-	virtual std::string	eval(CTemplatizerEnv* env)
+	virtual std::string	eval(CTemplatizerEnv* env) NL_OVERRIDE
 	{
 		std::string	value = evalParam("name", env);
 		return "";
 	}
 
 	/// Get Param list
-	virtual const char**	getDefParamList()
+	virtual const char**	getDefParamList() NL_OVERRIDE
 	{
 		static const char*	args[] = { "name" };
 		return (const char**)args;

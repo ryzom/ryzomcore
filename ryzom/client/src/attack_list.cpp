@@ -40,16 +40,16 @@ using namespace std::rel_ops;
 
 extern NL3D::UScene *Scene;
 
-CAttackListManager *CAttackListManager::_Instance = NULL;
+CAttackListManager *CAttackListManager::_Instance = nullptr;
 
 
 // get a .animation_fx sheet from its name (NULL if not found)
 static CAnimationFXSetSheet *getAnimFXSetSheetFromName(const std::string &name)
 {
 	CEntitySheet *sheet = SheetMngr.get(NLMISC::CSheetId(name));
-	if (!sheet) return NULL;
+	if (!sheet) return nullptr;
 	if (sheet->Type == CEntitySheet::ANIMATION_FX_SET) return static_cast<CAnimationFXSetSheet *>(sheet);
-	return NULL;
+	return nullptr;
 }
 
 // build an attack part
@@ -72,7 +72,7 @@ static void buildAttackPart(const std::string &sheetName, CAnimationFXSet &fxSet
 // ***********************************************************************************************
 CAttack::CAttack()
 {
-	Sheet = NULL;
+	Sheet = nullptr;
 }
 
 // ***********************************************************************************************
@@ -137,8 +137,8 @@ const CAttack *CAttackList::getAttackFromID(const CAttackIDSheet &id) const
 
 	CAttackListEntry ale(&id);
 	std::vector<CAttackListEntry>::const_iterator it = std::lower_bound(_Attacks.begin(), _Attacks.end(), ale, CAttackEntryComp2());
-	if (it == _Attacks.end()) return NULL;
-	if (*(it->ID) != id) return NULL;
+	if (it == _Attacks.end()) return nullptr;
+	if (*(it->ID) != id) return nullptr;
 	return &(it->Attack);
 }
 
@@ -156,7 +156,7 @@ void CAttackListManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ***********************************************************************************************
@@ -197,7 +197,7 @@ void CAttackListManager::release()
 	_Auras.release();
 	_Links.release();
 	delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ***********************************************************************************************
@@ -206,13 +206,13 @@ const CAttackList *CAttackListManager::getAttackList(const std::string &name) co
 	H_AUTO_USE(RZ_AttackList)
 	TAttackListMap::const_iterator it = _AttackMap.find(name);
 	if (it != _AttackMap.end()) return &(it->second);
-	return NULL;
+	return nullptr;
 }
 
 // ***********************************************************************************************
 CAttackListManager::CAttackListManager()
 {
-	_AnimationSet = NULL;
+	_AnimationSet = nullptr;
 }
 
 // *******************************************************************************************

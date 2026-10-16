@@ -834,7 +834,6 @@ inline uint32 CCharacter::getGuildId() const
 {
 	return _GuildId;
 }
-
 inline uint32 CCharacter::getLastGuildId() const
 {
 	return _LastGuildId;
@@ -862,8 +861,6 @@ inline void CCharacter::setGuildEnterTime(NLMISC::TGameCycle time, uint32 era)
 	_GuildEnterEra = era;
 }
 
-
-
 //------------------------------------------------------------------------------
 
 inline uint32 CCharacter::getTpTicketSlot() const
@@ -884,6 +881,8 @@ inline NLMISC::CVector CCharacter::getOutOutpostPos() const
 {
 	return _OutOutpostPos;
 }
+
+
 
 //------------------------------------------------------------------------------
 
@@ -914,6 +913,7 @@ inline uint8 CCharacter::getHair() const
 {
 	return _HairType;
 }
+
 
 //------------------------------------------------------------------------------
 
@@ -977,7 +977,6 @@ inline uint8 CCharacter::getUnderwearLegsColor() const
 {
 	return _UnderwearLegsColor;
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -1160,6 +1159,7 @@ inline std::string CCharacter::getTagPvPB() const
 	return _TagPvPB;
 }
 
+
 //------------------------------------------------------------------------------
 inline std::string CCharacter::getTagRightHand() const
 
@@ -1231,18 +1231,15 @@ inline bool CCharacter::checkRequiredFame(std::string faction, sint32 fame) cons
 {
 	if (faction == "" || faction == "*")
 		return true;
-
 	if (faction == "ranger" )
 	{
-		if (checkRequiredFame("fyros", fame) &&
-			checkRequiredFame("matis", fame) &&
-			checkRequiredFame("tryker", fame) &&
-			checkRequiredFame("zorai", fame))
+		if (checkRequiredFame("fyros", fame) && checkRequiredFame("matis", fame) && checkRequiredFame("tryker", fame) && checkRequiredFame("zorai", fame))
 			return true;
 		return false;
 	}
 
 	uint32 fameIdx = PVP_CLAN::getFactionIndex(PVP_CLAN::fromString(faction));
+
 	sint32 playerFame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
 
 	if (fame == NO_FAME)

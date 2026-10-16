@@ -38,7 +38,7 @@ public:
 	/// Constructor
 	CPixelProgram();
 	/// Destructor
-	virtual ~CPixelProgram();
+	virtual ~CPixelProgram() NL_OVERRIDE;
 };
 
 } // NL3D

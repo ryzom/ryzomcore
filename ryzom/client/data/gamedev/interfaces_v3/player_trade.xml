@@ -3,6 +3,7 @@
 <root id="interface" x="0" y="0" w="800" h="600" active="true" />
 <lua file="player_trade.lua" />
 
+
 <!-- some initialisations to do when the player trade window is opened -->
 <proc id="open_player_trade">
 	<!-- reset the price that the player proposes -->
@@ -58,13 +59,8 @@
 
 
 <!-- Interface for trade between players -->
-<group id="player_trade" type="container" x="258" y="650" w="262" h="407" pop_max_h="428" title="uiTrade2Player" global_color="false"
- on_active="proc" on_active_params="open_player_trade" active="false" openable="false" opened="true" movable="true" resizer="false" header_color="UI:SAVE:WIN:COLORS:TRADE"
- escapable="true"
- on_escape="end_exchange" 
- on_close_button="end_exchange"
->
-	<group id="header_opened" w="250" h="400" posref="TL TL">			
+<group id="player_trade" type="container" x="258" y="650" w="262" h="407" pop_max_h="428" title="uiTrade2Player" global_color="false" on_active="proc" on_active_params="open_player_trade" active="false" openable="false" opened="true" movable="true" resizer="false" header_color="UI:SAVE:WIN:COLORS:TRADE" escapable="true" on_escape="end_exchange" on_close_button="end_exchange" >
+	<group id="header_opened" w="250" h="400" posref="TL TL">
 		
 		<!-- 1/ TITLE & INTRO -->
 		<!--
@@ -88,6 +84,7 @@
 				<ctrl type="sheet" id="slot1" value="%exchange_receive:1" posparent="slot0"      posref="TR TL" x="2" onclick_r="open_help_auto" />
 				<ctrl type="sheet" id="slot2" value="%exchange_receive:2" posparent="slot1"      posref="TR TL" x="2" onclick_r="open_help_auto" />
 				<ctrl type="sheet" id="slot3" value="%exchange_receive:3" posparent="slot2"      posref="TR TL" x="2" onclick_r="open_help_auto" />
+				
 				<ctrl type="sheet" id="slot4" value="%exchange_receive:4" posparent="slot3"      posref="TR TL" x="2" onclick_r="open_help_auto" />
 
 				<ctrl type="sheet" id="slot5" value="%exchange_receive:5" posparent="slot0"      posref="BL TL" x="0" y="-2" onclick_r="open_help_auto" />
@@ -98,24 +95,20 @@
 			</group>
 			<!-- Money received -->
 			<instance template="argent" id="money_received" posref="BL TL" x="0" y="-14" w="130" h="16" posparent="received_items" tooltip="uittMoneyTradeOffer" value="%exchange_receive_money"/>
-			
+
 			<view type="text" id="bulk_txt" posref="BR TR" y="-7" x="0" posparent="received_items" color="255 255 255 255" global_color="false" shadow="true" fontsize="10" />
 			<instance template="text_tt" tooltip="uittBulkExchangeReceive" posparent="bulk_txt" />
 			<view type="bitmap" id="bulk" posref="ML MR" x="-4" y="0" scale="true" h="12" w="12" posparent="bulk_txt" texture="animal_inventory.tga" global_color="false" />
-			
+
 			<view type="text" id="weight_txt" posparent="bulk_txt" posref="BR TR" y="0" x="0" color="255 255 255 255" global_color="false" shadow="true" fontsize="10" />
 			<instance template="text_tt" tooltip="uittWeightExchangeReceive" posparent="weight_txt" />
 			<view type="bitmap" id="weight" posref="ML MR" x="0" y="0" scale="true" h="12" w="12" posparent="weight_txt" texture="W_weight.tga" global_color="false" />
 
 			<link expr="depends(@%exchange_receive)" action="lua:game:updateReceiveBulkAndWeight()"/>
 			<!--
-			<instance template="thunes" id="money_received" posref="TL TL" x="0" y="-12"
-			 value_1="%money_offer_from_other:SMALL_SEED"
- 			 value_2="%money_offer_from_other:MEDIUM_SEED"
-  			 value_3="%money_offer_from_other:BIG_SEED"
-			 value_4="%money_offer_from_other:VERY_BIG_SEED"	
-			/>
+			<instance template="thunes" id="money_received" posref="TL TL" x="0" y="-12" value_1="%money_offer_from_other:SMALL_SEED" value_2="%money_offer_from_other:MEDIUM_SEED" value_3="%money_offer_from_other:BIG_SEED" value_4="%money_offer_from_other:VERY_BIG_SEED" />
 			-->
+		
 		</group>
 
 
@@ -125,6 +118,7 @@
 		<view type="text" id="give_text" posref="TL TL" posparent="give_back" x="15" y="-14" color="255 255 255 255" fontsize="11" shadow="true" hardtext="uiPlayerGive" global_color="true" />
 		
 		<group id="give" posref="TM TM" posparent="give_back" x="15" y="-28" w="250" h="156">
+			
 			<!-- Items to give -->
 			<group id="given_items" posref="TL TL" x="0" y="-6" h="86" w="218">
 				<!-- 10 sheets that can't be drag and dropped -->
@@ -132,6 +126,7 @@
 				<ctrl type="sheet" id="slot1" onclick_r="open_help_auto" value="%exchange_give:1" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot0"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
 				<ctrl type="sheet" id="slot2" onclick_r="open_help_auto" value="%exchange_give:2" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot1"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
 				<ctrl type="sheet" id="slot3" onclick_r="open_help_auto" value="%exchange_give:3" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot2"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
+				
 				<ctrl type="sheet" id="slot4" onclick_r="open_help_auto" value="%exchange_give:4" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot3"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="TR TL" x="2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
 
 				<ctrl type="sheet" id="slot5" onclick_r="open_help_auto" value="%exchange_give:5" oncandrop="can_drop_to_exchange" dragable="true" posparent="slot0"   ondrop="proc" params_drop="drop_item" oncannotdrop="put_exchange_item_to_bag" posref="BL TL" x="0" y="-2" selection_group="inventory_selection" onclick_l="exchange_left_click_on_slot"/>
@@ -144,26 +139,26 @@
 			<!-- Money to give -->
 			<instance template="argent" id="money_given" posref="BL TL" x="0" y="-14" w="130" h="16" posparent="given_items" tooltip="uittMoneyTradeOffer" value="%money_proposal"/>
 			<!-- <instance template="thunes" id="money_given" posref="TL TL" x="0" y="-12"
-			 value_1="%money_proposal_1"
- 			 value_2="%money_proposal_2"
-  			 value_3="%money_proposal_3"
-			 value_4="%money_proposal_4"	
+			value_1="%money_proposal_1"
+			value_2="%money_proposal_2"
+			value_3="%money_proposal_3"
+			value_4="%money_proposal_4"
 			/>
 			-->
-			
+
 			<!-- Set money -->
-			<ctrl type="button" id="choose_money" button_type="push_button" posparent="money_given" posref="BR BL" y="0" x="4" tx_normal="w_button_edit.tga" tx_pushed="w_button_edit.tga" tx_over="W_button_16_over.tga"
-				onclick_l="enter_modal" params_l="group=ui:interface:money_choose_dialog" tooltip="uittSetMoney" />
+			<ctrl type="button" id="choose_money" button_type="push_button" posparent="money_given" posref="BR BL" y="0" x="4" tx_normal="w_button_edit.tga" tx_pushed="w_button_edit.tga" tx_over="W_button_16_over.tga" onclick_l="enter_modal" params_l="group=ui:interface:money_choose_dialog" tooltip="uittSetMoney" />
 
 			<view type="text" id="bulk_txt" posref="BR TR" y="-7" x="0" posparent="given_items" color="255 255 255 255" global_color="false" shadow="true" fontsize="10"/>
 			<instance template="text_tt" tooltip="uittBulkExchangeGive" posparent="bulk_txt" />
 			<view type="bitmap" id="bulk" posref="ML MR" x="-4" y="0" scale="true" h="12" w="12" posparent="bulk_txt" texture="animal_inventory.tga" global_color="false" />
-			
+
 			<view type="text" id="weight_txt" posparent="bulk_txt" posref="BR TR" y="0" x="0" color="255 255 255 255" global_color="false" shadow="true" fontsize="10"/>
 			<instance template="text_tt" tooltip="uittWeightExchangeGive" posparent="weight_txt" />
 			<view type="bitmap" id="weight" posref="ML MR" x="0" y="0" scale="true" h="12" w="12" posparent="weight_txt" texture="W_weight.tga" global_color="false" />
 
 			<link expr="depends(@%exchange_give)" action="lua:game:updateGiveBulkAndWeight()"/>
+		
 		</group>
 		
 		
@@ -218,7 +213,7 @@
 
 <!-- link to connect the activation of this dialog to the database entry that given the signal to start -->
 <link expr="@%exchange_begun" action="player_trade_start" target="player_trade:active" />
-<link expr="depends(@%exchange_text)" action="set_server_string" params="value=@%exchange_text|target=ui:interface:player_trade:title" />
+<link expr="depends(@%exchange_text)" action="set_server_string" params="value=@%exchange_text|target=ui:interface:player_trade:uc_title" />
 
 
 <!-- ************************************* -->
@@ -301,7 +296,7 @@
 <!-- init the trade invitation modal box -->
 <proc id="init_invitation_box">
 	<!-- set the name of the player that propose the invitation -->
-	<action handler="set_server_string" params="value=@@%other_player_name_id|target=other_player_name:hardtext" />
+	<action handler="set_server_string" params="value=@@%other_player_name_id|target=other_player_name:uc_hardtext" />
 </proc>
 
 

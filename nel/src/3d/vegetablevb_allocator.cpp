@@ -62,8 +62,8 @@ CVegetableVBAllocator::CVegetableVBAllocator()
 
 	// Init vbhard
 	_VBHardOk= false;
-	_AGPBufferPtr= NULL;
-	_RAMBufferPtr= NULL;
+	_AGPBufferPtr = nullptr;
+	_RAMBufferPtr = nullptr;
 
 	// Init unsync mode
 	_UnsynchronizedMode= false;
@@ -93,7 +93,7 @@ void			CVegetableVBAllocator::updateDriver(IDriver *driver)
 	// test change of driver.
 	nlassert(driver && !_VBHard.isLocked());
 	// If change of driver
-	if( _Driver==NULL || driver!=_Driver || (!_VBHard.isResident() && (_VBHard.capacity()!=0)))
+	if( _Driver == nullptr || driver!=_Driver || (!_VBHard.isResident() && (_VBHard.capacity()!=0)))
 	{
 		// delete old VBHard.
 		deleteVertexBufferHard();
@@ -146,7 +146,7 @@ void			CVegetableVBAllocator::clear()
 	_UnsynchronizedMode= false;
 
 	// clear other states.
-	_Driver= NULL;
+	_Driver = nullptr;
 	_VBHardOk= false;
 }
 
@@ -175,11 +175,11 @@ void			CVegetableVBAllocator::unlockBuffer()
 {
 	// unlock the VBHard
 	_VBAHard.unlock();
-	_AGPBufferPtr= NULL;
+	_AGPBufferPtr = nullptr;
 
 	// unlock the VBSoft
 	_VBASoft.unlock();
-	_RAMBufferPtr= NULL;
+	_RAMBufferPtr = nullptr;
 }
 
 

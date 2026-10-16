@@ -136,22 +136,22 @@ public:
 	CServerPatchApplier();
 
 	// IModule specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
-	void onModuleUpdate();
-	std::string buildModuleManifest() const;
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleUpdate() NL_OVERRIDE;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 
 	// CAdministeredModuleBase specialisation implementation
-	void installVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version);
-	void launchVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version);
+	void installVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version) NL_OVERRIDE;
+	void launchVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version) NL_OVERRIDE;
 
 	// CDeploymentConfigurationSynchroniser specialisation implementation
-	void cbDeploymentConfigurationSynchronised(NLNET::IModuleProxy* sender);
+	void cbDeploymentConfigurationSynchronised(NLNET::IModuleProxy* sender) NL_OVERRIDE;
 
 	// CFileReceiver specialisation implementation
-	void cbValidateRequestMatches(TFileRequestMatches& requestMatches);
-	void cbFileDownloadSuccess(const NLMISC::CSString& fileName,const NLMISC::CMemStream& data);
+	void cbValidateRequestMatches(TFileRequestMatches& requestMatches) NL_OVERRIDE;
+	void cbFileDownloadSuccess(const NLMISC::CSString& fileName,const NLMISC::CMemStream& data) NL_OVERRIDE;
 
 private:
 	// private methods for applying patches

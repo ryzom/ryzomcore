@@ -1479,7 +1479,7 @@ public:
 	/**
 	 * Clear whole object content but key (delete subobjects if there are, key is left unmodified), default clear value is 0.
 	 */
-	virtual void					clear();
+	virtual void					clear() NL_OVERRIDE;
 	
 	/**
 	 * Cast base object to CMissionGuildPD
@@ -1514,7 +1514,7 @@ public:
 	 */
 	
 	CMissionGuildPD();
-	virtual ~CMissionGuildPD();
+	virtual ~CMissionGuildPD() NL_OVERRIDE;
 	
 	// @}
 
@@ -1524,8 +1524,8 @@ public:
 	/// \name Persistent methods declaration
 	// @{
 		
-	virtual void					apply(CPersistentDataRecord &__pdr);
-	virtual void					store(CPersistentDataRecord &__pdr) const;
+	virtual void					apply(CPersistentDataRecord &__pdr) NL_OVERRIDE;
+	virtual void					store(CPersistentDataRecord &__pdr) const NL_OVERRIDE;
 	
 	// @}
 
@@ -1539,8 +1539,8 @@ protected:
 	 * Overload those methods to implement init and release behaviours
 	 */
 	
-	virtual void					init();
-	virtual void					release();
+	virtual void					init() NL_OVERRIDE;
+	virtual void					release() NL_OVERRIDE;
 	
 	// @}
 
@@ -1550,15 +1550,15 @@ protected:
 	/// \name Internal Management methods
 	// @{
 		
-	virtual void					pds__init(const uint32 &TemplateId);
-	virtual void					pds__destroy();
-	virtual void					pds__fetch(RY_PDS::CPData &data);
-	virtual void					pds__register();
-	virtual void					pds__registerAttributes();
-	virtual void					pds__unregister();
-	virtual void					pds__unregisterAttributes();
-	virtual void					pds__notifyInit();
-	virtual void					pds__notifyRelease();
+	virtual void					pds__init(const uint32 &TemplateId) NL_OVERRIDE;
+	virtual void					pds__destroy() NL_OVERRIDE;
+	virtual void					pds__fetch(RY_PDS::CPData &data) NL_OVERRIDE;
+	virtual void					pds__register() NL_OVERRIDE;
+	virtual void					pds__registerAttributes() NL_OVERRIDE;
+	virtual void					pds__unregister() NL_OVERRIDE;
+	virtual void					pds__unregisterAttributes() NL_OVERRIDE;
+	virtual void					pds__notifyInit() NL_OVERRIDE;
+	virtual void					pds__notifyRelease() NL_OVERRIDE;
 	static void						pds_static__init();
 	
 	// @}
@@ -1602,7 +1602,7 @@ public:
 	/**
 	 * Clear whole object content but key (delete subobjects if there are, key is left unmodified), default clear value is 0.
 	 */
-	virtual void					clear();
+	virtual void					clear() NL_OVERRIDE;
 	
 	/**
 	 * Cast base object to CMissionTeamPD
@@ -1637,7 +1637,7 @@ public:
 	 */
 	
 	CMissionTeamPD();
-	virtual ~CMissionTeamPD();
+	virtual ~CMissionTeamPD() NL_OVERRIDE;
 	
 	// @}
 
@@ -1647,8 +1647,8 @@ public:
 	/// \name Persistent methods declaration
 	// @{
 		
-	virtual void					apply(CPersistentDataRecord &__pdr);
-	virtual void					store(CPersistentDataRecord &__pdr) const;
+	virtual void					apply(CPersistentDataRecord &__pdr) NL_OVERRIDE;
+	virtual void					store(CPersistentDataRecord &__pdr) const NL_OVERRIDE;
 	
 	// @}
 
@@ -1662,8 +1662,8 @@ protected:
 	 * Overload those methods to implement init and release behaviours
 	 */
 	
-	virtual void					init();
-	virtual void					release();
+	virtual void					init() NL_OVERRIDE;
+	virtual void					release() NL_OVERRIDE;
 	
 	// @}
 
@@ -1673,15 +1673,15 @@ protected:
 	/// \name Internal Management methods
 	// @{
 		
-	virtual void					pds__init(const uint32 &TemplateId);
-	virtual void					pds__destroy();
-	virtual void					pds__fetch(RY_PDS::CPData &data);
-	virtual void					pds__register();
-	virtual void					pds__registerAttributes();
-	virtual void					pds__unregister();
-	virtual void					pds__unregisterAttributes();
-	virtual void					pds__notifyInit();
-	virtual void					pds__notifyRelease();
+	virtual void					pds__init(const uint32 &TemplateId) NL_OVERRIDE;
+	virtual void					pds__destroy() NL_OVERRIDE;
+	virtual void					pds__fetch(RY_PDS::CPData &data) NL_OVERRIDE;
+	virtual void					pds__register() NL_OVERRIDE;
+	virtual void					pds__registerAttributes() NL_OVERRIDE;
+	virtual void					pds__unregister() NL_OVERRIDE;
+	virtual void					pds__unregisterAttributes() NL_OVERRIDE;
+	virtual void					pds__notifyInit() NL_OVERRIDE;
+	virtual void					pds__notifyRelease() NL_OVERRIDE;
 	static void						pds_static__init();
 	
 	// @}
@@ -1725,7 +1725,7 @@ public:
 	/**
 	 * Clear whole object content but key (delete subobjects if there are, key is left unmodified), default clear value is 0.
 	 */
-	virtual void					clear();
+	virtual void					clear() NL_OVERRIDE;
 	
 	/**
 	 * Cast base object to CMissionSoloPD
@@ -1760,7 +1760,7 @@ public:
 	 */
 	
 	CMissionSoloPD();
-	virtual ~CMissionSoloPD();
+	virtual ~CMissionSoloPD() NL_OVERRIDE;
 	
 	// @}
 
@@ -1770,8 +1770,8 @@ public:
 	/// \name Persistent methods declaration
 	// @{
 		
-	virtual void					apply(CPersistentDataRecord &__pdr);
-	virtual void					store(CPersistentDataRecord &__pdr) const;
+	virtual void					apply(CPersistentDataRecord &__pdr) NL_OVERRIDE;
+	virtual void					store(CPersistentDataRecord &__pdr) const NL_OVERRIDE;
 	
 	// @}
 
@@ -1785,8 +1785,8 @@ protected:
 	 * Overload those methods to implement init and release behaviours
 	 */
 	
-	virtual void					init();
-	virtual void					release();
+	virtual void					init() NL_OVERRIDE;
+	virtual void					release() NL_OVERRIDE;
 	
 	// @}
 
@@ -1796,15 +1796,15 @@ protected:
 	/// \name Internal Management methods
 	// @{
 		
-	virtual void					pds__init(const uint32 &TemplateId);
-	virtual void					pds__destroy();
-	virtual void					pds__fetch(RY_PDS::CPData &data);
-	virtual void					pds__register();
-	virtual void					pds__registerAttributes();
-	virtual void					pds__unregister();
-	virtual void					pds__unregisterAttributes();
-	virtual void					pds__notifyInit();
-	virtual void					pds__notifyRelease();
+	virtual void					pds__init(const uint32 &TemplateId) NL_OVERRIDE;
+	virtual void					pds__destroy() NL_OVERRIDE;
+	virtual void					pds__fetch(RY_PDS::CPData &data) NL_OVERRIDE;
+	virtual void					pds__register() NL_OVERRIDE;
+	virtual void					pds__registerAttributes() NL_OVERRIDE;
+	virtual void					pds__unregister() NL_OVERRIDE;
+	virtual void					pds__unregisterAttributes() NL_OVERRIDE;
+	virtual void					pds__notifyInit() NL_OVERRIDE;
+	virtual void					pds__notifyRelease() NL_OVERRIDE;
 	static void						pds_static__init();
 	
 	// @}

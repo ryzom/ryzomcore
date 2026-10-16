@@ -240,12 +240,12 @@ void CSpawnBotNpc::updateChat(CAIState const* state)
 	if (!state)
 		return;
 	CBotNpc const& botNpc = getPersistent();
-
+	
 	FOREACHC(itChat, CCont<CAIStateChat>, state->chats())
 	{
 		if (!itChat->testCompatibility(botNpc))
 			continue;
-
+		
 		// update chat information if any
 		CNpcChatProfileImp const* const chatProfile = botNpc.getChat();
 		if (chatProfile)
@@ -1112,10 +1112,10 @@ void CBotNpc::setVisualProperties(std::string input)	// AJM
 		// split 'input' string into keyword and tail
 		std::string keyword, tail;
 		if(!AI_SHARE::stringToKeywordAndTail(vpx[i],keyword,tail))
-		{
+	{
 			nlwarning("Failed to parse visual property text: '%s' for bot: '%s'", vpx[i].c_str(), getAliasNode()->fullName().c_str());
 			return;
-		}
+	}
 
 		// load val from tail
 		// accept 64bit hex value
@@ -1124,7 +1124,7 @@ void CBotNpc::setVisualProperties(std::string input)	// AJM
 
 		// can't set into mirror row until bot is spawned, so save away
 		if( NLMISC::nlstricmp( keyword,"VPA")==0 )	// VisualPropertyA
-		{
+	{
 			_VisualPropertyA = val;
 			_useVisualProperties = true;
 		}
@@ -1138,12 +1138,12 @@ void CBotNpc::setVisualProperties(std::string input)	// AJM
 			_VisualPropertyC = val;
 			_useVisualProperties = true;
 		}
-		else
+	else
 		{
-			nlwarning("Bot '%s'%s: failed to parse visual property argument: '%s'",
-				getAliasFullName().c_str(),
-				getAliasString().c_str(),
-				input.c_str());
+		nlwarning("Bot '%s'%s: failed to parse visual property argument: '%s'",
+			getAliasFullName().c_str(),
+			getAliasString().c_str(),
+			input.c_str());
 		}
 	}
 }

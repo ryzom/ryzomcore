@@ -159,7 +159,7 @@ void setValues()
 {
 	nlinfo ("reloading the config file!");
 
-	CConfigFile::CVar *varPtr = 0;
+	CConfigFile::CVar *varPtr = nullptr;
 
 	//////////
 	// MISC //

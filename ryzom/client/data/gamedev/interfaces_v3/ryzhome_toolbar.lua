@@ -9,6 +9,7 @@ function RyzhomeBar:close()
 	setOnDraw(getUI("ui:interface:ryzhomeMain"), "")
 	getUI("ui:interface:ryzhomeMain").active = false
 	getUI("ui:interface:ryzhomeItems").active = false
+
 end
 
 function RyzhomeBar:addItems()
@@ -110,7 +111,7 @@ function RyzhomeBar:listItems()
 		local ui = getUI("ui:interface")
 		framewin.x = (ui.w - framewin.w) / 2
 		framewin.y = (ui.h + framewin.h) / 2
-	end
+	end 
 
 	if RyzhomeBar.Items == nil then
 		RyzhomeBar.Items = {}
@@ -167,7 +168,6 @@ function RyzhomeBar:callFriendUrl(action, target)
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
-
 function RyzhomeBar:spawnItems()
 	runAH(nil, "remove_shapes", "")
 	for k,v in pairs(RyzhomeBar.spawnedItems) do
@@ -181,27 +181,27 @@ function RyzhomeBar:spawnItems()
 			setup["col size z"] = "0"
 		end
 	end
+
 end
 
-
 function RyzhomeBar:setupItems()
-	for k = 1, 8 do
+	for k = 1, 8 do 
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":but"..tostring(k)).active=false
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=false
-		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).hardtext=""
-		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).hardtext=""
+		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=""
+		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).uc_hardtext=""
 	end
 	if RyzhomeBar.Items[RyzhomeBar.selectedPage] then
-		for k,v in pairs(RyzhomeBar.Items[RyzhomeBar.selectedPage]) do
-			if k ~= nil then
-				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=true
-				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":but"..tostring(k)).active=true
-				local text = ""
-				text = v[3]
-				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).hardtext=text
-				text = v[4]
-				getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).hardtext=text
-			end
+	for k,v in pairs(RyzhomeBar.Items[RyzhomeBar.selectedPage]) do
+		if k ~= nil then
+			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=true
+			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":but"..tostring(k)).active=true
+			local text = ucstring()
+			text:fromUtf8(v[3])
+			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=text
+			text:fromUtf8(v[4])
+			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).uc_hardtext=text
+		end
 		end
 	end
 end
@@ -220,7 +220,7 @@ function RyzhomePlace:move(x, y, z)
 end
 
 function RyzhomePlace:rot(b, c, a)
-	pos_a = pos_a + a
+	pos_a=pos_a+a
 	pos_b = pos_b + b
 	pos_c = pos_c + c
 
@@ -228,16 +228,16 @@ function RyzhomePlace:rot(b, c, a)
 	local my = "+0"
 	local mz = "+0"
 	if x ~= 0 then
-		mx = "+"..tostring(a)
+					mx = "+"..tostring(a)
 	end
 	if y ~= 0 then
-		my = "+"..tostring(b)
+					my = "+"..tostring(b)
 	end
 	if z ~= 0 then
-		mz = "+"..tostring(c)
+					mz = "+"..tostring(c)
 	end
-	 if RyzhomeBar.spawnedItems[RyzhomeBar.editShapeId] then
-		rotateShape(RyzhomeBar.editShapeId, my, mz, mx)
+		if RyzhomeBar.spawnedItems[RyzhomeBar.editShapeId] then
+					rotateShape(RyzhomeBar.editShapeId, my, mz, mx)
 	end
 end
 
@@ -264,12 +264,11 @@ function RyzhomePlace:close()
 	getUI("ui:interface:webig_ryzhome_place_item").active=false
 	getUI("ui:interface:ryzhomeItems").active=false
 end
-
 function RyzhomePlace:hl(id)
 	local ui = getUI("ui:interface:ryzhomeItems"):find("item_"..tostring(id))
 	ui.onover="lua"
 	ui.params_over="arkRyzhomeHighlightItem("..tostring(id)..")"
 end
-
 -- VERSION --
 FILE_RYZHOME_TOOLBAR_VERSION = 129
+

@@ -55,7 +55,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 		CSheetId	Sheet;
 		uint16		Quantity;
 	};
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_Place = 0xFFFF;
@@ -119,7 +119,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 			return ret;
 		}
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		string webAppUrl;
 		vector<string> status;
@@ -266,7 +266,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -274,7 +274,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 			ret[i] = _SubSteps[i].Quantity;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_FAUNA_";
@@ -377,7 +377,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 		EGSPD::CPeople::TPeople	Race;
 		uint16				Quantity;
 	};
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_Place = 0xFFFF;
@@ -428,7 +428,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 			return ret;
 		}
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::Kill )
 		{
@@ -479,7 +479,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -489,7 +489,7 @@ class CMissionStepKillRace : public IMissionStepTemplate
 		}
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_RACE_";
@@ -547,7 +547,7 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 		TAIAlias	Alias;
 //		NLMISC::TStringId	NpcName;
 	};
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -580,7 +580,7 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 			return ret;
 		}
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		string webAppUrl;
 		CCharacter * user = PlayerManager.getChar(getEntityIdFromRow(userRow));
@@ -642,7 +642,7 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -652,7 +652,7 @@ class CMissionStepKillNpc : public IMissionStepTemplate
 		}
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepTextReact = "MIS_NEED_REACTIVATION";
 		static const std::string stepText = "MIS_KILL_NPC_";
@@ -715,7 +715,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 		TAIAlias	Alias;
 	};
 
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -757,7 +757,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 		}
 		return ret;
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::KillGroup )
 		{
@@ -773,7 +773,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -783,7 +783,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 		}
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		/// overloaded text in script
 
@@ -797,7 +797,7 @@ class CMissionStepKillGroup : public IMissionStepTemplate
 
 	// See comment in CMissionStepKillNpc about getInvolvedBot()
 
-	bool checkTextConsistency()
+	bool checkTextConsistency() NL_OVERRIDE
 	{
 		return true;
 	}
@@ -813,7 +813,7 @@ MISSION_REGISTER_STEP(CMissionStepKillGroup,"kill_group");
 // ----------------------------------------------------------------------------
 class CMissionStepKillFaction : public IMissionStepTemplate
 {
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_Place = 0xFFFF;
@@ -856,7 +856,7 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 		}
 		return ret;
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::Kill )
 		{
@@ -907,14 +907,14 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( 1 );
 		ret.back() = _Quantity;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "MIS_KILL_FACTION";
 		static const std::string stepTextLoc = "MIS_KILL_FACTION_LOC";
@@ -964,7 +964,7 @@ class CMissionStepKillByName : public IMissionStepTemplate
 	string				TargetName;
 	uint16				Quantity;
 	uint16				Place;
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 
@@ -1022,7 +1022,7 @@ class CMissionStepKillByName : public IMissionStepTemplate
 		}
 		return true;
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::Kill )
 		{
@@ -1076,14 +1076,14 @@ class CMissionStepKillByName : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( 1 );
 		ret[0] = Quantity;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepTextNoLoc = "MIS_KILL_NPC_BY_NAME";
 		static const std::string stepTextLoc = "MIS_KILL_NPC_BY_NAME_LOC";
@@ -1132,7 +1132,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 	};
 
 
-	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_Place = 0xFFFF;
@@ -1198,7 +1198,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 	}
 
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::KillPlayer )
 		{
@@ -1255,7 +1255,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 	}
 
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -1266,7 +1266,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 	}
 
 
-	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "MIS_KILL_PLAYER";
 		static const std::string stepTextLoc = "MIS_KILL_PLAYER_LOC";

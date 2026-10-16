@@ -1242,7 +1242,7 @@ class CWelcomeService : public IService
 public:
 
 	/// Init the service, load the universal time.
-	void init ()
+	void init () NL_OVERRIDE
 	{
 		string FrontendServiceName = ConfigFile.getVar ("FrontendServiceName").asString();
 
@@ -1323,7 +1323,7 @@ public:
 //		NLMISC::CCommandRegistry::getInstance().execute("ws.plug wg", InfoLog());
 	}
 
-	bool			update ()
+	bool			update () NL_OVERRIDE
 	{
 		// update the service status
 

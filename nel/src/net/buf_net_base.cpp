@@ -51,7 +51,8 @@ CBufNetBase::CBufNetBase() :
 #endif
 	_RecvFifo("CBufNetBase::_RecvFifo"),
 	_DisconnectionCallback(),
-	_DisconnectionCbArg( NULL ),
+	_DisconnectionCbArg(nullptr)
+    ,
 	_MaxExpectedBlockSize( DefaultMaxExpectedBlockSize ),
 	_MaxSentBlockSize( DefaultMaxSentBlockSize ),
 	_DataAvailable( false )

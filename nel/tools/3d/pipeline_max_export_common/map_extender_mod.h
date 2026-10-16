@@ -6,8 +6,14 @@
  * whole corpus); the computed map lives flat in the LocalModData cache
  * (0x2500 → 0x2512 → Mesh-like 0x03e8.. map channel). See max_geometry_formats.md Part P and
  * pipeline_max_design §10z-quatorze.
+ *
+ * The cache decode has since graduated into the pipeline_max library
+ * (BUILTIN::STORAGE::CMapExtenderCache, leaf/container dual form, corpus-selftested —
+ * design-doc §10j-huit); readMapExtenderCache is a thin copy from that typed model into
+ * SMapChannel. The apply policy (face-count refusal) stays here.
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
+ * \author Claude Fable 5
  */
 
 /*
@@ -66,7 +72,7 @@ struct SMapChannel
 /// plugin object (\a mod) beyond class-id identification — all functional data is in the cache.
 /// Optional \a err receives a short reason on failure.
 bool readMapExtenderCache(PIPELINE::MAX::CStorageContainer *modApp, SMapChannel &out,
-                          std::string *err = 0);
+                          std::string *err = nullptr);
 
 /// Apply the cache onto a mesh's map channel. \a currentFaceCount is the evaluated mesh's face
 /// count after lower modifiers; if it does not match the cache face count the apply is refused
@@ -77,7 +83,7 @@ bool applyMapExtender(PIPELINE::MAX::CSceneClass *mod, PIPELINE::MAX::CStorageCo
                       int &outChannel,
                       std::vector<NLMISC::CVector> &outUVs,
                       std::vector<uint32> &outFaceUVs,
-                      std::string *err = 0);
+                      std::string *err = nullptr);
 
 } /* namespace MAPEXT */
 

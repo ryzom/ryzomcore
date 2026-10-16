@@ -39,6 +39,8 @@
 #include "material_build.h"
 #include "scene_lib.h"
 
+#include "../pipeline_max_export_common/export_ids.h"
+
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace NLMISC;
@@ -51,11 +53,6 @@ using MAXSCENE::decompMatrix;
 namespace REMANENCEBUILD {
 
 // AppData sub-ids (export_appdata.h)
-#define NEL3D_APPDATA_REMANENCE_SLICE_NUMBER     1423062632
-#define NEL3D_APPDATA_REMANENCE_SAMPLING_PERIOD  1423062633
-#define NEL3D_APPDATA_REMANENCE_SHIFTING_TEXTURE 1423062634
-#define NEL3D_APPDATA_REMANENCE_ROLLUP_RATIO     1423062635
-#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS  1423062587
 
 IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLighting)
 {
@@ -78,7 +75,7 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': expected a single material, got %u\n",
 		        name.c_str(), (uint)materials.size());
-		return NULL;
+		return nullptr;
 	}
 
 	// Base shape object
@@ -89,7 +86,7 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': base object is not a Shape (can't get curves)\n",
 		        name.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	SPLINESHAPE::SShape shape;
@@ -97,13 +94,13 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': no spline data decoded on shape object\n",
 		        name.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if (shape.Curves.size() != 1)
 	{
 		fprintf(stderr, "SKIP remanence '%s': expected 1 curve, got %u\n",
 		        name.c_str(), (uint)shape.Curves.size());
-		return NULL;
+		return nullptr;
 	}
 
 	std::vector<CVector> ends;
@@ -111,7 +108,7 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': curve needs at least one segment (2 knots)\n",
 		        name.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	// objectToLocal = objectTM * inverse(nodeTM), same as water/mesh paths and the reference

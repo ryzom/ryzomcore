@@ -418,7 +418,7 @@ template<class T>	typename CQuadGrid<T>::CIterator	CQuadGrid<T>::erase(typename 
 	// Then delete it..., and update selection linked list.
 	//=====================================================
 	// if selected.
-	CBaseNode	*next= NULL;
+	CBaseNode	*next = nullptr;
 	if(ptr->Prev)
 	{
 		next= ptr->Next;

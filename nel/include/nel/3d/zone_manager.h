@@ -75,7 +75,7 @@ public:
 
 	/// checkZonesAround : Add/Remove all zomes around a certain point
 	/// If a work is currently completed remove it and began another one
-	void checkZonesAround (uint x, uint y, uint area, const std::vector<uint16> *validZoneIds = NULL);
+	void checkZonesAround (uint x, uint y, uint area, const std::vector<uint16> *validZoneIds = nullptr);
 
 	/// Is a work has been completed ?
 	bool isWorkComplete (SZoneManagerWork &rWork);
@@ -155,11 +155,11 @@ class CZoneLoadingTask : public NLMISC::IRunnablePos
 public:
 	/// Constructor
 	CZoneLoadingTask (const std::string &sZoneName, TVolatileZonePtr *ppZone, CVector &pos, bool monochrome, float factor);
-	~CZoneLoadingTask();
+	~CZoneLoadingTask() NL_OVERRIDE;
 
 	/// Runnable Task
-	void run (void);
-	void getName (std::string &result) const;
+	void run (void) NL_OVERRIDE;
+	void getName (std::string &result) const NL_OVERRIDE;
 
 private:
 

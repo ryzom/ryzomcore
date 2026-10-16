@@ -105,18 +105,18 @@ namespace NLGUI
 
 		// Constructor
 		CGroupHTML(const TCtorParam &param);
-		~CGroupHTML();
+		~CGroupHTML() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// CInterfaceGroup Interface
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-		virtual void draw ();
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void draw () NL_OVERRIDE;
 
 		// Events
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc) NL_OVERRIDE;
 
 		// Browse
 		virtual void browse (const char *url);
@@ -142,7 +142,7 @@ namespace NLGUI
 		bool isBrowsing();
 
 		// Update coords
-		void updateCoords();
+		void updateCoords() NL_OVERRIDE;
 
 		// New paragraph
 		void newParagraph(uint beginSpace);
@@ -615,7 +615,7 @@ namespace NLGUI
 		inline CInterfaceGroup *getDiv() const
 		{
 			if (_Divs.empty())
-				return NULL;
+				return nullptr;
 			return _Divs.back();
 		}
 
@@ -624,7 +624,7 @@ namespace NLGUI
 		inline CGroupTable *getTable() const
 		{
 			if (_Tables.empty())
-				return NULL;
+				return nullptr;
 			return _Tables.back();
 		}
 
@@ -650,11 +650,11 @@ namespace NLGUI
 			public:
 				CEntry ()
 				{
-					TextArea = NULL;
-					Checkbox = NULL;
-					ComboBox = NULL;
-					SelectBox = NULL;
-					sbRBRef = NULL;
+					TextArea = nullptr;
+					Checkbox = nullptr;
+					ComboBox = nullptr;
+					SelectBox = nullptr;
+					sbRBRef = nullptr;
 					sbMultiple = false;
 					sbOptionDisabled = -1;
 					InitialSelection = 0;
@@ -850,9 +850,11 @@ namespace NLGUI
 		{
 		public:
 			CDataDownload(const std::string &u, const std::string &d)
-				: ICurlDownloadCB(u), data(NULL), fp(NULL), dest(d), redirects(0), ConnectionTimeout(60)
+				: ICurlDownloadCB(u), data(nullptr)
+		        , fp(nullptr)
+		        , dest(d), redirects(0), ConnectionTimeout(60)
 			{}
-			virtual ~CDataDownload();
+			virtual ~CDataDownload() NL_OVERRIDE;
 
 			/// called when the download is dropped without calling finish(), so back-references can be cleared
 			virtual void abortDownload() {}
@@ -1096,8 +1098,8 @@ namespace NLGUI
 
 		sint32 Offset;
 		CGroupHTMLInputOffset(const TCtorParam &param);
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 	};
 }
 

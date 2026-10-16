@@ -157,7 +157,7 @@ namespace STRING_MANAGER
 	 *	This number can then be send to the client via the
 	 *	database mecanisme.
 	 */
-	uint32	sendStringToClient(const TDataSetRow &clientIndex, const std::string &stringName, const std::vector<TParam> &params, ISender *sender = NULL);
+	uint32	sendStringToClient(const TDataSetRow &clientIndex, const std::string &stringName, const std::vector<TParam> &params, ISender *sender = nullptr);
 
 	/** Send a string to a client through IOS.
 	 *	This method create a message and send it to the IOS
@@ -166,7 +166,7 @@ namespace STRING_MANAGER
 	 *	This number can then be send to the client via the
 	 *	database mecanisme.
 	 */
-	inline uint32	sendStringToClient(const TDataSetRow &clientIndex, const char * stringName, const std::vector<TParam> &params, ISender *sender = NULL)
+	inline uint32	sendStringToClient(const TDataSetRow &clientIndex, const char * stringName, const std::vector<TParam> &params, ISender *sender = nullptr)
 	{
 		std::string str(stringName);
 		return sendStringToClient(clientIndex, str, params, sender);
@@ -181,7 +181,7 @@ namespace STRING_MANAGER
 	 *	The IOS then broacast it to all the charactere in the audience of the
 	 *	originator.
 	 */
-	void	sendCustomEmoteTextToClientAudience(const TDataSetRow &clientIndex, const std::vector<NLMISC::CEntityId> &excluded, const char * stringName, const std::vector<STRING_MANAGER::TParam> &params, ISender *sender = NULL);
+	void	sendCustomEmoteTextToClientAudience(const TDataSetRow &clientIndex, const std::vector<NLMISC::CEntityId> &excluded, const char * stringName, const std::vector<STRING_MANAGER::TParam> &params, ISender *sender = nullptr);
 
 		/** Send a string to the system chat of audience of a client
 	 *	This method create a message and send it to the IOS
@@ -189,7 +189,7 @@ namespace STRING_MANAGER
 	 *	The IOS then broacast it to all the charactere in the audience of the
 	 *	originator.
 	 */
-	void	sendSystemStringToClientAudience(const TDataSetRow &clientIndex, const std::vector<NLMISC::CEntityId> &excluded, CChatGroup::TGroupType audience, const char * stringName, const std::vector<TParam> &params, ISender *sender = NULL);
+	void	sendSystemStringToClientAudience(const TDataSetRow &clientIndex, const std::vector<NLMISC::CEntityId> &excluded, CChatGroup::TGroupType audience, const char * stringName, const std::vector<TParam> &params, ISender *sender = nullptr);
 
 
 	/** Send a string to a user (i.e.: a player that has not chosen a character yet) through IOS.
@@ -199,7 +199,7 @@ namespace STRING_MANAGER
 	 *	This number can then be send to the client via the
 	 *	database mecanisme.
 	 */
-	uint32	sendStringToUser(uint32 userId, const std::string &stringName, const std::vector<TParam> &params, ISender *sender = NULL);
+	uint32	sendStringToUser(uint32 userId, const std::string &stringName, const std::vector<TParam> &params, ISender *sender = nullptr);
 
 	/** Send a string to a user (i.e.: a player that has not chosen a character yet) through IOS.
 	 *	This method create a message and send it to the IOS
@@ -208,7 +208,7 @@ namespace STRING_MANAGER
 	 *	This number can then be send to the client via the
 	 *	database mecanisme.
 	 */
-	inline uint32	sendStringToUser(uint32 userId, const char * stringName, const std::vector<TParam> &params, ISender *sender = NULL)
+	inline uint32	sendStringToUser(uint32 userId, const char * stringName, const std::vector<TParam> &params, ISender *sender = nullptr)
 	{
 		std::string str(stringName);
 		return sendStringToUser(userId, str, params, sender);

@@ -46,7 +46,8 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_Unknown2140(NULL), m_AppData(NULL)
+CAnimatable::CAnimatable(CScene *scene) : CSceneClass(scene), m_Unknown2140(nullptr)
+    , m_AppData(nullptr)
 {
 
 }
@@ -56,9 +57,9 @@ CAnimatable::~CAnimatable()
 	if (!m_ChunksOwnsPointers)
 	{
 		delete m_Unknown2140;
-		m_Unknown2140 = NULL;
+		m_Unknown2140 = nullptr;
 		delete m_AppData;
-		m_AppData = NULL;
+		m_AppData = nullptr;
 	}
 }
 
@@ -79,7 +80,6 @@ void CAnimatable::parse(uint16 version, uint filter)
 		if (m_Unknown2140)
 		{
 			// nldebug("Found unknown 0x2140");
-			// TODO: Put std::cout code here
 		}
 		m_AppData = static_cast<STORAGE::CAppData *>(getChunk(PMBS_APP_DATA_CHUNK_ID));
 	}
@@ -88,7 +88,11 @@ void CAnimatable::parse(uint16 version, uint filter)
 void CAnimatable::clean()
 {
 	CSceneClass::clean();
-	if (m_AppData) m_AppData->clean();
+	// A freshly created AppData (authoring: appData() on an object that had none) has no source
+	// chunks to clean — and CAppData::clean's empty-chunks state is otherwise its double-clean
+	// coding-error check, which is fatal. Skip it; build populates the fresh container (or
+	// discards it when it stays empty).
+	if (m_AppData && !m_AppData->chunks().empty()) m_AppData->clean();
 }
 
 void CAnimatable::build(uint16 version, uint filter)
@@ -104,7 +108,7 @@ void CAnimatable::build(uint16 version, uint filter)
 		{
 			// Discard appdata if it has no entries
 			delete m_AppData;
-			m_AppData = NULL;
+			m_AppData = nullptr;
 		}
 		else
 		{
@@ -115,8 +119,8 @@ void CAnimatable::build(uint16 version, uint filter)
 
 void CAnimatable::disown()
 {
-	m_Unknown2140 = NULL;
-	m_AppData = NULL;
+	m_Unknown2140 = nullptr;
+	m_AppData = nullptr;
 	CSceneClass::disown();
 }
 
@@ -148,7 +152,7 @@ void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad, u
 
 STORAGE::CAppData *CAnimatable::appData()
 {
-	if (m_ChunksOwnsPointers) { nlerror("Not parsed"); return NULL; }
+	if (m_ChunksOwnsPointers) { nlerror("Not parsed"); return nullptr; }
 	if (!m_AppData)
 	{
 		m_AppData = new STORAGE::CAppData();

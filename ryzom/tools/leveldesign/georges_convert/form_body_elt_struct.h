@@ -39,25 +39,25 @@ public:
 	NLMISC_DECLARE_CLASS( CFormBodyEltStruct );
 	CFormBodyEltStruct();
 	CFormBodyEltStruct( const CFormBodyEltStruct& _fbes );
-	virtual ~CFormBodyEltStruct();
-	virtual void serial( NLMISC::IStream& s );
+	virtual ~CFormBodyEltStruct() NL_OVERRIDE;
+	virtual void serial( NLMISC::IStream& s ) NL_OVERRIDE;
 
 			CFormBodyElt&	operator  =( const CFormBodyEltStruct& _fbes );
-	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe );
-	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe );
-	virtual CFormBodyElt&	operator -=( const CFormBodyElt& _fbe );
-	virtual bool			operator ==( const CFormBodyElt& _fbe ) const;
+	virtual CFormBodyElt&	operator  =( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual CFormBodyElt&	operator +=( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual CFormBodyElt&	operator -=( const CFormBodyElt& _fbe ) NL_OVERRIDE;
+	virtual bool			operator ==( const CFormBodyElt& _fbe ) const NL_OVERRIDE;
 
-	virtual CFormBodyElt* Clone() const;
-	virtual bool Empty() const;
+	virtual CFormBodyElt* Clone() const NL_OVERRIDE;
+	virtual bool Empty() const NL_OVERRIDE;
 	CStringEx GetComment() const;
 	void SetComment( const CStringEx _sxcomment );
 	CStringEx GetParent( unsigned int _index ) const;
 	CStringEx GetActivity( unsigned int _index ) const;
 
 	uint32 GetNbElt () const;
-	virtual CFormBodyElt* GetElt( const unsigned int _index ) const;
-	virtual CFormBodyElt* GetElt( const CStringEx _sxname ) const;
+	virtual CFormBodyElt* GetElt( const unsigned int _index ) const NL_OVERRIDE;
+	virtual CFormBodyElt* GetElt( const CStringEx _sxname ) const NL_OVERRIDE;
 
 	void AddElt( CFormBodyElt* const pfbe );
 };

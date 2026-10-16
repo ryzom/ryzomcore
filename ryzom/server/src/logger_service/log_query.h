@@ -43,7 +43,7 @@ struct EIncompatibleType : public NLMISC::Exception
 	{
 	}
 
-	virtual const char	*what() const throw()
+	virtual const char	*what() const throw() NL_OVERRIDE
 	{
 		return "Incompatible types";
 	}
@@ -374,13 +374,13 @@ inline LGS::TParamValue convertParam(const LGS::TParamValue &value, LGS::TSuppor
 template <class Combiner>
 struct TCombineNode : public TQueryNode
 {
-	virtual bool init()
+	virtual bool init() NL_OVERRIDE
 	{
 		return true;
 	}
 
 	/// Evaluate the node result
-	virtual TLogEntries evalNode(const CLogStorage &logs)
+	virtual TLogEntries evalNode(const CLogStorage &logs) NL_OVERRIDE
 	{
 		TLogEntries leftEntries, rightEntries;
 
@@ -396,7 +396,7 @@ struct TCombineNode : public TQueryNode
 	}
 
 	/// Evaluate a date against the predicate (only test the date predicate)
-	virtual TTimeLine evalDate()
+	virtual TTimeLine evalDate() NL_OVERRIDE
 	{
 		nlassert(LeftNode && RightNode);
 
@@ -409,7 +409,7 @@ struct TCombineNode : public TQueryNode
 	}
 
 
-	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const
+	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const NL_OVERRIDE
 	{
 		log.displayNL("%s%s", tab.c_str(), typeid(this).name());
 	}
@@ -518,7 +518,7 @@ struct TTypePredicateNode : public TQueryNode
 	{
 	}
 
-	bool init()
+	bool init() NL_OVERRIDE
 	{
 		// Build a list of compatible parameters
 		for (uint i=0; i<_LogDefs.size(); ++i)
@@ -569,7 +569,7 @@ struct TTypePredicateNode : public TQueryNode
 		return !_SelectedParams.empty();
 	}
 
-	TLogEntries evalNode(const CLogStorage &logs)
+	TLogEntries evalNode(const CLogStorage &logs) NL_OVERRIDE
 	{
 		Operator op;
 		TLogEntries ret;
@@ -611,7 +611,7 @@ struct TTypePredicateNode : public TQueryNode
 	}
 
 	/// Evaluate a date against the predicate (only test the date predicate)
-	virtual TTimeLine evalDate()
+	virtual TTimeLine evalDate() NL_OVERRIDE
 	{
 		// type predicate cannot work on date, consider returning a complete timeline!
 		TTimeLine tl;
@@ -620,7 +620,7 @@ struct TTypePredicateNode : public TQueryNode
 	}
 
 
-	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const
+	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const NL_OVERRIDE
 	{
 		log.displayNL("%s%s", tab.c_str(), typeid(this).name());
 		log.displayNL("%s  ParamType : %s, refValue : %s", tab.c_str(), _ParamType.toString().c_str(), NLMISC::toString(_RefValue).c_str());
@@ -662,7 +662,7 @@ struct TPredicateNode : public TQueryNode
 	{
 	}
 
-	bool init()
+	bool init() NL_OVERRIDE
 	{
 		if (_ParameterName == "LogDate")
 		{
@@ -754,7 +754,7 @@ struct TPredicateNode : public TQueryNode
 	}
 
 	/// Evaluate a date against the predicate (only test the date predicate)
-	virtual TTimeLine evalDate()
+	virtual TTimeLine evalDate() NL_OVERRIDE
 	{
 		if (_SelectedParams.size() == 1 && _SelectedParams.begin()->first.ParamType == LGS::TSupportedParamType::invalid_val)
 		{
@@ -811,7 +811,7 @@ struct TPredicateNode : public TQueryNode
 	}
 
 
-	TLogEntries evalNode(const CLogStorage &logs)
+	TLogEntries evalNode(const CLogStorage &logs) NL_OVERRIDE
 	{
 		// apply the operator on all the log entry
 
@@ -923,7 +923,7 @@ struct TPredicateNode : public TQueryNode
 		return ret;
 	}
 
-	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const
+	virtual void dumpNode(NLMISC::CLog &log, const std::string &tab) const NL_OVERRIDE
 	{
 		log.displayNL("%s%s", tab.c_str(), typeid(this).name());
 		log.displayNL("%s  ParamName : %s, refValue : %s", tab.c_str(), _ParameterName.c_str(), NLMISC::toString(_RefValue).c_str());
@@ -1181,7 +1181,7 @@ public:
 				ErrorStr(erroStr)
 		{}
 
-		virtual const char* what() const throw ()
+		virtual const char* what() const throw () NL_OVERRIDE
 		{
 			return ErrorStr;
 		}

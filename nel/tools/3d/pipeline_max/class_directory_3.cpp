@@ -145,7 +145,7 @@ void CClassDirectory3::parse(uint16 version, uint filter)
 					throw EStorageParse(); // There were chunks inbetween
 				if (!parsedDllEntry)
 				{
-					m_ChunkCache.push_back(TStorageObjectWithId(id, NULL)); // Dummy entry to know the location
+					m_ChunkCache.push_back(TStorageObjectWithId(id, nullptr)); // Dummy entry to know the location
 					lastCached = id;
 					parsedDllEntry = true;
 				}
@@ -177,7 +177,7 @@ void CClassDirectory3::clean()
 	// Clean chunks
 	for (TStorageObjectContainer::iterator it = m_ChunkCache.begin(), end = m_ChunkCache.end(); it != end; ++it)
 	{
-		if (it->second != NULL && it->second->isContainer())
+		if (it->second != nullptr && it->second->isContainer())
 		{
 			static_cast<CStorageContainer *>(it->second)->clean();
 		}
@@ -237,7 +237,7 @@ void CClassDirectory3::disown()
 const CClassEntry *CClassDirectory3::get(uint16 index) const
 {
 	nlassert(!m_ChunksOwnsPointers);
-	if (index >= m_Entries.size()) { nlerror("Index 0x%x is above the number of entries %i", (uint32)index, (uint32)m_Entries.size()); return NULL; }
+	if (index >= m_Entries.size()) { nlerror("Index 0x%x is above the number of entries %i", (uint32)index, (uint32)m_Entries.size()); return nullptr; }
 	return m_Entries[index];
 }
 
@@ -294,7 +294,8 @@ IStorageObject *CClassDirectory3::createChunkById(uint16 id, bool container)
 //		SuperClassID: 3072 }
 //	1 0x2042: (CStorageValue) { NeL Material } }
 
-CClassEntry::CClassEntry() : m_Header(NULL), m_Name(NULL)
+CClassEntry::CClassEntry() : m_Header(nullptr)
+    , m_Name(nullptr)
 {
 
 }
@@ -365,8 +366,8 @@ void CClassEntry::build(uint16 version, uint filter)
 void CClassEntry::disown()
 {
 	// CStorageContainer::disown();
-	m_Header = NULL;
-	m_Name = NULL;
+	m_Header = nullptr;
+	m_Name = nullptr;
 	nlassert(m_ChunksOwnsPointers);
 }
 

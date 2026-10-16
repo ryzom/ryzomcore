@@ -49,14 +49,14 @@ namespace NLGUI
         CCtrlQuad( const TCtorParam &param );
 
 		// from CInterfaceElement
-		bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup);
-		virtual void updateCoords();
-		virtual void draw();
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		// from CViewBase
-		virtual sint32 getAlpha() const { return (sint32) _Color.A; }
-		virtual void setAlpha (sint32 a);
+		virtual sint32 getAlpha() const NL_OVERRIDE { return (sint32) _Color.A; }
+		virtual void setAlpha (sint32 a) NL_OVERRIDE;
 
 		// texture
 		void setTexture(const std::string &texName);
@@ -93,13 +93,13 @@ namespace NLGUI
 
 
 		// from CCtrlBase, no op by default
-		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
+		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE;
 
 		// see if this control contains the given point (in parent coords)
 		bool contains(const NLMISC::CVector2f &pos) const;
 
 		// no capturable by default (just tooltip capability wanted)
-		virtual	bool		isCapturable() const { return false; }
+		virtual	bool		isCapturable() const NL_OVERRIDE { return false; }
 
 
 	private:

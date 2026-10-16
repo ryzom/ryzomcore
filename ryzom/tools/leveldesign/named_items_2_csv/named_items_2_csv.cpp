@@ -58,7 +58,7 @@ vector<CVectorSString> items;
 int verifItemsFile (const char *filename)
 {
 	FILE *f = nlfopen(filename, "r");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	char buffer[1024];
@@ -90,7 +90,7 @@ int verifItemsFile (const char *filename)
 int verifCsvFile (const char *filename)
 {
 	FILE *f = nlfopen(filename, "r");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	uint prevId = -1;
@@ -151,7 +151,7 @@ void processItemLine(const string &s)
 int getItemsFromFile(const char *filename)
 {
 	FILE *f = fopen(filename, "r");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	char buffer[1024];
@@ -166,7 +166,7 @@ int getItemsFromFile(const char *filename)
 int getFieldsFromFile(const char *filename)
 {
 	FILE *f = nlfopen(filename, "r");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	char buffer[1024];
@@ -191,7 +191,7 @@ int getFieldsFromFile(const char *filename)
 int getNbItemFromFile(const char *filename)
 {
 	FILE *f = nlfopen(filename, "r");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	int max = 0;
@@ -221,7 +221,7 @@ int exportCsv(const char *filename)
 
 	uint i, j;
 	FILE *f = nlfopen(filename, "w");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	// print fields name
@@ -248,7 +248,7 @@ int importCsv(const char *filename)
 
 	char buffer[1024];
 	FILE *f = nlfopen(filename, "r");
-	if (f == NULL)
+	if (f == nullptr)
 		nlerror("Can't open file : %s", filename);
 
 	// read fields name

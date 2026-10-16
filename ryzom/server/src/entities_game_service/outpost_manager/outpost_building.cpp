@@ -39,6 +39,7 @@ using namespace std;
 
 //----------------------------------------------------------------------------
 CVariable<float>	OutpostDrillerCostTime("egs", "OutpostDrillerCostTime", "Cost time to build driller (in seconds, 0 means use sheet value)", 0.0f, 0, true );
+
 CVariable<float>	OutpostDrillerTimeUnit("egs", "OutpostDrillerTimeUnit", "Production time of mp in the driller (in seconds)", 3600.0f, 0, true );
 CVariable<bool>		EnableOutpostDrillerMPGeneration("egs", "EnableOutpostDrillerMPGeneration", "Set if the outpost drillers generate mps or not", true, 0, true );
 extern NLMISC::CRandom RandomGenerator;
@@ -76,7 +77,7 @@ bool COutpostBuilding::construct(NLMISC::CSheetId sheetid)
 	_StaticData = CSheets::getOutpostBuildingForm(_CurrentSheet);
 	if (!_StaticData)
 		return false;
-
+	
 	_BuiltDate = CTime::getSecondsSince1970();
 
 	_Constructing = true;
@@ -160,7 +161,7 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 		{
 			if (!EnableOutpostDrillerMPGeneration.get())
 				break;
-			if (!_Parent->isBelongingToAGuild())
+			if (!_Parent->isBelongingToAGuild()) 
 				break;
 			if (nCurrentTime <= _MPLastTime)
 				break;
@@ -176,8 +177,7 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 			// speed of production in mp / second
 			float fSpeed = _StaticData->Driller.MPQuantities[0] / OutpostDrillerTimeUnit.get();
 			_MPLeft += elapsedTime * fSpeed;
-
-			EGSPD::TGuildId gid = _Parent->getOwnerGuild();
+					EGSPD::TGuildId gid = _Parent->getOwnerGuild();
 			CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(gid);
 
 			while (_MPLeft > 1.0f)
@@ -190,14 +190,16 @@ void COutpostBuilding::update(uint32 nCurrentTime)
 						if (_StaticData->Driller.QualityFactor[j])
 						{
 							TLogContext_Item_OutpostDriller outpostContext(CEntityId::Unknown);
-							if (pGuild != NULL)
-							{
-								CGameItemPtr item;
-								item = GameItemManager.createItem(_StaticData->Driller.MPs[i], (j+1)*(250/DRILLER_NB_LEVEL), true, false);
-								if (item != NULL)
+					if (pGuild != NULL)
+					{
+						CGameItemPtr item;
+						item = GameItemManager.createItem(	_StaticData->Driller.MPs[i], 
+															(j+1)*(250/DRILLER_NB_LEVEL), 
+															true, false);
+						if (item != NULL)
 								{
 									nlinfo("OP %s MP Generated %s Q%i", _Parent->getName().c_str(), _StaticData->Driller.MPs[i].toString().c_str(), (j+1)*(250/DRILLER_NB_LEVEL));
-									pGuild->putItem(item);
+							pGuild->putItem(item);
 								}
 							}
 						}
@@ -357,10 +359,10 @@ void COutpostBuilding::postLoad()
 #define PERSISTENT_PRE_APPLY\
 	H_AUTO(COutpostBuildingApply);\
 	/*preApply();*/\
-
+	
 #define PERSISTENT_POST_APPLY\
 	postLoad();\
-
+	
 //#define PERSISTENT_POST_STORE\
 //	postStore();
 
@@ -372,7 +374,7 @@ void COutpostBuilding::postLoad()
 	PROP(CSheetId, _CurrentSheet)\
 	PROP(float, _MPLeft)\
 	PROP(uint32, _MPLastTime)\
-
+	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
 

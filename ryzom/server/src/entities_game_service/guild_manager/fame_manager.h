@@ -178,12 +178,12 @@ private:
 
 	void	 addFameIndexed(const NLMISC::CEntityId &entityId, uint32 faction, sint32 deltaFame, const std::string &serviceName, bool propagate, TFamePropagation propagationType = no_propagation);
 	/// FameInterface adder implementation.
-	virtual void addFameIndexed(const NLMISC::CEntityId &entityId, uint factionIndex, sint32 deltaFame, bool propagate);
+	virtual void addFameIndexed(const NLMISC::CEntityId &entityId, uint factionIndex, sint32 deltaFame, bool propagate) NL_OVERRIDE;
 	/// Fame interface get fame implementation
-	sint32	getFameIndexed(const NLMISC::CEntityId &entityId, uint32 factionIndex, bool modulated = false, bool returnUnknownValue = false);
-	virtual const TDataSetRow &getCivilisationIndex(const NLMISC::CEntityId &entityId);
-	virtual const TDataSetRow &getGuildIndex(const NLMISC::CEntityId &entityId);
-	virtual const TDataSetRow &getFameMemoryIndex(const NLMISC::CEntityId &entityId);
+	sint32	getFameIndexed(const NLMISC::CEntityId &entityId, uint32 factionIndex, bool modulated = false, bool returnUnknownValue = false) NL_OVERRIDE;
+	virtual const TDataSetRow &getCivilisationIndex(const NLMISC::CEntityId &entityId) NL_OVERRIDE;
+	virtual const TDataSetRow &getGuildIndex(const NLMISC::CEntityId &entityId) NL_OVERRIDE;
+	virtual const TDataSetRow &getFameMemoryIndex(const NLMISC::CEntityId &entityId) NL_OVERRIDE;
 
 	static void cbFameDelta( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 

@@ -160,8 +160,7 @@ bool CMagicActionBasicDamage::launchOnEntity(
 	uint32				casterSkillBaseValue,
 	bool				isMad,
 	float				rangeFactor,
-	CTargetInfos&		targetInfos,
-	sint16&				deltaHP)
+	CTargetInfos&		targetInfos, sint16&				deltaHP)
 {
 	// for main target only, check reflect damage effects
 	if (mainTarget)
@@ -282,7 +281,7 @@ bool CMagicActionBasicDamage::launchOnEntity(
 		
 		sint32 maxDmgHp =  sint32 ( _DmgHp * dmgFactor );
 		sint32 realDmgHp = target->applyDamageOnArmor( _DmgType, maxDmgHp );
-
+		
 		// update behaviour for lost Hp
 		CCreature * npc = dynamic_cast<CCreature*>(target);
 		CCharacter * c = dynamic_cast<CCharacter*>(actor);
@@ -302,6 +301,7 @@ bool CMagicActionBasicDamage::launchOnEntity(
 		targetInfos.DmgHp			= maxDmgHp;
 		targetInfos.ResistFactor	= resistFactor;
 		targetInfos.DmgFactor		= dmgFactor;
+		
 		return false;
 	}
 	else

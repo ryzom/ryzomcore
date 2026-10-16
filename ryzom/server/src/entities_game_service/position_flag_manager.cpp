@@ -180,7 +180,7 @@ struct CPositionFlagManagerFileLoadCallback: public IBackupFileReceiveCallback
 
 	CPositionFlagManagerFileLoadCallback(CPositionFlagManager* parent,const std::string& fileName): Parent(parent), FileName(fileName)  {}
 
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		// if the file isn't found then just give up
 		DROP_IF(fileDescription.FileName.empty(),"<CPositionFlagManager::loadFromFile> file not found: "<< FileName, return);

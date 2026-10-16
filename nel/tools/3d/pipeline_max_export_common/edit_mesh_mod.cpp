@@ -3,6 +3,7 @@
  * \brief See edit_mesh_mod.h.
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.7 (1M context)
+ * \author Claude Fable 5
  */
 
 /*
@@ -26,177 +27,74 @@
 
 #include "edit_mesh_mod.h"
 
-#include <cstring>
+#include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/storage/mesh_delta.h"
 
 using namespace PIPELINE::MAX;
+using PIPELINE::MAX::BUILTIN::CDerivedObject;
+using PIPELINE::MAX::BUILTIN::STORAGE::CMeshDelta;
 
 namespace EDITMESH {
 
-// Read a 0x2700 bit-array container (uint32 bit-count + LSB-first packed bits, dword padded) into
-// a caller-supplied bool vector. Silent no-op on any structural surprise (returns the vector
-// untouched) — matches the ig decode's failure discipline (raw chunk survives regardless).
-static bool readBitArray(CStorageContainer *cont, std::vector<bool> &out)
-{
-	if (!cont) return false;
-	for (CStorageContainer::TStorageObjectConstIt it = cont->chunks().begin(); it != cont->chunks().end(); ++it)
-	{
-		if (it->first != 0x2700) continue;
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-		if (!raw || raw->Value.size() < 4) return false;
-		uint32 n;
-		memcpy(&n, nlVectorData(raw->Value), 4);
-		if (raw->Value.size() < 4 + ((size_t)n + 7) / 8) return false;
-		out.resize(n);
-		for (uint32 i = 0; i < n; ++i)
-			out[i] = (raw->Value[4 + i / 8] >> (i % 8)) & 1;
-		return true;
-	}
-	return false;
-}
-
+// Thin copy from the typed library decode (BUILTIN::STORAGE::CMeshDelta, design-doc §10j-sept)
+// into the SEdits evaluation record. The chunk-level format knowledge lives on CMeshDelta now
+// (bit-exact rows, corpus-selftested); this wrapper only converts the raw float-bit words into
+// the CVector shapes applyEdits consumes. Public API and semantics unchanged: true iff the
+// 0x2512 → 0x4000 mesh-delta subtree exists, decoded records appended to \a out.
 bool readModApp(CStorageContainer *c2500, SEdits &out)
 {
-	if (!c2500) return false;
-	for (CStorageContainer::TStorageObjectConstIt it = c2500->chunks().begin(); it != c2500->chunks().end(); ++it)
+	CMeshDelta md;
+	if (!md.decode(CDerivedObject::modAppLocalModData(c2500)))
+		return false;
+	out.Moves.reserve(out.Moves.size() + md.moves().size());
+	for (uint i = 0; i < md.moves().size(); ++i)
 	{
-		if (it->first != 0x2512) continue;
-		CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(it->second);
-		if (!c2512) continue;
-		for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end(); ++jt)
-		{
-			if (jt->first != 0x4000) continue;
-			CStorageContainer *c4000 = dynamic_cast<CStorageContainer *>(jt->second);
-			if (!c4000) continue;
-			for (CStorageContainer::TStorageObjectConstIt kt = c4000->chunks().begin(); kt != c4000->chunks().end(); ++kt)
-			{
-				if (kt->first == 0x0140)
-				{
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (!raw || raw->Value.size() < 4) continue;
-					uint32 n;
-					memcpy(&n, nlVectorData(raw->Value), 4);
-					if (raw->Value.size() < 4 + (size_t)n * 16) continue;
-					out.Moves.reserve(out.Moves.size() + n);
-					for (uint32 i = 0; i < n; ++i)
-					{
-						uint32 idx;
-						float v[3];
-						memcpy(&idx, nlVectorData(raw->Value) + 4 + i * 16, 4);
-						memcpy(v, nlVectorData(raw->Value) + 4 + i * 16 + 4, 12);
-						out.Moves.push_back(std::make_pair(idx, NLMISC::CVector(v[0], v[1], v[2])));
-					}
-				}
-				else if (kt->first == 0x0130)
-				{
-					// Created verts: `uint32 count + (uint32 srcTag, Point3 pos)[count]`, 16-byte
-					// stride. srcTag == 0xFFFFFFFF → fresh vertex, pos is the absolute object-space
-					// position; srcTag != -1 → CLONE of input vertex srcTag, pos is the OFFSET from
-					// the source vertex (the modern merge of legacy TOPO_CVERTS_CHUNK clone-sources
-					// + TOPO_NVERTS_CHUNK absolute creates + the clone's move, §L.5/§L.6 — how
-					// chamfer/extrude records its geometry). Decoded off the primes_racines sky
-					// domes (§10z-quinze): reading clone offsets as absolute positions was the
-					// "created-vertex positions offset" class of §10x/§10z-ter.
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (!raw || raw->Value.size() < 4) continue;
-					uint32 n;
-					memcpy(&n, nlVectorData(raw->Value), 4);
-					if (raw->Value.size() < 4 + (size_t)n * 16) continue;
-					out.CreatedVerts.reserve(out.CreatedVerts.size() + n);
-					for (uint32 i = 0; i < n; ++i)
-					{
-						SCreatedVert cv;
-						memcpy(&cv.SrcTag, nlVectorData(raw->Value) + 4 + (size_t)i * 16, 4);
-						float v[3];
-						memcpy(v, nlVectorData(raw->Value) + 4 + (size_t)i * 16 + 4, 12);
-						cv.Pos = NLMISC::CVector(v[0], v[1], v[2]);
-						out.CreatedVerts.push_back(cv);
-					}
-				}
-				else if (kt->first == 0x0208)
-				{
-					// Created faces variant A: `uint32 count + (uint32 srcTag, uint32 v[3],
-					// uint32 smGrp, uint32 flagsMatId)[count]`, 24-byte stride. srcTag ignored,
-					// same reasoning as 0x0130. This is the record the corpus proves the
-					// reference plugin actually consumes (see the SEdits header comment for the
-					// fy_hall_reunion face-count match).
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (!raw || raw->Value.size() < 4) continue;
-					uint32 n;
-					memcpy(&n, nlVectorData(raw->Value), 4);
-					if (raw->Value.size() < 4 + (size_t)n * 24) continue;
-					out.CreatedFacesA.reserve(out.CreatedFacesA.size() + n);
-					for (uint32 i = 0; i < n; ++i)
-					{
-						const uint8 *p = nlVectorData(raw->Value) + 4 + (size_t)i * 24;
-						SFace f;
-						memcpy(f.V, p + 4, 12);
-						memcpy(&f.SmGroup, p + 16, 4);
-						memcpy(&f.FaceFlags, p + 20, 4);
-						out.CreatedFacesA.push_back(f);
-					}
-				}
-				else if (kt->first == 0x0210)
-				{
-					// Face-vertex remap (modern equivalent of legacy TOPO_FACEMAP_CHUNK 0x2780):
-					// `uint32 count + (uint32 faceIdx, uint32 applyMask, uint32 v[3])[count]`,
-					// 20-byte stride. ApplyMask bits 0..2 select which of face `faceIdx`'s
-					// corners get replaced with the corresponding v[i]. Corpus-validated across
-					// 445 files / 113 chunks / 2881 entries: every observed mask is 0..7 (0 =
-					// no-op remap on a face that's about to be deleted; 3 = most common; 7 =
-					// full replacement, e.g. fy_hall_reunion face 18 → (76, 81, 74) matching the
-					// reference `.cmb` exactly). Corners not covered by mask carry undefined
-					// bytes in the writer and must be ignored — see SFaceVertRemap::applyCorner.
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (!raw || raw->Value.size() < 4) continue;
-					uint32 n;
-					memcpy(&n, nlVectorData(raw->Value), 4);
-					if (raw->Value.size() < 4 + (size_t)n * 20) continue;
-					out.FaceRemap.reserve(out.FaceRemap.size() + n);
-					for (uint32 i = 0; i < n; ++i)
-					{
-						const uint8 *p = nlVectorData(raw->Value) + 4 + (size_t)i * 20;
-						SFaceVertRemap r;
-						memcpy(&r.Index, p + 0, 4);
-						memcpy(&r.ApplyMask, p + 4, 4);
-						memcpy(r.V, p + 8, 12);
-						out.FaceRemap.push_back(r);
-					}
-				}
-				else if (kt->first == 0x0220)
-				{
-					// Per-face attribute changes: `uint32 count + (uint32 idx, uint32 apply,
-					// uint32 values)[count]`, 12-byte stride. Modern-format counterpart of
-					// LEGACY TOPO_ATTRIBS_CHUNK — see edit_mesh_mod.h SFaceAttribChange for the
-					// bit layouts. Pinned by the fy_hall_reunion corpus match: 82 entries (=
-					// input face count), most with ApplyMask=0x10 and Values where
-					// (Values>>5)&0xFFFF exactly reproduces the reference `.cmb`'s per-face
-					// matID column (69 matID-60 faces, 48 matID-59 etc. — the raw base mesh has
-					// matID 0 everywhere; 0x0220 is what promotes them).
-					CStorageRaw *raw = dynamic_cast<CStorageRaw *>(kt->second);
-					if (!raw || raw->Value.size() < 4) continue;
-					uint32 n;
-					memcpy(&n, nlVectorData(raw->Value), 4);
-					if (raw->Value.size() < 4 + (size_t)n * 12) continue;
-					out.FaceAttribs.reserve(out.FaceAttribs.size() + n);
-					for (uint32 i = 0; i < n; ++i)
-					{
-						const uint8 *p = nlVectorData(raw->Value) + 4 + (size_t)i * 12;
-						SFaceAttribChange fa;
-						memcpy(&fa.Index, p + 0, 4);
-						memcpy(&fa.ApplyMask, p + 4, 4);
-						memcpy(&fa.Values, p + 8, 4);
-						out.FaceAttribs.push_back(fa);
-					}
-				}
-				else if (kt->first == 0x0170)
-					readBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelVerts);
-				else if (kt->first == 0x0270)
-					readBitArray(dynamic_cast<CStorageContainer *>(kt->second), out.DelFaces);
-			}
-			return true;
-		}
+		const CMeshDelta::SMove &m = md.moves()[i];
+		out.Moves.push_back(std::make_pair(m.Index, NLMISC::CVector(
+			CMeshDelta::asF(m.P[0]), CMeshDelta::asF(m.P[1]), CMeshDelta::asF(m.P[2]))));
 	}
-	return false;
+	out.CreatedVerts.reserve(out.CreatedVerts.size() + md.createdVerts().size());
+	for (uint i = 0; i < md.createdVerts().size(); ++i)
+	{
+		const CMeshDelta::SCreatedVert &v = md.createdVerts()[i];
+		SCreatedVert cv;
+		cv.SrcTag = v.SrcTag;
+		cv.Pos = NLMISC::CVector(CMeshDelta::asF(v.P[0]), CMeshDelta::asF(v.P[1]), CMeshDelta::asF(v.P[2]));
+		out.CreatedVerts.push_back(cv);
+	}
+	out.CreatedFacesA.reserve(out.CreatedFacesA.size() + md.createdFaces().size());
+	for (uint i = 0; i < md.createdFaces().size(); ++i)
+	{
+		const CMeshDelta::SCreatedFace &cf = md.createdFaces()[i];
+		SFace f;
+		f.V[0] = cf.V[0]; f.V[1] = cf.V[1]; f.V[2] = cf.V[2];
+		f.SmGroup = cf.SmGroup;
+		f.FaceFlags = cf.FaceFlags;
+		out.CreatedFacesA.push_back(f);
+	}
+	out.FaceRemap.reserve(out.FaceRemap.size() + md.faceRemap().size());
+	for (uint i = 0; i < md.faceRemap().size(); ++i)
+	{
+		const CMeshDelta::SFaceVertRemap &mr = md.faceRemap()[i];
+		SFaceVertRemap r;
+		r.Index = mr.Index;
+		r.ApplyMask = mr.ApplyMask;
+		r.V[0] = mr.V[0]; r.V[1] = mr.V[1]; r.V[2] = mr.V[2];
+		out.FaceRemap.push_back(r);
+	}
+	out.FaceAttribs.reserve(out.FaceAttribs.size() + md.faceAttribs().size());
+	for (uint i = 0; i < md.faceAttribs().size(); ++i)
+	{
+		const CMeshDelta::SFaceAttrib &ma = md.faceAttribs()[i];
+		SFaceAttribChange fa;
+		fa.Index = ma.Index;
+		fa.ApplyMask = ma.ApplyMask;
+		fa.Values = ma.Values;
+		out.FaceAttribs.push_back(fa);
+	}
+	if (md.delVerts().Present) md.delVerts().bits(out.DelVerts);
+	if (md.delFaces().Present) md.delFaces().bits(out.DelFaces);
+	return true;
 }
 
 } /* namespace EDITMESH */

@@ -92,7 +92,7 @@ void CGroupHTMLMail::handle ()
 	// Do nothing if WebServer is not initialized
 /*	if (!WebServer.empty())
 	{
-		Home = "/webig/mailbox.php";
+		Home = WebServer+"mailbox.php";
 		CGroupHTML::handle ();
 	}
 */

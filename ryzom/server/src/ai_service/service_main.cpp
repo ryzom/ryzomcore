@@ -78,10 +78,10 @@ namespace AICOMP
 class CAIService : public NLNET::IService
 {
 public:
-	void commandStart();
-	void init();
-	bool update();
-	void release();
+	void commandStart() NL_OVERRIDE;
+	void init() NL_OVERRIDE;
+	bool update() NL_OVERRIDE;
+	void release() NL_OVERRIDE;
 	void tickRelease();
 };
 

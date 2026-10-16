@@ -37,7 +37,7 @@
 ////////////////////
 // STATIC MEMBERS //
 ////////////////////
-CVisualSlotManager	*CVisualSlotManager::_Instance = 0;
+CVisualSlotManager	*CVisualSlotManager::_Instance = nullptr;
 
 
 ////////////////////
@@ -50,7 +50,7 @@ CVisualSlotManager	*CVisualSlotManager::_Instance = 0;
 //---------------------------------------------------
 CVisualSlotManager * CVisualSlotManager::getInstance()
 {
-	if(_Instance == 0)
+	if(_Instance == nullptr)
 	{
 		_Instance = new CVisualSlotManager();
 		if(_Instance)
@@ -64,7 +64,7 @@ void CVisualSlotManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 /////////////
@@ -175,7 +175,7 @@ NLMISC::CSheetId * CVisualSlotManager::index2Sheet(uint32 index, SLOTTYPE::EVisu
 		nlwarning("VSMngr:index2Sheet: Bad slot '%d' -> you probably need to rebuild the tab.", (sint)slot);
 
 	// No SheetId
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------

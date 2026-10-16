@@ -413,12 +413,12 @@ void CSpawnGroupNpc::spawnBots(const std::string &name, const std::string &vpx)
 			CSpawnBot *spawnBot = bot->getSpawnObj();
 			if (spawnBot && !ucName.empty())
 			{
-				TDataSetRow	row = spawnBot->dataSetRow();
-				NLNET::CMessage	msgout("CHARACTER_NAME");
-				msgout.serial(row);
-				msgout.serial(ucName);
-				sendMessageViaMirror("IOS", msgout);
-				spawnBot->getPersistent().setCustomName(ucName);
+					TDataSetRow	row = spawnBot->dataSetRow();
+					NLNET::CMessage	msgout("CHARACTER_NAME");
+					msgout.serial(row);
+					msgout.serial(ucName);
+					sendMessageViaMirror("IOS", msgout);
+					spawnBot->getPersistent().setCustomName(ucName);
 			}
 
 			if (_Cell < 0) {
@@ -719,13 +719,13 @@ void CGroupNpc::addParameter(std::string const& parameter)
 	static std::string DESPAWN_TIME("despawn time");
 	static std::string RING("ring");
 	static std::string DENIED_ASTAR_FLAGS("denied_astar_flags");
-
+	
 	std::string key, tail;
-
+	
 	// force lowercase
 	std::string p = NLMISC::toLowerAscii(parameter);
 	AI_SHARE::stringToKeywordAndTail(p, key, tail);
-
+	
 	breakable
 	{
 		if (key == RING)

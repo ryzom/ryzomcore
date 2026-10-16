@@ -58,7 +58,7 @@ CRTWorld::~CRTWorld()
 	}
 
 	for (i = 0; i < vLightAccel.size(); ++i)
-		if (vLightAccel[i] != NULL)
+		if (vLightAccel[i] != nullptr)
 			delete vLightAccel[i];
 }
 
@@ -107,7 +107,7 @@ void CRTWorld::build (vector<SLightBuild> &AllLights, const CVector &trans,
 		vLight[i].Direction = rLight.Direction;
 		vLight[i].rSoftShadowRadius = rLight.rSoftShadowRadius;
 		vLight[i].rSoftShadowConeLength = rLight.rSoftShadowConeLength;
-		vLightAccel[i] = NULL;
+		vLightAccel[i] = nullptr;
 
 		switch (rLight.Type)
 		{
@@ -312,7 +312,7 @@ void CRTWorld::testCell (CRGBAF &retValue, SGridCell &cell, CVector &vLightPos, 
 		{ // This is a transparent face we have to look in the texture
 			ITexture *pT = cell.pMBB->Materials[cell.pF->MaterialId].getTexture(0);
 			CRGBAF cPixMap;
-			if( pT == NULL )
+			if( pT == nullptr)
 			{
 				retValue *= 1.0f - (cell.pMBB->Materials[cell.pF->MaterialId].getOpacity()/255.0f);
 				cPixMap = CRGBAF(1.0f, 1.0f, 1.0f, 0.0f);

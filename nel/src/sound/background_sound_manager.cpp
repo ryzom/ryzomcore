@@ -92,7 +92,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 
 	sd.SoundName = CStringMapper::map(soundName);
 	sd.Sound = mixer->getSoundId(sd.SoundName);
-	sd.Source = 0;
+	sd.Source = nullptr;
 
 	// Copy the points
 	sd.Points.resize (points.size ());
@@ -102,7 +102,7 @@ void CBackgroundSoundManager::addSound(const std::string &soundName, uint layerI
 	sd.Selected = false;
 	sd.IsPath = isPath;
 
-	if (sd.Sound != 0)
+	if (sd.Sound != nullptr)
 	{
 		// the sound is available !
 		// compute bouding box/
@@ -803,7 +803,7 @@ void CBackgroundSoundManager::stop ()
 		std::vector<TSoundData>::iterator first(_Layers[i].begin()), last(_Layers[i].end());
 		for (; first != last; ++first)
 		{
-			if (first->Source != 0 && first->Source->isPlaying())
+			if (first->Source != nullptr && first->Source->isPlaying())
 				first->Source->stop();
 		}
 	}
@@ -865,10 +865,10 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 	// special case for clustered sound management. If the listener is not
 	// in the global cluster, it's background listening place could be different
 	CClusteredSound *clusteredSound = mixer->getClusteredSound();
-	if (clusteredSound != 0)
+	if (clusteredSound != nullptr)
 	{
 		const CClusteredSound::CClusterSoundStatus *css = clusteredSound->getClusterSoundStatus(clusteredSound->getRootCluster());
-		if (css != 0)
+		if (css != nullptr)
 		{
 			listener = css->Position;
 			listener.z = 0.0f;
@@ -879,7 +879,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 	if (mixer->useReverb())
 	{
 		H_AUTO(NLSOUND_EvaluateEnvFx)
-		NL3D::CCluster *rootCluster = 0;
+		NL3D::CCluster *rootCluster = nullptr;
 		if (mixer->getClusteredSound())
 			rootCluster = mixer->getClusteredSound()->getRootCluster();
 
@@ -988,7 +988,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 					// ok, the bank is unloaded
 					_LoadedBanks.erase(*first);
 				}
-				else if (mixer->getSampleBankManager()->findSampleBank(CStringMapper::map(*first)) == 0)
+				else if (mixer->getSampleBankManager()->findSampleBank(CStringMapper::map(*first)) == nullptr)
 				{
 					// ok, the bank is unavailable !
 					_LoadedBanks.erase(*first);
@@ -999,8 +999,8 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 
 	H_BEFORE(NLSOUND_UpdateSoundLayer)
 	// retreive the root cluster...
-	NL3D::CCluster *rootCluster = 0;
-	if (mixer->getClusteredSound() != 0)
+	NL3D::CCluster *rootCluster = nullptr;
+	if (mixer->getClusteredSound() != nullptr)
 		rootCluster = mixer->getClusteredSound()->getRootCluster();
 
 	// Apply the same algo for each sound layer.
@@ -1029,7 +1029,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 			{
 //				nldebug("patat %u is rejected  by box (%s)", count, first->SoundName.c_str());
 				// listener out of this box.
-				if (first->Selected && first->Source != 0)
+				if (first->Selected && first->Source != nullptr)
 				{
 					// we leave this box.
 					leaveIndex.push_back(count);
@@ -1115,12 +1115,12 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 							ss.SoundData.Selected = true;
 
 							// start the sound (if needed) and update the volume.
-							if (ss.SoundData.Source == 0)
+							if (ss.SoundData.Source == nullptr)
 							{
 								// try to create the source.
-								ss.SoundData.Source = static_cast<CSourceCommon*>(mixer->createSource(ss.SoundData.Sound, false, 0, 0, rootCluster));
+								ss.SoundData.Source = static_cast<CSourceCommon*>(mixer->createSource(ss.SoundData.Sound, false, nullptr, nullptr, rootCluster));
 							}
-							if (ss.SoundData.Source != 0)
+							if (ss.SoundData.Source != nullptr)
 							{
 								// update the position (not used I think, but maybe important...)
 								ss.Position.z = _LastPosition.z + BACKGROUND_SOUND_ALTITUDE;
@@ -1133,7 +1133,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 								}
 							}
 						}
-						else if (ss.SoundData.Source != 0 && ss.SoundData.Source->isPlaying())
+						else if (ss.SoundData.Source != nullptr && ss.SoundData.Source->isPlaying())
 						{
 							// stop this too far source.
 							ss.SoundData.Source->stop();
@@ -1166,12 +1166,12 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 
 							// start the sound (if needed) and update the volume.
 
-							if (ss.SoundData.Source == 0)
+							if (ss.SoundData.Source == nullptr)
 							{
 								// try to create the source.
-								ss.SoundData.Source = static_cast<CSourceCommon*>(mixer->createSource(ss.SoundData.Sound, false, 0, 0, rootCluster));
+								ss.SoundData.Source = static_cast<CSourceCommon*>(mixer->createSource(ss.SoundData.Sound, false, nullptr, nullptr, rootCluster));
 							}
-							if (ss.SoundData.Source != 0)
+							if (ss.SoundData.Source != nullptr)
 							{
 								// set the volume
 								ss.SoundData.Source->setRelativeGain(gain);
@@ -1189,7 +1189,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 									ss.SoundData.Source->checkup();
 							}
 						}
-						else if (ss.SoundData.Source != 0 && ss.SoundData.Source->isPlaying())
+						else if (ss.SoundData.Source != nullptr && ss.SoundData.Source->isPlaying())
 						{
 							// stop this too far source.
 							ss.SoundData.Source->stop();
@@ -1267,7 +1267,7 @@ void CBackgroundSoundManager::updateBackgroundStatus()
 				if (first->Selected)
 				{
 					// update this playing sound
-					if (first->Source != 0 && first->Source->getType() == CSourceCommon::SOURCE_BACKGROUND)
+					if (first->Source != nullptr && first->Source->getType() == CSourceCommon::SOURCE_BACKGROUND)
 						static_cast<CBackgroundSource*>(first->Source)->updateFilterValues(_FilterFadeValues);
 				}
 			}
@@ -1443,7 +1443,7 @@ void CBackgroundSoundManager::TSoundData::serial(NLMISC::IStream &s)
 		s.serial(str);
 		SoundName = NLMISC::CStringMapper::map(str);
 		Sound = mixer->getSoundId(SoundName);
-		Source = NULL;
+		Source = nullptr;
 		Selected = false;
 	}
 	else

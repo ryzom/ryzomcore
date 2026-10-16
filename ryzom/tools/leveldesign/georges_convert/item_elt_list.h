@@ -33,30 +33,30 @@ protected:
 
 public:
 	CItemEltList( CLoader* const _pl );
-	virtual ~CItemEltList();
+	virtual ~CItemEltList() NL_OVERRIDE;
 
 	void BuildItem( CItemElt* const _pie );
 
 	void Clear();
 
-	virtual CStringEx GetFormula() const;
-	virtual void FillParent( const CFormBodyElt* const _pfbe );
-	virtual void FillCurrent(const  CFormBodyElt* const _pfbe );
-	virtual CItemElt* Clone();
-	virtual CFormBodyElt* BuildForm();
-	virtual unsigned int GetNbElt() const;
-	virtual CItemElt* GetElt( const unsigned int _index ) const;
-	virtual CItemElt* GetElt( const CStringEx sxname ) const;
+	virtual CStringEx GetFormula() const NL_OVERRIDE;
+	virtual void FillParent( const CFormBodyElt* const _pfbe ) NL_OVERRIDE;
+	virtual void FillCurrent(const  CFormBodyElt* const _pfbe ) NL_OVERRIDE;
+	virtual CItemElt* Clone() NL_OVERRIDE;
+	virtual CFormBodyElt* BuildForm() NL_OVERRIDE;
+	virtual unsigned int GetNbElt() const NL_OVERRIDE;
+	virtual CItemElt* GetElt( const unsigned int _index ) const NL_OVERRIDE;
+	virtual CItemElt* GetElt( const CStringEx sxname ) const NL_OVERRIDE;
 
 	void NewElt();
 	void AddElt( const CItemElt* const _pie );
 	void DelElt( CItemElt* const _pie );
 	void VerifyName();
-	virtual bool SetModified( const unsigned int _index );
-	virtual void SetModified( const bool _b );
+	virtual bool SetModified( const unsigned int _index ) NL_OVERRIDE;
+	virtual void SetModified( const bool _b ) NL_OVERRIDE;
 
-	virtual unsigned int GetNbChild ();
-	virtual CItemElt* GetChild (unsigned int _index);
+	virtual unsigned int GetNbChild () NL_OVERRIDE;
+	virtual CItemElt* GetChild (unsigned int _index) NL_OVERRIDE;
 };
 
 } // NLGEORGES

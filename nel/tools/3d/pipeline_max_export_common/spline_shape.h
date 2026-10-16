@@ -2,15 +2,20 @@
  * \file spline_shape.h
  * \brief Decode Max Shape-superclass objects (SplineShape, Line, Rectangle, …) into knot
  * positions for consumers that need curve endpoints — primarily CSegRemanence export
- * (InterpPiece3D at piece ends) and any future spline-tessellation path (cmb XRef fallback,
- * residual mesh-eval shape-class nodes).
+ * (InterpPiece3D at piece ends) and the spline-tessellation path (spline_mesh).
  *
- * On-disk format (corpus-verified against Max 3→9→2010 assets; see max_geometry_formats.md
- * Part N): under the shape object's BezierShape tree, each Spline3D is a container holding
+ * The chunk-level decode lives in the typed scene class PIPELINE::MAX::BUILTIN::CShapeObject
+ * (pipeline_max/builtin/shape_object.{h,cpp}) — every superclass-0x40 object parses through it
+ * since the typed-graduation series (design doc §10j-quater). This module keeps the export-side
+ * SShape/SSpline/SKnot value types and is a thin copy from the typed model, plus the parametric
+ * Rectangle knot generator and the piece-endpoint helper (evaluation, not format).
+ *
+ * On-disk format (corpus-verified; see shape_object.h and max_geometry_formats.md Part N):
+ * under the shape object's BezierShape tree, each Spline3D is a container holding
  *   0x2900  uint32 numKnots
- *   0x2904  uint32 closed (0/1)
+ *   0x2904  uint32 (0 corpus-wide, semantics unknown)
  *   0x290a  numKnots × 52-byte compact knot records
- *   0x290d  trailing uint32
+ *   0x290d  uint32 closed flag (0 open / 1 closed)
  * Compact knot (52 B) = ktype i32 + ltype i32 + du f32 + Point3 p0 + Point3 p1 + Point3 p2
  * + flags u32. The **first Point3** is the knot point matching ShapeObject::InterpPiece3D
  * endpoints at u=0/1 (corpus-verified against reference remanence corners after objectToLocal).
@@ -19,6 +24,7 @@
  * Rectangle (0x1065,0).
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
+ * \author Claude Fable 5
  */
 
 /*
@@ -61,7 +67,8 @@ extern const NLMISC::CClassId CLASSID_SPLINESHAPE; // (0x0000000a, 0)
 extern const NLMISC::CClassId CLASSID_LINE;        // (0x00001040, 0)
 extern const NLMISC::CClassId CLASSID_RECTANGLE;   // (0x00001065, 0)
 
-/// True when the scene class is a Shape-superclass object (spline geometry).
+/// True when the scene class is a Shape-superclass object (spline geometry) — rides the typed
+/// CShapeObject class registration.
 bool isShapeObject(PIPELINE::MAX::CSceneClass *obj);
 
 /// One knot of a Spline3D (compact on-disk form).
@@ -99,12 +106,10 @@ struct SShape
 /// (CIRCLE_VECTOR_LENGTH = 0.5517861843). Closed.
 void buildRectangleKnots(float length, float width, float fillet, SSpline &out);
 
-/// Decode all Spline3D records under a shape scene object (walks orphaned + claimed chunk trees
-/// looking for the 0x2900/0x290a sibling pattern). Returns false if no spline data found.
+/// Copy all Spline3D records of a shape scene object from the typed CShapeObject model (document
+/// order across all BezierShapes). Returns false if no spline data present (parametric shape
+/// classes, or a non-shape object).
 bool decodeShapeObject(PIPELINE::MAX::CSceneClass *shapeObj, SShape &out);
-
-/// Decode a single 0x290a raw payload given numKnots from 0x2900.
-bool decodeKnotsRaw(const uint8 *data, uint size, uint32 numKnots, std::vector<SKnot> &out);
 
 /// Piece-endpoint positions for curve 0 — the sequence remanence samples via
 /// InterpPiece3D(time, 0, k, u) at the piece ends: knot[0], knot[1], … knot[n-1]

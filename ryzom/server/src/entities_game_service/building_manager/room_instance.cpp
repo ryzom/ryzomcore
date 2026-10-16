@@ -116,7 +116,7 @@ void CRoomInstanceGuild::addUser( CCharacter* user, const NLMISC::CEntityId & ow
 
 	// open guild inventory window
 	PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
-
+	
 	user->sendUrl("app_ryzhome action=open_guild_room&owner="+ owner.toString()+"&room_name="+guildBuilding->getName());
 
 	++_RefCount;
@@ -228,7 +228,7 @@ bool IRoomInstance::create( IBuildingPhysical * building, uint16 roomIdx,uint16 
 			nlwarning("<BUILDING> Invalid bot id '%s'%s in destination '%s'", eid.toString().c_str(), CPrimitivesParser::aliasToString(templ.Bots[i]).c_str(), templ.Name.c_str() );
 			continue;
 		}
-
+		
 		//allocate a new creature
 		static uint64 id64 = 0;
 		NLMISC::CEntityId entityId(RYZOMID::npc, id64++, TServiceId8(NLNET::IService::getInstance()->getServiceId()).get(), NLNET::TServiceId8(NLNET::IService::getInstance()->getServiceId()).get());

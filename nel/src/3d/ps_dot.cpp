@@ -147,14 +147,14 @@ void CPSDot::draw(bool opaque)
 
 	/// update the material if the global color of the system is variable
 	CParticleSystem &ps = *(_Owner->getOwner());
-	if (_ColorScheme == NULL)
+	if (_ColorScheme == nullptr)
 	{
 		NLMISC::CRGBA col;
 		if (ps.getForceGlobalColorLightingFlag() || usesGlobalColorLighting())
 		{
 			col.modulateFromColor(ps.getGlobalColorLighted(), _Color);
 		}
-		else if (ps.getColorAttenuationScheme() != NULL || ps.isUserColorUsed())
+		else if (ps.getColorAttenuationScheme() != nullptr || ps.isUserColorUsed())
 		{
 			col.modulateFromColor(ps.getGlobalColor(), _Color);
 		}

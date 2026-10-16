@@ -97,7 +97,7 @@ public:
 
 
 	/// texture file may allow the driver to degrade (default is true).
-	virtual bool	allowDegradation() const { return _AllowDegradation; }
+	virtual bool	allowDegradation() const NL_OVERRIDE { return _AllowDegradation; }
 	/// Change the degradation mode. NB: this does not touch() the ITexture... This state is serialized.
 	void			setAllowDegradation(bool allow);
 
@@ -107,9 +107,9 @@ public:
 	 * \author Lionel Berenguier
 	 * \date 2000
 	 */
-	virtual bool			supportSharing() const {return _SupportSharing;}
+	virtual bool			supportSharing() const NL_OVERRIDE {return _SupportSharing;}
 
-	virtual std::string		getShareName() const;
+	virtual std::string		getShareName() const NL_OVERRIDE;
 	// User can disable the sharing system. Default is to be enabled. Not serialized
 	void					enableSharing(bool enable);
 
@@ -119,10 +119,10 @@ public:
 	 * \author Stephane Coutelas
 	 * \date 2000
 	 */
-	void doGenerate(bool async = false);
+	void doGenerate(bool async = false) NL_OVERRIDE;
 
 	/// Save the texture file name.
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CTextureFile);
 
 

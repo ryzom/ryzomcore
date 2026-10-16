@@ -1014,7 +1014,7 @@ public:
 	/**
 	 * Init
 	 */
-	void init()
+	void init() NL_OVERRIDE
 	{
 		// if a baseport is available in the config file, get it
 		CConfigFile::CVar *var;
@@ -1086,7 +1086,7 @@ public:
 	/**
 	 * Update
 	 */
-	bool update ()
+	bool update () NL_OVERRIDE
 	{
 		checkWaitingUnregistrationServices ();
 
@@ -1095,7 +1095,7 @@ public:
 		return true;
 	}
 
-	void release()
+	void release() NL_OVERRIDE
 	{
 		if (CallbackServer != NULL)
 			delete CallbackServer;

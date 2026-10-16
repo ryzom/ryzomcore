@@ -65,7 +65,7 @@ class CCharScanScriptFile
 {
 public:
 	// public interface
-	bool parseFile(const std::string& fileName,	CCharScanScript* container=NULL);
+	bool parseFile(const std::string& fileName,	CCharScanScript* container = nullptr);
 	bool applyToJob(CCharacterScanJob& job);
 
 	const std::string& getFileName() const;
@@ -159,11 +159,11 @@ public:
 	class CCharScriptCommand_##name: public ICharScanScriptCommand\
 {\
 public:\
-	virtual const char* getName()			{return #name;}\
-	virtual const char* getSyntax()			{return syntax;}\
-	virtual const char* getDescription()	{return description;}\
+	virtual const char* getName() NL_OVERRIDE			{return #name;}\
+	virtual const char* getSyntax() NL_OVERRIDE			{return syntax;}\
+	virtual const char* getDescription() NL_OVERRIDE	{return description;}\
 \
-	virtual bool		execute(CCharScanScriptFile& scriptFile,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& rawCmdLine,CCharScanScript* container);\
+	virtual bool		execute(CCharScanScriptFile& scriptFile,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& rawCmdLine,CCharScanScript* container) NL_OVERRIDE;\
 };\
 CCharScanScriptCommandRegisterer<CCharScriptCommand_##name> __Registerer_CCharScriptCommand_##name;\
 bool CCharScriptCommand_##name::execute(CCharScanScriptFile& scriptFile,const NLMISC::CVectorSString& args,const NLMISC::CSString& rawArgs,const NLMISC::CSString& rawCmdLine,CCharScanScript* container)

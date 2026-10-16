@@ -21,9 +21,9 @@ IF(NOT DESCRIBE)
       WORKING_DIRECTORY "${SOURCE_DIR}"
       OUTPUT_VARIABLE _BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    IF(_BRANCH STREQUAL "main/yubo-dev")
+    IF(_BRANCH STREQUAL "main/yubo-dev" OR _BRANCH STREQUAL "feature/core4-yubo")
       SET(_DOMAIN "Alpha /")
-    ELSEIF(_BRANCH STREQUAL "main/gingo-test")
+    ELSEIF(_BRANCH STREQUAL "main/gingo-test" OR _BRANCH STREQUAL "feature/core4-gingo")
       SET(_DOMAIN "Beta /")
     ELSE()
       SET(_DOMAIN "Omega /")

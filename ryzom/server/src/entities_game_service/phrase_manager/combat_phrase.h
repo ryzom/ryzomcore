@@ -156,10 +156,10 @@ public:
 	CCombatPhrase() { init(); _Attacker = NULL; }
 
 	/// destructor
-	virtual ~CCombatPhrase();
+	virtual ~CCombatPhrase() NL_OVERRIDE;
 
 	/// build the phrase
-	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true );
+	virtual bool build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute = true ) NL_OVERRIDE;
 
 	/// build the phrase from an ai action
 	virtual bool initPhraseFromAiAction( const TDataSetRow & actorRowId, const CStaticAiAction *aiAction, float damageCoeff, float speedCoeff );
@@ -168,7 +168,7 @@ public:
 	 * set the primary target
 	 * \param entityId id of the primary target
 	 */
-	virtual void setPrimaryTarget( const TDataSetRow &entityRowId )
+	virtual void setPrimaryTarget( const TDataSetRow &entityRowId ) NL_OVERRIDE
 	{
 //		_TargetRowId = entityRowId;
 	}
@@ -177,43 +177,43 @@ public:
 	 * evaluate phrase
 	 * \return true if eval has been made without errors
 	 */
-	virtual bool evaluate();
+	virtual bool evaluate() NL_OVERRIDE;
 
 	/**
 	 * validate phrase
 	 * \return true of the phrase is valid
 	 */
-	virtual bool validate();
+	virtual bool validate() NL_OVERRIDE;
 
 	/**
 	 * update method
 	 */
-	virtual bool update();
+	virtual bool update() NL_OVERRIDE;
 
 	/**
 	 * execute this phrase
 	 */
-	virtual void execute();
+	virtual void execute() NL_OVERRIDE;
 
 	/**
 	 * launch method, called at the end of the execution
 	 */
-	virtual bool launch();
+	virtual bool launch() NL_OVERRIDE;
 
 	/**
 	 * apply method, called at the end of the execution, starts latency
 	 */
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 	/**
 	 * called at the end of the latency time
 	 */
-	virtual void end();
+	virtual void end() NL_OVERRIDE;
 
 	/**
 	 * called when brutally ends the action (before latency ends)
 	 */
-	virtual void stop();
+	virtual void stop() NL_OVERRIDE;
 
 	/**
 	 * set attacker
@@ -290,7 +290,7 @@ public:
 	inline SLOT_EQUIPMENT::TSlotEquipment getHitLocalisation() const { return _HitLocalisation; }
 
 	// BRIANCODE Added to support mission evaluation of combat bricks
-	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & bricks)
+	virtual void setBrickSheets( const std::vector<NLMISC::CSheetId> & bricks) NL_OVERRIDE
 	{
 		_BrickSheets = bricks;
 	}

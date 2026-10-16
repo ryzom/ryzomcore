@@ -411,7 +411,7 @@ void	CMeshMRMGeom::applySkinWithNormal(CLod &lod, const CSkeletonModel *skeleton
 	// compute src array.
 	CMesh::CSkinWeight	*srcSkinPtr;
 	CVector				*srcVertexPtr;
-	CVector				*srcNormalPtr= NULL;
+	CVector				*srcNormalPtr = nullptr;
 	srcSkinPtr= &_SkinWeights[0];
 	srcVertexPtr= &_OriginalSkinVertices[0];
 	srcNormalPtr= &(_OriginalSkinNormals[0]);

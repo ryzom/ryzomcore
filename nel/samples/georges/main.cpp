@@ -87,7 +87,7 @@ struct TSampleConfig
 		// Get the array called "TestArray"
 		NLGEORGES::UFormElm *testArray;
 		root.getNodeByName(&testArray, ".TestArray");
-		if(testArray != NULL) {
+		if(testArray != nullptr) {
 			// Get the size of the array.
 			uint size;
 			testArray->getArraySize(size);
@@ -142,7 +142,7 @@ int main(void)
 	new NLMISC::CApplicationContext;
 
 	// get a pointer ready for the form loader.
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 
 	NLMISC::CPath::addSearchPath(GF_DIR, false, false);
 
@@ -197,7 +197,7 @@ int main(void)
 
 			nlinfo("TestArray retrieval returned: %s", res ? "true" : "false");
 			// make sure it was there.
-			if(testArray != NULL) {
+			if(testArray != nullptr) {
 				// get the size of the array.
 				uint size;
 				testArray->getArraySize(size);
@@ -224,7 +224,7 @@ int main(void)
 			res=root.getNodeByName(&coolFiles, ".CoolFilesInfo");
 
 			nlinfo("Retrieving CoolFilesInfo returned: %s", res ? "true" : "false");
-			if(coolFiles != NULL) {
+			if(coolFiles != nullptr) {
 				uint size;
 				coolFiles->getArraySize(size);
 

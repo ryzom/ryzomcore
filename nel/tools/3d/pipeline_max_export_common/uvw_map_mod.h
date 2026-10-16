@@ -101,7 +101,7 @@ struct SMeshView
 /// return false with \a outType set — the corpus-validated set grows per type (planar is pinned
 /// by the Rectangle01 GT; the rest await their own corpus/GT validation).
 bool applyUvwMap(PIPELINE::MAX::CSceneClass *mod, PIPELINE::MAX::CStorageContainer *modApp,
-                 SMeshView &mesh, uint typeMask = 0xFFFFFFFF, int *outType = 0);
+                 SMeshView &mesh, uint typeMask = 0xFFFFFFFF, int *outType = nullptr);
 
 /// Pure projection (no scene wiring) — for tests and for reuse by parametric-prim UV paths.
 /// \a tm maps object-space points into map space (row-vector: p' = p * tm).

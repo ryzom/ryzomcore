@@ -52,7 +52,7 @@ public:
 	///@{
 		CPSRibbonBase();
 		/// serialisation. Derivers must override this, and call their parent version
-		virtual void			serial(NLMISC::IStream &f);
+		virtual void			serial(NLMISC::IStream &f) NL_OVERRIDE;
 	///@}
 
 	///\name Behaviour
@@ -70,9 +70,9 @@ public:
 	///\name Geometry
 	///@{
 		/// set the number of segments used with this particle. In this case, it can't be lower than 2
-		void				setTailNbSeg(uint32 nbSegs);
+		void				setTailNbSeg(uint32 nbSegs) NL_OVERRIDE;
 		/// get the number of segments used with this particle
-		uint32				getTailNbSeg(void) const { return _NbSegs; }
+		uint32				getTailNbSeg(void) const NL_OVERRIDE { return _NbSegs; }
 		/** Set how many seconds need a seg to be traversed. Long times will create longer ribbons. Default is 0.02.
 		  * It gives the sampling rate for each type of ribbon
 		  */
@@ -107,13 +107,13 @@ protected:
 
 
 	/// inherited from CPSLocatedBindable
-	virtual void					newElement(const CPSEmitterInfo &info);
+	virtual void					newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 	/// inherited from CPSLocatedBindable
-	virtual void					deleteElement(uint32 index);
+	virtual void					deleteElement(uint32 index) NL_OVERRIDE;
 	/// inherited from CPSLocatedBindable
-	virtual void					resize(uint32 size);
+	virtual void					resize(uint32 size) NL_OVERRIDE;
 	/// called when the motion type has changed, this allow us to draw smoother ribbons when parametric anim is used
-	virtual	void					motionTypeChanged(bool parametric);
+	virtual	void					motionTypeChanged(bool parametric) NL_OVERRIDE;
 
 	/** Get position of the i-th ribbon and store them in a table of vector.
 	  * It uses the interpolation setting of this object.
@@ -190,7 +190,7 @@ private:
 										         uint stride = sizeof(NLMISC::CVector)
 										       );
 	// called by the system when its date has been manually changed
-	virtual void			systemDateChanged();
+	virtual void			systemDateChanged() NL_OVERRIDE;
 };
 
 /////////////

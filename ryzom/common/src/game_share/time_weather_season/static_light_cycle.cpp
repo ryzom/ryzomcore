@@ -45,7 +45,7 @@ void CStaticLightCycle::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 
 		for( uint i = 0; i < NbSeasons; ++i )
 		{
-			UFormElm* SeasonElt = NULL;
+			UFormElm* SeasonElt = nullptr;
 			if( ! ( root.getNodeByName( &SeasonElt, season[ i ] ) && SeasonElt ) )
 			{
 				nlwarning("<CStaticLightCycle readGeorges> can get node %s in sheet %s", season[ i ].c_str(), sheetId.toString().c_str() );

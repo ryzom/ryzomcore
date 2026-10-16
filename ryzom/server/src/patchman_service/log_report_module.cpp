@@ -69,7 +69,7 @@ public:
 			"Display summary, all or a part of the log report built by makeLogReport (default: summary)", "[all | <service id> | <-p page number>]");
 	NLMISC_COMMAND_HANDLER_TABLE_END
 
-	bool initModule(const TParsedCommandLine &initInfo)
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE
 	{
 		// setup a variable to build the init message in...
 		NLMISC::CSString logMsg;
@@ -90,7 +90,7 @@ public:
 		return true;
 	}
 
-	void onModuleUp(IModuleProxy *module)
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE
 	{
 		// allow the base classes a chance to do their stuff
 		CAdministeredModuleBase::onModuleUp(module);
@@ -105,13 +105,13 @@ public:
 		}
 	}
 
-	void onModuleDown(IModuleProxy *module)
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		// allow the base classes a chance to do their stuff
 		CAdministeredModuleBase::onModuleDown(module);
 	}
 
-	void onModuleUpdate()
+	void onModuleUpdate() NL_OVERRIDE
 	{
 		H_AUTO(CServerPatchApplier_onModuleUpdate);
 

@@ -94,24 +94,24 @@ public:
 	static COutpost* getOutpostByAlias(TAIAlias outpostAlias);
 
 	COutpost(CContinent* owner, uint32 alias, std::string const& name, std::string const& filename);
-	virtual ~COutpost();
+	virtual ~COutpost() NL_OVERRIDE;
 	
 	/// @name CChild implementation
 	//@{
-	virtual std::string getIndexString() const;
+	virtual std::string getIndexString() const NL_OVERRIDE;
 	virtual std::string	getOneLineInfoString() const;
 //	virtual std::vector<std::string> getMultiLineInfoString() const;
-	virtual std::string getFullName() const;
+	virtual std::string getFullName() const NL_OVERRIDE;
 	//	virtual std::string getName() const;
 	//@}
 	
 	/// @name IManagerParent implementation
 	//@{
-	virtual CAIInstance* getAIInstance() const;
-	virtual CCellZone* getCellZone() { return NULL; }
+	virtual CAIInstance* getAIInstance() const NL_OVERRIDE;
+	virtual CCellZone* getCellZone() NL_OVERRIDE { return NULL; }
 //	virtual std::string getIndexString() const = 0;
-	virtual std::string getManagerIndexString(CManager const* manager) const;
-	virtual void groupDead(CGroup* grp) { }
+	virtual std::string getManagerIndexString(CManager const* manager) const NL_OVERRIDE;
+	virtual void groupDead(CGroup* grp) NL_OVERRIDE { }
 	//@}
 	
 	/// @name Children containers accessors
@@ -205,8 +205,8 @@ public:
 	const CSquadLinks& squadLinks() const { return _SquadLinks; }
 	
 private:
-	IAliasCont		*getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree);	
+	IAliasCont		*getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree) NL_OVERRIDE;	
 	template <class T>
 	void sendOutpostMessage(std::string const& msgName, T& paramStruct);
 		
@@ -258,7 +258,7 @@ public:
 	: CAliasChild<CAIInstance>(owner, alias, name)
 	{
 	}
-	virtual	~COutpostSquadFamily()
+	virtual	~COutpostSquadFamily() NL_OVERRIDE
 	{
 		_GroupDescs.clear();	
 	}
@@ -270,8 +270,8 @@ public:
 	virtual std::string getIndexString() const;
 	
 //private:
-	IAliasCont		*getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree);	
+	IAliasCont		*getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner	*createChild(IAliasCont	*cont, CAIAliasDescriptionNode *aliasTree) NL_OVERRIDE;	
 	
 private:
 	/// These are only references to the group descs that are created when reading the squad template primitive
@@ -289,7 +289,7 @@ class COutpostSpawnZone
 {
 public:
 	COutpostSpawnZone(COutpost* owner, CAIAliasDescriptionNode* adn);
-	~COutpostSpawnZone();
+	~COutpostSpawnZone() NL_OVERRIDE;
 	
 	virtual std::string getFullName() const;
 	virtual std::string getIndexString() const;
@@ -306,13 +306,13 @@ class COutpostManager
 {
 public:
 	COutpostManager(COutpost* parent, uint32 alias, std::string const& name, std::string const& filename = std::string());
-	virtual ~COutpostManager();
+	virtual ~COutpostManager() NL_OVERRIDE;
 	
-	void update();
+	void update() NL_OVERRIDE;
 	
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);
-	virtual std::string	getOneLineInfoString() const;
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
 	
 	/// Change the list of enemies of the squad (attackers of the outpost)
 	void setEnemies( TAllianceId attackerAllianceId );
@@ -327,7 +327,7 @@ public:
 	CAIEvent EventOutpostAttackerChanged;
 	CAIEvent EventOutpostStateChanged;
 	
-	virtual void registerEvents();
+	virtual void registerEvents() NL_OVERRIDE;
 	virtual void unregisterEvents();
 	
 	void setAutoSpawn(bool autoSpawn) { _AutoSpawn = autoSpawn; }

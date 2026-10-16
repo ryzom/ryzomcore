@@ -661,7 +661,7 @@ bool CCfbWriter::assemble(std::vector<uint8> &fileOut)
 
 // ---- CStorageOleIn (native) ------------------------------------------------------------------
 
-CStorageOleIn::CStorageOleIn() : m_Impl(NULL) { }
+CStorageOleIn::CStorageOleIn() : m_Impl(nullptr) { }
 CStorageOleIn::~CStorageOleIn() { close(); }
 
 bool CStorageOleIn::open(const std::string &path)
@@ -677,12 +677,12 @@ bool CStorageOleIn::open(const std::string &path)
 	return true;
 }
 
-bool CStorageOleIn::isOpen() const { return m_Impl != NULL; }
+bool CStorageOleIn::isOpen() const { return m_Impl != nullptr; }
 
 void CStorageOleIn::close()
 {
 	delete static_cast<CCfbReader *>(m_Impl);
-	m_Impl = NULL;
+	m_Impl = nullptr;
 }
 
 bool CStorageOleIn::getClassId(uint8 classId[16]) const
@@ -758,7 +758,7 @@ bool CStorageOleOut::write(const std::string &path)
 	CNativeOut *o = static_cast<CNativeOut *>(m_Impl);
 	CCfbWriter w;
 	w.Streams = &o->Streams;
-	w.Clsid = o->HaveClsid ? o->Clsid : NULL;
+	w.Clsid = o->HaveClsid ? o->Clsid : nullptr;
 	std::vector<uint8> bytes;
 	if (!w.assemble(bytes)) return false;
 	return writeWholeFile(path, bytes);

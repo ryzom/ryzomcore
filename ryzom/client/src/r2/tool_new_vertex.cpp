@@ -112,7 +112,7 @@ bool CToolNewVertex::onDeleteCmd()
 {
 	//H_AUTO(R2_CToolNewVertex_onDeleteCmd)
 	CTool::TSmartPtr hold(this);
-	getEditor().setCurrentTool(NULL);
+	getEditor().setCurrentTool(nullptr);
 	return false; // don't handle event because the current zone will be deleted
 }
 

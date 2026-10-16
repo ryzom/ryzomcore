@@ -69,7 +69,10 @@ namespace BUILTIN {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_HasReferencesChunk(false), m_204B_Equals_2E(NULL), m_References2035Value0(0), m_References2034Count(0), m_Unknown2045(NULL), m_Unknown2047(NULL), m_Unknown21B0(NULL)
+CReferenceMaker::CReferenceMaker(CScene *scene) : CAnimatable(scene), m_ReferenceMap(false), m_HasReferencesChunk(false), m_204B_Equals_2E(nullptr)
+    , m_References2035Value0(0), m_References2034Count(0), m_Unknown2045(nullptr)
+    , m_Unknown2047(nullptr)
+    , m_Unknown21B0(nullptr)
 {
 
 }
@@ -79,13 +82,13 @@ CReferenceMaker::~CReferenceMaker()
 	if (!m_ChunksOwnsPointers)
 	{
 		delete m_204B_Equals_2E;
-		m_204B_Equals_2E = NULL;
+		m_204B_Equals_2E = nullptr;
 		delete m_Unknown2045;
-		m_Unknown2045 = NULL;
+		m_Unknown2045 = nullptr;
 		delete m_Unknown2047;
-		m_Unknown2047 = NULL;
+		m_Unknown2047 = nullptr;
 		delete m_Unknown21B0;
-		m_Unknown21B0 = NULL;
+		m_Unknown21B0 = nullptr;
 	}
 }
 
@@ -222,10 +225,10 @@ void CReferenceMaker::disown()
 	m_HasReferencesChunk = false;
 	m_References2035Value0 = 0;
 	m_References2034Count = 0;
-	m_204B_Equals_2E = NULL;
-	m_Unknown2045 = NULL;
-	m_Unknown2047 = NULL;
-	m_Unknown21B0 = NULL;
+	m_204B_Equals_2E = nullptr;
+	m_Unknown2045 = nullptr;
+	m_Unknown2047 = nullptr;
+	m_Unknown21B0 = nullptr;
 	CAnimatable::disown();
 }
 
@@ -299,7 +302,7 @@ void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pa
 
 CReferenceMaker *CReferenceMaker::getReference(uint index) const
 {
-	if (m_References.size() <= index) return NULL;
+	if (m_References.size() <= index) return nullptr;
 	return m_References[index];
 }
 

@@ -25,9 +25,11 @@
 #ifdef NL_OS_WINDOWS
 #	include <direct.h>
 #	include <tchar.h>
-//#	include <imagehlp.h>
-//#	pragma comment(lib, "imagehlp.lib")
-#	include "breakpad/client/windows/handler/exception_handler.h"
+#	include <imagehlp.h>
+#	pragma comment(lib, "imagehlp.lib")
+#	ifdef NL_HAVE_BREAKPAD
+#		include "breakpad/client/windows/handler/exception_handler.h"
+#	endif
 #	ifndef getcwd
 #		define getcwd(_a, _b) (_getcwd(_a,_b))
 #	endif
@@ -41,7 +43,9 @@
 #	define IsDebuggerPresent() false
 #   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 #	    include <execinfo.h>
-# 		include "client/linux/handler/exception_handler.h"
+#	    ifdef NL_HAVE_BREAKPAD
+#	        include "client/linux/handler/exception_handler.h"
+#	    endif
 #   endif
 //#	include <malloc.h>
 #	include <errno.h>
@@ -49,7 +53,7 @@
 
 #include "nel/misc/debug.h"
 
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 // Kept as a pointer so changeLogDirectory() can move the dump directory along with the logs.
 static google_breakpad::ExceptionHandler *DumpHandler = NULL;
 #endif
@@ -125,7 +129,7 @@ CLog* CImposterLog::operator -> ()
 	{
 		return (NLMISC::INelContext::getInstance().*_Accessor)();
 	}
-	return NULL;
+	return nullptr;
 }
 
 CImposterLog::operator CLog*()
@@ -134,7 +138,7 @@ CImposterLog::operator CLog*()
 	{
 		return (NLMISC::INelContext::getInstance().*_Accessor)();
 	}
-	return NULL;
+	return nullptr;
 }
 
 CLog &CImposterLog::operator ()()
@@ -156,13 +160,13 @@ CImposterLog	AssertLog(&INelContext::getAssertLog);
 
 
 // ***************************************************************************
-CMemDisplayer *DefaultMemDisplayer = NULL;
-CMsgBoxDisplayer *DefaultMsgBoxDisplayer = NULL;
+CMemDisplayer *DefaultMemDisplayer = nullptr;
+CMsgBoxDisplayer *DefaultMsgBoxDisplayer = nullptr;
 
-static CStdDisplayer *sd = NULL;
-static CFileDisplayer *fd = NULL;
+static CStdDisplayer *sd = nullptr;
+static CFileDisplayer *fd = nullptr;
 
-static TCrashCallback CrashCallback = NULL;
+static TCrashCallback CrashCallback = nullptr;
 
 void setCrashCallback(TCrashCallback crashCallback)
 {
@@ -191,7 +195,7 @@ void nlFatalError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -210,7 +214,7 @@ void nlError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -307,36 +311,106 @@ bool _assert_stop(bool &ignoreNextTime, sint line, const char *file, const char 
 
 #ifdef NL_OS_WINDOWS
 
+/*
+// ***************************************************************************
+static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
+{
+	IMAGEHLP_MODULE moduleInfo;
+
+	if (SymGetModuleInfo(hProcess, dwReturnAddress, &moduleInfo))
+		return moduleInfo.BaseOfImage;
+	else
+	{
+		MEMORY_BASIC_INFORMATION memoryBasicInfo;
+
+		if (::VirtualQueryEx(hProcess, (LPVOID) dwReturnAddress,
+			&memoryBasicInfo, sizeof(memoryBasicInfo)))
+		{
+			DWORD cch = 0;
+			wchar_t szFile[MAX_PATH] = { 0 };
+
+			cch = GetModuleFileNameW((HINSTANCE)memoryBasicInfo.AllocationBase,
+								 szFile, MAX_PATH);
+
+			if (cch && (lstrcmpA(szFile, "DBFN")== 0))
+			{
+				if (!SymLoadModule(hProcess,
+				   NULL, "MN",
+				   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
+				{
+					DWORD dwError = GetLastError();
+//					nlinfo("Error: %d", dwError);
+				}
+		}
+		else
+		{
+		 if (!SymLoadModule(hProcess,
+			   NULL, ((cch) ? szFile : NULL),
+			   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
+			{
+				DWORD dwError = GetLastError();
+//				nlinfo("Error: %d", dwError);
+			 }
+
+		}
+
+		 return (DWORD) memoryBasicInfo.AllocationBase;
+	  }
+//		else
+//			nlinfo("Error is %d", GetLastError());
+	}
+
+	return 0;
+}
+
+LPVOID __stdcall FunctionTableAccess (HANDLE hProcess, DWORD AddrBase)
+{
+	AddrBase = 0x40291f;
+	DWORD addr = SymGetModuleBase (hProcess, AddrBase);
+	HRESULT hr = GetLastError ();
+
+	IMAGEHLP_MODULE moduleInfo;
+	moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE);
+	SymGetModuleInfo(hProcess, addr, &moduleInfo);
+	hr = GetLastError ();
+	SymLoadModule(hProcess, NULL, NULL, NULL, 0, 0);
+	hr = GetLastError ();
+
+	LPVOID temp = SymFunctionTableAccess (hProcess, AddrBase);
+	hr = GetLastError ();
+	return temp;
+}
+*/
+
 /* can't include dbghelp.h */
 typedef struct _NEL_MINIDUMP_EXCEPTION_INFORMATION {  DWORD ThreadId;  PEXCEPTION_POINTERS ExceptionPointers;  BOOL ClientPointers;
 } NEL_MINIDUMP_EXCEPTION_INFORMATION, *PNEL_MINIDUMP_EXCEPTION_INFORMATION;
 typedef enum _NEL_MINIDUMP_TYPE
 {
-	MiniDumpNormal = 0x00000000,
-	MiniDumpWithDataSegs = 0x00000001,
-	MiniDumpWithFullMemory = 0x00000002,
-	MiniDumpWithHandleData = 0x00000004,
-	MiniDumpFilterMemory = 0x00000010,
-	MiniDumpWithUnloaded = 0x00000020,
-	MiniDumpWithIndirectlyReferencedMemory = 0x00000040,
-	MiniDumpFilterModulePaths = 0x00000080,
-	MiniDumpWithProcessThreadData = 0x00000100,
-	MiniDumpWithPrivateReadWriteMemory = 0x00000200,
-	MiniDumpWithoutOptionalData = 0x00000400,
-	MiniDumpWithFullMemoryInfo = 0x00000800,
-	MiniDumpWithThreadInfo = 0x00001000,
-	MiniDumpWithCodeSegs = 0x00002000
+  MiniDumpNormal = 0x00000000,
+  MiniDumpWithDataSegs = 0x00000001,
+  MiniDumpWithFullMemory = 0x00000002,
+  MiniDumpWithHandleData = 0x00000004,
+  MiniDumpFilterMemory = 0x00000010,
+  MiniDumpWithUnloaded = 0x00000020,
+  MiniDumpWithIndirectlyReferencedMemory = 0x00000040,
+  MiniDumpFilterModulePaths = 0x00000080,
+  MiniDumpWithProcessThreadData = 0x00000100,
+  MiniDumpWithPrivateReadWriteMemory = 0x00000200,
+  MiniDumpWithoutOptionalData = 0x00000400,
+  MiniDumpWithFullMemoryInfo = 0x00000800,
+  MiniDumpWithThreadInfo = 0x00001000,
+  MiniDumpWithCodeSegs = 0x00002000
 } NEL_MINIDUMP_TYPE;
 
+#ifdef NL_HAVE_BREAKPAD
 // Persistent handler (HANDLER_NONE: we keep our own SE translator / EDebug flow as the
 // primary crash detection, we don't let Breakpad install its own automatic filters).
 // Even with HANDLER_NONE, Breakpad unconditionally creates its own internal dedicated
 // handler thread + semaphores, used by WriteMinidumpForException() below: it captures the
 // requesting thread ID on the calling (crashed) thread, wakes its own handler thread to
 // actually write the dump there (not on the crashed thread, whose stack may be corrupted),
-// then blocks the crashed thread until done. This is exactly the dedicated-thread pattern
-// a previous version of this code hand-rolled -- using Breakpad's own tested
-// implementation instead correctly attributes the crash to the right thread.
+// then blocks the crashed thread until done.
 static google_breakpad::ExceptionHandler *DumpHandler = NULL;
 
 static void WriteMiniDumpNow()
@@ -389,6 +463,11 @@ static void ensureDumpHandler()
 
 	SetUnhandledExceptionFilter(unhandledExceptionFilter);
 
+	// Reserve stack headroom so DumpMiniDump() still has room to run
+	// if the crash being handled is itself a stack overflow
+	ULONG stackGuaranteeBytes = 64 * 1024;
+	SetThreadStackGuarantee(&stackGuaranteeBytes);
+
 	string dumpPath = getLogDirectory();
 	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
 	DumpHandler = new google_breakpad::ExceptionHandler(
@@ -399,9 +478,11 @@ static void ensureDumpHandler()
 		google_breakpad::ExceptionHandler::HANDLER_NONE
 	);
 }
+#endif // NL_HAVE_BREAKPAD
 
 static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 {
+#ifdef NL_HAVE_BREAKPAD
 	if (DumpHandler)
 	{
 		refreshDumpHandlerPath();
@@ -409,6 +490,55 @@ static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 	}
 	else
 		WriteMiniDumpNow();
+#else
+	HANDLE file = CreateFileA (NL_CRASH_DUMP_FILE, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file)
+	{
+		HMODULE hm = LoadLibraryA ("dbghelp.dll");
+		if (hm)
+		{
+			BOOL (WINAPI* MiniDumpWriteDump)(
+			  HANDLE hProcess,
+			  DWORD ProcessId,
+			  HANDLE hFile,
+			  NEL_MINIDUMP_TYPE DumpType,
+			  PNEL_MINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
+			  PNEL_MINIDUMP_EXCEPTION_INFORMATION UserStreamParam,
+			  PNEL_MINIDUMP_EXCEPTION_INFORMATION CallbackParam
+			) = NULL;
+			*(FARPROC*)&MiniDumpWriteDump = GetProcAddress(hm, "MiniDumpWriteDump");
+			if (MiniDumpWriteDump)
+			{
+				// OutputDebugString(_T("writing minidump\r\n"));
+				NEL_MINIDUMP_EXCEPTION_INFORMATION eInfo;
+				eInfo.ThreadId = GetCurrentThreadId();
+				eInfo.ExceptionPointers = excpInfo;
+				eInfo.ClientPointers = FALSE;
+
+				// note:  MiniDumpWithIndirectlyReferencedMemory does not work on Win98
+				MiniDumpWriteDump(
+					GetCurrentProcess(),
+					GetCurrentProcessId(),
+					file,
+					MiniDumpNormal,
+					excpInfo ? &eInfo : NULL,
+					NULL,
+					NULL);
+			}
+			else
+			{
+				nlwarning ("Can't get proc MiniDumpWriteDump in dbghelp.dll");
+			}
+		}
+		else
+		{
+			nlwarning ("Can't load dbghelp.dll");
+		}
+		CloseHandle (file);
+	}
+	else
+		nlwarning ("Can't create mini dump file");
+#endif
 }
 
 class EDebug : public ETrapDebug
@@ -424,8 +554,9 @@ public:
 
 	void createWhat ()
 	{
-		string shortExc, longExc;
+		string shortExc, longExc, subject;
 		string addr, ext;
+		ULONG_PTR skipNFirst = 0;
 		_Reason.clear();
 
 		if (m_pexp == NULL)
@@ -482,7 +613,10 @@ public:
 			case STATUS_ILLEGAL_VLM_REFERENCE        : shortExc="Illegal VLM Reference"; longExc.clear(); break;
 #endif
 			case 0xE06D7363                          : shortExc="Microsoft C++ Exception"; longExc="Microsoft C++ Exception"; break;	// cpp exception
-			case 0xACE0ACE                           : shortExc.clear(); longExc.clear(); break;	// just want the stack
+			case 0xACE0ACE                           : shortExc.clear(); longExc.clear();
+				if (m_pexp->ExceptionRecord->NumberParameters == 1)
+					skipNFirst = m_pexp->ExceptionRecord->ExceptionInformation [0];
+				break;	// just want the stack
 			default                                  : shortExc="Unknown Exception"; longExc="Unknown Exception "+toString("0x%X", m_pexp->ExceptionRecord->ExceptionCode); break;
 			};
 
@@ -494,12 +628,36 @@ public:
 					addr = " at <NULL>";
 			}
 
+			string progname;
+			if(!shortExc.empty() || !longExc.empty())
+			{
+				wchar_t name[1024];
+				GetModuleFileNameW (NULL, name, 1023);
+				progname = CFile::getFilename(wideToUtf8(name));
+				progname += " ";
+			}
+
+			subject = progname + shortExc + addr;
+
 			if (_Reason.empty())
 			{
 				if (!shortExc.empty()) _Reason += shortExc + " exception generated" + addr + ext + ".\n";
 				if (!longExc.empty()) _Reason += longExc + ".\n";
 			}
 
+			// display the stack
+			addStackAndLogToReason (skipNFirst);
+
+			if(!shortExc.empty() || !longExc.empty())
+			{
+				// yoyo: allow only to send the crash report once. Because users usually click ignore,
+				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
+				report(progname + shortExc, subject, _Reason, NL_CRASH_DUMP_FILE, true, !isCrashAlreadyReported(), ReportAbort);
+				// TODO: Does this need to be synchronous? Why does this not handle the report result?
+
+				// no more sent mail for crash
+				setCrashAlreadyReported(true);
+			}
 		}
 	}
 
@@ -979,7 +1137,7 @@ void getCallStack(std::string &result, sint skipNFirst)
 #elif !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 	const int MaxFrame = 64;
 	void *trace[MaxFrame];
-	char **messages = (char **)NULL;
+	char **messages = (char **)nullptr;
 	int i, trace_size = 0;
 	trace_size = backtrace(trace, MaxFrame);
 	messages = backtrace_symbols(trace, trace_size);
@@ -995,6 +1153,36 @@ void getCallStack(std::string &result, sint skipNFirst)
 void getCallStackAndLog (string &result, sint skipNFirst)
 {
 	getCallStack(result, skipNFirst);
+//#ifdef NL_OS_WINDOWS
+//	try
+//	{
+//		WORKAROUND_VCPP_SYNCHRONOUS_EXCEPTION // force to install a exception frame
+//
+//		DWORD array[1];
+//		array[0] = skipNFirst;
+//		RaiseException (0xACE0ACE, 0, 1, array);
+//	}
+//	catch (const EDebug &e)
+//	{
+//		result += e.what();
+//	}
+//#else
+//
+//	// Make place for stack frames and function names
+//	const uint MaxFrame=64;
+//	void *trace[MaxFrame];
+//	char **messages = (char **)NULL;
+//	int i, trace_size = 0;
+//
+//	trace_size = backtrace(trace, MaxFrame);
+//	messages = backtrace_symbols(trace, trace_size);
+//	result += "Dumping call stack :\n";
+//	for (i=0; i<trace_size; ++i)
+//		result += toString("%i : %s\n", i, messages[i]);
+//	// free the messages
+//	free(messages);
+//#endif
+//
 	result += "-------------------------------\n";
 	result += "\n";
 	if(DefaultMemDisplayer)
@@ -1033,7 +1221,7 @@ void getCallStackAndLog (string &result, sint skipNFirst)
 void changeLogDirectory(const std::string &dir)
 {
 	LogPath = CPath::standardizePath(dir);
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	if (DumpHandler)
 	{
 		DumpHandler->set_minidump_descriptor(google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath));
@@ -1055,19 +1243,19 @@ std::string getLogDirectory()
 // or there will be various issues when static destructors call nldebug etc...
 void destroyDebug()
 {
-	delete sd; sd = NULL;
-	delete DefaultMsgBoxDisplayer; DefaultMsgBoxDisplayer = NULL;
-	delete fd; fd = NULL;
-	delete DefaultMemDisplayer; DefaultMemDisplayer = NULL;
+	delete sd; sd = nullptr;
+	delete DefaultMsgBoxDisplayer; DefaultMsgBoxDisplayer = nullptr;
+	delete fd; fd = nullptr;
+	delete DefaultMemDisplayer; DefaultMemDisplayer = nullptr;
 	if (INelContext::isContextInitialised())
 	{
 		CLog *log;
 		INelContext &context = INelContext::getInstance();
-		log = context.getErrorLog(); context.setErrorLog(NULL); delete log; log = NULL;
-		log = context.getWarningLog(); context.setWarningLog(NULL); delete log; log = NULL;
-		log = context.getInfoLog(); context.setInfoLog(NULL); delete log; log = NULL;
-		log = context.getDebugLog(); context.setDebugLog(NULL); delete log; log = NULL;
-		log = context.getAssertLog(); context.setAssertLog(NULL); delete log; log = NULL;
+		log = context.getErrorLog(); context.setErrorLog(nullptr); delete log; log = nullptr;
+		log = context.getWarningLog(); context.setWarningLog(nullptr); delete log; log = nullptr;
+		log = context.getInfoLog(); context.setInfoLog(nullptr); delete log; log = nullptr;
+		log = context.getDebugLog(); context.setDebugLog(nullptr); delete log; log = nullptr;
+		log = context.getAssertLog(); context.setAssertLog(nullptr); delete log; log = nullptr;
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(false);
 	}
 }
@@ -1077,11 +1265,9 @@ void attachExceptionHandler()
 #ifndef NL_COMP_MINGW
 #	ifdef NL_OS_WINDOWS
 	_set_se_translator(exceptionTranslator);
-	// Reserve stack headroom so DumpMiniDump() still has room to run
-	// if the crash being handled is itself a stack overflow
-	ULONG stackGuaranteeBytes = 64 * 1024;
-	SetThreadStackGuarantee(&stackGuaranteeBytes);
+#		ifdef NL_HAVE_BREAKPAD
 	ensureDumpHandler();
+#		endif
 #	endif // NL_OS_WINDOWS
 #endif //!NL_COMP_MINGW
 }
@@ -1114,11 +1300,9 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 				_set_se_translator(exceptionTranslator);
 				SetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, "1" );
 			}
-			// Reserve stack headroom so DumpMiniDump() still has room to run
-			// if the crash being handled is itself a stack overflow
-			ULONG stackGuaranteeBytes = 64 * 1024;
-			SetThreadStackGuarantee(&stackGuaranteeBytes);
+#			ifdef NL_HAVE_BREAKPAD
 			ensureDumpHandler();
+#			endif
 		}
 #	endif // NL_OS_WINDOWS
 #endif //!NL_COMP_MINGW
@@ -1142,7 +1326,7 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		if (logInFile)
 		{
 			string fn;
-			if (logPath != NULL)
+			if (logPath != nullptr)
 			{
 				LogPath = CPath::standardizePath(logPath);
 				fn += LogPath;
@@ -1169,7 +1353,7 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 
 		initDebug2(logInFile);
 
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		if (!DumpHandler)
 		{
 			DumpHandler = new google_breakpad::ExceptionHandler(
@@ -1201,7 +1385,7 @@ void beep( uint freq, uint duration )
 
 NLMISC_SAFE_SINGLETON_IMPL(CInstanceCounterManager);
 
-CInstanceCounterLocalManager *CInstanceCounterLocalManager::_Instance = NULL;
+CInstanceCounterLocalManager *CInstanceCounterLocalManager::_Instance = nullptr;
 
 TInstanceCounterData::TInstanceCounterData(const char *className)
 :	_InstanceCounter(0),
@@ -1456,7 +1640,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayMemlog, "displays the last N line of the 
 	else if (args.size() == 1) NLMISC::fromString(args[0], nbLines);
 	else return false;
 
-	if (DefaultMemDisplayer == NULL) return false;
+	if (DefaultMemDisplayer == nullptr) return false;
 
 	deque<string>::const_iterator it;
 
@@ -1689,6 +1873,7 @@ NLMISC_CATEGORISED_COMMAND(nel, readaccess, "read a uint8 value in an invalid ad
 
 #endif // FINAL_VERSION
 
+#ifdef NL_HAVE_BREAKPAD
 // Always available, even in FINAL_VERSION: crash-dump handler self-tests.
 NLMISC_CATEGORISED_COMMAND(nel, crashtest, "generate a real crash, to test that the minidump/crash handler produces a single clean report", "")
 {
@@ -1720,5 +1905,6 @@ NLMISC_CATEGORISED_COMMAND(nel, crashtestreal, "generate a real crash on its own
 #endif
 	return true;
 }
+#endif // NL_HAVE_BREAKPAD
 
 } // NLMISC

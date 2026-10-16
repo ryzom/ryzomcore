@@ -62,7 +62,7 @@ public:
 	CWaterModel();
 
 	// dtor
-	~CWaterModel();
+	~CWaterModel() NL_OVERRIDE;
 
 	// to call the first time after the shape & the matrix  has been set
 	void init()
@@ -75,7 +75,7 @@ public:
 	static CTransform *creator() { return new CWaterModel; }
 
 	// get default tracks
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 
 	/// inherited from UWaterInstance
 	virtual uint32	getWaterHeightMapID() const;
@@ -91,8 +91,8 @@ public:
 
 	/// \name CTransform traverse specialisation
 	// @{
-	virtual void	traverseRender();
-	virtual	bool	clip();
+	virtual void	traverseRender() NL_OVERRIDE;
+	virtual	bool	clip() NL_OVERRIDE;
 	// @}
 
 	// get num wanted vertices for current frame (& precache clipped triangles)
@@ -178,7 +178,7 @@ class CWaveMakerModel : public CTransformShape
 	static CTransform *creator() { return new CWaveMakerModel; }
 
 	// get default tracks
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 
 	/// \name CTransform traverse specialisation
 	// @{
@@ -186,7 +186,7 @@ class CWaveMakerModel : public CTransformShape
 	 *  - call CTransformShape::traverseAnimDetail()
 	 *  - perform perturbation
 	 */
-	virtual void	traverseAnimDetail();
+	virtual void	traverseAnimDetail() NL_OVERRIDE;
 	// @}
 
 protected:

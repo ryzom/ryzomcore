@@ -63,7 +63,7 @@ CAnimationSet::CAnimationSet()
 	_RunDist		= 0.0;
 	_WalkLength		= 0.0;
 	_RunLength		= 0.0;
-	_Sheet = NULL;
+	_Sheet = nullptr;
 
 }// CAnimationSet //
 
@@ -178,7 +178,7 @@ void CAnimationSet::init(CAnimationSetSheet *sheet, NL3D::UAnimationSet *animati
 //-----------------------------------------------
 CAnimationState *CAnimationSet::getAnimationStateByIndex(uint index)
 {
-	if (index >= _AnimationStates.size()) return NULL;
+	if (index >= _AnimationStates.size()) return nullptr;
 	return &_AnimationStates[index];
 
 }// getAnimationStateByIndex //

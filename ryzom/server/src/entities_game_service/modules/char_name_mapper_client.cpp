@@ -72,7 +72,7 @@ public:
 		CCharNameMapperClientSkel::init(this);
 	}
 
-	void onModuleUp(IModuleProxy *module)
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module->getModuleClassName() == "CharNameMapper")
 		{
@@ -89,7 +89,7 @@ public:
 		}
 	}
 
-	void onModuleDown(IModuleProxy *module)
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module == _CharNameMapper)
 		{
@@ -98,7 +98,7 @@ public:
 		}
 	}
 
-	void onModuleUpdate()
+	void onModuleUpdate() NL_OVERRIDE
 	{
 		H_AUTO(CCharNameMapperClient_onModuleUpdate);
 
@@ -129,7 +129,7 @@ public:
 	// Virtual from ICharNameMapperClient
 	///////////////////////////////////////////////////////////////////////////
 
-	virtual void mapCharacterName(const NLMISC::CEntityId &charEid, const ucstring &charName)
+	virtual void mapCharacterName(const NLMISC::CEntityId &charEid, const ucstring &charName) NL_OVERRIDE
 	{
 		_PendingCharNames.push_back(TPendingCharName());
 
@@ -144,7 +144,7 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 
 	// 
-	virtual void charNamesMapped(NLNET::IModuleProxy *sender, const std::vector < TCharMappedInfo > &charMappedInfos)
+	virtual void charNamesMapped(NLNET::IModuleProxy *sender, const std::vector < TCharMappedInfo > &charMappedInfos) NL_OVERRIDE
 	{
 		nldebug("Receveived %u mapped names from IOS", charMappedInfos.size());
 

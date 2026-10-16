@@ -41,14 +41,14 @@ public:
 	struct	CSheetChildPhrase : public CDBGroupListSheetText::CSheetChild
 	{
 		CSheetChildPhrase();
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
-		virtual void update(CDBGroupListSheetText *pFather);
-		virtual void updateViewText(CDBGroupListSheetText *pFather);
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText *pFather) NL_OVERRIDE;
 
 		sint32		CacheVersion;
 	};
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildPhrase; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildPhrase; }
 
 };
 

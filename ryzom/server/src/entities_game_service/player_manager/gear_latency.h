@@ -35,8 +35,6 @@ class CGearLatency
 {
 	NL_INSTANCE_COUNTER_DECL(CGearLatency);
 public:
-
-
 	CGearLatency();
 
 	/// update latencies
@@ -89,7 +87,7 @@ private:
 	};
 
 	/// list of affected slots, sorted by increasing latency end dates
-	std::list<CGearSlot>	_GearLatencies;
+	std::list<CGearSlot>	_GearLatencies;	
 	NLMISC::TGameCycle	_LastLatencyUpdate;
 	NLMISC::TGameCycle	_MaxEquipTime;
 };

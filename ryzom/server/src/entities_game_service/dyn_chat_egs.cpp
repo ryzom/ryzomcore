@@ -62,7 +62,7 @@ void CDynChatEGS::init()
 	};
 
 	CUnifiedNetwork::getInstance()->addCallbackArray( _cbArray, sizeof(_cbArray) / sizeof(_cbArray[0]) );
-
+	
 }
 
 
@@ -114,7 +114,7 @@ TChanID CDynChatEGS::addChan(const std::string &name, const ucstring &title, boo
 		_DynChat.getChan(_NextChanID)->Title = title;
 		_ChanNames.add(_NextChanID, name);
 		_NextChanID.setShortId(_NextChanID.getShortId()+1);
-		if (_NextChanID == DYN_CHAT_INVALID_CHAN)
+		if (_NextChanID == DYN_CHAT_INVALID_CHAN) 
 			_NextChanID.setShortId(_NextChanID.getShortId()+1);
 		return result;
 	}
@@ -157,7 +157,7 @@ uint CDynChatEGS::getSessionCount(TChanID chanID)
 
 //============================================================================================================
 bool CDynChatEGS::removeChan(TChanID chanID)
-{
+{		
 	// remove channel from all clients database
 	CDynChatChan *chan = _DynChat.getChan(chanID);
 	if (!chan) return false;
@@ -167,7 +167,7 @@ bool CDynChatEGS::removeChan(TChanID chanID)
 		CEntityBase *eb = CEntityBaseManager::getEntityBasePtr(currSession->getClient()->getID());
 		CCharacter *ch = dynamic_cast<CCharacter *>(eb);
 		if (ch)
-		{
+		{		
 			ch->removeDynChatChan(chanID);
 		}
 		currSession = currSession->getNextChannelSession();
@@ -205,13 +205,13 @@ bool CDynChatEGS::removeClient(const TDataSetRow &client)
 bool CDynChatEGS::addSession(TChanID chan, const TDataSetRow &client, bool writeRight)
 {
 	CEntityBase *eb = CEntityBaseManager::getEntityBasePtr(client);
-	if (!eb)
+	if (!eb) 
 	{
 		return false;
 	}
 	CDynChatSession *session = _DynChat.addSession(chan, client);
 	if (!session)
-	{
+	{ 
 		nlwarning("error adding session for %s client!",client.toString().c_str());
 		return false;
 	}
@@ -220,7 +220,7 @@ bool CDynChatEGS::addSession(TChanID chan, const TDataSetRow &client, bool write
 	if (chanName)
 	{
 		if (!session->getChan()->Localized)
-		{
+		{			
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 			params[0].Literal= session->getChan()->Title;
 			session->StringID = STRING_MANAGER::sendStringToClient(client, "LITERAL", params);
@@ -228,16 +228,16 @@ bool CDynChatEGS::addSession(TChanID chan, const TDataSetRow &client, bool write
 		else
 		{
 			TVectorParamCheck params;
-			// send name of channel to client
+			// send name of channel to client			
 			session->StringID = STRING_MANAGER::sendStringToClient(client, chanName->c_str(), params);
 		}
 	}
 	session->WriteRight = writeRight;
-	// add session in character
+	// add session in character	
 	CCharacter *ch = dynamic_cast<CCharacter *>(eb);
 	if (ch)
-	{
-		ch->setDynChatChan(chan, session->StringID, writeRight);
+	{		
+		ch->setDynChatChan(chan, session->StringID, writeRight);	
 	}
 	return true;
 }
@@ -249,10 +249,10 @@ bool CDynChatEGS::removeSession(TChanID chan,const TDataSetRow &client)
 	if (!eb) return false;
 	if (!_DynChat.removeSession(chan, client)) return false;
 	iosRemoveSession(chan, client);
-	// add session in character
+	// add session in character	
 	CCharacter *ch = dynamic_cast<CCharacter *>(eb);
 	if (ch)
-	{
+	{		
 		ch->removeDynChatChan(chan);
 	}
 	return true;
@@ -262,8 +262,8 @@ bool CDynChatEGS::removeSession(TChanID chan,const TDataSetRow &client)
 bool CDynChatEGS::getPlayersInChan(TChanID chanID, std::vector<NLMISC::CEntityId> &players)
 {
 	CDynChatChan *chan = _DynChat.getChan(chanID);
-	if (!chan) return false;
-
+	if (!chan) return false;	
+		
 	CDynChatSession *currSession = chan->getFirstSession();
 	bool havePlayers = false;
 	while (currSession)
@@ -280,7 +280,7 @@ bool CDynChatEGS::getPlayersInChan(TChanID chanID, std::vector<NLMISC::CEntityId
 void CDynChatEGS::iosSetHistoricSize(TChanID chan, uint32 size)
 {
 	CMessage msg("DYN_CHAT:SET_HISTORIC_SIZE");
-	msg.serial(chan);
+	msg.serial(chan);	
 	msg.serial(size);
 	sendMessageViaMirror( "IOS", msg);
 }
@@ -289,7 +289,7 @@ void CDynChatEGS::iosSetHistoricSize(TChanID chan, uint32 size)
 void CDynChatEGS::setHistoricSize(TChanID chanID, uint32 size)
 {
 	CDynChatChan *chan = _DynChat.getChan(chanID);
-	if (!chan) return;
+	if (!chan) return;	
 	chan->HistoricSize = size;
 	iosSetHistoricSize(chanID, size);
 }
@@ -303,11 +303,11 @@ bool CDynChatEGS::setWriteRight(TChanID chan, const TDataSetRow &client, bool wr
 	if (!session) return false;
 	if (writeRight == session->WriteRight) return true; // already good value
 	session->WriteRight = writeRight;
-	iosSetReadOnlyFlag(chan, client, writeRight);
+	iosSetReadOnlyFlag(chan, client, writeRight);	
 	CCharacter *ch = dynamic_cast<CCharacter *>(eb);
 	if (ch)
-	{
-		ch->setDynChatChan(chan, session->StringID, writeRight);
+	{		
+		ch->setDynChatChan(chan, session->StringID, writeRight);	
 	}
 	return true;
 }
@@ -316,12 +316,12 @@ bool CDynChatEGS::setWriteRight(TChanID chan, const TDataSetRow &client, bool wr
 //============================================================================================================
 bool CDynChatEGS::setHideBubble(TChanID chanID, bool hideBubble)
 {
-
+	
 	CDynChatChan *chan = _DynChat.getChan(chanID);
 	if (!chan) return false;
 	if (hideBubble == chan->HideBubble) return true; // already good value
 	chan->HideBubble = hideBubble;
-	iosSetHideBubble(chanID, hideBubble);
+	iosSetHideBubble(chanID, hideBubble);		
 	return true;
 }
 
@@ -355,11 +355,11 @@ void CDynChatEGS::cbServiceAddChan(NLNET::CMessage& msgin, const std::string &se
 //============================================================================================================
 void CDynChatEGS::cbServiceSetHideBubble(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	TChanID		chan;
+	TChanID		chan;	
 	bool		hideBubble;
-
+	
 	msgin.serial(chan);
-	msgin.serial(hideBubble);
+	msgin.serial(hideBubble);		
 	DynChatEGS.setHideBubble(chan, hideBubble);
 }
 //============================================================================================================
@@ -478,7 +478,7 @@ void CDynChatEGS::onServiceDown(NLNET::TServiceId serviceId)
 void CDynChatEGS::iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify, const std::string &name)
 {
 	CMessage msg("DYN_CHAT:ADD_CHAN");
-	msg.serial(chan);
+	msg.serial(chan);	
 	msg.serial(noBroadcast);
 	msg.serial(forwardPlayerInputs);
 	msg.serial(unify);
@@ -491,9 +491,9 @@ void CDynChatEGS::iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerI
 
 //============================================================================================================
 void CDynChatEGS::iosRemoveChan(TChanID chan)
-{
+{	
 	CMessage msg("DYN_CHAT:REMOVE_CHAN");
-	msg.serial(chan);
+	msg.serial(chan);	
 	sendMessageViaMirror( "IOS", msg);
 }
 
@@ -501,7 +501,7 @@ void CDynChatEGS::iosRemoveChan(TChanID chan)
 void CDynChatEGS::iosAddSession(TChanID chan, const TDataSetRow &client, bool writeRight)
 {
 	CMessage msg("DYN_CHAT:ADD_SESSION");
-	msg.serial(chan);
+	msg.serial(chan);	
 	serialDSR(msg, client);
 	msg.serial(writeRight);
 	sendMessageViaMirror( "IOS", msg);
@@ -511,8 +511,8 @@ void CDynChatEGS::iosAddSession(TChanID chan, const TDataSetRow &client, bool wr
 void CDynChatEGS::iosSetHideBubble(TChanID chan, bool hideBubble)
 {
 	CMessage msg("DYN_CHAT:SET_HIDE_BUBBLE");
-	msg.serial(chan);
-	msg.serial(hideBubble);
+	msg.serial(chan);	
+	msg.serial(hideBubble);		
 	sendMessageViaMirror( "IOS", msg);
 }
 
@@ -547,7 +547,7 @@ void CDynChatEGS::iosSetReadOnlyFlag(TChanID chan, const TDataSetRow &client, bo
 //============================================================================================================
 void CDynChatEGS::iosResetDynChat()
 {
-	CMessage msg("DYN_CHAT:RESET");
+	CMessage msg("DYN_CHAT:RESET");	
 	sendMessageViaMirror( "IOS", msg);
 }
 
@@ -561,7 +561,7 @@ void CDynChatEGS::iosConnection()
 	CDynChat::TChanPtrVector chans;
 	_DynChat.getChans(chans);
 	for(uint k = 0; k < chans.size(); ++k)
-	{
+	{			
 		iosAddChan(chans[k]->getID(), chans[k]->getDontBroadcastPlayerInputs(), chans[k]->getForwardPlayerIntputToOwnerService(), chans[k]->getUnifiedChannel(), getChanNameFromID(chans[k]->getID()));
 		// add each session in the channel
 		CDynChatSession *currSession = chans[k]->getFirstSession();

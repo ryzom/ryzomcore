@@ -12,12 +12,10 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common)
 
 SET(RZ_SERVER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/server/src)
 
-ADD_SUBDIRECTORY(common)
-
-IF(WITH_RYZOM_GAMESHARE)
-  # add target alias
-  SET(RYZOM_GAMESHARE_LIBRARIES ryzom_gameshare)
-ENDIF()
+if(WITH_RYZOM_XSLT)
+  find_package(LibXslt REQUIRED COMPONENTS xsltproc)
+  include(../cmake/add_module_interface.cmake)
+endif()
 
 IF(WITH_RYZOM_CLIENT)
   # Always out of date: refreshes ryzom_build_info.h (used by user_agent.cpp) on every build
@@ -27,6 +25,7 @@ IF(WITH_RYZOM_CLIENT)
     VERBATIM)
 ENDIF()
 
+ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(client)
 
@@ -36,6 +35,8 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
   FIND_PACKAGE(MySQL)
   IF(MYSQL_FOUND)
     ADD_SUBDIRECTORY(server)
+  ELSE ()
+    message(WARNING Server dependencies are not build due to missing MySQL package)
   ENDIF()
 ENDIF()
 

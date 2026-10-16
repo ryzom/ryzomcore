@@ -327,7 +327,6 @@ CClientConfig::CClientConfig()
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
-
 	QuicConnection		= true;
 	QuicCertValidation	= true;
 
@@ -441,15 +440,15 @@ CClientConfig::CClientConfig()
 	PatchletUrl.clear();
 	PatchVersion.clear();
 
-	WebIgMainDomain.clear();
-	WebIgTrustedDomains.clear();
+	WebIgMainDomain = RYZOM_WEBIG_MAIN_URL;						// https://open.ryzom.dev/"
+	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
 
-	RingReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_RING_URL;
-	ReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_URL;
+	RingReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
+	ReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
 
 
 	///////////////
@@ -735,7 +734,7 @@ CClientConfig::CClientConfig()
 
 	R2EDLoadDynamicFeatures	= 0;
 
-	CheckR2ScenarioMD5 = false;
+	CheckR2ScenarioMD5 = true;
 
 	DisplayTPReason = false;
 
@@ -776,7 +775,7 @@ void CClientConfig::setValuesOnFileChange()
 //---------------------------------------------------
 void CClientConfig::setValues()
 {
-	CConfigFile::CVar *varPtr = 0;
+	CConfigFile::CVar *varPtr = nullptr;
 	static bool	firstTimeSetValues= true;
 
 	//////////////////////
@@ -818,7 +817,6 @@ void CClientConfig::setValues()
 
 	// r2ed interfaces
 	READ_STRINGVECTOR_FV(XMLR2EDInterfaceFiles);
-
 	READ_STRINGVECTOR_FV(UiFeatureFlags)
 
 	// logos
@@ -935,21 +933,21 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(QuicCertValidation)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
-
-
+	
+	
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ForgetPwdURL)
-
+	
 	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
 
 	// defined in client_default.cfg
 	READ_STRING_FV(LoginSupportURL)
-
+	
 	// read NamingPolicyURL from client_default.cfg
 	//READ_STRING_FV(NamingPolicyURL)
-
+	
 	std::string languageCo = "wk";
 	CConfigFile::CVar *languageCodeVarPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
 
@@ -979,7 +977,7 @@ void CClientConfig::setValues()
 			}
 		}
 	}
-
+	
 	// read NamingPolicyURL from client_default.cfg
 	//READ_STRING_FV(ConditionsTermsURL)
 	CConfigFile::CVar *coturl = ClientCfg.ConfigFile.getVarPtr("ConditionsTermsURL");
@@ -989,7 +987,7 @@ void CClientConfig::setValues()
 		for (uint i = 0; i < coturl->size(); ++i)
 		{
 			std::string entry = coturl->asString(i);
-
+			
 			if (entry.size() >= languageCo.size())
 			{
 				if (nlstricmp(entry.substr(0, languageCo.size()), languageCo) == 0)
@@ -1004,7 +1002,7 @@ void CClientConfig::setValues()
 			}
 		}
 	}
-
+	
 
 #ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch
@@ -1191,8 +1189,8 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ReleaseNotePath)
 #endif
 
-	/////////////////////////////
-	// GARBAGE PATCHLET SYSTEM //
+	/////////////////////////
+	// NEW PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
 
 	///////////
@@ -1328,6 +1326,7 @@ void CClientConfig::setValues()
 	if (varPtr)
 	{
 		if (nlstricmp(varPtr->asString(), "Auto") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvAuto;
+		else if (nlstricmp(varPtr->asString(), "FMod") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvFMod;
 		else if (nlstricmp(varPtr->asString(), "OpenAL") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvOpenAL;
 		else if (nlstricmp(varPtr->asString(), "DirectSound") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvDirectSound;
 		else if (nlstricmp(varPtr->asString(), "XAudio2") == 0) ClientCfg.DriverSound = CClientConfig::SoundDrvXAudio2;
@@ -2101,7 +2100,7 @@ void CClientConfig::init(const string &configFileName)
 		// create the basic .cfg
 		FILE *fp = nlfopen(configFileName, "w");
 
-		if (fp == NULL)
+		if (fp == nullptr)
 			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
 		else
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
@@ -2160,39 +2159,37 @@ void CClientConfig::init(const string &configFileName)
 	// load the config files
 	ClientCfg.ConfigFile.load (configFileName);
 
-	CConfigFile::CVar *varPtr;
+	CConfigFile::CVar *pCV;
 	// check language code is supported
-	varPtr = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
-	if (varPtr)
+	pCV = ClientCfg.ConfigFile.getVarPtr("LanguageCode");
+	if (pCV)
 	{
-		std::string lang = varPtr->asString();
+		std::string lang = pCV->asString();
 		if (!CI18N::isLanguageCodeSupported(lang))
 		{
 			nlinfo("Unsupported language code \"%s\" fallback on default", lang.c_str());
 			// fallback to default language
 			ClientCfg.LanguageCode = CI18N::getSystemLanguageCode();
 			// update ConfigFile variable
-			varPtr->setAsString(ClientCfg.LanguageCode);
+			pCV->setAsString(ClientCfg.LanguageCode);
 			ClientCfg.ConfigFile.save();
 		}
 	}
 
 	// update the ConfigFile variable in the config file
-	varPtr = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
-	if (varPtr)
+	pCV = ClientCfg.ConfigFile.getVarPtr("ClientVersion");
+	if (pCV)
 	{
-		std::string str = varPtr->asString ();
+		std::string str = pCV->asString ();
 		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
 			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
-			varPtr->setAsString(getVersion());
+			pCV->setAsString(getVersion());
 			ClientCfg.ConfigFile.save();
 		}
 	}
 	else
-	{
 		nlwarning ("There's no ClientVersion variable in the config file!");
-	}
 
 }// init //
 
@@ -2209,7 +2206,7 @@ void CClientConfig::release ()
 		// Save values
 		try
 		{
-			CConfigFile::CVar *varPtr = NULL;
+			CConfigFile::CVar *varPtr = nullptr;
 
 			// Driver still alive ?
 			if (Driver && Driver->isActive ())

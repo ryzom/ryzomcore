@@ -59,31 +59,31 @@ public:
 	CFileContainer()
 	{
 		_MemoryCompressed = false;
-		_AllFileNames = NULL;
+		_AllFileNames = nullptr;
 	}
 
 	~CFileContainer();
 
 
-	void			addSearchPath (const std::string &path, bool recurse, bool alternative, class IProgressCallback *progressCallBack = NULL);
+	void			addSearchPath (const std::string &path, bool recurse, bool alternative, class IProgressCallback *progressCallBack = nullptr);
 
 	/** Used only for compatibility with the old CPath. In this case, we don't use the map to have the same behavior as the old CPath */
-	void			addSearchPath (const std::string &path) { addSearchPath (path, false, true, NULL); }
+	void			addSearchPath (const std::string &path) { addSearchPath (path, false, true, nullptr); }
 
 	/** Same as AddSearchPath but with a file "c:/autoexec.bat" this file only will included. wildwards *doesn't* work */
-	void			addSearchFile (const std::string &file, bool remap = false, const std::string &virtual_ext = "", class NLMISC::IProgressCallback *progressCallBack = NULL);
+	void			addSearchFile (const std::string &file, bool remap = false, const std::string &virtual_ext = "", class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Same as AddSearchPath but with a path file "c:/test.pth" all files name contain in this file will be included (the extention is used to know that it's a path file) */
 	void			addSearchListFile (const std::string &filename, bool recurse, bool alternative);
 
 	/** Same as AddSearchPath but with a big file "c:/test.nbf" all files name contained in the big file will be included  (the extention (Nel Big File) is used to know that it's a big file) */
-	void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = nullptr);
 	
 	/** Sale but for .snp (Streamed NeL Package) */
-	void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Same as AddSearchPath but with a xml pack file "c:/test.xml_pack" all files name contained in the xml pack will be included   */
-	void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Remove all search path contains in the alternative directories */
 	void			removeAllAlternativeSearchPath ();
@@ -177,7 +177,7 @@ public:
 	 *  \param progressCallBack is a progression callback interface pointer.
 	 *  \param showEverything false skips *.log files and CVS directories
 	 */
-	void			getPathContent (const std::string &path, bool recurse, bool wantDir, bool wantFile, std::vector<std::string> &result, class IProgressCallback *progressCallBack = NULL, bool showEverything=false);
+	void			getPathContent (const std::string &path, bool recurse, bool wantDir, bool wantFile, std::vector<std::string> &result, class IProgressCallback *progressCallBack = nullptr, bool showEverything=false);
 
 	/** Get the full path based on a file/path and the current directory. Example, imagine that the current path is c:\temp and toto is a directory
 	 * getFullPath ("toto") returns "c:/temp/toto/"
@@ -364,25 +364,25 @@ public:
 	 * \param Alternative true if you want to add the path in the Alternative directories.
 	 * \param progressCallBack is a progression callback interface pointer.
 	 */
-	static void			addSearchPath (const std::string &path, bool recurse, bool alternative, class IProgressCallback *progressCallBack = NULL);
+	static void			addSearchPath (const std::string &path, bool recurse, bool alternative, class IProgressCallback *progressCallBack = nullptr);
 
 	/** Used only for compatibility with the old CPath. In this case, we don't use the map to have the same behavior as the old CPath */
-	static void			addSearchPath (const std::string &path) { addSearchPath (path, false, true, NULL); }
+	static void			addSearchPath (const std::string &path) { addSearchPath (path, false, true, nullptr); }
 
 	/** Same as AddSearchPath but with a file "c:/autoexec.bat" this file only will included. wildwards *doesn't* work */
-	static void			addSearchFile (const std::string &file, bool remap = false, const std::string &virtual_ext = "", class NLMISC::IProgressCallback *progressCallBack = NULL);
+	static void			addSearchFile (const std::string &file, bool remap = false, const std::string &virtual_ext = "", class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Same as AddSearchPath but with a path file "c:/test.pth" all files name contain in this file will be included (the extention is used to know that it's a path file) */
 	static void			addSearchListFile (const std::string &filename, bool recurse, bool alternative);
 
 	/** Same as AddSearchPath but with a big file "c:/test.nbf" all files name contained in the big file will be included  (the extention (Nel Big File) is used to know that it's a big file) */
-	static void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	static void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Same but Streamed Package */
-	static void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	static void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Same as AddSearchPath but with a xml pack file "c:/test.xml_pack" all files name contained in the xml pack will be included   */
-	static void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	static void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Remove all search path contains in the alternative directories */
 	static void			removeAllAlternativeSearchPath ();
@@ -476,7 +476,7 @@ public:
 	 *  \param progressCallBack is a progression callback interface pointer.
 	 *  \param showEverything false skips *.log files and CVS directories
 	 */
-	static void			getPathContent (const std::string &path, bool recurse, bool wantDir, bool wantFile, std::vector<std::string> &result, class IProgressCallback *progressCallBack = NULL, bool showEverything=false);
+	static void			getPathContent (const std::string &path, bool recurse, bool wantDir, bool wantFile, std::vector<std::string> &result, class IProgressCallback *progressCallBack = nullptr, bool showEverything=false);
 
 	/** Get the full path based on a file/path and the current directory. Example, imagine that the current path is c:\temp and toto is a directory
 	 * getFullPath ("toto") returns "c:/temp/toto/"
@@ -702,7 +702,7 @@ struct CFile
 	  * \param failIfExists If the destination file exists, nothing is done, and it returns false.
 	  * \return true if the copy succeeded
 	  */
-	static bool copyFile(const std::string &dest, const std::string &src, bool failIfExists = false, class IProgressCallback *progress = NULL);
+	static bool copyFile(const std::string &dest, const std::string &src, bool failIfExists = false, class IProgressCallback *progress = nullptr);
 
 	/** Compare 2 files
 	  * \return true if both files exist and the files have same timestamp and size

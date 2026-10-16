@@ -126,7 +126,7 @@ void		CMeshMRMGeom::CLod::buildSkinVertexBlocks()
 	}
 
 	// For all vertices, test if they are used, and build the according SkinVertexBlocks;
-	CVertexBlock	*vBlock= NULL;
+	CVertexBlock	*vBlock = nullptr;
 	for(i=0; i<vertexMap.size();i++)
 	{
 		if(vertexMap[i])
@@ -149,7 +149,7 @@ void		CMeshMRMGeom::CLod::buildSkinVertexBlocks()
 		else
 		{
 			// Finish the preceding block (if any).
-			vBlock= NULL;
+			vBlock = nullptr;
 		}
 	}
 
@@ -467,7 +467,7 @@ void	CMeshMRMGeom::applyMaterialRemap(const std::vector<sint> &remap)
 // ***************************************************************************
 void	CMeshMRMGeom::applyGeomorph(std::vector<CMRMWedgeGeom>  &geoms, float alphaLod)
 {
-	applyGeomorphWithVBHardPtr(geoms, alphaLod, NULL);
+	applyGeomorphWithVBHardPtr(geoms, alphaLod, nullptr);
 }
 
 
@@ -496,7 +496,7 @@ void	CMeshMRMGeom::applyGeomorphWithVBHardPtr(std::vector<CMRMWedgeGeom>  &geoms
 
 
 	// If VBuffer Hard disabled
-	if(vertexDestPtr==NULL)
+	if(vertexDestPtr == nullptr)
 	{
 		// write into vertexPtr.
 		vertexDestPtr= vertexPtr;
@@ -1002,8 +1002,8 @@ void	CMeshMRMGeom::render(IDriver *drv, CTransformShape *trans, float polygonCou
 			}
 		}
 
-		drv->bindUniformBuffer(UBBindingVertexProgram, NULL);
-		drv->activeVertexProgram(NULL);
+		drv->bindUniformBuffer(UBBindingVertexProgram, nullptr);
+		drv->activeVertexProgram(nullptr);
 		drv->forceNormalize(bkupNorm);
 		return;
 	}
@@ -1041,7 +1041,7 @@ void	CMeshMRMGeom::render(IDriver *drv, CTransformShape *trans, float polygonCou
 								 useTangentSpace,
 								 &_OriginalSkinVertices,
 								 &_OriginalSkinNormals,
-								 useTangentSpace ? &_OriginalTGSpace : NULL,
+								 useTangentSpace ? &_OriginalTGSpace : nullptr,
 								 false );
 			_MeshMorpher.updateSkinned (mi->getBlendShapeFactors());
 		}
@@ -1087,7 +1087,7 @@ void	CMeshMRMGeom::render(IDriver *drv, CTransformShape *trans, float polygonCou
 	//===========
 
 	// use MeshVertexProgram effect?
-	bool	useMeshVP= _MeshVertexProgram != NULL;
+	bool	useMeshVP= _MeshVertexProgram != nullptr;
 	if( useMeshVP )
 	{
 		CMatrix		invertedObjectMatrix;
@@ -1246,7 +1246,7 @@ void	CMeshMRMGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 							 useTangentSpace,
 							 &_OriginalSkinVertices,
 							 &_OriginalSkinNormals,
-							 useTangentSpace ? &_OriginalTGSpace : NULL,
+							 useTangentSpace ? &_OriginalTGSpace : nullptr,
 							 true );
 		_MeshMorpher.updateSkinned (mi->getBlendShapeFactors());
 	}
@@ -1304,7 +1304,7 @@ void	CMeshMRMGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	//===========
 
 	// use MeshVertexProgram effect?
-	bool	useMeshVP= _MeshVertexProgram != NULL;
+	bool	useMeshVP= _MeshVertexProgram != nullptr;
 	if( useMeshVP )
 	{
 		CMatrix		invertedObjectMatrix;
@@ -1731,14 +1731,14 @@ sint	CMeshMRMGeom::loadHeader(NLMISC::IStream &f)
 	// Mesh Vertex Program.
 	if (ver >= 2)
 	{
-		IMeshVertexProgram	*mvp= NULL;
+		IMeshVertexProgram	*mvp = nullptr;
 		f.serialPolyPtr(mvp);
 		_MeshVertexProgram= mvp;
 	}
 	else
 	{
 		// release vp
-		_MeshVertexProgram= NULL;
+		_MeshVertexProgram = nullptr;
 	}
 
 	// blend shapes
@@ -1886,7 +1886,7 @@ void	CMeshMRMGeom::save(NLMISC::IStream &f)
 	// Mesh Vertex Program.
 	if (ver >= 2)
 	{
-		IMeshVertexProgram	*mvp= NULL;
+		IMeshVertexProgram	*mvp = nullptr;
 		mvp= _MeshVertexProgram;
 		f.serialPolyPtr(mvp);
 	}
@@ -2225,7 +2225,7 @@ void	CMeshMRMGeom::restoreOriginalSkinPart(CLod &lod)
 
 	// compute src array.
 	CVector				*srcVertexPtr;
-	CVector				*srcNormalPtr= NULL;
+	CVector				*srcNormalPtr = nullptr;
 	srcVertexPtr= &_OriginalSkinVertices[0];
 	if(normalOff)
 		srcNormalPtr= &(_OriginalSkinNormals[0]);
@@ -2539,7 +2539,7 @@ void	CMeshMRMGeom::compileRunTime()
 	_SupportMeshBlockRendering= !_Skinned && _MeshMorpher.BlendShapes.empty();
 
 	// \todo yoyo: support later MeshVertexProgram
-	_SupportMeshBlockRendering= _SupportMeshBlockRendering && _MeshVertexProgram==NULL;
+	_SupportMeshBlockRendering= _SupportMeshBlockRendering && _MeshVertexProgram == nullptr;
 }
 
 
@@ -3249,7 +3249,7 @@ void CMeshMRMGeom::renderGPUSkin(CMeshMRMInstance *mi, float alphaMRM, CSkeleton
 	}
 
 	// Unbind UBO
-	drv->bindUniformBuffer(UBBindingVertexProgram, NULL);
+	drv->bindUniformBuffer(UBBindingVertexProgram, nullptr);
 }
 
 
@@ -3406,7 +3406,7 @@ IMeshGeom	*CMeshMRM::supportMeshBlockRendering (CTransformShape *trans, float &p
 		return (IMeshGeom*)&_MeshMRMGeom;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
@@ -3777,7 +3777,7 @@ void		CMeshMRMGeom::updateRawSkinNormal(bool enabled, CMeshMRMInstance *mi, sint
 						};
 					}
 					else
-						skinLod.VertexRemap[i]= NULL;
+						skinLod.VertexRemap[i] = nullptr;
 				}
 			}
 		}

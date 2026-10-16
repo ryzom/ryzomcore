@@ -102,7 +102,7 @@ IAnimatedValue* CAnimatedLightmap::getValue (uint valueId)
 
 	// should not be here!!
 	nlstop;
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 const char *CAnimatedLightmap::getValueName (uint valueId) const
@@ -128,7 +128,7 @@ ITrack*	CAnimatedLightmap::getDefaultTrack (uint valueId)
 
 	// should not be here!!
 	nlstop;
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 void	CAnimatedLightmap::registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix)

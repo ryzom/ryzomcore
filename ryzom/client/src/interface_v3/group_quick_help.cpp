@@ -386,7 +386,7 @@ void CGroupQuickHelp::activateCurrentStep ()
 
 			// A link to follow ?
 			if (!step.URL.empty())
-				CAHManager::getInstance()->runActionHandler("browse", NULL, "url="+step.URL);
+				CAHManager::getInstance()->runActionHandler("browse", nullptr, "url="+step.URL);
 
 			// Test a skip condition
 			if (!step.Condition.empty() && evalExpression (step.Condition))
@@ -417,7 +417,7 @@ bool CGroupQuickHelp::evalExpression (const std::string &condition)
  */
 class CHandlerSubmitQuickHelp : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId("ui:interface:quick_help:content:html");
 		if (element)
@@ -451,7 +451,7 @@ REGISTER_ACTION_HANDLER( CHandlerSubmitQuickHelp, "submit_quick_help");
  */
 class CHandlerRunQuickHelp : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 

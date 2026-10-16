@@ -51,42 +51,42 @@ public:
 	// ctor
 	CDisplayerVisualEntity();
 	// dtor
-	~CDisplayerVisualEntity();
+	~CDisplayerVisualEntity() NL_OVERRIDE;
 
 	////////////
 	// EVENTS //
 	////////////
-	virtual void onPreRender();
-	virtual void onPostRender();
-	virtual void onAttrModified(const std::string &name, sint32 index);
-	virtual void onSelect(bool selected);
-	virtual void onPostHrcMove();
-	virtual void onFocus(bool focused);
-	virtual void onCreate();
-	virtual void onPostCreate();
+	virtual void onPreRender() NL_OVERRIDE;
+	virtual void onPostRender() NL_OVERRIDE;
+	virtual void onAttrModified(const std::string &name, sint32 index) NL_OVERRIDE;
+	virtual void onSelect(bool selected) NL_OVERRIDE;
+	virtual void onPostHrcMove() NL_OVERRIDE;
+	virtual void onFocus(bool focused) NL_OVERRIDE;
+	virtual void onCreate() NL_OVERRIDE;
+	virtual void onPostCreate() NL_OVERRIDE;
 	//
-	virtual void onParentDisplayModeChanged();
+	virtual void onParentDisplayModeChanged() NL_OVERRIDE;
 
 	////////////////
 	// PROPERTIES //
 	////////////////
 	std::string		  getSheet() const;
-	float			  getAngle() const { return _Angle; }
+	float			  getAngle() const NL_OVERRIDE { return _Angle; }
 	std::string		  getVisualProperties() const;
 	void			  setVisualProperties(const std::string&) {}
 
 	// from ISelectableObject
-	const NLMISC::CMatrix	&getInvertedMatrix() const;
-	virtual bool			getLastClip() const;
-	virtual NLMISC::CAABBox getSelectBox() const;
-	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const;
+	const NLMISC::CMatrix	&getInvertedMatrix() const NL_OVERRIDE;
+	virtual bool			getLastClip() const NL_OVERRIDE;
+	virtual NLMISC::CAABBox getSelectBox() const NL_OVERRIDE;
+	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const NL_OVERRIDE;
 
 	//////////
 	// MISC //
 	//////////
 	float					getSelectionDecalRadius() const;
 	//virtual NLMISC::CVector evalLinkPoint(bool leader) const;
-	virtual void			snapToGround();
+	virtual void			snapToGround() NL_OVERRIDE;
 	// Get pointer to client entity that is used to display that object
 	CEntityCL *getEntity() const { return _Entity; }
 
@@ -116,15 +116,15 @@ public:
 	REFLECT_EXPORT_END
 
 	// from ISelectableObject
-	virtual	bool			isInProjection(const NLMISC::CVector2f &pos) const;
+	virtual	bool			isInProjection(const NLMISC::CVector2f &pos) const NL_OVERRIDE;
 	// from ISelectableObject
-	virtual TSelectionType getSelectionType() const;
+	virtual TSelectionType getSelectionType() const NL_OVERRIDE;
 
 	// return radius of the cylinder for the collision primitive, or -1 if a box is used
 	float getCylinderRadius() const;
 
 	// from CDisplayerVisual
-	virtual void setDisplayMode(sint32 mode);
+	virtual void setDisplayMode(sint32 mode) NL_OVERRIDE;
 
 	// manage clipping of entity to display then earest entities (and thus bypass the 255 entities limit)
 	void setClipBlend(float amount);
@@ -136,11 +136,11 @@ public:
 	bool isUserCreated() const;
 
 	// from CDisplayerBase
-	virtual bool maxVisibleEntityExceeded() const;
+	virtual bool maxVisibleEntityExceeded() const NL_OVERRIDE;
 
 	// from CDisplayerVisual
-	virtual void setActive(bool active);
-	virtual bool getActive() const;
+	virtual void setActive(bool active) NL_OVERRIDE;
+	virtual bool getActive() const NL_OVERRIDE;
 
 
 private:
@@ -183,7 +183,7 @@ private:
 protected:
 
 	// update world position from position property
-	virtual void updateWorldPos();
+	virtual void updateWorldPos() NL_OVERRIDE;
 	//void updateValidPosFlag();
 	void createEntity();
 	void updateVisibility();

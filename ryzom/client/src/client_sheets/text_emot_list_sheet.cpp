@@ -62,7 +62,7 @@ CTextEmotListSheet::CTextEmotListSheet()
 //-----------------------------------------------
 void CTextEmotListSheet::build(const NLGEORGES::UFormElm &item)
 {
-	const UFormElm *list = 0;
+	const UFormElm *list = nullptr;
 	item.getNodeByName(&list, "Array");
 	if(list)
 	{
@@ -76,9 +76,9 @@ void CTextEmotListSheet::build(const NLGEORGES::UFormElm &item)
 		// Get emots name.
 		for(uint i=0; i<size; ++i)
 		{
-			const UFormElm *node = 0;
+			const UFormElm *node = nullptr;
 			list->getArrayNode(&node, i);
-			if (node != NULL)
+			if (node != nullptr)
 			{
 				string path, anim, emoteId, fxToSpawn;
 				float fxSpawnDelay = 0.f;

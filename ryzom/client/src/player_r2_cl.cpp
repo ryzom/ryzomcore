@@ -89,7 +89,7 @@ CPlayerR2CL::CPlayerR2CL()
 	_Instances.resize(SLOTTYPE::NB_SLOT);
 
 	// No sheet pointed.
-	_Sheet			= 0;
+	_Sheet			= nullptr;
 	//_PlayerSheet	= 0;
 
 	// Some default colors.
@@ -113,7 +113,7 @@ CPlayerR2CL::CPlayerR2CL()
 CPlayerR2CL::~CPlayerR2CL()
 {
 	// No more sheet pointed.
-	_Sheet = NULL;
+	_Sheet = nullptr;
 
 	// Remove the light
 	if(!_Light.empty())
@@ -141,10 +141,10 @@ CGenderInfo * CPlayerR2CL::getGenderInfo()
 	}
 	CRaceStatsSheet *pRSS = dynamic_cast<CRaceStatsSheet*>(SheetMngr.get (RSid));
 
-	if (pRSS == NULL)
+	if (pRSS == nullptr)
 	{
 		nlwarning ("cannot find sheet for people:%d male:%d", ePeople, bMale);
-		return NULL;
+		return nullptr;
 	}
 
 	// Choose default stuff is we are male or female
@@ -196,7 +196,7 @@ bool CPlayerR2CL::build(const CEntitySheet *sheet)	// virtual
 {
 	// Cast the sheet in the right type.
 	_Sheet = dynamic_cast<const CCharacterSheet *>(sheet);
-	if(_Sheet==0)
+	if(_Sheet==nullptr)
 	{
 		pushDebugStr(NLMISC::toString("R2 Player '%d' sheet is not a '.creature' -> BIG PROBLEM.", _Slot));
 		return false;
@@ -210,7 +210,7 @@ bool CPlayerR2CL::build(const CEntitySheet *sheet)	// virtual
 		if(nodeRoot)
 		{
 			_DBEntry = dynamic_cast<CCDBNodeBranch *>(nodeRoot->getNode(_Slot));
-			if(_DBEntry == 0)
+			if(_DBEntry == nullptr)
 				pushDebugStr("Cannot get a pointer on the DB entry.");
 		}
 	}
@@ -572,7 +572,7 @@ void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle
 		}
 		// Create face
 		// Only create a face when there is no Helmet
-		if(_Items[SLOTTYPE::HEAD_SLOT].Sheet == 0 || _Items[SLOTTYPE::HEAD_SLOT].Sheet->Family != ITEMFAMILY::ARMOR)
+		if(_Items[SLOTTYPE::HEAD_SLOT].Sheet == nullptr || _Items[SLOTTYPE::HEAD_SLOT].Sheet->Family != ITEMFAMILY::ARMOR)
 		{
 			CItemSheet *faceItem = getItem(*getGenderInfo(), SLOTTYPE::FACE_SLOT);
 			if (faceItem)
@@ -591,7 +591,7 @@ void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle
 					if (!_Face.Loading.empty())
 					{
 						Scene->deleteInstance(_Face.Loading);
-						_Face.Loading = NULL;
+						_Face.Loading = nullptr;
 						_Face.LoadingName = sFaceName;
 					}
 					_Face.Loading = Scene->createInstance(sFaceName);
@@ -619,11 +619,11 @@ void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle
 			// There is a helmet !
 			if (!_Face.Loading.empty())
 				Scene->deleteInstance(_Face.Loading);
-			_Face.Loading = NULL;
+			_Face.Loading = nullptr;
 			_Face.LoadingName.clear();
 			if (!_Face.Current.empty())
 				Scene->deleteInstance(_Face.Current);
-			_Face.Current = NULL;
+			_Face.Current = nullptr;
 			_Face.CurrentName.clear();
 		}
 		// Now we have a skeleton, we can update VpB and VpC.
@@ -729,7 +729,7 @@ void CPlayerR2CL::updateVisualPropertyVpc(const NLMISC::TGameCycle &/* gameCycle
 			float MTmin, MTmax;
 
 			CGenderInfo *pGI = getGenderInfo();
-			if (pGI == NULL)
+			if (pGI == nullptr)
 				return;
 
 			MTmin = pGI->BlendShapeMin[0];

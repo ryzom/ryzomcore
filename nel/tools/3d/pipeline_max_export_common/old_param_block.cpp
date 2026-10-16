@@ -27,9 +27,7 @@
 #include <nel/misc/types_nl.h>
 #include "old_param_block.h"
 
-#include <cstring>
-
-#include "../pipeline_max/storage_object.h"
+#include "../pipeline_max/builtin/param_block.h"
 
 using namespace PIPELINE::MAX;
 
@@ -37,39 +35,25 @@ namespace OLDPBLOCK {
 
 void readOldParamBlock(CSceneClass *pblock, std::map<sint32, SParam> &out)
 {
-	const CStorageContainer::TStorageObjectContainer &po = pblock->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt it = po.begin(); it != po.end(); ++it)
+	// Every superclass-0x8 object parses through the typed BUILTIN::CParamBlock (one decode
+	// path, in the library); this is a thin copy onto the legacy map shape. Entry order is
+	// preserved (later duplicate indices overwrite, as the inline decode did), and both value
+	// views are bit-copies of the stored dword — IsInt marks only the 0x0101 int kind (a bool
+	// param, value chunk 0x0104, kept the legacy float-bits view).
+	BUILTIN::CParamBlock *pb = dynamic_cast<BUILTIN::CParamBlock *>(pblock);
+	if (!pb) return;
+	const std::vector<BUILTIN::CParamBlock::SParam> &params = pb->params();
+	for (std::vector<BUILTIN::CParamBlock::SParam>::const_iterator it = params.begin(); it != params.end(); ++it)
 	{
-		if (it->first != 0x0002) continue;
-		CStorageContainer *pc = dynamic_cast<CStorageContainer *>(it->second);
-		if (!pc) continue;
-		sint32 idx = -1;
-		for (CStorageContainer::TStorageObjectConstIt cit = pc->chunks().begin(); cit != pc->chunks().end(); ++cit)
-		{
-			CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
-			if (!cr) continue;
-			if (cit->first == 0x0003 && cr->Value.size() == 4)
-				memcpy(&idx, nlVectorData(cr->Value), 4);
-			else if (cit->first == 0x0102 && cr->Value.size() == 12 && idx >= 0)
-			{
-				SParam p;
-				p.IsPoint3 = true;
-				p.IsInt = false;
-				p.I = 0;
-				memcpy(p.V, nlVectorData(cr->Value), 12);
-				out[idx] = p;
-			}
-			else if (cit->first != 0x0004 && cr->Value.size() == 4 && idx >= 0)
-			{
-				SParam p;
-				p.IsPoint3 = false;
-				p.IsInt = (cit->first == 0x0101);
-				p.V[1] = p.V[2] = 0.0f;
-				memcpy(p.V, nlVectorData(cr->Value), 4);
-				memcpy(&p.I, nlVectorData(cr->Value), 4);
-				out[idx] = p;
-			}
-		}
+		if (it->Index < 0 || !it->HasConstant) continue;
+		SParam p;
+		p.IsPoint3 = it->Kind == BUILTIN::CParamBlock::KindPoint3;
+		p.IsInt = it->Kind == BUILTIN::CParamBlock::KindInt;
+		p.I = p.IsPoint3 ? 0 : it->I;
+		p.V[0] = it->F[0];
+		p.V[1] = p.IsPoint3 ? it->F[1] : 0.0f;
+		p.V[2] = p.IsPoint3 ? it->F[2] : 0.0f;
+		out[it->Index] = p;
 	}
 }
 

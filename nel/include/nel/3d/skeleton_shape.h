@@ -76,29 +76,29 @@ public:
 	// @{
 
 	/// Create a CSkeletonModel, which contains bones.
-	virtual	CTransformShape		*createInstance(CScene &scene);
+	virtual	CTransformShape		*createInstance(CScene &scene) NL_OVERRIDE;
 
 	/// clip this skeleton.
-	virtual bool	clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix);
+	virtual bool	clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) NL_OVERRIDE;
 
 	/// render() this skeletonshape in a driver  (no-op)
-	virtual void	render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */)
+	virtual void	render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) NL_OVERRIDE
 	{
 	}
 
 	/** return the bounding box of the shape. Default is to return Null bbox.
 	 */
-	virtual	void	getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual	void	getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 
 	/// get an approximation of the number of triangles this instance will render for a fixed distance.
-	virtual float	getNumTriangles (float distance);
+	virtual float	getNumTriangles (float distance) NL_OVERRIDE;
 
 	/// serial this skeletonshape.
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CSkeletonShape);
 
 	/// flush textures used by this shape.
-	virtual void	flushTextures (IDriver &/* driver */, uint /* selectedTexture */) {}
+	virtual void	flushTextures (IDriver &/* driver */, uint /* selectedTexture */) NL_OVERRIDE {}
 
 	// @}
 

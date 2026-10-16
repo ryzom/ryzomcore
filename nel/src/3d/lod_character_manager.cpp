@@ -137,7 +137,7 @@ uint32			CLodCharacterManager::createShapeBank()
 	for(uint i=0;i<_ShapeBankArray.size();i++)
 	{
 		// if ree, use it.
-		if(_ShapeBankArray[i]==NULL)
+		if(_ShapeBankArray[i] == nullptr)
 		{
 			_ShapeBankArray[i]= new CLodCharacterShapeBank;
 			return i;
@@ -153,7 +153,7 @@ uint32			CLodCharacterManager::createShapeBank()
 const CLodCharacterShapeBank	*CLodCharacterManager::getShapeBank(uint32 bankId) const
 {
 	if(bankId>=_ShapeBankArray.size())
-		return NULL;
+		return nullptr;
 	else
 		return _ShapeBankArray[bankId];
 }
@@ -162,7 +162,7 @@ const CLodCharacterShapeBank	*CLodCharacterManager::getShapeBank(uint32 bankId) 
 CLodCharacterShapeBank	*CLodCharacterManager::getShapeBank(uint32 bankId)
 {
 	if(bankId>=_ShapeBankArray.size())
-		return NULL;
+		return nullptr;
 	else
 		return _ShapeBankArray[bankId];
 }
@@ -175,7 +175,7 @@ void			CLodCharacterManager::deleteShapeBank(uint32 bankId)
 		if(_ShapeBankArray[bankId])
 		{
 			delete _ShapeBankArray[bankId];
-			_ShapeBankArray[bankId]= NULL;
+			_ShapeBankArray[bankId] = nullptr;
 		}
 	}
 }
@@ -205,7 +205,7 @@ const CLodCharacterShape	*CLodCharacterManager::getShape(uint32 shapeId) const
 		return shapeBank->getShape(shapeInBankId);
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
@@ -918,7 +918,7 @@ void			CLodCharacterManager::initInstance(CLodCharacterInstance &instance)
 // ***************************************************************************
 void			CLodCharacterManager::releaseInstance(CLodCharacterInstance &instance)
 {
-	if(instance._Owner==NULL)
+	if(instance._Owner == nullptr)
 		return;
 	nlassert(this==instance._Owner);
 
@@ -927,7 +927,7 @@ void			CLodCharacterManager::releaseInstance(CLodCharacterInstance &instance)
 		_FreeIds.push_back(instance._TextureId);
 
 	// reset the instance
-	instance._Owner= NULL;
+	instance._Owner = nullptr;
 	instance._TextureId= -1;
 	contReset(instance._UVs);
 }
@@ -940,7 +940,7 @@ CRGBA			*CLodCharacterManager::getTextureInstance(CLodCharacterInstance &instanc
 	nlassert(instance._TextureId!=-1);
 	// if the texture id is a "not enough memory", quit.
 	if(instance._TextureId==NL3D_CLOD_TEXT_NUM_IDS)
-		return NULL;
+		return nullptr;
 
 	// get the x/y.
 	uint	xId= instance._TextureId % NL3D_CLOD_TEXT_NLOD_WIDTH;

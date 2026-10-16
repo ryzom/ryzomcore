@@ -720,7 +720,6 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message> [<
 	ucstring ucstr;
 	ucstr.fromUtf8(args[2]);
 	TDataSetRow rowId = ci->DataSetIndex;
-
 	try
 	{
 		CChatGroup::TGroupType oldMode = IOS->getChatManager().getClient(rowId).getChatMode();
@@ -735,7 +734,6 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message> [<
 
 		if (mode == CChatGroup::guild)
 			IOS->getChatManager().getClient(rowId).setGuildChatGroup(groupId);
-
 		if (mode == CChatGroup::team)
 			IOS->getChatManager().getClient(rowId).setTeamChatGroup(groupId);
 

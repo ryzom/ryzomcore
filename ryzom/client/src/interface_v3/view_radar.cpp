@@ -135,7 +135,7 @@ void CViewRadar::draw ()
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CEntityCL *user = EntitiesMngr.entity(0);
-	if (user == NULL) return;
+	if (user == nullptr) return;
 
 	float angle;
 	CVectorD xyzRef = user->pos();
@@ -170,7 +170,7 @@ void CViewRadar::draw ()
 	for (sint32 i = 1; i < 256; ++i)
 	{
 		CEntityCL *entity = EntitiesMngr.entity(i);
-		if (entity == NULL) continue;
+		if (entity == nullptr) continue;
 
 		// if the entity must not be shown in radar
 		if(!entity->getDisplayInRadar())

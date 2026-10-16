@@ -10,7 +10,7 @@ file "entities_game_service/guild_member_pd"
 		{
 			onChange()
 			@[
-				// callback the manager
+				// callback the manager 
 				IGuildManager::getInstance().guildMemberChanged(this);
 			]@
 		}
@@ -50,11 +50,11 @@ file "entities_game_service/guild_pd"
 
 
 
-		CGuildMemberPD:Guild<>				Members
+		CGuildMemberPD:Guild<>				Members		
 		{
 			onChange()
 			@[
-				// callback the manager
+				// callback the manager 
 				IGuildManager::getInstance().guildMemberListChanged(this);
 			]@
 		}
@@ -68,10 +68,10 @@ file "entities_game_service/guild_pd"
 
 		//CEntityId[TMaxChargeApplied]		ChargesAppliedId;
 		//CEntityId							ChargeOwnedId;
-
+		
 		//CGuildMissionName:Guild<>			SuccessfulMissions;
 		//CGuildChargeName:Guild<>			SuccessfulCharges;
-
+		
 		parent CGuildContainerPD:Guilds		Parent;
 	}
 }

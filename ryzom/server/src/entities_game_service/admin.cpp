@@ -780,7 +780,7 @@ static void selectEntities (const string &entityName, vector <CEntityId> &entiti
 struct __name##Class : public NLMISC::ICommand \
 { \
 __name##Class () : NLMISC::ICommand("variables",#__name, __help, "<entity> [<value>]") { Type = Variable; } \
-	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) \
+	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE \
 	{ \
 		if (args.size () != 1 && args.size () != 2) \
 			return false; \
@@ -1226,7 +1226,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 
 		if ( value.find(',') != string::npos )
 		{
-			explode(value, string(","), res);
+			explode (value, string(","), res);
 			if (res.size() >= 2)
 			{
 				fromString(res[0], fx);
@@ -3455,6 +3455,7 @@ NLMISC_COMMAND( summon, "summon a player in front of the CSR", "<CSR eId><player
 		}
 	}
 */
+
 	COfflineEntityState state;
 	state.X = target->getState().X;
 	state.Y = target->getState().Y;
@@ -4650,6 +4651,7 @@ NLMISC_COMMAND (setDontTranslateLangs, "Set langs that a player dont want to see
 	CUnifiedNetwork::getInstance()->send("IOS", msgout);
 	c->setDontTranslate(langs);
 	return true;
+
 }
 
 NLMISC_COMMAND (updateTarget, "Update current target", "<eid>")
@@ -4733,10 +4735,7 @@ CInventoryPtr getInv(CCharacter *c, const string &inv)
 			case INVENTORIES::pet_animal1:
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
-			case INVENTORIES::pet_animal4:
-			case INVENTORIES::pet_animal5:
-			case INVENTORIES::pet_animal6:
-			case INVENTORIES::pet_animal7:
+			case INVENTORIES::pet_animal4: case INVENTORIES::pet_animal5: case INVENTORIES::pet_animal6: case INVENTORIES::pet_animal7:
 			case INVENTORIES::guild:
 			case INVENTORIES::player_room:
 				inventoryPtr = c->getInventory(selectedInv);
@@ -4994,10 +4993,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				case INVENTORIES::pet_animal2:
 				case INVENTORIES::pet_animal3:
 				case INVENTORIES::pet_animal4:
-				case INVENTORIES::pet_animal5:
-				case INVENTORIES::pet_animal6:
-				case INVENTORIES::pet_animal7:
-				case INVENTORIES::guild:
+				case INVENTORIES::pet_animal5: case INVENTORIES::pet_animal6: case INVENTORIES::pet_animal7: case INVENTORIES::guild:
 				case INVENTORIES::player_room:
 					inventory = inv;
 					break;
@@ -7755,9 +7751,9 @@ ENTITY_VARIABLE (Aggro, "Aggroable by creatures")
 			c->setAggroableOverride(aggroable);
 			c->setAggroableSave(aggroable);
 
-			if (aggroable > 0)
+			if (aggroable>0)
 				nlinfo ("%s is now aggroable", entity.toString().c_str());
-			else if (aggroable < 0)
+			else if (aggroable<0)
 				nlinfo ("%s aggroable is defined by privilege", entity.toString().c_str());
 			else
 				nlinfo ("%s is now non aggroable", entity.toString().c_str());
@@ -9443,10 +9439,10 @@ NLMISC_COMMAND (lockItem, "Lock/unlock item in inventory", "<user id> <inventory
 	bool lock = (args[3] != "0");
 	sint32 slot = -1;
 	fromString(args[2], slot);
-
 	if (selected_inv == "guild") return false;
 
 	CInventoryPtr inventory = getInv(c, selected_inv);
+
 	if (inventory == NULL) return false;
 
 	if (slot < 0 || slot >= INVENTORIES::NbBagSlots) return false;

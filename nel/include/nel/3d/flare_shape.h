@@ -55,28 +55,28 @@ public:
 		CFlareShape();
 
 		/// serial this shape
-		void serial(NLMISC::IStream &f);
+		void serial(NLMISC::IStream &f) NL_OVERRIDE;
 		//@}
 
 
 	/// inherited from IShape
-	virtual	CTransformShape		*createInstance(CScene &scene);
+	virtual	CTransformShape		*createInstance(CScene &scene) NL_OVERRIDE;
 
 	/// inherited from IShape
-	virtual bool				clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix);
+	virtual bool				clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) NL_OVERRIDE;
 
 
 	/// inherited from IShape. Does nothing. A new traverseRender() was set for that
-	virtual void				render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) {}
+	virtual void				render(IDriver * /* drv */, CTransformShape * /* trans */, bool /* opaquePass */) NL_OVERRIDE {}
 
 	/// inherited from IShape
-	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 
 	/// inherited from ishape
-	virtual float				getNumTriangles (float distance);
+	virtual float				getNumTriangles (float distance) NL_OVERRIDE;
 
 	/// inherited from ishape
-	virtual void				flushTextures (IDriver &driver, uint selectedTexture);
+	virtual void				flushTextures (IDriver &driver, uint selectedTexture) NL_OVERRIDE;
 
 	/** set a texture for the flare
 	  * \param index the index of the flare to set. Vaklue ranges from 0 to MaxFlareNum - 1

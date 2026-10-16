@@ -43,13 +43,13 @@
 
 		void fromSkillName(const std::string &amp;skillName)
 		{
-			// we considere the lenght of the skill name to be proportional to the level
+			// we consider the length of the skill name to be proportional to the level
 			if (skillName.size() &lt; 2)
 			{
 				// skill name too short
 				_Value = invalid_val;
 			}
-			uint32 size = skillName.size()-1;
+			uint32 size = (uint32)skillName.size()-1;
 			if (size &lt; end_of_enum)
 				_Value = TValues(size);
 			else
@@ -71,7 +71,7 @@
 				default: BOMB("Invalid value being converted to level - returning 1",return 1);
 			}
 		}
-			</header_code>
+</header_code>
 		</enum>
 
 		<class name="TRunningScenarioInfo">
@@ -239,7 +239,7 @@
 
 
 			<method name="onScenarioRingAccessUpdated" msg="SRAU">
-				<doc line="Update the the ring access of a scenario."/>
+				<doc line="Update the ring access of a scenario."/>
 				<param type="bool" name="ok" />
 				<param type="std::string" name="ringAccess" byref="true" />
 				<param type="std::string" name="errMsg" byref="true" />

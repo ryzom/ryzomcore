@@ -124,12 +124,12 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 		case Timer0End:
 		{
 			if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
-			{
-				--_CurrentOutpostLevel;
-				OUTPOST_INF("Outpost %s: outpost level is now %d", _Name.c_str(), _CurrentOutpostLevel+1);
-			}
-			if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
-				actionSetTimer0(computeLevelDecrementTime());
+				{
+					--_CurrentOutpostLevel;
+					OUTPOST_INF("Outpost %s: outpost level is now %d", _Name.c_str(), _CurrentOutpostLevel+1);
+				}
+				if (_CurrentOutpostLevel>computeGuildMinimumOutpostLevel())
+					actionSetTimer0(computeLevelDecrementTime());
 		} break;
 		case EndOfState:
 		{
@@ -307,7 +307,6 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 		{
 			OUTPOST_INF("Outpost %s: Continuing attack phase (after fight)", _Name.c_str());
 			// Here we may shorten the delay if _MaxAttackLevel<=_CurrentOutpostLevel
-
 			// On GvG/GVE/PVE win, set OutpostLevelAfterWinOnGvE and instant peace
 			if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
 			{
@@ -321,10 +320,10 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 				}
 				else
 				{
-					if (OutpostStateTimeOverride>(uint32)0)
-						actionSetTimer0(OutpostStateTimeOverride);
-					else
-						actionSetTimer0(computeTimeAfterAttack());
+			if (OutpostStateTimeOverride>(uint32)0)
+				actionSetTimer0(OutpostStateTimeOverride);
+			else
+				actionSetTimer0(computeTimeAfterAttack());
 				}
 			}
 			else
@@ -334,9 +333,9 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 				{
 					if (getName().substr(0, 14) != "outpost_nexus_")
 					{
-						CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
-						if (pGuild)
-							pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
+							CGuild *pGuild = CGuildManager::getInstance()->getGuildFromId(getAttackerGuild());
+							if (pGuild)
+								pGuild->setLastFailedGVE(CTickEventHandler::getGameCycle());
 					}
 
 					if (_PVPType == OUTPOSTENUMS::GVE)
@@ -357,16 +356,14 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 		{
 			// Only Full need defenseBefore
 			if (_PVPType == OUTPOSTENUMS::Full)
-			{
-				if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
+		{
+			if (_FightData._MaxAttackLevel > _CurrentOutpostLevel)
 					actionPostNextState(DefenseBefore);
 				else
 					actionPostNextState(Peace);
-			}
-
+				}
 			if (_PVPType == OUTPOSTENUMS::GVG)
 				actionPostNextState(Peace);
-
 		//	tellEventState(event, _State);
 		} break;
 		case EndOfState:
@@ -535,7 +532,7 @@ void COutpost::eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventPara
 	default:
 		eventException(event, eventParams);
 	}
-
+	
 	// update the main outpost properties in client database
 	askOutpostDBUpdate();
 	askGuildDBUpdate(COutpostGuildDBUpdater::OUTPOST_PROPERTIES);

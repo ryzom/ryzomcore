@@ -185,6 +185,13 @@ target_sources(nelmisc
 		${HEADERS}
 )
 
+IF(WITH_SSE2)
+	TARGET_COMPILE_DEFINITIONS(nelmisc PUBLIC NL_HAS_SSE2)
+	IF(WITH_SSE3)
+		TARGET_COMPILE_DEFINITIONS(nelmisc PUBLIC NL_HAS_SSE3)
+	ENDIF()
+ENDIF()
+
 IF(WITH_GTK)
   IF(GTK2_FOUND)
     TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${GTK2_INCLUDE_DIRS})
@@ -212,31 +219,9 @@ IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(PNG)
   FIND_PACKAGE(PNG CONFIG REQUIRED)
   # add compatibility with cmake FindPNG
-  if(GIF_FOUND AND NOT TARGET PNG::PNG)
+  if(PNG_FOUND AND NOT TARGET PNG::PNG)
       add_library(PNG::PNG ALIAS PNG::png)
   endif()
-  SET(PNG_LIBRARY   PNG::png)
-  SET(PNG_LIBRARIES PNG::png)
-
-  HUNTER_ADD_PACKAGE(breakpad)
-  FIND_PACKAGE(breakpad CONFIG REQUIRED)
-  TARGET_LINK_LIBRARIES(nelmisc breakpad::libbreakpad_client)
-ELSE()
-  IF(UNIX)
-    IF(APPLE)
-    ELSE()
-      FIND_PATH(BREAKPAD_INCLUDE_DIR client/linux/handler/exception_handler.h
-        PATHS /usr/local/include/breakpad
-        NO_DEFAULT_PATH
-      )
-      FIND_LIBRARY(BREAKPAD_CLIENT_LIB breakpad_client
-        PATHS /usr/local/lib
-        NO_DEFAULT_PATH
-      )
-    ENDIF()
-  ENDIF()
-  TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
-  TARGET_LINK_LIBRARIES(nelmisc PRIVATE ${BREAKPAD_CLIENT_LIB})
 ENDIF()
 
 IF(JPEG_FOUND)
@@ -297,6 +282,26 @@ NL_ADD_LIB_SUFFIX(nelmisc)
 
 IF(WITH_PCH)
   target_precompile_headers(nelmisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h)
+ENDIF()
+
+IF(WITH_BREAKPAD)
+  IF(HUNTER_ENABLED)
+    HUNTER_ADD_PACKAGE(breakpad)
+    FIND_PACKAGE(breakpad CONFIG REQUIRED)
+    TARGET_LINK_LIBRARIES(nelmisc PRIVATE breakpad::libbreakpad_client)
+  ELSEIF(UNIX AND NOT APPLE)
+    FIND_PATH(BREAKPAD_INCLUDE_DIR client/linux/handler/exception_handler.h
+      PATHS /usr/local/include/breakpad
+      NO_DEFAULT_PATH
+    )
+    FIND_LIBRARY(BREAKPAD_CLIENT_LIB breakpad_client
+      PATHS /usr/local/lib
+      NO_DEFAULT_PATH
+    )
+    TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
+    TARGET_LINK_LIBRARIES(nelmisc PRIVATE ${BREAKPAD_CLIENT_LIB})
+  ENDIF()
+  TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE NL_HAVE_BREAKPAD)
 ENDIF()
 
 NL_GEN_PC(nel-misc.pc)

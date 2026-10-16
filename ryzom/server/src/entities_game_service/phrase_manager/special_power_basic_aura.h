@@ -56,7 +56,7 @@ public:
 	}
 
 	/// apply effects
-	virtual void apply();
+	virtual void apply() NL_OVERRIDE;
 
 	/// set families
 	inline void setFamilies(EFFECT_FAMILIES::TEffectFamily rootEffectFamily, EFFECT_FAMILIES::TEffectFamily createdEffectFamily)

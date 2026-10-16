@@ -121,7 +121,7 @@ namespace NLNET
 
 		// Module management =====================
 
-		virtual ~IModule() {}
+		virtual ~IModule() NL_OVERRIDE {}
 
 		/** Module initialization.
 		 *	If the initialization return false, then the module manager deleted
@@ -316,14 +316,14 @@ namespace NLNET
 
 		TSecurityData(const TCtorParam &params)
 			: DataTag(params.DataTag),
-			NextItem(NULL)
+			NextItem(nullptr)
 
 		{
 		}
 
 		virtual ~TSecurityData()
 		{
-			if (NextItem != NULL)
+			if (NextItem != nullptr)
 				delete NextItem;
 		}
 
@@ -343,7 +343,7 @@ namespace NLNET
 		{
 		}
 
-		void serial(NLMISC::CMemStream &s)
+		void serial(NLMISC::CMemStream &s) NL_OVERRIDE
 		{
 			for (uint i=0; i<Data.size(); ++i)
 			{
@@ -507,7 +507,7 @@ namespace NLNET
 		TMethodPtr	_TaskMethod;
 
 		// override CTask::run
-		void run()
+		void run() NL_OVERRIDE
 		{
 			initMessageQueue(_Module);
 
@@ -578,8 +578,8 @@ namespace NLNET
 		virtual void	deleteModule(IModule *module);
 
 		/** Virtual destructor.
-		 *	The destructor while unregister the module factory from the
-		 *	factory registry and ALL module factored
+		 *	The destructor will unregister the module factory from the
+		 *	factory registry and ALL modules created by this factory
 		 *	will also be deleted.
 		 */
 		virtual ~IModuleFactory();
@@ -598,14 +598,14 @@ namespace NLNET
 			: IModuleFactory(moduleClassName)
 		{}
 
-		virtual IModule *createModule()
+		virtual IModule *createModule() NL_OVERRIDE
 		{
 			IModule *module = new moduleClass;
 			registerModuleInFactory(module);
 			return module;
 		}
 
-		virtual const std::string &getInitStringHelp() const
+		virtual const std::string &getInitStringHelp() const NL_OVERRIDE
 		{
 			return moduleClass::getInitStringHelp();
 		}
@@ -681,7 +681,7 @@ namespace NLNET
 		CModuleTask				*_MessageDispatchTask;
 		//@}
 
-		virtual void setFactory(IModuleFactory *factory);
+		virtual void setFactory(IModuleFactory *factory) NL_OVERRIDE;
 		virtual IModuleFactory *getFactory();
 	protected:
 		/// Keep track of the module factory
@@ -695,27 +695,27 @@ namespace NLNET
 
 
 		CModuleBase();
-		~CModuleBase();
+		~CModuleBase() NL_OVERRIDE;
 
-		virtual void registerInterceptor(IModuleInterceptable *interceptor);
-		virtual void unregisterInterceptor(IModuleInterceptable *interceptor);
+		virtual void registerInterceptor(IModuleInterceptable *interceptor) NL_OVERRIDE;
+		virtual void unregisterInterceptor(IModuleInterceptable *interceptor) NL_OVERRIDE;
 
-		const std::string	&getCommandHandlerName() const;
-		TModuleId			getModuleId() const;
-		const std::string	&getModuleName() const;
+		const std::string	&getCommandHandlerName() const NL_OVERRIDE;
+		TModuleId			getModuleId() const NL_OVERRIDE;
+		const std::string	&getModuleName() const NL_OVERRIDE;
 
-		const std::string	&getModuleClassName() const;
+		const std::string	&getModuleClassName() const NL_OVERRIDE;
 
-		const std::string	&getModuleFullyQualifiedName() const;
+		const std::string	&getModuleFullyQualifiedName() const NL_OVERRIDE;
 
-		std::string			getModuleManifest() const;
+		std::string			getModuleManifest() const NL_OVERRIDE;
 
 		/** Called by a socket to receive a message in the module context.
 		 *	Basic implementation either forward directly to onProcessModuleMessage
 		 *	or queue the message in the coroutine message queue (when a synchronous
 		 *	messaging coroutine is started) for later dispatching.
 		 */
-		virtual void		onReceiveModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message);
+		virtual void		onReceiveModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message) NL_OVERRIDE;
 
 		/// The message dispatching task
 		void _receiveModuleMessageTask();
@@ -738,10 +738,10 @@ namespace NLNET
 		 *	returned.
 		 */
 		template <class T>
-		T *getInterceptor(T *dummy, IModuleInterceptable *previous = NULL)
+		T *getInterceptor(T *dummy, IModuleInterceptable *previous = nullptr)
 		{
 			TInterceptors::iterator it(_ModuleInterceptors.begin());
-			if (previous != NULL)
+			if (previous != nullptr)
 			{
 				// advance up to next the previous
 				while (it != _ModuleInterceptors.end() && *it != previous)
@@ -755,7 +755,7 @@ namespace NLNET
 				IModuleInterceptable *mi = *it;
 				T *inter = dynamic_cast<T*>(mi);
 
-				if (inter != NULL)
+				if (inter != nullptr)
 				{
 					dummy = inter;
 					return inter;
@@ -765,18 +765,18 @@ namespace NLNET
 			}
 
 			dummy = NULL;
-			return NULL;
+			return nullptr;
 		}
 	protected:
 		// Init base module, init module name
-		bool				initModule(const TParsedCommandLine &initInfo);
+		bool				initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
 
-		void				plugModule(IModuleSocket *moduleSocket);
-		void				unplugModule(IModuleSocket *moduleSocket);
-		void				getPluggedSocketList(std::vector<IModuleSocket*> &resultList);
-		void				invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg);
-		void				_onModuleUp(IModuleProxy *removedProxy);
-		void				_onModuleDown(IModuleProxy *removedProxy);
+		void				plugModule(IModuleSocket *moduleSocket) NL_OVERRIDE;
+		void				unplugModule(IModuleSocket *moduleSocket) NL_OVERRIDE;
+		void				getPluggedSocketList(std::vector<IModuleSocket*> &resultList) NL_OVERRIDE;
+		void				invokeModuleOperation(IModuleProxy *destModule, const NLNET::CMessage &opMsg, NLNET::CMessage &resultMsg) NL_OVERRIDE;
+		void				_onModuleUp(IModuleProxy *removedProxy) NL_OVERRIDE;
+		void				_onModuleDown(IModuleProxy *removedProxy) NL_OVERRIDE;
 
 		bool				_onProcessModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message);
 
@@ -841,16 +841,16 @@ namespace NLNET
 		 *	When module are declared in another process, they receive a
 		 *	local ID that is different than the ID in their host process.
 		 */
-		virtual TModuleId	getModuleProxyId() const;
+		virtual TModuleId	getModuleProxyId() const NL_OVERRIDE;
 
-		virtual TModuleId	getForeignModuleId() const;
+		virtual TModuleId	getForeignModuleId() const NL_OVERRIDE;
 
 
-		uint32				getModuleDistance() const;
+		uint32				getModuleDistance() const NL_OVERRIDE;
 
-		IModule				*getLocalModule() const;
+		IModule				*getLocalModule() const NL_OVERRIDE;
 
-		CGatewayRoute		*getGatewayRoute() const;
+		CGatewayRoute		*getGatewayRoute() const NL_OVERRIDE;
 
 		/** Return the module name. Each module instance must have a unique
 		 *	name in the host process.
@@ -859,26 +859,26 @@ namespace NLNET
 		 *	Distant module name are always the FQMN, ie, it is the same as
 		 *	getModuleFullyQualifiedName()
 		 */
-		virtual const std::string &getModuleName() const;
+		virtual const std::string &getModuleName() const NL_OVERRIDE;
 		/// Return the module class.
-		virtual const std::string &getModuleClassName() const;
+		virtual const std::string &getModuleClassName() const NL_OVERRIDE;
 		/// return the module manifest
-		virtual const std::string &getModuleManifest() const;
+		virtual const std::string &getModuleManifest() const NL_OVERRIDE;
 
 		/** Return the gateways interface by witch this module is accessible.
 		 */
-		virtual IModuleGateway *getModuleGateway() const;
+		virtual IModuleGateway *getModuleGateway() const NL_OVERRIDE;
 
 		/** Send a message to the module.
 		 */
-		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message);
+		virtual void		sendModuleMessage(IModule *senderModule, const NLNET::CMessage &message) NL_OVERRIDE;
 
-		virtual const TSecurityData *getFirstSecurityData() const
+		virtual const TSecurityData *getFirstSecurityData() const NL_OVERRIDE
 		{
 			return _SecurityData;
 		}
 
-		virtual const TSecurityData *findSecurityData(uint8 dataTag) const;
+		virtual const TSecurityData *findSecurityData(uint8 dataTag) const NL_OVERRIDE;
 	};
 
 

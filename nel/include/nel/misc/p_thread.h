@@ -50,18 +50,18 @@ public:
 	/// Constructor
 	CPThread( IRunnable *runnable, uint32 stackSize);
 
-	virtual ~CPThread();
+	virtual ~CPThread() NL_OVERRIDE;
 
-	virtual void start();
-	virtual bool isRunning();
-	virtual void terminate();
-	virtual void wait();
-	virtual bool setCPUMask(uint64 cpuMask);
-	virtual uint64 getCPUMask();
-	virtual void setPriority(TThreadPriority priority);
-	virtual std::string getUserName();
+	virtual void start() NL_OVERRIDE;
+	virtual bool isRunning() NL_OVERRIDE;
+	virtual void terminate() NL_OVERRIDE;
+	virtual void wait() NL_OVERRIDE;
+	virtual bool setCPUMask(uint64 cpuMask) NL_OVERRIDE;
+	virtual uint64 getCPUMask() NL_OVERRIDE;
+	virtual void setPriority(TThreadPriority priority) NL_OVERRIDE;
+	virtual std::string getUserName() NL_OVERRIDE;
 
-	virtual IRunnable *getRunnable()
+	virtual IRunnable *getRunnable() NL_OVERRIDE
 	{
 		return Runnable;
 	}
@@ -85,9 +85,9 @@ private:
 class CPProcess : public IProcess
 {
 public:
-	virtual ~CPProcess() {}
-	virtual uint64 getCPUMask();
-	virtual bool setCPUMask(uint64 mask);
+	virtual ~CPProcess() NL_OVERRIDE {}
+	virtual uint64 getCPUMask() NL_OVERRIDE;
+	virtual bool setCPUMask(uint64 mask) NL_OVERRIDE;
 };
 
 } // NLMISC

@@ -58,10 +58,10 @@ public:
 	 * apply the effects of the... effect
 	 * \return true if effects ends
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 protected:
 	float					_Multiplier;

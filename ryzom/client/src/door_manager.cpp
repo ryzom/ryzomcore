@@ -41,7 +41,7 @@ using namespace NL3D;
 
 CIGDoorAddedCallback		IGDoorCallback;
 
-CDoorManager *CDoorManager::_Instance = NULL;
+CDoorManager *CDoorManager::_Instance = nullptr;
 
 extern CEntityManager		EntitiesMngr;
 
@@ -52,7 +52,7 @@ void CDoorManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ***************************************************************************
@@ -392,7 +392,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 				nlwarning("All the door part are not well initialized");
 				for (sint j = 0; j < (sint)pDoor->Prims.size(); ++j)
 				{
-					if (PACS != NULL)
+					if (PACS != nullptr)
 						PACS->removePrimitive(pDoor->Prims[j]);
 					else
 						nlwarning("PACS should not be NULL at this point");
@@ -457,7 +457,7 @@ void CDoorManager::removedCallback (NL3D::UInstanceGroup *ig)
 			// Remove Pacs
 			for (j = 0; j < (sint)pDoor->Prims.size(); ++j)
 			{
-				if (PACS != NULL)
+				if (PACS != nullptr)
 					PACS->removePrimitive(pDoor->Prims[j]);
 				else
 					nlwarning("PACS should not be NULL at this point");
@@ -498,8 +498,8 @@ void CDoorManager::getPACSTriggers()
 				continue;
 
 			// Retrieve the door pointer
-			SDoor *pDoor = NULL;
-			CEntityCL *pEntity = NULL;
+			SDoor *pDoor = nullptr;
+			CEntityCL *pEntity = nullptr;
 
 			uint32 doorId = ((nUserDataDoor >> 16) & 0xffffffff);
 			uint32 entityId = ((nUserDataEntity >> 16) & 0xffffffff);

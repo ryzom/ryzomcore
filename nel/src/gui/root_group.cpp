@@ -43,7 +43,7 @@ namespace NLGUI
 		return this;
 
 		if (id.substr(0, _Id.size()) != _Id)
-			return NULL;
+			return nullptr;
 
 		std::vector<CViewBase*>::const_iterator itv;
 		for (itv = _Views.begin(); itv != _Views.end(); itv++)
@@ -74,7 +74,7 @@ namespace NLGUI
 			CInterfaceGroup *pIG = it->second;
 			return pIG->getElement(id);
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	void CRootGroup::addGroup (CInterfaceGroup *child, sint eltOrder)

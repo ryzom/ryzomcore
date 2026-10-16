@@ -97,7 +97,7 @@ bool buildParametricMesh(const NLMISC::CClassId &cid,
                          const std::map<sint32, OLDPBLOCK::SParam> &params,
                          std::vector<NLMISC::CVector> &verts,
                          std::vector<SPrimTri> &tris,
-                         std::vector<NLMISC::CVector> *uvVerts = NULL);
+                         std::vector<NLMISC::CVector> *uvVerts = nullptr);
 
 } /* namespace PRIMMESH */
 

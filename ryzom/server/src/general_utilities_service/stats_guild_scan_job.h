@@ -35,17 +35,17 @@ class CGuildScanJob: public CJobManager::IJob
 {
 public:
 	// inherited virtual interface
-	virtual void start();
-	virtual bool finished();
-	virtual std::string getShortStatus();
-	virtual std::string getStatus();
-	virtual void display(NLMISC::CLog* log=NLMISC::InfoLog);
-	virtual void update();
+	virtual void start() NL_OVERRIDE;
+	virtual bool finished() NL_OVERRIDE;
+	virtual std::string getShortStatus() NL_OVERRIDE;
+	virtual std::string getStatus() NL_OVERRIDE;
+	virtual void display(NLMISC::CLog* log=NLMISC::InfoLog) NL_OVERRIDE;
+	virtual void update() NL_OVERRIDE;
 
 public:
 	// ctor / dtor
 	CGuildScanJob(CStatGuildContainer* guildContainer,const NLMISC::CSString& outputRoot="");
-	~CGuildScanJob();
+	~CGuildScanJob() NL_OVERRIDE;
 
 public:
 	// interface for initialisation and configuration of the job

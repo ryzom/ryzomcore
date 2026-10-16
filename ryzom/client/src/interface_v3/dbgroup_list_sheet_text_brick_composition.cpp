@@ -66,13 +66,13 @@ bool CDBGroupListSheetTextBrickComposition::parse (xmlNodePtr cur, CInterfaceGro
 // ***************************************************************************
 CDBGroupListSheetTextBrickComposition::CSheetChildBrick::CSheetChildBrick()
 {
-	CostView= NULL;
+	CostView = nullptr;
 }
 
 // ***************************************************************************
 CDBGroupListSheetTextBrickComposition::CSheetChildBrick::~CSheetChildBrick()
 {
-	CostView= NULL;
+	CostView = nullptr;
 }
 
 

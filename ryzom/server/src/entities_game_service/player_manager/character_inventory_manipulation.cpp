@@ -1064,7 +1064,6 @@ void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot
 	if (item->getItemWornState() == ITEM_WORN_STATE::Worned
 			&& (form->Family != ITEMFAMILY::CRAFTING_TOOL && form->Family != ITEMFAMILY::HARVEST_TOOL))
 		return;
-
 	if (form->Family != ITEMFAMILY::AMMO && dstInvId != INVENTORIES::hotbar)
 	{
 		// split stack before use, item slot is not changed
@@ -1076,19 +1075,14 @@ void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot
 			{
 				switch(res)
 				{
-					case CInventoryBase::ior_no_free_slot:
-					{
+					case CInventoryBase::ior_no_free_slot: {
 						// TODO: better error message than just "bag full"
 						SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
 						params[0].Int = bagInv->getSlotCount();
 						sendDynamicSystemMessage(_Id, "BAG_FULL", params);
 						break;
 					}
-					case CInventoryBase::ior_item_locked:
-					case CInventoryBase::ior_stack_undersize:
-					case CInventoryBase::ior_error:
-					default:
-						nlwarning("Split item stack failed: ior = %d", res);
+					case CInventoryBase::ior_item_locked: case CInventoryBase::ior_stack_undersize: case CInventoryBase::ior_error: default: nlwarning("Split item stack failed: ior = %d", res);
 						break;
 				}
 				return;
@@ -1232,7 +1226,7 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 			_PropertyDatabase, checkedCast<uint16>(_CurrentParryLevel));
 		CPhraseManager::getInstance().disengage(_EntityRowId, true);
 
-		// Remove enchant weapon effects as they are linked to equipped item
+	// Remove enchant weapon effects as they are linked to equipped item
 		CSEffectPtr const effect = lookForActiveEffect(EFFECT_FAMILIES::PowerEnchantWeapon);
 
 		if (effect)
@@ -1260,13 +1254,9 @@ bool CCharacter::checkItemValidityWithSlot(const CSheetId &sheet, INVENTORIES::T
 	BOMB_IF(form == 0,
 			NLMISC::toString("Item %s have no static form, recompute packed sheet.", sheet.toString().c_str()),
 			return false);
-
 	if (inv == INVENTORIES::hotbar) {
 		return
-			form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE ||
-			form->Family == ITEMFAMILY::CRYSTALLIZED_SPELL ||
-			form->Family == ITEMFAMILY::CONSUMABLE ||
-			form->Family == ITEMFAMILY::XP_CATALYSER;
+			form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE || form->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || form->Family == ITEMFAMILY::CONSUMABLE || form->Family == ITEMFAMILY::XP_CATALYSER;
 	}
 
 	// if hands inventory, check if item match with slot (right hand and left hand)
@@ -1323,9 +1313,11 @@ bool CCharacter::checkItemValidityWithSlot(const CSheetId &sheet, INVENTORIES::T
 
 				if (item != 0)
 				{
-					const CStaticItem *form2 = CSheets::getForm(item->getSheetId());
-					BOMB_IF(form2 == 0, NLMISC::toString("Item %s have no static form, recompute packed sheet.", item->getSheetId().toString().c_str()),
+					const CStaticItem* form2 = CSheets::getForm(item->getSheetId());
+					BOMB_IF(form2 == 0, NLMISC::toString("Item %s have no static form, recompute packed sheet.",
+														 item->getSheetId().toString().c_str()),
 							return false);
+
 					if (form->Family == ITEMFAMILY::AMMO && form2->Family == ITEMFAMILY::RANGE_WEAPON)
 					{
 						result = checkIfAmmoCompatibleWithWeapon(form->Skill, form2->Skill);
@@ -1333,7 +1325,6 @@ bool CCharacter::checkItemValidityWithSlot(const CSheetId &sheet, INVENTORIES::T
 					else
 					{
 						result = checkRightLeftHandCompatibility(form2->Slots, form->Slots);
-
 						// if the current item we want to drop is a dagger, check if right hand is a sword or a dagger
 						if (form->Type == ITEM_TYPE::DAGGER && result)
 							result = form2->Type == ITEM_TYPE::DAGGER || form2->Type == ITEM_TYPE::SWORD;
@@ -1725,6 +1716,10 @@ void CCharacter::itemInvToExchange(uint32 invSrc, uint32 invSlot, uint32 exchang
 // ****************************************************************************
 void CCharacter::itemExchangeToBag(uint32 exchangeSlot)
 {
+	// check exchange slot sent by the client
+	if (exchangeSlot >= CExchangeView::NbExchangeSlots)
+		return;
+
 	// check exchange integrity
 	bool exchangeWithBot;
 
@@ -2583,11 +2578,20 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			}
 
 			item = guild->getItem(slot);
+
+			if (item == NULL)
+				return;
+
 			infos.versionInfo = guild->getAndSyncItemInfoVersion(slot, getId());
 		}
 		else if (inventory == INVENTORIES::player_room)
 		{
-			item = _PlayerRoom->getInventory()->getItem(slot);
+			CInventoryPtr roomInv = _PlayerRoom->getInventory();
+
+			if (roomInv == NULL || slot >= roomInv->getSlotCount())
+				return;
+
+			item = roomInv->getItem(slot);
 
 			if (item == NULL)
 				return;
@@ -2952,7 +2956,6 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 		sendDynamicSystemMessage(_EntityRowId, "WEAPONS_ONLY_CAN_BEEN_RECHARGED", params);
 		return;
 	}
-
 	if (rightHandItem->sapLoad() == rightHandItem->maxSapLoad()) {
 		SM_STATIC_PARAMS_2(params, STRING_MANAGER::item, STRING_MANAGER::integer);
 		params[0].SheetId = rightHandItem->getSheetId();
@@ -3138,7 +3141,6 @@ void CCharacter::enchantItem(INVENTORIES::TInventory invId, uint32 slot)
 		// consume crystal (destroy it)
 		if (inv->deleteStackItem(slot, 1) == 0)
 			nlwarning("Consuming enchant crystal failed for user %s, slot %d", getId().toString().c_str(), slot);
-
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
 		params[0].SheetId = rightHandItem->getSheetId();
 		sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_NOW_ENCHANTED", params);
@@ -3163,7 +3165,6 @@ void CCharacter::rechargeItem(INVENTORIES::TInventory invId, uint32 slot)
 		// reload sap in right hand item
 		if (sapRechargeItem->sapLoad() == 0)
 			sapRechargeItem->setSapLoad(sapRechargeItem->quality());
-
 		if (rightHandItem->sapLoad() == rightHandItem->maxSapLoad()) {
 			SM_STATIC_PARAMS_2(params, STRING_MANAGER::item, STRING_MANAGER::integer);
 			params[0].SheetId = rightHandItem->getSheetId();
@@ -3185,7 +3186,7 @@ void CCharacter::rechargeItem(INVENTORIES::TInventory invId, uint32 slot)
 
 // proc enchantment of an item
 // ****************************************************************************
- void CCharacter::procEnchantment()
+void CCharacter::procEnchantment()
 {
 	if (!EnchantSystemEnabled)
 		return;

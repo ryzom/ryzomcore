@@ -67,7 +67,7 @@ void CAction::runAction ()
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	if (IM)
 	{
-		CAHManager::getInstance()->runActionHandler (Name.Name, NULL, Name.Argu);
+		CAHManager::getInstance()->runActionHandler (Name.Name, nullptr, Name.Argu);
 	}
 }
 
@@ -123,7 +123,7 @@ bool CActionsManager::addAction(const CAction::CName &name)
 CAction* CActionsManager::getAction(const CAction::CName &name)
 {
 	TActionsMap::iterator it = _Actions.find(name);
-	if (it == _Actions.end()) return NULL;
+	if (it == _Actions.end()) return nullptr;
 	return &(it->second);
 }
 
@@ -463,7 +463,7 @@ void CActionsManager::updateKeyButton (NLMISC::TKeyButton newButtons)
 		NLMISC::TKey key = iteWatchedAction->first;
 
 		// Best matching action
-		CAction		*bestMatching = NULL;
+		CAction		*bestMatching = nullptr;
 		sint		bestMatchingNote = -1;
 
 		// For each action with the same key, search the best combo
@@ -801,7 +801,7 @@ const CActionsManager::CCategoryLocator *CActionsManager::getActionLocator (cons
 		uint baseActionSize = cat.BaseActions.size();
 
 		if( ite->second.BaseActionId >= cat.BaseActions.size() )
-			return NULL;
+			return nullptr;
 
 		const CBaseAction &baseAction = cat.BaseActions[ite->second.BaseActionId];
 
@@ -859,14 +859,14 @@ const CActionsManager::CCategoryLocator *CActionsManager::getActionLocator (cons
 		ite++;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
 const CBaseAction *CActionsManager::getBaseAction (const CAction::CName &name) const
 {
 	const CCategoryLocator *pCL = getActionLocator(name);
-	if (pCL == NULL) return NULL;
+	if (pCL == nullptr) return nullptr;
 	return &_Categories[pCL->CategoryId].BaseActions[pCL->BaseActionId];
 }
 
@@ -874,7 +874,7 @@ const CBaseAction *CActionsManager::getBaseAction (const CAction::CName &name) c
 void CActionsManager::removeBaseAction(const CAction::CName &name)
 {
 	const CCategoryLocator *pCL = getActionLocator(name);
-	if (pCL == NULL)
+	if (pCL == nullptr)
 	{
 		nlwarning("Action %s %s not found.", name.Name.c_str(), name.Argu.c_str());
 		return;
@@ -887,7 +887,7 @@ void CActionsManager::removeBaseAction(const CAction::CName &name)
 const CCategory *CActionsManager::getCategory (const CAction::CName &name) const
 {
 	const CCategoryLocator *pCL = getActionLocator(name);
-	if (pCL == NULL) return NULL;
+	if (pCL == nullptr) return nullptr;
 	return &_Categories[pCL->CategoryId];
 }
 
@@ -943,7 +943,7 @@ CActionsManager *CActionsContext::getActionsManager (const std::string &category
 		ite = _ActionsManagers.find ("");
 		if (ite != _ActionsManagers.end())
 			return ite->second;
-		return NULL;
+		return nullptr;
 	}
 }
 

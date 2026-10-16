@@ -85,7 +85,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListAscensor, std::string, "list_sheet
 #define WIN_JOIN_PROPOSAL					"ui:interface:join_guild_proposal"
 #define VIEW_JOIN_PROPOSAL_PHRASE			"ui:interface:join_guild_proposal:content:inside:phrase"
 
-CGuildManager* CGuildManager::_Instance = NULL;
+CGuildManager* CGuildManager::_Instance = nullptr;
 
 // ***************************************************************************
 CGuildManager::CGuildManager()
@@ -334,12 +334,12 @@ void CGuildManager::update()
 				if (!IngameDbMngr.initInProgress())
 				{
 					pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD);
-					if (pElt != NULL)
+					if (pElt != nullptr)
 						pElt->setActive(true);
 				}
 				// Browse the forum
 				pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM":content:html");
-				if (pElt != NULL)
+				if (pElt != nullptr)
 				{
 					CGroupHTML *html = dynamic_cast<CGroupHTML*>(pElt);
 					if (html)
@@ -416,7 +416,7 @@ void CGuildManager::update()
 			}
 
 			// Search for UserEntity to find our own grade
-			if ((UserEntity != NULL) && (!_GuildMembers.empty()))
+			if ((UserEntity != nullptr) && (!_GuildMembers.empty()))
 			{
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;
@@ -439,20 +439,20 @@ void CGuildManager::update()
 
 			// update the guild display
 			CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD));
-			if (pGuild != NULL)
+			if (pGuild != nullptr)
 			{
 				// if the guild window is visible
 				if (pGuild->isOpen() && pGuild->getActive())
 				{
 					// Close the modal window if the member list will change
-					if(CWidgetManager::getInstance()->getModalWindow()!=NULL && _NeedUpdateMembers)
+					if(CWidgetManager::getInstance()->getModalWindow() != nullptr && _NeedUpdateMembers)
 					{
 						if (CWidgetManager::getInstance()->getModalWindow()->getId() == MENU_GUILD_MEMBER )
 							CWidgetManager::getInstance()->disableModalWindow();
 					}
 
 					// Rebuild interface. Rebuild members only if needed
-					CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
+					CAHManager::getInstance()->runActionHandler("guild_sheet_open", nullptr, toString("update_members=%d", (uint)_NeedUpdateMembers) );
 				}
 			}
 
@@ -471,10 +471,10 @@ void CGuildManager::update()
 		{
 			_JoinPropUpdate = false;
 			CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_JOIN_PROPOSAL));
-			if (pJoinProp != NULL)
+			if (pJoinProp != nullptr)
 			{
 				CViewText *pJoinPropPhraseView = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_JOIN_PROPOSAL_PHRASE));
-				if (pJoinPropPhraseView != NULL)
+				if (pJoinPropPhraseView != nullptr)
 					pJoinPropPhraseView->setText(_JoinPropPhrase);
 
 				pJoinProp->setActive(true);
@@ -513,7 +513,7 @@ void CGuildManager::launchAscensor()
 	// Start Ascensor Interface
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_ASCENSOR));
-	if (pAC == NULL) return;
+	if (pAC == nullptr) return;
 	pAC->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(pAC);
 }
@@ -565,7 +565,7 @@ void CGuildManager::quitAscensor()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_ASCENSOR));
-	if (pAC == NULL) return;
+	if (pAC == nullptr) return;
 	pAC->setActive(false);
 }
 
@@ -581,7 +581,7 @@ void CGuildManager::quitJoinProposal()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_JOIN_PROPOSAL));
-	if (pJoinProp != NULL)
+	if (pJoinProp != nullptr)
 		pJoinProp->setActive(false);
 }
 
@@ -590,13 +590,13 @@ void CGuildManager::closeAllInterfaces()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD));
-	if (pGuild != NULL)
+	if (pGuild != nullptr)
 		pGuild->setActive(false);
 	CGroupContainer *pGuildForum = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM));
-	if (pGuildForum != NULL)
+	if (pGuildForum != nullptr)
 		pGuildForum->setActive(false);
 	CGroupContainer *pGuildChat = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_CHAT));
-	if (pGuildChat != NULL)
+	if (pGuildChat != nullptr)
 		pGuildChat->setActive(false);
 }
 
@@ -788,7 +788,7 @@ void CGuildManager::CDBObsMembers::update(ICDBNode* /* node */)
 // ***************************************************************************
 class CAHGuildSheetOpen : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGuildManager *pGM = CGuildManager::getInstance();
@@ -819,7 +819,7 @@ class CAHGuildSheetOpen : public IActionHandler
 
 			// rebuild guild member list
 			CGroupList *pParent = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_MEMBERS));
-			if (pParent == NULL) return;
+			if (pParent == nullptr) return;
 			pParent->clearGroups();
 			pParent->setDynamicDisplaySize(false);
 			uint member_online = 0;
@@ -829,18 +829,18 @@ class CAHGuildSheetOpen : public IActionHandler
 				string templateId = LIST_GUILD_MEMBERS ":m" + toString(i);
 				vector< pair<string, string> > vParams;
 				vParams.push_back(vector< pair<string, string> >::value_type("id", templateId));
-				CInterfaceGroup *pLine = NULL;
+				CInterfaceGroup *pLine = nullptr;
 				pLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_GUILD_MEMBER, LIST_GUILD_MEMBERS, vParams);
-				if (pLine == NULL) continue;
+				if (pLine == nullptr) continue;
 
 				// Set name
 				CViewText *pViewName = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_NAME));
-				if (pViewName != NULL)
+				if (pViewName != nullptr)
 					pViewName->setText (rGuildMembers[i].Name);
 
 				// Set Grade
 				CViewText *pViewGrade = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_GRADE));
-				if (pViewGrade != NULL)
+				if (pViewGrade != nullptr)
 				{
 					if (rGuildMembers[i].Grade == EGSPD::CGuildGrade::Leader)
 						pViewGrade->setText (CI18N::get("uiGuildLeader"));
@@ -854,7 +854,7 @@ class CAHGuildSheetOpen : public IActionHandler
 
 				// online?
 				CViewBitmap *onlineView = dynamic_cast<CViewBitmap*>(pLine->getView("online"));
-				if (onlineView != NULL)
+				if (onlineView != nullptr)
 				{
 					CCtrlBase *toolTip = pLine->getCtrl("tt_online");
 
@@ -879,14 +879,14 @@ class CAHGuildSheetOpen : public IActionHandler
 						break;
 					}
 				}
-
+				
 				CCtrlBase *inviteButton = pLine->getCtrl("invite_button");
-				if (inviteButton != NULL)
+				if (inviteButton != nullptr)
 					inviteButton->setActive(rGuildMembers[i].Online != ccs_offline && rGuildMembers[i].Name != UserEntity->getEntityName());
 
 				// Enter Date
 				CViewText *pViewEnterDate = dynamic_cast<CViewText*>(pLine->getView(TEMPLATE_GUILD_MEMBER_ENTER_DATE));
-				if (pViewEnterDate != NULL)
+				if (pViewEnterDate != nullptr)
 				{
 					CRyzomTime rt;
 					rt.updateRyzomClock(rGuildMembers[i].EnterDate);
@@ -903,12 +903,12 @@ class CAHGuildSheetOpen : public IActionHandler
 				pLine->setParent (pParent);
 				pParent->addChild (pLine);
 			}
-
+			
 			// update member online count view
 			CViewText	*pOnlineMember = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT_ONLINE));
 			if (pOnlineMember)
  				pOnlineMember->setText(toString(member_online));
-
+			
 		}
 	}
 };
@@ -920,25 +920,25 @@ static void setRights(bool lead, bool hioff, bool offi, bool recr, bool bear, bo
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewTextMenu *pVTM;
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":lead")));
-	if (pVTM != NULL) pVTM->setGrayed(!lead);
+	if (pVTM != nullptr) pVTM->setGrayed(!lead);
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":hiof")));
-	if (pVTM != NULL) pVTM->setGrayed(!hioff);
+	if (pVTM != nullptr) pVTM->setGrayed(!hioff);
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":offi")));
-	if (pVTM != NULL) pVTM->setGrayed(!offi);
+	if (pVTM != nullptr) pVTM->setGrayed(!offi);
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":recr")));
-	if (pVTM != NULL) pVTM->setGrayed(!recr);
+	if (pVTM != nullptr) pVTM->setGrayed(!recr);
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":bear")));
-	if (pVTM != NULL) pVTM->setGrayed(!bear);
+	if (pVTM != nullptr) pVTM->setGrayed(!bear);
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":memb")));
-	if (pVTM != NULL) pVTM->setGrayed(!memb);
+	if (pVTM != nullptr) pVTM->setGrayed(!memb);
 	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":kick")));
-	if (pVTM != NULL) pVTM->setGrayed(!kick);
+	if (pVTM != nullptr) pVTM->setGrayed(!kick);
 }
 
 // ***************************************************************************
 class CAHGuildSheetMenuOpen : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGuildManager *pGM = CGuildManager::getInstance();
@@ -946,7 +946,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 
 		// *** Check and retrieve the current member index (index in the member list)
 		CCtrlBase	*ctrlLaunchingModal= CWidgetManager::getInstance()->getCtrlLaunchingModal();
-		if (pCaller == NULL || ctrlLaunchingModal == NULL)
+		if (pCaller == nullptr || ctrlLaunchingModal == nullptr)
 		{
 			// Error -> Close
 			CWidgetManager::getInstance()->disableModalWindow();
@@ -1050,7 +1050,7 @@ static void sendMsgSetGrade(EGSPD::CGuildGrade::TGuildGrade Grade)
 class CAHGuildSheetSortGuildList : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
 		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
@@ -1062,7 +1062,7 @@ public:
 		}
 
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
-		CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
+		CAHManager::getInstance()->runActionHandler("guild_sheet_open", nullptr, toString("update_members=1"));
 	}
 };
 REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");
@@ -1073,14 +1073,14 @@ REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");
 class CAHGuildSheetTellMember : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase * pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGuildManager *pGM = CGuildManager::getInstance();
 		const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
 		// *** Check and retrieve the current member index (index in the member list)
 		CCtrlBase	*ctrlLaunchingModal= CWidgetManager::getInstance()->getCtrlLaunchingModal();
-		if (pCaller == NULL)
+		if (pCaller == nullptr)
 		{
 			// Error -> Close
 			return;
@@ -1097,7 +1097,7 @@ public:
 		MemberIndexSelected= nLineNb;
 		MemberNameSelected = rGuildMembers[nLineNb].Name;
 
-		CPeopleInterraction::displayTellInMainChat(MemberNameSelected);
+		CPeopleInterraction::displayTellInMainChat(MemberNameSelected);	
 	}
 
 	// Current selection
@@ -1112,7 +1112,7 @@ string		CAHGuildSheetTellMember::MemberNameSelected;
 // ***************************************************************************
 class CAHGuildSheetSetLeader : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1121,11 +1121,11 @@ class CAHGuildSheetSetLeader : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeader, "guild_member_chg_to_leader");
-
+		
 // ***************************************************************************
 class CAHGuildSheetSetLeaderConfirm : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Leadership change confirmed
 		sendMsgSetGrade(EGSPD::CGuildGrade::Leader);
@@ -1138,7 +1138,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeaderConfirm, "guild_member_do_change_
 // ***************************************************************************
 class CAHGuildSheetSetHighOfficer : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgSetGrade(EGSPD::CGuildGrade::HighOfficer);
 	}
@@ -1148,7 +1148,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetHighOfficer, "guild_member_chg_to_high_
 // ***************************************************************************
 class CAHGuildSheetSetOfficer : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgSetGrade(EGSPD::CGuildGrade::Officer);
 	}
@@ -1158,7 +1158,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetOfficer, "guild_member_chg_to_officer")
 // ***************************************************************************
 class CAHGuildSheetSetRecruiter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//sendMsgSetGrade(EGSPD::CGuildGrade::Recruiter);
 	}
@@ -1168,7 +1168,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetRecruiter, "guild_member_chg_to_recruit
 // ***************************************************************************
 class CAHGuildSheetSetBearer : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//sendMsgSetGrade(EGSPD::CGuildGrade::Bearer);
 	}
@@ -1178,7 +1178,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetBearer, "guild_member_chg_to_bearer");
 // ***************************************************************************
 class CAHGuildSheetSetMember : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgSetGrade(EGSPD::CGuildGrade::Member);
 	}
@@ -1188,7 +1188,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetMember, "guild_member_chg_to_member");
 // ***************************************************************************
 class CAHGuildSheetKick : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		const string &message = "GUILD:KICK_MEMBER";
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1224,7 +1224,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetKick, "guild_member_kick");
 // ***************************************************************************
 class CHandlerAscensorTeleport : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		if (!ctrlSheet) return;
@@ -1379,7 +1379,7 @@ static void sendMoneyServerMessage(const string &sMsg)
 // ***************************************************************************
 class CHandlerGuildInvGetMoney : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMoneyServerMessage("GUILD:TAKE_MONEY");
 		CWidgetManager::getInstance()->popModalWindow();
@@ -1391,7 +1391,7 @@ REGISTER_ACTION_HANDLER (CHandlerGuildInvGetMoney, "guild_inv_get_money");
 // ***************************************************************************
 class CHandlerGuildInvPutMoney : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMoneyServerMessage("GUILD:PUT_MONEY");
 		CWidgetManager::getInstance()->popModalWindow();

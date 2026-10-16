@@ -84,7 +84,7 @@ public:
 	/// Constructor
 	IMeshGeom();
 	/// dtor
-	virtual ~IMeshGeom();
+	virtual ~IMeshGeom() NL_OVERRIDE;
 
 
 	/** store useful information for this meshGeom in the instance. Used for IMeshVertexProgram as example

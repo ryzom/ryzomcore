@@ -66,14 +66,14 @@ public:
 	TDataSetRow			PlayerIndex;
 	uint32				Type;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className("CGPMPlayerPrivilege");
 		property("PlayerIndex", PropDataSetRow, TDataSetRow(), PlayerIndex);
 		property("Type", PropUInt32, (uint32)Player, Type);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE {}
 };
 
 

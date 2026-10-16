@@ -1048,9 +1048,9 @@ void CPackedZone32::addInstance(const CShapeInfo &si, const NLMISC::CMatrix &mat
 // ***************************************************************************************
 CSmartPtr<CPackedZone16> CPackedZone32::buildPackedZone16()
 {
-	if (Verts.size() > 65535) return NULL;
-	if (Tris.size() > 65534) return NULL; // NB : not 65534 here because -1 is used to mark the end of a list
-	if (TriLists.size() > 65534) return NULL;
+	if (Verts.size() > 65535) return nullptr;
+	if (Tris.size() > 65534) return nullptr; // NB : not 65534 here because -1 is used to mark the end of a list
+	if (TriLists.size() > 65534) return nullptr;
 	// can convert
 	CSmartPtr<CPackedZone16> dest = new CPackedZone16;
 	dest->Box = Box;
@@ -1279,7 +1279,7 @@ void CPackedZone16::unpackTri(const CPackedTri16 &src, CVector dest[3]) const
 }
 
 // raytrace code, common to CPackedZone32 & CPackedZone16
-template <class T> bool raytrace(T &packedZone, const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL)
+template <class T> bool raytrace(T &packedZone, const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<CTriangle> *testedTriangles = nullptr, NLMISC::CVector *normal = nullptr)
 {
 	if (packedZone.Grid.empty()) return false;
 	CVector2f start2f((start.x - packedZone.Box.getMin().x) / packedZone.CellSize, (start.y - packedZone.Box.getMin().y) / packedZone.CellSize);

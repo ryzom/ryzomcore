@@ -1101,7 +1101,7 @@ static void speedTest1()
 class CPersistentDataTest: public IServiceSingleton
 {
 public:
-	void init() 
+	void init() NL_OVERRIDE 
 	{
 		// test1(); // test pd tree & lines format
 		// test2(); // test a pdr containing a bit of everything

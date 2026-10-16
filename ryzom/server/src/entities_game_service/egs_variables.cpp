@@ -591,10 +591,10 @@ CVariable<sint32> FameAbsoluteMin( "egs", "FameAbsoluteMin", "Absolute fame mini
 CVariable<sint32> FameAbsoluteMax( "egs", "FameAbsoluteMax", "Absolute fame maximum a player can have", 100*kFameMultipler, 0, true );
 
 /* Fame variables, naming:
-	The fame variables begin with the name "Fame". The next part is if the variable is a
-	starting value, "Start", or maximum value, "Max".  The last elements indicate the groups
-	compared.  The first group is the character's group, then a small 'v' to separate, and
-	then the target group of the fame desired. For example: FameStartTrykervFyros is a Tryker
+	The fame variables begin with the name "Fame". The next part is if the variable is a 
+	starting value, "Start", or maximum value, "Max".  The last elements indicate the groups 
+	compared.  The first group is the character's group, then a small 'v' to separate, and 
+	then the target group of the fame desired. For example: FameStartTrykervFyros is a Tryker 
 	character's starting Fyros fame.
 */
 
@@ -662,7 +662,7 @@ CVariable<bool> UseFemaleTitles("egs","UseFemaleTitles", "Use female titles when
 // - NPC Icons
 CVariable<uint32> ClientNPCIconRefreshTimerDelay("egs", "ClientNPCIconRefreshTimerDelay", "Max number of gamecycles between 2 refreshes of a single mission giver NPC", 60*10, 0, true, CPlayerManager::onNPCIconTimerChanged);
 
-// - Ring
+// - Ring 
 CVariable<uint32> TickFrequencyNpcControlUpdate("egs","TickFrequencyNpcControlUpdate","Min time in tick between 2 updates of udate of npc control", 6, 0, true);
 CVariable<bool> RingXpEnabled("egs", "RingXpEnabled", "Enable earning XP in Ring", false, 0, true);
 CVariable<bool> RingLootEnabled("egs", "RingLootEnabled", "Enable looting mobs in Ring", false, 0, true);

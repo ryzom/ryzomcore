@@ -91,32 +91,32 @@ public:
 	}
 
 protected:
-	virtual void addCallbackArray(const NLNET::TCallbackItem *callbackarray, sint arraysize)
+	virtual void addCallbackArray(const NLNET::TCallbackItem *callbackarray, sint arraysize) NL_OVERRIDE
 	{
 		_CallbackServer.addCallbackArray(callbackarray, arraysize);
 	}
-	virtual void setConnectionCallback(NLNET::TNetCallback cb, void *arg)
+	virtual void setConnectionCallback(NLNET::TNetCallback cb, void *arg) NL_OVERRIDE
 	{
 		_CallbackServer.setConnectionCallback(cb, arg);
 	}
-	virtual void setDisconnectionCallback(NLNET::TNetCallback cb, void *arg)
+	virtual void setDisconnectionCallback(NLNET::TNetCallback cb, void *arg) NL_OVERRIDE
 	{
 		_CallbackServer.setDisconnectionCallback(cb, arg);
 	}
-	virtual void init(uint16 port)
+	virtual void init(uint16 port) NL_OVERRIDE
 	{
 		_CallbackServer.init(port);
 	}
-	virtual void disconnect( NLNET::TSockId hostid)
+	virtual void disconnect( NLNET::TSockId hostid) NL_OVERRIDE
 	{
 		_CallbackServer.disconnect(hostid);
 	}
 
-	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid, bool log = true)
+	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid, bool log = true) NL_OVERRIDE
 	{
 		_CallbackServer.send(buffer, hostid, log);
 	}
-	virtual void update()
+	virtual void update() NL_OVERRIDE
 	{
 		_CallbackServer.update();
 	}
@@ -137,28 +137,28 @@ public:
 	}
 
 protected:
-	virtual void addCallbackArray(const NLNET::TCallbackItem *callbackarray, sint arraysize)
+	virtual void addCallbackArray(const NLNET::TCallbackItem *callbackarray, sint arraysize) NL_OVERRIDE
 	{
 		_CallbackClient.addCallbackArray(callbackarray, arraysize);
 	}
-	virtual void setDisconnectionCallback(NLNET::TNetCallback cb, void *arg)
+	virtual void setDisconnectionCallback(NLNET::TNetCallback cb, void *arg) NL_OVERRIDE
 	{
 		_CallbackClient.setDisconnectionCallback(cb, arg);
 	}
-	virtual void connect( const NLNET::CInetHost& addr )
+	virtual void connect( const NLNET::CInetHost& addr ) NL_OVERRIDE
 	{
 		_CallbackClient.connect(addr);
 	}
-	virtual bool connected()
+	virtual bool connected() NL_OVERRIDE
 	{
 		return _CallbackClient.connected();
 	}
 
-	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true)
+	virtual void send(const NLNET::CMessage &buffer, NLNET::TSockId hostid = NLNET::InvalidSockId, bool log = true) NL_OVERRIDE
 	{
 		_CallbackClient.send(buffer, hostid, log);
 	}
-	virtual void update()
+	virtual void update() NL_OVERRIDE
 	{
 		_CallbackClient.update();
 	}

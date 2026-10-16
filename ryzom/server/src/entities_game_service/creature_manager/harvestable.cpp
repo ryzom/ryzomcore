@@ -80,7 +80,7 @@ CHarvestable::~CHarvestable()
 
 
 //--------------------------------------------------------------
-//						removeMp()
+//						removeMp()  
 //--------------------------------------------------------------
 void CHarvestable::removeMp( uint32 mpIndex, uint16 quantity )
 {
@@ -89,7 +89,7 @@ void CHarvestable::removeMp( uint32 mpIndex, uint16 quantity )
 		nlwarning("<CHarvestable::removeMp> Invalid mp index %u, there is only %u mps", mpIndex, _Mps.size() );
 		return;
 	}
-
+	
 	_Mps[ mpIndex ].Quantity = ( _Mps[ mpIndex ].Quantity > quantity) ? (_Mps[ mpIndex ].Quantity-quantity) : 0;
 
 	// if a player has been specified, update his database with the new quantity
@@ -107,7 +107,7 @@ void CHarvestable::removeMp( uint32 mpIndex, uint16 quantity )
 
 
 //--------------------------------------------------------------
-//						writeMpInfos()
+//						writeMpInfos()  
 //--------------------------------------------------------------
 bool CHarvestable::writeMpInfos()
 {
@@ -146,11 +146,11 @@ bool CHarvestable::writeMpInfos()
 	for (uint i = 0 ; i < nbMp ; ++i)
 	{
 		const CCreatureRawMaterial &mp = _Mps[i];
-
+		
 		if (mp.ItemId != CSheetId::Unknown)
 			if (mp.Quantity > 0)
 				++validMps;
-	}
+	}	
 
 	// Display quantity and sheet id of the mps
 	for (uint i = 0; i < invTemp->getSlotCount()-_LootSlotCount; ++i)
@@ -207,7 +207,7 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 	_Mps.clear();
 	_GenericMps.clear();
 
-	if( IsRingShard )
+	if( IsRingShard ) 
 	{
 		if (VerboseQuartering)
 			nldebug("QRTR: %s: No quartering in Ring mode", CurrentCreatureSpawningDebug.c_str());

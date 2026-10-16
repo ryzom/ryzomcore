@@ -61,20 +61,20 @@ public:
 	CMeshVPPerPixelLight() : SpecularLighting(true), _Enabled(false) {}
 	/// \name IMeshVertexProgram implementation
 	// @{
-		virtual	void	initInstance(CMeshBaseInstance *mbi);
+		virtual	void	initInstance(CMeshBaseInstance *mbi) NL_OVERRIDE;
 		virtual	bool	begin(IDriver *drv,
 							  CScene *scene,
 							  CMeshBaseInstance *mbi,
 							  const NLMISC::CMatrix &invertedModelMat,
-							  const NLMISC::CVector &viewerPos);
-		virtual	void	end(IDriver *drv);
-		virtual void	serial(NLMISC::IStream &f);
+							  const NLMISC::CVector &viewerPos) NL_OVERRIDE;
+		virtual	void	end(IDriver *drv) NL_OVERRIDE;
+		virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 		virtual void	setupForMaterial(const CMaterial &mat,
 										 IDriver *drv,
 										 CScene *scene,
 										 CVertexBuffer *vb
-										);
-		virtual	bool	needTangentSpace() const { return true; }
+										) NL_OVERRIDE;
+		virtual	bool	needTangentSpace() const NL_OVERRIDE { return true; }
 		NLMISC_DECLARE_CLASS(CMeshVPPerPixelLight);
 	// @}
 private:

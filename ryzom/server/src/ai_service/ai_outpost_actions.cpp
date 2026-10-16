@@ -502,8 +502,9 @@ DEFINE_ACTION(ContextSquadTemplateVariant,GRPTMPL)
 		return;
 
 	aii->registerSquadVariant( CWorkPtr::squadVariantName(), groupDesc );
+
 	CWorkPtr::groupDesc( groupDesc );
-	
+
 	groupDesc->setBaseBotCount(botCount);
 	groupDesc->setCountMultiplierFlag(countMultipliedBySheet);
 	groupDesc->setMultiLevel(multiLevel);

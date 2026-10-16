@@ -120,9 +120,9 @@ class CInfoExtractor_##name: public ICharInfoExtractor\
 {\
 public:\
 	CInfoExtractor_##name(const std::string& rawArgs,const ICharInfoExtractorBuilder *builder) {_RawArgs=rawArgs;_Builder=builder;}\
-	virtual std::string toString() const {return std::string(#name)+" "+_RawArgs;}\
-	virtual const ICharInfoExtractorBuilder* getBuilder() const {return _Builder;}\
-	virtual void execute(CCharacterScanJob* job,const CStatsScanCharacter* c);\
+	virtual std::string toString() const NL_OVERRIDE {return std::string(#name)+" "+_RawArgs;}\
+	virtual const ICharInfoExtractorBuilder* getBuilder() const NL_OVERRIDE {return _Builder;}\
+	virtual void execute(CCharacterScanJob* job,const CStatsScanCharacter* c) NL_OVERRIDE;\
 private:\
 	NLMISC::CSString _RawArgs;\
 	const ICharInfoExtractorBuilder *_Builder;\
@@ -130,10 +130,10 @@ private:\
 class CInfoExtractorBuilder_##name: public ICharInfoExtractorBuilder\
 {\
 public:\
-	virtual const char* getName() const			{return #name;}\
-	virtual const char* getDescription() const	{return description;}\
-	virtual const char* getFields() const		{return fields;}\
-	virtual ICharInfoExtractor* build(const std::string& rawArgs) const {return new CInfoExtractor_##name(rawArgs,this);}\
+	virtual const char* getName() const NL_OVERRIDE			{return #name;}\
+	virtual const char* getDescription() const NL_OVERRIDE	{return description;}\
+	virtual const char* getFields() const NL_OVERRIDE		{return fields;}\
+	virtual ICharInfoExtractor* build(const std::string& rawArgs) const NL_OVERRIDE {return new CInfoExtractor_##name(rawArgs,this);}\
 };\
 CInfoExtractorRegisterer<CInfoExtractorBuilder_##name> __Registerer_CInfoExtractor_##name;\
 void CInfoExtractor_##name::execute(CCharacterScanJob* job,const CStatsScanCharacter* c)

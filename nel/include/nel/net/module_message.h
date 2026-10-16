@@ -95,7 +95,8 @@ namespace NLNET
 
 		/// default constructor, used to read in stream
 		TBinBuffer()
-			:	_Buffer(NULL),
+			:	_Buffer(nullptr)
+	        ,
 				_BufferSize(0),
 				_Owner(true)
 		{
@@ -120,7 +121,7 @@ namespace NLNET
 
 		~TBinBuffer()
 		{
-			if (_Owner && _Buffer != NULL)
+			if (_Owner && _Buffer != nullptr)
 				delete _Buffer;
 		}
 

@@ -44,7 +44,7 @@ public:
 	CClientReceiveTask( CBufClient *client, CNonBlockingBufSock *bufsock ) : NbLoop(0), _Client(client), _NBBufSock(bufsock) {} // CHANGED: non-blocking client connection
 
 	/// Run
-	virtual void run();
+	virtual void run() NL_OVERRIDE;
 
 	/// Returns a pointer to the bufsock object
 	CNonBlockingBufSock		*bufSock() { return _NBBufSock; } // CHANGED: non-blocking client connection (previously, returned _SockId->Sock)
@@ -95,7 +95,7 @@ public:
 	CBufClient( bool nodelay=true, bool replaymode=false, bool initPipeForDataAvailable=true );
 
 	/// Destructor
-	virtual ~CBufClient();
+	virtual ~CBufClient() NL_OVERRIDE;
 
 	/// Connects to the specified host
 	void	connect( const CInetHost &addr );
@@ -165,7 +165,7 @@ public:
 	 * \returns False if an error has occurred (e.g. the remote host is disconnected).
 	 * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
 	 */
-	bool	flush( uint *nbBytesRemaining=NULL ) { return _BufSock->flush( nbBytesRemaining ); }
+	bool	flush( uint *nbBytesRemaining = nullptr) { return _BufSock->flush( nbBytesRemaining ); }
 
 
 

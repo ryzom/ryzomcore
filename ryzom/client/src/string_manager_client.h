@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -422,13 +422,13 @@ public:
  */
 class CLoadProxy : public NLMISC::CI18N::ILoadProxy, public TStringDiff::IDiffCallback
 {
-	void loadStringFile(const std::string &filename, ucstring &text); // TODO: UTF-8 (serial)
+	void loadStringFile(const std::string &filename, ucstring &text) NL_OVERRIDE; // TODO: UTF-8 (serial)
 
-	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context);
+	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
 
 };
 

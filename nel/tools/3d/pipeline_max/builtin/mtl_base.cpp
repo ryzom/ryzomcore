@@ -46,7 +46,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CMtlBase::CMtlBase(CScene *scene) : CReferenceTarget(scene), m_NameChunk(NULL)
+CMtlBase::CMtlBase(CScene *scene) : CReferenceTarget(scene), m_NameChunk(nullptr)
 {
 
 }
@@ -83,7 +83,7 @@ void CMtlBase::build(uint16 version, uint filter)
 
 void CMtlBase::disown()
 {
-	m_NameChunk = NULL;
+	m_NameChunk = nullptr;
 	CReferenceTarget::disown();
 }
 
@@ -107,7 +107,7 @@ const ISceneClassDesc *CMtlBase::classDesc() const
 // child of the 0x4000 material-base container.
 void CMtlBase::decodeName()
 {
-	m_NameChunk = NULL;
+	m_NameChunk = nullptr;
 	const TStorageObjectContainer &orphans = orphanedChunks();
 	for (TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
 	{

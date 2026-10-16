@@ -53,7 +53,7 @@ void CItemFXSheet::build(const NLGEORGES::UFormElm &item, const std::string &pre
 	item.getValueByName(AttackFXRot.y,    (prefix + "AttackFXRot.Y").c_str());
 	item.getValueByName(AttackFXRot.z,    (prefix + "AttackFXRot.Z").c_str());
 	item.getValueByName(ImpactFXDelay,    (prefix + "ImpactFXDelay").c_str());
-	const NLGEORGES::UFormElm *array = NULL;
+	const NLGEORGES::UFormElm *array = nullptr;
 	if (item.getNodeByName(&array, prefix + "StaticFXs") && array)
 	{
 		uint count;

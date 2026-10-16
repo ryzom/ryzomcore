@@ -129,7 +129,7 @@ public:
 	
 protected:
 
-	virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+	virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 	{
 		// no header
 		if (Result->size() < 10000)
@@ -146,7 +146,7 @@ public:
 
 	CLogAnalyserService::CQuery*	Query;
 
-	virtual void	run()
+	virtual void	run() NL_OVERRIDE
 	{
 		NLMISC::CLog	taskLog;
 		CStrDisplayer	taskDisplayer(&(Query->Result));

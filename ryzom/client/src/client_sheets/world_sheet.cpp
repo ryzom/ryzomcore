@@ -139,7 +139,7 @@ void SMap::build(const NLGEORGES::UFormElm *pItem)
 	const UFormElm *pElt;
 	nlverify (pItem->getNodeByName (&pElt, "children"));
 	uint size;
-	if (pElt == NULL) return;
+	if (pElt == nullptr) return;
 	nlverify (pElt->getArraySize (size));
 	Children.reserve(size);
 	for (uint32 i = 0; i < size; ++i)

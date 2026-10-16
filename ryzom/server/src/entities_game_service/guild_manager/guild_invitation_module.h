@@ -44,7 +44,7 @@ public:
 	void accept();
 private:
 	/// handler called on parent ( player destruction )
-	virtual void onParentDestructionHandler();
+	virtual void onParentDestructionHandler() NL_OVERRIDE;
 	/// "real" invitation object
 	CGuildInvitation * _Invitation;
 };

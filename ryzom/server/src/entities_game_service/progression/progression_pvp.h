@@ -208,14 +208,14 @@ public:
 	void getPlayersWoundedByCreature(TDataSetRow creatureRowId, std::vector<TDataSetRow> & woundedPlayers) const;
 
 protected:
-	void cbTeamReferenceAdded(TDataSetRow ownerRowId, TTeamId teamId);
-	void cbTeamReferenceRemoved(TDataSetRow ownerRowId, TTeamId teamId);
+	void cbTeamReferenceAdded(TDataSetRow ownerRowId, TTeamId teamId) NL_OVERRIDE;
+	void cbTeamReferenceRemoved(TDataSetRow ownerRowId, TTeamId teamId) NL_OVERRIDE;
 
-	void cbPlayerReferenceAdded(TDataSetRow ownerRowId, TDataSetRow playerRowId);
-	void cbPlayerReferenceRemoved(TDataSetRow ownerRowId, TDataSetRow playerRowId);
+	void cbPlayerReferenceAdded(TDataSetRow ownerRowId, TDataSetRow playerRowId) NL_OVERRIDE;
+	void cbPlayerReferenceRemoved(TDataSetRow ownerRowId, TDataSetRow playerRowId) NL_OVERRIDE;
 
-	void cbCreatureReferenceAdded(TDataSetRow ownerRowId, TDataSetRow creatureRowId);
-	void cbCreatureReferenceRemoved(TDataSetRow ownerRowId, TDataSetRow creatureRowId);
+	void cbCreatureReferenceAdded(TDataSetRow ownerRowId, TDataSetRow creatureRowId) NL_OVERRIDE;
+	void cbCreatureReferenceRemoved(TDataSetRow ownerRowId, TDataSetRow creatureRowId) NL_OVERRIDE;
 
 private:
 	typedef CHashMap<TDataSetRow, std::vector<TDataSetRow>, TDataSetRow::CHashCode>	TPlayersWoundedByEntity;

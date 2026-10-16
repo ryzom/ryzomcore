@@ -47,14 +47,14 @@ namespace NLGUI
         CViewQuad( const TCtorParam &param );
 
 		// from CInterfaceElement
-		bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup);
-		virtual void updateCoords();
-		virtual void draw();
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		// from CViewBase
-		virtual sint32 getAlpha() const { return (sint32) _Color.A; }
-		virtual void setAlpha (sint32 a);
+		virtual sint32 getAlpha() const NL_OVERRIDE { return (sint32) _Color.A; }
+		virtual void setAlpha (sint32 a) NL_OVERRIDE;
 
 		// texture
 		void setTexture(const std::string &texName);

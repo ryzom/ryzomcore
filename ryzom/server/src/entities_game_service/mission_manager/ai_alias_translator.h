@@ -362,7 +362,7 @@ inline const NLMISC::CEntityId& CAIAliasTranslator::getEntityId(TAIAlias aiid) c
 	if(  it != _HashTableAiId.end() )
 		return (*it).second;
 #if !FINAL_VERSION
-	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see 
+	nlerror( "Illegal call to getEntityId on entity with no alias" ); // see
 #endif
 	return NLMISC::CEntityId::Unknown;
 }// CAIAliasTranslator getEntityId

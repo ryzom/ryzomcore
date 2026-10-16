@@ -70,7 +70,7 @@ void CFormDfn::write (xmlDocPtr doc, const std::string &filename)
 	_Filename = CFile::getFilename (filename);
 
 	// Create the first node
-	xmlNodePtr node = xmlNewDocNode (doc, NULL, (const xmlChar*)"DFN", NULL);
+	xmlNodePtr node = xmlNewDocNode (doc, nullptr, (const xmlChar*)"DFN", nullptr);
 	xmlDocSetRootElement (doc, node);
 
 	// Write elements
@@ -81,7 +81,7 @@ void CFormDfn::write (xmlDocPtr doc, const std::string &filename)
 		if (!Parents[parent].ParentFilename.empty ())
 		{
 			// Parent node
-			xmlNodePtr parentNode = xmlNewChild ( node, NULL, (const xmlChar*)"PARENT", NULL);
+			xmlNodePtr parentNode = xmlNewChild ( node, nullptr, (const xmlChar*)"PARENT", nullptr);
 
 			// Save parent
 			xmlSetProp (parentNode, (const xmlChar*)"Name", (const xmlChar*)Parents[parent].ParentFilename.c_str());
@@ -93,7 +93,7 @@ void CFormDfn::write (xmlDocPtr doc, const std::string &filename)
 	for (elm=0; elm<Entries.size(); elm++)
 	{
 		// Add a node
-		xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"ELEMENT", NULL);
+		xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"ELEMENT", nullptr);
 		xmlSetProp (elmPtr, (const xmlChar*)"Name", (const xmlChar*)Entries[elm].Name.c_str());
 
 		// What kind of element
@@ -135,7 +135,7 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 	_Filename = CFile::getFilename (filename);
 
 	// Check node name
-	if ( ((const char*)root->name == NULL) || (strcmp ((const char*)root->name, "DFN") != 0) )
+	if ( ((const char*)root->name == nullptr) || (strcmp ((const char*)root->name, "DFN") != 0) )
 	{
 		// Throw exception
 		warning (true, "read", "XML Syntax error in block line %d, node (%s) should be DFN.", (sint)root->line, root->name);
@@ -161,7 +161,7 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 
 			// Load the parent
 			Parents[parentNumber].Parent = loader.loadFormDfn (Parents[parentNumber].ParentFilename.c_str (), forceLoad);
-			if ((Parents[parentNumber].Parent == NULL) && !forceLoad)
+			if ((Parents[parentNumber].Parent == nullptr) && !forceLoad)
 			{
 				// Throw exception
 				warning (true, "read", "Can't load parent DFN file (%s).", Parents[parentNumber].ParentFilename.c_str ());
@@ -204,8 +204,8 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 			xmlFree ((void*)value);
 
 			// Reset
-			Entries[childNumber].Dfn = NULL;
-			Entries[childNumber].Type = NULL;
+			Entries[childNumber].Dfn = nullptr;
+			Entries[childNumber].Type = nullptr;
 			Entries[childNumber].Default.clear ();
 
 			const char *filename = (const char*)xmlGetProp (child, (xmlChar*)"Filename");
@@ -250,7 +250,7 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 					if (!Entries[childNumber].Filename.empty ())
 					{
 						Entries[childNumber].Type = loader.loadType (Entries[childNumber].Filename.c_str ());
-						if ((Entries[childNumber].Type == NULL) && !forceLoad)
+						if ((Entries[childNumber].Type == nullptr) && !forceLoad)
 						{
 							// Throw exception
 							warning (true, "read", "In XML block (%s) line %d, file not found %s.",
@@ -284,7 +284,7 @@ void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const
 					{
 						// Load the filename
 						Entries[childNumber].Dfn = loader.loadFormDfn (Entries[childNumber].Filename.c_str (), forceLoad);
-						if ((Entries[childNumber].Dfn == NULL) && !forceLoad)
+						if ((Entries[childNumber].Dfn == nullptr) && !forceLoad)
 						{
 							// Throw exception
 							warning (true, "read", "XML In block (%s) line %d, file not found %s.",
@@ -470,7 +470,7 @@ void CFormDfn::setNumParent (uint size)
 void CFormDfn::setParent (uint parent, CFormLoader &loader, const std::string &filename)
 {
 	if (filename.empty())
-		Parents[parent].Parent = NULL;
+		Parents[parent].Parent = nullptr;
 	else
 		Parents[parent].Parent = loader.loadFormDfn (filename, false);
 	Parents[parent].ParentFilename = filename;
@@ -481,7 +481,7 @@ void CFormDfn::setParent (uint parent, CFormLoader &loader, const std::string &f
 void CFormDfn::CEntry::setType (CFormLoader &loader, const std::string &filename)
 {
 	TypeElement = EntryType;
-	Dfn = NULL;
+	Dfn = nullptr;
 	Filename = filename;
 	Type = loader.loadType (filename);
 }
@@ -497,7 +497,7 @@ void CFormDfn::CEntry::setDfn (CFormLoader &loader, const std::string &filename)
 {
 	TypeElement = EntryDfn;
 	Filename = filename;
-	Type = NULL;
+	Type = nullptr;
 	Dfn = loader.loadFormDfn (filename, false);
 }
 
@@ -507,8 +507,8 @@ void CFormDfn::CEntry::setDfnPointer ()
 {
 	TypeElement = EntryVirtualDfn;
 	Filename.clear();
-	Type = NULL;
-	Dfn = NULL;
+	Type = nullptr;
+	Dfn = nullptr;
 }
 
 // ***************************************************************************
@@ -626,7 +626,7 @@ CFormDfn *CFormDfn::getSubDfn (uint index, uint &dfnIndex)
 
 	// Should be found..
 	nlstop;
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -653,7 +653,7 @@ const CFormDfn *CFormDfn::getSubDfn (uint index, uint &dfnIndex) const
 
 	// Should be found..
 	nlstop;
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -763,7 +763,7 @@ bool	CFormDfn::getEntryByName (const std::string &name, CFormDfn::CEntry **entry
 		}
 		entryIndex--;
 	}
-	*entry=NULL;
+	*entry = nullptr;
 	return	false;
 }
 
@@ -775,7 +775,7 @@ bool	CFormDfn::getEntryDfnByName (const std::string &name, UFormDfn **dfn)
 		*dfn=entry->getDfnPtr();
 		return	true;
 	}
-	*dfn=NULL;
+	*dfn = nullptr;
 	return	false;
 }
 

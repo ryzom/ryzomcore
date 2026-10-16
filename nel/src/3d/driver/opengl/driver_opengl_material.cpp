@@ -305,7 +305,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	if (!mat._MatDrvInfo)
 	{
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)NULL);
+		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)nullptr);
 		// create and set iterator, for future deletion.
 		*it= mat._MatDrvInfo= new CShaderGL(this, it);
 
@@ -360,7 +360,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 				material is created, with the same pointer (bad luck). Since an newly allocated material always
 				pass here before use, we are sure to avoid any problems.
 			*/
-			_CurrentMaterial= NULL;
+			_CurrentMaterial = nullptr;
 		}
 
 		// Optimize: reset all flags at the end.
@@ -417,7 +417,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
 		{
 			ITexture	*text= mat.getTexture(uint8(stage));
-			if (text != NULL && !setupTexture(*text))
+			if (text != nullptr && !setupTexture(*text))
 				return false;
 		}
 	}
@@ -427,7 +427,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		for (uint stage = 0; stage < mat._LightMaps.size(); ++stage)
 		{
 			ITexture *text = mat._LightMaps[stage].Texture;
-			if (text != NULL && !setupTexture(*text))
+			if (text != nullptr && !setupTexture(*text))
 				return(false);
 		}
 	}
@@ -796,7 +796,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 		for(uint stage = 1; stage < inlGetNumTextStages(); stage++)
 		{
 			// disable texturing.
-			activateTexture(stage, NULL);
+			activateTexture(stage, nullptr);
 		}
 
 		return;
@@ -1014,7 +1014,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 		else
 		{
 			// else all other stages are disabled.
-			activateTexture(stage,NULL);
+			activateTexture(stage, nullptr);
 		}
 	}
 
@@ -1169,7 +1169,7 @@ void			CDriverGL::setupSpecularBegin()
 	for(; stage < inlGetNumTextStages(); stage++)
 	{
 		// disable texturing
-		activateTexture(stage, NULL);
+		activateTexture(stage, nullptr);
 	}
 
 	// ---- Stage 0 Common Setup.
@@ -1234,7 +1234,7 @@ sint			CDriverGL::beginSpecularMultiPass()
 		setupSpecularBegin();
 
 	// Manage the rare case when the SpecularMap is not provided (fault of graphist).
-	if(mat.getTexture(1)==NULL)
+	if(mat.getTexture(1) == nullptr)
 		return 1;
 
 	if(!_Extensions.ARBTextureCubeMap)
@@ -1253,7 +1253,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// Manage the rare case when the SpecularMap is not provided (error of a graphist).
-	if(mat.getTexture(1)==NULL)
+	if(mat.getTexture(1) == nullptr)
 	{
 		// Just display the texture
 		// NB: setupMaterial() code has correclty setuped textures.
@@ -1319,7 +1319,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		// Set Stage 1
 		// Special: not the same sepcial env if there is or not texture in stage 0.
 		CTexEnvSpecial		newEnvStage1;
-		if( mat.getTexture(0) == NULL )
+		if( mat.getTexture(0) == nullptr)
 			newEnvStage1= TexEnvSpecialSpecularStage1NoText;
 		else
 			newEnvStage1= TexEnvSpecialSpecularStage1;
@@ -1376,7 +1376,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 		// Set Stage 1
 		// Special: not the same special env if there is or not texture in stage 0.
 		CTexEnvSpecial		newEnvStage1;
-		if( mat.getTexture(0) == NULL )
+		if( mat.getTexture(0) == nullptr)
 			newEnvStage1= TexEnvSpecialSpecularStage1NoText;
 		else
 			newEnvStage1= TexEnvSpecialSpecularStage1;
@@ -1549,7 +1549,7 @@ CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
 	uint cubeMapIndex = expToCubeMap[exp];
 	nlassert(cubeMapIndex < numCubeMap);
 
-	if (_SpecularTextureCubes[cubeMapIndex] != NULL) // has the cube map already been cted ?
+	if (_SpecularTextureCubes[cubeMapIndex] != nullptr) // has the cube map already been cted ?
 	{
 		return _SpecularTextureCubes[cubeMapIndex];
 	}
@@ -1648,7 +1648,7 @@ void			CDriverGL::setupPPLPass(uint pass)
 
 	for (uint k = 3; k < inlGetNumTextStages(); ++k)
 	{
-		activateTexture(k, NULL);
+		activateTexture(k, nullptr);
 	}
 
 	// setup the tex envs
@@ -1849,7 +1849,7 @@ void			CDriverGL::setupPPLNoSpecPass(uint pass)
 
 	for (uint k = 2; k < inlGetNumTextStages(); ++k)
 	{
-		activateTexture(k, NULL);
+		activateTexture(k, nullptr);
 	}
 
 	// setup the tex envs
@@ -2211,9 +2211,9 @@ void CDriverGL::setupWaterPassR200(const CMaterial &mat)
 	}
 	for (k = 4; k < inlGetNumTextStages(); ++k)
 	{
-		activateTexture(k, NULL);
+		activateTexture(k, nullptr);
 	}
-	if (mat.getTexture(3) != NULL) // is there a diffuse map ?
+	if (mat.getTexture(3) != nullptr) // is there a diffuse map ?
 	{
 		nglBindFragmentShaderATI(ATIWaterShaderHandle);
 	}
@@ -2287,9 +2287,9 @@ void CDriverGL::setupWaterPassARB(const CMaterial &mat)
 	}
 	for (k = 4; k < inlGetNumTextStages(); ++k)
 	{
-		activateTexture(k, NULL);
+		activateTexture(k, nullptr);
 	}
-	uint waterShaderIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0);
+	uint waterShaderIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != nullptr ? 2 : 0);
 	// Calculated reflectivity: blend alpha from the per-vertex
 	// reflectivity base + reflection luma (variant optional; flat
 	// reflection alpha otherwise)
@@ -2437,7 +2437,7 @@ void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 	}
 	for (uint k = 4; k < inlGetNumTextStages(); ++k)
 	{
-		activateTexture(k, NULL);
+		activateTexture(k, nullptr);
 	}
 
 	// setup the texture shaders
@@ -2445,7 +2445,7 @@ void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 	activateTexEnvMode(0, texEnvReplace);
 	activateTexEnvMode(1, texEnvReplace);
 	nlctassert(IDRV_MAT_MAXTEXTURES == 4); // if this value changes, may have to change the arrays WaterNoDiffuseTexAddrMode & WaterTexAddrMode
-	if (mat.getTexture(3) == NULL)
+	if (mat.getTexture(3) == nullptr)
 	{
 		setTextureShaders(WaterNoDiffuseTexAddrMode, mat._Textures);
 		activateTexEnvMode(2, texEnvReplace);

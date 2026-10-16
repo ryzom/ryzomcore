@@ -47,23 +47,23 @@ class CBotPlayer
 {
 public:	
 	CBotPlayer(CManagerPlayer* owner, TDataSetRow const& dataSetRow, NLMISC::CEntityId const& id, uint32 level);
-	virtual ~CBotPlayer();
+	virtual ~CBotPlayer() NL_OVERRIDE;
 	
 	/// @name CChild implementation
 	//@{
 	virtual std::string	getIndexString() const;
 	virtual std::string getEntityIdString() const;
-	virtual std::string	getOneLineInfoString() const;
-	std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	//@}
 	
-	CAIInstance* getAIInstance() const;
+	CAIInstance* getAIInstance() const NL_OVERRIDE;
 	
 	void setAggroable(bool aggroable = true) { _Aggroable = aggroable; }
 	bool isAggroable() const { return _Aggroable; }
 	
 	// player are always attackable (this is a IA point of view, it mean that IA can attack player)
-	virtual bool isBotAttackable() const { return true; }
+	virtual bool isBotAttackable() const NL_OVERRIDE { return true; }
 	
 	virtual bool spawn();
 	void despawnBot();
@@ -73,10 +73,10 @@ public:
 	//	update the pos and link of player (if the position is valid, otherwise, no move are done)
 	//	perhaps should we invalidate the player worldPosition. (!?).
 	void updatePos();
-	virtual CAIPos aipos() const;
+	virtual CAIPos aipos() const NL_OVERRIDE;
 	
-	void setTarget(CAIEntityPhysical* target) { CTargetable<CAIEntityPhysical>::setTarget(target); }
-	void setVisualTarget(CAIEntityPhysical* target) { CTargetable<CAIEntityPhysical>::setVisualTarget(target); }
+	void setTarget(CAIEntityPhysical* target) NL_OVERRIDE { CTargetable<CAIEntityPhysical>::setTarget(target); }
+	void setVisualTarget(CAIEntityPhysical* target) NL_OVERRIDE { CTargetable<CAIEntityPhysical>::setVisualTarget(target); }
 	
 	bool isUnReachable() const;
 	
@@ -85,13 +85,13 @@ public:
 	float walkSpeed() const;
 	float runSpeed() const;
 	
-	CAIEntityPhysical& getPhysical() { return *this; }
+	CAIEntityPhysical& getPhysical() NL_OVERRIDE { return *this; }
 	
-	virtual RYZOMID::TTypeId getRyzomType() const { return RYZOMID::player; }
+	virtual RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::player; }
 	
 	bool isAggressive() const;
 	
-	void processEvent(const	CCombatInterface::CEvent &);
+	void processEvent(const	CCombatInterface::CEvent &) NL_OVERRIDE;
 
 	uint16	getCurrentTeamId()	const			{ return _CurrentTeamId;}
 	void	setCurrentTeamId(uint16 teamId)		{ _CurrentTeamId = teamId;}
@@ -107,8 +107,8 @@ public:
 	/// Updates the reference to zone in which the player is that can trigger event (on enter, on leave)	
 	void updateInsideTriggerZones(const std::set<uint32>& newInsideTriggerZone, std::vector<uint32>& onEnterZone, std::vector<uint32>& onLeaveZone);
 	
-	virtual sint32 getFame(std::string const& faction, bool modulated = false, bool returnUnknowValue = false) const;
-	virtual sint32 getFameIndexed(uint32 factionIndex, bool modulated = false, bool returnUnknowValue = false) const;
+	virtual sint32 getFame(std::string const& faction, bool modulated = false, bool returnUnknowValue = false) const NL_OVERRIDE;
+	virtual sint32 getFameIndexed(uint32 factionIndex, bool modulated = false, bool returnUnknowValue = false) const NL_OVERRIDE;
 	
 public:
 	static bool useOldUnreachable;
@@ -140,7 +140,7 @@ public:
 	{
 	}
 	
-	virtual ~CManagerPlayer();
+	virtual ~CManagerPlayer() NL_OVERRIDE;
 	
 	CAIInstance* getAIInstance() const
 	{

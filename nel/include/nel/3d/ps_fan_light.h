@@ -40,14 +40,14 @@ class CPSFanLight : public CPSParticle, public CPSColoredParticle
 {
 public:
 	NLMISC_DECLARE_CLASS(CPSFanLight);
-	virtual bool		completeBBox(NLMISC::CAABBox &box) const;
+	virtual bool		completeBBox(NLMISC::CAABBox &box) const NL_OVERRIDE;
 	///\name Object
 	//@{
 	/// Ctor, with the numbers of fans to draw (minimum is 3, maximum is 128)
 	CPSFanLight(uint32 nbFans = 7);
 	/// Dtor
-	~CPSFanLight();
-	void				serial(NLMISC::IStream &f);
+	~CPSFanLight() NL_OVERRIDE;
+	void				serial(NLMISC::IStream &f) NL_OVERRIDE;
 	//@}
 
 	// Set the number of fans used for drawing (minimum is 3, maximum is 128)
@@ -88,57 +88,57 @@ public:
 	float				getPhaseSpeed(void) const { return _PhaseSpeed / 256.0f; }
 
 	// update the material and the vb so that they match the color scheme. Inherited from CPSColoredParticle
-	virtual void		updateMatAndVbForColor(void);
+	virtual void		updateMatAndVbForColor(void) NL_OVERRIDE;
 
 
 	/// must call this at least if you intend to use fanlight
 	static void			initFanLightPrecalc(void);
 
 	/// return true if there are transparent faces in the object
-	virtual bool		hasTransparentFaces(void);
+	virtual bool		hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool		hasOpaqueFaces(void);
+	virtual bool		hasOpaqueFaces(void) NL_OVERRIDE;
 
 
 	/// return the max number of faces needed for display. This is needed for LOD balancing
-	virtual uint32		getNumWantedTris() const;
+	virtual uint32		getNumWantedTris() const NL_OVERRIDE;
 
 	/// Set a texture. NULL remove it
-	void setTexture(CSmartPtr<ITexture> tex)
+	void setTexture(CSmartPtr<ITexture> tex) NL_OVERRIDE
 	{
 		_Tex = tex;
 	}
 
 	/// get the texture used
-	ITexture *getTexture(void)
+	ITexture *getTexture(void) NL_OVERRIDE
 	{
 		return _Tex;
 	}
-	const ITexture *getTexture(void) const
+	const ITexture *getTexture(void) const NL_OVERRIDE
 	{
 		return _Tex;
 	}
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool hasLightableFaces() { 	return false; }
+	virtual bool hasLightableFaces() NL_OVERRIDE { 	return false; }
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return true; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return true; }
 
-	virtual	void			enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv);
+	virtual	void			enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv) NL_OVERRIDE;
 
 	// from CPSParticle
-	virtual void			setZBias(float value) { CPSMaterial::setZBias(value); }
-	virtual float			getZBias() const { return CPSMaterial::getZBias(); }
+	virtual void			setZBias(float value) NL_OVERRIDE { CPSMaterial::setZBias(value); }
+	virtual float			getZBias() const NL_OVERRIDE { return CPSMaterial::getZBias(); }
 
 protected:
-	void				newElement(const CPSEmitterInfo &info);
-	void				deleteElement(uint32);
-	virtual void resize(uint32 size);
-	virtual CPSLocated *getColorOwner(void) { return _Owner; }
-	virtual CPSLocated *getSizeOwner(void) { return _Owner; }
-	virtual CPSLocated *getAngle2DOwner(void) { return _Owner; }
+	void				newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	void				deleteElement(uint32) NL_OVERRIDE;
+	virtual void resize(uint32 size) NL_OVERRIDE;
+	virtual CPSLocated *getColorOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getSizeOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getAngle2DOwner(void) NL_OVERRIDE { return _Owner; }
 private:
 	friend class CPSFanLightHelper;
 	typedef CHashMap<uint, CVertexBuffer>  TVBMap;
@@ -162,7 +162,7 @@ private:
 private:
 	/// initialisations
 	virtual void init(void);
-	virtual void draw(bool opaque);
+	virtual void draw(bool opaque) NL_OVERRIDE;
 	// setup and get the needed vb for display
 	void getVBnIB(CVertexBuffer *&vb, CIndexBuffer *&ib);
 	uint getNumFanlightsInVB() const;

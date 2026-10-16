@@ -64,7 +64,7 @@ namespace NLNET
 		{
 		}
 
-		void sendMessage(const CMessage &message) const;
+		void sendMessage(const CMessage &message) const NL_OVERRIDE;
 	};
 
 #define LAYER3_SERVER_CLASS_NAME "L3Server"
@@ -92,26 +92,26 @@ namespace NLNET
 		{
 		}
 
-		~CGatewayL3ServerTransport()
+		~CGatewayL3ServerTransport() NL_OVERRIDE
 		{
-			if (_CallbackServer.get() != NULL)
+			if (_CallbackServer.get() != nullptr)
 			{
 				// the transport is still open, close it before destruction
 				closeServer();
 			}
 		}
 
-		const std::string &getClassName() const
+		const std::string &getClassName() const NL_OVERRIDE
 		{
 			static string className(LAYER3_SERVER_CLASS_NAME);
 			return className;
 		}
 
-		virtual void update()
+		virtual void update() NL_OVERRIDE
 		{
 			H_AUTO(L3S_update);
 			// update the callback server
-			if (_CallbackServer.get() != NULL)
+			if (_CallbackServer.get() != nullptr)
 				_CallbackServer->update2(100, 0);
 
 			uint32 now = CTime::getSecondsSince1970();
@@ -139,16 +139,16 @@ namespace NLNET
 
 		}
 
-		virtual uint32 getRouteCount() const
+		virtual uint32 getRouteCount() const NL_OVERRIDE
 		{
 			return (uint32)_Routes.size();
 		}
 
-		void dump(NLMISC::CLog &log) const
+		void dump(NLMISC::CLog &log) const NL_OVERRIDE
 		{
 			IModuleManager &mm = IModuleManager::getInstance();
 			log.displayNL("  NeL Net layer 3 transport, SERVER mode");
-			if (_CallbackServer.get() == NULL)
+			if (_CallbackServer.get() == nullptr)
 			{
 				log.displayNL("  The server is currently closed.");
 			}
@@ -173,7 +173,7 @@ namespace NLNET
 							IModuleProxy *modProx = mm.getModuleProxy(first->second);
 
 							log.displayNL("      - Proxy '%s' : local proxy id %u => foreign module id %u",
-								modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
+								modProx != nullptr ? modProx->getModuleName().c_str() : "ERROR, invalid module",
 								first->second,
 								first->first);
 						}
@@ -187,13 +187,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */)
+		void onCommand(const CMessage &/* command */) NL_OVERRIDE
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command)
+		bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();
@@ -202,7 +202,7 @@ namespace NLNET
 			if (commandName == "open")
 			{
 				const TParsedCommandLine *portParam = command.getParam("port");
-				if (portParam == NULL)
+				if (portParam == nullptr)
 					throw EInvalidCommand();
 
 				uint16 port;
@@ -223,7 +223,7 @@ namespace NLNET
 		/// Open the server by starting listing for incoming connection on the specified port
 		void openServer(uint16 port)
 		{
-			if (_CallbackServer.get() != NULL)
+			if (_CallbackServer.get() != nullptr)
 				throw ETransportError("openServer : The server is already open");
 
 			// create a new callback server
@@ -246,7 +246,7 @@ namespace NLNET
 		/// Close the server, this will close the listing socket and any active connection
 		void closeServer()
 		{
-			if (_CallbackServer.get() == NULL)
+			if (_CallbackServer.get() == nullptr)
 				throw ETransportError("closeServer : The server is not open");
 
 			// close all client connections
@@ -418,7 +418,7 @@ namespace NLNET
 		{
 		}
 
-		void sendMessage(const CMessage &message) const
+		void sendMessage(const CMessage &message) const NL_OVERRIDE
 		{
 			NLNET_AUTO_DELTE_ASSERT;
 			H_AUTO(L3CRoute_sendMessage);
@@ -476,14 +476,14 @@ namespace NLNET
 		{
 		}
 
-		~CGatewayL3ClientTransport()
+		~CGatewayL3ClientTransport() NL_OVERRIDE
 		{
 			deletePendingRoute();
 
 			// close all open connection
 			for (uint i=0; i<_RouteIds.size(); ++i)
 			{
-				if (_RouteIds[i] != NULL)
+				if (_RouteIds[i] != nullptr)
 				{
 					// close this open connection
 					close(i);
@@ -501,20 +501,20 @@ namespace NLNET
 				_DispatcherIndex.erase(&(route->CallbackClient));
 				_Routes.erase(route->CallbackClient.getSockId());
 
-				_RouteIds[route->ConnId] = NULL;
+				_RouteIds[route->ConnId] = nullptr;
 				_FreeRoutesIds.push_back(route->ConnId);
 				delete route;
 				_RouteToRemove.pop_front();
 			}
 		}
 
-		const std::string &getClassName() const
+		const std::string &getClassName() const NL_OVERRIDE
 		{
 			static string className(LAYER3_CLIENT_CLASS_NAME);
 			return className;
 		}
 
-		virtual void update()
+		virtual void update() NL_OVERRIDE
 		{
 			H_AUTO(L3C_update);
 			// delete any route pending
@@ -570,12 +570,12 @@ namespace NLNET
 			}
 		}
 
-		virtual uint32 getRouteCount() const
+		virtual uint32 getRouteCount() const NL_OVERRIDE
 		{
 			return (uint32)_Routes.size();
 		}
 
-		void dump(NLMISC::CLog &log) const
+		void dump(NLMISC::CLog &log) const NL_OVERRIDE
 		{
 			IModuleManager &mm = IModuleManager::getInstance();
 			log.displayNL("  NeL Net layer 3 transport, CLIENT mode");
@@ -597,7 +597,7 @@ namespace NLNET
 						IModuleProxy *modProx = mm.getModuleProxy(first->second);
 						
 						log.displayNL("      - Proxy '%s' : local proxy id %u => foreign module id %u",
-							modProx != NULL ? modProx->getModuleName().c_str() : "ERROR, invalid module",
+							modProx != nullptr ? modProx->getModuleName().c_str() : "ERROR, invalid module",
 							first->second,
 							first->first);
 					}
@@ -610,13 +610,13 @@ namespace NLNET
 			}
 		}
 
-		void onCommand(const CMessage &/* command */)
+		void onCommand(const CMessage &/* command */) NL_OVERRIDE
 		{
 			// nothing done for now
 			throw EInvalidCommand();
 		}
 		/// The gateway send a textual command to the transport
-		bool onCommand(const TParsedCommandLine &command)
+		bool onCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
 			if (command.SubParams.size() < 1)
 				throw  EInvalidCommand();
@@ -625,7 +625,7 @@ namespace NLNET
 			if (commandName == "connect")
 			{
 				const TParsedCommandLine *addrParam = command.getParam("addr");
-				if (addrParam == NULL)
+				if (addrParam == nullptr)
 					throw EInvalidCommand();
 
 				CInetHost addr(addrParam->ParamValue);
@@ -635,7 +635,7 @@ namespace NLNET
 			else if (commandName == "close")
 			{
 				const TParsedCommandLine *conIdParam= command.getParam("connId");
-				if (conIdParam == NULL)
+				if (conIdParam == nullptr)
 					throw EInvalidCommand();
 
 				uint32	connId;
@@ -721,7 +721,7 @@ namespace NLNET
 				return;
 			}
 
-			if (_RouteIds[connId] == NULL)
+			if (_RouteIds[connId] == nullptr)
 			{
 				nlwarning("CGatewayL3ClientTransport : Invalid connectionId %u, the connection is unused now.", connId);
 				return;
@@ -752,7 +752,7 @@ namespace NLNET
 			_DispatcherIndex.erase(&(route->CallbackClient));
 			_Routes.erase(it);
 			delete route;
-			_RouteIds[connId] = NULL;
+			_RouteIds[connId] = nullptr;
 			_FreeRoutesIds.push_back(connId);
 		}
 

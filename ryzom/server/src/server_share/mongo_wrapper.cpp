@@ -35,7 +35,7 @@ string CMongo::dbname;
 void CMongo::init()
 {
 	dbname = ChatDbName.get();
-
+	
 	try
 	{
 		bool res;

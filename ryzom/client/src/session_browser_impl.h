@@ -41,25 +41,25 @@ public:
 	  */
 	void init(NLGUI::CLuaState *ls);
 	// from CSessionBrowser
-	virtual void on_connectionFailed();
+	virtual void on_connectionFailed() NL_OVERRIDE;
 	virtual void on_connectionClosed();
-	virtual void on_CRingSessionManagerWebClient_Disconnection(NLNET::TSockId from);
-	virtual void on_invokeResult(NLNET::TSockId from, uint32 userId, uint32 resultCode, const std::string &resultString);
-	virtual void on_scheduleSessionResult(NLNET::TSockId from, uint32 charId, TSessionId sessionId, uint8 result, const std::string &resultString);
+	virtual void on_CRingSessionManagerWebClient_Disconnection(NLNET::TSockId from) NL_OVERRIDE;
+	virtual void on_invokeResult(NLNET::TSockId from, uint32 userId, uint32 resultCode, const std::string &resultString) NL_OVERRIDE;
+	virtual void on_scheduleSessionResult(NLNET::TSockId from, uint32 charId, TSessionId sessionId, uint8 result, const std::string &resultString) NL_OVERRIDE;
 	virtual void on_sessionInfoResult(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const RSMGR::TRaceFilter &raceFilter, const RSMGR::TReligionFilter &religionFilter,
-		const RSMGR::TGuildFilter &guildFilter, const RSMGR::TShardFilter &shardFilter, const RSMGR::TLevelFilter &levelFilter, bool subscriptionClosed, bool autoInvite, const std::string &language, const RSMGR::TSessionOrientation &orientation, const std::string &description);
-	virtual void on_joinSessionResult(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const RSMGR::TSessionPartStatus &participantStatus);
-	virtual void on_joinSessionResultExt(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const RSMGR::TSessionPartStatus &participantStatus, const CSecurityCode& securityCode);
-	virtual void on_getShardsResult(NLNET::TSockId from, uint32 userId, const std::string &result);
-	virtual void on_CSessionBrowserServerWebClient_Disconnection(NLNET::TSockId from);
-	virtual void on_sessionList(NLNET::TSockId from, uint32 charId, const std::vector < RSMGR::TSessionDesc > &sessions);
-	virtual void on_charList(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::vector < RSMGR::TCharDesc > &charDescs);
-	virtual void on_playerRatings(NLNET::TSockId from, uint32 charId, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection);
-	virtual void on_ringRatings(NLNET::TSockId from, uint32 charId, uint32 authorRating, uint32 AMRating, uint32 masterlessRating);
-	virtual void on_ringPoints(NLNET::TSockId from, uint32 charId, const std::string &ringPoints, const std::string &maxRingPoints);
+		const RSMGR::TGuildFilter &guildFilter, const RSMGR::TShardFilter &shardFilter, const RSMGR::TLevelFilter &levelFilter, bool subscriptionClosed, bool autoInvite, const std::string &language, const RSMGR::TSessionOrientation &orientation, const std::string &description) NL_OVERRIDE;
+	virtual void on_joinSessionResult(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const RSMGR::TSessionPartStatus &participantStatus) NL_OVERRIDE;
+	virtual void on_joinSessionResultExt(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const RSMGR::TSessionPartStatus &participantStatus, const CSecurityCode& securityCode) NL_OVERRIDE;
+	virtual void on_getShardsResult(NLNET::TSockId from, uint32 userId, const std::string &result) NL_OVERRIDE;
+	virtual void on_CSessionBrowserServerWebClient_Disconnection(NLNET::TSockId from) NL_OVERRIDE;
+	virtual void on_sessionList(NLNET::TSockId from, uint32 charId, const std::vector < RSMGR::TSessionDesc > &sessions) NL_OVERRIDE;
+	virtual void on_charList(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::vector < RSMGR::TCharDesc > &charDescs) NL_OVERRIDE;
+	virtual void on_playerRatings(NLNET::TSockId from, uint32 charId, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection) NL_OVERRIDE;
+	virtual void on_ringRatings(NLNET::TSockId from, uint32 charId, uint32 authorRating, uint32 AMRating, uint32 masterlessRating) NL_OVERRIDE;
+	virtual void on_ringPoints(NLNET::TSockId from, uint32 charId, const std::string &ringPoints, const std::string &maxRingPoints) NL_OVERRIDE;
 	// Return average scores of a session
-	virtual void on_sessionAverageScores(NLNET::TSockId from, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal);
-	virtual void on_scenarioAverageScores(NLNET::TSockId from, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal);
+	virtual void on_sessionAverageScores(NLNET::TSockId from, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal) NL_OVERRIDE;
+	virtual void on_scenarioAverageScores(NLNET::TSockId from, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal) NL_OVERRIDE;
 
 	static uint32 getCharId();
 

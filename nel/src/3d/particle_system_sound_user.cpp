@@ -47,7 +47,7 @@ void UParticleSystemSound::setPSSound(NLSOUND::UAudioMixer *audioMixer)
 	}
 	else
 	{
-		assignSoundServerToPS(NULL);
+		assignSoundServerToPS(nullptr);
 	}
 }
 

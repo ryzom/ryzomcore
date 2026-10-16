@@ -112,7 +112,7 @@ public:
 
 	// Tools
 	static TApplyResult apply(	const std::string &sPatchFilename, const std::string &sFileToPatchFilename,
-						const std::string &sOutputFilename, std::string &errorMsg, ICallBack *pCallBack = NULL);
+						const std::string &sOutputFilename, std::string &errorMsg, ICallBack *pCallBack = nullptr);
 	static bool info(const std::string &sPatchFilename);
 
 

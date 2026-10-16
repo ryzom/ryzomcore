@@ -44,19 +44,19 @@ public:
 	/// Constructor
 	CDBGroupListSheetTextShare(const TCtorParam &param);
 
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
 	// A child node
 	class	CSheetChildShare : public CDBGroupListSheetText::CSheetChild
 	{
 	public:
 		CSheetChildShare();
-		virtual ~CSheetChildShare();
-		virtual void init(CDBGroupListSheetText *pFather, uint index);
-		virtual bool isInvalidated(CDBGroupListSheetText *pFather);
-		virtual void update(CDBGroupListSheetText *pFather);
-		virtual void updateViewText(CDBGroupListSheetText *pFather);
-		virtual void hide(CDBGroupListSheetText *pFather);
+		virtual ~CSheetChildShare() NL_OVERRIDE;
+		virtual void init(CDBGroupListSheetText *pFather, uint index) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void update(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void updateViewText(CDBGroupListSheetText *pFather) NL_OVERRIDE;
+		virtual void hide(CDBGroupListSheetText *pFather) NL_OVERRIDE;
 
 		CInterfaceProperty	CurrentNbMember;
 		CInterfaceProperty	CurrentChance;
@@ -71,7 +71,7 @@ public:
 		CViewBitmap	*Wanted;	// Does the player wants this item (validate icon)
 	};
 
-	virtual CSheetChild *createSheetChild() { return new CSheetChildShare; }
+	virtual CSheetChild *createSheetChild() NL_OVERRIDE { return new CSheetChildShare; }
 
 	sint32		getXWanted() const {return _XWanted;}
 	sint32		getYWanted() const {return _YWanted;}

@@ -137,7 +137,7 @@ public:
 #if !FINAL_VERSION
 			nlstop;
 #endif // !FINAL_VERSION
-			return 0;
+			return nullptr;
 		}
 		return &(_Animations[animId]);
 	}

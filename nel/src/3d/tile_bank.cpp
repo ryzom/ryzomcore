@@ -336,7 +336,7 @@ void CTileBank::xchgTileset (sint firstTileSet, sint secondTileSet)
 void TroncFileName (char* sDest, const char* sSrc)
 {
 	const char* ptr=strrchr (sSrc, '\\');
-	if (ptr==NULL)
+	if (ptr == nullptr)
 		ptr=strrchr (sSrc, '/');
 	if (ptr)
 	{
@@ -447,7 +447,7 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 	if (_DisplacementMap.empty())
 	{
 		// it happens when serial a tile bank with version < 4
-		return NULL;
+		return nullptr;
 	}
 
 	// Check tile number..
@@ -463,16 +463,34 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 			//nlassert (_TileSetVector[tileSet]._DisplacementBitmap[tileSubNoise]<_DisplacementMap.size());
 
 			if (_TileSetVector[tileSet]._DisplacementBitmap[tileSubNoise]>=_DisplacementMap.size())
-				return NULL;
+				return nullptr;
 
 			// Return the tile noise map
 			CTileNoise &tileNoise=_DisplacementMap[_TileSetVector[tileSet]._DisplacementBitmap[tileSubNoise]];
 
 			// Not loaded ?
-			if (tileNoise._TileNoiseMap==NULL)
+			if (tileNoise._TileNoiseMap == nullptr)
 			{
-				// Load a bitmap
-				CTextureFile texture (getAbsPath()+tileNoise._FileName);
+				// Load a bitmap. Banks authored on the original build machines carry
+				// absolute Windows paths ("R:/graphics/..." roots, backslash-separated
+				// "displace\foo.png" filenames). When the authored path does not resolve
+				// on this machine, fall back to a CPath lookup of the bare filename so
+				// the displacement maps load from the registered search paths - the same
+				// convention the client applies through makeAllPathRelative(). Without
+				// this, offline lighting silently substitutes the placeholder pattern
+				// below for every displacement map and every lumel normal is wrong.
+				string noisePath = getAbsPath()+tileNoise._FileName;
+				if (!tileNoise._FileName.empty() && !CFile::fileExists(noisePath))
+				{
+					string noiseFile = tileNoise._FileName;
+					for (uint c=0; c<noiseFile.size(); c++)
+						if (noiseFile[c]=='\\') noiseFile[c]='/';
+					noiseFile = CFile::getFilename(noiseFile);
+					string looked = CPath::lookup(noiseFile, false, false);
+					if (!looked.empty())
+						noisePath = looked;
+				}
+				CTextureFile texture (noisePath);
 				texture.loadGrayscaleAsAlpha (false);
 				texture.generate ();
 				texture.convertToType (CBitmap::Luminance);
@@ -497,11 +515,10 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 				else
 				{
 					// This is not a normal behaviour.
-					string	pathname= getAbsPath()+tileNoise._FileName;
 					if( texture.getWidth ()==0 || texture.getHeight ()==0 )
-						nlwarning("TileNoiseMap not found: %s.", pathname.c_str());
+						nlwarning("TileNoiseMap not found: %s.", noisePath.c_str());
 					else
-						nlwarning("Bad TileNoiseMap size: %s.", pathname.c_str());
+						nlwarning("Bad TileNoiseMap size: %s.", noisePath.c_str());
 
 					// Not good size, copy a static map
 					sint8 notGoodSizeForm[NL3D_TILE_NOISE_MAP_SIZE*NL3D_TILE_NOISE_MAP_SIZE]=
@@ -551,7 +568,7 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 	}
 
 	if (_DisplacementMap.empty() || _DisplacementMap[0]._TileNoiseMap)
-		return NULL;
+		return nullptr;
 
 	// Checks
 	nlassert (_DisplacementMap[0]._TileNoiseMap);
@@ -1859,13 +1876,13 @@ void CTileSetTransition::serial(NLMISC::IStream &f)
 CTileNoise::CTileNoise ()
 {
 	// Not loaded
-	_TileNoiseMap=NULL;
+	_TileNoiseMap = nullptr;
 }
 // ***************************************************************************
 CTileNoise::CTileNoise (const CTileNoise &src)
 {
 	// Default ctor
-	_TileNoiseMap=NULL;
+	_TileNoiseMap = nullptr;
 
 	// Copy
 	*this=src;
@@ -1876,7 +1893,7 @@ CTileNoise::~CTileNoise ()
 	if (_TileNoiseMap)
 	{
 		delete _TileNoiseMap;
-		_TileNoiseMap=NULL;
+		_TileNoiseMap = nullptr;
 	}
 }
 // ***************************************************************************
@@ -1888,7 +1905,7 @@ CTileNoise& CTileNoise::operator= (const CTileNoise &src)
 	// Tile noise map ?
 	if (src._TileNoiseMap)
 	{
-		if (_TileNoiseMap==NULL)
+		if (_TileNoiseMap == nullptr)
 		{
 			// Allocate it
 			_TileNoiseMap=new CTileNoiseMap;
@@ -1903,7 +1920,7 @@ CTileNoise& CTileNoise::operator= (const CTileNoise &src)
 		if (_TileNoiseMap)
 		{
 			delete _TileNoiseMap;
-			_TileNoiseMap=NULL;
+			_TileNoiseMap = nullptr;
 		}
 	}
 	return *this;
@@ -1933,7 +1950,7 @@ void CTileNoise::reset()
 	if (_TileNoiseMap)
 	{
 		delete _TileNoiseMap;
-		_TileNoiseMap=NULL;
+		_TileNoiseMap = nullptr;
 	}
 
 	// Erase filename

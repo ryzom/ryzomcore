@@ -40,6 +40,7 @@
 #include "mesh_eval.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
 #include "../pipeline_max_export_common/biped_rig.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/scene.h"
@@ -51,12 +52,28 @@ using namespace MAXMATH;
 using namespace SCENELIB;
 using namespace MESHEVAL;
 
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_INTERFACE_FILE 1423062700
-#define NEL3D_APPDATA_INTERFACE_THRESHOLD 1423062701
-#define NEL3D_APPDATA_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS 1423062702
-
 namespace IFACEBUILD {
+
+// ---------------------------------------------------------------------------------------------
+
+NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache, bool skinned)
+{
+	if (skinned)
+		return NLMISC::CMatrix::Identity;
+	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
+	Matrix3M nodeTM = getNodeTM(&node, tmCache);
+	Point3M opos;
+	QuatM orot;
+	ScaleValueM oscale;
+	readObjectOffset(n, opos, orot, oscale);
+	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
+	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
+	NLMISC::CMatrix toWorld, fromExportSpace;
+	MAXSCENE::convertMatrix(toWorld, objectTM);
+	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
+	fromExportSpace.invert();
+	return toWorld * fromExportSpace;
+}
 
 // ---------------------------------------------------------------------------------------------
 
@@ -203,28 +220,28 @@ static const std::vector<SMeshInterface> *loadInterfaces(const std::string &auth
 	{
 		fprintf(stderr, "WARNING: interface file '%s' does not resolve under the database root\n",
 		        path.c_str());
-		return NULL;
+		return nullptr;
 	}
 	TInterfaceCache::iterator it = s_interfaceCache.find(resolved);
 	if (it != s_interfaceCache.end())
-		return it->second.empty() ? NULL : &it->second;
+		return it->second.empty() ? nullptr : &it->second;
 	std::vector<SMeshInterface> &out = s_interfaceCache[resolved];
 
 	SLoadedMax *lm = loadMaxFileCached(resolved);
 	if (!lm || !lm->Scene)
 	{
 		fprintf(stderr, "WARNING: cannot load interface file '%s'\n", resolved.c_str());
-		return NULL;
+		return nullptr;
 	}
 	CSceneClassContainer *ssc = lm->Scene->container();
 	SNodeTMCache tmCache;
-	tmCache.SceneRoot = NULL;
+	tmCache.SceneRoot = nullptr;
 	for (CStorageContainer::TStorageObjectConstIt nit = ssc->chunks().begin();
 	     nit != ssc->chunks().end(); ++nit)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(nit->second);
 		if (!node) continue;
-		CSceneClass *base = baseObjectOf(*node, NULL, NULL);
+		CSceneClass *base = baseObjectOf(*node, nullptr, nullptr);
 		if (!base) continue;
 		// The corpus interface files draw their border polygons as SplineShape/Line nodes
 		// (+ Edit Mesh) — the reference's ConvertToType handles those transparently, and so
@@ -233,7 +250,7 @@ static const std::vector<SMeshInterface> *loadInterfaces(const std::string &auth
 		TSClassId scid = base->classDesc()->superClassId();
 		if (scid != SCLASS_GEOMOBJECT && scid != 0x40 /* SHAPE */) continue;
 		SEvalMesh mesh;
-		if (!evalNodeMesh(*node, mesh, NULL)) continue;
+		if (!evalNodeMesh(*node, mesh, nullptr)) continue;
 		if (mesh.Faces.empty()) continue;
 		// object → world of the INTERFACE scene: objectTM = offsetTM * nodeTM
 		Matrix3M nodeTM = getNodeTM(node, tmCache);
@@ -266,7 +283,7 @@ static const std::vector<SMeshInterface> *loadInterfaces(const std::string &auth
 	if (out.empty())
 	{
 		fprintf(stderr, "WARNING: no interface polygons in '%s'\n", resolved.c_str());
-		return NULL;
+		return nullptr;
 	}
 	return &out;
 }
@@ -379,7 +396,7 @@ static void addNodeFaces(const CAABBox &delimiter, std::vector<SNodeFace> &dest,
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(node);
 	if (n)
 	{
-		CSceneClass *base = baseObjectOf(*n, NULL, NULL);
+		CSceneClass *base = baseObjectOf(*n, nullptr, nullptr);
 		// Evaluable classes only (EditableMesh/EditablePoly/parametric prims/splines): the
 		// reference sweeps everything tri-convertible, which additionally includes Biped
 		// Objects (0x9125, the Classic body-part boxes) — those have no headless mesh decode
@@ -399,7 +416,7 @@ static void addNodeFaces(const CAABBox &delimiter, std::vector<SNodeFace> &dest,
 		if (evaluable)
 		{
 			SEvalMesh mesh;
-			if (evalNodeMesh(*n, mesh, NULL) && !mesh.Faces.empty())
+			if (evalNodeMesh(*n, mesh, nullptr) && !mesh.Faces.empty())
 			{
 				Matrix3M nodeTM = getNodeTM(n, tmCache);
 				MAXMATH::Point3M opos;
@@ -527,7 +544,7 @@ void applyInterfaceToMeshBuild(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	else
 	{
 		CSceneClassContainer *ssc = node.container();
-		INode *root = ssc ? (INode *)ssc->scene()->rootNode() : NULL;
+		INode *root = ssc ? (INode *)ssc->scene()->rootNode() : nullptr;
 		if (root)
 			applyUsingSceneNormals(*interfaces, buildMesh, toWorldMat, threshold, root, ssc, tmCache);
 	}

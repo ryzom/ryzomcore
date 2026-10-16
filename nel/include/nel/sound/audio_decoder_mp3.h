@@ -56,7 +56,7 @@ protected:
 
 public:
 	CAudioDecoderMP3(NLMISC::IStream *stream, bool loop);
-	virtual ~CAudioDecoderMP3();
+	virtual ~CAudioDecoderMP3() NL_OVERRIDE;
 
 	inline NLMISC::IStream *getStream() { return _Stream; }
 	inline sint32 getStreamSize() { return _StreamSize; }
@@ -69,28 +69,28 @@ public:
 	static bool getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title, float &length);
 
 	/// Get how many bytes the music buffer requires for output minimum.
-	virtual uint32 getRequiredBytes();
+	virtual uint32 getRequiredBytes() NL_OVERRIDE;
 
 	/// Get an amount of bytes between minimum and maximum (can be lower than minimum if at end).
-	virtual uint32 getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum);
+	virtual uint32 getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum) NL_OVERRIDE;
 
 	/// Get the amount of channels (2 is stereo) in output.
-	virtual uint8 getChannels();
+	virtual uint8 getChannels() NL_OVERRIDE;
 
 	/// Get the samples per second (often 44100) in output.
-	virtual uint getSamplesPerSec();
+	virtual uint getSamplesPerSec() NL_OVERRIDE;
 
 	/// Get the bits per sample (often 16) in output.
-	virtual uint8 getBitsPerSample();
+	virtual uint8 getBitsPerSample() NL_OVERRIDE;
 
 	/// Get if the music has ended playing (never true if loop).
-	virtual bool isMusicEnded();
+	virtual bool isMusicEnded() NL_OVERRIDE;
 
 	/// Get the total time in seconds.
-	virtual float getLength();
+	virtual float getLength() NL_OVERRIDE;
 
 	/// Set looping
-	virtual void setLooping(bool loop);
+	virtual void setLooping(bool loop) NL_OVERRIDE;
 
 }; /* class CAudioDecoderMP3 */
 

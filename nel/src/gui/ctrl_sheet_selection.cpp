@@ -86,7 +86,7 @@ namespace NLGUI
 		if (index > _Groups.size())
 		{
 			// nlwarning("<CCtrlSheetSelection::getGroup> invalid group index");
-			return NULL;
+			return nullptr;
 		}
 		return &_Groups[index];
 	}
@@ -97,7 +97,7 @@ namespace NLGUI
 		if (index > _Groups.size())
 		{
 			nlwarning("<CCtrlSheetSelection::getGroup> invalid group index");
-			return NULL;
+			return nullptr;
 		}
 		return &_Groups[index];
 	}

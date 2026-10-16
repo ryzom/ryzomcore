@@ -209,6 +209,6 @@ void	CFlyingTextManager::unlinkToInterface(CGroupInfo &gi)
 	CWidgetManager::getInstance()->unMakeWindow(gi.GroupInScene);
 	// remove but don't delete
 	gi.GroupInScene->getParent()->delGroup(gi.GroupInScene, true);
-	gi.GroupInScene->setParent(NULL);
+	gi.GroupInScene->setParent(nullptr);
 }
 

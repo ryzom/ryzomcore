@@ -260,7 +260,7 @@ void		CStripifier::optimizeTriangles(const CIndexBuffer &in, CIndexBuffer &out, 
 	vector<CCornerNode*>	vertexConnectivity;
 	vector<CCornerNode>		cornerAllocator;
 	cornerAllocator.resize(numTris * 3);
-	vertexConnectivity.resize(numVerts, NULL);
+	vertexConnectivity.resize(numVerts, nullptr);
 	// For all triangles.
 	for (i = 0; i < numTris; i++)
 	{

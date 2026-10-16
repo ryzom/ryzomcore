@@ -30,7 +30,7 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-bool getPosFromZoneName(const std::string &name, NLMISC::CVector2f &dest)
+bool getPosFromZoneName(const std::string &name,NLMISC::CVector2f &dest)
 {
 
 	if (name.empty())

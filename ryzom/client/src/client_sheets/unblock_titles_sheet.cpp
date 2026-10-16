@@ -64,7 +64,7 @@ void CUnblockTitlesSheet::build(const UFormElm &item)
 {
 	TitlesUnblock.resize (CHARACTER_TITLE::NB_CHARACTER_TITLE);
 
-	const UFormElm *arrayTUElt = NULL;
+	const UFormElm *arrayTUElt = nullptr;
 	if( item.getNodeByName( &arrayTUElt, "Titles" ) )
 	{
 		if( arrayTUElt )
@@ -75,7 +75,7 @@ void CUnblockTitlesSheet::build(const UFormElm &item)
 
 			for (uint i = 0; i < NbTitlesUnblock; ++i)
 			{
-				const UFormElm* TUElt = NULL;
+				const UFormElm* TUElt = nullptr;
 				if( ! ( arrayTUElt->getArrayNode( &TUElt, i ) && TUElt ) )
 				{
 					nlwarning("<CSkillsTreeSheet::build> can't get array node of TitleUnblock in sheet");

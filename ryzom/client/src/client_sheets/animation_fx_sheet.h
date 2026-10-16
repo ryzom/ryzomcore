@@ -54,13 +54,13 @@ public:
 
 public:
 	// Constructor
-	CAnimationFXSheet(const std::string &psName = "", const float *userParams = NULL);
+	CAnimationFXSheet(const std::string &psName = "", const float *userParams = nullptr);
 	/// from CEntitySheet
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 	/// Build the fx from an external script.
 	void build(const NLGEORGES::UFormElm &item, const std::string &prefix);
 	/// Serialize a CAnimationFX.
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 

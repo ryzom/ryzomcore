@@ -5,10 +5,11 @@
  * @package    Smarty
  * @subpackage PluginsModifierCompiler
  */
+
 /**
  * Smarty string_format modifier plugin
- * Type:     modifier
- * Name:     string_format
+ * Type:     modifier<br>
+ * Name:     string_format<br>
  * Purpose:  format strings via sprintf
  *
  * @link   http://www.smarty.net/manual/en/language.modifier.string.format.php string_format (Smarty online manual)
@@ -20,5 +21,5 @@
  */
 function smarty_modifiercompiler_string_format($params)
 {
-    return 'sprintf(' . $params[ 1 ] . ',' . $params[ 0 ] . ')';
+    return 'sprintf(' . $params[1] . ',' . $params[0] . ')';
 }

@@ -54,7 +54,7 @@ public:
 	/** 
 	 * init the service
 	 */
-	void init();
+	void init() NL_OVERRIDE;
 
 	/**
 	 * load the sart position and other parameters
@@ -64,7 +64,7 @@ public:
 	/**
 	 * main loop
 	 */
-	bool update();
+	bool update() NL_OVERRIDE;
 
 	/**
 	 * EGS update
@@ -84,13 +84,13 @@ public:
 	/**
 	 * release
 	 */
-	void release();
+	void release() NL_OVERRIDE;
 
 	// ai instance ready callback
-	void onAiInstanceReady(const CReportStaticAIInstanceMsg &msg);
+	void onAiInstanceReady(const CReportStaticAIInstanceMsg &msg) NL_OVERRIDE;
 
 	// ai instance down callback
-	void onAiInstanceDown(const CReportStaticAIInstanceMsg &msg);
+	void onAiInstanceDown(const CReportStaticAIInstanceMsg &msg) NL_OVERRIDE;
 
 	// call back character ready for monkey loader
 	void egsAddMonkeyPlayerCallback(uint32 userId);

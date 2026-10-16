@@ -108,19 +108,19 @@ class CVertexBufferGL3 : public IVertexBufferGL3
 {
 public:
 	CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TBufferUsage preferred, CVertexBuffer *vb);
-	virtual	~CVertexBufferGL3();
+	virtual	~CVertexBufferGL3() NL_OVERRIDE;
 
 	/// \name Implementation
 	// @{
-	virtual	void *lock();
-	virtual	void unlock();
-	virtual void unlock(uint startVert, uint endVert);
-	virtual void *getPointer();
-	virtual	void enable();
-	virtual	void disable();
-	virtual GLuint getGLuint();
-	virtual void setFrameInFlight(uint64 swapBufferCounter);
-	virtual void flush();
+	virtual	void *lock() NL_OVERRIDE;
+	virtual	void unlock() NL_OVERRIDE;
+	virtual void unlock(uint startVert, uint endVert) NL_OVERRIDE;
+	virtual void *getPointer() NL_OVERRIDE;
+	virtual	void enable() NL_OVERRIDE;
+	virtual	void disable() NL_OVERRIDE;
+	virtual GLuint getGLuint() NL_OVERRIDE;
+	virtual void setFrameInFlight(uint64 swapBufferCounter) NL_OVERRIDE;
+	virtual void flush() NL_OVERRIDE;
 	// @}
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
@@ -163,18 +163,18 @@ class CVertexBufferAMDPinned : public IVertexBufferGL3
 {
 public:
 	CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TBufferUsage preferred, CVertexBuffer *vb);
-	virtual	~CVertexBufferAMDPinned();
+	virtual	~CVertexBufferAMDPinned() NL_OVERRIDE;
 
 	/// \name Implementation
 	// @{
-	virtual	void *lock();
-	virtual	void unlock();
-	virtual void unlock(uint startVert, uint endVert);
-	virtual void *getPointer();
-	virtual	void enable();
-	virtual	void disable();
-	virtual GLuint getGLuint();
-	virtual void setFrameInFlight(uint64 swapBufferCounter);
+	virtual	void *lock() NL_OVERRIDE;
+	virtual	void unlock() NL_OVERRIDE;
+	virtual void unlock(uint startVert, uint endVert) NL_OVERRIDE;
+	virtual void *getPointer() NL_OVERRIDE;
+	virtual	void enable() NL_OVERRIDE;
+	virtual	void disable() NL_OVERRIDE;
+	virtual GLuint getGLuint() NL_OVERRIDE;
+	virtual void setFrameInFlight(uint64 swapBufferCounter) NL_OVERRIDE;
 	// @}
 
 private:

@@ -826,14 +826,7 @@
 
 						<group id="crop_desc" posparent="back_small_description" posref="TL TL" x="4" y="-4" sizeref="wh" w="-20" h="-12"/>
 
-						<group type="edit_box" id="edit_small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" 
-						 child_resize_h="true" w="0" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" 
-						 max_h="-4" want_return="true" 
-						 onenter="" params=""
-						 on_focus_lost="" on_focus_lost_params="" 
-						 reset_focus_on_hide="true"
-						 max_num_chars="256"
-						>
+						<group type="edit_box" id="edit_small_description" posparent="crop_desc" posref="TL TL" x="0" y="0" sizeref="w" child_resize_h="true" w="0" child_resize_hmargin="10" max_sizeparent="crop_desc" max_sizeref="h" max_h="-4" want_return="true" onenter="" params="" on_focus_lost="" on_focus_lost_params="" reset_focus_on_hide="true" max_num_chars="256" >
 											
 							<view type="text" id="edit_text" x="4" y="-1" posref="TL TL" multi_line="true" 
 							 fontsize="12" shadow="true" hardtext="" global_color="false"/>

@@ -60,15 +60,15 @@ bool CInstanceMapDeco::CCtrlButtonEntity::handleEvent(const NLGUI::CEventDescrip
 CInstanceMapDeco::CInstanceMapDeco()
 {
 	//H_AUTO(R2_CInstanceMapDeco_CInstanceMapDeco)
-	_Main = NULL;
-	_Over = NULL;
-	_OverInvalid = NULL;
-	_Orient = NULL;
-	_GlowStar[0] = _GlowStar[1] = NULL;
+	_Main = nullptr;
+	_Over = nullptr;
+	_OverInvalid = nullptr;
+	_Orient = nullptr;
+	_GlowStar[0] = _GlowStar[1] = nullptr;
 	_GlowStarActive = false;
 	_OrientBlendFactor = 0.f;
 	_LastCloseView = false;
-	_Instance = NULL;
+	_Instance = nullptr;
 	_AddedToMap = false;
 	_Orientable = false;
 	_Active = true;
@@ -191,25 +191,25 @@ void CInstanceMapDeco::onRemove(CGroupMap &owner)
 	nlassert(_Over);
 	nlassert(_OverInvalid);
 	owner.delCtrl(_Main);
-	_Main = NULL;
+	_Main = nullptr;
 	owner.delCtrl(_Over);
-	_Over = NULL;
+	_Over = nullptr;
 	owner.delCtrl(_OverInvalid);
-	_OverInvalid = NULL;
+	_OverInvalid = nullptr;
 	if (_Orient)
 	{
 		owner.delCtrl(_Orient);
-		_Orient = NULL;
+		_Orient = nullptr;
 	}
 	if (_GlowStar[0])
 	{
 		_GlowStar[0]->getParent()->delCtrl(_GlowStar[0]);
-		_GlowStar[0] = NULL;
+		_GlowStar[0] = nullptr;
 		_GlowStar[1]->getParent()->delCtrl(_GlowStar[1]);
-		_GlowStar[1] = NULL;
+		_GlowStar[1] = nullptr;
 	}
 	_AddedToMap = false;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 

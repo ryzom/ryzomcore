@@ -510,7 +510,7 @@ void		CLightingManager::computeModelLightContributions(NLMISC::CRGBA sunAmbient,
 	// End the list.
 	if(i<NL3D_MAX_LIGHT_CONTRIBUTION)
 	{
-		lightContrib.PointLight[i]= NULL;
+		lightContrib.PointLight[i] = nullptr;
 	}
 
 }

@@ -502,7 +502,9 @@ void CPVPManager2::addFactionChannelToCharacter(TChanID channel, CCharacter * us
 					(*it).second.push_back(user->getId());
 				}
 
+
 				broadcastMessage(channel, string("<INFO>"), "<-- "+playerName.toUtf8());
+
 				sendChannelUsers(channel, user);
 			}
 		}
@@ -515,12 +517,14 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 	ucstring playerName = CEntityIdTranslator::getInstance()->getByEntity(user->getId());
 	CEntityIdTranslator::removeShardFromName(playerName);
 	std::vector<TChanID> currentChannels;
+
+
 	if (channel == DYN_CHAT_INVALID_CHAN) // Send leaves message to all user channels
 	{
 		currentChannels = getCharacterUserChannels(user);
 		for (uint i = 0; i < currentChannels.size(); i++)
 			broadcastMessage(currentChannels[i], string("<INFO>"), playerName.toUtf8()+" -->[]");
-	}
+		}
 
 	if (userChannel)
 		broadcastMessage(channel, string("<INFO>"), playerName.toUtf8()+" -->[]");
@@ -827,9 +831,9 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		}
 		////////////////////////////////////////////////////////
 	}
-
 	bool is_ennemy = false;
 	bool is_neutral_op = false;
+
 	uint i;
 	for( i=0; i<_PVPInterface.size(); ++i )
 	{
@@ -855,10 +859,9 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		if (relationTmp == PVP_RELATION::Ally && relation != PVP_RELATION::NeutralPVP)
 			relation = PVP_RELATION::Ally;
 	}
-
 	if (is_neutral_op)
 		return PVP_RELATION::NeutralPVP;
-
+	
 	if (is_ennemy)
 		return PVP_RELATION::Ennemy;
 
@@ -1187,6 +1190,7 @@ bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan c
 /// create the faction chat channel when IOS mirror ready
 void CPVPManager2::onIOSMirrorUp()
 {
+
 	createExtraFactionChannel("marauders");
 	createExtraFactionChannel("ranger");
 
@@ -1196,13 +1200,13 @@ void CPVPManager2::onIOSMirrorUp()
 	createExtraFactionChannel("de", true);
 	createExtraFactionChannel("ru", true);
 	createExtraFactionChannel("es", true);
+
 	createExtraFactionChannel("rf", true);
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{
 		createFactionChannel((PVP_CLAN::TPVPClan)i);
 	}
-
 #ifdef HAVE_MEMCACHED
 	CMemC:init();
 	string nbr_usrchannels = CMemC::get("Shard-UserChannels-Nbr");
@@ -1305,7 +1309,6 @@ TChanID CPVPManager2::createUserChannel(const std::string & channelName, const s
 		TChanID factionChannelId = DynChatEGS.addChan(channelName, channelTitle);
 		if (factionChannelId != DYN_CHAT_INVALID_CHAN)
 		{
-
 #ifdef HAVE_MEMCACHED
 			nlinfo("createUserChannel");
 			if (cacheIndex == 0)
@@ -1335,7 +1338,6 @@ void CPVPManager2::deleteUserChannel(const std::string & channelName)
 			CMemC::set(toString("Shard-UserChannel-%s", channelId.c_str()), "");
 			CMemC::set(toString("Shard-UserChannelId-%s", channelName.c_str()), "", 1);
 #endif
-
 		DynChatEGS.removeChan( (*it).second );
 		TMAPPassChannel::iterator it2 = _PassChannels.find((*it).second);
 		if( it2 != _PassChannels.end() )

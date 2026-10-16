@@ -123,7 +123,7 @@ void CGroupHTMLForum::handle ()
 /*	// Do nothing if WebServer is not initialized
 	if (!WebServer.empty())
 	{
-		Home = "/webig/forum.php";
+		Home = WebServer+"forum.php";
 		CGroupHTML::handle ();
 	}
 */

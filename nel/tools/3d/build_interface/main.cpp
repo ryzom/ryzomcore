@@ -218,6 +218,7 @@ int main(int argc, char **argv)
 	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
 	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
 	args.addArg("", "no-border", "", "Disable border duplication. Enabled by default");
+	args.addArg("k", "keep-going", "", "Skip input files that cannot be loaded as bitmaps (with a warning) instead of aborting");
 
 	if (!args.parse(argc, argv)) return 1;
 
@@ -240,6 +241,9 @@ int main(int argc, char **argv)
 
 	// extract all interface elements
 	bool extractElements = args.haveArg("x");
+
+	// skip unloadable input files instead of aborting
+	bool keepGoing = args.haveArg("k");
 
 	// output format
 	std::string outputFormat;
@@ -399,7 +403,7 @@ int main(int argc, char **argv)
 	AllMaps.resize( mapSize );
 	for(sint i = 0; i < mapSize; ++i )
 	{
-		NLMISC::CBitmap *pBtmp = NULL;
+		NLMISC::CBitmap *pBtmp = nullptr;
 
 		try
 		{
@@ -445,9 +449,29 @@ int main(int argc, char **argv)
 		{
 			if (pBtmp) delete pBtmp;
 
+			if (keepGoing)
+			{
+				outString(toString("WARNING : skipping %s : %s", AllMapNames[i].c_str(), e.what()));
+				AllMaps[i] = nullptr;
+				continue;
+			}
+
 			outString(toString("ERROR : %s", e.what()));
 			return -1;
 		}
+	}
+
+	// Drop entries skipped by --keep-going
+	for (sint i = 0; i < mapSize; )
+	{
+		if (AllMaps[i] == nullptr)
+		{
+			AllMaps.erase(AllMaps.begin() + i);
+			AllMapNames.erase(AllMapNames.begin() + i);
+			--mapSize;
+		}
+		else
+			++i;
 	}
 
 	// Sort all maps by decreasing size
@@ -533,7 +557,7 @@ int main(int argc, char **argv)
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
 		FILE *f = nlfopen(fmtName, "wb");
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			for (sint i = 0; i < mapSize; ++i)
 			{
@@ -568,7 +592,7 @@ int main(int argc, char **argv)
 		fmtName += ".txt";
 		FILE *f = nlfopen(fmtName, "wb");
 
-		if (f == NULL)
+		if (f == nullptr)
 		{
 			outString(toString("ERROR: Unable to write UV file %s", fmtName.c_str()));
 			return -1;

@@ -66,7 +66,7 @@ bool CIF3DSceneParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGrou
 	if (parentGroup)
 	{
 		CGroupList *pList = dynamic_cast<CGroupList*>(parentGroup);
-		if (pList != NULL)
+		if (pList != nullptr)
 			pList->addChild (pScene);
 		else
 			parentGroup->addGroup (pScene);
@@ -96,7 +96,7 @@ CIFDDXParser::~CIFDDXParser()
 
 bool CIFDDXParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 {
-	CInterfaceDDX *pDDX = NULL;
+	CInterfaceDDX *pDDX = nullptr;
 	pDDX = new CInterfaceDDX;
 	if (pDDX)
 	{

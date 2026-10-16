@@ -218,13 +218,13 @@ public :
 	enum TTickStateMode		{ TickRunning = 0, TickHalted };
 	
 	/// Initialise the service
-	void init();
+	void init() NL_OVERRIDE;
 
 	/// Update
-	bool update();
+	bool update() NL_OVERRIDE;
 
 	/// Release
-	void release();
+	void release() NL_OVERRIDE;
 
 	/**
 	 *	Register a client

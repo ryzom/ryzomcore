@@ -22,6 +22,8 @@
 
 #include <sstream>
 
+
+
 #include <nel/misc/command.h>
 
 //#include "game_share/generic_msg_mngr.h"
@@ -33,7 +35,6 @@
 
 #include "server_share/r2_variables.h"
 #include "server_share/memc_wrapper.h"
-
 #include <boost/uuid/uuid.hpp>            // uuid class
 #include <boost/uuid/uuid_generators.hpp> // generators
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
@@ -65,6 +66,7 @@ CVariable<bool>			VerboseChatManagement("ios","VerboseChatManagement", "Set verb
 CVariable<std::string>	LogChatDirectory("ios", "LogChatDirectory", "Log Chat directory (default, unset is SaveFiles service directory", "", 0, true, logChatDirChanged);
 CVariable<bool>			ForceFarChat("ios","ForceFarChat", "Force the use of SU to dispatch chat", false, 0, true);
 CVariable<bool>			EnableDeepL("ios","EnableDeepL", "Enable DeepL auto-translation system", false, 0, true);
+
 
 typedef NLMISC::CTwinMap<TChanID, string> TChanTwinMap;
 TChanTwinMap 	_ChanNames;
@@ -174,6 +176,7 @@ void CChatManager::addMutedUser( const NLMISC::CEntityId &eid )
 #ifdef HAVE_MEMCACHED
 	CMemC::setWithIndex("Shard-Command", toString("addMutedUser:%d", eid.getShortId()));
 #endif
+
 	_MutedUsers.insert( eid );
 }
 
@@ -182,6 +185,7 @@ void CChatManager::removeMutedUser( const NLMISC::CEntityId &eid )
 #ifdef HAVE_MEMCACHED
 	CMemC::setWithIndex("Shard-Command", toString("removeMutedUser:%d", eid.getShortId()));
 #endif
+
 	_MutedUsers.erase( eid );
 }
 
@@ -787,6 +791,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 					return;
 				}
 
+
 				TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
 				_DestUsers.push_back(grpId);
 
@@ -825,7 +830,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 								string sourceText = rtzText.substr(9, endOfOriginal-9);
 								strFindReplace(sourceText, ")", "}");
 								rtzText = rtzText.substr(endOfOriginal+4, rtzText.size()-endOfOriginal-4);
-								}
+							}
 							else
 							{
 								rtzText = rtzText.substr(4, rtzText.size()-4);
@@ -839,7 +844,9 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 							chatId = "FACTION_EN";
 							if (usedlang != SM->getLanguageCodeString(ci->Language))
 								autoSub = "0";
+
 						}
+
 						chatInGroup( grpId, ucstr.substr(1), sender );
 					}
 					else if (senderClient.dontSendTranslation(senderLang))
@@ -856,6 +863,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 				}
 				else
 					chatInGroup( grpId, ucstr, sender );
+
+
 			}
 			break;
 
@@ -867,15 +876,16 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 				uint nbrReceivers;
 				checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers, grpId);
 				_Log.displayNL("team:%s|%s|%s|%s|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), langs.c_str(), ucstr.toUtf8().c_str() );
+
 			}
 			break;
 
-		case CChatGroup::guild:
-			{
+		case CChatGroup::guild: {
 				TGroupId grpId = itCl->second->getGuildChatGroup();
 				_DestUsers.push_back(grpId);
 
 				uint32 guildId = grpId.getShortId() - 0x10000000;
+
 				ostringstream sGuildId;
 				sGuildId << guildId;
 
@@ -894,14 +904,13 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 						rtzText = rtzText.substr(1);
 						string::size_type endOfOriginal = rtzText.find("}@{");
 						if (rtzText.size() > 4 && rtzText[0] == ':' && rtzText[3] == ':')
-						{
+				{
 							if (rtzText[4] == '{')
 								isTranslation = true;
 							startPos = 5;
 							usedlang = rtzText.substr(1, 2);
 							string source_lang = usedlang;
-
-							if (endOfOriginal != string::npos)
+				if (endOfOriginal != string::npos)
 							{
 								if (rtzText.size() > 9)
 									source_lang = rtzText.substr(6, 2);
@@ -930,14 +939,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 						string langs;
 						uint nbrReceivers;
 						checkNeedDeeplize(sender, ucstr, senderLang, langs, nbrReceivers, grpId);
+
 						_Log.displayNL("guild:%s|%s|%s|%s|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), langs.c_str(), ucstr.toUtf8().c_str() );
+						}
 					}
-				}
 			}
 			break;
-
-
-
 		case CChatGroup::dyn_chat:
 		{
 			TChanID chanId = itCl->second->getDynChatChan();
@@ -1011,6 +1018,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 								else
 									rtzText = ":"+source_lang+": "+rtzText;
 							}
+
 						}
 						// Send for translation
 						else
@@ -1057,6 +1065,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 
 					if (sendMessages)
 					{
+
 						if (!session->getChan()->getDontBroadcastPlayerInputs())
 						{
 							// add msg to the historic
@@ -1116,7 +1125,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 							}
 						}
 						else
-							sendChat(itCl->second->getChatMode(), itCl->first, ucstr, sender, chanId);
+								sendChat(itCl->second->getChatMode(), itCl->first, ucstr, sender, chanId);
 
 						if (session->getChan()->getForwardPlayerIntputToOwnerService())
 						{
@@ -1991,19 +2000,19 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 {
 	const TChanID *chanId = _ChanNames.getA(chan);
 
-	if (chan == "universe")
-	{
-		TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
-		farChatInGroup(grpId, 0, ucstr, ucstring("~"+name), senderCid);
-	}
-	else if (chan.substr(0, 6) == "guild:")
-	{
-		TGroupId grpId = CEntityId::Unknown;
-		grpId.fromString(chan.substr(6).c_str());
-		farChatInGroup(grpId, 0, ucstr, ucstring("~"+name), senderCid);
-	}
+		if (chan == "universe")
+		{
+			TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
+			farChatInGroup(grpId, 0, ucstr, ucstring("~"+name), senderCid);
+		}
+		else if (chan.substr(0, 6) == "guild:")
+		{
+			TGroupId grpId = CEntityId::Unknown;
+			grpId.fromString(chan.substr(6).c_str());
+			farChatInGroup(grpId, 0, ucstr, ucstring("~"+name), senderCid);
+		}
 	else if (chan.substr(0, 5) == "tell:")
-	{
+		{
 		nlinfo("here:[%s]", ucstr.toUtf8().c_str());
 		farTell(CEntityId::Unknown, ucstring("~"+name), false, ucstring(chan.substr(5)), ucstr);
 	}
@@ -2019,10 +2028,11 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 			text = ucstr.substr(4);
 		}
 
-		CDynChatSession *dcc = _DynChat.getChan(*chanId)->getFirstSession();
-		while (dcc)
-		{
-			NLMISC::CEntityId receiverId = TheDataset.getEntityId(dcc->getClient()->getID());
+			CDynChatSession *dcc = _DynChat.getChan(*chanId)->getFirstSession();
+			while (dcc)
+			{
+
+				NLMISC::CEntityId receiverId = TheDataset.getEntityId(dcc->getClient()->getID());
 			CCharacterInfos* charInfo = IOS->getCharInfos(receiverId);
 			nlinfo("%s vs %s", usedlang.c_str(), SM->getLanguageCodeString(charInfo->Language).c_str());
 			if (!EnableDeepL || usedlang.empty() || usedlang == SM->getLanguageCodeString(charInfo->Language))
@@ -2044,7 +2054,6 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 			{
 				if (senderCid > 0 && itCl->second->isInIgnoreList(senderCid))
 					return;
-
 				uint32 senderNameIndex = SM->storeString( senderName );
 
 				// send the string to FE
@@ -2183,8 +2192,8 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 				}
 				else
 				{
-					chatMsg.CompressedIndex = sender.getCompressedIndex();
-					chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
+				chatMsg.CompressedIndex = sender.getCompressedIndex();
+				chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
 				}
 				chatMsg.ChatMode = (uint8) senderChatMode;
 				chatMsg.PhraseId = phraseId;
@@ -2519,7 +2528,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 		}
 		else if (IChatUnifierClient::getInstance() != NULL)
 		{
-			if (senderMuted && receiverInfos && receiverInfos->HavePrivilege == false)
+			if(	senderMuted && receiverInfos && receiverInfos->HavePrivilege == false )
 			{
 				nldebug("IOSCM: tell The player %s:%x is muted and %s have no privilege",
 					TheDataset.getEntityId(sender).toString().c_str(),
@@ -2547,6 +2556,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 
 void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr  )
 {
+
 	CCharacterInfos * receiverInfos = IOS->getCharInfos( receiver );
 	if( receiverInfos )
 	{
@@ -2571,6 +2581,7 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 				nlinfo("found senderInfos");
 				// info for log the chat message
 				string receiverName = receiverInfos->Name.toString();
+
 
 				// if the client doesn't know this dynamic string(name of sender), we send it to him
 				// send the string to FE
@@ -2661,8 +2672,7 @@ void CChatManager::displayChatGroup(NLMISC::CLog &log, TGroupId gid, CChatGroup 
 		{
 			CCharacterInfos *ci = IOS->getCharInfos(TheDataset.getEntityId(*first));
 			if (ci != NULL)
-				log.displayNL(" - '%s' %s:%x",
-					ci->Name.toUtf8().c_str(),
+				log.displayNL(" - '%s' %s:%x", ci->Name.toUtf8().c_str(),
 					ci->EntityId.toString().c_str(),
 					first->getIndex());
 			else
@@ -2896,6 +2906,7 @@ void CChatManager::unsubscribeCharacterInRingUniverse(const NLMISC::CEntityId &c
 		removeFromGroup(grpUniverse, dsr);
 	}
 }
+
 
 TChanID CChatManager::getChanId(const string name) {
 	const TChanID *chanid = _ChanNames.getA(name);

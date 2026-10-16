@@ -385,7 +385,7 @@ public:
 protected:
 	//////////////////////////////////////////
 	// Apply all params / compute result item
-	virtual void apply(CFaberPhrase * phrase)
+	virtual void apply(CFaberPhrase * phrase) NL_OVERRIDE
 	{
 		CCharacter* character = ( CCharacter * ) CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
 		if( character )
@@ -703,7 +703,7 @@ protected:
 	}
 
 	// Apply params for system craft / compute result item (exemple selling item, not crafted by a player)
-	virtual void systemApply(CFaberPhrase * phrase)
+	virtual void systemApply(CFaberPhrase * phrase) NL_OVERRIDE
 	{
 		// compute success factor
 		CCraftParameters	Params;
@@ -998,19 +998,19 @@ public:
 	CFaberActionMakeGeneric() {};
 	
 	// dtor
-	virtual ~CFaberActionMakeGeneric() {};
+	virtual ~CFaberActionMakeGeneric() NL_OVERRIDE {};
 	
 protected:
 	//////////////////////////////////////////
 	// check sentence validity
-	virtual bool checkSentenceValidity( CFaberPhrase * phrase )
+	virtual bool checkSentenceValidity( CFaberPhrase * phrase ) NL_OVERRIDE
 	{
 		return CFaberActionCommon::checkSentenceValidity( phrase );
 	}
 	
 	//////////////////////////////////////////
 	// Apply all params / compute result item
-	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF )
+	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF ) NL_OVERRIDE
 	{
 		// the faber parameter of this MP in the current item part
 		float mpStatEnergy = phrase->getMps()[ mpOccurence ]->Mp->StatEnergy / 100.f;
@@ -1480,7 +1480,7 @@ FABER_ACTION_FACTORY( CFaberActionMakeAutolaunch, ITEM_TYPE::AUTOLAUCH )
 class CFaberActionMakeAmmo : public CFaberActionMakeGeneric
 {
 protected:
-	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF )
+	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF ) NL_OVERRIDE
 	{
 		// Generic
 		CFaberActionMakeGeneric::specializedApply(phrase, mpOccurence, mpParameters, params, statBF);
@@ -1529,7 +1529,7 @@ FABER_ACTION_FACTORY( CFaberActionMakeBowrifleAmmo, ITEM_TYPE::BOWRIFLE_AMMO )
 class CFaberActionMakeExplosiveAmmo : public CFaberActionMakeGeneric
 {
 protected:
-	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF )
+	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF ) NL_OVERRIDE
 	{
 		// Generic
 		CFaberActionMakeGeneric::specializedApply(phrase, mpOccurence, mpParameters, params, statBF);
@@ -1567,7 +1567,7 @@ class CFaberActionMakeArmor : public CFaberActionMakeGeneric
 protected:
 	//////////////////////////////////////////
 	// Apply all params / compute result item
-	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF )
+	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF ) NL_OVERRIDE
 	{
 		// Generic
 		CFaberActionMakeGeneric::specializedApply(phrase, mpOccurence, mpParameters, params, statBF);
@@ -1706,7 +1706,7 @@ FABER_ACTION_FACTORY( CFaberActionMakeBuckler, ITEM_TYPE::BUCKLER )
 class CFaberActionMakeJewelry : public CFaberActionMakeGeneric
 {
 protected:
-	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF )
+	virtual void specializedApply( CFaberPhrase * phrase, uint32 mpOccurence, uint mpParameters, CCraftParameters& params, uint64 &statBF ) NL_OVERRIDE
 	{
 		// Generic
 		CFaberActionMakeGeneric::specializedApply(phrase, mpOccurence	, mpParameters, params, statBF);
@@ -1832,14 +1832,14 @@ public:
 protected:
 	//////////////////////////////////////////
 	// check sentence validity
-	virtual bool checkSentenceValidity( CFaberPhrase * phrase )
+	virtual bool checkSentenceValidity( CFaberPhrase * phrase ) NL_OVERRIDE
 	{
 		return CFaberActionCommon::checkSentenceValidity( phrase );
 	}
 	
 	//////////////////////////////////////////
 	// Apply all params / compute result item
-	virtual void apply(CFaberPhrase * phrase)
+	virtual void apply(CFaberPhrase * phrase) NL_OVERRIDE
 	{
 		CCharacter* character = ( CCharacter * ) CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
 		if( character )
@@ -1883,7 +1883,7 @@ protected:
 	}
 	
 	// Apply params for system craft / compute result item (exemple selling item, not crafted by a player)
-	virtual void systemApply(CFaberPhrase * phrase)
+	virtual void systemApply(CFaberPhrase * phrase) NL_OVERRIDE
 	{
 		CCraftParameters	Params;
 		CFaberActionCommon::createCraftedItem(phrase, 0, SKILLS::unknown, 0, phrase->getCraftedItemStaticForm()->SheetId, 0, 1, Params, 1.0f );

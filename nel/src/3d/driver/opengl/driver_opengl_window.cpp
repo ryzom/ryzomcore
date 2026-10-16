@@ -273,7 +273,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				int format_return = 0;
 				unsigned long nitems_return = 0;
 				unsigned long bytes_after_return = 0;
-				long *data = NULL;
+				long *data = nullptr;
 
 				int status = XGetWindowProperty(driver->_dpy, driver->_win, XA_FRAME_EXTENTS, 0, 4, False, XA_CARDINAL, &type_return, &format_return, &nitems_return, &bytes_after_return, (unsigned char**)&data);
 
@@ -395,9 +395,9 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	nlunreferenced(windowIcon);
 
-	_dpy = XOpenDisplay(NULL);
+	_dpy = XOpenDisplay(nullptr);
 
-	if (_dpy == NULL)
+	if (_dpy == nullptr)
 	{
 		nlerror ("XOpenDisplay failed on '%s'", getenv("DISPLAY"));
 	}
@@ -535,12 +535,12 @@ bool CDriverGL::unInit()
 #elif defined (NL_OS_UNIX)
 
 	// restore default X errors handler
-	XSetErrorHandler(NULL);
+	XSetErrorHandler(nullptr);
 
 	if (_dpy)
 	{
 		XCloseDisplay(_dpy);
-		_dpy = NULL;
+		_dpy = nullptr;
 	}
 
 #endif // NL_OS_UNIX
@@ -1123,9 +1123,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// first try 24bpp and if that fails 16bpp
 	XVisualInfo *visual_info = glXChooseVisual (_dpy, DefaultScreen(_dpy), sAttribList24bpp);
-	if (visual_info == NULL)
+	if (visual_info == nullptr)
 		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
-	if(visual_info == NULL)
+	if(visual_info == nullptr)
 	{
 		nlerror("glXChooseVisual() failed");
 	}
@@ -1133,7 +1133,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	_visual_info = visual_info;
 
 	_ctx = glXCreateContext (_dpy, visual_info, None, GL_TRUE);
-	if (_ctx == NULL)
+	if (_ctx == nullptr)
 	{
 		nlerror("glXCreateContext() failed");
 	}
@@ -1597,7 +1597,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 #elif defined (NL_OS_UNIX)
 
-	if (_visual_info == NULL)
+	if (_visual_info == nullptr)
 		return false;
 
 	nlWindow root = RootWindow(_dpy, DefaultScreen(_dpy));
@@ -1719,7 +1719,7 @@ bool CDriverGL::destroyWindow()
 	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
 		glXDestroyContext(_dpy, _ctx);
 
-	_ctx = NULL;
+	_ctx = nullptr;
 
 #endif
 
@@ -2724,7 +2724,7 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 #ifdef X_HAVE_UTF8_STRING
 	// UTF8 properties
-	Xutf8SetWMProperties (_dpy, _win, (char*)title.toUtf8().c_str(), (char*)title.toUtf8().c_str(), NULL, 0, NULL, NULL, NULL);
+	Xutf8SetWMProperties (_dpy, _win, (char*)title.toUtf8().c_str(), (char*)title.toUtf8().c_str(), nullptr, 0, nullptr, nullptr, nullptr);
 #else
 	// standard properties
 	XTextProperty text_property;
@@ -3024,7 +3024,7 @@ bool CDriverGL::activate()
 
 	GLXContext nctx = glXGetCurrentContext();
 
-	if (nctx != NULL && nctx != _ctx)
+	if (nctx != nullptr && nctx != _ctx)
 		glXMakeCurrent(_dpy, _win, _ctx);
 
 #endif // USE_OPENGLES

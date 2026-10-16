@@ -84,9 +84,9 @@ private:
 	/// @name Primitive data (static)
 	//@{
 	COutpost				*_Parent;
-
+	
 	TAIAlias				_Alias;
-
+	
 	// Position in the world
 	NLMISC::CVector			_Center;
 
@@ -99,25 +99,25 @@ private:
 	// Static data of the building
 	const CStaticOutpostBuilding *_StaticData;
 	//@}
-
+	
 	/// @name Persistent data
 	//@{
 	// Date of the last constructed or the beginning of construction
 	uint32					_BuiltDate;
-
+	
 	// Is there a construction in progress ?
 	bool					_Constructing;
-
+	
 	// Currently spawned object
 	NLMISC::CSheetId		_CurrentSheet;
-
+	
 	/// Used for driller
 	//@{
 	float	_MPLeft;
 	uint32	_MPLastTime;
 	//@}
 	//@}
-
+	
 	/// @name Dynamic data
 	//@{
 	/// Used BotObject

@@ -41,7 +41,7 @@ class CMissionStepGainChargePoint : public IMissionStepTemplate
 {
 	uint32	_ChargePoints;
 		
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2 )
@@ -58,7 +58,7 @@ class CMissionStepGainChargePoint : public IMissionStepTemplate
 		return true;
 	}
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		// the event contains the guild charge points
 		if( event.Type == CMissionEvent::ChargePoints )
@@ -70,14 +70,14 @@ class CMissionStepGainChargePoint : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( 1 );
 		ret[0] = _ChargePoints;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "MIS_CHARGE_POINT";
 		textPtr = &stepText;
@@ -92,7 +92,7 @@ class CMissionStepGainChargePoint : public IMissionStepTemplate
 	}
 	
 	
-	bool checkTextConsistency()
+	bool checkTextConsistency() NL_OVERRIDE
 	{
 		return true;
 	}
@@ -106,7 +106,7 @@ MISSION_REGISTER_STEP(CMissionStepGainChargePoint,"charge_point")
 class CMissionStepGainOutpostControl : public IMissionStepTemplate
 {
 	std::string OutpostName;
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if( script.size() != 2)
@@ -119,7 +119,7 @@ class CMissionStepGainOutpostControl : public IMissionStepTemplate
 		return true;
 	}
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		// the event contains the guilsd charge points
 		if( event.Type == CMissionEvent::OutpostGain )
@@ -130,14 +130,14 @@ class CMissionStepGainOutpostControl : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( 1 );
 		ret[0] = 1;
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "MIS_GAIN_CONTROL";
 		textPtr = &stepText;
@@ -148,7 +148,7 @@ class CMissionStepGainOutpostControl : public IMissionStepTemplate
 	}
 	
 	
-	bool checkTextConsistency()
+	bool checkTextConsistency() NL_OVERRIDE
 	{
 		return true;
 	}

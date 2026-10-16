@@ -50,7 +50,7 @@ Steps linked with bot chat
 // ----------------------------------------------------------------------------
 class CMissionStepTalk : public IMissionStepTemplate
 {
-	bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() < 2 )
@@ -100,7 +100,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 		return true;
 	}
 
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		string webAppUrl;
 
@@ -131,7 +131,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 		return 0;
 	}
 
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( 1 );
@@ -167,7 +167,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 		return false;
 	}
 
-	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver )
+	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver ) NL_OVERRIDE
 	{
 
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
@@ -218,7 +218,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 		return 0;
 	}
 	
-	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift)
+	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift) NL_OVERRIDE
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( bot )
@@ -255,7 +255,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 		return false;
 	}
 
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		nbSubSteps = 1;
 		static const std::string stepText = "MIS_TALK_TO";
@@ -298,7 +298,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 		}
 	}
 
-	bool solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  )
+	bool solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  ) NL_OVERRIDE
 	{
 		if (!_IsDynamic)
 		{
@@ -329,7 +329,7 @@ class CMissionGiveMoney : public IMissionStepTemplate
 	uint		_Amount;
 	TAIAlias	_Bot;
 		
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		if ( script.size() != 3 )
@@ -347,7 +347,7 @@ class CMissionGiveMoney : public IMissionStepTemplate
 		return true;	
 	}
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		// not check here : they are done before. If a give event comes here, the step advances
 		if( event.Type == CMissionEvent::GiveMoney )
@@ -358,12 +358,12 @@ class CMissionGiveMoney : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.resize( 1,_Amount );
 	}
 	
-	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver )
+	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver ) NL_OVERRIDE
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( bot )
@@ -382,7 +382,7 @@ class CMissionGiveMoney : public IMissionStepTemplate
 		return 0;
 	}
 	
-	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift)
+	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift) NL_OVERRIDE
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
@@ -398,7 +398,7 @@ class CMissionGiveMoney : public IMissionStepTemplate
 		return false;
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		nlassert( subStepStates.size() == 1);
 		static const std::string stepText = "MIS_GIVE_MONEY";
@@ -420,9 +420,9 @@ class CMissionGiveMoney : public IMissionStepTemplate
 			retParams.back().Identifier = "giver";
 	}
 
-	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
+	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE { invalidIsGiver=true; return _Bot; }
 
-	bool checkPlayerGift( CMission * instance, CCharacter * user )
+	bool checkPlayerGift( CMission * instance, CCharacter * user ) NL_OVERRIDE
 	{
 		// check that player gives money and no item
 		if (user->getExchangeMoney() == 0)
@@ -448,7 +448,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 //		uint16		Quality;
 //		uint32		Quantity;
 //	};
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -534,7 +534,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		return ret;
 		
 	}
-	bool solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  )
+	bool solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  ) NL_OVERRIDE
 	{
 		bool ret = IMissionStepTemplate::solveTextsParams(missionData,templ);
 		if ( !CMissionParser::solveTextsParams(_SourceLine, _Params,missionData ) )
@@ -542,7 +542,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		return ret;
 	}
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if( event.Type == CMissionEvent::GiveItem )
 		{
@@ -557,7 +557,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 	}
 
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -567,7 +567,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		}
 	}
 	
-	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver )
+	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver ) NL_OVERRIDE
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( bot )
@@ -600,7 +600,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		return 0;
 	}
 	
-	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift)
+	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift) NL_OVERRIDE
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
@@ -616,7 +616,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		return false;
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		nlassert( _SubSteps.size() == subStepStates.size() );
 		static const std::string stepText = "MIS_GIVE_ITEM_";
@@ -653,10 +653,10 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 			retParams.back().Identifier = "giver";
 	}
 
-	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
+	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE { invalidIsGiver=true; return _Bot; }
 
 	//***********************
-	bool checkPlayerGift( CMission * instance, CCharacter * user )
+	bool checkPlayerGift( CMission * instance, CCharacter * user ) NL_OVERRIDE
 	{
 		if ( user->getExchangeMoney() != 0 )
 			return false;
@@ -715,7 +715,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 	}
 
 	//***********************
-	bool itemGiftDone( CCharacter & user , const std::vector< CGameItemPtr > & itemsGiven, const EGSPD::CActiveStepPD & step, std::vector<uint32>& result )
+	bool itemGiftDone( CCharacter & user , const std::vector< CGameItemPtr > & itemsGiven, const EGSPD::CActiveStepPD & step, std::vector<uint32>& result ) NL_OVERRIDE
 	{
 		// init the result vector with the initial values of the sub steps
 		for ( map<uint32,EGSPD::CActiveStepStatePD>::const_iterator it = step.getStatesBegin(); it != step.getStatesEnd(); ++it )
@@ -784,7 +784,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 	}
 
 	//***********************
-	std::vector< CSubStep > getSubSteps()
+	std::vector< CSubStep > getSubSteps() NL_OVERRIDE
 	{
 		return _SubSteps;
 	}

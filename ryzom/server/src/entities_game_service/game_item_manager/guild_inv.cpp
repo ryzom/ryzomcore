@@ -33,7 +33,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
-extern NLMISC::CVariable<uint32>	GuildChestSlots;
+extern NLMISC::CVariable<sint32>	GuildChestSlots;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 /////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ void CGuildInventoryView::init( CGuildInventory *inventory, CCDBGroup *guildInvD
 	bindToInventory( inventory );
 	{
 		H_AUTO(resizeGuildInventoryInit);
-		_ItemsSessions.resize( getInventory()->getSlotCount(), 0 );
+		_ItemsSessions.resize( getInventory()->getSlotCount(), 0 );	
 	}
 	_GuildInvDb = guildInvDb;
 	CBankAccessor_GUILD::getGUILD().getINVENTORY().setSESSION(*_GuildInvDb, _InventorySession );
@@ -100,7 +100,7 @@ void CGuildInventoryView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFla
 		updateInfoVersion( slot );
 		updateSession( slot );
 	}
-	else if ( changeFlags.checkEnumValue(INVENTORIES::itc_removed) )
+	else if ( changeFlags.checkEnumValue( INVENTORIES::itc_removed ) )
 	{
 		resetClientSlot( slot );
 		updateSession( slot );
@@ -137,13 +137,11 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 {
 	CGameItemPtr item = getInventory()->getItem( slot );
 	const INVENTORIES::TItemId &itemId = item->getItemId();
-
 	BOTCHATTYPE::TBotChatResaleFlag resaleFlag = (item->durability() == item->maxDurability() ? BOTCHATTYPE::ResaleOk : BOTCHATTYPE::ResaleKOBroken);
 	if (item->getLockedByOwner())
 	{
 		resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
 	}
-
 
 	INVENTORIES::CItemSlot itemSlot( slot );
 	itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
@@ -239,7 +237,7 @@ void CGuildInventoryView::updateInfoVersion(uint32 slot)
 		bms.serial( slotId );
 		bms.serial( currentVersion );
 		msgout.serialBufferWithSize( (uint8*)bms.buffer(), bms.length() );
-		sendMessageViaMirror( NLNET::TServiceId(destCharacterId.getDynamicId()), msgout );
+		sendMessageViaMirror( NLNET::TServiceId(destCharacterId.getDynamicId()), msgout );	
 	}
 }
 
@@ -355,8 +353,8 @@ void CGuildInventoryView::provideContents( CBitMemStream& stream, const CEntityI
 				CGameItemPtr itemPtr = guildInv->getItem( i );
 				if ( itemPtr != NULL )
 				{
-					updateClientSlot( i );
-					_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
+			updateClientSlot( i );
+			_GuildInvUpdater.pushItemInfoVersion( i ); // send the current info version (no change)
 				}
 			}
 		}

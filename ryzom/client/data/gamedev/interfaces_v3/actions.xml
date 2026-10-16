@@ -38,9 +38,9 @@
 	<value value="animal_global"		hardtext="uiAnimals" contexts="game"/>
 
 	<value value="compass"				hardtext="uiCompas" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
-
+	
 	<value value="map"					hardtext="uiMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
-
+	
 	<value value="gestion_windows"		hardtext="uiWindows" contexts="game"/>
 	<value value="milko_pad"			hardtext="uiTaskbar" contexts="game"/>
 
@@ -54,7 +54,7 @@
 	<value value="contact_list"			hardtext="uiContactList" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
 	<value value="main_chat"			hardtext="uiMainChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="tell"					hardtext="uiTellWinAct" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
-
+	
 	<value value="keys"					hardtext="uiKeys" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="macros"				hardtext="uiMacros" contexts="game"/>
 	<value value="game_config"			hardtext="uiGlobalSettings" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
@@ -406,30 +406,7 @@
 		</parameter>
 		<parameter hardtext="uiTalkCmdMsg" type="%action_param_user" name="text"/>
 	</action>
-	<action name="talk_message" hardtext="uiTalkMem">
-		<parameter hardtext="uiTalkMemMsg" type="%action_param_constant" value="0">
-			<value value="00" hardtext="uiTalkMemMsg00"/>
-			<value value="01" hardtext="uiTalkMemMsg01"/>
-			<value value="02" hardtext="uiTalkMemMsg02"/>
-			<value value="03" hardtext="uiTalkMemMsg03"/>
-			<value value="04" hardtext="uiTalkMemMsg04"/>
-			<value value="05" hardtext="uiTalkMemMsg05"/>
-			<value value="06" hardtext="uiTalkMemMsg06"/>
-			<value value="07" hardtext="uiTalkMemMsg07"/>
-			<value value="08" hardtext="uiTalkMemMsg08"/>
-			<value value="09" hardtext="uiTalkMemMsg09"/>
-			<value value="10" hardtext="uiTalkMemMsg10"/>
-			<value value="11" hardtext="uiTalkMemMsg11"/>
-			<value value="12" hardtext="uiTalkMemMsg12"/>
-			<value value="13" hardtext="uiTalkMemMsg13"/>
-			<value value="14" hardtext="uiTalkMemMsg14"/>
-			<value value="15" hardtext="uiTalkMemMsg15"/>
-			<value value="16" hardtext="uiTalkMemMsg16"/>
-			<value value="17" hardtext="uiTalkMemMsg17"/>
-			<value value="18" hardtext="uiTalkMemMsg18"/>
-			<value value="19" hardtext="uiTalkMemMsg19"/>
-		</parameter>
-	</action>
+
 </action_category>
 
 <action_category name="view" hardtext="uiView" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
@@ -474,7 +451,7 @@
 		<parameter hardtext="uiWindowName">
 			<instance template="popable_window_list"/>
 		</parameter>
-	</action>
+	</action>	
 	<action name="show" hardtext="uiShow" repeat="1" keyup="1">
 		<parameter hardtext="uiWindowName">
 			<instance template="container_window_list"/>
@@ -499,15 +476,14 @@
 			<value value="REGION_CHAT"			hardtext="uiREGION" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
 			<value value="UNIVERSE_CHAT"		hardtext="uiUNIVERSE" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm" />
 		</parameter>
-	</action>
+	</action>	
 	<action name="show_on_press" hardtext="uiShowOnPress" repeat="1" keyup="1" macroisable="false">
 		<parameter hardtext="uiWindowName">
 			<instance template="container_window_list"/>
 		</parameter>
-	</action>
+	</action>	
 
 	<action name="fullmap" hardtext="uiShowFullMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
-
 	<!-- in r2 virtual desktop are used for the different mode (edition, dm, test) -->
 	<action name="set_desktop"			hardtext="uiSetDesktop" repeat="1" keyup="1" contexts="game">
 		<parameter hardtext="uiDesktopNumber">
@@ -526,11 +502,11 @@
 		</parameter>
 	</action>
 </action_category>
-
+  
 <action_category name="system" hardtext="uiSystem" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
 	<action name="quit_game"						hardtext="uiQuitGameWithoutWarning" contexts="game, r2ed_scenario_creation"/>
-	<action name="quit_ryzom"						hardtext="uiQuitRyzomWithoutWarning" contexts="game, r2ed_scenario_creation"/>
-	<action name="quit_ryzom_now"					hardtext="uiQuitRyzomWithoutWarning" contexts="r2ed, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>
+	<action name="quit_ryzom"						hardtext="uiQuitRyzomWithoutWarning" contexts="game, r2ed_scenario_creation"/>	
+	<action name="quit_ryzom_now"					hardtext="uiQuitRyzomWithoutWarning" contexts="r2ed, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>	
 
 	<action name="enter_modal" hardtext="uiQuit">
 		<parameter value="ui:interface:quit_dialog" name="group" type="%action_param_hidden" />
@@ -577,7 +553,7 @@
 	<action name="display_infos"			hardtext="uiDebugDisplayInfos" contexts="game, waiting_network, r2ed, r2ed_anim_test, r2ed_anim_dm, r2ed_scenario_creation"/>
 	<action name="render_mode"				hardtext="uiDebugRenderMode" />
 	<action name="toggle_render"			hardtext="uiDebugToggleRender" />
-	<action name="switch_console_display"	hardtext="uiDebugSwitchConsoleDisplay" />
+	<action name="switch_console_display"	hardtext="uiDebugSwitchConsoleDisplay" />	
 	<action name="toggle_fly"				hardtext="uiDebugToggleFly" />
 	<action name="test"						hardtext="uiDebugTest" />
 	<action name="set_pos"					hardtext="uiDebugSetPos" />
@@ -621,7 +597,7 @@
 	<action name="update_clouds"			hardtext="uiDebugWeatherUpdateClouds" />
 	<action name="toggle_weather_function"	hardtext="uiDebugWeatherTogFunction" />
 	<action name="inc_hour"					hardtext="uiDebugWeatherIncHour" />
-	<action name="dec_hour"					hardtext="uiDebugWeatherDecHour" />
+	<action name="dec_hour"					hardtext="uiDebugWeatherDecHour" />	
 	<action name="weather_stats"			hardtext="uiDebugWeatherStats" />
 	<action name="dec_display_factor"		hardtext="uiDebugWeatherDecDispFactor" />
 	<action name="inc_display_factor"		hardtext="uiDebugWeatherIncDispFactor" />
@@ -639,7 +615,7 @@
 <action_category name="r2ed" hardtext="uiR2EDActionCategory" macroisable="false" contexts="r2ed">
 	<!-- edition specific (in keys_r2ed.xml) -->
 	<action name="r2ed_context_command"		hardtext="uimR2EDContextualCommand">
-		<!-- contextual commands -->
+		<!-- contextual commands -->		
 		<parameter hardtext="uimR2EDCommandName" name="commandId">
 				<value value="delete"				hardtext="uimR2EDMenuDelete"/>
 				<value value="properties"			hardtext="uimR2EDMenuProperties"/>
@@ -651,7 +627,7 @@
 				<value value="patrol_route"			hardtext="uimR2EDMenuPatrolRoute"/>
 				<value value="repeat_route"			hardtext="uimR2EDMenuRepeatRoute"/>
 				<value value="stand_still"			hardtext="uimR2EDMenuStandInPlace"/>
-				<value value="customize_look"		hardtext="uiR2EDCustomizeLook"/>
+				<value value="customize_look"		hardtext="uiR2EDCustomizeLook"/>				
 		</parameter>
 	</action>
 	<action name="r2ed_cancel_tool"		hardtext="uimR2EDCancelTool" contexts="r2ed, r2ed_anim_dm"/>

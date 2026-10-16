@@ -89,12 +89,13 @@ public:
 	typedef CCallback<bool /* continue */, const std::string &/* filename */, uint32 /* currentSize */, uint32 /* totalSize */> TUnpackProgressCallback;
 
 	// Unpack all files in sBigFileName to sDestDir and send progress notifications to optional callback
-	static bool unpack(const std::string &sBigFileName, const std::string &sDestDir, TUnpackProgressCallback *callback = NULL);
+	static bool unpack(const std::string &sBigFileName, const std::string &sDestDir, TUnpackProgressCallback *callback = nullptr);
 
 	// A BNPFile header (filename is a char* pointing on FileNames and is always lowercase)
 	struct BNPFile
 	{
-		BNPFile() : Name(NULL), Size(0), Pos(0) { }
+		BNPFile() : Name(nullptr)
+		    , Size(0), Pos(0) { }
 		char*		Name;
 		uint32		Size;
 		uint32		Pos;
@@ -144,7 +145,7 @@ public:
 		bool appendFile(const std::string &filename);
 
 		// Unpack BigFileName to sDestDir and send progress notifications to optional callback
-		bool unpack(const std::string &sDestDir, TUnpackProgressCallback *callback = NULL);
+		bool unpack(const std::string &sDestDir, TUnpackProgressCallback *callback = nullptr);
 	};
 
 // ***************
@@ -156,7 +157,7 @@ private:
 	struct	CHandleFile
 	{
 		FILE		*File;
-		CHandleFile() : File(NULL) { }
+		CHandleFile() : File(nullptr) { }
 	};
 
 	// A class which return a FILE * handle per Thread.

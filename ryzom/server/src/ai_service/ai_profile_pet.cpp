@@ -39,7 +39,7 @@ class CTopoPosValidator
 {
 public:
 	CTopoPosValidator(CWorldPosition const& startPos, TAStarFlag denyFlags);
-	bool check(CWorldPosition const& wpos) const;
+	bool check(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
 private:
 	CWorldPosition _StartPos;

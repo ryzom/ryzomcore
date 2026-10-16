@@ -26,9 +26,9 @@ class CIGSeasonCallback : public IIGObserver
 public:
 	EGSPD::CSeason::TSeason	Season;
 private:
-	virtual void instanceGroupLoaded(NL3D::UInstanceGroup * /* ig */) { }
-	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig);
-	virtual void instanceGroupRemoved(NL3D::UInstanceGroup * /* ig */) { }
+	virtual void instanceGroupLoaded(NL3D::UInstanceGroup * /* ig */) NL_OVERRIDE { }
+	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig) NL_OVERRIDE;
+	virtual void instanceGroupRemoved(NL3D::UInstanceGroup * /* ig */) NL_OVERRIDE { }
 };
 
 extern CIGSeasonCallback IGSeasonCallback;

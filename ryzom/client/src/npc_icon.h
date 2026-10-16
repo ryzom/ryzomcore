@@ -186,21 +186,21 @@ protected:
 	class CMissionStartStopObserver : public ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(ICDBNode* node) NL_OVERRIDE;
 	}
 		MissionStartStopObserver;
 
 	class CMissionNpcAliasObserver : public ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(ICDBNode* node) NL_OVERRIDE;
 	}
 		MissionNpcAliasObserver;
 
 	class CMissionPrerequisitEventObserver : public ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(ICDBNode* node) NL_OVERRIDE;
 	}
 		MissionPrerequisitEventObserver;
 

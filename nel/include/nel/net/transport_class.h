@@ -298,32 +298,32 @@ protected:
 
 		CRegisteredClass () { clear (); }
 
-		void clear () { Instance = NULL; }
+		void clear () { Instance = nullptr; }
 	};
 
 	typedef std::map<std::string, CRegisteredClass> TRegisteredClass;
 
 	template <class T> struct CRegisteredProp : public CRegisteredBaseProp
 	{
-		CRegisteredProp () : Value(NULL) { }
+		CRegisteredProp () : Value(nullptr) { }
 
-		CRegisteredProp (const std::string &name, TProp type, T defaultValue, T *value = NULL) :
+		CRegisteredProp (const std::string &name, TProp type, T defaultValue, T *value = nullptr) :
 			CRegisteredBaseProp (name, type), DefaultValue(defaultValue), Value (value) { }
 
 		T DefaultValue, *Value;
 
-		virtual void serialDefaultValue (NLMISC::IStream &f)
+		virtual void serialDefaultValue (NLMISC::IStream &f) NL_OVERRIDE
 		{
 			f.serial (DefaultValue);
 		}
 
-		virtual void serialValue (NLMISC::IStream &f)
+		virtual void serialValue (NLMISC::IStream &f) NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			f.serial (*Value);
 		}
 
-		virtual void setDefaultValue ()
+		virtual void setDefaultValue () NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			*Value = DefaultValue;
@@ -332,25 +332,25 @@ protected:
 
 	template <class T> struct CRegisteredPropCont : public CRegisteredBaseProp
 	{
-		CRegisteredPropCont () : Value(NULL) { }
+		CRegisteredPropCont () : Value(nullptr) { }
 
-		CRegisteredPropCont (const std::string &name, TProp type, T *value = NULL) :
+		CRegisteredPropCont (const std::string &name, TProp type, T *value = nullptr) :
 			CRegisteredBaseProp (name, type), Value (value) { }
 
 		T *Value;
 
-		virtual void serialDefaultValue (NLMISC::IStream &/* f */)
+		virtual void serialDefaultValue (NLMISC::IStream &/* f */) NL_OVERRIDE
 		{
 			// nothing
 		}
 
-		virtual void serialValue (NLMISC::IStream &f)
+		virtual void serialValue (NLMISC::IStream &f) NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			f.serialCont (*Value);
 		}
 
-		virtual void setDefaultValue ()
+		virtual void setDefaultValue () NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			Value->clear ();

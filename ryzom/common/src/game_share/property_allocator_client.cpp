@@ -111,11 +111,11 @@ void		*CPropertyAllocatorClient::accessPropertySegment( const std::string& propN
 	if ( ipim == _PropertiesInMirror.end() )
 	{
 		nlwarning( "MIRROR: Invalid property name %s", propName.c_str() );
-		return NULL;
+		return nullptr;
 	}
 
 	TPropertyInfo& propinfo = GET_PROPERTY_INFO(ipim);
-	if ( propinfo.Segment != NULL )
+	if ( propinfo.Segment != nullptr)
 	{
 		nlwarning( "MIRROR: Cannot receive twice the same shared mem info" );
 		return propinfo.Segment;
@@ -123,7 +123,7 @@ void		*CPropertyAllocatorClient::accessPropertySegment( const std::string& propN
 
 	// Set the segment pointer
 	propinfo.Segment = CSharedMemory::accessSharedMemory( toSharedMemId(smid) );
-	if ( propinfo.Segment != NULL )
+	if ( propinfo.Segment != nullptr)
 	{
 		propinfo.Pending = false;
 		propinfo.SMId = smid;
@@ -148,7 +148,7 @@ void		*CPropertyAllocatorClient::accessOtherPropertySegment( sint32 smid )
 		{
 			// We have it already
 			nlwarning( "MIRROR: Segment already accessed smid %d", smid );
-			return NULL;
+			return nullptr;
 		}
 	}
 	void *segment = CSharedMemory::accessSharedMemory( toSharedMemId(smid) );
@@ -166,10 +166,10 @@ void		CPropertyAllocatorClient::unallocProperty( const std::string& propName )
 	TPropertiesInMirror::iterator ipim = _PropertiesInMirror.find( propName );
 	if ( ipim != _PropertiesInMirror.end() )
 	{
-		if ( GET_PROPERTY_INFO(ipim).Segment != NULL )
+		if ( GET_PROPERTY_INFO(ipim).Segment != nullptr)
 		{
 			CSharedMemory::closeSharedMemory( GET_PROPERTY_INFO(ipim).Segment );
-			GET_PROPERTY_INFO(ipim).Segment = NULL;
+			GET_PROPERTY_INFO(ipim).Segment = nullptr;
 		}
 		else
 			nlwarning( "MIRROR: Cannot unalloc property" );

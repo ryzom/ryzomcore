@@ -121,7 +121,7 @@ protected:
 	/// clear online guild properties for a given player
 	void clearOnlineGuildProperties();
 	/// handler called on parent ( player ) destruction
-	void onParentDestructionHandler();
+	void onParentDestructionHandler() NL_OVERRIDE;
 	/// return true if the member can affect another member of the specified grade
 	virtual bool canAffectGrade(EGSPD::CGuildGrade::TGuildGrade)const;
 	

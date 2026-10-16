@@ -53,7 +53,7 @@ public:
 	void			serialSeparatedBufferOut( uint8 *buf, uint len );
 
 	/// Method inherited from IStream
-	virtual void	serialBit(bool &bit);
+	virtual void	serialBit(bool &bit) NL_OVERRIDE;
 
 	/// Template serialisation (should take the one from IStream)
     template<class T>
@@ -95,33 +95,33 @@ public:
 	 */
 	//@{
 
-	virtual void	serial(uint8 &b) ;
-	virtual void	serial(sint8 &b) ;
-	virtual void	serial(uint16 &b) ;
-	virtual void	serial(sint16 &b) ;
-	virtual void	serial(uint32 &b) ;
-	virtual void	serial(sint32 &b) ;
-	virtual void	serial(uint64 &b) ;
-	virtual void	serial(sint64 &b) ;
-	virtual void	serial(float &b) ;
-	virtual void	serial(double &b) ;
-	virtual void	serial(bool &b) ;
+	virtual void	serial(uint8 &b) NL_OVERRIDE ;
+	virtual void	serial(sint8 &b) NL_OVERRIDE ;
+	virtual void	serial(uint16 &b) NL_OVERRIDE ;
+	virtual void	serial(sint16 &b) NL_OVERRIDE ;
+	virtual void	serial(uint32 &b) NL_OVERRIDE ;
+	virtual void	serial(sint32 &b) NL_OVERRIDE ;
+	virtual void	serial(uint64 &b) NL_OVERRIDE ;
+	virtual void	serial(sint64 &b) NL_OVERRIDE ;
+	virtual void	serial(float &b) NL_OVERRIDE ;
+	virtual void	serial(double &b) NL_OVERRIDE ;
+	virtual void	serial(bool &b) NL_OVERRIDE ;
 #ifndef NL_OS_CYGWIN
-	virtual void	serial(char &b) ;
+	virtual void	serial(char &b) NL_OVERRIDE ;
 #endif
-	virtual void	serial(std::string &b) ;
-	virtual void	serial(ucstring &b) ;
+	virtual void	serial(std::string &b) NL_OVERRIDE ;
+	virtual void	serial(ucstring &b) NL_OVERRIDE ;
 	//@}
 
 	/// Specialisation of serialCont() for vector<uint8>
-	virtual void			serialCont(std::vector<uint8> &cont) { serialVector(cont); }
+	virtual void			serialCont(std::vector<uint8> &cont) NL_OVERRIDE { serialVector(cont); }
 	/// Specialisation of serialCont() for vector<sint8>
-	virtual void			serialCont(std::vector<sint8> &cont) { serialVector(cont); }
+	virtual void			serialCont(std::vector<sint8> &cont) NL_OVERRIDE { serialVector(cont); }
 	/// Specialisation of serialCont() for vector<bool>
-	virtual void			serialCont(std::vector<bool> &cont);
+	virtual void			serialCont(std::vector<bool> &cont) NL_OVERRIDE;
 
 	/// Serialisation in hexadecimal
-	virtual void	serialHex(uint32 &b);
+	virtual void	serialHex(uint32 &b) NL_OVERRIDE;
 };
 
 

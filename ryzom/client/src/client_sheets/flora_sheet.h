@@ -51,9 +51,9 @@ public:
 	/// ctor
 	CFloraSheet();
 	/// Build the sheet from an external script.
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 	/// Serialize plant sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	// Get total weight of plant infos
 	uint64		 getPlantInfoTotalWeight() const { return _TotalWeight; }
 	/** Get plant info from weighted index

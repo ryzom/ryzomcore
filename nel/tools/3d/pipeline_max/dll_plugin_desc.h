@@ -63,9 +63,7 @@ public:
 class IDllPluginDesc : public IDllPluginDescInternal
 {
 public:
-	// virtual const ucchar *displayName() const = 0;
-	// virtual const ucchar *internalName() const = 0;
-	// TODO: list scene classes
+	// TODO: enumerate the scene classes this plugin provides.
 
 }; /* class IDllPluginDesc */
 
@@ -73,14 +71,13 @@ public:
  * \brief CDllPluginDescBuiltin
  * \date 2012-08-20 09:59GMT
  * \author Jan Boon (Kaetemi)
- * Use only internally for builtin classes
- * TODO: Move to separate header?
+ * Use only internally for builtin classes.
  */
 class CDllPluginDescBuiltin : public IDllPluginDescInternal
 {
 public:
-	virtual const ucchar *displayName() const;
-	virtual const ucchar *internalName() const;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
+	virtual const ucchar *internalName() const NL_OVERRIDE;
 }; /* class CDllPluginDescBuiltin */
 
 extern const CDllPluginDescBuiltin DllPluginDescBuiltin;
@@ -89,14 +86,13 @@ extern const CDllPluginDescBuiltin DllPluginDescBuiltin;
  * \brief CDllPluginDescScript
  * \date 2012-08-20 09:59GMT
  * \author Jan Boon (Kaetemi)
- * Use only internally for scripts
- * TODO: Move to separate header?
+ * Use only internally for scripts.
  */
 class CDllPluginDescScript : public IDllPluginDescInternal
 {
 public:
-	virtual const ucchar *displayName() const;
-	virtual const ucchar *internalName() const;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
+	virtual const ucchar *internalName() const NL_OVERRIDE;
 }; /* class CDllPluginDescScript */
 
 extern const CDllPluginDescScript DllPluginDescScript;

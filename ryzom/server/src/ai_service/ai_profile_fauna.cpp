@@ -53,12 +53,12 @@ class CBotProfileFightFauna
 public:
 	CBotProfileFightFauna(CProfileOwner* owner, CAIEntityPhysical* ennemy);
 	
-	virtual std::string getOneLineInfoString() const { return NLMISC::toString("fight fauna bot profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return NLMISC::toString("fight fauna bot profile"); }
 	
-	void noMoreTarget();
+	void noMoreTarget() NL_OVERRIDE;
 	
-	void eventBeginFight();
-	void eventTargetKilled();
+	void eventBeginFight() NL_OVERRIDE;
+	void eventTargetKilled() NL_OVERRIDE;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -71,9 +71,9 @@ class CBotProfileHealFauna
 public:
 	CBotProfileHealFauna(TDataSetRow const& row, CProfileOwner* owner);
 	
-	virtual std::string getOneLineInfoString() const { return NLMISC::toString("heal fauna bot profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return NLMISC::toString("heal fauna bot profile"); }
 	
-	void noMoreTarget();
+	void noMoreTarget() NL_OVERRIDE;
 	
 //	void eventBeginFight();
 //	void eventTargetKilled();
@@ -89,13 +89,13 @@ class CBotProfileReturnAfterFightFauna
 {
 public:
 	CBotProfileReturnAfterFightFauna(CProfileOwner* owner);
-	~CBotProfileReturnAfterFightFauna();
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual std::string getOneLineInfoString() const { return NLMISC::toString("return_after_fight fauna bot profile"); }
+	~CBotProfileReturnAfterFightFauna() NL_OVERRIDE;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return NLMISC::toString("return_after_fight fauna bot profile"); }
 	
-	virtual NLMISC::CSmartPtr<CMovementMagnet> const& getMovementMagnet() const { return _MovementMagnet; }
+	virtual NLMISC::CSmartPtr<CMovementMagnet> const& getMovementMagnet() const NL_OVERRIDE { return _MovementMagnet; }
 	
 private:
 	NLMISC::CSmartPtr<CMovementMagnet>	_MovementMagnet;

@@ -87,7 +87,7 @@ public:
 	virtual void doRender(const CMatrix &camMatrix, TGlobalAnimationTime time, UDriver &drv) = 0;
 private:
 	// from IWaterEnvMapRender
-	virtual void render(TFace face, TGlobalAnimationTime time, UDriver &drv);
+	virtual void render(TFace face, TGlobalAnimationTime time, UDriver &drv) NL_OVERRIDE;
 };
 
 
@@ -99,7 +99,7 @@ class CWaterEnvMapRenderFromUScene : public CWaterEnvMapRenderHelper
 public:
 	// ctor
 	CWaterEnvMapRenderFromUScene();
-	virtual ~CWaterEnvMapRenderFromUScene() {}
+	virtual ~CWaterEnvMapRenderFromUScene() NL_OVERRIDE {}
 	// Set the scene and camera to be used for render, and create a camera for that purpose
 	void				  setScene(UScene *scene, UCamera cam);
 	void				  setCamPos(const NLMISC::CVector &pos) { _CamPos = pos; }
@@ -129,7 +129,7 @@ private:
 	UScene::TRenderPart _RenderPart;
 	NLMISC::CVector	_CamPos;
 private:
-	virtual void doRender(const CMatrix &camMatrix, TGlobalAnimationTime time, UDriver &drv);
+	virtual void doRender(const CMatrix &camMatrix, TGlobalAnimationTime time, UDriver &drv) NL_OVERRIDE;
 };
 
 }

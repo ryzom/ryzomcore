@@ -79,9 +79,9 @@ void			CPatch::computeNewFar(const NLMISC::CBSphere &patchSphere, sint &newFar0,
 		CPatchRdrPass	*oldPass1=_PatchRdrPassFar1;
 
 		// Checks
-		if (oldPass0==NULL)
+		if (oldPass0 == nullptr)
 			nlassert (Far0<=0);
-		if (oldPass1==NULL)
+		if (oldPass1 == nullptr)
 			nlassert (Far1<=0);
 
 		float oldFar0UScale=Far0UScale;
@@ -93,11 +93,11 @@ void			CPatch::computeNewFar(const NLMISC::CBSphere &patchSphere, sint &newFar0,
 
 		// Don't delete the pass0 if the new newFar1 will use it
 		if ((newFar1==Far0)&&(Far0>0))
-			_PatchRdrPassFar0=NULL;
+			_PatchRdrPassFar0 = nullptr;
 
 		// Don't delete the pass1 if the new newFar0 will use it
 		if ((newFar0==Far1)&&(Far1>0))
-			_PatchRdrPassFar1=NULL;
+			_PatchRdrPassFar1 = nullptr;
 
 		// Pass0 have changed ?
 		if (newFar0!=Far0)
@@ -144,7 +144,7 @@ void			CPatch::computeNewFar(const NLMISC::CBSphere &patchSphere, sint &newFar0,
 				if (_PatchRdrPassFar0)
 				{
 					Zone->Landscape->freeFarRenderPass (this, _PatchRdrPassFar0, Far0);
-					_PatchRdrPassFar0=NULL;
+					_PatchRdrPassFar0 = nullptr;
 				}
 			}
 		}
@@ -208,7 +208,7 @@ void			CPatch::computeNewFar(const NLMISC::CBSphere &patchSphere, sint &newFar0,
 				if (_PatchRdrPassFar1)
 				{
 					Zone->Landscape->freeFarRenderPass (this, _PatchRdrPassFar1, Far1);
-					_PatchRdrPassFar1=NULL;
+					_PatchRdrPassFar1 = nullptr;
 				}
 			}
 		}
@@ -342,7 +342,7 @@ void			CPatch::preRender(const NLMISC::CBSphere &patchSphere)
 	bool	doClipFar= Far0==0 && Far1==1;
 	// Parse all TessBlocks.
 	uint			nTessBlock= TessBlocks.size();
-	CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0]: NULL ;
+	CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0] : nullptr;
 	for(; nTessBlock>0; pTessBlock++, nTessBlock--)
 	{
 		CTessBlock		&tblock= *pTessBlock;
@@ -582,7 +582,7 @@ void			CPatch::renderFar0()
 
 	// Render tris of TessBlocks.
 	uint			nTessBlock= TessBlocks.size();
-	CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0]: NULL ;
+	CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0] : nullptr;
 	for(; nTessBlock>0; pTessBlock++, nTessBlock--)
 	{
 		CTessBlock		&tblock= *pTessBlock;
@@ -614,7 +614,7 @@ void			CPatch::renderFar1()
 
 	// Render tris of TessBlocks.
 	uint			nTessBlock= TessBlocks.size();
-	CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0]: NULL ;
+	CTessBlock		*pTessBlock= nTessBlock>0? &TessBlocks[0] : nullptr;
 	for(; nTessBlock>0; pTessBlock++, nTessBlock--)
 	{
 		CTessBlock		&tblock= *pTessBlock;

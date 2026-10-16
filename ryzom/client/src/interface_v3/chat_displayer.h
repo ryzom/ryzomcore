@@ -56,7 +56,7 @@ public:
 	}
 
 	/// Display the string to the chat window
-	virtual void doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message )
+	virtual void doDisplay ( const NLMISC::CLog::TDisplayInfo& args, const char *message ) NL_OVERRIDE
 	{
 		std::string temp = message;
 		std::string str;

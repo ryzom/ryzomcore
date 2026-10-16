@@ -33,7 +33,7 @@ namespace NLMISC
 
 NL_LIB_HANDLE nlLoadLibrary(const std::string &libName)
 {
-	NL_LIB_HANDLE res = 0;
+	NL_LIB_HANDLE res = nullptr;
 #ifdef NL_OS_WINDOWS
 	res = LoadLibraryW(nlUtf8ToWide(libName));
 #elif defined(NL_OS_UNIX)
@@ -41,7 +41,7 @@ NL_LIB_HANDLE nlLoadLibrary(const std::string &libName)
 #else
 #	error "You must code nlLoadLibrary() for your platform"
 #endif
-	if(res == 0) nlwarning("Load library '%s' failed: %s", libName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
+	if(res == nullptr) nlwarning("Load library '%s' failed: %s", libName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
 	return res;
 }
 
@@ -58,7 +58,7 @@ bool nlFreeLibrary(NL_LIB_HANDLE libHandle)
 
 void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
 {
-	void *res = 0;
+	void *res = nullptr;
 #ifdef NL_OS_WINDOWS
 	res = (void *)GetProcAddress(libHandle, procName.c_str());
 #elif defined(NL_OS_UNIX)
@@ -66,7 +66,7 @@ void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
 #else
 #	error "You must code nlGetProcAddress() for your platform"
 #endif
-	if(res == 0) nlwarning("Getting symbol address of '%s' failed: %s", procName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
+	if(res == nullptr) nlwarning("Getting symbol address of '%s' failed: %s", procName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
 	return res;
 }
 
@@ -154,14 +154,15 @@ void CLibrary::addLibPath(const std::string &path)
 }
 
 CLibrary::CLibrary()
-:	_LibHandle(NULL),
+:	_LibHandle(nullptr)
+    ,
 	_Ownership(true),
-	_PureNelLibrary(NULL)
+	_PureNelLibrary(nullptr)
 {
 }
 
 CLibrary::CLibrary(NL_LIB_HANDLE libHandle, bool ownership)
-: _PureNelLibrary(NULL)
+: _PureNelLibrary(nullptr)
 {
 	_LibHandle = libHandle;
 	_Ownership = ownership;
@@ -169,7 +170,7 @@ CLibrary::CLibrary(NL_LIB_HANDLE libHandle, bool ownership)
 }
 
 CLibrary::CLibrary(const std::string &libName, bool addNelDecoration, bool tryLibPath, bool ownership)
-: _PureNelLibrary(NULL)
+: _PureNelLibrary(nullptr)
 {
 	loadLibrary(libName, addNelDecoration, tryLibPath, ownership);
 	// Assert here !
@@ -179,7 +180,7 @@ CLibrary::CLibrary(const std::string &libName, bool addNelDecoration, bool tryLi
 
 CLibrary::~CLibrary()
 {
-	if (_LibHandle != NULL && _Ownership)
+	if (_LibHandle != nullptr && _Ownership)
 	{
 		nlFreeLibrary(_LibHandle);
 	}
@@ -215,7 +216,7 @@ bool CLibrary::loadLibrary(const std::string &libName, bool addNelDecoration, bo
 	_LibHandle = nlLoadLibrary(libPath);
 	_LibFileName = libPath;
 	// MTR: some new error handling. Just logs if it couldn't load the handle.
-	if(_LibHandle == NULL)
+	if(_LibHandle == nullptr)
 	{
 #ifdef NL_OS_UNIX
 		const char *errormsg = dlerror();
@@ -228,7 +229,7 @@ bool CLibrary::loadLibrary(const std::string &libName, bool addNelDecoration, bo
 	{
 		// check for 'pure' NeL library
 		void *entryPoint = getSymbolAddress(NL_MACRO_TO_STR(NLMISC_PURE_LIB_ENTRY_POINT));
-		if (entryPoint != NULL)
+		if (entryPoint != nullptr)
 		{
 			// rebuild the interface pointer
 			_PureNelLibrary = *(reinterpret_cast<INelLibrary**>(entryPoint));
@@ -237,7 +238,7 @@ bool CLibrary::loadLibrary(const std::string &libName, bool addNelDecoration, bo
 		}
 	}
 
-	return _LibHandle != NULL;
+	return _LibHandle != nullptr;
 }
 
 void CLibrary::freeLibrary()
@@ -255,8 +256,8 @@ void CLibrary::freeLibrary()
 		nldebug("Freeing dynamic library '%s'", _LibFileName.c_str());
 		nlFreeLibrary(_LibHandle);
 
-		_PureNelLibrary = NULL;
-		_LibHandle = NULL;
+		_PureNelLibrary = nullptr;
+		_LibHandle = nullptr;
 		_Ownership = false;
 		_LibFileName.clear();
 	}
@@ -271,18 +272,18 @@ void *CLibrary::getSymbolAddress(const std::string &symbolName)
 
 bool CLibrary::isLibraryLoaded()
 {
-	return _LibHandle != NULL;
+	return _LibHandle != nullptr;
 }
 
 bool CLibrary::isLibraryPure()
 {
-	return _LibHandle != NULL && _PureNelLibrary != NULL;
+	return _LibHandle != nullptr && _PureNelLibrary != nullptr;
 }
 
 INelLibrary *CLibrary::getNelLibraryInterface()
 {
 	if (!isLibraryPure())
-		return NULL;
+		return nullptr;
 
 	return _PureNelLibrary;
 }
@@ -290,7 +291,7 @@ INelLibrary *CLibrary::getNelLibraryInterface()
 INelLibrary::~INelLibrary()
 {
 	// cleanup ram
-	if (_LibContext != NULL)
+	if (_LibContext != nullptr)
 		delete _LibContext;
 }
 

@@ -133,12 +133,12 @@ struct TPropertyValueArrayHeader
 {
 	void				reset()
 	{
-		Values = NULL;
-		ChangeTimestamps = NULL;
+		Values = nullptr;
+		ChangeTimestamps = nullptr;
 #ifdef STORE_CHANGE_SERVICEIDS
-		ChangeServiceIds = NULL;
+		ChangeServiceIds = nullptr;
 #endif
-		ListCellContainer = NULL;
+		ListCellContainer = nullptr;
 		DataTypeSize = 0;
 //#ifdef NL_DEBUG
 		IsReadOnly = false;
@@ -183,11 +183,11 @@ struct TEntityIdArrayHeader
 {
 	void				reset()
 	{
-		EntityIds = NULL;
-		OnlineBitfieldPt = NULL;
-		OnlineTimestamps = NULL;
-		Counts = NULL;
-		SpawnerServiceIds = NULL;
+		EntityIds = nullptr;
+		OnlineBitfieldPt = nullptr;
+		OnlineTimestamps = nullptr;
+		Counts = nullptr;
+		SpawnerServiceIds = nullptr;
 	}
 
 	/// Set the service responsible for managing the entity (spawning/despawning)
@@ -550,7 +550,7 @@ protected:
 	 * segmentSize is used only if initValues is true.
 	 * If propName is the special entityId property, the behaviour is different (propName need not exist)
 	 */
-	void						setPropertyPointer( std::string& propName, TPropertyIndex propIndex, void *segmentPt, bool initValues, uint32 dataTypeSize, bool isReadOnly, bool mustMonitorAssignment, std::vector<uint8> *ptCountsToSet=NULL, NLMISC::TGameCycle timestamp=0, uint32 segmentSize=~0 );
+	void						setPropertyPointer( std::string& propName, TPropertyIndex propIndex, void *segmentPt, bool initValues, uint32 dataTypeSize, bool isReadOnly, bool mustMonitorAssignment, std::vector<uint8> *ptCountsToSet = nullptr, NLMISC::TGameCycle timestamp=0, uint32 segmentSize=~0 );
 
 	/// Get the property index corresponding to the specified property name in the dataset
 	TPropertyIndex				getPropertyIndex( const std::string& propName ) const;

@@ -185,20 +185,20 @@ class CDynamicMapClientEventForwarder : public CDynamicMapClient
 {
 public:
 	CDynamicMapClientEventForwarder(const std::string &eid, NLNET::IModuleSocket * clientGateway, lua_State *luaState);
-	virtual void nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position);
-	virtual void nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value);
+	virtual void nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position) NL_OVERRIDE;
+	virtual void nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value) NL_OVERRIDE;
 	virtual void nodeInserted(const std::string& instanceId, const std::string& attrName, sint32 position,
-							  const std::string& key, CObject* value);
+							  const std::string& key, CObject* value) NL_OVERRIDE;
 	virtual void nodeMoved(const std::string& instanceId, const std::string& attrName, sint32 position,
-							const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
-	virtual void scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialActIndex);
+							const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition) NL_OVERRIDE;
+	virtual void scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialActIndex) NL_OVERRIDE;
 
-	virtual void onAnimationModeConnected(const CClientMessageAdventureUserConnection& connected);
-	virtual void onEditionModeConnected( uint32 userSlotId, uint32 adventureId, CObject* highLevel, const std::string& versionName, bool willTP, uint32 initialActIndex);
-	virtual void onEditionModeDisconnected();
-	virtual void onResetEditionMode();
-	virtual void onTestModeConnected();
-	virtual void onTestModeDisconnected(TSessionId sessionId, uint32 lasAct, TScenarioSessionType sessionType);
+	virtual void onAnimationModeConnected(const CClientMessageAdventureUserConnection& connected) NL_OVERRIDE;
+	virtual void onEditionModeConnected( uint32 userSlotId, uint32 adventureId, CObject* highLevel, const std::string& versionName, bool willTP, uint32 initialActIndex) NL_OVERRIDE;
+	virtual void onEditionModeDisconnected() NL_OVERRIDE;
+	virtual void onResetEditionMode() NL_OVERRIDE;
+	virtual void onTestModeConnected() NL_OVERRIDE;
+	virtual void onTestModeDisconnected(TSessionId sessionId, uint32 lasAct, TScenarioSessionType sessionType) NL_OVERRIDE;
 };
 
 
@@ -315,17 +315,17 @@ void CDynamicMapClientEventForwarder::onAnimationModeConnected(const CClientMess
 CEditor::CEditor()
 {
 	//H_AUTO(R2_CEditor_CEditor)
-	_SelectedInstance = NULL;
-	_FocusedInstance = NULL;
-	_Scenario = NULL;
+	_SelectedInstance = nullptr;
+	_FocusedInstance = nullptr;
+	_Scenario = nullptr;
 	_EnteredInSetSelectedInstance = false;
 	_DecalRefTime = 0;
 	_Initialized = false;
 	//vianney?? _LastUIModificationDate = 0;
 	_InstanceObserverHandleCounter = 0;
 	// module are initialized one time and never reconnected
-	_DMC = NULL;
-	_DMS = NULL;
+	_DMC = nullptr;
+	_DMS = nullptr;
 	_Mode = NotInitialized;
 	_AccessMode = AccessModeUnknown;
 	_SerializeUIConfig = true;
@@ -343,11 +343,11 @@ CEditor::CEditor()
 	_TPReceivedFlag = false;
 	_WaitScenarioScreenWanted = false;
 	_WaitScenarioScreenActive = false;
-	_NewScenario = NULL;
+	_NewScenario = nullptr;
 	_NewScenarioInitialAct = 0;
 	_EditionModeDisconnectedFlag = true;
 	_PostponeScenarioUpdated = false;
-	_EntitySorter = NULL;
+	_EntitySorter = nullptr;
 	_MaxVisibleEntityExceededFlag = false;
 }
 
@@ -447,7 +447,7 @@ void CEditor::initModules(bool connectDMC)
 	}
 	else
 	{
-		_DMS = 0;
+		_DMS = nullptr;
 	}
 	if (connectDMC)
 		_DMC = new CDynamicMapClientEventForwarder("Client0",socketClientGw,  getLua().getStatePointer());
@@ -467,8 +467,8 @@ void CEditor::releaseModules()
 	delete _DMC; // must have a virtual destructor
 	if (ClientCfg.Local)
 		delete _DMS;
-	_DMC = NULL;
-	_DMS = NULL;
+	_DMC = nullptr;
+	_DMS = nullptr;
 
 	IModuleManager &mm = IModuleManager::getInstance();
 	NLNET::IModule*  clientGw = mm.getLocalModule("clientGw");
@@ -512,13 +512,13 @@ void CEditor::requestSetLocalNode(const std::string& instanceId, const std::stri
 	//H_AUTO(R2_CEditor_requestSetLocalNode)
 	CHECK_EDITOR
 
-	CObject* obj = NULL;
+	CObject* obj = nullptr;
 	{
 
 		CObject *src = _DMC->find(instanceId);
 		if (!src)
 		{
-			nlwarning("Can't find object with id '%s' (setting attribute '%s')", instanceId.c_str(), attrName.c_str());
+			nlwarning("Can't find object with id %s", instanceId.c_str());
 			return;
 		}
 		if (!attrName.empty())
@@ -533,7 +533,7 @@ void CEditor::requestSetLocalNode(const std::string& instanceId, const std::stri
 					return;
 				}
 				CObject::TSmartPtr valueClone = valueBase->clone();
-				valueClone->setParent(0);
+				valueClone->setParent(nullptr);
 				src->setObject(attrName, valueClone);
 				subObj = src->getAttr(attrName);
 			}
@@ -715,7 +715,7 @@ int CEditor::luaSetSelectedInstanceId(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, "setSelectedInstance", 2, LUA_TSTRING);
 	if (strcmp(ls.toString(2), "") == 0)
 	{
-		getEditor().setSelectedInstance(NULL);
+		getEditor().setSelectedInstance(nullptr);
 		return 0;
 	}
 	CInstance *inst = getEditor().getInstanceFromId(ls.toString(2));
@@ -742,7 +742,7 @@ int CEditor::luaSetCurrentTool(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, "setCurrentTool", 2, LUA_TSTRING);
 	if (ls.strlen(2) ==  0)
 	{
-		getEditor().setCurrentTool(NULL);
+		getEditor().setCurrentTool(nullptr);
 	}
 	else
 	{
@@ -795,7 +795,7 @@ int CEditor::luaGetInstanceFromId(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	CInstance *inst = getEditor().getInstanceFromId(ls.toString(2));
-	if (inst == NULL)
+	if (inst == nullptr)
 	{
 		ls.pushNil();
 		return 1;
@@ -1372,7 +1372,7 @@ int CEditor::luaIsCurrentSelectionPlayer(CLuaState &ls)
 	const char *funcName = "isCurrentSelectionPlayer";
 	CLuaIHM::checkArgCount(ls, funcName, 1); // method with 0 args
 	CPlayerCL *player = dynamic_cast<CPlayerCL *>(EntitiesMngr.entity(UserEntity->getTargetSlotNoLag()));
-	ls.push(player != NULL);
+	ls.push(player != nullptr);
 	return 1;
 }
 
@@ -1727,8 +1727,8 @@ void CEditor::waitScenarioScreen()
 	//
 	ActionsContext.setContext("waiting_network");
 	TGameCycle serverTick = NetMngr.getCurrentServerTick();
-	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
-	CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
+	CWidgetManager::getInstance()->setDefaultCaptureKeyboard(nullptr);
 	loadBackgroundBitmap (StartBackground);
 
 	// patch for the 'sys info that pop' prb (cause unknown for now ...)
@@ -1782,7 +1782,7 @@ void CEditor::waitScenarioScreen()
 			{
 				// Display the firewall alert string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
-				if (pVT != NULL)
+				if (pVT != nullptr)
 					pVT->setText(CI18N::get("uiFirewallAlert")+"...");
 
 				// The mouse and fullscreen mode should be unlocked for the user to set the firewall permission
@@ -1835,7 +1835,7 @@ void CEditor::waitScenarioScreen()
 
 		if (sysInfo) sysInfo->setActive(false);
 
-		getUI().updateFrameViews(NULL);
+		getUI().updateFrameViews(nullptr);
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
@@ -1872,7 +1872,7 @@ void CEditor::waitScenarioScreen()
 			{
 				// Display the firewall error string instead of the normal failure string
 				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
-				if (pVT != NULL)
+				if (pVT != nullptr)
 				{
 					pVT->setMultiLine( true );
 					pVT->setText(CI18N::get("uiFirewallFail")+".\n"+
@@ -1896,16 +1896,16 @@ class CInstanceObserverLua : public CEditor::IInstanceObserver
 {
 public:
 	CInstanceObserverLua(CLuaObject &receiver);
-	~CInstanceObserverLua();
+	~CInstanceObserverLua() NL_OVERRIDE;
 	CLuaObject &getReceiver() { return _Receiver; }
 	// from IInstanceObserver
-	virtual void onInstanceCreated(CInstance &instance);
-	virtual void onInstanceErased(CInstance &instance);
-	virtual void onInstancePreHrcMove(CInstance &instance);
-	virtual void onInstancePostHrcMove(CInstance &instance);
-	virtual void onPreHrcMove(CInstance &instance);
-	virtual void onPostHrcMove(CInstance &instance);
-	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex);
+	virtual void onInstanceCreated(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstanceErased(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstancePreHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstancePostHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onPreHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onPostHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
 private:
 	CLuaObject _Receiver; // table that will receive the notifications
 	static uint _Count;
@@ -2018,12 +2018,12 @@ int CEditor::luaRemoveInstanceObserver(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method (self + 1 params)
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // instance  id
 	IInstanceObserver *observer = getEditor().getInstanceObserver((TInstanceObserverHandle) ls.toInteger(2));
-	if (observer == NULL)
+	if (observer == nullptr)
 	{
 		CLuaIHM::fails(ls, "Instance observer not found for handle = %" NL_I64 "d", ls.toInteger(2));
 	}
 	CInstanceObserverLua *luaObserver = dynamic_cast<CInstanceObserverLua *>(observer);
-	if (luaObserver == NULL)
+	if (luaObserver == nullptr)
 	{
 		CLuaIHM::fails(ls, "Instance observer found for handle %" NL_I64 "d, but has bad type, it wasn't registered from lua.", ls.toInteger(2));
 	}
@@ -2053,7 +2053,7 @@ const CObjectTable *CEditor::getObjectTableFromId(const TInstanceId &id) const
 	CHECK_EDITOR
 	nlassert(_DMC);
 	const CObject *obj = _DMC->find(id);
-	if (!obj) return NULL;
+	if (!obj) return nullptr;
 	nlassert(obj->isTable());
 	return (CObjectTable *) obj;
 }
@@ -2063,13 +2063,13 @@ CInstance *CEditor::getInstanceFromObject(const CObject *obj) const
 {
 	//H_AUTO(R2_CEditor_getInstanceFromObject)
 	CHECK_EDITOR
-	if (!obj->isTable()) return NULL;
+	if (!obj->isTable()) return nullptr;
 	TInstanceMap::const_iterator it = _Instances.find((CObjectTable *) obj);
 	if (it != _Instances.end())
 	{
 		return it->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -2178,7 +2178,7 @@ void CEditor::loadLanguageFile()
 	CHECK_EDITOR
 	static bool reload = false;
 	CI18N::ILoadProxy *oldLoadProxy = CI18N::getLoadProxy();
-	CI18N::setLoadProxy(NULL);
+	CI18N::setLoadProxy(nullptr);
 	string lc = ClientCfg.LanguageCode;
 	nlinfo("Reloading the r2_%s.uxt", lc.c_str());
 	CI18N::loadFromFilename("r2_"+lc+".uxt", reload);
@@ -2346,7 +2346,7 @@ void CEditor::setMode(TMode mode)
 	if (mode != EditionMode)
 	{
 		delete _EntitySorter;
-		_EntitySorter = NULL;
+		_EntitySorter = nullptr;
 	}
 	//H_AUTO(R2_CEditor_setMode)
 	CHECK_EDITOR
@@ -2425,9 +2425,9 @@ void CEditor::setMode(TMode mode)
 	_Mode = mode;
 	loadKeySet(getKeySetPrefix(_Mode));
 	CWidgetManager::getInstance()->disableModalWindow();
-	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
-	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+	CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
+	CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
 	// Season is now unknown, until server force it (in test mode), or first set act set it (in edit mode)
 	_Season = UnknownSeason;
 	//
@@ -2450,7 +2450,7 @@ void CEditor::setMode(TMode mode)
 			  * its sole purpose is to route messages to the current tool
 			  */
 			ContextCur.add(false,	"STAND BY",		DEFAULT_CURSOR,			0.0f,	CEditor::checkCursor,	CEditor::mouseClick);
-			forceSetSelectedInstance(NULL);
+			forceSetSelectedInstance(nullptr);
 			initReferencePlotItems();
 			// force speed to "run" ("walk" not available in edition)
 			if (!UserEntity->running())
@@ -2591,7 +2591,7 @@ void CEditor::setMode(TMode mode)
 	// warn lua that mode has changed
 	callEnvMethod("onModeChanged", 0, 0);
 	//
-	setCurrentTool(NULL);
+	setCurrentTool(nullptr);
 
 	// display the bars over the player (not available during edition, but available at test time)
 	UserEntity->buildInSceneInterface();
@@ -2668,7 +2668,7 @@ void CEditor::hideRingWindows()
 void CEditor::init(TMode initialMode, TAccessMode accessMode)
 {
 	nlwarning("*R2* init");
-	_EntitySorter = NULL;
+	_EntitySorter = nullptr;
 	//H_AUTO(R2_CEditor_init)
 	CNiceInputAuto niceInputs;
 	nlassert((uint) initialMode < ModeCount);
@@ -2741,7 +2741,7 @@ void CEditor::init(TMode initialMode, TAccessMode accessMode)
 	//
 	{
 		CLuaStackChecker lsc4(&getLua());
-		setCurrentTool(NULL); // force the default tool (select / move)
+		setCurrentTool(nullptr); // force the default tool (select / move)
 	}
 
 	initDecals();
@@ -3070,7 +3070,7 @@ void CEditor::addSelectingDecal(const NLMISC::CVector &pos, float scale)
 {
 	//H_AUTO(R2_CEditor_addSelectingDecal)
 	CHECK_EDITOR
-	CSelectingDecal *decal = NULL;
+	CSelectingDecal *decal = nullptr;
 	// see if there's an unused decal in the list
 	for(uint k = 0; k < _SelectingDecals.size(); ++k)
 	{
@@ -3080,7 +3080,7 @@ void CEditor::addSelectingDecal(const NLMISC::CVector &pos, float scale)
 			break;
 		}
 	}
-	if (decal == NULL)
+	if (decal == nullptr)
 	{
 		_SelectingDecals.push_back(new CSelectingDecal);
 		decal = _SelectingDecals.back();
@@ -3520,7 +3520,7 @@ void CEditor::initObjectProjectionMetatable()
 				if (!checkTag(ls)) return false;
 			#endif
 			CObjectTable::TRefPtrConst &obj= *(CObjectTable::TRefPtrConst *) ls.toUserData(1);
-			if (obj == NULL)
+			if (obj == nullptr)
 			{
 				throw ELuaWrappedFunctionException(&ls, "Trying to set a property in an erased object, returning nil");
 			}
@@ -3619,7 +3619,7 @@ void CEditor::initObjectProjectionMetatable()
 				if (!checkTag(ls)) return false;
 			#endif
 			CObjectTable::TRefPtrConst &obj= *(CObjectTable::TRefPtrConst *) ls.toUserData(1);
-			if (obj == NULL)
+			if (obj == nullptr)
 			{
 				throw ELuaWrappedFunctionException(&ls, "editor object '__next' metatmethod : Attempt to access an erased object");
 			}
@@ -3774,7 +3774,7 @@ void CEditor::setCurrentAct(CInstance *act)
 	//
 	struct CPreActChangedVisitor : public IInstanceVisitor
 	{
-		virtual void visit(CInstance &inst)
+		virtual void visit(CInstance &inst) NL_OVERRIDE
 		{
 			inst.onPreActChanged();
 		}
@@ -3783,7 +3783,7 @@ void CEditor::setCurrentAct(CInstance *act)
 	_ScenarioInstance->visit(preActChangedVisitor);
 	struct CActChangedVisitor : public IInstanceVisitor
 	{
-		virtual void visit(CInstance &inst)
+		virtual void visit(CInstance &inst) NL_OVERRIDE
 		{
 			inst.onActChanged();
 		}
@@ -3814,10 +3814,10 @@ void CEditor::setCurrentAct(CInstance *act)
 
 	callEnvMethod("onActChanged", 2, 0);
 
-	setSelectedInstance(currentActSelected ? _CurrentAct : NULL);
+	setSelectedInstance(currentActSelected ? _CurrentAct : nullptr);
 
 
-	setCurrentTool(NULL);
+	setCurrentTool(nullptr);
 }
 
 // *********************************************************************************************************
@@ -3945,8 +3945,8 @@ void CEditor::clearContent()
 	_ClearingContent = true;
 
 	CHECK_EDITOR
-	setSelectedInstance(NULL);
-	setFocusedInstance(NULL);
+	setSelectedInstance(nullptr);
+	setFocusedInstance(nullptr);
 
 	// backup all "requestCommand"
 
@@ -3954,7 +3954,7 @@ void CEditor::clearContent()
 	if (_CurrentTool) _CurrentTool->cancel();
 	CTool::releaseMouse();
 
-	_NewScenario = NULL; // will be not NULL only if quit is called during the scenario connection screen
+	_NewScenario = nullptr; // will be not NULL only if quit is called during the scenario connection screen
 
 	eraseScenario();
 
@@ -3965,21 +3965,21 @@ void CEditor::clearContent()
 	_Cookies.clear();
 	_LocalGeneratedNames.clear();
 	_Instances.clear();
-	_BaseAct = NULL;
-	_CurrentAct = NULL;
-	_SelectedInstance = NULL;
-	_FocusedInstance = NULL;
-	_ScenarioInstance = NULL;
-	_Scenario = NULL;
+	_BaseAct = nullptr;
+	_CurrentAct = nullptr;
+	_SelectedInstance = nullptr;
+	_FocusedInstance = nullptr;
+	_ScenarioInstance = nullptr;
+	_Scenario = nullptr;
 	_SelectingDecals.clear();
 	_InstanceObservers.clear();
 	_InstanceObserverHandles.clear();
-	_LastInstanceUnderPos = NULL;
-	_CurrentTool = NULL;
+	_LastInstanceUnderPos = nullptr;
+	_CurrentTool = nullptr;
 
 
 	removeAllEntitySlots(); // for safety...
-	_DMC->CDynamicMapClient::scenarioUpdated(NULL, false, 1); // clear scenario for real
+	_DMC->CDynamicMapClient::scenarioUpdated(nullptr, false, 1); // clear scenario for real
 	_ClearingContent = false;
 
 	_PlotItemInfos.clear();
@@ -4001,7 +4001,7 @@ const TMissionItem *CEditor::getPlotItemInfos(uint32 sheetId) const
 {
 	//H_AUTO(R2_CEditor_getPlotItemInfos)
 	std::map<uint32, TMissionItem>::const_iterator it = _PlotItemInfos.find(sheetId);
-	if (it == _PlotItemInfos.end()) return NULL;
+	if (it == _PlotItemInfos.end()) return nullptr;
 	return &it->second;
 }
 
@@ -4038,7 +4038,7 @@ void CEditor::release()
 	if (_CurrentTool)
 	{
 		_CurrentTool->cancel();
-		_CurrentTool = NULL;
+		_CurrentTool = nullptr;
 	}
 
 	// clear the environment
@@ -4081,7 +4081,7 @@ void CEditor::release()
 	_InstancesByDispName.clear();
 	//
 	delete _EntitySorter;
-	_EntitySorter = NULL;
+	_EntitySorter = nullptr;
 }
 
 
@@ -4093,7 +4093,7 @@ void CEditor::removeAllEntitySlots()
 	CHECK_EDITOR
 	for (uint k = 1; k < 255; ++k)
 	{
-		if (EntitiesMngr.entity(k) != NULL)
+		if (EntitiesMngr.entity(k) != nullptr)
 		{
 			EntitiesMngr.remove(k, false);
 		}
@@ -4237,7 +4237,7 @@ bool CEditor::hasInstanceWithId(const TInstanceId &id) const
 {
 	//H_AUTO(R2_CEditor_hasInstanceWithId)
 	CHECK_EDITOR
-	return getInstanceFromId(id) != NULL;
+	return getInstanceFromId(id) != nullptr;
 }
 
 // *********************************************************************************************************
@@ -4246,7 +4246,7 @@ CInstance *CEditor::getInstanceFromId(const TInstanceId &id) const
 	//H_AUTO(R2_CEditor_getInstanceFromId)
 	CHECK_EDITOR
 	const CObjectTable   *objTable = getObjectTableFromId(id);
-	if (!objTable) return NULL;
+	if (!objTable) return nullptr;
 	return getInstanceFromObject(objTable);
 }
 
@@ -4389,7 +4389,7 @@ void CEditor::setCurrentTool(CTool *tool)
 		}
 	}
 	CTool::setContextHelp(ucstring(""));
-	if (tool == NULL)
+	if (tool == nullptr)
 	{
 		if (_Mode == EditionMode)
 		{
@@ -4397,7 +4397,7 @@ void CEditor::setCurrentTool(CTool *tool)
 		}
 		else
 		{
-			_CurrentTool = NULL;
+			_CurrentTool = nullptr;
 			ContextCur.release();
 			::initContextualCursor();
 			ContextCur.context("STAND BY");
@@ -4750,7 +4750,7 @@ void CEditor::waitScenario()
 	{
 		scenarioUpdated(_NewScenario, false, _NewScenarioInitialAct);
 		_PostponeScenarioUpdated = false;
-		_NewScenario = NULL;
+		_NewScenario = nullptr;
 	}
 
 
@@ -4846,7 +4846,7 @@ bool CEditor::handleEvent (const NLGUI::CEventDescriptor &eventDesc)
 			if (edsf.hasFocus() == false)
 			{
 				// cancel current tool
-				setCurrentTool(NULL);
+				setCurrentTool(nullptr);
 				return true;
 			}
 		}
@@ -4907,7 +4907,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 {
 	//H_AUTO(R2_CEditor_createEntity)
 	CHECK_EDITOR
-	if (sheetId == NLMISC::CSheetId::Unknown) return NULL;
+	if (sheetId == NLMISC::CSheetId::Unknown) return nullptr;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
 	if (EntitiesMngr.entity(slot))
@@ -4921,15 +4921,15 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	if (!entity)
 	{
 		nlwarning("Can't create entity");
-		return NULL;
+		return nullptr;
 	}
 
 	// Set the permanent statut icon
 	entity->setPermanentStatutIcon(permanentStatutIcon);
 
 	// TMP TMP : code taken from /entity command
-	sint64       *prop = 0;
-	CCDBNodeLeaf *node = 0;
+	sint64       *prop = nullptr;
+	CCDBNodeLeaf *node = nullptr;
 	// Set The property 'CLFECOMMON::PROPERTY_POSITION'.
 	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + NLMISC::toString("%d", slot)+":P" + NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
 	if(node)
@@ -4979,7 +4979,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 		// visual property A depends on the type of the entity
 		visualA.PropertySubData.Sex = ClientCfg.Sex;
 	}
-	else if(dynamic_cast<CPlayerR2CL *>(entity) == NULL)
+	else if(dynamic_cast<CPlayerR2CL *>(entity) == nullptr)
 	{
 		// Get the database entry.
 		// Get the old value (not useful since we change the whole property).
@@ -5007,7 +5007,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	SPropVisualB visualB;
 	visualB.PropertySubData.LTrail = 1;
 	// fill infos for look
-	sint64       *propB = 0;
+	sint64       *propB = nullptr;
 	propB = (sint64 *)&visualB;
 	// Set the database.
 	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*propB);
@@ -5028,7 +5028,7 @@ CInstance *CEditor::getInstanceFromEntity(CEntityCL *entity) const
 	{
 		if (it->second->getEntity() == entity) return it->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // *********************************************************************************************************
@@ -5044,7 +5044,7 @@ void CEditor::displayContextMenu()
 	}
 	if (getCurrentTool() && getCurrentTool()->isCreationTool())
 	{
-		setCurrentTool(NULL);
+		setCurrentTool(nullptr);
 	}
 	// retrieve the context menu depending on the type of the entity
 	CLuaObject classDesc = _SelectedInstance->getClass();
@@ -5118,7 +5118,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		}
 	}
 	//
-	CObject *parent = NULL;
+	CObject *parent = nullptr;
 	//
 	if (inst)
 	{
@@ -5137,11 +5137,11 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		// if object is selected or focused, then clear these flags
 		if (inst == getSelectedInstance())
 		{
-			setSelectedInstance(NULL);
+			setSelectedInstance(nullptr);
 		}
 		if (inst == getFocusedInstance())
 		{
-			setFocusedInstance(NULL);
+			setFocusedInstance(nullptr);
 		}
 	}
 
@@ -5170,7 +5170,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		{
 		public:
 			CEraseNotification(CInstance &instance) : Instance(instance) {}
-			virtual void doAction(IInstanceObserver &obs)
+			virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 			{
 				obs.onInstanceErased(Instance);
 			}
@@ -5345,7 +5345,7 @@ void  CEditor::onEditionModeDisconnected()
 {
 	//H_AUTO(R2_CEditor_onEditionModeDisconnected)
 	_EditionModeDisconnectedFlag = true;
-	_NewScenario = NULL;
+	_NewScenario = nullptr;
 	CHECK_EDITOR
 	// Useful only for the pionner that does not do requestTranslateFeatures()
 	// Because avec using the button the currentScenario = 0
@@ -5366,7 +5366,7 @@ void  CEditor::onTestModeConnected()
 	CHECK_EDITOR
 	// TODO nico : change the name of the function : should rather be 'onAnimationModeConnected'
 	// start as a GM
-	CAHManager::getInstance()->runActionHandler("r2ed_anim_dm_mode", NULL, "");
+	CAHManager::getInstance()->runActionHandler("r2ed_anim_dm_mode", nullptr, "");
 	_DMC->CDynamicMapClient::onTestModeConnected();
 }
 
@@ -5424,7 +5424,7 @@ void CEditor::notifyInstanceObserversOfCreation(CInstance &inst)
 	{
 	public:
 		CCreationNotification(CInstance &instance) : Instance(instance) {}
-		virtual void doAction(IInstanceObserver &obs)
+		virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 		{
 			obs.onInstanceCreated(Instance);
 		}
@@ -5441,7 +5441,7 @@ void CEditor::onPostCreate(const CObject *obj)
 	CHECK_EDITOR
 	struct CPostCreateVisitor : public IObjectVisitor
 	{
-		virtual void visit(CObjectTable &obj)
+		virtual void visit(CObjectTable &obj) NL_OVERRIDE
 		{
 			// if table has a "InstanceId" field there is a matching editor object
 			CInstance *inst = getEditor().getInstanceFromObject(&obj);
@@ -5640,7 +5640,7 @@ void CEditor::onAttrModified(CInstance &parentInstance, const std::string &attrN
 	public:
 		CAttrModifiedNotification(CInstance &instance, const std::string &key, sint32 indexInArray)
 			: Instance(instance), Key(key), IndexInArray(indexInArray)  {}
-		virtual void doAction(IInstanceObserver &obs)
+		virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 		{
 			obs.onAttrModified(Instance, Key, IndexInArray);
 		}
@@ -5739,7 +5739,7 @@ void CEditor::eraseScenario()
 		backupRequestCommands();
 		onErase(_Scenario);
 		restoreRequestCommands();
-		_Scenario = NULL;
+		_Scenario = nullptr;
 	}
 
 }
@@ -5755,7 +5755,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	{
 		// defer scenario update to the end of the wait screen
 		nlassert(!_NewScenario);
-		_NewScenario = highLevel ? highLevel->clone() : NULL;
+		_NewScenario = highLevel ? highLevel->clone() : nullptr;
 		_NewScenarioInitialAct = initialActIndex;
 		_PostponeScenarioUpdated = true;
 		return;
@@ -5774,8 +5774,8 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	_UpdatingScenario = true;
 
 
-	_BaseAct = NULL;
-	_CurrentAct = NULL;
+	_BaseAct = nullptr;
+	_CurrentAct = nullptr;
 	CLuaStackRestorer lsc(&getLua(), getLua().getTop());
 	//nlwarning("Scenario updated, start highlevel = ");
 	//highLevel->dump();
@@ -5813,7 +5813,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	}
 	else
 	{
-		_ScenarioInstance = NULL;
+		_ScenarioInstance = nullptr;
 		nlwarning("Can't retrieve scenario (no instance id)");
 		_Scenario->dump();
 	}
@@ -5947,13 +5947,13 @@ CInstance *CEditor::getDefaultFeature(CInstance *act)
 {
 	//H_AUTO(R2_CEditor_getDefaultFeature)
 	CHECK_EDITOR
-	if (!act) return NULL;
+	if (!act) return nullptr;
 	CObject *defaultFeature = act->getObjectTable()->getAttr("Features");
-	if (!defaultFeature) return NULL;
+	if (!defaultFeature) return nullptr;
 	defaultFeature = defaultFeature->getValueAtPos(0);
-	if (!defaultFeature) return NULL; // 0 should be the default feature
+	if (!defaultFeature) return nullptr; // 0 should be the default feature
 	CInstance *result = getInstanceFromId(defaultFeature->toString("InstanceId"));
-	if (!result) return NULL;
+	if (!result) return nullptr;
 	if (!result->isKindOf("DefaultFeature"))
 	{
 		nlwarning("Can't retrieve default feature.");
@@ -5989,7 +5989,7 @@ void CEditor::nodeMoved(const std::string& instanceId, const std::string& attrNa
 		{
 		public:
 			CPreHrcMoveNotification(CInstance &instance) : Instance(instance) {}
-			virtual void doAction(IInstanceObserver &obs)
+			virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 			{
 				obs.onPreHrcMove(Instance);
 			}
@@ -6015,7 +6015,7 @@ void CEditor::nodeMoved(const std::string& instanceId, const std::string& attrNa
 		{
 		public:
 			CPostHrcMoveNotification(CInstance &instance) : Instance(instance) {}
-			virtual void doAction(IInstanceObserver &obs)
+			virtual void doAction(IInstanceObserver &obs) NL_OVERRIDE
 			{
 				obs.onPostHrcMove(Instance);
 			}
@@ -6055,13 +6055,13 @@ struct CSortSelectableObject
 class CSelectableUser : public ISelectableObject
 {
 public:
-	virtual bool			isSelectable() const { return true; }
-	virtual bool			getLastClip() const { return UserEntity->getLastClip(); }
-	virtual NLMISC::CAABBox getSelectBox() const
+	virtual bool			isSelectable() const NL_OVERRIDE { return true; }
+	virtual bool			getLastClip() const NL_OVERRIDE { return UserEntity->getLastClip(); }
+	virtual NLMISC::CAABBox getSelectBox() const NL_OVERRIDE
 	{
 		return UserEntity->localSelectBox();
 	}
-	virtual const NLMISC::CMatrix &getInvertedMatrix() const
+	virtual const NLMISC::CMatrix &getInvertedMatrix() const NL_OVERRIDE
 	{
 		static CMatrix invertedMatrix;
 		invertedMatrix = UserEntity->dirMatrix();
@@ -6069,12 +6069,12 @@ public:
 		invertedMatrix.invert();
 		return invertedMatrix;
 	}
-	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const
+	virtual float			preciseIntersectionTest(const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir) const NL_OVERRIDE
 	{
 		if (!UserEntity) return FLT_MAX;
 		return CEditor::preciseEntityIntersectionTest(*UserEntity, worldRayStart, worldRayDir);
 	}
-	virtual CInstance		*getInstanceInEditor() const { return NULL; }
+	virtual CInstance		*getInstanceInEditor() const NL_OVERRIDE { return nullptr; }
 };
 
 // ***************************************************************
@@ -6085,7 +6085,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 	static volatile bool ignore = false;
 	if (ignore)
 	{
-		return NULL;
+		return nullptr;
 	}
 	//H_AUTO(R2_CEditor_getInstanceUnderPos)
 	CHECK_EDITOR
@@ -6103,7 +6103,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 
 	// reset result
 	isPlayerUnderCursor= false;
-	_LastInstanceUnderPos = NULL;
+	_LastInstanceUnderPos = nullptr;
 
 
 	// build the ray
@@ -6129,7 +6129,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 	intersectedObjects.clear();
 
 
-	ISelectableObject *precSelectableObject = NULL;
+	ISelectableObject *precSelectableObject = nullptr;
 
 	validObjects.push_back(&SelectableUser); // add fake object for test with user entity
 	for(TInstanceMap::iterator it = _Instances.begin(); it != _Instances.end(); ++it)
@@ -6150,7 +6150,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 	CTool::TRayIntersectionType rayInterType = CTool::computeLandscapeRayIntersection(worldViewRay, sceneInter);
 
 	CSortSelectableObject	selectObj;
-	ISelectableObject *borderSelected = NULL;
+	ISelectableObject *borderSelected = nullptr;
 	for(uint k = 0; k < validObjects.size(); ++k)
 	{
 		ISelectableObject *object = validObjects[k];
@@ -6215,7 +6215,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 
 	// if no intersected entities, quit
 	if(intersectedObjects.empty())
-		return NULL;
+		return nullptr;
 
 	// Compute startDistBox: nearest entity distance, but the user
 	float	startDistBox;
@@ -6226,7 +6226,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 		isPlayerUnderCursor= true;
 		// if only player intersected, return NULL!
 		if(intersectedObjects.size()==1)
-			return NULL;
+			return nullptr;
 		// so take the second for startDistBox
 		startDistBox= intersectedObjects[1].Depth;
 	}
@@ -6242,7 +6242,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 	projectedObjects.clear();*/
 
 	// **** get best entity according to distance face-camera or box-ray if no face intersection
-	ISelectableObject	*objectSelected= NULL;
+	ISelectableObject	*objectSelected = nullptr;
 	float		bestDistBox= FLT_MAX;
 	float		bestDistZ= FLT_MAX;
 	for(i=0;i<intersectedObjects.size();i++)
@@ -6364,7 +6364,7 @@ CInstance *CEditor::getInstanceUnderPos(float x, float y, float distSelection, b
 
 
 	// return the best entity
-	_LastInstanceUnderPos = objectSelected ? objectSelected->getInstanceInEditor() : NULL;
+	_LastInstanceUnderPos = objectSelected ? objectSelected->getInstanceInEditor() : nullptr;
 	return	_LastInstanceUnderPos;
 }// getEntityUnderPos //
 
@@ -6600,7 +6600,7 @@ CEditor::IInstanceObserver *CEditor::removeInstanceObserver(TInstanceObserverHan
 	if (it == _InstanceObserverHandles.end())
 	{
 		nlwarning("removeInstanceObserver : Instance observer handle not found : %d", (int) handle);
-		return NULL;
+		return nullptr;
 	}
 	IInstanceObserver *observer = it->second->second;
 	//nlwarning("#removing instance observer 0x%x", (int) observer);
@@ -6619,7 +6619,7 @@ CEditor::IInstanceObserver *CEditor::getInstanceObserver(TInstanceObserverHandle
 	TInstanceObserverHandleMap::iterator it = _InstanceObserverHandles.find(handle);
 	if (it == _InstanceObserverHandles.end())
 	{
-		return NULL;
+		return nullptr;
 	}
 	return it->second->second;
 }
@@ -6667,7 +6667,7 @@ void CEditor::checkMissingCollisions()
 // move
 class CAHEdContextMenu : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().displayContextMenu();
 	}
@@ -6714,7 +6714,7 @@ CObject::TSmartPtr buildVector(const NLMISC::CVectorD &vector, const std::string
 // *********************************************************************************************************
 const CObject *getObject(const CObject *obj,const std::string &attrName)
 {
-	if (!obj) return NULL;
+	if (!obj) return nullptr;
 	return getEditor().getDMC().getPropertyAccessor().getPropertyValue(obj, attrName);
 }
 
@@ -6758,7 +6758,7 @@ void CEditor::onContinentChanged()
 	{
 		struct CContinentChangedVisitor : public IInstanceVisitor
 		{
-			virtual void visit(CInstance &inst)
+			virtual void visit(CInstance &inst) NL_OVERRIDE
 			{
 				inst.onContinentChanged();
 			}
@@ -7053,7 +7053,7 @@ void CEditor::unregisterInstanceDispName(CInstance *inst)
 //
 class CAHCreateEntity : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		if (getEditor().getMode() != CEditor::EditionMode)
@@ -7101,9 +7101,9 @@ class CAHCreateEntity : public IActionHandler
 			nlwarning("Can't get sheet");
 			return;
 		}
-		getEditor().setCurrentTool(NULL); // remove current to avoid to have ghost removed by that tool if it was a "CToolCreateEntity" too.
+		getEditor().setCurrentTool(nullptr); // remove current to avoid to have ghost removed by that tool if it was a "CToolCreateEntity" too.
 		uint ghostSlot = 1; // TMP TMP
-		CEntityCL * entity = NULL;
+		CEntityCL * entity = nullptr;
 		if (!(entity=CEditor::createEntity(ghostSlot, sheetId, CVector::Null, 0.f)))
 		{
 			return;
@@ -7153,7 +7153,7 @@ class CAHCreateEntity : public IActionHandler
 				SPropVisualA vA;
 				SPropVisualB vB;
 				SPropVisualC vC;
-				sint64     *prop = 0;
+				sint64     *prop = nullptr;
 
 				//vA.PropertySubData.Sex = (uint) visualProps["Sex"];
 				const CEntitySheet *entitySheet = SheetMngr.get((CSheetId)sheetId.asInt());
@@ -7386,7 +7386,7 @@ void CEditor::setMaxVisibleEntityExceededFlag(bool on)
 // *********************************************************************************************************
 class CAHGoTest : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		ConnectionWanted = true;
@@ -7397,7 +7397,7 @@ REGISTER_ACTION_HANDLER(CAHGoTest, "r2ed_go_test");
 // *********************************************************************************************************
 class CAHStopTest : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		if (getEditor().getAccessMode() != CEditor::AccessEditor) return;
@@ -7409,7 +7409,7 @@ REGISTER_ACTION_HANDLER(CAHStopTest, "r2ed_stop_test");
 // *********************************************************************************************************
 class CAHOpenScenarioControl : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 
@@ -7417,7 +7417,7 @@ class CAHOpenScenarioControl : public IActionHandler
 		bool showHide = (getParam(sParams, "showHide")=="1");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* wnd = NULL;
+		CInterfaceGroup* wnd = nullptr;
 
 		if(!R2::getEditor().isInitialized())
 			wnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:ring_scenario_loading_window"));
@@ -7439,7 +7439,7 @@ REGISTER_ACTION_HANDLER(CAHOpenScenarioControl, "open_scenario_control");
 // *********************************************************************************************************
 class CAHR2StopLive : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 
@@ -7479,7 +7479,7 @@ REGISTER_ACTION_HANDLER(CAHR2StopLive, "r2_stop_live");
 // *********************************************************************************************************
 class CAHInviteCharacter : public IActionHandler
 {
-	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 
@@ -7516,7 +7516,7 @@ class CAHInviteCharacter : public IActionHandler
 					if(sessionBrowser._LastInvokeResult == 14)
 					{
 						CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-						if (pVT != NULL)
+						if (pVT != nullptr)
 							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 
 						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
@@ -7537,7 +7537,7 @@ REGISTER_ACTION_HANDLER(CAHInviteCharacter, "r2ed_invite_character");
 // *********************************************************************************************************
 class CAHTryGoTest : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		getEditor().callEnvMethod("tryGoTest", 0, 0);
@@ -7548,11 +7548,11 @@ REGISTER_ACTION_HANDLER(CAHTryGoTest, "r2ed_try_go_test");
 // *********************************************************************************************************
 class CAHCancelTool : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (!ClientCfg.R2EDEnabled || !getEditor().isInitialized()) return;
 		CHECK_EDITOR
-		getEditor().setCurrentTool(NULL);
+		getEditor().setCurrentTool(nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHCancelTool, "r2ed_cancel_tool");
@@ -7565,7 +7565,7 @@ REGISTER_ACTION_HANDLER(CAHCancelTool, "r2ed_cancel_tool");
 // *********************************************************************************************************
 class CAHAnimTestMode : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		if (getEditor().getAccessMode() == CEditor::AccessDM) return;
@@ -7577,7 +7577,7 @@ REGISTER_ACTION_HANDLER(CAHAnimTestMode, "r2ed_anim_test_mode");
 // *********************************************************************************************************
 class CAHAnimDMMode : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		getEditor().setMode(CEditor::DMMode);
@@ -7589,7 +7589,7 @@ REGISTER_ACTION_HANDLER(CAHAnimDMMode, "r2ed_anim_dm_mode");
 // *********************************************************************************************************
 class CAHR2ContextCommand : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CHECK_EDITOR
 		// forward the call to lua
@@ -7611,7 +7611,7 @@ REGISTER_ACTION_HANDLER(CAHR2ContextCommand, "r2ed_context_command");
 // *********************************************************************************************************
 class CAHR2Teleport : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		if (!ClientCfg.R2EDEnabled) return;
 		if (R2::getEditor().getMode() != CEditor::EditionMode &&
@@ -7628,7 +7628,7 @@ REGISTER_ACTION_HANDLER(CAHR2Teleport, "r2ed_teleport");
 // *********************************************************************************************************
 class CAHR2Undo : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// if an edit box currently has focus, then try undo on it first
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>( CWidgetManager::getInstance()->getCaptureKeyboard());
@@ -7639,7 +7639,7 @@ class CAHR2Undo : public IActionHandler
 		CActionHistoric &historic = getEditor().getDMC().getActionHistoric();
 		if (historic.canUndo())
 		{
-			getEditor().setCurrentTool(NULL);
+			getEditor().setCurrentTool(nullptr);
 			const ucstring *actionName = historic.getPreviousActionName();
 			nlassert(actionName);
 #ifdef RYZOM_LUA_UCSTRING
@@ -7661,7 +7661,7 @@ REGISTER_ACTION_HANDLER(CAHR2Undo, "r2ed_undo");
 // *********************************************************************************************************
 class CAHR2Redo : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// if an edit box currently has focus, then try redo on it first
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
@@ -7672,7 +7672,7 @@ class CAHR2Redo : public IActionHandler
 		CActionHistoric &historic = getEditor().getDMC().getActionHistoric();
 		if (historic.canRedo())
 		{
-			getEditor().setCurrentTool(NULL);
+			getEditor().setCurrentTool(nullptr);
 			const ucstring *actionName = historic.getNextActionName();
 			nlassert(actionName);
 #ifdef RYZOM_LUA_UCSTRING
@@ -7695,7 +7695,7 @@ REGISTER_ACTION_HANDLER(CAHR2Redo, "r2ed_redo");
 // signal the server that a dm gift has begun, so that the server can take note of the target entity (the current target)
 class CAHR2DMGiftBegin : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream("DM_GIFT:BEGIN", out))
@@ -7712,7 +7712,7 @@ REGISTER_ACTION_HANDLER(CAHR2DMGiftBegin, "r2ed_dm_gift_begin");
 // signal the server that a dm gift has begun, so that the server can take note of the target entity (the current target)
 class CAHR2DMGiftValidate : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CBitMemStream out;
@@ -7742,7 +7742,7 @@ REGISTER_ACTION_HANDLER(CAHR2DMGiftValidate, "r2ed_dm_gift_validate");
 // freeze / unfreeze bot objects
 class CAHR2FreezeUnfreezeBotObjects : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CLuaManager::getInstance().executeLuaScript("r2:freezeUnfreezeBotObjects()");
 	}
@@ -7794,7 +7794,7 @@ NLMISC_COMMAND(saveScenarioRtData, "save scenario RtData to file", "<filename>")
 		if( description )
 		{
 			R2::CObject *name = description->findAttr("Name");
-			R2::CObject *title = 0;
+			R2::CObject *title = nullptr;
 			if (name)
 			{
 				title = name;
@@ -7825,7 +7825,7 @@ NLMISC_COMMAND(saveScenarioRtData, "save scenario RtData to file", "<filename>")
 	nlassert( pHighLevel );
 
 	R2::CObject::TSmartPtr pRtData = R2::getEditor().getDMC().translateScenario( pHighLevel );
-	pHighLevel = NULL;
+	pHighLevel = nullptr;
 	if( !pRtData )
 	{
 		nlwarning("Failed to translate high-level scenario into rtdata");
@@ -7856,8 +7856,7 @@ NLMISC_COMMAND(saveScenarioRtData, "save scenario RtData to file", "<filename>")
 		output.open(fullFileName);
 		pRtData->serialize(ss);
 		//std::string str = ss.str();
-		// output.serial(ss);
-		output.serialBuffer((uint8 *)ss.c_str(), ss.length());
+		output.serial(ss);
 		output.flush();
 		output.close();
 	}

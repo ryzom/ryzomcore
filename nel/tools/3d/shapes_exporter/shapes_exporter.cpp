@@ -53,7 +53,8 @@ Settings::Settings()
 	light_direction = CVector(0.f, 0.f, 0.f);
 }
 
-ShapesExporter::ShapesExporter():Driver(NULL), Scene(NULL)
+ShapesExporter::ShapesExporter():Driver(nullptr)
+    , Scene(nullptr)
 {
 }
 
@@ -576,7 +577,7 @@ bool ShapesExporter::exportSkeleton(const string &skeleton, const vector<string>
 
 	// get AABox of Entity
 	CAABBox bbox;
-	Skeleton.computeCurrentBBox(bbox, NULL);
+	Skeleton.computeCurrentBBox(bbox, nullptr);
 	setCamera(bbox, Skeleton);
 
 	renderShape(Skeleton, output_path);

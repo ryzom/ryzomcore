@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010-2021  Winch Gate Property Limited
 //
@@ -578,7 +579,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -638,7 +639,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1230,7 +1231,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1288,7 +1289,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1621,13 +1622,14 @@ namespace RSMGR
 					// cascading deletion for vector child SessionParticipants
 					if (loadSessionParticipants(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
-						while (!childs.empty())
-						{
-							getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
+
+					while (!childs.empty())
+					{
+						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -1635,13 +1637,14 @@ namespace RSMGR
 					// cascading deletion for vector child KnownBy
 					if (loadKnownBy(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CKnownUserPtr > & childs = getKnownBy();
 
-						while (!childs.empty())
-						{
-							getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CKnownUserPtr > & childs = getKnownBy();
+
+					while (!childs.empty())
+					{
+						getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -1649,13 +1652,14 @@ namespace RSMGR
 					// unreference (and update) for vector child PlayerRatings
 					if (loadPlayerRatings(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getPlayerRatingsByIndex(i)->setAuthor(0);
-							getPlayerRatingsByIndex(i)->update(connection);
+					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
+
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getPlayerRatingsByIndex(i)->setAuthor(0);
+						getPlayerRatingsByIndex(i)->update(connection);
 						}
 					}
 				}
@@ -1995,7 +1999,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -2085,7 +2089,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -2617,13 +2621,14 @@ namespace RSMGR
 					// cascading deletion for vector child KnownUsers
 					if (loadKnownUsers(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CKnownUserPtr > & childs = getKnownUsers();
 
-						while (!childs.empty())
-						{
-							getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CKnownUserPtr > & childs = getKnownUsers();
+
+					while (!childs.empty())
+					{
+						getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -2631,50 +2636,54 @@ namespace RSMGR
 					// cascading deletion for map child Characters
 					if (loadCharacters(connection, __FILE__, __LINE__))
 					{
-						const std::map < uint32, CCharacterPtr > & childs = getCharacters();
 
-						while (!childs.empty())
-						{
-							getCharactersById(childs.begin()->first)->remove(connection);
-						}
+					const std::map < uint32, CCharacterPtr > & childs = getCharacters();
+
+					while (!childs.empty())
+					{
+						getCharactersById(childs.begin()->first)->remove(connection);
 					}
+				}
 				}
 
 				{
 					// cascading deletion for single child GMStatus
 					if (loadGMStatus(connection, __FILE__, __LINE__))
 					{
-						if (getGMStatus() != NULL)
-							getGMStatus()->remove(connection);
-					}
+
+					if (getGMStatus() != NULL)
+						getGMStatus()->remove(connection);
+				}
 				}
 
 				{
 					// unreference (and update) for vector child Folders
 					if (loadFolders(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CFolderPtr > & childs = getFolders();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getFoldersByIndex(i)->setAuthor(0);
-							getFoldersByIndex(i)->update(connection);
-						}
+					const std::vector < CFolderPtr > & childs = getFolders();
+
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getFoldersByIndex(i)->setAuthor(0);
+						getFoldersByIndex(i)->update(connection);
 					}
+				}
 				}
 
 				{
 					// unreference (and update) for vector child FolderAccess
 					if (loadFolderAccess(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getFolderAccessByIndex(i)->setUserId(0);
-							getFolderAccessByIndex(i)->update(connection);
+					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
+
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getFolderAccessByIndex(i)->setUserId(0);
+						getFolderAccessByIndex(i)->update(connection);
 						}
 					}
 				}
@@ -3326,9 +3335,7 @@ namespace RSMGR
 		qs += "session_type, title, owner, plan_date, start_date, description, orientation, level, rule_type, access_type, state, host_shard_id, subscription_slots, reserved_slots, estimated_duration, final_duration, folder_id, lang, icone, anim_mode, race_filter, religion_filter, guild_filter, shard_filter, level_filter, subscription_closed, newcomer";
 		qs += ") VALUES (";
 		
-		qs += _SessionType.isValid()
-			? "'"+_SessionType.toString()+"'"
-			: "DEFAULT(session_type)";
+		qs += "'"+_SessionType.toString()+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3437,9 +3444,7 @@ namespace RSMGR
 		std::string qs;
 		qs = "UPDATE sessions SET ";
 		
-		qs += "session_type = " + (_SessionType.isValid()
-			? "'"+_SessionType.toString()+"'"
-			: "DEFAULT(session_type)");
+		qs += "session_type = '"+_SessionType.toString()+"'";
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3527,13 +3532,14 @@ namespace RSMGR
 					// cascading deletion for vector child SessionParticipants
 					if (loadSessionParticipants(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
-						while (!childs.empty())
-						{
-							getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
+
+					while (!childs.empty())
+					{
+						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -3541,13 +3547,14 @@ namespace RSMGR
 					// cascading deletion for vector child GuildInvites
 					if (loadGuildInvites(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
 
-						while (!childs.empty())
-						{
-							getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
+
+					while (!childs.empty())
+					{
+						getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -3555,11 +3562,12 @@ namespace RSMGR
 					// cascading deletion for vector child JournalEntries
 					if (loadJournalEntries(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
 
-						while (!childs.empty())
-						{
-							getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
+					const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
+
+					while (!childs.empty())
+					{
+						getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
 						}
 					}
 				}
@@ -3955,7 +3963,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -4107,7 +4115,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -5132,13 +5140,14 @@ namespace RSMGR
 					// cascading deletion for vector child Invites
 					if (loadInvites(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CGuildInvitePtr > & childs = getInvites();
 
-						while (!childs.empty())
-						{
-							getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CGuildInvitePtr > & childs = getInvites();
+
+					while (!childs.empty())
+					{
+						getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -5146,13 +5155,14 @@ namespace RSMGR
 					// unreference (and update) for vector child Characters
 					if (loadCharacters(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CCharacterPtr > & childs = getCharacters();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getCharactersByIndex(i)->setGuildId(0);
-							getCharactersByIndex(i)->update(connection);
+					const std::vector < CCharacterPtr > & childs = getCharacters();
+
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getCharactersByIndex(i)->setGuildId(0);
+						getCharactersByIndex(i)->update(connection);
 						}
 					}
 				}
@@ -5452,7 +5462,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6122,7 +6132,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6172,7 +6182,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6765,7 +6775,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6825,7 +6835,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -7395,7 +7405,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -7659,13 +7669,14 @@ namespace RSMGR
 					// cascading deletion for vector child FolderAccess
 					if (loadFolderAccess(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
-						while (!childs.empty())
-						{
-							getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
+
+					while (!childs.empty())
+					{
+						getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -7673,13 +7684,14 @@ namespace RSMGR
 					// unreference (and update) for vector child Sessions
 					if (loadSessions(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CSessionPtr > & childs = getSessions();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getSessionsByIndex(i)->setFolderId(0);
-							getSessionsByIndex(i)->update(connection);
+					const std::vector < CSessionPtr > & childs = getSessions();
+
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getSessionsByIndex(i)->setFolderId(0);
+						getSessionsByIndex(i)->update(connection);
 						}
 					}
 				}
@@ -7984,7 +7996,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8656,7 +8668,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8706,7 +8718,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8975,13 +8987,14 @@ namespace RSMGR
 					// cascading deletion for vector child SessionLogs
 					if (loadSessionLogs(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CSessionLogPtr > & childs = getSessionLogs();
 
-						while (!childs.empty())
-						{
-							getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					const std::vector < CSessionLogPtr > & childs = getSessionLogs();
+
+					while (!childs.empty())
+					{
+						getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
+				}
 				}
 
 
@@ -8989,11 +9002,12 @@ namespace RSMGR
 					// cascading deletion for vector child PlayerRatings
 					if (loadPlayerRatings(connection, __FILE__, __LINE__))
 					{
-						const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
-						while (!childs.empty())
-						{
-							getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
+					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
+
+					while (!childs.empty())
+					{
+						getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
 						}
 					}
 				}
@@ -9930,7 +9944,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -10474,7 +10488,7 @@ namespace RSMGR
 			return false;
 		}
 
-		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
+		CUniquePtr<MSW::CStoreResult> result = connection.storeResult();
 
 		// check that the data description is consistent with database content
 		nlassert(result->getNumRows() <= 1);

@@ -21,11 +21,12 @@
  * @link http://smarty.php.net/
  * @author Monte Ohrt <monte at ohrt dot com>
  * @author Andrei Zmievski <andrei@php.net>
+ * @version 2.6.25-dev
  * @copyright 2001-2005 New Digital Group, Inc.
  * @package Smarty
  */
 
-/* $Id$ */
+/* $Id: Smarty_Compiler.class.php 4779 2013-09-30 19:14:32Z Uwe.Tews@googlemail.com $ */
 
 /**
  * Template compiling class
@@ -77,8 +78,10 @@ class Smarty_Compiler extends Smarty {
     /**
      * The class constructor.
      */
-    public function __construct()
+    function __construct()
     {
+        parent::__construct();
+
         // matches double quoted strings:
         // "foobar"
         // "foo\"bar"
@@ -258,10 +261,14 @@ class Smarty_Compiler extends Smarty {
 
         preg_match_all($search, $source_content, $match,  PREG_SET_ORDER);
         $this->_folded_blocks = $match;
+        reset($this->_folded_blocks);
 
         /* replace special blocks by "{php}" */
-        $source_content = preg_replace_callback($search, array($this,'_preg_callback')
-                                       , $source_content);
+        $source_content = preg_replace_callback($search, function($matches) {
+            return $this->_quote_replace($this->left_delimiter).'php'.
+                str_repeat("\n", substr_count($matches[1], "\n")).
+                $this->_quote_replace($this->right_delimiter);
+        }, $source_content);
 
         /* Gather all template tags. */
         preg_match_all("~{$ldq}\s*(.*?)\s*{$rdq}~s", $source_content, $_match);
@@ -391,7 +398,7 @@ class Smarty_Compiler extends Smarty {
         }
 
         // put header at the top of the compiled template
-        $template_header = "<?php /* Smarty version ".$this->_version.", created on ".date("Y-m-d H:i:s")."\n";
+        $template_header = "<?php /* Smarty version ".$this->_version.", created on ".strftime("%Y-%m-%d %H:%M:%S")."\n";
         $template_header .= "         compiled from ".strtr(urlencode($resource_name), array('%2F'=>'/', '%3A'=>':'))." */ ?>\n";
 
         /* Emit code to load needed plugins. */
@@ -550,7 +557,7 @@ class Smarty_Compiler extends Smarty {
 
             case 'php':
                 /* handle folded tags replaced by {php} */
-                $block = array_shift($this->_folded_blocks);
+                $block = current($this->_folded_blocks);
                 $this->_current_line_no += substr_count($block[0], "\n");
                 /* the number of matched elements in the regexp in _compile_file()
                    determins the type of folded tag that was found */
@@ -748,12 +755,7 @@ class Smarty_Compiler extends Smarty {
         return true;
     }
 
-    function _preg_callback ($matches) {
-    return $this->_quote_replace($this->left_delimiter)
-           . 'php'
-           . str_repeat("\n", substr_count($matches[1], "\n"))
-           . $this->_quote_replace($this->right_delimiter);
-    }
+
     /**
      * compile custom function tag
      *
@@ -1191,7 +1193,7 @@ class Smarty_Compiler extends Smarty {
         }
 
         $output = '<?php ';
-        $output .= "\$_from = $from; if ((\$_from instanceof StdClass) || (!is_array(\$_from) && !is_object(\$_from))) { settype(\$_from, 'array'); }";
+        $output .= "\$_from = $from; if (!is_array(\$_from) && !is_object(\$_from)) { settype(\$_from, 'array'); }";
         if (isset($name)) {
             $foreach_props = "\$this->_foreach[$name]";
             $output .= "{$foreach_props} = array('total' => count(\$_from), 'iteration' => 0);\n";
@@ -1773,7 +1775,6 @@ class Smarty_Compiler extends Smarty {
                 } else {
                     $_var_name = substr(array_shift($_indexes), 1);
                     $_output = "\$this->_smarty_vars['$_var_name']";
-                    $_output = "(isset($_output) ? $_output : null)";
                 }
             } elseif(is_numeric($_var_name) && is_numeric(substr($var_expr, 0, 1))) {
                 // because . is the operator for accessing arrays thru inidizes we need to put it together again for floating point numbers
@@ -1785,11 +1786,9 @@ class Smarty_Compiler extends Smarty {
                 $_output = $_var_name;
             } else {
                 $_output = "\$this->_tpl_vars['$_var_name']";
-                $_output = "(isset($_output) ? $_output : null)";
             }
 
             foreach ($_indexes as $_index) {
-                $_lastOutput = $_output;
                 if (substr($_index, 0, 1) == '[') {
                     $_index = substr($_index, 1, -1);
                     if (is_numeric($_index)) {
@@ -1830,10 +1829,6 @@ class Smarty_Compiler extends Smarty {
                     $_output .= $_index;
                 } else {
                     $_output .= $_index;
-                }
-                if ($_lastOutput != $_output)
-                {
-                    $_output = "(null !== $_lastOutput ? $_output : null)";
                 }
             }
         }

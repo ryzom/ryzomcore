@@ -227,7 +227,7 @@ void CPVPFactionRewardManager::init()
 
 struct TTotemFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		CPVPFactionRewardManager::getInstance()._totemFileCallback(fileDescription, dataStream);
 	}

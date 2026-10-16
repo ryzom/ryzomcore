@@ -206,7 +206,7 @@ namespace R2
 
 		void fromSkillName(const std::string &skillName)
 		{
-			// we considere the length of the skill name to be proportional to the level
+			// we consider the length of the skill name to be proportional to the level
 			if (skillName.size() < 2)
 			{
 				// skill name too short
@@ -236,7 +236,7 @@ namespace R2
 		}
 
 	};
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class TRunningScenarioInfo
@@ -270,16 +270,11 @@ namespace R2
 			return _ScenarioKey;
 		}
 
-
 		void setScenarioKey(const NLMISC::CHashKeyMD5 &value)
 		{
-
-
 				_ScenarioKey = value;
-
-
 		}
-			//
+		//
 		const std::string &getScenarioTitle() const
 		{
 			return _ScenarioTitle;
@@ -290,16 +285,11 @@ namespace R2
 			return _ScenarioTitle;
 		}
 
-
 		void setScenarioTitle(const std::string &value)
 		{
-
-
 				_ScenarioTitle = value;
-
-
 		}
-			//
+		//
 		const std::string &getScenarioDesc() const
 		{
 			return _ScenarioDesc;
@@ -310,16 +300,11 @@ namespace R2
 			return _ScenarioDesc;
 		}
 
-
 		void setScenarioDesc(const std::string &value)
 		{
-
-
 				_ScenarioDesc = value;
-
-
 		}
-			//
+		//
 		TSessionLevel getSessionLevel() const
 		{
 			return _SessionLevel;
@@ -327,11 +312,9 @@ namespace R2
 
 		void setSessionLevel(TSessionLevel value)
 		{
-
 				_SessionLevel = value;
-
 		}
-			//
+		//
 		const std::string &getScenarioAuthorName() const
 		{
 			return _ScenarioAuthorName;
@@ -342,16 +325,11 @@ namespace R2
 			return _ScenarioAuthorName;
 		}
 
-
 		void setScenarioAuthorName(const std::string &value)
 		{
-
-
 				_ScenarioAuthorName = value;
-
-
 		}
-			//
+		//
 		uint32 getSessionAnimatorCharId() const
 		{
 			return _SessionAnimatorCharId;
@@ -359,11 +337,9 @@ namespace R2
 
 		void setSessionAnimatorCharId(uint32 value)
 		{
-
 				_SessionAnimatorCharId = value;
-
 		}
-			//
+		//
 		bool getDMLess() const
 		{
 			return _DMLess;
@@ -371,11 +347,9 @@ namespace R2
 
 		void setDMLess(bool value)
 		{
-
 				_DMLess = value;
-
 		}
-			//
+		//
 		const std::string &getMissionTag() const
 		{
 			return _MissionTag;
@@ -386,14 +360,9 @@ namespace R2
 			return _MissionTag;
 		}
 
-
 		void setMissionTag(const std::string &value)
 		{
-
-
 				_MissionTag = value;
-
-
 		}
 
 		bool operator == (const TRunningScenarioInfo &other) const
@@ -412,7 +381,6 @@ namespace R2
 		// constructor
 		TRunningScenarioInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -425,7 +393,6 @@ namespace R2
 			s.serial(_SessionAnimatorCharId);
 			s.serial(_DMLess);
 			s.serial(_MissionTag);
-
 		}
 
 
@@ -671,7 +638,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CShareServerAnimationItfSkel::TInterceptor *interceptor = NULL;
+				CShareServerAnimationItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -679,7 +646,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CShareServerAnimationItfProxy()
@@ -908,7 +875,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CShareServerEditionItfSkel::TInterceptor *interceptor = NULL;
+				CShareServerEditionItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -916,7 +883,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CShareServerEditionItfProxy()
@@ -1277,7 +1244,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CShareClientEditionItfSkel::TInterceptor *interceptor = NULL;
+				CShareClientEditionItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -1285,7 +1252,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CShareClientEditionItfProxy()
@@ -1378,9 +1345,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1397,9 +1362,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1416,9 +1379,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1435,9 +1396,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1454,9 +1413,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1473,9 +1430,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1492,9 +1447,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1511,9 +1464,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1530,9 +1481,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1549,9 +1498,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1568,9 +1515,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1587,9 +1532,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -1723,16 +1666,11 @@ namespace R2
 			return _ItemSheet;
 		}
 
-
 		void setItemSheet(const NLMISC::CSheetId &value)
 		{
-
-
 				_ItemSheet = value;
-
-
 		}
-			//
+		//
 		const ucstring &getName() const
 		{
 			return _Name;
@@ -1743,14 +1681,9 @@ namespace R2
 			return _Name;
 		}
 
-
 		void setName(const ucstring &value)
 		{
-
-
 				_Name = value;
-
-
 		}
 
 		bool operator == (const TCharMappedInfo &other) const
@@ -1763,14 +1696,12 @@ namespace R2
 		// constructor
 		TCharMappedInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_ItemSheet);
 			s.serial(_Name);
-
 		}
 
 
@@ -1863,7 +1794,7 @@ namespace R2
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CIOSRingItfSkel::TInterceptor *interceptor = NULL;
+				CIOSRingItfSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -1871,7 +1802,7 @@ namespace R2
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CIOSRingItfProxy()

@@ -39,13 +39,13 @@ public:
 
 
 	/// Initialization
-	virtual void	init();
+	virtual void	init() NL_OVERRIDE;
 
 	/// Release
-	virtual void	release();
+	virtual void	release() NL_OVERRIDE;
 
 	/// Update
-	virtual bool	update();
+	virtual bool	update() NL_OVERRIDE;
 
 
 public:

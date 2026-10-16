@@ -52,7 +52,7 @@ using NLMISC::toString;
 // *************************************************************************************************
 CBotChatPageDynamicMission::CBotChatPageDynamicMission()
 {
-	std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
+	std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *)nullptr);
 	for(uint k = 0; k < DYNAMIC_MISSION_NUM_CHOICES; ++k)
 	{
 		for(uint l = 0; l < DYNAMIC_MISSION_MAX_NUM_OPTIONS; ++l)
@@ -94,7 +94,7 @@ void CBotChatPageDynamicMission::begin()
 	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION));
 	if (!ig)
 	{
-		std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
+		std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *)nullptr);
 	}
 	else
 	{
@@ -288,7 +288,7 @@ void CBotChatPageDynamicMission::regen()
 // the player has clicked on an item to buy it
 class CAHChangeDMOption : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		//get id of choice
 		sint id;
@@ -307,7 +307,7 @@ REGISTER_ACTION_HANDLER(CAHChangeDMOption, "change_dm_option");
 // regenerate current mission
 class CAHRegenDM : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->DynamicMission->regen();
 	}
@@ -319,7 +319,7 @@ REGISTER_ACTION_HANDLER(CAHRegenDM, "regen_dm");
 // the player accepted the mission
 class CAHAcceptDM : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		NLMISC::CBitMemStream out;
 		static const char *msgName = "BOTCHAT:DM_ACCEPT";
@@ -331,7 +331,7 @@ class CAHAcceptDM : public IActionHandler
 		{
 			nlwarning(" unknown message name %s", msgName);
 		}
-		CBotChatManager::getInstance()->setCurrPage(NULL);
+		CBotChatManager::getInstance()->setCurrPage(nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHAcceptDM, "accept_dm");

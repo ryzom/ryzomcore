@@ -21,6 +21,7 @@
 #include <nel/misc/types_nl.h>
 
 #include <string>
+#include <vector>
 
 struct CMeshUtilsSettings
 {
@@ -29,6 +30,18 @@ struct CMeshUtilsSettings
 	// Absolute Paths
 	std::string SourceFilePath;
 	std::string DestinationDirectoryPath;
+	// With-coarse-mesh shape output (nel-extras glTF import route; empty = same as destination).
+	std::string ShapeCoarseDirectoryPath;
+	// Instance-group (.ig) output (nel-extras glTF import route; empty = same as destination).
+	std::string IGDirectoryPath;
+	// Animation (.anim) output (nel-extras glTF import route; empty = same as destination).
+	std::string AnimDirectoryPath;
+	// Ligo zone output root (zones/ + zoneligos/ re-emitted under it; empty = destination).
+	std::string ZoneDirectoryPath;
+	// Materials sidecar .gltf files (assimp route only): materials-only glTFs carrying nel_*
+	// material extras, bound to scene materials by NAME. Later files override earlier ones
+	// (shared library first, per-asset second). See material_sidecar.h.
+	std::vector<std::string> MaterialSidecarPaths;
 	std::string ToolDependLog;
 	std::string ToolErrorLog;
 

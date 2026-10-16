@@ -276,7 +276,7 @@ public:
 	}
 
 	/// Destructor
-	virtual ~CMixedStreamFile()
+	virtual ~CMixedStreamFile() NL_OVERRIDE
 	{
 		close();
 	}
@@ -326,7 +326,7 @@ protected:
 
 public:
 
-	virtual void		serialBuffer(uint8 *buf, uint len)
+	virtual void		serialBuffer(uint8 *buf, uint len) NL_OVERRIDE
 	{
 		if (_File == NULL)
 			throw NLMISC::EStream("CMixedStreamFile not opened");
@@ -343,7 +343,7 @@ public:
 		}
 	}
 
-	virtual void		serialBit(bool &bit)
+	virtual void		serialBit(bool &bit) NL_OVERRIDE
 	{
 		if (isReading())
 		{

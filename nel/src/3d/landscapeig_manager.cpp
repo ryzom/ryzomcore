@@ -52,7 +52,7 @@ CLandscapeIGManager::CInstanceGroupElement::CInstanceGroupElement(UInstanceGroup
 {
 	Ig = ig;
 	AddedToScene = false;
-	if (fileName != NULL)
+	if (fileName != nullptr)
 		FileName = fileName;
 }
 
@@ -60,20 +60,20 @@ CLandscapeIGManager::CInstanceGroupElement::CInstanceGroupElement(UInstanceGroup
 void	CLandscapeIGManager::CInstanceGroupElement::release()
 {
 	delete Ig;
-	Ig= NULL;
+	Ig = nullptr;
 }
 
 
 // ***************************************************************************
 CLandscapeIGManager::CLandscapeIGManager()
 {
-	_Scene=NULL;
+	_Scene = nullptr;
 }
 // ***************************************************************************
 CLandscapeIGManager::~CLandscapeIGManager()
 {
 	// reset should have been called.
-	if(_Scene != NULL)
+	if(_Scene != nullptr)
 		nlwarning ("CLandscapeIGManager not reseted");
 }
 // ***************************************************************************
@@ -107,7 +107,7 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 			file.getline(tmpBuff, 260);
 			char *token = strtok(tmpBuff, delimiterBox);
 			// create the instance group.
-			if(token != NULL)
+			if(token != nullptr)
 			{
 				if( _ZoneInstanceGroupMap.find(token)!=_ZoneInstanceGroupMap.end() )
 					throw Exception("CLandscapeIGManager::initIG() found 2 igs with same name in %s", igFile.c_str());
@@ -139,7 +139,7 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 									{
 										// Shape present ?
 										CShapeBank *shapeBank = _scene.getShapeBank();
-										IShape *shape = NULL;
+										IShape *shape = nullptr;
 										if (shapeBank->getPresentState (shapeName) == CShapeBank::NotPresent)
 											shapeBank->load (shapeName);
 										if (shapeBank->getPresentState (shapeName) == CShapeBank::Present)
@@ -182,7 +182,7 @@ UInstanceGroup *CLandscapeIGManager::loadZoneIG(const std::string &name)
 	NL3D_HAUTO_LAND_MNGR_LOAD_ZONEIG
 
 	if(name.empty())
-		return NULL;
+		return nullptr;
 
 	// try to find this InstanceGroup.
 	ItZoneInstanceGroupMap	it;
@@ -195,7 +195,7 @@ UInstanceGroup *CLandscapeIGManager::loadZoneIG(const std::string &name)
 		if( !it->second.AddedToScene )
 		{
 			// add to the scene.
-			if (it->second.Ig != NULL)
+			if (it->second.Ig != nullptr)
 			{
 				it->second.Ig->addToScene(*_Scene);
 				it->second.AddedToScene= true;
@@ -205,7 +205,7 @@ UInstanceGroup *CLandscapeIGManager::loadZoneIG(const std::string &name)
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 // ***************************************************************************
@@ -280,7 +280,7 @@ bool	CLandscapeIGManager::isIGAddedToScene(const std::string &name) const
 UInstanceGroup	*CLandscapeIGManager::getIG(const std::string &name) const
 {
 	if(name.empty())
-		return NULL;
+		return nullptr;
 
 	// try to find this InstanceGroup.
 	ConstItZoneInstanceGroupMap	it;
@@ -290,7 +290,7 @@ UInstanceGroup	*CLandscapeIGManager::getIG(const std::string &name) const
 	if( it!= _ZoneInstanceGroupMap.end() )
 		return it->second.Ig;
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -325,7 +325,7 @@ void	CLandscapeIGManager::reset()
 		CScene &_scene = static_cast<CSceneUser*>(_Scene)->getScene();
 		CSmartPtr<IShape> *smartPtr = (CSmartPtr<IShape> *)(ite->second);
 		IShape *shapeToRelease = *smartPtr;
-		*smartPtr = NULL;
+		*smartPtr = nullptr;
 		_scene.getShapeBank()->release(shapeToRelease);
 		delete smartPtr;
 
@@ -334,7 +334,7 @@ void	CLandscapeIGManager::reset()
 	}
 	_ShapeAdded.clear ();
 
-	_Scene=NULL;
+	_Scene = nullptr;
 }
 
 

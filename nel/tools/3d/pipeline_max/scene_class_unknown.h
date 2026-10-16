@@ -49,8 +49,8 @@ class CSceneClassUnknownDllPluginDesc : public IDllPluginDescInternal
 {
 public:
 	CSceneClassUnknownDllPluginDesc(const ucstring &dllFilename, const ucstring &dllDescription);
-	virtual const ucchar *internalName() const;
-	virtual const ucchar *displayName() const;
+	virtual const ucchar *internalName() const NL_OVERRIDE;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
 
 private:
 	ucstring m_InternalName;
@@ -68,13 +68,13 @@ class CSceneClassUnknownDesc : public ISceneClassDesc
 {
 public:
 	CSceneClassUnknownDesc(const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription);
-	virtual CSceneClass *create(CScene *scene) const;
-	virtual void destroy(CSceneClass *sc) const;
-	virtual const ucchar *displayName() const;
-	virtual const char *internalName() const;
-	virtual NLMISC::CClassId classId() const;
-	virtual TSClassId superClassId() const;
-	virtual const IDllPluginDescInternal *dllPluginDesc() const;
+	virtual CSceneClass *create(CScene *scene) const NL_OVERRIDE;
+	virtual void destroy(CSceneClass *sc) const NL_OVERRIDE;
+	virtual const ucchar *displayName() const NL_OVERRIDE;
+	virtual const char *internalName() const NL_OVERRIDE;
+	virtual NLMISC::CClassId classId() const NL_OVERRIDE;
+	virtual TSClassId superClassId() const NL_OVERRIDE;
+	virtual const IDllPluginDescInternal *dllPluginDesc() const NL_OVERRIDE;
 
 private:
 	ucstring m_DisplayName;
@@ -97,10 +97,10 @@ class CSceneClassUnknown : public TSuperClass
 {
 public:
 	CSceneClassUnknown(CScene *scene, const NLMISC::CClassId classId, const TSClassId superClassId, const ucstring &displayName, const std::string &internalName, const ucstring &dllFilename, const ucstring &dllDescription) : TSuperClass(scene), m_Desc(classId, superClassId, displayName, internalName, dllFilename, dllDescription) { }
-	virtual ~CSceneClassUnknown() { }
+	virtual ~CSceneClassUnknown() NL_OVERRIDE { }
 
 	// inherited
-	virtual const ISceneClassDesc *classDesc() const { return &m_Desc; }
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE { return &m_Desc; }
 
 private:
 	CSceneClassUnknownDesc m_Desc;

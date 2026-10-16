@@ -111,8 +111,8 @@ inline IServiceSingleton::IServiceSingleton()
 
 inline CSingletonRegistry* CSingletonRegistry::getInstance()
 {
-	static CSingletonRegistry* instance= NULL;
-	if (instance==NULL)
+	static CSingletonRegistry* instance = nullptr;
+	if (instance == nullptr)
 	{
 		instance=new CSingletonRegistry;
 	}
