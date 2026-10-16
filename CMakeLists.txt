@@ -354,6 +354,11 @@ ENDIF()
 
 IF(WITH_MSQUIC)
   FIND_PACKAGE(msquic REQUIRED)
+  # msquic's own package configuration exports the target as plain "msquic" up to 2.4.x
+  # (what vcpkg ships) and as msquic::msquic since; Findmsquic.cmake provides the latter
+  IF(TARGET msquic AND NOT TARGET msquic::msquic)
+    ADD_LIBRARY(msquic::msquic ALIAS msquic)
+  ENDIF()
 ENDIF()
 
 IF(WITH_NEL_TESTS OR WITH_TESTING)
