@@ -16,7 +16,7 @@ on:
       - vcpkg.json
       - vcpkg-configuration.json
   pull_request:
-    branches: [ "core4" ]
+    branches: [ "core4", "feature/core4-*" ]
     paths:
       - .github/workflows/build-client.yml
       # TODO use nel package instead

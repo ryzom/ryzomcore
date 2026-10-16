@@ -15,7 +15,7 @@ on:
       - 'snowballs2/**'
       - '!snowballs2/**/CMakeLists.txt'
   pull_request:
-    branches: [ "core4" ]
+    branches: [ "core4", "feature/core4-*" ]
   workflow_dispatch:
 
 env:
