@@ -666,6 +666,14 @@ void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 			break;
 		}
 		case ITexture::AlphaLuminance:
+		{
+#ifndef USE_OPENGLES3
+			// GL_LUMINANCE_ALPHA semantics on a GL_RG8 texture: luminance to RGB, alpha to A
+			static const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_GREEN };
+			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
+			break;
+		}
 		case ITexture::DsDt:
 		{
 #ifndef USE_OPENGLES3
