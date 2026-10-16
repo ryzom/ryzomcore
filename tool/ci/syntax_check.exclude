@@ -12,7 +12,8 @@ ryzom/tools/leveldesign/world_editor/world_editor_shard_monitor_plugin/world_edi
 # Parser test fixtures with intentionally unusual markup.
 nel/tools/htmlcss_test/tests/*
 
-# Python 2 remnants of the old build_gamedata pipeline (the rest of the pipeline is Python 3).
+# The build_gamedata pipeline is Python 2 (the quick start provisions external/python27 for it).
+# Only the files with Python 2-only syntax are listed; the rest also parses as Python 3.
 nel/tools/build_gamedata/[0-3]_*.py
 nel/tools/build_gamedata/configuration/scripts.py
 nel/tools/build_gamedata/generators/*
