@@ -60,6 +60,7 @@ public:
 	    , Configuration(NULL)
 	    , Connection(NULL)
 	    , DesiredStateChange(NoChange)
+	    , Buffer("CQuicConnectionImpl::Buffer")
 		, BufferWrites(0)
 	    , BufferReads(0)
 	    , State(CQuicConnection::Disconnected)
