@@ -1044,7 +1044,7 @@ class PiePlotC extends PiePlot {
     }
 
 
-    function Stroke($img,$aaoption=0) {
+    function Stroke(&$img,$aaoption=0) {
 
 	// Stroke the pie but don't stroke values
 	$tmp =  $this->value->show;

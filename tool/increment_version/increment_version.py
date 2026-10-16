@@ -40,33 +40,33 @@ VersionComma = str(MajorVersion) + ", " + str(MinorVersion) + ", " + str(PatchVe
 
 for line in fileinput.input("CMakeLists.txt", inplace = True):
 	if ("#  Version" in line):
-		print "#  Version: " + VersionString
+		print("#  Version: " + VersionString)
 	elif ("SET(NL_VERSION_MAJOR" in line):
-		print "SET(NL_VERSION_MAJOR " + str(MajorVersion) + ")"
+		print("SET(NL_VERSION_MAJOR " + str(MajorVersion) + ")")
 	elif ("SET(NL_VERSION_MINOR" in line):
-		print "SET(NL_VERSION_MINOR " + str(MinorVersion) + ")"
+		print("SET(NL_VERSION_MINOR " + str(MinorVersion) + ")")
 	elif ("SET(NL_VERSION_PATCH" in line):
-		print "SET(NL_VERSION_PATCH " + str(PatchVersion) + ")"
+		print("SET(NL_VERSION_PATCH " + str(PatchVersion) + ")")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir(RootDir)
 os.chdir("web/public_php/ams/templates/")
 
 for line in fileinput.input("layout.tpl", inplace = True):
 	if (" Powered by: " in line):
-		print "\t\t\t{if $permission > 1}<p class=\"pull-right\">AMS " + VersionString + " Powered by: <a href=\"http://usman.it/free-responsive-admin-template\">Charisma</a></p>{/if}"
+		print("\t\t\t{if $permission > 1}<p class=\"pull-right\">AMS " + VersionString + " Powered by: <a href=\"http://usman.it/free-responsive-admin-template\">Charisma</a></p>{/if}")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir(RootDir)
 os.chdir("ryzom/common/src/game_share/")
 
 for line in fileinput.input("ryzom_version.h", inplace = True):
 	if (("\"v" in line) and (" \\" in line)):
-		print "\t\"v" + VersionString + "\" \\"
+		print("\t\"v" + VersionString + "\" \\")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir(RootDir)
 os.chdir("nel/tools/3d/plugin_max/")
@@ -74,89 +74,89 @@ os.chdir("nel_export")
 
 for line in fileinput.input("nel_export.rc", inplace = True):
 	if ("FILEVERSION" in line):
-		print " FILEVERSION " + VersionComma
+		print(" FILEVERSION " + VersionComma)
 	elif ("PRODUCTVERSION" in line):
-		print " PRODUCTVERSION " + VersionComma
+		print(" PRODUCTVERSION " + VersionComma)
 	elif (("FileVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"FileVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"FileVersion\", \"" + VersionString + "\\0\"")
 	elif (("ProductVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"ProductVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"ProductVersion\", \"" + VersionString + "\\0\"")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir("..")
 os.chdir("nel_patch_converter")
 
 for line in fileinput.input("nel_patch_converter.rc", inplace = True):
 	if ("FILEVERSION" in line):
-		print " FILEVERSION " + VersionComma
+		print(" FILEVERSION " + VersionComma)
 	elif ("PRODUCTVERSION" in line):
-		print " PRODUCTVERSION " + VersionComma
+		print(" PRODUCTVERSION " + VersionComma)
 	elif (("FileVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"FileVersion\", \"" + VersionString + "\""
+		print("            VALUE \"FileVersion\", \"" + VersionString + "\"")
 	elif (("ProductVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"ProductVersion\", \"" + VersionString + "\""
+		print("            VALUE \"ProductVersion\", \"" + VersionString + "\"")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir("..")
 os.chdir("nel_patch_edit")
 
 for line in fileinput.input("mods.rc", inplace = True):
 	if ("FILEVERSION" in line):
-		print " FILEVERSION " + VersionComma
+		print(" FILEVERSION " + VersionComma)
 	elif ("PRODUCTVERSION" in line):
-		print " PRODUCTVERSION " + VersionComma
+		print(" PRODUCTVERSION " + VersionComma)
 	elif (("FileVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"FileVersion\", \"" + VersionString + "\""
+		print("            VALUE \"FileVersion\", \"" + VersionString + "\"")
 	elif (("ProductVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"ProductVersion\", \"" + VersionString + "\""
+		print("            VALUE \"ProductVersion\", \"" + VersionString + "\"")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir("..")
 os.chdir("nel_patch_paint")
 
 for line in fileinput.input("nel_patch_paint.rc", inplace = True):
 	if ("FILEVERSION" in line):
-		print " FILEVERSION " + VersionComma
+		print(" FILEVERSION " + VersionComma)
 	elif ("PRODUCTVERSION" in line):
-		print " PRODUCTVERSION " + VersionComma
+		print(" PRODUCTVERSION " + VersionComma)
 	elif (("FileVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"FileVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"FileVersion\", \"" + VersionString + "\\0\"")
 	elif (("ProductVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"ProductVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"ProductVersion\", \"" + VersionString + "\\0\"")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir("..")
 os.chdir("nel_vertex_tree_paint")
 
 for line in fileinput.input("vertex_tree_paint.rc", inplace = True):
 	if ("FILEVERSION" in line):
-		print " FILEVERSION " + VersionComma
+		print(" FILEVERSION " + VersionComma)
 	elif ("PRODUCTVERSION" in line):
-		print " PRODUCTVERSION " + VersionComma
+		print(" PRODUCTVERSION " + VersionComma)
 	elif (("FileVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"FileVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"FileVersion\", \"" + VersionString + "\\0\"")
 	elif (("ProductVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"ProductVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"ProductVersion\", \"" + VersionString + "\\0\"")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 os.chdir("..")
 os.chdir("tile_utility")
 
 for line in fileinput.input("tile_utility.rc", inplace = True):
 	if ("FILEVERSION" in line):
-		print " FILEVERSION " + VersionComma
+		print(" FILEVERSION " + VersionComma)
 	elif ("PRODUCTVERSION" in line):
-		print " PRODUCTVERSION " + VersionComma
+		print(" PRODUCTVERSION " + VersionComma)
 	elif (("FileVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"FileVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"FileVersion\", \"" + VersionString + "\\0\"")
 	elif (("ProductVersion" in line) and ("VALUE" in line)):
-		print "            VALUE \"ProductVersion\", \"" + VersionString + "\\0\""
+		print("            VALUE \"ProductVersion\", \"" + VersionString + "\\0\"")
 	else:
-		print line.rstrip()
+		print(line.rstrip())
 
 # end of file
