@@ -235,6 +235,9 @@ public:
 	ITexture::TWrapMode		WrapT;
 	ITexture::TMagFilter	MagFilter;
 	ITexture::TMinFilter	MinFilter;
+	// Upload format resolved at upload time, with Auto replaced by the bitmap
+	// pixel format. Drives the swizzle of one and two channel textures.
+	ITexture::TUploadFormat	SwizzleFormat;
 
 	// The gl id is auto created here.
 	CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL3 *drvGl, bool isRectangleTexture);
