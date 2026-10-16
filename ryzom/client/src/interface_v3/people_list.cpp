@@ -146,9 +146,9 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	_BaseContainer->setLocalize(desc.Localize);
 	_BaseContainer->setTitle(desc.PeopleListTitle);
 	if (_BaseContainer->getTitleOpenedViewText() != NULL)
-		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+		_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	if (_BaseContainer->getTitleClosedViewText() != NULL)
-		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+		_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	//_BaseContainer->setId("ui:interface:" + desc.Id);
 
 	// create the chat window if there's one
@@ -454,9 +454,9 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 	if (_ContactType != CPeopleListDesc::Team)
 	{
 		if (_BaseContainer->getTitleOpenedViewText() != NULL)
-			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 		if (_BaseContainer->getTitleClosedViewText() != NULL)
-			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	}
 
 	return (sint) _Peoples.size() - 1;
@@ -491,9 +491,9 @@ void CPeopleList::removePeople(uint index)
 	if (_ContactType != CPeopleListDesc::Team)
 	{
 		if (_BaseContainer->getTitleOpenedViewText() != NULL)
-			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleOpenedViewText()->setTextLocalized(_BaseContainer->getTitleOpenedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 		if (_BaseContainer->getTitleClosedViewText() != NULL)
-			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + std::to_string(_Peoples.size()) + ")", true);
+			_BaseContainer->getTitleClosedViewText()->setTextLocalized(_BaseContainer->getTitleClosedViewText()->getText() + " (" + NLMISC::toString(_Peoples.size()) + ")", true);
 	}
 }
 

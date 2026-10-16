@@ -1295,7 +1295,10 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 	// Hands management
 	if (vCS[0] == getInventory().UIHands[0]) // if right hand 
 	{
-		std::vector<CDBCtrlSheet *> vCSLeftHand = {getInventory().UIHands[1], getInventory().UIHands2[1], getInventory().UIHands3[1]};
+		std::vector<CDBCtrlSheet *> vCSLeftHand;
+		vCSLeftHand.push_back(getInventory().UIHands[1]);
+		vCSLeftHand.push_back(getInventory().UIHands2[1]);
+		vCSLeftHand.push_back(getInventory().UIHands3[1]);
 
 		if (!vCSLeftHand[0])
 			return;
