@@ -33,6 +33,8 @@ bool	getPosFromZoneName(const std::string &name, NLMISC::CVector2f &dest);
 /// Get a zone position from a zone name
 bool	getZonePosFromZoneName(const std::string &name, sint &x, sint &y);
 
+/// Get a zone id from a zone name
+uint16 	getZoneIdFromName(const std::string &name);
 
 #endif
 

@@ -274,6 +274,26 @@ IF(WITH_PCH)
   target_precompile_headers(nelmisc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdmisc.h)
 ENDIF()
 
+IF(WITH_BREAKPAD)
+  IF(HUNTER_ENABLED)
+    HUNTER_ADD_PACKAGE(breakpad)
+    FIND_PACKAGE(breakpad CONFIG REQUIRED)
+    TARGET_LINK_LIBRARIES(nelmisc breakpad::libbreakpad_client)
+  ELSEIF(UNIX AND NOT APPLE)
+    FIND_PATH(BREAKPAD_INCLUDE_DIR client/linux/handler/exception_handler.h
+      PATHS /usr/local/include/breakpad
+      NO_DEFAULT_PATH
+    )
+    FIND_LIBRARY(BREAKPAD_CLIENT_LIB breakpad_client
+      PATHS /usr/local/lib
+      NO_DEFAULT_PATH
+    )
+    TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
+    TARGET_LINK_LIBRARIES(nelmisc ${BREAKPAD_CLIENT_LIB})
+  ENDIF()
+  TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE NL_HAVE_BREAKPAD)
+ENDIF()
+
 NL_GEN_PC(nel-misc.pc)
 
 IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC)

@@ -34,6 +34,10 @@
 #	include <cerrno>
 #endif // NL_OS_WINDOWS
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#   include "client/linux/handler/exception_handler.h"
+#endif
+
 #include "nel/misc/path.h"
 #include "nel/misc/mutex.h"
 #include "nel/misc/report.h"
@@ -712,6 +716,11 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		// Check the envvar NEL_IGNORE_ASSERT
 		if (getenv ("NEL_IGNORE_ASSERT") == NULL)
 		{
+
+			#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+				google_breakpad::ExceptionHandler::WriteMinidump(getLogDirectory().empty() ? "." : getLogDirectory(), NULL, NULL);
+			#endif
+
 			// yoyo: allow only to send the crash report once. Because users usually click ignore,
 			// which create noise into list of bugs (once a player crash, it will surely continues to do it).
 			std::string filename = getLogDirectory() + NL_CRASH_DUMP_FILE;

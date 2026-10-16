@@ -18,7 +18,7 @@
 #include "stdpch.h"
 #include "chat_client.h"
 #include "input_output_service.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -139,15 +139,13 @@ bool CChatClient::isMuted()
 //-----------------------------------------------
 void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 {
+
 	TIgnoreListCont::iterator itIgnore = _IgnoreList.find(id.getShortId());
 	if (ignored)
 	{
 		if( itIgnore == _IgnoreList.end() )
 		{
 			_IgnoreList.insert( id.getShortId() );
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{ 'cid': %u}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $push:{ 'ignore': %u } }", id.getShortId()));
-#endif
 		}
 
 	}
@@ -156,11 +154,15 @@ void CChatClient::setIgnoreStatus( const NLMISC::CEntityId &id, bool ignored)
 		if( itIgnore != _IgnoreList.end() )
 		{
 			_IgnoreList.erase( itIgnore );
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{ 'cid': %u}", TheDataset.getEntityId(_DataSetIndex).getShortId()), toString("{ $pull:{ 'ignore': %u } }", id.getShortId()));
-#endif
 		}
 	}
+
+#ifdef HAVE_MEMCACHED
+	if (ignored)
+		CMemC::setWithIndex("Shard-Command", toString("setIgnoreStatus:%d:%d:true", _Id.getShortId(), id.getShortId()));
+	else
+		CMemC::setWithIndex("Shard-Command", toString("setIgnoreStatus:%d:%d:false", _Id.getShortId(), id.getShortId()));
+#endif
 } // ignore //
 
 

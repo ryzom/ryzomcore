@@ -38,3 +38,6 @@ if RYZOM_WEB_QUEUE_VERSION ~= 335 then broadcastBadLuaVersions(RYZOM_WEB_QUEUE_V
 if RYZOM_WEBBROWSER_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_WEBBROWSER_VERSION, 324, "webbrowser") end
 if RYZOM_WEBIG_VERSION ~= 324 then broadcastBadLuaVersions(RYZOM_WEBIG_VERSION, 324, "webig") end
 if RYZOM_WORLD_VERSION ~= 366 then broadcastBadLuaVersions(RYZOM_WORLD_VERSION, 366, "world") end
+
+-- VERSION --
+FILE_CHECK_LUA_VERSIONS_VERSION = 94

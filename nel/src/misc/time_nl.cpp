@@ -308,6 +308,17 @@ uint32 CTime::getSecondsSince1970 ()
 	return uint32(time(NULL));
 }
 
+
+/* Return the number of second 64b since midnight (00:00:00), January 1, 1970,
+ * coordinated universal time, according to the system clock.
+ * This values is the same on all computer if computers are synchronized (with NTP for example).
+ */
+uint64 CTime::getSeconds64bSince1970 ()
+{
+	return uint64(time(NULL));
+}
+
+
 /** Return the number of second since midnight (00:00:00), January 1, 1970,
  * coordinated universal time, according to the system clock.
  * The time returned is UTC (aka GMT+0), ie it does not have the local time ajustement

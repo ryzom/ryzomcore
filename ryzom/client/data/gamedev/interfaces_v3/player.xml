@@ -249,7 +249,11 @@
   1 to 5: Pack animals
 -->
 <variable entry="UI:BEAST_SELECTED" type="sint64" value="0" />
-<group type="container" id="animal_global" w="236" h="96" title="uiAnimalsTitle" opened="true" openable="false" resizer="false" movable="true" active="false" pop_min_h="62" pop_max_h="512" min_w="236" max_w="236" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=0" global_color="false" global_color_over="true" header_color="UI:SAVE:WIN:COLORS:ANI" help_page="interf_animals.html">
+<!-- ******************************************* -->
+<!-- Mod Code: modified x and y for the new icon -->
+<!-- Thanks to Syphox-->
+<!-- ******************************************* -->
+<group type="container" id="animal_global" w="250" h="96" title="uiAnimalsTitle" opened="true" openable="false" resizer="false" movable="true" active="false" pop_min_h="62" pop_max_h="512" min_w="250" max_w="250" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL|value=0" global_color="false" global_color_over="true" header_color="UI:SAVE:WIN:COLORS:ANI" help_page="interf_animals.html">
 	<group id="header_closed" x="0" y="0" h="16" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
 	</group>
 	<group id="header_opened" x="0" y="0" h="16" posref="TL TL" group_onclick_r="proc" group_params_r="right_click_on_animal_proc|0"></group>
@@ -278,26 +282,26 @@
 	<group type="container" id="userpa#index" w="220" title="uiPATitleMount#index" resizer="false" opened="true" openable="false" active_savable="false" global_color="false" global_color_over="true" header_color="UI:SAVE:WIN:COLORS:ANI" title_delta_max_w="-150" title_over_extend_view_text="true" on_tooltip="userpa_name_tooltip" on_tooltip_params="#index">
 		<group id="header_closed" h="12" posref="TL TL"></group>
 		<group id="header_opened" h="14" posref="TL TL" group_onclick_r="proc" group_params_r="right_click_on_animal_proc|#index">
-			<view type="bar3" id="jauges" posref="MR MR" mini="true" x="-16" color1="%bulk_color" range1="#beast_db_entry:BULK_MAX" color2="255 255 255 255" value2="#beast_db_entry:HUNGER" range2="31" color3="%hp_color" value3="#bars_entry:HP" range3="127" />
-			<ctrl type="tooltip" id="tt" instant_help="true" posparent="jauges" posref="TL TL" x="0" y="0" sizeref="wh" tooltip="uittAnimalBar" tooltip_parent="win" />
+			<view type="bar3" id="jauges" posref="MR MR" mini="true" x="-29" color1="%bulk_color" range1="#beast_db_entry:BULK_MAX" color2="255 255 255 255" value2="#beast_db_entry:HUNGER" range2="31" color3="%hp_color" value3="#bars_entry:HP" range3="127" />
+			<ctrl type="tooltip" id="tt" instant_help="true" posparent="jauges" posref="TL TL" x="-13" y="0" sizeref="wh" tooltip="uittAnimalBar" tooltip_parent="win" />
 			<!-- if animal is dead, display despawn timer bar instead of jauges -->
-			<view type="bar" id="death_timer" posref="MR MR" mini="true" x="-16" color="255 255 255 255" value="#beast_db_entry:DESPAWN" range="71" />
+			<view type="bar" id="death_timer" posref="MR MR" mini="true" x="-30" color="255 255 255 255" value="#beast_db_entry:DESPAWN" range="71" />
 			<ctrl type="tooltip" id="tt_death_timer" instant_help="true" posparent="death_timer" posref="TL TL" x="0" y="0" sizeref="wh" tooltip="uittDeathTimer" tooltip_parent="win" />
 			<link expr="isAnimalStatusDead(@#beast_db_entry:STATUS)" target="death_timer:active,tt_death_timer:active" />
 			<!-- animal status icon -->
-			<view type="bitmap" id="animal_alive_landscape" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="mektoub_map.tga" />
+			<view type="bitmap" id="animal_alive_landscape" posref="MR MR" x="-137" w="14" h="14" scale="true" texture="mektoub_map.tga" />
 			<instance template="text_tt" tooltip="uittAliveLandscape" posparent="animal_alive_landscape" tooltip_parent="win" />
 			<link expr="and(isAnimalStatusAlive(@#beast_db_entry:STATUS),not(isAnimalStatusInStable(@#beast_db_entry:STATUS)),not(isAnimalStatusInBag(@#beast_db_entry:STATUS)))" target="animal_alive_landscape:active,tt_animal_alive_landscape:active" />
-			<view type="bitmap" id="animal_stable" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="building_state2.tga" />
+			<view type="bitmap" id="animal_stable" posref="MR MR" x="-137" w="14" h="14" scale="true" texture="building_state2.tga" />
 			<instance template="text_tt" tooltip="uittStable" posparent="animal_stable" tooltip_parent="win" />
 			<link expr="isAnimalStatusInStable(@#beast_db_entry:STATUS)" target="animal_stable:active,tt_animal_stable:active" />
-			<view type="bitmap" id="animal_dead" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="MP_skull.tga" />
+			<view type="bitmap" id="animal_dead" posref="MR MR" x="-137" w="14" h="14" scale="true" texture="MP_skull.tga" />
 			<instance template="text_tt" tooltip="uittDead" posparent="animal_dead" tooltip_parent="win" />
 			<link expr="isAnimalStatusDead(@#beast_db_entry:STATUS)" target="animal_dead:active,tt_animal_dead:active" />
-			<view type="bitmap" id="animal_in_bag" posref="MR MR" x="-124" w="14" h="14" scale="true" texture="ico_mission_purse.tga" />
+			<view type="bitmap" id="animal_in_bag" posref="MR MR" x="-137" w="14" h="14" scale="true" texture="ico_mission_purse.tga" />
 			<instance template="text_tt" tooltip="uittInBag" posparent="animal_in_bag" tooltip_parent="win" />
 			<link expr="isAnimalStatusInBag(@#beast_db_entry:STATUS)" target="animal_in_bag:active,tt_animal_in_bag:active" />
-			<view type="bitmap" id="weight" posref="MR MR" x="-84" texture="W_weight.tga" />
+			<view type="bitmap" id="weight" posref="MR MR" x="-98" texture="W_weight.tga" />
 			<ctrl type="tooltip" id="tt_weight" posparent="weight" posref="MR MR" x="0" y="0" sizeref="wh" w="28" h="14" tooltip="uittAnimalWeight" tooltip_parent="win" />
 			<view type="text" id="weight_txt" posparent="weight" posref="TL TR" x="-2" y="-2" color="255 255 255 255" shadow="true" fontsize="8" />
 			<!-- set the weight -->
@@ -307,9 +311,17 @@
 			<!-- if animal is dead we don't display the jauges and weight -->
 			<link expr="not(isAnimalStatusDead(@#beast_db_entry:STATUS))" target="jauges:active,weight:active,weight_txt:active" />
 			<!-- Open Inventory button -->
-			<ctrl type="button" id="open_inv" button_type="push_button" posref="MR MR" x="-1" w="14" h="14" scale="true" tx_normal="animal_inventory.tga" tx_pushed="animal_inventory.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="false" onclick_l="animal_open_inventory" params_l="#index" tooltip="uittAnimalInv" tooltip_parent="win" />
+			<ctrl type="button" id="open_inv" button_type="push_button" posref="MR MR" x="-14" w="14" h="14" scale="true" tx_normal="animal_inventory.tga" tx_pushed="animal_inventory.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="false" onclick_l="animal_open_inventory" params_l="#index" tooltip="uittAnimalInv" tooltip_parent="win" />
 			<!-- BIG TRANSPARENT BUTTON TO TARGET THE PACK_ANIMAL. w="-16" to let the "inventory" button work -->
-			<ctrl type="button" id="select_button" button_type="push_button" posref="ML ML" sizeref="wh" w="-16" h="0" scale="true" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_pushed="0 0 0 0" col_over="255 255 255 32" onclick_l="animal_target" params_l="#index" />
+			<ctrl type="button" id="select_button" button_type="push_button" posref="ML ML" sizeref="wh" w="-28" h="0" scale="true" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="0 0 0 0" col_pushed="0 0 0 0" col_over="255 255 255 32" onclick_l="animal_target" params_l="#index" />
+			<!-- *********************************************** -->
+			<!-- Mod Code: Show Animal position on a tooltip map -->
+			<!-- Thanks to Syphox -->
+			<!-- *********************************************** -->
+			<ctrl type="button" id="animal_pos" button_type="push_button" posref="MR MR" x="0" w="14" h="14" scale="true" tx_normal="location.tga" tx_pushed="location.tga" tx_over="location.png" global_color_normal="false" global_color_over="true" global_color_pushed="true" onover="lua" params_over="game:animalShowTooltipMap(#index)" tooltip="uittLocation_of_the_animal" tooltip_parent="win" />
+			<!-- *********************************************** -->
+			<!-- End of Mod Code -->
+			<!-- *********************************************** -->
 		</group>
 		<!-- links to change the name color if it is the target -->
 		<link expr="ifthenelse(eq(@#beast_db_entry:UID,@UI:VARIABLES:TARGET:UID),

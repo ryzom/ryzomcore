@@ -176,7 +176,7 @@ TGameCycle CItemForSale::getGameCycleLeft() const
 #define PERSISTENT_DATA\
 	PROP2(_Price, uint32, _PriceInfo.getAmount(), _PriceInfo.setCurrency(RYMSG::TTradeCurrency::tc_dappers); _PriceInfo.setAmount(val))\
 	PROP(uint32,_RetirePrice)\
-	PROP_GAME_CYCLE_COMP(_StartSaleCycle)\
+	PROP_GAME_CYCLE_OR_CURRENT(_StartSaleCycle)\
 	PROP(CEntityId,_Owner)\
 	PROP2(_Continent,string,CONTINENT::toString(_Continent),_Continent=CONTINENT::toContinent(val))\
 	PROP(uint32,_Quantity)\

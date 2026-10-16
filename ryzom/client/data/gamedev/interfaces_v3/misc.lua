@@ -135,4 +135,4 @@ function misc:initInvObserver(
     return setmetatable(misc, self.invObserver)
 end
 -- VERSION --
-RYZOM_MISC_VERSION = 324
+FILE_MISC_VERSION = 31

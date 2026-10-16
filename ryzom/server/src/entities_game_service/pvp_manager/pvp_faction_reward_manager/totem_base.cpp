@@ -409,8 +409,8 @@ bool CTotemBase::canStartBuilding( CCharacter* actor )
 #define PERSISTENT_DATA\
 	PROP2(_OwnerFaction, string, PVP_CLAN::toString( _OwnerFaction ), _OwnerFaction = PVP_CLAN::fromString( val ); )\
 	PROP(bool,			_IsBuildingFinished)\
-	PROP_GAME_CYCLE_COMP(_BuildingStartTime)\
-	PROP_GAME_CYCLE_COMP(_LastTickUpdate)\
+	PROP_GAME_CYCLE_OR_CURRENT(_BuildingStartTime)\
+	PROP_GAME_CYCLE_OR_CURRENT(_LastTickUpdate)\
 	PROP(float,			_BuildHpGain)\
 	PROP(float,			_TotemMaxHP)\
 	PROP(float,			_TotemCurrentHP)\

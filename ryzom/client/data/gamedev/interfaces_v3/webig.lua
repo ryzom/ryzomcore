@@ -245,7 +245,7 @@ else
 end
 end
 -- VERSION --
-RYZOM_WEBIG_VERSION = 324
+FILE_WEBIG_VERSION = 31
 
 
 

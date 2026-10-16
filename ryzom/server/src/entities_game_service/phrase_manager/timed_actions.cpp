@@ -162,6 +162,8 @@ void CTPTimedAction::applyAction(CTimedActionPhrase *phrase, CEntityBase *actor)
 					}
 				}
 			}
+			else
+				sendDynamicSystemMessage(character->getEntityRowId(), "LAST_PACT_USED");
 		}
 		if (destroy)
 			character->destroyItem(INVENTORIES::bag, slot, 1, true);

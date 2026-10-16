@@ -1,0 +1,70 @@
+MessagesPanel {
+	border: round orange;
+	border-bottom: hidden black;
+	margin-bottom: 3;
+	padding: 0;
+}
+
+MessagesTabs {
+	height: 1fr;
+}
+
+MessagesPanel ProgressBar {
+	width: 1fr;
+}
+
+MessagesPanel ProgressBar .bar--bar {
+	color: orange;
+	width: 100%;
+}
+
+MessagesPanel ProgressBar Bar {
+	width: 1fr;
+	margin: 0 2;
+}
+
+MessagesPanel ProgressBar PercentageStatus {
+	width: 5;
+}
+
+MessagesPanel > Horizontal {
+	width: 1fr;
+	height: 1;
+}
+
+MessagesPanel Input {
+	border: hidden white;
+	height: 1;
+	width: 1fr;
+	padding: 0;
+	text-style: bold;
+	background: #003E00;
+	color: #7CFF7C;
+	margin-bottom: 1;
+}
+
+MessagesPanel Label {
+	color: orange;
+	width: 22;
+	text-align: center;
+	text-style: bold;
+}
+
+MessagesPanel Button {
+	background: gray;
+	color: white;
+	margin: 0 1;
+	padding: 0 0; 
+	width: 22;
+	border: hidden white;
+}
+
+
+.messages {
+	margin: 0;
+	padding: 0;
+}
+
+TabPane Label {
+	color: red;
+}

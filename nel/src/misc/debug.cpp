@@ -27,6 +27,9 @@
 #	include <tchar.h>
 #	include <imagehlp.h>
 #	pragma comment(lib, "imagehlp.lib")
+#	ifdef NL_HAVE_BREAKPAD
+#		include "breakpad/client/windows/handler/exception_handler.h"
+#	endif
 #	ifndef getcwd
 #		define getcwd(_a, _b) (_getcwd(_a,_b))
 #	endif
@@ -40,6 +43,9 @@
 #	define IsDebuggerPresent() false
 #   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
 #	    include <execinfo.h>
+#	    ifdef NL_HAVE_BREAKPAD
+#	        include "client/linux/handler/exception_handler.h"
+#	    endif
 #   endif
 //#	include <malloc.h>
 #	include <errno.h>
@@ -394,6 +400,19 @@ typedef enum _NEL_MINIDUMP_TYPE
 
 static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 {
+#ifdef NL_HAVE_BREAKPAD
+	string dumpPath = getLogDirectory();
+
+	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
+	google_breakpad::ExceptionHandler handler(
+		wpath,
+		NULL,
+		NULL,
+		NULL,
+		google_breakpad::ExceptionHandler::HANDLER_NONE
+	);
+	handler.WriteMinidump();
+#else
 	HANDLE file = CreateFileA (NL_CRASH_DUMP_FILE, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file)
 	{
@@ -441,6 +460,7 @@ static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 	}
 	else
 		nlwarning ("Can't create mini dump file");
+#endif
 }
 
 class EDebug : public ETrapDebug
@@ -1122,8 +1142,8 @@ void getCallStackAndLog (string &result, sint skipNFirst)
 
 void changeLogDirectory(const std::string &dir)
 {
-	if (fd == NULL)return;
 	LogPath = CPath::standardizePath(dir);
+	if (fd == NULL) return;
 	string p = LogPath + "log.log";
 	fd->setParam(p);
 }
@@ -1242,6 +1262,14 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 			INelContext::getInstance().setWindowedApplication(true);
 
 		initDebug2(logInFile);
+
+#if defined(NL_HAVE_BREAKPAD) && defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		string path = LogPath.empty() ? "." : LogPath;
+		static google_breakpad::MinidumpDescriptor descriptor(path);
+		static google_breakpad::ExceptionHandler handler(
+			descriptor, NULL, NULL, NULL, true, -1
+		);
+#endif
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);
 //		alreadyCreateSharedAmongThreads = true;

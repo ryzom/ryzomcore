@@ -467,7 +467,7 @@ void CLoginStateMachine::run()
 			/// check the data to check if patch needed
 			CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_PostLogin, "login_step_post_login"));
 
-			if (!ClientCfg.PatchWanted || Args.haveLongArg("nopatch"))
+		if (!ClientCfg.PatchWanted || (Args.haveArg("n") && Args.getArg("n").front() != "0") || (Args.haveLongArg("nopatch") && Args.getLongArg("nopatch").front() != "0"))
 			{
 				// client don't want to be patched !
 				_CurrentState = st_display_eula;

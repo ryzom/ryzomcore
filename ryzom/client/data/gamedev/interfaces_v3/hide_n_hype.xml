@@ -1,0 +1,165 @@
+<!-- ****************************************** -->
+<!-- *				Hide n Hype					* -->
+<!-- ****************************************** -->
+<interface_config>
+	<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+<group type="container" id="hide_n_hype_main" w="0" h="0" title="" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:COM" resizer="true" pop_min_w="0" pop_min_h="0" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" lockable="true" openable="false" opened="false" movable="true" active="false" savable="false">
+	<group id="header_closed" x="0" y="0" h="10" posref="TL TL"/>
+	<group id="header_opened" x="0" y="0" w="0" h="10" posref="TL TL"/>
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
+	<group type="webig_html" id="html" posref="TL TL" url="" home="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 255" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="black2" browse_next_time="false" form_text_area_group="edit_box_widget_multiline" browse_refresh="ui:interface:web_transactions:header_opened:browse_refresh" browse_undo="ui:interface:web_transactions:header_opened:browse_undo" browse_redo="ui:interface:web_transactions:header_opened:browse_redo">
+		<group id="black" posref="BR BR" sizeref="hw" w="-10" h="-12" inherit_gc_alpha="true"/>
+		<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+		<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+		<ctrl style="skin_scroll" id="scroll_bar"/>
+	</group>
+	</group>
+</group>
+
+<group type="container" id="hide_n_hype_asked_abort" w="0" h="0" title="" global_color="false" open_button="false" force_open_out="true" header_color="UI:SAVE:WIN:COLORS:COM" resizer="true" pop_min_w="0" pop_min_h="0" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" lockable="true" openable="false" opened="false" movable="true" active="false" savable="false">
+	<group id="header_closed" x="0" y="0" h="10" posref="TL TL"/>
+	<group id="header_opened" x="0" y="0" w="0" h="10" posref="TL TL"/>
+	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
+	<group type="webig_html" id="html" posref="TL TL" url="" home="" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 255" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="black2" browse_next_time="false" form_text_area_group="edit_box_widget_multiline" browse_refresh="ui:interface:web_transactions:header_opened:browse_refresh" browse_undo="ui:interface:web_transactions:header_opened:browse_undo" browse_redo="ui:interface:web_transactions:header_opened:browse_redo">
+		<group id="black" posref="BR BR" sizeref="hw" w="-10" h="-12" inherit_gc_alpha="true"/>
+		<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+		<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+		<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+		<ctrl style="skin_scroll" id="scroll_bar"/>
+	</group>
+	</group>
+</group>
+
+<group id="load_pars_json"
+		type="container"
+		w="36"
+		h="36"
+		global_color="false"
+		global_color_over="true"
+		header_active="false"
+		right_button="false"
+		movable="false"
+		active="false"
+		resizer="false"
+		opened="false"
+		openable="false"
+		savable="false">
+		
+		<view type="bitmap" posref="MM MM" id="display_loading_img" w="36" h="36" y="0" x="0" texture="ico_time.tga" />
+</group>
+
+<tree node="hide_n_hype_main"></tree>
+<tree node="hide_n_hype_asked_abort"></tree>
+<tree node="load_pars_json" />
+
+<template name="hide_n_hype_timer" keep="true" w="100" h="50" x="0" y="-5" font_size="30" text_color="0 185 0 255" timer="00:00" id="">
+			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="1">
+				<view type="text" posref="TL TL"
+					id="text"
+					x="#x"
+					y="#y"
+					hardtext="#timer"
+					fontsize="#font_size"
+					color="#text_color"
+					shadow="true"
+					global_color="false" />
+			</group>
+		</template>
+		
+		<template name="hide_n_hype_text" keep="true" x="0" y="0" font_size="30" text_color="0 185 0 255" hardtext="" id="" w="60" h="20">
+			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="1">
+				<view type="text" posref="TL TL"
+					id="text"
+					x="#x"
+					y="#y"
+					hardtext="#hardtext"
+					fontsize="#font_size"
+					color="#text_color"
+					shadow="true"
+					global_color="false" />
+			</group>
+		</template>
+		
+			<template name="hide_n_hype_button_images" render_layer1="1" render_layer2="2" keep="true" tooltip="" w="40" h="40" bg="" img1="" x="0" y="0" lua_function="" ctrl_active="true" >
+			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+				<view type="bitmap" posref="ML ML" render_layer="#render_layer1"
+					id="back"
+					x="0"
+					y="0"
+					w="#w"
+					h="#h"
+					scale="true"
+					resize="true"
+					texture="#bg"
+					global_color="false" />
+				<view type="bitmap" posref="ML ML" render_layer="#render_layer2"
+					id="img1"
+					x="0"
+					y="0"
+					w="#w"
+					h="#h"
+					scale="true"
+					resize="true"
+					texture="#img1"
+					global_color="false" />
+				<ctrl id="ctrl" active="#ctrl_active" type="button" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0"
+					tx_normal="W_slot_blason_over.tga"
+					tx_over="W_slot_blason_over.tga"
+					tx_pushed="W_slot_blason_over.tga"
+					scale="true"
+					w="#w"
+					h="#h"
+					tooltip="#tooltip"
+					color="255 255 255 0"
+					col_over="255 255 255 255"
+					col_pushed="255 255 255 255"
+					render_layer="0"
+					onclick_l="lua"
+					params_l="Ryzhide:#lua_function('#id')" />
+			</group>
+		</template>
+		
+		<template name="hide_n_hype_only_images" render_layer1="1" keep="true" tooltip="" w="16" h="16" img1="" x="0" y="0" >
+			<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+				<view type="bitmap" posref="ML ML" render_layer="#render_layer1"
+					id="img1"
+					x="#x"
+					y="#y"
+					w="#w"
+					h="#h"
+					scale="true"
+					resize="true"
+					texture="#img1"
+					global_color="false" />
+				<ctrl id="ctrl" type="button" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0"
+					scale="true"
+					w="#w"
+					h="#h"
+					tooltip="#tooltip"
+					color="0 0 0 0"
+					render_layer="0" />
+			</group>
+		</template>
+		
+		<template name="hide_n_hype_3d_preview" keep="true" id="" shape="">
+			<group id="#id" w="200" h="300" pop_max_w="200" pop_max_h="300" pop_min_w="64" pop_min_h="32" header_color="UI:SAVE:WIN:COLORS:COM" posref="TL TL" title="S.E. Shape List" global_color="true" global_color_over="true" right_button="true" movable="true" lockable="true" active="false" openable="true" opened="true" resizer="true" on_active="lua" on_active_params="WebBrowser:onActive()">
+				<scene3d id="scene3d" x="-10" y="-10"  sizeref="wh" posref="MR MR" curcam="cam" curcs="env" render_layer="-2"
+					user_interaction="true" rotz_factor="0.017"
+					roty_factor="0.005" roty_limit_min="-80" roty_limit_max="90"
+					dist_factor="0.05" dist_limit_min="15.0" dist_limit_max="20.0"
+					ambient="255 255 255" sun_ambient="255 255 255" sun_diffuse="255 255 255" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+					
+					<camera id="cam" fov="80" pos="0.0 0 0" target="0.0 0 0" roll="0" />
+					<light id="back" pos="0.0 1 1" color="255 255 255" near="1" far="4.0" />
+					<light id="back2" pos="0.0 1 2" color="255 255 255" near="1" far="4.0" />
+					<light id="lgt" pos="0.0 -1 1" color="255 255 255" near="1" far="4.0" />
+					<light id="lgt2" pos="0.0 -1 2" color="255 255 255" near="1" far="4.0" />
+					<shape id="object" name="#shape" pos="0.0 0 0" rot="0.0 0.0 2.0" />
+				</scene3d>
+			</group>
+		</template>
+		
+	<lua file="hide_n_hype.lua" />
+</interface_config>

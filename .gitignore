@@ -62,8 +62,8 @@ log.txt
 *.dlm
 *.dlu
 
-# makeall build
-.mode_static
+
+.zuliprc
 
 # cmake build files & directories
 CMakeFiles
@@ -88,6 +88,10 @@ ltmain.sh
 missing
 ylwrap
 *.mk
+*.tmp
+
+# makeall build
+.mode_static
 
 # Visual Studio garbage
 .vscode/
@@ -276,7 +280,13 @@ nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
 # Configs
 ryzom/server/www/config.php
 ryzom/server/tools/config.sh
+setup.ini
+
+server_open_status
 
 # machine specific files
 CMakeUserPresets.json
 .claude/settings.local.json
+
+*.out
+ryzom/server/www/login/server_open_status

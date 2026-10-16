@@ -775,13 +775,14 @@ NLMISC_COMMAND(resetDefaultAttackSquads, "Reset Attack squads to Default", "<out
 
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryCycle>")
+NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryCycle> <entreEra>")
 {
 	if (args.size() < 1) return false;
 
 	GET_CHARACTER
 
 	uint32 cycleEntryDate;
+	uint32 cycleEntryEra = 0;
 
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( c->getGuildId() );
 	if (guild == NULL)
@@ -797,13 +798,19 @@ NLMISC_COMMAND(setMemberEntryDate, "Set guild member entry date", "<eid> <entryC
 	}
 	if (args.size() == 1)
 	{
-		log.displayNL("%u", guild->getMemberFromEId(eid)->getEnterTime());
+		log.displayNL("%" NL_I64 "u", guild->getMemberFromEId(eid)->getRealEnterTime());
 		return true;
+	}
+
+	if (args.size() >= 3)
+	{
+		NLMISC::fromString(args[2], cycleEntryEra);
 	}
 
 	NLMISC::fromString(args[1], cycleEntryDate);
 
 	guild->getMemberFromEId(eid)->setEnterTime(cycleEntryDate);
+	guild->getMemberFromEId(eid)->setEnterEra(cycleEntryEra);
 
 	return true;
 }

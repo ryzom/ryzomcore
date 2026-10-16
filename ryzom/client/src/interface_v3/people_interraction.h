@@ -189,7 +189,7 @@ public:
 	bool				getPeopleFromCurrentMenu(CPeopleList *&peopleList, uint &index);
 	/** Get the people list that triggered the current menu
 	  */
-	CPeopleList			*getPeopleListFromCurrentMenu();
+	CPeopleList *getPeopleListFromCurrentMenu(CCtrlBase *pCaller);
 	/** Get a people list from its container id
 	  */
 	CPeopleList			*getPeopleListFromContainerID(const std::string &id);

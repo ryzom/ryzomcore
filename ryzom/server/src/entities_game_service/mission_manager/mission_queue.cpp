@@ -870,7 +870,7 @@ void CMissionQueue::dump()
 	PROP(string, _QueueName)\
 	PROP(uint32, _QueueId)\
 	PROP(uint16, _CreateQueueStepIndex)\
-	PROP_GAME_CYCLE_COMP(_MaxTimeInCriticalPart)\
+	PROP_GAME_CYCLE_OR_0(_MaxTimeInCriticalPart)\
 	PROP(TAIAlias, _MissionAlias)\
 	PROP(CEntityId, _CriticalPartEntityId)\
 	STRUCT_LIST(CWaitingEntity,_Entities)\

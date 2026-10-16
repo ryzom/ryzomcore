@@ -93,4 +93,4 @@ function game:updateMilkoKey(key, status)
 	game:resizeMilkoPad()
 end
 -- VERSION --
-RYZOM_TASKBAR_VERSION = 324
+FILE_TASKBAR_VERSION = 31

@@ -1,0 +1,11 @@
+name: Logs_AIS_ARK
+description: Check Logs of Ryzom Ai Service
+group: Services
+env:
+  - LC_ALL: "C"
+  - LANGUAGE: ""
+  - LOG_FILE: "/home/nevrax/shard/logs/ai_service_ais_ark.log"
+steps:
+  - name: run
+    dir: /home/nevrax/shard/tools/Monitoring
+    command: python3 monitor_ais.py ${LOG_FILE}

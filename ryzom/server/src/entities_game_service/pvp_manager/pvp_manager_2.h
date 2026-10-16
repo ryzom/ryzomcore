@@ -161,7 +161,7 @@ public:
 	// create an extra faction channel if not already exist (for marauders, agnos, urasiens and hominits)
 	void createExtraFactionChannel(const std::string & channelName, bool universalChannel = false);
 	// create an user channel if not already exist
-	TChanID createUserChannel(const std::string & channelName, const std::string & pass);
+	TChanID createUserChannel(const std::string & channelName, const std::string & pass, uint32 cacheIndex = 0);
 	// remove a user channel
 	void deleteUserChannel(const std::string & channelName);
 	// remove a fation channel if faction is no more involved in a war

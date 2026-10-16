@@ -19,7 +19,7 @@
 #include "entity_manager/entity_manager.h"
 #include "entity_manager/entity_base.h"
 #include "player_manager/character.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 //
 #include "nel/net/message.h"
 
@@ -173,12 +173,17 @@ bool CDynChatEGS::removeChan(TChanID chanID)
 		currSession = currSession->getNextChannelSession();
 	}
 	_DynChat.removeChan(chanID);
-	if (_ChanNames.getB(chanID)) 
+	const string *chanName = _ChanNames.getB(chanID);
+	if (chanName)
+	{
+		string nameCopy = *chanName;
 		_ChanNames.removeWithA(chanID);
-	
-#ifdef HAVE_MONGO
-	CMongo::remove("ryzom_channels", toString("{'ryzomId': '%s'}", chanID.toString().c_str()));
+
+#ifdef HAVE_MEMCACHED
+		CMemC::setWithIndex("Shard-Command", "removeChan:"+nameCopy);
 #endif
+	}
+
 	// send msg to IOS
 	iosRemoveChan(chanID);
 	return true;

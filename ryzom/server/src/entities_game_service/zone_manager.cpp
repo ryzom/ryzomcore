@@ -1311,8 +1311,11 @@ bool CZoneManager::parseGooBorder( const string &name, const string &params, con
 		else
 		{
 			delete place;
+			return false;
 		}
 	}
+
+	return true;
 }
 
 bool CZoneManager::parsePath( const string &params, CPrimPath *path )

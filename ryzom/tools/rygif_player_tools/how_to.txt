@@ -1,0 +1,37 @@
+##########This tool is to auto generate Spritesheets what we can play like a fake Gif.
+##########You need a Video (mp4) and Python (+ the addons like Pillow and FFmpeg)
+##########FFmpeg will generate the Frames on the FPS, Size and Quality you set
+##########Then we take all generate Frames and creat the Spritesheets from the client and the UV file
+
+
+##########You need installed:
+
+Python 3 (64-bit) — ideally 3.10+ (3.12 is fine).
+Verify: py --version
+
+Pillow (the modern PIL) for image I/O used by the spritesheet builder.
+Install:
+
+py -m pip install --upgrade pip
+py -m pip install pillow
+
+
+Verify:
+
+py - <<'PY'
+import PIL, PIL.Image; print("Pillow OK", PIL.__version__)
+PY
+
+
+FFmpeg (command-line tool) for extracting frames from video.
+Install (pick one):
+
+winget install ffmpeg
+# or
+choco install ffmpeg
+
+
+Verify: ffmpeg -version
+
+##########Example:
+python3 convert_video_to_spritesheet.py "C:\Users\m_van\Desktop\test_ffmpg\brave_MqzpHBI3QK.mp4" --base trailer_new --output-dir "C:\Users\m_van\Desktop\test_ffmpg\trail_finish" --overwrite

@@ -106,7 +106,7 @@ void CGuildLeaderModule::quitGuild()
 		// check if the current member is the successor
 		if ( successor == NULL ||
 			 member->getGrade() < successor->getGrade() ||
-			 ( member->getGrade() == successor->getGrade() && member->getEnterTime() < successor->getEnterTime() ) )
+			 ( member->getGrade() == successor->getGrade() && member->getRealEnterTime() < successor->getRealEnterTime() ) )
 		{
 			successor = member;
 		}

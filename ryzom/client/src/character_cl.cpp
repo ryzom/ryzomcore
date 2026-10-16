@@ -210,7 +210,7 @@ H_AUTO_DECL ( RZ_Client_Entity_CL_Update_Pos_Compute_Motion )
 //---------------------------------------------------
 void CCharacterCL::dirEndAnim(const CVector &vect)
 {
-	setVect(_DirEndAnim, vect, true, true);
+	setVect(_DirEndAnim, vect, true, false);
 }// dirEndAnim //
 
 

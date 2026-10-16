@@ -66,10 +66,14 @@ public:
 	
 	uint32							getEnterTime() const;
 	void							setEnterTime(uint32 __v, bool forceWrite=false);
-	
+
+	uint32							getEnterEra() const;
+	void							setEnterEra(uint32 __v, bool forceWrite=false);
+
 	CGuildPD*						getGuild();
 	const CGuildPD*					getGuild() const;
-	
+
+
 	// @}
 
 
@@ -165,6 +169,7 @@ protected:
 	TCharacterId					_Id;
 	CGuildGrade::TGuildGrade		_Grade;
 	uint32							_EnterTime;
+	uint32							_EnterEra;
 	CGuildPD*						_Guild;
 	
 	// @}

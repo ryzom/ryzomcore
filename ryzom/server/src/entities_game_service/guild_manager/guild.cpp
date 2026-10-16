@@ -40,7 +40,7 @@
 /// todo guild remove entity id translator
 #include "nel/misc/eid_translator.h"
 #include "chat_groups_ids.h"
-#include "server_share/mongo_wrapper.h"
+#include "server_share/memc_wrapper.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -194,6 +194,11 @@ void CGuild::setChestA(const CEntityId &recipient, uint8 chest)
 	if (chest >= _Chests.size())
 		return;
 	_GuildInventoryView->setChestA(recipient, chest);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, _Chests[chest].PutGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, _Chests[chest].GetGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setBULK_MAX(_DbGroup, _Chests[chest].BulkMax, true);
 	sendClientDBChest(recipient);
 }
 
@@ -203,6 +208,11 @@ void CGuild::setChestB(const CEntityId &recipient, uint8 chest)
 	if (chest >= _Chests.size())
 		return;
 	_GuildInventoryView->setChestB(recipient, chest);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setNAME(_DbGroup, _Chests[chest].Name, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setVIEW_GRADE(_DbGroup, _Chests[chest].ViewGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setPUT_GRADE(_DbGroup, _Chests[chest].PutGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setGET_GRADE(_DbGroup, _Chests[chest].GetGrade, true);
+	CBankAccessor_GUILD::getGUILD().getCHEST().getArray(chest).setBULK_MAX(_DbGroup, _Chests[chest].BulkMax, true);
 	sendClientDBChest(recipient);
 }
 
@@ -596,12 +606,13 @@ void CGuild::dumpGuildInfos( NLMISC::CLog & log )
 
 		CEntityId eId = member->getIngameEId();
 		string name = CEntityIdTranslator::getInstance()->getByEntity( eId ).toUtf8();
-		log.displayNL("\tMember '%s' %s, index: %hu, grade: %s, enter time: %u",
+		log.displayNL("\tMember '%s' %s, index: %hu, grade: %s, enter time: %u, enter era: %u",
 			name.c_str(),
 			eId.toString().c_str(),
 			member->getMemberIndex(),
 			EGSPD::CGuildGrade::toString( member->getGrade() ).c_str(),
-			member->getEnterTime()
+			member->getEnterTime(),
+			member->getEnterEra()
 			);
 	}
 
@@ -1404,7 +1415,7 @@ void CGuild::putMoney( CCharacter * user, uint64 money, uint16 session )
 }
 
 //----------------------------------------------------------------------------
-CGuildMember* CGuild::newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime )
+CGuildMember* CGuild::newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime, sint32 enterEra )
 {
 	incMemberSession();
 	CGuildMember * member = EGS_PD_CAST<CGuildMember *>( EGSPD::CGuildMemberPD::create( id ) );
@@ -1414,6 +1425,7 @@ CGuildMember* CGuild::newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCy
 	CGuildManager::getInstance()->storeCharToGuildAssoc(id, getId());
 
 	member->setEnterTime( enterTime == 0 ? CTickEventHandler::getGameCycle() : enterTime );
+	member->setEnterEra( enterEra == -1 ? CurrentEra : (uint32)enterEra );
 	member->setGrade( EGSPD::CGuildGrade::Member );
 	if ( !_FreeMemberIndexes.empty() )
 	{
@@ -1482,11 +1494,18 @@ void CGuild::deleteMember( CGuildMember* member )
 	nlassert(member);
 	nlassert( uint(member->getGrade()) < _GradeCounts.size() );
 
-#ifdef HAVE_MONGO
-		CMongo::update("ryzom_users", toString("{'cid':%" NL_I64 "u}", member->getIngameEId().getShortId()), "{$set:{'guildId':0}}");
+#ifdef HAVE_MEMCACHED
+	ucstring charName;
+	CCharacter *character = PlayerManager.getChar(member->getIngameEId());
+	if (character != NULL)
+	{
+		charName = character->getName().toUtf8();
+		CEntityIdTranslator::removeShardFromName(charName);
+		CMemC::setWithIndex("Shard-Command", toString("deleteMember:%s:%s", getName().toUtf8().c_str(), charName.toUtf8().c_str()));
+	}
 #endif
 
-	if (PlayerManager.getChar(member->getIngameEId()) != NULL)
+	if (character != NULL)
 		setMemberOffline( member );
 	incMemberSession();
 	uint16 idx = member->getMemberIndex();
@@ -1671,7 +1690,8 @@ void CGuild::setMemberClientDB( CGuildMember* member )
 //	setClientDBProp( dbBase + "GRADE", member->getGrade() );
 	memberElem.setGRADE(_DbGroup, member->getGrade() );
 //	setClientDBProp( dbBase + "ENTER_DATE", member->getEnterTime() );
-	memberElem.setENTER_DATE(_DbGroup, member->getEnterTime() );
+// Unused
+//	memberElem.setENTER_DATE(_DbGroup, member->getRealEnterTime() );
 
 	CGuildMemberModule * module = NULL;
 	if ( member->getReferencingModule( module ) )
@@ -1734,7 +1754,7 @@ const EGSPD::TCharacterId CGuild::getHighestGradeOnlineUser() const
 		// check if the current member is the successor
 		if ( best == NULL ||
 			member->getGrade() < best->getGrade() ||
-			( member->getGrade() == best->getGrade() && member->getEnterTime() < best->getEnterTime() ) )
+			( member->getGrade() == best->getGrade() && member->getRealEnterTime() < best->getRealEnterTime() ) )
 		{
 			best = member;
 		}
@@ -2622,7 +2642,7 @@ private:
 	STRUCT2(GuildInventory, _Inventory->store(pdr), _Inventory->apply(pdr, NULL))\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
-	PROP_GAME_CYCLE_COMP(_LastFailedGVE)\
+	PROP_GAME_CYCLE_OR_0(_LastFailedGVE)\
 	STRUCT_VECT(_Chests)\
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

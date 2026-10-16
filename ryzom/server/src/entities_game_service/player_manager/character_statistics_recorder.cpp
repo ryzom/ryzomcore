@@ -83,7 +83,7 @@ void CCharaterStatisticsRecorderRecord::build(const CCharaterStatisticsRecorderR
 
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clear())\
-	PROP_GAME_CYCLE_COMP(_TicksInGame)\
+	PROP_GAME_CYCLE_OR_CURRENT(_TicksInGame)\
 	PROP(sint32,_TotalXP)\
 	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )

@@ -152,6 +152,7 @@
 #include "modules/client_command_forwarder.h"
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
+#include "server_share/memc_wrapper.h"
 
 ///////////
 // USING //
@@ -229,7 +230,7 @@ CVariable<uint32> NBPointsForGuild("egs", "NbrPointsForGuild", "Nb points need t
 CVariable<string> ArkSalt("egs", "ArkSalt", "Salt used to hmac callbacks", string("BAE"), 0, true);
 CVariable<uint32> OutpostDaysForGvX("egs", "OutpostDaysForGvX", "Minimum days in Guild for GvE,PvE and GvG", 21, 0, true);
 
-CVariable<float> RegenerateReposModifierFactor("egs", "RegenerateReposModifierFactor", "Factor who will increase the RegenerateModifier with the time", 0, 0, true);
+CVariable<float> RegenerateReposModifierFactor("egs", "RegenerateReposModifierFactor", "Factor who will increase the RegenerateModifier with the time", 0.03, 0, true);
 
 // Max Bonus/malus/consumable effects displayed by client (database corresponding array must have the same size, and client must process the same size)
 const uint32 MaxBonusMalusDisplayed = 12;
@@ -369,6 +370,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 //	_CarriedWeight = 0;
 	_GuildId = 0;
 	_LastGuildId = 0;
+	_GuildEnterEra = 0;
 	_GuildEnterTime = 0;
 	_UseFactionSymbol = false;
 
@@ -695,8 +697,9 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_ChannelAdded = false;
 
 	_DuelOpponent = NULL;
-
+	_IsTeleportFromRespawn = false;
 	_LastTpTick = 0;
+	_LastRespawnTick = 0;
 	_LastOverSpeedTick = 0;
 	_LastMountTick = 0;
 	_LastUnMountTick = 0;
@@ -767,6 +770,7 @@ void CCharacter::clear()
 	_GuildId = 0;
 	_LastGuildId = 0;
 	_GuildEnterTime = 0;
+	_GuildEnterEra = 0;
 	_CreationPointsRepartition = 0;
 	_ForbidAuraUseStartDate = 0;
 	_ForbidAuraUseEndDate = 0;
@@ -1633,6 +1637,14 @@ uint32 CCharacter::tickUpdate()
 	{
 		nextUpdate = 8;
 	}
+	if (hasMoved() && !haveAnyPrivilege() && getInvisibility())
+	{
+		nlinfo("Not Priv, Not afk and Invisible => made visible");
+		setInvisibility(false);
+		setWhoSeesMe(~0);
+		setAggroableOverride(true);
+		setAggroableSave(true);
+	}
 
 	_SavedPosX = _EntityState.X();
 	_SavedPosY = _EntityState.Y();
@@ -2052,6 +2064,8 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 	// remove character of vision of other PC
 	CMessage msgout("ENTITY_TELEPORTATION");
 	msgout.serial( _Id );
+	// save Last Respawn Tick if player respawns
+	_LastRespawnTick = CTickEventHandler::getGameCycle();
 	if (IsRingShard)
 	{
 		nlinfo("Asking GPMS to TP character %s to (0,0) for respawn",_Id.toString().c_str());
@@ -2083,6 +2097,7 @@ void CCharacter::respawn(sint32 x, sint32 y, sint32 z, float heading, bool apply
 //---------------------------------------------------
 void CCharacter::applyRespawnEffects(bool applyDP)
 {
+	_IsTeleportFromRespawn = true;
 	CSheetId usedSheet;
 	CSBrickParamJewelAttrs sbrickParam = getJewelAttrs("rez", SLOT_EQUIPMENT::NECKLACE, usedSheet);
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::sbrick);
@@ -5603,8 +5618,14 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 		}
 	}
 
-	if (_IntangibleEndDate != ~0 && !fromVortex) // Don't save Last Tp Tick if player respawns or teleport from Vortex
+	if (_IsTeleportFromRespawn && !fromVortex)
+	{
+		_LastRespawnTick = CTickEventHandler::getGameCycle();
+	}
+	else if (!_IsTeleportFromRespawn && !fromVortex)
+	{
 		_LastTpTick = CTickEventHandler::getGameCycle();
+	}
 
 	_TpCoordinate.X = x;
 	_TpCoordinate.Y = y;
@@ -5658,7 +5679,9 @@ void CCharacter::teleportCharacter(sint32 x, sint32 y, sint32 z, bool teleportWi
 //	respawnMsg.send("AIS");
 
 	// backup the who sees me property and set it to 0
-	CMirrorPropValue<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, _EntityRowId, DSPropertyWHO_SEES_ME );
+	CMirrorPropValue<TYPE_WHO_SEES_ME> whoSeesMe(TheDataset, _EntityRowId, DSPropertyWHO_SEES_ME);
+
+	_IsTeleportFromRespawn = false;
 
 
 	/*
@@ -6853,12 +6876,15 @@ void CCharacter::removeAnimal( CGameItemPtr item, CPetCommandMsg::TCommand mode 
 		}
 	}
 }
-void CCharacter::removeRentAMount()
+void CCharacter::removeRentAMount(TDataSetRow rentamount)
 {
 	CPetCommandMsg msg;
 	msg.Command = CPetCommandMsg::DESPAWN;
 	msg.CharacterMirrorRow = _EntityRowId;
-	msg.PetMirrorRow = _RentAMount;
+	if (rentamount == INVALID_DATASET_INDEX)
+		msg.PetMirrorRow = _RentAMount;
+	else
+		msg.PetMirrorRow = rentamount;
 	msg.Coordinate_X = _EntityState.X;
 	msg.Coordinate_Y = _EntityState.Y;
 	msg.Coordinate_H = _EntityState.Z;
@@ -11246,6 +11272,10 @@ void CCharacter::setLangChannel(const string &lang) {
 
 //-----------------------------------------------------------------------------
 void CCharacter::setNewTitle(const string &title) {
+#ifdef HAVE_MEMCACHED
+	if (title != _NewTitle)
+		CMemC::setWithIndex("Shard-Command", toString("setNewTitle:%s:%s", getName().toString().c_str(), title.c_str()));
+#endif
 	_NewTitle = title;
 }
 
@@ -20414,10 +20444,15 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 			if (outpost->getName().substr(0, 14) != "outpost_nexus_")
 			{
 				CGuildMember* member = guild->getMemberFromEId(_Id);
-				if (member != NULL && ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (86400/CTickEventHandler::getGameTimeStep())) < OutpostDaysForGvX.get())
+				if (member != NULL)
+				{
+					nlinfo("Check Need days = 21, %" NL_I64 "u, %" NL_I64 "u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
 				{
 					side = OUTPOSTENUMS::UnknownPVPSide;
 					nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+						sendDynamicSystemMessage(_EntityRowId, "OUTPOST_CANT_PARTICIPATE_21DAYS");
+					}
 				}
 			}
 
@@ -21454,8 +21489,12 @@ bool CCharacter::setGuildId( uint32 guildId )
 
 		_GuildId = guildId;
 
-#ifdef HAVE_MONGO
-		CMongo::update("users", toString("{'game.cid':%" NL_I64 "u}", _Id.getShortId()), toString("{$set:{'game.guildId':%d}}", guildId));
+#ifdef HAVE_MEMCACHED
+		ucstring name = CEntityIdTranslator::getInstance()->getByEntity(getId());
+		CEntityIdTranslator::removeShardFromName(name);
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(guildId);
+		if (guild)
+			CMemC::setWithIndex("Shard-Command", toString("setUserGuild:%s:%s", name.toUtf8().c_str(), guild->getName().toUtf8().c_str()));
 #endif
 
 		return true;

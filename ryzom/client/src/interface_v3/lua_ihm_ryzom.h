@@ -57,6 +57,7 @@ private:
 	static int	setTextFormatTaged(CLuaState &ls);	// set a text that may contains Tag Format infos
 	static int	validMessageBox(CLuaState &ls);	// ok/cancel type message box (can't get it to work through luabind)
 	static int  initEmotesMenu(CLuaState &ls);
+	static int  getEmotesList(CLuaState &ls);
 	static int  hideAllWindows(CLuaState &ls);
 	static int  hideAllNonSavableWindows(CLuaState &ls);
 	static int  getDesktopIndex(CLuaState &ls);
@@ -140,6 +141,7 @@ private:
 	static int getShapeColOrient(CLuaState &ls);
 	static int deleteShape(CLuaState &ls);
 
+	static int loadTextures(CLuaState &ls);
 
 	///////////////////////////// Standard Lua stuff ends here //////////////////////////////////////////////
 

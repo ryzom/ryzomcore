@@ -915,7 +915,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1016,7 +1016,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1854,6 +1854,8 @@ NLMISC_COMMAND(getPvpPoints, "get pvp points of player (if quantity, give/take/s
 	}
 
 	log.displayNL("%u", points);
+
+	return true;
 }
 
 
@@ -3074,15 +3076,15 @@ NLMISC_COMMAND(getTags, "get player tags", "<uid>")
 
 	GET_ACTIVE_CHARACTER
 
-	log.displayNL(c->getTagPvPA().c_str());
-	log.displayNL(c->getTagPvPB().c_str());
-	log.displayNL(c->getDefaultTagA().c_str());
-	log.displayNL(c->getDefaultTagB().c_str());
-	log.displayNL(c->getTagA().c_str());
-	log.displayNL(c->getTagB().c_str());
-	log.displayNL(c->getTagRightHand().c_str());
-	log.displayNL(c->getTagLeftHand().c_str());
-	log.displayNL(c->getTagHat().c_str());
+	log.displayNL("%s", c->getTagPvPA().c_str());
+	log.displayNL("%s", c->getTagPvPB().c_str());
+	log.displayNL("%s", c->getDefaultTagA().c_str());
+	log.displayNL("%s", c->getDefaultTagB().c_str());
+	log.displayNL("%s", c->getTagA().c_str());
+	log.displayNL("%s", c->getTagB().c_str());
+	log.displayNL("%s", c->getTagRightHand().c_str());
+	log.displayNL("%s", c->getTagLeftHand().c_str());
+	log.displayNL("%s", c->getTagHat().c_str());
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponRightHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.WeaponLeftHand);
 	log.displayNL("%d", c->getVisualPropertyA().directAccessForStructMembers().PropertySubData.HatModel);
@@ -3410,6 +3412,19 @@ NLMISC_COMMAND(getLastTpTick,"get tick of last teleport","<uid>")
 }
 
 //-----------------------------------------------
+NLMISC_COMMAND(getLastRespawnTick,"get tick of last respawn","<uid>")
+{
+	if (args.size() != 1)
+		return false;
+
+	GET_ACTIVE_CHARACTER;
+
+	log.displayNL("%d", c->getLastRespawnTick());
+
+	return true;
+}
+
+//-----------------------------------------------
 NLMISC_COMMAND(getLastOverSpeedTick,"get tick of last over speed","<uid>")
 {
 	if (args.size() != 1)
@@ -3475,9 +3490,9 @@ NLMISC_COMMAND(getLastExchangeMount,"get tick of last exchange mount","<uid>")
 }
 
 //-----------------------------------------------
-NLMISC_COMMAND(mount,"mount the target","<uid>")
+NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 {
-	if (args.size() != 1)
+	if (args.size() < 1)
 		return false;
 
 	GET_ACTIVE_CHARACTER;
@@ -3485,6 +3500,12 @@ NLMISC_COMMAND(mount,"mount the target","<uid>")
 	if ( c->getRiderEntity().isNull() )
 	{
 		CEntityId target = c->getTarget();
+		if (args.size() > 1)
+		{
+			CEntityId entityId(args[1]);
+			if (entityId != target)
+				log.displayNL("ERR: Bad target");
+		}
 		if( target.getType() == RYZOMID::creature || target.getType() == RYZOMID::npc )
 		{
 			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( target );
@@ -3707,6 +3728,19 @@ NLMISC_COMMAND(setTrigger, "set a custom trigger", "<trigger> [<web_app>] [<args
 		CBuildingManager::getInstance()->setCustomTrigger(triggerId, "");
 	log.displayNL("OK");
 	return true;
+}
+
+/*
+setRegionTrigger uiR2_Jungle18 app_arcc action=mScript_Run&script=7624&command=reset_all
+*/
+NLMISC_COMMAND(setRegionTrigger,"set region trigger","<region_name> <app> <params>")
+{
+	if (args.size() == 3)
+	{
+		CZoneManager::getInstance().addRegionTrigger(args[0], args[1]+" "+args[2]);
+		return true;
+	}
+	return false;
 }
 
 //----------------------------------------------------------------------------
@@ -3967,7 +4001,7 @@ NLMISC_COMMAND(spawnPlayerPet, "spawn player pet", "<uid> <slot>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>]")
+NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInventory=0|1>|<entittyid>]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3979,7 +4013,17 @@ NLMISC_COMMAND(removePlayerPet, "remove player pet", "<uid> <slot> [<keepInvento
 
 	if (index >= MAX_INVENTORY_ANIMAL)
 	{
-		c->removeRentAMount();
+		if (args.size() > 2)
+		{
+			CEntityId entityId(args[2]);
+			if (entityId != CEntityId::Unknown)
+			{
+				TDataSetRow row = TheDataset.getDataSetRow(entityId);
+				c->removeRentAMount(row);
+				return true;
+			}
+		}
+		c->removeRentAMount(TDataSetRow());
 		return true;
 	}
 
@@ -4595,7 +4639,7 @@ NLMISC_COMMAND(haveBricks, "Return list of player selected learned bricks", "<ui
 	{
 		CSheetId brickId(bricks[i]);
 		if (c->haveBrick(brickId))
-			log.displayNL(bricks[i].c_str());
+			log.displayNL("%s", bricks[i].c_str());
 	}
 
 	return true;
@@ -5561,10 +5605,44 @@ NLMISC_COMMAND(setSpecial,"set special values","uid special value")
 
 	GET_ACTIVE_CHARACTER
 
-	uint32 value;
 
 	if (args[1] == "speedswimbonus") {
+		uint32 value;
 		NLMISC::fromString(args[2], value);
 		c->setCurrentSpeedSwimBonus(value);
 	}
+	if (args[1] == "invisible")
+	{
+		if (args[2] == "1" || strlwr(args[2]) == "on" || strlwr(args[2]) == "true")
+		{
+
+			// check if player is invulnerable, if so do not apply goo damage
+			bool invulnerable = false;
+			CSEffect* effect = c->lookForActiveEffect(EFFECT_FAMILIES::PowerInvulnerability);
+			if (!effect)
+				effect = c->lookForActiveEffect(EFFECT_FAMILIES::Invincibility);
+
+			if (!effect)
+			{
+				c->setInvisibility(true);
+				c->setWhoSeesMe(0);
+				c->setAggroableOverride(false);
+				c->setAggroableSave(false);
+				//c->setAfkState(true);
+				log.displayNL("OK");
+}
+			else
+				log.displayNL("ERR:INVU");
+		}
+		else
+		{
+			c->setInvisibility(false);
+			c->setWhoSeesMe(~0);
+			c->setAggroableOverride(true);
+			c->setAggroableSave(true);
+			//c->setAfkState(false);
+			log.displayNL("OK");
+		}
+	}
+	return true;
 }

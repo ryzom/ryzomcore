@@ -1,0 +1,9 @@
+name: MonitorOutposts
+description: Monitoring of Ryzom Outposts
+group: ShardServices
+timeoutSec: 0
+env:
+  - PYTHONPATH: /home/nevrax/shard/tools/
+steps:
+  - name: run
+    command: python3 /home/nevrax/shard/tools/Monitoring/monitor_outposts.py /home/nevrax/shard/logs/entities_game_service.log

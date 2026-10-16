@@ -360,7 +360,7 @@ void	uncbMsgProcessing(CMessage &msgin, TSockId from, CCallbackNetBase &/* netba
 	if (itcb == uni->_Callbacks.end())
 	{
 		// the callback doesn't exist
-		nlwarning ("HNETL5: Can't find callback '%s' called by service %hu", msgin.getName().c_str(), sid.get());
+		//nlwarning ("HNETL5: Can't find callback '%s' called by service %hu", msgin.getName().c_str(), sid.get());
 	}
 	else
 	{
