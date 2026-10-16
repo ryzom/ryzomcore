@@ -298,6 +298,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Branches that carry a different web tree (the Atys merge branches) have no
+      # Dockerfile; the job then has nothing to build and must not fail.
+      - id: dockerfile
+        name: Check for web/Dockerfile
+        shell: bash
+        run: echo "present=$([ -f web/Dockerfile ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
       - id: cache
         uses: actions/cache@v6
         with:
@@ -305,7 +312,7 @@ jobs:
           path: ${{ needs.strings.outputs.build-dir }}/web/web-*
 
       - uses: ./.github/web
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dockerfile.outputs.present == 'true' && steps.cache.outputs.cache-hit != 'true'
         with:
           build-dir: ${{ needs.strings.outputs.build-dir }}
           build-version: ${{ needs.strings.outputs.build-version }}
@@ -313,6 +320,7 @@ jobs:
           image-version: ${{ needs.strings.outputs.image-version }}
 
       - uses: actions/upload-artifact@v7
+        if: steps.dockerfile.outputs.present == 'true'
         with:
           name: web-${{ needs.strings.outputs.build-version }}
           path: ${{ needs.strings.outputs.build-dir }}/web/web-*
