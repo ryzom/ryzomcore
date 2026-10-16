@@ -1,3 +1,4 @@
+// clang-format off
 /*
  * public domain sha512 crypt implementation
  *
