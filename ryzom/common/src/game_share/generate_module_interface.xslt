@@ -1765,13 +1765,14 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @cont='vector']">
 				{
 					// cascading deletion for vector child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-
-					while (!childs.empty())
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						get<xsl:value-of select="@name"/>ByIndex((uint32)childs.size()-1)->remove(connection);
+						const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+
+						while (!childs.empty())
+						{
+							get<xsl:value-of select="@name"/>ByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
@@ -1779,72 +1780,77 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @cont='map']">
 				{
 					// cascading deletion for map child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-
-					while (!childs.empty())
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						get<xsl:value-of select="@name"/>ById(childs.begin()->first)->remove(connection);
+						const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+
+						while (!childs.empty())
+						{
+							get<xsl:value-of select="@name"/>ById(childs.begin()->first)->remove(connection);
+						}
 					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @relation='one-to-one']">
 				{
 					// cascading deletion for single child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					if (get<xsl:value-of select="@name"/>() != NULL)
-						get<xsl:value-of select="@name"/>()->remove(connection);
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
+					{
+						if (get<xsl:value-of select="@name"/>() != NULL)
+							get<xsl:value-of select="@name"/>()->remove(connection);
+					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @cont='vector']">
 				{
 					// unreference (and update) for vector child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-
-					for (uint i=0; i &lt; childs.size(); ++i)
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						<xsl:variable name="type" select="@type"/>
-						<xsl:variable name="child_name" select="@name"/>
-						<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
-						get<xsl:value-of select="@name"/>ByIndex(i)->set<xsl:value-of select="$parent_prop"/>(0);
-						get<xsl:value-of select="@name"/>ByIndex(i)->update(connection);
+						const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+
+						for (uint i=0; i &lt; childs.size(); ++i)
+						{
+							<xsl:variable name="type" select="@type"/>
+							<xsl:variable name="child_name" select="@name"/>
+							<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
+							get<xsl:value-of select="@name"/>ByIndex(i)->set<xsl:value-of select="$parent_prop"/>(0);
+							get<xsl:value-of select="@name"/>ByIndex(i)->update(connection);
+						}
 					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @cont='map']">
 				{
 					// unreference (and update) for map child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
-					std::map&lt; uint32, <xsl:value-of select="@type"/>Ptr &gt;::const_iterator first(childs.begin()), last(childs.end());
-
-					for (; first != last; ++first)
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						<xsl:variable name="type" select="@type"/>
-						<xsl:variable name="child_name" select="@name"/>
-						<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
-						get<xsl:value-of select="@name"/>ById(it->first)->set<xsl:value-of select="$parent_prop"/>(0);
-						get<xsl:value-of select="@name"/>ById(it->first)->update(connection);
+						const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
+						std::map&lt; uint32, <xsl:value-of select="@type"/>Ptr &gt;::const_iterator first(childs.begin()), last(childs.end());
+
+						for (; first != last; ++first)
+						{
+							<xsl:variable name="type" select="@type"/>
+							<xsl:variable name="child_name" select="@name"/>
+							<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
+							get<xsl:value-of select="@name"/>ById(it->first)->set<xsl:value-of select="$parent_prop"/>(0);
+							get<xsl:value-of select="@name"/>ById(it->first)->update(connection);
+						}
 					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @relation='one-to-one']">
 				{
 					// unreference (and update) for single child <xsl:value-of select="@name"/>
-					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
-
-					<xsl:variable name="type" select="@type"/>
-					<xsl:variable name="child_name" select="@name"/>
-					<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
-					if (get<xsl:value-of select="@name"/>() != NULL)
+					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
 					{
-						get<xsl:value-of select="@name"/>()->set<xsl:value-of select="parent_prop"/>(0);
-						get<xsl:value-of select="@name"/>()->update(connection);
+						<xsl:variable name="type" select="@type"/>
+						<xsl:variable name="child_name" select="@name"/>
+						<xsl:variable name="parent_prop" select="//class[@name = $type]/property[@db_col = //class[@name = $type]/parent[@class = $className]/@db_col]/@name"/>
+						if (get<xsl:value-of select="@name"/>() != NULL)
+						{
+							get<xsl:value-of select="@name"/>()->set<xsl:value-of select="parent_prop"/>(0);
+							get<xsl:value-of select="@name"/>()->update(connection);
+						}
 					}
 				}
 </xsl:for-each>
