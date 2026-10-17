@@ -2160,15 +2160,14 @@ function r2.addR2PlayerEquipment(paletteElt, equipmentTable)
 				end
 				local rightHand = string.sub(equFile, 1, e-1)
 
-				equFile = string.sub(equFile, e+1)
-				s, e = string.find(equFile, ":")
+				local rest = string.sub(equFile, e+1)
+				s, e = string.find(rest, ":")
 				if s==nil or e==nil then
 					debugInfo("Palette probleme with equipment : "..paletteElt.Equipment)
 				end
-				local leftHand = string.sub(equFile, 1, e-1)
+				local leftHand = string.sub(rest, 1, e-1)
 
-				equFile = string.sub(equFile, e+1)
-				local handsLevel = equFile
+				local handsLevel = string.sub(rest, e+1)
 				table.insert(tempTable[equType], {
 													["trad"]=tradEquName, 
 													["rightHand"]=rightHand, 

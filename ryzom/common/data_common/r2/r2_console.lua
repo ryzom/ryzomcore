@@ -80,9 +80,9 @@ function writeTable(t, output)
 					
 				elseif (type(value) == "string")
 				then
-					value = "\"" ..value .. "\""
+					local displayValue = "\"" ..value .. "\""
 					writeSpace(n+1)
-					output.write(key, "=", value,", \n")
+					output.write(key, "=", displayValue,", \n")
 				elseif (type(value) == "number")
 				then
 					writeSpace(n+1)

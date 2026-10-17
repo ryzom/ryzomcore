@@ -118,14 +118,15 @@ function enum_generator.build(name, enum, template_h, template_cpp)
 	end
 
 	for ext,str in pairs(files) do
+		local output = str
 		for k,v in pairs(names) do
-			str = string.gsub(str, "%%"..k.."%%", v)
+			output = string.gsub(output, "%%"..k.."%%", v)
 		end
 		for k,v in pairs(enums) do
-			str = string.gsub(str, "%%"..k.."%%", v)
+			output = string.gsub(output, "%%"..k.."%%", v)
 		end
 		local file = assert(io.open(names["name1"]..ext, "w"))
-		file:write(str)
+		file:write(output)
 		file:close()
 	end
 end
