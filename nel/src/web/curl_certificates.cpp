@@ -150,7 +150,7 @@ namespace NLWEB
 			// NULL certificate
 			if (!cert) return "";
 
-			X509_NAME *subject = X509_get_subject_name(cert);
+			const X509_NAME *subject = X509_get_subject_name(cert);
 
 			std::string name;
 			unsigned char *tmp = nullptr;
@@ -158,8 +158,8 @@ namespace NLWEB
 			// construct a multiline string with name
 			for (int j = 0, jlen = X509_NAME_entry_count(subject); j < jlen; ++j)
 			{
-				X509_NAME_ENTRY *e = X509_NAME_get_entry(subject, j);
-				ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+				const X509_NAME_ENTRY *e = X509_NAME_get_entry(subject, j);
+				const ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
 
 				if (ASN1_STRING_to_UTF8(&tmp, d) > 0)
 				{
