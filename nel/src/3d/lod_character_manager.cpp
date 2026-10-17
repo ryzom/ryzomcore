@@ -832,8 +832,15 @@ void			CLodCharacterTmpBitmap::build(const NLMISC::CBitmap &bmpIn)
 {
 	uint	width= bmpIn.getWidth();
 	uint	height= bmpIn.getHeight();
-	nlassert(width>0 && width<=256);
-	nlassert(height>0 && height<=256);
+	// CAsyncTextureManager already refuses such coarse copies and names the file; this catches any other
+	// caller. Not an engine error, so no assert: the impostor just keeps this material black.
+	if(width==0 || height==0 || width>NL3D_CLOD_TMP_BITMAP_MAX_SIZE || height>NL3D_CLOD_TMP_BITMAP_MAX_SIZE)
+	{
+		nlwarning("ASSET ERROR: CLod character bitmap is %ux%u, must be 1..%u on each side; impostor material left black",
+			width, height, (uint)NL3D_CLOD_TMP_BITMAP_MAX_SIZE);
+		reset();
+		return;
+	}
 
 	// resize bitmap.
 	_Bitmap.resize(width*height);

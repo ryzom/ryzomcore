@@ -121,6 +121,9 @@ SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/ams/" CACHE STRI
 SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/core4/patch/" CACHE STRING "Ryzom Client Patch URL")
 SET(RYZOM_CLIENT_APP_NAME               "core4")
 
+SET(RYZOM_WEBIG_MAIN_URL                "https://open.ryzom.dev/" CACHE STRING "Ryzom Client WebIG Main URL")
+SET(RYZOM_WEBIG_TRUSTED_DOMAIN          "open.ryzom.dev" CACHE STRING "Ryzom Client WebIG Trusted Domain")
+
 SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")

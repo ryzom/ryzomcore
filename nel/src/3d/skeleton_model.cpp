@@ -976,8 +976,9 @@ void		CSkeletonModel::computeLodTexture()
 						coarseBitmap= asyncMngr->getCoarseBitmap(asyncTextId);
 					}
 
-					// So if we have no bmp here, build with material color, else build a texture
-					if(!coarseBitmap)
+					// So if we have no bmp here (or a refused one, see CTextureEntry::createCoarseBitmap), build with
+					// material color, else build a texture
+					if(!coarseBitmap || coarseBitmap->getWidth()==0)
 					{
 						dstBmp.build(mbi->Materials[i].getDiffuse());
 					}
