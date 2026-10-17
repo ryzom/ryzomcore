@@ -10,17 +10,31 @@ MACRO(FIND_CORRECT_LUA_VERSION)
   IF(LUABIND_LIBRARY_RELEASE MATCHES "\\.so")
     INCLUDE(CheckDepends)
 
-    # check for Lua 5.4
-    SET(LUA54_LIBRARIES liblua5.4 liblua-5.4 liblua.so.5.4)
+    # check for Lua 5.5
+    SET(LUA55_LIBRARIES liblua5.5 liblua-5.5 liblua.so.5.5)
 
-    FOREACH(_LIB ${LUA54_LIBRARIES})
+    FOREACH(_LIB ${LUA55_LIBRARIES})
       CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
       IF(LUALIB_FOUND)
-        MESSAGE(STATUS "Luabind is using Lua 5.4")
-        FIND_PACKAGE(Lua REQUIRED 5.4)
+        MESSAGE(STATUS "Luabind is using Lua 5.5")
+        FIND_PACKAGE(Lua REQUIRED 5.5)
         BREAK()
       ENDIF()
     ENDFOREACH()
+
+    IF(NOT LUALIB_FOUND)
+      # check for Lua 5.4
+      SET(LUA54_LIBRARIES liblua5.4 liblua-5.4 liblua.so.5.4)
+
+      FOREACH(_LIB ${LUA54_LIBRARIES})
+        CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE _LIB LUALIB_FOUND)
+        IF(LUALIB_FOUND)
+          MESSAGE(STATUS "Luabind is using Lua 5.4")
+          FIND_PACKAGE(Lua REQUIRED 5.4)
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
+    ENDIF()
 
     IF(NOT LUALIB_FOUND)
       # check for Lua 5.3
