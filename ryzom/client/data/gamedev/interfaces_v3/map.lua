@@ -129,6 +129,7 @@ function game:onLoadMap(map)
 	delArkPoints()
 	game.mapMapArkPointHelpUrl = ""
 	for section, points in pairs(game.mapArkPoints) do
+		local currentSection = section
 		real_section = {}
 		map_section = section
 		for k, v in string.gmatch(section, "(%w+)/(%w+)") do
@@ -136,18 +137,18 @@ function game:onLoadMap(map)
 		end
 
 		if real_section[1] then
-			section = real_section[1]
+			currentSection = real_section[1]
 			map_section = real_section[2]
 		end
 
-		if game.mapHideSections[section] == nil then
+		if game.mapHideSections[currentSection] == nil then
 			if game.mapRegionSections[map_section] == nil or game.mapRegionSections[map_section][texture] == true then
-		for name, point in pairs(points) do
-			addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
+				for name, point in pairs(points) do
+					addLandMark(point[1], point[2], point[3], point[4], "lua", point[5], "", "", "lua", point[6])
+				end
+			end
 		end
 	end
-end
-end
 
 	-- if alt view not enabled
 	if getDbProp("UI:VARIABLES:SHOW_ALT_MAP") == 0 or map:isIsland() then
