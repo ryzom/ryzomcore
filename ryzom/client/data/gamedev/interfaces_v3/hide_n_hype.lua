@@ -58,6 +58,7 @@ if not Ryzhide then
 
 		player_name = "",
 		hnh_id = 0,
+		game_mode = "",
 
 		json_pull_counter = 0,
 		json_pull_counter_old = 0,
@@ -109,6 +110,18 @@ function Ryzhide:is_other_hide(hnh_id)
 		return false
 	end
 	return tonumber(hnh_id) ~= tonumber(self.hnh_id)
+end
+
+--only public hides have rewards, private and gm rounds are just for fun
+function Ryzhide:has_rewards()
+	return self.game_mode == nil or self.game_mode == "" or self.game_mode == "public"
+end
+
+function Ryzhide:claim_reward_html()
+	if(Ryzhide:has_rewards())then
+		return [[<a href="ah:lua&Ryzhide:open_clain_reward_script()"><h3>]]..Ryzhide:load_translation("hide_n_hype_click_here_to_claim_your_price")..[[</h3></a>]]
+	end
+	return [[<h3>]]..Ryzhide:load_translation("hide_n_hype_no_reward_in_this_mode")..[[</h3>]]
 end
 
 function Ryzhide:display_debug_messanges(debug_message)
@@ -459,6 +472,10 @@ function Ryzhide:check_for_update_server_config(json_data_from_join)
 		self.duration_time_most_wanted_offline = tonumber(json_data_from_join.duration_time_most_wanted_offline)
 	end
 	
+	if(json_data_from_join.game_mode ~= nil)then
+		self.game_mode = json_data_from_join.game_mode
+	end
+
 	if(self.type_data ~= json_data_from_join.type_data)then
 		self.type_data = json_data_from_join.type_data
 	end
@@ -533,6 +550,7 @@ function Ryzhide:pars_json_data_login()
 				self.duration_time_claim_reward = tonumber(self.hide_n_hide_json_data.duration_time_claim_reward)
 				self.duration_time_most_wanted_offline = tonumber(self.hide_n_hide_json_data.duration_time_most_wanted_offline)
 				self.type_data = self.hide_n_hide_json_data.type_data
+				self.game_mode = self.hide_n_hide_json_data.game_mode or ""
 
 				Ryzhide:display_debug_messanges("ready: "..self.hide_n_hide_json_data.ready)
 				Ryzhide:display_debug_messanges("player_round_id: "..self.hide_n_hide_json_data.player_round_id)
@@ -823,6 +841,12 @@ function Ryzhide:build_invite_window()
 	local window_height = 420
 	local window_width = 400
 
+	--gm mode: the gm is the most wanted, all others can only hunt
+	if(self.game_mode == "gm")then
+		self.hunter_or_most_wanted_accept_active = "false"
+		self.most_wanted_accept_active = "false"
+	end
+
 
 	local html_invite_window=""
 	html_invite_window=[[<title>]]..Ryzhide:load_translation("hide_n_hype_a_new_hide_start_soon_window")..[[</title>
@@ -1099,6 +1123,7 @@ function Ryzhide:inti_invite_window(json_data)
 			self.hunter_array = self.hunter_array + 1
 			if(self.player_name == name)then
 				found_hunter = 1
+				self.player_click_to_register = 1
 				self.regist_as_hunter = 1
 				self.hunter_accept_image = "rap_invited_no_dm.tga"
 				self.hunter_accept_active = "false"
@@ -1128,6 +1153,7 @@ function Ryzhide:inti_invite_window(json_data)
 			self.hunter_or_most_wanted_array = self.hunter_or_most_wanted_array + 1
 			if(self.player_name == name)then
 				found_most_wanted_hunter = 1
+				self.player_click_to_register = 1
 				self.regist_as_hunter_or_most_wanted = 1
 				self.hunter_or_most_wanted_accept_image = "rap_invited_no_dm.tga"
 				self.hunter_or_most_wanted_accept_active = "false"
@@ -1157,6 +1183,7 @@ function Ryzhide:inti_invite_window(json_data)
 			self.most_wanted_array = self.most_wanted_array + 1
 			if(self.player_name == name)then
 				found_most_wanted = 1
+				self.player_click_to_register = 1
 				self.regist_as_most_wanted = 1
 				self.most_wanted_accept_image = "rap_invited_no_dm.tga"
 				self.most_wanted_accept_active = "false"
@@ -1240,7 +1267,7 @@ function Ryzhide:check_and_pars_player_infos(json_data,action_button,action_coun
 	if (type(json_data) == "boolean") then
 		local regist_hunter_img = mainui:find(action_button)
 		regist_hunter_img:find("img1").texture = ""
-		regist_hunter_img:find("ctrl").active = true
+		regist_hunter_img:find("ctrl").active = not (self.game_mode == "gm" and (action_button == "mostwanted_accept" or action_button == "hunter_or_mostwanted_accept"))
 
 		local regist_hunter_text = mainui:find(action_count_text)
 		if(action_count_text == "reject_text")then
@@ -1258,6 +1285,9 @@ function Ryzhide:check_and_pars_player_infos(json_data,action_button,action_coun
 			count_array = count_array + 1
 			if(self.player_name == name)then
 				found_player_in_list = 1
+				if(action_button ~= "reject_accept")then
+					self.player_click_to_register = 1
+				end
 				Ryzhide:display_debug_messanges("player_name: "..self.player_name.." array_name: "..name)
 				regist_hunter_img:find("img1").texture = "rap_invited_no_dm.tga"
 				regist_hunter_img:find("ctrl").active = false
@@ -1268,7 +1298,8 @@ function Ryzhide:check_and_pars_player_infos(json_data,action_button,action_coun
 	if(found_player_in_list == 0)then
 		local regist_hunter_img = mainui:find(action_button)
 		regist_hunter_img:find("img1").texture = ""
-		regist_hunter_img:find("ctrl").active = true
+		--gm mode keeps the most wanted buttons locked
+		regist_hunter_img:find("ctrl").active = not (self.game_mode == "gm" and (action_button == "mostwanted_accept" or action_button == "hunter_or_mostwanted_accept"))
 	end
 
 	if(count_array == 0)then
@@ -2307,7 +2338,7 @@ function Ryzhide:build_finished_hunter(hunter_name,most_wanted_name)
 				</tr>
 
 				<tr>
-					<td align="center"><a href="ah:lua&Ryzhide:open_clain_reward_script()"><h3>]]..Ryzhide:load_translation("hide_n_hype_click_here_to_claim_your_price")..[[</h3></a></td>
+					<td align="center">]]..Ryzhide:claim_reward_html()..[[</td>
 				</tr>
 			</table>]]
 	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_finished_hunter, "", "")
@@ -2346,7 +2377,7 @@ function Ryzhide:build_finished_most_wanted(hunter_name,most_wanted_name)
 				</tr>
 
 				<tr>
-					<td align="center"><a href="ah:lua&Ryzhide:open_clain_reward_script()"><h3>]]..Ryzhide:load_translation("hide_n_hype_click_here_to_claim_your_price")..[[</h3></a></td>
+					<td align="center">]]..Ryzhide:claim_reward_html()..[[</td>
 				</tr>
 			</table>]]
 
@@ -2504,7 +2535,7 @@ function Ryzhide:build_most_wanted_not_found_most_wanted()
 				</tr>
 
 				<tr>
-					<td align="center"><a href="ah:lua&Ryzhide:open_clain_reward_script()"><h3>]]..Ryzhide:load_translation("hide_n_hype_click_here_to_claim_your_price")..[[</h3></a></td>
+					<td align="center">]]..Ryzhide:claim_reward_html()..[[</td>
 				</tr>
 			</table>]]
 
