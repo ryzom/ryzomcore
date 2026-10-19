@@ -148,15 +148,15 @@
 				<scene3d id="scene3d" x="-10" y="-10"  sizeref="wh" posref="MR MR" curcam="cam" curcs="env" render_layer="-2"
 					user_interaction="true" rotz_factor="0.017"
 					roty_factor="0.005" roty_limit_min="-80" roty_limit_max="90"
-					dist_factor="0.05" dist_limit_min="15.0" dist_limit_max="20.0"
+					dist_factor="0.05" dist_limit_min="0.5" dist_limit_max="40.0"
 					ambient="255 255 255" sun_ambient="255 255 255" sun_diffuse="255 255 255" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
 					
-					<camera id="cam" fov="80" pos="0.0 0 0" target="0.0 0 0" roll="0" />
+					<camera id="cam" fov="45" pos="0.0 -5 1" target="0.0 0 1" roll="0" />
 					<light id="back" pos="0.0 1 1" color="255 255 255" near="1" far="4.0" />
 					<light id="back2" pos="0.0 1 2" color="255 255 255" near="1" far="4.0" />
 					<light id="lgt" pos="0.0 -1 1" color="255 255 255" near="1" far="4.0" />
 					<light id="lgt2" pos="0.0 -1 2" color="255 255 255" near="1" far="4.0" />
-					<shape id="object" name="#shape" pos="0.0 0 0" rot="0.0 0.0 2.0" />
+					<shape id="object" name="#shape" pos="0.0 0 0" rot="0.0 0.0 0.0" />
 				</scene3d>
 			</group>
 		</template>
