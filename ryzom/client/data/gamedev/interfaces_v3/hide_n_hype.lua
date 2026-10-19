@@ -2537,6 +2537,25 @@ function Ryzhide:build_most_wanted_bad_position()
 		Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_bad_position, "click_close_button", "close_window_abort_most_wanted_bad_position_window")
 end
 
+function Ryzhide:build_most_wanted_no_object()
+	local window_height = 200
+	local window_width = 400
+
+
+	local html_most_wanted_no_object = ""
+	html_most_wanted_no_object=[[<title>]]..Ryzhide:load_translation("hide_n_hype_abort_most_wanted_no_object_window")..[[</title>
+		<table width="100%" height="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
+			<tr>
+				<td align="center"><img src="icon_dead.png" width="80" height="80" ></td>
+			</tr>
+
+			<tr>
+				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype_abort_most_wanted_no_object")..[[</h3></td>
+			</tr>
+		</table>]]
+		Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_no_object, "click_close_button", "close_window_abort_most_wanted_no_object_window")
+end
+
 function Ryzhide:build_error_not_enough_players()
 	local window_height = 200
 	local window_width = 370
@@ -2654,6 +2673,10 @@ function Ryzhide:abort_because_of(process_info_name,round_id,hnh_id)
 
 	if(process_info_name == "most_wanted_bad_position")then
 		Ryzhide:build_most_wanted_bad_position()
+	end
+
+	if(process_info_name == "most_wanted_no_object")then
+		Ryzhide:build_most_wanted_no_object()
 	end
 
 	if(process_info_name == "error_no_player_founds" or process_info_name == "error_no_hunter_found" or process_info_name == "error_no_most_wanted_found")then
