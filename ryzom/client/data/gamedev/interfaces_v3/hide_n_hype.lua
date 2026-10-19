@@ -2861,8 +2861,16 @@ function Ryzhide:got_first_sheet_object()
 	end
 end
 
+function Ryzhide:get_3d_preview_scene()
+	local preview = getUI(self.abort_window_name):find("window_3d_previes")
+	if preview == nil then
+		return nil
+	end
+	return preview:find("scene3d")
+end
+
 function Ryzhide:load_3d_preview(sheet_id)
-	local scene = getUI(self.abort_window_name):find("window_3d_previes"):find("scene3d")
+	local scene = Ryzhide:get_3d_preview_scene()
 	if scene == nil then
 		return
 	end
@@ -2883,7 +2891,39 @@ function Ryzhide:load_3d_preview(sheet_id)
 	shape.roty = 0
 	shape.rotz = 0
 
-	--getBBoxSize* returns -0.5 when the bbox is unknown, use a 2m cube then
+	--reset the user rotation from the previous object
+	camera.rotz = 0
+	camera.roty = 0
+
+	self.preview_bbox = ""
+	Ryzhide:fit_3d_preview()
+
+	--a shape loaded the first time has no bbox yet, fit again for some frames until the size is known
+	self.preview_fit_frames = 60
+	setOnDraw(getUI(self.abort_window_name), "Ryzhide:refit_3d_preview()")
+end
+
+function Ryzhide:refit_3d_preview()
+	if self.preview_fit_frames == nil or self.preview_fit_frames <= 0 or Ryzhide:get_3d_preview_scene() == nil then
+		setOnDraw(getUI(self.abort_window_name), "")
+		return
+	end
+	self.preview_fit_frames = self.preview_fit_frames - 1
+	Ryzhide:fit_3d_preview()
+end
+
+function Ryzhide:fit_3d_preview()
+	local scene = Ryzhide:get_3d_preview_scene()
+	if scene == nil then
+		return
+	end
+	local shape = scene:getElement("shape#0")
+	local camera = scene:getElement("camera#0")
+	if shape == nil or camera == nil then
+		return
+	end
+
+	--getBBoxSize* returns -0.5 when the bbox is unknown (shape still loading), use a 2m cube then
 	local size_x = shape.getBBoxSizeX
 	local size_y = shape.getBBoxSizeY
 	local size_z = shape.getBBoxSizeZ
@@ -2891,27 +2931,32 @@ function Ryzhide:load_3d_preview(sheet_id)
 		size_x, size_y, size_z = 2, 2, 2
 	end
 
+	--only move the camera when the size changed, else the user zoom is kept
+	local bbox = string.format("%.2f %.2f %.2f", size_x, size_y, size_z)
+	if bbox == self.preview_bbox then
+		return
+	end
+	self.preview_bbox = bbox
+
 	--fit the bounding sphere into the (horizontal) field of view
 	local radius = 0.5 * math.sqrt(size_x * size_x + size_y * size_y + size_z * size_z)
 	local distance = radius / math.sin(math.rad(camera.fov / 2)) * 1.15
 	local pitch = math.rad(20)
 
-	--reset the user rotation from the previous object
-	camera.rotz = 0
-	camera.roty = 0
-
 	--target first, the camera distance is calculated from pos and target
+	--the objects look to +y, so the camera stands on the +y side to see the front
 	camera.tgtx = 0
 	camera.tgty = 0
 	camera.tgtz = size_z / 2
 	camera.posx = 0
-	camera.posy = -distance * math.cos(pitch)
+	camera.posy = distance * math.cos(pitch)
 	camera.posz = size_z / 2 + distance * math.sin(pitch)
 
 	--zoom limits relative to the object size
 	scene.distlimitmin = radius * 1.2
 	scene.distlimitmax = distance * 3
 end
+
 --###################################### END build_3d_preview #######################################
 -- VERSION --
 FILE_HIDE_N_HYPE_VERSION = 181
