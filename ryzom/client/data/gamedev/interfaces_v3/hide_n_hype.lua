@@ -899,7 +899,11 @@ function Ryzhide:private_feedback()
 	end
 
 	if(data.error)then
-		Ryzhide:display_message_to_player('error', 'AMB', Ryzhide:load_translation("hide_n_hype_"..data.error))
+		local message = Ryzhide:load_translation("hide_n_hype_"..data.error)
+		if(data.needed ~= nil)then
+			message = message.." "..(data.players or 0).." / "..data.needed
+		end
+		Ryzhide:display_message_to_player('error', 'AMB', message)
 		Ryzhide:private_request("private_status")
 		return
 	end
