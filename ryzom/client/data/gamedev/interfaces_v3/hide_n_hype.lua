@@ -118,6 +118,22 @@ function Ryzhide:has_rewards()
 	return self.game_mode == nil or self.game_mode == "" or self.game_mode == "public"
 end
 
+--without reward the window needs a close button (claiming the reward closes it otherwise)
+function Ryzhide:no_reward_close_function()
+	if(Ryzhide:has_rewards())then
+		return ""
+	end
+	return "click_close_button"
+end
+
+--info line for the invite window: gm round without automatic reward
+function Ryzhide:round_info_html()
+	if(self.game_mode == "gm")then
+		return [[<tr><td colspan="4" align="center"><font color="#FFAA00"><b>]]..Ryzhide:load_translation("hide_n_hype_gm_round_info")..[[ ]]..self.gm_name..[[</b></font></td></tr>]]
+	end
+	return ""
+end
+
 function Ryzhide:claim_reward_html()
 	if(Ryzhide:has_rewards())then
 		return [[<a href="ah:lua&Ryzhide:open_clain_reward_script()"><h3>]]..Ryzhide:load_translation("hide_n_hype_click_here_to_claim_your_price")..[[</h3></a>]]
@@ -367,6 +383,10 @@ function Ryzhide:click_close_button(window_id)
 	end
 
 	if(window_id == "close_window_unregister_window")then
+		removeOnDbChange(getUI(self.main_window_name),self.timer_str)
+	end
+
+	if(window_id == "close_window_no_reward")then
 		removeOnDbChange(getUI(self.main_window_name),self.timer_str)
 	end
 
@@ -846,6 +866,11 @@ function Ryzhide:build_invite_window()
 	local window_height = 420
 	local window_width = 400
 
+	--room for the gm round info line
+	if(self.game_mode == "gm")then
+		window_height = 450
+	end
+
 
 	local html_invite_window=""
 	html_invite_window=[[<title>]]..Ryzhide:load_translation("hide_n_hype_a_new_hide_start_soon_window")..[[</title>
@@ -856,6 +881,7 @@ function Ryzhide:build_invite_window()
 				<td align="center" width="40"><img src="ico_time.png" width="40"></td>
 			</tr>
 
+			]]..Ryzhide:round_info_html()..[[
 			<tr>
 				<td colspan="4" align="center"><font color="orange">]]..Ryzhide:load_translation("hide_n_hype_forbidden_regions")..[[</font></td>
 			</tr>
@@ -2371,7 +2397,7 @@ function Ryzhide:build_finished_hunter(hunter_name,most_wanted_name)
 					<td align="center">]]..Ryzhide:claim_reward_html()..[[</td>
 				</tr>
 			</table>]]
-	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_finished_hunter, "", "")
+	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_finished_hunter, Ryzhide:no_reward_close_function(), "close_window_no_reward")
 end
 
 function Ryzhide:build_finished_most_wanted(hunter_name,most_wanted_name)
@@ -2411,7 +2437,7 @@ function Ryzhide:build_finished_most_wanted(hunter_name,most_wanted_name)
 				</tr>
 			</table>]]
 
-	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_finished_most_wanted, "", "")
+	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_finished_most_wanted, Ryzhide:no_reward_close_function(), "close_window_no_reward")
 end
 
 function Ryzhide:build_loos_hunter(hunter_name,most_wanted_name,pox_mostwanted,poy_mostwanted)
@@ -2569,7 +2595,7 @@ function Ryzhide:build_most_wanted_not_found_most_wanted()
 				</tr>
 			</table>]]
 
-	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_not_found_most_wanted, "", "")
+	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_most_wanted_not_found_most_wanted, Ryzhide:no_reward_close_function(), "close_window_no_reward")
 end
 
 
