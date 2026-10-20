@@ -917,6 +917,7 @@ function Ryzhide:private_feedback()
 
 	if(data.success == "ok_private_created")then
 		Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_private_created").." "..(data.code or ""))
+		Ryzhide:copy_join_command(data.code or "")
 	else
 		Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_"..data.success))
 	end
@@ -925,7 +926,7 @@ end
 
 function Ryzhide:build_private_window(data)
 	local window_width = 365
-	local window_height = 360
+	local window_height = 420
 	local html = [[<title>]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[</title>
 		<table width="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
 			<tr><td align="center"><font color="#FFAA00">]]..Ryzhide:load_translation("hide_n_hype_private_round_info")..[[</font></td></tr>
@@ -945,6 +946,7 @@ function Ryzhide:build_private_window(data)
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_code")..[[</td></tr>
 			<tr><td align="center"><h2>]]..(data.code or "")..[[</h2></td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_tell_code")..[[</td></tr>
+			<tr><td align="center"><a href="ah:lua&Ryzhide:copy_join_command(']]..(data.code or "")..[[')">]]..Ryzhide:load_translation("hide_n_hype_private_copy_command")..[[</a></td></tr>
 			<tr><td>&nbsp;</td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_players")..[[ (]]..#(data.players or {})..[[ / ]]..(data.needed or 2)..[[)</td></tr>
 			<tr><td align="center">]]..players..[[</td></tr>
@@ -961,7 +963,7 @@ function Ryzhide:build_private_window(data)
 			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_leave')">]]..Ryzhide:load_translation("hide_n_hype_private_leave")..[[</a></td></tr>]]
 		end
 		html = html..[[<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_status')">]]..Ryzhide:load_translation("hide_n_hype_private_refresh")..[[</a></td></tr>]]
-		window_height = 400
+		window_height = 430
 	else
 		--normal objects always, the objects of a running event only while it runs
 		html = html..[[
@@ -972,15 +974,91 @@ function Ryzhide:build_private_window(data)
 		end
 		html = html..[[
 			<tr><td>&nbsp;</td></tr>
+			<tr><td>&nbsp;</td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_join_with_code")..[[</td></tr>
-			<tr><td align="center"><form action="https://app.ryzom.com/app_ryzhide/" method="GET"><input type="hidden" name="mode" value="private_join"><input type="text" name="code" size="8" maxlength="8"> <input type="submit" value="]]..Ryzhide:load_translation("hide_n_hype_private_join")..[["></form></td></tr>]]
+			<tr><td>&nbsp;</td></tr>
+			<tr><td align="center"><form action="https://app.ryzom.com/app_ryzhide/" method="GET"><input type="hidden" name="mode" value="private_join">
+				<table cellpadding="4" cellspacing="0">
+					<tr><td align="center"><input type="text" name="code" size="10" maxlength="8"></td></tr>
+					<tr><td align="center"><input type="submit" value="]]..Ryzhide:load_translation("hide_n_hype_private_join")..[["></td></tr>
+				</table>
+			</form></td></tr>
+			<tr><td align="center"><font size="1">/hidenhype join CODE</font></td></tr>]]
 	end
 	html = html..[[</table>]]
 
 	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html, "click_close_button", "close_private_window")
 end
 
+function Ryzhide:copy_join_command(code)
+	local command = "/hidenhype join "..code
+	runAH(nil, "copy_to_clipboard", command)
+	Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_private_command_copied").." "..command)
+end
+
 --###################################### END private rounds #######################################
+
+
+--###################################### START chat commands #######################################
+
+--/hidenhype <command> [parameter] (or /hnh)
+function Ryzhide:chat_command(text)
+	local words = Ryzhide:split(text or "", " ")
+	local command = string.lower(words[1] or "")
+	local parameter = words[2] or ""
+
+	if(command == "register")then
+		if(self.player_already_registerd == 1)then
+			Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_already_registerd"))
+			return
+		end
+		Ryzhide:open_register_window()
+		Ryzhide:click_icon_registration("register_accept")
+	elseif(command == "unregister" or command == "deregister")then
+		if(self.player_already_registerd == 0)then
+			Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_not_registerd"))
+			return
+		end
+		--asks before, like the button
+		Ryzhide:open_register_window()
+		Ryzhide:build_ask_for_abort_unregister()
+	elseif(command == "private" or command == "privat")then
+		Ryzhide:open_private_window()
+	elseif(command == "join")then
+		if(parameter == "")then
+			Ryzhide:display_message_to_player('error', 'AMB', "/hidenhype join CODE")
+			return
+		end
+		Ryzhide:private_request("private_join", "&code="..string.upper(parameter))
+	elseif(command == "create")then
+		if(string.lower(parameter) == "event")then
+			Ryzhide:private_request("private_create", "&objects=event")
+		else
+			Ryzhide:private_request("private_create", "&objects=normal")
+		end
+	elseif(command == "start")then
+		Ryzhide:private_request("private_start")
+	elseif(command == "leave")then
+		Ryzhide:private_request("private_leave")
+	elseif(command == "close")then
+		Ryzhide:private_request("private_close")
+	elseif(command == "abort")then
+		--reject the running invite
+		if(self.game_is_now_running == 1 and tonumber(self.current_round_id) ~= 0)then
+			Ryzhide:click_icon_abort("abort_skip_yes")
+		else
+			Ryzhide:close_window(self.main_window_name, "")
+		end
+	elseif(command == "reload")then
+		Ryzhide:check_data_at_login()
+	elseif(command == "debug")then
+		Ryzhide:set_debug_vars(parameter)
+	else
+		Ryzhide:display_message_to_player('sys', 'SYS', "/hidenhype register | unregister | private | join CODE | create [event] | start | leave | close | abort | reload")
+	end
+end
+
+--###################################### END chat commands #######################################
 
 
 --###################################### START build and load invite window #######################################
