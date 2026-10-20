@@ -969,7 +969,7 @@ function Ryzhide:build_private_window(data)
 		local private_count = tonumber(data.private_count) or 0
 		local private_max = tonumber(data.private_max) or 0
 		html = html..[[
-			<tr><td align="center"><font size="1">]]..Ryzhide:text_or("hide_n_hype_private_count", "Private rounds on this shard:")..[[ ]]..private_count..[[ / ]]..private_max..[[</font></td></tr>]]
+			<tr><td align="center"><font color="#AAAAAA">]]..Ryzhide:text_or("hide_n_hype_private_count", "Private rounds on this shard:")..[[ ]]..private_count..[[ / ]]..private_max..[[</font></td></tr>]]
 		if(private_max > 0 and private_count >= private_max)then
 			html = html..[[
 			<tr><td align="center"><font color="orange">]]..Ryzhide:load_translation("hide_n_hype_private_limit_reached")..[[</font></td></tr>]]
@@ -993,7 +993,7 @@ function Ryzhide:build_private_window(data)
 					<tr><td align="center"><input type="submit" value="]]..Ryzhide:load_translation("hide_n_hype_private_join")..[["></td></tr>
 				</table>
 			</form></td></tr>
-			<tr><td align="center"><font size="1">/hidenhype join CODE</font></td></tr>]]
+			<tr><td align="center"><font color="#AAAAAA">/hidenhype join CODE</font></td></tr>]]
 	end
 	html = html..[[</table>]]
 
