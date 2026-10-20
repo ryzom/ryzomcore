@@ -13,6 +13,14 @@ if not Ryzhide then
 		hidenhype_feedback = nil,
 		load_animation_timer = 0,
 		load_animation = 0,
+		private_loading = 0,
+		private_spinner_owned = 0,
+		private_is_owner = 0,
+		private_request_time = 0,
+		private_window_shown = 0,
+		private_next_refresh = 0,
+		private_refresh_seconds = 10,
+		private_answer_timeout = 15,
 		player_already_registerd = 0,
 		game_is_full_loaded = 0,
 
@@ -138,9 +146,20 @@ function Ryzhide:round_info_html()
 	return ""
 end
 
+--the no reward text is longer than the claim link and wraps (de), the game over windows need more height then
+function Ryzhide:no_reward_extra_height()
+	if(Ryzhide:has_rewards())then
+		return 0
+	end
+	return 20
+end
+
 function Ryzhide:claim_reward_html()
 	if(Ryzhide:has_rewards())then
 		return [[<a href="ah:lua&Ryzhide:open_clain_reward_script()"><h3>]]..Ryzhide:load_translation("hide_n_hype_click_here_to_claim_your_price")..[[</h3></a>]]
+	end
+	if(self.game_mode == "private")then
+		return [[<a href="ah:lua&Ryzhide:open_private_window()"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_back")..[[</h3></a>]]
 	end
 	return [[<h3>]]..Ryzhide:load_translation("hide_n_hype_no_reward_in_this_mode")..[[</h3>]]
 end
@@ -174,6 +193,10 @@ end
 function Ryzhide:update_timer(id,remaining_time_display,duration_display)
 	local mainui = getUI(self.main_window_name)
 	local timer_hard_text = mainui:find(id)
+	--another window may have replaced the one with this timer
+	if(timer_hard_text == nil)then
+		return
+	end
 
 	local minutes = math.floor(remaining_time_display / 60)
 	local seconds = remaining_time_display % 60
@@ -264,6 +287,7 @@ function Ryzhide:start_fetch_json_data(url_to_fetch)
 	self.load_animation_timer = 0
 
 	local load_pars_json_window_ui = getUI("ui:interface:load_pars_json")
+	self.private_spinner_owned = 0
 	setOnDraw(load_pars_json_window_ui, "Ryzhide:fetch_json_data('"..url_to_fetch.."')")
 	load_pars_json_window_ui.active=true
 end
@@ -356,6 +380,15 @@ mainui.active = true
 		mainui_close_button.params_l = "Ryzhide:"..close_function_id.."('"..close_function_parameter.."')"
 	end
 
+	if(close_function_parameter == "close_private_window")then
+		self.private_window_shown = 1
+	else
+		self.private_window_shown = 0
+	end
+
+	--the window may be made bigger, but not smaller than its content (a tester dragged it down to 0)
+	mainui.pop_min_h = win_h
+	mainui.pop_min_w = win_w
 	mainui.h = win_h
 	mainui.w = win_w
 
@@ -376,14 +409,26 @@ function Ryzhide:close_window(window_id, function_id)
 	end
 end
 
-function Ryzhide:click_close_button(window_id)
+--closing a game over window of a private round goes back to the private window
+local private_round_end_windows = {
+	close_window_no_reward = true,
+	close_window_build_loos_hunter = true,
+	close_window_build_most_wanted_not_found_hunter = true,
+}
 
+function Ryzhide:click_close_button(window_id)
 	if(window_id == "close_window_build_most_wanted_not_found_hunter")then
 		self.closed_most_wanted_not_found_hunter = 1
 	end
 
 	if(window_id == "close_window_build_loos_hunter")then
 		self.closed_loos_hunter = 1
+	end
+
+	if(self.game_mode == "private" and private_round_end_windows[window_id] and self.game_is_now_running == 0)then
+		removeOnDbChange(getUI(self.main_window_name), self.timer_str)
+		Ryzhide:open_private_window()
+		return
 	end
 
 	if(window_id == "close_window_unregister_window")then
@@ -663,14 +708,14 @@ end
 --###################################### START build and load registration window #######################################
 
 function Ryzhide:build_register_window()
-	local window_height = 320
+	local window_height = 345
 	local window_width = 365
 
 	local html_ungister = ""
 	html_ungister=[[<title>]]..Ryzhide:load_translation("hide_n_hype_unregister_window")..[[</title>
 		<table width="100%" height="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
 			<tr>
-				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype")..[[</h3></td>
+				<td align="center" nowrap><h3>]]..Ryzhide:load_translation("hide_n_hype")..[[</h3></td>
 			</tr>
 
 			<tr>
@@ -682,7 +727,7 @@ function Ryzhide:build_register_window()
 			</tr>
 
 			<tr>
-				<td align="center">]]..Ryzhide:load_translation("hide_n_hype_asked_unregister")..[[</td>
+				<td align="center" nowrap>]]..Ryzhide:load_translation("hide_n_hype_asked_unregister")..[[</td>
 			</tr>
 
 			<tr>
@@ -694,11 +739,11 @@ function Ryzhide:build_register_window()
 			</tr>
 
 			<tr>
-				<td align="center">]]..Ryzhide:load_translation("hide_n_hype_unregister_now_and_close")..[[</td>
+				<td align="center" nowrap>]]..Ryzhide:load_translation("hide_n_hype_unregister_now_and_close")..[[</td>
 			</tr>
 
 			<tr>
-				<td align="center"><a href="ah:lua&Ryzhide:open_private_window()">]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[ &raquo;</a></td>
+				<td align="center" nowrap><a href="ah:lua&Ryzhide:open_private_window()">]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[ &raquo;</a></td>
 			</tr>
 			</table>]]
 
@@ -706,7 +751,7 @@ function Ryzhide:build_register_window()
 	html_register=[[<title>]]..Ryzhide:load_translation("hide_n_hype_register_window")..[[</title>
 		<table width="100%" height="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
 			<tr>
-				<td align="center"><h3>]]..Ryzhide:load_translation("hide_n_hype")..[[</h3></td>
+				<td align="center" nowrap><h3>]]..Ryzhide:load_translation("hide_n_hype")..[[</h3></td>
 			</tr>
 
 			<tr>
@@ -718,7 +763,7 @@ function Ryzhide:build_register_window()
 			</tr>
 
 			<tr>
-				<td align="center">]]..Ryzhide:load_translation("hide_n_hype_asked_register")..[[</td>
+				<td align="center" nowrap>]]..Ryzhide:load_translation("hide_n_hype_asked_register")..[[</td>
 			</tr>
 
 			<tr>
@@ -730,11 +775,11 @@ function Ryzhide:build_register_window()
 			</tr>
 
 			<tr>
-				<td align="center">]]..Ryzhide:load_translation("hide_n_hype_register_now")..[[</td>
+				<td align="center" nowrap>]]..Ryzhide:load_translation("hide_n_hype_register_now")..[[</td>
 			</tr>
 
 			<tr>
-				<td align="center"><a href="ah:lua&Ryzhide:open_private_window()">]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[ &raquo;</a></td>
+				<td align="center" nowrap><a href="ah:lua&Ryzhide:open_private_window()">]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[ &raquo;</a></td>
 			</tr>
 			</table>]]
 
@@ -876,7 +921,71 @@ end
 --###################################### START private rounds #######################################
 
 function Ryzhide:private_request(mode, params)
+	self.private_loading = 1
+	self.private_request_time = os.time()
+	--show the hourglass next to the window as feedback, but never take it over from a running json fetch
+	local load_window = getUI("ui:interface:load_pars_json")
+	if(load_window ~= nil and load_window.active == false)then
+		self.load_animation = 0
+		self.load_animation_timer = 0
+		self.private_spinner_owned = 1
+		setOnDraw(load_window, "Ryzhide:private_loading_draw()")
+		load_window.active = true
+	end
 	webig:openUrlInBg("https://app.ryzom.com/app_ryzhide/?mode="..mode..(params or ""))
+end
+
+function Ryzhide:private_loading_draw()
+	if(self.private_loading == 0)then
+		Ryzhide:private_loading_done()
+		return
+	end
+	Ryzhide:position_json_load_window()
+	if(os.time() - self.private_request_time > self.private_answer_timeout)then
+		Ryzhide:private_loading_done()
+		Ryzhide:display_message_to_player('error', 'AMB', Ryzhide:text_or("hide_n_hype_private_no_answer", "No answer from the server, please try again."))
+	end
+end
+
+function Ryzhide:private_loading_done()
+	self.private_loading = 0
+	--only hide the hourglass when it is ours, a round window may use it to load its data now
+	if(self.private_spinner_owned == 0)then
+		return
+	end
+	self.private_spinner_owned = 0
+	local load_window = getUI("ui:interface:load_pars_json")
+	if(load_window ~= nil)then
+		setOnDraw(load_window, "")
+		load_window.active = false
+	end
+end
+
+--while a player waits in a private round the window asks the server every private_refresh_seconds
+function Ryzhide:private_auto_refresh_start()
+	self.private_next_refresh = os.time() + self.private_refresh_seconds
+	addOnDbChange(getUI(self.main_window_name):find("html"), self.timer_str, "Ryzhide:private_auto_refresh_tick()")
+end
+
+function Ryzhide:private_auto_refresh_stop()
+	removeOnDbChange(getUI(self.main_window_name):find("html"), self.timer_str)
+end
+
+function Ryzhide:private_auto_refresh_tick()
+	local mainui = getUI(self.main_window_name)
+	if(self.private_window_shown == 0 or mainui.active == false)then
+		Ryzhide:private_auto_refresh_stop()
+		return
+	end
+	if(self.private_loading == 0 and os.time() >= self.private_next_refresh)then
+		self.private_next_refresh = os.time() + self.private_refresh_seconds
+		Ryzhide:private_request("private_status")
+	end
+end
+
+--links in the html replace every "&" by "|", so the window calls this instead of passing "&objects=" itself
+function Ryzhide:private_create(objects)
+	Ryzhide:private_request("private_create", "&objects="..objects)
 end
 
 function Ryzhide:open_private_window()
@@ -885,12 +994,15 @@ function Ryzhide:open_private_window()
 		return
 	end
 	removeOnDbChange(getUI(self.main_window_name), self.timer_str)
-	Ryzhide:open_resize_window(self.main_window_name, 120, 365, [[<title>]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[</title><table width="100%"><tr><td align="center"><h3>...</h3></td></tr></table>]], "click_close_button", "close_private_window")
+	Ryzhide:open_resize_window(self.main_window_name, 120, 420, [[<title>]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[</title><table width="100%"><tr><td align="center"><h3>...</h3></td></tr></table>]], "click_close_button", "close_private_window")
 	Ryzhide:private_request("private_status")
 end
 
 --called by the answers of all private modes (the server sends the json and calls this function)
 function Ryzhide:private_feedback()
+	if(self.private_loading == 1)then
+		Ryzhide:private_loading_done()
+	end
 	local data = Json.decode(self.private_feedback_json or "")
 	self.private_feedback_json = nil
 	if(data == nil)then
@@ -909,11 +1021,15 @@ function Ryzhide:private_feedback()
 	end
 
 	if(data.success == "private_status")then
+		if(self.game_is_now_running == 1)then
+			return
+		end
 		--keep the client in sync with the hide the player plays in now
 		self.hnh_id = tonumber(data.hnh_id) or 0
 		self.game_mode = data.game_mode or ""
 		self.gm_name = data.gm_name or ""
 		self.player_already_registerd = tonumber(data.registered) or 0
+		self.private_is_owner = tonumber(data.is_owner) or 0
 		self.game_is_full_loaded = 1
 		Ryzhide:build_private_window(data)
 		return
@@ -928,13 +1044,47 @@ function Ryzhide:private_feedback()
 	Ryzhide:private_request("private_status")
 end
 
+--row of icon buttons with their label below, buttons = {{id, icon, translation key[, text behind]}, ...}
+function Ryzhide:private_icon_row(buttons)
+	local icons = ""
+	local labels = ""
+	for _, button in ipairs(buttons) do
+		local label = Ryzhide:load_translation(button[3])..(button[4] or "")
+		--the tooltip sits in the style attribute, a ";" would end it
+		local tooltip = label:gsub(";", ",")
+		icons = icons..[[<td align="center" width="]]..math.floor(100 / #buttons)..[[%"><div id="]]..button[1]..[[" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_button_images;id:]]..button[1]..[[;bg:]]..button[2]..[[;tooltip:]]..tooltip..[[;lua_function:click_icon_private;'></div></td>]]
+		labels = labels..[[<td align="center"><a href="ah:lua&Ryzhide:click_icon_private(']]..button[1]..[[')">]]..label..[[</a></td>]]
+	end
+	return [[<tr><td align="center"><table width="100%" cellpadding="2" cellspacing="0"><tr>]]..icons..[[</tr><tr>]]..labels..[[</tr></table></td></tr>]]
+end
+
+function Ryzhide:click_icon_private(id)
+	if(id == "private_btn_create_normal")then
+		Ryzhide:private_create("normal")
+	elseif(id == "private_btn_create_event")then
+		Ryzhide:private_create("event")
+	elseif(id == "private_btn_start")then
+		Ryzhide:private_request("private_start")
+	elseif(id == "private_btn_close")then
+		Ryzhide:private_request("private_close")
+	elseif(id == "private_btn_leave")then
+		Ryzhide:private_request("private_leave")
+	elseif(id == "private_btn_refresh")then
+		Ryzhide:private_request("private_status")
+	elseif(id == "private_btn_copy")then
+		Ryzhide:copy_join_command(self.private_code or "")
+	elseif(id == "private_btn_copy_code")then
+		Ryzhide:copy_join_code(self.private_code or "")
+	end
+end
+
 function Ryzhide:build_private_window(data)
-	local window_width = 365
-	local window_height = 420
+	local window_width = 420
+	local window_height = 440
+	local auto_refresh = false
 	local html = [[<title>]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[</title>
 		<table width="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
-			<tr><td align="center"><font color="#FFAA00">]]..Ryzhide:load_translation("hide_n_hype_private_round_info")..[[</font></td></tr>
-			<tr><td>&nbsp;</td></tr>]]
+			<tr><td align="center"><font color="#FFAA00">]]..Ryzhide:load_translation("hide_n_hype_private_round_info")..[[</font></td></tr>]]
 
 	if(tonumber(data.in_private) == 1)then
 		local players = ""
@@ -944,47 +1094,57 @@ function Ryzhide:build_private_window(data)
 			end
 			players = players..name
 		end
+		self.private_code = data.code or ""
 		html = html..[[
 			<tr><td align="center"><h3>]]..(data.name or "")..[[</h3></td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_objects")..[[ <b>]]..(data.objects or "normal")..[[</b></td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_code")..[[</td></tr>
 			<tr><td align="center"><h2>]]..(data.code or "")..[[</h2></td></tr>
-			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_tell_code")..[[</td></tr>
-			<tr><td align="center"><a href="ah:lua&Ryzhide:copy_join_command(']]..(data.code or "")..[[')">]]..Ryzhide:load_translation("hide_n_hype_private_copy_command")..[[</a></td></tr>
+			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_tell_code")..[[</td></tr>]]
+		html = html..Ryzhide:private_icon_row({{"private_btn_copy", "r2ed_tool_copy.png", "hide_n_hype_private_copy_command"}, {"private_btn_copy_code", "r2ed_tool_paste.png", "hide_n_hype_private_copy_code"}})
+		html = html..[[
 			<tr><td>&nbsp;</td></tr>
-			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_players")..[[ (]]..#(data.players or {})..[[ / ]]..(data.needed or 2)..[[)</td></tr>
+			<tr><td align="center"><img src="tb_team.png" width="24" height="24"> ]]..Ryzhide:load_translation("hide_n_hype_private_players")..[[ (]]..#(data.players or {})..[[ / ]]..(data.needed or 2)..[[)</td></tr>
 			<tr><td align="center">]]..players..[[</td></tr>
 			<tr><td>&nbsp;</td></tr>]]
+		local buttons = {}
 		if(tonumber(data.is_owner) == 1)then
 			if(tonumber(data.can_start) == 1)then
-				html = html..[[<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_start')"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_start")..[[</h3></a></td></tr>]]
+				table.insert(buttons, {"private_btn_start", "mp3_button_play.png", "hide_n_hype_private_start"})
 			else
 				html = html..[[<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_round_running")..[[</td></tr>]]
 			end
-			html = html..[[<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_close')">]]..Ryzhide:load_translation("hide_n_hype_private_close")..[[</a></td></tr>]]
+			table.insert(buttons, {"private_btn_refresh", "r2ed_icon_rotate.png", "hide_n_hype_private_refresh"})
+			table.insert(buttons, {"private_btn_close", "TB_quit.png", "hide_n_hype_private_close"})
 		else
-			html = html..[[<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_wait_owner")..[[ ]]..(data.owner or "")..[[</td></tr>
-			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_leave')">]]..Ryzhide:load_translation("hide_n_hype_private_leave")..[[</a></td></tr>]]
+			html = html..[[<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_wait_owner")..[[ ]]..(data.owner or "")..[[</td></tr>]]
+			table.insert(buttons, {"private_btn_refresh", "r2ed_icon_rotate.png", "hide_n_hype_private_refresh"})
+			table.insert(buttons, {"private_btn_leave", "asc_exit.png", "hide_n_hype_private_leave"})
 		end
-		html = html..[[<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_status')">]]..Ryzhide:load_translation("hide_n_hype_private_refresh")..[[</a></td></tr>]]
-		window_height = 430
+		html = html..Ryzhide:private_icon_row(buttons)
+		window_height = 500
+		if(tonumber(data.can_start) == 1)then
+			html = html..[[<tr><td align="center"><font color="#AAAAAA">]]..Ryzhide:text_or("hide_n_hype_private_auto_refresh", "Refreshes automatically every 10 seconds.")..[[</font></td></tr>]]
+			window_height = window_height + 20
+			auto_refresh = true
+		end
 	else
 		--how many private rounds run on this shard, creating is not possible when the limit is reached
 		local private_count = tonumber(data.private_count) or 0
 		local private_max = tonumber(data.private_max) or 0
 		html = html..[[
+			<tr><td>&nbsp;</td></tr>
 			<tr><td align="center"><font color="#AAAAAA">]]..Ryzhide:text_or("hide_n_hype_private_count", "Private rounds on this shard:")..[[ ]]..private_count..[[ / ]]..private_max..[[</font></td></tr>]]
 		if(private_max > 0 and private_count >= private_max)then
 			html = html..[[
 			<tr><td align="center"><font color="orange">]]..Ryzhide:load_translation("hide_n_hype_private_limit_reached")..[[</font></td></tr>]]
 		else
 			--normal objects always, the objects of a running event only while it runs
-			html = html..[[
-			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_create','&objects=normal')"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_create_normal")..[[</h3></a></td></tr>]]
+			local buttons = {{"private_btn_create_normal", "ico_dodge.png", "hide_n_hype_private_create_normal"}}
 			if(data.event_type ~= nil and data.event_type ~= "")then
-				html = html..[[
-			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_create','&objects=event')"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_create_event")..[[ ]]..data.event_type..[[</h3></a></td></tr>]]
+				table.insert(buttons, {"private_btn_create_event", "ryzhome_add_item.png", "hide_n_hype_private_create_event", " "..data.event_type})
 			end
+			html = html..[[<tr><td>&nbsp;</td></tr>]]..Ryzhide:private_icon_row(buttons)
 		end
 		html = html..[[
 			<tr><td>&nbsp;</td></tr>
@@ -1002,12 +1162,25 @@ function Ryzhide:build_private_window(data)
 	html = html..[[</table>]]
 
 	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html, "click_close_button", "close_private_window")
+	if(auto_refresh)then
+		Ryzhide:private_auto_refresh_start()
+	else
+		Ryzhide:private_auto_refresh_stop()
+	end
 end
 
+--copies a short invitation, not the bare command: pasted into the chat it is sent as a message and not run as command
+--no translated text, the friends may play in another language
 function Ryzhide:copy_join_command(code)
+	Ryzhide:check_local_player_name()
 	local command = "/hidenhype join "..code
-	runAH(nil, "copy_to_clipboard", command)
+	runAH(nil, "copy_to_clipboard", "[Hide n Hype] "..self.player_name..": "..command)
 	Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_private_command_copied").." "..command)
+end
+
+function Ryzhide:copy_join_code(code)
+	runAH(nil, "copy_to_clipboard", code)
+	Ryzhide:display_message_to_player('info', 'AMB', Ryzhide:load_translation("hide_n_hype_private_code_copied").." "..code)
 end
 
 --###################################### END private rounds #######################################
@@ -1046,9 +1219,9 @@ function Ryzhide:chat_command(text)
 		Ryzhide:private_request("private_join", "&code="..string.upper(parameter))
 	elseif(command == "create")then
 		if(string.lower(parameter) == "event")then
-			Ryzhide:private_request("private_create", "&objects=event")
+			Ryzhide:private_create("event")
 		else
-			Ryzhide:private_request("private_create", "&objects=normal")
+			Ryzhide:private_create("normal")
 		end
 	elseif(command == "start")then
 		Ryzhide:private_request("private_start")
@@ -1075,7 +1248,7 @@ end
 --translated text, english fallback while the translation is missing
 function Ryzhide:text_or(key, fallback)
 	local text = i18n.get(key):toUtf8()
-	if(text == nil or text == "" or text == " ")then
+	if(text == nil or text == "" or text == " " or text:find("<NotExist:", 1, true))then
 		return fallback
 	end
 	return text
@@ -1096,9 +1269,9 @@ function Ryzhide:chat_help()
 		{"abort", "abort", "rejects the running invite"},
 		{"reload", "reload", "loads your Hide n Hype status again"},
 	}
-	Ryzhide:display_message_to_player('sys', 'SYS', Ryzhide:text_or("hide_n_hype_help_title", "Hide n Hype commands (/hidenhype or /hnh):"))
+	Ryzhide:display_message_to_player('sys', 'AROUND', Ryzhide:text_or("hide_n_hype_help_title", "Hide n Hype commands (/hidenhype or /hnh):"))
 	for _, entry in ipairs(commands) do
-		Ryzhide:display_message_to_player('sys', 'SYS', "/hnh "..entry[2].." - "..Ryzhide:text_or("hide_n_hype_help_"..entry[1], entry[3]))
+		Ryzhide:display_message_to_player('sys', 'AROUND', "/hnh "..entry[2].." - "..Ryzhide:text_or("hide_n_hype_help_"..entry[1], entry[3]))
 	end
 end
 
@@ -1107,12 +1280,15 @@ end
 
 --###################################### START build and load invite window #######################################
 function Ryzhide:build_invite_window()
-	local window_height = 420
+	--ryzom does not stretch the rows, so the height must fit the content (else the free space ends up at the bottom)
+	local window_height = 410
 	local window_width = 400
 
-	--room for the gm/private round info line
-	if(self.game_mode == "gm" or self.game_mode == "private")then
-		window_height = 450
+	--room for the gm/private round info line (the gm line with the name may wrap)
+	if(self.game_mode == "private")then
+		window_height = 440
+	elseif(self.game_mode == "gm")then
+		window_height = 460
 	end
 
 
@@ -1131,6 +1307,10 @@ function Ryzhide:build_invite_window()
 			</tr>
 
 			<tr>
+				<td colspan="4">&nbsp;</td>
+			</tr>
+
+			<tr>
 				<td>&nbsp;</td>
 				<td colspan="2" align="center">]]..Ryzhide:load_translation("hide_n_hype_currently_registerd_player_online")..[[</td>
 				<td>&nbsp;</td>
@@ -1140,6 +1320,10 @@ function Ryzhide:build_invite_window()
 				<td>&nbsp;</td>
 				<td colspan="2" align="center"><div id="player_online_text" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_text;id:player_online_text;font_size:18;text_color:]]..self.register_player_online_color..[[;hardtext:]]..self.register_player_online..[[;'></div></td>
 				<td>&nbsp;</td>
+			</tr>
+
+			<tr>
+				<td colspan="4">&nbsp;</td>
 			</tr>
 
 			<tr>
@@ -1244,6 +1428,8 @@ function Ryzhide:open_ask_for_join_window(current_round_time,current_round,hnh_i
 
 	self.current_round_id = tonumber(current_round)
 	self.game_is_now_running = 1
+	self.private_window_shown = 0
+	Ryzhide:private_auto_refresh_stop()
 
 	Ryzhide:display_debug_messanges("asked_join_id: "..current_round)
 	Ryzhide:display_debug_messanges("reject_invite_round_id: "..self.reject_invite_round_id)
@@ -1822,8 +2008,9 @@ function Ryzhide:pars_json_data_wait_for_most_wanted()
 end
 
 function Ryzhide:build_hunter_window()
-	local window_height = 210
-	local window_width = 365
+	--wide enough for the german texts in one line each
+	local window_height = 220
+	local window_width = 430
 
 
 	local html_hunter=""
@@ -1853,14 +2040,15 @@ function Ryzhide:build_object_table()
 	local split_type_data = Ryzhide:split(self.type_data, ",")
 	local out = {}
 	
-	out[#out+1] = '<table width="' .. tostring(table_width) .. '" border="' .. tostring(self.debug_window_border) .. '">'
+	out[#out+1] = '<table width="100%" border="' .. tostring(self.debug_window_border) .. '">'
 
 	for i, obj in ipairs(split_type_data) do
 		if (i % 2) == 1 then
 			out[#out+1] = '<tr>'
 		end
 
-		out[#out+1] = '<td align="center"><a href="ah:lua&Ryzhide:spawn_object(\'' .. obj .. '\')">' ..self:load_translation(obj) .. '</a></td>'
+		--fixed half width and no wrap, else ryzom gives the columns different widths and wraps the names
+		out[#out+1] = '<td align="center" width="50%" nowrap><a href="ah:lua&Ryzhide:spawn_object(\'' .. obj .. '\')">' ..self:load_translation(obj) .. '</a></td>'
 
 		if (i % 2) == 0 then
 			out[#out+1] = '</tr>'
@@ -1876,18 +2064,24 @@ function Ryzhide:build_object_table()
 end
 
 function Ryzhide:build_most_wanted_window()
-	local window_height = 550
-	local window_width = 415
-	local table_width = window_width + 15
+	--two objects per row, the window grows with the object list
+	local object_rows = math.ceil(#Ryzhide:split(self.type_data, ",") / 2)
+	local window_height = 430 + object_rows * 20
+	local window_width = 460
 
 
 	local html_most_wanted=""
 	html_most_wanted=[[<title>]]..Ryzhide:load_translation("hide_n_hype_go_and_hide_fast")..[[</title>
 			<table width="100%" height="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
 			<tr>
-				<td align="center" width="40"><img src="ico_time.png" width="40"></td>
-				<td align="center" width="180"><div id="hide_n_hype_timer_hunter" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_timer;id:hide_n_hype_timer_hunter;timer:]]..Ryzhide:convert_secound_to_string(self.duration_time_prepartion)..[[;'></div></td>
-				<td align="center" width="40"><img src="ico_time.png" width="40"></td>
+				<td align="center" colspan="3">
+					<!-- own symmetric table: the columns below are wider, the 40/180/40 cells would sit off center -->
+					<table width="100%" cellpadding="0" cellspacing="0"><tr>
+						<td align="center" width="40"><img src="ico_time.png" width="40"></td>
+						<td align="center"><div id="hide_n_hype_timer_hunter" class='ryzom-ui-grouptemplate' style='display:inline-block;template:hide_n_hype_timer;id:hide_n_hype_timer_hunter;timer:]]..Ryzhide:convert_secound_to_string(self.duration_time_prepartion)..[[;'></div></td>
+						<td align="center" width="40"><img src="ico_time.png" width="40"></td>
+					</tr></table>
+				</td>
 			</tr>
 
 			<tr>
@@ -1922,7 +2116,7 @@ function Ryzhide:build_most_wanted_window()
 
 			<tr>
 				<td align="center" colspan="3">
-					]]..Ryzhide:build_object_table(table_width)..[[
+					]]..Ryzhide:build_object_table()..[[
 				</td>
 			</tr>
 
@@ -2257,6 +2451,8 @@ function Ryzhide:pars_json_data_game_running_hunter()
 							Ryzhide:display_try_found_sucess(Ryzhide:load_translation("hide_n_hype_ok_you_found_most_wanted"))
 							Ryzhide:feedback_found_button("success")
 							self.manuell_action = 0
+							--the wait window replaced the running window, its timers are gone
+							return
 						end
 					else
 						Ryzhide:update_hint_data()
@@ -2618,7 +2814,7 @@ function Ryzhide:open_clain_reward_script()
 end
 
 function Ryzhide:build_finished_hunter(hunter_name,most_wanted_name)
-	local window_height = 330
+	local window_height = 330 + Ryzhide:no_reward_extra_height()
 	local window_width = 365
 
 
@@ -2653,7 +2849,7 @@ function Ryzhide:build_finished_hunter(hunter_name,most_wanted_name)
 end
 
 function Ryzhide:build_finished_most_wanted(hunter_name,most_wanted_name)
-	local window_height = 370
+	local window_height = 370 + Ryzhide:no_reward_extra_height()
 	local window_width = 380
 
 
@@ -2819,7 +3015,7 @@ function Ryzhide:build_most_wanted_not_found_hunter(most_wanted_name,pox_mostwan
 end
 
 function Ryzhide:build_most_wanted_not_found_most_wanted()
-	local window_height = 310
+	local window_height = 310 + Ryzhide:no_reward_extra_height()
 	local window_width = 365
 
 
@@ -2997,7 +3193,15 @@ function Ryzhide:abort_because_of(process_info_name,round_id,hnh_id)
 	Ryzhide:display_debug_messanges("reason: "..process_info_name.." round_id: "..round_id)
 	Ryzhide:display_debug_messanges("self: "..self.reject_invite_round_id.." round: "..round_id)
 
-	if(tonumber(self.reject_invite_round_id) == tonumber(round_id))then
+	--a player who skipped the invite (or was afk) hears nothing, only the owner of a private round always gets told
+	local skipped_invite = (tonumber(self.reject_invite_round_id) == tonumber(round_id))
+	if(skipped_invite and not (self.game_mode == "private" and self.private_is_owner == 1))then
+		return
+	end
+
+	--private rounds go back to the private window, the owner starts the next round there
+	if(self.game_mode == "private")then
+		Ryzhide:private_round_aborted(process_info_name)
 		return
 	end
 
@@ -3030,6 +3234,24 @@ function Ryzhide:abort_because_of(process_info_name,round_id,hnh_id)
 	if(process_info_name == "hide_stopped")then
 		Ryzhide:close_window(self.main_window_name, "")
 	end
+end
+
+local private_abort_texts = {
+	abort_not_enough_player = "hide_n_hype_abort_not_enough_player",
+	error_no_player_founds = "hide_n_hype_abort_not_enough_player",
+	error_no_hunter_found = "hide_n_hype_abort_not_enough_player",
+	error_no_most_wanted_found = "hide_n_hype_abort_not_enough_player",
+	most_wanted_moved = "hide_n_hype_most_wanted_moved_game_abort",
+	most_wanted_bad_position = "hide_n_hype_abort_most_wanted_bad_position",
+	most_wanted_no_object = "hide_n_hype_abort_most_wanted_no_object",
+	most_wanted_offline = "hide_n_hype_most_wanted_offline_game_abort",
+	hide_stopped = "hide_n_hype_ok_private_closed",
+}
+
+function Ryzhide:private_round_aborted(process_info_name)
+	local text_key = private_abort_texts[process_info_name] or "hide_n_hype_abort_not_enough_player"
+	Ryzhide:display_message_to_player('error', 'AMB', Ryzhide:load_translation(text_key))
+	Ryzhide:open_private_window()
 end
 
 function Ryzhide:most_wanted_offline(time_until_abort,round_id,hnh_id)
