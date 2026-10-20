@@ -161,5 +161,10 @@
 			</group>
 		</template>
 		
+	<command name="hidenhype" action="lua" params="Ryzhide:chat_command([[]])" />
+	<command name="hidenhype" action="lua" params="Ryzhide:chat_command([[+]])" />
+	<command name="hnh" action="lua" params="Ryzhide:chat_command([[]])" />
+	<command name="hnh" action="lua" params="Ryzhide:chat_command([[+]])" />
+
 	<lua file="hide_n_hype.lua" />
 </interface_config>
