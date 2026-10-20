@@ -59,6 +59,7 @@ if not Ryzhide then
 		player_name = "",
 		hnh_id = 0,
 		game_mode = "",
+		gm_name = "",
 
 		json_pull_counter = 0,
 		json_pull_counter_old = 0,
@@ -475,6 +476,9 @@ function Ryzhide:check_for_update_server_config(json_data_from_join)
 	if(json_data_from_join.game_mode ~= nil)then
 		self.game_mode = json_data_from_join.game_mode
 	end
+	if(json_data_from_join.gm_name ~= nil)then
+		self.gm_name = json_data_from_join.gm_name
+	end
 
 	if(self.type_data ~= json_data_from_join.type_data)then
 		self.type_data = json_data_from_join.type_data
@@ -551,6 +555,7 @@ function Ryzhide:pars_json_data_login()
 				self.duration_time_most_wanted_offline = tonumber(self.hide_n_hide_json_data.duration_time_most_wanted_offline)
 				self.type_data = self.hide_n_hide_json_data.type_data
 				self.game_mode = self.hide_n_hide_json_data.game_mode or ""
+				self.gm_name = self.hide_n_hide_json_data.gm_name or ""
 
 				Ryzhide:display_debug_messanges("ready: "..self.hide_n_hide_json_data.ready)
 				Ryzhide:display_debug_messanges("player_round_id: "..self.hide_n_hide_json_data.player_round_id)
@@ -841,12 +846,6 @@ function Ryzhide:build_invite_window()
 	local window_height = 420
 	local window_width = 400
 
-	--gm mode: the gm is the most wanted, all others can only hunt
-	if(self.game_mode == "gm")then
-		self.hunter_or_most_wanted_accept_active = "false"
-		self.most_wanted_accept_active = "false"
-	end
-
 
 	local html_invite_window=""
 	html_invite_window=[[<title>]]..Ryzhide:load_translation("hide_n_hype_a_new_hide_start_soon_window")..[[</title>
@@ -910,6 +909,7 @@ function Ryzhide:build_invite_window()
 			</table>]]
 
 	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_invite_window, "", "")
+	Ryzhide:apply_gm_locks()
 end
 
 
@@ -927,6 +927,35 @@ function Ryzhide:build_wait_start_window()
 			</table>]]
 
 	Ryzhide:open_resize_window(self.main_window_name, window_height, window_width, html_wait_for_start, "", "")
+end
+
+--gm mode: the gm is the most wanted and can not choose, the others can only hunt
+--locked buttons get a red cross and the reason as tooltip
+function Ryzhide:apply_gm_locks()
+	if(self.game_mode ~= "gm")then
+		return
+	end
+	Ryzhide:check_local_player_name()
+
+	local locked_buttons = {"mostwanted_accept", "hunter_or_mostwanted_accept"}
+	local reason = "hide_n_hype_gm_is_most_wanted"
+	if(self.player_name == self.gm_name)then
+		locked_buttons = {"hunte_accept", "hunter_or_mostwanted_accept", "mostwanted_accept", "reject_accept"}
+		reason = "hide_n_hype_you_are_the_gm_most_wanted"
+	end
+
+	local mainui = getUI(self.main_window_name)
+	for _, button_id in ipairs(locked_buttons) do
+		local button = mainui:find(button_id)
+		if(button ~= nil)then
+			--keep the mark of the own choice (the gm is in the most wanted list)
+			if(button:find("img1").texture ~= "rap_invited_no_dm.tga")then
+				button:find("img1").texture = "w_answer_16_cancel.tga"
+			end
+			button:find("ctrl").active = false
+			button:find("ctrl").tooltip = Ryzhide:load_translation(reason)
+		end
+	end
 end
 
 function Ryzhide:open_ask_for_join_window(current_round_time,current_round,hnh_id)
@@ -1254,6 +1283,7 @@ function Ryzhide:update_invite_window(json_data)
 	Ryzhide:check_and_pars_player_infos(json_data.hunter_and_most_wanted_list,"hunter_or_mostwanted_accept","hunter_or_mostwanted_text","hunter_or_mostwanted_display_status")
 	Ryzhide:check_and_pars_player_infos(json_data.most_wanted_list,"mostwanted_accept","mostwanted_text","mostwanted_display_status")
 	Ryzhide:check_and_pars_player_infos(json_data.reject_list,"reject_accept","reject_text","none")
+	Ryzhide:apply_gm_locks()
 end
 
 function Ryzhide:check_and_pars_player_infos(json_data,action_button,action_count_text,action_ok_image)
@@ -1267,7 +1297,7 @@ function Ryzhide:check_and_pars_player_infos(json_data,action_button,action_coun
 	if (type(json_data) == "boolean") then
 		local regist_hunter_img = mainui:find(action_button)
 		regist_hunter_img:find("img1").texture = ""
-		regist_hunter_img:find("ctrl").active = not (self.game_mode == "gm" and (action_button == "mostwanted_accept" or action_button == "hunter_or_mostwanted_accept"))
+		regist_hunter_img:find("ctrl").active = true
 
 		local regist_hunter_text = mainui:find(action_count_text)
 		if(action_count_text == "reject_text")then
@@ -1299,7 +1329,7 @@ function Ryzhide:check_and_pars_player_infos(json_data,action_button,action_coun
 		local regist_hunter_img = mainui:find(action_button)
 		regist_hunter_img:find("img1").texture = ""
 		--gm mode keeps the most wanted buttons locked
-		regist_hunter_img:find("ctrl").active = not (self.game_mode == "gm" and (action_button == "mostwanted_accept" or action_button == "hunter_or_mostwanted_accept"))
+		regist_hunter_img:find("ctrl").active = true
 	end
 
 	if(count_array == 0)then
