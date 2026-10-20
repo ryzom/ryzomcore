@@ -1054,7 +1054,37 @@ function Ryzhide:chat_command(text)
 	elseif(command == "debug")then
 		Ryzhide:set_debug_vars(parameter)
 	else
-		Ryzhide:display_message_to_player('sys', 'SYS', "/hidenhype register | unregister | private | join CODE | create [event] | start | leave | close | abort | reload")
+		Ryzhide:chat_help()
+	end
+end
+
+--translated text, english fallback while the translation is missing
+function Ryzhide:text_or(key, fallback)
+	local text = i18n.get(key):toUtf8()
+	if(text == nil or text == "" or text == " ")then
+		return fallback
+	end
+	return text
+end
+
+function Ryzhide:chat_help()
+	local commands = {
+		{"help", "help", "shows this list"},
+		{"register", "register", "register for Hide n Hype on this shard"},
+		{"unregister", "unregister", "unregister (also leaves your private round)"},
+		{"private", "private", "opens the window of the private rounds"},
+		{"create", "create", "creates a private round with normal objects, the join command is copied"},
+		{"create_event", "create event", "creates a private round with the objects of the running event"},
+		{"join", "join CODE", "joins the private round with this code"},
+		{"start", "start", "starts the next round of your private round (owner)"},
+		{"leave", "leave", "leaves your private round"},
+		{"close", "close", "closes your private round (owner)"},
+		{"abort", "abort", "rejects the running invite"},
+		{"reload", "reload", "loads your Hide n Hype status again"},
+	}
+	Ryzhide:display_message_to_player('sys', 'SYS', Ryzhide:text_or("hide_n_hype_help_title", "Hide n Hype commands (/hidenhype or /hnh):"))
+	for _, entry in ipairs(commands) do
+		Ryzhide:display_message_to_player('sys', 'SYS', "/hnh "..entry[2].." - "..Ryzhide:text_or("hide_n_hype_help_"..entry[1], entry[3]))
 	end
 end
 
