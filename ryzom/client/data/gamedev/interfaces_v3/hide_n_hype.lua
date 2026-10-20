@@ -1508,16 +1508,24 @@ function Ryzhide:pars_json_data_wait_for_most_wanted()
 
 	local mainui = getUI(self.main_window_name)
 
+	--when the time is over the window is replaced, so stop here (its elements do not exist anymore)
 	if(self.round_time_to_start ~= 0)then
 		local remaining_time = self.round_time_to_start - os.time()
 
 		if(remaining_time < 0)then
 			Ryzhide:wait_most_wanted_timer_stopped()
+			return
 		else
 			Ryzhide:update_timer("hide_n_hype_timer_hunter",remaining_time, self.duration_time_prepartion)
 		end
 	else
 		Ryzhide:wait_most_wanted_timer_stopped()
+		return
+	end
+
+	--the most wanted window can be closed or replaced by an abort message
+	if(self.player_type == "most_wanted" and mainui:find("ready_most_wanted_text") == nil)then
+		return
 	end
 
 	if(self.player_type == "most_wanted")then
