@@ -925,7 +925,7 @@ end
 
 function Ryzhide:build_private_window(data)
 	local window_width = 365
-	local window_height = 330
+	local window_height = 360
 	local html = [[<title>]]..Ryzhide:load_translation("hide_n_hype_private_rounds")..[[</title>
 		<table width="100%" cellpadding="2" cellspacing="2" border="]]..self.debug_window_border..[[">
 			<tr><td align="center"><font color="#FFAA00">]]..Ryzhide:load_translation("hide_n_hype_private_round_info")..[[</font></td></tr>
@@ -941,6 +941,7 @@ function Ryzhide:build_private_window(data)
 		end
 		html = html..[[
 			<tr><td align="center"><h3>]]..(data.name or "")..[[</h3></td></tr>
+			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_objects")..[[ <b>]]..(data.objects or "normal")..[[</b></td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_code")..[[</td></tr>
 			<tr><td align="center"><h2>]]..(data.code or "")..[[</h2></td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_tell_code")..[[</td></tr>
@@ -962,8 +963,14 @@ function Ryzhide:build_private_window(data)
 		html = html..[[<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_status')">]]..Ryzhide:load_translation("hide_n_hype_private_refresh")..[[</a></td></tr>]]
 		window_height = 400
 	else
+		--normal objects always, the objects of a running event only while it runs
 		html = html..[[
-			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_create')"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_create")..[[</h3></a></td></tr>
+			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_create','&objects=normal')"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_create_normal")..[[</h3></a></td></tr>]]
+		if(data.event_type ~= nil and data.event_type ~= "")then
+			html = html..[[
+			<tr><td align="center"><a href="ah:lua&Ryzhide:private_request('private_create','&objects=event')"><h3>]]..Ryzhide:load_translation("hide_n_hype_private_create_event")..[[ ]]..data.event_type..[[</h3></a></td></tr>]]
+		end
+		html = html..[[
 			<tr><td>&nbsp;</td></tr>
 			<tr><td align="center">]]..Ryzhide:load_translation("hide_n_hype_private_join_with_code")..[[</td></tr>
 			<tr><td align="center"><form action="https://app.ryzom.com/app_ryzhide/" method="GET"><input type="hidden" name="mode" value="private_join"><input type="text" name="code" size="8" maxlength="8"> <input type="submit" value="]]..Ryzhide:load_translation("hide_n_hype_private_join")..[["></form></td></tr>]]
