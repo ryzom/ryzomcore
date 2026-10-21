@@ -39,13 +39,24 @@ class PanoplyUIMixin:
 		_resolve_panoply_texture_name() (what file name to try loading) and
 		_ensure_live_panoply_texture() (what to try computing live if that
 		file turns out to be missing/stale)."""
-		if not self._panoply_selection or not base_name:
+		if not base_name:
 			return {}
 		available = self.search_paths_dialog.panoply_variants_for(base_name)
-		return {
+		dims = {
 			axis: value for axis, value in self._panoply_selection.items()
 			if value in available.get(axis, ())
 		}
+		# A colour axis never picked (the Panoply section only auto-defaults
+		# while it is drawn, and only for the main shape's own axes) falls
+		# back to this texture's first variant -- live_data alone ships only
+		# baked variants ("..._fy_u1.dds"), never the base texture, so
+		# without it the name asked for ("..._FY.tga") doesn't exist. Never
+		# "skin": forced by the Bind preview creature, or deliberately
+		# cleared by the user to get the base texture back.
+		for axis in panoply.AXES:
+			if axis != "skin" and axis not in self._panoply_selection and available.get(axis):
+				dims[axis] = available[axis][0]
+		return dims
 
 	def _resolve_panoply_texture_name(self, base_name):
 		"""`base_name` unchanged, unless _panoply_dims_for() finds one or
