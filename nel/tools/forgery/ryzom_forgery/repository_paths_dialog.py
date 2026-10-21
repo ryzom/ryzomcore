@@ -105,7 +105,7 @@ class RepositoryPathsDialog:
 				self._repository_paths_dialog = pfd.select_folder(f"Choose {repo_name}", configured.get(repo_name, ""))
 			imgui.same_line()
 			clone_tooltip = f"Clone {repo_name} repository"
-			path_exists = configured.get(repo_name) and Path(configured[repo_name]).exists()
+			path_exists = bool(configured.get(repo_name) and Path(configured[repo_name]).exists())
 			imgui.begin_disabled(path_exists)
 			if _icon_button(f"{fa_icons.ICON_FA_DOWNLOAD}##clone-{repo_name}", clone_tooltip):
 				# Open folder picker for target directory
