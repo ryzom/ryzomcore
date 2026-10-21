@@ -753,6 +753,11 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 			PVP_CLAN::TPVPClan clan = shop->ItemTrade->getPriceInfo().getFaction();
 			if ((clan >= PVP_CLAN::BeginClans) && (clan <= PVP_CLAN::EndClans))
 			{
+				if( shop->ShopUnit == 0 )
+				{
+					nlwarning("<CCharacterShoppingList::buyItem> ShopUnit ptr is NULL for a faction points item");
+					return;
+				}
 				factionPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
 				if (_Character->getFactionPoint(clan) < (factionPrice*quantity))
 				{

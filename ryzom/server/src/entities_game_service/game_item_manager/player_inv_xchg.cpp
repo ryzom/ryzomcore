@@ -70,10 +70,11 @@ void CExchangeView::setInterlocutorView(CExchangeView * interlocutorView)
 // ****************************************************************************
 bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exchangeSlot, uint32 quantity)
 {
-	nlassert(invSlot < getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getSlotCount());
-	nlassert(exchangeSlot < NbExchangeSlots);
 	CCharacter * c = getCharacter();
-	CGameItemPtr item = c->getInventory(INVENTORIES::TInventory(invSrc))->getItem(invSlot);
+	CInventoryPtr inv = c->getInventory(INVENTORIES::TInventory(invSrc));
+	if (inv == NULL || invSlot >= inv->getSlotCount() || exchangeSlot >= NbExchangeSlots)
+		return false;
+	CGameItemPtr item = inv->getItem(invSlot);
 	if (item == NULL)
 		return false;
 
@@ -187,7 +188,9 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 // ****************************************************************************
 bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 invSrc, uint32 invSlot, uint32 quantity)
 {
-	nlassert(invSlot < getCharacter()->getInventory(INVENTORIES::TInventory(invSrc))->getSlotCount());
+	CInventoryPtr inv = getCharacter()->getInventory(INVENTORIES::TInventory(invSrc));
+	if (inv == NULL || invSlot >= inv->getSlotCount())
+		return false;
 
 	bool foundSlot;
 	uint32 exchangeSlot;
