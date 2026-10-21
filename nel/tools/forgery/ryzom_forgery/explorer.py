@@ -667,13 +667,12 @@ class Explorer:
 		if imgui.is_item_clicked():
 			additive = self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control())
 			self._select(item, key, additive)
-			# Runs whatever the context menu's own first entry would --
-			# same commands, same order (CommandRegistry.commands_for_selection()
-			# already preserves registration order), just without making
-			# the user right-click then pick it explicitly.
-			commands = self.commands.commands_for_selection([item])
-			if commands:
-				commands[0].callback([item])
+			# Runs the extension's click action (first command registered for
+			# it, see CommandRegistry.click_command_for_selection()) -- not
+			# necessarily listed in the context menu.
+			command = self.commands.click_command_for_selection([item])
+			if command is not None:
+				command.callback([item])
 
 		if imgui.begin_popup_context_item(f"ctx-{key}"):
 			if key not in self._selection:

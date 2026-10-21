@@ -47,7 +47,11 @@ l'explorateur, sans que `explorer.py` ait besoin de connaître ces actions
  une sélection multiple (`explorer.py`).
 - `ObjectEditorApp` (`apps/object_editor.py`) enregistre des
  commandes concrètes sur `self.commands`, notamment
- `register_for_extension(".shape", "Load in viewer", self._on_load_command)`.
+ `register_for_extension(".shape", "Load in viewer", self._on_load_command, in_menu=False)`
+ (`in_menu=False` : absente du menu contextuel mais exécutée par le clic
+ gauche, via `click_command_for_selection()` qui ne prend jamais une
+ commande globale) et deux commandes globales « Copy file name » /
+ « Copy file path ».
 - `examples/smoke_test.py` montre l'usage minimal d'une commande
  globale : `self.commands.register_global("Print path", lambda items: print([str(i.path) for i in items]))`.
 

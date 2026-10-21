@@ -74,7 +74,7 @@ Trois tâches Panda3D tournent en continu indépendamment du dessin ImGui :
 - `_display_shape(shape_file)` (object_editor.py) : affecte `self.shape_file`, applique la rotation par défaut du shape (`CMeshBase::DefaultRotQuat`) au pivot (object_editor.py), appelle `_rebuild_geometry` puis `_auto_select_multi_bitmap_slot`.
 - `_reset_shape_state` (object_editor.py) : réinitialise tout l'état d'édition avant d'afficher un nouveau shape (matériaux, expansions UI, caches de textures...).
 - `_rebuild_geometry` (object_editor.py) : cœur du rendu — reconstruit `model_root`, itère `iter_render_passes` (shape_geometry.py, documenté ailleurs) pour construire un `GeomNode` par passe, applique les matériaux (`_apply_material`), construit l'état vent/skin si applicable, recadre la caméra sur la bbox, reconstruit les helpers de viewport et les shapes de référence.
-- Commandes contextuelles Explorer : `.shape` → "Load in viewer" (`_on_load_command`, object_editor.py), `.skel`/`.anim` → chargement en tant que squelette/animation de preview de skinning (object_editor.py). Depuis `on_selection_changed` (object_editor.py), une simple sélection ne charge plus rien automatiquement — seul le clic droit "Load..." le fait.
+- Explorer : le clic gauche exécute la première commande enregistrée pour l'extension (`.shape` → `_on_load_command`, `.skel`/`.anim` → chargement en tant que squelette/animation de preview de skinning, object_editor.py), enregistrées avec `in_menu=False` donc absentes du menu contextuel. Le menu contextuel ne contient que « Copy file name » et « Copy file path » (globales ; un fichier dans un `.bnp` donne `chemin_bnp @ nom`, un élément par ligne en sélection multiple).
 
 ### Rendu 3D et matériaux
 

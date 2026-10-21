@@ -619,11 +619,19 @@ class ObjectEditorApp(
 		# _save_session_state()/_restore_session_state()).
 		self._restore_session_state()
 
+	def _copy_file_names(self, items):
+		imgui.set_clipboard_text("\n".join(item.name for item in items))
+
+	def _copy_file_paths(self, items):
+		"""One per line; a file inside a .bnp is "<bnp path> @ <name>"."""
+		imgui.set_clipboard_text("\n".join(
+			str(item.path) if item.bnp_path is None else f"{item.bnp_path} @ {item.name}" for item in items))
+
 	def on_selection_changed(self, items):
-		# Selecting alone no longer auto-loads anything -- .shape used to,
-		# .skel/.anim never did, which read as inconsistent. Right-click ->
-		# "Load in viewer"/"Load as bone-preview skeleton"/"...animation" is
-		# now the one way to load any of them, matching across all three.
+		# Loading is the Explorer's left-click action (first command
+		# registered for the extension, not listed in the context menu --
+		# see CommandRegistry.click_command_for_selection()), run from
+		# Explorer._draw_leaf() rather than from here.
 		print(f"[object_editor] selection changed: {[item.name for item in items]}")
 
 	def _on_active_workspace_changed(self, workspace_dir):

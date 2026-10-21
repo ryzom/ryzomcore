@@ -6,6 +6,9 @@ from typing import Callable
 class Command:
 	label: str
 	callback: Callable[[list], None]
+	# False: never listed in the context menu, but still the extension's
+	# click action (see CommandRegistry.click_command_for_selection()).
+	in_menu: bool = True
 
 
 class CommandRegistry:
@@ -25,16 +28,26 @@ class CommandRegistry:
 	def register_global(self, label, callback):
 		self._global_commands.append(Command(label, callback))
 
-	def register_for_extension(self, extension, label, callback):
+	def register_for_extension(self, extension, label, callback, in_menu=True):
 		extension = extension.lower()
-		self._commands_by_extension.setdefault(extension, []).append(Command(label, callback))
+		self._commands_by_extension.setdefault(extension, []).append(Command(label, callback, in_menu))
 
-	def commands_for_selection(self, items: list) -> list[Command]:
-		commands = list(self._global_commands)
-
+	def _extension_commands_for_selection(self, items: list) -> list[Command]:
 		extensions = {item.suffix.lower() for item in items if item.suffix}
 		if len(extensions) == 1:
-			extension = next(iter(extensions))
-			commands.extend(self._commands_by_extension.get(extension, []))
+			return list(self._commands_by_extension.get(next(iter(extensions)), []))
+		return []
 
+	def commands_for_selection(self, items: list) -> list[Command]:
+		"""Commands listed in the context menu (global first, then the
+		selection's extension ones flagged `in_menu`)."""
+		commands = list(self._global_commands)
+		commands.extend(c for c in self._extension_commands_for_selection(items) if c.in_menu)
 		return commands
+
+	def click_command_for_selection(self, items: list):
+		"""What a plain left-click on `items` runs: the first command
+		registered for their extension (menu-listed or not), never a global
+		one -- or None."""
+		commands = self._extension_commands_for_selection(items)
+		return commands[0] if commands else None
