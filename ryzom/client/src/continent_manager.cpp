@@ -397,30 +397,22 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 	{
 		H_AUTO(InitRZWorldMapHandling)
 		CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
-		string foundMap = "";
 		string firstMap = "";
 		for (uint32 i = 0; i < pWS->Maps.size(); ++i)
 		{
 			if (pWS->Maps[i].ContinentName == name)
 			{
-				if (foundMap.empty())
-				{
-					firstMap =  pWS->Maps[i].Name;
-					foundMap = firstMap;
-				}
-				if (pos.x >= pWS->Maps[i].MinX
-					&& pos.x <= pWS->Maps[i].MaxX
-					&& pos.y >= pWS->Maps[i].MinY
-					&& pos.y <= pWS->Maps[i].MaxY)
-					foundMap = pWS->Maps[i].Name;
+				firstMap = pWS->Maps[i].Name;
+				break;
 			}
 		}
 
 		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 		if (pMap != NULL)
-			pMap->setMap(foundMap);
+			pMap->selectMapAfterTeleport(name, CVector2f((float) pos.x, (float) pos.y));
 		pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
-		if (pMap != NULL)
+		// no map for R2 continents
+		if (pMap != NULL && !firstMap.empty())
 			pMap->setMap(firstMap);
 	}
 

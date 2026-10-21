@@ -147,11 +147,14 @@ public:
 		REFLECT_STRING("texture", getMapTexture, dummySet);
 		REFLECT_LUA_METHOD("isIsland", luaIsIsland);
 		REFLECT_LUA_METHOD("reload", luaReload);
+		REFLECT_LUA_METHOD("showPos", luaShowPos);
 		REFLECT_STRING("map", getMap, setMap);
 	REFLECT_EXPORT_END
 
 	int luaReload(CLuaState &ls);
 	int luaIsIsland(CLuaState &ls);
+	// showPos(mapName, x, y [, zoomPercent]) : see showPos()
+	int luaShowPos(CLuaState &ls);
 
 public:
 	CGroupMap(const TCtorParam &param);
@@ -187,6 +190,11 @@ public:
 
 	// center the map on the player
 	void centerOnPlayer();
+	// go back to the map where the player is if another map is displayed, then center on the player
+	void showPlayerMap();
+	// show a world position: change the map if needed (empty name: current map if it shows the
+	// position, else the most detailed one), zoom (0 = whole map, 100 = max zoom) and center on it
+	bool showPos(const std::string &mapName, const NLMISC::CVector2f &pos, float zoomPercent);
 	// center current map on world coords (if not out of map bounds)
 	void centerOnWorldPos(const NLMISC::CVector2f &worldPos);
 
@@ -304,6 +312,9 @@ public:
 
 	bool isIsland() const { return _IsIsland; }
 
+	// select the map after a teleport or a continent change (depends on the map auto zoom option)
+	void selectMapAfterTeleport(const std::string &continent, const NLMISC::CVector2f &pos);
+
 	void updateClosestLandMarkMenu(const std::string &menu, const NLMISC::CVector2f &pos) const;
 
 	// show/hide all user landmarks
@@ -398,6 +409,8 @@ private:
 
 		bool				_IsIsland;  // true if current map is an island (island bitmap need not to be raised to the next
 									  // power of 2
+		SMap				*_AutoMap;	// last map chosen from the player position by the map auto zoom
+		std::string			_AutoMapContinent;	// continent of the last teleport, to switch the map on a continent change
 
 		TPolyButtonVect		_PolyButtons;
 
@@ -636,6 +649,18 @@ private:
 	void computeOffsets();
 
 	void updatePlayerPos();
+	// switch between continent and city map when the player crosses a city border (map auto zoom)
+	void updateAutoMap(const NLMISC::CVector2f &pos);
+	bool isAutoZoomEnabled() const;
+	// zoom between the whole map (0) and the max zoom (1) of the current map
+	void setZoomRatio(float ratio);
+	// saved zoom of a map (UI:SAVE:MAP:ZOOM:<map>, user scale * 1000, 0 if never saved)
+	static NLMISC::CCDBNodeLeaf *getMapZoomLeaf(const std::string &mapName, bool create);
+	// save the zoom of the current map / restore it after a map change (zoomIfUnknown: zoom on the player if never saved)
+	void saveMapZoom();
+	void restoreMapZoom(bool zoomIfUnknown);
+	// smallest (or largest) map of a continent that contains a world position, NULL if none
+	SMap *findMapAtPos(const std::string &continent, const NLMISC::CVector2f &pos, bool smallest) const;
 	// clamp offsets & change window size if necessary
 	//void fitWindow();
 	//
