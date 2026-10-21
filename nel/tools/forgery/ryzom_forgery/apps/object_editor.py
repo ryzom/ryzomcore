@@ -468,6 +468,7 @@ class ObjectEditorApp(
 		self.ryzom_paths_section = RyzomPathsSection(self.live_data_dialog)
 		self.live_data_index_dialog = LiveDataIndexDialog()
 		self.live_data_dialog.on_refresh_requested = self._force_rebuild_live_data_index
+		self.live_data_dialog.on_path_changed = lambda: self.search_paths_dialog.reload()
 		# import_watcher/workspace_sync/tex_dds_sync each keep their own
 		# conversion/sync logic and state, but share a single filesystem
 		# watch (self.workspace_watch, one Observer/one debounce handler for
@@ -604,12 +605,15 @@ class ObjectEditorApp(
 		self.taskMgr.add(self._update_bound_shape_rotation, "object-editor-bound-shape-rotation")
 		self.taskMgr.add(self._update_bind_anim_time, "object-editor-bind-anim-time")
 		self.taskMgr.add(self._update_assembled_creature_skin, "object-editor-assembled-creature-skin")
+		# Click actions (see CommandRegistry.click_command_for_selection()),
+		# not listed in the context menu.
 		self.commands.register_for_extension(
-			".skel", "Load as bone-preview skeleton", self._on_load_skeleton_command)
+			".skel", "Load as bone-preview skeleton", self._on_load_skeleton_command, in_menu=False)
 		self.commands.register_for_extension(
-			".anim", "Load as bone-preview animation", self._on_load_animation_command)
-
-		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
+			".anim", "Load as bone-preview animation", self._on_load_animation_command, in_menu=False)
+		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command, in_menu=False)
+		self.commands.register_global("Copy file name", self._copy_file_names)
+		self.commands.register_global("Copy file path", self._copy_file_paths)
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
 		self.explorer.extra_header = self.workspace_setup_dialog.draw_active_workspace_row
 

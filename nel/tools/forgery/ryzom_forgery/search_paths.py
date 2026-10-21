@@ -82,14 +82,23 @@ def _iter_bnp_entries(bnp_path: Path, bnp_table_cache: dict) -> Iterator[FoundEn
 		return
 	key = str(bnp_path)
 	cached = bnp_table_cache.get(key)
-	if cached is not None and cached.get("mtime") == stat.st_mtime and cached.get("size") == stat.st_size:
-		names = cached.get("names", [])
+	# Only a successful, non-empty listing is ever cached (an unreadable .bnp
+	# must not be remembered as "empty": it would stay invisible until its
+	# mtime/size changed); a cached empty listing from an older version is
+	# treated as a miss and re-read.
+	if (cached is not None and cached.get("mtime") == stat.st_mtime and cached.get("size") == stat.st_size
+			and cached.get("names")):
+		names = cached["names"]
 	else:
 		try:
 			names = [entry.name for entry in BnpReader(bnp_path).list()]
 		except BnpError:
-			names = []
-		bnp_table_cache[key] = {"mtime": stat.st_mtime, "size": stat.st_size, "names": names}
+			bnp_table_cache.pop(key, None)
+			return
+		if names:
+			bnp_table_cache[key] = {"mtime": stat.st_mtime, "size": stat.st_size, "names": names}
+		else:
+			bnp_table_cache.pop(key, None)
 	for name in names:
 		yield FoundEntry(name=name, fs_path=None, bnp_path=bnp_path)
 

@@ -471,8 +471,20 @@ class SearchPathsDialog:
 		bnp_table_cache = search_paths.load_bnp_table_cache()
 		cache = search_paths.load_scan_cache()
 		self._external_scan_caches = (bnp_table_cache, cache)
-		self._external_scan_gen = self._scan_dirs_incremental(self._dirs, bnp_table_cache, cache)
+		self._external_scan_gen = self._scan_dirs_incremental(self._external_scan_dirs(), bnp_table_cache, cache)
 		self._external_scan_start_time = time.monotonic()
+
+	def _external_scan_dirs(self):
+		"""The user's search paths plus Ryzom Live's data folder, injected
+		last (lowest priority) -- read from the current settings on every
+		scan and never saved into settings.search_paths, so changing
+		live_data_path can't leave the old folder active (same "injected, not
+		persisted" idea as _workspace_dir)."""
+		dirs = list(self._dirs)
+		live_data_path = app_settings.load().live_data_path
+		if live_data.is_valid_live_data_path(live_data_path):
+			dirs.append(SearchPathDir(path=live_data_path, recursive=True))
+		return dirs
 
 	def _advance_external_scan(self):
 		"""Called once per frame (see draw()): pumps the in-flight external
@@ -633,35 +645,21 @@ class SearchPathsDialog:
 				continue
 			key = found.cache_key()
 			cached = cache.get(key)
-			if cached is not None and cached.get("mtime") == mtime and cached.get("size") == size:
-				cached_bones = cached.get("bones")
-				if cached_bones is None:
-					# A cached *failure* (see the `else` branch below) --
-					# known permanently unparseable as of this
-					# (mtime, size), skip without re-attempting the
-					# parse. Distinct from a cache miss, where `cached`
-					# itself is None.
-					continue
-				bones = frozenset(cached_bones)
+			# Only successful parses are ever cached; a cached entry with no
+			# bones (written by an older version, which cached failures) is
+			# treated as a miss and re-parsed, never trusted.
+			if (cached is not None and cached.get("mtime") == mtime and cached.get("size") == size
+					and cached.get("bones") is not None):
+				bones = frozenset(cached["bones"])
 			else:
 				bones = self._parse_bones(found, is_skel)
-				# Cached either way, success or failure: a real .anim/
-				# .skel that this parser can't handle stays permanently
-				# unparseable (its mtime/size aren't going to change on
-				# their own) -- caching only successes meant a file
-				# pynel can't parse got a full, expensive, doomed parse
-				# attempt on *every single scan, forever* (this is what
-				# was actually behind the persistent per-frame stalls:
-				# real Ryzom .anim files using track classes pynel
-				# doesn't support yet, e.g. CTrackKeyFramerTCBQuat/
-				# BezierVector/BezierFloat/ConstBool -- a pynel gap, not
-				# a scanning bug; worth a separate look at some point).
+				if bones is None:
+					cache.pop(key, None)
+					continue
 				cache[key] = {
 					"mtime": mtime, "size": size, "type": "skel" if is_skel else "anim",
-					"bones": sorted(bones) if bones is not None else None,
+					"bones": sorted(bones),
 				}
-				if bones is None:
-					continue
 
 			if is_skel:
 				skeleton_entries[found.name] = found
@@ -839,28 +837,7 @@ class SearchPathsDialog:
 			found = search_paths.find_file(self._priority_entries_for(tuple(priority_paths)), name)
 			if found is not None:
 				return found
-		found = search_paths.find_file(self._file_entries, name)
-		if found is not None:
-			return found
-		return self._find_in_live_data(name)
-
-	def _find_in_live_data(self, name):
-		"""Last-resort fallback once neither the workspace nor the
-		user-configured search paths have `name` -- tried automatically,
-		never added to settings.search_paths itself (same "injected, not
-		persisted" idea as _workspace_dir, but lowest priority instead of
-		highest). Reuses _priority_entries_for()'s own one-shot, uncached,
-		in-memory-only index (search_paths.build_texture_index(), see its
-		own docstring) -- lazy: live_data_path is only ever walked the first
-		time this actually misses everywhere else, not at startup or on
-		every reload() (added 2026-09-18, Nuno: "la question c'est pas de
-		rescanner tout ça... quel intérêt ? juste que si un fichier n'est
-		pas trouvé dans les search paths, on le cherche dans le live_data")."""
-		settings = app_settings.load()
-		if not live_data.is_valid_live_data_path(settings.live_data_path):
-			return None
-		entries = self._priority_entries_for((settings.live_data_path,))
-		return search_paths.find_file(entries, name)
+		return search_paths.find_file(self._file_entries, name)
 
 	def _priority_entries_for(self, priority_paths):
 		cached = self._priority_entries_cache.get(priority_paths)
@@ -941,7 +918,7 @@ class SearchPathsDialog:
 
 		live_data_path = app_settings.load().live_data_path
 		if live_data.is_valid_live_data_path(live_data_path):
-			suffix = " (Ryzom Live data, last-resort fallback)"
+			suffix = " (Ryzom Live data, injected)"
 			available = imgui.get_content_region_avail().x - imgui.calc_text_size(suffix).x
 			imgui.text_disabled(_truncate_path_to_width(live_data_path, max(available, 20)) + suffix)
 			if imgui.is_item_hovered():

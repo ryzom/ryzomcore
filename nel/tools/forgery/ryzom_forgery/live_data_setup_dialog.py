@@ -38,6 +38,9 @@ class LiveDataSetupDialog:
 		# Settings tab's refresh button is clicked, to force-rebuild
 		# creature_full_index.py's cache regardless of sha1 staleness.
 		self.on_refresh_requested = None
+		# Called when live_data_path actually changes (the search paths scan
+		# injects it, see SearchPathsDialog._external_scan_dirs()).
+		self.on_path_changed = None
 
 		# Silent auto-fill: only attempted once, only when nothing is set yet
 		# -- a user who already confirmed/changed this manually is never
@@ -66,9 +69,12 @@ class LiveDataSetupDialog:
 		WorkspaceSetupDialog._save() -- avoids clobbering other components'
 		concurrent settings changes with a stale in-memory copy."""
 		fresh = app_settings.load()
+		changed = fresh.live_data_path != self._settings.live_data_path
 		fresh.live_data_path = self._settings.live_data_path
 		app_settings.save(fresh)
 		self._settings = fresh
+		if changed and self.on_path_changed is not None:
+			self.on_path_changed()
 
 	def draw(self):
 		"""Call once per frame from the host app (see object_editor.py's

@@ -126,15 +126,17 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  d'un seul `.skel`/`.anim` — seuls les noms d'os sont gardés en mémoire pour
  tous les fichiers scannés, pas les données complètes.
 - `find_file(name, priority_paths=None)` (`search_paths_dialog.py`) : résout
- un nom de fichier contre l'index scanné (workspace + search paths). Si rien
- n'est trouvé, retombe automatiquement sur `_find_in_live_data(name)` --
- dernier recours, `live_data_path` n'est jamais ajouté à `settings.search_paths`.
-- `_find_in_live_data(name)` (`search_paths_dialog.py`) : index "one-shot"
- non persistant de `live_data_path` (même mécanisme que `priority_paths` --
- `_priority_entries_for`/`search_paths.build_texture_index`), construit
- paresseusement seulement au premier échec réel de résolution, jamais au
- démarrage ni à chaque `reload`. `None` si `live_data_path` n'est pas
- configuré/valide.
+ un nom de fichier contre l'index scanné (workspace + search paths + `live_data`).
+- `_external_scan_dirs()` (`search_paths_dialog.py`) : les search paths de
+ l'utilisateur **plus le dossier `live_data_path` injecté en dernier** (priorité
+ la plus basse), relu depuis les settings à chaque scan. Jamais écrit dans
+ `settings.search_paths` : changer `live_data_path` ne laisse donc pas l'ancien
+ dossier actif (`LiveDataSetupDialog.on_path_changed` relance le scan). Comme il
+ est dans le scan, `live_data` alimente aussi les index squelettes/animations
+ (Bind preview, Skinning preview), pas seulement `find_file`.
+- Caches de scan : seuls les résultats réussis sont écrits (parse `.skel`/`.anim`
+ et listing d'un `.bnp`). Un échec n'est jamais mémorisé ; une entrée en échec/vide
+ déjà en cache est ignorée et recalculée.
 - `panoply_variants_for(base_texture_name)` (`search_paths_dialog.py`) :
  variantes panoply pour une texture de base donnée.
 - `_load_ryzom_data_panoply_variants` (`search_paths_dialog.py`) : lit
