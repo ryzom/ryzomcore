@@ -451,6 +451,7 @@ class ObjectEditorApp(
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.search_paths_dialog = SearchPathsDialog()
+		self.search_paths_dialog.sysinfo = self.sysinfo
 		# Wexplorer (Explorer.pinned_folders, see _on_active_workspace_changed())
 		# covers the whole active workspace already watched by search_paths_dialog
 		# -- piggybacks on that same watch instead of a 3rd Observer, so any

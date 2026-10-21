@@ -48,6 +48,8 @@ _PANOPLY_FILE_NAME = "panoply_files.txt"
 # with rendering instead of running flat-out alone), which is the trade-off
 # asked for: never block the UI, however long the scan takes.
 _SCAN_FRAME_TIME_BUDGET = 0.002
+_EXTERNAL_SCAN_TASK_ID = "search_paths_scan"
+_WORKSPACE_SCAN_TASK_ID = "workspace_scan"
 # Bulk operations (extracting a .bnp, a git checkout, a texture batch export
 # from another tool...) fire dozens of individual FS events in a burst --
 # without debouncing, each one would kick off its own full rescan.
@@ -270,6 +272,9 @@ class SearchPathsDialog:
 		# tuple every call) rather than rescanning on every single find_file()
 		# call.
 		self._priority_entries_cache = {}
+		# SysInfoBar of the host app (set by it right after construction), so a
+		# running scan shows up in the bottom status bar -- None: no reporting.
+		self.sysinfo = None
 
 		# The active workspace's own folder, always searched first -- see
 		# set_workspace_dir(); kept separate from self._dirs (recursive,
@@ -499,8 +504,9 @@ class SearchPathsDialog:
 		deadline = slice_start + _SCAN_FRAME_TIME_BUDGET
 		try:
 			while time.monotonic() < deadline:
-				next(self._external_scan_gen)
+				progress = next(self._external_scan_gen)
 		except StopIteration as stop:
+			self._clear_scan_progress(_EXTERNAL_SCAN_TASK_ID)
 			self._external_result = stop.value
 			bnp_table_cache, cache = self._external_scan_caches
 			# Persisting the caches (mainly _save_external_index_cache(), which
@@ -531,6 +537,8 @@ class SearchPathsDialog:
 			self._scanning_external = False
 			self._external_scan_gen = None
 			self._external_scan_caches = None
+		else:
+			self._report_scan_progress(_EXTERNAL_SCAN_TASK_ID, "Scanning search paths", progress)
 
 	@staticmethod
 	def _save_external_scan_caches(bnp_table_cache, cache, result):
@@ -567,8 +575,9 @@ class SearchPathsDialog:
 		deadline = time.monotonic() + _SCAN_FRAME_TIME_BUDGET
 		try:
 			while time.monotonic() < deadline:
-				next(self._workspace_scan_gen)
+				progress = next(self._workspace_scan_gen)
 		except StopIteration as stop:
+			self._clear_scan_progress(_WORKSPACE_SCAN_TASK_ID)
 			self._workspace_result = stop.value
 			bnp_table_cache, cache = self._workspace_scan_caches
 			search_paths.save_scan_cache(cache)
@@ -579,6 +588,24 @@ class SearchPathsDialog:
 			self._scanning_workspace = False
 			self._workspace_scan_gen = None
 			self._workspace_scan_caches = None
+		else:
+			self._report_scan_progress(_WORKSPACE_SCAN_TASK_ID, "Scanning workspace", progress)
+
+	def _report_scan_progress(self, task_id, label, progress):
+		"""Status bar line for a running scan: `progress` is the generator's
+		(done, expected_total or None) -- no bar while still listing files
+		(total unknown), a real fraction once parsing starts."""
+		if self.sysinfo is None:
+			return
+		done, expected_total = progress
+		if expected_total is None:
+			self.sysinfo.report_task(task_id, f"{label}: listing files... {done}")
+		else:
+			self.sysinfo.report_task(task_id, f"{label}... {done}/{expected_total}", done / max(expected_total, 1))
+
+	def _clear_scan_progress(self, task_id):
+		if self.sysinfo is not None:
+			self.sysinfo.clear_task(task_id)
 
 	def _scan_dirs_incremental(self, dirs, bnp_table_cache, cache, exclude=None):
 		"""Pure scan of exactly `dirs` -- no side effects on `self` (the
@@ -614,16 +641,20 @@ class SearchPathsDialog:
 		panoply_variants = {}
 		total = 0
 
-		entries = search_paths.iter_all_entries(dirs, bnp_table_cache, exclude=exclude)
-		while True:
+		# Phase 1: list every entry first (cheap -- no parsing, .bnp tables are
+		# cached) so phase 2 knows the real total and the status bar can show
+		# an actual fraction. Each yield carries (done, expected_total or
+		# None) -- see _report_scan_progress().
+		listed = []
+		for found in search_paths.iter_all_entries(dirs, bnp_table_cache, exclude=exclude):
+			listed.append(found)
+			yield len(listed), None
+
+		for found in listed:
 			# Unconditional, right at the top of the loop body -- every
 			# iteration yields exactly once this way regardless of which of
 			# the several `continue`s below it takes.
-			yield
-			try:
-				found = next(entries)
-			except StopIteration:
-				break
+			yield total, len(listed)
 
 			total += 1
 			lower_name = found.name.lower()

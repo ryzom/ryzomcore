@@ -303,6 +303,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# Settings surface isn't needed here -- it's the same search paths
 		# already configured for the whole suite (see explorer_root above).
 		self.search_paths_dialog = SearchPathsDialog()
+		self.search_paths_dialog.sysinfo = self.sysinfo
 		# Two independent visibility roots (Nuno 2026-09-13: "il faudrait
 		# séparer l'affichage des 2 [...] 2 .bam différents, 2 boutons
 		# différents") -- zone-owned .ig (per-region bundles) and the

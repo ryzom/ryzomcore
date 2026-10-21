@@ -11,6 +11,9 @@ def _version_label():
 	return f"Ryzom Forgery v{version} -- Ulukyn, Claude@anthropic"
 
 
+_TASK_BAR_WIDTH = 220
+
+
 class SysInfoBar:
 	"""Standard bottom status bar for Ryzom Forgery tool apps.
 
@@ -30,6 +33,10 @@ class SysInfoBar:
 		# cursor readout would fight with that instead of coexisting with
 		# it. Drawn right after FPS, `status` (if any) drawn after this.
 		self.cursor_info = ""
+		# {task_id: (label, fraction or None)}, insertion order = queue order
+		# (project-todos/forgery/unified_background_task_status_bar.md) --
+		# only the oldest still-active task is drawn, centered.
+		self._tasks = {}
 		# Computed once -- importlib.metadata.version() reads install
 		# metadata off disk, and the running version can't change mid-session.
 		self._version_label = _version_label()
@@ -40,6 +47,15 @@ class SysInfoBar:
 
 	def set_cursor_info(self, text: str):
 		self.cursor_info = text
+
+	def report_task(self, task_id: str, label: str, fraction=None):
+		"""Called every frame a background task is active (main thread only,
+		never from the worker thread). `fraction` is 0..1, or None when
+		unknown: the label is then drawn alone, without a bar."""
+		self._tasks[task_id] = (label, fraction)
+
+	def clear_task(self, task_id: str):
+		self._tasks.pop(task_id, None)
 
 	def draw(self):
 		framerate = imgui.get_io().framerate
@@ -56,6 +72,19 @@ class SysInfoBar:
 				imgui.text_colored(self.status_color, self.status)
 			else:
 				imgui.text(self.status)
+
+		if self._tasks:
+			label, fraction = next(iter(self._tasks.values()))
+			segment_width = imgui.calc_text_size(label).x
+			if fraction is not None:
+				segment_width += imgui.get_style().item_spacing.x + _TASK_BAR_WIDTH
+			centered_x = (imgui.get_window_width() - segment_width) / 2
+			# Never overlap what is already drawn on the left.
+			imgui.same_line(max(centered_x, imgui.get_cursor_pos_x() + 20))
+			imgui.text(label)
+			if fraction is not None:
+				imgui.same_line()
+				imgui.progress_bar(max(0.0, min(1.0, fraction)), (_TASK_BAR_WIDTH, 0))
 
 		label_width = imgui.calc_text_size(self._version_label).x
 		imgui.same_line(imgui.get_window_width() - label_width - imgui.get_style().item_spacing.x)

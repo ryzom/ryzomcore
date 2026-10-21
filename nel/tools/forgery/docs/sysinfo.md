@@ -22,6 +22,14 @@ partie de l'app peut mettre à jour, et le numéro de version affiché à droite
  en cours de session, sysinfo.py).
   - `set_status(text, color=None)` (sysinfo.py) — met à jour la ligne de
  statut libre, avec une couleur optionnelle `(r, g, b, a)`.
+  - `report_task(task_id, label, fraction=None)` / `clear_task(task_id)`
+ (sysinfo.py) — tâches de fond affichées au centre de la barre. `report_task`
+ est appelé à chaque frame où la tâche est active (thread principal
+ uniquement, jamais depuis le thread de fond) ; `fraction` 0..1, ou `None`
+ (inconnue) : le libellé seul est alors affiché, sans barre. Une seule tâche
+ est dessinée à la fois, la plus ancienne encore active (ordre d'insertion du
+ dict). Branché pour l'instant sur le scan des search paths et du workspace
+ (`SearchPathsDialog.sysinfo`, posé par l'app hôte) : le scan liste d'abord tous les fichiers (libellé seul « listing files... N »), puis parse avec une vraie barre « Scanning search paths... fait/total ».
   - `draw` (sysinfo.py) — dessine, sur une seule ligne ImGui : FPS +
  ms/frame (calculé depuis `imgui.get_io.framerate`), puis le texte de
  statut (coloré ou non), puis le libellé de version aligné à droite (
