@@ -19,6 +19,7 @@ from panda3d.core import ClockObject, GeomNode, InternalName, NodePath, Point3, 
 
 from pynel.ryzom_shape import Mesh, MeshMRMSkinned, WindTreeParams
 
+from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom, shape_stats
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_grid_geom,
@@ -968,6 +969,25 @@ class ViewportTransformMixin:
 			if _icon_button(icon, "Link X/Y/Z: editing one axis sets the other two (unlocked) axes to match",
 			                linked, square=True, active_color=_LOCKED_COLOR):
 				self._scale_axes_linked = not linked
+
+		if prop == "rotation":
+			# Orbit axis of the 3D view (navcube included): Z (Ryzom) or Y
+			# (most other 3D tools). Applied immediately, saved in settings.
+			imgui.same_line()
+			orbit_y_up = self.orbit_camera.y_up
+			if _icon_button(fa_icons.ICON_FA_ARROWS_ROTATE,
+			                "Orbit the view around Y instead of Z (Y-up, as in most 3D tools)",
+			                orbit_y_up, square=True, active_color=_LOCKED_COLOR):
+				orbit_y_up = not orbit_y_up
+				self.orbit_camera.y_up = orbit_y_up
+				fresh = app_settings.load()
+				fresh.orbit_y_up = orbit_y_up
+				app_settings.save(fresh)
+		elif prop == "position":
+			# Empty slot where the other rows have their extra toggle, so the
+			# reset buttons line up in one column.
+			imgui.same_line()
+			imgui.dummy((imgui.get_frame_height(), imgui.get_frame_height()))
 
 		imgui.same_line()
 		if _icon_button(fa_icons.ICON_FA_ARROW_ROTATE_LEFT, f"Reset {label.lower()} (current reference frame only)", square=True):

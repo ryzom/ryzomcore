@@ -158,17 +158,6 @@ def _draw_rotate_icon(draw_list, center, radius, color, clockwise):
 	draw_list.add_triangle_filled(tip, p1, p2, color)
 
 
-def _orbit_offset(heading, pitch, distance):
-	"""Same offset formula as OrbitCamera._update_camera_pos(), so the
-	gizmo's fixed-distance camera turns in lockstep with the real one."""
-	h_rad, p_rad = radians(heading), radians(pitch)
-	return Vec3(
-		distance * cos(p_rad) * sin(h_rad),
-		-distance * cos(p_rad) * cos(h_rad),
-		distance * sin(p_rad),
-	)
-
-
 class NavigationCube:
 	"""Small clickable 3D orientation gizmo rendered in its own DisplayRegion
 	in the bottom-right corner, plus the reset/rotate-90 buttons that go with
@@ -363,8 +352,9 @@ class NavigationCube:
 	def _update(self, task):
 		self._layout()
 
-		heading, pitch = self.orbit_camera.heading, self.orbit_camera.pitch
-		self.cam_np.set_pos(_orbit_offset(heading, pitch, _CAM_DISTANCE))
+		# Same offset as the real camera's (OrbitCamera.world_offset()), so the
+		# gizmo's fixed-distance camera turns in lockstep with it.
+		self.cam_np.set_pos(self.orbit_camera.world_offset(_CAM_DISTANCE))
 		# Mirror the main camera's up_hint too, not just heading/pitch, so the
 		# two can't silently disagree if up_hint is ever driven away from
 		# world Z by something other than snap_to_axis()/reset().

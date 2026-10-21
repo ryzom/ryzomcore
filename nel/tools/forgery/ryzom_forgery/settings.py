@@ -193,6 +193,9 @@ class Settings:
 	# halves each patch's tessellation grid; False (normal quality) by
 	# default.
 	landscape_low_poly: bool = False
+	# Patina's orbit camera turns around world Y instead of Z (the Y-up
+	# convention of most 3D tools, vs Ryzom's Z-up) -- see OrbitCamera.y_up.
+	orbit_y_up: bool = False
 
 
 _load_cache: Optional[Settings] = None
@@ -252,6 +255,7 @@ def load() -> Settings:
 	settings.live_data_path = data.get("live_data_path") or None
 	settings.landscape_editor_mode = data.get("landscape_editor_mode") or None
 	settings.landscape_low_poly = bool(data.get("landscape_low_poly", False))
+	settings.orbit_y_up = bool(data.get("orbit_y_up", False))
 	settings.panel_states = {
 		str(name): PanelState(open=bool(entry.get("open", False)), x=float(entry.get("x", 0.0)), y=float(entry.get("y", 0.0)))
 		for name, entry in data.get("panel_states", {}).items() if isinstance(entry, dict)
@@ -326,6 +330,7 @@ def save(settings: Settings) -> None:
 	doc["panel_states"] = {name: asdict(state) for name, state in settings.panel_states.items()}
 	doc["landscape_zone_stage_colors"] = dict(settings.landscape_zone_stage_colors)
 	doc["landscape_low_poly"] = settings.landscape_low_poly
+	doc["orbit_y_up"] = settings.orbit_y_up
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]

@@ -58,6 +58,10 @@ class OrbitCamera:
 		# world Z axis (giving the usual orbit-camera behaviour, always as
 		# level as the current pitch allows).
 		self.up_hint = Vec3(0, 0, 1)
+		# False: heading turns around world Z (NeL/Ryzom convention). True:
+		# heading turns around world Y instead (the convention of most 3D
+		# tools) -- see the y_up property, which is what callers set.
+		self._y_up = False
 
 		self.min_distance = 0.5
 		self.max_distance = 2000.0
@@ -97,6 +101,50 @@ class OrbitCamera:
 		self.app.taskMgr.add(self._update, "orbit-camera-update")
 
 		self._update_camera_pos()
+
+	@property
+	def y_up(self):
+		return self._y_up
+
+	@y_up.setter
+	def y_up(self, value):
+		value = bool(value)
+		if value == self._y_up:
+			return
+		self._y_up = value
+		self._anim = None
+		self.up_hint = self.world_up()
+		self._update_camera_pos()
+
+	def world_up(self):
+		return Vec3(0, 1, 0) if self._y_up else Vec3(0, 0, 1)
+
+	def _orbit_to_world(self, vec):
+		"""heading/pitch/offset math (and AXIS_VIEWS) is always done in the
+		Z-up convention; in y_up mode this maps it onto the world with a
+		proper rotation (not a mirror): orbit +Z -> world +Y, orbit -Y
+		(the default front camera position) -> world +Z."""
+		if self._y_up:
+			return Vec3(vec.x, vec.z, -vec.y)
+		return Vec3(vec)
+
+	def _world_to_orbit(self, vec):
+		if self._y_up:
+			return Vec3(vec.x, -vec.z, vec.y)
+		return Vec3(vec)
+
+	def world_offset(self, distance=None):
+		"""World-space camera position relative to the target, for the
+		current heading/pitch (navcube.py reuses this so its gizmo camera
+		turns in lockstep with the real one)."""
+		if distance is None:
+			distance = self.distance
+		h_rad, p_rad = radians(self.heading), radians(self.pitch)
+		return self._orbit_to_world(Vec3(
+			distance * cos(p_rad) * sin(h_rad),
+			-distance * cos(p_rad) * cos(h_rad),
+			distance * sin(p_rad),
+		))
 
 	def _mouse_captured_by_ui(self):
 		imgui = getattr(self.app, "imgui", None)
@@ -151,12 +199,7 @@ class OrbitCamera:
 		lerps, which don't correspond to any single real rotation and were
 		visibly animating through the wrong intermediate orientations even
 		though they still landed on the correct final one."""
-		h_rad, p_rad = radians(self.heading), radians(self.pitch)
-		start_offset = Vec3(
-			self.distance * cos(p_rad) * sin(h_rad),
-			-self.distance * cos(p_rad) * cos(h_rad),
-			self.distance * sin(p_rad),
-		)
+		start_offset = self.world_offset()
 		# setFromAxisAngle() (_advance_anim()) asserts its axis is unit
 		# length -- `axis` here is usually self.up_hint or a live getRight(),
 		# already unit in principle, but re-normalize defensively rather
@@ -188,7 +231,7 @@ class OrbitCamera:
 			eased = t
 			rotation = Quat()
 			rotation.setFromAxisAngle(anim["angle"] * eased, anim["axis"])
-			offset = rotation.xform(anim["start_offset"])
+			offset = self._world_to_orbit(rotation.xform(anim["start_offset"]))
 			self.pitch = degrees(asin(max(-1.0, min(1.0, offset.z / self.distance))))
 			self.heading = degrees(atan2(offset.x, -offset.y))
 			up = rotation.xform(anim["start_up"])
@@ -377,7 +420,7 @@ class OrbitCamera:
 		self.target = Point3(self._default_target)
 		self.distance = self._default_distance
 		self.heading, self.pitch = AXIS_VIEWS["-y"]
-		self.up_hint = Vec3(0, 0, 1)
+		self.up_hint = self.world_up()
 		self._update_camera_pos()
 
 	def animate_to_orientation(self, heading, pitch):
@@ -389,12 +432,20 @@ class OrbitCamera:
 		landscape_editor__2d_3d_toggle.md -- Nuno 2026-09-11: the 3D->2D
 		snap already animates nicely via snap_to_axis(), 2D->3D should feel
 		the same way instead of jumping instantly)."""
-		self._start_anim(heading, pitch, Vec3(0, 0, 1))
+		self._start_anim(heading, pitch, self.world_up())
 
 	def snap_to_axis(self, axis):
 		"""Snap the view to look straight along one of the 6 world axes
 		(+x/-x/+y/-y/+z/-z), keeping the current target/distance. Animated,
-		like step_to_face()/roll_step() (see _start_anim())."""
+		like step_to_face()/roll_step() (see _start_anim()). `axis` is a
+		WORLD axis: in y_up mode it is mapped back to the Z-up orbit
+		convention AXIS_VIEWS is written in (world +Y is the "top" view)."""
+		if self._y_up:
+			world_vec = Vec3(0, 0, 0)
+			world_vec["xyz".index(axis[1])] = 1 if axis[0] == "+" else -1
+			orbit_vec = self._world_to_orbit(world_vec)
+			index = max(range(3), key=lambda i: abs(orbit_vec[i]))
+			axis = ("+" if orbit_vec[index] > 0 else "-") + "xyz"[index]
 		self.animate_to_orientation(*AXIS_VIEWS[axis])
 
 	def step_to_face(self, direction):
@@ -464,25 +515,12 @@ class OrbitCamera:
 		if self._anim is not None:
 			return
 
-		h_rad, p_rad = radians(self.heading), radians(self.pitch)
-		offset = Vec3(
-			self.distance * cos(p_rad) * sin(h_rad),
-			-self.distance * cos(p_rad) * cos(h_rad),
-			self.distance * sin(p_rad),
-		)
-		forward = -offset
+		forward = -self.world_offset()
 		forward.normalize()
 		self._start_axis_anim(forward, degrees_step * direction)
 
 	def _update_camera_pos(self):
-		h_rad = radians(self.heading)
-		p_rad = radians(self.pitch)
-		offset = (
-			self.distance * cos(p_rad) * sin(h_rad),
-			-self.distance * cos(p_rad) * cos(h_rad),
-			self.distance * sin(p_rad),
-		)
-		self.app.camera.setPos(self.target + offset)
+		self.app.camera.setPos(self.target + self.world_offset())
 		self.app.camera.lookAt(self.target, self.up_hint)
 
 

@@ -415,6 +415,7 @@ class ObjectEditorApp(
 		self._scale_axes_linked = False
 
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
+		self.orbit_camera.y_up = app_settings.load().orbit_y_up
 		self.object_manipulator = ObjectManipulator(self, self._object_pivot, self.orbit_camera)
 		self.nav_cube = NavigationCube(self, self.orbit_camera, self._object_pivot)
 
