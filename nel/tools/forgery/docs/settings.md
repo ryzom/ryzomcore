@@ -87,6 +87,11 @@ shapes, compatibilité `.skel`/`.anim`, panoplies).
  délibérément : rescaler le style entier de façon répétée pendant qu'on
  bouge un slider a provoqué de vrais crashs en test réel (voir
  `docs/app.md`).
+- `orbit_y_up: bool` (`settings.py`, défaut `False`) : la caméra orbitale de
+ Patina tourne autour de l'axe Y du monde (convention Y-up de la plupart des
+ outils 3D) au lieu de Z (Ryzom). Relue au démarrage par `object_editor.py`
+ (`orbit_camera.y_up = ...`), réécrite par le bouton de la ligne Rotation du
+ panneau Pos/Rot/Scl. Atyscape ne la lit pas (reste en Z-up).
 - `load -> Settings` (`settings.py`) : parse
  `config_dir/"settings.toml"` avec `tomlkit`. Renvoie un `Settings`
  par défaut (valeurs vierges) si le fichier est absent ou invalide

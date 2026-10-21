@@ -28,9 +28,9 @@ principal (navcube.py).
  à la main (arc + triangle) car aucun glyphe Font Awesome (FA4 ou FA6) ne
  distingue rotation horaire/anti-horaire (les glyphes `rotate*` sont
  génériques, non directionnels).
-- `_orbit_offset(heading, pitch, distance)` (navcube.py) — même formule
- que `OrbitCamera._update_camera_pos`, pour que la caméra du gizmo
- tourne en lock-step avec la vraie.
+- Le gizmo n'a plus de formule d'offset propre : sa caméra utilise
+ `OrbitCamera.world_offset(_CAM_DISTANCE)` (camera.py), la même que la vraie
+ caméra, donc il suit aussi le mode « Orbit around Y » (`y_up`).
 - `class NavigationCube` (navcube.py) :
   - `__init__` (navcube.py) : construit les 6 faces + collisions du cube
  externe, le cube interne (`_build_inner_cube`), les arêtes, le triède

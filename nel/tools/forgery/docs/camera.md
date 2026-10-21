@@ -56,6 +56,18 @@ pas de 90° utilisées par les boutons du navcube.
  (camera.py) sur le choix de l'axe de rotation.
   - `roll_step(direction, degrees_step=90.0)` (camera.py) : roule la
  vue autour de son propre axe avant (les 2 boutons coin du navcube).
+  - `y_up` (propriété, camera.py) / `world_up()` / `_orbit_to_world` /
+ `_world_to_orbit` / `world_offset(distance=None)` (camera.py) : option
+ « Orbit around Y ». Toute la maths heading/pitch (et `AXIS_VIEWS`) reste dans
+ la convention Z-up ; en mode `y_up`, `_orbit_to_world` la projette sur le
+ monde par une vraie rotation (pas un miroir) : +Z d'orbite -> +Y monde, -Y
+ d'orbite (la caméra de face par défaut) -> +Z monde. `y_up = ...` annule
+ l'animation en cours, remet `up_hint = world_up()` et replace la caméra.
+ `world_offset()` donne la position caméra relative à la cible, réutilisée par
+ `_update_camera_pos`, `roll_step`, `_start_anim` et `navcube.py`. Voir aussi
+ `snap_to_axis`, qui reçoit un axe MONDE et le convertit en axe d'orbite avant
+ de lire `AXIS_VIEWS`, et `animate_to_orientation`/`reset`, qui utilisent
+ `world_up()` à la place du Z fixe.
   - `_update_camera_pos` (camera.py) : place et oriente
  `app.camera` à partir de heading/pitch/distance/target/up_hint —
  fonction centrale rejouée par tout ce qui précède.

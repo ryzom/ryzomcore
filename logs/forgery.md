@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-21 — ✨ Orbit around Y option (Patina), Forgery 4.22.0
+
+Order from User: Ryzom is Z-up, most 3D tools are Y-up, so the orbit must be able to turn around Y.
+`OrbitCamera.y_up` (`camera.py`) keeps the whole heading/pitch math (and `AXIS_VIEWS`) in the Z-up
+convention and maps it onto the world with a proper rotation (orbit +Z -> world +Y, orbit -Y -> world
++Z) through `_orbit_to_world`/`_world_to_orbit`/`world_offset()`; `up_hint`, `reset`,
+`animate_to_orientation`, `roll_step` and `snap_to_axis` (which now converts a WORLD axis back to the
+orbit convention) follow it. `navcube.py` dropped its own `_orbit_offset()` for
+`OrbitCamera.world_offset()`, so the gizmo stays in lock-step. New `Settings.orbit_y_up` (read at
+startup by `object_editor.py`), toggled by a button at the right of the Rot row of the Pos/Rot/Scl
+window (`viewport_transform.py`), applied immediately; Atyscape unchanged (Z-up). The Position row
+gets an empty slot so the reset buttons stay aligned.
+
+Documentation: `docs/camera.md`, `docs/navcube.md`, `docs/settings.md`, `docs/apps/object_editor.md`.
+
 ## 2026-09-17 — ✨ Bind preview: Bip01 Head attach point + readable labels, Forgery 4.18.0
 
 `creature_ref.WEAPON_ATTACH_POINTS` gains a 4th entry, `"Bip01 Head"` (a real skeleton bone
