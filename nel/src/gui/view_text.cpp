@@ -3489,7 +3489,7 @@ namespace NLGUI
 
 		// color format is available only if multilined
 		if (!_MultiLine)
-			nlwarning("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.c_str());
+			CLuaIHM::debugInfo(NLMISC::toString("ViewText isn't multilined : uc_hardtext_format will not act as wanted !\n%s", text.c_str()));
 	}
 
 #ifdef RYZOM_LUA_UCSTRING
@@ -3557,7 +3557,7 @@ namespace NLGUI
 
 		// this color format is available only if not multilined
 		if (_MultiLine)
-			nlwarning("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.c_str());
+			CLuaIHM::debugInfo(NLMISC::toString("ViewText is multilined : uc_hardtext_single_line_format will not act as wanted !\n%s", text.c_str()));
 	}
 
 

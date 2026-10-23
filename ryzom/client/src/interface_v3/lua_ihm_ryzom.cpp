@@ -390,9 +390,33 @@ void CLuaIHMRyzom::createLuaEnumTable(CLuaState &ls, const std::string &str)
 	}
 }
 
+// ***************************************************************************
+// The developer trace sink of the generic Lua bindings: the traces go through debugInfo() below, so they
+// show in the system info window with a goto-line button when ClientCfg.DisplayLuaDebugInfo is set
+class CLuaDebugOutputRyzom : public CLuaIHM::IDebugOutput
+{
+public:
+	virtual void debugInfo(const std::string &dbg) NL_OVERRIDE
+	{
+		CLuaIHMRyzom::debugInfo(dbg);
+	}
+	virtual void dumpCallStack(int startStackLevel) NL_OVERRIDE
+	{
+		CLuaIHMRyzom::dumpCallStack(startStackLevel);
+	}
+};
+static CLuaDebugOutputRyzom LuaDebugOutputRyzom;
+
+extern NLMISC::CLog g_log;
+
+// ***************************************************************************
 void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 {
 	CLuaStackChecker lsc(&ls);
+
+	// developer traces of the generic bindings go to the system info window, runCommand() output to the chat
+	CLuaIHM::setDebugOutput(&LuaDebugOutputRyzom);
+	CLuaIHM::setCommandLog(&g_log);
 
 	// MISC ui ctors
 	struct CUICtor

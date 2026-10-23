@@ -1115,6 +1115,43 @@ namespace NLGUI
 	}
 
 
+	// ***************************************************************************
+	static CLuaIHM::IDebugOutput *s_DebugOutput = nullptr;
+	static NLMISC::CLog *s_CommandLog = nullptr;
+
+	void CLuaIHM::setDebugOutput(IDebugOutput *output)
+	{
+		s_DebugOutput = output;
+	}
+
+	CLuaIHM::IDebugOutput *CLuaIHM::getDebugOutput()
+	{
+		return s_DebugOutput;
+	}
+
+	void CLuaIHM::debugInfo(const std::string &dbg)
+	{
+		if (s_DebugOutput)
+			s_DebugOutput->debugInfo(dbg);
+	}
+
+	void CLuaIHM::dumpCallStack(int startStackLevel)
+	{
+		if (s_DebugOutput)
+			s_DebugOutput->dumpCallStack(startStackLevel);
+	}
+
+	void CLuaIHM::setCommandLog(NLMISC::CLog *log)
+	{
+		s_CommandLog = log;
+	}
+
+	NLMISC::CLog *CLuaIHM::getCommandLog()
+	{
+		return s_CommandLog ? s_CommandLog : NLMISC::InfoLog;
+	}
+
+	// ***************************************************************************
 	int CLuaIHM::getCurrentWindowUnder(CLuaState &ls)
 	{
 		//H_AUTO(Lua_CLuaIHM_getCurrentWindowUnder)
@@ -1123,7 +1160,7 @@ namespace NLGUI
 		if(!pIE)
 		{
 			ls.pushNil();
-			nlerror("getCurrentWindowUnder(): No UICaller found. return Nil");
+			debugInfo("getCurrentWindowUnder(): no window under the pointer, returning nil");
 		}
 		else
 		{
@@ -1291,7 +1328,7 @@ namespace NLGUI
 			}
 		}
 
-		ls.push(command->execute(rawCommandString,   args,    NLMISC::ErrorLog(),    false,    true));
+		ls.push(command->execute(rawCommandString,   args,    *getCommandLog(),    false,    true));
 		return 1;
 	}
 
