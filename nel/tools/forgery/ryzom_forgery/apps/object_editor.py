@@ -6,6 +6,7 @@
 render yet.
 """
 
+import threading
 import time
 from pathlib import Path
 
@@ -389,6 +390,7 @@ class ObjectEditorApp(
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
 		self._virtual_categories_cache = None  # {category: [Path, ...]} or None -- see _scan_active_workspace_virtual_categories()
 		self._virtual_categories_cache_time = 0.0
+		self._virtual_categories_thread = None  # background rescan in flight, or None
 		self._bake_progress = None  # dict or None -- see _start_panoply_bake()/_draw_bake_progress_popup()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
@@ -738,14 +740,37 @@ class ObjectEditorApp(
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		if workspace_dir is None:
 			return {}
-		now = time.monotonic()
 		stale = (self._virtual_categories_cache is None
-		         or now - self._virtual_categories_cache_time > _VIRTUAL_CATEGORIES_RESCAN_INTERVAL)
-		if stale:
+		         or time.monotonic() - self._virtual_categories_cache_time > _VIRTUAL_CATEGORIES_RESCAN_INTERVAL)
+		thread = self._virtual_categories_thread
+		if thread is not None and not thread.is_alive():
+			thread = self._virtual_categories_thread = None
+		if stale and thread is None:
 			exclusion_rules = app_settings.load().exclusion_rules
-			self._virtual_categories_cache = virtual_categories.scan_workspace(workspace_dir, exclusion_rules)
-			self._virtual_categories_cache_time = now
-		return self._virtual_categories_cache
+			self._virtual_categories_thread = threading.Thread(
+				target=self._rescan_virtual_categories, args=(workspace_dir, exclusion_rules), daemon=True)
+			self._virtual_categories_thread.start()
+		return self._virtual_categories_cache if self._virtual_categories_cache is not None else {}
+
+	def _rescan_virtual_categories(self, workspace_dir, exclusion_rules):
+		"""Background half of _scan_active_workspace_virtual_categories(): the
+		recursive scan (and the sort the Explorer needs) of a very large
+		workspace took long enough to freeze every frame when done on the
+		draw thread. A result for a workspace that is no longer the active
+		one is dropped; an unchanged result keeps the previous object, so the
+		Explorer's caches keyed on it stay valid."""
+		try:
+			buckets = virtual_categories.scan_workspace(workspace_dir, exclusion_rules)
+			for paths in buckets.values():
+				paths.sort(key=lambda path: path.name.lower())
+		except OSError as exc:
+			print(f"[object_editor] virtual categories rescan failed: {exc}")
+			return
+		if self.workspace_setup_dialog.active_workspace_dir != workspace_dir:
+			return
+		if buckets != self._virtual_categories_cache:
+			self._virtual_categories_cache = buckets
+		self._virtual_categories_cache_time = time.monotonic()
 
 	def _on_exit(self):
 		"""Runs right before the process actually exits, whether that was

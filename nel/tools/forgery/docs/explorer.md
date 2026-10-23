@@ -58,7 +58,16 @@ en plus ou à la place.
  `virtual_categories.md`), `explorer.py` se contente de dessiner le dict
  déjà calculé, dans l'ordre où ses clés arrivent.
 - `_draw_dir_contents` (`explorer.py`) : vue principale, plate,
- clic pour naviguer (pas d'expansion en place).
+ clic pour naviguer (pas d'expansion en place). Ne dessine que les lignes
+ visibles (`ListClipper`) sur `_visible_rows()`, les lignes qui passent
+ recherche/filtre/fichiers cachés, mises en cache par état de filtre.
+ `_dir_rows()` (type dossier / `.bnp` / fichier, un seul `is_dir()` par
+ entrée) et `_visible_count()` sont aussi en cache ; `refresh()` vide tout.
+ Dans le Wexplorer, `_draw_tree_children` et
+ `_draw_pinned_virtual_categories` découpent aussi les séries de fichiers
+ avec un `ListClipper` (catégorie triée une fois, `_virtual_sorted()`) :
+ un dossier ou une catégorie de dizaines de milliers de fichiers ne coûte
+ que les lignes à l'écran.
 - `_bnp_entries` / `_bnp_visible_entries` (`explorer.py`) :
  listing (avec cache) et filtrage (avec cache séparé) du contenu d'un
  `.bnp`.

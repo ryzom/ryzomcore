@@ -77,7 +77,7 @@ dans `others`.
 - `explorer.py` : ne l'importe **pas** directement -- reçoit un dict déjà
  calculé via `virtual_categories_source` (voir `explorer.md`).
 - `apps/object_editor.py` : `_scan_active_workspace_virtual_categories()`
- (appelle `scan_workspace()`, throttlé à 1 scan/seconde, voir
+ (lance `scan_workspace()` dans un thread de fond (`_rescan_virtual_categories`, tri inclus, résultat ignoré si le workspace actif a changé, objet conservé si rien n'a changé), au plus 1 scan/seconde après la fin du précédent ; liste vide jusqu'au premier scan, voir
  `_VIRTUAL_CATEGORIES_RESCAN_INTERVAL`) et `_workspace_shape_save_path()`
  (appelle `find_existing_file()`).
 - `search_paths_dialog.py` : `_make_workspace_exclude()` appelle

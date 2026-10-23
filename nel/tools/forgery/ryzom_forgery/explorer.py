@@ -124,6 +124,17 @@ class Explorer:
 		# in a folder full of .bnp archives. Cached per (bnp, filter state),
 		# cleared whenever search/extension_filter actually change.
 		self._bnp_visible_cache: dict = {}
+		# Same reasoning for the rows themselves: is_dir() is a syscall per
+		# entry, the hidden/search/extension filters a loop over all of them,
+		# and draw() ran both for every entry of a (possibly huge) folder at
+		# every frame. _dir_rows: (path, kind) per entry; _dir_visible_rows:
+		# those that pass the filters, per (dir, search, extension_filter,
+		# show_hidden); _virtual_sorted: sorted bucket of a virtual category.
+		# All cleared by refresh().
+		self._dir_rows_cache: dict = {}
+		self._dir_visible_rows_cache: dict = {}
+		self._dir_visible_count_cache: dict = {}
+		self._virtual_sorted_cache: dict = {}
 		# Wexplorer texture thumbnails (see _get_thumbnail_ref()) -- own
 		# state, separate from any shape-editing app's own texture state
 		# (e.g. object_editor.py's _texture_cache, which is shape-load-
@@ -173,6 +184,10 @@ class Explorer:
 		self._dir_cache.clear()
 		self._bnp_cache.clear()
 		self._bnp_visible_cache.clear()
+		self._dir_rows_cache.clear()
+		self._dir_visible_rows_cache.clear()
+		self._dir_visible_count_cache.clear()
+		self._virtual_sorted_cache.clear()
 
 	def _navigate_to(self, path: Path):
 		self.root = path
@@ -311,7 +326,7 @@ class Explorer:
 		for label, path in self.pinned_folders:
 			if not path.is_dir():
 				continue
-			visible_count = sum(1 for entry in self._list_dir(path) if not self._is_hidden(entry.name))
+			visible_count = self._visible_count(path)
 			imgui.push_id(str(path))
 			opened = imgui.tree_node_ex(
 				"##pinned-root", imgui.TreeNodeFlags_.open_on_arrow.value,
@@ -320,6 +335,15 @@ class Explorer:
 				self._draw_tree_children(path)
 				imgui.tree_pop()
 			imgui.pop_id()
+
+	def _virtual_sorted(self, category, paths):
+		"""A virtual category's files sorted by name, cached while the
+		bucket the host app hands back is the same list of paths."""
+		cached = self._virtual_sorted_cache.get(category)
+		if cached is None or cached[0] is not paths or cached[1] != len(paths):
+			cached = (paths, len(paths), sorted(paths, key=lambda path: path.name.lower()))
+			self._virtual_sorted_cache[category] = cached
+		return cached[2]
 
 	def _draw_pinned_virtual_categories(self):
 		"""Same visual slot/pattern as _draw_pinned_folders() above (one
@@ -339,8 +363,13 @@ class Explorer:
 				"##virtual-category-root", imgui.TreeNodeFlags_.open_on_arrow.value,
 				f"{fa_icons.ICON_FA_FOLDER_OPEN} {category} ({len(paths)})")
 			if opened:
-				for entry in sorted(paths, key=lambda path: path.name.lower()):
-					self._draw_leaf(ExplorerItem(path=entry, name=entry.name), show_thumbnail=True)
+				ordered = self._virtual_sorted(category, paths)
+				clipper = imgui.ListClipper()
+				clipper.begin(len(ordered))
+				while clipper.step():
+					for i in range(clipper.display_start, clipper.display_end):
+						entry = ordered[i]
+						self._draw_leaf(ExplorerItem(path=entry, name=entry.name), show_thumbnail=True)
 				imgui.tree_pop()
 			imgui.pop_id()
 
@@ -356,61 +385,45 @@ class Explorer:
 		Otherwise reuses _draw_leaf() as-is, so selecting/double-click-to-
 		load/the right-click command menu all behave exactly like the main
 		view."""
-		for entry in self._list_dir(dir_path):
-			if self._is_hidden(entry.name):
-				continue
-			if entry.is_dir():
-				visible_count = sum(1 for child in self._list_dir(entry) if not self._is_hidden(child.name))
+		rows = [(entry, kind) for entry, kind in self._dir_rows(dir_path) if not self._is_hidden(entry.name)]
+		index = 0
+		while index < len(rows):
+			entry, kind = rows[index]
+			if kind == "dir":
+				visible_count = self._visible_count(entry)
 				opened = imgui.tree_node_ex(
 					str(entry), imgui.TreeNodeFlags_.open_on_arrow.value,
 					f"{fa_icons.ICON_FA_FOLDER} {entry.name} ({visible_count})")
 				if opened:
 					self._draw_tree_children(entry)
 					imgui.tree_pop()
-			elif entry.suffix.lower() in BNP_EXTENSIONS:
+				index += 1
+			elif kind == "bnp":
 				opened = imgui.tree_node_ex(
 					str(entry), imgui.TreeNodeFlags_.open_on_arrow.value, f"{fa_icons.ICON_FA_BOX_ARCHIVE} {entry.name}")
 				if opened:
-					for bnp_entry in self._bnp_entries(entry):
-						self._draw_leaf(
-							ExplorerItem(path=entry, name=bnp_entry.name, bnp_path=entry), show_thumbnail=True)
+					bnp_entries = self._bnp_entries(entry)
+					clipper = imgui.ListClipper()
+					clipper.begin(len(bnp_entries))
+					while clipper.step():
+						for i in range(clipper.display_start, clipper.display_end):
+							self._draw_leaf(
+								ExplorerItem(path=entry, name=bnp_entries[i].name, bnp_path=entry), show_thumbnail=True)
 					imgui.tree_pop()
+				index += 1
 			else:
-				self._draw_leaf(ExplorerItem(path=entry, name=entry.name), show_thumbnail=True)
-
-	def _draw_favorites(self):
-		is_favorite = str(self.root) in self._favorites
-		tooltip = "Remove current folder from favorites" if is_favorite else "Add current folder to favorites"
-		star_color = _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR
-		if _icon_button(fa_icons.ICON_FA_STAR, tooltip, color=star_color):
-			self._toggle_favorite(str(self.root))
-
-		imgui.same_line()
-		if imgui.begin_combo("##favorites", "Favorites"):
-			if not self._favorites:
-				imgui.text_disabled("(none yet -- click the star to add the current folder)")
-			for favorite in list(self._favorites):
-				imgui.push_id(favorite)
-				clicked, _ = imgui.selectable(Path(favorite).name or favorite, False)
-				if imgui.is_item_hovered():
-					imgui.set_tooltip(favorite)
-				if clicked:
-					self._navigate_to(Path(favorite))
-					imgui.close_current_popup()
-				imgui.pop_id()
-			imgui.end_combo()
-
-	def _toggle_favorite(self, path: str):
-		if path in self._favorites:
-			self._favorites.remove(path)
-		else:
-			self._favorites.append(path)
-		# Re-loads fresh and overwrites only our own section -- other
-		# components (export, search paths, data_root) persist independently
-		# and may have changed their own section since our own __init__.
-		fresh = app_settings.load()
-		fresh.explorer_favorites = self._favorites
-		app_settings.save(fresh)
+				# A run of plain files: only the rows on screen are drawn
+				# (a folder can hold tens of thousands).
+				end = index
+				while end < len(rows) and rows[end][1] == "file":
+					end += 1
+				clipper = imgui.ListClipper()
+				clipper.begin(end - index)
+				while clipper.step():
+					for i in range(index + clipper.display_start, index + clipper.display_end):
+						file_path = rows[i][0]
+						self._draw_leaf(ExplorerItem(path=file_path, name=file_path.name), show_thumbnail=True)
+				index = end
 
 	def draw(self):
 		# Top-to-bottom order: host app's own header (e.g. object_editor.py's
@@ -503,29 +516,77 @@ class Explorer:
 			self._dir_cache[key] = entries
 		return entries
 
+	def _dir_rows(self, dir_path: Path) -> list:
+		"""(path, kind) for every entry of `dir_path`, kind being "dir",
+		"bnp" or "file" -- cached, so the is_dir() syscall happens once."""
+		key = str(dir_path)
+		rows = self._dir_rows_cache.get(key)
+		if rows is None:
+			rows = []
+			for entry in self._list_dir(dir_path):
+				if entry.is_dir():
+					kind = "dir"
+				elif entry.suffix.lower() in BNP_EXTENSIONS:
+					kind = "bnp"
+				else:
+					kind = "file"
+				rows.append((entry, kind))
+			self._dir_rows_cache[key] = rows
+		return rows
+
+	def _visible_count(self, dir_path: Path) -> int:
+		"""Entries of `dir_path` that are not hidden -- cached per show_hidden."""
+		key = (str(dir_path), self._show_hidden)
+		count = self._dir_visible_count_cache.get(key)
+		if count is None:
+			count = sum(1 for entry in self._list_dir(dir_path) if not self._is_hidden(entry.name))
+			self._dir_visible_count_cache[key] = count
+		return count
+
+	def _visible_rows(self, dir_path: Path) -> list:
+		"""The rows of `dir_path` the main view shows (hidden files, search
+		and extension filter applied) -- cached per filter state."""
+		key = (str(dir_path), self.search, self.extension_filter, self._show_hidden)
+		rows = self._dir_visible_rows_cache.get(key)
+		if rows is None:
+			rows = []
+			for entry, kind in self._dir_rows(dir_path):
+				if self._is_hidden(entry.name):
+					continue
+				if kind == "bnp":
+					if not self._matches_filters(entry.name) and not self._bnp_has_visible_entries(entry):
+						continue
+				elif kind == "file" and not self._matches_filters(entry.name):
+					continue
+				rows.append((entry, kind))
+			self._dir_visible_rows_cache[key] = rows
+		return rows
+
 	def _draw_dir_contents(self, dir_path: Path):
 		"""Flat, single-click listing of `dir_path`'s own entries only --
-		clicking a sub-folder or `.bnp` navigates into it (no tree/expand)."""
+		clicking a sub-folder or `.bnp` navigates into it (no tree/expand).
+		Only the rows on screen are drawn (ListClipper)."""
 		if dir_path.parent != dir_path:
 			clicked, _ = imgui.selectable("..", False)
 			if clicked:
 				self._navigate_to(dir_path.parent)
 
-		for entry in self._list_dir(dir_path):
-			if self._is_hidden(entry.name):
-				continue
-			if entry.is_dir():
-				clicked, _ = imgui.selectable(f"{fa_icons.ICON_FA_FOLDER} {entry.name}", False)
-				if clicked:
-					self._navigate_to(entry)
-			elif entry.suffix.lower() in BNP_EXTENSIONS:
-				if not self._matches_filters(entry.name) and not self._bnp_has_visible_entries(entry):
-					continue
-				clicked, _ = imgui.selectable(f"{fa_icons.ICON_FA_BOX_ARCHIVE} {entry.name}", False)
-				if clicked:
-					self._enter_bnp(entry)
-			elif self._matches_filters(entry.name):
-				self._draw_leaf(ExplorerItem(path=entry, name=entry.name))
+		rows = self._visible_rows(dir_path)
+		clipper = imgui.ListClipper()
+		clipper.begin(len(rows))
+		while clipper.step():
+			for i in range(clipper.display_start, clipper.display_end):
+				entry, kind = rows[i]
+				if kind == "dir":
+					clicked, _ = imgui.selectable(f"{fa_icons.ICON_FA_FOLDER} {entry.name}", False)
+					if clicked:
+						self._navigate_to(entry)
+				elif kind == "bnp":
+					clicked, _ = imgui.selectable(f"{fa_icons.ICON_FA_BOX_ARCHIVE} {entry.name}", False)
+					if clicked:
+						self._enter_bnp(entry)
+				else:
+					self._draw_leaf(ExplorerItem(path=entry, name=entry.name))
 
 	def _bnp_entries(self, bnp_path: Path) -> list:
 		"""Every entry in `bnp_path`, unfiltered -- cached (a .bnp's own

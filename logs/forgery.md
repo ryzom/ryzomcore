@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-23 — ⚡️ Explorer and workspace lists stay fast with very large folders, Forgery 4.28.2
+
+A very large workspace (or Explorer folder) dropped Patina under 4 fps.
+
+- Explorer main list, Wexplorer folder trees and virtual categories only draw the rows on screen
+  (`ListClipper`); the per-entry `is_dir()`, the filters, the entry counts and the sorted categories are
+  cached (`explorer.py`: `_dir_rows()`, `_visible_rows()`, `_visible_count()`, `_virtual_sorted()`), cleared by
+  Refresh.
+- The recursive rescan of the workspace for the virtual categories ran on the draw thread every second; it now
+  runs in a background thread (`_rescan_virtual_categories`, `object_editor.py`), sorted there, and an unchanged
+  result keeps the same object so the Explorer caches stay valid. The categories are empty until the first scan
+  ends.
+
+Documentation: `docs/explorer.md`, `docs/virtual_categories.md`.
+
 ## 2026-10-23 — 🐛 Patina: Multi Bitmap slot kept in the scene and shown right away, Forgery 4.28.1
 
 - With a creature displayed, the edited shape is drawn from its bound copy, which the material nodes never
