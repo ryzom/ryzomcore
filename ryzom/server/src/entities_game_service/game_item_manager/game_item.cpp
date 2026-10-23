@@ -5133,6 +5133,6 @@ NLMISC_COMMAND(testItemSystem,"call CGameItem::testItemsForBugs()","")
 //-----------------------------------------------
 NLMISC_COMMAND(displayItemsStats,"Display items stats and memory allocation","")
 {
-	log.displayNL( CGameItem::showItemsStats().c_str() );
+	log.displayNL("%s", CGameItem::showItemsStats().c_str());
 	return true;
 }

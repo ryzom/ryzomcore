@@ -2420,7 +2420,7 @@ NLMISC_COMMAND(setPetAnimalSatiety,"Set the satiety of pet animal (petIndex in 0
 				result += " nameForAnswer not found";
 		}
 
-		log.displayNL( result.c_str() );
+		log.displayNL("%s", result.c_str());
 	}
 
 	return true;
@@ -2458,7 +2458,7 @@ NLMISC_COMMAND(getPetAnimalSatiety,"Get the satiety of pet animal (petIndex in 0
 				result += " nameForAnswer not found";
 		}
 
-		log.displayNL( result.c_str() );
+		log.displayNL("%s", result.c_str());
 	}
 	return true;
 }
