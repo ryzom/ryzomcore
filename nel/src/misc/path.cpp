@@ -545,6 +545,9 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 
 
 	// Try to find in the alternative directories
+	// str was lowercased for the indexed map; an alternative directory holds the real names, so the name as
+	// given is probed too (a case-sensitive filesystem never matches an uppercase name through the lowercased one)
+	string givenName = CFile::getFilename(filename);
 	for (uint i = 0; i < _AlternativePaths.size(); i++)
 	{
 		string s = _AlternativePaths[i] + str;
@@ -552,6 +555,15 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 		{
 			NL_DISPLAY_PATH("PATH: CPath::lookup(%s): found in the alternative directory: '%s'", str.c_str(), s.c_str());
 			return s;
+		}
+		if (givenName != str)
+		{
+			s = _AlternativePaths[i] + givenName;
+			if ( CFile::fileExists(s) )
+			{
+				NL_DISPLAY_PATH("PATH: CPath::lookup(%s): found in the alternative directory: '%s'", str.c_str(), s.c_str());
+				return s;
+			}
 		}
 
 		// try with the remapping
