@@ -201,35 +201,38 @@ namespace TM
 
 				{
 					// cascading deletion for map child MapChilds
-					nlassert(loadMapChilds(connection, __FILE__, __LINE__));
-
-					const std::map < uint32, CMapChildPtr > & childs = getMapChilds();
-
-					while (!childs.empty())
+					if (loadMapChilds(connection, __FILE__, __LINE__))
 					{
-						getMapChildsById(childs.begin()->first)->remove(connection);
+						const std::map < uint32, CMapChildPtr > & childs = getMapChilds();
+
+						while (!childs.empty())
+						{
+							getMapChildsById(childs.begin()->first)->remove(connection);
+						}
 					}
 				}
 
 				{
 					// cascading deletion for single child OneChild
-					nlassert(loadOneChild(connection, __FILE__, __LINE__));
-					
-					if (getOneChild() != NULL)
-						getOneChild()->remove(connection);
+					if (loadOneChild(connection, __FILE__, __LINE__))
+					{
+						if (getOneChild() != NULL)
+							getOneChild()->remove(connection);
+					}
 				}
 
 				{
 					// unreference (and update) for vector child VectorChilds
-					nlassert(loadVectorChilds(connection, __FILE__, __LINE__));
-
-					const std::vector < CVectorChildPtr > & childs = getVectorChilds();
-
-					for (uint i=0; i < childs.size(); ++i)
+					if (loadVectorChilds(connection, __FILE__, __LINE__))
 					{
-						
-						getVectorChildsByIndex(i)->setParentId(0);
-						getVectorChildsByIndex(i)->update(connection);
+						const std::vector < CVectorChildPtr > & childs = getVectorChilds();
+
+						for (uint i=0; i < childs.size(); ++i)
+						{
+							
+							getVectorChildsByIndex(i)->setParentId(0);
+							getVectorChildsByIndex(i)->update(connection);
+						}
 					}
 				}
 
