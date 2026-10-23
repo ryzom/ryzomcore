@@ -645,7 +645,7 @@ public:
 		SCharacteristicsAndScores &hp = _PhysScores._PhysicalScores[SCORES::hit_points];
 		sint32 maxhp = hp.Max;
 		if ( maxhp != 0 )
-			barLevel = (sint32)( (1023 * hp.Current) / maxhp);
+			barLevel = (sint32)( (1023 * (sint64)hp.Current) / maxhp);
 		else
 			barLevel = 0;
 		barresValue = (uint32)barLevel & 0x7ff;
