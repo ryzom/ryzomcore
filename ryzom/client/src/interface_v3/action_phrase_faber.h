@@ -167,6 +167,15 @@ private:
 	CDBAnimalObs			_DBAnimalObs;
 	friend class			CDBAnimalObs;
 
+	// mod_craft_success.sbrick
+	class CDBModCraftObs : public NLMISC::ICDBNode::IPropertyObserver
+	{
+	public:
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
+	};
+	CDBModCraftObs			_DBModCraftObs;
+	friend class			CDBModCraftObs;
+
 
 	// The Current MP Construction for a Line of Item Requirement
 	class CMPBuild
