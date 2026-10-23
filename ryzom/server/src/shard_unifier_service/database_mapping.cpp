@@ -4697,6 +4697,14 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadGuilds(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CShard::remove : failed to load the Guilds children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM shard ";
 		
@@ -4707,6 +4715,16 @@ namespace RSMGR
 		{
 			if (connection.getAffectedRows() == 1)
 			{
+
+				{
+					// cascading deletion for map child Guilds
+					const std::map < uint32, CGuildPtr > & childs = getGuilds();
+
+					while (!childs.empty())
+					{
+						getGuildsById(childs.begin()->first)->remove(connection);
+					}
+				}
 
 
 				// change the persistant state to 'removed'.

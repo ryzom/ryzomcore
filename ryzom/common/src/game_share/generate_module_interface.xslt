@@ -1197,12 +1197,22 @@ namespace <xsl:value-of select="@name"/>
 	<!-- #####         Class generation (db mapping, serial and message)### -->
 	<!-- ######################################################### -->
 	<!-- #####  Include file #### -->
+	<!-- the delete policy of every child must be one the remove() generator knows, otherwise its cascade is silently left out -->
+	<xsl:template name="checkChildClasses">
+		<xsl:for-each select="child_class[@on-delete and @on-delete != 'cascade' and @on-delete != 'update']">
+			<xsl:message terminate="yes">
+				ERROR : Invalid on-delete value '<xsl:value-of select="@on-delete"/>' for child <xsl:value-of select="@name"/> in class '<xsl:value-of select="../@name"/>', must be 'cascade' or 'update'
+			</xsl:message>
+		</xsl:for-each>
+	</xsl:template>
+
 	<xsl:template match="class" mode="header">
-		<xsl:if test="count(property[@unique_id = 'true' and @db_col]) != 1 and datase">
+		<xsl:if test="count(property[@unique_id = 'true' and @db_col]) != 1 and database">
 			<xsl:message terminate="yes">
 				ERROR : You must have ONE and ONLY one unique_id property in class '_<xsl:value-of select="@name"/>'
 			</xsl:message>
 		</xsl:if>
+		<xsl:call-template name="checkChildClasses"/>
 
 		<xsl:choose>
 			<xsl:when test="database">
@@ -1559,6 +1569,7 @@ namespace <xsl:value-of select="@name"/>
 				ERROR : You must have ONE and ONLY one unique_id property in class '_<xsl:value-of select="@name"/>'
 			</xsl:message>
 		</xsl:if>
+		<xsl:call-template name="checkChildClasses"/>
 
 		<xsl:choose>
 			<xsl:when test="database">
