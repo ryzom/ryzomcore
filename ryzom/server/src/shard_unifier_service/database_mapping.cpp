@@ -1627,6 +1627,24 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadSessionParticipants(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CCharacter::remove : failed to load the SessionParticipants children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadKnownBy(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CCharacter::remove : failed to load the KnownBy children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadPlayerRatings(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CCharacter::remove : failed to load the PlayerRatings children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM characters ";
 		
@@ -1640,44 +1658,35 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					if (loadSessionParticipants(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
+					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
-						while (!childs.empty())
-						{
-							getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child KnownBy
-					if (loadKnownBy(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CKnownUserPtr > & childs = getKnownBy();
+					const std::vector < CKnownUserPtr > & childs = getKnownBy();
 
-						while (!childs.empty())
-						{
-							getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// unreference (and update) for vector child PlayerRatings
-					if (loadPlayerRatings(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
+					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getPlayerRatingsByIndex(i)->setAuthor(0);
-							getPlayerRatingsByIndex(i)->update(connection);
-						}
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getPlayerRatingsByIndex(i)->setAuthor(0);
+						getPlayerRatingsByIndex(i)->update(connection);
 					}
 				}
 
@@ -2643,6 +2652,34 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadKnownUsers(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the KnownUsers children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadCharacters(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the Characters children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadFolders(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the Folders children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadFolderAccess(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the FolderAccess children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadGMStatus(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the GMStatus children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM ring_users ";
 		
@@ -2656,67 +2693,52 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child KnownUsers
-					if (loadKnownUsers(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CKnownUserPtr > & childs = getKnownUsers();
+					const std::vector < CKnownUserPtr > & childs = getKnownUsers();
 
-						while (!childs.empty())
-						{
-							getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// cascading deletion for map child Characters
-					if (loadCharacters(connection, __FILE__, __LINE__))
-					{
-						const std::map < uint32, CCharacterPtr > & childs = getCharacters();
+					const std::map < uint32, CCharacterPtr > & childs = getCharacters();
 
-						while (!childs.empty())
-						{
-							getCharactersById(childs.begin()->first)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getCharactersById(childs.begin()->first)->remove(connection);
 					}
 				}
 
 				{
 					// cascading deletion for single child GMStatus
-					if (loadGMStatus(connection, __FILE__, __LINE__))
-					{
-						if (getGMStatus() != NULL)
-							getGMStatus()->remove(connection);
-					}
+					if (getGMStatus() != NULL)
+						getGMStatus()->remove(connection);
 				}
 
 				{
 					// unreference (and update) for vector child Folders
-					if (loadFolders(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CFolderPtr > & childs = getFolders();
+					const std::vector < CFolderPtr > & childs = getFolders();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getFoldersByIndex(i)->setAuthor(0);
-							getFoldersByIndex(i)->update(connection);
-						}
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getFoldersByIndex(i)->setAuthor(0);
+						getFoldersByIndex(i)->update(connection);
 					}
 				}
 
 				{
 					// unreference (and update) for vector child FolderAccess
-					if (loadFolderAccess(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
+					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getFolderAccessByIndex(i)->setUserId(0);
-							getFolderAccessByIndex(i)->update(connection);
-						}
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getFolderAccessByIndex(i)->setUserId(0);
+						getFolderAccessByIndex(i)->update(connection);
 					}
 				}
 
@@ -3585,6 +3607,24 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadSessionParticipants(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CSession::remove : failed to load the SessionParticipants children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadGuildInvites(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CSession::remove : failed to load the GuildInvites children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadJournalEntries(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CSession::remove : failed to load the JournalEntries children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM sessions ";
 		
@@ -3598,42 +3638,33 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					if (loadSessionParticipants(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
+					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
-						while (!childs.empty())
-						{
-							getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child GuildInvites
-					if (loadGuildInvites(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
+					const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
 
-						while (!childs.empty())
-						{
-							getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child JournalEntries
-					if (loadJournalEntries(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
+					const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
 
-						while (!childs.empty())
-						{
-							getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
@@ -5194,6 +5225,19 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadCharacters(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CGuild::remove : failed to load the Characters children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadInvites(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CGuild::remove : failed to load the Invites children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM guilds ";
 		
@@ -5207,30 +5251,24 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child Invites
-					if (loadInvites(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CGuildInvitePtr > & childs = getInvites();
+					const std::vector < CGuildInvitePtr > & childs = getInvites();
 
-						while (!childs.empty())
-						{
-							getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// unreference (and update) for vector child Characters
-					if (loadCharacters(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CCharacterPtr > & childs = getCharacters();
+					const std::vector < CCharacterPtr > & childs = getCharacters();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getCharactersByIndex(i)->setGuildId(0);
-							getCharactersByIndex(i)->update(connection);
-						}
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getCharactersByIndex(i)->setGuildId(0);
+						getCharactersByIndex(i)->update(connection);
 					}
 				}
 
@@ -7725,6 +7763,19 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadFolderAccess(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CFolder::remove : failed to load the FolderAccess children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadSessions(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CFolder::remove : failed to load the Sessions children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM folder ";
 		
@@ -7738,30 +7789,24 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child FolderAccess
-					if (loadFolderAccess(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
+					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
-						while (!childs.empty())
-						{
-							getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// unreference (and update) for vector child Sessions
-					if (loadSessions(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CSessionPtr > & childs = getSessions();
+					const std::vector < CSessionPtr > & childs = getSessions();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getSessionsByIndex(i)->setFolderId(0);
-							getSessionsByIndex(i)->update(connection);
-						}
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getSessionsByIndex(i)->setFolderId(0);
+						getSessionsByIndex(i)->update(connection);
 					}
 				}
 
@@ -9053,6 +9098,19 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadSessionLogs(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CScenario::remove : failed to load the SessionLogs children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadPlayerRatings(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CScenario::remove : failed to load the PlayerRatings children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM scenario ";
 		
@@ -9066,28 +9124,22 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionLogs
-					if (loadSessionLogs(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CSessionLogPtr > & childs = getSessionLogs();
+					const std::vector < CSessionLogPtr > & childs = getSessionLogs();
 
-						while (!childs.empty())
-						{
-							getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 
 
 				{
 					// cascading deletion for vector child PlayerRatings
-					if (loadPlayerRatings(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
+					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
-						while (!childs.empty())
-						{
-							getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
 

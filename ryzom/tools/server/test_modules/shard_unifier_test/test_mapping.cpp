@@ -188,6 +188,24 @@ namespace TM
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadOneChild(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRootTable::remove : failed to load the OneChild children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadMapChilds(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRootTable::remove : failed to load the MapChilds children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadVectorChilds(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRootTable::remove : failed to load the VectorChilds children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM root_table ";
 		
@@ -201,38 +219,29 @@ namespace TM
 
 				{
 					// cascading deletion for map child MapChilds
-					if (loadMapChilds(connection, __FILE__, __LINE__))
-					{
-						const std::map < uint32, CMapChildPtr > & childs = getMapChilds();
+					const std::map < uint32, CMapChildPtr > & childs = getMapChilds();
 
-						while (!childs.empty())
-						{
-							getMapChildsById(childs.begin()->first)->remove(connection);
-						}
+					while (!childs.empty())
+					{
+						getMapChildsById(childs.begin()->first)->remove(connection);
 					}
 				}
 
 				{
 					// cascading deletion for single child OneChild
-					if (loadOneChild(connection, __FILE__, __LINE__))
-					{
-						if (getOneChild() != NULL)
-							getOneChild()->remove(connection);
-					}
+					if (getOneChild() != NULL)
+						getOneChild()->remove(connection);
 				}
 
 				{
 					// unreference (and update) for vector child VectorChilds
-					if (loadVectorChilds(connection, __FILE__, __LINE__))
-					{
-						const std::vector < CVectorChildPtr > & childs = getVectorChilds();
+					const std::vector < CVectorChildPtr > & childs = getVectorChilds();
 
-						for (uint i=0; i < childs.size(); ++i)
-						{
-							
-							getVectorChildsByIndex(i)->setParentId(0);
-							getVectorChildsByIndex(i)->update(connection);
-						}
+					for (uint i=0; i < childs.size(); ++i)
+					{
+						
+						getVectorChildsByIndex(i)->setParentId(0);
+						getVectorChildsByIndex(i)->update(connection);
 					}
 				}
 
