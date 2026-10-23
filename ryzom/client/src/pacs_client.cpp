@@ -29,6 +29,7 @@
 #include "user_entity.h"
 #include "ig_callback.h"
 #include "ig_client.h"
+#include "entities.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -118,6 +119,8 @@ void releasePACS ()
 	// Move container presents ?
 	if (PACS)
 	{
+		// The primitives go with the container, no handle may outlive it
+		EntitiesMngr.forgetShapePrimitives(PACS);
 		UMoveContainer::deleteMoveContainer (PACS);
 		PACS = nullptr;
 	}

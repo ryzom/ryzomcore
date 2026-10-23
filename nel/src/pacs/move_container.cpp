@@ -1467,6 +1467,10 @@ void CMoveContainer::removePrimitive (UMovePrimitive* primitive)
 	// CMovePrimitive pointer
 	CMovePrimitive *prim=(CMovePrimitive*)primitive;
 
+	// Must be a primitive of this container: a primitive of another container would be unlinked from the wrong
+	// modified list and deleted under its owner, and a dangling handle cannot be dereferenced at all
+	nlassert (_PrimitiveSet.find (prim) != _PrimitiveSet.end ());
+
 	// Get the primitive world image
 	for (uint8 i=0; i<prim->getNumWorldImage (); i++)
 	{

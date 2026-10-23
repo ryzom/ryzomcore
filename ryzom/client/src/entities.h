@@ -107,6 +107,7 @@ public:
 		Deleted = false;
 		LastDeleted = -1;
 		Primitive = nullptr;
+		PrimitiveContainer = nullptr;
 		PrimSize = CVector(1.f, 1.f, 1.f);
 		PrimHeight = 1.f;
 		PrimRelativePos = CVector(0.f, 0.f, 0.f);
@@ -114,6 +115,8 @@ public:
 
 	NL3D::UInstance Instance;
 	NLPACS::UMovePrimitive *Primitive;
+	/// The move container that created Primitive; it may be hibernated while another container is current
+	NLPACS::UMoveContainer *PrimitiveContainer;
 	CVector PrimSize;
 	float PrimHeight;
 	CVector PrimRelativePos;
@@ -232,6 +235,8 @@ public:
 	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, sint32 &idx);
 	bool deleteInstance(uint32 idx);
 	bool removeInstances();
+	/// Forget the primitives owned by a move container that is about to be deleted (they are deleted with it)
+	void forgetShapePrimitives(NLPACS::UMoveContainer *container);
 	CVector getInstancePos(uint32 idx);
 	bool setInstancePos(uint32 idx, CVector pos);
 	CVector getInstanceRot(uint32 idx);
