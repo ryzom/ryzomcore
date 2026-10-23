@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-10-21 — 🐛 Panoply textures with live_data only: default colour axes, Forgery 4.25.1
+
+With `live_data` alone (no `ryzom-data`, no extra search paths) the Bind preview printed "texture not
+found" for the creature's pieces and the hat. Measured on the real install: `live_data` ships only
+baked variants (`fy_hof_underwear_torso_fy_u1.dds`, `fy_hof_visage_c1_fy_e1.dds`,
+`ma_hof_casque01_c1_u1.dds`...), never the base texture or the masks, while `panoply_files.txt` is
+there (in `characters_maps_hr.bnp`). `_panoply_dims_for()` (`panoply_ui.py`) only kept the axes of the
+shape-wide selection, and colour axes only entered it through the Panoply section's auto-default
+(drawn UI only, main shape's own axes only), so the name asked for was `..._FY.tga` (race alone).
+It now also fills in `user`/`hair`/`eyes` axes never picked with the texture's first variant listed in
+`panoply_files.txt` -- never `skin` (forced by the creature, or deliberately cleared by the user).
+
+Related, same day: Forgery 4.24.0 injects `live_data` into the external scan
+(`SearchPathsDialog._external_scan_dirs()`), skeleton/animation indexes included; scan caches no longer
+store failures (`.skel`/`.anim` parse, empty `.bnp` listing); Forgery 4.25.0 shows the scan in the
+status bar (`SysInfoBar.report_task()`/`clear_task()`): "listing files..." then a real done/total bar.
+
+Documentation: `docs/apps/object_editor.md`, `docs/search_paths.md`, `docs/sysinfo.md`.
+
+## 2026-10-21 — ✨ Explorer: Copy file name/path, left click runs the extension's first command, Forgery 4.23.0
+
+Order from User: the right-click "Load in viewer" entry is useless, replace it with two copies.
+`Command.in_menu` + `CommandRegistry.click_command_for_selection()` (`commands.py`): a plain left click
+(`Explorer._draw_leaf()`) runs the first command registered for the extension (never a global one),
+whether or not it is listed in the context menu. Patina registers `.shape` "Load in viewer" and the
+`.skel`/`.anim` "Load as bone-preview skeleton/animation" with `in_menu=False`, plus two global commands,
+"Copy file name" and "Copy file path" (`object_editor.py`): one item per line on a multi-selection, a
+file inside a `.bnp` copies as `<bnp path> @ <name>`. Also 4.23.1: `repository_paths_dialog.py` passed a
+non-bool to `imgui.begin_disabled()` for an unconfigured repository path.
+
+Documentation: `docs/commands.md`, `docs/apps/object_editor.md`.
+
 ## 2026-10-21 — ✨ Orbit around Y option (Patina), Forgery 4.22.0
 
 Order from User: Ryzom is Z-up, most 3D tools are Y-up, so the orbit must be able to turn around Y.
