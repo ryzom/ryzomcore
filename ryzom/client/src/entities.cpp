@@ -566,9 +566,10 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 			idx = _LastRemovedInstance;
 			_ShapeInstances[idx].Instance = instance;
 			if (_ShapeInstances[idx].Primitive)
-				PACS->removePrimitive(_ShapeInstances[idx].Primitive);
+				_ShapeInstances[idx].PrimitiveContainer->removePrimitive(_ShapeInstances[idx].Primitive);
 
 			_ShapeInstances[idx].Primitive = primitive;
+			_ShapeInstances[idx].PrimitiveContainer = primitive ? PACS : nullptr;
 			_ShapeInstances[idx].ContextText = text;
 			_ShapeInstances[idx].ContextURL = url;
 			_ShapeInstances[idx].BboxActive = !text.empty() || !url.empty();
@@ -595,6 +596,7 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 		{
 			CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, !text.empty() || !url.empty(), inIgZone > 0);
 			instref.Primitive = primitive;
+			instref.PrimitiveContainer = primitive ? PACS : nullptr;
 			idx = _ShapeInstances.size();
 			_ShapeInstances.push_back(instref);
 			TIGZoneShapes::iterator it = _IgZoneShapes.find(inIgZone);
@@ -626,11 +628,12 @@ bool CEntityManager::deleteInstance(uint32 idx, bool force)
 	if (!_ShapeInstances[idx].Instance.empty())
 		Scene->deleteInstance(_ShapeInstances[idx].Instance);
 
-	UMovePrimitive *primitive = _ShapeInstances[idx].Primitive;
-	if (primitive)
+	if (_ShapeInstances[idx].Primitive)
 	{
-		PACS->removePrimitive(primitive);
-		_ShapeInstances[idx].Primitive = NULL;
+		// remove it from the container that created it, not from the current one
+		_ShapeInstances[idx].PrimitiveContainer->removePrimitive(_ShapeInstances[idx].Primitive);
+		_ShapeInstances[idx].Primitive = nullptr;
+		_ShapeInstances[idx].PrimitiveContainer = nullptr;
 	}
 
 	if (!_ShapeInstances[idx].Deleted)
@@ -827,15 +830,16 @@ bool CEntityManager::removeInstances()
 	}
 	return true;
 }
-void CEntityManager::removeShapePrimitives()
+void CEntityManager::forgetShapePrimitives(NLPACS::UMoveContainer *container)
 {
-	for(uint i=0; i<_ShapeInstances.size(); ++i)
+	for (uint i = 0; i < _ShapeInstances.size(); ++i)
 	{
-		if (_ShapeInstances[i].Primitive)
+		if (_ShapeInstances[i].Primitive && _ShapeInstances[i].PrimitiveContainer == container)
 		{
-			if (PACS)
-				PACS->removePrimitive(_ShapeInstances[i].Primitive);
-			_ShapeInstances[i].Primitive = NULL;
+			// the container deletes its primitives; a shape should have been removed before, see CContinent::unselect()
+			nlwarning("Shape instance %u still has a primitive in the move container being deleted", i);
+			_ShapeInstances[i].Primitive = nullptr;
+			_ShapeInstances[i].PrimitiveContainer = nullptr;
 		}
 	}
 }

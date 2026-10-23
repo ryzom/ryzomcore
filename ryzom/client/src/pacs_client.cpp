@@ -119,10 +119,8 @@ void releasePACS ()
 	// Move container presents ?
 	if (PACS)
 	{
-		// Every primitive handle held outside the container must be cleared before it is freed
-		EntitiesMngr.removeCollision();
-		EntitiesMngr.removeShapePrimitives();
-
+		// The primitives go with the container, no handle may outlive it
+		EntitiesMngr.forgetShapePrimitives(PACS);
 		UMoveContainer::deleteMoveContainer (PACS);
 		PACS = nullptr;
 	}
