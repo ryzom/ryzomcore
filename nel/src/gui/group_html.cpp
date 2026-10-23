@@ -3534,14 +3534,13 @@ namespace NLGUI
 			}
 			else if (form.Entries[i].ComboBox)
 			{
+				// a select with no option, or nothing selected, submits no value (as a browser does)
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-				if (cb)
+				sint32 sel = cb->getSelection();
+				if (sel >= 0 && sel < (sint32)form.Entries[i].SelectValues.size())
 				{
-					if (form.Entries[i].SelectValues.size() > 0)
-					{
-				entryData = form.Entries[i].SelectValues[cb->getSelection()];
-				addEntry = true;
-					}
+					entryData = form.Entries[i].SelectValues[sel];
+					addEntry = true;
 				}
 			}
 			else if (form.Entries[i].SelectBox)
