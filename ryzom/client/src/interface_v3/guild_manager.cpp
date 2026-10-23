@@ -361,6 +361,8 @@ void CGuildManager::update()
 			if (!pSMC->getString (_GuildMembers[i].NameID, _GuildMembers[i].Name)) bAllValid = false;
 			else _GuildMembers[i].Name = CEntityCL::removeTitleAndShardFromName(_GuildMembers[i].Name);
 		}
+		// Our own name arrives through the string manager as well, and the grade below is looked up by name
+		if ((UserEntity != nullptr) && (!_GuildMembers.empty()) && UserEntity->getEntityName().empty()) bAllValid = false;
 
 		// If all is valid no more need update and if guild is opened update the interface
 		if (bAllValid)
