@@ -1107,7 +1107,12 @@ def load_panda_texture(name, cache=None, search_dirs=None, repeat=False, finder=
 		if min_filter is not None:
 			texture.set_minfilter(_NEL_MIN_FILTER_TO_PANDA.get(min_filter, PandaTexture.FT_linear_mipmap_linear))
 
-	if cache is not None:
+	# A miss is not cached: the cache is keyed by name only, but what a name
+	# resolves to depends on `search_dirs` -- a miss made while building one
+	# shape (e.g. the edited one, loaded from a .bnp, no folder of its own)
+	# must not hide the file from another shape that does have its folder
+	# (a scene shape built later with the same texture name).
+	if cache is not None and texture is not None:
 		cache[name] = texture
 	return texture
 

@@ -1,6 +1,6 @@
 # scene.py -- modèle de scène Patina
 
-Données pures (pas d'UI, pas de Panda3D) d'une scène multi-shapes, sérialisée en JSON dans `<workspace>/scenes/*.scene` (dossier créé à la demande, workspaces externes compris). Chantier : `project-todos/forgery/patina_multi_shapes_scenes.md`.
+Données pures (pas d'UI, pas de Panda3D) d'une scène multi-shapes, sérialisée en JSON dans `<workspace>/scenes/*.scene` (dossier créé à la demande, workspaces externes compris). Chantier : `project-todos/forgery/patina-multi-shapes-scenes.md`.
 
 - `Scene` : `entries`, `edited_id` (entrée en cours d'édition), `solo_id` (seule entrée affichée), `creature` (PNJ unique partagé), `ui` (dict opaque : caméra, panneaux, lumières, vent...).
 - `SceneEntry` : `id`, `source`, `visible`, `transparent`, `placement` (`auto`/`origin`/`pivot`), `bind_slot` / `bind_attach_point`. `editable` est faux pour les 3 shapes de référence (jamais éditables, jamais solo).

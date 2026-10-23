@@ -267,6 +267,7 @@ class ShapeIOMixin:
 			old_quat = Quat(old_rot.w, old_rot.x, old_rot.y, old_rot.z)
 			self._object_pivot.set_quat(old_quat.conjugate() * self._object_pivot.get_quat())
 		self._rebuild_geometry()
+		self._capture_shape_baseline()
 
 	def _has_unsaved_changes_at(self, target_path):
 		"""True if the in-memory shape currently open differs from what's on
@@ -388,23 +389,19 @@ class ShapeIOMixin:
 
 	def _request_load_shape(self, item):
 		"""Routes every shape-load entry point through the unsaved-changes
-		guard: loads `item` immediately unless the currently open shape is
-		at risk of losing edits, in which case the load is queued and
-		_draw_load_shape_unsaved_popup() asks first instead of silently
-		discarding in-progress work. A shape loaded from a plain file
-		(_shape_source_path set) is checked against that file directly; one
-		loaded from inside a .bnp has no such file, so it's checked against
-		wherever Save would actually write it instead
-		(_workspace_shape_save_path()) -- if that resolves to nothing (no
-		active workspace, or genuinely no copy anywhere in it yet), there's
-		nothing to compare against and the edit is unconditionally at risk,
-		same as _has_unsaved_changes_at() already treats a missing file."""
-		unsaved = False
-		if self.shape_file is not None:
-			target_path = self._shape_source_path
-			if target_path is None:
-				target_path = self._workspace_shape_save_path()
-			unsaved = target_path is None or self._has_unsaved_changes_at(target_path)
+		guard: a file that already is another entry of the scene just becomes
+		the shape being edited (the current one keeps its edits in memory,
+		see scene_io.py); a shape kept in the scene stays there when another
+		file is loaded (same); otherwise `item` replaces the shape being
+		edited, loaded immediately unless that one was modified since it was
+		loaded/saved (_edited_shape_modified()), in which case the load is
+		queued and _draw_load_shape_unsaved_popup() asks first instead of
+		silently discarding in-progress work."""
+		existing = self._scene_entry_for_item(item)
+		if existing is not None and existing.id != self._scene.edited_id:
+			self._select_edited_scene_shape(existing)
+			return
+		unsaved = self._edited_shape_replacement_loses_edits(item)
 		if unsaved:
 			self._pending_load_shape_item = item
 			self._load_shape_unsaved_prompt_open = True
@@ -448,7 +445,13 @@ class ShapeIOMixin:
 				imgui.close_current_popup()
 			imgui.end_popup()
 
-	def _load_shape(self, item):
+	def _load_shape(self, item, register=True):
+		"""Loads `item` as the shape being edited. `register` (the default)
+		makes it the scene's edited entry (see scene_io.py); the callers that
+		already point the scene at it -- selecting an entry of the scene, a
+		scene load -- pass False."""
+		if register:
+			self._prepare_replace_edited_shape(item)
 		self._reset_shape_state()
 		self._shape_source_path = item.path if item.bnp_path is None else None
 		self._shape_source_bnp_path = item.bnp_path
@@ -464,6 +467,9 @@ class ShapeIOMixin:
 			return
 
 		self._display_shape(shape_file)
+		self._capture_shape_baseline()
+		if register:
+			self._register_edited_scene_entry(item)
 
 	def _save_session_state(self):
 		"""Persists where the Explorer is browsing and which shape is
@@ -480,6 +486,8 @@ class ShapeIOMixin:
 			fresh.last_shape_path = str(shape_path) if shape_path is not None else None
 			fresh.last_shape_bnp = str(self._shape_source_bnp_path) if self._shape_source_bnp_path is not None else None
 			fresh.last_shape_name = self._shape_source_name
+			if self._pending_reload_scene is None:  # else the startup question was never answered, keep the previous one
+				fresh.last_scene_name = self._scene_name
 			fresh.panel_states = self._collect_panel_states()
 			app_settings.save(fresh)
 		except OSError as exc:
@@ -515,23 +523,21 @@ class ShapeIOMixin:
 		_draw_reopen_shape_popup()/_load_pending_reopen_shape()), asked
 		once the first frame is up."""
 		settings = app_settings.load()
-		panel_attrs = {
-			"wind": "_wind_panel",
-			"bone_preview": "_bone_preview_panel",
-			"bind": "_bind_panel",
-			"light": "_light_panel",
-			"info": "_info_panel",
-		}
-		for name, attr_prefix in panel_attrs.items():
-			state = settings.panel_states.get(name)
-			if state is not None:
-				setattr(self, f"{attr_prefix}_open", state.open)
-				setattr(self, f"{attr_prefix}_pos", (state.x, state.y))
+		self._apply_panel_states(settings.panel_states)
 
 		if settings.last_folder and Path(settings.last_folder).is_dir():
 			self.explorer._navigate_to(Path(settings.last_folder))
 			if settings.last_bnp and Path(settings.last_bnp).is_file():
 				self.explorer._enter_bnp(Path(settings.last_bnp))
+
+		# The scene saved at the last quit (default.scene, see scene_io.py)
+		# replaces the old "reopen the last shape" question when there is one.
+		last_scene, last_scene_name = self._read_last_scene(settings.last_scene_name)
+		if last_scene is not None and (last_scene.entries or last_scene.ui):
+			self._pending_reload_scene = last_scene
+			self._pending_reload_scene_name = last_scene_name
+			self._reopen_shape_prompt_open = True
+			return
 
 		if not (settings.last_shape_name and settings.last_shape_path):
 			return
@@ -569,6 +575,16 @@ class ShapeIOMixin:
 				and not self.search_paths_dialog.has_scanned_data:
 			self._restore_scan_popup_open = True
 
+	def _load_pending_reload_scene(self):
+		"""Actually loads self._pending_reload_scene (see
+		_restore_session_state()) -- called once the user answers "Yes" to
+		_draw_reopen_shape_popup(). Same cold-start texture-scan handling as
+		_load_pending_reopen_shape()."""
+		self._apply_loaded_scene(self._pending_reload_scene, self._pending_reload_scene_name)
+		if self.shape_file is not None and self.search_paths_dialog.scanning \
+				and not self.search_paths_dialog.has_scanned_data:
+			self._restore_scan_popup_open = True
+
 	def _draw_reopen_shape_popup(self):
 		"""Drawn every frame from draw_panel() while a previous session's
 		shape is queued for a reopen decision (see
@@ -589,16 +605,24 @@ class ShapeIOMixin:
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_REOPEN_SHAPE_POPUP_ID, None, flags)
 		if opened:
-			imgui.text(f"Reopen \"{self._pending_reopen_shape_item.name}\" from last session?")
+			if self._pending_reload_scene is not None:
+				imgui.text(f"Reload the scene \"{Path(self._pending_reload_scene_name).stem}\" from last session?")
+			else:
+				imgui.text(f"Reopen \"{self._pending_reopen_shape_item.name}\" from last session?")
 			if _colored_button("Yes", _CONFIRM_YES_COLOR):
-				self._load_pending_reopen_shape()
+				if self._pending_reload_scene is not None:
+					self._load_pending_reload_scene()
+				else:
+					self._load_pending_reopen_shape()
 				self._reopen_shape_prompt_open = False
 				self._pending_reopen_shape_item = None
+				self._pending_reload_scene = None
 				imgui.close_current_popup()
 			imgui.same_line()
 			if _colored_button("No", _CONFIRM_NO_COLOR):
 				self._reopen_shape_prompt_open = False
 				self._pending_reopen_shape_item = None
+				self._pending_reload_scene = None
 				imgui.close_current_popup()
 			imgui.end_popup()
 
@@ -644,6 +668,12 @@ class ShapeIOMixin:
 		self._material_override_colors = {}
 		self._tex_transform_ui_state = {}
 		self._panoply_selection = {}
+		# A creature picked in the Bind panel still forces its race skin on
+		# the next shape: without it every skin-variant texture (e.g.
+		# ..._hand_c1_FY_U1.tga) is looked up without its race and missing.
+		creature_skin = self._creature_forced_skin()
+		if creature_skin:
+			self._panoply_selection["skin"] = creature_skin
 		self._panoply_selection_defaulted = False
 		self._shape_source_path = None
 		self._shape_source_bnp_path = None  # set alongside _shape_source_path when the shape lives inside a .bnp -- see _save_session_state()
@@ -784,12 +814,18 @@ class ShapeIOMixin:
 		genuinely new asset with no existing match anywhere. None if
 		there's no active workspace configured yet, or no shape name is
 		known."""
+		return self._workspace_shape_save_path_for(self._shape_source_name)
+
+	def _workspace_shape_save_path_for(self, shape_name):
+		"""_workspace_shape_save_path() for the shape file named `shape_name`
+		-- also used for the shapes of the scene that aren't the one being
+		edited."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
-		if workspace_dir is None or not self._shape_source_name:
+		if workspace_dir is None or not shape_name:
 			return None
 		exclusion_rules = app_settings.load().exclusion_rules
-		existing = virtual_categories.find_existing_file(workspace_dir, self._shape_source_name, exclusion_rules)
-		return existing if existing is not None else workspace_dir / "shapes" / self._shape_source_name
+		existing = virtual_categories.find_existing_file(workspace_dir, shape_name, exclusion_rules)
+		return existing if existing is not None else workspace_dir / "shapes" / shape_name
 
 	def _bake_transform_into_shape(self):
 		"""Whatever position/rotation/scale _object_pivot is currently at
@@ -1000,6 +1036,7 @@ class ShapeIOMixin:
 			# baseline -- otherwise Ctrl+Reset would keep snapping back to
 			# the pre-save values forever.
 			self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
+			self._capture_shape_baseline()
 		except (OSError, ShapeWriteError) as exc:
 			self._save_status = f"Save failed: {exc}"
 			print(f"[object_editor] {self._save_status}")

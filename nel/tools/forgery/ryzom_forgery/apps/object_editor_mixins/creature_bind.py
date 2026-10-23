@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
-from panda3d.core import ClockObject, GeomNode, Mat4, Quat, Vec3
+from panda3d.core import ClockObject, GeomNode, Mat4, Quat, TransparencyAttrib, Vec3
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
@@ -39,7 +39,7 @@ from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_reskin_mesh_state, _reskin_mrm_state, _reskin_shadow_skin_state, _reskin_state,
 )
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
-	_capture_panel_pos, _icon_button, _set_panel_pos, _VIEWPORT_TOGGLE_MARGIN_PX,
+	_capture_panel_pos, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _set_panel_pos, _VIEWPORT_TOGGLE_MARGIN_PX,
 )
 
 _COMPATIBLE_COLOR = (0.35, 0.85, 0.35, 1.0)  # green -- "this .skel matches the loaded shape's bones"
@@ -386,6 +386,18 @@ class CreatureBindMixin:
 				_reskin_mesh_state(loaded_state, bone_world_matrices)
 			else:
 				_reskin_state(loaded_state, bone_world_matrices)
+		for state in self._scene_bound.values():
+			scene_skin_state = state["skin_state"]
+			if scene_skin_state is not None:
+				if isinstance(scene_skin_state, _MrmSkinState):
+					_reskin_mrm_state(scene_skin_state, bone_world_matrices)
+				elif isinstance(scene_skin_state, _MeshSkinState):
+					_reskin_mesh_state(scene_skin_state, bone_world_matrices)
+				else:
+					_reskin_state(scene_skin_state, bone_world_matrices)
+			attach_point = state["attach_point"]
+			if attach_point is not None and attach_point in bone_world_matrices and not state["node"].is_empty():
+				state["node"].set_mat(_nel_matrix_to_panda_mat4(bone_world_matrices[attach_point]))
 		if (not self._bind_slot_override and self._bind_attach_point
 				and self._bind_attach_point in self._bind_skeleton.bone_map
 				and self._assembled_creature_loaded_shape_node is not None):
@@ -780,8 +792,9 @@ class CreatureBindMixin:
 		# panoply en fonction du pnj qu'on charge"). Harmless no-op if the
 		# loaded shape's textures have no "skin" variants at all --
 		# _reapply_all_materials() just won't find anything to change.
-		if 0 <= record.race < len(panoply.RACES):
-			self._panoply_selection["skin"] = panoply.RACES[record.race]
+		skin = self._creature_forced_skin()
+		if skin:
+			self._panoply_selection["skin"] = skin
 			self._reapply_all_materials()
 		# Deliberately not routed through _apply_bone_preview_skeleton() --
 		# that would also reassign the *main* shape's live-re-skin skeleton
@@ -792,6 +805,14 @@ class CreatureBindMixin:
 		# _apply_loaded_shape_to_creature()) is entirely resolved by
 		# _rebuild_assembled_creature() below, which calls that method itself.
 		self._rebuild_assembled_creature()
+
+	def _creature_forced_skin(self):
+		"""The panoply "skin" (race) of the creature picked in the Bind
+		panel, or "" when none is picked."""
+		record = self._bind_creatures.get(self._bind_creature_name)
+		if record is not None and 0 <= record.race < len(panoply.RACES):
+			return panoply.RACES[record.race]
+		return ""
 
 	def _copy_creatures_ref_to_workspace(self):
 		"""Copies the bundled default creatures_ref.txt into the active
@@ -992,6 +1013,141 @@ class CreatureBindMixin:
 		self._apply_loaded_shape_to_creature()
 
 	def _apply_loaded_shape_to_creature(self):
+		"""Re-applies the whole bind: the shape being edited
+		(_apply_edited_shape_to_creature()), then every other scene shape
+		bound on the creature (_apply_scene_shapes_to_creature()) and the
+		standalone ones. The edited entry's own bind choice (the Bind
+		preview's slot / attach-point combos) is mirrored on its scene entry
+		first, so the scene always knows it."""
+		entry = self._scene.entry(self._scene.edited_id)
+		if entry is not None:
+			entry.bind_slot = self._bind_slot_override
+			entry.bind_attach_point = self._bind_attach_point
+		self._apply_edited_shape_to_creature()
+		self._refresh_scene_shapes()
+
+	def _creature_displayed(self):
+		return self._bind_skeleton is not None and bool(self._assembled_creature_bone_matrices)
+
+	def _scene_entry_bound_on_creature(self, entry):
+		"""True if `entry` is currently drawn on the displayed creature
+		(a slot, or an attach point the creature's skeleton really has)
+		rather than standalone."""
+		if not self._creature_displayed():
+			return False
+		if entry.bind_slot:
+			return True
+		return bool(entry.bind_attach_point) and entry.bind_attach_point in self._bind_skeleton.bone_map
+
+	def _apply_scene_shapes_to_creature(self):
+		"""(Re)builds, on the displayed creature, every scene shape other than
+		the one being edited that has a bind (a slot of the creature -- the
+		creature's own piece for that slot is hidden --, or a rigid attach
+		point): same builders as the shape being edited
+		(_build_assembled_shape_geometry()). Cheap, no disk I/O besides a
+		shape's first parse. The per-frame re-skin/animation of what is built
+		here is done by _update_assembled_creature_skin()."""
+		for state in self._scene_bound.values():
+			if not state["node"].is_empty():
+				state["node"].remove_node()
+		self._scene_bound = {}
+		edited_slot = (self._bind_slot_override
+		               if self._assembled_creature_loaded_shape_node is not None else "")
+		for slot_name in self._scene_hidden_slots:
+			base_node = self._assembled_creature_base_nodes.get(slot_name)
+			if base_node is not None and not base_node.is_empty() and slot_name != edited_slot:
+				base_node.show()
+		self._scene_hidden_slots = set()
+		# The edited shape hides its own slot's piece of the creature only
+		# while it is itself shown (eye off, or solo on another shape).
+		edited_base = self._assembled_creature_base_nodes.get(edited_slot) if edited_slot else None
+		if edited_base is not None and not edited_base.is_empty():
+			(edited_base.hide if self._main_shape_shown() else edited_base.show)()
+		if not self._creature_displayed():
+			return
+		for entry in self._scene.entries:
+			if entry.id == self._scene.edited_id or not self._scene.is_shown(entry):
+				continue
+			if not self._scene_entry_bound_on_creature(entry):
+				continue
+			shape_file = self._get_scene_shape(entry)
+			if shape_file is None:
+				continue
+			if entry.bind_slot:
+				slot_name = entry.bind_slot
+				base_node = self._assembled_creature_base_nodes.get(slot_name)
+				if base_node is not None:
+					base_node.hide()
+					self._scene_hidden_slots.add(slot_name)
+				node_path = self._assembled_creature_root.attach_new_node(f"{slot_name}-{entry.id}")
+				with self._scene_entry_textures(entry):
+					_content_root, skin_state = self._build_assembled_shape_geometry(
+						shape_file.value, self._bind_skeleton, self._assembled_creature_bone_matrices, node_path, slot_name)
+				attach_point = None
+			else:
+				attach_point = entry.bind_attach_point
+				node_path = self._assembled_creature_root.attach_new_node(f"attach-point-{entry.id}")
+				with self._scene_entry_textures(entry):
+					_content_root, skin_state = self._build_assembled_shape_geometry(
+						shape_file.value, None, None, node_path, "attach-point")
+				node_path.set_mat(_nel_matrix_to_panda_mat4(self._assembled_creature_bone_matrices[attach_point]))
+			if entry.transparent:
+				node_path.set_transparency(TransparencyAttrib.M_alpha)
+				node_path.set_color_scale(1, 1, 1, _OBJECT_TRANSPARENCY_ALPHA)
+			self._scene_bound[entry.id] = {"node": node_path, "skin_state": skin_state, "attach_point": attach_point}
+
+	def _draw_scene_entry_bind_row(self, entry):
+		"""One row of the Bind preview's "Scene shapes" list: the slot combo
+		of a skinned scene shape, or the attach-point combo of a rigid one --
+		same choices as the shape being edited, bound on the same creature."""
+		shape_file = self._get_scene_shape(entry)
+		if shape_file is None:
+			return
+		changed = False
+		imgui.push_id(f"scene-bind-{entry.id}")
+		imgui.text(self._scene_entry_label(entry))
+		imgui.set_next_item_width(220)
+		if _is_shape_skinned(shape_file.value):
+			if imgui.begin_combo("##slot", entry.bind_slot or "(none)"):
+				clicked, _ = imgui.selectable("(none)", entry.bind_slot == "")
+				if clicked:
+					entry.bind_slot = ""
+					changed = True
+				for slot_name in list(creature_ref.BODY_SLOTS) + ["hair"]:
+					clicked, _ = imgui.selectable(slot_name, slot_name == entry.bind_slot)
+					if clicked:
+						entry.bind_slot = slot_name
+						changed = True
+				imgui.end_combo()
+		else:
+			preview = "(none)"
+			for curated_name in creature_ref.WEAPON_ATTACH_POINTS:
+				if entry.bind_attach_point and curated_name.lower() == entry.bind_attach_point.lower():
+					preview = creature_ref.WEAPON_ATTACH_POINT_LABELS.get(curated_name, curated_name)
+					break
+			if imgui.begin_combo("##attach", preview):
+				clicked, _ = imgui.selectable("(none)", entry.bind_attach_point == "")
+				if clicked:
+					entry.bind_attach_point = ""
+					changed = True
+				for curated_name in creature_ref.WEAPON_ATTACH_POINTS:
+					resolved_name = self._resolve_bone_name(self._bind_skeleton, curated_name)
+					label = creature_ref.WEAPON_ATTACH_POINT_LABELS.get(curated_name, curated_name)
+					is_selected = bool(entry.bind_attach_point) and curated_name.lower() == entry.bind_attach_point.lower()
+					clicked, _ = imgui.selectable(label, is_selected)
+					if clicked:
+						entry.bind_attach_point = resolved_name if resolved_name is not None else curated_name
+						changed = True
+				imgui.end_combo()
+		imgui.pop_id()
+		if changed:
+			if (entry.bind_slot or entry.bind_attach_point) and not self._show_assembled_creature:
+				self._show_assembled_creature = True
+				self._rebuild_assembled_creature()
+			else:
+				self._refresh_scene_shapes()
+
+	def _apply_edited_shape_to_creature(self):
 		"""(Re)shows wherever the currently loaded shape (self.shape_file)
 		belongs relative to the Bind-preview creature -- exactly one of:
 		(a) skinned into a body-part slot (self._bind_slot_override),
@@ -1422,6 +1578,13 @@ class CreatureBindMixin:
 							self._bind_creature_name or "creature", export_format, self.search_paths_dialog.find_file,
 							weapon_shape_value=weapon_shape_value, weapon_bone_name=weapon_bone_name)
 				imgui.end_popup()
+
+			scene_others = [e for e in self._scene.entries if e.id != self._scene.edited_id]
+			if scene_others and self._bind_creature_name:
+				imgui.separator()
+				imgui.text("Scene shapes")
+				for scene_entry in scene_others:
+					self._draw_scene_entry_bind_row(scene_entry)
 
 			self._bind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 			self._bind_panel_pos = _capture_panel_pos()

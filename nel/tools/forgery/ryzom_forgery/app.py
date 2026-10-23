@@ -264,10 +264,23 @@ class ForgeryApp(ShowBase):
 		# self.userExit() -- see object_editor.py) triggered the exit.
 		self.exitFunc = self._on_exit
 
+		# The OS's own close button/Alt+F4 doesn't close the window by itself
+		# anymore: it throws this event instead, so a subclass can first ask
+		# about unsaved work (request_exit()) before actually exiting.
+		if self.win is not None:
+			self.win.set_close_request_event("forgery-close-requested")
+			self.accept("forgery-close-requested", self.request_exit)
+
 	def windowEvent(self, win):
 		super().windowEvent(win)
 		if win == self.win:
 			self._save_window_geometry()
+
+	def request_exit(self):
+		"""Quit requested (an app's Quit button, or the OS's own window-close
+		control, see __init__): exits right away. A subclass overrides this
+		to ask about unsaved work first, then calls self.userExit() itself."""
+		self.userExit()
 
 	def _on_exit(self):
 		"""Hook for subclasses: called once, right before the process

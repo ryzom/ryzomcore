@@ -39,6 +39,7 @@ class SceneEntry:
 	placement: str = "auto"  # "auto" (side by side) | "origin" | "pivot"
 	bind_slot: str = ""  # creature_ref.BODY_SLOTS entry or "hair" (skinned); "" = none
 	bind_attach_point: str = ""  # bone name (rigid); "" = none
+	kept: bool = True  # False only for the entry a load from the Explorer created, until the user adds it with [+]: the next Explorer load replaces it. Not saved -- entries read from a scene are all kept
 
 	@property
 	def editable(self) -> bool:

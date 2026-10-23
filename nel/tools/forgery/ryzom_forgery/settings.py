@@ -123,6 +123,7 @@ class Settings:
 	last_shape_path: Optional[str] = None
 	last_shape_bnp: Optional[str] = None
 	last_shape_name: Optional[str] = None
+	last_scene_name: Optional[str] = None  # scenes/ file the last session was working on
 	# Path to an external image editor executable (e.g. GIMP/Krita/Photoshop),
 	# used by the Textures tab's "Edit" button (see object_editor.py) once a
 	# texture already lives in the active workspace. None until the user
@@ -246,6 +247,7 @@ def load() -> Settings:
 	settings.last_shape_path = data.get("last_shape_path") or None
 	settings.last_shape_bnp = data.get("last_shape_bnp") or None
 	settings.last_shape_name = data.get("last_shape_name") or None
+	settings.last_scene_name = data.get("last_scene_name") or None
 	settings.image_editor_path = data.get("image_editor_path") or None
 	settings.text_editor_path = data.get("text_editor_path") or None
 	settings.ryzom_tools_path = data.get("ryzom_tools_path") or None
@@ -314,6 +316,8 @@ def save(settings: Settings) -> None:
 		doc["last_shape_bnp"] = settings.last_shape_bnp
 	if settings.last_shape_name is not None:
 		doc["last_shape_name"] = settings.last_shape_name
+	if settings.last_scene_name is not None:
+		doc["last_scene_name"] = settings.last_scene_name
 	if settings.image_editor_path is not None:
 		doc["image_editor_path"] = settings.image_editor_path
 	if settings.text_editor_path is not None:

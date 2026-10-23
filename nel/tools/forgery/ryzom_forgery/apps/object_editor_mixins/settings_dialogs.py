@@ -338,7 +338,7 @@ class SettingsDialogsMixin:
 		if avail > quit_width:
 			imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + avail - quit_width)
 		if _colored_button(quit_label, _QUIT_BUTTON_COLOR):
-			self.userExit()
+			self.request_exit()
 
 		if writable:
 			self._draw_save_confirmation_popup()

@@ -42,6 +42,7 @@ class MeshImportMixin:
 			# root this app otherwise searches.
 			self._texture_search_dirs = texture_search_dirs_for(source_path)
 		self._display_shape(ShapeFile(type_name="Mesh", value=mesh))
+		self._detach_edited_scene_entry()
 
 	def _on_import_replace(self, mesh, source_path):
 		if self.shape_file is None:

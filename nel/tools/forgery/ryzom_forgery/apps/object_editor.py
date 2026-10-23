@@ -26,6 +26,7 @@ from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply_config
 from ryzom_forgery import panoply_live
+from ryzom_forgery import scene as scene_model
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
@@ -46,6 +47,7 @@ from ryzom_forgery.apps.object_editor_mixins.materials import MaterialsMixin
 from ryzom_forgery.apps.object_editor_mixins.mesh_import import MeshImportMixin
 from ryzom_forgery.apps.object_editor_mixins.panoply_ui import PanoplyUIMixin
 from ryzom_forgery.apps.object_editor_mixins.reference_shapes import ReferenceShapesMixin
+from ryzom_forgery.apps.object_editor_mixins.scene_io import SceneIOMixin
 from ryzom_forgery.apps.object_editor_mixins.settings_dialogs import SettingsDialogsMixin
 from ryzom_forgery.apps.object_editor_mixins.shape_io import ShapeIOMixin
 from ryzom_forgery.apps.object_editor_mixins.texture_widgets import TextureWidgetsMixin
@@ -133,7 +135,7 @@ APP_INFO = {
 
 class ObjectEditorApp(
 		CreatureBindMixin, GeometryUIMixin, MaterialsMixin, MeshImportMixin, PanoplyUIMixin, ReferenceShapesMixin,
-		SettingsDialogsMixin, ShapeIOMixin, TextureWidgetsMixin, ViewportTransformMixin, ForgeryApp):
+		SceneIOMixin, SettingsDialogsMixin, ShapeIOMixin, TextureWidgetsMixin, ViewportTransformMixin, ForgeryApp):
 	def __init__(self):
 		# The Explorer starts out wherever the highest-priority configured
 		# search path points (there's no separate "data root" concept --
@@ -326,10 +328,21 @@ class ObjectEditorApp(
 		# undefined cases (skeleton=None there, see _build_assembled_shape_geometry()).
 		self._assembled_creature_loaded_shape_skin_state = None
 		self._reference_root = self.render.attach_new_node("reference-root")
-		self._reference_shapes = {}  # label -> ShapeFile or None (failed to load), lazily parsed once
-		self._reference_active = set()  # labels currently shown
-		self._reference_placement = {}  # label -> "origin"/"pivot"; missing/"auto" = default side-by-side layout
-		self._reference_transparent = set()  # labels currently shown at 50% transparency
+		self._scene = scene_model.Scene()  # see ryzom_forgery/scene.py
+		self._scene_shapes = {}  # entry id -> ShapeFile or None (failed to load), lazily parsed once
+		self._scene_shape_dialog = None  # in-flight portable_file_dialogs.open_file, for the [+] menu's "<add a .shape file>"
+		self._scene_bound = {}  # entry id -> {"node", "skin_state", "attach_point"}, see creature_bind.py's _apply_scene_shapes_to_creature()
+		self._scene_hidden_slots = set()  # creature slots currently hidden by a bound scene entry, same
+		self._scene_dirty = {}  # entry id -> modified shape kept in memory while another entry is edited, see scene_io.py
+		self._shape_baseline_bytes = None  # dumps() of the edited shape as loaded/saved: what "modified" is compared to, see scene_io.py
+		self._scene_unsaved_items = []  # shapes the unsaved prompt still asks about, see scene_io.py's _draw_scene_unsaved_popup()
+		self._scene_unsaved_prompt_open = False
+		self._scene_unsaved_then = None  # callback to run once the unsaved prompt is resolved (quit, load a scene...)
+		self._scene_name_input = ""  # "Save scene as" popup's text field
+		self._scene_overwrite_confirm = ""  # file name the Save popup is waiting a second click on to overwrite
+		self._scene_name = scene_model.DEFAULT_SCENE_NAME  # file the scene was last loaded from / saved to, proposed by that popup
+		self._pending_reload_scene = None  # Scene of the last session, waiting on the startup Yes/No prompt
+		self._pending_reload_scene_name = ""  # its file name in scenes/
 		self._material_node_paths = {}  # material_id -> list[NodePath], to re-apply a material live after an edit
 		self._multi_bitmap_expanded = set()  # slot indices currently expanded in the Multi Bitmap editor
 		self._material_expanded = set()  # material_ids currently expanded in the Materials tab's property editor
@@ -613,6 +626,7 @@ class ObjectEditorApp(
 		self.commands.register_for_extension(
 			".anim", "Load as bone-preview animation", self._on_load_animation_command, in_menu=False)
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command, in_menu=False)
+		self.commands.register_for_extension(".scene", "Load scene", self._on_load_scene_command, in_menu=False)
 		self.commands.register_global("Copy file name", self._copy_file_names)
 		self.commands.register_global("Copy file path", self._copy_file_paths)
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
@@ -738,6 +752,7 @@ class ObjectEditorApp(
 		requested via the in-app Quit button or the OS's own window-close
 		control -- see app.py's ForgeryApp.__init__()/_on_exit()."""
 		self._save_session_state()
+		self._save_current_scene()
 
 	def panel_title(self):
 		return self._shape_source_name or "Panel"
@@ -784,6 +799,7 @@ class ObjectEditorApp(
 		self._draw_replace_match_popup()
 		self._draw_reopen_shape_popup()
 		self._draw_load_shape_unsaved_popup()
+		self._draw_scene_unsaved_popup()
 		self._draw_restore_scan_popup()
 		self._draw_bake_progress_popup()
 		self._draw_import_conflict_popup()
