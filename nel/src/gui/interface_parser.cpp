@@ -3166,7 +3166,7 @@ namespace NLGUI
 			// if fail to reload a script, display the error code
 			if( !loadLUA( *it, error ) )
 			{
-				nlwarning( LuaHelperStuff::formatLuaErrorSysInfo( error ).c_str() );
+				CLuaManager::reportScriptError( error );
 			}
 		}
 	}

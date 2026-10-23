@@ -32,6 +32,25 @@ namespace NLGUI
 	bool CLuaManager::debugLua = false;
 	bool CLuaManager::editorMode = false;
 	CLuaManager* CLuaManager::instance = nullptr;
+	static CLuaManager::IScriptErrorReporter *s_ScriptErrorReporter = nullptr;
+
+	void CLuaManager::setScriptErrorReporter(IScriptErrorReporter *reporter)
+	{
+		s_ScriptErrorReporter = reporter;
+	}
+
+	CLuaManager::IScriptErrorReporter *CLuaManager::getScriptErrorReporter()
+	{
+		return s_ScriptErrorReporter;
+	}
+
+	void CLuaManager::reportScriptError(const std::string &error, const std::string &luaScript)
+	{
+		if (s_ScriptErrorReporter)
+			s_ScriptErrorReporter->onScriptError(error, luaScript);
+		else
+			nlwarning("%s", error.c_str());
+	}
 
 	CLuaManager::CLuaManager()
 	{
@@ -70,7 +89,7 @@ namespace NLGUI
 		}
 		catch( const ELuaError &e )
 		{
-			nlwarning( e.luaWhat().c_str() );
+			reportScriptError( e.luaWhat(), luaScript );
 			return false;
 		}
 
@@ -84,11 +103,13 @@ namespace NLGUI
 		luaState = new CLuaState( debugLua );
 	}
 
-	void CLuaManager::forceGarbageCollect()
+	uint CLuaManager::forceGarbageCollect()
 	{
 		nlinfo("Collecting Garbaged LUA variables");
 		luaState->setGCThreshold( 0 );
-		nlinfo( NLMISC::toString( "Memory Used : %d Kb", luaState->getGCCount() ).c_str() );
+		uint memoryUsed = luaState->getGCCount();
+		nlinfo( "Memory Used : %u Kb", memoryUsed );
+		return memoryUsed;
 	}
 }
 

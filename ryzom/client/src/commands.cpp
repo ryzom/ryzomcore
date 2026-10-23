@@ -5316,7 +5316,9 @@ NLMISC_COMMAND(luaGC, "Force a garbage collector of lua", "")
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	if(ClientCfg.AllowDebugLua)
 	{
-		CLuaManager::getInstance().forceGarbageCollect();
+		pIM->dumpLuaString("Collecting Garbaged LUA variables");
+		uint memoryUsed = CLuaManager::getInstance().forceGarbageCollect();
+		pIM->dumpLuaString(NLMISC::toString("Memory Used : %u Kb", memoryUsed));
 		return true;
 	}
 	else

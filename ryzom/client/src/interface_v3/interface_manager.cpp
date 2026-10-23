@@ -655,11 +655,57 @@ void CInterfaceManager::destroy ()
 	_Instance = nullptr;
 }
 
+// ------------------------------------------------------------------------------------------------
+// Script errors are shown in the system info window, with a button to open the script at the failing line when
+// ClientCfg.LuaDebugInfoGotoButtonEnabled is set, or with the script lines around the error when the error text
+// does not name a file. The same text goes to the log.
+class CLuaScriptErrorReporterRyzom : public CLuaManager::IScriptErrorReporter
+{
+public:
+	virtual void onScriptError(const std::string &error, const std::string &luaScript) NL_OVERRIDE
+	{
+		std::string msg = error;
+		char filename[MAX_PATH];
+		char exceptionName[MAX_PATH];
+		uint32 line;
+		// Hamster: quick fix on AJM code but sscanf is still awfull
+		if (sscanf(msg.c_str(), "%259s: %259s.lua:%d:", exceptionName, filename, &line) == 3) // NB: test not exact here, but should work in 99,9 % of cases
+		{
+			msg = CLuaIHMRyzom::createGotoFileButtonTag(filename, line) + msg;
+		}
+		else if (!luaScript.empty()) // AJM: handle the other 0.1% of cases
+		{
+			// Yoyo: seems that previous test doesn't work.... btw, must still print the message please...
+			std::vector<string> errorParts;
+			splitString(msg, ":", errorParts);
+			if (errorParts.size() > 3)
+			{
+				std::vector<string> contextList;
+				explode(luaScript, string("\n"), contextList);
+				fromString(errorParts[2], line);
+				if (line >= 3 && contextList.size() >= line)
+					msg = errorParts[0]+": \n>>> "+contextList[line-3]+"\n>>> "+contextList[line-2]+"\n>>> "+contextList[line-1]+"\nError:"+errorParts[2]+": "+errorParts[3];
+				else if (line >= 2 && contextList.size() >= line)
+					msg = errorParts[0]+": \n>>>"+contextList[line-2]+"\n>>>"+contextList[line-1]+"\nError:"+errorParts[2]+": "+errorParts[3];
+				else if (line >= 1 && contextList.size() >= line)
+					msg = errorParts[0]+": \n>>>"+contextList[line-1]+"\nError:"+errorParts[2]+": "+errorParts[3];
+			}
+		}
+		nlwarning("%s", LuaHelperStuff::formatLuaErrorNlWarn(msg).c_str());
+		CInterfaceManager::getInstance()->displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(msg));
+	}
+};
+static CLuaScriptErrorReporterRyzom LuaScriptErrorReporterRyzom;
+
+// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::initLUA()
 {
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	if( parser->isLuaInitialized() )
 		return;
+
+	// script errors are reported in game, not only in the log
+	CLuaManager::setScriptErrorReporter(&LuaScriptErrorReporterRyzom);
 
 	parser->initLUA();
 
