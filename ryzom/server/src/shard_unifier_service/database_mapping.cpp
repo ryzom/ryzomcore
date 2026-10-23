@@ -1,6 +1,6 @@
 
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+// Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -160,7 +160,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_TargetCharacter), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Relation.toString()+"'";
+		qs += _Relation.isValid()
+			? "'"+_Relation.toString()+"'"
+			: "DEFAULT(relation_type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Comments), connection)+"'";
 
@@ -225,7 +227,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "targer_character = '"+MSW::escapeString(NLMISC::toString(_TargetCharacter), connection)+"'";
 		qs += ", ";
-		qs += "relation_type = '"+_Relation.toString()+"'";
+		qs += "relation_type = " + (_Relation.isValid()
+			? "'"+_Relation.toString()+"'"
+			: "DEFAULT(relation_type)");
 		qs += ", ";
 		qs += "comments = '"+MSW::escapeString(NLMISC::toString(_Comments), connection)+"'";
 
@@ -815,7 +819,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Status.toString()+"'";
+		qs += _Status.isValid()
+			? "'"+_Status.toString()+"'"
+			: "DEFAULT(status)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Kicked), connection)+"'";
 
@@ -878,7 +884,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "char_id = '"+MSW::escapeString(NLMISC::toString(_CharId), connection)+"'";
 		qs += ", ";
-		qs += "status = '"+_Status.toString()+"'";
+		qs += "status = " + (_Status.isValid()
+			? "'"+_Status.toString()+"'"
+			: "DEFAULT(status)");
 		qs += ", ";
 		qs += "kicked = '"+MSW::escapeString(NLMISC::toString(_Kicked), connection)+"'";
 
@@ -1482,11 +1490,17 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_RingAccess), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Race.toString()+"'";
+		qs += _Race.isValid()
+			? "'"+_Race.toString()+"'"
+			: "DEFAULT(race)";
 		qs += ", ";
-		qs += "'"+_Civilisation.toString()+"'";
+		qs += _Civilisation.isValid()
+			? "'"+_Civilisation.toString()+"'"
+			: "DEFAULT(civilisation)";
 		qs += ", ";
-		qs += "'"+_Cult.toString()+"'";
+		qs += _Cult.isValid()
+			? "'"+_Cult.toString()+"'"
+			: "DEFAULT(cult)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
@@ -1568,11 +1582,17 @@ namespace RSMGR
 		qs += ", ";
 		qs += "ring_access = '"+MSW::escapeString(NLMISC::toString(_RingAccess), connection)+"'";
 		qs += ", ";
-		qs += "race = '"+_Race.toString()+"'";
+		qs += "race = " + (_Race.isValid()
+			? "'"+_Race.toString()+"'"
+			: "DEFAULT(race)");
 		qs += ", ";
-		qs += "civilisation = '"+_Civilisation.toString()+"'";
+		qs += "civilisation = " + (_Civilisation.isValid()
+			? "'"+_Civilisation.toString()+"'"
+			: "DEFAULT(civilisation)");
 		qs += ", ";
-		qs += "cult = '"+_Cult.toString()+"'";
+		qs += "cult = " + (_Cult.isValid()
+			? "'"+_Cult.toString()+"'"
+			: "DEFAULT(cult)");
 		qs += ", ";
 		qs += "current_session = '"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
@@ -1607,6 +1627,24 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadSessionParticipants(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CCharacter::remove : failed to load the SessionParticipants children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadKnownBy(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CCharacter::remove : failed to load the KnownBy children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadPlayerRatings(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CCharacter::remove : failed to load the PlayerRatings children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM characters ";
 		
@@ -1620,9 +1658,6 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					if (loadSessionParticipants(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
 					while (!childs.empty())
@@ -1630,14 +1665,10 @@ namespace RSMGR
 						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// cascading deletion for vector child KnownBy
-					if (loadKnownBy(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CKnownUserPtr > & childs = getKnownBy();
 
 					while (!childs.empty())
@@ -1645,14 +1676,10 @@ namespace RSMGR
 						getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// unreference (and update) for vector child PlayerRatings
-					if (loadPlayerRatings(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
 					for (uint i=0; i < childs.size(); ++i)
@@ -1660,7 +1687,6 @@ namespace RSMGR
 						
 						getPlayerRatingsByIndex(i)->setAuthor(0);
 						getPlayerRatingsByIndex(i)->update(connection);
-						}
 					}
 				}
 
@@ -2512,19 +2538,29 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
-		qs += "'"+_CurrentActivity.toString()+"'";
+		qs += _CurrentActivity.isValid()
+			? "'"+_CurrentActivity.toString()+"'"
+			: "DEFAULT(current_activity)";
 		qs += ", ";
-		qs += "'"+_CurrentStatus.toString()+"'";
+		qs += _CurrentStatus.isValid()
+			? "'"+_CurrentStatus.toString()+"'"
+			: "DEFAULT(current_status)";
 		qs += ", ";
-		qs += "'"+_PublicLevel.toString()+"'";
+		qs += _PublicLevel.isValid()
+			? "'"+_PublicLevel.toString()+"'"
+			: "DEFAULT(public_level)";
 		qs += ", ";
-		qs += "'"+_AccountType.toString()+"'";
+		qs += _AccountType.isValid()
+			? "'"+_AccountType.toString()+"'"
+			: "DEFAULT(account_type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ContentAccessLevel), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Lang.toString()+"'";
+		qs += _Lang.isValid()
+			? "'"+_Lang.toString()+"'"
+			: "DEFAULT(lang)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Cookie), connection)+"'";
 		qs += ", ";
@@ -2567,19 +2603,29 @@ namespace RSMGR
 		qs += ", ";
 		qs += "current_session = '"+MSW::escapeString(NLMISC::toString(_CurrentSession), connection)+"'";
 		qs += ", ";
-		qs += "current_activity = '"+_CurrentActivity.toString()+"'";
+		qs += "current_activity = " + (_CurrentActivity.isValid()
+			? "'"+_CurrentActivity.toString()+"'"
+			: "DEFAULT(current_activity)");
 		qs += ", ";
-		qs += "current_status = '"+_CurrentStatus.toString()+"'";
+		qs += "current_status = " + (_CurrentStatus.isValid()
+			? "'"+_CurrentStatus.toString()+"'"
+			: "DEFAULT(current_status)");
 		qs += ", ";
-		qs += "public_level = '"+_PublicLevel.toString()+"'";
+		qs += "public_level = " + (_PublicLevel.isValid()
+			? "'"+_PublicLevel.toString()+"'"
+			: "DEFAULT(public_level)");
 		qs += ", ";
-		qs += "account_type = '"+_AccountType.toString()+"'";
+		qs += "account_type = " + (_AccountType.isValid()
+			? "'"+_AccountType.toString()+"'"
+			: "DEFAULT(account_type)");
 		qs += ", ";
 		qs += "content_access_level = '"+MSW::escapeString(NLMISC::toString(_ContentAccessLevel), connection)+"'";
 		qs += ", ";
 		qs += "description = '"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "lang = '"+_Lang.toString()+"'";
+		qs += "lang = " + (_Lang.isValid()
+			? "'"+_Lang.toString()+"'"
+			: "DEFAULT(lang)");
 		qs += ", ";
 		qs += "cookie = '"+MSW::escapeString(NLMISC::toString(_Cookie), connection)+"'";
 		qs += ", ";
@@ -2606,6 +2652,34 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadKnownUsers(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the KnownUsers children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadCharacters(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the Characters children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadFolders(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the Folders children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadFolderAccess(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the FolderAccess children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadGMStatus(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CRingUser::remove : failed to load the GMStatus children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM ring_users ";
 		
@@ -2619,9 +2693,6 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child KnownUsers
-					if (loadKnownUsers(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CKnownUserPtr > & childs = getKnownUsers();
 
 					while (!childs.empty())
@@ -2629,14 +2700,10 @@ namespace RSMGR
 						getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// cascading deletion for map child Characters
-					if (loadCharacters(connection, __FILE__, __LINE__))
-					{
-
 					const std::map < uint32, CCharacterPtr > & childs = getCharacters();
 
 					while (!childs.empty())
@@ -2644,23 +2711,15 @@ namespace RSMGR
 						getCharactersById(childs.begin()->first)->remove(connection);
 					}
 				}
-				}
 
 				{
 					// cascading deletion for single child GMStatus
-					if (loadGMStatus(connection, __FILE__, __LINE__))
-					{
-
 					if (getGMStatus() != NULL)
 						getGMStatus()->remove(connection);
-				}
 				}
 
 				{
 					// unreference (and update) for vector child Folders
-					if (loadFolders(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CFolderPtr > & childs = getFolders();
 
 					for (uint i=0; i < childs.size(); ++i)
@@ -2670,13 +2729,9 @@ namespace RSMGR
 						getFoldersByIndex(i)->update(connection);
 					}
 				}
-				}
 
 				{
 					// unreference (and update) for vector child FolderAccess
-					if (loadFolderAccess(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
 					for (uint i=0; i < childs.size(); ++i)
@@ -2684,7 +2739,6 @@ namespace RSMGR
 						
 						getFolderAccessByIndex(i)->setUserId(0);
 						getFolderAccessByIndex(i)->update(connection);
-						}
 					}
 				}
 
@@ -3335,7 +3389,9 @@ namespace RSMGR
 		qs += "session_type, title, owner, plan_date, start_date, description, orientation, level, rule_type, access_type, state, host_shard_id, subscription_slots, reserved_slots, estimated_duration, final_duration, folder_id, lang, icone, anim_mode, race_filter, religion_filter, guild_filter, shard_filter, level_filter, subscription_closed, newcomer";
 		qs += ") VALUES (";
 		
-		qs += "'"+_SessionType.toString()+"'";
+		qs += _SessionType.isValid()
+			? "'"+_SessionType.toString()+"'"
+			: "DEFAULT(session_type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3347,15 +3403,25 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Orientation.toString()+"'";
+		qs += _Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)";
 		qs += ", ";
-		qs += "'"+_Level.toString()+"'";
+		qs += _Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)";
 		qs += ", ";
-		qs += "'"+_RuleType.toString()+"'";
+		qs += _RuleType.isValid()
+			? "'"+_RuleType.toString()+"'"
+			: "DEFAULT(rule_type)";
 		qs += ", ";
-		qs += "'"+_AccessType.toString()+"'";
+		qs += _AccessType.isValid()
+			? "'"+_AccessType.toString()+"'"
+			: "DEFAULT(access_type)";
 		qs += ", ";
-		qs += "'"+_State.toString()+"'";
+		qs += _State.isValid()
+			? "'"+_State.toString()+"'"
+			: "DEFAULT(state)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_HostShardId), connection)+"'";
 		qs += ", ";
@@ -3363,7 +3429,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ReservedSlots), connection)+"'";
 		qs += ", ";
-		qs += "'"+_EstimatedDuration.toString()+"'";
+		qs += _EstimatedDuration.isValid()
+			? "'"+_EstimatedDuration.toString()+"'"
+			: "DEFAULT(estimated_duration)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_FinalDuration), connection)+"'";
 		qs += ", ";
@@ -3373,17 +3441,21 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Icone), connection)+"'";
 		qs += ", ";
-		qs += "'"+_AnimMode.toString()+"'";
+		qs += _AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)";
 		qs += ", ";
-		qs += "'"+MSW::escapeString(NLMISC::toString(_RaceFilter), connection)+"'";
+		qs += "'"+_RaceFilter.toString()+"'";
 		qs += ", ";
-		qs += "'"+MSW::escapeString(NLMISC::toString(_ReligionFilter), connection)+"'";
+		qs += "'"+_ReligionFilter.toString()+"'";
 		qs += ", ";
-		qs += "'"+_GuildFilter.toString()+"'";
+		qs += _GuildFilter.isValid()
+			? "'"+_GuildFilter.toString()+"'"
+			: "DEFAULT(guild_filter)";
 		qs += ", ";
-		qs += "'"+MSW::escapeString(NLMISC::toString(_ShardFilter), connection)+"'";
+		qs += "'"+_ShardFilter.toString()+"'";
 		qs += ", ";
-		qs += "'"+MSW::escapeString(NLMISC::toString(_LevelFilter), connection)+"'";
+		qs += "'"+_LevelFilter.toString()+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_SubscriptionClosed), connection)+"'";
 		qs += ", ";
@@ -3444,7 +3516,9 @@ namespace RSMGR
 		std::string qs;
 		qs = "UPDATE sessions SET ";
 		
-		qs += "session_type = '"+_SessionType.toString()+"'";
+		qs += "session_type = " + (_SessionType.isValid()
+			? "'"+_SessionType.toString()+"'"
+			: "DEFAULT(session_type)");
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3456,15 +3530,25 @@ namespace RSMGR
 		qs += ", ";
 		qs += "description = '"+MSW::escapeString(NLMISC::toString(_Description), connection)+"'";
 		qs += ", ";
-		qs += "orientation = '"+_Orientation.toString()+"'";
+		qs += "orientation = " + (_Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)");
 		qs += ", ";
-		qs += "level = '"+_Level.toString()+"'";
+		qs += "level = " + (_Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)");
 		qs += ", ";
-		qs += "rule_type = '"+_RuleType.toString()+"'";
+		qs += "rule_type = " + (_RuleType.isValid()
+			? "'"+_RuleType.toString()+"'"
+			: "DEFAULT(rule_type)");
 		qs += ", ";
-		qs += "access_type = '"+_AccessType.toString()+"'";
+		qs += "access_type = " + (_AccessType.isValid()
+			? "'"+_AccessType.toString()+"'"
+			: "DEFAULT(access_type)");
 		qs += ", ";
-		qs += "state = '"+_State.toString()+"'";
+		qs += "state = " + (_State.isValid()
+			? "'"+_State.toString()+"'"
+			: "DEFAULT(state)");
 		qs += ", ";
 		qs += "host_shard_id = '"+MSW::escapeString(NLMISC::toString(_HostShardId), connection)+"'";
 		qs += ", ";
@@ -3472,7 +3556,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "reserved_slots = '"+MSW::escapeString(NLMISC::toString(_ReservedSlots), connection)+"'";
 		qs += ", ";
-		qs += "estimated_duration = '"+_EstimatedDuration.toString()+"'";
+		qs += "estimated_duration = " + (_EstimatedDuration.isValid()
+			? "'"+_EstimatedDuration.toString()+"'"
+			: "DEFAULT(estimated_duration)");
 		qs += ", ";
 		qs += "final_duration = '"+MSW::escapeString(NLMISC::toString(_FinalDuration), connection)+"'";
 		qs += ", ";
@@ -3482,17 +3568,21 @@ namespace RSMGR
 		qs += ", ";
 		qs += "icone = '"+MSW::escapeString(NLMISC::toString(_Icone), connection)+"'";
 		qs += ", ";
-		qs += "anim_mode = '"+_AnimMode.toString()+"'";
+		qs += "anim_mode = " + (_AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)");
 		qs += ", ";
-		qs += "race_filter = '"+MSW::escapeString(NLMISC::toString(_RaceFilter), connection)+"'";
+		qs += "race_filter = '"+_RaceFilter.toString()+"'";
 		qs += ", ";
-		qs += "religion_filter = '"+MSW::escapeString(NLMISC::toString(_ReligionFilter), connection)+"'";
+		qs += "religion_filter = '"+_ReligionFilter.toString()+"'";
 		qs += ", ";
-		qs += "guild_filter = '"+_GuildFilter.toString()+"'";
+		qs += "guild_filter = " + (_GuildFilter.isValid()
+			? "'"+_GuildFilter.toString()+"'"
+			: "DEFAULT(guild_filter)");
 		qs += ", ";
-		qs += "shard_filter = '"+MSW::escapeString(NLMISC::toString(_ShardFilter), connection)+"'";
+		qs += "shard_filter = '"+_ShardFilter.toString()+"'";
 		qs += ", ";
-		qs += "level_filter = '"+MSW::escapeString(NLMISC::toString(_LevelFilter), connection)+"'";
+		qs += "level_filter = '"+_LevelFilter.toString()+"'";
 		qs += ", ";
 		qs += "subscription_closed = '"+MSW::escapeString(NLMISC::toString(_SubscriptionClosed), connection)+"'";
 		qs += ", ";
@@ -3517,6 +3607,24 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadSessionParticipants(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CSession::remove : failed to load the SessionParticipants children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadGuildInvites(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CSession::remove : failed to load the GuildInvites children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadJournalEntries(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CSession::remove : failed to load the JournalEntries children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM sessions ";
 		
@@ -3530,9 +3638,6 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					if (loadSessionParticipants(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
 					while (!childs.empty())
@@ -3540,14 +3645,10 @@ namespace RSMGR
 						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// cascading deletion for vector child GuildInvites
-					if (loadGuildInvites(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
 
 					while (!childs.empty())
@@ -3555,20 +3656,15 @@ namespace RSMGR
 						getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// cascading deletion for vector child JournalEntries
-					if (loadJournalEntries(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
 
 					while (!childs.empty())
 					{
 						getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
-						}
 					}
 				}
 
@@ -4539,7 +4635,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_WSOnline), connection)+"'";
 		qs += ", ";
-		qs += "'"+_RequiredState.toString()+"'";
+		qs += _RequiredState.isValid()
+			? "'"+_RequiredState.toString()+"'"
+			: "DEFAULT(RequiredState)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_MOTD), connection)+"'";
 
@@ -4574,7 +4672,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "WSOnline = '"+MSW::escapeString(NLMISC::toString(_WSOnline), connection)+"'";
 		qs += ", ";
-		qs += "RequiredState = '"+_RequiredState.toString()+"'";
+		qs += "RequiredState = " + (_RequiredState.isValid()
+			? "'"+_RequiredState.toString()+"'"
+			: "DEFAULT(RequiredState)");
 		qs += ", ";
 		qs += "MOTD = '"+MSW::escapeString(NLMISC::toString(_MOTD), connection)+"'";
 
@@ -4597,6 +4697,14 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadGuilds(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CShard::remove : failed to load the Guilds children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM shard ";
 		
@@ -4607,6 +4715,16 @@ namespace RSMGR
 		{
 			if (connection.getAffectedRows() == 1)
 			{
+
+				{
+					// cascading deletion for map child Guilds
+					const std::map < uint32, CGuildPtr > & childs = getGuilds();
+
+					while (!childs.empty())
+					{
+						getGuildsById(childs.begin()->first)->remove(connection);
+					}
+				}
 
 
 				// change the persistant state to 'removed'.
@@ -5125,6 +5243,19 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadCharacters(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CGuild::remove : failed to load the Characters children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadInvites(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CGuild::remove : failed to load the Invites children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM guilds ";
 		
@@ -5138,9 +5269,6 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child Invites
-					if (loadInvites(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CGuildInvitePtr > & childs = getInvites();
 
 					while (!childs.empty())
@@ -5148,14 +5276,10 @@ namespace RSMGR
 						getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// unreference (and update) for vector child Characters
-					if (loadCharacters(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CCharacterPtr > & childs = getCharacters();
 
 					for (uint i=0; i < childs.size(); ++i)
@@ -5163,7 +5287,6 @@ namespace RSMGR
 						
 						getCharactersByIndex(i)->setGuildId(0);
 						getCharactersByIndex(i)->update(connection);
-						}
 					}
 				}
 
@@ -7011,7 +7134,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Type.toString()+"'";
+		qs += _Type.isValid()
+			? "'"+_Type.toString()+"'"
+			: "DEFAULT(type)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Text), connection)+"'";
 		qs += ", ";
@@ -7063,7 +7188,9 @@ namespace RSMGR
 		qs += ", ";
 		qs += "author = '"+MSW::escapeString(NLMISC::toString(_Author), connection)+"'";
 		qs += ", ";
-		qs += "type = '"+_Type.toString()+"'";
+		qs += "type = " + (_Type.isValid()
+			? "'"+_Type.toString()+"'"
+			: "DEFAULT(type)");
 		qs += ", ";
 		qs += "text = '"+MSW::escapeString(NLMISC::toString(_Text), connection)+"'";
 		qs += ", ";
@@ -7654,6 +7781,19 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadFolderAccess(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CFolder::remove : failed to load the FolderAccess children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadSessions(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CFolder::remove : failed to load the Sessions children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM folder ";
 		
@@ -7667,9 +7807,6 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child FolderAccess
-					if (loadFolderAccess(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
 					while (!childs.empty())
@@ -7677,14 +7814,10 @@ namespace RSMGR
 						getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// unreference (and update) for vector child Sessions
-					if (loadSessions(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CSessionPtr > & childs = getSessions();
 
 					for (uint i=0; i < childs.size(); ++i)
@@ -7692,7 +7825,6 @@ namespace RSMGR
 						
 						getSessionsByIndex(i)->setFolderId(0);
 						getSessionsByIndex(i)->update(connection);
-						}
 					}
 				}
 
@@ -8894,13 +9026,19 @@ namespace RSMGR
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_RRPTotal), connection)+"'";
 		qs += ", ";
-		qs += "'"+_AnimMode.toString()+"'";
+		qs += _AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Language), connection)+"'";
 		qs += ", ";
-		qs += "'"+_Orientation.toString()+"'";
+		qs += _Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)";
 		qs += ", ";
-		qs += "'"+_Level.toString()+"'";
+		qs += _Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_AllowFreeTrial), connection)+"'";
 
@@ -8943,13 +9081,19 @@ namespace RSMGR
 		qs += ", ";
 		qs += "rrp_total = '"+MSW::escapeString(NLMISC::toString(_RRPTotal), connection)+"'";
 		qs += ", ";
-		qs += "anim_mode = '"+_AnimMode.toString()+"'";
+		qs += "anim_mode = " + (_AnimMode.isValid()
+			? "'"+_AnimMode.toString()+"'"
+			: "DEFAULT(anim_mode)");
 		qs += ", ";
 		qs += "language = '"+MSW::escapeString(NLMISC::toString(_Language), connection)+"'";
 		qs += ", ";
-		qs += "orientation = '"+_Orientation.toString()+"'";
+		qs += "orientation = " + (_Orientation.isValid()
+			? "'"+_Orientation.toString()+"'"
+			: "DEFAULT(orientation)");
 		qs += ", ";
-		qs += "level = '"+_Level.toString()+"'";
+		qs += "level = " + (_Level.isValid()
+			? "'"+_Level.toString()+"'"
+			: "DEFAULT(level)");
 		qs += ", ";
 		qs += "allow_free_trial = '"+MSW::escapeString(NLMISC::toString(_AllowFreeTrial), connection)+"'";
 
@@ -8972,6 +9116,19 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_dirty || getPersistentState() == NOPE::os_clean);
 
+		// load the children the cascade below works on before anything is deleted: a failed load
+		// then leaves the database untouched instead of orphaning the children of a deleted parent
+		if (!loadSessionLogs(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CScenario::remove : failed to load the SessionLogs children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+		if (!loadPlayerRatings(connection, __FILE__, __LINE__))
+		{
+			nlwarning("CScenario::remove : failed to load the PlayerRatings children of object %u, nothing removed", getObjectId());
+			return false;
+		}
+
 		std::string qs;
 		qs = "DELETE FROM scenario ";
 		
@@ -8985,9 +9142,6 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionLogs
-					if (loadSessionLogs(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CSessionLogPtr > & childs = getSessionLogs();
 
 					while (!childs.empty())
@@ -8995,20 +9149,15 @@ namespace RSMGR
 						getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 
 				{
 					// cascading deletion for vector child PlayerRatings
-					if (loadPlayerRatings(connection, __FILE__, __LINE__))
-					{
-
 					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
 					while (!childs.empty())
 					{
 						getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
-						}
 					}
 				}
 
