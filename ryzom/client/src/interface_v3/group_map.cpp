@@ -87,7 +87,8 @@ using namespace STRING_MANAGER;
 // STATICS //
 // /////// //
 static CGroupMap   *LastClickedMap = nullptr;
-static CCtrlButton *LastSelectedLandMark = nullptr;
+// the landmark being renamed; a CRefPtr, so that it nulls itself when the button is deleted under the dialog
+static NLMISC::CRefPtr<CCtrlButton> LastSelectedLandMark;
 static bool		   UseUserPositionForLandMark = false;
 static const char  *WIN_LANDMARK_NAME="ui:interface:enter_landmark_name";
 
@@ -160,6 +161,7 @@ static void closeLandMarkNameDialog()
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 	gc->setActive(false);
+	LastSelectedLandMark = nullptr;
 }
 
 //============================================================================================================
@@ -2458,6 +2460,14 @@ void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 }
 
 //============================================================================================================
+void CGroupMap::removeUserLandMarks()
+{
+	// the dialog may be renaming one of the buttons about to be deleted
+	closeLandMarkNameDialog();
+	removeLandMarks(_UserLM);
+}
+
+//============================================================================================================
 void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 {
 	// disable any match in "world" mode
@@ -2544,7 +2554,7 @@ void CGroupMap::createContinentLandMarks()
 	for (k = 0; k < _ContinentText.size(); ++k)
 		delView(_ContinentText[k]);
 	_ContinentText.clear();
-	removeLandMarks(_UserLM);
+	removeUserLandMarks();
 	for (k = 0; k < _PolyButtons.size(); ++k)
 		delCtrl(_PolyButtons[k]);
 	_PolyButtons.clear();
@@ -2625,7 +2635,7 @@ void CGroupMap::updateUserLandMarks()
 	if (_CurMap == nullptr || _CurMap->Name == "world" || _CurContinent == nullptr) return;
 
 	// Remove all
-	removeLandMarks(_UserLM);
+	removeUserLandMarks();
 
 	// Re create User Landmarks
 	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)

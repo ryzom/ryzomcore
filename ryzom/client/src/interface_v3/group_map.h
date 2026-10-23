@@ -545,6 +545,8 @@ private:
 	void updateMatchedLandmarks();
 	//
 	void removeLandMarks(TLandMarkButtonVect &lm);
+	/// Remove the user landmark buttons; closes the landmark name dialog first, it may be renaming one of them
+	void removeUserLandMarks();
 	/** create landmarks from the continent (and remove previous ones)
 	  * this includes fixed and user landmarks
 	  */
