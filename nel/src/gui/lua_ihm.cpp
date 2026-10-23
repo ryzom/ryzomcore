@@ -1160,7 +1160,11 @@ namespace NLGUI
 		if(!pIE)
 		{
 			ls.pushNil();
-			debugInfo("getCurrentWindowUnder(): no window under the pointer, returning nil");
+			// FIXME(atys): trace disabled on this branch. info_player.lua installs game:onOverCap() with setOnDraw()
+			// on the cap window and polls getCurrentWindowUnder() every frame, so it hits the no-window case
+			// constantly in normal play. That script should react to an over event instead of probing per frame;
+			// once it does, drop this comment and the trace comes back with core4.
+			//debugInfo("getCurrentWindowUnder(): no window under the pointer, returning nil");
 		}
 		else
 		{
