@@ -2315,7 +2315,9 @@ namespace NLGUI
 
 		CEventDescriptorKey &eventDesc = (CEventDescriptorKey&)evnt;
 
-		//_LastEventKeyDesc = eventDesc;
+		// Keep the key event that is about to run action handlers, so they can look at it (modifiers of the
+		// triggering key): it must be stored before the dispatch below, since the captured keyboard paths return
+		lastKeyEvent = eventDesc;
 
 		// Any Key event disable the ContextHelp
 		disableContextHelp();
@@ -2432,8 +2434,6 @@ namespace NLGUI
 			CDBManager::getInstance()->flushObserverCalls();
 			return result;
 		}
-
-		lastKeyEvent = eventDesc;
 
 		return handled;
 	}
