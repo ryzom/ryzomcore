@@ -95,6 +95,9 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	// must attach group to hierarchy before we can use it
 	CGroupContainer *gc = dynamic_cast<CGroupContainer  *>(mainIg);
 	if (!gc) return false;
+	// a contact list keeps every entry: the list's element limit (1024 by default) evicts the oldest ones
+	if (gc->getList())
+		gc->getList()->setProperty("maxelements", "-1");
 	if (fatherContainer != nullptr)
 	{
 		fatherContainer->attachContainer(gc, desc.InsertPosition);
@@ -205,7 +208,7 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
 	{
-		return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
+		return sortExByName(a, b);
 	}
 	else
 	{
