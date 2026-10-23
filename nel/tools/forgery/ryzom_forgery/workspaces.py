@@ -25,7 +25,7 @@ import tomlkit
 # is deliberately not a top-level entry -- panoply-baked .dds output lives
 # in build/dds/ instead (see _BUILD_SUBDIRS below), since it's derived/
 # final output, not a source to browse alongside the others.
-SUBDIRS = ("tex", "masks", "shapes", "anims", "skels", "imports", "exports", "build")
+SUBDIRS = ("tex", "masks", "shapes", "anims", "skels", "scenes", "imports", "exports", "build")
 _BUILD_SUBDIRS = ("dds",)  # nested inside build/, not a top-level SUBDIRS entry
 
 _EXTERNAL_WORKSPACES_FILE_NAME = "external_workspaces.toml"

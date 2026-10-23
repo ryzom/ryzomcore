@@ -22,7 +22,7 @@ même résolution save/export) ; seule sa localisation physique diffère.
 
 ## API principale
 
-- `SUBDIRS = ("tex", "masks", "shapes", "anims", "skels", "imports", "exports", "build")`
+- `SUBDIRS = ("tex", "masks", "shapes", "anims", "skels", "scenes", "imports", "exports", "build")`
  (`workspaces.py`) — la structure de dossiers standard d'un workspace **interne** :
   - `tex/` : textures sources du workspace (éditables, synchronisées en direct — voir
  `workspace_sync.md`).
@@ -31,6 +31,7 @@ même résolution save/export) ; seule sa localisation physique diffère.
  fichier existant n'a été trouvé ailleurs — voir `virtual_categories.md`'s
  `find_existing_file`).
   - `anims/`, `skels/` : animations et squelettes.
+  - `scenes/` : scènes Patina (`*.scene`, JSON), créé à la demande aussi dans les workspaces externes.
   - `imports/` : zone surveillée par `import_watcher.py` pour l'auto-import de meshes.
   - `exports/` : zone de sortie du dialogue d'export (`export_dialog.py`) — **exclue par
  défaut** (voir Settings.exclusion_rules dans `settings.md`) pour éviter une boucle

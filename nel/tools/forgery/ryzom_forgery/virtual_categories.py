@@ -25,11 +25,12 @@ CATEGORY_3D_FILES = "3d files"
 CATEGORY_MASKS = "masks"
 CATEGORY_ANIMS = "anims"
 CATEGORY_SKELS = "skels"
+CATEGORY_SCENES = "scenes"
 CATEGORY_OTHERS = "others"
 
 CATEGORIES = (
 	CATEGORY_SHAPES, CATEGORY_TEXTURES, CATEGORY_3D_FILES,
-	CATEGORY_MASKS, CATEGORY_ANIMS, CATEGORY_SKELS, CATEGORY_OTHERS,
+	CATEGORY_MASKS, CATEGORY_ANIMS, CATEGORY_SKELS, CATEGORY_SCENES, CATEGORY_OTHERS,
 )
 
 # dds excluded on purpose -- see module docstring.
@@ -61,6 +62,8 @@ def categorize(name: str) -> str:
 		return CATEGORY_ANIMS
 	if suffix == ".skel":
 		return CATEGORY_SKELS
+	if suffix == ".scene":
+		return CATEGORY_SCENES
 	if suffix in _3D_FILE_EXTENSIONS:
 		return CATEGORY_3D_FILES
 	if suffix in _TEXTURE_EXTENSIONS:

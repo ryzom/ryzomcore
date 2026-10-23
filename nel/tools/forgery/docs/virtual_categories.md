@@ -6,7 +6,7 @@
 
 Classe les fichiers d'un workspace en catégories virtuelles fixes
 (forgery-workspace-projects chantier) : `shapes`, `textures`,
-`3d files`, `masks`, `anims`, `skels`, `others` -- uniquement par nom
+`3d files`, `masks`, `anims`, `skels`, `scenes`, `others` -- uniquement par nom
 (extension, ou suffixe `_<axis>` pour un masque Panoply), **peu importe
 le vrai sous-dossier où le fichier vit sur disque**. Rien n'est déplacé :
 c'est un regroupement d'affichage/recherche, consommé par
