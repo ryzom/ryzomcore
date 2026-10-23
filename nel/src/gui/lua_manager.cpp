@@ -77,6 +77,8 @@ namespace NLGUI
 
 	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
 	{
+		H_AUTO ( RZ_Interface_executeLuaScript )
+
 		if( editorMode )
 			return true;
 

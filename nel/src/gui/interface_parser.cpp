@@ -405,6 +405,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseXMLDocument(xmlNodePtr root, bool reload)
 	{
+		H_AUTO(parseXMLDocument)
 
 		CWidgetManager::SMasterGroup *curRoot = nullptr;
 		CInterfaceGroup *rootGroup = nullptr;
@@ -618,6 +619,7 @@ namespace NLGUI
 		// add all modals group to the window list
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
+			H_AUTO(addWindowToMasterGroup)
 
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[i];
 			// insert all modals
@@ -642,6 +644,8 @@ namespace NLGUI
 		// keep template that have the "keep" flag if we are not reloading
 		// if reloading, always keep the template
 		{
+			H_AUTO(keep_template)
+
 			CXMLAutoPtr ptr;
 			for(uint k = 0; k < _Templates.size(); ++k)
 			{
@@ -745,6 +749,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseInstance(xmlNodePtr cur)
 	{
+		H_AUTO(parseInstance)
 		CXMLAutoPtr ptr;
 
 		//try to find the instance template in our template vector. If the template doesn't exist, return false
@@ -802,6 +807,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseVector(xmlNodePtr cur)
 	{
+		H_AUTO(parseVector)
 		//get the number of elements
 		CXMLAutoPtr cSize((const char*) xmlGetProp( cur, (xmlChar*)"_size" ));
 		if (!cSize)
@@ -937,6 +943,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseLink(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
+		H_AUTO(parseLink)
 		CXMLAutoPtr ptr((const char*) xmlGetProp (cur, (xmlChar*)"expr"));
 		if (!ptr)
 		{
@@ -995,6 +1002,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseVariable (xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	{
+		H_AUTO(parseVariable)
 		//get the args
 		CXMLAutoPtr ptr((const char*) xmlGetProp (cur, (xmlChar*)"entry"));
 		if (!ptr)
@@ -1109,6 +1117,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseOptions (xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	{
+		H_AUTO(parseOptions)
 		// build the options from type
 		CInterfaceOptions *options = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
@@ -1164,6 +1173,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseGroup (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
+		H_AUTO(parseGroup)
 		CInterfaceGroup * group;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (ptr)
@@ -1270,6 +1280,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseControl (xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
+		H_AUTO(parseControl)
 		CCtrlBase* ctrl = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (!ptr)
@@ -1311,6 +1322,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseView(xmlNodePtr cur, CInterfaceGroup * parentGroup, bool reload)
 	{
+		H_AUTO(parseView)
 		CViewBase * view = nullptr;
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"type" ));
 		if (!ptr)
@@ -1695,6 +1707,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup)
 	{
+		H_AUTO(parseTree)
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
@@ -1763,6 +1776,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseDefine(xmlNodePtr cur)
 	{
+		H_AUTO(parseDefine)
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"id" ));
 		if (!ptr || *ptr==0)
 		{
@@ -1829,6 +1843,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseProcedure(xmlNodePtr cur, bool reload)
 	{
+		H_AUTO(parseProcedure)
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"id" ));
 		if (!ptr || *ptr==0)
 		{
@@ -1916,6 +1931,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::initCoordsAndLuaScript()
 	{
+		H_AUTO(initCoordsAndLuaScript)
 		// set all position associations
 		for (map<CInterfaceElement*,string>::const_iterator it = _ParentPositionsMap.begin(); it != _ParentPositionsMap.end();it++)
 		{
@@ -2191,6 +2207,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool				CInterfaceParser::solveDefine(xmlNodePtr cur)
 	{
+		H_AUTO(solveDefine)
 		CXMLAutoPtr ptr;
 
 		//get the node properties
@@ -2494,6 +2511,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CInterfaceParser::parseSheetSelection(xmlNodePtr cur)
 	{
+		H_AUTO(parseSheetSelection)
 		CXMLAutoPtr prop;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"name" );
 		if (!prop)
@@ -2606,6 +2624,7 @@ namespace NLGUI
 	//==================================================================
 	bool CInterfaceParser::parseAnim(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	{
+		H_AUTO(parseAnim)
 		CInterfaceAnim *pAnim;
 
 		CXMLAutoPtr ptr;
@@ -2942,6 +2961,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CInterfaceParser::parseStyle(xmlNodePtr cur)
 	{
+		H_AUTO(parseStyle)
 		string		styleId;
 		CXMLAutoPtr prop;
 
@@ -2985,6 +3005,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CInterfaceParser::parseLUAScript (xmlNodePtr cur)
 	{
+		H_AUTO(parseLUA)
 		// read fileName
 		CXMLAutoPtr prop;
 		string	fileName;
@@ -3008,6 +3029,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool				CInterfaceParser::solveStyle(xmlNodePtr cur)
 	{
+		H_AUTO(solveStyle)
 		CXMLAutoPtr ptr;
 
 		// if the node is a style, abort (not recrusive because use "style" as param name)

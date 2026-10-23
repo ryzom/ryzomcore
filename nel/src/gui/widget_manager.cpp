@@ -269,6 +269,8 @@ namespace NLGUI
 
 	void CWidgetManager::SMasterGroup::sortWorldSpaceGroup ()
 	{
+		H_AUTO ( RZ_Interface_sortWorldSpaceGroup )
+
 		static std::vector<CElementToSort> sortTable;
 		sortTable.clear ();
 
@@ -2089,6 +2091,8 @@ namespace NLGUI
 		CViewRenderer::getInstance()->activateWorldSpaceMatrix (false);
 		NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
 
+		H_BEFORE ( RZ_Interface_DrawViews_Setup )
+
 		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
 		if( getCaptureKeyboard() != nullptr)
 		{
@@ -2144,6 +2148,9 @@ namespace NLGUI
 
 		// Update global alphaS from database
 		updateGlobalAlphas();
+		H_AFTER ( RZ_Interface_DrawViews_Setup )
+
+		H_BEFORE ( RZ_Interface_DrawWindows )
 
 		/*  Draw all the windows
 			To minimize texture swapping, we first sort per Window, then we sort per layer, then we render per Global Texture.
@@ -2201,6 +2208,9 @@ namespace NLGUI
 				}
 			}
 		}
+		H_AFTER ( RZ_Interface_DrawWindows )
+
+		H_BEFORE ( RZ_Interface_DrawViews_After )
 
 		CDBManager::getInstance()->flushObserverCalls();
 
@@ -2241,6 +2251,7 @@ namespace NLGUI
 		driver->setMatrixMode2D11();
 
 		CDBManager::getInstance()->flushObserverCalls();
+		H_AFTER ( RZ_Interface_DrawViews_After )
 	}
 
 	bool CWidgetManager::handleEvent( const CEventDescriptor &evnt )
