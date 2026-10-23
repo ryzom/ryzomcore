@@ -113,8 +113,6 @@ namespace NLGUI
 
 		void			setColorRGBA(NLMISC::CRGBA col);
 		NLMISC::CRGBA	getColorRGBA() const;
-		/// called by CGroupHTML when the pending download is aborted/destroyed, to avoid a dangling pointer
-		void resetHtmlDownload() { _HtmlDownload = NULL; }
 
 		/// called by CGroupHTML when the pending download is aborted/destroyed, to avoid a dangling pointer
 		void resetHtmlDownload() { _HtmlDownload = nullptr; }
