@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-23 — ✨ Patina multi-shape scenes, Forgery 4.28.0
+
+Patina can now hold several shapes at once, shown like the reference shapes of the top-left bar.
+
+- **Bar**: the shape loaded from the Explorer is the "temp shape" (first column: edited indicator, show/hide,
+  show only; greyed when there is none). Shapes of the scene sit to its right with all options (show/hide,
+  place at origin/pivot, 50 % transparent, show only, remove). Under the [+] column: Load / Save scene.
+  [+] menu: the 3 reference shapes, "Add the current shape" (temp shape moves into the scene list), "<add a
+  .shape file>".
+- **Edited shape** = the one whose icon is orange; only it is saved as `.shape`. Unsaved edits of the other
+  shapes stay in memory; quitting asks Save / Discard per modified shape.
+- **Bind**: one shared creature, each shape has its own slot / attach point (Bind panel, "Scene shapes").
+  The creature's own piece of a slot is hidden only while the shape replacing it is shown.
+- **Scenes**: JSON in `<workspace>/scenes/*.scene` (new virtual category `scenes`, folder created on demand,
+  external workspaces included) with camera, open panels and positions, lights, wind, viewport toggles and
+  creature. Quitting saves the scene into the file it came from (`default.scene` if none; offered again at
+  launch, `settings.last_scene_name`); saving over an existing scene asks a second click.
+- **Fixes met on the way**: panoply skin of the picked creature kept when the edited shape changes (hands
+  textures were looked up without their race); a missed texture is no longer cached (cache is keyed by
+  name only); scene shapes look for textures in their own file's folder; camera moved at scene load.
+
+Documentation: `docs/scene.md`, `docs/apps/object_editor.md`, `docs/settings.md`, `docs/workspaces.md`,
+`docs/virtual_categories.md`. Chantier: `project-todos/forgery/patina-multi-shapes-scenes.md`.
+
 ## 2026-10-21 — 🐛 Panoply textures with live_data only: default colour axes, Forgery 4.25.1
 
 With `live_data` alone (no `ryzom-data`, no extra search paths) the Bind preview printed "texture not

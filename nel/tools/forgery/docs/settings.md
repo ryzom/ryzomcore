@@ -59,7 +59,7 @@ shapes, compatibilité `.skel`/`.anim`, panoplies).
  utilisée uniquement pour pré-remplir un nouveau workspace, jamais relue
  pour un workspace existant — `settings.py`)
   - État de restauration de session : `last_folder`, `last_bnp`,
- `last_shape_path`, `last_shape_bnp`, `last_shape_name`
+ `last_shape_path`, `last_shape_bnp`, `last_shape_name`, `last_scene_name` (fichier de `scenes/` rechargé au lancement)
  (`settings.py`) — `last_shape_bnp`/`last_bnp` ne sont renseignés
  que quand le dossier/shape parcouru vit dans une archive `.bnp`.
   - `image_editor_path: Optional[str]` : chemin vers un éditeur d'image
