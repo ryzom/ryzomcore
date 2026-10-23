@@ -425,6 +425,40 @@ class Explorer:
 						self._draw_leaf(ExplorerItem(path=file_path, name=file_path.name), show_thumbnail=True)
 				index = end
 
+	def _draw_favorites(self):
+		is_favorite = str(self.root) in self._favorites
+		tooltip = "Remove current folder from favorites" if is_favorite else "Add current folder to favorites"
+		star_color = _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR
+		if _icon_button(fa_icons.ICON_FA_STAR, tooltip, color=star_color):
+			self._toggle_favorite(str(self.root))
+
+		imgui.same_line()
+		if imgui.begin_combo("##favorites", "Favorites"):
+			if not self._favorites:
+				imgui.text_disabled("(none yet -- click the star to add the current folder)")
+			for favorite in list(self._favorites):
+				imgui.push_id(favorite)
+				clicked, _ = imgui.selectable(Path(favorite).name or favorite, False)
+				if imgui.is_item_hovered():
+					imgui.set_tooltip(favorite)
+				if clicked:
+					self._navigate_to(Path(favorite))
+					imgui.close_current_popup()
+				imgui.pop_id()
+			imgui.end_combo()
+
+	def _toggle_favorite(self, path: str):
+		if path in self._favorites:
+			self._favorites.remove(path)
+		else:
+			self._favorites.append(path)
+		# Re-loads fresh and overwrites only our own section -- other
+		# components (export, search paths, data_root) persist independently
+		# and may have changed their own section since our own __init__.
+		fresh = app_settings.load()
+		fresh.explorer_favorites = self._favorites
+		app_settings.save(fresh)
+
 	def draw(self):
 		# Top-to-bottom order: host app's own header (e.g. object_editor.py's
 		# active-workspace row), the Wexplorer (pinned folders, always fully

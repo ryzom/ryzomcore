@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-23 — 🐛 Explorer: _draw_favorites/_toggle_favorite restored, Forgery 4.28.3
+
+Forgery 4.28.2 crashed on the first frame (`AttributeError: 'Explorer' object has no attribute
+'_draw_favorites'`): the edit of `_draw_tree_children()` in `explorer.py` had also removed the two methods
+that followed it, `_draw_favorites()` and `_toggle_favorite()`. Both are back, unchanged.
+
 ## 2026-10-23 — ⚡️ Explorer and workspace lists stay fast with very large folders, Forgery 4.28.2
 
 A very large workspace (or Explorer folder) dropped Patina under 4 fps.
