@@ -2399,7 +2399,7 @@ NLMISC_COMMAND(setPetAnimalSatiety,"Set the satiety of pet animal (petIndex in 0
 				result += " nameForAnswer not found";
 		}
 
-		log.displayNL( result.c_str() );
+		log.displayNL("%s", result.c_str());
 	}
 
 	return true;
@@ -2437,7 +2437,7 @@ NLMISC_COMMAND(getPetAnimalSatiety,"Get the satiety of pet animal (petIndex in 0
 				result += " nameForAnswer not found";
 		}
 
-		log.displayNL( result.c_str() );
+		log.displayNL("%s", result.c_str());
 	}
 	return true;
 }
@@ -4179,7 +4179,7 @@ NLMISC_COMMAND (infos, "give info on character (GodMode, Invisible...)", "")
 		str << "NOT_AGGROABLE ";
 	}
 
-	log.displayNL(str.c_str());
+	log.displayNL("%s", str.c_str());
 	return true;
 }
 
@@ -9189,7 +9189,7 @@ NLMISC_COMMAND(characterInventoryDump, "Dump character inventory info", "<eid> <
 
 			++j;
 			if ( ! (j % 3)) {
-				log.displayNL(msg.c_str());	
+				log.displayNL("%s", msg.c_str());	
 				msg = "";
 				j = 0;
 			}
@@ -9199,7 +9199,7 @@ NLMISC_COMMAND(characterInventoryDump, "Dump character inventory info", "<eid> <
 	log.displayNL("Showing slot %d - %d for inventory '%s':", start_slot, end_slot, selected_inv.c_str());
 	if (msg.length() > 0)
 	{
-		log.displayNL(msg.c_str());
+		log.displayNL("%s", msg.c_str());
 	}
 	else {
 		log.displayNL("Nothing to display.");

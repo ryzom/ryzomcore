@@ -4120,7 +4120,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, kickPioneer)
 
 	std::string msg;
 	bool success = kickPioneerImpl((TSessionId)sessionId, userId, msg);
-	log.displayNL(msg.c_str());
+	log.displayNL("%s", msg.c_str());
 
 	return success;
 }
@@ -4142,7 +4142,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, unkickPioneer)
 
 	std::string msg;
 	bool success = unkickPioneerImpl((TSessionId)sessionId, userId, msg);
-	log.displayNL(msg.c_str());
+	log.displayNL("%s", msg.c_str());
 
 	return success;
 }

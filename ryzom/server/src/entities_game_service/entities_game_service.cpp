@@ -2167,7 +2167,7 @@ NLMISC_COMMAND(plrStat,"get or set a player stat","<pid><stat><value>")
 		CEntityId playerId(RYZOMID::player,pid);
 		string stat( args[1] );
 		string value = PlayerManager.getValue( playerId, stat );
-		log.displayNL(value.c_str());
+		log.displayNL("%s", value.c_str());
 		return true;
 	}
 
@@ -2213,7 +2213,7 @@ NLMISC_COMMAND(obj_stat,"get or set an object stat","<oid><stat>[type|loc|qualit
 		//if( args[1] == "loc" ) result = WorldObjectManager.getObject(objectId).getLocation().toString());
 		if( args[1] == "quality" ) result = toString(WorldObjectManager.getObject(objectId).getQuality());
 		if( args[1] == "hp" ) result = toString(WorldObjectManager.getObject(objectId).getHP());
-		log.displayNL(result.c_str());
+		log.displayNL("%s", result.c_str());
 		return true;
 	}
 

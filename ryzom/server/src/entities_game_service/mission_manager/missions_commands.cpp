@@ -692,7 +692,7 @@ NLMISC_COMMAND(getItemList, "get list of named items of character by filter", "<
 							string item_stats = toString("%3d|%s|", j, sheet.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -788,7 +788,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 							string item_stats = toString("%3d|%s|", j, phraseId.c_str());
 							if (!extra.empty())
 								itemPtr->getStats(extra, item_stats);
-							log.displayNL(item_stats.c_str());
+							log.displayNL("%s", item_stats.c_str());
 						}
 					}
 				}
@@ -1001,7 +1001,7 @@ NLMISC_COMMAND(getTarget, "get target of player", "<uid>")
 		}
 	}
 	
-	log.displayNL(msg.c_str());
+	log.displayNL("%s", msg.c_str());
 	
 	return true;
 }
@@ -1013,7 +1013,7 @@ NLMISC_COMMAND(getMoney, "get money of player", "<uid>")
 
 	string value = toString(c->getMoney());
 
-	log.displayNL(value.c_str());
+	log.displayNL("%s", value.c_str());
 
 	return true;
 }
@@ -1026,7 +1026,7 @@ NLMISC_COMMAND(getPvpPoints, "get pvp points of player", "<uid>")
 
 	string value = toString("%u", c->getPvpPoint());
 
-	log.displayNL(value.c_str());
+	log.displayNL("%s", value.c_str());
 
 	return true;
 }
