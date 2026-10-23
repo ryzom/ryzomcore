@@ -49,6 +49,7 @@ CIF3DSceneParser::~CIF3DSceneParser()
 
 bool CIF3DSceneParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 {
+	H_AUTO(parseScene3D)
 	CInterface3DScene *pScene;
 	CXMLAutoPtr ptr;
 
@@ -96,6 +97,7 @@ CIFDDXParser::~CIFDDXParser()
 
 bool CIFDDXParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 {
+	H_AUTO(parseDDX)
 	CInterfaceDDX *pDDX = nullptr;
 	pDDX = new CInterfaceDDX;
 	if (pDDX)
@@ -124,6 +126,7 @@ CActionCategoryParser::~CActionCategoryParser()
 
 bool CActionCategoryParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 {
+	H_AUTO(parseActionCategory)
 	// The category
    	CCategory category;
 
@@ -352,6 +355,7 @@ CCommandParser::~CCommandParser()
 
 bool CCommandParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 {
+	H_AUTO(parseCommand)
 	// Parse the key
 	bool ret = false;
 
@@ -411,6 +415,7 @@ CKeyParser::~CKeyParser()
 
 bool CKeyParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup )
 {
+	H_AUTO(parseKey)
 	// Parse the key
 	bool ret = false;
 

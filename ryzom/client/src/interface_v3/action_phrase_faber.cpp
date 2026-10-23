@@ -2016,7 +2016,7 @@ void CActionPhraseFaber::CSkillObserver::onSkillChange()
 
 void CActionPhraseFaber::CDBModCraftObs::update(ICDBNode * /* node */)
 {
-	if (ActionPhraseFaber == NULL || ActionPhraseFaber->_ExecuteFromItemPlanBrick == NULL)
+	if (ActionPhraseFaber == nullptr || ActionPhraseFaber->_ExecuteFromItemPlanBrick == nullptr)
 		return;
 
 	ActionPhraseFaber->updateItemResult();

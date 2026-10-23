@@ -671,7 +671,7 @@ namespace NLGUI
 		}
 		catch(const std::exception &e)
 		{
-			//CLuaIHMRyzom::dumpCallStack();
+			CLuaIHM::dumpCallStack();
 			nlwarning(e.what());
 		}
 	}

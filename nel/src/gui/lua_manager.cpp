@@ -37,6 +37,25 @@ namespace NLGUI
 	bool CLuaManager::debugLua = false;
 	bool CLuaManager::editorMode = false;
 	CLuaManager* CLuaManager::instance = nullptr;
+	static CLuaManager::IScriptErrorReporter *s_ScriptErrorReporter = nullptr;
+
+	void CLuaManager::setScriptErrorReporter(IScriptErrorReporter *reporter)
+	{
+		s_ScriptErrorReporter = reporter;
+	}
+
+	CLuaManager::IScriptErrorReporter *CLuaManager::getScriptErrorReporter()
+	{
+		return s_ScriptErrorReporter;
+	}
+
+	void CLuaManager::reportScriptError(const std::string &error, const std::string &luaScript)
+	{
+		if (s_ScriptErrorReporter)
+			s_ScriptErrorReporter->onScriptError(error, luaScript);
+		else
+			nlwarning("%s", error.c_str());
+	}
 
 	CLuaManager::CLuaManager()
 	{
@@ -63,6 +82,8 @@ namespace NLGUI
 
 	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
 	{
+		H_AUTO ( RZ_Interface_executeLuaScript )
+
 		if( editorMode )
 			return true;
 
@@ -75,15 +96,7 @@ namespace NLGUI
 		}
 		catch( const ELuaError &e )
 		{
-			nlwarning("--- LUA ERROR ---");
-			nlwarning(e.luaWhat().c_str());
-			std::vector<std::string> res;
-			NLMISC::explode(luaScript, std::string("\n"), res);
-			for(uint k = 0; k < res.size(); ++k)
-			{
-					nlwarning("%.05u %s", k, res[k].c_str());
-			}
-			nlwarning("--- ********* ---");
+			reportScriptError( e.luaWhat(), luaScript );
 			return false;
 		}
 
@@ -97,11 +110,13 @@ namespace NLGUI
 		luaState = new CLuaState( debugLua );
 	}
 
-	void CLuaManager::forceGarbageCollect()
+	uint CLuaManager::forceGarbageCollect()
 	{
 		nlinfo("Collecting Garbaged LUA variables");
 		luaState->setGCThreshold( 0 );
-		nlinfo( NLMISC::toString( "Memory Used : %d Kb", luaState->getGCCount() ).c_str() );
+		uint memoryUsed = luaState->getGCCount();
+		nlinfo( "Memory Used : %u Kb", memoryUsed );
+		return memoryUsed;
 	}
 }
 
