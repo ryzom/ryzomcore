@@ -179,7 +179,7 @@ private:
 	class CDBModCraftObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	CDBModCraftObs			_DBModCraftObs;
 	friend class			CDBModCraftObs;

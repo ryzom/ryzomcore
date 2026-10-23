@@ -2252,7 +2252,8 @@ class CAHConfirmTrade : public IActionHandler
 		case 1:		enableResale = true; break;
 		default: // 2: comes only from Enter of Shift+Enter key from an edit box or in the modal window
 			{
-				enableResale = !Driver->AsyncListener.isKeyPushed(KeySHIFT);
+				const NLGUI::CEventDescriptorKey& keyEvent = CWidgetManager::getInstance()->getLastKeyEvent();
+				enableResale = ! keyEvent.getKeyShift();
 			}
 		}
 

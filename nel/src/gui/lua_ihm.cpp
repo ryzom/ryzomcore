@@ -1113,6 +1113,43 @@ namespace NLGUI
 
 		return 0;
 	}
+	// ***************************************************************************
+	static CLuaIHM::IDebugOutput *s_DebugOutput = nullptr;
+	static NLMISC::CLog *s_CommandLog = nullptr;
+
+	void CLuaIHM::setDebugOutput(IDebugOutput *output)
+	{
+		s_DebugOutput = output;
+	}
+
+	CLuaIHM::IDebugOutput *CLuaIHM::getDebugOutput()
+	{
+		return s_DebugOutput;
+	}
+
+	void CLuaIHM::debugInfo(const std::string &dbg)
+	{
+		if (s_DebugOutput)
+			s_DebugOutput->debugInfo(dbg);
+	}
+
+	void CLuaIHM::dumpCallStack(int startStackLevel)
+	{
+		if (s_DebugOutput)
+			s_DebugOutput->dumpCallStack(startStackLevel);
+	}
+
+	void CLuaIHM::setCommandLog(NLMISC::CLog *log)
+	{
+		s_CommandLog = log;
+	}
+
+	NLMISC::CLog *CLuaIHM::getCommandLog()
+	{
+		return s_CommandLog ? s_CommandLog : NLMISC::InfoLog;
+	}
+
+	// ***************************************************************************
 
 
 	int CLuaIHM::getCurrentWindowUnder(CLuaState &ls)
@@ -1123,6 +1160,11 @@ namespace NLGUI
 		if(!pIE)
 		{
 			ls.pushNil();
+			// FIXME(atys): trace disabled on this branch. info_player.lua installs game:onOverCap() with setOnDraw()
+			// on the cap window and polls getCurrentWindowUnder() every frame, so it hits the no-window case
+			// constantly in normal play. That script should react to an over event instead of probing per frame;
+			// once it does, drop this comment and the trace comes back with core4.
+			//debugInfo("getCurrentWindowUnder(): no window under the pointer, returning nil");
 		}
 		else
 		{
@@ -1290,7 +1332,7 @@ namespace NLGUI
 			}
 		}
 
-		ls.push(command->execute(rawCommandString,   args,    NLMISC::ErrorLog(),    false,    true));
+		ls.push(command->execute(rawCommandString,   args,    *getCommandLog(),    false,    true));
 		return 1;
 	}
 
