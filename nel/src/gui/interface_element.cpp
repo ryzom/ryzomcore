@@ -1172,6 +1172,8 @@ namespace NLGUI
 		{
 			_Active = state;
 			invalidateCoords();
+			// force invalidate CViewText/CGroupTable inner elements
+			invalidateContent();
 		}
 	}
 
