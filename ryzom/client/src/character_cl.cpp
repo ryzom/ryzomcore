@@ -3662,7 +3662,9 @@ void CCharacterCL::beginCast(const MBEHAV::CBehaviour &behaviour)
 		dirToTarget.z = 0;
 		dirToTarget.normalize();
 		front( dirToTarget );
-		dir( dirToTarget );
+		// dir() does not check the sheet's Turn flag as front() does: a placed object must not swing its mesh
+		if(_CanTurn)
+			dir( dirToTarget );
 	}
 
 	switch(behaviour.Behaviour)
@@ -4834,7 +4836,9 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 				frontYawBefore = frontYaw();
 				front( dirToTarget );
 			}
-			dir( dirToTarget );
+			// dir() does not check the sheet's Turn flag as front() does: a placed object must not swing its mesh
+			if(_CanTurn)
+				dir( dirToTarget );
 		}
 
 		// Apply the state animation chosen before
