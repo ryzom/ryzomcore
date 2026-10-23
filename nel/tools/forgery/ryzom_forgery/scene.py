@@ -39,6 +39,7 @@ class SceneEntry:
 	placement: str = "auto"  # "auto" (side by side) | "origin" | "pivot"
 	bind_slot: str = ""  # creature_ref.BODY_SLOTS entry or "hair" (skinned); "" = none
 	bind_attach_point: str = ""  # bone name (rigid); "" = none
+	texture_slot: Optional[int] = None  # Multi Bitmap slot chosen for this shape (a preview choice, kept here rather than as a shape modification); None = as stored in the .shape
 	kept: bool = True  # False only for the entry a load from the Explorer created, until the user adds it with [+]: the next Explorer load replaces it. Not saved -- entries read from a scene are all kept
 
 	@property
@@ -133,7 +134,8 @@ def to_dict(scene: Scene) -> Dict[str, Any]:
 		"solo": scene.solo_id,
 		"entries": [
 			{"id": e.id, "source": e.source, "visible": e.visible, "transparent": e.transparent,
-			 "placement": e.placement, "bind_slot": e.bind_slot, "bind_attach_point": e.bind_attach_point}
+			 "placement": e.placement, "bind_slot": e.bind_slot, "bind_attach_point": e.bind_attach_point,
+			 "texture_slot": e.texture_slot}
 			for e in scene.entries
 		],
 		"ui": scene.ui,
@@ -150,7 +152,8 @@ def from_dict(data: Dict[str, Any], workspace_dir: Optional[Path],
 			entry = SceneEntry(
 				id=str(raw["id"]), source=dict(raw["source"]), visible=bool(raw.get("visible", True)),
 				transparent=bool(raw.get("transparent", False)), placement=str(raw.get("placement", "auto")),
-				bind_slot=str(raw.get("bind_slot", "")), bind_attach_point=str(raw.get("bind_attach_point", "")))
+				bind_slot=str(raw.get("bind_slot", "")), bind_attach_point=str(raw.get("bind_attach_point", "")),
+				texture_slot=int(raw["texture_slot"]) if raw.get("texture_slot") is not None else None)
 		except (KeyError, TypeError, ValueError):
 			continue
 		if resolve_source(entry.source, workspace_dir, bnp_has) is None or scene.entry(entry.id) is not None:

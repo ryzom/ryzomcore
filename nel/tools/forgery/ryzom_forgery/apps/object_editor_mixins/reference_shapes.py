@@ -23,6 +23,7 @@ from ryzom_forgery.explorer import ExplorerItem
 from pynel.ryzom_bnp import BnpError, BnpReader
 from pynel.ryzom_shape import ShapeParseError, parse_shape
 
+from ryzom_forgery.apps.object_editor_mixins.scene_io import apply_texture_slot
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import _build_geom, _build_vertex_data
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
@@ -78,6 +79,8 @@ class ReferenceShapesMixin:
 				path = scene_model.resolve_source(source, self.workspace_setup_dialog.active_workspace_dir)
 				data = path.read_bytes()
 			shape_file = parse_shape(data)
+			if entry.texture_slot is not None:
+				apply_texture_slot(shape_file.value, entry.texture_slot)
 		except (OSError, ShapeParseError, BnpError, KeyError, AttributeError) as exc:
 			print(f"[object_editor] failed to load scene shape {entry.id!r} ({path}): {exc}")
 			shape_file = None

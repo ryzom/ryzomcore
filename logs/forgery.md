@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-23 — 🐛 Patina: Multi Bitmap slot kept in the scene and shown right away, Forgery 4.28.1
+
+- With a creature displayed, the edited shape is drawn from its bound copy, which the material nodes never
+  reached: changing the Multi Bitmap slot (or a colour, a texture, the panoply pick) only showed after
+  switching the edited shape. `_reapply_material()`/`_reapply_all_materials()` (`materials.py`) now rebuild
+  the bound copy (`_refresh_bound_edited_shape()`).
+- The slot is a preview choice: it no longer makes the shape "modified" (the modified check serializes the
+  shape as if its slot were the first one, `_slot_neutral_dumps()`), and it is saved per shape in the scene
+  (`texture_slot` of each entry in `scenes/*.scene`), applied again when the scene is loaded, the shape
+  becomes the edited one, or it is drawn read-only. Saving the `.shape` still writes the current slot.
+
+Documentation: `docs/scene.md`, `docs/apps/object_editor.md`.
+
 ## 2026-10-23 — ✨ Patina multi-shape scenes, Forgery 4.28.0
 
 Patina can now hold several shapes at once, shown like the reference shapes of the top-left bar.

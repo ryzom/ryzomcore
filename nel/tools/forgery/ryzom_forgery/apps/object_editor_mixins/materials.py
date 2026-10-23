@@ -371,6 +371,10 @@ class MaterialsMixin:
 	def _reapply_material(self, material_id):
 		"""Re-runs _apply_material on every NodePath using this material, e.g.
 		after an in-place edit of the parsed Material (texture set change...)."""
+		self._reapply_material_nodes(material_id)
+		self._refresh_bound_edited_shape()
+
+	def _reapply_material_nodes(self, material_id):
 		for node_path in self._material_node_paths.get(material_id, []):
 			self._apply_material(node_path, material_id)
 
@@ -379,7 +383,15 @@ class MaterialsMixin:
 		panoply race/user-color pick) affects any material whose texture has
 		a variant for it, not just one."""
 		for material_id in self._material_node_paths:
-			self._reapply_material(material_id)
+			self._reapply_material_nodes(material_id)
+		self._refresh_bound_edited_shape()
+
+	def _refresh_bound_edited_shape(self):
+		"""With a creature displayed the edited shape is drawn from its bound
+		copy (model_root is hidden), which the material nodes above do not
+		reach: rebuild it so a texture change shows right away."""
+		if self._creature_displayed():
+			self._apply_loaded_shape_to_creature()
 
 	def _set_material_override_color(self, material_id, color):
 		"""Sets (or, if color is None, clears) a material's manual flat-color

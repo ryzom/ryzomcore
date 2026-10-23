@@ -17,6 +17,7 @@ from panda3d.core import Quat, Vec3
 import dataclasses
 
 from pynel.ryzom_shape import AABBox, Mesh, Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
+from ryzom_forgery.apps.object_editor_mixins.scene_io import apply_texture_slot
 
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import PanelState
@@ -466,6 +467,9 @@ class ShapeIOMixin:
 			self.shape_error = str(exc)
 			return
 
+		edited_entry = self._scene.entry(self._scene.edited_id)
+		if not register and edited_entry is not None and edited_entry.texture_slot is not None:
+			apply_texture_slot(shape_file.value, edited_entry.texture_slot)
 		self._display_shape(shape_file)
 		self._capture_shape_baseline()
 		if register:

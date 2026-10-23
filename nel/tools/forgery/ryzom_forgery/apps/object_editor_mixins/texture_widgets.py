@@ -385,6 +385,9 @@ class TextureWidgetsMixin:
 		happened to be selected when the shape was authored (e.g. index 0 /
 		nospec.png, which shows no specular at all regardless of slot)."""
 		materials = self.shape_file.value.materials
+		edited_entry = self._scene.entry(self._scene.edited_id)
+		if edited_entry is not None:
+			edited_entry.texture_slot = index  # kept in the scene, see scene.SceneEntry.texture_slot
 		for material_id, texture in entries:
 			self._ensure_multi_bitmap_slot(texture, index)
 			texture.selected_index = index

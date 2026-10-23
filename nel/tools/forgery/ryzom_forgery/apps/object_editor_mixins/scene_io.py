@@ -36,6 +36,31 @@ _SCENE_LOAD_POPUP_ID = "##scene-load-popup"
 _SCENE_SAVE_POPUP_ID = "##scene-save-popup"
 _OVERWRITE_COLOR = (0.95, 0.55, 0.15, 1.0)
 
+def multi_file_textures(shape_value):
+	"""Every CTextureMultiFile of the shape's materials (stage 0, and the
+	faces of a stage 1 specular cube) -- the textures a Multi Bitmap slot
+	choice applies to."""
+	found = []
+	for material in getattr(shape_value, "materials", None) or []:
+		textures = list(material.textures or [])
+		if textures and textures[0] is not None:
+			found.append(textures[0])
+		if len(textures) > 1 and textures[1] is not None:
+			stage1 = textures[1]
+			found.extend(stage1.sub_textures or [] if stage1.class_name == "CTextureCube" else [stage1])
+	return [t for t in found if t is not None and t.class_name == "CTextureMultiFile" and t.file_names]
+
+
+def apply_texture_slot(shape_value, index):
+	"""Selects Multi Bitmap slot `index` on every multi-file texture of the
+	shape (same writes as the Textures tab's Select button)."""
+	for texture in multi_file_textures(shape_value):
+		while len(texture.file_names) <= index:
+			texture.file_names.append("")
+		texture.selected_index = index
+		texture.file_name = texture.file_names[index]
+
+
 _PANEL_ATTRS = {
 	"wind": "_wind_panel",
 	"bone_preview": "_bone_preview_panel",
@@ -58,6 +83,21 @@ class SceneIOMixin:
 	# Which entry is the shape being edited, and what "modified" means
 	# ------------------------------------------------------------------
 
+	def _slot_neutral_dumps(self):
+		"""The shape serialized as if its Multi Bitmap slot were the first
+		one: the slot is a preview choice kept in the scene, not a
+		modification of the shape."""
+		saved = [(t, t.selected_index, t.file_name) for t in multi_file_textures(self.shape_file.value)]
+		try:
+			for texture, _index, _name in saved:
+				texture.selected_index = 0
+				texture.file_name = texture.file_names[0]
+			return dumps(self.shape_file)
+		finally:
+			for texture, index, name in saved:
+				texture.selected_index = index
+				texture.file_name = name
+
 	def _capture_shape_baseline(self):
 		"""Remembers how the shape being edited serializes right now (after
 		its pivot was baked into it, exactly as a Save would) -- what
@@ -69,7 +109,7 @@ class SceneIOMixin:
 			return
 		try:
 			self._bake_transform_into_shape()
-			self._shape_baseline_bytes = dumps(self.shape_file)
+			self._shape_baseline_bytes = self._slot_neutral_dumps()
 		except ShapeWriteError:
 			pass
 
@@ -84,7 +124,7 @@ class SceneIOMixin:
 			return True  # a pivot-locked edit, baked into the vertices only at save time
 		try:
 			self._bake_transform_into_shape()
-			return dumps(self.shape_file) != self._shape_baseline_bytes
+			return self._slot_neutral_dumps() != self._shape_baseline_bytes
 		except ShapeWriteError:
 			return False
 
@@ -119,6 +159,8 @@ class SceneIOMixin:
 			self._scene.add(entry)
 			self._scene.edited_id = entry.id
 		else:
+			if entry.source != source:
+				entry.texture_slot = None
 			entry.source = source
 		self._scene_shapes[entry.id] = self.shape_file
 		self._scene_dirty.pop(entry.id, None)
