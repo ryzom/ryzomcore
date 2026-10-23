@@ -114,7 +114,8 @@ protected:
 		const SZoneUnit2&operator= (const SZoneUnit&zu);
 	};
 
-	static std::string			_StringOutOfBound;
+	/// Returned by getName() for a cell outside the region; a constant, so that constructing a region touches no static
+	static const std::string	_StringOutOfBound;
 
 protected:
 
