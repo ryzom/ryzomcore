@@ -2927,7 +2927,7 @@ void CCharacter::postLoadTreatment()
 
 	if (gid != _GuildId)
 	{
-		nlwarning("Player %s think he is in guild %u, he really is in guild %u, changing",
+		nlwarning("Player %s think he is in guild %u, he really is in guild %s, changing",
 			_Id.toString().c_str(),
 			_GuildId,
 			guildIdToString(gid).c_str());
