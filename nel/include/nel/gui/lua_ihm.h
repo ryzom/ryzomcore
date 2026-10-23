@@ -33,6 +33,7 @@ namespace NLMISC
 	class CPolygon2D;
 	class CVector2f;
 	class CRGBA;
+	class CLog;
 }
 
 namespace NLGUI
@@ -77,6 +78,32 @@ namespace NLGUI
 	{
 	public:
 		static void	registerAll(CLuaState &ls);
+
+		/** Developer trace sink of the Lua bindings.
+		  * The library has no notion of a system info window or of a user setting that turns Lua tracing on, so
+		  * the application installs one; without a sink the traces are dropped. These traces report conditions a
+		  * UI script author wants to know about (an unknown element, a call that returns nil, a format used on the
+		  * wrong kind of text); they are never errors of the library itself.
+		  */
+		class IDebugOutput
+		{
+		public:
+			virtual ~IDebugOutput() {}
+			/// print a trace, typically with the location of the calling Lua line
+			virtual void debugInfo(const std::string &dbg) = 0;
+			/// print the current Lua call stack
+			virtual void dumpCallStack(int startStackLevel) = 0;
+		};
+		static void			setDebugOutput(IDebugOutput *output);
+		static IDebugOutput	*getDebugOutput();
+		/// trace through the installed sink (nothing happens without one)
+		static void			debugInfo(const std::string &dbg);
+		/// dump the Lua call stack through the installed sink (nothing happens without one)
+		static void			dumpCallStack(int startStackLevel = 0);
+
+		/// log that receives the output of console commands run from Lua with runCommand(), NLMISC::InfoLog by default
+		static void			setCommandLog(NLMISC::CLog *log);
+		static NLMISC::CLog	*getCommandLog();
 
 		/** CReflectableInterfaceElement management on stack, stored by a CRefPtr.
 		  * May be called as well for ui element, because they derive from CReflectableRefPtrTarget
