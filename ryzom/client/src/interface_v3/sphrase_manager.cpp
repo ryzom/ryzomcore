@@ -567,23 +567,27 @@ void		CSPhraseManager::updateMemoryDBSlot(uint32 memorySlot)
 	if(!_InitInGameDone)
 		return;
 
-	if(_SelectedMemoryDB==-1 || _SelectedMemoryDB>=(sint32)_Memories.size())
-		return;
-
 	if(memorySlot<PHRASE_MAX_MEMORY_SLOT)
 	{
-		CMemorySlot		&slot= _Memories[_SelectedMemoryDB].Slot[memorySlot];
-		if(!slot.isPhrase())
-			_MemoryDbLeaves[memorySlot]->setValue32(0);
-		else
-			_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
+		if(_SelectedMemoryDB !=-1 && _SelectedMemoryDB < (sint32)_Memories.size())
+		{
+			CMemorySlot &slot= _Memories[_SelectedMemoryDB].Slot[memorySlot];
 
-		CMemorySlot		&slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
+			if(!slot.isPhrase())
+				_MemoryDbLeaves[memorySlot]->setValue32(0);
+			else
+				_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
+		}
 
-		if(!slotAlt.isPhrase())
-			_MemoryAltDbLeaves[memorySlot]->setValue32(0);
-		else
-			_MemoryAltDbLeaves[memorySlot]->setValue32(slotAlt.Id);
+		if(_SelectedMemoryDBalt !=-1 && _SelectedMemoryDBalt < (sint32)_Memories.size())
+		{
+			CMemorySlot &slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
+
+			if(!slotAlt.isPhrase())
+				_MemoryAltDbLeaves[memorySlot]->setValue32(0);
+			else
+				_MemoryAltDbLeaves[memorySlot]->setValue32(slotAlt.Id);
+		}
 	}
 }
 
