@@ -1731,7 +1731,7 @@ namespace NLGUI
 			linePushed= true;
 		}
 		// Append to the last line
-		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext);
+		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, _TabWidth, *TextContext);
 		// reset the word
 		ucCurrentWord.clear();
 	}
@@ -1830,7 +1830,7 @@ namespace NLGUI
 				if(currLine[i].Format!=lineWordFormat)
 				{
 					// add the current lineWord to the line.
-					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
+					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, _TabWidth, *TextContext);
 					// get new lineWordFormat
 					lineWordFormat= currLine[i].Format;
 					// and clear
@@ -1844,7 +1844,7 @@ namespace NLGUI
 			}
 
 			if(!lineWord.empty())
-				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
+				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, _TabWidth, *TextContext);
 
 			// clear
 			currLine.clear();
@@ -2008,7 +2008,7 @@ namespace NLGUI
 						spaceWord.build ("", *TextContext, maxNumSpaces);
 						spaceWord.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
-						_Lines.back()->addWord(spaceWord, _FontWidth);
+						_Lines.back()->addWord(spaceWord, _FontWidth, _TabWidth);
 						if (expandSpaces)
 						{
 							_Lines.back()->setSpaceWidth(nMaxWidth / (float) maxNumSpaces);
@@ -2047,7 +2047,7 @@ namespace NLGUI
 						{
 							_Lines.back()->setSpaceWidth(0);
 						}
-						_Lines.back()->addWord(word, _FontWidth);
+						_Lines.back()->addWord(word, _FontWidth, _TabWidth);
 						currPos = currPos + numSpaces + currChar;
 					}
 				}
@@ -2073,7 +2073,7 @@ namespace NLGUI
 						word.build(wordValue, *TextContext, numSpaces);
 						word.Format= wordFormat;
 						// update line width
-						_Lines.back()->addWord(word, _FontWidth);
+						_Lines.back()->addWord(word, _FontWidth, _TabWidth);
 						++numWordsInLine;
 					}
 				}
@@ -2191,7 +2191,7 @@ namespace NLGUI
 					CViewText::CLine *endLine = new CViewText::CLine;
 					CViewText::CWord w;
 					w.build(_OverflowText, *TextContext);
-					endLine->addWord(w, _FontWidth);
+					endLine->addWord(w, _FontWidth, _TabWidth);
 					_Lines.push_back(TLineSPtr(endLine));
 				}
 			}
@@ -2877,16 +2877,16 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const std::string &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext)
+	void CViewText::CLine::addWord(const std::string &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, float tabWidth, NL3D::UTextContext &textContext)
 	{
 		CWord word;
 		word.build(text, textContext, numSpaces);
 		word.Format= wordFormat;
-		addWord(word, fontWidth);
+		addWord(word, fontWidth, tabWidth);
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const CWord &word, float fontWidth)
+	void CViewText::CLine::addWord(const CWord &word, float fontWidth, float tabWidth)
 	{
 		_Words.push_back(word);
 		_NumChars += word.NumSpaces + uint(word.Info.StringLength);
@@ -2896,7 +2896,7 @@ namespace NLGUI
 			_StringLine = word.Info.StringLine;
 		}
 		// the width of the line must reach at least the Tab
-		_WidthWithoutSpaces= max(_WidthWithoutSpaces, word.Format.TabX * fontWidth);
+		_WidthWithoutSpaces= max(_WidthWithoutSpaces, word.Format.TabX * tabWidth);
 		// append the text space
 		_WidthWithoutSpaces += word.Info.StringWidth;
 	}
