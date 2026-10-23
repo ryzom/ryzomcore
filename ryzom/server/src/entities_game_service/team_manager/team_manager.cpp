@@ -421,6 +421,16 @@ void CTeamManager::joinAccept( const NLMISC::CEntityId &charId)
 		return;
 	}
 	invitor->setAfkState(false);
+	// the invitation was issued while the invitor was alone or a team leader (isInvitableBy); if the invitor
+	// has since joined a team led by someone else, that leader never invited anyone, the invitation is void
+	CTeam *invitorTeam = getTeam( invitor->getTeamId() );
+	if ( invitorTeam && invitorTeam->getLeader() != invitorId )
+	{
+		nlwarning("<CTeamManager joinAccept>character %s accepted an invitation from %s, who is no longer the leader of team %u", charId.toString().c_str(), invitorId.toString().c_str(), invitor->getTeamId());
+		invited->setTeamInvitor( CEntityId::Unknown );
+		return;
+	}
+
 	//cancel the proposal
 	invited->setTeamInvitor( CEntityId::Unknown );
 
