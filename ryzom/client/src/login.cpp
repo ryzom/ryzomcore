@@ -836,6 +836,10 @@ void initLoginScreen()
 	loginOK = false;
 }
 
+// Login with LoginLogin / LoginPassword. On failure the error is shown and ev_bad_login is pushed; on success the
+// caller pushes ev_login_ok once it is ready to go on (auto login first selects the shard in legacy mode).
+static bool tryLogin(bool vanishScreen);
+
 void initAutoLogin()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -843,7 +847,10 @@ void initAutoLogin()
 	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 	pGEBLog->setInputString(LoginLogin);
 	pGEBPwd->setInputString(LoginPassword);
-	CAHManager::getInstance()->runActionHandler("on_login", nullptr, "");
+
+	// a failed login shows the error and pushes ev_bad_login, the state machine returns to the login screen
+	if (!tryLogin(true))
+		return;
 
 	if (ClientCfg.R2Mode)
 	{
@@ -1236,7 +1243,7 @@ void initShardDisplay()
 
 // ***************************************************************************
 
-void onlogin(bool vanishScreen = true)
+static bool tryLogin(bool vanishScreen)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1254,113 +1261,8 @@ void onlogin(bool vanishScreen = true)
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
 
 	// Check the login/pass
-
-	// main menu page for r2mode
 	string res = checkLogin(LoginLogin, LoginPassword, ClientApp, LoginCustomParameters);
-	if (res.empty())
-	{
-		// if not in auto login, push login ok event
-		if (LoginSM.getCurrentState() != CLoginStateMachine::st_auto_login)
-			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
-
-		return;
-		// Ok there is something ! Display next window
-
-		if (ClientCfg.R2Mode)
-		{
-//			if (ClientCfg.PatchWanted)
-//			{
-//				// start the patching system
-//				CPatchManager *pPM = CPatchManager::getInstance();
-//
-//				pPM->init(R2PatchURLs, R2BackupPatchURL, R2ServerVersion);
-//
-//				pPM->startCheckThread();
-//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
-//			}
-//			else
-//			{
-//				// go directly to web browser
-//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
-//
-//				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//				// start the browser
-//				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
-//
-//				pGH->browse(RingMainURL.c_str());
-//			}
-//			return;
-		}
-		else
-		{
-//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
-		}
-
-//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
-//		if (pList == NULL)
-//		{
-//			nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
-//			return;
-//		}
-//		/* // To test more servers
-//		for (uint fff = 0; fff < 20; ++fff)
-//		{
-//			CShard s (	toString("%05d",fff), fff%3, fff+32, toString("%s%d","pipo",fff),
-//						32*fff%46546, "32.32.32.32", "http://www.ryzom.com" );
-//			Shards.push_back(s);
-//		}*/
-//
-//		CInterfaceGroup *pPrevLine = NULL;
-//		for(uint i = 0; i < Shards.size(); i++)
-//		{
-//			vector< pair < string, string > > params;
-//			params.clear();
-//			params.push_back(pair<string,string>("id", "s"+toString(i)));
-//			if (i>0)
-//				params.push_back(pair<string,string>("posref", "BL TL"));
-//
-//			CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
-//			if (pNewLine != NULL)
-//			{
-//				CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
-//				if (pVT != NULL) pVT->setText(Shards[i].Name);
-//
-//				pVT = dynamic_cast<CViewText*>(pNewLine->getView("version"));
-//				if (pVT != NULL) pVT->setText(Shards[i].Version);
-//
-//				CViewBase *pVBon = pNewLine->getView("online");
-//				CViewBase *pVBoff = pNewLine->getView("offline");
-//				if ((pVBon != NULL) && (pVBoff != NULL))
-//				{
-//					pVBon->setActive (Shards[i].Online);
-//					pVBoff->setActive (!Shards[i].Online);
-//				}
-//
-//				pVT = dynamic_cast<CViewText*>(pNewLine->getView("nbplayer"));
-//				if (pVT != NULL) pVT->setText(toString(Shards[i].NbPlayers));
-//
-//
-//				// Add to the list
-//				pNewLine->setParent(pList);
-//				pNewLine->setParentSize(pList);
-//				pNewLine->setParentPos(pPrevLine);
-//				pList->addGroup(pNewLine);
-//
-//				pPrevLine = pNewLine;
-//			}
-//		}
-//		// UI Patch
-//		if (!Shards.empty())
-//		{
-//			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
-//			if (pCB != NULL)
-//				pCB->setPushed(true);
-//			CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
-//
-//		}
-//		pList->invalidateCoords();
-	}
-	else
+	if (!res.empty())
 	{
 		// close the socket in case of error
 		HttpClient.disconnect();
@@ -1368,14 +1270,17 @@ void onlogin(bool vanishScreen = true)
 		pIM->messageBoxWithHelp("Error : " + res, "ui:login");
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_bad_login);
-//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
-//
-//		if (LoginLogin.empty())
-//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
-//		else
-//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
-
+		return false;
 	}
+	return true;
+}
+
+// ***************************************************************************
+
+void onlogin(bool vanishScreen = true)
+{
+	if (tryLogin(vanishScreen))
+		LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
 }
 
 class CAHOnLogin : public IActionHandler

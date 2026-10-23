@@ -337,6 +337,7 @@ void CLoginStateMachine::run()
 				// r2 mode
 				SM_BEGIN_EVENT_TABLE
 					SM_EVENT(ev_login_ok, st_check_patch);
+					SM_EVENT(ev_bad_login, st_login);
 					SM_EVENT(ev_quit, st_end);
 				SM_END_EVENT_TABLE
 			}
@@ -529,6 +530,7 @@ void CLoginStateMachine::run()
 			{
 				SM_BEGIN_EVENT_TABLE
 					SM_EVENT(ev_enter_game, st_ingame);
+					SM_EVENT(ev_conn_failed, st_login);
 				SM_END_EVENT_TABLE
 			}
 			else
