@@ -32,9 +32,9 @@ class ZulipClient(zulip.Client):
 				res = self.register(None, None, **kwargs)
 			else:
 				res = self.register(event_types, narrow, **kwargs)
-			if "error" in res["result"]:
+			if not isinstance(res, dict) or "error" in res.get("result", "error") or "queue_id" not in res or "last_event_id" not in res:
 				if self.verbose:
-					print("Server returned error:\n{}".format(res["msg"]))
+					print("Server returned error:\n{}".format(res.get("msg", "") if isinstance(res, dict) else res))
 				time.sleep(1)
 			else:
 				self.queue_id = res["queue_id"]
@@ -75,18 +75,23 @@ class ZulipClient(zulip.Client):
 				time.sleep(1)
 				continue
 
-			if "error" in res["result"]:
-				if res["result"] == "http-error":
+			if not isinstance(res, dict):
+				print(f"Unexpected get_events response: {res!r}")
+				time.sleep(1)
+				continue
+
+			if "error" in res.get("result", "error"):
+				if res.get("result") == "http-error":
 					if self.verbose:
 						print("HTTP error fetching events -- probably a server restart")
 				else:
 					if self.verbose:
-						print("Server returned error:\n{}".format(res["msg"]))
+						print("Server returned error:\n{}".format(res.get("msg", "")))
 					# Eventually, we'll only want the
 					# BAD_EVENT_QUEUE_ID check, but we check for the
 					# old string to support legacy Zulip servers.  We
 					# should remove that legacy check in 2019.
-					if res.get("code") == "BAD_EVENT_QUEUE_ID" or res["msg"].startswith(
+					if res.get("code") == "BAD_EVENT_QUEUE_ID" or str(res.get("msg", "")).startswith(
 						"Bad event queue id:"
 					):
 						# Our event queue went away, probably because
@@ -106,15 +111,26 @@ class ZulipClient(zulip.Client):
 				time.sleep(1)
 				continue
 
-			for event in res["events"]:
-				if event["type"] == "heartbeat":
+			for event in res.get("events", []):
+				if not isinstance(event, dict):
+					print(f"Invalid event: {event!r}")
+					continue
+				try:
+					event_id = int(event.get("id", -1))
+				except (TypeError, ValueError):
+					print(f"Invalid event id: {event!r}")
+					event_id = -1
+
+				if event.get("type") == "heartbeat":
 					# Heartbeat events are sent to clients regardless
 					# of the client's requested event types, and are
 					# intended to be an internal part of the Zulip
 					# longpolling protocol, not something that clients
 					# need to handle.
-					self.last_event_id = max(self.last_event_id, int(event["id"]))
+					self.last_event_id = max(self.last_event_id, event_id)
 					continue
+				# A network error retries the event, any other bad event
+				# must never kill the long-polling loop
 				try:
 					callback(event)
 				except NETWORK_ERRORS:
@@ -122,7 +138,9 @@ class ZulipClient(zulip.Client):
 						print(f"Connection error processing event:\n{traceback.format_exc()}")
 					time.sleep(1)
 					break
-				self.last_event_id = max(self.last_event_id, int(event["id"]))
+				except Exception:
+					print(f"Error handling event {event.get('id')}:\n{traceback.format_exc()}")
+				self.last_event_id = max(self.last_event_id, event_id)
 
 	def registerMessages(self, **kwargs):
 		self.doRegister(EVENT_TYPES, None, **kwargs)

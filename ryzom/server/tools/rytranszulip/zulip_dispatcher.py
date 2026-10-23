@@ -23,6 +23,7 @@ import sys
 import time
 import html
 import re
+import traceback
 import urllib.parse
 import urllib.request
 
@@ -89,15 +90,27 @@ class ZulipDispatcher(ZulipService):
 	def sendMessage(self, m):
 		message_type = "stream"
 		user = m.sender
+		if not user:
+			print("Message without sender, skipped")
+			return None
 		# Normalize potential Zulip-style upload markdown to plain URLs before sending
 		clean_text = self.convert_zulip_upload_links(m.text)
 		if m.channel == "player":
 			message_type = "private"
+			if not m.channel_id:
+				print(f"Private message from {user} without recipient, skipped")
+				return None
 			channel = m.channel_id.lower()+"@ig.ryzom.com"
 		elif m.channel == "dyn":
 			channel = self.getRealChannel(m.channel_id)
+			if channel.startswith(u"❇️ League_"):
+				print(f"Bad channel {channel}")
+				return None
 		else:
 			channel = self.getRealChannel(m.channel)
+		if not channel:
+			print(f"Message from {user} without channel, skipped")
+			return None
 		request = {
 			"type": message_type,
 			"to": channel,
@@ -116,10 +129,12 @@ class ZulipDispatcher(ZulipService):
 		except Exception as e:
 			print("Error sending message", e)
 			return -1
-		if result["result"] == "success":
+		if not isinstance(result, dict):
+			print("Error sending message, invalid response", result)
+			return None
+		if result.get("result") == "success" and "id" in result:
 			log_channel =  channel.split(" ")[0]
 			log_content =  "".join([ s[0] for s in  content.split() ])
-			log_queueid = self.getZulipQueueId()
 			print(f"💬 {message_type} to {log_channel} with {log_content} = {result['id']}")
 			return result["id"]
 		print("Error sending message", result.get("code", ""), result.get("msg", ""))
@@ -147,6 +162,9 @@ class ZulipDispatcher(ZulipService):
 		except Exception as e:
 			print("Error sending reaction", e)
 			return False
+		if not isinstance(result, dict):
+			print("Error sending reaction, invalid response", result)
+			return None
 		if result.get("result") != "success":
 			print("Error sending reaction", result.get("code", ""), result.get("msg", ""))
 			return False if self.retryError(result) else None
@@ -154,14 +172,14 @@ class ZulipDispatcher(ZulipService):
 		return True
 
 	def sendTranslation(self, message_id, m):
-		if message_id > 0 and m.translation and m.source_lang:
+		if message_id > 0 and m.translation and m.source_lang and m.translated_lang:
 			# Normalize Zulip-style upload markdown in translation as well
 			clean_translation = self.convert_zulip_upload_links(m.translation)
 			request = {
 				"message_id": message_id,
 			}
 			try:
-				request["content"] = (self.quotePrefix(m)+"<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+
+				request["content"] = (self.quotePrefix(m)+"<["+m.translated_lang+"]>"+flags.get(m.source_lang.lower(), "")+" "+
 					(clean_translation if clean_translation is not None else ""))
 				result = self.zulip.update_message(request)
 			except (ValueError, TypeError, KeyError, IndexError, AttributeError) as e:
@@ -170,12 +188,13 @@ class ZulipDispatcher(ZulipService):
 			except Exception as e:
 				print("Error update message", e)
 				return False
-			else:
-				if result.get("result") != "success":
-					print("Error updating translation", result.get("code", ""), result.get("msg", ""))
-					return False if self.retryError(result) else None
-				request["content"] = "".join([ s[0] for s in  request["content"].split() ])
-				print(f"{emojis[m.translated_lang.lower()]} {message_id}")
+			if not isinstance(result, dict):
+				print(f"Error update message {message_id}, invalid response", result)
+				return None
+			if result.get("result") != "success":
+				print("Error updating translation", result.get("code", ""), result.get("msg", ""))
+				return False if self.retryError(result) else None
+			print(f"{emojis.get(m.translated_lang.lower(), m.translated_lang)} {message_id}")
 		return True
 
 	def run(self):
@@ -192,7 +211,7 @@ class ZulipDispatcher(ZulipService):
 						if message and message.chat.get("reaction"):
 							if lang == "wk" and message.source != "zulip":
 								result = self.sendReaction(message)
-						elif message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
+						elif message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and (message.translated_lang or "").lower() == lang:
 							if lang == "wk":
 								if message.source != "zulip":
 									message_id = self.sendMessage(message)
@@ -217,8 +236,9 @@ class ZulipDispatcher(ZulipService):
 								else:
 									print("No Zulip ID for translation", i, lang)
 									result = None
-					except (ValueError, TypeError, KeyError, IndexError, AttributeError) as e:
-						print("Invalid queued message", i, lang, e)
+					except Exception:
+						# Skip the message instead of crashing or retrying it forever
+						print(f"Error dispatching message {i} ({lang}):\n{traceback.format_exc()}")
 						result = None
 					if result is False:
 						break
