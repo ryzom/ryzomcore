@@ -1915,7 +1915,7 @@ void CObjectString::dump(const std::string prefix, uint depth) const
 	//H_AUTO(R2_CObjectString_dump)
 	std::string result(depth * 4, ' ');
 	result += NLMISC::toString("%sString, ptr = Ox%p, value = %s, ghost = %s", prefix.c_str(), this, _Value.c_str(), _Ghost ? "true" : "false");
-	nlwarning(result.c_str());
+	nlwarning("%s", result.c_str());
 }
 
 void CObjectNumber::dump(const std::string prefix, uint depth) const
@@ -1926,7 +1926,7 @@ void CObjectNumber::dump(const std::string prefix, uint depth) const
 		result += NLMISC::toString("%sNumber, ptr = 0x%p, isNumber, value = %lf, ghost = %s", prefix.c_str(), this, m_Value.Integer, _Ghost ? "true" : "false");
 	else
 		result += NLMISC::toString("%sNumber, ptr = 0x%p, isInteger, value = %lf, ghost = %s", prefix.c_str(), this, m_Value.Number, _Ghost ? "true" : "false");
-	nlwarning(result.c_str());
+	nlwarning("%s", result.c_str());
 }
 
 void CObjectTable::dump(const std::string prefix, uint depth) const
@@ -1934,7 +1934,7 @@ void CObjectTable::dump(const std::string prefix, uint depth) const
 	//H_AUTO(R2_CObjectTable_dump)
 	std::string result(depth * 4, ' ');
 	result += NLMISC::toString("%sTable, ptr = 0x%p, , ghost = %s", prefix.c_str(), this, _Ghost ? "true" : "false");
-	nlwarning(result.c_str());
+	nlwarning("%s", result.c_str());
 	for(uint k = 0; k < _Value.size(); ++k)
 	{
 		std::string prefix = NLMISC::toString("Index = %d, key = %s ", (int) k, _Value[k].first.c_str());

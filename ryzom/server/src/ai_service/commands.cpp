@@ -1395,7 +1395,7 @@ void	execBufferedCommands()
 
 	// Show ret commands
 	FOREACHC(strIt, vector<string>, retStrings)
-		nlwarning(strIt->c_str());
+		nlwarning("%s", strIt->c_str());
 	bufferedRetStrings.insert(bufferedRetStrings.end(), retStrings.begin(), retStrings.end());
 }
 

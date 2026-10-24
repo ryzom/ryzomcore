@@ -114,7 +114,7 @@ void setTimer_ff_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function setTimer used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		nlassert(false);
 	}
 	
@@ -179,7 +179,7 @@ void timerSetRyzomDaytime_fff_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerSetRyzomDaytime used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -218,7 +218,7 @@ void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerIsEnabled used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -258,7 +258,7 @@ void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerIsSuspended used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -297,7 +297,7 @@ void timerSuspend_f_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerSuspend used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -335,7 +335,7 @@ void timerDisable_f_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerDisable used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -373,7 +373,7 @@ void timerResume_f_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerResume used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -416,7 +416,7 @@ void timerAdd_ff_(CStateInstance* si, CScriptStack& stack)
 	{
 		string errStr("critical, native function timerAdd used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 	
@@ -501,7 +501,7 @@ void postNextState_s_(CStateInstance* si, CScriptStack& stack)
 			errStr="state "+NextStateName+" not found for "+si->getGroup()->getName();
 		else
 			errStr="state "+NextStateName+" not found for unnamed group";
-		nlwarning(errStr.c_str());
+		nlwarning("%s", errStr.c_str());
 		return;
 	}
 

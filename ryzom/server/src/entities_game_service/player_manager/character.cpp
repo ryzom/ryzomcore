@@ -3801,8 +3801,8 @@ void CCharacter::setTargetBotchatProgramm( CEntityBase * target, const CEntityId
 			url += "&teid="+c->getId().toString();
 
 			string defaultSalt = toString(getLastConnectedDate());
-			nlinfo(defaultSalt.c_str());
-			nlinfo(url.c_str());
+			nlinfo("%s", defaultSalt.c_str());
+			nlinfo("%s", url.c_str());
 			string control = "&hmac="+NLMISC::getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
 
 			params[0].Literal = url + control;

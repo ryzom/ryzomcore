@@ -221,7 +221,7 @@ void connectToDatabase()
 	}
 	catch(const EConfigFile &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		return;
 	}
 

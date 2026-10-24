@@ -181,7 +181,7 @@ bool CRepository::init(const NLMISC::CSString& name,const NLMISC::CSString& dire
 
 void CRepository::updateFile(NLMISC::CSString fileName)
 {
-	nldebug(("GUSREP_Updating repository entry for file: '"+fileName+"'").c_str());
+	nldebug("%s", ("GUSREP_Updating repository entry for file: '"+fileName+"'").c_str());
 
 	// if the name of the file that has changed contains the target directory name then crop it
 	if (fileName.left((uint32)_TargetDirectory.size())==_TargetDirectory)
@@ -216,7 +216,7 @@ void CRepository::updateFile(NLMISC::CSString fileName)
 
 void CRepository::addFileStub(NLMISC::CSString fileName)
 {
-	nldebug(("GUSREP_Adding repository stub for file: '"+fileName+"'").c_str());
+	nldebug("%s", ("GUSREP_Adding repository stub for file: '"+fileName+"'").c_str());
 
 	// if the name of the file that has changed contains the target directory name then crop it
 	if (fileName.left((uint32)_TargetDirectory.size())==_TargetDirectory)
