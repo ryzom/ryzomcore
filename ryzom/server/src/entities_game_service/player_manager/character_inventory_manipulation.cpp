@@ -2589,7 +2589,10 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			CInventoryPtr roomInv = _PlayerRoom->getInventory();
 
 			if (roomInv == NULL || slot >= roomInv->getSlotCount())
+			{
+				nlwarning("<sendItemInfos> user %s: room inventory %s, slot %u", _Id.toString().c_str(), roomInv == NULL ? "missing" : "too small", slot);
 				return;
+			}
 
 			item = roomInv->getItem(slot);
 
