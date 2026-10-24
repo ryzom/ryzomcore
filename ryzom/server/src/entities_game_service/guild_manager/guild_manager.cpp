@@ -756,11 +756,6 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	TPendingGuildCreate pgc = it->second;
 	_PendingGuildCreates.erase(it);
 
-	if (result != CHARSYNC::TCharacterNameResult::cnr_ok)
-	{
-		// no valid name
-		return;
-	}
 	TLogContext_Item_CreateGuild itemContext(pgc.CreatorChar);
 
 	// Rebuild a proxy
@@ -772,6 +767,16 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	}
 
 	CGuildCharProxy proxy(character->getCharacter());
+
+	// the shard unifier rejected the name: tell the player why
+	if (result != CHARSYNC::TCharacterNameResult::cnr_ok)
+	{
+		if (result == CHARSYNC::TCharacterNameResult::cnr_already_exist)
+			proxy.sendSystemMessage("GUILD_NAME_ALREADY_EXISTS");
+		else
+			proxy.sendSystemMessage("GUILD_INVALID_NAME");
+		return;
+	}
 
 	// recheck if interlocutor is ok
 	CCreature * bot = proxy.getInterlocutor();
