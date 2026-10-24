@@ -460,7 +460,7 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 	}
 	catch (const ESoundDriver &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
@@ -555,7 +555,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	}
 	catch (const ESoundDriver &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
@@ -1907,7 +1907,7 @@ void				CAudioMixerUser::update()
 			sprintf(tmp, "[%2u]%8p ", i, _Tracks[i]->getSource());
 			str += tmp;
 		}
-		nldebug((string("Status1: ")+str).c_str());
+		nldebug("%s", (string("Status1: ")+str).c_str());
 		str.clear();
 		for (i=_NbTracks/2; i<_NbTracks; ++i)
 		{
@@ -2963,7 +2963,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displaySoundProfile, "Display information on sou
 	vector<string> pv;
 	explode<string>(performance, "\n", pv, true);
 	vector<string>::iterator it(pv.begin()), end(pv.end());
-	for (; it != end; ++it) log.displayNL((*it).c_str());
+	for (; it != end; ++it) log.displayNL("%s", (*it).c_str());
 	return true;
 }
 

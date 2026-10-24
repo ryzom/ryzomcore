@@ -472,7 +472,7 @@ bool CDriverD3D::activeShader(CD3DShaderFX *shd)
 		{
 			nlwarning ("Can't create shader '%s' (0x%x):", shd->getName(), hr);
 			if (pErrorMsgs)
-				nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
+				nlwarning ("%s", (const char*)pErrorMsgs->GetBufferPointer());
 			shd->_ShaderChanged = false;
 			_CurrentShader = NULL;
 			return false;

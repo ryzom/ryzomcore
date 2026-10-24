@@ -1138,7 +1138,7 @@ NLMISC_CLASS_COMMAND_IMPL(CSimulatedClient, displayScript)
 {
 	for (CScriptList::const_iterator it=_Script.begin(); it!=_Script.end(); ++it)
 	{
-		log.displayNL((string("> ") + *it).c_str());
+		log.displayNL("%s", (string("> ") + *it).c_str());
 	}
 	return true;
 }
@@ -1164,7 +1164,7 @@ NLMISC_COMMAND(quiet, "Don't verbose the following piece of script", "{args}")
 NLMISC_COMMAND(echo, "Display the latest stored value (top of stack)", "[<value]")
 {
 	if (args.size() > 0)
-		log.displayNL(args[0].c_str());
+		log.displayNL("%s", args[0].c_str());
 	else
 		log.displayNL("Result=%s", CScriptStack::getInstance()->top().c_str());
 	return true;

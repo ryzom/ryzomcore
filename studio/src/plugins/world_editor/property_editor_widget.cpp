@@ -246,12 +246,12 @@ void PropertyEditorWidget::updateSelection(Node *node)
 
 void PropertyEditorWidget::propertyChanged(QtProperty *p)
 {
-	nlinfo(QString("property %1 changed").arg(p->propertyName()).toUtf8().constData());
+	nlinfo("%s", QString("property %1 changed").arg(p->propertyName()).toUtf8().constData());
 }
 
 void PropertyEditorWidget::resetProperty(QtProperty *property)
 {
-	nlinfo(QString("property %1 reset").arg(property->propertyName()).toUtf8().constData());
+	nlinfo("%s", QString("property %1 reset").arg(property->propertyName()).toUtf8().constData());
 }
 
 NLLIGO::IProperty* PropertyEditorWidget::getLigoProperty( QtProperty *p )

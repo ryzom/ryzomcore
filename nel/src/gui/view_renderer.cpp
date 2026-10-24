@@ -922,7 +922,7 @@ namespace NLGUI
 			if (getTextureIdFromName(sTGAname) != -1)
 			{
 				string tmp = string("duplicate texture name in ") + textureFileName + "(" + sTGAname + ")";
-				nlwarning(tmp.c_str());
+				nlwarning("%s", tmp.c_str());
 			}
 			else
 			{

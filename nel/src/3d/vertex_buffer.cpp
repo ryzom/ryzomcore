@@ -412,7 +412,7 @@ void CVertexBuffer::dumpFormat() const
 					result += "???";
 				break;
 			}
-			nlinfo(result.c_str());
+			nlinfo("%s", result.c_str());
 		}
 	}
 }

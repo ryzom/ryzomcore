@@ -918,6 +918,6 @@ static void computeIGBBoxFromContinent(NLMISC::CConfigFile &parameter,
 	}	
 	catch (const NLMISC::EUnknownVar &e)
 	{
-		nlinfo(e.what());
+		nlinfo("%s", e.what());
 	}
 }

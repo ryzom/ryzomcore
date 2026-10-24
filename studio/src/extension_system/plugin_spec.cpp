@@ -195,7 +195,7 @@ bool PluginSpec::setFileName(const QString &fileName)
 
 #endif
 
-	nlinfo(m_filePath.toUtf8().constData());
+	nlinfo("%s", m_filePath.toUtf8().constData());
 
 	if (!exists)
 		return reportError(QCoreApplication::translate("PluginSpec", "File does not exist: %1").arg(file.fileName()));

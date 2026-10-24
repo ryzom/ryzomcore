@@ -148,7 +148,7 @@ void outString (const string &sText)
 	GetCWD (MAX_PATH, sCurDir);
 	ChDir (sExeDir);
 	NLMISC::createDebug ();
-	NLMISC::InfoLog->displayRaw(sText.c_str());
+	NLMISC::InfoLog->displayRaw("%s", sText.c_str());
 	ChDir (sCurDir);
 }
 
@@ -572,11 +572,11 @@ int main(int nNbArg, char **ppArgs)
 			}						
 			if (AllLightmapTags[k] == -1)
 			{
-				nlinfo(NLMISC::toString("Lightmap %s has no tag", AllLightmapNames[k].c_str()).c_str());
+				nlinfo("Lightmap %s has no tag", AllLightmapNames[k].c_str());
 			}
 			else
 			{			
-				nlinfo(NLMISC::toString("Lightmap %s has tag %d : %s", AllLightmapNames[k].c_str(), (int) AllLightmapTags[k], tags[AllLightmapTags[k]].c_str()).c_str());
+				nlinfo("Lightmap %s has tag %d : %s", AllLightmapNames[k].c_str(), (int) AllLightmapTags[k], tags[AllLightmapTags[k]].c_str());
 			}			
 		}
 

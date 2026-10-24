@@ -2353,7 +2353,7 @@ bool initCreateAccount()
 		{
 			string errorMessage("Can't send (error code 60)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.c_str());
+			nlwarning("%s", errorMessage.c_str());
 			return false;
 		}
 
@@ -2362,7 +2362,7 @@ bool initCreateAccount()
 		{
 			string errorMessage("Can't receive (error code 61)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.c_str());
+			nlwarning("%s", errorMessage.c_str());
 			return false;
 		}
 
@@ -2370,7 +2370,7 @@ bool initCreateAccount()
 		{
 			string errorMessage("Empty result (error code 13)");
 			errorMessageBox(errorMessage);
-			nlwarning(errorMessage.c_str());
+			nlwarning("%s", errorMessage.c_str());
 			return false;
 		}
 
@@ -2529,7 +2529,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Can't connect");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 
@@ -2556,7 +2556,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Can't send (error code 60)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 
@@ -2565,7 +2565,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Can't receive (error code 61)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 
@@ -2573,7 +2573,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 			{
 				string errorMessage("Empty result (error code 13)");
 				errorMessageBox(errorMessage);
-				nlwarning(errorMessage.c_str());
+				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
 

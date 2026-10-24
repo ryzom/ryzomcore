@@ -1891,7 +1891,7 @@ void cbDynChatServiceChat(CMessage& msgin, const string &serviceName, TServiceId
 
 	// send the message to all the player in this chat
 	CDynChatSession *dcc = chan->getFirstSession();
-	if(!dcc) nlwarning(("nobody hears on channel "+chanID.toString()).c_str());
+	if(!dcc) nlwarning("%s", ("nobody hears on channel "+chanID.toString()).c_str());
 
 	while (dcc)
 	{

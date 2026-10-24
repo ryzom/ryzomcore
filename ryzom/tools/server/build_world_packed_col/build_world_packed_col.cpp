@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 						catch(const EStream &e)
 						{
 							e; // avoid compile warning
-							nlwarning(e.what());
+							nlwarning("%s", e.what());
 						}
 					}
 					
@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
 			catch (const Exception &e)
 			{
 				e; // avoid compile warning
-				nlwarning(e.what());
+				nlwarning("%s", e.what());
 			}
 		}
 	}		

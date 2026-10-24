@@ -93,7 +93,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 
 	if(_GroupMenu == nullptr)
 	{
-		nlwarning(("gamecontextmenu:init: 'ui:interface:" + menuId + "' window does not exist.").c_str());
+		nlwarning("%s", ("gamecontextmenu:init: 'ui:interface:" + menuId + "' window does not exist.").c_str());
 		return;
 	}
 

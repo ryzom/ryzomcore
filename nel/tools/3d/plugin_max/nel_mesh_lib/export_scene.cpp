@@ -463,7 +463,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 								}
 								catch (const NLMISC::Exception &e)
 								{
-									nlwarning(e.what());									
+									nlwarning("%s", e.what());									
 								}
 							}							
 							if (buildMeshBBox)

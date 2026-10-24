@@ -709,7 +709,7 @@ void CConfigFile::display (CLog *log) const
 	log->displayRaw ("Root config files: ");
 	for(int i = 1; i < (int)FileNames.size(); i++)
 	{
-		log->displayRaw (FileNames[i].c_str());
+		log->displayRaw ("%s", FileNames[i].c_str());
 	}
 	log->displayRawNL ("");
 	log->displayRawNL ("------------------------------------------------------");

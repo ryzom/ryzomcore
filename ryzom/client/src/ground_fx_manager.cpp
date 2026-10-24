@@ -321,7 +321,7 @@ void CGroundFXManager::checkIntegrity()
 			nlassert(!it->FXUnderWater.hasParticles());
 			if (it->FXUnderWater.hasParticles())
 			{
-				nlinfo(it->FXName.c_str());
+				nlinfo("%s", it->FXName.c_str());
 			}
 		}
 	}

@@ -718,7 +718,7 @@ namespace NLGUI
 							else
 								sTmp = string("cannot parse template node property: ") + ((const char *) ptr + 1) + string(" in instance : NULL");
 							// todo hulud interface syntax error
-							nlinfo(sTmp.c_str());
+							nlinfo("%s", sTmp.c_str());
 
 							return false;
 						}
@@ -1237,7 +1237,7 @@ namespace NLGUI
 		{
 			string tmp = "cannot parse group "+group->getId();
 			// todo hulud interface syntax error
-			nlinfo (tmp.c_str());
+			nlinfo ("%s", tmp.c_str());
 		}
 		return ok;
 	}
@@ -1418,7 +1418,7 @@ namespace NLGUI
 		{
 			string stmp = string("element not found for tree : ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
@@ -1426,7 +1426,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a container : ") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		parentGroup->attachContainer (pIC);
@@ -1469,7 +1469,7 @@ namespace NLGUI
 		{
 			string stmp = string("element not found for tree : ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pEltFound);
@@ -1477,7 +1477,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a container : ") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 		// See if the group should be docked.
@@ -1665,7 +1665,7 @@ namespace NLGUI
 		{
 			string stmp = string("no group found for ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1675,7 +1675,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1684,7 +1684,7 @@ namespace NLGUI
 		{
 			string stmp = string("tree can't have modal group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1734,7 +1734,7 @@ namespace NLGUI
 		{
 			string stmp = string("no group found for ") + string((const char*)ptr);
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1744,7 +1744,7 @@ namespace NLGUI
 		{
 			string stmp = string("not a group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -1753,7 +1753,7 @@ namespace NLGUI
 		{
 			string stmp = string("tree can't have modal group !") + pEltFound->getId();
 			// todo hulud interface syntax error
-			nlinfo(stmp.c_str());
+			nlinfo("%s", stmp.c_str());
 			return false;
 		}
 
@@ -3171,7 +3171,7 @@ namespace NLGUI
 		}
 		catch(const ELuaError &e)
 		{
-			nlwarning(e.luaWhat().c_str());
+			nlwarning("%s", e.luaWhat().c_str());
 			error= e.luaWhat();
 			return false;
 		}

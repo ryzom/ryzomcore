@@ -167,7 +167,7 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	if (res != 0)
 	{
 		if (verbose)
-			nlwarning(&m_ErrorBuf[0]);
+			nlwarning("%s", &m_ErrorBuf[0]);
 		return false;
 	}
 

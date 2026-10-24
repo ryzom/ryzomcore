@@ -943,7 +943,7 @@ retryJoinEdit:
 
 		// Info in the log
 		string outErrorMsg = toString("Could not join %ssession %u: '%s' error\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg );
-		nlwarning( outErrorMsg.c_str() );
+		nlwarning("%s", outErrorMsg.c_str());
 //		if ( httpErrorStr.empty() )
 //		{
 //			string delimiter = "Content-Type: text/html";

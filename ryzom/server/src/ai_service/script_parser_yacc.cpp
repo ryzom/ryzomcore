@@ -185,7 +185,7 @@ int myfprintf (FILE *file, const char *format, ...)
 	{
 		char buffer[1024];
 		result = vsnprintf(buffer, 1024, format, args);
-		nldebug (buffer);
+		nldebug ("%s", buffer);
 	}
 	else
 	{

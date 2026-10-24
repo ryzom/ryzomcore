@@ -1964,7 +1964,7 @@ void CDepositMapsBatchTask::run()
 			imageFilename = imageFilename.replace( " ", "" );
 			CSString cmdLine = "makeDepositMap " + fields[FPos] + " " + pathName + imageFilename + " 1 600";
 			egs_feinfo( cmdLine.c_str() );
-			log.displayNL( ("\n\n<B><A HREF=\"" + imageFilename + "\">" + imageFilename + "</A></B>\n").c_str() );
+			log.displayNL("%s", ("\n\n<B><A HREF=\"" + imageFilename + "\">" + imageFilename + "</A></B>\n").c_str());
 			ICommand::execute( cmdLine, log );
 			++_CurrentMap;
 		}

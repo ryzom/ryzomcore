@@ -201,7 +201,7 @@ void addPacsPrim(const std::string &fileName)
 	std::string ppName = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(fileName));
 	if (PacsPrims.find(ppName) != PacsPrims.end())
 	{
-		nlwarning(("Pacs primitive " + ppName + " already has been inserted").c_str());
+		nlwarning("%s", ("Pacs primitive " + ppName + " already has been inserted").c_str());
 		return;
 	}
 	CUniquePtr<NLPACS::UPrimitiveBlock> pb(NLPACS::UPrimitiveBlock::createPrimitiveBlockFromFile(fileName));

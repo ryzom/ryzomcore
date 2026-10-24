@@ -482,7 +482,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					}
 					catch (const Exception &e)
 					{
-						nlwarning (e.what());
+						nlwarning ("%s", e.what());
 					}
 				}
 			}
@@ -519,7 +519,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					}
 					catch (const Exception &e)
 					{
-						nlwarning (e.what());
+						nlwarning ("%s", e.what());
 					}
 				}
 
@@ -651,7 +651,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					}
 					catch (const Exception &e)
 					{
-						nlwarning (e.what());
+						nlwarning ("%s", e.what());
 					}
 					if(BackgroundIG)
 					{

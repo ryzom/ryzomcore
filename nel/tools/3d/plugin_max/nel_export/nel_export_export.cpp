@@ -392,7 +392,7 @@ bool CNelExport::exportSkeleton	(const std::string &sPath, INode* pNode, TimeVal
 		}
 		catch (const Exception &e)
 		{
-			nlwarning (e.what());
+			nlwarning ("%s", e.what());
 		}
 	}
 

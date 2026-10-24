@@ -327,7 +327,7 @@ void CBracketToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	str+="["+_Body+"]";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -379,7 +379,7 @@ void CCharToken::dump(size_t indent) const
 	str+="'";
 	str+=_c;
 	str+="'";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -422,7 +422,7 @@ void CTokenToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	str+="{"+_tokenName+"}";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -477,10 +477,10 @@ void CParenthesisToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	
-	nldebug((str+"(").c_str());
+	nldebug("%s", (str+"(").c_str());
 	FOREACHC(tokenIt,TTokenList,_tokenList)
 		(*tokenIt)->dump(indent+1);
-	nldebug((str+")").c_str());
+	nldebug("%s", (str+")").c_str());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -530,7 +530,7 @@ void COrToken::dump(size_t indent) const
 	string str;
 	str.resize(indent,' ');
 	str+="|";
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	secondToken->dump(indent+1);
 }
 
@@ -622,7 +622,7 @@ void CCardToken::dump(size_t indent) const
 	default:
 		break;
 	}
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	_childToken->dump(indent+1);
 }
 
@@ -676,7 +676,7 @@ void CCodeTokenNode::dump(size_t indent)
 	if (_FirstChildNode)
 		str+=":"+_FirstChildNode->getFullName();
 	
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	if (_FirstChildNode)
 		_FirstChildNode->dump(indent+1);
 	
@@ -840,7 +840,7 @@ CToken::CToken(const  string 	&tokenName, const string &tokenDesc)
 void CToken::dump() const
 {
 	const string str = "Token:"+_tokenName+" : "+_tokenDesc;
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	FOREACHC(tokenIt,TTokenContainer,_Tokens)
 		(*tokenIt)->dump(0);
 }
@@ -1052,7 +1052,7 @@ CSmartPtr<CSubRuleTracer> CCompiler::buildCodeTree (const string &code) const
 			string str(">> TOKEN: ");
 			str+=tokenName;
 			str+=" "+toString(tokenIndex);
-			nldebug(str.c_str());
+			nldebug("%s", str.c_str());
 		}
 #endif
 		CSmartPtr<CSubRuleTracer> tracer=new CSubRuleTracer(lastIndex, index-1, tokenName, textValue);
@@ -1203,7 +1203,7 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeOld (const string &source
 	catch (const Exception &e)
 	{
 		nlwarning("compilation failed for %s", fullName.c_str());
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 
 	return NULL;
@@ -1266,15 +1266,15 @@ static void displayErrorLinesForIndex(const string &text, size_t &index)
 	{
 		string lineoStr("at line ");
 		lineoStr += toString(lineIndex);
-		nlwarning(lineoStr.c_str());
+		nlwarning("%s", lineoStr.c_str());
 	}
 	
-	nlwarning(tmp.c_str());
+	nlwarning("%s", tmp.c_str());
 	{
 		string indexerStr;
 		indexerStr.resize(index-totalIndex,' ');
 		indexerStr += "^";
-		nlwarning(indexerStr.c_str());
+		nlwarning("%s", indexerStr.c_str());
 	}
 }
 
@@ -1806,7 +1806,7 @@ void CSubRuleTracer::dump(size_t indent) const
 	str+=","+toString(_tokenIndex); 		
 	str+="): "+_TextValue;
 	
-	nldebug(str.c_str());
+	nldebug("%s", str.c_str());
 	FOREACHC(itTracer, TSubRuleTracerList, _childTracers)
 		(*itTracer)->dump(indent+1);
 }

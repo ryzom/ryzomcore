@@ -2851,7 +2851,7 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 			std::string info(currDepth * 4, ' ');
 			info += id;
 			info += toString(", address=0x%p", ig);
-			nlinfo(info.c_str());
+			nlinfo("%s", info.c_str());
 			// dump view & controls for this group
 			for(uint k = 0; k < ig->getViews().size(); ++k)
 			{
@@ -2867,7 +2867,7 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				{
 					info += "<NULL>";
 				}
-				nlinfo(info.c_str());
+				nlinfo("%s", info.c_str());
 			}
 			//
 			for(uint k = 0; k < ig->getControls().size(); ++k)
@@ -2884,7 +2884,7 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				{
 					info += "<NULL>";
 				}
-				nlinfo(info.c_str());
+				nlinfo("%s", info.c_str());
 			}
 
 			//
@@ -3717,7 +3717,7 @@ std::vector<std::string>		CInterfaceManager::getInGameXMLInterfaceFiles()
 // ***************************************************************************
 void		CInterfaceManager::dumpLuaString(const std::string &str)
 {
-	nlinfo(str.c_str());
+	nlinfo("%s", str.c_str());
 	displaySystemInfo(LuaHelperStuff::formatLuaErrorSysInfo(str));
 }
 

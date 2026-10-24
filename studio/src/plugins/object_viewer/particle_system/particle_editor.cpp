@@ -115,7 +115,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 	}
 	catch(NLMISC::EStream &e)
 	{
-		nlerror(e.what());
+		nlerror("%s", e.what());
 		return;
 	}
 
@@ -131,7 +131,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 		}
 		catch(NLMISC::EStream &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 		if (node->isLoaded() && !firstLoadedNode)
 			firstLoadedNode = node;
@@ -153,7 +153,7 @@ void CParticleEditor::createNewWorkspace(const std::string &fullPath)
 	}
 	catch(NLMISC::EStream &e)
 	{
-		nlerror(e.what());
+		nlerror("%s", e.what());
 	}
 	closeWorkspace();
 	_PW = newPW;
@@ -168,7 +168,7 @@ void CParticleEditor::saveWorkspaceStructure()
 	}
 	catch(NLMISC::EStream &e)
 	{
-		nlerror(e.what());
+		nlerror("%s", e.what());
 	}
 }
 
