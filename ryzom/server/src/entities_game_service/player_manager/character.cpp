@@ -16732,6 +16732,8 @@ void CCharacter::onDisconnection(bool bCrashed)
 
 	// Remove handledAIGroups for all missions of the player
 	despawnAllHandledAIGroup();
+	// drop the pending R2 give/receive item entries the character registered on npcs
+	CR2GiveItem::getInstance().onCharacterLogout( getEntityRowId() );
 
 	// update for the unified entity locator
 	if (IShardUnifierEvent::getInstance() != NULL
