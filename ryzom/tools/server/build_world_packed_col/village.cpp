@@ -261,7 +261,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 	}
 	catch(const EStream &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 	if (IG)
 	{
@@ -297,7 +297,7 @@ void CIGInfo::load(TShapeCache &shapeCache)
 				catch (const EStream &e)
 				{
 					// shape not loaded
-					nlwarning(e.what());
+					nlwarning("%s", e.what());
 				}
 			}			
 		}				

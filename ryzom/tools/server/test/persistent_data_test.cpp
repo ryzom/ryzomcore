@@ -684,9 +684,9 @@ static void test3()
 	NLMISC::InfoLog->displayNL("\nTest11:");
 	std:: string s;
 	pdr11b.toString(s);
-	NLMISC::InfoLog->displayNL(s.c_str());
+	NLMISC::InfoLog->displayNL("%s", s.c_str());
 	pdr11c.toString(s);
-	NLMISC::InfoLog->displayNL(s.c_str());
+	NLMISC::InfoLog->displayNL("%s", s.c_str());
 }
 
 

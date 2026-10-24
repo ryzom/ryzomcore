@@ -532,7 +532,7 @@ bool	CNetworkConnection::connect(string &result)
 				}
 				catch (Exception &e)
 				{
-					nlwarning (e.what ());
+					nlwarning ("%s", e.what ());
 				}
 			}
 			if (i == shards.size())
