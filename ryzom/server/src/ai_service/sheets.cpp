@@ -650,7 +650,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 
 uint AISHEETS::CCreature::getVersion()
 { 
-	return 45;
+	return 46;
 }
 
 void AISHEETS::CCreature::serial(NLMISC::IStream &s)

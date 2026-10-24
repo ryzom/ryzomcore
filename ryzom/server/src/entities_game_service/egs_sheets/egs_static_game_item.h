@@ -851,7 +851,7 @@ public:
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	// return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 68 + ( SKILLS::NUM_SKILLS << 16 ); }
+	inline static uint getVersion () { return 69 + ( SKILLS::NUM_SKILLS << 16 ); }
 
 	/// called when the sheet is removed
 	void removed() {}
