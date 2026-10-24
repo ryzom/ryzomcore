@@ -14076,12 +14076,10 @@ bool CCharacter::autoFillExchangeView()
 			break;
 
 		validateSteps = missionTemplate->Steps[*itSet-1]->getSubSteps();
-
-		// get gift step from mission
+		// the template holds the full quantities; the step state holds what is still owed
 		const CActiveStepPD *botGiftStep = currentMission->getSteps(*itSet);
 		if (botGiftStep)
 		{
-			// fill in remaining quantities
 			for (uint i = 0; i < validateSteps.size(); ++i)
 			{
 				const CActiveStepStatePD *gift = botGiftStep->getStates(i + 1);
