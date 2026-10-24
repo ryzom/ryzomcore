@@ -153,6 +153,8 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 			opts += [ "-DWITH_LUA53=ON" ]
 		elif luaVer == 504:
 			opts += [ "-DWITH_LUA54=ON" ]
+		elif luaVer == 505:
+			opts += [ "-DWITH_LUA55=ON" ]
 	else:
 		opts += [ "-DWITH_LUA51=OFF" ]
 	

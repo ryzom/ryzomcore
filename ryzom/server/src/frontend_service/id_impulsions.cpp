@@ -35,6 +35,13 @@ using namespace NLNET;
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 extern NLNET::TServiceId SelfServiceId;
 
+// DEBUG:CMD forwards a client's text to any service as an EXEC_COMMAND, which that service executes with its
+// own rights and without any privilege check. Only the /cmd command of non-final clients sends it. A live
+// shard must not accept it from a client, so it is refused unless the shard turns this on.
+CVariable<bool> AllowClientServiceCommands("FS", "AllowClientServiceCommands",
+	"Forward the DEBUG:CMD message (the /cmd command of non-final clients) to services as EXEC_COMMAND, executed with the service's rights; keep it off on a live shard",
+	false, 0, true);
+
 void cbImpulsionIdGatewayOpen( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId );
 void cbImpulsionIdGatewayMessage( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId );
 void cbImpulsionIdGatewayClose( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId );
@@ -89,6 +96,14 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 		return;
 	}
 	
+	if (!AllowClientServiceCommands.get())
+	{
+		nlwarning("FEHACK: client %s sent DEBUG:CMD '%s %s' for service %s, refused (AllowClientServiceCommands is off)",
+			sender.toString().c_str(), cmd.c_str(), arg.c_str(), dest.c_str());
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( RefusedServiceCommand, (TUid)(sender.getShortId() >> 4) );
+		return;
+	}
+
 	nlinfo("<impulsionCmd> CMD received : %s %s to %s",cmd.c_str(), arg.c_str(), dest.c_str());
 	
 	CMessage msgout("EXEC_COMMAND");

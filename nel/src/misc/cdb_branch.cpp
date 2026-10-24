@@ -722,7 +722,7 @@ void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, cons
 			msg += dbPathFromThisNode;
 			msg += " branch missing in DB";
 
-			nlerror( msg.c_str() );
+			nlerror("%s", msg.c_str());
 			delete handle;
 			return;
 		}
@@ -745,7 +745,7 @@ void CCDBNodeBranch::removeBranchObserver(const char *dbPathFromThisNode, ICDBNo
 		msg += ":";
 		msg += dbPathFromThisNode;
 		msg += " branch missing in DB";
-		nlerror( msg.c_str() );
+		nlerror("%s", msg.c_str());
 		return;
 	}
 	branchNode->removeBranchObserver(&observer);

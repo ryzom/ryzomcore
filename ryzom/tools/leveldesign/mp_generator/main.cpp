@@ -1577,7 +1577,7 @@ int main( int argc, char* argv[] )
 	}
 	catch(const Exception &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		nlwarning("HTML Doc generation failed\n");
 	}
 

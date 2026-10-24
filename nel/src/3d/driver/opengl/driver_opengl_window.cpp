@@ -454,7 +454,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 		for(sint i = 0; i < nextensions; ++i)
 		{
 			if(i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(NLMISC::toString("%s ", extensions[i]).c_str());
+			DebugLog->displayRaw("%s ", extensions[i]);
 			if(i%5==4) DebugLog->displayRaw("\n");
 		}
 

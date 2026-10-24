@@ -2571,6 +2571,8 @@ const char *fetchToCaseInsensitiveAsUtf8(const char **str)
 
 // ***************************************************************************
 
+// Bytes are compared as unsigned: UTF-8 code units are >= 0x80 and char is signed on most compilers,
+// so a signed compare would order every non-ASCII character before ASCII and before the end of a string
 int compareCaseInsensitive(const char *a, const char *b)
 {
 	// while (*a != 0 && *b != 0)
@@ -2583,7 +2585,7 @@ int compareCaseInsensitive(const char *a, const char *b)
 			// Easy case, ASCII compare or junk
 			if (*a != *b)
 			{
-				if (*a > * b) return 1;
+				if ((unsigned char)*a > (unsigned char)*b) return 1;
 				else return -1;
 			}
 			else if (!*a) // Equal and NUL, ends both
@@ -2601,7 +2603,7 @@ int compareCaseInsensitive(const char *a, const char *b)
 			{
 				if (*ca != *b)
 				{
-					if (*ca > *b) return 1;
+					if ((unsigned char)*ca > (unsigned char)*b) return 1;
 					else return -1;
 				}
 				++ca;
@@ -2616,7 +2618,7 @@ int compareCaseInsensitive(const char *a, const char *b)
 			{
 				if (*a != *cb)
 				{
-					if (*a > *cb) return 1;
+					if ((unsigned char)*a > (unsigned char)*cb) return 1;
 					else return -1;
 				}
 				++a;
@@ -2632,17 +2634,22 @@ int compareCaseInsensitive(const char *a, const char *b)
 				{
 					if (*ca != *cb)
 					{
-						if (*ca > *cb) return 1;
+						if ((unsigned char)*ca > (unsigned char)*cb) return 1;
 						else return -1;
 					}
 					++ca;
 					++cb;
 				} while (*ca && *cb);
+				if (*ca != *cb) // Folded forms of different lengths, the shorter one sorts first
+				{
+					if ((unsigned char)*ca > (unsigned char)*cb) return 1;
+					else return -1;
+				}
 			}
 		}
 	}
 	// if (*a == *b) return 0;
-	// if (*a > *b) return 1;
+	// if ((unsigned char)*a > (unsigned char)*b) return 1;
 	// return -1;
 }
 
@@ -2662,12 +2669,12 @@ int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t len
 			}
 			else
 			{
-				return 1; // A is longer
+				return -1; // A ended first, it is the shorter prefix
 			}
 		}
 		if (b >= mb)
 		{
-			return -1; // B is longer
+			return 1; // B ended first, A is longer
 		}
 		const char *ca = fetchToCaseInsensitiveAsUtf8(&a);
 		const char *cb = fetchToCaseInsensitiveAsUtf8(&b);
@@ -2676,7 +2683,7 @@ int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t len
 			// Easy case, ASCII compare or junk
 			if (*a != *b)
 			{
-				if (*a > * b) return 1;
+				if ((unsigned char)*a > (unsigned char)*b) return 1;
 				else return -1;
 			}
 			/*
@@ -2694,9 +2701,10 @@ int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t len
 			nlassert(*ca);
 			do
 			{
+				if (b >= mb) return 1; // B ended inside the folded character, A is longer
 				if (*ca != *b)
 				{
-					if (*ca > *b) return 1;
+					if ((unsigned char)*ca > (unsigned char)*b) return 1;
 					else return -1;
 				}
 				++ca;
@@ -2709,9 +2717,10 @@ int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t len
 			nlassert(*cb);
 			do
 			{
+				if (a >= ma) return -1; // A ended inside the folded character, B is longer
 				if (*a != *cb)
 				{
-					if (*a > *cb) return 1;
+					if ((unsigned char)*a > (unsigned char)*cb) return 1;
 					else return -1;
 				}
 				++a;
@@ -2727,12 +2736,17 @@ int compareCaseInsensitive(const char *a, size_t lenA, const char *b, size_t len
 				{
 					if (*ca != *cb)
 					{
-						if (*ca > *cb) return 1;
+						if ((unsigned char)*ca > (unsigned char)*cb) return 1;
 						else return -1;
 					}
 					++ca;
 					++cb;
 				} while (*ca && *cb);
+				if (*ca != *cb) // Folded forms of different lengths, the shorter one sorts first
+				{
+					if ((unsigned char)*ca > (unsigned char)*cb) return 1;
+					else return -1;
+				}
 			}
 		}
 	}

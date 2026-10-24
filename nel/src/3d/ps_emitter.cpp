@@ -335,7 +335,7 @@ bool	CPSEmitter::setEmissionType(TEmissionType freqType)
 								  "' with the current configuration : the system has been flagged with \
 								   'BypassMaxNumIntegrationSteps', and should have a finite duration.  \
 								   The flag is not set";
-				nlwarning(mess.c_str());
+				nlwarning("%s", mess.c_str());
 				return false;
 
 			}

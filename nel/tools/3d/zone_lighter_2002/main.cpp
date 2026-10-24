@@ -258,7 +258,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 	}	
 	catch (NLMISC::EUnknownVar &e)
 	{
-		nlinfo(e.what());
+		nlinfo("%s", e.what());
 	}
 }
 

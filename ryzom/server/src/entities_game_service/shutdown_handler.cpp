@@ -371,7 +371,7 @@ void CAutomaticShutdownHandler::update()
 		{
 			string msg = DailyShutdownBroadcastMessage.get();
 			PlayerManager.broadcastMessage( 1, 0, 0, msg );
-			nlinfo( msg.c_str() );
+			nlinfo("%s", msg.c_str());
 			_NextPlannedShutdownEndTime = _NextPlannedShutdownStartTime + (DailyShutdownCounterMinutes.get()*60);
 			_NextPlannedShutdownStartTime = MaxTime;
 		}

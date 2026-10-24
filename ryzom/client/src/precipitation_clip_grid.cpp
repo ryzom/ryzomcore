@@ -553,7 +553,7 @@ void CPrecipitationClipGrid::printGridValues() const
 			TGrid::const_iterator gridIt = getGridIt(_Grid, l, k, _Size);
 			outStr += toString("%5d%c ", (uint) gridIt->MeanHeight, l == _Size ? ' ' : ',');
 		}
-		nlinfo(outStr.c_str());
+		nlinfo("%s", outStr.c_str());
 	}
 }
 

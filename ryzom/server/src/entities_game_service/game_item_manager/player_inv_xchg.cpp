@@ -240,7 +240,13 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 invSrc, uint32 invSlo
 // ****************************************************************************
 bool CExchangeView::removeItemFromExchange(uint32 exchangeSlot, uint32 quantity)
 {
-	nlassert(exchangeSlot < NbExchangeSlots);
+	// the slot comes from the client (EXCHANGE:REMOVE)
+	if (exchangeSlot >= NbExchangeSlots)
+	{
+		nlwarning("<CExchangeView::removeItemFromExchange> %s: exchange slot %u (count %u) out of range",
+			getCharacter()->getId().toString().c_str(), exchangeSlot, (uint)NbExchangeSlots);
+		return false;
+	}
 
 	if (quantity == 0)
 		return false;

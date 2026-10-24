@@ -111,6 +111,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Unknown format type;";
 	if ( reasons & UnauthorizedCharacterSlot )
 		s += " Unauthorized character slot;";
+	if ( reasons & RefusedServiceCommand )
+		s += " Refused service command;";
 	return s;
 }
 

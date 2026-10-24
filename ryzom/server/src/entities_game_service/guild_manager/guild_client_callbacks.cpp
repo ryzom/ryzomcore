@@ -106,12 +106,12 @@ void cbClientGuildSetGrade( NLNET::CMessage& msgin, const std::string & serviceN
 	uint8 grade;
 	uint8 session;
 	msgin.serial( eId,index,grade,session );
-	GET_GUILD_MODULE(eId);
 	if ( grade >= uint8(EGSPD::CGuildGrade::EndGuildGrade) )
 	{
-		nlwarning("<GUILD>'%s' sent an invalid grade %u",eId.toString().c_str(),uint(grade));
+		nlwarning("<GUILD> %s sent an invalid grade %u", eId.toString().c_str(), (uint)grade);
 		return;
 	}
+	GET_GUILD_MODULE(eId);
 	if ( grade == EGSPD::CGuildGrade::Leader )
 		module->setLeader( index,session );
 	else

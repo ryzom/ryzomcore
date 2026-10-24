@@ -544,7 +544,7 @@ void CLigoConfig::errorMessage (const char *format, ... )
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	nlwarning (buffer);
+	nlwarning ("%s", buffer);
 }
 
 // ***************************************************************************

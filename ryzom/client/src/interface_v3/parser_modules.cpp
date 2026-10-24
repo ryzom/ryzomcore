@@ -76,7 +76,7 @@ bool CIF3DSceneParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGrou
 	{
 		std::string tmp = "no parent for "+pScene->getId();
 		// todo hulud interface syntax error
-		nlinfo (tmp.c_str());
+		nlinfo ("%s", tmp.c_str());
 		delete pScene;
 		return false;
 	}

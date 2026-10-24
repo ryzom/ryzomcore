@@ -65,7 +65,7 @@ public:
 		if(!objectToRemove)
 			return;
 		if(Set.erase(objectToRemove)!=1)
-			nlerror(errorString);
+			nlerror("%s", errorString);
 		else
 			delete objectToRemove;
 	}

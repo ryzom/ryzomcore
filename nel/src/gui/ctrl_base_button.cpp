@@ -506,7 +506,7 @@ namespace NLGUI
         }
         else
         {
-                nlinfo(("cannot parse button type for button " + getId()).c_str());
+                nlinfo("%s", ("cannot parse button type for button " + getId()).c_str());
         }
 
 		prop= (char*) xmlGetProp (cur, (xmlChar*)"over_when_pushed");
@@ -846,7 +846,7 @@ namespace NLGUI
 		else
 		{
 			_Type = ToggleButton;
-			nlinfo( ( "cannot parse button type for button " + getId() ).c_str() );
+			nlinfo("%s", ( "cannot parse button type for button " + getId() ).c_str());
 		}
 	}
 

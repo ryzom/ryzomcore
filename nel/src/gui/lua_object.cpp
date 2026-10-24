@@ -471,7 +471,7 @@ namespace NLGUI
 			push();
 			lua_Debug ar;
 			lua_getinfo (_LuaState->getStatePointer(), ">lS", &ar);
-			nlwarning((std::string(ar.what) + ", at line " + NLMISC::toString(ar.linedefined) + " in " + std::string(ar.source)).c_str());
+			nlwarning("%s", (std::string(ar.what) + ", at line " + NLMISC::toString(ar.linedefined) + " in " + std::string(ar.source)).c_str());
 		}
 		push();
 		_LuaState->insert(-1 - numArgs); // put the function before its arguments
@@ -481,7 +481,7 @@ namespace NLGUI
 			case LUA_ERRRUN:
 			case LUA_ERRMEM:
 			case LUA_ERRERR:
-				nlwarning(_LuaState->toString(-1));
+				nlwarning("%s", _LuaState->toString(-1));
 				_LuaState->pop();
 				return false;
 			break;
@@ -672,7 +672,7 @@ namespace NLGUI
 		catch(const std::exception &e)
 		{
 			CLuaIHM::dumpCallStack();
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 	}
 

@@ -1812,6 +1812,11 @@ void cbDynChatAddSessionWithName(CMessage& msgin, const string &serviceName, TSe
 		return;
 	}
 	CCharacterInfos* cInfo = IOS->getCharInfos(clientName);
+	if (cInfo == NULL)
+	{
+		nlwarning("<cbDynChatAddSessionWithName> unknown character '%s', session not changed", clientName.toUtf8().c_str());
+		return;
+	}
 	client = cInfo->DataSetIndex;
 	if(client.isValid())
 	{
@@ -1863,6 +1868,11 @@ void cbDynChatRemoveSessionWithName(CMessage& msgin, const string &serviceName, 
 	msgin.serial(chan);
 	msgin.serial(clientName);
 	CCharacterInfos* cInfo = IOS->getCharInfos(clientName);
+	if (cInfo == NULL)
+	{
+		nlwarning("<cbDynChatRemoveSessionWithName> unknown character '%s', session not changed", clientName.toUtf8().c_str());
+		return;
+	}
 	client = cInfo->DataSetIndex;
 	if(client.isValid())
 	{
@@ -1979,7 +1989,7 @@ void cbDynChatServiceChat(CMessage& msgin, const string &serviceName, TServiceId
 
 	// send the message to all the player in this chat
 	CDynChatSession *dcc = chan->getFirstSession();
-	if(!dcc) nlwarning(("nobody hears on channel "+chanID.toString()).c_str());
+	if(!dcc) nlwarning("%s", ("nobody hears on channel "+chanID.toString()).c_str());
 
 	while (dcc)
 	{

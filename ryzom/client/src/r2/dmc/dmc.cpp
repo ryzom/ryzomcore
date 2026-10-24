@@ -406,7 +406,7 @@ CObject::TSmartPtr CDynamicMapClient::translateScenario(CObject* scenario)
 	CObject::TSmartPtr rtdata = _ComLua->translateFeatures(scenario, errorMsg);
 	if( !rtdata )
 	{
-		nlwarning( errorMsg.c_str() );
+		nlwarning("%s", errorMsg.c_str());
 	}
 	return rtdata;
 }

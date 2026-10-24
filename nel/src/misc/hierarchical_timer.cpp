@@ -128,7 +128,7 @@ void CHTimer::CNode::displayPath(CLog *log) const
 {
 	std::string path;
 	getPath(path);
-	log->displayRawNL(("HTIMER: " + path).c_str());
+	log->displayRawNL("%s", ("HTIMER: " + path).c_str());
 }
 
 //=================================================================
@@ -368,7 +368,7 @@ void	CHTimer::display(CLog *log, TSortCriterion criterion, bool displayInline /*
 			(*statIt)->getStats(statsInline, displayEx, rootStats.TotalTime, _WantStandardDeviation);
 			char out[4096];
 			NLMISC::smprintf(out, 2048, format.c_str(), (*statIt)->Timer->_Name, statsInline.c_str());
-			log->displayRawNL(out);
+			log->displayRawNL("%s", out);
 		}
 	}
 	benchClock.stop();
@@ -465,7 +465,7 @@ void		CHTimer::displayByExecutionPath(CLog *log, TSortCriterion criterion, bool 
 
 			char out[2048];
 			NLMISC::smprintf(out, 2048, format.c_str(), nodePath.c_str(), statsInline.c_str());
-			log->displayRawNL(out);
+			log->displayRawNL("%s", out);
 		}
 	}
 	benchClock.stop();
@@ -866,7 +866,7 @@ void CHTimer::CStats::display(CLog *log, bool displayEx, bool wantStandardDeviat
 {
 	log->displayRawNL("HTIMER: Total time                = %.3f ms", (float) TotalTime);
 	log->displayRawNL("HTIMER: Total time without sons   = %.3f ms", (float) TotalTimeWithoutSons);
-	log->displayRawNL(("HTIMER: Num visits                = " + NLMISC::toString(NumVisits)).c_str());
+	log->displayRawNL("%s", ("HTIMER: Num visits                = " + NLMISC::toString(NumVisits)).c_str());
 	if (displayEx)
 	{
 			log->displayRawNL("HTIMER: Min time                  = %.3f ms", (float) MinTime);

@@ -1030,7 +1030,7 @@ void CBuildingManager::buildBuildingTradeList(const NLMISC::CEntityId & userId, 
 	CCharacter * user = PlayerManager.getChar( userId );
 	if ( !user )
 	{
-		nlwarning("<BUILDING> Invalid char %s",userId.toString().c_str());
+		nlwarning("<BUILDING> invalid user %s", userId.toString().c_str());
 		return;
 	}
 	user->setAfkState(false);

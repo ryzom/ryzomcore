@@ -8906,106 +8906,41 @@ bool CCharacter::checkCreateParams( const CCreateCharMsg& createCharMsg, CCreate
 		}
 	}
 
-	// the race comes from the client: refuse it if no race sheet matches (setStartStatistics needs a valid one)
-	if (people_sheet == CSheetId::Unknown)
+	// the people comes from the client: refuse it when no race sheet matches (setStartStatistics needs one)
+	if( people_sheet == CSheetId::Unknown )
 	{
 		createCharErrorMsg.People = false;
 		returnValue = false;
-		egs_chinfo("<CCharacter::checkCreateParams> People %u is refused because no race sheet matches", (uint)createCharMsg.People);
+		egs_chinfo("<CCharacter::checkCreateParams> People %u refused: no race sheet matches", (uint)createCharMsg.People);
 	}
-
-	// visual properties come from the client: refuse values that do not fit the visual property bit fields
-	// (see SPropVisualA/B/C). The ranges follow the bit widths, not the gameplay limits.
+	// the visual values come from the client: refuse what does not fit the visual property bit fields
+	// (SPropVisualA/B/C); the ranges are the field widths, not the gameplay limits
 	{
-		struct CRange
-		{
-			static bool ok(sint8 value, sint8 maxValue) { return value >= 0 && value <= maxValue; }
-		};
-
+		struct CRange { static bool ok(sint8 value, sint8 maxValue) { return value >= 0 && value <= maxValue; } };
 		bool visualOk = true;
-
-		if (!CRange::ok(createCharMsg.HairType, 127))
-		{
-			createCharErrorMsg.HairType = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.HairColor, 7))
-		{
-			createCharErrorMsg.HairColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritHeight, 15))
-		{
-			createCharErrorMsg.GabaritHeight = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritTorsoWidth, 15) || !CRange::ok(createCharMsg.GabaritBreastSize, 15))
-		{
-			createCharErrorMsg.GabaritTorsoWidth = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritArmsWidth, 15))
-		{
-			createCharErrorMsg.GabaritArmsWidth = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.GabaritLegsWidth, 15))
-		{
-			createCharErrorMsg.GabaritLegsWidth = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.JacketColor, 7))
-		{
-			createCharErrorMsg.JacketColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.TrousersColor, 7))
-		{
-			createCharErrorMsg.TrousersColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.HatColor, 7))
-		{
-			createCharErrorMsg.HatColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.ArmsColor, 7))
-		{
-			createCharErrorMsg.ArmsColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.HandsColor, 7))
-		{
-			createCharErrorMsg.HandsColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.FeetColor, 7))
-		{
-			createCharErrorMsg.FeetColor = false;
-			visualOk = false;
-		}
-
-		if (!CRange::ok(createCharMsg.MorphTarget1, 7) || !CRange::ok(createCharMsg.MorphTarget2, 7) || !CRange::ok(createCharMsg.MorphTarget3, 7) || !CRange::ok(createCharMsg.MorphTarget4, 7) || !CRange::ok(createCharMsg.MorphTarget5, 7) || !CRange::ok(createCharMsg.MorphTarget6, 7) || !CRange::ok(createCharMsg.MorphTarget7, 7) || !CRange::ok(createCharMsg.MorphTarget8, 7) || !CRange::ok(createCharMsg.EyesColor, 7) || !CRange::ok(createCharMsg.Tattoo, 127))
-		{
-			createCharErrorMsg.FacialMorphDetail = false;
-			visualOk = false;
-		}
-
-		if (!visualOk)
+		if( !CRange::ok(createCharMsg.HairType, 127) )				{ createCharErrorMsg.HairType = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.HairColor, 7) )				{ createCharErrorMsg.HairColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritHeight, 15) )			{ createCharErrorMsg.GabaritHeight = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritTorsoWidth, 15) || !CRange::ok(createCharMsg.GabaritBreastSize, 15) )
+																	{ createCharErrorMsg.GabaritTorsoWidth = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritArmsWidth, 15) )		{ createCharErrorMsg.GabaritArmsWidth = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.GabaritLegsWidth, 15) )		{ createCharErrorMsg.GabaritLegsWidth = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.JacketColor, 7) )				{ createCharErrorMsg.JacketColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.TrousersColor, 7) )			{ createCharErrorMsg.TrousersColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.HatColor, 7) )				{ createCharErrorMsg.HatColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.ArmsColor, 7) )				{ createCharErrorMsg.ArmsColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.HandsColor, 7) )				{ createCharErrorMsg.HandsColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.FeetColor, 7) )				{ createCharErrorMsg.FeetColor = false; visualOk = false; }
+		if( !CRange::ok(createCharMsg.MorphTarget1, 7) || !CRange::ok(createCharMsg.MorphTarget2, 7)
+			|| !CRange::ok(createCharMsg.MorphTarget3, 7) || !CRange::ok(createCharMsg.MorphTarget4, 7)
+			|| !CRange::ok(createCharMsg.MorphTarget5, 7) || !CRange::ok(createCharMsg.MorphTarget6, 7)
+			|| !CRange::ok(createCharMsg.MorphTarget7, 7) || !CRange::ok(createCharMsg.MorphTarget8, 7)
+			|| !CRange::ok(createCharMsg.EyesColor, 7) || !CRange::ok(createCharMsg.Tattoo, 127) )
+																	{ createCharErrorMsg.FacialMorphDetail = false; visualOk = false; }
+		if( !visualOk )
 		{
 			returnValue = false;
-			egs_chinfo("<CCharacter::checkCreateParams> Visual properties refused because out of range");
+			egs_chinfo("<CCharacter::checkCreateParams> Visual properties refused: out of range");
 		}
 	}
 
@@ -10698,10 +10633,10 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	if ( _CurrentBotChatType == BOTCHATTYPE::GuildRoleMaster )
 		ok = false;	// todo
 
-	// buy the phrase (botChatIndex comes from the client: only index the list if it is in range)
-	CTradePhrase *pPhrase = ok ? &_CurrentPhrasesTradeList[botChatIndex] : NULL;
+	// buy the phrase (botChatIndex comes from the client: only index the list when it is in range)
+	CTradePhrase *phrase = ok ? &_CurrentPhrasesTradeList[ botChatIndex ] : NULL;
 	if(ok)
-		ok = buyRolemasterPhrase(pPhrase->SheetId, knownPhraseIndex, false);
+		ok = buyRolemasterPhrase(phrase->SheetId, knownPhraseIndex, false);
 
 	// send the result to client if he tries to learn it in the ActionBook
 	if (knownPhraseIndex != 0)
@@ -10726,7 +10661,7 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	if (ok)
 	{
 		// mark phrase as deleted (NB: already no more appear in the trade list, since hidden client-side)
-		pPhrase->SheetId = CSheetId::Unknown;
+		phrase->SheetId = CSheetId::Unknown;
 
 		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
 		if ( bot == NULL )
@@ -10976,7 +10911,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 	CInventoryPtr child = _Inventory[ inv ];
 	if (child == NULL)
 	{
-		nlwarning("<CCharacter:-:sellItem> inventory %u is NULL", (uint)inv);
+		nlwarning("<CCharacter::sellItem> %s: inventory %u has no instance", _Id.toString().c_str(), (uint)inv);
 		return;
 	}
 
@@ -14076,12 +14011,10 @@ bool CCharacter::autoFillExchangeView()
 			break;
 
 		validateSteps = missionTemplate->Steps[*itSet-1]->getSubSteps();
-
-		// get gift step from mission
+		// the template holds the full quantities; the step state holds what is still owed
 		const CActiveStepPD *botGiftStep = currentMission->getSteps(*itSet);
 		if (botGiftStep)
 		{
-			// fill in remaining quantities
 			for (uint i = 0; i < validateSteps.size(); ++i)
 			{
 				const CActiveStepStatePD *gift = botGiftStep->getStates(i + 1);
@@ -18263,6 +18196,8 @@ void CCharacter::onDisconnection(bool bCrashed)
 
 	// Remove handledAIGroups for all missions of the player
 	despawnAllHandledAIGroup();
+	// drop the pending R2 give/receive item entries the character registered on npcs
+	CR2GiveItem::getInstance().onCharacterLogout( getEntityRowId() );
 
 	updateJewelsModifiers(true);
 

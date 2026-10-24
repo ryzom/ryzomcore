@@ -67,7 +67,7 @@ CFamilyBehavior::CFamilyBehavior(CCellZone *owner, const	CGroupFamily	*grpFamily
 		std::set<NLMISC::TStringId>::iterator it;
 		for (it = props.begin(); it != props.end(); ++it)
 		{
-			nlinfo(NLMISC::CStringMapper::unmap(*it).c_str());
+			nlinfo("%s", NLMISC::CStringMapper::unmap(*it).c_str());
 		}
 	}
 	nlinfo("REST");
@@ -76,7 +76,7 @@ CFamilyBehavior::CFamilyBehavior(CCellZone *owner, const	CGroupFamily	*grpFamily
 		std::set<NLMISC::TStringId>::iterator it;
 		for (it = props.begin(); it != props.end(); ++it)
 		{
-			nlinfo(NLMISC::CStringMapper::unmap(*it).c_str());
+			nlinfo("%s", NLMISC::CStringMapper::unmap(*it).c_str());
 		}
 	}
 	*/

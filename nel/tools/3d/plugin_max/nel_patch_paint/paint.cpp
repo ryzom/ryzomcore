@@ -3719,7 +3719,7 @@ void EPM_PaintCMode::DoPaint ()
 					if (mYedge == -1)
 					{
 					 	std::string error = NLMISC::toString("Invalid edge '%i' with value '%i' in patch '%i' in PatchMesh", p, mYedge, e);
-					 	nlwarning(error.c_str());
+					 	nlwarning("%s", error.c_str());
 					 	MessageBox(NULL, MaxTStrFromUtf8(error).data(), _T("NeL Patch Painter"), MB_OK | MB_ICONSTOP);
 					 	return;
 					}

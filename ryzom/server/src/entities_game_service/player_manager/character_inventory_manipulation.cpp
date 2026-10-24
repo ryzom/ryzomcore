@@ -2594,7 +2594,10 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 		{
 			CInventoryPtr roomInventory = _PlayerRoom == nullptr ? nullptr : _PlayerRoom->getInventory();
 			if (roomInventory == nullptr || slot >= roomInventory->getSlotCount())
+			{
+				nlwarning("<sendItemInfos> user %s: room inventory %s, slot %u", _Id.toString().c_str(), roomInventory == nullptr ? "missing" : "too small", slot);
 				return false;
+			}
 			item = roomInventory->getItem(slot);
 
 			if (item == NULL)

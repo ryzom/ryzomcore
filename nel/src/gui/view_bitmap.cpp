@@ -297,7 +297,7 @@ namespace NLGUI
 		if (! CViewBase::parse(cur,parentGroup) )
 		{
 			string tmp = string("cannot parse view:")+getId()+", parent:"+parentGroup->getId();
-			nlinfo (tmp.c_str());
+			nlinfo ("%s", tmp.c_str());
 			return false;
 		}
 

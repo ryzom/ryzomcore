@@ -175,15 +175,8 @@ void	initMoulinette()
 
 		// Read paths
 		CConfigFile::CVar *cvPathes = cf.getVarPtr("Pathes");
-		// alternative=false: the 1-arg overload defaults to
-		// alternative=true, which never indexes the directory's real file
-		// names and instead does a case-SENSITIVE CFile::fileExists()
-		// against an unconditionally lowercased query string, silently
-		// failing to find any real file whose name isn't already
-		// all-lowercase (zone/ig names are always "<row>_<UPPERCASE
-		// LETTERS>").
 		for (i=0; cvPathes != nullptr && i<cvPathes->size(); ++i)
-			CPath::addSearchPath(cvPathes->asString(i), false, false);
+			CPath::addSearchPath(cvPathes->asString(i));
 
 		ProcessAllPasses = getBool(cf, "ProcessAllPasses", false);
 		CheckPrims = getBool(cf, "CheckPrims", false);
@@ -205,11 +198,7 @@ void	initMoulinette()
 			ZoneExt = getString(cf, "ZoneExt", ".zonew");
 			ZoneNHExt = getString(cf, "ZoneNHExt", ".zonenhw");
 			ZoneLookUpPath = getString(cf, "ZonePath", "./");
-			// alternative=false -- same fix as the Pathes loop above, this
-			// is what build_surf.cpp's per-zone CPath::lookup() (its own
-			// getZoneNameById(), always uppercase) needs to actually find
-			// anything.
-			CPath::addSearchPath(ZoneLookUpPath, false, false);
+			CPath::addSearchPath(ZoneLookUpPath);
 
 			TessellationPath = getString(cf, "TessellationPath");
 			TessellateLevel = getInt(cf, "TessellateLevel");

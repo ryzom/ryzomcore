@@ -2001,8 +2001,20 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					CCharacterInfos *senderChar = IOS->getCharInfos(TheDataset.getEntityId(sender));
 					CCharacterInfos *receiverChar = IOS->getCharInfos(TheDataset.getEntityId(*itM));
 
-					if (senderChar == NULL || receiverChar == NULL)
+					if (senderChar == NULL)
+					{
+						// the speaker is in the universe group but its character info never arrived
+						nlwarning("<CChatManager::chatInGroup> universe sender %s:%x has no character info, message dropped",
+							TheDataset.getEntityId(sender).toString().c_str(), sender.getIndex());
+						return;
+					}
+					if (receiverChar == NULL)
+					{
+						// group membership can arrive before the name registration (cf cbAddToGroup); skip until it does
+						nldebug("<CChatManager::chatInGroup> universe member %s:%x has no character info yet, skipped",
+							TheDataset.getEntityId(*itM).toString().c_str(), (*itM).getIndex());
 						continue;
+					}
 
 					// set GM mode if either speaker of listener is a GM
 					bool isGM= senderChar->HavePrivilege || receiverChar->HavePrivilege;
@@ -2610,6 +2622,10 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 			return;
 		}
 
+		// the audience line goes out with an invalid sender (see below), so the receivers' ignore lists
+		// are checked here against the real sender; privileged senders are never ignored
+		CCharacterInfos *senderInfos = IOS->getCharInfos( eid );
+		bool senderHavePrivilege = senderInfos != NULL && senderInfos->HavePrivilege;
 		// set the player chat mode and update its audience
 		CChatGroup::TGroupType oldMode = itCl->second->getChatMode();
 		TChanID	oldChan = itCl->second->getDynChatChan();
@@ -2625,10 +2641,13 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 			// ignore users in the excluded vector
 			if ( std::find( excluded.begin(),excluded.end(), (*itA) ) == excluded.end() )
 			{
-				static ucstring ucstr = ucstring("");
+				TClientInfoCont::iterator itRecv = _Clients.find( *itA );
+				if( itRecv != _Clients.end() && !senderHavePrivilege && itRecv->second->isInIgnoreList( sender ) )
+					continue;
 				// the phrase
 				uint32 sentId = STRING_MANAGER::sendStringToClient( *itA,phraseId.c_str(),params,&IosLocalSender );
-				sendChat2Ex( CChatGroup::say, *itA, sentId, sender, ucstr, true );
+				// send phrase id with an invalid sender, so that client dont display "toto says : toto bows"
+				sendChat2Ex( CChatGroup::say, *itA, sentId, TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
 			}
 		}
 		// restore old chat mode
@@ -3240,7 +3259,7 @@ void CChatManager::sendChatParam( CChatGroup::TGroupType senderChatMode, const T
 //	sendChat2Ex
 //
 //-----------------------------------------------
-void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender, ucstring customTxt, bool isEmote )
+void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender, ucstring customTxt )
 {
 	CCharacterInfos * charInfos = NULL;
 	if( sender.isValid() /* != CEntityId::Unknown*/ )
@@ -3283,17 +3302,8 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT2", bms );
 
 				CChatMsg2 chatMsg;
-				if (isEmote)
-				{
-					TDataSetRow senderFake = TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
-					chatMsg.CompressedIndex = senderFake.getCompressedIndex();
-					chatMsg.SenderNameId = 0;
-				}
-				else
-				{
 				chatMsg.CompressedIndex = sender.getCompressedIndex();
 				chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
-				}
 				chatMsg.ChatMode = (uint8) senderChatMode;
 				chatMsg.PhraseId = phraseId;
 				chatMsg.CustomTxt = customTxt;

@@ -203,7 +203,7 @@ namespace NLQT
 			}
 			else 
 			{
-				nldebug(QString("setModelData from %1 to %2")
+				nldebug("%s", QString("setModelData from %1 to %2")
 					.arg(oldValue).arg(value).toUtf8().constData());
 				model->setData(index, value, Qt::EditRole);
 			}
@@ -224,7 +224,7 @@ namespace NLQT
 					}
 					else 
 					{
-						nldebug(QString("setModelData from %1 to %2")
+						nldebug("%s", QString("setModelData from %1 to %2")
 							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
@@ -241,7 +241,7 @@ namespace NLQT
 					}
 					else 
 					{
-						nldebug(QString("setModelData from %1 to %2")
+						nldebug("%s", QString("setModelData from %1 to %2")
 							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
@@ -262,7 +262,7 @@ namespace NLQT
 					}
 					else 
 					{
-						nldebug(QString("setModelData from %1 to %2")
+						nldebug("%s", QString("setModelData from %1 to %2")
 							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}

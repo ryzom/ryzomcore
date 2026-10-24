@@ -577,7 +577,7 @@ void CPredictWeather::generateWeatherStats(const std::string &fileName, const CW
 	}
 	catch (const NLMISC::EStream &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 	outputFile.close();
 }

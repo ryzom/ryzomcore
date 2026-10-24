@@ -315,7 +315,7 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 			else
 			{
 				nlwarning("Can't assemble vs_2_0 vertex program:");
-				nlwarning((const char*)pErrorMsgs->GetBufferPointer());
+				nlwarning("%s", (const char*)pErrorMsgs->GetBufferPointer());
 			}
 
 			if (vs20Ok)
@@ -369,7 +369,7 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 		if (!result)
 		{
 			nlwarning("Unable to parse a vertex program :");
-			nlwarning(errorOutput.c_str());
+			nlwarning("%s", errorOutput.c_str());
 			program->m_CompileFailed = true;
 			#ifdef NL_DEBUG_D3D
 				nlassert(0);
@@ -405,10 +405,10 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 		string::size_type lineEnd;
 		while ((lineEnd = dest.find('\n', lineBegin)) != string::npos)
 		{
-			nlinfo(dest.substr (lineBegin, lineEnd-lineBegin).c_str());
+			nlinfo("%s", dest.substr (lineBegin, lineEnd-lineBegin).c_str());
 			lineBegin = lineEnd+1;
 		}
-		nlinfo(dest.substr (lineBegin, lineEnd-lineBegin).c_str());
+		nlinfo("%s", dest.substr (lineBegin, lineEnd-lineBegin).c_str());
 #endif // NL_DEBUG_D3D
 
 		LPD3DXBUFFER pShader;
@@ -424,7 +424,7 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 		else
 		{
 			nlwarning ("Can't assemble vertex program:");
-			nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
+			nlwarning ("%s", (const char*)pErrorMsgs->GetBufferPointer());
 			program->m_CompileFailed = true;
 			return false;
 		}

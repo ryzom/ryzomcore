@@ -51,7 +51,7 @@ using namespace NL3D;
 void outString (const string &sText)
 {
 	createDebug ();
-	InfoLog->displayRaw(sText.c_str());
+	InfoLog->displayRaw("%s", sText.c_str());
 	//printf ("%s", sText.c_str());
 }
 

@@ -163,7 +163,7 @@ void ZoneBuilder::addTransition(const sint32 posX, const sint32 posY)
 	m_createdAction = false;
 	m_zonePositionList.clear();
 
-	nlinfo(QString("trans %1,%2").arg(posX).arg(posY).toUtf8().constData());
+	nlinfo("%s", QString("trans %1,%2").arg(posX).arg(posY).toUtf8().constData());
 
 	sint32 x = (sint32)floor(float(posX) / m_landscapeScene->cellSize());
 	sint32 y = (sint32)floor(float(posY) / m_landscapeScene->cellSize());

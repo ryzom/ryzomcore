@@ -197,7 +197,7 @@ void nlFatalError (const char *format, ...)
 
 	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
-	NLMISC::ErrorLog->displayNL (str);
+	NLMISC::ErrorLog->displayNL ("%s", str);
 
 	if (INelContext::getInstance().getDebugNeedAssert())
 			NLMISC_BREAKPOINT;
@@ -216,7 +216,7 @@ void nlError (const char *format, ...)
 
 	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == nullptr);
 
-	NLMISC::ErrorLog->displayNL (str);
+	NLMISC::ErrorLog->displayNL ("%s", str);
 
 	if (INelContext::getInstance().getDebugNeedAssert())
 		NLMISC_BREAKPOINT;
@@ -1619,7 +1619,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayInstanceCounter, "display the instance co
 				continue;
 		}
 
-		log.displayNL(lines[i].c_str());
+		log.displayNL("%s", lines[i].c_str());
 	}
 
 	return true;
