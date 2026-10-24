@@ -12900,7 +12900,6 @@ bool CCharacter::autoFillExchangeView()
 	CMission * currentMission = NULL;
 	CGameItemPtr invItem;
 	uint stepCounter, candidateCounter, totalItemsInBag, itemsSeenCount;
-	CActiveStepPD activeStep;
 	CMissionTemplate * missionTemplate;
 	std::map<uint32, CActiveStepPD>::iterator stepIterator;
 	std::vector<IMissionStepTemplate::CSubStep> validateSteps;
@@ -12939,6 +12938,17 @@ bool CCharacter::autoFillExchangeView()
 			break;
 
 		validateSteps = missionTemplate->Steps[*itSet-1]->getSubSteps();
+		// the template holds the full quantities; the step state holds what is still owed
+		const CActiveStepPD *botGiftStep = currentMission->getSteps(*itSet);
+		if (botGiftStep)
+		{
+			for (uint i = 0; i < validateSteps.size(); ++i)
+			{
+				const CActiveStepStatePD *gift = botGiftStep->getStates(i + 1);
+				if (gift != NULL)
+					validateSteps[i].Quantity = gift->getState();
+			}
+		}
 
 		// the exchange temp inventory thingy has only 8 slots, so very benign failures to put items into it
 		// are possible. Hence merely breaking (doing no further work) as opposed to aborting work done,
