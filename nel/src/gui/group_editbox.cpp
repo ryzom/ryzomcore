@@ -611,7 +611,7 @@ namespace NLGUI
 		if (! CInterfaceGroup::parse(cur,parentGroup) )
 		{
 			string tmp = "cannot parse view:"+getId()+", parent:"+parentGroup->getId();
-			nlinfo(tmp.c_str());
+			nlinfo("%s", tmp.c_str());
 			return false;
 		}
 

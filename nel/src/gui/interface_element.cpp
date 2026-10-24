@@ -68,7 +68,7 @@ namespace NLGUI
 	void CInterfaceElement::parseError(CInterfaceGroup * parentGroup, const char *reason)
 	{
 		string tmp = string("cannot parse view:")+getId()+", parent:"+parentGroup->getId();
-		nlinfo(tmp.c_str());
+		nlinfo("%s", tmp.c_str());
 		if (reason)
 			nlinfo("reason : %s", reason);
 	}

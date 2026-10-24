@@ -3106,7 +3106,7 @@ namespace NLGUI
 		if (i == _MasterGroups.size())
 		{
 			std::string stmp = std::string("not found master group for window: ")+group->getId();
-			nlwarning (stmp.c_str());
+			nlwarning ("%s", stmp.c_str());
 			return;
 		}
 		else
@@ -3141,7 +3141,7 @@ namespace NLGUI
 			if (!noWarning)
 			{
 				std::string stmp = std::string("not found master group for window: ")+group->getId();
-				nlwarning (stmp.c_str());
+				nlwarning ("%s", stmp.c_str());
 			}
 			return;
 		}

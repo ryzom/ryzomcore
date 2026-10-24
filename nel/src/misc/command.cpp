@@ -198,7 +198,7 @@ bool ICommand::execute (const std::string &commandWithArgs, CLog &log, bool quie
 	catch(const exception &e)
 	{
 		log.displayNL("Command '%s' thrown an exception :", commandWithArgs.c_str());
-		log.displayNL(e.what());
+		log.displayNL("%s", e.what());
 
 		return false;
 	}

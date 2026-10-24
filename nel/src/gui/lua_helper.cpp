@@ -478,7 +478,7 @@ namespace NLGUI
 		}
 		catch (const ELuaError &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 			return false;
 		}
 		return true;

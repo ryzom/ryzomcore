@@ -3172,7 +3172,7 @@ void CZoneLighter::lightWater(CWaterShape &ws, const CMatrix &MT, const CLightDe
 	catch(const NLMISC::Exception &e)
 	{
 		nlwarning("Water shape lighting failed !");
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 }
 

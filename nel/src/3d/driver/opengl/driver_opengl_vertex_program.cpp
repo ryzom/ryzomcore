@@ -138,7 +138,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	if (!result)
 	{
 		nlwarning("Unable to parse a vertex program :");
-		nlwarning(errorOutput.c_str());
+		nlwarning("%s", errorOutput.c_str());
 		#ifdef NL_DEBUG
 			nlassert(0);
 		#endif
@@ -1564,11 +1564,11 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 					break;
 				}
 			}
-			nlwarning(std::string(lineStart, lineEnd).c_str());
+			nlwarning("%s", std::string(lineStart, lineEnd).c_str());
 			// display the gl error msg
 			const GLubyte *errorMsg = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 			nlassert((const char *) errorMsg);
-			nlwarning((const char *) errorMsg);
+			nlwarning("%s", (const char *) errorMsg);
 		}
 		// the clip variant is optional: the caller falls back to the base
 		// program (geometry then ignores user clip planes)
@@ -1722,7 +1722,7 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	{
 		nlwarning("Unable to parse a vertex program.");
 		#ifdef NL_DEBUG
-			nlerror(errorOutput.c_str());
+			nlerror("%s", errorOutput.c_str());
 		#endif
 		return false;
 	}
@@ -1863,7 +1863,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	{
 		nlwarning("Unable to parse a vertex program.");
 		#ifdef NL_DEBUG
-			nlerror(errorOutput.c_str());
+			nlerror("%s", errorOutput.c_str());
 		#endif
 		return false;
 	}

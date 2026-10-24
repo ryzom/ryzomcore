@@ -63,7 +63,7 @@ static void writePNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 
 static void setPNGWarning(png_struct * /* png_ptr */, const char* message)
 {
-	nlwarning(message);
+	nlwarning("%s", message);
 }
 
 static void setPNGError(png_struct *png_ptr, const char* message)

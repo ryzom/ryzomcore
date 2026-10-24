@@ -234,11 +234,11 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 					break;
 				}
 			}
-			nlwarning(std::string(lineStart, lineEnd).c_str());
+			nlwarning("%s", std::string(lineStart, lineEnd).c_str());
 			// display the gl error msg
 			const GLubyte *errorMsg = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
 			nlassert((const char *) errorMsg);
-			nlwarning((const char *) errorMsg);
+			nlwarning("%s", (const char *) errorMsg);
 		}
 		nlassert(0);
 		return false;
