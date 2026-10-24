@@ -758,7 +758,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 			{
 				if( shop->ShopUnit == 0 )
 				{
-					nlwarning("<CCharacterShoppingList::buyItem> ShopUnit ptr is NULL for a faction points item");
+					nlwarning("<CCharacterShoppingList::buyItem> %s: no shop unit for faction item %u", _Character->getId().toString().c_str(), itemNumber);
 					return;
 				}
 				factionPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );

@@ -3049,7 +3049,7 @@ public:
 			if(!chld)
 			{
 				std::string tmp= "no npc named "+_Npc+"! say nothing!";
-				nlwarning(tmp.c_str());
+				nlwarning("%s", tmp.c_str());
 				return true;
 			}
 			bot= chld->getSpawnObj();

@@ -4134,7 +4134,7 @@ NLMISC_COMMAND(dumpItems, "Sort items by category & display their sheet ids", ""
 		info += itemIt->IS->Id.toString();
 		info += "; Sheet ID = ";
 		info += toString(itemIt->ID.asInt());
-		nlwarning(info.c_str());
+		nlwarning("%s", info.c_str());
 	}
 	return true;
 }
@@ -4858,13 +4858,13 @@ NLMISC_COMMAND(stick_log, "", "<slot>")
 			if(!inst.empty())
 			{
 				string	str= toString("  %d: %X. %s", i, inst.getObjectPtr(), inst.getShapeName().c_str());
-				nlinfo(str.c_str());
+				nlinfo("%s", str.c_str());
 				pIM->displaySystemInfo(str);
 			}
 			else
 			{
 				string	str= toString("  %d: %X. NOT a TransformShape", i, sticks[i].getObjectPtr());
-				nlinfo(str.c_str());
+				nlinfo("%s", str.c_str());
 				pIM->displaySystemInfo(str);
 			}
 		}
@@ -5214,7 +5214,7 @@ NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 	SoundMngr->getMixer()->getSoundNames(sounds);
 	for(uint k = 0; k < sounds.size(); ++k)
 	{
-		nlinfo(NLMISC::CStringMapper::unmap(sounds[k]).c_str());
+		nlinfo("%s", NLMISC::CStringMapper::unmap(sounds[k]).c_str());
 	}
 	return true;
 }
@@ -5588,7 +5588,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 		}
 		catch(const NLMISC::EStream &e)
 		{
-			nlinfo(e.what());
+			nlinfo("%s", e.what());
 			srcFile.clear();
 		}
 	}
@@ -5636,7 +5636,7 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 	}
 	catch(const NLMISC::EStream &e)
 	{
-		nlinfo(e.what());
+		nlinfo("%s", e.what());
 	}
 	return true;
 }
@@ -5676,7 +5676,7 @@ NLMISC_COMMAND(dumpAllLoadedZones, "dump all loaded zones", "")
 		Landscape->getAllZoneLoaded(loadedZones);
 		for(uint k = 0; k < loadedZones.size(); ++k)
 		{
-			nlwarning(loadedZones[k].c_str());
+			nlwarning("%s", loadedZones[k].c_str());
 		}
 	}
 	else

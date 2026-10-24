@@ -103,6 +103,9 @@ public:
 	// on unspawn: update _PendingRequest
 	void onUnspawn( TDataSetRow creatureRowId );
 
+	// on character disconnection: drop the entries it registered
+	void onCharacterLogout( TDataSetRow characterRowId );
+
 private:
 	bool _ValidateGiveItemRequest( const TItemRequest &req );
 	void _SetClientDB( const TItemRequest & req, uint32 MissionIndex );

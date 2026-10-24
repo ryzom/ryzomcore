@@ -91,7 +91,7 @@ bool CNelExport::exportSWT(const std::string &sPath, std::vector<INode*>& vectNo
 			}
 			catch (const Exception &e)
 			{
-				nlwarning (e.what());
+				nlwarning ("%s", e.what());
 			}
 		}
 	}

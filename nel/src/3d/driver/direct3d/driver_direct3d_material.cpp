@@ -1935,10 +1935,10 @@ IDirect3DPixelShader9	*CDriverD3D::buildPixelShader (const CNormalShaderDesc &no
 	string::size_type lineEnd;
 	while ((lineEnd = shaderText.find('\n', lineBegin)) != string::npos)
 	{
-		nlinfo(shaderText.substr (lineBegin, lineEnd-lineBegin).c_str());
+		nlinfo("%s", shaderText.substr (lineBegin, lineEnd-lineBegin).c_str());
 		lineBegin = lineEnd+1;
 	}
-	nlinfo(shaderText.substr (lineBegin, lineEnd-lineBegin).c_str());
+	nlinfo("%s", shaderText.substr (lineBegin, lineEnd-lineBegin).c_str());
 #endif // NL_DEBUG_D3D
 
 	// Add the shader
@@ -1958,7 +1958,7 @@ IDirect3DPixelShader9	*CDriverD3D::buildPixelShader (const CNormalShaderDesc &no
 	else
 	{
 		nlwarning ("Can't assemble pixel shader:");
-		nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
+		nlwarning ("%s", (const char*)pErrorMsgs->GetBufferPointer());
 		normalPixelShaders.back().PixelShader = NULL;
 	}
 

@@ -809,7 +809,7 @@ void CScriptVM::interpretCode(
 			{
 				if (AIScriptDisplayPrint)
 				{
-					nlinfo(currentString.c_str());
+					nlinfo("%s", currentString.c_str());
 				}
 				currentString.resize(0);
 				++index;
@@ -819,7 +819,7 @@ void CScriptVM::interpretCode(
 			{
 				if (AIScriptDisplayLog)
 				{
-					nlinfo(currentString.c_str());
+					nlinfo("%s", currentString.c_str());
 				}
 				currentString.resize(0);
 				++index;

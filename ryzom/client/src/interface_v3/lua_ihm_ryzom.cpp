@@ -939,7 +939,7 @@ int CLuaIHMRyzom::breakPoint(CLuaState &ls)
 	std::string reason;
 	ls.getStackContext(reason,   1);		// 1 because 0 is the current C function => return 1 for script called
 	LuaHelperStuff::formatLuaStackContext(reason);
-	NLMISC::InfoLog->displayRawNL(reason.c_str());
+	NLMISC::InfoLog->displayRawNL("%s", reason.c_str());
 	static volatile bool doAssert = true;
 
 	if (doAssert) // breakPoint can be discarded in case of looping assert
@@ -3249,11 +3249,11 @@ void CLuaIHMRyzom::rawDebugInfo(const std::string &dbg)
 		if (!dbg.empty() && dbg[0] == '@')
 		{
 			// if color is already given use the message as it
-			NLMISC::InfoLog->displayRawNL(dbg.c_str());
+			NLMISC::InfoLog->displayRawNL("%s", dbg.c_str());
 		}
 		else
 		{
-			NLMISC::InfoLog->displayRawNL(LuaHelperStuff::formatLuaErrorSysInfo(dbg).c_str());
+			NLMISC::InfoLog->displayRawNL("%s", LuaHelperStuff::formatLuaErrorSysInfo(dbg).c_str());
 		}
 
 #ifdef LUA_NEVRAX_VERSION
@@ -3489,7 +3489,7 @@ bool CLuaIHMRyzom::executeFunctionOnStack(CLuaState &ls,   int numArgs,   int nu
 		lua_Debug ar;
 		ls.pushValue(-1 - numArgs);
 		lua_getinfo(ls.getStatePointer(), ">lS", &ar);
-		nlwarning((std::string(ar.what) + ", at line " + toString(ar.linedefined) + " in " + std::string(ar.source)).c_str());
+		nlwarning("%s", (std::string(ar.what) + ", at line " + toString(ar.linedefined) + " in " + std::string(ar.source)).c_str());
 	}
 
 	int result = ls.pcall(numArgs,   numRet);

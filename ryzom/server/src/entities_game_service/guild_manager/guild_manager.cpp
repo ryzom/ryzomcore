@@ -769,6 +769,7 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	}
 
 	CGuildCharProxy proxy(character->getCharacter());
+	// the shard unifier rejected the name: tell the player why
 
 	if (result != CHARSYNC::TCharacterNameResult::cnr_ok)
 	{

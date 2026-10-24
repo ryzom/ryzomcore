@@ -3188,7 +3188,7 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 			CGuildMember * gm = guild->getMemberFromEId(charId);
 			if( gm == NULL )
 			{
-				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s is not a member of his guild", charId.toString().c_str());
+				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> %s is not a member of guild %u", charId.toString().c_str(), c->getGuildId());
 				return;
 			}
 			if( gm->getGrade() == EGSPD::CGuildGrade::Leader )
@@ -3202,7 +3202,7 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 		}
 		else
 		{
-			nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character % have no guild", charId.toString().c_str());
+			nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s has no guild", charId.toString().c_str());
 		}
 	}
 	else

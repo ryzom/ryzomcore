@@ -50,20 +50,6 @@ extern CClientChatManager   ChatMngr;
 /////////////////////
 
 //==================================================================
-static void attachPeopleContainer(CGroupContainer *parent, CGroupContainer *child)
-{
-	CGroupList *list = parent->getList();
-	if (list != NULL)
-	{
-		// Contacts and group headers must not evict existing entries from the list.
-		const uint needed = list->getNumChildren() + 1;
-		if (needed > list->getMaxElements())
-			list->setProperty("maxelements", toString(needed));
-	}
-	parent->attachContainer(child);
-}
-
-//==================================================================
 CPeopleList::CPeopleList() : _ChatWindow(nullptr)
     ,
 			     _ContactType(CPeopleListDesc::Unknown),
@@ -110,6 +96,9 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	// must attach group to hierarchy before we can use it
 	CGroupContainer *gc = dynamic_cast<CGroupContainer  *>(mainIg);
 	if (!gc) return false;
+	// a contact list keeps every entry: the list's element limit (1024 by default) evicts the oldest ones
+	if (gc->getList())
+		gc->getList()->setProperty("maxelements", "-1");
 	if (fatherContainer != nullptr)
 	{
 		fatherContainer->attachContainer(gc, desc.InsertPosition);
@@ -215,8 +204,7 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	// Compare folded strings because compareCaseInsensitive mishandles name prefixes.
-	return NLMISC::toCaseInsensitive(a.getName()) < NLMISC::toCaseInsensitive(b.getName()); // FIXME: Locale-dependent sort
+	return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
 }
 
 //==================================================================
@@ -299,7 +287,7 @@ void CPeopleList::sortEx(TSortOrder order)
 		for(cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
 		{
 			group = _GroupContainers[cptContainers].second;
-			attachPeopleContainer(_BaseContainer, group);
+			_BaseContainer->attachContainer(group);
 		}
 	}
 	
@@ -319,7 +307,7 @@ void CPeopleList::sortEx(TSortOrder order)
 			}
 		}
 		
-		attachPeopleContainer(group, _Peoples[k].Container);
+		group->attachContainer(_Peoples[k].Container);
 	}
 }
 
@@ -336,7 +324,7 @@ void CPeopleList::sort()
 	std::sort(_Peoples.begin(), _Peoples.end());
 	for(k = 0; k < _Peoples.size(); ++k)
 	{
-		attachPeopleContainer(_BaseContainer, _Peoples[k].Container);
+		_BaseContainer->attachContainer(_Peoples[k].Container);
 	}
 }
 
@@ -436,7 +424,7 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 	  }
 	  else*/
 	{
-		attachPeopleContainer(_BaseContainer, gc);
+		_BaseContainer->attachContainer(gc);
 	}
 
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
@@ -554,7 +542,7 @@ void CPeopleList::changeGroup(uint index, const std::string &groupName)
 
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
-	attachPeopleContainer(_BaseContainer, gc);
+	_BaseContainer->attachContainer(gc);
 	
 	_GroupContainers.push_back(make_pair(group, gc));
 	
@@ -578,7 +566,7 @@ void CPeopleList::readContactGroups()
 	
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
-	attachPeopleContainer(_BaseContainer, gc);
+	_BaseContainer->attachContainer(gc);
 	
 	_GroupContainers.push_back(make_pair("", gc));
 	
@@ -636,7 +624,7 @@ void CPeopleList::readContactGroups()
 
 							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 							pRoot->addGroup (gc);
-							attachPeopleContainer(_BaseContainer, gc);
+							_BaseContainer->attachContainer(gc);
 
 							_GroupContainers.push_back(make_pair(propGroup, gc));
 						}

@@ -120,7 +120,7 @@ public:
 		unsigned int newFP = _controlfp(0, 0);
 		if ((newFP & (_MCW_DN | _MCW_IC | _MCW_RC | _MCW_PC)) != (_FPControlWord &  (_MCW_DN | _MCW_IC | _MCW_RC | _MCW_PC)))
 		{
-			nlwarning(_Label);
+			nlwarning("%s", _Label);
 			nlassert(0);
 		}
 	}

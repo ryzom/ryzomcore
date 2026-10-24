@@ -193,7 +193,7 @@ class CAHProfileTexture : public IActionHandler
 			log.displayRawNL("********* TEXTURE PROFILE **********");
 			for(uint i=0;i<res.size();i++)
 			{
-				log.displayRawNL(res[i].c_str());
+				log.displayRawNL("%s", res[i].c_str());
 			}
 			log.displayRawNL("************************************");
 		}

@@ -207,7 +207,7 @@ void CFileDescriptionContainer::display(NLMISC::CLog* log) const
 
 	// display the file list
 	for (uint32 i=0;i<_FileDescriptions.size();++i)
-		log->displayNL(lines[i].c_str());
+		log->displayNL("%s", lines[i].c_str());
 }
 
 void CFileDescriptionContainer::serial(NLMISC::IStream& stream)

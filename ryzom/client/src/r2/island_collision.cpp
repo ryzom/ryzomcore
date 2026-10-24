@@ -441,7 +441,7 @@ CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::C
 			}
 			catch(const Exception &e)
 			{
-				nlwarning(e.what());
+				nlwarning("%s", e.what());
 				_HeightMap.clear();
 			}
 		}
@@ -582,7 +582,7 @@ void CIslandCollision::loadEntryPoints()
 		catch (const NLMISC::EStream &e)
 		{
 			_EntryPointsLoadingFailure = true;
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 	}
 }

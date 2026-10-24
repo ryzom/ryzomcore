@@ -227,7 +227,7 @@ public:
 		}
 		catch (const std::exception &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 		catch(...)
 		{

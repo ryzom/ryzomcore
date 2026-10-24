@@ -1644,7 +1644,7 @@ NLMISC_COMMAND(aesSystem, "Execute a system() call", "<command>")
 			char *res = fgets(str, 1023, fp);
 			if (res == NULL)
 				break;
-			log.displayRaw(res);
+			log.displayRaw("%s", res);
 		}
 
 		fclose(fp);
@@ -1662,7 +1662,7 @@ NLMISC_COMMAND(aesSystem, "Execute a system() call", "<command>")
 			char *res = fgets(str, 1023, fp);
 			if (res == NULL)
 				break;
-			log.displayRaw(res);
+			log.displayRaw("%s", res);
 		}
 
 		fclose(fp);

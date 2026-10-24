@@ -383,6 +383,8 @@ public:
 	// @{
 	/// For debug: dump in the sysinfo and nlwarning state of lua. detail range from 0 to 2 (clamped).
 	void dumpLuaState(uint detail);
+	// display a string in SysInfo and nlinfo
+	void	dumpLuaString(const std::string &str);
 	// @}
 
 	// Get the list of InGame XML Interface files, with any AddOn ones
@@ -659,8 +661,6 @@ private:
 	// @{
 	// str= printable version of value at stack index
 	void	getLuaValueInfo(std::string &str, sint index);
-	// display a string in SysInfo and nlinfo
-	void	dumpLuaString(const std::string &str);
 	// dump printable version of pair key-index in top of stack. if value is a table, recurs (up to recursTableLevel times)
 	void	dumpLuaKeyValueInfo(uint recursTableLevel, uint tabLevel);
 	// @}

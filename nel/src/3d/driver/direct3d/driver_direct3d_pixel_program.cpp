@@ -115,7 +115,7 @@ bool CDriverD3D::compilePixelProgram(CPixelProgram *program)
 		else
 		{
 			nlwarning ("Can't assemble pixel program:");
-			nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
+			nlwarning ("%s", (const char*)pErrorMsgs->GetBufferPointer());
 			delete drvInfo;
 			program->m_DrvInfo = NULL;
 			program->m_CompileFailed = true;

@@ -1638,7 +1638,7 @@ sint CComLuaModule::luaTalkAs(lua_State* state)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	std::string npcname( lua_tostring(state, 1) );
-	nlinfo(("luaTalkAs:: "+npcname).c_str());
+	nlinfo("%s", ("luaTalkAs:: "+npcname).c_str());
 	this2->_Client->getEditionModule().requestTalkAs(npcname);
 	return 0;
 }
