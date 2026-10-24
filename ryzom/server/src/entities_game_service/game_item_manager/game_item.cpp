@@ -4504,8 +4504,9 @@ uint16 CGameItem::getClientEnchantValue() const
 	}
 	if ( sabrinaValue != 0)
 	{
-		// client side value is limited to 10bits
-		return std::min(uint(999), uint(1 + sapLoad / (uint32)(sabrinaValue * sabrinaRelativeValue)));
+		// the client shows value - 1 on the item icon; the field is 10 bits wide and 999 is the
+		// largest count that still reads as a cap on the icon, so the value saturates at 1000
+		return (uint16)std::min(1000u, 1 + sapLoad / (uint32)(sabrinaValue * sabrinaRelativeValue));
 	}
 	else
 	{
