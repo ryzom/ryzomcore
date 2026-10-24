@@ -789,7 +789,7 @@ CCharacterInfos * CInputOutputService::getCharInfos( const ucstring& chName )
 	
 	// Not found so check any renamed players
 	itInfos = _RenamedCharInfos.find( chName.toUtf8() );
-	if( itInfos != _NameToInfos.end() )
+	if( itInfos != _RenamedCharInfos.end() )
 	{
 		return 	itInfos->second;
 	}
