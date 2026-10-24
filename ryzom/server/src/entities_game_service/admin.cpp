@@ -1172,7 +1172,7 @@ ENTITY_VARIABLE (FBT, "Focus Beta Tester")
 	}
 }
 
-ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,<posz>][,<season>] | <bot_name> | <player_name> | home | <creature>")
+ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,<posz>][,<season>] | <bot_name> | <player_name> | home | <creature>; append @<cell> to any form to enter that building cell (apartment, guild hall), or give @<cell> alone to change only the cell")
 {
 	H_AUTO(Position);
 
@@ -1193,7 +1193,22 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 	}
 	else
 	{
-		if ( value.find(',') != string::npos )
+		// an optional "@<cell>" suffix on any form selects the building cell (apartment, guild hall) to
+		// teleport into; without it the destination is outdoors (cell 0)
+		string::size_type at = value.find('@');
+		if ( at != string::npos )
+		{
+			fromString(value.substr(at + 1), cell);
+			value = value.substr(0, at);
+		}
+		if ( value.empty() )
+		{
+			// "@<cell>" alone: keep the coordinates, change the cell
+			x = e->getState().X();
+			y = e->getState().Y();
+			z = e->getState().Z();
+		}
+		else if ( value.find(',') != string::npos )
 		{
 			explode (value, string(","), res);
 			if (res.size() >= 2)
@@ -1207,17 +1222,6 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 			{
 				fromString(res[2], z);
 				z *= 1000;
-			}
-		}
-		else if ( value.find('@') != string::npos )
-		{
-			x = e->getState().X();
-			y = e->getState().Y();
-			z = e->getState().Z();
-			explode (value, string("@"), res);
-			if (res.size() == 1)
-			{
-				fromString(res[0], cell);
 			}
 		}
 		else
