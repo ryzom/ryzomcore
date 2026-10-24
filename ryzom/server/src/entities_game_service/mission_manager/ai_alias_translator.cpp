@@ -117,22 +117,24 @@ void CAIAliasTranslator::buildBotTree(const NLLIGO::IPrimitive* prim)
 				nlwarning("<CAIAliasTranslator buildBotTree> errors : name='%s' alias='%s' in '%s'",name.c_str(),value.c_str(), buildPrimPath(prim).c_str());
 			}
 
-			NLMISC::strlwr(name);
 			//remove AI name parameters
 			string::size_type trash = name.find('$');
 			if ( trash != string::npos )
 			{
 				name.resize(trash);
 			}
+			// the name-to-alias tables are keyed by the lowercased name; the alias-to-name table keeps
+			// the primitive's spelling, it is what players get told (answerWhere) and what the logs show
+			std::string lowerName = NLMISC::toLower(name);
 			if (!error)
 			{
 				if ( !nlstricmp(aiClass.c_str(),"npc_bot") )
 				{
 					_BotIdsToNames.insert( make_pair(id,name) );
-					_BotNamesToIds.insert( make_pair(name,id) );
+					_BotNamesToIds.insert( make_pair(lowerName,id) );
 				}
 				else
-					_AIGroupNamesToIds.insert( make_pair(name,id) );
+					_AIGroupNamesToIds.insert( make_pair(lowerName,id) );
 			}
 		}
 		if ( !nlstricmp(aiClass.c_str(),"spire") )
