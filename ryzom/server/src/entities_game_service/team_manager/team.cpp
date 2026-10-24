@@ -560,7 +560,8 @@ void CTeam::removeCharacter( CCharacter * player )
 		_RewardSharing->resetCandidates(this);
 
 	// update positions
-	updateMembersPositions();
+	// the remaining members shifted slots: resend every position
+	updateMembersPositions(true);
 
 	// remove character from chat group
 	TGroupId idGroupe = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
