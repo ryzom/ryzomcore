@@ -1796,6 +1796,11 @@ NLMISC_CATEGORISED_COMMAND(nel, sleep, "Freeze the service for N seconds (for de
 	return true;
 }
 
+// These three commands let anyone with a service command prompt run a program on the host. Every service
+// linked with NeL carried them, so any privilege bug in a command channel (admin tool, EXEC_COMMAND, the
+// client admin commands) turned into a shell. Nothing uses them; a shard that wants a shell escape can
+// register one in its own admin executor service.
+#if 0
 NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system() function call (wait until the end of the command)", "<commandline>")
 {
 	nlunreferenced(rawCommandString);
@@ -1846,6 +1851,7 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 	killProgram(pid);
 	return true;
 }
+#endif
 
 #ifdef NL_OS_WINDOWS
 LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
