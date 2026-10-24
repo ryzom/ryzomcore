@@ -3030,31 +3030,80 @@ void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &
 	thread->start();
 }
 
-// all admin /a /b commands executed by the client go in this callback
-// A client admin command reaches ICommand::execute as one line, "<cmd> [<eid>] <arg>", and the registry
-// runs every ';'-separated command in that line. Only the first one is checked against the client's
-// privilege, so an argument with an unquoted, unescaped ';' would run a second command with the
-// service's own rights. NeL treats ';' as a separator outside double quotes and when not escaped as "\;";
-// this mirrors that, so an argument that works today still works and only a smuggled command is refused.
-static bool hasCommandSeparator(const std::string &arg)
+// Number of commands NLMISC::ICommand::execute() would run for this line, following its parser: a ';' outside
+// quotes separates two commands, '\' escapes the next character and a '"' only opens a quoted argument at the
+// start of a word. A line that parser rejects (missing end quote, trailing backslash) counts as 0.
+// The privilege check of a client admin command only covers its first command, so the client's text must not
+// add a second one.
+static uint countCommandsInLine(const std::string &line)
 {
-	bool inQuote = false;
-	for (std::string::size_type i = 0; i < arg.size(); ++i)
+	uint nbCommands = 0;
+	bool firstArg = true;
+	string::size_type i = 0;
+	const string::size_type size = line.size();
+	for (;;)
 	{
-		const char c = arg[i];
-		if (c == '\\')
+		// skip whitespace
+		while (i < size && (line[i] == ' ' || line[i] == '\t' || line[i] == '\n' || line[i] == '\r'))
+			++i;
+		if (i == size)
+			return nbCommands;
+
+		bool emptyArg = true;
+		if (line[i] == '"')
 		{
-			++i; // an escaped character, whatever it is
-			continue;
+			// quoted argument, ';' is not a separator inside
+			for (++i;; ++i)
+			{
+				if (i == size)
+					return 0;
+				if (line[i] == '"')
+				{
+					++i;
+					break;
+				}
+				if (line[i] == '\\' && ++i == size)
+					return 0;
+				emptyArg = false;
+			}
 		}
-		if (c == '"')
-			inQuote = !inQuote;
-		else if (c == ';' && !inQuote)
-			return true;
+		else
+		{
+			// normal word, ends at whitespace or ';'
+			for (;;)
+			{
+				if (line[i] == '\\')
+				{
+					if (++i == size)
+						return 0;
+				}
+				else if (line[i] == ';')
+				{
+					break;
+				}
+				emptyArg = false;
+				++i;
+				if (i == size || line[i] == ' ' || line[i] == '\t' || line[i] == '\n' || line[i] == '\r')
+					break;
+			}
+		}
+
+		if (!emptyArg && firstArg)
+		{
+			++nbCommands;
+			firstArg = false;
+		}
+
+		// separator
+		if (i < size && line[i] == ';')
+		{
+			firstArg = true;
+			++i;
+		}
 	}
-	return false;
 }
 
+// all admin /a /b commands executed by the client go in this callback
 void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbClientAdmin);
@@ -3069,12 +3118,6 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 
 	CSString cmdName, arg;
 	msgin.serial (cmdName, arg);
-	if (hasCommandSeparator(arg))
-	{
-		nlwarning("HACK: %s sent client admin command '%s' with a command separator in its argument '%s', refused",
-			eid.toString().c_str(), cmdName.c_str(), arg.c_str());
-		return;
-	}
 
 	//nlinfo("ADMIN: Executing admin command: eid=%s onTarget=%s cmdName=%s arg=%s",eid.toString().c_str(),onTarget?"true":"false",cmdName.quote().c_str(),arg.quote().c_str());
 	TLogContext_Command_ExecCtx logContext(eid);
@@ -3120,6 +3163,14 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 	{
 		nlinfo("ADMIN: Player %s doesn't have privilege to execute /b command onTarget '%s' ", eid.toString().c_str(), cmdName.c_str());
 		chatToPlayer (eid, "You don't have privilege to execute this command");
+		return;
+	}
+
+	// the arguments must not chain another command, it would run without any privilege check
+	if (countCommandsInLine(cmdName + " " + arg) > 1)
+	{
+		nlwarning("ADMIN: Player %s tried to chain commands in client admin command '%s %s', refused", eid.toString().c_str(), cmdName.c_str(), arg.c_str());
+		chatToPlayer (eid, "Only one command can be executed at a time");
 		return;
 	}
 
@@ -3222,12 +3273,6 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 
 	string cmdName, arg;
 	msgin.serial (cmdName, arg);
-	if (hasCommandSeparator(arg))
-	{
-		nlwarning("HACK: %s sent client admin command '%s' with a command separator in its argument '%s', refused",
-			eid.toString().c_str(), cmdName.c_str(), arg.c_str());
-		return;
-	}
 
 	nlinfo("ADMIN: Executing admin /c command: eid=%s onTarget=%s cmdName=%s arg=%s",eid.toString().c_str(),characterName.c_str(),cmdName.c_str(),arg.c_str());
 
@@ -3272,6 +3317,14 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 	{
 		nlinfo("ADMIN: Player %s doesn't have privilege to execute /c command '%s' ", eid.toString().c_str(), cmdName.c_str());
 		chatToPlayer (eid, "You don't have privilege to execute this command");
+		return;
+	}
+
+	// the arguments must not chain another command, it would run without any privilege check
+	if (countCommandsInLine(cmdName + " " + arg) > 1)
+	{
+		nlwarning("ADMIN: Player %s tried to chain commands in client admin command /c '%s %s', refused", eid.toString().c_str(), cmdName.c_str(), arg.c_str());
+		chatToPlayer (eid, "Only one command can be executed at a time");
 		return;
 	}
 
