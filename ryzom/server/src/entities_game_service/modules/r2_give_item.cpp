@@ -235,10 +235,10 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 			if( vec[i].ActionId == actionId )
 			{
 				CCharacter *c = PlayerManager.getChar( vec[i].CharacterRowId );
-				if (c == NULL)
+				if( c == NULL )
 				{
-					nlwarning("R2GiveItem: character of the request %u is no more online", actionId);
-					// drop the request of the offline character, nobody can use it any more
+					// the character that registered this entry is offline, nobody can use it any more
+					nlwarning("R2GiveItem: character %u of the request %u is no more online, request dropped", vec[i].CharacterRowId.getIndex(), actionId);
 					vec[i] = vec.back();
 					vec.pop_back();
 					if( vec.empty() )
@@ -311,6 +311,31 @@ void CR2GiveItem::onUnspawn( TDataSetRow creatureRowId )
 	if( it != _PendingRequest.end() )
 	{
 		_PendingRequest.erase( it );
+	}
+}
+
+//----------------------------------------------------------------------------
+void CR2GiveItem::onCharacterLogout( TDataSetRow characterRowId )
+{
+	// drop every pending entry the character registered, on any npc
+	TPendingRequest::iterator it = _PendingRequest.begin();
+	while( it != _PendingRequest.end() )
+	{
+		TCreatureItemRequest &vec = (*it).second;
+		for( uint32 i = 0; i < vec.size(); )
+		{
+			if( vec[i].CharacterRowId == characterRowId )
+			{
+				vec[i] = vec.back();
+				vec.pop_back();
+			}
+			else
+				++i;
+		}
+		if( vec.empty() )
+			_PendingRequest.erase( it++ );
+		else
+			++it;
 	}
 }
 
