@@ -460,6 +460,15 @@ public:
 		Category = MP_CATEGORY::Undefined;
 		Family	 = RM_FAMILY::Unknown;
 		//IsForMission = false;
+		// serial() writes these unconditionally while readGeorges() only sets
+		// them when the sheet has the value, so default them here rather than
+		// pack uninitialized memory into the packed sheets
+		Ecosystem    = ECOSYSTEM::unknown;
+		HarvestSkill = SKILLS::unknown;
+		StatEnergy   = 0;
+		MaxQuality   = 0;
+		Rarity       = 0;
+		MpColor      = 0;
 	}
 
 	/// Init the 'group <--> string' mapping
