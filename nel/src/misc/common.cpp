@@ -21,6 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/common.h"
+#include "nel/misc/variable.h"
 
 #ifdef NL_OS_WINDOWS
 #	include <ShellAPI.h>
@@ -1796,6 +1797,15 @@ NLMISC_CATEGORISED_COMMAND(nel, sleep, "Freeze the service for N seconds (for de
 	return true;
 }
 
+// The system/launchProgram/killProgram commands run arbitrary programs with the service's own rights through
+// ICommand::execute, so a single leak into that path (see the DEBUG:CMD and /a issues) turns into code execution
+// on the host. They are not used by anything in normal operation, so a release build does not compile them at
+// all; a developer build still has them, but refuses to run until this variable is turned on in the config.
+#if !FINAL_VERSION
+CVariable<bool> AllowSystemCommands("nel", "AllowSystemCommands",
+	"Allow the system, launchProgram and killProgram commands to run programs on the host with the service's rights; keep it off on a live shard (never compiled in a release build)",
+	false, 0, true);
+
 NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system() function call (wait until the end of the command)", "<commandline>")
 {
 	nlunreferenced(rawCommandString);
@@ -1803,6 +1813,12 @@ NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system()
 	nlunreferenced(human);
 
 	if(args.size() != 1) return false;
+
+	if (!AllowSystemCommands.get())
+	{
+		log.displayNL ("Command 'system' is disabled (AllowSystemCommands is off)");
+		return false;
+	}
 
 	string cmd = args[0];
 	log.displayNL ("Executing '%s'", cmd.c_str());
@@ -1826,6 +1842,12 @@ NLMISC_CATEGORISED_COMMAND(nel, launchProgram, "Execute the command line using l
 
 	if(args.size() != 2) return false;
 
+	if (!AllowSystemCommands.get())
+	{
+		log.displayNL ("Command 'launchProgram' is disabled (AllowSystemCommands is off)");
+		return false;
+	}
+
 	string cmd = args[0];
 	string arg = args[1];
 	log.displayNL ("Executing '%s' with argument '%s'", cmd.c_str(), arg.c_str());
@@ -1841,11 +1863,19 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 	nlunreferenced(human);
 
 	if(args.size() != 1) return false;
+
+	if (!AllowSystemCommands.get())
+	{
+		log.displayNL ("Command 'killProgram' is disabled (AllowSystemCommands is off)");
+		return false;
+	}
+
 	uint32 pid;
 	fromString(args[0], pid);
 	killProgram(pid);
 	return true;
 }
+#endif // !FINAL_VERSION
 
 #ifdef NL_OS_WINDOWS
 LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
