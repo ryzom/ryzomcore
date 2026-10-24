@@ -26,7 +26,7 @@ using namespace std;
 namespace NLLIGO
 {
 
-string CZoneRegion::_StringOutOfBound;
+const string CZoneRegion::_StringOutOfBound = STRING_OUT_OF_BOUND;
 
 // ***************************************************************************
 // SZoneUnit
@@ -145,7 +145,6 @@ const CZoneRegion::SZoneUnit2& CZoneRegion::SZoneUnit2::operator=(const CZoneReg
 // ---------------------------------------------------------------------------
 CZoneRegion::CZoneRegion()
 {
-	_StringOutOfBound = STRING_OUT_OF_BOUND;
 	_MinX = _MinY = 0;
 	_MaxX = _MaxY = -1;
 }

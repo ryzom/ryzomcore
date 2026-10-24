@@ -28,7 +28,7 @@ public:
 
 		for (uint32 i=0;i<fdc.size();++i)
 		{
-			nlinfo(fdc[i].FileName.c_str());
+			nlinfo("%s", fdc[i].FileName.c_str());
 		}
 
 		COFile outf;

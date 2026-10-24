@@ -1919,7 +1919,10 @@ uint8 CGuild::getAndSyncItemInfoVersion( uint32 slot, const NLMISC::CEntityId& c
 	uint8 infoVersion = _GuildInventoryView->getItemInfoVersion( slot );
 	CGuildMember* member = EGS_PD_CAST<CGuildMember*>(getMembers( characterId ));
 	if ( member == NULL )
+	{
+		// a guest in the guild room is not a member: nothing to sync for it
 		return infoVersion;
+	}
 	CGuildMemberModule *onlineMember = NULL;
 	if ( member->getReferencingModule( onlineMember ) ) // contains slow dynamic cast :(
 		onlineMember->setLastSentInfoVersion( slot, infoVersion );

@@ -180,7 +180,7 @@ bool		CServiceInstanceManager::queryStartService( const std::string& serviceName
 					// Only one service by shard is allowed => deny
 					grantStarting = false;
 					reason = toString( "Service %s already found as %hu, must be unique on shard", serviceName.c_str(), ios->get() );
-					nlinfo( reason.c_str() );
+					nlinfo("%s", reason.c_str());
 					break;
 				}
 				else
@@ -198,7 +198,7 @@ bool		CServiceInstanceManager::queryStartService( const std::string& serviceName
 					{
 						grantStarting = false;
 						reason = toString( "Service %s already found as %hu on same machine", serviceName.c_str(), ios->get() );
-						nlinfo( reason.c_str() );
+						nlinfo("%s", reason.c_str());
 						break;
 					}
 				}

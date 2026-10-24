@@ -226,7 +226,7 @@ static bool	DisplayCFGWarning = false;
 static void	cfgWarning(const char *s)
 {
 	if(DisplayCFGWarning)
-		nlwarning(s);
+		nlwarning("%s", s);
 }
 
 //---------------------------------------------------

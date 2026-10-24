@@ -219,7 +219,7 @@ void				CRangeMirrorManager::getRange( const std::vector<string>& datasetNames, 
 			if ( ! GET_RANGE_LIST(ids).acquireRange( declaratorServiceId, mirrorServiceId, nbRows, &first, &last ) )
 			{
 				errorStr = NLMISC::toString( "Cannot acquire requested range of %d rows in %s, index limit reached (declarator=%hu entityTypeId=%hu) (check 'max number of rows' in dataset file)", nbRows, ((*ids).first).c_str(), declaratorServiceId.get(), (uint16)entityTypeId, nbRows );
-				nlwarning( errorStr.c_str() );
+				nlwarning("%s", errorStr.c_str());
 				displayRanges();
 //#ifdef NL_OS_WINDOWS
 				//nlstop;

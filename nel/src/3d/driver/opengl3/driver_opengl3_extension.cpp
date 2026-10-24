@@ -674,7 +674,7 @@ bool	registerGlExtensions(CGlExtensions &ext)
 		for (uint i = 0; i < glext.size(); i++)
 		{
 			if (i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(string(glext[i]) + " ").c_str());
+			DebugLog->displayRaw("%s", string(string(glext[i]) + " ").c_str());
 			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -809,7 +809,7 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 		for (uint i = 0; i < exts.size(); i++)
 		{
 			if (i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw("%s", string(exts[i]+" ").c_str());
 			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -853,7 +853,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 		for (uint i = 0; i < exts.size(); i++)
 		{
 			if (i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw("%s", string(exts[i]+" ").c_str());
 			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -927,7 +927,7 @@ bool	registerGlExtensions(CGlExtensions &ext)
 		for (uint i = 0; i < glext.size(); i++)
 		{
 			if (i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(string(glext[i]) + " ").c_str());
+			DebugLog->displayRaw("%s", string(string(glext[i]) + " ").c_str());
 			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");

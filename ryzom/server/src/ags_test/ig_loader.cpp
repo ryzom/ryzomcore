@@ -47,7 +47,7 @@ void CIGLoader::load()
 		}
 		catch (std::exception &e)
 		{
-			nlinfo(e.what());
+			nlinfo("%s", e.what());
 		}
 	}
 }

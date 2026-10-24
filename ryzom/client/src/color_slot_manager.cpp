@@ -199,14 +199,14 @@ bool CColorSlotManager::addTexturesFromPath(const std::string &path, const char 
 	}
 	if (!NLMISC::CFile::isExists(path))
 	{
-		nlwarning(("CColorSlotManager::addTexturesFromPath : path not found : " + path).c_str());
+		nlwarning("%s", ("CColorSlotManager::addTexturesFromPath : path not found : " + path).c_str());
 		return false;
 	}
 	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(path, true, false, true, files);
 	if (files.empty())
 	{
-		 nlwarning(("CColorSlotManager::addTexturesFromPath : empty path :" + path).c_str());
+		 nlwarning("%s", ("CColorSlotManager::addTexturesFromPath : empty path :" + path).c_str());
 		 return false;
 	}
 	bool everythingOk = true;
@@ -231,7 +231,7 @@ bool CColorSlotManager::addTexturesFromPath(const std::string &path, const char 
 	}
 	if (!fileFound)
 	{
-		nlwarning(("CColorSlotManager::addTexturesFromPath : the path " + path + " contains no texture files").c_str());
+		nlwarning("%s", ("CColorSlotManager::addTexturesFromPath : the path " + path + " contains no texture files").c_str());
 	}
 	return everythingOk;
 }
@@ -290,7 +290,7 @@ bool CColorSlotManager::parseTexName(const char *texName, std::string *texNameWi
 		{
 			if (slotsId[k].first == slotId.first)
 			{
-				nlwarning((std::string("Duplicated extension in texture name ") + texName).c_str());
+				nlwarning("%s", (std::string("Duplicated extension in texture name ") + texName).c_str());
 				return false;
 			}
 		}
@@ -349,7 +349,7 @@ bool CColorSlotManager::addSlotsFromConfigFile(NLMISC::CConfigFile &cf, uint &st
 		catch (const NLMISC::EUnknownVar &)
 		{
 			_Slots.resize(startSlot);
-			nlwarning(("CColorSlotManager::addSlotsFromConfigFile : invalid config file, variable not found :" + mask_extensions->asString(k) + "_color_id").c_str());
+			nlwarning("%s", ("CColorSlotManager::addSlotsFromConfigFile : invalid config file, variable not found :" + mask_extensions->asString(k) + "_color_id").c_str());
 			return false;
 		}
 	}

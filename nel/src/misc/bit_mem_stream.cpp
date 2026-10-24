@@ -735,13 +735,13 @@ void		CBitMemStream::displayStream( const char *title, CLog *log )
 //	if ( _BufPos == _Buffer.getPtr() )
 	if ( _Buffer.Pos == 0 )
 	{
-		log->displayNL( (s + "Empty").c_str() );
+		log->displayNL("%s", (s + "Empty").c_str());
 		return;
 	}
 
 //	s += NLMISC::toString( "BitPos=%d Pos=%u FreeBits=%u Size=%u ", getPosInBit(), (uint32)(_BufPos-_Buffer.getPtr()), _FreeBits, _Buffer.size() );
 	s += NLMISC::toString( "BitPos=%d Pos=%u FreeBits=%u Size=%u ", getPosInBit(), _Buffer.Pos, _FreeBits, _Buffer.getBuffer().size() );
-	log->displayNL( s.c_str() );
+	log->displayNL("%s", s.c_str());
 	s.clear();
 
 	// Display bitstream (output: until _BufPos/_FreeBits; input: whole buffer)
@@ -769,12 +769,12 @@ void		CBitMemStream::displayStream( const char *title, CLog *log )
 		s += ' '; // a blank char between each byte
 		if ( bitpos % 64 == 0 ) // limit to 8 bytes per line
 		{
-			log->displayRawNL( s.c_str() );
+			log->displayRawNL("%s", s.c_str());
 			s.clear();
 		}
 	}
 	if ( bitpos % 64 != 0 )
-		log->displayRawNL( s.c_str() );
+		log->displayRawNL("%s", s.c_str());
 	_DbgInfo.endEventBrowsing();
 
 	// Display legend
@@ -782,7 +782,7 @@ void		CBitMemStream::displayStream( const char *title, CLog *log )
 	string::size_type crp = sLegend.find( '\n', lineStart );
 	while ( crp != string::npos )
 	{
-		log->displayRawNL( sLegend.substr( lineStart, crp-lineStart ).c_str() );
+		log->displayRawNL("%s", sLegend.substr( lineStart, crp-lineStart ).c_str());
 		lineStart = crp + 1;
 		crp = sLegend.find( '\n', lineStart );
 	}

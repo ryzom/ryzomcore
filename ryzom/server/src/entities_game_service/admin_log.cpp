@@ -62,5 +62,5 @@ void CAdminLog::display(const char *format, ...)
 	string toDisp = str;
 	toDisp = string(IDisplayer::dateToHumanString()) + string(" ") + toDisp;
 
-	Log->displayRawNL(toDisp.c_str());
+	Log->displayRawNL("%s", toDisp.c_str());
 }

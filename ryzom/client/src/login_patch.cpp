@@ -2263,7 +2263,7 @@ void CCheckThread::run ()
 			sTranslate = CI18N::get("uiCheckingFile") + " " + rDescFiles.getFile(i).getFileName();
 			pPM->setState(true, sTranslate);
 			// get list of patch to apply to this file. don't to a full checksum test if possible
-			nlwarning(rDescFiles.getFile(i).getFileName().c_str());
+			nlwarning("%s", rDescFiles.getFile(i).getFileName().c_str());
 			pPM->getPatchFromDesc(ftp, rDescFiles.getFile(i), false);
 			// add the file if there are some patches to apply, or if an already patched version was found in the unpack directory
 			if (!ftp.Patches.empty() || (IncludeBackgroundPatch && !ftp.SrcFileName.empty()))

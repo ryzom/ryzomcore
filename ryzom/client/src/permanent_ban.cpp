@@ -96,7 +96,7 @@ static void setPermanentBanFileMarker(const std::string &path, bool on)
 		}
 		catch(const EStream &e)
 		{
-			nlinfo(e.what());
+			nlinfo("%s", e.what());
 		}
 	}
 	else

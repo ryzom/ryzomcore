@@ -87,7 +87,8 @@ using namespace STRING_MANAGER;
 // STATICS //
 // /////// //
 static CGroupMap   *LastClickedMap = nullptr;
-static CCtrlButton *LastSelectedLandMark = nullptr;
+// the landmark being renamed; a CRefPtr, so that it nulls itself when the button is deleted under the dialog
+static NLMISC::CRefPtr<CCtrlButton> LastSelectedLandMark;
 static bool		   UseUserPositionForLandMark = false;
 static const char  *WIN_LANDMARK_NAME="ui:interface:enter_landmark_name";
 
@@ -160,7 +161,7 @@ static void closeLandMarkNameDialog()
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 	gc->setActive(false);
-	LastSelectedLandMark = NULL;
+	LastSelectedLandMark = nullptr;
 }
 
 //============================================================================================================
@@ -811,7 +812,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	}
 	catch(const NLMISC::EFile &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 	return true;
 }
@@ -2115,7 +2116,7 @@ void CGroupMap::loadPlayerPos()
 		}
 		catch(const NLMISC::Exception &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 			return;
 		}
 	}
@@ -2202,7 +2203,7 @@ void CGroupMap::loadMap()
 		}
 		catch(const NLMISC::Exception &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 			return;
 		}
 	}
@@ -2520,6 +2521,7 @@ void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 //============================================================================================================
 void CGroupMap::removeUserLandMarks()
 {
+	// the dialog may be renaming one of the buttons about to be deleted
 	closeLandMarkNameDialog();
 	removeLandMarks(_UserLM);
 }
@@ -3968,7 +3970,7 @@ class CAHRemoveUserLandMark : public IActionHandler
 		map->removeUserLandMark(button);
 		// close the rename window & create window
 		closeLandMarkNameDialog();
-		LastSelectedLandMark = NULL;
+		LastSelectedLandMark = nullptr;
 		// close confirmation
 		CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
 	}
