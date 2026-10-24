@@ -1302,6 +1302,10 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 			return;
 		}
 
+		// the audience line goes out with an invalid sender (see below), so the receivers' ignore lists
+		// are checked here against the real sender; privileged senders are never ignored
+		CCharacterInfos *senderInfos = IOS->getCharInfos( eid );
+		bool senderHavePrivilege = senderInfos != NULL && senderInfos->HavePrivilege;
 		// set the player chat mode and update its audience
 		CChatGroup::TGroupType oldMode = itCl->second->getChatMode();
 		TChanID	oldChan = itCl->second->getDynChatChan();
@@ -1317,6 +1321,9 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 			// ignore users in the excluded vector
 			if ( std::find( excluded.begin(),excluded.end(), (*itA) ) == excluded.end() )
 			{
+				TClientInfoCont::iterator itRecv = _Clients.find( *itA );
+				if( itRecv != _Clients.end() && !senderHavePrivilege && itRecv->second->isInIgnoreList( sender ) )
+					continue;
 				// the phrase
 				uint32 sentId = STRING_MANAGER::sendStringToClient( *itA,phraseId.c_str(),params,&IosLocalSender );
 				// send phrase id with an invalid sender, so that client dont display "toto says : toto bows"
