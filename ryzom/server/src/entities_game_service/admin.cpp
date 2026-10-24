@@ -3031,6 +3031,30 @@ void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &
 }
 
 // all admin /a /b commands executed by the client go in this callback
+// A client admin command reaches ICommand::execute as one line, "<cmd> [<eid>] <arg>", and the registry
+// runs every ';'-separated command in that line. Only the first one is checked against the client's
+// privilege, so an argument with an unquoted, unescaped ';' would run a second command with the
+// service's own rights. NeL treats ';' as a separator outside double quotes and when not escaped as "\;";
+// this mirrors that, so an argument that works today still works and only a smuggled command is refused.
+static bool hasCommandSeparator(const std::string &arg)
+{
+	bool inQuote = false;
+	for (std::string::size_type i = 0; i < arg.size(); ++i)
+	{
+		const char c = arg[i];
+		if (c == '\\')
+		{
+			++i; // an escaped character, whatever it is
+			continue;
+		}
+		if (c == '"')
+			inQuote = !inQuote;
+		else if (c == ';' && !inQuote)
+			return true;
+	}
+	return false;
+}
+
 void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
 	H_AUTO(cbClientAdmin);
@@ -3045,6 +3069,12 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 
 	CSString cmdName, arg;
 	msgin.serial (cmdName, arg);
+	if (hasCommandSeparator(arg))
+	{
+		nlwarning("HACK: %s sent client admin command '%s' with a command separator in its argument '%s', refused",
+			eid.toString().c_str(), cmdName.c_str(), arg.c_str());
+		return;
+	}
 
 	//nlinfo("ADMIN: Executing admin command: eid=%s onTarget=%s cmdName=%s arg=%s",eid.toString().c_str(),onTarget?"true":"false",cmdName.quote().c_str(),arg.quote().c_str());
 	TLogContext_Command_ExecCtx logContext(eid);
@@ -3192,6 +3222,12 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 
 	string cmdName, arg;
 	msgin.serial (cmdName, arg);
+	if (hasCommandSeparator(arg))
+	{
+		nlwarning("HACK: %s sent client admin command '%s' with a command separator in its argument '%s', refused",
+			eid.toString().c_str(), cmdName.c_str(), arg.c_str());
+		return;
+	}
 
 	nlinfo("ADMIN: Executing admin /c command: eid=%s onTarget=%s cmdName=%s arg=%s",eid.toString().c_str(),characterName.c_str(),cmdName.c_str(),arg.c_str());
 
