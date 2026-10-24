@@ -1241,8 +1241,20 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					CCharacterInfos *senderChar = IOS->getCharInfos(TheDataset.getEntityId(sender));
 					CCharacterInfos *receiverChar = IOS->getCharInfos(TheDataset.getEntityId(*itM));
 
-					if (senderChar == NULL || receiverChar == NULL)
+					if (senderChar == NULL)
+					{
+						// the speaker is in the universe group but its character info never arrived
+						nlwarning("<CChatManager::chatInGroup> universe sender %s:%x has no character info, message dropped",
+							TheDataset.getEntityId(sender).toString().c_str(), sender.getIndex());
+						return;
+					}
+					if (receiverChar == NULL)
+					{
+						// group membership can arrive before the name registration (cf cbAddToGroup); skip until it does
+						nldebug("<CChatManager::chatInGroup> universe member %s:%x has no character info yet, skipped",
+							TheDataset.getEntityId(*itM).toString().c_str(), (*itM).getIndex());
 						continue;
+					}
 
 					// set GM mode if either speaker of listener is a GM
 					bool isGM= senderChar->HavePrivilege || receiverChar->HavePrivilege;
