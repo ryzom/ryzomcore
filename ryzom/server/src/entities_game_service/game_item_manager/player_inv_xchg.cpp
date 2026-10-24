@@ -67,8 +67,13 @@ void CExchangeView::setInterlocutorView(CExchangeView * interlocutorView)
 // ****************************************************************************
 bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity)
 {
-	nlassert(bagSlot < getInventory()->getSlotCount());
-	nlassert(exchangeSlot < NbExchangeSlots);
+	// both slots come from the client (EXCHANGE:ADD)
+	if (bagSlot >= getInventory()->getSlotCount() || exchangeSlot >= NbExchangeSlots)
+	{
+		nlwarning("<CExchangeView::putItemInExchange> %s: bag slot %u (count %u) or exchange slot %u (count %u) out of range",
+			getCharacter()->getId().toString().c_str(), bagSlot, getInventory()->getSlotCount(), exchangeSlot, (uint)NbExchangeSlots);
+		return false;
+	}
 
 	CGameItemPtr item = getInventory()->getItem(bagSlot);
 	if (item == NULL)
@@ -196,7 +201,13 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quant
 // ****************************************************************************
 bool CExchangeView::removeItemFromExchange(uint32 exchangeSlot, uint32 quantity)
 {
-	nlassert(exchangeSlot < NbExchangeSlots);
+	// the slot comes from the client (EXCHANGE:REMOVE)
+	if (exchangeSlot >= NbExchangeSlots)
+	{
+		nlwarning("<CExchangeView::removeItemFromExchange> %s: exchange slot %u (count %u) out of range",
+			getCharacter()->getId().toString().c_str(), exchangeSlot, (uint)NbExchangeSlots);
+		return false;
+	}
 
 	if (quantity == 0)
 		return false;

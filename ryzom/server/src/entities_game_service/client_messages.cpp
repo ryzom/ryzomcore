@@ -388,6 +388,10 @@ sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory,
 		return -1;
 	}
 	CInventoryPtr invent = character->getInventory(inventory);
+	if (invent == NULL)
+	{
+		return -1;
+	}
 	if (slot >= invent->getSlotCount())
 	{
 		return -2;
@@ -424,6 +428,7 @@ void cbClientItemWrite( NLNET::CMessage& msgin, const std::string & serviceName,
 		// it should be the crafter of the item, check
 		if (inventory==INVENTORIES::UNDEFINED) return;
 		CInventoryPtr invent = character->getInventory(inventory);
+		if (invent == NULL) return;
 		if (slot >= invent->getSlotCount()) return;
 		if (invent->getItem(slot) == NULL) return;
 		CGameItemPtr item = invent->getItem(slot);
@@ -3150,6 +3155,11 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 		if( guild )
 		{
 			CGuildMember * gm = guild->getMemberFromEId(charId);
+			if( gm == NULL )
+			{
+				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> %s is not a member of guild %u", charId.toString().c_str(), c->getGuildId());
+				return;
+			}
 			if( gm->getGrade() == EGSPD::CGuildGrade::Leader )
 			{
 				guild->setAllegianceFromIndeterminedStatus(allegiance);
@@ -3161,7 +3171,7 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 		}
 		else
 		{
-			nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character % have no guild", charId.toString().c_str());
+			nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s has no guild", charId.toString().c_str());
 		}
 	}
 	else

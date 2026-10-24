@@ -84,6 +84,21 @@ void CRewardSharing::userItemSelect(const TDataSetRow & userRow,uint32 itemPos,u
 	}
 	if ( state != _Session )
 		return;
+	// the sender must be one of the candidates (a member who joined the team after the loot is not)
+	bool isCandidate = false;
+	for (uint i = 0; i < _Candidates.size(); i++)
+	{
+		if ( _Candidates[i].UserRow == userRow )
+		{
+			isCandidate = true;
+			break;
+		}
+	}
+	if ( !isCandidate )
+	{
+		nlwarning("<CRewardSharing userItemSelect> user %u is not a candidate", userRow.getIndex());
+		return;
+	}
 	_Session++;
 
 	// force all team members who validated to invalidate their interface
@@ -161,7 +176,7 @@ bool CRewardSharing::userValidSelect(const TDataSetRow & userRow, uint8 state)
 			break;
 		pos++;
 	}
-	if ( pos > _Candidates.size())
+	if ( pos >= _Candidates.size())
 	{
 		nlwarning("<CRewardSharing userValidSelect> Invalid validation position %u. size = %u",pos,_Candidates.size());
 		return false;
