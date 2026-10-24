@@ -1730,7 +1730,7 @@ public:
 			if (pNL != nullptr)
 				CreateCharMsg.StartPoint = (RYZOM_STARTING_POINT::TStartPoint)(pNL->getValue64());
 			else
-				nlwarning(("Can't read starting point from the database : " + sLocationPath).c_str());
+				nlwarning("%s", ("Can't read starting point from the database : " + sLocationPath).c_str());
 
 			if (CS.People == EGSPD::CPeople::Fyros)
 				CreateCharMsg.StartPoint= (RYZOM_STARTING_POINT::TStartPoint)(((uint8)CreateCharMsg.StartPoint) + ((uint8)RYZOM_STARTING_POINT::fyros_start));
@@ -2129,7 +2129,7 @@ public:
 			}
 		}
 
-		nlinfo(res.c_str());
+		nlinfo("%s", res.c_str());
 	}
 };
 REGISTER_ACTION_HANDLER (CAHDispInfo, "disp_info");
@@ -3607,7 +3607,7 @@ class CAHImportCharacter : public IActionHandler
 			}
 			catch (const EStream &e)
 			{
-				nlwarning(e.what());
+				nlwarning("%s", e.what());
 			}
 			fd.close();
 		}
@@ -3660,7 +3660,7 @@ class CAHExportCharacter : public IActionHandler
 			}
 			catch (const EStream &e)
 			{
-				nlwarning(e.what());
+				nlwarning("%s", e.what());
 			}
 			fd.close();
 		}

@@ -437,7 +437,7 @@ void CBGDownloaderAccess::CDownloadCoTask::createDownloaderProcess()
 	}
 	else
 	{
-		nlwarning(Parent->_CommandLine.c_str());
+		nlwarning("%s", Parent->_CommandLine.c_str());
 	}
 }
 

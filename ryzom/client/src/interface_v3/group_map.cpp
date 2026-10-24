@@ -811,7 +811,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	}
 	catch(const NLMISC::EFile &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 	}
 	return true;
 }
@@ -2066,7 +2066,7 @@ void CGroupMap::loadPlayerPos()
 		}
 		catch(const NLMISC::Exception &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 			return;
 		}
 	}
@@ -2153,7 +2153,7 @@ void CGroupMap::loadMap()
 		}
 		catch(const NLMISC::Exception &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 			return;
 		}
 	}

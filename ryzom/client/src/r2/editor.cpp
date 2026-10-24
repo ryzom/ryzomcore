@@ -908,7 +908,7 @@ int CEditor::luaSetEntityCustomSelectBox(CLuaState &ls)
 	{
 		for (TEntityCustomSelectBoxMap::const_iterator watchIt = boxMap.begin(); watchIt != boxMap.end(); ++ watchIt)
 		{
-			nlwarning(watchIt->first.c_str());
+			nlwarning("%s", watchIt->first.c_str());
 		}
 	}
 	*/
@@ -4524,7 +4524,7 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 			std::string filename = msg.substr(0, extPos + 4); // extract filename including extension
 			int line;
 			fromString(&*(msg.begin() + extPos + 5), line); // line number follows
-			nlwarning((CLuaIHMRyzom::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
+			nlwarning("%s", (CLuaIHMRyzom::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
 		}
 		else
 		{
@@ -5131,7 +5131,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		}
 		catch (const ELuaNotATable &e)
 		{
-			nlwarning(e.what());
+			nlwarning("%s", e.what());
 		}
 
 		// if object is selected or focused, then clear these flags

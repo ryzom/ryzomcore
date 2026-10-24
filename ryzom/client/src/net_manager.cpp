@@ -2132,7 +2132,7 @@ void impulseWhere(NLMISC::CBitMemStream &impulse)
 	double zf = ((double)z)/1000.0f;
 
 	sprintf(buf,"Your server position is : X= %g   Y= %g   Z= %g",xf,yf,zf);
-	nlinfo(buf);
+	nlinfo("%s", buf);
 	CInterfaceManager::getInstance()->displaySystemInfo(buf);
 }// impulseWhere //
 

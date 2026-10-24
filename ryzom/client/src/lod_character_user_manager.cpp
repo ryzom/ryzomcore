@@ -71,7 +71,7 @@ bool			CLodCharacterUserManager::addLodShapeBank(const std::string &filename)
 	}
 	catch(const Exception &e)
 	{
-		nlwarning(e.what());
+		nlwarning("%s", e.what());
 		return false;
 	}
 

@@ -138,7 +138,7 @@ string CControlSheetInfoWaiter::infoValidated() const
 			}
 			else
 			{
-				nlwarning(toString("Ucstring result expected when calling '%s', possible script error", LuaMethodName.c_str()).c_str());
+				nlwarning("Ucstring result expected when calling '%s', possible script error", LuaMethodName.c_str());
 			}
 		}
 	}
@@ -634,7 +634,7 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if (! CCtrlBase::parse(cur,parentGroup) )
 	{
 		string tmp = "cannot parse view:"+getId()+", parent:"+parentGroup->getId();
-		nlinfo(tmp.c_str());
+		nlinfo("%s", tmp.c_str());
 		return false;
 	}
 
@@ -656,7 +656,7 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		else
 		{
 			string tmp = "cannot get property value, view:"+getId()+", parent:"+parentGroup->getId();
-			nlinfo(tmp.c_str());
+			nlinfo("%s", tmp.c_str());
 			return false;
 		}
 	}
