@@ -322,6 +322,15 @@ public:
 		CMessage msg("", true);
 		uint32 len;
 		bms.serial(len);
+		// the length comes from the client: it must fit in what is left of the message before the buffer is allocated
+		if (len > bms.length() - (uint32)bms.getPos())
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message of %u bytes in %u, discarded", (uint)clientId, len, bms.length() - (uint32)bms.getPos());
+			frs->rejectReceivedMessage( HackedSizeInBuffer, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		bms.serialBuffer(msg.bufferToFill(len), len);
 		msg.readType();
 
