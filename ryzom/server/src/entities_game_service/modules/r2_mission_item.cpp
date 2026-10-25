@@ -433,12 +433,25 @@ void CR2MissionItem::_getMissionItemOwnedByCharacter( CInventoryPtr inv, std::ve
 }
 
 //----------------------------------------------------------------------------
+// The DM gift messages come from the client: only the editor or an animator of the session may give items
+static bool isSessionDM( const CCharacter *c )
+{
+	R2::TUserRole role = c->sessionUserRole();
+	return role == R2::TUserRole::ur_editor || role == R2::TUserRole::ur_animator;
+}
+
+//----------------------------------------------------------------------------
 void CR2MissionItem::dmGiftBegin( NLMISC::CEntityId eid )
 {
 	CCharacter *c = PlayerManager.getChar( eid );
 	if( !c )
 	{
 		nlwarning("DM_GIFT:ITEM: can't found DM character %s", eid.toString().c_str());
+		return;
+	}
+	if( !isSessionDM( c ) )
+	{
+		nlwarning("DM_GIFT:BEGIN: character %s is not a DM of its session, refused", eid.toString().c_str());
 		return;
 	}
 	CEntityId target = c->getTarget();
@@ -471,6 +484,14 @@ void CR2MissionItem::dmGiftValidate( NLMISC::CEntityId eid, std::vector< R2::TIt
 	if( it == _DMSelectedPlayer.end() )
 	{
 		nlwarning("DM_GIFT:ITEM: can't found DM(%s) targeted character", eid.toString().c_str());
+		return;
+	}
+
+	CCharacter *dm = PlayerManager.getChar( eid );
+	if( !dm || !isSessionDM( dm ) )
+	{
+		nlwarning("DM_GIFT:VALIDATE: character %s is not a DM of its session, refused", eid.toString().c_str());
+		_DMSelectedPlayer.erase(it);
 		return;
 	}
 
