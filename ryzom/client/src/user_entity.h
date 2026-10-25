@@ -562,6 +562,8 @@ protected:
 	/// Velocity : Front and Lateral
 	float						_FrontVelocity;
 	float						_LateralVelocity;
+	/// Horizontal speed of the last PACS move, reported as the user speed in internal view
+	double						_FinalPacsSpeed;
 	/// Speed adjustement from gpms
 	float						_SpeedServerAdjust;
 	/// Head Pitch
