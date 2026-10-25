@@ -376,9 +376,9 @@ void CQuicConnectionImpl::update()
 		return;
 	}
 
-	// Also simple case
+	// Also simple case, a handshake still in progress is abandoned the same way rather than waited out
 	if (m->DesiredStateChange != NoChange // Disconnect or Connect (reconnecting)
-	    && m->State == CQuicConnection::Connected)
+	    && (m->State == CQuicConnection::Connected || m->State == CQuicConnection::Connecting))
 	{
 		m->State = CQuicConnection::Disconnecting;
 		shutdown();
@@ -393,7 +393,7 @@ void CQuicConnectionImpl::update()
 			m->State = CQuicConnection::Connected;
 			// We're good!
 		}
-		else
+		else if (m->State != CQuicConnection::Disconnecting) // The handshake may complete while it is being abandoned
 		{
 			nlwarning("Connection is connected, but state is %d", m->State);
 		}
