@@ -428,6 +428,16 @@ namespace NLGUI
 		return it != options.trustedDomains.end();
 	}
 
+	// A trusted page runs its Lua in the client and gets the player's web auth key, so the trust
+	// check is on the host name and, unless the client turned it off, on the page having come over
+	// https; over plain http anyone on the network path can answer for the trusted host.
+	bool CGroupHTML::isTrustedUrl(const string &scheme, const string &domain)
+	{
+		if (!isTrustedDomain(domain))
+			return false;
+		return !options.trustedHttpsOnly || toLowerAscii(scheme) == "https";
+	}
+
 	// Update view after download has finished
 	void CGroupHTML::setImage(CViewBase * view, const string &file, const TImageType type)
 	{
@@ -745,7 +755,7 @@ namespace NLGUI
 
 		CUrlParser uri(download->url);
 		if (!uri.host.empty())
-			sendCookies(curl, uri.host, isTrustedDomain(uri.host));
+			sendCookies(curl, uri.host, isTrustedUrl(uri.scheme, uri.host));
 
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
@@ -3448,10 +3458,14 @@ namespace NLGUI
 				finalUrl = options.webServer + finalUrl;
 			}
 
+			if (!isLocal)
+				finalUrl = upgradeInsecureUrl(finalUrl);
 			_URL = finalUrl;
 
 			CUrlParser uri (_URL);
-			_TrustedDomain = isTrustedDomain(uri.host);
+			_TrustedDomain = isLocal ? isTrustedDomain(uri.host) : isTrustedUrl(uri.scheme, uri.host);
+			if (!_TrustedDomain && !isLocal && isTrustedDomain(uri.host))
+				nlwarning("(%s) WEB: '%s' is a trusted domain but '%s' is not https, the page is not trusted", _Id.c_str(), uri.host.c_str(), _URL.c_str());
 			_DocumentDomain = uri.host;
 
 			// file is probably from bnp (ingame help)
@@ -3497,10 +3511,12 @@ namespace NLGUI
 		CForm &form = _Forms[_PostFormId];
 
 		// button can override form action url (and methor, but we only do POST)
-		_URL = _PostFormAction.empty() ? form.Action : _PostFormAction;
+		_URL = upgradeInsecureUrl(_PostFormAction.empty() ? form.Action : _PostFormAction);
 
 		CUrlParser uri(_URL);
-		_TrustedDomain = isTrustedDomain(uri.host);
+		_TrustedDomain = isTrustedUrl(uri.scheme, uri.host);
+		if (!_TrustedDomain && isTrustedDomain(uri.host))
+			nlwarning("(%s) WEB: '%s' is a trusted domain but the form action '%s' is not https, the page is not trusted", _Id.c_str(), uri.host.c_str(), _URL.c_str());
 		_DocumentDomain = uri.host;
 
 		for (i=0; i<form.Entries.size(); i++)
@@ -3879,7 +3895,7 @@ namespace NLGUI
 		CUrlParser uri(data->url);
 		if (!uri.host.empty())
 		{
-			receiveCookies(data->data->Request, uri.host, isTrustedDomain(uri.host));
+			receiveCookies(data->data->Request, uri.host, isTrustedUrl(uri.scheme, uri.host));
 		}
 
 		long code = -1;

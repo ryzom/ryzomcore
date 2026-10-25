@@ -497,6 +497,7 @@ CInterfaceManager::CInterfaceManager()
 	CViewTextFormated::setFormatter( &RyzomTextFormatter );
 
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
+	CGroupHTML::options.trustedHttpsOnly = ClientCfg.WebIgTrustedHttpsOnly;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();

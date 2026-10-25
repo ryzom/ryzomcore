@@ -338,6 +338,8 @@ struct CClientConfig
 	std::string		ReleaseNotePath;
 
 	std::vector<string>	WebIgTrustedDomains;
+	/// A trusted domain is only trusted over https; a final build cannot turn this off
+	bool			WebIgTrustedHttpsOnly;
 
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;

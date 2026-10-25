@@ -444,6 +444,7 @@ CClientConfig::CClientConfig()
 	PatchVersion.clear();
 
 	WebIgTrustedDomains.clear();
+	WebIgTrustedHttpsOnly = true;
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
@@ -1137,6 +1138,7 @@ void CClientConfig::setValues()
 	///////////
 	// WEBIG //
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
+	READ_BOOL_DEV(WebIgTrustedHttpsOnly); // a development shard may serve its web apps over plain http; a final build always requires https
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
