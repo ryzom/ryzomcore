@@ -68,6 +68,13 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	float				heading;
 	msgin.serial(tick, x, y, z, heading);
 
+	// the heading goes to PACS and to every client around: one that is not a number is replaced by the current one
+	if (!isValidDouble(heading))
+	{
+		nlwarning("<cbClientPosition> %s sent an invalid heading, the current one is kept", id.toString().c_str());
+		heading = CMirrorPropValueRO<float>( TheDataset, entityIndex, DSPropertyORIENTATION );
+	}
+
 	if (IsRingShard)
 	{
 		// make sure the move that the player is trying to make is legal
