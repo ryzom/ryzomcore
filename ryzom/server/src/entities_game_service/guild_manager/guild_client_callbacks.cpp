@@ -260,13 +260,19 @@ void cbClientGuildItemAccess(NLNET::CMessage &msgin, const std::string &serviceN
 	DROP_IF(!character, "Character not found", return);
 	// DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
 
+	DROP_IF(grade >= EGSPD::CGuildGrade::EndGuildGrade, "Character " << eid.toString() << " sent invalid guild grade " << (uint)grade, return);
+
 	CInventoryPtr invent = character->getInventory(INVENTORIES::guild);
+	DROP_IF(invent == NULL, "Character " << eid.toString() << " has no guild inventory", return);
 	DROP_IF(slot >= invent->getSlotCount(), "Invalid slot specified", return);
 	CGameItemPtr item = invent->getItem(slot);
 	DROP_IF(item == NULL, "Item does not exist", return);
 
 	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(character->getGuildId());
-	bool hasAccess = guild->getMemberFromEId(eid)->getGrade() <= item->getAccessGrade();
+	DROP_IF(guild == NULL, "Character " << eid.toString() << " has no guild", return);
+	CGuildMember *member = guild->getMemberFromEId(eid);
+	DROP_IF(member == NULL, "Character " << eid.toString() << " is not a member of guild " << guild->getId(), return);
+	bool hasAccess = member->getGrade() <= item->getAccessGrade();
 	DROP_IF(!hasAccess, "Character does not have the right grade to change access rights on this item", return);
 
 	item->setAccessGrade(grade);

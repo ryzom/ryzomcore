@@ -370,6 +370,7 @@ void cbClientItemLock(NLNET::CMessage &msgin, const std::string &serviceName, NL
 	DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
 
 	CInventoryPtr invent = character->getInventory(inventory);
+	DROP_IF(invent == NULL, "Character " << eid.toString() << " has no inventory " << (uint)inventory, return);
 	DROP_IF(slot >= invent->getSlotCount(), "Invalid slot specified", return);
 	CGameItemPtr item = invent->getItem(slot);
 	DROP_IF(item == NULL, "Item does not exist", return);
