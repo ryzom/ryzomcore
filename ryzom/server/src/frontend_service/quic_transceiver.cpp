@@ -568,7 +568,13 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 		if (QUIC_FAILED(status))
 		{
 			nlwarning("MsQuic->ConnectionSetConfiguration failed with status 0x%x", status);
-			// Assuming we still get a QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE after this, which will decreaseRef the user context!
+			// Returning the failure makes MsQuic refuse the connection and take the handle back,
+			// and it then never reports QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE, so the user context is released here.
+			// The handle must not be closed (MsQuic asserts on that), and no further event may reach the context.
+			MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, null, null);
+			user->Connection = null;
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connections.value().erase(userPtr);
 		}
 		break;
 	}
