@@ -284,6 +284,30 @@ inline bool startsWith(const char *str, const char *prefix)
 inline bool startsWith(const std::string &str, const char *prefix) { return startsWith(str.c_str(), prefix); }
 inline bool startsWith(const std::string &str, const std::string &prefix) { return startsWith(str.c_str(), prefix.c_str()); }
 
+// Prefix test that ignores the case of ASCII letters only; every other byte must match exactly.
+// For scheme and keyword checks on byte strings, e.g. startsWithCaseInsensitiveAscii(url, "https://").
+inline bool startsWithCaseInsensitiveAscii(const char *str, const char *prefix)
+{
+	for (int i = 0;; ++i)
+	{
+		char a = str[i];
+		char b = prefix[i];
+		if (b == '\0')
+			return true;
+		if (a == '\0')
+			return false;
+		if (a >= 'A' && a <= 'Z')
+			a += 'a' - 'A';
+		if (b >= 'A' && b <= 'Z')
+			b += 'a' - 'A';
+		if (a != b)
+			return false;
+	}
+}
+
+inline bool startsWithCaseInsensitiveAscii(const std::string &str, const char *prefix) { return startsWithCaseInsensitiveAscii(str.c_str(), prefix); }
+inline bool startsWithCaseInsensitiveAscii(const std::string &str, const std::string &prefix) { return startsWithCaseInsensitiveAscii(str.c_str(), prefix.c_str()); }
+
 inline bool endsWith(const char *str, size_t strLen, const char *suffix, size_t suffixLen)
 {
 	if (strLen < suffixLen)
