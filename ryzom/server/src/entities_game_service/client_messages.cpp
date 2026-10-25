@@ -743,6 +743,20 @@ void cbClientPhraseLearn( NLNET::CMessage& msgin, const std::string &serviceName
 		return;
 	}
 
+	// The name comes from the client and is saved with the character. The phrase editor allows 20 characters and the
+	// longest localized phrase name is under 100, so a longer one is cut (not refused: the client already has the
+	// phrase in its action book and memorizes it next)
+	static const ucstring::size_type MaxPhraseNameLength = 255;
+	if (phrase.Name.size() > MaxPhraseNameLength)
+	{
+		nlwarning("<cbClientPhraseLearn> player %s sent a name of %u characters for phrase %u, cut to %u",
+			Id.toString().c_str(), (uint)phrase.Name.size(), (uint)phraseId, (uint)MaxPhraseNameLength);
+		ucstring::size_type length = MaxPhraseNameLength;
+		if (phrase.Name[length - 1] >= 0xD800 && phrase.Name[length - 1] <= 0xDBFF)
+			--length; // do not keep half of a surrogate pair
+		phrase.Name.resize(length);
+	}
+
 	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name );
 	ch->setAfkState(false);
 }
