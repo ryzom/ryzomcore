@@ -420,6 +420,10 @@ namespace NLGUI
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
 	{
+		// an empty host (an empty or relative url) is never trusted, in particular it must not match an
+		// empty web server domain when the shard has not sent one
+		if (domain.empty())
+			return false;
 		if (domain == options.webServerDomain)
 			return true;
 
