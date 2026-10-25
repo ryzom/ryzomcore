@@ -234,7 +234,7 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 		CCharacter * user = PlayerManager.getChar( eId );
 		if ( member == NULL || user == NULL )
 		{
-			nlwarning("<CGuildMemberModule::setMOTD>%s invalid member id %s",eId.toString().c_str());
+			nlwarning("<CGuild::setMOTD> invalid member id %s",eId.toString().c_str());
 			return;
 		}
 
