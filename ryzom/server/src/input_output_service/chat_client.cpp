@@ -207,11 +207,11 @@ void CChatClient::filter( TFilter filterId )
 	set<TFilter>::iterator itF = _Filters.find( filterId );
 	if( itF != _Filters.end() )
 	{
-		_Filters.insert( filterId );
+		_Filters.erase( itF );
 	}
 	else
 	{
-		_Filters.erase( itF );
+		_Filters.insert( filterId );
 	}
 
 } // addGameplayFilter //
