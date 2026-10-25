@@ -2935,6 +2935,12 @@ void cbClientCompassEnableDynamic( NLNET::CMessage& msgin, const std::string & s
 	msgin.serial(userId);
 	msgin.serial(compressedIndex);
 
+	// the index comes from the client and getCurrentDataSetRow() uses it to index the dataset without a check
+	if ( compressedIndex >= (uint32)TheDataset.maxNbRows() )
+	{
+		nlwarning("<cbClientCompassEnableDynamic> user %s sent entity index %u, the dataset has %u rows", userId.toString().c_str(), compressedIndex, (uint32)TheDataset.maxNbRows());
+		return;
+	}
 	TDataSetRow index = TheDataset.getCurrentDataSetRow( compressedIndex );
 	if ( ! TheDataset.isAccessible(index) )
 	{

@@ -196,6 +196,12 @@ void cbClientBotChatDynChatSend( NLNET::CMessage& msgin, const std::string &serv
 	if (!checkPlayer(userId, "cbClientBotChatDynChatSend")) return;
 	CCharacter* user = PlayerManager.getChar( userId );
 
+	// the index comes from the client and getCurrentDataSetRow() uses it to index the dataset without a check
+	if ( index >= TheDataset.maxNbRows() )
+	{
+		nlwarning("<cbClientBotChatDynChatSend> user %s sent bot index %u, the dataset has %u rows", userId.toString().c_str(), index, TheDataset.maxNbRows());
+		return;
+	}
 	CMissionManager::getInstance()->dynChatChoice( user, TheDataset.getCurrentDataSetRow(index) , choice);
 	user->setAfkState(false);
 }
