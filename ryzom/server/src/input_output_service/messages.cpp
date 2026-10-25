@@ -435,8 +435,9 @@ void cbImpulsionAfkTxt( CMessage& msgin, const string &serviceName, TServiceId s
 		return;
 	}
 
-	// Do a general filtering on client input
-	afkTxt = IOS->getChatManager().filterClientInputColorCode(afkTxt);
+	// Do a general filtering on client input, as for chat: the text is sent to whoever tells the player, and a
+	// leading '&' would let it pass for a system message ('&SYS&')
+	afkTxt = IOS->getChatManager().filterClientInput(afkTxt);
 
 	CCharacterInfos * charInfos = IOS->getCharInfos( sender );
 	if( charInfos != NULL )
