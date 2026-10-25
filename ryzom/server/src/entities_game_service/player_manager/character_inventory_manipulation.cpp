@@ -2248,6 +2248,12 @@ void CCharacter::sendItemInfos( uint16 slotId )
 				nlwarning("<sendItemInfos> user %s cellId %d is not a guild room !",_Id.toString().c_str(),cell);
 				return;
 			}
+			// the slot comes from the client and indexes the info version tables, which have NbGuildSlots entries
+			if ( slot >= INVENTORIES::NbGuildSlots )
+			{
+				nlwarning("<sendItemInfos> user %s: guild inventory slot %u, count is %u", _Id.toString().c_str(), slot, INVENTORIES::NbGuildSlots);
+				return;
+			}
 			item = guild->getItem( slot );
 			infos.versionInfo = guild->getAndSyncItemInfoVersion( slot, getId() );
 		}
