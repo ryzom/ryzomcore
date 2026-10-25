@@ -34,13 +34,13 @@ class CStaticRolemasterPhrase
 public:
 
 	/// Constructor
-	CStaticRolemasterPhrase() {}
+	CStaticRolemasterPhrase() : IsRolemasterPhrase(false), IsValidPhrase(false), ShowInAPOnlyIfLearnt(false), MinFameValue(0) {}
 
 	/// Read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);
 
 	/// Return the version of this class, increments this value when the content of this class has changed
-	inline static uint getVersion () { return 4; }
+	inline static uint getVersion () { return 5; }
 
 	/// Serial
 	void serial(NLMISC::IStream &f)
@@ -54,6 +54,7 @@ public:
 		}
 		f.serial( IsRolemasterPhrase );
 		f.serial( IsValidPhrase );
+		f.serial( ShowInAPOnlyIfLearnt );
 		computeMinFameValue();
 	}
 
@@ -72,6 +73,9 @@ public:
 
 	/// true if the phrase is a real phrase (and so learnable), false if it's only a brick upgrade
 	bool							IsValidPhrase;
+
+	/// true if the phrase is given by missions only: the client lists it in the action progression only once learnt, and no rolemaster sells it
+	bool							ShowInAPOnlyIfLearnt;
 
 	sint32							MinFameValue;
 

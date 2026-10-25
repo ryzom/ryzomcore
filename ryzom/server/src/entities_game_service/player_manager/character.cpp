@@ -9336,6 +9336,41 @@ void CCharacter::setFilters( uint32 minQuality, uint32 maxQuality, uint32 minPri
 }
 
 //-----------------------------------------------
+// the rolemaster flags of what a bot sells, sent to the client in TRADING:ROLEMASTER_FLAGS
+//-----------------------------------------------
+static uint8 getRolemasterFlags(const CCreature *bot, EGSPD::CSPType::TSPType *rolemasterType)
+{
+	uint8 flags = 0;
+	if( bot->isSellingCharacteristics() )
+		flags |= (1<<ROLEMASTER_FLAGS::CaracteristicUpgrades);
+	if( bot->isSellingFightAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::FightActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Fight;
+	}
+	if( bot->isSellingMagicAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::MagicActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Magic;
+	}
+	if( bot->isSellingHarvestAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::ForageActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Harvest;
+	}
+	if( bot->isSellingCraftAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::CraftActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Craft;
+	}
+
+	if (flags != 0)
+		flags |= (1<<ROLEMASTER_FLAGS::SpecialPowers);
+
+	return flags;
+}
+
+//-----------------------------------------------
 // start a trade action
 //-----------------------------------------------
 void CCharacter::startTradePhrases(uint16 session)
@@ -9373,32 +9408,10 @@ void CCharacter::startTradePhrases(uint16 session)
 	}
 
 	// *** Set right rolemaster flags and race in Database
-	uint8 flags = 0;
-	if( bot->isSellingCharacteristics() )
-		flags |= (1<<ROLEMASTER_FLAGS::CaracteristicUpgrades);
-	if( bot->isSellingFightAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::FightActions);
-		setRolemasterType(EGSPD::CSPType::Fight);
-	}
-	if( bot->isSellingMagicAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::MagicActions);
-		setRolemasterType(EGSPD::CSPType::Magic);
-	}
-	if( bot->isSellingHarvestAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::ForageActions);
-		setRolemasterType(EGSPD::CSPType::Harvest);
-	}
-	if( bot->isSellingCraftAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::CraftActions);
-		setRolemasterType(EGSPD::CSPType::Craft);
-	}
-
-	if (flags != 0)
-		flags |= (1<<ROLEMASTER_FLAGS::SpecialPowers);
+	EGSPD::CSPType::TSPType rolemasterType = EGSPD::CSPType::Unknown;
+	uint8 flags = getRolemasterFlags(bot, &rolemasterType);
+	if (rolemasterType != EGSPD::CSPType::Unknown)
+		setRolemasterType(rolemasterType);
 
 //	_PropertyDatabase.setProp( "TRADING:ROLEMASTER_FLAGS", flags );
 	CBankAccessor_PLR::getTRADING().setROLEMASTER_FLAGS(_PropertyDatabase, flags );
@@ -9789,6 +9802,18 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 		{
 			nlwarning("Server refused buy sheet action for player %s, sheet %s, rolemaster race %s",
 						_Id.toString().c_str(), phraseId.toString().c_str(), EGSPD::CPeople::toString(people).c_str() );
+			return false;
+		}
+
+		// The sheet comes from the client, whose phrase list for a rolemaster only holds player phrases that the
+		// rolemaster's flags sell and that missions do not give: any other phrase, an AI phrase among them, is
+		// refused (it would also be paid in the skill points of the rolemaster's type, whatever its own)
+		const string phraseName = phraseId.toString();
+		if ( phraseName.find( "saiphrase" ) != string::npos || !staticPhrase->IsRolemasterPhrase || staticPhrase->ShowInAPOnlyIfLearnt
+			|| !ROLEMASTER_FLAGS::canSellPhrase( getRolemasterFlags(bot, NULL), phraseName ) )
+		{
+			nlwarning("Server refused buy sheet action for player %s, sheet %s is not sold by rolemaster %s",
+						_Id.toString().c_str(), phraseName.c_str(), bot->getId().toString().c_str() );
 			return false;
 		}
 	}
