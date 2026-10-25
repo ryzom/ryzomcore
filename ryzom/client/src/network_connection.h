@@ -521,6 +521,12 @@ public:
 		return m_Connection.UdpSock; // FIXME: QUIC
 	}
 
+	/// Get the QUIC connection, to tell why it could not be established
+	const CQuicConnection&		getQuicConnection() const
+	{
+		return m_QuicConnection;
+	}
+
 	/// Get userId
 	uint32						getUserId()
 	{

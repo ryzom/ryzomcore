@@ -41,6 +41,96 @@
 using namespace NLMISC;
 using namespace NLNET;
 
+namespace /* anonymous */ {
+
+/// Name and code of a QUIC status, for logs and error messages
+std::string quicStatusText(QUIC_STATUS status)
+{
+	// Compared one by one, as some statuses are not constant expressions (HRESULT_FROM_WIN32) and some share a value on some platforms
+#define CL_QUIC_STATUS_NAME(s) \
+	if (status == (s)) return toString("%s (0x%x)", #s, (uint32)status);
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_OUT_OF_MEMORY)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_INVALID_PARAMETER)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_INVALID_STATE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_NOT_SUPPORTED)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_HANDSHAKE_FAILURE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_ABORTED)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_INVALID_ADDRESS)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CONNECTION_TIMEOUT)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CONNECTION_IDLE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_UNREACHABLE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_INTERNAL_ERROR)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CONNECTION_REFUSED)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_PROTOCOL_ERROR)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_VER_NEG_ERROR)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_TLS_ERROR)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_USER_CANCELED)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_ALPN_NEG_FAILURE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CLOSE_NOTIFY)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_BAD_CERTIFICATE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_UNSUPPORTED_CERTIFICATE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_REVOKED_CERTIFICATE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_EXPIRED_CERTIFICATE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_UNKNOWN_CERTIFICATE)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_REQUIRED_CERTIFICATE)
+#ifdef QUIC_STATUS_CERT_EXPIRED
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CERT_EXPIRED)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CERT_UNTRUSTED_ROOT)
+	CL_QUIC_STATUS_NAME(QUIC_STATUS_CERT_NO_CERT)
+#endif
+#undef CL_QUIC_STATUS_NAME
+	uint32 alert = (uint32)status - (uint32)QUIC_STATUS_TLS_ALERT(0);
+	if (alert < 256)
+		return toString("TLS alert %u (0x%x)", alert, (uint32)status);
+	return toString("0x%x", (uint32)status);
+}
+
+/// What a QUIC status that ended a connection attempt means for the user
+CQuicConnection::TFailure quicStatusFailure(QUIC_STATUS status)
+{
+	if (status == QUIC_STATUS_CONNECTION_IDLE // The handshake timed out
+	    || status == QUIC_STATUS_CONNECTION_TIMEOUT)
+		return CQuicConnection::NoResponse;
+	if (status == QUIC_STATUS_UNREACHABLE) // ICMP unreachable
+		return CQuicConnection::Unreachable;
+	if (status == QUIC_STATUS_CONNECTION_REFUSED)
+		return CQuicConnection::Refused;
+	if (status == QUIC_STATUS_ALPN_NEG_FAILURE
+	    || status == QUIC_STATUS_VER_NEG_ERROR)
+		return CQuicConnection::ProtocolMismatch;
+#ifdef QUIC_STATUS_CERT_EXPIRED
+	if (status == QUIC_STATUS_CERT_EXPIRED
+	    || status == QUIC_STATUS_CERT_UNTRUSTED_ROOT
+	    || status == QUIC_STATUS_CERT_NO_CERT)
+		return CQuicConnection::CertificateRejected;
+#endif
+	// A certificate that fails validation ends the handshake with a TLS alert
+	uint32 alert = (uint32)status - (uint32)QUIC_STATUS_TLS_ALERT(0);
+	switch (alert)
+	{
+	case 42: // bad_certificate
+	case 43: // unsupported_certificate
+	case 44: // certificate_revoked
+	case 45: // certificate_expired
+	case 46: // certificate_unknown
+	case 48: // unknown_ca
+	case 116: // certificate_required
+		return CQuicConnection::CertificateRejected;
+	case 120: // no_application_protocol
+		return CQuicConnection::ProtocolMismatch;
+	default:
+		break;
+	}
+#ifdef NL_OS_WINDOWS
+	// Certificate chain errors (CERT_E_*) from the Windows certificate validation
+	if (((uint32)status & 0xFFFF0000) == 0x800B0000)
+		return CQuicConnection::CertificateRejected;
+#endif
+	return CQuicConnection::OtherFailure;
+}
+
+} /* anonymous namespace */
+
 class CQuicConnectionImpl
 {
 public:
@@ -71,6 +161,10 @@ public:
 		, MaxSendLength(0)
 		, SendBusy(false)
 		, SentCount(0)
+		, Failure(CQuicConnection::NoFailure)
+		, Established(false)
+		, TransportStatus(0)
+		, PeerShutdown(false)
 	{
 	}
 
@@ -106,6 +200,14 @@ public:
 	QUIC_BUFFER SendQuicBuffer;
 	CAtomicInt SentCount;
 
+	// Why the last connection ended before it was established (main thread only)
+	CQuicConnection::TFailure Failure;
+	std::string FailureText;
+	CInetHost Address; // Address of the last connection attempt (main thread only)
+	bool Established; // Set once the connection reached the Connected state (main thread only)
+	CAtomicInt TransportStatus; // Status of a shutdown initiated by the transport, set by the callback thread
+	CAtomicBool PeerShutdown; // Set by the callback thread when the server shuts the connection down
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_CONNECTION_CALLBACK)
@@ -118,6 +220,13 @@ public:
 	void shutdown();
 	void close();
 	void release();
+
+	/// Record why the connection could not be established (main thread only)
+	void setFailure(CQuicConnection::TFailure failure, const std::string &text)
+	{
+		Failure = failure;
+		FailureText = text;
+	}
 
 	/// Received datagram (from quic threads)
 	void datagramReceived(const uint8 *buffer, uint32 length);
@@ -201,6 +310,11 @@ void CQuicConnectionImpl::connect()
 	m->SendBusy.clear(); // Each connection starts with nothing in flight, the previous one is closed
 	m->BufferReads = m->BufferWrites;
 	m->ReceiveEnable = true;
+	m->setFailure(CQuicConnection::NoFailure, std::string());
+	m->Address = addr;
+	m->Established = false;
+	m->TransportStatus.store(QUIC_STATUS_SUCCESS);
+	m->PeerShutdown.store(false);
 
 	// Clear FIFO
 	{
@@ -212,11 +326,13 @@ void CQuicConnectionImpl::connect()
 	if (!MsQuic)
 	{
 		nlwarning("QUIC API not available");
+		m->setFailure(CQuicConnection::OtherFailure, "QUIC library not available");
 		return;
 	}
 
 	if (!addr.isValid())
 	{
+		m->setFailure(CQuicConnection::OtherFailure, "invalid address");
 		return;
 	}
 
@@ -251,6 +367,7 @@ void CQuicConnectionImpl::connect()
 		{
 			close();
 			nlwarning("MsQuic->ConfigurationOpen failed with status 0x%x", status);
+			m->setFailure(CQuicConnection::OtherFailure, "ConfigurationOpen: " + quicStatusText(status));
 			return;
 		}
 
@@ -270,6 +387,7 @@ void CQuicConnectionImpl::connect()
 			MsQuic->ConfigurationClose(m->Configuration);
 			m->Configuration = nullptr;
 			nlwarning("MsQuic->ConfigurationLoadCredential failed with status 0x%x", status);
+			m->setFailure(CQuicConnection::OtherFailure, "ConfigurationLoadCredential: " + quicStatusText(status));
 			return;
 		}
 	}
@@ -280,6 +398,7 @@ void CQuicConnectionImpl::connect()
 	{
 		close();
 		nlwarning("MsQuic->ConnectionOpen failed with status 0x%x", status);
+		m->setFailure(CQuicConnection::OtherFailure, "ConnectionOpen: " + quicStatusText(status));
 		return;
 	}
 
@@ -289,6 +408,7 @@ void CQuicConnectionImpl::connect()
 	{
 		close();
 		nlwarning("MsQuic->ConnectionStart to %s failed with status 0x%x", addr.toStringLong().c_str(), status);
+		m->setFailure(CQuicConnection::OtherFailure, "ConnectionStart: " + quicStatusText(status));
 		return;
 	}
 
@@ -391,6 +511,7 @@ void CQuicConnectionImpl::update()
 		if (m->State == CQuicConnection::Connecting)
 		{
 			m->State = CQuicConnection::Connected;
+			m->Established = true;
 			// We're good!
 		}
 		else if (m->State != CQuicConnection::Disconnecting) // The handshake may complete while it is being abandoned
@@ -419,6 +540,17 @@ void CQuicConnectionImpl::update()
 		nlassert(m->State != CQuicConnection::Disconnected);
 		nlassert(m->Connection);
 		close();
+		if (!m->Established)
+		{
+			// Ended before it was established, which is no failure if it was abandoned on request
+			QUIC_STATUS transportStatus = (QUIC_STATUS)m->TransportStatus.load();
+			if (m->PeerShutdown.load())
+				m->setFailure(CQuicConnection::Refused, "shut down by the server");
+			else if (transportStatus != QUIC_STATUS_SUCCESS)
+				m->setFailure(quicStatusFailure(transportStatus), quicStatusText(transportStatus));
+			if (m->Failure != CQuicConnection::NoFailure)
+				nlwarning("QUIC connection to %s could not be established: %s", m->Address.toStringLong().c_str(), m->FailureText.c_str());
+		}
 		m->State = CQuicConnection::Disconnected;
 		update();
 		return;
@@ -499,21 +631,12 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	}
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_TRANSPORT: {
+		m->TransportStatus.store((int)ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status); // Before the flag, which releases it
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		if (INelContext::isContextInitialised())
 		{
-			nlwarning("Shutdown initiated by transport, error code %llu, status 0x%x", ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status);
-			switch (ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status)
-			{
-			case QUIC_STATUS_CLOSE_NOTIFY: nlinfo("Close notify"); break;
-			case QUIC_STATUS_BAD_CERTIFICATE: nlinfo("Bad Certificate"); break;
-			case QUIC_STATUS_UNSUPPORTED_CERTIFICATE: nlinfo("Unsupported Certficiate"); break;
-			case QUIC_STATUS_REVOKED_CERTIFICATE: nlinfo("Revoked Certificate"); break;
-			case QUIC_STATUS_EXPIRED_CERTIFICATE: nlinfo("Expired Certificate"); break;
-			case QUIC_STATUS_UNKNOWN_CERTIFICATE: nlinfo("Unknown Certificate"); break;
-			case QUIC_STATUS_REQUIRED_CERTIFICATE: nlinfo("Required Certificate"); break;
-			}
+			nlwarning("Shutdown initiated by transport, error code %" NL_I64 "u, status %s", (uint64)ev->SHUTDOWN_INITIATED_BY_TRANSPORT.ErrorCode, quicStatusText(ev->SHUTDOWN_INITIATED_BY_TRANSPORT.Status).c_str());
 		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
@@ -521,8 +644,9 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_SHUTDOWN_INITIATED_BY_PEER: {
 		if (INelContext::isContextInitialised())
 		{
-			nlinfo("Shutdown initiated by peer");
+			nlinfo("Shutdown initiated by peer, error code %" NL_I64 "u", (uint64)ev->SHUTDOWN_INITIATED_BY_PEER.ErrorCode);
 		}
+		m->PeerShutdown.store(true); // Before the flag, which releases it
 		m->ShuttingDownFlag.clear();
 		m->MaxSendLength = 0;
 		status = QUIC_STATUS_SUCCESS;
@@ -672,6 +796,21 @@ bool CQuicConnection::isSupported() const
 	return true;
 }
 
+CQuicConnection::TFailure CQuicConnection::failure() const
+{
+	return m->Failure;
+}
+
+const std::string &CQuicConnection::failureText() const
+{
+	return m->FailureText;
+}
+
+const NLNET::CInetHost &CQuicConnection::address() const
+{
+	return m->Address;
+}
+
 void CQuicConnectionImpl::datagramReceived(const uint8 *buffer, uint32 length)
 {
 	CQuicConnectionImpl *const m = this;
@@ -690,6 +829,8 @@ class CQuicConnectionImpl
 {
 public:
 	int Dummy;
+	std::string FailureText;
+	CInetHost Address;
 };
 
 CQuicConnection::CQuicConnection()
@@ -753,6 +894,21 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 bool CQuicConnection::isSupported() const
 {
 	return false;
+}
+
+CQuicConnection::TFailure CQuicConnection::failure() const
+{
+	return NoFailure;
+}
+
+const std::string &CQuicConnection::failureText() const
+{
+	return m->FailureText;
+}
+
+const NLNET::CInetHost &CQuicConnection::address() const
+{
+	return m->Address;
 }
 
 #endif

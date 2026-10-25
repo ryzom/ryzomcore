@@ -738,6 +738,70 @@ TInterfaceState autoLogin (const string &cookie, const string &fsaddr, bool firs
 }
 
 // ------------------------------------------------------------------------------------------------
+// Show why the connection failed, under the first line of the connection failure screen
+static void setConnectionFailureReason(const std::string &reason, const std::string &hint)
+{
+	CViewText *line2 = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title2"));
+	CViewText *line3 = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title3"));
+	if (line2 != nullptr && line3 != nullptr)
+	{
+		line2->setTextLocalized(reason, false);
+		line3->setTextLocalized(hint, false);
+		return;
+	}
+
+	// Older layout, with a single title
+	CViewText *title = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
+	if (title != nullptr)
+	{
+		title->setMultiLine(true);
+		title->setTextLocalized(CI18N::get("uiFirewallFail") + ".\n" + reason + (hint.empty() ? std::string() : "\n" + hint), false);
+	}
+}
+
+// The secure connection messages are newer than some data, so they fall back on English
+static std::string getConnectionFailureString(const char *label, const char *english)
+{
+	return CI18N::hasTranslation(label) ? CI18N::get(label) : std::string(english);
+}
+
+// Show why the secure (QUIC) connection to the frontend could not be established
+static void setQuicConnectionFailureReason(const CQuicConnection &quic)
+{
+	std::string reason, hint;
+	switch (quic.failure())
+	{
+	case CQuicConnection::NoResponse:
+		reason = getConnectionFailureString("uiQuicNoResponse", "The server did not answer on its secure connection port (UDP %port).");
+		hint = getConnectionFailureString("uiQuicHintNetwork", "The server may be offline, or a firewall may be blocking that port.");
+		break;
+	case CQuicConnection::Unreachable:
+		reason = getConnectionFailureString("uiQuicUnreachable", "The server's secure connection port (UDP %port) could not be reached.");
+		hint = getConnectionFailureString("uiQuicHintNetwork", "The server may be offline, or a firewall may be blocking that port.");
+		break;
+	case CQuicConnection::Refused:
+		reason = getConnectionFailureString("uiQuicRefused", "The server refused the secure connection.");
+		hint = getConnectionFailureString("uiQuicHintLater", "Please try again later.");
+		break;
+	case CQuicConnection::CertificateRejected:
+		reason = getConnectionFailureString("uiQuicCertificate", "The server's identity could not be verified (certificate rejected).");
+		hint = getConnectionFailureString("uiQuicHintCertificate", "Check your computer's date and time, or contact the server team.");
+		break;
+	case CQuicConnection::ProtocolMismatch:
+		reason = getConnectionFailureString("uiQuicProtocol", "The server does not support this client's connection protocol.");
+		hint = getConnectionFailureString("uiQuicHintUpdate", "The client or the server needs to be updated.");
+		break;
+	default:
+		reason = getConnectionFailureString("uiQuicFailed", "The secure connection to the server failed (%status).");
+		hint = getConnectionFailureString("uiQuicHintLater", "Please try again later.");
+		break;
+	}
+	strFindReplace(reason, "%port", toString(quic.address().port()));
+	strFindReplace(reason, "%status", quic.failureText());
+	setConnectionFailureReason(reason, hint);
+}
+
+// ------------------------------------------------------------------------------------------------
 void globalMenuMovieShooter()
 {
 
@@ -1223,13 +1287,12 @@ TInterfaceState globalMenu()
 				if ( firewallTimeout )
 				{
 					// Display the firewall error string instead of the normal failure string
-					CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
-					if (pVT != nullptr)
-					{
-						pVT->setMultiLine( true );
-						pVT->setTextLocalized(CI18N::get("uiFirewallFail")+".\n"+
-									  CI18N::get("uiFirewallAlert")+".", false);
-					}
+					setConnectionFailureReason(CI18N::get("uiFirewallAlert") + ".", std::string());
+				}
+				else if (NetMngr.getQuicConnection().failure() != CQuicConnection::NoFailure)
+				{
+					// The secure connection could not be established, the normal failure string is about something else
+					setQuicConnectionFailureReason(NetMngr.getQuicConnection());
 				}
 			}
 		}
