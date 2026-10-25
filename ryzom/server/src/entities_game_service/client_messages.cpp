@@ -2891,7 +2891,12 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 		return;
 	}
 
-	if ( title == uint8(CHARACTER_TITLE::FBT) )
+	if ( (uint)title >= (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE )
+	{
+		nlwarning("<cbClientSetCharacterTitle> user %s sent title %u, there are %u", eId.toString().c_str(), (uint)title, (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE);
+		return;
+	}
+	else if ( title == uint8(CHARACTER_TITLE::FBT) )
 	{
 		if ( !p->isBetaTester() )
 			return;
