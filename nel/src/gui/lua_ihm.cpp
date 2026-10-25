@@ -123,6 +123,7 @@ namespace NLGUI
 		{
 			return NLMISC::CPath::lookup(fileName,   false);
 		}
+#if 0 // the shellExecute Lua binding is compiled out, see registerBasics()
 		static void shellExecute(const std::string &operation, const std::string &fileName, const std::string &parameters)
 		{
 		#if !FINAL_VERSION
@@ -131,6 +132,7 @@ namespace NLGUI
 			#endif
 		#endif
 		}
+#endif
 	};
 
 
@@ -1721,13 +1723,16 @@ namespace NLGUI
 			luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const std::string &)) &findReplaceAll),
 			luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const ucstring &)) &findReplaceAll),
 
-		#if !FINAL_VERSION
+		// The Lua state also runs scripts served by trusted web domains. A binding that starts a program or
+		// opens a document with the system gives those scripts the run of the player's machine, so openDoc,
+		// launchProgram and shellExecute are not registered in any build.
+		#if 0
 			LUABIND_FUNC(openDoc),
 			LUABIND_FUNC(launchProgram),
+			luabind::def("shellExecute",  CMiscFunctions::shellExecute),
 		#endif
 
 			luabind::def("fileLookup",    CMiscFunctions::fileLookup),
-			luabind::def("shellExecute",  CMiscFunctions::shellExecute),
 			LUABIND_FUNC(fileExists)
 		];
 
