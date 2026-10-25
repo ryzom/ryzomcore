@@ -966,6 +966,8 @@ namespace NLGUI
 		bool isTrustedDomain(const std::string &domain);
 		// trusted domain and, when trustedHttpsOnly is set, an https url
 		bool isTrustedUrl(const std::string &scheme, const std::string &domain);
+		// url with https where the client knows it must be: an HSTS host, or a trusted domain when trustedHttpsOnly is set
+		std::string upgradeInsecureUrl(const std::string &url);
 		void setImage(CViewBase *view, const std::string &file, const TImageType type);
 		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
 
