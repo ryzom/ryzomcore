@@ -115,6 +115,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Refused service command;";
 	if ( reasons & MalformedMultiPart )
 		s += " Malformed multi-part;";
+	if ( reasons & MalformedAckSync )
+		s += " Malformed ack sync;";
 	return s;
 }
 
@@ -1147,14 +1149,33 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 						// process ack
 						uint	ack = std::max(backack, clienthost->LastReceivedAck+1);
 						//nlinfo("BEN-DBG: ACK_SYNC, start reading longackbitfield from client %d", clienthost->clientId());
-						for (; ack<=frontack; ++ack)
+						if (ack <= frontack)
 						{
-							bool	ackvalue = longackbitfield[ack&(NumBitsInLongAck-1)];
-							//nlinfo("BEN-DBG: ACK_SYNC, ack %d: %s", ack, (ackvalue ? "true" : "false"));
-							_History->ack(clienthost->clientId(), ack, ackvalue);
-							if (ackvalue)
+							// The range and the bit field come from the client. Its long ack covers at most
+							// NumBitsInLongAck packets, in a field of at least that many bits (the client sends 1024):
+							// a wider range is cut to its last NumBitsInLongAck packets, so the loop stays bounded (with
+							// frontack 0xFFFFFFFF it used to wrap around and never end), and a bit missing from a
+							// shorter field reads as a negative ack instead of asserting.
+							if (frontack - ack >= NumBitsInLongAck || longackbitfield.size() < NumBitsInLongAck)
 							{
-								clienthost->ImpulseEncoder.ack(ack);
+								nlwarning("FEHACK: client %u (uid %u, %s) sent ACK_SYNC for packets %u to %u with a long ack of %u bits (at most %u packets in at least %u bits)",
+									(uint)clienthost->clientId(), clienthost->Uid, clienthost->address().asString().c_str(), ack, frontack, longackbitfield.size(), NumBitsInLongAck, NumBitsInLongAck);
+								rejectReceivedMessage( MalformedAckSync, clienthost->Uid );
+								if (frontack - ack >= NumBitsInLongAck)
+									ack = frontack - (NumBitsInLongAck - 1);
+							}
+							for (;; ++ack)
+							{
+								uint	bit = ack&(NumBitsInLongAck-1);
+								bool	ackvalue = bit < longackbitfield.size() && longackbitfield[bit];
+								//nlinfo("BEN-DBG: ACK_SYNC, ack %d: %s", ack, (ackvalue ? "true" : "false"));
+								_History->ack(clienthost->clientId(), ack, ackvalue);
+								if (ackvalue)
+								{
+									clienthost->ImpulseEncoder.ack(ack);
+								}
+								if (ack == frontack)
+									break;
 							}
 						}
 						//nlinfo("BEN-DBG: ACK_SYNC, end reading longackbitfield from client %d", clienthost->clientId());
