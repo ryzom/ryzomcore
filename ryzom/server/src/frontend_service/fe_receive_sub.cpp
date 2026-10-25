@@ -82,6 +82,11 @@ void cbGwTrDisconnection ( TClientId clientId );
 extern CVariable<string>	SaveShardRootGameShare;
 extern CVariable<bool>		VerboseFEStatsTime;
 
+// Rejected messages are those no official client produces (see rejectReceivedMessage()). A connected client that
+// sends RejectedMessagesLimit of them within RejectedMessagesWindow seconds is disconnected; 0 only logs them.
+CVariable<uint32>	RejectedMessagesLimit("fs", "RejectedMessagesLimit", "Rejected messages from a connected client within RejectedMessagesWindow seconds after which it is disconnected (0: never, only log)", 0, 0, true);
+CVariable<uint32>	RejectedMessagesWindow("fs", "RejectedMessagesWindow", "Window in seconds over which RejectedMessagesLimit counts", 60, 0, true);
+
 
 /*
  * Return the string for the message invalidity reasons
@@ -1549,6 +1554,32 @@ void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid user
 	// Set the userId and the reasons flag
 	desc.UserId = userId;
 	desc.Reasons |= bmft;
+
+	// Only a connected client is counted: messages from unidentified addresses are noise and their source spoofable
+	if ( RejectedMessagesLimit.get() != 0 && userId != 0 )
+	{
+		CClientHost *client = findClientHostByUid( userId );
+		if ( client != NULL )
+		{
+			TTime now = CTime::getLocalTime();
+			if ( client->RejectedMessages == 0 || now - client->RejectedMessagesSince > (TTime)RejectedMessagesWindow.get() * 1000 )
+			{
+				client->RejectedMessages = 0;
+				client->RejectedMessagesSince = now;
+			}
+			if ( ++client->RejectedMessages == RejectedMessagesLimit.get() )
+			{
+				nlwarning( "FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s; disconnected",
+					(uint)client->clientId(), userId, client->address().asString().c_str(), client->RejectedMessages, RejectedMessagesWindow.get(), getBadMessageString( bmft ).c_str() );
+
+				// as when a service asks for the disconnection (cbDisconnectClient)
+				CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+				client->ImpulseEncoder.add(act, 0);
+				removeFromRemoveList( client->clientId() );
+				addToRemoveList( client->clientId() );
+			}
+		}
+	}
 }
 
 

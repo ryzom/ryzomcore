@@ -148,6 +148,8 @@ public:
 		//AvailableImpulseBitsize( "AvailImpulseBitsize", MaxImpulseBitSizes[2] ),
 		NbActionsSentAtCycle(0),
 		QuitId(0),
+		RejectedMessages(0),
+		RejectedMessagesSince(0),
 		QuicUser(quicUser)
 		{
 			IdTranslator.setId( id );
@@ -504,6 +506,10 @@ public:
 
 	/// Quit Id
 	uint32				QuitId;
+
+	/// Messages rejected since RejectedMessagesSince (see RejectedMessagesLimit)
+	uint32				RejectedMessages;
+	NLMISC::TTime		RejectedMessagesSince;
 
 	CQuicUserContextPtr QuicUser;
 
