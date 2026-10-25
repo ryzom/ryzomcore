@@ -1026,13 +1026,15 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 						CCharacter::sendDynamicSystemMessage( userId, "CHALLENGE_OTHER_TEAM_AGGRO");
 						return;
 					}
-				}
-				CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
-				sint32 cell = mirrorCell;		
-				if  (cell <= -2  )
-				{
-					CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
-					return;
+
+					// inside the test, as for the accepting team: an offline member has no character
+					CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
+					sint32 cell = mirrorCell;
+					if  (cell <= -2  )
+					{
+						CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
+						return;
+					}
 				}
 				//removeDuelInvitor( *it );
 			}

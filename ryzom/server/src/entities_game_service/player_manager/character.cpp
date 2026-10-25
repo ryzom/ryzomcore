@@ -18994,18 +18994,19 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 		// validate outpost alias
 		setOutpostAlias( _OutpostIdBeforeUserValidation );
 
+		CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias( _OutpostIdBeforeUserValidation );
 		CGuild * guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
-		if (guild != NULL)
+		if (guild != NULL && outpost != NULL)
 		{
 			// he his guild owns the outpost he can only help his guild
-			if( _GuildId == COutpostManager::getInstance().getOutpostFromAlias( _OutpostIdBeforeUserValidation )->getOwnerGuild() )
+			if( _GuildId == outpost->getOwnerGuild() )
 			{
 				setOutpostSide( OUTPOSTENUMS::OutpostOwner );
 				_OutpostIdBeforeUserValidation = 0;
 				return;
 			}
 			// he his guild attacks the outpost he can only help his guild
-			if( _GuildId == COutpostManager::getInstance().getOutpostFromAlias( _OutpostIdBeforeUserValidation )->getAttackerGuild() )
+			if( _GuildId == outpost->getAttackerGuild() )
 			{
 				setOutpostSide( OUTPOSTENUMS::OutpostAttacker );
 				_OutpostIdBeforeUserValidation = 0;
@@ -19013,7 +19014,6 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 			}
 		}
 		// check : if outpost belongs to a tribe the choice can only be attacker
-		CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias( _OutpostIdBeforeUserValidation );
 		if( outpost )
 		{
 			if (outpost->isBelongingToAGuild() == false)
