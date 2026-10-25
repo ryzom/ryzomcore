@@ -2041,6 +2041,17 @@ void cbClientBotChatEnd( NLNET::CMessage& msgin, const std::string &serviceName,
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+// The behaviour of an emote comes from the client, which sends IDLE or one of the emote animations; the firework
+// animations in that range are played by firework items, not by emotes
+static bool isClientEmoteBehaviour( MBEHAV::EBehaviour behaviour )
+{
+	if ( behaviour == MBEHAV::IDLE )
+		return true;
+	if ( behaviour < MBEHAV::EMOTE_BEGIN || behaviour > MBEHAV::EMOTE_END )
+		return false;
+	return !( behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109) );
+}
+
 // client send an emote
 void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -2059,6 +2070,13 @@ void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, 
 	catch(const Exception &e)
 	{
 		nlwarning("Bad emote serialisation '%s'", e.what());
+		return;
+	}
+
+	if ( !isClientEmoteBehaviour( behaviour ) )
+	{
+		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
+		nlwarning("HACK: %s %s sent emote behaviour %d, which is no emote animation", id.toString().c_str(), name.c_str(), behaviour);
 		return;
 	}
 
@@ -2107,10 +2125,10 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		return;
 	}
 
-	if (behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109))
+	if ( !isClientEmoteBehaviour( behaviour ) )
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
-		nlwarning("HACK: %s %s tries to launch a firework %d", id.toString().c_str(), name.c_str(), behaviour);
+		nlwarning("HACK: %s %s sent custom emote behaviour %d, which is no emote animation", id.toString().c_str(), name.c_str(), behaviour);
 		return;
 	}
 
