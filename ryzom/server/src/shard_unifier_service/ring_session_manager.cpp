@@ -57,6 +57,7 @@ CVariable<uint32>	ShardAssocTimeout( "su", "ShardAssocTimeout", "Timeout (in s)b
 CVariable<uint32>	ForceWelcomerShard( "su", "ForceWelcomerShard", "SessionId of a shard to promote when joining any mainland (0=none)", 0, 0, true );
 CVariable<string>	DomainName("su", "DomainName", "The name of the domain", "ryzom", 0, true);
 CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privilege allowed to join any animation session", ":GM:SGM:", 0, true);
+CVariable<string>	FastDisconnectionPassPhrase("su", "FastDisconnectionPassPhrase", "Secret (up to 10 characters) shared with the EGS FastDisconnectionPassPhrase, which encodes the code that lets a character joining a ring session skip the mainland disconnection timer; empty grants no skip", "", 0, true);
 
 namespace RSMGR
 {
@@ -3486,12 +3487,13 @@ endOfWelcomeUserResult:
 			pjs.From = from;
 			pjs.SessionId = TSessionId(storedSessionId);
 
-			if (mustGrantFastDisconnection)
+			// the code is only worth something with a pass phrase the client does not know
+			if (mustGrantFastDisconnection && !FastDisconnectionPassPhrase.get().empty())
 			{
 				CSecurityCheckForFastDisconnection securityCheck;
 				securityCheck.setSessionId(sessionId);
 				securityCheck.setCookie(cookie); // must not be changed by joinSession(), because the client sends the one he knows before Far TPing
-				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(""));
+				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(FastDisconnectionPassPhrase.get().c_str()));
 			}
 			_PendingJoins.push_back(pjs);
 

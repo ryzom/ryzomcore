@@ -3236,6 +3236,12 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// The fast-disconnection code is encoded by the shard unifier when a character joins a ring session. Without a pass
+// phrase known only to the services, a client computes it from its own cookie, so the bypass is refused while unset.
+CVariable<string> FastDisconnectionPassPhrase("egs", "FastDisconnectionPassPhrase",
+	"Secret (up to 10 characters) that the shard unifier's FastDisconnectionPassPhrase must match for a client to skip the disconnection timer; empty refuses the skip",
+	string(""), 0, true);
+
 void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId charId;
@@ -3259,8 +3265,9 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 				if (player)
 					securityCheck.setCookie(player->getLoginCookie()); // if not set (null player), the check won't pass
 
-				// TODO_RYZOMCLASSIC: There used to be a value here. -Kaetemi
-				securityCheck.check("");
+				if (FastDisconnectionPassPhrase.get().empty())
+					throw Exception("FastDisconnectionPassPhrase is not set");
+				securityCheck.check(FastDisconnectionPassPhrase.get().c_str());
 			}
 		}
 	}
