@@ -188,6 +188,13 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		return;
 	}
 
+	// the client offers no destroy in the guild inventory, whose items only leave through the guild's grade checks
+	if (inventory == INVENTORIES::guild)
+	{
+		nlwarning("<cbItemDestroy> player %s tried to destroy slot %u of the guild inventory, refused", user.toString().c_str(), slot);
+		return;
+	}
+
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
 }
@@ -297,6 +304,12 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbClientItemEnchant> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
+	// the client offers no enchant or recharge in the guild inventory, which would consume a guild crystal
+	if (inv == INVENTORIES::guild)
+	{
+		nlwarning("<cbClientItemEnchant> player %s tried to use slot %u of the guild inventory, refused", user.toString().c_str(), slot);
+		return;
+	}
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );
 	character->setAfkState(false);
 }
@@ -368,6 +381,8 @@ void cbClientItemLock(NLNET::CMessage &msgin, const std::string &serviceName, NL
 	CCharacter *character = PlayerManager.getChar(eid);
 	DROP_IF(!character, "Character not found", return);
 	DROP_IF(inventory == INVENTORIES::UNDEFINED, "Inventory is undefined", return);
+	// the client offers no lock in the guild inventory: the lock is the owner's, and guild items are the guild's
+	DROP_IF(inventory == INVENTORIES::guild, "Character " << eid.toString() << " tried to lock an item of the guild inventory", return);
 
 	CInventoryPtr invent = character->getInventory(inventory);
 	DROP_IF(invent == NULL, "Character " << eid.toString() << " has no inventory " << (uint)inventory, return);
