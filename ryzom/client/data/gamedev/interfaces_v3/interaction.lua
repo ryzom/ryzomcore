@@ -18,16 +18,16 @@ end
 ------------------------------------------------------------------------------------------------------------
 --
 function string:split(Pattern)
-    local Results = {}
-    local Start = 1
-    local SplitStart, SplitEnd = string.find(self, Pattern, Start)
-    while(SplitStart)do
-        table.insert(Results, string.sub(self, Start, SplitStart-1))
-        Start = SplitEnd+1
-        SplitStart, SplitEnd = string.find(self, Pattern, Start)
-    end
-    table.insert(Results, string.sub(self, Start))
-    return Results
+	local Results = {}
+	local Start = 1
+	local SplitStart, SplitEnd = string.find(self, Pattern, Start)
+	while(SplitStart)do
+		table.insert(Results, string.sub(self, Start, SplitStart-1))
+		Start = SplitEnd+1
+		SplitStart, SplitEnd = string.find(self, Pattern, Start)
+	end
+	table.insert(Results, string.sub(self, Start))
+	return Results
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -307,17 +307,17 @@ function game:updateRpItems()
 			local a = html:find("action"..v)
 			if a then
 				if string.find(left..":"..target..":"..mode..":"..tostring(v), k) ~= nil
-				    or string.find(left..":::"..tostring(v), k) ~= nil
-				    or string.find(left..":"..target.."::"..tostring(v), k) ~= nil
-    				or string.find(left..":"..target..":*:"..tostring(v), k) ~= nil
-    				or string.find(right..":"..target..":"..mode..":"..tostring(v), k) ~= nil
-    				or string.find(right..":::"..tostring(v), k) ~= nil
-    				or string.find(right..":"..target.."::"..tostring(v), k) ~= nil
-    				or string.find(right..":"..target..":*:"..tostring(v), k) ~= nil
-    				or string.find(right_no_variant..":"..target..":"..mode..":"..tostring(v), k) ~= nil
-    				or string.find(right_no_variant..":::"..tostring(v), k) ~= nil
-    				or string.find(right_no_variant..":"..target.."::"..tostring(v), k) ~= nil
-    				or string.find(right_no_variant..":"..target..":*:"..tostring(v), k) ~= nil
+					or string.find(left..":::"..tostring(v), k) ~= nil
+					or string.find(left..":"..target.."::"..tostring(v), k) ~= nil
+					or string.find(left..":"..target..":*:"..tostring(v), k) ~= nil
+					or string.find(right..":"..target..":"..mode..":"..tostring(v), k) ~= nil
+					or string.find(right..":::"..tostring(v), k) ~= nil
+					or string.find(right..":"..target.."::"..tostring(v), k) ~= nil
+					or string.find(right..":"..target..":*:"..tostring(v), k) ~= nil
+					or string.find(right_no_variant..":"..target..":"..mode..":"..tostring(v), k) ~= nil
+					or string.find(right_no_variant..":::"..tostring(v), k) ~= nil
+					or string.find(right_no_variant..":"..target.."::"..tostring(v), k) ~= nil
+					or string.find(right_no_variant..":"..target..":*:"..tostring(v), k) ~= nil
 				then
 					a:find("img").texture = "grey_0.tga"
 					a:find("but").onclick_l = "lua"
@@ -754,17 +754,17 @@ function game:openWindowHeader()
 	if ui ~= nil and game.ui_props[id] ~= nil then
 
 	-- set size from saved values
-	if game.ui_props[id].pop_min_h ~= nil then
-		ui.pop_min_h = game.ui_props[id].pop_min_h
-	end
+		if game.ui_props[id].pop_min_h ~= nil then
+			ui.pop_min_h = game.ui_props[id].pop_min_h
+		end
 
-	if game.ui_props[id].h ~= nil then
-		ui.h = game.ui_props[id].h
-	end
+		if game.ui_props[id].h ~= nil then
+			ui.h = game.ui_props[id].h
+		end
 
-	 if ui_webig_browser_w ~= nil then
-		ui.w = game.ui_props[id].w;
-end
+		if ui_webig_browser_w ~= nil then
+			ui.w = game.ui_props[id].w;
+		end
 	end
 end
 
@@ -803,7 +803,6 @@ end
 function game:chatUrlBrowse()
 	runAH(nil, "browse", "name=ui:interface:webig:content:html|url=" .. SavedUrl)
 end
-
 ------------------------------------------------------------------------------------------------------------
 --
 if game.sDynChat == nil then game.sDynChat = {} end
@@ -822,8 +821,8 @@ function game:openChannels()
 				local node = uc[tostring(i)]
 				channels[tonumber(node.id)] = {
 					rgba = node.rgba,
-					name = node.name,
-					passwd = node.passwd
+						name = node.name,
+						passwd = node.passwd
 				}
 			end
 			local t = {}
@@ -909,9 +908,9 @@ function game:saveChannel(verbose)
 							if k[chan] then password = k[chan] end
 						end
 						channels[tostring(i)] = {
-						    rgba = cRGBA,
-						    name = chan,
-						    passwd = password
+							rgba = cRGBA,
+								name = chan,
+								passwd = password
 						}
 					end
 				end
@@ -930,7 +929,7 @@ function game:chatWelcomeMsg(input)
 		input = getUICaller().params_r
 		if input then
 			input = input:match("ED:([^_]+)"):lower()
-	    end
+		end
 	end
 	local chat = input
 	local temp = "UI:TEMP:ONCHAT:"
@@ -945,13 +944,13 @@ function game:chatWelcomeMsg(input)
 					-- faction, nation and organization
 					for k, v in pairs({
 						kami = i18n.get("uiFameAllegiance2"),
-						karavan = i18n.get("uiFameAllegiance3"),
-						fyros = i18n.get("uiFameAllegiance4"),
-						matis = i18n.get("uiFameAllegiance5"),
-						tryker = i18n.get("uiFameAllegiance6"),
-						zorai = i18n.get("uiFameAllegiance7"),
-						marauder = i18n.get("uiFameMarauders"),
-						ranger = i18n.get("uiOrganization_7")
+							karavan = i18n.get("uiFameAllegiance3"),
+							fyros = i18n.get("uiFameAllegiance4"),
+							matis = i18n.get("uiFameAllegiance5"),
+							tryker = i18n.get("uiFameAllegiance6"),
+							zorai = i18n.get("uiFameAllegiance7"),
+							marauder = i18n.get("uiFameMarauders"),
+							ranger = i18n.get("uiOrganization_7")
 					}) do
 						if name == v:toUtf8() then
 							msg = i18n.get("uiWelcome_"..k)
@@ -991,3 +990,4 @@ end
 
 -- VERSION --
 FILE_INTERACTION_VERSION = 122
+

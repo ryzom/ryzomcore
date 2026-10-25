@@ -635,7 +635,6 @@ function GameR2Loading:buildNewbielandScenarioTree()
 
 	tree:forceRebuild()
 end
-
-
 -- VERSION --
 FILE_GAME_R2_LOADING_VERSION = 31
+

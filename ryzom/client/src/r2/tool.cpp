@@ -939,7 +939,7 @@ void CTool::setContextHelp(const ucstring &contextHelp)
 	CLuaState &ls = getEditor().getLua();
 	CLuaStackChecker lsc(&ls);
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(ls, contextHelp);
+	CLuaIHM::pushUCString(ls, contextHelp.toUtf8()); // Compatibility
 #else
 	ls.push(contextHelp.toUtf8());
 #endif

@@ -156,6 +156,7 @@
 
 <define id="game_config_screen_ratio_eb" value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
 <define id="game_config_screen_ratio_cb" value="ui:interface:game_config:content:general:screen_ratio:combo" />
+
 <define id="game_config_save_channel_cb" value="ui:interface:game_config:content:chat_colors:save_channel_cb:c" />
 <define id="game_config_auto_channel_cb" value="ui:interface:game_config:content:chat_colors:auto_channel_cb:c" />
 <proc id="game_config_init">
@@ -302,7 +303,6 @@
 			<!-- interface scale -->
 			<instance template="tgcw_checkbox" id="scale_auto" text="uiInterfaceScaleAuto" posref="BL TL" posparent="gam" x="-20" y="-28" />
 			<instance template="tgcw_scrollbarfloat" id="scale" text="uiInterfaceScale" posref="BL TL" posparent="scale_auto" x="20" y="-2" />
-			
 			<!-- window snap -->
 			<view style="sgc_title2" type="text" id="title_win_snap" posref="BL TL" x="-20" y="-28" hardtext="uiWindowSnap" posparent="scale" />
 			<instance template="tgcw_scrollbarint" id="window_snap_distance" text="uiWindowSnapDistance" posref="BL TL" posparent="title_win_snap" x="20" y="-2" />
@@ -321,6 +321,7 @@
 					onclick_l="game_config_change_vid_fullscreen" params_l="" />
 				<view type="text" id="text" posparent="c" posref="MR ML" x="4" y="-2" color="255 255 255 192" fontsize="12" shadow="true" hardtext="uiFullscreen" />
 			</group>
+
 			<group type="combo_box" id="video_modes" w="100" h="20" value="UI:TEMP:VID_MODE" posparent="fullscreen" posref="BL TL" x="0" y="-4">
 				<instance template="combo_box_def1" />
 			</group>
@@ -556,6 +557,7 @@
 			<instance template="tgcw_checkbox" id="show_dyn_channel_name_in_chat_cb" text="uiShowDynChannelNameInChatCB" tooltip="uittShowDynChannelNameInChat" posparent="show_times_in_chat_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_checkbox" id="show_online_offline_notifications_cb" text="uiShowOnlineOfflineNotifications" tooltip="uittShowOnlineOfflineNotifications" posparent="show_dyn_channel_name_in_chat_cb" posref="BL TL" x="0" y="-8" />
 			<instance template="tgcw_scrollbarint" id="font_size" text="uiFontSize" posref="BL TL" posparent="show_online_offline_notifications_cb" x="0" y="-8" />
+
 			<instance template="tgcw_combo_emoji_mode" id="emoji_mode" text="uiEmojiMode" value="UI:TEMP:CHAT:EMOJI_MODE" posref="BL TL" posparent="font_size" x="0" y="-8" />
 			<instance template="tgcw_scrollbarint" id="emoji_size" text="uiEmojiSize" posref="BL TL" posparent="emoji_mode" x="0" y="-8" />
 			<view type="text" id="emoji_size_small" posparent="emoji_size" posref="TR TR" x="0" y="0" color="255 255 255 192" fontsize="10" shadow="true" hardtext="uiEmojiSizeSmall" />
@@ -856,6 +858,7 @@
 			<param ui="general:scale_auto:c" type="cfg" realtime="true" widget="boolbut" link="InterfaceScaleAuto" />
 			<param ui="general:scale:c" type="cfg" realtime="false" ui_view="general:scale:c_res" ui_decimal="2" widget="sbfloat" link="InterfaceScale" />
 			<param ui="general:waitvbl:c" type="cfg" realtime="true" widget="boolbut" link="WaitVBL" />
+
 			<param ui="general:occeventbnps:c" type="cfg" realtime="false" widget="boolbut" link="EnableEventsBnp" />
 			<param ui="general:occitems:c" type="cfg" realtime="false" widget="boolbut" link="EnableOccsBnp" />
 			<param ui="general:window_snap_distance:c" type="cfg" realtime="true" ui_view="general:window_snap_distance:c_res" ui_decimal="2" widget="sbint" link="WindowSnapDistance" />
@@ -949,8 +952,8 @@
 		   <param ui="chat_colors:cc_civi:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:CIVILIZATION" realtime="true" />
 		   <param ui="chat_colors:cc_terri:c" type="db" widget="colbut" link="UI:SAVE:CHAT:COLORS:TERRITORY" realtime="true" />
 		   -->
-					<param ui="chat_colors:enter_dontquit_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" realtime="true" />
-					<param ui="chat_colors:chat_autocomplete_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:CHAT_AUTOCOMPLETE" realtime="true" />
+			<param ui="chat_colors:enter_dontquit_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB" realtime="true" />
+			<param ui="chat_colors:chat_autocomplete_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:CHAT_AUTOCOMPLETE" realtime="true" />
 			<param ui="chat_colors:save_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SAVE_CHANNEL" realtime="true" />
 			<param ui="chat_colors:auto_channel_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:AUTO_CHANNEL" realtime="true" />
 			<param ui="chat_colors:show_times_in_chat_cb:c" type="db" widget="boolbut" link="UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB" realtime="true" />

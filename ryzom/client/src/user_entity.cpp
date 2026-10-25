@@ -151,6 +151,7 @@ CUserEntity::CUserEntity()
 
 	_FrontVelocity		= 0.0f;
 	_LateralVelocity	= 0.0f;
+	_FinalPacsSpeed		= 0.0;
 
 	_SpeedServerAdjust  = 1.0f;
 
@@ -1006,6 +1007,9 @@ CVector CUserEntity::getVelocity() const
 //-----------------------------------------------
 double CUserEntity::speed() const	// virtual
 {
+	// In internal view the user moves PACS directly and the stage speed is never updated
+	if(UserControls.isInternalView())
+		return _FinalPacsSpeed;
 	return CPlayerCL::speed();
 //	return (double)getVelocity().norm();
 }// speed //
@@ -2137,8 +2141,13 @@ void CUserEntity::pacsFinalizeMove()	// virtual
 	if(_Primitive == nullptr)
 		return;
 
+	// Previous final position (pacsPos() resets it on teleport and position correction)
+	CVectorD lastPacsPos = _FinalPacsPos;
 	// Get the global position
 	_FinalPacsPos = _Primitive->getFinalPosition(dynamicWI);
+	// Horizontal speed of this frame's move
+	if(DT > 0.f)
+		_FinalPacsSpeed = CVectorD(_FinalPacsPos.x - lastPacsPos.x, _FinalPacsPos.y - lastPacsPos.y, 0.0).norm() / DT;
 
 	// Get the global position
 	UGlobalPosition gPos;

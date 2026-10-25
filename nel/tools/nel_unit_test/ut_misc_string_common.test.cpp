@@ -735,3 +735,20 @@ TEST_F(CUTMiscStringCommonTest, fromStringBool)
 	ret = NLMISC::fromString("nope", val);
 	EXPECT_TRUE(!ret && !val);
 }
+
+TEST_F(CUTMiscStringCommonTest, startsWithCaseInsensitiveAscii)
+{
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("https://app.ryzom.com/", "https://"));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("HTTPS://app.ryzom.com/", "https://"));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("Https://", "https://"));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii(std::string("URL(x)"), "url("));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii(std::string("abc"), std::string("")));
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("", ""));
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("http://app.ryzom.com/", "https://"));
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("https:/", "https://")); // shorter than the prefix
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("", "h"));
+	// only ASCII letters fold: a non-letter byte and a non-ASCII byte must match exactly
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("http;//", "http://"));
+	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("\xC3\x89x", "\xC3\xA9x")); // E acute vs e acute in UTF-8
+	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("\xC3\xA9X", "\xC3\xA9x"));
+}

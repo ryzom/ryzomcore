@@ -86,9 +86,6 @@ namespace NLGUI
 
 		void setText(const std::string &text);
 		void setTextLocalized(const std::string &text, bool localized);
-#ifdef RYZOM_LUA_UCSTRING
-		void setTextAsUtf16 (const ucstring &text); // Compatibility
-#endif
 		void setLocalized(bool localized);
 		void setFontName (const std::string &name);
 		void setFontSize (sint nFontSize, bool coef = true);
@@ -101,9 +98,6 @@ namespace NLGUI
 		void setShadowOffset (sint x, sint y);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
 		void setOverflowText(const std::string &text) { _OverflowText = text; }
-#ifdef RYZOM_LUA_UCSTRING
-		void setOverflowTextAsUtf16(const ucstring &text) { _OverflowText = text.toUtf8(); } // Compatibility
-#endif
 		void setMultiLine (bool bMultiLine);
 		void setMultiLineSpace (sint nMultiLineSpace);
 		void setMultiLineMaxWOnly (bool state);
@@ -123,10 +117,6 @@ namespace NLGUI
 
 		/// Get displayed text
 		std::string		getText() const { return _Text; }
-#ifdef RYZOM_LUA_UCSTRING
-		ucstring		getTextAsUtf16() const; // Compatibility
-		ucstring		getHardTextAsUtf16() const; // Compatibility
-#endif
 		bool			isLocalized() const { return _Localized;  }
 		sint			getFontSize() const;
 		std::string		getFontName() const { return _FontName; }
@@ -138,9 +128,6 @@ namespace NLGUI
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
 		void			getShadowOffset(sint &x, sint &y) { x = _ShadowX; y = _ShadowY; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
-#ifdef RYZOM_LUA_UCSTRING
-		ucstring		getOverflowTextAsUtf16()	const { return _OverflowText; } // Compatibility
-#endif
 		bool			getMultiLine() const		{ return _MultiLine; }
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
 		bool			getMultiLineMaxWOnly()	const	{ return _MultiLineMaxWOnly; }
@@ -193,9 +180,6 @@ namespace NLGUI
 		/// If localized, return localization key (ie "uiLanguage"), else return displayed text.
 		std::string getHardText() const { return _HardText.empty() ? _Text : _HardText; }
 		void        setHardText (const std::string &ht); //< Localizes strings starting with "ui"
-#ifdef RYZOM_LUA_UCSTRING
-		void		setHardTextAsUtf16(const ucstring &ht); // Compatibility
-#endif
 
 		std::string getColorAsString() const;
 		void        setColorAsString(const std::string &ht);
@@ -214,14 +198,8 @@ namespace NLGUI
 		static uint			getFormatTagLength(const std::string &text, uint index);
 		/// Color and tooltip tags in effect at pos, to render text.substr(pos) alone. Empty for untagged text.
 		static std::string	getFormatTagPrefixAt(const std::string &text, uint pos);
-#ifdef RYZOM_LUA_UCSTRING
-		void	setTextFormatTagedAsUtf16(const ucstring &text); // Compatibility
-#endif
 
 		void	setSingleLineTextFormatTaged(const std::string &text);
-#ifdef RYZOM_LUA_UCSTRING
-		void	setSingleLineTextFormatTagedAsUtf16(const ucstring &text); // Compatibility
-#endif
 
 		// Remove end space
 		void removeEndSpaces();
@@ -253,10 +231,9 @@ namespace NLGUI
 			REFLECT_STRING("text_format", getText, setTextFormatTaged);
 			REFLECT_STRING("text_single_line_format", getText, setSingleLineTextFormatTaged);
 #ifdef RYZOM_LUA_UCSTRING
-			// REFLECT_UCSTRING("uc_text", getTextAsUtf16, setTextAsUtf16); // Deprecate uc_ functions
-			REFLECT_UCSTRING("uc_hardtext", getHardTextAsUtf16, setHardTextAsUtf16); // Compatibility
-			REFLECT_UCSTRING("uc_hardtext_format", getTextAsUtf16, setTextFormatTagedAsUtf16); // Compatibility
-			REFLECT_UCSTRING("uc_hardtext_single_line_format", getTextAsUtf16, setSingleLineTextFormatTagedAsUtf16); // Compatibility
+			REFLECT_UCSTRING("uc_hardtext", getHardText, setHardText); // Compatibility
+			REFLECT_UCSTRING("uc_hardtext_format", getText, setTextFormatTaged); // Compatibility
+			REFLECT_UCSTRING("uc_hardtext_single_line_format", getText, setSingleLineTextFormatTaged); // Compatibility
 #endif
 			REFLECT_STRING ("color", getColorAsString, setColorAsString);
 			REFLECT_RGBA ("color_rgba", getColorRGBA, setColorRGBA);

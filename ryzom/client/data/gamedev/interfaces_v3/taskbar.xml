@@ -106,21 +106,21 @@
  on_active="configure_quit_dialog_box"
  on_active_params=""
 >
-<group id="indent_middle" child_resize_w="true" child_resize_h="true" child_resize_hmargin="4" child_resize_wmargin="16" posref="TM TM" x="8" y="-10" >
+	<group id="indent_middle" child_resize_w="true" child_resize_h="true" child_resize_hmargin="4" child_resize_wmargin="16" posref="TM TM" x="8" y="-10" >
 	
 		<!-- NORMAL	-->
 		
 		<ctrl style="quit_button" id="cancel" posref="TL TL" hardtext="uittQuitCancel" onclick_l="proc" params_l="quit_dialog_cancel"
 			color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" />
-			<group id="half_buttons" posparent="cancel" posref="BL TL" y="%quit_button_delta_y" child_resize_h="true" sizeref="w">
-				<group id="options_container" child_resize_h="true" sizeref="w5" w="0" posref="TL TL">
-					<ctrl style="quit_button" id="options" posref="TL TL" sizeref="w" hardtext="uiMk_system1_short" onclick_l="proc" params_l="quit_dialog_options" color="105 240 255 255" col_over="105 240 255 255" col_pushed="105 240 255 255" text_color_normal="105 240 255 160" />
-				</group>
-				<group id="keys_container" child_resize_h="true" sizeref="w5" w="0" posref="TR TR">
-					<ctrl style="quit_button" id="keys" posref="TL TL" sizeref="w" hardtext="uiMk_system2_abrv" onclick_l="proc" params_l="quit_dialog_keys" color="105 240 255 255" col_over="105 240 255 255" col_pushed="105 240 255 255" text_color_normal="105 240 255 160" />
-				</group>
+		<group id="half_buttons" posparent="cancel" posref="BL TL" y="%quit_button_delta_y" child_resize_h="true" sizeref="w">
+			<group id="options_container" child_resize_h="true" sizeref="w5" w="0" posref="TL TL">
+				<ctrl style="quit_button" id="options" posref="TL TL" sizeref="w" hardtext="uiMk_system1_short" onclick_l="proc" params_l="quit_dialog_options" color="105 240 255 255" col_over="105 240 255 255" col_pushed="105 240 255 255" text_color_normal="105 240 255 160" />
 			</group>
-			<ctrl style="quit_button" id="return_mainland" posparent="half_buttons" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland" color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
+			<group id="keys_container" child_resize_h="true" sizeref="w5" w="0" posref="TR TR">
+				<ctrl style="quit_button" id="keys" posref="TL TL" sizeref="w" hardtext="uiMk_system2_abrv" onclick_l="proc" params_l="quit_dialog_keys" color="105 240 255 255" col_over="105 240 255 255" col_pushed="105 240 255 255" text_color_normal="105 240 255 160" />
+			</group>
+		</group>
+		<ctrl style="quit_button" id="return_mainland" posparent="half_buttons" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland" color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
 		<ctrl style="quit_button" id="reselect_char" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
 		<!--<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_game"
@@ -429,8 +429,8 @@
 						<!-- Inventory -->
 						<instance template="mk_icon_text" id="window4" hardtext="uiMk_window2" posparent="window3" posref="BL TL" c="%color_blue" tooltip="uiMk_window2" onclick_l="show_hide" params_l="inventory" tx_normal="tb_inventory.tga" tx_pushed="tb_inventory.tga"/>
 						
-							<!-- Ency -->
-							<instance template="mk_icon_text" id="window5" hardtext="uiMk_Encyclopedia" posparent="window4" posref="BL TL" c="%color_orange" tooltip="uiMk_Encyclopedia" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
+						<!-- Ency -->
+						<instance template="mk_icon_text" id="window5" hardtext="uiMk_Encyclopedia" posparent="window4" posref="BL TL" c="%color_orange" tooltip="uiMk_Encyclopedia" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
 						
 						<!-- Tasks -->
 						<instance template="mk_icon_text" id="window6" hardtext="uiMk_window4" posparent="window5" posref="BL TL" c="%color_turquoise" tooltip="uiMk_window4" onclick_l="show_hide" params_l="info_player_journal" tx_normal="tb_missions.tga" tx_pushed="tb_missions.tga"/>
@@ -579,8 +579,8 @@
 				<!-- Inventory -->
 				<instance template="mk_icon" id="window4" tooltip="uiMk_window2" posparent="window3" posref="BL TL" onclick_l="show_hide" params_l="inventory" tx_normal="tb_inventory.tga" tx_pushed="tb_inventory.tga"/>
 				
-					<!-- Encyclopedia -->
-					<instance template="mk_icon" id="window5" tooltip="uiMk_Encyclopedia" posparent="window4" posref="BL TL" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
+				<!-- Encyclopedia -->
+				<instance template="mk_icon" id="window5" tooltip="uiMk_Encyclopedia" posparent="window4" posref="BL TL" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
 				
 				<!-- Tasks -->
 				<instance template="mk_icon" id="window6" tooltip="uiMk_window4" posparent="window5" posref="BL TL" onclick_l="show_hide" params_l="info_player_journal" tx_normal="tb_missions.tga" tx_pushed="tb_missions.tga"/>
@@ -673,8 +673,8 @@
 				<!-- Inventory -->
 				<instance template="mk_icon" id="window4" tooltip="uiMk_window2" posparent="window3" posref="TR TL" onclick_l="show_hide" params_l="inventory" tx_normal="tb_inventory.tga" tx_pushed="tb_inventory.tga"/>
 				
-					<!-- Encyclopedia -->
-					<instance template="mk_icon" id="window5" tooltip="uiMk_Encyclopedia" posparent="window4" posref="TR TL" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
+				<!-- Encyclopedia -->
+				<instance template="mk_icon" id="window5" tooltip="uiMk_Encyclopedia" posparent="window4" posref="TR TL" onclick_l="show_hide" params_l="encyclopedia" tx_normal="tb_actions.tga" tx_pushed="tb_actions.tga"/>
 				
 				<!-- Tasks -->
 				<instance template="mk_icon" id="window6" tooltip="uiMk_window4" posparent="window5" posref="TR TL" onclick_l="show_hide" params_l="info_player_journal" tx_normal="tb_missions.tga" tx_pushed="tb_missions.tga"/>
@@ -793,8 +793,10 @@
 		tx_normal="tb_connection.tga" tx_pushed="tb_connection.tga" c="%color_beige" />
 	
 	<!-- Mp3 player -->
-	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_system6" posparent="sys5" posref="BL TL" onclick_l="show_hide" params_l="mp3_player" tooltip="uiMk_system6" tx_normal="mp3.tga" tx_pushed="mp3.tga" c="%color_beige" />
-
+	<instance template="mk_icon_text" id="sys6" hardtext="uiMk_system6" posparent="sys5" posref="BL TL"
+		onclick_l="show_hide" params_l="mp3_player" tooltip="uiMk_system6"
+		tx_normal="mp3.tga" tx_pushed="mp3.tga" c="%color_beige" />
+	
 	<!-- Background downloader
 	<instance template="mk_icon_text" id="sys7" hardtext="uiMk_system8" posparent="sys6" posref="BL TL" onclick_l="show_hide" params_l="bg_downloader" tooltip="uiMk_system8" tx_normal="bg_downloader.tga" tx_pushed="bg_downloader.tga" c="%color_beige" />
 	-->
@@ -897,7 +899,7 @@
 										global_color_normal="false" global_color_over="false" global_color_pushed="false"
 										click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
 
-										<view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color" shadow="true" hardtext="#text" />
+		<view type="text" id="text" posparent="but" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color" shadow="true" hardtext="#text" />
 		<view type="text" id="key" posref="MR MR" x="-8" y="-2" fontsize="8" global_color="false" color="#color" shadow="true" hardtext="uiNotAssigned" />
 
 
@@ -914,7 +916,7 @@
 		<view type="bitmap" id="back" x="8" texture="w_slot_on.tga" scale="true" w="14" h="14" color="#color_grayed" posref="ML ML" global_color="false"/>
 		<ctrl type="button" id="but" button_type="toggle_button" x="8" y="0" posref="ML ML" active="false" tx_normal="w_slot_on.tga" tx_pushed="W_opacity_on.tga" color="#color" col_pushed="#color" col_over="#color" global_color_normal="false" global_color_over="false" global_color_pushed="false" click_when_pushed="true" onclick_l="show_hide" params_l="#win_name" />
 				
-										<view type="text" id="text" posparent="back" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color_grayed" shadow="true" hardtext="#text" />
+		<view type="text" id="text" posparent="back" posref="MR ML" x="4" y="-3" fontsize="11" global_color="false" color="#color_grayed" shadow="true" hardtext="#text" />
 		<view type="text" id="key" posref="MR MR" x="-8" y="0" fontsize="8" global_color="false" color="#color_grayed" shadow="true" hardtext="CTRL+SHIFT+ALT+NUMPADD" />
 	
 		
@@ -932,8 +934,8 @@
 
 <group id="gestion_windows" type="container" w="588" h="590" openable="false" header_active="false" right_button="false" resizer="false" movable="true" active="false" opened="true" win_priority="%win_priority_high" min_w="588" max_w="588" max_h="590" pop_max_h="590" on_active="gestion_windows_update_key_binding" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color" >
 
-<group id="header_closed" x="0" y="0" w="600" h="570" posref="TL TL" />
-<group id="header_opened" x="0" y="0" w="600" h="570" posref="TL TL" />
+	<group id="header_closed" x="0" y="0" w="600" h="570" posref="TL TL" />
+	<group id="header_opened" x="0" y="0" w="600" h="570" posref="TL TL" />
 	<group id="content" x="0" y="0" w="600" h="0" posref="TL TL" />
 <!--
 	<view type="text" id="title" posref="TM TM" x="0" y="-8" fontsize="16" color="255 255 255 255" global_color="false" shadow="true" hardtext="uiWinDisplay" />
@@ -954,14 +956,14 @@
 		<instance template="win_button" id="journal"	color="UI:SAVE:WIN:COLORS:PLA" text="uimwMissions" posparent="caracs" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:MISSIONS"	win_name="info_player_journal" />
 
-			<instance template="win_button_grayed" id="target"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwTarget" posparent="journal" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:TARGET" 	win_name="target" />
+		<instance template="win_button_grayed" id="target"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwTarget" posparent="journal" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:TARGET" 	win_name="target" />
 
-			<instance template="win_button_grayed" id="jauge"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBars" posparent="target" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:PLAYER"		win_name="player" />
+		<instance template="win_button_grayed" id="jauge"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBars" posparent="target" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:PLAYER"		win_name="player" />
 			
 		<instance template="win_button" id="bonus_malus"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBonusMalus" posparent="jauge" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:BONUS_MALUS"	win_name="bonus_malus" />
 
-			<instance template="win_button_grayed" id="ency"		color="UI:SAVE:WIN:COLORS:PLA" text="uiWisdomChest" posparent="bonus_malus" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA"	win_name="encyclopedia"  />
+		<instance template="win_button_grayed" id="ency"		color="UI:SAVE:WIN:COLORS:PLA" text="uiWisdomChest" posparent="bonus_malus" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA"	win_name="encyclopedia"  />
 
 	</group>
 	<view type="bitmap" id="pla_ico_back" posparent="status" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
@@ -981,11 +983,11 @@
 		<instance template="win_button" id="hands2" color="UI:SAVE:WIN:COLORS:INV" text="uimwHands2" posparent="hands" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:SETS2" win_name="gestionsets2" />
 			
-			<instance template="win_button" id="hotbar" color="UI:SAVE:WIN:COLORS:INV" text="uiHotbarTitle" posparent="hands2" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:INV_HOTBAR" win_name="inv_hotbar" />
+		<instance template="win_button" id="hotbar" color="UI:SAVE:WIN:COLORS:INV" text="uiHotbarTitle" posparent="hands2" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:INV_HOTBAR" win_name="inv_hotbar" />
 
-			<instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hotbar" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:INVENTORY" win_name="inventory" />
+		<instance template="win_button" id="invent" color="UI:SAVE:WIN:COLORS:INV" text="uimwInventory" posparent="hotbar" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:INVENTORY" win_name="inventory" />
 
-			<instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiMK_Actions" posparent="invent" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:ACTIONS" win_name="phrase_book" />
+		<instance template="win_button" id="action_book" color="UI:SAVE:WIN:COLORS:INV" text="uiMK_Actions" posparent="invent" posref="BL TL" x="0" y="-4" pushflag="UI:VARIABLES:ISACTIVE:ACTIONS" win_name="phrase_book" />
 		
 		<instance template="win_button" id="links" color="UI:SAVE:WIN:COLORS:INV" text="uiLinksTitle" posparent="action_book" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:LINKS" win_name="links" />
@@ -1047,7 +1049,7 @@
 
 		<instance template="win_button" id="fame"	color="UI:SAVE:WIN:COLORS:COM" text="uimwFame" posparent="mailbox" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:FAME"		win_name="fame" />
-
+		
 		<instance template="win_button" id="webig"	color="UI:SAVE:WIN:COLORS:COM" text="uimwWebIG" posparent="fame" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:WEBIG"		win_name="webig" />
 
@@ -1122,7 +1124,7 @@
 		<instance template="win_button" id="mp" color="UI:SAVE:WIN:COLORS:OPT" text="uimwTaskBar" posparent="mp3" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:MILKO_PAD" win_name="milko_pad" />
 		
-			<!--		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
+		<!--		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" /> -->
 
     <!--<instance template="win_button" id="cosm" color="UI:SAVE:WIN:COLORS:OPT" text="uimwCosmetics" posparent="mp3" posref="BL TL" x="0" y="-4"

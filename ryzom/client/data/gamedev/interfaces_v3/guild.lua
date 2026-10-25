@@ -96,6 +96,5 @@ function game:guildDeactive()
 
 	setDbProp('UI:VARIABLES:ISACTIVE:GUILD', 0);
 end
-
 -- VERSION --
 FILE_GUILD_VERSION = 31

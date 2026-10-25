@@ -605,7 +605,7 @@
  posref="TL TL" w="185" h="100" x="-35" y="85"
  on_enter="phrase_faber_select_mp_quantity" options="skin_modal"
 >
-<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
+	<view type="text" id="text" posref="TL TL" x="4" y="-4" color="255 255 255 255" fontsize="12" shadow="true" global_color="false" hardtext="uiSelectQuantity" />
 	<ctrl type="sheet" id="sheet" onclick_r="open_help_auto" value="UI:PHRASE:FABER:STACK_SELECT" posref="MM MM" x="-26" y="0" use_quantity="false" />
 	<view type="text" id="x" posparent="sheet" posref="MR MM" x="8" y="0" color="255 255 255 255" fontsize="12" shadow="true" hardtext="X" />
 	<instance template="edit_box_widget" id="edit" entry_type="positive_integer" text_ref="TR TR" text_y="-1" fontsize="12"
@@ -794,7 +794,7 @@
 			<!-- NAME. Get the Name spell -->
 			<view type="text" id="spell_name" posref="TL TL" y="-1" w="120" h="10" shadow="true" fontsize="10"
 				global_color="false" />
-				<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:uc_hardtext" />
+			<link expr="getSPhraseName(@SERVER:EXECUTE_PHRASE:LINK:#index:PHRASE)" target="spell_name:uc_hardtext" />
 
 			<!-- COSTS (HP, SAP, STA) -->
 			<!--

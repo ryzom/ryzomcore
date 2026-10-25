@@ -11,14 +11,14 @@
 <template name="landmark_row_icon" keep="true"
 	id="" posref="TL TL" sizeref="w" posparent="parent" x="0" y="0" w="24" h="18"
 	icon_id="icon" icon_x="0" icon_y="-4" icon_color="80 80 80 255" icon_texture="lm_user.tga">
-<group id="#id" posref="#posref" posparent="#posparent" sizeref="#sizeref" x="#x" y="#y" w="#w" h="#h">
-	<view type="bitmap" id="#icon_id" posref="MM MM" x="#icon_x" y="#icon_y" color="#icon_color"
+	<group id="#id" posref="#posref" posparent="#posparent" sizeref="#sizeref" x="#x" y="#y" w="#w" h="#h">
+		<view type="bitmap" id="#icon_id" posref="MM MM" x="#icon_x" y="#icon_y" color="#icon_color"
 		global_color="false" texture="#icon_texture" />
-</group>
+	</group>
 </template>
 
 <!-- base menu of landmark -->
-<group type="menu" id="land_mark_menu" extends="base_menu">
+<group type="menu" id="land_mark_menu" extends="base_menu">	
 	<action id="target" name="uiTargetLM" handler="land_mark_selected" params="" icon="ico_aim.tga" />
 	<action id="lmteleport" name="uiTeleport" handler="land_mark_teleport" params="" icon="mp_batiment_noyau_maduk.tga" />
 	<separator/>
@@ -30,6 +30,7 @@
 	<view type="text" id="t" posref="TL TL" x="20" y="-5" color="233 197 42 255" fontsize="12" shadow="true" global_color="false" hardtext="uiRemove" />
 	<instance template="button_ok_cancel" posref="BR BR" x="-4" y="4" onclick_ok="remove_user_landmark" onclick_ok_param="" onclick_cancel="leave_modal" onclick_cancel_param="" />
 </group>
+
 
 <!-- menu of user landmark -->
 <group type="menu" id="user_land_mark_menu_base" extends="land_mark_menu">
@@ -46,7 +47,6 @@
 <group type="menu" id="user_land_mark_menu" extends="user_land_mark_menu_base">
 	<!-- closest landmarks added from c++ at the end of the menu -->
 </group>
-
 
 <!-- menu of map -->
 <group type="menu" id="map_menu" extends="base_menu"
@@ -77,7 +77,7 @@
 <group type="menu" id="map_menu_island" extends="base_menu"
  on_active="lua"
  on_active_params="if r2 and r2.Mode == 'Edit' then r2:setCurrentTool('') end"
->
+>	
 	<action id="teleport" name="uiTeleport" handler="map_teleport" params="" icon="mp_batiment_noyau_maduk.tga"/>
 	<action id="center" name="uiMenuCenter" handler="map_center" params="map=ui:interface:map:content:map_content:actual_map" icon="curs_pick.tga"/>
 </group>
@@ -286,8 +286,6 @@
 	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MAP_EVENTS|value=0)"/>
 </proc>
 
-
-
 <!-- used to override onclick handler -->
 <proc id="dummy_proc" />
 
@@ -326,11 +324,11 @@
 
 			<!-- back -->
 			<ctrl type="button" id="map_back" button_type="push_button" posref="TL TL" y="0"  x="4" tx_normal="w_back_map.tga" tx_pushed="w_back_map.tga" tx_over="W_button_16_over.tga" onclick_l="map_back" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittBack" />
-			<!-- zoom in -->
+			<!-- zoom in -->			
 			<ctrl type="button" id="zoom_in" button_type="push_button" posparent="map_back" posref="TR TL" y="0"  x="4" tx_normal="w_zoom_in.tga" tx_pushed="w_zoom_in.tga" tx_over="W_button_16_over.tga" onclick_l="map_zoom_in" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittZoomIn" />
-			<!-- zoom out -->
+			<!-- zoom out -->			
 			<ctrl type="button" id="zoom_out" button_type="push_button" posparent="zoom_in" posref="TR TL" y="0"  x="4" tx_normal="w_zoom_out.tga" tx_pushed="w_zoom_out.tga" tx_over="W_button_16_over.tga" onclick_l="map_zoom_out" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittZoomOut" />
-			<!-- center on player -->
+			<!-- center on player -->			
 			<ctrl type="button" id="center" button_type="push_button" posparent="zoom_out" posref="TR TL" y="0"  x="4" tx_normal="w_center_map.tga" tx_pushed="w_center_map.tga" tx_over="W_button_16_over.tga" onclick_l="map_center" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittCenter" />
 			<!-- search -->
 			<ctrl type="button" id="lm_search_btn" button_type="push_button" posparent="center" posref="TR TL" y="0" x="4" tx_normal="w_help_1.tga" tx_pushed="w_help_1.tga" tx_over="W_button_16_over.tga" onclick_l="proc" params_l="map_search_toggle" tooltip="uittMapSearch" />
@@ -345,9 +343,9 @@
 			<view type="text" id="time" x="4" y="-18" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
 			<view type="text" id="weather" x="4" y="-32" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
 			<ctrl type="tooltip" id="weather_tt" posparent="weather" sizeref="wh" w="0" h="0" tooltip="" tooltip_parent="ctrl" tooltip_posref="BL TL" />
-
+			
 			<instance template="box_widget" id="back" posref="TL TL" sizeref="wh" w="-2" h="-50" x="1" y="-50" render_layer="0" />
-
+			
 			<group type="map" id="actual_map" sizeref="wh" w="-4" h="-6" posparent="back" posref="TL TL" x="2" y="-2" render_layer="1"
 			 group_onclick_r="world_map_right_click"
 			 group_params_r="map=ui:interface:map:content:map_content:actual_map"
@@ -552,7 +550,7 @@
 <proc id="respawn_map_activated">
 	<action handler="exit_free_look" />
 	<action handler="set" params="dblink=UI:VARIABLES:RESPAWN:MSG_SENT|value=0" />
-<!-- <action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(div(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn),10))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" /> -->
+	<!-- <action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(div(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn),10))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" /> -->
 	<action handler="add_link" params="id=respawn_timer_link|expr=secondsToTimeString(mul(div(sub(%player_percent_max,abs(@%player_hp_percent)),%player_percent_max),%time_before_auto_respawn))|target=ui:interface:respawn_map:content:map_content:timer:t:uc_hardtext" />
 	<action handler="add_link" params="id=respawn_acttimer_link|expr=depends(@%player_hp_percent)|action=respawn_map_valid|params=map=ui:interface:respawn_map:content:map_content:actual_map|cond=and(eq(abs(@%player_hp_percent), %player_percent_max), and(lt(@%player_hp_percent,0), eq(@UI:VARIABLES:CDB_INIT_IN_PROGRESS, 0)) ,ne(@UI:VARIABLES:RESPAWN:MSG_SENT,1)) " />
 	<action handler="add_link" params="id=respawn_showtimer_link|expr=lt(abs(@%player_hp_percent), %player_percent_max)|target=ui:interface:respawn_map:content:map_content:timer:active" />

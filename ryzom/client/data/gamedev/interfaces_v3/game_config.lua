@@ -198,6 +198,5 @@ function game:configInit()
 	winActive("wc_r2_scenario_control", true)
 	winActive("wc_r2_player_tracking", r2WinOn)
 end
-
 -- VERSION --
 FILE_GAME_CONFIG_VERSION = 31

@@ -14,6 +14,5 @@ function onRingWindowShown()
 		firstBrowseDone = true
 	end
 end
-
 -- VERSION --
 FILE_RING_WINDOW_VERSION = 98

@@ -87,9 +87,6 @@ namespace NLGUI
 
 		/// Get the ContextHelp for this control. Default is to return _ContextHelp
 		virtual void		getContextHelp(std::string &help) const {help= _ContextHelp;}
-#ifdef RYZOM_LUA_UCSTRING
-		virtual void		getContextHelpAsUtf16(ucstring &help) const {help.fromUtf8(_ContextHelp);} // Compatibility
-#endif
 		/// Get the ContextHelp for this control, with tooltip specific code. Default behaviour is identical to getContextHelp.
 		virtual void		getContextHelpToolTip(std::string &help) const { getContextHelp(help); }
 		// Get the name of the context help window. Default to "context_help"
@@ -129,10 +126,6 @@ namespace NLGUI
 		/// replace the default contextHelp
 		std::string			getDefaultContextHelp() const {return _ContextHelp;}
 		void				setDefaultContextHelp(const std::string &help) {_ContextHelp= help;}
-#ifdef RYZOM_LUA_UCSTRING
-		ucstring			getDefaultContextHelpAsUtf16() const {return ucstring::makeFromUtf8(_ContextHelp);} // Compatibility
-		void				setDefaultContextHelpAsUtf16(const ucstring &help) {_ContextHelp= help.toUtf8();} // Compatibility
-#endif
 		void				setOnContextHelp(const std::string &help) {_OnContextHelp= help;}
 		void				setOnContextHelpAHParams(const std::string &p) {_OnContextHelpParams= p;}
 
@@ -163,13 +156,13 @@ namespace NLGUI
 		virtual void		onKeyboardCaptureLost() {}
 
 #ifdef RYZOM_LUA_UCSTRING
-		// 'tooltip' property expects string to be ucstring or latin1 which is not possible from html page
+		// html pages set the tooltip with this, from when the 'tooltip' property did not take UTF-8 strings
 		int luaSetTooltipUtf8(CLuaState &ls); // Compatibility
 #endif
 
 		REFLECT_EXPORT_START(CCtrlBase, CViewBase)
 #ifdef RYZOM_LUA_UCSTRING
-			REFLECT_UCSTRING("tooltip", getDefaultContextHelpAsUtf16, setDefaultContextHelpAsUtf16); // Compatibility
+			REFLECT_UCSTRING("tooltip", getDefaultContextHelp, setDefaultContextHelp); // Compatibility
 			REFLECT_LUA_METHOD("setTooltipUtf8", luaSetTooltipUtf8); // Compatibility
 #else
 			REFLECT_STRING("tooltip", getDefaultContextHelp, setDefaultContextHelp);

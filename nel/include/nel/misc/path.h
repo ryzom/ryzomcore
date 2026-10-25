@@ -593,6 +593,30 @@ struct CFile
 	static std::string getPath (const std::string &filename);
 
 	/**
+	 * Normalize a relative path for use with isSafeFilename():
+	 * - backslashes become forward slashes
+	 * - leading "./" segments and leading slashes are removed (a rooted path is treated as relative)
+	 * - duplicate separators are collapsed
+	 * It does not resolve ".." segments and does not make the path valid or safe by itself;
+	 * call isSafeFilename() on the result.
+	 */
+	static std::string normalizeRelativePath (const std::string &path);
+
+	/**
+	 * Return true when a file name, or with allowSubdirs a relative path, is safe to use below a
+	 * directory of our choosing: no path traversal, no absolute path, no reserved or illegal character.
+	 * The string must be valid UTF-8 (strictly: no overlong sequence, no surrogate, no code point
+	 * above U+10FFFF). Rejected are control characters, the Unicode look-alikes of '/', '\\', ':' and
+	 * '.' that legacy code pages map onto those characters, the Windows-illegal characters
+	 * : * ? " < > |, the replacement character and the byte order mark, any "." or ".." segment,
+	 * a leading separator, and a leading or trailing space or trailing dot in any segment (Windows
+	 * strips those, so the file would get a different name). Longer than 255 bytes is rejected too.
+	 * Windows device names (CON, NUL, COM1, ...) are not checked.
+	 * Call normalizeRelativePath() first when the input may contain backslashes or "./".
+	 */
+	static bool isSafeFilename (const std::string &filename, bool allowSubdirs);
+
+	/**
 	 * Just to know if it is a directory.
 	 * _FileName empty and path not !!!
 	 */

@@ -150,12 +150,217 @@ namespace NLGUI
 		l_free_func(b, os);
 		return newB;
 	}
+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+	namespace
+	{
+	#ifndef LUA_LOADED_TABLE
+	#define LUA_LOADED_TABLE "_LOADED" // the registry key of package.loaded; 5.1 and 5.2 spell it the same, 5.3 added the macro
+	#endif
+
+		// Open a standard library and publish it as a global, as luaL_openlibs does
+		void openStandardLibrary(lua_State *L, const char *name, lua_CFunction open)
+		{
+	#if LUA_VERSION_NUM >= 502
+			luaL_requiref(L, name, open, 1);
+			lua_pop(L, 1);
+	#else
+			lua_pushcfunction(L, open);
+			lua_pushstring(L, name);
+			lua_call(L, 1, 0);
+	#endif
+		}
+
+		// Open a standard library but publish only the listed functions. The open function builds the full
+		// table, the listed entries are copied into a fresh table, and that table becomes the global and the
+		// package.loaded entry; the full table is dropped. The C functions are static inside the Lua library,
+		// so this is the way to get os.time without os.execute.
+		void openStandardLibrarySubset(lua_State *L, const char *name, lua_CFunction open, const char *const *functions)
+		{
+			lua_pushcfunction(L, open);
+			lua_pushstring(L, name);
+			lua_call(L, 1, 1); // the full table; 5.1's open function also set the global and the loaded entry, both are overwritten below
+			lua_newtable(L);
+			for (; *functions; ++functions)
+			{
+				lua_getfield(L, -2, *functions);
+				lua_setfield(L, -2, *functions);
+			}
+			lua_pushvalue(L, -1);
+			lua_setglobal(L, name);
+			lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+			if (lua_istable(L, -1))
+			{
+				lua_pushvalue(L, -2);
+				lua_setfield(L, -2, name);
+			}
+			lua_pop(L, 3); // loaded table (or nil), subset, full table
+		}
+
+		// Gather a chunk given as a string or as a reader function, the two forms load() accepts
+		bool readChunk(lua_State *L, int index, std::string &chunk)
+		{
+			if (lua_type(L, index) == LUA_TSTRING)
+			{
+				size_t len;
+				const char *s = lua_tolstring(L, index, &len);
+				chunk.assign(s, len);
+				return true;
+			}
+			if (lua_type(L, index) != LUA_TFUNCTION)
+				return false;
+			for (;;)
+			{
+				lua_pushvalue(L, index);
+				lua_call(L, 0, 1);
+				if (lua_isnil(L, -1))
+				{
+					lua_pop(L, 1);
+					return true;
+				}
+				size_t len;
+				const char *s = lua_tolstring(L, -1, &len);
+				if (!s)
+				{
+					lua_pop(L, 1);
+					return false; // the reader must return a string
+				}
+				if (len == 0)
+				{
+					lua_pop(L, 1);
+					return true;
+				}
+				chunk.append(s, len);
+				lua_pop(L, 1);
+			}
+		}
+
+		// nil plus a message, the failure return of load() and loadfile()
+		int loadFailure(lua_State *L, const std::string &msg)
+		{
+			lua_pushnil(L);
+			lua_pushlstring(L, msg.data(), msg.size());
+			return 2;
+		}
+
+		// Compile a text chunk and leave the function on the stack. A binary chunk is refused: Lua does not
+		// verify bytecode, so a crafted chunk corrupts the VM and gets past every other restriction. In 5.2+ an
+		// environment argument becomes the chunk's _ENV, as with load().
+		int loadTextChunk(lua_State *L, const std::string &chunk, const std::string &chunkName, int envIndex)
+		{
+			if (!chunk.empty() && chunk[0] == LUA_SIGNATURE[0])
+				return loadFailure(L, "attempt to load a binary chunk (only text chunks are allowed)");
+			if (luaL_loadbuffer(L, chunk.data(), chunk.size(), chunkName.c_str()) != 0)
+			{
+				const char *err = lua_tostring(L, -1);
+				std::string msg = err ? err : "load error";
+				lua_pop(L, 1);
+				return loadFailure(L, msg);
+			}
+	#if LUA_VERSION_NUM >= 502
+			if (!lua_isnone(L, envIndex))
+			{
+				lua_pushvalue(L, envIndex);
+				if (!lua_setupvalue(L, -2, 1))
+					lua_pop(L, 1);
+			}
+	#else
+			(void)envIndex;
+	#endif
+			return 1;
+		}
+
+		// load(chunk [, chunkname [, mode [, env]]]), also installed as 5.1's loadstring: text chunks only
+		int luaSafeLoad(lua_State *L)
+		{
+			std::string chunk;
+			if (!readChunk(L, 1, chunk))
+				return luaL_argerror(L, 1, "string or function expected");
+			const char *name = luaL_optstring(L, 2, NULL);
+			std::string chunkName = name ? std::string(name) : (lua_type(L, 1) == LUA_TSTRING ? chunk : std::string("=(load)"));
+			return loadTextChunk(L, chunk, chunkName, 4);
+		}
+
+		// loadfile(filename [, mode [, env]]): the name must be a safe relative path, found through CPath (the
+		// client's data) or below the current directory (saved files); text chunks only
+		int luaSafeLoadFile(lua_State *L)
+		{
+			const char *arg = luaL_checkstring(L, 1);
+			std::string name = NLMISC::CFile::normalizeRelativePath(arg);
+			if (!NLMISC::CFile::isSafeFilename(name, true))
+				return loadFailure(L, std::string("cannot open ") + arg + ": not a safe relative path");
+			std::string path = NLMISC::CPath::lookup(name, false, false);
+			if (path.empty())
+				return loadFailure(L, std::string("cannot open ") + arg);
+			NLMISC::CIFile file;
+			if (!file.open(path))
+				return loadFailure(L, std::string("cannot open ") + arg);
+			std::string chunk;
+			chunk.resize(file.getFileSize());
+			if (!chunk.empty())
+				file.serialBuffer((uint8 *)&chunk[0], (uint)chunk.size());
+			return loadTextChunk(L, chunk, "@" + name, 3);
+		}
+
+		// The libraries the interface scripts get. The same state runs scripts served by the trusted web
+		// domains, so a release build opens nothing that reaches the file system, the process or the VM
+		// internals: no io, no package (require, loadlib), os reduced to its clock functions, debug reduced
+		// to traceback, dofile removed, loadfile restricted to the client's data and load() to text chunks.
+		// A development build may ask for the full set, for the R2 editor's file exports and profiler and
+		// for MobDebug.
+		void openStandardLibraries(lua_State *L, bool developmentLibraries)
+		{
+			static const char *const osSubset[] = { "time", "date", "clock", "difftime", NULL };
+			static const char *const debugSubset[] = { "traceback", NULL };
+
+	#if LUA_VERSION_NUM >= 502
+			openStandardLibrary(L, "_G", luaopen_base);
+			if (developmentLibraries)
+				openStandardLibrary(L, LUA_LOADLIBNAME, luaopen_package);
+			openStandardLibrary(L, LUA_COLIBNAME, luaopen_coroutine);
+	#else
+			openStandardLibrary(L, "", luaopen_base); // coroutine is part of the base library in 5.1
+			if (developmentLibraries)
+				openStandardLibrary(L, LUA_LOADLIBNAME, luaopen_package);
+	#endif
+			openStandardLibrary(L, LUA_TABLIBNAME, luaopen_table);
+			openStandardLibrary(L, LUA_STRLIBNAME, luaopen_string);
+			openStandardLibrary(L, LUA_MATHLIBNAME, luaopen_math);
+	#if LUA_VERSION_NUM >= 503
+			openStandardLibrary(L, LUA_UTF8LIBNAME, luaopen_utf8);
+	#endif
+	#if LUA_VERSION_NUM == 502 || (LUA_VERSION_NUM == 503 && defined(LUA_COMPAT_BITLIB))
+			openStandardLibrary(L, LUA_BITLIBNAME, luaopen_bit32);
+	#endif
+			if (developmentLibraries)
+			{
+				openStandardLibrary(L, LUA_IOLIBNAME, luaopen_io);
+				openStandardLibrary(L, LUA_OSLIBNAME, luaopen_os);
+				openStandardLibrary(L, LUA_DBLIBNAME, luaopen_debug);
+			}
+			else
+			{
+				openStandardLibrarySubset(L, LUA_OSLIBNAME, luaopen_os, osSubset);
+				openStandardLibrarySubset(L, LUA_DBLIBNAME, luaopen_debug, debugSubset);
+			}
+
+			// base library fixups, in every build
+			lua_pushnil(L);
+			lua_setglobal(L, "dofile");
+			lua_pushcfunction(L, luaSafeLoadFile);
+			lua_setglobal(L, "loadfile");
+			lua_pushcfunction(L, luaSafeLoad);
+			lua_setglobal(L, "load");
+			lua_pushcfunction(L, luaSafeLoad);
+			lua_setglobal(L, "loadstring"); // the 5.1 name, kept on every version for the scripts that use it
+		}
+	}
+#endif // LUA_VERSION_NUM >= 501
 
 
 
 	const int MinGCThreshold = 128; // min value at which garbage collector will be triggered (in kilobytes)
 	// ***************************************************************************
-	CLuaState::CLuaState( bool debugger )
+	CLuaState::CLuaState( bool debugger, bool developmentLibraries )
 	{
 		_State = nullptr;
 
@@ -219,24 +424,28 @@ namespace NLGUI
 			nlassert(_State);
 		}
 
-		// *** Load base libs
+		// *** Load the standard libraries, see openStandardLibraries() for what a script may reach
 		{
 			CLuaStackChecker lsc(this);
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
-			luaL_openlibs(_State);
+			openStandardLibraries(_State, developmentLibraries);
 #else
 			luaopen_base (_State);
 			luaopen_table (_State);
-			luaopen_io (_State);
 			luaopen_string (_State);
 			luaopen_math (_State);
+			if (developmentLibraries)
+			{
+				luaopen_io (_State);
 			luaopen_debug (_State);
+			}
 #endif
 
 #ifdef _WIN32
 #ifdef NL_DEBUG
-			// Lua socket library for MobDebug, optional
-			if (NLMISC::CFile::fileExists("socket\\core.dll"))
+			m_LuaSocket = NULL;
+			// Lua socket library for MobDebug, optional; it registers through package.preload, so only with the development libraries
+			if (developmentLibraries && NLMISC::CFile::fileExists("socket\\core.dll"))
 			{
 				// Load socket\core.dll dynamically
 				m_LuaSocket = LoadLibraryW(L"socket\\core.dll");
@@ -267,11 +476,6 @@ namespace NLGUI
 					}
 				}
 			}
-			else
-			{
-				m_LuaSocket = NULL;
-			}
-
 #endif
 #endif
 

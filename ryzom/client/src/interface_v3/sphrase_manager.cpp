@@ -4577,11 +4577,7 @@ void CSPhraseManager::setRegenTickRange(uint powerIndex, const CTickRange &tickR
 // ***************************************************************************
 string CSPhraseComAdpater::updateTooltip()
 {
-#ifdef RYZOM_LUA_UCSTRING
-	ucstring help; // Compatibility
-#else
 	string help;
-#endif
 	CLuaState *ls = CLuaManager::getInstance().getLuaState();
 	CLuaStackRestorer lsr(ls, 0);
 	CLuaIHM::pushReflectableOnStack(*ls, this);
@@ -4592,22 +4588,18 @@ string CSPhraseComAdpater::updateTooltip()
 	if (!ls->empty())
 	{
 #ifdef RYZOM_LUA_UCSTRING
-		CLuaIHM::pop(*ls, help);
+		CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
 #else
 		help = ls->toString();
-		ls->pop();
 #endif
+		ls->pop();
 	}
 	else
 	{
 		nlwarning("Ucstring result expected when calling 'game:updatePhraseTooltip', possible script error");
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	return help.toUtf8();
-#else
 	return help;
-#endif
 }
 
 // ***************************************************************************
@@ -4725,7 +4717,7 @@ int CSPhraseComAdpater::luaGetStaCost(CLuaState &ls)
 int CSPhraseComAdpater::luaGetName(CLuaState &ls)
 {
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(ls, this->Phrase.Name);
+	CLuaIHM::pushUCString(ls, this->Phrase.Name.toUtf8()); // Compatibility
 #else
 	ls.push(this->Phrase.Name.toUtf8());
 #endif
@@ -4745,8 +4737,7 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 		if (*desc)
 		{
 #ifdef RYZOM_LUA_UCSTRING
-			ucstring uc = ucstring::makeFromUtf8(desc); // Compatibility
-			CLuaIHM::push(ls, uc);
+			CLuaIHM::pushUCString(ls, desc); // Compatibility
 #else
 			ls.push(desc);
 #endif

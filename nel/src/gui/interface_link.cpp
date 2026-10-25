@@ -107,6 +107,10 @@ namespace NLGUI
 			break;
 			case CReflectedProperty::String:
 			case CReflectedProperty::StringRef:
+#ifdef RYZOM_LUA_UCSTRING
+			case CReflectedProperty::UCString:
+			case CReflectedProperty::UCStringRef:
+#endif
 				if (valueToAffect.toString())
 				{
 					(destElem.*(property.SetMethod.SetString))(valueToAffect.getString());
@@ -116,19 +120,6 @@ namespace NLGUI
 
 					return false;
 				}
-			break;
-#ifdef RYZOM_LUA_UCSTRING
-			case CReflectedProperty::UCString:
-			case CReflectedProperty::UCStringRef:
-				if (valueToAffect.toString())
-				{
-					(destElem.*(property.SetMethod.SetUCString))(ucstring::makeFromUtf8(valueToAffect.getString()));
-				}
-				else
-				{
-					return false;
-				}
-#endif
 			break;
 			case CReflectedProperty::RGBA:
 				if (valueToAffect.toRGBA())
