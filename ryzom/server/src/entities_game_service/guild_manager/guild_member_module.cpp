@@ -152,7 +152,8 @@ void CGuildMemberModule::setGrade( uint16 index,uint8 session, EGSPD::CGuildGrad
 		return;
 	}
 	EGSPD::CGuildGrade::TGuildGrade oldGrade = member->getGrade();
-	if ( !canAffectGrade( oldGrade ) )
+	// both the member's grade and the one given must be below the caller's own, as the client's menu offers
+	if ( !canAffectGrade( oldGrade ) || !canAffectGrade( grade ) )
 	{
 		proxy.sendSystemMessage("GUILD_INSUFFICIENT_GRADE");
 		return;
