@@ -974,7 +974,7 @@ namespace NLGUI
 			{
 				// normalize
 				std::string image = trim(it->second);
-				if (toLowerAscii(image.substr(0, 4)) == "url(")
+				if (startsWithCaseInsensitiveAscii(image, "url("))
 				{
 					image = image.substr(4, image.size()-5);
 				}

@@ -90,7 +90,7 @@ namespace NLGUI
 	// Return URL with https if host is in HSTS list
 	static std::string upgradeHstsUrl(const std::string &url)
 	{
-		if (toLowerAscii(url.substr(0, 7)) != "http://") {
+		if (!startsWithCaseInsensitiveAscii(url, "http://")) {
 			return url;
 		}
 
@@ -186,7 +186,7 @@ namespace NLGUI
 			bool hasHSTSHeader()
 			{
 				// ignore header if not secure connection
-				if (toLowerAscii(Url.substr(0, 8)) != "https://")
+				if (!startsWithCaseInsensitiveAscii(Url, "https://"))
 				{
 					return false;
 				}
@@ -449,7 +449,7 @@ namespace NLGUI
 	string CGroupHTML::upgradeInsecureUrl(const string &url)
 	{
 		string result = upgradeHstsUrl(url);
-		if (options.trustedHttpsOnly && toLowerAscii(result.substr(0, 7)) == "http://")
+		if (options.trustedHttpsOnly && startsWithCaseInsensitiveAscii(result, "http://"))
 		{
 			CUrlParser uri(result);
 			if (isTrustedDomain(uri.host))
@@ -741,7 +741,7 @@ namespace NLGUI
 		LOG_DL("curl easy handle %p created for '%s'", curl, download->url.c_str());
 
 		// https://
-		if (toLowerAscii(download->url.substr(0, 8)) == "https://")
+		if (startsWithCaseInsensitiveAscii(download->url, "https://"))
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
@@ -3713,7 +3713,7 @@ namespace NLGUI
 		}
 
 		// https://
-		if (toLowerAscii(url.substr(0, 8)) == "https://")
+		if (startsWithCaseInsensitiveAscii(url, "https://"))
 		{
 			// if supported, use custom SSL context function to load certificates
 			NLWEB::CCurlCertificates::useCertificates(curl);
