@@ -30,6 +30,7 @@ namespace NLGUI
 {
 
 	bool CLuaManager::debugLua = false;
+	bool CLuaManager::developmentLibraries = false;
 	bool CLuaManager::editorMode = false;
 	CLuaManager* CLuaManager::instance = nullptr;
 	static CLuaManager::IScriptErrorReporter *s_ScriptErrorReporter = nullptr;
@@ -54,7 +55,7 @@ namespace NLGUI
 
 	CLuaManager::CLuaManager()
 	{
-		luaState = new NLGUI::CLuaState( debugLua );
+		luaState = new NLGUI::CLuaState( debugLua, developmentLibraries );
 	}
 
 	CLuaManager::~CLuaManager()
@@ -102,7 +103,7 @@ namespace NLGUI
 	{
 		if (luaState) delete luaState;
 
-		luaState = new CLuaState( debugLua );
+		luaState = new CLuaState( debugLua, developmentLibraries );
 	}
 
 	uint CLuaManager::forceGarbageCollect()
