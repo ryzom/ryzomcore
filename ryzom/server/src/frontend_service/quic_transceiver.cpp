@@ -784,7 +784,7 @@ void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
 
 bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
 {
-	if (buffer.size() <= user->MaxSendLength.load())
+	if (buffer.length() <= user->MaxSendLength.load())
 	{
 		if (user->SendBusy.testAndSet())
 		{
