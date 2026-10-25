@@ -67,6 +67,7 @@
 #endif
 
 #include "lua_ihm_ryzom.h"
+#include "nel/gui/lua_ihm_ucstring.h"
 #include "interface_manager.h"
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/lua_object.h"
@@ -293,11 +294,12 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 
 		// try with ucstring
 #ifdef RYZOM_LUA_UCSTRING
-		ucstring ucstrVal;
-
-		if (CLuaIHM::pop(ls, ucstrVal))
+		if (CLuaIHM::isUCStringOnStack(ls, -1))
 		{
-			result.setString(ucstrVal.toUtf8());
+			std::string str;
+			CLuaIHM::getUCStringOnStack(ls, -1, str);
+			ls.pop();
+			result.setString(str);
 			ok = true;
 		}
 
@@ -598,15 +600,15 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		LUABIND_FUNC(getDefine),
 		LUABIND_FUNC(setContextHelpText),
 #ifdef RYZOM_LUA_UCSTRING
-		luabind::def("messageBox", (void(*)(const ucstring &)) &messageBox),
-		luabind::def("messageBox", (void(*)(const ucstring &, const std::string &)) &messageBox),
-		luabind::def("messageBox", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBox),
+		luabind::def("messageBox", (void(*)(const CLuaUCString &)) &messageBox),
+		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &)) &messageBox),
+		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBox),
 #endif
 		luabind::def("messageBox", (void(*)(const std::string &)) &messageBox),
 #ifdef RYZOM_LUA_UCSTRING
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &)) &messageBoxWithHelp), // TODO: Lua UTF-8
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
-		luabind::def("messageBoxWithHelp", (void(*)(const ucstring &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
+		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
 #endif
 		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
 		LUABIND_FUNC(replacePvpEffectParam),
@@ -912,9 +914,8 @@ int CLuaIHMRyzom::validMessageBox(CLuaState &ls)
 	const char *funcName = "validMessageBox";
 	CLuaIHM::checkArgCount(ls, funcName, 6);
 #ifdef RYZOM_LUA_UCSTRING
-	ucstring msg;
-	ls.pushValue(1); // copy ucstring at the end of stack to pop it
-	CLuaIHM::check(ls, CLuaIHM::pop(ls, msg), "validMessageBox : ucstring wanted as first parameter");
+	std::string msg;
+	CLuaIHM::check(ls, CLuaIHM::getUCStringOnStack(ls, 1, msg), "validMessageBox : ucstring or string wanted as first parameter");
 #else
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 #endif
@@ -925,7 +926,7 @@ int CLuaIHMRyzom::validMessageBox(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 6, LUA_TSTRING);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 #ifdef RYZOM_LUA_UCSTRING
-	im->validMessageBox(CInterfaceManager::QuestionIconMsg, msg.toUtf8(), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
+	im->validMessageBox(CInterfaceManager::QuestionIconMsg, msg, ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
 #else
 	im->validMessageBox(CInterfaceManager::QuestionIconMsg, ls.toString(1), ls.toString(2), ls.toString(3), ls.toString(4), ls.toString(5), ls.toString(6));
 #endif
@@ -965,22 +966,10 @@ int	CLuaIHMRyzom::setTextFormatTaged(CLuaState &ls)
 
 	// *** check and retrieve param 2. must be a string or a ucstring
 #ifdef RYZOM_LUA_UCSTRING
-	ucstring	text;
-
-	if (ls.isString(2))
+	string	text;
+	if (!CLuaIHM::getUCStringOnStack(ls, 2, text))
 	{
-		std::string			str;
-		ls.toString(2,    str);
-		text = str;
-	}
-	else
-	{
-		// try to pop a ucstring from the stack
-		// fail?
-		if (!CLuaIHM::pop(ls, text))
-		{
-			CLuaIHM::check(ls,   false,    "setTextFormatTaged() requires a string or a ucstring in param 2");
-		}
+		CLuaIHM::check(ls,   false,    "setTextFormatTaged() requires a string or a ucstring in param 2");
 	}
 #else
 	string text;
@@ -997,11 +986,7 @@ int	CLuaIHMRyzom::setTextFormatTaged(CLuaState &ls)
 		throw ELuaIHMException("setTextFormatTaged(): '%s' is not a CViewText",    pIE->getId().c_str());
 
 	// Set the text as format
-#ifdef RYZOM_LUA_UCSTRING
-	vt->setTextFormatTaged(text.toUtf8());
-#else
 	vt->setTextFormatTaged(text);
-#endif
 
 	return 0;
 }
@@ -2054,12 +2039,12 @@ int CLuaIHMRyzom::displaySystemInfo(CLuaState &ls)
 #endif
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 #ifdef RYZOM_LUA_UCSTRING
-	ucstring msg;
+	std::string msg;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 1, msg));
 #endif
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 #ifdef RYZOM_LUA_UCSTRING
-	pIM->displaySystemInfo(msg.toUtf8(), ls.toString(2));
+	pIM->displaySystemInfo(msg, ls.toString(2));
 #else
 	pIM->displaySystemInfo(ls.toString(1), ls.toString(2));
 #endif
@@ -3331,9 +3316,9 @@ std::string	CLuaIHMRyzom::getDefine(const std::string &def)
 
 #ifdef RYZOM_LUA_UCSTRING
 // ***************************************************************************
-void		CLuaIHMRyzom::setContextHelpText(const ucstring &text)
+void		CLuaIHMRyzom::setContextHelpText(const CLuaUCString &text)
 {
-	CWidgetManager::getInstance()->setContextHelpText(text.toUtf8());
+	CWidgetManager::getInstance()->setContextHelpText(text.Utf8);
 }
 #else
 // ***************************************************************************
@@ -3345,23 +3330,23 @@ void		CLuaIHMRyzom::setContextHelpText(const std::string &text)
 
 #ifdef RYZOM_LUA_UCSTRING
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBox(const ucstring &text)
+void		CLuaIHMRyzom::messageBox(const CLuaUCString &text)
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text.toUtf8());
+	pIM->messageBox(text.Utf8);
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGroup)
+void		CLuaIHMRyzom::messageBox(const CLuaUCString &text, const std::string &masterGroup)
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text.toUtf8(), masterGroup);
+	pIM->messageBox(text.Utf8, masterGroup);
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGroup, int caseMode)
+void		CLuaIHMRyzom::messageBox(const CLuaUCString &text, const std::string &masterGroup, int caseMode)
 {
 	if (caseMode < 0 || caseMode >= CaseCount)
 	{
@@ -3370,7 +3355,7 @@ void		CLuaIHMRyzom::messageBox(const ucstring &text, const std::string &masterGr
 
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBox(text.toUtf8(), masterGroup, (TCaseMode) caseMode);
+	pIM->messageBox(text.Utf8, masterGroup, (TCaseMode) caseMode);
 }
 #endif
 
@@ -3412,23 +3397,23 @@ void		CLuaIHMRyzom::messageBox(const std::string &text, const std::string &maste
 
 #ifdef RYZOM_LUA_UCSTRING
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text) // TODO: Lua UTF-8
+void		CLuaIHMRyzom::messageBoxWithHelp(const CLuaUCString &text) // TODO: Lua UTF-8
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text.toUtf8());
+	pIM->messageBoxWithHelp(text.Utf8);
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup) // TODO: Lua UTF-8
+void		CLuaIHMRyzom::messageBoxWithHelp(const CLuaUCString &text, const std::string &masterGroup) // TODO: Lua UTF-8
 {
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text.toUtf8(), masterGroup);
+	pIM->messageBoxWithHelp(text.Utf8, masterGroup);
 }
 
 // ***************************************************************************
-void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode) // TODO: Lua UTF-8
+void		CLuaIHMRyzom::messageBoxWithHelp(const CLuaUCString &text, const std::string &masterGroup, int caseMode) // TODO: Lua UTF-8
 {
 	if (caseMode < 0 || caseMode >= CaseCount)
 	{
@@ -3437,7 +3422,7 @@ void		CLuaIHMRyzom::messageBoxWithHelp(const ucstring &text, const std::string &
 
 	//H_AUTO(Lua_CLuaIHM_messageBox)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(text.toUtf8(), masterGroup, "" , "", (TCaseMode) caseMode);
+	pIM->messageBoxWithHelp(text.Utf8, masterGroup, "" , "", (TCaseMode) caseMode);
 }
 #endif
 
@@ -3520,15 +3505,15 @@ bool CLuaIHMRyzom::executeFunctionOnStack(CLuaState &ls,   int numArgs,   int nu
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-ucstring CLuaIHMRyzom::replacePvpEffectParam(const ucstring &str, sint32 parameter)
+CLuaUCString CLuaIHMRyzom::replacePvpEffectParam(const CLuaUCString &str, sint32 parameter)
 #else
 std::string CLuaIHMRyzom::replacePvpEffectParam(const std::string &str, sint32 parameter)
 #endif
 {
 	//H_AUTO(Lua_CLuaIHM_replacePvpEffectParam)
 #ifdef RYZOM_LUA_UCSTRING
-	ucstring result = str;
-	CSString s = str.toString();
+	std::string result = str.Utf8;
+	CSString s = str.Utf8;
 #else
 	std::string result = str;
 	CSString s = str;
@@ -3571,7 +3556,7 @@ std::string CLuaIHMRyzom::replacePvpEffectParam(const std::string &str, sint32 p
 
 	default:
 #ifdef RYZOM_LUA_UCSTRING
-		debugInfo("Bad arguments in " + str.toString() + " : " + paramString);
+		debugInfo("Bad arguments in " + str.Utf8 + " : " + paramString);
 #else
 		debugInfo("Bad arguments in " + str + " : " + paramString);
 #endif
@@ -3641,7 +3626,7 @@ void CLuaIHMRyzom::loadBackground(const std::string &bg)
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-ucstring CLuaIHMRyzom::getPatchLastErrorMessage()
+CLuaUCString CLuaIHMRyzom::getPatchLastErrorMessage()
 #else
 std::string CLuaIHMRyzom::getPatchLastErrorMessage()
 #endif
@@ -3712,10 +3697,10 @@ sint32	CLuaIHMRyzom::getSkillIdFromName(const std::string &def)
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-ucstring	CLuaIHMRyzom::getSkillLocalizedName(sint32 skillId)
+CLuaUCString	CLuaIHMRyzom::getSkillLocalizedName(sint32 skillId)
 {
 	//H_AUTO(Lua_CLuaIHM_getSkillLocalizedName)
-	return ucstring(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
+	return CLuaUCString(STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)skillId));
 }
 #else
 std::string	CLuaIHMRyzom::getSkillLocalizedName(sint32 skillId)
@@ -3861,12 +3846,12 @@ void		CLuaIHMRyzom::clearHtmlUndoRedo(const std::string &htmlId)
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-ucstring	CLuaIHMRyzom::getDynString(sint32 dynStringId)
+CLuaUCString	CLuaIHMRyzom::getDynString(sint32 dynStringId)
 {
 	//H_AUTO(Lua_CLuaIHM_getDynString)
 	string result;
 	STRING_MANAGER::CStringManagerClient::instance()->getDynString(dynStringId,   result);
-	return ucstring::makeFromUtf8(result); // Compatibility
+	return CLuaUCString(result); // Compatibility
 }
 #else
 std::string	CLuaIHMRyzom::getDynString(sint32 dynStringId)
@@ -4257,7 +4242,7 @@ void setMouseCursor(const std::string &texture)
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-void CLuaIHMRyzom::tell(const ucstring &player, const ucstring &msg)
+void CLuaIHMRyzom::tell(const CLuaUCString &player, const CLuaUCString &msg)
 #else
 void CLuaIHMRyzom::tell(const std::string &player, const std::string &msg)
 #endif
@@ -4270,7 +4255,7 @@ void CLuaIHMRyzom::tell(const std::string &player, const std::string &msg)
 		{
 			// Parse any tokens in the message.
 #ifdef RYZOM_LUA_UCSTRING
-			string msg_modified = msg.toUtf8();
+			string msg_modified = msg.Utf8;
 #else
 			string msg_modified = msg;
 #endif
@@ -4282,7 +4267,7 @@ void CLuaIHMRyzom::tell(const std::string &player, const std::string &msg)
 			}
 
 #ifdef RYZOM_LUA_UCSTRING
-			ChatMngr.tell(player.toUtf8(), msg_modified);
+			ChatMngr.tell(player.Utf8, msg_modified);
 #else
 			ChatMngr.tell(player, msg_modified);
 #endif
@@ -4297,7 +4282,7 @@ void CLuaIHMRyzom::tell(const std::string &player, const std::string &msg)
 				w->setKeyboardFocus();
 				w->enableBlink(1);
 #ifdef RYZOM_LUA_UCSTRING
-				w->setCommand("tell " + CEntityCL::removeTitleFromName(player.toUtf8()) + " ", false);
+				w->setCommand("tell " + CEntityCL::removeTitleFromName(player.Utf8) + " ", false);
 #else
 				w->setCommand("tell " + CEntityCL::removeTitleFromName(player) + " ", false);
 #endif
@@ -4354,10 +4339,10 @@ bool CLuaIHMRyzom::isCtrlKeyDown()
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-std::string CLuaIHMRyzom::encodeURLUnicodeParam(const ucstring &text)
+std::string CLuaIHMRyzom::encodeURLUnicodeParam(const CLuaUCString &text)
 {
 	//H_AUTO(Lua_CLuaIHM_encodeURLUnicodeParam)
-	return convertToHTML(text.toUtf8());
+	return convertToHTML(text.Utf8);
 }
 #else
 std::string CLuaIHMRyzom::encodeURLUnicodeParam(const std::string &text)
@@ -4480,10 +4465,10 @@ sint32 CLuaIHMRyzom::getTargetLevel()
 
 // ***************************************************************************
 #ifdef RYZOM_LUA_UCSTRING
-ucstring CLuaIHMRyzom::getTargetSheet()
+CLuaUCString CLuaIHMRyzom::getTargetSheet()
 {
 	CEntityCL *target = getTargetEntity();
-	if (!target) return ucstring();
+	if (!target) return CLuaUCString();
 
 	return target->sheetId().toString();
 }

@@ -42,6 +42,20 @@ namespace NLGUI
 	class CReflectable;
 	class CReflectedProperty;
 
+#ifdef RYZOM_LUA_UCSTRING
+	/** Text of a Lua 'ucstring' object, for functions bound through luabind (see lua_ihm_ucstring.h).
+	  * Scripts written when ucstring held UTF-16 text still create, compare and modify these objects.
+	  * They hold UTF-8 now, so passing text between those scripts and the interface converts nothing.
+	  */
+	struct CLuaUCString
+	{
+		CLuaUCString() { }
+		CLuaUCString(const std::string &utf8) : Utf8(utf8) { }
+		bool empty() const { return Utf8.empty(); }
+		std::string Utf8;
+	};
+#endif
+
 	// ***************************************************************************
 	/* 	Use this Exception for all LUA Error (eg: scripted passes bad number of paramters).
 	 *	Does not herit from Exception because avoid nlinfo,    because sent twice (catch then resent)
@@ -113,12 +127,17 @@ namespace NLGUI
 		static CReflectableRefPtrTarget	*getReflectableOnStack(CLuaState &ls, sint index);
 
 
-		// ucstring
+		// ucstring, the text object of older scripts (it holds UTF-8)
 #ifdef RYZOM_LUA_UCSTRING
-		static bool pop(CLuaState &ls, ucstring &dest);
-		static void push(CLuaState &ls, const ucstring &value);
+		/// push a new ucstring object
+		static void	pushUCString(CLuaState &ls, const std::string &utf8);
+		static void	pushUCString(lua_State *L, const std::string &utf8);
+		/// true for a ucstring object only, as the Lua function isUCString()
 		static bool	isUCStringOnStack(CLuaState &ls, sint index);
-		static bool getUCStringOnStack(CLuaState &ls, sint index, ucstring &dest);
+		/// get the UTF-8 text of a ucstring object, a string or a number; false for any other value
+		static bool getUCStringOnStack(CLuaState &ls, sint index, std::string &utf8);
+		/// the text held by the ucstring object at 'index', NULL if the value is not a ucstring object
+		static std::string *getUCStringObject(lua_State *L, int index);
 #endif
 
 
@@ -139,7 +158,7 @@ namespace NLGUI
 		static void	checkArgType(CLuaState &ls, const char *funcName, uint index, int argType);
 		static void	checkArgTypeRGBA(CLuaState &ls, const char *funcName, uint index);
 #ifdef RYZOM_LUA_UCSTRING
-		static void	checkArgTypeUCString(CLuaState &ls, const char *funcName, uint index);
+		static void	checkArgTypeUCString(CLuaState &ls, const char *funcName, uint index); // a ucstring object, a string or a number
 #endif
 		/** throw a lua expection (inside a C function called from lua) with the given reason, and the current call stack
 		  * The various check... function call this function when their test fails
@@ -187,10 +206,7 @@ namespace NLGUI
 		static double		getPreciseLocalTime();
 		static std::string	findReplaceAll(const std::string &str, const std::string &search, const std::string &replace);
 #ifdef RYZOM_LUA_UCSTRING
-		static ucstring		findReplaceAll(const ucstring &str, const ucstring &search, const ucstring &replace);
-		static ucstring		findReplaceAll(const ucstring &str, const std::string &search, const std::string &replace);
-		static ucstring		findReplaceAll(const ucstring &str, const std::string &search, const ucstring &replace);
-		static ucstring		findReplaceAll(const ucstring &str, const ucstring &search, const std::string &replace);
+		static CLuaUCString	findReplaceAll(const CLuaUCString &str, const CLuaUCString &search, const CLuaUCString &replace);
 #endif
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

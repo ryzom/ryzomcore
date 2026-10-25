@@ -251,15 +251,6 @@ namespace NLGUI
 		// Get the header color draw. NB: depends if grayed, and if active.
 		NLMISC::CRGBA	getDrawnHeaderColor () const NL_OVERRIDE;
 
-#ifdef RYZOM_LUA_UCSTRING
-		ucstring		getUCTitleOpened () const; // Compatibility
-		void			setUCTitleOpened (const ucstring &title); // Compatibility
-		ucstring		getUCTitleClosed () const; // Compatibility
-		void			setUCTitleClosed (const ucstring &title); // Compatibility
-		ucstring		getUCTitle () const; // Compatibility
-		void			setUCTitle (const ucstring &title); // Compatibility
-#endif
-
 		void			setPopable(bool popable) { _Popable = popable; }
 		bool			isPopable() const { return _Popable; }
 		bool			isPopuped() const { return _Poped; }
@@ -294,9 +285,9 @@ namespace NLGUI
 			REFLECT_STRING("title_closed", getTitleClosed, setTitleClosed);
 
 #ifdef RYZOM_LUA_UCSTRING
-			REFLECT_UCSTRING("uc_title_opened", getUCTitleOpened, setUCTitleOpened); // Compatibility
-			REFLECT_UCSTRING("uc_title_closed", getUCTitleClosed, setUCTitleClosed); // Compatibility
-			REFLECT_UCSTRING("uc_title", getUCTitle, setUCTitle); // Compatibility
+			REFLECT_UCSTRING("uc_title_opened", getTitleOpened, setTitleOpened); // Compatibility
+			REFLECT_UCSTRING("uc_title_closed", getTitleClosed, setTitleClosed); // Compatibility
+			REFLECT_UCSTRING("uc_title", getTitle, setTitle); // Compatibility
 #endif
 
 			REFLECT_STRING("title_color", getTitleColorAsString, setTitleColorAsString);

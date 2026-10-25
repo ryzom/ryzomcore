@@ -1850,32 +1850,12 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 
 	if (pRP->Type == CReflectedProperty::String)
 		return ((elem->*(pRP->GetMethod.GetString))());
+#ifdef RYZOM_LUA_UCSTRING
+	if (pRP->Type == CReflectedProperty::UCString) // Compatibility
+		return ((elem->*(pRP->GetMethod.GetString))());
+#endif
 	return "";
 }
-
-#ifdef RYZOM_LUA_UCSTRING
-// ------------------------------------------------------------------------------------------------
-ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
-{
-	string sTmp = targetName;
-	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
-
-	CInterfaceLink::CTargetInfo &rTI = targetsVector[0];
-
-	CInterfaceElement *elem = rTI.Elem;
-	if (!elem)
-	{
-		nlwarning("<CInterfaceExpr::getprop> : Element is NULL");
-		return ucstring(""); // TODO: UTF-8 Lua
-	}
-	const CReflectedProperty *pRP = elem->getReflectedProperty(rTI.PropertyName);
-
-	if (pRP->Type == CReflectedProperty::UCString)
-		return ((elem->*(pRP->GetMethod.GetUCString))());
-	return ucstring(""); // TODO: UTF-8 Lua
-}
-#endif
 
 /*// Ask the server to rename a character
 // ------------------------------------------------------------------------------------------------
@@ -1947,11 +1927,7 @@ public:
 		string sDBLink = getParam(Params, "dblink");
 		CharNameValidDBLink = sDBLink;
 
-#ifdef RYZOM_LUA_UCSTRING
-		string sName = getUCTarget(NULL,sTarget).toUtf8(); // TODO: UTF-8 Lua
-#else
 		string sName = getTarget(nullptr, sTarget);
-#endif
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (sName.empty())

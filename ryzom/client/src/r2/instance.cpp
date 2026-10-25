@@ -122,8 +122,8 @@ ucstring CInstance::getDisplayName()
 	if (getLuaProjection().callMethodByNameNoThrow("getDisplayName", 0, 1))
 	{
 #ifdef RYZOM_LUA_UCSTRING
-		ucstring result;
-		if (CLuaIHM::pop(ls, result)) return result;
+		std::string result; // a ucstring object or a string
+		if (CLuaIHM::getUCStringOnStack(ls, -1, result)) return ucstring::makeFromUtf8(result);
 #else
 		std::string res = ls.toString();
 		ls.pop();

@@ -75,6 +75,7 @@
 
 
 #include "nel/gui/lua_ihm.h"
+#include "nel/gui/lua_ihm_ucstring.h"
 #include "nel/gui/reflect.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/file.h"
@@ -104,14 +105,6 @@ using namespace NLMISC;
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
-#endif
-
-#ifdef RYZOM_LUA_UCSTRING
-// declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
-std::ostream &operator<<(std::ostream &str, const ucstring &value)
-{
-	return str << value.toString();
-}
 #endif
 
 namespace NLGUI
@@ -184,58 +177,250 @@ namespace NLGUI
 
 #ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
-	bool CLuaIHM::pop(CLuaState &ls,   ucstring &dest)
+	/* ucstring object
+	   Scripts written when ucstring held UTF-16 text use it as an object: they build one, change it in
+	   place with fromUtf8(), compare and concatenate it, and hand it to the interface. It is a full
+	   userdata holding the text as a UTF-8 std::string, behind the same Lua interface, so nothing is
+	   converted on either side. Every function taking a ucstring also takes a string or a number.
+	*/
+
+	// its address is the registry key of the ucstring metatable
+	static char UCStringMetatableKey;
+
+	struct CUCStringObject
 	{
-		//H_AUTO(Lua_CLuaIHM_pop)
-		try
+		// text of the ucstring object at 'index', Lua error if the value is not one
+		static std::string &self(CLuaState &ls, const char *funcName, int index)
 		{
-			if (ls.isNil(-1)) return false;
-	#if LUABIND_VERSION > 600
-			luabind::object obj(luabind::from_stack(ls.getStatePointer(), -1));
-			ls.pop();
-	#else
-			luabind::object obj(ls.getStatePointer());
-			obj.set();
-	#endif
-			dest = luabind::object_cast<ucstring>(obj);
+			std::string *str = CLuaIHM::getUCStringObject(ls.getStatePointer(), index);
+			if (!str)
+			{
+				CLuaIHM::fails(ls, "%s : argument %d must be a ucstring", funcName, index);
+			}
+			return *str;
 		}
-		catch(const luabind::cast_failed &)
+
+		// text of the ucstring object, string or number at 'index', Lua error for any other value
+		static void text(CLuaState &ls, const char *funcName, int index, std::string &dest)
 		{
-			return false;
+			CLuaIHM::checkArgTypeUCString(ls, funcName, index);
+			CLuaIHM::getUCStringOnStack(ls, index, dest);
 		}
-		return true;
+
+		// ucstring(), ucstring(text)
+		static int construct(CLuaState &ls)
+		{
+			const char *funcName = "ucstring";
+			CLuaIHM::checkArgMax(ls, funcName, 1);
+			std::string str;
+			if (ls.getTop() == 1)
+			{
+				text(ls, funcName, 1, str);
+			}
+			CLuaIHM::pushUCString(ls, str);
+			return 1;
+		}
+
+		// uc:toUtf8(), uc:toString(), tostring(uc)
+		static int toUtf8(CLuaState &ls)
+		{
+			const std::string &str = self(ls, "ucstring:toUtf8", 1);
+			lua_pushlstring(ls.getStatePointer(), str.data(), str.size());
+			return 1;
+		}
+
+		// uc:fromUtf8(text)
+		static int fromUtf8(CLuaState &ls)
+		{
+			const char *funcName = "ucstring:fromUtf8";
+			CLuaIHM::checkArgCount(ls, funcName, 2);
+			std::string &str = self(ls, funcName, 1);
+			text(ls, funcName, 2, str);
+			return 0;
+		}
+
+		// uc:substr(pos, count), counted in UTF-16 code units as when the text was UTF-16
+		static int substr(CLuaState &ls)
+		{
+			const char *funcName = "ucstring:substr";
+			CLuaIHM::checkArgMin(ls, funcName, 1);
+			CLuaIHM::checkArgMax(ls, funcName, 3);
+			const std::string &str = self(ls, funcName, 1);
+			sint64 pos = 0;
+			sint64 count = -1; // to the end
+			if (ls.getTop() >= 2)
+			{
+				CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER);
+				pos = ls.toInteger(2);
+			}
+			if (ls.getTop() >= 3)
+			{
+				CLuaIHM::checkArgType(ls, funcName, 3, LUA_TNUMBER);
+				count = ls.toInteger(3);
+			}
+			// keep the characters whose units all lie in [pos, pos + count); one above U+FFFF is two units
+			std::string::size_type first = std::string::npos;
+			std::string::size_type last = str.size();
+			sint64 unit = 0;
+			for (std::string::size_type i = 0; i < str.size();)
+			{
+				uint8 c = (uint8)str[i];
+				std::string::size_type len = (c < 0xC0) ? 1 : (c < 0xE0) ? 2 : (c < 0xF0) ? 3 : (c < 0xF8) ? 4 : 1;
+				if (len > str.size() - i) len = str.size() - i; // truncated sequence at the end
+				sint units = (len == 4) ? 2 : 1;
+				if (count >= 0 && unit + units > pos + count)
+				{
+					last = i;
+					break;
+				}
+				if (first == std::string::npos && unit >= pos)
+				{
+					first = i;
+				}
+				unit += units;
+				i += len;
+			}
+			CLuaIHM::pushUCString(ls, first < last ? str.substr(first, last - first) : std::string());
+			return 1;
+		}
+
+		// uc1 == uc2, Lua only asks when both values are userdata
+		static int eq(CLuaState &ls)
+		{
+			const std::string *lhs = CLuaIHM::getUCStringObject(ls.getStatePointer(), 1);
+			const std::string *rhs = CLuaIHM::getUCStringObject(ls.getStatePointer(), 2);
+			ls.push(lhs && rhs && *lhs == *rhs);
+			return 1;
+		}
+
+		// uc1 < uc2, either side may be a string from Lua 5.2 on
+		static int lt(CLuaState &ls)
+		{
+			std::string lhs, rhs;
+			text(ls, "ucstring <", 1, lhs);
+			text(ls, "ucstring <", 2, rhs);
+			ls.push(lhs < rhs);
+			return 1;
+		}
+
+		// uc1 <= uc2
+		static int le(CLuaState &ls)
+		{
+			std::string lhs, rhs;
+			text(ls, "ucstring <=", 1, lhs);
+			text(ls, "ucstring <=", 2, rhs);
+			ls.push(lhs <= rhs);
+			return 1;
+		}
+
+		// uc + text, text + uc, gives a new ucstring
+		static int add(CLuaState &ls)
+		{
+			std::string lhs, rhs;
+			text(ls, "ucstring +", 1, lhs);
+			text(ls, "ucstring +", 2, rhs);
+			CLuaIHM::pushUCString(ls, lhs + rhs);
+			return 1;
+		}
+
+		// __gc, also safe when a script calls it directly
+		static int gc(CLuaState &ls)
+		{
+			typedef std::string TString;
+			TString *str = CLuaIHM::getUCStringObject(ls.getStatePointer(), 1);
+			if (str)
+			{
+				str->~TString();
+				// a second call no longer sees a ucstring
+				ls.pushNil();
+				ls.setMetaTable(1);
+			}
+			return 0;
+		}
+
+		// i18n.get(label), the translation as a ucstring
+		static int i18nGet(CLuaState &ls)
+		{
+			const char *funcName = "i18n.get";
+			CLuaIHM::checkArgCount(ls, funcName, 1);
+			CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+			CLuaIHM::pushUCString(ls, CI18N::get(std::string(ls.toString(1), ls.strlen(1))));
+			return 1;
+		}
+	};
+
+	// ***************************************************************************
+	void CLuaIHM::pushUCString(lua_State *L, const std::string &utf8)
+	{
+		//H_AUTO(Lua_CLuaIHM_pushUCString)
+		void *ptr = lua_newuserdata(L, sizeof(std::string));
+		nlassert(ptr);
+
+// disable memory leaks detection for placement new
+#ifdef new
+	#undef new
+#endif
+
+		new (ptr) std::string(utf8);
+
+// reenable memory leaks detection for placement new
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
+		lua_pushlightuserdata(L, &UCStringMetatableKey);
+		lua_rawget(L, LUA_REGISTRYINDEX);
+		lua_setmetatable(L, -2);
+	}
+
+	// ***************************************************************************
+	void CLuaIHM::pushUCString(CLuaState &ls, const std::string &utf8)
+	{
+		pushUCString(ls.getStatePointer(), utf8);
+	}
+
+	// ***************************************************************************
+	std::string *CLuaIHM::getUCStringObject(lua_State *L, int index)
+	{
+		//H_AUTO(Lua_CLuaIHM_getUCStringObject)
+		if (lua_type(L, index) != LUA_TUSERDATA || !lua_getmetatable(L, index))
+		{
+			return nullptr;
+		}
+		lua_pushlightuserdata(L, &UCStringMetatableKey);
+		lua_rawget(L, LUA_REGISTRYINDEX);
+		bool isUCString = lua_rawequal(L, -1, -2) != 0;
+		lua_pop(L, 2);
+		return isUCString ? (std::string *)lua_touserdata(L, index) : nullptr;
 	}
 
 	// ***************************************************************************
 	bool CLuaIHM::isUCStringOnStack(CLuaState &ls, sint index)
 	{
 		//H_AUTO(Lua_CLuaIHM_isUCStringOnStack)
-		ls.pushValue(index);
-		ucstring dummy;
-		return pop(ls, dummy);
+		return getUCStringObject(ls.getStatePointer(), index) != nullptr;
 	}
 
 	// ***************************************************************************
-	bool CLuaIHM::getUCStringOnStack(CLuaState &ls, sint index, ucstring &dest)
+	bool CLuaIHM::getUCStringOnStack(CLuaState &ls, sint index, std::string &utf8)
 	{
 		//H_AUTO(Lua_CLuaIHM_getUCStringOnStack)
-		ls.pushValue(index);
-		return pop(ls, dest);
-	}
-
-
-	// ***************************************************************************
-	void CLuaIHM::push(CLuaState &ls, const ucstring &value)
-	{
-		//H_AUTO(Lua_CLuaIHM_push)
-	#if defined(LUABIND_STACK_HPP_INCLUDED)
-		luabind::push(ls.getStatePointer(), value);
-	#elif (LUABIND_VERSION > 600)
-		luabind::detail::push(ls.getStatePointer(), value);
-	#else
-		luabind::object obj(ls.getStatePointer(), value);
-		obj.pushvalue();
-	#endif
+		lua_State *L = ls.getStatePointer();
+		const std::string *str = getUCStringObject(L, index);
+		if (str)
+		{
+			utf8 = *str;
+			return true;
+		}
+		int type = lua_type(L, index);
+		if (type != LUA_TSTRING && type != LUA_TNUMBER)
+		{
+			return false;
+		}
+		size_t len;
+		const char *s = lua_tolstring(L, index, &len);
+		utf8.assign(s, len);
+		return true;
 	}
 #endif
 
@@ -704,26 +889,44 @@ namespace NLGUI
 		];
 
 #ifdef RYZOM_LUA_UCSTRING
-		// ucstring
-		module(L)
-		[
-			class_<ucstring>("ucstring")
-				.def(constructor<>())
-				.def(constructor<const ucstring &>())
-				.def(constructor<const std::string &>())
-				.def(const_self + other<const std::string>())
-				.def(other<const std::string>() + const_self)
-				// NB nico : luabind crash not solved here -> use concatUCString as a replacement
-	//			.def(const_self + other<const ucstring &>())
-				.def(const_self < other<const ucstring&>())
-				.def(const_self == other<const ucstring&>())
-				.def("toUtf8",   &ucstring::toUtf8)
-				.def("fromUtf8",   &ucstring::fromUtf8)
-				.def("substr",  &ucstring::luabind_substr)
-				.def(luabind::tostring(const_self)) // __string metamethod
-				.def("toString",   (std::string(ucstring::*)()const)&ucstring::toString)
-				//.def(self + other<ucstring>())
-		];
+		// ucstring object, see CUCStringObject
+		ls.pushLightUserData(&UCStringMetatableKey);
+		ls.newTable();
+		ls.push("__index");
+		ls.newTable();
+		ls.push("toUtf8");
+		ls.push(CUCStringObject::toUtf8);
+		ls.setTable(-3);
+		ls.push("toString");
+		ls.push(CUCStringObject::toUtf8);
+		ls.setTable(-3);
+		ls.push("fromUtf8");
+		ls.push(CUCStringObject::fromUtf8);
+		ls.setTable(-3);
+		ls.push("substr");
+		ls.push(CUCStringObject::substr);
+		ls.setTable(-3);
+		ls.setTable(-3);
+		ls.push("__tostring");
+		ls.push(CUCStringObject::toUtf8);
+		ls.setTable(-3);
+		ls.push("__eq");
+		ls.push(CUCStringObject::eq);
+		ls.setTable(-3);
+		ls.push("__lt");
+		ls.push(CUCStringObject::lt);
+		ls.setTable(-3);
+		ls.push("__le");
+		ls.push(CUCStringObject::le);
+		ls.setTable(-3);
+		ls.push("__add");
+		ls.push(CUCStringObject::add);
+		ls.setTable(-3);
+		ls.push("__gc");
+		ls.push(CUCStringObject::gc);
+		ls.setTable(-3);
+		ls.setTable(LUA_REGISTRYINDEX);
+		ls.registerFunc("ucstring", CUCStringObject::construct);
 #endif
 
 		// CVector2f
@@ -1354,23 +1557,15 @@ namespace NLGUI
 	{
 		//H_AUTO(Lua_CLuaIHM_concatUCString)
 		const char *funcName = "concatUCString";
-		ucstring result;
+		std::string result;
+		std::string part;
 		for (uint k = 1; k <= (uint) ls.getTop(); ++k)
 		{
-			//nlwarning("arg %d = %s", k, ls.getTypename(ls.type(k)));
-			ucstring part;
-			if (ls.isString(k))
-			{
-				part.fromUtf8(ls.toString(k));
-			}
-			else
-			{
-				CLuaIHM::checkArgTypeUCString(ls, funcName, k);
-				nlverify(CLuaIHM::getUCStringOnStack(ls, k, part));
-			}
+			CLuaIHM::checkArgTypeUCString(ls, funcName, k);
+			CLuaIHM::getUCStringOnStack(ls, k, part);
 			result += part;
 		}
-		CLuaIHM::push(ls, result);
+		CLuaIHM::pushUCString(ls, result);
 		return 1;
 	}
 #endif
@@ -1467,30 +1662,10 @@ namespace NLGUI
 			break;
 #ifdef RYZOM_LUA_UCSTRING
 			case CReflectedProperty::UCString:
-			{
-				ucstring str = (reflectedObject.*(property.GetMethod.GetUCString))();
-	#if defined(LUABIND_STACK_HPP_INCLUDED)
-				luabind::push(ls.getStatePointer(), str);
-	#elif (LUABIND_VERSION > 600)
-				luabind::detail::push(ls.getStatePointer(), str);
-	#else
-				luabind::object obj(ls.getStatePointer(), str);
-				obj.pushvalue();
-	#endif
-			}
+				pushUCString(ls, (reflectedObject.*(property.GetMethod.GetString))());
 			break;
 			case CReflectedProperty::UCStringRef:
-			{
-				ucstring str = (reflectedObject.*(property.GetMethod.GetUCStringRef))();
-	#if defined(LUABIND_STACK_HPP_INCLUDED)
-				luabind::push(ls.getStatePointer(), str);
-	#elif (LUABIND_VERSION > 600)
-				luabind::detail::push(ls.getStatePointer(), str);
-	#else
-				luabind::object obj(ls.getStatePointer(), str);
-				obj.pushvalue();
-	#endif
-			}
+				pushUCString(ls, (reflectedObject.*(property.GetMethod.GetStringRef))());
 			break;
 #endif
 			case CReflectedProperty::StringRef:
@@ -1565,7 +1740,15 @@ namespace NLGUI
 			case CReflectedProperty::StringRef:
 				{
 					std::string val;
+#ifdef RYZOM_LUA_UCSTRING
+					// a ucstring object gives its text as well
+					if (!getUCStringOnStack(ls, stackIndex, val))
+					{
+						ls.toString(stackIndex,    val);
+					}
+#else
 					ls.toString(stackIndex,    val);
+#endif
 					(target.*(property.SetMethod.SetString))(val);
 					return;
 				}
@@ -1573,25 +1756,13 @@ namespace NLGUI
 			case CReflectedProperty::UCString:
 			case CReflectedProperty::UCStringRef:
 				{
-					ucstring val;
-					// Additionaly return of CInterfaceExpr may be std::string... test std string too
-					if(ls.isString() || ls.isNumber() || ls.isInteger())
+					// a ucstring object, a string or a number, all UTF-8
+					std::string val;
+					if (!getUCStringOnStack(ls, stackIndex, val))
 					{
-						std::string	str;
-						ls.toString(stackIndex,    str);
-						val= str;
+						throw ELuaIHMException("You must set a string,    number or ucstring to UI property '%s'",    property.Name.c_str());
 					}
-#ifdef RYZOM_LUA_UCSTRING
-					else
-					{
-						// else this should be a ucstring
-						if (!pop(ls, val))
-						{
-							throw ELuaIHMException("You must set a string,    number or ucstring to UI property '%s'",    property.Name.c_str());
-						}
-					}
-#endif
-					(target.*(property.SetMethod.SetUCString))(val);
+					(target.*(property.SetMethod.SetString))(val);
 					return;
 				}
 #endif
@@ -1722,10 +1893,10 @@ namespace NLGUI
 		luabind::module(L)
 		[
 			luabind::def("findReplaceAll",    (std::string(*)(const std::string &,  const std::string &,  const std::string &)) &findReplaceAll),
-			luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const ucstring &)) &findReplaceAll),
-			luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const std::string &)) &findReplaceAll),
-			luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const ucstring &,  const std::string &)) &findReplaceAll),
-			luabind::def("findReplaceAll",    (ucstring(*)(const ucstring &,  const std::string &,  const ucstring &)) &findReplaceAll),
+#ifdef RYZOM_LUA_UCSTRING
+			// any ucstring argument gives a ucstring, all strings give a string
+			luabind::def("findReplaceAll",    (CLuaUCString(*)(const CLuaUCString &,  const CLuaUCString &,  const CLuaUCString &)) &findReplaceAll),
+#endif
 
 		// The Lua state also runs scripts served by trusted web domains. A binding that starts a program or
 		// opens a document with the system gives those scripts the run of the player's machine, so openDoc,
@@ -1743,13 +1914,21 @@ namespace NLGUI
 		// inside i18n table
 		luabind::module(L, "i18n")
 		[
-#ifdef RYZOM_LUA_UCSTRING
-			luabind::def("get", &CI18N::getAsUtf16), // Compatibility
-#else
+#ifndef RYZOM_LUA_UCSTRING
 			luabind::def("get", &CI18N::get),
 #endif
 			luabind::def("hasTranslation", &CI18N::hasTranslation)
 		];
+#ifdef RYZOM_LUA_UCSTRING
+		// i18n.get gives a ucstring, through a plain function so the text is copied only once
+		ls.pushGlobalTable();
+		ls.push("i18n");
+		ls.getTable(-2);
+		ls.push("get");
+		ls.push(CUCStringObject::i18nGet);
+		ls.setTable(-3);
+		ls.pop(2);
+#endif
 		// inside 'nlfile' table
 		luabind::module(L, "nlfile")
 		[
@@ -1927,31 +2106,10 @@ namespace NLGUI
 
 #ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
-	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const ucstring &replace)
+	CLuaUCString	CLuaIHM::findReplaceAll(const CLuaUCString &str,   const CLuaUCString &search,   const CLuaUCString &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return strFindReplaceAll(str, search, replace);
-	}
-
-	// ***************************************************************************
-	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const std::string &replace)
-	{
-		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring::makeFromUtf8(search),   ucstring::makeFromUtf8(replace));
-	}
-
-	// ***************************************************************************
-	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const std::string &search,   const ucstring &replace)
-	{
-		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   ucstring::makeFromUtf8(search),  replace);
-	}
-
-	// ***************************************************************************
-	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const std::string &replace)
-	{
-		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		return findReplaceAll(str,   search,   ucstring::makeFromUtf8(replace));
+		return CLuaUCString(strFindReplaceAll(str.Utf8, search.Utf8, replace.Utf8));
 	}
 #endif
 
@@ -2050,11 +2208,11 @@ namespace NLGUI
 		{
 			fails(ls, "%s : argument %d of expected type ucstring was not defined",   funcName,   index);
 		}
-		ls.pushValue(index);
-		ucstring dummy;
-		if (!pop(ls, dummy))
+		// a ucstring object, a string or a number
+		int type = ls.type(index);
+		if (type != LUA_TSTRING && type != LUA_TNUMBER && !isUCStringOnStack(ls, index))
 		{
-			fails(ls, "%s : argument %d of expected type ucstring has bad type : %s",   funcName,   index,   ls.getTypename(ls.type(index)),   ls.type(index));
+			fails(ls, "%s : argument %d of expected type ucstring has bad type : %s",   funcName,   index,   ls.getTypename(type),   type);
 		}
 	}
 #endif

@@ -893,7 +893,7 @@ int CComLuaModule::luaRequestNewAction(lua_State* state, bool pending, uint coun
 	{
 		if (lua_type(state, -1) == LUA_TSTRING)
 		{
-			actionName = lua_tostring(state, -1);
+			actionName.fromUtf8(lua_tostring(state, -1));
 		}
 		else
 		{
@@ -901,11 +901,13 @@ int CComLuaModule::luaRequestNewAction(lua_State* state, bool pending, uint coun
 			// try with ucstring
 			CLuaState &ls = getEditor().getLua();
 			nlassert(ls.getStatePointer() == state);
-			if (!CLuaIHM::getUCStringOnStack(ls, -1, actionName))
+			std::string actionNameUtf8;
+			if (!CLuaIHM::getUCStringOnStack(ls, -1, actionNameUtf8))
 			{
 				nlwarning("<r2.%s> : ucstring or string expected as action name", funcName);
 				return 0;
 			}
+			actionName.fromUtf8(actionNameUtf8);
 #else
 			return 0;
 #endif
