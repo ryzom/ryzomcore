@@ -494,6 +494,9 @@ public:
  		std::vector<bool>					BlockReceived;
  
  		void set (CLFECOMMON::CActionGenericMultiPart *agmp, CClientHost *client);
+ 
+ 		/// Drop the parts received so far and free their memory
+ 		void reset ();
  	};
  
  	std::vector<CGenericMultiPartTemp>	GenericMultiPartTemp;

@@ -459,21 +459,47 @@ void				CClientHost::setEntityIndex( const TEntityIndex& ei )
 
 void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, CClientHost *client)
 {
+	// The numbers in a part come from the client. A part that does not fit the message being reassembled is
+	// dropped, logged and counted, and the client's stream goes on.
+	if (agmp->NbBlock == 0 || agmp->Part >= agmp->NbBlock)
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, dropped",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+		return;
+	}
+
 	if (NbBlock == 0xFFFFFFFF)
 	{
 		// new GenericMultiPart
+		// The client sends all the parts of a message before the first part of the next one, so a message still
+		// incomplete here will never complete: it is dropped, which keeps one reassembly per client in memory.
+		for (uint i = 0; i < client->GenericMultiPartTemp.size(); ++i)
+		{
+			CGenericMultiPartTemp &other = client->GenericMultiPartTemp[i];
+			if (&other != this && other.NbBlock != 0xFFFFFFFF)
+			{
+				nlwarning("FEHACK: client %u (uid %u, %s) started multi-part message %u with message %u still at %u of %u parts, the unfinished one dropped",
+					(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, i, other.NbCurrentBlock, other.NbBlock);
+				CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+				other.reset();
+			}
+		}
+
 		NbBlock = agmp->NbBlock;
 		NbCurrentBlock = 0;
 		TempSize = 0;
 		Temp.clear();
 		Temp.resize(NbBlock);
-		BlockReceived.resize(NbBlock);
-		for (uint i = 0; i < NbBlock; i++)
-			BlockReceived[i] = false;
+		BlockReceived.assign(NbBlock, false);
 	}
-	
-	nlassert (NbBlock == agmp->NbBlock);
-	nlassert (NbBlock > agmp->Part);
+	else if (NbBlock != agmp->NbBlock)
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which has %u parts, dropped",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number, NbBlock);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+		return;
+	}
 
 	// check if the block was already received
 	if (BlockReceived[agmp->Part])
@@ -496,11 +522,14 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 
 		for (uint i = 0; i < Temp.size (); i++)
 		{
-			memcpy (ptr, &(Temp[i][0]), Temp[i].size());
-			ptr += Temp[i].size();
+			if (!Temp[i].empty())
+			{
+				memcpy (ptr, &(Temp[i][0]), Temp[i].size());
+				ptr += Temp[i].size();
+			}
 		}
 
-		NbBlock = 0xFFFFFFFF;
+		reset();
 
 		if ( client->eId().isUnknownId() )
 		{
@@ -511,6 +540,13 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 			routeImpulsionIdFromClient(bms, client->eId(), client->LastReceivedGameCycle);
 		}
 	}
+}
+
+void				CClientHost::CGenericMultiPartTemp::reset ()
+{
+	NbBlock = 0xFFFFFFFF;
+	std::vector<std::vector<uint8> >().swap(Temp);
+	std::vector<bool>().swap(BlockReceived);
 }
 
 void				CClientHost::resetClientVision()

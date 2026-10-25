@@ -113,6 +113,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Unauthorized character slot;";
 	if ( reasons & RefusedServiceCommand )
 		s += " Refused service command;";
+	if ( reasons & MalformedMultiPart )
+		s += " Malformed multi-part;";
 	return s;
 }
 
