@@ -740,8 +740,8 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 				dapperPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
 			}
 
-			// check if character have enough money
-			if( ( dapperPrice * quantity ) > _Character->getMoney() )
+			// check if character have enough money (in 64 bits: the quantity comes from the client and a 32-bit product wraps)
+			if( (uint64)dapperPrice * quantity > _Character->getMoney() )
 			{
 				// return player information 'not enough money'
 				_Character->sendDynamicSystemMessage( _Character->getId(), "OPS_NOT_ENOUGHT_SEED" );
@@ -761,7 +761,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 					return;
 				}
 				factionPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
-				if (_Character->getFactionPoint(clan) < (factionPrice*quantity))
+				if ((uint64)_Character->getFactionPoint(clan) < (uint64)factionPrice * quantity)
 				{
 					// return player information 'not enough faction point'
 					_Character->sendDynamicSystemMessage( _Character->getId(), "OPS_NOT_ENOUGHT_FACTION_POINTS" );
@@ -884,7 +884,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 	{
 	case RYMSG::TTradeCurrency::tc_dappers:
 		// Spend dappers
-		_Character->spendMoney( dapperPrice * stackSize );
+		_Character->spendMoney( (uint64)dapperPrice * stackSize );
 
 		break;
 	case RYMSG::TTradeCurrency::tc_faction_points:
