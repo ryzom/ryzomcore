@@ -3407,7 +3407,7 @@ void cbRingMissionSelectAction( NLNET::CMessage& msgin, const std::string & serv
 	CCharacter *ch = PlayerManager.getChar( eid );
 	if( ch )
 	{
-		CR2GiveItem::getInstance().giveItemGranted( ch->getTargetDataSetRow(), actionId );
+		CR2GiveItem::getInstance().giveItemGranted( ch->getTargetDataSetRow(), ch->getEntityRowId(), actionId );
 	}
 }
 
