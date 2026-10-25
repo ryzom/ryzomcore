@@ -603,6 +603,15 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 		return;
 	}
 
+	// A craft in progress consumes the materials selected for it when it ends, and the phrase manager refuses a
+	// second craft only after the lists below are replaced; refuse it before, so the running craft keeps its own.
+	const CEntityPhrases *entityPhrases = CPhraseManager::getInstance().getEntityPhrases( ch->getEntityRowId() );
+	if ( entityPhrases != NULL && entityPhrases->getCurrentActionConst() != NULL && entityPhrases->getCurrentActionConst()->getType() == BRICK_TYPE::FABER )
+	{
+		nlwarning("player %s sent EXECUTE_FABER while a craft is in progress, refused", Id.toString().c_str() );
+		return;
+	}
+
 	ch->abortExchange();
 
 	ch->setCraftPlan( craftPlan );
