@@ -759,12 +759,6 @@ static void setConnectionFailureReason(const std::string &reason, const std::str
 	}
 }
 
-// The secure connection messages are newer than some data, so they fall back on English
-static std::string getConnectionFailureString(const char *label, const char *english)
-{
-	return CI18N::hasTranslation(label) ? CI18N::get(label) : std::string(english);
-}
-
 // Show why the secure (QUIC) connection to the frontend could not be established
 static void setQuicConnectionFailureReason(const CQuicConnection &quic)
 {
@@ -772,28 +766,28 @@ static void setQuicConnectionFailureReason(const CQuicConnection &quic)
 	switch (quic.failure())
 	{
 	case CQuicConnection::NoResponse:
-		reason = getConnectionFailureString("uiQuicNoResponse", "The server did not answer on its secure connection port (UDP %port).");
-		hint = getConnectionFailureString("uiQuicHintNetwork", "The server may be offline, or a firewall may be blocking that port.");
+		reason = CI18N::get("uiQuicNoResponse");
+		hint = CI18N::get("uiQuicHintNetwork");
 		break;
 	case CQuicConnection::Unreachable:
-		reason = getConnectionFailureString("uiQuicUnreachable", "The server's secure connection port (UDP %port) could not be reached.");
-		hint = getConnectionFailureString("uiQuicHintNetwork", "The server may be offline, or a firewall may be blocking that port.");
+		reason = CI18N::get("uiQuicUnreachable");
+		hint = CI18N::get("uiQuicHintNetwork");
 		break;
 	case CQuicConnection::Refused:
-		reason = getConnectionFailureString("uiQuicRefused", "The server refused the secure connection.");
-		hint = getConnectionFailureString("uiQuicHintLater", "Please try again later.");
+		reason = CI18N::get("uiQuicRefused");
+		hint = CI18N::get("uiQuicHintLater");
 		break;
 	case CQuicConnection::CertificateRejected:
-		reason = getConnectionFailureString("uiQuicCertificate", "The server's identity could not be verified (certificate rejected).");
-		hint = getConnectionFailureString("uiQuicHintCertificate", "Check your computer's date and time, or contact the server team.");
+		reason = CI18N::get("uiQuicCertificate");
+		hint = CI18N::get("uiQuicHintCertificate");
 		break;
 	case CQuicConnection::ProtocolMismatch:
-		reason = getConnectionFailureString("uiQuicProtocol", "The server does not support this client's connection protocol.");
-		hint = getConnectionFailureString("uiQuicHintUpdate", "The client or the server needs to be updated.");
+		reason = CI18N::get("uiQuicProtocol");
+		hint = CI18N::get("uiQuicHintUpdate");
 		break;
 	default:
-		reason = getConnectionFailureString("uiQuicFailed", "The secure connection to the server failed (%status).");
-		hint = getConnectionFailureString("uiQuicHintLater", "Please try again later.");
+		reason = CI18N::get("uiQuicFailed");
+		hint = CI18N::get("uiQuicHintLater");
 		break;
 	}
 	strFindReplace(reason, "%port", toString(quic.address().port()));
