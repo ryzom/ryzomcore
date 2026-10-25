@@ -3669,15 +3669,23 @@ bool CLuaIHMRyzom::isPlayerSlotNewbieLand(uint32 slot)
 }
 
 // ***************************************************************************
-ucstring	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
+#ifdef RYZOM_LUA_UCSTRING
+CLuaUCString	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
+#else
+std::string	CLuaIHMRyzom::getSheetLocalizedName(const std::string &sheet)
+#endif
 {
-	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(CSheetId(sheet)));
+	return std::string(STRING_MANAGER::CStringManagerClient::getItemLocalizedName(CSheetId(sheet)));
 }
 
 // ***************************************************************************
-ucstring	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
+#ifdef RYZOM_LUA_UCSTRING
+CLuaUCString	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
+#else
+std::string	CLuaIHMRyzom::getSheetLocalizedDesc(const std::string &sheet)
+#endif
 {
-	return ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(CSheetId(sheet)));
+	return std::string(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(CSheetId(sheet)));
 }
 
 
@@ -3873,12 +3881,12 @@ bool		CLuaIHMRyzom::isDynStringAvailable(sint32 dynStringId)
 }
 
 #ifdef RYZOM_LUA_UCSTRING
-ucstring	CLuaIHMRyzom::getSrvString(sint32 stringId)
+CLuaUCString	CLuaIHMRyzom::getSrvString(sint32 stringId)
 {
 	//H_AUTO(Lua_CLuaIHM_getDynString)
 	string result;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(stringId,   result);
-	return ucstring::makeFromUtf8(result); // Compatibility
+	return CLuaUCString(result); // Compatibility
 }
 #else
 std::string	CLuaIHMRyzom::getSrvString(sint32 stringId)

@@ -228,8 +228,13 @@ private:
 	static bool	isPlayerSlotNewbieLand(uint32 slot);  // test if one of the player slot is a newbieland one, if not so, client must be patched in order to continue
 
 	// GameInfo
-	static ucstring	getSheetLocalizedName(const std::string &sheet);
-	static ucstring	getSheetLocalizedDesc(const std::string &sheet);
+#ifdef RYZOM_LUA_UCSTRING
+	static CLuaUCString	getSheetLocalizedName(const std::string &sheet);
+	static CLuaUCString	getSheetLocalizedDesc(const std::string &sheet);
+#else
+	static std::string	getSheetLocalizedName(const std::string &sheet);
+	static std::string	getSheetLocalizedDesc(const std::string &sheet);
+#endif
 	static sint32 getSkillIdFromName(const std::string &def);
 #ifdef RYZOM_LUA_UCSTRING
 	static CLuaUCString	getSkillLocalizedName(sint32 skillId);
@@ -249,7 +254,7 @@ private:
 #endif
 	static bool	isDynStringAvailable(sint32 dynStringId);
 #ifdef RYZOM_LUA_UCSTRING
-	static ucstring	getSrvString(sint32 stringId);
+	static CLuaUCString	getSrvString(sint32 stringId);
 #else
 	static std::string	getSrvString(sint32 stringId);
 #endif
