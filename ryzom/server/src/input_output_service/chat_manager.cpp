@@ -2007,8 +2007,9 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 	}
 	else
 	{
-		// look for named group chat
-		std::map<TStringId, TGroupId>::iterator it(_GroupNames.find(CStringMapper::map(receiver)));
+		// look for named group chat (the name comes from the client: find() does not keep it, map() would forever)
+		TStringId receiverId = CStringMapper::find(receiver);
+		std::map<TStringId, TGroupId>::iterator it(receiverId != CStringMapper::emptyId() ? _GroupNames.find(receiverId) : _GroupNames.end());
 		if (it != _GroupNames.end())
 		{
 			// we found one
