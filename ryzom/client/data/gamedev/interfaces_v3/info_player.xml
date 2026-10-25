@@ -143,7 +143,7 @@
          	<view type="bitmap" id="jauge_graph" posref="TL TL" texture="jauge.tga" color="#color" global_color="false" />
          </group>
          
-         <view type="text" id="t" posref="TL TL" x="16" y="2" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" hardtext="#text" />
+		<view type="text" id="t" posref="TL TL" x="16" y="2" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" hardtext="#text" />
 		 <!--  
          <view type="text_number" id="max" posref="MR MR" x="-12" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" value="#maxval" positive="true" />
          <view type="text" id="sep" posparent="max" posref="TL TR" x="-1" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="/" />
@@ -213,8 +213,8 @@
 		<group type="tab" id="info_player_skills_tabs" child_resize_w="true" h="24" posref="TL TL" x="0" y="-24" >
 			<ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL"	group="content:basics_skills"		hardtext="uiR2EDBasicSkills"		onclick_r="" params_r="" onclick_l="" params_l="" />
 			<ctrl style="tab_button_new" id="tab1" posparent="tab0"		group="content:ring_skills"	hardtext="uiR2EDRingSkills"	onclick_r="" params_r="" onclick_l="" params_l="" />
-	                <ctrl style="tab_button_new" id="tab2" posparent="tab1" group="content:rpjobs" hardtext="uiRpJobs" onclick_r="" params_r="" />
-	                <ctrl style="tab_button_new" id="tab3" posparent="tab2" group="content:webinfos" hardtext="uiPlayerInfos" onclick_r="" params_r="" onclick_l="" params_l="" />
+			<ctrl style="tab_button_new" id="tab2" posparent="tab1" group="content:rpjobs" hardtext="uiRpJobs" onclick_r="" params_r="" />
+			<ctrl style="tab_button_new" id="tab3" posparent="tab2" group="content:webinfos" hardtext="uiPlayerInfos" onclick_r="" params_r="" onclick_l="" params_l="" />
 		</group>
 		
 		<view type="bitmap" id="sep" posparent="info_player_skills_tabs" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
@@ -226,8 +226,8 @@
 		
 		<group id="basics_skills" sizeref="wh" w="0" y="0" h="0" posref="TL TL">
 		
-                	<view type="text" id="character_race_title" posparent="basics_skills" posref="TL TL" x="0" y="-10" hardtext="uiRaceBold" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" />
-                	<view type="text" id="character_race_name" posparent="character_race_title" posref="TR TL" shadow="true" color="255 200 55 255" global_color="false" x="2" fontsize="12" hardtext="" />
+			<view type="text" id="character_race_title" posparent="basics_skills" posref="TL TL" x="0" y="-10" hardtext="uiRaceBold" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" />
+			<view type="text" id="character_race_name" posparent="character_race_title" posref="TR TL" shadow="true" color="255 200 55 255" global_color="false" x="2" fontsize="12" hardtext="" />
 
 			<group id="guild" posref="TL TL" sizeref="w" h="14" y="-30" >
 				<view type="text" id="guild_title" posref="TL TL" x="0" y="0" hardtext="uiGuildMembership" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
@@ -336,7 +336,7 @@
 				<instance template="text_tt" posparent="resists_t" tooltip="uittMagicResistTable" />
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-16" w="0" h="140" inherit_gc_alpha="true" >
 						
-						<instance template="tipc_magic_resist" id="Desert" posref="TL TL" x="8" y="-8" w="-8"
+					<instance template="tipc_magic_resist" id="Desert" posref="TL TL" x="8" y="-8" w="-8"
 													val="%player_resist_desert" />
 						<instance template="tipc_magic_resist" id="Forest" posparent="Desert" posref="BL TL" y="0"
 													val="%player_resist_forest" />
@@ -355,15 +355,15 @@
 				<instance template="text_tt" posparent="protections_t" tooltip="uittMagicProtectTable" />
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-16" w="0" h="140" inherit_gc_alpha="true" >
 						
-						<instance template="tipc_magic_protect" id="Acid" posref="TL TL" x="8" y="-8" w="-8"
+					<instance template="tipc_magic_protect" id="Acid" posref="TL TL" x="8" y="-8" w="-8"
 													val="%player_protect_acid" />
 						<instance template="tipc_magic_protect" id="Cold" posparent="Acid" posref="BL TL" y="0"
 													val="%player_protect_cold" />
-						<instance template="tipc_magic_protect" id="Rot" posparent="Cold" posref="BL TL" y="0"
+					<instance template="tipc_magic_protect" id="Rot" posparent="Cold" posref="BL TL" y="0"
 													val="%player_protect_rot" />
-						<instance template="tipc_magic_protect" id="Fire" posparent="Rot" posref="BL TL" y="0"
+					<instance template="tipc_magic_protect" id="Fire" posparent="Rot" posref="BL TL" y="0"
 													val="%player_protect_fire" />
-						<instance template="tipc_magic_protect" id="Shockwave" posparent="Fire" posref="BL TL" y="0"
+					<instance template="tipc_magic_protect" id="Shockwave" posparent="Fire" posref="BL TL" y="0"
 													val="%player_protect_shockwave" />
 						<instance template="tipc_magic_protect" id="Poison" posparent="Shockwave" posref="BL TL" y="0"
 													val="%player_protect_poison" />
@@ -396,6 +396,7 @@
 		</group>
 
 		<group id="ring_skills" sizeref="wh" w="0" y="0" h="0" posref="TL TL">
+			
 			<instance template="ecosystem_points_widget" id="ep" posref="TL TL" x="0" y="-10" />
 			<instance template="faction_points_widget" id="fp" posparent="ep" posref="BL TL" x="0" y="-10" />
 			<instance template="org_points_widget" id="op" posparent="fp" posref="BL TL" x="0" y="-10" />
@@ -559,7 +560,7 @@
 	</group>
 	
 		
-        <group id="content" x="0" y="0" h="330" posref="TL TL">
+	<group id="content" x="0" y="0" h="330" posref="TL TL">
 
 		<group id="you" posref="TL TL" x="0" y="-4" sizeref="wh" w="0" h="0">
 
@@ -576,7 +577,7 @@
 				<instance template="text_tt" posparent="parent" on_tooltip="lua:game:fameAllegianceTooltipCiv()" />
 			</group>
 
-			<ctrl style="text_button_16" id="neutral_civ"
+			<ctrl style="text_button_16" id="neutral_civ" 
 				active="false"
 				posparent="civ_allegiance_group"
 				posref="MR ML" x="14" y="0"
@@ -596,13 +597,13 @@
 				<instance template="text_tt" posparent="parent" on_tooltip="lua:game:fameAllegianceTooltipCult()" />
 			</group>
 
-			<ctrl style="text_button_16" id="neutral_cult"
+			<ctrl style="text_button_16" id="neutral_cult" 
 				active="false"
 				posparent="cult_allegiance_group" posref="MR ML" x="14" y="0"
 				hardtext="uiFameAllegianceCultSetNeutral" tooltip="uiFameAllegianceCultSetNeutralTT"
 				onclick_l="fame_set_neutral" params_l="type=cult|force=0" global_color="true" />
 			<link expr="and(eq(@SERVER:FAME:CULT_ALLEGIANCE, 0),not(isDBInitInProgress()))" target="neutral_cult:active" />
-
+			
 			<!-- Organization -->
 			<view type="text" id="organization_text" posref="TL BL" posparent="organization" x="0" y="0" color="255 255 255 255" fontsize="10" global_color="true" shadow="true" hardtext="uiOrganization" />
 			<group id="organization" posref="BL BL" x="8" y="8" h="34" w="-12" sizeref="w">
@@ -618,6 +619,7 @@
 				<instance template="inner_thin_border" inherit_gc_alpha="true" />
 			</group>
 		</group>
+		
 		<group id="guild" posref="TL TL" x="0" y="-4" sizeref="wh" w="0" h="0">
 
 			<!-- Civilisation -->
@@ -633,8 +635,8 @@
 				<instance template="text_tt" posparent="parent" on_tooltip="lua:game:fameAllegianceTooltipCivGuild()" />
 			</group>
 
-			<ctrl style="text_button_16" id="neutral_civ"
-				posparent="civ_allegiance_group" posref="MR ML" x="14" y="2"
+			<ctrl style="text_button_16" id="neutral_civ" 
+				posparent="civ_allegiance_group" posref="MR ML" x="14" y="2" 
 				hardtext="uiFameAllegianceCivSetNeutral" tooltip="uiFameAllegianceCivSetNeutralGuildTT"
 				onclick_l="fame_set_neutral" params_l="type=civ_guild|force=0" global_color="true" />
 			<link expr="eq(@SERVER:GUILD:FAME:CIV_ALLEGIANCE, 0)" target="neutral_civ:active" />
@@ -651,15 +653,17 @@
 				<link expr="@SERVER:GUILD:FAME:CULT_ALLEGIANCE" action="lua:game:updateAllegiance('SERVER:GUILD:FAME:CULT_ALLEGIANCE', 'cult_allegiance_val')" />
 				<instance template="text_tt" posparent="parent" on_tooltip="lua:game:fameAllegianceTooltipCultGuild()" />
 			</group>
-			<ctrl style="text_button_16" id="neutral_cult"
-				posparent="cult_allegiance_group" posref="MR ML" x="14" y="2"
+
+			<ctrl style="text_button_16" id="neutral_cult" 
+				posparent="cult_allegiance_group" posref="MR ML" x="14" y="2" 
 				hardtext="uiFameAllegianceCultSetNeutral" tooltip="uiFameAllegianceCultSetNeutralGuildTT"
 				onclick_l="fame_set_neutral" params_l="type=cult_guild|force=0" global_color="true" />
 			<link expr="eq(@SERVER:GUILD:FAME:CULT_ALLEGIANCE, 0)" target="neutral_cult:active" />
 			<link expr="ne(@UI:VARIABLES:USER:GUILD_GRADE, 0)" target="neutral_cult:frozen" />
-		</group>
 
-		<group id="tribes" posref="TL TL" x="0" y="-4" sizeref="wh" w="0" h="-10" lua_class="game:initFameTribe()">
+		</group>
+		
+		<group id="tribes" posref="TL TL" x="0" y="-4" sizeref="wh" w="0" h="-10" lua_class="game:initFameTribe()" >
 			<group id="black" posparent="list" posref="TL TL" x="-4" sizeref="wh" w="-3" h="4" inherit_gc_alpha="true" />
 			<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
 
@@ -669,35 +673,35 @@
 
 			<ctrl style="skin_scroll" id="scroll_bar" target="list" align="T" target_stepy="28" />
 		</group>
-
+		
 		<!-- TODO_SPIRE: when spire OK, remove active="false". see TODO_SPIRE -->
-		<group id="pvp" posref="TL TL" x="0" y="-4" sizeref="wh" w="0" h="-10" active="false">
-
+		<group id="pvp" posref="TL TL" x="0" y="-4" sizeref="wh" w="0" h="-10" active="false" >
+			
 			<!-- Texts -->
-			<view type="text" id="allegiance_header" posref="TL TL" x="4" y="-10" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpFameAllegiance" multi_line="true" multi_line_space="0" global_color="false" />
-			<view type="text" id="cult_allegiance_pts" posparent="allegiance_header" posref="BL TL" x="0" y="-4" color="255 255 255 255" fontsize="10" shadow="true" hardtext="" multi_line="true" multi_line_space="0" />
+			<view type="text" id="allegiance_header" 								 			posref="TL TL" x="4" y="-10"  color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpFameAllegiance" 		multi_line="true" multi_line_space="0" global_color="false"/>			
+			<view type="text" id="cult_allegiance_pts" 		posparent="allegiance_header" 		posref="BL TL" x="0" y="-4" color="255 255 255 255" fontsize="10" shadow="true" hardtext="" 	multi_line="true" multi_line_space="0"/>
 			<view type="text" id="civ_allegiance_pts" posparent="cult_allegiance_pts" posref="BL TL" x="0" y="-8" color="255 255 255 255" fontsize="10" shadow="true" hardtext="" multi_line="true" multi_line_space="0" />
-			<view type="text" id="pvpEffectsInfo" posparent="civ_allegiance_pts" posref="BL TL" x="0" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpEffectInfo" multi_line="true" multi_line_space="0" global_color="false" />
-
+			<view type="text" id="pvpEffectsInfo" 			posparent="civ_allegiance_pts"		posref="BL TL" x="0" y="0"  color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpEffectInfo" 				multi_line="true" multi_line_space="0" global_color="false"/>
+			
 			<!-- Tooltips -->
 			<instance template="text_tt" posparent="allegiance_header" tooltip="uittPvpFameAllegianceInfo" />
 			<instance template="text_tt" posparent="pvpEffectsInfo" tooltip="uittPvpFameInfo" />
-
+			
 			<!-- Update allegiance faction points -->
 			<link expr="depends(@SERVER:PVP_EFFECTS:PVP_FACTION_POINTS)" action="lua:game:getAllegiancePoints()" />
-
+			
 			<!-- Black background -->
 			<group id="black" posref="TL TL" x="10" y="-85" sizeparent="parent" sizeref="wh" w="-14" h="-85" inherit_gc_alpha="true" />
-			<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
-
+			<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+			
 			<!-- Spire effects with scroll bar -->
-			<group id="list" posref="TL TL" x="10" y="-88" sizeparent="parent" sizeref="w" w="-14" h="0" max_sizeparent="parent" max_sizeref="h" max_h="-91" child_resize_h="true" child_resize_hmargin="8">
-				<view type="text" id="pvpEffectsBonusMalusInfo" posref="TL TL" x="4" y="-2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpFameNoCivAllegiance" multi_line="true" multi_line_space="0" global_color="false" />
-				<view type="text" id="pvpEffectsBonusMalus" posparent="pvpEffectsBonusMalusInfo" posref="BL TL" x="4" y="-4" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpFameNoCivAllegiance" multi_line="true" multi_line_space="0" />
-
+			<group id="list"  posref="TL TL" x="10" y="-88" sizeparent="parent" sizeref="w" w="-14" h="0" max_sizeparent="parent" max_sizeref="h" max_h="-91" child_resize_h="true" child_resize_hmargin="8">
+				<view type="text" id="pvpEffectsBonusMalusInfo" 							 				posref="TL TL" x="4" y="-2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpFameNoCivAllegiance" multi_line="true" multi_line_space="0" global_color="false"/>
+				<view type="text" id="pvpEffectsBonusMalus" 		posparent="pvpEffectsBonusMalusInfo"	posref="BL TL" x="4" y="-4" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPvpFameNoCivAllegiance" multi_line="true" multi_line_space="0"/>
+				
 				<!-- Update spire effects -->
 				<link expr="depends(@SERVER:PVP_EFFECTS)" action="lua:game:getPvpEffects()" />
-
+				
 			</group>
 			<ctrl style="skin_scroll" id="scroll_bar" target="list" align="T" target_stepy="11" />
 		</group>
@@ -991,6 +995,7 @@
 	</group>
 </group>
 
+
 <!-- Main container : info_player_journal -->
 <group type="container" id="info_player_journal" w="280" h="382" title="uiJournalTitle"
 	global_color="false" opened="true" openable="false" header_color="UI:SAVE:WIN:COLORS:PLA"
@@ -1030,8 +1035,7 @@
 	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" 
 	 group_onclick_r="active_menu" group_params_r="menu=ui:interface:mission_journal_menu"
 	>
-
-	<group id="mission_combo" type="group_wheel" posref="TL TL" x="2" y="-5" sizeref="w" w="-26" h="24" on_wheel_up="lua" on_wheel_up_params="game:onMissionComboWheelUp()" on_wheel_down="lua" on_wheel_down_params="game:onMissionComboWheelDown()">
+		<group id="mission_combo" type="group_wheel" posref="TL TL" x="2" y="-5" sizeref="w" w="-26" h="24" on_wheel_up="lua" on_wheel_up_params="game:onMissionComboWheelUp()" on_wheel_down="lua" on_wheel_down_params="game:onMissionComboWheelDown()">
 			<!-- DECORATION -->				
 			<instance template="box_widget" id="back" sizeref="wh" w="0" h="0" />	
 			<view type="bitmap" active="false" id="arrow" posref="MR MR" x="-2" texture="W_arrow_down_0.tga"/>
@@ -1076,7 +1080,7 @@
 												multi_line="true" multi_line_space="0" fontsize="10" />
 
 			</group>
-			
+
 			<group id="web" w="0" h="64" posparent="uppart" posref="BL TL" y="-2" x="-5" sizeref="w">
 				<view id="background_bitmap" type="bitmap" posref="MM MM" sizeref="wh" w="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 125" global_color="false" />
 				<instance template="webig_html_noborder" home="#home" browse_redo="#browse_redo" browse_undo="#browse_undo" browse_refresh="#browse_refresh" x="-1" w="240" y="7" h="64"/>
@@ -1117,7 +1121,7 @@
 
 </group>
 <tree node="cap" />
-<tree node="info_player_journal" />
+<tree node="info_player_journal"/>
 
 
 <group id="cap_popup" title=""  type="container" posref="MM MM" x="" y="" movable="false" pop_min_w="800" pop_max_w="800" resizer="true" opened="false" openable="false" options="compass" header_active="false" right_button="false">
@@ -1128,6 +1132,7 @@
 	</group>
 </group>
 <tree node="cap_popup" />
+
 
 <!-- update ui when one goes from start island to mainland --> 
 <link expr="depends(@SERVER:USER:IS_NEWBIE)" action="lua:game:onMissionJournalOpened()" />
@@ -1190,8 +1195,8 @@
 	</group>
 
 	<!--***********************-->
-<!--*    RPJOB TEMPLATES  *-->
-<!--***********************-->
+	<!--*    RPJOB TEMPLATES  *-->
+	<!--***********************-->
 </template>
 
 <template h="48" id="" name="rpjob_title" posparent="parent" posref="TL TL" sizeref="w" suffix="" text="" tooltip="" val="" w="0" x="0" y="0">
@@ -1319,7 +1324,7 @@
 	<group id="header_closed" x="0" y="0" w="120" h="16" posref="TL TL" on_active="lua" on_active_params="WebBrowser:saveWindowPop()"></group>
 	<group id="header_opened" x="0" y="0" w="950" h="16" posref="TL TL" on_active="lua" on_active_params="WebBrowser:restoreWindowPop()"></group>
 	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL">
-			<group id="htmlA" type="html" posref="ML ML" url="https://app.ryzom.com" title_prefix="" sizeref="h" x="-16" y="10" w="220" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
+		<group id="htmlA" type="html" posref="ML ML" url="https://app.ryzom.com" title_prefix="" sizeref="h" x="-16" y="10" w="220" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
 			<group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true" />
 			<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" color="255 255 255 0" />
 			<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />

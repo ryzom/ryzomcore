@@ -164,11 +164,11 @@
 <!-- Temp DB that may contains other static bonus (XPcatalyzer, RingXPcatalyzer, PVP Outpost) -->
 <variable entry="UI:VARIABLES:BONUS:$i:SHEET" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:BONUS:$i:DISABLED" type="sint32" value="0" size="%num_local_bonus_malus" />
-	<variable entry="UI:VARIABLES:BONUS:$i:DISABLED_TIME" type="sint32" value="0" size="%num_local_bonus_malus" />
+<variable entry="UI:VARIABLES:BONUS:$i:DISABLED_TIME" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:BONUS:$i:SPECIAL_TOOLTIP" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:MALUS:$i:SHEET" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:MALUS:$i:DISABLED" type="sint32" value="0" size="%num_local_bonus_malus" />
-	<variable entry="UI:VARIABLES:MALUS:$i:DISABLED_TIME" type="sint32" value="0" size="%num_local_bonus_malus" />
+<variable entry="UI:VARIABLES:MALUS:$i:DISABLED_TIME" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:MALUS:$i:SPECIAL_TOOLTIP" type="sint32" value="0" size="%num_local_bonus_malus" />
 <variable entry="UI:VARIABLES:SHOW_BONUS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:SHOW_MALUS" type="sint32" value="0" />

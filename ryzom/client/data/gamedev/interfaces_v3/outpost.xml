@@ -464,7 +464,7 @@
 <!--***************-->
 
 <!-- Should be HALF the value in Database -->
-<define id="outpost_nb_max_squad_in_list" value="12" />
+<define id="outpost_nb_max_squad_in_list"  value="12" />
 <define id="right_squad_list_index"  value="12" />
 <define id="outpost_selected"	value="SERVER:GUILD:OUTPOST:O[UI:TEMP:OUTPOST:SELECTION]" />
 <define id="outpost_squad_line_h" value="15" />
@@ -639,7 +639,7 @@
 			<instance template="t_squad_list" id="list_cur_start" x="0" y="0" posparent="cur_round" posref="BL TL" 
 				squad_template="t_spawned_squad_line" firstindex="0" 
 				header="uiOutpostSSquadStart" tooltip="uittOutpostSSquadStart" />
-				<instance template="t_squad_list" id="list_cur_during" x="10" y="0" posparent="list_cur_start" posref="TR TL" squad_template="t_spawned_squad_line" firstindex="%right_squad_list_index" header="uiOutpostSSquadDuring" tooltip="uittOutpostSSquadDuring" />
+			<instance template="t_squad_list" id="list_cur_during" x="10" y="0" posparent="list_cur_start" posref="TR TL" squad_template="t_spawned_squad_line" firstindex="%right_squad_list_index" header="uiOutpostSSquadDuring" tooltip="uittOutpostSSquadDuring" />
 
 			<!-- Next Round -->
 			<view type="bitmap" id="sep_next" posparent="list_cur_start" posref="BL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="-8" texture="W_line_hor.tga" sizeparent="parent" />
@@ -648,7 +648,7 @@
 			<instance template="t_squad_list" id="list_next_start" x="0" y="0" posparent="next_round" posref="BL TL" 
 				squad_template="t_training_squad_line" firstindex="0" 
 				header="uiOutpostTSquadStart" tooltip="uittOutpostTSquadStart" />
-				<instance template="t_squad_list" id="list_next_during" x="10" y="0" posparent="list_next_start" posref="TR TL" squad_template="t_training_squad_line" firstindex="%right_squad_list_index" header="uiOutpostTSquadDuring" tooltip="uittOutpostTSquadDuring" />
+			<instance template="t_squad_list" id="list_next_during" x="10" y="0" posparent="list_next_start" posref="TR TL" squad_template="t_training_squad_line" firstindex="%right_squad_list_index" header="uiOutpostTSquadDuring" tooltip="uittOutpostTSquadDuring" />
 
 			<!-- Capital -->
 			<view type="bitmap" id="sep_capital" posparent="list_next_start" posref="BL TL" scale="true" sizeref="w" w="0" h="2" x="0" y="-8" texture="W_line_hor.tga" sizeparent="parent" />
@@ -660,7 +660,7 @@
 				<ctrl style="text_button_16" id="cap_but" posparent="cap_text" posref="MR ML" x="8" y="1" 
 					hardtext="0" onclick_l="lua:game:outpostSelectSquadCapitalOpen()" 
 					text_color_normal="255 255 255 255" text_color_over="255 255 255 255" text_color_pushed="255 255 255 255" />
-					<link expr="@%outpost_selected:SQUAD_CAPITAL" target="cap_but:uc_hardtext" />
+				<link expr="@%outpost_selected:SQUAD_CAPITAL" target="cap_but:uc_hardtext" />
 				<link expr="eq(@SERVER:USER:OUTPOST_ADMIN,0)" target="cap_but:frozen" />
 				<link expr="ifthenelse(eq(@SERVER:USER:OUTPOST_ADMIN,0), 
 								localize('uiOutpostCapitalEditKO'),

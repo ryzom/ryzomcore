@@ -125,7 +125,6 @@
 	<action handler="set" params="target='ui:interface:gestion_windows:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:gestion_windows:w')),2)" />
 	<action handler="set" params="target='ui:interface:gestion_windows:y'|value=add(getprop('ui:interface:gestion_windows:h'),div(sub(getprop('ui:interface:h'),getprop('ui:interface:gestion_windows:h')),2))" />
 	<action handler="set" params="target='ui:interface:gestion_windows:active'|value=@UI:TEMP:ACTIVE" />
-
 	<!-- AppZone -->
 	<action handler="set" params="target='ui:interface:appzone:active'|value=0" />
 	<action handler="set" params="target='ui:interface:appzone:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:appzone:w')),2)" />
@@ -302,7 +301,7 @@
 	<action handler="set" params="dblink=UI:SAVE:TRANSLATION:ARROUND:DISABLE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:TRANSLATION:SYSTEM:DISABLE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:TRANSLATION:REGION:DISABLE|value=0" />
-	
+
 	<action handler="set" params="dblink=UI:SAVE:CHAT:FONT_SIZE|value=10" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:MULTI_LINE_SPACE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:SHADOWED_TEXT|value=1" />

@@ -35,8 +35,8 @@
   <key name="KeyNUMPAD1" action="camera_turn_left" /> 
   <key name="KeyNUMPAD2" action="camera_turn_right" /> 
   <key name="KeyDECIMAL" action="camera_turn_center" /> 
-<key name="KeyF5" shift="1" action="toggle_chat" />
-<key name="N/A" action="toggle_free_look" />
+  <key name="KeyF5" shift="1" action="toggle_chat" /> 
+  <key name="N/A" action="toggle_free_look" />
  <!--  Target 
   --> 
   <key name="KeyF12" ctrl="0" action="no_target" /> 
@@ -116,13 +116,13 @@
   <key name="Key9" ctrl="1" action="select_shortcut_bar" params="9" /> 
   <key name="Key0" ctrl="1" action="select_shortcut_bar" params="10" /> 
   <key name="KeyS" ctrl="1" action="phrase_cancel_cast" /> 
-<!--  Hotbar
+  <!--  Hotbar
   --> 
-<key name="Key1" menu="1" action="use_hotbar_item" params="slot=0" />
-<key name="Key2" menu="1" action="use_hotbar_item" params="slot=1" />
-<key name="Key3" menu="1" action="use_hotbar_item" params="slot=2" />
-<key name="Key4" menu="1" action="use_hotbar_item" params="slot=3" />
-<key name="Key5" menu="1" action="use_hotbar_item" params="slot=4" />
+  <key name="Key1" menu="1" action="use_hotbar_item" params="slot=0" />
+  <key name="Key2" menu="1" action="use_hotbar_item" params="slot=1" />
+  <key name="Key3" menu="1" action="use_hotbar_item" params="slot=2" />
+  <key name="Key4" menu="1" action="use_hotbar_item" params="slot=3" />
+  <key name="Key5" menu="1" action="use_hotbar_item" params="slot=4" />
  <!--  Misc 
   --> 
   <key name="KeyF7" shift="0" action="mount_unmount" /> 
@@ -256,14 +256,14 @@
   <key name="KeyJ" action="show_hide" params="info_player_journal" /> 
   <key name="KeyG" action="show_hide" params="guild" /> 
   <key name="KeyF" shift="1" action="show_hide" params="fame" />
-<key name="KeyE" shift="0" action="show_hide" params="encyclopedia" />
+  <key name="KeyE" shift="0" action="show_hide" params="encyclopedia" />
   
  <!--  Inventory 
   --> 
   <key name="KeyI" action="show_hide" params="inventory" /> 
   <key name="KeyB" action="show_hide" params="phrase_book" /> 
   <key name="N/A" action="show_hide" params="gestionsets" /> 
-<key name="N/A" action="show_hide" params="inv_hotbar" />
+  <key name="N/A" action="show_hide" params="inv_hotbar" />
   <key name="KeyP" shift="1" action="show_hide" params="animal_global" /> 
   <key name="N/A" action="inv_temp_all" params="" />
   
@@ -274,7 +274,7 @@
   <key name="KeyR" action="show_hide" params="radar" /> 
   <key name="KeyM" action="show_hide" params="map" /> 
   
-<key name="KeyM" ctrl="1" action="fullmap" params="" />
+  <key name="KeyM" ctrl="1" action="fullmap" params="" />
  <!--  Communication 
   --> 
 	<key name="N/A" action="show_hide" params="target" />

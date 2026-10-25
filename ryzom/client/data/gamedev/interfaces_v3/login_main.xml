@@ -10,6 +10,7 @@
 
 <variable entry="UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS" type="sint32" value="-1" />
 
+
 <proc id="top_center">
   <action handler="set" params="target='@0:x'|value=div(sub(getprop('ui:login:w'),getprop('@0:w')),2)" />
   <action handler="set" params="target='@0:y'|value=getprop('ui:login:h')" />
@@ -102,7 +103,7 @@
 																but_login_support:active" />
 
     <!-- RESOLUTION ET LEVEL OF DETAILS -->
-    <instance template="server_box" id="res_win" posparent="window" posref="TL TL" w="276" h="24" y="-733" x="10" />
+    <instance template="server_box" id="res_win" posparent="window" posref="TL TL" w="276" h="24" y="-733" x="10"/>
     <instance template="server_box" id="lod_win" posparent="res_win" posref="TR TL" w="276" h="24" x="16" />
     <instance template="server_box" id="ver_win" posparent="lod_win" posref="TR TL" w="276" h="24" x="26" />
 	<!-- Game Configuration -->
@@ -695,7 +696,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		<!-- *** WELCOME/ERRORS *** -->
 		<!-- ********************** -->
 
-		<instance template="log_box_blank" id="welcome_errors_gr" posparent="eb_login" posref="TR TL" h="180" w="260" x="20" y="0"
+        <instance template="log_box_blank" id="welcome_errors_gr" posparent="eb_login" posref="TR TL" h="180" w="260" x="20" y="0"
 		 blackColor="0 0 0 255" whiteColor="255 255 255 255" />
 
 		<group id="erros_txt" posparent="welcome_errors_gr" posref="TL TL" x="8" y="-8" sizeref="w" child_resize_h="true"
@@ -711,7 +712,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		<!-- ********************** -->
 		<!-- ******* RULES ******** -->
 		<!-- ********************** -->
-		<instance template="server_box" id="rules_gr" posref="BL BL" w="800" h="80" y="70" />
+        <instance template="server_box" id="rules_gr" posref="BL BL" w="800" h="80" y="70" />
 
 		<!-- login rules -->
 		<view type="text" id="rules_login" active="false" posparent="rules_gr" multi_line="true" line_maxw="720" posref="TL TL" hardtext="login rules" fontsize="8" x="10" y="-10"  color="255 255 255 255" />

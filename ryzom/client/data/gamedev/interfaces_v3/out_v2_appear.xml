@@ -2663,7 +2663,7 @@
 
 <anim id="anim_job_on" duration="1.0"  disable_buttons="true" on_finish="" on_finish_params="" >
 
-		<!--
+	<!--
 		<track type="tcb" target="appear:job_options:options:alpha" dynamic="true" >
 		<key time="0.0" value="getprop('ui:outgame:appear:job_options:options:alpha')" 	tension="1.0" easefrom="0"/>
 		<key time="1.0" value="255" 															tension="1.0" easeto="1"/>
@@ -2682,7 +2682,7 @@
 
 <anim id="anim_job_off" duration="1.0"  disable_buttons="true" on_finish="set" on_finish_params="target_property=ui:outgame:appear:job_options:active|value=0" >
 
-		<!--
+	<!--
 		<track type="tcb" target="appear:job_options:options:alpha" dynamic="true" >
 		<key time="0.0" value="getprop('ui:outgame:appear:job_options:options:alpha')" 		tension="1.0" easefrom="0"/>
 		<key time="1.0" value="0" 																tension="1.0" easeto="1"/>

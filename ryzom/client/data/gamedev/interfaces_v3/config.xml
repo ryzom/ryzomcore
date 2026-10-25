@@ -1417,6 +1417,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <define id="pa_bag1" value="%set_base:PACK_ANIMAL1" />
 <define id="pa_bag2" value="%set_base:PACK_ANIMAL2" />
 <define id="pa_bag3" value="%set_base:PACK_ANIMAL3" />
+
 <define id="pa_bag4" value="%set_base:PACK_ANIMAL4" />
 <define id="pa_bag5" value="%set_base:PACK_ANIMAL5" />
 <define id="pa_bag6" value="%set_base:PACK_ANIMAL6" />
@@ -1433,6 +1434,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <define id="faction_index_karavan" value_from_code="getFactionIndex('karavan')" />
 <define id="faction_index_matis" value_from_code="getFactionIndex('matis')" />
 <define id="faction_index_tryker" value_from_code="getFactionIndex('tryker')" />
+
 <define id="faction_index_marauder" value_from_code="getFactionIndex('black_kami')" />
 <define id="faction_index_ranger" value_from_code="getFactionIndex('white_karavan')" />
 <define id="faction_points_kami" value="LOCAL:USER:FACTION_POINTS_%faction_index_kami:VALUE" />
@@ -1443,6 +1445,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <define id="faction_points_tryker" value="LOCAL:USER:FACTION_POINTS_%faction_index_tryker:VALUE" />
 <define id="faction_points_marauder" value="LOCAL:USER:FACTION_POINTS_%faction_index_marauder:VALUE" />
 <define id="faction_points_ranger" value="LOCAL:USER:FACTION_POINTS_%faction_index_ranger:VALUE" />
+
 <define id="faction_icon_kami" value="faction_Kami.tga" />
 <define id="faction_icon_fyros" value="faction_Fyros.tga" />
 <define id="faction_icon_zorai" value="faction_Zorai.tga" />
@@ -1709,6 +1712,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:VARIABLES:MAIL_WAITING" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:FORUM_UPDATED" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:DYNE_UPDATED" type="bool" value="0" />
+
 <variable entry="UI:VARIABLES:CURRENT_TIME" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_SERVER_TICK" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK" type="sint64" value="0" />
@@ -1813,6 +1817,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:CHAT:FONT_SIZE" type="sint32" value="10" />
 <variable entry="UI:SAVE:CHAT:MULTI_LINE_SPACE" type="sint32" value="0" />
 <variable entry="UI:SAVE:CHAT:SHADOWED_TEXT" type="bool" value="true" />
+
 <!-- ******************************* -->
 <!-- * CHAT TRANSLATION PARAMETERS * -->
 <!-- ******************************* -->
@@ -2257,6 +2262,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <!-- Misc -->
 <define id="item_type_to_item_sheet_MEKTOUB_PACKER_TICKET" value="iapd.sitem" />
 <define id="item_type_to_item_sheet_MEKTOUB_MOUNT_TICKET" value="iasd.sitem" />
+
+
 <define id="item_type_to_item_sheet_JOB_ELEMENT" value="rpjob_elementary.sitem" />
 
 <!-- ************************ -->

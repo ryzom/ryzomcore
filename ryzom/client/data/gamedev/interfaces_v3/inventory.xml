@@ -123,24 +123,24 @@
 	<action handler="set" params="target_property=ui:interface:inv_equip:content:equip:midsection:content:visu3d:char3d:active|value=1" />
 </proc>
 <template name="tinv_equip">
-			<group id="equip" posref="MM MM" sizeref="w" child_resize_h="true" child_resize_hmargin="20" x="0" y="-10">
-				<!-- Midsection -->
-				<group id="midsection" posref="TM TM" w="140" h="200" x="22" y="0">
-					<group id="tab_group" posref="TL TL" x="0" y="0" sizeref="w" h="24" >
-						<group type="tab" id="view_select" posref="TL TL" x="0" y="0" child_resize_w="true" h="24" >
-							<ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL"	group="content:equip:midsection:content:visu3d"	hardtext="ui3DView"/>
-							<ctrl style="tab_button_new" id="tab1" posparent="tab0" group="content:equip:midsection:content:itemgroups" hardtext="uimGroup" />
-						</group>
-						<view type="bitmap" id="septab" posparent="view_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
-					</group>
-					<group id="content" posref="BL TL" posparent="tab_group" w="140" h="173">
-						<group id="black" posref="TL TL" sizeref="h" h="0" inherit_gc_alpha="true"/>
-						<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
-						<!-- 3d preview -->
-						<group id="visu3d" sizeref="wh" posref="TL TL" w="-3" h="-3" x="3" y="-3">
-							<scene3d id="char3d" x="0" y="0" active="false" sizeref="wh" posref="TL TL" curcam="cam" render_layer="0" user_interaction="true" rotz_factor="0.017" roty_factor="0" roty_limit_min="0" roty_limit_max="0" dist_factor="0.005" dist_limit_min="2" dist_limit_max="3" ambient="20 20 20" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="0 0 0" >
+	<group id="equip" posref="MM MM" sizeref="w" child_resize_h="true" child_resize_hmargin="20" x="0" y="-10">
+		<!-- Midsection -->
+		<group id="midsection" posref="TM TM" w="140" h="200" x="22" y="0">
+			<group id="tab_group" posref="TL TL" x="0" y="0" sizeref="w" h="24" >
+				<group type="tab" id="view_select" posref="TL TL" x="0" y="0" child_resize_w="true" h="24" >
+					<ctrl style="tab_button_new" id="tab0" x="0" posref="TL TL"	group="content:equip:midsection:content:visu3d"	hardtext="ui3DView"/>
+					<ctrl style="tab_button_new" id="tab1" posparent="tab0" group="content:equip:midsection:content:itemgroups" hardtext="uimGroup" />
+				</group>
+				<view type="bitmap" id="septab" posparent="view_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
+			</group>
+			<group id="content" posref="BL TL" posparent="tab_group" w="140" h="173">
+				<group id="black" posref="TL TL" sizeref="h" h="0" inherit_gc_alpha="true"/>
+				<instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+				<!-- 3d preview -->
+				<group id="visu3d" sizeref="wh" posref="TL TL" w="-3" h="-3" x="3" y="-3">
+					<scene3d id="char3d" x="0" y="0" active="false" sizeref="wh" posref="TL TL" curcam="cam" render_layer="0" user_interaction="true" rotz_factor="0.017" roty_factor="0" roty_limit_min="0" roty_limit_max="0" dist_factor="0.005" dist_limit_min="2" dist_limit_max="3" ambient="20 20 20" sun_ambient="20 20 20" sun_diffuse="80 64 32" sun_specular="0 0 0" sun_direction="0 0 0" >
 
-								<character3d id="char" dblink="player" pos="0.0 26.5 1" rot="0.0 0.0 0.0" />
+						<character3d id="char" dblink="player" pos="0.0 26.5 1" rot="0.0 0.0 0.0" />
 
 						<camera id="cam" fov="30" pos="0.0 24.0 1.9" target="0.0 26.5 1.9" roll="0" />
 
@@ -161,16 +161,16 @@
 						<group type="list" id="itemgroups_list" posref="TR TR" over="true" sizeref="h" w="119" h="-6" x="-2" y="-3">
 
 		</group>
-		<view type="text" id="empty_text" active="false" posref="MM MM" posparent="black" x="0" y="0" color="255 255 255 155" fontsize="9" shadow="true" global_color="false" multi_line="true" line_maxw="105" hardtext="uiEmptyItemgroups" justification="centered" />
-		<ctrl style="skin_scroll" id="scroll_bar" posref="TL TR" posparent="itemgroups_list" x="-4" target="itemgroups_list" target_stepy="4"/>
-	</group>
-	<group id="itemgroup_create" posref="BM TM" posparent="list_container" y="-4" child_resize_w="true">
-		<instance template="edit_box_widget" id="edit_name" posref="TL TL" x="0" y="0" child_resize_h="true" w="104" fontsize="10" prompt="" max_num_chars="255" clear_on_escape="true" reset_focus_on_hide="true" onenter="item_group_create" enter_loose_focus="false" on_focus_lost="proc" on_focus_lost_params="lose_focus_group_create" entry_type="text" tooltip="uittItemgroupNameInput" />
-		<ctrl type="button" id="create_button" button_type="push_button" posref="MR ML" posparent="edit_name" x="2" h="18" w="18" scale="true" tx_normal="r2ed_icon_newactivity.tga" tx_pushed="r2ed_icon_newactivity.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="true" onclick_l="item_group_create" tooltip="uimFaCrea" />
-	</group>
-</group>
-</group>
-</group>
+						<view type="text" id="empty_text" active="false" posref="MM MM" posparent="black" x="0" y="0" color="255 255 255 155" fontsize="9" shadow="true" global_color="false" multi_line="true" line_maxw="105" hardtext="uiEmptyItemgroups" justification="centered" />
+						<ctrl style="skin_scroll" id="scroll_bar" posref="TL TR" posparent="itemgroups_list" x="-4" target="itemgroups_list" target_stepy="4"/>
+					</group>
+					<group id="itemgroup_create" posref="BM TM" posparent="list_container" y="-4" child_resize_w="true">
+						<instance template="edit_box_widget" id="edit_name" posref="TL TL" x="0" y="0" child_resize_h="true" w="104" fontsize="10" prompt="" max_num_chars="255" clear_on_escape="true" reset_focus_on_hide="true" onenter="item_group_create" enter_loose_focus="false" on_focus_lost="proc" on_focus_lost_params="lose_focus_group_create" entry_type="text" tooltip="uittItemgroupNameInput" />
+						<ctrl type="button" id="create_button" button_type="push_button" posref="MR ML" posparent="edit_name" x="2" h="18" w="18" scale="true" tx_normal="r2ed_icon_newactivity.tga" tx_pushed="r2ed_icon_newactivity.tga" tx_over="W_button_14_over.tga" global_color_normal="false" global_color_over="true" global_color_pushed="true" onclick_l="item_group_create" tooltip="uimFaCrea" />
+					</group>
+				</group>
+			</group>
+		</group>
 		
 		<!-- Armor -->
 		<group id="armors" posref="TR TL" posparent="midsection" child_resize_w="true" h="192" x="20" y="-5">
@@ -222,12 +222,12 @@
 </template>
 
 <template name="tinv_hotbar" x="0" y="0">
-    <group id="hotbar" posref="MM MM" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-        <ctrl style="hotbar_item" id="hotbar1" posref="TL TL" x="0" y="0" tx_noitem="W_hotbar1.tga" value="%hotbar:0" tooltip="uittHotbarItem1" />
-        <ctrl style="hotbar_item" id="hotbar2" posref="TR TL" posparent="hotbar1" x="2" y="0" tx_noitem="W_hotbar2.tga" value="%hotbar:1" tooltip="uittHotbarItem2" />
-        <ctrl style="hotbar_item" id="hotbar3" posref="TR TL" posparent="hotbar2" x="2" y="0" tx_noitem="W_hotbar3.tga" value="%hotbar:2" tooltip="uittHotbarItem3" />
-        <ctrl style="hotbar_item" id="hotbar4" posref="TR TL" posparent="hotbar3" x="2" y="0" tx_noitem="W_hotbar4.tga" value="%hotbar:3" tooltip="uittHotbarItem4" />
-        <ctrl style="hotbar_item" id="hotbar5" posref="TR TL" posparent="hotbar4" x="2" y="0" tx_noitem="W_hotbar5.tga" value="%hotbar:4" tooltip="uittHotbarItem5" />
+	<group id="hotbar" posref="MM MM" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
+		<ctrl style="hotbar_item" id="hotbar1" posref="TL TL" x="0" y="0" tx_noitem="W_hotbar1.tga" value="%hotbar:0" tooltip="uittHotbarItem1" />
+		<ctrl style="hotbar_item" id="hotbar2" posref="TR TL" posparent="hotbar1" x="2" y="0" tx_noitem="W_hotbar2.tga" value="%hotbar:1" tooltip="uittHotbarItem2" />
+		<ctrl style="hotbar_item" id="hotbar3" posref="TR TL" posparent="hotbar2" x="2" y="0" tx_noitem="W_hotbar3.tga" value="%hotbar:2" tooltip="uittHotbarItem3" />
+		<ctrl style="hotbar_item" id="hotbar4" posref="TR TL" posparent="hotbar3" x="2" y="0" tx_noitem="W_hotbar4.tga" value="%hotbar:3" tooltip="uittHotbarItem4" />
+		<ctrl style="hotbar_item" id="hotbar5" posref="TR TL" posparent="hotbar4" x="2" y="0" tx_noitem="W_hotbar5.tga" value="%hotbar:4" tooltip="uittHotbarItem5" />
 	</group>
 </template>
 
