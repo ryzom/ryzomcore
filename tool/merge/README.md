@@ -40,7 +40,7 @@ The scripts need Python 3 only; `gen_db.py` additionally needs `lxml`.
 | `MAX_OTHER_PET = 0`, pet inventory transactions (`4924b3563`) | inventory layout | `inventories.h`, `item_type`, pet DB branches stay atys |
 | `CHARAC_BUFFS`, `ACCESS` inventory fields, `_DisplayItemQuality` (`24ceb5df0`, `d512d10f1`) | inventory sync format | atys inventory sync, guild chests, exchange slots |
 | `LOCK`/`WRITE` message removal, exchange `ADD` format | client messages | `msg.xml` is atys |
-| Lua ucstring API removal (`d11936a03`) | atys Lua scripts still use it | `RYZOM_LUA_UCSTRING` stays defined |
+| Lua ucstring API removal (`d11936a03`) | atys Lua scripts still use it | `RYZOM_LUA_UCSTRING` stays defined; its ucstring objects hold UTF-8, so the switch converts nothing |
 | `web/` rewrite, core4 `README.md`, BuildInfo | atys-owned, expected to diverge | whole trees |
 
 ### Things atys has that core4 does not want upstream

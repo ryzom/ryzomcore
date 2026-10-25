@@ -107,11 +107,7 @@ void CControlSheetInfoWaiter::infoReceived()
 
 string CControlSheetInfoWaiter::infoValidated() const
 {
-#ifdef RYZOM_LUA_UCSTRING
-	ucstring help; // Compatibility
-#else
 	string help;
-#endif
 	if (CtrlSheet && !LuaMethodName.empty())
 	{
 		// delegate setup of context he help ( & window ) to lua
@@ -130,11 +126,11 @@ string CControlSheetInfoWaiter::infoValidated() const
 			if (!ls->empty())
 			{
 #ifdef RYZOM_LUA_UCSTRING
-				CLuaIHM::pop(*ls, help);
+				CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
 #else
 				help = ls->toString(-1);
-				ls->pop();
 #endif
+				ls->pop();
 			}
 			else
 			{
@@ -143,11 +139,7 @@ string CControlSheetInfoWaiter::infoValidated() const
 		}
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	return help.toUtf8();
-#else
 	return help;
-#endif
 }
 
 #endif
@@ -202,7 +194,7 @@ int CDBCtrlSheet::luaGetItemInfo(CLuaState &ls)
 int CDBCtrlSheet::luaGetName(CLuaState &ls)
 {
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(ls, ucstring::makeFromUtf8(getItemActualName()));
+	CLuaIHM::pushUCString(ls, getItemActualName()); // Compatibility
 #else
 	ls.push(getItemActualName());
 #endif
@@ -236,7 +228,7 @@ int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
 	string creatorName;
 	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(ls, ucstring::makeFromUtf8(creatorName)); // FIXME: Lua UTF-8
+	CLuaIHM::pushUCString(ls, creatorName); // Compatibility
 #else
 	ls.push(creatorName);
 #endif
@@ -3705,13 +3697,11 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 				if (!ls->empty())
 				{
 #ifdef RYZOM_LUA_UCSTRING
-					ucstring tmpHelp; // Compatibility
-					CLuaIHM::pop(*ls, tmpHelp);
-					help = tmpHelp.toUtf8();
+					CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
 #else
 					help = ls->toString();
-					ls->pop();
 #endif
+					ls->pop();
 				}
 				else
 				{

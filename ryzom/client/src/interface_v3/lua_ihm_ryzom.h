@@ -157,31 +157,31 @@ private:
 	static void	getCallStackAsString(int startStackLevel, std::string &result);
 	static std::string	getDefine(const std::string &def);
 #ifdef RYZOM_LUA_UCSTRING
-	static void			setContextHelpText(const ucstring &text);
+	static void			setContextHelpText(const CLuaUCString &text);
 #else
 	static void			setContextHelpText(const std::string &text);
 #endif
 
 
 #ifdef RYZOM_LUA_UCSTRING
-	static void	messageBox(const ucstring &text);
-	static void	messageBox(const ucstring &text, const std::string &masterGroup);
-	static void	messageBox(const ucstring &text, const std::string &masterGroup, int caseMode);
+	static void	messageBox(const CLuaUCString &text);
+	static void	messageBox(const CLuaUCString &text, const std::string &masterGroup);
+	static void	messageBox(const CLuaUCString &text, const std::string &masterGroup, int caseMode);
 #endif
 	static void	messageBox(const std::string &text);
 	static void	messageBox(const std::string &text, const std::string &masterGroup);
 	static void	messageBox(const std::string &text, const std::string &masterGroup, int caseMode);
 #ifdef RYZOM_LUA_UCSTRING
-	static void	messageBoxWithHelp(const ucstring &text);
-	static void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup);
-	static void	messageBoxWithHelp(const ucstring &text, const std::string &masterGroup, int caseMode);
+	static void	messageBoxWithHelp(const CLuaUCString &text);
+	static void	messageBoxWithHelp(const CLuaUCString &text, const std::string &masterGroup);
+	static void	messageBoxWithHelp(const CLuaUCString &text, const std::string &masterGroup, int caseMode);
 #endif
 	static void	messageBoxWithHelp(const std::string &text);
 	static void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup);
 	static void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup, int caseMode);
 
 #ifdef RYZOM_LUA_UCSTRING
-	static ucstring	replacePvpEffectParam(const ucstring &str, sint32 parameter); // TODO: UTF-8 Lua
+	static CLuaUCString	replacePvpEffectParam(const CLuaUCString &str, sint32 parameter); // TODO: UTF-8 Lua
 #else
 	static std::string	replacePvpEffectParam(const std::string &str, sint32 parameter); // TODO: UTF-8 Lua
 #endif
@@ -194,7 +194,7 @@ private:
 #endif
 	static void	loadBackground(const std::string &bg);
 #ifdef RYZOM_LUA_UCSTRING
-	static ucstring	getPatchLastErrorMessage();
+	static CLuaUCString	getPatchLastErrorMessage();
 #else
 	static std::string	getPatchLastErrorMessage();
 #endif
@@ -205,7 +205,7 @@ private:
 	// GameInfo
 	static sint32 getSkillIdFromName(const std::string &def);
 #ifdef RYZOM_LUA_UCSTRING
-	static ucstring	getSkillLocalizedName(sint32 skillId);
+	static CLuaUCString	getSkillLocalizedName(sint32 skillId);
 #else
 	static std::string	getSkillLocalizedName(sint32 skillId);
 #endif
@@ -216,7 +216,7 @@ private:
 	static void	browseNpcWebPage(const std::string &htmlId, const std::string &url, bool addParameters, double timeout);
 	static void	clearHtmlUndoRedo(const std::string &htmlId);
 #ifdef RYZOM_LUA_UCSTRING
-	static ucstring	getDynString(sint32 dynStringId);
+	static CLuaUCString	getDynString(sint32 dynStringId);
 #else
 	static std::string	getDynString(sint32 dynStringId);
 #endif
@@ -261,7 +261,7 @@ private:
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
 #ifdef RYZOM_LUA_UCSTRING
-	static void	tell(const ucstring &player, const ucstring &msg);
+	static void	tell(const CLuaUCString &player, const CLuaUCString &msg);
 #else
 	static void	tell(const std::string &player, const std::string &msg);
 #endif
@@ -271,7 +271,7 @@ private:
 	// because it would be too easy to write a key recorder ...)
 	static bool	isCtrlKeyDown(); 							     
 #ifdef RYZOM_LUA_UCSTRING
-	static std::string encodeURLUnicodeParam(const ucstring &text);
+	static std::string encodeURLUnicodeParam(const CLuaUCString &text);
 #else
 	static std::string encodeURLUnicodeParam(const std::string &text);
 #endif
@@ -284,7 +284,7 @@ private:
 	static sint32 getTargetForceRegion(); // get 'force region' for current target, or -1 if there's no selected target
 	static sint32 getTargetLevelForce();	// get 'level force' for current target, or -1 if there's no selected target					     
 #ifdef RYZOM_LUA_UCSTRING
-	static ucstring getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
+	static CLuaUCString getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
 #else
 	static std::string getTargetSheet();		// get the name of the target sheet (like 'zoha2old.creature')
 #endif

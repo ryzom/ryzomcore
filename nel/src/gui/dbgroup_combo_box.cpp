@@ -361,14 +361,6 @@ namespace NLGUI
 			return empty;
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	ucstring CDBGroupComboBox::getTextAsUtf16(uint i) const
-	{
-		return ucstring::makeFromUtf8(getText(i));
-	}
-#endif
-
 	// ***************************************************************************
 	uint CDBGroupComboBox::getTextId(uint i) const
 	{
@@ -404,14 +396,6 @@ namespace NLGUI
 		else
 			return empty;
 	}
-
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	ucstring CDBGroupComboBox::getTextureAsUtf16(uint i) const
-	{
-		return ucstring::makeFromUtf8(getTexture(i));
-	}
-#endif
 
 	// ***************************************************************************
 	void		CDBGroupComboBox::setSelection(sint32 val)
@@ -492,14 +476,6 @@ namespace NLGUI
 	{
 		return _ViewText->getText();
 	}
-
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	ucstring CDBGroupComboBox::getViewTextAsUtf16() const
-	{
-		return  CUtfStringView(_ViewText->getText()).toUtf16();
-	}
-#endif
 
 	// ***************************************************************************
 	CViewText *CDBGroupComboBox::getViewText()
@@ -584,9 +560,9 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 #ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
-		ucstring text; // Compatibility
-		nlverify(CLuaIHM::pop(ls, text));
-		addText(text.toUtf8());
+		string text; // Compatibility
+		CLuaIHM::getUCStringOnStack(ls, 1, text);
+		addText(text);
 #else
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		string text = ls.toString(1);
@@ -603,9 +579,9 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 #ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
-		ucstring text; // Compatibility
-		nlverify(CLuaIHM::pop(ls, text));
-		setText((uint) ls.toInteger(1), text.toUtf8());
+		string text; // Compatibility
+		CLuaIHM::getUCStringOnStack(ls, 2, text);
+		setText((uint) ls.toInteger(1), text);
 #else
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		string text = ls.toString(2);
@@ -622,9 +598,9 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 #ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
-		ucstring text;
-		nlverify(CLuaIHM::pop(ls, text));
-		insertText((uint) ls.toInteger(1), text.toUtf8()); // FIXME: Lua should just do UTF-8!
+		string text; // Compatibility
+		CLuaIHM::getUCStringOnStack(ls, 2, text);
+		insertText((uint) ls.toInteger(1), text);
 #else
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		string text = ls.toString(2);
@@ -641,9 +617,9 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 #ifdef RYZOM_LUA_UCSTRING
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
-		ucstring texture;
-		nlverify(CLuaIHM::pop(ls, texture));
-		setTexture((uint) ls.toInteger(1), texture.toUtf8()); // FIXME: Lua should just do UTF-8!
+		string texture; // Compatibility
+		CLuaIHM::getUCStringOnStack(ls, 2, texture);
+		setTexture((uint) ls.toInteger(1), texture);
 #else
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 		string texture = ls.toString(2);
@@ -659,7 +635,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 #ifdef RYZOM_LUA_UCSTRING
-		CLuaIHM::push(ls, getTextAsUtf16((uint) ls.toInteger(1)));
+		CLuaIHM::pushUCString(ls, getText((uint) ls.toInteger(1))); // Compatibility
 #else
 		ls.push(getText((uint)ls.toInteger(1)));
 #endif

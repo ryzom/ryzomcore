@@ -1289,10 +1289,10 @@ namespace NLGUI
 		const char *funcName = "addTextChild";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 #ifdef RYZOM_LUA_UCSTRING
-		ucstring text; // Compatibility
-		if(CLuaIHM::pop(ls, text))
+		std::string text; // Compatibility
+		if(CLuaIHM::getUCStringOnStack(ls, 1, text))
 		{
-			addTextChild(text.toUtf8());
+			addTextChild(text);
 		}
 #else
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);

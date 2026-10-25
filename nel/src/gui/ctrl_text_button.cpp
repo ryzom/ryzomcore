@@ -1064,23 +1064,6 @@ namespace NLGUI
 		return true;
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	void CCtrlTextButton::setTextAsUtf16 (const ucstring &text)
-	{
-		if (_ViewText && !_IsViewTextId)
-			_ViewText->setText(text.toUtf8());
-	}
-
-	// ***************************************************************************
-	ucstring CCtrlTextButton::getTextAsUtf16 () const
-	{
-		if (_ViewText && !_IsViewTextId)
-			return CUtfStringView(_ViewText->getText()).toUtf16();
-		return ucstring("");
-	}
-#endif
-
 	// ***************************************************************************
 	void CCtrlTextButton::setHardText (const std::string &text)
 	{

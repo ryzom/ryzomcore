@@ -4680,7 +4680,7 @@ int CSPhraseComAdpater::luaGetStaCost(CLuaState &ls)
 int CSPhraseComAdpater::luaGetName(CLuaState &ls)
 {
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(ls, this->Phrase.Name);
+	CLuaIHM::pushUCString(ls, this->Phrase.Name.toUtf8()); // Compatibility
 #else
 	ls.push(this->Phrase.Name.toUtf8());
 #endif
@@ -4700,8 +4700,7 @@ int CSPhraseComAdpater::luaGetDesc(CLuaState &ls)
 		if (*desc)
 		{
 #ifdef RYZOM_LUA_UCSTRING
-			ucstring uc = ucstring::makeFromUtf8(desc); // Compatibility
-			CLuaIHM::push(ls, uc);
+			CLuaIHM::pushUCString(ls, desc); // Compatibility
 #else
 			ls.push(desc);
 #endif
