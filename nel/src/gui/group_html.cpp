@@ -87,8 +87,8 @@ namespace NLGUI
 
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
-	// Return URL with https is host is in HSTS list
-	static std::string upgradeInsecureUrl(const std::string &url)
+	// Return URL with https if host is in HSTS list
+	static std::string upgradeHstsUrl(const std::string &url)
 	{
 		if (toLowerAscii(url.substr(0, 7)) != "http://") {
 			return url;
@@ -440,6 +440,26 @@ namespace NLGUI
 		if (!isTrustedDomain(domain))
 			return false;
 		return !options.trustedHttpsOnly || toLowerAscii(scheme) == "https";
+	}
+
+	// An http url to a host that sent Strict-Transport-Security is upgraded to https. When trusted domains are
+	// only trusted over https, an http url to a trusted domain is upgraded too, so a plain http link or
+	// redirect handed out by the web side keeps the page trusted instead of losing its Lua and auth key.
+	// The web side should not hand out such links, so the upgrade is logged.
+	string CGroupHTML::upgradeInsecureUrl(const string &url)
+	{
+		string result = upgradeHstsUrl(url);
+		if (options.trustedHttpsOnly && toLowerAscii(result.substr(0, 7)) == "http://")
+		{
+			CUrlParser uri(result);
+			if (isTrustedDomain(uri.host))
+			{
+				uri.scheme = "https";
+				result = uri.toString();
+				nlinfo("(%s) WEB: '%s' is a trusted domain, '%s' upgraded to https", _Id.c_str(), uri.host.c_str(), url.c_str());
+			}
+		}
+		return result;
 	}
 
 	// Update view after download has finished
