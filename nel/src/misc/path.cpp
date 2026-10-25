@@ -1972,6 +1972,152 @@ string CFile::getFilename (const string &filename)
 		return filename;
 }
 
+string CFile::normalizeRelativePath (const string &path)
+{
+	string result;
+	result.reserve(path.size());
+
+	bool leading = true;
+	char prev = 0;
+	for (string::size_type i = 0; i < path.size(); ++i)
+	{
+		char c = path[i];
+		if (c == '\\')
+			c = '/';
+		if (leading)
+		{
+			if (c == '/')
+				continue; // skip leading separators
+			if (c == '.' && i + 1 < path.size() && (path[i + 1] == '/' || path[i + 1] == '\\'))
+			{
+				++i;
+				continue; // skip leading "./" segments
+			}
+			leading = false;
+		}
+		if (prev == '/' && c == '/')
+			continue; // skip duplicate separators
+		prev = c;
+		result += c;
+	}
+
+	return result;
+}
+
+// Strict UTF-8 decoding for isSafeFilename(): false for a truncated, malformed or overlong sequence,
+// a surrogate or a code point above U+10FFFF. CUtfStringView is deliberately lenient and would
+// decode an overlong "\xC0\xAF" as '/', which is exactly the kind of input this check exists for.
+static bool decodeStrictUtf8 (const string &s, string::size_type &offset, uint32 &c)
+{
+	const uint8 b0 = (uint8)s[offset];
+	uint len;
+	uint32 minValue;
+	if (b0 < 0x80)
+	{
+		c = b0;
+		offset += 1;
+		return true;
+	}
+	else if ((b0 & 0xE0) == 0xC0) { len = 2; c = b0 & 0x1F; minValue = 0x80; }
+	else if ((b0 & 0xF0) == 0xE0) { len = 3; c = b0 & 0x0F; minValue = 0x800; }
+	else if ((b0 & 0xF8) == 0xF0) { len = 4; c = b0 & 0x07; minValue = 0x10000; }
+	else return false; // a continuation byte or a 0xF8+ lead byte
+	if (offset + len > s.size())
+		return false;
+	for (uint i = 1; i < len; ++i)
+	{
+		const uint8 b = (uint8)s[offset + i];
+		if ((b & 0xC0) != 0x80)
+			return false;
+		c = (c << 6) | (b & 0x3F);
+	}
+	if (c < minValue)
+		return false; // overlong
+	if (c > 0x10FFFF || (c >= 0xD800 && c <= 0xDFFF))
+		return false;
+	offset += len;
+	return true;
+}
+
+bool CFile::isSafeFilename (const string &filename, bool allowSubdirs)
+{
+	if (filename.empty())
+		return false;
+	if (filename.size() > 255)
+	{
+		// Largest file name on common Linux file systems (per element; Windows limits the whole
+		// absolute path to 260); anything longer is refused before further validation
+		return false;
+	}
+
+	uint32 prev = 0;
+	string::size_type offset = 0;
+	while (offset < filename.size())
+	{
+		uint32 c;
+		if (!decodeStrictUtf8(filename, offset, c))
+			return false;
+
+		// Forbidden code points: control characters, the Unicode equivalents of path characters
+		// that legacy code pages map onto '/', '\\', ':' or '.', surrogates, the replacement
+		// character, the byte order mark, and the characters Windows forbids in a name
+		if (c <= 0x1F // control characters (C0)
+			|| c == 0x7F // control character (DEL)
+			|| (c >= 0x80 && c <= 0x9F) // control characters (C1)
+			|| c == 0xFF0E // Fullwidth Full Stop (period equivalent)
+			|| c == 0xFF0F // Fullwidth Solidus (forward slash equivalent, CP 874, 1250-1258)
+			|| c == 0xFF3C // Fullwidth Reverse Solidus (backslash equivalent, CP 874, 1250-1258)
+			|| c == 0xFF1A // Fullwidth Colon (colon equivalent, CP 874, 1250-1258)
+			|| c == 0x2215 // Division Slash (forward slash equivalent, CP 1250, 1252, 1254)
+			|| c == 0x2216 // Set Minus (backslash equivalent, CP 1250, 1252, 1254)
+			|| c == 0x2044 // Fraction Slash (forward slash equivalent, CP 1250, 1252, 1254)
+			|| c == 0x2236 // Ratio (colon equivalent, CP 1250, 1252, 1254)
+			|| c == 0x0589 // Armenian Full Stop (colon equivalent, CP 1250, 1252, 1254)
+			|| c == 0x00A5 // Yen Sign (backslash equivalent, CP 932 Japanese)
+			|| c == 0x20A9 // Won Sign (backslash equivalent, CP 949, 1361 Korean)
+			|| c == 0x00B4 // Acute Accent (forward slash equivalent, CP 1253 Greek)
+			|| (c >= 0xD800 && c <= 0xDFFF) // UTF-16 surrogates
+			|| c > 0x10FFFF // above the Unicode range
+			|| c == 0xFFFD // Replacement Character
+			|| c == 0xFEFF // Byte Order Mark
+			|| c == ':' || c == '*' // illegal in a Windows file name
+			|| c == '?' || c == '"' || c == '<' || c == '>' || c == '|')
+		{
+			return false;
+		}
+		if (allowSubdirs)
+		{
+			if ((prev == '.' || prev == ' ') && (c == '/' || c == '\\'))
+			{
+				// A segment ending in a dot or a space: Windows strips those, and this also
+				// catches the "." and ".." segments
+				return false;
+			}
+			if ((prev == '/' || prev == '\\') && c == ' ')
+			{
+				// A segment starting with a space: Windows strips it
+				return false;
+			}
+		}
+		else if (c == '/' || c == '\\')
+		{
+			return false; // no subdirectories, so no separators
+		}
+		prev = c;
+	}
+
+	// A leading or trailing space or a trailing dot is stripped by Windows and gives a different
+	// file name (only U+0020, other whitespace is kept). This also rejects "." and ".." themselves.
+	if (filename[0] == ' ' || filename[filename.size() - 1] == ' ' || filename[filename.size() - 1] == '.')
+		return false;
+
+	// No leading separator
+	if (filename[0] == '/' || filename[0] == '\\')
+		return false;
+
+	return true;
+}
+
 string CFile::getFilenameWithoutExtension (const string &filename)
 {
 	string filename2 = getFilename (filename);
