@@ -169,8 +169,12 @@ namespace NLGUI
 	public:
 		typedef NLMISC::CRefPtr<CLuaState>   TRefPtr;
 
-		// Create a new environement
-		CLuaState( bool debugger = false );
+		/** Create a new environment.
+		 *  \param debugger attach the Lua IDE debugger (LUA_NEVRAX_VERSION only)
+		 *  \param developmentLibraries open the full standard libraries (io, package, os, debug) instead of the
+		 *         restricted set a release client gets; see openStandardLibraries() in lua_helper.cpp
+		 */
+		CLuaState( bool debugger = false, bool developmentLibraries = false );
 		~CLuaState();
 
 

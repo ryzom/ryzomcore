@@ -140,26 +140,27 @@ function WebBrowser:saveWindow(app)
   app.minimized = true
   app.winw = app.uiWindow.w
   app.winh = app.uiWindow.h
-	if app.update_pop_max then
-		app.uiWindow.pop_max_w = 32 + app.closedw
-		app.uiWindow.pop_max_h = 32 + app.closedh
-	end
+  if app.update_pop_max then
+    app.uiWindow.pop_max_w = 32 + app.closedw
+    app.uiWindow.pop_max_h = 32 + app.closedh
+  end
   app.uiWindow.w = app.closedw
   app.uiWindow.h = app.closedh
 end
 
 function WebBrowser:restoreWindow(app)
   if app.minimized then
-		if app.update_pop_max then
-			local ui = getUI("ui:interface")
-			app.uiWindow.pop_max_w = ui.w
-			app.uiWindow.pop_max_h = ui.h
-  end
+    if app.update_pop_max then
+      local ui = getUI("ui:interface")
+      app.uiWindow.pop_max_w = ui.w
+      app.uiWindow.pop_max_h = ui.h
+    end
     app.uiWindow.w = app.winw
     app.uiWindow.h = app.winh
     app.minimized = false
   end
 end
+
 
 ------------------------------------------------------------------------------------------------------------
 --
@@ -250,6 +251,5 @@ function WebBrowser:onClickHome()
     html:browse("home")
   end
 end
-
 -- VERSION --
 FILE_WEBBROWSER_VERSION = 129

@@ -86,13 +86,16 @@ namespace NLGUI
 			std::string languageCode;
 			/// List of domains the widget can consider secure.
 			std::vector<std::string> trustedDomains;
+			/// A trusted domain is only trusted when the page came over https (a trusted page runs Lua and
+			/// receives the player's web auth key, so a plain http page must not be trusted)
+			bool trustedHttpsOnly;
 			/// Web server
 			std::string webServer;
 			std::string webServerDomain;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
 
-			SWebOptions(): curlMaxConnections(5)
+			SWebOptions(): trustedHttpsOnly(true), curlMaxConnections(5)
 			{
 			}
 		};
@@ -961,6 +964,10 @@ namespace NLGUI
 		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
+		// trusted domain and, when trustedHttpsOnly is set, an https url
+		bool isTrustedUrl(const std::string &scheme, const std::string &domain);
+		// url with https where the client knows it must be: an HSTS host, or a trusted domain when trustedHttpsOnly is set
+		std::string upgradeInsecureUrl(const std::string &url);
 		void setImage(CViewBase *view, const std::string &file, const TImageType type);
 		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
 

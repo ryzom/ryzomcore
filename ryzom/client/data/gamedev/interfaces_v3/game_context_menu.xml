@@ -38,7 +38,6 @@
 	<action id="mr1"					name=""							handler="mission_ring"					params="id=1" />
 	<action id="mr2"					name=""							handler="mission_ring"					params="id=2" />
 	<action id="mr3"					name=""							handler="mission_ring"					params="id=3" />
-
 	<!-- trade -->
 	<action id="trade_item"				name="uimGcmTrade"				handler="context_trade_item"			params=""	icon="ico_mission_casket.tga" />
 	<action id="trade_pact"				name="uimGcmTradePact"			handler="context_trade_pact"			params=""	icon="ico_mission_casket.tga" />
@@ -107,7 +106,6 @@
 
 	<action id="stop"					name="uimGcmStopMove"			handler="context_stop"					params="" icon="r2_hand_pan.tga"/>
 	<action id="unseat"					name="uimUnmount"				handler="beast_order"	params="order=unmount|beast_index=0" icon="mektoub_unmount.tga"/>
-
 
 	<separator/>
 	<!-- Action for GMs -->

@@ -357,31 +357,33 @@
 		<view type="text" id="forum_nb" posref="BR BR" x="0" y="0" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
 	</group>
 	<link expr="@UI:VARIABLES:FORUM_UPDATED" target="forum:active" />
-		<!-- show/hide webig calendar -->
-		<group id="calendar" posref="TL TL" group_onclick_l="lua" group_params_l="game:displayCalendar()" tooltip="uiMFDate" w="24" h="24" x="4" y="-20">
-			<view id="envelop" type="bitmap" texture="calendar.tga" global_color="false" />
-			<view type="text" id="date" posref="BM BM" x="0" y="2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="19" />
-		</group>
-		<!-- show/hide map -->
-		<group id="map" posref="BL BL" group_onclick_l="show_hide" group_params_l="map" tooltip="uiMk_window5" w="24" h="24" x="4" y="22">
-			<view id="envelop" type="bitmap" texture="ico_hatred.tga" global_color="false" />
-		</group>
-		<!-- show/hide dynE -->
-		<group id="dyne" posref="TR TR" group_onclick_l="lua" group_params_l="game:displayDynE()" tooltip="uiR2Events" active="false" w="24" h="24" x="-7" y="-50">
-			<view id="envelop" type="bitmap" texture="dyn_event_compass.tga" global_color="false" />
-			<view type="text" id="dyne_nb" posref="BR BR" x="-1" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
-		</group>
-		<!-- show/hide whatsup -->
-		<group id="whatsup" posref="BL BL" group_onclick_l="lua" group_params_l="game:displayWhatsUp()" tooltip="uiTalkMemMsg10" active="false" w="24" h="24" x="4" y="50">
-			<view id="envelop" type="bitmap" texture="whatsup_mini.tga" global_color="false" />
-		</group>
-		<!-- show/hide help -->
-		<group id="help" posref="TR TR" group_onclick_l="lua" group_params_l="AppZone:handle(1092)" tooltip="uiMk_window8" w="24" h="24" x="-4" y="-20">
-			<view id="envelop" type="bitmap" texture="tb_help2.tga" global_color="false" />
-		</group>
 
-		<view type="text" id="dist" posref="BM BM" x="0" y="2" hardtext="uiRadarZoom0" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" line_maxw="164" over_extend_view_text="false" />
-		<ctrl type="button" id="open_menu" button_type="push_button" posref="BM BM" x="0" y="2" w="180" h="14" render_layer="5" scale="true" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="255 255 255 0" col_over="255 255 255 50" col_pushed="255 255 255 100" tooltip="uittCompassDistance" tooltip_parent="win" onclick_l="active_menu" params_l="menu=ui:interface:compass_menu" />
+
+	<!-- show/hide webig calendar -->
+	<group id="calendar" posref="TL TL" group_onclick_l="lua" group_params_l="game:displayCalendar()" tooltip="uiMFDate" w="24" h="24" x="4" y="-20">
+		<view id="envelop" type="bitmap" texture="calendar.tga" global_color="false" />
+		<view type="text" id="date" posref="BM BM" x="0" y="2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="19" />
+	</group>
+	<!-- show/hide map -->
+	<group id="map" posref="BL BL" group_onclick_l="show_hide" group_params_l="map" tooltip="uiMk_window5" w="24" h="24" x="4" y="22">
+		<view id="envelop" type="bitmap" texture="ico_hatred.tga" global_color="false" />
+	</group>
+	<!-- show/hide dynE -->
+	<group id="dyne" posref="TR TR" group_onclick_l="lua" group_params_l="game:displayDynE()" tooltip="uiR2Events" active="false" w="24" h="24" x="-7" y="-50">
+		<view id="envelop" type="bitmap" texture="dyn_event_compass.tga" global_color="false" />
+		<view type="text" id="dyne_nb" posref="BR BR" x="-1" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
+	</group>
+	<!-- show/hide whatsup -->
+	<group id="whatsup" posref="BL BL" group_onclick_l="lua" group_params_l="game:displayWhatsUp()" tooltip="uiTalkMemMsg10" active="false" w="24" h="24" x="4" y="50">
+		<view id="envelop" type="bitmap" texture="whatsup_mini.tga" global_color="false" />
+	</group>
+	<!-- show/hide help -->
+	<group id="help" posref="TR TR" group_onclick_l="lua" group_params_l="AppZone:handle(1092)" tooltip="uiMk_window8" w="24" h="24" x="-4" y="-20">
+		<view id="envelop" type="bitmap" texture="tb_help2.tga" global_color="false" />
+	</group>
+
+	<view type="text" id="dist" posref="BM BM" x="0" y="2" hardtext="uiRadarZoom0" shadow="true" color="255 255 255 255" global_color="false" fontsize="12" line_maxw="164" over_extend_view_text="false" />
+	<ctrl type="button" id="open_menu" button_type="push_button" posref="BM BM" x="0" y="2" w="180" h="14" render_layer="5" scale="true" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" color="255 255 255 0" col_over="255 255 255 50" col_pushed="255 255 255 100" tooltip="uittCompassDistance" tooltip_parent="win" onclick_l="active_menu" params_l="menu=ui:interface:compass_menu" />
 
 	<scene3d id="arrow3d" x="0" y="0" w="142" h="142" posref="TM TM" curcam="cam"
 		ambient="0 0 0" sun_ambient="20 20 20" sun_diffuse="0 0 0" sun_specular="0 0 0" sun_direction="2.0 1.0 -1.0">

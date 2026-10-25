@@ -937,7 +937,6 @@ function RingAccessPoint:newScenario()
 		self:getWindow().active = false
 	end
 end
-
-
 -- VERSION --
 FILE_RING_ACCESS_POINT_VERSION = 31
+
