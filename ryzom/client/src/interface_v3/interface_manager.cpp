@@ -496,6 +496,7 @@ CInterfaceManager::CInterfaceManager()
 	CViewTextFormated::setFormatter( &RyzomTextFormatter );
 
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
+	CGroupHTML::options.trustedHttpsOnly = ClientCfg.WebIgTrustedHttpsOnly;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
@@ -706,6 +707,14 @@ void CInterfaceManager::initLUA()
 
 	// script errors are reported in game, not only in the log
 	CLuaManager::setScriptErrorReporter(&LuaScriptErrorReporterRyzom);
+
+#if !FINAL_VERSION
+	// A development client with AllowDebugLua gets the full Lua standard libraries (io, package, os, debug)
+	// for the R2 editor's file exports and profiler and for MobDebug. A release client never does: the same
+	// Lua state runs scripts served by the trusted web domains.
+	if (ClientCfg.AllowDebugLua)
+		CLuaManager::enableDevelopmentLibraries();
+#endif
 
 	parser->initLUA();
 
