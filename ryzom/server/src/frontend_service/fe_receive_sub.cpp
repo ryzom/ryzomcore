@@ -117,6 +117,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Malformed multi-part;";
 	if ( reasons & MalformedAckSync )
 		s += " Malformed ack sync;";
+	if ( reasons & MisplacedImpulse )
+		s += " Impulse not valid in this state;";
 	return s;
 }
 
