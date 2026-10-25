@@ -12351,7 +12351,12 @@ void CCharacter::abandonMission(uint8 indexClient)
 			{
 				templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
 				if ( templ == NULL || templ->Tags.NoList ) // skip invalid or invisible missions
+				{
+					// and forget them: when no visible mission has the index, the last one skipped was abandoned
+					mission = NULL;
+					templ = NULL;
 					continue;
+				}
 			}
 			break;
 		}
