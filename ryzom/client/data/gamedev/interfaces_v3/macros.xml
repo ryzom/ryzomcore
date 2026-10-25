@@ -306,8 +306,7 @@
 		 
 		 
 		<ctrl style="new_element_header" id="add_button" posref="MR MR" x="-16" y="0" wmargin="8" hardtext="uittNewMacro"
-				 onclick_l="macros_new_macro" />
-
+				 onclick_l="macros_new_macro" />					
 		<ctrl style="new_element_header" id="save_button" posparent="add_button" posref="ML MR" x="-4" y="0" wmargin="8" hardtext="uiSaveUI"
 				 onclick_l="save_ui" />
 

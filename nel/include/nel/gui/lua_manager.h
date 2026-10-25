@@ -50,6 +50,8 @@ namespace NLGUI
 
 		/// Enables attaching the Lua debugger in the CLuaState instance, only matters on startup.
 		static void enableLuaDebugging(){ debugLua = true;	}
+		/// the next Lua state gets the full standard libraries (io, package, os, debug); development builds only
+		static void enableDevelopmentLibraries(){ developmentLibraries = true; }
 
 		/** Reporter of script errors.
 		  * The library only has the log. The application installs a reporter that can show the error to the UI
@@ -92,6 +94,7 @@ namespace NLGUI
 
 		static CLuaManager *instance;
 		static bool debugLua;
+		static bool developmentLibraries;
 		static bool editorMode;
 
 		NLGUI::CLuaState *luaState;

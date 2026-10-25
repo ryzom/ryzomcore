@@ -186,7 +186,7 @@
 		<leaf name="ACCEPTED" type="I1" />
 		<leaf name="MONEY" type="I64" />
 		<branch name="GIVE">
-				<branch name="" count="10"> <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
+			<branch name="" count="10"> <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
 				<!-- Common Item Data -->
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
@@ -207,7 +207,7 @@
 			</branch>
 		</branch>
 		<branch name="RECEIVE">
-				<branch name="" count="10"> <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
+			<branch name="" count="10"> <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
 				<!-- Common Item Data -->
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />

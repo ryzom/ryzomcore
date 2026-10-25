@@ -1193,9 +1193,9 @@ int CEditor::luaGenInstanceName(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
 #ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
-	ucstring baseName;
+	std::string baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
-	CLuaIHM::push(ls, getEditor().genInstanceName(baseName));
+	CLuaIHM::pushUCString(ls, getEditor().genInstanceName(ucstring::makeFromUtf8(baseName)).toUtf8()); // FIXME: Ring UTF-8
 #else
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	ls.push(getEditor().genInstanceName(ucstring::makeFromUtf8(ls.toString(2))).toUtf8()); // FIXME: Ring UTF-8
@@ -1212,9 +1212,9 @@ int CEditor::luaIsPostFixedByNumber(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method
 #ifdef RYZOM_LUA_UCSTRING
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 2); // name
-	ucstring baseName;
+	std::string baseName;
 	nlverify(CLuaIHM::getUCStringOnStack(ls, 2, baseName));
-	ls.push(getEditor().isPostFixedByNumber(baseName));
+	ls.push(getEditor().isPostFixedByNumber(ucstring::makeFromUtf8(baseName))); // FIXME: Ring UTF-8
 #else
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	ls.push(getEditor().isPostFixedByNumber(ucstring::makeFromUtf8(ls.toString(2)))); // FIXME: Ring UTF-8
@@ -1353,9 +1353,13 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	R2::TMissionItem mi;
 	mi.SheetId = (uint32) ls.toInteger(2);
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::getUCStringOnStack(ls, 3, mi.Name);
-	CLuaIHM::getUCStringOnStack(ls, 4, mi.Description);
-	CLuaIHM::getUCStringOnStack(ls, 5, mi.Comment);
+	std::string text;
+	CLuaIHM::getUCStringOnStack(ls, 3, text);
+	mi.Name.fromUtf8(text);
+	CLuaIHM::getUCStringOnStack(ls, 4, text);
+	mi.Description.fromUtf8(text);
+	CLuaIHM::getUCStringOnStack(ls, 5, text);
+	mi.Comment.fromUtf8(text);
 #else
 	mi.Name = ucstring::makeFromUtf8(ls.toString(3));
 	mi.Description = ucstring::makeFromUtf8(ls.toString(4));
@@ -7643,7 +7647,7 @@ class CAHR2Undo : public IActionHandler
 			const ucstring *actionName = historic.getPreviousActionName();
 			nlassert(actionName);
 #ifdef RYZOM_LUA_UCSTRING
-			CLuaIHM::push(getEditor().getLua(), *actionName);
+			CLuaIHM::pushUCString(getEditor().getLua(), actionName->toUtf8()); // Compatibility
 #else
 			getEditor().getLua().push((*actionName).toUtf8());
 #endif
@@ -7676,7 +7680,7 @@ class CAHR2Redo : public IActionHandler
 			const ucstring *actionName = historic.getNextActionName();
 			nlassert(actionName);
 #ifdef RYZOM_LUA_UCSTRING
-			CLuaIHM::push(getEditor().getLua(), *actionName);
+			CLuaIHM::pushUCString(getEditor().getLua(), actionName->toUtf8()); // Compatibility
 #else
 			getEditor().getLua().push((*actionName).toUtf8());
 #endif

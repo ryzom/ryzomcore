@@ -14,7 +14,6 @@ game.PrevSessionMission = - 1
 
 -- flag set to true when the in game db has been initialized
 game.InGameDbInitialized = false
-
 game.WebMissionLastDesc = {}
 
 ------------------------------------------------------------------------------------------------------------
@@ -393,7 +392,7 @@ function game:startNpcWebPage()
 	if not self.NpcWebPage.WaitingDynStr then
 		self.NpcWebPage.UrlTextId = getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_URL");
 	end
-	self.NpcWebPage.BrowseDone = false;
+	self.NpcWebPage.BrowseDone= false;
 
 	available = isDynStringAvailable(self.NpcWebPage.UrlTextId)
 	if available then
@@ -490,7 +489,6 @@ function game:updateFameBar(path)
 	local	thresholdTrade = getDbProp('SERVER:FAME:THRESHOLD_TRADE');
 	local	fameValue = getDbProp(path .. ':VALUE');
 	local	fameMax = getDbProp(path .. ':THRESHOLD');
-
 	-- known/unknown fame
 	local	fameVisible = fameValue ~= -128
 	if fameVisible then
@@ -1723,7 +1721,6 @@ function game:checkRpItemsUpdate()
 	else
 		setOnDraw(getUI("ui:interface:rpitems_actions"), "")
 	end
-
 end
 
 
@@ -1758,6 +1755,7 @@ function game:onInGameDbInitialized()
 	game:openChannels()
 
 	runAH(nil, "proc", "init_3d_preview")
+
 	runAH(nil, "sort_tribefame", "")
 	if getDbProp("UI:SAVE:AUTO_LIGHT") == 1 then
 		runAH(nil, "light_on", "")
@@ -1766,7 +1764,7 @@ end
 
 function game:initWebIg()
 	if not game.webigInitialized then
-	game.webigInitialized = true
+		game.webigInitialized = true
 		openUrlInBg("https://app.ryzom.com/index.php?init_webig=1")
 
 		game.setupWebigWithDBInitialized = true
@@ -1800,6 +1798,7 @@ end
 function game:onWebIgReady()
 	-- Deprecated
 end
+
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ at the start of a far TP (log to char selection or far tp)
 function game:onFarTpStart()
@@ -2023,7 +2022,7 @@ function game:ensureWebMissionVisibility()
 	local maxNumMissions = 2 * self:getGroupMissionFirstIndex()
 	for k = 0, maxNumMissions - 1 do
 		if getDbProp(self:getMissionDbPath(k) .. ":TITLE") ~= 0 then
-		missionsH = missionsH + 17
+			missionsH = missionsH + 17
 		end
 	end
 

@@ -43,11 +43,11 @@ namespace NLGUI
 					 Float,
 					 String,
 #ifdef RYZOM_LUA_UCSTRING
-					 UCString,
+					 UCString, // a String that Lua sees as a ucstring object
 #endif
 					 StringRef,
 #ifdef RYZOM_LUA_UCSTRING
-					 UCStringRef,
+					 UCStringRef, // a StringRef that Lua sees as a ucstring object
 #endif
 					 RGBA,
 					 LuaMethod
@@ -58,9 +58,7 @@ namespace NLGUI
 		typedef uint32			(CReflectable::* TGetUInt32) () const;
 		typedef float			(CReflectable::* TGetFloat) () const;
 		typedef std::string		(CReflectable::* TGetString) () const;
-		typedef ucstring		(CReflectable::* TGetUCString) () const;
 		typedef const std::string &		(CReflectable::* TGetStringRef) () const;
-		typedef const ucstring &		(CReflectable::* TGetUCStringRef) () const;
 		typedef NLMISC::CRGBA	(CReflectable::* TGetRGBA) () const;
 		//
 		typedef void   (CReflectable::* TSetBool) (bool);
@@ -68,7 +66,6 @@ namespace NLGUI
 		typedef void   (CReflectable::* TSetUInt32) (uint32);
 		typedef void   (CReflectable::* TSetFloat) (float);
 		typedef void   (CReflectable::* TSetString) (const std::string &);
-		typedef void   (CReflectable::* TSetUCString) (const ucstring &);
 		typedef void   (CReflectable::* TSetRGBA) (NLMISC::CRGBA col);
 		//
 		typedef int   (CReflectable:: *TLuaMethod) (CLuaState &luaState);
@@ -83,13 +80,7 @@ namespace NLGUI
 			TGetUInt32		GetUInt32;
 			TGetFloat		GetFloat;
 			TGetString		GetString;
-#ifdef RYZOM_LUA_UCSTRING
-			TGetUCString	GetUCString;
-#endif
 			TGetStringRef	GetStringRef;
-#ifdef RYZOM_LUA_UCSTRING
-			TGetUCStringRef	GetUCStringRef;
-#endif
 			TGetRGBA		GetRGBA;
 			TLuaMethod		GetLuaMethod; // lua method can only be obtained, not written ...
 		} GetMethod;
@@ -100,9 +91,6 @@ namespace NLGUI
 			TSetUInt32		SetUInt32;
 			TSetFloat		SetFloat;
 			TSetString		SetString;
-#ifdef RYZOM_LUA_UCSTRING
-			TSetUCString	SetUCString;
-#endif
 			TSetRGBA		SetRGBA;
 		} SetMethod;
 		// name of the property
@@ -238,16 +226,13 @@ namespace NLGUI
 			typedef uint32			(className::* TGetUInt32a) () const;                       \
 			typedef float			(className::* TGetFloata) () const;                        \
 			typedef std::string		(className::* TGetStringa) () const;                       \
-			typedef ucstring		(className::* TGetUCStringa) () const;                     \
 			typedef const std::string &		(className::* TGetStringRefa) () const;                       \
-			typedef const ucstring &		(className::* TGetUCStringRefa) () const;                     \
 			typedef NLMISC::CRGBA	(className::* TGetRGBAa) () const;                         \
 			typedef void   (className::* TSetBoola) (bool);                                    \
 			typedef void   (className::* TSetSInt32a) (sint32);                                \
 			typedef void   (className::* TSetUInt32a) (uint32);                                \
 			typedef void   (className::* TSetFloata) (float);                                  \
 			typedef void   (className::* TSetStringa) (const std::string &);                   \
-			typedef void   (className::* TSetUCStringa) (const ucstring &);                    \
 			typedef void   (className::* TSetRGBAa) (NLMISC::CRGBA col);                       \
 			typedef int   (className:: *TLuaMethoda) (CLuaState &luaState);                    \
 			nlunreferenced(props);
@@ -309,14 +294,14 @@ namespace NLGUI
 	}
 
 #ifdef RYZOM_LUA_UCSTRING
-	// export a unicode string value, by giving the name of the get and the set method
+	// export a string value that Lua sees as a ucstring object, by giving the name of the get and the set method
 	#define REFLECT_UCSTRING(exportName, getMethod, setMethod)                         \
 	{                                                                                  \
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::UCString;                                      \
-		prop.GetMethod.GetUCString = (CReflectedProperty::TGetUCString) static_cast<TGetUCStringa>(&A::getMethod); \
-		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
+		prop.GetMethod.GetString = (CReflectedProperty::TGetString) static_cast<TGetStringa>(&A::getMethod); \
+		prop.SetMethod.SetString = (CReflectedProperty::TSetString) static_cast<TSetStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 #endif
@@ -333,14 +318,14 @@ namespace NLGUI
 	}
 
 #ifdef RYZOM_LUA_UCSTRING
-	// export a unicode string value, by giving the name of the get and the set method
+	// export a string value that Lua sees as a ucstring object, by giving the name of the get and the set method
 	#define REFLECT_UCSTRING_REF(exportName, getMethod, setMethod)                         \
 	{                                                                                  \
 		CReflectedProperty prop;                                                       \
 		prop.Name = exportName;                                                        \
 		prop.Type = CReflectedProperty::UCStringRef;                                   \
-		prop.GetMethod.GetUCStringRef = (CReflectedProperty::TGetUCStringRef) static_cast<TGetUCStringRefa>(&A::getMethod); \
-		prop.SetMethod.SetUCString = (CReflectedProperty::TSetUCString) static_cast<TSetUCStringa>(&A::setMethod); \
+		prop.GetMethod.GetStringRef = (CReflectedProperty::TGetStringRef) static_cast<TGetStringRefa>(&A::getMethod); \
+		prop.SetMethod.SetString = (CReflectedProperty::TSetString) static_cast<TSetStringa>(&A::setMethod); \
 		props.push_back(prop);                                                         \
 	}
 #endif

@@ -1872,20 +1872,6 @@ namespace NLGUI
 		return NLMISC::CUtfStringView(_InputString).toUtf8();
 	}
 
-#ifdef RYZOM_LUA_UCSTRING
-	// ***************************************************************************
-	void	CGroupEditBox::setInputStringAsUtf16(const ucstring &str)
-	{
-		setInputStringAsUtf32(CUtfStringView(str).toUtf32());
-	}
-
-	// ***************************************************************************
-	ucstring	CGroupEditBox::getInputStringAsUtf16() const
-	{
-		return CUtfStringView(_InputString).toUtf16();
-	}
-#endif
-
 	// ***************************************************************************
 	void CGroupEditBox::setCommand(const std::string &command, bool execute)
 	{

@@ -94,6 +94,7 @@ function outgame:procGenerateName()
 	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
 	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
 	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
+
 	local application = getClientCfgVar("Application")
 	getUI("ui:outgame:appear:job_options:generator:html"):browse("https://app.ryzom.com/app_arcc/outgame_generate_name.php?application="..tostring(application["0"]).."&dbNameRace="..dbNameRace.."&dbNameSubRaceFirstName="..dbNameSubRaceFirstName.."&dbNameSubRaceLastName="..dbNameSubRaceLastName)
 end

@@ -166,7 +166,7 @@
 			<value value="7" hardtext="uitabInvPAZig3"/>
 		</parameter>
 	</action>
-		<action name="beast_order" hardtext="uimEnterBag">
+	<action name="beast_order" hardtext="uimEnterBag">
 		<parameter name="order" value="enter_bag" type="%action_param_hidden"/>
 		<parameter hardtext="uiAnimals" name="beast_index" value="5">
 			<value value="5" hardtext="uitabInvPAZig1"/>
@@ -187,8 +187,8 @@
 <action_category name="movement" hardtext="uiMovement" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm, misc">
 	<action name="toggle_sit_stand"	hardtext="uiMoveToggleSitStand" contexts="game, r2ed_anim_test"/>
 	<action name="command" hardtext="uimFollow" contexts="game, misc">
-    	<parameter name="" value="follow" type="%action_param_hidden"/>
-    </action>
+		<parameter name="" value="follow" type="%action_param_hidden"/>
+	</action>
 	<action name="forward"			hardtext="uiMoveForward" macroisable="false" />
 	<action name="backward"			hardtext="uiMoveBackward" macroisable="false" />
 	<action name="turn_left"		hardtext="uiMoveTurnLeft" macroisable="false" />

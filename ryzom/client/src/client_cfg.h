@@ -337,6 +337,8 @@ struct CClientConfig
 
 	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
+	/// A trusted domain is only trusted over https; a final build cannot turn this off
+	bool			WebIgTrustedHttpsOnly;
 	uint			WebIgNotifInterval; // value in minutes for notification thread
 
 	sint32			CurlMaxConnections;

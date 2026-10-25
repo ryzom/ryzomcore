@@ -81,12 +81,6 @@ namespace NLGUI
 		sint64		getInputStringAsInt64() const;
 		void		setInputStringAsFloat(float val);
 		float		getInputStringAsFloat() const;
-#ifdef RYZOM_LUA_UCSTRING
-		void		setInputStringAsUtf16(const ucstring &str); // Compatibility
-		ucstring    getInputStringAsUtf16() const; // Compatibility
-		void		setInputStringAsUtf32(const ::u32string &str) { setInputStringRef(str); } // Compatibility
-		::u32string   getInputStringAsUtf32() const { return _InputString; } // Compatibility
-#endif
 		void		setColor(NLMISC::CRGBA col);
 
 
@@ -196,7 +190,7 @@ namespace NLGUI
 			REFLECT_STRING("input_string", getInputString, setInputString);
 			REFLECT_STRING("prompt", getPrompt, setPrompt);
 #ifdef RYZOM_LUA_UCSTRING
-			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16); // Compatibility
+			REFLECT_UCSTRING("uc_input_string", getInputString, setInputString); // Compatibility
 #endif
 		REFLECT_EXPORT_END
 

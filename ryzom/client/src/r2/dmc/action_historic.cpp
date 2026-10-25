@@ -589,7 +589,7 @@ void CActionHistoric::CRequestEraseNode::undo(IDynamicMapClient *dmc, CScenario 
 	_OldValue = nullptr;
 
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(_InstanceId));
+	CLuaIHM::pushUCString(getEditor().getLua(), _InstanceId); // Compatibility
 #else
 	getEditor().getLua().push(_InstanceId);
 #endif
@@ -623,7 +623,7 @@ void CActionHistoric::CRequestInsertNode::redo(IDynamicMapClient *dmc, CScenario
 
 	CObject* nodeId = _Value->findAttr("InstanceId");
 #ifdef RYZOM_LUA_UCSTRING
-	CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(nodeId->toString()));
+	CLuaIHM::pushUCString(getEditor().getLua(), nodeId->toString()); // Compatibility
 #else
 	getEditor().getLua().push(nodeId->toString());
 #endif
@@ -652,7 +652,7 @@ void CActionHistoric::CRequestInsertNode::undo(IDynamicMapClient *dmc, CScenario
 			dmc->doRequestEraseNode(instanceId, attrName, position);
 
 #ifdef RYZOM_LUA_UCSTRING
-			CLuaIHM::push(getEditor().getLua(), ucstring::makeFromUtf8(instanceId));
+			CLuaIHM::pushUCString(getEditor().getLua(), instanceId); // Compatibility
 #else
 			getEditor().getLua().push(instanceId);
 #endif

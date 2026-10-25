@@ -34,7 +34,7 @@
 </template>
 
 <template name="server_box" posref="TL TL" x="0" y="0" w="64" h="16"  id="" posparent="parent" sizeref="" keep="true" >
-	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref">
+	<group id="#id" posparent="#posparent" posref="#posref" w="#w" h="#h" x="#x" y="#y" sizeref="#sizeref" >
 		<group id="bg" sizeref="hw" h="0" w="0" />
 		<view type="bitmap" id="bk" scale="true" posparent="bg" posref="MM MM" sizeref="hw" w="-16" h="-16" texture="log_eb_m.tga" />
 		<view type="bitmap" id="tl" texture="log_eb_tl.tga" posref="TL TL" />
