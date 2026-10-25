@@ -604,7 +604,7 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 
 bool CQuicConnection::sendDatagramSwap(NLMISC::CBitMemStream &buffer, uint32 size)
 {
-	if (m->Connection && m->State && CQuicConnection::Connected && size <= m->MaxSendLength.load() && size <= buffer.length())
+	if (m->Connection && m->State == CQuicConnection::Connected && size <= m->MaxSendLength.load() && size <= buffer.length())
 	{
 		if (m->SendBusy.testAndSet())
 		{
