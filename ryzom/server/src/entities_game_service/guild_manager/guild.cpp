@@ -723,6 +723,9 @@ void CGuild::removeMission( uint idx, TMissionResult result)
 		_Missions[idx]->clearUsersJournalEntry();
 	}
 
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
+
 	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
 	delete _Missions[idx];
 	_Missions.erase(_Missions.begin() + idx) ;

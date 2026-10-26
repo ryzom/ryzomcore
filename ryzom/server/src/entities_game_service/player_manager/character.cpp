@@ -12421,6 +12421,10 @@ void CCharacter::removeMission(TAIAlias alias, /*TMissionResult*/ uint32 result)
 		mission->clearUsersJournalEntry();
 	}
 
+	// a mission removed without a failure (a success before its queue_end step, a command) leaves its queue too; the
+	// character is given, the missions that failed while it was offline are removed before it is their taker
+	mission->leaveWaitingQueue(_Id);
+
 	CMissionManager::getInstance()->deInstanciateMission(mission);
 	_Missions->deleteFromMissions( alias );
 	updateTarget();

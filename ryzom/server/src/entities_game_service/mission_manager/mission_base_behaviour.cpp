@@ -845,14 +845,7 @@ void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 	nlassert(templ);
 
 	// if mission was in a waiting queue, removed player from queue manager
-	if (_Mission->getWaitingQueueId() != 0)
-	{
-		CCharacter * user = getMainEntity();
-		if (user)
-		{
-			CMissionQueueManager::getInstance()->removePlayerFromQueue(user->getId(), _Mission->getWaitingQueueId());
-		}
-	}
+	leaveWaitingQueue();
 
 	// remove the mission from the timed mission container
 	// we have to do that because jumps can prevent the mission from being deleted
@@ -963,6 +956,31 @@ void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 		// stop children missions
 		stopChildren();
 	}
+}
+
+//----------------------------------------------------------------------------
+void CMissionBaseBehaviour::leaveWaitingQueue(const CEntityId &owner)
+{
+	const uint32 queueId = _Mission->getWaitingQueueId();
+	if (queueId == 0)
+		return;
+
+	// The entity that waits is the main entity when the queue_start step was activated: a team can have another leader
+	// and a guild another highest grade online since, and the entry of a player who went offline no longer holds the
+	// mission
+	std::vector<CEntityId> candidates;
+	if (owner != CEntityId::Unknown)
+		candidates.push_back(owner);
+	CCharacter *user = getMainEntity();
+	if (user)
+		candidates.push_back(user->getId());
+	std::vector<TDataSetRow> entities;
+	getEntities(entities);
+	for (uint i = 0; i < entities.size(); ++i)
+		candidates.push_back(getEntityIdFromRow(entities[i]));
+	// once taken out, the mission no longer waits: removing it after its failure does not look for the entity again
+	if (CMissionQueueManager::getInstance()->removeMissionFromQueue(queueId, _Mission, candidates))
+		_Mission->setWaitingQueueId(0);
 }
 
 //----------------------------------------------------------------------------

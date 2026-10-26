@@ -131,6 +131,42 @@ void CMissionQueue::clearOfflinePlayer()
 }
 
 // ----------------------------------------------------------------------------
+NLMISC::CEntityId CMissionQueue::getEntityWaitingFor(const CMission *mission) const
+{
+	if (mission == NULL)
+		return NLMISC::CEntityId::Unknown;
+
+	const CMission *criticalPartMission = m_CriticalPartMission;
+	if (_CriticalPartEntityId != CEntityId::Unknown && criticalPartMission == mission)
+		return _CriticalPartEntityId;
+
+	for (list<CWaitingEntity>::const_iterator it = _Entities.begin(); it != _Entities.end(); ++it)
+	{
+		const CMission *waitingMission = (*it).Mission;
+		if (waitingMission == mission)
+			return (*it).Id;
+	}
+	return NLMISC::CEntityId::Unknown;
+}
+
+// ----------------------------------------------------------------------------
+bool CMissionQueue::waitsWithoutMission(const NLMISC::CEntityId &id) const
+{
+	if (id == CEntityId::Unknown)
+		return false;
+
+	if (_CriticalPartEntityId == id)
+		return m_CriticalPartMission == NULL;
+
+	for (list<CWaitingEntity>::const_iterator it = _Entities.begin(); it != _Entities.end(); ++it)
+	{
+		if ((*it).Id == id)
+			return (*it).Mission == NULL;
+	}
+	return false;
+}
+
+// ----------------------------------------------------------------------------
 void CMissionQueue::removePlayer(const NLMISC::CEntityId &id)
 {
 	// if removed entity is the one in critical part, choose another one and exit
@@ -346,6 +382,7 @@ void CMissionQueue::tickUpdate()
 	else if (_CriticalPartEntityId != CEntityId::Unknown)
 	{
 		// player failed his mission !!
+		const CEntityId criticalPartEntityId = _CriticalPartEntityId;
 		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(_MissionAlias);
 		if (!templ)
 		{
@@ -377,9 +414,11 @@ void CMissionQueue::tickUpdate()
 					nlwarning( "mission %u  has a NULL instance (index %u) ", _MissionAlias, i);
 			}
 		}
-			
-		// get next entity in queue
-		playerLeavesCriticalArea();
+
+		// get next entity in queue, unless the failure took the player out of the critical part (removePlayer), which
+		// already asked the next one
+		if (_CriticalPartEntityId == criticalPartEntityId)
+			playerLeavesCriticalArea();
 	}
 
 
@@ -549,6 +588,9 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 			}
 		}
 
+		//remove entry
+		_Entities.erase(itPlayerCritical);
+
 		// step is succesfull, generate event
 		if (player)
 		{
@@ -558,16 +600,17 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 				mission->setCriticalPartEndDate(CTickEventHandler::getGameCycle() + _MaxTimeInCriticalPart);
 			}
 
+			// The player is in the critical part before the event: processing it can end the mission (a queue_end
+			// step right after, a failure, a success that removes it), which takes the player out of the critical part
+			// (removePlayer), the entry already removed
+			_CriticalPartTimer = _MaxTimeInCriticalPart;
+			_CriticalPartEntityId = id;
+			m_CriticalPartMission = mission;
+
 			// Mission event
 			CMissionEventQueueEntryOk event;
 			player->processMissionEvent( event );
-
-			_CriticalPartTimer = _MaxTimeInCriticalPart;
-			_CriticalPartEntityId = id;
 		}
-
-		//remove entry
-		_Entities.erase(itPlayerCritical);		
 	}
 	else
 	{
@@ -623,6 +666,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 void CMissionQueue::playerLeavesCriticalArea()
 {
 	_CriticalPartEntityId = CEntityId::Unknown;
+	m_CriticalPartMission = NULL;
 	_CriticalPartTimer = 0;
 
 	// get next candidate and send him an enter critical part request

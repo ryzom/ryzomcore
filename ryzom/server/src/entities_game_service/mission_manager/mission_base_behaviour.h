@@ -146,6 +146,10 @@ public:
 	virtual void stopChildren() = 0;
 	/// On failure processing
 	virtual void onFailure(bool ignoreJumps,bool sendMessage = true);
+	/// take the entity that waits for the mission out of the queue the mission is in (between its queue_start and
+	/// queue_end steps), when the mission fails or is removed. owner is the character of a solo mission: while the
+	/// character is loaded, it is not the main entity yet.
+	void leaveWaitingQueue(const NLMISC::CEntityId &owner = NLMISC::CEntityId::Unknown);
 
 	///\name dynamic teleport methods methods
 	//@{

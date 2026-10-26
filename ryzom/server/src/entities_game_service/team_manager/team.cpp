@@ -903,6 +903,9 @@ void CTeam::removeMission( uint idx, TMissionResult result)
 		_Missions[idx]->clearUsersJournalEntry();
 	}
 
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
+
 	/*Bsi.append( StatPath, NLMISC::toString("[MIT%s] %u %s",
 		MissionResultStatLogTag[result],
 		this->_TeamId,

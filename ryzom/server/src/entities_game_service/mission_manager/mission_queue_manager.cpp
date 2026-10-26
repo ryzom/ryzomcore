@@ -259,6 +259,33 @@ void CMissionQueueManager::removePlayerFromQueue(const CEntityId &id, uint32 que
 }
 
 // ----------------------------------------------------------------------------
+bool CMissionQueueManager::removeMissionFromQueue(uint32 queueId, const CMission *mission, const std::vector<CEntityId> &candidates)
+{
+	map<uint32, CMissionQueue>::iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
+	{
+		nlwarning("Trying to remove a mission from queue %u but this queue doesn't exist in manager !", queueId);
+		return true;
+	}
+
+	CEntityId id = (*it).second.getEntityWaitingFor(mission);
+	for (uint i = 0; id == CEntityId::Unknown && i < candidates.size(); ++i)
+	{
+		if ((*it).second.waitsWithoutMission(candidates[i]))
+			id = candidates[i];
+	}
+	if (id == CEntityId::Unknown)
+	{
+		// the entry is already gone (clearOfflinePlayer), or the player who waits is offline and no longer in the group
+		nldebug("No entity waits in queue %u for the removed mission", queueId);
+		return false;
+	}
+
+	removePlayerFromQueue(id, queueId);
+	return true;
+}
+
+// ----------------------------------------------------------------------------
 void CMissionQueueManager::disconnectPlayer(const CCharacter *c)
 {
 	H_AUTO(CMissionQueueManagerDisconnectPlayer);
