@@ -10339,7 +10339,8 @@ void CCharacter::itemSolded( uint32 identifier, uint32 quantity, uint32 sellPric
 				nlwarning("sell price is smaller than base price, setting sell price = base price !");
 				sellPrice = basePrice;
 			}
-			uint64 winMoney = (sellPrice - basePrice) * quantity;
+			// in 64 bits, as the buyer paid it (CCharacterShoppingList::buyItem): a 32-bit product wraps
+			uint64 winMoney = (uint64)(sellPrice - basePrice) * quantity;
 			giveMoney( winMoney );
 
 			SM_STATIC_PARAMS_6(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::entity, STRING_MANAGER::integer, STRING_MANAGER::integer, STRING_MANAGER::integer);
