@@ -220,22 +220,14 @@ public:
 		// set this transport as the open transport
 		OpenTransport() = this;
 
-		THostMap &hostmap = CFrontEndService::instance()->receiveSub()->clientMap();
-		THostMap::iterator first(hostmap.begin()), last(hostmap.end());
-		for (; first != last; ++first)
-		{
-			CClientHost *ch = first->second;
-
-			CMessage message("IMPULTION_ID");
-			CBitMemStream bms;
-			GenericXmlMsgHeaderMngr.pushNameToStream( "MODULE_GATEWAY:FEOPEN", bms );
-			message.serialMemStream( bms );
-
-			message.invert();
- 
-			sendImpulsion( ch->clientId(), message, 1, toString( "from FE to ClientId %u", ch->clientId()).c_str(), false );
-		}
-
+		// Clients connected now are not told: a FEOPEN without a route has no serial number for the client to read
+		// (it would throw and end the client), and no serial could be right, since the client numbers the messages per
+		// transport while each new route starts at 0. A client opens its route by sending FEOPEN when its own gateway
+		// transport opens (the ring editor modules); a client whose transport was already open keeps no route here
+		// until it opens it again.
+		uint nbClients = (uint)CFrontEndService::instance()->receiveSub()->clientMap().size();
+		if (nbClients != 0)
+			nlwarning("Frontend gateway transport opened with %u clients connected: those whose own gateway transport is open (ring editors) have no route until they open it again", nbClients);
 	}
 
 	/// Close the server, this will close the listing socket and any active connection
