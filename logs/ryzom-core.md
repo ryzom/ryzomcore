@@ -166,3 +166,13 @@ Crash found from a dump: in the death / squad spawn map modes,
 it against the list size. An out of range saved value now resets the
 selection to the first respawn point and writes it back to the database, so
 a point is always selected.
+
+## 2026-10-26 — 🐛 CTextureFar: check the far bank tile size before reading it
+
+15 crash reports (read access violation) in `CTextureFar::rebuildPatch()`,
+probably from one or two players. The far bank tile pixels are read from a
+file as 6 independent vectors, and `isFill()` only tests the first order,
+while the pixels are read from order 1 or 2 for the smaller far textures.
+The tile must now hold `sourceSize * sourceSize` pixels for the order in use,
+otherwise a warning is logged and the layers of this tile are skipped. The
+root cause of the bad tile is not confirmed.
