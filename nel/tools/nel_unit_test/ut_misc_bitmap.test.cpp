@@ -419,3 +419,37 @@ TEST(CUTMiscBitmap, resampleGrayFormats)
 	EXPECT_EQ(4u, alpha.getWidth());
 	EXPECT_EQ(4u, alpha.getHeight());
 }
+
+namespace {
+
+bool loadUntrusted(CBitmap &bitmap, const TBytes &bytes, uint32 maxSize)
+{
+	CMemStream stream(true);
+	stream.fill(&bytes[0], (uint32)bytes.size());
+	return bitmap.loadUntrusted(stream, maxSize);
+}
+
+} // namespace
+
+TEST(CUTMiscBitmap, untrustedLoadRefusesEverythingElse)
+{
+	CBitmap bitmap;
+	EXPECT_TRUE(loadUntrusted(bitmap, writeImage(FormatPNG, 64, 32), 64));
+	EXPECT_EQ(64u, bitmap.getWidth());
+
+	// larger than the limit of the caller
+	EXPECT_FALSE(loadUntrusted(bitmap, writeImage(FormatPNG, 64, 32), 63));
+	EXPECT_EQ(0u, bitmap.getWidth());
+	EXPECT_EQ(0u, bitmap.getPixels().size());
+
+	// the exceptions of the readers
+	EXPECT_FALSE(loadUntrusted(bitmap, makeDDS(16, 8, 8, 1), 64));
+	TBytes tga = writeImage(FormatTGA, 16, 16);
+	tga.resize(tga.size() / 2);
+	EXPECT_FALSE(loadUntrusted(bitmap, tga, 64));
+	EXPECT_EQ(0u, bitmap.getHeight());
+
+	// not an image
+	const char text[] = "<html>404</html>";
+	EXPECT_FALSE(loadUntrusted(bitmap, TBytes(text, text + sizeof(text) - 1), 64));
+}

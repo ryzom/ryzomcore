@@ -110,6 +110,43 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 }
 
 /*-------------------------------------------------------------------*\
+								loadUntrusted
+\*-------------------------------------------------------------------*/
+bool CBitmap::loadUntrusted(NLMISC::IStream &f, uint32 maxSize, uint mipMapSkip)
+{
+	uint8 depth = 0;
+	try
+	{
+		depth = readImage(f, mipMapSkip, std::min(maxSize, MAX_BITMAP_SIZE));
+		if (depth == 0)
+			nlwarning("The image '%s' could not be read", f.getStreamName().c_str());
+	}
+	catch (const std::exception &e)
+	{
+		// NLMISC::Exception and std::bad_alloc
+		nlwarning("The image '%s' could not be read: %s", f.getStreamName().c_str(), e.what());
+		depth = 0;
+	}
+
+	if (depth != 0 && (_Width == 0 || _Height == 0))
+	{
+		nlwarning("The image '%s' is empty", f.getStreamName().c_str());
+		depth = 0;
+	}
+
+	if (depth == 0)
+	{
+		// a reader may have failed after allocating some levels
+		for (uint i = 0; i < MAX_MIPMAP; ++i)
+			NLMISC::contReset(_Data[i]);
+		reset();
+		return false;
+	}
+
+	return true;
+}
+
+/*-------------------------------------------------------------------*\
 								readImage
 \*-------------------------------------------------------------------*/
 uint8 CBitmap::readImage(NLMISC::IStream &f, uint mipMapSkip, uint32 maxSize)

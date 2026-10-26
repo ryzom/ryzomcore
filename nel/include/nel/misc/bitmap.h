@@ -359,6 +359,16 @@ public:
 
 
 	/**
+	 * Read a bitmap of any format load() reads from a stream that is not trusted, such as a download of the web
+	 * browser: an image of more than maxSize pixels a side is refused, and so is any error of the readers, exceptions
+	 * included.
+	 * \param maxSize the largest width or height accepted, MAX_BITMAP_SIZE at most
+	 * \return true if the image was loaded; false after a warning naming the stream, with the bitmap left empty
+	 */
+	bool	loadUntrusted(NLMISC::IStream &f, uint32 maxSize, uint mipMapSkip=0);
+
+
+	/**
 	 * Determinate the bitmap size from a bitmap(TGA or DDS) from an IStream. load just header of the file.
 	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5), PNG, JPEG and
 	 * uncompressed TGA (24 and 32 bits).
