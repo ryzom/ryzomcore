@@ -463,12 +463,15 @@ void CQuicTransceiver::stop()
 			}
 		}
 		// Wait for connections to be empty, lousy spin loop
+		// (the lock is released while sleeping: SHUTDOWN_COMPLETE needs it to erase each connection)
 		nldebug("Wait for shutdown");
 		for (;;)
 		{
-			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
-			if (connections.value().empty())
-				break;
+			{
+				NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+				if (connections.value().empty())
+					break;
+			}
 			nlSleep(1);
 		}
 		nldebug("Shutdown ok");
