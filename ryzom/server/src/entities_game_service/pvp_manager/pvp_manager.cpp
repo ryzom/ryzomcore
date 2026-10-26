@@ -892,8 +892,8 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 		return;
 	
 	entry.ExpirationDate = CTickEventHandler::getGameCycle() + DuelQueryDuration;
-	_PVPChallengesAsked.push_front( entry );
-	
+	_PVPChallengesAsked.push_back(entry); // tickUpdate expires them from the front, the oldest first
+
 	// tell invited player
 	params[0].setEIdAIAlias( userId, CAIAliasTranslator::getInstance()->getAIAlias(userId) );
 	uint32 txt = STRING_MANAGER::sendStringToClient( target->getEntityRowId(), "PVP_CHALLENGE_INVITATION", params );

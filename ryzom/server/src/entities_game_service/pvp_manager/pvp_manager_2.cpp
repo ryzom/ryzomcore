@@ -1485,8 +1485,8 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 	duelAsked.Invitor = user->getEntityRowId();
 	duelAsked.Invited = target->getEntityRowId();
 	duelAsked.ExpirationDate = CTickEventHandler::getGameCycle() + DuelQueryDuration;
-	_DuelsAsked.push_front( duelAsked );
-	
+	_DuelsAsked.push_back(duelAsked); // tickUpdate expires them from the front, the oldest first
+
 	// tell invited player
 	params[0].setEIdAIAlias( userId, CAIAliasTranslator::getInstance()->getAIAlias(userId) );
 	uint32 txt = STRING_MANAGER::sendStringToClient( target->getEntityRowId(), "DUEL_INVITATION", params );
