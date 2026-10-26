@@ -305,3 +305,66 @@ TEST(CUTMiscBitmap, truncatedPngFails)
 	CBitmap bitmap;
 	EXPECT_EQ(0, loadImage(bitmap, png));
 }
+
+TEST(CUTMiscBitmap, truncatedJpegEnds)
+{
+	// the JPEG reader returned an empty buffer as filled at the end of the data, and libjpeg read past it; the end of
+	// the data now ends the image, the missing part is grey
+	TBytes jpg = writeImage(FormatJPG, 64, 64);
+	jpg.resize(jpg.size() / 2);
+	CBitmap bitmap;
+	EXPECT_NE(0, loadImage(bitmap, jpg));
+	EXPECT_EQ(64u, bitmap.getWidth());
+	EXPECT_EQ(64u, bitmap.getHeight());
+}
+
+TEST(CUTMiscBitmap, jpegMarkerPastTheEndEnds)
+{
+	// an APP1 marker of 65535 bytes in a 6 byte file: skipping it looped forever
+	TBytes jpg;
+	const uint8 bytes[] = { 0xff, 0xd8, 0xff, 0xe1, 0xff, 0xff };
+	jpg.assign(bytes, bytes + sizeof(bytes));
+	CBitmap bitmap;
+	EXPECT_EQ(0, loadImage(bitmap, jpg));
+}
+
+// a grayscale progressive JPEG of size x size: one DC scan, then acScans empty AC scans
+static TBytes makeProgressiveJPG(uint32 size, uint32 acScans)
+{
+	// clang-format off
+	const uint8 head[] = { 0xff, 0xd8, 0xff, 0xdb, 0x00, 0x43, 0x00 }; // start, then a quantization table of 64 ones
+	const uint8 frame[] = { 0xff, 0xc2, 0x00, 0x0b, 0x08, 0, 0, 0, 0, 0x01, 0x01, 0x11, 0x00 }; // progressive, 1 component
+	const uint8 dcScan[] = { 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	const uint8 acScan[] = { 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x01, 0x3f, 0x00 };
+	// clang-format on
+	TBytes jpg(head, head + sizeof(head));
+	jpg.insert(jpg.end(), 64, 1);
+	size_t framePos = jpg.size();
+	jpg.insert(jpg.end(), frame, frame + sizeof(frame));
+	putBE16(jpg, framePos + 5, size);
+	putBE16(jpg, framePos + 7, size);
+	for (uint8 table = 0; table < 2; ++table)
+	{
+		// the DC then the AC Huffman table, of one code
+		const uint8 huffman[] = { 0xff, 0xc4, 0x00, 0x14, (uint8)(table << 4), 1 };
+		jpg.insert(jpg.end(), huffman, huffman + sizeof(huffman));
+		jpg.insert(jpg.end(), 15, 0);
+		jpg.push_back(0);
+	}
+	jpg.insert(jpg.end(), dcScan, dcScan + sizeof(dcScan));
+	for (uint32 i = 0; i < acScans; ++i)
+		jpg.insert(jpg.end(), acScan, acScan + sizeof(acScan));
+	jpg.push_back(0xff);
+	jpg.push_back(0xd9);
+	return jpg;
+}
+
+TEST(CUTMiscBitmap, jpegScanCountIsLimited)
+{
+	// every scan walks every block of the image: 10000 scans, 100 KiB, took 8 s at 4096x4096
+	CBitmap few;
+	EXPECT_NE(0, loadImage(few, makeProgressiveJPG(64, 10)));
+	EXPECT_EQ(64u, few.getWidth());
+	CBitmap many;
+	EXPECT_EQ(0, loadImage(many, makeProgressiveJPG(64, 600)));
+}
