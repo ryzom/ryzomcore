@@ -211,3 +211,9 @@ done when both are positive.
 
 Crash found from a dump (read at 0x0): a source marked as playing could have no
 voice left (destroyed by `release()`). It is now marked as stopped.
+
+## 2026-10-26 — 🐛 flushStringCache: do not throw on a write error
+
+Crash found from a dump: a write error (disk full, locked file) while saving the
+string cache threw out of `releaseMainLoop()`. The cache is only an
+optimization, so it now logs a warning.
