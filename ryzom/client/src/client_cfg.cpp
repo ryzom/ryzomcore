@@ -452,6 +452,9 @@ CClientConfig::CClientConfig()
 
 	WebIgImageMaxSize = 4096;
 	WebIgDataUrlMaxBytes = 4 * 1024 * 1024;
+	WebIgImageMaxBytes = 16 * 1024 * 1024;
+	WebIgPageMaxBytes = 8 * 1024 * 1024;
+	WebIgStylesheetMaxBytes = 1024 * 1024;
 
 	RingReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_RING_URL;
 	ReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_URL;
@@ -1158,6 +1161,19 @@ void CClientConfig::setValues()
 	{
 		nlwarning("CFG: WebIgDataUrlMaxBytes is %d, a negative value is no limit as 0", ClientCfg.WebIgDataUrlMaxBytes);
 		ClientCfg.WebIgDataUrlMaxBytes = 0;
+	}
+	READ_INT_FV(WebIgImageMaxBytes);
+	READ_INT_FV(WebIgPageMaxBytes);
+	READ_INT_FV(WebIgStylesheetMaxBytes);
+	sint32 *webByteLimits[] = { &ClientCfg.WebIgImageMaxBytes, &ClientCfg.WebIgPageMaxBytes, &ClientCfg.WebIgStylesheetMaxBytes };
+	const char *webByteLimitNames[] = { "WebIgImageMaxBytes", "WebIgPageMaxBytes", "WebIgStylesheetMaxBytes" };
+	for (uint i = 0; i < sizeof(webByteLimits) / sizeof(webByteLimits[0]); ++i)
+	{
+		if (*webByteLimits[i] < 0)
+		{
+			nlwarning("CFG: %s is %d, a negative value is no limit as 0", webByteLimitNames[i], *webByteLimits[i]);
+			*webByteLimits[i] = 0;
+		}
 	}
 
 	READ_STRING_FV(CurlCABundle);

@@ -238,7 +238,16 @@ namespace NLGUI
 	{
 		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
 		if (me)
+		{
+			// a page larger than the limit cancels the transfer (curl fails it with a write error)
+			uint32 maxBytes = CGroupHTML::options.pageMaxBytes;
+			if (maxBytes && (uint64)me->Content.size() + size * nmemb > maxBytes)
+			{
+				nlwarning("The page '%s' is larger than %u bytes, its download is cancelled", me->Url.c_str(), maxBytes);
+				return 0;
+			}
 			me->Content.append(buffer, size * nmemb);
+		}
 
 		return size * nmemb;
 	}
@@ -265,6 +274,20 @@ namespace NLGUI
 	{
 		delete data;
 		data = nullptr;
+	}
+
+	size_t CGroupHTML::CDataDownload::writeData(char *buffer, size_t size, size_t nmemb, void *download)
+	{
+		CDataDownload *me = static_cast<CDataDownload *>(download);
+		size_t length = size * nmemb;
+		if (me->maxBytes && (uint64)me->receivedBytes + length > me->maxBytes)
+		{
+			// curl fails the transfer with a write error, and dataDownloadFinished deletes the partial file
+			nlwarning("The download of '%s' is larger than %u bytes, it is cancelled", me->url.c_str(), me->maxBytes);
+			return 0;
+		}
+		me->receivedBytes += (uint32)length;
+		return fwrite(buffer, 1, length, me->fp);
 	}
 
 	void CGroupHTML::StylesheetDownloadCB::finish()
@@ -782,6 +805,7 @@ namespace NLGUI
 
 		download->data = new CCurlWWWData(curl, download->url);
 		download->fp = fp;
+		download->receivedBytes = 0;
 
 		// initial connection timeout, curl default is 300sec
 		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, download->ConnectionTimeout);
@@ -814,8 +838,8 @@ namespace NLGUI
 		if (!uri.host.empty())
 			sendCookies(curl, uri.host, isTrustedUrl(uri.scheme, uri.host));
 
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, download);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CDataDownload::writeData);
 
 		CURLMcode ret = curl_multi_add_handle(MultiCurl, curl);
 		if (ret != CURLM_OK)

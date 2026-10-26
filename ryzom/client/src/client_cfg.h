@@ -348,6 +348,10 @@ struct CClientConfig
 	sint32			WebIgImageMaxSize;
 	/// Largest data: URL in bytes, 0 for no limit
 	sint32			WebIgDataUrlMaxBytes;
+	/// Largest download of an image, a page and a stylesheet in bytes, 0 for no limit
+	sint32			WebIgImageMaxBytes;
+	sint32			WebIgPageMaxBytes;
+	sint32			WebIgStylesheetMaxBytes;
 
 	///////////////
 	// ANIMATION //

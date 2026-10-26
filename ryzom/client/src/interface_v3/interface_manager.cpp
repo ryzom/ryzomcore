@@ -506,6 +506,9 @@ CInterfaceManager::CInterfaceManager()
 	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
 	CGroupHTML::options.imageMaxSize = (uint32)ClientCfg.WebIgImageMaxSize;
 	CGroupHTML::options.dataUrlMaxBytes = (uint32)ClientCfg.WebIgDataUrlMaxBytes;
+	CGroupHTML::options.imageMaxBytes = (uint32)ClientCfg.WebIgImageMaxBytes;
+	CGroupHTML::options.pageMaxBytes = (uint32)ClientCfg.WebIgPageMaxBytes;
+	CGroupHTML::options.stylesheetMaxBytes = (uint32)ClientCfg.WebIgStylesheetMaxBytes;
 
 	if (!ClientCfg.CurlCABundle.empty())
 	{

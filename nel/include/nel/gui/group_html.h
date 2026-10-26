@@ -99,8 +99,14 @@ namespace NLGUI
 			uint32 imageMaxSize;
 			/// Largest data: URL, in bytes (0 for no limit)
 			uint32 dataUrlMaxBytes;
+			/// Largest download of an image or a texture, of a page, and of a stylesheet, in bytes (0 for no limit): the
+			/// transfer of a larger one is cancelled
+			uint32 imageMaxBytes;
+			uint32 pageMaxBytes;
+			uint32 stylesheetMaxBytes;
 
-			SWebOptions(): trustedHttpsOnly(true), curlMaxConnections(5), imageMaxSize(4096), dataUrlMaxBytes(4 * 1024 * 1024)
+			SWebOptions(): trustedHttpsOnly(true), curlMaxConnections(5), imageMaxSize(4096), dataUrlMaxBytes(4 * 1024 * 1024),
+				imageMaxBytes(16 * 1024 * 1024), pageMaxBytes(8 * 1024 * 1024), stylesheetMaxBytes(1024 * 1024)
 			{
 			}
 
@@ -862,15 +868,18 @@ namespace NLGUI
 		class CDataDownload : public ICurlDownloadCB
 		{
 		public:
-			CDataDownload(const std::string &u, const std::string &d)
+			CDataDownload(const std::string &u, const std::string &d, uint32 byteLimit = 0)
 				: ICurlDownloadCB(u), data(nullptr)
 		        , fp(nullptr)
-		        , dest(d), redirects(0), ConnectionTimeout(60)
+		        , dest(d), redirects(0), ConnectionTimeout(60), maxBytes(byteLimit), receivedBytes(0)
 			{}
 			virtual ~CDataDownload() NL_OVERRIDE;
 
 			/// called when the download is dropped without calling finish(), so back-references can be cleared
 			virtual void abortDownload() {}
+
+			/// the curl write function of the downloads: it writes to fp, and cancels a transfer larger than maxBytes
+			static size_t writeData(char *buffer, size_t size, size_t nmemb, void *download);
 
 		public:
 			CCurlWWWData *data;
@@ -879,13 +888,16 @@ namespace NLGUI
 			uint32 redirects;
 			FILE *fp;
 			uint32 ConnectionTimeout;
+			/// the largest file accepted, 0 for no limit (see SWebOptions), and the bytes written so far
+			uint32 maxBytes;
+			uint32 receivedBytes;
 		};
 
 		class StylesheetDownloadCB : public CDataDownload
 		{
 		public:
 			StylesheetDownloadCB(const std::string &url, const std::string &dest, CGroupHTML *parent)
-				: CDataDownload(url, dest), Parent(parent)
+				: CDataDownload(url, dest, options.stylesheetMaxBytes), Parent(parent)
 			{}
 
 			virtual void finish() NL_OVERRIDE;
@@ -909,7 +921,7 @@ namespace NLGUI
 			};
 
 			ImageDownloadCB(const std::string &url, const std::string &dest, CViewBase *img, const CStyleParams &style, TImageType type, CGroupHTML *parent)
-			: CDataDownload(url, dest), Parent(parent)
+			: CDataDownload(url, dest, options.imageMaxBytes), Parent(parent)
 			{
 				addImage(img, style, type);
 			}
@@ -931,7 +943,7 @@ namespace NLGUI
 		{
 		public:
 			TextureDownloadCB(const std::string &url, const std::string &dest, sint32 texId, CViewBase *view)
-			: CDataDownload(url, dest)
+			: CDataDownload(url, dest, options.imageMaxBytes)
 			{
 				addTexture(texId, view);
 			}
