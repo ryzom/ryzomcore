@@ -1135,7 +1135,6 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				{
 					H_AUTO(SystemAckSyncCode);
 					//nldebug("FERECV: received ACK_SYNC from client %d", clienthost->clientId());
-					clienthost->setConnectedState();
 
 					// decode long ack
 					uint32	frontack;
@@ -1190,6 +1189,10 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 						clienthost->LastReceivedAck = frontack;
 
 						++clienthost->LastSentSync;
+
+						// Only an ACK_SYNC that answers the current SYNC and was read whole ends the synchronization:
+						// the client answers every SYNC, and a later SYNC brings an ACK_SYNC with the right code
+						clienthost->setConnectedState();
 					}
 					else
 					{
