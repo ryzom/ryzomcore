@@ -27,6 +27,7 @@
 #include "game_share/ryzom_mirror_properties.h"
 
 #include "input_output_service.h"
+#include "server_share/client_refusal.h"
 #include "server_share/client_text.h"
 /*#include "game_share/tick_event_handler.h"
 #include "game_share/msg_client_server.h"
@@ -1561,15 +1562,44 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 		msgin.serial(sender);
 		msgin.serial(emoteCustomText);
 
-		// filter emote text
-		emoteCustomText = IOS->getChatManager().filterClientInputColorCode(emoteCustomText);
-		
 		// get the player
 		if ( sender == TDataSetRow::createFromRawIndex(INVALID_DATASET_ROW) )
 		{
 			nlwarning("<cbCustomEmote> ignoring emote because PC %x Invalid", sender.getIndex());
 			return;
 		}
+
+		// The stock client sends "&EMT&", its display name (the name without title and home shard), a space and the
+		// text. The receivers show a line that starts with a category as it is, without a sender name, so the category
+		// and the name are made here: a line can pass neither for a system message nor for another character's emote.
+		const CEntityId senderId = TheDataset.getEntityId(sender);
+		static const ucstring s_EmotePrefix("&EMT&");
+		if (emoteCustomText.compare(0, s_EmotePrefix.size(), s_EmotePrefix) != 0)
+		{
+			nlwarning("HACK: %s sent a custom emote that does not start with &EMT&, refused", senderId.toString().c_str());
+			reportRefusedClientMessage(senderId);
+			return;
+		}
+		CCharacterInfos *senderInfos = IOS->getCharInfos(senderId);
+		if (senderInfos == NULL)
+		{
+			nlwarning("<cbCustomEmote> ignoring emote because %s has no character infos", senderId.toString().c_str());
+			return;
+		}
+		ucstring senderName = senderInfos->ShortName;
+		ucstring::size_type shardPos = senderName.find('(');
+		if (shardPos != ucstring::npos)
+			senderName = senderName.substr(0, shardPos);
+		// the client's name is the sender's (a name set by a command can contain spaces), or ends at the first space; a
+		// general filtering on the text, as for chat
+		ucstring::size_type textPos;
+		if (emoteCustomText.compare(s_EmotePrefix.size(), senderName.size() + 1, senderName + ucstring(" ")) == 0)
+			textPos = s_EmotePrefix.size() + senderName.size();
+		else
+			textPos = emoteCustomText.find(' ', s_EmotePrefix.size());
+		ucstring text = (textPos == ucstring::npos) ? ucstring() : emoteCustomText.substr(textPos + 1);
+		text = IOS->getChatManager().filterClientInput(text);
+		emoteCustomText = s_EmotePrefix + senderName + ucstring(" ") + text;
 		if (!cm.acceptChatLine(sender))
 			return;
 		// send the phrase
