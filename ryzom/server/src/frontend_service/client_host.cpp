@@ -33,6 +33,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace CLFECOMMON;
 
+// The stock client sends a few hundred bytes in parts for most messages (a chat line is about 520). The largest are the
+// Ring editor's node messages (onNodeSetAsked, onNodeInsertAsked), a compressed object, which a pasted group makes
+// larger: they are not cut, whatever R2EDDssNetwork, which only splits the messages sent with sendMsgToDss.
+CVariable<uint32> MaxClientMessageSize("fs", "MaxClientMessageSize", "Largest message in bytes a client may send in parts", 256 * 1024, 0, true);
 
 #ifdef HALF_FREQUENCY_SENDING_TO_CLIENT
 //#pragma message ("HALF_FREQUENCY_SENDING_TO_CLIENT")
@@ -523,6 +527,16 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which expects part %u, the message dropped",
 			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number, NbCurrentBlock);
 		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+		reset();
+		return;
+	}
+
+	// The memory held for a client is bounded by MaxClientMessageSize: a part count can announce up to 65535 parts
+	if (Temp.size() + agmp->PartCont.size() > MaxClientMessageSize.get())
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent multi-part message %u with more than %u bytes at part %u of %u, the message dropped",
+		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, MaxClientMessageSize.get(), (uint)agmp->Part, (uint)agmp->NbBlock);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage(MalformedMultiPart, client->Uid);
 		reset();
 		return;
 	}
