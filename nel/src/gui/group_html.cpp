@@ -429,10 +429,15 @@ namespace NLGUI
 	void CGroupHTML::BnpDownloadCB::finish()
 	{
 		bool verified = false;
+		// getMD5 gives lowercase hexadecimal
+		std::string md5 = toLowerAscii(m_md5sum);
 		// no tmpfile if file was already in cache
+		// the file is verified when it has the md5 given, if any (the comparison was inverted, a file with another md5
+		// was installed and the right one deleted)
 		if (CFile::fileExists(tmpdest))
 		{
-			verified = m_md5sum.empty() || (m_md5sum != getMD5(tmpdest).toString());
+			std::string got = getMD5(tmpdest).toString();
+			verified = md5.empty() || (md5 == got);
 			if (verified)
 			{
 				if (CFile::fileExists(dest))
@@ -443,12 +448,14 @@ namespace NLGUI
 			}
 			else
 			{
+				nlwarning("The bnp download of '%s' has the md5 %s instead of %s, it is not installed", url.c_str(), got.c_str(),
+				    md5.c_str());
 				CFile::deleteFile(tmpdest);
 			}
 		}
 		else if (CFile::fileExists(dest))
 		{
-			verified = m_md5sum.empty() || (m_md5sum != getMD5(dest).toString());
+			verified = md5.empty() || (md5 == getMD5(dest).toString());
 		}
 
 		if (!m_lua.empty())
