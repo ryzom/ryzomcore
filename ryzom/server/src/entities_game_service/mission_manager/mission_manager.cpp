@@ -2126,11 +2126,14 @@ void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 	string name;
 	if (CWorldInstances::instance().getAIInstanceNameFromeServiceId(aiServiceId,name))
 	{
-		const uint size = (uint)_CrashHandlingMissions.size();
-		for ( uint i = 0; i < size; i++ )
+		// A crash handler can fail its mission. That removes the mission and the ones it stops from
+		// _CrashHandlingMissions (removeCrashHandlingMissions moves the last one into its place) and can delete them: go
+		// through a copy and use only the missions still registered.
+		const std::vector<CMission *> missions = _CrashHandlingMissions;
+		for (uint i = 0; i < missions.size(); i++)
 		{
-			if ( _CrashHandlingMissions[i] )
-				_CrashHandlingMissions[i]->applyCrashHandler(false, name);
+			if (missions[i] && std::find(_CrashHandlingMissions.begin(), _CrashHandlingMissions.end(), missions[i]) != _CrashHandlingMissions.end())
+				missions[i]->applyCrashHandler(false, name);
 		}
 	}
 	else
