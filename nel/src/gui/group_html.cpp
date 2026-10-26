@@ -317,16 +317,33 @@ namespace NLGUI
 		vec.swap(Images);
 
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) || CFile::getFileSize(tmpdest) == 0)
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
 		{
 			try {
-				// verify that image is not corrupted
+				// verify that image is not corrupted, a corrupted one is not used and does not replace the cached one
 				uint32 w, h;
 				CBitmap::loadSize(tmpdest, w, h);
 				if (w != 0 && h != 0)
 				{
 					if (CFile::fileExists(dest))
 						CFile::deleteFile(dest);
+
+					// to reload image on page, the easiest seems to be changing texture
+					// to temp file temporarily. that forces driver to reload texture from disk
+					// ITexture::touch() seem not to do this.
+					// cache was updated, first set texture as temp file
+					for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
+					{
+						SImageInfo &img = *it;
+						Parent->setImage(img.Image, tmpdest, img.Type);
+						Parent->setImageSize(img.Image, img.Style);
+					}
+
+					CFile::moveFile(dest, tmpdest);
+				}
+				else
+				{
+					nlwarning("Invalid image (%s) from url (%s)", tmpdest.c_str(), url.c_str());
 				}
 			}
 			catch(const NLMISC::Exception &e)
@@ -334,19 +351,6 @@ namespace NLGUI
 				// exception message has .tmp file name, so keep it for further analysis
 				nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
 			}
-
-			// to reload image on page, the easiest seems to be changing texture
-			// to temp file temporarily. that forces driver to reload texture from disk
-			// ITexture::touch() seem not to do this.
-			// cache was updated, first set texture as temp file
-			for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
-			{
-				SImageInfo &img = *it;
-				Parent->setImage(img.Image, tmpdest, img.Type);
-				Parent->setImageSize(img.Image, img.Style);
-			}
-
-			CFile::moveFile(dest, tmpdest);
 		}
 
 		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
