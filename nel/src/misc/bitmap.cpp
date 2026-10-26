@@ -1882,7 +1882,9 @@ void CBitmap::releaseMipMaps()
 \*-------------------------------------------------------------------*/
 void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 {
-	nlassert(PixelFormat == RGBA || PixelFormat == Luminance || PixelFormat == AlphaLuminance);
+	// Alpha is one 8-bit channel as Luminance (a grayscale image loads as Alpha by default, and the drivers resample it
+	// when they degrade textures)
+	nlassert(PixelFormat == RGBA || PixelFormat == Luminance || PixelFormat == Alpha || PixelFormat == AlphaLuminance);
 	bool needRebuild = false;
 
 	// Deleting mipmaps
@@ -1912,7 +1914,7 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 		resamplePicture32 ((NLMISC::CRGBA*)&_Data[0][0], pDestRgba, _Width, _Height, nNewWidth, nNewHeight);
 		//logResample("Resample: 60");
 	}
-	else if (PixelFormat == Luminance)
+	else if (PixelFormat == Luminance || PixelFormat == Alpha)
 	{
 		pDestui.resize(nNewWidth*nNewHeight);
 		//logResample("Resample: 40");
@@ -1929,7 +1931,8 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 		uint16 *pSrc = (uint16*)&_Data[0][0];
 		uint16 *pDest = (uint16*)&pDestui[0];
 
-		size_t srcSize = _Width*_Width;
+		// the source pixel count (it was _Width*_Width: a bitmap wider than tall was read past its end)
+		size_t srcSize = (size_t)_Width * _Height;
 		uint8 *pSrcGray = new uint8[srcSize];
 		uint8 *pSrcAlpha = new uint8[srcSize];
 

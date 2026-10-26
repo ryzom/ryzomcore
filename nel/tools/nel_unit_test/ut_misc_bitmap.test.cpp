@@ -402,3 +402,20 @@ TEST(CUTMiscBitmap, gifCanvasHoldsTheFirstFrame)
 	CBitmap refused;
 	EXPECT_EQ(0, loadImage(refused, makeGIF(30000, 0)));
 }
+
+TEST(CUTMiscBitmap, resampleGrayFormats)
+{
+	// gray and alpha, wider than tall: the source was read as width x width pixels, past the bitmap
+	CBitmap grayAlpha;
+	grayAlpha.resize(16, 2, CBitmap::AlphaLuminance);
+	grayAlpha.resample(8, 1);
+	EXPECT_EQ(8u, grayAlpha.getWidth());
+	EXPECT_EQ(1u, grayAlpha.getHeight());
+
+	// alpha, as a grayscale image loads by default, which the drivers resample to degrade textures: it asserted
+	CBitmap alpha;
+	alpha.resize(8, 8, CBitmap::Alpha);
+	alpha.resample(4, 4);
+	EXPECT_EQ(4u, alpha.getWidth());
+	EXPECT_EQ(4u, alpha.getHeight());
+}
