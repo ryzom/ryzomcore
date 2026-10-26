@@ -137,6 +137,7 @@ public:
 		LastReceivedAck(0xFFFFFFFF),
 		ImpulseMultiPartNumber (0),
 		AuthorizedCharSlot(~0),
+		ConnectionReportedToWS(false),
 		LastReceivedGameCycle(0),
 		LastSentSync(1),
 		//
@@ -443,6 +444,12 @@ public:
 	// The only character slot that will be granted to connect [0..4], or 0xF (15) for any character
 	uint8				AuthorizedCharSlot;
 
+	// clang-format off
+	/// The login told the welcome service that the user connected (a pending cookie, see CLoginServer::isPendingCookie),
+	/// so the user leaving is told too, once
+	bool				ConnectionReportedToWS;
+	// clang-format on
+
 	/// States of the client connection
 	enum
 	{
@@ -621,6 +628,7 @@ public:
 		// The client is restored with what it logged in with (see exitFromLimboMode)
 		InstanceId = client->InstanceId;
 		AuthorizedCharSlot = client->AuthorizedCharSlot;
+		ConnectionReportedToWS = client->ConnectionReportedToWS;
 	}
 
 	NLNET::CInetAddress	AddrFrom;
@@ -633,6 +641,7 @@ public:
 	// clang-format off
 	uint32				InstanceId;
 	uint8				AuthorizedCharSlot;
+	bool				ConnectionReportedToWS;
 	// clang-format on
 };
 

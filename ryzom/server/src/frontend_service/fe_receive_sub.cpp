@@ -426,7 +426,7 @@ void CFeReceiveSub::handleIncomingMsg()
 			if (ilc != LimboClients.end() && ilc->second.QuicUser == _CurrentInMsg->QuicUser)
 			{
 				nlinfo("FERECV: User %u closed its connection in limbo mode", ilc->first);
-				removeLimboClient(ilc, true, true, true);
+				removeLimboClient(ilc, true, true);
 				return;
 			}
 			nlinfo("FERECV: Not removing already removed client");
@@ -480,12 +480,14 @@ bool		CFeReceiveSub::acceptUserIdConnection( TUid userId )
 /*
  * Add client
  */
-CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool sendCLConnect )
+CClientHost *CFeReceiveSub::addClient(const NLNET::CInetAddress &addrfrom, CQuicUserContext *quicUser, TUid userId, const string &userName, const string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool connectionReportedToWS, bool sendCLConnect)
 {
 	MEM_DELTA_MULTI_LAST2(Client,AddClient);
 	if ( ! acceptUserIdConnection( userId ) )
 	{
 		cbDisconnectClient( userId , "FS CFeReceiveSub::addClient"); // simulate a request by the login system (NeL Launcher bypass mode)
+		if (connectionReportedToWS)
+			CLoginServer::clientDisconnected(userId);
 		return NULL;
 	}
 
@@ -496,6 +498,8 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
 	if ( clientid == InvalidClientId )
 	{
 		nlwarning( "Front-end is full, new client %s rejected", addrfrom.asString().c_str() );
+		if (connectionReportedToWS)
+			CLoginServer::clientDisconnected(userId);
 		return NULL;
 	}
 
@@ -536,6 +540,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
 	clienthost->LoginCookie = cookie;
 	clienthost->InstanceId = instanceId;
 	clienthost->AuthorizedCharSlot = authorizedCharSlot;
+	clienthost->ConnectionReportedToWS = connectionReportedToWS;
 
 	clienthost->initSendCycle( false );
 	CFrontEndService::instance()->sendSub()->setSendBufferAddress( clientid, &addrfrom, quicUser );
@@ -668,7 +673,7 @@ CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 	nlinfo("Restoring user %u from limbo mode", lc.Uid);
 
 	// The EGS already has the CL_CONNECT sent with the QUIT
-	CClientHost *client = addClient(lc.AddrFrom, lc.QuicUser.get(), lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, lc.InstanceId, lc.AuthorizedCharSlot, false);
+	CClientHost *client = addClient(lc.AddrFrom, lc.QuicUser.get(), lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, lc.InstanceId, lc.AuthorizedCharSlot, lc.ConnectionReportedToWS, false);
 	if (!client)
 	{
 		nlwarning("User %u could not be restored from limbo mode", lc.Uid);
@@ -685,7 +690,7 @@ CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 /*
  *
  */
-void CFeReceiveSub::removeLimboClient(std::map<TUid, CLimboClient>::iterator ilc, bool crashed, bool tellEGS, bool tellLoginService)
+void CFeReceiveSub::removeLimboClient(std::map<TUid, CLimboClient>::iterator ilc, bool crashed, bool tellEGS)
 {
 	CLimboClient &lc = ilc->second;
 
@@ -699,13 +704,30 @@ void CFeReceiveSub::removeLimboClient(std::map<TUid, CLimboClient>::iterator ilc
 	}
 
 	// as doRemoveClient does when a connected client leaves
-	if (tellLoginService)
+	if (lc.ConnectionReportedToWS)
 		CLoginServer::clientDisconnected(lc.Uid);
 
 	if (lc.QuicUser.get())
 		lc.QuicUser->Transceiver->shutdown(lc.QuicUser.get());
 
 	LimboClients.erase(ilc);
+}
+
+/*
+ *
+ */
+void CFeReceiveSub::removeLimboClientOnLogin(TUid uid)
+{
+	std::map<TUid, CLimboClient>::iterator ilc = LimboClients.find(uid);
+	if (ilc == LimboClients.end())
+		return;
+
+	// The EGS had the CL_CONNECT sent at the QUIT: it is told that the user left before the CL_CONNECT of this login,
+	// which it would refuse otherwise. The connection kept for limbo mode is closed, unless this login came on it.
+	nlinfo("FERECV: User %u logged in again in limbo mode", uid);
+	if (ilc->second.QuicUser == _CurrentInMsg->QuicUser)
+		ilc->second.QuicUser = nullptr;
+	removeLimboClient(ilc, false, true);
 }
 
 /*
@@ -720,7 +742,7 @@ void CFeReceiveSub::removeTimedOutLimboClients(NLMISC::TTime timeOut)
 		if (itr->second.Timeout < oldest)
 		{
 			nlwarning("User %u stayed in limbo mode longer than %u ms: the EGS did not answer its QUIT", itr->first, (uint)timeOut);
-			removeLimboClient(itr, true, true, true);
+			removeLimboClient(itr, true, true);
 		}
 	}
 }
@@ -838,7 +860,8 @@ void CFeReceiveSub::doRemoveClient( CClientHost *client, bool crashed )
 		// unless user wants to reconnect, disconnect him from login service
 		//if( ! findInReconnectList( client->Uid ) )
 		//nldebug( "disconnecting client %d from login service", client->clientId() );
-		CLoginServer::clientDisconnected( client->Uid );
+		if (client->ConnectionReportedToWS)
+			CLoginServer::clientDisconnected(client->Uid);
 
 	}
 
@@ -1007,7 +1030,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					if (systemMode && (code == SYSTEM_DISCONNECTION_CODE))
 					{
 						nlinfo("FERECV: User %u disconnected in limbo mode", ilc->first);
-						removeLimboClient(ilc, false, true, true);
+						removeLimboClient(ilc, false, true);
 					}
 					return;
 				}
@@ -1030,11 +1053,22 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			}
 
 			Msgin.serial(lc);
+			// Read before the cookie is checked: a valid cookie is used up, and the welcome service told
+			string languageId;
+			Msgin.serial(languageId);
 
 			string userName = "NotSet";
 			string userPriv;
 			string userExtended;
 			uint32 instanceId, charSlot;
+
+			// A pending cookie makes isValidCookie() tell the welcome service that the user connected. If the user's
+			// previous session is in limbo mode, the welcome service must see it leave first: a leave told after this
+			// login would make the user offline there.
+			bool pendingCookie = CLoginServer::isPendingCookie(lc);
+			if (pendingCookie)
+				removeLimboClientOnLogin(lc.getUserId());
+
 			//if ( removeFromReconnectList( lc.getUserId() ) )
 			//	validCookie = true;
 			//else
@@ -1127,35 +1161,20 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			else
 				uid = lc.getUserId();
 
-			string languageId;
-			Msgin.serial(languageId);
-
-			// ALWAYS REMOVE CLIENT FROM LIMBO!
-			// The EGS had the CL_CONNECT sent at the QUIT of a user in limbo mode: it is told that the user left before
-			// the CL_CONNECT of this login, which it would refuse otherwise. The login service is not told: the user is
-			// logging in now, and a disconnection sent after this login would make it offline. The welcome service then
-			// counts one user more than are connected, as it does for a login refused because the frontend is full.
-			// The connection kept for limbo mode is closed, unless this login came on it.
-			std::map<TUid, CLimboClient>::iterator ilc = LimboClients.find(uid);
-			if (ilc != LimboClients.end())
-			{
-				nlinfo("FERECV: User %u logged in again in limbo mode", uid);
-				if (ilc->second.QuicUser == _CurrentInMsg->QuicUser)
-					ilc->second.QuicUser = nullptr;
-				removeLimboClient(ilc, false, true, false);
-			}
+			// ALWAYS REMOVE CLIENT FROM LIMBO! (done above for a pending cookie, see pendingCookie)
+			removeLimboClientOnLogin(uid);
 
 			// Another user logging in on a connection kept for limbo mode takes it over: the user in limbo mode leaves,
 			// otherwise both would be given a client host on the same connection
-			ilc = findLimboClientByAddress(_CurrentInMsg->AddrFrom);
+			std::map<TUid, CLimboClient>::iterator ilc = findLimboClientByAddress(_CurrentInMsg->AddrFrom);
 			if ((ilc != LimboClients.end()) && (ilc->second.QuicUser == _CurrentInMsg->QuicUser))
 			{
 				nlwarning("FERECV: User %u logged in on the connection of user %u, in limbo mode", uid, ilc->first);
 				ilc->second.QuicUser = nullptr;
-				removeLimboClient(ilc, false, true, true);
+				removeLimboClient(ilc, false, true);
 			}
 
-			clienthost = addClient( _CurrentInMsg->AddrFrom, _CurrentInMsg->QuicUser, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot );
+			clienthost = addClient(_CurrentInMsg->AddrFrom, _CurrentInMsg->QuicUser, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot, pendingCookie, true);
 
 			// Check if the addition worked
 			if ( clienthost != NULL )
@@ -1888,8 +1907,10 @@ CClientHost *CFeReceiveSub::findClientHostByUid( TUid uid, bool exitFromLimbo )
 		CClientHost *clienthost = exitFromLimboMode( lc );
 		if (clienthost == NULL)
 		{
-			// the user cannot come back (see the warning of exitFromLimboMode): it is gone for the EGS too
-			removeLimboClient(ilc, true, true, true);
+			// the user cannot come back (see the warning of exitFromLimboMode): it is gone for the EGS too, and addClient
+			// told the welcome service
+			ilc->second.ConnectionReportedToWS = false;
+			removeLimboClient(ilc, true, true);
 			return NULL;
 		}
 		LimboClients.erase( ilc );

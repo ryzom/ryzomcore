@@ -478,6 +478,20 @@ string CLoginServer::isValidCookie (const CLoginCookie &lc, string &userName, st
 	return "I didn't receive the cookie from WS";
 }
 
+bool CLoginServer::isPendingCookie(const CLoginCookie &lc)
+{
+	// the same checks as isValidCookie()
+	if (!AcceptInvalidCookie && !lc.isValid())
+		return false;
+
+	for (list<CPendingUser>::const_iterator it = PendingUsers.begin(); it != PendingUsers.end(); ++it)
+	{
+		if (it->Cookie == lc)
+			return true;
+	}
+	return false;
+}
+
 void CLoginServer::connectToWS ()
 {
 	CUnifiedNetwork::getInstance()->addCallbackArray(WSCallbackArray, sizeof(WSCallbackArray)/sizeof(WSCallbackArray[0]));

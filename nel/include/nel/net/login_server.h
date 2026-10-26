@@ -79,6 +79,11 @@ public:
 	/// Used only in UDP, check if the cookie is valid. return empty string if valid, reason otherwise
 	static std::string isValidCookie (const CLoginCookie &lc, std::string &userName, std::string &userPriv, std::string &userExtended, uint32 &instanceId, uint32 &charSlot);
 
+	/// Used only in UDP, check without side effects if the cookie is pending: isValidCookie() then accepts it and tells
+	/// the WS that the user connected, and clientDisconnected() must be called when the user leaves.
+	/// A cookie accepted only because invalid cookies are accepted is not pending, and the WS is not told about it.
+	static bool isPendingCookie(const CLoginCookie &lc);
+
 	/// Call this method when a user is disconnected or the server disconnect the user.
 	/// This method will warn the login system that the user is not here anymore
 	static void clientDisconnected (uint32 userId);

@@ -124,10 +124,11 @@ public:
 	/// Release
 	void				release();
 
-	/// Add client
-	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
-
 	// clang-format off
+	/// Add a client. connectionReportedToWS: the login told the welcome service that the user connected
+	/// (CClientHost::ConnectionReportedToWS); when no client host can be created, the leave is told at once.
+	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool connectionReportedToWS, bool sendCLConnect );
+
 	/// Send CL_CONNECT to the EGS (at login, and after a QUIT)
 	void				sendClientConnectionToEGS( TUid userId, const std::string &userName, const std::string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CInetAddress &addrfrom, const NLNET::CLoginCookie &cookie );
 	// clang-format on
@@ -155,8 +156,11 @@ public:
 
 	// clang-format off
 	/// Remove a user from limbo mode without restoring it: its QUIC connection is closed. The EGS, which had the CL_CONNECT
-	/// sent at the QUIT, and the login service are told that the user left, when they need to be. The caller logs why.
-	void				removeLimboClient( std::map<TUid,CLimboClient>::iterator ilc, bool crashed, bool tellEGS, bool tellLoginService );
+	/// sent at the QUIT, and the welcome service are told that the user left, when they need to be. The caller logs why.
+	void				removeLimboClient( std::map<TUid,CLimboClient>::iterator ilc, bool crashed, bool tellEGS );
+
+	/// A user who logs in while the previous session is in limbo mode: that session is removed
+	void				removeLimboClientOnLogin( TUid uid );
 
 	/// Remove the users that stayed in limbo mode longer than LimboTimeOut
 	void				removeTimedOutLimboClients( NLMISC::TTime timeOut );

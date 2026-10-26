@@ -668,7 +668,7 @@ void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::
 	if (!receiveSub->LimboClients.empty())
 		nlinfo("Disconnecting %u users in limbo mode", (uint)receiveSub->LimboClients.size());
 	while (!receiveSub->LimboClients.empty())
-		receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), false, true, true);
+		receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), false, true);
 }
 
 /*
@@ -949,7 +949,7 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 	if (ilc != receiveSub->LimboClients.end())
 	{
 		nlinfo("%s asked to remove user %u, in limbo mode", reqServiceName.c_str(), userId);
-		receiveSub->removeLimboClient(ilc, false, true, true);
+		receiveSub->removeLimboClient(ilc, false, true);
 		return;
 	}
 
@@ -1084,7 +1084,7 @@ void cbServiceDown( const string& serviceName, NLNET::TServiceId serviceId, void
 			CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
 			uint clientsInLimbo = (uint)receiveSub->LimboClients.size();
 			while (!receiveSub->LimboClients.empty())
-				receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), true, false, true);
+				receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), true, false);
 			nlinfo("Removed %u clients in limbo mode", clientsInLimbo);
 		}
 	}
