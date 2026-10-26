@@ -68,11 +68,18 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	float				heading;
 	msgin.serial(tick, x, y, z, heading);
 
-	// the heading goes to PACS and to every client around: one that is not a number is replaced by the current one
+	// the heading goes to PACS, to the AI service and to every client around: one that is not a number is replaced by
+	// the current one. The client sends the atan2 of its front vector, so one outside [-Pi, Pi] is brought back into
+	// it: the AI service converts it to a fixed-point angle that a large one overflows.
 	if (!isValidDouble(heading))
 	{
 		nlwarning("<cbClientPosition> %s sent an invalid heading, the current one is kept", id.toString().c_str());
 		heading = CMirrorPropValueRO<float>( TheDataset, entityIndex, DSPropertyORIENTATION );
+	}
+	else if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
+	{
+		nlwarning("<cbClientPosition> %s sent a heading of %g, outside [-Pi, Pi], brought back into it", id.toString().c_str(), (double)heading);
+		heading = (float)atan2(sin((double)heading), cos((double)heading));
 	}
 
 	if (IsRingShard)
