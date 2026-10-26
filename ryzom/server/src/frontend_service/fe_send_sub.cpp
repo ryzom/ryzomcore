@@ -313,6 +313,15 @@ void CFeSendSub::swapSendBuffers()
 	}
 	_BuffersToEnable.clear();*/
 
+	// The flush of the flushing buffers has ended (the caller waits for it), so they can now receive the addresses that
+	// were set or unset in the filling buffers only. They are enabled again when filled.
+	for (std::vector<TClientId>::const_iterator it = m_PendingSendBufferIds.begin(); it != m_PendingSendBufferIds.end(); ++it)
+	{
+		const CSendBuffer &filling = (*_CurrentFillingBuffers)[*it];
+		(*_CurrentFlushingBuffers)[*it].setAddress(&filling.DestAddress, filling.QuicUser.get(), false);
+	}
+	m_PendingSendBufferIds.clear();
+
 	// Swap the buffers
 	if ( _CurrentFillingBuffers == &_SendBuffers1 )
 	{
