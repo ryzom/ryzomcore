@@ -206,3 +206,8 @@ configuration (the file is optional).
 Crash found from a dump: `setMode()` divided the relative cursor position by the
 mode width and height, which divided by zero for an empty mode. It is now only
 done when both are positive.
+
+## 2026-10-26 — 🐛 CSourceXAudio2::updateState: handle a source without voice
+
+Crash found from a dump (read at 0x0): a source marked as playing could have no
+voice left (destroyed by `release()`). It is now marked as stopped.
