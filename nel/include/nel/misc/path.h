@@ -617,6 +617,22 @@ struct CFile
 	static bool isSafeFilename (const std::string &filename, bool allowSubdirs);
 
 	/**
+	 * Return true when Windows would not open a path as a local file: a network share (\\host\share, //host/share or
+	 * any mix of slashes), a device or long path (\\.\..., \\?\...) or the NT object namespace (\??\...). Opening such
+	 * a path connects to the host and sends the user's credentials, so a path from untrusted input must not be.
+	 * DOS device names (CON, NUL, COM1, ...) are not detected. Always false on other systems, where a leading // is
+	 * the root.
+	 */
+	static bool isNetworkOrDevicePath(const std::string &path);
+
+	/**
+	 * The part of a path after the last '/', '\\' or '@', wherever each is. getFilename looks for a backslash only
+	 * when the path has no slash, and for '@' only when it has neither, so its result can still be a path. Use this to
+	 * look a network or device path up by its file name: CPath::lookup returns a name containing '@' as it is.
+	 */
+	static std::string getFilenameAfterAnySeparator(const std::string &path);
+
+	/**
 	 * Just to know if it is a directory.
 	 * _FileName empty and path not !!!
 	 */

@@ -3366,11 +3366,25 @@ namespace NLGUI
 			return false;
 		}
 
-		tmp = CPath::lookup (CFile::getFilename(result), false, false, false);
+		// The file name of a path that mixes separators can itself be a network path ("x/\\host\share\a@b.png"), which
+		// CPath::lookup returns as it is because of its '@'
+		string fileName = CFile::getFilename(result);
+		if (CFile::isNetworkOrDevicePath(fileName))
+			fileName = CFile::getFilenameAfterAnySeparator(fileName);
+		tmp = CPath::lookup (fileName, false, false, false);
 		if (tmp.empty())
 		{
-			// try to find in local directory
-			tmp = CPath::lookup (result, false, false, true);
+			// "file://host/share/x.png" names another host: Windows opens it as a network path, which sends the user's
+			// credentials to that host
+			if (CFile::isNetworkOrDevicePath(result))
+			{
+				nlwarning("A page asks for the network path '%s', which is not opened", result.c_str());
+			}
+			else
+			{
+				// try to find in local directory
+				tmp = CPath::lookup (result, false, false, true);
+			}
 		}
 
 		if (!tmp.empty())

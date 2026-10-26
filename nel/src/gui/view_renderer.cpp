@@ -1203,7 +1203,8 @@ namespace NLGUI
 		else
 		{
 			sLwrGTName = toLowerAscii(name);
-			std::string filename = CPath::lookup(sLwrGTName, false);
+			// a network or device path is only looked up by its file name, as in createTexture
+			std::string filename = CPath::lookup(CFile::isNetworkOrDevicePath(sLwrGTName) ? CFile::getFilenameAfterAnySeparator(sLwrGTName) : sLwrGTName, false);
 			if (filename.empty())
 			{
 				nlwarning("Unable to find file '%s for texture %d", name.c_str(), texId);
@@ -1269,7 +1270,11 @@ namespace NLGUI
 		// If global texture not exists create it
 		if (ite == _GlobalTextures.end())
 		{
-			string filename = CPath::lookup (sLwrGTName, false);
+			// A texture name can come from a web page (an image, a CSS background, a button): a network or device path
+			// is only looked up by its file name, never opened, as Windows would send the user's credentials to its
+			// host. CPath::lookup returns a name containing '@' (a file in a bnp) unchanged, so the path itself must not
+			// reach it.
+			string filename = CPath::lookup(CFile::isNetworkOrDevicePath(sLwrGTName) ? CFile::getFilenameAfterAnySeparator(sLwrGTName) : sLwrGTName, false);
 			if (filename.empty() ) return -1;
 
 			SGlobalTexture gtTmp;

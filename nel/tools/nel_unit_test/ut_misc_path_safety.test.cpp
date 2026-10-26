@@ -258,3 +258,46 @@ TEST(CUTMiscPathSafety, combined)
 	expectCombined("traversal to cfg",       false, "examples/../../client.cfg");
 	expectCombined("absolute unix path",     false, "/../etc/passwd");
 }
+
+TEST(CUTMiscPathSafety, networkOrDevicePath)
+{
+	// local paths, on every system
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath(""));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("/"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("web_del.tga"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("cache/0123.cache"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("C:/Ryzom/data/x.tga"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("C:\\Ryzom\\data\\x.tga"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("/usr/share/ryzom/x.tga"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("\\Ryzom\\x.tga"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("/?/x"));
+	// (\? keeps two question marks from forming a trigraph)
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("\?\?/x"));
+#ifdef NL_OS_WINDOWS
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("//evil.example/share/x.tga"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("\\\\evil.example\\share\\x.tga"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("/\\evil.example/share"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("\\/evil.example/share"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("\\\\?\\UNC\\evil.example\\share"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("\\\\.\\pipe\\x"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("\\\?\?\\UNC\\evil.example\\share"));
+	EXPECT_TRUE(CFile::isNetworkOrDevicePath("/\?\?/UNC/evil.example/share"));
+#else
+	// a leading // is the root
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("//usr/share/ryzom/x.tga"));
+	EXPECT_FALSE(CFile::isNetworkOrDevicePath("\\\\evil.example\\share"));
+#endif
+}
+
+TEST(CUTMiscPathSafety, filenameAfterAnySeparator)
+{
+	EXPECT_EQ("x.tga", CFile::getFilenameAfterAnySeparator("x.tga"));
+	EXPECT_EQ("x.tga", CFile::getFilenameAfterAnySeparator("data/x.tga"));
+	EXPECT_EQ("x.tga", CFile::getFilenameAfterAnySeparator("data\\x.tga"));
+	EXPECT_EQ("y.tga", CFile::getFilenameAfterAnySeparator("x.bnp@y.tga"));
+	EXPECT_EQ("", CFile::getFilenameAfterAnySeparator("data/"));
+	// getFilename stops at the last slash and leaves a path behind it
+	EXPECT_EQ("\\\\evil.example\\share\\a@b.tga", CFile::getFilename("x/\\\\evil.example\\share\\a@b.tga"));
+	EXPECT_EQ("b.tga", CFile::getFilenameAfterAnySeparator("x/\\\\evil.example\\share\\a@b.tga"));
+	EXPECT_EQ("b.tga", CFile::getFilenameAfterAnySeparator("\\/x/\\\\evil.example\\share\\a@b.tga"));
+}
