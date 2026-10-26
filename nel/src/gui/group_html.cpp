@@ -243,7 +243,8 @@ namespace NLGUI
 			uint32 maxBytes = CGroupHTML::options.pageMaxBytes;
 			if (maxBytes && (uint64)me->Content.size() + size * nmemb > maxBytes)
 			{
-				nlwarning("The page '%s' is larger than %u bytes, its download is cancelled", me->Url.c_str(), maxBytes);
+				// without the query: the one of a trusted page carries the user's web authentication key (addHTTPGetParams)
+				nlwarning("The page '%s' is larger than %u bytes, its download is cancelled", me->Url.substr(0, me->Url.find('?')).c_str(), maxBytes);
 				return 0;
 			}
 			me->Content.append(buffer, size * nmemb);
