@@ -56,7 +56,7 @@ class CQuicTransceiver;
 typedef std::list< std::pair<TClientId,uint8> > TClientsToRemove;
 
 /// Types of message invalidity (used for THackingDesc::Reasons bitfield)
-enum TBadMessageFormatType { InsufficientSize=1, NotSystemLoginCode=2, BadCookie=4, BadSystemCode=8, HackedSizeInBuffer=16, AccessClosed=32, IrrelevantSystemMessage=64, MalformedAction=128, UnknownExceptionType=256, UnknownFormatType=512, UnauthorizedCharacterSlot=1024, RefusedServiceCommand=2048, MalformedMultiPart=4096, MalformedAckSync=8192, MisplacedImpulse=16384 };
+enum TBadMessageFormatType { InsufficientSize=1, NotSystemLoginCode=2, BadCookie=4, BadSystemCode=8, HackedSizeInBuffer=16, AccessClosed=32, IrrelevantSystemMessage=64, MalformedAction=128, UnknownExceptionType=256, UnknownFormatType=512, UnauthorizedCharacterSlot=1024, RefusedServiceCommand=2048, MalformedMultiPart=4096, MalformedAckSync=8192, MisplacedImpulse=16384, InvalidStringRequest=32768 };
 
 /// Return the string for the message invalidity reasons
 std::string getBadMessageString( uint32 reasons );
@@ -185,6 +185,9 @@ public:
 	/// Do not accept the current message (hacking detection)
 	void				rejectReceivedMessage( TBadMessageFormatType bmft, TUid userId=0 );
 
+	/// A service refused a message the connected client with this uid sent (hacking detection)
+	void				rejectClientMessage( TBadMessageFormatType bmft, TUid userId );
+
 	// Entity to client
 	CClientIdLookup		EntityToClient;
 
@@ -210,6 +213,12 @@ protected:
 
 	/// Utility method to remove a client
 	void	doRemoveClient( CClientHost *client, bool crashed );
+
+	/// Log a refused message of an address once per cycle (FEHACK)
+	void	recordRejectedMessage( const NLNET::CInetAddress &addr, TBadMessageFormatType bmft, TUid userId );
+
+	/// Count a refused message against a connected client, which RejectedMessagesLimit can disconnect
+	void	countRejectedMessage( CClientHost *client, TBadMessageFormatType bmft );
 
 private:
 

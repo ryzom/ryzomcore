@@ -1867,8 +1867,20 @@ void CStringManager::init(NLMISC::CLog *log)
 		loadCache();
 	}
 
-	// store the initial empty string
-	storeString(ucstring(""));
+	// store the initial empty string, at id 0, the id the client keeps for it and never asks for
+	if (storeString(ucstring("")) != 0 && !_TestOnly)
+	{
+		// A cache made while storeString could leave a blank entry before the first string, or a damaged one, has it
+		// elsewhere: it is started again, with a new timestamp, which makes the clients drop their own cache.
+		nlwarning("<CStringManager::init> the string cache has the empty string at id %u instead of 0, it is cleared", _StringIdx[ucstring()]);
+		CFile::deleteFile(_CacheFilename);
+		_StringIdx.clear();
+		_StringBase.clear();
+		_CacheLoaded = false;
+		loadCache();
+		if (storeString(ucstring("")) != 0)
+			nlerror("<CStringManager::init> the string cache %s could not be cleared", _CacheFilename.c_str());
+	}
 
 	// Load the sheets Id.
 	NLMISC::CSheetId::init(false);

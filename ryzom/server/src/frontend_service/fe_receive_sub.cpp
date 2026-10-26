@@ -124,6 +124,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Malformed ack sync;";
 	if ( reasons & MisplacedImpulse )
 		s += " Impulse not valid in this state;";
+	if ( reasons & InvalidStringRequest )
+		s += " Request for a string never sent;";
 	return s;
 }
 
@@ -1555,16 +1557,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid userId )
 {
 	//nlwarning("FEHACK: Incoming client failed identification: systemMode=%s, code=%d, isValidCookie=%s", (systemMode ? "true" : "false"), code, result.c_str());
-	pair<THackingAddrSet::iterator,bool> res = _UnidentifiedFlyingClients.insert( make_pair( _CurrentInMsg->AddrFrom, THackingDesc() ) );
-	THackingDesc& desc = (*(res.first)).second;
-	if ( ! res.second )
-	{
-		++desc.InvalidMsgCounter; // increment the counter
-	}
-
-	// Set the userId and the reasons flag
-	desc.UserId = userId;
-	desc.Reasons |= bmft;
+	recordRejectedMessage( _CurrentInMsg->AddrFrom, bmft, userId );
 
 	// Only a connected client is counted, and only for what it sent itself: the reject must name the uid of the
 	// client the current message came from. A login message can name any uid in its cookie (BadCookie), and messages
@@ -1575,24 +1568,68 @@ void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid user
 		CClientHost *client = (ihm != _ClientMap.end()) ? GETCLIENTA(ihm) : NULL;
 		if ( client != NULL && client->Uid == userId )
 		{
-			TTime now = CTime::getLocalTime();
-			if ( client->RejectedMessages == 0 || now - client->RejectedMessagesSince > (TTime)RejectedMessagesWindow.get() * 1000 )
-			{
-				client->RejectedMessages = 0;
-				client->RejectedMessagesSince = now;
-			}
-			if ( ++client->RejectedMessages == RejectedMessagesLimit.get() )
-			{
-				nlwarning( "FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
-					(uint)client->clientId(), userId, client->address().asString().c_str(), client->RejectedMessages, RejectedMessagesWindow.get(), getBadMessageString( bmft ).c_str() );
-
-				// as when a service asks for the disconnection (cbDisconnectClient)
-				CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
-				client->ImpulseEncoder.add(act, 0);
-				removeFromRemoveList( client->clientId() );
-				addToRemoveList( client->clientId() );
-			}
+			countRejectedMessage( client, bmft );
 		}
+	}
+}
+
+
+/*
+ * A service refused a message of a connected client, which the frontend had identified when routing it
+ */
+void CFeReceiveSub::rejectClientMessage( TBadMessageFormatType bmft, TUid userId )
+{
+	CClientHost *client = findClientHostByUid( userId, false );
+	if ( client == NULL )
+		return; // gone since
+
+	recordRejectedMessage( client->address(), bmft, userId );
+	if ( RejectedMessagesLimit.get() != 0 )
+	{
+		countRejectedMessage( client, bmft );
+	}
+}
+
+
+/*
+ * Log a refused message of an address once per cycle (FEHACK)
+ */
+void CFeReceiveSub::recordRejectedMessage( const CInetAddress &addr, TBadMessageFormatType bmft, TUid userId )
+{
+	pair<THackingAddrSet::iterator,bool> res = _UnidentifiedFlyingClients.insert( make_pair( addr, THackingDesc() ) );
+	THackingDesc& desc = (*(res.first)).second;
+	if ( ! res.second )
+	{
+		++desc.InvalidMsgCounter; // increment the counter
+	}
+
+	// Set the userId and the reasons flag
+	desc.UserId = userId;
+	desc.Reasons |= bmft;
+}
+
+
+/*
+ * Count a refused message against a connected client, and disconnect it at RejectedMessagesLimit
+ */
+void CFeReceiveSub::countRejectedMessage( CClientHost *client, TBadMessageFormatType bmft )
+{
+	TTime now = CTime::getLocalTime();
+	if ( client->RejectedMessages == 0 || now - client->RejectedMessagesSince > (TTime)RejectedMessagesWindow.get() * 1000 )
+	{
+		client->RejectedMessages = 0;
+		client->RejectedMessagesSince = now;
+	}
+	if ( ++client->RejectedMessages == RejectedMessagesLimit.get() )
+	{
+		nlwarning( "FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), client->RejectedMessages, RejectedMessagesWindow.get(), getBadMessageString( bmft ).c_str() );
+
+		// as when a service asks for the disconnection (cbDisconnectClient)
+		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+		client->ImpulseEncoder.add(act, 0);
+		removeFromRemoveList( client->clientId() );
+		addToRemoveList( client->clientId() );
 	}
 }
 

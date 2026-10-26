@@ -634,6 +634,20 @@ void cbServerDisconnectClient( CMessage& msgin, const string &serviceName, NLNET
 }
 
 /*
+ * The IOS was asked by a client for a string id it never sent, which only a client scanning the string cache does:
+ * counted as a rejected message of that client
+ */
+void cbInvalidStringRequest( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+{
+	uint32	userId;
+	uint32	stringId;
+	msgin.serial(userId);
+	msgin.serial(stringId);
+
+	CFrontEndService::instance()->receiveSub()->rejectClientMessage( InvalidStringRequest, userId );
+}
+
+/*
  * Server request frontend to disconnect a client
  */
 void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
@@ -701,6 +715,7 @@ TUnifiedCallbackItem cbFrontEndArray [] =
 	{ "ENTITY_NAMES", cbSetEntityNames },
 	{ "DISCONNECT_CLIENT", cbServerDisconnectClient },		// Called by server to disconnect a client
 	{ "DISCONNECT_ALL_CLIENTS", cbDisconnectAllClients },	// Called by server to disconnect all clients at once
+	{ "INVALID_STRING_RQ", cbInvalidStringRequest },		// Called by the IOS for a string request no client sends
 
 	{ "FS_ACCEPT", cbAcceptClients }
 };

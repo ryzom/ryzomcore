@@ -755,6 +755,18 @@ void CStringManager::requestString(uint32 userId, uint32 stringId)
 		frontendId = itUser->second.FrontEndId;
 	}
 
+	// A client only asks for the ids of the strings it was sent. A blank entry or an id past the end is only asked
+	// for by a client scanning the string cache: it is not answered, and the frontend counts it against the client.
+	if (!isStoredStringId(stringId))
+	{
+		nlwarning("HACK: user %u asked for string %u, which no string was stored with, not answered", userId, stringId);
+		CMessage msgReject( "INVALID_STRING_RQ" );
+		msgReject.serial( userId );
+		msgReject.serial( stringId );
+		NLNET::CUnifiedNetwork::getInstance()->send( frontendId, msgReject );
+		return;
+	}
+
 	ucstring str = getString(stringId);
 	LOG("Sending string %u as [%s] to user %u", stringId, str.toString().c_str(), userId);
 	// build the response message
@@ -771,8 +783,6 @@ void CStringManager::requestString(uint32 userId, uint32 stringId)
 	msgout.serialBufferWithSize((uint8*)bmsOut.buffer(), bmsOut.length());
 	NLNET::CUnifiedNetwork::getInstance()->send( frontendId, msgout );
 	nldebug( "IOSSM: Sent IMPULSION_UID to %hu (STRING_RESP)", frontendId.get() );
-
-	// TODO: if (strUtf8.empty() && stringId) ban user
 }
 
 
@@ -855,7 +865,8 @@ uint32	CStringManager::storeString(const ucstring &str)
 	{
 		// occasionally create a blank entry, 
 		// this lets us find out if someone is scanning the string cache
-		if ((rand() & 7) == 0)
+		// (never before the first string, the empty string stored at init, which then has id 0 as on the client)
+		if (!_StringBase.empty() && (rand() & 7) == 0)
 			_StringBase.push_back(ucstring());
 
 		// create a new entry
@@ -884,6 +895,13 @@ const ucstring &CStringManager::getString(uint32 stringId)
 		return _StringBase[stringId];
 	else
 		return _StringBase.front();
+}
+
+bool CStringManager::isStoredStringId(uint32 stringId) const
+{
+	// storeString occasionally leaves a blank entry before a new string, and no id it returns points to one: the only
+	// empty string stored is the one init stores at id 0
+	return stringId < _StringBase.size() && (stringId == 0 || !_StringBase[stringId].empty());
 }
 
 
