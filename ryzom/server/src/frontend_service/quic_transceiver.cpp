@@ -68,6 +68,13 @@ CVariable<bool> QuicConnection("fs", "QuicConnection", "", true, 0, true);
 CVariable<std::string> QuicCertificate("fs", "QuicCertificate", "", "", 0, true);
 CVariable<std::string> QuicPrivateKey("fs", "QuicPrivateKey", "", "", 0, true);
 CVariable<std::string> QuicLetsEncryptLive("fs", "QuicLetsEncryptLive", "", "/home/nevrax/letsencrypt/live", 0, true);
+CVariable<bool> QuicEcn("fs", "QuicEcn", "Mark the QUIC packets sent as ECN capable (read when QUIC starts)", true, 0, true);
+
+// QuicEcn as the configuration was opened with, and the closed QUIC connections that had completed their handshake, and
+// those of them whose path was ECN capable when they closed (see quicEcnStats)
+bool s_EcnEnabled = false;
+CAtomicInt s_ClosedConnections;
+CAtomicInt s_EcnCapableConnections;
 
 #ifdef FE_DEBUG_QUIC
 CAtomicInt s_UserContextCount;
@@ -265,12 +272,19 @@ void CQuicTransceiver::start(uint16 port)
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
 		settings.MinimumMtu = 576;
 		settings.IsSet.MinimumMtu = TRUE;
+		// A bottleneck whose queue management marks (fq_codel, CAKE, PIE, L4S) then signals congestion without dropping
+		// packets. MsQuic marks every new path for 3 PTOs (about 3 s before an RTT is measured, the handshake included),
+		// and keeps marking only if the client's ACKs echo the marks correctly. A client or a path that does not echo
+		// them then gets unmarked packets; a path that drops marked packets delays the handshake by those 3 PTOs.
+		settings.EcnEnabled = QuicEcn.get();
+		settings.IsSet.EcnEnabled = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
 			nlwarning("MsQuic->ConfigurationOpen failed with status 0x%x", status);
 			return;
 		}
+		s_EcnEnabled = settings.EcnEnabled;
 
 		if (QuicCertificate.get().empty() || QuicPrivateKey.get().empty())
 		{
@@ -686,7 +700,27 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		user->DebugRefCount = true;
 #endif
 		user->MaxSendLength = 0;
-		nlinfo("Shutdown complete");
+		if (ev->SHUTDOWN_COMPLETE.HandshakeCompleted)
+		{
+			++s_ClosedConnections;
+			QUIC_STATISTICS_V2 stats = {};
+			uint32 statsSize = sizeof(stats);
+			QUIC_STATUS statsStatus = MsQuic->GetParam(connection, QUIC_PARAM_CONN_STATISTICS_V2, &statsSize, &stats);
+			if (QUIC_SUCCEEDED(statsStatus))
+			{
+				if (stats.EcnCapable)
+					++s_EcnCapableConnections;
+				nlinfo("Shutdown complete (ECN %s, %u congestion events, %u of them from ECN)", stats.EcnCapable ? "capable" : "not capable", stats.SendCongestionCount, stats.SendEcnCongestionCount);
+			}
+			else
+			{
+				nlwarning("Shutdown complete, but the connection statistics could not be read (status 0x%x)", statsStatus);
+			}
+		}
+		else
+		{
+			nlinfo("Shutdown complete, before the handshake completed");
+		}
 		if (ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
 		{
 			// Only applicable on client when ConnectionClose is called on the connection, so warn if this happens
@@ -980,6 +1014,15 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 }
 
 #endif
+
+NLMISC_CATEGORISED_COMMAND(fs, quicEcnStats, "Display how many of the closed QUIC connections that completed their handshake were ECN capable when they closed", "")
+{
+	if (args.size() != 0)
+		return false;
+
+	log.displayNL("ECN %s: %u of %u closed QUIC connections were ECN capable when they closed", s_EcnEnabled ? "enabled" : "disabled", (uint)s_EcnCapableConnections.load(), (uint)s_ClosedConnections.load());
+	return true;
+}
 
 NLMISC_CATEGORISED_COMMAND(fs, quicCertReload, "Reload QUIC certificates", "")
 {
