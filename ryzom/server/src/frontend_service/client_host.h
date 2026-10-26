@@ -487,13 +487,16 @@ public:
 	//@{
  	struct CGenericMultiPartTemp
  	{
- 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF) { }
- 		uint32								NbBlock;
- 		uint32								NbCurrentBlock;
- 		uint32								TempSize;
- 		std::vector<std::vector<uint8> >	Temp;
+ 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF), NbCurrentBlock(0) { }
  
- 		std::vector<bool>					BlockReceived;
+ 		/// The client's parts fit an impulse of 230 bytes, header included (CNetworkConnection::push)
+ 		enum { MaxClientMultiPartSize = 230 };
+ 
+ 		uint32								NbBlock;
+ 		/// Parts received so far, which is also the index of the next part expected
+ 		uint32								NbCurrentBlock;
+ 		/// The parts received so far, one after the other
+ 		std::vector<uint8>					Temp;
  
  		void set (CLFECOMMON::CActionGenericMultiPart *agmp, CClientHost *client);
  
