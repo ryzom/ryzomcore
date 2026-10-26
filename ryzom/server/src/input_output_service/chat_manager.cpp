@@ -1938,8 +1938,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 					if ( _UsersIgnoringTells.find( receiverInfos->EntityId ) != _UsersIgnoringTells.end() )
 					{
 						// send special message to user (same message as if the receiver was offline)
-						SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-						vect[0].Literal = ucstring( receiver );
+						TVectorParamCheck vect;
 						uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 						sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 						return;
@@ -2039,8 +2038,7 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				// ERROR : not in this chat group !!!!!
 				nlwarning("<CChatManager::tell> The receiver %s is unknown, no tell message sent",receiver.c_str());
 
-				SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-				vect[0].Literal = ucstring( receiver );
+				TVectorParamCheck vect;
 				uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 				sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 			}
@@ -2063,8 +2061,9 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 		}
 		else
 		{
-			SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-			vect[0].Literal = ucstring( receiver );
+			// TELL_PLAYER_UNKNOWN does not repeat the name the client typed: a literal parameter is kept in the
+			// string cache, and its file, for good
+			TVectorParamCheck vect;
 			uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 			sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 		}
@@ -2110,8 +2109,7 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 //					if ( _UsersIgnoringTells.find( receiverInfos->EntityId ) != _UsersIgnoringTells.end() )
 //					{
 //						// send special message to user (same message as if the receiver was offline)
-//						SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-//						vect[0].Literal = ucstring( receiver );
+//						TVectorParamCheck vect;
 //						uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 //						sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 //						return;
