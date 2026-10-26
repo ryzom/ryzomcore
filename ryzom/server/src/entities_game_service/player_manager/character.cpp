@@ -491,6 +491,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_MeleeCombatIsValid = false;
 
 	_CurrentBotChatType = BOTCHATTYPE::UnknownFlag;
+	_RolemasterType = EGSPD::CSPType::Unknown;
 
 /*
 	_HaveMweaTool = false;
@@ -9766,20 +9767,20 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 		}
 	}
 
-	// check price can be paid
-	if ( getSP(_RolemasterType) < spPrice )
-	{
-		// return information 'not enough skill points'
-		sendDynamicSystemMessage( _Id, "EGS_NOT_ENOUGHT_SP" );
-		return false;
-	}
-	//Bsi.append( StatPath, NLMISC::toString("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice) );
-	//EgsStat.displayNL("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice);
-//	EGSPD::buyAction(_Id, phraseId.toString(), spPrice);
+	// the skill points spent are those of the rolemaster's type, set with the phrase list a PHRASE:BUY indexes
+	EGSPD::CSPType::TSPType spType = _RolemasterType;
 
 	// check phrase requirements
 	if (testRestrictions)
 	{
+		// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster
+		if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag )
+		{
+			nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade (bot chat type %u)",
+						_Id.toString().c_str(), phraseId.toString().c_str(), (uint)_CurrentBotChatType );
+			return false;
+		}
+
 		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
 		if ( bot == NULL )
 		{
@@ -9807,10 +9808,14 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 
 		// The sheet comes from the client, whose phrase list for a rolemaster only holds player phrases that the
 		// rolemaster's flags sell and that missions do not give: any other phrase, an AI phrase among them, is
-		// refused (it would also be paid in the skill points of the rolemaster's type, whatever its own)
+		// refused (it would also be paid in the skill points of the rolemaster's type, whatever its own).
+		// The skill points are those of this rolemaster's type, as startTradePhrases shows them, not those
+		// of the last phrase trade.
 		const string phraseName = phraseId.toString();
+		spType = EGSPD::CSPType::Unknown;
+		const uint8 rolemasterFlags = getRolemasterFlags(bot, &spType);
 		if ( phraseName.find( "saiphrase" ) != string::npos || !staticPhrase->IsRolemasterPhrase || staticPhrase->ShowInAPOnlyIfLearnt
-			|| !ROLEMASTER_FLAGS::canSellPhrase( getRolemasterFlags(bot, NULL), phraseName ) )
+			|| spType == EGSPD::CSPType::Unknown || !ROLEMASTER_FLAGS::canSellPhrase( rolemasterFlags, phraseName ) )
 		{
 			nlwarning("Server refused buy sheet action for player %s, sheet %s is not sold by rolemaster %s",
 						_Id.toString().c_str(), phraseName.c_str(), bot->getId().toString().c_str() );
@@ -9818,10 +9823,21 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 		}
 	}
 
+	// check price can be paid
+	if ( getSP(spType) < spPrice )
+	{
+		// return information 'not enough skill points'
+		sendDynamicSystemMessage( _Id, "EGS_NOT_ENOUGHT_SP" );
+		return false;
+	}
+	//Bsi.append( StatPath, NLMISC::toString("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice) );
+	//EgsStat.displayNL("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice);
+//	EGSPD::buyAction(_Id, phraseId.toString(), spPrice);
+
 	if ( ! learnPrebuiltPhrase(phraseId, knownPhraseIndex, false, (knownPhraseIndex==0) ) )
 		return false;
 
-	spendSP( (double)spPrice, _RolemasterType );
+	spendSP( (double)spPrice, spType );
 
 	BRICK_TYPE::EBrickType phraseType = BRICK_TYPE::UNKNOWN;
 	if ( !staticPhrase->Bricks.empty() )
