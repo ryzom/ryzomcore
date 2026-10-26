@@ -74,6 +74,7 @@
 #include "game_share/r2_share_itf.h"
 
 #include "server_share/r2_vision.h"
+#include "server_share/client_refusal.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "player_manager/character.h"
@@ -9726,6 +9727,14 @@ void CCharacter::buyItem( uint16 itemNumber, uint16 quantity )
 		nlwarning( "<buyItem> Character %s Receive a BOTCHAT:BUY message but _ShoppingList of character are NULL", _Id.toString().c_str() );
 		return;
 	}
+	// The stock client sends 1 to 999 (isTradeValid, the quantity box of bot_chat_v4.xml), and 0 would reach the
+	// nlassert of setStackSize
+	if (quantity == 0)
+	{
+		nlwarning("HACK: %s sent BOTCHAT:BUY for trade item %u with quantity 0, refused", _Id.toString().c_str(), (uint)itemNumber);
+		reportRefusedClientMessage(_Id);
+		return;
+	}
 	_ShoppingList->buyItem( itemNumber, quantity );
 }
 
@@ -9739,6 +9748,13 @@ void CCharacter::destroySaleItem( uint16 itemNumber, uint16 quantity )
 	if( _ShoppingList == 0 )
 	{
 		nlwarning( "<destroyItem> Character %s Receive a BOTCHAT:DESTROY message but _ShoppingList of character are NULL", _Id.toString().c_str() );
+		return;
+	}
+	// The stock client refuses 0 (CBotChatPageTrade)
+	if (quantity == 0)
+	{
+		nlwarning("HACK: %s sent BOTCHAT:DESTROY_ITEM for trade item %u with quantity 0, refused", _Id.toString().c_str(), (uint)itemNumber);
+		reportRefusedClientMessage(_Id);
 		return;
 	}
 	_ShoppingList->destroyItem( itemNumber, quantity );
