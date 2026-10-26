@@ -319,6 +319,10 @@ void	CBitSet::serial(IStream &f)
 	{
 		f.serial(sz);
 
+		// NumBits is a sint and resize() rounds it up to whole words through NumBits+NL_BITLEN, which must fit a sint
+		if(sz > (uint32)0x7FFFFFFF - NL_BITLEN)
+			throw EStreamOverflow("bit set of %u bits is too large", sz);
+
 		// sz comes from the stream, so it is checked against the words actually read before the set is sized to
 		// it. Older writers stored sz/32 words, leaving out the last partial one, so that word may be missing and
 		// its bits are then read as false.
