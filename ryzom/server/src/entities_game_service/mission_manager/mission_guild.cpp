@@ -56,6 +56,10 @@ void CMissionGuild::updateUsersJournalEntry()
 //----------------------------------------------------------------------------
 void CMissionGuild::clearUsersJournalEntry()
 {
+	// a mission hidden from the journal has no entry (0xFF)
+	if ( _ClientIndex == 0xFF )
+		return;
+
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 	if (!guild)
 	{
@@ -86,6 +90,8 @@ void CMissionGuild::clearUsersJournalEntry()
 		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
 		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
 		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
+		// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
+		missionItem.setSLEEP(user->_PropertyDatabase, 0);
 		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
 		{
 			CBankAccessor_PLR::TGROUP::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
