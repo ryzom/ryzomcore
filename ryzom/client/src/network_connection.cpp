@@ -3042,7 +3042,10 @@ bool	CNetworkConnection::stateQuit()
 				{
 				case SYSTEM_SYNC_CODE:
 					// receive sync, decode sync and state synchronize
+					// The session is new: its send numbers start again at 0 and its ticks and lag compensation are
+					// those of a new connection (reset() alone leaves _LCT at 100 ms instead of LCT)
 					reset();
+					initTicks();
 					_ConnectionState = Synchronize;
 					nldebug("CNET[%p]: quit->synchronize", this);
 					receiveSystemSync(msgin);
