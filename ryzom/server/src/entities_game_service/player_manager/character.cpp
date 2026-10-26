@@ -658,8 +658,6 @@ CCharacter::CCharacter():	CEntityBase(false),
 
 	_ChannelAdded = false;
 
-	_DuelOpponent = NULL;
-
 	_LastCivPointWriteDB = ~0;
 	_LastCultPointWriteDB = ~0;
 

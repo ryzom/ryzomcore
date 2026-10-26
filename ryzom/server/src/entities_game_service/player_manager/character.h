@@ -3646,8 +3646,10 @@ private:
 	/// temporary outpost id(user doesn't have chosen his side yet)
 	TAIAlias						_OutpostIdBeforeUserValidation;
 
-	// duel opponent
-	CCharacter						* _DuelOpponent;
+	// duel opponent (a reference pointer: no dangling opponent if one side is gone without the duel ending)
+	// clang-format off
+	NLMISC::CRefPtr<CCharacter>		_DuelOpponent;
+	// clang-format on
 
 	TAIAlias						_LastCreatedNpcGroup;
 

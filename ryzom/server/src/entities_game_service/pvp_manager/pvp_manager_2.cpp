@@ -43,6 +43,7 @@
 #include "egs_globals.h"
 #include "stat_db.h"
 #include "admin.h"
+#include "server_share/client_refusal.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1369,6 +1370,22 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 		nlwarning("<CPVPManager2::askForDuel>'%s' has an invalid target",userId.toString().c_str() );
 		return;
 	}
+	// the client offers no duel with the player's own character (canDuel)
+	if (target == user)
+	{
+		nlwarning("HACK: <CPVPManager2::askForDuel> '%s' asks itself for a duel, refused", userId.toString().c_str());
+		reportRefusedClientMessage(userId);
+		return;
+	}
+	// The client hides the duel entry while USER:IN_DUEL is set, which comes a database update after the duel starts.
+	// A second duel would leave the first opponent pointing at this character.
+	if (user->getDuelOpponent() != NULL)
+	{
+		nldebug("<CPVPManager2::askForDuel> '%s' asks '%s' for a duel while in a duel with '%s', refused", userId.toString().c_str(), target->getId().toString().c_str(), user->getDuelOpponent()->getId().toString().c_str());
+		params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
+		CCharacter::sendDynamicSystemMessage(userId, "DUEL_YOU_ALREADY_IN_PVP", params);
+		return;
+	}
 
 	// test if duel is allowed in this place
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
@@ -1386,7 +1403,7 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 	if ( target->getDuelOpponent() != NULL )
 	{	
 		params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
-		CCharacter::sendDynamicSystemMessage( userId, "DUEL_TARGET_ALREADY_INVITED",params);
+		CCharacter::sendDynamicSystemMessage(userId, "DUEL_TARGET_ALREADY_IN_PVP", params);
 		return;
 	}
 
@@ -1548,7 +1565,19 @@ void CPVPManager2::acceptDuel( const NLMISC::CEntityId & userId )
 				_DuelsAsked.erase(it);
 				return;
 			}
-			
+
+			// a pending invitation keeps both from any other duel (askForDuel), so this means the bookkeeping broke
+			if (invitor->getDuelOpponent() != NULL || invited->getDuelOpponent() != NULL)
+			{
+				nlwarning("<PVP> '%s' accepts the duel of '%s', but one of them is already in a duel, refused", userId.toString().c_str(), invitor->getId().toString().c_str());
+				params[0].setEIdAIAlias(invitor->getId(), CAIAliasTranslator::getInstance()->getAIAlias(invitor->getId()));
+				CCharacter::sendDynamicSystemMessage(userId, invited->getDuelOpponent() != NULL ? "DUEL_YOU_ALREADY_IN_PVP" : "DUEL_TARGET_ALREADY_IN_PVP", params);
+				std::list<CDuelAsked>::iterator itErase = it;
+				++it;
+				_DuelsAsked.erase(itErase);
+				continue;
+			}
+
 			params[0].setEIdAIAlias( userId, CAIAliasTranslator::getInstance()->getAIAlias(userId) );
 			CCharacter::sendDynamicSystemMessage( invitor->getId(), "DUEL_ACCEPTED", params);
 			params[0].setEIdAIAlias( invitor->getId(), CAIAliasTranslator::getInstance()->getAIAlias(invitor->getId()) );
@@ -1627,22 +1656,31 @@ void CPVPManager2::endDuel( CCharacter * user, const string& userTxt, const stri
 	{
 		if( !userTxt.empty() )
 			CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), userTxt );
-		if( !opponentTxt.empty() )
-			CCharacter::sendDynamicSystemMessage( duelOpponent->getEntityRowId(), opponentTxt );
-		
-//		duelOpponent->_PropertyDatabase.setProp("USER:IN_DUEL",false );
-		CBankAccessor_PLR::getUSER().setIN_DUEL(duelOpponent->_PropertyDatabase, false );
-	//	duelOpponent->removeAllSpells();  //< Spells should not be removed
-	//	duelOpponent->stopAllLinks(1.0f); //< Offensive links are automatically broken when PvP state change
-		duelOpponent->setDuelOpponent( NULL );
-				
+
+		// the opponent's own duel is ended only when it is this one
+		if (duelOpponent->getDuelOpponent() == user)
+		{
+			if (!opponentTxt.empty())
+				CCharacter::sendDynamicSystemMessage(duelOpponent->getEntityRowId(), opponentTxt);
+
+			//			duelOpponent->_PropertyDatabase.setProp("USER:IN_DUEL",false );
+			CBankAccessor_PLR::getUSER().setIN_DUEL(duelOpponent->_PropertyDatabase, false);
+			//	duelOpponent->removeAllSpells();  //< Spells should not be removed
+			//	duelOpponent->stopAllLinks(1.0f); //< Offensive links are automatically broken when PvP state change
+			duelOpponent->setDuelOpponent(NULL);
+			CPVPManager2::getInstance()->setPVPModeInMirror(duelOpponent);
+		}
+		else
+		{
+			nlwarning("<CPVPManager2::endDuel> '%s' was in a duel with '%s', who is not in a duel with them", user->getId().toString().c_str(), duelOpponent->getId().toString().c_str());
+		}
+
 //		user->_PropertyDatabase.setProp("USER:IN_DUEL",false );
 		CBankAccessor_PLR::getUSER().setIN_DUEL(user->_PropertyDatabase, false );
 	//	user->removeAllSpells();  //< Spells should not be removed
 	//	user->stopAllLinks(1.0f); //< Offensive links are automatically broken when PvP state change
 		user->setDuelOpponent( NULL );
 
-		CPVPManager2::getInstance()->setPVPModeInMirror( duelOpponent );
 		CPVPManager2::getInstance()->setPVPModeInMirror( user );
 	}
 
