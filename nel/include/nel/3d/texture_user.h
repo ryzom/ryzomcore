@@ -199,6 +199,10 @@ public:
 	{
 		return ((CTextureFile*)(ITexture*)_Texture)->getEnlargeCanvasNonPOW2Tex();
 	}
+	virtual void	setUntrustedMaxSize(uint32 maxSize) NL_OVERRIDE
+	{
+		((CTextureFile*)(ITexture*)_Texture)->setUntrustedMaxSize(maxSize);
+	}
 };
 
 

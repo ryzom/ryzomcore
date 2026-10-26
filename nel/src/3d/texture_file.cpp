@@ -38,7 +38,7 @@ namespace NL3D
 bool CTextureFile::_SupportNonPowerOfTwoTextures = false;
 
 ///==================================================================
-void CTextureFile::buildBitmapFromFile(NLMISC::CBitmap &dest, const std::string &fileName, bool asyncload, uint8 mipMapSkip, bool enlargeCanvasNonPOW2Tex)
+void CTextureFile::buildBitmapFromFile(NLMISC::CBitmap &dest, const std::string &fileName, bool asyncload, uint8 mipMapSkip, bool enlargeCanvasNonPOW2Tex, uint32 untrustedMaxSize)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -76,8 +76,21 @@ void CTextureFile::buildBitmapFromFile(NLMISC::CBitmap &dest, const std::string 
 		if (f.open(file))
 		{
 			H_AUTO( NL3D_loadBitmap )
-			// skip DDS mipmap if wanted
-			dest.load (f, mipMapSkip);
+			if (untrustedMaxSize)
+			{
+				// a file from outside the game data: an image that cannot be read is shown as the dummy texture,
+				// loadUntrusted has logged why
+				if (!dest.loadUntrusted(f, untrustedMaxSize, mipMapSkip))
+				{
+					dest.makeDummy();
+					return;
+				}
+			}
+			else
+			{
+				// skip DDS mipmap if wanted
+				dest.load (f, mipMapSkip);
+			}
 		}
 		else
 		{
@@ -90,8 +103,8 @@ void CTextureFile::buildBitmapFromFile(NLMISC::CBitmap &dest, const std::string 
 	}
 	// *** Need usercolor computing ?
 
-	// Texture not compressed ?
-	if (dest.PixelFormat == RGBA)
+	// Texture not compressed ? (no user color companion is looked up for a file from outside the game data)
+	if (dest.PixelFormat == RGBA && untrustedMaxSize == 0)
 	{
 		H_AUTO( NL3D_buildBitmapUserColor )
 		// Make a filename
@@ -238,7 +251,7 @@ void CTextureFile::doGenerate(bool async)
 	 * ***********************************************/
 	H_AUTO( NL3D_TextureFileDoGenerate )
 
-	buildBitmapFromFile(*this, _FileName, async, _MipMapSkipAtLoad, _EnlargeCanvasNonPOW2Tex);
+	buildBitmapFromFile(*this, _FileName, async, _MipMapSkipAtLoad, _EnlargeCanvasNonPOW2Tex, m_UntrustedMaxSize);
 }
 
 
@@ -296,6 +309,7 @@ void CTextureFile::dupInfo(const CTextureFile &other)
 	_SupportSharing	  = other._SupportSharing;
 	_MipMapSkipAtLoad = other._MipMapSkipAtLoad;
 	_EnlargeCanvasNonPOW2Tex   = other._EnlargeCanvasNonPOW2Tex;
+	m_UntrustedMaxSize = other.m_UntrustedMaxSize;
 }
 
 
