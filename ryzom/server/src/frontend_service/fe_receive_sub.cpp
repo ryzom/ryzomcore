@@ -130,6 +130,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Request for a string never sent;";
 	if (reasons & TextTooLong)
 		s += " Text above the length limit;";
+	if (reasons & RefusedClientMessage)
+		s += " Message a service refused;";
 	return s;
 }
 

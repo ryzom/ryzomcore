@@ -660,6 +660,18 @@ void cbClientTextTooLong(CMessage &msgin, const string &serviceName, NLNET::TSer
 }
 
 /*
+ * A service refused a message of a character in game that no stock client sends (server_share/client_refusal.h):
+ * counted as a rejected message of that client
+ */
+void cbClientMessageRefused(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
+{
+	CEntityId sender;
+	msgin.serial(sender);
+
+	CFrontEndService::instance()->receiveSub()->rejectClientMessage(RefusedClientMessage, (TUid)(sender.getShortId() >> 4));
+}
+
+/*
  * Server request frontend to disconnect a client
  */
 void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
@@ -740,6 +752,7 @@ TUnifiedCallbackItem cbFrontEndArray [] =
 	{ "DISCONNECT_ALL_CLIENTS", cbDisconnectAllClients },	// Called by server to disconnect all clients at once
 	{ "INVALID_STRING_RQ", cbInvalidStringRequest },		// Called by the IOS for a string request no client sends
 	{ "CLIENT_TEXT_TOO_LONG", cbClientTextTooLong },		// Called by the IOS and the EGS for a text no stock client sends
+	{ "CLIENT_MESSAGE_REFUSED", cbClientMessageRefused },	// Called by a service for a message no stock client sends
 
 	{ "FS_ACCEPT", cbAcceptClients }
 };

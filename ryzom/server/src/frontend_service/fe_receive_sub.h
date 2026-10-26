@@ -74,7 +74,8 @@ enum TBadMessageFormatType
 	MalformedAckSync = 8192,
 	MisplacedImpulse = 16384,
 	InvalidStringRequest = 32768,
-	TextTooLong = 65536
+	TextTooLong = 65536,
+	RefusedClientMessage = 131072
 };
 
 /// Return the string for the message invalidity reasons
