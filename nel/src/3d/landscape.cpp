@@ -2871,6 +2871,12 @@ bool			CLandscape::initTileBanks ()
 		// Far actived!
 		_FarInitialized=true;
 	}
+	else if (TileFarBank.getNumTile() == 0)
+	{
+		// No far bank was loaded: the zone lighters and the world editor's land export only load the tile bank.
+		// CTileFarBank::serial reports a far bank file without tiles.
+		nldebug("No far bank, the far tiles are not checked against the tile bank");
+	}
 	else
 	{
 		// The far bank was not built from this tile bank. Its tiles are not checked against it, CTextureFar and
