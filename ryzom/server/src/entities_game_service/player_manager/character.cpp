@@ -10211,7 +10211,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		if( (_PlayerPets[ inv - INVENTORIES::pet_animal1 ].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == false )
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-			params[0].Int = inv - INVENTORIES::pet_animal1;
+			params[0].Int = inv - INVENTORIES::pet_animal1 + 1; // the interface numbers the animals from 1
 			sendDynamicSystemMessage( _Id, "ANIMAL_INVENTORY_INACCESSIBLE", params );
 			return;
 		}
