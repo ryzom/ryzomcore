@@ -288,8 +288,11 @@ public:
 	void sendReady();
 	void onFailure();
 	/// After onFailure, nothing is left to go back to: show its message and exit the client. Called by the loops that run
-	/// on the main thread while the login state machine reconnects (farTPmainLoop, globalMenu).
+	/// on the main thread while the login state machine reconnects (globalMenu, and through exitIfFailedOrDisconnected).
 	void exitIfFailed();
+	/// As exitIfFailed, after failing the Far TP when its connection closed while joining the shard. Called by the loops
+	/// that wait for the new shard on the main thread (farTPmainLoop, sendReady, initMainLoop on a reselect).
+	void exitIfFailedOrDisconnected();
 	void onDssDown(bool forceReturn=false);
 
 	void setIngame() { _InGameMode = true; }

@@ -1391,7 +1391,7 @@ void CFarTP::sendReady()
 			NetMngr.update();
 			IngameDbMngr.flushObserverCalls();
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();
-			exitIfFailed(); // the connection was closed
+			exitIfFailedOrDisconnected(); // the tick does not advance on a closed connection
 			// Be nice to the system
 			nlSleep(100);
 		}
@@ -1467,6 +1467,22 @@ void CFarTP::exitIfFailed()
 	quitCrashReport();
 	NLMISC::NL3D_BlockMemoryAssertOnPurge = false;
 	exit(EXIT_FAILURE);
+}
+
+void CFarTP::exitIfFailedOrDisconnected()
+{
+	if (m_FailureMessage.empty() && isJoiningShard() && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
+	{
+		// The connection closed while joining the shard (connectToNewShard has started it, or kept it for limbo mode):
+		// the frontend or the EGS refused the user, the backend went down (SERVER_DOWN), the session timed out in limbo
+		// mode (the frontend closes a QUIC connection, a UDP client gives up after QuitTimeOut), or the transport was
+		// lost, possibly already during the quit countdown. Only ACTION_DISCONNECTION sends ev_conn_dropped, so nothing
+		// else would end the reconnection.
+		bool beforeCharacters = (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_fs);
+		_Reason = new string((m_ReselectThroughLimbo && beforeCharacters) ? "the connection was closed while going back to the character selection" : "the connection to the shard was closed");
+		LoginSM.pushEvent(CLoginStateMachine::ev_conn_dropped);
+	}
+	exitIfFailed();
 }
 
 void CFarTP::onDssDown(bool forceReturn)
@@ -1552,7 +1568,7 @@ void CFarTP::farTPmainLoop()
 		NetMngr.update();
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
-		exitIfFailed();
+		exitIfFailedOrDisconnected();
 
 		// TODO: resend in case the last datagram sent was lost?
 //		// check if we can send another dated block
@@ -1568,17 +1584,7 @@ void CFarTP::farTPmainLoop()
 //			NetMngr.send();
 //		}
 
-		if ((LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_fs) && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
-		{
-			// The connection closed before the characters came (connectToNewShard has started it, or kept it for limbo
-			// mode): the frontend or the EGS refused the user, the session timed out in limbo mode (the frontend closes a
-			// QUIC connection, a UDP client gives up after QuitTimeOut), or the connection was already lost during the
-			// quit countdown. Nothing sends ev_conn_dropped for that.
-			_Reason = new string(m_ReselectThroughLimbo ? "the connection was closed while going back to the character selection" : "the connection to the shard was closed");
-			LoginSM.pushEvent(CLoginStateMachine::ev_conn_dropped);
-			exitIfFailed();
-		}
-		else if (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_select_char)
+		if (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_select_char)
 		{
 			// Far TP part 3.2bis: go to character selection dialog
 			// This is done outside the co-routine because it may need to co-routine to do an embedded server hop

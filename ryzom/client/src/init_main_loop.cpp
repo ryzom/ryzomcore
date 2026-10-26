@@ -352,7 +352,7 @@ inline void	waitForNetworkMessage(bool &var)
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		// a Far TP that failed while waiting (the connection was closed) leaves nothing to go back to
-		FarTP.exitIfFailed();
+		FarTP.exitIfFailedOrDisconnected();
 		// Send dummy info
 		NetMngr.send();
 		// Do not take all the CPU.
@@ -1374,7 +1374,7 @@ void initMainLoop()
 				NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			}
 			// on a character reselect, a closed connection ends the Far TP as a failure, which leaves nothing to go back to
-			FarTP.exitIfFailed();
+			FarTP.exitIfFailedOrDisconnected();
 
 			// Set the LastGameCycle
 			LastGameCycle = NetMngr.getCurrentServerTick();
