@@ -1419,6 +1419,18 @@ void CFrontEndService::release()
 		SendTask->stopThread();
 	}
 
+	// The send thread uses the QUIC transceiver, which the receive subsystem deletes: let it finish first
+	if (SendThread != NULL)
+	{
+		nlinfo("Release send thread, waiting for task to terminate");
+		// stop send thread
+		while (SendThread->isRunning()) // FIXME: Implement thread.join()
+			nlSleep(1);
+
+		delete SendThread;
+		SendThread = NULL;
+	}
+
 	_ReceiveSub.release();
 
 	//CModuleManager::stopAll();
@@ -1435,17 +1447,6 @@ void CFrontEndService::release()
 
 	InfoLog->removeFilter( "FEHTIMER" );
 	InfoLog->removeFilter( "FE" );
-
-	if (SendThread != NULL)
-	{
-		nlinfo("Release send thread, waiting for task to terminate");
-		// stop send thread
-		while (SendThread->isRunning()) // FIXME: Implement thread.join()
-			nlSleep(1);
-
-		delete SendThread;
-		SendThread = NULL;
-	}
 
 	delete SendTask;
 	SendTask = NULL;
