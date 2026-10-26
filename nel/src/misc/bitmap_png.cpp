@@ -43,6 +43,9 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 {
 	IStream *stream = static_cast<IStream*>(png_get_io_ptr(png_ptr));
 
+	// png_error longjmps, so it is called once the exception is handled: a longjmp out of a catch handler leaks the
+	// exception with GCC and Clang
+	bool failed = false;
 	try
 	{
 		if (stream)
@@ -50,8 +53,10 @@ static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 	}
 	catch (...)
 	{
-		png_error(png_ptr, "Read error while decoding PNG file");
+		failed = true;
 	}
+	if (failed)
+		png_error(png_ptr, "Read error while decoding PNG file");
 }
 
 static void writePNGData(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -99,12 +104,19 @@ uint8 CBitmap::readPNG(NLMISC::IStream &f, uint32 maxSize)
 		return 0;
 	}
 
+	// the decoded image, freed by the setjmp handler too when libpng fails while reading it (a truncated file): they
+	// leaked. Volatile, so that they keep their value through the longjmp.
+	png_bytep volatile imageData = nullptr;
+	png_bytepp volatile row_pointers = nullptr;
+
 	if (setjmp(png_jmpbuf(png_ptr)))
 	{
+		png_free(png_ptr, row_pointers);
+		png_free(png_ptr, imageData);
 		// free all of the memory associated with the png_ptr and info_ptr
 		png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 		// if we get here, we had a problem reading the file
-		nlwarning("Error while reading PNG");
+		nlwarning("Error while reading PNG '%s'", f.getStreamName().c_str());
 		return 0;
 	}
 
@@ -189,10 +201,11 @@ uint8 CBitmap::readPNG(NLMISC::IStream &f, uint32 maxSize)
 	uint32 srcChannels = png_get_channels(png_ptr, info_ptr);
 
 	// allocates buffer to copy image data
-	png_bytepp row_pointers = (png_bytepp)png_malloc(png_ptr, height * sizeof(png_bytep));
+	imageData = (png_bytep)png_malloc(png_ptr, (png_alloc_size_t)rowbytes * height);
+	row_pointers = (png_bytepp)png_malloc(png_ptr, height * sizeof(png_bytep));
 
 	for (uint row = 0; row < height; row++)
-		row_pointers[row] = (png_bytep)png_malloc(png_ptr, rowbytes);
+		row_pointers[row] = imageData + (size_t)row * rowbytes;
 
 	// effective read of the image
 	png_read_image(png_ptr, row_pointers);
@@ -243,12 +256,9 @@ uint8 CBitmap::readPNG(NLMISC::IStream &f, uint32 maxSize)
 		}
 	}
 
-	// free allocated memory to copy each rows
-	for (uint row = 0; row < height; row++)
-		png_free(png_ptr, row_pointers[row]);
-
 	// free allocated memory to copy the image
 	png_free(png_ptr, row_pointers);
+	png_free(png_ptr, imageData);
 
 	// clean up after the read, and free any memory allocated
 	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);

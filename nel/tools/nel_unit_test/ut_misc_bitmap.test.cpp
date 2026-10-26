@@ -296,3 +296,12 @@ TEST(CUTMiscBitmap, truncatedTgaThrows)
 	CBitmap bitmap;
 	EXPECT_THROW(loadImage(bitmap, tga), NLMISC::EStream);
 }
+
+TEST(CUTMiscBitmap, truncatedPngFails)
+{
+	// libpng's error longjmp leaked the rows already allocated
+	TBytes png = writeImage(FormatPNG, 64, 64);
+	png.resize(png.size() / 2);
+	CBitmap bitmap;
+	EXPECT_EQ(0, loadImage(bitmap, png));
+}
