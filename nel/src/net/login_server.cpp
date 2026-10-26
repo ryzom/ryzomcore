@@ -471,6 +471,7 @@ string CLoginServer::isValidCookie (const CLoginCookie &lc, string &userName, st
 		userName = "InvalidUserName";
 		userPriv = DefaultUserPriv;
 		instanceId = 0xffffffff;
+		charSlot = 0xffffffff;
 		return "";
 	}
 
