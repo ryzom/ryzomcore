@@ -1,5 +1,12 @@
 # Crash fixes
 
+## 2026-10-27 — 🐛 CWidgetManager::checkCoords: ignore NULL master groups
+
+Two more dumps of the `checkCoords()` crash (read at 0x78, a small offset from
+NULL). The previous fix only covered NULL windows; a NULL master group is also
+skipped now in both loops. If those dumps come from a build that has the
+previous fix, this is the remaining NULL candidate.
+
 ## 2026-10-26 — 🐛 flushStringCache: do not throw on a write error
 
 Crash found from a dump: a write error (disk full, locked file) while saving the

@@ -1077,7 +1077,7 @@ namespace NLGUI
 			for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 			{
 				CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-				if (rMG.Group->getActive())
+				if (rMG.Group && rMG.Group->getActive())
 				{
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
@@ -1103,7 +1103,7 @@ namespace NLGUI
 			for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 			{
 				CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-				if (rMG.Group->getActive())
+				if (rMG.Group && rMG.Group->getActive())
 				{
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
