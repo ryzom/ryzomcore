@@ -331,7 +331,39 @@ public:
 			frs->rejectReceivedMessage( HackedSizeInBuffer, client != NULL ? client->Uid : 0 );
 			return;
 		}
+		// The header is the client's too. The client writes it in binary: 4 bytes, the format, then the length and the
+		// characters of the name. An empty message would be read from the uninitialised 1000-byte buffer that
+		// bufferToFill(0) leaves in place.
+		const uint32 minHeaderSize = 4 + 1 + 4;
+		if (len < minHeaderSize)
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message of %u bytes, shorter than a message header, discarded", (uint)clientId, len);
+			frs->rejectReceivedMessage( InsufficientSize, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		bms.serialBuffer(msg.bufferToFill(len), len);
+		// readType asserts (in setType) that the name is not empty, and ignores a short format, which the L5 transport of
+		// the service the message goes to fails on (nlerror in readTypeAtCurrentPos). The header is read on a stream of
+		// its own: the message has no read length before readType.
+		CMessage::TFormat format;
+		uint32 nameLength;
+		{
+			NLMISC::CMemStream header(true);
+			header.fill(msg.buffer(), minHeaderSize);
+			header.seek(4, NLMISC::IStream::begin);
+			header.serial(format);
+			header.serial(nameLength);
+		}
+		if (format.StringMode || !format.LongFormat || nameLength == 0 || nameLength > len - minHeaderSize)
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message with a header of format %u and a name of %u bytes in %u, discarded", (uint)clientId, (uint)msg.buffer()[4], nameLength, len - minHeaderSize);
+			frs->rejectReceivedMessage( MalformedAction, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		msg.readType();
 
 		// forward to gateway
