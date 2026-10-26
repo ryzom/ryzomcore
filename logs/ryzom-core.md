@@ -131,3 +131,11 @@ Two distinct bugs in `nel/src/misc/p_thread.cpp`, both Linux-only (the Windows e
 2. **`CPThread::_ThreadHandle` never initialized.** Fixing bug 1 alone didn't stop the crash: the minidump still pointed inside `pthread_getaffinity_np` itself. `CPThread`'s constructor never sets `_ThreadHandle`, and `CPMainThread` (the static global wrapper representing the main thread, `p_thread.cpp:44`) is zero-initialized before its constructor runs — so `_ThreadHandle` was `0`, an invalid `pthread_t`, for every call made from the main thread. Fixed by explicitly setting `_ThreadHandle = pthread_self();` in `CPMainThread`'s constructor.
 
 Validated end-to-end: rebuilt `zone_welder`/`zone_lighter` via `ryzom-docker`'s tools build, ran the full pipeline on a real `.zone` (welded, then lighted) — no crash, `Number of CPU used: 1` logged correctly, and the resulting `.zonel` parses successfully with `pynel.ryzom_zone.load_zone()`.
+
+## 2026-10-26 — 🐛 Help window: dangling source ctrl sheet
+
+Crash found from a dump: `CInterfaceHelp::updateWindowSPhraseTexts()` called
+`CDBCtrlSheet::getType()` on a destroyed control. `CInfoWindow::CtrlSheet`
+(the sheet that opened an info window) was a raw pointer, never cleared if
+that control was destroyed while the window stayed open. It is now a
+`CRefPtr`, which becomes NULL by itself.

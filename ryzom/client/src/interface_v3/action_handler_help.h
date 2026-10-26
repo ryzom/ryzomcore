@@ -132,14 +132,14 @@ private:
 	public:
 		// The Info Window
 		CInterfaceGroupPtr	Window;
-		// The item used to open this window
-		CDBCtrlSheet	*CtrlSheet;
+		// The item used to open this window (may be destroyed while the window stays open)
+		NLMISC::CRefPtr<CDBCtrlSheet>	CtrlSheet;
 		// KeepMode
 		bool			KeepMode;
 		// The button for KeepMode. Button state == KeepMode
 		CCtrlBaseButtonPtr	KeepButton;
 	public:
-		CInfoWindow() : CtrlSheet(NULL) {KeepMode= false;}
+		CInfoWindow() {KeepMode= false;}
 		virtual void	infoReceived();
 		virtual void	missionInfoReceived(const CPrerequisitInfos &infos);
 	};
