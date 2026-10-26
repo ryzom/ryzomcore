@@ -666,12 +666,15 @@ void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::
 {
 	for (THostMap::iterator it = CFrontEndService::instance()->receiveSub()->clientMap().begin (); it != CFrontEndService::instance()->receiveSub()->clientMap().end (); it++)
 	{
+		// A client already being removed is left as it is: removing it again would push its removal back
+		if (CFrontEndService::instance()->receiveSub()->isInRemoveList(GETCLIENTA(it)->clientId()))
+			continue;
+
 		// Ask the client to disconnect
 		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 		GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
 
 		// Prepare removal of client on the front-end
-		CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
 		CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
 	}
 
@@ -941,6 +944,14 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 	{
 		if ( GETCLIENTA(it)->Uid == userId)
 		{
+			// A client already being removed is left as it is: removing it again would push its removal back, forever
+			// for a client that keeps sending what gets it disconnected (a SELECT_CHAR with a slot it may not use)
+			if (CFrontEndService::instance()->receiveSub()->isInRemoveList(GETCLIENTA(it)->clientId()))
+			{
+				nldebug("%s asked to remove player %hu (uid %u), who is being removed already", reqServiceName.c_str(), GETCLIENTA(it)->clientId(), userId);
+				return;
+			}
+
 			// Ask the client to disconnect
 			CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 			GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
@@ -950,7 +961,6 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 				userId );
 
 			// Prepare removal of client on the front-end
-			CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
 			CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
 			
 			return;

@@ -84,8 +84,10 @@ extern CVariable<bool>		VerboseFEStatsTime;
 
 // Rejected messages are those no official client produces (see rejectReceivedMessage()). A connected client that
 // sends RejectedMessagesLimit of them within RejectedMessagesWindow seconds is disconnected; 0 only logs them.
+// clang-format off
 CVariable<uint32>	RejectedMessagesLimit("fs", "RejectedMessagesLimit", "Rejected messages from a connected client within RejectedMessagesWindow seconds after which it is disconnected (0: never, only log)", 0, 0, true);
-CVariable<uint32>	RejectedMessagesWindow("fs", "RejectedMessagesWindow", "Window in seconds over which RejectedMessagesLimit counts", 60, 0, true);
+CVariable<uint32>	RejectedMessagesWindow("fs", "RejectedMessagesWindow", "Window in seconds over which RejectedMessagesLimit counts (0: the whole connection)", 60, 0, true);
+// clang-format on
 
 
 /*
@@ -1775,22 +1777,28 @@ void CFeReceiveSub::recordRejectedMessage( const CInetAddress &addr, TBadMessage
  */
 void CFeReceiveSub::countRejectedMessage( CClientHost *client, TBadMessageFormatType bmft )
 {
+	// A client already being removed is not counted: removing it again would push its removal back, so a client
+	// that keeps sending rejected messages would never be removed
+	if (isInRemoveList(client->clientId()))
+		return;
+
 	TTime now = CTime::getLocalTime();
-	if ( client->RejectedMessages == 0 || now - client->RejectedMessagesSince > (TTime)RejectedMessagesWindow.get() * 1000 )
+	uint32 window = RejectedMessagesWindow.get();
+	if (client->RejectedMessages == 0 || (window != 0 && now - client->RejectedMessagesSince > (TTime)window * 1000))
 	{
 		client->RejectedMessages = 0;
 		client->RejectedMessagesSince = now;
 	}
-	if ( ++client->RejectedMessages == RejectedMessagesLimit.get() )
+	// (at or above: the limit can be lowered while the service runs)
+	if (++client->RejectedMessages >= RejectedMessagesLimit.get())
 	{
-		nlwarning( "FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
-			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), client->RejectedMessages, RejectedMessagesWindow.get(), getBadMessageString( bmft ).c_str() );
+		nlwarning("FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
+		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), client->RejectedMessages, (uint)((now - client->RejectedMessagesSince) / 1000), getBadMessageString(bmft).c_str());
 
 		// as when a service asks for the disconnection (cbDisconnectClient)
 		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 		client->ImpulseEncoder.add(act, 0);
-		removeFromRemoveList( client->clientId() );
-		addToRemoveList( client->clientId() );
+		addToRemoveList(client->clientId());
 	}
 }
 
