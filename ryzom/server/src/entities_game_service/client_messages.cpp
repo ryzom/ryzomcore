@@ -59,6 +59,7 @@
 #include "modules/r2_give_item.h"
 #include "game_share/scenario.h"
 #include "server_share/r2_vision.h"
+#include "server_share/client_text.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -2163,6 +2164,9 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		return;
 	}
 
+	if (refuseClientTextTooLong(id, "COMMAND:CUSTOM_EMOTE", emoteCustomText, serviceId))
+		return;
+
 	if ( !isClientEmoteBehaviour( behaviour ) )
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
@@ -2294,6 +2298,9 @@ void cbClientGuildMotd( NLNET::CMessage& msgin, const std::string &serviceName, 
 	string motd;
 	msgin.serial( entityId );
 	msgin.serial( motd );
+
+	if (refuseClientTextTooLong(entityId, "COMMAND:GUILDMOTD", ucstring::makeFromUtf8(motd), serviceId))
+		return;
 
 	CCharacter * user = PlayerManager.getChar( entityId );
 	if (!user)

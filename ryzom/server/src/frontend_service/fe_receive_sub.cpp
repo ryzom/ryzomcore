@@ -126,6 +126,8 @@ string getBadMessageString( uint32 reasons )
 		s += " Impulse not valid in this state;";
 	if ( reasons & InvalidStringRequest )
 		s += " Request for a string never sent;";
+	if (reasons & TextTooLong)
+		s += " Text above the length limit;";
 	return s;
 }
 

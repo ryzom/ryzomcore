@@ -76,6 +76,7 @@
 // Game Share
 #include "game_share/character_summary.h"
 #include "game_share/brick_types.h"
+#include "game_share/chat_group.h"
 #include "game_share/seeds.h"
 #include "game_share/entity_types.h"
 #include "game_share/inventories.h"
@@ -4727,6 +4728,7 @@ public:
 				{
 					ucstr = ucstring("&EMT&") + UserEntity->getDisplayName() + ucstring(" ") + ucstr; // FIXME: UTF-8 (serial)
 				}
+				ucstr = NLMISC::truncateUtf16(ucstr, CChatGroup::MaxClientTextLength); // what the server accepts
 
 				out.serialEnum(behavToSend);
 				out.serial(ucstr); // FIXME: UTF-8 (serial)

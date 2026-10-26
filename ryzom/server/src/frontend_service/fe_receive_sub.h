@@ -56,7 +56,26 @@ class CQuicTransceiver;
 typedef std::list< std::pair<TClientId,uint8> > TClientsToRemove;
 
 /// Types of message invalidity (used for THackingDesc::Reasons bitfield)
-enum TBadMessageFormatType { InsufficientSize=1, NotSystemLoginCode=2, BadCookie=4, BadSystemCode=8, HackedSizeInBuffer=16, AccessClosed=32, IrrelevantSystemMessage=64, MalformedAction=128, UnknownExceptionType=256, UnknownFormatType=512, UnauthorizedCharacterSlot=1024, RefusedServiceCommand=2048, MalformedMultiPart=4096, MalformedAckSync=8192, MisplacedImpulse=16384, InvalidStringRequest=32768 };
+enum TBadMessageFormatType
+{
+	InsufficientSize = 1,
+	NotSystemLoginCode = 2,
+	BadCookie = 4,
+	BadSystemCode = 8,
+	HackedSizeInBuffer = 16,
+	AccessClosed = 32,
+	IrrelevantSystemMessage = 64,
+	MalformedAction = 128,
+	UnknownExceptionType = 256,
+	UnknownFormatType = 512,
+	UnauthorizedCharacterSlot = 1024,
+	RefusedServiceCommand = 2048,
+	MalformedMultiPart = 4096,
+	MalformedAckSync = 8192,
+	MisplacedImpulse = 16384,
+	InvalidStringRequest = 32768,
+	TextTooLong = 65536
+};
 
 /// Return the string for the message invalidity reasons
 std::string getBadMessageString( uint32 reasons );

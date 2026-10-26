@@ -77,6 +77,7 @@
 #include "game_share/inventories.h"
 #include "game_share/animal_type.h"
 #include "game_share/bot_chat_types.h"
+#include "game_share/chat_group.h"
 // Sound animation
 #include "nel/sound/sound_anim_manager.h"
 #include "nel/sound/sound_animation.h"
@@ -3074,6 +3075,7 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 	// custom afk txt
 	ucstring ucstr; // TODO: UTF-8 (serial)
 	ucstr.fromUtf8( afkTxt );
+	ucstr = NLMISC::truncateUtf16(ucstr, CChatGroup::MaxClientTextLength); // what the server accepts
 	CBitMemStream outTxt;
 	static const string msgNameTxt = "STRING:AFK_TXT";
 	if( GenericMsgHeaderMngr.pushNameToStream(msgNameTxt,outTxt) )

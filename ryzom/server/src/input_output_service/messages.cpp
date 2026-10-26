@@ -27,6 +27,7 @@
 #include "game_share/ryzom_mirror_properties.h"
 
 #include "input_output_service.h"
+#include "server_share/client_text.h"
 /*#include "game_share/tick_event_handler.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/mode_and_behaviour.h" //TEMP!!!
@@ -128,6 +129,9 @@ void cbImpulsionChat( CMessage& msgin, const string &serviceName, TServiceId ser
 		return;
 	}
 
+	if (refuseClientTextTooLong(sender, "STRING:CHAT", ucstr, serviceId))
+		return;
+
 	// Do a general filtering on client input
 	ucstr = IOS->getChatManager().filterClientInput(ucstr);
 
@@ -168,6 +172,9 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 		nlwarning("<impulsionChatTeam> %s",e.what());
 		return;
 	}
+
+	if (refuseClientTextTooLong(sender, "STRING:CHAT_TEAM", ucstr, serviceId))
+		return;
 
 	// Do a general filtering on client input
 	ucstr = IOS->getChatManager().filterClientInput(ucstr);
@@ -218,6 +225,9 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 		nlwarning("<impulsionTell> %s",e.what());
 		return;
 	}
+
+	if (refuseClientTextTooLong(sender, "STRING:TELL", str, serviceId))
+		return;
 
 	// Do a general filtering on client input
 	str = IOS->getChatManager().filterClientInput(str);
@@ -434,6 +444,9 @@ void cbImpulsionAfkTxt( CMessage& msgin, const string &serviceName, TServiceId s
 		nlwarning("<cbImpulsionAfkTxt> %s",e.what());
 		return;
 	}
+
+	if (refuseClientTextTooLong(sender, "STRING:AFK_TXT", afkTxt, serviceId))
+		return;
 
 	// Do a general filtering on client input, as for chat: the text is sent to whoever tells the player, and a
 	// leading '&' would let it pass for a system message ('&SYS&')
