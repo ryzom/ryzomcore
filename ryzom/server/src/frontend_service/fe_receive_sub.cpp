@@ -1555,11 +1555,14 @@ void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid user
 	desc.UserId = userId;
 	desc.Reasons |= bmft;
 
-	// Only a connected client is counted: messages from unidentified addresses are noise and their source spoofable
+	// Only a connected client is counted, and only for what it sent itself: the reject must name the uid of the
+	// client the current message came from. A login message can name any uid in its cookie (BadCookie), and messages
+	// from unidentified addresses are noise and their source spoofable.
 	if ( RejectedMessagesLimit.get() != 0 && userId != 0 )
 	{
-		CClientHost *client = findClientHostByUid( userId );
-		if ( client != NULL )
+		THostMap::iterator ihm = _ClientMap.find( _CurrentInMsg->AddrFrom );
+		CClientHost *client = (ihm != _ClientMap.end()) ? GETCLIENTA(ihm) : NULL;
+		if ( client != NULL && client->Uid == userId )
 		{
 			TTime now = CTime::getLocalTime();
 			if ( client->RejectedMessages == 0 || now - client->RejectedMessagesSince > (TTime)RejectedMessagesWindow.get() * 1000 )
@@ -1569,7 +1572,7 @@ void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid user
 			}
 			if ( ++client->RejectedMessages == RejectedMessagesLimit.get() )
 			{
-				nlwarning( "FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s; disconnected",
+				nlwarning( "FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
 					(uint)client->clientId(), userId, client->address().asString().c_str(), client->RejectedMessages, RejectedMessagesWindow.get(), getBadMessageString( bmft ).c_str() );
 
 				// as when a service asks for the disconnection (cbDisconnectClient)
