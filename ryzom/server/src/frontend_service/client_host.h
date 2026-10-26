@@ -618,6 +618,9 @@ public:
 		// Set limbo timeout start
 		Timeout = NLMISC::CTime::getLocalTime();
 		LoginCookie = client->LoginCookie;
+		// The client is restored with what it logged in with (see exitFromLimboMode)
+		InstanceId = client->InstanceId;
+		AuthorizedCharSlot = client->AuthorizedCharSlot;
 	}
 
 	NLNET::CInetAddress	AddrFrom;
@@ -627,6 +630,10 @@ public:
 	uint32				QuitId;
 	NLMISC::TTime		Timeout;
 	NLNET::CLoginCookie	LoginCookie;
+	// clang-format off
+	uint32				InstanceId;
+	uint8				AuthorizedCharSlot;
+	// clang-format on
 };
 
 

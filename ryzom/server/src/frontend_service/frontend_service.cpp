@@ -662,6 +662,13 @@ void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::
 		CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
 		CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
 	}
+
+	// and the users in limbo mode
+	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+	if (!receiveSub->LimboClients.empty())
+		nlinfo("Disconnecting %u users in limbo mode", (uint)receiveSub->LimboClients.size());
+	while (!receiveSub->LimboClients.empty())
+		receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), false, true, true);
 }
 
 /*
@@ -934,6 +941,18 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 			return;
 		}
 	}
+
+	// A user in limbo mode has no client host: the EGS refuses its CL_CONNECT while its character is still in game (a
+	// QUIT before the quit countdown ended), and the login service or another service may remove it meanwhile
+	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+	std::map<TUid, CLimboClient>::iterator ilc = receiveSub->LimboClients.find(userId);
+	if (ilc != receiveSub->LimboClients.end())
+	{
+		nlinfo("%s asked to remove user %u, in limbo mode", reqServiceName.c_str(), userId);
+		receiveSub->removeLimboClient(ilc, false, true, true);
+		return;
+	}
+
 	nlwarning( "%s asked to remove an unknown player (uid %u)", reqServiceName.c_str(), userId );
 }
 
@@ -1061,10 +1080,12 @@ void cbServiceDown( const string& serviceName, NLNET::TServiceId serviceId, void
 			CFrontEndService::instance()->ShardDown = true;
 			nlinfo( "Entering SERVER_DOWN mode" );
 
-			// remove all limbo clients
-			uint	clientsInLimbo = (uint)CFrontEndService::instance()->receiveSub()->LimboClients.size();
-			CFrontEndService::instance()->receiveSub()->LimboClients.clear();
-			nlinfo("Removed %d clients in limbo mode", clientsInLimbo);
+			// remove all limbo clients (the EGS is gone, it is not told)
+			CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+			uint clientsInLimbo = (uint)receiveSub->LimboClients.size();
+			while (!receiveSub->LimboClients.empty())
+				receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), true, false, true);
+			nlinfo("Removed %u clients in limbo mode", clientsInLimbo);
 		}
 	}
 
@@ -1494,17 +1515,8 @@ bool CFrontEndService::update()
 	}
 #endif
 
-/*
-	map<TUid,CLimboClient>::iterator	it;
-	TTime								timeout = CTime::getLocalTime()-_LimboTimeOut;
-	for (it=_ReceiveSub.LimboClients.begin(); it!=_ReceiveSub.LimboClients.end(); )
-	{
-		map<TUid,CLimboClient>::iterator	itr = it++;
-		// removes limbo client if it timed out
-		if ((*it).second.Timeout < timeout)
-			_ReceiveSub.LimboClients.erase(itr);
-	}
-*/
+	// Remove the users that stayed in limbo mode longer than LimboTimeOut (the EGS did not answer their QUIT)
+	_ReceiveSub.removeTimedOutLimboClients(_LimboTimeOut);
 
 	// If the back-end is down, set all clients to "server down" state
 	// (this breaks the tick synchronisation of the clients, anyway the clients disconnect after receiving "server down")

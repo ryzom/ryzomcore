@@ -127,11 +127,21 @@ public:
 	/// Add client
 	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
 
+	// clang-format off
+	/// Send CL_CONNECT to the EGS (at login, and after a QUIT)
+	void				sendClientConnectionToEGS( TUid userId, const std::string &userName, const std::string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CInetAddress &addrfrom, const NLNET::CLoginCookie &cookie );
+	// clang-format on
+
 	/// Add to the list of clients which will be removed by addr at the three cycles later (leaving the time to send an impulsion to the client)
 	void				addToRemoveList( TClientId clientid ) { _ClientsToRemove.push_back( std::make_pair(clientid,3) ); }
 
 	/// Remove from the list of clients
 	void				removeFromRemoveList( TClientId clientid );
+
+	// clang-format off
+	/// Return true if the client is waiting in the list of clients to remove
+	bool				isInRemoveList( TClientId clientid ) const;
+	// clang-format on
 
 	/// Return the number of connecged client
 	uint32				getNbClient();
@@ -142,8 +152,21 @@ public:
 	void				setClientInLimboMode( CClientHost *client );
 
 	CClientHost			*exitFromLimboMode( const CLimboClient& client );
-	
-	void				removeClientFromMap( CClientHost *client );
+
+	// clang-format off
+	/// Remove a user from limbo mode without restoring it: its QUIC connection is closed. The EGS, which had the CL_CONNECT
+	/// sent at the QUIT, and the login service are told that the user left, when they need to be. The caller logs why.
+	void				removeLimboClient( std::map<TUid,CLimboClient>::iterator ilc, bool crashed, bool tellEGS, bool tellLoginService );
+
+	/// Remove the users that stayed in limbo mode longer than LimboTimeOut
+	void				removeTimedOutLimboClients( NLMISC::TTime timeOut );
+
+	/// Find the user in limbo mode at this address (the token address for QUIC), or LimboClients.end()
+	std::map<TUid,CLimboClient>::iterator	findLimboClientByAddress( const NLNET::CInetAddress &addr );
+
+	/// Remove the client from the client map. A client put in limbo mode keeps its QUIC connection.
+	void				removeClientFromMap( CClientHost *client, bool closeQuicConnection = true );
+	// clang-format on
 	
 	/// Remove a client by clientid
 	/// all remove are supposed to be a client crashed. it s false only on the case we receive really the client message
