@@ -524,6 +524,43 @@ bool	CBitmap::isGrayscale() const
 
 
 
+// The DDS header after the "DDS " file type (DDSURFACEDESC2): 31 uint32, the first one being its size in bytes
+static const uint s_DDSHeaderLength = 31;
+
+// The largest texture Direct3D 11 takes, it also keeps the mipmap sizes computed from the header in uint32 (the shipped
+// textures are at most 4800 pixels a side)
+static const uint32 s_DDSMaxSize = 16384;
+
+/** Reads the DDS header after the "DDS " file type. It comes from the file, which may be an image the web browser
+ *  downloaded, so its sizes are checked before anything is read or allocated from them.
+ *  \return false if it is not a valid header
+ */
+static bool readDDSHeader(NLMISC::IStream &f, uint32 (&header)[s_DDSHeaderLength])
+{
+	f.serial(header[0]); // size in bytes of the header (without "DDS ")
+	if (header[0] != s_DDSHeaderLength * 4)
+	{
+		nlwarning("Invalid DDS header size %u in '%s', must be %u", header[0], f.getStreamName().c_str(), s_DDSHeaderLength * 4);
+		return false;
+	}
+
+#ifdef NL_LITTLE_ENDIAN
+	f.serialBuffer((uint8 *)(header + 1), (s_DDSHeaderLength - 1) * 4);
+#else
+	for (uint i = 1; i < s_DDSHeaderLength; ++i)
+		f.serial(header[i]);
+#endif
+
+	// height, width and mipmap count
+	if (header[2] == 0 || header[3] == 0 || header[2] > s_DDSMaxSize || header[3] > s_DDSMaxSize || header[6] > MAX_MIPMAP)
+	{
+		nlwarning("Invalid DDS of %ux%u with %u mipmaps in '%s'", header[3], header[2], header[6], f.getStreamName().c_str());
+		return false;
+	}
+
+	return true;
+}
+
 /*-------------------------------------------------------------------*\
 								readDDS
 \*-------------------------------------------------------------------*/
@@ -538,19 +575,9 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 
 	//-------------- reading entire header
 
-	uint32 size = 0;
-	f.serial(size); // size in Bytes of header(without "DDS")
-	uint32 * _DDSSurfaceDesc = new uint32[size];
-	_DDSSurfaceDesc[0]= size;
-
-#ifdef NL_LITTLE_ENDIAN
-	f.serialBuffer((uint8*)(_DDSSurfaceDesc+1), size-4);
-#else
-	for(uint i= 0; i<size/4 - 1; i++)
-	{
-		f.serial(_DDSSurfaceDesc[i+1]);
-	}
-#endif
+	uint32 _DDSSurfaceDesc[s_DDSHeaderLength];
+	if (!readDDSHeader(f, _DDSSurfaceDesc))
+		throw EDDSBadHeader();
 
 	// flags determines which members of the header structure contain valid data
 	uint32 flags = _DDSSurfaceDesc[1];
@@ -559,7 +586,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 	if(!(flags & DDSD_LINEARSIZE))
     {
 		nlwarning("A DDS doesn't have the flag DDSD_LINEARSIZE");
-		//delete [] _DDSSurfaceDesc;
 		//throw EDDSBadHeader();
 	}
 
@@ -611,7 +637,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 
 	if(PixelFormat!= DXTC1 && PixelFormat!= DXTC1Alpha && PixelFormat!= DXTC3 && PixelFormat!= DXTC5)
 	{
-		delete [] _DDSSurfaceDesc;
 		throw EDDSBadHeader();
 	}
 
@@ -654,7 +679,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 		{
 			if(!f.seek(seekSize, IStream::current))
 			{
-				delete [] _DDSSurfaceDesc;
 				throw ESeekFailed();
 			}
 		}
@@ -707,8 +731,6 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 	}
 
 	//------------- End
-
-	delete [] _DDSSurfaceDesc;
 
 	switch(PixelFormat)
 	{
@@ -3491,15 +3513,9 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 	if(fileType == DDS_HEADER)
 	{
 		// read entire DDS header.
-		uint32 size = 0;
-		f.serial(size); // size in Bytes of header(without "DDS")
-		uint32 * _DDSSurfaceDesc = new uint32[size];
-		_DDSSurfaceDesc[0]= size;
-
-		for(uint i= 0; i<size/4 - 1; i++)
-		{
-			f.serial(_DDSSurfaceDesc[i+1]);
-		}
+		uint32 _DDSSurfaceDesc[s_DDSHeaderLength];
+		if (!readDDSHeader(f, _DDSSurfaceDesc))
+			return;
 
 		// flags determines which members of the header structure contain valid data
 		uint32 flags = _DDSSurfaceDesc[1];
@@ -3508,15 +3524,12 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		if(!(flags & DDSD_LINEARSIZE))
 		{
 			nlwarning("A DDS doesn't have the flag DDSD_LINEARSIZE");
-			//delete [] _DDSSurfaceDesc;
 			//throw EDDSBadHeader();
 		}
 
 		//-------------- extracting and testing useful info
 		retHeight  = _DDSSurfaceDesc[2];
 		retWidth = _DDSSurfaceDesc[3];
-
-		delete [] _DDSSurfaceDesc;
 	}
 	else if(fileType == PNG_HEADER)
 	{
@@ -3558,7 +3571,13 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 					break;
 				}
 
-				// skip data of this chunk and CRC32
+				// skip data of this chunk and CRC32, a length that does not fit the signed seek offset would seek backward
+				// and read the same chunks again forever
+				if (chunkLength > 0x7fffffffu - 4)
+				{
+					nlwarning("Invalid PNG chunk length %u in '%s'", chunkLength, f.getStreamName().c_str());
+					break;
+				}
 				f.seek(chunkLength+4, IStream::current);
 			}
 			catch(...)
@@ -3620,6 +3639,13 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 						// size of a block
 						f.serial(blockSize);
 						NLMISC_BSWAP16(blockSize);
+
+						// the size includes its own 2 bytes
+						if (blockSize < 2)
+						{
+							nlwarning("Invalid JPG block size %u in '%s'", (uint)blockSize, f.getStreamName().c_str());
+							break;
+						}
 
 						// frame marker (which contains image width and height)
 						if (blockMarker2 >= 0xc0 && blockMarker2 <= 0xc3)
