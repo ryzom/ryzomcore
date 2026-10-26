@@ -76,7 +76,7 @@ static int readGIFData(GifFileType *gif, GifByteType *data, int length)
 /*-------------------------------------------------------------------*\
 							readGIF
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readGIF( NLMISC::IStream &f )
+uint8 CBitmap::readGIF(NLMISC::IStream &f, uint32 maxSize)
 {
 	if(!f.isReading()) return false;
 
@@ -91,10 +91,10 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 		f.serial(height);
 
 		// limit image size as we are using 32bit pixels
-		// 4000x4000x4 ~ 61MiB
-		if (width*height > 4000*4000)
+		// 4000x4000x4 ~ 61MiB (the product is computed in uint32: two uint16 multiplied as int overflowed)
+		if (width > maxSize || height > maxSize || (uint32)width * height > 4000 * 4000)
 		{
-			nlwarning("GIF image size is too big (width=%d, height=%d)", width, height);
+			nlwarning("GIF image size is too big (width=%u, height=%u)", (uint)width, (uint)height);
 			return 0;
 		}
 
@@ -314,7 +314,7 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 
 #else
 
-uint8 CBitmap::readGIF( NLMISC::IStream &/* f */)
+uint8 CBitmap::readGIF(NLMISC::IStream & /* f */, uint32 /* maxSize */)
 {
 	nlwarning ("You must compile NLMISC with USE_GIF if you want gif support");
 	return 0;

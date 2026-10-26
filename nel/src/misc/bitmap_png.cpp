@@ -76,7 +76,7 @@ static void setPNGError(png_struct *png_ptr, const char* message)
 /*-------------------------------------------------------------------*\
 							readPNG
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readPNG( NLMISC::IStream &f )
+uint8 CBitmap::readPNG(NLMISC::IStream &f, uint32 maxSize)
 {
 	if(!f.isReading()) return false;
 
@@ -113,6 +113,9 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 
 	// set number of bit already read (in order to step back)
 	png_set_sig_bytes(png_ptr, 4);
+
+	// png_read_info refuses a larger image, before anything is allocated from its size
+	png_set_user_limits(png_ptr, maxSize, maxSize);
 
 	// read header info and use it
 	png_read_info(png_ptr, info_ptr);

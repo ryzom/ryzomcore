@@ -128,7 +128,7 @@ static jpeg_source_mgr jpgSourceManager = { nullptr, 0,
 /*-------------------------------------------------------------------*\
 							readJPG
 \*-------------------------------------------------------------------*/
-uint8 CBitmap::readJPG( NLMISC::IStream &f )
+uint8 CBitmap::readJPG(NLMISC::IStream &f, uint32 maxSize)
 {
 	if(!f.isReading()) return false;
 
@@ -158,6 +158,15 @@ uint8 CBitmap::readJPG( NLMISC::IStream &f )
 	{
 		jpeg_destroy_decompress(&cinfo);
 		nlwarning("failed to read header");
+		return 0;
+	}
+
+	if (cinfo.image_width > maxSize || cinfo.image_height > maxSize)
+	{
+		nlwarning("The JPEG image '%s' of %ux%u is larger than %u pixels a side", f.getStreamName().c_str(),
+		    (uint)cinfo.image_width, (uint)cinfo.image_height, maxSize);
+		jpeg_destroy_decompress(&cinfo);
+		JPGStream = nullptr;
 		return 0;
 	}
 
@@ -345,7 +354,7 @@ bool CBitmap::writeJPG( NLMISC::IStream &/* f */, uint8 /* quality */)
 	return false;
 }
 
-uint8 CBitmap::readJPG( NLMISC::IStream &/* f */)
+uint8 CBitmap::readJPG(NLMISC::IStream & /* f */, uint32 /* maxSize */)
 {
 	nlwarning ("You must compile NLMISC with USE_JPEG if you want jpeg support");
 	return 0;
