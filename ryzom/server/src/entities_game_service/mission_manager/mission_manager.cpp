@@ -724,6 +724,23 @@ void CMissionManager::instanciateChargeMission(TAIAlias  alias, TAIAlias giver, 
 	*/
 }
 
+// The first GROUP:MISSIONS entry in [first, first + count) that none of the missions uses as its client index. The
+// caller has checked that there are fewer than count missions, so one is free.
+template <class TMission>
+static uint8 getFreeGroupMissionClientIndex( const std::vector<TMission*> &missions, uint8 first, uint8 count )
+{
+	for ( uint i = first; i < (uint)first + count; ++i )
+	{
+		bool used = false;
+		for ( uint j = 0; j < missions.size() && !used; ++j )
+			used = ( missions[j] != NULL && missions[j]->getClientIndex() == i );
+		if ( !used )
+			return (uint8)i;
+	}
+	nlwarning( "<MISSIONS> no free group mission journal entry in %u..%u", (uint)first, (uint)first + count - 1 );
+	return first;
+}
+
 void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission)
 {
 	nlassert(user);
@@ -818,20 +835,14 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 			teamMission->onCreation( giver );
 			teamMission->setTeam( user->getTeamId() );
 
-			// Find a suitable client index (for non-invisible missions)
+			// Find a suitable client index (for non-invisible missions): the first journal entry no mission of the team
+			// uses. The taker's own database cannot tell: it misses the missions taken before the taker joined. The
+			// entry is cleared for the members first, who may still show a mission of a previous team there, as the
+			// title is only written into an empty entry.
 			if ( templ->Tags.NoList == false )
 			{
-				uint8 idx = 0;
-				for ( uint i = 0; i < MaxGroupMissionCount; i++ )
-				{
-//					if ( ! user->_PropertyDatabase.x_getProp( NLMISC::toString( "GROUP:MISSIONS:%u:TITLE",i) ) )
-					if ( ! CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(i).getTITLE(user->_PropertyDatabase))
-					{
-						idx = i;
-						break;
-					}
-				}
-				teamMission->setClientIndex( idx );
+				teamMission->setClientIndex( getFreeGroupMissionClientIndex( team->getMissions(), 0, MaxGroupMissionCount ) );
+				teamMission->clearUsersJournalEntry();
 			}
 
 			// Add mission
@@ -881,27 +892,18 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		guildMission->onCreation( giver );
 		guildMission->setGuild(user->getGuildId());
 
-		// Find a suitable client index (for non-invisible missions)
+		// Find a suitable client index (for non-invisible missions): the first journal entry after the team's that no
+		// mission of the guild uses (the taker's database misses those taken while the taker was offline), cleared for
+		// the members first as for team missions
 		if ( templ->Tags.NoList == false )
 		{
-			uint8 idx = 0;
-			for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
-			{
-				if ( ! CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(i).getTITLE(user->_PropertyDatabase))
-				{
-					idx = i;
-					break;
-				}
-			}
-			guildMission->setClientIndex( idx );
+			guildMission->setClientIndex( getFreeGroupMissionClientIndex( guild->getMissions(), MaxGroupMissionCount, MaxGuildMissionCount ) );
+			guildMission->clearUsersJournalEntry();
 		}
 
 		// Add mission
 		guild->addMission( guildMission );
 		inst = guildMission;
-
-		/// /!\ Do the same thing that the team missions but with the loop: for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
-		/// Instead of for ( uint i = 0; i < MaxGroupMissionCount; i++ ), so that we use available space for guild missions
 
 		/*//teamMission->initBasics( giver );
 		//soloMission->setTeam( user->getTeamId() );
