@@ -977,8 +977,8 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 		// we have to find the user as the invited of a duel to start the duel
 		if ( (*it).InvitedUser == invited->getEntityRowId() || ( team1 && invited->getTeamId() ==  (*it).InvitedTeam ) )
 		{
-			invitor = PlayerManager.getChar( (*it).Invitor );
-			if ( !invitor )
+			CCharacter * candidate = PlayerManager.getChar( (*it).Invitor );
+			if ( !candidate )
 			{
 				nlwarning("<PVP>invalid invitor %s", getEntityIdFromRow( (*it).Invitor ).toString().c_str() );
 				_PVPChallengesAsked.erase(it);
@@ -986,14 +986,15 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 			}
 			
 
-			// ignore deprecated invitation
-			if ( invited->getPVPInterface().isValid() || invitor->getPVPInterface().isValid() )
+			// ignore deprecated invitation: its invitor must not start the challenge below
+			if ( invited->getPVPInterface().isValid() || candidate->getPVPInterface().isValid() )
 			{
 				std::list< CPVPChallengeAsked >::iterator itErase = it;
 				++it;
 				_PVPChallengesAsked.erase(itErase);
 				continue;
 			}
+			invitor = candidate;
 			std::list< CPVPChallengeAsked >::iterator itErase = it;
 			++it;
 			_PVPChallengesAsked.erase(itErase);
