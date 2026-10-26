@@ -1062,9 +1062,24 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 		}
 
 
+		// The players are the users whose connection the WS was told of, so that each later leave it is told of
+		// (CLoginServer::clientDisconnected) was counted: those in limbo mode too, and not the sessions it never knew
+		// (AcceptInvalidCookie)
+		CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+		uint32 nbClients = 0;
+		for (THostMap::const_iterator it = receiveSub->clientMap().begin(); it != receiveSub->clientMap().end(); ++it)
+		{
+			if (it->second->ConnectionReportedToWS)
+				++nbClients;
+		}
+		for (std::map<TUid, CLimboClient>::const_iterator it = receiveSub->LimboClients.begin(); it != receiveSub->LimboClients.end(); ++it)
+		{
+			if (it->second.ConnectionReportedToWS)
+				++nbClients;
+		}
+
 		// send number of players on FS
 		CMessage			msgPlr("NBPLAYERS2");
-		uint32				nbClients = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
 		uint32				nbPendingClients = CLoginServer::getNbPendingUsers();
 		
 		msgPlr.serial(nbClients);
