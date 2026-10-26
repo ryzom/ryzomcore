@@ -1078,6 +1078,9 @@ TInterfaceState globalMenu()
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
+		// A Server Hop from here that failed leaves nothing to go back to
+		FarTP.exitIfFailed();
+
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
 		{

@@ -19,6 +19,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
+#include "nel/misc/block_memory.h"
 #include "nel/3d/u_driver.h"
 #include "far_tp.h"
 #include "net_manager.h"
@@ -1390,6 +1391,7 @@ void CFarTP::sendReady()
 			NetMngr.update();
 			IngameDbMngr.flushObserverCalls();
 			NLGUI::CDBManager::getInstance()->flushObserverCalls();
+			exitIfFailed(); // the connection was closed
 			// Be nice to the system
 			nlSleep(100);
 		}
@@ -1443,11 +1445,28 @@ void CFarTP::onFailure()
 	{
 		reason += ": no characters found!";
 	}
-	Driver->systemMessageBox(("Unable to join shard"+reason).c_str(), "Error", UDriver::okType, UDriver::exclamationIcon);
 
 	// TODO: recover from error
+	// The previous shard is left, and the loop waiting for the reconnection shows the message and exits the client, on
+	// the main thread (this runs in the login co-task)
+	m_FailureMessage = "Unable to join shard" + reason;
+	nlwarning("%s", m_FailureMessage.c_str());
 
 	LoginSM.pushEvent(CLoginStateMachine::ev_quit);
+}
+
+void CFarTP::exitIfFailed()
+{
+	if (m_FailureMessage.empty())
+		return;
+
+	Driver->systemMessageBox(m_FailureMessage.c_str(), "Error", UDriver::okType, UDriver::exclamationIcon);
+
+	// as ExitClientError does, after its own message box
+	extern void quitCrashReport();
+	quitCrashReport();
+	NLMISC::NL3D_BlockMemoryAssertOnPurge = false;
+	exit(EXIT_FAILURE);
 }
 
 void CFarTP::onDssDown(bool forceReturn)
@@ -1533,6 +1552,7 @@ void CFarTP::farTPmainLoop()
 		NetMngr.update();
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		exitIfFailed();
 
 		// TODO: resend in case the last datagram sent was lost?
 //		// check if we can send another dated block
@@ -1548,14 +1568,15 @@ void CFarTP::farTPmainLoop()
 //			NetMngr.send();
 //		}
 
-		if (m_ReselectThroughLimbo && (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_fs)
-		    && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
+		if ((LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_fs) && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
 		{
-			// The connection closed instead of being synchronized again: the EGS refused the user, the session timed out
-			// in limbo mode (the frontend closes a QUIC connection, a UDP client gives up after QuitTimeOut), or the
-			// connection was already lost during the quit countdown. Nothing sends ev_conn_dropped for that.
-			_Reason = new string("the connection was closed while going back to the character selection");
+			// The connection closed before the characters came (connectToNewShard has started it, or kept it for limbo
+			// mode): the frontend or the EGS refused the user, the session timed out in limbo mode (the frontend closes a
+			// QUIC connection, a UDP client gives up after QuitTimeOut), or the connection was already lost during the
+			// quit countdown. Nothing sends ev_conn_dropped for that.
+			_Reason = new string(m_ReselectThroughLimbo ? "the connection was closed while going back to the character selection" : "the connection to the shard was closed");
 			LoginSM.pushEvent(CLoginStateMachine::ev_conn_dropped);
+			exitIfFailed();
 		}
 		else if (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_select_char)
 		{

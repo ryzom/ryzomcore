@@ -287,6 +287,9 @@ public:
 	void selectCharAndEnter();
 	void sendReady();
 	void onFailure();
+	/// After onFailure, nothing is left to go back to: show its message and exit the client. Called by the loops that run
+	/// on the main thread while the login state machine reconnects (farTPmainLoop, globalMenu).
+	void exitIfFailed();
 	void onDssDown(bool forceReturn=false);
 
 	void setIngame() { _InGameMode = true; }
@@ -331,6 +334,7 @@ private:
 	bool _DSSDown; // remembers a DSSDown event if occurs during a FarTP
 //	bool _SelfReconnecting; // allows to disconnect after character selection and reconnect until the player can choose another character
 	bool m_ReselectThroughLimbo; // the current character reselect keeps the connection (see requestReselectThroughLimbo)
+	std::string m_FailureMessage; // set by onFailure (see exitIfFailed)
 
 };
 

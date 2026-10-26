@@ -2119,6 +2119,13 @@ bool mainLoop()
 					// from the EGS, resume the sequence because the EGS is down and won't reply.
 					FarTP.onServerQuitOk();
 				}
+				else if ((connectionState == CNetworkConnection::Disconnect) && (lastConnectionState != CNetworkConnection::Disconnect) && (LoginSM.getCurrentState() == CLoginStateMachine::st_leave_shard))
+				{
+					// The connection was lost during the quit countdown of a Far TP or a character reselect: SERVER_QUIT_OK
+					// will not come, so the sequence goes on, and reconnects or fails as it does on its own
+					nlinfo("The connection was lost while leaving the shard, the Far TP goes on");
+					FarTP.onServerQuitOk();
+				}
 
 				// Yoyo: MovieShooter.
 				if(MovieShooterSaving)

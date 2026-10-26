@@ -73,6 +73,7 @@
 #include "view.h"
 #include "time_client.h"
 #include "connection.h"
+#include "far_tp.h"
 #include "sheet_manager.h"
 #include "world_database_manager.h"
 #include "continent_manager.h"
@@ -350,6 +351,8 @@ inline void	waitForNetworkMessage(bool &var)
 		NetMngr.update();
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		// a Far TP that failed while waiting (the connection was closed) leaves nothing to go back to
+		FarTP.exitIfFailed();
 		// Send dummy info
 		NetMngr.send();
 		// Do not take all the CPU.
@@ -1370,6 +1373,8 @@ void initMainLoop()
 				IngameDbMngr.flushObserverCalls();
 				NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			}
+			// on a character reselect, a closed connection ends the Far TP as a failure, which leaves nothing to go back to
+			FarTP.exitIfFailed();
 
 			// Set the LastGameCycle
 			LastGameCycle = NetMngr.getCurrentServerTick();
