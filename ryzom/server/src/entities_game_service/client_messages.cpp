@@ -60,6 +60,7 @@
 #include "game_share/scenario.h"
 #include "server_share/r2_vision.h"
 #include "server_share/client_text.h"
+#include "server_share/client_refusal.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -305,10 +306,12 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbClientItemEnchant> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
-	// the client offers no enchant or recharge in the guild inventory, which would consume a guild crystal
-	if (inv == INVENTORIES::guild)
+	// The client offers enchant and recharge in the bag, the room and the pack animals only (item_menu_in_bag, not in
+	// the guild inventory, which would consume a guild crystal)
+	if (inv != INVENTORIES::bag && inv != INVENTORIES::player_room && (inv < INVENTORIES::pet_animal || inv >= INVENTORIES::max_pet_animal))
 	{
-		nlwarning("<cbClientItemEnchant> player %s tried to use slot %u of the guild inventory, refused", user.toString().c_str(), slot);
+		nlwarning("HACK: <cbClientItemEnchant> player %s tried to use slot %u of inventory %u, refused", user.toString().c_str(), (uint)slot, (uint)inv);
+		reportRefusedClientMessage(user);
 		return;
 	}
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );
