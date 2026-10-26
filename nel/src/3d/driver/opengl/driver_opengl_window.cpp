@@ -2024,6 +2024,13 @@ bool CDriverGL::setMode(const GfxMode& amode)
 	if (!_DestroyWindow)
 		return true;
 
+	// a window has a size (the size of a minimized window is empty, and the cursor position is relative to it)
+	if (amode.Windowed && (amode.Width == 0 || amode.Height == 0))
+	{
+		nlwarning("3D: Refusing an empty window size %ux%u", (uint)amode.Width, (uint)amode.Height);
+		return false;
+	}
+
 #if !(HAVE_XRANDR)
 	const GfxMode &mode = amode;
 #endif
