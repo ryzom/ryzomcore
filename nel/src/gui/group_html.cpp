@@ -3929,6 +3929,9 @@ namespace NLGUI
 		long code = -1;
 		curl_easy_getinfo(data->data->Request, CURLINFO_RESPONSE_CODE, &code);
 
+		// the callbacks move a downloaded file over the cached one: only a complete download may get there
+		bool downloaded = false;
+
 		LOG_DL("(%s) transfer '%p' completed with http code %d, url (len %d) '%s'", _Id.c_str(), data->data->Request, code, data->url.size(), data->url.c_str());
 		curl_multi_remove_handle(MultiCurl, data->data->Request);
 
@@ -3953,6 +3956,7 @@ namespace NLGUI
 				{
 					CFile::deleteFile(data->tmpdest);
 				}
+				downloaded = true;
 			}
 			else if ((code >= 301 && code <= 303) || code == 307 || code == 308)
 			{
@@ -4008,6 +4012,12 @@ namespace NLGUI
 		else
 		{
 			nlwarning("DATA download failed '%s', error '%s'", data->url.c_str(), error.c_str());
+		}
+
+		// a transfer that failed (the file is partial) or an error page (404, a redirect that was not followed)
+		if (!downloaded && CFile::fileExists(data->tmpdest))
+		{
+			CFile::deleteFile(data->tmpdest);
 		}
 
 		finishCurlDownload(data);

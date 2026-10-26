@@ -1060,7 +1060,16 @@ namespace NLGUI
 		CIFile ifTmp;
 		if (ifTmp.open(filename))
 		{
-			CBitmap::loadSize (ifTmp, gt->Width, gt->Height);
+			// the file may be a download of the web browser, which can be too short to hold a header
+			try
+			{
+				CBitmap::loadSize(ifTmp, gt->Width, gt->Height);
+			}
+			catch (const NLMISC::EStream &e)
+			{
+				nlwarning("Failed to load the texture '%s': %s", filename.c_str(), e.what());
+				return false;
+			}
 			gt->DefaultWidth = gt->Width;
 			gt->DefaultHeight = gt->Height;
 			if (gt->Width == 0 || gt->Height == 0)
