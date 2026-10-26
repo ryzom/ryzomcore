@@ -230,7 +230,9 @@ public:
 		else if (t == CBitmap::DXTC5)			bpp = 8;
 		else if (t == CBitmap::DsDt)			bpp = 16;
 
-		uint size = w*h*bpp/8;
+		// CDriverUser::createTextureMem refuses a size that does not fit in 32 bits (w*h*bpp wrapped from 2^27 RGBA
+		// pixels to a far smaller buffer)
+		uint size = (uint)((uint64)w * h * bpp / 8);
 		uint8 *data = new uint8[size];
 
 		CTextureMem *pTxMem = new CTextureMem(data, size, true, false, w, h, t);
