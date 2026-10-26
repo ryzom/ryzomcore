@@ -683,12 +683,21 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	try
 	{
 		std::string mixerConfigFile = NLMISC::CPath::lookup("default.mixer_config", false);
-		if (!mixerConfigFile.empty())
+		if (mixerConfigFile.empty())
+		{
+			nlwarning("AM: No default.mixer_config, the default mixer configuration is used and no sample bank is preloaded");
+		}
+		else
 		{
 			formLoader = NLGEORGES::UFormLoader::createLoader();
 
 			NLMISC::CSmartPtr<NLGEORGES::UForm> form;
 			form = formLoader->loadForm(mixerConfigFile.c_str());
+
+			// loadForm has logged why (a damaged sound data file, a missing dfn): the sample banks it lists cannot be
+			// loaded, so the mixer initialization fails
+			if (!form)
+				throw NLMISC::Exception(NLMISC::toString("AM: Cannot load the mixer config '%s', the sound data is broken", mixerConfigFile.c_str()));
 
 			NLGEORGES::UFormElm &root = form->getRootNode();
 
@@ -779,6 +788,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	catch(...)
 	{
 		NLGEORGES::UFormLoader::releaseLoader(formLoader);
+		throw;
 	}
 
 	// init the user var bindings
