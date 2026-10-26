@@ -623,11 +623,11 @@ public:
 				uint32 bar;
 				if( score == SCORES::hit_points )
 				{
-					bar = (uint32)( (1023 * _PhysScores._PhysicalScores[score].Current) / _PhysScores._PhysicalScores[score].Max);
+					bar = (uint32)scoreRatio(_PhysScores._PhysicalScores[score].Current, _PhysScores._PhysicalScores[score].Max, 1023);
 				}
 				else
 				{
-					bar = (uint32)( (127 * _PhysScores._PhysicalScores[score].Current) / _PhysScores._PhysicalScores[score].Max);
+					bar = (uint32)scoreRatio(_PhysScores._PhysicalScores[score].Current, _PhysScores._PhysicalScores[score].Max, 127);
 				}
 				setScoreBar(score,bar);
 			}
@@ -635,6 +635,12 @@ public:
 				setScoreBar(score,0);
 			
 		}
+	}
+
+	/// scale * current / max, in 64 bits: 1023 * current overflowed above 2,099,202 hit points, 127 * current above 16,909,320
+	static sint32 scoreRatio(sint32 current, sint32 max, sint32 scale)
+	{
+		return (sint32)(((sint64)scale * current) / max);
 	}
 
 	///
@@ -645,7 +651,7 @@ public:
 		SCharacteristicsAndScores &hp = _PhysScores._PhysicalScores[SCORES::hit_points];
 		sint32 maxhp = hp.Max;
 		if ( maxhp != 0 )
-			barLevel = (sint32)( (1023 * hp.Current) / maxhp);
+			barLevel = scoreRatio(hp.Current, maxhp, 1023);
 		else
 			barLevel = 0;
 		barresValue = (uint32)barLevel & 0x7ff;
@@ -659,7 +665,7 @@ public:
 		
 		if( _PhysScores._PhysicalScores[SCORES::stamina].Max > 0 )
 		{
-			barLevel = (uint32)( (127 * _PhysScores._PhysicalScores[SCORES::stamina].Current) / _PhysScores._PhysicalScores[SCORES::stamina].Max);
+			barLevel = scoreRatio(_PhysScores._PhysicalScores[SCORES::stamina].Current, _PhysScores._PhysicalScores[SCORES::stamina].Max, 127);
 		}
 		else
 		{
@@ -669,7 +675,7 @@ public:
 
 		if( _PhysScores._PhysicalScores[SCORES::sap].Max > 0 )
 		{
-			barLevel = (uint32)( (127 * _PhysScores._PhysicalScores[SCORES::sap].Current) / _PhysScores._PhysicalScores[SCORES::sap].Max);
+			barLevel = scoreRatio(_PhysScores._PhysicalScores[SCORES::sap].Current, _PhysScores._PhysicalScores[SCORES::sap].Max, 127);
 		}
 		else
 		{
@@ -679,7 +685,7 @@ public:
 
 		if( _PhysScores._PhysicalScores[SCORES::focus].Max > 0 )
 		{
-			barLevel = (uint32)( (127 * _PhysScores._PhysicalScores[SCORES::focus].Current) / _PhysScores._PhysicalScores[SCORES::focus].Max);
+			barLevel = scoreRatio(_PhysScores._PhysicalScores[SCORES::focus].Current, _PhysScores._PhysicalScores[SCORES::focus].Max, 127);
 		}
 		else
 		{

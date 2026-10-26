@@ -17065,7 +17065,7 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 	else
 	{
 		if( _PhysScores._PhysicalScores[SCORES::hit_points].Max > 0)
-			setHpBar( (uint32) ( (1023 * _PhysScores._PhysicalScores[SCORES::hit_points].Current) / _PhysScores._PhysicalScores[SCORES::hit_points].Max) );
+			setHpBar((uint32)scoreRatio(_PhysScores._PhysicalScores[SCORES::hit_points].Current, _PhysScores._PhysicalScores[SCORES::hit_points].Max, 1023));
 		else
 			setHpBar(0);
 		return false;
