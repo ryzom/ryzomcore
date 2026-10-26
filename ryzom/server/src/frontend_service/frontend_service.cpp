@@ -1170,9 +1170,12 @@ inline void	CFrontEndService::onTick()
 			fillPrioritizedActionsToSend();
 			swapSendBuffers(); // waits for the end of flushMessagesToSend using the boolean FlushInProgress (with addWait there would be a deadlock at the beginning)
 
-			SendTask->sendBuffer();
-
-			if (SendThread == NULL)
+			// The send thread and its task only exist with UseSendThread
+			if (SendTask)
+			{
+				SendTask->sendBuffer();
+			}
+			else
 			{
 				H_AUTO(FlushMessagesToSend);
 				flushMessagesToSend();
