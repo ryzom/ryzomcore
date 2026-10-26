@@ -455,6 +455,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	//
 	_MapMode = MapMode_Normal;
 	_RespawnSelected = 0;
+	_RespawnPosReseted = false;
 	_RespawnSelectedBitmap = nullptr;
 	//
 	_WorldToMapDeltaX = 0.f;
@@ -3420,7 +3421,8 @@ void CGroupMap::getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &wo
 //=========================================================================================================
 void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 {
-	_RespawnPosReseted = false;
+	// A reset stays pending until checkCoords applies it (when the map is shown): the points the EGS adds one by one
+	// after sending the whole list must not cancel it
 	if (rpm.NeedToReset)
 	{
 		_RespawnPosReseted = true;
