@@ -382,6 +382,10 @@ bool CCharacterShoppingList::checkAltarRestriction()
 //-----------------------------------------------------------------------------
 uint32 CCharacterShoppingList::getSellPrice( const TItemTradePtr itemTrade, bool dynnamicShop )
 {
+	// the price a player resells an item for is kept to the dapper: through a float, one above 2^24 was rounded
+	if( dynnamicShop )
+		return (uint32)itemTrade->getPriceInfo().getAmount();
+
 	float priceFactor = 1.0f;
 	if( _CurrentMerchant != 0 && dynnamicShop == false )
 	{

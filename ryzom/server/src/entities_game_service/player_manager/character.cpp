@@ -10259,6 +10259,13 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			return;
 		}
 
+		// the resale price is kept in the sint32 of a TPriceInfo; the client sends 0 rather than a price that does not fit
+		if( sellPrice > (uint32)std::numeric_limits<sint32>::max() )
+		{
+			nlwarning("<CCharacter sellItem> character %s try to sell an item %s for %u, more than a resale price can be, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str(), sellPrice );
+			return;
+		}
+
 		if (item->getRefInventory() == _Inventory[INVENTORIES::equipment])
 		{
 			nlwarning("<CCharacter sellItem> character %s try to sell an equipped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
