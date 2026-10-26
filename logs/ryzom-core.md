@@ -176,3 +176,20 @@ while the pixels are read from order 1 or 2 for the smaller far textures.
 The tile must now hold `sourceSize * sourceSize` pixels for the order in use,
 otherwise a warning is logged and the layers of this tile are skipped. The
 root cause of the bad tile is not confirmed.
+
+## 2026-10-26 — 🐛 CDrawDraggedSheet: the widget pointer may not exist
+
+3 crash reports on the login screen (read access violation at 0x141):
+`CDrawDraggedSheet::process()` called `show()` on the pointer returned by
+`CWidgetManager::getPointer()` without a NULL test. It now reads the pointer
+once and skips drawing when there is none.
+
+## 2026-10-26 — 🐛 initLogin: an empty XMLLoginInterfaceFiles is a fatal error
+
+The crash in `CDrawDraggedSheet::process()` on the login screen comes from a
+client without the login interface: `initLogin()` only logged
+"no xml login config files in client.cfg" and returned, so no pointer
+view was created but the login loop kept drawing. It is now a `nlerror`, as
+is an empty `XMLInterfaceFiles` in `initInGame()`, and a failed
+`parseInterface()` in `initLogin()` and `initOutGame()` shows the existing XML
+error message box.
