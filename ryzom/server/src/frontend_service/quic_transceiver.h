@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <atomic>
+#include <mutex>
 
 #include "nel/misc/atomic.h"
 #include "nel/misc/bit_mem_stream.h"
@@ -112,6 +113,11 @@ public:
 
 	// Handle of the connection, null once closed or given back to MsQuic (taken out under the transceiver's lock)
 	void *Connection;
+
+	// The callbacks get the handle as a parameter; everywhere else Connection is read, used or taken out under this
+	// lock (the send thread sends through it, the main thread shuts it down, takeConnection takes it out to close it).
+	// When both are taken, it is locked after the transceiver's OpenConnections lock.
+	std::mutex ConnectionMutex;
 
 	// Not a real address, just a token to identify the connection (immutable)
 	// Give everyone an IPv6 in unique local network fdd5:d66b:8698::/48

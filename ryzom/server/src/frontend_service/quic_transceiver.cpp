@@ -457,10 +457,7 @@ void CQuicTransceiver::stop()
 		nldebug("Shutdown %i connections", (int)connectionsCopy.size());
 		for (const CQuicUserContextPtr &user : connectionsCopy)
 		{
-			if (user->Connection)
-			{
-				MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
-			}
+			shutdown(user.get());
 		}
 		// Wait for connections to be empty, lousy spin loop
 		// (the lock is released while sleeping: SHUTDOWN_COMPLETE needs it to erase each connection)
@@ -494,6 +491,7 @@ void CQuicTransceiver::stop()
 		NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&m->OpenConnections);
 		for (CQuicUserContext *user : openConnections.value())
 		{
+			std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
 			leftovers.push_back(user->Connection);
 			user->Connection = null;
 		}
@@ -559,7 +557,13 @@ CQuicUserContext::~CQuicUserContext()
 	// since we increase the reference when the connection gets opened,
 	// and decrease the reference when the connection is shutdown.
 	// Once the transceiver has stopped, it has closed the handle already and may be gone: it is not touched then.
-	if (Connection)
+	bool hasConnection;
+	{
+		// (released before takeConnection, which locks OpenConnections first)
+		std::unique_lock<std::mutex> connectionLock(ConnectionMutex);
+		hasConnection = Connection != null;
+	}
+	if (hasConnection)
 	{
 		CQuicTransceiverImpl *m = Transceiver->m.get();
 		void *connection = m->takeConnection(this);
@@ -571,8 +575,13 @@ CQuicUserContext::~CQuicUserContext()
 void *CQuicTransceiverImpl::takeConnection(CQuicUserContext *user)
 {
 	NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&OpenConnections);
-	void *connection = user->Connection;
-	user->Connection = null;
+	void *connection;
+	{
+		// Once taken out, the send thread and shutdown() no longer use the handle
+		std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
+		connection = user->Connection;
+		user->Connection = null;
+	}
 	openConnections.value().erase(user);
 	return connection;
 }
@@ -843,6 +852,14 @@ bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemS
 			return false;
 		}
 
+		// The handle may be taken out to be closed (takeConnection) while this thread sends
+		std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
+		if (!user->Connection)
+		{
+			user->SendBusy.clear();
+			return false;
+		}
+
 		// Swap buffers
 		++user->SentCount;
 		user->SendBuffer.swap(buffer);
@@ -868,6 +885,7 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 	// Gracefully shuts down a connection (assume this is called from the main service thread only)
 	// Assuming we can call shutdown as many times as we like...
 	// (once the transceiver has stopped, the context has no handle any more)
+	std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
 	if (!user->Connection)
 		return;
 	CQuicTransceiverImpl *m = user->Transceiver->m.get();
