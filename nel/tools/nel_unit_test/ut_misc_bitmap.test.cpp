@@ -368,3 +368,37 @@ TEST(CUTMiscBitmap, jpegScanCountIsLimited)
 	CBitmap many;
 	EXPECT_EQ(0, loadImage(many, makeProgressiveJPG(64, 600)));
 }
+
+// a GIF of a 2x2 canvas whose 2x2 first frame is at left, top
+static TBytes makeGIF(uint32 left, uint32 top)
+{
+	// clang-format off
+	const uint8 bytes[] = {
+		'G', 'I', 'F', '8', '9', 'a', 2, 0, 2, 0, 0x80, 0, 0, // canvas of 2x2, global color map of 2 colors
+		0, 0, 0, 0xff, 0xff, 0xff,                              // the color map
+		0x2c, 0, 0, 0, 0, 2, 0, 2, 0, 0,                         // the frame
+		2, 3, 0x04, 0x00, 0x05, 0,                               // its LZW data: clear, 4 times 0, end
+		0x3b
+	};
+	// clang-format on
+	TBytes gif(bytes, bytes + sizeof(bytes));
+	putLE16(gif, 20, left);
+	putLE16(gif, 22, top);
+	return gif;
+}
+
+TEST(CUTMiscBitmap, gifCanvasHoldsTheFirstFrame)
+{
+	// a frame not within the canvas was copied past it: the canvas grows as in browsers (without GIF support, no GIF
+	// loads)
+	CBitmap grown;
+	if (loadImage(grown, makeGIF(1, 1)) != 0)
+	{
+		EXPECT_EQ(3u, grown.getWidth());
+		EXPECT_EQ(3u, grown.getHeight());
+	}
+
+	// a canvas that would be larger than the limit
+	CBitmap refused;
+	EXPECT_EQ(0, loadImage(refused, makeGIF(30000, 0)));
+}

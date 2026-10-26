@@ -48,10 +48,9 @@ static uint8 GIF_DISPOSE_RESTORE = 3;
 
 static NLMISC::IStream *GIFStream = nullptr;
 
-#if GIFLIB_MAJOR < 5
-static uint8 INTERLACED_OFFSET[] = { 0, 4, 2, 1 };
-static uint8 INTERLACED_JUMP[] = { 8, 8, 4, 2 };
-#endif
+// the first row and the row step of the 4 passes of an interlaced image
+static const uint8 INTERLACED_OFFSET[] = { 0, 4, 2, 1 };
+static const uint8 INTERLACED_JUMP[] = { 8, 8, 4, 2 };
 
 static int readGIFData(GifFileType *gif, GifByteType *data, int length)
 {
@@ -119,11 +118,96 @@ uint8 CBitmap::readGIF(NLMISC::IStream &f, uint32 maxSize)
 	}
 #endif
 
-	// this will read and decode all frames
-	sint32 ret = DGifSlurp(gif);
-	if (ret != GIF_OK)
+	// Read the records up to the first image, the only frame used. DGifSlurp decoded and kept every frame of an animation,
+	// each as large as its descriptor said.
+	sint32 transparency = GIF_NOT_TRANSPARENT;
+	std::vector<GifPixelType> raster;
+	ColorMapObject *ColorMap = nullptr;
+	uint32 offset_x = 0, offset_y = 0, width = 0, height = 0;
+	uint32 canvasWidth = 0, canvasHeight = 0;
+	bool imageRead = false;
+	bool failed = false;
+	GifRecordType recordType = UNDEFINED_RECORD_TYPE;
+
+	while (!imageRead && !failed && recordType != TERMINATE_RECORD_TYPE)
 	{
-		nlwarning("failed to read gif, error=%d", ret);
+		if (DGifGetRecordType(gif, &recordType) == GIF_ERROR)
+		{
+			failed = true;
+		}
+		else if (recordType == EXTENSION_RECORD_TYPE)
+		{
+			int extCode = 0;
+			GifByteType *ext = nullptr;
+			if (DGifGetExtension(gif, &extCode, &ext) == GIF_ERROR)
+			{
+				failed = true;
+			}
+			else
+			{
+				// the graphics control block of the next image: its length, the flags, the delay (2 bytes), and the
+				// transparent color index (it was read without checking that the block holds it)
+				if (extCode == GRAPHICS_EXT_FUNC_CODE && ext && ext[0] >= 4)
+					transparency = (ext[1] & GIF_TRANSPARENT_MASK) ? ext[4] : GIF_NOT_TRANSPARENT;
+				while (ext && !failed)
+				{
+					if (DGifGetExtensionNext(gif, &ext) == GIF_ERROR)
+						failed = true;
+				}
+			}
+		}
+		else if (recordType == IMAGE_DESC_RECORD_TYPE)
+		{
+			if (DGifGetImageDesc(gif) == GIF_ERROR)
+			{
+				failed = true;
+			}
+			else
+			{
+				offset_x = gif->Image.Left;
+				offset_y = gif->Image.Top;
+				width = gif->Image.Width;
+				height = gif->Image.Height;
+
+				// the frame is copied into the canvas without clipping: the canvas grows to hold a frame that does not lie
+				// within it, as browsers do, within the size limits
+				canvasWidth = std::max((uint32)std::max(gif->SWidth, 0), offset_x + width);
+				canvasHeight = std::max((uint32)std::max(gif->SHeight, 0), offset_y + height);
+				if (gif->Image.Left < 0 || gif->Image.Top < 0 || gif->Image.Width <= 0 || gif->Image.Height <= 0
+				    || canvasWidth > maxSize || canvasHeight > maxSize || canvasWidth * canvasHeight > 4000 * 4000)
+				{
+					nlwarning("The GIF image '%s' has a frame of %ux%u at %u,%u, the canvas would be too large",
+					    f.getStreamName().c_str(), width, height, offset_x, offset_y);
+					failed = true;
+				}
+				else
+				{
+					raster.resize(width * height);
+
+					// the rows of an interlaced image come in 4 passes
+					uint passCount = gif->Image.Interlace ? 4 : 1;
+					for (uint pass = 0; pass < passCount && !failed; ++pass)
+					{
+						uint32 first = gif->Image.Interlace ? INTERLACED_OFFSET[pass] : 0;
+						uint32 step = gif->Image.Interlace ? INTERLACED_JUMP[pass] : 1;
+						for (uint32 y = first; y < height && !failed; y += step)
+						{
+							if (DGifGetLine(gif, &raster[y * width], (int)width) == GIF_ERROR)
+								failed = true;
+						}
+					}
+
+					// select color map for frame
+					ColorMap = gif->Image.ColorMap ? gif->Image.ColorMap : gif->SColorMap;
+					imageRead = !failed;
+				}
+			}
+		}
+	}
+
+	if (!imageRead)
+	{
+		nlwarning("failed to read gif '%s'", f.getStreamName().c_str());
 #if GIFLIB_MAJOR >= 5 && GIFLIB_MINOR >= 1
 		DGifCloseFile(gif, &errorCode);
 #else
@@ -132,174 +216,64 @@ uint8 CBitmap::readGIF(NLMISC::IStream &f, uint32 maxSize)
 		return 0;
 	}
 
+	if (ColorMap == nullptr || ColorMap->ColorCount <= 0)
+	{
+		nlwarning("GIF has no global or local color map");
+		ColorMap = nullptr;
+	}
+
 	// resize target buffer
 	uint32 dstChannels = 4; // RGBA
-	resize (gif->SWidth, gif->SHeight, RGBA);
+	resize(canvasWidth, canvasHeight, RGBA);
 
 	// make transparent
 	_Data[0].fill(0);
 
-	// make sure background color index exists in global colormap
-	if (gif->SColorMap && gif->SColorMap->ColorCount < gif->SBackGroundColor)
-	{
-		gif->SBackGroundColor = 0;
-	}
-
-	// merge all frames one by one into single target
-	ColorMapObject *ColorMap;
-	sint32 transparency = GIF_NOT_TRANSPARENT;
+	// copy frame to canvas
 	uint8 r, g, b, a;
-	uint32 offset_x, offset_y, width, height;
-
-	// disable loop as we only interested in first frame
-	// for (uint32 frame = 0; frame < gif->ImageCount; frame++)
+	for (uint32 y = 0; y < height; y++)
 	{
-		uint32 frame = 0;
-		SavedImage *curFrame = &gif->SavedImages[frame];
-
-		if (curFrame->ExtensionBlockCount > 0)
+		uint32 srcOffset = y * width;
+		uint32 dstOffset = (y + offset_y) * canvasWidth * dstChannels + offset_x * dstChannels;
+		for (uint32 x = 0; x < width; x++)
 		{
-			for(sint e = 0; e < curFrame->ExtensionBlockCount; e++)
+			uint32 index = raster[srcOffset];
+
+			if ((sint32)index != transparency)
 			{
-				ExtensionBlock *ext = &curFrame->ExtensionBlocks[e];
-
-				if (ext->Function == GRAPHICS_EXT_FUNC_CODE)
+				// make sure color index is not outside colormap (an index equal to the color count was read past it)
+				if (ColorMap)
 				{
-					uint8 flag = ext->Bytes[0];
-					//delay = (ext.Bytes[1] << 8) | ext.Bytes[2];
-					transparency = (flag & GIF_TRANSPARENT_MASK) ? ext->Bytes[3] : GIF_NOT_TRANSPARENT;
-					//dispose = ((flag >> 2) & GIF_DISPOSE_MASK);
-				}
-			}
-		}
-
-		// select color map for frame
-		if (curFrame->ImageDesc.ColorMap)
-		{
-			ColorMap = curFrame->ImageDesc.ColorMap;
-		}
-		else
-		if (gif->SColorMap)
-		{
-			ColorMap = gif->SColorMap;
-		}
-		else
-		{
-			nlwarning("GIF has no global or local color map");
-			ColorMap = nullptr;
-		}
-
-		// copy frame to canvas
-		offset_x = curFrame->ImageDesc.Left;
-		offset_y = curFrame->ImageDesc.Top;
-		width = curFrame->ImageDesc.Width;
-		height = curFrame->ImageDesc.Height;
-
-#if GIFLIB_MAJOR < 5
-		// giflib 4 does not handle interlaced images, so we must do it
-		if (curFrame->ImageDesc.Interlace)
-		{
-			uint32 srcOffset = 0;
-			for (uint8 pass = 0; pass < 4; pass++)
-			{
-				uint32 nextLine = INTERLACED_OFFSET[pass];
-
-				// y is destination row
-				for (uint32 y = 0; y < height; y++)
-				{
-					if (y != nextLine)
-						continue;
-
-					uint32 dstOffset = (y + offset_y)*gif->SWidth*dstChannels + offset_x*dstChannels;
-					nextLine += INTERLACED_JUMP[pass];
-
-					for (uint32 x = 0; x < width; x++)
+					if ((sint)index >= ColorMap->ColorCount)
 					{
-						uint32 index = curFrame->RasterBits[srcOffset];
-
-						if ((sint32)index != transparency)
-						{
-							// make sure color index is not outside colormap
-							if (ColorMap)
-							{
-								if ((sint)index > ColorMap->ColorCount)
-								{
-									index = 0;
-								}
-								r = ColorMap->Colors[index].Red;
-								g = ColorMap->Colors[index].Green;
-								b = ColorMap->Colors[index].Blue;
-							}
-							else
-							{
-								// broken gif, no colormap
-								r = g = b = 0;
-							}
-							a = 255;
-						}
-						else
-						{
-							// transparent
-							r = g = b = a = 0;
-						}
-
-						_Data[0][dstOffset]   = r;
-						_Data[0][dstOffset+1] = g;
-						_Data[0][dstOffset+2] = b;
-						_Data[0][dstOffset+3] = a;
-
-						srcOffset++;
-						dstOffset+= dstChannels;
-					} // x loop
-				} // y loop
-			} // pass loop
-		}
-		else
-#endif
-		for (uint32 y = 0; y < height; y++)
-		{
-			uint32 srcOffset = y*width;
-			uint32 dstOffset = (y + offset_y)*gif->SWidth*dstChannels + offset_x*dstChannels;
-			for (uint32 x = 0; x < width; x++)
-			{
-				uint32 index = curFrame->RasterBits[srcOffset];
-
-				if ((sint32)index != transparency)
-				{
-					// make sure color index is not outside colormap
-					if (ColorMap)
-					{
-						if ((sint)index > ColorMap->ColorCount)
-						{
-							index = 0;
-						}
-						r = ColorMap->Colors[index].Red;
-						g = ColorMap->Colors[index].Green;
-						b = ColorMap->Colors[index].Blue;
+						index = 0;
 					}
-					else
-					{
-						// broken gif, no colormap
-						r = g = b = 0;
-					}
-					a = 255;
+					r = ColorMap->Colors[index].Red;
+					g = ColorMap->Colors[index].Green;
+					b = ColorMap->Colors[index].Blue;
 				}
 				else
 				{
-					// transparent
-					r = g = b = a = 0;
+					// broken gif, no colormap
+					r = g = b = 0;
 				}
+				a = 255;
+			}
+			else
+			{
+				// transparent
+				r = g = b = a = 0;
+			}
 
-				_Data[0][dstOffset]   = r;
-				_Data[0][dstOffset+1] = g;
-				_Data[0][dstOffset+2] = b;
-				_Data[0][dstOffset+3] = a;
+			_Data[0][dstOffset] = r;
+			_Data[0][dstOffset + 1] = g;
+			_Data[0][dstOffset + 2] = b;
+			_Data[0][dstOffset + 3] = a;
 
-				srcOffset++;
-				dstOffset+= dstChannels;
-			} // x loop
-		} // y loop
-	}
+			srcOffset++;
+			dstOffset += dstChannels;
+		} // x loop
+	} // y loop
 
 	// clean up after the read, and free any memory allocated
 #if GIFLIB_MAJOR >= 5 && GIFLIB_MINOR >= 1
