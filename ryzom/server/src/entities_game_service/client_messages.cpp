@@ -604,11 +604,15 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 	}
 
 	// A craft in progress consumes the materials selected for it when it ends, and the phrase manager refuses a
-	// second craft only after the lists below are replaced; refuse it before, so the running craft keeps its own.
+	// second craft only after the lists below are replaced, so they are left alone. The phrase is still executed:
+	// the phrase manager refuses it and acknowledges the client's execution counter, which the client has already
+	// increased (the craft window stays open during a craft, so this is an ordinary second click).
 	const CEntityPhrases *entityPhrases = CPhraseManager::getInstance().getEntityPhrases( ch->getEntityRowId() );
 	if ( entityPhrases != NULL && entityPhrases->getCurrentActionConst() != NULL && entityPhrases->getCurrentActionConst()->getType() == BRICK_TYPE::FABER )
 	{
-		nlwarning("player %s sent EXECUTE_FABER while a craft is in progress, refused", Id.toString().c_str() );
+		nldebug("player %s sent EXECUTE_FABER while a craft is in progress, its materials are kept", Id.toString().c_str() );
+		ch->executeMemorizedPhrase( set, slot, false,false );
+		ch->setAfkState(false);
 		return;
 	}
 
