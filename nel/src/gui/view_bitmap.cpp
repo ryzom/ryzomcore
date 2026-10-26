@@ -468,7 +468,9 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CViewBitmap::setTexture(const std::string & TxName)
 	{
-		if (TxName.find("://") != string::npos || TxName.find("//") == 0)
+		// a data: URL is decoded by the renderer: one containing "://" went back to addImageDownload, which set it here
+		// again, until the stack overflowed
+		if (!startsWith(TxName, "data:") && (TxName.find("://") != string::npos || TxName.find("//") == 0))
 		{
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 			if (groupHtml) {
