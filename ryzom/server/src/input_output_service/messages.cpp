@@ -131,6 +131,8 @@ void cbImpulsionChat( CMessage& msgin, const string &serviceName, TServiceId ser
 
 	if (refuseClientTextTooLong(sender, "STRING:CHAT", ucstr, serviceId))
 		return;
+	if (!IOS->getChatManager().acceptChatLine(TheDataset.getDataSetRow(sender)))
+		return;
 
 	// Do a general filtering on client input
 	ucstr = IOS->getChatManager().filterClientInput(ucstr);
@@ -174,6 +176,8 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 	}
 
 	if (refuseClientTextTooLong(sender, "STRING:CHAT_TEAM", ucstr, serviceId))
+		return;
+	if (!IOS->getChatManager().acceptChatLine(TheDataset.getDataSetRow(sender)))
 		return;
 
 	// Do a general filtering on client input
@@ -227,6 +231,8 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 	}
 
 	if (refuseClientTextTooLong(sender, "STRING:TELL", str, serviceId))
+		return;
+	if (!IOS->getChatManager().acceptChatLine(TheDataset.getDataSetRow(sender)))
 		return;
 
 	// Do a general filtering on client input
@@ -1564,6 +1570,8 @@ void cbCustomEmote( CMessage& msgin, const string &serviceName, TServiceId servi
 			nlwarning("<cbCustomEmote> ignoring emote because PC %x Invalid", sender.getIndex());
 			return;
 		}
+		if (!cm.acceptChatLine(sender))
+			return;
 		// send the phrase
 		cm.sendEmoteCustomTextToAll(sender, emoteCustomText);
 	}

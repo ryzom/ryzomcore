@@ -49,9 +49,13 @@ void	logChatDirChanged(IVariable &var)
 	//IOS->getChatManager().resetChatLog();
 }
 
+// clang-format off
 CVariable<bool>			VerboseChatManagement("ios","VerboseChatManagement", "Set verbosity for chat management", false, 0, true);
 CVariable<std::string>	LogChatDirectory("ios", "LogChatDirectory", "Log Chat directory (default, unset is SaveFiles service directory", "", 0, true, logChatDirChanged);
 CVariable<bool>			ForceFarChat("ios","ForceFarChat", "Force the use of SU to dispatch chat", false, 0, true);
+CVariable<uint32>		ChatLineBurst("ios", "ChatLineBurst", "Chat lines, tells and custom emotes a player can send at once, before ChatLineInterval applies (0: no limit)", 6, 0, true);
+CVariable<uint32>		ChatLineInterval("ios", "ChatLineInterval", "Time in ms after which a player who used up ChatLineBurst can send one more line (0: no limit)", 1000, 0, true);
+// clang-format on
 
 
 
@@ -479,6 +483,40 @@ CChatGroup& CChatManager::getGroup( const TGroupId& gId )
 } // getGroup //
 
 
+
+//-----------------------------------------------
+//	acceptChatLine
+//
+//-----------------------------------------------
+bool CChatManager::acceptChatLine(const TDataSetRow &sender)
+{
+	if (ChatLineBurst.get() == 0)
+		return true;
+
+	TClientInfoCont::iterator itCl = _Clients.find(sender);
+	if (itCl == _Clients.end())
+		return true; // chat and tell report an unknown sender
+
+	CEntityId eid = TheDataset.getEntityId(sender);
+	CCharacterInfos *ci = IOS->getCharInfos(eid);
+	if (ci != NULL && ci->HavePrivilege)
+		return true;
+
+	switch (itCl->second->takeChatLine(CTime::getLocalTime(), ChatLineBurst.get(), ChatLineInterval.get()))
+	{
+	case CChatClient::ChatLineAccepted:
+		return true;
+	case CChatClient::ChatLineFirstRefused: {
+		nlinfo("IOSCM: %s sends chat lines faster than %u at once and then one each %u ms, refused until it slows down", eid.toString().c_str(), ChatLineBurst.get(), ChatLineInterval.get());
+		uint32 phraseId = STRING_MANAGER::sendStringToClient(sender, "CHAT_TOO_FAST", TVectorParamCheck(), &IosLocalSender);
+		sendChat2Ex(CChatGroup::system, sender, phraseId);
+		return false;
+	}
+	default:
+		nldebug("IOSCM: %s sends chat lines too fast, line refused", eid.toString().c_str());
+		return false;
+	}
+}
 
 //-----------------------------------------------
 //	chat

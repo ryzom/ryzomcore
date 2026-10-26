@@ -158,6 +158,13 @@ public :
 	void chat( const TDataSetRow& sender, const ucstring& ucstr );
 
 	/**
+	 * Check a chat line, tell or custom emote of a player against the player's allowance (ChatLineBurst lines at once,
+	 * then one each ChatLineInterval ms). A refused line is not sent, and the player is told once, until a line is
+	 * accepted again. Privileged players are not limited.
+	 */
+	bool acceptChatLine(const TDataSetRow &sender);
+
+	/**
 	 * Transmit a chat message to a group
 	 * \param gId is the group's id
 	 * \param str is the chat content

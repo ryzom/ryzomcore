@@ -54,7 +54,38 @@ CChatClient::CChatClient( const TDataSetRow& index )
 
 	_DynChatChan = 0;
 
+	m_ChatAllowanceTime = 0;
+	m_ChatLineRefused = false;
+
 } // CChatClient //
+
+//-----------------------------------------------
+//	takeChatLine
+//
+//-----------------------------------------------
+CChatClient::TChatLineCheck CChatClient::takeChatLine(NLMISC::TTime now, uint32 lineBurst, uint32 lineInterval)
+{
+	nlassert(lineBurst > 0);
+
+	// A line is accepted while the allowance is less than lineBurst lines from full. It is never more than lineBurst
+	// lines from full, which a clock going back or a lower setting would otherwise leave it.
+	NLMISC::TTime emptyTime = now + (NLMISC::TTime)lineBurst * lineInterval;
+	if (m_ChatAllowanceTime > emptyTime)
+		m_ChatAllowanceTime = emptyTime;
+	else if (m_ChatAllowanceTime < now)
+		m_ChatAllowanceTime = now;
+	if (m_ChatAllowanceTime - now > (NLMISC::TTime)(lineBurst - 1) * lineInterval)
+	{
+		if (m_ChatLineRefused)
+			return ChatLineRefused;
+		m_ChatLineRefused = true;
+		return ChatLineFirstRefused;
+	}
+
+	m_ChatAllowanceTime += lineInterval;
+	m_ChatLineRefused = false;
+	return ChatLineAccepted;
+}
 
 CChatClient::~CChatClient()
 {
