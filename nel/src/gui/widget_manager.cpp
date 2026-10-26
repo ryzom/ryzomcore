@@ -1045,6 +1045,11 @@ namespace NLGUI
 				i--;
 			}
 		}
+
+		// A window deleted without unMakeWindow (CInterfaceGroup::delGroup, a Lua delGroup) must leave the window lists of
+		// its master group, which check, update and draw it every frame. Only pointers are compared, so this is safe from
+		// the destructor, and while the master group itself is deleted.
+		unMakeWindow(group, true);
 	}
 
 
