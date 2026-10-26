@@ -193,3 +193,10 @@ view was created but the login loop kept drawing. It is now a `nlerror`, as
 is an empty `XMLInterfaceFiles` in `initInGame()`, and a failed
 `parseInterface()` in `initLogin()` and `initOutGame()` shows the existing XML
 error message box.
+
+## 2026-10-26 — 🐛 CAudioMixerUser::initDevice: handle a mixer config that cannot be loaded
+
+2 crash reports (read access violation at 0x0): `initDevice()` dereferenced the
+form returned by `loadForm()` for `default.mixer_config`, which is NULL when the
+file cannot be loaded. It now logs a warning and keeps the default
+configuration (the file is optional).
