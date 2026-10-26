@@ -3958,7 +3958,10 @@ namespace NLGUI
 			// if server did not send any error back
 			if (content.empty())
 			{
-				content = string("<html><head><title>ERROR</title></head><body><h1>Connection failed</h1><p>HTTP code '" + toString((sint32)code) + "'</p><p>URL '" + _CurlWWW->Url + "'</p></body></html>");
+				// The page is rendered with the rights of the url's domain: the url is escaped, or a query of a link to a
+				// trusted domain that answers an error without a body could add a <lua> element. It is the page's url,
+				// without the parameters that addHTTPGetParams adds, which include the user's web authentication key.
+				content = string("<html><head><title>ERROR</title></head><body><h1>Connection failed</h1><p>HTTP code '" + toString((sint32)code) + "'</p><p>URL '" + CHtmlElement::htmlEscape(_URL) + "'</p></body></html>");
 			}
 		}
 
