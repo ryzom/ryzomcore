@@ -552,11 +552,19 @@ restartLoop:
 	{
 		if (!_CacheStringToSave.empty() && !_CacheFilename.empty())
 		{
-			NLMISC::COFile file(_CacheFilename, true);
-			for(uint i=0;i<_CacheStringToSave.size();i++)
+			// the cache is only an optimization, a write error (disk full, file locked) must not be fatal
+			try
 			{
-				file.serial(_CacheStringToSave[i].StringId);
-				file.serial(_CacheStringToSave[i].String);
+				NLMISC::COFile file(_CacheFilename, true);
+				for (uint i = 0; i < _CacheStringToSave.size(); i++)
+				{
+					file.serial(_CacheStringToSave[i].StringId);
+					file.serial(_CacheStringToSave[i].String);
+				}
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				nlwarning("Cannot save the string cache %s: %s", _CacheFilename.c_str(), e.what());
 			}
 
 			_CacheStringToSave.clear();
