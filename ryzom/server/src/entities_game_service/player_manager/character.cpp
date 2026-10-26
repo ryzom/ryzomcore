@@ -9791,36 +9791,37 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 	// the skill points spent are those of the rolemaster's type, set with the phrase list a PHRASE:BUY indexes
 	EGSPD::CSPType::TSPType spType = _RolemasterType;
 
+	// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster, and a dyn chat can change the
+	// interlocutor without ending that bot chat (PHRASE:BUY is checked by buyPhraseByIndex)
+	if (testRestrictions && (_CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot))
+	{
+		nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+		    _Id.toString().c_str(), phraseId.toString().c_str(), _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType);
+		return false;
+	}
+
+	CCreature *bot = CreatureManager.getCreature(_CurrentInterlocutor);
+	if (bot == NULL)
+	{
+		nlwarning("Invalid bot %s", _CurrentInterlocutor.toString().c_str());
+		return false;
+	}
+
+	// startTradePhrases checks the fame when the trade starts, for both messages, and it can drop while the trade page
+	// stays open
+	if (CFameInterface::getInstance().getFameIndexed(_Id, bot->getForm()->getFaction()) < MinFameToTrade)
+	{
+		nldebug("Server refused buy phrase action for player %s, phrase %s, fame too low to trade with rolemaster %s",
+		    _Id.toString().c_str(), phraseId.toString().c_str(), bot->getId().toString().c_str());
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+		params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+		sendDynamicSystemMessage(_Id, "TRADE_FAME_TOO_LOW", params);
+		return false;
+	}
+
 	// check phrase requirements
 	if (testRestrictions)
 	{
-		// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster, and a dyn chat can change the
-		// interlocutor without ending that bot chat
-		if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot )
-		{
-			nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
-						_Id.toString().c_str(), phraseId.toString().c_str(), _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType );
-			return false;
-		}
-
-		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
-		if ( bot == NULL )
-		{
-			nlwarning( "Invalid bot %s",_CurrentInterlocutor.toString().c_str() );
-			return false;
-		}
-
-		// startTradePhrases refuses a trade on fame after the bot chat has started as a phrase trade
-		if ( CFameInterface::getInstance().getFameIndexed( _Id, bot->getForm()->getFaction() ) < MinFameToTrade )
-		{
-			nlwarning("Server refused buy sheet action for player %s, sheet %s, fame too low to trade with rolemaster %s",
-						_Id.toString().c_str(), phraseId.toString().c_str(), bot->getId().toString().c_str() );
-			SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
-			params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
-			sendDynamicSystemMessage( _Id, "TRADE_FAME_TOO_LOW", params );
-			return false;
-		}
-
 		if ( bot->getOriginShopSelector().empty() )
 			return false;
 
