@@ -4094,8 +4094,10 @@ namespace NLGUI
 			}
 			catch(...) { }
 
-			// create html code with image url inside and do the request again
-			renderHtmlString("<html><head><title>"+_URL+"</title></head><body><img src=\"" + _URL + "\"></body></html>");
+			// create html code with image url inside and do the request again. The url is escaped: a query of the url
+			// could close the attribute and add elements, a <lua> one run with the rights of a trusted domain
+			std::string url = CHtmlElement::htmlEscape(_URL);
+			renderHtmlString("<html><head><title>" + url + "</title></head><body><img src=\"" + url + "\"></body></html>");
 		}
 		else if (_TrustedDomain && type.find("text/lua") == 0)
 		{

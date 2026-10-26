@@ -145,7 +145,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	std::string CHtmlElement::htmlEscape(const std::string &val) const
+	std::string CHtmlElement::htmlEscape(const std::string &val)
 	{
 		if (val.find_first_of("\"'&<>\xA0") == std::string::npos)
 			return val;
