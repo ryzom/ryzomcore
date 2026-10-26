@@ -9383,6 +9383,10 @@ void CCharacter::startTradePhrases(uint16 session)
 	if( _ShoppingList != 0 ) delete _ShoppingList;
 	_ShoppingList = 0;
 
+	// nor keep the phrase list of a previous trade, which PHRASE:BUY indexes, if this one is refused
+	_CurrentPhrasesTradeList.clear();
+	_CurrentPhrasesTradeBot = CEntityId::Unknown;
+
 	// get the bot creature
 	CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
 	if ( bot == NULL )
@@ -9405,6 +9409,9 @@ void CCharacter::startTradePhrases(uint16 session)
 		npcTellToPlayerEx( bot->getEntityRowId(),_EntityRowId,txt );
 		return;
 	}
+
+	// the purchases of this trade are made from this bot only
+	_CurrentPhrasesTradeBot = bot->getId();
 
 	// *** Set right rolemaster flags and race in Database
 	EGSPD::CSPType::TSPType rolemasterType = EGSPD::CSPType::Unknown;
@@ -9771,11 +9778,12 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 	// check phrase requirements
 	if (testRestrictions)
 	{
-		// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster
-		if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag )
+		// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster, and a dyn chat can change the
+		// interlocutor without ending that bot chat
+		if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot )
 		{
-			nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade (bot chat type %u)",
-						_Id.toString().c_str(), phraseId.toString().c_str(), (uint)_CurrentBotChatType );
+			nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+						_Id.toString().c_str(), phraseId.toString().c_str(), _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType );
 			return false;
 		}
 
@@ -9783,6 +9791,17 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 		if ( bot == NULL )
 		{
 			nlwarning( "Invalid bot %s",_CurrentInterlocutor.toString().c_str() );
+			return false;
+		}
+
+		// startTradePhrases refuses a trade on fame after the bot chat has started as a phrase trade
+		if ( CFameInterface::getInstance().getFameIndexed( _Id, bot->getForm()->getFaction() ) < MinFameToTrade )
+		{
+			nlwarning("Server refused buy sheet action for player %s, sheet %s, fame too low to trade with rolemaster %s",
+						_Id.toString().c_str(), phraseId.toString().c_str(), bot->getId().toString().c_str() );
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+			params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
+			sendDynamicSystemMessage( _Id, "TRADE_FAME_TOO_LOW", params );
 			return false;
 		}
 
@@ -9913,6 +9932,15 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	bool ok = true;
 	if (botChatIndex >= uint8(_CurrentPhrasesTradeList.size() ) )
 		ok = false;
+
+	// the list and _RolemasterType come from the phrase trade of a bot: once another bot chat has started, or a dyn chat
+	// has changed the interlocutor without ending it, the refresh below would set the type from another bot
+	if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot )
+	{
+		nlwarning("Server refused buy action for player %s, index %u, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+					_Id.toString().c_str(), (uint)botChatIndex, _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType );
+		ok = false;
+	}
 
 	// Old feature if the user is buying a guild rolemaster research option, treat this case separatly
 	if ( _CurrentBotChatType == BOTCHATTYPE::GuildRoleMaster )
@@ -11283,6 +11311,7 @@ void CCharacter::endBotChat(bool newBotChat, bool closeDynChat)
 		case (uint8)BOTCHATTYPE::TradeBuildingOptions :
 		case (uint8)BOTCHATTYPE::TradeOutpostBuilding :
 			_CurrentPhrasesTradeList.clear();
+			_CurrentPhrasesTradeBot = CEntityId::Unknown;
 			break;
 		case (uint8)BOTCHATTYPE::CreateGuildFlag:
 			{

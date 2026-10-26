@@ -3168,6 +3168,8 @@ private:
 	CCharacterShoppingList				*_ShoppingList;
 	// special trading struct for phrases
 	std::vector<CTradePhrase>			_CurrentPhrasesTradeList;
+	// the bot whose phrase trade the list and _RolemasterType are for (unknown when no phrase trade is open)
+	NLMISC::CEntityId					_CurrentPhrasesTradeBot;
 	// current trade session
 	uint16								_CurrentTradeSession;
 	// list of trade pages waiting update
