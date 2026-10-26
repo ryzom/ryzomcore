@@ -245,3 +245,54 @@ TEST(CUTMiscBitmap, resizeBeyondMemoryThrows)
 	bitmap.resize(16, 16, CBitmap::RGBA);
 	EXPECT_EQ(16u * 16u * 4u, bitmap.getPixels().size());
 }
+
+// a TGA header (18 bytes) of the given type, size and depth, with the origin at the top
+static TBytes makeTGAHeader(uint8 type, uint32 width, uint32 height, uint8 depth)
+{
+	TBytes tga(18, 0);
+	tga[2] = type;
+	putLE16(tga, 12, width);
+	putLE16(tga, 14, height);
+	tga[16] = depth;
+	tga[17] = 0x20;
+	return tga;
+}
+
+TEST(CUTMiscBitmap, tgaRlePacketStopsAtTheImageEnd)
+{
+	// a 2x2 RLE image whose single packet repeats its pixel 128 times: the reader wrote 512 bytes into the 16 of the
+	// bitmap
+	TBytes tga = makeTGAHeader(10, 2, 2, 32);
+	tga.push_back(0x80 | 127);
+	tga.push_back(0x10);
+	tga.push_back(0x20);
+	tga.push_back(0x30);
+	tga.push_back(0x40);
+	CBitmap bitmap;
+	EXPECT_EQ(32, loadImage(bitmap, tga));
+	ASSERT_EQ(2u, bitmap.getWidth());
+	ASSERT_EQ(2u, bitmap.getHeight());
+	ASSERT_EQ(16u, bitmap.getPixels().size());
+	for (uint i = 0; i < 4; ++i)
+	{
+		EXPECT_EQ(0x30, bitmap.getPixels()[i * 4]);
+		EXPECT_EQ(0x40, bitmap.getPixels()[i * 4 + 3]);
+	}
+}
+
+TEST(CUTMiscBitmap, tgaRgbOf8BitsIsRefused)
+{
+	// read 3 bytes per pixel from scanlines of 1
+	TBytes tga = makeTGAHeader(2, 4, 1, 8);
+	tga.resize(tga.size() + 4, 0x7f);
+	CBitmap bitmap;
+	EXPECT_EQ(0, loadImage(bitmap, tga));
+}
+
+TEST(CUTMiscBitmap, truncatedTgaThrows)
+{
+	TBytes tga = writeImage(FormatTGA, 64, 64);
+	tga.resize(tga.size() / 2);
+	CBitmap bitmap;
+	EXPECT_THROW(loadImage(bitmap, tga), NLMISC::EStream);
+}

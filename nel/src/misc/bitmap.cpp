@@ -2537,6 +2537,20 @@ void CBitmap::resamplePicture8Fast (const uint8 *pSrc, uint8 *pDest,
 
 
 
+/** The pixel count of an RLE or raw packet of a TGA, which must end with the image at the latest: the last packet of a
+ *  broken file could run on past it, and write past the bitmap. The image is cut at its end, with a warning.
+ */
+static sint32 clampTGAPacket(const NLMISC::IStream &f, uint32 count, uint32 remaining)
+{
+	if (count > remaining)
+	{
+		nlwarning("The TGA image '%s' has an RLE packet of %u pixels where %u remain, it is cut at the end of the image",
+		    f.getStreamName().c_str(), count, remaining);
+		return (sint32)remaining;
+	}
+	return (sint32)count;
+}
+
 /*-------------------------------------------------------------------*\
 							readTGA
 \*-------------------------------------------------------------------*/
@@ -2629,6 +2643,15 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 		return 0;
 	}
 
+	// an uncompressed RGB(A) image is converted from 16, 24 or 32 bits per pixel: with 8, the conversion read 3 bytes
+	// per pixel from scanlines of 1
+	if (imageType == 2 && imageDepth != 16 && imageDepth != 24 && imageDepth != 32)
+	{
+		nlwarning("The TGA image '%s' is RGB with %u bits per pixel, which is not supported", f.getStreamName().c_str(),
+		    (uint)imageDepth);
+		return 0;
+	}
+
 	_Width = width;
 	_Height = height;
 
@@ -2641,11 +2664,9 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 			uint8 upSideDown = ((desc & (1 << 5))==0);
 			slsize = _Width * imageDepth / 8;
 
-			scanline = new uint8[slsize];
-			if(!scanline)
-			{
-				throw EAllocationFailure();
-			}
+			// a vector, not new[]: a truncated file throws from serialBuffer, which leaked the scanline
+			std::vector<uint8> scanlineBuffer(std::max(slsize, (sint32)1));
+			scanline = &scanlineBuffer[0];
 
 			for(y=0; y<_Height;y++)
 			{
@@ -2736,7 +2757,6 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 			}
 
 			PixelFormat = RGBA;
-			delete []scanline;
 		};
 		break;
 
@@ -2747,11 +2767,8 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 			uint8 upSideDown = ((desc & (1 << 5))==0);
 			slsize = _Width;
 
-			scanline = new uint8[slsize];
-			if(!scanline)
-			{
-				throw EAllocationFailure();
-			}
+			std::vector<uint8> scanlineBuffer(std::max(slsize, (sint32)1));
+			scanline = &scanlineBuffer[0];
 
 			for(y=0; y<_Height;y++)
 			{
@@ -2769,7 +2786,6 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 			}
 
 			PixelFormat = _LoadGrayscaleAsAlpha?Alpha:Luminance;
-			delete []scanline;
 		};
 		break;
 
@@ -2787,13 +2803,14 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 			while(readSize < imageSize)
 			{
 				f.serial(packet);
+				sint32 count = clampTGAPacket(f, (packet & 0x7F) + 1, imageSize - readSize);
 				if((packet & 0x80) > 0) // packet RLE
 				{
 					for(i=0; i<imageDepth/8; i++)
 					{
 						f.serial(pixel[i]);
 					}
-					for (i=0; i < (packet & 0x7F) + 1; i++)
+					for (i = 0; i < count; i++)
 					{
 						_Data[0][dstId++]= pixel[2];
 						_Data[0][dstId++]= pixel[1];
@@ -2803,7 +2820,7 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 				}
 				else	// packet Raw
 				{
-					for(i=0; i<((packet & 0x7F) + 1); i++)
+					for (i = 0; i < count; i++)
 					{
 						for(j=0; j<imageDepth/8; j++)
 						{
@@ -2815,7 +2832,7 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 						_Data[0][dstId++]= pixel[3];
 					}
   				}
-				readSize += (packet & 0x7F) + 1;
+				readSize += count;
 			}
 			PixelFormat = RGBA;
 
@@ -2836,23 +2853,24 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 			while(readSize < imageSize)
 			{
 				f.serial(packet);
+				sint32 count = clampTGAPacket(f, (packet & 0x7F) + 1, imageSize - readSize);
 				if((packet & 0x80) > 0) // packet RLE
 				{
 					f.serial(pixel[0]);
-					for (i=0; i < (packet & 0x7F) + 1; i++)
+					for (i = 0; i < count; i++)
 					{
 						_Data[0][dstId++]= pixel[0];
 					}
 				}
 				else	// packet Raw
 				{
-					for(i=0; i<((packet & 0x7F) + 1); i++)
+					for (i = 0; i < count; i++)
 					{
 						f.serial(pixel[0]);
 						_Data[0][dstId++]= pixel[0];
 					}
   				}
-				readSize += (packet & 0x7F) + 1;
+				readSize += count;
 			}
 			PixelFormat = _LoadGrayscaleAsAlpha?Alpha:Luminance;
 		};
