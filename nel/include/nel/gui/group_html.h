@@ -1000,6 +1000,7 @@ namespace NLGUI
 		void initBnpDownload();
 		void checkBnpDownload();
 		bool addBnpDownload(std::string url, const std::string &action, const std::string &script, const std::string &md5sum);
+		/// user/ and the file name the url ends with, empty when that is not a plain file name
 		std::string localBnpName(const std::string &url);
 
 		// add css file from <link href=".." rel="stylesheet"> to download queue

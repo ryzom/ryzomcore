@@ -1021,7 +1021,12 @@ namespace NLGUI
 	string CGroupHTML::localBnpName(const string &url)
 	{
 		size_t lastIndex = url.find_last_of("/");
-		string dest = "user/"+url.substr(lastIndex+1);
+		string name = url.substr(lastIndex + 1);
+		// the name comes from the url, and the file is mounted from user/: it must be a plain file name there (on
+		// Windows, a "..\" in the last segment of the url left user/; a query made a name that cannot be created)
+		if (!CFile::isSafeFilename(name, false))
+			return string();
+		string dest = "user/" + name;
 		return dest;
 	}
 
@@ -1041,6 +1046,11 @@ namespace NLGUI
 		}
 
 		string dest = localBnpName(url);
+		if (dest.empty())
+		{
+			nlwarning("The bnp download '%s' does not end with a plain file name, it is refused", url.c_str());
+			return false;
+		}
 		LOG_DL("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
 
 		// create/delete the local file
