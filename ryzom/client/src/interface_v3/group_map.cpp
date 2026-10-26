@@ -1257,24 +1257,26 @@ void CGroupMap::checkCoords()
 	}
 	if ((_MapMode == MapMode_Death) || (_MapMode == MapMode_SpawnSquad))
 	{
-		if (_RespawnPosReseted)
+		bool resetSelection = _RespawnPosReseted;
+		_RespawnPosReseted = false;
+		if (!resetSelection)
 		{
-			_RespawnPosReseted = false;
+			_RespawnSelected = getRespawnSelected();
+			// the saved value may not match the current list, a point must always be selected to be able to respawn
+			if (!_RespawnLM.empty() && (_RespawnSelected < 0 || _RespawnSelected >= (sint32)_RespawnLM.size()))
+				resetSelection = true;
+		}
+		if (resetSelection)
+		{
 			// Reset selection
 			_RespawnSelected = 0;
 			if (_MapMode == MapMode_Death)
 				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
 			else if (_MapMode == MapMode_SpawnSquad)
 				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
-			if (!_RespawnLM.empty())
-				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 		}
-		else
-		{
-			_RespawnSelected = getRespawnSelected();
-			if (!_RespawnLM.empty())
-				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
-		}
+		if (!_RespawnLM.empty())
+			_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 	}
 
 	// **** Animal Landmarks
