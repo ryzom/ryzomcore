@@ -157,3 +157,12 @@ Crash found from a dump: `checkCoords()` dereferenced the entries of
 a TODO about NULL pointers in that list). Both loops of `checkCoords()` now
 skip a NULL entry and `SMasterGroup::addWindow()` refuses a NULL window. A
 dangling pointer (window destroyed without `delWindow`) is not covered.
+
+## 2026-10-26 — 🐛 CGroupMap: validate the selected respawn point
+
+Crash found from a dump: in the death / squad spawn map modes,
+`CGroupMap::checkCoords()` indexed `_RespawnLM` with the value of
+`UI:SAVE:RESPAWN_PT` (or `UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT`) without checking
+it against the list size. An out of range saved value now resets the
+selection to the first respawn point and writes it back to the database, so
+a point is always selected.
