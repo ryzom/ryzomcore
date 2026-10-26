@@ -1056,6 +1056,30 @@ bool CMissionBaseBehaviour::itemGiftDone( CCharacter * user,const std::vector< C
 }
 
 //----------------------------------------------------------------------------
+void CMissionBaseBehaviour::clearGroupJournalEntry(CCharacter &user, uint8 clientIndex)
+{
+	CBankAccessor_PLR::TGROUP::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(clientIndex);
+	missionItem.setTYPE(user._PropertyDatabase, 0);
+	missionItem.setICON(user._PropertyDatabase, CSheetId::Unknown);
+	missionItem.setTITLE(user._PropertyDatabase, 0);
+	missionItem.setDETAIL_TEXT(user._PropertyDatabase, 0);
+	missionItem.setEND_DATE(user._PropertyDatabase, 0);
+	missionItem.setBEGIN_DATE(user._PropertyDatabase, 0);
+	// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
+	missionItem.setSLEEP(user._PropertyDatabase, 0);
+	for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
+	{
+		CBankAccessor_PLR::TGROUP::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
+		targetItem.setTITLE(user._PropertyDatabase, 0);
+		targetItem.setX(user._PropertyDatabase, 0);
+		targetItem.setY(user._PropertyDatabase, 0);
+	}
+	for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
+	{
+		missionItem.getGOALS().getArray(i).setTEXT(user._PropertyDatabase, 0);
+	}
+}
+
 void CMissionBaseBehaviour::updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix )
 {
 	if (dbPrefix == "GROUP:")

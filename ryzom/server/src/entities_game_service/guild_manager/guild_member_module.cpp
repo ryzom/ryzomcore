@@ -36,6 +36,7 @@
 #include "building_manager/building_physical.h"
 #include "guild_manager/fame_manager.h"
 #include "zone_manager.h"
+#include "mission_manager/mission_base_behaviour.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -508,6 +509,14 @@ void CGuildMemberModule::clearOnlineGuildProperties()
 	getProxy(targetProxy);
 	targetProxy.setGuildId(0);
 	targetProxy.updateTargetingChars();
+
+	// the guild missions, which the next guild's missions would otherwise inherit (see CTeam::clearPlayerTeamDB)
+	CCharacter *user = PlayerManager.getChar(targetProxy.getId());
+	if (user)
+	{
+		for (uint8 i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; ++i)
+			CMissionBaseBehaviour::clearGroupJournalEntry(*user, i);
+	}
 
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, targetProxy.getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;

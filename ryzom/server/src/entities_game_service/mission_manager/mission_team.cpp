@@ -71,36 +71,7 @@ void CMissionTeam::clearUsersJournalEntry()
 			continue;
 		}
 
-		CBankAccessor_PLR::TGROUP::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(_ClientIndex);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TYPE",_ClientIndex), 0);
-		missionItem.setTYPE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:ICON",_ClientIndex), 0);
-		missionItem.setICON(user->_PropertyDatabase, CSheetId::Unknown);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TITLE",_ClientIndex), 0);
-		missionItem.setTITLE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:DETAIL_TEXT",_ClientIndex), 0);
-		missionItem.setDETAIL_TEXT(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:END_DATE",_ClientIndex), 0 );
-		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
-		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
-		// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
-		missionItem.setSLEEP(user->_PropertyDatabase, 0);
-		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
-		{
-			CBankAccessor_PLR::TGROUP::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:TITLE",_ClientIndex,i), 0);
-			targetItem.setTITLE(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:X",_ClientIndex,i), 0);
-			targetItem.setX(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:Y",_ClientIndex,i), 0);
-			targetItem.setY(user->_PropertyDatabase, 0);
-		}
-		for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
-		{
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
-			missionItem.getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0);
-		}	
+		clearGroupJournalEntry(*user, _ClientIndex);
 	}
 }
 
