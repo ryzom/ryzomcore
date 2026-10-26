@@ -397,6 +397,7 @@ void cbClientItemLock(NLNET::CMessage &msgin, const std::string &serviceName, NL
 /// -1: Invalid inventory
 /// -2: Invalid slot
 /// -3: Empty slot
+/// -4: The item is held in an inventory the character's inventory updater does not keep (no info version to raise)
 sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
 {
 	if (inventory==INVENTORIES::UNDEFINED)
@@ -418,9 +419,20 @@ sint32 clientItemWrite(CCharacter* character, INVENTORIES::TInventory inventory,
 	}
 
 	CGameItemPtr item = invent->getItem(slot);
+
+	// The client re-fetches the item info when the info version of the slot that holds the item changes: an equipped
+	// item is held in the bag, and the inventories the character's inventory updater does not keep (the guild's, whose
+	// versions are the guild's) have none to change
+	CInventoryPtr holder = item->getInventory();
+	INVENTORIES::TInventory holderId = holder != NULL ? holder->getInventoryId() : INVENTORIES::UNDEFINED;
+	if (holderId >= INVENTORIES::NUM_ALL_INVENTORY || !character->_InventoryUpdater.isCompatibleWithInventory(holderId))
+	{
+		return -4;
+	}
+
 	item->setCustomText(text.toUtf8());
 	// Following line was commented out by trap, reason unknown
-	character->incSlotVersion(inventory, slot); // this ensures re-fetch of info window, unusual case
+	character->incSlotVersion(holderId, item->getInventorySlot()); // this ensures re-fetch of info window, unusual case
 
 	return 0;
 }
@@ -438,6 +450,14 @@ void cbClientItemWrite( NLNET::CMessage& msgin, const std::string & serviceName,
 
 	CCharacter* character = PlayerManager.getChar(eid);
 	if(!character) return;
+
+	// the client offers text edition in the bag only, to the crafter and to privileged players alike
+	if (inventory != INVENTORIES::bag)
+	{
+		string name = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
+		nlwarning("HACK: %s %s tries to set custom text on slot %u of inventory %u, which is not the bag", eid.toString().c_str(), name.c_str(), (uint)slot, (uint)inventory);
+		return;
+	}
 
 	if (!character->havePriv(":DEV:SGM:GM:EM:"))
 	{

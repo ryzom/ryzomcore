@@ -8471,6 +8471,9 @@ NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces 
 	case -3:
 		log.displayNL("Empty slot %u", slot);
 		break;
+	case -4:
+		log.displayNL("The item in slot %u is held in an inventory whose item infos the character does not keep", slot);
+		break;
 	default:
 		log.displayNL("Unknown error");
 	}
@@ -8488,30 +8491,30 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 
 	GET_CHARACTER
 	INVENTORIES::TInventory	inventory = INVENTORIES::toInventory(args[1]);
-	if (inventory==INVENTORIES::UNDEFINED)
-	{
-		log.displayNL("'%s' is not a valid inventory name", args[1].c_str());
-		return true;
-	}
 	uint32 slot;
 	NLMISC::fromString(args[2], slot);
-	CInventoryPtr invent = c->getInventory(inventory);
-	if (slot >= invent->getSlotCount())
-	{
-		log.displayNL("Invalid slot %u max = %u", slot, invent->getSlotCount()-1);
-		return true;
-	}
-	if (invent->getItem(slot) == NULL)
-	{
-		log.displayNL("empty slot %u", slot);
-		return true;
-	}
 
-	CGameItemPtr item = invent->getItem(slot);
-	item->setCustomText(std::string());
-	// Following line was commented out by trap, reason unknown
-	c->incSlotVersion(INVENTORIES::bag, slot);
-	log.displayNL("item in slot %u has now its default text displayed", slot);
+	// as eventSetItemCustomText with an empty text, which also checks the inventory and raises the right slot version
+	switch (clientItemWrite(c, inventory, slot, ucstring()))
+	{
+	case 0:
+		log.displayNL("item in slot %u has now its default text displayed", slot);
+		break;
+	case -1:
+		log.displayNL("'%s' is not a valid inventory name", args[1].c_str());
+		break;
+	case -2:
+		log.displayNL("Invalid slot %u", slot);
+		break;
+	case -3:
+		log.displayNL("empty slot %u", slot);
+		break;
+	case -4:
+		log.displayNL("The item in slot %u is held in an inventory whose item infos the character does not keep", slot);
+		break;
+	default:
+		log.displayNL("Unknown error");
+	}
 
 	return true;
 }
