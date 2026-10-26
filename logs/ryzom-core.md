@@ -200,3 +200,9 @@ error message box.
 form returned by `loadForm()` for `default.mixer_config`, which is NULL when the
 file cannot be loaded. It now logs a warning and keeps the default
 configuration (the file is optional).
+
+## 2026-10-26 — 🐛 CDriverGL::setMode: do not divide by an empty mode size
+
+Crash found from a dump: `setMode()` divided the relative cursor position by the
+mode width and height, which divided by zero for an empty mode. It is now only
+done when both are positive.
