@@ -80,7 +80,7 @@ H_AUTO_DECL ( RZ_Client_Network_Connection_Set_Reference_Position )
 
 //#define MEASURE_FE_SENDING
 
-extern const char * ConnectionStateCStr [9];
+extern const char *ConnectionStateCStr[10];
 
 
 /**

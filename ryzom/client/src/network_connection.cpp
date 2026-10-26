@@ -82,7 +82,7 @@
 #define SMOOTH_SERVER_TICK_ACCEL		4.0f
 
 
-const char * ConnectionStateCStr [9] = { "NotInitialised", "NotConnected", "Authenticate", "Login", "Synchronize", "Connected", "Probe", "Stalled", "Disconnect" };
+const char *ConnectionStateCStr[10] = { "NotInitialised", "NotConnected", "Authenticate", "Login", "Synchronize", "Connected", "Probe", "Stalled", "Disconnect", "Quit" };
 
 
 // ***************************************************************************
@@ -2478,7 +2478,7 @@ bool	CNetworkConnection::stateProbe()
 					return false; // exit now from loop, don't expect a new state
 					break;
 				default:
-					nlwarning("CNET[%p]: received system %d in state Probe", message);
+					nlwarning("CNET[%p]: received system %d in state Probe", this, message);
 					break;
 				}
 			}
@@ -2569,7 +2569,7 @@ bool	CNetworkConnection::stateStalled()
 					return false; // exit now from loop, don't expect a new state
 					break;
 				default:
-					nlwarning("CNET[%p]: received system %d in state Stalled", message);
+					nlwarning("CNET[%p]: received system %d in state Stalled", this, message);
 					break;
 				}
 			}
@@ -3062,13 +3062,13 @@ bool	CNetworkConnection::stateQuit()
 					receiveSystemAckQuit(msgin);
 					break;
 				default:
-					nlwarning("CNET[%p]: received system %d in state Stalled", message);
+					nlwarning("CNET[%p]: received system %d in state Quit", this, message);
 					break;
 				}
 			}
 			else
 			{
-				nlwarning("CNET[%p]: received normal in state Stalled", this);
+				nlwarning("CNET[%p]: received normal in state Quit", this);
 			}
 		}
 	}
