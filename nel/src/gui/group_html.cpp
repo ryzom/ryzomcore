@@ -309,6 +309,37 @@ namespace NLGUI
 		Images.clear();
 	}
 
+	/** The check of a downloaded image or texture before it replaces the cached file. A broken one, or one larger than
+	 *  the browser accepts, is refused, and its cache entry, stored for the refused body, is cleared so that the next
+	 *  request downloads it again.
+	 */
+	static bool checkDownloadedImage(const std::string &tmpdest, const std::string &dest, const std::string &url)
+	{
+		uint32 w = 0, h = 0;
+		try
+		{
+			CBitmap::loadSize(tmpdest, w, h);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			// exception message has .tmp file name, so keep it for further analysis
+			nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
+			w = h = 0;
+		}
+
+		uint32 maxSize = CGroupHTML::options.getImageMaxSize();
+		if (w != 0 && h != 0 && w <= maxSize && h <= maxSize)
+			return true;
+
+		if (w != 0 && h != 0)
+			nlwarning("The image (%s) of %ux%u from url (%s) is larger than %u pixels a side", tmpdest.c_str(), w, h,
+			    url.c_str(), maxSize);
+		else
+			nlwarning("Invalid image (%s) from url (%s)", tmpdest.c_str(), url.c_str());
+		CHttpCache::getInstance()->store(dest, CHttpCacheObject());
+		return false;
+	}
+
 	void CGroupHTML::ImageDownloadCB::finish()
 	{
 		// Image setTexture will remove itself from Images while iterating over it.
@@ -317,40 +348,24 @@ namespace NLGUI
 		vec.swap(Images);
 
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
+		// verify that image is not corrupted, a corrupted one is not used and does not replace the cached one
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0 && checkDownloadedImage(tmpdest, dest, url))
 		{
-			try {
-				// verify that image is not corrupted, a corrupted one is not used and does not replace the cached one
-				uint32 w, h;
-				CBitmap::loadSize(tmpdest, w, h);
-				if (w != 0 && h != 0)
-				{
-					if (CFile::fileExists(dest))
-						CFile::deleteFile(dest);
+			if (CFile::fileExists(dest))
+				CFile::deleteFile(dest);
 
-					// to reload image on page, the easiest seems to be changing texture
-					// to temp file temporarily. that forces driver to reload texture from disk
-					// ITexture::touch() seem not to do this.
-					// cache was updated, first set texture as temp file
-					for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
-					{
-						SImageInfo &img = *it;
-						Parent->setImage(img.Image, tmpdest, img.Type);
-						Parent->setImageSize(img.Image, img.Style);
-					}
-
-					CFile::moveFile(dest, tmpdest);
-				}
-				else
-				{
-					nlwarning("Invalid image (%s) from url (%s)", tmpdest.c_str(), url.c_str());
-				}
-			}
-			catch(const NLMISC::Exception &e)
+			// to reload image on page, the easiest seems to be changing texture
+			// to temp file temporarily. that forces driver to reload texture from disk
+			// ITexture::touch() seem not to do this.
+			// cache was updated, first set texture as temp file
+			for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 			{
-				// exception message has .tmp file name, so keep it for further analysis
-				nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
+				SImageInfo &img = *it;
+				Parent->setImage(img.Image, tmpdest, img.Type);
+				Parent->setImageSize(img.Image, img.Style);
 			}
+
+			CFile::moveFile(dest, tmpdest);
 		}
 
 		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
@@ -371,7 +386,8 @@ namespace NLGUI
 	void CGroupHTML::TextureDownloadCB::finish()
 	{
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
+		// the same check as for images: an invalid texture does not replace the cached one
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0 && checkDownloadedImage(tmpdest, dest, url))
 		{
 			if (CFile::fileExists(dest))
 				CFile::deleteFile(dest);
@@ -658,13 +674,26 @@ namespace NLGUI
 		}
 	}
 
+	// the directory of the download cache, whose files come from the web
+	static const char *s_CacheDirectory = "cache/";
+
 	// Get an url and return the local filename with the path where the url image should be
 	string CGroupHTML::localImageName(const string &url)
 	{
-		string dest = "cache/";
+		string dest = s_CacheDirectory;
 		dest += getMD5((uint8 *)url.c_str(), (uint32)url.size()).toString();
 		dest += ".cache";
 		return dest;
+	}
+
+	bool CGroupHTML::isCacheFile(const std::string &path)
+	{
+		return startsWith(path, s_CacheDirectory);
+	}
+
+	uint32 CGroupHTML::SWebOptions::getImageMaxSize() const
+	{
+		return imageMaxSize == 0 ? NLMISC::MAX_BITMAP_SIZE : std::min(imageMaxSize, NLMISC::MAX_BITMAP_SIZE);
 	}
 
 	void CGroupHTML::pumpCurlQueue()

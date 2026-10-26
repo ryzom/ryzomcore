@@ -27,6 +27,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/base64.h"
 #include "nel/misc/md5.h"
+#include "nel/gui/group_html.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -1009,17 +1010,25 @@ namespace NLGUI
 
 	bool CViewRenderer::loadTextureFromString(CViewRenderer::SGlobalTexture *gt, const std::string &data)
 	{
+		// a data URL comes from a web page; the log shows its beginning only
+		uint32 maxBytes = CGroupHTML::options.dataUrlMaxBytes;
+		if (maxBytes && data.size() > maxBytes)
+		{
+			nlwarning("A data URL of %u bytes is larger than %u: '%s'", (uint)data.size(), maxBytes, data.substr(0, 64).c_str());
+			return false;
+		}
+
 		size_t pos = data.find(";base64,");
 		if (pos == std::string::npos)
 		{
-			nlwarning("Data does not have 'data:image/...;base64,...' format '%s'", data.c_str());
+			nlwarning("Data does not have 'data:image/...;base64,...' format '%s'", data.substr(0, 64).c_str());
 			return false;
 		}
 
 		std::string decoded = base64::decode(data.substr(pos + 8));
 		if (decoded.empty())
 		{
-			nlwarning("base64 decoding failed '%s", data.substr(pos + 8).c_str());
+			nlwarning("base64 decoding failed '%s'", data.substr(0, 64).c_str());
 			return false;
 		}
 
@@ -1028,17 +1037,16 @@ namespace NLGUI
 		buf.serialBuffer((uint8 *)(decoded.data()), decoded.size());
 		buf.invert();
 
+		// the image comes from a web page; the texture memory is filled with RGBA pixels whatever the format read
 		CBitmap btm;
-		btm.load(buf);
-
-		gt->Width = gt->DefaultWidth = btm.getWidth();;
-		gt->Height = gt->DefaultHeight = btm.getHeight();
-
-		if (gt->Width == 0 || gt->Height == 0)
+		if (!btm.loadUntrusted(buf, CGroupHTML::options.getImageMaxSize()) || !btm.convertToType(CBitmap::RGBA))
 		{
-			nlwarning("Decoded image has width==0 || height==0, check image format. '%s'", data.c_str());
+			nlwarning("Cannot read the image of a data URL '%s'", data.substr(0, 64).c_str());
 			return false;
 		}
+
+		gt->Width = gt->DefaultWidth = btm.getWidth();
+		gt->Height = gt->DefaultHeight = btm.getHeight();
 
 		UTextureMem *texture = driver->createTextureMem(btm.getWidth(), btm.getHeight(), CBitmap::RGBA);
 		if (!texture)
@@ -1056,6 +1064,10 @@ namespace NLGUI
 
 	bool CViewRenderer::loadTextureFromFile(CViewRenderer::SGlobalTexture *gt, const std::string &filename)
 	{
+		// a file of the download cache comes from the web: the texture reads it as untrusted (see
+		// NLMISC::CBitmap::loadUntrusted), and a larger image than the browser accepts is not loaded
+		uint32 untrustedMaxSize = CGroupHTML::isCacheFile(filename) ? CGroupHTML::options.getImageMaxSize() : 0;
+
 		// load new file
 		CIFile ifTmp;
 		if (ifTmp.open(filename))
@@ -1077,9 +1089,18 @@ namespace NLGUI
 				nlwarning("Failed to load the texture '%s', please check image format", filename.c_str());
 				return false;
 			}
+			if (untrustedMaxSize && (gt->Width > untrustedMaxSize || gt->Height > untrustedMaxSize))
+			{
+				nlwarning("The texture '%s' of %ux%u is larger than %u pixels a side", filename.c_str(), gt->Width, gt->Height,
+				    untrustedMaxSize);
+				return false;
+			}
 		}
 
-		gt->Texture = driver->createTextureFile(filename);
+		UTextureFile *texture = driver->createTextureFile(filename);
+		if (untrustedMaxSize)
+			texture->setUntrustedMaxSize(untrustedMaxSize);
+		gt->Texture = texture;
 		gt->FromGlobaleTexture = false;
 
 		return true;

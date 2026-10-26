@@ -94,10 +94,18 @@ namespace NLGUI
 			std::string webServerDomain;
 			/// Maximum concurrent MultiCurl connections per CGroupHTML instance
 			sint32 curlMaxConnections;
+			/// Largest width or height of a downloaded image or a data: URL image, in pixels (0 or a larger value than
+			/// NLMISC::MAX_BITMAP_SIZE for that size): a larger one, or one that cannot be read, is not shown
+			uint32 imageMaxSize;
+			/// Largest data: URL, in bytes (0 for no limit)
+			uint32 dataUrlMaxBytes;
 
-			SWebOptions(): trustedHttpsOnly(true), curlMaxConnections(5)
+			SWebOptions(): trustedHttpsOnly(true), curlMaxConnections(5), imageMaxSize(4096), dataUrlMaxBytes(4 * 1024 * 1024)
 			{
 			}
+
+			/// imageMaxSize within 1..NLMISC::MAX_BITMAP_SIZE
+			uint32 getImageMaxSize() const;
 		};
 
 		static SWebOptions options;
@@ -158,6 +166,8 @@ namespace NLGUI
 		ICurlDownloadCB *addTextureDownload(const std::string &url, sint32 &texId, CViewBase *view);
 		void removeImageDownload(ICurlDownloadCB *handle, CViewBase *img);
 		std::string localImageName(const std::string &url);
+		/// A file of the download cache (images, textures, stylesheets): it is not trusted, see SWebOptions::imageMaxSize
+		static bool isCacheFile(const std::string &path);
 
 		// Timeout
 		void	setTimeout(float tm) {_TimeoutValue= std::max(0.f, tm);}

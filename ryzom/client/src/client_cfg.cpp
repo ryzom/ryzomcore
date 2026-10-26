@@ -29,6 +29,7 @@
 #include "stdpch.h"
 // Misc.
 #include "nel/misc/config_file.h"
+#include "nel/misc/bitmap.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/cmd_args.h"
@@ -448,6 +449,9 @@ CClientConfig::CClientConfig()
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
+
+	WebIgImageMaxSize = 4096;
+	WebIgDataUrlMaxBytes = 4 * 1024 * 1024;
 
 	RingReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_RING_URL;
 	ReleaseNotePath = RYZOM_CLIENT_RELEASENOTES_URL;
@@ -1142,6 +1146,19 @@ void CClientConfig::setValues()
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
+
+	READ_INT_FV(WebIgImageMaxSize);
+	if (ClientCfg.WebIgImageMaxSize < 0 || ClientCfg.WebIgImageMaxSize > (sint32)NLMISC::MAX_BITMAP_SIZE)
+	{
+		nlwarning("CFG: WebIgImageMaxSize is %d, a web image is at most %u pixels a side", ClientCfg.WebIgImageMaxSize, NLMISC::MAX_BITMAP_SIZE);
+		ClientCfg.WebIgImageMaxSize = 0;
+	}
+	READ_INT_FV(WebIgDataUrlMaxBytes);
+	if (ClientCfg.WebIgDataUrlMaxBytes < 0)
+	{
+		nlwarning("CFG: WebIgDataUrlMaxBytes is %d, a negative value is no limit as 0", ClientCfg.WebIgDataUrlMaxBytes);
+		ClientCfg.WebIgDataUrlMaxBytes = 0;
+	}
 
 	READ_STRING_FV(CurlCABundle);
 	if (!ClientCfg.CurlCABundle.empty() && ClientCfg.CurlCABundle[0] == '%') // Path is relative to client_default.cfg path (used by ryzom patch)
