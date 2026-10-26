@@ -110,7 +110,7 @@ public:
 	// Reference to QUIC context (immutable)
 	CQuicTransceiver *Transceiver;
 
-	// Reference to the internal connection (immutable)
+	// Handle of the connection, null once closed or given back to MsQuic (taken out under the transceiver's lock)
 	void *Connection;
 
 	// Not a real address, just a token to identify the connection (immutable)

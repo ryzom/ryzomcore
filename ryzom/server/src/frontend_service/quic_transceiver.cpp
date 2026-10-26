@@ -112,6 +112,14 @@ public:
 	// Connections that have not shutdown yet
 	NLMISC::CSynchronized<std::set<CQuicUserContextPtr>> Connections;
 
+	// Connections whose handle is not closed yet, which includes those that have shut down while a CClientHost, a limbo
+	// client, a send buffer or a queued datagram still holds their context: stop() closes them, since RegistrationClose
+	// waits for every connection to be closed
+	NLMISC::CSynchronized<std::set<CQuicUserContext *>> OpenConnections;
+
+	// Take the handle out of a context, to close it once (or leave it to MsQuic); null if it was already taken
+	void *takeConnection(CQuicUserContext *user);
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_LISTENER_CALLBACK)
@@ -467,15 +475,32 @@ void CQuicTransceiver::stop()
 		// Forcefully close all connections
 		for (const CQuicUserContextPtr &user : connectionsCopy)
 		{
-			if (user->Connection)
-			{
-				MsQuic->ConnectionClose((HQUIC)user->Connection);
-				user->Connection = nullptr;
-			}
+			void *connection = m->takeConnection(user.get());
+			if (connection)
+				MsQuic->ConnectionClose((HQUIC)connection);
 		}
 		nldebug("Closed all connections");
 		connectionsCopy.clear();
 		nldebug("Cleared references. There may be leftovers in CClientHost, etc");
+	}
+
+	// Close the connections that had shut down before but whose context is still held (see OpenConnections), so that
+	// RegistrationClose does not wait for them, and a context released later no longer reaches this transceiver
+	std::vector<void *> leftovers;
+	{
+		NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&m->OpenConnections);
+		for (CQuicUserContext *user : openConnections.value())
+		{
+			leftovers.push_back(user->Connection);
+			user->Connection = null;
+		}
+		openConnections.value().clear();
+	}
+	nldebug("Close %i connections that had already shut down", (int)leftovers.size());
+	for (void *connection : leftovers)
+	{
+		if (connection)
+			MsQuic->ConnectionClose((HQUIC)connection);
 	}
 
 	// Clear queue
@@ -530,12 +555,23 @@ CQuicUserContext::~CQuicUserContext()
 	// This should never get called before the connection is shutdown,
 	// since we increase the reference when the connection gets opened,
 	// and decrease the reference when the connection is shutdown.
-	CQuicTransceiverImpl *m = Transceiver->m.get();
-	if (Connection) // Should always be set, this is already warned for in the shutdown handling.
+	// Once the transceiver has stopped, it has closed the handle already and may be gone: it is not touched then.
+	if (Connection)
 	{
-		MsQuic->ConnectionClose((HQUIC)Connection);
-		Connection = null;
+		CQuicTransceiverImpl *m = Transceiver->m.get();
+		void *connection = m->takeConnection(this);
+		if (connection)
+			MsQuic->ConnectionClose((HQUIC)connection);
 	}
+}
+
+void *CQuicTransceiverImpl::takeConnection(CQuicUserContext *user)
+{
+	NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&OpenConnections);
+	void *connection = user->Connection;
+	user->Connection = null;
+	openConnections.value().erase(user);
+	return connection;
 }
 
 QUIC_STATUS
@@ -560,6 +596,10 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
 			connections.value().insert(userPtr);
 		}
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&m->OpenConnections);
+			openConnections.value().insert(user);
+		}
 		// user->increaseRef();
 		// They're in.
 		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, (void *)CQuicTransceiverImpl::connectionCallback, (void *)user);
@@ -572,7 +612,7 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 			// and it then never reports QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE, so the user context is released here.
 			// The handle must not be closed (MsQuic asserts on that), and no further event may reach the context.
 			MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, null, null);
-			user->Connection = null;
+			m->takeConnection(user);
 			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
 			connections.value().erase(userPtr);
 		}
@@ -639,8 +679,8 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		{
 			// Only applicable on client when ConnectionClose is called on the connection, so warn if this happens
 			nlwarning("App close in progress flagged, connection was deleted before the context. This should never happen.");
-			// Should never happen, but just in case, set to null to avoid double deletion
-			user->Connection = null;
+			// Should never happen, but just in case, take the handle out so it is not closed twice
+			m->takeConnection(user);
 		}
 		// TODO: Report to the boss (forge a disconnect datagram from this user)
 		// It's detected through the datagram handling already, anyway
@@ -824,6 +864,9 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 {
 	// Gracefully shuts down a connection (assume this is called from the main service thread only)
 	// Assuming we can call shutdown as many times as we like...
+	// (once the transceiver has stopped, the context has no handle any more)
+	if (!user->Connection)
+		return;
 	CQuicTransceiverImpl *m = user->Transceiver->m.get();
 	MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
 }
