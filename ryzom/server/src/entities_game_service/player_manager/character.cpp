@@ -1374,7 +1374,6 @@ uint32 CCharacter::tickUpdate()
 					for ( uint i =  0; i < size; i++ )
 					{
 						nlassert(team->getMissions()[i]);
-						team->getMissions()[i]->updateCompass(*this, string(""));
 						team->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}
@@ -1390,7 +1389,6 @@ uint32 CCharacter::tickUpdate()
 					for ( uint i =  0; i < size; i++ )
 					{
 						nlassert(guild->getMissions()[i]);
-						guild->getMissions()[i]->updateCompass(*this, string(""));
 						guild->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}

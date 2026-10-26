@@ -1421,6 +1421,8 @@ uint CMissionBaseBehaviour::_updateCompass(CCharacter & user, DBType &missionDb)
 			maxClientIndex = MaxSoloMissionCount;
 		else if ( dynamic_cast<CMissionTeam*>( _Mission ) )
 			maxClientIndex = MaxGroupMissionCount;
+		else if ( dynamic_cast<CMissionGuild*>( _Mission ) )
+			maxClientIndex = MaxGroupMissionCount + MaxGuildMissionCount; // the guild entries follow the team ones in GROUP:MISSIONS
 		if ( _ClientIndex < maxClientIndex )
 		{
 //			if ( node )
