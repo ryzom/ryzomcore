@@ -36,6 +36,15 @@ class JoinSessionCb extends CRingSessionManagerWeb
 			echo 'You are allowed in the session <br>';
 		}
 	}
+
+	/**
+	 * A join the shard unifier may let skip the mainland disconnection timer comes with a security code, which is
+	 * for the client's own session browser: the web join only needs the rest
+	 */
+	function joinSessionResultExt($userId, $sessionId, $result, $shardAddr, $participantStatus, $securityCheckForFastDisconnection)
+	{
+		$this->joinSessionResult($userId, $sessionId, $result, $shardAddr, $participantStatus);
+	}
 }
 
 

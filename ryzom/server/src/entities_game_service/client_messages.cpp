@@ -3274,11 +3274,14 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// The fast-disconnection code is encoded by the shard unifier when a character joins a ring session. Without a pass
-// phrase known only to the services, a client computes it from its own cookie, so the bypass is refused while unset.
-CVariable<string> FastDisconnectionPassPhrase("egs", "FastDisconnectionPassPhrase",
-	"Secret (up to 10 characters) that the shard unifier's FastDisconnectionPassPhrase must match for a client to skip the disconnection timer; empty refuses the skip",
-	string(""), 0, true);
+// The secret the shard unifier's ring session manager makes the fast-disconnection codes with, chosen at random when it
+// starts and received from its entity locator (CShardUnifierClient): empty until then, and the bypass is refused.
+std::string FastDisconnectionSecret;
+
+// The login cookies, by user id, that a fast-disconnection code was refused for. The code has 16 bits and the session
+// id comes from the client, so one wrong code ends fast disconnection until the next account login: the cookie the
+// code is made from only changes then, far TPs and reconnections keep it.
+static std::map<uint32, NLNET::CLoginCookie> FastDisconnectionRefusedCookies;
 
 void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
@@ -3299,13 +3302,32 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 				H_AUTO(BypassDiscoTimer);
 				CSecurityCheckForFastDisconnection securityCheck;
 				securityCheck.receiveSecurityCode(msgin);
-				CPlayer *player = PlayerManager.getPlayer(uint32(charId.getShortId()) >> 4);
-				if (player)
-					securityCheck.setCookie(player->getLoginCookie()); // if not set (null player), the check won't pass
 
-				if (FastDisconnectionPassPhrase.get().empty())
-					throw Exception("FastDisconnectionPassPhrase is not set");
-				securityCheck.check(FastDisconnectionPassPhrase.get().c_str());
+				// the code is made from the login cookie, which a player still loading does not have yet
+				const uint32 userId = uint32(charId.getShortId()) >> 4;
+				CPlayer *player = PlayerManager.getPlayer(userId);
+				if (player == NULL || !player->getLoginCookie().isValid())
+					throw Exception("no login cookie");
+				securityCheck.setCookie(player->getLoginCookie());
+
+				if (FastDisconnectionSecret.empty())
+					throw Exception("no fast disconnection secret from the shard unifier");
+
+				// one wrong code per account login, so that the code cannot be found by trying them all
+				std::map<uint32, NLNET::CLoginCookie>::const_iterator itRefused = FastDisconnectionRefusedCookies.find(userId);
+				if (itRefused != FastDisconnectionRefusedCookies.end() && itRefused->second == player->getLoginCookie())
+					throw Exception("a code was already refused during this login");
+				try
+				{
+					securityCheck.check(FastDisconnectionSecret.c_str());
+				}
+				catch (const Exception &e)
+				{
+					nlwarning("Fast disconnection code of %s refused (%s), no other is checked on this EGS until the next account login: a hacked client, a code from a shard unifier that has restarted since, or one of another version",
+						charId.toString().c_str(), e.what());
+					FastDisconnectionRefusedCookies[userId] = player->getLoginCookie();
+					throw;
+				}
 			}
 		}
 	}

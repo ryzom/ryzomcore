@@ -58,6 +58,15 @@ class JoinShardCb extends CRingSessionManagerWeb
 	}
 
 	/**
+	 * A join the shard unifier may let skip the mainland disconnection timer comes with a security code, which is
+	 * for the client's own session browser: the web join only needs the rest
+	 */
+	function joinSessionResultExt($userId, $sessionId, $result, $shardAddr, $participantStatus, $securityCheckForFastDisconnection)
+	{
+		$this->joinSessionResult($userId, $sessionId, $result, $shardAddr, $participantStatus);
+	}
+
+	/**
 	 * Receive the result of the shard list, then call the global $getShardListCallback with the associative array as argument
 	 */
 	function getShardsResult($userId, $resultStr)

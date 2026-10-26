@@ -24,6 +24,11 @@
 namespace RSMGR
 {
 	const char *const RingSessionManagerClassName = "RingSessionManager";
+
+	/** The secret the codes for fast disconnection are made with, chosen at random once per run of the shard unifier.
+	 *	The entity locator gives it to each EGS, which checks with it the code a client presents.
+	 */
+	const std::string &getFastDisconnectionSecret();
 }
 
 
