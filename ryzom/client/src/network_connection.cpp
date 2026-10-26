@@ -3232,14 +3232,27 @@ void	CNetworkConnection::sendSystemQuit()
 
 	uint32	length = message.length();
 	if (m_UseQuic)
+	{
 		m_QuicConnection.sendDatagramSwap(message, length);
+	}
 	else
-		m_Connection.send(message.buffer(), length);
+	{
+		// as sendSystemDisconnection: quit() runs in the login co-task, where an exception would stop it, and the QUIT
+		// is sent again until the frontend answers or QuitTimeOut
+		try
+		{
+			m_Connection.send(message.buffer(), length);
+		}
+		catch (const ESocket &e)
+		{
+			nlwarning("CNET[%p]: QUIT not sent, socket exception: %s", this, e.what());
+		}
+	}
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 
 	updateBufferizedPackets ();
-	nlinfo("CNET[%p]: sent QUIT", this);
+	nldebug("CNET[%p]: sent QUIT", this); // every 100 ms until the frontend answers
 }
 
 //
