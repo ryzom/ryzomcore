@@ -868,6 +868,14 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 	uint32 currentsize = _CurrentInMsg->userSize();
 	//nlinfo( "currentsize: %u", currentsize );
 
+	// An empty datagram holds nothing to read, and bufferToFill(0) leaves Msgin as the previous message left it:
+	// what was left of that message would be read as if this sender had sent it
+	if ( currentsize == 0 )
+	{
+		rejectReceivedMessage( InsufficientSize, clienthost ? clienthost->Uid : 0 );
+		return;
+	}
+
 	memcpy( Msgin.bufferToFill( currentsize ), _CurrentInMsg->userDataR(), currentsize );
 
 	try
