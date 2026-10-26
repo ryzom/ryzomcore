@@ -232,8 +232,18 @@ public:
 		NbJoinModes
 	};
 
-	CFarTP() : _Reason(nullptr)
-	    , _SessionIdToJoinFast(0), _InGameMode(false), _PreviousR2EdEnabled(false), _ReselectingChar(false), _IsServerHopEmbedded(false), _HookedForEditor(false), _DSSDown(false) /*, _SelfReconnecting(false)*/ {}
+	CFarTP()
+	    : _Reason(nullptr)
+	    , _SessionIdToJoinFast(0)
+	    , _InGameMode(false)
+	    , _PreviousR2EdEnabled(false)
+	    , _ReselectingChar(false)
+	    , _IsServerHopEmbedded(false)
+	    , _HookedForEditor(false)
+	    , _DSSDown(false) /*, _SelfReconnecting(false)*/
+	    , m_ReselectThroughLimbo(false)
+	{
+	}
 
 	// Get the address of a front-end service via http, then begin Far TP
 	bool requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP::TJoinMode joinMode, bool bailOutIfSessionVanished);
@@ -249,6 +259,11 @@ public:
 
 	/// Begin a Character Reselect sequence
 	void requestReconnection();
+
+	/// Begin a Character Reselect sequence on the current connection, without the shard unifier: after the EGS quit
+	/// countdown the client sends SYSTEM_QUIT, and the frontend keeps the session (its limbo mode) until the EGS sends
+	/// the characters again
+	void requestReselectThroughLimbo();
 
 	// These states can overlap
 	bool isIngame() const { return _InGameMode; }
@@ -276,8 +291,19 @@ public:
 
 	void setIngame() { _InGameMode = true; }
 	void setOutgame() { _InGameMode = false; }
-	void setMainLoopEntered() { setIngame(); _ReselectingChar = false; }
-	void beginEmbeddedServerHop() { _IsServerHopEmbedded = true; setOutgame(); _ReselectingChar = false; }
+	void setMainLoopEntered()
+	{
+		setIngame();
+		_ReselectingChar = false;
+		m_ReselectThroughLimbo = false;
+	}
+	void beginEmbeddedServerHop()
+	{
+		_IsServerHopEmbedded = true;
+		setOutgame();
+		_ReselectingChar = false;
+		m_ReselectThroughLimbo = false;
+	}
 	void endEmbeddedServerHop() { _IsServerHopEmbedded = false; setIngame(); _ReselectingChar = true; }
 
 	void setURLBase(const std::string& urlBase) { _URLBase = urlBase; }
@@ -304,6 +330,7 @@ private:
 	bool _HookedForEditor; // allows to Far TP to editor instead of following the next Far TP request
 	bool _DSSDown; // remembers a DSSDown event if occurs during a FarTP
 //	bool _SelfReconnecting; // allows to disconnect after character selection and reconnect until the player can choose another character
+	bool m_ReselectThroughLimbo; // the current character reselect keeps the connection (see requestReselectThroughLimbo)
 
 };
 

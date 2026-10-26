@@ -1031,6 +1031,29 @@ void CFarTP::requestReconnection()
 		_ReselectingChar = false;
 }
 
+/*
+ * requestReselectThroughLimbo
+ */
+void CFarTP::requestReselectThroughLimbo()
+{
+	if (LoginSM.getCurrentState() != CLoginStateMachine::st_ingame)
+	{
+		nlwarning("Cannot go back to the character selection in login state %s", CLoginStateMachine::toString(LoginSM.getCurrentState()).c_str());
+		return;
+	}
+	if (NetMngr.getConnectionState() != CNetworkConnection::Connected)
+	{
+		nlwarning("Cannot go back to the character selection in connection state %s", NetMngr.getConnectionStateCStr());
+		return;
+	}
+
+	// The same sequence as requestReconnection() once the shard unifier has answered, but for the same shard and
+	// connection: no fast disconnection, the quit countdown applies (see disconnectFromPreviousShard)
+	_ReselectingChar = true;
+	m_ReselectThroughLimbo = true;
+	_SessionIdToJoinFast = 0;
+	LoginSM.pushEvent(CLoginStateMachine::ev_connect);
+}
 
 const char * CFarTP::_URLTable[CFarTP::NbJoinModes] =
 {
@@ -1108,6 +1131,7 @@ void CFarTP::onServerQuitAbort()
 	if (LoginSM.getCurrentState() == CLoginStateMachine::st_leave_shard)
 		LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
 	_ReselectingChar = false;
+	m_ReselectThroughLimbo = false;
 }
 
 void CFarTP::disconnectFromPreviousShard()
@@ -1145,8 +1169,18 @@ void CFarTP::disconnectFromPreviousShard()
 		}
 	}
 
-	// Disconnect from the FS
-	NetMngr.disconnect();
+	if (m_ReselectThroughLimbo)
+	{
+		// Leave the game but keep the connection: on SYSTEM_QUIT the frontend tells the EGS that the user left (the quit
+		// countdown is over, so the character is gone) and came back, and keeps the session until the EGS sends the
+		// characters, then synchronizes it again (see stateQuit())
+		NetMngr.quit();
+	}
+	else
+	{
+		// Disconnect from the FS
+		NetMngr.disconnect();
+	}
 
 	if (isIngame())
 	{
@@ -1189,7 +1223,10 @@ void CFarTP::disconnectFromPreviousShard()
 		(done in resetShardSpecificData() above)
 		If we do the resetShardSpecificData() after, scenari could arise where Local database could not be reseted
 	*/
-	NetMngr.reinit();
+	if (m_ReselectThroughLimbo)
+		NetMngr.resetSession();
+	else
+		NetMngr.reinit();
 
 	// Reset weather state so the new shard's weather starts clean
 	ClientCfg.ManualWeatherSetup = false;
@@ -1207,21 +1244,25 @@ void CFarTP::connectToNewShard()
 {
 	// TODO: start commands?
 
-	// Connect to the next FS
-	NetMngr.initCookie(Cookie, FSAddr);
-
-	// connect the session browser to the new shard
-	NLNET::CInetHost sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
-	sbsAddress.setPort(sbsAddress.port()+SBSPortOffset);
-	CSessionBrowserImpl::getInstance().connectItf(sbsAddress);
-
-	string result;
-	NetMngr.connect(result);
-	if (!result.empty())
+	// Through limbo, the connection is kept (still quitting until the frontend synchronizes it again)
+	if (!m_ReselectThroughLimbo)
 	{
-		_Reason = new string(result);
-		LoginSM.pushEvent(CLoginStateMachine::ev_conn_failed);
-		return;
+		// Connect to the next FS
+		NetMngr.initCookie(Cookie, FSAddr);
+
+		// connect the session browser to the new shard
+		NLNET::CInetHost sbsAddress(CSessionBrowserImpl::getInstance().getFrontEndAddress());
+		sbsAddress.setPort(sbsAddress.port() + SBSPortOffset);
+		CSessionBrowserImpl::getInstance().connectItf(sbsAddress);
+
+		string result;
+		NetMngr.connect(result);
+		if (!result.empty())
+		{
+			_Reason = new string(result);
+			LoginSM.pushEvent(CLoginStateMachine::ev_conn_failed);
+			return;
+		}
 	}
 
 	// Reinit the string manager cache.
@@ -1507,7 +1548,16 @@ void CFarTP::farTPmainLoop()
 //			NetMngr.send();
 //		}
 
-		if (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_select_char)
+		if (m_ReselectThroughLimbo && (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_fs)
+		    && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
+		{
+			// The connection closed instead of being synchronized again: the EGS refused the user, the session timed out
+			// in limbo mode (the frontend closes a QUIC connection, a UDP client gives up after QuitTimeOut), or the
+			// connection was already lost during the quit countdown. Nothing sends ev_conn_dropped for that.
+			_Reason = new string("the connection was closed while going back to the character selection");
+			LoginSM.pushEvent(CLoginStateMachine::ev_conn_dropped);
+		}
+		else if (LoginSM.getCurrentState() == CLoginStateMachine::st_reconnect_select_char)
 		{
 			// Far TP part 3.2bis: go to character selection dialog
 			// This is done outside the co-routine because it may need to co-routine to do an embedded server hop

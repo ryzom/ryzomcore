@@ -822,6 +822,12 @@ protected:
 
 	void						reinit();
 
+	// clang-format off
+	/// Reset the data of the session but keep the connection, for going back to the character selection on it after
+	/// quit() (the frontend's limbo mode); reinit() also resets the connection
+	void						resetSession();
+	// clang-format on
+
 private:
 
 	/// Set MsPerTick value
@@ -876,6 +882,9 @@ private:
 	uint32						_QuitId;
 	bool						_ReceivedAckQuit;
 	NLMISC::TTime				_LatestQuitTime;
+	// clang-format off
+	NLMISC::TTime				m_QuitTime; // when quit() was called, for QuitTimeOut
+	// clang-format on
 
 	//
 	void						reset();

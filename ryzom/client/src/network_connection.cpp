@@ -84,6 +84,11 @@
 
 const char *ConnectionStateCStr[10] = { "NotInitialised", "NotConnected", "Authenticate", "Login", "Synchronize", "Connected", "Probe", "Stalled", "Disconnect", "Quit" };
 
+// How long the client waits in state Quit for the frontend to synchronize the connection again (after its limbo mode)
+// before disconnecting, in ms. Longer than the frontend's LimboTimeOut (1 min in the default configuration), so that the
+// frontend removes the session first.
+static const uint32 QuitTimeOut = 90000;
+
 
 // ***************************************************************************
 using namespace std;
@@ -320,8 +325,10 @@ CNetworkConnection::CNetworkConnection()
 	_DataBase = nullptr;
 
 	reset();
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
 
 	_QuitId = 0;
+	m_QuitTime = 0;
 
 	initTicks();
 }
@@ -3068,9 +3075,19 @@ bool	CNetworkConnection::stateQuit()
 			}
 			else
 			{
-				nlwarning("CNET[%p]: received normal in state Quit", this);
+				// sent by the frontend before it received the QUIT
+				nldebug("CNET[%p]: received normal in state Quit", this);
 			}
 		}
+	}
+
+	if (_UpdateTime - m_QuitTime > QuitTimeOut)
+	{
+		// The frontend did not take the session back after its limbo mode: it timed out, the EGS refused the user, or
+		// the session was removed. Over UDP the frontend cannot tell the client, so this is the only way to find out.
+		nlwarning("CNET[%p]: no SYNC from the frontend %u ms after QUIT, disconnecting", this, QuitTimeOut);
+		disconnect();
+		return false;
 	}
 
 	// send quit if not yet received a ack quit
@@ -3088,12 +3105,21 @@ bool	CNetworkConnection::stateQuit()
  */
 void	CNetworkConnection::quit()
 {
+	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Authenticate
+	    || _ConnectionState == Disconnect)
+	{
+		// Same states as in disconnect(): there is no connection to send the QUIT on
+		nlwarning("CNET[%p]: cannot quit in state %s, the connection is not open", this, ConnectionStateCStr[_ConnectionState]);
+		return;
+	}
+
 	nlinfo("CNetworkConnection::quit() called, setting to quitting state.");
 
 	++_QuitId;
 	_ConnectionState = Quit;
 	_ReceivedAckQuit = false;
 	_LatestQuitTime = _UpdateTime;
+	m_QuitTime = _UpdateTime;
 
 	sendSystemQuit();
 }
@@ -3134,7 +3160,8 @@ void	CNetworkConnection::reset()
 	_TotalLostPackets = 0;
 	_ConnectionQuality = false;
 
-	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+	// The send numbers start again at 0
+	_PacketStamps.clear();
 
 	_CurrentSmoothServerTick= 0;
 	_SSTLastLocalTime= 0;
@@ -3150,18 +3177,10 @@ void	CNetworkConnection::initTicks()
 
 void	CNetworkConnection::reinit()
 {
-	// Reset data
-	_ImpulseDecoder.reset();
-	if (_DataBase)
-		_DataBase->resetData(_CurrentServerTick, true);
-	_LongAckBitField.clearAll();
-	_PacketStamps.clear();
-	_Actions.clear();
-	_Changes.clear();
-	_GenericMultiPartTemp.clear();
-	_IdMap.clear();
-	reset();
-	initTicks();
+	resetSession();
+
+	// The transport is chosen for each new connection, never for one that is kept (see resetSession)
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
 
 	// Reuse the udp socket
 	m_Connection.~CUdpSimSock();
@@ -3179,6 +3198,21 @@ void	CNetworkConnection::reinit()
 	m_QuicConnection.disconnect();
 	if (!m_UseQuic)
 		m_QuicConnection.release();
+}
+
+void CNetworkConnection::resetSession()
+{
+	// Reset data
+	_ImpulseDecoder.reset();
+	if (_DataBase)
+		_DataBase->resetData(_CurrentServerTick, true);
+	_LongAckBitField.clearAll();
+	_Actions.clear();
+	_Changes.clear();
+	_GenericMultiPartTemp.clear();
+	_IdMap.clear();
+	reset();
+	initTicks();
 }
 
 // sends system sync acknowledge

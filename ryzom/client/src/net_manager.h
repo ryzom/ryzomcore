@@ -118,6 +118,11 @@ public:
 	void reinit();
 
 	/**
+	 * Reset data but keep the connection (going back to the character selection on it, see CFarTP)
+	 */
+	void resetSession();
+
+	/**
 	 * Waits for server to answer
 	 */
 	void waitForServer();

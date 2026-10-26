@@ -1295,11 +1295,24 @@ REGISTER_ACTION_HANDLER( CAHReturnToMainland, "return_to_mainland");
 
 // ***************************************************************************
 // quit the ring session and return to character selection
+// With limbo=1, the character selection is reached on the same connection, without the shard unifier (single shard).
+// A ring session is left by a Far TP whatever the parameter.
 class CAHReselectCharacter : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
+		if (getParam(sParams, "limbo") == "1")
+		{
+			if (!IsInRingSession)
+			{
+				nlinfo("User request to reselect character on the same connection");
+				FarTP.requestReselectThroughLimbo();
+				return;
+			}
+			nlinfo("User request to reselect character on the same connection, but a ring session is left by a Far TP");
+		}
+
 		nlinfo("User request to reselect character");
 		FarTP.requestReconnection();
 	}
