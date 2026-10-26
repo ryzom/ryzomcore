@@ -144,9 +144,13 @@ void CMissionGuild::stopChildren()
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
 		if ( child )
 		{
-			for ( uint j = 0; j < child->Instances.size(); j++ )
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = child->Instances;
+			for (uint j = 0; j < instances.size(); j++)
 			{
-				CMissionGuild * mission = dynamic_cast<CMissionGuild*>( child->Instances[j] );
+				if (!child->isInstance(instances[j]))
+					continue;
+				CMissionGuild *mission = dynamic_cast<CMissionGuild *>(instances[j]);
 				if ( mission && mission->_GuildId == _GuildId )
 					mission->onFailure( true,false );
 			}
@@ -205,7 +209,7 @@ void CMissionGuild::forceSuccess()
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			guild->sendMessageToGuildMembers(isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, this);
 		stopChildren();
 		guild->processMissionEvent( event );
 		

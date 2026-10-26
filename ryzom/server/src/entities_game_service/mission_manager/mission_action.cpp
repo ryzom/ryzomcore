@@ -2750,14 +2750,17 @@ class CMissionActionFailMissionCat : public IMissionAction
 			return;
 
 		CMissionManager *pMM = CMissionManager::getInstance();
-		std::map<TAIAlias, CMission*>::iterator itMiss = pChar->getMissionsBegin();
-		while (itMiss != pChar->getMissionsEnd())
+		// onFailure can remove other missions of the character (those it stops): go through the aliases, and look each
+		// mission up again
+		std::vector<TAIAlias> aliases;
+		for (std::map<TAIAlias, CMission *>::iterator itMiss = pChar->getMissionsBegin(); itMiss != pChar->getMissionsEnd(); ++itMiss)
+			aliases.push_back(itMiss->first);
+		for (uint i = 0; i < aliases.size(); ++i)
 		{
-			map<TAIAlias, CMission*>::iterator itNext = itMiss;
-			++itNext;
-
-			CMission *pMiss = itMiss->second;
-			if (pMiss != NULL && pMiss != instance)	// Do not fail current mission even if its category matches
+			CMission *pMiss = pChar->getMission(aliases[i]);
+			// Do not fail current mission even if its category matches, nor a mission already finished (a success would
+			// become a failure)
+			if (pMiss != NULL && pMiss != instance && !pMiss->getFinished())
 			{
 				CMissionTemplate *pMissTemplate;
 				bool bFailed = false;
@@ -2783,8 +2786,6 @@ class CMissionActionFailMissionCat : public IMissionAction
 					}
 				}
 			}
-			// next mission
-			itMiss = itNext;
 		}
 	}
 

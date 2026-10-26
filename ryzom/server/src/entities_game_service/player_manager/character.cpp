@@ -12457,6 +12457,7 @@ void CCharacter::abandonMission(uint8 indexClient)
 		MISDBG( "user:%s abandonMission : ERROR : invalid mission index %u sent ",_Id.toString().c_str(), indexClient );
 		return;
 	}
+	const TAIAlias alias = mission->getTemplateId();
 	if ( mission->getFinished() == false )
 	{
 		if ( !templ )
@@ -12472,8 +12473,12 @@ void CCharacter::abandonMission(uint8 indexClient)
 		MISDBG("user:%s abandonMission", getId().toString().c_str());
 		mission->onFailure(true, false);
 		CCharacter::sendDynamicSystemMessage( _EntityRowId, "ABANDON_MISSION" );
+
+		// A no_list, chained or auto_remove mission has removed (deleted) itself
+		if (_Missions->getMissions(alias) == NULL)
+			return;
 	}
-	removeMission( mission->getTemplateId(), mr_abandon );
+	removeMission(alias, mr_abandon);
 }
 
 void CCharacter::clearSuccessfullMission()
@@ -12728,7 +12733,7 @@ bool CCharacter::processMissionStepUserEvent(std::list< CMissionEvent* > & event
 
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			sendDynamicSystemMessage( _Id,bChained?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
 		mission->stopChildren();
 
 		// only remove no list missions, other must be manually removed by user

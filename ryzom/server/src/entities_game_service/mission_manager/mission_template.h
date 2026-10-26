@@ -321,6 +321,10 @@ public:
 	NLMISC::CSheetId								Icon;
 	/// instance of the mission, if the mission is MonoInstance
 	std::vector<CMission*>							Instances;
+	/// true if the mission is still one of Instances: failing an instance removes it, and the missions it stops, from
+	/// Instances (deInstanciateMission moves the last one into its place), so a loop that fails them goes through a
+	/// copy and checks each one
+	bool isInstance(const CMission *mission) const { return std::find(Instances.begin(), Instances.end(), mission) != Instances.end(); }
 	/// the steps of the mission
 	std::vector< IMissionStepTemplate *>			Steps;
 	/// mission alias

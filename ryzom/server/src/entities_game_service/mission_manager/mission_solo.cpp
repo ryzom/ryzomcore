@@ -133,9 +133,13 @@ void CMissionSolo::stopChildren()
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
 		if ( child )
 		{
-			for ( uint j = 0; j < child->Instances.size(); j++ )
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = child->Instances;
+			for (uint j = 0; j < instances.size(); j++)
 			{
-				CMissionSolo * mission = dynamic_cast<CMissionSolo*>( child->Instances[j] );
+				if (!child->isInstance(instances[j]))
+					continue;
+				CMissionSolo *mission = dynamic_cast<CMissionSolo *>(instances[j]);
 				if ( mission && mission->_Taker == _Taker )
 					mission->onFailure( true,false );
 			}
@@ -192,7 +196,7 @@ void CMissionSolo::forceSuccess()
 		user->addSuccessfulMissions( *templ );
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			CCharacter::sendDynamicSystemMessage( user->getId(), isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, this);
 		stopChildren();
 		user->processMissionEvent( event );
 		

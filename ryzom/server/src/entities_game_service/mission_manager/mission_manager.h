@@ -194,7 +194,7 @@ public:
 	/// deinstanciate a mission From this manager. It doesnt delete it, nor does it remove it from a character
 	void deInstanciateMission(CMission * mission);
 	/// tell the system that a mission was done for the first time
-	void missionDoneOnce( CMissionTemplate* templ );
+	void missionDoneOnce(CMissionTemplate *templ, CMission *done);
 	/// add a timed mission
 	void addTimedMission( CMission * mission );
 	/// add a timed mission

@@ -354,17 +354,22 @@ void CMissionQueue::tickUpdate()
 		else
 		{
 			const TDataSetRow rowId = TheDataset.getDataSetRow(_CriticalPartEntityId);
-			for ( uint i = 0; i < templ->Instances.size() ; ++i)
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = templ->Instances;
+			for (uint i = 0; i < instances.size(); ++i)
 			{
-				if ( templ->Instances[i] )
+				if (!templ->isInstance(instances[i]))
+					continue;
+				if (instances[i])
 				{
 					vector<TDataSetRow> entities;
-					templ->Instances[i]->getEntities( entities );
+					instances[i]->getEntities(entities);
 					for ( uint j = 0 ; j < entities.size() ; ++j )
 					{
 						if( entities[j] == rowId )
 						{
-							templ->Instances[i]->onFailure(false);
+							instances[i]->onFailure(false);
+							break;
 						}
 					}
 				}

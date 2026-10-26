@@ -954,7 +954,7 @@ bool CTeam::processTeamMissionStepEvent(std::list< CMissionEvent* > & eventList,
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
 		mission->stopChildren();
 		
 		// only remove no list missions, other must be manually removed by user
