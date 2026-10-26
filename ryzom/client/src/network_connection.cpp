@@ -578,6 +578,9 @@ bool	CNetworkConnection::connect(string &result)
 		return false;
 	}
 
+	// The transport is chosen when a connection starts: the constructor runs before client.cfg is read
+	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+
 	// try to find where common data are located depending to where we'll connect
 	// the goal is to use the same database.txt as the server one
 	try
