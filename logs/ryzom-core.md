@@ -139,3 +139,13 @@ Crash found from a dump: `CInterfaceHelp::updateWindowSPhraseTexts()` called
 (the sheet that opened an info window) was a raw pointer, never cleared if
 that control was destroyed while the window stayed open. It is now a
 `CRefPtr`, which becomes NULL by itself.
+
+## 2026-10-26 — 🐛 CBitmap::loadSize: validate sizes read from the file
+
+Crash found from a dump (frames 0-7 missing): `loadSize()` is called on
+downloaded web images by `CGroupHTML::ImageDownloadCB::finish()`. The DDS
+branch allocated `new uint32[size]` with `size` read from the file, so a
+corrupt header (size 0, below 4, or huge) wrote or read out of the array, or
+threw `std::bad_alloc`. The DDS header size must now be in [16, 1024]. The JPG
+branch also refuses a block size below 2, which made `seek(blockSize - 2)` go
+backward forever.
