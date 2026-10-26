@@ -149,3 +149,11 @@ corrupt header (size 0, below 4, or huge) wrote or read out of the array, or
 threw `std::bad_alloc`. The DDS header size must now be in [16, 1024]. The JPG
 branch also refuses a block size below 2, which made `seek(blockSize - 2)` go
 backward forever.
+
+## 2026-10-26 — 🐛 CWidgetManager::checkCoords: ignore NULL windows
+
+Crash found from a dump: `checkCoords()` dereferenced the entries of
+`PrioritizedWindows` without a NULL test (the draw loop already had one, with
+a TODO about NULL pointers in that list). Both loops of `checkCoords()` now
+skip a NULL entry and `SMasterGroup::addWindow()` refuses a NULL window. A
+dangling pointer (window destroyed without `delWindow`) is not covered.

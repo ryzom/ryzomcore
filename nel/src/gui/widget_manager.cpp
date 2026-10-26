@@ -76,6 +76,10 @@ namespace NLGUI
 	{
 		nlassert(nPrio<WIN_PRIORITY_MAX);
 
+		// a NULL window would crash the loops over PrioritizedWindows
+		if (!pIG)
+			return;
+
 		// Priority WIN_PRIORITY_WORLD_SPACE is only for CGroupInScene !
 		// Add this group in another priority list
 		nlassert ((nPrio!=WIN_PRIORITY_MAX) || pIG->isGroupInScene() );
@@ -1083,7 +1087,7 @@ namespace NLGUI
 						{
 							CInterfaceGroup *pIG = *itw;
 							itw++;	// since checkCoords invalidate the iterator, be sure we move to the next one before
-							if (pIG->getActive())
+							if (pIG && pIG->getActive())
 								pIG->checkCoords ();
 						}
 					}
@@ -1108,6 +1112,8 @@ namespace NLGUI
 						for (itw = rList.begin(); itw!= rList.end(); itw++)
 						{
 							CInterfaceGroup *pIG = *itw;
+							if (!pIG)
+								continue;
 							bool		updateCoordCalled= false;
 							// updateCoords the window only if the master group is his parent and if need it
 							// do it until updateCoords() no more invalidate coordinates!!
