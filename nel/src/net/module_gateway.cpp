@@ -911,7 +911,15 @@ namespace NLNET
 
 					break;
 				default:
-					// should not append
+					// The route of a firewalled transport is a client (a frontend's game client), which can send
+					// anything: the rest of its update cannot be read without knowing this event. Between services, an
+					// unknown event is a protocol mismatch, which stays fatal.
+					if (from->getTransport()->Firewalled)
+					{
+						nlwarning("NLNETL5 : Gateway '%s' : a client route sent a module update with the unknown event %u, the rest of the update is discarded",
+							getGatewayName().c_str(), (uint)type);
+						return;
+					}
 					nlstop;
 				}
 			}
@@ -926,6 +934,23 @@ namespace NLNET
 
 			// for each received module info
 			TStringId modNameId = CStringMapper::map(modDesc.ModuleFullName);
+
+			// The route of a firewalled transport is a client (a frontend's game client), which chooses the name and the
+			// id. A module the gateway already knows would let the client send as that module, and with a shorter
+			// distance take its route, so the module's messages, and the disclosures of the modules that send to it, go
+			// to the client: a client discloses only modules of its own. An id the route already uses would break its
+			// translation table (TTwinMap::add asserts). Between services, a module is known through several routes.
+			if (from->getTransport()->Firewalled
+				&& (_NameToProxyIdx.getB(modNameId) != nullptr || from->ForeignToLocalIdx.getB(modDesc.ModuleProxyId) != nullptr))
+			{
+				nlwarning("NLNETL5 : Gateway '%s' : a client route disclosed module '%s' with foreign id %u, but the gateway already knows that module or the route that id, ignored",
+					getGatewayName().c_str(),
+					modDesc.ModuleFullName.c_str(),
+					modDesc.ModuleProxyId);
+				delete modDesc.SecDesc.SecurityData;
+				return;
+			}
+
 			/// store the module information
 			TKnownModuleInfo modInfo;
 			modInfo.ForeignProxyId = modDesc.ModuleProxyId;
