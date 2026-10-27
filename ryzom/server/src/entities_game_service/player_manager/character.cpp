@@ -13305,10 +13305,10 @@ void CCharacter::updateSavedMissions()
 	// Every mission has its taker and its journal index before any is put in game: the events of a mission's active
 	// steps can give a new mission, which takes the first index no mission holds
 	uint idx = 0;
-	vector<TAIAlias> aliases;
+	vector<NLMISC::CRefPtr<CMission>> loaded;
 	for (map<TAIAlias, CMission *>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
-		aliases.push_back((*it).first);
+		loaded.push_back((*it).second);
 
 		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate((*it).second->getTemplateId());
 		EGS_PD_AST(templ);
@@ -13319,11 +13319,12 @@ void CCharacter::updateSavedMissions()
 	}
 
 	// The events of a mission's active steps, and its crash or reconnect handler, can end and remove missions, this one
-	// or others (its children): go through the aliases, and skip the missions already removed
-	for (uint i = 0; i < aliases.size(); ++i)
+	// or others (its children), and give new ones: go through the missions loaded, and skip those already removed. A
+	// mission given again at a removed one's alias is a new instance, already in game.
+	for (uint i = 0; i < loaded.size(); ++i)
 	{
-		CMission *found = _Missions->getMissions(aliases[i]);
-		if (found == NULL)
+		CMission *found = loaded[i];
+		if (found == nullptr)
 			continue;
 
 		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(found->getTemplateId());

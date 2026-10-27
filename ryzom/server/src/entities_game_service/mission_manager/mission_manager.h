@@ -381,6 +381,9 @@ inline bool CMissionManager::getEmoteId(const std::string & str, uint32&  emoteI
 
 inline void CMissionManager::addTimedMission( CMission * mission )
 {
+	// A mission is listed once, at its end date: a timer set again, or a mission put in game again, moves it. Listed
+	// twice, it stays at the head of the list once its failure has reset its end date, and tickUpdate fails it forever.
+	removeTimedMission(mission);
 	std::list< CMission* >::iterator it = _TimedMissions.begin();
 	for (; it != _TimedMissions.end(); ++it )
 	{
