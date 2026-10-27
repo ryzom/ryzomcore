@@ -2895,6 +2895,23 @@ void CCharacter::prepareToLoad()
 	initPDStructs();
 }
 
+// A saved heading as the GPMS takes one from a client: 0 for one that is not a number, one outside [-Pi, Pi] brought
+// back into it. Returns true when it was changed.
+static bool repairSavedHeading(float &heading)
+{
+	if (!isValidDouble(heading))
+	{
+		heading = 0.f;
+		return true;
+	}
+	if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
+	{
+		heading = (float)atan2(sin((double)heading), cos((double)heading));
+		return true;
+	}
+	return false;
+}
+
 
 //---------------------------------------------------
 // postLoadTreatment: method called after applying a pdr save record for all generic processing work
@@ -2942,6 +2959,27 @@ void CCharacter::postLoadTreatment()
 	}
 
 	_NbSurvivePact = (uint8)_Pact.size();
+
+	// A heading that is not a number goes to the client in USER_CHAR, which then sends it in every POSITION, each refused
+	// as a HACK, and one outside [-Pi, Pi] goes to the AI service, whose fixed-point angle it overflows: a modified client
+	// could have either saved before the GPMS refused them (2a9ed025b, 033d556f8)
+	{
+		float heading = _EntityState.Heading;
+		if (repairSavedHeading(heading))
+		{
+			nlwarning("%s: the saved heading is not a number or outside [-Pi, Pi], set to %g", _Id.toString().c_str(), (double)heading);
+			_EntityState.Heading = heading;
+		}
+		for (uint i = 0; i < PositionStack.size(); ++i)
+		{
+			CFarPosition farPos = PositionStack[i];
+			if (repairSavedHeading(farPos.PosState.Heading))
+			{
+				nlwarning("%s: the heading saved in its position stack at %u is not a number or outside [-Pi, Pi], set to %g", _Id.toString().c_str(), i, (double)farPos.PosState.Heading);
+				PositionStack.substFarPosition(i, farPos);
+			}
+		}
+	}
 
 	{
 	H_AUTO(FixPetTicket);

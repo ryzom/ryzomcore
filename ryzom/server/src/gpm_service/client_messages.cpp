@@ -74,9 +74,12 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	// it: the AI service converts it to a fixed-point angle that a large one overflows.
 	if (!isValidDouble(heading))
 	{
-		nlwarning("HACK: <cbClientPosition> %s sent an invalid heading, the current one is kept", id.toString().c_str());
+		nlwarning("HACK: <cbClientPosition> %s sent an invalid heading, the current one is kept (0 if it is invalid too)", id.toString().c_str());
 		reportRefusedClientMessage(id);
 		heading = CMirrorPropValueRO<float>( TheDataset, entityIndex, DSPropertyORIENTATION );
+		// the current one came from the client or its save the same way
+		if (!isValidDouble(heading))
+			heading = 0.f;
 	}
 	else if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
 	{
