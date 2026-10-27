@@ -112,6 +112,9 @@ void CTeam::release()
 	for ( uint i = 0; i < size; i++ )
 	{
 		_Missions[i]->clearUsersJournalEntry();
+		// the missions of a dissolved team are deleted without a failure, which would take the entity waiting for one
+		// out of its queue
+		_Missions[i]->leaveWaitingQueue();
 		CMissionManager::getInstance()->deInstanciateMission(_Missions[i]);
 		delete _Missions[i];
 	}

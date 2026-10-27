@@ -808,6 +808,9 @@ void CMissionBaseBehaviour::setSuccessFlag()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	nlassert(templ);
+	// a success that keeps the mission in the journal does not remove it, which would take the entity waiting for it
+	// out of its queue
+	leaveWaitingQueue();
 	_Mission->setFinished(true);
 	_Mission->setMissionSuccess(true);
 	while( _Mission->getStepsBegin() != _Mission->getStepsEnd() )
