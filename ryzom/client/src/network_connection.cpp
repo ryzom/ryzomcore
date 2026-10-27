@@ -580,6 +580,8 @@ bool	CNetworkConnection::connect(string &result)
 
 	// The transport is chosen when a connection starts: the constructor runs before client.cfg is read
 	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+	// A fallback to the next frontend address left by an earlier connection would connect again over this one
+	m_LoginNextAddress = false;
 
 	// try to find where common data are located depending to where we'll connect
 	// the goal is to use the same database.txt as the server one
@@ -861,6 +863,8 @@ bool	CNetworkConnection::update()
 
 	if (m_LoginNextAddress)
 	{
+		// once: a next update must not connect again (and assert on the socket it connected)
+		m_LoginNextAddress = false;
 		nlassert(!m_Connection.connected());
 
 		std::string tres = "No remaining FS connection addresses";
@@ -993,7 +997,9 @@ bool	CNetworkConnection::update()
 		_ConnectionState = Disconnect;
 	}
 
-	if (!m_UseQuic && !m_Connection.connected())
+	// a receive error while logging in closed the socket to try the next frontend address at the next update: that
+	// update returns at once if the state is Disconnect
+	if (!m_UseQuic && !m_Connection.connected() && !m_LoginNextAddress)
 	{
 		//if(!ClientCfg.Local)
 		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
