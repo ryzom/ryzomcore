@@ -2131,6 +2131,7 @@ bool CFile::isNetworkOrDevicePath(const string &path)
 	// \??\path, which Win32 passes on to the NT object namespace unchanged
 	return path.size() >= 4 && path[1] == '?' && path[2] == '?' && (path[3] == '/' || path[3] == '\\');
 #else
+	nlunreferenced(path);
 	return false;
 #endif
 }

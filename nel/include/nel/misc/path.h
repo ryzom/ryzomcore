@@ -619,7 +619,7 @@ struct CFile
 	/**
 	 * Return true when Windows would not open a path as a local file: a network share (\\host\share, //host/share or
 	 * any mix of slashes), a device or long path (\\.\..., \\?\...) or the NT object namespace (\??\...). Opening such
-	 * a path connects to the host and sends the user's credentials, so a path from untrusted input must not be.
+	 * a path connects to the host and sends the user's credentials, so a path from untrusted input must not be opened.
 	 * DOS device names (CON, NUL, COM1, ...) are not detected. Always false on other systems, where a leading // is
 	 * the root.
 	 */
