@@ -10198,9 +10198,12 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		return;
 	}
 
-	if( inv >= INVENTORIES::NUM_INVENTORY)
+	// The trade window sells from the bag and the pack animals only. The hands and the equipment refer to bag items, and
+	// removing an item from them only unlinks it: the item would be listed for sale while it stays in the bag.
+	if (inv != INVENTORIES::bag && (inv < INVENTORIES::pet_animal1 || inv > INVENTORIES::pet_animal4))
 	{
-		nlwarning("<CCharacter:-:sellItem> bad inventory index sended by client");
+		nlwarning("HACK: %s sent BOTCHAT:SELL from inventory %u, refused", _Id.toString().c_str(), (uint)inv);
+		reportRefusedClientMessage(_Id);
 		return;
 	}
 
