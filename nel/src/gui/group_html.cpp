@@ -879,6 +879,12 @@ namespace NLGUI
 		if (ret != CURLM_OK)
 		{
 			nlwarning("cURL multi handle %p error %d on '%s'", curl, ret, download->url.c_str());
+			// nothing was downloaded: the callback finds no file, as for the failures above, and the handle is freed
+			fclose(fp);
+			download->fp = nullptr;
+			CFile::deleteFile(download->tmpdest);
+			delete download->data;
+			download->data = nullptr;
 			return false;
 		}
 
