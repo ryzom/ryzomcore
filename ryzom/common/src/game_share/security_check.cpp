@@ -50,7 +50,10 @@ CSecurityCode CSecurityCheckForFastDisconnection::encode(const char *passPhrase)
 {
 	if (!passPhrase)
 		throw Exception("Null passPhrase");
-	strncpy(Block.PassPhrase, passPhrase, 10);
+	// The whole pass phrase counts, through the first 10 bytes of its MD5: a client receives a code with every ring
+	// join, and could test guesses at the pass phrase against it offline.
+	CHashKeyMD5 phraseKey = getMD5((const uint8*)passPhrase, (uint32)strlen(passPhrase));
+	memcpy(Block.PassPhrase, phraseKey.Data, sizeof(Block.PassPhrase));
 	CHashKeyMD5 md5 = getMD5((uint8*)&Block, sizeof(Block));
 	CSecurityCode sc; // parts from NLMISC::CHashKeyMD5 (would CRC16 be better?)
 	sc.Data[0] = md5.Data[0];

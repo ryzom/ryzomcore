@@ -316,7 +316,7 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 		CCharacter * user = PlayerManager.getChar( eId );
 		if ( member == NULL || user == NULL )
 		{
-			nlwarning("<CGuildMemberModule::setMOTD>%s invalid member id %s",eId.toString().c_str());
+			nlwarning("<CGuild::setMOTD> invalid member id %s",eId.toString().c_str());
 			return;
 		}
 
@@ -830,6 +830,9 @@ void CGuild::removeMission( uint idx, TMissionResult result)
 		_Missions[idx]->clearUsersJournalEntry();
 	}
 
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
+
 	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
 	delete _Missions[idx];
 	_Missions.erase(_Missions.begin() + idx) ;
@@ -939,7 +942,7 @@ bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
 		mission->stopChildren();
 
 		// only remove no list missions, other must be manually removed by user

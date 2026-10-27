@@ -220,22 +220,14 @@ public:
 		// set this transport as the open transport
 		OpenTransport() = this;
 
-		THostMap &hostmap = CFrontEndService::instance()->receiveSub()->clientMap();
-		THostMap::iterator first(hostmap.begin()), last(hostmap.end());
-		for (; first != last; ++first)
-		{
-			CClientHost *ch = first->second;
-
-			CMessage message("IMPULTION_ID");
-			CBitMemStream bms;
-			GenericXmlMsgHeaderMngr.pushNameToStream( "MODULE_GATEWAY:FEOPEN", bms );
-			message.serialMemStream( bms );
-
-			message.invert();
- 
-			sendImpulsion( ch->clientId(), message, 1, toString( "from FE to ClientId %u", ch->clientId()).c_str(), false );
-		}
-
+		// Clients connected now are not told: a FEOPEN without a route has no serial number for the client to read
+		// (it would throw and end the client), and no serial could be right, since the client numbers the messages per
+		// transport while each new route starts at 0. A client opens its route by sending FEOPEN when its own gateway
+		// transport opens (the ring editor modules); a client whose transport was already open keeps no route here
+		// until it opens it again.
+		uint nbClients = (uint)CFrontEndService::instance()->receiveSub()->clientMap().size();
+		if (nbClients != 0)
+			nlwarning("Frontend gateway transport opened with %u clients connected: those whose own gateway transport is open (ring editors) have no route until they open it again", nbClients);
 	}
 
 	/// Close the server, this will close the listing socket and any active connection
@@ -322,7 +314,48 @@ public:
 		CMessage msg("", true);
 		uint32 len;
 		bms.serial(len);
+		// the length comes from the client: it must fit in what is left of the message before the buffer is allocated
+		if (len > bms.length() - (uint32)bms.getPos())
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message of %u bytes in %u, discarded", (uint)clientId, len, bms.length() - (uint32)bms.getPos());
+			frs->rejectReceivedMessage( HackedSizeInBuffer, client != NULL ? client->Uid : 0 );
+			return;
+		}
+		// The header is the client's too. The client writes it in binary: 4 bytes, the format, then the length and the
+		// characters of the name. An empty message would be read from the uninitialised 1000-byte buffer that
+		// bufferToFill(0) leaves in place.
+		const uint32 minHeaderSize = 4 + 1 + 4;
+		if (len < minHeaderSize)
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message of %u bytes, shorter than a message header, discarded", (uint)clientId, len);
+			frs->rejectReceivedMessage( InsufficientSize, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		bms.serialBuffer(msg.bufferToFill(len), len);
+		// readType asserts (in setType) that the name is not empty, and ignores a short format, which the L5 transport of
+		// the service the message goes to fails on (nlerror in readTypeAtCurrentPos). The header is read on a stream of
+		// its own: the message has no read length before readType.
+		CMessage::TFormat format;
+		uint32 nameLength;
+		{
+			NLMISC::CMemStream header(true);
+			header.fill(msg.buffer(), minHeaderSize);
+			header.seek(4, NLMISC::IStream::begin);
+			header.serial(format);
+			header.serial(nameLength);
+		}
+		if (format.StringMode || !format.LongFormat || nameLength == 0 || nameLength > len - minHeaderSize)
+		{
+			CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+			CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+			nlwarning("FEHACK: client %u sent a gateway message with a header of format %u and a name of %u bytes in %u, discarded", (uint)clientId, (uint)msg.buffer()[4], nameLength, len - minHeaderSize);
+			frs->rejectReceivedMessage( MalformedAction, client != NULL ? client->Uid : 0 );
+			return;
+		}
 		msg.readType();
 
 		// forward to gateway

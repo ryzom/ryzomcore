@@ -110,12 +110,16 @@ void CCAisActionMsgImp::callback(const std::string &name, NLNET::TServiceId id)
 			{
 				if ( Content[1] == "end_escort" )
 				{
-					for ( uint i = 0; i < templ->Instances.size() ; i++)
+					// an event can complete and remove an instance (see CMissionTemplate::isInstance)
+					const std::vector<CMission *> instances = templ->Instances;
+					for (uint i = 0; i < instances.size(); i++)
 					{
-						if ( templ->Instances[i] )
+						if (!templ->isInstance(instances[i]))
+							continue;
+						if (instances[i])
 						{
 							vector<TDataSetRow> entities;
-							templ->Instances[i]->getEntities( entities );
+							instances[i]->getEntities(entities);
 							for ( uint j = 0; j < entities.size() ; j++ )
 							{
 								CCharacter * user = PlayerManager.getChar( entities[j] );
@@ -162,12 +166,16 @@ void CCAisActionMsgImp::callback(const std::string &name, NLNET::TServiceId id)
 				}
 				else
 				{
-					for ( uint i = 0; i < templ->Instances.size() ; ++i)
+					// an event can complete and remove an instance (see CMissionTemplate::isInstance)
+					const std::vector<CMission *> instances = templ->Instances;
+					for (uint i = 0; i < instances.size(); ++i)
 					{
-						if ( templ->Instances[i] )
+						if (!templ->isInstance(instances[i]))
+							continue;
+						if (instances[i])
 						{
 							vector<TDataSetRow> entities;
-							templ->Instances[i]->getEntities( entities );
+							instances[i]->getEntities(entities);
 							for ( uint j = 0 ; j < entities.size() ; ++j )
 							{
 								CCharacter * user = PlayerManager.getChar( entities[j] );
@@ -513,23 +521,24 @@ void CMissionManager::tickUpdate()
 		( *it )->onFailure(true);
 		it = _MonoMissions.begin();
 	}
-
-	for ( map< CMission*, std::vector<CPlaceChecker> >::iterator it = _PlaceDependantMissions.begin(); it != _PlaceDependantMissions.end();)
+	// onFailure removes the mission, and the missions it stops, from _PlaceDependantMissions: the missions out of time are
+	// found first, then each one still there fails
+	std::vector<CMission *> placeFailures;
+	for (map<CMission *, std::vector<CPlaceChecker>>::iterator it = _PlaceDependantMissions.begin(); it != _PlaceDependantMissions.end(); ++it)
 	{
-		uint i = 0;
-		uint size = (uint)(*it).second.size();
-		map< CMission*, std::vector<CPlaceChecker> >::iterator itBack= it;
-		++itBack;
-		for ( ; i < size; i++ )
+		for (uint i = 0; i < (*it).second.size(); i++)
 		{
-			CPlaceChecker & check = (*it).second[i];
-			if ( check.EndDate  <= CTickEventHandler::getGameCycle() )
+			if ((*it).second[i].EndDate <= CTickEventHandler::getGameCycle())
 			{
-				(*it).first->onFailure(true);
+				placeFailures.push_back((*it).first);
 				break;
 			}
 		}
-		it = itBack;
+	}
+	for (uint i = 0; i < placeFailures.size(); i++)
+	{
+		if (_PlaceDependantMissions.find(placeFailures[i]) != _PlaceDependantMissions.end())
+			placeFailures[i]->onFailure(true);
 	}
 
 	checkVisitPlaceMissions();
@@ -733,6 +742,23 @@ bool CMissionManager::isMissionSuccessfull(CCharacter* user,TAIAlias  alias)
 	return user->isMissionSuccessfull(*templ);
 }
 
+// The first GROUP:MISSIONS entry in [first, first + count) that none of the missions uses as its client index. The
+// caller has checked that there are fewer than count missions, so one is free.
+template <class TMission>
+static uint8 getFreeGroupMissionClientIndex( const std::vector<TMission*> &missions, uint8 first, uint8 count )
+{
+	for ( uint i = first; i < (uint)first + count; ++i )
+	{
+		bool used = false;
+		for ( uint j = 0; j < missions.size() && !used; ++j )
+			used = ( missions[j] != NULL && missions[j]->getClientIndex() == i );
+		if ( !used )
+			return (uint8)i;
+	}
+	nlwarning( "<MISSIONS> no free group mission journal entry in %u..%u", (uint)first, (uint)first + count - 1 );
+	return first;
+}
+
 uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission)
 {
 	nlassert(user);
@@ -827,20 +853,14 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 			teamMission->onCreation( giver );
 			teamMission->setTeam( user->getTeamId() );
 
-			// Find a suitable client index (for non-invisible missions)
+			// Find a suitable client index (for non-invisible missions): the first journal entry no mission of the team
+			// uses. The taker's own database cannot tell: it misses the missions taken before the taker joined. The
+			// entry is cleared for the members first, who may still show a mission of a previous team there, as the
+			// title is only written into an empty entry.
 			if ( templ->Tags.NoList == false )
 			{
-				uint8 idx = 0;
-				for ( uint i = 0; i < MaxGroupMissionCount; i++ )
-				{
-//					if ( ! user->_PropertyDatabase.x_getProp( NLMISC::toString( "GROUP:MISSIONS:%u:TITLE",i) ) )
-					if ( ! CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(i).getTITLE(user->_PropertyDatabase))
-					{
-						idx = i;
-						break;
-					}
-				}
-				teamMission->setClientIndex( idx );
+				teamMission->setClientIndex( getFreeGroupMissionClientIndex( team->getMissions(), 0, MaxGroupMissionCount ) );
+				teamMission->clearUsersJournalEntry();
 			}
 
 			// Add mission
@@ -890,27 +910,18 @@ uint8 CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIA
 		guildMission->onCreation( giver );
 		guildMission->setGuild(user->getGuildId());
 
-		// Find a suitable client index (for non-invisible missions)
+		// Find a suitable client index (for non-invisible missions): the first journal entry after the team's that no
+		// mission of the guild uses (the taker's database misses those taken while the taker was offline), cleared for
+		// the members first as for team missions
 		if ( templ->Tags.NoList == false )
 		{
-			uint8 idx = 0;
-			for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
-			{
-				if ( ! CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(i).getTITLE(user->_PropertyDatabase))
-				{
-					idx = i;
-					break;
-				}
-			}
-			guildMission->setClientIndex( idx );
+			guildMission->setClientIndex( getFreeGroupMissionClientIndex( guild->getMissions(), MaxGroupMissionCount, MaxGuildMissionCount ) );
+			guildMission->clearUsersJournalEntry();
 		}
 
 		// Add mission
 		guild->addMission( guildMission );
 		inst = guildMission;
-
-		/// /!\ Do the same thing that the team missions but with the loop: for ( uint i = MaxGroupMissionCount; i < MaxGroupMissionCount + MaxGuildMissionCount; i++ )
-		/// Instead of for ( uint i = 0; i < MaxGroupMissionCount; i++ ), so that we use available space for guild missions
 
 		/*//teamMission->initBasics( giver );
 		//soloMission->setTeam( user->getTeamId() );
@@ -1090,14 +1101,23 @@ void CMissionManager::deInstanciateMission(CMission * mission)
 
 }// CMissionManager::deInstanciateMission
 
-void CMissionManager::missionDoneOnce( CMissionTemplate* templ )
+void CMissionManager::missionDoneOnce(CMissionTemplate *templ, CMission *done)
 {
 	nlassert(templ);
 	if ( !templ->Tags.DoneOnce )
 		return;
-
-	for ( uint i = 0; i < templ->Instances.size(); i++ )
-		templ->Instances[i]->onFailure(true);
+	// The other instances fail, not the one done. onFailure can remove an instance, and the missions it stops, from
+	// Instances (deInstanciateMission moves the last one into its place) and delete it: go through a copy, and fail
+	// only the instances still in Instances.
+	const std::vector<CMission *> instances = templ->Instances;
+	for (uint i = 0; i < instances.size(); i++)
+	{
+		if (instances[i] == done)
+			continue;
+		if (!templ->isInstance(instances[i]))
+			continue;
+		instances[i]->onFailure(true);
+	}
 }// CMissionManager::missionDoneOnce
 
 void CMissionManager::sendDebugJournal( CCharacter * user)
@@ -1561,6 +1581,10 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
                         break;
                     }
 
+					// The events below can complete and remove the mission: its journal entry is updated first
+					if (updateJournal)
+						inst->updateUsersJournalEntry();
+
 					// Process events whatever happened (even if mission fails or complete)
 					while( !eventList.empty() )
 					{
@@ -1575,8 +1599,6 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
                     break; // stop we found the jump point selected
                 }
             }
-            if (updateJournal)
-                inst->updateUsersJournalEntry();
 
 			if (i != nbJumpPoints) // Found the jump point so no more dynchat to process
                 break;
@@ -2139,11 +2161,14 @@ void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 	string name;
 	if (CWorldInstances::instance().getAIInstanceNameFromeServiceId(aiServiceId,name))
 	{
-		const uint size = (uint)_CrashHandlingMissions.size();
-		for ( uint i = 0; i < size; i++ )
+		// A crash handler can fail its mission. That removes the mission and the ones it stops from
+		// _CrashHandlingMissions (removeCrashHandlingMissions moves the last one into its place) and can delete them: go
+		// through a copy and use only the missions still registered.
+		const std::vector<CMission *> missions = _CrashHandlingMissions;
+		for (uint i = 0; i < missions.size(); i++)
 		{
-			if ( _CrashHandlingMissions[i] )
-				_CrashHandlingMissions[i]->applyCrashHandler(false, name);
+			if (missions[i] && std::find(_CrashHandlingMissions.begin(), _CrashHandlingMissions.end(), missions[i]) != _CrashHandlingMissions.end())
+				missions[i]->applyCrashHandler(false, name);
 		}
 	}
 	else
@@ -2213,9 +2238,12 @@ void CMissionManager::checkEscortFailure( TAIAlias group , bool groupWiped)
 		const CMissionTemplate * templ = getTemplate( (*it).second );
 		if ( templ )
 		{
-			for ( uint i = 0; i < templ->Instances.size(); i++ )
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = templ->Instances;
+			for (uint i = 0; i < instances.size(); i++)
 			{
-				templ->Instances[i]->checkEscortFailure(groupWiped);
+				if (templ->isInstance(instances[i]))
+					instances[i]->checkEscortFailure(groupWiped);
 			}
 		}
 		else

@@ -33,6 +33,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace CLFECOMMON;
 
+// The stock client sends a few hundred bytes in parts for most messages (a chat line is about 520). The largest are the
+// Ring editor's node messages (onNodeSetAsked, onNodeInsertAsked), a compressed object, which a pasted group makes
+// larger: they are not cut, whatever R2EDDssNetwork, which only splits the messages sent with sendMsgToDss.
+CVariable<uint32> MaxClientMessageSize("fs", "MaxClientMessageSize", "Largest message in bytes a client may send in parts", 256 * 1024, 0, true);
 
 #ifdef HALF_FREQUENCY_SENDING_TO_CLIENT
 //#pragma message ("HALF_FREQUENCY_SENDING_TO_CLIENT")
@@ -459,48 +463,105 @@ void				CClientHost::setEntityIndex( const TEntityIndex& ei )
 
 void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, CClientHost *client)
 {
-	if (NbBlock == 0xFFFFFFFF)
+	// The numbers in a part come from the client. A part that does not fit the message being reassembled is
+	// dropped, logged and counted, and the client's stream goes on.
+	if (agmp->NbBlock == 0 || agmp->Part >= agmp->NbBlock)
 	{
-		// new GenericMultiPart
-		NbBlock = agmp->NbBlock;
-		NbCurrentBlock = 0;
-		TempSize = 0;
-		Temp.clear();
-		Temp.resize(NbBlock);
-		BlockReceived.resize(NbBlock);
-		for (uint i = 0; i < NbBlock; i++)
-			BlockReceived[i] = false;
-	}
-	
-	nlassert (NbBlock == agmp->NbBlock);
-	nlassert (NbBlock > agmp->Part);
-
-	// check if the block was already received
-	if (BlockReceived[agmp->Part])
-	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, dropped",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
 		return;
 	}
 
-	Temp[agmp->Part] = agmp->PartCont;
-	BlockReceived[agmp->Part] = true;
+	// The client cuts a message into parts that fit an impulse of 230 bytes (CNetworkConnection::push)
+	if (agmp->PartCont.size() > MaxClientMultiPartSize)
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u with %u bytes, more than %u, dropped",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number, (uint)agmp->PartCont.size(), (uint)MaxClientMultiPartSize);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+		return;
+	}
 
+	if (NbBlock == 0xFFFFFFFF)
+	{
+		// new GenericMultiPart, which starts with its first part (a stray part must not drop the message in progress)
+		if (agmp->Part != 0)
+		{
+			nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which has not started, dropped",
+				(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number);
+			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+			return;
+		}
+
+		// The client sends all the parts of a message before the first part of the next one, so a message still
+		// incomplete here will never complete: it is dropped, which keeps one reassembly per client in memory.
+		for (uint i = 0; i < client->GenericMultiPartTemp.size(); ++i)
+		{
+			CGenericMultiPartTemp &other = client->GenericMultiPartTemp[i];
+			if (&other != this && other.NbBlock != 0xFFFFFFFF)
+			{
+				nlwarning("FEHACK: client %u (uid %u, %s) started multi-part message %u with message %u still at %u of %u parts, the unfinished one dropped",
+					(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, i, other.NbCurrentBlock, other.NbBlock);
+				CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+				other.reset();
+			}
+		}
+
+		// a free slot holds no part (reset)
+		NbBlock = agmp->NbBlock;
+	}
+	else if (NbBlock != agmp->NbBlock)
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which has %u parts, dropped",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number, NbBlock);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+		return;
+	}
+
+	// The client repeats every block not yet acknowledged in each datagram, oldest first, and the frontend takes each
+	// block once, by its cycle, so the parts of a message come here once each and in the order the client pushed them.
+	// They are appended as they come, so the memory held is what the client has sent, not what its part count
+	// announces. A part out of order means the message can no longer be rebuilt: it is dropped.
+	if (agmp->Part != NbCurrentBlock)
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which expects part %u, the message dropped",
+			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number, NbCurrentBlock);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+		reset();
+		return;
+	}
+
+	// The memory held for a client is bounded by MaxClientMessageSize: a part count can announce up to 65535 parts
+	if (Temp.size() + agmp->PartCont.size() > MaxClientMessageSize.get())
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent multi-part message %u with more than %u bytes at part %u of %u, the message dropped",
+		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, MaxClientMessageSize.get(), (uint)agmp->Part, (uint)agmp->NbBlock);
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage(MalformedMultiPart, client->Uid);
+		reset();
+		return;
+	}
+
+	Temp.insert(Temp.end(), agmp->PartCont.begin(), agmp->PartCont.end());
 	NbCurrentBlock++;
-	TempSize += (uint32)agmp->PartCont.size();
 
 	if (NbCurrentBlock == NbBlock)
 	{
-		// reform the total action
-		CBitMemStream bms(true);
-
-		uint8 *ptr = bms.bufferToFill (TempSize);
-
-		for (uint i = 0; i < Temp.size (); i++)
+		// A message whose parts are all empty has nothing to route: bufferToFill(0) would leave the stream reading
+		// its own uninitialised buffer. The client never sends an empty part.
+		if (Temp.empty())
 		{
-			memcpy (ptr, &(Temp[i][0]), Temp[i].size());
-			ptr += Temp[i].size();
+			nlwarning("FEHACK: client %u (uid %u, %s) sent multi-part message %u with %u empty parts, dropped",
+				(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, NbBlock);
+			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
+			reset();
+			return;
 		}
 
-		NbBlock = 0xFFFFFFFF;
+		// reform the total action
+		CBitMemStream bms(true);
+		memcpy(bms.bufferToFill((uint32)Temp.size()), &Temp[0], Temp.size());
+
+		reset();
 
 		if ( client->eId().isUnknownId() )
 		{
@@ -511,6 +572,13 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 			routeImpulsionIdFromClient(bms, client->eId(), client->LastReceivedGameCycle);
 		}
 	}
+}
+
+void				CClientHost::CGenericMultiPartTemp::reset ()
+{
+	NbBlock = 0xFFFFFFFF;
+	NbCurrentBlock = 0;
+	std::vector<uint8>().swap(Temp);
 }
 
 void				CClientHost::resetClientVision()

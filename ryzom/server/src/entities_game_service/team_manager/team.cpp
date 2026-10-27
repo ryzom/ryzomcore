@@ -407,12 +407,18 @@ void CTeam::removeCharacter( CCharacter * player )
 	// check if the team must be removed
 	if ( _NbMembers == 1 )
 	{
-		const uint size = (uint)_Missions.size();
-		uint count = 0;
-		while ( !_Missions.empty() && count < size )
+		// (the failures run on the main entity, the leader, which is still the one who left if it was the leader: what
+		// the missions registered under it, dyn chats, queue entries and escorts, is removed from it)
+		// onFailure removes some missions (and the missions they stop) and only flags the others: each fails once, looked
+		// up again by its alias
+		std::vector<TAIAlias> aliases;
+		for (uint i = 0; i < _Missions.size(); ++i)
+			aliases.push_back(_Missions[i]->getTemplateId());
+		for (uint i = 0; i < aliases.size(); ++i)
 		{
-			_Missions[0]->onFailure(true);
-			count++;
+			CMissionTeam *mission = getMissionByAlias(aliases[i]);
+			if (mission != NULL && !mission->getFinished())
+				mission->onFailure(true);
 		}
 		
 		// send a message to the last team member
@@ -844,6 +850,11 @@ void CTeam::clearPlayerTeamDB( const NLMISC::CEntityId &charId )
 //			character->_PropertyDatabase.setProp( buffer, (uint32)CLFECOMMON::INVALID_CLIENT_DATASET_INDEX );
 			groupItem.setUID(character->_PropertyDatabase, CLFECOMMON::INVALID_CLIENT_DATASET_INDEX);
 		}
+
+		// the team missions, which the next team's missions would otherwise inherit (the title is only written in an
+		// empty entry, and the journal actions resolve an entry by its index)
+		for (uint8 i = 0; i < MaxGroupMissionCount; ++i)
+			CMissionBaseBehaviour::clearGroupJournalEntry(*character, i);
 	}
 }// CTeam clearPlayerTeamVar
 
@@ -891,6 +902,9 @@ void CTeam::removeMission( uint idx, TMissionResult result)
 	{
 		_Missions[idx]->clearUsersJournalEntry();
 	}
+
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
 
 	/*Bsi.append( StatPath, NLMISC::toString("[MIT%s] %u %s",
 		MissionResultStatLogTag[result],
@@ -954,7 +968,7 @@ bool CTeam::processTeamMissionStepEvent(std::list< CMissionEvent* > & eventList,
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
 		mission->stopChildren();
 		
 		// only remove no list missions, other must be manually removed by user

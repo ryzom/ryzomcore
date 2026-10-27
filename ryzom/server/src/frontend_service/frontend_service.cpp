@@ -634,20 +634,68 @@ void cbServerDisconnectClient( CMessage& msgin, const string &serviceName, NLNET
 }
 
 /*
+ * The IOS was asked by a client for a string id it never sent, which only a client scanning the string cache does:
+ * counted as a rejected message of that client
+ */
+void cbInvalidStringRequest( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
+{
+	uint32	userId;
+	uint32	stringId;
+	msgin.serial(userId);
+	msgin.serial(stringId);
+
+	CFrontEndService::instance()->receiveSub()->rejectClientMessage( InvalidStringRequest, userId );
+}
+
+/*
+ * A service refused a text from a client because it was longer than CChatGroup::MaxClientTextLength, which the stock
+ * client never sends: counted as a rejected message of that client
+ */
+void cbClientTextTooLong(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
+{
+	CEntityId sender;
+	msgin.serial(sender);
+
+	CFrontEndService::instance()->receiveSub()->rejectClientMessage(TextTooLong, (TUid)(sender.getShortId() >> 4));
+}
+
+/*
+ * A service refused a message of a character in game that no stock client sends (server_share/client_refusal.h):
+ * counted as a rejected message of that client
+ */
+void cbClientMessageRefused(CMessage &msgin, const string &serviceName, NLNET::TServiceId serviceId)
+{
+	CEntityId sender;
+	msgin.serial(sender);
+
+	CFrontEndService::instance()->receiveSub()->rejectClientMessage(RefusedClientMessage, (TUid)(sender.getShortId() >> 4));
+}
+
+/*
  * Server request frontend to disconnect a client
  */
 void cbDisconnectAllClients( CMessage& msgin, const string &serviceName, NLNET::TServiceId serviceId )
 {
 	for (THostMap::iterator it = CFrontEndService::instance()->receiveSub()->clientMap().begin (); it != CFrontEndService::instance()->receiveSub()->clientMap().end (); it++)
 	{
+		// A client already being removed is left as it is: removing it again would push its removal back
+		if (CFrontEndService::instance()->receiveSub()->isInRemoveList(GETCLIENTA(it)->clientId()))
+			continue;
+
 		// Ask the client to disconnect
 		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 		GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
 
 		// Prepare removal of client on the front-end
-		CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
 		CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
 	}
+
+	// and the users in limbo mode
+	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+	if (!receiveSub->LimboClients.empty())
+		nlinfo("Disconnecting %u users in limbo mode", (uint)receiveSub->LimboClients.size());
+	while (!receiveSub->LimboClients.empty())
+		receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), false, true);
 }
 
 /*
@@ -690,6 +738,7 @@ void cbAcceptClients( CMessage& msgin, const string &serviceName, NLNET::TServic
 /*
  *
  */
+// clang-format off
 TUnifiedCallbackItem cbFrontEndArray [] =
 {
 	{ "IMPULSION_ID", cbImpulsionId },
@@ -701,9 +750,13 @@ TUnifiedCallbackItem cbFrontEndArray [] =
 	{ "ENTITY_NAMES", cbSetEntityNames },
 	{ "DISCONNECT_CLIENT", cbServerDisconnectClient },		// Called by server to disconnect a client
 	{ "DISCONNECT_ALL_CLIENTS", cbDisconnectAllClients },	// Called by server to disconnect all clients at once
+	{ "INVALID_STRING_RQ", cbInvalidStringRequest },		// Called by the IOS for a string request no client sends
+	{ "CLIENT_TEXT_TOO_LONG", cbClientTextTooLong },		// Called by the IOS and the EGS for a text no stock client sends
+	{ "CLIENT_MESSAGE_REFUSED", cbClientMessageRefused },	// Called by a service for a message no stock client sends
 
 	{ "FS_ACCEPT", cbAcceptClients }
 };
+// clang-format on
 
 
 
@@ -904,6 +957,14 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 	{
 		if ( GETCLIENTA(it)->Uid == userId)
 		{
+			// A client already being removed is left as it is: removing it again would push its removal back, forever
+			// for a client that keeps sending what gets it disconnected (a SELECT_CHAR with a slot it may not use)
+			if (CFrontEndService::instance()->receiveSub()->isInRemoveList(GETCLIENTA(it)->clientId()))
+			{
+				nldebug("%s asked to remove player %hu (uid %u), who is being removed already", reqServiceName.c_str(), GETCLIENTA(it)->clientId(), userId);
+				return;
+			}
+
 			// Ask the client to disconnect
 			CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
 			GETCLIENTA(it)->ImpulseEncoder.add(act, 0);
@@ -913,12 +974,23 @@ void cbDisconnectClient (TUid userId, const std::string &reqServiceName)
 				userId );
 
 			// Prepare removal of client on the front-end
-			CFrontEndService::instance()->receiveSub()->removeFromRemoveList( GETCLIENTA(it)->clientId() ); // prevent to insert it twice
 			CFrontEndService::instance()->receiveSub()->addToRemoveList( GETCLIENTA(it)->clientId() );
 			
 			return;
 		}
 	}
+
+	// A user in limbo mode has no client host: the EGS refuses its CL_CONNECT while its character is still in game (a
+	// QUIT before the quit countdown ended), and the login service or another service may remove it meanwhile
+	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+	std::map<TUid, CLimboClient>::iterator ilc = receiveSub->LimboClients.find(userId);
+	if (ilc != receiveSub->LimboClients.end())
+	{
+		nlinfo("%s asked to remove user %u, in limbo mode", reqServiceName.c_str(), userId);
+		receiveSub->removeLimboClient(ilc, false, true);
+		return;
+	}
+
 	nlwarning( "%s asked to remove an unknown player (uid %u)", reqServiceName.c_str(), userId );
 }
 
@@ -990,9 +1062,24 @@ void cbServiceUp( const string& serviceName, NLNET::TServiceId serviceId, void *
 		}
 
 
+		// The players are the users whose connection the WS was told of, so that each later leave it is told of
+		// (CLoginServer::clientDisconnected) was counted: those in limbo mode too, and not the sessions it never knew
+		// (AcceptInvalidCookie)
+		CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+		uint32 nbClients = 0;
+		for (THostMap::const_iterator it = receiveSub->clientMap().begin(); it != receiveSub->clientMap().end(); ++it)
+		{
+			if (it->second->ConnectionReportedToWS)
+				++nbClients;
+		}
+		for (std::map<TUid, CLimboClient>::const_iterator it = receiveSub->LimboClients.begin(); it != receiveSub->LimboClients.end(); ++it)
+		{
+			if (it->second.ConnectionReportedToWS)
+				++nbClients;
+		}
+
 		// send number of players on FS
 		CMessage			msgPlr("NBPLAYERS2");
-		uint32				nbClients = (uint32)CFrontEndService::instance()->receiveSub()->clientMap().size();
 		uint32				nbPendingClients = CLoginServer::getNbPendingUsers();
 		
 		msgPlr.serial(nbClients);
@@ -1046,10 +1133,12 @@ void cbServiceDown( const string& serviceName, NLNET::TServiceId serviceId, void
 			CFrontEndService::instance()->ShardDown = true;
 			nlinfo( "Entering SERVER_DOWN mode" );
 
-			// remove all limbo clients
-			uint	clientsInLimbo = (uint)CFrontEndService::instance()->receiveSub()->LimboClients.size();
-			CFrontEndService::instance()->receiveSub()->LimboClients.clear();
-			nlinfo("Removed %d clients in limbo mode", clientsInLimbo);
+			// remove all limbo clients (the EGS is gone, it is not told)
+			CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+			uint clientsInLimbo = (uint)receiveSub->LimboClients.size();
+			while (!receiveSub->LimboClients.empty())
+				receiveSub->removeLimboClient(receiveSub->LimboClients.begin(), true, false);
+			nlinfo("Removed %u clients in limbo mode", clientsInLimbo);
 		}
 	}
 
@@ -1155,9 +1244,12 @@ inline void	CFrontEndService::onTick()
 			fillPrioritizedActionsToSend();
 			swapSendBuffers(); // waits for the end of flushMessagesToSend using the boolean FlushInProgress (with addWait there would be a deadlock at the beginning)
 
-			SendTask->sendBuffer();
-
-			if (SendThread == NULL)
+			// The send thread and its task only exist with UseSendThread
+			if (SendTask)
+			{
+				SendTask->sendBuffer();
+			}
+			else
 			{
 				H_AUTO(FlushMessagesToSend);
 				flushMessagesToSend();
@@ -1401,6 +1493,18 @@ void CFrontEndService::release()
 		SendTask->stopThread();
 	}
 
+	// The send thread uses the QUIC transceiver, which the receive subsystem deletes: let it finish first
+	if (SendThread != NULL)
+	{
+		nlinfo("Release send thread, waiting for task to terminate");
+		// stop send thread
+		while (SendThread->isRunning()) // FIXME: Implement thread.join()
+			nlSleep(1);
+
+		delete SendThread;
+		SendThread = NULL;
+	}
+
 	_ReceiveSub.release();
 
 	//CModuleManager::stopAll();
@@ -1417,17 +1521,6 @@ void CFrontEndService::release()
 
 	InfoLog->removeFilter( "FEHTIMER" );
 	InfoLog->removeFilter( "FE" );
-
-	if (SendThread != NULL)
-	{
-		nlinfo("Release send thread, waiting for task to terminate");
-		// stop send thread
-		while (SendThread->isRunning()) // FIXME: Implement thread.join()
-			nlSleep(1);
-
-		delete SendThread;
-		SendThread = NULL;
-	}
 
 	delete SendTask;
 	SendTask = NULL;
@@ -1475,17 +1568,8 @@ bool CFrontEndService::update()
 	}
 #endif
 
-/*
-	map<TUid,CLimboClient>::iterator	it;
-	TTime								timeout = CTime::getLocalTime()-_LimboTimeOut;
-	for (it=_ReceiveSub.LimboClients.begin(); it!=_ReceiveSub.LimboClients.end(); )
-	{
-		map<TUid,CLimboClient>::iterator	itr = it++;
-		// removes limbo client if it timed out
-		if ((*it).second.Timeout < timeout)
-			_ReceiveSub.LimboClients.erase(itr);
-	}
-*/
+	// Remove the users that stayed in limbo mode longer than LimboTimeOut (the EGS did not answer their QUIT)
+	_ReceiveSub.removeTimedOutLimboClients(_LimboTimeOut);
 
 	// If the back-end is down, set all clients to "server down" state
 	// (this breaks the tick synchronisation of the clients, anyway the clients disconnect after receiving "server down")

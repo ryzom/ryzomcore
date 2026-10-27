@@ -46,6 +46,10 @@ void CMissionSolo::updateUsersJournalEntry()
 
 void CMissionSolo::clearUsersJournalEntry()
 {	
+	// a mission hidden from the journal has no entry (0xFF)
+	if ( _ClientIndex == 0xFF )
+		return;
+
 	CCharacter * user = PlayerManager.getChar( _Taker );
 	if ( user )
 	{
@@ -62,6 +66,8 @@ void CMissionSolo::clearUsersJournalEntry()
 		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
 //		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
 		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
+		// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
+		missionItem.setSLEEP(user->_PropertyDatabase, 0);
 		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
 		{
 			CBankAccessor_PLR::TMISSIONS::TArray::TTARGET &targetItem = CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(i);
@@ -128,9 +134,13 @@ void CMissionSolo::stopChildren()
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
 		if ( child )
 		{
-			for ( uint j = 0; j < child->Instances.size(); j++ )
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = child->Instances;
+			for (uint j = 0; j < instances.size(); j++)
 			{
-				CMissionSolo * mission = dynamic_cast<CMissionSolo*>( child->Instances[j] );
+				if (!child->isInstance(instances[j]))
+					continue;
+				CMissionSolo *mission = dynamic_cast<CMissionSolo *>(instances[j]);
 				if ( mission && mission->_Taker == _Taker )
 					mission->onFailure( true,false );
 			}
@@ -189,7 +199,7 @@ void CMissionSolo::forceSuccess()
 		user->addSuccessfulMissions( *templ );
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			CCharacter::sendDynamicSystemMessage( user->getId(), isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, this);
 		stopChildren();
 		user->processMissionEvent( event );
 		

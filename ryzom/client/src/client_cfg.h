@@ -344,6 +344,15 @@ struct CClientConfig
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;
 
+	/// Largest width or height of a web image in pixels (0 for the largest, 16384), see CGroupHTML::SWebOptions
+	sint32			WebIgImageMaxSize;
+	/// Largest data: URL in bytes, 0 for no limit
+	sint32			WebIgDataUrlMaxBytes;
+	/// Largest download of an image, a page and a stylesheet in bytes, 0 for no limit
+	sint32			WebIgImageMaxBytes;
+	sint32			WebIgPageMaxBytes;
+	sint32			WebIgStylesheetMaxBytes;
+
 	///////////////
 	// ANIMATION //
 	// With a bigger angle, rotation is animated.

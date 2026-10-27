@@ -191,10 +191,12 @@ void CQueryEgsImp::callback (const std::string &name, NLNET::TServiceId id)
 		case CQueryEgs::MaxStamina: ret = NLMISC::toString("%d", character->getMaxScore(SCORES::stamina)); break;
 		case CQueryEgs::MaxFocus: ret = NLMISC::toString("%d", character->getMaxScore(SCORES::focus)); break;
 		// Score  / MaxScore
-		case CQueryEgs::RatioHp: { sint32 val = character->getMaxScore(SCORES::hit_points); ret = NLMISC::toString("%d", val? 100 * character->getCurrentScore(SCORES::hit_points) / val:0);} break;
-		case CQueryEgs::RatioSap: { sint32 val = character->getMaxScore(SCORES::sap); ret = NLMISC::toString("%d", val? 100 * character->getCurrentScore(SCORES::sap) / val:0);} break;
-		case CQueryEgs::RatioStamina: { sint32 val = character->getMaxScore(SCORES::stamina); ret = NLMISC::toString("%d", val? 100 * character->getCurrentScore(SCORES::stamina) / val:0);} break;
-		case CQueryEgs::RatioFocus: { sint32 val = character->getMaxScore(SCORES::focus); ret = NLMISC::toString("%d", val? 100 * character->getCurrentScore(SCORES::focus) / val:0);} break;
+		// clang-format off
+		case CQueryEgs::RatioHp: { sint32 val = character->getMaxScore(SCORES::hit_points); ret = NLMISC::toString("%d", val? CEntityBase::scoreRatio(character->getCurrentScore(SCORES::hit_points), val, 100):0);} break;
+		case CQueryEgs::RatioSap: { sint32 val = character->getMaxScore(SCORES::sap); ret = NLMISC::toString("%d", val? CEntityBase::scoreRatio(character->getCurrentScore(SCORES::sap), val, 100):0);} break;
+		case CQueryEgs::RatioStamina: { sint32 val = character->getMaxScore(SCORES::stamina); ret = NLMISC::toString("%d", val? CEntityBase::scoreRatio(character->getCurrentScore(SCORES::stamina), val, 100):0);} break;
+		case CQueryEgs::RatioFocus: { sint32 val = character->getMaxScore(SCORES::focus); ret = NLMISC::toString("%d", val? CEntityBase::scoreRatio(character->getCurrentScore(SCORES::focus), val, 100):0);} break;
+		// clang-format on
 		
 		// Skills
 		case CQueryEgs::BestSkillLevel: 

@@ -468,7 +468,11 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CViewBitmap::setTexture(const std::string & TxName)
 	{
-		if (TxName.find("://") != string::npos || TxName.find("//") == 0)
+		// Only a web URL is downloaded (the browser downloads http and https only). Any other name goes to the renderer,
+		// as the names addImageDownload sets here: a data: URL, which the renderer decodes, or a local file, which can be
+		// named by a file: URL. One of those containing "://" went back to addImageDownload, which set it here again,
+		// until the stack overflowed.
+		if (startsWithCaseInsensitiveAscii(TxName, "http://") || startsWithCaseInsensitiveAscii(TxName, "https://") || startsWith(TxName, "//"))
 		{
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 			if (groupHtml) {

@@ -741,6 +741,64 @@ TInterfaceState autoLogin (const string &cookie, const string &fsaddr, bool firs
 }
 
 // ------------------------------------------------------------------------------------------------
+// Show why the connection failed, under the first line of the connection failure screen
+static void setConnectionFailureReason(const std::string &reason, const std::string &hint)
+{
+	CViewText *line2 = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title2"));
+	CViewText *line3 = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title3"));
+	if (line2 != nullptr && line3 != nullptr)
+	{
+		line2->setTextLocalized(reason, false);
+		line3->setTextLocalized(hint, false);
+		return;
+	}
+
+	// Older layout, with a single title
+	CViewText *title = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
+	if (title != nullptr)
+	{
+		title->setMultiLine(true);
+		title->setTextLocalized(CI18N::get("uiFirewallFail") + ".\n" + reason + (hint.empty() ? std::string() : "\n" + hint), false);
+	}
+}
+
+// Show why the secure (QUIC) connection to the frontend could not be established
+static void setQuicConnectionFailureReason(const CQuicConnection &quic)
+{
+	std::string reason, hint;
+	switch (quic.failure())
+	{
+	case CQuicConnection::NoResponse:
+		reason = CI18N::get("uiQuicNoResponse");
+		hint = CI18N::get("uiQuicHintNetwork");
+		break;
+	case CQuicConnection::Unreachable:
+		reason = CI18N::get("uiQuicUnreachable");
+		hint = CI18N::get("uiQuicHintNetwork");
+		break;
+	case CQuicConnection::Refused:
+		reason = CI18N::get("uiQuicRefused");
+		hint = CI18N::get("uiQuicHintLater");
+		break;
+	case CQuicConnection::CertificateRejected:
+		reason = CI18N::get("uiQuicCertificate");
+		hint = CI18N::get("uiQuicHintCertificate");
+		break;
+	case CQuicConnection::ProtocolMismatch:
+		reason = CI18N::get("uiQuicProtocol");
+		hint = CI18N::get("uiQuicHintUpdate");
+		break;
+	default:
+		reason = CI18N::get("uiQuicFailed");
+		hint = CI18N::get("uiQuicHintLater");
+		break;
+	}
+	strFindReplace(reason, "%port", toString(quic.address().port()));
+	strFindReplace(reason, "%status", quic.failureText());
+	setConnectionFailureReason(reason, hint);
+}
+
+// ------------------------------------------------------------------------------------------------
 void globalMenuMovieShooter()
 {
 
@@ -1023,6 +1081,9 @@ TInterfaceState globalMenu()
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
+		// A Server Hop from here that failed leaves nothing to go back to
+		FarTP.exitIfFailed();
+
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
 		{
@@ -1226,13 +1287,12 @@ TInterfaceState globalMenu()
 				if ( firewallTimeout )
 				{
 					// Display the firewall error string instead of the normal failure string
-					CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
-					if (pVT != nullptr)
-					{
-						pVT->setMultiLine( true );
-						pVT->setTextLocalized(CI18N::get("uiFirewallFail")+".\n"+
-									  CI18N::get("uiFirewallAlert")+".", false);
-					}
+					setConnectionFailureReason(CI18N::get("uiFirewallAlert") + ".", std::string());
+				}
+				else if (NetMngr.getQuicConnection().failure() != CQuicConnection::NoFailure)
+				{
+					// The secure connection could not be established, the normal failure string is about something else
+					setQuicConnectionFailureReason(NetMngr.getQuicConnection());
 				}
 			}
 		}

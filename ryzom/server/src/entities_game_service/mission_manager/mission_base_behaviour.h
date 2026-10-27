@@ -138,12 +138,18 @@ public:
 	virtual CCharacter* getMainEntity() = 0;
 	/// clear the users journal entry corresponding to this mission
 	virtual void clearUsersJournalEntry() = 0;
+	/// clear one entry of a user's team and guild missions (GROUP:MISSIONS), for a mission or for a user who leaves
+	static void clearGroupJournalEntry(CCharacter &user, uint8 clientIndex);
 	/// update the users journal entry corresponding to this mission
 	virtual void updateUsersJournalEntry() = 0;
 	/// stop all children missions that have the same taker
 	virtual void stopChildren() = 0;
 	/// On failure processing
 	virtual void onFailure(bool ignoreJumps,bool sendMessage = true);
+	/// take the entity that waits for the mission out of the queue the mission is in (between its queue_start and
+	/// queue_end steps), when the mission fails or is removed. owner is the character of a solo mission: while the
+	/// character is loaded, it is not the main entity yet.
+	void leaveWaitingQueue(const NLMISC::CEntityId &owner = NLMISC::CEntityId::Unknown);
 
 	///\name dynamic teleport methods methods
 	//@{

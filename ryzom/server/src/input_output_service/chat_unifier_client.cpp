@@ -192,8 +192,8 @@ public:
 		case TFailInfo::fi_dest_char_unknown:
 		case TFailInfo::fi_char_offline:
 			{
-				SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-				vect[0].Literal = destName;
+				// no name parameter: a literal is kept in the string cache for good, and destName comes from the client
+				TVectorParamCheck vect;
 				uint32 phraseId = STRING_MANAGER::sendStringToClient( dsr, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 				cm.sendChat2Ex( CChatGroup::tell, dsr, phraseId );
 			}

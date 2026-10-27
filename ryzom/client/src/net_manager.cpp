@@ -4129,6 +4129,18 @@ void CNetManager::reinit()
 	CNetworkConnection::reinit();
 }
 
+/**
+ * Reset data but keep the connection
+ */
+void CNetManager::resetSession()
+{
+	if (ClientCfg.Local)
+		return;
+
+	IngameDbMngr.resetInitState();
+	CNetworkConnection::resetSession();
+}
+
 void CNetManager::waitForServer()
 {
 	sint	LastGameCycle = getCurrentServerTick();

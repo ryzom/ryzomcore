@@ -123,6 +123,7 @@ namespace STRING_MANAGER
 
 		if (_CacheInited)
 		{
+			bool readingRecords = false;
 			try
 			{
 				const uint currentVersion = 1;
@@ -180,6 +181,7 @@ namespace STRING_MANAGER
 				nlassert(_Timestamp == timestamp);
 				nlassert(version >= 1); // Initial version
 
+				readingRecords = true;
 				while (!file.eof())
 				{
 					uint32			id;
@@ -199,6 +201,17 @@ namespace STRING_MANAGER
 			{
 				nlinfo("SM : loadCache failed, exception : %s", e.what());
 				nlinfo("SM : cache deactivated");
+				// A broken cache would fail again in every session with this timestamp: delete it, the next session
+				// creates a new one
+				if (!_CacheFilename.empty() && CFile::fileExists(_CacheFilename))
+					CFile::deleteFile(_CacheFilename);
+				// a partly written record shifts the ones after it: the strings read before the failure may be wrong too,
+				// the server sends them again
+				if (readingRecords)
+				{
+					_ReceivedStrings.clear();
+					_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
+				}
 				// unactivated cache.
 				_CacheFilename.erase();
 			}
@@ -543,11 +556,24 @@ restartLoop:
 	{
 		if(!_CacheStringToSave.empty())
 		{
-			NLMISC::COFile file(_CacheFilename, true);
-			for(uint i=0;i<_CacheStringToSave.size();i++)
+			// the cache is only an optimization, a write error (disk full, file locked) must not be fatal
+			try
 			{
-				file.serial(_CacheStringToSave[i].StringId);
-				file.serial(_CacheStringToSave[i].String);
+				NLMISC::COFile file(_CacheFilename, true);
+				for (uint i = 0; i < _CacheStringToSave.size(); i++)
+				{
+					file.serial(_CacheStringToSave[i].StringId);
+					file.serial(_CacheStringToSave[i].String);
+				}
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				// A partly written string would shift the ones appended after it: delete the cache and stop using it,
+				// the next session creates a new one
+				nlwarning("Cannot save the string cache %s, it is deleted: %s", _CacheFilename.c_str(), e.what());
+				if (CFile::fileExists(_CacheFilename))
+					CFile::deleteFile(_CacheFilename);
+				_CacheFilename.clear();
 			}
 
 			_CacheStringToSave.clear();

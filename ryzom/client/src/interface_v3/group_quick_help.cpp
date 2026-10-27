@@ -296,7 +296,8 @@ std::string CGroupQuickHelp::getLanguageUrl(const std::string &href, std::string
 {
 	std::string uri = href;
 
-	if (uri.size() < 5 || uri.substr(0, 5) == "http://" || uri.substr(0, 6) == "https://")
+	// a web page has no language version here
+	if (uri.size() < 5 || startsWithCaseInsensitiveAscii(uri, "http://") || startsWithCaseInsensitiveAscii(uri, "https://") || startsWith(uri, "//"))
 	{
 		return uri;
 	}
@@ -325,7 +326,9 @@ std::string CGroupQuickHelp::getLanguageUrl(const std::string &href, std::string
 		{
 			fname = uri;
 		}
-		if (CPath::lookup(fname, false) == "" && lang != "en")
+		// in the search paths only, as CGroupHTML::lookupLocalFile: the name comes from a link, and is never opened as
+		// a path (Windows opens a network path, sending the user's credentials to its host)
+		if (CPath::lookup(fname, false, true, false) == "" && lang != "en")
 		{
 			uri = getLanguageUrl(href, "en");
 		}

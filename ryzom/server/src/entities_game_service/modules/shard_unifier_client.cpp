@@ -31,6 +31,7 @@
 //#include "pd_lib/pd_string_manager.h"
 
 #include "shard_unifier_client.h"
+#include "client_messages.h"
 #include "player_manager/player_manager_interface.h"
 #include "player_manager/character_interface.h"
 #include "guild_manager/guild_interface.h"
@@ -282,6 +283,9 @@ public:
 		else if (module == _EntityLocator)
 		{
 			_EntityLocator = NULL;
+
+			// a shard unifier that restarts chooses another one
+			FastDisconnectionSecret.clear();
 
 			nldebug("Uni : onModuleDown : Entity locator down ! removing online %u player info", _OnlineEntities.size());
 
@@ -1074,6 +1078,14 @@ public:
 	/////////////////////////////////////////////////////////////////
 	// CEntityLocatorClient implementation
 	/////////////////////////////////////////////////////////////////
+
+	// The entity locator answers initState with the secret the ring session manager makes the codes for fast
+	// disconnection with (see cbClientQuitGameRequest)
+	virtual void setFastDisconnectionSecret(NLNET::IModuleProxy *sender, const std::string &secret) NL_OVERRIDE
+	{
+		nldebug("Uni : setFastDisconnectionSecret: received the fast disconnection secret from '%s'", sender->getModuleName().c_str());
+		FastDisconnectionSecret = secret;
+	}
 
 	// The entity locator send a list of connection event to EGS
 	virtual void connectionEvents(NLNET::IModuleProxy *sender, const std::vector < TCharConnectionEvent > &events) NL_OVERRIDE

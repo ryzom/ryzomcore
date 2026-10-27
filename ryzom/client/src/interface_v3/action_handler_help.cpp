@@ -206,6 +206,9 @@ void	CInterfaceHelp::release()
 		_InfoWindowInit = false;
 		_InfoWindows.clear();
 	}
+	// it indexes _InfoWindows: updateWindowSPhraseTexts, which the next interface's hand and armor links call, would read the
+	// windows of the released interface before initWindows refills the list
+	_ActiveWindows.clear();
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)

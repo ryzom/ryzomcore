@@ -126,6 +126,8 @@ public:
 	static TStringId map(const std::string &str) { return s_GlobalMapper.localMap(str); }
 	/// Globaly map a string into a unique Id. ** This method IS Thread-Safe **
 	static TStringId map(const char *str) { return s_GlobalMapper.localMap(str); }
+	/// Globaly find the Id of a string without mapping it: emptyId() if it was never mapped. ** This method IS Thread-Safe **
+	static TStringId find(const std::string &str) { return s_GlobalMapper.localFind(str); }
 	/// Globaly unmap a string. ** This method IS Thread-Safe **
 	static const std::string &unmap(const TStringId &stringId) { return s_GlobalMapper.localUnmap(stringId); }
 	/// Globaly helper to serial a string id. ** This method IS Thread-Safe **
@@ -150,6 +152,8 @@ public:
 	*/
 	TStringId localMap(const char *str);
 #endif
+	/// Localy find the Id of a string without mapping it: emptyId() if it was never mapped
+	TStringId localFind(const std::string &str);
 	/// Localy unmap a string
 	const std::string &localUnmap(const TStringId &stringId) const { return (stringId == nullptr) ? *m_EmptyId : *((const std::string *)stringId); }
 	/// Localy helper to serial a string id

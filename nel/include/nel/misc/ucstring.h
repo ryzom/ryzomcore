@@ -262,6 +262,10 @@ ucstring toUpper(const ucstring &str);
 void toUpper(ucchar *str);
 ucchar toUpper(ucchar c);
 
+/** Return at most the first maxLength UTF-16 units of a string, without cutting a surrogate pair in half
+ */
+ucstring truncateUtf16(const ucstring &str, size_t maxLength);
+
 };
 
 #endif // NL_UCSTRING_H

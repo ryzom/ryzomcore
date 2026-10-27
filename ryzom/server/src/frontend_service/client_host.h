@@ -137,6 +137,7 @@ public:
 		LastReceivedAck(0xFFFFFFFF),
 		ImpulseMultiPartNumber (0),
 		AuthorizedCharSlot(~0),
+		ConnectionReportedToWS(false),
 		LastReceivedGameCycle(0),
 		LastSentSync(1),
 		//
@@ -148,6 +149,8 @@ public:
 		//AvailableImpulseBitsize( "AvailImpulseBitsize", MaxImpulseBitSizes[2] ),
 		NbActionsSentAtCycle(0),
 		QuitId(0),
+		RejectedMessages(0),
+		RejectedMessagesSince(0),
 		QuicUser(quicUser)
 		{
 			IdTranslator.setId( id );
@@ -441,6 +444,12 @@ public:
 	// The only character slot that will be granted to connect [0..4], or 0xF (15) for any character
 	uint8				AuthorizedCharSlot;
 
+	// clang-format off
+	/// The login told the welcome service that the user connected (a pending cookie, see CLoginServer::isPendingCookie),
+	/// so the user leaving is told too, once
+	bool				ConnectionReportedToWS;
+	// clang-format on
+
 	/// States of the client connection
 	enum
 	{
@@ -485,15 +494,21 @@ public:
 	//@{
  	struct CGenericMultiPartTemp
  	{
- 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF) { }
- 		uint32								NbBlock;
- 		uint32								NbCurrentBlock;
- 		uint32								TempSize;
- 		std::vector<std::vector<uint8> >	Temp;
+ 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF), NbCurrentBlock(0) { }
  
- 		std::vector<bool>					BlockReceived;
+ 		/// The client's parts fit an impulse of 230 bytes, header included (CNetworkConnection::push)
+ 		enum { MaxClientMultiPartSize = 230 };
+ 
+ 		uint32								NbBlock;
+ 		/// Parts received so far, which is also the index of the next part expected
+ 		uint32								NbCurrentBlock;
+ 		/// The parts received so far, one after the other
+ 		std::vector<uint8>					Temp;
  
  		void set (CLFECOMMON::CActionGenericMultiPart *agmp, CClientHost *client);
+ 
+ 		/// Drop the parts received so far and free their memory
+ 		void reset ();
  	};
  
  	std::vector<CGenericMultiPartTemp>	GenericMultiPartTemp;
@@ -501,6 +516,10 @@ public:
 
 	/// Quit Id
 	uint32				QuitId;
+
+	/// Messages rejected since RejectedMessagesSince (see RejectedMessagesLimit)
+	uint32				RejectedMessages;
+	NLMISC::TTime		RejectedMessagesSince;
 
 	CQuicUserContextPtr QuicUser;
 
@@ -606,6 +625,10 @@ public:
 		// Set limbo timeout start
 		Timeout = NLMISC::CTime::getLocalTime();
 		LoginCookie = client->LoginCookie;
+		// The client is restored with what it logged in with (see exitFromLimboMode)
+		InstanceId = client->InstanceId;
+		AuthorizedCharSlot = client->AuthorizedCharSlot;
+		ConnectionReportedToWS = client->ConnectionReportedToWS;
 	}
 
 	NLNET::CInetAddress	AddrFrom;
@@ -615,6 +638,11 @@ public:
 	uint32				QuitId;
 	NLMISC::TTime		Timeout;
 	NLNET::CLoginCookie	LoginCookie;
+	// clang-format off
+	uint32				InstanceId;
+	uint8				AuthorizedCharSlot;
+	bool				ConnectionReportedToWS;
+	// clang-format on
 };
 
 

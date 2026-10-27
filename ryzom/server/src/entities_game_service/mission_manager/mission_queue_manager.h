@@ -113,6 +113,11 @@ public:
 	/// remove a player from queue (timer elapsed or he is out of the critical area)
 	void removePlayerFromQueue(const NLMISC::CEntityId &id, uint32 queueId);
 
+	/// remove the entity that waits for a mission that failed or is removed, or is in the critical part with it: the
+	/// one known to have the mission, else the first of the candidates that waits with no mission known (an entry that
+	/// holds another mission belongs to another team or guild). Return false if none was found.
+	bool removeMissionFromQueue(uint32 queueId, const CMission *mission, const std::vector<NLMISC::CEntityId> &candidates);
+
 	/// a player enters a critical area in specified queue
 	void playerEntersCriticalArea(const NLMISC::CEntityId &id, uint32 queueId, bool accept);
 

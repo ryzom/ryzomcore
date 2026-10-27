@@ -693,7 +693,7 @@ void CTeamManager::removeFakeTeam(CCharacter * player)
 	{
 		if ( _Teams[player->getTeamId()].isFake() )
 		{
-			_Teams[_FirstFreeTeamId].release();
+			_Teams[player->getTeamId()].release();
 			removeTeam( player->getTeamId() );
 			player->setTeamId( CTEAM::InvalidTeamId );
 		}

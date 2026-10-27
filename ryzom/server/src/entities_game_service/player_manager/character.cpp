@@ -75,6 +75,7 @@
 #include "game_share/r2_share_itf.h"
 
 #include "server_share/r2_vision.h"
+#include "server_share/client_refusal.h"
 
 #include "egs_sheets/egs_sheets.h"
 #include "player_manager/character.h"
@@ -519,6 +520,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_MeleeCombatIsValid = false;
 
 	_CurrentBotChatType = BOTCHATTYPE::UnknownFlag;
+	_RolemasterType = EGSPD::CSPType::Unknown;
 
 /*
 	_HaveMweaTool = false;
@@ -697,7 +699,6 @@ CCharacter::CCharacter():	CEntityBase(false),
 
 	_ChannelAdded = false;
 
-	_DuelOpponent = NULL;
 	_IsTeleportFromRespawn = false;
 	_LastTpTick = 0;
 	_LastRespawnTick = 0;
@@ -1434,7 +1435,6 @@ uint32 CCharacter::tickUpdate()
 					for ( uint i =  0; i < size; i++ )
 					{
 						nlassert(team->getMissions()[i]);
-						team->getMissions()[i]->updateCompass(*this, string(""));
 						team->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}
@@ -1450,7 +1450,6 @@ uint32 CCharacter::tickUpdate()
 					for ( uint i =  0; i < size; i++ )
 					{
 						nlassert(guild->getMissions()[i]);
-						guild->getMissions()[i]->updateCompass(*this, string(""));
 						guild->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}
@@ -10090,6 +10089,41 @@ void CCharacter::setFilters(uint32 minQuality, uint32 maxQuality, uint32 minPric
 }
 
 //-----------------------------------------------
+// the rolemaster flags of what a bot sells, sent to the client in TRADING:ROLEMASTER_FLAGS
+//-----------------------------------------------
+static uint8 getRolemasterFlags(const CCreature *bot, EGSPD::CSPType::TSPType *rolemasterType)
+{
+	uint8 flags = 0;
+	if( bot->isSellingCharacteristics() )
+		flags |= (1<<ROLEMASTER_FLAGS::CaracteristicUpgrades);
+	if( bot->isSellingFightAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::FightActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Fight;
+	}
+	if( bot->isSellingMagicAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::MagicActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Magic;
+	}
+	if( bot->isSellingHarvestAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::ForageActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Harvest;
+	}
+	if( bot->isSellingCraftAction() )
+	{
+		flags |= (1<<ROLEMASTER_FLAGS::CraftActions);
+		if (rolemasterType) *rolemasterType = EGSPD::CSPType::Craft;
+	}
+
+	if (flags != 0)
+		flags |= (1<<ROLEMASTER_FLAGS::SpecialPowers);
+
+	return flags;
+}
+
+//-----------------------------------------------
 // start a trade action
 //-----------------------------------------------
 void CCharacter::startTradePhrases(uint16 session)
@@ -10102,6 +10136,10 @@ void CCharacter::startTradePhrases(uint16 session)
 	// Delete any current TradeItem shopping list
 	if( _ShoppingList != 0 ) delete _ShoppingList;
 	_ShoppingList = 0;
+
+	// nor keep the phrase list of a previous trade, which PHRASE:BUY indexes, if this one is refused
+	_CurrentPhrasesTradeList.clear();
+	_CurrentPhrasesTradeBot = CEntityId::Unknown;
 
 	// get the bot creature
 	CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
@@ -10126,33 +10164,14 @@ void CCharacter::startTradePhrases(uint16 session)
 		return;
 	}
 
-	// *** Set right rolemaster flags and race in Database
-	uint8 flags = 0;
-	if( bot->isSellingCharacteristics() )
-		flags |= (1<<ROLEMASTER_FLAGS::CaracteristicUpgrades);
-	if( bot->isSellingFightAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::FightActions);
-		setRolemasterType(EGSPD::CSPType::Fight);
-	}
-	if( bot->isSellingMagicAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::MagicActions);
-		setRolemasterType(EGSPD::CSPType::Magic);
-	}
-	if( bot->isSellingHarvestAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::ForageActions);
-		setRolemasterType(EGSPD::CSPType::Harvest);
-	}
-	if( bot->isSellingCraftAction() )
-	{
-		flags |= (1<<ROLEMASTER_FLAGS::CraftActions);
-		setRolemasterType(EGSPD::CSPType::Craft);
-	}
+	// the purchases of this trade are made from this bot only
+	_CurrentPhrasesTradeBot = bot->getId();
 
-	if (flags != 0)
-		flags |= (1<<ROLEMASTER_FLAGS::SpecialPowers);
+	// *** Set right rolemaster flags and race in Database
+	EGSPD::CSPType::TSPType rolemasterType = EGSPD::CSPType::Unknown;
+	uint8 flags = getRolemasterFlags(bot, &rolemasterType);
+	if (rolemasterType != EGSPD::CSPType::Unknown)
+		setRolemasterType(rolemasterType);
 
 //	_PropertyDatabase.setProp( "TRADING:ROLEMASTER_FLAGS", flags );
 	CBankAccessor_PLR::getTRADING().setROLEMASTER_FLAGS(_PropertyDatabase, flags );
@@ -10461,6 +10480,14 @@ void CCharacter::buyItem( uint16 itemNumber, uint16 quantity )
 		nlwarning( "<buyItem> Character %s Receive a BOTCHAT:BUY message but _ShoppingList of character are NULL", _Id.toString().c_str() );
 		return;
 	}
+	// The stock client sends 1 to 999 (isTradeValid, the quantity box of bot_chat_v4.xml), and 0 would reach the
+	// nlassert of setStackSize
+	if (quantity == 0)
+	{
+		nlwarning("HACK: %s sent BOTCHAT:BUY for trade item %u with quantity 0, refused", _Id.toString().c_str(), (uint)itemNumber);
+		reportRefusedClientMessage(_Id);
+		return;
+	}
 	_ShoppingList->buyItem( itemNumber, quantity );
 }
 
@@ -10474,6 +10501,13 @@ void CCharacter::destroySaleItem( uint16 itemNumber, uint16 quantity )
 	if( _ShoppingList == 0 )
 	{
 		nlwarning( "<destroyItem> Character %s Receive a BOTCHAT:DESTROY message but _ShoppingList of character are NULL", _Id.toString().c_str() );
+		return;
+	}
+	// The stock client refuses 0 (CBotChatPageTrade)
+	if (quantity == 0)
+	{
+		nlwarning("HACK: %s sent BOTCHAT:DESTROY_ITEM for trade item %u with quantity 0, refused", _Id.toString().c_str(), (uint)itemNumber);
+		reportRefusedClientMessage(_Id);
 		return;
 	}
 	_ShoppingList->destroyItem( itemNumber, quantity );
@@ -10507,27 +10541,40 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 		}
 	}
 
-	// check price can be paid
-	if ( getSP(_RolemasterType) < spPrice )
+	// the skill points spent are those of the rolemaster's type, set with the phrase list a PHRASE:BUY indexes
+	EGSPD::CSPType::TSPType spType = _RolemasterType;
+
+	// PHRASE:BUY_SHEET is only sent from the phrase trade page of a rolemaster, and a dyn chat can change the
+	// interlocutor without ending that bot chat (PHRASE:BUY is checked by buyPhraseByIndex)
+	if (testRestrictions && (_CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot))
 	{
-		// return information 'not enough skill points'
-		sendDynamicSystemMessage( _Id, "EGS_NOT_ENOUGHT_SP" );
+		nlwarning("Server refused buy sheet action for player %s, sheet %s, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+		    _Id.toString().c_str(), phraseId.toString().c_str(), _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType);
 		return false;
 	}
-	//Bsi.append( StatPath, NLMISC::toString("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice) );
-	//EgsStat.displayNL("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice);
-//	EGSPD::buyAction(_Id, phraseId.toString(), spPrice);
+
+	CCreature *bot = CreatureManager.getCreature(_CurrentInterlocutor);
+	if (bot == NULL)
+	{
+		nlwarning("Invalid bot %s", _CurrentInterlocutor.toString().c_str());
+		return false;
+	}
+
+	// startTradePhrases checks the fame when the trade starts, for both messages, and it can drop while the trade page
+	// stays open
+	if (CFameInterface::getInstance().getFameIndexed(_Id, bot->getForm()->getFaction()) < MinFameToTrade)
+	{
+		nldebug("Server refused buy phrase action for player %s, phrase %s, fame too low to trade with rolemaster %s",
+		    _Id.toString().c_str(), phraseId.toString().c_str(), bot->getId().toString().c_str());
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+		params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+		sendDynamicSystemMessage(_Id, "TRADE_FAME_TOO_LOW", params);
+		return false;
+	}
 
 	// check phrase requirements
 	if (testRestrictions)
 	{
-		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
-		if ( bot == NULL )
-		{
-			nlwarning( "Invalid bot %s",_CurrentInterlocutor.toString().c_str() );
-			return false;
-		}
-
 		if ( bot->getOriginShopSelector().empty() )
 			return false;
 
@@ -10545,12 +10592,39 @@ bool CCharacter::buyRolemasterPhrase( const NLMISC::CSheetId &phraseId, uint16 k
 						_Id.toString().c_str(), phraseId.toString().c_str(), EGSPD::CPeople::toString(people).c_str() );
 			return false;
 		}
+
+		// The sheet comes from the client, whose phrase list for a rolemaster only holds player phrases that the
+		// rolemaster's flags sell and that missions do not give: any other phrase, an AI phrase among them, is
+		// refused (it would also be paid in the skill points of the rolemaster's type, whatever its own).
+		// The skill points are those of this rolemaster's type, as startTradePhrases shows them, not those
+		// of the last phrase trade.
+		const string phraseName = phraseId.toString();
+		spType = EGSPD::CSPType::Unknown;
+		const uint8 rolemasterFlags = getRolemasterFlags(bot, &spType);
+		if ( phraseName.find( "saiphrase" ) != string::npos || !staticPhrase->IsRolemasterPhrase || staticPhrase->ShowInAPOnlyIfLearnt
+			|| spType == EGSPD::CSPType::Unknown || !ROLEMASTER_FLAGS::canSellPhrase( rolemasterFlags, phraseName ) )
+		{
+			nlwarning("Server refused buy sheet action for player %s, sheet %s is not sold by rolemaster %s",
+						_Id.toString().c_str(), phraseName.c_str(), bot->getId().toString().c_str() );
+			return false;
+		}
 	}
+
+	// check price can be paid
+	if ( getSP(spType) < spPrice )
+	{
+		// return information 'not enough skill points'
+		sendDynamicSystemMessage( _Id, "EGS_NOT_ENOUGHT_SP" );
+		return false;
+	}
+	//Bsi.append( StatPath, NLMISC::toString("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice) );
+	//EgsStat.displayNL("[AA] %s %s %d", _Id.toString().c_str(), phraseId.toString().c_str(), spPrice);
+//	EGSPD::buyAction(_Id, phraseId.toString(), spPrice);
 
 	if ( ! learnPrebuiltPhrase(phraseId, knownPhraseIndex, false, (knownPhraseIndex==0) ) )
 		return false;
 
-	spendSP( (double)spPrice, _RolemasterType );
+	spendSP( (double)spPrice, spType );
 
 	BRICK_TYPE::EBrickType phraseType = BRICK_TYPE::UNKNOWN;
 	if ( !staticPhrase->Bricks.empty() )
@@ -10628,6 +10702,14 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	bool ok = true;
 	if (botChatIndex >= uint8(_CurrentPhrasesTradeList.size() ) )
 		ok = false;
+	// the list and _RolemasterType come from the phrase trade of a bot: once another bot chat has started, or a dyn chat
+	// has changed the interlocutor without ending it, the refresh below would set the type from another bot
+	if ( _CurrentBotChatType != BOTCHATTYPE::TradePhraseFlag || _CurrentInterlocutor != _CurrentPhrasesTradeBot )
+	{
+		nlwarning("Server refused buy action for player %s, index %u, outside a phrase trade with %s (phrase trade bot %s, bot chat type %u)",
+					_Id.toString().c_str(), (uint)botChatIndex, _CurrentInterlocutor.toString().c_str(), _CurrentPhrasesTradeBot.toString().c_str(), (uint)_CurrentBotChatType );
+		ok = false;
+	}
 
 	// Old feature if the user is buying a guild rolemaster research option, treat this case separatly
 	if ( _CurrentBotChatType == BOTCHATTYPE::GuildRoleMaster )
@@ -10879,7 +10961,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		if( (_PlayerPets[ inv - INVENTORIES::pet_animal1 ].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == false )
 		{
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
-			params[0].Int = inv - INVENTORIES::pet_animal1;
+			params[0].Int = inv - INVENTORIES::pet_animal1 + 1; // the interface numbers the animals from 1
 			sendDynamicSystemMessage( _Id, "ANIMAL_INVENTORY_INACCESSIBLE", params );
 			return;
 		}
@@ -10990,6 +11072,13 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			return;
 		}
 
+		// the resale price is kept in the sint32 of a TPriceInfo; the client sends 0 rather than a price that does not fit
+		if( sellPrice > (uint32)std::numeric_limits<sint32>::max() )
+		{
+			nlwarning("<CCharacter sellItem> character %s try to sell an item %s for %u, more than a resale price can be, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str(), sellPrice );
+			return;
+		}
+
 		if (sellPrice > ufBasePrice && sellPrice != 0)
 		{
 			nlwarning("<CCharacter sellItem> character %s try to sell an item %s above it's base price (base price %d, sell price %d, margin %d), must not permited by client", _Id.toString().c_str(), sheet.toString().c_str(), ufBasePrice, sellPrice, uint32(((sellPrice - ufBasePrice) * 100.0f) / ufBasePrice));
@@ -11097,7 +11186,8 @@ void CCharacter::itemSolded( uint32 identifier, uint32 quantity, uint32 sellPric
 				nlwarning("sell price is smaller than base price, setting sell price = base price !");
 				sellPrice = basePrice;
 			}
-			uint64 winMoney = (sellPrice - basePrice) * quantity;
+			// in 64 bits, as the buyer paid it (CCharacterShoppingList::buyItem): a 32-bit product wraps
+			uint64 winMoney = (uint64)(sellPrice - basePrice) * quantity;
 			giveMoney( winMoney );
 
 			SM_STATIC_PARAMS_6(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::entity, STRING_MANAGER::integer, STRING_MANAGER::integer, STRING_MANAGER::integer);
@@ -12159,6 +12249,7 @@ void CCharacter::endBotChat(bool newBotChat, bool closeDynChat, bool processMiss
 		case (uint8)BOTCHATTYPE::TradeBuildingOptions :
 		case (uint8)BOTCHATTYPE::TradeOutpostBuilding :
 			_CurrentPhrasesTradeList.clear();
+			_CurrentPhrasesTradeBot = CEntityId::Unknown;
 			break;
 		case (uint8)BOTCHATTYPE::CreateGuildFlag:
 			{
@@ -13330,6 +13421,9 @@ void CCharacter::removeMission(TAIAlias alias, /*TMissionResult*/ uint32 result,
 		if (!doNotClearJournal)
 			mission->clearUsersJournalEntry();
 	}
+	// a mission removed without a failure (a success before its queue_end step, a command) leaves its queue too; the
+	// character is given, the missions that failed while it was offline are removed before it is their taker
+	mission->leaveWaitingQueue(_Id);
 
 	CMissionManager::getInstance()->deInstanciateMission(mission);
 	_Missions->deleteFromMissions( alias );
@@ -13352,7 +13446,12 @@ void CCharacter::abandonMission(uint8 indexClient)
 			{
 				templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
 				if (templ == NULL || templ->Tags.NoList) // skip invalid or invisible missions
+				{
+					// and forget them: when no visible mission has the index, the last one skipped was abandoned
+					mission = NULL;
+					templ = NULL;
 					continue;
+				}
 			}
 			break;
 		}
@@ -13362,6 +13461,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		MISDBG( "user:%s abandonMission : ERROR : invalid mission index %u sent ",_Id.toString().c_str(), indexClient );
 		return;
 	}
+	const TAIAlias alias = mission->getTemplateId();
+	const bool finishedWithSuccess = mission->getFinished() && mission->getMissionSuccess();
+	bool removedItself = false;
 	if ( mission->getFinished() == false )
 	{
 		if ( !templ )
@@ -13377,6 +13479,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		MISDBG("user:%s abandonMission", getId().toString().c_str());
 		mission->onFailure(true, false);
 		CCharacter::sendDynamicSystemMessage( _EntityRowId, "ABANDON_MISSION" );
+
+		// A no_list, chained or auto_remove mission has removed (deleted) itself
+		removedItself = (_Missions->getMissions(alias) == NULL);
 	}
 	// the template can be missing for a finished mission
 	if (templ != NULL)
@@ -13385,7 +13490,7 @@ void CCharacter::abandonMission(uint8 indexClient)
 	vector<string> params = getCustomMissionParams(toUpper(templ->getMissionName()) + "_CALLBACK");
 	if (params.size() >= 1)
 	{
-		if (mission->getFinished() && mission->getMissionSuccess())
+		if (finishedWithSuccess)
 			validateDynamicMissionStep(params[0] + "&result=FINABD");
 		else
 			validateDynamicMissionStep(params[0] + "&result=ABD");
@@ -13393,7 +13498,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		}
 	}
 
-	removeMission(mission->getTemplateId(), mr_abandon);
+	if (removedItself)
+		return;
+	removeMission(alias, mr_abandon);
 }
 
 void CCharacter::clearSuccessfullMission()
@@ -13662,7 +13769,7 @@ bool CCharacter::processMissionStepUserEvent(std::list< CMissionEvent* > & event
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
 		mission->stopChildren();
 
 		// only remove no list missions, other must be manually removed by user
@@ -18395,7 +18502,7 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 	else
 	{
 		if( _PhysScores._PhysicalScores[SCORES::hit_points].Max > 0)
-			setHpBar( (uint32) ( (1023 * _PhysScores._PhysicalScores[SCORES::hit_points].Current) / _PhysScores._PhysicalScores[SCORES::hit_points].Max) );
+			setHpBar((uint32)scoreRatio(_PhysScores._PhysicalScores[SCORES::hit_points].Current, _PhysScores._PhysicalScores[SCORES::hit_points].Max, 1023));
 		else
 			setHpBar(0);
 		return false;

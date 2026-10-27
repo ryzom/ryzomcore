@@ -200,6 +200,10 @@ public:
 	virtual void	setEnlargeCanvasNonPOW2Tex(bool dontStretch)  = 0;
 	virtual bool	getEnlargeCanvasNonPOW2Tex() const = 0;
 
+	/// The file is not trusted (a download of the web browser) when maxSize is not 0, see CTextureFile::setUntrustedMaxSize.
+	/// NB: this must be done before first render(), ie just after creation.
+	virtual void	setUntrustedMaxSize(uint32 maxSize) = 0;
+
 };
 
 

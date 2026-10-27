@@ -192,6 +192,12 @@ void			CDriverUser::deleteTextureFile(UTextureFile *textfile)
 // ***************************************************************************
 UTextureMem		*CDriverUser::createTextureMem(uint width, uint height, CBitmap::TType texType)
 {
+	// 4 bytes per pixel at most
+	if ((uint64)width * height * 4 > 0xffffffff)
+	{
+		nlwarning("3D: Cannot create a memory texture of %ux%u", width, height);
+		return nullptr;
+	}
 
 	CTextureMemUser	*pTx= new CTextureMemUser(width, height, texType);
 	_Textures.insert(pTx);
