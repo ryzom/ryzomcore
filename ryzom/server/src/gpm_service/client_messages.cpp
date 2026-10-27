@@ -35,6 +35,7 @@
 //#include "game_share/ryzom_mirror_properties.h"
 
 #include "server_share/r2_variables.h"
+#include "server_share/client_refusal.h"
 
 #include "world_position_manager.h"
 #include "gpm_service.h"
@@ -73,12 +74,14 @@ void cbClientPosition( CMessage& msgin, const string &serviceName, NLNET::TServi
 	// it: the AI service converts it to a fixed-point angle that a large one overflows.
 	if (!isValidDouble(heading))
 	{
-		nlwarning("<cbClientPosition> %s sent an invalid heading, the current one is kept", id.toString().c_str());
+		nlwarning("HACK: <cbClientPosition> %s sent an invalid heading, the current one is kept", id.toString().c_str());
+		reportRefusedClientMessage(id);
 		heading = CMirrorPropValueRO<float>( TheDataset, entityIndex, DSPropertyORIENTATION );
 	}
 	else if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
 	{
-		nlwarning("<cbClientPosition> %s sent a heading of %g, outside [-Pi, Pi], brought back into it", id.toString().c_str(), (double)heading);
+		nlwarning("HACK: <cbClientPosition> %s sent a heading of %g, outside [-Pi, Pi], brought back into it", id.toString().c_str(), (double)heading);
+		reportRefusedClientMessage(id);
 		heading = (float)atan2(sin((double)heading), cos((double)heading));
 	}
 
