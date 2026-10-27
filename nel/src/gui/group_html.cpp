@@ -333,13 +333,21 @@ namespace NLGUI
 		Images.clear();
 	}
 
-	/** The check of a downloaded image or texture before it replaces the cached file. A broken one, or one larger than
-	 *  the browser accepts, is refused, and its cache entry, stored for the refused body, is cleared so that the next
-	 *  request downloads it again.
+	/** The check of a downloaded image or texture before it replaces the cached file. An empty or broken one, or one
+	 *  larger than the browser accepts, is refused, and its cache entry, stored for the refused body, is cleared so that
+	 *  the next request downloads it again (with the Etag of an empty answer, the next request gets 304 and keeps the old
+	 *  file).
 	 */
 	static bool checkDownloadedImage(const std::string &tmpdest, const std::string &dest, const std::string &url)
 	{
 		uint32 w = 0, h = 0;
+		if (CFile::getFileSize(tmpdest) == 0)
+		{
+			nlwarning("The image (%s) from url (%s) is empty", tmpdest.c_str(), url.c_str());
+			CHttpCache::getInstance()->store(dest, CHttpCacheObject());
+			return false;
+		}
+
 		try
 		{
 			CBitmap::loadSize(tmpdest, w, h);
@@ -373,23 +381,30 @@ namespace NLGUI
 
 		// tmpdest file does not exist if download skipped (ie cache was used)
 		// verify that image is not corrupted, a corrupted one is not used and does not replace the cached one
-		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0 && checkDownloadedImage(tmpdest, dest, url))
+		if (CFile::fileExists(tmpdest))
 		{
-			if (CFile::fileExists(dest))
-				CFile::deleteFile(dest);
-
-			// to reload image on page, the easiest seems to be changing texture
-			// to temp file temporarily. that forces driver to reload texture from disk
-			// ITexture::touch() seem not to do this.
-			// cache was updated, first set texture as temp file
-			for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
+			if (checkDownloadedImage(tmpdest, dest, url))
 			{
-				SImageInfo &img = *it;
-				Parent->setImage(img.Image, tmpdest, img.Type);
-				Parent->setImageSize(img.Image, img.Style);
-			}
+				if (CFile::fileExists(dest))
+					CFile::deleteFile(dest);
 
-			CFile::moveFile(dest, tmpdest);
+				// to reload image on page, the easiest seems to be changing texture
+				// to temp file temporarily. that forces driver to reload texture from disk
+				// ITexture::touch() seem not to do this.
+				// cache was updated, first set texture as temp file
+				for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
+				{
+					SImageInfo &img = *it;
+					Parent->setImage(img.Image, tmpdest, img.Type);
+					Parent->setImageSize(img.Image, img.Style);
+				}
+
+				CFile::moveFile(dest, tmpdest);
+			}
+			else
+			{
+				CFile::deleteFile(tmpdest);
+			}
 		}
 
 		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
@@ -411,12 +426,19 @@ namespace NLGUI
 	{
 		// tmpdest file does not exist if download skipped (ie cache was used)
 		// the same check as for images: an invalid texture does not replace the cached one
-		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0 && checkDownloadedImage(tmpdest, dest, url))
+		if (CFile::fileExists(tmpdest))
 		{
-			if (CFile::fileExists(dest))
-				CFile::deleteFile(dest);
+			if (checkDownloadedImage(tmpdest, dest, url))
+			{
+				if (CFile::fileExists(dest))
+					CFile::deleteFile(dest);
 
-			CFile::moveFile(dest, tmpdest);
+				CFile::moveFile(dest, tmpdest);
+			}
+			else
+			{
+				CFile::deleteFile(tmpdest);
+			}
 		}
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
