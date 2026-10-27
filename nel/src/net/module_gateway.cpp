@@ -990,6 +990,9 @@ namespace NLNET
 
 					proxy->_Distance = modInfo.ModuleDistance;
 					proxy->_Route = modInfo.Route;
+					// messages to the module now go through that route, with the module's id there (as when a
+					// distance update moves the route)
+					proxy->_ForeignModuleId = modInfo.ForeignProxyId;
 
 					sendModuleDistanceUpdate(proxy);
 				}
