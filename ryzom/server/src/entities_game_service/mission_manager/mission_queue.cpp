@@ -98,9 +98,11 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 	{
 		if (_PlayersToRollBackInSteps[i] == c->getId())
 		{
-			// update mission
+			// The player was in the critical part when the service stopped: its solo mission goes back to its queue_start
+			// step, and the player to the head of the queue. A team does not outlive a restart, and a guild mission is
+			// shared by members who may have gone on with it: those are left as they are.
 			CMission *mission = c->getMission(_MissionAlias);
-			if (mission)
+			if (mission != NULL && mission->getWaitingQueueId() == _QueueId)
 			{
 				vector<uint32> removedSteps;
 
@@ -116,10 +118,33 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 					mission->deleteFromStepsDone(removedSteps[j]);
 					mission->addToSteps(removedSteps[j]);
 				}
+
+				// The critical part starts again when the player enters it: its end date would fail the mission at a later
+				// login. One that has passed is kept: the mission fails as the character's missions are restored
+				// (CCharacter::updateSavedMissions), which takes the entry out again.
+				if (mission->getCriticalPartEndDate() > CTickEventHandler::getGameCycle())
+					mission->setCriticalPartEndDate(0);
+
+				// Offline, as the loop below expects; queue_start's onActivation gives the entry its mission
+				bool queued = false;
+				for (list<CWaitingEntity>::const_iterator itEntity = _Entities.begin(); itEntity != _Entities.end(); ++itEntity)
+				{
+					if ((*itEntity).Id == c->getId())
+						queued = true;
+				}
+				if (!queued)
+				{
+					CWaitingEntity entity;
+					entity.Id = c->getId();
+					entity.Awake = true;
+					entity.Online = false;
+					entity.LastConnectionDate = CTime::getSecondsSince1970();
+					_Entities.push_front(entity);
+				}
 			}
 			else
 			{
-				nlwarning("Cannot find mission alias %u in player %s, BUG", _MissionAlias, c->getId().toString().c_str());
+				nldebug("%s was in the critical part of queue %u, with no solo mission waiting in it", c->getId().toString().c_str(), _QueueId);
 			}
 
 			_PlayersToRollBackInSteps[i] = _PlayersToRollBackInSteps.back();
@@ -509,6 +534,7 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 			{
 				_Entities.push_front(*it);
 				_Entities.erase(it);
+				it = _Entities.begin();
 			}
 
 			//increase the online position of remaining players
@@ -786,8 +812,10 @@ void CMissionQueue::postApply()
 
 	if ( _CriticalPartEntityId != CEntityId::Unknown )
 	{
-		// player was in critical part, add him at the head of the queue
-		addPlayer( _CriticalPartEntityId, NULL, true );
+		// The player was in the critical part: its mission goes back to its queue_start step, and the player to the head
+		// of the queue, when the character comes back (characterLoadedCallback). Calling addPlayer here did nothing:
+		// it needs the character, which is not loaded at startup, so the mission was rolled back without its entry and
+		// waited at queue_start for a proposal that never came.
 
 		// keep player Id to reset his mission step when he will be back
 		// when he will be online
