@@ -198,8 +198,7 @@ void CMissionSolo::forceSuccess()
 			CCharacter::sendDynamicSystemMessage( user->getId(), isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
 		CMissionManager::getInstance()->missionDoneOnce(templ, this);
 		stopChildren();
-		user->processMissionEvent( event );
-		
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
 		{
@@ -210,6 +209,10 @@ void CMissionSolo::forceSuccess()
 		{
 			setSuccessFlag();
 		}
+
+		// The mission is done before the event, as when its last step ends: the event can end a parent mission, which
+		// removes its children, this one among them. Nothing of this mission is used from here
+		user->processMissionEvent(event);
 	}
 	else
 		nlwarning("<MISSIONS> alias %s : invalid user", CPrimitivesParser::aliasToString(templ->Alias).c_str());

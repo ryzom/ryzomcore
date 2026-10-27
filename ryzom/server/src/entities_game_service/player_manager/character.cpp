@@ -12685,9 +12685,17 @@ bool CCharacter::processMissionUserEvent(std::list< CMissionEvent* > & eventList
 		return processMissionStepUserEvent( eventList, alias, 0xFFFFFFFF );
 	else
 	{
+		// Processing an event can remove missions: a failed action (recv_item with fail_if_inventory_full) fails its
+		// mission, which removes an auto_remove, no_list or chained one, and returns Nothing. Go through the aliases, and
+		// skip the missions already removed
+		vector<TAIAlias> aliases;
 		for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
+			aliases.push_back((*it).first);
+		for (uint i = 0; i < aliases.size(); ++i)
 		{
-			if ( processMissionStepUserEvent( eventList,(*it).second->getTemplateId() ,0xFFFFFFFF) )
+			if (_Missions->getMissions(aliases[i]) == NULL)
+				continue;
+			if (processMissionStepUserEvent(eventList, aliases[i], 0xFFFFFFFF))
 				return true;
 		}
 	}
@@ -13280,23 +13288,40 @@ void CCharacter::updateSavedMissions()
 	}
 	for ( uint i  = 0; i < failed.size(); i++ )
 		removeMission( failed[i]->getTemplateId() , mr_fail );
-	uint idx = 0;
 
 	bool bLaunchCrashHandler = true;
 	if (_SaveDate > IService::getInstance()->getLaunchingDate())
 		bLaunchCrashHandler = false; // Launch the player_reconnect handler
 
-	for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); )
+	// Every mission has its taker and its journal index before any is put in game: the events of a mission's active
+	// steps can give a new mission, which takes the first index no mission holds
+	uint idx = 0;
+	vector<TAIAlias> aliases;
+	for (map<TAIAlias, CMission *>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
-		CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( (*it).second->getTemplateId() );
-		EGS_PD_AST ( templ );
+		aliases.push_back((*it).first);
 
-		CMissionSolo* mission = EGS_PD_CAST<CMissionSolo*>( (*it).second );
-		EGS_PD_AST( mission );
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate((*it).second->getTemplateId());
+		EGS_PD_AST(templ);
+		CMissionSolo *mission = EGS_PD_CAST<CMissionSolo *>((*it).second);
+		EGS_PD_AST(mission);
 		mission->setTaker(_EntityRowId);
+		mission->setClientIndex(templ->Tags.NoList ? 0xFF : idx++);
+	}
+
+	// The events of a mission's active steps, and its crash or reconnect handler, can end and remove missions, this one
+	// or others (its children): go through the aliases, and skip the missions already removed
+	for (uint i = 0; i < aliases.size(); ++i)
+	{
+		CMission *found = _Missions->getMissions(aliases[i]);
+		if (found == NULL)
+			continue;
+
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(found->getTemplateId());
+		CMissionSolo *mission = EGS_PD_CAST<CMissionSolo *>(found);
 		if ( !templ->Tags.NoList )
 		{
-			mission->setClientIndex( idx );
+			NLMISC::CRefPtr<CMission> missionRef = mission;
 			mission->putInGame();
 			mission->updateUsersJournalEntry();
 			list<CMissionEvent*> eventList;
@@ -13313,23 +13338,20 @@ void CCharacter::updateSavedMissions()
 				delete *eventList.begin();
 				eventList.pop_front();
 			}
+			// the events can have removed it
+			if (missionRef == NULL)
+				continue;
 			// we reload the missions : there was a crash before
-			map<TAIAlias, CMission*>::iterator itBack = it;
-			++itBack;
 			if (bLaunchCrashHandler)
 				mission->applyCrashHandler(true, std::string());
 			else
 				mission->applyPlayerReconnectHandler();
-			it = itBack;
-			++idx;
 		}
 		else
 		{
-			mission->setClientIndex( 0xFF );
-			mission->setTaker(_EntityRowId);
 			mission->putInGame();
 
-			for ( map<uint32,EGSPD::CMissionCompassPD>::iterator itCompass = (*it).second->getCompassBegin(); itCompass != (*it).second->getCompassEnd(); ++itCompass )
+			for (map<uint32, EGSPD::CMissionCompassPD>::iterator itCompass = mission->getCompassBegin(); itCompass != mission->getCompassEnd(); ++itCompass)
 			{
 				TVectorParamCheck params(1);
 				sint32 x = 0;
@@ -13366,7 +13388,6 @@ void CCharacter::updateSavedMissions()
 					}
 				}
 			}
-			++it;
 		}
 	}
 }

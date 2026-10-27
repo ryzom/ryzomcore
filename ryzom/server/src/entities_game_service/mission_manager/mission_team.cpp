@@ -193,8 +193,7 @@ void CMissionTeam::forceSuccess()
 		}
 		CMissionManager::getInstance()->missionDoneOnce(templ, this);
 		stopChildren();
-		team->processTeamMissionEvent( eventList, CAIAliasTranslator::Invalid  );
-		
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
 		{
@@ -205,6 +204,10 @@ void CMissionTeam::forceSuccess()
 		{
 			setSuccessFlag();
 		}
+
+		// The mission is done before the event, as when its last step ends: the event can end a parent mission, which
+		// removes its children, this one among them. Nothing of this mission is used from here
+		team->processTeamMissionEvent(eventList, CAIAliasTranslator::Invalid);
 	}
 	else
 		nlwarning("<MISSIONS> alias %s : invalid team", CPrimitivesParser::aliasToString(templ->Alias).c_str());
