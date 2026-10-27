@@ -1325,7 +1325,8 @@ namespace NLGUI
 		size_t pos = data.find(";base64,");
 		if (pos == std::string::npos)
 		{
-			nlwarning("Failed to parse dataURL (not base64?) '%s'", data.c_str());
+			// a data URL comes from a web page; the log shows its beginning only, as in loadTextureFromString
+			nlwarning("Failed to parse dataURL (not base64?) '%s'", data.substr(0, 64).c_str());
 			return -1;
 		}
 
