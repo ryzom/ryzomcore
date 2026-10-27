@@ -103,11 +103,16 @@ public:
 	NLMISC::CEntityId getEntityWaitingFor(const CMission *mission) const;
 
 	/// true if the entity waits in this queue, or is in its critical part, with no mission known: the entry of a player
-	/// who went offline holds none, even once the player is back, nor does one restored when the queue is loaded
+	/// who went offline holds none until the player is back (and none then if no mission of the player waits in the
+	/// queue), nor does one restored when the queue is loaded
 	bool waitsWithoutMission(const NLMISC::CEntityId &id) const;
 
 	///remove a player from queue
 	void disconnectPlayer(const NLMISC::CEntityId &id);
+
+	/// a player whose critical part a restart ended no longer needs its rollback: its character was saved with it on
+	/// disconnection, it entered the critical part again, or it left the queue
+	void forgetRollBack(const NLMISC::CEntityId &id);
 
 	/// add player in queue
 	void addPlayer(const NLMISC::CEntityId &id, CMission *mission, bool forceTopOfQueue = false);

@@ -28,6 +28,7 @@
 #include "guild_manager/guild.h"
 #include "mission_team.h"
 #include "mission_guild.h"
+#include "mission_step_queue.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -47,29 +48,76 @@ CVariable<uint32> MinSleepingTime("egs", "MinSleepingTime", "min 'sleeping' time
 CVariable<uint32> MaxEnterCriticalAnswerTime("egs", "MaxEnterCriticalAnswerTime", "time the player has to answer to the server request about entering a mission critical ppart, in ticks (default = 60 s)", 600, true );
 
 // ----------------------------------------------------------------------------
-// whether a player has a mission of this queue that waits in it: its own, its team's or its guild's
-static bool hasMissionWaitingIn(CCharacter *c, TAIAlias missionAlias, uint32 queueId)
+// whether one of a mission's active steps is the queue_start step of a queue
+static bool isWaitingIn(const CMission *mission, const std::string &queueName)
 {
-	const CMission *mission = c->getMission(missionAlias);
-	if (mission != NULL && mission->getWaitingQueueId() == queueId)
-		return true;
+	const CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(mission->getTemplateId());
+	if (templ == nullptr)
+		return false;
 
-	CTeam *team = TeamManager.getRealTeam(c->getTeamId());
-	if (team != NULL)
+	for (map<uint32, EGSPD::CActiveStepPD>::const_iterator it = mission->getStepsBegin(); it != mission->getStepsEnd(); ++it)
 	{
-		const CMissionTeam *teamMission = team->getMissionByAlias(missionAlias);
-		if (teamMission != NULL && teamMission->getWaitingQueueId() == queueId)
-			return true;
-	}
-
-	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
-	if (guild != NULL)
-	{
-		const CMissionGuild *guildMission = guild->getMissionByAlias(missionAlias);
-		if (guildMission != NULL && guildMission->getWaitingQueueId() == queueId)
+		const uint32 index = (*it).second.getIndexInTemplate() - 1;
+		if (index >= templ->Steps.size())
+			continue;
+		const CMissionStepQueueStart *step = dynamic_cast<const CMissionStepQueueStart *>(templ->Steps[index]);
+		if (step != nullptr && step->QueueName == queueName)
 			return true;
 	}
 	return false;
+}
+
+// ----------------------------------------------------------------------------
+// whether a mission has done a queue_end step of a queue
+static bool hasLeftQueue(CMission *mission, CMissionTemplate *templ, const std::string &queueName)
+{
+	for (map<uint32, EGSPD::CDoneStepPD>::iterator it = mission->getStepsDoneBegin(); it != mission->getStepsDoneEnd(); ++it)
+	{
+		const uint32 index = (*it).first - 1;
+		if (index >= templ->Steps.size())
+			continue;
+		const CMissionStepQueueEnd *step = dynamic_cast<const CMissionStepQueueEnd *>(templ->Steps[index]);
+		if (step != nullptr && step->QueueName == queueName)
+			return true;
+	}
+	return false;
+}
+
+// ----------------------------------------------------------------------------
+// The mission a player waits in a queue for: its own, its team's or its guild's mission whose queue_start step of the
+// queue is active. The step tells it, not the mission's waiting queue id, which keeps only the last of two queues a
+// mission waits in at once, nor the alias of the mission that created the queue: missions of other templates with the
+// same name share the queue.
+static CMission *getMissionWaitingIn(CCharacter *c, const std::string &queueName)
+{
+	for (map<TAIAlias, CMission *>::iterator it = c->getMissionsBegin(); it != c->getMissionsEnd(); ++it)
+	{
+		if ((*it).second != nullptr && isWaitingIn((*it).second, queueName))
+			return (*it).second;
+	}
+
+	CTeam *team = TeamManager.getRealTeam(c->getTeamId());
+	if (team != nullptr)
+	{
+		const vector<CMissionTeam *> &missions = team->getMissions();
+		for (uint i = 0; i < missions.size(); ++i)
+		{
+			if (missions[i] != nullptr && isWaitingIn(missions[i], queueName))
+				return missions[i];
+		}
+	}
+
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild != nullptr)
+	{
+		const vector<CMissionGuild *> &missions = guild->getMissions();
+		for (uint i = 0; i < missions.size(); ++i)
+		{
+			if (missions[i] != nullptr && isWaitingIn(missions[i], queueName))
+				return missions[i];
+		}
+	}
+	return nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -101,22 +149,56 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 			// The player was in the critical part when the service stopped: its solo mission goes back to its queue_start
 			// step, and the player to the head of the queue. A team does not outlive a restart, and a guild mission is
 			// shared by members who may have gone on with it: those are left as they are.
+			// The mission is in the critical part as saved when its queue_start step is done, or rolled back already, by a
+			// login whose character was saved, when it is active. It has not left the queue at a queue_end, which clears
+			// its waiting queue id: this queue's, or another one's (a mission waiting in two queues keeps only the last)
+			// with no queue_end of this queue done (done steps are never cleared, so only then). The step at the queue's
+			// index must still be its queue_start: the primitives can change across a restart.
 			CMission *mission = c->getMission(_MissionAlias);
-			if (mission != NULL && mission->getWaitingQueueId() == _QueueId)
+			CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(_MissionAlias);
+			CMissionStepQueueStart *queueStart = nullptr;
+			if (templ != nullptr && _CreateQueueStepIndex < templ->Steps.size())
+				queueStart = dynamic_cast<CMissionStepQueueStart *>(templ->Steps[_CreateQueueStepIndex]);
+			const uint32 queueStartKey = (uint32)_CreateQueueStepIndex + 1; // a step's key is its index in the template + 1
+			const bool inCriticalPart = mission != nullptr && mission->getStepsDone(queueStartKey) != nullptr;
+			const bool rolledBack = mission != nullptr && mission->getSteps(queueStartKey) != nullptr;
+			const bool isQueueStart = queueStart != nullptr && queueStart->QueueName == _QueueName;
+			const bool inQueue = mission != nullptr
+			    && (mission->getWaitingQueueId() == _QueueId
+			        || (mission->getWaitingQueueId() != 0 && !hasLeftQueue(mission, templ, _QueueName)));
+			if (isQueueStart && inQueue && inCriticalPart && queueStart->getOOOStepIndex() != 0xFFFFFFFF && !queueStart->isAny())
 			{
-				vector<uint32> removedSteps;
-
-				map<uint32, EGSPD::CDoneStepPD>::iterator it = mission->getStepsDoneBegin();
-				for ( ; it != mission->getStepsDoneEnd() ; ++it )
+				// queue_start alone would complete its out of order block at the acceptance, skipping the others
+				nlwarning("%s was in the critical part of queue %u '%s', whose queue_start is in an out of order block: its mission is not rolled back",
+				    c->getId().toString().c_str(), _QueueId, _QueueName.c_str());
+				_PlayersToRollBackInSteps[i] = _PlayersToRollBackInSteps.back();
+				_PlayersToRollBackInSteps.pop_back();
+			}
+			else if (isQueueStart && inQueue && (inCriticalPart || rolledBack))
+			{
+				if (inCriticalPart)
 				{
-					if ( (*it).first > _CreateQueueStepIndex )
-						removedSteps.push_back((*it).first);
-				}
+					// The steps of the critical part go, done or active, and queue_start is active again with its initial
+					// state, as a jump activates a step: an active step without its state fails the mission as the
+					// character's missions are restored (checkConsistencyWithTemplate). The missions are not in game yet,
+					// so nothing of the active steps is left.
+					vector<uint32> doneSteps;
+					for (map<uint32, EGSPD::CDoneStepPD>::iterator it = mission->getStepsDoneBegin(); it != mission->getStepsDoneEnd(); ++it)
+					{
+						if ((*it).first >= queueStartKey)
+							doneSteps.push_back((*it).first);
+					}
+					for (uint j = 0; j < doneSteps.size(); ++j)
+						mission->deleteFromStepsDone(doneSteps[j]);
 
-				for (uint j = 0 ; j < removedSteps.size() ; ++j)
-				{
-					mission->deleteFromStepsDone(removedSteps[j]);
-					mission->addToSteps(removedSteps[j]);
+					while (mission->getStepsBegin() != mission->getStepsEnd())
+						mission->deleteFromSteps((*mission->getStepsBegin()).first);
+
+					EGSPD::CActiveStepPD *step = mission->addToSteps(queueStartKey);
+					vector<uint32> initState;
+					templ->Steps[_CreateQueueStepIndex]->getInitState(initState);
+					for (uint j = 0; j < initState.size(); ++j)
+						step->addToStates(j + 1)->setState(initState[j]);
 				}
 
 				// The critical part starts again when the player enters it: its end date would fail the mission at a later
@@ -125,12 +207,15 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 				if (mission->getCriticalPartEndDate() > CTickEventHandler::getGameCycle())
 					mission->setCriticalPartEndDate(0);
 
-				// Offline, as the loop below expects; queue_start's onActivation gives the entry its mission
+				// Offline, as the loop below expects, which also gives the entry its mission
 				bool queued = false;
 				for (list<CWaitingEntity>::const_iterator itEntity = _Entities.begin(); itEntity != _Entities.end(); ++itEntity)
 				{
 					if ((*itEntity).Id == c->getId())
+					{
 						queued = true;
+						break;
+					}
 				}
 				if (!queued)
 				{
@@ -141,14 +226,21 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 					entity.LastConnectionDate = CTime::getSecondsSince1970();
 					_Entities.push_front(entity);
 				}
+
+				// The rollback is in memory until the character is saved, and a character that leaves before entering
+				// the game is not, while this queue is: the id stays until the character is saved on disconnection
+				// (CMissionQueueManager::disconnectPlayer), enters the critical part again or leaves the queue.
 			}
 			else
 			{
-				nldebug("%s was in the critical part of queue %u, with no solo mission waiting in it", c->getId().toString().c_str(), _QueueId);
+				if (mission != nullptr && !isQueueStart)
+					nlwarning("%s was in the critical part of queue %u '%s', whose mission no longer has its queue_start at step %u: its mission is not rolled back",
+					    c->getId().toString().c_str(), _QueueId, _QueueName.c_str(), (uint)queueStartKey);
+				else
+					nldebug("%s was in the critical part of queue %u, with no solo mission in it", c->getId().toString().c_str(), _QueueId);
+				_PlayersToRollBackInSteps[i] = _PlayersToRollBackInSteps.back();
+				_PlayersToRollBackInSteps.pop_back();
 			}
-
-			_PlayersToRollBackInSteps[i] = _PlayersToRollBackInSteps.back();
-			_PlayersToRollBackInSteps.pop_back();
 			break;
 		}
 	}
@@ -161,6 +253,10 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 			retValue = true;
 			(*it).Online = true;
 			(*it).LastConnectionDate = CTime::getSecondsSince1970();
+			// A disconnection clears the entry's mission. queue_start's onActivation gives it back only for a mission of
+			// the player itself (putInGame, as the character's missions are restored), not for a guild's, whose
+			// acceptance would then find no mission.
+			(*it).Mission = getMissionWaitingIn(c, _QueueName);
 			++it;
 			break;
 		}
@@ -174,6 +270,20 @@ bool CMissionQueue::characterLoadedCallback(CCharacter *c)
 }
 
 // ----------------------------------------------------------------------------
+void CMissionQueue::forgetRollBack(const NLMISC::CEntityId &id)
+{
+	for (uint i = 0; i < _PlayersToRollBackInSteps.size(); ++i)
+	{
+		if (_PlayersToRollBackInSteps[i] == id)
+		{
+			_PlayersToRollBackInSteps[i] = _PlayersToRollBackInSteps.back();
+			_PlayersToRollBackInSteps.pop_back();
+			return;
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
 void CMissionQueue::clearOfflinePlayer()
 {
 	uint16 nbRemoved = 0;
@@ -183,6 +293,7 @@ void CMissionQueue::clearOfflinePlayer()
 	{
 		if ( !(*it).Online && (time - (*it).LastConnectionDate > MaxDisconnectTimeForQueue) )
 		{
+			forgetRollBack((*it).Id);
 			it = _Entities.erase(it);
 			++nbRemoved;
 		}
@@ -237,6 +348,8 @@ bool CMissionQueue::waitsWithoutMission(const NLMISC::CEntityId &id) const
 // ----------------------------------------------------------------------------
 void CMissionQueue::removePlayer(const NLMISC::CEntityId &id)
 {
+	forgetRollBack(id);
+
 	// if removed entity is the one in critical part, choose another one and exit
 	if (_CriticalPartEntityId == id)
 	{
@@ -651,6 +764,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 			_CriticalPartTimer = _MaxTimeInCriticalPart;
 			_CriticalPartEntityId = id;
 			m_CriticalPartMission = mission;
+			forgetRollBack(id);
 
 			// Mission event
 			CMissionEventQueueEntryOk event(_QueueId);
@@ -712,10 +826,16 @@ void CMissionQueue::playerLeavesCriticalArea()
 		if (candidate == CEntityId::Unknown)
 			break;
 		CCharacter *c = PlayerManager.getChar(candidate);
-		if (c == NULL || hasMissionWaitingIn(c, _MissionAlias, _QueueId))
+		if (c == NULL || getMissionWaitingIn(c, _QueueName) != nullptr)
 			break;
 		nldebug("%s waits in queue %u with no mission waiting in it, taken out of the queue", candidate.toString().c_str(), _QueueId);
 		CMissionQueueManager::getInstance()->removePlayerFromQueue(candidate, _QueueId);
+		if (getNextCandidateInQueue().Id == candidate)
+		{
+			// the manager's queue of this id is another one (a damaged queue file): the loop would not end
+			nlwarning("Queue %u '%s': the queue manager could not take %s out of it, taken out here", _QueueId, _QueueName.c_str(), candidate.toString().c_str());
+			removePlayer(candidate);
+		}
 	}
 
 	// get next candidate and send him an enter critical part request
@@ -793,9 +913,10 @@ const CWaitingEntity &CMissionQueue::getNextCandidateInQueue() const
 	{
 		if ( (*it).Online && (*it).Awake )
 		{
-			// skip player if he already has a proposal in progress
+			// skip player if he already has a proposal in progress, or is still loading: the character is online from its
+			// selection, and a client without its interface yet drops the proposal, then times out asleep
 			CCharacter *player = PlayerManager.getChar((*it).Id);
-			if (player && player->getEnterCriticalZoneProposalQueueId() == 0)
+			if (player && player->getEnterCriticalZoneProposalQueueId() == 0 && player->getEnterFlag())
 			{
 				return (*it);
 			}
@@ -820,6 +941,7 @@ void CMissionQueue::postApply()
 		// keep player Id to reset his mission step when he will be back
 		// when he will be online
 		// check the steps he has validated and come back in steps until we found the create_queue step
+		forgetRollBack(_CriticalPartEntityId);
 		_PlayersToRollBackInSteps.push_back(_CriticalPartEntityId);
 
 		playerLeavesCriticalArea();

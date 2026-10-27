@@ -296,12 +296,25 @@ void CMissionQueueManager::disconnectPlayer(const CCharacter *c)
 	TPlayerQueues::const_iterator itPQ =  _PlayerQueues.find(c->getId());
 	if (itPQ != _PlayerQueues.end())
 	{
-		const CQueueVect &queues = (*itPQ).second;
-		for ( uint i = 0 ; i < queues.QueueIds.size() ; ++i)
+		const vector<uint32> queueIds = (*itPQ).second.QueueIds;
+		for (uint i = 0; i < queueIds.size(); ++i)
 		{
-			map<uint32,CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
+			map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queueIds[i]);
 			BOMB_IF(itMQ == _Queues.end(),"Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
 			(*itMQ).second.disconnectPlayer(c->getId());
+		}
+
+		// CPlayerManager::disconnectPlayer saves a character that entered the game right after this, with the rollback of
+		// a critical part a restart ended: the next save of the queues drops its id. The queue file saved above keeps it,
+		// which a crash before the character's save needs.
+		if (c->getEnterFlag())
+		{
+			for (uint i = 0; i < queueIds.size(); ++i)
+			{
+				map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queueIds[i]);
+				if (itMQ != _Queues.end())
+					(*itMQ).second.forgetRollBack(c->getId());
+			}
 		}
 	}
 }
