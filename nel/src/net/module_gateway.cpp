@@ -1347,6 +1347,20 @@ namespace NLNET
 		virtual void sendModuleProxyMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_sendModuleMessage);
+			// check for visibility rules, before the sender is disclosed to the addressee's route: a frontend's game client
+			// can address any proxy id, and a message to another client's module, discarded here, would otherwise disclose
+			// the sender's module (of a class the client chose) to that client, whose answer would disclose its own module
+			// and the frontend's client info about it
+			if (!isModuleProxyVisible(addresseeProxy, senderProxy->getGatewayRoute()))
+			{
+				nlwarning("Module %u '%s' try to send message to %u '%s' but addressee is not visible, message discarded",
+					senderProxy->getModuleProxyId(),
+					senderProxy->getModuleName().c_str(),
+					addresseeProxy->getModuleProxyId(),
+					addresseeProxy->getModuleName().c_str());
+				return;
+			}
+
 			// manage firewall
 			if (addresseeProxy->getGatewayRoute()
 				&& addresseeProxy->getGatewayRoute()->getTransport()->Firewalled)
@@ -1359,17 +1373,6 @@ namespace NLNET
 					discloseModuleToRoute(route, senderProxy);
 					route->FirewallDisclosed.insert(senderProxy->getModuleProxyId());
 				}
-			}
-
-			// check for visibility rules
-			if (!isModuleProxyVisible(addresseeProxy, senderProxy->getGatewayRoute()))
-			{
-				nlwarning("Module %u '%s' try to send message to %u '%s' but addressee is not visible, message discarded",
-					senderProxy->getModuleProxyId(),
-					senderProxy->getModuleName().c_str(),
-					addresseeProxy->getModuleProxyId(),
-					addresseeProxy->getModuleName().c_str());
-				return;
 			}
 
 			if (addresseeProxy->getGatewayRoute() == nullptr)
