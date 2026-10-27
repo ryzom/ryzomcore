@@ -76,7 +76,7 @@ bool CGroupQuickHelp::submitEvent (const char *event)
 			// Update the text
 			updateParagraph ();
 
-			CLuaManager::getInstance().executeLuaScript(toString("\ngame:processTutorialEvent(\"%s\")\n", event), true);
+			CLuaManager::getInstance().callMethod("game", "processTutorialEvent", event);
 		}
 	}
 	return false;

@@ -80,6 +80,13 @@ namespace NLGUI
 		 */
 		bool executeLuaScript( const std::string &luaScript, bool smallScript = false );
 
+		/**
+		 * Calls the Lua method tableName:functionName(argument) with one string argument. The text is a value on the
+		 * stack, never part of a script, so nothing in it needs escaping. A missing table or function and a Lua error are
+		 * reported through reportScriptError. Returns false when the call did not run or failed.
+		 */
+		bool callMethod(const char *tableName, const char *functionName, const std::string &argument);
+
 		/// Resets the Lua state, that is deallocates it and allocates a new one.
 		void ResetLuaState();
 

@@ -197,13 +197,12 @@ std::deque<CRefPtr<CCtrlBase> >		CHandlerLUA::_UICallerStack;
 class CHandlerSCRIPT : public IActionHandler
 {
 public:
-	void execute(CCtrlBase *pCaller,    const std::string &sParams)
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
+		// the parameter is a script for the game's Lua, its lines separated by '|', passed as a string argument
 		string script = sParams;
-		while(strFindReplace(script, "[", "〈"));
-		while(strFindReplace(script, "]", "〉"));
 		strFindReplace(script, "|", "\n");
-		CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+script+"]])\n",   true);
+		CLuaManager::getInstance().callMethod("game", "executeRyzomScript", script);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerSCRIPT,    "script");

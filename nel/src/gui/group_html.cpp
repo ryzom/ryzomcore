@@ -5539,7 +5539,8 @@ namespace NLGUI
 			string suri = elm.getAttribute("href");
 			if(suri.find("ah:") == 0)
 			{
-				if (_TrustedDomain || suri.find("ah:script:") == 0)
+				// an action handler runs with the client's rights, the script one included: trusted pages only
+				if (_TrustedDomain)
 					_Link.back() = suri;
 			}
 			else
@@ -6416,17 +6417,14 @@ namespace NLGUI
 		// object, run with trusted rights.
 		_Object = false;
 
-		if (_ObjectType=="application/ryzom-tutorial")
+		if (_ObjectType=="application/ryzom-tutorial" || _ObjectType=="application/ryzom-script")
 		{
-			while(strFindReplace(_ObjectScript, "[", "〈"));
-			while(strFindReplace(_ObjectScript, "]", "〉"));
-			CLuaManager::getInstance().executeLuaScript("\ngame:executeTutorial([["+_ObjectScript+"]])\n", true);
-		}
-		else if (_ObjectType=="application/ryzom-script")
-		{
-			while(strFindReplace(_ObjectScript, "[", "〈"));
-			while(strFindReplace(_ObjectScript, "]", "〉"));
-			CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+_ObjectScript+"]])\n", true);
+			// The text is a script for the game's Lua: only a trusted page may run one, and it goes as a string
+			// argument rather than as source text, so nothing in it needs escaping.
+			if (_TrustedDomain)
+				CLuaManager::getInstance().callMethod("game", _ObjectType=="application/ryzom-tutorial" ? "executeTutorial" : "executeRyzomScript", _ObjectScript);
+			else
+				nlwarning("The page '%s' has an <object type=\"%s\">, which only a trusted page may run", _URL.c_str(), _ObjectType.c_str());
 		}
 #if RYZOM_WEB_BNP_DOWNLOAD
 		else if (_TrustedDomain && _ObjectType=="application/ryzom-data")
