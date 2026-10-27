@@ -23,7 +23,11 @@
 #include "mission_manager.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
-
+#include "team_manager/team_manager.h"
+#include "guild_manager/guild_manager.h"
+#include "guild_manager/guild.h"
+#include "mission_team.h"
+#include "mission_guild.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -41,6 +45,32 @@ CWaitingEntity CWaitingEntity::Unknown;
 CVariable<uint32> MaxDisconnectTimeForQueue("egs", "MaxDisconnectTimeForQueue", "max time a player can stay disconnected wihtout being removed from it's mission queues, in seconds (default = 1 week)", 604800, true );
 CVariable<uint32> MinSleepingTime("egs", "MinSleepingTime", "min 'sleeping' time, the duration after which a player who has set himself to sleep mode cannot awake. in seconds (default = 2 min)", 120, true );
 CVariable<uint32> MaxEnterCriticalAnswerTime("egs", "MaxEnterCriticalAnswerTime", "time the player has to answer to the server request about entering a mission critical ppart, in ticks (default = 60 s)", 600, true );
+
+// ----------------------------------------------------------------------------
+// whether a player has a mission of this queue that waits in it: its own, its team's or its guild's
+static bool hasMissionWaitingIn(CCharacter *c, TAIAlias missionAlias, uint32 queueId)
+{
+	const CMission *mission = c->getMission(missionAlias);
+	if (mission != NULL && mission->getWaitingQueueId() == queueId)
+		return true;
+
+	CTeam *team = TeamManager.getRealTeam(c->getTeamId());
+	if (team != NULL)
+	{
+		const CMissionTeam *teamMission = team->getMissionByAlias(missionAlias);
+		if (teamMission != NULL && teamMission->getWaitingQueueId() == queueId)
+			return true;
+	}
+
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+	if (guild != NULL)
+	{
+		const CMissionGuild *guildMission = guild->getMissionByAlias(missionAlias);
+		if (guildMission != NULL && guildMission->getWaitingQueueId() == queueId)
+			return true;
+	}
+	return false;
+}
 
 // ----------------------------------------------------------------------------
 // show a queued mission's journal entry asleep or awake
@@ -646,6 +676,21 @@ void CMissionQueue::playerLeavesCriticalArea()
 	_CriticalPartEntityId = CEntityId::Unknown;
 	m_CriticalPartMission = NULL;
 	_CriticalPartTimer = 0;
+
+	// A candidate with no mission waiting here any more is taken out of the queue: it would hold the critical part until
+	// it timed out. That is the entry of a player who was offline when the mission was removed (which then cannot tell
+	// the entry belongs to it), or who left the team or guild whose mission the player waited for.
+	for (;;)
+	{
+		const CEntityId candidate = getNextCandidateInQueue().Id;
+		if (candidate == CEntityId::Unknown)
+			break;
+		CCharacter *c = PlayerManager.getChar(candidate);
+		if (c == NULL || hasMissionWaitingIn(c, _MissionAlias, _QueueId))
+			break;
+		nldebug("%s waits in queue %u with no mission waiting in it, taken out of the queue", candidate.toString().c_str(), _QueueId);
+		CMissionQueueManager::getInstance()->removePlayerFromQueue(candidate, _QueueId);
+	}
 
 	// get next candidate and send him an enter critical part request
 	const CWaitingEntity &nextEntity = getNextCandidateInQueue();

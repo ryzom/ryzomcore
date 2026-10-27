@@ -274,7 +274,8 @@ bool CMissionQueueManager::removeMissionFromQueue(uint32 queueId, const CMission
 	}
 	if (id == CEntityId::Unknown)
 	{
-		// the entry is already gone (clearOfflinePlayer), or the player who waits is offline and no longer in the group
+		// the entry is already gone (clearOfflinePlayer), or the player who waits is offline and no longer in the group:
+		// that entry is taken out when it comes up for the critical part (CMissionQueue::playerLeavesCriticalArea)
 		nldebug("No entity waits in queue %u for the removed mission", queueId);
 		return false;
 	}
