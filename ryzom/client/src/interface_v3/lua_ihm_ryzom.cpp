@@ -492,7 +492,9 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetName", getTargetName);
 	ls.registerFunc("getTargetTitleRaw", getTargetTitleRaw);
 	ls.registerFunc("getTargetTitle", getTargetTitle);
+#if RYZOM_WEB_BNP_DOWNLOAD
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
+#endif
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
 	ls.registerFunc("displayChatMessage", displayChatMessage);
 	ls.registerFunc("disableContextHelpForControl", disableContextHelpForControl);
@@ -1494,7 +1496,9 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 	return 1;
 }
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 // ***************************************************************************
+// Mounts user/, where the bnp downloads of web pages are installed (see RYZOM_WEB_BNP_DOWNLOAD in nel/gui/group_html.h)
 int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_addSearchPathUser)
@@ -1514,6 +1518,7 @@ int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
 
 	return 0;
 }
+#endif
 
 // ***************************************************************************
 int CLuaIHMRyzom::isPlayerFreeTrial(CLuaState &ls)

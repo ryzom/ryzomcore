@@ -32,6 +32,13 @@
 #include "nel/gui/css_style.h"
 #include "nel/gui/css_background_renderer.h"
 
+// The bnp download of trusted web pages (<object type="application/ryzom-data">, installed in user/ and mounted by the
+// Lua addSearchPathUser) is unmaintained and no longer supported, and no web app uses it. Set it to 1 here, or define it
+// for nel and the client alike, to build it: it changes the layout of CGroupHTML.
+#ifndef RYZOM_WEB_BNP_DOWNLOAD
+#define RYZOM_WEB_BNP_DOWNLOAD 0
+#endif
+
 // forward declaration
 typedef void CURLM;
 
@@ -469,7 +476,9 @@ namespace NLGUI
 		bool			_LuaHrefHack;
 
 		bool			_Object;
+#if RYZOM_WEB_BNP_DOWNLOAD
 		std::string		_ObjectScript;
+#endif
 
 		// Data container for active curl transfer
 		class CCurlWWWData *	_CurlWWW;
@@ -794,11 +803,13 @@ namespace NLGUI
 		bool			_SelectOption;
 		std::string		_SelectOptionStr;
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 		// Current node is a object
 		std::string		_ObjectType;
 		std::string		_ObjectData;
 		std::string		_ObjectMD5Sum;
 		std::string		_ObjectAction;
+#endif
 		std::string		_TextAreaScript;
 
 		// Get last char
@@ -958,6 +969,7 @@ namespace NLGUI
 			std::vector<std::pair<sint32, CViewBase *> > TextureIds;
 		};
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 		class BnpDownloadCB : public CDataDownload
 		{
 		public:
@@ -972,6 +984,7 @@ namespace NLGUI
 			std::string m_md5sum;
 			std::string m_lua;
 		};
+#endif
 
 		std::list<CDataDownload*> Curls;
 		CURLM *MultiCurl;
@@ -996,12 +1009,14 @@ namespace NLGUI
 		void setTextButtonStyle(CCtrlTextButton *ctrlButton, const CStyleParams &style);
 		void setTextStyle(CViewText *pVT, const CStyleParams &style);
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 		// BnpDownload system
 		void initBnpDownload();
 		void checkBnpDownload();
 		bool addBnpDownload(std::string url, const std::string &action, const std::string &script, const std::string &md5sum);
 		/// user/ and the file name the url ends with, empty when that is not a plain file name
 		std::string localBnpName(const std::string &url);
+#endif
 
 		// add css file from <link href=".." rel="stylesheet"> to download queue
 		void addStylesheetDownload(std::vector<CHtmlParser::StyleLink> links);

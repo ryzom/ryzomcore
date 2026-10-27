@@ -449,6 +449,7 @@ namespace NLGUI
 		}
 	}
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 	void CGroupHTML::BnpDownloadCB::finish()
 	{
 		bool verified = false;
@@ -489,6 +490,7 @@ namespace NLGUI
 			CLuaManager::getInstance().executeLuaScript(script, true );
 		}
 	}
+#endif
 
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
@@ -1054,6 +1056,7 @@ namespace NLGUI
 	}
 
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 	// Get an url and return the local filename with the path where the bnp should be
 	string CGroupHTML::localBnpName(const string &url)
 	{
@@ -1124,6 +1127,7 @@ namespace NLGUI
 		if ( ! CFile::isExists( pathName ) )
 			CFile::createDirectory( pathName );
 	}
+#endif
 
 	void CGroupHTML::addStylesheetDownload(const std::vector<CHtmlParser::StyleLink> links)
 	{
@@ -1787,7 +1791,9 @@ namespace NLGUI
 		_CurlWWW = nullptr;
 
 		initImageDownload();
+#if RYZOM_WEB_BNP_DOWNLOAD
 		initBnpDownload();
+#endif
 
 		// setup default browser style
 		setProperty("browser_css_file", "browser.css");
@@ -2854,7 +2860,10 @@ namespace NLGUI
 		// In title ?
 		if (_Object)
 		{
+			// the text inside an object is not shown
+#if RYZOM_WEB_BNP_DOWNLOAD
 			_ObjectScript += tmpStr;
+#endif
 		}
 		else if (_SelectOption)
 		{
@@ -6388,19 +6397,29 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupHTML::htmlOBJECT(const CHtmlElement &elm)
 	{
+#if RYZOM_WEB_BNP_DOWNLOAD
 		_ObjectType = elm.getAttribute("type");
 		_ObjectData = elm.getAttribute("data");
 		_ObjectMD5Sum = elm.getAttribute("id");
 		_ObjectAction = elm.getAttribute("standby");
+		_ObjectScript.clear();
+#else
+		if (elm.getAttribute("type") == "application/ryzom-data")
+			nlwarning("The page '%s' asks for the bnp download '%s' (<object type=\"application/ryzom-data\">), which is no "
+			    "longer supported: this client is built without RYZOM_WEB_BNP_DOWNLOAD", _URL.c_str(), elm.getAttribute("data").c_str());
+#endif
 		_Object = true;
 	}
 
 	void CGroupHTML::htmlOBJECTend(const CHtmlElement &elm)
 	{
-		if (!_TrustedDomain)
-			return;
+		// The text after the object is shown, whatever the page's trust. The end of an object on an untrusted page left
+		// this set until the next page, and the text that followed went into the script of the next trusted page's
+		// object, run with trusted rights.
+		_Object = false;
 
-		if (_ObjectType=="application/ryzom-data")
+#if RYZOM_WEB_BNP_DOWNLOAD
+		if (_TrustedDomain && _ObjectType=="application/ryzom-data")
 		{
 			if (!_ObjectData.empty())
 			{
@@ -6408,10 +6427,10 @@ namespace NLGUI
 				{
 					CLuaManager::getInstance().executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
 				}
-				_ObjectScript.clear();
 			}
 		}
-		_Object = false;
+		_ObjectScript.clear();
+#endif
 	}
 
 	// ***************************************************************************
