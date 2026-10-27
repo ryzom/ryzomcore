@@ -77,15 +77,16 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 	TPlayerQueues::const_iterator itPQ =  _PlayerQueues.find(c->getId());
 	if (itPQ != _PlayerQueues.end())
 	{
-		const CQueueVect &queues = (*itPQ).second;
-		for ( uint i = 0 ; i < queues.QueueIds.size() ; )
+		// a copy: removePlayerFromQueue changes the player's entry, and erases it with its last queue
+		const vector<uint32> queueIds = (*itPQ).second.QueueIds;
+		for (uint i = 0; i < queueIds.size(); ++i)
 		{
 			// check coherency with infos kept in manager
 			const uint size2 = (uint)playerQueues.size();
 			uint j;
 			for ( j = 0 ; j < size2 ; ++j)
 			{
-				if (playerQueues[j] == queues.QueueIds[i])
+				if (playerQueues[j] == queueIds[i])
 				{
 					playerQueues[j] = playerQueues.back();
 					playerQueues.pop_back();
@@ -95,17 +96,14 @@ void CMissionQueueManager::characterLoadedCallback(CCharacter *c)
 
 			if (j == size2)
 			{
-				// queue not found in player queues, remove it and go to next
-				removePlayerFromQueue(c->getId(), queues.QueueIds[i]);
-				continue;
+				// queue not found in player queues, remove it
+				removePlayerFromQueue(c->getId(), queueIds[i]);
 			}
 			else
 			{
-				map<uint32,CMissionQueue>::iterator itMQ = _Queues.find(queues.QueueIds[i]);
+				map<uint32, CMissionQueue>::iterator itMQ = _Queues.find(queueIds[i]);
 				BOMB_IF(itMQ == _Queues.end(),"Failed to find queue from it's id, but referenced in _PlayerQueues queues list, BUG", continue);
 				(*itMQ).second.characterLoadedCallback(c);
-
-				++i;
 			}
 		}
 	}
@@ -245,7 +243,7 @@ void CMissionQueueManager::removePlayerFromQueue(const CEntityId &id, uint32 que
 	TPlayerQueues::iterator itPQ = _PlayerQueues.find(id);
 	if (itPQ == _PlayerQueues.end())
 	{
-		nlwarning("Failed to find entry in _PlayerQueues for player ! BUG", id.toString().c_str());
+		nlwarning("Failed to find entry in _PlayerQueues for player %s ! BUG", id.toString().c_str());
 		return;
 	}
 
