@@ -328,6 +328,9 @@ void			CTextureFile::setMipMapSkipAtLoad(uint8 level)
 // ***************************************************************************
 std::string		CTextureFile::getShareName() const
 {
+	// an untrusted file (see setUntrustedMaxSize) is read with other checks, and is never shared with the trusted one
+	if (m_UntrustedMaxSize)
+		return toLowerAscii(_FileName) + toString("@Untrusted:%u", m_UntrustedMaxSize);
 	return toLowerAscii(_FileName);
 }
 
