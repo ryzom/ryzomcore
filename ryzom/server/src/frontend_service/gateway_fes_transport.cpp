@@ -30,6 +30,9 @@ using namespace CLFECOMMON;
 
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
+// whether the FESecurity plug-in is created on this gateway (defined after CFESecurity)
+static bool isFESecurityCreated(IModuleGateway *gateway);
+
 /** the specialized route for frontend server transport */
 class CFEServerRoute : public CGatewayRoute
 {
@@ -203,11 +206,13 @@ public:
 				return false;
 			}
 
-			openServer();
+			if (!openServer())
+				return false;
 		}
 		else if (commandName == "close")
 		{
-			closeServer();
+			if (!closeServer())
+				return false;
 		}
 		else
 			return false;
@@ -215,18 +220,29 @@ public:
 		return true;
 	}
 
-	/// Open the server by intercepting client gateway message
-	void openServer()
+	/// Open the server by intercepting client gateway message. A refusal is logged and the frontend runs on, with no
+	/// route for the clients' modules: nothing catches an exception thrown from a command, which would end the frontend.
+	bool openServer()
 	{
 		if (OpenTransport() != NULL)
-			throw ETransportError("openServer : a transport is already open !");
+		{
+			nlwarning("Frontend gateway transport not opened: a transport of this type is already open");
+			return false;
+		}
 
 		// a game client would see every module and other clients' modules, and could disclose modules under any name
 		if (!Firewalled || !PeerInvisible)
 		{
-			// the command log alone would hide it: the frontend runs on, with no route for the clients' modules
 			nlwarning("Frontend gateway transport not opened: it must be Firewalled and PeerInvisible, its routes are game clients (gw.transportOptions fes(PeerInvisible Firewalled))");
-			throw ETransportError("openServer : the frontend transport must be Firewalled and PeerInvisible");
+			return false;
+		}
+
+		// the plug-in replaces the security data of the clients' modules with the frontend's client info: without it,
+		// the services would take whatever a client sends for its own modules as the frontend's word
+		if (!isFESecurityCreated(_Gateway))
+		{
+			nlwarning("Frontend gateway transport not opened: the FESecurity plug-in must be created on its gateway first (gw.securityCreate FESecurity)");
+			return false;
 		}
 
 		// set this transport as the open transport
@@ -240,13 +256,21 @@ public:
 		uint nbClients = (uint)CFrontEndService::instance()->receiveSub()->clientMap().size();
 		if (nbClients != 0)
 			nlwarning("Frontend gateway transport opened with %u clients connected: those whose own gateway transport is open (ring editors) have no route until they open it again", nbClients);
+
+		return true;
 	}
 
+	/// The gateway hosting this transport
+	IModuleGateway *getGateway() const { return _Gateway; }
+
 	/// Close the server, this will close the listing socket and any active connection
-	void closeServer()
+	bool closeServer()
 	{
 		if (OpenTransport() != this)
-			throw ETransportError("closeServer : The server is not open");
+		{
+			nlwarning("Frontend gateway transport not closed: it is not open");
+			return false;
+		}
 
 		// close all client connections
 		while (!_Routes.empty())
@@ -263,6 +287,7 @@ public:
 
 		// this transport is no longer open
 		OpenTransport() = NULL;
+		return true;
 	}
 
 
@@ -613,8 +638,20 @@ public:
 	}
 
 
+	/// The gateway this plug-in is created on
+	IModuleGateway *getGateway() const { return _Gateway; }
+
 	void onDelete() NL_OVERRIDE
 	{
+		// The clients' modules that connect later would keep the security data they send: the client routes are closed
+		// with the plug-in, as the transport does not open without it
+		CGatewayFEServerTransport *transport = CGatewayFEServerTransport::OpenTransport();
+		if (transport != NULL && transport->getGateway() == _Gateway)
+		{
+			nlwarning("FESecurity plug-in removed: the frontend gateway transport is closed with it, and its client routes");
+			transport->closeServer();
+		}
+
 		// remove any client security info
 		vector<IModuleProxy*> proxies;
 		_Gateway->getModuleProxyList(proxies);
@@ -673,6 +710,11 @@ public:
 NLMISC_REGISTER_OBJECT(CGatewaySecurity, CFESecurity, std::string, string(FE_SECURITY_CLASS_NAME));
 
 CFESecurity		*CFESecurity::Instance = NULL;
+
+static bool isFESecurityCreated(IModuleGateway *gateway)
+{
+	return CFESecurity::Instance != NULL && CFESecurity::Instance->getGateway() == gateway;
+}
 
 
 void cbEntityIdChanged(CClientHost *clienthost)
