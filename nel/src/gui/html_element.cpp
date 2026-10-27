@@ -147,7 +147,7 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string CHtmlElement::htmlEscape(const std::string &val)
 	{
-		if (val.find_first_of("\"'&<>\xA0") == std::string::npos)
+		if (val.find_first_of("\"'&<>\xC2") == std::string::npos)
 			return val;
 
 		std::string ret;
@@ -162,7 +162,19 @@ namespace NLGUI
 				case '&': ret.append("&amp;"); break;
 				case '<': ret.append("&lt;"); break;
 				case '>': ret.append("&gt;"); break;
-				case '\xA0': ret.append("&nbsp;"); break;
+				case '\xC2':
+					// the no-break space U+00A0 in UTF-8; a 0xA0 byte alone is the second byte of many characters
+					// (C3 A0 is a-grave)
+					if (pos + 1 < val.size() && val[pos + 1] == '\xA0')
+					{
+						ret.append("&nbsp;");
+						++pos;
+					}
+					else
+					{
+						ret.append(&val[pos], 1);
+					}
+					break;
 				default : ret.append(&val[pos],1); break;
 			}
 		}
