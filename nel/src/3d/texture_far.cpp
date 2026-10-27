@@ -686,6 +686,16 @@ void CTextureFar::rebuildPatch (const CVector2s texturePos, const CPatchIdent &p
 								sourceSize=tileSize;
 							}
 
+							// The far bank is read from a file: the tile must hold every pixel read below for this order
+							uint nbSourcePixels=(uint)sourceSize*(uint)sourceSize;
+							if (pTile->getSize (CTileFarBank::diffuse, orderX)<nbSourcePixels
+								|| (bAdditive && pTile->getSize (CTileFarBank::additive, orderX)<nbSourcePixels))
+							{
+								nlwarning ("FarBank tile %d is too small for order %d (needs %u pixels)", tile, (sint)orderX, nbSourcePixels);
+								// Stop, do not read outside of the tile
+								break;
+							}
+
 							// Compute offset and deltas
 							switch (nRot)
 							{
