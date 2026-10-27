@@ -48,9 +48,10 @@ bool	bsstrincmp(const char* s1, const char* s2, int n)
 
 std::string	getBackupFileName(const std::string& filename)
 {
-	// A leading separator is relative to SaveShardRoot like the rest of the name (the logger service sends "/" + name),
-	// also when SaveShardRoot is empty and the BS works in its current directory
-	return SaveShardRootGameShare.get() + NLMISC::CFile::normalizeRelativePath(filename);
+	// A leading separator is relative to SaveShardRoot like the rest of the name (the logger service sends "/" + name).
+	// The name no longer brings its own separator, so a SaveShardRoot written without its trailing one gets it here,
+	// as the services' local path does (CPath::standardizePath leaves an empty one empty)
+	return NLMISC::CPath::standardizePath(SaveShardRootGameShare.get()) + NLMISC::CFile::normalizeRelativePath(filename);
 	/* // BSFilePrefix and BSFileSubst are deprecated
 	if (BSFilePrefix.get().empty())
 		return filename;
