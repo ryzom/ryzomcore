@@ -762,9 +762,13 @@ namespace NLGUI
 					if (!startCurlDownload(*it))
 					{
 						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
-						finishCurlDownload(*it);
+						// out of the queue before its callback runs, as in checkDownloads; the callback can release the
+						// downloads of the page, so the queue is walked again from the start
+						CDataDownload *download = *it;
+						Curls.erase(it);
+						finishCurlDownload(download);
 
-						it = Curls.erase(it);
+						it = Curls.begin();
 						continue;
 					}
 				}
@@ -1179,9 +1183,12 @@ namespace NLGUI
 								error = curl_easy_strerror(msg->data.result);
 							}
 							LOG_DL("data download finished with curl code %d (%s)", (sint)msg->msg, error.c_str());
-							dataDownloadFinished(success, error, *it);
 
+							// Out of the queue before its callback runs: the Lua of a bnp download can render the page,
+							// which releases every download in the queue. A redirect puts it back in front.
+							CDataDownload *download = *it;
 							Curls.erase(it);
+							dataDownloadFinished(success, error, download);
 							break;
 						}
 					}
@@ -4031,6 +4038,7 @@ namespace NLGUI
 	void CGroupHTML::dataDownloadFinished(bool success, const std::string &error, CDataDownload *data)
 	{
 		fclose(data->fp);
+		data->fp = nullptr;
 
 		CUrlParser uri(data->url);
 		if (!uri.host.empty())
