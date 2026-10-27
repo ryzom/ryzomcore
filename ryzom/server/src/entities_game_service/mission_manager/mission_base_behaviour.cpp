@@ -921,12 +921,16 @@ void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 			CCharacter * user = getMainEntity();
 			if (user)
 			{
+				// the events can remove this mission (the overrides of onFailure check it too)
+				NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 				while( !eventList.empty() )
 				{
 					user->processMissionEvent( *eventList.front() );
 					delete eventList.front();
 					eventList.pop_front();
 				}
+				if (self == NULL)
+					return;
 			}
 		}
 	}
@@ -1534,12 +1538,16 @@ void CMissionBaseBehaviour::applyPlayerReconnectHandler()
 			CCharacter * user = getMainEntity();
 			if (user != NULL)
 			{
+				// the events can end and remove this mission
+				NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 				while (!eventList.empty())
 				{
 					user->processMissionEvent(*eventList.front());
 					delete eventList.front();
 					eventList.pop_front();
 				}
+				if (self == NULL)
+					return;
 			}
 		}
 	}
@@ -1599,12 +1607,16 @@ void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::string &
 			CCharacter * user = getMainEntity();
 			if (user)
 			{
+				// the events can end and remove this mission
+				NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 				while( !eventList.empty() )
 				{
 					user->processMissionEvent( *eventList.front() );
 					delete eventList.front();
 					eventList.pop_front();
 				}
+				if (self == NULL)
+					return;
 			}
 		}
 	}

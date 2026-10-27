@@ -154,7 +154,11 @@ void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	nlassert(templ);
+	// the events of the failure actions can remove this mission
+	NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 	CMission::onFailure(ignoreJumps);
+	if (self == NULL)
+		return;
 
 	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
 	{
