@@ -610,7 +610,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 			m_CriticalPartMission = mission;
 
 			// Mission event
-			CMissionEventQueueEntryOk event;
+			CMissionEventQueueEntryOk event(_QueueId);
 			player->processMissionEvent( event );
 		}
 	}
