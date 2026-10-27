@@ -220,6 +220,8 @@ void CMissionQueue::removePlayer(const NLMISC::CEntityId &id)
 		{
 			_AskedEntityId = CEntityId::Unknown;
 			_StepAnswerTimer = 0;
+			// every queue skips a player whose proposal is still set
+			player->setEnterCriticalZoneProposalQueueId(0);
 
 			// send message to close proposal window
 			CMessage msgout( "IMPULSION_ID" );
