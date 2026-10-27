@@ -26,6 +26,7 @@
 #include "game_share/synchronised_message.h"
 #include "player_manager/character_game_event.h"
 #include "player_manager/character.h"
+#include "mission_manager/mission_template.h"
 #include "game_event_manager.h"
 #include "dyn_chat_egs.h"
 #include "egs_pd.h"
@@ -70,35 +71,29 @@ void CCharacterGameEvent::subscribe()
 }
 
 //-----------------------------------------------------------------------------
-void CCharacterGameEvent::reset()
+void CCharacterGameEvent::reset(const EGSPD::CMissionPD *running)
 {
 	// if we are not in a game event do not reset
 	if (! isInGameEvent()) return;
 
-	// Remove game event mission
-	map<TAIAlias, CMission*>::iterator it = _Char.getMissionsBegin();
-	// remove missions
-	while (it != _Char.getMissionsEnd())
+	// Remove game event missions as abandoned, which takes them out of the mission manager, the journal and their
+	// queue: deleting them only left stale pointers there. removeMission erases from the map, so collect them first.
+	// The mission whose action resets the game event is still processing that action, and ends by itself.
+	vector<TAIAlias> eventMissions;
+	for (map<TAIAlias, CMission *>::iterator it = _Char.getMissionsBegin(); it != _Char.getMissionsEnd(); ++it)
 	{
-		if (CGameEventManager::getInstance().isGameEventMission(it->first))
-		{
-			TAIAlias mission = it->first;
-			map<TAIAlias, CMission*>::iterator itToDel = it;
-			++it;
-			_Char._Missions->deleteFromMissions( mission );
-		}
-		else
-		{
-			++it;
-		}
+		if (CGameEventManager::getInstance().isGameEventMission(it->first) && it->second != running)
+			eventMissions.push_back(it->first);
 	}
+	for (uint i = 0; i < eventMissions.size(); ++i)
+		_Char.removeMission(eventMissions[i], mr_abandon);
+
 	// remove mission history
 	map<TAIAlias, TMissionHistory>::iterator itH = _Char._MissionHistories.begin();
 	while (itH != _Char._MissionHistories.end())
 	{
-		if (CGameEventManager::getInstance().isGameEventMission(it->first))
+		if (CGameEventManager::getInstance().isGameEventMission(itH->first))
 		{
-			TAIAlias mission = itH->first;
 			map<TAIAlias, TMissionHistory>::iterator itHToDel = itH;
 			++itH;
 			_Char._MissionHistories.erase( itHToDel );
