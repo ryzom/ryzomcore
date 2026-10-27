@@ -112,7 +112,7 @@ void cbClientBotChatPickStaticMission( NLNET::CMessage& msgin, const std::string
 	// Check that index falls in good range
 	if ( index >= user->getCurrentMissionList().size() )
 	{
-		MISLOG("%s invalid index %u, there are %u", sDebugPrefix.c_str(), index, user->getCurrentMissionList().size() );
+		MISLOG("%s invalid index %u, there are %u", sDebugPrefix.c_str(), index, (uint)user->getCurrentMissionList().size());
 		return;
 	}
 
@@ -274,7 +274,7 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 		if ( missionPos >= team->getMissions().size() )
 		{
 			MISLOG("user:%s cbClientGroupAbandonMission : no team mission at journal index %u ( count %u )",
-							userId.toString().c_str(), index, team->getMissions().size());
+			    userId.toString().c_str(), index, (uint)team->getMissions().size());
 			return;
 		}
 
@@ -330,7 +330,7 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 		if ( missionPos >= guild->getMissions().size() )
 		{
 			MISLOG("user:%s cbClientGroupAbandonMission : no guild mission at journal index %u ( count %u )",
-				userId.toString().c_str(), index, guild->getMissions().size());
+			    userId.toString().c_str(), index, (uint)guild->getMissions().size());
 			return;
 		}
 
@@ -439,7 +439,7 @@ void cbClientMissionGroupWake( NLNET::CMessage& msgin, const std::string & servi
 	if ( missionPos >=  team->getMissions().size() )
 	{
 		MISLOG("user:%s cbClientMissionGroupWake : no team mission at journal index %u ( count %u )",
-			userId.toString().c_str(), missionGroupIndex, team->getMissions().size());
+		    userId.toString().c_str(), missionGroupIndex, (uint)team->getMissions().size());
 		return;
 	}
 	
