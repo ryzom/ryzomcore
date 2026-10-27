@@ -42,6 +42,19 @@ CVariable<uint32> MaxDisconnectTimeForQueue("egs", "MaxDisconnectTimeForQueue", 
 CVariable<uint32> MinSleepingTime("egs", "MinSleepingTime", "min 'sleeping' time, the duration after which a player who has set himself to sleep mode cannot awake. in seconds (default = 2 min)", 120, true );
 CVariable<uint32> MaxEnterCriticalAnswerTime("egs", "MaxEnterCriticalAnswerTime", "time the player has to answer to the server request about entering a mission critical ppart, in ticks (default = 60 s)", 600, true );
 
+// ----------------------------------------------------------------------------
+// show a queued mission's journal entry asleep or awake
+static void setJournalSleep(CCharacter *character, const CMissionTemplate *templ, CMission *mission, bool sleep)
+{
+	// a mission hidden from the journal has no entry (0xFF)
+	if (mission->getClientIndex() == 0xFF)
+		return;
+
+	if (templ->Type == MISSION_DESC::Solo)
+		CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, sleep);
+	else
+		CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, sleep);
+}
 
 // ----------------------------------------------------------------------------
 bool CMissionQueue::characterLoadedCallback(CCharacter *c)
@@ -321,15 +334,7 @@ void CMissionQueue::tickUpdate()
 						}
 						else
 						{
-							string prefix;
-							if ( templ->Type  == MISSION_DESC::Solo )
-//								prefix = "";
-								CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, 1);
-							else //if ( templ->Type  == MISSION_DESC::Group )
-//								prefix = "GROUP:";
-								CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, 1);
-
-							//character->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), 1);
+							setJournalSleep(character, templ, mission, true);
 						}
 					}
 				}
@@ -461,16 +466,7 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 			}
 			else if (mission)
 			{
-				string prefix;
-				
-				if ( templ->Type  == MISSION_DESC::Solo )
-//					prefix = "";
-					CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, ((*it).Awake?0:1));
-				else //if ( templ->Type  == MISSION_DESC::Group )
-//					prefix = "GROUP:";
-					CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, ((*it).Awake?0:1));
-					
-//				player->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), ((*it).Awake?0:1) );
+				setJournalSleep(player, templ, mission, !(*it).Awake);
 			}
 
 			(*it).LastConnectionDate = CTime::getSecondsSince1970();
@@ -512,16 +508,7 @@ void CMissionQueue::addPlayer( const NLMISC::CEntityId &id, CMission *mission, b
 	}
 	else if (mission)
 	{
-		string prefix;
-		
-		if ( templ->Type  == MISSION_DESC::Solo )
-//			prefix = "";
-			CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 0);
-		else //if ( templ->Type  == MISSION_DESC::Group )
-//			prefix = "GROUP:";
-			CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 0);
-		
-//		player->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), 0);
+		setJournalSleep(player, templ, mission, false);
 	}
 
 	if (!forceTopOfQueue)
@@ -628,18 +615,7 @@ void CMissionQueue::playerEntersCriticalArea(const NLMISC::CEntityId &id, bool a
 				// indicate to player he is now in sleep mode		
 				if (mission && player)
 				{
-//					string prefix;
-					if ( templ->Type  == MISSION_DESC::Solo )
-//						prefix = "";
-						CBankAccessor_PLR::getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 1);
-					else //if ( templ->Type  == MISSION_DESC::Group )
-//						prefix = "GROUP:";
-						CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(mission->getClientIndex()).setSLEEP(player->_PropertyDatabase, 1);
-						
-//					if (player)
-//					{
-//						player->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),mission->getClientIndex()), 1);
-//					}
+					setJournalSleep(player, templ, mission, true);
 				}
 
 				//decrease the online position of remaining players
@@ -798,23 +774,10 @@ void CMissionQueue::changePlayerAwakeState(const NLMISC::CEntityId &id, bool wak
 			}
 			else if ((*it).Mission != NULL)
 			{
-//				string prefix;
-				
 				CCharacter *character = PlayerManager.getChar(id);
 				if (character)
 				{
-					if ( templ->Type  == MISSION_DESC::Solo )
-//						prefix = "";
-						CBankAccessor_PLR::getMISSIONS().getArray((*it).Mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, (wakeUp?0:1));
-					else //if ( templ->Type  == MISSION_DESC::Group )
-//						prefix = "GROUP:";
-						CBankAccessor_PLR::getGROUP().getMISSIONS().getArray((*it).Mission->getClientIndex()).setSLEEP(character->_PropertyDatabase, (wakeUp?0:1));
-					
-//					CCharacter *character = PlayerManager.getChar(id);
-//					if (character)
-//					{
-//						character->_PropertyDatabase.setProp( toString("%sMISSIONS:%u:SLEEP",prefix.c_str(),(*it).Mission->getClientIndex()), (wakeUp?0:1));
-//					}
+					setJournalSleep(character, templ, (*it).Mission, !wakeUp);
 				}
 			}
 
