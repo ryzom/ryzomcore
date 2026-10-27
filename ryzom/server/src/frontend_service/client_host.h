@@ -494,7 +494,7 @@ public:
 	//@{
  	struct CGenericMultiPartTemp
  	{
- 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF), NbCurrentBlock(0) { }
+ 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF), NbCurrentBlock(0), Dropped(false) { }
  
  		/// The client's parts fit an impulse of 230 bytes, header included (CNetworkConnection::push)
  		enum { MaxClientMultiPartSize = 230 };
@@ -504,11 +504,15 @@ public:
  		uint32								NbCurrentBlock;
  		/// The parts received so far, one after the other
  		std::vector<uint8>					Temp;
+ 		/// The message was dropped (and counted once): its remaining parts are discarded until a first part starts the next
+ 		bool								Dropped;
  
  		void set (CLFECOMMON::CActionGenericMultiPart *agmp, CClientHost *client);
  
  		/// Drop the parts received so far and free their memory
  		void reset ();
+ 		/// Drop the message being reassembled, whose remaining parts will still come
+ 		void drop ();
  	};
  
  	std::vector<CGenericMultiPartTemp>	GenericMultiPartTemp;

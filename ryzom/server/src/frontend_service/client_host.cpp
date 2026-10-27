@@ -487,6 +487,9 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 		// new GenericMultiPart, which starts with its first part (a stray part must not drop the message in progress)
 		if (agmp->Part != 0)
 		{
+			// the rest of a message already dropped and counted
+			if (Dropped)
+				return;
 			nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which has not started, dropped",
 				(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number);
 			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
@@ -503,12 +506,13 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 				nlwarning("FEHACK: client %u (uid %u, %s) started multi-part message %u with message %u still at %u of %u parts, the unfinished one dropped",
 					(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, i, other.NbCurrentBlock, other.NbBlock);
 				CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
-				other.reset();
+				other.drop();
 			}
 		}
 
 		// a free slot holds no part (reset)
 		NbBlock = agmp->NbBlock;
+		Dropped = false;
 	}
 	else if (NbBlock != agmp->NbBlock)
 	{
@@ -527,7 +531,7 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 		nlwarning("FEHACK: client %u (uid %u, %s) sent part %u of %u for multi-part message %u, which expects part %u, the message dropped",
 			(uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Part, (uint)agmp->NbBlock, (uint)agmp->Number, NbCurrentBlock);
 		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedMultiPart, client->Uid );
-		reset();
+		drop();
 		return;
 	}
 
@@ -537,7 +541,7 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 		nlwarning("FEHACK: client %u (uid %u, %s) sent multi-part message %u with more than %u bytes at part %u of %u, the message dropped",
 		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), (uint)agmp->Number, MaxClientMessageSize.get(), (uint)agmp->Part, (uint)agmp->NbBlock);
 		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage(MalformedMultiPart, client->Uid);
-		reset();
+		drop();
 		return;
 	}
 
@@ -578,7 +582,16 @@ void				CClientHost::CGenericMultiPartTemp::reset ()
 {
 	NbBlock = 0xFFFFFFFF;
 	NbCurrentBlock = 0;
+	Dropped = false;
 	std::vector<uint8>().swap(Temp);
+}
+
+void				CClientHost::CGenericMultiPartTemp::drop ()
+{
+	// one rejected message, not one per remaining part: with RejectedMessagesLimit, a single message over
+	// MaxClientMessageSize would disconnect the client
+	reset();
+	Dropped = true;
 }
 
 void				CClientHost::resetClientVision()
