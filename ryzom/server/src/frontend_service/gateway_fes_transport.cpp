@@ -117,6 +117,10 @@ public:
 	CGatewayFEServerTransport(const IGatewayTransport::TCtorParam &param) 
 		: IGatewayTransport(param)
 	{
+		// The routes are game clients: they see only the modules that address them, not each other's, and the gateway
+		// limits what they can disclose (see openServer)
+		Firewalled = true;
+		PeerInvisible = true;
 	}
 
 	~CGatewayFEServerTransport() NL_OVERRIDE
@@ -216,6 +220,14 @@ public:
 	{
 		if (OpenTransport() != NULL)
 			throw ETransportError("openServer : a transport is already open !");
+
+		// a game client would see every module and other clients' modules, and could disclose modules under any name
+		if (!Firewalled || !PeerInvisible)
+		{
+			// the command log alone would hide it: the frontend runs on, with no route for the clients' modules
+			nlwarning("Frontend gateway transport not opened: it must be Firewalled and PeerInvisible, its routes are game clients (gw.transportOptions fes(PeerInvisible Firewalled))");
+			throw ETransportError("openServer : the frontend transport must be Firewalled and PeerInvisible");
+		}
 
 		// set this transport as the open transport
 		OpenTransport() = this;
@@ -578,8 +590,9 @@ public:
 				ci->UserId = ch->Uid;
 			}
 
-			/// store the security data in the proxy
-			setSecurityData(proxy, ci);
+			/// store the security data in the proxy, in place of any the client sent: the services trust what a proxy
+			/// carries
+			replaceAllSecurityDatas(proxy, ci);
 		}
 	}
 
