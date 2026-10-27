@@ -12748,8 +12748,17 @@ bool CCharacter::processMissionStepUserEvent(std::list< CMissionEvent* > & event
 
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			sendDynamicSystemMessage( _Id,bChained?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
+		// The failure actions of the other instances or of the children can remove the mission (game_event_reset) or fail
+		// it (fail_mission_cat): its MissionDone event is in the list already. It is Normal meanwhile, as in forceSuccess:
+		// a failure of a Complete mission is taken as its end, which would end it again with a second MissionDone.
+		NLMISC::CRefPtr<CMission> missionRef = mission;
+		mission->setProcessingState(CMission::Normal);
 		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
-		mission->stopChildren();
+		if (missionRef != nullptr)
+			mission->stopChildren();
+		if (missionRef == nullptr || mission->getFinished())
+			return true;
+		mission->setProcessingState(CMission::Complete);
 
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || bChained || templ->Tags.AutoRemove )

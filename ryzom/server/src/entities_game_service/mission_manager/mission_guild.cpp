@@ -110,6 +110,8 @@ void CMissionGuild::stopChildren()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	nlassert(templ);
+	// a child's failure actions can remove this mission: nothing of it is read in the loop
+	const uint32 guildId = _GuildId;
 	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
 	{
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
@@ -122,7 +124,7 @@ void CMissionGuild::stopChildren()
 				if (!child->isInstance(instances[j]))
 					continue;
 				CMissionGuild *mission = dynamic_cast<CMissionGuild *>(instances[j]);
-				if ( mission && mission->_GuildId == _GuildId )
+				if (mission && mission->_GuildId == guildId)
 					mission->onFailure( true,false );
 			}
 		}
@@ -184,8 +186,17 @@ void CMissionGuild::forceSuccess()
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			guild->sendMessageToGuildMembers(isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
 
+		// the failure actions of the other instances or of the children can remove this mission or end it: the event is
+		// still processed, and nothing of this mission is used
+		NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 		CMissionManager::getInstance()->missionDoneOnce(templ, this);
-		stopChildren();
+		if (self != nullptr)
+			stopChildren();
+		if (self == nullptr || getFinished())
+		{
+			guild->processMissionEvent(event);
+			return;
+		}
 
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
