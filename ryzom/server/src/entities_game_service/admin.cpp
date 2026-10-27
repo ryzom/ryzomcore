@@ -7750,7 +7750,7 @@ NLMISC_COMMAND(acceptProposalForQueue, "player accept to enter critical part (fo
 
 	uint32 queueId = 0;
 	if (args.size() == 3)
-		NLMISC::fromString(args[1], queueId);
+		NLMISC::fromString(args[2], queueId);
 	else
 	{
 		CCharacter *player = PlayerManager.getChar(eid);
@@ -7772,7 +7772,7 @@ NLMISC_COMMAND(awakePlayerInQueue, "awake player in given queue", "<eid> <queueI
 	uint32 queueId;
 	NLMISC::fromString(args[1], queueId);
 
-	CMissionQueueManager::getInstance()->playerWakesUp( eid, queueId);
+	CMissionQueueManager::getInstance()->playerWakesUpInQueue(eid, queueId);
 
 	return true;
 }

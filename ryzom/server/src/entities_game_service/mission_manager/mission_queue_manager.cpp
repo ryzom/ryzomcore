@@ -350,10 +350,8 @@ void CMissionQueueManager::playerWakesUp(const NLMISC::CEntityId &id, TAIAlias m
 {
 	H_AUTO(CMissionQueueManagerPlayerWakesUp);
 
-#ifdef NL_DEBUG
 	bool found = false;
-#endif
-	
+
 	map<uint32,CMissionQueue>::iterator it;
 
 	for ( it = _Queues.begin() ; it != _Queues.end() ; ++it )
@@ -361,15 +359,26 @@ void CMissionQueueManager::playerWakesUp(const NLMISC::CEntityId &id, TAIAlias m
 		if ((*it).second.getMissionAlias() == missionAlias)
 		{
 			(*it).second.changePlayerAwakeState(id, true);
-#ifdef NL_DEBUG
 			found = true;
-#endif
 		}
 	}
 
-#ifdef NL_DEBUG
-	nlassert(found == true);
-#endif
+	// the client asks with the mission of a journal entry: the mission can have left its queue since the entry showed it
+	// asleep
+	if (!found)
+		nldebug("%s wakes up for mission %u, which has no queue", id.toString().c_str(), missionAlias);
+}
+
+// ----------------------------------------------------------------------------
+void CMissionQueueManager::playerWakesUpInQueue(const NLMISC::CEntityId &id, uint32 queueId)
+{
+	map<uint32, CMissionQueue>::iterator it = _Queues.find(queueId);
+	if (it == _Queues.end())
+	{
+		nlwarning("Cannot wake %s up in queue %u, which does not exist", id.toString().c_str(), queueId);
+		return;
+	}
+	(*it).second.changePlayerAwakeState(id, true);
 }
 
 // ----------------------------------------------------------------------------

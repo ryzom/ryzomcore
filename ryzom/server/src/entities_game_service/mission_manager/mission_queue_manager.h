@@ -124,8 +124,8 @@ public:
 	/// player wakes up for missionAlias
 	void playerWakesUp(const NLMISC::CEntityId &id, TAIAlias missionAlias);
 
-	/// player wakes up for queueId
-	//void playerWakesUp(const NLMISC::CEntityId &id, uint32 queueId);
+	/// player wakes up in queueId
+	void playerWakesUpInQueue(const NLMISC::CEntityId &id, uint32 queueId);
 
 	/// disconnect player
 	void disconnectPlayer(const CCharacter *c);
