@@ -3912,20 +3912,17 @@ namespace NLGUI
 	{
 		if (!success)
 		{
-			CUrlParser uri(_CurlWWW->Url);
-
-			// potentially unwanted chars
-			std::string url = _CurlWWW->Url;
-			url = strFindReplaceAll(url, string("<"), string("%3C"));
-			url = strFindReplaceAll(url, string(">"), string("%3E"));
-			url = strFindReplaceAll(url, string("\""), string("%22"));
-			url = strFindReplaceAll(url, string("'"), string("%27"));
+			// The page is rendered with the rights of the url's domain, so everything in it is escaped. It is made from the
+			// page's url, without the parameters that addHTTPGetParams adds to the request, which include the user's web
+			// authentication key: the reload link would put it in the history and in later error pages.
+			CUrlParser uri(_URL);
+			std::string url = CHtmlElement::htmlEscape(_URL);
 
 			std::string err;
 			err = "<html><head><title>cURL error</title></head><body>";
 			err += "<h1>Connection failed with cURL error</h1>";
-			err += error;
-			err += "<hr>(" + uri.scheme + "://" + uri.host + ") <a href=\"" + url + "\">reload</a>";
+			err += CHtmlElement::htmlEscape(error);
+			err += "<hr>(" + CHtmlElement::htmlEscape(uri.scheme + "://" + uri.host) + ") <a href=\"" + url + "\">reload</a>";
 			err += "</body></html>";
 			browseErrorHtml(err);
 			return;
