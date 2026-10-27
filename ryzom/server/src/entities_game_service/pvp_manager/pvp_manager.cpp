@@ -20,6 +20,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/log.h"
 #include "server_share/r2_variables.h"
+#include "server_share/client_refusal.h"
 
 #include "pvp_manager/pvp_manager.h"
 #include "player_manager/player_manager.h"
@@ -708,6 +709,13 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 	if ( !target )
 	{
 		nlwarning("<PVP_CHALLENGE>'%s' has an invalid target",user->getTarget().toString().c_str() );
+		return;
+	}
+	// the client offers no challenge to the player's own character (canPvpChallenge), as for a duel
+	if (target == user)
+	{
+		nlwarning("HACK: <PVP_CHALLENGE> '%s' challenges itself, refused", userId.toString().c_str());
+		reportRefusedClientMessage(userId);
 		return;
 	}
 
