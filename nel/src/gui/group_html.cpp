@@ -948,6 +948,10 @@ namespace NLGUI
 		std::string image = CFile::getPath(url) + CFile::getFilenameWithoutExtension(url) + ".tga";
 		if (lookupLocalFile(finalUrl, image.c_str(), false))
 		{
+			// The name found, unless the page's is a texture the renderer has (an interface icon): the renderer would
+			// look a path whose file name it reads differently up as given
+			if (CViewRenderer::getInstance()->getTextureIdFromName(image) < 0)
+				image = finalUrl;
 			setImage(img, image, type);
 			setImageSize(img, style);
 			return nullptr;
@@ -3135,6 +3139,11 @@ namespace NLGUI
 					over = localImageName(overBitmap);
 					addImageDownload(overBitmap, ctrlButton, style, OverImage);
 				}
+				else
+				{
+					// the name the normal bitmap resolved to: the page's path would be looked up as given by the renderer
+					over = normal;
+				}
 			}
 		}
 
@@ -3355,10 +3364,12 @@ namespace NLGUI
 	{
 		result = url;
 		string tmp;
+		bool fileUrl = false;
 
 		if (toLowerAscii(result).find("file:") == 0 && result.size() > 5)
 		{
 			result = result.substr(5, result.size()-5);
+			fileUrl = true;
 		}
 		else if (result.find("://") != string::npos || result.find("//") == 0)
 		{
@@ -3366,26 +3377,17 @@ namespace NLGUI
 			return false;
 		}
 
+		// A page names a local file by its file name, and only the files of the search paths are local: the game data,
+		// the patches, the user directory and the bnp files mounted from it. A local page is rendered with trusted
+		// rights, and the directories around the search paths hold files a page can steer: the download cache (such as
+		// a stylesheet a page makes the client download), the chat logs and the log files. A path is never opened as
+		// given: Windows opens a network path (credentials sent to its host) or a device name.
 		// The file name of a path that mixes separators can itself be a network path ("x/\\host\share\a@b.png"), which
 		// CPath::lookup returns as it is because of its '@'
 		string fileName = CFile::getFilename(result);
 		if (CFile::isNetworkOrDevicePath(fileName))
 			fileName = CFile::getFilenameAfterAnySeparator(fileName);
 		tmp = CPath::lookup (fileName, false, false, false);
-		if (tmp.empty())
-		{
-			// "file://host/share/x.png" names another host: Windows opens it as a network path, which sends the user's
-			// credentials to that host
-			if (CFile::isNetworkOrDevicePath(result))
-			{
-				nlwarning("A page asks for the network path '%s', which is not opened", result.c_str());
-			}
-			else
-			{
-				// try to find in local directory
-				tmp = CPath::lookup (result, false, false, true);
-			}
-		}
 
 		if (!tmp.empty())
 		{
@@ -3399,13 +3401,16 @@ namespace NLGUI
 		}
 		else
 		{
-			// Is it a texture in the big texture ?
-			if (CViewRenderer::getInstance()->getTextureIdFromName (result) >= 0)
+			// Is it a texture in the big texture ? (an image only: a page is opened as a file)
+			if (!isUrl && CViewRenderer::getInstance()->getTextureIdFromName (result) >= 0)
 			{
 				return true;
 			}
 			else
 			{
+				if (fileUrl)
+					nlwarning("A page asks for the local file '%s', which is not in the search paths", result.c_str());
+
 				// This is not a file in the CPath, let libwww open this URL
 				result = url;
 				return false;

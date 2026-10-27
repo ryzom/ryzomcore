@@ -384,7 +384,7 @@ namespace NLGUI
 		std::string getTitle() const;
 		void setContainerTitle (const std::string &title);
 
-		// Lookup a url in local file system
+		// Look a page's url or image name up by its file name in the search paths, whose files are the only local ones
 		bool lookupLocalFile (std::string &result, const char *url, bool isUrl);
 
 		// Delete page content and prepare next page
