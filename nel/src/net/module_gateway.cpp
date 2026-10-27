@@ -87,43 +87,63 @@ namespace NLNET
 				if (nbSecBlock == 0)
 					SecurityData = nullptr;
 
-				for (uint i=0; i<nbSecBlock; ++i)
+				// The sender writes the blocks, and on a frontend's gateway the sender can be a game client: the blocks
+				// read so far are freed if the rest cannot be read
+				try
 				{
-					uint8 dataTag;
-					s.serial(dataTag);
-					uint32 blockSize;
-					s.serial(blockSize);
-					sint32 pos = s.getPos();
-					TSecurityData *sd;
-
-					try
+					for (uint i=0; i<nbSecBlock; ++i)
 					{
-						TSecurityData::TCtorParam param(dataTag);
-						sd = NLMISC_GET_FACTORY(TSecurityData, uint8).createObject(dataTag, param);
+						uint8 dataTag;
+						s.serial(dataTag);
+						uint32 blockSize;
+						s.serial(blockSize);
+						sint32 pos = s.getPos();
+						// an unknown block allocates its size before reading it: no more than the stream has left
+						if (blockSize > s.length() - (uint32)pos)
+							throw EStreamOverflow("Security data block of %u bytes, larger than the stream", blockSize);
+						TSecurityData *sd = nullptr;
 
-						if (sd == nullptr)
+						try
 						{
-							// we don't know this type, create an unknow security block
+							TSecurityData::TCtorParam param(dataTag);
+							sd = NLMISC_GET_FACTORY(TSecurityData, uint8).createObject(dataTag, param);
+
+							if (sd == nullptr)
+							{
+								// we don't know this type, create an unknow security block
+								sd = new TUnknownSecurityData(dataTag, blockSize);
+								sd->serial(s);
+							}
+							else
+							{
+								sd->serial(s);
+							}
+						}
+						catch(const EStreamOverflow &)
+						{
+							// FAILED to read the security block, rewind to old pos and serial as unknow
+							nlwarning("Error while reading stream for security data type %u", dataTag);
+							delete sd;
+
+							s.seek(pos, NLMISC::IStream::begin);
 							sd = new TUnknownSecurityData(dataTag, blockSize);
 							sd->serial(s);
 						}
-						else
+						catch (...)
 						{
-							sd->serial(s);
+							delete sd;
+							throw;
 						}
-					}
-					catch(const EStreamOverflow &)
-					{
-						// FAILED to read the security block, rewind to old pos and serial as unknow
-						nlwarning("Error while reading stream for security data type %u", dataTag);
 
-						s.seek(pos, NLMISC::IStream::begin);
-						sd = new TUnknownSecurityData(dataTag, blockSize);
-						sd->serial(s);
+						*pLastSd = sd;
+						pLastSd = &(sd->NextItem);
 					}
-
-					*pLastSd = sd;
-					pLastSd = &(sd->NextItem);
+				}
+				catch (...)
+				{
+					delete SecurityData;
+					SecurityData = nullptr;
+					throw;
 				}
 			}
 
@@ -911,7 +931,15 @@ namespace NLNET
 
 					break;
 				default:
-					// should not append
+					// The route of a firewalled transport is a client (a frontend's game client), which can send
+					// anything: the rest of its update cannot be read without knowing this event. Between services, an
+					// unknown event is a protocol mismatch, which stays fatal.
+					if (from->getTransport()->Firewalled)
+					{
+						nlwarning("NLNETL5 : Gateway '%s' : a client route sent a module update with the unknown event %u, the rest of the update is discarded",
+							getGatewayName().c_str(), (uint)type);
+						return;
+					}
 					nlstop;
 				}
 			}
@@ -926,6 +954,23 @@ namespace NLNET
 
 			// for each received module info
 			TStringId modNameId = CStringMapper::map(modDesc.ModuleFullName);
+
+			// The route of a firewalled transport is a client (a frontend's game client), which chooses the name and the
+			// id. A module the gateway already knows would let the client send as that module, and with a shorter
+			// distance take its route, so the module's messages, and the disclosures of the modules that send to it, go
+			// to the client: a client discloses only modules of its own. An id the route already uses would break its
+			// translation table (TTwinMap::add asserts). Between services, a module is known through several routes.
+			if (from->getTransport()->Firewalled
+				&& (_NameToProxyIdx.getB(modNameId) != nullptr || from->ForeignToLocalIdx.getB(modDesc.ModuleProxyId) != nullptr))
+			{
+				nlwarning("NLNETL5 : Gateway '%s' : a client route disclosed module '%s' with foreign id %u, but the gateway already knows that module or the route that id, ignored",
+					getGatewayName().c_str(),
+					modDesc.ModuleFullName.c_str(),
+					modDesc.ModuleProxyId);
+				delete modDesc.SecDesc.SecurityData;
+				return;
+			}
+
 			/// store the module information
 			TKnownModuleInfo modInfo;
 			modInfo.ForeignProxyId = modDesc.ModuleProxyId;
@@ -965,6 +1010,9 @@ namespace NLNET
 
 					proxy->_Distance = modInfo.ModuleDistance;
 					proxy->_Route = modInfo.Route;
+					// messages to the module now go through that route, with the module's id there (as when a
+					// distance update moves the route)
+					proxy->_ForeignModuleId = modInfo.ForeignProxyId;
 
 					sendModuleDistanceUpdate(proxy);
 				}
@@ -1143,6 +1191,7 @@ namespace NLNET
 			if (pModuleId == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module foreign proxy %u", secChg.ModuleId);
+				delete secChg.SecDesc.SecurityData;
 				return;
 			}
 
@@ -1152,6 +1201,7 @@ namespace NLNET
 			if (modProx == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module proxy %u, foreign %u", moduleId, secChg.ModuleId);
+				delete secChg.SecDesc.SecurityData;
 				return;
 			}
 
@@ -1297,6 +1347,20 @@ namespace NLNET
 		virtual void sendModuleProxyMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message) NL_OVERRIDE
 		{
 			H_AUTO(CModuleGetaway_sendModuleMessage);
+			// check for visibility rules, before the sender is disclosed to the addressee's route: a frontend's game client
+			// can address any proxy id, and a message to another client's module, discarded here, would otherwise disclose
+			// the sender's module (of a class the client chose) to that client, whose answer would disclose its own module
+			// and the frontend's client info about it
+			if (!isModuleProxyVisible(addresseeProxy, senderProxy->getGatewayRoute()))
+			{
+				nlwarning("Module %u '%s' try to send message to %u '%s' but addressee is not visible, message discarded",
+					senderProxy->getModuleProxyId(),
+					senderProxy->getModuleName().c_str(),
+					addresseeProxy->getModuleProxyId(),
+					addresseeProxy->getModuleName().c_str());
+				return;
+			}
+
 			// manage firewall
 			if (addresseeProxy->getGatewayRoute()
 				&& addresseeProxy->getGatewayRoute()->getTransport()->Firewalled)
@@ -1309,17 +1373,6 @@ namespace NLNET
 					discloseModuleToRoute(route, senderProxy);
 					route->FirewallDisclosed.insert(senderProxy->getModuleProxyId());
 				}
-			}
-
-			// check for visibility rules
-			if (!isModuleProxyVisible(addresseeProxy, senderProxy->getGatewayRoute()))
-			{
-				nlwarning("Module %u '%s' try to send message to %u '%s' but addressee is not visible, message discarded",
-					senderProxy->getModuleProxyId(),
-					senderProxy->getModuleName().c_str(),
-					addresseeProxy->getModuleProxyId(),
-					addresseeProxy->getModuleName().c_str());
-				return;
 			}
 
 			if (addresseeProxy->getGatewayRoute() == nullptr)

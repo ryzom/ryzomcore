@@ -3181,6 +3181,23 @@ void CCharacter::prepareToLoad()
 	initPDStructs();
 }
 
+// A saved heading as the GPMS takes one from a client: 0 for one that is not a number, one outside [-Pi, Pi] brought
+// back into it. Returns true when it was changed.
+static bool repairSavedHeading(float &heading)
+{
+	if (!isValidDouble(heading))
+	{
+		heading = 0.f;
+		return true;
+	}
+	if (heading > (float)NLMISC::Pi || heading < -(float)NLMISC::Pi)
+	{
+		heading = (float)atan2(sin((double)heading), cos((double)heading));
+		return true;
+	}
+	return false;
+}
+
 
 //---------------------------------------------------
 // postLoadTreatment: method called after applying a pdr save record for all generic processing work
@@ -3228,6 +3245,27 @@ void CCharacter::postLoadTreatment()
 	}
 
 	_NbSurvivePact = (uint8)_Pact.size();
+
+	// A heading that is not a number goes to the client in USER_CHAR, which then sends it in every POSITION, each refused
+	// as a HACK, and one outside [-Pi, Pi] goes to the AI service, whose fixed-point angle it overflows: a modified client
+	// could have either saved before the GPMS refused them (2a9ed025b, 033d556f8)
+	{
+		float heading = _EntityState.Heading;
+		if (repairSavedHeading(heading))
+		{
+			nlwarning("%s: the saved heading is not a number or outside [-Pi, Pi], set to %g", _Id.toString().c_str(), (double)heading);
+			_EntityState.Heading = heading;
+		}
+		for (uint i = 0; i < PositionStack.size(); ++i)
+		{
+			CFarPosition farPos = PositionStack[i];
+			if (repairSavedHeading(farPos.PosState.Heading))
+			{
+				nlwarning("%s: the heading saved in its position stack at %u is not a number or outside [-Pi, Pi], set to %g", _Id.toString().c_str(), i, (double)farPos.PosState.Heading);
+				PositionStack.substFarPosition(i, farPos);
+			}
+		}
+	}
 
 	{
 	H_AUTO(FixPetTicket);
@@ -10950,9 +10988,12 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		return;
 	}
 
-	if( inv >= INVENTORIES::NUM_INVENTORY)
+	// The trade window sells from the bag and the pack animals only. The hands and the equipment refer to bag items, and
+	// removing an item from them only unlinks it: the item would be listed for sale while it stays in the bag.
+	if (inv != INVENTORIES::bag && (inv < INVENTORIES::pet_animal1 || inv > INVENTORIES::pet_animal4))
 	{
-		nlwarning("<CCharacter:-:sellItem> bad inventory index sended by client");
+		nlwarning("HACK: %s sent BOTCHAT:SELL from inventory %u, refused", _Id.toString().c_str(), (uint)inv);
+		reportRefusedClientMessage(_Id);
 		return;
 	}
 
@@ -13700,9 +13741,17 @@ bool CCharacter::processMissionUserEvent(std::list< CMissionEvent* > & eventList
 		return processMissionStepUserEvent( eventList, alias, 0xFFFFFFFF );
 	else
 	{
+		// Processing an event can remove missions: a failed action (recv_item with fail_if_inventory_full) fails its
+		// mission, which removes an auto_remove, no_list or chained one, and returns Nothing. Go through the aliases, and
+		// skip the missions already removed
+		vector<TAIAlias> aliases;
 		for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
+			aliases.push_back((*it).first);
+		for (uint i = 0; i < aliases.size(); ++i)
 		{
-			if ( processMissionStepUserEvent( eventList,(*it).second->getTemplateId() ,0xFFFFFFFF) )
+			if (_Missions->getMissions(aliases[i]) == NULL)
+				continue;
+			if (processMissionStepUserEvent(eventList, aliases[i], 0xFFFFFFFF))
 				return true;
 		}
 	}
@@ -13769,8 +13818,17 @@ bool CCharacter::processMissionStepUserEvent(std::list< CMissionEvent* > & event
 			}
 		}
 
+		// The failure actions of the other instances or of the children can remove the mission (game_event_reset) or fail
+		// it (fail_mission_cat): its MissionDone event is in the list already. It is Normal meanwhile, as in forceSuccess:
+		// a failure of a Complete mission is taken as its end, which would end it again with a second MissionDone.
+		NLMISC::CRefPtr<CMission> missionRef = mission;
+		mission->setProcessingState(CMission::Normal);
 		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
-		mission->stopChildren();
+		if (missionRef != nullptr)
+			mission->stopChildren();
+		if (missionRef == nullptr || mission->getFinished())
+			return true;
+		mission->setProcessingState(CMission::Complete);
 
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || bChained || templ->Tags.AutoRemove )
@@ -14310,24 +14368,42 @@ void CCharacter::updateSavedMissions()
 	}
 	for ( uint i  = 0; i < failed.size(); i++ )
 		removeMission( failed[i]->getTemplateId() , mr_fail );
-	uint idx = 0;
 
 	bool bLaunchCrashHandler = true;
 	if (_SaveDate > IService::getInstance()->getLaunchingDate())
 		bLaunchCrashHandler = false; // Launch the player_reconnect handler
 
-	for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); )
+	// Every mission has its taker and its journal index before any is put in game: the events of a mission's active
+	// steps can give a new mission, which takes the first index no mission holds
+	uint idx = 0;
+	vector<NLMISC::CRefPtr<CMission>> loaded;
+	for (map<TAIAlias, CMission *>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it)
 	{
-		CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( (*it).second->getTemplateId() );
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate((*it).second->getTemplateId());
 		if (!templ)
 			continue;
+		loaded.push_back((*it).second);
 
-		CMissionSolo* mission = EGS_PD_CAST<CMissionSolo*>( (*it).second );
-		EGS_PD_AST( mission );
+		CMissionSolo *mission = EGS_PD_CAST<CMissionSolo *>((*it).second);
+		EGS_PD_AST(mission);
 		mission->setTaker(_EntityRowId);
+		mission->setClientIndex(templ->Tags.NoList ? 0xFF : idx++);
+	}
+
+	// The events of a mission's active steps, and its crash or reconnect handler, can end and remove missions, this one
+	// or others (its children), and give new ones: go through the missions loaded, and skip those already removed. A
+	// mission given again at a removed one's alias is a new instance, already in game.
+	for (uint i = 0; i < loaded.size(); ++i)
+	{
+		CMission *found = loaded[i];
+		if (found == nullptr)
+			continue;
+
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(found->getTemplateId());
+		CMissionSolo *mission = EGS_PD_CAST<CMissionSolo *>(found);
 		if ( !templ->Tags.NoList )
 		{
-			mission->setClientIndex( idx );
+			NLMISC::CRefPtr<CMission> missionRef = mission;
 			mission->putInGame();
 			mission->updateUsersJournalEntry();
 
@@ -14341,7 +14417,7 @@ void CCharacter::updateSavedMissions()
 				SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
 				textParams[0].Literal.fromUtf8(msg);
 				uint32 txt = STRING_MANAGER::sendStringToClient(getEntityRowId(), "LITERAL", textParams);
-				(*it).second->addCompassTarget((TAIAlias)txt, true, true);
+				mission->addCompassTarget((TAIAlias)txt, true, true);
 			}
 
 			list<CMissionEvent *> eventList;
@@ -14358,20 +14434,17 @@ void CCharacter::updateSavedMissions()
 				delete *eventList.begin();
 				eventList.pop_front();
 			}
+			// the events can have removed it
+			if (missionRef == NULL)
+				continue;
 			// we reload the missions : there was a crash before
-			map<TAIAlias, CMission*>::iterator itBack = it;
-			++itBack;
 			if (bLaunchCrashHandler)
 				mission->applyCrashHandler(true, std::string());
 			else
 				mission->applyPlayerReconnectHandler();
-			it = itBack;
-			++idx;
 		}
 		else
 		{
-			mission->setClientIndex( 0xFF );
-			mission->setTaker(_EntityRowId);
 			mission->putInGame();
 
 			sint32 x = 0;
@@ -14379,7 +14452,7 @@ void CCharacter::updateSavedMissions()
 			string msg;
 			getPositionCheck(toUpper(templ->getMissionName()), x, y, msg);
 
-			for (map<uint32, EGSPD::CMissionCompassPD>::iterator itCompass = (*it).second->getCompassBegin(); itCompass != (*it).second->getCompassEnd(); ++itCompass)
+			for (map<uint32, EGSPD::CMissionCompassPD>::iterator itCompass = mission->getCompassBegin(); itCompass != mission->getCompassEnd(); ++itCompass)
 			{
 				TVectorParamCheck params(1);
 				x = 0;
@@ -14393,7 +14466,6 @@ void CCharacter::updateSavedMissions()
 					textParams[0].Literal.fromUtf8(msg);
 					uint32 txt = STRING_MANAGER::sendStringToClient(getEntityRowId(), "LITERAL", textParams);
 					PlayerManager.sendImpulseToClient(_Id, "JOURNAL:ADD_COMPASS", x, y, txt);
-					++it;
 					continue;
 				}
 
@@ -14428,7 +14500,6 @@ void CCharacter::updateSavedMissions()
 					}
 				}
 			}
-			++it;
 		}
 	}
 }

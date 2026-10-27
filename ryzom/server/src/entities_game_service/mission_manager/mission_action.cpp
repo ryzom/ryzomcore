@@ -4374,7 +4374,8 @@ class CMissionActionGameEventReset : public IMissionAction
 				LOGMISSIONACTION("game_event_reset : invalid player row id " + entities[i].toString());
 				continue;
 			}
-			pChar->getGameEvent().reset();
+			// the mission is processing this action: it must not be removed under it
+			pChar->getGameEvent().reset(instance);
 		}
 	}
 

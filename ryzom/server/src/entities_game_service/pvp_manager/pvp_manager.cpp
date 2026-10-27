@@ -20,6 +20,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/log.h"
 #include "server_share/r2_variables.h"
+#include "server_share/client_refusal.h"
 
 #include "pvp_manager/pvp_manager.h"
 #include "player_manager/player_manager.h"
@@ -714,6 +715,13 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 		nlwarning("<PVP_CHALLENGE>'%s' has an invalid target",user->getTarget().toString().c_str() );
 		return;
 	}
+	// the client offers no challenge to the player's own character (canPvpChallenge), as for a duel
+	if (target == user)
+	{
+		nlwarning("HACK: <PVP_CHALLENGE> '%s' challenges itself, refused", userId.toString().c_str());
+		reportRefusedClientMessage(userId);
+		return;
+	}
 
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell1 = mirrorCell;
@@ -946,6 +954,13 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 					return;
 				}
 
+				// a team mate who entered PvP since the invitation (the invited player is checked below)
+				if (c != invited && c->getPVPInterface().isValid())
+				{
+					params[0].setEIdAIAlias((*it), CAIAliasTranslator::getInstance()->getAIAlias((*it)));
+					CCharacter::sendDynamicSystemMessage(userId, "DUEL_TEAM_MEMBER_ALREADY_IN_PVP", params);
+					return;
+				}
 
 				CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
 				sint32 cell = mirrorCell;		
@@ -1018,6 +1033,15 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 
 	if ( invitor )
 	{
+		// The invitation went to another player or team, but the invitor may have joined the invited player's team since:
+		// the challenge would have the same team on both sides
+		if (invitor->getTeamId() != CTEAM::InvalidTeamId && invitor->getTeamId() == invited->getTeamId())
+		{
+			params[0].setEIdAIAlias(invitor->getId(), CAIAliasTranslator::getInstance()->getAIAlias(invitor->getId()));
+			CCharacter::sendDynamicSystemMessage(userId, "CHALLENGE_SAME_TEAM", params);
+			return;
+		}
+
 		CTeam * team2 = TeamManager.getTeam( invitor->getTeamId() );
 		if ( team2 )
 		{
@@ -1029,6 +1053,14 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 					if ( c->getAggroCount() )
 					{
 						CCharacter::sendDynamicSystemMessage( userId, "CHALLENGE_OTHER_TEAM_AGGRO");
+						return;
+					}
+
+					// a member of the invitor's team who entered PvP since the invitation (the invitor is checked above)
+					if (c->getPVPInterface().isValid())
+					{
+						params[0].setEIdAIAlias((*it), CAIAliasTranslator::getInstance()->getAIAlias((*it)));
+						CCharacter::sendDynamicSystemMessage(userId, "DUEL_TARGET_TEAM_ALREADY_IN_PVP", params);
 						return;
 					}
 

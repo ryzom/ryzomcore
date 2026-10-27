@@ -580,6 +580,8 @@ bool	CNetworkConnection::connect(string &result)
 
 	// The transport is chosen when a connection starts: the constructor runs before client.cfg is read
 	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
+	// A fallback to the next frontend address left by an earlier connection would connect again over this one
+	m_LoginNextAddress = false;
 
 	// try to find where common data are located depending to where we'll connect
 	// the goal is to use the same database.txt as the server one
@@ -861,6 +863,8 @@ bool	CNetworkConnection::update()
 
 	if (m_LoginNextAddress)
 	{
+		// once: a next update must not connect again (and assert on the socket it connected)
+		m_LoginNextAddress = false;
 		nlassert(!m_Connection.connected());
 
 		std::string tres = "No remaining FS connection addresses";
@@ -993,7 +997,9 @@ bool	CNetworkConnection::update()
 		_ConnectionState = Disconnect;
 	}
 
-	if (!m_UseQuic && !m_Connection.connected())
+	// a receive error while logging in closed the socket to try the next frontend address at the next update: that
+	// update returns at once if the state is Disconnect
+	if (!m_UseQuic && !m_Connection.connected() && !m_LoginNextAddress)
 	{
 		//if(!ClientCfg.Local)
 		//	nlwarning("CNET[%p]: update() attempted whereas socket is not connected !", this);
@@ -3039,16 +3045,26 @@ bool	CNetworkConnection::stateQuit()
 				switch (message)
 				{
 				case SYSTEM_SYNC_CODE:
+				{
 					// receive sync, decode sync and state synchronize
-					// The session is new: its send numbers start again at 0 and its ticks and lag compensation are
-					// those of a new connection (reset() alone leaves _LCT at 100 ms instead of LCT)
+					// The session is new: its ticks and lag compensation are those of a new connection (reset() alone
+					// leaves _LCT at 100 ms instead of LCT). The packet numbers go on, so that a datagram of the
+					// previous session that arrives late is older than this session's on both sides: this client
+					// numbers its packets after the QUITs (the frontend takes its ACK_SYNC number as the start), and the
+					// frontend numbers this session after the previous one, starting at this SYNC (a frontend that
+					// starts again at 1 sends a SYNC numbered 1)
+					TPacketNumber sendNumber = _CurrentSendNumber;
 					reset();
 					initTicks();
+					_CurrentSendNumber = sendNumber;
+					_LastReceivedNumber = _CurrentReceivedNumber;
+					_LastReceivedPacketInBothModes = _CurrentReceivedNumber;
+					_LastAckInLongAck = _CurrentReceivedNumber;
 					_ConnectionState = Synchronize;
 					nldebug("CNET[%p]: quit->synchronize", this);
 					receiveSystemSync(msgin);
 					return true;
-					break;
+				}
 /*
 				case SYSTEM_PROBE_CODE:
 					// receive sync, decode sync
@@ -3182,6 +3198,8 @@ void	CNetworkConnection::initTicks()
 void	CNetworkConnection::reinit()
 {
 	resetSession();
+	// a new connection numbers its packets from 0
+	_CurrentSendNumber = 0;
 
 	// The transport is chosen for each new connection, never for one that is kept (see resetSession)
 	m_UseQuic = ClientCfg.QuicConnection && m_QuicConnection.isSupported();
@@ -3206,6 +3224,9 @@ void	CNetworkConnection::reinit()
 
 void CNetworkConnection::resetSession()
 {
+	// Through limbo mode the connection is kept, still quitting: its packet numbers go on (see stateQuit)
+	TPacketNumber sendNumber = _CurrentSendNumber;
+
 	// Reset data
 	_ImpulseDecoder.reset();
 	if (_DataBase)
@@ -3217,6 +3238,7 @@ void CNetworkConnection::resetSession()
 	_IdMap.clear();
 	reset();
 	initTicks();
+	_CurrentSendNumber = sendNumber;
 }
 
 // sends system sync acknowledge

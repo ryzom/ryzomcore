@@ -685,6 +685,9 @@ CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 		nlwarning("User %u could not be restored from limbo mode", lc.Uid);
 		return NULL;
 	}
+	// A datagram of the previous session that arrives late must be older than this session's: the client takes this
+	// session's SYNC number as its last received one, and this host takes the client's ACK_SYNC number as its own
+	client->continueSendNumbers(lc.SendNumber);
 	NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle();
 	client->setFirstSentPacket( client->sendNumber()+1, tick );
 	client->setSynchronizeState();
@@ -1361,9 +1364,19 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 						}
 						//nlinfo("BEN-DBG: ACK_SYNC, end reading longackbitfield from client %d", clienthost->clientId());
 
-						clienthost->LastReceivedAck = frontack;
+						// A host restored from limbo mode numbers its packets after the previous session's: a client that
+						// starts its numbers again acknowledges packet 0, and its first normal packet would then
+						// acknowledge too many packets at once (probe)
+						clienthost->LastReceivedAck = std::max(frontack, clienthost->sendNumberBase());
 
 						++clienthost->LastSentSync;
+
+						// The client sends its normal packets after this ACK_SYNC, so one numbered below it comes from an
+						// earlier session: after a limbo mode, the client goes on with its numbers, and without this a
+						// late normal datagram of the previous session would become the receive number, and every
+						// packet of the new session would then look old
+						if (clienthost->receiveNumber() == 0xFFFFFFFF && clienthost->sendNumberBase() != 0)
+							clienthost->receiveNumber() = receivednumber;
 
 						// Only an ACK_SYNC that answers the current SYNC and was read whole ends the synchronization:
 						// the client answers every SYNC, and a later SYNC brings an ACK_SYNC with the right code

@@ -129,6 +129,8 @@ void CMissionSolo::stopChildren()
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if (templ == NULL)
 		return;
+	// a child's failure actions can remove this mission (game_event_reset): nothing of it is read in the loop
+	const TDataSetRow taker = _Taker;
 	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
 	{
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
@@ -141,7 +143,7 @@ void CMissionSolo::stopChildren()
 				if (!child->isInstance(instances[j]))
 					continue;
 				CMissionSolo *mission = dynamic_cast<CMissionSolo *>(instances[j]);
-				if ( mission && mission->_Taker == _Taker )
+				if (mission && mission->_Taker == taker)
 					mission->onFailure( true,false );
 			}
 		}
@@ -156,7 +158,11 @@ void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if (templ == NULL)
 		return;
+	// the events of the failure actions can remove this mission
+	NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 	CMission::onFailure(ignoreJumps);
+	if (self == NULL)
+		return;
 
 	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
 	{
@@ -199,10 +205,18 @@ void CMissionSolo::forceSuccess()
 		user->addSuccessfulMissions( *templ );
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			CCharacter::sendDynamicSystemMessage( user->getId(), isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
+		// the failure actions of the other instances or of the children can remove this mission (game_event_reset) or
+		// end it (fail_mission_cat, a nested success): the event is still processed, and nothing of this mission is used
+		NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 		CMissionManager::getInstance()->missionDoneOnce(templ, this);
-		stopChildren();
-		user->processMissionEvent( event );
-		
+		if (self != nullptr)
+			stopChildren();
+		if (self == nullptr || getFinished())
+		{
+			user->processMissionEvent(event);
+			return;
+		}
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
 		{
@@ -213,6 +227,10 @@ void CMissionSolo::forceSuccess()
 		{
 			setSuccessFlag();
 		}
+
+		// The mission is done before the event, as when its last step ends: the event can end a parent mission, which
+		// removes its children, this one among them. Nothing of this mission is used from here
+		user->processMissionEvent(event);
 	}
 	else
 		nlwarning("<MISSIONS> alias %s : invalid user", CPrimitivesParser::aliasToString(templ->Alias).c_str());
