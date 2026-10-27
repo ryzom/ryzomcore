@@ -87,43 +87,63 @@ namespace NLNET
 				if (nbSecBlock == 0)
 					SecurityData = nullptr;
 
-				for (uint i=0; i<nbSecBlock; ++i)
+				// The sender writes the blocks, and on a frontend's gateway the sender can be a game client: the blocks
+				// read so far are freed if the rest cannot be read
+				try
 				{
-					uint8 dataTag;
-					s.serial(dataTag);
-					uint32 blockSize;
-					s.serial(blockSize);
-					sint32 pos = s.getPos();
-					TSecurityData *sd;
-
-					try
+					for (uint i=0; i<nbSecBlock; ++i)
 					{
-						TSecurityData::TCtorParam param(dataTag);
-						sd = NLMISC_GET_FACTORY(TSecurityData, uint8).createObject(dataTag, param);
+						uint8 dataTag;
+						s.serial(dataTag);
+						uint32 blockSize;
+						s.serial(blockSize);
+						sint32 pos = s.getPos();
+						// an unknown block allocates its size before reading it: no more than the stream has left
+						if (blockSize > s.length() - (uint32)pos)
+							throw EStreamOverflow("Security data block of %u bytes, larger than the stream", blockSize);
+						TSecurityData *sd = nullptr;
 
-						if (sd == nullptr)
+						try
 						{
-							// we don't know this type, create an unknow security block
+							TSecurityData::TCtorParam param(dataTag);
+							sd = NLMISC_GET_FACTORY(TSecurityData, uint8).createObject(dataTag, param);
+
+							if (sd == nullptr)
+							{
+								// we don't know this type, create an unknow security block
+								sd = new TUnknownSecurityData(dataTag, blockSize);
+								sd->serial(s);
+							}
+							else
+							{
+								sd->serial(s);
+							}
+						}
+						catch(const EStreamOverflow &)
+						{
+							// FAILED to read the security block, rewind to old pos and serial as unknow
+							nlwarning("Error while reading stream for security data type %u", dataTag);
+							delete sd;
+
+							s.seek(pos, NLMISC::IStream::begin);
 							sd = new TUnknownSecurityData(dataTag, blockSize);
 							sd->serial(s);
 						}
-						else
+						catch (...)
 						{
-							sd->serial(s);
+							delete sd;
+							throw;
 						}
-					}
-					catch(const EStreamOverflow &)
-					{
-						// FAILED to read the security block, rewind to old pos and serial as unknow
-						nlwarning("Error while reading stream for security data type %u", dataTag);
 
-						s.seek(pos, NLMISC::IStream::begin);
-						sd = new TUnknownSecurityData(dataTag, blockSize);
-						sd->serial(s);
+						*pLastSd = sd;
+						pLastSd = &(sd->NextItem);
 					}
-
-					*pLastSd = sd;
-					pLastSd = &(sd->NextItem);
+				}
+				catch (...)
+				{
+					delete SecurityData;
+					SecurityData = nullptr;
+					throw;
 				}
 			}
 
@@ -1171,6 +1191,7 @@ namespace NLNET
 			if (pModuleId == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module foreign proxy %u", secChg.ModuleId);
+				delete secChg.SecDesc.SecurityData;
 				return;
 			}
 
@@ -1180,6 +1201,7 @@ namespace NLNET
 			if (modProx == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module proxy %u, foreign %u", moduleId, secChg.ModuleId);
+				delete secChg.SecDesc.SecurityData;
 				return;
 			}
 
