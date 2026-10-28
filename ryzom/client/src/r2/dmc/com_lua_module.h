@@ -152,6 +152,9 @@ namespace R2
 
 		CObject::TSmartPtr loadLocal(const std::string& filename, const CScenarioValidator::TValues& values);
 
+		/// Parses scenario text into objects of the client factory, with the Name header value as Ghost_Name
+		CObject::TSmartPtr parseScenario(const std::string &text, const std::string &filename, const CScenarioValidator::TValues &values);
+
 		static sint luaUpdateScenario(lua_State* state);
 
 		static sint luaLoadUserComponent(lua_State* state);

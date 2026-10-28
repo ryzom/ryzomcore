@@ -856,6 +856,7 @@
 	<action handler="set" params="target_property=ui:interface:info_player_journal:content:desc:close:onclick_l|value='group_mission_abandon'" />
 	<action handler="set" params="target_property=ui:interface:info_player_journal:content:desc:wake:onclick_l|value='group_mission_wake'" />
 	<action handler="set" params="target_property=ui:interface:info_player_journal:content:desc:close:params_l|value='@0'" />
+	<action handler="set" params="target_property=ui:interface:info_player_journal:content:desc:wake:params_l|value='@0'" />
 	<action handler="remove_link" params="id=mission_abandon_text" />
 	<action handler="remove_link" params="id=mission_finished_bitmap" />
 	<action handler="remove_link" params="id=mission_abandon_active" />

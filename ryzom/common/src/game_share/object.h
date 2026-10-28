@@ -290,8 +290,10 @@ class CObjectNumber : public CObject
 public:
 	explicit CObjectNumber(double value);
 	explicit CObjectNumber(sint64 value);
-	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
-	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
+	double getNumberValue() const { return m_IsInteger ? (double)m_Value.Integer : m_Value.Number; }
+	// the conversion is explicit on the double branch only: a mixed ternary would be a double and
+	// round every integer above 2^53
+	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : (sint64)m_Value.Number; }
 
 #if !defined(CLANG_VERSION) && defined(NL_COMP_GCC) && (GCC_VERSION < 40800)
 	virtual const char *getTypeAsString() const;
@@ -612,6 +614,11 @@ public:
 	static void setClientObjectFactory(CObjectFactory *factory)
 	{
 		_ClientObjecFactory = factory;
+	}
+
+	static CObjectFactory *getClientObjectFactory()
+	{
+		return _ClientObjecFactory;
 	}
 };
 

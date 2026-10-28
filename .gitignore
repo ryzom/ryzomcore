@@ -301,3 +301,5 @@ ryzom/server/www/login/server_open_status
 imgui.ini
 
 
+# Crash reports downloaded from Zulip
+ryzom/tools/crash_reports/crash_*.md

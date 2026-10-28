@@ -20,6 +20,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/log.h"
 #include "server_share/r2_variables.h"
+#include "server_share/client_refusal.h"
 
 #include "pvp_manager/pvp_manager.h"
 #include "player_manager/player_manager.h"
@@ -714,6 +715,13 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 		nlwarning("<PVP_CHALLENGE>'%s' has an invalid target",user->getTarget().toString().c_str() );
 		return;
 	}
+	// the client offers no challenge to the player's own character (canPvpChallenge), as for a duel
+	if (target == user)
+	{
+		nlwarning("HACK: <PVP_CHALLENGE> '%s' challenges itself, refused", userId.toString().c_str());
+		reportRefusedClientMessage(userId);
+		return;
+	}
 
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell1 = mirrorCell;
@@ -896,7 +904,7 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 		return;
 
 	entry.ExpirationDate = CTickEventHandler::getGameCycle() + DuelQueryDuration;
-	_PVPChallengesAsked.push_front( entry );
+	_PVPChallengesAsked.push_back(entry); // tickUpdate expires them from the front, the oldest first
 
 	// tell invited player
 	params[0].setEIdAIAlias( userId, CAIAliasTranslator::getInstance()->getAIAlias(userId) );
@@ -912,11 +920,11 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 
 //----------------------------------------------------------------------------
 void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
-{
+{	
 	BOMB_IF(IsRingShard,"acceptPVPChallenge() - not allowed on Ring shards because PVP Challenge requires non-ring GPMS",return);
 
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
-	CCharacter * invited = PlayerManager.getChar(userId );
+	CCharacter * invited = PlayerManager.getChar(userId ); 
 	if ( !invited )
 	{
 		nlwarning("<PVP>invalid user %s", userId.toString().c_str() );
@@ -946,9 +954,16 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 					return;
 				}
 
+				// a team mate who entered PvP since the invitation (the invited player is checked below)
+				if (c != invited && c->getPVPInterface().isValid())
+				{
+					params[0].setEIdAIAlias((*it), CAIAliasTranslator::getInstance()->getAIAlias((*it)));
+					CCharacter::sendDynamicSystemMessage(userId, "DUEL_TEAM_MEMBER_ALREADY_IN_PVP", params);
+					return;
+				}
 
 				CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
-				sint32 cell = mirrorCell;
+				sint32 cell = mirrorCell;		
 				if  (cell <= -2  )
 				{
 					CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
@@ -965,7 +980,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 			return;
 		}
 		CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, invited->getEntityRowId(), DSPropertyCELL );
-		sint32 cell = mirrorCell;
+		sint32 cell = mirrorCell;		
 		if  (cell <= -2  )
 		{
 			CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
@@ -981,23 +996,24 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 		// we have to find the user as the invited of a duel to start the duel
 		if ( (*it).InvitedUser == invited->getEntityRowId() || ( team1 && invited->getTeamId() ==  (*it).InvitedTeam ) )
 		{
-			invitor = PlayerManager.getChar( (*it).Invitor );
-			if ( !invitor )
+			CCharacter * candidate = PlayerManager.getChar( (*it).Invitor );
+			if ( !candidate )
 			{
 				nlwarning("<PVP>invalid invitor %s", getEntityIdFromRow( (*it).Invitor ).toString().c_str() );
 				_PVPChallengesAsked.erase(it);
 				return;
 			}
+			
 
-
-			// ignore deprecated invitation
-			if ( invited->getPVPInterface().isValid() || invitor->getPVPInterface().isValid() )
+			// ignore deprecated invitation: its invitor must not start the challenge below
+			if ( invited->getPVPInterface().isValid() || candidate->getPVPInterface().isValid() )
 			{
 				std::list< CPVPChallengeAsked >::iterator itErase = it;
 				++it;
 				_PVPChallengesAsked.erase(itErase);
 				continue;
 			}
+			invitor = candidate;
 			std::list< CPVPChallengeAsked >::iterator itErase = it;
 			++it;
 			_PVPChallengesAsked.erase(itErase);
@@ -1017,6 +1033,15 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 
 	if ( invitor )
 	{
+		// The invitation went to another player or team, but the invitor may have joined the invited player's team since:
+		// the challenge would have the same team on both sides
+		if (invitor->getTeamId() != CTEAM::InvalidTeamId && invitor->getTeamId() == invited->getTeamId())
+		{
+			params[0].setEIdAIAlias(invitor->getId(), CAIAliasTranslator::getInstance()->getAIAlias(invitor->getId()));
+			CCharacter::sendDynamicSystemMessage(userId, "CHALLENGE_SAME_TEAM", params);
+			return;
+		}
+
 		CTeam * team2 = TeamManager.getTeam( invitor->getTeamId() );
 		if ( team2 )
 		{
@@ -1030,13 +1055,23 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 						CCharacter::sendDynamicSystemMessage( userId, "CHALLENGE_OTHER_TEAM_AGGRO");
 						return;
 					}
-				}
-				CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
-				sint32 cell = mirrorCell;
-				if  (cell <= -2  )
-				{
-					CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
-					return;
+
+					// a member of the invitor's team who entered PvP since the invitation (the invitor is checked above)
+					if (c->getPVPInterface().isValid())
+					{
+						params[0].setEIdAIAlias((*it), CAIAliasTranslator::getInstance()->getAIAlias((*it)));
+						CCharacter::sendDynamicSystemMessage(userId, "DUEL_TARGET_TEAM_ALREADY_IN_PVP", params);
+						return;
+					}
+
+					// inside the test, as for the accepting team: an offline member has no character
+					CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, c->getEntityRowId(), DSPropertyCELL );
+					sint32 cell = mirrorCell;
+					if  (cell <= -2  )
+					{
+						CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");
+						return;
+					}
 				}
 				//removeDuelInvitor( *it );
 			}
@@ -1050,7 +1085,7 @@ void CPVPManager::acceptPVPChallenge( const NLMISC::CEntityId & userId )
 				return;
 			}
 			CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, invitor->getEntityRowId(), DSPropertyCELL );
-			sint32 cell = mirrorCell;
+			sint32 cell = mirrorCell;		
 			if  (cell <= -2  )
 			{
 				CCharacter::sendDynamicSystemMessage( userId, "NO_CHALLENGE_HERE");

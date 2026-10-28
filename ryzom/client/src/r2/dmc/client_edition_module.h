@@ -1023,7 +1023,9 @@ public:
 
 	virtual void onUserComponentUploading(NLNET::IModuleProxy *senderModuleProxy, const NLMISC::CHashKeyMD5 & md5) NL_OVERRIDE;
 
+#if 0 // not built: a component is never downloaded from the server and run, see the .cpp
 	virtual void onUserComponentDownloaded(NLNET::IModuleProxy *senderModuleProxy, CUserComponent* component);
+#endif
 
 	std::string getUserComponentExtension() const {  return ".lua"; }
 

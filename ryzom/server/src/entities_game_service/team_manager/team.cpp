@@ -112,6 +112,9 @@ void CTeam::release()
 	for ( uint i = 0; i < size; i++ )
 	{
 		_Missions[i]->clearUsersJournalEntry();
+		// the missions of a dissolved team are deleted without a failure, which would take the entity waiting for one
+		// out of its queue
+		_Missions[i]->leaveWaitingQueue();
 		CMissionManager::getInstance()->deInstanciateMission(_Missions[i]);
 		delete _Missions[i];
 	}
@@ -407,12 +410,18 @@ void CTeam::removeCharacter( CCharacter * player )
 	// check if the team must be removed
 	if ( _NbMembers == 1 )
 	{
-		const uint size = (uint)_Missions.size();
-		uint count = 0;
-		while ( !_Missions.empty() && count < size )
+		// (the failures run on the main entity, the leader, which is still the one who left if it was the leader: what
+		// the missions registered under it, dyn chats, queue entries and escorts, is removed from it)
+		// onFailure removes some missions (and the missions they stop) and only flags the others: each fails once, looked
+		// up again by its alias
+		std::vector<TAIAlias> aliases;
+		for (uint i = 0; i < _Missions.size(); ++i)
+			aliases.push_back(_Missions[i]->getTemplateId());
+		for (uint i = 0; i < aliases.size(); ++i)
 		{
-			_Missions[0]->onFailure(true);
-			count++;
+			CMissionTeam *mission = getMissionByAlias(aliases[i]);
+			if (mission != NULL && !mission->getFinished())
+				mission->onFailure(true);
 		}
 		
 		// send a message to the last team member
@@ -844,6 +853,11 @@ void CTeam::clearPlayerTeamDB( const NLMISC::CEntityId &charId )
 //			character->_PropertyDatabase.setProp( buffer, (uint32)CLFECOMMON::INVALID_CLIENT_DATASET_INDEX );
 			groupItem.setUID(character->_PropertyDatabase, CLFECOMMON::INVALID_CLIENT_DATASET_INDEX);
 		}
+
+		// the team missions, which the next team's missions would otherwise inherit (the title is only written in an
+		// empty entry, and the journal actions resolve an entry by its index)
+		for (uint8 i = 0; i < MaxGroupMissionCount; ++i)
+			CMissionBaseBehaviour::clearGroupJournalEntry(*character, i);
 	}
 }// CTeam clearPlayerTeamVar
 
@@ -891,6 +905,9 @@ void CTeam::removeMission( uint idx, TMissionResult result)
 	{
 		_Missions[idx]->clearUsersJournalEntry();
 	}
+
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
 
 	/*Bsi.append( StatPath, NLMISC::toString("[MIT%s] %u %s",
 		MissionResultStatLogTag[result],
@@ -954,9 +971,18 @@ bool CTeam::processTeamMissionStepEvent(std::list< CMissionEvent* > & eventList,
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
-		mission->stopChildren();
-		
+		// The failure actions of the other instances or of the children can remove the mission or fail it: its MissionDone
+		// event is in the list already. It is Normal meanwhile, as in forceSuccess: a failure of a Complete mission is
+		// taken as its end, which would end it again with a second MissionDone.
+		NLMISC::CRefPtr<CMission> missionRef = mission;
+		mission->setProcessingState(CMission::Normal);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
+		if (missionRef != nullptr)
+			mission->stopChildren();
+		if (missionRef == nullptr || mission->getFinished())
+			return true;
+		mission->setProcessingState(CMission::Complete);
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || mission->isChained() || templ->Tags.AutoRemove )
 		{

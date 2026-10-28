@@ -926,9 +926,10 @@ void CGeorgesEditApp::gotoURL (LPCTSTR url)
 	NLMISC::openURL(tStrToUtf8(url));
 }
 
-void CGeorgesEditApp::WinHelp(DWORD dwData, UINT nCmd) 
+void CGeorgesEditApp::WinHelp(DWORD dwData, UINT nCmd)
 {
-	gotoURL(nlUtf8ToTStr(NLMISC::CFile::getPath(ExePath) + "georges_edit.html"));
+	// a local file, which openURL no longer opens
+	NLMISC::openDoc(NLMISC::CFile::getPath(ExePath) + "georges_edit.html");
 }
 
 void CGeorgesEditApp::OnViewRefresh() 

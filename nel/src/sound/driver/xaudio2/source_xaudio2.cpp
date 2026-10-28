@@ -411,7 +411,9 @@ void CSourceXAudio2::submitStreamingBuffer(IBuffer *buffer)
 		uint8 bitsPerSample;
 		uint32 frequency;
 		buffer->getFormat(bufferFormat, channels, bitsPerSample, frequency);
-		preparePlay(bufferFormat, channels, bitsPerSample, frequency);
+		// without a voice (preparePlay has logged why), the buffer cannot be queued
+		if (!preparePlay(bufferFormat, channels, bitsPerSample, frequency))
+			return;
 		_LastPreparedBuffer = NULL;
 	}
 	
@@ -512,8 +514,14 @@ bool CSourceXAudio2::initFormat(IBuffer::TBufferFormat bufferFormat, uint8 chann
 	if (bufferFormat == IBuffer::FormatDviAdpcm) _AdpcmUtility = new CAdpcmXAudio2(_IsLooping);
 	// create voice with adpcm utility callback or NULL callback
 	_SourceVoice = _SoundDriver->createSourceVoice(bufferFormat, channels, bitsPerSample, _AdpcmUtility);
+	if (!_SourceVoice)
+	{
+		// the next initFormat expects no adpcm utility
+		delete _AdpcmUtility;
+		_AdpcmUtility = NULL;
+		return false; // fail
+	}
 	if (_AdpcmUtility) _AdpcmUtility->setSourceVoice(_SourceVoice);
-	if (!_SourceVoice) return false; // fail
 	_Format = bufferFormat;
 	_Channels = channels;
 	_BitsPerSample = bitsPerSample;
@@ -557,9 +565,11 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 	if (_SourceVoice && (bufferFormat != _Format || channels != _Channels || bitsPerSample != _BitsPerSample))
 	{
 		// nlwarning(NLSOUND_XAUDIO2_PREFIX "Switching format %u to %u!", (uint32)_Format, (uint32)bufferFormat);
-		// destroy existing voice
+		// destroy existing voice (it was not stopped first when playing, see above: it is no longer playing)
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
 		_SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL;
+		_IsPlaying = false;
+		_IsPaused = false;
 		// destroy adpcm utility (if it exists)
 		delete _AdpcmUtility; _AdpcmUtility = NULL;
 		// reset current stuff
@@ -630,7 +640,12 @@ bool CSourceXAudio2::play()
 			// preparePlay already called, 
 			// stop already called before going into buffer streaming
 			nlassert(!_IsPlaying);
-			nlassert(_SourceVoice);
+			// without a voice (preparePlay has logged why), submitStreamingBuffer queued nothing and the source cannot play
+			if (!_SourceVoice)
+			{
+				stop();
+				return false;
+			}
 			_PlayStart = CTime::getLocalTime();
 			if (SUCCEEDED(_SourceVoice->Start(0))) _IsPlaying = true;
 			else nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Play (_BufferStreaming)");
@@ -639,10 +654,15 @@ bool CSourceXAudio2::play()
 		{
 			if (_StaticBuffer)
 			{
-				preparePlay(_StaticBuffer->getFormat(), 
-					_StaticBuffer->getChannels(), 
-					_StaticBuffer->getBitsPerSample(),
-					_StaticBuffer->getFrequency());
+				// without a voice (preparePlay has logged why), the source cannot play
+				if (!preparePlay(_StaticBuffer->getFormat(),
+				        _StaticBuffer->getChannels(),
+				        _StaticBuffer->getBitsPerSample(),
+				        _StaticBuffer->getFrequency()))
+				{
+					stop();
+					return false;
+				}
 				_LastPreparedBuffer = _StaticBuffer;
 				submitBuffer(_StaticBuffer);
 				_PlayStart = CTime::getLocalTime();

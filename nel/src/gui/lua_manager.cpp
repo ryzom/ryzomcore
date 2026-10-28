@@ -104,6 +104,49 @@ namespace NLGUI
 		return true;
 	}
 
+	bool CLuaManager::callMethod(const char *tableName, const char *functionName, const std::string &argument)
+	{
+		H_AUTO ( RZ_Interface_callMethod )
+
+		if( editorMode )
+			return true;
+
+		CLuaState &ls = *luaState;
+		CLuaStackChecker lsc(&ls);
+		ls.pushGlobalTable();
+		ls.push(tableName);
+		ls.getTable(-2);
+		ls.remove(-2); // the global table
+		if (!ls.isTable(-1))
+		{
+			ls.pop();
+			reportScriptError(NLMISC::toString("%s:%s(): '%s' is not a table", tableName, functionName, tableName));
+			return false;
+		}
+		ls.push(functionName);
+		ls.getTable(-2);
+		bool isFunction = ls.isFunction(-1);
+		ls.pop();
+		if (!isFunction)
+		{
+			ls.pop();
+			reportScriptError(NLMISC::toString("%s:%s(): '%s' is not a function of %s", tableName, functionName, functionName, tableName));
+			return false;
+		}
+		int tableIndex = ls.getTop();
+		ls.pushValue(tableIndex); // self
+		ls.push(argument);
+		if (ls.pcallByName(functionName, 2, 0, tableIndex) != 0)
+		{
+			const char *error = ls.toString(-1);
+			reportScriptError(error ? std::string(error) : NLMISC::toString("%s:%s() failed with an error that is not a string", tableName, functionName));
+			ls.pop(2); // the error and the table
+			return false;
+		}
+		ls.pop(); // the table
+		return true;
+	}
+
 	void CLuaManager::ResetLuaState()
 	{
 		if (luaState) delete luaState;

@@ -56,7 +56,27 @@ class CQuicTransceiver;
 typedef std::list< std::pair<TClientId,uint8> > TClientsToRemove;
 
 /// Types of message invalidity (used for THackingDesc::Reasons bitfield)
-enum TBadMessageFormatType { InsufficientSize=1, NotSystemLoginCode=2, BadCookie=4, BadSystemCode=8, HackedSizeInBuffer=16, AccessClosed=32, IrrelevantSystemMessage=64, MalformedAction=128, UnknownExceptionType=256, UnknownFormatType=512, UnauthorizedCharacterSlot=1024, RefusedServiceCommand=2048 };
+enum TBadMessageFormatType
+{
+	InsufficientSize = 1,
+	NotSystemLoginCode = 2,
+	BadCookie = 4,
+	BadSystemCode = 8,
+	HackedSizeInBuffer = 16,
+	AccessClosed = 32,
+	IrrelevantSystemMessage = 64,
+	MalformedAction = 128,
+	UnknownExceptionType = 256,
+	UnknownFormatType = 512,
+	UnauthorizedCharacterSlot = 1024,
+	RefusedServiceCommand = 2048,
+	MalformedMultiPart = 4096,
+	MalformedAckSync = 8192,
+	MisplacedImpulse = 16384,
+	InvalidStringRequest = 32768,
+	TextTooLong = 65536,
+	RefusedClientMessage = 131072
+};
 
 /// Return the string for the message invalidity reasons
 std::string getBadMessageString( uint32 reasons );
@@ -124,14 +144,25 @@ public:
 	/// Release
 	void				release();
 
-	/// Add client
-	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool sendCLConnect=true );
+	// clang-format off
+	/// Add a client. connectionReportedToWS: the login told the welcome service that the user connected
+	/// (CClientHost::ConnectionReportedToWS); when no client host can be created, the leave is told at once.
+	CClientHost			*addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const std::string &userName, const std::string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorisedCharSlot, bool connectionReportedToWS, bool sendCLConnect );
+
+	/// Send CL_CONNECT to the EGS (at login, and after a QUIT)
+	void				sendClientConnectionToEGS( TUid userId, const std::string &userName, const std::string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CInetAddress &addrfrom, const NLNET::CLoginCookie &cookie );
+	// clang-format on
 
 	/// Add to the list of clients which will be removed by addr at the three cycles later (leaving the time to send an impulsion to the client)
 	void				addToRemoveList( TClientId clientid ) { _ClientsToRemove.push_back( std::make_pair(clientid,3) ); }
 
 	/// Remove from the list of clients
 	void				removeFromRemoveList( TClientId clientid );
+
+	// clang-format off
+	/// Return true if the client is waiting in the list of clients to remove
+	bool				isInRemoveList( TClientId clientid ) const;
+	// clang-format on
 
 	/// Return the number of connecged client
 	uint32				getNbClient();
@@ -142,8 +173,24 @@ public:
 	void				setClientInLimboMode( CClientHost *client );
 
 	CClientHost			*exitFromLimboMode( const CLimboClient& client );
-	
-	void				removeClientFromMap( CClientHost *client );
+
+	// clang-format off
+	/// Remove a user from limbo mode without restoring it: its QUIC connection is closed. The EGS, which had the CL_CONNECT
+	/// sent at the QUIT, and the welcome service are told that the user left, when they need to be. The caller logs why.
+	void				removeLimboClient( std::map<TUid,CLimboClient>::iterator ilc, bool crashed, bool tellEGS );
+
+	/// A user who logs in while the previous session is in limbo mode: that session is removed
+	void				removeLimboClientOnLogin( TUid uid );
+
+	/// Remove the users that stayed in limbo mode longer than LimboTimeOut
+	void				removeTimedOutLimboClients( NLMISC::TTime timeOut );
+
+	/// Find the user in limbo mode at this address (the token address for QUIC), or LimboClients.end()
+	std::map<TUid,CLimboClient>::iterator	findLimboClientByAddress( const NLNET::CInetAddress &addr );
+
+	/// Remove the client from the client map. A client put in limbo mode keeps its QUIC connection.
+	void				removeClientFromMap( CClientHost *client, bool closeQuicConnection = true );
+	// clang-format on
 	
 	/// Remove a client by clientid
 	/// all remove are supposed to be a client crashed. it s false only on the case we receive really the client message
@@ -185,6 +232,9 @@ public:
 	/// Do not accept the current message (hacking detection)
 	void				rejectReceivedMessage( TBadMessageFormatType bmft, TUid userId=0 );
 
+	/// A service refused a message the connected client with this uid sent (hacking detection)
+	void				rejectClientMessage( TBadMessageFormatType bmft, TUid userId );
+
 	// Entity to client
 	CClientIdLookup		EntityToClient;
 
@@ -210,6 +260,12 @@ protected:
 
 	/// Utility method to remove a client
 	void	doRemoveClient( CClientHost *client, bool crashed );
+
+	/// Log a refused message of an address once per cycle (FEHACK)
+	void	recordRejectedMessage( const NLNET::CInetAddress &addr, TBadMessageFormatType bmft, TUid userId );
+
+	/// Count a refused message against a connected client, which RejectedMessagesLimit can disconnect
+	void	countRejectedMessage( CClientHost *client, TBadMessageFormatType bmft );
 
 private:
 

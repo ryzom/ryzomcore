@@ -48,7 +48,10 @@ bool	bsstrincmp(const char* s1, const char* s2, int n)
 
 std::string	getBackupFileName(const std::string& filename)
 {
-	return SaveShardRootGameShare.get() + filename;
+	// A leading separator is relative to SaveShardRoot like the rest of the name (the logger service sends "/" + name).
+	// The name no longer brings its own separator, so a SaveShardRoot written without its trailing one gets it here,
+	// as the services' local path does (CPath::standardizePath leaves an empty one empty)
+	return NLMISC::CPath::standardizePath(SaveShardRootGameShare.get()) + NLMISC::CFile::normalizeRelativePath(filename);
 	/* // BSFilePrefix and BSFileSubst are deprecated
 	if (BSFilePrefix.get().empty())
 		return filename;
@@ -189,9 +192,15 @@ void	CFileAccessManager::removeFileAccess(IFileAccess* access)
 
 IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 {
-	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
+	// a name that is not a safe relative path (one could leave SaveShardRoot) is answered as a missing file, so the
+	// requester does not wait, and never stalls
+	const bool confined = NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true);
+	if (!confined)
+		nlwarning("LOAD: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
 
-	if (!fileExists && checkFailureMode(MajorFailureIfFileNotExists))
+	bool fileExists = confined && NLMISC::CFile::fileExists(getBackupFileName(Filename));
+
+	if (!fileExists && confined && checkFailureMode(MajorFailureIfFileNotExists))
 	{
 		FailureReason = NLMISC::toString("MAJOR_FAILURE:LOAD: file '%s' doesn't not exist", Filename.c_str());
 		return MajorFailure;
@@ -225,7 +234,7 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 		}
 	}
 
-	if (!fileRead && checkFailureMode(MajorFailureIfFileUnreaddable))
+	if (!fileRead && confined && checkFailureMode(MajorFailureIfFileUnreaddable))
 	{
 		FailureReason = NLMISC::toString("MAJOR_FAILURE:LOAD: can't %s file '%s'", (!fileOpen ? "open" : "read"), Filename.c_str());
 		return MajorFailure;
@@ -259,6 +268,12 @@ IFileAccess::TReturnCode	CLoadFile::execute(CFileAccessManager& manager)
 				outMsg.FileDescription.FileTimeStamp, 
 				NLNET::TBinBuffer(outMsg.Data.buffer(), outMsg.Data.length()));
 		}
+	}
+
+	if (!confined)
+	{
+		FailureReason = NLMISC::toString("MINOR_FAILURE:LOAD: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
 	}
 
 	// If the file read failed for any other reason than file not found then complain
@@ -312,6 +327,15 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 
 IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 {
+	// a name that is not a safe relative path (one could leave SaveShardRoot) is discarded, whatever the failure mode:
+	// it is no disk problem to stall for
+	if (!NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true))
+	{
+		nlwarning("WRITE: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
+	}
+
 	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists)
@@ -446,6 +470,15 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
 {
+	// a name that is not a safe relative path (one could leave SaveShardRoot) is discarded, whatever the failure mode:
+	// it is no disk problem to stall for
+	if (!NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true))
+	{
+		nlwarning("DELETE: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
+		FailureReason = NLMISC::toString("MINOR_FAILURE:DELETE: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
+	}
+
 	bool	fileExists = NLMISC::CFile::fileExists(getBackupFileName(Filename));
 
 	if (!fileExists)

@@ -382,6 +382,10 @@ bool CCharacterShoppingList::checkAltarRestriction()
 //-----------------------------------------------------------------------------
 uint32 CCharacterShoppingList::getSellPrice( const TItemTradePtr itemTrade, bool dynnamicShop )
 {
+	// the price a player resells an item for is kept to the dapper: through a float, one above 2^24 was rounded
+	if( dynnamicShop )
+		return (uint32)itemTrade->getPriceInfo().getAmount();
+
 	float priceFactor = 1.0f;
 	if( _CurrentMerchant != 0 && dynnamicShop == false )
 	{
@@ -741,8 +745,8 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 				dapperPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
 			}
 
-			// check if character have enough money
-			if( ( dapperPrice * quantity ) > _Character->getMoney() )
+			// check if character have enough money (in 64 bits: the quantity comes from the client and a 32-bit product wraps)
+			if( (uint64)dapperPrice * quantity > _Character->getMoney() )
 			{
 				// return player information 'not enough money'
 				_Character->sendDynamicSystemMessage( _Character->getId(), "OPS_NOT_ENOUGHT_SEED" );
@@ -762,7 +766,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 					return;
 				}
 				factionPrice = getSellPrice( shop->ItemTrade, shop->ShopUnit->getShopUnitType() == IShopUnit::DynamicShop );
-				if (_Character->getFactionPoint(clan) < (factionPrice*quantity))
+				if ((uint64)_Character->getFactionPoint(clan) < (uint64)factionPrice * quantity)
 				{
 					// return player information 'not enough faction point'
 					_Character->sendDynamicSystemMessage( _Character->getId(), "OPS_NOT_ENOUGHT_FACTION_POINTS" );
@@ -885,7 +889,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 	{
 	case RYMSG::TTradeCurrency::tc_dappers:
 		// Spend dappers
-		_Character->spendMoney( dapperPrice * stackSize );
+		_Character->spendMoney( (uint64)dapperPrice * stackSize );
 
 		break;
 	case RYMSG::TTradeCurrency::tc_faction_points:

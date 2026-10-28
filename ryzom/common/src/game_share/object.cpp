@@ -246,7 +246,7 @@ bool CObject::isRefId(const std::string & prop /*=""*/) const
 	{
 		CObject* attr = getAttr(prop);
 		if (!attr) return false;
-		return attr->isTable();
+		return attr->isRefId();
 	}
 	return doIsRefId();
 }
@@ -2514,6 +2514,11 @@ public:
 					CObject* value;
 					uint8 keyIndex;
 					stream.serial(keyIndex);
+					if (keyIndex >= _OptionalProp.size())
+					{
+						nlwarning("CClassSerializer: optional property index %u out of %u", (uint)keyIndex, (uint)_OptionalProp.size());
+						throw NLMISC::EStream("optional property index out of range");
+					}
 					std::string key = _OptionalProp[keyIndex];
 					onSerial(stream, key, value, serializer);
 					if (!value)

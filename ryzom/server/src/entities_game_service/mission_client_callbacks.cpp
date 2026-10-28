@@ -112,7 +112,7 @@ void cbClientBotChatPickStaticMission( NLNET::CMessage& msgin, const std::string
 	// Check that index falls in good range
 	if ( index >= user->getCurrentMissionList().size() )
 	{
-		MISLOG("%s invalid index %u, there are %u", sDebugPrefix.c_str(), index, user->getCurrentMissionList().size() );
+		MISLOG("%s invalid index %u, there are %u", sDebugPrefix.c_str(), index, (uint)user->getCurrentMissionList().size());
 		return;
 	}
 
@@ -196,6 +196,12 @@ void cbClientBotChatDynChatSend( NLNET::CMessage& msgin, const std::string &serv
 	if (!checkPlayer(userId, "cbClientBotChatDynChatSend")) return;
 	CCharacter* user = PlayerManager.getChar( userId );
 
+	// the index comes from the client and getCurrentDataSetRow() uses it to index the dataset without a check
+	if ( index >= TheDataset.maxNbRows() )
+	{
+		nlwarning("<cbClientBotChatDynChatSend> user %s sent bot index %u, the dataset has %u rows", userId.toString().c_str(), index, TheDataset.maxNbRows());
+		return;
+	}
 	CMissionManager::getInstance()->dynChatChoice( user, TheDataset.getCurrentDataSetRow(index) , choice);
 	user->setAfkState(false);
 }
@@ -212,6 +218,27 @@ void cbClientAbandonMission( NLNET::CMessage& msgin, const std::string &serviceN
 
 	user->abandonMission( index );
 	user->setAfkState(false);
+}
+
+//----------------------------------------------------------------------------
+// The client names a group mission by its entry in the GROUP:MISSIONS database, which is the mission's client index:
+// team missions take the first MaxGroupMissionCount entries and guild missions the MaxGuildMissionCount after them.
+// It is not a position in the team's or the guild's mission list, which also holds the missions hidden from the
+// journal and closes up when one is removed. Returns that position, or the list size if no visible mission has it.
+template <class TMission>
+static uint findGroupMissionByClientIndex( std::vector<TMission*> &missions, uint8 clientIndex )
+{
+	for ( uint i = 0; i < missions.size(); ++i )
+	{
+		TMission *mission = missions[i];
+		if ( mission == NULL || mission->getClientIndex() != clientIndex )
+			continue;
+		CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
+		if ( templ == NULL || templ->Tags.NoList ) // skip invalid or invisible missions
+			continue;
+		return i;
+	}
+	return (uint)missions.size();
 }
 
 //----------------------------------------------------------------------------
@@ -243,14 +270,15 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 			return;
 		}
 
-		if ( index >=  team->getMissions().size() )
+		uint missionPos = findGroupMissionByClientIndex( team->getMissions(), index );
+		if ( missionPos >= team->getMissions().size() )
 		{
-			MISLOG("user:%s cbClientGroupAbandonMission : Invalid group mission %u ( count %u )", 
-							userId.toString().c_str(), index, team->getMissions().size());
+			MISLOG("user:%s cbClientGroupAbandonMission : no team mission at journal index %u ( count %u )",
+			    userId.toString().c_str(), index, (uint)team->getMissions().size());
 			return;
 		}
 
-		CMissionTeam* mission = team->getMissions()[index];
+		CMissionTeam* mission = team->getMissions()[missionPos];
 		nlassert(mission);
 
 		if ( mission->getFinished() == false )
@@ -273,13 +301,16 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 
 			team->sendDynamicMessageToMembers( "ABANDON_GROUP_MISSION",TVectorParamCheck(), excluded );
 		}
-		team->removeMission( index, mr_abandon );
+		team->removeMission( missionPos, mr_abandon );
 	}
 	else
 	{
 		// Guild
-		// We set the correct index
-		index = MaxGroupMissionCount - index;
+		if ( index >= MaxGroupMissionCount + MaxGuildMissionCount )
+		{
+			MISLOG("user:%s cbClientGroupAbandonMission : invalid journal index %u", userId.toString().c_str(), index);
+			return;
+		}
 
 		CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 		if ( !guild )
@@ -287,20 +318,23 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 			MISLOG("user:%s cbClientGroupAbandonMission : Invalid team", userId.toString().c_str());
 			return;
 		}
-		if ( guild->getLeader()->getIngameEId() != userId )
+		// a guild can be without a leader (getLeader() returns NULL)
+		CGuildMember * leader = guild->getLeader();
+		if ( leader == NULL || leader->getIngameEId() != userId )
 		{
 			CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), "REQ_LEADER_TO_ABANDON_MISSION" );
 			return;
 		}
 
-		if ( index >=  guild->getMissions().size() )
+		uint missionPos = findGroupMissionByClientIndex( guild->getMissions(), index );
+		if ( missionPos >= guild->getMissions().size() )
 		{
-			MISLOG("user:%s cbClientGroupAbandonMission : Invalid group mission %u ( count %u )", 
-				userId.toString().c_str(), index, guild->getMissions().size());
+			MISLOG("user:%s cbClientGroupAbandonMission : no guild mission at journal index %u ( count %u )",
+			    userId.toString().c_str(), index, (uint)guild->getMissions().size());
 			return;
 		}
 
-		CMissionGuild* mission = guild->getMissions()[index];
+		CMissionGuild* mission = guild->getMissions()[missionPos];
 		nlassert(mission);
 
 		if ( mission->getFinished() == false )
@@ -323,7 +357,7 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 
 			guild->sendDynamicMessageToMembers( "ABANDON_GROUP_MISSION",TVectorParamCheck(), excluded );
 		}
-		guild->removeMission( index, mr_abandon );
+		guild->removeMission( missionPos, mr_abandon );
 	}
 }
 
@@ -400,15 +434,17 @@ void cbClientMissionGroupWake( NLNET::CMessage& msgin, const std::string & servi
 		return;
 	}
 	
-	if ( missionGroupIndex >=  team->getMissions().size() )
+	// the journal index of the mission, as for GROUP_MISSION_ABANDON
+	uint missionPos = findGroupMissionByClientIndex( team->getMissions(), missionGroupIndex );
+	if ( missionPos >=  team->getMissions().size() )
 	{
-		MISLOG("user:%s cbClientMissionGroupWake : Invalid group mission %u ( count %u )", 
-			userId.toString().c_str(), missionGroupIndex, team->getMissions().size());
+		MISLOG("user:%s cbClientMissionGroupWake : no team mission at journal index %u ( count %u )",
+		    userId.toString().c_str(), missionGroupIndex, (uint)team->getMissions().size());
 		return;
 	}
 	
 	
-	CMissionTeam* mission = team->getMissions()[missionGroupIndex];
+	CMissionTeam* mission = team->getMissions()[missionPos];
 	nlassert(mission);
 	
 	if ( mission->getFinished() == false )

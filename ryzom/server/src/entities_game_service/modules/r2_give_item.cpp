@@ -224,7 +224,7 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 }
 
 //----------------------------------------------------------------------------
- void CR2GiveItem::giveItemGranted( TDataSetRow creatureRowId, uint32 actionId )
+ void CR2GiveItem::giveItemGranted( TDataSetRow creatureRowId, TDataSetRow characterRowId, uint32 actionId )
 {
 	TPendingRequest::iterator it = _PendingRequest.find( creatureRowId );
 	if( it != _PendingRequest.end() )
@@ -232,6 +232,13 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 		TCreatureItemRequest &vec = (*it).second;
 		for( uint32 i = 0; i < vec.size(); ++ i)
 		{
+			// the action id comes from the client: the entry must also be the requester's own, since action ids
+			// are a counter shared by every character
+			if( vec[i].ActionId == actionId && vec[i].CharacterRowId != characterRowId )
+			{
+				nlwarning("R2GiveItem: character %u selected action %u of character %u, refused", characterRowId.getIndex(), actionId, vec[i].CharacterRowId.getIndex());
+				return;
+			}
 			if( vec[i].ActionId == actionId )
 			{
 				CCharacter *c = PlayerManager.getChar( vec[i].CharacterRowId );
@@ -369,9 +376,9 @@ NLMISC_COMMAND(giveItemRequest, "test command for give item R2 feature", "<Chara
 	return true;
 }
 
-NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<CreatureId><ActionId>")
+NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<CreatureId><ActionId><CharacterId>")
 {
-	if( args.size() != 2 )
+	if( args.size() != 3 )
 		return false;
 
 	CEntityId eid;
@@ -383,7 +390,11 @@ NLMISC_COMMAND(giveItemGranted, "test command for give item R2 features", "<Crea
 	else return false;
 	uint32 actionId;
 	NLMISC::fromString(args[1], actionId);
-	CR2GiveItem::getInstance().giveItemGranted( creatureRowId, actionId );
+	CEntityId charEid;
+	charEid.fromString(args[2].c_str());
+	CCharacter *ch = PlayerManager.getChar(charEid);
+	if(!ch) return false;
+	CR2GiveItem::getInstance().giveItemGranted( creatureRowId, ch->getEntityRowId(), actionId );
 	return true;
 }
 

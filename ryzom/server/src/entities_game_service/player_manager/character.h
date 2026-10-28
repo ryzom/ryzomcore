@@ -3498,7 +3498,9 @@ private:
 	// Trading structures
 	CCharacterShoppingList* _ShoppingList;
 	// special trading struct for phrases
-	std::vector<CTradePhrase> _CurrentPhrasesTradeList;
+	std::vector<CTradePhrase>			_CurrentPhrasesTradeList;
+	// the bot whose phrase trade the list and _RolemasterType are for (unknown when no phrase trade is open)
+	NLMISC::CEntityId					_CurrentPhrasesTradeBot;
 	// current trade session
 	uint16 _CurrentTradeSession;
 	// list of trade pages waiting update
@@ -4009,8 +4011,10 @@ private:
 	/// temporary outpost id(user doesn't have chosen his side yet)
 	TAIAlias _OutpostIdBeforeUserValidation;
 
-	// duel opponent
-	CCharacter* _DuelOpponent;
+	// duel opponent (a reference pointer: no dangling opponent if one side is gone without the duel ending)
+	// clang-format off
+	NLMISC::CRefPtr<CCharacter>		_DuelOpponent;
+	// clang-format on
 
 	TAIAlias _LastCreatedNpcGroup;
 

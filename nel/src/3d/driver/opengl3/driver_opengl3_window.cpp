@@ -1875,6 +1875,13 @@ bool CDriverGL3::setMode(const GfxMode& mode)
 	if (!_DestroyWindow)
 		return true;
 
+	// a window has a size (the size of a minimized window is empty, and the cursor position is relative to it)
+	if (mode.Windowed && (mode.Width == 0 || mode.Height == 0))
+	{
+		nlwarning("3D: Refusing an empty window size %ux%u", (uint)mode.Width, (uint)mode.Height);
+		return false;
+	}
+
 #if defined(NL_OS_WINDOWS)
 	// save relative cursor
 	POINT cursorPos;

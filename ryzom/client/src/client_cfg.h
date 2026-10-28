@@ -340,9 +340,20 @@ struct CClientConfig
 	/// A trusted domain is only trusted over https; a final build cannot turn this off
 	bool			WebIgTrustedHttpsOnly;
 	uint			WebIgNotifInterval; // value in minutes for notification thread
+	/// Let the shard run client commands through COMMAND:REMOTE_ADMIN; off unless the player opts in
+	bool			AllowRemoteAdmin;
 
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;
+
+	/// Largest width or height of a web image in pixels (0 for the largest, 16384), see CGroupHTML::SWebOptions
+	sint32			WebIgImageMaxSize;
+	/// Largest data: URL in bytes, 0 for no limit
+	sint32			WebIgDataUrlMaxBytes;
+	/// Largest download of an image, a page and a stylesheet in bytes, 0 for no limit
+	sint32			WebIgImageMaxBytes;
+	sint32			WebIgPageMaxBytes;
+	sint32			WebIgStylesheetMaxBytes;
 
 	///////////////
 	// ANIMATION //

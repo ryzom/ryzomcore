@@ -49,6 +49,7 @@
 
 #include "game_share/player_visual_properties.h"
 #include "game_share/generic_xml_msg_mngr.h"
+#include "game_share/chat_group.h"
 #include "game_share/visual_slot_manager.h"
 #include "game_share/mode_and_behaviour.h"
 #include "game_share/brick_types.h"
@@ -5948,6 +5949,7 @@ NLMISC_COMMAND(guildmotd, "Set or see the guild message of the day","<msg of the
 		gmotd += " ";
 		gmotd += args[i];
 	}
+	gmotd = NLMISC::truncateUtf16(ucstring::makeFromUtf8(gmotd), CChatGroup::MaxClientTextLength).toUtf8(); // what the server accepts
 
 	out.serial (gmotd);
 	NetMngr.push (out);

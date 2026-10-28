@@ -53,6 +53,18 @@ public:
 		Disconnecting,
 	};
 
+	/// Why the last connection attempt ended before it was established
+	enum TFailure
+	{
+		NoFailure, // Established, still being attempted, or abandoned on request
+		NoResponse, // The server did not answer in time
+		Unreachable, // The network reported the server port as unreachable
+		Refused, // The server refused or closed the connection
+		CertificateRejected, // The server certificate could not be verified
+		ProtocolMismatch, // No protocol version in common with the server
+		OtherFailure, // Anything else, see failureText()
+	};
+
 	CQuicConnection();
 	~CQuicConnection();
 
@@ -105,6 +117,15 @@ public:
 
 	/// Check if quick is supported
 	bool isSupported() const;
+
+	/// Why the last connection attempt ended before it was established
+	TFailure failure() const;
+
+	/// What ended it, for logs and error messages (the QUIC status name and code)
+	const std::string &failureText() const;
+
+	/// Address of the last connection attempt
+	const NLNET::CInetHost &address() const;
 
 private:
 	friend CQuicConnectionImpl;

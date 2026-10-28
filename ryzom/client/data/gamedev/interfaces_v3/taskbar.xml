@@ -97,6 +97,12 @@
 	<action handler="leave_modal" />
 </proc>
 
+<!-- back to the character selection on the same connection, without the shard unifier (frontend limbo mode) -->
+<proc id="quit_dialog_reselect_char_limbo" >
+	<action handler="reselect_character" params="limbo=1" />
+	<action handler="leave_modal" />
+</proc>
+
 
 <!-- the modal (formerly: h="60") -->
 <define id="quit_button_delta_y" value="-4" />
@@ -123,8 +129,9 @@
 		<ctrl style="quit_button" id="return_mainland" posparent="half_buttons" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland" color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
 		<ctrl style="quit_button" id="reselect_char" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
-		<!--<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_game"
-			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />-->
+		<!-- hidden for now: back to the character selection through the frontend limbo mode, without the shard unifier -->
+		<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char_limbo" active="false"
+			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
 		<ctrl style="quit_button" id="ryzom" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitRyzom" onclick_l="proc" params_l="quit_dialog_ryzom"
 			color="240 125 110 255" col_over="240 125 110 255" col_pushed="240 125 110 255" text_color_normal="240 125 110 160" />
 		<ctrl style="quit_button" id="ryzom_now" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitRyzom" onclick_l="proc" params_l="quit_dialog_ryzom_now"
