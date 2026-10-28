@@ -445,6 +445,7 @@ CClientConfig::CClientConfig()
 	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 	WebIgTrustedHttpsOnly = true;
+	AllowRemoteAdmin = false;
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
@@ -1209,6 +1210,7 @@ void CClientConfig::setValues()
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_BOOL_DEV(WebIgTrustedHttpsOnly); // a development shard may serve its web apps over plain http; a final build always requires https
 	READ_INT_FV(WebIgNotifInterval);
+	READ_BOOL_FV(AllowRemoteAdmin);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;

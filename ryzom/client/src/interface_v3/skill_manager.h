@@ -161,10 +161,10 @@ public:
 	void blockTitleFromServer(CHARACTER_TITLE::ECharacterTitle ct);
 
 	/// Is the title unblocked and accessible to the player ?
-	bool isTitleUnblocked(CHARACTER_TITLE::ECharacterTitle ct) { return _TitlesUnblocked[ct].Unblocked; }
+	bool isTitleUnblocked(CHARACTER_TITLE::ECharacterTitle ct) { return (uint)ct < CHARACTER_TITLE::NB_CHARACTER_TITLE && _TitlesUnblocked[ct].Unblocked; }
 
 	/// Is the title reserved (can be unblocked only by a server message)
-	bool isTitleReserved(CHARACTER_TITLE::ECharacterTitle ct) { return _UnblockTitle->TitlesUnblock[ct].Reserved; }
+	bool isTitleReserved(CHARACTER_TITLE::ECharacterTitle ct) { return (uint)ct < CHARACTER_TITLE::NB_CHARACTER_TITLE && _UnblockTitle->TitlesUnblock[ct].Reserved; }
 
 	void setPlayerTitle(const std::string &name);
 	uint8 getPlayerTitle() const { return _CurrentTitle; }

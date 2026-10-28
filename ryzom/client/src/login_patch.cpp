@@ -722,6 +722,22 @@ void CPatchManager::deleteBatchFile()
 }
 
 // ****************************************************************************
+// Only these characters may enter the update script, which cmd.exe or sh runs with the client's rights:
+// letters, digits, '.', '_', '-' and '/', so no quote, variable or command substitution can get in
+static bool isUpdateScriptSafeAsciiPath(const std::string &path)
+{
+	if (path.empty())
+		return false;
+	for (std::string::size_type i = 0; i < path.size(); ++i)
+	{
+		char c = path[i];
+		if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' || c == '_' || c == '-' || c == '/'))
+			return false;
+	}
+	return true;
+}
+
+// ****************************************************************************
 void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart, bool useBatchFile)
 {
 	uint nblab = 0;
@@ -738,6 +754,18 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		const CBNPCategory &rCat = rDescCats.getCategory(i);
 
 		nlinfo("Category = %s", rCat.getName().c_str());
+
+		if (!rCat.getUnpackTo().empty())
+		{
+			// readDescFile() put the unpack path below the client directory; the part after the root
+			// goes into the update script, so it is checked here once, whether or not a move fails
+			string fullDstPath = CPath::standardizePath(rCat.getUnpackTo());
+			if (fullDstPath.compare(0, ClientRootPath.length(), ClientRootPath) != 0)
+				throw Exception("Unpack path '%s' of category '%s' is not below the client directory", fullDstPath.c_str(), rCat.getName().c_str());
+			string relativeDstPath = fullDstPath.substr(ClientRootPath.length());
+			if (!relativeDstPath.empty() && !isUpdateScriptSafeAsciiPath(relativeDstPath))
+				throw Exception("Unsafe unpack path '%s' of category '%s' for the update script", relativeDstPath.c_str(), rCat.getName().c_str());
+		}
 
 		if (!rCat.getUnpackTo().empty())
 		for (uint32 j = 0; j < rCat.fileCount(); ++j)
@@ -777,6 +805,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 					std::string FileName = vFilenames[fff];
 
+					// The name came out of a downloaded bnp and goes into the update script below
+					if (!isUpdateScriptSafeAsciiPath(FileName))
+						throw Exception("Unsafe file name '%s' unpacked from '%s'", FileName.c_str(), rFilename.c_str());
+
 					bool succeeded = false;
 
 					if (!useBatchFile)
@@ -794,15 +826,8 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					{
 						string batchRelativeDstPath;
 
-						// should be always true
-						if (fullDstPath.compare(0, ClientRootPath.length(), ClientRootPath) == 0)
-						{
-							batchRelativeDstPath = fullDstPath.substr(ClientRootPath.length()) + FileName;
-						}
-						else
-						{
-							batchRelativeDstPath = fullDstPath + FileName;
-						}
+						// both parts were checked above: the unpack path once per category, the name per file
+						batchRelativeDstPath = fullDstPath.substr(ClientRootPath.length()) + FileName;
 
 #ifdef NL_OS_WINDOWS
 						// only fix backslashes for .bat
@@ -1228,23 +1253,61 @@ void CPatchManager::readDescFile(sint32 nVersion)
 	if (!DescFile.load(srcName))
 		throw Exception ("Can't open file '%s'", srcName.c_str ());
 
+	// The description came from the patch server: every file name must be a bare file name, and every
+	// unpack path must stay below the client directory, or the files written from it could land anywhere.
+	// A description that fails is dropped whole, so nothing downstream ever reads an unchecked name.
+	std::string descError;
+	const CBNPFileSet &descFiles = DescFile.getFiles();
+	for (uint32 i = 0; i < descFiles.fileCount() && descError.empty(); ++i)
+	{
+		const std::string &fileName = descFiles.getFile(i).getFileName();
+		if (!CFile::isSafeFilename(fileName, false))
+			descError = toString("Unsafe file name '%s' in '%s'", fileName.c_str(), srcName.c_str());
+	}
+
 	uint cat;
 
-	if (ClientRootPath != "./")
+	for (cat = 0; cat < DescFile.getCategories().categoryCount() && descError.empty(); ++cat)
 	{
-		// fix relative paths
-		for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
+		const CBNPCategory &category = DescFile.getCategories().getCategory(cat);
+
+		for (uint32 i = 0; i < category.fileCount() && descError.empty(); ++i)
 		{
-			CBNPCategory &category = const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat));
-
-			std::string unpackTo = category.getUnpackTo();
-
-			if (unpackTo.substr(0, 1) == ".")
-			{
-				unpackTo = CPath::makePathAbsolute(unpackTo, ClientRootPath, true);
-				category.setUnpackTo(unpackTo);
-			}
+			if (!CFile::isSafeFilename(category.getFile(i), false))
+				descError = toString("Unsafe file name '%s' in category '%s' of '%s'", category.getFile(i).c_str(), category.getName().c_str(), srcName.c_str());
 		}
+
+		const std::string &unpackTo = category.getUnpackTo();
+		if (unpackTo.empty() || !descError.empty())
+			continue;
+
+		// "./" or "." is the client directory itself; anything else is a relative path below it. An
+		// absolute path never passes: a drive letter keeps its ':', and a leading separator is checked
+		// here because normalizeRelativePath() drops it.
+		std::string relative = CFile::normalizeRelativePath(unpackTo);
+		if (relative == ".")
+			relative.clear();
+		if (unpackTo[0] == '/' || unpackTo[0] == '\\' || (!relative.empty() && !CFile::isSafeFilename(relative, true)))
+			descError = toString("Unpack path '%s' of category '%s' in '%s' is not below the client directory", unpackTo.c_str(), category.getName().c_str(), srcName.c_str());
+	}
+
+	if (!descError.empty())
+	{
+		DescFile.clear();
+		throw Exception(descError);
+	}
+
+	// Every unpack path becomes a standardized path below ClientRootPath, which is itself standardized
+	for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
+	{
+		CBNPCategory &category = const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat));
+		if (category.getUnpackTo().empty())
+			continue;
+
+		std::string relative = CFile::normalizeRelativePath(category.getUnpackTo());
+		if (relative == ".")
+			relative.clear();
+		category.setUnpackTo(CPath::standardizePath(ClientRootPath + relative));
 	}
 
 	// patch category for current platform

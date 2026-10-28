@@ -340,6 +340,8 @@ struct CClientConfig
 	/// A trusted domain is only trusted over https; a final build cannot turn this off
 	bool			WebIgTrustedHttpsOnly;
 	uint			WebIgNotifInterval; // value in minutes for notification thread
+	/// Let the shard run client commands through COMMAND:REMOTE_ADMIN; off unless the player opts in
+	bool			AllowRemoteAdmin;
 
 	sint32			CurlMaxConnections;
 	string			CurlCABundle;

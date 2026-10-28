@@ -44,6 +44,8 @@
 #include "../../interface_v3/lua_ihm_ryzom.h"
 
 #include "game_share/object.h"
+#include "game_share/scenario_text_parser.h"
+#include "nel/misc/sstring.h"
 #include "../r2_lua.h"
 #include "game_share/scenario.h"
 #include "game_share/ring_access.h"
@@ -1319,35 +1321,61 @@ CObject::TSmartPtr CComLuaModule::loadLocal(const std::string& filename, const C
 	}
 
 	//H_AUTO(R2_CComLuaModule_loadLocal)
-	if (filename.empty()){ return nullptr; }
-	CObject::TSmartPtr object = nullptr;
-#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
-	if (luaL_dofile(_LuaState, filename.c_str()) == 0)
-#else
-	if (lua_dofile(_LuaState, filename.c_str()) == 0)
-#endif
-	{
-		lua_getglobal(_LuaState, "scenario");
+	if (filename.empty()) { return nullptr; }
 
-		if (lua_type(_LuaState, -1) == LUA_TTABLE)
+	// The local copy is read and parsed like any other scenario file, never run as Lua
+	std::string text;
+	{
+		CIFile file;
+		if (!file.open(filename, true))
 		{
-			object = getObjectFromLua(_LuaState);
-			if (object && !name.empty())
-			{
-				if (object->getAttr("Ghost_Name"))
-				{
-					object->set("Ghost_Name", name);
-				}
-				else
-				{
-					object->add("Ghost_Name", name);
-				}
-			}
+			nlwarning("Can't open scenario %s", filename.c_str());
+			return nullptr;
 		}
+		text.resize(file.getFileSize());
+		if (!text.empty())
+			file.serialBuffer((uint8 *)&text[0], (uint)text.size());
 	}
+	NLMISC::CSString normalized = text;
+	text = normalized.replace("\r\n", "\n");
+
+	return parseScenario(text, filename, values);
+}
+
+CObject::TSmartPtr CComLuaModule::parseScenario(const std::string &text, const std::string &filename, const CScenarioValidator::TValues &values)
+{
+	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
+	std::string name;
+	for (; first != last; ++first)
+	{
+		if (first->first == "Name") { name = first->second; }
+	}
+
+	// The file is data: it is parsed into objects and never run as Lua, so a scenario someone
+	// shared cannot execute anything in the editor
+	CObjectFactory *factory = CObjectSerializerClient::getClientObjectFactory();
+	if (!factory)
+	{
+		nlwarning("Error while loading %s: no client object factory", filename.c_str());
+		return nullptr;
+	}
+	std::string parseError;
+	CObject::TSmartPtr object = CScenarioTextParser::parse(text, factory, parseError);
 	if (!object)
 	{
-		nlwarning("Error while loading %s", filename.c_str());
+		nlwarning("Error while loading %s: %s", filename.c_str(), parseError.c_str());
+		return nullptr;
+	}
+	if (!name.empty())
+	{
+		if (object->getAttr("Ghost_Name"))
+		{
+			object->set("Ghost_Name", name);
+		}
+		else
+		{
+			object->add("Ghost_Name", name);
+		}
 	}
 	return object;
 }
@@ -1373,61 +1401,8 @@ bool CComLuaModule::loadUserComponent(const std::string& filename)
 
 CObject::TSmartPtr CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
 {
-	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name;
-	for (; first != last; ++first)
-	{
-		if (first->first == "Name" ) { name = first->second; }
-	}
-
 	//H_AUTO(R2_CComLuaModule_loadFromBuffer)
-	static volatile bool dump = false;
-	if (dump)
-	{
-		COFile testNico("test_nico.lua");
-		testNico.serialBuffer(const_cast<uint8 * >((const uint8 *) &data[0]), (uint)data.size());
-	}
-	CObject::TSmartPtr object = nullptr;
-	// TMP TMP
-	CLuaState &ls = getEditor().getLua();
-	try
-	{
-		ls.executeScript(data, 0);
-		lua_getglobal(_LuaState, "scenario");
-
-		if (lua_type(_LuaState, -1) == LUA_TTABLE)
-		{
-			object = getObjectFromLua(_LuaState);
-			if (object && !name.empty())
-			{
-				if (object->getAttr("Ghost_Name"))
-				{
-					object->set("Ghost_Name", name);
-				}
-				else
-				{
-					object->add("Ghost_Name", name);
-				}
-			}
-		}
-	}
-	catch(const ELuaError &e)
-	{
-		nlwarning("%s", e.what());
-	}
-	/*t res =
-	if (lua_dobuffer(_LuaState,data.c_str(), data.size(), filename.c_str()) == 0)
-	{
-
-	}*/
-	if (!object)
-	{
-		nlwarning("Error while loading %s", filename.c_str());
-		return nullptr;
-	}
-	return object;
-
-
+	return parseScenario(data, filename, values);
 }
 
 

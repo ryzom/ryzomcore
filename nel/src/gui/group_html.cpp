@@ -326,7 +326,13 @@ namespace NLGUI
 		// clear back-references so CViewBitmap does not keep a dangling pointer to this download once it is deleted
 		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
 		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(it->Image);
+			// the reference is NULL when the view was already deleted: removeContent() deletes the views of the page
+			// before clearContext() -> releaseDataDownloads() drops the downloads
+			CViewBase *view = it->Image;
+			if (!view)
+				continue;
+
+			CViewBitmap *bitmap = dynamic_cast<CViewBitmap *>(view);
 			if (bitmap)
 				bitmap->resetHtmlDownload();
 		}
@@ -395,6 +401,9 @@ namespace NLGUI
 				for (std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 				{
 					SImageInfo &img = *it;
+					// the view was deleted while the download was in flight
+					if (!img.Image)
+						continue;
 					Parent->setImage(img.Image, tmpdest, img.Type);
 					Parent->setImageSize(img.Image, img.Style);
 				}
@@ -417,6 +426,9 @@ namespace NLGUI
 		for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 		{
 			SImageInfo &img = *it;
+			// the view was deleted while the download was in flight
+			if (!img.Image)
+				continue;
 			Parent->setImage(img.Image, dest, img.Type);
 			Parent->setImageSize(img.Image, img.Style);
 		}
@@ -445,7 +457,9 @@ namespace NLGUI
 		for(uint i = 0; i < TextureIds.size(); i++)
 		{
 			rVR.reloadTexture(TextureIds[i].first, dest, false);
-			TextureIds[i].second->invalidateCoords();
+			// the view was deleted while the download was in flight
+			if (TextureIds[i].second)
+				TextureIds[i].second->invalidateCoords();
 		}
 	}
 
@@ -744,6 +758,16 @@ namespace NLGUI
 	bool CGroupHTML::isCacheFile(const std::string &path)
 	{
 		return startsWith(path, s_CacheDirectory);
+	}
+
+	/** A cache file that is not downloaded yet is not a texture: addImageDownload has set the placeholder, and the
+	 *  download callback sets the file once it is there. Given to the renderer now, the name only replaces the placeholder
+	 *  by a lookup miss, logged for every such image of the page.
+	 */
+	static void clearPendingCacheTexture(std::string &name)
+	{
+		if (CGroupHTML::isCacheFile(name) && !CFile::fileExists(name))
+			name.clear();
 	}
 
 	uint32 CGroupHTML::SWebOptions::getImageMaxSize() const
@@ -3188,6 +3212,10 @@ namespace NLGUI
 				}
 			}
 		}
+
+		clearPendingCacheTexture(normal);
+		clearPendingCacheTexture(pushed);
+		clearPendingCacheTexture(over);
 
 		ctrlButton->setType (type);
 		if (!normal.empty())

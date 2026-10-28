@@ -1995,6 +1995,12 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 bool openURL(const std::string &url)
 {
+	// Only web urls: anything else would go to the system's handler for that scheme or file type
+	if (!startsWithCaseInsensitiveAscii(url, "http://") && !startsWithCaseInsensitiveAscii(url, "https://"))
+	{
+		nlwarning("openURL: refused '%s', only http and https urls are opened", url.c_str());
+		return false;
+	}
 	return openDocWithExtension(url, "htm");
 }
 

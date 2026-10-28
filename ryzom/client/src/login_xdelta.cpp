@@ -216,6 +216,11 @@ bool CXDPFileReader::readUInt(uint32 &val)
 		donebit = c & 0x80;
 		bits = c & 0x7f;
 
+		// A 32-bit value takes at most 5 groups of 7 bits; a longer run is a corrupt patch, not a
+		// reason to write past arr
+		if (i >= 5)
+			return false;
+
 		arr[i++] = bits;
 
 		if (!donebit)
