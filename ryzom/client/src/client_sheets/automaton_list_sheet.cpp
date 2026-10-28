@@ -332,7 +332,7 @@ void CAutomatonStateSheet::serial(NLMISC::IStream &f)
 //-----------------------------------------------
 bool CAutomatonStateSheet::getModeConnection(MBEHAV::EMode mode, TAnimStateKey &transition) const
 {
-	if(mode<0 || (uint)mode >ModeConnection.size())
+	if(mode<0 || (uint)mode >= ModeConnection.size())
 		return false;
 
 	// If there is a transition -> fill the result.

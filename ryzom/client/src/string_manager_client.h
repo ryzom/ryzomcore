@@ -110,7 +110,7 @@ public:
 	static const char *getSPhraseLocalizedDescription(NLMISC::CSheetId id);
 
 	// Get the Localized Title name
-	static const char *getTitleLocalizedName(const std::string &titleId, bool women);
+	static std::string getTitleLocalizedName(const std::string &titleId, bool women);
 	static std::vector<std::string> getTitleInfos(const std::string &titleId, bool women);
 
 	// Get the Localized name of a classification type
@@ -295,7 +295,6 @@ private:
 	static bool _SpecItem_MemoryCompressed;
 
 	static	std::map<std::string, CItem> _SpecItem_TempMap;
-	static std::vector<std::string> _TitleWords;
 	static std::map<std::string, std::string> _DynStrings;
 
 

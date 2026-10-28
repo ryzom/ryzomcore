@@ -398,6 +398,13 @@ bool	CSkillManager::checkBaseSkillMetRequirement(SKILLS::ESkills eSkill, uint32 
 		return false;
 	}
 
+	if ((uint)eSkill >= SKILLS::NUM_SKILLS)
+	{
+		// item info from the server names a skill the client does not know
+		nlwarning("checkBaseSkillMetRequirement: skill %u out of %u", (uint)eSkill, (uint)SKILLS::NUM_SKILLS);
+		return false;
+	}
+
 	if (_MaxChildBaseSkillValue[eSkill] >= value)
 		return true;
 
@@ -588,7 +595,7 @@ void CSkillManager::checkTitleUnblocked(CHARACTER_TITLE::ECharacterTitle i, bool
 				// This is a new title, send a message
 				string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 				bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
-				const char *newtitle(CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle));
+				string newtitle = CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle);
 				CAHManager::getInstance()->runActionHandler("message_popup", nullptr, string("text1=") + newtitle + "|text0=" + CI18N::get("uiNewTitleBold"));
 			}
 			else
@@ -844,6 +851,11 @@ void CSkillManager::tryToUnblockTitleFromCult(bool show_message)
 // ***************************************************************************
 void CSkillManager::unblockTitleFromServer(CHARACTER_TITLE::ECharacterTitle ct)
 {
+	if ((uint)ct >= CHARACTER_TITLE::NB_CHARACTER_TITLE)
+	{
+		nlwarning("server tries to unblock title %u, out of %u", (uint)ct, (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE);
+		return;
+	}
 	if ( ! isTitleReserved(ct))
 	{
 		nlwarning("server tries to unblock a title that is not reserved");
@@ -1018,6 +1030,11 @@ void CSkillManager::tryToUnblockTitleFromItems(bool show_message)
 // ***************************************************************************
 void CSkillManager::blockTitleFromServer(CHARACTER_TITLE::ECharacterTitle ct)
 {
+	if ((uint)ct >= CHARACTER_TITLE::NB_CHARACTER_TITLE)
+	{
+		nlwarning("server tries to block title %u, out of %u", (uint)ct, (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE);
+		return;
+	}
 	if ( ! isTitleReserved(ct))
 	{
 		nlwarning("server tries to block a title that is not reserved");
@@ -1097,7 +1114,7 @@ public:
 				{
 					string titleStr = CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)i);
 					bool womenTitle = (UserEntity && UserEntity->getGender() == GSGENDER::female);
-					const char *s = CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle);
+					string s = CStringManagerClient::getTitleLocalizedName(titleStr, womenTitle);
 					pCB->addText(s);
 					pSM->_UIUnblockedTitles.push_back((CHARACTER_TITLE::ECharacterTitle)i);
 				}

@@ -43,7 +43,6 @@ namespace STRING_MANAGER
 	// ***************************************************************************
 	map<string, CStringManagerClient::CItem> CStringManagerClient::_SpecItem_TempMap;
 	map<string, string> CStringManagerClient::_DynStrings;
-	vector<string> CStringManagerClient::_TitleWords;
 	bool CStringManagerClient::_SpecItem_MemoryCompressed = false;
 	char *CStringManagerClient::_SpecItem_Labels = nullptr;
 	char *CStringManagerClient::_SpecItem_NameDesc = nullptr;
@@ -1652,17 +1651,14 @@ const char *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CSheetI
 }
 
 // ***************************************************************************
-const char *CStringManagerClient::getTitleLocalizedName(const string &titleId, bool women)
+std::string CStringManagerClient::getTitleLocalizedName(const string &titleId, bool women)
 {
 	vector<string> listInfos = getTitleInfos(titleId, women);
 
 	if (!listInfos.empty())
-	{
-		_TitleWords.push_back(listInfos[0]);
-		return _TitleWords.back().c_str();
-	}
-	
-	return titleId.c_str();
+		return listInfos[0];
+
+	return titleId;
 }
 
 // ***************************************************************************

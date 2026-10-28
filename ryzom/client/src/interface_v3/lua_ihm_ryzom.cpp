@@ -1452,9 +1452,14 @@ int CLuaIHMRyzom::getTargetDirection(CLuaState &ls)
 int CLuaIHMRyzom::getTargetGender(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getTargetGender", 0);
-	CCharacterCL* target = (CCharacterCL*)getTargetEntity();
+	// the target may be an item, a forage source or an fx, which have no gender
+	CCharacterCL* target = dynamic_cast<CCharacterCL*>(getTargetEntity());
 
-	if (!target) return (int)GSGENDER::unknown;
+	if (!target)
+	{
+		ls.push((uint8)GSGENDER::unknown);
+		return 1;
+	}
 
 	ls.push((uint8)target->getGender());
 	return 1;

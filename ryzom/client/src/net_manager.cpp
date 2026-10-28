@@ -215,6 +215,12 @@ void impulseDatabaseUpdateBank(NLMISC::CBitMemStream &impulse)
 		uint nbits;
 		FILL_nbits_WITH_NB_BITS_FOR_CDBBANK
 		impulse.serial( bank, nbits );
+		if (bank >= NB_CDB_BANKS)
+		{
+			// the field has room for one more value than there are banks
+			nlwarning("CDB: dropped a bank update for bank %u", bank);
+			return;
+		}
 
 		// read delta
 		IngameDbMngr.readDelta( serverTick, impulse, (TCDBBank)bank );
@@ -244,6 +250,12 @@ void impulseDatabaseInitBank(NLMISC::CBitMemStream &impulse)
 		uint nbits;
 		FILL_nbits_WITH_NB_BITS_FOR_CDBBANK
 		impulse.serial( bank, nbits );
+		if (bank >= NB_CDB_BANKS)
+		{
+			// the field has room for one more value than there are banks
+			nlwarning("CDB: dropped a bank init for bank %u", bank);
+			return;
+		}
 
 		// read delta
 		IngameDbMngr.readDelta( serverTick, impulse, (TCDBBank)bank );
@@ -274,6 +286,11 @@ void impulseDatabaseResetBank(NLMISC::CBitMemStream &impulse)
 		uint nbits;
 		FILL_nbits_WITH_NB_BITS_FOR_CDBBANK
 		impulse.serial( bank, nbits );
+		if (bank >= NB_CDB_BANKS)
+		{
+			nlwarning("CDB: dropped a bank reset for bank %u", bank);
+			return;
+		}
 
 		// reset the bank
 		IngameDbMngr.resetBank( serverTick, bank );
@@ -1811,6 +1828,12 @@ void impulseTeamContactInit(NLMISC::CBitMemStream &impulse)
 	impulse.serialCont(vFriendListName);
 	uint32 nbState;
 	impulse.serial(nbState);
+	// one state per name; the count is read on its own, so it is checked before it sizes anything
+	if (nbState != vFriendListName.size())
+	{
+		nlwarning("impulseTeamContactInit: dropped, %u names but %u states", (uint)vFriendListName.size(), nbState);
+		return;
+	}
 	vFriendListOnline.resize(nbState);
 	for (uint i=0; i<nbState; ++i)
 	{
@@ -3183,7 +3206,15 @@ void impulseEncyclopediaUpdate(NLMISC::CBitMemStream &impulse)
 	//nlinfo("impulseCallback : Received ENCYCLOPEDIA:UPDATE");
 
 	CEncyclopediaUpdateMsg msg;
-	impulse.serial(msg);
+	try
+	{
+		impulse.serial(msg);
+	}
+	catch (const EStream &e)
+	{
+		nlwarning("impulseEncyclopediaUpdate: dropped, %s", e.what());
+		return;
+	}
 	if (PermanentlyBanned) return;
 	CEncyclopediaManager::getInstance()->update(msg);
 }// impulseEncyclopediaUpdate //
@@ -3196,7 +3227,15 @@ void impulseEncyclopediaInit(NLMISC::CBitMemStream &impulse)
 	//nlinfo("impulseCallback : Received ENCYCLOPEDIA:INIT");
 
 	CEncyclopediaUpdateMsg msg;
-	impulse.serial(msg);
+	try
+	{
+		impulse.serial(msg);
+	}
+	catch (const EStream &e)
+	{
+		nlwarning("impulseEncyclopediaInit: dropped, %s", e.what());
+		return;
+	}
 	if (PermanentlyBanned) return;
 	CEncyclopediaManager::getInstance()->update(msg);
 }// impulseEncyclopediaInit //

@@ -364,7 +364,7 @@ void CProjectileManager::update()
 					}
 				}
 				// play physcial damage fx (if any)
-				if (proj.AttackInfo.PhysicalImpactIntensity != 0)
+				if (ccl && proj.AttackInfo.PhysicalImpactIntensity != 0)
 				{
 					ccl->meleeImpact(proj.AttackInfo);
 				}
@@ -709,7 +709,7 @@ void CProjectileManager::entityRemoved(uint slot)
 		{
 			// eval target pos
 			evalFXPosition(&pb.ProjectileAimingPoint, *entity, pb.Target.TargetPos); // note : insertion in the set depends not on this field, hence the const_cast
-			pb.TargeterInfo.Slot = CLFECOMMON::INVALID_SLOT;
+			pb.Target.Slot = CLFECOMMON::INVALID_SLOT;
 		}
 	}
 	// currently active projectile.
