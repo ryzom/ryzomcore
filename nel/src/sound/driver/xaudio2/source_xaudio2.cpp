@@ -239,6 +239,13 @@ void CSourceXAudio2::update3DChanges()
 
 void CSourceXAudio2::updateState()
 {
+	// the voice may already be destroyed (see release())
+	if (_IsPlaying && !_SourceVoice)
+	{
+		_IsPlaying = false;
+		return;
+	}
+
 	if (_IsPlaying)
 	{
 		if (_AdpcmUtility)
