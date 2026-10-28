@@ -246,7 +246,7 @@ bool CObject::isRefId(const std::string & prop /*=""*/) const
 	{
 		CObject* attr = getAttr(prop);
 		if (!attr) return false;
-		return attr->isTable();
+		return attr->isRefId();
 	}
 	return doIsRefId();
 }

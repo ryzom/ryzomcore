@@ -301,8 +301,10 @@ public:
 
 	virtual TSmartPtr clone() const NL_OVERRIDE;
 
-	double getNumberValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
-	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : m_Value.Number; }
+	double getNumberValue() const { return m_IsInteger ? (double)m_Value.Integer : m_Value.Number; }
+	// the conversion is explicit on the double branch only: a mixed ternary would be a double and
+	// round every integer above 2^53
+	sint64 getIntegerValue() const { return m_IsInteger ? m_Value.Integer : (sint64)m_Value.Number; }
 
 	virtual void dump(const std::string prefix = "", uint depth = 0) const NL_OVERRIDE;
 
