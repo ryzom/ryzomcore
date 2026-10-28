@@ -926,7 +926,8 @@ namespace NLGUI
 				: Image(img), Style(style), Type(type)
 				{}
 
-				CViewBase *Image;
+				/// a weak reference: the view can be deleted (the page is rendered again) while the download is pending
+				NLMISC::CRefPtr<CViewBase> Image;
 				CStyleParams Style;
 				TImageType Type;
 			};
@@ -966,7 +967,8 @@ namespace NLGUI
 			}
 
 		private:
-			std::vector<std::pair<sint32, CViewBase *> > TextureIds;
+			/// weak references: the views can be deleted while the download is pending
+			std::vector<std::pair<sint32, NLMISC::CRefPtr<CViewBase> > > TextureIds;
 		};
 
 #if RYZOM_WEB_BNP_DOWNLOAD
