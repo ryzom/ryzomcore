@@ -2132,7 +2132,7 @@ bool CDriverGL::setMode(const GfxMode& amode)
 
 #if defined(NL_OS_WINDOWS)
 	// restore relative cursor
-	if (cursorPosOk)
+	if (cursorPosOk && mode.Width > 0 && mode.Height > 0)
 	{
 		cursorPos.x = curX / (sint)mode.Width;
 		cursorPos.y = curY / (sint)mode.Height;

@@ -284,13 +284,15 @@ class CDrawDraggedSheet : public CWidgetManager::IOnWidgetsDrawnHandler
 public:
 	void process()
 	{
-		if ( CWidgetManager::getInstance()->getPointer()->show())
+		// the pointer does not exist yet (or anymore) during some screens, eg: login
+		CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+		if ( pointer && pointer->show())
 		{
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>( CWidgetManager::getInstance()->getCapturePointerLeft() );
 			if ((pCS != NULL) && (pCS->isDragged()))
 			{
-				sint	x= CWidgetManager::getInstance()->getPointer()->getX() - pCS->getDeltaDragX();
-				sint	y= CWidgetManager::getInstance()->getPointer()->getY() - pCS->getDeltaDragY();
+				sint	x= pointer->getX() - pCS->getDeltaDragX();
+				sint	y= pointer->getY() - pCS->getDeltaDragY();
 				pCS->drawSheet (x, y, false, false);
 
 				// if the control support CopyDrag, and if copy key pressed, display a tiny "+"
@@ -659,6 +661,8 @@ void CInterfaceManager::initLUA()
 }
 
 // ------------------------------------------------------------------------------------------------
+void badXMLParseMessageBox();
+
 void CInterfaceManager::initLogin()
 {
 	// Init LUA Scripting
@@ -675,8 +679,8 @@ void CInterfaceManager::initLogin()
 
 	if (ClientCfg.XMLLoginInterfaceFiles.empty())
 	{
-		nlinfo("no xml login config files in client.cfg");
-		return;
+		// without the login interface there is no pointer and nothing to display
+		nlerror("no xml login config files in client.cfg");
 	}
 
 	nldebug("Textures Login Interface");
@@ -693,7 +697,10 @@ void CInterfaceManager::initLogin()
 		loadTextures(*it + ".tga", *it + ".txt", true);
 	}
 
-	parseInterface (ClientCfg.XMLLoginInterfaceFiles, false);
+	if (!parseInterface (ClientCfg.XMLLoginInterfaceFiles, false))
+	{
+		badXMLParseMessageBox();
+	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
@@ -779,7 +786,10 @@ void CInterfaceManager::initOutGame()
 		loadTextures(*it + ".tga", *it + ".txt", true);
 	}
 
-	parseInterface (ClientCfg.XMLOutGameInterfaceFiles, false);
+	if (!parseInterface (ClientCfg.XMLOutGameInterfaceFiles, false))
+	{
+		badXMLParseMessageBox();
+	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
@@ -921,8 +931,8 @@ void CInterfaceManager::initInGame()
 
 	if (ClientCfg.XMLInterfaceFiles.empty())
 	{
-		nlinfo("no xml config files in client.cfg");
-		return;
+		// without the interface there is nothing to display
+		nlerror("no xml config files in client.cfg");
 	}
 
 	// Textures

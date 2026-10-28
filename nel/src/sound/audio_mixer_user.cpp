@@ -613,6 +613,13 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			NLMISC::CSmartPtr<NLGEORGES::UForm> form;
 			form = formLoader->loadForm(mixerConfigFile.c_str());
 
+			// loadForm returns NULL when the file cannot be loaded, the catch below releases the loader
+			if (form == NULL)
+			{
+				nlwarning("Cannot load the mixer config %s", mixerConfigFile.c_str());
+				throw NLMISC::Exception("Cannot load the mixer config");
+			}
+
 			NLGEORGES::UFormElm &root = form->getRootNode();
 
 			// read track reserve
