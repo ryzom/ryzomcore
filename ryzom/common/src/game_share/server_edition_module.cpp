@@ -2421,6 +2421,11 @@ void CServerEditionModule::onUserComponentDownloading(NLNET::IModuleProxy *sende
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
 
+	// Components are installed on each client; the server keeps the uploaded ones only to audit a
+	// session and to let editors agree on versions. It never hands a body to a client, which would
+	// run it as Lua, so the request is refused.
+	nlwarning("R2Ed: char %u asked to download user component %s, refused", charId, md5.toString().c_str());
+#if 0
 	CUserComponent* component = getUserComponent(md5);
 	if (component)
 	{
@@ -2429,6 +2434,7 @@ void CServerEditionModule::onUserComponentDownloading(NLNET::IModuleProxy *sende
 		component->serial(message);
 		senderModuleProxy->sendModuleMessage(this, message);
 	}
+#endif
 
 }
 
@@ -2484,11 +2490,11 @@ bool CServerEditionModule::onProcessModuleMessage(NLNET::IModuleProxy *senderMod
 
 		if (operationName == "SUCU")
 		{
-
-			CUserComponent* component = new CUserComponent();
+			// held until it is handed over, so a refused or truncated message does not leak it
+			CUniquePtr<CUserComponent> component(new CUserComponent());
 			//message.serial(const_cast<CUserComponent&>(*component));
 			component->serial( const_cast<CMessage&>(message));
-			onUserComponentUploaded(senderModuleProxy, component);
+			onUserComponentUploaded(senderModuleProxy, component.release());
 			return true;
 		}
 

@@ -533,6 +533,10 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 //
 	std::string operationName = message.getName();
 
+#if 0
+	// User components are installed on each client; the server only collects them for auditing and
+	// so that editors in a session can agree on versions. Downloading one from the server and running
+	// it was never a supported path, so it is not built: a component a client lacks stays missing.
 	if (operationName == "CUCD") //onUserComponentDownloaded
 	{
 		CUserComponent* component = new CUserComponent();
@@ -541,6 +545,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 		onUserComponentDownloaded(senderModuleProxy, component);
 		return true;
 	}
+#endif
 
 	if (operationName == "HELLO")
 	{
@@ -1269,7 +1274,7 @@ CUserComponent* CClientEditionModule::getUserComponentByHashMd5( const NLMISC::C
 	for (; first != last &&  (first->second->Md5 != md5) ; ++first ) {}
 	if (first == last)
 	{
-		nlwarning("Error: try to upload unknown component '%s'", md5.toString().c_str() );
+		// the callers say what they wanted it for
 		return nullptr;
 	}
 
@@ -1291,6 +1296,10 @@ void CClientEditionModule::onUserComponentUploading(NLNET::IModuleProxy * /* sen
 		userComponent->serial(message);
 		_ServerEditionProxy->sendModuleMessage(this, message);
 	}
+	else
+	{
+		nlwarning("R2Ed: the server asked for a user component this client does not have (md5 %s)", md5.toString().c_str());
+	}
 
 	return;
 }
@@ -1301,19 +1310,26 @@ void CClientEditionModule::onUserComponentRegistered(NLNET::IModuleProxy * /* se
 	//H_AUTO(R2_CClientEditionModule_onUserComponentRegistered)
 	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
 	CUserComponent* userComponent = getUserComponentByHashMd5(md5);
-    if (!userComponent)
+	if (!userComponent)
 	{
-		CShareServerEditionItfProxy proxy(_ServerEditionProxy);
-		proxy.onUserComponentDownloading(this, md5);
+		// Not installed here, and the client never fetches one from the server (see
+		// onUserComponentDownloaded), so this session's scenario cannot be assembled on this
+		// client until the player installs the component
+		nlwarning("R2Ed: a user component used in this session is not installed here (md5 %s)", md5.toString().c_str());
 	}
 	else
 	{
-		std::string filename = userComponent->getFilename();
-		R2::getEditor().getLua().executeScriptNoThrow(NLMISC::toString("r2.UserComponentsManager:addUserComponent('%s')", filename.c_str()));
+		// the name is a Lua argument, not Lua source; a missing manager table is reported by the call
+		R2::getEditor().getLua().push(userComponent->getFilename());
+		R2::getEditor().getEnv()["UserComponentsManager"].callMethodByNameNoThrow("addUserComponent", 1, 0);
 	}
 }
 
 
+#if 0
+// Not built: running a component the server sent is not a supported path (see onProcessModuleMessage).
+// Before this could ever come back: the lengths and Filename come from the message, UncompressedDataLength
+// + 1 wraps, Filename becomes the path saveUserComponentFile writes, and the body is run as Lua.
 void CClientEditionModule::onUserComponentDownloaded(NLNET::IModuleProxy *senderModuleProxy, CUserComponent* component)
 {
 	//H_AUTO(R2_CClientEditionModule_onUserComponentDownloaded)
@@ -1352,6 +1368,7 @@ void CClientEditionModule::onUserComponentDownloaded(NLNET::IModuleProxy *sender
 
 
 }
+#endif
 
 
 

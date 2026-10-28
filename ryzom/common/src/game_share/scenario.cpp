@@ -522,6 +522,14 @@ void  CUserComponent::serial(NLMISC::IStream &f)
 	if (f.isReading())
 	{
 		delete [] CompressedData;
+		CompressedData = nullptr;
+		// Both lengths come from the peer and size what a reader allocates; a component is a Lua
+		// package of a few hundred KB at most
+		if (CompressedDataLength > MaxUserComponentDataLength || UncompressedDataLength > MaxUserComponentDataLength)
+		{
+			nlwarning("CUserComponent::serial: refused '%s', %u compressed and %u uncompressed bytes", Filename.c_str(), CompressedDataLength, UncompressedDataLength);
+			throw NLMISC::EStream("user component too large");
+		}
 		CompressedData = new uint8[CompressedDataLength];
 	}
 
