@@ -581,6 +581,11 @@ public:
 	{
 		_ClientObjecFactory = factory;
 	}
+
+	static CObjectFactory *getClientObjectFactory()
+	{
+		return _ClientObjecFactory;
+	}
 };
 
 class CObjectSerializerServer: public CObjectSerializer

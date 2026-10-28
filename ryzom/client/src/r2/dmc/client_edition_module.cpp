@@ -472,6 +472,7 @@ void CClientEditionModule::release()
 	delete _ServerAnswerForseener; _ServerAnswerForseener = nullptr;
 	delete _Palette; _Palette = nullptr;
 	delete _Scenario;  _Scenario = nullptr;
+	CObjectSerializerClient::setClientObjectFactory(nullptr);
 	delete _Factory; _Factory = nullptr;
 	delete _PropertyAccessor;	_PropertyAccessor = nullptr;
 	_Initialized = false;
@@ -2497,7 +2498,8 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 		}
 
 	}
-	if (CFile::fileExists(filename))
+	// only a file that parsed becomes the local copy, which is read back the same way
+	if (object && CFile::fileExists(filename))
 	{
 		CFile::copyFile("save/r2_buffer.dat", filename);
 	}
