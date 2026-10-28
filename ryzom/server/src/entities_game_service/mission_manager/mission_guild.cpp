@@ -56,6 +56,10 @@ void CMissionGuild::updateUsersJournalEntry()
 //----------------------------------------------------------------------------
 void CMissionGuild::clearUsersJournalEntry()
 {
+	// a mission hidden from the journal has no entry (0xFF)
+	if ( _ClientIndex == 0xFF )
+		return;
+
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 	if (!guild)
 	{
@@ -73,34 +77,7 @@ void CMissionGuild::clearUsersJournalEntry()
 			continue;
 		}
 
-		CBankAccessor_PLR::TGROUP::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(_ClientIndex);
-		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TYPE",_ClientIndex), 0);
-		missionItem.setTYPE(user->_PropertyDatabase, 0);
-		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:ICON",_ClientIndex), 0);
-		missionItem.setICON(user->_PropertyDatabase, CSheetId::Unknown);
-		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TITLE",_ClientIndex), 0);
-		missionItem.setTITLE(user->_PropertyDatabase, 0);
-		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:DETAIL_TEXT",_ClientIndex), 0);
-		missionItem.setDETAIL_TEXT(user->_PropertyDatabase, 0);
-		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:END_DATE",_ClientIndex), 0 );
-		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
-		//		user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
-		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
-		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
-		{
-			CBankAccessor_PLR::TGROUP::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
-			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:TITLE",_ClientIndex,i), 0);
-			targetItem.setTITLE(user->_PropertyDatabase, 0);
-			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:X",_ClientIndex,i), 0);
-			targetItem.setX(user->_PropertyDatabase, 0);
-			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:TARGET%u:Y",_ClientIndex,i), 0);
-			targetItem.setY(user->_PropertyDatabase, 0);
-		}
-		for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
-		{
-			//			user->_PropertyDatabase.setProp( NLMISC::toString( "GROUP:MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
-			missionItem.getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0);
-		}
+		clearGroupJournalEntry(*user, _ClientIndex);
 	}
 }
 
@@ -133,15 +110,21 @@ void CMissionGuild::stopChildren()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	nlassert(templ);
+	// a child's failure actions can remove this mission: nothing of it is read in the loop
+	const uint32 guildId = _GuildId;
 	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
 	{
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
 		if ( child )
 		{
-			for ( uint j = 0; j < child->Instances.size(); j++ )
+			// a failed instance leaves Instances (see CMissionTemplate::isInstance)
+			const std::vector<CMission *> instances = child->Instances;
+			for (uint j = 0; j < instances.size(); j++)
 			{
-				CMissionGuild * mission = dynamic_cast<CMissionGuild*>( child->Instances[j] );
-				if ( mission && mission->_GuildId == _GuildId )
+				if (!child->isInstance(instances[j]))
+					continue;
+				CMissionGuild *mission = dynamic_cast<CMissionGuild *>(instances[j]);
+				if (mission && mission->_GuildId == guildId)
 					mission->onFailure( true,false );
 			}
 		}
@@ -155,7 +138,11 @@ void CMissionGuild::onFailure(bool ignoreJumps, bool sendMessage)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	nlassert(templ);
+	// the events of the failure actions can remove this mission
+	NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 	CMission::onFailure(ignoreJumps);
+	if (self == NULL)
+		return;
 	sendMessage = ( sendMessage && !templ->Tags.NoList );
 	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
 	{
@@ -199,10 +186,18 @@ void CMissionGuild::forceSuccess()
 		if ( !templ->Tags.NoList && !templ->Tags.AutoRemove )
 			guild->sendMessageToGuildMembers(isChained()?"EGS_MISSION_STEP_SUCCESS":"EGS_MISSION_SUCCESS");
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
-		stopChildren();
-		guild->processMissionEvent( event );
-		
+		// the failure actions of the other instances or of the children can remove this mission or end it: the event is
+		// still processed, and nothing of this mission is used
+		NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
+		CMissionManager::getInstance()->missionDoneOnce(templ, this);
+		if (self != nullptr)
+			stopChildren();
+		if (self == nullptr || getFinished())
+		{
+			guild->processMissionEvent(event);
+			return;
+		}
+
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || isChained() || templ->Tags.AutoRemove )
 		{
@@ -213,6 +208,10 @@ void CMissionGuild::forceSuccess()
 		{
 			setSuccessFlag();
 		}
+
+		// The mission is done before the event, as when its last step ends: the event can end a parent mission, which
+		// removes its children, this one among them. Nothing of this mission is used from here
+		guild->processMissionEvent(event);
 	}
 	else
 		nlwarning("<MISSIONS> alias %s : invalid team", CPrimitivesParser::aliasToString(templ->Alias).c_str());

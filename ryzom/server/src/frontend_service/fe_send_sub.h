@@ -134,33 +134,25 @@ public:
 	/// Set the address for send buffer, to match a connected client
 	void					setSendBufferAddress( TClientId id, const NLNET::CInetAddress *addr, CQuicUserContext *quicUser )
 	{
-		// We set the address for both, but we can't enable the buffer yet
-		((*_CurrentFillingBuffers)[id]).setAddress( addr, quicUser, false /*true*/ );
-		((*_CurrentFlushingBuffers)[id]).setAddress( addr, quicUser, false );
-		//_BuffersToEnable.insert( id ); // OBSOLETE: now it is enabled/disabled in CFeSendSub::fillPrioritizedActions
+		// The flushing buffers may be in use by the send thread: only the filling one is set now, the other one when
+		// they are swapped (see swapSendBuffers()). The buffer is enabled in CFeSendSub::fillPrioritizedActions.
+		((*_CurrentFillingBuffers)[id]).setAddress(addr, quicUser, false);
+		m_PendingSendBufferIds.push_back(id);
 	}
 
 	/// Unset a send buffer, when a client disconnects
 	void					disableSendBuffer( TClientId id )
 	{
-		// We can disable both, because no problem if the flushing thread sees the state of a buffer change to unused
-		// ((*_CurrentFillingBuffers)[id]).enableSendBuffer( false );
-		// ((*_CurrentFlushingBuffers)[id]).enableSendBuffer( false );
+		// As in setSendBufferAddress(), the flushing buffers are left to the send thread until they are swapped
 		NLNET::CInetAddress nullAddr(false);
 		((*_CurrentFillingBuffers)[id]).setAddress( &nullAddr, NULL, false );
-		((*_CurrentFlushingBuffers)[id]).setAddress( &nullAddr, NULL, false );
-
-		// But we must remove the id for _BuffersToEnable in the case when there was
-		// a connection and then a disconnection for the same client in the same cycle
-		// (maybe, not necessary to manage, because unlikely to happen)
-		//_BuffersToEnable.erase( id ); // OBSOLETE
+		m_PendingSendBufferIds.push_back(id);
 	}
 
-	/// Enable a send buffer, the first time when the buffer is ready to be flushed out
+	/// Enable a send buffer, to flush its outbox at the next swap (sendServerProblemStateToClients())
 	void					enableSendBuffer( TClientId id )
 	{
-		// In the filling one, we enabled the buffer as soon as the client connected
-		((*_CurrentFlushingBuffers)[id]).enableSendBuffer( true );
+		((*_CurrentFillingBuffers)[id]).enableSendBuffer(true);
 	}
 
 	/// Access the outbox (for filling)
@@ -233,6 +225,11 @@ private:
 
 	TSendBuffers			_SendBuffers1, _SendBuffers2;
 	TSendBuffers			*_CurrentFillingBuffers, *_CurrentFlushingBuffers;
+
+	// clang-format off
+	/// Buffers whose address was set or unset in the filling buffers only, to be copied to the others when swapping
+	std::vector<TClientId>	m_PendingSendBufferIds;
+	// clang-format on
 
 	/// MD5 hash keys of msg.xml and database.xml
 	NLMISC::CHashKeyMD5		_MsgXmlMD5;

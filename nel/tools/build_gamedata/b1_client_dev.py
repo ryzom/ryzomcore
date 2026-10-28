@@ -57,6 +57,7 @@ if not os.path.isfile(ClientDevLiveDirectory + "/client.cfg"):
 	cfg.write("PatchWanted          = 0;\n")
 	cfg.write("DisplayLuaDebugInfo  = 1;\n")
 	cfg.write("AllowDebugLua        = 1;\n")
+	cfg.write("AllowRemoteAdmin     = 1;\n")
 	cfg.write("FullScreen           = 0;\n")
 	cfg.flush()
 	cfg.close()

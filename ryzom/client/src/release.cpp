@@ -149,6 +149,12 @@ void saveIngameResolution()
 	{
 		uint32 width, height;
 		Driver->getWindowSize(width, height);
+		if (width == 0 || height == 0)
+		{
+			// a minimized window has an empty size, which the next setVideoMode would get
+			nldebug("The window is minimized, its size is not saved");
+			return;
+		}
 		ClientCfg.writeInt("Width", width);
 		ClientCfg.writeInt("Height", height);
 	}

@@ -97,8 +97,8 @@ public:
 	// onUntarget, clear database
 	void onUntarget( CCharacter *c, TDataSetRow oldTarget );
 
-	// player character choose an R2 Mission item
-	void giveItemGranted( TDataSetRow creatureRowId, uint32 actionId ); 
+	// player character choose an R2 Mission item (only an entry registered for that character)
+	void giveItemGranted( TDataSetRow creatureRowId, TDataSetRow characterRowId, uint32 actionId );
 
 	// on unspawn: update _PendingRequest
 	void onUnspawn( TDataSetRow creatureRowId );

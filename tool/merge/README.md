@@ -4,8 +4,16 @@ How to bring the next batch of changes from `core4` or from the atys branches
 into the shared merge branch without losing the clean diff again.
 
 Everything here was used to build `feature/core4-atys` (atys-live + core4,
-October 2026) and `feature/core4-gingo` (the same plus `main/gingo-test`).
+October 2026) and the three downstream merge branches on top of it:
+`feature/core4-rendor` (plus `main/rendor-staging`), `feature/core4-gingo`
+(plus `main/gingo-test`) and `feature/core4-yubo` (plus `main/yubo-dev`).
 The scripts need Python 3 only; `gen_db.py` additionally needs `lxml`.
+
+A full round ("follow the playbook") is: core4 into `feature/core4-atys`
+(3a), `main/atys-live` into it (3b), then for rendor, gingo and yubo in
+that order, `feature/core4-atys` into the branch (3c) and the branch's own
+atys line into it (3b with `--ref=feature/core4-atys`). A side with nothing
+new is skipped and named in the commit message of the step that did run.
 
 ## 1. The rules the branch is built on
 
@@ -62,9 +70,11 @@ last merged). Find them with:
 git log --first-parent --merges --format='%h %ad %s' --date=short feature/core4-atys | head
 ```
 
-The commit subjects are `Merge core4 <sha> (<date>) into feature/core4-atys`
-and `Merge atys main/<branch> <sha> (<date>) into ...`, so the last merged
-checkpoint of each side can be read straight off. Keep that convention.
+The commit subjects are `Merge core4 <sha> (<date>) into feature/core4-atys`,
+`Merge atys main/<branch> <sha> (<date>) into ...` and, on the downstream
+branches, `Merge feature/core4-atys <sha> (<date>) into feature/core4-<x>`,
+so the last merged checkpoint of each side can be read straight off. Keep
+that convention.
 
 History facts that stay fixed: the last commit atys-live shares with core4
 is `d8deff3f2` (October 2021). atys branch roles (their `BuildInfo.cmake`):
@@ -88,16 +98,23 @@ T=tool/merge          # scripts, from any checkout of core4 or the branch
 Pick a checkpoint: a tagged release, a PR merge, or the tip. Big mechanical
 passes (NL_OVERRIDE, clang-tidy, header updates) get a step of their own.
 
+The branch already has core4's formatting, so a core4 step is a plain
+merge, resolved by hand from git's conflict markers, keeping core4's shape
+and atys's behaviour:
+
 ```sh
-python $T/merge_step.py ../wt_merge <core4-commit> --side=core4 \
-       --base=<previous core4 checkpoint> --tag=stepN
+git merge --no-commit --no-ff -X renormalize <core4-commit>
 ```
 
-`--side=core4` runs `tokapply.py --verbatim`: wherever the branch did not
-change the conflicted spot since the previous core4 checkpoint, the core4
-text is inserted as-is (formatting included). Where atys changed the same
-spot you get a `SKIP both-changed` and resolve by hand, keeping core4's
-shape and atys's behaviour.
+A conflicted function that atys never touched (`diff -w` of its text
+between the previous core4 checkpoint and the branch is empty) is taken
+from core4 verbatim, not merged line by line. The applier is not used on
+this leg any more: `merge_step.py --side=core4` (`tokapply.py --verbatim`)
+left half-applied hunks on the October 2026 steps that git's own markers
+never produce (a stray `#if`, the head of a new function pasted into the
+atys function next to it, a command atys had removed pasted back with the
+tail of another one) and kept the old indentation of moved blocks, and
+finding those cost more than the conflicts it resolved.
 
 Policy for core4 steps:
 
@@ -109,9 +126,24 @@ Policy for core4 steps:
   change did not sneak in through an auto-merged neighbour file;
 * if core4 regenerated `database_*.{h,cpp}` or an `_itf` pair, rerun
   `gen_db.py` / the XSLT on the merged XML instead of merging the output;
-* after an NL_OVERRIDE-style pass, `override_skips.py ../wt_merge stepN.apply
-  --apply` annotates the atys-only declarations the same way so the next
-  core4 step does not conflict on them again.
+* after an NL_OVERRIDE-style pass, add `NL_OVERRIDE` to the atys-only
+  declarations as well, so the next core4 step does not conflict on them
+  again (`override_skips.py` did that from an applier report).
+
+Once everything is staged, before the commit:
+
+```sh
+python $T/check_core4_step.py ../wt_merge <previous core4 checkpoint> <core4-commit>
+python $T/residual_diff.py ../wt_merge <previous core4 checkpoint> <core4-commit> \
+       <branch tip before the merge> out_stepN
+```
+
+`check_core4_step.py` lists every line core4 added that the merged tree
+lacks (a dropped hunk, or a feature the branch deliberately lacks because
+atys removed it: name those in the commit message) or has with another
+indentation (take core4's text for that block). `residual_diff.py` writes,
+per file, how the branch's difference from core4 changed in the step, which
+is the hand resolution and nothing else: read it. Then build.
 
 ### 3b. Merging an atys checkpoint
 
@@ -146,12 +178,43 @@ Policy for atys steps:
   of that is taken; the content part, if any, comes through the applier;
 * new atys directories are carried as-is and listed in the commit message.
 
-### 3c. Finishing the step
+### 3c. Merging feature/core4-atys into rendor, gingo or yubo
 
-1. Open `stepN.apply`. Every `HAND` file: look at the `SKIP` lines
-   (`A a1-a2 B b1-b2` are line ranges in stage 2 and stage 3), edit the
-   worktree file, `git add`. One-sided conflicts (`DU`/`UD`): decide whether
-   the deletion or the edit wins by the rules above.
+The downstream branches carry core4's formatting through
+`feature/core4-atys`, so this leg is a plain merge like 3a, with
+`feature/core4-atys` in the place of core4 and no applier:
+
+```sh
+git merge --no-commit --no-ff -X renormalize feature/core4-atys
+```
+
+Conflicts can only sit where that branch's own atys line (`main/gingo-test`,
+`main/yubo-dev`, `main/rendor-staging`) changed the same code; resolve them
+from the markers, keeping what the step on `feature/core4-atys` decided and
+the downstream content around it. Policy files are already right on both
+sides. gingo-only C++ that uses the Lua ucstring API (`pop`/`push` of a
+ucstring, `*AsUtf16`) is adapted the way `feature/core4-atys` adapted its
+own callers. Before the commit:
+
+```sh
+python $T/check_core4_step.py ../wt_rendor <previous core4-atys checkpoint> feature/core4-atys
+```
+
+and `git diff feature/core4-atys feature/core4-<x> --stat` must still read as
+that atys line's extra content on top of `feature/core4-atys`. When the
+branch's own atys line also moved, do that step afterwards with 3b, with
+`--base` its previous checkpoint and `--ref=feature/core4-atys`; the token
+applier is still needed there because those atys branches are not
+formatted like the merge branches.
+
+### 3d. Finishing the step
+
+1. Atys step: open `stepN.apply`. Every `HAND` file: look at the `SKIP`
+   lines (`A a1-a2 B b1-b2` are line ranges in stage 2 and stage 3), edit
+   the worktree file, `git add`. Core4 and downstream steps: resolve the
+   conflict markers.
+   One-sided conflicts (`DU`/`UD`): decide whether the deletion or the edit
+   wins by the rules above.
 2. Go through the `POLICY-SENSITIVE` list even though git merged them
    cleanly.
 3. `git add` the files the applier resolved, `git diff --cached --stat`
@@ -191,7 +254,9 @@ original line ranges of both files, so a hunk can be hand-applied.
 
 | script | job |
 |---|---|
-| `merge_step.py` | one checkpoint merge: git merge, conflict triage, applier over all conflicts, policy list, whitespace clean-up |
+| `merge_step.py` | one atys checkpoint merge: git merge, conflict triage, applier over all conflicts, policy list, whitespace clean-up (`--side=core4` is retired, see 3a) |
+| `check_core4_step.py WT BASE TIP` | after a core4 step: core4's added lines that the merged tree lacks or has with another indentation |
+| `residual_diff.py WT BASE TIP PRE OUTDIR` | after a core4 step: per file, how the branch's difference from core4 changed, i.e. the hand resolution |
 | `tokapply.py A B --base=BASE [--ref=REF] --out=F [--mech\|--verbatim]` | three-way, formatting-immune application of B's changes onto A; the core of every step |
 | `tokdiff.py A B` | content diff on tokens, with original line numbers |
 | `ws_restore.py WT [--lines] --apply files` | undo whitespace-only hunks the index took over HEAD |

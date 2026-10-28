@@ -117,6 +117,7 @@
 #include "server_share/log_item_gen.h"
 #include "server_share/log_character_gen.h"
 #include "server_share/used_continent.h"
+#include "server_share/client_refusal.h"
 
 //
 // Externs
@@ -3384,8 +3385,30 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 	NLMISC::ICommand::execute(res, *InfoLog);
 }
 
+// The remote admin commands sent to clients and not answered yet, by request id and character: a client answers only a
+// command it was sent, once. A request can send several commands to a character. An entry older than this is dropped
+// (the admin request itself waits a few seconds).
+struct CPendingRemoteAdmin
+{
+	/// as the client answers them, without the "rc" that marks a remote command
+	std::vector<std::string> Cmds;
+	uint32 Time;
+};
+typedef std::map<std::pair<uint32, CEntityId>, CPendingRemoteAdmin> TPendingRemoteAdmins;
+static TPendingRemoteAdmins s_PendingRemoteAdmins;
+static const uint32 s_PendingRemoteAdminTimeout = 60; // in seconds
+
 void cbRemoteClientCallback (uint32 rid, const std::string &cmd, const std::string &entityNames)
 {
+	const uint32 now = CTime::getSecondsSince1970();
+	for (TPendingRemoteAdmins::iterator it = s_PendingRemoteAdmins.begin(); it != s_PendingRemoteAdmins.end();)
+	{
+		if (now - it->second.Time > s_PendingRemoteAdminTimeout)
+			s_PendingRemoteAdmins.erase(it++);
+		else
+			++it;
+	}
+
 	vector <CEntityId> entities;
 	selectEntities	(entityNames, entities);
 
@@ -3395,6 +3418,11 @@ void cbRemoteClientCallback (uint32 rid, const std::string &cmd, const std::stri
 		if (c != 0)
 		{
 			nlinfo ("ADMIN: I have to send a request for admin to a client : rid %d cmd '%s' eid %s", rid, cmd.c_str(), entities[i].toString().c_str());
+
+			// as impulseRemoteAdmin in the client does
+			CPendingRemoteAdmin &pending = s_PendingRemoteAdmins[std::make_pair(rid, entities[i])];
+			pending.Cmds.push_back((cmd.size() > 2 && toLowerAscii(cmd.substr(0, 2)) == "rc") ? cmd.substr(2) : cmd);
+			pending.Time = now;
 
 			CMessage msgout ("IMPULSION_ID");
 			msgout.serial (entities[i]);
@@ -3427,6 +3455,21 @@ void cbClientRemoteAdmin( NLNET::CMessage& msgin, const std::string &serviceName
 
 	string answer;
 	msgin.serial (answer);
+
+	// The request id alone would let any client answer, or answer again, a command sent to another
+	TPendingRemoteAdmins::iterator itPending = s_PendingRemoteAdmins.find(std::make_pair(rid, eid));
+	std::vector<std::string>::iterator itCmd;
+	if (itPending != s_PendingRemoteAdmins.end())
+		itCmd = std::find(itPending->second.Cmds.begin(), itPending->second.Cmds.end(), cmd);
+	if (itPending == s_PendingRemoteAdmins.end() || itCmd == itPending->second.Cmds.end())
+	{
+		nlwarning("HACK: %s answered command '%s' of remote admin request %u, which was not sent to it or was already answered, refused", eid.toString().c_str(), cmd.c_str(), rid);
+		reportRefusedClientMessage(eid);
+		return;
+	}
+	itPending->second.Cmds.erase(itCmd);
+	if (itPending->second.Cmds.empty())
+		s_PendingRemoteAdmins.erase(itPending);
 
 	vector<string> vara, vala;
 
@@ -7861,7 +7904,7 @@ NLMISC_COMMAND(acceptProposalForQueue, "player accept to enter critical part (fo
 
 	uint32 queueId = 0;
 	if (args.size() == 3)
-		NLMISC::fromString(args[1], queueId);
+		NLMISC::fromString(args[2], queueId);
 	else
 	{
 		CCharacter *player = PlayerManager.getChar(eid);
@@ -7883,7 +7926,7 @@ NLMISC_COMMAND(awakePlayerInQueue, "awake player in given queue", "<eid> <queueI
 	uint32 queueId;
 	NLMISC::fromString(args[1], queueId);
 
-	CMissionQueueManager::getInstance()->playerWakesUp( eid, queueId);
+	CMissionQueueManager::getInstance()->playerWakesUpInQueue(eid, queueId);
 
 	return true;
 }
@@ -8588,6 +8631,9 @@ NLMISC_COMMAND(eventSetItemCustomText, "set an item custom text, which replaces 
 	case -3:
 		log.displayNL("Empty slot %u", slot);
 		break;
+	case -4:
+		log.displayNL("The item in slot %u is held in an inventory whose item infos the character does not keep", slot);
+		break;
 	default:
 		log.displayNL("Unknown error");
 	}
@@ -8605,30 +8651,30 @@ NLMISC_COMMAND(eventResetItemCustomText, "set an item custom text, which replace
 
 	GET_CHARACTER
 	INVENTORIES::TInventory	inventory = INVENTORIES::toInventory(args[1]);
-	if (inventory==INVENTORIES::UNDEFINED)
-	{
-		log.displayNL("'%s' is not a valid inventory name", args[1].c_str());
-		return true;
-	}
 	uint32 slot;
 	NLMISC::fromString(args[2], slot);
-	CInventoryPtr invent = c->getInventory(inventory);
-	if (slot >= invent->getSlotCount())
-	{
-		log.displayNL("Invalid slot %u max = %u", slot, invent->getSlotCount()-1);
-		return true;
-	}
-	if (invent->getItem(slot) == NULL)
-	{
-		log.displayNL("empty slot %u", slot);
-		return true;
-	}
 
-	CGameItemPtr item = invent->getItem(slot);
-	item->setCustomText(ucstring());
-	// Following line was commented out by trap, reason unknown
-	c->incSlotVersion(INVENTORIES::bag, slot);
-	log.displayNL("item in slot %u has now its default text displayed", slot);
+	// as eventSetItemCustomText with an empty text, which also checks the inventory and raises the right slot version
+	switch (clientEventSetItemCustomText(c, inventory, slot, ucstring()))
+	{
+	case 0:
+		log.displayNL("item in slot %u has now its default text displayed", slot);
+		break;
+	case -1:
+		log.displayNL("'%s' is not a valid inventory name", args[1].c_str());
+		break;
+	case -2:
+		log.displayNL("Invalid slot %u", slot);
+		break;
+	case -3:
+		log.displayNL("empty slot %u", slot);
+		break;
+	case -4:
+		log.displayNL("The item in slot %u is held in an inventory whose item infos the character does not keep", slot);
+		break;
+	default:
+		log.displayNL("Unknown error");
+	}
 
 	return true;
 }

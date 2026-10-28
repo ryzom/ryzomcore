@@ -68,6 +68,13 @@ CVariable<bool> QuicConnection("fs", "QuicConnection", "", true, 0, true);
 CVariable<std::string> QuicCertificate("fs", "QuicCertificate", "", "", 0, true);
 CVariable<std::string> QuicPrivateKey("fs", "QuicPrivateKey", "", "", 0, true);
 CVariable<std::string> QuicLetsEncryptLive("fs", "QuicLetsEncryptLive", "", "/home/nevrax/letsencrypt/live", 0, true);
+CVariable<bool> QuicEcn("fs", "QuicEcn", "Mark the QUIC packets sent as ECN capable (read when QUIC starts)", true, 0, true);
+
+// QuicEcn as the configuration was opened with, and the closed QUIC connections that had completed their handshake, and
+// those of them whose path was ECN capable when they closed (see quicEcnStats)
+bool s_EcnEnabled = false;
+CAtomicInt s_ClosedConnections;
+CAtomicInt s_EcnCapableConnections;
 
 #ifdef FE_DEBUG_QUIC
 CAtomicInt s_UserContextCount;
@@ -111,6 +118,14 @@ public:
 
 	// Connections that have not shutdown yet
 	NLMISC::CSynchronized<std::set<CQuicUserContextPtr>> Connections;
+
+	// Connections whose handle is not closed yet, which includes those that have shut down while a CClientHost, a limbo
+	// client, a send buffer or a queued datagram still holds their context: stop() closes them, since RegistrationClose
+	// waits for every connection to be closed
+	NLMISC::CSynchronized<std::set<CQuicUserContext *>> OpenConnections;
+
+	// Take the handle out of a context, to close it once (or leave it to MsQuic); null if it was already taken
+	void *takeConnection(CQuicUserContext *user);
 
 	static QUIC_STATUS
 #ifdef _Function_class_
@@ -257,12 +272,19 @@ void CQuicTransceiver::start(uint16 port)
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
 		settings.MinimumMtu = 576;
 		settings.IsSet.MinimumMtu = TRUE;
+		// A bottleneck whose queue management marks (fq_codel, CAKE, PIE, L4S) then signals congestion without dropping
+		// packets. MsQuic marks every new path for 3 PTOs (about 3 s before an RTT is measured, the handshake included),
+		// and keeps marking only if the client's ACKs echo the marks correctly. A client or a path that does not echo
+		// them then gets unmarked packets; a path that drops marked packets delays the handshake by those 3 PTOs.
+		settings.EcnEnabled = QuicEcn.get();
+		settings.IsSet.EcnEnabled = TRUE;
 		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
 			nlwarning("MsQuic->ConfigurationOpen failed with status 0x%x", status);
 			return;
 		}
+		s_EcnEnabled = settings.EcnEnabled;
 
 		if (QuicCertificate.get().empty() || QuicPrivateKey.get().empty())
 		{
@@ -449,33 +471,51 @@ void CQuicTransceiver::stop()
 		nldebug("Shutdown %i connections", (int)connectionsCopy.size());
 		for (const CQuicUserContextPtr &user : connectionsCopy)
 		{
-			if (user->Connection)
-			{
-				MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
-			}
+			shutdown(user.get());
 		}
 		// Wait for connections to be empty, lousy spin loop
+		// (the lock is released while sleeping: SHUTDOWN_COMPLETE needs it to erase each connection)
 		nldebug("Wait for shutdown");
 		for (;;)
 		{
-			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
-			if (connections.value().empty())
-				break;
+			{
+				NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+				if (connections.value().empty())
+					break;
+			}
 			nlSleep(1);
 		}
 		nldebug("Shutdown ok");
 		// Forcefully close all connections
 		for (const CQuicUserContextPtr &user : connectionsCopy)
 		{
-			if (user->Connection)
-			{
-				MsQuic->ConnectionClose((HQUIC)user->Connection);
-				user->Connection = nullptr;
-			}
+			void *connection = m->takeConnection(user.get());
+			if (connection)
+				MsQuic->ConnectionClose((HQUIC)connection);
 		}
 		nldebug("Closed all connections");
 		connectionsCopy.clear();
 		nldebug("Cleared references. There may be leftovers in CClientHost, etc");
+	}
+
+	// Close the connections that had shut down before but whose context is still held (see OpenConnections), so that
+	// RegistrationClose does not wait for them, and a context released later no longer reaches this transceiver
+	std::vector<void *> leftovers;
+	{
+		NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&m->OpenConnections);
+		for (CQuicUserContext *user : openConnections.value())
+		{
+			std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
+			leftovers.push_back(user->Connection);
+			user->Connection = null;
+		}
+		openConnections.value().clear();
+	}
+	nldebug("Close %i connections that had already shut down", (int)leftovers.size());
+	for (void *connection : leftovers)
+	{
+		if (connection)
+			MsQuic->ConnectionClose((HQUIC)connection);
 	}
 
 	// Clear queue
@@ -530,12 +570,34 @@ CQuicUserContext::~CQuicUserContext()
 	// This should never get called before the connection is shutdown,
 	// since we increase the reference when the connection gets opened,
 	// and decrease the reference when the connection is shutdown.
-	CQuicTransceiverImpl *m = Transceiver->m.get();
-	if (Connection) // Should always be set, this is already warned for in the shutdown handling.
+	// Once the transceiver has stopped, it has closed the handle already and may be gone: it is not touched then.
+	bool hasConnection;
 	{
-		MsQuic->ConnectionClose((HQUIC)Connection);
-		Connection = null;
+		// (released before takeConnection, which locks OpenConnections first)
+		std::unique_lock<std::mutex> connectionLock(ConnectionMutex);
+		hasConnection = Connection != null;
 	}
+	if (hasConnection)
+	{
+		CQuicTransceiverImpl *m = Transceiver->m.get();
+		void *connection = m->takeConnection(this);
+		if (connection)
+			MsQuic->ConnectionClose((HQUIC)connection);
+	}
+}
+
+void *CQuicTransceiverImpl::takeConnection(CQuicUserContext *user)
+{
+	NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&OpenConnections);
+	void *connection;
+	{
+		// Once taken out, the send thread and shutdown() no longer use the handle
+		std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
+		connection = user->Connection;
+		user->Connection = null;
+	}
+	openConnections.value().erase(user);
+	return connection;
 }
 
 QUIC_STATUS
@@ -560,6 +622,10 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
 			connections.value().insert(userPtr);
 		}
+		{
+			NLMISC::CSynchronized<std::set<CQuicUserContext *>>::CAccessor openConnections(&m->OpenConnections);
+			openConnections.value().insert(user);
+		}
 		// user->increaseRef();
 		// They're in.
 		MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, (void *)CQuicTransceiverImpl::connectionCallback, (void *)user);
@@ -568,7 +634,13 @@ _Function_class_(QUIC_LISTENER_CALLBACK)
 		if (QUIC_FAILED(status))
 		{
 			nlwarning("MsQuic->ConnectionSetConfiguration failed with status 0x%x", status);
-			// Assuming we still get a QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE after this, which will decreaseRef the user context!
+			// Returning the failure makes MsQuic refuse the connection and take the handle back,
+			// and it then never reports QUIC_CONNECTION_EVENT_SHUTDOWN_COMPLETE, so the user context is released here.
+			// The handle must not be closed (MsQuic asserts on that), and no further event may reach the context.
+			MsQuic->SetCallbackHandler(ev->NEW_CONNECTION.Connection, null, null);
+			m->takeConnection(user);
+			NLMISC::CSynchronized<std::set<CQuicUserContextPtr>>::CAccessor connections(&m->Connections);
+			connections.value().erase(userPtr);
 		}
 		break;
 	}
@@ -628,13 +700,33 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		user->DebugRefCount = true;
 #endif
 		user->MaxSendLength = 0;
-		nlinfo("Shutdown complete");
+		if (ev->SHUTDOWN_COMPLETE.HandshakeCompleted)
+		{
+			++s_ClosedConnections;
+			QUIC_STATISTICS_V2 stats = {};
+			uint32 statsSize = sizeof(stats);
+			QUIC_STATUS statsStatus = MsQuic->GetParam(connection, QUIC_PARAM_CONN_STATISTICS_V2, &statsSize, &stats);
+			if (QUIC_SUCCEEDED(statsStatus))
+			{
+				if (stats.EcnCapable)
+					++s_EcnCapableConnections;
+				nlinfo("Shutdown complete (ECN %s, %u congestion events, %u of them from ECN)", stats.EcnCapable ? "capable" : "not capable", stats.SendCongestionCount, stats.SendEcnCongestionCount);
+			}
+			else
+			{
+				nlwarning("Shutdown complete, but the connection statistics could not be read (status 0x%x)", statsStatus);
+			}
+		}
+		else
+		{
+			nlinfo("Shutdown complete, before the handshake completed");
+		}
 		if (ev->SHUTDOWN_COMPLETE.AppCloseInProgress)
 		{
 			// Only applicable on client when ConnectionClose is called on the connection, so warn if this happens
 			nlwarning("App close in progress flagged, connection was deleted before the context. This should never happen.");
-			// Should never happen, but just in case, set to null to avoid double deletion
-			user->Connection = null;
+			// Should never happen, but just in case, take the handle out so it is not closed twice
+			m->takeConnection(user);
 		}
 		// TODO: Report to the boss (forge a disconnect datagram from this user)
 		// It's detected through the datagram handling already, anyway
@@ -653,7 +745,9 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
-		if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_SENT
+		// Canceled when it was still queued at shutdown, or no longer fits, and then it is never sent
+		if ((ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_SENT
+		        || ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_CANCELED)
 		    && (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)user->SentCount.load())
 		{
 			user->SendBusy.clear(); // release
@@ -784,11 +878,19 @@ void CQuicTransceiver::clearQueue(NLMISC::CBufFIFO *queue)
 
 bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemStream &buffer)
 {
-	if (buffer.size() <= user->MaxSendLength.load())
+	if (buffer.length() <= user->MaxSendLength.load())
 	{
 		if (user->SendBusy.testAndSet())
 		{
 			// Already busy
+			return false;
+		}
+
+		// The handle may be taken out to be closed (takeConnection) while this thread sends
+		std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
+		if (!user->Connection)
+		{
+			user->SendBusy.clear();
 			return false;
 		}
 
@@ -816,6 +918,10 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 {
 	// Gracefully shuts down a connection (assume this is called from the main service thread only)
 	// Assuming we can call shutdown as many times as we like...
+	// (once the transceiver has stopped, the context has no handle any more)
+	std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
+	if (!user->Connection)
+		return;
 	CQuicTransceiverImpl *m = user->Transceiver->m.get();
 	MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
 }
@@ -908,6 +1014,15 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 }
 
 #endif
+
+NLMISC_CATEGORISED_COMMAND(fs, quicEcnStats, "Display how many of the closed QUIC connections that completed their handshake were ECN capable when they closed", "")
+{
+	if (args.size() != 0)
+		return false;
+
+	log.displayNL("ECN %s: %u of %u closed QUIC connections were ECN capable when they closed", s_EcnEnabled ? "enabled" : "disabled", (uint)s_EcnCapableConnections.load(), (uint)s_ClosedConnections.load());
+	return true;
+}
 
 NLMISC_CATEGORISED_COMMAND(fs, quicCertReload, "Reload QUIC certificates", "")
 {

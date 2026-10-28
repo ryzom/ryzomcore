@@ -39,6 +39,8 @@
 #include "nel_database_mapping.h"
 #include "character_sync.h"
 
+#include <random>
+
 // defined by MySQL config file
 #ifdef access
 #undef access
@@ -57,10 +59,20 @@ CVariable<uint32>	ShardAssocTimeout( "su", "ShardAssocTimeout", "Timeout (in s)b
 CVariable<uint32>	ForceWelcomerShard( "su", "ForceWelcomerShard", "SessionId of a shard to promote when joining any mainland (0=none)", 0, 0, true );
 CVariable<string>	DomainName("su", "DomainName", "The name of the domain", "ryzom", 0, true);
 CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privilege allowed to join any animation session", ":GM:SGM:", 0, true);
-CVariable<string>	SecurityCheck("su", "SecurityCheck", "A Security Check", "", 0, true);
 
 namespace RSMGR
 {
+	const std::string &getFastDisconnectionSecret()
+	{
+		static std::string secret;
+		if (secret.empty())
+		{
+			std::random_device device;
+			for (uint i = 0; i < 4; ++i)
+				secret += NLMISC::toString("%08x", (uint32)device());
+		}
+		return secret;
+	}
 
 	class CRingSessionManager :
 		public CEmptyModuleServiceBehav<CEmptyModuleCommBehav<CEmptySocketBehav<CModuleBase> > >,
@@ -3487,12 +3499,13 @@ endOfWelcomeUserResult:
 			pjs.From = from;
 			pjs.SessionId = TSessionId(storedSessionId);
 
-			if (mustGrantFastDisconnection)
+			// (the code is made from the cookie, which the login service clears when the user leaves)
+			if (mustGrantFastDisconnection && cookie.isValid())
 			{
 				CSecurityCheckForFastDisconnection securityCheck;
 				securityCheck.setSessionId(sessionId);
 				securityCheck.setCookie(cookie); // must not be changed by joinSession(), because the client sends the one he knows before Far TPing
-				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(SecurityCheck));
+				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(getFastDisconnectionSecret().c_str()));
 			}
 			_PendingJoins.push_back(pjs);
 

@@ -232,8 +232,18 @@ public:
 		NbJoinModes
 	};
 
-	CFarTP() : _Reason(nullptr)
-	    , _SessionIdToJoinFast(0), _InGameMode(false), _PreviousR2EdEnabled(false), _ReselectingChar(false), _IsServerHopEmbedded(false), _HookedForEditor(false), _DSSDown(false) /*, _SelfReconnecting(false)*/ {}
+	CFarTP()
+	    : _Reason(nullptr)
+	    , _SessionIdToJoinFast(0)
+	    , _InGameMode(false)
+	    , _PreviousR2EdEnabled(false)
+	    , _ReselectingChar(false)
+	    , _IsServerHopEmbedded(false)
+	    , _HookedForEditor(false)
+	    , _DSSDown(false) /*, _SelfReconnecting(false)*/
+	    , m_ReselectThroughLimbo(false)
+	{
+	}
 
 	// Get the address of a front-end service via http, then begin Far TP
 	bool requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP::TJoinMode joinMode, bool bailOutIfSessionVanished);
@@ -249,6 +259,11 @@ public:
 
 	/// Begin a Character Reselect sequence
 	void requestReconnection();
+
+	/// Begin a Character Reselect sequence on the current connection, without the shard unifier: after the EGS quit
+	/// countdown the client sends SYSTEM_QUIT, and the frontend keeps the session (its limbo mode) until the EGS sends
+	/// the characters again
+	void requestReselectThroughLimbo();
 
 	// These states can overlap
 	bool isIngame() const { return _InGameMode; }
@@ -272,12 +287,29 @@ public:
 	void selectCharAndEnter();
 	void sendReady();
 	void onFailure();
+	/// After onFailure, nothing is left to go back to: show its message and exit the client. Called by the loops that run
+	/// on the main thread while the login state machine reconnects (globalMenu, and through exitIfFailedOrDisconnected).
+	void exitIfFailed();
+	/// As exitIfFailed, after failing the Far TP when its connection closed while joining the shard. Called by the loops
+	/// that wait for the new shard on the main thread (farTPmainLoop, sendReady, initMainLoop on a reselect).
+	void exitIfFailedOrDisconnected();
 	void onDssDown(bool forceReturn=false);
 
 	void setIngame() { _InGameMode = true; }
 	void setOutgame() { _InGameMode = false; }
-	void setMainLoopEntered() { setIngame(); _ReselectingChar = false; }
-	void beginEmbeddedServerHop() { _IsServerHopEmbedded = true; setOutgame(); _ReselectingChar = false; }
+	void setMainLoopEntered()
+	{
+		setIngame();
+		_ReselectingChar = false;
+		m_ReselectThroughLimbo = false;
+	}
+	void beginEmbeddedServerHop()
+	{
+		_IsServerHopEmbedded = true;
+		setOutgame();
+		_ReselectingChar = false;
+		m_ReselectThroughLimbo = false;
+	}
 	void endEmbeddedServerHop() { _IsServerHopEmbedded = false; setIngame(); _ReselectingChar = true; }
 
 	void setURLBase(const std::string& urlBase) { _URLBase = urlBase; }
@@ -304,6 +336,8 @@ private:
 	bool _HookedForEditor; // allows to Far TP to editor instead of following the next Far TP request
 	bool _DSSDown; // remembers a DSSDown event if occurs during a FarTP
 //	bool _SelfReconnecting; // allows to disconnect after character selection and reconnect until the player can choose another character
+	bool m_ReselectThroughLimbo; // the current character reselect keeps the connection (see requestReselectThroughLimbo)
+	std::string m_FailureMessage; // set by onFailure (see exitIfFailed)
 
 };
 

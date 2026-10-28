@@ -867,6 +867,9 @@ void CMissionBaseBehaviour::setSuccessFlag()
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if (templ == NULL)
 		return;
+	// a success that keeps the mission in the journal does not remove it, which would take the entity waiting for it
+	// out of its queue
+	leaveWaitingQueue();
 	_Mission->setFinished(true);
 	_Mission->setMissionSuccess(true);
 	while( _Mission->getStepsBegin() != _Mission->getStepsEnd() )
@@ -906,14 +909,7 @@ void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 		return;
 
 	// if mission was in a waiting queue, removed player from queue manager
-	if (_Mission->getWaitingQueueId() != 0)
-	{
-		CCharacter * user = getMainEntity();
-		if (user)
-		{
-			CMissionQueueManager::getInstance()->removePlayerFromQueue(user->getId(), _Mission->getWaitingQueueId());
-		}
-	}
+	leaveWaitingQueue();
 
 	// remove the mission from the timed mission container
 	// we have to do that because jumps can prevent the mission from being deleted
@@ -986,12 +982,16 @@ void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 			CCharacter * user = getMainEntity();
 			if (user)
 			{
+				// the events can remove this mission (the overrides of onFailure check it too)
+				NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 				while( !eventList.empty() )
 				{
 					user->processMissionEvent( *eventList.front() );
 					delete eventList.front();
 					eventList.pop_front();
 				}
+				if (self == NULL)
+					return;
 			}
 		}
 	}
@@ -1024,6 +1024,31 @@ void CMissionBaseBehaviour::onFailure(bool ignoreJumps,bool sendMessage)
 		// stop children missions
 		stopChildren();
 	}
+}
+
+//----------------------------------------------------------------------------
+void CMissionBaseBehaviour::leaveWaitingQueue(const CEntityId &owner)
+{
+	const uint32 queueId = _Mission->getWaitingQueueId();
+	if (queueId == 0)
+		return;
+
+	// The entity that waits is the main entity when the queue_start step was activated: a team can have another leader
+	// and a guild another highest grade online since, and the entry of a player who went offline no longer holds the
+	// mission
+	std::vector<CEntityId> candidates;
+	if (owner != CEntityId::Unknown)
+		candidates.push_back(owner);
+	CCharacter *user = getMainEntity();
+	if (user)
+		candidates.push_back(user->getId());
+	std::vector<TDataSetRow> entities;
+	getEntities(entities);
+	for (uint i = 0; i < entities.size(); ++i)
+		candidates.push_back(getEntityIdFromRow(entities[i]));
+	// once taken out, the mission no longer waits: removing it after its failure does not look for the entity again
+	if (CMissionQueueManager::getInstance()->removeMissionFromQueue(queueId, _Mission, candidates))
+		_Mission->setWaitingQueueId(0);
 }
 
 //----------------------------------------------------------------------------
@@ -1119,6 +1144,30 @@ bool CMissionBaseBehaviour::itemGiftDone( CCharacter * user,const std::vector< C
 }
 
 //----------------------------------------------------------------------------
+void CMissionBaseBehaviour::clearGroupJournalEntry(CCharacter &user, uint8 clientIndex)
+{
+	CBankAccessor_PLR::TGROUP::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getGROUP().getMISSIONS().getArray(clientIndex);
+	missionItem.setTYPE(user._PropertyDatabase, 0);
+	missionItem.setICON(user._PropertyDatabase, CSheetId::Unknown);
+	missionItem.setTITLE(user._PropertyDatabase, 0);
+	missionItem.setDETAIL_TEXT(user._PropertyDatabase, 0);
+	missionItem.setEND_DATE(user._PropertyDatabase, 0);
+	missionItem.setBEGIN_DATE(user._PropertyDatabase, 0);
+	// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
+	missionItem.setSLEEP(user._PropertyDatabase, 0);
+	for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
+	{
+		CBankAccessor_PLR::TGROUP::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
+		targetItem.setTITLE(user._PropertyDatabase, 0);
+		targetItem.setX(user._PropertyDatabase, 0);
+		targetItem.setY(user._PropertyDatabase, 0);
+	}
+	for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
+	{
+		missionItem.getGOALS().getArray(i).setTEXT(user._PropertyDatabase, 0);
+	}
+}
+
 void CMissionBaseBehaviour::updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix )
 {
 	if (dbPrefix == "GROUP:")
@@ -1484,6 +1533,8 @@ uint CMissionBaseBehaviour::_updateCompass(CCharacter & user, DBType &missionDb)
 			maxClientIndex = MaxSoloMissionCount;
 		else if ( dynamic_cast<CMissionTeam*>( _Mission ) )
 			maxClientIndex = MaxGroupMissionCount;
+		else if ( dynamic_cast<CMissionGuild*>( _Mission ) )
+			maxClientIndex = MaxGroupMissionCount + MaxGuildMissionCount; // the guild entries follow the team ones in GROUP:MISSIONS
 		if ( _ClientIndex < maxClientIndex )
 		{
 //			if ( node )
@@ -1564,12 +1615,16 @@ void CMissionBaseBehaviour::applyPlayerReconnectHandler()
 			CCharacter * user = getMainEntity();
 			if (user != NULL)
 			{
+				// the events can end and remove this mission
+				NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 				while (!eventList.empty())
 				{
 					user->processMissionEvent(*eventList.front());
 					delete eventList.front();
 					eventList.pop_front();
 				}
+				if (self == NULL)
+					return;
 			}
 		}
 	}
@@ -1629,12 +1684,16 @@ void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::string &
 			CCharacter * user = getMainEntity();
 			if (user)
 			{
+				// the events can end and remove this mission
+				NLMISC::CRefPtr<CMissionBaseBehaviour> self = this;
 				while( !eventList.empty() )
 				{
 					user->processMissionEvent( *eventList.front() );
 					delete eventList.front();
 					eventList.pop_front();
 				}
+				if (self == NULL)
+					return;
 			}
 		}
 	}

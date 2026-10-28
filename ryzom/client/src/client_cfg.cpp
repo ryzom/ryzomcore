@@ -29,6 +29,7 @@
 #include "stdpch.h"
 // Misc.
 #include "nel/misc/config_file.h"
+#include "nel/misc/bitmap.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/cmd_args.h"
@@ -444,9 +445,15 @@ CClientConfig::CClientConfig()
 	WebIgTrustedDomains.push_back(RYZOM_WEBIG_TRUSTED_DOMAIN);	// open.ryzom.dev
 	WebIgNotifInterval = 10; // time in minutes
 	WebIgTrustedHttpsOnly = true;
+	AllowRemoteAdmin = false;
 
 	CurlMaxConnections = 5;
 	CurlCABundle.clear();
+	WebIgImageMaxSize = 4096;
+	WebIgDataUrlMaxBytes = 4 * 1024 * 1024;
+	WebIgImageMaxBytes = 16 * 1024 * 1024;
+	WebIgPageMaxBytes = 8 * 1024 * 1024;
+	WebIgStylesheetMaxBytes = 1024 * 1024;
 
 	RingReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
 	ReleaseNotePath = WebIgMainDomain + "/app_releasenotes/index.php";
@@ -1203,9 +1210,35 @@ void CClientConfig::setValues()
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_BOOL_DEV(WebIgTrustedHttpsOnly); // a development shard may serve its web apps over plain http; a final build always requires https
 	READ_INT_FV(WebIgNotifInterval);
+	READ_BOOL_FV(AllowRemoteAdmin);
 	READ_INT_FV(CurlMaxConnections);
 	if (ClientCfg.CurlMaxConnections < 0)
 		ClientCfg.CurlMaxConnections = 2;
+	READ_INT_FV(WebIgImageMaxSize);
+	if (ClientCfg.WebIgImageMaxSize < 0 || ClientCfg.WebIgImageMaxSize > (sint32)NLMISC::MAX_BITMAP_SIZE)
+	{
+		nlwarning("CFG: WebIgImageMaxSize is %d, a web image is at most %u pixels a side", ClientCfg.WebIgImageMaxSize, NLMISC::MAX_BITMAP_SIZE);
+		ClientCfg.WebIgImageMaxSize = 0;
+	}
+	READ_INT_FV(WebIgDataUrlMaxBytes);
+	if (ClientCfg.WebIgDataUrlMaxBytes < 0)
+	{
+		nlwarning("CFG: WebIgDataUrlMaxBytes is %d, a negative value is no limit as 0", ClientCfg.WebIgDataUrlMaxBytes);
+		ClientCfg.WebIgDataUrlMaxBytes = 0;
+	}
+	READ_INT_FV(WebIgImageMaxBytes);
+	READ_INT_FV(WebIgPageMaxBytes);
+	READ_INT_FV(WebIgStylesheetMaxBytes);
+	sint32 *webByteLimits[] = { &ClientCfg.WebIgImageMaxBytes, &ClientCfg.WebIgPageMaxBytes, &ClientCfg.WebIgStylesheetMaxBytes };
+	const char *webByteLimitNames[] = { "WebIgImageMaxBytes", "WebIgPageMaxBytes", "WebIgStylesheetMaxBytes" };
+	for (uint i = 0; i < sizeof(webByteLimits) / sizeof(webByteLimits[0]); ++i)
+	{
+		if (*webByteLimits[i] < 0)
+		{
+			nlwarning("CFG: %s is %d, a negative value is no limit as 0", webByteLimitNames[i], *webByteLimits[i]);
+			*webByteLimits[i] = 0;
+		}
+	}
 
 	READ_STRING_FV(CurlCABundle);
 	if (!ClientCfg.CurlCABundle.empty() && ClientCfg.CurlCABundle[0] == '%') // Path is relative to client_default.cfg path (used by ryzom patch)
@@ -2219,8 +2252,8 @@ void CClientConfig::release ()
 				Driver->getWindowPos(x, y);
 				Driver->getWindowSize(width, height);
 
-				// Are we in window mode ?
-				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
+				// Are we in window mode ? A minimized window has an empty size, and Windows moves it off the screen.
+				if (ClientCfg.Windowed && width != 0 && height != 0 /* && !isWindowMaximized() */)
 				{
 					// Save windows position. width/height are saved when leaving ingame.
 					writeInt("PositionX", x);

@@ -323,8 +323,15 @@ namespace NLNET
 
 		virtual ~TSecurityData()
 		{
-			if (NextItem != nullptr)
-				delete NextItem;
+			// the chain is deleted in a loop: one read from a message can hold tens of thousands of blocks
+			TSecurityData *next = NextItem;
+			while (next != nullptr)
+			{
+				TSecurityData *after = next->NextItem;
+				next->NextItem = nullptr;
+				delete next;
+				next = after;
+			}
 		}
 
 		virtual void serial(NLMISC::CMemStream &s) =0;

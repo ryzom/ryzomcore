@@ -443,8 +443,14 @@ protected:
 class CMissionEventQueueEntryOk: public CMissionEvent
 {
 public:
-	CMissionEventQueueEntryOk()
-		:CMissionEvent(QueueEntryOk, TDataSetRow()) {}
+	CMissionEventQueueEntryOk(uint32 queueId = 0)
+	    : CMissionEvent(QueueEntryOk, TDataSetRow())
+	    , QueueId(queueId)
+	{
+	}
+	/// the queue whose critical part the player accepted: only its queue_start step is validated
+	uint32 QueueId;
+
 protected:
 	friend class CMissionEvent;
 	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */) NL_OVERRIDE{return false;}

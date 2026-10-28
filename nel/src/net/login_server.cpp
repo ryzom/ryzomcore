@@ -471,11 +471,26 @@ string CLoginServer::isValidCookie (const CLoginCookie &lc, string &userName, st
 		userName = "InvalidUserName";
 		userPriv = DefaultUserPriv;
 		instanceId = 0xffffffff;
+		charSlot = 0xffffffff;
 		return "";
 	}
 
 	// problem
 	return "I didn't receive the cookie from WS";
+}
+
+bool CLoginServer::isPendingCookie(const CLoginCookie &lc)
+{
+	// the same checks as isValidCookie()
+	if (!AcceptInvalidCookie && !lc.isValid())
+		return false;
+
+	for (list<CPendingUser>::const_iterator it = PendingUsers.begin(); it != PendingUsers.end(); ++it)
+	{
+		if (it->Cookie == lc)
+			return true;
+	}
+	return false;
 }
 
 void CLoginServer::connectToWS ()

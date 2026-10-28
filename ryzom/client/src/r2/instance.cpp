@@ -882,12 +882,29 @@ class CAHPickerLua : public IActionHandler
 			{}
 
 			NLMISC_DECLARE_CLASS(CToolPickLua);
+			// An instance id goes into Lua source as a quoted literal below, so it may only hold
+			// the characters the editor gives ids: letters, digits and '_'
+			static bool isLuaLiteralSafeAsciiId(const std::string &id)
+			{
+				for (std::string::size_type i = 0; i < id.size(); ++i)
+				{
+					char c = id[i];
+					if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'))
+						return false;
+				}
+				return true;
+			}
 			void pick(CInstance &instance) NL_OVERRIDE
 			{
 				CTool::TSmartPtr holdThis(this); // prevent 'setCurrentTool' from deleting 'this'
 				getEditor().setCurrentTool(nullptr);
 				if (!LuaPickFunc.empty())
 				{
+					if (!isLuaLiteralSafeAsciiId(instance.getId()))
+					{
+						nlwarning("CToolPickLua: refused instance id '%s'", instance.getId().c_str());
+						return;
+					}
 					getEditor().getLua().executeScriptNoThrow(LuaPickFunc + "('" + instance.getId() + "')");
 				}
 			}
@@ -903,6 +920,11 @@ class CAHPickerLua : public IActionHandler
 			bool canPick(const CInstance &instance) const NL_OVERRIDE
 			{
 				if (LuaPickFunc.empty()) return true;
+				if (!isLuaLiteralSafeAsciiId(instance.getId()))
+				{
+					nlwarning("CToolPickLua: refused instance id '%s'", instance.getId().c_str());
+					return false;
+				}
 				CLuaState &lua = getEditor().getLua();
 				int initialSize = lua.getTop();
 				std::string script = "return " + LuaTestFunc + "('" + instance.getId() + "')";

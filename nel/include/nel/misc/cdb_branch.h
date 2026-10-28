@@ -142,7 +142,7 @@ public:
 
 	void resetNode( TGameCycle gc, uint node )
 	{
-		if( node > _Nodes.size() )
+		if( node >= _Nodes.size() )
 			return;
 		
 		_Nodes[ node ]->resetData( gc );

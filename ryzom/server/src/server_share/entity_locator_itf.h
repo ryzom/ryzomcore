@@ -379,6 +379,8 @@ namespace ENTITYLOC
 
 		void connectionEvents_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
+		void setFastDisconnectionSecret_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
+
 		// declare one interceptor member of the skeleton
 		TInterceptor	_Interceptor;
 
@@ -391,6 +393,9 @@ namespace ENTITYLOC
 
 		// The entity locator send a list of connection event to EGS
 		virtual void connectionEvents(NLNET::IModuleProxy *sender, const std::vector < TCharConnectionEvent > &events) =0;
+		// The entity locator answers initState with the secret the ring session manager makes the codes for
+		// fast disconnection with, chosen at random when the SU starts: the EGS checks the code a client presents with it
+		virtual void setFastDisconnectionSecret(NLNET::IModuleProxy *sender, const std::string &secret) =0;
 
 
 	};
@@ -442,6 +447,9 @@ namespace ENTITYLOC
 
 		// The entity locator send a list of connection event to EGS
 		void connectionEvents(NLNET::IModule *sender, const std::vector < TCharConnectionEvent > &events);
+		// The entity locator answers initState with the secret the ring session manager makes the codes for
+		// fast disconnection with, chosen at random when the SU starts: the EGS checks the code a client presents with it
+		void setFastDisconnectionSecret(NLNET::IModule *sender, const std::string &secret);
 		// The entity locator send a list of connection event to EGS
 
 		// This is the broadcast version of the method.
@@ -462,6 +470,9 @@ namespace ENTITYLOC
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_connectionEvents(NLNET::CMessage &__message, const std::vector < TCharConnectionEvent > &events);
+
+		// Message serializer. Return the message received in reference for easier integration
+		static const NLNET::CMessage &buildMessageFor_setFastDisconnectionSecret(NLNET::CMessage &__message, const std::string &secret);
 
 
 

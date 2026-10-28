@@ -316,7 +316,7 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 		CCharacter * user = PlayerManager.getChar( eId );
 		if ( member == NULL || user == NULL )
 		{
-			nlwarning("<CGuildMemberModule::setMOTD>%s invalid member id %s",eId.toString().c_str());
+			nlwarning("<CGuild::setMOTD> invalid member id %s",eId.toString().c_str());
 			return;
 		}
 
@@ -830,6 +830,9 @@ void CGuild::removeMission( uint idx, TMissionResult result)
 		_Missions[idx]->clearUsersJournalEntry();
 	}
 
+	// an abandoned mission is removed without a failure, which would take the entity waiting for it out of its queue
+	_Missions[idx]->leaveWaitingQueue();
+
 	CMissionManager::getInstance()->deInstanciateMission(_Missions[idx]);
 	delete _Missions[idx];
 	_Missions.erase(_Missions.begin() + idx) ;
@@ -939,8 +942,17 @@ bool CGuild::processGuildMissionStepEvent(std::list< CMissionEvent*> & eventList
 			}
 		}
 
-		CMissionManager::getInstance()->missionDoneOnce(templ);
-		mission->stopChildren();
+		// The failure actions of the other instances or of the children can remove the mission or fail it: its MissionDone
+		// event is in the list already. It is Normal meanwhile, as in forceSuccess: a failure of a Complete mission is
+		// taken as its end, which would end it again with a second MissionDone.
+		NLMISC::CRefPtr<CMission> missionRef = mission;
+		mission->setProcessingState(CMission::Normal);
+		CMissionManager::getInstance()->missionDoneOnce(templ, mission);
+		if (missionRef != nullptr)
+			mission->stopChildren();
+		if (missionRef == nullptr || mission->getFinished())
+			return true;
+		mission->setProcessingState(CMission::Complete);
 
 		// only remove no list missions, other must be manually removed by user
 		if ( templ->Tags.NoList || mission->isChained() || templ->Tags.AutoRemove )

@@ -4425,13 +4425,18 @@ function Translator.CheckPickedEntity(component, prop)
 			local targetId = this[property.Name]
 
 			if targetId ~= r2.RefId("") then
-				debugInfo("targetId:" ..targetId)
-				local filterFunc = "return " ..property.PickFunction .."('"..targetId.."')"
-				debugInfo("filterfunc: " ..filterFunc)			
-				local ok = loadstring(filterFunc)()
-				if ok == false then
-					debugInfo("name: " ..property.Name)
-					r2.requestSetNode(this.InstanceId, property.Name, r2.RefId(""))	
+				-- the id goes into Lua source as a literal, so it may only hold letters, digits and '_'
+				if not string.match(tostring(targetId), "^[%w_]+$") then
+					debugInfo("CheckPickedEntity: refused target id " ..tostring(targetId))
+				else
+					debugInfo("targetId:" ..targetId)
+					local filterFunc = "return " ..property.PickFunction .."('"..targetId.."')"
+					debugInfo("filterfunc: " ..filterFunc)
+					local ok = loadstring(filterFunc)()
+					if ok == false then
+						debugInfo("name: " ..property.Name)
+						r2.requestSetNode(this.InstanceId, property.Name, r2.RefId(""))
+					end
 				end
 
 			end

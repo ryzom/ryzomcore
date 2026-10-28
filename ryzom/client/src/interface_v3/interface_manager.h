@@ -417,7 +417,7 @@ public:
 	bool	isItemCaracRequirementMet(CHARACTERISTICS::TCharacteristics type, sint32 value)
 	{
 		// carac requirement?
-		if( type < (int)CHARACTERISTICS::NUM_CHARACTERISTICS)
+		if( (uint)type < CHARACTERISTICS::NUM_CHARACTERISTICS) // unsigned: the enum may be signed and the value comes from the server
 			return value <= _CurrentPlayerCharac[type];
 		// no carac requirement => ok
 		else
@@ -427,7 +427,7 @@ public:
 	// get Player Carac
 	sint32	getCurrentPlayerCarac(CHARACTERISTICS::TCharacteristics type)
 	{
-		if( type < (int)CHARACTERISTICS::NUM_CHARACTERISTICS)
+		if( (uint)type < CHARACTERISTICS::NUM_CHARACTERISTICS)
 			return _CurrentPlayerCharac[type];
 		else
 			return 0;

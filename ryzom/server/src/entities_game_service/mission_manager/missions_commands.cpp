@@ -321,12 +321,16 @@ NLMISC_COMMAND(simAISMAction, "simulate an AI action.", "<action name> *[params]
 			{
 				if (args[0] == "end_escort")
 				{
-					for (uint i = 0; i < templ->Instances.size() ; i++)
+					// an event can complete and remove an instance (see CMissionTemplate::isInstance)
+					const std::vector<CMission *> instances = templ->Instances;
+					for (uint i = 0; i < instances.size(); i++)
 					{
-						if (templ->Instances[i])
+						if (!templ->isInstance(instances[i]))
+							continue;
+						if (instances[i])
 						{
 							vector<TDataSetRow> entities;
-							templ->Instances[i]->getEntities(entities);
+							instances[i]->getEntities(entities);
 							for (uint j = 0; j < entities.size() ; j++)
 							{
 								CCharacter * user = PlayerManager.getChar(entities[j]);
@@ -373,12 +377,16 @@ NLMISC_COMMAND(simAISMAction, "simulate an AI action.", "<action name> *[params]
 				}
 				else
 				{
-					for (uint i = 0; i < templ->Instances.size() ; ++i)
+					// an event can complete and remove an instance (see CMissionTemplate::isInstance)
+					const std::vector<CMission *> instances = templ->Instances;
+					for (uint i = 0; i < instances.size(); ++i)
 					{
-						if (templ->Instances[i])
+						if (!templ->isInstance(instances[i]))
+							continue;
+						if (instances[i])
 						{
 							vector<TDataSetRow> entities;
-							templ->Instances[i]->getEntities(entities);
+							instances[i]->getEntities(entities);
 							for (uint j = 0 ; j < entities.size() ; ++j)
 							{
 								CCharacter * user = PlayerManager.getChar(entities[j]);
@@ -427,14 +435,15 @@ NLMISC_COMMAND(failMissionCategory,"fail all missions of a specified category fo
 			if (pChar != NULL)
 			{
 				// Parse all missions to see if there is a mission that belongs to the mission_category
-				std::map<TAIAlias, CMission*>::iterator itMiss = pChar->getMissionsBegin();
-				while (itMiss != pChar->getMissionsEnd())
+				// (onFailure can remove other missions of the character, those it stops: go through the aliases, and
+				// look each mission up again)
+				std::vector<TAIAlias> aliases;
+				for (std::map<TAIAlias, CMission *>::iterator itMiss = pChar->getMissionsBegin(); itMiss != pChar->getMissionsEnd(); ++itMiss)
+					aliases.push_back(itMiss->first);
+				for (uint i = 0; i < aliases.size(); ++i)
 				{
-					map<TAIAlias, CMission*>::iterator itNext = itMiss;
-					++itNext;
-
-					CMission *pMiss = itMiss->second;
-					if (pMiss != NULL)
+					CMission *pMiss = pChar->getMission(aliases[i]);
+					if (pMiss != NULL && !pMiss->getFinished()) // a mission already finished keeps its result
 					{
 						CMissionTemplate *pMissTemplate;
 						bool bFailed = false;
@@ -456,8 +465,6 @@ NLMISC_COMMAND(failMissionCategory,"fail all missions of a specified category fo
 									pMiss->onFailure(true, false);
 						}
 					}
-					// next mission
-					itMiss = itNext;
 				}
 			}
 		}

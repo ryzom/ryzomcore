@@ -41,6 +41,8 @@ class IFileAccess;
 
 extern NLMISC::CVariable<std::string>	BSFilePrefix;
 
+/// The full path of a file name a requester gave, which is relative to SaveShardRoot. The accesses refuse a name for
+/// which CFile::isSafeFilename(CFile::normalizeRelativePath(name), true) is false, so the path stays below SaveShardRoot.
 std::string	getBackupFileName(const std::string& filename);
 
 
