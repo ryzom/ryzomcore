@@ -4,8 +4,16 @@ How to bring the next batch of changes from `core4` or from the atys branches
 into the shared merge branch without losing the clean diff again.
 
 Everything here was used to build `feature/core4-atys` (atys-live + core4,
-October 2026) and `feature/core4-gingo` (the same plus `main/gingo-test`).
+October 2026) and the three downstream merge branches on top of it:
+`feature/core4-rendor` (plus `main/rendor-staging`), `feature/core4-gingo`
+(plus `main/gingo-test`) and `feature/core4-yubo` (plus `main/yubo-dev`).
 The scripts need Python 3 only; `gen_db.py` additionally needs `lxml`.
+
+A full round ("follow the playbook") is: core4 into `feature/core4-atys`
+(3a), `main/atys-live` into it (3b), then for rendor, gingo and yubo in
+that order, `feature/core4-atys` into the branch (3c) and the branch's own
+atys line into it (3b with `--ref=feature/core4-atys`). A side with nothing
+new is skipped and named in the commit message of the step that did run.
 
 ## 1. The rules the branch is built on
 
@@ -62,9 +70,11 @@ last merged). Find them with:
 git log --first-parent --merges --format='%h %ad %s' --date=short feature/core4-atys | head
 ```
 
-The commit subjects are `Merge core4 <sha> (<date>) into feature/core4-atys`
-and `Merge atys main/<branch> <sha> (<date>) into ...`, so the last merged
-checkpoint of each side can be read straight off. Keep that convention.
+The commit subjects are `Merge core4 <sha> (<date>) into feature/core4-atys`,
+`Merge atys main/<branch> <sha> (<date>) into ...` and, on the downstream
+branches, `Merge feature/core4-atys <sha> (<date>) into feature/core4-<x>`,
+so the last merged checkpoint of each side can be read straight off. Keep
+that convention.
 
 History facts that stay fixed: the last commit atys-live shares with core4
 is `d8deff3f2` (October 2021). atys branch roles (their `BuildInfo.cmake`):
@@ -168,11 +178,41 @@ Policy for atys steps:
   of that is taken; the content part, if any, comes through the applier;
 * new atys directories are carried as-is and listed in the commit message.
 
-### 3c. Finishing the step
+### 3c. Merging feature/core4-atys into rendor, gingo or yubo
+
+The downstream branches carry core4's formatting through
+`feature/core4-atys`, so this leg is a plain merge like 3a, with
+`feature/core4-atys` in the place of core4 and no applier:
+
+```sh
+git merge --no-commit --no-ff -X renormalize feature/core4-atys
+```
+
+Conflicts can only sit where that branch's own atys line (`main/gingo-test`,
+`main/yubo-dev`, `main/rendor-staging`) changed the same code; resolve them
+from the markers, keeping what the step on `feature/core4-atys` decided and
+the downstream content around it. Policy files are already right on both
+sides. gingo-only C++ that uses the Lua ucstring API (`pop`/`push` of a
+ucstring, `*AsUtf16`) is adapted the way `feature/core4-atys` adapted its
+own callers. Before the commit:
+
+```sh
+python $T/check_core4_step.py ../wt_rendor <previous core4-atys checkpoint> feature/core4-atys
+```
+
+and `git diff feature/core4-atys feature/core4-<x> --stat` must still read as
+that atys line's extra content on top of `feature/core4-atys`. When the
+branch's own atys line also moved, do that step afterwards with 3b, with
+`--base` its previous checkpoint and `--ref=feature/core4-atys`; the token
+applier is still needed there because those atys branches are not
+formatted like the merge branches.
+
+### 3d. Finishing the step
 
 1. Atys step: open `stepN.apply`. Every `HAND` file: look at the `SKIP`
    lines (`A a1-a2 B b1-b2` are line ranges in stage 2 and stage 3), edit
-   the worktree file, `git add`. Core4 step: resolve the conflict markers.
+   the worktree file, `git add`. Core4 and downstream steps: resolve the
+   conflict markers.
    One-sided conflicts (`DU`/`UD`): decide whether the deletion or the edit
    wins by the rules above.
 2. Go through the `POLICY-SENSITIVE` list even though git merged them
