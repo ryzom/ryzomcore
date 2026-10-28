@@ -2506,6 +2506,22 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	if (cmd.size()>2 && tolower(cmd[0])=='r' && tolower(cmd[1])=='c') // FIXME: toLowerAscii
 		cmd = cmd.substr(2);
 
+	if (!ClientCfg.AllowRemoteAdmin)
+	{
+		// The command registry is open-ended, so the shard only gets to use it when the player opted in
+		nlwarning("impulseRemoteAdmin: refused remote command '%s', AllowRemoteAdmin is off", cmd.c_str());
+		CBitMemStream out;
+		if (GenericMsgHeaderMngr.pushNameToStream("COMMAND:REMOTE_ADMIN_ANSWER", out))
+		{
+			string str = "REMOTE_ADMIN_DISABLED";
+			out.serial(rid);
+			out.serial(cmd);
+			out.serial(str);
+			NetMngr.push(out);
+		}
+		return;
+	}
+
 	mdDisplayVars.clear ();
 	ICommand::execute(cmd, logDisplayVars, !ICommand::isCommand(cmd));
 	const std::deque<std::string>	&strs = mdDisplayVars.lockStrings();
