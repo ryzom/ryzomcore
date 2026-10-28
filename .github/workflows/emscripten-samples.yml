@@ -26,6 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - run: sudo apt-get update
+
       - name: Install ccache
         run: sudo apt-get install -y ccache
 
@@ -109,7 +111,6 @@ jobs:
         # not the rest of nel/tools. libpng/libjpeg are top-level find_package
         # requirements for nelmisc's CBitmap paths.
         run: |
-          sudo apt-get update
           sudo apt-get install -y libpng-dev libjpeg-dev libxml2-dev libcurl4-openssl-dev libgif-dev
           mkdir -p build-host
           cd build-host
