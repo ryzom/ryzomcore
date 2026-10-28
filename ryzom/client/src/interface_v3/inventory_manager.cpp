@@ -386,7 +386,8 @@ CItemImage &CInventoryManager::getTempItem(uint index)
 CItemImage *CInventoryManager::getHandItem(uint index)
 {
 	nlassert(index < MAX_HANDINV_ENTRIES);
-	if (Hands[index] != 0)
+	// the bag index comes from the database, one based, and its field holds more than the bag
+	if (Hands[index] != 0 && (uint32)Hands[index] <= MAX_BAGINV_ENTRIES)
 		return &Bag[Hands[index]-1];
 	else
 		return nullptr;
@@ -396,8 +397,8 @@ CItemImage *CInventoryManager::getHandItem(uint index)
 CItemImage *CInventoryManager::getEquipItem(uint index)
 {
 	nlassert(index < MAX_EQUIPINV_ENTRIES);
-	if (Equip[index] != 0)
-		return &Bag[Equip[index]];
+	if (Equip[index] != 0 && (uint32)Equip[index] <= MAX_BAGINV_ENTRIES)
+		return &Bag[Equip[index]-1];
 	else
 		return NULL;
 }
@@ -458,8 +459,8 @@ const CItemImage &CInventoryManager::getServerTempItem(uint index) const
 CItemImage *CInventoryManager::getServerHandItem(uint index)
 {
 	nlassert(index < MAX_HANDINV_ENTRIES);
-	if (ServerHands[index] != 0)
-		return &ServerBag[ServerHands[index]];
+	if (ServerHands[index] != 0 && (uint32)ServerHands[index] <= MAX_BAGINV_ENTRIES)
+		return &ServerBag[ServerHands[index]-1];
 	else
 		return nullptr;
 }
@@ -468,8 +469,8 @@ CItemImage *CInventoryManager::getServerHandItem(uint index)
 CItemImage *CInventoryManager::getServerEquipItem(uint index)
 {
 	nlassert(index < MAX_EQUIPINV_ENTRIES);
-	if (ServerEquip[index] != 0)
-		return &ServerBag[ServerEquip[index]];
+	if (ServerEquip[index] != 0 && (uint32)ServerEquip[index] <= MAX_BAGINV_ENTRIES)
+		return &ServerBag[ServerEquip[index]-1];
 	else
 		return nullptr;
 }

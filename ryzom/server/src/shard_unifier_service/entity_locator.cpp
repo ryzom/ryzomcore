@@ -60,6 +60,7 @@
 
 #include "entity_locator.h"
 #include "character_sync.h"
+#include "ring_session_manager.h"
 
 #include <functional>
 
@@ -489,6 +490,10 @@ namespace ENTITYLOC
 			{
 				charConnected(sender, connectedChars[i].getCharEId(), connectedChars[i].getLastDisconnectionDate());
 			}
+
+			// the EGS checks with it the codes for fast disconnection that the ring session manager makes
+			CEntityLocatorClientProxy elc(sender);
+			elc.setFastDisconnectionSecret(this, RSMGR::getFastDisconnectionSecret());
 		}
 
 

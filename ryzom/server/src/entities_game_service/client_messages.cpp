@@ -62,6 +62,8 @@
 #include "modules/r2_give_item.h"
 #include "game_share/scenario.h"
 #include "server_share/r2_vision.h"
+#include "server_share/client_text.h"
+#include "server_share/client_refusal.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -494,6 +496,13 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		return;
 	}
 
+	// the client offers no destroy in the guild inventory, whose items only leave through the guild's grade checks
+	if (inventory == INVENTORIES::guild)
+	{
+		nlwarning("<cbItemDestroy> player %s tried to destroy slot %u of the guild inventory, refused", user.toString().c_str(), slot);
+		return;
+	}
+
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
 }
@@ -653,9 +662,18 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbClientItemEnchant> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
+	// The client offers enchant and recharge in the bag, the room and the pack animals only (item_menu_in_bag, not in
+	// the guild inventory, which would consume a guild crystal)
+	if (inv != INVENTORIES::bag && inv != INVENTORIES::player_room && (inv < INVENTORIES::pet_animal || inv >= INVENTORIES::max_pet_animal))
+	{
+		nlwarning("HACK: <cbClientItemEnchant> player %s tried to use slot %u of inventory %u, refused", user.toString().c_str(), (uint)slot, (uint)inv);
+		reportRefusedClientMessage(user);
+		return;
+	}
 	// if player is dead or stunned don't reload or enchant
 	if (character->isDead() || character->isStunned())
 		return;
+
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );
 	character->setAfkState(false);
 }
@@ -825,6 +843,19 @@ void cbClientPhraseExecuteFaber( NLNET::CMessage& msgin, const std::string &serv
 		return;
 	}
 
+	// A craft in progress consumes the materials selected for it when it ends, and the phrase manager refuses a
+	// second craft only after the lists below are replaced, so they are left alone. The phrase is still executed:
+	// the phrase manager refuses it and acknowledges the client's execution counter, which the client has already
+	// increased (the craft window stays open during a craft, so this is an ordinary second click).
+	const CEntityPhrases *entityPhrases = CPhraseManager::getInstance().getEntityPhrases( ch->getEntityRowId() );
+	if ( entityPhrases != NULL && entityPhrases->getCurrentActionConst() != NULL && entityPhrases->getCurrentActionConst()->getType() == BRICK_TYPE::FABER )
+	{
+		nldebug("player %s sent EXECUTE_FABER while a craft is in progress, its materials are kept", Id.toString().c_str() );
+		ch->executeMemorizedPhrase( set, slot, false,false );
+		ch->setAfkState(false);
+		return;
+	}
+
 	ch->abortExchange();
 
 	ch->setCraftPlan( craftPlan );
@@ -954,6 +985,20 @@ void cbClientPhraseLearn( NLNET::CMessage& msgin, const std::string &serviceName
 	{
 		nlwarning("<cbClientPhraseLearn> player Id %s not yet ready", Id.toString().c_str() );
 		return;
+	}
+
+	// The name comes from the client and is saved with the character. The phrase editor allows 20 characters and the
+	// longest localized phrase name is under 100, so a longer one is cut (not refused: the client already has the
+	// phrase in its action book and memorizes it next)
+	static const ucstring::size_type MaxPhraseNameLength = 255;
+	if (phrase.Name.size() > MaxPhraseNameLength)
+	{
+		nlwarning("<cbClientPhraseLearn> player %s sent a name of %u characters for phrase %u, cut to %u",
+			Id.toString().c_str(), (uint)phrase.Name.size(), (uint)phraseId, (uint)MaxPhraseNameLength);
+		ucstring::size_type length = MaxPhraseNameLength;
+		if (phrase.Name[length - 1] >= 0xD800 && phrase.Name[length - 1] <= 0xDBFF)
+			--length; // do not keep half of a surrogate pair
+		phrase.Name.resize(length);
 	}
 
 	ch->learnPhrase( phrase.Bricks, phraseId, phrase.Name, phrase.IconIndex );
@@ -2296,6 +2341,17 @@ void cbClientBotChatEnd( NLNET::CMessage& msgin, const std::string &serviceName,
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+// The behaviour of an emote comes from the client, which sends IDLE or one of the emote animations; the firework
+// animations in that range are played by firework items, not by emotes
+static bool isClientEmoteBehaviour( MBEHAV::EBehaviour behaviour )
+{
+	if ( behaviour == MBEHAV::IDLE )
+		return true;
+	if ( behaviour < MBEHAV::EMOTE_BEGIN || behaviour > MBEHAV::EMOTE_END )
+		return false;
+	return !( behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109) );
+}
+
 // client send an emote
 void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
@@ -2314,6 +2370,13 @@ void cbClientSendEmote( NLNET::CMessage& msgin, const std::string &serviceName, 
 	catch(const Exception &e)
 	{
 		nlwarning("Bad emote serialisation '%s'", e.what());
+		return;
+	}
+
+	if ( !isClientEmoteBehaviour( behaviour ) )
+	{
+		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
+		nlwarning("HACK: %s %s sent emote behaviour %d, which is no emote animation", id.toString().c_str(), name.c_str(), behaviour);
 		return;
 	}
 
@@ -2362,10 +2425,13 @@ void cbClientSendCustomEmote( NLNET::CMessage& msgin, const std::string &service
 		return;
 	}
 
-	if (behaviour >= (MBEHAV::EMOTE_BEGIN + 80) && behaviour <= (MBEHAV::EMOTE_BEGIN + 109))
+	if (refuseClientTextTooLong(id, "COMMAND:CUSTOM_EMOTE", emoteCustomText, serviceId))
+		return;
+
+	if ( !isClientEmoteBehaviour( behaviour ) )
 	{
 		string name = CEntityIdTranslator::getInstance()->getByEntity(id).toString();
-		nlwarning("HACK: %s %s tries to launch a firework %d", id.toString().c_str(), name.c_str(), behaviour);
+		nlwarning("HACK: %s %s sent custom emote behaviour %d, which is no emote animation", id.toString().c_str(), name.c_str(), behaviour);
 		return;
 	}
 
@@ -2528,6 +2594,9 @@ void cbClientGuildMotd( NLNET::CMessage& msgin, const std::string &serviceName, 
 	string motd;
 	msgin.serial( entityId );
 	msgin.serial( motd );
+
+	if (refuseClientTextTooLong(entityId, "COMMAND:GUILDMOTD", ucstring::makeFromUtf8(motd), serviceId))
+		return;
 
 	CCharacter * user = PlayerManager.getChar( entityId );
 	if (!user)
@@ -3162,7 +3231,12 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 		return;
 	}
 
-	if ( title == uint8(CHARACTER_TITLE::FBT) )
+	if ( (uint)title >= (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE )
+	{
+		nlwarning("<cbClientSetCharacterTitle> user %s sent title %u, there are %u", eId.toString().c_str(), (uint)title, (uint)CHARACTER_TITLE::NB_CHARACTER_TITLE);
+		return;
+	}
+	else if ( title == uint8(CHARACTER_TITLE::FBT) )
 	{
 		if ( !p->isBetaTester() )
 			return;
@@ -3247,6 +3321,12 @@ void cbClientCompassEnableDynamic( NLNET::CMessage& msgin, const std::string & s
 	msgin.serial(userId);
 	msgin.serial(compressedIndex);
 
+	// the index comes from the client and getCurrentDataSetRow() uses it to index the dataset without a check
+	if ( compressedIndex >= (uint32)TheDataset.maxNbRows() )
+	{
+		nlwarning("<cbClientCompassEnableDynamic> user %s sent entity index %u, the dataset has %u rows", userId.toString().c_str(), compressedIndex, (uint32)TheDataset.maxNbRows());
+		return;
+	}
 	TDataSetRow index = TheDataset.getCurrentDataSetRow( compressedIndex );
 	if ( ! TheDataset.isAccessible(index) )
 	{
@@ -3495,6 +3575,15 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// The secret the shard unifier's ring session manager makes the fast-disconnection codes with, chosen at random when it
+// starts and received from its entity locator (CShardUnifierClient): empty until then, and the bypass is refused.
+std::string FastDisconnectionSecret;
+
+// The login cookies, by user id, that a fast-disconnection code was refused for. The code has 16 bits and the session
+// id comes from the client, so one wrong code ends fast disconnection until the next account login: the cookie the
+// code is made from only changes then, far TPs and reconnections keep it.
+static std::map<uint32, NLNET::CLoginCookie> FastDisconnectionRefusedCookies;
+
 void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId charId;
@@ -3593,6 +3682,7 @@ void cbClientReturnToMainland( NLNET::CMessage& msgin, const std::string & servi
 /// -1: Invalid inventory
 /// -2: Invalid slot
 /// -3: Empty slot
+/// -4: The item is held in an inventory the character's inventory updater does not keep (no info version to raise)
 sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInventory inventory, uint32 slot, ucstring const& text)
 {
 	if (inventory==INVENTORIES::UNDEFINED)
@@ -3614,9 +3704,20 @@ sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInvento
 	}
 
 	CGameItemPtr item = invent->getItem(slot);
+
+	// The client re-fetches the item info when the info version of the slot that holds the item changes: an equipped
+	// item is held in the bag, and the inventories the character's inventory updater does not keep (the guild's, whose
+	// versions are the guild's) have none to change
+	CInventoryPtr holder = item->getInventory();
+	INVENTORIES::TInventory holderId = holder != NULL ? holder->getInventoryId() : INVENTORIES::UNDEFINED;
+	if (holderId >= INVENTORIES::NUM_ALL_INVENTORY || !character->_InventoryUpdater.isCompatibleWithInventory(holderId))
+	{
+		return -4;
+	}
+
 	item->setCustomText(text);
 	// Following line was commented out by trap, reason unknown
-	character->incSlotVersion(inventory, slot);
+	character->incSlotVersion(holderId, item->getInventorySlot()); // this ensures re-fetch of info window, unusual case
 
 	return 0;
 }
@@ -3636,6 +3737,14 @@ void cbClientEventSetItemCustomText( NLNET::CMessage& msgin, const std::string &
 
 	CCharacter* character = PlayerManager.getChar(eid);
 	if(!character) return;
+
+	// the client offers text edition in the bag only, to the crafter and to privileged players alike
+	if (inventory != INVENTORIES::bag)
+	{
+		string name = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
+		nlwarning("HACK: %s %s tries to set custom text on slot %u of inventory %u, which is not the bag", eid.toString().c_str(), name.c_str(), (uint)slot, (uint)inventory);
+		return;
+	}
 
 	if (!character->havePriv(":DEV:SGM:GM:EM:"))
 	{
@@ -3829,7 +3938,7 @@ void cbRingMissionSelectAction( NLNET::CMessage& msgin, const std::string & serv
 	CCharacter *ch = PlayerManager.getChar( eid );
 	if( ch )
 	{
-		CR2GiveItem::getInstance().giveItemGranted( ch->getTargetDataSetRow(), actionId );
+		CR2GiveItem::getInstance().giveItemGranted( ch->getTargetDataSetRow(), ch->getEntityRowId(), actionId );
 	}
 }
 

@@ -1019,6 +1019,16 @@ void			CPatchDLMContext::computeTextureFar()
 						uint8	uvOff;
 						tileElm.getTile256Info(is256x256, uvOff);
 
+						// The far bank is read from a file: the tile must hold every pixel read below (2x2 at order1 for a
+						// 128x128 tile, four times more for a 256x256 one)
+						uint nbSourcePixels = is256x256 ? 16 : 4;
+						if (pTile->getSize(CTileFarBank::diffuse, CTileFarBank::order1) < nbSourcePixels)
+						{
+							nlwarning("ASSET ERROR: far bank tile %u is too small for a %s tile at order 1 (needs %u pixels)", (uint)tileId, is256x256 ? "256x256" : "128x128", nbSourcePixels);
+							// go to next tile.
+							break;
+						}
+
 						// compute src pixel
 						const CRGBA	*srcPixel= pTile->getPixels(CTileFarBank::diffuse, CTileFarBank::order1);
 						// compute src info, for this tile rot and 256x256 context.

@@ -303,8 +303,8 @@ void CClientChatManager::init( const string& /* staticDBFileName */ )
 //-----------------------------------------------
 void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 {
-	// Truncate to 255 chars max (because of server restriction)
-	ucstring	str= ucstring(strIn).substr(0,255);  // FIXME: UTF-8 (serial)
+	// Truncate to what the server accepts
+	ucstring str = NLMISC::truncateUtf16(ucstring(strIn), CChatGroup::MaxClientTextLength); // FIXME: UTF-8 (serial)
 
 	// send str to IOS
 	CBitMemStream bms;
@@ -398,9 +398,9 @@ bool CClientChatManager::sendChatShare(CChatGroup::TGroupType group, TChanID dyn
 //-----------------------------------------------
 void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 {
-	// Truncate to 255 chars max (because of server restriction)
+	// Truncate the receiver to 255 chars max, and the text to what the server accepts
 	string		receiver= receiverIn.substr(0,255); // FIXME: UTF-8 (serial)
-	ucstring	str= ucstring(strIn).substr(0,255); // FIXME: UTF-8 (serial)
+	ucstring str = NLMISC::truncateUtf16(ucstring(strIn), CChatGroup::MaxClientTextLength); // FIXME: UTF-8 (serial)
 
 	// *** send str
 	CBitMemStream bms;

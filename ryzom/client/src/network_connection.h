@@ -80,7 +80,7 @@ H_AUTO_DECL ( RZ_Client_Network_Connection_Set_Reference_Position )
 
 //#define MEASURE_FE_SENDING
 
-extern const char * ConnectionStateCStr [9];
+extern const char *ConnectionStateCStr[10];
 
 
 /**
@@ -521,6 +521,12 @@ public:
 		return m_Connection.UdpSock; // FIXME: QUIC
 	}
 
+	/// Get the QUIC connection, to tell why it could not be established
+	const CQuicConnection&		getQuicConnection() const
+	{
+		return m_QuicConnection;
+	}
+
 	/// Get userId
 	uint32						getUserId()
 	{
@@ -816,6 +822,12 @@ protected:
 
 	void						reinit();
 
+	// clang-format off
+	/// Reset the data of the session but keep the connection, for going back to the character selection on it after
+	/// quit() (the frontend's limbo mode); reinit() also resets the connection
+	void						resetSession();
+	// clang-format on
+
 private:
 
 	/// Set MsPerTick value
@@ -870,6 +882,9 @@ private:
 	uint32						_QuitId;
 	bool						_ReceivedAckQuit;
 	NLMISC::TTime				_LatestQuitTime;
+	// clang-format off
+	NLMISC::TTime				m_QuitTime; // when quit() was called, for QuitTimeOut
+	// clang-format on
 
 	//
 	void						reset();

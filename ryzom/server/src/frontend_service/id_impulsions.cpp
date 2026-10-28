@@ -361,6 +361,16 @@ void routeImpulsionIdFromClient( NLMISC::CBitMemStream& bms, const NLMISC::CEnti
 		{
 			nlwarning("Unable to decode message from sender %s", sender.toString().c_str());
 		}
+		else if (msgName.compare(0, 11, "CONNECTION:") == 0
+			&& (msgName == "CONNECTION:DELETE_CHAR" || msgName == "CONNECTION:SELECT_CHAR" || msgName == "CONNECTION:CREATE_CHAR"))
+		{
+			// The character selection screen is reached on a new connection, routed by uid. Once a character is in
+			// game, these would reach their handlers anyway (DELETE_CHAR prefixed with the entity id, which the EGS
+			// reads as an account id), so they are refused.
+			nlwarning("FEHACK: client %s sent %s with a character in game, refused", sender.toString().c_str(), msgName.c_str());
+			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MisplacedImpulse, (TUid)(sender.getShortId() >> 4) );
+			return;
+		}
 		else
 		{
 			// get format and sendto of message

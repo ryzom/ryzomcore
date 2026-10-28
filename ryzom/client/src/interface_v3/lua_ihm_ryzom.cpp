@@ -197,13 +197,12 @@ std::deque<CRefPtr<CCtrlBase> >		CHandlerLUA::_UICallerStack;
 class CHandlerSCRIPT : public IActionHandler
 {
 public:
-	void execute(CCtrlBase *pCaller,    const std::string &sParams)
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
+		// the parameter is a script for the game's Lua, its lines separated by '|', passed as a string argument
 		string script = sParams;
-		while(strFindReplace(script, "[", "〈"));
-		while(strFindReplace(script, "]", "〉"));
 		strFindReplace(script, "|", "\n");
-		CLuaManager::getInstance().executeLuaScript("\ngame:executeRyzomScript([["+script+"]])\n",   true);
+		CLuaManager::getInstance().callMethod("game", "executeRyzomScript", script);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerSCRIPT,    "script");
@@ -530,7 +529,9 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetTag", getTargetTag);
 	ls.registerFunc("getTargetMode", getTargetMode);
 	ls.registerFunc("moveToTarget", moveToTarget);
+#if RYZOM_WEB_BNP_DOWNLOAD
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
+#endif
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
 	ls.registerFunc("displayChatMessage", displayChatMessage);
 	ls.registerFunc("disableContextHelpForControl", disableContextHelpForControl);
@@ -1706,9 +1707,14 @@ int CLuaIHMRyzom::getTargetDirection(CLuaState &ls)
 int CLuaIHMRyzom::getTargetGender(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getTargetGender", 0);
-	CCharacterCL* target = (CCharacterCL*)getTargetEntity();
+	// the target may be an item, a forage source or an fx, which have no gender
+	CCharacterCL* target = dynamic_cast<CCharacterCL*>(getTargetEntity());
 
-	if (!target) return (int)GSGENDER::unknown;
+	if (!target)
+	{
+		ls.push((uint8)GSGENDER::unknown);
+		return 1;
+	}
 
 	ls.push((uint8)target->getGender());
 	return 1;
@@ -1792,7 +1798,9 @@ int CLuaIHMRyzom::moveToTarget(CLuaState &ls)
 }
 
 
+#if RYZOM_WEB_BNP_DOWNLOAD
 // ***************************************************************************
+// Mounts user/, where the bnp downloads of web pages are installed (see RYZOM_WEB_BNP_DOWNLOAD in nel/gui/group_html.h)
 int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_addSearchPathUser)
@@ -1812,6 +1820,7 @@ int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
 
 	return 0;
 }
+#endif
 
 // ***************************************************************************
 int CLuaIHMRyzom::isPlayerFreeTrial(CLuaState &ls)

@@ -62,10 +62,14 @@ void	logChatDirChanged(IVariable &var)
 	//IOS->getChatManager().resetChatLog();
 }
 
+// clang-format off
 CVariable<bool>			VerboseChatManagement("ios","VerboseChatManagement", "Set verbosity for chat management", false, 0, true);
 CVariable<std::string>	LogChatDirectory("ios", "LogChatDirectory", "Log Chat directory (default, unset is SaveFiles service directory", "", 0, true, logChatDirChanged);
 CVariable<bool>			ForceFarChat("ios","ForceFarChat", "Force the use of SU to dispatch chat", false, 0, true);
 CVariable<bool>			EnableDeepL("ios","EnableDeepL", "Enable DeepL auto-translation system", false, 0, true);
+CVariable<uint32>		ChatLineBurst("ios", "ChatLineBurst", "Chat lines, tells and custom emotes a player can send at once, before ChatLineInterval applies (0: no limit)", 6, 0, true);
+CVariable<uint32>		ChatLineInterval("ios", "ChatLineInterval", "Time in ms after which a player who used up ChatLineBurst can send one more line (0: no limit)", 1000, 0, true);
+// clang-format on
 
 
 typedef NLMISC::CTwinMap<TChanID, string> TChanTwinMap;
@@ -1134,6 +1138,41 @@ CChatGroup& CChatManager::getGroup( const TGroupId& gId )
 
 } // getGroup //
 
+
+
+//-----------------------------------------------
+//	acceptChatLine
+//
+//-----------------------------------------------
+bool CChatManager::acceptChatLine(const TDataSetRow &sender)
+{
+	if (ChatLineBurst.get() == 0)
+		return true;
+
+	TClientInfoCont::iterator itCl = _Clients.find(sender);
+	if (itCl == _Clients.end())
+		return true; // chat and tell report an unknown sender
+
+	CEntityId eid = TheDataset.getEntityId(sender);
+	CCharacterInfos *ci = IOS->getCharInfos(eid);
+	if (ci != NULL && ci->HavePrivilege)
+		return true;
+
+	switch (itCl->second->takeChatLine(CTime::getLocalTime(), ChatLineBurst.get(), ChatLineInterval.get()))
+	{
+	case CChatClient::ChatLineAccepted:
+		return true;
+	case CChatClient::ChatLineFirstRefused: {
+		nlinfo("IOSCM: %s sends chat lines faster than %u at once and then one each %u ms, refused until it slows down", eid.toString().c_str(), ChatLineBurst.get(), ChatLineInterval.get());
+		uint32 phraseId = STRING_MANAGER::sendStringToClient(sender, "CHAT_TOO_FAST", TVectorParamCheck(), &IosLocalSender);
+		sendChat2Ex(CChatGroup::system, sender, phraseId);
+		return false;
+	}
+	default:
+		nldebug("IOSCM: %s sends chat lines too fast, line refused", eid.toString().c_str());
+		return false;
+	}
+}
 
 //-----------------------------------------------
 //	checkNeedDeeplize
@@ -3565,13 +3604,42 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 					if ( _UsersIgnoringTells.find( receiverInfos->EntityId ) != _UsersIgnoringTells.end() )
 					{
 						// send special message to user (same message as if the receiver was offline)
-						SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-						vect[0].Literal = ucstring( receiver );
+						TVectorParamCheck vect;
 						uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 						sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 						return false;
 					}
 				}
+
+				// info for log the chat message
+				string senderName = senderInfos->Name.toString();
+/*
+				{
+					if (senderInfos == NULL)
+					{
+						senderName = TheDataset.getEntityId(sender).toString();
+					}
+					else
+						senderName = senderInfos->Name.toString();
+				}
+*/
+
+				// info for log the chat message
+				string receiverName = receiverInfos->Name.toString();
+/*
+				{
+					CCharacterInfos *ci = IOS->getCharInfos(senderInfos->EntityId);
+					if (ci == NULL)
+					{
+						receiverName = receiverInfos->EntityId.toString();
+					}
+					else
+						receiverName = receiverInfos->Name.toString();
+				}
+*/
+
+				_Log.displayNL("'%s' to '%s' (%s) : \t\"%s\"", senderName.c_str(), receiverName.c_str(), "tell", ucstr.toString().c_str() );
+
 
 				// if the client doesn't know this dynamic string(name of sender), we send it to him
 				// send the string to FE
@@ -3618,8 +3686,9 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 	}
 	else
 	{
-		// look for named group chat
-		std::map<TStringId, TGroupId>::iterator it(_GroupNames.find(CStringMapper::map(receiver)));
+		// look for named group chat (the name comes from the client: find() does not keep it, map() would forever)
+		TStringId receiverId = CStringMapper::find(receiver);
+		std::map<TStringId, TGroupId>::iterator it(receiverId != CStringMapper::emptyId() ? _GroupNames.find(receiverId) : _GroupNames.end());
 		if (it != _GroupNames.end())
 		{
 			// we found one
@@ -3650,8 +3719,7 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				// ERROR : not in this chat group !!!!!
 				nlwarning("<CChatManager::tell> The receiver %s is unknown, no tell message sent",receiver.c_str());
 
-				SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-				vect[0].Literal = ucstring( receiver );
+				TVectorParamCheck vect;
 				uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 				sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 				return false;
@@ -3685,8 +3753,9 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 		}
 		else
 		{
-			SM_STATIC_PARAMS_1( vect, STRING_MANAGER::literal );
-			vect[0].Literal = ucstring( receiver );
+			// TELL_PLAYER_UNKNOWN does not repeat the name the client typed: a literal parameter is kept in the
+			// string cache, and its file, for good
+			TVectorParamCheck vect;
 			uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 			sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
 		}

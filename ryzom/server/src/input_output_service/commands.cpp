@@ -69,8 +69,29 @@ NLMISC_COMMAND(smReloadEventFactions, "reload event factions", "[<filename>]")
 	return true;
 }
 
-NLMISC_COMMAND(smClearCache, "clear the string cache in string manager", "")
+NLMISC_COMMAND(smClearCache, "clear the string cache in string manager, only on an IOS started without the rest of the shard", "")
 {
+	// Nothing tells the shard that the cleared cache gives the ids it gave out to other strings: the services remap them
+	// only when the IOS itself comes up, the frontends' clients only get a new cache timestamp at login, and the mirror
+	// keeps the name ids. So no service may be known (registered on the naming service or added by address, connected or
+	// not) but the admin executor, through which the command may come, and the shard unifier, which every configured IOS
+	// keeps in its list and which only relays names and text between shards.
+	std::string connected;
+	const std::vector<TServiceId> &connections = CUnifiedNetwork::getInstance()->getConnectionList();
+	for (uint i = 0; i < connections.size(); ++i)
+	{
+		if (connections[i] == IService::getInstance()->getServiceId())
+			continue;
+		const std::string name = CUnifiedNetwork::getInstance()->getServiceName(connections[i]);
+		if (name != "AES" && name != "ShardUnifier")
+			connected += " " + CUnifiedNetwork::getInstance()->getServiceUnifiedName(connections[i]);
+	}
+	if (!connected.empty())
+	{
+		log.displayNL("The string cache is not cleared while the IOS knows other services:%s. Stop the shard, delete the IOS's ios.string_cache and start the shard again instead (the services and the clients only pick up a new cache when they reconnect).", connected.c_str());
+		return true;
+	}
+
 	SM->clearCache(&log);
 	return true;
 }

@@ -2789,6 +2789,10 @@ bool			CLandscape::eraseTileFarIfNotGood (uint tileNumber, uint sizeOrder0, uint
 			(TileFarBank.getTile (tileNumber)->getSize (CTileFarBank::diffuse, CTileFarBank::order2) != sizeOrder2)
 			)
 		{
+			const CTileFarBank::CTileFar *tile = TileFarBank.getTile(tileNumber);
+			nlwarning("ASSET ERROR: far bank tile %u has %u/%u/%u diffuse pixels, the tile bank needs %u/%u/%u, it is not drawn far away", tileNumber,
+			    tile->getSize(CTileFarBank::diffuse, CTileFarBank::order0), tile->getSize(CTileFarBank::diffuse, CTileFarBank::order1),
+			    tile->getSize(CTileFarBank::diffuse, CTileFarBank::order2), sizeOrder0, sizeOrder1, sizeOrder2);
 			TileFarBank.getTile (tileNumber)->erasePixels (CTileFarBank::diffuse);
 			bSame=false;
 		}
@@ -2804,6 +2808,10 @@ bool			CLandscape::eraseTileFarIfNotGood (uint tileNumber, uint sizeOrder0, uint
 			(TileFarBank.getTile (tileNumber)->getSize (CTileFarBank::additive, CTileFarBank::order2) != sizeOrder2)
 			)
 		{
+			const CTileFarBank::CTileFar *tile = TileFarBank.getTile(tileNumber);
+			nlwarning("ASSET ERROR: far bank tile %u has %u/%u/%u additive pixels, the tile bank needs %u/%u/%u, it is not drawn far away", tileNumber,
+			    tile->getSize(CTileFarBank::additive, CTileFarBank::order0), tile->getSize(CTileFarBank::additive, CTileFarBank::order1),
+			    tile->getSize(CTileFarBank::additive, CTileFarBank::order2), sizeOrder0, sizeOrder1, sizeOrder2);
 			TileFarBank.getTile (tileNumber)->erasePixels (CTileFarBank::additive);
 			bSame=false;
 		}
@@ -2862,6 +2870,19 @@ bool			CLandscape::initTileBanks ()
 
 		// Far actived!
 		_FarInitialized=true;
+	}
+	else if (TileFarBank.getNumTile() == 0)
+	{
+		// No far bank was loaded: the zone lighters and the world editor's land export only load the tile bank.
+		// CTileFarBank::serial reports a far bank file without tiles.
+		nldebug("No far bank, the far tiles are not checked against the tile bank");
+	}
+	else
+	{
+		// The far bank was not built from this tile bank. Its tiles are not checked against it, CTextureFar and
+		// CPatchDLMContext check each far tile they read.
+		nlwarning("ASSET ERROR: the far bank has %d tiles and the tile bank %d, the far bank must be rebuilt from this tile bank", TileFarBank.getNumTile(), TileBank.getTileCount());
+		bCompatibility = false;
 	}
 
 	// Register / Load the vegetables.

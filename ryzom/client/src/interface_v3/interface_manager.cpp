@@ -287,13 +287,15 @@ class CDrawDraggedSheet : public CWidgetManager::IOnWidgetsDrawnHandler
 public:
 	void process() NL_OVERRIDE
 	{
-		if ( CWidgetManager::getInstance()->getPointer()->show())
+		// the pointer does not exist yet (or anymore) during some screens, eg: login
+		CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+		if (pointer && pointer->show())
 		{
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>( CWidgetManager::getInstance()->getCapturePointerLeft() );
 			if ((pCS != nullptr) && (pCS->isDragged()))
 			{
-				sint	x= CWidgetManager::getInstance()->getPointer()->getX() - pCS->getDeltaDragX();
-				sint	y= CWidgetManager::getInstance()->getPointer()->getY() - pCS->getDeltaDragY();
+				sint x = pointer->getX() - pCS->getDeltaDragX();
+				sint y = pointer->getY() - pCS->getDeltaDragY();
 				pCS->drawSheet (x, y, false, false);
 
 				// if the control support CopyDrag, and if copy key pressed, display a tiny "+"
@@ -503,6 +505,11 @@ CInterfaceManager::CInterfaceManager()
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
 	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
+	CGroupHTML::options.imageMaxSize = (uint32)ClientCfg.WebIgImageMaxSize;
+	CGroupHTML::options.dataUrlMaxBytes = (uint32)ClientCfg.WebIgDataUrlMaxBytes;
+	CGroupHTML::options.imageMaxBytes = (uint32)ClientCfg.WebIgImageMaxBytes;
+	CGroupHTML::options.pageMaxBytes = (uint32)ClientCfg.WebIgPageMaxBytes;
+	CGroupHTML::options.stylesheetMaxBytes = (uint32)ClientCfg.WebIgStylesheetMaxBytes;
 
 	if (!ClientCfg.CurlCABundle.empty())
 	{
@@ -743,8 +750,8 @@ void CInterfaceManager::initLogin()
 
 	if (ClientCfg.XMLLoginInterfaceFiles.empty())
 	{
-		nlinfo("no xml login config files in client.cfg");
-		return;
+		// without the login interface there is no pointer and nothing to display
+		nlerror("XMLLoginInterfaceFiles is empty in the client configuration");
 	}
 
 	nldebug("Textures Login Interface");
@@ -761,7 +768,12 @@ void CInterfaceManager::initLogin()
 		loadTextures(*it + ".tga", *it + ".txt", true);
 	}
 
-	parseInterface (ClientCfg.XMLLoginInterfaceFiles, false);
+	if (!parseInterface(ClientCfg.XMLLoginInterfaceFiles, false))
+	{
+		// parseInterface has logged the file. Without the interface there is no pointer, which the widget manager's
+		// mouse handling needs: the login screen cannot run.
+		nlerror("Cannot load the login interface, its XML data is broken");
+	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
@@ -829,8 +841,8 @@ void CInterfaceManager::initOutGame()
 
 	if (ClientCfg.XMLOutGameInterfaceFiles.empty())
 	{
-		nlinfo("no xml outgame config files in client.cfg");
-		return;
+		// without the outgame interface there is no pointer and nothing to display
+		nlerror("XMLOutGameInterfaceFiles is empty in the client configuration");
 	}
 
 	nldebug("Textures OutGame Interface");
@@ -847,7 +859,12 @@ void CInterfaceManager::initOutGame()
 		loadTextures(*it + ".tga", *it + ".txt", true);
 	}
 
-	parseInterface (ClientCfg.XMLOutGameInterfaceFiles, false);
+	if (!parseInterface(ClientCfg.XMLOutGameInterfaceFiles, false))
+	{
+		// parseInterface has logged the file. Without the interface there is no pointer, which the widget manager's
+		// mouse handling needs: the outgame screens cannot run.
+		nlerror("Cannot load the outgame interface, its XML data is broken");
+	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
@@ -991,8 +1008,8 @@ void CInterfaceManager::initInGame()
 
 	if (ClientCfg.XMLInterfaceFiles.empty())
 	{
-		nlinfo("no xml config files in client.cfg");
-		return;
+		// without the interface there is nothing to display
+		nlerror("XMLInterfaceFiles is empty in the client configuration");
 	}
 
 	// Textures

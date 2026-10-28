@@ -2126,6 +2126,32 @@ bool CFile::isSafeFilename (const string &filename, bool allowSubdirs)
 	return true;
 }
 
+bool CFile::isNetworkOrDevicePath(const string &path)
+{
+#ifdef NL_OS_WINDOWS
+	if (path.size() < 2 || (path[0] != '/' && path[0] != '\\'))
+		return false;
+
+	// \\host\share, \\.\device, \\?\path, and the same with forward slashes
+	if (path[1] == '/' || path[1] == '\\')
+		return true;
+
+	// \??\path, which Win32 passes on to the NT object namespace unchanged
+	return path.size() >= 4 && path[1] == '?' && path[2] == '?' && (path[3] == '/' || path[3] == '\\');
+#else
+	nlunreferenced(path);
+	return false;
+#endif
+}
+
+string CFile::getFilenameAfterAnySeparator(const string &path)
+{
+	string::size_type pos = path.find_last_of("/\\@");
+	if (pos == string::npos)
+		return path;
+	return path.substr(pos + 1);
+}
+
 string CFile::getFilenameWithoutExtension (const string &filename)
 {
 	string filename2 = getFilename (filename);

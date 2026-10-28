@@ -177,6 +177,14 @@ void routeImpulsionUidFromClient( NLMISC::CBitMemStream& bms, const uint32& user
 		{
 			nlwarning("Unable to decode message from client %d", userId);
 		}
+		else if (GenericXmlMsgHeaderMngr.getNodeUserData(msgNodeId, 1) == 0 && msgName != "CONNECTION:DELETE_CHAR")
+		{
+			// Before a character is in game (character selection, and after limbo mode), a client only sends the messages
+			// that have a uid callback (initImpulsionUid), and DELETE_CHAR, whose EGS handler reads the account id.
+			// Another message would reach a handler that reads the uid where it reads a CEntityId.
+			nlwarning("FEHACK: client uid %u sent %s with no character in game, refused", userId, msgName.c_str());
+			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage(MisplacedImpulse, userId);
+		}
 		else
 		{
 			// get format and sendto of message

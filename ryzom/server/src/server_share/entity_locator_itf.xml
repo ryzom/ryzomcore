@@ -87,6 +87,14 @@
 				<param type="std::vector &lt; TCharConnectionEvent &gt;"	name="events"	serial="Cont" byref="true"/>
 			</method>
 
+			<!-- ========================================================== -->
+			<method name="setFastDisconnectionSecret" msg="ELC_FDS">
+				<doc line="The entity locator answers initState with the secret the ring session manager makes the codes for"/>
+				<doc line="fast disconnection with, chosen at random when the SU starts: the EGS checks the code a client presents with it"/>
+
+				<param type="std::string"	name="secret"	byref="true"/>
+			</method>
+
 		</module_interface>
 
 

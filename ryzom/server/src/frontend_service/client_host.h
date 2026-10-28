@@ -121,6 +121,7 @@ public:
 		_Id(NLMISC::CEntityId::Unknown),
 		_EntityIndex(),
 		_SendNumber(0),
+		m_SendNumberBase(0),
 		_SendSyncTick(0),
 		_Synchronized(false),
 		_Disconnected(false),
@@ -137,6 +138,7 @@ public:
 		LastReceivedAck(0xFFFFFFFF),
 		ImpulseMultiPartNumber (0),
 		AuthorizedCharSlot(~0),
+		ConnectionReportedToWS(false),
 		LastReceivedGameCycle(0),
 		LastSentSync(1),
 		//
@@ -148,6 +150,8 @@ public:
 		//AvailableImpulseBitsize( "AvailImpulseBitsize", MaxImpulseBitSizes[2] ),
 		NbActionsSentAtCycle(0),
 		QuitId(0),
+		RejectedMessages(0),
+		RejectedMessagesSince(0),
 		QuicUser(quicUser)
 		{
 			IdTranslator.setId( id );
@@ -195,6 +199,13 @@ public:
 
 	/// R access to last send number
 	uint32				sendNumber() const { return _SendNumber; }
+
+	/// Number this host's packets after those of the client's previous session (restored from limbo mode), so that the
+	/// client takes a datagram of the previous session that arrives late for an old one
+	void				continueSendNumbers(uint32 lastSendNumber) { _SendNumber = lastSendNumber; m_SendNumberBase = lastSendNumber; }
+
+	/// The send number this host started from: 0, or the last one of the client's previous session
+	uint32				sendNumberBase() const { return m_SendNumberBase; }
 
 	/// R/W access to first receive number
 	uint32&				firstReceiveNumber() { return _FirstReceiveNumber; }
@@ -334,7 +345,9 @@ public:
 		sint32 prevThrottle = getCurrentThrottle();
 #endif
 		// Update the average of bits sent
-		_BitBandwidthUsageAvg = (_BitBandwidthUsageAvg*(_SendNumber-1) + outbox.getPosInBit()) / _SendNumber;
+		// the average over the packets this host sent (at least the SYNC that preceded the connected state)
+		const uint32 nbSent = _SendNumber - m_SendNumberBase;
+		_BitBandwidthUsageAvg = (_BitBandwidthUsageAvg*(nbSent-1) + outbox.getPosInBit()) / nbSent;
 #ifdef NL_DEBUG
 		sint32 currThrottle = getCurrentThrottle();
 		if ( currThrottle != prevThrottle )
@@ -366,7 +379,8 @@ public:
 		else
 		{
 			// The remaining actions number is stable, calculate the available bitsize
-			_BitImpulsionUsageAvg = (_BitImpulsionUsageAvg*(_SendNumber-1) + currentNbBitsFilled) / _SendNumber;
+			const uint32 nbSent = _SendNumber - m_SendNumberBase;
+			_BitImpulsionUsageAvg = (_BitImpulsionUsageAvg*(nbSent-1) + currentNbBitsFilled) / nbSent;
 			sint32 availBitsize;
 			if ( _BitImpulsionUsageAvg < nominalBitSize )
 				availBitsize = nominalBitSize;
@@ -441,6 +455,12 @@ public:
 	// The only character slot that will be granted to connect [0..4], or 0xF (15) for any character
 	uint8				AuthorizedCharSlot;
 
+	// clang-format off
+	/// The login told the welcome service that the user connected (a pending cookie, see CLoginServer::isPendingCookie),
+	/// so the user leaving is told too, once
+	bool				ConnectionReportedToWS;
+	// clang-format on
+
 	/// States of the client connection
 	enum
 	{
@@ -485,15 +505,25 @@ public:
 	//@{
  	struct CGenericMultiPartTemp
  	{
- 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF) { }
- 		uint32								NbBlock;
- 		uint32								NbCurrentBlock;
- 		uint32								TempSize;
- 		std::vector<std::vector<uint8> >	Temp;
+ 		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF), NbCurrentBlock(0), Dropped(false) { }
  
- 		std::vector<bool>					BlockReceived;
+ 		/// The client's parts fit an impulse of 230 bytes, header included (CNetworkConnection::push)
+ 		enum { MaxClientMultiPartSize = 230 };
+ 
+ 		uint32								NbBlock;
+ 		/// Parts received so far, which is also the index of the next part expected
+ 		uint32								NbCurrentBlock;
+ 		/// The parts received so far, one after the other
+ 		std::vector<uint8>					Temp;
+ 		/// The message was dropped (and counted once): its remaining parts are discarded until a first part starts the next
+ 		bool								Dropped;
  
  		void set (CLFECOMMON::CActionGenericMultiPart *agmp, CClientHost *client);
+ 
+ 		/// Drop the parts received so far and free their memory
+ 		void reset ();
+ 		/// Drop the message being reassembled, whose remaining parts will still come
+ 		void drop ();
  	};
  
  	std::vector<CGenericMultiPartTemp>	GenericMultiPartTemp;
@@ -501,6 +531,10 @@ public:
 
 	/// Quit Id
 	uint32				QuitId;
+
+	/// Messages rejected since RejectedMessagesSince (see RejectedMessagesLimit)
+	uint32				RejectedMessages;
+	NLMISC::TTime		RejectedMessagesSince;
 
 	CQuicUserContextPtr QuicUser;
 
@@ -520,6 +554,9 @@ private:
 
 	/// Latest send number
 	uint32				_SendNumber;
+
+	/// The send number this host started from (see continueSendNumbers): _SendNumber - m_SendNumberBase packets were sent
+	uint32				m_SendNumberBase;
 
 	/// Counter (or flag) determining when to send the prioritized properties to the client
 	bool				_WhenToSend;
@@ -606,6 +643,11 @@ public:
 		// Set limbo timeout start
 		Timeout = NLMISC::CTime::getLocalTime();
 		LoginCookie = client->LoginCookie;
+		// The client is restored with what it logged in with (see exitFromLimboMode)
+		InstanceId = client->InstanceId;
+		AuthorizedCharSlot = client->AuthorizedCharSlot;
+		ConnectionReportedToWS = client->ConnectionReportedToWS;
+		SendNumber = client->sendNumber();
 	}
 
 	NLNET::CInetAddress	AddrFrom;
@@ -615,6 +657,13 @@ public:
 	uint32				QuitId;
 	NLMISC::TTime		Timeout;
 	NLNET::CLoginCookie	LoginCookie;
+	// clang-format off
+	uint32				InstanceId;
+	uint8				AuthorizedCharSlot;
+	bool				ConnectionReportedToWS;
+	// the restored client's packets are numbered after these (CClientHost::continueSendNumbers)
+	uint32				SendNumber;
+	// clang-format on
 };
 
 

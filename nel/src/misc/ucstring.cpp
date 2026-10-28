@@ -36,4 +36,20 @@ void ucstring::fromUtf8(const std::string &stringUtf8)
 	*this = NLMISC::CUtfStringView(stringUtf8).toUtf16();
 }
 
+namespace NLMISC {
+
+ucstring truncateUtf16(const ucstring &str, size_t maxLength)
+{
+	if (str.size() <= maxLength)
+		return str;
+
+	// a high surrogate kept as the last unit would lose its low surrogate
+	size_t length = maxLength;
+	if (length > 0 && str[length - 1] >= 0xD800 && str[length - 1] <= 0xDBFF)
+		--length;
+	return str.substr(0, length);
+}
+
+} /* namespace NLMISC */
+
 /* end of file */

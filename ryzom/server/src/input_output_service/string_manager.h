@@ -653,6 +653,8 @@ public:
 	uint32	storeString(const ucstring &str);
 	/// Retreive a string in the string base
 	const ucstring &getString(uint32 stringId);
+	/// Return true if the id is one a string was stored with, and so one a client may have been sent
+	bool	isStoredStringId(uint32 stringId) const;
 
 	// TODO : temp, remove when dyndb removed.
 //	ucstring	getEntityDisplayName(const NLMISC::CEntityId &eid);

@@ -49,6 +49,12 @@ typedef NLMISC::CEntityId TGroupId;
 struct CChatGroup
 {
 	enum { MaxDynChanPerPlayer = 8 };
+	/// Longest text, in UTF-16 units, that a client may send in a chat line, a tell, an AFK text, a custom emote or a
+	/// guild message of the day. The client cuts what the player types to it, and the services refuse a longer text.
+	enum
+	{
+		MaxClientTextLength = 255
+	};
 	// group type
 	enum TGroupType
 	{

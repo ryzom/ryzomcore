@@ -82,6 +82,13 @@ void cbGwTrDisconnection ( TClientId clientId );
 extern CVariable<string>	SaveShardRootGameShare;
 extern CVariable<bool>		VerboseFEStatsTime;
 
+// Rejected messages are those no official client produces (see rejectReceivedMessage()). A connected client that
+// sends RejectedMessagesLimit of them within RejectedMessagesWindow seconds is disconnected; 0 only logs them.
+// clang-format off
+CVariable<uint32>	RejectedMessagesLimit("fs", "RejectedMessagesLimit", "Rejected messages from a connected client within RejectedMessagesWindow seconds after which it is disconnected (0: never, only log)", 0, 0, true);
+CVariable<uint32>	RejectedMessagesWindow("fs", "RejectedMessagesWindow", "Window in seconds over which RejectedMessagesLimit counts (0: the whole connection)", 60, 0, true);
+// clang-format on
+
 
 /*
  * Return the string for the message invalidity reasons
@@ -113,6 +120,18 @@ string getBadMessageString( uint32 reasons )
 		s += " Unauthorized character slot;";
 	if ( reasons & RefusedServiceCommand )
 		s += " Refused service command;";
+	if ( reasons & MalformedMultiPart )
+		s += " Malformed multi-part;";
+	if ( reasons & MalformedAckSync )
+		s += " Malformed ack sync;";
+	if ( reasons & MisplacedImpulse )
+		s += " Impulse not valid in this state;";
+	if ( reasons & InvalidStringRequest )
+		s += " Request for a string never sent;";
+	if (reasons & TextTooLong)
+		s += " Text above the length limit;";
+	if (reasons & RefusedClientMessage)
+		s += " Message a service refused;";
 	return s;
 }
 
@@ -408,6 +427,14 @@ void CFeReceiveSub::handleIncomingMsg()
 		}
 		else
 		{
+			// A QUIC connection kept for a client in limbo mode has closed
+			std::map<TUid, CLimboClient>::iterator ilc = _CurrentInMsg->QuicUser ? findLimboClientByAddress(_CurrentInMsg->AddrFrom) : LimboClients.end();
+			if (ilc != LimboClients.end() && ilc->second.QuicUser == _CurrentInMsg->QuicUser)
+			{
+				nlinfo("FERECV: User %u closed its connection in limbo mode", ilc->first);
+				removeLimboClient(ilc, true, true);
+				return;
+			}
 			nlinfo("FERECV: Not removing already removed client");
 			return;
 		}
@@ -459,12 +486,14 @@ bool		CFeReceiveSub::acceptUserIdConnection( TUid userId )
 /*
  * Add client
  */
-CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQuicUserContext *quicUser, TUid userId, const string &userName, const string &userPriv, const std::string & userExtended, const std::string & languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool sendCLConnect )
+CClientHost *CFeReceiveSub::addClient(const NLNET::CInetAddress &addrfrom, CQuicUserContext *quicUser, TUid userId, const string &userName, const string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CLoginCookie &cookie, uint32 instanceId, uint8 authorizedCharSlot, bool connectionReportedToWS, bool sendCLConnect)
 {
 	MEM_DELTA_MULTI_LAST2(Client,AddClient);
 	if ( ! acceptUserIdConnection( userId ) )
 	{
 		cbDisconnectClient( userId , "FS CFeReceiveSub::addClient"); // simulate a request by the login system (NeL Launcher bypass mode)
+		if (connectionReportedToWS)
+			CLoginServer::clientDisconnected(userId);
 		return NULL;
 	}
 
@@ -475,6 +504,8 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
 	if ( clientid == InvalidClientId )
 	{
 		nlwarning( "Front-end is full, new client %s rejected", addrfrom.asString().c_str() );
+		if (connectionReportedToWS)
+			CLoginServer::clientDisconnected(userId);
 		return NULL;
 	}
 
@@ -515,6 +546,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
 	clienthost->LoginCookie = cookie;
 	clienthost->InstanceId = instanceId;
 	clienthost->AuthorizedCharSlot = authorizedCharSlot;
+	clienthost->ConnectionReportedToWS = connectionReportedToWS;
 
 	clienthost->initSendCycle( false );
 	CFrontEndService::instance()->sendSub()->setSendBufferAddress( clientid, &addrfrom, quicUser );
@@ -540,22 +572,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
 	{
 		if ( ! CFrontEndService::instance()->ShardDown )
 		{
-			CMessage msgout( "CL_CONNECT" );
-			msgout.serial( userId );
-			string un = userName;
-			msgout.serial( un );
-			string up = userPriv;
-			msgout.serial( up );
-			string ux = userExtended;
-			msgout.serial( ux );
-			string langId = languageId;
-			msgout.serial( langId );
-			string addrStr = addrfrom.asIPString();
-			msgout.serial( addrStr );
-			CLoginCookie	logcook = cookie;
-			nlinfo("WEB: sent cookie %s to EGS from player %d", cookie.toString().c_str(), userId);
-			msgout.serial( logcook );
-			sendMessageViaMirror( "EGS", msgout ); // because the EGS can despawn an entity
+			sendClientConnectionToEGS(userId, userName, userPriv, userExtended, languageId, addrfrom, cookie);
 		}
 		else
 		{
@@ -580,6 +597,29 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
 	return clienthost;
 }
 
+/*
+ * Tell the EGS that a user connects (at login, and after a QUIT, see setClientInLimboMode), in the order of
+ * cbClientConnection in the EGS
+ */
+void CFeReceiveSub::sendClientConnectionToEGS(TUid userId, const std::string &userName, const std::string &userPriv, const std::string &userExtended, const std::string &languageId, const NLNET::CInetAddress &addrfrom, const NLNET::CLoginCookie &cookie)
+{
+	CMessage msgout("CL_CONNECT");
+	msgout.serial(userId);
+	string un = userName;
+	msgout.serial(un);
+	string up = userPriv;
+	msgout.serial(up);
+	string ux = userExtended;
+	msgout.serial(ux);
+	string langId = languageId;
+	msgout.serial(langId);
+	string addrStr = addrfrom.asIPString();
+	msgout.serial(addrStr);
+	CLoginCookie logcook = cookie;
+	nlinfo("WEB: sent cookie %s to EGS from player %u", cookie.toString().c_str(), userId);
+	msgout.serial(logcook);
+	sendMessageViaMirror("EGS", msgout); // because the EGS can despawn an entity
+}
 
 /*
  * Remove a client by iterator on THostMap (see also byId)
@@ -612,8 +652,19 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, CQui
  */
 void CFeReceiveSub::setClientInLimboMode( CClientHost *client )
 {
-	LimboClients.insert( make_pair( client->Uid, CLimboClient( client ) ) );
-	removeClientFromMap( client );
+	// The client goes back to the character selection on the same connection: the user's identity is kept until the
+	// EGS answers the CL_CONNECT sent with the QUIT (cbImpulsionUid then restores the client, see exitFromLimboMode).
+	std::map<TUid, CLimboClient>::iterator ilc = LimboClients.find(client->Uid);
+	if (ilc != LimboClients.end())
+	{
+		// A uid is connected once, so it cannot already be in limbo mode
+		nlwarning("User %u is already in limbo mode, the previous entry is replaced", client->Uid);
+		if (ilc->second.QuicUser.get() && ilc->second.QuicUser != client->QuicUser)
+			ilc->second.QuicUser->Transceiver->shutdown(ilc->second.QuicUser.get());
+		LimboClients.erase(ilc);
+	}
+	LimboClients.insert(make_pair(client->Uid, CLimboClient(client)));
+	removeClientFromMap(client, false);
 	client->resetClientVision();
 	removeClientLinks( client );
 	deleteClient( client );
@@ -625,9 +676,18 @@ void CFeReceiveSub::setClientInLimboMode( CClientHost *client )
  */
 CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 {
-	nldebug( "Restoring user %u from limbo mode", lc.Uid );
+	nlinfo("Restoring user %u from limbo mode", lc.Uid);
 
-	CClientHost *client = addClient(lc.AddrFrom, lc.QuicUser.get(), lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, 0xF, false);
+	// The EGS already has the CL_CONNECT sent with the QUIT
+	CClientHost *client = addClient(lc.AddrFrom, lc.QuicUser.get(), lc.Uid, lc.UserName, lc.UserPriv, lc.UserExtended, lc.LanguageId, lc.LoginCookie, lc.InstanceId, lc.AuthorizedCharSlot, lc.ConnectionReportedToWS, false);
+	if (!client)
+	{
+		nlwarning("User %u could not be restored from limbo mode", lc.Uid);
+		return NULL;
+	}
+	// A datagram of the previous session that arrives late must be older than this session's: the client takes this
+	// session's SYNC number as its last received one, and this host takes the client's ACK_SYNC number as its own
+	client->continueSendNumbers(lc.SendNumber);
 	NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle();
 	client->setFirstSentPacket( client->sendNumber()+1, tick );
 	client->setSynchronizeState();
@@ -639,7 +699,82 @@ CClientHost *CFeReceiveSub::exitFromLimboMode( const CLimboClient& lc )
 /*
  *
  */
-void CFeReceiveSub::removeClientFromMap( CClientHost *client )
+void CFeReceiveSub::removeLimboClient(std::map<TUid, CLimboClient>::iterator ilc, bool crashed, bool tellEGS)
+{
+	CLimboClient &lc = ilc->second;
+
+	if (tellEGS)
+	{
+		// The EGS had the CL_CONNECT sent at the QUIT, whether it took the user back or refused it
+		CMessage msgout("CL_DISCONNECT");
+		msgout.serial(lc.Uid);
+		msgout.serial(crashed);
+		sendMessageViaMirror("EGS", msgout);
+	}
+
+	// as doRemoveClient does when a connected client leaves
+	if (lc.ConnectionReportedToWS)
+		CLoginServer::clientDisconnected(lc.Uid);
+
+	if (lc.QuicUser.get())
+		lc.QuicUser->Transceiver->shutdown(lc.QuicUser.get());
+
+	LimboClients.erase(ilc);
+}
+
+/*
+ *
+ */
+void CFeReceiveSub::removeLimboClientOnLogin(TUid uid)
+{
+	std::map<TUid, CLimboClient>::iterator ilc = LimboClients.find(uid);
+	if (ilc == LimboClients.end())
+		return;
+
+	// The EGS had the CL_CONNECT sent at the QUIT: it is told that the user left before the CL_CONNECT of this login,
+	// which it would refuse otherwise. The connection kept for limbo mode is closed, unless this login came on it.
+	nlinfo("FERECV: User %u logged in again in limbo mode", uid);
+	if (ilc->second.QuicUser == _CurrentInMsg->QuicUser)
+		ilc->second.QuicUser = nullptr;
+	removeLimboClient(ilc, false, true);
+}
+
+/*
+ *
+ */
+void CFeReceiveSub::removeTimedOutLimboClients(NLMISC::TTime timeOut)
+{
+	NLMISC::TTime oldest = CTime::getLocalTime() - timeOut;
+	for (std::map<TUid, CLimboClient>::iterator it = LimboClients.begin(); it != LimboClients.end();)
+	{
+		std::map<TUid, CLimboClient>::iterator itr = it++;
+		if (itr->second.Timeout < oldest)
+		{
+			nlwarning("User %u stayed in limbo mode longer than %u ms: the EGS did not answer its QUIT", itr->first, (uint)timeOut);
+			removeLimboClient(itr, true, true);
+		}
+	}
+}
+
+/*
+ *
+ */
+std::map<TUid, CLimboClient>::iterator CFeReceiveSub::findLimboClientByAddress(const NLNET::CInetAddress &addr)
+{
+	// There are few users in limbo mode at a time, each only until the EGS answers
+	std::map<TUid, CLimboClient>::iterator it;
+	for (it = LimboClients.begin(); it != LimboClients.end(); ++it)
+	{
+		if (it->second.AddrFrom == addr)
+			break;
+	}
+	return it;
+}
+
+/*
+ *
+ */
+void CFeReceiveSub::removeClientFromMap(CClientHost *client, bool closeQuicConnection)
 {
 	THostMap::iterator icm = _ClientMap.find( clientIdCont()[client->clientId()]->address() );
 	CFrontEndService::instance()->PrioSub.VisionProvider.DistanceSpreader.notifyClientRemoval( icm );
@@ -655,7 +790,8 @@ void CFeReceiveSub::removeClientFromMap( CClientHost *client )
 		{
 			client->QuicUser->ClientHost = nullptr;
 		}
-		client->QuicUser->Transceiver->shutdown(client->QuicUser.get());
+		if (closeQuicConnection)
+			client->QuicUser->Transceiver->shutdown(client->QuicUser.get());
 		client->QuicUser = nullptr;
 	}
 }
@@ -733,7 +869,8 @@ void CFeReceiveSub::doRemoveClient( CClientHost *client, bool crashed )
 		// unless user wants to reconnect, disconnect him from login service
 		//if( ! findInReconnectList( client->Uid ) )
 		//nldebug( "disconnecting client %d from login service", client->clientId() );
-		CLoginServer::clientDisconnected( client->Uid );
+		if (client->ConnectionReportedToWS)
+			CLoginServer::clientDisconnected(client->Uid);
 
 	}
 
@@ -857,6 +994,14 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 	uint32 currentsize = _CurrentInMsg->userSize();
 	//nlinfo( "currentsize: %u", currentsize );
 
+	// An empty datagram holds nothing to read, and bufferToFill(0) leaves Msgin as the previous message left it:
+	// what was left of that message would be read as if this sender had sent it
+	if ( currentsize == 0 )
+	{
+		rejectReceivedMessage( InsufficientSize, clienthost ? clienthost->Uid : 0 );
+		return;
+	}
+
 	memcpy( Msgin.bufferToFill( currentsize ), _CurrentInMsg->userDataR(), currentsize );
 
 	try
@@ -878,6 +1023,28 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 		if (clienthost == NULL)
 		{
 			MEM_DELTA_MULTI_LAST2(ReceivedMsg,AddClient);
+			uint8 code = 255;
+
+			if (systemMode)
+				Msgin.serialAndLog1(code);
+
+			// A client in limbo mode (see setClientInLimboMode) has no client host until the EGS answers: it keeps
+			// sending its QUIT until it is synchronized again, and may give up and disconnect meanwhile. Packets it
+			// sent before its QUIT can still arrive. A LOGIN is handled below.
+			if (!systemMode || (code != SYSTEM_LOGIN_CODE))
+			{
+				std::map<TUid, CLimboClient>::iterator ilc = findLimboClientByAddress(_CurrentInMsg->AddrFrom);
+				if ((ilc != LimboClients.end()) && (ilc->second.QuicUser == _CurrentInMsg->QuicUser))
+				{
+					if (systemMode && (code == SYSTEM_DISCONNECTION_CODE))
+					{
+						nlinfo("FERECV: User %u disconnected in limbo mode", ilc->first);
+						removeLimboClient(ilc, false, true);
+					}
+					return;
+				}
+			}
+
 			if ( ! _AccessOpen || ! CFrontEndService::instance()->AcceptClients )
 			{
 				rejectReceivedMessage( AccessClosed );
@@ -888,11 +1055,6 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			bool validCookie = false;
 			string result;
 
-			uint8 code = 255;
-
-			if ( systemMode )
-				Msgin.serialAndLog1(code);
-
 			if ( (!systemMode) || (code != SYSTEM_LOGIN_CODE) )
 			{
 				rejectReceivedMessage( NotSystemLoginCode );
@@ -900,11 +1062,22 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			}
 
 			Msgin.serial(lc);
+			// Read before the cookie is checked: a valid cookie is used up, and the welcome service told
+			string languageId;
+			Msgin.serial(languageId);
 
 			string userName = "NotSet";
 			string userPriv;
 			string userExtended;
 			uint32 instanceId, charSlot;
+
+			// A pending cookie makes isValidCookie() tell the welcome service that the user connected. If the user's
+			// previous session is in limbo mode, the welcome service must see it leave first: a leave told after this
+			// login would make the user offline there.
+			bool pendingCookie = CLoginServer::isPendingCookie(lc);
+			if (pendingCookie)
+				removeLimboClientOnLogin(lc.getUserId());
+
 			//if ( removeFromReconnectList( lc.getUserId() ) )
 			//	validCookie = true;
 			//else
@@ -962,6 +1135,8 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				{
 					// This ip address is already known: if not already connected, give the same user id back.
 					// (two clients either on the same machine or connected through a gateway won't get the same user id)
+					// A user id in limbo mode is given back too (a client restarted on the same machine): the login below
+					// takes it out of limbo mode.
 					uid = (*itaum).second;
 					while ( findClientHostByUid( uid ) != NULL )
 					{
@@ -972,8 +1147,10 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				else
 				{
 					// This ip address is new to us, give a new user id and store it
-					do { uid = CurrentAutoAllocUserid++; }
-					while ( findClientHostByUid( uid ) != NULL );
+					do
+					{
+						uid = CurrentAutoAllocUserid++;
+					} while ((findClientHostByUid(uid) != NULL) || (LimboClients.find(uid) != LimboClients.end()));
 					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.getAddress(), uid ) );
 
 				}
@@ -993,13 +1170,20 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			else
 				uid = lc.getUserId();
 
-			string languageId;
-			Msgin.serial(languageId);
+			// ALWAYS REMOVE CLIENT FROM LIMBO! (done above for a pending cookie, see pendingCookie)
+			removeLimboClientOnLogin(uid);
 
-			// ALWAYS REMOVE CLIENT FROM LIMBO!
-			LimboClients.erase(uid);
+			// Another user logging in on a connection kept for limbo mode takes it over: the user in limbo mode leaves,
+			// otherwise both would be given a client host on the same connection
+			std::map<TUid, CLimboClient>::iterator ilc = findLimboClientByAddress(_CurrentInMsg->AddrFrom);
+			if ((ilc != LimboClients.end()) && (ilc->second.QuicUser == _CurrentInMsg->QuicUser))
+			{
+				nlwarning("FERECV: User %u logged in on the connection of user %u, in limbo mode", uid, ilc->first);
+				ilc->second.QuicUser = nullptr;
+				removeLimboClient(ilc, false, true);
+			}
 
-			clienthost = addClient( _CurrentInMsg->AddrFrom, _CurrentInMsg->QuicUser, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot );
+			clienthost = addClient(_CurrentInMsg->AddrFrom, _CurrentInMsg->QuicUser, uid, userName, userPriv, userExtended, languageId, lc, instanceId, (uint8)charSlot, pendingCookie, true);
 
 			// Check if the addition worked
 			if ( clienthost != NULL )
@@ -1047,7 +1231,22 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 
 				Msgin.serialAndLog1(quitId);
 
-				nlinfo("Received QUIT %d from client %d (current client QuitId = %d)", quitId, clienthost->clientId(), clienthost->QuitId);
+				nldebug("Received QUIT %u from client %u (current client QuitId = %u)", quitId, (uint)clienthost->clientId(), clienthost->QuitId);
+
+				// A client that is being removed (see addToRemoveList) does not go to limbo mode: limbo deletes the client
+				// host at once, and the pending removal could then reach another client given the same id
+				if (isInRemoveList(clienthost->clientId()))
+				{
+					nldebug("Client %u is being removed, its QUIT is ignored", (uint)clienthost->clientId());
+					return;
+				}
+
+				// While the shard is down, the client stays connected and gets SERVER_DOWN like the others
+				if (CFrontEndService::instance()->ShardDown)
+				{
+					nldebug("Client %u sent QUIT while the shard is down, ignored", (uint)clienthost->clientId());
+					return;
+				}
 
 				if (quitId > clienthost->QuitId)
 				{
@@ -1067,17 +1266,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					sendMessageViaMirror( "EGS", msgout1 );
 
 					// ...and then a new connection to EGS
-					CMessage msgout2( "CL_CONNECT" );
-					msgout2.serial( clienthost->Uid );
-					msgout2.serial( clienthost->UserName );
-					msgout2.serial( clienthost->UserPriv );
-					msgout2.serial( clienthost->UserExtended );
-					msgout2.serial( clienthost->LanguageId );
-					string addrStr = clienthost->address().asIPString();
-					msgout2.serial( addrStr );
-					msgout2.serial( const_cast<CInetAddress&>(clienthost->address()) );
-					msgout2.serial( clienthost->LoginCookie );
-					sendMessageViaMirror( "EGS", msgout2 );
+					sendClientConnectionToEGS(clienthost->Uid, clienthost->UserName, clienthost->UserPriv, clienthost->UserExtended, clienthost->LanguageId, clienthost->address(), clienthost->LoginCookie);
 
 					nlinfo( "Client %hu (uid %u) reset", clienthost->clientId(), clienthost->Uid );
 
@@ -1124,7 +1313,6 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				{
 					H_AUTO(SystemAckSyncCode);
 					//nldebug("FERECV: received ACK_SYNC from client %d", clienthost->clientId());
-					clienthost->setConnectedState();
 
 					// decode long ack
 					uint32	frontack;
@@ -1145,21 +1333,54 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 						// process ack
 						uint	ack = std::max(backack, clienthost->LastReceivedAck+1);
 						//nlinfo("BEN-DBG: ACK_SYNC, start reading longackbitfield from client %d", clienthost->clientId());
-						for (; ack<=frontack; ++ack)
+						if (ack <= frontack)
 						{
-							bool	ackvalue = longackbitfield[ack&(NumBitsInLongAck-1)];
-							//nlinfo("BEN-DBG: ACK_SYNC, ack %d: %s", ack, (ackvalue ? "true" : "false"));
-							_History->ack(clienthost->clientId(), ack, ackvalue);
-							if (ackvalue)
+							// The range and the bit field come from the client. Its long ack covers at most
+							// NumBitsInLongAck packets, in a field of at least that many bits (the client sends 1024):
+							// a wider range is cut to its last NumBitsInLongAck packets, so the loop stays bounded (with
+							// frontack 0xFFFFFFFF it used to wrap around and never end), and a bit missing from a
+							// shorter field reads as a negative ack instead of asserting.
+							if (frontack - ack >= NumBitsInLongAck || longackbitfield.size() < NumBitsInLongAck)
 							{
-								clienthost->ImpulseEncoder.ack(ack);
+								nlwarning("FEHACK: client %u (uid %u, %s) sent ACK_SYNC for packets %u to %u with a long ack of %u bits (at most %u packets in at least %u bits)",
+									(uint)clienthost->clientId(), clienthost->Uid, clienthost->address().asString().c_str(), ack, frontack, longackbitfield.size(), NumBitsInLongAck, NumBitsInLongAck);
+								rejectReceivedMessage( MalformedAckSync, clienthost->Uid );
+								if (frontack - ack >= NumBitsInLongAck)
+									ack = frontack - (NumBitsInLongAck - 1);
+							}
+							for (;; ++ack)
+							{
+								uint	bit = ack&(NumBitsInLongAck-1);
+								bool	ackvalue = bit < longackbitfield.size() && longackbitfield[bit];
+								//nlinfo("BEN-DBG: ACK_SYNC, ack %d: %s", ack, (ackvalue ? "true" : "false"));
+								_History->ack(clienthost->clientId(), ack, ackvalue);
+								if (ackvalue)
+								{
+									clienthost->ImpulseEncoder.ack(ack);
+								}
+								if (ack == frontack)
+									break;
 							}
 						}
 						//nlinfo("BEN-DBG: ACK_SYNC, end reading longackbitfield from client %d", clienthost->clientId());
 
-						clienthost->LastReceivedAck = frontack;
+						// A host restored from limbo mode numbers its packets after the previous session's: a client that
+						// starts its numbers again acknowledges packet 0, and its first normal packet would then
+						// acknowledge too many packets at once (probe)
+						clienthost->LastReceivedAck = std::max(frontack, clienthost->sendNumberBase());
 
 						++clienthost->LastSentSync;
+
+						// The client sends its normal packets after this ACK_SYNC, so one numbered below it comes from an
+						// earlier session: after a limbo mode, the client goes on with its numbers, and without this a
+						// late normal datagram of the previous session would become the receive number, and every
+						// packet of the new session would then look old
+						if (clienthost->receiveNumber() == 0xFFFFFFFF && clienthost->sendNumberBase() != 0)
+							clienthost->receiveNumber() = receivednumber;
+
+						// Only an ACK_SYNC that answers the current SYNC and was read whole ends the synchronization:
+						// the client answers every SYNC, and a later SYNC brings an ACK_SYNC with the right code
+						clienthost->setConnectedState();
 					}
 					else
 					{
@@ -1514,7 +1735,46 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid userId )
 {
 	//nlwarning("FEHACK: Incoming client failed identification: systemMode=%s, code=%d, isValidCookie=%s", (systemMode ? "true" : "false"), code, result.c_str());
-	pair<THackingAddrSet::iterator,bool> res = _UnidentifiedFlyingClients.insert( make_pair( _CurrentInMsg->AddrFrom, THackingDesc() ) );
+	recordRejectedMessage( _CurrentInMsg->AddrFrom, bmft, userId );
+
+	// Only a connected client is counted, and only for what it sent itself: the reject must name the uid of the
+	// client the current message came from. A login message can name any uid in its cookie (BadCookie), and messages
+	// from unidentified addresses are noise and their source spoofable.
+	if ( RejectedMessagesLimit.get() != 0 && userId != 0 )
+	{
+		THostMap::iterator ihm = _ClientMap.find( _CurrentInMsg->AddrFrom );
+		CClientHost *client = (ihm != _ClientMap.end()) ? GETCLIENTA(ihm) : NULL;
+		if ( client != NULL && client->Uid == userId )
+		{
+			countRejectedMessage( client, bmft );
+		}
+	}
+}
+
+
+/*
+ * A service refused a message of a connected client, which the frontend had identified when routing it
+ */
+void CFeReceiveSub::rejectClientMessage( TBadMessageFormatType bmft, TUid userId )
+{
+	CClientHost *client = findClientHostByUid( userId, false );
+	if ( client == NULL )
+		return; // gone since
+
+	recordRejectedMessage( client->address(), bmft, userId );
+	if ( RejectedMessagesLimit.get() != 0 )
+	{
+		countRejectedMessage( client, bmft );
+	}
+}
+
+
+/*
+ * Log a refused message of an address once per cycle (FEHACK)
+ */
+void CFeReceiveSub::recordRejectedMessage( const CInetAddress &addr, TBadMessageFormatType bmft, TUid userId )
+{
+	pair<THackingAddrSet::iterator,bool> res = _UnidentifiedFlyingClients.insert( make_pair( addr, THackingDesc() ) );
 	THackingDesc& desc = (*(res.first)).second;
 	if ( ! res.second )
 	{
@@ -1524,6 +1784,37 @@ void CFeReceiveSub::rejectReceivedMessage( TBadMessageFormatType bmft, TUid user
 	// Set the userId and the reasons flag
 	desc.UserId = userId;
 	desc.Reasons |= bmft;
+}
+
+
+/*
+ * Count a refused message against a connected client, and disconnect it at RejectedMessagesLimit
+ */
+void CFeReceiveSub::countRejectedMessage( CClientHost *client, TBadMessageFormatType bmft )
+{
+	// A client already being removed is not counted: removing it again would push its removal back, so a client
+	// that keeps sending rejected messages would never be removed
+	if (isInRemoveList(client->clientId()))
+		return;
+
+	TTime now = CTime::getLocalTime();
+	uint32 window = RejectedMessagesWindow.get();
+	if (client->RejectedMessages == 0 || (window != 0 && now - client->RejectedMessagesSince > (TTime)window * 1000))
+	{
+		client->RejectedMessages = 0;
+		client->RejectedMessagesSince = now;
+	}
+	// (at or above: the limit can be lowered while the service runs)
+	if (++client->RejectedMessages >= RejectedMessagesLimit.get())
+	{
+		nlwarning("FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
+		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), client->RejectedMessages, (uint)((now - client->RejectedMessagesSince) / 1000), getBadMessageString(bmft).c_str());
+
+		// as when a service asks for the disconnection (cbDisconnectClient)
+		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+		client->ImpulseEncoder.add(act, 0);
+		addToRemoveList(client->clientId());
+	}
 }
 
 
@@ -1612,6 +1903,16 @@ void		CFeReceiveSub::removeFromRemoveList( TClientId clientid )
 	}
 }
 
+bool CFeReceiveSub::isInRemoveList(TClientId clientid) const
+{
+	for (TClientsToRemove::const_iterator icr = _ClientsToRemove.begin(); icr != _ClientsToRemove.end(); ++icr)
+	{
+		if (icr->first == clientid)
+			return true;
+	}
+	return false;
+}
+
 uint32	 CFeReceiveSub::getNbClient()
 {
 	return (uint32)_ClientMap.size();
@@ -1629,7 +1930,14 @@ CClientHost *CFeReceiveSub::findClientHostByUid( TUid uid, bool exitFromLimbo )
 	{
 		CLimboClient& lc = (*ilc).second;
 		CClientHost *clienthost = exitFromLimboMode( lc );
-		//clienthost->QuitId = lc.
+		if (clienthost == NULL)
+		{
+			// the user cannot come back (see the warning of exitFromLimboMode): it is gone for the EGS too, and addClient
+			// told the welcome service
+			ilc->second.ConnectionReportedToWS = false;
+			removeLimboClient(ilc, true, true);
+			return NULL;
+		}
 		LimboClients.erase( ilc );
 		return clienthost;
 	}

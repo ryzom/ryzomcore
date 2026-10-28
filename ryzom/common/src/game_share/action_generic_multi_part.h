@@ -56,6 +56,13 @@ public:
 			throw NLMISC::EInvalidDataStream();
 		}
 
+		// The size comes from the sender: a part never holds more than what is left of the message carrying it,
+		// so a larger size is refused before the buffer is allocated
+		if (size > ((uint32)message.length() * 8 - (uint32)message.getPosInBit()) / 8)
+		{
+			throw NLMISC::EStreamOverflow("multi-part size %u exceeds the message", size);
+		}
+
 		PartCont.resize(size);
 		if (size > 0)
 			message.serialBuffer(&(PartCont[0]), size);

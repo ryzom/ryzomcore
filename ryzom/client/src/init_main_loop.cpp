@@ -73,6 +73,7 @@
 #include "view.h"
 #include "time_client.h"
 #include "connection.h"
+#include "far_tp.h"
 #include "sheet_manager.h"
 #include "world_database_manager.h"
 #include "continent_manager.h"
@@ -338,6 +339,12 @@ inline void	waitForNetworkMessage(bool &var)
 		NetMngr.update();
 		IngameDbMngr.flushObserverCalls();
 		NLGUI::CDBManager::getInstance()->flushObserverCalls();
+		// a Far TP that failed while waiting (the connection was closed) leaves nothing to go back to
+		FarTP.exitIfFailedOrDisconnected();
+		// At the first login, the message will not come once the connection is closed: the main loop's disconnection
+		// handling takes over, as after the "Ready" wait
+		if (!FarTP.isJoiningShard() && (NetMngr.getConnectionState() == CNetworkConnection::Disconnect))
+			break;
 		// Send dummy info
 		NetMngr.send();
 		// Do not take all the CPU.
@@ -1356,13 +1363,19 @@ void initMainLoop()
 				IngameDbMngr.flushObserverCalls();
 				NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			}
+			// on a character reselect, a closed connection ends the Far TP as a failure, which leaves nothing to go back to
+			FarTP.exitIfFailedOrDisconnected();
 
 			// Set the LastGameCycle
 			LastGameCycle = NetMngr.getCurrentServerTick();
 
 			// Create the message for the server to create the character.
 			CBitMemStream out;
-			if(GenericMsgHeaderMngr.pushNameToStream("CONNECTION:READY", out))
+			// A closed connection gets no new server tick, which NetMngr.send waits for: the main loop shows the
+			// disconnection instead
+			if (NetMngr.getConnectionState() == CNetworkConnection::Disconnect)
+				nldebug("initMainLoop : the connection is closed, CONNECTION:READY is not sent");
+			else if (GenericMsgHeaderMngr.pushNameToStream("CONNECTION:READY", out))
 			{
 				// transmit language to IOS
 				out.serial(ClientCfg.LanguageCode);

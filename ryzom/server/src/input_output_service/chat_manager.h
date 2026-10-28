@@ -190,6 +190,13 @@ public :
 	bool bridgeChat(const std::string &sender, const std::string &channel, const std::string &externalId, const std::string &messageId, const std::string &quoteId, const std::string &sourceLanguage, const std::string &targetLanguage, const ucstring &text, const std::string &translatedParts);
 
 	/**
+	 * Check a chat line, tell or custom emote of a player against the player's allowance (ChatLineBurst lines at once,
+	 * then one each ChatLineInterval ms). A refused line is not sent, and the player is told once, until a line is
+	 * accepted again. Privileged players are not limited.
+	 */
+	bool acceptChatLine(const TDataSetRow &sender);
+
+	/**
 	 * Transmit a chat message to a group
 	 * \param gId is the group's id
 	 * \param str is the chat content
