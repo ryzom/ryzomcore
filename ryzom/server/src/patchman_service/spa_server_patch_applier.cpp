@@ -75,6 +75,12 @@ static NLMISC::CSString defaultScreenCfgFileName()
 	return NLMISC::CPath::standardizePath(DeploymentRootDirectory)+"screen.rc.default";
 }
 
+// the sections every domain dashboard starts with (the aes), for the servdash_cli alternative to screen
+static NLMISC::CSString defaultServdashIniFileName()
+{
+	return NLMISC::CPath::standardizePath(DeploymentRootDirectory) + "servdash.ini.default";
+}
+
 static NLMISC::CSString appDirectoryName(const NLMISC::CSString& domainDirectory,const NLMISC::CSString& appName)
 {
 	return domainDirectory+"service_"+appName+'/';
@@ -110,6 +116,7 @@ public:
 
 	NLMISC::CSString getAdminExecutorServiceCfgFileName(const NLMISC::CSString& domainName) const;
 	NLMISC::CSString getScreenCfgFileName(const NLMISC::CSString& domainName) const;
+	NLMISC::CSString getServdashIniFileName(const NLMISC::CSString &domainName) const;
 
 	uint32 getLiveVersion(const NLMISC::CSString& domainName) const;
 	uint32 getNextVersion(const NLMISC::CSString& domainName) const;
@@ -340,6 +347,13 @@ NLMISC::CSString CServerDirectories::getScreenCfgFileName(const NLMISC::CSString
 	nlassert(_Initialised);
 
 	return getDomainDirectory(domainName)+domainName+".screen.rc";
+}
+
+NLMISC::CSString CServerDirectories::getServdashIniFileName(const NLMISC::CSString &domainName) const
+{
+	nlassert(_Initialised);
+
+	return getDomainDirectory(domainName) + domainName + ".ini";
 }
 
 //-----------------------------------------------------------------------------
@@ -587,6 +601,19 @@ void CServerPatchApplier::cbDeploymentConfigurationSynchronised(NLNET::IModulePr
 		CSString screenConfig;
 		screenConfig.readFromFile(defaultScreenCfgFileName());
 
+		// setup the base for the <domain>.ini service dashboard file, the servdash_cli alternative to the
+		// screen session: the dashboard title, then the sections of the deployment (the aes)
+		CSString servdashConfig = "[]\nTitle=" + *dit + " on " + _HostName + "\n\n";
+		if (NLMISC::CFile::fileExists(defaultServdashIniFileName()))
+		{
+			CSString servdashDefault;
+			servdashDefault.readFromFile(defaultServdashIniFileName());
+			servdashConfig += servdashDefault;
+			if (!servdashDefault.empty() && servdashDefault[servdashDefault.size() - 1] != '\n')
+				servdashConfig += '\n';
+			servdashConfig += '\n';
+		}
+
 		// setup the base for the admin_executor_service config file
 		CSString adminExecutorConfig;
 		adminExecutorConfig.readFromFile(defaultAdminExecutorServiceCfgFileName(*dit));
@@ -635,6 +662,11 @@ void CServerPatchApplier::cbDeploymentConfigurationSynchronised(NLNET::IModulePr
 			CSString cfgFileName= dirName+'/'+theApp.CmdLine.firstWord()+".cfg";
 			NLMISC::CSString(theApp.CfgFile+paths).writeToFileIfDifferent(cfgFileName);
 
+			// the naming and admin services read their cfg file without the ryzom_ prefix; the launcher script of
+			// the screen setup copies it on each launch, the dashboard runs the service directly, so write it here too
+			if (theApp.CmdLine.firstWord().left(6) == "ryzom_")
+				NLMISC::CSString(theApp.CfgFile + paths).writeToFileIfDifferent(dirName + '/' + theApp.CmdLine.firstWord().leftCrop(6) + ".cfg");
+
 			// add an entry to the aes cfg file
 			CSString exePath= appExePath(_Directories.getLiveRootDirectory(*dit),theApp.CmdLine.firstWord()).quote();
 			CSString runPath= NLMISC::CSString(_Directories.getDomainDirectory(*dit)+theApp.AppName).quote();
@@ -649,6 +681,20 @@ void CServerPatchApplier::cbDeploymentConfigurationSynchronised(NLNET::IModulePr
 									SpaPreCmdLineText.get()+" "+exePath.unquote()+" "+exeArgs.unquote()+" "+SpaPostCmdLineText.get()+"\n\n";
 			screenConfig+= screenEntry;
 
+			// add a section to the <domain>.ini file: the dashboard runs the launch control protocol of the aes
+			// itself, in place of the launcher script, and the service gets its console over --ctrl; the admin
+			// service starts by itself, as the launcher script gives it its first run, the aes starts the others
+			servdashConfig += "[" + theApp.AppName + "]\n";
+			servdashConfig += "Title=" + theApp.AppName + "\n";
+			servdashConfig += "ReadyPattern=^[^*].+Service Console\n";
+			servdashConfig += "WorkingDirectory=" + runPath.unquote() + "\n";
+			servdashConfig += "LaunchCmd=" + exePath.unquote() + "\n";
+			servdashConfig += "LaunchArgs=" + exeArgs.unquote() + "\n";
+			servdashConfig += "LaunchCtrl=" + theApp.AppName + ".launch_ctrl," + theApp.AppName + ".state,LAUNCH,RUNNING,STOP,STOPPED\n";
+			servdashConfig += "Control=1\n";
+			servdashConfig += (exeName == "ryzom_admin_service") ? "AutoStart=1\n" : "AutoStart=0\n";
+			servdashConfig += "\n";
+
 			// add entries to the requiredFiles set
 			CSString exeArchive= "service_"+exeName;
 			_RequiredFiles[*dit].insert(exeArchive);
@@ -657,6 +703,9 @@ void CServerPatchApplier::cbDeploymentConfigurationSynchronised(NLNET::IModulePr
 
 		// write the <domain>.screen.rc file
 		screenConfig.writeToFileIfDifferent(_Directories.getScreenCfgFileName(*dit));
+
+		// write the <domain>.ini file
+		servdashConfig.writeToFileIfDifferent(_Directories.getServdashIniFileName(*dit));
 
 		// append the registered service list to the aes config file contents
 		adminExecutorConfig+= "\nRegisteredServices=\n{"+aesRegisteredServices+"\n};\n";
