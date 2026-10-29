@@ -20,6 +20,7 @@
 // shuts the shard down when the window closes, like the original.
 
 #include "dashboard.h"
+#include "icons.h"
 #include "main_window.h"
 
 #include <QApplication>
@@ -34,6 +35,7 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	QApplication::setApplicationName("Service Dashboard");
+	QApplication::setWindowIcon(Icons::app());
 	// Fusion draws the same frames on every platform and follows the system palette, where the
 	// Windows 11 style leaves text edits without edges; QT_STYLE_OVERRIDE still wins. Qt 6.12 or
 	// later: the Fusion of Qt 6.2 drops one pixel lines at a fractional display scale.
@@ -45,6 +47,7 @@ int main(int argc, char *argv[])
 	QString iniPath;
 	QString screenshotPath;
 	QString windowSize;
+	QString iconDir;
 	for (int i = 1; i < argc; ++i)
 	{
 		QString arg = QString::fromLocal8Bit(argv[i]);
@@ -52,8 +55,18 @@ int main(int argc, char *argv[])
 			screenshotPath = QString::fromLocal8Bit(argv[++i]);
 		else if (arg == "--size" && i + 1 < argc)
 			windowSize = QString::fromLocal8Bit(argv[++i]);
+		else if (arg == "--write-icon" && i + 1 < argc)
+			iconDir = QString::fromLocal8Bit(argv[++i]);
 		else if (iniPath.isEmpty())
 			iniPath = arg;
+	}
+	if (!iconDir.isEmpty())
+	{
+		// --write-icon <dir> writes the application icon as PNG files, one per size, from which
+		// the .ico of the Windows executable is packed
+		for (int size : { 16, 20, 24, 32, 40, 48, 64, 128, 256 })
+			Icons::appPixmap(size).save(QDir(iconDir).filePath(QString("servdash_gui_%1.png").arg(size)));
+		return 0;
 	}
 	if (iniPath.isEmpty())
 		iniPath = QFileDialog::getOpenFileName(nullptr, "Open a dashboard", QString(), "Dashboard files (*.ini);;All files (*)");

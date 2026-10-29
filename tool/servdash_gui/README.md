@@ -59,6 +59,9 @@ cmake -S tool/servdash_gui -B build_gui -DCMAKE_PREFIX_PATH=<Qt install prefix>
 cmake --build build_gui
 ```
 
-Qt 6.12 or later with the Core, Gui, Widgets and Network modules (the 2026q4 externals). The
+Qt 6.12 or later with the Core, Gui, Widgets and Network modules (the 2026q4 externals).
+The icons, including the application icon, are painted from code; `servdash_gui --write-icon
+<dir>` writes the application icon as PNG files per size, from which `servdash_gui.ico` for
+the Windows executable is packed. The
 tool also builds with Qt 5.15 and Qt 6.2, but their Fusion style drops one pixel lines at a
 fractional display scale, so frames and scrollbars come out without edges at 125 percent.

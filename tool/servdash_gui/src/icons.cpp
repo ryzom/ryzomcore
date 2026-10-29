@@ -151,6 +151,46 @@ QPixmap light(const QColor &color, int size)
 	return pixmap;
 }
 
+QPixmap appPixmap(int size)
+{
+	QPixmap pixmap(size, size);
+	pixmap.fill(Qt::transparent);
+	QPainter painter(&pixmap);
+	const qreal unit = size / 16.0;
+
+	// the panel, a dark slate with the same gloss as the buttons
+	QPainterPath panel;
+	panel.addRoundedRect(QRectF(0.5 * unit, 0.5 * unit, 15 * unit, 15 * unit), 2.5 * unit, 2.5 * unit);
+	paintGlossy(painter, panel, QColor(0x3C, 0x50, 0x6A), unit);
+
+	// three state lights down the left, three rows beside them, as in the process column
+	const QColor lights[3] = { QColor(0x11, 0xA2, 0x22), QColor(0xE0, 0x90, 0x10), QColor(0xD0, 0x30, 0x30) };
+	for (int i = 0; i < 3; ++i)
+	{
+		const qreal y = (4.5 + 3.5 * i) * unit;
+		QPainterPath light;
+		light.addEllipse(QPointF(4.5 * unit, y), 1.7 * unit, 1.7 * unit);
+		paintGlossy(painter, light, lights[i], unit * 0.6);
+
+		painter.setRenderHint(QPainter::Antialiasing);
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(QColor(0xE6, 0xEE, 0xF8, 0xE6));
+		painter.drawRoundedRect(QRectF(7.5 * unit, y - 0.9 * unit, 5.5 * unit, 1.8 * unit), 0.9 * unit, 0.9 * unit);
+	}
+	return pixmap;
+}
+
+QIcon app()
+{
+	static const QIcon s_Icon = []() {
+		QIcon icon;
+		for (int size : { 16, 20, 24, 32, 48, 64, 128, 256 })
+			icon.addPixmap(appPixmap(size));
+		return icon;
+	}();
+	return s_Icon;
+}
+
 QColor logColor(const QColor &color, const QPalette &palette)
 {
 	if (!color.isValid())

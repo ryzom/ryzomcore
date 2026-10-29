@@ -31,6 +31,11 @@ QIcon play();
 QIcon stop();
 QPixmap light(const QColor &color, int size);
 
+/// The application icon: a dashboard panel with the column of state lights and the rows
+/// beside them. `appPixmap` paints one size; `app` holds the sizes a window icon needs.
+QPixmap appPixmap(int size);
+QIcon app();
+
 /// A console log colour as the NeL window used it, adjusted for a dark theme where the
 /// dark red of warnings and the black of plain lines would vanish.
 QColor logColor(const QColor &color, const QPalette &palette);

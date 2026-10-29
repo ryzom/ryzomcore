@@ -1,0 +1,2 @@
+// The icon of the Windows executable, packed from the sizes `servdash_gui --write-icon` paints.
+IDI_ICON1 ICON "servdash_gui.ico"
