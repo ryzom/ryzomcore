@@ -60,6 +60,8 @@ public:
 		QString Text;
 		/// Invalid for the default text colour.
 		QColor Color;
+		/// From stdout or stderr, or a note of the dashboard, rather than from the console channel.
+		bool Raw = false;
 	};
 
 	CProcessEntry(const CSectionConfig &config, QObject *parent = nullptr);
@@ -78,8 +80,8 @@ public:
 	bool controlConnected() const { return m_Control != nullptr; }
 	/// Console labels as the service created them: empty is a row separator, `@Name|cmd` a button.
 	const QStringList &labels() const { return m_Labels; }
-	const QVector<CLine> &outputLines() const { return m_Output; }
-	const QVector<CLine> &consoleLines() const { return m_Console; }
+	/// The pane: console lines, the raw output and the dashboard's notes, in arrival order.
+	const QVector<CLine> &lines() const { return m_Lines; }
 	/// Whether the startup rules put the process in the start sequence.
 	bool autoLaunch() const { return m_AutoLaunch; }
 	bool hasLaunchCtrl() const { return m_LaunchCtrl != nullptr; }
@@ -109,9 +111,9 @@ signals:
 	void controlChanged(CProcessEntry *entry);
 	void labelChanged(CProcessEntry *entry, int index, const QString &value);
 	void labelsReset(CProcessEntry *entry);
-	void outputLine(CProcessEntry *entry, const CProcessEntry::CLine &line);
-	void consoleLine(CProcessEntry *entry, const CProcessEntry::CLine &line);
-	void consoleCleared(CProcessEntry *entry);
+	void lineAdded(CProcessEntry *entry, const CProcessEntry::CLine &line);
+	/// The lines changed as a whole: cleared, or the console part dropped before a replay.
+	void linesReset(CProcessEntry *entry);
 	/// The process wants a place in the start sequence (ProcessControl.LaunchWanted).
 	void launchWanted(CProcessEntry *entry);
 	/// The process has to stop (MainWindow.stopClicked).
@@ -130,8 +132,7 @@ private slots:
 private:
 	void setState(TState state);
 	void note(const QString &text, const QColor &color = QColor());
-	void appendOutput(const CLine &line);
-	void appendConsole(const CLine &line);
+	void appendLine(const CLine &line);
 	void readLines(QByteArray &buffer, const QByteArray &data, bool checkReady = true);
 	void flushLine(QByteArray &buffer, bool checkReady);
 	void handleOutputLine(const QString &text, bool checkReady);
@@ -154,8 +155,7 @@ private:
 	QProcess *m_Process = nullptr;
 	QByteArray m_OutputBuffer;
 	QByteArray m_ErrorBuffer;
-	QVector<CLine> m_Output;
-	QVector<CLine> m_Console;
+	QVector<CLine> m_Lines;
 	QStringList m_Labels;
 	QLocalServer *m_Server = nullptr;
 	QLocalSocket *m_Control = nullptr;

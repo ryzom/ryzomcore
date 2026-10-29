@@ -29,9 +29,11 @@ A section with `Control=1` is a NeL service. The dashboard listens on a local so
 and passes `--ctrl=<endpoint>`; the service then streams its log, labels, command buttons and
 title to the pane instead of opening its Win32 window, and the pane sends back the commands
 typed or clicked. The labels sit in fixed columns per row, as the Win32 service window laid
-them out. The Raw button, or F9 in the command line, shows the raw stdout and stderr of the
-service instead, where an assert or a crash report ends up. Up and Down in the command line
-walk its history; `CLEAR` or the Clear button empties the log.
+them out. Whatever the service writes to stdout or stderr besides its log, an assert or a
+crash report for instance, shows in the same pane in grey, as do the dashboard's own notes
+about the process; the service does not echo its log on stdout while it runs under a
+dashboard. Up and Down in the command line walk its history; `CLEAR` or the Clear button
+empties the log.
 
 A service without `Control=1` is shown through its pipes, and the input line goes to its stdin.
 

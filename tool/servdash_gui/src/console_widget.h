@@ -24,14 +24,13 @@
 
 class QLineEdit;
 class QPlainTextEdit;
-class QToolButton;
 class QVBoxLayout;
 
 /// The pane of one process. For a NeL service it is the service console as the Win32 window
 /// showed it: the toolbar of labels and command buttons in fixed columns, the log with a
-/// colour per log type, and the command line with its history. A plain process shows its
-/// output and gets a line for its stdin. F9 or the Raw button shows the raw output of a
-/// service, where an assert or a crash report ends up.
+/// colour per log type, and the command line with its history. Whatever the process writes
+/// to stdout or stderr besides, and the dashboard's own notes, appear in the same log in grey.
+/// A plain process shows its output and gets a line for its stdin.
 class CConsoleWidget : public QWidget
 {
 	Q_OBJECT
@@ -46,16 +45,14 @@ protected:
 	bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
-	void onOutputLine(CProcessEntry *entry, const CProcessEntry::CLine &line);
-	void onConsoleLine(CProcessEntry *entry, const CProcessEntry::CLine &line);
-	void onConsoleCleared();
+	void onLineAdded(CProcessEntry *entry, const CProcessEntry::CLine &line);
+	void onLinesReset();
 	void onLabelChanged(CProcessEntry *entry, int index, const QString &value);
 	void onLabelsReset();
-	void onRawToggled(bool raw);
 	void onSubmit();
 
 private:
-	bool showsConsole() const;
+	bool isConsole() const;
 	void reload();
 	void appendLine(const CProcessEntry::CLine &line);
 	void rebuildToolbar();
@@ -64,7 +61,6 @@ private:
 	CProcessEntry *m_Entry;
 	QWidget *m_Toolbar = nullptr;
 	QVBoxLayout *m_ToolbarLayout = nullptr;
-	QToolButton *m_RawButton = nullptr;
 	QPlainTextEdit *m_Log = nullptr;
 	QLineEdit *m_Input = nullptr;
 	QList<QWidget *> m_LabelWidgets;

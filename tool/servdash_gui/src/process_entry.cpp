@@ -317,23 +317,16 @@ void CProcessEntry::note(const QString &text, const QColor &color)
 	CLine line;
 	line.Text = "> " + text;
 	line.Color = color;
-	appendOutput(line);
+	line.Raw = true;
+	appendLine(line);
 }
 
-void CProcessEntry::appendOutput(const CLine &line)
+void CProcessEntry::appendLine(const CLine &line)
 {
-	if (m_Output.size() >= s_MaxLines)
-		m_Output.removeFirst();
-	m_Output.append(line);
-	emit outputLine(this, line);
-}
-
-void CProcessEntry::appendConsole(const CLine &line)
-{
-	if (m_Console.size() >= s_MaxLines)
-		m_Console.removeFirst();
-	m_Console.append(line);
-	emit consoleLine(this, line);
+	if (m_Lines.size() >= s_MaxLines)
+		m_Lines.removeFirst();
+	m_Lines.append(line);
+	emit lineAdded(this, line);
 }
 
 // *** launching ***
@@ -548,8 +541,8 @@ void CProcessEntry::sendCommand(const QString &text)
 
 void CProcessEntry::clearConsole()
 {
-	m_Console.clear();
-	emit consoleCleared(this);
+	m_Lines.clear();
+	emit linesReset(this);
 }
 
 void CProcessEntry::releaseProcess()
@@ -628,7 +621,8 @@ void CProcessEntry::handleOutputLine(const QString &text, bool checkReady)
 {
 	CLine line;
 	line.Text = text;
-	appendOutput(line);
+	line.Raw = true;
+	appendLine(line);
 	if (checkReady && !m_Config.Control && !m_ReadyTriggered && (m_State == Launched || m_State == Captured) && !m_ReadyPattern.pattern().isEmpty() && m_ReadyPattern.match(text).hasMatch())
 	{
 		m_ReadyTriggered = true;
@@ -658,10 +652,14 @@ void CProcessEntry::onNewControlConnection()
 		m_ControlBuffer.clear();
 		connect(socket, &QLocalSocket::readyRead, this, &CProcessEntry::onControlReadyRead);
 		connect(socket, &QLocalSocket::disconnected, this, &CProcessEntry::onControlDisconnected);
-		// the service replays its history on connection
-		m_Console.clear();
+		// the service replays its history on connection, so its earlier lines go; the raw ones stay
+		QVector<CLine> kept;
+		for (const CLine &line : m_Lines)
+			if (line.Raw)
+				kept.append(line);
+		m_Lines = kept;
 		m_Labels.clear();
-		emit consoleCleared(this);
+		emit linesReset(this);
 		emit labelsReset(this);
 		emit controlChanged(this);
 		if (m_State == Launched)
@@ -748,7 +746,7 @@ void CProcessEntry::handleControlLine(const QString &line)
 			CLine l;
 			l.Text = part;
 			l.Color = color;
-			appendConsole(l);
+			appendLine(l);
 		}
 	}
 }

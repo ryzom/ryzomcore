@@ -27,7 +27,6 @@
 #include <QPushButton>
 #include <QScrollBar>
 #include <QTextBlock>
-#include <QToolButton>
 #include <QVBoxLayout>
 
 namespace {
@@ -49,21 +48,11 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 
 	if (entry->config().Control)
 	{
-		QHBoxLayout *top = new QHBoxLayout();
-		top->setContentsMargins(0, 0, 0, 0);
 		m_Toolbar = new QWidget(this);
 		m_ToolbarLayout = new QVBoxLayout(m_Toolbar);
 		m_ToolbarLayout->setContentsMargins(0, 0, 0, 0);
 		m_ToolbarLayout->setSpacing(3);
-		top->addWidget(m_Toolbar, 1);
-		m_RawButton = new QToolButton(this);
-		m_RawButton->setText("Raw");
-		m_RawButton->setToolTip("Show the raw output of the process instead of its console (F9)");
-		m_RawButton->setCheckable(true);
-		m_RawButton->setAutoRaise(true);
-		connect(m_RawButton, &QToolButton::toggled, this, &CConsoleWidget::onRawToggled);
-		top->addWidget(m_RawButton, 0, Qt::AlignTop);
-		layout->addLayout(top);
+		layout->addWidget(m_Toolbar);
 	}
 
 	m_Log = new QPlainTextEdit(this);
@@ -80,9 +69,8 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 	connect(m_Input, &QLineEdit::returnPressed, this, &CConsoleWidget::onSubmit);
 	layout->addWidget(m_Input);
 
-	connect(entry, &CProcessEntry::outputLine, this, &CConsoleWidget::onOutputLine);
-	connect(entry, &CProcessEntry::consoleLine, this, &CConsoleWidget::onConsoleLine);
-	connect(entry, &CProcessEntry::consoleCleared, this, &CConsoleWidget::onConsoleCleared);
+	connect(entry, &CProcessEntry::lineAdded, this, &CConsoleWidget::onLineAdded);
+	connect(entry, &CProcessEntry::linesReset, this, &CConsoleWidget::onLinesReset);
 	connect(entry, &CProcessEntry::labelChanged, this, &CConsoleWidget::onLabelChanged);
 	connect(entry, &CProcessEntry::labelsReset, this, &CConsoleWidget::onLabelsReset);
 	reload();
@@ -93,22 +81,18 @@ void CConsoleWidget::focusInput()
 	m_Input->setFocus();
 }
 
-bool CConsoleWidget::showsConsole() const
+bool CConsoleWidget::isConsole() const
 {
-	return m_Entry->config().Control && (m_RawButton == nullptr || !m_RawButton->isChecked());
+	return m_Entry->config().Control;
 }
 
 void CConsoleWidget::reload()
 {
 	m_Log->clear();
-	const QVector<CProcessEntry::CLine> &lines = showsConsole() ? m_Entry->consoleLines() : m_Entry->outputLines();
-	for (const CProcessEntry::CLine &line : lines)
+	for (const CProcessEntry::CLine &line : m_Entry->lines())
 		appendLine(line);
 	if (m_Toolbar != nullptr)
-	{
-		m_Toolbar->setVisible(showsConsole());
 		rebuildToolbar();
-	}
 }
 
 void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
@@ -118,7 +102,10 @@ void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
 	QTextCursor cursor(m_Log->document());
 	cursor.movePosition(QTextCursor::End);
 	QTextCharFormat format;
-	format.setForeground(Icons::logColor(line.Color, palette()));
+	if (line.Raw && !line.Color.isValid() && isConsole())
+		format.setForeground(palette().color(QPalette::Mid)); // stdout and stderr beside the console log
+	else
+		format.setForeground(Icons::logColor(line.Color, palette()));
 	if (!m_Log->document()->isEmpty())
 		cursor.insertBlock();
 	cursor.insertText(line.Text, format);
@@ -126,29 +113,14 @@ void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
 		bar->setValue(bar->maximum());
 }
 
-void CConsoleWidget::onOutputLine(CProcessEntry *entry, const CProcessEntry::CLine &line)
+void CConsoleWidget::onLineAdded(CProcessEntry *entry, const CProcessEntry::CLine &line)
 {
 	Q_UNUSED(entry);
-	if (!showsConsole())
-		appendLine(line);
+	appendLine(line);
 }
 
-void CConsoleWidget::onConsoleLine(CProcessEntry *entry, const CProcessEntry::CLine &line)
+void CConsoleWidget::onLinesReset()
 {
-	Q_UNUSED(entry);
-	if (showsConsole())
-		appendLine(line);
-}
-
-void CConsoleWidget::onConsoleCleared()
-{
-	if (showsConsole())
-		m_Log->clear();
-}
-
-void CConsoleWidget::onRawToggled(bool raw)
-{
-	Q_UNUSED(raw);
 	reload();
 }
 
@@ -249,7 +221,7 @@ void CConsoleWidget::onSubmit()
 		if (m_History.size() > s_MaxHistory)
 			m_History.removeFirst();
 	}
-	if (showsConsole())
+	if (isConsole())
 	{
 		if (text == "CLEAR")
 			m_Entry->clearConsole();
@@ -297,11 +269,6 @@ bool CConsoleWidget::eventFilter(QObject *watched, QEvent *event)
 					m_Input->setText(m_Draft);
 				}
 			}
-			return true;
-		}
-		if (key->key() == Qt::Key_F9 && m_RawButton != nullptr)
-		{
-			m_RawButton->toggle();
 			return true;
 		}
 	}
