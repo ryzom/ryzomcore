@@ -31,6 +31,7 @@
 #include <QScrollBar>
 #include <QShowEvent>
 #include <QTextBlock>
+#include <QTimer>
 #include <QVBoxLayout>
 
 namespace {
@@ -103,8 +104,10 @@ void CConsoleWidget::onViewSettingsChanged()
 {
 	applyWrapMode();
 	// only the pane on screen rebuilds now; a hidden one does when it is shown
+	// after the event loop turn: a theme change delivers its new palette to the widgets
+	// through events, and the rebuild has to read the colours from that palette
 	if (isVisible())
-		reload();
+		QTimer::singleShot(0, this, &CConsoleWidget::reload);
 	else
 		m_ReloadPending = true;
 }
@@ -174,10 +177,11 @@ void CConsoleWidget::insertLine(QTextCursor &cursor, const CProcessEntry::CLine 
 {
 	const CViewSettings &settings = CViewSettings::instance();
 	const QString text = settings.compactPrefix() ? CViewSettings::compactPrefix(line.Text) : line.Text;
+	// a line in the default colour carries none, so it follows the palette on its own
 	QTextCharFormat format;
 	if (line.Raw && !line.Color.isValid() && isConsole())
 		format.setForeground(palette().color(QPalette::Mid)); // stdout and stderr beside the console log
-	else
+	else if (line.Color.isValid())
 		format.setForeground(Icons::logColor(line.Color, palette()));
 	cursor.movePosition(QTextCursor::End);
 	if (!m_Log->document()->isEmpty())
