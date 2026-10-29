@@ -16,7 +16,14 @@ servdash_cli start_mainland.ini      start the daemon if needed, then attach
 servdash_cli -d start_mainland.ini   start the daemon without attaching
 servdash_cli -a start_mainland.ini   attach only
 servdash_cli --shutdown start_mainland.ini   stop all services and exit the daemon
+servdash_cli --list                  the running dashboards of this user
+servdash_cli 2                       attach to the second one in the list
+servdash_cli Mainland                attach by title (or id, id prefix, ini path)
 ```
+
+Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash_cli\sessions`
+on Windows, `$XDG_RUNTIME_DIR/servdash_cli.sessions` or `/tmp/servdash_cli.sessions.<uid>` on
+Linux), so a running dashboard can be named from any directory without its ini path.
 
 Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F9 raw output or console,
 F10 detach, F12 twice to stop everything and quit, Tab or Alt+Up/Down to select a process,

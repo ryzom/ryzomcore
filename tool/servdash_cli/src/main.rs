@@ -26,25 +26,29 @@ mod ipc;
 mod launch_ctrl;
 mod log;
 mod proto;
+mod registry;
 mod session;
 mod spawn;
 mod ui;
 
 use anyhow::{bail, Context, Result};
 use session::Session;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 const USAGE: &str = "servdash_cli, service dashboard for Ryzom Core
 
 Usage:
-  servdash_cli [options] <dashboard.ini>
+  servdash_cli [options] <dashboard.ini | running dashboard>
+  servdash_cli --list
 
 Starts the dashboard daemon for the ini file when none runs, then attaches
-to it. Detaching (F10) or closing the terminal leaves the services running;
-the same command attaches again.
+to it. Detaching (F10) or closing the terminal leaves the services running.
+A running dashboard can be given instead of the ini file, from any directory:
+its number in --list, its title, its id or a prefix of it, or the ini path.
 
 Options:
+  -l, --list       list the running dashboards of this user
   -d, --detach     start the daemon without attaching
   -a, --attach     attach only, fail when no daemon runs
       --shutdown   stop all services and exit the daemon
@@ -67,10 +71,11 @@ struct Options {
 	shutdown: bool,
 	status: bool,
 	endpoint: bool,
+	list: bool,
 }
 
 fn parse_args() -> Result<Options> {
-	let mut options = Options { ini: None, daemon: false, detach: false, attach: false, shutdown: false, status: false, endpoint: false };
+	let mut options = Options { ini: None, daemon: false, detach: false, attach: false, shutdown: false, status: false, endpoint: false, list: false };
 	for arg in std::env::args().skip(1) {
 		match arg.as_str() {
 			"-h" | "--help" => {
@@ -87,19 +92,38 @@ fn parse_args() -> Result<Options> {
 			"--shutdown" => options.shutdown = true,
 			"--status" => options.status = true,
 			"--endpoint" => options.endpoint = true,
+			"-l" | "--list" => options.list = true,
 			other if other.starts_with('-') => bail!("unknown option '{}'\n\n{}", other, USAGE),
 			other => {
 				if options.ini.is_some() {
-					bail!("only one ini file can be given\n\n{}", USAGE);
+					bail!("only one dashboard can be given\n\n{}", USAGE);
 				}
 				options.ini = Some(PathBuf::from(other));
 			}
 		}
 	}
-	if options.ini.is_none() {
+	if options.ini.is_none() && !options.list {
 		bail!("{}", USAGE);
 	}
 	Ok(options)
+}
+
+/// The dashboard the command line names: an ini file, or a running dashboard by number,
+/// title, id or path. Starting a daemon needs the file itself.
+async fn resolve_session(target: &Path, options: &Options) -> Result<Session> {
+	if target.is_file() {
+		return Session::new(target);
+	}
+	let selector = target.to_string_lossy();
+	match registry::resolve(&selector).await {
+		Ok(record) => Session::from_record(&record.id, &record.ini_path),
+		Err(e) => {
+			if options.daemon || options.endpoint {
+				bail!("cannot find '{}'", selector);
+			}
+			bail!("'{}' is not an ini file and {}", selector, e)
+		}
+	}
 }
 
 async fn run_daemon(session: Session) -> Result<()> {
@@ -204,10 +228,14 @@ async fn start_and_attach(session: &Session, options: &Options) -> Result<()> {
 
 fn main() -> Result<()> {
 	let options = parse_args()?;
-	let ini = options.ini.clone().expect("checked by parse_args");
-	let session = Session::new(&ini)?;
 	let runtime = tokio::runtime::Runtime::new()?;
 	runtime.block_on(async {
+		if options.list {
+			registry::print_list(&registry::running().await);
+			return Ok(());
+		}
+		let target = options.ini.clone().expect("checked by parse_args");
+		let session = resolve_session(&target, &options).await?;
 		if options.endpoint {
 			println!("{}", session.control_endpoint());
 			Ok(())

@@ -55,6 +55,13 @@ impl Session {
 		Ok(Session { ini_path, dir, id: format!("{:016x}", fnv1a64(&key)) })
 	}
 
+	/// A session from a registry record of a running daemon: the file does not need to exist.
+	pub fn from_record(id: &str, ini_path: &str) -> Result<Session> {
+		let ini_path = PathBuf::from(ini_path);
+		let dir = ini_path.parent().map(Path::to_path_buf).context("the ini file has no parent directory")?;
+		Ok(Session { ini_path, dir, id: id.to_string() })
+	}
+
 	#[cfg(windows)]
 	fn runtime_dir(&self) -> PathBuf {
 		PathBuf::new()

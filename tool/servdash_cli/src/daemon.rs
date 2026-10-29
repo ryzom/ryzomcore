@@ -948,6 +948,7 @@ pub async fn run(session: Session) -> Result<()> {
 		});
 	}
 	log::note(&format!("daemon started for '{}' with {} sections", session.ini_path.display(), daemon.procs.len()));
+	crate::registry::register(&session, &daemon.title);
 
 	daemon.auto_start();
 	while let Some(event) = rx.recv().await {
@@ -958,6 +959,7 @@ pub async fn run(session: Session) -> Result<()> {
 	}
 	// give the Bye a moment to reach the clients
 	tokio::time::sleep(Duration::from_millis(100)).await;
+	crate::registry::unregister(&session);
 	session.cleanup_runtime_dir();
 	log::note("daemon exited");
 	Ok(())
