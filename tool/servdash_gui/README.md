@@ -16,6 +16,9 @@ servdash_cli, which keeps running when its terminal goes away.
 servdash_gui start_mainland.ini
 ```
 
+The class transport sample in `tool/servdash_cli/examples/class_transport` runs under both
+dashboards; its ini is the shared example for the format.
+
 Without an argument a file dialog asks for the ini. The directory of the ini file becomes the
 working directory. The Dashboard menu repeats Launch All and Shutdown All and adds Exit, which
 closes the window the same way.
