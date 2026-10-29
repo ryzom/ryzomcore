@@ -41,6 +41,13 @@ comes from the service itself, live: every command, variable and module command 
 as it registers them, so a module loaded later completes too.
 The mouse works too: click a process, its start/stop glyph, or a console button.
 
+## In the quick start package
+
+The shard scripts of the quick start (`shard_mainland.bat` and the others) open servdash_gui by
+default. With `"Headless": true` in `.nel/config.json` they run `servdash_cli <shard>.ini` in the
+console instead, for a development box reached over SSH: F10 detaches, the same script attaches
+again. The executable is taken from `external/utils` (the `Paths.Servdash` entry of the config).
+
 ## NeL services and the console channel
 
 A section with `Control=1` is a NeL service. The daemon listens on a local endpoint for it

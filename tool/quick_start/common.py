@@ -33,6 +33,7 @@ NeLNginxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Ngin
 NeLPHPDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["PHP"]))
 NeLphpMyAdminDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["phpMyAdmin"]))
 NeLDependenciesDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Dependencies"])) # Detect all dependencies of the build output and get them from externals
+NeLServdashDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Servdash"])) # servdash_cli and the Win32 servdash; servdash_gui comes from the tools build
 
 # Tools added to system path, for any platform
 # If these paths are wrong, tools from the system path may be used, which is okay

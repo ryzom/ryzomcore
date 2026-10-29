@@ -18,6 +18,7 @@
     "Sha1": "f0ef3c22d0373d2d6e3735207194d097c8f69877",
     "Timestamp": "http://timestamp.comodoca.com/authenticode"
   },
+  "Headless": false,
   "Toolchain": {
     "Server": {
       "Filter": [{ "OSId": "ubuntu", "OSCodename": "focal", "Platform": "amd64", "Hunter": false }],

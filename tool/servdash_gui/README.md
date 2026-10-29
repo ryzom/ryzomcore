@@ -64,6 +64,12 @@ and the Linux launcher handle them, so the web admin shard controls stay in step
 processes are tied to the dashboard with a job object on Windows and the parent death signal
 on Linux, so a crash of the dashboard does not leave them behind.
 
+## In the quick start package
+
+The tools build of the quick start builds servdash_gui when Qt is found, and the shard scripts
+(`shard_mainland.bat` and the others) open it on their ini; `"Headless": true` in
+`.nel/config.json` makes them run servdash_cli in the console instead.
+
 ## Building
 
 In the Ryzom Core tree the tool builds with `WITH_QT5` or `WITH_QT6`. On its own:

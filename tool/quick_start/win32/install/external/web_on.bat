@@ -11,4 +11,4 @@ mkdir ..\save\dev\www
 set PATH=%~dp0\php;%~dp0\mariadb;%~dp0\nginx;%PATH%
 call mariadb_setup.bat
 call nginx_setup.bat
-start ..\external\utils\servdash web_dash.ini
+call ..\_servdash.bat web_dash.ini

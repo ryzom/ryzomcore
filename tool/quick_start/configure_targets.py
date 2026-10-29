@@ -355,6 +355,12 @@ def GeneratePathScript():
 		fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + Targets["Native"]["client_dev"]["QtPluginBin"]) + "\n")
 	else:
 		fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + NeLConfig["Fallback"]["QtPluginBin"]) + "\n")
+	# The service dashboard the shard scripts open: servdash_gui in a window, or servdash_cli in the console when Headless
+	fo.write("set " + EscapeArg("RC_SERVDASH_DIR=" + NeLServdashDir) + "\n")
+	if NeLConfig["Headless"]:
+		fo.write("set RC_HEADLESS=1\n")
+	else:
+		fo.write("set RC_HEADLESS=0\n")
 	exedll = []
 	for client in NeLTargetClient:
 		exedll += [ "common/exedll_" + client ]

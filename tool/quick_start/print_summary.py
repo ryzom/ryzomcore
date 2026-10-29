@@ -52,6 +52,12 @@ printBuildTarget("samples", NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	printBuildTarget("plugin_max/" + pluginMax, NelTargetPluginMax[pluginMax])
 
+print()
+if NeLConfig["Headless"]:
+	print("Service dashboard: servdash_cli in the console (Headless)")
+else:
+	print("Service dashboard: servdash_gui (set Headless in .nel/config.json for servdash_cli)")
+
 # Notifications
 
 if not FoundDocker:
