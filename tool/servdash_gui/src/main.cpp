@@ -21,6 +21,7 @@
 
 #include "dashboard.h"
 #include "icons.h"
+#include "shard_lock.h"
 #include "main_window.h"
 
 #include <QApplication>
@@ -87,6 +88,15 @@ int main(int argc, char *argv[])
 	if (!CDashboardConfig::read(info.absoluteFilePath(), config, error))
 	{
 		QMessageBox::critical(nullptr, "Service Dashboard", error);
+		return 1;
+	}
+
+	// one dashboard per shard, whichever tool it is
+	CShardLock lock;
+	QString holder;
+	if (!lock.acquire(info.absoluteFilePath(), holder))
+	{
+		QMessageBox::critical(nullptr, "Service Dashboard", QString("'%1' is already open in %2.").arg(info.fileName(), holder));
 		return 1;
 	}
 

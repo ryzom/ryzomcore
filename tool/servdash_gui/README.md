@@ -20,7 +20,9 @@ The class transport sample in `tool/servdash_cli/examples/class_transport` runs 
 dashboards; its ini is the shared example for the format.
 
 Without an argument a file dialog asks for the ini. The directory of the ini file becomes the
-working directory. The Dashboard menu repeats Launch All and Shutdown All and adds Exit, which
+working directory. A shard is opened once: a lock file next to the ini, `<stem>.servdash.lock`,
+names the dashboard that holds it, servdash_gui or servdash_cli, and a second one is refused
+while that process lives. The Dashboard menu repeats Launch All and Shutdown All and adds Exit, which
 closes the window the same way.
 
 ## The console
