@@ -24,6 +24,7 @@
 
 class CConsoleWidget;
 class CProcessRow;
+class CRowsScrollArea;
 class QStackedWidget;
 
 /// The dashboard window, laid out as the Win32 servdash: a fixed column on the left with the
@@ -40,6 +41,7 @@ public:
 
 protected:
 	void closeEvent(QCloseEvent *event) override;
+	bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
 	void select(CProcessEntry *entry);
@@ -50,9 +52,10 @@ private:
 	void createPanels();
 
 	CDashboard *m_Dashboard;
-	QList<CProcessRow *> m_Rows;
+	QList<CProcessRow *> m_RowWidgets;
 	QList<CConsoleWidget *> m_Panes;
 	QStackedWidget *m_Stack = nullptr;
+	CRowsScrollArea *m_Rows = nullptr;
 	CProcessEntry *m_Selected = nullptr;
 	bool m_CloseRequested = false;
 };

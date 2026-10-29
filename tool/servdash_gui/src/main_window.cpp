@@ -22,12 +22,27 @@
 
 #include <QCloseEvent>
 #include <QPushButton>
+#include <QEvent>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QStatusBar>
 #include <QVBoxLayout>
+
+/// The scroll area of the process rows, with a gap between the rows and the vertical
+/// scrollbar while the bar is there, so the rows share the right edge of the buttons above
+/// them otherwise.
+class CRowsScrollArea : public QScrollArea
+{
+public:
+	explicit CRowsScrollArea(QWidget *parent)
+	    : QScrollArea(parent)
+	{
+	}
+
+	void setGap(int gap) { setViewportMargins(0, 0, gap, 0); }
+};
 
 CMainWindow::CMainWindow(CDashboard *dashboard, QWidget *parent)
     : QMainWindow(parent)
@@ -78,7 +93,7 @@ void CMainWindow::createPanels()
 		CProcessRow *row = new CProcessRow(entry, column);
 		connect(row, &CProcessRow::selected, this, &CMainWindow::select);
 		columnLayout->addWidget(row);
-		m_Rows.append(row);
+		m_RowWidgets.append(row);
 		CConsoleWidget *pane = new CConsoleWidget(entry, m_Stack);
 		m_Stack->addWidget(pane);
 		m_Panes.append(pane);
@@ -86,12 +101,13 @@ void CMainWindow::createPanels()
 	}
 	columnLayout->addStretch(1);
 
-	QScrollArea *scroll = new QScrollArea(panel);
+	CRowsScrollArea *scroll = new CRowsScrollArea(panel);
+	m_Rows = scroll;
 	scroll->setWidget(column);
 	scroll->setWidgetResizable(true);
 	scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	scroll->setFrameShape(QFrame::NoFrame);
-	scroll->verticalScrollBar()->setObjectName("columnBar");
+	scroll->verticalScrollBar()->installEventFilter(this);
 	panelLayout->addWidget(scroll, 1);
 
 	panel->setMinimumWidth(180);
@@ -106,10 +122,10 @@ void CMainWindow::createPanels()
 void CMainWindow::select(CProcessEntry *entry)
 {
 	m_Selected = entry;
-	for (int i = 0; i < m_Rows.size(); ++i)
+	for (int i = 0; i < m_RowWidgets.size(); ++i)
 	{
-		bool selected = m_Rows[i]->entry() == entry;
-		m_Rows[i]->setSelected(selected);
+		bool selected = m_RowWidgets[i]->entry() == entry;
+		m_RowWidgets[i]->setSelected(selected);
 		if (selected)
 		{
 			m_Stack->setCurrentWidget(m_Panes[i]);
@@ -125,6 +141,18 @@ void CMainWindow::refreshTitle()
 	if (m_Selected != nullptr)
 		title += " - " + m_Selected->title();
 	setWindowTitle(title);
+}
+
+bool CMainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+	if (m_Rows != nullptr && watched == m_Rows->verticalScrollBar())
+	{
+		if (event->type() == QEvent::Show)
+			m_Rows->setGap(4);
+		else if (event->type() == QEvent::Hide)
+			m_Rows->setGap(0);
+	}
+	return QMainWindow::eventFilter(watched, event);
 }
 
 void CMainWindow::closeEvent(QCloseEvent *event)

@@ -20,6 +20,7 @@
 // shuts the shard down when the window closes, like the original.
 
 #include "dashboard.h"
+#include "dashboard_style.h"
 #include "main_window.h"
 
 #include <QApplication>
@@ -37,22 +38,7 @@ int main(int argc, char *argv[])
 	// Fusion draws the same frames on every platform and follows the system palette, where the
 	// Windows 11 style leaves text edits without edges; QT_STYLE_OVERRIDE still wins
 	if (qEnvironmentVariableIsEmpty("QT_STYLE_OVERRIDE"))
-		QApplication::setStyle(QStyleFactory::create("Fusion"));
-
-	// The scrollbars come from the style sheet box model, which fills pixels, where the Fusion
-	// scrollbars stroke one pixel outlines that a fractional display scale drops. The colours
-	// are palette roles, so a dark theme is covered.
-	app.setStyleSheet(
-	    "QScrollBar:vertical { background: palette(window); width: 12px; margin: 0; border: none; }"
-	    "QScrollBar:horizontal { background: palette(window); height: 12px; margin: 0; border: none; }"
-	    "QScrollBar::handle:vertical { background: palette(mid); border-radius: 4px; margin: 2px; min-height: 24px; }"
-	    "QScrollBar::handle:horizontal { background: palette(mid); border-radius: 4px; margin: 2px; min-width: 24px; }"
-	    "QScrollBar::handle:hover { background: palette(dark); }"
-	    "QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; border: none; background: none; }"
-	    "QScrollBar::add-page, QScrollBar::sub-page { background: none; }"
-	    "QAbstractScrollArea::corner { background: palette(window); }"
-	    // the column keeps a gap between its rows and its scrollbar, which exists only when the bar does
-	    "QScrollBar#columnBar:vertical { margin-left: 4px; }");
+		QApplication::setStyle(new CDashboardStyle(QStyleFactory::create("Fusion")));
 
 	// --screenshot <file.png> renders the window after the services came up and closes it again;
 	// with QT_QPA_PLATFORM=offscreen this checks the layout without a desktop

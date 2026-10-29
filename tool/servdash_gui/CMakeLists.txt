@@ -22,6 +22,8 @@ TARGET_SOURCES(servdash_gui
   src/dashboard.h
   src/dashboard_config.cpp
   src/dashboard_config.h
+  src/dashboard_style.cpp
+  src/dashboard_style.h
   src/icons.cpp
   src/icons.h
   src/launch_ctrl.cpp
