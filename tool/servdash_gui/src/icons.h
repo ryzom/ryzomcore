@@ -40,6 +40,10 @@ QIcon app();
 /// dark red of warnings and the black of plain lines would vanish.
 QColor logColor(const QColor &color, const QPalette &palette);
 
+/// A dimmed text colour for timestamps and raw output beside the log: halfway between the
+/// text and the base colours, so it reads on a light and on a dark theme.
+QColor dimColor(const QPalette &palette);
+
 } // namespace Icons
 
 #endif // SERVDASH_ICONS_H

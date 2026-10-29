@@ -191,6 +191,13 @@ QIcon app()
 	return s_Icon;
 }
 
+QColor dimColor(const QPalette &palette)
+{
+	const QColor text = palette.color(QPalette::Text);
+	const QColor base = palette.color(QPalette::Base);
+	return QColor((text.red() + base.red()) / 2, (text.green() + base.green()) / 2, (text.blue() + base.blue()) / 2);
+}
+
 QColor logColor(const QColor &color, const QPalette &palette)
 {
 	if (!color.isValid())

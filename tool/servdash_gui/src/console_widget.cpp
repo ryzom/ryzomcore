@@ -184,7 +184,7 @@ void CConsoleWidget::insertLine(QTextCursor &cursor, const CProcessEntry::CLine 
 	// a line in the default colour carries none, so it follows the palette on its own
 	QTextCharFormat format;
 	if (line.Raw && !line.Color.isValid() && isConsole())
-		format.setForeground(palette().color(QPalette::Mid)); // stdout and stderr beside the console log
+		format.setForeground(Icons::dimColor(palette())); // stdout and stderr beside the console log
 	else if (line.Color.isValid())
 		format.setForeground(Icons::logColor(line.Color, palette()));
 	cursor.movePosition(QTextCursor::End);
@@ -199,7 +199,7 @@ void CConsoleWidget::insertLine(QTextCursor &cursor, const CProcessEntry::CLine 
 	if (settings.timestamps() && !line.Time.isEmpty())
 	{
 		QTextCharFormat stamp;
-		stamp.setForeground(palette().color(QPalette::Mid));
+		stamp.setForeground(Icons::dimColor(palette()));
 		cursor.insertText("[" + line.Time + "] ", stamp);
 	}
 	cursor.insertText(text, format);
