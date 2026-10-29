@@ -29,6 +29,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
+#include <QShowEvent>
 #include <QTextBlock>
 #include <QVBoxLayout>
 
@@ -61,6 +62,7 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 	m_Log = new QPlainTextEdit(this);
 	m_Log->setReadOnly(true);
 	m_Log->setMaximumBlockCount(s_MaxBlocks);
+	m_Log->setUndoRedoEnabled(false);
 	m_Log->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_Log, &QPlainTextEdit::customContextMenuRequested, this, &CConsoleWidget::onLogContextMenu);
 	connect(&CViewSettings::instance(), &CViewSettings::changed, this, &CConsoleWidget::onViewSettingsChanged);
@@ -100,7 +102,18 @@ void CConsoleWidget::applyWrapMode()
 void CConsoleWidget::onViewSettingsChanged()
 {
 	applyWrapMode();
-	reload();
+	// only the pane on screen rebuilds now; a hidden one does when it is shown
+	if (isVisible())
+		reload();
+	else
+		m_ReloadPending = true;
+}
+
+void CConsoleWidget::showEvent(QShowEvent *event)
+{
+	QWidget::showEvent(event);
+	if (m_ReloadPending)
+		reload();
 }
 
 void CConsoleWidget::onLogContextMenu(const QPoint &pos)
@@ -141,26 +154,32 @@ void CConsoleWidget::onLogContextMenu(const QPoint &pos)
 
 void CConsoleWidget::reload()
 {
+	m_ReloadPending = false;
+	// one edit, no repaints in between: a rebuild of thousands of lines stays quick
+	m_Log->setUpdatesEnabled(false);
 	m_Log->clear();
+	QTextCursor cursor(m_Log->document());
+	cursor.beginEditBlock();
 	for (const CProcessEntry::CLine &line : m_Entry->lines())
-		appendLine(line);
+		insertLine(cursor, line);
+	cursor.endEditBlock();
+	m_Log->setUpdatesEnabled(true);
+	QScrollBar *bar = m_Log->verticalScrollBar();
+	bar->setValue(bar->maximum());
 	if (m_Toolbar != nullptr)
 		rebuildToolbar();
 }
 
-void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
+void CConsoleWidget::insertLine(QTextCursor &cursor, const CProcessEntry::CLine &line)
 {
-	QScrollBar *bar = m_Log->verticalScrollBar();
-	bool atBottom = bar->value() >= bar->maximum();
 	const CViewSettings &settings = CViewSettings::instance();
 	const QString text = settings.hidePrefix() ? CViewSettings::stripPrefix(line.Text) : line.Text;
-	QTextCursor cursor(m_Log->document());
-	cursor.movePosition(QTextCursor::End);
 	QTextCharFormat format;
 	if (line.Raw && !line.Color.isValid() && isConsole())
 		format.setForeground(palette().color(QPalette::Mid)); // stdout and stderr beside the console log
 	else
 		format.setForeground(Icons::logColor(line.Color, palette()));
+	cursor.movePosition(QTextCursor::End);
 	if (!m_Log->document()->isEmpty())
 		cursor.insertBlock();
 	// wrapped continuations hang four characters in, so a line's start stays easy to find
@@ -170,6 +189,14 @@ void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
 	block.setTextIndent(-indent);
 	cursor.setBlockFormat(block);
 	cursor.insertText(text, format);
+}
+
+void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
+{
+	QScrollBar *bar = m_Log->verticalScrollBar();
+	bool atBottom = bar->value() >= bar->maximum();
+	QTextCursor cursor(m_Log->document());
+	insertLine(cursor, line);
 	if (atBottom)
 		bar->setValue(bar->maximum());
 }

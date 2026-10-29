@@ -24,6 +24,7 @@
 
 class QLineEdit;
 class QPlainTextEdit;
+class QTextCursor;
 class QVBoxLayout;
 
 /// The pane of one process. For a NeL service it is the service console as the Win32 window
@@ -43,6 +44,7 @@ public:
 
 protected:
 	bool eventFilter(QObject *watched, QEvent *event) override;
+	void showEvent(QShowEvent *event) override;
 
 private slots:
 	void onLogContextMenu(const QPoint &pos);
@@ -57,6 +59,7 @@ private:
 	bool isConsole() const;
 	void reload();
 	void appendLine(const CProcessEntry::CLine &line);
+	void insertLine(QTextCursor &cursor, const CProcessEntry::CLine &line);
 	void rebuildToolbar();
 	void applyWrapMode();
 	void pressButton(const QString &text, const QString &command);
@@ -70,6 +73,8 @@ private:
 	QStringList m_History;
 	int m_HistoryPos = -1;
 	QString m_Draft;
+	/// The view settings changed while the pane was hidden; it rebuilds when shown.
+	bool m_ReloadPending = false;
 };
 
 #endif // SERVDASH_CONSOLE_WIDGET_H
