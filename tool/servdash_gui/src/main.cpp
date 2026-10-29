@@ -27,11 +27,16 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QStyleFactory>
 
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	QApplication::setApplicationName("Service Dashboard");
+	// Fusion draws the same frames on every platform and follows the system palette, where the
+	// Windows 11 style leaves text edits without edges; QT_STYLE_OVERRIDE still wins
+	if (qEnvironmentVariableIsEmpty("QT_STYLE_OVERRIDE"))
+		QApplication::setStyle(QStyleFactory::create("Fusion"));
 
 	QString iniPath = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QString();
 	if (iniPath.isEmpty())
