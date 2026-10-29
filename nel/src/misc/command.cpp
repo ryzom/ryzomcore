@@ -119,6 +119,7 @@ void CCommandRegistry::registerCommand(ICommand *command)
 	}
 	_Commands[command->getName()] = command;
 	_Categories.insert(command->CategoryName);
+	notifyAdded(command->getName(), CommandEntryKind, command->CommandArgs, command->HelpString);
 }
 
 void CCommandRegistry::unregisterCommand(ICommand *command)
@@ -128,6 +129,7 @@ void CCommandRegistry::unregisterCommand(ICommand *command)
 		if (comm->second == command)
 		{
 			//printf("remove command\n");
+			notifyRemoved(comm->first);
 			_Commands.erase (comm);
 			return;
 		}
@@ -165,12 +167,28 @@ void CCommandRegistry::registerNamedCommandHandler(ICommandsHandler *handler, co
 	if (chci._Commands.empty())
 		std::swap(chci._Commands, commands);
 
+	// the instance, then its member commands as instance.command
+	notifyAdded(name, HandlerEntryKind, "", "commands of " + className);
+	for (TCommandHandlerClassInfo::TCommandsInfo::const_iterator cit = chci._Commands.begin(); cit != chci._Commands.end(); ++cit)
+		notifyAdded(name + "." + cit->first, HandlerCommandEntryKind, cit->second.CommandArgs, cit->second.CommandHelp);
 }
 
 void CCommandRegistry::unregisterNamedCommandHandler(ICommandsHandler *handler, const std::string &className)
 {
 	if (_CommandsHandlers.getA(handler) == nullptr)
 		return;
+
+	// the member commands go with the instance
+	{
+		const std::string name = *_CommandsHandlers.getA(handler);
+		TCommandsHandlersClass::iterator cit = _CommandsHandlersClass.find(className);
+		if (cit != _CommandsHandlersClass.end())
+		{
+			for (TCommandHandlerClassInfo::TCommandsInfo::const_iterator mit = cit->second._Commands.begin(); mit != cit->second._Commands.end(); ++mit)
+				notifyRemoved(name + "." + mit->first);
+		}
+		notifyRemoved(name);
+	}
 
 	_CommandsHandlers.removeWithB(handler);
 
@@ -188,6 +206,46 @@ void CCommandRegistry::unregisterNamedCommandHandler(ICommandsHandler *handler, 
 	}
 }
 
+void CCommandRegistry::addListener(ICommandRegistryListener *listener)
+{
+	if (std::find(_Listeners.begin(), _Listeners.end(), listener) == _Listeners.end())
+		_Listeners.push_back(listener);
+}
+
+void CCommandRegistry::removeListener(ICommandRegistryListener *listener)
+{
+	std::vector<ICommandRegistryListener *>::iterator it = std::find(_Listeners.begin(), _Listeners.end(), listener);
+	if (it != _Listeners.end())
+		_Listeners.erase(it);
+}
+
+void CCommandRegistry::notifyAdded(const std::string &name, TCommandEntryKind kind, const std::string &args, const std::string &help)
+{
+	for (uint i = 0; i < _Listeners.size(); ++i)
+		_Listeners[i]->onCommandAdded(name, kind, args, help);
+}
+
+void CCommandRegistry::notifyRemoved(const std::string &name)
+{
+	for (uint i = 0; i < _Listeners.size(); ++i)
+		_Listeners[i]->onCommandRemoved(name);
+}
+
+void CCommandRegistry::listCommands(ICommandRegistryListener &listener)
+{
+	for (TCommand::const_iterator it = _Commands.begin(); it != _Commands.end(); ++it)
+		listener.onCommandAdded(it->first, CommandEntryKind, it->second->CommandArgs, it->second->HelpString);
+	for (TCommandsHandlers::TAToBMap::const_iterator it = _CommandsHandlers.getAToBMap().begin(); it != _CommandsHandlers.getAToBMap().end(); ++it)
+	{
+		const std::string className = it->second->getCommandHandlerClassName();
+		listener.onCommandAdded(it->first, HandlerEntryKind, "", "commands of " + className);
+		TCommandsHandlersClass::const_iterator cit = _CommandsHandlersClass.find(className);
+		if (cit == _CommandsHandlersClass.end())
+			continue;
+		for (TCommandHandlerClassInfo::TCommandsInfo::const_iterator mit = cit->second._Commands.begin(); mit != cit->second._Commands.end(); ++mit)
+			listener.onCommandAdded(it->first + "." + mit->first, HandlerCommandEntryKind, mit->second.CommandArgs, mit->second.CommandHelp);
+	}
+}
 
 bool ICommand::execute (const std::string &commandWithArgs, CLog &log, bool quiet, bool human)
 {

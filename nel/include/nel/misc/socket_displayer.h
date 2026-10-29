@@ -17,12 +17,15 @@
 #ifndef NL_SOCKET_DISPLAYER_H
 #define NL_SOCKET_DISPLAYER_H
 
+#include "command.h"
 #include "types_nl.h"
 #include "time_nl.h"
 #include "window_displayer.h"
 
 #include <list>
+#include <map>
 #include <string>
+#include <vector>
 
 namespace NLMISC {
 
@@ -38,18 +41,26 @@ namespace NLMISC {
  *
  * Wire format: one message per line, fields separated by a tab, a backslash escaping
  * tab, newline, carriage return and backslash inside a field.
- *   service to dashboard: hello <version>, title <text>, label <index> <value>, log <rrggbb> <text>
+ *   service to dashboard: hello <version>, title <text>, label <index> <value>, log <rrggbb> <text>,
+ *     command <name> <kind> <args> <help>, uncommand <name>
  *   dashboard to service: cmd <command line>
+ * The command table follows the command registry live: every entry on connection, then each
+ * addition and removal. The kind is c for a command or variable, o for a named handler
+ * instance, m for a member command of an instance (instance.command).
  * A label value follows CWindowDisplayer::createLabel: empty is a separator, "@Name|command"
  * is a button, anything else is a variable label.
  *
  * MT = main thread, DT = display thread, as in CWindowDisplayer.
  */
-class CSocketDisplayer : public CWindowDisplayer
+class CSocketDisplayer : public CWindowDisplayer, public ICommandRegistryListener
 {
 public:
 	CSocketDisplayer(const std::string &path, const char *displayerName = "");
 	virtual ~CSocketDisplayer() NL_OVERRIDE;
+
+	// (MT) the command registry listener; queued for the display thread
+	virtual void onCommandAdded(const std::string &name, TCommandEntryKind kind, const std::string &args, const std::string &help) NL_OVERRIDE;
+	virtual void onCommandRemoved(const std::string &name) NL_OVERRIDE;
 
 	// (MT) the text shown as the window title by the dashboard
 	virtual void setTitleBar(const std::string &titleBar) NL_OVERRIDE;
@@ -69,13 +80,29 @@ private:
 	void flushLog();
 	void flushLabels(bool all);
 	void flushTitle();
+	void flushCommands();
 	void replay();
 
 	static std::string escapeField(const std::string &value);
 	static std::string unescapeField(const std::string &value);
 
+	struct CCommandEntry
+	{
+		std::string Name;
+		TCommandEntryKind Kind;
+		std::string Args;
+		std::string Help;
+		bool Removed;
+	};
+
+	bool sendCommand(const CCommandEntry &entry);
+
 	std::string m_Path;
 	CSynchronized<std::string> m_TitleBar;
+	// (MT writes, DT reads) what the registry said since the last flush
+	CSynchronized<std::vector<CCommandEntry>> m_CommandQueue;
+	// (DT) the command table as the dashboard should have it
+	std::map<std::string, CCommandEntry> m_Commands;
 	std::string m_SentTitleBar;
 	std::list<std::pair<uint32, std::string> > m_History;
 	uint m_HistoryMax;

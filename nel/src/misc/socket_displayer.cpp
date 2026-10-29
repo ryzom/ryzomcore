@@ -47,6 +47,7 @@ CSocketDisplayer::CSocketDisplayer(const std::string &path, const char *displaye
     : CWindowDisplayer(displayerName)
     , m_Path(path)
     , m_TitleBar("CSocketDisplayer::m_TitleBar")
+    , m_CommandQueue("CSocketDisplayer::m_CommandQueue")
     , m_HistoryMax(s_DefaultHistory)
     , m_Connected(false)
     , m_PathWarned(false)
@@ -63,10 +64,14 @@ CSocketDisplayer::CSocketDisplayer(const std::string &path, const char *displaye
 #ifdef NL_OS_WINDOWS
 	m_Event = CreateEventW(NULL, TRUE, FALSE, NULL);
 #endif
+	// the commands registered so far, then every change as it happens
+	CCommandRegistry::getInstance().listCommands(*this);
+	CCommandRegistry::getInstance().addListener(this);
 }
 
 CSocketDisplayer::~CSocketDisplayer()
 {
+	CCommandRegistry::getInstance().removeListener(this);
 	// stop the display thread before our members go away; the base destructor waits again, which is harmless
 	_Continue = false;
 	if (_Thread != nullptr)
@@ -126,8 +131,9 @@ void CSocketDisplayer::display_main()
 			}
 		}
 
-		// the history keeps filling while the dashboard is away
+		// the history keeps filling while the dashboard is away, and the command table keeps up
 		flushLog();
+		flushCommands();
 
 		if (m_Connected)
 		{
@@ -433,11 +439,67 @@ void CSocketDisplayer::replay()
 		return;
 	flushTitle();
 	flushLabels(true);
+	for (std::map<std::string, CCommandEntry>::const_iterator it = m_Commands.begin(); it != m_Commands.end(); ++it)
+	{
+		if (!sendCommand(it->second))
+			return;
+	}
 	for (std::list<std::pair<uint32, std::string> >::iterator it = m_History.begin(); it != m_History.end(); ++it)
 	{
 		if (!sendLine(std::string("log\t") + toString("%06x", it->first & 0xFFFFFF) + "\t" + escapeField(it->second)))
 			return;
 	}
+}
+
+// *** command table ***
+
+void CSocketDisplayer::onCommandAdded(const std::string &name, TCommandEntryKind kind, const std::string &args, const std::string &help)
+{
+	CCommandEntry entry;
+	entry.Name = name;
+	entry.Kind = kind;
+	entry.Args = args;
+	entry.Help = help;
+	entry.Removed = false;
+	CSynchronized<std::vector<CCommandEntry>>::CAccessor access(&m_CommandQueue);
+	access.value().push_back(entry);
+}
+
+void CSocketDisplayer::onCommandRemoved(const std::string &name)
+{
+	CCommandEntry entry;
+	entry.Name = name;
+	entry.Kind = CommandEntryKind;
+	entry.Removed = true;
+	CSynchronized<std::vector<CCommandEntry>>::CAccessor access(&m_CommandQueue);
+	access.value().push_back(entry);
+}
+
+void CSocketDisplayer::flushCommands()
+{
+	std::vector<CCommandEntry> changes;
+	{
+		CSynchronized<std::vector<CCommandEntry>>::CAccessor access(&m_CommandQueue);
+		changes.swap(access.value());
+	}
+	for (uint i = 0; i < changes.size(); ++i)
+	{
+		const CCommandEntry &entry = changes[i];
+		if (entry.Removed)
+			m_Commands.erase(entry.Name);
+		else
+			m_Commands[entry.Name] = entry;
+		if (m_Connected)
+			sendCommand(entry);
+	}
+}
+
+bool CSocketDisplayer::sendCommand(const CCommandEntry &entry)
+{
+	if (entry.Removed)
+		return sendLine(std::string("uncommand\t") + escapeField(entry.Name));
+	const char *kind = entry.Kind == HandlerEntryKind ? "o" : (entry.Kind == HandlerCommandEntryKind ? "m" : "c");
+	return sendLine(std::string("command\t") + escapeField(entry.Name) + "\t" + kind + "\t" + escapeField(entry.Args) + "\t" + escapeField(entry.Help));
 }
 
 // *** field escaping ***
