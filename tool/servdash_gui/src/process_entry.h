@@ -86,6 +86,10 @@ public:
 		bool Raw = false;
 		/// Local time of arrival, `hh:mm:ss`.
 		QString Time;
+		/// Index in the stream of the process, from 1; never reused, so a client can name a range.
+		quint64 Idx = 0;
+		/// Arrival time, milliseconds since the Unix epoch.
+		qint64 Ts = 0;
 	};
 
 	CProcessEntry(const CSectionConfig &config, QObject *parent = nullptr);
@@ -111,6 +115,21 @@ public:
 	/// Whether the startup rules put the process in the start sequence.
 	bool autoLaunch() const { return m_AutoLaunch; }
 	bool hasLaunchCtrl() const { return m_LaunchCtrl != nullptr; }
+	/// The index the next line gets; the lines so far are 1..nextIdx()-1.
+	quint64 nextIdx() const { return m_NextIdx; }
+	/// The process id while it runs, 0 otherwise.
+	qint64 pid() const;
+	/// When the current run started, milliseconds since the Unix epoch; 0 when not running.
+	qint64 startedAt() const { return m_StartedAt; }
+	/// Whether the last run ended by itself with an exit code.
+	bool hasExitCode() const { return m_HasExitCode; }
+	int exitCode() const { return m_ExitCode; }
+	bool relaunchPending() const { return m_RelaunchPending; }
+	int crashChain() const { return m_CrashChain; }
+	/// The console channel protocol version the service announced; 0 before its hello.
+	int channelVersion() const { return m_ChannelVersion; }
+	/// The launch control value this side applied last, as the control files spell it.
+	QString ctrlValueName() const;
 
 	/// ProcessHost.Launch: start the process now; while stopping, relaunch after the exit.
 	void launch();
@@ -125,6 +144,10 @@ public:
 	void sendInput(const QString &text);
 	/// A NeL command over the console channel, or on stdin while it is not connected.
 	void sendCommand(const QString &text);
+	/// A NeL command with its arguments already split, over the console channel: the service runs
+	/// it without parsing and answers with its done marker, which execDone reports. Without a
+	/// channel the answer is a failure.
+	void execCommand(const QString &id, const QString &command, const QStringList &args);
 	void clearConsole();
 	/// Called four times a second: launch control polling and the capture timeout.
 	void tick();
@@ -148,6 +171,8 @@ signals:
 	void stopWanted(CProcessEntry *entry);
 	/// The process exited (after the state change).
 	void exited(CProcessEntry *entry);
+	/// An execCommand ran; its output is in the lines before this.
+	void execDone(CProcessEntry *entry, const QString &id, bool ok);
 
 private slots:
 	void onReadyReadOutput();
@@ -185,6 +210,11 @@ private:
 	int m_CrashChain = 0;
 	bool m_ReadyTriggered = false;
 	bool m_AutoLaunch = true;
+	quint64 m_NextIdx = 1;
+	qint64 m_StartedAt = 0;
+	int m_ExitCode = 0;
+	bool m_HasExitCode = false;
+	int m_ChannelVersion = 0;
 	QRegularExpression m_ReadyPattern;
 	QProcess *m_Process = nullptr;
 	QByteArray m_OutputBuffer;

@@ -17,6 +17,7 @@
 #include "process_entry.h"
 
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QDir>
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -327,6 +328,8 @@ void CProcessEntry::appendLine(const CLine &line)
 {
 	CLine stamped = line;
 	stamped.Time = QTime::currentTime().toString("HH:mm:ss");
+	stamped.Ts = QDateTime::currentMSecsSinceEpoch();
+	stamped.Idx = m_NextIdx++;
 	if (m_Lines.size() >= s_MaxLines)
 		m_Lines.removeFirst();
 	m_Lines.append(stamped);
@@ -388,6 +391,8 @@ void CProcessEntry::launch()
 	m_KillRequested = false;
 	m_ReadyTriggered = false;
 	m_LaunchedAt.start();
+	m_StartedAt = QDateTime::currentMSecsSinceEpoch();
+	m_HasExitCode = false;
 	if (m_LaunchCtrl)
 		m_LaunchCtrl->countLaunch();
 
@@ -559,6 +564,31 @@ void CProcessEntry::sendCommand(const QString &text)
 		sendInput(text);
 }
 
+void CProcessEntry::execCommand(const QString &id, const QString &command, const QStringList &args)
+{
+	if (m_Control == nullptr)
+	{
+		note(QString("No console channel to run '%1' on").arg(command), QColor(0x80, 0x80, 0x00));
+		emit execDone(this, id, false);
+		return;
+	}
+	// the arguments travel as fields, so the service runs the command without parsing it
+	QString wire = "exec\t" + escapeField(id) + "\t" + escapeField(command);
+	for (const QString &arg : args)
+		wire += "\t" + escapeField(arg);
+	m_Control->write((wire + "\n").toUtf8());
+}
+
+qint64 CProcessEntry::pid() const
+{
+	return m_Process != nullptr ? m_Process->processId() : 0;
+}
+
+QString CProcessEntry::ctrlValueName() const
+{
+	return m_LaunchCtrl ? m_LaunchCtrl->valueName() : QString();
+}
+
 void CProcessEntry::clearConsole()
 {
 	m_Lines.clear();
@@ -584,6 +614,9 @@ void CProcessEntry::onFinished(int exitCode, QProcess::ExitStatus status)
 	flushLine(m_OutputBuffer, true);
 	flushLine(m_ErrorBuffer, true);
 	releaseProcess();
+	m_StartedAt = 0;
+	m_HasExitCode = status == QProcess::NormalExit;
+	m_ExitCode = exitCode;
 	QString how;
 	if (status == QProcess::NormalExit)
 		how = QString("code %1").arg(exitCode);
@@ -709,6 +742,8 @@ void CProcessEntry::onNewControlConnection()
 		m_Lines = kept;
 		m_Labels.clear();
 		m_Commands.clear();
+		// version 1 until the service says otherwise in its hello
+		m_ChannelVersion = 1;
 		emit linesReset(this);
 		emit labelsReset(this);
 		emit commandsChanged(this);
@@ -732,6 +767,7 @@ void CProcessEntry::onControlDisconnected()
 		return;
 	m_Control->deleteLater();
 	m_Control = nullptr;
+	m_ChannelVersion = 0;
 	emit controlChanged(this);
 }
 
@@ -760,7 +796,13 @@ void CProcessEntry::handleControlLine(const QString &line)
 	const QString type = fields.value(0);
 	if (type == "hello")
 	{
-		// nothing to answer
+		m_ChannelVersion = qMax(1, fields.value(1).toInt());
+		emit controlChanged(this);
+	}
+	else if (type == "done")
+	{
+		// done <id> <1|0>: an exec ran, its output is in the lines before
+		emit execDone(this, fields.value(1), fields.value(2) == "1");
 	}
 	else if (type == "title")
 	{

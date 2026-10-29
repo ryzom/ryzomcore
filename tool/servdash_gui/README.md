@@ -64,6 +64,38 @@ and the Linux launcher handle them, so the web admin shard controls stay in step
 processes are tied to the dashboard with a job object on Windows and the parent death signal
 on Linux, so a crash of the dashboard does not leave them behind.
 
+## Clients and the MCP server
+
+A running window serves the client protocol of servdash_cli on a local endpoint and registers
+itself in the shared session directory (`%LOCALAPPDATA%\servdash\sessions` on Windows,
+`$XDG_RUNTIME_DIR/servdash.sessions` or `/tmp/servdash.sessions.<uid>` elsewhere). So
+`servdash_cli --list` names it, `servdash_cli <title>` attaches a terminal to it, and the MCP
+servers of both tools reach it like a daemon. A client's Shutdown stops every process and
+closes the window, as closing it by hand does.
+
+`servdash_gui --mcp [<ini>...]` runs no window but the [Model Context Protocol](https://modelcontextprotocol.io/)
+server over stdin and stdout, for an agent such as Claude Code: the same tools as
+`servdash_cli --mcp`, over every running dashboard of the user, servdash_gui and servdash_cli
+alike. The ini files given are opened in a window of this tool when they do not run yet, so
+the shard comes up with the agent and stays when it leaves. In Claude Code, a `.mcp.json` next
+to the project does it:
+
+```json
+{ "mcpServers": { "servdash": { "command": "servdash_gui", "args": ["--mcp", "start_mainland.ini"] } } }
+```
+
+The tools: `list_dashboards`, `start_dashboard`, `shutdown_dashboard`; `list_processes`,
+`get_process` (state, pid, uptime, launch control, the service's status labels and buttons);
+`start_process`, `stop_process`, `kill_process`, `restart_process`, `start_all`, `stop_all`,
+`wait_for_state`, each with an optional wait; `list_commands` (the command table of a service,
+filtered by prefix or word); `run_command` (a NeL command with its arguments as a list, run
+over the console channel without parsing, with the lines it logged); `send_input` (a line on
+stdin, with the output that follows); `get_log` (lines by index range, time range or last N,
+optionally following for a while, filtered by log type or regex, with the NeL prefix left
+out, compacted or kept); `clear_log`. Every log line carries an index per process, from 1
+and never reused, and its arrival time in milliseconds. The servdash_cli README describes
+the tools in detail; the two servers answer alike.
+
 ## In the quick start package
 
 The tools build of the quick start builds servdash_gui when Qt is found, and the shard scripts

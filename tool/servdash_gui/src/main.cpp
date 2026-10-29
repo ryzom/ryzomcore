@@ -17,10 +17,13 @@
 // servdash_gui: the service dashboard of the quick start package as a Qt application, for
 // development shards on Windows, Linux and macOS. It reads the same ini files as the Win32
 // servdash and servdash_cli, shows NeL services through their console channel (--ctrl), and
-// shuts the shard down when the window closes, like the original.
+// shuts the shard down when the window closes, like the original. With --mcp it is no window
+// but a Model Context Protocol server on stdio over every running dashboard, for an agent.
 
+#include "dash_server.h"
 #include "dashboard.h"
 #include "icons.h"
+#include "mcp_server.h"
 #include "shard_lock.h"
 #include "view_settings.h"
 #include "main_window.h"
@@ -32,11 +35,34 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QScopedPointer>
 #include <QStyleFactory>
 #include <QTimer>
 
+/// `--mcp [<ini>...]`: the MCP server, without a window, until its client closes stdin.
+static int runMcp(int argc, char *argv[])
+{
+	QCoreApplication app(argc, argv);
+	QCoreApplication::setApplicationName("servdash_gui");
+	QCoreApplication::setApplicationVersion("0.1.0");
+	QStringList inis;
+	for (int i = 1; i < argc; ++i)
+	{
+		const QString arg = QString::fromLocal8Bit(argv[i]);
+		if (arg != "--mcp")
+			inis.append(arg);
+	}
+	CMcpServer server;
+	QObject::connect(&server, &CMcpServer::finished, &app, &QCoreApplication::quit, Qt::QueuedConnection);
+	server.start(inis);
+	return app.exec();
+}
+
 int main(int argc, char *argv[])
 {
+	for (int i = 1; i < argc; ++i)
+		if (QString::fromLocal8Bit(argv[i]) == "--mcp")
+			return runMcp(argc, argv);
 	QApplication app(argc, argv);
 	QApplication::setApplicationName("Service Dashboard");
 	QApplication::setWindowIcon(Icons::app());
@@ -108,7 +134,16 @@ int main(int argc, char *argv[])
 	}
 
 	CDashboard dashboard(config);
+	// the dashboard serves its clients (the servdash_cli terminal, the MCP servers of both tools) on
+	// a local endpoint and registers it, so one set of tools reaches a window and a daemon alike;
+	// the goodbye goes out before the window closes, which is why this connects first
+	CDashServer server(&dashboard, info.absoluteFilePath());
+	QString serverError;
+	if (!server.listen(serverError))
+		qWarning("%s", qPrintable(serverError));
+	QObject::connect(&dashboard, &CDashboard::allStopped, &server, &CDashServer::sendBye);
 	CMainWindow window(&dashboard);
+	QObject::connect(&server, &CDashServer::shutdownRequested, &window, &QWidget::close);
 	if (!windowSize.isEmpty())
 	{
 		// --size WxH for the screenshot mode

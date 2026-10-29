@@ -147,7 +147,7 @@ async fn resolve_session(target: &Path, options: &Options) -> Result<Session> {
 	}
 	let selector = target.to_string_lossy();
 	match registry::resolve(&selector).await {
-		Ok(record) => Session::from_record(&record.id, &record.ini_path),
+		Ok(record) => Session::from_record(&record),
 		Err(e) => {
 			if options.daemon || options.endpoint {
 				bail!("cannot find '{}'", selector);
@@ -211,7 +211,7 @@ async fn shutdown_all() -> Result<()> {
 	for record in records {
 		tasks.spawn(async move {
 			println!("Stopping '{}' ({})...", record.title, record.ini_path);
-			let session = Session::from_record(&record.id, &record.ini_path)?;
+			let session = Session::from_record(&record)?;
 			shutdown(&session).await
 		});
 	}

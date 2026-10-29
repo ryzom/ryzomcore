@@ -28,6 +28,9 @@ pub struct Session {
 	pub dir: PathBuf,
 	/// Stable hash of the ini path.
 	pub id: String,
+	/// The endpoint a registry record gave, for a dashboard of another tool (servdash_gui) whose
+	/// endpoint does not follow from the id.
+	pub endpoint: Option<String>,
 }
 
 fn fnv1a64(text: &str) -> u64 {
@@ -52,14 +55,15 @@ impl Session {
 		if cfg!(windows) {
 			key = key.to_lowercase();
 		}
-		Ok(Session { ini_path, dir, id: format!("{:016x}", fnv1a64(&key)) })
+		Ok(Session { ini_path, dir, id: format!("{:016x}", fnv1a64(&key)), endpoint: None })
 	}
 
-	/// A session from a registry record of a running daemon: the file does not need to exist.
-	pub fn from_record(id: &str, ini_path: &str) -> Result<Session> {
-		let ini_path = PathBuf::from(ini_path);
+	/// A session from a registry record of a running dashboard: the file does not need to exist,
+	/// and the endpoint is the record's, whichever tool wrote it.
+	pub fn from_record(record: &crate::registry::Record) -> Result<Session> {
+		let ini_path = PathBuf::from(&record.ini_path);
 		let dir = ini_path.parent().map(Path::to_path_buf).context("the ini file has no parent directory")?;
-		Ok(Session { ini_path, dir, id: id.to_string() })
+		Ok(Session { ini_path, dir, id: record.id.clone(), endpoint: Some(record.endpoint.clone()) })
 	}
 
 	#[cfg(windows)]
@@ -95,6 +99,9 @@ impl Session {
 
 	/// Where the dashboard clients connect.
 	pub fn control_endpoint(&self) -> String {
+		if let Some(endpoint) = &self.endpoint {
+			return endpoint.clone();
+		}
 		if cfg!(windows) {
 			format!(r"\\.\pipe\servdash_cli.{}", self.id)
 		} else {

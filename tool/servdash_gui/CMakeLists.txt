@@ -25,6 +25,10 @@ TARGET_SOURCES(servdash_gui
   src/console_widget.h
   src/dashboard.cpp
   src/dashboard.h
+  src/dash_client.cpp
+  src/dash_client.h
+  src/dash_server.cpp
+  src/dash_server.h
   src/dashboard_config.cpp
   src/dashboard_config.h
   src/icons.cpp
@@ -33,14 +37,20 @@ TARGET_SOURCES(servdash_gui
   src/launch_ctrl.h
   src/main_window.cpp
   src/main_window.h
+  src/mcp_server.cpp
+  src/mcp_server.h
   src/process_entry.cpp
   src/process_entry.h
   src/process_row.cpp
   src/process_row.h
+  src/registry.cpp
+  src/registry.h
   src/shard_lock.cpp
   src/shard_lock.h
   src/view_settings.cpp
   src/view_settings.h
+  src/wire.cpp
+  src/wire.h
 )
 TARGET_LINK_LIBRARIES(servdash_gui PRIVATE Qt::Core Qt::Gui Qt::Widgets Qt::Network)
 IF(WIN32)

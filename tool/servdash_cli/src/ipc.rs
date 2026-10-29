@@ -32,6 +32,7 @@ mod imp {
 	use std::time::Duration;
 	use tokio::net::windows::named_pipe::{ClientOptions, NamedPipeServer, ServerOptions};
 
+	const ERROR_FILE_NOT_FOUND: i32 = 2;
 	const ERROR_PIPE_BUSY: i32 = 231;
 
 	pub struct Listener {
@@ -66,10 +67,13 @@ mod imp {
 	}
 
 	pub async fn connect(name: &str) -> io::Result<Stream> {
-		for _ in 0..50 {
+		for attempt in 0..50 {
 			match ClientOptions::new().open(name) {
 				Ok(client) => return Ok(Box::new(client)),
 				Err(e) if e.raw_os_error() == Some(ERROR_PIPE_BUSY) => tokio::time::sleep(Duration::from_millis(20)).await,
+				// a QLocalServer (servdash_gui) has no listening instance between accepting a client
+				// and creating the next one in its event loop; a short retry bridges that gap
+				Err(e) if e.raw_os_error() == Some(ERROR_FILE_NOT_FOUND) && attempt < 5 => tokio::time::sleep(Duration::from_millis(20)).await,
 				Err(e) => return Err(e),
 			}
 		}

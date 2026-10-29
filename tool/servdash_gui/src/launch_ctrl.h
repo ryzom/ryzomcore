@@ -49,6 +49,8 @@ public:
 
 	/// The value this side applied last, `LaunchCtrlValue` in the Win32 tool.
 	int value() const { return m_Value; }
+	/// The name of that value, as the control files spell it.
+	QString valueName() const { return m_Config.Values[m_Value]; }
 
 	/// The value index of a control file text; unknown text reads as the current state, given
 	/// as a value index of that state (Running, Stop or Stopped) or Launch for a new process.
