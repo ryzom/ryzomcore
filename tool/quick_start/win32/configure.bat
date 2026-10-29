@@ -66,6 +66,8 @@ if %errorlevel% neq 0 pause
 cd /d %RC_ROOT%
 echo(
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y
+rem the Model Context Protocol registration for Claude Code, next to the launcher it names
+xcopy %RC_ROOT%\code\tool\quick_start\win32\install\.mcp.json %RC_ROOT%\ /Y
 if %errorlevel% neq 0 pause
 mkdir %RC_ROOT%\external > nul 2> nul
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\external\* %RC_ROOT%\external\ /Y

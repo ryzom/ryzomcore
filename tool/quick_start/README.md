@@ -13,6 +13,9 @@ Run the scripts in this order to configure the toolchains:
 The shard scripts (shard_mainland.bat and the others, web_on.bat) open servdash_gui from the tools
 build. Set `"Headless": true` in `.nel/config.json` to get servdash_cli in the console instead, for a
 box reached over SSH. The Win32 servdash of external/utils is the fallback when neither is built.
+`.mcp.json` in the root registers `_servdash_mcp.bat` with Claude Code: the Model Context Protocol
+server of the chosen dashboard tool, over every dashboard running for the user, so an agent can
+start a shard from its ini, watch the logs, run service commands and stop it again.
 
 Tools that are not C++ (servdash_cli, a Rust crate) are built by `build_docker/tools_xplat_build.bat`
 in the `ryzombuild_xplat_tools` Docker image, for a generic Linux (static musl) and for Windows

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "servdash": {
+      "command": "cmd",
+      "args": ["/c", "_servdash_mcp.bat"]
+    }
+  }
+}
