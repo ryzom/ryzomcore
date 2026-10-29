@@ -1,0 +1,30 @@
+[package]
+name = "servdash_cli"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "Service dashboard for Ryzom Core shards: a detachable terminal multiplexer that launches, shows and controls the services of a shard"
+
+[[bin]]
+name = "servdash_cli"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+ratatui = "0.29"
+crossterm = "0.28"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "process", "io-util", "sync", "time", "fs"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Security", "Win32_System_JobObjects", "Win32_System_Threading"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
