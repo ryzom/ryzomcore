@@ -924,6 +924,9 @@ impl Daemon {
 pub async fn run(session: Session) -> Result<()> {
 	std::env::set_current_dir(&session.dir).with_context(|| format!("cannot enter '{}'", session.dir.display()))?;
 	let cfg = crate::config::read(&session.ini_path)?;
+	// one dashboard per shard, whichever tool it is; released when the daemon exits
+	let _lock = crate::shard_lock::ShardLock::acquire(&session.ini_path)
+		.map_err(|holder| anyhow::anyhow!("'{}' is already open in {}", session.ini_path.display(), holder))?;
 	session.prepare_runtime_dir()?;
 	let listener = ipc::Listener::bind(&session.control_endpoint()).map_err(|e| {
 		if ipc::is_in_use(&e) {

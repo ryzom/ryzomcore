@@ -4,3 +4,4 @@
 *.deferred_launch_ctrl
 *.state
 *.start_count
+*.servdash.lock

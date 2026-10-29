@@ -28,6 +28,7 @@ mod log;
 mod proto;
 mod registry;
 mod session;
+mod shard_lock;
 mod spawn;
 mod ui;
 
@@ -201,6 +202,9 @@ async fn start_and_attach(session: &Session, options: &Options) -> Result<()> {
 		}
 		// the daemon reads the ini itself; a broken file is better reported here than in its log
 		config::read(&session.ini_path)?;
+		if let Some(holder) = shard_lock::holder(&session.ini_path) {
+			bail!("'{}' is already open in {}", session.ini_path.display(), holder);
+		}
 		spawn::spawn_daemon(&session.ini_path).context("cannot start the dashboard daemon")?;
 		let deadline = Instant::now() + Duration::from_secs(10);
 		while !ipc::is_listening(&endpoint).await {

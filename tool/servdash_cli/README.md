@@ -21,7 +21,9 @@ servdash_cli 2                       attach to the second one in the list
 servdash_cli Mainland                attach by title (or id, id prefix, ini path)
 ```
 
-Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash_cli\sessions`
+A shard is opened once: a lock file next to the ini, `<stem>.servdash.lock`, names the
+dashboard that holds it, servdash_cli or servdash_gui, and a second one is refused while that
+process lives. Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash_cli\sessions`
 on Windows, `$XDG_RUNTIME_DIR/servdash_cli.sessions` or `/tmp/servdash_cli.sessions.<uid>` on
 Linux), so a running dashboard can be named from any directory without its ini path.
 
