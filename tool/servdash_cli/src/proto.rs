@@ -81,15 +81,18 @@ pub struct StyledLine {
 	/// From stdout or stderr, or a note of the daemon, rather than from the console channel.
 	#[serde(default, skip_serializing_if = "std::ops::Not::not")]
 	pub raw: bool,
+	/// Local time of arrival at the daemon, `hh:mm:ss`.
+	#[serde(default, skip_serializing_if = "String::is_empty")]
+	pub time: String,
 }
 
 impl StyledLine {
 	pub fn plain(text: impl Into<String>) -> StyledLine {
-		StyledLine { spans: vec![Span { text: text.into(), fg: Color::Default, bold: false }], raw: false }
+		StyledLine { spans: vec![Span { text: text.into(), fg: Color::Default, bold: false }], raw: false, time: String::new() }
 	}
 
 	pub fn colored(text: impl Into<String>, fg: Color) -> StyledLine {
-		StyledLine { spans: vec![Span { text: text.into(), fg, bold: false }], raw: false }
+		StyledLine { spans: vec![Span { text: text.into(), fg, bold: false }], raw: false, time: String::new() }
 	}
 
 	pub fn into_raw(mut self) -> StyledLine {

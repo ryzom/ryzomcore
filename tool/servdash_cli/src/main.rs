@@ -60,7 +60,7 @@ Options:
 
 Keys:
   F5 start/stop  F6 kill  F7 start all  F8 stop all  F2 compact log prefixes
-  F3 wrap long lines  F10 detach  F12 twice: stop all and quit  Tab/Shift+Tab or Alt+Up/Down select
+  F3 wrap long lines  F4 timestamps  F10 detach  F12 twice: stop all and quit  Tab/Shift+Tab or Alt+Up/Down select
   Alt+1..9 press a console button  PgUp/PgDn scroll  Enter send the input line
 ";
 

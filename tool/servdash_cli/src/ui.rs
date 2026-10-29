@@ -102,6 +102,8 @@ pub struct App {
 	compact_prefix: bool,
 	/// Wrap long lines instead of cutting them.
 	wrap: bool,
+	/// Show the arrival time of each line.
+	show_time: bool,
 	layout: LayoutCache,
 	pub dirty: bool,
 }
@@ -219,14 +221,23 @@ fn compact_prefix(line: &StyledLine) -> StyledLine {
 		remove = 0;
 		spans.push(shortened);
 	}
-	StyledLine { spans, raw: line.raw }
+	StyledLine { spans, raw: line.raw, time: line.time.clone() }
+}
+
+/// The line with its arrival time in front, `[hh:mm:ss] `, in grey.
+fn with_time(mut line: StyledLine) -> StyledLine {
+	if line.time.is_empty() {
+		return line;
+	}
+	line.spans.insert(0, proto::Span { text: format!("[{}] ", line.time), fg: proto::Color::DarkGray, bold: false });
+	line
 }
 
 /// A line split into rows of at most `width` characters, continuations indented.
 fn wrap_line(line: &StyledLine, width: usize) -> Vec<StyledLine> {
 	let width = width.max(WRAP_INDENT + 1);
 	let mut rows: Vec<StyledLine> = Vec::new();
-	let mut current = StyledLine { spans: Vec::new(), raw: line.raw };
+	let mut current = StyledLine { spans: Vec::new(), raw: line.raw, time: line.time.clone() };
 	let mut used = 0usize;
 	for span in &line.spans {
 		let mut piece = proto::Span { text: String::new(), ..span.clone() };
@@ -238,7 +249,7 @@ fn wrap_line(line: &StyledLine, width: usize) -> Vec<StyledLine> {
 				}
 				rows.push(std::mem::replace(
 					&mut current,
-					StyledLine { spans: vec![proto::Span { text: " ".repeat(WRAP_INDENT), ..Default::default() }], raw: line.raw },
+					StyledLine { spans: vec![proto::Span { text: " ".repeat(WRAP_INDENT), ..Default::default() }], raw: line.raw, time: line.time.clone() },
 				));
 				used = 0;
 			}
@@ -280,8 +291,9 @@ impl App {
 			selected: 0,
 			notice: None,
 			quit_armed: None,
-			compact_prefix: false,
+			compact_prefix: true,
 			wrap: false,
+			show_time: true,
 			layout: LayoutCache::default(),
 			dirty: true,
 		}
@@ -481,6 +493,10 @@ impl App {
 			}
 			KeyCode::F(3) => {
 				self.wrap = !self.wrap;
+				self.dirty = true;
+			}
+			KeyCode::F(4) => {
+				self.show_time = !self.show_time;
 				self.dirty = true;
 			}
 			KeyCode::F(5) => actions.extend(self.toggle_selected()),
@@ -711,7 +727,18 @@ impl App {
 		// the rows to show: the lines, their headers compacted and wrapped as asked; the scrollbar
 		// takes the right column once there is more than fits
 		let console = view.is_console();
-		let shown: Vec<StyledLine> = view.lines.iter().map(|line| if self.compact_prefix { compact_prefix(line) } else { line.clone() }).collect();
+		let shown: Vec<StyledLine> = view
+			.lines
+			.iter()
+			.map(|line| {
+				let line = if self.compact_prefix { compact_prefix(line) } else { line.clone() };
+				if self.show_time {
+					with_time(line)
+				} else {
+					line
+				}
+			})
+			.collect();
 		let rows: Vec<StyledLine> = if self.wrap {
 			let width = content.width.saturating_sub(1).max(1) as usize;
 			shown.iter().flat_map(|line| wrap_line(line, width)).collect()
@@ -759,7 +786,7 @@ impl App {
 		let line = match notice {
 			Some(text) => Line::from(Span::styled(truncate(&text, area.width as usize), Style::default().fg(Color::Black).bg(Color::Yellow))),
 			None => {
-				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Compact  F3 Wrap  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
+				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Compact  F3 Wrap  F4 Time  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
 				Line::from(Span::styled(truncate(keys, area.width as usize), Style::default().fg(Color::DarkGray)))
 			}
 		};

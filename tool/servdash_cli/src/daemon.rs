@@ -362,9 +362,13 @@ impl Daemon {
 		self.push_lines(idx, lines);
 	}
 
-	fn push_lines(&mut self, idx: usize, lines: Vec<StyledLine>) {
+	fn push_lines(&mut self, idx: usize, mut lines: Vec<StyledLine>) {
 		if lines.is_empty() {
 			return;
+		}
+		let now = chrono::Local::now().format("%H:%M:%S").to_string();
+		for line in &mut lines {
+			line.time = now.clone();
 		}
 		for line in &lines {
 			push_capped(&mut self.procs[idx].lines, line.clone());
