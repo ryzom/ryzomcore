@@ -49,21 +49,27 @@ void CMainWindow::createPanels()
 	splitter->setChildrenCollapsible(false);
 	splitter->setHandleWidth(6);
 
-	// the fixed column of the original: the two buttons, then one row per process
-	QWidget *column = new QWidget();
-	QVBoxLayout *columnLayout = new QVBoxLayout(column);
-	columnLayout->setContentsMargins(6, 6, 6, 6);
-	columnLayout->setSpacing(4);
+	// the column of the original, with the two buttons kept above the scrolling rows; the rows
+	// share the right edge of the buttons and only give way to the scrollbar when it appears
+	QWidget *panel = new QWidget();
+	QVBoxLayout *panelLayout = new QVBoxLayout(panel);
+	panelLayout->setContentsMargins(6, 6, 6, 6);
+	panelLayout->setSpacing(4);
 
-	QPushButton *launchAll = new QPushButton(Icons::play(), tr("Launch All"), column);
+	QPushButton *launchAll = new QPushButton(Icons::play(), tr("Launch All"), panel);
 	launchAll->setToolTip(tr("Start every process of the dashboard in order"));
 	connect(launchAll, &QPushButton::clicked, this, [this]() { m_Dashboard->launchAll(); });
-	columnLayout->addWidget(launchAll);
-	QPushButton *shutdownAll = new QPushButton(Icons::stop(), tr("Shutdown All"), column);
+	panelLayout->addWidget(launchAll);
+	QPushButton *shutdownAll = new QPushButton(Icons::stop(), tr("Shutdown All"), panel);
 	shutdownAll->setToolTip(tr("Stop every running process"));
 	connect(shutdownAll, &QPushButton::clicked, this, [this]() { m_Dashboard->shutdownAll(); });
-	columnLayout->addWidget(shutdownAll);
-	columnLayout->addSpacing(8);
+	panelLayout->addWidget(shutdownAll);
+	panelLayout->addSpacing(4);
+
+	QWidget *column = new QWidget();
+	QVBoxLayout *columnLayout = new QVBoxLayout(column);
+	columnLayout->setContentsMargins(0, 0, 0, 0);
+	columnLayout->setSpacing(4);
 
 	m_Stack = new QStackedWidget();
 	for (CProcessEntry *entry : m_Dashboard->entries())
@@ -79,13 +85,15 @@ void CMainWindow::createPanels()
 	}
 	columnLayout->addStretch(1);
 
-	QScrollArea *scroll = new QScrollArea();
+	QScrollArea *scroll = new QScrollArea(panel);
 	scroll->setWidget(column);
 	scroll->setWidgetResizable(true);
 	scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	scroll->setFrameShape(QFrame::NoFrame);
-	scroll->setMinimumWidth(180);
-	splitter->addWidget(scroll);
+	panelLayout->addWidget(scroll, 1);
+
+	panel->setMinimumWidth(180);
+	splitter->addWidget(panel);
 	splitter->addWidget(m_Stack);
 	splitter->setStretchFactor(0, 0);
 	splitter->setStretchFactor(1, 1);
