@@ -946,6 +946,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		ini << "LaunchCmd=" << launchCmd << "\n";
 		ini << "LaunchArgs=" << cmdLine << "\n";
 		ini << "LaunchCtrl=.\\" << appDesc.AppName << ".launch_ctrl,.\\" << appDesc.AppName << ".state,LAUNCH,RUNNING,STOP,STOPPED\n";
+		ini << "Control=1\n"; // servdash_cli: NeL console over --ctrl, ignored by the Win32 servdash
 		if (priorityIt != priorityMap.end())
 			ini << "Priority=" << priorityIt->second << "\n";
 		ini << "\n";
@@ -967,6 +968,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 			ini << "ReadyPattern=^[^*].+Service Console\n";
 			ini << "LaunchCmd=ryzom_admin_service\n";
 			ini << "LaunchArgs=-A. -C. -L. --fulladminname=admin_executor_service --shortadminname=AES\n";
+			ini << "Control=1\n";
 			if (priorityIt != priorityMap.end())
 				ini << "Priority=" << priorityIt->second << "\n";
 			ini << "\n";

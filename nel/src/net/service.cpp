@@ -37,6 +37,7 @@
 #include "nel/misc/window_displayer.h"
 #include "nel/misc/gtk_displayer.h"
 #include "nel/misc/win_displayer.h"
+#include "nel/misc/socket_displayer.h"
 #include "nel/misc/path.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/report.h"
@@ -798,7 +799,13 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Create the window if needed
 		//
 
-		if ((var = ConfigFile.getVarPtr ("WindowStyle")) != nullptr)
+		if (haveLongArg("ctrl"))
+		{
+			// A dashboard in another process owns the console. This overrides WindowStyle,
+			// so an instance started by hand outside the dashboard still follows its config file.
+			WindowDisplayer = new CSocketDisplayer(getLongArg("ctrl"), "DEFAULT_WD");
+		}
+		else if ((var = ConfigFile.getVarPtr("WindowStyle")) != nullptr)
 		{
 			string disp = var->asString ();
 #ifdef NL_USE_GTK
