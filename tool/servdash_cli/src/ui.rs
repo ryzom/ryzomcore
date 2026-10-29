@@ -24,7 +24,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, Mou
 use ratatui::layout::{Constraint, Layout, Position, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Paragraph};
+use ratatui::widgets::{Block, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use ratatui::Frame;
 use std::time::{Duration, Instant};
 
@@ -639,8 +639,18 @@ impl App {
 		let total = buffer.len();
 		let end = total.saturating_sub(view.scroll.min(total));
 		let start = end.saturating_sub(height);
+		// the right column is the scrollbar once there is more than fits
+		let [text_area, bar_area] = Layout::horizontal([Constraint::Min(1), Constraint::Length(if total > height { 1 } else { 0 })]).areas(content);
 		let lines: Vec<Line> = buffer[start..end].iter().map(to_line).collect();
-		frame.render_widget(Paragraph::new(lines), content);
+		frame.render_widget(Paragraph::new(lines), text_area);
+		if total > height && bar_area.width > 0 {
+			let mut state = ScrollbarState::new(total.saturating_sub(height)).position(start).viewport_content_length(height);
+			frame.render_stateful_widget(
+				Scrollbar::new(ScrollbarOrientation::VerticalRight).begin_symbol(Some("▲")).end_symbol(Some("▼")),
+				bar_area,
+				&mut state,
+			);
+		}
 
 		let prompt = "> ";
 		let avail = input.width.saturating_sub(prompt.len() as u16) as usize;
