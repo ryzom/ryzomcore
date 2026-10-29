@@ -1,0 +1,6 @@
+# written by the services and the dashboard while the sample runs
+*.log
+*.launch_ctrl
+*.deferred_launch_ctrl
+*.state
+*.start_count
