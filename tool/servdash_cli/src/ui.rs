@@ -26,7 +26,10 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use ratatui::Frame;
+use std::sync::OnceLock;
 use std::time::{Duration, Instant};
+
+use regex::Regex;
 
 const LIST_WIDTH: u16 = 30;
 const MAX_CLIENT_LINES: usize = 10000;
@@ -85,6 +88,8 @@ struct LayoutCache {
 	glyph_col: u16,
 	buttons: Vec<(Rect, String)>,
 	content: Rect,
+	/// Rows the selected pane holds at the current width and wrap mode, for the scroll range.
+	total_rows: usize,
 }
 
 pub struct App {
@@ -93,6 +98,10 @@ pub struct App {
 	selected: usize,
 	notice: Option<(String, Instant)>,
 	quit_armed: Option<Instant>,
+	/// Hide the NeL log header of each line.
+	hide_prefix: bool,
+	/// Wrap long lines instead of cutting them.
+	wrap: bool,
 	layout: LayoutCache,
 	pub dirty: bool,
 }
@@ -147,6 +156,75 @@ fn to_color(color: proto::Color) -> Color {
 	}
 }
 
+/// Continuation rows of a wrapped line hang this many characters in.
+const WRAP_INDENT: usize = 4;
+
+/// The NeL log header as CWindowDisplayer writes it, `INF  b8c  service.cpp  879 NLNET::IService::main: `,
+/// or the `b8c: ` of a command log line; the thread id is hex and the function has no spaces.
+fn prefix_regex() -> &'static Regex {
+	static REGEX: OnceLock<Regex> = OnceLock::new();
+	REGEX.get_or_init(|| Regex::new(r"^(?:[A-Z]{3} +)?[0-9a-fA-F]{1,8}(?: +\S+ +\d+(?: +\S+)?)?: ").expect("a valid regex"))
+}
+
+/// The line without its NeL log header, if it has one; spans are consumed from the start.
+fn strip_prefix(line: &StyledLine) -> StyledLine {
+	let text = line.text();
+	let Some(found) = prefix_regex().find(&text) else {
+		return line.clone();
+	};
+	let mut remove = found.end();
+	let mut spans = Vec::new();
+	for span in &line.spans {
+		if remove == 0 {
+			spans.push(span.clone());
+			continue;
+		}
+		let len = span.text.len();
+		if remove >= len {
+			remove -= len;
+			continue;
+		}
+		let mut shortened = span.clone();
+		shortened.text = span.text[remove..].to_string();
+		remove = 0;
+		spans.push(shortened);
+	}
+	StyledLine { spans, raw: line.raw }
+}
+
+/// A line split into rows of at most `width` characters, continuations indented.
+fn wrap_line(line: &StyledLine, width: usize) -> Vec<StyledLine> {
+	let width = width.max(WRAP_INDENT + 1);
+	let mut rows: Vec<StyledLine> = Vec::new();
+	let mut current = StyledLine { spans: Vec::new(), raw: line.raw };
+	let mut used = 0usize;
+	for span in &line.spans {
+		let mut piece = proto::Span { text: String::new(), ..span.clone() };
+		for c in span.text.chars() {
+			let limit = if rows.is_empty() { width } else { width - WRAP_INDENT };
+			if used >= limit {
+				if !piece.text.is_empty() {
+					current.spans.push(std::mem::replace(&mut piece, proto::Span { text: String::new(), ..span.clone() }));
+				}
+				rows.push(std::mem::replace(
+					&mut current,
+					StyledLine { spans: vec![proto::Span { text: " ".repeat(WRAP_INDENT), ..Default::default() }], raw: line.raw },
+				));
+				used = 0;
+			}
+			piece.text.push(c);
+			used += 1;
+		}
+		if !piece.text.is_empty() {
+			current.spans.push(piece);
+		}
+	}
+	if !current.spans.is_empty() || rows.is_empty() {
+		rows.push(current);
+	}
+	rows
+}
+
 fn to_line(line: &StyledLine, console: bool) -> Line<'static> {
 	let spans: Vec<Span<'static>> = line
 		.spans
@@ -172,6 +250,8 @@ impl App {
 			selected: 0,
 			notice: None,
 			quit_armed: None,
+			hide_prefix: false,
+			wrap: false,
 			layout: LayoutCache::default(),
 			dirty: true,
 		}
@@ -270,7 +350,7 @@ impl App {
 
 	fn scroll_by(&mut self, delta: isize) {
 		if let Some(view) = self.procs.get_mut(self.selected) {
-			let total = view.lines.len();
+			let total = self.layout.total_rows.max(view.lines.len());
 			let height = self.layout.content.height.max(1) as usize;
 			let max = total.saturating_sub(height);
 			let next = (view.scroll as isize + delta).clamp(0, max as isize) as usize;
@@ -365,6 +445,14 @@ impl App {
 		let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
 		let alt = key.modifiers.contains(KeyModifiers::ALT);
 		match key.code {
+			KeyCode::F(2) => {
+				self.hide_prefix = !self.hide_prefix;
+				self.dirty = true;
+			}
+			KeyCode::F(3) => {
+				self.wrap = !self.wrap;
+				self.dirty = true;
+			}
 			KeyCode::F(5) => actions.extend(self.toggle_selected()),
 			KeyCode::F(6) => {
 				if let Some(name) = self.selected_name() {
@@ -589,15 +677,23 @@ impl App {
 			frame.render_widget(Paragraph::new(toolbar_lines), toolbar);
 		}
 
-		let buffer = &view.lines;
 		let height = content.height as usize;
-		let total = buffer.len();
+		// the rows to show: the lines, their headers hidden and wrapped as asked; the scrollbar
+		// takes the right column once there is more than fits
+		let console = view.is_console();
+		let shown: Vec<StyledLine> = view.lines.iter().map(|line| if self.hide_prefix { strip_prefix(line) } else { line.clone() }).collect();
+		let rows: Vec<StyledLine> = if self.wrap {
+			let width = content.width.saturating_sub(1).max(1) as usize;
+			shown.iter().flat_map(|line| wrap_line(line, width)).collect()
+		} else {
+			shown
+		};
+		let total = rows.len();
+		self.layout.total_rows = total;
 		let end = total.saturating_sub(view.scroll.min(total));
 		let start = end.saturating_sub(height);
-		// the right column is the scrollbar once there is more than fits
 		let [text_area, bar_area] = Layout::horizontal([Constraint::Min(1), Constraint::Length(if total > height { 1 } else { 0 })]).areas(content);
-		let console = view.is_console();
-		let lines: Vec<Line> = buffer[start..end].iter().map(|line| to_line(line, console)).collect();
+		let lines: Vec<Line> = rows[start..end].iter().map(|line| to_line(line, console)).collect();
 		frame.render_widget(Paragraph::new(lines), text_area);
 		if total > height && bar_area.width > 0 {
 			let mut state = ScrollbarState::new(total.saturating_sub(height)).position(start).viewport_content_length(height);
@@ -633,7 +729,7 @@ impl App {
 		let line = match notice {
 			Some(text) => Line::from(Span::styled(truncate(&text, area.width as usize), Style::default().fg(Color::Black).bg(Color::Yellow))),
 			None => {
-				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
+				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Prefixes  F3 Wrap  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
 				Line::from(Span::styled(truncate(keys, area.width as usize), Style::default().fg(Color::DarkGray)))
 			}
 		};

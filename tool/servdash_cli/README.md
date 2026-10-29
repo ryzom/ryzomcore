@@ -27,7 +27,8 @@ process lives. Each daemon registers itself in a per-user directory (`%LOCALAPPD
 on Windows, `$XDG_RUNTIME_DIR/servdash_cli.sessions` or `/tmp/servdash_cli.sessions.<uid>` on
 Linux), so a running dashboard can be named from any directory without its ini path.
 
-Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F10 detach, F12 twice to stop everything and quit, Tab or Alt+Up/Down to select a process,
+Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F2 hide the NeL log headers,
+F3 wrap long lines with a hanging indent, F10 detach, F12 twice to stop everything and quit, Tab or Alt+Up/Down to select a process,
 Alt+1..9 to press a console button, PgUp/PgDn to scroll, Enter to send the input line.
 The mouse works too: click a process, its start/stop glyph, or a console button.
 
