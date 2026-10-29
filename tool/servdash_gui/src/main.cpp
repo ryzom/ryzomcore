@@ -39,15 +39,33 @@ int main(int argc, char *argv[])
 	if (qEnvironmentVariableIsEmpty("QT_STYLE_OVERRIDE"))
 		QApplication::setStyle(QStyleFactory::create("Fusion"));
 
+	// The scrollbars come from the style sheet box model, which fills pixels, where the Fusion
+	// scrollbars stroke one pixel outlines that a fractional display scale drops. The colours
+	// are palette roles, so a dark theme is covered.
+	app.setStyleSheet(
+	    "QScrollBar:vertical { background: palette(window); width: 12px; margin: 0; border: none; }"
+	    "QScrollBar:horizontal { background: palette(window); height: 12px; margin: 0; border: none; }"
+	    "QScrollBar::handle:vertical { background: palette(mid); border-radius: 4px; margin: 2px; min-height: 24px; }"
+	    "QScrollBar::handle:horizontal { background: palette(mid); border-radius: 4px; margin: 2px; min-width: 24px; }"
+	    "QScrollBar::handle:hover { background: palette(dark); }"
+	    "QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; border: none; background: none; }"
+	    "QScrollBar::add-page, QScrollBar::sub-page { background: none; }"
+	    "QAbstractScrollArea::corner { background: palette(window); }"
+	    // the column keeps a gap between its rows and its scrollbar, which exists only when the bar does
+	    "QScrollBar#columnBar:vertical { margin-left: 4px; }");
+
 	// --screenshot <file.png> renders the window after the services came up and closes it again;
 	// with QT_QPA_PLATFORM=offscreen this checks the layout without a desktop
 	QString iniPath;
 	QString screenshotPath;
+	QString windowSize;
 	for (int i = 1; i < argc; ++i)
 	{
 		QString arg = QString::fromLocal8Bit(argv[i]);
 		if (arg == "--screenshot" && i + 1 < argc)
 			screenshotPath = QString::fromLocal8Bit(argv[++i]);
+		else if (arg == "--size" && i + 1 < argc)
+			windowSize = QString::fromLocal8Bit(argv[++i]);
 		else if (iniPath.isEmpty())
 			iniPath = arg;
 	}
@@ -75,6 +93,13 @@ int main(int argc, char *argv[])
 
 	CDashboard dashboard(config);
 	CMainWindow window(&dashboard);
+	if (!windowSize.isEmpty())
+	{
+		// --size WxH for the screenshot mode
+		QStringList parts = windowSize.split('x');
+		if (parts.size() == 2)
+			window.resize(parts[0].toInt(), parts[1].toInt());
+	}
 	window.show();
 	dashboard.start();
 	if (!screenshotPath.isEmpty())

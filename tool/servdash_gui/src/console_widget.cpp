@@ -36,32 +36,28 @@ namespace {
 const int s_MaxBlocks = 5000;
 const int s_MaxHistory = 200;
 
-/// The log view draws its own one pixel frame over the style's. With a fractional display
-/// scale the Fusion frame of a scroll area loses its top and bottom lines (the stroked rect
-/// lands between device pixels), while filled rects always cover at least one.
-class CLogView : public QPlainTextEdit
+/// A one pixel frame around the log view and its scrollbars, painted by a parent widget with
+/// filled edges. The style's own frame strokes a one pixel rectangle, which a fractional
+/// display scale drops on the top and bottom, and a frame painted by the scroll area itself
+/// is covered by its scrollbars.
+class CLogFrame : public QWidget
 {
 public:
-	explicit CLogView(QWidget *parent)
-	    : QPlainTextEdit(parent)
+	explicit CLogFrame(QWidget *parent)
+	    : QWidget(parent)
 	{
 	}
 
 protected:
-	bool event(QEvent *e) override
+	void paintEvent(QPaintEvent *) override
 	{
-		bool handled = QPlainTextEdit::event(e);
-		if (e->type() == QEvent::Paint)
-		{
-			QPainter painter(this);
-			const QColor edge = palette().color(QPalette::Mid);
-			const QRect r = rect();
-			painter.fillRect(QRect(r.left(), r.top(), r.width(), 1), edge);
-			painter.fillRect(QRect(r.left(), r.bottom(), r.width(), 1), edge);
-			painter.fillRect(QRect(r.left(), r.top(), 1, r.height()), edge);
-			painter.fillRect(QRect(r.right(), r.top(), 1, r.height()), edge);
-		}
-		return handled;
+		QPainter painter(this);
+		const QColor edge = palette().color(QPalette::Mid);
+		const QRect r = rect();
+		painter.fillRect(QRect(r.left(), r.top(), r.width(), 1), edge);
+		painter.fillRect(QRect(r.left(), r.bottom(), r.width(), 1), edge);
+		painter.fillRect(QRect(r.left(), r.top(), 1, r.height()), edge);
+		painter.fillRect(QRect(r.right(), r.top(), 1, r.height()), edge);
 	}
 };
 
@@ -72,7 +68,8 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
     , m_Entry(entry)
 {
 	QVBoxLayout *layout = new QVBoxLayout(this);
-	layout->setContentsMargins(6, 6, 6, 6);
+	// the splitter handle is the gap towards the column; the other sides match the column margins
+	layout->setContentsMargins(0, 6, 6, 6);
 	layout->setSpacing(4);
 	const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -95,12 +92,18 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 		layout->addLayout(top);
 	}
 
-	m_Log = new CLogView(this);
+	CLogFrame *logFrame = new CLogFrame(this);
+	QVBoxLayout *logLayout = new QVBoxLayout(logFrame);
+	logLayout->setContentsMargins(1, 1, 1, 1);
+	logLayout->setSpacing(0);
+	m_Log = new QPlainTextEdit(logFrame);
+	m_Log->setFrameShape(QFrame::NoFrame);
+	logLayout->addWidget(m_Log);
 	m_Log->setReadOnly(true);
 	m_Log->setMaximumBlockCount(s_MaxBlocks);
 	m_Log->setLineWrapMode(QPlainTextEdit::NoWrap);
 	m_Log->setFont(fixedFont);
-	layout->addWidget(m_Log, 1);
+	layout->addWidget(logFrame, 1);
 
 	m_Input = new QLineEdit(this);
 	m_Input->setFont(fixedFont);

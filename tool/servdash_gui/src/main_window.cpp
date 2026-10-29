@@ -23,6 +23,7 @@
 #include <QCloseEvent>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QStatusBar>
@@ -53,7 +54,7 @@ void CMainWindow::createPanels()
 	// share the right edge of the buttons and only give way to the scrollbar when it appears
 	QWidget *panel = new QWidget();
 	QVBoxLayout *panelLayout = new QVBoxLayout(panel);
-	panelLayout->setContentsMargins(6, 6, 6, 6);
+	panelLayout->setContentsMargins(6, 6, 0, 6);
 	panelLayout->setSpacing(4);
 
 	QPushButton *launchAll = new QPushButton(Icons::play(), tr("Launch All"), panel);
@@ -90,6 +91,7 @@ void CMainWindow::createPanels()
 	scroll->setWidgetResizable(true);
 	scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	scroll->setFrameShape(QFrame::NoFrame);
+	scroll->verticalScrollBar()->setObjectName("columnBar");
 	panelLayout->addWidget(scroll, 1);
 
 	panel->setMinimumWidth(180);
