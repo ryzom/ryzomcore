@@ -62,6 +62,8 @@ public:
 		QColor Color;
 		/// From stdout or stderr, or a note of the dashboard, rather than from the console channel.
 		bool Raw = false;
+		/// Local time of arrival, `hh:mm:ss`.
+		QString Time;
 	};
 
 	CProcessEntry(const CSectionConfig &config, QObject *parent = nullptr);

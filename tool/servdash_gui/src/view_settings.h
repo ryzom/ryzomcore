@@ -21,7 +21,8 @@
 #include <QString>
 
 /// How the logs are shown, kept across runs: whether the NeL log header (type, thread, file,
-/// line, function) is compacted, whether long lines wrap, and the colour theme. One instance,
+/// line, function) is compacted, whether long lines wrap, whether each line shows its arrival
+/// time, and the colour theme. One instance,
 /// shared by every pane; a change is signalled so the panes redraw.
 class CViewSettings : public QObject
 {
@@ -39,12 +40,14 @@ public:
 
 	bool compactPrefix() const { return m_CompactPrefix; }
 	bool wrap() const { return m_Wrap; }
+	bool timestamps() const { return m_Timestamps; }
 	TTheme theme() const { return m_Theme; }
 	/// Whether the theme can be chosen here; it always can, the palette makes it.
 	static bool themeSwitchAvailable();
 
 	void setCompactPrefix(bool compact);
 	void setWrap(bool wrap);
+	void setTimestamps(bool show);
 	void setTheme(TTheme theme);
 	/// Applies the stored theme to the application; called once at startup.
 	void applyTheme();
@@ -60,8 +63,9 @@ signals:
 private:
 	CViewSettings();
 
-	bool m_CompactPrefix = false;
+	bool m_CompactPrefix = true;
 	bool m_Wrap = false;
+	bool m_Timestamps = true;
 	TTheme m_Theme = System;
 };
 

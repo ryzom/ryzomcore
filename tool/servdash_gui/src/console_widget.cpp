@@ -132,6 +132,10 @@ void CConsoleWidget::onLogContextMenu(const QPoint &pos)
 	wrap->setCheckable(true);
 	wrap->setChecked(settings.wrap());
 	connect(wrap, &QAction::toggled, &settings, &CViewSettings::setWrap);
+	QAction *stamps = menu->addAction(tr("Show timestamps"));
+	stamps->setCheckable(true);
+	stamps->setChecked(settings.timestamps());
+	connect(stamps, &QAction::toggled, &settings, &CViewSettings::setTimestamps);
 	if (CViewSettings::themeSwitchAvailable())
 	{
 		QMenu *theme = menu->addMenu(tr("Theme"));
@@ -192,6 +196,12 @@ void CConsoleWidget::insertLine(QTextCursor &cursor, const CProcessEntry::CLine 
 	block.setLeftMargin(indent);
 	block.setTextIndent(-indent);
 	cursor.setBlockFormat(block);
+	if (settings.timestamps() && !line.Time.isEmpty())
+	{
+		QTextCharFormat stamp;
+		stamp.setForeground(palette().color(QPalette::Mid));
+		cursor.insertText("[" + line.Time + "] ", stamp);
+	}
 	cursor.insertText(text, format);
 }
 

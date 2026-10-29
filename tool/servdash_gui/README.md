@@ -36,7 +36,8 @@ crash report for instance, shows in the same pane in grey, as do the dashboard's
 about the process; the service does not echo its log on stdout while it runs under a
 dashboard. Up and Down in the command line walk its history; `CLEAR` or the Clear button
 empties the log. A right click on the log offers to compact the NeL log header (the type stays,
-thread, file and line go, the function is cut to `NLN…dcast`) and to wrap long lines with a hanging indent, and switches the theme
+thread, file and line go, the function is cut to `NLN…dcast`), to show the arrival time of
+each line (both on by default), and to wrap long lines with a hanging indent, and switches the theme
 between the system's, light and dark; the choices are kept across runs.
 
 A service without `Control=1` is shown through its pipes, and the input line goes to its stdin.

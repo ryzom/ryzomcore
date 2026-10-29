@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QTime>
 #include <QSharedPointer>
 
 #ifdef Q_OS_WIN
@@ -323,10 +324,12 @@ void CProcessEntry::note(const QString &text, const QColor &color)
 
 void CProcessEntry::appendLine(const CLine &line)
 {
+	CLine stamped = line;
+	stamped.Time = QTime::currentTime().toString("HH:mm:ss");
 	if (m_Lines.size() >= s_MaxLines)
 		m_Lines.removeFirst();
-	m_Lines.append(line);
-	emit lineAdded(this, line);
+	m_Lines.append(stamped);
+	emit lineAdded(this, stamped);
 }
 
 // *** launching ***

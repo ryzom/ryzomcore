@@ -44,8 +44,9 @@ CViewSettings &CViewSettings::instance()
 CViewSettings::CViewSettings()
 {
 	QSettings store = settings();
-	m_CompactPrefix = store.value("view/compactPrefix", false).toBool();
+	m_CompactPrefix = store.value("view/compactPrefix", true).toBool();
 	m_Wrap = store.value("view/wrap", false).toBool();
+	m_Timestamps = store.value("view/timestamps", true).toBool();
 	m_Theme = (TTheme)qBound(0, store.value("view/theme", 0).toInt(), 2);
 }
 
@@ -69,6 +70,15 @@ void CViewSettings::setWrap(bool wrap)
 		return;
 	m_Wrap = wrap;
 	settings().setValue("view/wrap", wrap);
+	emit changed();
+}
+
+void CViewSettings::setTimestamps(bool show)
+{
+	if (m_Timestamps == show)
+		return;
+	m_Timestamps = show;
+	settings().setValue("view/timestamps", show);
 	emit changed();
 }
 
