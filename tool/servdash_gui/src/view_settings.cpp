@@ -25,6 +25,9 @@
 
 namespace {
 
+/// Width of the shortened function name: three characters, an ellipsis, five characters.
+const int s_FunctionWidth = 9;
+
 QSettings settings()
 {
 	return QSettings("Ryzom Core", "servdash_gui");
@@ -41,7 +44,7 @@ CViewSettings &CViewSettings::instance()
 CViewSettings::CViewSettings()
 {
 	QSettings store = settings();
-	m_HidePrefix = store.value("view/hidePrefix", false).toBool();
+	m_CompactPrefix = store.value("view/compactPrefix", false).toBool();
 	m_Wrap = store.value("view/wrap", false).toBool();
 	m_Theme = (TTheme)qBound(0, store.value("view/theme", 0).toInt(), 2);
 }
@@ -51,12 +54,12 @@ bool CViewSettings::themeSwitchAvailable()
 	return true;
 }
 
-void CViewSettings::setHidePrefix(bool hide)
+void CViewSettings::setCompactPrefix(bool compact)
 {
-	if (m_HidePrefix == hide)
+	if (m_CompactPrefix == compact)
 		return;
-	m_HidePrefix = hide;
-	settings().setValue("view/hidePrefix", hide);
+	m_CompactPrefix = compact;
+	settings().setValue("view/compactPrefix", compact);
 	emit changed();
 }
 
@@ -140,13 +143,24 @@ void CViewSettings::applyTheme()
 #endif
 }
 
-QString CViewSettings::stripPrefix(const QString &line)
+QString CViewSettings::compactPrefix(const QString &line)
 {
-	// `INF  b8c  service.cpp  879 NLNET::IService::main: ` as CWindowDisplayer writes it,
-	// and `b8c: ` as the command log writes it; the thread id is hex, the function has no spaces
-	static const QRegularExpression s_Prefix("^(?:[A-Z]{3} +)?[0-9a-fA-F]{1,8}(?: +\\S+ +\\d+(?: +\\S+)?)?: ");
+	// `INF  b8c  service.cpp  879 NLNET::IService::main: ` as CWindowDisplayer writes it, or
+	// `b8c: ` as the command log writes it; the thread id is hex, the function has no spaces
+	static const QRegularExpression s_Prefix("^(?:([A-Z]{3}) +)?[0-9a-fA-F]{1,8}(?: +\\S+ +\\d+(?: +(\\S+))?)?: ");
 	QRegularExpressionMatch match = s_Prefix.match(line);
 	if (!match.hasMatch())
 		return line;
-	return line.mid(match.capturedLength());
+	const QString type = match.captured(1);
+	const QString function = match.captured(2);
+	const QString rest = line.mid(match.capturedLength());
+	if (function.isEmpty())
+		return rest;
+	// the function keeps its first three and last five characters, in a fixed width so the
+	// messages line up
+	QString shortName = function;
+	if (shortName.size() > s_FunctionWidth)
+		shortName = function.left(3) + QChar(0x2026) + function.right(5);
+	shortName = shortName.leftJustified(s_FunctionWidth);
+	return (type.isEmpty() ? QString() : type + " ") + shortName + ": " + rest;
 }

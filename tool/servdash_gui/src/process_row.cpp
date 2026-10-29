@@ -17,6 +17,7 @@
 #include "process_row.h"
 
 #include "icons.h"
+#include "view_settings.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -92,6 +93,8 @@ CProcessRow::CProcessRow(CProcessEntry *entry, QWidget *parent)
 	connect(m_Title, &QPushButton::clicked, this, [this]() { emit selected(m_Entry); });
 	layout->addWidget(m_Title, 1, Qt::AlignVCenter);
 
+	// a theme change needs the style sheet of the title button resolved against the new palette
+	connect(&CViewSettings::instance(), &CViewSettings::changed, this, [this]() { setSelected(m_Selected); });
 	connect(entry, &CProcessEntry::stateChanged, this, &CProcessRow::refresh);
 	connect(entry, &CProcessEntry::titleChanged, this, &CProcessRow::refresh);
 	connect(entry, &CProcessEntry::controlChanged, this, &CProcessRow::refresh);
@@ -102,6 +105,8 @@ void CProcessRow::setSelected(bool selected)
 {
 	// the selected title button takes the highlight colours
 	m_Selected = selected;
+	// set afresh even when unchanged: the palette colours in it resolve when it is set
+	m_Title->setStyleSheet(QString());
 	m_Title->setStyleSheet(selected ? s_SelectedTitleStyle : s_TitleStyle);
 	update();
 }

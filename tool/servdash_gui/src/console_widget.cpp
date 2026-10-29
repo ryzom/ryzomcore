@@ -121,10 +121,10 @@ void CConsoleWidget::onLogContextMenu(const QPoint &pos)
 	CViewSettings &settings = CViewSettings::instance();
 	QMenu *menu = m_Log->createStandardContextMenu(pos);
 	menu->addSeparator();
-	QAction *prefix = menu->addAction(tr("Hide log prefixes"));
+	QAction *prefix = menu->addAction(tr("Compact log prefixes"));
 	prefix->setCheckable(true);
-	prefix->setChecked(settings.hidePrefix());
-	connect(prefix, &QAction::toggled, &settings, &CViewSettings::setHidePrefix);
+	prefix->setChecked(settings.compactPrefix());
+	connect(prefix, &QAction::toggled, &settings, &CViewSettings::setCompactPrefix);
 	QAction *wrap = menu->addAction(tr("Wrap lines"));
 	wrap->setCheckable(true);
 	wrap->setChecked(settings.wrap());
@@ -173,7 +173,7 @@ void CConsoleWidget::reload()
 void CConsoleWidget::insertLine(QTextCursor &cursor, const CProcessEntry::CLine &line)
 {
 	const CViewSettings &settings = CViewSettings::instance();
-	const QString text = settings.hidePrefix() ? CViewSettings::stripPrefix(line.Text) : line.Text;
+	const QString text = settings.compactPrefix() ? CViewSettings::compactPrefix(line.Text) : line.Text;
 	QTextCharFormat format;
 	if (line.Raw && !line.Color.isValid() && isConsole())
 		format.setForeground(palette().color(QPalette::Mid)); // stdout and stderr beside the console log

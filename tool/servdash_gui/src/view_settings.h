@@ -21,7 +21,7 @@
 #include <QString>
 
 /// How the logs are shown, kept across runs: whether the NeL log header (type, thread, file,
-/// line, function) is hidden, whether long lines wrap, and the colour theme. One instance,
+/// line, function) is compacted, whether long lines wrap, and the colour theme. One instance,
 /// shared by every pane; a change is signalled so the panes redraw.
 class CViewSettings : public QObject
 {
@@ -37,21 +37,22 @@ public:
 
 	static CViewSettings &instance();
 
-	bool hidePrefix() const { return m_HidePrefix; }
+	bool compactPrefix() const { return m_CompactPrefix; }
 	bool wrap() const { return m_Wrap; }
 	TTheme theme() const { return m_Theme; }
 	/// Whether the theme can be chosen here; it always can, the palette makes it.
 	static bool themeSwitchAvailable();
 
-	void setHidePrefix(bool hide);
+	void setCompactPrefix(bool compact);
 	void setWrap(bool wrap);
 	void setTheme(TTheme theme);
 	/// Applies the stored theme to the application; called once at startup.
 	void applyTheme();
 
-	/// A log line without the NeL header: `DBG 9ea8 file.cpp 162 CClass::method: ` or the
-	/// `9ea8: ` of a command log line. Lines without one come back as they are.
-	static QString stripPrefix(const QString &line);
+	/// A log line with its NeL header shortened: `DBG 9ea8 file.cpp 162 NLNET::cbRegisterBroadcast: `
+	/// becomes `DBG NLN…dcast: `, the type kept, the function cut to a fixed width; the `9ea8: `
+	/// of a command log line goes. Lines without a header come back as they are.
+	static QString compactPrefix(const QString &line);
 
 signals:
 	void changed();
@@ -59,7 +60,7 @@ signals:
 private:
 	CViewSettings();
 
-	bool m_HidePrefix = false;
+	bool m_CompactPrefix = false;
 	bool m_Wrap = false;
 	TTheme m_Theme = System;
 };
