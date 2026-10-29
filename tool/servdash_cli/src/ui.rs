@@ -306,7 +306,7 @@ fn compact_prefix(line: &StyledLine) -> StyledLine {
 		remove = 0;
 		spans.push(shortened);
 	}
-	StyledLine { spans, raw: line.raw, time: line.time.clone() }
+	StyledLine { spans, raw: line.raw, time: line.time.clone(), ..Default::default() }
 }
 
 /// The line with its arrival time in front, `[hh:mm:ss] `, in grey.
@@ -322,7 +322,7 @@ fn with_time(mut line: StyledLine) -> StyledLine {
 fn wrap_line(line: &StyledLine, width: usize) -> Vec<StyledLine> {
 	let width = width.max(WRAP_INDENT + 1);
 	let mut rows: Vec<StyledLine> = Vec::new();
-	let mut current = StyledLine { spans: Vec::new(), raw: line.raw, time: line.time.clone() };
+	let mut current = StyledLine { spans: Vec::new(), raw: line.raw, time: line.time.clone(), ..Default::default() };
 	let mut used = 0usize;
 	for span in &line.spans {
 		let mut piece = proto::Span { text: String::new(), ..span.clone() };
@@ -334,7 +334,12 @@ fn wrap_line(line: &StyledLine, width: usize) -> Vec<StyledLine> {
 				}
 				rows.push(std::mem::replace(
 					&mut current,
-					StyledLine { spans: vec![proto::Span { text: " ".repeat(WRAP_INDENT), ..Default::default() }], raw: line.raw, time: line.time.clone() },
+					StyledLine {
+						spans: vec![proto::Span { text: " ".repeat(WRAP_INDENT), ..Default::default() }],
+						raw: line.raw,
+						time: line.time.clone(),
+						..Default::default()
+					},
 				));
 				used = 0;
 			}
@@ -476,6 +481,7 @@ impl App {
 				}
 			}
 			DaemonMsg::Notice { text } => self.notice(text),
+			DaemonMsg::ExecDone { .. } => {}
 			DaemonMsg::Bye => {}
 		}
 	}

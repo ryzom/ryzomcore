@@ -115,6 +115,11 @@ impl LaunchCtrl {
 		}
 	}
 
+	/// The name of the value this side applied last, as the control files spell it.
+	pub fn value_name(&self) -> &str {
+		self.cfg.values.get(self.value).map(String::as_str).unwrap_or("")
+	}
+
 	pub fn ctrl_is(&self, idx: usize) -> bool {
 		self.read_ctrl().map(|t| t.trim() == self.cfg.values[idx]).unwrap_or(false)
 	}

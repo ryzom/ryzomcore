@@ -196,7 +196,7 @@ pub fn parse_line(raw: &str) -> StyledLine {
 		i += 1;
 	}
 	flush(&mut spans, &mut text, &attrs);
-	StyledLine { spans, raw: true, time: String::new() }
+	StyledLine { spans, raw: true, ..Default::default() }
 }
 
 #[cfg(test)]

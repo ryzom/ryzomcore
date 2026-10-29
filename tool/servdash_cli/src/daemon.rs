@@ -39,8 +39,8 @@ use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWriteExt, BufReader};
 use tokio::process::Child;
 use tokio::sync::mpsc::{self, UnboundedSender};
 
-/// Lines kept per process and per stream.
-const MAX_LINES: usize = 5000;
+/// Lines kept per process; an MCP client asks for ranges of them, so more than a terminal shows.
+const MAX_LINES: usize = 10000;
 const TICK: Duration = Duration::from_millis(250);
 /// A control service that has not connected by then counts as captured, so the start order goes on.
 const CAPTURE_TIMEOUT: Duration = Duration::from_secs(30);
@@ -84,6 +84,13 @@ struct Proc {
 	gen: u64,
 	child: Option<Child>,
 	stdin: Option<UnboundedSender<String>>,
+	pid: Option<u32>,
+	started_at: Option<i64>,
+	exit_code: Option<i32>,
+	/// The index the next line gets, from 1; never reused, so a client can name a range exactly.
+	next_idx: u64,
+	/// The console channel protocol version the service announced; 0 before its hello.
+	channel_version: u32,
 	/// Console lines, raw output and notes, in arrival order.
 	lines: VecDeque<StyledLine>,
 	labels: Vec<String>,
@@ -114,6 +121,24 @@ impl Proc {
 			control: self.cfg.control,
 			control_connected: self.control.is_some(),
 			labels: self.labels.clone(),
+			pid: if self.running() { self.pid } else { None },
+			started_at: if self.running() { self.started_at } else { None },
+			exit_code: self.exit_code,
+			relaunch_pending: self.relaunch_pending,
+			crash_chain: self.crash_chain,
+			has_launch_ctrl: self.launch_ctrl.is_some(),
+			ctrl_value: self.launch_ctrl.as_ref().map(|lc| lc.value_name().to_string()),
+			priority: if self.cfg.priority == PRIORITY_NONE { None } else { Some(self.cfg.priority) },
+			auto_start: self.cfg.auto_start,
+			command: if self.cfg.launch_args.trim().is_empty() {
+				self.cfg.launch_cmd.clone()
+			} else {
+				format!("{} {}", self.cfg.launch_cmd, self.cfg.launch_args.trim())
+			},
+			working_directory: self.cfg.working_directory.as_ref().map(|d| d.to_string_lossy().to_string()).unwrap_or_default(),
+			next_idx: self.next_idx,
+			first_idx: self.lines.front().map(|l| l.idx).unwrap_or(0),
+			channel_version: if self.control.is_some() { self.channel_version } else { 0 },
 		}
 	}
 }
@@ -339,6 +364,11 @@ impl Daemon {
 				gen: 0,
 				child: None,
 				stdin: None,
+				pid: None,
+				started_at: None,
+				exit_code: None,
+				next_idx: 1,
+				channel_version: 0,
 				lines: VecDeque::new(),
 				labels: Vec::new(),
 				commands: BTreeMap::new(),
@@ -381,9 +411,15 @@ impl Daemon {
 		if lines.is_empty() {
 			return;
 		}
-		let now = chrono::Local::now().format("%H:%M:%S").to_string();
+		let now = chrono::Local::now();
+		let time = now.format("%H:%M:%S").to_string();
+		let ts = now.timestamp_millis();
+		let p = &mut self.procs[idx];
 		for line in &mut lines {
-			line.time = now.clone();
+			line.time = time.clone();
+			line.ts = ts;
+			line.idx = p.next_idx;
+			p.next_idx += 1;
 		}
 		for line in &lines {
 			push_capped(&mut self.procs[idx].lines, line.clone());
@@ -492,10 +528,13 @@ impl Daemon {
 				if let Some(stderr) = child.stderr.take() {
 					spawn_output_reader(self.tx.clone(), idx, gen, stderr, false);
 				}
+				p.pid = child.id();
 				p.child = Some(child);
 				p.ready_triggered = false;
 				p.relaunch_pending = false;
 				p.launched_at = Some(Instant::now());
+				p.started_at = Some(chrono::Local::now().timestamp_millis());
+				p.exit_code = None;
 				if let Some(lc) = &mut p.launch_ctrl {
 					lc.count_launch();
 				}
@@ -620,6 +659,7 @@ impl Daemon {
 		let p = &mut self.procs[idx];
 		p.child = None;
 		p.stdin = None;
+		p.exit_code = code;
 		let text = match code {
 			Some(code) => format!("> Process Exited (code {})", code),
 			None => "> Process Exited".to_string(),
@@ -795,7 +835,16 @@ impl Daemon {
 		}
 		let fields: Vec<String> = line.split('\t').map(unescape_field).collect();
 		match fields[0].as_str() {
-			"hello" => {}
+			"hello" => {
+				self.procs[idx].channel_version = fields.get(1).and_then(|v| v.trim().parse().ok()).unwrap_or(1);
+				self.broadcast_info(idx);
+			}
+			"done" => {
+				let id = fields.get(1).cloned().unwrap_or_default();
+				let ok = fields.get(2).map(String::as_str) == Some("1");
+				let name = self.procs[idx].cfg.name.clone();
+				self.broadcast(DaemonMsg::ExecDone { name, id, ok });
+			}
 			"title" => {
 				let title = fields.get(1).cloned().unwrap_or_default();
 				self.procs[idx].title = title.clone();
@@ -983,6 +1032,26 @@ impl Daemon {
 				if let Some(idx) = self.index_of(&name) {
 					self.procs[idx].lines.clear();
 					self.broadcast(DaemonMsg::Clear { name });
+				}
+			}
+			ClientMsg::Exec { name, id, command, args } => {
+				let Some(idx) = self.index_of(&name) else {
+					self.broadcast(DaemonMsg::ExecDone { name, id, ok: false });
+					return;
+				};
+				// the arguments travel as fields, so the service runs the command without parsing it
+				let mut wire = format!("exec\t{}\t{}", escape_field(&id), escape_field(&command));
+				for arg in &args {
+					wire.push('\t');
+					wire.push_str(&escape_field(arg));
+				}
+				let sent = match &self.procs[idx].control {
+					Some((_, tx)) => tx.send(wire).is_ok(),
+					None => false,
+				};
+				if !sent {
+					self.note(idx, format!("No console channel to run '{}' on", command), Color::Yellow);
+					self.broadcast(DaemonMsg::ExecDone { name, id, ok: false });
 				}
 			}
 			ClientMsg::Shutdown => {

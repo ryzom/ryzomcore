@@ -20,13 +20,16 @@ servdash_cli --list                  the running dashboards of this user
 servdash_cli --shutdown-all          stop every running dashboard, with its services
 servdash_cli 2                       attach to the second one in the list
 servdash_cli Mainland                attach by title (or id, id prefix, ini path)
+servdash_cli --mcp [start_mainland.ini]   serve the Model Context Protocol on stdio, see below
 ```
 
 A shard is opened once: a lock file next to the ini, `<stem>.servdash.lock`, names the
 dashboard that holds it, servdash_cli or servdash_gui, and a second one is refused while that
-process lives. Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash_cli\sessions`
-on Windows, `$XDG_RUNTIME_DIR/servdash_cli.sessions` or `/tmp/servdash_cli.sessions.<uid>` on
-Linux), so a running dashboard can be named from any directory without its ini path.
+process lives. Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash\sessions`
+on Windows, `$XDG_RUNTIME_DIR/servdash.sessions` or `/tmp/servdash.sessions.<uid>` on
+Linux), so a running dashboard can be named from any directory without its ini path. The
+directory is shared with servdash_gui, whose dashboards speak the same protocol on their
+endpoint: `--list` names them too, and the terminal client can attach to one.
 
 Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F2 compact the NeL log headers (type kept, function cut to `NLN…dcast`),
 F3 wrap long lines with a hanging indent, F4 show the arrival time of each line (compact
@@ -80,6 +83,13 @@ assert or a crash report for instance, shows in the same pane in grey, as do the
 notes about the process; the service does not echo its log on stdout while it runs under a
 dashboard.
 
+Commands reach the service in two forms: a command line (`cmd`), which the service parses as if
+typed, and a split command (`exec`), whose name and arguments travel as separate fields and run
+as given, followed by a `done` marker with the id of the request once the command ran and its
+output is in the log. The MCP server uses the second form, so an argument with a space, a quote
+or a semicolon arrives intact and the output of a command can be cut out of the log exactly.
+Services built before the marker (console channel version 1) still take `cmd`.
+
 A control section is stopped with `quit` over the channel, or on stdin while the channel is
 not connected; its `ShutdownCmd` and `ShutdownInput` keys are not used. A service that never
 connects (an older binary that does not know `--ctrl`) counts as captured after 30 seconds, so
@@ -122,6 +132,46 @@ this. servdash_cli does what `service_launcher.sh` does under screen: it starts 
 the orders, writes the state and the counter, consumes a LAUNCH order when the process exits
 so a crash does not relaunch in a loop, and promotes a deferred order after the exit. The
 start and stop buttons write the order file, as the Win32 tool does, so the AES stays in step.
+
+## MCP server for agents
+
+`servdash_cli --mcp [<ini>...]` serves the [Model Context Protocol](https://modelcontextprotocol.io/)
+on stdin and stdout, for an agent such as Claude Code that watches, drives and debugs the
+shards and the patchman services of the machine. It is a client of the dashboards like the
+terminal is: it attaches to every running dashboard of the user as it appears (servdash_cli
+and servdash_gui alike), mirrors their processes, logs and command tables, and forwards the
+orders; the dashboards keep running when the agent goes. The ini files given are started when
+they do not run yet, so a project can name its shard and have it come up with the agent. In
+Claude Code, a `.mcp.json` next to the project does it:
+
+```json
+{ "mcpServers": { "servdash": { "command": "servdash_cli", "args": ["--mcp", "start_mainland.ini"] } } }
+```
+
+On a production server, `claude mcp add servdash -- /home/nevrax/bin/servdash_cli --mcp` gives
+the agent every dashboard of the `nevrax` user: the patchman services of `admin.ini` and the
+domains. Every tool takes a `dashboard` parameter (title, id, ini path) that can be left out
+while one dashboard runs.
+
+| Tool | What it does |
+| --- | --- |
+| `list_dashboards`, `start_dashboard`, `shutdown_dashboard` | The dashboards running; start the daemon of an ini file; stop everything and exit a daemon. |
+| `list_processes`, `get_process` | State, pid, uptime, launch control value, pending restart, log line range; the service's status labels and buttons. |
+| `start_process`, `stop_process`, `kill_process`, `restart_process`, `start_all`, `stop_all`, `wait_for_state` | The buttons, each with an optional wait for the resulting state. |
+| `list_commands` | The command table of a service: commands, variables, handler instances and member commands with argument syntax and help, filtered by prefix or word. |
+| `run_command` | A NeL command with its arguments as a list, run over the console channel without parsing; returns what the command logged, cut out between the request and its `done` marker. |
+| `send_input` | A line on the stdin of a plain process, with the output that follows. |
+| `get_log` | Lines of a process, or of all processes merged by time: by index range, time range or last N, then optionally following for a while up to a line cap; filtered by log type or regex. |
+| `clear_log` | Drops the held lines. |
+
+Every log line carries an index, per process from 1 and never reused, and its arrival time
+in milliseconds, so a window of a log ("the 50 lines before the crash", "everything between
+these two indices", "the next 10 seconds") is named exactly and can be fetched again.
+`get_log` shows `idx time type message` by default, with the NeL prefix (thread, file, line,
+function) left out to keep the answer short; `prefix: compact` adds file, line and function,
+`prefix: full` keeps the line as logged. Plain output of a process shows as type `out`, the
+dashboard's own notes (started, exited, restarting) as `dash`. The daemon holds the last
+10000 lines per process; older indices are reported as no longer held.
 
 ## Building
 

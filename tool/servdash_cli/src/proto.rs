@@ -18,12 +18,17 @@
 //! The daemon streams every process to every client, and a client keeps the lines of all
 //! of them, so switching panes needs no round trip and a reattach gets a full snapshot.
 //! Each process has one stream: its console log, whatever it writes to stdout or stderr
-//! besides, and the daemon's notes, in arrival order; raw lines are tagged.
+//! besides, and the daemon's notes, in arrival order; raw lines are tagged. Every line carries
+//! the index the daemon gave it, counting from 1 per process and never reused, and its time of
+//! arrival, so a client can name a range of the log exactly.
+//!
+//! Version 2 added the line index and time stamp, the process details in ProcessInfo, and
+//! Exec with ExecDone: a command with its arguments already split, answered when it ran.
 
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
-pub const VERSION: u32 = 1;
+pub const VERSION: u32 = 2;
 
 /// The process states of the Win32 tool, with the same meaning.
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
@@ -84,15 +89,29 @@ pub struct StyledLine {
 	/// Local time of arrival at the daemon, `hh:mm:ss`.
 	#[serde(default, skip_serializing_if = "String::is_empty")]
 	pub time: String,
+	/// Index of the line in the stream of its process, from 1; dropped lines leave a gap.
+	#[serde(default, skip_serializing_if = "is_zero_u64")]
+	pub idx: u64,
+	/// Time of arrival at the daemon, milliseconds since the Unix epoch.
+	#[serde(default, skip_serializing_if = "is_zero_i64")]
+	pub ts: i64,
+}
+
+fn is_zero_u64(v: &u64) -> bool {
+	*v == 0
+}
+
+fn is_zero_i64(v: &i64) -> bool {
+	*v == 0
 }
 
 impl StyledLine {
 	pub fn plain(text: impl Into<String>) -> StyledLine {
-		StyledLine { spans: vec![Span { text: text.into(), fg: Color::Default, bold: false }], raw: false, time: String::new() }
+		StyledLine { spans: vec![Span { text: text.into(), fg: Color::Default, bold: false }], ..Default::default() }
 	}
 
 	pub fn colored(text: impl Into<String>, fg: Color) -> StyledLine {
-		StyledLine { spans: vec![Span { text: text.into(), fg, bold: false }], raw: false, time: String::new() }
+		StyledLine { spans: vec![Span { text: text.into(), fg, bold: false }], ..Default::default() }
 	}
 
 	pub fn into_raw(mut self) -> StyledLine {
@@ -142,6 +161,45 @@ pub struct ProcessInfo {
 	pub control_connected: bool,
 	/// Console labels as the service created them: empty is a row separator, `@Name|cmd` a button.
 	pub labels: Vec<String>,
+	/// The process id while it runs.
+	#[serde(default)]
+	pub pid: Option<u32>,
+	/// When the current run started, milliseconds since the Unix epoch.
+	#[serde(default)]
+	pub started_at: Option<i64>,
+	/// The exit code of the last run, when it ended by itself with one.
+	#[serde(default)]
+	pub exit_code: Option<i32>,
+	/// A RestartDelay relaunch is scheduled.
+	#[serde(default)]
+	pub relaunch_pending: bool,
+	/// Quick exits in a row, the RestartDelay backoff.
+	#[serde(default)]
+	pub crash_chain: u32,
+	#[serde(default)]
+	pub has_launch_ctrl: bool,
+	/// The launch control value this side applied last: LAUNCH, RUNNING, STOP or STOPPED.
+	#[serde(default)]
+	pub ctrl_value: Option<String>,
+	/// The `Priority` key; none for a section that starts one at a time.
+	#[serde(default)]
+	pub priority: Option<i32>,
+	#[serde(default)]
+	pub auto_start: bool,
+	/// The command line as the ini gives it.
+	#[serde(default)]
+	pub command: String,
+	#[serde(default)]
+	pub working_directory: String,
+	/// The index the next line of the process gets; the lines so far are 1..next_idx.
+	#[serde(default)]
+	pub next_idx: u64,
+	/// The oldest line the daemon still holds, 0 when it holds none.
+	#[serde(default)]
+	pub first_idx: u64,
+	/// The console channel protocol version the service announced, 0 when none is connected.
+	#[serde(default)]
+	pub channel_version: u32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -172,6 +230,14 @@ pub enum ClientMsg {
 	},
 	ClearConsole {
 		name: String,
+	},
+	/// A NeL command with its arguments already split, over the control channel; nothing is
+	/// parsed. ExecDone with the same id follows once the service ran it.
+	Exec {
+		name: String,
+		id: String,
+		command: String,
+		args: Vec<String>,
 	},
 	/// Stop every process and exit the daemon.
 	Shutdown,
@@ -224,6 +290,13 @@ pub enum DaemonMsg {
 	},
 	Notice {
 		text: String,
+	},
+	/// An Exec ran: its output is in the lines before this message. Not ok when the command
+	/// failed, or when the service has no console channel to run it on.
+	ExecDone {
+		name: String,
+		id: String,
+		ok: bool,
 	},
 	Bye,
 }

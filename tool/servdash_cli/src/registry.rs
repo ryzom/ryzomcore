@@ -18,6 +18,9 @@
 //! client can list them and attach by number, title or id without knowing the ini path or
 //! the working directory. A record whose endpoint no longer answers is a leftover of a
 //! crashed daemon and is dropped when listing.
+//!
+//! The directory is shared with servdash_gui, which writes the same records and serves the
+//! same protocol on its endpoint, so one list and one MCP server cover both tools.
 
 use crate::ipc;
 use crate::session::Session;
@@ -34,19 +37,22 @@ pub struct Record {
 	pub endpoint: String,
 	pub pid: u32,
 	pub started: u64,
+	/// The dashboard tool that wrote the record: servdash_cli or servdash_gui.
+	#[serde(default)]
+	pub tool: String,
 }
 
 #[cfg(windows)]
 fn dir() -> PathBuf {
 	let base = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(std::env::temp_dir);
-	base.join("servdash_cli").join("sessions")
+	base.join("servdash").join("sessions")
 }
 
 #[cfg(not(windows))]
 fn dir() -> PathBuf {
 	match std::env::var_os("XDG_RUNTIME_DIR") {
-		Some(base) => PathBuf::from(base).join("servdash_cli.sessions"),
-		None => PathBuf::from(format!("/tmp/servdash_cli.sessions.{}", unsafe { libc::getuid() })),
+		Some(base) => PathBuf::from(base).join("servdash.sessions"),
+		None => PathBuf::from(format!("/tmp/servdash.sessions.{}", unsafe { libc::getuid() })),
 	}
 }
 
@@ -62,6 +68,7 @@ pub fn register(session: &Session, title: &str) {
 		endpoint: session.control_endpoint(),
 		pid: std::process::id(),
 		started: SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0),
+		tool: crate::shard_lock::TOOL_NAME.to_string(),
 	};
 	let dir = dir();
 	if let Err(e) = std::fs::create_dir_all(&dir) {
@@ -85,6 +92,26 @@ pub fn register(session: &Session, title: &str) {
 
 pub fn unregister(session: &Session) {
 	let _ = std::fs::remove_file(record_path(&session.id));
+}
+
+/// Every record as it stands, without asking the endpoints; stale ones included. For a poll
+/// that runs often, since each liveness check costs the daemon a client connection.
+pub fn records() -> Vec<Record> {
+	let mut records = Vec::new();
+	let Ok(entries) = std::fs::read_dir(dir()) else {
+		return records;
+	};
+	for entry in entries.flatten() {
+		let path = entry.path();
+		if path.extension().and_then(|e| e.to_str()) != Some("json") {
+			continue;
+		}
+		if let Some(record) = std::fs::read(&path).ok().and_then(|bytes| serde_json::from_slice::<Record>(&bytes).ok()) {
+			records.push(record);
+		}
+	}
+	records.sort_by_key(|r| (r.started, r.id.clone()));
+	records
 }
 
 /// The dashboards that answer right now, oldest first. Stale records are removed.
@@ -143,8 +170,9 @@ pub fn print_list(records: &[Record]) {
 		println!("No dashboard is running.");
 		return;
 	}
-	println!("  #  id                title                         ini");
+	println!("  #  id                title                         tool          ini");
 	for (i, r) in records.iter().enumerate() {
-		println!("{:>3}  {:<16}  {:<28}  {}", i + 1, r.id, r.title, r.ini_path);
+		let tool = if r.tool.is_empty() { "servdash_cli" } else { r.tool.as_str() };
+		println!("{:>3}  {:<16}  {:<28}  {:<12}  {}", i + 1, r.id, r.title, tool, r.ini_path);
 	}
 }
