@@ -98,7 +98,14 @@ void CSocketDisplayer::open(std::string titleBar, bool /* iconified */, sint /* 
 	Log = log;
 	m_HistoryMax = (hs > 0) ? (uint)hs : s_DefaultHistory;
 	_HistorySize = (sint)m_HistoryMax;
-	setTitleBar(titleBar);
+	{
+		// the main thread may already have set the real title if this thread started late
+		CSynchronized<std::string>::CAccessor access(&m_TitleBar);
+		if (!access.value().empty())
+			titleBar.clear();
+	}
+	if (!titleBar.empty())
+		setTitleBar(titleBar);
 	_Init = true;
 }
 
@@ -231,11 +238,12 @@ bool CSocketDisplayer::sendLine(const std::string &line)
 				disconnect();
 				return false;
 			}
-			if (!GetOverlappedResult((HANDLE)m_Pipe, &overlapped, &written, FALSE))
-			{
-				disconnect();
-				return false;
-			}
+		}
+		// the byte count of an overlapped operation comes from here, also when it completed at once
+		if (!GetOverlappedResult((HANDLE)m_Pipe, &overlapped, &written, FALSE))
+		{
+			disconnect();
+			return false;
 		}
 		ptr += written;
 		left -= written;
@@ -385,15 +393,24 @@ void CSocketDisplayer::flushLog()
 
 void CSocketDisplayer::flushLabels(bool all)
 {
-	CSynchronized<std::vector<CLabelEntry> >::CAccessor access(&_Labels);
-	for (uint i = 0; i < access.value().size(); ++i)
+	// copied under the lock and sent outside it, so a dashboard that stops reading cannot
+	// stall the main thread in setLabel; a label lost to a failed send comes back with the replay
+	std::vector<std::pair<uint, std::string> > pending;
 	{
-		CLabelEntry &entry = access.value()[i];
-		if (!all && !entry.NeedUpdate)
-			continue;
-		if (!sendLine(std::string("label\t") + toString("%u", i) + "\t" + escapeField(entry.Value)))
+		CSynchronized<std::vector<CLabelEntry> >::CAccessor access(&_Labels);
+		for (uint i = 0; i < access.value().size(); ++i)
+		{
+			CLabelEntry &entry = access.value()[i];
+			if (!all && !entry.NeedUpdate)
+				continue;
+			pending.push_back(std::make_pair(i, entry.Value));
+			entry.NeedUpdate = false;
+		}
+	}
+	for (uint i = 0; i < pending.size(); ++i)
+	{
+		if (!sendLine(std::string("label\t") + toString("%u", pending[i].first) + "\t" + escapeField(pending[i].second)))
 			return;
-		entry.NeedUpdate = false;
 	}
 }
 
