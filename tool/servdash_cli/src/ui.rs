@@ -98,8 +98,8 @@ pub struct App {
 	selected: usize,
 	notice: Option<(String, Instant)>,
 	quit_armed: Option<Instant>,
-	/// Hide the NeL log header of each line.
-	hide_prefix: bool,
+	/// Compact the NeL log header of each line.
+	compact_prefix: bool,
 	/// Wrap long lines instead of cutting them.
 	wrap: bool,
 	layout: LayoutCache,
@@ -159,21 +159,51 @@ fn to_color(color: proto::Color) -> Color {
 /// Continuation rows of a wrapped line hang this many characters in.
 const WRAP_INDENT: usize = 4;
 
+/// Width of the shortened function name: three characters, an ellipsis, five characters.
+const FUNCTION_WIDTH: usize = 9;
+
 /// The NeL log header as CWindowDisplayer writes it, `INF  b8c  service.cpp  879 NLNET::IService::main: `,
 /// or the `b8c: ` of a command log line; the thread id is hex and the function has no spaces.
 fn prefix_regex() -> &'static Regex {
 	static REGEX: OnceLock<Regex> = OnceLock::new();
-	REGEX.get_or_init(|| Regex::new(r"^(?:[A-Z]{3} +)?[0-9a-fA-F]{1,8}(?: +\S+ +\d+(?: +\S+)?)?: ").expect("a valid regex"))
+	REGEX.get_or_init(|| Regex::new(r"^(?:([A-Z]{3}) +)?[0-9a-fA-F]{1,8}(?: +\S+ +\d+(?: +(\S+))?)?: ").expect("a valid regex"))
 }
 
-/// The line without its NeL log header, if it has one; spans are consumed from the start.
-fn strip_prefix(line: &StyledLine) -> StyledLine {
+/// The line with its NeL log header shortened: the type stays, thread, file and line go, and
+/// the function is cut to a fixed width, `NLNET::cbRegisterBroadcast` to `NLN…dcast`, so the
+/// messages line up. The thread of a command log line goes. Spans are consumed from the start.
+fn compact_prefix(line: &StyledLine) -> StyledLine {
 	let text = line.text();
-	let Some(found) = prefix_regex().find(&text) else {
+	let Some(found) = prefix_regex().captures(&text) else {
 		return line.clone();
 	};
-	let mut remove = found.end();
+	let whole = found.get(0).expect("the whole match");
+	let mut head = String::new();
+	if let Some(function) = found.get(2) {
+		let function = function.as_str();
+		let chars: Vec<char> = function.chars().collect();
+		let short: String = if chars.len() > FUNCTION_WIDTH {
+			let mut s: String = chars[..3].iter().collect();
+			s.push('…');
+			s.extend(chars[chars.len() - 5..].iter());
+			s
+		} else {
+			format!("{:<width$}", function, width = FUNCTION_WIDTH)
+		};
+		if let Some(kind) = found.get(1) {
+			head.push_str(kind.as_str());
+			head.push(' ');
+		}
+		head.push_str(&short);
+		head.push_str(": ");
+	}
+	// the header's bytes leave the spans; the shortened one takes the style of the first
+	let mut remove = whole.end();
 	let mut spans = Vec::new();
+	let first_style = line.spans.first().cloned().unwrap_or_default();
+	if !head.is_empty() {
+		spans.push(proto::Span { text: head, ..first_style });
+	}
 	for span in &line.spans {
 		if remove == 0 {
 			spans.push(span.clone());
@@ -250,7 +280,7 @@ impl App {
 			selected: 0,
 			notice: None,
 			quit_armed: None,
-			hide_prefix: false,
+			compact_prefix: false,
 			wrap: false,
 			layout: LayoutCache::default(),
 			dirty: true,
@@ -446,7 +476,7 @@ impl App {
 		let alt = key.modifiers.contains(KeyModifiers::ALT);
 		match key.code {
 			KeyCode::F(2) => {
-				self.hide_prefix = !self.hide_prefix;
+				self.compact_prefix = !self.compact_prefix;
 				self.dirty = true;
 			}
 			KeyCode::F(3) => {
@@ -678,10 +708,10 @@ impl App {
 		}
 
 		let height = content.height as usize;
-		// the rows to show: the lines, their headers hidden and wrapped as asked; the scrollbar
+		// the rows to show: the lines, their headers compacted and wrapped as asked; the scrollbar
 		// takes the right column once there is more than fits
 		let console = view.is_console();
-		let shown: Vec<StyledLine> = view.lines.iter().map(|line| if self.hide_prefix { strip_prefix(line) } else { line.clone() }).collect();
+		let shown: Vec<StyledLine> = view.lines.iter().map(|line| if self.compact_prefix { compact_prefix(line) } else { line.clone() }).collect();
 		let rows: Vec<StyledLine> = if self.wrap {
 			let width = content.width.saturating_sub(1).max(1) as usize;
 			shown.iter().flat_map(|line| wrap_line(line, width)).collect()
@@ -729,7 +759,7 @@ impl App {
 		let line = match notice {
 			Some(text) => Line::from(Span::styled(truncate(&text, area.width as usize), Style::default().fg(Color::Black).bg(Color::Yellow))),
 			None => {
-				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Prefixes  F3 Wrap  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
+				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Compact  F3 Wrap  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
 				Line::from(Span::styled(truncate(keys, area.width as usize), Style::default().fg(Color::DarkGray)))
 			}
 		};
