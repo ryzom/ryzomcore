@@ -35,7 +35,9 @@ them out. Whatever the service writes to stdout or stderr besides its log, an as
 crash report for instance, shows in the same pane in grey, as do the dashboard's own notes
 about the process; the service does not echo its log on stdout while it runs under a
 dashboard. Up and Down in the command line walk its history; `CLEAR` or the Clear button
-empties the log.
+empties the log. A right click on the log offers to hide the NeL log header (type, thread,
+file, line, function) and to wrap long lines with a hanging indent, and switches the theme
+between the system's, light and dark; the choices are kept across runs.
 
 A service without `Control=1` is shown through its pipes, and the input line goes to its stdin.
 

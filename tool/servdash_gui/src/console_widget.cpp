@@ -17,12 +17,15 @@
 #include "console_widget.h"
 
 #include "icons.h"
+#include "view_settings.h"
 
 #include <QFontDatabase>
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
+#include <QActionGroup>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
@@ -58,7 +61,10 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 	m_Log = new QPlainTextEdit(this);
 	m_Log->setReadOnly(true);
 	m_Log->setMaximumBlockCount(s_MaxBlocks);
-	m_Log->setLineWrapMode(QPlainTextEdit::NoWrap);
+	m_Log->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_Log, &QPlainTextEdit::customContextMenuRequested, this, &CConsoleWidget::onLogContextMenu);
+	connect(&CViewSettings::instance(), &CViewSettings::changed, this, &CConsoleWidget::onViewSettingsChanged);
+	applyWrapMode();
 	m_Log->setFont(fixedFont);
 	layout->addWidget(m_Log, 1);
 
@@ -86,6 +92,53 @@ bool CConsoleWidget::isConsole() const
 	return m_Entry->config().Control;
 }
 
+void CConsoleWidget::applyWrapMode()
+{
+	m_Log->setLineWrapMode(CViewSettings::instance().wrap() ? QPlainTextEdit::WidgetWidth : QPlainTextEdit::NoWrap);
+}
+
+void CConsoleWidget::onViewSettingsChanged()
+{
+	applyWrapMode();
+	reload();
+}
+
+void CConsoleWidget::onLogContextMenu(const QPoint &pos)
+{
+	CViewSettings &settings = CViewSettings::instance();
+	QMenu *menu = m_Log->createStandardContextMenu(pos);
+	menu->addSeparator();
+	QAction *prefix = menu->addAction(tr("Hide log prefixes"));
+	prefix->setCheckable(true);
+	prefix->setChecked(settings.hidePrefix());
+	connect(prefix, &QAction::toggled, &settings, &CViewSettings::setHidePrefix);
+	QAction *wrap = menu->addAction(tr("Wrap lines"));
+	wrap->setCheckable(true);
+	wrap->setChecked(settings.wrap());
+	connect(wrap, &QAction::toggled, &settings, &CViewSettings::setWrap);
+	if (CViewSettings::themeSwitchAvailable())
+	{
+		QMenu *theme = menu->addMenu(tr("Theme"));
+		QActionGroup *group = new QActionGroup(theme);
+		const struct
+		{
+			const char *Name;
+			CViewSettings::TTheme Theme;
+		} themes[3] = { { "System", CViewSettings::System }, { "Light", CViewSettings::Light }, { "Dark", CViewSettings::Dark } };
+		for (int i = 0; i < 3; ++i)
+		{
+			QAction *action = theme->addAction(tr(themes[i].Name));
+			action->setCheckable(true);
+			action->setChecked(settings.theme() == themes[i].Theme);
+			group->addAction(action);
+			CViewSettings::TTheme value = themes[i].Theme;
+			connect(action, &QAction::triggered, &settings, [&settings, value]() { settings.setTheme(value); });
+		}
+	}
+	menu->exec(m_Log->mapToGlobal(pos));
+	delete menu;
+}
+
 void CConsoleWidget::reload()
 {
 	m_Log->clear();
@@ -99,6 +152,8 @@ void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
 {
 	QScrollBar *bar = m_Log->verticalScrollBar();
 	bool atBottom = bar->value() >= bar->maximum();
+	const CViewSettings &settings = CViewSettings::instance();
+	const QString text = settings.hidePrefix() ? CViewSettings::stripPrefix(line.Text) : line.Text;
 	QTextCursor cursor(m_Log->document());
 	cursor.movePosition(QTextCursor::End);
 	QTextCharFormat format;
@@ -108,7 +163,13 @@ void CConsoleWidget::appendLine(const CProcessEntry::CLine &line)
 		format.setForeground(Icons::logColor(line.Color, palette()));
 	if (!m_Log->document()->isEmpty())
 		cursor.insertBlock();
-	cursor.insertText(line.Text, format);
+	// wrapped continuations hang four characters in, so a line's start stays easy to find
+	QTextBlockFormat block;
+	const qreal indent = QFontMetricsF(m_Log->font()).horizontalAdvance("    ");
+	block.setLeftMargin(indent);
+	block.setTextIndent(-indent);
+	cursor.setBlockFormat(block);
+	cursor.insertText(text, format);
 	if (atBottom)
 		bar->setValue(bar->maximum());
 }

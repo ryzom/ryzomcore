@@ -1,0 +1,136 @@
+// Ryzom Core - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2026  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "view_settings.h"
+
+#include <QApplication>
+#include <QGuiApplication>
+#include <QPalette>
+#include <QStyle>
+#include <QRegularExpression>
+#include <QSettings>
+#include <QStyleHints>
+
+namespace {
+
+QSettings settings()
+{
+	return QSettings("Ryzom Core", "servdash_gui");
+}
+
+} // namespace
+
+CViewSettings &CViewSettings::instance()
+{
+	static CViewSettings s_Instance;
+	return s_Instance;
+}
+
+CViewSettings::CViewSettings()
+{
+	QSettings store = settings();
+	m_HidePrefix = store.value("view/hidePrefix", false).toBool();
+	m_Wrap = store.value("view/wrap", false).toBool();
+	m_Theme = (TTheme)qBound(0, store.value("view/theme", 0).toInt(), 2);
+}
+
+bool CViewSettings::themeSwitchAvailable()
+{
+	return true;
+}
+
+void CViewSettings::setHidePrefix(bool hide)
+{
+	if (m_HidePrefix == hide)
+		return;
+	m_HidePrefix = hide;
+	settings().setValue("view/hidePrefix", hide);
+	emit changed();
+}
+
+void CViewSettings::setWrap(bool wrap)
+{
+	if (m_Wrap == wrap)
+		return;
+	m_Wrap = wrap;
+	settings().setValue("view/wrap", wrap);
+	emit changed();
+}
+
+void CViewSettings::setTheme(TTheme theme)
+{
+	if (m_Theme == theme)
+		return;
+	m_Theme = theme;
+	settings().setValue("view/theme", (int)theme);
+	applyTheme();
+	emit changed();
+}
+
+void CViewSettings::applyTheme()
+{
+	// The palette makes the theme, so it works without a platform theme (the offscreen
+	// platform, a bare Linux session). The system palette is the one the application started
+	// with. The colour scheme hint goes along where Qt has it, which also switches the
+	// Windows title bar.
+	static const QPalette s_SystemPalette = QApplication::palette();
+	QPalette palette = s_SystemPalette;
+	if (m_Theme == Light)
+	{
+		palette = QApplication::style()->standardPalette();
+	}
+	else if (m_Theme == Dark)
+	{
+		// the usual dark Fusion palette; the shades of the frames and buttons follow from the window colour
+		palette = QPalette(QColor(53, 53, 53));
+		palette.setColor(QPalette::WindowText, Qt::white);
+		palette.setColor(QPalette::Base, QColor(35, 35, 35));
+		palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+		palette.setColor(QPalette::ToolTipBase, QColor(25, 25, 25));
+		palette.setColor(QPalette::ToolTipText, Qt::white);
+		palette.setColor(QPalette::Text, Qt::white);
+		palette.setColor(QPalette::ButtonText, Qt::white);
+		palette.setColor(QPalette::BrightText, Qt::red);
+		palette.setColor(QPalette::Link, QColor(42, 130, 218));
+		palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+		palette.setColor(QPalette::HighlightedText, Qt::white);
+		palette.setColor(QPalette::PlaceholderText, QColor(140, 140, 140));
+		palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+		palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+		palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+		palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+	}
+	QApplication::setPalette(palette);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+	Qt::ColorScheme scheme = Qt::ColorScheme::Unknown;
+	if (m_Theme == Light)
+		scheme = Qt::ColorScheme::Light;
+	else if (m_Theme == Dark)
+		scheme = Qt::ColorScheme::Dark;
+	QGuiApplication::styleHints()->setColorScheme(scheme);
+#endif
+}
+
+QString CViewSettings::stripPrefix(const QString &line)
+{
+	// `INF  b8c  service.cpp  879 NLNET::IService::main: ` as CWindowDisplayer writes it,
+	// and `b8c: ` as the command log writes it; the thread id is hex, the function has no spaces
+	static const QRegularExpression s_Prefix("^(?:[A-Z]{3} +)?[0-9a-fA-F]{1,8}(?: +\\S+ +\\d+(?: +\\S+)?)?: ");
+	QRegularExpressionMatch match = s_Prefix.match(line);
+	if (!match.hasMatch())
+		return line;
+	return line.mid(match.capturedLength());
+}

@@ -22,6 +22,7 @@
 #include "dashboard.h"
 #include "icons.h"
 #include "shard_lock.h"
+#include "view_settings.h"
 #include "main_window.h"
 
 #include <QApplication>
@@ -42,6 +43,7 @@ int main(int argc, char *argv[])
 	// later: the Fusion of Qt 6.2 drops one pixel lines at a fractional display scale.
 	if (qEnvironmentVariableIsEmpty("QT_STYLE_OVERRIDE"))
 		QApplication::setStyle(QStyleFactory::create("Fusion"));
+	CViewSettings::instance().applyTheme();
 
 	// --screenshot <file.png> renders the window after the services came up and closes it again;
 	// with QT_QPA_PLATFORM=offscreen this checks the layout without a desktop

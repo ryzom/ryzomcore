@@ -37,6 +37,8 @@ TARGET_SOURCES(servdash_gui
   src/process_row.h
   src/shard_lock.cpp
   src/shard_lock.h
+  src/view_settings.cpp
+  src/view_settings.h
 )
 TARGET_LINK_LIBRARIES(servdash_gui PRIVATE Qt::Core Qt::Gui Qt::Widgets Qt::Network)
 IF(WIN32)

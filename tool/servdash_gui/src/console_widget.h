@@ -45,6 +45,8 @@ protected:
 	bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
+	void onLogContextMenu(const QPoint &pos);
+	void onViewSettingsChanged();
 	void onLineAdded(CProcessEntry *entry, const CProcessEntry::CLine &line);
 	void onLinesReset();
 	void onLabelChanged(CProcessEntry *entry, int index, const QString &value);
@@ -56,6 +58,7 @@ private:
 	void reload();
 	void appendLine(const CProcessEntry::CLine &line);
 	void rebuildToolbar();
+	void applyWrapMode();
 	void pressButton(const QString &text, const QString &command);
 
 	CProcessEntry *m_Entry;
