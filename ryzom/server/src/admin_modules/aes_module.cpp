@@ -54,7 +54,16 @@ namespace ADMIN
 	 */
 	CVariable<string> ShutdownRequestFileName("aes","ShutdownRequestFileName", "name of the file to use for shutdown requests", "./global.launch_ctrl", 0, true);
 
-	/** A kind rolling buffer used to count services start from the runner
+    /** A service that exits on its own within RestartBackoffStableRun seconds of its start is
+     *	crashing in a chain: each such exit doubles the delay before it is started again, from
+     *	RestartBackoffBase up to RestartBackoffMax seconds. A longer run, a stop order or a start
+     *	by command reset it.
+     */
+    CVariable<uint32> RestartBackoffStableRun("aes", "RestartBackoffStableRun", "run time in seconds under which an exit counts as a quick exit", 60, 0, true);
+    CVariable<uint32> RestartBackoffBase("aes", "RestartBackoffBase", "delay in seconds before the restart that follows the second quick exit in a row, doubled on each further one", 2, 0, true);
+    CVariable<uint32> RestartBackoffMax("aes", "RestartBackoffMax", "longest delay in seconds between the restarts of a chain crashing service", 5 * 60, 0, true);
+
+    /** A kind rolling buffer used to count services start from the runner
 	 *	script.
 	 */
 	class CRunnerLoopCounter
@@ -208,17 +217,23 @@ namespace ADMIN
 			uint32			LastStateDate;
 			uint32			StopRequestDate;	
 			uint32			StartRequestDate;
-			TModuleProxyPtr	ServiceModule;
+		    /// Exits in a row that came within RestartBackoffStableRun of the start
+		    uint32 QuickExits;
+		    /// No automatic start before this date, the backoff of a chain crashing service
+		    uint32 RestartNotBefore;
+		    TModuleProxyPtr	ServiceModule;
 			CRunnerLoopCounter	RunnerLoopCounter;
 
-			TServiceState()
-				:	DontUseShardOrders(false),
-					RunningState(TRunningState::rs_stopped),
-					PID(0),
-					LastStateDate(0),
-					StopRequestDate(0),
-					StartRequestDate(0)
-			{}
+		    TServiceState()
+		        : DontUseShardOrders(false)
+		        , RunningState(TRunningState::rs_stopped)
+		        , PID(0)
+		        , LastStateDate(0)
+		        , StopRequestDate(0)
+		        , StartRequestDate(0)
+		        , QuickExits(0)
+		        , RestartNotBefore(0)
+		    {}
 		};
 
 		typedef map<TAliasName, TServiceState>	TServiceStates;
@@ -482,7 +497,29 @@ namespace ADMIN
 						}
 						else
 						{
-							// the service is stopped
+						    if (ss.RunningState != TRunningState::rs_stopped)
+						    {
+							    // the service just exited; one nobody asked for that came quickly after the start counts
+							    // towards the restart backoff, a stop order or a long run resets it
+							    if (ss.StopRequestDate != 0 || _ShutdownForPatch || now - ss.StartRequestDate >= RestartBackoffStableRun.get())
+							    {
+								    ss.QuickExits = 0;
+								    ss.RestartNotBefore = 0;
+							    }
+							    else
+							    {
+								    ++ss.QuickExits;
+								    if (ss.QuickExits > 1)
+								    {
+									    uint32 delay = RestartBackoffBase.get() << std::min(ss.QuickExits - 2, 16u);
+									    delay = std::min(delay, std::max(RestartBackoffMax.get(), RestartBackoffBase.get()));
+									    ss.RestartNotBefore = now + delay;
+									    nlwarning("Service '%s' exited %u times in a row within %u s of its start, next start in %u s", aliasName.c_str(), ss.QuickExits, RestartBackoffStableRun.get(), delay);
+								    }
+							    }
+						    }
+
+						    // the service is stopped
 							ss.RunningState = TRunningState::rs_stopped;
 							ss.RunningTags.erase(TRunningTag::rt_locally_started);
 							ss.RunningTags.erase(TRunningTag::rt_externaly_started);
@@ -504,13 +541,14 @@ namespace ADMIN
 						TRunningOrders serviceOrders = _PersistentServiceOrders[aliasName];
 
 						// look if service need to be started
-						if (ss.RunningState == TRunningState::rs_stopped		// its stopped
-							&& serviceOrders == TRunningOrders::ro_activated	// and activated
-							&& shardOrders == TShardOrders::so_autostart_on		// and shard is autostart on
-							&& !ss.DontUseShardOrders							// and this service follow its shard orders
-							&& !_ShutdownForPatch								// and no patch pending
-							)
-						{
+					    if (ss.RunningState == TRunningState::rs_stopped // its stopped
+					        && serviceOrders == TRunningOrders::ro_activated // and activated
+					        && shardOrders == TShardOrders::so_autostart_on // and shard is autostart on
+					        && !ss.DontUseShardOrders // and this service follow its shard orders
+					        && !_ShutdownForPatch // and no patch pending
+					        && now >= ss.RestartNotBefore // and its restart backoff passed
+					    )
+					    {
 							// we must start this service !
 							startService(aliasName);
 						}
@@ -1686,7 +1724,9 @@ retry_pending_command_loop:
 				}
 			}
 
-			if (!startService(serviceAlias))
+		    ss.QuickExits = 0;
+		    ss.RestartNotBefore = 0;
+		    if (!startService(serviceAlias))
 				log.displayNL("Failed to start service '%s'", serviceAlias.c_str());
 			else
 				log.displayNL("Service '%s' start command written", serviceAlias.c_str());
