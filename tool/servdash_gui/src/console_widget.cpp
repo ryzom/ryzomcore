@@ -23,7 +23,6 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPainter>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
@@ -35,31 +34,6 @@ namespace {
 
 const int s_MaxBlocks = 5000;
 const int s_MaxHistory = 200;
-
-/// A one pixel frame around the log view and its scrollbars, painted by a parent widget with
-/// filled edges. The style's own frame strokes a one pixel rectangle, which a fractional
-/// display scale drops on the top and bottom, and a frame painted by the scroll area itself
-/// is covered by its scrollbars.
-class CLogFrame : public QWidget
-{
-public:
-	explicit CLogFrame(QWidget *parent)
-	    : QWidget(parent)
-	{
-	}
-
-protected:
-	void paintEvent(QPaintEvent *) override
-	{
-		QPainter painter(this);
-		const QColor edge = palette().color(QPalette::Mid);
-		const QRect r = rect();
-		painter.fillRect(QRect(r.left(), r.top(), r.width(), 1), edge);
-		painter.fillRect(QRect(r.left(), r.bottom(), r.width(), 1), edge);
-		painter.fillRect(QRect(r.left(), r.top(), 1, r.height()), edge);
-		painter.fillRect(QRect(r.right(), r.top(), 1, r.height()), edge);
-	}
-};
 
 } // namespace
 
@@ -92,18 +66,12 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 		layout->addLayout(top);
 	}
 
-	CLogFrame *logFrame = new CLogFrame(this);
-	QVBoxLayout *logLayout = new QVBoxLayout(logFrame);
-	logLayout->setContentsMargins(1, 1, 1, 1);
-	logLayout->setSpacing(0);
-	m_Log = new QPlainTextEdit(logFrame);
-	m_Log->setFrameShape(QFrame::NoFrame);
-	logLayout->addWidget(m_Log);
+	m_Log = new QPlainTextEdit(this);
 	m_Log->setReadOnly(true);
 	m_Log->setMaximumBlockCount(s_MaxBlocks);
 	m_Log->setLineWrapMode(QPlainTextEdit::NoWrap);
 	m_Log->setFont(fixedFont);
-	layout->addWidget(logFrame, 1);
+	layout->addWidget(m_Log, 1);
 
 	m_Input = new QLineEdit(this);
 	m_Input->setFont(fixedFont);

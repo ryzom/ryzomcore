@@ -20,7 +20,6 @@
 // shuts the shard down when the window closes, like the original.
 
 #include "dashboard.h"
-#include "dashboard_style.h"
 #include "main_window.h"
 
 #include <QApplication>
@@ -36,9 +35,10 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 	QApplication::setApplicationName("Service Dashboard");
 	// Fusion draws the same frames on every platform and follows the system palette, where the
-	// Windows 11 style leaves text edits without edges; QT_STYLE_OVERRIDE still wins
+	// Windows 11 style leaves text edits without edges; QT_STYLE_OVERRIDE still wins. Qt 6.12 or
+	// later: the Fusion of Qt 6.2 drops one pixel lines at a fractional display scale.
 	if (qEnvironmentVariableIsEmpty("QT_STYLE_OVERRIDE"))
-		QApplication::setStyle(new CDashboardStyle(QStyleFactory::create("Fusion")));
+		QApplication::setStyle(QStyleFactory::create("Fusion"));
 
 	// --screenshot <file.png> renders the window after the services came up and closes it again;
 	// with QT_QPA_PLATFORM=offscreen this checks the layout without a desktop

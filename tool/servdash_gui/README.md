@@ -56,4 +56,6 @@ cmake -S tool/servdash_gui -B build_gui -DCMAKE_PREFIX_PATH=<Qt install prefix>
 cmake --build build_gui
 ```
 
-Qt 5.15 or Qt 6 with the Core, Gui, Widgets and Network modules.
+Qt 6.12 or later with the Core, Gui, Widgets and Network modules (the 2026q4 externals). The
+tool also builds with Qt 5.15 and Qt 6.2, but their Fusion style drops one pixel lines at a
+fractional display scale, so frames and scrollbars come out without edges at 125 percent.
