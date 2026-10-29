@@ -22,6 +22,7 @@
 
 #include <QColor>
 #include <QElapsedTimer>
+#include <QMap>
 #include <QObject>
 #include <QProcess>
 #include <QRegularExpression>
@@ -55,6 +56,27 @@ public:
 		Stopped
 	};
 
+	/// What an entry of the service's command table is.
+	enum TCommandKind
+	{
+		/// A command, or a variable (its name starts with an upper case letter).
+		CommandKind,
+		/// A named command handler instance; its commands follow as `instance.command`.
+		HandlerKind,
+		/// A command of a handler instance.
+		MemberKind
+	};
+
+	/// A command of the service, for completion; `instance.command` for a member command.
+	struct CCommand
+	{
+		QString Name;
+		TCommandKind Kind = CommandKind;
+		/// The argument help, such as `<serviceName> [sid=<serviceId>]`.
+		QString Args;
+		QString Help;
+	};
+
 	struct CLine
 	{
 		QString Text;
@@ -84,6 +106,8 @@ public:
 	const QStringList &labels() const { return m_Labels; }
 	/// The pane: console lines, the raw output and the dashboard's notes, in arrival order.
 	const QVector<CLine> &lines() const { return m_Lines; }
+	/// The command table of the service, by name, as it reports it over the console channel.
+	const QMap<QString, CCommand> &commands() const { return m_Commands; }
 	/// Whether the startup rules put the process in the start sequence.
 	bool autoLaunch() const { return m_AutoLaunch; }
 	bool hasLaunchCtrl() const { return m_LaunchCtrl != nullptr; }
@@ -113,6 +137,8 @@ signals:
 	void controlChanged(CProcessEntry *entry);
 	void labelChanged(CProcessEntry *entry, int index, const QString &value);
 	void labelsReset(CProcessEntry *entry);
+	/// The command table changed: an entry came or went, or the table was dropped before a replay.
+	void commandsChanged(CProcessEntry *entry);
 	void lineAdded(CProcessEntry *entry, const CProcessEntry::CLine &line);
 	/// The lines changed as a whole: cleared, or the console part dropped before a replay.
 	void linesReset(CProcessEntry *entry);
@@ -159,6 +185,7 @@ private:
 	QByteArray m_ErrorBuffer;
 	QVector<CLine> m_Lines;
 	QStringList m_Labels;
+	QMap<QString, CCommand> m_Commands;
 	QLocalServer *m_Server = nullptr;
 	QLocalSocket *m_Control = nullptr;
 	QByteArray m_ControlBuffer;

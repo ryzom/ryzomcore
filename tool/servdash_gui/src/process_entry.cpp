@@ -662,8 +662,10 @@ void CProcessEntry::onNewControlConnection()
 				kept.append(line);
 		m_Lines = kept;
 		m_Labels.clear();
+		m_Commands.clear();
 		emit linesReset(this);
 		emit labelsReset(this);
+		emit commandsChanged(this);
 		emit controlChanged(this);
 		if (m_State == Launched)
 		{
@@ -734,6 +736,27 @@ void CProcessEntry::handleControlLine(const QString &line)
 			m_Labels.append(QString());
 		m_Labels[index] = fields.value(2);
 		emit labelChanged(this, index, m_Labels[index]);
+	}
+	else if (type == "command")
+	{
+		CCommand command;
+		command.Name = fields.value(1);
+		if (command.Name.isEmpty())
+			return;
+		const QString kind = fields.value(2);
+		command.Kind = kind == "o" ? HandlerKind : (kind == "m" ? MemberKind : CommandKind);
+		command.Args = fields.value(3);
+		command.Help = fields.value(4);
+		if (m_Commands.size() < 10000 || m_Commands.contains(command.Name))
+		{
+			m_Commands.insert(command.Name, command);
+			emit commandsChanged(this);
+		}
+	}
+	else if (type == "uncommand")
+	{
+		if (m_Commands.remove(fields.value(1)) > 0)
+			emit commandsChanged(this);
 	}
 	else if (type == "log")
 	{

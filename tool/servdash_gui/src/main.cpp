@@ -29,6 +29,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QKeyEvent>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QStyleFactory>
 #include <QTimer>
@@ -51,6 +53,7 @@ int main(int argc, char *argv[])
 	QString screenshotPath;
 	QString windowSize;
 	QString iconDir;
+	QString typedInput;
 	for (int i = 1; i < argc; ++i)
 	{
 		QString arg = QString::fromLocal8Bit(argv[i]);
@@ -60,6 +63,8 @@ int main(int argc, char *argv[])
 			windowSize = QString::fromLocal8Bit(argv[++i]);
 		else if (arg == "--write-icon" && i + 1 < argc)
 			iconDir = QString::fromLocal8Bit(argv[++i]);
+		else if (arg == "--input" && i + 1 < argc)
+			typedInput = QString::fromLocal8Bit(argv[++i]);
 		else if (iniPath.isEmpty())
 			iniPath = arg;
 	}
@@ -115,7 +120,37 @@ int main(int argc, char *argv[])
 	dashboard.start();
 	if (!screenshotPath.isEmpty())
 	{
-		QTimer::singleShot(5000, &window, [&window, screenshotPath]() {
+		QTimer::singleShot(5000, &window, [&window, screenshotPath, typedInput]() {
+			// --input <text> types into the command line of the shown console first; a \t in it is a Tab
+			if (!typedInput.isEmpty())
+			{
+				for (QLineEdit *edit : window.findChildren<QLineEdit *>())
+				{
+					if (!edit->isVisible())
+						continue;
+					edit->setFocus();
+					for (int i = 0; i < typedInput.size(); ++i)
+					{
+						if (typedInput.mid(i, 2) == "\\t")
+						{
+							QKeyEvent tab(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier);
+							QApplication::sendEvent(edit, &tab);
+							++i;
+						}
+						else if (typedInput.mid(i, 2) == "\\T")
+						{
+							QKeyEvent backtab(QEvent::KeyPress, Qt::Key_Backtab, Qt::ShiftModifier);
+							QApplication::sendEvent(edit, &backtab);
+							++i;
+						}
+						else
+						{
+							edit->insert(typedInput.mid(i, 1));
+						}
+					}
+					break;
+				}
+			}
 			window.grab().save(screenshotPath);
 			window.close();
 		});

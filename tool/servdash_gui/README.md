@@ -40,6 +40,13 @@ thread, file and line go, the function is cut to `NLN…dcast`), to show the arr
 each line (both on by default), and to wrap long lines with a hanging indent, and switches the theme
 between the system's, light and dark; the choices are kept across runs.
 
+The command line completes the commands of the service: the rest of the first matching name
+shows in grey after the cursor, with the arguments the command takes, and its help at the right.
+Tab takes the suggestion (a handler instance such as `moduleManager` completes to
+`moduleManager.` and its commands follow), Shift+Tab moves to the next match. The table comes
+from the service itself, live: every command, variable and module command it registers, as it
+registers them, so a module loaded later completes too.
+
 A service without `Control=1` is shown through its pipes, and the input line goes to its stdin.
 
 Stopping a service whose console is not connected yet sends `quit` on its stdin, which a NeL

@@ -16,6 +16,7 @@
 
 #include "console_widget.h"
 
+#include "command_line_edit.h"
 #include "icons.h"
 #include "view_settings.h"
 
@@ -71,7 +72,10 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 	m_Log->setFont(fixedFont);
 	layout->addWidget(m_Log, 1);
 
-	m_Input = new QLineEdit(this);
+	if (entry->config().Control)
+		m_Input = new CCommandLineEdit(entry, this);
+	else
+		m_Input = new QLineEdit(this);
 	m_Input->setFont(fixedFont);
 	m_Input->setPlaceholderText(entry->config().Control ? tr("command") : tr("stdin"));
 	m_Input->installEventFilter(this);

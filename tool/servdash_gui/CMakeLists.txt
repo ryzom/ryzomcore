@@ -19,6 +19,8 @@ ADD_EXECUTABLE(servdash_gui WIN32)
 TARGET_SOURCES(servdash_gui
   PRIVATE
   src/main.cpp
+  src/command_line_edit.cpp
+  src/command_line_edit.h
   src/console_widget.cpp
   src/console_widget.h
   src/dashboard.cpp

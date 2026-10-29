@@ -22,6 +22,7 @@
 #include <QStringList>
 #include <QWidget>
 
+class CCommandLineEdit;
 class QLineEdit;
 class QPlainTextEdit;
 class QTextCursor;
@@ -31,6 +32,7 @@ class QVBoxLayout;
 /// showed it: the toolbar of labels and command buttons in fixed columns, the log with a
 /// colour per log type, and the command line with its history. Whatever the process writes
 /// to stdout or stderr besides, and the dashboard's own notes, appear in the same log in grey.
+/// The command line completes the commands of the service (CCommandLineEdit).
 /// A plain process shows its output and gets a line for its stdin.
 class CConsoleWidget : public QWidget
 {
@@ -68,6 +70,7 @@ private:
 	QWidget *m_Toolbar = nullptr;
 	QVBoxLayout *m_ToolbarLayout = nullptr;
 	QPlainTextEdit *m_Log = nullptr;
+	/// A CCommandLineEdit for a service console, a plain QLineEdit for stdin.
 	QLineEdit *m_Input = nullptr;
 	QList<QWidget *> m_LabelWidgets;
 	QStringList m_History;
