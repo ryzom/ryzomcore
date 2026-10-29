@@ -618,7 +618,7 @@ function game:updateTargetOfTargetUI()
         game._totDisplaySlot = slot
         game._totDisplayNameId = id
         runAH(nil, "set_target_of_target_name",
-              "target=ui:interface:target_of_target:header_opened:target_info:name:uc_hardtext")
+              "target=ui:interface:target_of_target:header_opened:target_info:name:hardtext")
     end
 
     row.active = true

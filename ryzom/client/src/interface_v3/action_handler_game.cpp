@@ -2149,7 +2149,7 @@ class CActionHandlerSetTargetOfTargetName : public IActionHandler
                 {
                     string resolved = secondary->getDisplayName();
                     if (!resolved.empty() && resolved != "Name")
-                        displayed = STRING_MANAGER::CStringManagerClient::getLocalizedName(resolved);
+                        displayed = resolved;
                     nameId = secondary->getNameId();
                 }
             }
