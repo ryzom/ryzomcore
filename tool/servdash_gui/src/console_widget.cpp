@@ -23,6 +23,7 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPainter>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
@@ -34,6 +35,35 @@ namespace {
 
 const int s_MaxBlocks = 5000;
 const int s_MaxHistory = 200;
+
+/// The log view draws its own one pixel frame over the style's. With a fractional display
+/// scale the Fusion frame of a scroll area loses its top and bottom lines (the stroked rect
+/// lands between device pixels), while filled rects always cover at least one.
+class CLogView : public QPlainTextEdit
+{
+public:
+	explicit CLogView(QWidget *parent)
+	    : QPlainTextEdit(parent)
+	{
+	}
+
+protected:
+	bool event(QEvent *e) override
+	{
+		bool handled = QPlainTextEdit::event(e);
+		if (e->type() == QEvent::Paint)
+		{
+			QPainter painter(this);
+			const QColor edge = palette().color(QPalette::Mid);
+			const QRect r = rect();
+			painter.fillRect(QRect(r.left(), r.top(), r.width(), 1), edge);
+			painter.fillRect(QRect(r.left(), r.bottom(), r.width(), 1), edge);
+			painter.fillRect(QRect(r.left(), r.top(), 1, r.height()), edge);
+			painter.fillRect(QRect(r.right(), r.top(), 1, r.height()), edge);
+		}
+		return handled;
+	}
+};
 
 } // namespace
 
@@ -65,7 +95,7 @@ CConsoleWidget::CConsoleWidget(CProcessEntry *entry, QWidget *parent)
 		layout->addLayout(top);
 	}
 
-	m_Log = new QPlainTextEdit(this);
+	m_Log = new CLogView(this);
 	m_Log->setReadOnly(true);
 	m_Log->setMaximumBlockCount(s_MaxBlocks);
 	m_Log->setLineWrapMode(QPlainTextEdit::NoWrap);

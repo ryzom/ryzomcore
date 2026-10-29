@@ -28,6 +28,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QStyleFactory>
+#include <QTimer>
 
 int main(int argc, char *argv[])
 {
@@ -38,7 +39,18 @@ int main(int argc, char *argv[])
 	if (qEnvironmentVariableIsEmpty("QT_STYLE_OVERRIDE"))
 		QApplication::setStyle(QStyleFactory::create("Fusion"));
 
-	QString iniPath = argc > 1 ? QString::fromLocal8Bit(argv[1]) : QString();
+	// --screenshot <file.png> renders the window after the services came up and closes it again;
+	// with QT_QPA_PLATFORM=offscreen this checks the layout without a desktop
+	QString iniPath;
+	QString screenshotPath;
+	for (int i = 1; i < argc; ++i)
+	{
+		QString arg = QString::fromLocal8Bit(argv[i]);
+		if (arg == "--screenshot" && i + 1 < argc)
+			screenshotPath = QString::fromLocal8Bit(argv[++i]);
+		else if (iniPath.isEmpty())
+			iniPath = arg;
+	}
 	if (iniPath.isEmpty())
 		iniPath = QFileDialog::getOpenFileName(nullptr, "Open a dashboard", QString(), "Dashboard files (*.ini);;All files (*)");
 	if (iniPath.isEmpty())
@@ -65,5 +77,12 @@ int main(int argc, char *argv[])
 	CMainWindow window(&dashboard);
 	window.show();
 	dashboard.start();
+	if (!screenshotPath.isEmpty())
+	{
+		QTimer::singleShot(5000, &window, [&window, screenshotPath]() {
+			window.grab().save(screenshotPath);
+			window.close();
+		});
+	}
 	return app.exec();
 }

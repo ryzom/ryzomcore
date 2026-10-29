@@ -53,7 +53,7 @@ void CMainWindow::createPanels()
 	QWidget *column = new QWidget();
 	QVBoxLayout *columnLayout = new QVBoxLayout(column);
 	columnLayout->setContentsMargins(6, 6, 6, 6);
-	columnLayout->setSpacing(2);
+	columnLayout->setSpacing(4);
 
 	QPushButton *launchAll = new QPushButton(Icons::play(), tr("Launch All"), column);
 	launchAll->setToolTip(tr("Start every process of the dashboard in order"));

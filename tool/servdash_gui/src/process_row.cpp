@@ -67,10 +67,10 @@ CProcessRow::CProcessRow(CProcessEntry *entry, QWidget *parent)
     : QWidget(parent)
     , m_Entry(entry)
 {
-	// the row of the original: the light, the start/stop button, the title button
-	setAutoFillBackground(true);
+	// the row of the original: the light, the start/stop button, the title button; no margins,
+	// so the rows line up with the two buttons above them
 	QHBoxLayout *layout = new QHBoxLayout(this);
-	layout->setContentsMargins(3, 2, 3, 2);
+	layout->setContentsMargins(0, 0, 0, 0);
 	layout->setSpacing(4);
 
 	m_Light = new QLabel(this);
@@ -100,10 +100,8 @@ CProcessRow::CProcessRow(CProcessEntry *entry, QWidget *parent)
 
 void CProcessRow::setSelected(bool selected)
 {
-	// the highlight behind the row, as the original painted the selected control
+	// the selected title button takes the highlight colours
 	m_Selected = selected;
-	setBackgroundRole(selected ? QPalette::Highlight : QPalette::Window);
-	// the title button takes the highlight too, so the selection reads at a glance
 	m_Title->setStyleSheet(selected ? s_SelectedTitleStyle : s_TitleStyle);
 	update();
 }
