@@ -25,8 +25,7 @@ Each daemon registers itself in a per-user directory (`%LOCALAPPDATA%\servdash_c
 on Windows, `$XDG_RUNTIME_DIR/servdash_cli.sessions` or `/tmp/servdash_cli.sessions.<uid>` on
 Linux), so a running dashboard can be named from any directory without its ini path.
 
-Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F9 raw output or console,
-F10 detach, F12 twice to stop everything and quit, Tab or Alt+Up/Down to select a process,
+Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F10 detach, F12 twice to stop everything and quit, Tab or Alt+Up/Down to select a process,
 Alt+1..9 to press a console button, PgUp/PgDn to scroll, Enter to send the input line.
 The mouse works too: click a process, its start/stop glyph, or a console button.
 
@@ -39,8 +38,10 @@ dashboard, which executes the commands typed or clicked there. The `--ctrl` argu
 overrides `WindowStyle`, so a service started by hand outside the dashboard still opens its
 own window as its config file says. `ReadyPattern` applies to the title the service reports,
 exactly as it applied to the window title before; the patch terminal keeps generating
-`^[^*].+Service Console`. F9 shows the raw stdout and stderr of the service instead, which
-is where an assert or a crash report ends up.
+`^[^*].+Service Console`. Whatever the service writes to stdout or stderr besides its log, an
+assert or a crash report for instance, shows in the same pane in grey, as do the daemon's
+notes about the process; the service does not echo its log on stdout while it runs under a
+dashboard.
 
 A control section is stopped with `quit` over the channel, or on stdin while the channel is
 not connected; its `ShutdownCmd` and `ShutdownInput` keys are not used. A service that never

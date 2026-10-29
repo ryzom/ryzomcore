@@ -28,7 +28,7 @@ use crate::config::{DashCfg, SectionCfg, PRIORITY_NONE};
 use crate::ipc;
 use crate::launch_ctrl::{self, LaunchCtrl};
 use crate::log;
-use crate::proto::{self, ClientMsg, Color, DaemonMsg, ProcState, ProcessInfo, Stream, StyledLine};
+use crate::proto::{self, ClientMsg, Color, DaemonMsg, ProcState, ProcessInfo, StyledLine};
 use crate::session::Session;
 use crate::spawn;
 use anyhow::{Context, Result};
@@ -74,8 +74,8 @@ struct Proc {
 	gen: u64,
 	child: Option<Child>,
 	stdin: Option<UnboundedSender<String>>,
-	output: VecDeque<StyledLine>,
-	console: VecDeque<StyledLine>,
+	/// Console lines, raw output and notes, in arrival order.
+	lines: VecDeque<StyledLine>,
 	labels: Vec<String>,
 	control: Option<(u64, UnboundedSender<String>)>,
 	control_endpoint: Option<String>,
@@ -325,8 +325,7 @@ impl Daemon {
 				gen: 0,
 				child: None,
 				stdin: None,
-				output: VecDeque::new(),
-				console: VecDeque::new(),
+				lines: VecDeque::new(),
 				labels: Vec::new(),
 				control: None,
 				control_endpoint,
@@ -353,21 +352,25 @@ impl Daemon {
 		self.broadcast(DaemonMsg::Process { info });
 	}
 
+	/// A raw line: process output or a note of the daemon.
 	fn push_output(&mut self, idx: usize, line: StyledLine) {
-		push_capped(&mut self.procs[idx].output, line.clone());
-		let name = self.procs[idx].cfg.name.clone();
-		self.broadcast(DaemonMsg::Lines { name, stream: Stream::Output, lines: vec![line] });
+		self.push_lines(idx, vec![line.into_raw()]);
 	}
 
+	/// Console lines from the channel.
 	fn push_console(&mut self, idx: usize, lines: Vec<StyledLine>) {
+		self.push_lines(idx, lines);
+	}
+
+	fn push_lines(&mut self, idx: usize, lines: Vec<StyledLine>) {
 		if lines.is_empty() {
 			return;
 		}
 		for line in &lines {
-			push_capped(&mut self.procs[idx].console, line.clone());
+			push_capped(&mut self.procs[idx].lines, line.clone());
 		}
 		let name = self.procs[idx].cfg.name.clone();
-		self.broadcast(DaemonMsg::Lines { name, stream: Stream::Console, lines });
+		self.broadcast(DaemonMsg::Lines { name, lines });
 	}
 
 	fn note(&mut self, idx: usize, text: String, color: Color) {
@@ -689,11 +692,12 @@ impl Daemon {
 	fn on_control_connected(&mut self, idx: usize, conn: u64, tx: UnboundedSender<String>) {
 		let p = &mut self.procs[idx];
 		p.control = Some((conn, tx));
-		// the service replays its history on connection
-		p.console.clear();
+		// the service replays its history on connection, so its earlier lines go; the raw ones stay
+		p.lines.retain(|line| line.raw);
 		p.labels.clear();
 		let name = p.cfg.name.clone();
-		self.broadcast(DaemonMsg::Clear { name, stream: Stream::Console });
+		let lines = p.lines.iter().cloned().collect();
+		self.broadcast(DaemonMsg::Snapshot { name, lines });
 		if self.procs[idx].state == ProcState::Launched {
 			self.set_state(idx, ProcState::Captured);
 			if self.procs[idx].ready_re.is_none() {
@@ -790,10 +794,7 @@ impl Daemon {
 		let processes = self.procs.iter().map(Proc::info).collect();
 		send(DaemonMsg::Processes { processes });
 		for p in &self.procs {
-			send(DaemonMsg::Snapshot { name: p.cfg.name.clone(), stream: Stream::Output, lines: p.output.iter().cloned().collect() });
-			if p.cfg.control {
-				send(DaemonMsg::Snapshot { name: p.cfg.name.clone(), stream: Stream::Console, lines: p.console.iter().cloned().collect() });
-			}
+			send(DaemonMsg::Snapshot { name: p.cfg.name.clone(), lines: p.lines.iter().cloned().collect() });
 		}
 		self.clients.insert(id, tx);
 	}
@@ -874,8 +875,8 @@ impl Daemon {
 			}
 			ClientMsg::ClearConsole { name } => {
 				if let Some(idx) = self.index_of(&name) {
-					self.procs[idx].console.clear();
-					self.broadcast(DaemonMsg::Clear { name, stream: Stream::Console });
+					self.procs[idx].lines.clear();
+					self.broadcast(DaemonMsg::Clear { name });
 				}
 			}
 			ClientMsg::Shutdown => {

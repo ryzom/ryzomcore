@@ -15,8 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Messages between the daemon and its attached clients: one JSON document per line.
-//! The daemon streams every process to every client, and a client keeps the buffers of all
+//! The daemon streams every process to every client, and a client keeps the lines of all
 //! of them, so switching panes needs no round trip and a reattach gets a full snapshot.
+//! Each process has one stream: its console log, whatever it writes to stdout or stderr
+//! besides, and the daemon's notes, in arrival order; raw lines are tagged.
 
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncWrite, AsyncWriteExt};
@@ -76,29 +78,28 @@ fn is_default_color(c: &Color) -> bool {
 #[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq, Eq)]
 pub struct StyledLine {
 	pub spans: Vec<Span>,
+	/// From stdout or stderr, or a note of the daemon, rather than from the console channel.
+	#[serde(default, skip_serializing_if = "std::ops::Not::not")]
+	pub raw: bool,
 }
 
 impl StyledLine {
 	pub fn plain(text: impl Into<String>) -> StyledLine {
-		StyledLine { spans: vec![Span { text: text.into(), fg: Color::Default, bold: false }] }
+		StyledLine { spans: vec![Span { text: text.into(), fg: Color::Default, bold: false }], raw: false }
 	}
 
 	pub fn colored(text: impl Into<String>, fg: Color) -> StyledLine {
-		StyledLine { spans: vec![Span { text: text.into(), fg, bold: false }] }
+		StyledLine { spans: vec![Span { text: text.into(), fg, bold: false }], raw: false }
+	}
+
+	pub fn into_raw(mut self) -> StyledLine {
+		self.raw = true;
+		self
 	}
 
 	pub fn text(&self) -> String {
 		self.spans.iter().map(|s| s.text.as_str()).collect()
 	}
-}
-
-/// Which buffer of a process a line belongs to.
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Stream {
-	/// stdout and stderr of the process, plus the dashboard's own notes about it.
-	Output,
-	/// The NeL console log received over the control channel.
-	Console,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -168,19 +169,17 @@ pub enum DaemonMsg {
 		index: usize,
 		value: String,
 	},
+	/// The whole pane of a process: console lines, raw output and the daemon's notes in arrival order.
 	Snapshot {
 		name: String,
-		stream: Stream,
 		lines: Vec<StyledLine>,
 	},
 	Lines {
 		name: String,
-		stream: Stream,
 		lines: Vec<StyledLine>,
 	},
 	Clear {
 		name: String,
-		stream: Stream,
 	},
 	Notice {
 		text: String,

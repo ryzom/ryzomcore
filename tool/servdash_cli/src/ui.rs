@@ -19,7 +19,7 @@
 //! it. For a NeL service the console shows the service's own toolbar (labels and command
 //! buttons), its log and a command line, as the Win32 service window does.
 
-use crate::proto::{self, ClientMsg, DaemonMsg, ProcState, ProcessInfo, Stream, StyledLine};
+use crate::proto::{self, ClientMsg, DaemonMsg, ProcState, ProcessInfo, StyledLine};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind};
 use ratatui::layout::{Constraint, Layout, Position, Rect};
 use ratatui::style::{Color, Modifier, Style};
@@ -40,8 +40,8 @@ pub enum Action {
 
 struct ProcView {
 	info: ProcessInfo,
-	output: Vec<StyledLine>,
-	console: Vec<StyledLine>,
+	/// Console lines, raw output and the daemon's notes, in arrival order.
+	lines: Vec<StyledLine>,
 	/// Lines scrolled up from the bottom; zero follows the output.
 	scroll: usize,
 	input: String,
@@ -49,49 +49,16 @@ struct ProcView {
 	/// Position in the history while browsing it, with the draft kept aside.
 	history_pos: Option<usize>,
 	draft: String,
-	/// Show the raw process output instead of the console of a NeL service.
-	raw: bool,
 }
 
 impl ProcView {
 	fn new(info: ProcessInfo) -> ProcView {
-		ProcView {
-			info,
-			output: Vec::new(),
-			console: Vec::new(),
-			scroll: 0,
-			input: String::new(),
-			history: Vec::new(),
-			history_pos: None,
-			draft: String::new(),
-			raw: false,
-		}
+		ProcView { info, lines: Vec::new(), scroll: 0, input: String::new(), history: Vec::new(), history_pos: None, draft: String::new() }
 	}
 
-	fn shows_console(&self) -> bool {
-		self.info.control && !self.raw
-	}
-
-	fn buffer(&self, stream: Stream) -> &Vec<StyledLine> {
-		match stream {
-			Stream::Output => &self.output,
-			Stream::Console => &self.console,
-		}
-	}
-
-	fn buffer_mut(&mut self, stream: Stream) -> &mut Vec<StyledLine> {
-		match stream {
-			Stream::Output => &mut self.output,
-			Stream::Console => &mut self.console,
-		}
-	}
-
-	fn visible_stream(&self) -> Stream {
-		if self.shows_console() {
-			Stream::Console
-		} else {
-			Stream::Output
-		}
+	/// A NeL service: the input line is a command and the toolbar shows.
+	fn is_console(&self) -> bool {
+		self.info.control
 	}
 
 	/// The command buttons of the toolbar in order: (text, command).
@@ -180,12 +147,14 @@ fn to_color(color: proto::Color) -> Color {
 	}
 }
 
-fn to_line(line: &StyledLine) -> Line<'static> {
+fn to_line(line: &StyledLine, console: bool) -> Line<'static> {
 	let spans: Vec<Span<'static>> = line
 		.spans
 		.iter()
 		.map(|s| {
-			let mut style = Style::default().fg(to_color(s.fg));
+			// stdout and stderr beside a console log read apart in grey
+			let fg = if console && line.raw && s.fg == proto::Color::Default { Color::DarkGray } else { to_color(s.fg) };
+			let mut style = Style::default().fg(fg);
 			if s.bold {
 				style = style.add_modifier(Modifier::BOLD);
 			}
@@ -230,7 +199,6 @@ impl App {
 					if let Some(prev) = old.iter().find(|p| p.info.name == view.info.name) {
 						view.input = prev.input.clone();
 						view.history = prev.history.clone();
-						view.raw = prev.raw;
 					}
 					self.procs.push(view);
 				}
@@ -251,17 +219,19 @@ impl App {
 					labels[index] = value;
 				}
 			}
-			DaemonMsg::Snapshot { name, stream, lines } => {
-				if let Some(idx) = self.index_of(&name) {
-					*self.procs[idx].buffer_mut(stream) = lines;
-				}
-			}
-			DaemonMsg::Lines { name, stream, lines } => {
+			DaemonMsg::Snapshot { name, lines } => {
 				if let Some(idx) = self.index_of(&name) {
 					let view = &mut self.procs[idx];
-					let follows = view.scroll == 0 || view.visible_stream() != stream;
+					view.lines = lines;
+					view.scroll = view.scroll.min(view.lines.len());
+				}
+			}
+			DaemonMsg::Lines { name, lines } => {
+				if let Some(idx) = self.index_of(&name) {
+					let view = &mut self.procs[idx];
+					let follows = view.scroll == 0;
 					let count = lines.len();
-					let buffer = view.buffer_mut(stream);
+					let buffer = &mut view.lines;
 					buffer.extend(lines);
 					if buffer.len() > MAX_CLIENT_LINES {
 						let excess = buffer.len() - MAX_CLIENT_LINES;
@@ -274,9 +244,9 @@ impl App {
 					}
 				}
 			}
-			DaemonMsg::Clear { name, stream } => {
+			DaemonMsg::Clear { name } => {
 				if let Some(idx) = self.index_of(&name) {
-					self.procs[idx].buffer_mut(stream).clear();
+					self.procs[idx].lines.clear();
 					self.procs[idx].scroll = 0;
 				}
 			}
@@ -300,7 +270,7 @@ impl App {
 
 	fn scroll_by(&mut self, delta: isize) {
 		if let Some(view) = self.procs.get_mut(self.selected) {
-			let total = view.buffer(view.visible_stream()).len();
+			let total = view.lines.len();
 			let height = self.layout.content.height.max(1) as usize;
 			let max = total.saturating_sub(height);
 			let next = (view.scroll as isize + delta).clamp(0, max as isize) as usize;
@@ -353,7 +323,7 @@ impl App {
 			}
 		}
 		let name = view.info.name.clone();
-		if view.shows_console() {
+		if view.is_console() {
 			if text == "CLEAR" {
 				return Some(Action::Send(ClientMsg::ClearConsole { name }));
 			}
@@ -375,7 +345,7 @@ impl App {
 
 	fn press_button(&mut self, number: usize) -> Option<Action> {
 		let view = self.procs.get(self.selected)?;
-		if !view.shows_console() {
+		if !view.is_console() {
 			return None;
 		}
 		let (text, command) = view.buttons().into_iter().nth(number.checked_sub(1)?)?;
@@ -403,15 +373,6 @@ impl App {
 			}
 			KeyCode::F(7) => actions.push(Action::Send(ClientMsg::StartAll)),
 			KeyCode::F(8) => actions.push(Action::Send(ClientMsg::StopAll)),
-			KeyCode::F(9) => {
-				if let Some(view) = self.procs.get_mut(self.selected) {
-					if view.info.control {
-						view.raw = !view.raw;
-						view.scroll = 0;
-						self.dirty = true;
-					}
-				}
-			}
 			KeyCode::F(10) => actions.push(Action::Detach),
 			KeyCode::F(12) => {
 				let armed = self.quit_armed.is_some_and(|t| t.elapsed() < QUIT_ARM_TIME);
@@ -456,7 +417,7 @@ impl App {
 			}
 			KeyCode::Char('l') | KeyCode::Char('L') if ctrl => {
 				if let Some(view) = self.procs.get(self.selected) {
-					if view.shows_console() {
+					if view.is_console() {
 						actions.push(Action::Send(ClientMsg::ClearConsole { name: view.info.name.clone() }));
 					}
 				}
@@ -572,13 +533,7 @@ impl App {
 
 		let mut title = view.info.title.clone();
 		if view.info.control {
-			title.push_str(if view.raw {
-				"  [raw output]"
-			} else if view.info.control_connected {
-				"  [console]"
-			} else {
-				"  [console: not connected]"
-			});
+			title.push_str(if view.info.control_connected { "  [console]" } else { "  [console: not connected]" });
 		}
 		let block = Block::bordered().title(format!(" {} ", truncate(&title, area.width.saturating_sub(4) as usize)));
 		let inner = block.inner(area);
@@ -586,7 +541,7 @@ impl App {
 
 		// toolbar rows: labels split on the empty separator
 		let mut rows: Vec<Vec<String>> = vec![Vec::new()];
-		if view.shows_console() {
+		if view.is_console() {
 			for label in &view.info.labels {
 				if label.is_empty() {
 					rows.push(Vec::new());
@@ -634,14 +589,15 @@ impl App {
 			frame.render_widget(Paragraph::new(toolbar_lines), toolbar);
 		}
 
-		let buffer = view.buffer(view.visible_stream());
+		let buffer = &view.lines;
 		let height = content.height as usize;
 		let total = buffer.len();
 		let end = total.saturating_sub(view.scroll.min(total));
 		let start = end.saturating_sub(height);
 		// the right column is the scrollbar once there is more than fits
 		let [text_area, bar_area] = Layout::horizontal([Constraint::Min(1), Constraint::Length(if total > height { 1 } else { 0 })]).areas(content);
-		let lines: Vec<Line> = buffer[start..end].iter().map(to_line).collect();
+		let console = view.is_console();
+		let lines: Vec<Line> = buffer[start..end].iter().map(|line| to_line(line, console)).collect();
 		frame.render_widget(Paragraph::new(lines), text_area);
 		if total > height && bar_area.width > 0 {
 			let mut state = ScrollbarState::new(total.saturating_sub(height)).position(start).viewport_content_length(height);
@@ -677,8 +633,7 @@ impl App {
 		let line = match notice {
 			Some(text) => Line::from(Span::styled(truncate(&text, area.width as usize), Style::default().fg(Color::Black).bg(Color::Yellow))),
 			None => {
-				let keys =
-					"F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F9 Raw/Console  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
+				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
 				Line::from(Span::styled(truncate(keys, area.width as usize), Style::default().fg(Color::DarkGray)))
 			}
 		};
