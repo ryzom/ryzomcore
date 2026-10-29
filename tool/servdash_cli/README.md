@@ -46,7 +46,12 @@ The mouse works too: click a process, its start/stop glyph, or a console button.
 The shard scripts of the quick start (`shard_mainland.bat` and the others) open servdash_gui by
 default. With `"Headless": true` in `.nel/config.json` they run `servdash_cli <shard>.ini` in the
 console instead, for a development box reached over SSH: F10 detaches, the same script attaches
-again. The executable is taken from `external/utils` (the `Paths.Servdash` entry of the config).
+again. The quick start builds servdash_cli with `build_docker\tools_xplat_build.bat` in its
+`ryzombuild_xplat_tools` Docker image (Rust, cargo-xwin), for Windows into
+`build_docker/tools_xplat/x86_64-pc-windows-msvc/release` and for a generic Linux (static musl)
+into `build_docker/tools_xplat/x86_64-unknown-linux-musl/release`. The shard patch of the build
+pipeline (`c1_shard_patch.py`) puts the Linux one into `admin_install.tgz` as `bin/servdash_cli`,
+so it reaches the servers with the patchman package.
 
 ## NeL services and the console channel
 

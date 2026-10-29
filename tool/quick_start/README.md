@@ -12,7 +12,13 @@ Run the scripts in this order to configure the toolchains:
 
 The shard scripts (shard_mainland.bat and the others, web_on.bat) open servdash_gui from the tools
 build. Set `"Headless": true` in `.nel/config.json` to get servdash_cli in the console instead, for a
-box reached over SSH; it comes from external/utils, next to the Win32 servdash that is the fallback.
+box reached over SSH. The Win32 servdash of external/utils is the fallback when neither is built.
+
+Tools that are not C++ (servdash_cli, a Rust crate) are built by `build_docker/tools_xplat_build.bat`
+in the `ryzombuild_xplat_tools` Docker image, for a generic Linux (static musl) and for Windows
+(MSVC target through cargo-xwin), into `build_docker/tools_xplat/<target>/release`. The crates are
+listed in `common.py` (`NeLXplatTools`). The Linux servdash_cli goes into `admin_install.tgz` as
+`bin/servdash_cli` with the shard patch (`c1_shard_patch.py`).
 
 To optimize your server build, check your native compiler options. Copy the -march and -mtune options, and add them to the CUSTOM_FLAGS option in CMake
 ```

@@ -148,15 +148,24 @@ def FindLuaVersion(prefixPaths):
 	for dir in prefixPaths:
 		luaHeader = os.path.join(dir, "include/lua.h")
 		if os.path.isfile(luaHeader):
+			# Lua 5.5 defines LUA_VERSION_NUM from LUA_VERSION_MAJOR_N and LUA_VERSION_MINOR_N, earlier versions as a number
+			major = None
+			minor = None
 			fi = open(luaHeader)
 			line = fi.readline()
 			while line:
-				if "LUA_VERSION_NUM" in line:
+				syms = line.strip().split()
+				if len(syms) >= 3 and syms[0] == "#define":
+					if syms[1] == "LUA_VERSION_MAJOR_N":
+						major = int(syms[2])
+					elif syms[1] == "LUA_VERSION_MINOR_N":
+						minor = int(syms[2])
+					elif syms[1] == "LUA_VERSION_NUM" and syms[2].isdigit():
+						fi.close()
+						return int(syms[2])
+				if major is not None and minor is not None:
 					fi.close()
-					line = line.strip()
-					syms = line.split()
-					vers = syms[len(syms) - 1]
-					return int(vers)
+					return major * 100 + minor
 				line = fi.readline()
 			fi.close()
 	# TODO: For linux, if hunter, don't care,

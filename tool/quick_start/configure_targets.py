@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from quick_start.common import *
 from quick_start.find_external import *
 from quick_start.find_targets import *
+from quick_start.find_docker import *
 
 NeLSpecClient = 1
 NeLSpecServer = 2
@@ -22,7 +23,8 @@ NeLParallelFiles = int(max(NeLParallel // NeLParallelProjects, 1))
 Targets = {
 	"Native": { },
 	"Client": { },
-	"PluginMax": { }
+	"PluginMax": { },
+	"XplatTools": None
 }
 
 def EscapeArg(arg):
@@ -355,8 +357,13 @@ def GeneratePathScript():
 		fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + Targets["Native"]["client_dev"]["QtPluginBin"]) + "\n")
 	else:
 		fo.write("set " + EscapeArg("RC_QT_PLUGIN_DIR=" + NeLConfig["Fallback"]["QtPluginBin"]) + "\n")
+	# The cross-platform tools (servdash_cli) as the Docker build leaves them, per platform
+	xplatDir = os.path.join(NeLRootDir, os.path.normcase(NeLBuildDockerDirName + "/tools_xplat"))
+	if Targets["XplatTools"]:
+		xplatDir = os.path.join(NeLRootDir, os.path.normcase(Targets["XplatTools"]["BuildDir"]))
+	fo.write("set " + EscapeArg("RC_TOOLS_XPLAT_DIR_WIN=" + os.path.join(xplatDir, NeLXplatToolsTargets["win"], "release")) + "\n")
+	fo.write("set " + EscapeArg("RC_TOOLS_XPLAT_DIR_LINUX=" + os.path.join(xplatDir, NeLXplatToolsTargets["linux"], "release")) + "\n")
 	# The service dashboard the shard scripts open: servdash_gui in a window, or servdash_cli in the console when Headless
-	fo.write("set " + EscapeArg("RC_SERVDASH_DIR=" + NeLServdashDir) + "\n")
 	if NeLConfig["Headless"]:
 		fo.write("set RC_HEADLESS=1\n")
 	else:
@@ -750,6 +757,74 @@ def ConfigureTarget(spec, name, fv, target):
 			WriteCmdCall(fo_build_game_dev, buildScript, safeName + "_bld")
 	return res
 
+# *** cross-platform tools: Rust crates built in Docker, no CMake ***
+
+def GenerateXplatEnv(file, relBuildDir, buildDir, image):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("rem Ryzom Core Cross-Platform Tools (" + image + ")\n")
+	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
+	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
+	fo.write("set PATH=%RC_PATH%;%PATH%\n")
+	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
+	for var, interactive in [ ("RC_DOCKER", False), ("RC_DOCKER_IT", True) ]:
+		fo.write("set " + var + "=")
+		dockerCmdStr = ""
+		for cmd in DockerXplatCommand(image, relBuildDir, interactive):
+			dockerCmdStr += EscapeArgOpt(cmd) + " "
+		fo.write(dockerCmdStr[:-1] + "\n")
+	fo.close()
+
+def GenerateXplatCmd(file, envScript, image):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
+	fo.write("title Terminal - Ryzom Core Cross-Platform Tools - " + image + "\n")
+	fo.write("%RC_DOCKER_IT% bash\n")
+	fo.close()
+
+def GenerateXplatBuild(file, envScript, image):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("call " + EscapeArg(envScript) + "\n")
+	fo.write("title Build - Ryzom Core Cross-Platform Tools - " + image + "\n")
+	for crate in NeLXplatTools:
+		safeName = crate.replace("/", "_")
+		for key in NeLXplatToolsTargets:
+			label = safeName + "_" + key
+			fo.write(":" + label + "\n")
+			fo.write("@echo on\n")
+			cargo = "cargo xwin build" if key == "win" else "cargo build"
+			fo.write("%RC_DOCKER% " + cargo + " --release --target " + NeLXplatToolsTargets[key] + " --manifest-path " + DockerRootPath("code/" + crate + "/Cargo.toml") + "\n")
+			fo.write("@echo off\n")
+			WritePauseGoto(fo, ":" + label)
+	fo.write(":done\n")
+	fo.close()
+
+def ConfigureXplatTools():
+	image = NeLXplatToolsImage
+	if not FoundDocker or not image in FoundDocker:
+		return None
+	res = { }
+	relPath = os.path.join(NeLBuildDockerDirName, "tools_xplat")
+	buildDir = os.path.join(NeLRootDir, relPath)
+	os.makedirs(buildDir, exist_ok=True)
+	res["BuildScriptDir"] = NeLBuildDockerDirName
+	res["BuildDir"] = relPath.replace("\\", "/")
+	res["Image"] = image
+	res["Tools"] = NeLXplatTools
+	res["Targets"] = NeLXplatToolsTargets
+	envScript = os.path.join(NeLBuildDockerDir, "tools_xplat_env." + NeLScriptExt)
+	buildScript = os.path.join(NeLBuildDockerDir, "tools_xplat_build." + NeLScriptExt)
+	GenerateXplatEnv(envScript, relPath, buildDir, image)
+	GenerateXplatCmd(os.path.join(NeLBuildDockerDir, "tools_xplat_terminal." + NeLScriptExt), envScript, image)
+	GenerateXplatBuild(buildScript, envScript, image)
+	# cargo configures by itself, so only the build is called from the combined scripts
+	WriteCmdCall(fo_configure_rebuild_all, buildScript, "tools_xplat_bld")
+	WriteCmdCall(fo_build_all, buildScript, "tools_xplat_bld")
+	WriteCmdCall(fo_build_game_dev, buildScript, "tools_xplat_bld")
+	return res
+
 Targets["Native"]["client_dev"] = ConfigureTarget(NeLSpecClient, "client_dev", False, NeLTargetClientDev)
 Targets["Native"]["server_dev"] = ConfigureTarget(NeLSpecServer, "server_dev", False, NeLTargetServerDev)
 for client in NeLTargetClient:
@@ -759,6 +834,7 @@ Targets["Native"]["tools"] = ConfigureTarget(NeLSpecTools, "tools", False, NeLTa
 Targets["Native"]["samples"] = ConfigureTarget(NeLSpecSamples, "samples", False, NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	Targets["PluginMax"][pluginMax] = ConfigureTarget(NeLSpecPluginMax, "plugin_max/" + pluginMax, False, NelTargetPluginMax[pluginMax])
+Targets["XplatTools"] = ConfigureXplatTools()
 
 GeneratePathScript()
 GeneratePatchVersionScript()

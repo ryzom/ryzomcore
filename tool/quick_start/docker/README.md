@@ -20,6 +20,21 @@ docker build -t "ryzombuild_scout_amd64_gcc9" -f "Y:\ryzomcore4\code\tool\quick_
 docker build -t "ryzombuild_scout_i386_gcc9" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_i386_gcc9\Dockerfile" Y:\ryzomcore4\code
 ```
 
+## Cross-platform tools
+
+`ryzombuild_xplat_tools` holds the Rust toolchain for the tools of the code repository that are not
+C++ (tool/servdash_cli): the musl target for a generic Linux and the MSVC target through cargo-xwin,
+which fetches the Windows SDK and CRT into the `ryzombuild_xplat_tools_xwin` volume on first use.
+The quick start builds the image with the others and scripts the build; by hand:
+
+```
+docker build -t "ryzombuild_xplat_tools" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_xplat_tools\Dockerfile" Y:\ryzomcore4\code
+docker run --rm -v ryzombuild_xplat_tools_cargo:/usr/local/cargo/registry -v ryzombuild_xplat_tools_xwin:/root/.cache/cargo-xwin -e CARGO_TARGET_DIR=/mnt/nel/build_docker/tools_xplat --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir /mnt/nel/code ryzombuild_xplat_tools cargo build --release --target x86_64-unknown-linux-musl --manifest-path /mnt/nel/code/tool/servdash_cli/Cargo.toml
+docker run --rm -v ryzombuild_xplat_tools_cargo:/usr/local/cargo/registry -v ryzombuild_xplat_tools_xwin:/root/.cache/cargo-xwin -e CARGO_TARGET_DIR=/mnt/nel/build_docker/tools_xplat --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir /mnt/nel/code ryzombuild_xplat_tools cargo xwin build --release --target x86_64-pc-windows-msvc --manifest-path /mnt/nel/code/tool/servdash_cli/Cargo.toml
+```
+
+The image carries the label `dev.ryzom.quickstart.toolchain=none`, which keeps the toolchain scan away from it.
+
 ## Prepare Steam Runtime
 
 ```

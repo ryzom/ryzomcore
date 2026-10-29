@@ -33,7 +33,11 @@ NeLNginxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Ngin
 NeLPHPDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["PHP"]))
 NeLphpMyAdminDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["phpMyAdmin"]))
 NeLDependenciesDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Dependencies"])) # Detect all dependencies of the build output and get them from externals
-NeLServdashDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Servdash"])) # servdash_cli and the Win32 servdash; servdash_gui comes from the tools build
+
+# Cross-platform tools that are not C++ (Rust crates), built in Docker for a generic Linux and for Windows
+NeLXplatToolsImage = "ryzombuild_xplat_tools"
+NeLXplatTools = [ "tool/servdash_cli" ]
+NeLXplatToolsTargets = { "linux": "x86_64-unknown-linux-musl", "win": "x86_64-pc-windows-msvc" }
 
 # Tools added to system path, for any platform
 # If these paths are wrong, tools from the system path may be used, which is okay

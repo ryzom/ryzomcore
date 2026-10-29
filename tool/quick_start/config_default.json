@@ -31,7 +31,6 @@
     "phpMyAdmin": "external/phpmyadmin",
     "Dependencies": "external/dependencies",
     "Aria2": "external/utils",
-    "Servdash": "external/utils",
     "Ninja": "external/utils",
     "Jom": "external/utils"
   },

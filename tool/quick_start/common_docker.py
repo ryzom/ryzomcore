@@ -19,6 +19,21 @@ def DockerBaseCommand(image, arch, workdir, hunter, interactive=False):
 		res += [ "setarch", "i686" ]
 	return res
 
+# The cross-platform tools image: cargo keeps its registry and the Windows SDK of cargo-xwin in
+# volumes, and leaves the build output under the build directory
+def DockerXplatCommand(image, buildDir, interactive=False):
+	res = [ "docker", "run" ]
+	res += [ "--rm" ]
+	res += [ "-v", image + "_cargo:/usr/local/cargo/registry" ]
+	res += [ "-v", image + "_xwin:/root/.cache/cargo-xwin" ]
+	res += [ "-e", "CARGO_TARGET_DIR=/mnt/nel/" + buildDir.replace("\\", "/") ]
+	res += [ "--mount", "type=bind,source=" + NeLRootDir + ",target=/mnt/nel" ]
+	res += [ "--workdir", "/mnt/nel/code" ]
+	if interactive:
+		res += [ "-it" ]
+	res += [ image ]
+	return res
+
 def DockerRootPath(path):
 	return "/mnt/nel/" + path
 

@@ -70,6 +70,8 @@ NeLServerDirsFv = os.getenv("RC_SERVER_DIRS_FV")
 if NeLServerDirsFv:
 	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)
 
+NeLToolsXplatDirLinux = os.getenv("RC_TOOLS_XPLAT_DIR_LINUX")
+
 NeL3dsMaxExe = os.getenv('RC_3DSMAX_EXE')
 NeL3dsMaxUserDir = os.getenv('RC_3DSMAX_USER_DIR')
 
@@ -282,6 +284,16 @@ if not args.noconf:
 	try:
 		if args.preset:
 			DummyUnknownName
+		LinuxToolExecutableDirectories
+	except NameError:
+		# the cross-platform tools of the quick start (servdash_cli), built for a generic Linux
+		if NeLToolsXplatDirLinux:
+			LinuxToolExecutableDirectories = [ NeLToolsXplatDirLinux.replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom) ]
+		else:
+			LinuxToolExecutableDirectories = [ "R:/build_docker/tools_xplat/x86_64-unknown-linux-musl/release" ]
+	try:
+		if args.preset:
+			DummyUnknownName
 		PatchmanDevDirectory
 	except NameError:
 		PatchmanDevDirectory = "R:/patchman/terminal_dev"
@@ -417,6 +429,7 @@ if not args.noconf:
 		ExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[5]).replace("\\", "/")
 		ExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", ExeDllCfgDirectories[6]).replace("\\", "/")
 		LinuxServiceExecutableDirectories[0] = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectories[0]).replace("\\", "/")
+		LinuxToolExecutableDirectories[0] = askVar(log, "[IN] Linux Tool Executable Directory", LinuxToolExecutableDirectories[0]).replace("\\", "/")
 		PatchmanDevDirectory = askVar(log, "[IN] Patchman Directory", PatchmanDevDirectory).replace("\\", "/")
 		PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
 		PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
@@ -504,6 +517,8 @@ if not args.noconf:
 	sf.write("if NeLServerDirsFv:\n")
 	sf.write("	NeLServerDirsFv = NeLServerDirsFv.split(os.pathsep)\n")
 	sf.write("\n")
+	sf.write("NeLToolsXplatDirLinux = os.getenv(\"RC_TOOLS_XPLAT_DIR_LINUX\")\n")
+	sf.write("\n")
 	sf.write("# Quality option for this site (1 for BEST, 0 for DRAFT)\n")
 	sf.write("BuildQuality = " + str(BuildQuality) + "\n")
 	sf.write("\n")
@@ -556,6 +571,7 @@ if not args.noconf:
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("ExeDllCfgDirectories = " + str(ExeDllCfgDirectories) + "\n")
 	sf.write("LinuxServiceExecutableDirectories = " + str(LinuxServiceExecutableDirectories) + "\n")
+	sf.write("LinuxToolExecutableDirectories = " + str(LinuxToolExecutableDirectories) + "\n")
 	sf.write("PatchmanDevDirectory = \"" + str(PatchmanDevDirectory) + "\"\n")
 	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
 	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
@@ -565,6 +581,8 @@ if not args.noconf:
 	sf.write("	LinuxServiceExecutableDirectories = [] + NeLServerDirsFv\n")
 	sf.write("	for i in range(len(LinuxServiceExecutableDirectories)):\n")
 	sf.write("		LinuxServiceExecutableDirectories[i] = LinuxServiceExecutableDirectories[i].replace('\\\\', '/')\n")
+	sf.write("if NeLToolsXplatDirLinux:\n")
+	sf.write("	LinuxToolExecutableDirectories = [ NeLToolsXplatDirLinux.replace('\\\\', '/') ]\n")
 	sf.write("\n")
 	sf.write("# Sign tool\n")
 	sf.write("SignToolExecutable = \"" + str(SignToolExecutable) + "\"\n")

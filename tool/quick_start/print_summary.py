@@ -51,6 +51,11 @@ printBuildTarget("tools", NeLTargetTools)
 printBuildTarget("samples", NeLTargetSamples)
 for pluginMax in NelTargetPluginMax:
 	printBuildTarget("plugin_max/" + pluginMax, NelTargetPluginMax[pluginMax])
+xplat = NeLTargets.get("XplatTools") if isinstance(NeLTargets, dict) else None
+if xplat:
+	print("  tools_xplat: " + xplat["Image"] + " (Docker, " + ", ".join(xplat["Tools"]) + ")")
+else:
+	print("  tools_xplat: NOT FOUND")
 
 print()
 if NeLConfig["Headless"]:

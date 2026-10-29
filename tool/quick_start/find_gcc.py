@@ -51,6 +51,10 @@ def FindDockerGCC(image):
 		print("FAILED: " + image)
 		return
 	inspect = json.loads(output)
+	# an image that holds no C++ toolchain, such as the cross-platform tools image
+	labels = inspect[0]["Config"]["Labels"] or {}
+	if labels.get("dev.ryzom.quickstart.toolchain") == "none":
+		return
 	arch = inspect[0]["Architecture"]
 	baseCmd = DockerBaseCommand(image, arch, None, None)
 	
