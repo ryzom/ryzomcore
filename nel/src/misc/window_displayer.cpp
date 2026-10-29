@@ -82,6 +82,8 @@ bool CWindowDisplayer::update ()
 		ICommand::execute (copy[i], *Log);
 	}
 
+	updateExtra();
+
 	return _Continue;
 }
 

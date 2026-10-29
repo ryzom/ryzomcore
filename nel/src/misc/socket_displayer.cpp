@@ -37,7 +37,7 @@
 
 namespace NLMISC {
 
-static const char *const s_ProtocolVersion = "1";
+static const char *const s_ProtocolVersion = "2";
 static const uint s_DefaultHistory = 1000;
 static const uint s_ConnectIntervalMs = 1000;
 static const uint s_SendTimeoutMs = 2000;
@@ -48,6 +48,8 @@ CSocketDisplayer::CSocketDisplayer(const std::string &path, const char *displaye
     , m_Path(path)
     , m_TitleBar("CSocketDisplayer::m_TitleBar")
     , m_CommandQueue("CSocketDisplayer::m_CommandQueue")
+    , m_ArgCommands("CSocketDisplayer::m_ArgCommands")
+    , m_DoneQueue("CSocketDisplayer::m_DoneQueue")
     , m_HistoryMax(s_DefaultHistory)
     , m_Connected(false)
     , m_PathWarned(false)
@@ -134,6 +136,7 @@ void CSocketDisplayer::display_main()
 		// the history keeps filling while the dashboard is away, and the command table keeps up
 		flushLog();
 		flushCommands();
+		flushDone();
 
 		if (m_Connected)
 		{
@@ -373,10 +376,74 @@ void CSocketDisplayer::handleLine(const std::string &line)
 		CSynchronized<std::vector<std::string> >::CAccessor access(&_CommandsToExecute);
 		access.value().push_back(command);
 	}
+	else if (type == "exec")
+	{
+		// exec <id> <name> [<arg>...]: the fields are the arguments, nothing is parsed
+		CArgCommand command;
+		std::string::size_type start = 0;
+		uint field = 0;
+		for (;;)
+		{
+			std::string::size_type end = rest.find('\t', start);
+			std::string value = unescapeField(rest.substr(start, end == std::string::npos ? std::string::npos : end - start));
+			if (field == 0)
+				command.Id = value;
+			else if (field == 1)
+				command.Name = value;
+			else
+				command.Args.push_back(value);
+			++field;
+			if (end == std::string::npos)
+				break;
+			start = end + 1;
+		}
+		if (command.Name.empty())
+		{
+			// nothing to run; the caller still gets its answer
+			CSynchronized<std::vector<std::pair<std::string, bool>>>::CAccessor done(&m_DoneQueue);
+			done.value().push_back(std::make_pair(command.Id, false));
+			return;
+		}
+		// executed by the main thread in updateExtra
+		CSynchronized<std::vector<CArgCommand>>::CAccessor access(&m_ArgCommands);
+		access.value().push_back(command);
+	}
 	else
 	{
 		nldebug("Control socket '%s' sent an unknown message type '%s'", m_Path.c_str(), type.c_str());
 	}
+}
+
+void CSocketDisplayer::updateExtra()
+{
+	std::vector<CArgCommand> commands;
+	{
+		CSynchronized<std::vector<CArgCommand>>::CAccessor access(&m_ArgCommands);
+		commands.swap(access.value());
+	}
+	for (uint i = 0; i < commands.size(); ++i)
+	{
+		nlassert(Log != NULL);
+		bool ok = ICommand::executeArgs(commands[i].Name, commands[i].Args, *Log);
+		// the output of the command is in the log buffer by now; the done marker follows it
+		CSynchronized<std::vector<std::pair<std::string, bool>>>::CAccessor done(&m_DoneQueue);
+		done.value().push_back(std::make_pair(commands[i].Id, ok));
+	}
+}
+
+void CSocketDisplayer::flushDone()
+{
+	std::vector<std::pair<std::string, bool>> done;
+	{
+		CSynchronized<std::vector<std::pair<std::string, bool>>>::CAccessor access(&m_DoneQueue);
+		done.swap(access.value());
+	}
+	// the log lines of the command went out in flushLog just before; without a dashboard the markers
+	// have nobody to reach
+	if (!m_Connected)
+		return;
+	for (uint i = 0; i < done.size(); ++i)
+		sendLine(std::string("done\t") + escapeField(done[i].first) + "\t" + (done[i].second ? "1" : "0"));
 }
 
 void CSocketDisplayer::flushLog()

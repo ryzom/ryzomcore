@@ -130,6 +130,10 @@ public:
 	/// \param quiet true if you don't want to display the "executing the command ..."
 	static bool execute (const std::string &commandWithArgs, NLMISC::CLog &log, bool quiet = false, bool human = true);
 
+	/// Executes one command whose arguments are already split, so nothing is parsed: a remote caller
+	/// (the dashboard) sends them separated and no quote or semicolon in a value changes its meaning.
+	static bool executeArgs(const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet = false, bool human = true);
+
 	/** Command name completion.
 	 * Case-sensitive. Displays the list after two calls with the same non-unique completion.
      * Completes commands used with prefixes (such as "help " for example) as well.
@@ -619,6 +623,10 @@ class CCommandRegistry
 	/// Used by ICommand to unregister themselves
 	void unregisterCommand(ICommand *command);
 
+	/// One command of a command line, as execute() splits it
+	struct TCommandParams;
+	/// Runs one split command: a global command, or a member command of a named handler instance
+	bool executeParams(const TCommandParams &params, NLMISC::CLog &log, bool quiet, bool human);
 
 public:
 
@@ -636,6 +644,9 @@ public:
 	/// Executes the command and display output to the log
 	/// \param quiet true if you don't want to display the "executing the command ..."
 	bool execute (const std::string &commandWithArgs, NLMISC::CLog &log, bool quiet = false, bool human = true);
+
+	/// Executes one command with its arguments already split; see ICommand::executeArgs
+	bool executeArgs(const std::string &commandName, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet = false, bool human = true);
 
 	/** Command name completion.
 	 * Case-sensitive. Displays the list after two calls with the same non-unique completion.

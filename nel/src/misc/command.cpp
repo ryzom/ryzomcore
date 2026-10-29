@@ -262,7 +262,22 @@ bool ICommand::execute (const std::string &commandWithArgs, CLog &log, bool quie
 	}
 }
 
-struct TCommandParams
+bool ICommand::executeArgs(const std::string &commandName, const std::vector<std::string> &args, CLog &log, bool quiet, bool human)
+{
+	try
+	{
+		return CCommandRegistry::getInstance().executeArgs(commandName, args, log, quiet, human);
+	}
+	catch (const exception &e)
+	{
+		log.displayNL("Command '%s' thrown an exception :", commandName.c_str());
+		log.displayNL("%s", e.what());
+
+		return false;
+	}
+}
+
+struct CCommandRegistry::TCommandParams
 {
 	string			CommandName;
 	string			RawCommandString;
@@ -429,57 +444,91 @@ end:
 
 	for (uint u = 0; u < commands.size (); u++)
 	{
-		TCommandParams &cp = commands[u];
-		// find the command
-		// check for object name
-		string::size_type pos = cp.CommandName.find(".");
-		if (pos != string::npos)
-		{
-			// there is an object name, separate it and look in the object registry
-			string objectName = cp.CommandName.substr(0, pos);
-			string commandName = cp.CommandName.substr(pos+1);
-			ICommandsHandler *const *ppch = _CommandsHandlers.getB(objectName);
-			if (ppch != nullptr)
-			{
-				// ok, we found the object
-				ret = ret && (*ppch)->execute(commands[u].RawCommandString, commandName, commands[u].CommandArgs, log, quiet, human);
-			}
-			else
-			{
-				if (!quiet)
-					log.displayNL("Command '%s' : can't find object named '%s'",
-						cp.CommandName.c_str(),
-						objectName.c_str());
-			}
-		}
-		else
-		{
-			// this is a global command
-			TCommand::iterator comm = _Commands.find(commands[u].CommandName);
-			if (comm == _Commands.end ())
-			{
-				// the command doesn't exist
-				ret = false;
-				if (!quiet)
-					log.displayNL("Command '%s' not found, try 'help'", commands[u].CommandName.c_str());
-			}
-			else
-			{
-				bool res = comm->second->execute (commands[u].RawCommandString, commands[u].CommandArgs, log, quiet, human);
-				ret = ret & res;
-				if (!res)
-				{
-					if (!quiet)
-						log.displayNL("Bad command usage, try 'help %s'", commands[u].CommandName.c_str());
-				}
-			}
-		}
+		// every command runs, even after one failed, as before
+		bool res = executeParams(commands[u], log, quiet, human);
+		ret = ret && res;
 	}
 
 	// false if at least one command returned false
 	return ret;
 }
 
+bool CCommandRegistry::executeParams(const TCommandParams &cp, CLog &log, bool quiet, bool human)
+{
+	// find the command
+	// check for object name
+	string::size_type pos = cp.CommandName.find(".");
+	if (pos != string::npos)
+	{
+		// there is an object name, separate it and look in the object registry
+		string objectName = cp.CommandName.substr(0, pos);
+		string commandName = cp.CommandName.substr(pos + 1);
+		ICommandsHandler *const *ppch = _CommandsHandlers.getB(objectName);
+		if (ppch != nullptr)
+		{
+			// ok, we found the object
+			return (*ppch)->execute(cp.RawCommandString, commandName, cp.CommandArgs, log, quiet, human);
+		}
+		if (!quiet)
+			log.displayNL("Command '%s' : can't find object named '%s'",
+			    cp.CommandName.c_str(),
+			    objectName.c_str());
+		// an unknown object never failed the command line
+		return true;
+	}
+
+	// this is a global command
+	TCommand::iterator comm = _Commands.find(cp.CommandName);
+	if (comm == _Commands.end())
+	{
+		// the command doesn't exist
+		if (!quiet)
+			log.displayNL("Command '%s' not found, try 'help'", cp.CommandName.c_str());
+		return false;
+	}
+	bool res = comm->second->execute(cp.RawCommandString, cp.CommandArgs, log, quiet, human);
+	if (!res)
+	{
+		if (!quiet)
+			log.displayNL("Bad command usage, try 'help %s'", cp.CommandName.c_str());
+	}
+	return res;
+}
+
+/// An argument as the command line parser would have read it: quoted when it has a space, a
+/// quote, a backslash or a semicolon, so the raw command string of the command reads back right.
+static std::string quoteCommandArg(const std::string &arg)
+{
+	if (!arg.empty() && arg.find_first_of(" \t\n\r\"\\;") == string::npos)
+		return arg;
+	std::string quoted = "\"";
+	for (string::size_type i = 0; i < arg.size(); ++i)
+	{
+		if (arg[i] == '\"' || arg[i] == '\\')
+			quoted += '\\';
+		quoted += arg[i];
+	}
+	quoted += '\"';
+	return quoted;
+}
+
+bool CCommandRegistry::executeArgs(const std::string &commandName, const std::vector<std::string> &args, CLog &log, bool quiet, bool human)
+{
+	TCommandParams cp;
+	cp.CommandName = commandName;
+	cp.CommandArgs = args;
+	// the raw command string is what a user would have typed for these arguments; a command that
+	// reads the raw string rather than the arguments gets the same values
+	cp.RawCommandString = commandName;
+	for (uint i = 0; i < args.size(); ++i)
+	{
+		cp.RawCommandString += ' ';
+		cp.RawCommandString += quoteCommandArg(args[i]);
+	}
+	if (!quiet)
+		log.displayNL("Executing command : '%s'", cp.RawCommandString.c_str());
+	return executeParams(cp, log, quiet, human);
+}
 
 /*
  * Command name completion.
