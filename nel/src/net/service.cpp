@@ -804,6 +804,16 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// A dashboard in another process owns the console. This overrides WindowStyle,
 			// so an instance started by hand outside the dashboard still follows its config file.
 			WindowDisplayer = new CSocketDisplayer(getLongArg("ctrl"), "DEFAULT_WD");
+			// The dashboard shows the log over the channel. The echo on stdout goes (on Windows it
+			// is already silent without a console), so what still reaches stdout and stderr is
+			// what bypasses the log; unbuffered, it reaches the dashboard's pipe as it happens.
+			DebugLog->removeDisplayer("DEFAULT_SD");
+			InfoLog->removeDisplayer("DEFAULT_SD");
+			WarningLog->removeDisplayer("DEFAULT_SD");
+			ErrorLog->removeDisplayer("DEFAULT_SD");
+			AssertLog->removeDisplayer("DEFAULT_SD");
+			setvbuf(stdout, NULL, _IONBF, 0);
+			setvbuf(stderr, NULL, _IONBF, 0);
 		}
 		else if ((var = ConfigFile.getVarPtr("WindowStyle")) != nullptr)
 		{
