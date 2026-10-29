@@ -601,29 +601,32 @@ impl App {
 		let [toolbar, content, input] = Layout::vertical([Constraint::Length(toolbar_height), Constraint::Min(1), Constraint::Length(1)]).areas(inner);
 		self.layout.content = content;
 
+		// as CWinDisplayer::resizeLabels: the width is divided equally among the items of a row and
+		// each item sits in its own column, so a value that changes width does not move its neighbours
 		let mut toolbar_lines = Vec::new();
 		for (row_idx, row) in rows.iter().enumerate().take(toolbar_height as usize) {
 			let y = toolbar.y + row_idx as u16;
-			let mut x = toolbar.x;
+			let column = (toolbar.width / row.len().max(1) as u16).max(1);
 			let mut spans = Vec::new();
-			for label in row {
+			for (j, label) in row.iter().enumerate() {
+				let x = toolbar.x + j as u16 * column;
+				let room = column.saturating_sub(1) as usize;
 				if let Some(body) = label.strip_prefix('@') {
 					let (text, command) = match body.find('|') {
 						Some(pos) => (&body[..pos], &body[pos + 1..]),
 						None => (body, body),
 					};
-					let shown = format!("[{}]", text);
+					let shown = truncate(&format!("[{}]", text), room);
 					let width = shown.chars().count() as u16;
 					self.layout.buttons.push((Rect { x, y, width, height: 1 }, command.to_string()));
 					spans.push(Span::styled(shown, Style::default().fg(Color::Black).bg(Color::Gray).add_modifier(Modifier::BOLD)));
-					x += width;
+					spans.push(Span::raw(" ".repeat(column as usize - width as usize)));
 				} else {
-					let width = label.chars().count() as u16;
-					spans.push(Span::styled(label.clone(), Style::default().fg(Color::Cyan)));
-					x += width;
+					let shown = truncate(label, room);
+					let width = shown.chars().count();
+					spans.push(Span::styled(shown, Style::default().fg(Color::Cyan)));
+					spans.push(Span::raw(" ".repeat(column as usize - width)));
 				}
-				spans.push(Span::raw("  "));
-				x += 2;
 			}
 			toolbar_lines.push(Line::from(spans));
 		}
