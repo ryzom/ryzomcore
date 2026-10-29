@@ -105,6 +105,29 @@ impl StyledLine {
 	}
 }
 
+/// What an entry of the command table is, as the service reports it.
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum CommandKind {
+	/// A command, or a variable (its name starts with an upper case letter).
+	Command,
+	/// A named command handler instance; its commands follow as `instance.command`.
+	Handler,
+	/// A command of a handler instance.
+	Member,
+}
+
+/// A command of a NeL service, for completion; `instance.command` for a member command.
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct CommandInfo {
+	pub name: String,
+	pub kind: CommandKind,
+	/// The argument help, such as `<serviceName> [sid=<serviceId>]`.
+	#[serde(default, skip_serializing_if = "String::is_empty")]
+	pub args: String,
+	#[serde(default, skip_serializing_if = "String::is_empty")]
+	pub help: String,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ProcessInfo {
 	pub name: String,
@@ -183,6 +206,21 @@ pub enum DaemonMsg {
 	},
 	Clear {
 		name: String,
+	},
+	/// The whole command table of a NeL service: on attach, and when a service connects anew.
+	Commands {
+		name: String,
+		commands: Vec<CommandInfo>,
+	},
+	/// A command the service registered, or changed.
+	Command {
+		name: String,
+		command: CommandInfo,
+	},
+	/// A command the service unregistered.
+	Uncommand {
+		name: String,
+		command: String,
 	},
 	Notice {
 		text: String,

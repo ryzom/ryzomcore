@@ -19,13 +19,14 @@
 //! it. For a NeL service the console shows the service's own toolbar (labels and command
 //! buttons), its log and a command line, as the Win32 service window does.
 
-use crate::proto::{self, ClientMsg, DaemonMsg, ProcState, ProcessInfo, StyledLine};
+use crate::proto::{self, ClientMsg, CommandInfo, CommandKind, DaemonMsg, ProcState, ProcessInfo, StyledLine};
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind};
 use ratatui::layout::{Constraint, Layout, Position, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use ratatui::Frame;
+use std::collections::BTreeMap;
 use std::sync::OnceLock;
 use std::time::{Duration, Instant};
 
@@ -52,11 +53,93 @@ struct ProcView {
 	/// Position in the history while browsing it, with the draft kept aside.
 	history_pos: Option<usize>,
 	draft: String,
+	/// The command table of the service, by name.
+	commands: BTreeMap<String, CommandInfo>,
+	/// Which of the completions of the typed word is suggested; Shift+Tab moves it.
+	completion_index: usize,
+}
+
+/// What the input line suggests: the commands whose name starts with the word being typed,
+/// or the one command the arguments are being typed for.
+struct Suggestion {
+	candidates: Vec<CommandInfo>,
+	/// The one shown as ghost text and in the hint.
+	index: usize,
+	/// Still typing the command name: the ghost text completes it.
+	naming: bool,
+}
+
+impl Suggestion {
+	fn current(&self) -> &CommandInfo {
+		&self.candidates[self.index]
+	}
 }
 
 impl ProcView {
 	fn new(info: ProcessInfo) -> ProcView {
-		ProcView { info, lines: Vec::new(), scroll: 0, input: String::new(), history: Vec::new(), history_pos: None, draft: String::new() }
+		ProcView {
+			info,
+			lines: Vec::new(),
+			scroll: 0,
+			input: String::new(),
+			history: Vec::new(),
+			history_pos: None,
+			draft: String::new(),
+			commands: BTreeMap::new(),
+			completion_index: 0,
+		}
+	}
+
+	/// The completion of the input line against the command table, when there is one.
+	fn suggestion(&self) -> Option<Suggestion> {
+		if !self.is_console() || self.commands.is_empty() || self.input.is_empty() {
+			return None;
+		}
+		match self.input.find(' ') {
+			None => {
+				let word = self.input.as_str();
+				let lowered = word.to_lowercase();
+				// the names starting with the word; those matching its case first, each group in name order
+				let mut exact: Vec<CommandInfo> = Vec::new();
+				let mut loose: Vec<CommandInfo> = Vec::new();
+				for command in self.commands.values() {
+					if command.name.starts_with(word) {
+						exact.push(command.clone());
+					} else if command.name.to_lowercase().starts_with(&lowered) {
+						loose.push(command.clone());
+					}
+				}
+				exact.extend(loose);
+				if exact.is_empty() {
+					return None;
+				}
+				let index = self.completion_index % exact.len();
+				Some(Suggestion { candidates: exact, index, naming: true })
+			}
+			Some(space) => {
+				let word = &self.input[..space];
+				let lowered = word.to_lowercase();
+				let found = self.commands.get(word).or_else(|| self.commands.values().find(|c| c.name.to_lowercase() == lowered))?;
+				Some(Suggestion { candidates: vec![found.clone()], index: 0, naming: false })
+			}
+		}
+	}
+
+	/// Takes the suggested command: its name, then a dot for a handler instance (its commands
+	/// follow) or a space for a command.
+	fn accept_suggestion(&mut self) -> bool {
+		let Some(suggestion) = self.suggestion() else {
+			return false;
+		};
+		if !suggestion.naming {
+			return false;
+		}
+		let command = suggestion.current();
+		self.input = command.name.clone();
+		self.input.push(if command.kind == CommandKind::Handler { '.' } else { ' ' });
+		self.completion_index = 0;
+		self.history_pos = None;
+		true
 	}
 
 	/// A NeL service: the input line is a command and the toolbar shows.
@@ -90,6 +173,8 @@ struct LayoutCache {
 	content: Rect,
 	/// Rows the selected pane holds at the current width and wrap mode, for the scroll range.
 	total_rows: usize,
+	/// The command the input line suggests, with its arguments and help, for the status line.
+	hint: Option<String>,
 }
 
 pub struct App {
@@ -321,6 +406,7 @@ impl App {
 					if let Some(prev) = old.iter().find(|p| p.info.name == view.info.name) {
 						view.input = prev.input.clone();
 						view.history = prev.history.clone();
+						view.commands = prev.commands.clone();
 					}
 					self.procs.push(view);
 				}
@@ -370,6 +456,23 @@ impl App {
 				if let Some(idx) = self.index_of(&name) {
 					self.procs[idx].lines.clear();
 					self.procs[idx].scroll = 0;
+				}
+			}
+			DaemonMsg::Commands { name, commands } => {
+				if let Some(idx) = self.index_of(&name) {
+					let view = &mut self.procs[idx];
+					view.commands = commands.into_iter().map(|c| (c.name.clone(), c)).collect();
+					view.completion_index = 0;
+				}
+			}
+			DaemonMsg::Command { name, command } => {
+				if let Some(idx) = self.index_of(&name) {
+					self.procs[idx].commands.insert(command.name.clone(), command);
+				}
+			}
+			DaemonMsg::Uncommand { name, command } => {
+				if let Some(idx) = self.index_of(&name) {
+					self.procs[idx].commands.remove(&command);
 				}
 			}
 			DaemonMsg::Notice { text } => self.notice(text),
@@ -433,6 +536,7 @@ impl App {
 		let view = self.procs.get_mut(self.selected)?;
 		let text = std::mem::take(&mut view.input);
 		view.history_pos = None;
+		view.completion_index = 0;
 		view.draft.clear();
 		self.dirty = true;
 		if text.is_empty() {
@@ -518,8 +622,21 @@ impl App {
 					self.notice("F12 again stops all services and closes the dashboard (F10 detaches and keeps them running)");
 				}
 			}
-			KeyCode::Tab => self.select((self.selected + 1) % self.procs.len().max(1)),
-			KeyCode::BackTab => self.select((self.selected + self.procs.len().max(1) - 1) % self.procs.len().max(1)),
+			KeyCode::Tab => {
+				if let Some(view) = self.procs.get_mut(self.selected) {
+					if view.accept_suggestion() {
+						self.dirty = true;
+					}
+				}
+			}
+			KeyCode::BackTab => {
+				if let Some(view) = self.procs.get_mut(self.selected) {
+					if view.suggestion().is_some_and(|s| s.naming) {
+						view.completion_index += 1;
+						self.dirty = true;
+					}
+				}
+			}
 			KeyCode::Up if alt || ctrl => self.select((self.selected + self.procs.len().max(1) - 1) % self.procs.len().max(1)),
 			KeyCode::Down if alt || ctrl => self.select((self.selected + 1) % self.procs.len().max(1)),
 			KeyCode::Up => self.history_move(true),
@@ -539,6 +656,7 @@ impl App {
 				if let Some(view) = self.procs.get_mut(self.selected) {
 					view.input.clear();
 					view.history_pos = None;
+					view.completion_index = 0;
 					self.dirty = true;
 				}
 			}
@@ -546,6 +664,7 @@ impl App {
 				if let Some(view) = self.procs.get_mut(self.selected) {
 					view.input.pop();
 					view.history_pos = None;
+					view.completion_index = 0;
 					self.dirty = true;
 				}
 			}
@@ -563,6 +682,7 @@ impl App {
 				if let Some(view) = self.procs.get_mut(self.selected) {
 					view.input.push(c);
 					view.history_pos = None;
+					view.completion_index = 0;
 					self.dirty = true;
 				}
 			}
@@ -771,8 +891,48 @@ impl App {
 				view.input.clone()
 			}
 		};
+		// the rest of the suggested command name, and its arguments, in grey after the cursor
+		let suggestion = view.suggestion();
+		let ghost: String = match &suggestion {
+			Some(s) if s.naming => {
+				let command = s.current();
+				let rest: String = command.name.chars().skip(view.input.chars().count()).collect();
+				let args = if command.kind == CommandKind::Handler {
+					".".to_string()
+				} else if command.args.is_empty() {
+					String::new()
+				} else {
+					format!(" {}", command.args)
+				};
+				truncate(&format!("{}{}", rest, args), avail.saturating_sub(shown.chars().count()))
+			}
+			_ => String::new(),
+		};
+		self.layout.hint = suggestion.map(|s| {
+			let command = s.current();
+			let mut hint = command.name.clone();
+			if !command.args.is_empty() {
+				hint.push(' ');
+				hint.push_str(&command.args);
+			}
+			if !command.help.is_empty() {
+				hint.push_str(": ");
+				hint.push_str(&command.help);
+			}
+			if s.naming && s.candidates.len() > 1 {
+				hint.push_str(&format!("  [{}/{} Shift+Tab]", s.index + 1, s.candidates.len()));
+			}
+			hint
+		});
 		let cursor_x = input.x + prompt.len() as u16 + shown.chars().count() as u16;
-		frame.render_widget(Paragraph::new(Line::from(vec![Span::styled(prompt, Style::default().fg(Color::LightGreen)), Span::raw(shown)])), input);
+		frame.render_widget(
+			Paragraph::new(Line::from(vec![
+				Span::styled(prompt, Style::default().fg(Color::LightGreen)),
+				Span::raw(shown),
+				Span::styled(ghost, Style::default().fg(Color::DarkGray)),
+			])),
+			input,
+		);
 		if input.width > 0 {
 			frame.set_cursor_position(Position { x: cursor_x.min(input.right().saturating_sub(1)), y: input.y });
 		}
@@ -783,10 +943,11 @@ impl App {
 			Some((text, at)) if at.elapsed() < NOTICE_TIME => Some(text.clone()),
 			_ => None,
 		};
-		let line = match notice {
-			Some(text) => Line::from(Span::styled(truncate(&text, area.width as usize), Style::default().fg(Color::Black).bg(Color::Yellow))),
-			None => {
-				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Compact  F3 Wrap  F4 Time  F10 Detach  F12 Quit  Tab Next  Alt+1..9 Buttons  PgUp/PgDn Scroll";
+		let line = match (notice, &self.layout.hint) {
+			(Some(text), _) => Line::from(Span::styled(truncate(&text, area.width as usize), Style::default().fg(Color::Black).bg(Color::Yellow))),
+			(None, Some(hint)) => Line::from(Span::styled(truncate(hint, area.width as usize), Style::default().fg(Color::Cyan))),
+			(None, None) => {
+				let keys = "F5 Start/Stop  F6 Kill  F7 Start all  F8 Stop all  F2 Compact  F3 Wrap  F4 Time  F10 Detach  F12 Quit  Alt+Up/Down Select  Tab Complete  Alt+1..9 Buttons  PgUp/PgDn Scroll";
 				Line::from(Span::styled(truncate(keys, area.width as usize), Style::default().fg(Color::DarkGray)))
 			}
 		};

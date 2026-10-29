@@ -17,6 +17,7 @@ servdash_cli -d start_mainland.ini   start the daemon without attaching
 servdash_cli -a start_mainland.ini   attach only
 servdash_cli --shutdown start_mainland.ini   stop all services and exit the daemon
 servdash_cli --list                  the running dashboards of this user
+servdash_cli --shutdown-all          stop every running dashboard, with its services
 servdash_cli 2                       attach to the second one in the list
 servdash_cli Mainland                attach by title (or id, id prefix, ini path)
 ```
@@ -29,8 +30,15 @@ Linux), so a running dashboard can be named from any directory without its ini p
 
 Keys: F5 start/stop, F6 kill, F7 start all, F8 stop all, F2 compact the NeL log headers (type kept, function cut to `NLN…dcast`),
 F3 wrap long lines with a hanging indent, F4 show the arrival time of each line (compact
-headers and timestamps start on), F10 detach, F12 twice to stop everything and quit, Tab or Alt+Up/Down to select a process,
-Alt+1..9 to press a console button, PgUp/PgDn to scroll, Enter to send the input line.
+headers and timestamps start on), F10 detach, F12 twice to stop everything and quit, Alt+Up/Down or Ctrl+Up/Down
+to select a process, Alt+1..9 to press a console button, PgUp/PgDn to scroll, Enter to send the input line.
+
+The command line of a NeL service completes its commands: the rest of the first matching name
+shows in grey after the cursor, with the arguments the command takes, and the status line
+gives its help. Tab takes the suggestion (a handler instance such as `moduleManager` completes
+to `moduleManager.` and its commands follow), Shift+Tab moves to the next match. The table
+comes from the service itself, live: every command, variable and module command it registers,
+as it registers them, so a module loaded later completes too.
 The mouse works too: click a process, its start/stop glyph, or a console button.
 
 ## NeL services and the console channel

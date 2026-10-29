@@ -42,6 +42,7 @@ const USAGE: &str = "servdash_cli, service dashboard for Ryzom Core
 Usage:
   servdash_cli [options] <dashboard.ini | running dashboard>
   servdash_cli --list
+  servdash_cli --shutdown-all
 
 Starts the dashboard daemon for the ini file when none runs, then attaches
 to it. Detaching (F10) or closing the terminal leaves the services running.
@@ -53,6 +54,7 @@ Options:
   -d, --detach     start the daemon without attaching
   -a, --attach     attach only, fail when no daemon runs
       --shutdown   stop all services and exit the daemon
+      --shutdown-all  stop every running dashboard of this user, with its services
       --status     print the state of every process and exit
       --endpoint   print the local endpoint of the daemon and exit
   -h, --help       this text
@@ -60,8 +62,9 @@ Options:
 
 Keys:
   F5 start/stop  F6 kill  F7 start all  F8 stop all  F2 compact log prefixes
-  F3 wrap long lines  F4 timestamps  F10 detach  F12 twice: stop all and quit  Tab/Shift+Tab or Alt+Up/Down select
-  Alt+1..9 press a console button  PgUp/PgDn scroll  Enter send the input line
+  F3 wrap long lines  F4 timestamps  F10 detach  F12 twice: stop all and quit  Alt+Up/Down or Ctrl+Up/Down select
+  Tab complete the command, Shift+Tab the next completion  Alt+1..9 press a console button
+  PgUp/PgDn scroll  Enter send the input line
 ";
 
 struct Options {
@@ -70,13 +73,15 @@ struct Options {
 	detach: bool,
 	attach: bool,
 	shutdown: bool,
+	shutdown_all: bool,
 	status: bool,
 	endpoint: bool,
 	list: bool,
 }
 
 fn parse_args() -> Result<Options> {
-	let mut options = Options { ini: None, daemon: false, detach: false, attach: false, shutdown: false, status: false, endpoint: false, list: false };
+	let mut options =
+		Options { ini: None, daemon: false, detach: false, attach: false, shutdown: false, shutdown_all: false, status: false, endpoint: false, list: false };
 	for arg in std::env::args().skip(1) {
 		match arg.as_str() {
 			"-h" | "--help" => {
@@ -91,6 +96,7 @@ fn parse_args() -> Result<Options> {
 			"-d" | "--detach" => options.detach = true,
 			"-a" | "--attach" => options.attach = true,
 			"--shutdown" => options.shutdown = true,
+			"--shutdown-all" => options.shutdown_all = true,
 			"--status" => options.status = true,
 			"--endpoint" => options.endpoint = true,
 			"-l" | "--list" => options.list = true,
@@ -103,7 +109,7 @@ fn parse_args() -> Result<Options> {
 			}
 		}
 	}
-	if options.ini.is_none() && !options.list {
+	if options.ini.is_none() && !options.list && !options.shutdown_all {
 		bail!("{}", USAGE);
 	}
 	Ok(options)
@@ -157,8 +163,50 @@ async fn shutdown(session: &Session) -> Result<()> {
 		}
 	};
 	match tokio::time::timeout(Duration::from_secs(120), wait).await {
-		Ok(()) => println!("The dashboard daemon exited."),
+		Ok(()) => {
+			// the daemon closes its endpoint and leaves the registry right after the Bye
+			let gone = Instant::now() + Duration::from_secs(3);
+			while Instant::now() < gone && ipc::is_listening(&endpoint).await {
+				tokio::time::sleep(Duration::from_millis(50)).await;
+			}
+			println!("The dashboard daemon exited.");
+		}
 		Err(_) => println!("The services are still stopping; the daemon exits when they are gone."),
+	}
+	Ok(())
+}
+
+/// Stops every running dashboard of this user, all at once.
+async fn shutdown_all() -> Result<()> {
+	let records = registry::running().await;
+	if records.is_empty() {
+		println!("No dashboard is running.");
+		return Ok(());
+	}
+	let mut tasks = tokio::task::JoinSet::new();
+	for record in records {
+		tasks.spawn(async move {
+			println!("Stopping '{}' ({})...", record.title, record.ini_path);
+			let session = Session::from_record(&record.id, &record.ini_path)?;
+			shutdown(&session).await
+		});
+	}
+	let mut failed = false;
+	while let Some(result) = tasks.join_next().await {
+		match result {
+			Ok(Ok(())) => {}
+			Ok(Err(e)) => {
+				eprintln!("{:#}", e);
+				failed = true;
+			}
+			Err(e) => {
+				eprintln!("{}", e);
+				failed = true;
+			}
+		}
+	}
+	if failed {
+		bail!("not every dashboard could be stopped");
 	}
 	Ok(())
 }
@@ -237,6 +285,9 @@ fn main() -> Result<()> {
 		if options.list {
 			registry::print_list(&registry::running().await);
 			return Ok(());
+		}
+		if options.shutdown_all {
+			return shutdown_all().await;
 		}
 		let target = options.ini.clone().expect("checked by parse_args");
 		let session = resolve_session(&target, &options).await?;

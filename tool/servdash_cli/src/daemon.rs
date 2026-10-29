@@ -28,12 +28,12 @@ use crate::config::{DashCfg, SectionCfg, PRIORITY_NONE};
 use crate::ipc;
 use crate::launch_ctrl::{self, LaunchCtrl};
 use crate::log;
-use crate::proto::{self, ClientMsg, Color, DaemonMsg, ProcState, ProcessInfo, StyledLine};
+use crate::proto::{self, ClientMsg, Color, CommandInfo, CommandKind, DaemonMsg, ProcState, ProcessInfo, StyledLine};
 use crate::session::Session;
 use crate::spawn;
 use anyhow::{Context, Result};
 use regex::Regex;
-use std::collections::{HashMap, VecDeque};
+use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::time::{Duration, Instant};
 use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncWriteExt, BufReader};
 use tokio::process::Child;
@@ -77,6 +77,8 @@ struct Proc {
 	/// Console lines, raw output and notes, in arrival order.
 	lines: VecDeque<StyledLine>,
 	labels: Vec<String>,
+	/// The command table of the service, by name, as it reports it over the console channel.
+	commands: BTreeMap<String, CommandInfo>,
 	control: Option<(u64, UnboundedSender<String>)>,
 	control_endpoint: Option<String>,
 	launch_ctrl: Option<LaunchCtrl>,
@@ -327,6 +329,7 @@ impl Daemon {
 				stdin: None,
 				lines: VecDeque::new(),
 				labels: Vec::new(),
+				commands: BTreeMap::new(),
 				control: None,
 				control_endpoint,
 				launch_ctrl,
@@ -699,9 +702,11 @@ impl Daemon {
 		// the service replays its history on connection, so its earlier lines go; the raw ones stay
 		p.lines.retain(|line| line.raw);
 		p.labels.clear();
+		p.commands.clear();
 		let name = p.cfg.name.clone();
 		let lines = p.lines.iter().cloned().collect();
-		self.broadcast(DaemonMsg::Snapshot { name, lines });
+		self.broadcast(DaemonMsg::Snapshot { name: name.clone(), lines });
+		self.broadcast(DaemonMsg::Commands { name, commands: Vec::new() });
 		if self.procs[idx].state == ProcState::Launched {
 			self.set_state(idx, ProcState::Captured);
 			if self.procs[idx].ready_re.is_none() {
@@ -757,6 +762,37 @@ impl Daemon {
 					self.broadcast(DaemonMsg::Label { name, index, value });
 				}
 			}
+			"command" => {
+				let name = fields.get(1).cloned().unwrap_or_default();
+				if name.is_empty() {
+					return;
+				}
+				let kind = match fields.get(2).map(String::as_str) {
+					Some("o") => CommandKind::Handler,
+					Some("m") => CommandKind::Member,
+					_ => CommandKind::Command,
+				};
+				let command = CommandInfo {
+					name: name.clone(),
+					kind,
+					args: fields.get(3).cloned().unwrap_or_default(),
+					help: fields.get(4).cloned().unwrap_or_default(),
+				};
+				let p = &mut self.procs[idx];
+				if p.commands.len() < 10000 || p.commands.contains_key(&name) {
+					p.commands.insert(name, command.clone());
+					let name = p.cfg.name.clone();
+					self.broadcast(DaemonMsg::Command { name, command });
+				}
+			}
+			"uncommand" => {
+				let command = fields.get(1).cloned().unwrap_or_default();
+				let p = &mut self.procs[idx];
+				if p.commands.remove(&command).is_some() {
+					let name = p.cfg.name.clone();
+					self.broadcast(DaemonMsg::Uncommand { name, command });
+				}
+			}
 			"log" => {
 				let color = console_color(fields.get(1).map(String::as_str).unwrap_or("0"));
 				let text = fields.get(2).cloned().unwrap_or_default();
@@ -799,6 +835,9 @@ impl Daemon {
 		send(DaemonMsg::Processes { processes });
 		for p in &self.procs {
 			send(DaemonMsg::Snapshot { name: p.cfg.name.clone(), lines: p.lines.iter().cloned().collect() });
+			if !p.commands.is_empty() {
+				send(DaemonMsg::Commands { name: p.cfg.name.clone(), commands: p.commands.values().cloned().collect() });
+			}
 		}
 		self.clients.insert(id, tx);
 	}
