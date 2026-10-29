@@ -1682,6 +1682,14 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:SHOW_CLOCK" type="bool" value="false" />
 <variable entry="UI:SAVE:SHOW_CLOCK_12H" type="bool" value="false" />
 <variable entry="UI:SAVE:SHOW_RETICLE" type="bool" value="true" />
+<!-- Optional ToT window and independent target bars -->
+<variable entry="UI:SAVE:SHOW_TARGET_OF_TARGET" type="bool" value="false" />
+<variable entry="UI:SAVE:TARGET:BARS:SHOW_HP" type="bool" value="true" />
+<variable entry="UI:SAVE:TARGET:BARS:SHOW_SAP" type="bool" value="true" />
+<variable entry="UI:SAVE:TARGET:BARS:SHOW_STA" type="bool" value="true" />
+<variable entry="UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_HP" type="bool" value="true" />
+<variable entry="UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_SAP" type="bool" value="true" />
+<variable entry="UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_STA" type="bool" value="true" />
 <variable entry="UI:VARIABLES:MISSION_SELECTED_PREV_SESSION" type="sint32" value="-1" />
 
 <!-- set to true if the current header that called a menu was a popup container -->
@@ -1912,6 +1920,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 <!-- List Menu 4 -->
 <variable entry="UI:VARIABLES:ISACTIVE:TARGET" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:TARGET_OF_TARGET" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:GUILD_FORUM" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:TELL" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:TEAM_CHAT" type="sint32" value="0" />

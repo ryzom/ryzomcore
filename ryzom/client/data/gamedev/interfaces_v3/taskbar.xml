@@ -984,7 +984,10 @@
 		<instance template="win_button" id="target"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwTarget" posparent="journal" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:TARGET" 	win_name="target" />
 
-		<instance template="win_button" id="jauge"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBars" posparent="target" posref="BL TL" x="0" y="-4"
+		<instance template="win_button" id="target_of_target" color="UI:SAVE:WIN:COLORS:PLA" text="uiTargetOfTargetTitle" posparent="target" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:TARGET_OF_TARGET" win_name="target_of_target" />
+
+		<instance template="win_button" id="jauge"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBars" posparent="target_of_target" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:PLAYER"		win_name="player" />
 			
 		<instance template="win_button" id="bonus_malus"		color="UI:SAVE:WIN:COLORS:PLA" text="uimwBonusMalus" posparent="jauge" posref="BL TL" x="0" y="-4"

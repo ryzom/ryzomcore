@@ -48,6 +48,7 @@
 	<value value="team_chat"			hardtext="uiTeamChat" contexts="game"/>
 
 	<value value="target"				hardtext="uiTarget" contexts="game, r2ed_anim_test, r2ed_anim_dm"/>
+	<value value="target_of_target" hardtext="uiTargetOfTargetTitle" contexts="game" />
 	<value value="contact_list"			hardtext="uiContactList" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
 	<value value="main_chat"			hardtext="uiMainChat" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="tell"					hardtext="uiTellWinAct" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
