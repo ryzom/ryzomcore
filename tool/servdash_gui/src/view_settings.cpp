@@ -19,7 +19,6 @@
 #include <QApplication>
 #include <QGuiApplication>
 #include <QPalette>
-#include <QStyle>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QStyleHints>
@@ -90,7 +89,24 @@ void CViewSettings::applyTheme()
 	QPalette palette = s_SystemPalette;
 	if (m_Theme == Light)
 	{
-		palette = QApplication::style()->standardPalette();
+		// the light Fusion palette by hand: the style's own follows the platform's colour scheme,
+		// so on a system in dark mode it would be dark as well
+		palette = QPalette(QColor(239, 239, 239));
+		palette.setColor(QPalette::WindowText, Qt::black);
+		palette.setColor(QPalette::Base, Qt::white);
+		palette.setColor(QPalette::AlternateBase, QColor(247, 247, 247));
+		palette.setColor(QPalette::ToolTipBase, QColor(255, 255, 220));
+		palette.setColor(QPalette::ToolTipText, Qt::black);
+		palette.setColor(QPalette::Text, Qt::black);
+		palette.setColor(QPalette::ButtonText, Qt::black);
+		palette.setColor(QPalette::BrightText, Qt::white);
+		palette.setColor(QPalette::Link, QColor(0, 0, 255));
+		palette.setColor(QPalette::Highlight, QColor(48, 140, 198));
+		palette.setColor(QPalette::HighlightedText, Qt::white);
+		palette.setColor(QPalette::PlaceholderText, QColor(128, 128, 128));
+		palette.setColor(QPalette::Disabled, QPalette::Text, QColor(190, 190, 190));
+		palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(190, 190, 190));
+		palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(190, 190, 190));
 	}
 	else if (m_Theme == Dark)
 	{
