@@ -55,6 +55,9 @@ struct CSectionConfig
 	bool Control = false;
 	bool HasLaunchCtrl = false;
 	CLaunchCtrlConfig LaunchCtrl;
+	/// `RestartDelay`: seconds after which a process that exited on its own starts again, for a
+	/// process without launch control such as a patchman; negative when absent.
+	double RestartDelay = -1;
 
 	/// The button text before a process title arrives.
 	QString label() const { return Title.isEmpty() ? LaunchCmd : Title; }

@@ -163,6 +163,16 @@ bool CDashboardConfig::read(const QString &path, CDashboardConfig &config, QStri
 			}
 		}
 		s.AutoStart = r.get("AutoStart") != "0";
+		if (r.has("RestartDelay") && !r.get("RestartDelay").trimmed().isEmpty())
+		{
+			bool ok = false;
+			s.RestartDelay = r.get("RestartDelay").trimmed().toDouble(&ok);
+			if (!ok || s.RestartDelay < 0)
+			{
+				error = QString("Section [%1] has an invalid RestartDelay '%2'").arg(r.Name, r.get("RestartDelay"));
+				return false;
+			}
+		}
 		s.Control = r.get("Control") == "1";
 		if (r.has("LaunchCtrl"))
 		{

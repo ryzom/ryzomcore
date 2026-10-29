@@ -44,6 +44,10 @@ const MAX_LINES: usize = 5000;
 const TICK: Duration = Duration::from_millis(250);
 /// A control service that has not connected by then counts as captured, so the start order goes on.
 const CAPTURE_TIMEOUT: Duration = Duration::from_secs(30);
+/// A RestartDelay process that exits before running this long is crashing in a chain: each such
+/// exit doubles its delay, up to RESTART_DELAY_MAX; a longer run resets it.
+const STABLE_RUN: Duration = Duration::from_secs(60);
+const RESTART_DELAY_MAX: Duration = Duration::from_secs(300);
 
 enum Event {
 	ClientConnected(u64, UnboundedSender<DaemonMsg>),
@@ -57,6 +61,8 @@ enum Event {
 	ControlLine(usize, u64, String),
 	ControlGone(usize, u64),
 	Tick,
+	/// Process index, launch generation at its exit: its RestartDelay passed.
+	RelaunchDue(usize, u64),
 }
 
 struct Proc {
@@ -68,6 +74,10 @@ struct Proc {
 	started: bool,
 	shutdown_requested: bool,
 	restart_once: bool,
+	/// A RestartDelay relaunch is scheduled.
+	relaunch_pending: bool,
+	/// Exits in a row that came before STABLE_RUN; doubles the RestartDelay each time.
+	crash_chain: u32,
 	ready_triggered: bool,
 	ready_re: Option<Regex>,
 	/// Incremented per launch; events from an earlier child are ignored.
@@ -100,7 +110,7 @@ impl Proc {
 			label,
 			title: self.title.clone(),
 			state: self.state,
-			started: self.started,
+			started: self.started || self.relaunch_pending,
 			control: self.cfg.control,
 			control_connected: self.control.is_some(),
 			labels: self.labels.clone(),
@@ -322,6 +332,8 @@ impl Daemon {
 				started: false,
 				shutdown_requested: false,
 				restart_once: false,
+				relaunch_pending: false,
+				crash_chain: 0,
 				ready_triggered: false,
 				ready_re,
 				gen: 0,
@@ -482,6 +494,7 @@ impl Daemon {
 				}
 				p.child = Some(child);
 				p.ready_triggered = false;
+				p.relaunch_pending = false;
 				p.launched_at = Some(Instant::now());
 				if let Some(lc) = &mut p.launch_ctrl {
 					lc.count_launch();
@@ -508,6 +521,14 @@ impl Daemon {
 	/// MainWindow.stopClicked: leave the queue and ask the process to stop.
 	fn stop(&mut self, idx: usize) {
 		self.queue.retain(|&i| i != idx);
+		if self.procs[idx].relaunch_pending {
+			// a pending RestartDelay relaunch is what there is to stop
+			self.procs[idx].relaunch_pending = false;
+			self.procs[idx].crash_chain = 0;
+			self.push_output(idx, StyledLine::plain("> Restart cancelled"));
+			self.broadcast_info(idx);
+		}
+		self.procs[idx].crash_chain = 0;
 		self.shutdown(idx);
 	}
 
@@ -581,6 +602,8 @@ impl Daemon {
 
 	fn kill(&mut self, idx: usize) {
 		self.queue.retain(|&i| i != idx);
+		self.procs[idx].relaunch_pending = false;
+		self.procs[idx].crash_chain = 0;
 		if !self.procs[idx].running() {
 			return;
 		}
@@ -603,21 +626,60 @@ impl Daemon {
 		};
 		self.push_output(idx, StyledLine::plain(text));
 		self.set_state(idx, ProcState::Stopped);
+		let shutting_down = self.shutting_down;
 		let p = &mut self.procs[idx];
 		if let Some(lc) = &mut p.launch_ctrl {
 			lc.after_exit();
 		}
 		let relaunch = p.restart_once && !p.shutdown_requested;
+		// RestartDelay: an exit nobody asked for starts the process again after the delay; a
+		// process under launch control is the AES's to restart
+		let keep_alive = !relaunch && !p.shutdown_requested && p.launch_ctrl.is_none() && !shutting_down;
+		let delay = if keep_alive { p.cfg.restart_delay } else { None };
+		// a chain of quick exits backs off, so a crashing process is not hammered
+		let stable = p.launched_at.is_some_and(|t| t.elapsed() >= STABLE_RUN);
+		if delay.is_some() {
+			p.crash_chain = if stable { 0 } else { p.crash_chain.saturating_add(1) };
+		}
+		let chain = p.crash_chain;
+		let delay = delay.map(|base| if chain <= 1 { base } else { base.saturating_mul(1u32 << (chain - 1).min(16)).min(RESTART_DELAY_MAX.max(base)) });
 		p.restart_once = false;
 		p.shutdown_requested = false;
 		if relaunch {
 			self.launch(idx);
+		}
+		if let Some(delay) = delay {
+			self.procs[idx].relaunch_pending = true;
+			self.broadcast_info(idx);
+			let gen = self.procs[idx].gen;
+			let text = if chain > 1 {
+				format!("> Restarting in {} s ({} quick exits in a row)", delay.as_secs_f64(), chain)
+			} else {
+				format!("> Restarting in {} s", delay.as_secs_f64())
+			};
+			self.push_output(idx, StyledLine::plain(text));
+			let tx = self.tx.clone();
+			tokio::spawn(async move {
+				tokio::time::sleep(delay).await;
+				let _ = tx.send(Event::RelaunchDue(idx, gen));
+			});
 		}
 		if self.shutting_down {
 			self.check_done();
 		} else {
 			self.auto_start();
 		}
+	}
+
+	/// The RestartDelay of a process passed: start it again, unless something happened to it since.
+	fn on_relaunch_due(&mut self, idx: usize, gen: u64) {
+		let shutting_down = self.shutting_down;
+		let p = &mut self.procs[idx];
+		if !p.relaunch_pending || p.gen != gen || p.running() || shutting_down {
+			return;
+		}
+		p.relaunch_pending = false;
+		self.launch_wanted(idx);
 	}
 
 	fn check_done(&mut self) {
@@ -857,7 +919,8 @@ impl Daemon {
 			ClientMsg::Hello { .. } => {}
 			ClientMsg::Start { name } => {
 				if let Some(idx) = self.index_of(&name) {
-					// ProcessControl.startButton_Click
+					// ProcessControl.startButton_Click; a start by hand begins a new crash chain
+					self.procs[idx].crash_chain = 0;
 					let has_ctrl = self.procs[idx].launch_ctrl.is_some();
 					if has_ctrl {
 						if let Some(lc) = &mut self.procs[idx].launch_ctrl {
@@ -951,6 +1014,7 @@ impl Daemon {
 			Event::ControlConnected(idx, conn, tx) => self.on_control_connected(idx, conn, tx),
 			Event::ControlLine(idx, conn, line) => self.on_control_line(idx, conn, line),
 			Event::ControlGone(idx, conn) => self.on_control_gone(idx, conn),
+			Event::RelaunchDue(idx, gen) => self.on_relaunch_due(idx, gen),
 			Event::Tick => {
 				for idx in 0..self.procs.len() {
 					if self.procs[idx].running() {

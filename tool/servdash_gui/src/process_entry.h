@@ -95,7 +95,7 @@ public:
 	const QString &name() const { return m_Config.Name; }
 	TState state() const { return m_State; }
 	/// Whether the start button means stop. Set on launch, cleared on exit.
-	bool started() const { return m_Started; }
+	bool started() const { return m_Started || m_RelaunchPending; }
 	bool running() const { return m_Process != nullptr; }
 	/// Button text: the Title key, else the process title once known, else the command.
 	QString label() const { return m_Config.Title.isEmpty() ? m_Title : m_Config.Title; }
@@ -177,6 +177,12 @@ private:
 	bool m_KillRequested = false;
 	bool m_LaunchBlocked = false;
 	bool m_RestartOnce = false;
+	/// Counts the RestartDelay relaunches scheduled; a stop or kill makes the pending one stale.
+	int m_RelaunchGen = 0;
+	/// A RestartDelay relaunch is scheduled; it shows as started, so the button cancels it.
+	bool m_RelaunchPending = false;
+	/// Exits in a row that came within the first minute of a run; doubles the RestartDelay each time.
+	int m_CrashChain = 0;
 	bool m_ReadyTriggered = false;
 	bool m_AutoLaunch = true;
 	QRegularExpression m_ReadyPattern;

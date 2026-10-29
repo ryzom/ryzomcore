@@ -24,6 +24,7 @@
 
 use anyhow::{bail, Context, Result};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 /// Priority of a section without a `Priority` key. Such sections start one at a time.
 pub const PRIORITY_NONE: i32 = i32::MAX;
@@ -56,6 +57,10 @@ pub struct SectionCfg {
 	/// `Control=1`: a NeL service; the dashboard opens a console channel and passes it as `--ctrl`.
 	pub control: bool,
 	pub launch_ctrl: Option<LaunchCtrlCfg>,
+	/// `RestartDelay`: seconds after which a process that exited on its own starts again. For a
+	/// process without launch control, such as a patchman: what the relaunch loops of the screen
+	/// setup do. A process stopped or killed from the dashboard stays down.
+	pub restart_delay: Option<Duration>,
 }
 
 #[derive(Clone, Debug)]
@@ -148,6 +153,16 @@ fn parse_section(raw: &RawSection) -> Result<SectionCfg> {
 		}
 		None => None,
 	};
+	let restart_delay = match raw.get("RestartDelay").filter(|v| !v.trim().is_empty()) {
+		Some(v) => {
+			let seconds: f64 = v.trim().parse().with_context(|| format!("section [{}] has an invalid RestartDelay '{}'", raw.name, v))?;
+			if seconds < 0.0 {
+				bail!("section [{}] has a negative RestartDelay", raw.name);
+			}
+			Some(Duration::from_secs_f64(seconds))
+		}
+		None => None,
+	};
 	Ok(SectionCfg {
 		name: raw.name.clone(),
 		title: raw.get("Title").map(str::to_string),
@@ -162,6 +177,7 @@ fn parse_section(raw: &RawSection) -> Result<SectionCfg> {
 		auto_start: raw.get("AutoStart") != Some("0"),
 		control: raw.get("Control") == Some("1"),
 		launch_ctrl,
+		restart_delay,
 	})
 }
 
@@ -215,6 +231,17 @@ mod tests {
 		let lc = s.launch_ctrl.unwrap();
 		assert_eq!(lc.values[2], "STOP");
 		assert!(lc.ctrl_file.to_string_lossy().contains("egs_mainland.launch_ctrl"));
+	}
+
+	#[test]
+	fn restart_delay_in_seconds() {
+		let raw = parse_raw("[x]\nLaunchCmd=a\nRestartDelay=2.5\n");
+		let s = parse_section(&raw[1]).unwrap();
+		assert_eq!(s.restart_delay, Some(Duration::from_millis(2500)));
+		let raw = parse_raw("[x]\nLaunchCmd=a\n");
+		assert_eq!(parse_section(&raw[1]).unwrap().restart_delay, None);
+		let raw = parse_raw("[x]\nLaunchCmd=a\nRestartDelay=soon\n");
+		assert!(parse_section(&raw[1]).is_err());
 	}
 
 	#[test]

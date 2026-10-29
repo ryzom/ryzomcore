@@ -21,6 +21,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QTime>
+#include <QTimer>
 #include <QSharedPointer>
 
 #ifdef Q_OS_WIN
@@ -415,6 +416,15 @@ void CProcessEntry::killChild()
 
 void CProcessEntry::shutdown()
 {
+	++m_RelaunchGen;
+	m_CrashChain = 0;
+	if (m_RelaunchPending)
+	{
+		// a pending RestartDelay relaunch is what there is to stop
+		m_RelaunchPending = false;
+		note("Restart cancelled");
+		emit stateChanged(this);
+	}
 	if (!running())
 		return;
 	if (m_ShutdownRequested)
@@ -489,6 +499,13 @@ void CProcessEntry::shutdown()
 
 void CProcessEntry::kill()
 {
+	++m_RelaunchGen;
+	m_CrashChain = 0;
+	if (m_RelaunchPending)
+	{
+		m_RelaunchPending = false;
+		emit stateChanged(this);
+	}
 	if (!running())
 		return;
 	m_ShutdownRequested = true;
@@ -579,10 +596,39 @@ void CProcessEntry::onFinished(int exitCode, QProcess::ExitStatus status)
 	if (m_LaunchCtrl)
 		m_LaunchCtrl->afterExit();
 	bool relaunch = m_RestartOnce && !m_ShutdownRequested;
+	// RestartDelay: an exit nobody asked for starts the process again after the delay; a process
+	// under launch control is the AES's to restart
+	bool keepAlive = !relaunch && !m_ShutdownRequested && !m_LaunchCtrl && m_Config.RestartDelay >= 0 && !m_LaunchBlocked;
 	m_RestartOnce = false;
 	m_ShutdownRequested = false;
 	if (relaunch)
 		launch();
+	if (keepAlive)
+	{
+		// a chain of quick exits backs off, so a crashing process is not hammered: each exit within
+		// the first minute of a run doubles the delay, up to five minutes; a longer run resets it
+		const bool stable = m_LaunchedAt.isValid() && m_LaunchedAt.elapsed() >= 60000;
+		m_CrashChain = stable ? 0 : m_CrashChain + 1;
+		double delay = m_Config.RestartDelay;
+		if (m_CrashChain > 1)
+			delay = qMin(delay * double(1 << qMin(m_CrashChain - 1, 16)), qMax(300.0, delay));
+		if (m_CrashChain > 1)
+			note(QString("Restarting in %1 s (%2 quick exits in a row)").arg(delay).arg(m_CrashChain));
+		else
+			note(QString("Restarting in %1 s").arg(delay));
+		const int gen = ++m_RelaunchGen;
+		m_RelaunchPending = true;
+		emit stateChanged(this);
+		QTimer::singleShot(int(delay * 1000), this, [this, gen]() {
+			if (gen != m_RelaunchGen)
+				return;
+			m_RelaunchPending = false;
+			if (!running())
+				launch();
+			else
+				emit stateChanged(this);
+		});
+	}
 	emit exited(this);
 }
 

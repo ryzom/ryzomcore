@@ -53,6 +53,19 @@ into `build_docker/tools_xplat/x86_64-unknown-linux-musl/release`. The shard pat
 pipeline (`c1_shard_patch.py`) puts the Linux one into `admin_install.tgz` as `bin/servdash_cli`,
 so it reaches the servers with the patchman package.
 
+## Production servers
+
+The patchman package (`admin_install.tgz`) carries servdash_cli in `bin/`, and its scripts
+have a servdash mode next to the screen one, chosen by the presence of `/home/nevrax/use_servdash`.
+In that mode `bin/admin start` writes `/home/nevrax/admin.ini` from `patchman_list` and
+`special_patchman_list` (the patchman of the host and its special roles, each with a
+`RestartDelay` instead of a shell loop) and starts a detached dashboard on it; `join` attaches,
+`stop` shuts it down. Each domain gets `<domain>/<domain>.ini` from the patch applier, next to
+its `<domain>.screen.rc`: the aes section from `patchman/servdash.ini.default`, then a section
+per service with the launch control files the AES drives, so the dashboard replaces
+`service_launcher.sh` and the services get their console. `bin/domain_<domain>` and the domain
+wrapper use it for `start`, `stop`, `join` and `state`.
+
 ## NeL services and the console channel
 
 A section with `Control=1` is a NeL service. The daemon listens on a local endpoint for it
@@ -86,6 +99,7 @@ The format and keys of the Win32 servdash, which ignores the two new ones:
 | `LaunchCmd`, `LaunchArgs` | The program and its arguments. On Windows the argument string is passed as it stands; on Linux it is split like a shell does. |
 | `ShutdownCmd`, `ShutdownArgs` | A program run to stop the process. Without any stop method the process is killed. |
 | `ShutdownInput` | New: a line written to the process stdin to stop it. |
+| `RestartDelay` | New: seconds after which a process that exited on its own starts again. For a process without `LaunchCtrl`, such as a patchman: what the relaunch loops of the screen setup do. Stop and Kill keep it down. An exit within the first minute of a run doubles the delay each time, up to five minutes; a longer run resets it. |
 | `ReadyPattern` | Regex for the ready state, see above. |
 | `Priority` | Start order group, lowest first; processes without it start one at a time. |
 | `AutoStart` | `0` keeps the process out of the start sequence. |
