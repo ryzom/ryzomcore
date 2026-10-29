@@ -185,7 +185,7 @@ jobs:
       - id: cache
         uses: actions/cache@v6
         with:
-          key: ryzom-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'ryzom/**', '.github/ryzom/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: ryzom-${{ matrix.os }}-${{ hashFiles('build/nel-*.sh', 'ryzom/**', 'tool/CMakeLists.txt', 'tool/bin2c/**', 'tool/servdash_gui/**', '.github/ryzom/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
           path: ${{ needs.strings.outputs.build-dir }}/ryzom/ryzom-*
 
       - uses: ./.github/ryzom

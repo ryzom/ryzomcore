@@ -136,6 +136,9 @@ cargo install cargo-xwin
 cargo xwin build --release --target x86_64-pc-windows-msvc
 ```
 
+The GitHub Actions workflow `.github/workflows/tools.yml` formats, lints, tests and builds the
+tool for Linux (musl) and Windows on every change, and keeps both binaries as run artifacts.
+
 ## Not done yet
 
 - Processes are shown line by line through pipes. A program that needs a terminal (a shell,

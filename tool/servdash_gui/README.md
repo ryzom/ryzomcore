@@ -85,3 +85,7 @@ The icons, including the application icon, are painted from code; `servdash_gui 
 the Windows executable is packed. The
 tool also builds with Qt 5.15 and Qt 6.2, but their Fusion style drops one pixel lines at a
 fractional display scale, so frames and scrollbars come out without edges at 125 percent.
+
+The GitHub Actions workflow `.github/workflows/tools.yml` builds the tool on its own against
+the Qt 5 and Qt 6 of Ubuntu and against Qt 6.8 on Windows, where the deployed executable
+is kept as a run artifact; the Linux Ryzom job of `ci.yml` builds it in the tree with Qt 5.
