@@ -32,6 +32,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFont>
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -80,6 +81,7 @@ int main(int argc, char *argv[])
 	QString windowSize;
 	QString iconDir;
 	QString typedInput;
+	QString fontFamily;
 	for (int i = 1; i < argc; ++i)
 	{
 		QString arg = QString::fromLocal8Bit(argv[i]);
@@ -91,8 +93,18 @@ int main(int argc, char *argv[])
 			iconDir = QString::fromLocal8Bit(argv[++i]);
 		else if (arg == "--input" && i + 1 < argc)
 			typedInput = QString::fromLocal8Bit(argv[++i]);
+		else if (arg == "--font" && i + 1 < argc)
+			fontFamily = QString::fromLocal8Bit(argv[++i]);
 		else if (iniPath.isEmpty())
 			iniPath = arg;
+	}
+	// --font <family> names the interface font, for the offscreen platform whose fallback picks
+	// whatever family it finds first in QT_QPA_FONTDIR; the console keeps the fixed font
+	if (!fontFamily.isEmpty())
+	{
+		QFont font = QApplication::font();
+		font.setFamily(fontFamily);
+		QApplication::setFont(font);
 	}
 	if (!iconDir.isEmpty())
 	{
