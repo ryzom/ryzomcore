@@ -27,6 +27,8 @@ def printBuildTarget(name, tn):
 		addtl = ""
 		if "Docker" in tc and tc["Docker"]:
 			addtl += ", Docker"
+		if "Wine" in tc and tc["Wine"]:
+			addtl += ", Wine"
 		if "Hunter" in tc and tc["Hunter"]:
 			addtl += ", Hunter"
 		if "LuaVersion" in tc:

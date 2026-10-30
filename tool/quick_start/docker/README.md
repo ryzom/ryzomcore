@@ -29,6 +29,28 @@ docker build -t "ryzombuild_noble_amd64" -f "Y:\ryzomcore4\code\tool\quick_start
 docker build -t "ryzombuild_resolute_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_resolute_amd64\Dockerfile" Y:\ryzomcore4\code
 ```
 
+## Windows toolchains under Wine
+
+`ryzombuild_wine_amd64` carries Wine with the 32-bit libraries, Ninja, CMake and Python, and no
+compiler of its own: its label `dev.ryzom.quickstart.toolchain=wine` tells the toolchain scan to
+probe the Wine prefixes of the `ryzombuild_wine_amd64_prefixes` volume instead (`dump_wine.py`, run
+inside the image, reports the Visual Studio installations, Windows and DirectX SDKs, 3ds Max SDKs and
+`*_external_<toolset>_<platform>` externals folders of every prefix on the volume). `configure_docker`
+fills the volume from the packaged prefixes listed under `WinePrefixes` in the configuration (the
+archive of a prefix unpacks to a folder of its own name, the externals archives are bare and unpack
+under `drive_c`) and runs the setup script of the toolchain layer over them.
+
+A toolset becomes a build toolchain when a layer exists for it: the wrapper scripts and CMake toolchain
+file that drive its compiler through Wine, `tool/wine_vs2008` for Visual Studio 2008 (the same layer
+the VS2008 workflow of the GitHub CI uses). The toolchain is keyed like a native one with a `/W` suffix,
+`Win2k/VS/v90/x86/W`, so the target filters pick it up where no native install exists, and a filter can
+exclude it with `"Wine": false`. Its scripts land under `build_docker` like the Linux ones. By hand:
+
+```
+docker build -t "ryzombuild_wine_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_wine_amd64\Dockerfile" Y:\ryzomcore4\code
+docker run --rm -v ryzombuild_wine_amd64_prefixes:/opt/wineprefixes --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" ryzombuild_wine_amd64 python3 /mnt/nel/code/tool/quick_start/dump_wine.py /opt/wineprefixes
+```
+
 ## Cross-platform tools
 
 `ryzombuild_xplat_tools` holds the Rust toolchain for the tools of the code repository that are not

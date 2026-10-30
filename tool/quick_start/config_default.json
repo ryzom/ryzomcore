@@ -20,6 +20,16 @@
   },
   "UseNinja": true,
   "Headless": false,
+  "WinePrefixes": {
+    "toolchain_v90_prefix": {
+      "Url": "https://cdn.ryzom.dev/core/toolchain_v90_prefix.7z",
+      "Externals": {
+        "2019q4_external_v90_x86": "https://cdn.ryzom.dev/core/2019q4_external_v90_x86.7z"
+      },
+      "Setup": "tool/wine_vs2008/setup.sh",
+      "SetupEnv": "NL_WINE_VS2008_PREFIX"
+    }
+  },
   "Paths": {
     "Python27": "external/python27",
     "Python3": "external/python3",

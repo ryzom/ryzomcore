@@ -17,6 +17,15 @@ box reached over SSH. The Win32 servdash of external/utils is the fallback when 
 server of the chosen dashboard tool, over every dashboard running for the user, so an agent can
 start a shard from its ini, watch the logs, run service commands and stop it again.
 
+Toolchains come from three scans: `find_vstudio.py` for the Visual Studio installations of the
+native drive, `find_gcc.py` for GCC on the host and in every Docker image under `docker/`, and
+`find_wine.py` for Windows toolchains under Wine, which asks each Docker image labelled
+`dev.ryzom.quickstart.toolchain=wine` to probe the Wine prefixes of its volume (`dump_wine.py`,
+sharing `vstudio_scan.py` with the native scan). A Wine toolchain needs a toolchain layer for its
+toolset (`NeLWineToolchainLayers` in `configure_toolchains.py`, `tool/wine_vs2008` for v90) and
+builds through Docker with Ninja and the layer's toolchain file; `configure_docker.py` downloads the
+packaged prefixes (`WinePrefixes` in the configuration) into the volume. See `docker/README.md`.
+
 Tools that are not C++ (servdash_cli, a Rust crate) are built by `build_docker/tools_xplat_build.bat`
 in the `ryzombuild_xplat_tools` Docker image, for a generic Linux (static musl) and for Windows
 (MSVC target through cargo-xwin), into `build_docker/tools_xplat/<target>/release`. The crates are

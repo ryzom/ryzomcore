@@ -1,8 +1,7 @@
 
 # This script detects all external library paths
 # Useful for locating all dynamic libraries
-
-from .common_config import *
+# Standard library only: dump_wine.py imports it as a plain module to probe the externals of a Wine prefix
 
 import os
 

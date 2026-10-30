@@ -35,11 +35,19 @@ ln -sfn "$VC/include" "$SHADOW/VC/include"
 ln -sfn "$VC/lib" "$SHADOW/VC/lib"
 ln -sfn "$VC/atlmfc" "$SHADOW/VC/atlmfc"
 ln -sfn "$VC/redist" "$SHADOW/VC/redist"
-cp "$HERE/winecl-env" "$SHADOW/VC/bin/winecl-env"
-cp "$HERE/winecl-cc" "$SHADOW/VC/bin/cl.exe"
-cp "$HERE/winecl-link" "$SHADOW/VC/bin/link.exe"
-cp "$HERE/winecl-lib" "$SHADOW/VC/bin/lib.exe"
-chmod +x "$SHADOW/VC/bin/cl.exe" "$SHADOW/VC/bin/link.exe" "$SHADOW/VC/bin/lib.exe"
+# The wrappers are copied with their line endings normalized: a checkout mounted from Windows (the quick
+# start) may carry CRLF, which bash does not forgive. mt and rc go along so that toolchain.cmake can
+# take every wrapper from here.
+install_wrapper() {
+	sed 's/\r$//' "$HERE/$1" > "$SHADOW/VC/bin/$2"
+	chmod +x "$SHADOW/VC/bin/$2"
+}
+install_wrapper winecl-env winecl-env
+install_wrapper winecl-cc cl.exe
+install_wrapper winecl-link link.exe
+install_wrapper winecl-lib lib.exe
+install_wrapper winecl-mt winecl-mt
+install_wrapper winecl-rc winecl-rc
 
 # 2b. maxscript SDK patch: maxsdk/include/maxscrpt/value.h declares a global
 #     'extern ScripterExport Empty empty;' that collides with VC's ivec.h

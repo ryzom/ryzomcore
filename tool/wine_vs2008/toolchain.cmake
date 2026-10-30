@@ -43,8 +43,16 @@ set(CMAKE_C_COMPILER   "${_NLWINE_SHADOW}/VC/bin/cl.exe")
 set(CMAKE_CXX_COMPILER "${_NLWINE_SHADOW}/VC/bin/cl.exe")
 set(CMAKE_LINKER       "${_NLWINE_SHADOW}/VC/bin/link.exe")
 set(CMAKE_AR           "${_NLWINE_SHADOW}/VC/bin/lib.exe")
-set(CMAKE_MT           "${CMAKE_CURRENT_LIST_DIR}/winecl-mt")
-set(CMAKE_RC_COMPILER  "${CMAKE_CURRENT_LIST_DIR}/winecl-rc")
+# setup.sh copies the mt and rc wrappers next to the compiler wrappers with normalized line
+# endings and the execute bit (a checkout mounted from Windows has neither for sure); a shadow
+# dir made by an older setup.sh falls back to the wrappers in this folder.
+if(EXISTS "${_NLWINE_SHADOW}/VC/bin/winecl-mt")
+	set(CMAKE_MT           "${_NLWINE_SHADOW}/VC/bin/winecl-mt")
+	set(CMAKE_RC_COMPILER  "${_NLWINE_SHADOW}/VC/bin/winecl-rc")
+else()
+	set(CMAKE_MT           "${CMAKE_CURRENT_LIST_DIR}/winecl-mt")
+	set(CMAKE_RC_COMPILER  "${CMAKE_CURRENT_LIST_DIR}/winecl-rc")
+endif()
 
 # NEVER, not ONLY: ONLY restricts find_path/find_library to paths prefixed
 # by CMAKE_FIND_ROOT_PATH, which we never set (empty) - with an empty root

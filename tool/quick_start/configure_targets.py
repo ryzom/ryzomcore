@@ -48,6 +48,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 		maxSdk = target["MaxSDK"]
 	isDocker = "Docker" in tc and tc["Docker"]
 	isHunter = "Hunter" in tc and tc["Hunter"]
+	isWine = "Wine" in tc and tc["Wine"]
 	opts = []
 	
 	# Generator
@@ -59,6 +60,10 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 			opts += [ "-G", "%RC_GENERATOR%" ]
 		else:
 			opts += [ "-G", gen ]
+	
+	# Windows toolchain under Wine: the toolchain file of the layer drives the compiler through its wrapper scripts
+	if isWine:
+		opts += [ "-DCMAKE_TOOLCHAIN_FILE=" + DockerRootPath("code/" + tc["WineLayer"]["Dir"] + "/toolchain.cmake") ]
 	
 	# Visual Studio Toolset and Platform
 	if gen and gen.startswith("Visual Studio") and "Toolset" in tc and tc["Toolset"].startswith("v"):
@@ -191,8 +196,8 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 		opts += [ "-DWITH_DRIVER_OPENGL3=OFF" ]
 		opts += [ "-DWITH_DRIVER_OPENAL=OFF" ]
 	
-	# CMake Prefix
-	if "Prefix" in tc and len(tc["Prefix"]) > 0:
+	# CMake Prefix (the Wine toolchain file sets it from the externals folder of the prefix)
+	if "Prefix" in tc and len(tc["Prefix"]) > 0 and not isWine:
 		opts += [ "-DCMAKE_PREFIX_PATH=%RC_PREFIX_PATH%" ]
 	
 	if spec == NeLSpecClient:
@@ -417,6 +422,47 @@ def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
 	if len(dockerCmdStr) > 0:
 		fo.write(dockerCmdStr[:-1])
 	fo.write("\n")
+	fo.close()
+
+# The environment of a Windows toolchain under Wine: what its toolchain layer reads for the prefix, the
+# shadow VC folder and the externals, and what the Find modules read for the SDKs
+def WineEnv(tc):
+	layer = tc["WineLayer"]
+	env = {}
+	env[layer["Prefix"]] = tc["WinePrefix"]
+	env[layer["Shadow"]] = tc["WinePrefix"] + "-msvc-shadow"
+	env[layer["External"]] = tc["ExternalDir"]
+	if "ProgramFiles" in tc:
+		env["PROGRAMFILES"] = tc["ProgramFiles"]
+	if "WindowsSDK" in tc:
+		env["WINSDK_DIR"] = tc["WindowsSDK"]
+	if "DirectXSDK" in tc:
+		env["DXSDK_DIR"] = tc["DirectXSDK"]
+	return env
+
+def GenerateWineEnv(file, relBuildDir, buildDir, tc):
+	fo = open(file, 'w')
+	fo.write("@echo off\n")
+	fo.write("rem " + tc["DisplayName"] + "\n")
+	fo.write("cd /d " + EscapeArg(buildDir) + "\n")
+	fo.write("call " + EscapeArg(NeLPathScript) + "\n")
+	fo.write("set PATH=%RC_PATH%;%PATH%\n")
+	fo.write("set " + EscapeArg("RC_GENERATOR=" + tc["Generator"]) + "\n")
+	platform = tc["Platform"]
+	if platform == "x86" or platform == "386":
+		platform = "Win32"
+	else:
+		platform = "x64"
+	fo.write("set " + EscapeArg("RC_PLATFORM=" + platform) + "\n")
+	fo.write("set " + EscapeArg("RC_TOOLSET=" + tc["Toolset"]) + "\n")
+	fo.write("set " + EscapeArg("RC_BUILD_DIR=" + buildDir) + "\n")
+	env = WineEnv(tc)
+	for varName, interactive in [ ("RC_DOCKER", False), ("RC_DOCKER_IT", True) ]:
+		fo.write("set " + varName + "=")
+		dockerCmdStr = ""
+		for cmd in DockerWineCommand(tc["Image"], relBuildDir, env, interactive=interactive):
+			dockerCmdStr += EscapeArgOpt(cmd) + " "
+		fo.write(dockerCmdStr[:-1] + "\n")
 	fo.close()
 
 _pause_goto_counter = 0
@@ -691,6 +737,7 @@ def ConfigureTarget(spec, name, fv, target):
 	buildRootDir = None
 	isDocker = "Docker" in tc and tc["Docker"]
 	isHunter = "Hunter" in tc and tc["Hunter"]
+	isWine = "Wine" in tc and tc["Wine"]
 	if isDocker:
 		relPath = os.path.join(NeLBuildDockerDirName, relPath)
 		relBuildRootDir = NeLBuildDockerDirName
@@ -723,7 +770,17 @@ def ConfigureTarget(spec, name, fv, target):
 	configureScript = os.path.join(buildRootDir, safeName + "_configure." + NeLScriptExt)
 	buildScript = os.path.join(buildRootDir, safeName + "_build." + NeLScriptExt)
 	scriptOk = False
-	if tc["Compiler"] == "MSVC":
+	if isWine:
+		# Windows toolchain under Wine: Docker scripts around the toolchain file of the layer; the externals
+		# live in the prefixes volume, out of reach of the host
+		res["PrefixPath"] = []
+		res["PrefixBin"] = []
+		GenerateWineEnv(envScript, relPath, buildDir, tc)
+		GenerateDockerCmd(os.path.join(buildRootDir, safeName + "_terminal." + NeLScriptExt), envScript, target)
+		GenerateCMakeCreate(configureScript, envScript, spec, gen, fv, target, buildDir, [])
+		GenerateBuild(buildScript, envScript, spec, gen, fv, target, buildDir)
+		scriptOk = True
+	elif tc["Compiler"] == "MSVC":
 		filteredPrefix = FilterPrefix(target, spec)
 		res["PrefixPath"] = filteredPrefix
 		res["PrefixBin"] = FindBinPaths(filteredPrefix)

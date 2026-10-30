@@ -8,6 +8,7 @@ from quick_start.common import *
 from quick_start.find_vstudio import *
 from quick_start.find_external import *
 from quick_start.find_gcc import *
+from quick_start.find_wine import *
 
 Toolchains = {}
 
@@ -172,6 +173,83 @@ for gcc in FoundGCC:
 	if "LuaVersion" in copyToolchain:
 		del copyToolchain["LuaVersion"]
 	Toolchains[name + "/H"] = copyToolchain
+
+# Windows toolchains under Wine, found in the prefixes of the Wine Docker images. A toolset needs a
+# toolchain layer: the wrapper scripts and CMake toolchain file that drive its compiler through Wine,
+# and the environment variables the layer reads for the prefix, its shadow VC folder and the externals.
+NeLWineToolchainLayers = {
+	"v90": { "Dir": "tool/wine_vs2008", "Prefix": "NL_WINE_VS2008_PREFIX", "Shadow": "NL_WINE_VS2008_SHADOW", "External": "NL_WINE_VS2008_EXTERNAL" }
+}
+# The Windows SDK of the era, as installed under Program Files\Microsoft SDKs\Windows
+NeLWineWindowsSDK = { 9: "v6.0A", 10: "v7.0A" }
+
+for wine in FoundWine:
+	for vs in wine["VisualStudio"]:
+		ts = vs["Toolset"]
+		if not ts in NeLWineToolchainLayers:
+			print("NOTE: " + vs["DisplayName"] + " in Wine prefix \"" + wine["Name"] + "\" has no Wine toolchain layer, skipped")
+			continue
+		layer = NeLWineToolchainLayers[ts]
+		# The layers drive the 32-bit compiler
+		platform = "x86"
+		external = None
+		for ext in wine["Externals"]:
+			if ext["Toolset"] == ts and ext["Platform"] == platform:
+				external = ext
+				break
+		if not external:
+			print("NOTE: No " + ts + " " + platform + " externals in Wine prefix \"" + wine["Name"] + "\", skipped")
+			continue
+		toolchain = {}
+		toolchain["Compiler"] = "MSVC"
+		toolchain["Wine"] = True
+		toolchain["Docker"] = True
+		toolchain["Image"] = wine["Image"]
+		toolchain["WinePrefix"] = wine["Path"]
+		toolchain["WineLayer"] = layer
+		toolchain["VSPath"] = vs["Path"]
+		if len(wine["ProgramFiles"]):
+			toolchain["ProgramFiles"] = wine["ProgramFiles"][0]
+		# No Visual Studio generator off Windows
+		toolchain["Generator"] = "Ninja"
+		toolchain["DisplayName"] = vs["DisplayName"] + " (Wine, " + wine["Name"] + ")"
+		toolchain["Platform"] = platform
+		toolchain["Toolset"] = ts
+		toolchain["Version"] = vs["Version"]
+		toolchain["Prefix"] = external["Prefix"]
+		toolchain["ExternalDir"] = external["Dir"]
+		toolchain["CMake"] = []
+		toolchain["EnvSet"] = []
+		if vs["Version"] in NeLWineWindowsSDK and NeLWineWindowsSDK[vs["Version"]] in wine["WindowsSDK"]:
+			sdkVersion = NeLWineWindowsSDK[vs["Version"]]
+			toolchain["WindowsSDK"] = wine["WindowsSDK"][sdkVersion]
+			toolchain["CMake"] += [ "-DWINSDK_DIR=" + toolchain["WindowsSDK"] ]
+			toolchain["CMake"] += [ "-DWINSDK_VERSION=" + sdkVersion[1:] ]
+		# The probe looked for the headers, the paths are not reachable from here
+		directXSdk = PickDirectXSDK(wine["DirectXSDK"], vs["Version"])
+		if directXSdk:
+			toolchain["DirectXSDK"] = directXSdk["Path"]
+			if directXSdk["HasXAudio2"]:
+				toolchain["HasXAudio2"] = True
+		if vs["HasMFC"]:
+			toolchain["HasMFC"] = True
+		if "LuaVersion" in external:
+			toolchain["LuaVersion"] = external["LuaVersion"]
+		if "HasMsQuic" in external and external["HasMsQuic"]:
+			toolchain["HasMsQuic"] = True
+		if len(wine["MaxSDK"]):
+			toolchain["MaxSDK"] = wine["MaxSDK"]
+		if vs["Version"] >= 11:
+			toolchain["OS"] = "Win7"
+		elif vs["Version"] >= 10:
+			toolchain["OS"] = "WinXP"
+		elif vs["Version"] >= 9:
+			toolchain["OS"] = "Win2k"
+		elif vs["Version"] >= 8:
+			toolchain["OS"] = "Win98"
+		else:
+			continue
+		Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/W"] = toolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + NeLPlatformId + "_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)
