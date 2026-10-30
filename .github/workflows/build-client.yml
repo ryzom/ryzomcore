@@ -123,10 +123,10 @@ jobs:
           libxrandr-dev \
           libxrender-dev \
           libxxf86vm-dev \
-          libmsquic
-        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
-        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
-        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+          libmsquic=2.6.3
+        wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
     - name: Dependencies Linux
@@ -181,7 +181,7 @@ jobs:
       if: runner.os == 'Windows' && matrix.vcpkg != true
       with:
         path: C:\msquic
-        key: msquic-schannel-2.5.12
+        key: msquic-schannel-2.6.3
 
     # Hunter has no msquic package; Microsoft publishes the Windows binaries on NuGet
     # (build/native/{include,lib/x64,bin/x64}). The hunter preset points Findmsquic at C:/msquic.
@@ -190,7 +190,7 @@ jobs:
       shell: cmd
       run: |
         IF NOT EXIST C:\msquic (
-          aria2c -o msquic.nupkg https://api.nuget.org/v3-flatcontainer/microsoft.native.quic.msquic.schannel/2.5.12/microsoft.native.quic.msquic.schannel.2.5.12.nupkg
+          aria2c -o msquic.nupkg https://api.nuget.org/v3-flatcontainer/microsoft.native.quic.msquic.schannel/2.6.3/microsoft.native.quic.msquic.schannel.2.6.3.nupkg
           7z x msquic.nupkg -oC:\msquic -y
           del msquic.nupkg
         )

@@ -4,6 +4,8 @@ LABEL org.opencontainers.image.authors="Ryzom Core <https://wiki.ryzom.dev/>"
 RUN sed -i -e 's/archive\.ubuntu\.com/mirrors\.digitalocean\.com/' /etc/apt/sources.list
 
 ARG CMAKE_VERSION=3.31.11
+# libmsquic from packages.microsoft.com, with the headers of the same release
+ARG MSQUIC_VERSION=2.6.3
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   software-properties-common aria2 wget \
@@ -27,10 +29,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   liblzma-dev \
   libgsf-1-dev \
   qtbase5-dev qttools5-dev qttools5-dev-tools \
-  libmsquic \
-  && aria2c https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h \
-  && aria2c https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h \
-  && aria2c https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h \
+  libmsquic=${MSQUIC_VERSION} \
+  && aria2c https://raw.githubusercontent.com/microsoft/msquic/v${MSQUIC_VERSION}/src/inc/msquic.h \
+  && aria2c https://raw.githubusercontent.com/microsoft/msquic/v${MSQUIC_VERSION}/src/inc/msquic_posix.h \
+  && aria2c https://raw.githubusercontent.com/microsoft/msquic/v${MSQUIC_VERSION}/src/inc/quic_sal_stub.h \
   && mv msquic.h /usr/include/msquic.h \
   && mv msquic_posix.h /usr/include/msquic_posix.h \
   && mv quic_sal_stub.h /usr/include/quic_sal_stub.h \

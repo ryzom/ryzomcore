@@ -67,10 +67,10 @@ RUN wget --output-document=/tmp/microsoft.deb https://packages.microsoft.com/con
     && dpkg --install /tmp/microsoft.deb \
     && apt update \
     && apt install --yes \
-      libmsquic \
-    && wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h \
-    && wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h \
-    && wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h \
+      libmsquic=2.6.3 \
+    && wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/msquic.h \
+    && wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/msquic_posix.h \
+    && wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/quic_sal_stub.h \
     && sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
 
