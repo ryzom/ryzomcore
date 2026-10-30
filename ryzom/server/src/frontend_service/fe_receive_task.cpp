@@ -101,13 +101,14 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	DataSock->bind( addrlist[0] );
 */
 
-	// Bind on all network interfaces (TODO: find a simple way to bind only on the external interface; note: change releaase code for Linux in fe_receive_sub.cpp as well)
+	// Bind on all network interfaces: this is the public client port, the BindAddress setting of the service only applies to the service ports
+	// (TODO: find a simple way to bind only on the external interface; note: change releaase code for Linux in fe_receive_sub.cpp as well)
 	uint16 actualPort;
 	for ( actualPort=firstAcceptablePort; actualPort<=lastAcceptablePort; ++actualPort )
 	{
 		try
 		{
-			DataSock->bind( actualPort );
+			DataSock->bind(CInetAddress(CIPv6Address::any(), actualPort));
 			break;
 		}
 		catch (const ESocket &e)

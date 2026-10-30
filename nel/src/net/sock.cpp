@@ -140,6 +140,29 @@ ESocket::ESocket( const char *reason, bool systemerror, CInetHost *addr )
 }
 
 
+/// Address that listening sockets bind to when they are given a port only, see CSock::setDefaultBindAddress().
+/// Created on first use, since CIPv6Address::any() initializes the network and must not run during static initialization
+static CIPv6Address &defaultBindAddressStorage()
+{
+	static CIPv6Address s_DefaultBindAddress = CIPv6Address::any();
+	return s_DefaultBindAddress;
+}
+
+void CSock::setDefaultBindAddress(const CIPv6Address &address)
+{
+	if (!address.isValid())
+	{
+		defaultBindAddressStorage() = CIPv6Address::any();
+		return;
+	}
+	defaultBindAddressStorage() = address;
+}
+
+const CIPv6Address &CSock::defaultBindAddress()
+{
+	return defaultBindAddressStorage();
+}
+
 /*
  * Initializes the network engine if it is not already done (under Windows, calls WSAStartup()).
  */

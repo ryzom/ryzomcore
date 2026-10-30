@@ -282,11 +282,39 @@ void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntr
 	// Connecting from srcEntry, make a nice list of addresses that are usable to reach dstEntry
 	dstAddr.clear();
 
+	// Both services connected to the naming service from the same address, or both over loopback: they run on the same host.
+	// A service bound to the loopback address only (BindAddress) registers nothing but that address, so this is the only way to tell for it
+	bool sameHostByConnection = false;
+	if (dstEntry.SockId != NULL && srcEntry.SockId != NULL)
+	{
+		const CIPv6Address &dstFrom = CallbackServer->hostAddress(dstEntry.SockId).getAddress();
+		const CIPv6Address &srcFrom = CallbackServer->hostAddress(srcEntry.SockId).getAddress();
+		bool bothLoopback = dstFrom.getType() == CIPv6Address::Loopback && srcFrom.getType() == CIPv6Address::Loopback;
+		sameHostByConnection = bothLoopback || dstFrom == srcFrom;
+	}
+
+	// A destination that registered only loopback addresses can only be reached from its own host
+	bool dstLoopbackOnly = !dstEntry.Addr.empty();
+	for (const CInetAddress &addr : dstEntry.Addr)
+	{
+		if (addr.getAddress().getType() != CIPv6Address::Loopback)
+			dstLoopbackOnly = false;
+	}
+	if (dstLoopbackOnly)
+	{
+		if (sameHostByConnection)
+		{
+			// Just send one loopback address
+			dstAddr.push_back(dstEntry.Addr[0]);
+		}
+		return;
+	}
+
 	// First check if it's the same host
 	// If all the IP addresses in the destination exist in the source, and there's more than just loopbacks, it's the same host
 	// Then, just send the first loopback address if there is one
 	// Otherwise, send all the destination addresses
-	
+
 	// Check
 	bool foundMissing = false;
 	bool foundNonLoopback = false;
@@ -302,9 +330,10 @@ void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntr
 		if (srcAddrs.find(addr.getAddress()) == srcAddrs.end())
 			foundMissing = true;
 	}
-	if (foundNonLoopback && !foundMissing)
+	if ((foundNonLoopback && !foundMissing) || sameHostByConnection)
 	{
 		// There are addresses other than the loopback, and none of them are found missing, this is the same host
+		// (or the source registered only its loopback address, and the connections to the naming service say it is the same host)
 		for (const CInetAddress &addr : dstEntry.Addr)
 		{
 			if (addr.getAddress().getType() == CIPv6Address::Loopback)
@@ -314,9 +343,10 @@ void getDstAddresses(vector<CInetAddress> &dstAddr, const CServiceEntry &dstEntr
 				return;
 			}
 		}
-		
+
 		// Didn't find a loopback, so just send all addresses
 		dstAddr = dstEntry.Addr;
+		return;
 	}
 
 	// It's not the same host

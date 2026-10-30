@@ -81,8 +81,8 @@ CUdpSock::CUdpSock( bool logging ) :
  */
 void CUdpSock::bind( uint16 port )
 {
-	CInetAddress addr; // any IP address
-	addr.setPort( port );
+	// The default bind address is the any address unless CSock::setDefaultBindAddress() was called
+	CInetAddress addr(CSock::defaultBindAddress(), port);
 	bind( addr );
 	setLocalAddress(); // will not set the address if the host is multihomed, use bind(CInetAddress) instead
 }

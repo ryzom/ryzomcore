@@ -75,19 +75,22 @@ CListenSock::CListenSock() : CTcpSock(), _Bound( false )
  */
 void CListenSock::init( uint16 port )
 {
-    // Use any address
-	CInetAddress localaddr; // By default, INETADDR_ANY (useful for gateways that have several ip addresses)
-	localaddr.setPort( port );
+	// Use the default bind address, which is the any address unless CSock::setDefaultBindAddress() was called
+	// (binding to any is useful for gateways that have several ip addresses)
+	CInetAddress localaddr(CSock::defaultBindAddress(), port);
 	init( localaddr );
 
-	// Now set the address visible from outside
-	try
+	if (localaddr.getAddress().isAny())
 	{
-		_LocalAddr = CInetAddress::localHost(port);
-	}
-	catch (ESocket &e)
-	{
-		nlwarning("CListenSock::init: Can't get local host address: %s", e.what());
+		// Now set the address visible from outside
+		try
+		{
+			_LocalAddr = CInetAddress::localHost(port);
+		}
+		catch (ESocket &e)
+		{
+			nlwarning("CListenSock::init: Can't get local host address: %s", e.what());
+		}
 	}
 	LNETL0_DEBUG("LNETL0: Socket %d listen socket is at %s", _Sock, _LocalAddr.asString().c_str());
 }

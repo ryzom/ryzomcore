@@ -1072,6 +1072,22 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		}
 
 		//
+		// Bind the listening sockets to one address instead of all interfaces (must be before anything listens)
+		// BindAddress = "127.0.0.1" keeps the service ports of a development shard off the network
+		//
+
+		if ((var = ConfigFile.getVarPtr("BindAddress")) != nullptr && !var->asString().empty())
+		{
+			CIPv6Address bindAddress(var->asString());
+			if (!bindAddress.isValid())
+			{
+				nlerror("SERVICE: BindAddress '%s' is not an IP address, use for example \"127.0.0.1\" to listen on localhost only", var->asString().c_str());
+			}
+			CSock::setDefaultBindAddress(bindAddress);
+			nlinfo("SERVICE: Listening sockets bind to %s", bindAddress.toString().c_str());
+		}
+
+		//
 		// Register all network associations (must be before the CUnifiedNetwork::getInstance()->init)
 		//
 
