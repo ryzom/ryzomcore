@@ -108,7 +108,9 @@ CFEReceiveTask::CFEReceiveTask( uint16 firstAcceptablePort, uint16 lastAcceptabl
 	{
 		try
 		{
-			DataSock->bind(CInetAddress(CIPv6Address::any(), actualPort));
+			CInetAddress anyAddress; // the dual stack any address
+			anyAddress.setPort(actualPort);
+			DataSock->bind(anyAddress);
 			break;
 		}
 		catch (const ESocket &e)

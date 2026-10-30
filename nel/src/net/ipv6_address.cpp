@@ -231,8 +231,9 @@ CIPv6Address CIPv6Address::any()
 
 	CSock::initNetwork();
 
+	// Either the node or the service must be given, so ask for the passive address of port 0
 	hints.ai_family = AF_INET6;
-	if (getaddrinfo(nullptr, nullptr, &hints, &result) == 0)
+	if (getaddrinfo(nullptr, "0", &hints, &result) == 0)
 	{
 		// IPv6
 		CIPv6Address addr;
