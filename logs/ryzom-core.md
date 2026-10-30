@@ -1,5 +1,14 @@
 # ryzom-core
 
+## 2026-10-30 — ✨ nlcrashdbg: debug logs tagged with a crash group id
+
+Added the `nlcrashdbg(id, "format", ...)` macro in `nel/include/nel/misc/debug.h`.
+It is an `nlinfo` prefixed with `CRASHDBG #<id>`, where `<id>` is the id of the
+first report of a crash group. The tool that sends crash reports reads
+`client.log`, so it can pick those lines up and send them with the report, and
+they can all be removed with a grep once the crash is fixed. Not compiled in a
+full client build or run yet. See `docs/crash-debug-logs.md`.
+
 ## 2026-09-16 — ✨ Add smoothing angle property to material
 
 Added `CMaterial::_SmoothingAngle` (float, sentinel `-1.0` = never set) on
