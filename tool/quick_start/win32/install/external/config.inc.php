@@ -21,7 +21,8 @@ $cfg['Servers'][$i]['AllowNoPassword'] = true;
 
 /* End of servers configuration */
 
-$cfg['blowfish_secret'] = '@]$36/0i~1UD[EOCaJHcO;W9gd.SL1@';
+/* Cookie secret, filled in by configure_web.py when it writes this file into the phpMyAdmin folder */
+$cfg['blowfish_secret'] = '';
 $cfg['DefaultLang'] = 'en';
 $cfg['ServerDefault'] = 1;
 $cfg['UploadDir'] = '';

@@ -83,4 +83,29 @@ if os.path.isfile(phpIniDevelopment):
 			print("Please improve configure_web.py appropriately and submit a pull request.")
 			print()
 
+# Generate the phpMyAdmin configuration with its own cookie secret, from the template in the install folder
+# (nginx_setup.bat only copies the template as is when this file is missing)
+pmaSecretFile = os.path.join(shardDevDir, "rc_pma_blowfish_secret.txt")
+if not os.path.isfile(pmaSecretFile):
+	pmaSecret = secrets.token_urlsafe(24) # 32 characters, the length phpMyAdmin expects
+	fo = open(pmaSecretFile, 'w')
+	fo.write(pmaSecret + '\n')
+	fo.close()
+else:
+	fi = open(pmaSecretFile, 'r')
+	pmaSecret = fi.readline().strip()
+	fi.close()
+
+pmaTemplate = os.path.join(os.path.dirname(os.path.realpath(__file__)), "win32", "install", "external", "config.inc.php")
+pmaPlaceholder = "$cfg['blowfish_secret'] = '';"
+if os.path.isdir(NeLphpMyAdminDir) and os.path.isfile(pmaTemplate):
+	with open(pmaTemplate, 'r') as fi:
+		pmaConfig = fi.read()
+	if pmaPlaceholder in pmaConfig:
+		pmaConfig = pmaConfig.replace(pmaPlaceholder, "$cfg['blowfish_secret'] = '" + pmaSecret + "';")
+		with open(os.path.join(NeLphpMyAdminDir, "config.inc.php"), 'w') as fo:
+			fo.write(pmaConfig)
+	else:
+		print("WARNING: The blowfish_secret placeholder was not found in " + pmaTemplate + ", phpMyAdmin keeps its configuration")
+
 # end of file

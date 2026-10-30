@@ -10,7 +10,7 @@ goto :done
 .\bin\mysql_install_db --default-user --datadir=..\..\pipeline\shard_dev\mysql
 if %errorlevel% neq 0 pause
 if not exist ..\phpmyadmin.sql goto :done
-start .\bin\mysqld --no-defaults --port=9040 --datadir=..\..\pipeline\shard_dev\mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --standalone
+start .\bin\mysqld --no-defaults --bind-address=127.0.0.1 --port=9040 --datadir=..\..\pipeline\shard_dev\mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --standalone
 if %errorlevel% neq 0 pause
 .\bin\mysql -P 9040 -u root < ..\phpmyadmin.sql
 if %errorlevel% neq 0 pause
@@ -18,10 +18,11 @@ if %errorlevel% neq 0 pause
 if %errorlevel% neq 0 pause
 .\bin\mysql -P 9040 -u root -e "SELECT GROUP_CONCAT(QUOTE(user),'@',QUOTE(host)) INTO @accounts FROM mysql.user WHERE user = ''; EXECUTE IMMEDIATE CONCAT('DROP USER ', @accounts);"
 if %errorlevel% neq 0 pause
-.\bin\mysql -P 9040 -u root -e "CREATE USER 'shard_dev' IDENTIFIED BY '%RC_MYSQL_PASSWORD%'; GRANT SELECT, INSERT, UPDATE, DELETE, FILE ON *.* TO 'shard_dev';"
+rem The database only listens on localhost, the shard user is limited to localhost as well
+.\bin\mysql -P 9040 -u root -e "CREATE USER 'shard_dev'@'localhost' IDENTIFIED BY '%RC_MYSQL_PASSWORD%'; GRANT SELECT, INSERT, UPDATE, DELETE, FILE ON *.* TO 'shard_dev'@'localhost';"
 if %errorlevel% neq 0 pause
 .\bin\mysqladmin -u root -P 9040 shutdown
 if %errorlevel% neq 0 pause
 :done
-rem .\bin\mysqld --no-defaults --port=9040 --datadir=..\..\pipeline\shard_dev\mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --console --standalone
+rem .\bin\mysqld --no-defaults --bind-address=127.0.0.1 --port=9040 --datadir=..\..\pipeline\shard_dev\mysql --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --console --standalone
 cd ..
