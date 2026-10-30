@@ -1,5 +1,17 @@
 # Crash fixes
 
+## 2026-10-30 — 🐛 submitBuffer: log invalid buffer/source state for crash group 6435168
+
+Not a fix: debug logging for the 18 `EXCEPTION_BREAKPOINT` reports raised inside
+`IXAudio2SourceVoice::SubmitSourceBuffer` (first report 6435168). The `nlassert`s
+at the top of `CSourceXAudio2::submitBuffer()` do nothing in release, so a NULL
+voice, an empty buffer or a buffer whose format/channels/bits differ from the
+source reach XAudio2 silently. Those cases now write an `nlcrashdbg` line (voice,
+size, data pointer, both formats, ADPCM/streaming/looping flags) to `client.log`,
+before the call, without changing the behavior. Nothing is logged when the state
+is valid, to avoid flooding the log while streaming. Remove with
+`grep nlcrashdbg` once the group is fixed. Not compiled (XAudio2 is Windows only).
+
 ## 2026-10-30 — 🐛 createUserLandMark: the map that launched the menu may not exist
 
 Two dumps crashed in `createUserLandMark()` (read at 0xac0, a small offset from

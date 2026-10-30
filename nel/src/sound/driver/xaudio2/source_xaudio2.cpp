@@ -290,6 +290,18 @@ void CSourceXAudio2::submitBuffer(CBufferXAudio2 *ibuffer)
 	nlassert(ibuffer->getFormat() == _Format
 		&& ibuffer->getChannels() == _Channels
 		&& ibuffer->getBitsPerSample() == _BitsPerSample);
+	// the nlasserts above do nothing in release: log the cases they would catch, without changing the behavior
+	if (!_SourceVoice || !ibuffer->getSize() || !ibuffer->getData()
+		|| ibuffer->getFormat() != _Format
+		|| ibuffer->getChannels() != _Channels
+		|| ibuffer->getBitsPerSample() != _BitsPerSample)
+	{
+		nlcrashdbg(6435168, "submitBuffer: voice=%p size=%u data=%p buffer(format=%d channels=%u bits=%u) source(format=%d channels=%u bits=%u) adpcm=%d streaming=%d looping=%d",
+			(void *)_SourceVoice, (unsigned int)ibuffer->getSize(), (const void *)ibuffer->getData(),
+			(int)ibuffer->getFormat(), (unsigned int)ibuffer->getChannels(), (unsigned int)ibuffer->getBitsPerSample(),
+			(int)_Format, (unsigned int)_Channels, (unsigned int)_BitsPerSample,
+			_AdpcmUtility ? 1 : 0, _BufferStreaming ? 1 : 0, _IsLooping ? 1 : 0);
+	}
 	if (_AdpcmUtility)
 	{
 		nlassert(!_BufferStreaming);
