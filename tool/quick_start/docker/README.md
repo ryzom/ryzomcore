@@ -10,6 +10,13 @@ To add another distribution; simply add a folder with a Dockerfile here or under
 
 Just build the Docker images like this. The quick start scripts will generate the proper command line.
 
+The server images are one per Ubuntu LTS: `focal` (20.04, GCC 9, the default server target of
+`config_default.json`), `jammy` (22.04, GCC 11), `noble` (24.04, GCC 13) and `resolute` (26.04,
+GCC 15). Each takes `libmsquic` from packages.microsoft.com at the version its `MSQUIC_VERSION`
+argument names, with the headers of that same release; the 20.04 repository stopped at msquic
+2.4.8, the later ones carry 2.6.3. To build the server for another release, point the `Server`
+filter of `.nel/config.json` at its codename.
+
 ```
 docker build -t "ryzombuild_bionic_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_bionic_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_bionic_amd64_gcc8" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_bionic_amd64_gcc8\Dockerfile" Y:\ryzomcore4\code
@@ -18,6 +25,9 @@ docker build -t "ryzombuild_scout_amd64" -f "Y:\ryzomcore4\code\tool\quick_start
 docker build -t "ryzombuild_scout_amd64_gcc5" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64_gcc5\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64_gcc9" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64_gcc9\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_i386_gcc9" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_i386_gcc9\Dockerfile" Y:\ryzomcore4\code
+docker build -t "ryzombuild_jammy_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_jammy_amd64\Dockerfile" Y:\ryzomcore4\code
+docker build -t "ryzombuild_noble_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_noble_amd64\Dockerfile" Y:\ryzomcore4\code
+docker build -t "ryzombuild_resolute_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_resolute_amd64\Dockerfile" Y:\ryzomcore4\code
 ```
 
 ## Cross-platform tools

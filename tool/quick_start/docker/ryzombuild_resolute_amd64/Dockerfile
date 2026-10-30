@@ -1,0 +1,55 @@
+FROM --platform=linux/amd64 ubuntu:resolute
+LABEL org.opencontainers.image.authors="Ryzom Core <https://wiki.ryzom.dev/>"
+
+# the deb822 sources of 24.04 and later
+RUN sed -i -e 's/archive\.ubuntu\.com/mirrors\.digitalocean\.com/' /etc/apt/sources.list.d/ubuntu.sources
+
+ARG CMAKE_VERSION=3.31.11
+# libmsquic from packages.microsoft.com, with the headers of the same release
+ARG MSQUIC_VERSION=2.6.3
+
+# ffmpeg 8 of 26.04 has no libpostproc any more
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  software-properties-common aria2 wget \
+  && aria2c https://packages.microsoft.com/config/ubuntu/26.04/packages-microsoft-prod.deb \
+  && dpkg -i packages-microsoft-prod.deb \
+  && rm packages-microsoft-prod.deb \
+  && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  ninja-build curl build-essential ccache \
+  bison autoconf automake \
+  libpng-dev \
+  libjpeg-dev \
+  libgif-dev libfreetype-dev \
+  freeglut3-dev \
+  liblua5.2-dev libluabind-dev libcpptest-dev \
+  libogg-dev libvorbis-dev libopenal-dev \
+  libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev \
+  libmysqlclient-dev \
+  libxml2-dev \
+  libcurl4-openssl-dev libssl-dev \
+  libsquish-dev \
+  liblzma-dev \
+  libgsf-1-dev \
+  qtbase5-dev qttools5-dev qttools5-dev-tools \
+  libmsquic=${MSQUIC_VERSION} \
+  && aria2c https://raw.githubusercontent.com/microsoft/msquic/v${MSQUIC_VERSION}/src/inc/msquic.h \
+  && aria2c https://raw.githubusercontent.com/microsoft/msquic/v${MSQUIC_VERSION}/src/inc/msquic_posix.h \
+  && aria2c https://raw.githubusercontent.com/microsoft/msquic/v${MSQUIC_VERSION}/src/inc/quic_sal_stub.h \
+  && mv msquic.h /usr/include/msquic.h \
+  && mv msquic_posix.h /usr/include/msquic_posix.h \
+  && mv quic_sal_stub.h /usr/include/quic_sal_stub.h \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh \
+  && mkdir --parents /opt/cmake-${CMAKE_VERSION} \
+  && sh /tmp/cmake.sh --skip-license --prefix=/opt/cmake-${CMAKE_VERSION} \
+  && ln --symbolic --force /opt/cmake-${CMAKE_VERSION}/bin/* /usr/local/bin \
+  && rm /tmp/cmake.sh
+
+ENV CC=/usr/lib/ccache/gcc
+ENV CXX=/usr/lib/ccache/g++
+ENV CCACHE_SLOPPINESS=pch_defines,time_macros
+
+RUN mkdir -p /mnt/nel
+
+WORKDIR /mnt/nel
