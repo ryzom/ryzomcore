@@ -98,6 +98,8 @@ private:
 	static int  getUserRace(CLuaState &ls);
 	static int  getSheet2idx(CLuaState &ls);
 	static int	getTargetSlot(CLuaState &ls);
+	static int getTargetOfTargetSlot(CLuaState &ls); // -1 if secondary target is not visible
+	static int getTargetOfTargetBars(CLuaState &ls); // HP, SAP, STA ratios (0..127)
 	static int  getSlotDataSetId(CLuaState &ls);
 
 	// LUA functions exported for Dev only (debug)

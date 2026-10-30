@@ -1,0 +1,12 @@
+// Ryzom Target-of-Target feature translations (de).
+// LanguageName is required by NeL .uxt; loadFromFilename(reload=true) overlays the base dictionary.
+LanguageName [Deutsch]
+uiTargetOfTargetTitle [Ziel des Ziels]
+uiTargetOfTargetNoVisibleTarget [Kein sichtbares Ziel]
+uiTargetOfTargetLoadingName [Name wird geladen]
+uiTargetOfTargetSettingTargetHP [Ziel: HP]
+uiTargetOfTargetSettingTargetSAP [Ziel: SAP]
+uiTargetOfTargetSettingTargetStamina [Ziel: Ausdauer]
+uiTargetOfTargetSettingHP [Ziel des Ziels: HP]
+uiTargetOfTargetSettingSAP [Ziel des Ziels: SAP]
+uiTargetOfTargetSettingStamina [Ziel des Ziels: Ausdauer]

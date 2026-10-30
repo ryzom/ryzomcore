@@ -2097,6 +2097,85 @@ class CActionHandlerSetTargetName : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CActionHandlerSetTargetName, "set_target_name");
 
+// ToT: use the same asynchronous name post-processing as the
+// normal target, but validate the secondary target instead of player selection.
+class CSPPRemoveTitleAndCheckTargetOfTarget : public CStringPostProcessRemoveTitle
+{
+public:
+	CLFECOMMON::TCLEntityId SelectedSlot;
+	CLFECOMMON::TCLEntityId SecondarySlot;
+	uint32 NameId;
+
+	bool cbIDStringReceived(string &inOut) NL_OVERRIDE
+	{
+		if (UserEntity == nullptr || UserEntity->targetSlot() != SelectedSlot)
+			return false;
+
+		CEntityCL *selected = EntitiesMngr.entity(SelectedSlot);
+		CEntityCL *secondary = EntitiesMngr.entity(SecondarySlot);
+		if (selected == nullptr || secondary == nullptr
+			|| selected->getTargetSlotNoLag() != SecondarySlot
+			|| secondary->getNameId() != NameId)
+			return false;
+
+		return CStringPostProcessRemoveTitle::cbIDStringReceived(inOut);
+	}
+};
+
+class CActionHandlerSetTargetOfTargetName : public IActionHandler
+{
+    void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+    {
+        string sNameTarget = getParam(Params, "target");
+        if (sNameTarget.empty() || !findInterfacePath(sNameTarget, pCaller))
+            return;
+
+        // Resolve from client entities just like getTargetOfTargetSlot().
+        // Do not depend on re-evaluating a second UI DB slot expression.
+        // Use the standard NeL I18N dictionary, shared with the XML widgets.
+        string displayed = CI18N::get("uiTargetOfTargetLoadingName");
+        CLFECOMMON::TCLEntityId selectedSlot = CLFECOMMON::INVALID_SLOT;
+        CLFECOMMON::TCLEntityId secondarySlot = CLFECOMMON::INVALID_SLOT;
+        uint32 nameId = 0;
+        if (UserEntity)
+        {
+            selectedSlot = UserEntity->targetSlot();
+            CEntityCL *selected = EntitiesMngr.entity(selectedSlot);
+            if (selected)
+            {
+                secondarySlot = selected->getTargetSlotNoLag();
+                CEntityCL *secondary = EntitiesMngr.entity(secondarySlot);
+                if (secondary)
+                {
+                    string resolved = secondary->getDisplayName();
+                    if (!resolved.empty() && resolved != "Name")
+                        displayed = resolved;
+                    nameId = secondary->getNameId();
+                }
+            }
+        }
+
+        // The existing entity already has the correctly formatted display
+        // name in the normal case; show it without waiting for an async event.
+        CInterfaceExprValue value;
+        value.setString(displayed);
+        CInterfaceLink::setTargetProperty(sNameTarget, value);
+
+        // Still support late-arriving names. The callback rejects outdated
+        // selections/slots and strips title/shard like the original target.
+        if (nameId != 0 && secondarySlot != CLFECOMMON::INVALID_SLOT)
+        {
+            CSPPRemoveTitleAndCheckTargetOfTarget *processor =
+                new CSPPRemoveTitleAndCheckTargetOfTarget;
+            processor->SelectedSlot = selectedSlot;
+            processor->SecondarySlot = secondarySlot;
+            processor->NameId = nameId;
+            CInterfaceManager::getInstance()->addServerID(sNameTarget, nameId, processor);
+        }
+    }
+};
+REGISTER_ACTION_HANDLER(CActionHandlerSetTargetOfTargetName, "set_target_of_target_name");
+
 // ***************************************************************************
 class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 {
@@ -2801,6 +2880,28 @@ class CAHAssistTarget : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHAssistTarget, "assist_target");
+
+// ToT: click the standalone ToT display to select that exact entity.
+// Unlike assist_target, this also permits selecting yourself, if selectable.
+class CAHTargetOfTargetSelect : public IActionHandler
+{
+    void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+    {
+        if (UserEntity == nullptr)
+            return;
+        CEntityCL *selected = EntitiesMngr.entity(UserEntity->targetSlot());
+        if (selected == nullptr)
+            return;
+
+        const CLFECOMMON::TCLEntityId slot = selected->getTargetSlotNoLag();
+        CEntityCL *secondary = EntitiesMngr.entity(slot);
+        if (secondary == nullptr || !secondary->properties().selectable())
+            return;
+
+        UserEntity->selection(slot);
+    }
+};
+REGISTER_ACTION_HANDLER(CAHTargetOfTargetSelect, "target_of_target_select");
 
 // ***************************************************************************
 class CAHToggleCombat : public IActionHandler
