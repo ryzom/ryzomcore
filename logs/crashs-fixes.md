@@ -1,5 +1,14 @@
 # Crash fixes
 
+## 2026-10-30 — 🐛 createUserLandMark: the map that launched the menu may not exist
+
+Two dumps crashed in `createUserLandMark()` (read at 0xac0, a small offset from
+NULL) when clicking the "create landmark" entries of the map menu. The map is
+taken with a `dynamic_cast` of the control that launched the modal menu, which is
+NULL when no modal is active or when the menu was not launched by a map, and was
+dereferenced without a test. The handler now does nothing in that case. How the
+modal stack can be empty at that point is not established.
+
 ## 2026-10-27 — 🐛 CWidgetManager::checkCoords: ignore NULL master groups
 
 Two more dumps of the `checkCoords()` crash (read at 0x78, a small offset from
