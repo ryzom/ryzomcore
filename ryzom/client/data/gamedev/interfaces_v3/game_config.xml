@@ -747,6 +747,9 @@
 			<!-- Entities Names -->
 			<view style="sgc_title" type="text" id="hen" posref="TM TM" x="0" y="0" hardtext="uiHelp" />
 			<instance template="tgcw_checkbox" id="context_help" text="uiShowContextHelp" posref="TL TL" x="0" y="-20" />
+            <instance template="tgcw_checkbox" id="tooltip_enabled" text="uiShowTooltips" posparent="context_help" posref="BL TL" x="0" y="-10" />
+            <instance template="tgcw_checkbox" id="tooltip_extended" text="uiShowExtendedActionTooltips" posparent="tooltip_enabled" posref="BL TL" x="18" y="-10" />
+            <link expr="not(@UI:SAVE:TOOLTIP:ENABLED)" target="ui:interface:game_config:content:help:tooltip_extended:c:frozen" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_help" align="T" target="help" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -973,6 +976,8 @@
 			<param ui="landmark_colors:cc_teleporter:c" type="db" widget="colbut" link="UI:SAVE:LANDMARK:COLORS:TELEPORTER" realtime="true" />
 
 			<param ui="help:context_help:c" type="db" widget="boolbut" link="UI:SAVE:ENTITY:CONTEXT_HELP" realtime="true" />
+            <param ui="help:tooltip_enabled:c" type="db" widget="boolbut" link="UI:SAVE:TOOLTIP:ENABLED" realtime="true" />
+            <param ui="help:tooltip_extended:c" type="db" widget="boolbut" link="UI:SAVE:TOOLTIP:EXTENDED" realtime="true" />
 		</ddx>
 	</group>
 </group>
