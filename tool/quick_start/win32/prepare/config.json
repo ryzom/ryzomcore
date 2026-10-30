@@ -21,7 +21,7 @@
   "Headless": false,
   "Toolchain": {
     "Server": {
-      "Filter": [{ "OSId": "ubuntu", "OSCodename": "focal", "Platform": "amd64", "Hunter": false }],
+      "Filter": [{ "OSId": "ubuntu", "OSCodename": "noble", "Platform": "amd64", "Hunter": false }],
       "CMake": [
         "-DCUSTOM_FLAGS=-march=znver2 -mtune=znver2"
       ]

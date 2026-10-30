@@ -10,17 +10,16 @@ To add another distribution; simply add a folder with a Dockerfile here or under
 
 Just build the Docker images like this. The quick start scripts will generate the proper command line.
 
-The server images are one per Ubuntu LTS: `focal` (20.04, GCC 9, the default server target of
-`config_default.json`), `jammy` (22.04, GCC 11), `noble` (24.04, GCC 13) and `resolute` (26.04,
-GCC 15). Each takes `libmsquic` from packages.microsoft.com at the version its `MSQUIC_VERSION`
-argument names, with the headers of that same release; the 20.04 repository stopped at msquic
-2.4.8, the later ones carry 2.6.3. To build the server for another release, point the `Server`
-filter of `.nel/config.json` at its codename.
+The server images are one per supported Ubuntu LTS: `jammy` (22.04, GCC 11), `noble` (24.04,
+GCC 13, the default server target of `config_default.json`) and `resolute` (26.04, GCC 15).
+Each takes `libmsquic` from packages.microsoft.com at the version its `MSQUIC_VERSION` argument
+names, with the headers of that same release. To build the server for another release, point
+the `Server` filter of `.nel/config.json` at its codename. Images of releases that reached their
+end of standard support move to `archive`, where the toolchain scan does not look.
 
 ```
 docker build -t "ryzombuild_bionic_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_bionic_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_bionic_amd64_gcc8" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_bionic_amd64_gcc8\Dockerfile" Y:\ryzomcore4\code
-docker build -t "ryzombuild_focal_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_focal_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64_gcc5" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64_gcc5\Dockerfile" Y:\ryzomcore4\code
 docker build -t "ryzombuild_scout_amd64_gcc9" -f "Y:\ryzomcore4\code\tool\quick_start\docker\ryzombuild_scout_amd64_gcc9\Dockerfile" Y:\ryzomcore4\code
@@ -68,17 +67,18 @@ del "com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot.tar.gz"
 ## Check CMake Version
 
 ```
-docker run --rm ryzombuild_bionic_amd64 cmake --version
-docker run --rm ryzombuild_focal_amd64 cmake --version
+docker run --rm ryzombuild_jammy_amd64 cmake --version
+docker run --rm ryzombuild_noble_amd64 cmake --version
+docker run --rm ryzombuild_resolute_amd64 cmake --version
 docker run --rm steamrt_scout_amd64 cmake --version
 ```
 
 ## Check GCC Version
 
 ```
-docker run --rm ryzombuild_bionic_amd64 gcc -v
-docker run --rm ryzombuild_bionic_amd64_gcc8 gcc -v
-docker run --rm ryzombuild_focal_amd64 gcc -v
+docker run --rm ryzombuild_jammy_amd64 gcc -v
+docker run --rm ryzombuild_noble_amd64 gcc -v
+docker run --rm ryzombuild_resolute_amd64 gcc -v
 docker run --rm ryzombuild_scout_amd64 gcc -v
 docker run --rm ryzombuild_scout_amd64_gcc5 gcc -v
 docker run --rm ryzombuild_scout_amd64_gcc9 gcc -v
@@ -92,11 +92,6 @@ docker run --rm ryzombuild_scout_i386_gcc9 c++ -v
 ```
 docker run --rm -v ryzombuild_jammy_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_jammy" ryzombuild_jammy_amd64 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_JOBS_NUMBER=9 -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_NELNS=OFF -DWITH_QT5=OFF -DWITH_LIBGSF=OFF -DFINAL_VERSION=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_SSE3=OFF ../code
 docker run --rm -v ryzombuild_jammy_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_jammy" ryzombuild_jammy_amd64 ninja -j9
-```
-
-```
-docker run --rm -v ryzombuild_focal_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_focal" ryzombuild_focal_amd64 cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DHUNTER_ENABLED=ON -DHUNTER_STATUS_DEBUG=ON -DHUNTER_JOBS_NUMBER=9 -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_RYZOM=ON -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_RYZOM_TOOLS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_NELNS=OFF -DWITH_QT5=OFF -DWITH_LIBGSF=OFF -DFINAL_VERSION=ON -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENAL=ON -DWITH_SSE3=OFF ../code
-docker run --rm -v ryzombuild_focal_amd64_hunter:/root/.hunter --mount "type=bind,source=Y:\ryzomcore4,target=/mnt/nel" --workdir "/mnt/nel/build_client_focal" ryzombuild_focal_amd64 ninja -j9
 ```
 
 ```

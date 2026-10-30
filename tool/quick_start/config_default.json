@@ -96,7 +96,7 @@
     },
     "Server": {
       "Filter": [
-        { "OSId": "ubuntu", "OSCodename": "focal", "Platform": "amd64", "Hunter": false }
+        { "OSId": "ubuntu", "OSCodename": "noble", "Platform": "amd64", "Hunter": false }
       ]
     },
     "Client": {
