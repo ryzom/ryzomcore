@@ -739,13 +739,11 @@ TARGET_INCLUDE_DIRECTORIES(nel3d
         ${LIBVR_INCLUDE_DIR}
 )
 
-IF(HUNTER_ENABLED)
-    # Hunter's freetype config exposes a lowercase target but does not set FREETYPE_FOUND.
-    # Without this branch the Windows build selects the fallback GDI font renderer.
-    TARGET_LINK_LIBRARIES(nel3d freetype::freetype)
-    TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE HAVE_FREETYPE)
-ELSEIF(FREETYPE_FOUND)
-    TARGET_LINK_LIBRARIES(nel3d Freetype::Freetype)
+IF(FREETYPE_FOUND)
+    TARGET_LINK_LIBRARIES(nel3d
+            #PRIVATE
+            Freetype::Freetype
+    )
     TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE HAVE_FREETYPE)
 ELSE()
     TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE NL_DONT_USE_EXTERNAL_CODE)
