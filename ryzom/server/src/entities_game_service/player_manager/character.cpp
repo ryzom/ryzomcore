@@ -13011,41 +13011,31 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 
 					const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _BotGift->MissionAlias );
 					nlassert( templ );
-					// if step Any, add all following steps which are part of this step any
-					if( templ->Steps[botchats[j].StepIndex - 1]->isAny() )
+					// a gift step of a step any takes the gift for all the gift steps of its block at this bot,
+					// whichever of their menu entries was picked
+					IMissionStepTemplate *pickedStep = templ->Steps[botchats[j].StepIndex - 1];
+					if (pickedStep->isAny())
 					{
-						j++;
-						while(j<botchats.size() && botchats[j].Gift && templ->Steps[botchats[j].StepIndex - 1]->isAny())
+						for (uint k = 0; k < botchats.size(); ++k)
 						{
-							_BotGift->StepsIndex.insert( botchats[j].StepIndex );
-							j++;
+							IMissionStepTemplate *step = templ->Steps[botchats[k].StepIndex - 1];
+							if (botchats[k].Gift && step->isAny() && step->getOOOStepIndex() == pickedStep->getOOOStepIndex())
+								_BotGift->StepsIndex.insert(botchats[k].StepIndex);
 						}
 					}
-					else
-						j++;
 
-					// init exchange view
-					_ExchangeView = new CExchangeView;
-					_ExchangeView->setCharacter(this);
-					_ExchangeView->bindToInventory(_Inventory[INVENTORIES::bag]);
-
-					SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
-					params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
-					uint32 txt = STRING_MANAGER::sendStringToClient( _EntityRowId, "EXCHANGE_TITLE_BOT", params );
-//					_PropertyDatabase.setProp( "EXCHANGE:TEXT", txt );
-					CBankAccessor_PLR::getEXCHANGE().setTEXT(_PropertyDatabase, txt );
-
-					// try to auto fill exchange view
-					autoFillExchangeView();
+					openMissionGiftExchange();
 				}
 				return;
 			}
+			// one menu entry per option, as sendContextTexts lists them
 			idx++;
+			j++;
 		}
-		uint j = 0;
 		for ( map<uint32,EGSPD::CMissionTeleportPD>::iterator itTp = (*it).second->getTeleportsBegin(); itTp != (*it).second->getTeleportsEnd(); ++itTp )
 		{
-			if ( (*it).second->getTeleportBot( (*itTp).second.getIndex() ) == bot->getAlias() )
+			// the menu also lists the teleports of a mission at its giver
+			if ((*it).second->getTeleportBot((*itTp).second.getIndex()) == bot->getAlias() || bot->getAlias() == (*it).second->getGiver())
 			{
 				if ( idx == index )
 				{
@@ -13088,6 +13078,8 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 					else
 					{
 						// store infos on the current bot gift
+						if (_BotGift)
+							delete _BotGift;
 						_BotGift = new CBotGift;
 						_BotGift->Type = MISSION_DESC::Group;
 						_BotGift->MissionAlias = team->getMissions()[i]->getTemplateId();
@@ -13095,31 +13087,31 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 
 						const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _BotGift->MissionAlias );
 						nlassert( templ );
-						// if step Any, add all following steps which are part of this step any
-						if( templ->Steps[botchats[j].StepIndex - 1]->isAny() )
+						// a gift step of a step any takes the gift for all the gift steps of its block at this bot,
+						// whichever of their menu entries was picked
+						IMissionStepTemplate *pickedStep = templ->Steps[botchats[j].StepIndex - 1];
+						if (pickedStep->isAny())
 						{
-							j++;
-							while(j<botchats.size() && botchats[j].Gift && templ->Steps[botchats[j].StepIndex - 1]->isAny())
+							for (uint k = 0; k < botchats.size(); ++k)
 							{
-								_BotGift->StepsIndex.insert( botchats[j].StepIndex );
-								j++;
+								IMissionStepTemplate *step = templ->Steps[botchats[k].StepIndex - 1];
+								if (botchats[k].Gift && step->isAny() && step->getOOOStepIndex() == pickedStep->getOOOStepIndex())
+									_BotGift->StepsIndex.insert(botchats[k].StepIndex);
 							}
 						}
-						else
-							j++;
 
-						// init exchange view
-						_ExchangeView = new CExchangeView;
-						_ExchangeView->setCharacter(this);
-						_ExchangeView->bindToInventory(_Inventory[INVENTORIES::bag]);
+						openMissionGiftExchange();
 					}
 					return;
 				}
+				// one menu entry per option, as sendContextTexts lists them
 				idx++;
+				j++;
 			}
 			for ( map<uint32,EGSPD::CMissionTeleportPD>::iterator it = team->getMissions()[i]->getTeleportsBegin(); it != team->getMissions()[i]->getTeleportsEnd(); ++it )
 			{
-				if ( team->getMissions()[i]->getTeleportBot( (*it).second.getIndex() ) == bot->getAlias() )
+				// the menu also lists the teleports of a mission at its giver
+				if (team->getMissions()[i]->getTeleportBot((*it).second.getIndex()) == bot->getAlias() || bot->getAlias() == team->getMissions()[i]->getGiver())
 				{
 					if ( idx == index )
 					{
@@ -13175,6 +13167,25 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 	}
 	nlwarning("<CCharacter botChatMissionAdvance> invalid index %u", index );
 }// botChatMissionAdvance
+
+//-----------------------------------------------
+// openMissionGiftExchange
+//-----------------------------------------------
+void CCharacter::openMissionGiftExchange()
+{
+	// init exchange view
+	_ExchangeView = new CExchangeView;
+	_ExchangeView->setCharacter(this);
+	_ExchangeView->bindToInventory(_Inventory[INVENTORIES::bag]);
+
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+	params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+	uint32 txt = STRING_MANAGER::sendStringToClient(_EntityRowId, "EXCHANGE_TITLE_BOT", params);
+	CBankAccessor_PLR::getEXCHANGE().setTEXT(_PropertyDatabase, txt);
+
+	// try to auto fill exchange view
+	autoFillExchangeView();
+}
 
 
 

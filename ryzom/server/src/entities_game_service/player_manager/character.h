@@ -2966,6 +2966,9 @@ private:
 	/// check the bot gift exchange against the steps it is given to, clamping its money to what a step still needs; giftStep gets the step index that accepts it
 	bool isBotGiftValid(uint32 &giftStep);
 
+	/// open the exchange of the mission gift just stored in _BotGift, with its title and the items it needs
+	void openMissionGiftExchange();
+
 	/// add an entity that must be saved with me when i am saved
 	void	addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void	clearEntitiesToSaveWithMe();
