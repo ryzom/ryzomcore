@@ -2972,6 +2972,9 @@ private:
 	/// open the exchange of the mission gift just stored in _BotGift, with its title and the items it needs
 	void openMissionGiftExchange();
 
+	/// end the bot chat of a mission option picked outside the time and season bounds of its mission, telling why
+	void refuseMissionOptionNotNow(const CCreature *bot);
+
 	/// add an entity that must be saved with me when i am saved
 	void	addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void	clearEntitiesToSaveWithMe();

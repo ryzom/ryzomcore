@@ -11750,9 +11750,12 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 		if (!isBotGiftValid(giftStep))
 		{
 			nldebug("CCharacter::acceptExchange : %s validated a gift its mission step does not accept", _Id.toString().c_str());
+			// the gift window may have opened within the time and season bounds of the mission and been validated after
+			const CMission *giftMission = getMissionFromBotGift();
+			const bool outOfBounds = giftMission != NULL && !giftMission->checkConstraints(false);
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
 			params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
-			sendDynamicSystemMessage(_EntityRowId, "EXCHANGE_GIFT_NOT_NEEDED", params);
+			sendDynamicSystemMessage(_EntityRowId, outOfBounds ? "MIS_OPTION_NOT_NOW" : "EXCHANGE_GIFT_NOT_NEEDED", params);
 			// the client closes its gift window when it validates, release what it offered
 			resetExchange();
 			return;
@@ -12989,6 +12992,12 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 		{
 			if ( idx == index )
 			{
+				// outside its time and season bounds the mission ignores the option, say so instead
+				if (!(*it).second->checkConstraints(false))
+				{
+					refuseMissionOptionNotNow(bot);
+					return;
+				}
 				if ( !botchats[j].Gift )
 				{
 					// build a talk event
@@ -13065,6 +13074,12 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 			{
 				if ( idx == index )
 				{
+					// outside its time and season bounds the mission ignores the option, say so instead
+					if (!team->getMissions()[i]->checkConstraints(false))
+					{
+						refuseMissionOptionNotNow(bot);
+						return;
+					}
 					if ( !botchats[j].Gift )
 					{
 						// build a talk event
@@ -13172,6 +13187,20 @@ void CCharacter::botChatMissionAdvance( uint8 index )
 	}
 	nlwarning("<CCharacter botChatMissionAdvance> invalid index %u", index );
 }// botChatMissionAdvance
+
+//-----------------------------------------------
+// refuseMissionOptionNotNow
+//-----------------------------------------------
+void CCharacter::refuseMissionOptionNotNow(const CCreature *bot)
+{
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+	params[0].setEIdAIAlias(bot->getId(), CAIAliasTranslator::getInstance()->getAIAlias(bot->getId()));
+	sendDynamicSystemMessage(_EntityRowId, "MIS_OPTION_NOT_NOW", params);
+
+	// the client opens its gift window as it sends a gift option, and the AI stopped the bot for the chat
+	endBotChat();
+	staticActionInProgress(false);
+}
 
 //-----------------------------------------------
 // openMissionGiftExchange
