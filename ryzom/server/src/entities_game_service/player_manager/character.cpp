@@ -11089,6 +11089,12 @@ void CCharacter::acceptExchangeInvitation()
 		sendDynamicSystemMessage( _Id, "OPS_EXCHANGE_IMPOSSIBLE");
 		return;
 	}
+	if (_ExchangeAsker == CEntityId::Unknown)
+	{
+		// the invitation was cancelled (the players moved apart) before the answer came
+		nldebug("CCharacter::acceptExchangeInvitation : %s has no pending invitation", _Id.toString().c_str());
+		return;
+	}
 	CCharacter* c = PlayerManager.getChar(_ExchangeAsker);
 	if ( !c )
 	{
@@ -11182,6 +11188,13 @@ void CCharacter::acceptExchangeInvitation()
 //-----------------------------------------------
 void CCharacter::declineExchangeInvitation()
 {
+	if (_ExchangeAsker == CEntityId::Unknown)
+	{
+		// the invitation was cancelled (the players moved apart) before the answer came
+		nldebug("CCharacter::declineExchangeInvitation : %s has no pending invitation", _Id.toString().c_str());
+		return;
+	}
+
 	//the target decline the proposition, reset everything and inform the asker
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( _Id, CAIAliasTranslator::getInstance()->getAIAlias(_Id) );

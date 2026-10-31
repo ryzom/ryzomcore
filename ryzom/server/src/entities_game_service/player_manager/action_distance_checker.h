@@ -141,14 +141,10 @@ void CActionDistanceChecker::tickUpdate()
 		return;
 	if ( _LastCheck >= _Checks.size() )
 		_LastCheck = 0;
-	
-	// compute the higher check index that will be done this tick
-	uint max = (uint)_Checks.size();
-	if ( max > _LastCheck + _NbCheckPerTick )
-		max = _LastCheck + _NbCheckPerTick;
 
-	// iterate through the check that will be performed
-	for ( uint i = _LastCheck; i < max; i++ )
+	// do up to _NbCheckPerTick checks, going on from where the previous tick stopped
+	uint i = _LastCheck;
+	for (uint n = 0; n < _NbCheckPerTick && i < _Checks.size(); ++n)
 	{
 		// get player and target
 		uint32 distSquare = ~0;
@@ -157,18 +153,20 @@ void CActionDistanceChecker::tickUpdate()
 		if ( player && entity )
 			distSquare = (uint32) pow( ( player->getState().X - entity->getState().X )/1000.0 ,2 ) + (uint32)pow( ( player->getState().Y - entity->getState().Y )/1000.0,2);
 
-		if ( distSquare < MaxTalkingDistSquare )
-			i++;
+		if (distSquare < MaxTalkingDistSquare)
+		{
+			++i;
+		}
 		else
 		{
-			max--;
 			if (player != NULL)
 				player->cancelExchangeInvitation();
+			// the last check moves into slot i and is done next
 			_Checks[i] = _Checks.back();
 			_Checks.pop_back();
-			continue;
 		}
 	}
+	_LastCheck = i;
 }// CActionDistanceChecker tickUpdate
 
 #endif // RY_ACTION_DISTANCE_CHECKER_H
