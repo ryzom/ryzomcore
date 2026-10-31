@@ -25,7 +25,7 @@ BOOST_VER=1.83.0
 BOOST_VER_UND="${BOOST_VER//./_}"
 OPENSSL_VER=3.0.13
 CURL_VER=8.5.0
-LUABIND_REV=0ae9bd6   # ryzom/luabind
+LUABIND_REV=6cb0688   # ryzom/luabind
 
 mkdir -p "$PREFIX/lib" "$PREFIX/include"
 
@@ -101,10 +101,7 @@ if [ ! -f "$PREFIX/lib/libluabind09.a" ]; then
 	# LuaBind then consumes LUA_INCLUDE_DIR / LUA_LIBRARIES straight from
 	# our cache values.
 	sed -i 's|find_package(Lua)|set(LUA_FOUND TRUE)|' ../luabind/CMakeLists.txt
-	# CMAKE_POLICY_VERSION_MINIMUM: the pinned revision asks for cmake_minimum_required(VERSION 3.0.0), which
-	# CMake 4 (current runners) refuses; luabind builds with 3.5 policies everywhere else as well
 	emcmake cmake ../luabind \
-		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX="$PREFIX" \
 		-DBUILD_SHARED_LIBS=OFF \
