@@ -73,7 +73,7 @@ private:
 
 protected:
 	// const
-	static const uint _MaxMusicFader = 2;
+	NL_STATIC_CONST(uint, _MaxMusicFader, 2);
 
 	// outside pointers
 	ISoundDriver *_SoundDriver;

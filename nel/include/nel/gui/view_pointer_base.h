@@ -66,7 +66,7 @@ namespace NLGUI
 		/// get buttons state
 		NLMISC::TMouseButton getButtonState() const { return _Buttons; }
 
-		static const sint32 InvalidCoord = 0x80000000;
+		NL_STATIC_CONST(sint32, InvalidCoord, 0x80000000);
 
 	protected:
 		// (x,y) is from the TopLeft corner of the window

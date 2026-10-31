@@ -78,8 +78,8 @@ class   CWaterModel;
 class CVertexProgramLighted : public CVertexProgram
 {
 public:
-	static const uint MaxLight = 4;
-	static const uint MaxPointLight = (MaxLight - 1);
+	NL_STATIC_CONST(uint, MaxLight, 4);
+	NL_STATIC_CONST(uint, MaxPointLight, (MaxLight - 1));
 	struct CIdxLighted
 	{
 		uint Ambient;

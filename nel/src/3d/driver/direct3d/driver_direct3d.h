@@ -1605,6 +1605,7 @@ public:
 	friend class CIBDrvInfosD3D;
 	friend class CVolatileVertexBuffer;
 	friend class CVolatileIndexBuffer;
+	friend struct CPixelShaderPtrState; // C++98 gives nested classes no access to the enclosing class's private members
 
 	// Init render states
 	void initRenderVariables();
@@ -2388,6 +2389,8 @@ private:
 	bool					_AlphaBlendedCursorSupported;
 	bool					_AlphaBlendedCursorSupportRetrieved;
 
+	class CCursor;
+	friend class CCursor; // C++98 gives nested classes no access to the enclosing class's private members
 	class CCursor
 	{
 	public:

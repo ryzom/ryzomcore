@@ -135,6 +135,8 @@ namespace NLGUI
 		static CAHManager *_GlobalInstance;
 		static bool editorMode;
 
+		class CDeleter;
+		friend class CDeleter; // C++98 gives nested classes no access to the enclosing class's private members
 		class CDeleter
 		{
 		public:

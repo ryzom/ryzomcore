@@ -869,6 +869,10 @@ namespace NLGUI
 
 	private:
 		friend class CHtmlParser;
+		class StylesheetDownloadCB;
+		class ImageDownloadCB;
+		friend class StylesheetDownloadCB; // C++98 gives nested classes no access to the enclosing class's private members
+		friend class ImageDownloadCB;
 
 		// move src->Children into CurrentHtmlElement.parent.children element
 		void spliceFragment(std::list<CHtmlElement>::iterator src);

@@ -29,8 +29,13 @@
 #	define NOMINMAX
 #endif
 #include <windows.h>
+#ifdef NL_COMP_VC6
+// The VC98 headers predate the IPv6 interface
+#include "winsock_vc6.h"
+#else
 // Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
 #include <ws2ipdef.h>
+#endif
 typedef sint socklen_t;
 
 #elif defined NL_OS_UNIX

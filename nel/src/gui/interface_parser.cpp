@@ -650,7 +650,7 @@ namespace NLGUI
 			for(uint k = 0; k < _Templates.size(); ++k)
 			{
 				CXMLAutoPtr ptr(xmlGetProp(_Templates[k], (const xmlChar *) "keep"));
-				if (reload || (ptr && nlstricmp((const char *) ptr, "true") == 0))
+				if (reload || ((bool)ptr && nlstricmp((const char *) ptr, "true") == 0))
 				{
 					// xmlUnsetProp(_Templates[k], (const xmlChar *) "keep");
 					xmlNodePtr	copy = xmlCopyNode(_Templates[k], 1);

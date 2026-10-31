@@ -236,7 +236,7 @@ bool CFormElm::isAtom () const
 
 // ***************************************************************************
 
-const CType* CFormElm::getType ()
+const CFormElmType* CFormElm::getType ()
 {
 	warning (false, "getType", "This node is not an atom.");
 	return nullptr;
@@ -2826,7 +2826,7 @@ bool CFormElmAtom::isAtom () const
 
 // ***************************************************************************
 
-const CType* CFormElmAtom::getType ()
+const CFormElmType* CFormElmAtom::getType ()
 {
 	return Type;
 }

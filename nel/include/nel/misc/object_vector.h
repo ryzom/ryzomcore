@@ -448,14 +448,6 @@ template<> class CObjectVector<uint64, true> : public CObjectVector<uint64, fals
 template<> class CObjectVector<sint64, true> : public CObjectVector<sint64, false>
 {
 };
-#ifdef NL_COMP_VC6
-template<> class CObjectVector<uint, true> : public CObjectVector<uint, false>
-{
-};
-template<> class CObjectVector<sint, true> : public CObjectVector<sint, false>
-{
-};
-#endif // !NL_COMP_VC6
 template<> class CObjectVector<float, true> : public CObjectVector<float, false>
 {
 };

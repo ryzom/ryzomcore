@@ -196,7 +196,11 @@ typedef std::function<void(const std::string &serviceName, TServiceId sid, void 
  * \param serviceName name of the service that sent the message
  * \param sid id of the service that sent the message
  */
-#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
+// Visual C++ 6.0 cannot brace-initialize the callback item tables when the callback is a class: a plain
+// function pointer there (nothing builds these from an object and a method)
+#if defined(NL_COMP_VC6)
+typedef void (*TUnifiedMsgCallback)(CMessage &msgin, const std::string &serviceName, TServiceId sid);
+#elif defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
 typedef NLMISC::CCallback<void, CMessage &, const std::string &, TServiceId> TUnifiedMsgCallback;
 #else
 typedef std::function<void(CMessage &msgin, const std::string &serviceName, TServiceId sid)> TUnifiedMsgCallback;
@@ -699,7 +703,7 @@ private:
 	std::vector<TCallbackArgItem>				_UpUniCallback;
 	TNameMappedCallback							_DownCallbacks;
 	std::vector<TCallbackArgItem>				_DownUniCallback;
-	std::set<std::pair<std::string, TServiceId>>	_NotifiedUpCallbacks;
+	std::set<std::pair<std::string, TServiceId> >	_NotifiedUpCallbacks;
 
 	/// Recording state
 	CCallbackNetBase::TRecordingState			_RecordingState;

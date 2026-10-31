@@ -229,7 +229,7 @@ test_again:
 #endif
 
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && !defined(NL_COMP_VC6) // no C++/CLI before Visual C++ 2005
 #pragma managed(push, off)
 #endif
 

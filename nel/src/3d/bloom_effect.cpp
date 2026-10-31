@@ -49,20 +49,20 @@ namespace NL3D
 
 // vertex program used to blur texture
 static const char *TextureOffset =
-"!!VP1.0																	\n\
-	MOV o[COL0].x, c[8].x;	          										\n\
-	MOV o[COL0].y, c[8].y;	          										\n\
-	MOV o[COL0].z, c[8].z;	          										\n\
-	MOV o[COL0].w, c[8].w;	          										\n\
-	MOV o[HPOS].x, v[OPOS].x;												\n\
-	MOV o[HPOS].y, v[OPOS].y;												\n\
-	MOV o[HPOS].z, v[OPOS].z;												\n\
-	MOV o[HPOS].w, c[9].w;													\n\
-	ADD o[TEX0], v[TEX0], c[10];											\n\
-	ADD o[TEX1], v[TEX0], c[11];											\n\
-	ADD o[TEX2], v[TEX0], c[12];											\n\
-	ADD o[TEX3], v[TEX0], c[13];											\n\
-	END \n";
+"!!VP1.0																	\n"
+"	MOV o[COL0].x, c[8].x;	          										\n"
+"	MOV o[COL0].y, c[8].y;	          										\n"
+"	MOV o[COL0].z, c[8].z;	          										\n"
+"	MOV o[COL0].w, c[8].w;	          										\n"
+"	MOV o[HPOS].x, v[OPOS].x;												\n"
+"	MOV o[HPOS].y, v[OPOS].y;												\n"
+"	MOV o[HPOS].z, v[OPOS].z;												\n"
+"	MOV o[HPOS].w, c[9].w;													\n"
+"	ADD o[TEX0], v[TEX0], c[10];											\n"
+"	ADD o[TEX1], v[TEX0], c[11];											\n"
+"	ADD o[TEX2], v[TEX0], c[12];											\n"
+"	ADD o[TEX3], v[TEX0], c[13];											\n"
+"	END \n";
 
 // GLSL 330 version of the same vertex program for the GL3 driver.
 // Varying locations follow TAttribOffset: diffuseColor=3, texCoord0-3=8-11.

@@ -36,6 +36,13 @@ class CType;
 class CFormDfn;
 class CForm;
 
+// Visual C++ 6.0 has no covariant return types: getType returns the interface's UType there
+#ifdef NL_COMP_VC6
+typedef UType CFormElmType;
+#else
+typedef CType CFormElmType;
+#endif
+
 /**
   * Base class of form elements
   */
@@ -90,7 +97,7 @@ public:
 	virtual bool	setValueByName (bool value, const std::string &name, bool *created) NL_OVERRIDE;
 	virtual bool	setValueByName (NLMISC::CRGBA value, const std::string &name, bool *created) NL_OVERRIDE;
 	virtual UFormElm	*getParent () const;
-	virtual const CType *getType () NL_OVERRIDE;
+	virtual const CFormElmType *getType () NL_OVERRIDE;
 	virtual bool	isArray () const NL_OVERRIDE;
 	virtual bool	getArraySize (uint &size) const NL_OVERRIDE;
 	virtual bool	getArrayNode (const UFormElm **result, uint arrayIndex) const NL_OVERRIDE;
@@ -444,7 +451,7 @@ public:
 	bool						setParent (CFormElm *parent);
 	void						getFormName (std::string &result, const CFormElm *child) const NL_OVERRIDE;
 	void						getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
-	const CType*                      getType () NL_OVERRIDE;
+	const CFormElmType*               getType () NL_OVERRIDE;
 
 	// Call by CFormLoader
 	void						read (xmlNodePtr node, CFormLoader &loader, const CType *type, CForm *form);

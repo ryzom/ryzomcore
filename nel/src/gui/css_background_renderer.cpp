@@ -389,8 +389,8 @@ namespace NLGUI
 				// fall-thru
 			default:
 			{
-				tilePos -= std::ceil(abs(tilePos - areaPos)/(float)tileSize)*tileSize;
-				tiles = std::ceil((std::abs(areaPos - tilePos) + areaSize) / (float)tileSize);
+				tilePos -= ceil(abs(tilePos - areaPos)/(float)tileSize)*tileSize;
+				tiles = ceil((abs(areaPos - tilePos) + areaSize) / (float)tileSize);
 				spacing = 0;
 				break;
 			}
@@ -407,13 +407,13 @@ namespace NLGUI
 		sint32 paintX, paintY, paintW, paintH;
 		getPaintingArea(bg, paintX, paintY, paintW, paintH);
 		if (paintX < areaX)
-			areaX -= std::ceil((areaX - paintX) / (float)texW) * texW;
+			areaX -= ceil((areaX - paintX) / (float)texW) * texW;
 		if ((paintX + paintW) > (areaX + areaW))
-			areaW += std::ceil(((paintX + paintW) - (areaX + areaW)) / (float)texW) * texW;
+			areaW += ceil(((paintX + paintW) - (areaX + areaW)) / (float)texW) * texW;
 		if (paintY < areaY)
-			areaY -= std::ceil((areaY - paintY) / (float)texH) * texH;
+			areaY -= ceil((areaY - paintY) / (float)texH) * texH;
 		if ((paintY + paintH) > (areaY + areaH))
-			areaH += std::ceil(((paintY + paintH) - (areaY + areaH)) / (float)texH) * texH;
+			areaH += ceil(((paintY + paintH) - (areaY + areaH)) / (float)texH) * texH;
 
 		if (texW <= 0 || texH <= 0 || areaW <= 0 || areaH <= 0)
 		{
@@ -424,7 +424,7 @@ namespace NLGUI
 
 		if (bg.repeatX == CSS_VALUE_ROUND)
 		{
-			sint numTiles = std::max(1, (sint)std::ceil(((float)areaW / texW) - 0.5f));
+			sint numTiles = std::max(1, (sint)ceil(((float)areaW / texW) - 0.5f));
 			texW = areaW / numTiles;
 			if (bg.height.isAuto() && bg.repeatY != CSS_VALUE_ROUND)
 			{
@@ -435,7 +435,7 @@ namespace NLGUI
 
 		if (bg.repeatY == CSS_VALUE_ROUND)
 		{
-			sint numTiles = std::max(1, (sint)std::ceil(((float)areaH / texH) - 0.5f));
+			sint numTiles = std::max(1, (sint)ceil(((float)areaH / texH) - 0.5f));
 			texH = areaH / numTiles;
 			if (bg.width.isAuto() && bg.repeatX != CSS_VALUE_ROUND)
 			{

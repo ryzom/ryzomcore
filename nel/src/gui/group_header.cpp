@@ -256,7 +256,7 @@ namespace NLGUI
 			return;
 		}
 		else
-			return CGroupList::setProperty( name, value );
+			CGroupList::setProperty( name, value );
 	}
 
 

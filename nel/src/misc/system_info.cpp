@@ -24,8 +24,107 @@
 #ifdef NL_OS_WINDOWS
 #	include <winnt.h>
 #	include <tchar.h>
-#	include <intrin.h>
-#	define nlcpuid(regs, idx) __cpuid(regs, idx)
+#	ifdef NL_COMP_VC6
+// Visual C++ 6.0 has no intrin.h: cpuid through the inline assembler, _mm_getcsr from the
+// Processor Pack's xmmintrin.h
+#		include <xmmintrin.h>
+static void nlcpuid(sint32 regs[4], sint32 idx)
+{
+	__asm
+	{
+		mov eax, idx
+		_emit 0x0F // cpuid
+		_emit 0xA2
+		mov esi, regs
+		mov [esi], eax
+		mov [esi + 4], ebx
+		mov [esi + 8], ecx
+		mov [esi + 12], edx
+	}
+}
+// The VC98 winnt.h has the first OSVERSIONINFOEX (wReserved[2] where the later SDKs, at the same size,
+// have wSuiteMask, wProductType and one reserved byte) and predates the constants below
+struct NL_OSVERSIONINFOEXA
+{
+	DWORD dwOSVersionInfoSize;
+	DWORD dwMajorVersion;
+	DWORD dwMinorVersion;
+	DWORD dwBuildNumber;
+	DWORD dwPlatformId;
+	CHAR szCSDVersion[128];
+	WORD wServicePackMajor;
+	WORD wServicePackMinor;
+	WORD wSuiteMask;
+	BYTE wProductType;
+	BYTE wReserved;
+};
+#		define OSVERSIONINFOEXA NL_OSVERSIONINFOEXA
+#		ifndef VER_NT_WORKSTATION
+#			define VER_NT_WORKSTATION 0x0000001
+#			define VER_NT_DOMAIN_CONTROLLER 0x0000002
+#			define VER_NT_SERVER 0x0000003
+#		endif
+#		ifndef VER_SUITE_ENTERPRISE
+#			define VER_SUITE_ENTERPRISE 0x00000002
+#		endif
+#		ifndef VER_SUITE_DATACENTER
+#			define VER_SUITE_DATACENTER 0x00000080
+#		endif
+#		ifndef VER_SUITE_PERSONAL
+#			define VER_SUITE_PERSONAL 0x00000200
+#		endif
+#		ifndef VER_SUITE_BLADE
+#			define VER_SUITE_BLADE 0x00000400
+#		endif
+#		ifndef VER_SUITE_COMPUTE_SERVER
+#			define VER_SUITE_COMPUTE_SERVER 0x00004000
+#		endif
+#		ifndef PROCESSOR_ARCHITECTURE_IA64
+#			define PROCESSOR_ARCHITECTURE_IA64 6
+#		endif
+#		ifndef PROCESSOR_ARCHITECTURE_AMD64
+#			define PROCESSOR_ARCHITECTURE_AMD64 9
+#		endif
+#		ifndef SM_SERVERR2
+#			define SM_SERVERR2 89
+#		endif
+// GlobalMemoryStatusEx (Windows 2000) is newer than the VC98 headers and kernel32.lib
+struct NL_MEMORYSTATUSEX
+{
+	DWORD dwLength;
+	DWORD dwMemoryLoad;
+	uint64 ullTotalPhys;
+	uint64 ullAvailPhys;
+	uint64 ullTotalPageFile;
+	uint64 ullAvailPageFile;
+	uint64 ullTotalVirtual;
+	uint64 ullAvailVirtual;
+	uint64 ullAvailExtendedVirtual;
+};
+static BOOL nlGlobalMemoryStatusEx(NL_MEMORYSTATUSEX *ms)
+{
+	typedef BOOL (WINAPI *TGlobalMemoryStatusEx)(NL_MEMORYSTATUSEX *);
+	TGlobalMemoryStatusEx globalMemoryStatusEx = (TGlobalMemoryStatusEx)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GlobalMemoryStatusEx");
+	if (globalMemoryStatusEx) return globalMemoryStatusEx(ms);
+	MEMORYSTATUS m;
+	m.dwLength = sizeof(m);
+	GlobalMemoryStatus(&m);
+	ms->dwMemoryLoad = m.dwMemoryLoad;
+	ms->ullTotalPhys = m.dwTotalPhys;
+	ms->ullAvailPhys = m.dwAvailPhys;
+	ms->ullTotalPageFile = m.dwTotalPageFile;
+	ms->ullAvailPageFile = m.dwAvailPageFile;
+	ms->ullTotalVirtual = m.dwTotalVirtual;
+	ms->ullAvailVirtual = m.dwAvailVirtual;
+	ms->ullAvailExtendedVirtual = 0;
+	return TRUE;
+}
+#		define MEMORYSTATUSEX NL_MEMORYSTATUSEX
+#		define GlobalMemoryStatusEx nlGlobalMemoryStatusEx
+#	else
+#		include <intrin.h>
+#		define nlcpuid(regs, idx) __cpuid(regs, idx)
+#	endif
 
 // define them here to not rely on Windows 10 SDKs
 #	define NL_PRODUCT_UNDEFINED                           0x00000000
@@ -1475,6 +1574,7 @@ uint64 CSystemInfo::availablePhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullAvailPhys;
 #elif defined NL_OS_MAC
@@ -1490,6 +1590,7 @@ uint64 CSystemInfo::totalPhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalPhys;
 #elif defined NL_OS_MAC
@@ -1872,6 +1973,7 @@ uint64 CSystemInfo::virtualMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalVirtual - ms.ullAvailVirtual;
 #else

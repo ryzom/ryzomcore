@@ -79,6 +79,10 @@ namespace NLMISC{
 		 Also it manages adding/removing itself to/from the marked observer handles list, which is handled by CCDBBranchObservingHandler.
 
 		 */
+		// the handle reads the handler's private lists (C++98 does not let nested classes do that)
+		class CCDBDBBranchObserverHandle;
+		friend class CCDBDBBranchObserverHandle;
+
 		class CCDBDBBranchObserverHandle : public CCDBNodeBranch::ICDBDBBranchObserverHandle{
 
 		public:

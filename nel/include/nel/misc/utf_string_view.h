@@ -62,7 +62,9 @@ public:
 #endif
 
 	inline CUtfStringView(const ucstring &utf16Str) : m_Str(utf16Str.c_str()), m_Size(utf16Str.size() << 1), m_Iterator(utf16Iterator) {}
+#ifndef NL_NO_NATIVE_WCHAR_T // else ucchar is wchar_t
 	inline CUtfStringView(const ucchar *utf16Str) : m_Str(utf16Str), m_Size(strlen((const char *)utf16Str) & (ptrdiff_t)(-2)), m_Iterator(utf16Iterator) {}
+#endif
 	inline CUtfStringView(const ::u32string &utf32Str) : m_Str(utf32Str.c_str()), m_Size(utf32Str.size() << 2), m_Iterator(utf32Iterator) {}
 
 	std::string toUtf8(bool reEncode = false) const; // Makes a copy
@@ -76,19 +78,23 @@ public:
 	inline bool isUtf16() const { return m_Iterator == utf16Iterator; }
 	inline bool isUtf32() const { return m_Iterator == utf32Iterator; }
 
+	// the iterator reads the view's private members (C++98 does not let nested classes do that)
+	struct const_iterator;
+	friend struct const_iterator;
+
 	struct const_iterator
 	{
 	public:
 		inline void operator++()
 		{
-			if ((ptrdiff_t)m_Next > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
-				m_Next = (void *)((ptrdiff_t)m_View.m_Str + m_View.m_Size);
+			if ((ptrdiff_t)m_Next > ((ptrdiff_t)m_View->m_Str + m_View->m_Size))
+				m_Next = (void *)((ptrdiff_t)m_View->m_Str + m_View->m_Size);
 			m_Addr = m_Next;
-			m_Char = m_View.m_Iterator(&m_Next);
+			m_Char = m_View->m_Iterator(&m_Next);
 		}
 		inline void operator+=(ptrdiff_t a)
 		{
-			while ((ptrdiff_t)m_Addr < ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
+			while ((ptrdiff_t)m_Addr < ((ptrdiff_t)m_View->m_Str + m_View->m_Size))
 			{
 				++(*this);
 			}
@@ -96,7 +102,7 @@ public:
 		inline bool operator!=(const const_iterator &o) const { return m_Addr != o.m_Addr; }
 		inline bool operator==(const const_iterator &o) const { return m_Addr == o.m_Addr; }
 		inline const u32char &operator*() const { return m_Char; }
-		const_iterator() : m_View(*(CUtfStringView *)nullptr)
+		const_iterator() : m_View(nullptr)
 		    , m_Addr(nullptr)
 		    , m_Char(0) { }
 
@@ -110,13 +116,13 @@ public:
 		const void *ptr() const { return m_Addr; }
 	private:
 		friend class CUtfStringView;
-		inline const_iterator(const CUtfStringView &view, const void *addr) : m_View(view), m_Addr(addr), m_Next(addr), m_Char(view.m_Iterator(&m_Next))
+		inline const_iterator(const CUtfStringView &view, const void *addr) : m_View(&view), m_Addr(addr), m_Next(addr), m_Char(view.m_Iterator(&m_Next))
 		{
-			if ((ptrdiff_t)m_Next > ((ptrdiff_t)m_View.m_Str + m_View.m_Size))
-				m_Next = (void *)((ptrdiff_t)m_View.m_Str + m_View.m_Size);
+			if ((ptrdiff_t)m_Next > ((ptrdiff_t)m_View->m_Str + m_View->m_Size))
+				m_Next = (void *)((ptrdiff_t)m_View->m_Str + m_View->m_Size);
 		}
-		inline const_iterator(const CUtfStringView &view) : m_View(view), m_Addr((char *)view.m_Str + view.m_Size), m_Next((char *)view.m_Str + view.m_Size + 1), m_Char(0) { }
-		const CUtfStringView &m_View;
+		inline const_iterator(const CUtfStringView &view) : m_View(&view), m_Addr((char *)view.m_Str + view.m_Size), m_Next((char *)view.m_Str + view.m_Size + 1), m_Char(0) { }
+		const CUtfStringView *m_View; // a pointer, so the default iterator needs no object to refer to
 		const void *m_Addr; // Current address
 		const void *m_Next; // Next address
 		u32char m_Char;

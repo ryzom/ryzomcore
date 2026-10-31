@@ -559,7 +559,7 @@ private:
 		uint32 IBCount;		///< Number of indices
 	};
 	/// _GPULodPasses[lodId][passId]
-	std::vector<std::vector<GPULodPass>>	_GPULodPasses;
+	std::vector<std::vector<GPULodPass> >	_GPULodPasses;
 	/// Build the GPU skinning VB and IB from the standard vertex data.
 	void	buildGPUSkinVB();
 	// @}

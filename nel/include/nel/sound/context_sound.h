@@ -234,7 +234,8 @@ class CContextSoundContainer : public IContextSoundContainer
 		// ok, now create the key and store the sound.
 		CContextMatcher<NbJoker, UseRandom, Shift>	cm(args, randomValue);
 
-		std::pair<typename THashContextSound::iterator, bool>	ret;
+		typedef typename THashContextSound::iterator TIterator; // Visual C++ 6.0 takes no typename in a template argument here
+		std::pair<TIterator, bool>	ret;
 		ret = _ContextSounds.insert(std::make_pair(cm, sound));
 		if (!ret.second)
 		{

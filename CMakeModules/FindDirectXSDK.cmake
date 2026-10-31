@@ -10,8 +10,10 @@ IF(DXSDK_DIR)
   SET(DXSDK_FIND_QUIETLY TRUE)
 ENDIF()
 
+# dxsdkver.h arrived with the DirectX 9.0c SDKs; the DirectX 9.0 SDK (Summer 2003) of the VC6 setup
+# is recognized by its d3d9.h
 FIND_PATH(DXSDK_DIR
-  "Include/dxsdkver.h"
+  NAMES "Include/dxsdkver.h" "Include/d3d9.h"
   PATHS
   "$ENV{DXSDK_DIR}"
   "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)"
@@ -38,7 +40,8 @@ IF(DXSDK_DIR)
   IF(TARGET_X64)
     SET(DXSDK_LIBRARY_DIRS ${DXSDK_DIR}/Lib/x64 ${DXSDK_DIR}/lib/amd64)
   ELSE()
-    SET(DXSDK_LIBRARY_DIRS ${DXSDK_DIR}/Lib/x86 ${DXSDK_DIR}/lib)
+    # older SDKs keep the x86 libraries in Lib itself (the spelling matters on case-sensitive hosts)
+    SET(DXSDK_LIBRARY_DIRS ${DXSDK_DIR}/Lib/x86 ${DXSDK_DIR}/Lib ${DXSDK_DIR}/lib)
   ENDIF()
 
   FIND_PATH(DXSDK_LIBRARY_DIR

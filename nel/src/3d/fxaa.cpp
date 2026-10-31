@@ -132,13 +132,9 @@ private:
 	CIdx m_Idx;
 };
 
-}
-
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
 #endif
-
-namespace NL3D {
 
 CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(nullptr)
     , m_PP(nullptr)

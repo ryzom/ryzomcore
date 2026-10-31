@@ -44,9 +44,9 @@ class CScenarioTextParser
 {
 public:
 	/// Largest nesting of tables accepted
-	static const uint32 MaxDepth = 256;
+	NL_STATIC_CONST(uint32, MaxDepth, 256);
 	/// Largest number of values accepted in one file (the shipped example scenarios have about 10000)
-	static const uint32 MaxNodes = 1024 * 1024;
+	NL_STATIC_CONST(uint32, MaxNodes, 1024 * 1024);
 
 	/**
 	 * Parses "scenario = { ... }", with whitespace and comments allowed around it. The objects come

@@ -1148,12 +1148,12 @@ namespace NLGUI
 
 		// hack: allow shadow to overflow outside parent box.
 		// In CGroupHTML context, clip is set for row
-		if (std::abs(_ShadowX) > 0)
+		if (abs(_ShadowX) > 0)
 		{
 			ClipX -= 3;
 			ClipW += 3;
 		}
-		if (std::abs(_ShadowY) > 0)
+		if (abs(_ShadowY) > 0)
 		{
 			ClipY -= 3;
 			ClipH += 3;
@@ -2917,8 +2917,8 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32 CViewText::getMaxUsedW() const
 	{
-		static const char *spaceStr(" \t");
-		static const char *lineFeedStr("\n");
+		static const char *spaceStr = " \t";
+		static const char *lineFeedStr = "\n";
 		float maxWidth = 0;
 
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);

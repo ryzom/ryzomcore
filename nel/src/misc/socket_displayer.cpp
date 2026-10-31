@@ -400,12 +400,12 @@ void CSocketDisplayer::handleLine(const std::string &line)
 		if (command.Name.empty())
 		{
 			// nothing to run; the caller still gets its answer
-			CSynchronized<std::vector<std::pair<std::string, bool>>>::CAccessor done(&m_DoneQueue);
+			CSynchronized<std::vector<std::pair<std::string, bool> > >::CAccessor done(&m_DoneQueue);
 			done.value().push_back(std::make_pair(command.Id, false));
 			return;
 		}
 		// executed by the main thread in updateExtra
-		CSynchronized<std::vector<CArgCommand>>::CAccessor access(&m_ArgCommands);
+		CSynchronized<std::vector<CArgCommand> >::CAccessor access(&m_ArgCommands);
 		access.value().push_back(command);
 	}
 	else
@@ -418,7 +418,7 @@ void CSocketDisplayer::updateExtra()
 {
 	std::vector<CArgCommand> commands;
 	{
-		CSynchronized<std::vector<CArgCommand>>::CAccessor access(&m_ArgCommands);
+		CSynchronized<std::vector<CArgCommand> >::CAccessor access(&m_ArgCommands);
 		commands.swap(access.value());
 	}
 	for (uint i = 0; i < commands.size(); ++i)
@@ -426,16 +426,16 @@ void CSocketDisplayer::updateExtra()
 		nlassert(Log != NULL);
 		bool ok = ICommand::executeArgs(commands[i].Name, commands[i].Args, *Log);
 		// the output of the command is in the log buffer by now; the done marker follows it
-		CSynchronized<std::vector<std::pair<std::string, bool>>>::CAccessor done(&m_DoneQueue);
+		CSynchronized<std::vector<std::pair<std::string, bool> > >::CAccessor done(&m_DoneQueue);
 		done.value().push_back(std::make_pair(commands[i].Id, ok));
 	}
 }
 
 void CSocketDisplayer::flushDone()
 {
-	std::vector<std::pair<std::string, bool>> done;
+	std::vector<std::pair<std::string, bool> > done;
 	{
-		CSynchronized<std::vector<std::pair<std::string, bool>>>::CAccessor access(&m_DoneQueue);
+		CSynchronized<std::vector<std::pair<std::string, bool> > >::CAccessor access(&m_DoneQueue);
 		done.swap(access.value());
 	}
 	// the log lines of the command went out in flushLog just before; without a dashboard the markers
@@ -528,7 +528,7 @@ void CSocketDisplayer::onCommandAdded(const std::string &name, TCommandEntryKind
 	entry.Args = args;
 	entry.Help = help;
 	entry.Removed = false;
-	CSynchronized<std::vector<CCommandEntry>>::CAccessor access(&m_CommandQueue);
+	CSynchronized<std::vector<CCommandEntry> >::CAccessor access(&m_CommandQueue);
 	access.value().push_back(entry);
 }
 
@@ -538,7 +538,7 @@ void CSocketDisplayer::onCommandRemoved(const std::string &name)
 	entry.Name = name;
 	entry.Kind = CommandEntryKind;
 	entry.Removed = true;
-	CSynchronized<std::vector<CCommandEntry>>::CAccessor access(&m_CommandQueue);
+	CSynchronized<std::vector<CCommandEntry> >::CAccessor access(&m_CommandQueue);
 	access.value().push_back(entry);
 }
 
@@ -546,7 +546,7 @@ void CSocketDisplayer::flushCommands()
 {
 	std::vector<CCommandEntry> changes;
 	{
-		CSynchronized<std::vector<CCommandEntry>>::CAccessor access(&m_CommandQueue);
+		CSynchronized<std::vector<CCommandEntry> >::CAccessor access(&m_CommandQueue);
 		changes.swap(access.value());
 	}
 	for (uint i = 0; i < changes.size(); ++i)

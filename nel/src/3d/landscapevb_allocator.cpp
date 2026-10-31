@@ -450,56 +450,56 @@ NB: 9 ope for normal errorMetric, and 9 ope for smoothing with TileNear.
 
 */
 const char* NL3D_LandscapeCommonStartProgram=
-"!!VP1.0																				\n\
-	# compute Basic geomorph into R0.x													\n\
-	ADD	R0, v[0], -c[5];			# R0 = startPos - RefineCenter						\n\
-	DP3	R2.x, R0, R0;				# R2.x= sqrDist= (startPos - RefineCenter).sqrnorm()\n\
-	RCP	R0.x, R2.x;					# R0.x= 1 / sqrDist									\n\
-	MUL	R0.x, v[10].x, R0.x;		# R0.x= ErrorMetric= GeomFactor / sqrDist			\n\
-																						\n\
-	# compute Transition Factor To TileNear Geomorph, into R0.z							\n\
-	ADD	R0.z, c[6].x, -R2.x;		# R0.z= TileDistFarSqr - sqrDist					\n\
-	MUL	R0.z, R0.z, c[6].y;			# R0.z= f= (TileDistFarSqr - sqrDist ) * OOTileDistDeltaSqr	\n\
-	MAX R0.z, R0.z, c[4].x;																\n\
-	MIN R0.z, R0.z, c[4].y;			# R0.z= f= clamp(f, 0, 1);							\n\
-	MUL R0.z, R0.z, R0.z;																\n\
-	MUL R0.z, R0.z, R0.z;			# R0.z= finalFactor= f^4							\n\
-																						\n\
-	# Apply the transition factor to the ErrorMetric => R0.w= ErrorMetricModified.		\n\
-	ADD	R0.w, v[10].y, -R0.x;		# R0.w= maxNearLimit - ErrorMetric					\n\
-	MAD	R0.w, R0.z, R0.w, R0.x;	# R0.w= finalFactor * (maxNearLimit - ErrorMetric) + ErrorMetric \n\
-																						\n\
-	# R0.w may be < R0.x; (when the point is very near). Must take the bigger errorMetric.	\n\
-	MAX	R0.x, R0.x, R0.w;			# R0.x= ErrorMetric Max								\n\
-																						\n\
-	# apply geomorph into R1															\n\
-	ADD R0.x, R0.x, -c[4].y;		# R0.x= ErrorMetric Max - 1							\n\
-	MAX R0.x, R0.x, c[4].x;																\n\
-	MIN R0.x, R0.x, c[4].y;			# R0.x= geomBlend= clamp(R0.x, 0, 1);				\n\
-																						\n\
-	# NB: Can't use MAD R1.xyz, v[11], R0.x, v[0], because can't acces 2 inputs in one op.	\n\
-	# Hence, can use a MAD to Sub the Landscape Center _PZBModelPosition				\n\
-	# write to R1.w is useless (but needed to avoid a read error when multiplied by 0)  \n\
-	# in the next instruction															\n\
-	MAD	R1.xyzw, v[11], R0.x, -c[12];													\n\
-	# set w to 1 by using c[4] = { 0, 1, 0.5, 0}										\n\
-	MAD	R1, R1, c[4].yyyx, v[0];	# R1= geomBlend * (EndPos-StartPos) + StartPos		\n\
-";
+"!!VP1.0																				\n"
+"	# compute Basic geomorph into R0.x													\n"
+"	ADD	R0, v[0], -c[5];			# R0 = startPos - RefineCenter						\n"
+"	DP3	R2.x, R0, R0;				# R2.x= sqrDist= (startPos - RefineCenter).sqrnorm()\n"
+"	RCP	R0.x, R2.x;					# R0.x= 1 / sqrDist									\n"
+"	MUL	R0.x, v[10].x, R0.x;		# R0.x= ErrorMetric= GeomFactor / sqrDist			\n"
+"																						\n"
+"	# compute Transition Factor To TileNear Geomorph, into R0.z							\n"
+"	ADD	R0.z, c[6].x, -R2.x;		# R0.z= TileDistFarSqr - sqrDist					\n"
+"	MUL	R0.z, R0.z, c[6].y;			# R0.z= f= (TileDistFarSqr - sqrDist ) * OOTileDistDeltaSqr	\n"
+"	MAX R0.z, R0.z, c[4].x;																\n"
+"	MIN R0.z, R0.z, c[4].y;			# R0.z= f= clamp(f, 0, 1);							\n"
+"	MUL R0.z, R0.z, R0.z;																\n"
+"	MUL R0.z, R0.z, R0.z;			# R0.z= finalFactor= f^4							\n"
+"																						\n"
+"	# Apply the transition factor to the ErrorMetric => R0.w= ErrorMetricModified.		\n"
+"	ADD	R0.w, v[10].y, -R0.x;		# R0.w= maxNearLimit - ErrorMetric					\n"
+"	MAD	R0.w, R0.z, R0.w, R0.x;	# R0.w= finalFactor * (maxNearLimit - ErrorMetric) + ErrorMetric \n"
+"																						\n"
+"	# R0.w may be < R0.x; (when the point is very near). Must take the bigger errorMetric.	\n"
+"	MAX	R0.x, R0.x, R0.w;			# R0.x= ErrorMetric Max								\n"
+"																						\n"
+"	# apply geomorph into R1															\n"
+"	ADD R0.x, R0.x, -c[4].y;		# R0.x= ErrorMetric Max - 1							\n"
+"	MAX R0.x, R0.x, c[4].x;																\n"
+"	MIN R0.x, R0.x, c[4].y;			# R0.x= geomBlend= clamp(R0.x, 0, 1);				\n"
+"																						\n"
+"	# NB: Can't use MAD R1.xyz, v[11], R0.x, v[0], because can't acces 2 inputs in one op.	\n"
+"	# Hence, can use a MAD to Sub the Landscape Center _PZBModelPosition				\n"
+"	# write to R1.w is useless (but needed to avoid a read error when multiplied by 0)  \n"
+"	# in the next instruction															\n"
+"	MAD	R1.xyzw, v[11], R0.x, -c[12];													\n"
+"	# set w to 1 by using c[4] = { 0, 1, 0.5, 0}										\n"
+"	MAD	R1, R1, c[4].yyyx, v[0];	# R1= geomBlend * (EndPos-StartPos) + StartPos		\n"
+"";
 
 
 // ***********************
 // Test Speed.
-/*"!!VP1.0																				\n\
-	# compute Basic geomorph into R0.x													\n\
-	ADD	R0, v[0], -c[5];			# R0 = startPos - RefineCenter						\n\
-	DP3	R2.x, R0, R0;				# R2.x= sqrDist= (startPos - RefineCenter).sqrnorm()\n\
-	MOV	R1, v[0];					# R1= geomBlend * (EndPos-StartPos) + StartPos		\n\
-";
+/*"!!VP1.0																				\n"
+"	# compute Basic geomorph into R0.x													\n"
+"	ADD	R0, v[0], -c[5];			# R0 = startPos - RefineCenter						\n"
+"	DP3	R2.x, R0, R0;				# R2.x= sqrDist= (startPos - RefineCenter).sqrnorm()\n"
+"	MOV	R1, v[0];					# R1= geomBlend * (EndPos-StartPos) + StartPos		\n"
+"";
 */
 const string NL3D_LandscapeTestSpeedProgram=
-"	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n\
-	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n\
-";
+"	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n"
+"	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n	MOV R1, R1; \n"
+"";
 
 
 // ***********************
@@ -510,16 +510,16 @@ const string NL3D_LandscapeTestSpeedProgram=
 */
 // ***********************
 const char* NL3D_LandscapeFar0EndProgram=
-"	# compute in Projection space														\n\
-	DP4 o[HPOS].x, c[0], R1;															\n\
-	DP4 o[HPOS].y, c[1], R1;															\n\
-	DP4 o[HPOS].z, c[2], R1;															\n\
-	DP4 o[HPOS].w, c[3], R1;															\n\
-	MOV o[TEX0], v[8];																\n\
-	MOV o[TEX1], v[9];																\n\
-	DP4	o[FOGC].x, c[10], R1;															\n\
-	END																					\n\
-";
+"	# compute in Projection space														\n"
+"	DP4 o[HPOS].x, c[0], R1;															\n"
+"	DP4 o[HPOS].y, c[1], R1;															\n"
+"	DP4 o[HPOS].z, c[2], R1;															\n"
+"	DP4 o[HPOS].w, c[3], R1;															\n"
+"	MOV o[TEX0], v[8];																\n"
+"	MOV o[TEX1], v[9];																\n"
+"	DP4	o[FOGC].x, c[10], R1;															\n"
+"	END																					\n"
+"";
 
 
 // ***********************
@@ -531,22 +531,22 @@ const char* NL3D_LandscapeFar0EndProgram=
 */
 // ***********************
 const char* NL3D_LandscapeFar1EndProgram=
-"	# compute Alpha Transition															\n\
-	ADD R0.x, R2.x, -v[12].x;		# R0.x= sqrDist-TransitionSqrMin					\n\
-	MUL	R0.x, R0.x, v[12].y;		# R0.x= (sqrDist-TransitionSqrMin) * OOTransitionSqrDelta	\n\
-	MAX R0.x, R0.x, c[4].x;																\n\
-	MIN o[COL0].w, R0.x, c[4].y;	# col.A= clamp(R0.x, 0, 1);							\n\
-																						\n\
-	# compute in Projection space														\n\
-	DP4 o[HPOS].x, c[0], R1;															\n\
-	DP4 o[HPOS].y, c[1], R1;															\n\
-	DP4 o[HPOS].z, c[2], R1;															\n\
-	DP4 o[HPOS].w, c[3], R1;															\n\
-	MOV o[TEX0], v[8];																\n\
-	MOV o[TEX1], v[9];																\n\
-	DP4	o[FOGC].x, c[10], R1;															\n\
-	END																					\n\
-";
+"	# compute Alpha Transition															\n"
+"	ADD R0.x, R2.x, -v[12].x;		# R0.x= sqrDist-TransitionSqrMin					\n"
+"	MUL	R0.x, R0.x, v[12].y;		# R0.x= (sqrDist-TransitionSqrMin) * OOTransitionSqrDelta	\n"
+"	MAX R0.x, R0.x, c[4].x;																\n"
+"	MIN o[COL0].w, R0.x, c[4].y;	# col.A= clamp(R0.x, 0, 1);							\n"
+"																						\n"
+"	# compute in Projection space														\n"
+"	DP4 o[HPOS].x, c[0], R1;															\n"
+"	DP4 o[HPOS].y, c[1], R1;															\n"
+"	DP4 o[HPOS].z, c[2], R1;															\n"
+"	DP4 o[HPOS].w, c[3], R1;															\n"
+"	MOV o[TEX0], v[8];																\n"
+"	MOV o[TEX1], v[9];																\n"
+"	DP4	o[FOGC].x, c[10], R1;															\n"
+"	END																					\n"
+"";
 
 
 // ***********************
@@ -557,29 +557,29 @@ const char* NL3D_LandscapeFar1EndProgram=
 */
 // ***********************
 const char* NL3D_LandscapeTileEndProgram=
-"	# compute in Projection space														\n\
-	DP4 o[HPOS].x, c[0], R1;															\n\
-	DP4 o[HPOS].y, c[1], R1;															\n\
-	DP4 o[HPOS].z, c[2], R1;															\n\
-	DP4 o[HPOS].w, c[3], R1;															\n\
-	MOV o[TEX0], v[8];																	\n\
-	MOV o[TEX1], v[9];																	\n\
-	DP4	o[FOGC].x, c[10], R1;															\n\
-	END																					\n\
-";
+"	# compute in Projection space														\n"
+"	DP4 o[HPOS].x, c[0], R1;															\n"
+"	DP4 o[HPOS].y, c[1], R1;															\n"
+"	DP4 o[HPOS].z, c[2], R1;															\n"
+"	DP4 o[HPOS].w, c[3], R1;															\n"
+"	MOV o[TEX0], v[8];																	\n"
+"	MOV o[TEX1], v[9];																	\n"
+"	DP4	o[FOGC].x, c[10], R1;															\n"
+"	END																					\n"
+"";
 
 /// Same version but write Tex0 to take uv2, ie v[13], for lightmap pass
 const char* NL3D_LandscapeTileLightMapEndProgram=
-"	# compute in Projection space														\n\
-	DP4 o[HPOS].x, c[0], R1;															\n\
-	DP4 o[HPOS].y, c[1], R1;															\n\
-	DP4 o[HPOS].z, c[2], R1;															\n\
-	DP4 o[HPOS].w, c[3], R1;															\n\
-	MOV o[TEX0], v[12];																\n\
-	MOV o[TEX1], v[9];																\n\
-	DP4	o[FOGC].x, c[10], R1;															\n\
-	END																					\n\
-";
+"	# compute in Projection space														\n"
+"	DP4 o[HPOS].x, c[0], R1;															\n"
+"	DP4 o[HPOS].y, c[1], R1;															\n"
+"	DP4 o[HPOS].z, c[2], R1;															\n"
+"	DP4 o[HPOS].w, c[3], R1;															\n"
+"	MOV o[TEX0], v[12];																\n"
+"	MOV o[TEX1], v[9];																\n"
+"	DP4	o[FOGC].x, c[10], R1;															\n"
+"	END																					\n"
+"";
 
 
 // ***************************************************************************

@@ -501,2532 +501,2532 @@ static void setFX(CD3DShaderFX &s, const char *name, const char *prog, CDriverD3
 #define setFx(a,b,c) { setFX(a, b, c, this); }
 
 static const char *CloudFx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-float4 factor0;														\n\
-																	\n\
-pixelshader two_stages_ps = asm										\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	lrp r0.w, v0, t0, t1;											\n\
-	mov r0.xyz, c0;													\n\
-	+mul r0.w, c0, r0;												\n\
-};																	\n\
-																	\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShader = (two_stages_ps);								\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"float4 factor0;														\n"
+"																	\n"
+"pixelshader two_stages_ps = asm										\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	lrp r0.w, v0, t0, t1;											\n"
+"	mov r0.xyz, c0;													\n"
+"	+mul r0.w, c0, r0;												\n"
+"};																	\n"
+"																	\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShader = (two_stages_ps);								\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap0Fx =  
-"																	\n\
-texture texture0;													\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-technique one_stage_1												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// do a standard lighting with the first light				\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TEXTURE;										\n\
-		ColorArg2[0] = DIFFUSE;										\n\
-		AlphaOp[0] = SELECTARG1; // for alpha test					\n\
-		AlphaArg1[0] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"technique one_stage_1												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// do a standard lighting with the first light				\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TEXTURE;										\n"
+"		ColorArg2[0] = DIFFUSE;										\n"
+"		AlphaOp[0] = SELECTARG1; // for alpha test					\n"
+"		AlphaArg1[0] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap0blendFx =  
-"																	\n\
-texture texture0;													\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-technique one_stage_1												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// do a standard lighting with the first light				\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = SRCALPHA;										\n\
-		DestBlend = INVSRCALPHA;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TEXTURE;										\n\
-		ColorArg2[0] = DIFFUSE;										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"technique one_stage_1												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// do a standard lighting with the first light				\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = SRCALPHA;										\n"
+"		DestBlend = INVSRCALPHA;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TEXTURE;										\n"
+"		ColorArg2[0] = DIFFUSE;										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap0blend_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-technique one_stage_1												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// do a standard lighting with the first light				\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = SRCALPHA;										\n\
-		DestBlend = INVSRCALPHA;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TEXTURE;										\n\
-		ColorArg2[0] = DIFFUSE;										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"technique one_stage_1												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// do a standard lighting with the first light				\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = SRCALPHA;										\n"
+"		DestBlend = INVSRCALPHA;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TEXTURE;										\n"
+"		ColorArg2[0] = DIFFUSE;										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap0_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-technique one_stage_1												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// do a standard lighting with the first light				\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TEXTURE;										\n\
-		ColorArg2[0] = DIFFUSE;										\n\
-		AlphaOp[0] = SELECTARG1; // for alpha test					\n\
-		AlphaArg1[0] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"technique one_stage_1												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// do a standard lighting with the first light				\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TEXTURE;										\n"
+"		ColorArg2[0] = DIFFUSE;										\n"
+"		AlphaOp[0] = SELECTARG1; // for alpha test					\n"
+"		AlphaArg1[0] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap1Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		AlphaOp[0] =   SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] =   SELECTARG1; // for alpha test				\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		AlphaOp[0] =   SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] =   SELECTARG1; // for alpha test				\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap1blendFx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = SRCALPHA;										\n\
-		DestBlend = INVSRCALPHA;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = SRCALPHA;										\n"
+"		DestBlend = INVSRCALPHA;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap1blend_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = SRCALPHA;										\n\
-		DestBlend = INVSRCALPHA;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = SRCALPHA;										\n"
+"		DestBlend = INVSRCALPHA;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap1_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		AlphaOp[0] =   SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] =   SELECTARG1; // for alpha test				\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		AlphaOp[0] =   SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] =   SELECTARG1; // for alpha test				\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_ps);							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1; // for alpha test					\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-}																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_ps);							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1; // for alpha test					\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap2blendFx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_ps);							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_ps);							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap2blend_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_ps);							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_ps);							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap2_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_ps);							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1; // for alpha test if enabled		\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-}																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_ps);							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1; // for alpha test if enabled		\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap3Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Lighting = false;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture3>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color3>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE; // for case when there's alpha test	\n\
-		AlphaOp[2] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1; // alpha in case were alpha test is used\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Lighting = false;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture3>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color3>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE; // for case when there's alpha test	\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1; // alpha in case were alpha test is used\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap3blendFx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		DestBlend = one;											\n\
-		Lighting = false;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture3>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color3>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-		AlphaOp[2] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		DestBlend = one;											\n"
+"		Lighting = false;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture3>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color3>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap3blend_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		DestBlend = one;											\n\
-		Lighting = false;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture3>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color3>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-		AlphaOp[2] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		DestBlend = one;											\n"
+"		Lighting = false;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture3>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color3>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap3_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Lighting = false;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture3>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color3>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE; // for case when there's alpha test	\n\
-		AlphaOp[2] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1; // alpha in case were alpha test is used\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Lighting = false;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture3>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color3>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE; // for case when there's alpha test	\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1; // alpha in case were alpha test is used\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap4Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-texture texture4;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-dword color4;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-float4 factor4;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 5 stages technique											\n\
-pixelshader five_stages_ps = asm									\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld r0, t0;													\n\
-	texld r1, t1;													\n\
-	texld r2, t2;													\n\
-	texld r3, t3;													\n\
-	texld r4, t4;													\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r1.xyz, c1, r1, v0;											\n\
-	mad r1.xyz, c2, r2, r1;											\n\
-	mad r1.xyz, c3, r3, r1;											\n\
-	mad r1.xyz, c4, r4, r1;											\n\
-	mul r0.xyz, r1, r0;												\n\
-};																	\n\
-																	\n\
-technique five_stages_5												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-		TexCoordIndex[4] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		Texture[4] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShaderConstant[4] = <factor4>;							\n\
-		PixelShader = (five_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture4>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color4>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		ColorOp[3] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-		AlphaOp[2] = DISABLE;										\n\
-		AlphaOp[3] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	// 2 pass with the same pixel shader							\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialDiffuse= <g_black>;									\n\
-																	\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[1] = <texture3>;									\n\
-		Texture[2] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor3>;							\n\
-		PixelShaderConstant[2] = <factor4>;							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-	pass p3															\n\
-	{																\n\
-		Texture[0] = <texture4>;									\n\
-		TextureFactor = <color4>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"texture texture4;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"dword color4;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"float4 factor4;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 5 stages technique											\n"
+"pixelshader five_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld r0, t0;													\n"
+"	texld r1, t1;													\n"
+"	texld r2, t2;													\n"
+"	texld r3, t3;													\n"
+"	texld r4, t4;													\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r1.xyz, c1, r1, v0;											\n"
+"	mad r1.xyz, c2, r2, r1;											\n"
+"	mad r1.xyz, c3, r3, r1;											\n"
+"	mad r1.xyz, c4, r4, r1;											\n"
+"	mul r0.xyz, r1, r0;												\n"
+"};																	\n"
+"																	\n"
+"technique five_stages_5												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"		TexCoordIndex[4] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		Texture[4] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShaderConstant[4] = <factor4>;							\n"
+"		PixelShader = (five_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture4>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color4>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		ColorOp[3] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		AlphaOp[3] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	// 2 pass with the same pixel shader							\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialDiffuse= <g_black>;									\n"
+"																	\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[1] = <texture3>;									\n"
+"		Texture[2] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor3>;							\n"
+"		PixelShaderConstant[2] = <factor4>;							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"	pass p3															\n"
+"	{																\n"
+"		Texture[0] = <texture4>;									\n"
+"		TextureFactor = <color4>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap4blendFx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-texture texture4;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-dword color4;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-float4 factor4;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 5 stages technique											\n\
-pixelshader five_stages_ps = asm									\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld r0, t0;													\n\
-	texld r1, t1;													\n\
-	texld r2, t2;													\n\
-	texld r3, t3;													\n\
-	texld r4, t4;													\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r1.xyz, c1, r1, v0;											\n\
-	mad r1.xyz, c2, r2, r1;											\n\
-	mad r1.xyz, c3, r3, r1;											\n\
-	mad r1.xyz, c4, r4, r1;											\n\
-	mul r0.xyz, r1, r0;												\n\
-	mov r0.w, r0;													\n\
-};																	\n\
-																	\n\
-technique five_stages_5												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-		TexCoordIndex[4] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		Texture[4] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShaderConstant[4] = <factor4>;							\n\
-		PixelShader = (five_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture4>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color4>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		ColorOp[3] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-		AlphaOp[2] = DISABLE;										\n\
-		AlphaOp[3] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul r0.xyz, r0, t0;												\n\
-	mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	// 2 pass with the same pixel shader							\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialDiffuse= <g_black>;									\n\
-																	\n\
-		DestBlend = one;											\n\
-		Texture[1] = <texture3>;									\n\
-		Texture[2] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor3>;							\n\
-		PixelShaderConstant[2] = <factor4>;							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE;										\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-	pass p3															\n\
-	{																\n\
-		Texture[0] = <texture4>;									\n\
-		TextureFactor = <color4>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"texture texture4;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"dword color4;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"float4 factor4;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"float4 g_dyn_factor = { 1.0f, 1.0f, 1.0f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 5 stages technique											\n"
+"pixelshader five_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld r0, t0;													\n"
+"	texld r1, t1;													\n"
+"	texld r2, t2;													\n"
+"	texld r3, t3;													\n"
+"	texld r4, t4;													\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r1.xyz, c1, r1, v0;											\n"
+"	mad r1.xyz, c2, r2, r1;											\n"
+"	mad r1.xyz, c3, r3, r1;											\n"
+"	mad r1.xyz, c4, r4, r1;											\n"
+"	mul r0.xyz, r1, r0;												\n"
+"	mov r0.w, r0;													\n"
+"};																	\n"
+"																	\n"
+"technique five_stages_5												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"		TexCoordIndex[4] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		Texture[4] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShaderConstant[4] = <factor4>;							\n"
+"		PixelShader = (five_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture4>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color4>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		ColorOp[3] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		AlphaOp[3] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul r0.xyz, r0, t0;												\n"
+"	mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	// 2 pass with the same pixel shader							\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialDiffuse= <g_black>;									\n"
+"																	\n"
+"		DestBlend = one;											\n"
+"		Texture[1] = <texture3>;									\n"
+"		Texture[2] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor3>;							\n"
+"		PixelShaderConstant[2] = <factor4>;							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE;										\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"	pass p3															\n"
+"	{																\n"
+"		Texture[0] = <texture4>;									\n"
+"		TextureFactor = <color4>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap4blend_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-texture texture4;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-dword color4;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-float4 factor4;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 5 stages technique											\n\
-pixelshader five_stages_ps = asm									\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld r0, t0;													\n\
-	texld r1, t1;													\n\
-	texld r2, t2;													\n\
-	texld r3, t3;													\n\
-	texld r4, t4;													\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r1.xyz, c1, r1, v0;											\n\
-	mad r1.xyz, c2, r2, r1;											\n\
-	mad r1.xyz, c3, r3, r1;											\n\
-	mad r1.xyz, c4, r4, r1;											\n\
-	mul_x2 r0.xyz, r1, r0;											\n\
-};																	\n\
-																	\n\
-technique five_stages_5												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-		TexCoordIndex[4] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		Texture[4] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShaderConstant[4] = <factor4>;							\n\
-		PixelShader = (five_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture4>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color4>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		ColorOp[3] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-		AlphaOp[2] = DISABLE;										\n\
-		AlphaOp[3] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	// 2 pass with the same pixel shader							\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialDiffuse= <g_black>;									\n\
-																	\n\
-		DestBlend = one;											\n\
-		Texture[1] = <texture3>;									\n\
-		Texture[2] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor3>;							\n\
-		PixelShaderConstant[2] = <factor4>;							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = srcalpha;										\n\
-		DestBlend = invsrcalpha;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-	pass p3															\n\
-	{																\n\
-		Texture[0] = <texture4>;									\n\
-		TextureFactor = <color4>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"texture texture4;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"dword color4;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"float4 factor4;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 5 stages technique											\n"
+"pixelshader five_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld r0, t0;													\n"
+"	texld r1, t1;													\n"
+"	texld r2, t2;													\n"
+"	texld r3, t3;													\n"
+"	texld r4, t4;													\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r1.xyz, c1, r1, v0;											\n"
+"	mad r1.xyz, c2, r2, r1;											\n"
+"	mad r1.xyz, c3, r3, r1;											\n"
+"	mad r1.xyz, c4, r4, r1;											\n"
+"	mul_x2 r0.xyz, r1, r0;											\n"
+"};																	\n"
+"																	\n"
+"technique five_stages_5												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"		TexCoordIndex[4] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		Texture[4] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShaderConstant[4] = <factor4>;							\n"
+"		PixelShader = (five_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture4>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color4>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		ColorOp[3] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		AlphaOp[3] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	// 2 pass with the same pixel shader							\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialDiffuse= <g_black>;									\n"
+"																	\n"
+"		DestBlend = one;											\n"
+"		Texture[1] = <texture3>;									\n"
+"		Texture[2] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor3>;							\n"
+"		PixelShaderConstant[2] = <factor4>;							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = srcalpha;										\n"
+"		DestBlend = invsrcalpha;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"	pass p3															\n"
+"	{																\n"
+"		Texture[0] = <texture4>;									\n"
+"		TextureFactor = <color4>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"																	\n"
+"";
 
 static const char *Lightmap4_x2Fx =  
-"																	\n\
-texture texture0;													\n\
-texture texture1;													\n\
-texture texture2;													\n\
-texture texture3;													\n\
-texture texture4;													\n\
-// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n\
-// Other colors are the lightmap Factors for each lightmap			\n\
-dword color0;														\n\
-dword color1;														\n\
-dword color2;														\n\
-dword color3;														\n\
-dword color4;														\n\
-float4 factor0;														\n\
-float4 factor1;														\n\
-float4 factor2;														\n\
-float4 factor3;														\n\
-float4 factor4;														\n\
-																	\n\
-float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n\
-// modulate the dyn light by 0.5, because of MODULATE2X				\n\
-float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n\
-																	\n\
-																	\n\
-// **** 5 stages technique											\n\
-pixelshader five_stages_ps = asm									\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld r0, t0;													\n\
-	texld r1, t1;													\n\
-	texld r2, t2;													\n\
-	texld r3, t3;													\n\
-	texld r4, t4;													\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r1.xyz, c1, r1, v0;											\n\
-	mad r1.xyz, c2, r2, r1;											\n\
-	mad r1.xyz, c3, r3, r1;											\n\
-	mad r1.xyz, c4, r4, r1;											\n\
-	mul_x2 r0.xyz, r1, r0;											\n\
-};																	\n\
-																	\n\
-technique five_stages_5												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-		TexCoordIndex[4] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		Texture[4] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShaderConstant[4] = <factor4>;							\n\
-		PixelShader = (five_stages_ps);								\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 4 stages technique											\n\
-pixelshader four_stages_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	tex t3;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mad r0.xyz, c3, t3, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique four_stages_4												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-		TexCoordIndex[3] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShaderConstant[3] = <factor3>;							\n\
-		PixelShader = (four_stages_ps);								\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture4>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color4>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		ColorOp[2] = DISABLE;										\n\
-		ColorOp[3] = DISABLE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-		AlphaOp[2] = DISABLE;										\n\
-		AlphaOp[3] = DISABLE;										\n\
-		PixelShader = NULL;											\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 3 stages technique											\n\
-pixelshader three_stages_0_ps = asm									\n\
-{																	\n\
-	ps_1_1;															\n\
-	tex t0;															\n\
-	tex t1;															\n\
-	tex t2;															\n\
-	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n\
-	mad r0.xyz, c1, t1, v0;											\n\
-	mad r0.xyz, c2, t2, r0;											\n\
-	mul_x2 r0.xyz, r0, t0;											\n\
-	+mov r0.w, t0;													\n\
-};																	\n\
-																	\n\
-technique three_stages_3											\n\
-{																	\n\
-	// 2 pass with the same pixel shader							\n\
-	pass p0															\n\
-	{																\n\
-		TexCoordIndex[2] = 1;										\n\
-																	\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShaderConstant[2] = <factor2>;							\n\
-		PixelShader = (three_stages_0_ps);							\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n\
-		MaterialEmissive= <g_black>;								\n\
-		MaterialDiffuse= <g_black>;									\n\
-																	\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[1] = <texture3>;									\n\
-		Texture[2] = <texture4>;									\n\
-		PixelShaderConstant[1] = <factor3>;							\n\
-		PixelShaderConstant[2] = <factor4>;							\n\
-	}																\n\
-}																	\n\
-																	\n\
-// **** 2 stages, no pixel shader technique							\n\
-technique two_stages_2												\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n\
-		Lighting = true;											\n\
-		MaterialEmissive= <factor0>;								\n\
-		MaterialAmbient= <g_black>;									\n\
-		MaterialDiffuse= <g_dyn_factor>;							\n\
-		MaterialSpecular= <g_black>;								\n\
-		AlphaBlendEnable = false;									\n\
-																	\n\
-		// the DiffuseTexture texture 0 is in last stage			\n\
-		TexCoordIndex[0] = 1;										\n\
-		TexCoordIndex[1] = 0;										\n\
-		Texture[0] = <texture1>;									\n\
-		Texture[1] = <texture0>;									\n\
-		TextureFactor = <color1>;									\n\
-		ColorOp[0] = MULTIPLYADD;									\n\
-		ColorArg0[0] = DIFFUSE;										\n\
-		ColorArg1[0] = TFACTOR;										\n\
-		ColorArg2[0] = TEXTURE;										\n\
-		ColorOp[1] = MODULATE2X;									\n\
-		ColorArg1[1] = CURRENT;										\n\
-		ColorArg2[1] = TEXTURE;										\n\
-		// Alpha stage 0 unused										\n\
-		AlphaOp[0] = SELECTARG1;									\n\
-		AlphaArg1[0] = TFACTOR;										\n\
-		AlphaOp[1] = SELECTARG1;									\n\
-		AlphaArg1[1] = TEXTURE;										\n\
-	}																\n\
-	pass p1															\n\
-	{																\n\
-		FogColor = 0x00000000; // don't accumulate fog several times\n\
-		Lighting = false;											\n\
-		AlphaBlendEnable = true;									\n\
-		SrcBlend = one;												\n\
-		DestBlend = one;											\n\
-		Texture[0] = <texture2>;									\n\
-		TextureFactor = <color2>;									\n\
-		ColorOp[0] = MODULATE;										\n\
-	}																\n\
-	pass p2															\n\
-	{																\n\
-		Texture[0] = <texture3>;									\n\
-		TextureFactor = <color3>;									\n\
-	}																\n\
-	pass p3															\n\
-	{																\n\
-		Texture[0] = <texture4>;									\n\
-		TextureFactor = <color4>;									\n\
-	}																\n\
-}																	\n\
-																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0;													\n"
+"texture texture1;													\n"
+"texture texture2;													\n"
+"texture texture3;													\n"
+"texture texture4;													\n"
+"// Color0 is the Ambient Added to the lightmap (for Lightmap 8 bit compression)\n"
+"// Other colors are the lightmap Factors for each lightmap			\n"
+"dword color0;														\n"
+"dword color1;														\n"
+"dword color2;														\n"
+"dword color3;														\n"
+"dword color4;														\n"
+"float4 factor0;														\n"
+"float4 factor1;														\n"
+"float4 factor2;														\n"
+"float4 factor3;														\n"
+"float4 factor4;														\n"
+"																	\n"
+"float4 g_black = { 0.0f, 0.0f, 0.0f, 1.0f };						\n"
+"// modulate the dyn light by 0.5, because of MODULATE2X				\n"
+"float4 g_dyn_factor = { 0.5f, 0.5f, 0.5f, 1.0f };					\n"
+"																	\n"
+"																	\n"
+"// **** 5 stages technique											\n"
+"pixelshader five_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld r0, t0;													\n"
+"	texld r1, t1;													\n"
+"	texld r2, t2;													\n"
+"	texld r3, t3;													\n"
+"	texld r4, t4;													\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r1.xyz, c1, r1, v0;											\n"
+"	mad r1.xyz, c2, r2, r1;											\n"
+"	mad r1.xyz, c3, r3, r1;											\n"
+"	mad r1.xyz, c4, r4, r1;											\n"
+"	mul_x2 r0.xyz, r1, r0;											\n"
+"};																	\n"
+"																	\n"
+"technique five_stages_5												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"		TexCoordIndex[4] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		Texture[4] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShaderConstant[4] = <factor4>;							\n"
+"		PixelShader = (five_stages_ps);								\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 4 stages technique											\n"
+"pixelshader four_stages_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	tex t3;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mad r0.xyz, c3, t3, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique four_stages_4												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"		TexCoordIndex[3] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShaderConstant[3] = <factor3>;							\n"
+"		PixelShader = (four_stages_ps);								\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture4>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color4>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		ColorOp[2] = DISABLE;										\n"
+"		ColorOp[3] = DISABLE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"		AlphaOp[2] = DISABLE;										\n"
+"		AlphaOp[3] = DISABLE;										\n"
+"		PixelShader = NULL;											\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 3 stages technique											\n"
+"pixelshader three_stages_0_ps = asm									\n"
+"{																	\n"
+"	ps_1_1;															\n"
+"	tex t0;															\n"
+"	tex t1;															\n"
+"	tex t2;															\n"
+"	// multiply lightmap with factor, and add with LMCAmbient+DynamicLight term\n"
+"	mad r0.xyz, c1, t1, v0;											\n"
+"	mad r0.xyz, c2, t2, r0;											\n"
+"	mul_x2 r0.xyz, r0, t0;											\n"
+"	+mov r0.w, t0;													\n"
+"};																	\n"
+"																	\n"
+"technique three_stages_3											\n"
+"{																	\n"
+"	// 2 pass with the same pixel shader							\n"
+"	pass p0															\n"
+"	{																\n"
+"		TexCoordIndex[2] = 1;										\n"
+"																	\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShaderConstant[2] = <factor2>;							\n"
+"		PixelShader = (three_stages_0_ps);							\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		// second pass: shut down all lighting (lmc ambient term and dynamic lighting already added in first pass)\n"
+"		MaterialEmissive= <g_black>;								\n"
+"		MaterialDiffuse= <g_black>;									\n"
+"																	\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[1] = <texture3>;									\n"
+"		Texture[2] = <texture4>;									\n"
+"		PixelShaderConstant[1] = <factor3>;							\n"
+"		PixelShaderConstant[2] = <factor4>;							\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"// **** 2 stages, no pixel shader technique							\n"
+"technique two_stages_2												\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		// Use Emissive For LMCAmbient, and diffuse for per vertex dynamic lighting\n"
+"		Lighting = true;											\n"
+"		MaterialEmissive= <factor0>;								\n"
+"		MaterialAmbient= <g_black>;									\n"
+"		MaterialDiffuse= <g_dyn_factor>;							\n"
+"		MaterialSpecular= <g_black>;								\n"
+"		AlphaBlendEnable = false;									\n"
+"																	\n"
+"		// the DiffuseTexture texture 0 is in last stage			\n"
+"		TexCoordIndex[0] = 1;										\n"
+"		TexCoordIndex[1] = 0;										\n"
+"		Texture[0] = <texture1>;									\n"
+"		Texture[1] = <texture0>;									\n"
+"		TextureFactor = <color1>;									\n"
+"		ColorOp[0] = MULTIPLYADD;									\n"
+"		ColorArg0[0] = DIFFUSE;										\n"
+"		ColorArg1[0] = TFACTOR;										\n"
+"		ColorArg2[0] = TEXTURE;										\n"
+"		ColorOp[1] = MODULATE2X;									\n"
+"		ColorArg1[1] = CURRENT;										\n"
+"		ColorArg2[1] = TEXTURE;										\n"
+"		// Alpha stage 0 unused										\n"
+"		AlphaOp[0] = SELECTARG1;									\n"
+"		AlphaArg1[0] = TFACTOR;										\n"
+"		AlphaOp[1] = SELECTARG1;									\n"
+"		AlphaArg1[1] = TEXTURE;										\n"
+"	}																\n"
+"	pass p1															\n"
+"	{																\n"
+"		FogColor = 0x00000000; // don't accumulate fog several times\n"
+"		Lighting = false;											\n"
+"		AlphaBlendEnable = true;									\n"
+"		SrcBlend = one;												\n"
+"		DestBlend = one;											\n"
+"		Texture[0] = <texture2>;									\n"
+"		TextureFactor = <color2>;									\n"
+"		ColorOp[0] = MODULATE;										\n"
+"	}																\n"
+"	pass p2															\n"
+"	{																\n"
+"		Texture[0] = <texture3>;									\n"
+"		TextureFactor = <color3>;									\n"
+"	}																\n"
+"	pass p3															\n"
+"	{																\n"
+"		Texture[0] = <texture4>;									\n"
+"		TextureFactor = <color4>;									\n"
+"	}																\n"
+"}																	\n"
+"																	\n"
+"																	\n"
+"";
 
 // Water ps_2_0 pixel shaders compiled from shaders/water_fp.cg
 // Compiled with: cgc -profile ps_2_0 -O3 -fastmath -fastprecision [-DUSE_DIFFUSE]
@@ -3038,204 +3038,204 @@ technique two_stages_2												\n\
 //       constant layouts and are NOT compiled from the Cg source
 
 static const char *Water_diffuseFx =
-"																	\n\
-texture texture0; // bumpmap0										\n\
-texture texture1; // bumpmap1										\n\
-texture texture2; // envmap											\n\
-texture texture3; // diffuse										\n\
-																	\n\
-float4 factor0; // bumpmap0 scale									\n\
-float4 factor1; // bumpmap1 scale									\n\
-float  scalarFloat0; // bump scale for 1_1 version					\n\
-																	\n\
-pixelshader water_diffuse_2_0 = asm									\n\
-{																	\n\
-	ps_2_0;															\n\
-	dcl_2d s0;														\n\
-	dcl_2d s1;														\n\
-	dcl_2d s2;														\n\
-	dcl_2d s3;														\n\
-	dcl t0.xy;														\n\
-	dcl t1.xy;														\n\
-	dcl t2.xy;														\n\
-	dcl t3.xy;														\n\
-	texld r0, t0, s0;												\n\
-	mad r0.xy, r0, c0.x, c0.y;										\n\
-	add r0.xy, r0, t1;												\n\
-	texld r0, r0, s1;												\n\
-	mad r0.xy, r0, c1.x, c1.y;										\n\
-	add r1.xy, r0, t2;												\n\
-	texld r0, t3, s3;												\n\
-	texld r1, r1, s2;												\n\
-	mul r0, r1, r0;													\n\
-	mov oC0, r0;													\n\
-};																	\n\
-																	\n\
-technique technique_water_diffuse_2_0								\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_diffuse_2_0);							\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_diffuse_1_4 = asm									\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld   r0, t0;													\n\
-	texld   r1, t1;													\n\
-	texcrd  r2.xyz, t2;												\n\
-	mad r2.xy, r0_bx2, c0, r2;										\n\
-	mad r2.xy, r1_bx2, c1, r2;										\n\
-	phase															\n\
-	texld r2, r2;													\n\
-	texld r3, t3;													\n\
-	mul r0, r2, r3;													\n\
-};																	\n\
-																	\n\
-technique technique_water_diffuse_1_4								\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_diffuse_1_4);							\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_diffuse_1_1 = asm									\n\
-{																	\n\
-	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n\
-	ps_1_1;															\n\
-	tex t1;															\n\
-	texbem t2, t1;													\n\
-	tex t3;															\n\
-	mul r0, t3, t2;													\n\
-};																	\n\
-																	\n\
-technique technique_water_diffuse_1_1								\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_diffuse_1_1);							\n\
-		BumpEnvMat00[2] = <scalarFloat0>;							\n\
-		BumpEnvMat01[0] = 0;										\n\
-		BumpEnvMat10[0] = 0;										\n\
-		BumpEnvMat11[2] = <scalarFloat0>;							\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0; // bumpmap0										\n"
+"texture texture1; // bumpmap1										\n"
+"texture texture2; // envmap											\n"
+"texture texture3; // diffuse										\n"
+"																	\n"
+"float4 factor0; // bumpmap0 scale									\n"
+"float4 factor1; // bumpmap1 scale									\n"
+"float  scalarFloat0; // bump scale for 1_1 version					\n"
+"																	\n"
+"pixelshader water_diffuse_2_0 = asm									\n"
+"{																	\n"
+"	ps_2_0;															\n"
+"	dcl_2d s0;														\n"
+"	dcl_2d s1;														\n"
+"	dcl_2d s2;														\n"
+"	dcl_2d s3;														\n"
+"	dcl t0.xy;														\n"
+"	dcl t1.xy;														\n"
+"	dcl t2.xy;														\n"
+"	dcl t3.xy;														\n"
+"	texld r0, t0, s0;												\n"
+"	mad r0.xy, r0, c0.x, c0.y;										\n"
+"	add r0.xy, r0, t1;												\n"
+"	texld r0, r0, s1;												\n"
+"	mad r0.xy, r0, c1.x, c1.y;										\n"
+"	add r1.xy, r0, t2;												\n"
+"	texld r0, t3, s3;												\n"
+"	texld r1, r1, s2;												\n"
+"	mul r0, r1, r0;													\n"
+"	mov oC0, r0;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_diffuse_2_0								\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_diffuse_2_0);							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_diffuse_1_4 = asm									\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld   r0, t0;													\n"
+"	texld   r1, t1;													\n"
+"	texcrd  r2.xyz, t2;												\n"
+"	mad r2.xy, r0_bx2, c0, r2;										\n"
+"	mad r2.xy, r1_bx2, c1, r2;										\n"
+"	phase															\n"
+"	texld r2, r2;													\n"
+"	texld r3, t3;													\n"
+"	mul r0, r2, r3;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_diffuse_1_4								\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_diffuse_1_4);							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_diffuse_1_1 = asm									\n"
+"{																	\n"
+"	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n"
+"	ps_1_1;															\n"
+"	tex t1;															\n"
+"	texbem t2, t1;													\n"
+"	tex t3;															\n"
+"	mul r0, t3, t2;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_diffuse_1_1								\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_diffuse_1_1);							\n"
+"		BumpEnvMat00[2] = <scalarFloat0>;							\n"
+"		BumpEnvMat01[0] = 0;										\n"
+"		BumpEnvMat10[0] = 0;										\n"
+"		BumpEnvMat11[2] = <scalarFloat0>;							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Water_no_diffuseFx =
-"																	\n\
-texture texture0; // bumpmap0										\n\
-texture texture1; // bumpmap1										\n\
-texture texture2; // envmap											\n\
-																	\n\
-float4 factor0; // bumpmap0 scale									\n\
-float4 factor1; // bumpmap1 scale									\n\
-float  scalarFloat0; // bump scale for 1_1 version					\n\
-																	\n\
-pixelshader water_no_diffuse_2_0 = asm								\n\
-{																	\n\
-	ps_2_0;															\n\
-	dcl_2d s0;														\n\
-	dcl_2d s1;														\n\
-	dcl_2d s2;														\n\
-	dcl t0.xy;														\n\
-	dcl t1.xy;														\n\
-	dcl t2.xy;														\n\
-	texld r0, t0, s0;												\n\
-	mad r0.xy, r0, c0.x, c0.y;										\n\
-	add r0.xy, r0, t1;												\n\
-	texld r0, r0, s1;												\n\
-	mad r0.xy, r0, c1.x, c1.y;										\n\
-	add r0.xy, r0, t2;												\n\
-	texld r0, r0, s2;												\n\
-	mov oC0, r0;													\n\
-};																	\n\
-																	\n\
-technique technique_water_no_diffuse_2_0							\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_no_diffuse_2_0);						\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_no_diffuse_1_4 = asm								\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld   r0, t0;													\n\
-	texld   r1, t1;													\n\
-	texcrd  r2.xyz, t2;												\n\
-	mad r2.xy, r0_bx2, c0, r2;										\n\
-	mad r2.xy, r1_bx2, c1, r2;										\n\
-	phase															\n\
-	texld r2, r2;													\n\
-	mov r0, r2;														\n\
-};																	\n\
-																	\n\
-technique technique_water_no_diffuse_1_4							\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_no_diffuse_1_4);						\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_no_diffuse_1_1 = asm								\n\
-{																	\n\
-	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n\
-	ps_1_1;															\n\
-	tex t1;															\n\
-	texbem t2, t1;													\n\
-	mov r0, t2;														\n\
-};																	\n\
-																	\n\
-technique technique_water_no_diffuse_1_1							\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_no_diffuse_1_1);						\n\
-		BumpEnvMat00[2] = <scalarFloat0>;							\n\
-		BumpEnvMat01[0] = 0;										\n\
-		BumpEnvMat10[0] = 0;										\n\
-		BumpEnvMat11[2] = <scalarFloat0>;							\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0; // bumpmap0										\n"
+"texture texture1; // bumpmap1										\n"
+"texture texture2; // envmap											\n"
+"																	\n"
+"float4 factor0; // bumpmap0 scale									\n"
+"float4 factor1; // bumpmap1 scale									\n"
+"float  scalarFloat0; // bump scale for 1_1 version					\n"
+"																	\n"
+"pixelshader water_no_diffuse_2_0 = asm								\n"
+"{																	\n"
+"	ps_2_0;															\n"
+"	dcl_2d s0;														\n"
+"	dcl_2d s1;														\n"
+"	dcl_2d s2;														\n"
+"	dcl t0.xy;														\n"
+"	dcl t1.xy;														\n"
+"	dcl t2.xy;														\n"
+"	texld r0, t0, s0;												\n"
+"	mad r0.xy, r0, c0.x, c0.y;										\n"
+"	add r0.xy, r0, t1;												\n"
+"	texld r0, r0, s1;												\n"
+"	mad r0.xy, r0, c1.x, c1.y;										\n"
+"	add r0.xy, r0, t2;												\n"
+"	texld r0, r0, s2;												\n"
+"	mov oC0, r0;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_no_diffuse_2_0							\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_no_diffuse_2_0);						\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_no_diffuse_1_4 = asm								\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld   r0, t0;													\n"
+"	texld   r1, t1;													\n"
+"	texcrd  r2.xyz, t2;												\n"
+"	mad r2.xy, r0_bx2, c0, r2;										\n"
+"	mad r2.xy, r1_bx2, c1, r2;										\n"
+"	phase															\n"
+"	texld r2, r2;													\n"
+"	mov r0, r2;														\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_no_diffuse_1_4							\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_no_diffuse_1_4);						\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_no_diffuse_1_1 = asm								\n"
+"{																	\n"
+"	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n"
+"	ps_1_1;															\n"
+"	tex t1;															\n"
+"	texbem t2, t1;													\n"
+"	mov r0, t2;														\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_no_diffuse_1_1							\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_no_diffuse_1_1);						\n"
+"		BumpEnvMat00[2] = <scalarFloat0>;							\n"
+"		BumpEnvMat01[0] = 0;										\n"
+"		BumpEnvMat10[0] = 0;										\n"
+"		BumpEnvMat11[2] = <scalarFloat0>;							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 // Calculated reflectivity variants of the water effects: the ps_2_0
 // technique derives the blend alpha from the per-vertex reflectivity base
@@ -3246,214 +3246,214 @@ technique technique_water_no_diffuse_1_1							\n\
 // -DUSE_CALC_REFLECTIVITY.
 
 static const char *Water_calc_diffuseFx =
-"																	\n\
-texture texture0; // bumpmap0										\n\
-texture texture1; // bumpmap1										\n\
-texture texture2; // envmap											\n\
-texture texture3; // diffuse										\n\
-																	\n\
-float4 factor0; // bumpmap0 scale									\n\
-float4 factor1; // bumpmap1 scale									\n\
-float  scalarFloat0; // bump scale for 1_1 version					\n\
-																	\n\
-pixelshader water_calc_diffuse_2_0 = asm							\n\
-{																	\n\
-	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n\
-	ps_2_0;															\n\
-	dcl_2d s0;														\n\
-	dcl_2d s1;														\n\
-	dcl_2d s2;														\n\
-	dcl_2d s3;														\n\
-	def c2, 0.2126, 0.7152, 0.0722, 1.0;							\n\
-	dcl t0.xy;														\n\
-	dcl t1.xy;														\n\
-	dcl t2.xyz;														\n\
-	dcl t3.xy;														\n\
-	texld r0, t0, s0;												\n\
-	texld r2, t3, s3;												\n\
-	mad r0.xy, r0, c0.x, c0.y;										\n\
-	add r0.xy, r0, t1;												\n\
-	add r1.x, -t2.z, c2.w;											\n\
-	texld r0, r0, s1;												\n\
-	mad r0.xy, r0, c1.x, c1.y;										\n\
-	add r0.xy, r0, t2;												\n\
-	texld r3, r0, s2;												\n\
-	dp3 r0.x, r3, c2;												\n\
-	mad r3.w, r0.x, r1.x, t2.z;										\n\
-	mul r0, r3, r2;													\n\
-	mov oC0, r0;													\n\
-};																	\n\
-																	\n\
-technique technique_water_calc_diffuse_2_0								\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_calc_diffuse_2_0);							\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_calc_diffuse_1_4 = asm									\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld   r0, t0;													\n\
-	texld   r1, t1;													\n\
-	texcrd  r2.xyz, t2;												\n\
-	mad r2.xy, r0_bx2, c0, r2;										\n\
-	mad r2.xy, r1_bx2, c1, r2;										\n\
-	phase															\n\
-	texld r2, r2;													\n\
-	texld r3, t3;													\n\
-	mul r0, r2, r3;													\n\
-};																	\n\
-																	\n\
-technique technique_water_calc_diffuse_1_4								\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_calc_diffuse_1_4);							\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_calc_diffuse_1_1 = asm									\n\
-{																	\n\
-	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n\
-	ps_1_1;															\n\
-	tex t1;															\n\
-	texbem t2, t1;													\n\
-	tex t3;															\n\
-	mul r0, t3, t2;													\n\
-};																	\n\
-																	\n\
-technique technique_water_calc_diffuse_1_1								\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		Texture[3] = <texture3>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_calc_diffuse_1_1);							\n\
-		BumpEnvMat00[2] = <scalarFloat0>;							\n\
-		BumpEnvMat01[0] = 0;										\n\
-		BumpEnvMat10[0] = 0;										\n\
-		BumpEnvMat11[2] = <scalarFloat0>;							\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0; // bumpmap0										\n"
+"texture texture1; // bumpmap1										\n"
+"texture texture2; // envmap											\n"
+"texture texture3; // diffuse										\n"
+"																	\n"
+"float4 factor0; // bumpmap0 scale									\n"
+"float4 factor1; // bumpmap1 scale									\n"
+"float  scalarFloat0; // bump scale for 1_1 version					\n"
+"																	\n"
+"pixelshader water_calc_diffuse_2_0 = asm							\n"
+"{																	\n"
+"	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n"
+"	ps_2_0;															\n"
+"	dcl_2d s0;														\n"
+"	dcl_2d s1;														\n"
+"	dcl_2d s2;														\n"
+"	dcl_2d s3;														\n"
+"	def c2, 0.2126, 0.7152, 0.0722, 1.0;							\n"
+"	dcl t0.xy;														\n"
+"	dcl t1.xy;														\n"
+"	dcl t2.xyz;														\n"
+"	dcl t3.xy;														\n"
+"	texld r0, t0, s0;												\n"
+"	texld r2, t3, s3;												\n"
+"	mad r0.xy, r0, c0.x, c0.y;										\n"
+"	add r0.xy, r0, t1;												\n"
+"	add r1.x, -t2.z, c2.w;											\n"
+"	texld r0, r0, s1;												\n"
+"	mad r0.xy, r0, c1.x, c1.y;										\n"
+"	add r0.xy, r0, t2;												\n"
+"	texld r3, r0, s2;												\n"
+"	dp3 r0.x, r3, c2;												\n"
+"	mad r3.w, r0.x, r1.x, t2.z;										\n"
+"	mul r0, r3, r2;													\n"
+"	mov oC0, r0;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_calc_diffuse_2_0								\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_calc_diffuse_2_0);							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_calc_diffuse_1_4 = asm									\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld   r0, t0;													\n"
+"	texld   r1, t1;													\n"
+"	texcrd  r2.xyz, t2;												\n"
+"	mad r2.xy, r0_bx2, c0, r2;										\n"
+"	mad r2.xy, r1_bx2, c1, r2;										\n"
+"	phase															\n"
+"	texld r2, r2;													\n"
+"	texld r3, t3;													\n"
+"	mul r0, r2, r3;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_calc_diffuse_1_4								\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_calc_diffuse_1_4);							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_calc_diffuse_1_1 = asm									\n"
+"{																	\n"
+"	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n"
+"	ps_1_1;															\n"
+"	tex t1;															\n"
+"	texbem t2, t1;													\n"
+"	tex t3;															\n"
+"	mul r0, t3, t2;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_calc_diffuse_1_1								\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		Texture[3] = <texture3>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_calc_diffuse_1_1);							\n"
+"		BumpEnvMat00[2] = <scalarFloat0>;							\n"
+"		BumpEnvMat01[0] = 0;										\n"
+"		BumpEnvMat10[0] = 0;										\n"
+"		BumpEnvMat11[2] = <scalarFloat0>;							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 static const char *Water_calc_no_diffuseFx =
-"																	\n\
-texture texture0; // bumpmap0										\n\
-texture texture1; // bumpmap1										\n\
-texture texture2; // envmap											\n\
-																	\n\
-float4 factor0; // bumpmap0 scale									\n\
-float4 factor1; // bumpmap1 scale									\n\
-float  scalarFloat0; // bump scale for 1_1 version					\n\
-																	\n\
-pixelshader water_calc_no_diffuse_2_0 = asm						\n\
-{																	\n\
-	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n\
-	ps_2_0;															\n\
-	dcl_2d s0;														\n\
-	dcl_2d s1;														\n\
-	dcl_2d s2;														\n\
-	def c2, 0.2126, 0.7152, 0.0722, 1.0;							\n\
-	dcl t0.xy;														\n\
-	dcl t1.xy;														\n\
-	dcl t2.xyz;														\n\
-	texld r0, t0, s0;												\n\
-	mad r0.xy, r0, c0.x, c0.y;										\n\
-	add r0.xy, r0, t1;												\n\
-	add r1.x, -t2.z, c2.w;											\n\
-	texld r0, r0, s1;												\n\
-	mad r0.xy, r0, c1.x, c1.y;										\n\
-	add r0.xy, r0, t2;												\n\
-	texld r2, r0, s2;												\n\
-	dp3 r0.x, r2, c2;												\n\
-	mad r2.w, r0.x, r1.x, t2.z;										\n\
-	mov oC0, r2;													\n\
-};																	\n\
-																	\n\
-technique technique_water_calc_no_diffuse_2_0							\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_calc_no_diffuse_2_0);						\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_calc_no_diffuse_1_4 = asm								\n\
-{																	\n\
-	ps_1_4;															\n\
-	texld   r0, t0;													\n\
-	texld   r1, t1;													\n\
-	texcrd  r2.xyz, t2;												\n\
-	mad r2.xy, r0_bx2, c0, r2;										\n\
-	mad r2.xy, r1_bx2, c1, r2;										\n\
-	phase															\n\
-	texld r2, r2;													\n\
-	mov r0, r2;														\n\
-};																	\n\
-																	\n\
-technique technique_water_calc_no_diffuse_1_4							\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[0] = <texture0>;									\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_calc_no_diffuse_1_4);						\n\
-	}																\n\
-};																	\n\
-																	\n\
-pixelshader water_calc_no_diffuse_1_1 = asm								\n\
-{																	\n\
-	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n\
-	ps_1_1;															\n\
-	tex t1;															\n\
-	texbem t2, t1;													\n\
-	mov r0, t2;														\n\
-};																	\n\
-																	\n\
-technique technique_water_calc_no_diffuse_1_1							\n\
-{																	\n\
-	pass p0															\n\
-	{																\n\
-		Texture[1] = <texture1>;									\n\
-		Texture[2] = <texture2>;									\n\
-		PixelShaderConstant[0] = <factor0>;							\n\
-		PixelShaderConstant[1] = <factor1>;							\n\
-		PixelShader = (water_calc_no_diffuse_1_1);						\n\
-		BumpEnvMat00[2] = <scalarFloat0>;							\n\
-		BumpEnvMat01[0] = 0;										\n\
-		BumpEnvMat10[0] = 0;										\n\
-		BumpEnvMat11[2] = <scalarFloat0>;							\n\
-	}																\n\
-};																	\n\
-																	\n\
-";
+"																	\n"
+"texture texture0; // bumpmap0										\n"
+"texture texture1; // bumpmap1										\n"
+"texture texture2; // envmap											\n"
+"																	\n"
+"float4 factor0; // bumpmap0 scale									\n"
+"float4 factor1; // bumpmap1 scale									\n"
+"float  scalarFloat0; // bump scale for 1_1 version					\n"
+"																	\n"
+"pixelshader water_calc_no_diffuse_2_0 = asm						\n"
+"{																	\n"
+"	// calculated reflectivity: alpha = lerp(t2.z, 1, luma(reflection))	\n"
+"	ps_2_0;															\n"
+"	dcl_2d s0;														\n"
+"	dcl_2d s1;														\n"
+"	dcl_2d s2;														\n"
+"	def c2, 0.2126, 0.7152, 0.0722, 1.0;							\n"
+"	dcl t0.xy;														\n"
+"	dcl t1.xy;														\n"
+"	dcl t2.xyz;														\n"
+"	texld r0, t0, s0;												\n"
+"	mad r0.xy, r0, c0.x, c0.y;										\n"
+"	add r0.xy, r0, t1;												\n"
+"	add r1.x, -t2.z, c2.w;											\n"
+"	texld r0, r0, s1;												\n"
+"	mad r0.xy, r0, c1.x, c1.y;										\n"
+"	add r0.xy, r0, t2;												\n"
+"	texld r2, r0, s2;												\n"
+"	dp3 r0.x, r2, c2;												\n"
+"	mad r2.w, r0.x, r1.x, t2.z;										\n"
+"	mov oC0, r2;													\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_calc_no_diffuse_2_0							\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_calc_no_diffuse_2_0);						\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_calc_no_diffuse_1_4 = asm								\n"
+"{																	\n"
+"	ps_1_4;															\n"
+"	texld   r0, t0;													\n"
+"	texld   r1, t1;													\n"
+"	texcrd  r2.xyz, t2;												\n"
+"	mad r2.xy, r0_bx2, c0, r2;										\n"
+"	mad r2.xy, r1_bx2, c1, r2;										\n"
+"	phase															\n"
+"	texld r2, r2;													\n"
+"	mov r0, r2;														\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_calc_no_diffuse_1_4							\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[0] = <texture0>;									\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_calc_no_diffuse_1_4);						\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"pixelshader water_calc_no_diffuse_1_1 = asm								\n"
+"{																	\n"
+"	// note in OpenGL on nVidia cards, it is permitted to chain 2 texbem so the effect is less nice there (no bumpmap animation)\n"
+"	ps_1_1;															\n"
+"	tex t1;															\n"
+"	texbem t2, t1;													\n"
+"	mov r0, t2;														\n"
+"};																	\n"
+"																	\n"
+"technique technique_water_calc_no_diffuse_1_1							\n"
+"{																	\n"
+"	pass p0															\n"
+"	{																\n"
+"		Texture[1] = <texture1>;									\n"
+"		Texture[2] = <texture2>;									\n"
+"		PixelShaderConstant[0] = <factor0>;							\n"
+"		PixelShaderConstant[1] = <factor1>;							\n"
+"		PixelShader = (water_calc_no_diffuse_1_1);						\n"
+"		BumpEnvMat00[2] = <scalarFloat0>;							\n"
+"		BumpEnvMat01[0] = 0;										\n"
+"		BumpEnvMat10[0] = 0;										\n"
+"		BumpEnvMat11[2] = <scalarFloat0>;							\n"
+"	}																\n"
+"};																	\n"
+"																	\n"
+"";
 
 
 

@@ -76,7 +76,11 @@
 #		endif
 #	endif
 #	include <winsock2.h>
-#	include <ws2tcpip.h>
+#	ifdef NL_COMP_VC6
+#		include "winsock_vc6.h" // the VC98 headers predate the IPv6 interface
+#	else
+#		include <ws2tcpip.h>
+#	endif
 #	include <windows.h>
 #endif
 

@@ -114,13 +114,13 @@ private:
 	std::string m_Path;
 	CSynchronized<std::string> m_TitleBar;
 	// (MT writes, DT reads) what the registry said since the last flush
-	CSynchronized<std::vector<CCommandEntry>> m_CommandQueue;
+	CSynchronized<std::vector<CCommandEntry> > m_CommandQueue;
 	// (DT) the command table as the dashboard should have it
 	std::map<std::string, CCommandEntry> m_Commands;
 	// (DT writes, MT reads) exec messages waiting for the main thread
-	CSynchronized<std::vector<CArgCommand>> m_ArgCommands;
+	CSynchronized<std::vector<CArgCommand> > m_ArgCommands;
 	// (MT writes, DT reads) the done markers to send: id and success
-	CSynchronized<std::vector<std::pair<std::string, bool>>> m_DoneQueue;
+	CSynchronized<std::vector<std::pair<std::string, bool> > > m_DoneQueue;
 	std::string m_SentTitleBar;
 	std::list<std::pair<uint32, std::string> > m_History;
 	uint m_HistoryMax;

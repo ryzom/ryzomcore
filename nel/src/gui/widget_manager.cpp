@@ -2813,8 +2813,8 @@ namespace NLGUI
 
 		// These are floats packed in the sint32 from the NEL events that provide them as float
 		// see comment in CInputHandler::handleMouseMoveEvent
-		sint32 newX = static_cast< sint32 >( std::floor( *reinterpret_cast< float* >( &x ) * screenW + 0.5f ) );
-		sint32 newY = static_cast< sint32 >( std::floor( *reinterpret_cast< float* >( &y ) * screenH + 0.5f ) );
+		sint32 newX = static_cast< sint32 >( floor( *reinterpret_cast< float* >( &x ) * screenW + 0.5f ) );
+		sint32 newY = static_cast< sint32 >( floor( *reinterpret_cast< float* >( &y ) * screenH + 0.5f ) );
 
 		if( ( oldX != newX ) || ( oldY != newY ) )
 		{

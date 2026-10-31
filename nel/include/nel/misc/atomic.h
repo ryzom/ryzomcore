@@ -62,7 +62,16 @@ level!
 // In the future, enable /volatile:iso on all C++14 and up builds, once volatile usage is removed
 #define NL_VOLATILE_ACQ_REL
 #endif
+#if defined(NL_COMP_VC6)
+// Visual C++ 6.0 has neither intrin.h nor the _Interlocked intrinsics. The kernel32 functions are
+// full barriers as well (declared as in the VC98 winbase.h).
+extern "C" __declspec(dllimport) long __stdcall InterlockedExchange(long *, long);
+extern "C" __declspec(dllimport) long __stdcall InterlockedExchangeAdd(long *, long);
+#define _InterlockedExchange(target, value) InterlockedExchange(const_cast<long *>(target), (value))
+#define _InterlockedExchangeAdd(target, value) InterlockedExchangeAdd(const_cast<long *>(target), (value))
+#else
 #include <intrin.h>
+#endif
 #endif
 
 #if defined(NL_CPU_INTEL)

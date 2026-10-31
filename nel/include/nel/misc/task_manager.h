@@ -148,7 +148,7 @@ protected:
 private:
 
 	/// Register task priority callback
-	void	changeTaskPriority(CSynchronized<std::list<CWaitingTask>>::CAccessor &acces);
+	void	changeTaskPriority(CSynchronized<std::list<CWaitingTask> >::CAccessor &acces);
 
 	/// The callback
 	IChangeTaskPriority		*_ChangePriorityCallback;

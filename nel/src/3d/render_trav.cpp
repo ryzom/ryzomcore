@@ -1316,162 +1316,162 @@ void	CRenderTrav::getStrongestLightColors(NLMISC::CRGBA &diffuse, NLMISC::CRGBA 
 
 // ***************************************************************************
 static const char*	LightingVPFragmentNormalize=
-"	# normalize normal																	\n\
-	DP3	R6.w, R6, R6;																	\n\
-	RSQ	R6.w, R6.w;																		\n\
-	MUL	R6, R6, R6.w;																	\n\
-";
+"	# normalize normal																	\n"
+"	DP3	R6.w, R6, R6;																	\n"
+"	RSQ	R6.w, R6.w;																		\n"
+"	MUL	R6, R6, R6.w;																	\n"
+"";
 
 
 // ***************************************************************************
 // NB: all CTS+x are replaced with good cte index.
 static const char*	LightingVPFragmentNoSpecular_Begin=
-"																						\n\
-	# Global Ambient.																	\n\
-	MOV	R2, c[CTS+0];																	\n\
-																						\n\
-	# Diffuse Sun																		\n\
-	DP3	R0.x, R6, c[CTS+5];			# R0.x= normal*-lightDir							\n\
-	LIT	R0.y, R0.xxxx;				# R0.y= R0.x clamped								\n\
-	MAD	R2, R0.y, c[CTS+1], R2;		# R2= summed vertex color.							\n\
-";
+"																						\n"
+"	# Global Ambient.																	\n"
+"	MOV	R2, c[CTS+0];																	\n"
+"																						\n"
+"	# Diffuse Sun																		\n"
+"	DP3	R0.x, R6, c[CTS+5];			# R0.x= normal*-lightDir							\n"
+"	LIT	R0.y, R0.xxxx;				# R0.y= R0.x clamped								\n"
+"	MAD	R2, R0.y, c[CTS+1], R2;		# R2= summed vertex color.							\n"
+"";
 
 // The 3 point Light code.
 static const char*	LightingVPFragmentNoSpecular_PL[]=
 {
-"	# Diffuse PointLight 0.																\n\
-	ADD	R0, c[CTS+6], -R5;			# R0= lightPos-vertex								\n\
-	DP3	R0.w, R0, R0;				# normalize R0.										\n\
-	RSQ	R0.w, R0.w;																		\n\
-	MUL	R0, R0, R0.w;																	\n\
-	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n\
-	LIT	R0.y, R0.xxxx;				# R0.y= R0.x clamped								\n\
-	MAD	R2, R0.y, c[CTS+2], R2;		# R2= summed vertex color.							\n\
-",
-"	# Diffuse PointLight 1.																\n\
-	ADD	R0, c[CTS+7], -R5;			# R0= lightPos-vertex								\n\
-	DP3	R0.w, R0, R0;				# normalize R0.										\n\
-	RSQ	R0.w, R0.w;																		\n\
-	MUL	R0, R0, R0.w;																	\n\
-	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n\
-	LIT	R0.y, R0;					# R0.y= R0.x clamped								\n\
-	MAD	R2, R0.y, c[CTS+3], R2;		# R2= summed vertex color.							\n\
-",
-"	# Diffuse PointLight 2.																\n\
-	ADD	R0, c[CTS+8], -R5;			# R0= lightPos-vertex								\n\
-	DP3	R0.w, R0, R0;				# normalize R0.										\n\
-	RSQ	R0.w, R0.w;																		\n\
-	MUL	R0, R0, R0.w;																	\n\
-	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n\
-	LIT	R0.y, R0;					# R0.y= R0.x clamped								\n\
-	MAD	R2, R0.y, c[CTS+4], R2;		# R2= summed vertex color.							\n\
-"
+"	# Diffuse PointLight 0.																\n"
+"	ADD	R0, c[CTS+6], -R5;			# R0= lightPos-vertex								\n"
+"	DP3	R0.w, R0, R0;				# normalize R0.										\n"
+"	RSQ	R0.w, R0.w;																		\n"
+"	MUL	R0, R0, R0.w;																	\n"
+"	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n"
+"	LIT	R0.y, R0.xxxx;				# R0.y= R0.x clamped								\n"
+"	MAD	R2, R0.y, c[CTS+2], R2;		# R2= summed vertex color.							\n"
+"",
+"	# Diffuse PointLight 1.																\n"
+"	ADD	R0, c[CTS+7], -R5;			# R0= lightPos-vertex								\n"
+"	DP3	R0.w, R0, R0;				# normalize R0.										\n"
+"	RSQ	R0.w, R0.w;																		\n"
+"	MUL	R0, R0, R0.w;																	\n"
+"	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n"
+"	LIT	R0.y, R0;					# R0.y= R0.x clamped								\n"
+"	MAD	R2, R0.y, c[CTS+3], R2;		# R2= summed vertex color.							\n"
+"",
+"	# Diffuse PointLight 2.																\n"
+"	ADD	R0, c[CTS+8], -R5;			# R0= lightPos-vertex								\n"
+"	DP3	R0.w, R0, R0;				# normalize R0.										\n"
+"	RSQ	R0.w, R0.w;																		\n"
+"	MUL	R0, R0, R0.w;																	\n"
+"	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n"
+"	LIT	R0.y, R0;					# R0.y= R0.x clamped								\n"
+"	MAD	R2, R0.y, c[CTS+4], R2;		# R2= summed vertex color.							\n"
+""
 };
 
 // The End code.
 static const char*	LightingVPFragmentNoSpecular_End=
-"	# output to o[COL0] only, replacing alpha with material alpha.						\n\
-	MAD	o[COL0], R2, c[CTS+9].zzzx, c[CTS+9].xxxw;										\n\
-";
+"	# output to o[COL0] only, replacing alpha with material alpha.						\n"
+"	MAD	o[COL0], R2, c[CTS+9].zzzx, c[CTS+9].xxxw;										\n"
+"";
 
 
 // ***************************************************************************
 // NB: all CTS+x are replaced with good cte index.
 static const char*	LightingVPFragmentSpecular_Begin=
-"																						\n\
-	# Global Ambient.																	\n\
-	MOV	R2, c[CTS+0];																	\n\
-																						\n\
-	# Always keep Specular exponent in R0.w												\n\
-	MOV	R0.w, c[CTS+5].w;																\n\
-																						\n\
-	# Compute vertex-to-eye vector normed.												\n\
-	ADD	R4, c[CTS+11], -R5;																\n\
-	DP3	R1.w, R4, R4;																	\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R4, R4, R1.w;																	\n\
-																						\n\
-	# Diffuse-Specular Sun																\n\
-	# Compute R1= halfAngleVector= (lightDir+R4).normed().								\n\
-	ADD	R1.xyz, c[CTS+9], R4;		# R1= halfAngleVector								\n\
-	DP3	R1.w, R1, R1;				# normalize R1.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R1.xyz, R1, R1.w;																\n\
-	# Compute Factors and colors.														\n\
-	DP3	R0.x, R6, c[CTS+9];			# R0.x= normal*-lightDir							\n\
-	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n\
-	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n\
-	MAD	R2, R0.y, c[CTS+1], R2;		# R2= summed vertex color.							\n\
-	MUL	R3, R0.z, c[CTS+5];			# R3= specular color.								\n\
-";
+"																						\n"
+"	# Global Ambient.																	\n"
+"	MOV	R2, c[CTS+0];																	\n"
+"																						\n"
+"	# Always keep Specular exponent in R0.w												\n"
+"	MOV	R0.w, c[CTS+5].w;																\n"
+"																						\n"
+"	# Compute vertex-to-eye vector normed.												\n"
+"	ADD	R4, c[CTS+11], -R5;																\n"
+"	DP3	R1.w, R4, R4;																	\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R4, R4, R1.w;																	\n"
+"																						\n"
+"	# Diffuse-Specular Sun																\n"
+"	# Compute R1= halfAngleVector= (lightDir+R4).normed().								\n"
+"	ADD	R1.xyz, c[CTS+9], R4;		# R1= halfAngleVector								\n"
+"	DP3	R1.w, R1, R1;				# normalize R1.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R1.xyz, R1, R1.w;																\n"
+"	# Compute Factors and colors.														\n"
+"	DP3	R0.x, R6, c[CTS+9];			# R0.x= normal*-lightDir							\n"
+"	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n"
+"	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n"
+"	MAD	R2, R0.y, c[CTS+1], R2;		# R2= summed vertex color.							\n"
+"	MUL	R3, R0.z, c[CTS+5];			# R3= specular color.								\n"
+"";
 
 // The 3 point Light code.
 static const char*	LightingVPFragmentSpecular_PL[]=
 {
-"	# Diffuse-Specular PointLight 0.													\n\
-	# Compute R0= (lightPos-vertex).normed().											\n\
-	ADD	R0.xyz, c[CTS+12], -R5;		# R0= lightPos-vertex								\n\
-	DP3	R1.w, R0, R0;				# normalize R0.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R0.xyz, R0, R1.w;																\n\
-	# Compute R1= halfAngleVector= (R0+R4).normed().									\n\
-	ADD	R1.xyz, R0, R4;				# R1= halfAngleVector								\n\
-	DP3	R1.w, R1, R1;				# normalize R1.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R1.xyz, R1, R1.w;																\n\
-	# Compute Factors and colors.														\n\
-	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n\
-	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n\
-	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n\
-	MAD	R2, R0.y, c[CTS+2], R2;		# R2= summed vertex color.							\n\
-	MAD	R3, R0.z, c[CTS+6], R3;		# R3= summed specular color.						\n\
-",
-"	# Diffuse-Specular PointLight 1.													\n\
-	# Compute R0= (lightPos-vertex).normed().											\n\
-	ADD	R0.xyz, c[CTS+13], -R5;		# R0= lightPos-vertex								\n\
-	DP3	R1.w, R0, R0;				# normalize R0.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R0.xyz, R0, R1.w;																\n\
-	# Compute R1= halfAngleVector= (R0+R4).normed().									\n\
-	ADD	R1.xyz, R0, R4;				# R1= halfAngleVector								\n\
-	DP3	R1.w, R1, R1;				# normalize R1.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R1.xyz, R1, R1.w;																\n\
-	# Compute Factors and colors.														\n\
-	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n\
-	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n\
-	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n\
-	MAD	R2, R0.y, c[CTS+3], R2;		# R2= summed vertex color.							\n\
-	MAD	R3, R0.z, c[CTS+7], R3;		# R3= summed specular color.						\n\
-",
-"	# Diffuse-Specular PointLight 2.													\n\
-	# Compute R0= (lightPos-vertex).normed().											\n\
-	ADD	R0.xyz, c[CTS+14], -R5;		# R0= lightPos-vertex								\n\
-	DP3	R1.w, R0, R0;				# normalize R0.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R0.xyz, R0, R1.w;																\n\
-	# Compute R1= halfAngleVector= (R0+R4).normed().									\n\
-	ADD	R1.xyz, R0, R4;				# R1= halfAngleVector								\n\
-	DP3	R1.w, R1, R1;				# normalize R1.										\n\
-	RSQ	R1.w, R1.w;																		\n\
-	MUL	R1.xyz, R1, R1.w;																\n\
-	# Compute Factors and colors.														\n\
-	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n\
-	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n\
-	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n\
-	MAD	R2, R0.y, c[CTS+4], R2;		# R2= summed vertex color.							\n\
-"
+"	# Diffuse-Specular PointLight 0.													\n"
+"	# Compute R0= (lightPos-vertex).normed().											\n"
+"	ADD	R0.xyz, c[CTS+12], -R5;		# R0= lightPos-vertex								\n"
+"	DP3	R1.w, R0, R0;				# normalize R0.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R0.xyz, R0, R1.w;																\n"
+"	# Compute R1= halfAngleVector= (R0+R4).normed().									\n"
+"	ADD	R1.xyz, R0, R4;				# R1= halfAngleVector								\n"
+"	DP3	R1.w, R1, R1;				# normalize R1.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R1.xyz, R1, R1.w;																\n"
+"	# Compute Factors and colors.														\n"
+"	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n"
+"	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n"
+"	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n"
+"	MAD	R2, R0.y, c[CTS+2], R2;		# R2= summed vertex color.							\n"
+"	MAD	R3, R0.z, c[CTS+6], R3;		# R3= summed specular color.						\n"
+"",
+"	# Diffuse-Specular PointLight 1.													\n"
+"	# Compute R0= (lightPos-vertex).normed().											\n"
+"	ADD	R0.xyz, c[CTS+13], -R5;		# R0= lightPos-vertex								\n"
+"	DP3	R1.w, R0, R0;				# normalize R0.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R0.xyz, R0, R1.w;																\n"
+"	# Compute R1= halfAngleVector= (R0+R4).normed().									\n"
+"	ADD	R1.xyz, R0, R4;				# R1= halfAngleVector								\n"
+"	DP3	R1.w, R1, R1;				# normalize R1.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R1.xyz, R1, R1.w;																\n"
+"	# Compute Factors and colors.														\n"
+"	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n"
+"	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n"
+"	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n"
+"	MAD	R2, R0.y, c[CTS+3], R2;		# R2= summed vertex color.							\n"
+"	MAD	R3, R0.z, c[CTS+7], R3;		# R3= summed specular color.						\n"
+"",
+"	# Diffuse-Specular PointLight 2.													\n"
+"	# Compute R0= (lightPos-vertex).normed().											\n"
+"	ADD	R0.xyz, c[CTS+14], -R5;		# R0= lightPos-vertex								\n"
+"	DP3	R1.w, R0, R0;				# normalize R0.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R0.xyz, R0, R1.w;																\n"
+"	# Compute R1= halfAngleVector= (R0+R4).normed().									\n"
+"	ADD	R1.xyz, R0, R4;				# R1= halfAngleVector								\n"
+"	DP3	R1.w, R1, R1;				# normalize R1.										\n"
+"	RSQ	R1.w, R1.w;																		\n"
+"	MUL	R1.xyz, R1, R1.w;																\n"
+"	# Compute Factors and colors.														\n"
+"	DP3	R0.x, R6, R0;				# R0.x= normal*lightDir								\n"
+"	DP3	R0.yz, R6, R1;				# R0.yz= normal*halfAngleVector						\n"
+"	LIT	R0.yz, R0;					# R0.y= R0.x clamped, R0.z= pow(spec, R0.w) clamp	\n"
+"	MAD	R2, R0.y, c[CTS+4], R2;		# R2= summed vertex color.							\n"
+""
 };
 
 
 // The End code.
 static const char*	LightingVPFragmentSpecular_End=
-"	# output directly to secondary color.												\n\
-	MAD	o[COL1], R0.z, c[CTS+8], R3;	# final summed specular color.					\n\
-																						\n\
-	# output diffuse to o[COL0], replacing alpha with material alpha.					\n\
-	MAD	o[COL0], R2, c[CTS+10].zzzx, c[CTS+10].xxxw;									\n\
-";
+"	# output directly to secondary color.												\n"
+"	MAD	o[COL1], R0.z, c[CTS+8], R3;	# final summed specular color.					\n"
+"																						\n"
+"	# output diffuse to o[COL0], replacing alpha with material alpha.					\n"
+"	MAD	o[COL0], R2, c[CTS+10].zzzx, c[CTS+10].xxxw;									\n"
+"";
 
 // ***************************************************************************
 static	void	strReplaceAll(string &strInOut, const string &tokenSrc, const string &tokenDst)

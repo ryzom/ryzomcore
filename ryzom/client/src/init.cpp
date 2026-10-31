@@ -903,7 +903,7 @@ void prelogInit()
 		H_AUTO ( RZ_Client_Init );
 
 		// Assert if no more memory
-		set_new_handler(outOfMemory);
+		std::set_new_handler(outOfMemory);
 
 		NLMISC_REGISTER_CLASS(CStage);
 		NLMISC_REGISTER_CLASS(CStageSet);

@@ -2172,6 +2172,10 @@ string CFile::getPath (const string &filename)
 		return "";
 }
 
+#if defined(NL_OS_WINDOWS) && !defined(INVALID_FILE_ATTRIBUTES)
+#define INVALID_FILE_ATTRIBUTES ((DWORD)-1) // not in the VC98 headers
+#endif
+
 bool CFile::isDirectory (const string &filename)
 {
 #ifdef NL_OS_WINDOWS

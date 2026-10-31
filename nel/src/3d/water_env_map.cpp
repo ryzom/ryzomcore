@@ -249,14 +249,14 @@ void CWaterEnvMap::doInit()
 }
 /*
 static const char *testMeshVPstr =
-"!!VP1.0\n\
- DP4 o[HPOS].x, c[0], v[0]; \n\
- DP4 o[HPOS].y, c[1], v[0]; \n\
- DP4 o[HPOS].z, c[2], v[0]; \n\
- DP4 o[HPOS].w, c[3], v[0]; \n\
- MAD o[COL0], v[8], c[4].xxxx, c[4].yyyy;   \n\
- MOV o[TEX0], v[8];         \n\
- END";
+"!!VP1.0\n"
+" DP4 o[HPOS].x, c[0], v[0]; \n"
+" DP4 o[HPOS].y, c[1], v[0]; \n"
+" DP4 o[HPOS].z, c[2], v[0]; \n"
+" DP4 o[HPOS].w, c[3], v[0]; \n"
+" MAD o[COL0], v[8], c[4].xxxx, c[4].yyyy;   \n"
+" MOV o[TEX0], v[8];         \n"
+" END";
 
 
 class CVertexProgramTestMeshVP : public CVertexProgram

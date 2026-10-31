@@ -597,7 +597,7 @@ bool CInterfaceDDX::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			if(ptrUIView)
 				p.ResultView = _Parent->getId()+":"+string((const char*)ptrUIView);
 			CXMLAutoPtr ptrUIUnit((const char*)xmlGetProp (cur, (xmlChar*)"ui_unit"));
-			if(ptrUIUnit && ((const char*)ptrUIUnit)[0]!=0 )
+			if((bool)ptrUIUnit && ((const char*)ptrUIUnit)[0]!=0 )
 				p.ResultUnit = CI18N::get((const char*)ptrUIUnit);
 			CXMLAutoPtr ptrUIDecimal((const char*)xmlGetProp (cur, (xmlChar*)"ui_decimal"));
 			if(ptrUIDecimal)

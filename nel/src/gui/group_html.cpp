@@ -81,7 +81,11 @@ namespace NLGUI
 {
 
 	// Uncomment nlwarning() to see the log about curl downloads
+#ifdef NL_COMP_VC6
+	#define LOG_DL 1 ? (void)0 : (void) // no variadic macros in Visual C++ 6.0
+#else
 	#define LOG_DL(fmt, ...) //nlwarning(fmt, ## __VA_ARGS__)
+#endif
 	// Uncomment to log curl progess
 	//#define LOG_CURL_PROGRESS 1
 

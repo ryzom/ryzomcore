@@ -399,6 +399,9 @@ std::string CI18N::getSystemLanguageCode ()
 			if (nlGetUserDefaultLocaleName)
 			{
 				// get user locale
+#ifndef LOCALE_NAME_MAX_LENGTH // Windows Vista, newer than the VC98 headers
+#define LOCALE_NAME_MAX_LENGTH 85
+#endif
 				wchar_t buffer[LOCALE_NAME_MAX_LENGTH];
 				sint res = nlGetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
 

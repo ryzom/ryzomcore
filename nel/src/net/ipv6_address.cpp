@@ -23,7 +23,10 @@
 
 #include "nel/net/sock.h"
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(NL_COMP_VC6)
+// The VC98 headers predate the IPv6 interface
+#include "winsock_vc6.h"
+#elif defined(NL_OS_WINDOWS)
 // Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
 #include <ws2ipdef.h>
 // Windows includes for `inet_pton` and `getaddrinfo`

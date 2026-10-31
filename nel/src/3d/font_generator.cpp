@@ -30,8 +30,6 @@
 
 #include "nel/3d/font_generator.h"
 
-using namespace std;
-
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 
 #include <ft2build.h>
@@ -60,6 +58,8 @@ const char*  err_msg;
 
 #include FT_ERRORS_H
 
+// after the FreeType headers, whose parameters named 'vector' Visual C++ 6.0 would take for std::vector
+using namespace std;
 using namespace NLMISC;
 
 #ifdef DEBUG_NEW
@@ -474,6 +474,7 @@ uint32	 CFontGenerator::getCharIndex (u32char c)
 #include <windows.h>
 #undef byte
 
+using namespace std;
 using namespace NLMISC;
 
 namespace NL3D {

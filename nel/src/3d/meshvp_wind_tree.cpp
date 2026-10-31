@@ -374,42 +374,42 @@ static const char* WindTreeVPCodeGLSL_UBO_Body =
 	"}\n";
 
 static const char*	WindTreeVPCodeWave=
-"!!VP1.0																				\n\
-  # extract from color.R the 3 factors into R0.xyz									\n\
-	MAD	R0, v[3].x, c[9].x, c[9].yzww;	# col.R*3										\n\
-	MIN	R0, R0, c[8].yyyy;				# clamp each to 0,1								\n\
-	MAX	R0, R0, c[8].xxxx;																\n\
-																						\n\
-	# Add influence of Bone Level1														\n\
-	MAD	R5, c[15], R0.x, v[0];															\n\
-																						\n\
-	# Sample LevelPhase into R7.yz: 0 to 3.												\n\
-	MUL	R7, v[3].xyzw, c[10].x;															\n\
-																						\n\
-	# Add influence of Bone Level2														\n\
-	ARL	A0.x, R7.y;																		\n\
-	MAD	R5, c[A0.x+16], R0.y, R5;														\n\
-																						\n\
-	# Add influence of Bone Level3														\n\
-	ARL	A0.x, R7.z;																		\n\
-	MAD	R5, c[A0.x+20], R0.z, R5;														\n\
-																						\n\
-	# Get normal in R6 for lighting.													\n\
-	MOV	R6, v[2];																		\n\
-";
+"!!VP1.0																				\n"
+"  # extract from color.R the 3 factors into R0.xyz									\n"
+"	MAD	R0, v[3].x, c[9].x, c[9].yzww;	# col.R*3										\n"
+"	MIN	R0, R0, c[8].yyyy;				# clamp each to 0,1								\n"
+"	MAX	R0, R0, c[8].xxxx;																\n"
+"																						\n"
+"	# Add influence of Bone Level1														\n"
+"	MAD	R5, c[15], R0.x, v[0];															\n"
+"																						\n"
+"	# Sample LevelPhase into R7.yz: 0 to 3.												\n"
+"	MUL	R7, v[3].xyzw, c[10].x;															\n"
+"																						\n"
+"	# Add influence of Bone Level2														\n"
+"	ARL	A0.x, R7.y;																		\n"
+"	MAD	R5, c[A0.x+16], R0.y, R5;														\n"
+"																						\n"
+"	# Add influence of Bone Level3														\n"
+"	ARL	A0.x, R7.z;																		\n"
+"	MAD	R5, c[A0.x+20], R0.z, R5;														\n"
+"																						\n"
+"	# Get normal in R6 for lighting.													\n"
+"	MOV	R6, v[2];																		\n"
+"";
 
 static const char*	WindTreeVPCodeEnd=
-"	# compute in Projection space														\n\
-	DP4 o[HPOS].x, c[0], R5;															\n\
-	DP4 o[HPOS].y, c[1], R5;															\n\
-	DP4 o[HPOS].z, c[2], R5;															\n\
-	DP4 o[HPOS].w, c[3], R5;															\n\
-	MOV o[TEX0], v[8];																\n\
-	# hulud : remove this line for the moment because it doesn't work under d3d, if it is needed, we will have to create 2 CVertexProgram objects.\n\
-	#MOV o[TEX1], v[9];																\n\
-	DP4	o[FOGC].x, c[6], R5;															\n\
-	END																					\n\
-";
+"	# compute in Projection space														\n"
+"	DP4 o[HPOS].x, c[0], R5;															\n"
+"	DP4 o[HPOS].y, c[1], R5;															\n"
+"	DP4 o[HPOS].z, c[2], R5;															\n"
+"	DP4 o[HPOS].w, c[3], R5;															\n"
+"	MOV o[TEX0], v[8];																\n"
+"	# hulud : remove this line for the moment because it doesn't work under d3d, if it is needed, we will have to create 2 CVertexProgram objects.\n"
+"	#MOV o[TEX1], v[9];																\n"
+"	DP4	o[FOGC].x, c[6], R5;															\n"
+"	END																					\n"
+"";
 
 
 // Shared index struct for wind tree VP uniforms

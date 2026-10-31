@@ -101,18 +101,9 @@ inline void _check(unsigned char /* a */) { }
 inline void _check(long /* a */) { }
 inline void _check(unsigned long /* a */) { }
 
-#ifdef NL_COMP_VC6
-	inline void _check(uint8 /* a */) { }
-#endif // NL_COMP_VC6
-
 inline void _check(sint8 /* a */) { }
 inline void _check(uint16 /* a */) { }
 inline void _check(sint16 /* a */) { }
-
-#ifdef NL_COMP_VC6
-	inline void _check(uint32 /* a */) { }
-	inline void _check(sint32 /* a */) { }
-#endif // NL_COMP_VC6
 
 inline void _check(uint64 /* a */) { }
 inline void _check(sint64 /* a */) { }
@@ -194,7 +185,9 @@ inline std::string toString(const uint64 &val) { return toString("%" NL_I64 "u",
 inline std::string toString(const sint64 &val) { return toString("%" NL_I64 "d", val); }
 
 #ifdef NL_OS_WINDOWS
+#ifndef NL_NO_NATIVE_WCHAR_T // else wchar_t is uint16
 inline std::string toString(const wchar_t &val) { return toString(reinterpret_cast<const uint16 &>(val)); }
+#endif
 #endif
 
 #ifdef NL_COMP_GCC
@@ -228,11 +221,6 @@ inline std::string toString(const std::string &val) { return val; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference
 
-#ifdef NL_COMP_VC6
-inline std::string toString(const uint &val) { return toString("%u", val); }
-inline std::string toString(const sint &val) { return toString("%d", val); }
-#endif // NL_COMP_VC6
-
 template<class T>
 bool fromString(const std::string &str, T &obj)
 {
@@ -251,7 +239,9 @@ inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(s
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
 
 #ifdef NL_OS_WINDOWS
+#ifndef NL_NO_NATIVE_WCHAR_T // else wchar_t is uint16
 inline bool fromString(const std::string &str, wchar_t &val) { return fromString(str, reinterpret_cast<uint16 &>(val)); }
+#endif
 #endif
 
 /// Fast string to bool, reliably defined for strings starting with 0, 1, t, T, f, F, y, Y, n, N, and empty strings, anything else is undefined.
@@ -264,11 +254,6 @@ bool fromString(const std::string &str, bool &val);
 inline bool fromString(const std::string &str, std::string &val) { val = str; return true; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference
-
-#ifdef NL_COMP_VC6
-inline bool fromString(const std::string &str, uint &val) { return sscanf(str.c_str(), "%u", &val) == 1; }
-inline bool fromString(const std::string &str, sint &val) { return sscanf(str.c_str(), "%d", &val) == 1; }
-#endif // NL_COMP_VC6
 
 inline bool startsWith(const char *str, const char *prefix)
 {

@@ -127,8 +127,8 @@ namespace NLGUI
 		/** From several target names of a link (seprated by ','), retrieve the target elements and their target properties
 		  * \return true if all targets are valid
 		  */
-		static bool splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect);
-		static bool splitLinkTargetsExt(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect, std::vector<CInterfaceLink::CCDBTargetInfo> &cdbTargetsVect);
+		static bool splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CTargetInfo> &targetsVect);
+		static bool splitLinkTargetsExt(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CTargetInfo> &targetsVect, std::vector<CCDBTargetInfo> &cdbTargetsVect);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private:
 		friend struct CRemoveTargetPred;

@@ -42,7 +42,9 @@
 
 #ifdef NL_OS_WINDOWS
 #	include <process.h>
-#	include <intrin.h>
+#	ifndef NL_COMP_VC6 // Visual C++ 6.0 has no intrin.h
+#		include <intrin.h>
+#	endif
 #else
 #	include <unistd.h>
 #	include <sys/types.h>
@@ -90,6 +92,17 @@ inline uint64 rdtsc()
 	__asm__ volatile("rdtsc" : "=A" (ticks));
 	return ticks;
 #endif
+#elif defined(NL_COMP_VC6)
+	// no __rdtsc intrinsic in Visual C++ 6.0 (LOW and HIGH are assembler operators, hence the names)
+	uint32 tscLow, tscHigh;
+	__asm
+	{
+		_emit 0x0F // rdtsc
+		_emit 0x31
+		mov tscLow, eax
+		mov tscHigh, edx
+	}
+	return (uint64(tscHigh) << 32) | tscLow;
 #else
 	return uint64(__rdtsc());
 #endif

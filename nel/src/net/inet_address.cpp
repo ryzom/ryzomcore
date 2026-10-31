@@ -30,10 +30,15 @@
 
 #ifdef NL_OS_WINDOWS
 #include <winsock2.h>
+#ifdef NL_COMP_VC6
+// The VC98 headers predate the IPv6 interface
+#include "winsock_vc6.h"
+#else
 #include <ws2tcpip.h>
 #include <ws2ipdef.h>
 // for Windows 2000 compatibility
 #include <wspiapi.h>
+#endif
 #elif defined NL_OS_UNIX
 #include <unistd.h>
 #include <sys/socket.h>

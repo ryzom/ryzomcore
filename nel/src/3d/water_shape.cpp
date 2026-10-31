@@ -51,122 +51,122 @@ namespace NL3D {
 /////////////////////////
 
 static const char *WaterVPNoWave =
-"!!VP1.0                                                                        \n\
- DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
- DP4 o[HPOS].y, c[1], v[0];												        \n\
- DP4 o[HPOS].z, c[2], v[0];												        \n\
- DP4 o[HPOS].w, c[3], v[0];												        \n\
- # MUL R1, R2.x, R1;                                                            \n\
- DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n\
- MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n\
- ADD o[TEX0], R3, c[6];										                    \n\
- MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n\
- ADD o[TEX1], R3, c[8];											                \n\
- ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
- DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
- RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
- MUL R0, R0, R1;                                                                \n\
- DP3 R1.x, R0.xyww, R0.xyww;                                                    \n\
- MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord						\n\
- END";
+"!!VP1.0                                                                        \n"
+" DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n"
+" DP4 o[HPOS].y, c[1], v[0];												        \n"
+" DP4 o[HPOS].z, c[2], v[0];												        \n"
+" DP4 o[HPOS].w, c[3], v[0];												        \n"
+" # MUL R1, R2.x, R1;                                                            \n"
+" DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n"
+" MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n"
+" ADD o[TEX0], R3, c[6];										                    \n"
+" MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n"
+" ADD o[TEX1], R3, c[8];											                \n"
+" ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n"
+" DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)^2	\n"
+" RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n"
+" MUL R0, R0, R1;                                                                \n"
+" DP3 R1.x, R0.xyww, R0.xyww;                                                    \n"
+" MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord						\n"
+" END";
 
 // a diffuse texture is added
 static const char *WaterVPNoWaveDiffuse =
-"!!VP1.0\n\
-DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
-DP4 o[HPOS].y, c[1], v[0];												        \n\
-DP4 o[HPOS].z, c[2], v[0];												        \n\
-DP4 o[HPOS].w, c[3], v[0];												        \n\
-# MUL R1, R2.x, R1;                                                             \n\
-DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n\
-MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n\
-ADD o[TEX0], R3, c[6];										                    \n\
-MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n\
-ADD o[TEX1], R3, c[8];											                \n\
-ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
-DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
-RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
-MUL R0, R0, R1;                                                                 \n\
-MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord							\n\
-DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
-DP4 o[TEX3].y, v[0], c[12];													    \n\
-END";
+"!!VP1.0\n"
+"DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n"
+"DP4 o[HPOS].y, c[1], v[0];												        \n"
+"DP4 o[HPOS].z, c[2], v[0];												        \n"
+"DP4 o[HPOS].w, c[3], v[0];												        \n"
+"# MUL R1, R2.x, R1;                                                             \n"
+"DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n"
+"MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n"
+"ADD o[TEX0], R3, c[6];										                    \n"
+"MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n"
+"ADD o[TEX1], R3, c[8];											                \n"
+"ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n"
+"DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n"
+"RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n"
+"MUL R0, R0, R1;                                                                 \n"
+"MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord							\n"
+"DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n"
+"DP4 o[TEX3].y, v[0], c[12];													    \n"
+"END";
 
 // Planar reflection variant: reflection UVs are computed per vertex on the
 // CPU (projected through the reflected camera's sub-frustum, see
 // CWaterModel::fillVBHard) and passed through TexCoord0 (v[8]).
 static const char *WaterVPNoWavePlanar =
-"!!VP1.0                                                                        \n\
- DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
- DP4 o[HPOS].y, c[1], v[0];												        \n\
- DP4 o[HPOS].z, c[2], v[0];												        \n\
- DP4 o[HPOS].w, c[3], v[0];												        \n\
- DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n\
- MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n\
- ADD o[TEX0], R3, c[6];										                    \n\
- MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n\
- ADD o[TEX1], R3, c[8];											                \n\
- MOV o[TEX2], v[8];			      #planar reflection uv from vertex	            \n\
- END";
+"!!VP1.0                                                                        \n"
+" DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n"
+" DP4 o[HPOS].y, c[1], v[0];												        \n"
+" DP4 o[HPOS].z, c[2], v[0];												        \n"
+" DP4 o[HPOS].w, c[3], v[0];												        \n"
+" DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n"
+" MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n"
+" ADD o[TEX0], R3, c[6];										                    \n"
+" MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n"
+" ADD o[TEX1], R3, c[8];											                \n"
+" MOV o[TEX2], v[8];			      #planar reflection uv from vertex	            \n"
+" END";
 
 static const char *WaterVPNoWavePlanarDiffuse =
-"!!VP1.0\n\
-DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
-DP4 o[HPOS].y, c[1], v[0];												        \n\
-DP4 o[HPOS].z, c[2], v[0];												        \n\
-DP4 o[HPOS].w, c[3], v[0];												        \n\
-DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n\
-MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n\
-ADD o[TEX0], R3, c[6];										                    \n\
-MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n\
-ADD o[TEX1], R3, c[8];											                \n\
-MOV o[TEX2], v[8];			          #planar reflection uv from vertex	        \n\
-DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
-DP4 o[TEX3].y, v[0], c[12];													    \n\
-END";
+"!!VP1.0\n"
+"DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n"
+"DP4 o[HPOS].y, c[1], v[0];												        \n"
+"DP4 o[HPOS].z, c[2], v[0];												        \n"
+"DP4 o[HPOS].w, c[3], v[0];												        \n"
+"DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n"
+"MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n"
+"ADD o[TEX0], R3, c[6];										                    \n"
+"MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n"
+"ADD o[TEX1], R3, c[8];											                \n"
+"MOV o[TEX2], v[8];			          #planar reflection uv from vertex	        \n"
+"DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n"
+"DP4 o[TEX3].y, v[0], c[12];													    \n"
+"END";
 
 // Calculated reflectivity over the artist envmap: the reflected-ray UV as
 // usual, plus the per-vertex reflectivity base passed through o[TEX2].z
 // (from TexCoord0.z, see CWaterModel::fillVBHard).
 static const char *WaterVPNoWaveEnvCalc =
-"!!VP1.0                                                                        \n\
- DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
- DP4 o[HPOS].y, c[1], v[0];												        \n\
- DP4 o[HPOS].z, c[2], v[0];												        \n\
- DP4 o[HPOS].w, c[3], v[0];												        \n\
- DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n\
- MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n\
- ADD o[TEX0], R3, c[6];										                    \n\
- MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n\
- ADD o[TEX1], R3, c[8];											                \n\
- ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
- DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
- RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
- MUL R0, R0, R1;                                                                \n\
- MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord						\n\
- MOV o[TEX2].z, v[8].z;			      #per-vertex reflectivity base				\n\
- END";
+"!!VP1.0                                                                        \n"
+" DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n"
+" DP4 o[HPOS].y, c[1], v[0];												        \n"
+" DP4 o[HPOS].z, c[2], v[0];												        \n"
+" DP4 o[HPOS].w, c[3], v[0];												        \n"
+" DP4 o[FOGC].x, c[4], v[0];	      #setup fog					                \n"
+" MUL R3, v[0], c[5];			      #compute bump 0 uv's			            \n"
+" ADD o[TEX0], R3, c[6];										                    \n"
+" MUL R3, v[0], c[7];			      #compute bump 1 uv's			            \n"
+" ADD o[TEX1], R3, c[8];											                \n"
+" ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n"
+" DP3 R1, R0, R0;				      #r1 = eye - vertex, r2 = (eye - vertex)^2	\n"
+" RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n"
+" MUL R0, R0, R1;                                                                \n"
+" MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord						\n"
+" MOV o[TEX2].z, v[8].z;			      #per-vertex reflectivity base				\n"
+" END";
 
 static const char *WaterVPNoWaveEnvCalcDiffuse =
-"!!VP1.0\n\
-DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n\
-DP4 o[HPOS].y, c[1], v[0];												        \n\
-DP4 o[HPOS].z, c[2], v[0];												        \n\
-DP4 o[HPOS].w, c[3], v[0];												        \n\
-DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n\
-MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n\
-ADD o[TEX0], R3, c[6];										                    \n\
-MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n\
-ADD o[TEX1], R3, c[8];											                \n\
-ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n\
-DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
-RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
-MUL R0, R0, R1;                                                                 \n\
-MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord							\n\
-MOV o[TEX2].z, v[8].z;			      #per-vertex reflectivity base				\n\
-DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
-DP4 o[TEX3].y, v[0], c[12];													    \n\
-END";
+"!!VP1.0\n"
+"DP4 o[HPOS].x, c[0], v[0];	          #transform vertex in view space	        \n"
+"DP4 o[HPOS].y, c[1], v[0];												        \n"
+"DP4 o[HPOS].z, c[2], v[0];												        \n"
+"DP4 o[HPOS].w, c[3], v[0];												        \n"
+"DP4 o[FOGC].x, c[4], v[0];	          #setup fog					            \n"
+"MUL R3, v[0], c[5];			          #compute bump 0 uv's			            \n"
+"ADD o[TEX0], R3, c[6];										                    \n"
+"MUL R3, v[0], c[7];			          #compute bump 1 uv's			            \n"
+"ADD o[TEX1], R3, c[8];											                \n"
+"ADD R0, c[9], -v[0];			      #r1 = eye - vertex						\n"
+"DP3 R1, R0, R0;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n"
+"RSQ R1, R1.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n"
+"MUL R0, R0, R1;                                                                 \n"
+"MAD o[TEX2], -R0, c[10], c[10];		  #envmap tex coord							\n"
+"MOV o[TEX2].z, v[8].z;			      #per-vertex reflectivity base				\n"
+"DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n"
+"DP4 o[TEX3].y, v[0], c[12];													    \n"
+"END";
 
 // GLSL body for water VP UBO path.
 // modelViewProjection and modelView come from NlModel UBO (UsesObjectUBO).
@@ -417,83 +417,83 @@ void CVertexProgramWaterVPNoWave::buildInfo()
   */
 
 static const char *WaterVPStartCode =
-"!!VP1.0\n\
-	ADD R1, c[7], -v[0];			      #r1 = eye - vertex						\n\
-	DP3 R2, R1, R1;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n\
-	MAX R2, R2, c[16];                    # avoid imprecision around 0				\n\
-	RSQ R2, R2.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n\
-	RCP R3, R2.x;																    \n\
-	MAD R3, c[6].xxxx, -R3, c[6].yyyy;											    \n\
-	MAX R3, c[5],	R3;															    \n\
-	MUL R0, R3, v[8];			          #attenuate normal with distance		    \n\
-	MUL R4.z,   R3, v[0];			      #attenuate height with distance 	        \n\
-	MOV R4.xyw, v[0];														 	    \n\
-	MOV R0.z,  c[4].x;			          #set normal z to 1 				        \n\
-	DP3 R3.x, R0, R0;															    \n\
-	RSQ R3.x,  R3.x;				      #normalize normal in R3			        \n\
-	MUL R0,  R0, R3.x;															    \n\
-	DP4 o[HPOS].x, c[0], R4;	          #transform vertex in view space	        \n\
-	DP4 o[HPOS].y, c[1], R4;												        \n\
-	DP4 o[HPOS].z, c[2], R4;												        \n\
-	DP4 o[HPOS].w, c[3], R4;												        \n\
-	MUL R1, R1, R2.x;		              #normalize r1, r1 = (eye - vertex).normed \n\
-	# DP3 R2.x, R1.xyww, R1.xyww;                                                     \n\
-	# MUL R1, R2.x, R1;                                                             \n\
-	DP4 o[FOGC].x, c[18], R4;	          #setup fog					            \n\
-";
+"!!VP1.0\n"
+"	ADD R1, c[7], -v[0];			      #r1 = eye - vertex						\n"
+"	DP3 R2, R1, R1;				          #r1 = eye - vertex, r2 = (eye - vertex)^2	\n"
+"	MAX R2, R2, c[16];                    # avoid imprecision around 0				\n"
+"	RSQ R2, R2.x;					      #r1 = eye - vertex, r2 = 1/d(eye, vertex)	\n"
+"	RCP R3, R2.x;																    \n"
+"	MAD R3, c[6].xxxx, -R3, c[6].yyyy;											    \n"
+"	MAX R3, c[5],	R3;															    \n"
+"	MUL R0, R3, v[8];			          #attenuate normal with distance		    \n"
+"	MUL R4.z,   R3, v[0];			      #attenuate height with distance 	        \n"
+"	MOV R4.xyw, v[0];														 	    \n"
+"	MOV R0.z,  c[4].x;			          #set normal z to 1 				        \n"
+"	DP3 R3.x, R0, R0;															    \n"
+"	RSQ R3.x,  R3.x;				      #normalize normal in R3			        \n"
+"	MUL R0,  R0, R3.x;															    \n"
+"	DP4 o[HPOS].x, c[0], R4;	          #transform vertex in view space	        \n"
+"	DP4 o[HPOS].y, c[1], R4;												        \n"
+"	DP4 o[HPOS].z, c[2], R4;												        \n"
+"	DP4 o[HPOS].w, c[3], R4;												        \n"
+"	MUL R1, R1, R2.x;		              #normalize r1, r1 = (eye - vertex).normed \n"
+"	# DP3 R2.x, R1.xyww, R1.xyww;                                                     \n"
+"	# MUL R1, R2.x, R1;                                                             \n"
+"	DP4 o[FOGC].x, c[18], R4;	          #setup fog					            \n"
+"";
 /** This part of vertex program compute 2 layers of bump (for use with texture shaders)
   */
 static const char *WaterVpBump2LayersCode =
-"	MUL R3, v[0], c[10];			#compute bump 0 uv's			\n\
-	ADD o[TEX0], R3, c[9];										    \n\
-	MUL R3, v[0], c[12];			#compute bump 1 uv's			\n\
-	ADD o[TEX1], R3, c[11];											\n\
-	DP3 R2.x, R1, R0;												\n\
-	MUL R0, R0, R2.x;												\n\
-	ADD R2, R0, R0;													\n\
-	ADD R0, R2, -R1;				#compute reflection vector		\n\
-	MAD o[TEX2], R0, c[8], c[8];									\n\
-";
+"	MUL R3, v[0], c[10];			#compute bump 0 uv's			\n"
+"	ADD o[TEX0], R3, c[9];										    \n"
+"	MUL R3, v[0], c[12];			#compute bump 1 uv's			\n"
+"	ADD o[TEX1], R3, c[11];											\n"
+"	DP3 R2.x, R1, R0;												\n"
+"	MUL R0, R0, R2.x;												\n"
+"	ADD R2, R0, R0;													\n"
+"	ADD R0, R2, -R1;				#compute reflection vector		\n"
+"	MAD o[TEX2], R0, c[8], c[8];									\n"
+"";
 /** Version with one bump map only (Texture shaders support chaining of offset textures, EMBM does not)
   */
 static const char *WaterVpBump1LayersCode =
-"MUL R3, v[0], c[12];			#compute bump 1 uv's				\n\
- ADD o[TEX0], R3, c[11];										    \n\
- DP3 R2.x, R1, R0;													\n\
- MUL R0, R0, R2.x;													\n\
- ADD R2, R0, R0;													\n\
- ADD R0, R2, -R1;				#compute reflection vector			\n\
- MAD o[TEX1], R0, c[8], c[8];									    \n\
-";
+"MUL R3, v[0], c[12];			#compute bump 1 uv's				\n"
+" ADD o[TEX0], R3, c[11];										    \n"
+" DP3 R2.x, R1, R0;													\n"
+" MUL R0, R0, R2.x;													\n"
+" ADD R2, R0, R0;													\n"
+" ADD R0, R2, -R1;				#compute reflection vector			\n"
+" MAD o[TEX1], R0, c[8], c[8];									    \n"
+"";
 /** Optional diffuse texture in stage 3
   */
 static const char *WaterVpDiffuseMapStage3Code =
-"DP4 o[TEX3].x, R4, c[13]; #compute uv for diffuse texture					\n\
- DP4 o[TEX3].y, R4, c[14];													\n\
-";
+"DP4 o[TEX3].x, R4, c[13]; #compute uv for diffuse texture					\n"
+" DP4 o[TEX3].y, R4, c[14];													\n"
+"";
 /** Optional diffuse texture in stage 2
   */
 static const char *WaterVpDiffuseMapStage2Code =
-"DP4 o[TEX2].x, R4, c[13]; #compute uv for diffuse texture					\n\
- DP4 o[TEX2].y, R4, c[14];													\n\
-";
+"DP4 o[TEX2].x, R4, c[13]; #compute uv for diffuse texture					\n"
+" DP4 o[TEX2].y, R4, c[14];													\n"
+"";
 
 /** Optional diffuse texture in stage 1
   */
 static const char *WaterVpDiffuseMapStage1Code =
-"DP4 o[TEX1].x, R4, c[13]; #compute uv for diffuse texture					\n\
- DP4 o[TEX1].y, R4, c[14];													\n\
-";
+"DP4 o[TEX1].x, R4, c[13]; #compute uv for diffuse texture					\n"
+" DP4 o[TEX1].y, R4, c[14];													\n"
+"";
 
 // Envmap is setup in texture 0, no bump is used
 static const char *WaterVpNoBumpCode =
-"  DP3 R2.x, R1, R0;			 #project view vector on normal for symetry	\n\
-   MUL R0, R0, R2.x;														\n\
-   ADD R2, R0, R0;															\n\
-   ADD R0, R2, -R1;				 #compute reflection vector					\n\
-   MAD o[TEX0], R0, c[8], c[8];											    \n\
-   DP4 o[FOGC].x, c[18], R4;	 #setup fog									\n\
-";
+"  DP3 R2.x, R1, R0;			 #project view vector on normal for symetry	\n"
+"   MUL R0, R0, R2.x;														\n"
+"   ADD R2, R0, R0;															\n"
+"   ADD R0, R2, -R1;				 #compute reflection vector					\n"
+"   MAD o[TEX0], R0, c[8], c[8];											    \n"
+"   DP4 o[FOGC].x, c[18], R4;	 #setup fog									\n"
+"";
 
 
 // static members

@@ -207,7 +207,9 @@ MACRO(NL_ADD_RUNTIME_FLAGS name)
 #      LINK_FLAGS_RELEASE "${CMAKE_LINK_FLAGS_RELEASE}")
   ENDIF()
   IF(WITH_STLPORT)
-    TARGET_LINK_LIBRARIES(${name} PRIVATE ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+    # Appended to the property rather than through TARGET_LINK_LIBRARIES: the targets use both the plain
+    # and the keyword signature of TARGET_LINK_LIBRARIES, which CMake does not allow mixing.
+    SET_PROPERTY(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   ENDIF()
 ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 
@@ -853,14 +855,37 @@ MACRO(NL_SETUP_BUILD)
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 ${DEBUG_CFLAGS}")
+    ELSEIF(MSVC_VERSION LESS 1300)
+      # Visual C++ 6.0: no /Gy-, /GS- or /GT; /GF pools strings
+      SET(RELEASE_CFLAGS "/Ob2 /Oi /Ot /Oy /GF ${RELEASE_CFLAGS}")
+      SET(DEBUG_CFLAGS "/Ob1 ${DEBUG_CFLAGS}")
     ELSE()
       MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
     ENDIF()
 
-    ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_WIN32 /DWIN32 /D_WINDOWS /wd4250")
+    ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_WIN32 /DWIN32 /D_WINDOWS")
+    IF(NOT MSVC_VERSION LESS 1300)
+      # VC6 has no /wd
+      ADD_PLATFORM_FLAGS("/wd4250")
+    ELSE()
+      # The VC98 windows.h pulls in winsock.h when _WIN32_WINNT is below 0x0400, and its definitions
+      # clash with a later winsock2.h (later SDKs reconcile the two); the guard keeps winsock.h out,
+      # defined empty as winsock2.h defines it. From 0x0400 it pulls in winsock2.h and mswsock.h
+      # instead, and when winsock2.h comes first (it includes windows.h before declaring SOCKET),
+      # mswsock.h fails; nothing uses mswsock.h, so its guard keeps it out.
+      ADD_PLATFORM_FLAGS("/D_WINSOCKAPI_= /D_MSWSOCK_")
+    ENDIF()
 
     # huge PCH
-    ADD_PLATFORM_FLAGS("/Zm1000")
+    IF(MSVC_VERSION LESS 1300)
+      # /Zm800 is the largest VC6 heap the VC6 Wine prefix is set up for (two 400 MB blocks, see zmhook).
+      # CMake's VC6 defaults carry /Zm1000, which would emit D4025 on every translation unit.
+      STRING(REPLACE "/Zm1000" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+      STRING(REPLACE "/Zm1000" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+      ADD_PLATFORM_FLAGS("/Zm800")
+    ELSE()
+      ADD_PLATFORM_FLAGS("/Zm1000")
+    ENDIF()
 
     IF(TARGET_X64)
       # Fix a bug with Intellisense
@@ -876,6 +901,10 @@ MACRO(NL_SETUP_BUILD)
     # strip it so the /EHa override doesn't emit D9025 on every translation unit.
     STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} /EHa")
+    IF(MSVC_VERSION LESS 1300)
+      # RTTI is off by default before Visual C++ 2005, and CMake leaves out /GR under policy CMP0117
+      SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} /GR")
+    ENDIF()
 
     IF(WITH_SYMBOLS)
       SET(NL_RELEASE_CFLAGS "/Zi ${NL_RELEASE_CFLAGS}")
@@ -890,7 +919,13 @@ MACRO(NL_SETUP_BUILD)
       SET(RUNTIME_FLAG "/MD")
     ENDIF()
 
-    SET(NL_DEBUG_CFLAGS "/Zi ${RUNTIME_FLAG}d /RTC1 /D_DEBUG ${DEBUG_CFLAGS} ${NL_DEBUG_CFLAGS}")
+    IF(MSVC_VERSION LESS 1300)
+      # VC6 has /GZ where later compilers have /RTC1
+      SET(_NL_RUNTIME_CHECKS "/GZ")
+    ELSE()
+      SET(_NL_RUNTIME_CHECKS "/RTC1")
+    ENDIF()
+    SET(NL_DEBUG_CFLAGS "/Zi ${RUNTIME_FLAG}d ${_NL_RUNTIME_CHECKS} /D_DEBUG ${DEBUG_CFLAGS} ${NL_DEBUG_CFLAGS}")
     SET(NL_RELEASE_CFLAGS "${RUNTIME_FLAG} /DNDEBUG ${RELEASE_CFLAGS} ${NL_RELEASE_CFLAGS}")
     SET(NL_DEBUG_LINKFLAGS "/DEBUG /OPT:NOREF /OPT:NOICF /NODEFAULTLIB:msvcrt ${MSVC_INCREMENTAL_YES_FLAG} ${NL_DEBUG_LINKFLAGS}")
     SET(NL_RELEASE_LINKFLAGS "/OPT:REF /OPT:ICF /INCREMENTAL:NO ${NL_RELEASE_LINKFLAGS}")
@@ -1525,11 +1560,24 @@ MACRO(SETUP_EXTERNAL)
     # IF(DXSDK_INCLUDE_DIR)
     #   INCLUDE_DIRECTORIES(${DXSDK_INCLUDE_DIR})
     # ENDIF()
+    IF(MSVC AND MSVC_VERSION LESS 1300 AND DXSDK_INCLUDE_DIR)
+      # Visual C++ 6.0: STLport, then the DirectX SDK, then VC98 (added by FindMSVC). The SDK's
+      # basetsd.h, dsound.h and friends replace the older VC98 ones.
+      INCLUDE_DIRECTORIES(${DXSDK_INCLUDE_DIR})
+    ENDIF()
   ENDIF()
 
   IF(MSVC)
     FIND_PACKAGE(MSVC REQUIRED)
-    FIND_PACKAGE(WindowsSDK REQUIRED)
+    IF(MSVC_VERSION LESS 1300)
+      # Visual C++ 6.0 has its Platform SDK headers and libraries in VC98 itself
+      SET(WINSDK_DIR "${VC_DIR}")
+      SET(WINSDK_INCLUDE_DIR "${VC_INCLUDE_DIR}")
+      SET(WINSDK_LIBRARY_DIR "${VC_DIR}/lib")
+      SET(WINDOWSSDK_FOUND ON)
+    ELSE()
+      FIND_PACKAGE(WindowsSDK REQUIRED)
+    ENDIF()
     IF(NOT DXSDK_DIR)
       MESSAGE(FATAL_ERROR "DirectX SDK or DirectX files from Windows SDK not found.")
     ENDIF()

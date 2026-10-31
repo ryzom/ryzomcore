@@ -49,7 +49,7 @@ bool CSheetId::_Initialised = false;
 bool CSheetId::_RemoveUnknownSheet = true;
 bool CSheetId::_DontHaveSheetKnowledge = false;
 std::map<std::string, uint32> CSheetId::_DevTypeNameToId;
-std::vector<std::vector<std::string>> CSheetId::_DevSheetIdToName;
+std::vector<std::vector<std::string> > CSheetId::_DevSheetIdToName;
 std::map<std::string, uint32> CSheetId::_DevSheetNameToId;
 
 const CSheetId CSheetId::Unknown((uint32)0);

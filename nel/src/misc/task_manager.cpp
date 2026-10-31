@@ -230,7 +230,7 @@ uint CTaskManager::getNumWaitingTasks()
 
 // ***************************************************************************
 
-void CTaskManager::changeTaskPriority(CSynchronized<std::list<CWaitingTask>>::CAccessor &acces)
+void CTaskManager::changeTaskPriority(CSynchronized<std::list<CWaitingTask> >::CAccessor &acces)
 {
 	if (_ChangePriorityCallback)
 	{

@@ -85,10 +85,10 @@ namespace NLNET
 
     bool CModuleSocket::isPlugged(IModule *module) const
     {
-	    const TPluggedModules::TBToAMap &map = _PluggedModules.getBToAMap();
-	    const TPluggedModules::TBToAMap::const_iterator &it(map.find(module));
+	    const TPluggedModules::TBToAMap &bToA = _PluggedModules.getBToAMap();
+	    TPluggedModules::TBToAMap::const_iterator it = bToA.find(module);
 
-		return it != map.end();
+		return it != bToA.end();
     }
 
 	void CModuleSocket::sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)

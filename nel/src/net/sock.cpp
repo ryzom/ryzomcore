@@ -30,7 +30,11 @@
 #		define NOMINMAX
 #	endif
 #	include <winsock2.h>
-#   include <ws2ipdef.h>
+#	ifdef NL_COMP_VC6
+#		include "winsock_vc6.h" // the VC98 headers predate the IPv6 interface
+#	else
+#		include <ws2ipdef.h>
+#	endif
 #	include <windows.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()

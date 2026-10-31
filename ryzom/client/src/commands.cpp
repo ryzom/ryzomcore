@@ -5574,17 +5574,17 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 		}
 	}
 	std::string newPrim =
-	NLMISC::toString("<CHILD TYPE=\"CPrimPoint\">            \n\
-						   <PT X=\"%f\" Y=\"%f\" Z=\"%f\"/>  \n\
-								<PROPERTY TYPE=\"string\">   \n\
-									<NAME>class</NAME>       \n\
-									<STRING>plot</STRING>    \n\
-							   </PROPERTY>                   \n\
-							   <PROPERTY TYPE=\"string\">    \n\
-									<NAME>name</NAME>        \n\
-									<STRING>%s</STRING>      \n\
-							   </PROPERTY>                   \n\
-						  </CHILD>\n", (float) EntitiesMngr.entity(0)->pos().x, (float) EntitiesMngr.entity(0)->pos().y, (float) EntitiesMngr.entity(0)->pos().z, comment.c_str());
+	NLMISC::toString("<CHILD TYPE=\"CPrimPoint\">            \n"
+"						   <PT X=\"%f\" Y=\"%f\" Z=\"%f\"/>  \n"
+"								<PROPERTY TYPE=\"string\">   \n"
+"									<NAME>class</NAME>       \n"
+"									<STRING>plot</STRING>    \n"
+"							   </PROPERTY>                   \n"
+"							   <PROPERTY TYPE=\"string\">    \n"
+"									<NAME>name</NAME>        \n"
+"									<STRING>%s</STRING>      \n"
+"							   </PROPERTY>                   \n"
+"						  </CHILD>\n", (float) EntitiesMngr.entity(0)->pos().x, (float) EntitiesMngr.entity(0)->pos().y, (float) EntitiesMngr.entity(0)->pos().z, comment.c_str());
 
 	// try to append result to current file
 	const std::string LAST_CHILD_MARKER = "</CHILD>";
@@ -5600,12 +5600,12 @@ NLMISC_COMMAND(dumpPosAsPrim, "ld helper : add current position to pos.primitive
 	}
 	if (srcFile.empty())
 	{
-		srcFile = "<?xml version=\"1.0\"?>                        \n\
-					    <PRIMITIVES VERSION=\"1\">                \n\
-                             <ROOT_PRIMITIVE TYPE=\"CPrimNode\">  \n"
+		srcFile = "<?xml version=\"1.0\"?>                        \n"
+"					    <PRIMITIVES VERSION=\"1\">                \n"
+"                             <ROOT_PRIMITIVE TYPE=\"CPrimNode\">  \n"
 				   + newPrim
-				   + "    </ROOT_PRIMITIVE> \n\
-					  </PRIMITIVES>\n";
+				   + "    </ROOT_PRIMITIVE> \n"
+"					  </PRIMITIVES>\n";
 	}
 
 	// write result

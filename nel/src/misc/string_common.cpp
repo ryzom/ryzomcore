@@ -29,6 +29,12 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
+#if defined(NL_OS_WINDOWS) && defined(NL_COMP_VC6)
+// _malloca and _freea arrived with Visual C++ 2005
+#define _malloca(size) malloc(size)
+#define _freea(ptr) free(ptr)
+#endif
+
 namespace NLMISC
 {
 

@@ -512,7 +512,7 @@ private:
 	CSampleBankManager			*_SampleBankManager;
 
 	/// The number of music fading channels
-	static const uint			_NbMusicChannelFaders = 2;
+	NL_STATIC_CONST(uint, _NbMusicChannelFaders, 2);
 
 	/// Music channel faders
 	CMusicChannelFader			_MusicChannelFaders[_NbMusicChannelFaders];

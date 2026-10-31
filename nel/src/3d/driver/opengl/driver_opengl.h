@@ -767,6 +767,8 @@ private:
 	bool						_AlphaBlendedCursorSupported;
 	bool						_AlphaBlendedCursorSupportRetrieved;
 
+	class CCursor;
+	friend class CCursor; // C++98 gives nested classes no access to the enclosing class's private members
 	class CCursor
 	{
 	public:

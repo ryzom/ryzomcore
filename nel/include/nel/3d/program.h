@@ -600,7 +600,7 @@ public:
 		std::string DisplayName;
 
 		/// Minimal required profile for this GPU program
-		IProgram::TProfile Profile;
+		TProfile Profile; // unqualified: VC6 cannot name members of the incomplete IProgram
 
 		const char *SourcePtr;
 		size_t SourceLen;

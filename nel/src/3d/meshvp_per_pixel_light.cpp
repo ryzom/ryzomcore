@@ -59,143 +59,143 @@ static	const uint	VPLightConstantStart = 24;
   */
 // omni light + specular, no normalization
 static const char*	PPLightingVPCodeBegin =
-"!!VP1.0																				\n\
-#compute B = N ^ T																		\n\
-MOV R6, v[2];																			\n\
-MUL R1, R6.yzxw, v[9].zxyw;																\n\
-MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n\
-#vector in tangent space = [ T B N ] * L												\n\
-ADD R2, c[4], -v[0];			   # compute L											\n\
-DP3 R3, R2, R2;					   # get L normalized									\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-DP3 o[TEX0].x, v[9], R2;		   # get x of light vector in tangent space             \n\
-DP3 o[TEX0].y, R1, R2;             # get y												\n\
-DP3 o[TEX0].z, R6, R2;			   # get z												\n\
-#specular part																			\n\
-ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n\
-#compute inverse norm of V																\n\
-DP3 R4, R3, R3;																			\n\
-RSQ R4, R4.x;																			\n\
-#we normalize V and add it to L															\n\
-MAD R2, R4, R3, R2; #H in R1															\n\
-																						\n\
-#normalize H																			\n\
-DP3 R3, R2, R2;																			\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-#compute H in tangent space																\n\
-DP3 o[TEX2].x, v[9], R2;																\n\
-DP3 o[TEX2].y, R1, R2;																	\n\
-DP3 o[TEX2].z, R6, R2;																	\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-# Normal is in R6 for additionnal lighting												\n\
-";
+"!!VP1.0																				\n"
+"#compute B = N ^ T																		\n"
+"MOV R6, v[2];																			\n"
+"MUL R1, R6.yzxw, v[9].zxyw;																\n"
+"MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"ADD R2, c[4], -v[0];			   # compute L											\n"
+"DP3 R3, R2, R2;					   # get L normalized									\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"DP3 o[TEX0].x, v[9], R2;		   # get x of light vector in tangent space             \n"
+"DP3 o[TEX0].y, R1, R2;             # get y												\n"
+"DP3 o[TEX0].z, R6, R2;			   # get z												\n"
+"#specular part																			\n"
+"ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n"
+"#compute inverse norm of V																\n"
+"DP3 R4, R3, R3;																			\n"
+"RSQ R4, R4.x;																			\n"
+"#we normalize V and add it to L															\n"
+"MAD R2, R4, R3, R2; #H in R1															\n"
+"																						\n"
+"#normalize H																			\n"
+"DP3 R3, R2, R2;																			\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"#compute H in tangent space																\n"
+"DP3 o[TEX2].x, v[9], R2;																\n"
+"DP3 o[TEX2].y, R1, R2;																	\n"
+"DP3 o[TEX2].z, R6, R2;																	\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"";
 
 /// The same as above, but for skin / MRM : This normalize the tangent basis.
 static const char*	PPLightingVPNormalizeCodeBegin =
-"!!VP1.0																				\n\
-#normalize the normal																	\n\
-DP3 R1, v[2], v[2];																		\n\
-RSQ R1, R1.x;																			\n\
-MUL R6, v[2], R1;																			\n\
-																						\n\
-#normalize the second vector															\n\
-DP3	R1, R6, v[9];																		\n\
-MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n\
-DP3 R2, R1, R1;																			\n\
-RSQ	R2, R2.x;																			\n\
-MUL R5, R1, R2;	#second basis vector in R5												\n\
-#compute B = N ^ T																		\n\
-MUL R1, R6.yzxw, R5.zxyw;																\n\
-MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-ADD R2, c[4], -v[0];			   # compute L											\n\
-DP3 R3, R2, R2;					   # get L normalized									\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-DP3 o[TEX0].x, R5, R2;			   # get x of light vector in tangent space				\n\
-DP3 o[TEX0].y, R1, R2;             # get y												\n\
-DP3 o[TEX0].z, R6, R2;			   # get z												\n\
-																						\n\
-#specular part																			\n\
-ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n\
-#compute inverse norm of V																\n\
-DP3 R4, R3, R3;																			\n\
-RSQ R4, R4.x;																			\n\
-#we normalize V and add it to L															\n\
-MAD R2, R4, R3, R2; #H in R1															\n\
-																						\n\
-#normalize H																			\n\
-DP3 R3, R2, R2;																			\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-#compute H in tangent space																\n\
-DP3 o[TEX2].x, R5, R2;																	\n\
-DP3 o[TEX2].y, R1, R2;																	\n\
-DP3 o[TEX2].z, R6, R2;																	\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-# Normal is in R6 for additionnal lighting												\n\
-";
+"!!VP1.0																				\n"
+"#normalize the normal																	\n"
+"DP3 R1, v[2], v[2];																		\n"
+"RSQ R1, R1.x;																			\n"
+"MUL R6, v[2], R1;																			\n"
+"																						\n"
+"#normalize the second vector															\n"
+"DP3	R1, R6, v[9];																		\n"
+"MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n"
+"DP3 R2, R1, R1;																			\n"
+"RSQ	R2, R2.x;																			\n"
+"MUL R5, R1, R2;	#second basis vector in R5												\n"
+"#compute B = N ^ T																		\n"
+"MUL R1, R6.yzxw, R5.zxyw;																\n"
+"MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"ADD R2, c[4], -v[0];			   # compute L											\n"
+"DP3 R3, R2, R2;					   # get L normalized									\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"DP3 o[TEX0].x, R5, R2;			   # get x of light vector in tangent space				\n"
+"DP3 o[TEX0].y, R1, R2;             # get y												\n"
+"DP3 o[TEX0].z, R6, R2;			   # get z												\n"
+"																						\n"
+"#specular part																			\n"
+"ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n"
+"#compute inverse norm of V																\n"
+"DP3 R4, R3, R3;																			\n"
+"RSQ R4, R4.x;																			\n"
+"#we normalize V and add it to L															\n"
+"MAD R2, R4, R3, R2; #H in R1															\n"
+"																						\n"
+"#normalize H																			\n"
+"DP3 R3, R2, R2;																			\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"#compute H in tangent space																\n"
+"DP3 o[TEX2].x, R5, R2;																	\n"
+"DP3 o[TEX2].y, R1, R2;																	\n"
+"DP3 o[TEX2].z, R6, R2;																	\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"";
 
 
 // Omni light, no specular
 static const char*	PPLightingNoSpecVPCodeBegin =
-"!!VP1.0																				\n\
-#compute B = N ^ T																		\n\
-MOV R6, v[2];																			\n\
-MUL R1, R6.yzxw, v[9].zxyw;																\n\
-MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-ADD R2, c[4], -v[0];			   # compute L											\n\
-DP3 R3, R2, R2;					   # get L normalized									\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-DP3 o[TEX0].x, v[9], R2;		   # get x of light vector in tangent space             \n\
-DP3 o[TEX0].y, R1, R2;             # get y												\n\
-DP3 o[TEX0].z, R6, R2;			   # get z												\n\
-																						\n\
-																						\n\
-# Normal is in R6 for additionnal lighting												\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-";
+"!!VP1.0																				\n"
+"#compute B = N ^ T																		\n"
+"MOV R6, v[2];																			\n"
+"MUL R1, R6.yzxw, v[9].zxyw;																\n"
+"MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"ADD R2, c[4], -v[0];			   # compute L											\n"
+"DP3 R3, R2, R2;					   # get L normalized									\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"DP3 o[TEX0].x, v[9], R2;		   # get x of light vector in tangent space             \n"
+"DP3 o[TEX0].y, R1, R2;             # get y												\n"
+"DP3 o[TEX0].z, R6, R2;			   # get z												\n"
+"																						\n"
+"																						\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"";
 
 /// Omni light with normalization and no specular
 static const char*	PPLightingVPNormalizeNoSpecCodeBegin =
-"!!VP1.0																				\n\
-#normalize the normal																	\n\
-DP3 R1, v[2], v[2];																		\n\
-RSQ R1, R1.x;																			\n\
-MUL R6, v[2], R1;																			\n\
-																						\n\
-#normalize the second vector															\n\
-DP3	R1, R6, v[9];																		\n\
-MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n\
-DP3 R2, R1, R1;																			\n\
-RSQ	R2, R2.x;																			\n\
-MUL R5, R1, R2;	#second basis vector in R5												\n\
-#compute B = N ^ T																		\n\
-MUL R1, R6.yzxw, R5.zxyw;																\n\
-MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-ADD R2, c[4], -v[0];			   # compute L											\n\
-DP3 R3, R2, R2;					   # get L normalized									\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-DP3 o[TEX0].x, R5, R2;			   # get x of light vector in tangent space				\n\
-DP3 o[TEX0].y, R1, R2;             # get y												\n\
-DP3 o[TEX0].z, R6, R2;			   # get z												\n\
-																						\n\
-# Normal is in R6 for additionnal lighting												\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-";
+"!!VP1.0																				\n"
+"#normalize the normal																	\n"
+"DP3 R1, v[2], v[2];																		\n"
+"RSQ R1, R1.x;																			\n"
+"MUL R6, v[2], R1;																			\n"
+"																						\n"
+"#normalize the second vector															\n"
+"DP3	R1, R6, v[9];																		\n"
+"MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n"
+"DP3 R2, R1, R1;																			\n"
+"RSQ	R2, R2.x;																			\n"
+"MUL R5, R1, R2;	#second basis vector in R5												\n"
+"#compute B = N ^ T																		\n"
+"MUL R1, R6.yzxw, R5.zxyw;																\n"
+"MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"ADD R2, c[4], -v[0];			   # compute L											\n"
+"DP3 R3, R2, R2;					   # get L normalized									\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"DP3 o[TEX0].x, R5, R2;			   # get x of light vector in tangent space				\n"
+"DP3 o[TEX0].y, R1, R2;             # get y												\n"
+"DP3 o[TEX0].z, R6, R2;			   # get z												\n"
+"																						\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"";
 
 
 /////////////////////////
@@ -207,141 +207,141 @@ MOV R5, v[0];																			\n\
 
 // directionnal, no normalization
 static const char*	PPLightingDirectionnalVPCodeBegin =
-"!!VP1.0																				\n\
-#compute B = N ^ T																		\n\
-MOV R6, v[2];																			\n\
-MUL R1, R6.yzxw, v[9].zxyw;																\n\
-MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-DP3 o[TEX0].x, v[9], -c[4];		   # get x of light vector in tangent space             \n\
-DP3 o[TEX0].y, R1, -c[4];           # get y												\n\
-DP3 o[TEX0].z, R6, -c[4];		   # get z												\n\
-																						\n\
-#specular part																			\n\
-ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n\
-#compute inverse norm of V																\n\
-DP3 R4, R3, R3;																			\n\
-RSQ R4, R4.x;																			\n\
-#we normalize V and add it to L. It gives H unnormalized								\n\
-MAD R2, R4, R3, -c[4]; #H in R1															\n\
-																						\n\
-#normalize H																			\n\
-DP3 R3, R2, R2;																			\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-#compute H in tangent space																\n\
-DP3 o[TEX2].x, v[9], R2;																\n\
-DP3 o[TEX2].y, R1, R2;																	\n\
-DP3 o[TEX2].z, R6, R2;																	\n\
-																						\n\
-# Normal is in R6 for additionnal lighting												\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-";
+"!!VP1.0																				\n"
+"#compute B = N ^ T																		\n"
+"MOV R6, v[2];																			\n"
+"MUL R1, R6.yzxw, v[9].zxyw;																\n"
+"MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"DP3 o[TEX0].x, v[9], -c[4];		   # get x of light vector in tangent space             \n"
+"DP3 o[TEX0].y, R1, -c[4];           # get y												\n"
+"DP3 o[TEX0].z, R6, -c[4];		   # get z												\n"
+"																						\n"
+"#specular part																			\n"
+"ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n"
+"#compute inverse norm of V																\n"
+"DP3 R4, R3, R3;																			\n"
+"RSQ R4, R4.x;																			\n"
+"#we normalize V and add it to L. It gives H unnormalized								\n"
+"MAD R2, R4, R3, -c[4]; #H in R1															\n"
+"																						\n"
+"#normalize H																			\n"
+"DP3 R3, R2, R2;																			\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"#compute H in tangent space																\n"
+"DP3 o[TEX2].x, v[9], R2;																\n"
+"DP3 o[TEX2].y, R1, R2;																	\n"
+"DP3 o[TEX2].z, R6, R2;																	\n"
+"																						\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"";
 
 // directionnal + normalization
 static const char*	PPLightingDirectionnalVPNormalizeCodeBegin =
-"!!VP1.0																				\n\
-#normalize the normal																	\n\
-DP3 R1, v[2], v[2];																		\n\
-RSQ R1, R1.x;																			\n\
-MUL R6, v[2], R1;																		\n\
-																						\n\
-#normalize the second vector															\n\
-DP3	R1, R6, v[9];																		\n\
-MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n\
-DP3 R2, R1, R1;																			\n\
-RSQ	R2, R2.x;																			\n\
-MUL R5, R1, R2;	#second basis vector in R5												\n\
-#compute B = N ^ T																		\n\
-MUL R1, R6.yzxw, R5.zxyw;																\n\
-MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-DP3 o[TEX0].x, R5, -c[4];			   # get x of light vector in tangent space			\n\
-DP3 o[TEX0].y, R1, -c[4];               # get y											\n\
-DP3 o[TEX0].z, R6, -c[4];			   # get z											\n\
-																						\n\
-#specular part																			\n\
-ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n\
-#compute inverse norm of V																\n\
-DP3 R4, R3, R3;																			\n\
-RSQ R4, R4.x;																			\n\
-#we normalize V and add it to L															\n\
-MAD R2, R4, R3, -c[4]; #H in R1															\n\
-																						\n\
-#normalize H																			\n\
-DP3 R3, R2, R2;																			\n\
-RSQ R3, R3.x;																			\n\
-MUL R2, R3, R2;																			\n\
-#compute H in tangent space																\n\
-DP3 o[TEX2].x, R5, R2;																	\n\
-DP3 o[TEX2].y, R1, R2;																	\n\
-DP3 o[TEX2].z, R6, R2;																	\n\
-# Normal is in R6 for additionnal lighting												\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-";
+"!!VP1.0																				\n"
+"#normalize the normal																	\n"
+"DP3 R1, v[2], v[2];																		\n"
+"RSQ R1, R1.x;																			\n"
+"MUL R6, v[2], R1;																		\n"
+"																						\n"
+"#normalize the second vector															\n"
+"DP3	R1, R6, v[9];																		\n"
+"MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n"
+"DP3 R2, R1, R1;																			\n"
+"RSQ	R2, R2.x;																			\n"
+"MUL R5, R1, R2;	#second basis vector in R5												\n"
+"#compute B = N ^ T																		\n"
+"MUL R1, R6.yzxw, R5.zxyw;																\n"
+"MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"DP3 o[TEX0].x, R5, -c[4];			   # get x of light vector in tangent space			\n"
+"DP3 o[TEX0].y, R1, -c[4];               # get y											\n"
+"DP3 o[TEX0].z, R6, -c[4];			   # get z											\n"
+"																						\n"
+"#specular part																			\n"
+"ADD R3, c[5], - v[0];			   # compute V (return to eye)							\n"
+"#compute inverse norm of V																\n"
+"DP3 R4, R3, R3;																			\n"
+"RSQ R4, R4.x;																			\n"
+"#we normalize V and add it to L															\n"
+"MAD R2, R4, R3, -c[4]; #H in R1															\n"
+"																						\n"
+"#normalize H																			\n"
+"DP3 R3, R2, R2;																			\n"
+"RSQ R3, R3.x;																			\n"
+"MUL R2, R3, R2;																			\n"
+"#compute H in tangent space																\n"
+"DP3 o[TEX2].x, R5, R2;																	\n"
+"DP3 o[TEX2].y, R1, R2;																	\n"
+"DP3 o[TEX2].z, R6, R2;																	\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"";
 
 
 // directionnal, no normalization, no specular
 static const char*	PPLightingDirectionnalNoSpecVPCodeBegin =
-"!!VP1.0																				\n\
-#compute B = N ^ T																		\n\
-MOV R6, v[2];																			\n\
-MUL R1, R6.yzxw, v[9].zxyw;																\n\
-MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-DP3 o[TEX0].x, v[9], -c[4];		   # get x of light vector in tangent space             \n\
-DP3 o[TEX0].y, R1, -c[4];           # get y												\n\
-DP3 o[TEX0].z, R6, -c[4];		   # get z												\n\
-# Normal is in R6 for additionnal lighting												\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-";
+"!!VP1.0																				\n"
+"#compute B = N ^ T																		\n"
+"MOV R6, v[2];																			\n"
+"MUL R1, R6.yzxw, v[9].zxyw;																\n"
+"MAD R1, v[9].yzxw, -R6.zxyw, R1;														\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"DP3 o[TEX0].x, v[9], -c[4];		   # get x of light vector in tangent space             \n"
+"DP3 o[TEX0].y, R1, -c[4];           # get y												\n"
+"DP3 o[TEX0].z, R6, -c[4];		   # get z												\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"";
 
 // directionnal + normalization, no specular
 static const char*	PPLightingDirectionnalNoSpecVPNormalizeCodeBegin =
-"!!VP1.0																				\n\
-#normalize the normal																	\n\
-DP3 R1, v[2], v[2];																		\n\
-RSQ R1, R1.x;																			\n\
-MUL R6, v[2], R1;																		\n\
-																						\n\
-#normalize the second vector															\n\
-DP3	R1, R6, v[9];																		\n\
-MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n\
-DP3 R2, R1, R1;																			\n\
-RSQ	R2, R2.x;																			\n\
-MUL R5, R1, R2;	#second basis vector in R5												\n\
-#compute B = N ^ T																		\n\
-MUL R1, R6.yzxw, R5.zxyw;																\n\
-MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n\
-																						\n\
-#vector in tangent space = [ T B N ] * L												\n\
-DP3 o[TEX0].x, R5, -c[4];			   # get x of light vector in tangent space			\n\
-DP3 o[TEX0].y, R1, -c[4];               # get y											\n\
-DP3 o[TEX0].z, R6, -c[4];			   # get z											\n\
-																						\n\
-# Normal is in R6 for additionnal lighting												\n\
-# Position in R5 for additionnal lighting                                               \n\
-MOV R5, v[0];																			\n\
-";
+"!!VP1.0																				\n"
+"#normalize the normal																	\n"
+"DP3 R1, v[2], v[2];																		\n"
+"RSQ R1, R1.x;																			\n"
+"MUL R6, v[2], R1;																		\n"
+"																						\n"
+"#normalize the second vector															\n"
+"DP3	R1, R6, v[9];																		\n"
+"MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n"
+"DP3 R2, R1, R1;																			\n"
+"RSQ	R2, R2.x;																			\n"
+"MUL R5, R1, R2;	#second basis vector in R5												\n"
+"#compute B = N ^ T																		\n"
+"MUL R1, R6.yzxw, R5.zxyw;																\n"
+"MAD R1, R5.yzxw, -R6.zxyw, R1; #third basis vector in R1								\n"
+"																						\n"
+"#vector in tangent space = [ T B N ] * L												\n"
+"DP3 o[TEX0].x, R5, -c[4];			   # get x of light vector in tangent space			\n"
+"DP3 o[TEX0].y, R1, -c[4];               # get y											\n"
+"DP3 o[TEX0].z, R6, -c[4];			   # get z											\n"
+"																						\n"
+"# Normal is in R6 for additionnal lighting												\n"
+"# Position in R5 for additionnal lighting                                               \n"
+"MOV R5, v[0];																			\n"
+"";
 
 
 
 // End of per pixel lighting code : compute pos and setup texture
 static const char*	PPLightingVPCodeEnd=
-"	# compute in Projection space														\n\
-	DP4 o[HPOS].x, c[0], v[0];															\n\
-	DP4 o[HPOS].y, c[1], v[0];															\n\
-	DP4 o[HPOS].z, c[2], v[0];															\n\
-	DP4 o[HPOS].w, c[3], v[0];															\n\
-	MOV o[TEX1], v[8];																	\n\
-	END																					\n\
-";
+"	# compute in Projection space														\n"
+"	DP4 o[HPOS].x, c[0], v[0];															\n"
+"	DP4 o[HPOS].y, c[1], v[0];															\n"
+"	DP4 o[HPOS].z, c[2], v[0];															\n"
+"	DP4 o[HPOS].w, c[3], v[0];															\n"
+"	MOV o[TEX1], v[8];																	\n"
+"	END																					\n"
+"";
 
 /***************************************************************/
 /******************* THE FOLLOWING CODE IS COMMENTED OUT *******/
@@ -349,15 +349,15 @@ static const char*	PPLightingVPCodeEnd=
 
 // Test code : map the tangent space vector as the diffuse color
 static const char*	PPLightingVPCodeTest =
-"!!VP1.0																			\n\
- # compute in Projection space														\n\
- DP4 o[HPOS].x, c[0], v[0];															\n\
- DP4 o[HPOS].y, c[1], v[0];															\n\
- DP4 o[HPOS].z, c[2], v[0];															\n\
- DP4 o[HPOS].w, c[3], v[0];															\n\
- MOV o[COL0], v[9];																	\n\
- END																				\n\
-";
+"!!VP1.0																			\n"
+" # compute in Projection space														\n"
+" DP4 o[HPOS].x, c[0], v[0];															\n"
+" DP4 o[HPOS].y, c[1], v[0];															\n"
+" DP4 o[HPOS].z, c[2], v[0];															\n"
+" DP4 o[HPOS].w, c[3], v[0];															\n"
+" MOV o[COL0], v[9];																	\n"
+" END																				\n"
+"";
 ***************************************************************/
 
 class CVertexProgramPerPixelLight : public CVertexProgramLighted

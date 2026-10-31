@@ -3502,7 +3502,7 @@ class CAHInitImportCharacter : public IActionHandler
 				if (id.empty())
 					continue;
 
-				std::vector<pair<string, string>> params;
+				std::vector<pair<string, string> > params;
 				params.clear();
 				params.push_back(std::pair<string, string>("id", id));
 				// adjust ref

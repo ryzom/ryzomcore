@@ -82,6 +82,10 @@ public:
 		FloatMat4x3,
 	};
 
+	// the entries read the private s_TypeSize (C++98 does not let nested classes do that)
+	struct CEntry;
+	friend struct CEntry;
+
 	struct CEntry
 	{
 		NLMISC::TStringId Name;

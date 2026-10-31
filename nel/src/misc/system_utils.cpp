@@ -26,11 +26,17 @@
 #endif
 
 #ifdef NL_OS_WINDOWS
+#ifndef NL_COMP_VC6
+// DXGI (Vista and later) needs a DirectX SDK of 2010 or a Windows SDK; the Visual C++ 6.0 builds
+// (Windows 2000 and XP) find the video memory through DirectDraw only
+#define NL_SYSTEM_UTILS_DXGI
+#endif
 #define INITGUID
 #include <ddraw.h>
 #include <windows.h>
 #include <string.h>
 #include <stdio.h>
+#ifdef NL_SYSTEM_UTILS_DXGI
 #ifdef DXGI_STATUS_OCCLUDED
 #undef DXGI_STATUS_OCCLUDED
 #undef DXGI_STATUS_CLIPPED
@@ -58,6 +64,10 @@
 #undef DXGI_ERROR_REMOTE_OUTOFMEMORY
 #endif
 #include <dxgi.h>
+#endif // NL_SYSTEM_UTILS_DXGI
+#ifdef NL_COMP_VC6
+#	include <objbase.h> // the VC98 initguid.h needs it first
+#endif
 #include <initguid.h>
 #include <cguid.h>
 #	include <objbase.h>
@@ -351,7 +361,7 @@ bool CSystemUtils::isScreensaverEnabled()
 //	SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &bRetValue, 0);
 //	res = (bRetValue == TRUE);
 	HKEY hKeyScreenSaver = NULL;
-	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
+	LONG lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
 	if (lReturn == ERROR_SUCCESS)
 	{
 		DWORD dwType = 0L;
@@ -475,8 +485,16 @@ uint CSystemUtils::getCurrentColorDepth()
 bool CSystemUtils::detectWindowedApplication()
 {
 #ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC6
+	// GetConsoleWindow (Windows 2000) is newer than the VC98 headers
+	typedef HWND (WINAPI *TGetConsoleWindow)();
+	TGetConsoleWindow GetConsoleWindow = (TGetConsoleWindow)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetConsoleWindow");
+	if (GetConsoleWindow && GetConsoleWindow() == NULL)
+		return true;
+#else
 	if (GetConsoleWindow() == NULL)
 		return true;
+#endif
 #endif
 	return false;
 }
@@ -513,6 +531,7 @@ struct SAdapter
 	}
 };
 
+#ifdef NL_SYSTEM_UTILS_DXGI
 static std::list<SAdapter> s_dxgiAdapters;
 
 static void EnumerateUsingDXGI(IDXGIFactory *pDXGIFactory)
@@ -545,6 +564,7 @@ static void EnumerateUsingDXGI(IDXGIFactory *pDXGIFactory)
 		SAFE_RELEASE(pAdapter);
 	}
 }
+#endif // NL_SYSTEM_UTILS_DXGI
 
 BOOL WINAPI DDEnumCallbackEx(GUID FAR* lpGUID, LPSTR lpDriverDescription, LPSTR lpDriverName, LPVOID lpContext, HMONITOR hm)
 {
@@ -567,6 +587,7 @@ sint CSystemUtils::getTotalVideoMemory()
 	sint res = -1;
 
 #if defined(NL_OS_WINDOWS)
+#ifdef NL_SYSTEM_UTILS_DXGI
 	// using DXGI
 	HINSTANCE hDXGI = LoadLibraryA("dxgi.dll");
 
@@ -614,6 +635,7 @@ sint CSystemUtils::getTotalVideoMemory()
 
 		FreeLibrary(hDXGI);
 	}
+#endif // NL_SYSTEM_UTILS_DXGI
 
 	if (res == -1)
 	{

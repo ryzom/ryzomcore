@@ -280,7 +280,7 @@ namespace NLGUI
 			float radius = std::min(thickness / 2.f, width / 2.f);
 			float dot = thickness;
 
-			sint32 count = std::floor((float)width / dot);
+			sint32 count = floor((float)width / dot);
 			// 3n (dot, gap, dot) groups; count should be odd
 			if ((count % 2) == 0) count += 1;
 
@@ -339,7 +339,7 @@ namespace NLGUI
 			if (adjWidthL > 0) innerWidth -= adjWidthL;
 			if (adjWidthR > 0) innerWidth -= adjWidthR;
 
-			sint32 count = std::floor((float)innerWidth * 2.f / (thickness * 3));
+			sint32 count = floor((float)innerWidth * 2.f / (thickness * 3));
 
 			if ((float)innerWidth < 2.f * thickness)
 			{
@@ -593,8 +593,8 @@ namespace NLGUI
 		NLMISC::CLine out;
 		if (getCircleLineIntersection(cX, cY, cR, line, out))
 		{
-			float fromAngle = std::atan2(out.V0.y - cY, out.V0.x - cX);
-			float toAngle   = std::atan2(out.V1.y - cY, out.V1.x - cX);
+			float fromAngle = atan2(out.V0.y - cY, out.V0.x - cX);
+			float toAngle   = atan2(out.V1.y - cY, out.V1.x - cX);
 			if (fromAngle < 0) fromAngle += twopi;
 			if (toAngle < 0) toAngle += twopi;
 			fromAngle /= twopi;
@@ -621,7 +621,7 @@ namespace NLGUI
 		}
 
 		// number of sectors for full circle
-		uint sectors = std::max(minSectors, (uint)std::ceil(radius * m_Scale));
+		uint sectors = std::max(minSectors, (uint)ceil(radius * m_Scale));
 
 		float arcLength;
 		if (toAngle < fromAngle)

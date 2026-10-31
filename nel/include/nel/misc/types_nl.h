@@ -200,8 +200,12 @@
 // 'nullptr' is an ordinary identifier in C++03, so a named constant suffices — no macro.
 // The emulation converts to any pointer or member pointer but never to arithmetic types,
 // so overload resolution matches the C++11 builds.
-// (If VC6's member templates choke on this, drop to '#define nullptr 0' for _MSC_VER < 1300.)
-#if (defined(_MSC_VER) && (_MSC_VER < 1600)) || (!defined(_MSC_VER) && defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__))
+// VC6 cannot brace-initialize the class nor use its template conversion operators, so there
+// nullptr is plain 0 (the C++11 and VC++ 2008 builds keep catching misuse). NL_NO_NULLPTR_TYPE
+// stays undefined: it selects the overloads that take the emulated CNullPtrT, which 0 does not need.
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+#define nullptr 0
+#elif (defined(_MSC_VER) && (_MSC_VER < 1600)) || (!defined(_MSC_VER) && defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__))
 #define NL_NO_NULLPTR_TYPE
 const class CNullPtrT
 {
@@ -286,8 +290,10 @@ template<class T> inline bool operator!=(const CNullPtrT &, T p) { return p != 0
 #	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
 #		pragma warning (disable : 4005)			// don't warn on redefinitions caused by xp platform sdk
 #	endif // NL_COMP_VC8 || NL_COMP_VC9
-#	pragma warning (disable : 26495)		// Variable is uninitialized. Always initialize a member variable. (On purpose for performance.)
-#	pragma warning (disable : 26812)		// The enum type is unscoped. Prefer 'enum class' over 'enum' (Enum.3).
+#	if !defined(NL_COMP_VC) || (NL_COMP_VC_VERSION >= 80) // older compilers reject warning numbers past 4999
+#		pragma warning (disable : 26495)		// Variable is uninitialized. Always initialize a member variable. (On purpose for performance.)
+#		pragma warning (disable : 26812)		// The enum type is unscoped. Prefer 'enum class' over 'enum' (Enum.3).
+#	endif
 #endif // NL_OS_WINDOWS
 
 
@@ -387,17 +393,42 @@ template<class T> inline bool operator!=(const CNullPtrT &, T p) { return p != 0
 
 #ifdef NL_OS_WINDOWS
 
+#ifdef NL_COMP_VC6
+// To Visual C++ 6.0, __int8 to __int32 are types of their own rather than names of char, short and int (as
+// they are from Visual C++ .NET on), so uint32 and uint would not match: use the standard types
+typedef	signed		char		sint8;
+typedef	unsigned	char		uint8;
+typedef	signed		short		sint16;
+typedef	unsigned	short		uint16;
+typedef	signed		int			sint32;
+typedef	unsigned	int			uint32;
+#else
 typedef	signed		__int8		sint8;
 typedef	unsigned	__int8		uint8;
 typedef	signed		__int16		sint16;
 typedef	unsigned	__int16		uint16;
 typedef	signed		__int32		sint32;
 typedef	unsigned	__int32		uint32;
+#endif
 typedef	signed		__int64		sint64;
 typedef	unsigned	__int64		uint64;
 
 typedef				int			sint;			// at least 32bits (depend of processor)
 typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
+
+#ifdef NL_COMP_VC6
+// Visual C++ 6.0 has no intptr_t and uintptr_t (later compilers define them in stddef.h)
+#	ifndef _INTPTR_T_DEFINED
+typedef				int			intptr_t;
+#		define _INTPTR_T_DEFINED
+#	endif
+#	ifndef _UINTPTR_T_DEFINED
+typedef	unsigned	int			uintptr_t;
+#		define _UINTPTR_T_DEFINED
+#	endif
+// and scopes for-loop variables to the enclosing block
+#	define for if (false) {} else for
+#endif
 
 #define	NL_I64 "I64"
 
@@ -437,6 +468,26 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
 #endif // NL_OS_UNIX
 
+/**
+ * \def NL_STATIC_CONST(type, name, value)
+ * Integral class constant: a static const member with its value in the class, or an enumerator where
+ * the compiler has no in-class initializers for static members (Visual C++ 6.0).
+ */
+#ifdef NL_COMP_VC6
+#	define NL_STATIC_CONST(type, name, value) enum { name = (value) }
+#else
+#	define NL_STATIC_CONST(type, name, value) static const type name = (value)
+#endif
+
+/**
+ * \def NL_NO_NATIVE_WCHAR_T
+ * Defined where wchar_t is a typedef of unsigned short rather than a type of its own (Visual C++ 6.0, or
+ * later Visual C++ with /Zc:wchar_t-). There wchar_t is uint16, so overloads on both would collide.
+ */
+#if defined(_MSC_VER) && !defined(_NATIVE_WCHAR_T_DEFINED)
+#	define NL_NO_NATIVE_WCHAR_T
+#endif
+
 
 // #ifdef NL_ENABLE_FORCE_INLINE
 #	ifdef NL_COMP_VC
@@ -451,13 +502,64 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 // #endif
 
 
-#ifdef NL_COMP_VC
+#if defined(NL_COMP_VC6)
+// __declspec(align) arrived with Visual C++ .NET
+#define NL_ALIGN(nb)
+#elif defined(NL_COMP_VC)
 #define NL_ALIGN(nb) __declspec(align(nb))
 #else
 #define NL_ALIGN(nb) __attribute__((aligned(nb)))
 #endif
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS) && defined(NL_COMP_VC6)
+// Visual C++ 6.0 has neither intrin.h nor _aligned_malloc: over-allocate and keep the original
+// pointer just below the aligned block
+#include <stdlib.h>
+#include <malloc.h>
+inline void *aligned_malloc(size_t size, size_t alignment)
+{
+	char *p = (char *)malloc(size + alignment + sizeof(void *));
+	if (!p) return 0;
+	char *a = (char *)(((size_t)(p + sizeof(void *)) + alignment - 1) & ~(alignment - 1));
+	((void **)a)[-1] = p;
+	return a;
+}
+inline void aligned_free(void *ptr)
+{
+	if (ptr) free(((void **)ptr)[-1]);
+}
+// The VC98 Platform SDK predates the Win64-ready window API names; on Win32 they are the plain ones
+// (values as in later SDKs). LONG_PTR and friends come from the DirectX SDK's basetsd.h.
+#define SetWindowLongPtrA SetWindowLongA
+#define SetWindowLongPtrW SetWindowLongW
+#define GetWindowLongPtrA GetWindowLongA
+#define GetWindowLongPtrW GetWindowLongW
+#define SetClassLongPtrA SetClassLongA
+#define SetClassLongPtrW SetClassLongW
+#define GetClassLongPtrA GetClassLongA
+#define GetClassLongPtrW GetClassLongW
+#ifdef UNICODE
+#define SetWindowLongPtr SetWindowLongPtrW
+#define GetWindowLongPtr GetWindowLongPtrW
+#define SetClassLongPtr SetClassLongPtrW
+#define GetClassLongPtr GetClassLongPtrW
+#else
+#define SetWindowLongPtr SetWindowLongPtrA
+#define GetWindowLongPtr GetWindowLongPtrA
+#define SetClassLongPtr SetClassLongPtrA
+#define GetClassLongPtr GetClassLongPtrA
+#endif
+#define GWLP_WNDPROC (-4)
+#define GWLP_HINSTANCE (-6)
+#define GWLP_HWNDPARENT (-8)
+#define GWLP_ID (-12)
+#define GWLP_USERDATA (-21)
+#define GCLP_HBRBACKGROUND (-10)
+#define GCLP_HCURSOR (-12)
+#define GCLP_HICON (-14)
+#define GCLP_WNDPROC (-24)
+#define GCLP_HICONSM (-34)
+#elif defined(NL_OS_WINDOWS)
 #include <stdlib.h>
 #include <intrin.h>
 #include <malloc.h>
@@ -517,6 +619,7 @@ extern void operator delete[](void *p) throw();
 #if defined(_STLPORT_VERSION) // STLport detected
 #	include <hash_map>
 #	include <hash_set>
+#	include <memory> // CUniquePtr
 #	ifdef _STLP_HASH_MAP
 #		define CHashMap ::std::hash_map
 #		define CHashSet ::std::hash_set
@@ -524,6 +627,9 @@ extern void operator delete[](void *p) throw();
 #	endif // _STLP_HASH_MAP
 #	define CUniquePtr ::std::auto_ptr
 #	define CUniquePtrMove
+#	if !defined(NL_ISO_CPP0X_AVAILABLE) && !(defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100))
+#		define NL_OVERRIDE
+#	endif
 #elif defined(NL_ISO_CPP0X_AVAILABLE) || (defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100))
 #	include <unordered_map>
 #	include <unordered_set>
@@ -623,9 +729,10 @@ typedef std::basic_string<uint32> u32string;
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)
 #	else
-#		define INT64_CONSTANT(c)	(c)
-#		define SINT64_CONSTANT(c)	(c)
-#		define UINT64_CONSTANT(c)	(c)
+		// Visual C++ 6.0 to .NET 2003: no LL suffixes, their own i64 ones
+#		define INT64_CONSTANT(c)	(c##i64)
+#		define SINT64_CONSTANT(c)	(c##i64)
+#		define UINT64_CONSTANT(c)	(c##ui64)
 #	endif
 #else
 #	define INT64_CONSTANT(c)		(c##LL)

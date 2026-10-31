@@ -30,6 +30,9 @@ class CDoorManager : public NL3D::ITransformName
 {
 	static uint32 s_nextId;
 
+	struct SDoor;
+	friend struct SDoor; // C++98 gives nested classes no access to the enclosing class's private members
+
 	struct SDoor
 	{
 		uint32					ID;

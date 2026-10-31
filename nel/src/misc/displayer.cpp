@@ -507,7 +507,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 	{
 		_FilePointer = nlfopen (_FileName, "at");
 		if (_FilePointer == nullptr)
-#ifndef NL_OS_WINDOWS
+#if !defined(NL_OS_WINDOWS) || defined(NL_COMP_VC6) // no _wcserror in Visual C++ 6.0
 			printf ("Can't open log file '%s': %s\n", _FileName.c_str(), strerror (errno));
 #else
 			wprintf(L"Can't open log file '%s': %s\n", nlUtf8ToWide(_FileName), _wcserror(errno));
@@ -729,7 +729,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 				break;
 			case ReportAbort:
 #		ifdef NL_OS_WINDOWS
-#		ifndef NL_COMP_MINGW
+#		if !defined(NL_COMP_MINGW) && !defined(NL_COMP_VC6) // _set_abort_behavior arrived with Visual C++ 2005
 				// disable the Windows popup telling that the application aborted and disable the dr watson report.
 				_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #		endif

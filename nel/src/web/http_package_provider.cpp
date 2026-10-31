@@ -41,9 +41,9 @@ CHttpPackageProvider::~CHttpPackageProvider()
 	// release
 }
 
-bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, const std::string &name)
+bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &fileHash, const std::string &name)
 {
-	CStreamedPackage::makePath(filePath, hash);
+	CStreamedPackage::makePath(filePath, fileHash);
 	std::string downloadUrlFile = filePath + ".lzma";
 	filePath = Path + filePath;
 	std::string downloadPath = filePath + ".download." + toString(rand() * rand());
@@ -131,9 +131,9 @@ bool CHttpPackageProvider::getFile(std::string &filePath, const CHashKey &hash, 
 	}
 	CFile::deleteFile(downloadPath);
 
-	if (!(outHash == hash))
+	if (!(outHash == fileHash))
 	{
-		std::string wantHashS = hash.toString();
+		std::string wantHashS = fileHash.toString();
 		std::string outHashS = outHash.toString();
 		nlwarning("Invalid SHA1 hash for file '%s', download has hash '%s'", wantHashS.c_str(), outHashS.c_str());
 		return false;

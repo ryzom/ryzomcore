@@ -46,7 +46,11 @@ class CCallbackNetBase;
  * msgin contains parameters of the message
  * from is the SockId of the connection, for a client, from is always the same value
  */
-#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
+// Visual C++ 6.0 cannot brace-initialize the callback item tables when the callback is a class: a plain
+// function pointer there (nothing builds these from an object and a method)
+#if defined(NL_COMP_VC6)
+typedef void (*TMsgCallback)(CMessage &msgin, TSockId from, CCallbackNetBase &netbase);
+#elif defined(NL_COMP_VC) && NL_COMP_VC_VERSION < 100
 typedef NLMISC::CCallback<void, CMessage &, TSockId, CCallbackNetBase &> TMsgCallback;
 #else
 typedef std::function<void(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)> TMsgCallback;

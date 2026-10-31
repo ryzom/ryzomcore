@@ -135,7 +135,7 @@ void CDBGroupListSheetTextBrickComposition::CSheetChildBrick::updateViewText(CDB
 	// Get the compo description of the phrase (Desc2)
 	CSheetId	brickSheetId= CSheetId(Ctrl->getSheetId());
 	// Temp if the Desc2 is empty, set Name
-	const char *desc2(STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheetId));
+	const char *desc2 = STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheetId);
 	if( *desc2 && !hasOnlyBlankChars(desc2))	// tolerate Blank error in translation
 		Text->setText(desc2);
 	else

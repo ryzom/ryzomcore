@@ -134,7 +134,7 @@ public:
 	/** Return possibly available drivers for current platform.
 	 * If no drivers are available, return empty list.
 	 */
-	static std::vector<ISoundDriver::TDriver> getAvailableDrivers();
+	static std::vector<TDriver> getAvailableDrivers();
 	/** The static method which builds the sound driver instance
 	 * In case of failure, can throw one of these ESoundDriver exception objects:
 	 * ESoundDriverNotFound, ESoundDriverCorrupted, ESoundDriverOldVersion, ESoundDriverUnknownVersion

@@ -32,6 +32,9 @@
 #	include <eax.h>
 #endif
 
+#ifdef NL_COMP_VC6
+#include <objbase.h> // the VC98 initguid.h needs it first
+#endif
 #include <initguid.h>
 #include <dsound.h>
 

@@ -103,7 +103,7 @@ class NLMISC_CALLBACK_ARGS_CLASS \
 		 \
 		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const \
 		{ \
-			return m_CallbackFunction(NLMISC_CALLBACK_ARGS_IMPL); \
+			NLMISC_CALLBACK_RETURN m_CallbackFunction(NLMISC_CALLBACK_ARGS_IMPL); \
 		} \
 		 \
 		virtual bool equals(const CCallbackBase *callbackBase) const \
@@ -137,7 +137,7 @@ class NLMISC_CALLBACK_ARGS_CLASS \
 		 \
 		virtual TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const \
 		{ \
-			return (m_CallbackObject->*m_CallbackMethod)(NLMISC_CALLBACK_ARGS_IMPL); \
+			NLMISC_CALLBACK_RETURN (m_CallbackObject->*m_CallbackMethod)(NLMISC_CALLBACK_ARGS_IMPL); \
 		} \
 		 \
 		virtual bool equals(const CCallbackBase *callbackBase) const \
@@ -155,32 +155,34 @@ class NLMISC_CALLBACK_ARGS_CLASS \
 	}; \
 	 \
 public: \
-	CCallback() : m_CallbackBase(NULL) \
+	typedef TCallbackFunction *TCallbackFunctionPtr; \
+	 \
+	NLMISC_CALLBACK_NAME() : m_CallbackBase(NULL) \
 	{ \
 		 \
 	} \
 	 \
-	CCallback(TCallbackFunction *callbackFunction) : m_CallbackBase(new CCallbackFunction(callbackFunction)) \
+	NLMISC_CALLBACK_NAME(TCallbackFunction *callbackFunction) : m_CallbackBase(new CCallbackFunction(callbackFunction)) \
 	{ \
 		nlassert(m_CallbackBase); \
 		m_CallbackBase->refAdd(); \
 	} \
 	 \
 	template<typename TClass> \
-	CCallback(TClass *callbackObject, TReturn (TClass::*callbackMethod)(NLMISC_CALLBACK_ARGS_DECL)) : m_CallbackBase(new CCallbackMethod<TClass>(callbackObject, callbackMethod)) \
+	NLMISC_CALLBACK_NAME(TClass *callbackObject, TReturn (TClass::*callbackMethod)(NLMISC_CALLBACK_ARGS_DECL)) : m_CallbackBase(new CCallbackMethod<TClass>(callbackObject, callbackMethod)) \
 	{ \
 		nlassert(m_CallbackBase); \
 		m_CallbackBase->refAdd(); \
 	} \
 	 \
-	CCallback(const CCallback &callback) \
+	NLMISC_CALLBACK_NAME(const NLMISC_CALLBACK_NAME &callback) \
 	{ \
 		m_CallbackBase = callback.m_CallbackBase; \
 		if (m_CallbackBase) \
 			m_CallbackBase->refAdd(); \
 	} \
 	 \
-	CCallback &operator=(const CCallback &callback) \
+	NLMISC_CALLBACK_NAME &operator=(const NLMISC_CALLBACK_NAME &callback) \
 	{ \
 		if (m_CallbackBase != callback.m_CallbackBase) \
 		{ \
@@ -193,7 +195,7 @@ public: \
 		return *this; \
 	} \
 	 \
-	~CCallback() \
+	~NLMISC_CALLBACK_NAME() \
 	{ \
 		if (m_CallbackBase) \
 		{ \
@@ -205,13 +207,13 @@ public: \
 	TReturn callback(NLMISC_CALLBACK_ARGS_DECL) const \
 	{ \
 		nlassert(m_CallbackBase); \
-		return m_CallbackBase->callback(NLMISC_CALLBACK_ARGS_IMPL); \
+		NLMISC_CALLBACK_RETURN m_CallbackBase->callback(NLMISC_CALLBACK_ARGS_IMPL); \
 	} \
 	 \
 	TReturn operator()(NLMISC_CALLBACK_ARGS_DECL) const \
 	{ \
 		nlassert(m_CallbackBase); \
-		return m_CallbackBase->callback(NLMISC_CALLBACK_ARGS_IMPL); \
+		NLMISC_CALLBACK_RETURN m_CallbackBase->callback(NLMISC_CALLBACK_ARGS_IMPL); \
 	} \
 	 \
 	bool valid() const \
@@ -224,7 +226,7 @@ public: \
 		return m_CallbackBase != NULL; \
 	} \
 	 \
-	bool operator==(const CCallback &callback) const \
+	bool operator==(const NLMISC_CALLBACK_NAME &callback) const \
 	{ \
 		return m_CallbackBase->equals(callback.m_CallbackBase); \
 	} \
@@ -234,8 +236,13 @@ private: \
 	 \
 }; /* class CCallback */ \
 
+#ifndef NL_COMP_VC6
+
 template<typename TReturn, typename TArgsA = void, typename TArgsB = void, typename TArgsC = void, typename TArgsD = void, typename TArgsE = void, typename TArgsF = void, typename TArgsG = void, typename TDummy = void>
 class CCallback;
+
+#define NLMISC_CALLBACK_NAME CCallback
+#define NLMISC_CALLBACK_RETURN return
 
 #define NLMISC_CALLBACK_ARGS_CLASS CCallback<TReturn, void, void, void, void, void, void, void, void>
 #define NLMISC_CALLBACK_ARGS_TYPENAME 
@@ -316,7 +323,306 @@ NLMISC_CALLBACK_TEMPLATE
 #undef NLMISC_CALLBACK_ARGS_TYPENAME
 #undef NLMISC_CALLBACK_ARGS_DECL
 #undef NLMISC_CALLBACK_ARGS_IMPL
-#undef NLMISC_CALLBACK_ARGS_CLASSNAME
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#else // NL_COMP_VC6
+
+/*
+ * Visual C++ 6.0 has no partial template specialization and does not return void expressions: each
+ * arity is a class of its own (CCallback0 to CCallback7, and CCallbackVoid0 to CCallbackVoid7 without
+ * the returns), and CCallback derives from the one its arguments select, through member templates of
+ * full specializations. Unused argument slots are CCallbackNone rather than void.
+ */
+
+#define NLMISC_CALLBACK_NO_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback0
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback0
+#define NLMISC_CALLBACK_ARGS_TYPENAME 
+#define NLMISC_CALLBACK_ARGS_DECL 
+#define NLMISC_CALLBACK_ARGS_IMPL 
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid0
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid0
+#define NLMISC_CALLBACK_ARGS_TYPENAME 
+#define NLMISC_CALLBACK_ARGS_DECL 
+#define NLMISC_CALLBACK_ARGS_IMPL 
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback1
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback1
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA
+#define NLMISC_CALLBACK_ARGS_IMPL argsA
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid1
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid1
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA
+#define NLMISC_CALLBACK_ARGS_IMPL argsA
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback2
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback2
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid2
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid2
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback3
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback3
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid3
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid3
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback4
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback4
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid4
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid4
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback5
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback5
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD, TArgsE argsE
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD, argsE
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid5
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid5
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD, TArgsE argsE
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD, argsE
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback6
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback6
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD, TArgsE argsE, TArgsF argsF
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD, argsE, argsF
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid6
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid6
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD, TArgsE argsE, TArgsF argsF
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD, argsE, argsF
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallback7
+#define NLMISC_CALLBACK_RETURN return
+#define NLMISC_CALLBACK_ARGS_CLASS CCallback7
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD, TArgsE argsE, TArgsF argsF, TArgsG argsG
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD, argsE, argsF, argsG
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#define NLMISC_CALLBACK_NAME CCallbackVoid7
+#define NLMISC_CALLBACK_RETURN NLMISC_CALLBACK_NO_RETURN
+#define NLMISC_CALLBACK_ARGS_CLASS CCallbackVoid7
+#define NLMISC_CALLBACK_ARGS_TYPENAME , typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG
+#define NLMISC_CALLBACK_ARGS_DECL TArgsA argsA, TArgsB argsB, TArgsC argsC, TArgsD argsD, TArgsE argsE, TArgsF argsF, TArgsG argsG
+#define NLMISC_CALLBACK_ARGS_IMPL argsA, argsB, argsC, argsD, argsE, argsF, argsG
+NLMISC_CALLBACK_TEMPLATE
+#undef NLMISC_CALLBACK_ARGS_CLASS
+#undef NLMISC_CALLBACK_ARGS_TYPENAME
+#undef NLMISC_CALLBACK_ARGS_DECL
+#undef NLMISC_CALLBACK_ARGS_IMPL
+
+#undef NLMISC_CALLBACK_NAME
+#undef NLMISC_CALLBACK_RETURN
+
+#undef NLMISC_CALLBACK_NO_RETURN
+
+struct CCallbackNone { };
+
+template<typename T> struct CCallbackIsNone { enum { Value = 0 }; };
+template<> struct CCallbackIsNone<CCallbackNone> { enum { Value = 1 }; };
+template<typename T> struct CCallbackIsVoid { enum { Value = 0 }; };
+template<> struct CCallbackIsVoid<void> { enum { Value = 1 }; };
+
+template<int TIndex> struct CCallbackSelect;
+template<> struct CCallbackSelect<0> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback0<TReturn> TType; }; };
+template<> struct CCallbackSelect<1> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback1<TReturn, TArgsA> TType; }; };
+template<> struct CCallbackSelect<2> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback2<TReturn, TArgsA, TArgsB> TType; }; };
+template<> struct CCallbackSelect<3> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback3<TReturn, TArgsA, TArgsB, TArgsC> TType; }; };
+template<> struct CCallbackSelect<4> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback4<TReturn, TArgsA, TArgsB, TArgsC, TArgsD> TType; }; };
+template<> struct CCallbackSelect<5> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback5<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE> TType; }; };
+template<> struct CCallbackSelect<6> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback6<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE, TArgsF> TType; }; };
+template<> struct CCallbackSelect<7> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallback7<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE, TArgsF, TArgsG> TType; }; };
+template<> struct CCallbackSelect<8> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid0<TReturn> TType; }; };
+template<> struct CCallbackSelect<9> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid1<TReturn, TArgsA> TType; }; };
+template<> struct CCallbackSelect<10> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid2<TReturn, TArgsA, TArgsB> TType; }; };
+template<> struct CCallbackSelect<11> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid3<TReturn, TArgsA, TArgsB, TArgsC> TType; }; };
+template<> struct CCallbackSelect<12> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid4<TReturn, TArgsA, TArgsB, TArgsC, TArgsD> TType; }; };
+template<> struct CCallbackSelect<13> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid5<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE> TType; }; };
+template<> struct CCallbackSelect<14> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid6<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE, TArgsF> TType; }; };
+template<> struct CCallbackSelect<15> { template<typename TReturn, typename TArgsA, typename TArgsB, typename TArgsC, typename TArgsD, typename TArgsE, typename TArgsF, typename TArgsG> struct CApply { typedef CCallbackVoid7<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE, TArgsF, TArgsG> TType; }; };
+
+#define NLMISC_CALLBACK_SELECT CCallbackSelect<(7 - CCallbackIsNone<TArgsA>::Value - CCallbackIsNone<TArgsB>::Value - CCallbackIsNone<TArgsC>::Value - CCallbackIsNone<TArgsD>::Value - CCallbackIsNone<TArgsE>::Value - CCallbackIsNone<TArgsF>::Value - CCallbackIsNone<TArgsG>::Value) + 8 * CCallbackIsVoid<TReturn>::Value>::CApply<TReturn, TArgsA, TArgsB, TArgsC, TArgsD, TArgsE, TArgsF, TArgsG>::TType
+
+template<typename TReturn, typename TArgsA = CCallbackNone, typename TArgsB = CCallbackNone, typename TArgsC = CCallbackNone, typename TArgsD = CCallbackNone, typename TArgsE = CCallbackNone, typename TArgsF = CCallbackNone, typename TArgsG = CCallbackNone>
+class CCallback : public NLMISC_CALLBACK_SELECT
+{
+	typedef typename NLMISC_CALLBACK_SELECT TBase;
+
+public:
+	CCallback() { }
+	CCallback(const TBase &callback) : TBase(callback) { }
+	// VC6 deduces no template argument from a function name, so the function pointer type is spelled out
+	CCallback(typename TBase::TCallbackFunctionPtr callbackFunction) : TBase(callbackFunction) { }
+	template<typename TClass, typename TMethod> CCallback(TClass *callbackObject, TMethod callbackMethod) : TBase(callbackObject, callbackMethod) { }
+};
+
+#undef NLMISC_CALLBACK_SELECT
+
+#endif // NL_COMP_VC6
 
 #undef NLMISC_CALLBACK_TEMPLATE
 

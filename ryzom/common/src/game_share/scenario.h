@@ -237,7 +237,7 @@ public: //public type
 	enum TComponentType {Compressed, Dev} ;
 
 	/// Largest compressed or uncompressed body serial() accepts from a peer; a component is a Lua package
-	static const uint32 MaxUserComponentDataLength = 4 * 1024 * 1024;
+	NL_STATIC_CONST(uint32, MaxUserComponentDataLength, 4 * 1024 * 1024);
 
 public://public functions
 	CUserComponent();

@@ -37,6 +37,10 @@
 #	pragma warning( push )
 #	pragma warning( disable : 4244 )
 #endif
+// NeL passes its own stream callbacks; the static defaults would only be unused
+#ifndef OV_EXCLUDE_STATIC_CALLBACKS
+#	define OV_EXCLUDE_STATIC_CALLBACKS
+#endif
 #include <vorbis/vorbisfile.h>
 #ifdef NL_OS_WINDOWS
 #	pragma warning( pop )
