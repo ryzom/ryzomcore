@@ -1724,8 +1724,13 @@ void CMissionManager::dynChatChoice( CCharacter * user, const TDataSetRow & botR
  */
 inline void CMissionManager::closeDynChat( CCharacter * user, const TDataSetRow & botRow )
 {
-	user->staticActionInProgress(false);
-	user->setCurrentInterlocutor(CEntityId::Unknown);
+	// a bot chat window (mission list, trade, mission gift...) opened since the dyn chat owns the interlocutor now,
+	// clearing it would orphan that window: its end could no longer clean it up
+	if (user->getBotChatType() == BOTCHATTYPE::UnknownFlag && !user->hasBotGift() && user->getCurrentInterlocutor() == TheDataset.getEntityId(botRow))
+	{
+		user->staticActionInProgress(false);
+		user->setCurrentInterlocutor(CEntityId::Unknown);
+	}
 	CMessage msgout( "IMPULSION_ID" );
 	CBitMemStream bms;
 	msgout.serial( (CEntityId&)user->getId() );

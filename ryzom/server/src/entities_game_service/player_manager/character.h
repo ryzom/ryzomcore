@@ -1103,6 +1103,9 @@ public:
 	/// return the current bot chat type
 	uint8 getBotChatType()const;
 
+	/// true while a mission gift is open, it has no bot chat type of its own
+	bool hasBotGift() const { return _BotGift != NULL; }
+
 	///\return the current bot chat page
 	uint8 getCurrentBotChatListPage();
 	

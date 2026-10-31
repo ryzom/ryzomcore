@@ -12414,8 +12414,9 @@ void CCharacter::buildMissionList( CCreature * creature,uint16 sessionId )
 	// check must be done done before
 	nlassert(creature);
 
-	// re-init mission interface page
+	// re-init mission interface page, a list left from a chat that did not end normally is dropped
 	_CurrentBotChatListPage = 0;
+	_CurrentMissionList.clear();
 	// for each mission proposed by the creature, check if the player can take the mission, if yes, add the mission to the proposed mission list
 	string noMissionMsg;
 	for ( uint i =  0; i < creature->getMissionVector().size(); i++ )
