@@ -5513,8 +5513,8 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 				}
 			}
 		}
-		// check we can add delta mount
-		if( (nbMektoubMount + delta) > MAX_MEKTOUB_MOUNT )
+		// check we can add delta mount (delta is negative when an exchange gives more than it receives)
+		if ((sint32)nbMektoubMount + delta > MAX_MEKTOUB_MOUNT)
 		{
 			if( sendMessage )
 			{
@@ -5541,8 +5541,8 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 				}
 			}
 		}
-		// check we can add delta packer
-		if( (nbMektoubPacker + delta) > MAX_PACK_ANIMAL )
+		// check we can add delta packer (delta is negative when an exchange gives more than it receives)
+		if ((sint32)nbMektoubPacker + delta > MAX_PACK_ANIMAL)
 		{
 			if( sendMessage )
 			{
@@ -12131,6 +12131,12 @@ void CCharacter::addExchangeItems(CCharacter* trader,vector<CGameItemPtr >& item
 			msgAI.OwnerMirrorRow = _EntityRowId;
 			msgAI.PetMirrorRow = _PlayerPets[ i ].SpawnedPets;
 			CWorldInstances::instance().msgToAIInstance(getInstanceNumber(), msgAI);
+		}
+		else
+		{
+			// validateExchange checks the animal counts, which should leave a slot for every pet received
+			nlwarning("<CCharacter::addExchangeItems> %s has no free pet slot, the pet %s from %s is lost",
+			    _Id.toString().c_str(), playerPetsAdded[p].PetSheetId.toString().c_str(), trader->getId().toString().c_str());
 		}
 	}
 
