@@ -2957,6 +2957,12 @@ private:
 	/// stop the static action that accepting a player exchange started, if it is still the current one
 	void endExchangeStaticAction();
 
+	/// close the bot chat window the client opened for a refused bot chat, telling why with phrase (bot b) if not NULL
+	void refuseBotChat(const CCreature *bot, const char *phrase);
+
+	/// tell the client to close its bot chat window, return false if the message is not known
+	bool sendBotChatForceEnd();
+
 	/// add an entity that must be saved with me when i am saved
 	void	addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void	clearEntitiesToSaveWithMe();

@@ -947,22 +947,14 @@ void CBuildingManager::buildBuildingTradeList(const NLMISC::CEntityId & userId, 
 	// start a new trade session
 	user->setCurrentTradeSession(session);
 
-	// start a bot chat
+	// start a bot chat, startBotChat refuses an invalid target or one that does not offer it, and tells the client
 	CCreature * bot = CreatureManager.getCreature(user->getTarget());
-	if ( !bot)
-	{
-		nlwarning("<BUILDING> user %s : invalid bot %s ",userId.toString().c_str(),user->getTarget().toString().c_str());
-		return;
-	}
-	if (bot->getOutpostBuilding())
+	if (bot != NULL && bot->getOutpostBuilding())
 		bot = user->startBotChat( BOTCHATTYPE::TradeOutpostBuilding );
 	else
 		bot = user->startBotChat( BOTCHATTYPE::TradeBuildingOptions );
-	if ( !bot)
-	{
-		nlwarning("<BUILDING> user %s : invalid bot %s ",userId.toString().c_str(),user->getCurrentInterlocutor().toString().c_str());
+	if (!bot)
 		return;
-	}
 
 	// build the list
 	vector< CTradePhrase > & tradeList =  user->currentPhrasesTradeList();

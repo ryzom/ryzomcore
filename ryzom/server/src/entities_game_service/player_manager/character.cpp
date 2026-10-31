@@ -11352,6 +11352,7 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 	if (!bot)
 	{
 		nlwarning("<CCharacter startBotChat> invalid bot %s", _Target().toString().c_str());
+		refuseBotChat(NULL, NULL);
 		return NULL;
 	}
 	// Special case if it is an outpost building
@@ -11360,6 +11361,7 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 		const double distanceSquare = pow(float( bot->getState().X - _EntityState.X )/1000.0f,2) + pow(float( bot->getState().Y - _EntityState.Y )/1000,2);
 		if( distanceSquare > MaxTalkingOutpostBuildingDistSquare )
 		{
+			refuseBotChat(bot, "BOTCHAT_TOO_FAR");
 			return NULL;
 		}
 	}
@@ -11368,9 +11370,27 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 		const double distanceSquare = pow(float( bot->getState().X - _EntityState.X )/1000.0f,2) + pow(float( bot->getState().Y - _EntityState.Y )/1000,2);
 		if( distanceSquare > MaxTalkingDistSquare )
 		{
+			refuseBotChat(bot, "BOTCHAT_TOO_FAR");
 			return NULL;
 		}
 	}
+
+	// The client asks for a bot chat with its current target without naming it, after running to the NPC that
+	// offered it, and the target can change on the way: refuse what this NPC does not offer. Cosmetic shops open
+	// as item trade. Continuing a mission (UnknownFlag) is checked by the mission step against the NPC.
+	if (chatType != BOTCHATTYPE::UnknownFlag)
+	{
+		uint32 offered = (uint32)1 << (uint32)chatType;
+		if (chatType == BOTCHATTYPE::TradeItemFlag)
+			offered |= (uint32)1 << (uint32)BOTCHATTYPE::TradeCosmeticFlag;
+		if ((bot->getBotChatProgram() & offered) == 0)
+		{
+			nldebug("<CCharacter startBotChat> %s asked %s for bot chat %u, which it does not offer", _Id.toString().c_str(), bot->getId().toString().c_str(), (uint)chatType);
+			refuseBotChat(bot, "BOTCHAT_NOT_OFFERED");
+			return NULL;
+		}
+	}
+
 	_CurrentBotChatType = (uint8)chatType;
 
 	// set the bot as the new interlocutor
@@ -11379,6 +11399,43 @@ CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
 	CharacterBotChatBeginEnd.BotChatStart.push_back( TheDataset.getDataSetRow(_CurrentInterlocutor) );
 
 	return bot;
+}
+
+//-----------------------------------------------
+// refuseBotChat
+//-----------------------------------------------
+void CCharacter::refuseBotChat(const CCreature *bot, const char *phrase)
+{
+	// startBotChat set the bot chat static action before its checks
+	staticActionInProgress(false);
+
+	if (bot != NULL && phrase != NULL)
+	{
+		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+		params[0].setEIdAIAlias(bot->getId(), CAIAliasTranslator::getInstance()->getAIAlias(bot->getId()));
+		sendDynamicSystemMessage(_EntityRowId, phrase, params);
+	}
+
+	// the client opens its bot chat window when it sends the request
+	sendBotChatForceEnd();
+}
+
+//-----------------------------------------------
+// sendBotChatForceEnd
+//-----------------------------------------------
+bool CCharacter::sendBotChatForceEnd()
+{
+	CMessage msgout("IMPULSION_ID");
+	CBitMemStream bms;
+	msgout.serial(_Id);
+	if (!GenericMsgManager.pushNameToStream("BOTCHAT:FORCE_END", bms))
+	{
+		nlwarning("<CCharacter sendBotChatForceEnd> Msg name BOTCHAT:FORCE_END not found");
+		return false;
+	}
+	msgout.serialBufferWithSize((uint8 *)bms.buffer(), bms.length());
+	sendMessageViaMirror(NLNET::TServiceId(_Id.getDynamicId()), msgout);
+	return true;
 }
 
 //-----------------------------------------------
@@ -11406,16 +11463,8 @@ void CCharacter::endBotChat(bool newBotChat, bool closeDynChat)
 		if ( !newBotChat)
 		{
 			//force the end of the bot chat on the client side
-			CMessage msgout( "IMPULSION_ID" );
-			CBitMemStream bms;
-			msgout.serial( _Id );
-			if ( ! GenericMsgManager.pushNameToStream( "BOTCHAT:FORCE_END", bms) )
-			{
-				nlwarning("<CCharacter endBotChat> Msg name BOTCHAT:FORCE_END not found");
+			if (!sendBotChatForceEnd())
 				return;
-			}
-			msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-			sendMessageViaMirror( NLNET::TServiceId(_Id.getDynamicId()), msgout );
 
 			if ( closeDynChat )
 				CMissionManager::getInstance()->removeAllUserDynChat( this );
