@@ -110,7 +110,10 @@ public:
 	
 	// forget xp gain of one creature
 	bool forgetXpGain( TDataSetRow creature );
-	
+
+	// true if an action on this opponent is remembered (until its death or its aggro is lost)
+	bool hasActedOn(TDataSetRow opponent) const { return _SkillProgressPerOpponent.find(opponent) != _SkillProgressPerOpponent.end(); }
+
 private:
 	// TOffensiveCharacter struct per creature
 	TSkillProgressPerOpponentContainer _SkillProgressPerOpponent;

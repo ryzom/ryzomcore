@@ -395,6 +395,39 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 							}
 						}
 					}
+
+					// GainXp is only set by actions on creatures that give xp, so a team breaking a crate that gives none
+					// would get no mission item: also count the other members who fought this creature and stayed near it
+					for (list<CEntityId>::const_iterator itMember = teamMembers.begin(); itMember != teamMembers.end(); ++itMember)
+					{
+						bool gainXp = false;
+						for (uint i = 0; i != members.size(); ++i)
+						{
+							if (members[i].Id == *itMember)
+							{
+								gainXp = members[i].GainXp;
+								break;
+							}
+						}
+						if (gainXp)
+							continue; // counted with the xp above
+
+						TDataSetRow playerRowId = TheDataset.getDataSetRow(*itMember);
+						TCharacterActionsContainer::const_iterator it = _CharacterActions.find(playerRowId);
+						if (it == _CharacterActions.end() || !(*it).second->hasActedOn(creature))
+							continue;
+
+						if (PHRASE_UTILITIES::getDistance(playerRowId, creature) > MaxDistanceForXpGain)
+						{
+							const std::set<TDataSetRow> &aggrolist = creaturePtr->getAggroList();
+							if (aggrolist.find(playerRowId) == aggrolist.end())
+								continue;
+						}
+
+						CCharacter *player = PlayerManager.getChar(playerRowId);
+						if (player)
+							player->getMatchingMissionLootRequirements(itemLevel, creaturePtr->getForm()->getItemsForMissions(), matchingItemsForMissions);
+					}
 				}
 			}
 			// all xp (and mission auto-quartering) go to a single player
