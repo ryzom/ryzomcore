@@ -162,8 +162,8 @@ function __notify_gc()
 end	
 function __notify_post_gc()
 	local deltaTime = nltime.getLocalTime() - gcStartTime
-	local used, threshold = gcinfo()
-	debugInfo(colorTag(255, 0, 0) .. string.format("** GC ** (%d ms) (used = %d kb, threshold = %d kb", deltaTime, used, threshold))
+	local used = math.floor(collectgarbage("count"))
+	debugInfo(colorTag(255, 0, 0) .. string.format("** GC ** (%d ms) (used = %d kb)", deltaTime, used))
 end
 
 

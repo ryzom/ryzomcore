@@ -1140,7 +1140,7 @@ function userComponentManager:export(list, refX, refY, refZ)
 
 	-- Position confirmation
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate export with reference position (%d, %d, %d)", x, y, z))
+		debugInfo(string.format("Validate export with reference position (%.2f, %.2f, %.2f)", x, y, z))
 		local refPosition = {}
 		refPosition["x"] = x
 		refPosition["y"] = y

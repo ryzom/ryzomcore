@@ -88,7 +88,7 @@ Logic.Components.LogicEntityAction =
 
 			
 			if this.Event.ValueString and this.Event.ValueString ~= "" then
-				if string.gfind(eventType, "%%1")() then
+				if string.find(eventType, "%%1") then
 					eventType = string.gsub(eventType, "%%1", "'"..tostring(this.Event.ValueString).."'")
 				else
 					eventType = eventType .. " '" .. tostring(this.Event.ValueString).. "'"
@@ -171,7 +171,7 @@ Logic.Components.LogicEntityAction =
 
 					if actionInst.Action.ValueString and actionInst.Action.ValueString ~= "" then
 
-						if string.gfind(actionsList, "%%1")() then
+						if string.find(actionsList, "%%1") then
 							actionsList = string.gsub(actionsList, "%%1", "'"..tostring(actionInst.Action.ValueString).."'")
 						else
 							actionsList = actionsList .. " '" .. tostring(actionInst.Action.ValueString).. "'"

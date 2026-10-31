@@ -310,7 +310,7 @@ end
 
 table.insert = function(t, key, value)
 	if not key then
-		debugWarning(string.format("Inserting '%s' '%s' in table with %d elements, nil is not a valid appending value, inserting false instead to fix behaviour!", key, value, #t))
+		debugWarning(string.format("Inserting '%s' '%s' in table with %d elements, nil is not a valid appending value, inserting false instead to fix behaviour!", tostring(key), tostring(value), #t))
 		if value then
 			oldInsertFunction(t, false, value)
 		else

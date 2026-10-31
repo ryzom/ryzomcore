@@ -304,6 +304,13 @@ namespace NLGUI
 			return loadTextChunk(L, chunk, "@" + name, 3);
 		}
 
+		// math.pow(x, y), which 5.3 and 5.4 keep only under LUA_COMPAT_MATHLIB and 5.5 dropped
+		int luaMathPow(lua_State *L)
+		{
+			lua_pushnumber(L, pow(luaL_checknumber(L, 1), luaL_checknumber(L, 2)));
+			return 1;
+		}
+
 		// The libraries the interface scripts get. The same state runs scripts served by the trusted web
 		// domains, so a release build opens nothing that reaches the file system, the process or the VM
 		// internals: no io, no package (require, loadlib), os reduced to its clock functions, debug reduced
@@ -355,6 +362,27 @@ namespace NLGUI
 			lua_setglobal(L, "load");
 			lua_pushcfunction(L, luaSafeLoad);
 			lua_setglobal(L, "loadstring"); // the 5.1 name, kept on every version for the scripts that use it
+
+			// unpack moved into the table library in 5.2, both names on every version for the scripts of either
+			lua_getglobal(L, LUA_TABLIBNAME);
+	#if LUA_VERSION_NUM >= 502
+			lua_getfield(L, -1, "unpack");
+			lua_setglobal(L, "unpack");
+	#else
+			lua_getglobal(L, "unpack");
+			lua_setfield(L, -2, "unpack");
+	#endif
+			lua_pop(L, 1);
+
+			// math.pow on every version for the scripts that use it, where the Lua build no longer has it
+			lua_getglobal(L, LUA_MATHLIBNAME);
+			lua_getfield(L, -1, "pow");
+			if (lua_isnil(L, -1))
+			{
+				lua_pushcfunction(L, luaMathPow);
+				lua_setfield(L, -3, "pow");
+			}
+			lua_pop(L, 2);
 		}
 	}
 #endif // LUA_VERSION_NUM >= 501

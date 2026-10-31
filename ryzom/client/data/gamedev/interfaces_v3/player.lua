@@ -388,9 +388,9 @@ end
 -- regen_text_disabled_color="255 255 255"
 function game:formatRegenTimer(timer, dbPath)
 	if timer > 60 then
-		return string.format("%dm", timer / 60);
+		return string.format("%dm", math.floor(timer / 60));
 	else
-		return string.format("%ds", timer);
+		return string.format("%ds", math.floor(timer));
 	end
 end
 
@@ -832,6 +832,7 @@ end
 
 function game:timeInSecondsToReadableTime(regenTime)			
 	local seconds = math.fmod(regenTime, 60)	
+	if seconds == math.floor(seconds) then seconds = math.floor(seconds) end -- 30, not 30.0, from Lua 5.3 on
 	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
 	local hours = math.floor(regenTime / 3600)	
 	local result = ""
