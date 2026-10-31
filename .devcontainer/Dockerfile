@@ -14,13 +14,13 @@ RUN apt update && \
         libavcodec-dev \
         libavdevice-dev \
         libavformat-dev \
+        libboost-dev \
         libcurl4-openssl-dev \
         libfreetype6-dev \
         libgif-dev \
         libgsf-1-dev \
         libjpeg-dev \
         liblua5.2-dev \
-        libluabind-dev \
         liblzma-dev \
         libmysqlclient-dev \
         libogg-dev \
@@ -84,6 +84,16 @@ RUN wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releas
 RUN mkdir --parents "$CMAKE_INSTALL_DIR" \
     && sh /tmp/cmake.sh --skip-license --prefix="$CMAKE_INSTALL_DIR" \
     && ln --symbolic --force "$CMAKE_INSTALL_DIR/bin/"* /usr/local/bin
+
+# ryzom/luabind as a static library, built like .github/scripts/build-luabind.sh does for the CI jobs;
+# the luabind package of Ubuntu does not work
+ARG LUABIND_REV=6cb0688f78b753ce94df528ac640090251043759
+RUN mkdir /tmp/luabind \
+    && curl -L --fail --retry 3 https://github.com/ryzom/luabind/archive/${LUABIND_REV}.tar.gz | tar -xz -C /tmp/luabind --strip-components=1 \
+    && cmake -S /tmp/luabind -B /tmp/luabind/build -DCMAKE_BUILD_TYPE=Release -DLUABIND_DYNAMIC_LINK=OFF -DBUILD_TESTING=OFF \
+    && cmake --build /tmp/luabind/build --parallel $(nproc) \
+    && cmake --install /tmp/luabind/build \
+    && rm -rf /tmp/luabind
 
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \

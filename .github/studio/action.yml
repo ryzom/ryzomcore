@@ -32,7 +32,7 @@ runs:
           libjpeg-dev \
           libgif-dev libfreetype-dev \
           freeglut3-dev \
-          liblua5.2-dev libluabind-dev \
+          liblua5.2-dev libboost-dev \
           libogg-dev libvorbis-dev libopenal-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \
@@ -41,6 +41,19 @@ runs:
           liblzma-dev \
           libgsf-1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools libqtpropertybrowser-dev
+
+    - uses: actions/cache@v5
+      if: runner.os == 'Linux'
+      with:
+        path: ~/luabind
+        key: luabind-${{ inputs.os }}-${{ hashFiles('.github/scripts/build-luabind.sh') }}
+
+    - name: Luabind Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        bash .github/scripts/build-luabind.sh "$HOME/luabind"
+        sudo cp --archive "$HOME/luabind/." /usr/local/
 
     - name: Install Dependency
       if: runner.os == 'Linux'

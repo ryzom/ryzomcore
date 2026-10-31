@@ -18,7 +18,6 @@ RUN apt update; \
         libgsf-1-114 \
         libjpeg8 \
         liblua5.2-0 \
-        libluabind0.9.1d1 \
         libmysqlclient21 \
         libpng16-16 \
         libqt5widgets5 \

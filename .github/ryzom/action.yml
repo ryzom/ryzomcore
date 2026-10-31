@@ -42,7 +42,7 @@ runs:
           libjpeg-dev \
           libgif-dev libfreetype-dev \
           freeglut3-dev \
-          liblua5.2-dev libluabind-dev \
+          liblua5.2-dev libboost-dev \
           libogg-dev libvorbis-dev libopenal-dev \
           libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
           libmysqlclient-dev \
@@ -56,6 +56,19 @@ runs:
         wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/msquic_posix.h
         wget https://raw.githubusercontent.com/microsoft/msquic/v2.6.3/src/inc/quic_sal_stub.h
         sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
+
+    - uses: actions/cache@v5
+      if: runner.os == 'Linux'
+      with:
+        path: ~/luabind
+        key: luabind-${{ inputs.os }}-${{ hashFiles('.github/scripts/build-luabind.sh') }}
+
+    - name: Luabind Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        bash .github/scripts/build-luabind.sh "$HOME/luabind"
+        sudo cp --archive "$HOME/luabind/." /usr/local/
 
     - name: Install Dependency
       if: runner.os == 'Linux'

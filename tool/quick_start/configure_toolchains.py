@@ -150,6 +150,8 @@ for gcc in FoundGCC:
 			toolchain["LuaVersion"] = 503
 		elif luaVer == "5.4":
 			toolchain["LuaVersion"] = 504
+		elif luaVer == "5.5":
+			toolchain["LuaVersion"] = 505
 	if "HasMsQuic" in gcc and gcc["HasMsQuic"]:
 		toolchain["HasMsQuic"] = True
 	toolchain["CMake"] = []

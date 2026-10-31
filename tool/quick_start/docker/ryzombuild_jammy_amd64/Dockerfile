@@ -19,7 +19,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libjpeg-dev \
   libgif-dev libfreetype6-dev \
   freeglut3-dev \
-  liblua5.2-dev libluabind-dev libcpptest-dev \
+  liblua5.2-dev libboost-dev libcpptest-dev \
   libogg-dev libvorbis-dev libopenal-dev \
   libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev libpostproc-dev \
   libmysqlclient-dev \
@@ -43,6 +43,16 @@ RUN wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releas
   && sh /tmp/cmake.sh --skip-license --prefix=/opt/cmake-${CMAKE_VERSION} \
   && ln --symbolic --force /opt/cmake-${CMAKE_VERSION}/bin/* /usr/local/bin \
   && rm /tmp/cmake.sh
+
+# ryzom/luabind as a static library, built like .github/scripts/build-luabind.sh does for the CI jobs;
+# the luabind package of Ubuntu does not work
+ARG LUABIND_REV=6cb0688f78b753ce94df528ac640090251043759
+RUN mkdir /tmp/luabind \
+  && curl -L --fail --retry 3 https://github.com/ryzom/luabind/archive/${LUABIND_REV}.tar.gz | tar -xz -C /tmp/luabind --strip-components=1 \
+  && cmake -S /tmp/luabind -B /tmp/luabind/build -DCMAKE_BUILD_TYPE=Release -DLUABIND_DYNAMIC_LINK=OFF -DBUILD_TESTING=OFF \
+  && cmake --build /tmp/luabind/build --parallel $(nproc) \
+  && cmake --install /tmp/luabind/build \
+  && rm -rf /tmp/luabind
 
 ENV CC=/usr/lib/ccache/gcc
 ENV CXX=/usr/lib/ccache/g++

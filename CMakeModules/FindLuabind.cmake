@@ -191,8 +191,8 @@ IF(WITH_STLPORT)
 ENDIF()
 
 # generic libraries names
-LIST(APPEND LIBRARY_NAME_RELEASE luabind luabind09 libluabind)
-LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd luabind09-d libluabind_d libluabindd)
+LIST(APPEND LIBRARY_NAME_RELEASE luabind09 luabind libluabind)
+LIST(APPEND LIBRARY_NAME_DEBUG luabind09-d luabind_d luabindd libluabind_d libluabindd)
 
 FIND_PACKAGE_HELPER(Luabind luabind/luabind.hpp RELEASE ${LIBRARY_NAME_RELEASE} DEBUG ${LIBRARY_NAME_DEBUG})
 

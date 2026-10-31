@@ -21,8 +21,13 @@ foreach(_dependency IN ITEMS @package_required_dependencies@)
 endforeach()
 
 
-# Dependencies for components
-foreach(_comp ${_@PROJECT_NAME@_supported_components})
+# Dependencies of the requested components, or of all of them when none are named,
+# so that a project without the GUI does not need Lua and Luabind
+set(_@PROJECT_NAME@_dependent_components ${@PROJECT_NAME@_FIND_COMPONENTS})
+if(NOT _@PROJECT_NAME@_dependent_components)
+  set(_@PROJECT_NAME@_dependent_components ${_@PROJECT_NAME@_supported_components})
+endif()
+foreach(_comp ${_@PROJECT_NAME@_dependent_components})
   foreach(_dependency IN ITEMS ${_@PROJECT_NAME@_${_comp}_dependencies})
     find_dependency(${_dependency} REQUIRED)
   endforeach()

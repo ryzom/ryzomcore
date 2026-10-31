@@ -432,10 +432,11 @@ IF(WITH_NEL)
 
   # allow find_package to find projects from within the mono repo
   list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/nel/internal")
-ELSE()
-#  FIND_PACKAGE(NeL COMPONENTS 3d misc pacs sound nimp REQUIRED)
-  FIND_PACKAGE(NeL REQUIRED)
 ENDIF()
+
+# Without WITH_NEL, each project below finds the installed NeL with the components it uses. The imported NeL targets
+# and those of the dependencies of the components then share that project's directory, where the link interfaces of
+# the NeL targets are resolved, and a project without the GUI needs no Lua and Luabind.
 
 IF(WITH_RYZOM)
   ADD_SUBDIRECTORY(ryzom)
