@@ -2951,6 +2951,9 @@ private:
 	/// reset exchange: clear and reset exchange views, clear exchange related members and client database
 	void resetExchange();
 
+	/// end the exchange with trader and tell both when they are too far apart, return true if it ended
+	bool abortExchangeIfTooFar(const CCharacter *trader);
+
 	/// add an entity that must be saved with me when i am saved
 	void	addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void	clearEntitiesToSaveWithMe();

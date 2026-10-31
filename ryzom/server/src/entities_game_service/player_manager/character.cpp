@@ -2544,6 +2544,15 @@ void CCharacter::processStaticAction()
 		}
 	}
 
+	// A player exchange gives only the accepting player a static action, which compares that player's
+	// position with where the exchange began. Check the distance between the two traders here, for both.
+	if (isExchanging() && _CurrentInterlocutor.getType() == RYZOMID::player)
+	{
+		const CCharacter *trader = PlayerManager.getChar(_CurrentInterlocutor);
+		if (trader != nullptr)
+			abortExchangeIfTooFar(trader);
+	}
+
 	// test if the character has moved since last update (if character is in action mode)
 	if ( _StaticActionInProgress || _HarvestOpened )
 	{
@@ -5223,6 +5232,10 @@ void CCharacter::teleportCharacter( sint32 x, sint32 y, sint32 z, bool teleportW
 
 	// take all items from temp inventory
 	sendCloseTempInventoryImpulsion();
+
+	// an exchange with another player belongs to the place being left
+	if (isExchanging() && _CurrentInterlocutor.getType() == RYZOMID::player)
+		abortExchange();
 
 	// manage teleport in pvp
 	CPVPManager2::getInstance()->playerTeleports(this);
@@ -11270,6 +11283,24 @@ void CCharacter::resetExchange()
 }
 
 //-----------------------------------------------
+// abortExchangeIfTooFar
+//-----------------------------------------------
+bool CCharacter::abortExchangeIfTooFar(const CCharacter *trader)
+{
+	double sqrDistance = CVector2d(_EntityState.X() - trader->getX(), _EntityState.Y() - trader->getY()).sqrnorm();
+	if (sqrDistance <= MaxTalkingDistSquare * 1000.0 * 1000.0)
+		return false;
+
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
+	params[0].setEIdAIAlias(trader->getId(), CAIAliasTranslator::getInstance()->getAIAlias(trader->getId()));
+	sendDynamicSystemMessage(_EntityRowId, "EXCHANGE_TOO_FAR", params);
+	params[0].setEIdAIAlias(_Id, CAIAliasTranslator::getInstance()->getAIAlias(_Id));
+	sendDynamicSystemMessage(trader->getEntityRowId(), "EXCHANGE_TOO_FAR", params);
+	resetExchange();
+	return true;
+}
+
+//-----------------------------------------------
 // startBotChat
 //-----------------------------------------------
 CCreature *  CCharacter::startBotChat(BOTCHATTYPE::TBotChatFlags chatType)
@@ -11740,6 +11771,10 @@ bool CCharacter::validateExchange()
 		abortExchange();
 		return false;
 	}
+
+	// the distance is checked on character ticks, which do not run every game cycle
+	if (abortExchangeIfTooFar(c))
+		return false;
 
 	uint32 userGiveBulk = 0;
 	uint32 userGiveWeight = 0;
