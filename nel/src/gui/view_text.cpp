@@ -2992,7 +2992,7 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32 CViewText::getMinUsedW() const
 	{
-		static const char *spaceOrLineFeedStr(" \n\t");
+		static const char *spaceOrLineFeedStr = " \n\t";
 		float maxWidth = 0.0f;
 
 		// Not multi line ? Same size than min

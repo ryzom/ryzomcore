@@ -22,52 +22,7 @@
 
 #include <algorithm>
 
-// to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
-#include <cassert>
-#ifdef assert
-#undef assert
-#endif
-
-// Warning: cannot use namespace std,    when using luabind
-#ifdef NL_OS_WINDOWS
-#  ifndef NL_EXTENDED_FOR_SCOPE
-#    undef for
-#  endif
-#endif
-
-#ifdef NL_DEBUG
-#	define assert(x) nlassert(x)
-#else
-#	define assert(x)
-#endif
-
-// Always use unique_ptr with ValyriaTear/luabind on Ubuntu 20,
-// since the setting is not stored in build_information.hpp
-#ifndef LUABIND_USE_CXX11
-#define LUABIND_USE_CXX11
-#endif
-
-#include <luabind/luabind.hpp>
-// in luabind > 0.6, LUABIND_MAX_ARITY is set to 10
-#if LUABIND_MAX_ARITY == 10
-#	include <luabind/operator.hpp>
-// only luabind > 0.7 have version.hpp (file checked with build system)
-#	ifdef HAVE_LUABIND_VERSION
-#		include <luabind/version.hpp>
-#	endif
-#	ifndef LUABIND_VERSION
-// luabind 0.7 doesn't define LUABIND_VERSION
-#		define LUABIND_VERSION 700
-#	endif
-// luabind 0.6 doesn't define LUABIND_VERSION but LUABIND_MAX_ARITY is set to 5
-#elif LUABIND_MAX_ARITY == 5
-#	define LUABIND_VERSION 600
-#else
-#	pragma error("luabind version not recognized")
-#endif
-
 #include "lua_ihm_ryzom.h"
-#include "nel/gui/lua_ihm_ucstring.h"
 #include "interface_manager.h"
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/lua_object.h"
@@ -321,9 +276,6 @@ CCtrlBase* CHandlerLUA::getUICaller()
 	} \
 
 
-
-#define LUABIND_FUNC(__func__) luabind::def(#__func__,    &__func__)
-
 // ***************************************************************************
 int CLuaIHMRyzom::luaClientCfgIndex(CLuaState &ls)
 {
@@ -524,110 +476,10 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("deleteShape",  deleteShape);
 	ls.registerFunc("setupShape",  setupShape);
 	
-	lua_State *L = ls.getStatePointer();
-
 	LUABIND_ENUM(PVP_CLAN::TPVPClan, "game.TPVPClan", PVP_CLAN::NbClans, PVP_CLAN::toString);
 	LUABIND_ENUM(BONUS_MALUS::TBonusMalusSpecialTT, "game.TBonusMalusSpecialTT", BONUS_MALUS::NbSpecialTT, BONUS_MALUS::toString);
 
-	luabind::module(L)
-	[
-		LUABIND_FUNC(getDbProp),
-		LUABIND_FUNC(getDbProp64),
-		LUABIND_FUNC(setDbProp),
-		LUABIND_FUNC(setDbProp64),
-		LUABIND_FUNC(addDbProp),
-		LUABIND_FUNC(delDbProp),
-		LUABIND_FUNC(getDbRGBA),
-		LUABIND_FUNC(setDbRGBA),
-		LUABIND_FUNC(debugInfo),
-		LUABIND_FUNC(rawDebugInfo),
-		LUABIND_FUNC(dumpCallStack),
-		LUABIND_FUNC(getDefine),
-		LUABIND_FUNC(setContextHelpText),
-#ifdef RYZOM_LUA_UCSTRING
-		luabind::def("messageBox", (void(*)(const CLuaUCString &)) &messageBox),
-		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &)) &messageBox),
-		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBox),
-#endif
-		luabind::def("messageBox", (void(*)(const std::string &)) &messageBox),
-#ifdef RYZOM_LUA_UCSTRING
-		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &)) &messageBoxWithHelp), // TODO: Lua UTF-8
-		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
-		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
-#endif
-		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
-		LUABIND_FUNC(replacePvpEffectParam),
-		LUABIND_FUNC(secondsSince1970ToHour),
-#ifdef RYZOM_BG_DOWNLOADER
-		LUABIND_FUNC(pauseBGDownloader),
-		LUABIND_FUNC(unpauseBGDownloader),
-		LUABIND_FUNC(requestBGDownloaderPriority),
-		LUABIND_FUNC(getBGDownloaderPriority),
-#endif
-		LUABIND_FUNC(loadBackground),
-		LUABIND_FUNC(getPatchLastErrorMessage),
-		LUABIND_FUNC(getPlayerSelectedSlot),
-		LUABIND_FUNC(isInGame),
-		LUABIND_FUNC(isPlayerSlotNewbieLand),
-		LUABIND_FUNC(getSkillIdFromName),
-		LUABIND_FUNC(getSkillLocalizedName),
-		LUABIND_FUNC(getMaxSkillValue),
-		LUABIND_FUNC(getBaseSkillValueMaxChildren),
-		LUABIND_FUNC(getMagicResistChance),
-		LUABIND_FUNC(getDodgeParryChance),
-		LUABIND_FUNC(browseNpcWebPage),
-		LUABIND_FUNC(clearHtmlUndoRedo),
-		LUABIND_FUNC(getDynString),
-		LUABIND_FUNC(isDynStringAvailable),
-		LUABIND_FUNC(isFullyPatched),
-		LUABIND_FUNC(getSheetType),
-		LUABIND_FUNC(getSheetFamily),
-		LUABIND_FUNC(getSheetName),
-		LUABIND_FUNC(getFameIndex),
-		LUABIND_FUNC(getFameName),
-		LUABIND_FUNC(getFameDBIndex),
-		LUABIND_FUNC(getFirstTribeFameIndex),
-		LUABIND_FUNC(getNbTribeFameIndex),
-		LUABIND_FUNC(getClientCfg),
-		LUABIND_FUNC(sendMsgToServer),
-		LUABIND_FUNC(sendMsgToServerPvpTag),
-		LUABIND_FUNC(sendMsgToServerUseItem),
-		LUABIND_FUNC(isGuildQuitAvailable),
-		LUABIND_FUNC(sortGuildMembers),
-		LUABIND_FUNC(getNbGuildMembers),
-		LUABIND_FUNC(getGuildMemberName),
-		LUABIND_FUNC(getGuildMemberGrade),
-		LUABIND_FUNC(isR2Player),
-		LUABIND_FUNC(getR2PlayerRace),
-		LUABIND_FUNC(isR2PlayerMale),
-		LUABIND_FUNC(getCharacterSheetSkel),
-		LUABIND_FUNC(getSheetId),
-		LUABIND_FUNC(getCharacterSheetRegionForce),
-		LUABIND_FUNC(getCharacterSheetRegionLevel),
-		LUABIND_FUNC(getRegionByAlias),
-		LUABIND_FUNC(getGroundZ),
-		LUABIND_FUNC(tell),
-		LUABIND_FUNC(isRingAccessPointInReach),
-		LUABIND_FUNC(updateTooltipCoords),
-		LUABIND_FUNC(isCtrlKeyDown),
-		LUABIND_FUNC(encodeURLUnicodeParam),
-		LUABIND_FUNC(getPlayerLevel),
-		LUABIND_FUNC(getPlayerVpa),
-		LUABIND_FUNC(getPlayerVpb),
-		LUABIND_FUNC(getPlayerVpc),
-		LUABIND_FUNC(getTargetLevel),
-		LUABIND_FUNC(getTargetForceRegion),
-		LUABIND_FUNC(getTargetLevelForce),
-		LUABIND_FUNC(getTargetSheet),
-		LUABIND_FUNC(getTargetVpa),
-		LUABIND_FUNC(getTargetVpb),
-		LUABIND_FUNC(getTargetVpc),
-		LUABIND_FUNC(isTargetNPC),
-		LUABIND_FUNC(isTargetPlayer),
-		LUABIND_FUNC(isTargetUser),
-		LUABIND_FUNC(isPlayerInPVPMode),
-		LUABIND_FUNC(isTargetInPVPMode)
-	];
+	registerLuabindFunctions(ls);
 }
 
 // ***************************************************************************

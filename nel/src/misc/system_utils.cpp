@@ -31,7 +31,10 @@
 // (Windows 2000 and XP) find the video memory through DirectDraw only
 #define NL_SYSTEM_UTILS_DXGI
 #endif
+#ifndef NL_COMP_VC6
+// The VC98 DEFINE_GUID has no selectany and the GUIDs would clash with dxguid.lib: VC6 takes them from there
 #define INITGUID
+#endif
 #include <ddraw.h>
 #include <windows.h>
 #include <string.h>
@@ -65,10 +68,9 @@
 #endif
 #include <dxgi.h>
 #endif // NL_SYSTEM_UTILS_DXGI
-#ifdef NL_COMP_VC6
-#	include <objbase.h> // the VC98 initguid.h needs it first
-#endif
+#ifndef NL_COMP_VC6
 #include <initguid.h>
+#endif
 #include <cguid.h>
 #	include <objbase.h>
 #	ifdef _WIN32_WINNT_WIN7

@@ -788,10 +788,10 @@ namespace NLGUI
 			{
 				if ((*it)->data == nullptr)
 				{
-					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
+					LOG_DL("(%s) starting new download '%s'", _Id.c_str(), (*it)->url.c_str());
 					if (!startCurlDownload(*it))
 					{
-						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), it->url.c_str());
+						LOG_DL("(%s) failed to start '%s)'", _Id.c_str(), (*it)->url.c_str());
 						// out of the queue before its callback runs, as in checkDownloads; the callback can release the
 						// downloads of the page, so the queue is walked again from the start
 						CDataDownload *download = *it;
@@ -971,7 +971,7 @@ namespace NLGUI
 		{
 			if((*it)->url == finalUrl)
 			{
-				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), img);
+				LOG_DL("already downloading '%s' img %p", finalUrl.c_str(), view);
 				TextureDownloadCB *cb = dynamic_cast<TextureDownloadCB*>(*it);
 				if (cb)
 				{

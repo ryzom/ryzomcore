@@ -240,7 +240,13 @@ IF(TARGET PNG::PNG)
 ENDIF()
 
 IF(WIN32)
-  TARGET_LINK_LIBRARIES(nelmisc PUBLIC winmm.lib dbghelp)
+  IF(MSVC AND MSVC_VERSION LESS 1300)
+    # VC98 has no dbghelp.lib; debug.cpp and mem_displayer.cpp use the imagehlp.lib functions. The
+    # DirectDraw GUIDs of system_utils.cpp come from dxguid.lib there.
+    TARGET_LINK_LIBRARIES(nelmisc PUBLIC winmm.lib imagehlp ${DXSDK_GUID_LIBRARY})
+  ELSE()
+    TARGET_LINK_LIBRARIES(nelmisc PUBLIC winmm.lib dbghelp)
+  ENDIF()
 ENDIF()
 
 #TODO: needed for hunter aswell?

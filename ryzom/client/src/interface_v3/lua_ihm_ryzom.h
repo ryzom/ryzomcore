@@ -12,6 +12,8 @@ public:
 
 private:
 	static void createLuaEnumTable(CLuaState &ls, const std::string &str);
+	// the luabind part of RegisterRyzomFunctions, in lua_ihm_ryzom_luabind.cpp
+	static void registerLuabindFunctions(CLuaState &ls);
 
 	static int luaClientCfgIndex(CLuaState &ls);
 	static int luaClientCfgNewIndex(CLuaState &ls);

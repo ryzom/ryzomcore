@@ -208,8 +208,25 @@ MACRO(NL_ADD_RUNTIME_FLAGS name)
   ENDIF()
   IF(WITH_STLPORT)
     # Appended to the property rather than through TARGET_LINK_LIBRARIES: the targets use both the plain
-    # and the keyword signature of TARGET_LINK_LIBRARIES, which CMake does not allow mixing.
-    SET_PROPERTY(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+    # and the keyword signature of TARGET_LINK_LIBRARIES, which CMake does not allow mixing. The property
+    # takes no optimized and debug keywords, so those become generator expressions.
+    SET(_NL_RUNTIME_LIBS)
+    SET(_NL_RUNTIME_CONFIG)
+    FOREACH(_NL_LIB ${STLPORT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+      IF(_NL_LIB STREQUAL "optimized")
+        SET(_NL_RUNTIME_CONFIG "$<NOT:$<CONFIG:Debug>>")
+      ELSEIF(_NL_LIB STREQUAL "debug")
+        SET(_NL_RUNTIME_CONFIG "$<CONFIG:Debug>")
+      ELSEIF(_NL_LIB STREQUAL "general")
+        SET(_NL_RUNTIME_CONFIG)
+      ELSEIF(_NL_RUNTIME_CONFIG)
+        LIST(APPEND _NL_RUNTIME_LIBS "$<${_NL_RUNTIME_CONFIG}:${_NL_LIB}>")
+        SET(_NL_RUNTIME_CONFIG)
+      ELSE()
+        LIST(APPEND _NL_RUNTIME_LIBS "${_NL_LIB}")
+      ENDIF()
+    ENDFOREACH()
+    SET_PROPERTY(TARGET ${name} APPEND PROPERTY LINK_LIBRARIES ${_NL_RUNTIME_LIBS})
   ENDIF()
 ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 

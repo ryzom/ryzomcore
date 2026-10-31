@@ -32,10 +32,10 @@
 #	include <eax.h>
 #endif
 
-#ifdef NL_COMP_VC6
-#include <objbase.h> // the VC98 initguid.h needs it first
-#endif
+#ifndef NL_COMP_VC6
+// The VC98 DEFINE_GUID has no selectany and would define the GUIDs in every object: VC6 takes them from dxguid.lib
 #include <initguid.h>
+#endif
 #include <dsound.h>
 
 #include <iostream>
