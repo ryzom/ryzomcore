@@ -21,7 +21,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libjpeg-dev \
   libgif-dev libfreetype-dev \
   freeglut3-dev \
-  liblua5.2-dev libboost-dev libcpptest-dev \
+  liblua5.4-dev libboost-dev libcpptest-dev \
   libogg-dev libvorbis-dev libopenal-dev \
   libavcodec-dev libavformat-dev libavdevice-dev libswscale-dev \
   libmysqlclient-dev \

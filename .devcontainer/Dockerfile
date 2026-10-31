@@ -20,7 +20,7 @@ RUN apt update && \
         libgif-dev \
         libgsf-1-dev \
         libjpeg-dev \
-        liblua5.2-dev \
+        liblua5.4-dev \
         liblzma-dev \
         libmysqlclient-dev \
         libogg-dev \

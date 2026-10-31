@@ -17,7 +17,7 @@ RUN apt update; \
         libgif7 \
         libgsf-1-114 \
         libjpeg8 \
-        liblua5.2-0 \
+        liblua5.4-0 \
         libmysqlclient21 \
         libpng16-16 \
         libqt5widgets5 \

@@ -27,7 +27,7 @@
         "WITH_NEL_TESTS": true,
         "WITH_NEL_SAMPLES": true,
         "WITH_LUA51": false,
-        "WITH_LUA52": true,
+        "WITH_LUA54": true,
         "WITH_RYZOM": true,
         "WITH_RYZOM_SERVER": true,
         "WITH_RYZOM_CLIENT": true,
