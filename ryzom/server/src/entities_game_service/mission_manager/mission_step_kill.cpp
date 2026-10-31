@@ -702,8 +702,9 @@ class CMissionStepKillFaction : public IMissionStepTemplate
 		nbSubSteps = 1;
 		retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::faction));
 		retParams.back().Enum = _Faction;
-		retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::integer, sint32(_Quantity)));
-				
+		// the remaining count, as the other kill steps show it
+		retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::integer, sint32(subStepStates[0])));
+
 		if ( _Place != 0xFFFF )
 		{
 			STRING_MANAGER::TParam param;
