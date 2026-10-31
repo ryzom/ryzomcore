@@ -53,11 +53,11 @@ void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progr
 	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
 	if ((const char *) nullable != NULL)
 	{
-		_Nullable = (nullable.getDatas()[0] == '1');
+		_IsNullable = (nullable.getDatas()[0] == '1');
 	}
 	else
 	{
-		_Nullable = false;
+		_IsNullable = false;
 	}
 
 	// Read type

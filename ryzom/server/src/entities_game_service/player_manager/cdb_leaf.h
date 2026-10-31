@@ -40,7 +40,7 @@ public:
 	inline const EPropType &	type() const {return _Type;}
 
 	/// Return the type of the property.
-	inline bool					nullable() const {return _Nullable;}
+	inline bool					nullable() const {return _IsNullable;}
 
 	/// The overridden version that is usable from ICDBStructNode
 	virtual EPropType			getType() const NL_OVERRIDE		{return _Type;}
@@ -52,7 +52,7 @@ public:
 	/**
 	 * Default constructor
 	 */
-	CCDBStructNodeLeaf() : ICDBStructNode(), _Parent( NULL ), _Type( UNKNOWN ), _Nullable( false ) {}
+	CCDBStructNodeLeaf() : ICDBStructNode(), _Parent( NULL ), _Type( UNKNOWN ), _IsNullable( false ) {}
 	
 	/**
 	 *	Build the structure of the database from a file
@@ -185,7 +185,7 @@ private:
 	EPropType			_Type;
 
 	/// nullable
-	bool				_Nullable;
+	bool				_IsNullable;
 
 	/// Binary property id of the leaf (precalculated & stored to avoid having to get back in the tree to build it)
 	CBinId				_LeafId;
