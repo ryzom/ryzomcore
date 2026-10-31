@@ -79,7 +79,7 @@ void cbLiftOut( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::T
 	msgin.serial(triggerId);
 	msgin.serial(rowId);
 
-	CBuildingManager::getInstance()->removeTriggerRequest( rowId );
+	CBuildingManager::getInstance()->leaveTrigger(rowId, triggerId);
 }
 
 //----------------------------------------------------------------------------
@@ -366,7 +366,7 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 {
 	//GPMS can send a trigger msg more than one. So check if we already received it
 	TTriggerRequestCont::iterator itReq = _TriggerRequests.find( rowId );
-	if ( itReq != _TriggerRequests.end() )
+	if (itReq != _TriggerRequests.end() && (*itReq).second.TriggerId == triggerId)
 		return;
 
 	/// get the trigger associated with the pacs trigger id
@@ -425,6 +425,11 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 		return;
 	}
 
+	// the user entered this trigger before the GPMS reported him leaving the previous one, which
+	// happens between neighbouring triggers in one move: the new trigger replaces the old one
+	removeTriggerRequest(rowId);
+
+	request.TriggerId = triggerId;
 	// the GPMS sends the position of a trigger by id, and one id can be placed several times, so keep where the user is
 	request.EnterX = user->getX();
 	request.EnterY = user->getY();
@@ -559,6 +564,17 @@ void CBuildingManager::removeTriggerRequest( const TDataSetRow & rowId )
 //		user->_PropertyDatabase.setProp( NLMISC::toString( "ASCENSOR:%u:NAME",i), 0 );
 		CBankAccessor_PLR::getASCENSOR().getArray(i).setNAME(user->_PropertyDatabase, 0 );
 	}
+}
+
+//----------------------------------------------------------------------------
+void CBuildingManager::leaveTrigger(const TDataSetRow &rowId, sint32 triggerId)
+{
+	// the request belongs to another trigger when the user entered that one before leaving this one
+	TTriggerRequestCont::iterator itReq = _TriggerRequests.find(rowId);
+	if (itReq == _TriggerRequests.end() || (*itReq).second.TriggerId != triggerId)
+		return;
+
+	removeTriggerRequest(rowId);
 }
 
 //----------------------------------------------------------------------------

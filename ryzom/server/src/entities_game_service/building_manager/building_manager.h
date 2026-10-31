@@ -67,8 +67,10 @@ public:
 	void addTriggerRequest( const TDataSetRow & rowId, sint32 triggerId );
 	/// fill a player trigger page
 	void fillTriggerPage(const NLMISC::CEntityId & eId, uint16 clientSession, bool resetPage );
-	/// a user left a trigger, remove its request
+	/// remove the trigger request of a user and close its window
 	void removeTriggerRequest( const TDataSetRow & rowId);
+	/// a user left a trigger, remove its request if it is for that trigger
+	void leaveTrigger(const TDataSetRow &rowId, sint32 triggerId);
 	/// teleport a user through a lift
 	void triggerTeleport(CCharacter * user, uint16 index);
 	//@}
@@ -161,6 +163,7 @@ private:
 		CTriggerRequest()
 		{
 			Timer = NULL;
+			TriggerId = 0;
 			EnterX = 0;
 			EnterY = 0;
 		}
@@ -169,6 +172,8 @@ private:
 		uint16								Session;
 		std::vector<CTriggerRequestEntry>	Entries;
 		CTimer*								Timer;
+		/// the trigger the request was opened for
+		sint32								TriggerId;
 		/// where the user entered the trigger (mm), the request is only valid near it
 		sint32								EnterX;
 		sint32								EnterY;
