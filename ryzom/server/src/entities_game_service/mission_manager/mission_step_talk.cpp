@@ -273,13 +273,17 @@ class CMissionGiveMoney : public IMissionStepTemplate
 
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE { invalidIsGiver=true; return _Bot; }
 
-	bool checkPlayerGift( CMission * instance, CCharacter * user ) NL_OVERRIDE
+	bool checkPlayerGift(CMission *instance, const CActiveStepPD &step, CCharacter *user) NL_OVERRIDE
 	{
 		// check that player gives money and no item
 		if (user->getExchangeMoney() == 0)
 			return false;
-		// clamp give money to amount needed
-		user->setExchangeMoney( (uint32)min( (uint32)_Amount, (uint32)user->getExchangeMoney() ) );
+		// clamp give money to the amount the step still needs, earlier gifts may have paid part of it
+		const CActiveStepStatePD *state = step.getStates(1);
+		uint64 needed = state ? state->getState() : _Amount;
+		if (needed == 0)
+			return false;
+		user->setExchangeMoney(min(needed, user->getExchangeMoney()));
 		nlassert(user->getExchangeView() != NULL);
 		return user->getExchangeView()->isEmpty();
 	}
@@ -507,7 +511,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE { invalidIsGiver=true; return _Bot; }
 
 	//***********************
-	bool checkPlayerGift( CMission * instance, CCharacter * user ) NL_OVERRIDE
+	bool checkPlayerGift(CMission *instance, const CActiveStepPD &step, CCharacter *user) NL_OVERRIDE
 	{
 		if ( user->getExchangeMoney() != 0 )
 			return false;
@@ -515,15 +519,9 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		std::vector<CSubStep> validateSteps = _SubSteps;
 
 		// build the list of need item by substracting the template step with the current step state
-		// TODO : this code is only aware of the first active step !
-		if (instance->getStepsBegin() == instance->getStepsEnd())
-			return false;
-
-		const CActiveStepPD &activeStep = instance->getStepsBegin()->second;
-
 		for (uint i=0; i<_SubSteps.size(); ++i)
 		{
-			const CActiveStepStatePD *activeStepState = activeStep.getStates(i+1);
+			const CActiveStepStatePD *activeStepState = step.getStates(i + 1);
 			if (activeStepState != NULL)
 				validateSteps[i].Quantity = activeStepState->getState();
 		}

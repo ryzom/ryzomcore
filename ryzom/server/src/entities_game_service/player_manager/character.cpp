@@ -11531,44 +11531,35 @@ void CCharacter::checkBotGift()
 		return;
 	}
 
-	CMission * mission = NULL;
-	if (_BotGift->Type == MISSION_DESC::Solo)
+	uint32 giftStep;
+	CBankAccessor_PLR::getEXCHANGE().setACCEPTED(_PropertyDatabase, isBotGiftValid(giftStep));
+}
+
+//-----------------------------------------------
+// isBotGiftValid
+//
+//-----------------------------------------------
+bool CCharacter::isBotGiftValid(uint32 &giftStep)
+{
+	nlassert(_BotGift);
+	CMission *mission = getMissionFromBotGift();
+	if (!mission)
+		return false;
+
+	const CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(mission->getTemplateId());
+	nlassert(templ);
+
+	for (set<uint32>::const_iterator itSet = _BotGift->StepsIndex.begin(); itSet != _BotGift->StepsIndex.end(); ++itSet)
 	{
-		mission = _Missions->getMissions( _BotGift->MissionAlias );
-	}
-	else if (_BotGift->Type == MISSION_DESC::Group)
-	{
-		CTeam * team = TeamManager.getRealTeam( _TeamId );
-		if (!team)
+		// the step ends when a team member completes it while the gift window is open
+		const CActiveStepPD *step = mission->getSteps(*itSet);
+		if (step && templ->Steps[*itSet - 1]->checkPlayerGift(mission, *step, this))
 		{
-			nlwarning("Player %s has no team!", _Id.toString().c_str());
-			return;
+			giftStep = *itSet;
+			return true;
 		}
-		mission = team->getMissionByAlias( _BotGift->MissionAlias );
 	}
-
-	if (mission)
-	{
-		const CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
-		nlassert( templ );
-
-		set<uint32>::iterator itSet;
-		bool giftOk = false;
-		for( itSet=_BotGift->StepsIndex.begin(); itSet!=_BotGift->StepsIndex.end(); ++itSet )
-		{
-			if ( templ->Steps[*itSet-1]->checkPlayerGift(mission,this) )
-			{
-				giftOk = true;
-				break;
-			}
-		}
-//		_PropertyDatabase.setProp("EXCHANGE:ACCEPTED", giftOk);
-		CBankAccessor_PLR::getEXCHANGE().setACCEPTED(_PropertyDatabase, giftOk);
-
-	}
-	else
-//		_PropertyDatabase.setProp("EXCHANGE:ACCEPTED", false);
-CBankAccessor_PLR::getEXCHANGE().setACCEPTED(_PropertyDatabase, false);
+	return false;
 }
 
 //-----------------------------------------------
@@ -11742,6 +11733,27 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 			return;
 		}
 
+		// the exchange ends with the gift, a second validate finds none
+		if (_ExchangeView == NULL)
+		{
+			nldebug("CCharacter::acceptExchange : %s validated a gift with no exchange open", _Id.toString().c_str());
+			return;
+		}
+
+		// check the gift again before taking it: a team member may have paid or ended the step since it was offered,
+		// and a modified client can validate a gift that was refused
+		uint32 giftStep;
+		if (!isBotGiftValid(giftStep))
+		{
+			nldebug("CCharacter::acceptExchange : %s validated a gift its mission step does not accept", _Id.toString().c_str());
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
+			params[0].setEIdAIAlias(_CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor));
+			sendDynamicSystemMessage(_EntityRowId, "EXCHANGE_GIFT_NOT_NEEDED", params);
+			// the client closes its gift window when it validates, release what it offered
+			resetExchange();
+			return;
+		}
+
 		MISSION_DESC::TMissionType type = _BotGift->Type;
 		TAIAlias	missionAlias = _BotGift->MissionAlias;
 
@@ -11776,23 +11788,13 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 
 		if (mission)
 		{
-			// check if gift is ok for the step or for one of the "step any" steps
-			uint32					stepIndex;
-			vector<uint32>			quantities;
-			bool					giftDone = false;
-			set<uint32>::iterator	itSet;
-			for( itSet=_BotGift->StepsIndex.begin(); itSet!=_BotGift->StepsIndex.end(); ++itSet )
-			{
-				stepIndex = *itSet;
-				quantities.clear();
-				giftDone = mission->itemGiftDone( this ,vect, stepIndex, quantities );
-				if( giftDone )
-					break;
-			}
+			// the gift goes to the step that accepted it, which in a "step any" need not be the first;
+			// checkPlayerGift accepts either items or money, never both
+			uint32 stepIndex = giftStep;
+			vector<uint32> quantities;
+			bool giftDone = !vect.empty() && mission->itemGiftDone(this, vect, stepIndex, quantities);
 			if( !giftDone )
 			{
-				stepIndex = *_BotGift->StepsIndex.begin();
-
 				std::list< CMissionEvent* > eventList;
 				CMissionEventGiveMoney eventMoney( (uint32) _ExchangeMoney );
 				// no item accepted : this is a give money

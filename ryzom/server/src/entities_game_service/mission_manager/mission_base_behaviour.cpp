@@ -539,7 +539,7 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 	if ( stepIndex != 0xFFFFFFFF )
 	{
 		EGSPD::CActiveStepPD * step = _Mission->getSteps( stepIndex );
-		nlassert( step ); // TODO: fails if two members of a team with a 'give item' team mission give an item at the exact same time - from CTeam::processTeamMissionStepEvent() from CCharacter::acceptExchange() from cbClientValidateMissionGift()
+		nlassert(step); // CCharacter::acceptExchange checks a gifted step is still active, a team member may have ended it
 		resultEnum = processEventForStep(userRow, *step, event);
 		if ( resultEnum != CMissionEvent::StepEnds )
 			return resultEnum;

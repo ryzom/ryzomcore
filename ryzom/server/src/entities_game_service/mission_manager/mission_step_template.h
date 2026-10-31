@@ -88,8 +88,8 @@ public:
 	virtual uint32	sendStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver);
 	///\return the alias of the NPC/bot involved in the step, or CAIAliasTranslator::Invalid if there is none (or if specified as "giver", in which case invalidIsGiver is set to true)
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=false; return CAIAliasTranslator::Invalid; }
-	/// check if the current player gift is ok
-	virtual bool	checkPlayerGift( CMission* instance, CCharacter * user );
+	/// check if the current player gift is ok for the active step it is given to
+	virtual bool checkPlayerGift(CMission *instance, const EGSPD::CActiveStepPD &step, CCharacter *user);
 	/// callback called when the step is activated by a player (mission beginning or later when character comes back to game). stepIndex starts at 0 here.
 	virtual void	onActivation(CMission* inst,uint32 stepIndex, std::list< CMissionEvent * > & eventList) {}
 	/// When the mission step is removed when not successfully processed (e.g. aborted by user). stepIndex starts at 0 here.

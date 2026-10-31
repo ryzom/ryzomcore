@@ -214,7 +214,7 @@ void IMissionStepTemplate::addAction(IMissionAction * action)
 	_Actions.push_back( action );
 }// IMissionAction solveTextsParams
 
-bool IMissionStepTemplate::checkPlayerGift( CMission* instance, CCharacter * user )
+bool IMissionStepTemplate::checkPlayerGift(CMission *instance, const EGSPD::CActiveStepPD &step, CCharacter *user)
 {
 	nlwarning("<checkPlayerGift> Not implemented in this class");
 	return false;

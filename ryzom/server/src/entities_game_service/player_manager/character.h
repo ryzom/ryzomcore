@@ -2963,6 +2963,9 @@ private:
 	/// tell the client to close its bot chat window, return false if the message is not known
 	bool sendBotChatForceEnd();
 
+	/// check the bot gift exchange against the steps it is given to, clamping its money to what a step still needs; giftStep gets the step index that accepts it
+	bool isBotGiftValid(uint32 &giftStep);
+
 	/// add an entity that must be saved with me when i am saved
 	void	addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void	clearEntitiesToSaveWithMe();
