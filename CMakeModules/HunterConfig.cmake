@@ -15,8 +15,8 @@ hunter_config(Boost
 
 hunter_config(luabind
   VERSION 0.9.1
-  URL  "https://github.com/ryzom/luabind/tarball/6cb0688f78b753ce94df528ac640090251043759"
-  SHA1 "620c2b630be02c1061f44745b8a4b1bf03d42fbb"
+  URL  "https://github.com/ryzom/luabind/tarball/af52fcf7cc903437d739ee2c9bee92e6025b4908"
+  SHA1 "e5cc27cf7af89e360bc52867b95eea01c45dc5a0"
 )
 
 hunter_config(OpenAL

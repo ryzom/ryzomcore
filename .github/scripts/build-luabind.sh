@@ -18,7 +18,7 @@
 set -euo pipefail
 
 PREFIX="$1"
-LUABIND_REV=6cb0688f78b753ce94df528ac640090251043759   # ryzom/luabind master
+LUABIND_REV=af52fcf7cc903437d739ee2c9bee92e6025b4908   # ryzom/luabind master
 
 if [ -f "$PREFIX/lib/libluabind09.a" ]; then
 	echo "== luabind already in $PREFIX"

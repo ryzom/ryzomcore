@@ -25,7 +25,7 @@ BOOST_VER=1.83.0
 BOOST_VER_UND="${BOOST_VER//./_}"
 OPENSSL_VER=3.0.13
 CURL_VER=8.5.0
-LUABIND_REV=6cb0688   # ryzom/luabind
+LUABIND_REV=af52fcf   # ryzom/luabind
 
 mkdir -p "$PREFIX/lib" "$PREFIX/include"
 

@@ -47,7 +47,7 @@ RUN wget --output-document=/tmp/cmake.sh https://github.com/Kitware/CMake/releas
 
 # ryzom/luabind as a static library, built like .github/scripts/build-luabind.sh does for the CI jobs;
 # the luabind package of Ubuntu does not work
-ARG LUABIND_REV=6cb0688f78b753ce94df528ac640090251043759
+ARG LUABIND_REV=af52fcf7cc903437d739ee2c9bee92e6025b4908
 RUN mkdir /tmp/luabind \
   && curl -L --fail --retry 3 https://github.com/ryzom/luabind/archive/${LUABIND_REV}.tar.gz | tar -xz -C /tmp/luabind --strip-components=1 \
   && cmake -S /tmp/luabind -B /tmp/luabind/build -DCMAKE_BUILD_TYPE=Release -DLUABIND_DYNAMIC_LINK=OFF -DBUILD_TESTING=OFF \
