@@ -610,6 +610,13 @@ MACRO(NL_SETUP_BUILD)
       set(CMAKE_C_STANDARD_REQUIRED ON)
       set(NL_CPP_STANDARD_SET ON)
     endif()
+  elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7) OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 11))
+    # clang-cl takes the MSVC branch above
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_C_STANDARD_REQUIRED ON)
+    set(NL_CPP_STANDARD_SET ON)
   endif()
 
   IF(CMAKE_CXX_LIBRARY_ARCHITECTURE)
@@ -1112,7 +1119,7 @@ MACRO(NL_SETUP_BUILD)
           ENDIF()
         ENDIF()
         
-        IF(NOT NL_CPP_STANDARD_SET)
+        IF(CLANG)
           # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
           # minimum target is now OS X 10.7
           SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -stdlib=libc++")

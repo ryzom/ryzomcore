@@ -2374,7 +2374,10 @@ display_months:
 ////////////////////////////////////////
 // functor for orderby clause in command displayMissionStats
 
-struct TOrderByTry : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByTry
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2382,7 +2385,10 @@ struct TOrderByTry : public std::binary_function<const pair<TAIAlias, TMissionSt
 	}
 };
 
-struct TOrderBySuccess : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderBySuccess
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2390,7 +2396,10 @@ struct TOrderBySuccess : public std::binary_function<const pair<TAIAlias, TMissi
 	}
 };
 
-struct TOrderByFail : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByFail
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2398,7 +2407,10 @@ struct TOrderByFail : public std::binary_function<const pair<TAIAlias, TMissionS
 	}
 };
 
-struct TOrderByAbandon : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByAbandon
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
@@ -2406,7 +2418,10 @@ struct TOrderByAbandon : public std::binary_function<const pair<TAIAlias, TMissi
 	}
 };
 
-struct TOrderByLastTry : public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+struct TOrderByLastTry
+#ifndef NL_CPP17
+	: public std::binary_function<const pair<TAIAlias, TMissionStats*>, const pair<TAIAlias, TMissionStats*>, bool>
+#endif
 {
 	bool operator()(const pair<TAIAlias, TMissionStats*> ms1, const pair<TAIAlias, TMissionStats*> ms2) const
 	{
