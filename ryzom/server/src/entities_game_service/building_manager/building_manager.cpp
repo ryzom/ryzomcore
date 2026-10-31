@@ -18,6 +18,7 @@
 
 #include "stdpch.h"
 #include "nel/misc/algo.h"
+#include "nel/misc/vector_2d.h"
 #include "nel/net/service.h"
 #include "server_share/log_item_gen.h"
 #include "server_share/r2_variables.h"
@@ -55,6 +56,10 @@ using namespace NLNET;
 using namespace NLLIGO;
 
 NL_INSTANCE_COUNTER_IMPL(CTriggerRequestTimoutEvent);
+
+// How far a user may be from where he entered a lift trigger when he uses it. The largest lift trigger
+// in the shipped data is a 4.14 by 3.11 m box, 5.2 m from corner to corner.
+static const double s_MaxTriggerDistSquare = 8.0 * 8.0;
 
 /// a player entered in a lift
 void cbLiftIn( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
@@ -168,11 +173,7 @@ void CBuildingManager::playerDisconnects(const CCharacter * user)
 	nlassert(user);
 	TTriggerRequestCont::iterator itReq = _TriggerRequests.find( user->getEntityRowId() );
 	if ( itReq != _TriggerRequests.end() )
-	{
-		if ( (*itReq).second.Timer )
-			delete (*itReq).second.Timer;
-		_TriggerRequests.erase( itReq );
-	}
+		eraseTriggerRequest(itReq);
 }
 
 
@@ -424,6 +425,9 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 		return;
 	}
 
+	// the GPMS sends the position of a trigger by id, and one id can be placed several times, so keep where the user is
+	request.EnterX = user->getX();
+	request.EnterY = user->getY();
 	request.Timer = new CTimer;
 	request.Timer->setRemaining( TriggerRequestTimout, new CTriggerRequestTimoutEvent(rowId) );
 	// add the request to our manager
@@ -521,9 +525,7 @@ void CBuildingManager::removeTriggerRequest( const TDataSetRow & rowId )
 	if ( itReq == _TriggerRequests.end() )
 		return;
 
-	if ( (*itReq).second.Timer )
-		delete (*itReq).second.Timer;
-	_TriggerRequests.erase( itReq );
+	eraseTriggerRequest(itReq);
 
 	CCharacter * user = PlayerManager.getChar( rowId );
 	if ( !user )
@@ -557,6 +559,14 @@ void CBuildingManager::removeTriggerRequest( const TDataSetRow & rowId )
 //		user->_PropertyDatabase.setProp( NLMISC::toString( "ASCENSOR:%u:NAME",i), 0 );
 		CBankAccessor_PLR::getASCENSOR().getArray(i).setNAME(user->_PropertyDatabase, 0 );
 	}
+}
+
+//----------------------------------------------------------------------------
+void CBuildingManager::eraseTriggerRequest(TTriggerRequestCont::iterator it)
+{
+	// a timeout left behind would later remove the next request of the same user
+	delete (*it).second.Timer;
+	_TriggerRequests.erase(it);
 }
 
 
@@ -722,7 +732,14 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 		return;
 	}
 
-
+	// the request ends when the GPMS reports that the user left the trigger, refuse it if he left unreported
+	const double sqrDistance = CVector2d(user->getX() - (*it).second.EnterX, user->getY() - (*it).second.EnterY).sqrnorm();
+	if (sqrDistance > s_MaxTriggerDistSquare * 1000.0 * 1000.0)
+	{
+		nlwarning("<BUILDING> char %s uses a lift %.1f m away from where he entered it", user->getId().toString().c_str(), sqrt(sqrDistance) * 0.001);
+		removeTriggerRequest(user->getEntityRowId());
+		return;
+	}
 
 	// check if sessions mactch between user and system
 	uint16 session = 0;
@@ -741,7 +758,7 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 	if ( session != (*it).second.Session )
 	{
 		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(),"TELEPORT_BAD_SESSION");
-		_TriggerRequests.erase( it );
+		removeTriggerRequest(user->getEntityRowId());
 		return;
 	}
 
@@ -749,19 +766,15 @@ void CBuildingManager::triggerTeleport(CCharacter * user, uint16 index)
 	if ( index >= (*it).second.Entries.size() )
 	{
 		nlwarning( "<BUILDING> char %s : dest = %u, count = %u",user->getId().toString().c_str(), index, (*it).second.Entries.size() );
-		_TriggerRequests.erase( it );
+		removeTriggerRequest(user->getEntityRowId());
 		return;
 	}
 	CTriggerRequestEntry & entry = (*it).second.Entries[index];
 	IDestination * dest = entry.Destination;
 	uint16 ownerIdx = entry.OwnerIndex;
 
-	// remove the requests
-	while ( it != _TriggerRequests.end() )
-	{
-		_TriggerRequests.erase( it );
-		it = _TriggerRequests.find( user->getEntityRowId() );
-	}
+	// remove the request
+	eraseTriggerRequest(it);
 
 	if ( !dest->isUserAllowed(user,ownerIdx) )
 	{

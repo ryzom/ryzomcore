@@ -161,11 +161,18 @@ private:
 		CTriggerRequest()
 		{
 			Timer = NULL;
+			EnterX = 0;
+			EnterY = 0;
 		}
+		// clang-format off
 		uint8								Page;
 		uint16								Session;
 		std::vector<CTriggerRequestEntry>	Entries;
 		CTimer*								Timer;
+		/// where the user entered the trigger (mm), the request is only valid near it
+		sint32								EnterX;
+		sint32								EnterY;
+		// clang-format on
 	};
 
 	///\name structs and members used during parsing only
@@ -201,6 +208,9 @@ private:
 	/// trigger requests of the players
 	typedef CHashMap< TDataSetRow , CTriggerRequest , TDataSetRow::CHashCode > TTriggerRequestCont;
 	TTriggerRequestCont		_TriggerRequests;
+
+	/// delete the timeout of a trigger request and erase the request
+	void eraseTriggerRequest(TTriggerRequestCont::iterator it);
 
 	/// physical buildings by Alias
 	std::map<TAIAlias,IBuildingPhysical*> _BuildingPhysicals;

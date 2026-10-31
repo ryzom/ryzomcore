@@ -5233,9 +5233,10 @@ void CCharacter::teleportCharacter( sint32 x, sint32 y, sint32 z, bool teleportW
 	// take all items from temp inventory
 	sendCloseTempInventoryImpulsion();
 
-	// an exchange with another player belongs to the place being left
+	// an exchange with another player and an open lift belong to the place being left
 	if (isExchanging() && _CurrentInterlocutor.getType() == RYZOMID::player)
 		abortExchange();
+	CBuildingManager::getInstance()->removeTriggerRequest(_EntityRowId);
 
 	// manage teleport in pvp
 	CPVPManager2::getInstance()->playerTeleports(this);
