@@ -97,8 +97,7 @@ inline uint64 rdtsc()
 	uint32 tscLow, tscHigh;
 	__asm
 	{
-		_emit 0x0F // rdtsc
-		_emit 0x31
+		rdtsc
 		mov tscLow, eax
 		mov tscHigh, edx
 	}

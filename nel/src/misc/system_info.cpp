@@ -33,8 +33,7 @@ static void nlcpuid(sint32 regs[4], sint32 idx)
 	__asm
 	{
 		mov eax, idx
-		_emit 0x0F // cpuid
-		_emit 0xA2
+		cpuid // the mnemonic, so the compiler saves the ebx it clobbers (emitted bytes would hide it)
 		mov esi, regs
 		mov [esi], eax
 		mov [esi + 4], ebx
