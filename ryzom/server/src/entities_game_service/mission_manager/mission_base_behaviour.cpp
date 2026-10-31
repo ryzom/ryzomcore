@@ -509,6 +509,34 @@ bool CMissionBaseBehaviour::checkConstraints( bool logForProcessingEvent, const 
 
 
 //----------------------------------------------------------------------------
+// The time and season bounds of a mission (day_period, season) only hold back the actions a player can do again
+// within them. An event sent once (a group spawned, a dyn chat or another mission ended, a queue entry, an escort
+// or AI message, a GM forcing the step) must pass, or the step waiting for it would never end.
+static bool isBoundedByConstraints(CMissionEvent::TMissionEventType type)
+{
+	switch (type)
+	{
+	case CMissionEvent::GiveItem:
+	case CMissionEvent::GiveMoney:
+	case CMissionEvent::EnterZone:
+	case CMissionEvent::Cast:
+	case CMissionEvent::Kill:
+	case CMissionEvent::KillPlayer:
+	case CMissionEvent::BuyItem:
+	case CMissionEvent::SellItem:
+	case CMissionEvent::Forage:
+	case CMissionEvent::Talk:
+	case CMissionEvent::Target:
+	case CMissionEvent::Craft:
+	case CMissionEvent::LootRm:
+	case CMissionEvent::LootItem:
+		return true;
+	default:
+		return false;
+	}
+}
+
+//----------------------------------------------------------------------------
 CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & userRow, std::list< CMissionEvent* > & eventList,uint32 stepIndex )
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
@@ -526,12 +554,12 @@ CMissionEvent::TResult CMissionBaseBehaviour::processEvent( const TDataSetRow & 
 	//ignore events for empty missions
 	if ( templ->Steps.empty() )
 		return CMissionEvent::Nothing;
-	// check constraints
-	if ( ! checkConstraints( true, sDebugPrefix ) )
-		CMissionEvent::Nothing;
 	// get the event to test ( first of the list )
 	nlassert( !eventList.empty() );
 	CMissionEvent & event = *( *(eventList.begin()) );
+	// outside the time and season bounds of the mission a player action is ignored
+	if (isBoundedByConstraints(event.Type) && !checkConstraints(true, sDebugPrefix))
+		return CMissionEvent::Nothing;
 //	MISDBG("mission %s receiving event %u", CPrimitivesParser::aliasToString(templ->Alias).c_str(), event.Type );
 
 	EGSPD::CActiveStepPD * currentStep = NULL;

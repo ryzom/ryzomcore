@@ -11546,6 +11546,10 @@ bool CCharacter::isBotGiftValid(uint32 &giftStep)
 	if (!mission)
 		return false;
 
+	// outside its time and season bounds the mission ignores the gift event, after the gift was taken
+	if (!mission->checkConstraints(false))
+		return false;
+
 	const CMissionTemplate *templ = CMissionManager::getInstance()->getTemplate(mission->getTemplateId());
 	nlassert(templ);
 
@@ -14925,6 +14929,9 @@ void	CCharacter::getMatchingMissionLootRequirements( uint16 itemLevel, const std
 	for ( std::map<TAIAlias, CMission*>::iterator itMission=getMissionsBegin(); itMission!=getMissionsEnd(); ++itMission )
 	{
 		CMission *mission = (*itMission).second;
+		// outside its time and season bounds the mission ignores the loot event, the item would give no credit
+		if (!mission->checkConstraints(false))
+			continue;
 		//uint32 missionTemplateId = mission->getTemplateId();
 		CMissionTemplate *missionTemplate = CMissionManager::getInstance()->getTemplate( (*itMission).first );
 		// Browse active steps
