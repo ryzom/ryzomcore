@@ -6609,6 +6609,10 @@ void CCharacter::removePetCharacterAfterDeath( uint32 index )
 	// forget it
 	if( _PlayerPets[ index ].ItemPtr != 0 )
 	{
+		// a ticket offered in an exchange is locked, and destroyItem would leave it behind without its pet
+		if (_PlayerPets[index].ItemPtr->getLockCount() != 0 && isExchanging())
+			abortExchange();
+
 		uint32 slot = _PlayerPets[ index ].ItemPtr->getInventorySlot();
 
 		// release our ref before we destroy the item
