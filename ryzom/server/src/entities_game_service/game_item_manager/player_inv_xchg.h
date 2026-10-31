@@ -79,6 +79,9 @@ public:
 	/// return true if there is no item in the exchange view
 	bool isEmpty() const;
 
+	/// return true if item is offered in the exchange view
+	bool containsItem(const CGameItemPtr &item) const;
+
 	/// return nb ticket exchanged for an ticket type, counted from the exchange slots
 	uint32 getPetTicketExchanged(ITEM_TYPE::TItemType itemType) const;
 

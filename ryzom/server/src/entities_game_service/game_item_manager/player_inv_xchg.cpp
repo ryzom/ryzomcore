@@ -290,6 +290,18 @@ bool CExchangeView::isEmpty() const
 }
 
 // ****************************************************************************
+bool CExchangeView::containsItem(const CGameItemPtr &item) const
+{
+	for (uint i = 0; i < NbExchangeSlots; i++)
+	{
+		if (getExchangeItem(i) == item)
+			return true;
+	}
+
+	return false;
+}
+
+// ****************************************************************************
 bool CExchangeView::checkPetTickets()
 {
 	if (_InterlocutorView == NULL)

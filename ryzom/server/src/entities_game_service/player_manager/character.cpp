@@ -6611,9 +6611,14 @@ void CCharacter::removePetCharacterAfterDeath( uint32 index )
 	// forget it
 	if( _PlayerPets[ index ].ItemPtr != 0 )
 	{
-		// a ticket offered in an exchange is locked, and destroyItem would leave it behind without its pet
-		if (_PlayerPets[index].ItemPtr->getLockCount() != 0 && isExchanging())
-			abortExchange();
+		// destroyItem only destroys the unlocked quantity, and the pet is gone: unlock the ticket,
+		// whether an exchange locked it (end the exchange first) or lockTicketInInventory on a Ring shard
+		if (_PlayerPets[index].ItemPtr->getLockCount() != 0)
+		{
+			if (isExchanging() && _ExchangeView->containsItem(_PlayerPets[index].ItemPtr))
+				abortExchange();
+			_PlayerPets[index].ItemPtr->setLockCount(0);
+		}
 
 		uint32 slot = _PlayerPets[ index ].ItemPtr->getInventorySlot();
 
