@@ -79,8 +79,12 @@ public:
 	/// return true if there is no item in the exchange view
 	bool isEmpty() const;
 
-	/// return nb ticket exchanged for an ticket type
-	uint32 getPetTicketExchanged(ITEM_TYPE::TItemType itemType) { return * getPetTicketCount(itemType); }
+	/// return nb ticket exchanged for an ticket type, counted from the exchange slots
+	uint32 getPetTicketExchanged(ITEM_TYPE::TItemType itemType) const;
+
+	/// check again that the pet animals of the tickets offered to a player can still be given,
+	/// return false and tell the owner when one cannot
+	bool checkPetTickets();
 
 private:
 	/// helper: used to update client when an exchange slot changes
@@ -89,8 +93,8 @@ private:
 	/// return true if item is a pet animal ticket
 	bool isPetTicket(ITEM_TYPE::TItemType itemType) const;
 
-	/// return a pointer of _PackerTicketCount or _MountTicketCount depending on the type
-	uint32 * getPetTicketCount(ITEM_TYPE::TItemType itemType);
+	/// return true if the pet animal of a ticket can be given (empty inventory, not mounted), tell the owner otherwise
+	bool canGivePetTicket(const CGameItemPtr &item);
 
 private:
 	struct CExchangeSlot
@@ -107,12 +111,6 @@ private:
 
 	/// exchange slots
 	std::vector<CExchangeSlot> _ExchangeSlots;
-
-	/// nb of packer tickets in the exchange view
-	uint32 _PackerTicketCount;
-
-	/// nb of mount tickets in the exchange view
-	uint32 _MountTicketCount;
 };
 
 

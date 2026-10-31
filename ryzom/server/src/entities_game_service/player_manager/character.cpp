@@ -11776,6 +11776,13 @@ bool CCharacter::validateExchange()
 	if (abortExchangeIfTooFar(c))
 		return false;
 
+	// pet animals are checked when their ticket goes into the exchange, but can be filled or mounted afterwards
+	if (!_ExchangeView->checkPetTickets() || !c->_ExchangeView->checkPetTickets())
+	{
+		invalidateExchange();
+		return false;
+	}
+
 	uint32 userGiveBulk = 0;
 	uint32 userGiveWeight = 0;
 	uint32 userGiveSlots = 0;
