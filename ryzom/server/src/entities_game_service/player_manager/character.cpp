@@ -415,6 +415,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_ExchangeId = 0;
 	_ExchangeAccepted = false;
 	_ExchangeMoney = (uint64)0;
+	m_ExchangeStaticAction = false;
 
 	// pvp for player with privilege inactive
 	_PriviledgePvp = false;
@@ -11149,6 +11150,7 @@ void CCharacter::acceptExchangeInvitation()
 
 	CActionDistanceChecker::getInstance()->removePlayer( getEntityRowId() );
 	staticActionInProgress(true);
+	m_ExchangeStaticAction = true;
 
 	_CurrentInterlocutor = _ExchangeAsker;
 	_ExchangeAsker = CEntityId::Unknown;
@@ -11269,6 +11271,7 @@ void CCharacter::resetExchange()
 	_ExchangeAsker = CEntityId::Unknown;
 	_ExchangeAccepted = false;
 	_ExchangeMoney = (uint64) 0;
+	endExchangeStaticAction();
 
 	// if interlocutor is a bot, leave it to endBotChat() method
 	if (_CurrentInterlocutor.getType() == RYZOMID::player)
@@ -11284,7 +11287,22 @@ void CCharacter::resetExchange()
 		c->_CurrentInterlocutor = CEntityId::Unknown;
 		c->_ExchangeAccepted = false;
 		c->_ExchangeMoney = (uint64) 0;
+		c->endExchangeStaticAction();
 	}
+}
+
+//-----------------------------------------------
+// endExchangeStaticAction
+//-----------------------------------------------
+void CCharacter::endExchangeStaticAction()
+{
+	if (!m_ExchangeStaticAction)
+		return;
+	m_ExchangeStaticAction = false;
+
+	// any other static action would have cancelled the exchange when it started
+	if (_StaticActionInProgress && _StaticActionType == STATIC_ACT_TYPES::Neutral)
+		staticActionInProgress(false);
 }
 
 //-----------------------------------------------

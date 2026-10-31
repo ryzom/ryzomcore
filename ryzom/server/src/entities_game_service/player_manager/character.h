@@ -2954,6 +2954,9 @@ private:
 	/// end the exchange with trader and tell both when they are too far apart, return true if it ended
 	bool abortExchangeIfTooFar(const CCharacter *trader);
 
+	/// stop the static action that accepting a player exchange started, if it is still the current one
+	void endExchangeStaticAction();
+
 	/// add an entity that must be saved with me when i am saved
 	void	addEntityToSaveWithMe(const NLMISC::CEntityId &entityId);
 	void	clearEntitiesToSaveWithMe();
@@ -3215,7 +3218,12 @@ private:
 	
 	// money in exchange
 	uint64								_ExchangeMoney;
-	
+
+	// clang-format off
+	// accepting a player exchange started the current static action
+	bool								m_ExchangeStaticAction;
+	// clang-format on
+
 	/// current bot gift of the player
 	CBotGift							*_BotGift;
 	
