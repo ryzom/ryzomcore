@@ -1155,7 +1155,16 @@ void	CGuild::takeMoney( CCharacter * user, uint64 money, uint16 session )
 		CCharacter::sendDynamicSystemMessage(user->getEntityRowId(), "CANT_ACCESS_GUILD_INVENTORY");
 		return;
 	}
-	
+
+	// check if user is trial, as for items
+	CPlayer *p = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
+	BOMB_IF(p == NULL, "Failed to find player record for character: " << user->getId().toString(), return);
+	if (p->isTrialPlayer())
+	{
+		user->sendDynamicSystemMessage(user->getId(), "EGS_CANT_TAKE_GUILD_MONEY_IS_TRIAL_PLAYER");
+		return;
+	}
+
 	if ( money > _Money )
 	{
 		nlwarning( "takeMoney guild %u user %s : money = %" NL_I64 "u, max = %" NL_I64 "u",_Id,user->getId().toString().c_str(),money,_Money);
