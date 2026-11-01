@@ -1558,11 +1558,15 @@ void	CActionPhraseFaber::updateItemResult()
 	// Stat is computed like server
 	float	statArray[RM_FABER_STAT_TYPE::NumRMStatType];
 	float	statCount[RM_FABER_STAT_TYPE::NumRMStatType];
+	// the stats are summed in whole points: a float sum depends on the order the MPs were put in, and a stat landing
+	// exactly on a percent could show one point less
+	uint32 statPoints[RM_FABER_STAT_TYPE::NumRMStatType];
 	uint64	itemStatBF= 0;
 	for(i=0;i<RM_FABER_STAT_TYPE::NumRMStatType;i++)
 	{
 		statArray[i]= 0;
 		statCount[i]= 0;
+		statPoints[i] = 0;
 	}
 	// Color stat (for armour)
 	uint32		bestItemColor[RM_COLOR::NumColors];
@@ -1570,7 +1574,7 @@ void	CActionPhraseFaber::updateItemResult()
 		bestItemColor[i]= 0;
 	// Stat energy is computed like server
 	float	statEnergy= 0;
-
+	uint32 statEnergyPoints = 0;
 
 	// **** Parse all Bricks of the phrase executed, to get min level
 	// take The brick with the lowest CR_RECOMMENDED
@@ -1625,13 +1629,12 @@ void	CActionPhraseFaber::updateItemResult()
 					{
 						if(RM_FABER_STAT_TYPE::isStatRelevant(mpBuild.FaberTypeRequired, (RM_FABER_STAT_TYPE::TRMStatType)k))
 						{
-							// %age to 0-1.
-							statArray[k]+= numMps * (mpIP.Stats[k]/100.f);
+							statPoints[k] += numMps * mpIP.Stats[k];
 						}
 					}
 
 					// Same for total energy
-					statEnergy+= numMps * (mp->Mp.StatEnergy/100.f);
+					statEnergyPoints += numMps * mp->Mp.StatEnergy;
 
 					// Increment color stat
 					if(mp->Mp.MpColor>=0 && mp->Mp.MpColor<RM_COLOR::NumColors)
@@ -1681,18 +1684,18 @@ void	CActionPhraseFaber::updateItemResult()
 		}
 	}
 
-	// Mean stat
+	// Mean stat, %age to 0-1.
 	for(i=0;i<RM_FABER_STAT_TYPE::NumRMStatType;i++)
 	{
 		if(statCount[i])
-			statArray[i]/= statCount[i];
+			statArray[i] = statPoints[i] / (100.f * statCount[i]);
 		clamp(statArray[i], 0.f, 1.f);
 	}
 
 	// Mean stat energy
 	if(totalItemPartMPReq)
 	{
-		statEnergy/= totalItemPartMPReq;
+		statEnergy = statEnergyPoints / (100.f * totalItemPartMPReq);
 		clamp(statEnergy, 0.f, 1.f);
 	}
 
@@ -1814,7 +1817,8 @@ void	CActionPhraseFaber::updateItemResult()
 				CDBViewBar	*statValueBar= dynamic_cast<CDBViewBar*>(groupStat->getElement(groupStat->getId()+":bar" ));
 				CViewText	*statValueText= dynamic_cast<CViewText*>(groupStat->getElement(groupStat->getId()+":textstat" ));
 				CCtrlBase	*statToolTip= dynamic_cast<CCtrlBase*>(groupStat->getElement(groupStat->getId()+":tt" ));
-				uint	sv= uint(statArray[i]*100);
+				// the stretch can leave a whole percent a float error below it
+				uint sv = uint(statArray[i] * 100 + 0.001f);
 				if(statTitle)
 				{
 					statTitle->setText(RM_FABER_STAT_TYPE::toLocalString(statType));
