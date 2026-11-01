@@ -156,6 +156,9 @@ std::string ISoundDriver::getDriverFileName(TDriver driverType)
 	case DriverAuto:
 #if defined (NL_COMP_MINGW)
 		return "libnel_drv_xaudio2_win";
+#elif defined (NL_COMP_VC6)
+		// no XAudio2 in the DirectX SDKs Visual C++ 6.0 builds with, and DirectSound needs nothing installed
+		return "nel_drv_dsound_win";
 #elif defined (NL_OS_WINDOWS)
 		return "nel_drv_xaudio2_win";
 #elif defined (NL_OS_UNIX)

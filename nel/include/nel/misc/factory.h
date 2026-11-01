@@ -60,9 +60,19 @@ public:
 	/// Get the singleton instance reference.
 	static CFactory &instance()
 	{
+#ifdef NL_COMP_VC6
+		// Visual C++ 6.0 does not share a function-local static object of an inline function between
+		// translation units: registrations made in one would be missing in the others. A static pointer
+		// needs no dynamic initialization, and is shared (NeL kept the factories that way up to 2008).
+		static CFactory *instance = nullptr;
+		if (!instance)
+			instance = new CFactory();
+		return *instance;
+#else
 		// Singleton instance pointer.
 		static CFactory	instance;
 		return instance;
+#endif
 	}
 
 	/** Register a factorable object in the factory.
@@ -181,8 +191,16 @@ public:
 	/// Get the singleton instance reference.
 	static CFactoryIndirect &instance()
 	{
+#ifdef NL_COMP_VC6
+		// as CFactory::instance
+		static CFactoryIndirect *instance = nullptr;
+		if (!instance)
+			instance = new CFactoryIndirect();
+		return *instance;
+#else
 		static CFactoryIndirect	instance;
 		return instance;
+#endif
 	}
 
 	void registerClass(const KeyType &key, IFactoryIndirectRegister<BaseFactoryClass> *factoryRegister)
