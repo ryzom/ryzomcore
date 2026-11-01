@@ -58,8 +58,8 @@ public:
 	// destructor
 	~CCharacterShoppingList();
 
-	// mount shopping list with merchant shop
-	void mountShoppingList( CONTINENT::TContinent continent );
+	// mount shopping list with merchant shop, reportRestrictions tells the player what an altar keeps back
+	void mountShoppingList(CONTINENT::TContinent continent, bool reportRestrictions);
 
 	// init page update data
 	void initPageToUpdate( uint32 nbSlotPerPage );

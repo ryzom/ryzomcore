@@ -87,7 +87,7 @@ struct TTradeItemCmp
 };
 
 //-----------------------------------------------------------------------------
-void CCharacterShoppingList::mountShoppingList( CONTINENT::TContinent continent )
+void CCharacterShoppingList::mountShoppingList(CONTINENT::TContinent continent, bool reportRestrictions)
 {
 	set< TItemTradePtr > setOfPlayerItem;
 	set< TItemTradePtr, TTradeItemCmp> setOfNpcItem;
@@ -173,7 +173,7 @@ void CCharacterShoppingList::mountShoppingList( CONTINENT::TContinent continent 
 				}
 			}
 		}
-		if( altarRestrictionReport)
+		if (altarRestrictionReport && reportRestrictions)
 			CCharacter::sendDynamicSystemMessage(_Character->getEntityRowId(), "ALTAR_RESTRICTION");
 	}
 

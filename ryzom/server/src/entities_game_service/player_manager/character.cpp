@@ -9293,7 +9293,7 @@ CEvalNumExpr::TReturnState CCharacter::evalValue (const char *value, double &res
 }
 
 //-----------------------------------------------------------------------------
-void CCharacter::startTradeItemSession( uint16 session )
+void CCharacter::startTradeItemSession(uint16 session, bool reportRestrictions)
 {
 
 	// Start a new trade sesssion
@@ -9337,7 +9337,7 @@ void CCharacter::startTradeItemSession( uint16 session )
 
 	_ShoppingList = new CCharacterShoppingList( bot->getMerchantPtr(), *this, fameFactor );
 
-	_ShoppingList->mountShoppingList( _CurrentContinent );
+	_ShoppingList->mountShoppingList(_CurrentContinent, reportRestrictions);
 	_ShoppingList->initPageToUpdate( NB_SLOT_PER_PAGE );
 	_ShoppingList->fillTradePage( _CurrentTradeSession );
 
@@ -20717,7 +20717,8 @@ void CCharacter::resetItemTypeFilter()
 
 void CCharacter::refreshTradeList()
 {
-	startTradeItemSession( _CurrentTradeSession + 1 );
+	// the client asks for a rebuild as soon as the window opens (its filters), the trade start already reported
+	startTradeItemSession(_CurrentTradeSession + 1, false);
 }
 
 

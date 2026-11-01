@@ -1408,8 +1408,8 @@ public:
 	/// for all handles in all missions send despawn-msg to ais
 	void despawnAllHandledAIGroup();
 	
-	/// build the item trade list
-	void startTradeItemSession( uint16 session );
+	/// build the item trade list, reportRestrictions when the trade opens: a rebuild must not repeat the messages
+	void startTradeItemSession(uint16 session, bool reportRestrictions = true);
 
 	std::vector<CTradePhrase> & currentPhrasesTradeList();
 
