@@ -230,6 +230,15 @@ static memcpyPtr findBestmemcpy ()
 #endif // NL_OS_WINDOWS
 }
 
-void  *(*CFastMem::memcpy)(void *dts, const void *src, size_t nbytes) = findBestmemcpy ();
+// Starts on this function, so it is valid before any static initializer runs, and picks the best memcpy
+// on the first call: CSystemInfo detects the processor features in a static initializer of its own, which
+// may run after this file's
+static void *memcpyFirst(void *dts, const void *src, size_t nbytes)
+{
+	CFastMem::memcpy = findBestmemcpy();
+	return CFastMem::memcpy(dts, src, nbytes);
+}
+
+void  *(*CFastMem::memcpy)(void *dts, const void *src, size_t nbytes) = memcpyFirst;
 
 } // NLMISC

@@ -1475,6 +1475,7 @@ uint64 CSystemInfo::availablePhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullAvailPhys;
 #elif defined NL_OS_MAC
@@ -1490,6 +1491,7 @@ uint64 CSystemInfo::totalPhysicalMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalPhys;
 #elif defined NL_OS_MAC
@@ -1872,6 +1874,7 @@ uint64 CSystemInfo::virtualMemory ()
 {
 #ifdef NL_OS_WINDOWS
 	MEMORYSTATUSEX ms;
+	ms.dwLength = sizeof(ms);
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalVirtual - ms.ullAvailVirtual;
 #else

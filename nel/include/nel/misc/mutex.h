@@ -512,6 +512,10 @@ private:
 
 #endif
 
+#ifdef NL_OS_WINDOWS
+#pragma managed(pop)
+#endif
+
 /**
  * Windows: uses Mutex, the handle can't be shared among processes, but
  * the mutex still can be be shared by passing a common object name to

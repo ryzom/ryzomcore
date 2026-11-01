@@ -229,7 +229,8 @@ std::string wideToUtf8(const wchar_t *str, size_t len)
 #if defined(NL_OS_WINDOWS)
 	return winWideToCp(str, len, CP_UTF8);
 #else
-	return CUtfStringView(str, len).toUtf8();
+	// a length of 0 is a NUL-terminated string, as on Windows
+	return len ? CUtfStringView(str, len).toUtf8() : CUtfStringView(str).toUtf8();
 #endif
 }
 
@@ -244,7 +245,7 @@ std::wstring utf8ToWide(const char *str, size_t len)
 #if defined(NL_OS_WINDOWS)
 	return winCpToWide(str, len, CP_UTF8); // UTF-16
 #else
-	return CUtfStringView(str, len).toWide(); // UTF-32
+	return len ? CUtfStringView(str, len).toWide() : CUtfStringView(str).toWide(); // UTF-32
 #endif
 }
 
