@@ -319,9 +319,17 @@ void CCharacter::itemPickup( const NLMISC::CEntityId& entity, bool harvest )
 							return;
 						}
 						
-						// check creature and character are not too far away
+						// check creature and character are not too far away, measured from the edge of the creature: the client
+						// walks to the edge of a large one, which can be further than MaxHarvestDistance from its centre. Its
+						// size there includes the scale a GM can give it (eventSetBotScale)
+						CMirrorPropValueRO<TYPE_VPB> visualPropertyB(TheDataset, creature->getEntityRowId(), DSPropertyVPB);
+						const SAltLookProp2 altLook((uint64)visualPropertyB());
+						float scale = form->getScale();
+						if (altLook.PropertySubData.Scale != 0)
+							scale *= (float)altLook.PropertySubData.Scale / 100.0f;
 						const double distance = PHRASE_UTILITIES::getDistance( _Id, entity);
-						if (distance < 0 || distance > MaxHarvestDistance)
+						const double maxDistance = MaxHarvestDistance + form->getColRadius() * scale;
+						if (distance < 0 || distance > maxDistance)
 						{
 							sendDynamicSystemMessage( _Id, "EGS_HARVEST_CORPSE_TOO_FAR" );
 							sendCloseTempInventoryImpulsion();
