@@ -1098,6 +1098,16 @@ void CBotChatPageTrade::setFocusOnEditBox(CInterfaceGroup *ebi)
 }
 
 // ***************************************************************************************
+const char *CBotChatPageTrade::getBuildingLossWarning() const
+{
+	// a guild changing hall keeps its inventory, unlike a player's apartment (the server tells them apart the same way)
+	static const CSheetId s_GuildBuilding("guild_main_building.sitem");
+	if (_CurrItemSheet && _CurrItemSheet->getSheetId() == (sint32)s_GuildBuilding.asInt())
+		return "uiQReplaceGuildHall";
+	return "uiQReplaceAppartment";
+}
+
+// ***************************************************************************************
 bool CBotChatPageTrade::isTradeValid( bool enableResale ) const
 {
 	// If the Current Item has been canceled (eg: move out), then not valid!
@@ -2299,8 +2309,8 @@ class CAHConfirmTrade : public IActionHandler
 		else
 		{
 			// need to ask user first. Important unexecpected consequence, so use a warning icon
-			pIM->validMessageBox(CInterfaceManager::WarningIconMsg, CI18N::get("uiQReplaceAppartment"),
-				"confirm_trade", toString("resale=%d|noconfirm=1", (uint)enableResale));
+			pIM->validMessageBox(CInterfaceManager::WarningIconMsg, CI18N::get(BotChatPageAll->Trade->getBuildingLossWarning()),
+			    "confirm_trade", toString("resale=%d|noconfirm=1", (uint)enableResale));
 		}
 	}
 };

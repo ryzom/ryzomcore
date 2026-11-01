@@ -61,6 +61,10 @@ public:
 	void		 endTradeModal();
 	// test if trade can be confirmed yet (price & quantity valid)
 	bool		 isTradeValid( bool enableResale ) const;
+	// clang-format off
+	// the question before buying a building that replaces the one owned: a guild hall or an apartment
+	const char	*getBuildingLossWarning() const;
+	// clang-format on
 	// set the page to diplay buy interface (no sell of player item is done)
 	void		 setBuyOnly(bool buyOnly) { _BuyOnly = buyOnly; }
 	bool		 getBuyOnly() const { return _BuyOnly; }
