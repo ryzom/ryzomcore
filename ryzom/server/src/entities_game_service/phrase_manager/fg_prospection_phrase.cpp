@@ -781,6 +781,10 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 				pos, weather, _EcotypeSpec,
 				_MaterialGroupFilter, _MaterialFamilyFilter, _CraftableItemPartFilter,
 				_MaterialEnergy, _FindExactMaterialEnergy, fromNeighbourhood, true, &deposit, &depositForK, reason );
+			// keep the reason of every failed attempt: a depleted site found by one probe must not be hidden by the
+			// "no deposit here" of a later probe that strayed off the deposit
+			if (!rawMaterial && reason != NFUnknown)
+				reasons.insert(reason);
 			if ( rawMaterial || (!deposit) )
 				break; // stop attempts if RM found (rawMaterial) or impossible to find one (!deposit)
 		}
