@@ -10319,6 +10319,13 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			return;
 		if ( item->getLockCount() )
 			return;
+		// the trade window does not list the items their owner has locked
+		if (item->getLockedByOwner())
+		{
+			nlwarning("HACK: %s sent BOTCHAT:SELL for a locked item (inventory %u, slot %u), refused", _Id.toString().c_str(), (uint)inv, slot);
+			reportRefusedClientMessage(_Id);
+			return;
+		}
 		sheet = item->getSheetId();
 		quality = item->quality();
 		quantity = min(quantity, item->getStackSize());

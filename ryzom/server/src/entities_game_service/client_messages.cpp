@@ -197,6 +197,21 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		return;
 	}
 
+	// the client offers no destroy for an item its owner has locked, where it sees the lock: only the bag and the
+	// pack animals send their RESALE_FLAG, and a locked item moved to the apartment shows unlocked there
+	bool lockShown = inventory == INVENTORIES::bag || (inventory >= INVENTORIES::pet_animal1 && inventory <= INVENTORIES::pet_animal4);
+	CInventoryPtr inv = lockShown ? character->getInventory(INVENTORIES::TInventory(inventory)) : NULL;
+	if (inv != NULL && slot < inv->getSlotCount())
+	{
+		CGameItemPtr item = inv->getItem(slot);
+		if (item != NULL && item->getLockedByOwner())
+		{
+			nlwarning("HACK: %s sent ITEM:DESTROY for a locked item (inventory %u, slot %u), refused", user.toString().c_str(), (uint)inventory, (uint)slot);
+			reportRefusedClientMessage(user);
+			return;
+		}
+	}
+
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
 }
