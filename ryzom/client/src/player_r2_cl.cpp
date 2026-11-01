@@ -263,8 +263,9 @@ void CPlayerR2CL::initProperties()
 	properties().selectable(true);
 	properties().attackable(false);
 	properties().givable(true);
-	properties().invitable(true);
-	properties().canExchangeItem(true);
+	// a bot that looks like a player, but it is still a bot: no team and no exchange, as CCharacterCL
+	properties().invitable(false);
+	properties().canExchangeItem(false);
 }// initProperties //
 
 
