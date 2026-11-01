@@ -47,6 +47,11 @@ namespace NLDRIVERGL {
 #endif
 #endif
 
+#ifdef NL_OS_MAC
+// whether the cursor is shown, macOS keeps a hide count of its own (see showCursor)
+static bool s_CursorVisible = true;
+#endif
+
 // *************************************************************************************
 CDriverGL::CCursor::CCursor() : ColorDepth(CDriverGL::ColorDepth32),
 								OrigHeight(32),
@@ -455,21 +460,22 @@ void CDriverGL::showCursor(bool b)
 	// the cursor was hidden.
 
 	CGDisplayErr error  = kCGErrorSuccess;
-	static bool visible = true;
 
-	if(b && !visible)
+	if (b && !s_CursorVisible)
 	{
 		error = CGDisplayShowCursor(kCGDirectMainDisplay);
-		visible = true;
+		s_CursorVisible = true;
 	}
-	else if(!b && visible)
+	else if (!b && s_CursorVisible)
 	{
 		error = CGDisplayHideCursor(kCGDirectMainDisplay);
-		visible = false;
+		s_CursorVisible = false;
 	}
 
 	if(error != kCGErrorSuccess)
 		nlerror("cannot show / hide cursor");
+
+	updateMouseRelative();
 
 #elif defined (NL_OS_UNIX)
 
@@ -511,6 +517,12 @@ void CDriverGL::setMousePos(float x, float y)
 
 #elif defined(NL_OS_MAC)
 
+	_EventEmitter.setMousePos(x, y);
+
+	// a relative mouse has only NeL's position, the cursor stays where it is
+	if (_EventEmitter.isMouseRelative())
+		return;
+
 	// CG wants absolute coordinates related to first screen's top left
 
 	// get the first screen's (conaints menubar) rect (this is not mainScreen)
@@ -535,6 +547,9 @@ void CDriverGL::setMousePos(float x, float y)
 
 	if(error != kCGErrorSuccess)
 		nlerror("cannot set mouse position");
+
+	// after a warp, macOS keeps the cursor where it is for a moment, unless it is associated with the mouse again
+	CGAssociateMouseAndMouseCursorPosition(true);
 
 #elif defined (NL_OS_UNIX)
 
@@ -571,6 +586,8 @@ void CDriverGL::setCapture (bool b)
 	// no need to capture
 	_MouseCaptured = b;
 
+	updateMouseRelative();
+
 #elif defined (NL_OS_UNIX)
 
 	if(b /* && isSystemCursorInClientArea() && !isSystemCursorCaptured()*/) // capture the cursor.
@@ -588,6 +605,37 @@ void CDriverGL::setCapture (bool b)
 
 #endif // NL_OS_UNIX
 }
+
+#ifdef NL_OS_MAC
+// ***************************************************************************
+void CDriverGL::updateMouseRelative()
+{
+	// A captured hidden cursor belongs to NeL, as in the free look: the mouse moves NeL's own position and
+	// the cursor stays where it is. NeL then never warps it, as macOS keeps a cursor still for a moment
+	// after a warp, which stops the free look each time it centres the cursor.
+	// (only in a window the driver made: a view of another toolkit's window gets no focus changes)
+	bool relative = _MouseCaptured && !s_CursorVisible && _WindowFocus && _DestroyWindow;
+	if (relative == _EventEmitter.isMouseRelative())
+		return;
+
+	_EventEmitter.setMouseRelative(relative);
+
+	if (relative)
+	{
+		CGAssociateMouseAndMouseCursorPosition(false);
+	}
+	else
+	{
+		// the cursor comes back where NeL's position is (without the focus, setMousePos does not move it)
+		float x, y;
+		_EventEmitter.getMousePos(x, y);
+		clamp(x, 0.f, 1.f);
+		clamp(y, 0.f, 1.f);
+		setMousePos(x, y);
+		CGAssociateMouseAndMouseCursorPosition(true);
+	}
+}
+#endif
 
 // ***************************************************************************
 bool CDriverGL::isSystemCursorInClientArea()

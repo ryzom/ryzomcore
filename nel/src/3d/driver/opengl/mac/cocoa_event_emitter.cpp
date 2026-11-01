@@ -204,6 +204,25 @@ static NLMISC::TMouseButton draggedOrReleasedButton(NSEventType type)
 	}
 }
 
+/// whether an event is one of the mouse events NeL is told about
+static bool isMouseEvent(NSEventType type)
+{
+	switch (type)
+	{
+	case NSLeftMouseDown:
+	case NSLeftMouseUp:
+	case NSRightMouseDown:
+	case NSRightMouseUp:
+	case NSMouseMoved:
+	case NSLeftMouseDragged:
+	case NSRightMouseDragged:
+	case NSScrollWheel:
+		return true;
+	default:
+		return false;
+	}
+}
+
 /// check whether a given event represents input text
 static bool isTextKeyEvent(NSEvent* event)
 {
@@ -283,12 +302,36 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.x /= (float)viewRect.size.width;
 	mousePos.y /= (float)viewRect.size.height;
 
+	// a relative mouse leaves the cursor where it is: each move adds its delta to NeL's position, kept in
+	// the view, which all the mouse events report (the drags with the other buttons are not reported,
+	// their moves still count)
+	if (m_MouseRelative)
+	{
+		if (event.type == NSMouseMoved || event.type == NSLeftMouseDragged || event.type == NSRightMouseDragged || event.type == NSOtherMouseDragged)
+		{
+			// deltaY is positive downwards, NeL's y upwards
+			m_MouseX += (float)(event.deltaX / viewRect.size.width);
+			m_MouseY -= (float)(event.deltaY / viewRect.size.height);
+			clamp(m_MouseX, 0.f, 1.f);
+			clamp(m_MouseY, 0.f, 1.f);
+		}
+
+		mousePos = NSMakePoint(m_MouseX, m_MouseY);
+	}
+
 	// if the mouse event was placed outside the view, don't tell NeL :)
 	// except the drags and the release of a button pressed in the view: Cocoa sends them to the window
 	// of the press wherever the cursor is, and without the release NeL would keep the button held
-	if ((mousePos.x < 0.0 || mousePos.x > 1.0 || mousePos.y < 0.0 || mousePos.y > 1.0) && event.type != NSKeyDown && event.type != NSKeyUp && !(m_ButtonsDown & draggedOrReleasedButton(event.type)))
+	if (!m_MouseRelative && (mousePos.x < 0.0 || mousePos.x > 1.0 || mousePos.y < 0.0 || mousePos.y > 1.0) && event.type != NSKeyDown && event.type != NSKeyUp && !(m_ButtonsDown & draggedOrReleasedButton(event.type)))
 	{
 		return false;
+	}
+
+	// where a relative mouse starts from
+	if (isMouseEvent(event.type))
+	{
+		m_MouseX = (float)mousePos.x;
+		m_MouseY = (float)mousePos.y;
 	}
 
 	// convert the modifiers for nel to pass them with the events

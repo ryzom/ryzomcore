@@ -728,6 +728,9 @@ public:
 
 	/// the focus is the key state of the window holding the view, see the definition
 	void						updateWindowFocus();
+
+	/// the mouse is relative while the cursor is captured, hidden and in the focused window, see the definition
+	void						updateMouseRelative();
 #endif
 
 private:

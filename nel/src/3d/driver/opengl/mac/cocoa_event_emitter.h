@@ -46,12 +46,21 @@ class CCocoaEventEmitter : public IEventEmitter
 	// buttons pressed in the view and not released yet
 	uint             m_ButtonsDown;
 
+	// while the mouse is relative, its moves add their deltas to NeL's position and the cursor stays where it is
+	bool             m_MouseRelative;
+	// NeL's position of the mouse in the view
+	float            m_MouseX;
+	float            m_MouseY;
+
 public:
 	CCocoaEventEmitter() :
 		_driver(NULL),
 		_glView(nil),
 		_server(NULL),
-		m_ButtonsDown(0) { }
+		m_ButtonsDown(0),
+		m_MouseRelative(false),
+		m_MouseX(0.5f),
+		m_MouseY(0.5f) { }
 
 	void         init(NL3D::IDriver*, CocoaOpenGLView*, bool eventLoop);
 	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
@@ -60,6 +69,14 @@ public:
 
 	/// the window got or lost the keyboard focus
 	void         postFocusEvent(bool focused);
+
+	/// see m_MouseRelative, the driver decides when the mouse is relative
+	void         setMouseRelative(bool relative) { m_MouseRelative = relative; }
+	bool         isMouseRelative() const { return m_MouseRelative; }
+
+	/// NeL's position of the mouse, from the last mouse event or the last position the driver set
+	void         setMousePos(float x, float y) { m_MouseX = x; m_MouseY = y; }
+	void         getMousePos(float &x, float &y) const { x = m_MouseX; y = m_MouseY; }
 
 	virtual bool copyTextToClipboard(const std::string &text);
 	virtual bool pasteTextFromClipboard(std::string &text);

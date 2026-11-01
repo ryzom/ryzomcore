@@ -221,6 +221,9 @@ void CDriverGL::updateWindowFocus()
 
 	_WindowFocus = focus;
 	_EventEmitter.postFocusEvent(focus);
+
+	// a relative mouse would keep the cursor still for the other applications
+	updateMouseRelative();
 }
 
 #elif defined (NL_OS_UNIX)
