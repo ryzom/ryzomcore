@@ -18146,8 +18146,8 @@ void CCharacter::entersWater() const
 {
 	// tranfert damage for player
 	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->transferDamageOnFictitiousCreature(_EntityRowId, _TeamId);
-	// clear Xp for player
-	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->clearAllXpForPlayer(_EntityRowId, _TeamId, true);
+	// clear Xp for player (his share of the team damage was moved by the transfer, the team keeps the rest)
+	PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->clearAllXpForPlayer(_EntityRowId, _TeamId, false);
 	// disengage player if engaged in combat
 	CPhraseManager::getInstance().disengage(_EntityRowId, true);
 }

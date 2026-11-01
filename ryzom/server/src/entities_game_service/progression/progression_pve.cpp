@@ -1328,13 +1328,10 @@ void CCharacterProgressionPVE::lostAggro(TDataSetRow creature, TDataSetRow playe
 				//nlassert(index >= 0);
 				BOMB_IF( index < 0, "PROGRESSION_BUG: player lost aggro (is in team), found attacked creature with no registered damage for this team", return);
 
+				// the whole team left the fight: it gives up all its damage, and its entry goes with the creature
+				// leaving its list, which removeCreature expects
 				teamAttackedCreatures.erase(teamAttackedCreatures.begin() + i);
-			//	(*itCreature).second.PlayerInflictedDamage.erase((*itCreature).second.PlayerInflictedDamage.begin() + index);
-				CCharacter *playerChar = PlayerManager.getChar(playerId);
-				if (playerChar)
-					(*itCreature).second.transferDamageOnFictitiousCreature(playerId, playerChar->getTeamId());
-				else
-					(*itCreature).second.transferDamageOnFictitiousCreature(playerId, CTEAM::InvalidTeamId);
+				(*itCreature).second.transferTeamDamageOnFictitiousCreature(teamId);
 
 				return;
 			}
@@ -2374,7 +2371,8 @@ bool CCreatureTakenDamage::transferDamageOnFictitiousCreature(const CEntityId &p
 		}
 		else if ( teamId != CTEAM::InvalidTeamId && PlayerInflictedDamage[i].TeamId == teamId)
 		{
-			if (PlayerInflictedDamage[i].TeamMembers.empty())
+			// only a member fighting this creature has a share of the team damage to give up
+			if (!PlayerInflictedDamage[i].hasMember(playerId))
 				return false;
 
 			found = true;
@@ -2393,29 +2391,47 @@ bool CCreatureTakenDamage::transferDamageOnFictitiousCreature(const CEntityId &p
 
 		if (found)
 		{
-			TotalCreatureInflictedDamage += damage;
-
-			const uint nbC = (uint)CreatureInflictedDamage.size();
-			for ( uint j = 0 ; j < nbC ; ++j)
-			{
-				if (CreatureInflictedDamage[j].CreatureId == CEntityId::Unknown)
-				{
-					CreatureInflictedDamage[j].TotalDamage += damage;
-					return retValue;
-				}
-			}
-
-			CCreatureInflictedDamage dam;
-			dam.TotalDamage = damage;
-			dam.CreatureId = CEntityId::Unknown;
-
-			CreatureInflictedDamage.push_back(dam);
-
+			addFictitiousDamage(damage);
 			return retValue;
 		}
 	}
 
 	return false;
+}
+
+//----------------------------------------------------------------------------
+// CCreatureTakenDamage::transferTeamDamageOnFictitiousCreature
+//----------------------------------------------------------------------------
+void CCreatureTakenDamage::transferTeamDamageOnFictitiousCreature(uint16 teamId)
+{
+	const sint16 index = getIndexForTeam(teamId);
+	if (index < 0)
+		return;
+
+	const float damage = PlayerInflictedDamage[index].TotalDamage;
+	PlayerInflictedDamage[index] = PlayerInflictedDamage.back();
+	PlayerInflictedDamage.pop_back();
+	addFictitiousDamage(damage);
+}
+
+//----------------------------------------------------------------------------
+// CCreatureTakenDamage::addFictitiousDamage
+//----------------------------------------------------------------------------
+void CCreatureTakenDamage::addFictitiousDamage(float damage)
+{
+	TotalCreatureInflictedDamage += damage;
+
+	const sint16 index = getIndexForCreature(CEntityId::Unknown);
+	if (index >= 0)
+	{
+		CreatureInflictedDamage[index].TotalDamage += damage;
+		return;
+	}
+
+	CCreatureInflictedDamage dam;
+	dam.TotalDamage = damage;
+	dam.CreatureId = CEntityId::Unknown;
+	CreatureInflictedDamage.push_back(dam);
 }
 
 

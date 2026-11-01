@@ -176,6 +176,17 @@ public:
 		TeamMembers[TeamMembers.size()-1].GainXp = true;
 	}
 
+	/// true if the player is one of the team members fighting this creature
+	bool hasMember(const NLMISC::CEntityId &playerId) const
+	{
+		for (uint i = 0; i < TeamMembers.size(); ++i)
+		{
+			if (TeamMembers[i].Id == playerId)
+				return true;
+		}
+		return false;
+	}
+
 	/// remove a team member
 	void removeMember(const NLMISC::CEntityId &playerId)
 	{
@@ -374,10 +385,16 @@ struct CCreatureTakenDamage
 	/// tranfer player damage on a fictious creature (when player enters water), return true if entry hve been erased
 	bool transferDamageOnFictitiousCreature(const NLMISC::CEntityId &playerId, uint16 teamId = CTEAM::InvalidTeamId);
 
+	/// tranfer all the damage of a team on a fictious creature and erase its entry (when the whole team lost aggro)
+	void transferTeamDamageOnFictitiousCreature(uint16 teamId);
+
 	/// attribute kills for mission system
 	void attributeKillsForMission(TDataSetRow victimRowId);
 
 private:
+	/// add damage given up by players to the fictious creature
+	void addFictitiousDamage(float damage);
+
 	/// attribute kill to an entity for mission system
 	static void attributeKill( TDataSetRow killerRowId, TDataSetRow victimRowId);
 	
