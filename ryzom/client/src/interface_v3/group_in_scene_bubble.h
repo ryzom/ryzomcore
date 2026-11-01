@@ -149,11 +149,15 @@ private:
 		uint32 BotName;
 		uint32 DescWaiting;
 		CGroupInSceneBubble	*Bubble;
+		// opened by a web page (webIgChatOpen), not by a server dyn chat: each kind only ever finds its own bubbles
+		bool WebIg;
+
 	public:
 		CDynBubble()
 		{
 			DescWaiting = 0;
 			Bubble = nullptr;
+			WebIg = false;
 		}
 		void displayOptions(bool bShow);
 		// get string id for an option in the dynchat

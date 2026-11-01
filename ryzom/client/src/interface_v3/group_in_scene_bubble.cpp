@@ -432,10 +432,10 @@ void CGroupInSceneBubbleManager::update ()
 			{
 				//nlinfo ("dynchat bubble erase BotUID:%d",_DynBubbles[j].BotUID);
 
-				// Unlink from character
+				// Unlink from character, unless it shows its other bubble (dyn chat and web page) by now
 				CEntityCL *pEntity = EntitiesMngr.getEntityByCompressedIndex(_DynBubbles[j].BotUID);
 				CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(pEntity);
-				if (pChar != nullptr)
+				if (pChar != nullptr && pChar->getBubble() == _DynBubbles[j].Bubble)
 					pChar->setBubble(nullptr);
 
 				CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[j].Bubble);
@@ -896,7 +896,8 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		// a web page's bubble on the same bot has its own options, they do not answer the dyn chat
+		if (_DynBubbles[pos].BotUID == nBotUID && !_DynBubbles[pos].WebIg)
 			break;
 	}
 
@@ -1009,7 +1010,8 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	uint32 pos, j;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		// never a server dyn chat's bubble: its options would be turned into links
+		if (_DynBubbles[pos].BotUID == nBotUID && _DynBubbles[pos].WebIg)
 			break;
 	}
 
@@ -1018,8 +1020,6 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	string id;
 	if (pos == _DynBubbles.size())
 	{
-		uint32 i = 0;
-		while (getDynBubble(i) != nullptr) i++;
 		id = "in_scene_webig_bubble_" + toString(nBotUID);
 		// Create the instance
 		std::vector<std::pair<std::string,std::string> > templateParams;
@@ -1049,6 +1049,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		dynBubble.BotName = 0;
 		dynBubble.BotUID = nBotUID;
 		dynBubble.Bubble = bubble;
+		dynBubble.WebIg = true;
 		_DynBubbles.push_back(dynBubble);
 	}
 	else
@@ -1162,7 +1163,7 @@ void CGroupInSceneBubbleManager::dynChatClose (uint32 nBotUID)
 	uint32 pos;
 	for (pos = 0; pos < _DynBubbles.size(); ++pos)
 	{
-		if (_DynBubbles[pos].BotUID == nBotUID)
+		if (_DynBubbles[pos].BotUID == nBotUID && !_DynBubbles[pos].WebIg)
 			break;
 	}
 	if (pos != _DynBubbles.size())
@@ -1182,12 +1183,12 @@ CGroupInSceneBubbleManager::CDynBubble *CGroupInSceneBubbleManager::getDynBubble
 {
 	uint32 value;
 	for (uint32 i = 0; i < _DynBubbles.size(); ++i)
-		if (_DynBubbles[i].Bubble != nullptr)
+		if (_DynBubbles[i].Bubble != nullptr && !_DynBubbles[i].WebIg) // only dyn bubbles are numbered
 		{
+			// the number follows "ui:interface:in_scene_dyn_bubble_"
 			string id = _DynBubbles[i].Bubble->getId();
 			id = id.substr(33, id.size());
-			fromString(id, value);
-			if (value == nDynBubbleNb)
+			if (fromString(id, value) && value == nDynBubbleNb)
 				return &_DynBubbles[i];
 		}
 	return nullptr;
