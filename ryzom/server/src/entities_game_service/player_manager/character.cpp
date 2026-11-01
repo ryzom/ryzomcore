@@ -19348,6 +19348,15 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 		return;
 	}
 
+	// the dialog stays open when the player walks out of the zone, but a side can only be taken inside it: outside, no
+	// leaving countdown would ever end the tag
+	if (!neutral && getCurrentPVPZone() != _OutpostIdBeforeUserValidation)
+	{
+		nldebug("<CCharacter::outpostSideChosen> player %s chose a side of outpost %s after leaving its zone", getId().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
+		_OutpostIdBeforeUserValidation = 0;
+		return;
+	}
+
 	if( !neutral )
 	{
 		// validate outpost alias
