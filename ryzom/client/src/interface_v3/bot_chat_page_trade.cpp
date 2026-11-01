@@ -367,8 +367,8 @@ uint32 CBotChatPageTrade::getCurrItemPriceResale() const
 		CGroupEditBox *resaleMarginBox = dynamic_cast<CGroupEditBox *>(ig->getGroup("header_opened:resell_group:can_resell:choose_resell:edit:eb"));
 		if (!resaleMarginBox) return 0;
 
-		// Calculate the resale price from the resale margin
-		uint32 margin = (uint32)resaleMarginBox->getInputStringAsInt();
+		// Calculate the resale price from the resale margin, which the server caps too
+		uint32 margin = std::min((uint32)resaleMarginBox->getInputStringAsInt(), BOTCHATTYPE::MaxResaleMargin);
 		// temp uint64 because we add case where basePrice= 50000, and margin= 99999% => 50000*99999 > 4gig
 		uint64 basePrice = getCurrItemPrice(false);	// base Price without fame margin
 		return uint32(basePrice + basePrice * margin / 100);
@@ -1573,9 +1573,9 @@ void	CBotChatPageTrade::setupResellGroup(bool sellMode, uint defaultQuantity, CI
 			if (eb)
 			{
 				sint32	resaleMargin= NLGUI::CDBManager::getInstance()->getDbProp( "UI:SAVE:TRADE_ITEM:RESALE_MARGIN" )->getValue32();
-				clamp(resaleMargin, 0, (sint32)MaxResaleMargin);
+				clamp(resaleMargin, 0, (sint32)BOTCHATTYPE::MaxResaleMargin);
 				eb->setInputString( toString( resaleMargin ) );
-				eb->setPositiveIntegerMaxValue(MaxResaleMargin);
+				eb->setPositiveIntegerMaxValue(BOTCHATTYPE::MaxResaleMargin);
 			}
 		}
 	}
@@ -2563,7 +2563,7 @@ class CAHBotChatChangeResaleMargin : public IActionHandler
 			sint32 delta;
 			fromString(sParams, delta);
 			sint32 newValue = resaleMarginBox->getInputStringAsInt() + delta;
-			clamp(newValue, 0, (sint32)CBotChatPageTrade::MaxResaleMargin);
+			clamp(newValue, 0, (sint32)BOTCHATTYPE::MaxResaleMargin);
 			resaleMarginBox->setInputStringAsInt( newValue );
 		}
 	}

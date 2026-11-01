@@ -10363,6 +10363,21 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		uint32 basePrice;
 		queryItemPrice( item, basePrice );
 
+		// the client adds the resale margin to the price without fame, and caps the margin; not counted as a hack:
+		// older clients took a pasted margin above the cap, and a live change of the price coefficients leaves the
+		// client with a stale base price
+		const uint64 maxResalePrice = (uint64)basePrice + (uint64)basePrice * BOTCHATTYPE::MaxResaleMargin / 100;
+		if (sellPrice > maxResalePrice)
+		{
+			nlwarning("<CCharacter sellItem> character %s try to sell an item %s at %u, above the resale margin cap (%" NL_I64 "u), refused", _Id.toString().c_str(), sheet.toString().c_str(), sellPrice, maxResalePrice);
+			SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
+			params[0].SheetId = sheet;
+			params[1].Int = quantity;
+			params[2].Int = quality;
+			sendDynamicSystemMessage(_Id, "ITEM_CANT_BE_SOLD", params);
+			return;
+		}
+
 		float famePriceFactor = 1.0f - CShopTypeManager::getFamePriceFactor( fame );
 		basePrice = uint32(basePrice * famePriceFactor);
 

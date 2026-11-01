@@ -362,6 +362,8 @@ namespace NLGUI
 			}
 			return false;
 		}
+		// false when the entry is a number with bounds and str holds a number outside them
+		bool isWithinBounds(const ::u32string &str) const;
 
 		static IComboKeyHandler *comboKeyHandler;
 

@@ -42,12 +42,6 @@ public:
 	// GuildXP is for guild role master
 	enum TBuyMean { Money, SkillPoints, MoneyGuildXP, GuildXP, MoneyFactionPoints, GuildMoneyGuildXP, GuildMoney };
 
-	// At Max +9999% resale margin
-	enum
-	{
-		MaxResaleMargin= 9999
-	};
-
 public:
 	CBotChatPageTrade();
 	virtual void begin() NL_OVERRIDE;

@@ -96,6 +96,11 @@ namespace BOTCHATTYPE
 	 */
 	const	float	RecommendedPriceFactor= 2.0f;
 
+	/** Highest resale margin, in percent above the base price without fame.
+	 *	The client caps the margin a player sets, the server refuses a resale price above it.
+	 */
+	const	uint32	MaxResaleMargin= 9999;
+
 	//R2
 	const	uint32	MaxR2MissionEntryDatabase = 4;
 
