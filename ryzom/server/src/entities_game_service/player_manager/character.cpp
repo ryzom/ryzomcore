@@ -19364,25 +19364,24 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 
 		CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias( _OutpostIdBeforeUserValidation );
 		CGuild * guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
+		bool guildSide = false;
 		if (guild != NULL && outpost != NULL)
 		{
 			// he his guild owns the outpost he can only help his guild
 			if( _GuildId == outpost->getOwnerGuild() )
 			{
-				setOutpostSide( OUTPOSTENUMS::OutpostOwner );
-				_OutpostIdBeforeUserValidation = 0;
-				return;
+				side = OUTPOSTENUMS::OutpostOwner;
+				guildSide = true;
 			}
 			// he his guild attacks the outpost he can only help his guild
-			if( _GuildId == outpost->getAttackerGuild() )
+			else if (_GuildId == outpost->getAttackerGuild())
 			{
-				setOutpostSide( OUTPOSTENUMS::OutpostAttacker );
-				_OutpostIdBeforeUserValidation = 0;
-				return;
+				side = OUTPOSTENUMS::OutpostAttacker;
+				guildSide = true;
 			}
 		}
 		// check : if outpost belongs to a tribe the choice can only be attacker
-		if( outpost )
+		if (outpost && !guildSide)
 		{
 			if (outpost->isBelongingToAGuild() == false)
 			{
@@ -19395,6 +19394,14 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 		}
 		// his guild doesn't participate in outpost conflict so he can choose the side he wants
 		setOutpostSide( side );
+
+		// name the side taken, nothing else in the interface shows it
+		if (outpost != NULL && (side == OUTPOSTENUMS::OutpostOwner || side == OUTPOSTENUMS::OutpostAttacker))
+		{
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::outpost);
+			params[0].SheetId = outpost->getSheet();
+			sendDynamicSystemMessage(_EntityRowId, side == OUTPOSTENUMS::OutpostOwner ? "OUTPOST_SIDE_DEFENDER" : "OUTPOST_SIDE_ATTACKER", params);
+		}
 	}
 
 	_OutpostIdBeforeUserValidation = 0;
