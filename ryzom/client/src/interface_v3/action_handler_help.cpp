@@ -1909,7 +1909,15 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 
 	// Custom text
 	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
-	if (!itemInfo.CustomText.empty())
+	if (NLMISC::startsWith(itemInfo.CustomText, "@WEB"))
+	{
+		// "@WEB<url> text": the url is the item's web action, which the item reading window opens; only the text
+		// after it is for the player
+		string::size_type delimiter = itemInfo.CustomText.find(' ');
+		string text = delimiter == string::npos ? string() : itemInfo.CustomText.substr(delimiter + 1);
+		strFindReplace(itemText, "%custom_text", text.empty() ? string() : "\n@{FFFF}" + text + "\n");
+	}
+	else if (!itemInfo.CustomText.empty())
 	{
 		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText + "\n");
 		const string &itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
