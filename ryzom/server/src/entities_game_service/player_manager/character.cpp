@@ -2118,10 +2118,10 @@ void CCharacter::mount( TDataSetRow PetRowId )
 							// remember the mount state
 							_PlayerPets[petIndex].IsMounted = true;
 
-//							_PropertyDatabase.setProp( "USER:MOUNT_WALK_SPEED", (sint64)(sint)(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
-							CBankAccessor_PLR::getUSER().setMOUNT_WALK_SPEED(_PropertyDatabase, checkedCast<uint16>(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
-//							_PropertyDatabase.setProp( "USER:MOUNT_RUN_SPEED", (sint64)(sint)(e->getPhysScores().CurrentRunSpeed() * 1000.0f) );
-							CBankAccessor_PLR::getUSER().setMOUNT_RUN_SPEED(_PropertyDatabase, checkedCast<uint16>(e->getPhysScores().CurrentRunSpeed() * 1000.0f) );
+							// the mount's base speeds: the rider's speed modifier reaches the client through its SPEED_FACTOR, and
+							// the creature's current speed can still carry the modifier of an earlier ride
+							CBankAccessor_PLR::getUSER().setMOUNT_WALK_SPEED(_PropertyDatabase, checkedCast<uint16>(form->getWalkSpeed() * 1000.0f));
+							CBankAccessor_PLR::getUSER().setMOUNT_RUN_SPEED(_PropertyDatabase, checkedCast<uint16>(form->getRunSpeed() * 1000.0f));
 
 							if( e->getContextualProperty().directAccessForStructMembers().mountable() )
 							{
@@ -2225,6 +2225,8 @@ void CCharacter::unmount( bool changeMountedState, uint petIndex )
 	{
 		e->setMode( MBEHAV::NORMAL, true );
 		e->setRiderEntity( TDataSetRow() );
+		// the rider's speed modifier is copied onto the mount during the ride, it must not stay with the creature
+		e->setSpeedVariationModifier(0);
 		e->getContextualProperty().directAccessForStructMembers().mountable( true );
 		e->getContextualProperty().setChanged();
 	}
