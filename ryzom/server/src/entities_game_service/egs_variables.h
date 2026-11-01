@@ -76,6 +76,7 @@ extern NLMISC::CVariable<uint32>				StoreSavePeriod;
 extern NLMISC::CVariable<float>					MaxDistanceForXpGain;
 extern NLMISC::CVariable<float>					XPTeamMemberDivisorValue;
 extern NLMISC::CVariable<float>					MaxXPGainPerPlayer;
+extern NLMISC::CVariable<uint32>				KillCreditNonPlayerDamage;
 extern NLMISC::CVariable<sint32>				SkillFightValueLimiter;
 extern NLMISC::CVariable<sint32>				SkillMagicValueLimiter;
 extern NLMISC::CVariable<sint32>				SkillCraftValueLimiter;

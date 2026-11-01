@@ -323,8 +323,13 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 	// attribute kills for mission system
 	creatureTakenDmg.attributeKillsForMission(creature);
 
-	// get most effective team or single player
-	const sint16 index = creatureTakenDmg.getMaxInflictedDamageTeamIndex();
+	// get most effective team or single player, which must also beat the non-player damage KillCreditNonPlayerDamage counts
+	float nonPlayerDamage = 0.0f;
+	if (KillCreditNonPlayerDamage.get() == 1)
+		nonPlayerDamage = creatureTakenDmg.getTransferedDamage();
+	else if (KillCreditNonPlayerDamage.get() == 2)
+		nonPlayerDamage = std::max(0.0f, creatureTakenDmg.TotalCreatureInflictedDamage); // the running sum can drift below 0 with regen
+	const sint16 index = creatureTakenDmg.getMaxInflictedDamageTeamIndex(nonPlayerDamage);
 
 	// max damage have been done by players
 	if (index != -1)
@@ -511,7 +516,9 @@ void CCharacterProgressionPVE::creatureDeath(TDataSetRow creature)
 	else
 	{
 		// If fictitious entity killed the creature send a message to all players involved to tell em they were not enough implied
-		if (creatureTakenDmg.isMaxCreatureInflictedDamageTransfered())
+		// (when it is the only non-player damage counted, it is what beat them)
+		const bool transfered = KillCreditNonPlayerDamage.get() == 1 ? creatureTakenDmg.getTransferedDamage() > 0.0f : creatureTakenDmg.isMaxCreatureInflictedDamageTransfered();
+		if (transfered)
 		{
 			// Get players list
 			std::set<NLMISC::CEntityId> players(creatureTakenDmg.getAllPlayers());

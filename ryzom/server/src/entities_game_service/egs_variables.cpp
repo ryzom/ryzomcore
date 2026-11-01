@@ -44,6 +44,16 @@ CVariable<uint32>	DelayBeforeItemTP("egs","DelayBeforeItemTP","delay between ite
 CVariable<float>			MaxDistanceForXpGain("egs","MaxDistanceForXpGain", "max distance from combat to gain Xp at creature death (in meters)", 50.0f, 0, true );
 CVariable<float>			XPTeamMemberDivisorValue("egs","XPTeamMemberDivisorValue", "for team XP progression, add this value to the xp divisor for each team member above one", 0.9f, 0, true );
 CVariable<float>			MaxXPGainPerPlayer("egs","MaxXPGainPerPlayer", "Max XP gain by any one player on any creature (each team member can gain up to this value)", 30.0f, 0, true );
+static void cbKillCreditNonPlayerDamage(IVariable &var);
+CVariable<uint32>			KillCreditNonPlayerDamage("egs","KillCreditNonPlayerDamage", "non-player damage the player or team that did the most damage to a creature must also beat to get its loot and xp: 0 none, 1 only damage players gave up by losing aggro or entering water, 2 all (guards and other creatures too)", 1, 0, true, cbKillCreditNonPlayerDamage );
+static void cbKillCreditNonPlayerDamage(IVariable &var)
+{
+	if (KillCreditNonPlayerDamage.get() > 2)
+	{
+		nlwarning("KillCreditNonPlayerDamage %u is not 0, 1 or 2, using 1", KillCreditNonPlayerDamage.get());
+		KillCreditNonPlayerDamage.set(1);
+	}
+}
 
 CVariable<uint32>			NbTickForRegenCreature("egs","NbTickForRegenCreature", "nb tick needed for regenerate scores of all creature (total creature / number regenerated per tick)", 64, 0, true );
 

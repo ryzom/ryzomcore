@@ -283,10 +283,21 @@ struct CCreatureTakenDamage
 		return sint16(-1);
 	}
 
-	/// return index of the team which has inflicted the most damage, returns -1 if most damage have been made by other creatures
-	sint16 getMaxInflictedDamageTeamIndex()
+	/// damage held by the fictitious creature: what players gave up by losing aggro or entering water
+	float getTransferedDamage() const
 	{
-		float maxDmg = 0;//TotalCreatureInflictedDamage;
+		for (uint i = 0; i < CreatureInflictedDamage.size(); ++i)
+		{
+			if (CreatureInflictedDamage[i].CreatureId == NLMISC::CEntityId::Unknown)
+				return CreatureInflictedDamage[i].TotalDamage;
+		}
+		return 0.0f;
+	}
+
+	/// return index of the team which has inflicted the most damage, more than nonPlayerDamage, returns -1 if no team did
+	sint16 getMaxInflictedDamageTeamIndex(float nonPlayerDamage)
+	{
+		float maxDmg = nonPlayerDamage;
 		sint16 index = -1;
 		const uint size = (uint)PlayerInflictedDamage.size();
 		for ( uint i = 0 ; i < size ; ++i)
