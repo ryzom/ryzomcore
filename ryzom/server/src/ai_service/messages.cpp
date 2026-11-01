@@ -445,6 +445,58 @@ static void cbAddEntities( NLNET::CMessage& msgin, const std::string &serviceNam
 //	This is where we should deal with player record creation
 }
 
+// How far (in cells, metres) the walk to a prospected source may stray beyond the box between prospector and source
+static const sint32 s_SourceSpawnWalkMargin = 16;
+
+// Whether a walk on the world map from start reaches the map position end without leaving the box around the two,
+// widened by margin cells on each side; reached is the position walked to. Bounded: a surface only reachable by a long
+// way round is out of reach.
+static bool reachesOnWorldMap(const RYAI_MAP_CRUNCH::CWorldMap &worldMap, const RYAI_MAP_CRUNCH::CWorldPosition &start, const RYAI_MAP_CRUNCH::CMapPosition &end, sint32 margin, RYAI_MAP_CRUNCH::CWorldPosition &reached)
+{
+	const sint32 minX = std::min(start.x(), end.x()) - margin;
+	const sint32 maxX = std::max(start.x(), end.x()) + margin;
+	const sint32 minY = std::min(start.y(), end.y()) - margin;
+	const sint32 maxY = std::max(start.y(), end.y()) + margin;
+	static const RYAI_MAP_CRUNCH::CDirection s_Directions[4] = {
+		RYAI_MAP_CRUNCH::CDirection(1, 0),
+		RYAI_MAP_CRUNCH::CDirection(-1, 0),
+		RYAI_MAP_CRUNCH::CDirection(0, 1),
+		RYAI_MAP_CRUNCH::CDirection(0, -1)
+	};
+
+	// breadth first on cell and surface, one bit per surface of each cell of the box
+	const sint32 width = maxX - minX + 1;
+	std::vector<uint8> visited((size_t)width * (size_t)(maxY - minY + 1), 0);
+	std::deque<RYAI_MAP_CRUNCH::CWorldPosition> open;
+	visited[(size_t)(start.y() - minY) * width + (start.x() - minX)] |= (uint8)(1 << start.slot());
+	open.push_back(start);
+	while (!open.empty())
+	{
+		const RYAI_MAP_CRUNCH::CWorldPosition pos = open.front();
+		open.pop_front();
+		if (pos.x() == end.x() && pos.y() == end.y())
+		{
+			reached = pos;
+			return true;
+		}
+		for (uint i = 0; i < 4; ++i)
+		{
+			RYAI_MAP_CRUNCH::CWorldPosition next = pos;
+			if (!worldMap.move(next, s_Directions[i]))
+				continue;
+			if (next.x() < minX || next.x() > maxX || next.y() < minY || next.y() > maxY)
+				continue;
+			uint8 &cell = visited[(size_t)(next.y() - minY) * width + (next.x() - minX)];
+			const uint8 bit = (uint8)(1 << next.slot());
+			if ((cell & bit) == 0)
+			{
+				cell |= bit;
+				open.push_back(next);
+			}
+		}
+	}
+	return false;
+}
 
 //--------------------------------------------------------------------------
 // Messages from the EGS
@@ -456,14 +508,16 @@ void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceNa
 	// Read/write header
 	CMessage msgout( "SRC_SPWN_VLD_R" );
 	uint32 nbSources;
-	//CVector prospectingPos;
-	//msgin.fastRead( prospectingPos );
+	CVector prospectingPos;
+	msgin.serial(prospectingPos);
 
-	// Get world position of prospector
+	// Get world position of prospector, on the surface nearest to the prospector's height
 	const RYAI_MAP_CRUNCH::CWorldMap& worldMap = CWorldContainer::getWorldMap();
-	//RYAI_MAP_CRUNCH::CWorldPosition prospectorWorldPos;
-	//CAIVector prospectingAiPos( (double)prospectingPos.x, (double)prospectingPos.y );
-	//bool isProspectingPosValid = worldMap.setWorldPosition( (double)prospectingPos.z, prospectorWorldPos, prospectingAiPos );
+	RYAI_MAP_CRUNCH::CWorldPosition prospectorWorldPos;
+	CAIVector prospectingAiPos((double)prospectingPos.x, (double)prospectingPos.y);
+	bool isProspectingPosValid = worldMap.setWorldPosition((sint32)(prospectingPos.z * 1000.0f), prospectorWorldPos, prospectingAiPos);
+	if (!isProspectingPosValid)
+		nldebug("Prospector at %s is not on the world map, sources are placed on the highest surface", prospectingPos.asString().c_str());
 
 	msgin.fastRead( nbSources );
 	msgout.fastWrite( nbSources );
@@ -479,24 +533,26 @@ void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceNa
 
 		// Check position
 		RYAI_MAP_CRUNCH::CWorldPosition wPos;
-		CAIVector aiPos( (double)pos2f.x, (double)pos2f.y );
-		std::vector<RYAI_MAP_CRUNCH::CWorldPosition> wPosList;
+		CAIVector aiPos((double)pos2f.x, (double)pos2f.y);
 
-		bool canSpawnHere = worldMap.setWorldPosition( AITYPES::vp_auto, wPos, aiPos );
-
-		//worldMap.getWorldPositions( wPosList, aiPos );
-		//for ( std::vector<RYAI_MAP_CRUNCH::CWorldPosition>::const_iterator it=wPosList.begin(); it!=wPosList.end(); ++it )
+		bool canSpawnHere;
+		if (isProspectingPosValid)
 		{
-			// Discard if the position is in water or in interiors
-			if ( canSpawnHere && (wPos.getFlags() & (RYAI_MAP_CRUNCH::Water | RYAI_MAP_CRUNCH::Interior)) )
-				canSpawnHere = false;
-				//continue;
-	
-			msgout.fastWrite( canSpawnHere );
-
-			// TODO: Browse the possible surfaces for the position (x,y), then keep only the one(s)
-			// for which a pathfinding from the prospector to the source limited to 5 surfaces succeeds
+			// only where the prospector can walk to, around obstacles but without a long way round: the plateau above
+			// the cliff the prospector stands under is out of reach, even when some other way leads up to it. The
+			// surface checked is the one walked to (the client still places the source on the ground itself)
+			canSpawnHere = reachesOnWorldMap(worldMap, prospectorWorldPos, RYAI_MAP_CRUNCH::CMapPosition(aiPos), s_SourceSpawnWalkMargin, wPos);
 		}
+		else
+		{
+			canSpawnHere = worldMap.setWorldPosition(AITYPES::vp_auto, wPos, aiPos);
+		}
+
+		// Discard if the position is in water or in interiors
+		if (canSpawnHere && (wPos.getFlags() & (RYAI_MAP_CRUNCH::Water | RYAI_MAP_CRUNCH::Interior)))
+			canSpawnHere = false;
+
+		msgout.fastWrite(canSpawnHere);
 	}
 
 	// Send reply

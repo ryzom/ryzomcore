@@ -142,7 +142,7 @@ CSourceSpawnPosValidator::CSourceSpawnPosValidator( uint32 aiInstanceNumber, con
 	if ( _AisId.get() != 0 )
 	{
 		_MsgOut.setType( "SRC_SPWN_VLD" );
-		//_MsgOut.serial( const_cast<CVector&>(prospectingPos) );
+		_MsgOut.serial(const_cast<CVector &>(prospectingPos));
 		_SizePos = (uint16)_MsgOut.reserve( sizeof(_NbItems) );
 		_NbItems = 0;
 	}
