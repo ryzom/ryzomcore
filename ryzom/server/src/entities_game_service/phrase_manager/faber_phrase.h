@@ -93,6 +93,8 @@ public:
 	
 	// get recommended skill for use item
 	inline uint32 getRecommendedSkill() const { return _Recommended; }
+	// recommended skill before the wearing equipment penalty, the level the stanza's option bricks were bought at
+	inline uint32 getNominalRecommendedSkill() const { return m_NominalRecommended; }
 
 	// item stats modifiers
 	inline sint16 getMBOQuality() const { return _MBOQuality; }
@@ -150,6 +152,10 @@ private:
 
 	// recommended wanted
 	uint32						_Recommended;
+	// clang-format off
+	// recommended wanted, before the wearing equipment penalty
+	uint32						m_NominalRecommended;
+	// clang-format on
 
 	// stats modifiers on item
 	sint16						_MBOQuality;

@@ -60,6 +60,7 @@ CFaberPhrase::CFaberPhrase()
 
 	// recommended skill level for using crafted item
 	_Recommended = 0;
+	m_NominalRecommended = 0;
 
 	// Item stats modifier
 	_MBOQuality = 0;
@@ -388,6 +389,7 @@ void CFaberPhrase::apply()
 	}
 
 	// apply wearing equipment penalty on Recommended skill
+	m_NominalRecommended = _Recommended;
 	_Recommended -= (uint32)(_Recommended * c->wearMalus() * WearMalusCraftFactor);
 
 	const CStaticBrick * plan = CSheets::getSBrickForm( c->getCraftPlan() );
