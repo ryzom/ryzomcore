@@ -1728,7 +1728,7 @@ void CMagicPhrase::apply()
 					params[0].setEIdAIAlias( CEntityBaseManager::getEntityId(_Targets[i].getId()), CAIAliasTranslator::getInstance()->getAIAlias(CEntityBaseManager::getEntityId(_Targets[i].getId())) );
 					PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "MAGIC_TARGET_INVULNERABLE_ALL_MAGIC", params);
 				}
-				else if (invulnerabilityOffensive[i])
+				else if (invulnerabilityOffensive[i] && _Nature == ACTNATURE::OFFENSIVE_MAGIC) // the shield lets a heal through
 				{
 					params[0].setEIdAIAlias( CEntityBaseManager::getEntityId(_Targets[i].getId()), CAIAliasTranslator::getInstance()->getAIAlias(CEntityBaseManager::getEntityId(_Targets[i].getId())) );
 					PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "MAGIC_TARGET_INVULNERABLE_OFFENSIVE", params);
@@ -1745,7 +1745,7 @@ void CMagicPhrase::apply()
 
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "MAGIC_TARGET_INVULNERABLE_ALL_MAGIC", params);
 		}
-		else if (invulnerabilityOffensive[0])
+		else if (invulnerabilityOffensive[0] && _Nature == ACTNATURE::OFFENSIVE_MAGIC)
 		{
 			params[0].setEIdAIAlias( CEntityBaseManager::getEntityId(_Targets[0].getId()), CAIAliasTranslator::getInstance()->getAIAlias(CEntityBaseManager::getEntityId(_Targets[0].getId())) );
 			
