@@ -4514,6 +4514,10 @@ void CCombatPhrase::buildTargetList(bool rightHand, bool isMad)
 		uint targetIndex = 1;
 		for ( uint i = 1; i <  areaSelector.getEntities().size() ; i++ )
 		{
+			// the attacker is not hit by his own area, as with area spells
+			if (areaSelector.getEntities()[i]->getEntityRowId() == _Attacker->getEntityRowId())
+				continue;
+
 			if ( PHRASE_UTILITIES::testOffensiveActionAllowed(_Attacker->getEntityRowId(), areaSelector.getEntities()[i]->getEntityRowId(), dummy, false) )
 			{
 				CCombatDefenderPtr defender = createDefender(areaSelector.getEntities()[i]->getEntityRowId());
