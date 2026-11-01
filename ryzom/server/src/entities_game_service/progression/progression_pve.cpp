@@ -227,6 +227,11 @@ void CCharacterProgressionPVE::actionReport( TReportAction& reportAction, bool i
 						if (*it == reportAction.TargetRowId)
 							continue;
 
+						// the action counts on the other creatures of the fight, but only on those fought with a known skill: on a
+						// creature the player hurt only with enchantments, it would take all his kill xp for a skill never used on it
+						if (!canCopyActionTo(playerChar, *it))
+							continue;
+
 						CEntityBase *creature = CreatureManager.getCreature(*it);
 						if (creature)
 						{
@@ -1375,6 +1380,30 @@ bool CCharacterProgressionPVE::checkAggroForTeam( uint16 teamId, TDataSetRow cre
 	return false;
 }
 
+//----------------------------------------------------------------------------
+// CCharacterProgressionPVE::canCopyActionTo
+//----------------------------------------------------------------------------
+bool CCharacterProgressionPVE::canCopyActionTo(const CCharacter *player, TDataSetRow creature) const
+{
+	// the player's own actions on the creature decide when there are some
+	TCharacterActionsContainer::const_iterator itPlayer = _CharacterActions.find(player->getEntityRowId());
+	if (itPlayer != _CharacterActions.end() && itPlayer->second->hasActedOn(creature))
+		return itPlayer->second->hasSkillActionOn(creature);
+
+	// a team member fighting another creature of the fight shares the xp of those his team fights with a known skill
+	CTeam *team = TeamManager.getRealTeam(player->getTeamId());
+	if (!team)
+		return false;
+
+	const list<CEntityId> &members = team->getTeamMembers();
+	for (list<CEntityId>::const_iterator itMember = members.begin(); itMember != members.end(); ++itMember)
+	{
+		TCharacterActionsContainer::const_iterator it = _CharacterActions.find(TheDataset.getDataSetRow(*itMember));
+		if (it != _CharacterActions.end() && it->second->hasSkillActionOn(creature))
+			return true;
+	}
+	return false;
+}
 
 //----------------------------------------------------------------------------
 // CCharacterProgressionPVE::addDamage

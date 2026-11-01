@@ -74,7 +74,18 @@ public:
 	
 	/// apply xp to skill
 	bool applyXp( CCharacter * c, float xpGainPerOpponent );
-	
+
+	/// true if an action with a known skill is counted, enchantment uses have none
+	bool hasSkillAction() const
+	{
+		for (uint i = 0; i < _SkillsProgress.size(); ++i)
+		{
+			if (_SkillsProgress[i].Skill != SKILLS::unknown)
+				return true;
+		}
+		return false;
+	}
+
 	/// return reference on __SkillsProgress
 	std::vector< TSkillProgress >& getSkillsProgress() { return _SkillsProgress; }
 
@@ -113,6 +124,13 @@ public:
 
 	// true if an action on this opponent is remembered (until its death or its aggro is lost)
 	bool hasActedOn(TDataSetRow opponent) const { return _SkillProgressPerOpponent.find(opponent) != _SkillProgressPerOpponent.end(); }
+
+	// true if an action with a known skill on this opponent is remembered, so not only enchantment uses
+	bool hasSkillActionOn(TDataSetRow opponent) const
+	{
+		TSkillProgressPerOpponentContainer::const_iterator it = _SkillProgressPerOpponent.find(opponent);
+		return it != _SkillProgressPerOpponent.end() && it->second->hasSkillAction();
+	}
 
 private:
 	// TOffensiveCharacter struct per creature
@@ -507,6 +525,10 @@ private:
 
 	/// check at least a team member has aggro with given creature, return true if aggro exists
 	bool checkAggroForTeam( uint16 teamId, TDataSetRow creatureRowId );
+
+	/// true if an action of the player on another creature of the fight may also count on this one: he used a known skill
+	/// on it, or, if he did nothing on it, a member of his team did
+	bool canCopyActionTo(const CCharacter *player, TDataSetRow creature) const;
 
 private:	
 	// singleton instance
