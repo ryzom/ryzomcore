@@ -226,6 +226,9 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x31: return KeyAPOSTROPHE;
 	case 0x33: return KeyBACKSLASH;
 	case 0x5e: return KeyOEM_102;
+	case 0x5b: return KeyDECIMAL; // KPDL, on the layouts where it gives a period or a comma
+	case 0x61: return KeyOEM_102; // AB11, the ro key of Japanese keyboards, as on Windows (it shares the name with LSGT on Brazilian ones)
+	case 0x84: return KeyDASH; // AE13, the yen key of Japanese keyboards: no other key gives KeyDASH on X11
 //	case 0x3a: return KeyCOMMA;
 	case 0x3b: return KeyPERIOD;
 	case 0x3c: return KeySLASH;
@@ -241,7 +244,7 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x1f: return KeyI;
 	case 0x20: return KeyO;
 	case 0x21: return KeyP;
-	case 0x26: return KeyQ;
+	case 0x26: return KeyA;
 	case 0x27: return KeyS;
 	case 0x28: return KeyD;
 	case 0x29: return KeyF;
@@ -272,6 +275,7 @@ TKey getKeyFromKeySym (KeySym keysym)
 	{
 	case XK_BackSpace: return KeyBACK;
 	case XK_Tab: return KeyTAB;
+	case XK_ISO_Left_Tab: return KeyTAB; // Shift+Tab
 	case XK_Return: return KeyRETURN;
 	case XK_Sys_Req: return KeySNAPSHOT;
 	case XK_Scroll_Lock: return KeySCROLL;
@@ -315,6 +319,7 @@ TKey getKeyFromKeySym (KeySym keysym)
 	case XK_KP_Add: return KeyADD;
 	case XK_KP_Subtract: return KeySUBTRACT;
 	case XK_KP_Decimal: return KeyDECIMAL;
+	case XK_KP_Separator: return KeyDECIMAL; // the decimal comma of the keypad, as on Windows
 //	case XK_period: return KeyDECIMAL;
 	case XK_KP_Divide: return KeyDIVIDE;
 	case XK_F1: return KeyF1;
@@ -339,6 +344,12 @@ TKey getKeyFromKeySym (KeySym keysym)
 	case XK_Mode_switch: return KeyMENU;
 	case XK_ISO_Level3_Shift: return KeyMENU;
 	case XK_Menu: return KeyAPPS;
+	// Japanese keyboards; without these, Zenkaku_Hankaku falls back to its keycode, the apostrophe's
+	case XK_Zenkaku_Hankaku: return KeyKANJI;
+	case XK_Kanji: return KeyKANJI;
+	case XK_Henkan_Mode: return KeyCONVERT;
+	case XK_Muhenkan: return KeyNONCONVERT;
+	case XK_Hiragana_Katakana: return KeyKANA;
 	case XK_Alt_L: return KeyMENU;
 	case XK_Alt_R: return KeyMENU;
 	case XK_space: return KeySPACE;
@@ -399,6 +410,18 @@ TKey getKeyFromKeySym (KeySym keysym)
 	break;
 	}
 	return KeyNOKEY;
+}
+
+// the key of a key event: by its keysym, then by its keycode for the keys whose keysym depends on the layout,
+// then by the keysym of its first level for the keys that give an unknown keysym with modifiers (Ctrl+Pause gives Break)
+static TKey getKeyFromKeyEvent(Display *dpy, uint keycode, KeySym keysym)
+{
+	TKey key = getKeyFromKeySym(keysym);
+	if (key == KeyNOKEY)
+		key = getKeyFromKeycode(keycode);
+	if (key == KeyNOKEY)
+		key = getKeyFromKeySym(XkbKeycodeToKeysym(dpy, keycode, 0, 0));
+	return key;
 }
 
 // check if the next pressed key is the same
@@ -519,9 +542,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		// send CEventKeyDown event only if keyCode is defined
 		if (keyCode)
 		{
-			TKey key = getKeyFromKeySym(k);
-			if (key == KeyNOKEY)
-				key = getKeyFromKeycode(keyCode);
+			TKey key = getKeyFromKeyEvent(_dpy, keyCode, k);
 
 			// search for key in map
 			std::map<TKey, bool>::const_iterator it = _PressedKeys.find(key);
@@ -583,9 +604,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			else
 			{
 				// pressed before the window had the focus: the key without modifiers
-				key = getKeyFromKeySym(XkbKeycodeToKeysym(_dpy, event.xkey.keycode, 0, 0));
-				if (key == KeyNOKEY)
-					key = getKeyFromKeycode(event.xkey.keycode);
+				key = getKeyFromKeyEvent(_dpy, event.xkey.keycode, XkbKeycodeToKeysym(_dpy, event.xkey.keycode, 0, 0));
 			}
 
 			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
