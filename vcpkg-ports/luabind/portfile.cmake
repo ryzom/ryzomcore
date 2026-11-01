@@ -1,10 +1,12 @@
 #vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
 
+# a commit, never a branch: the SHA512 stops matching when the branch moves; the same revision as
+# .github/scripts/build-luabind.sh, the Dockerfiles and CMakeModules/HunterConfig.cmake
 vcpkg_from_github(
         OUT_SOURCE_PATH SOURCE_PATH
         REPO ryzom/luabind
-        REF "master"
-        SHA512 2e951e861c35e3bda6148881f3c4d0100ac37e6e940cee0a7cfd86bc5724d01b414f69c2bbb3ca37c3c020fcc1acf87791a08c0325ac33a380abf2d7a31d1b3f
+        REF af52fcf7cc903437d739ee2c9bee92e6025b4908
+        SHA512 2861c5b3a4b925cac58972e0a400ea352d4c64e0c5c414a603a647a8f67fd0c4cbf4a43a71c0deb4cce9042a8a046c75742fcb2012a7455ebb930bb7570c3271
         HEAD_REF master
 )
 
