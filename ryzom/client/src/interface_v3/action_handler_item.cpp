@@ -1510,6 +1510,21 @@ class CHandlerMoveItem : public IActionHandler
 							return;
 						}
 					}
+					// no empty slot: a stack of the same item with room left takes it, as when the item is dropped on it
+					CDBCtrlSheet *src = dynamic_cast<CDBCtrlSheet *>(pCaller);
+					if (src != nullptr && src->getStackable() > 1)
+					{
+						for (sint32 i = 0; i < nbelt; ++i)
+						{
+							CDBCtrlSheet *dst = pLS->getSheet(i);
+							if (dst != src && !dst->getGrayed() && dst->getSheetId() == src->getSheetId()
+							    && dst->getQuality() == src->getQuality() && dst->getQuantity() < src->getStackable())
+							{
+								CAHManager::getInstance()->runActionHandler("swap_item", dst, "src=" + toString(pCaller->getId()));
+								return;
+							}
+						}
+					}
 					// ok try next list
 					nListIt++;
 					if (nListIt >= nNbList)
