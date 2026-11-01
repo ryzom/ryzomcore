@@ -501,6 +501,13 @@ private:
 			CLandMarkOptions Options;
 		};
 		std::vector<SMatchedLandmark> _MatchedLandmarks;
+		// clang-format off
+		// a search result picked on another map of the continent, shown from checkCoords: switching the map rebuilds
+		// the result list, and the button of the click with it
+		SMap				*m_SearchTargetMap;
+		NLMISC::CVector2f	m_SearchTargetPos;
+		std::string			m_SearchTargetName;
+		// clang-format on
 
 	//////////////////////
 	// Respawn handling //
@@ -543,6 +550,8 @@ private:
 	void updateLandMarkList(TLandMarkButtonVect &lm);
 	void updateLandMarkTextList(TLandMarkTextVect &lm);
 	void updateMatchedLandmarks();
+	// point the compass to a search result
+	void showSearchTarget(const std::string &name, const NLMISC::CVector2f &pos);
 	//
 	void removeLandMarks(TLandMarkButtonVect &lm);
 	/// Remove the user landmark buttons; closes the landmark name dialog first, it may be renaming one of them
