@@ -954,7 +954,7 @@ void CDamageScoreManager::reportAction(const TReportAction & action)
 		for (uint i = 0; i < teamTargets.size(); i++)
 		{
 			// check distance between player and team targets (but the current player target)
-			if (target != NULL && teamTargets[i] == target->getEntityRowId())
+			if (target == NULL || teamTargets[i] != target->getEntityRowId())
 			{
 				const double distance = PHRASE_UTILITIES::getDistance(actorChar->getEntityRowId(), teamTargets[i]);
 				if (distance > MaxDistanceForPVPPointsGain)
