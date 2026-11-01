@@ -1337,7 +1337,7 @@
     <style style="inv_container" type="container" w="350" h="310" resizer="true" pop_min_w="350" pop_min_h="110" pop_max_w="920" pop_max_h="1600" movable="true" active="false" opened="true" openable="false" global_color="false" global_color_over="true" />
     <style style="inv_container_guild" type="container" w="336" h="310" resizer="true" pop_min_w="336" pop_min_h="110" pop_max_w="920" pop_max_h="1600" movable="true" active="false" opened="true" openable="false" global_color="false" global_color_over="true" />
     <!-- template for the bulk and the weight -->
-    <template name="tinv_nbslots_bulk_weight" id="" inv_branch_nb="256" inv_branch="" inv_bulk_max="" posparent="parent" posref="TL TL" x="0" y="0">
+    <template name="tinv_nbslots_bulk_weight" id="" inv_branch_nb="10000" inv_branch="" inv_bulk_max="" posparent="parent" posref="TL TL" x="0" y="0">
         <group id="#id" sizeref="w" h="16" posref="#posref">
             <group id="bulk_weight" w="128" h="16" posref="BR BR" posparent="#posparent">
                 <view type="bitmap" id="weight" posref="MR MR" x="0" texture="W_weight.tga" global_color="false" />
