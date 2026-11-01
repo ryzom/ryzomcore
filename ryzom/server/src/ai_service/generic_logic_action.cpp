@@ -861,6 +861,21 @@ public:
 		return hour + (minute * 100.f)/(60.f*100.f);
 	}
 
+	// ticks until day _DayNumber of the period at _DayTime, the next time it comes: a day number beyond the length of
+	// the period means a day in a later period, the data uses it for stays longer than one period
+	// (counted in whole ticks: in hours, a timer could fire a tick early, find its day still to come when set again from
+	// its own event, and fire twice)
+	uint32 ticksUntilDayOfPeriod(uint32 dayOfPeriod, uint32 daysInPeriod) const
+	{
+		// both times of day are whole ticks: h:mm is hour*1800 + minute*30, the clock counts ticks of the day
+		const sint64 targetTick = (sint64)floor(_DayTime * RYZOM_HOURS_IN_TICKS + 0.5);
+		const sint64 nowTick = (sint64)floor(CTimeInterface::getRyzomTime().getRyzomTime() * RYZOM_HOURS_IN_TICKS + 0.5);
+		sint64 delta = ((sint64)_DayNumber - (sint64)dayOfPeriod) * RYZOM_DAY_IN_TICKS + targetTick - nowTick;
+		while (delta <= 0)
+			delta += (sint64)daysInPeriod * RYZOM_DAY_IN_TICKS;
+		return (uint32)delta;
+	}
+
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
@@ -885,40 +900,16 @@ public:
 			}
 			break;
 		case tm_weekday:
-			{
-				uint32 dow = (uint32)CTimeInterface::getRyzomTime().getRyzomDayOfWeek();
-				while (dow < _DayNumber)
-					dow += RYZOM_WEEK_IN_DAY;
-
-				_Min = _Max = timeTicks + dow * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod((uint32)CTimeInterface::getRyzomTime().getRyzomDayOfWeek(), RYZOM_WEEK_IN_DAY);
 			break;
 		case tm_monthday:
-			{
-				uint32 dom = CTimeInterface::getRyzomTime().getRyzomDayOfMonth();
-				while (dom < _DayNumber)
-					dom += RYZOM_MONTH_IN_DAY;
-
-				_Min = _Max = timeTicks + dom * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod(CTimeInterface::getRyzomTime().getRyzomDayOfMonth(), RYZOM_MONTH_IN_DAY);
 			break;
 		case tm_seasonday:
-			{
-				uint32 dos = CTimeInterface::getRyzomTime().getRyzomDayOfSeason();
-				while (dos < _DayNumber)
-					dos += RYZOM_SEASON_IN_DAY;
-
-				_Min = _Max = timeTicks + dos * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod(CTimeInterface::getRyzomTime().getRyzomDayOfSeason(), RYZOM_SEASON_IN_DAY);
 			break;
 		case tm_yearday:
-			{
-				uint32 doy = CTimeInterface::getRyzomTime().getRyzomDayOfYear();
-				while (doy < _DayNumber)
-					doy += RYZOM_YEAR_IN_DAY;
-
-				_Min = _Max = timeTicks + doy * RYZOM_DAY_IN_TICKS;
-			}
+			_Min = _Max = ticksUntilDayOfPeriod(CTimeInterface::getRyzomTime().getRyzomDayOfYear(), RYZOM_YEAR_IN_DAY);
 			break;
 		}
 
