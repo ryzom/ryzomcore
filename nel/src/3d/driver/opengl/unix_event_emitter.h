@@ -102,6 +102,7 @@ private:
 	Display*				_dpy;
 	Window					_win;
 	std::map<TKey, bool>	_PressedKeys;
+	std::map<uint, TKey>	m_PressedKeycodes; // key reported for each held keycode
 	XIM						_im;
 	XIC						_ic;
 	NL3D::IDriver*			_driver;

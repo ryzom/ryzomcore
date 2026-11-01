@@ -532,6 +532,9 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			server->postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), firstTime, this));
 			_PressedKeys[key] = true;
 
+			// its release reports the same key, whatever the modifiers are by then
+			m_PressedKeycodes[keyCode] = key;
+
 			// don't send a control character when deleting
 			if (key == KeyDELETE) c = 0;
 		}
@@ -568,13 +571,22 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	{
 		if (!keyRepeat(_dpy, &event))
 		{
-			KeySym k;
-			// only need to get correct KeySym
-			int c = XLookupString(&event.xkey, nullptr, 0, &k, nullptr);
-
-			TKey key = getKeyFromKeySym(k);
-			if(key == KeyNOKEY)
-				key = getKeyFromKeycode(event.xkey.keycode);
+			// the key its press reported: looked up again, the keysym follows the modifiers held now,
+			// and a Shift key that gives Caps_Lock at its second level would be released as Caps Lock
+			TKey key;
+			std::map<uint, TKey>::iterator it = m_PressedKeycodes.find(event.xkey.keycode);
+			if (it != m_PressedKeycodes.end())
+			{
+				key = it->second;
+				m_PressedKeycodes.erase(it);
+			}
+			else
+			{
+				// pressed before the window had the focus: the key without modifiers
+				key = getKeyFromKeySym(XkbKeycodeToKeysym(_dpy, event.xkey.keycode, 0, 0));
+				if (key == KeyNOKEY)
+					key = getKeyFromKeycode(event.xkey.keycode);
+			}
 
 			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
 			_PressedKeys[key] = false;
