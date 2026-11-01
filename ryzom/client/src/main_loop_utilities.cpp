@@ -379,6 +379,14 @@ void updateFromClientCfg()
 			{
 				SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
 				SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
+				// and the MP3 player's, which the interface only sets when its slider moves
+				CCDBNodeLeaf *mp3Volume = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MP3_VOLUME", false);
+				if (mp3Volume)
+				{
+					float volume = mp3Volume->getValue32() / 255.f;
+					clamp(volume, 0.f, 1.f);
+					SoundMngr->setUserMusicVolume(volume);
+				}
 			}
 		}
 		else

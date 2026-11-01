@@ -512,6 +512,8 @@ void CMusicPlayer::update ()
 		{
 			_State = Stopped;
 			clearPlayingInfo();
+			// sound was turned off during a song: the play button must not stay on pause
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MP3_PLAYING")->setValueBool(false);
 		}
 		return;
 	}
@@ -688,10 +690,13 @@ public:
 	{
 		if(!SoundMngr)
 		{
-			// Do not show warning on volume change as its restored at startup
-			if (Params.find("volume") == std::string::npos)
+			// Do not show warning on volume change as its restored at startup, nor on pause or stop: the play button
+			// pauses right after playing once the flag below is put back
+			if (Params.find("volume") == std::string::npos && Params != "pause" && Params != "stop")
 				CInterfaceManager::getInstance()->messageBox (CI18N::get ("uiMP3SoundDisabled"));
 
+			// the play button flipped the flag before calling here: nothing plays without sound, put the button back
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MP3_PLAYING")->setValueBool(false);
 			return;
 		}
 
