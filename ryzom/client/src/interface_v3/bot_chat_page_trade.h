@@ -159,6 +159,8 @@ private:
 	void				getItemFactionTypePoints(CDBCtrlSheet *sheet, PVP_CLAN::TPVPClan &pvpClan, uint32 &points) const;
 	void				getCurrItemFactionTypePoints(PVP_CLAN::TPVPClan &pvpClan, uint32 &points) const;
 	uint32				getUserFactionPoints(PVP_CLAN::TPVPClan clan) const;
+	// true if the item is paid in dappers: on the money page, or on the faction page without a faction price
+	bool				isPricedInDappers(CDBCtrlSheet *sheet) const;
 
 	// setup display of buy mean (skill points & money) in the modal
 	void		setupBuyMeanInModal(CInterfaceGroup *modal);

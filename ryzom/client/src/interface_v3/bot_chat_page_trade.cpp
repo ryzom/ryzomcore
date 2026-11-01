@@ -493,6 +493,20 @@ void	CBotChatPageTrade::getCurrItemFactionTypePoints(PVP_CLAN::TPVPClan &pvpClan
 }
 
 // ***************************************************************************
+bool CBotChatPageTrade::isPricedInDappers(CDBCtrlSheet *sheet) const
+{
+	if (_BuyMean == Money)
+		return true;
+	if (_BuyMean != MoneyFactionPoints)
+		return false;
+	// the faction page also lists items priced in dappers
+	PVP_CLAN::TPVPClan fpType;
+	uint32 fpCost;
+	getItemFactionTypePoints(sheet, fpType, fpCost);
+	return fpType == PVP_CLAN::None;
+}
+
+// ***************************************************************************
 uint32 CBotChatPageTrade::getUserFactionPoints(PVP_CLAN::TPVPClan clan) const
 {
 	if ((clan < PVP_CLAN::BeginClans) || (clan > PVP_CLAN::EndClans))
@@ -710,14 +724,15 @@ void CBotChatPageTrade::updateTradeModal()
 					{
 						if ((_BuyMean == Money) || (_BuyMean == MoneyFactionPoints))
 						{
-							if (totalPriceWithoutFame > getInventory().getMoney())
+							// an item costs faction points or dappers, never both: its PRICE holds one or the other
+							if (fpType == PVP_CLAN::None && totalPriceWithoutFame > getInventory().getMoney())
 							{
 								if (confirmTradeGroup) confirmTradeGroup->setActive(false);
 								if (cantTradeGroup) cantTradeGroup->setActive(true);
 								if (cantTradeButton)	cantTradeButton->setText(CI18N::get("uiNotEnoughMoney"));
 								if (cantTradeButton)	cantTradeButton->setDefaultContextHelp(CI18N::get("uittNotEnoughMoney"));
 							}
-							else if (_BuyMean == MoneyFactionPoints)
+							else if (fpType != PVP_CLAN::None)
 							{
 								// Check if the player has enough faction point for the object selected
 								if ((confirmTradeGroup != nullptr) && (cantTradeButton != nullptr) && (cantTradeGroup != nullptr))
@@ -840,8 +855,9 @@ void CBotChatPageTrade::setupBuyMeanInModal(CInterfaceGroup *modal)
 	CViewBase *equal = modal->getView("standard_price:total_price:equal");
 	CInterfaceGroup *money = modal->getGroup("standard_price:total_price:item_price");
 	CInterfaceGroup *skillPoints = modal->getGroup("standard_price:total_price:sp");
-	if (equal) equal->setActive(_BuyMean == Money);
-	if (money) money->setActive(_BuyMean == Money);
+	bool dappers = isPricedInDappers(_CurrItemSheet);
+	if (equal) equal->setActive(dappers);
+	if (money) money->setActive(dappers);
 	if (skillPoints) skillPoints->setActive(_BuyMean == SkillPoints);
 }
 
@@ -868,13 +884,13 @@ void CBotChatPageTrade::startBuyDialog(CDBCtrlSheet *sheet, CCtrlBase * /* pCall
 
 	// Set price label
 	CViewText *priceLabel = dynamic_cast<CViewText*>(ig->getView( "standard_price:total_price_header" ));
-	if ( _BuyMean == Money && priceLabel )
+	if (priceLabel)
 	{
-		priceLabel->setText( CI18N::get( "uiPrice" ) );
-		priceLabel->setActive(true);
+		bool dappers = isPricedInDappers(sheet);
+		if (dappers)
+			priceLabel->setText(CI18N::get("uiPrice"));
+		priceLabel->setActive(dappers);
 	}
-	else
-		priceLabel->setActive( false );
 
 	// show quantity dialog if a correct item (only stackable items etc....)
 	uint	defaultQuantity= initQuantityMode(false, sheet);
@@ -1151,8 +1167,10 @@ bool CBotChatPageTrade::isTradeValid( bool enableResale ) const
 			}
 			if (_BuyMean == MoneyFactionPoints)
 			{
-				return ((totalPrice <= getInventory().getMoney()) &&
-						(quantity*fpCost <= getUserFactionPoints(fpType)));
+				// an item costs faction points or dappers, never both: its PRICE holds one or the other
+				if (fpType != PVP_CLAN::None)
+					return (uint64)quantity * fpCost <= getUserFactionPoints(fpType);
+				return totalPrice <= getInventory().getMoney();
 			}
 			else if (_BuyMean == SkillPoints)
 			{
