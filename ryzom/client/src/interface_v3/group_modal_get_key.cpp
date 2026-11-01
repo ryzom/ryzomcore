@@ -77,7 +77,8 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 	if (event.getType() == NLGUI::CEventDescriptor::key)
 	{
 		NLGUI::CEventDescriptorKey &edk = (NLGUI::CEventDescriptorKey &)event;
-		if (edk.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown)
+		// a key the platform could not identify has no name, and would match every other such key: it cannot be bound
+		if (edk.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown && edk.getKey() != KeyNOKEY)
 		{
 //			if ((edk.getKey() != KeyCONTROL) && (edk.getKey() != KeyMENU) && (edk.getKey() != KeySHIFT))
 //			{
