@@ -37,13 +37,18 @@ runs:
       with:
         cmakeVersion: "^3.31.11"
 
+    # only for vcpkg presets: another job restoring the vcpkg cache would save it again under a new key before
+    # the vcpkg job had built what changed
     - uses: lukka/run-vcpkg@v11
+      if: contains(inputs.cmake-preset, 'vcpkg')
 
     - uses: actions/cache/restore@v5
+      if: contains(inputs.cmake-preset, 'vcpkg')
       id: vcpkg-cache
       with:
         path: ${{ inputs.vcpkg-cache-dir}}
-        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ inputs.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+        restore-keys: vcpkg-${{ inputs.os }}-
 
     - name: Dependencies Linux
       if: runner.os == 'Linux'
@@ -89,7 +94,7 @@ runs:
       run: cmake --preset ${{ inputs.cmake-preset }}
 
     - uses: actions/cache/save@v5
-      if: ( ! cancelled() )
+      if: ( ! cancelled() ) && contains(inputs.cmake-preset, 'vcpkg')
       with:
         path: ${{ inputs.vcpkg-cache-dir }}
         key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}

@@ -131,7 +131,7 @@ jobs:
       - id: cache
         uses: actions/cache@v6
         with:
-          key: nelns-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', '.github/nelns/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json') }}
+          key: nelns-${{ matrix.os }}-${{ matrix.cmake-preset }}-${{ hashFiles('build/nel-*.sh', 'nelns/**', '.github/nelns/**', 'cmake/**', 'CMakeModules/**', 'CMakeLists.txt', 'CMakePresets.json', 'vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
           path: ${{ needs.strings.outputs.build-dir }}/nelns/nelns-*
 
       - uses: ./.github/nelns

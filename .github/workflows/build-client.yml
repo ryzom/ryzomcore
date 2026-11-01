@@ -12,7 +12,7 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
-      - vcpkg/**
+      - vcpkg-ports/**
       - vcpkg.json
       - vcpkg-configuration.json
   pull_request:
@@ -26,7 +26,7 @@ on:
       - CMakeModules/**
       - CMakeLists.txt
       - CMakePresets.json
-      - vcpkg/**
+      - vcpkg-ports/**
       - vcpkg.json
       - vcpkg-configuration.json
 
@@ -104,7 +104,8 @@ jobs:
       if: matrix.vcpkg == true
       with:
         path: ${{ github.workspace }}/.vcpkg
-        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
+        restore-keys: vcpkg-${{ matrix.os }}-
 
     - name: Dependencies Linux
       if: runner.os == 'Linux' && matrix.vcpkg != true
@@ -221,7 +222,7 @@ jobs:
       if: (matrix.vcpkg == true)
       with:
         path: ${{ github.workspace }}/.vcpkg
-        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json') }}
+        key: vcpkg-${{ matrix.os }}-${{ hashFiles('vcpkg.json', 'vcpkg-configuration.json', 'vcpkg-ports/**') }}
 
     - name: Build
       env:
