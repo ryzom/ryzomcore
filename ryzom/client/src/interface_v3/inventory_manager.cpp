@@ -1333,7 +1333,11 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 			// If incompatible -> remove
 			if (!getInventory().isLeftHandItemCompatibleWithRightHandItem(leftSheet, rightSheet, lastRightSheet))
 			{
-				pCSLeftHand->setSheet("");
+				// the client's own unequips have taken the left item off by now; still worn, it is the server that emptied
+				// the right hand (an item destroyed or dropped from it) and kept the left one, which only the client rule
+				// refuses: keep showing it, or it stays worn but hidden, out of reach of the hands bar
+				if (leftSheet == 0)
+					pCSLeftHand->setSheet("");
 			}
 			// WORKAROUND: useful when an item is destroyed before it is unequipped (clean the left hand)
 			if ((leftSheet == 0) && (rightSheet == 0))
