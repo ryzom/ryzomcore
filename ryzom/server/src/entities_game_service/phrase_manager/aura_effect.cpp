@@ -137,7 +137,10 @@ void CAuraRootEffect::createEffectOnEntity(CEntityBase *entity, CEntityBase *cre
 			}
 			else
 			{
-				if (_Value < auraEffect->getParamValue())
+				// a stronger aura replaces the effect, but only when it will be allowed to create its own: another
+				// caster's aura still disables this one on the target, and the target would be left with neither
+				NLMISC::TGameCycle replaceEndDate;
+				if (_Value > auraEffect->getParamValue() && (_IsFromConsumable || character->isAuraEffective(_PowerType, replaceEndDate, creator->getId())))
 				{
 					auraEffect->stopEffect();
 				}

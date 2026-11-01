@@ -32,13 +32,21 @@ class CSpecialPowerBasicAura : public CSpecialPowerAuras
 {
 public:
 	/// Default Constructor
-	CSpecialPowerBasicAura() : CSpecialPowerAuras()
-	{		
+	CSpecialPowerBasicAura()
+	    : CSpecialPowerAuras()
+	    , _Duration(0)
+	    , _ParamValue(0)
+	    , _RootEffectFamily(EFFECT_FAMILIES::Unknown)
+	    , _CreatedEffectFamily(EFFECT_FAMILIES::Unknown)
+	{
 	}
 
 	/// Constructor
 	CSpecialPowerBasicAura(TDataSetRow actorRowId, CSpecialPowerPhrase *phrase, float durationInSeconds, float userDisableTimeInSeconds, float targetsDisableTimeInSeconds, POWERS::TPowerType powerType)
-	:CSpecialPowerAuras()
+	    : CSpecialPowerAuras()
+	    , _ParamValue(0) // the protection auras have no value: they all compare equal
+	    , _RootEffectFamily(EFFECT_FAMILIES::Unknown)
+	    , _CreatedEffectFamily(EFFECT_FAMILIES::Unknown)
 	{
 		_Phrase = phrase;
 		_Duration = NLMISC::TGameCycle(durationInSeconds / CTickEventHandler::getGameTimeStep());;		
