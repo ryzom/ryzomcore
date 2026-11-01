@@ -40,7 +40,8 @@ using NL3D::CDriverGL;
 
 - (id)initWithDriver:(CDriverGL*)driver;
 - (void)windowDidMove:(NSNotification*)notification;
-- (void)windowDidBecomeKey:(NSNotification *)notification;
-- (void)windowDidResignKey:(NSNotification *)notification;
+- (void)anyWindowDidChangeKey:(NSNotification *)notification;
+/// the driver's window is destroyed: the delegate stops watching and reaching the driver
+- (void)detachDriver;
 
 @end

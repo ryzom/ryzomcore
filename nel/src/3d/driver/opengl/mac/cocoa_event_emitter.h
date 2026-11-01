@@ -43,16 +43,23 @@ class CCocoaEventEmitter : public IEventEmitter
 	// TODO like internal server in unix event emitter... review!
 	CEventServer*    _server;
 
+	// buttons pressed in the view and not released yet
+	uint             m_ButtonsDown;
+
 public:
 	CCocoaEventEmitter() :
 		_driver(NULL),
 		_glView(nil),
-		_server(NULL) { }
+		_server(NULL),
+		m_ButtonsDown(0) { }
 
 	void         init(NL3D::IDriver*, CocoaOpenGLView*, bool eventLoop);
 	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
 	virtual void submitEvents(CEventServer& server, bool allWindows);
 	bool         handleQuitRequest();
+
+	/// the window got or lost the keyboard focus
+	void         postFocusEvent(bool focused);
 
 	virtual bool copyTextToClipboard(const std::string &text);
 	virtual bool pasteTextFromClipboard(std::string &text);

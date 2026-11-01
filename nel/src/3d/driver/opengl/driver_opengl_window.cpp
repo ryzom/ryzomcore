@@ -207,6 +207,22 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 	return driver->_EventEmitter.processMessage(event);
 }
 
+// ***************************************************************************
+void CDriverGL::updateWindowFocus()
+{
+	// The focus is the key state of the window holding the view. In fullscreen that is a window of AppKit's,
+	// and the window the driver made resigns as the key window when the view moves there.
+	if (_win == EmptyWindow)
+		return;
+
+	bool focus = [[containerView() window] isKeyWindow] == YES;
+	if (focus == _WindowFocus)
+		return;
+
+	_WindowFocus = focus;
+	_EventEmitter.postFocusEvent(focus);
+}
+
 #elif defined (NL_OS_UNIX)
 
 static Atom XA_WM_STATE = 0;
@@ -1564,8 +1580,11 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	[closeButton setAction:@selector(applicationShouldTerminate:)];
 	[closeButton setTarget:appDelegate];
 
-	// set the delegate which will handle window move events
-	[cocoa_window setDelegate:[[CocoaWindowDelegate alloc] initWithDriver:this]];
+	// set the delegate which will handle window move and focus events (the delegate of a window made
+	// before is detached, as it watches every window)
+	[m_WindowDelegate detachDriver];
+	m_WindowDelegate = [[CocoaWindowDelegate alloc] initWithDriver:this];
+	[cocoa_window setDelegate:m_WindowDelegate];
 
 	// set the window to non transparent
 	[cocoa_window setOpaque:YES];
@@ -1655,6 +1674,12 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	_win = window;
 
+#ifdef NL_OS_MAC
+	// the window became the key window before it was the driver's, and need not be (the application may
+	// not be active)
+	updateWindowFocus();
+#endif
+
 	_CurrentMode.Width = mode.Width;
 	_CurrentMode.Height = mode.Height;
 
@@ -1733,6 +1758,11 @@ bool CDriverGL::destroyWindow()
 
 	if (_DestroyWindow)
 	{
+		// the delegate watches every window, it must not reach the driver any more (it is not released,
+		// as a window does not retain its delegate)
+		[m_WindowDelegate detachDriver];
+		m_WindowDelegate = nil;
+
 		[[containerView() window] release];
 		[containerView() release];
 		[_glView release];
@@ -1881,6 +1911,9 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 		// let the gl view receive key events
 		[[containerView() window] makeFirstResponder:_glView];
 	}
+
+	// the view may have changed windows
+	updateWindowFocus();
 
 #elif defined(NL_OS_UNIX)
 

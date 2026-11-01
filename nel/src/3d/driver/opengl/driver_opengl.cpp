@@ -200,6 +200,7 @@ CDriverGL::CDriverGL()
 
 	_ctx                = nil;
 	_glView             = nil;
+	m_WindowDelegate    = nil;
 	_backBufferHeight   = 0;
 	_backBufferWidth    = 0;
 

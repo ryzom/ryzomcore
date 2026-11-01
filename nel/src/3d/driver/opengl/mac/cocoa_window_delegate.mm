@@ -41,6 +41,12 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	if((self = [super init])) 
 	{
 		_driver = driver;
+
+		// in fullscreen the view is in a window of AppKit's, which has no delegate: watch every window
+		NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+		[center addObserver:self selector:@selector(anyWindowDidChangeKey:) name:NSWindowDidBecomeKeyNotification object:nil];
+		[center addObserver:self selector:@selector(anyWindowDidChangeKey:) name:NSWindowDidResignKeyNotification object:nil];
+
 		return self;
 	}
 
@@ -55,19 +61,18 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	windowDidMove([notification  object], _driver);
 }
 
-- (void)windowDidBecomeKey:(NSNotification *)notification
+-(void)detachDriver
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	_driver = nullptr;
+}
+
+-(void)anyWindowDidChangeKey:(NSNotification *)notification
 {
 	if (!_driver)
 		return;
 
-	_driver->_WindowFocus = true;
-}
-- (void)windowDidResignKey:(NSNotification *)notification;
-{
-	if(!_driver)
-		return;
-
-	_driver->_WindowFocus = false;
+	_driver->updateWindowFocus();
 }
 
 @end

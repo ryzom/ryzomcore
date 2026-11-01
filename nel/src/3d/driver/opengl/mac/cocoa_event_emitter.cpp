@@ -188,6 +188,22 @@ static NLMISC::TKeyButton modifierFlagsToNelKeyButton(unsigned int modifierFlags
 	return (NLMISC::TKeyButton)buttons;
 }
 
+/// the button of a mouse drag or release, noButton for the other events
+static NLMISC::TMouseButton draggedOrReleasedButton(NSEventType type)
+{
+	switch (type)
+	{
+	case NSLeftMouseDragged:
+	case NSLeftMouseUp:
+		return NLMISC::leftButton;
+	case NSRightMouseDragged:
+	case NSRightMouseUp:
+		return NLMISC::rightButton;
+	default:
+		return NLMISC::noButton;
+	}
+}
+
 /// check whether a given event represents input text
 static bool isTextKeyEvent(NSEvent* event)
 {
@@ -268,9 +284,9 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.y /= (float)viewRect.size.height;
 
 	// if the mouse event was placed outside the view, don't tell NeL :)
-	if((mousePos.x < 0.0 || mousePos.x > 1.0 ||
-		mousePos.y < 0.0 || mousePos.y > 1.0) &&
-		event.type != NSKeyDown && event.type != NSKeyUp)
+	// except the drags and the release of a button pressed in the view: Cocoa sends them to the window
+	// of the press wherever the cursor is, and without the release NeL would keep the button held
+	if ((mousePos.x < 0.0 || mousePos.x > 1.0 || mousePos.y < 0.0 || mousePos.y > 1.0) && event.type != NSKeyDown && event.type != NSKeyUp && !(m_ButtonsDown & draggedOrReleasedButton(event.type)))
 	{
 		return false;
 	}
@@ -282,11 +298,13 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	{
 	case NSLeftMouseDown:
 	{
+		m_ButtonsDown |= NLMISC::leftButton;
 		server->postEvent(new NLMISC::CEventMouseDown(mousePos.x, mousePos.y, (NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
 	}
 	break;
 	case NSLeftMouseUp:
 	{
+		m_ButtonsDown &= ~NLMISC::leftButton;
 		server->postEvent(new NLMISC::CEventMouseUp(
 			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::leftButton | modifiers), this));
@@ -294,6 +312,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	}
 	case NSRightMouseDown:
 	{
+		m_ButtonsDown |= NLMISC::rightButton;
 		server->postEvent(new NLMISC::CEventMouseDown(
 			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
@@ -301,6 +320,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	}
 	case NSRightMouseUp:
 	{
+		m_ButtonsDown &= ~NLMISC::rightButton;
 		server->postEvent(new NLMISC::CEventMouseUp(
 			mousePos.x, mousePos.y,
 			(NLMISC::TMouseButton)(NLMISC::rightButton | modifiers), this));
@@ -413,6 +433,16 @@ bool CCocoaEventEmitter::handleQuitRequest()
 	}
 
 	return false;
+}
+
+void CCocoaEventEmitter::postFocusEvent(bool focused)
+{
+	// a button released while another window has the focus is never seen
+	if (!focused)
+		m_ButtonsDown = 0;
+
+	if (_server)
+		_server->postEvent(new CEventSetFocus(focused, this));
 }
 
 typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);

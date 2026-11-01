@@ -725,6 +725,9 @@ public:
 
 #ifdef NL_OS_MAC
 	NLMISC::CCocoaEventEmitter _EventEmitter;
+
+	/// the focus is the key state of the window holding the view, see the definition
+	void						updateWindowFocus();
 #endif
 
 private:
@@ -836,6 +839,7 @@ private:
 	friend bool							GlWndProc(CDriverGL*, const void*);
 
 	CocoaOpenGLView*           _glView;
+	id                         m_WindowDelegate; // CocoaWindowDelegate of the window the driver made
 	NSAutoreleasePool*         _autoreleasePool;
 	uint16                     _backBufferHeight;
 	uint16                     _backBufferWidth;
