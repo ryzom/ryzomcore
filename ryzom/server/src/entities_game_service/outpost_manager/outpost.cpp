@@ -2602,6 +2602,8 @@ uint32 COutpost::computeTimeRangeAttForClient() const
 	case OUTPOSTENUMS::AttackBefore:
 		return time;
 	case OUTPOSTENUMS::AttackRound:
+		// the timer ends the current round: the period started that many rounds earlier
+		return time - (_FightData._CurrentCombatRound + 1) * computeRoundTime();
 	case OUTPOSTENUMS::AttackAfter:
 	case OUTPOSTENUMS::DefenseBefore:
 	case OUTPOSTENUMS::DefenseRound:
@@ -2622,13 +2624,22 @@ uint32 COutpost::computeTimeRangeDefForClient() const
 		time += computeTimeBeforeAttack();
 	case OUTPOSTENUMS::AttackBefore:
 		time += computeRoundTime() * computeRoundCount();
-	case OUTPOSTENUMS::AttackRound:
 		time += computeTimeAfterAttack();
+		time += computeTimeBeforeDefense();
+		return time;
+	case OUTPOSTENUMS::AttackRound:
+		// the timer ends the current round, the rounds left come before the end of the attack
+		time += (computeRoundCount() - _FightData._CurrentCombatRound - 1) * computeRoundTime();
+		time += computeTimeAfterAttack();
+		time += computeTimeBeforeDefense();
+		return time;
 	case OUTPOSTENUMS::AttackAfter:
 		time += computeTimeBeforeDefense();
 	case OUTPOSTENUMS::DefenseBefore:
 		return time;
 	case OUTPOSTENUMS::DefenseRound:
+		// the timer ends the current round: the period started that many rounds earlier
+		return time - (_FightData._CurrentCombatRound + 1) * computeRoundTime();
 	case OUTPOSTENUMS::DefenseAfter:
 		return 0;
 	}
