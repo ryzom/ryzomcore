@@ -117,53 +117,52 @@ copy %RC_ROOT%\code\nel\tools\3d\zone_lighter\zone_lighter.cfg zone_lighter.cfg
 copy %RC_ROOT%\code\nel\tools\3d\zone_welder\zwelder.cfg zwelder.cfg
 copy %RC_ROOT%\code\nel\tools\3d\zviewer\zviewer.cfg zviewer.cfg
 
-copy "C:\2022q2_external_v143_x64\ogg\bin\ogg.dll" "ogg.dll"
-copy "C:\2022q2_external_v143_x64\libpng\bin\libpng16.dll" "libpng16.dll"
-copy "C:\2022q2_external_v143_x64\vorbis\bin\vorbis.dll" "vorbis.dll"
-copy "C:\2022q2_external_v143_x64\vorbis\bin\vorbisfile.dll" "vorbisfile.dll"
-copy "C:\2022q2_external_v143_x64\libjpeg\bin\jpeg62.dll" "jpeg62.dll"
-copy "C:\2022q2_external_v143_x64\libxml2\bin\libxml2.dll" "libxml2.dll"
-copy "C:\2022q2_external_v143_x64\libiconv\bin\libiconv.dll" "libiconv.dll"
-copy "C:\2022q2_external_v143_x64\libiconv\bin\libcharset.dll" "libcharset.dll"
-copy "C:\2022q2_external_v143_x64\zlib\bin\zlib.dll" "zlib.dll"
-copy "C:\2022q2_external_v143_x64\freetype\bin\freetype.dll" "freetype.dll"
-copy "C:\2022q2_external_v143_x64\openal-soft\bin\OpenAL32.dll" "OpenAL32.dll"
-copy "C:\2022q2_external_v143_x64\assimp\bin\assimp.dll" "assimp.dll"
-rem copy "C:\2022q2_external_v143_x64\openssl\bin\ssleay32.dll" "ssleay32.dll"
-rem copy "C:\2022q2_external_v143_x64\openssl\bin\libeay32.dll" "libeay32.dll"
-rem copy "C:\2022q2_external_v143_x64\curl\bin\libcurl.dll" "libcurl.dll"
+copy "C:\2026q4_external_v143_x64\ogg\bin\ogg.dll" "ogg.dll"
+copy "C:\2026q4_external_v143_x64\libpng\bin\libpng16.dll" "libpng16.dll"
+copy "C:\2026q4_external_v143_x64\vorbis\bin\vorbis.dll" "vorbis.dll"
+copy "C:\2026q4_external_v143_x64\vorbis\bin\vorbisfile.dll" "vorbisfile.dll"
+copy "C:\2026q4_external_v143_x64\libjpeg\bin\jpeg62.dll" "jpeg62.dll"
+copy "C:\2026q4_external_v143_x64\giflib\bin\gif.dll" "gif.dll"
+copy "C:\2026q4_external_v143_x64\libxml2\bin\libxml2.dll" "libxml2.dll"
+copy "C:\2026q4_external_v143_x64\zlib\bin\z.dll" "z.dll"
+copy "C:\2026q4_external_v143_x64\freetype\bin\freetype.dll" "freetype.dll"
+copy "C:\2026q4_external_v143_x64\openal-soft\bin\OpenAL32.dll" "OpenAL32.dll"
+copy "C:\2026q4_external_v143_x64\assimp\bin\assimp.dll" "assimp.dll"
+rem copy "C:\2026q4_external_v143_x64\openssl\bin\libssl-3-x64.dll" "libssl-3-x64.dll"
+rem copy "C:\2026q4_external_v143_x64\openssl\bin\libcrypto-3-x64.dll" "libcrypto-3-x64.dll"
+rem copy "C:\2026q4_external_v143_x64\curl\bin\libcurl.dll" "libcurl.dll"
 
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5Core.dll Qt5Core.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5Gui.dll Qt5Gui.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5Test.dll Qt5Test.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5Xml.dll Qt5Xml.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5Widgets.dll Qt5Widgets.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5Network.dll Qt5Network.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\Qt5PrintSupport.dll Qt5PrintSupport.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\libGLESv2.dll libGLESv2.dll
-copy C:\2022q2_external_v143_x64\qt5\bin\libEGL.dll libEGL.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5Core.dll Qt5Core.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5Gui.dll Qt5Gui.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5Test.dll Qt5Test.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5Xml.dll Qt5Xml.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5Widgets.dll Qt5Widgets.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5Network.dll Qt5Network.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\Qt5PrintSupport.dll Qt5PrintSupport.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\libGLESv2.dll libGLESv2.dll
+copy C:\2026q4_external_v143_x64\qt5\bin\libEGL.dll libEGL.dll
 
 rmdir /s /q platforms
 mkdir platforms
 cd platforms
-copy C:\2022q2_external_v143_x64\qt5\plugins\platforms\qwindows.dll qwindows.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\platforms\qwindows.dll qwindows.dll
 cd ..
 
 rmdir /s /q styles
 mkdir styles
 cd styles
-copy C:\2022q2_external_v143_x64\qt5\plugins\styles\qwindowsvistastyle.dll qwindowsvistastyle.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\styles\qwindowsvistastyle.dll qwindowsvistastyle.dll
 cd ..
 
 rmdir /s /q imageformats
 mkdir imageformats
 cd imageformats
-copy C:\2022q2_external_v143_x64\qt5\plugins\imageformats\qjpeg.dll qjpeg.dll
-copy C:\2022q2_external_v143_x64\qt5\plugins\imageformats\qgif.dll qgif.dll
-copy C:\2022q2_external_v143_x64\qt5\plugins\imageformats\qtga.dll qtga.dll
-copy C:\2022q2_external_v143_x64\qt5\plugins\imageformats\qwbmp.dll qwbmp.dll
-copy C:\2022q2_external_v143_x64\qt5\plugins\imageformats\qtiff.dll qtiff.dll
-copy C:\2022q2_external_v143_x64\qt5\plugins\imageformats\qwebp.dll qwebp.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\imageformats\qjpeg.dll qjpeg.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\imageformats\qgif.dll qgif.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\imageformats\qtga.dll qtga.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\imageformats\qwbmp.dll qwbmp.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\imageformats\qtiff.dll qtiff.dll
+copy C:\2026q4_external_v143_x64\qt5\plugins\imageformats\qwebp.dll qwebp.dll
 cd ..
 
 cd ..

@@ -4,7 +4,7 @@
 #
 #   NL_WINE_VS2008_PREFIX    the extracted prefix   (default $HOME/toolchain_v90_prefix)
 #   NL_WINE_VS2008_SHADOW    shadow VC dir to create (default <prefix>-msvc-shadow)
-#   NL_WINE_VS2008_EXTERNAL  externals root          (default <prefix>/drive_c/2019q4_external_v90_x86)
+#   NL_WINE_VS2008_EXTERNAL  externals root          (default <prefix>/drive_c/2026q4_external_v90_x86)
 #
 # What it does:
 #   1. dosdevices links (packaged prefix ships without symlinks - 7z would
@@ -18,7 +18,7 @@ set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"
 PREFIX="${NL_WINE_VS2008_PREFIX:-$HOME/toolchain_v90_prefix}"
 SHADOW="${NL_WINE_VS2008_SHADOW:-$PREFIX-msvc-shadow}"
-EXTERNAL="${NL_WINE_VS2008_EXTERNAL:-$PREFIX/drive_c/2019q4_external_v90_x86}"
+EXTERNAL="${NL_WINE_VS2008_EXTERNAL:-$PREFIX/drive_c/2026q4_external_v90_x86}"
 PFX="$PREFIX/drive_c"
 VC="$PFX/Program Files/Microsoft Visual Studio 9.0/VC"
 

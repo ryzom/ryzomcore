@@ -31,10 +31,11 @@ cp "$EXT/libpng/bin/libpng16.dll" "$OUT/"
 cp "$EXT/vorbis/bin/vorbis.dll" "$OUT/"
 cp "$EXT/vorbis/bin/vorbisfile.dll" "$OUT/"
 cp "$EXT/libjpeg/bin/jpeg62.dll" "$OUT/"
+cp "$EXT/giflib/bin/gif.dll" "$OUT/"
 cp "$EXT/libxml2/bin/libxml2.dll" "$OUT/"
 cp "$EXT/libiconv/bin/libiconv.dll" "$OUT/"
 cp "$EXT/libiconv/bin/libcharset.dll" "$OUT/"
-cp "$EXT/zlib/bin/zlib.dll" "$OUT/"
+cp "$EXT/zlib/bin/z.dll" "$OUT/"
 cp "$EXT/freetype/bin/freetype.dll" "$OUT/"
 
 # plugin binaries, renamed per the historical install convention

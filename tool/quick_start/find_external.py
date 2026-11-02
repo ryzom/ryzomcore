@@ -126,7 +126,7 @@ def FindBinPaths(prefixPaths):
 	return res
 
 def FindVSPrefixPaths(toolset, platform):
-	# 2021q4_external_v143_x64
+	# 2026q4_external_v143_x64
 	dirExt = "_external_" + toolset + "_" + platform
 	found = []
 	for dir in os.listdir("C:\\"):

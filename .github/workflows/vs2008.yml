@@ -3,7 +3,7 @@ name: "Ryzom Core: VS2008 / Wine"
 # Builds the codebase with the VS2008 SP1 x86 reference toolchain under Wine,
 # using a prepared wine prefix (VS2008 + Windows SDK v6.0A + DirectX SDK June
 # 2010 + Max 2010 SDK + .NET 2.0, packaged from a WinXP install) and the
-# 2019q4 v90 x86 externals. See tool/wine_vs2008/ for the toolchain layer.
+# 2026q4 v90 x86 externals. See tool/wine_vs2008/ for the toolchain layer.
 
 on:
   push:
@@ -20,7 +20,7 @@ on:
 
 env:
   TOOLCHAIN_PREFIX_URL: https://cdn.ryzom.dev/core/toolchain_v90_prefix.7z
-  EXTERNAL_URL: https://cdn.ryzom.dev/core/2019q4_external_v90_x86.7z
+  EXTERNAL_URL: https://cdn.ryzom.dev/core/2026q4_external_v90_x86.7z
   NL_WINE_VS2008_PREFIX: /home/runner/toolchain_v90_prefix
 
 jobs:
@@ -70,8 +70,8 @@ jobs:
         with:
           path: |
             ~/toolchain_v90_prefix
-            ~/2019q4_external_v90_x86
-          key: vs2008-toolchain-v1
+            ~/2026q4_external_v90_x86
+          key: vs2008-toolchain-v2-2026q4
 
       - name: Download and extract toolchain
         if: steps.cache-toolchain.outputs.cache-hit != 'true'
@@ -82,15 +82,15 @@ jobs:
           # the externals archive is bare (boost/, curl/, ... at the root) —
           # extract into a named directory
           curl -sSfO "$EXTERNAL_URL"
-          mkdir -p "$HOME/2019q4_external_v90_x86"
-          7z x -y -o"$HOME/2019q4_external_v90_x86" 2019q4_external_v90_x86.7z > /dev/null
-          rm 2019q4_external_v90_x86.7z
+          mkdir -p "$HOME/2026q4_external_v90_x86"
+          7z x -y -o"$HOME/2026q4_external_v90_x86" 2026q4_external_v90_x86.7z > /dev/null
+          rm 2026q4_external_v90_x86.7z
 
       - name: Set up toolchain
         run: |
           # externals live inside the prefix's drive_c by convention
-          ln -sfn "$HOME/2019q4_external_v90_x86" \
-            "$NL_WINE_VS2008_PREFIX/drive_c/2019q4_external_v90_x86"
+          ln -sfn "$HOME/2026q4_external_v90_x86" \
+            "$NL_WINE_VS2008_PREFIX/drive_c/2026q4_external_v90_x86"
           tool/wine_vs2008/setup.sh
 
       - name: Configure
@@ -109,7 +109,7 @@ jobs:
             -DWITH_NEL_TESTS=OFF -DWITH_TESTING=OFF -DWITH_STATIC=ON \
             -DWITH_FFMPEG=OFF -DWITH_MSQUIC=OFF -DWITH_QT=OFF -DWITH_QT5=OFF -DWITH_QT6=OFF \
             -DWITH_STATIC_LIBXML2=OFF -DWITH_STATIC_CURL=OFF -DCURL_NO_CURL_CMAKE=ON \
-            -DFINAL_VERSION=ON -DWITH_LUA51=OFF -DWITH_LUA53=ON \
+            -DFINAL_VERSION=ON -DWITH_LUA51=OFF -DWITH_LUA55=ON \
             -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_DSOUND=ON -DWITH_DRIVER_XAUDIO2=ON \
             -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENGL3=ON -DWITH_DRIVER_OPENAL=ON \
             -DWITH_ASSIMP=OFF -DWITH_NELNS=OFF -DWITH_3D=ON \
@@ -126,7 +126,7 @@ jobs:
         if: matrix.package_plugin
         run: |
           tool/wine_vs2008/package_max_plugin.sh \
-            build/bin "$HOME/2019q4_external_v90_x86" package
+            build/bin "$HOME/2026q4_external_v90_x86" package
 
       - uses: actions/upload-artifact@v7
         if: matrix.package_plugin

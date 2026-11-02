@@ -37,7 +37,7 @@ def DefaultRoots():
 	res += sorted(glob.glob(os.path.join(home, "*_prefix")))
 	return res
 
-# 2019q4_external_v90_x86
+# 2026q4_external_v90_x86
 ExternalDirPattern = re.compile(r"^(.+)_external_(v[0-9]+(?:_xp)?)_(x86|x64|arm64)$", re.IGNORECASE)
 
 def ProbePrefix(prefix):
