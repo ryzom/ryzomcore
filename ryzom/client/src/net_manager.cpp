@@ -3050,7 +3050,7 @@ void impulsePlayerInspectResult(NLMISC::CBitMemStream &impulse)
 			CWidgetManager::getInstance()->getWindowFromId("ui:interface:player_inspect"));
 		if (window) window->setActive(false);
 		CInterfaceManager::getInstance()->displaySystemInfo(
-			"This player does not allow equipment inspection.");
+			CI18N::get("uiInspectDenied"));
 	}
 	else if (count == 0)
 	{

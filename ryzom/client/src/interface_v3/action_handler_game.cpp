@@ -660,7 +660,7 @@ public:
 		if (window)
 		{
 			window->setActive(false);
-			window->setTitle("Inspect: " + target->getDisplayName());
+			window->setTitle(NLMISC::CI18N::get("uimGcmInspect") + ": " + target->getDisplayName());
 		}
 		sendMsgToServer("PLAYER_INSPECT:GET", PlayerInspectCurrentToken);
 	}

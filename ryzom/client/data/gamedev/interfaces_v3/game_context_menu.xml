@@ -87,7 +87,7 @@
 	<action id="assist"					name="uimAssist"				handler="assist_target"					params="" />
 	<action id="follow"					name="uimFollow"				handler="command"						params="follow" />
 	<action id="exchange"				name="uimGcmExchange"			handler="context_exchange"				params="" />
-	<action id="inspect"                 name="Inspect"              handler="context_inspect"                 params="" />
+	<action id="inspect"                 name="uimGcmInspect"              handler="context_inspect"                 params="" />
 	<action id="invit"					name="uimGcmInvit"				handler="context_invit"					params="" />
 	<action id="guild_invit"			name="uimGcmGuildInvit"			handler="context_guild_invit"			params="" />
 	<action id="add_to_friend_list"		name="uimGcmAddToFriendList"	handler="context_add_to_friend_list"	params="" />
