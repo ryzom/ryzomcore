@@ -91,6 +91,7 @@ const std::string CInventoryManager::InventoryDBs[]=
 	"INVENTORY:SHARE",
 	"GUILD:INVENTORY",
 	"INVENTORY:ROOM",
+	"PLAYER_INSPECT", // virtual read-only equipment slots
 };
 
 static void dummyCheck()
@@ -114,6 +115,7 @@ const uint CInventoryManager::InventoryIndexes[]=
 	INVENTORIES::reward_sharing,
 	INVENTORIES::guild,
 	INVENTORIES::player_room,
+	INVENTORIES::NUM_ALL_INVENTORY, // virtual slot id, not a real inventory
 };
 
 const	uint	CInventoryManager::NumInventories= sizeof(CInventoryManager::InventoryDBs)/sizeof(CInventoryManager::InventoryDBs[0]);
@@ -3404,7 +3406,12 @@ uint				CInventoryManager::getItemSheetForSlotId(uint slotId) const
 	{
 		if( InventoryIndexes[i] == (slotId>>CItemInfos::SlotIdIndexBitSize) )
 		{
-			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp( toString( "SERVER:%s:%d:SHEET", InventoryDBs[i].c_str(), (slotId&CItemInfos::SlotIdIndexBitMask)), false);
+			// The inspection snapshot is client-local. Never request an inspected
+			// item from the normal server inventory protocol.
+			const std::string branch = InventoryIndexes[i] == INVENTORIES::NUM_ALL_INVENTORY
+				? "LOCAL:PLAYER_INSPECT" : "SERVER:" + InventoryDBs[i];
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(
+				branch + ":" + toString(slotId & CItemInfos::SlotIdIndexBitMask) + ":SHEET", false);
 			if(node)
 				return node->getValue32();
 			else
@@ -3963,6 +3970,16 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 	else if (inv == INVENTORIES::exchange)
 	{
 		CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:EXCHANGE:GIVE:" + toString(index));
+		if (itemBranch)
+		{
+			static CItemImage image;
+			image.build(itemBranch);
+			return &image;
+		}
+	}
+	else if (inv == INVENTORIES::NUM_ALL_INVENTORY)
+	{
+		CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:PLAYER_INSPECT:" + toString(index));
 		if (itemBranch)
 		{
 			static CItemImage image;

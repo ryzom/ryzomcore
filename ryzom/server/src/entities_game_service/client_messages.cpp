@@ -2986,6 +2986,38 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 //		CLIENT:ITEM_INFO
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// Read-only target equipment inspection. The server derives the target from
+// its own current targeting state, never from a client-supplied character ID.
+void cbClientPlayerInspectGet(NLNET::CMessage &msgin, const std::string &, NLNET::TServiceId)
+{
+	CEntityId characterId;
+	uint32 token;
+	msgin.serial(characterId);
+	msgin.serial(token);
+	CCharacter *character = PlayerManager.getChar(characterId);
+	if (character && character->getEnterFlag())
+		character->sendEquipmentInspection(token);
+}
+
+void cbClientPlayerInspectSetMode(NLNET::CMessage &msgin, const std::string &, NLNET::TServiceId)
+{
+	CEntityId characterId;
+	uint8 mode;
+	msgin.serial(characterId);
+	msgin.serial(mode);
+	CCharacter *character = PlayerManager.getChar(characterId);
+	if (!character || !character->getEnterFlag())
+		return;
+	if (mode <= 3 && mode != character->getEquipmentInspectionMode())
+	{
+		character->setEquipmentInspectionMode(mode);
+		PlayerManager.savePlayerChar(
+			PlayerManager.getPlayerId(characterId),
+			PlayerManager.getCharIndex(characterId));
+	}
+	character->sendEquipmentInspectionMode();
+}
+
 void cbClientItemInfos( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId	userId;
@@ -3598,6 +3630,8 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:ITEM:WRITE",                  cbClientItemWrite },
 
 
+	{ "CLIENT:PLAYER_INSPECT:GET",             cbClientPlayerInspectGet },
+	{ "CLIENT:PLAYER_INSPECT:SET_MODE",        cbClientPlayerInspectSetMode },
 	{ "CLIENT:ITEM_INFO:GET",				cbClientItemInfos },
 	{ "CLIENT:MISSION_PREREQ:GET",			cbClientMissionPrereq },
 

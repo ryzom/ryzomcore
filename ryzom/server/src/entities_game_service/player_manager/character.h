@@ -2693,7 +2693,17 @@ public:
 	void incSlotVersion(INVENTORIES::TInventory invId, uint32 slot);
 
 	/// send item infos. For slotId (combination of inventory and slot), see explanation in CItemInfos
-	void sendItemInfos( uint16 slotId );
+	void sendItemInfos( uint16 slotId, const NLMISC::CEntityId &recipientId = NLMISC::CEntityId::Unknown,
+		uint16 recipientSlotId = 0, uint32 inspectToken = 0 );
+
+	/// Send a read-only equipment snapshot to this character after checking the target's permission.
+	void sendEquipmentInspection(uint32 requestToken);
+	/// Report this character's persisted inspection setting.
+	void sendEquipmentInspectionMode();
+
+	/// Persisted per character; zero denies all requests.
+	uint8 getEquipmentInspectionMode() const { return _EquipmentInspectionMode; }
+	void setEquipmentInspectionMode(uint8 mode) { if (mode <= 3) _EquipmentInspectionMode = mode; }
 
 	/// return true if the player wears an item with the specified sheetId
 	bool doesWear(const NLMISC::CSheetId & sheetId) const;
@@ -3631,6 +3641,7 @@ private:
 	// set full pvp mode for player
 	bool							_FullPvp;
 	// flag PVP, true for player involved in Faction PVP and other PVP
+	uint8							_EquipmentInspectionMode;	// 0=none, 1=guild, 2=Kami/Karavan, 3=everyone
 	bool							_PVPFlag;
 	// time of last change in pvp safe
 	NLMISC::TGameCycle				_PVPSafeLastTimeChange;

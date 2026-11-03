@@ -635,8 +635,69 @@ protected:
 REGISTER_ACTION_HANDLER( CHandlerContextAttack, "context_attack");
 
 // ***************************************************************************
-// GCM Duel
+// GCM Inspect
 // ***************************************************************************
+
+// The token is also checked on the receiving side. A slow reply for an
+// earlier selected player must never replace a more recent inspection.
+extern uint32 PlayerInspectCurrentToken;
+extern uint8 PlayerInspectConfirmedMode;
+
+class CHandlerContextInspect : public IActionHandler
+{
+public:
+	void execute(CCtrlBase *, const std::string &) NL_OVERRIDE
+	{
+		if (!UserEntity)
+			return;
+		CEntityCL *target = EntitiesMngr.entity(UserEntity->selection());
+		if (!target || target->Type != CEntityCL::Player || target == UserEntity)
+			return;
+		if (++PlayerInspectCurrentToken == 0)
+			++PlayerInspectCurrentToken;
+		CGroupContainer *window = dynamic_cast<CGroupContainer *>(
+			CWidgetManager::getInstance()->getWindowFromId("ui:interface:player_inspect"));
+		if (window)
+		{
+			window->setActive(false);
+			window->setTitle("Inspect: " + target->getDisplayName());
+		}
+		sendMsgToServer("PLAYER_INSPECT:GET", PlayerInspectCurrentToken);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerContextInspect, "context_inspect");
+
+class CHandlerPlayerInspectQueryMode : public IActionHandler
+{
+public:
+	void execute(CCtrlBase *, const std::string &) NL_OVERRIDE
+	{
+		// Prevent an old character's UI value from changing the current
+		// character's sharing policy while the server response is pending.
+		PlayerInspectConfirmedMode = 255;
+		sendMsgToServer("PLAYER_INSPECT:SET_MODE", (uint8)255);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerPlayerInspectQueryMode, "player_inspect_query_mode");
+
+class CHandlerPlayerInspectSetMode : public IActionHandler
+{
+public:
+	void execute(CCtrlBase *, const std::string &) NL_OVERRIDE
+	{
+		// Ignore local default/initialisation until the server answered the query.
+		if (PlayerInspectConfirmedMode > 3)
+			return;
+		NLMISC::CCDBNodeLeaf *value =
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:PLAYER_INSPECT_MODE", false);
+		if (!value)
+			return;
+		const uint32 mode = value->getValue32();
+		if (mode <= 3 && mode != PlayerInspectConfirmedMode)
+			sendMsgToServer("PLAYER_INSPECT:SET_MODE", (uint8)mode);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerPlayerInspectSetMode, "player_inspect_set_mode");
 
 class CHandlerContextDuel : public IActionHandler
 {

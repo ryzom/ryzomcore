@@ -1,0 +1,37 @@
+<interface_config>
+<!-- Read-only snapshot; use direct sheet controls rather than zero-sized equip template. -->
+<group type="container" id="player_inspect" w="364" h="310" title="uiInvEquipTitle" title_class="text"
+       locked="true" movable="true" active="false" opened="true" openable="false" resizer="false"
+       escapable="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:INV">
+  <group id="header_opened" x="0" y="0" w="0" h="12" posref="TL TL"/>
+  <group id="content" posref="TL TL" x="0" y="0" w="354" h="268">
+    <view type="text" id="jewelry_title" posref="TL TL" x="36" y="-9" hardtext="uiJewelryTitle" fontsize="11" shadow="true"/>
+    <view type="text" id="armor_title" posref="TL TL" x="169" y="-9" hardtext="uiArmorTitle" fontsize="11" shadow="true"/>
+    <view type="text" id="weapon_title" posref="TL TL" x="290" y="-9" hardtext="uiHandsTitle" fontsize="11" shadow="true"/>
+    <view type="text" id="right_label" posref="TL TL" x="284" y="-84" hardtext="uittHandR" fontsize="10"/>
+    <view type="text" id="left_label" posref="TL TL" x="284" y="-140" hardtext="uittHandL" fontsize="10"/>
+    <ctrl type="sheet" id="inspect_slot_0" posref="TL TL" x="51" y="-40" w="27" h="27" value="LOCAL:PLAYER_INSPECT:0" tx_noitem="W_PA_diadem.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_1" posref="TL TL" x="171" y="-40" w="27" h="27" value="LOCAL:PLAYER_INSPECT:1" tx_noitem="W_AR_helmet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_2" posref="TL TL" x="212" y="-40" w="27" h="27" value="LOCAL:PLAYER_INSPECT:2" tx_noitem="W_AR_helmet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_3" posref="TL TL" x="10" y="-80" w="27" h="27" value="LOCAL:PLAYER_INSPECT:3" tx_noitem="W_PA_earring.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_4" posref="TL TL" x="92" y="-80" w="27" h="27" value="LOCAL:PLAYER_INSPECT:4" tx_noitem="W_PA_earring.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_5" posref="TL TL" x="51" y="-80" w="27" h="27" value="LOCAL:PLAYER_INSPECT:5" tx_noitem="W_PA_pendant.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_6" posref="TL TL" x="171" y="-80" w="27" h="27" value="LOCAL:PLAYER_INSPECT:6" tx_noitem="W_AR_gilet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_7" posref="TL TL" x="212" y="-80" w="27" h="27" value="LOCAL:PLAYER_INSPECT:7" tx_noitem="W_AR_armpad.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_8" posref="TL TL" x="10" y="-120" w="27" h="27" value="LOCAL:PLAYER_INSPECT:8" tx_noitem="W_PA_bracelet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_9" posref="TL TL" x="92" y="-120" w="27" h="27" value="LOCAL:PLAYER_INSPECT:9" tx_noitem="W_PA_bracelet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_10" posref="TL TL" x="212" y="-120" w="27" h="27" value="LOCAL:PLAYER_INSPECT:10" tx_noitem="W_AR_hand.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_11" posref="TL TL" x="51" y="-120" w="27" h="27" value="LOCAL:PLAYER_INSPECT:11" tx_noitem="W_AR_hand.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_12" posref="TL TL" x="51" y="-160" w="27" h="27" value="LOCAL:PLAYER_INSPECT:12" tx_noitem="W_AR_hand.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_13" posref="TL TL" x="10" y="-160" w="27" h="27" value="LOCAL:PLAYER_INSPECT:13" tx_noitem="W_PA_ring.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_14" posref="TL TL" x="92" y="-160" w="27" h="27" value="LOCAL:PLAYER_INSPECT:14" tx_noitem="W_PA_ring.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_15" posref="TL TL" x="171" y="-120" w="27" h="27" value="LOCAL:PLAYER_INSPECT:15" tx_noitem="W_AR_pantabotte.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_16" posref="TL TL" x="10" y="-200" w="27" h="27" value="LOCAL:PLAYER_INSPECT:16" tx_noitem="W_PA_anklet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_17" posref="TL TL" x="92" y="-200" w="27" h="27" value="LOCAL:PLAYER_INSPECT:17" tx_noitem="W_PA_anklet.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_18" posref="TL TL" x="171" y="-160" w="27" h="27" value="LOCAL:PLAYER_INSPECT:18" tx_noitem="W_AR_botte.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_19" posref="TL TL" x="302" y="-48" w="27" h="27" value="LOCAL:PLAYER_INSPECT:19" tx_noitem="hand_right.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+    <ctrl type="sheet" id="inspect_slot_20" posref="TL TL" x="302" y="-104" w="27" h="27" value="LOCAL:PLAYER_INSPECT:20" tx_noitem="hand_left.tga" dragable="false" auto_grayed="false" col_noitem="true"/>
+  </group>
+</group>
+<tree node="player_inspect"/>
+</interface_config>

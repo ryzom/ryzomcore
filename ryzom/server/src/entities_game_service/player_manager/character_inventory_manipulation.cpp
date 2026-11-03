@@ -2170,7 +2170,122 @@ void CCharacter::incSlotVersion(INVENTORIES::TInventory invId, uint32 slot)
 }
 
 // ****************************************************************************
-void CCharacter::sendItemInfos( uint16 slotId )
+// Inspection is a snapshot, not an inventory view. No trade slots are touched.
+// The owner remains responsible for producing CItemInfos, so the existing
+// serializer serves both trade and inspection without duplicating item stats.
+void CCharacter::sendEquipmentInspection(uint32 requestToken)
+{
+	if (requestToken == 0 || !getEnterFlag())
+		return;
+
+	CCharacter *target = PlayerManager.getChar(_Target());
+	bool allowed = false;
+	if (target && target != this && target->getEnterFlag() &&
+		TheDataset.isAccessible(target->getEntityRowId()))
+	{
+		const uint8 mode = target->getEquipmentInspectionMode();
+		switch (mode)
+		{
+		case 1:
+			allowed = getGuildId() != 0 && getGuildId() == target->getGuildId();
+			break;
+		case 2:
+			{
+				const PVP_CLAN::TPVPClan cult = target->getAllegiance().first;
+				allowed = cult >= PVP_CLAN::BeginCults && cult <= PVP_CLAN::EndCults &&
+					getAllegiance().first == cult;
+			}
+			break;
+		case 3:
+			allowed = true;
+			break;
+		default:
+			break;
+		}
+	}
+
+	CBitMemStream bms;
+	if (!GenericMsgManager.pushNameToStream("PLAYER_INSPECT:RESULT", bms))
+		return;
+	bms.serial(requestToken);
+	bms.serial(allowed);
+
+	// A 19-slot equipped inventory plus right/left hand. Send nonempty slots
+	// only, with their real display properties, exactly as in the bag/trade UI.
+	std::vector<INVENTORIES::CItemSlot> slots;
+	if (allowed)
+	{
+		for (uint32 n = 0; n < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT + INVENTORIES::NB_HAND_SLOT; ++n)
+		{
+			const bool hand = n >= SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT;
+			const INVENTORIES::TInventory invId = hand ? INVENTORIES::handling : INVENTORIES::equipment;
+			const uint32 slot = hand ? n - SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT : n;
+			const CGameItemPtr item = target->getItem(invId, slot);
+			if (item == NULL)
+				continue;
+
+			INVENTORIES::CItemSlot itemSlot(n);
+			itemSlot.reset();
+			itemSlot.setItemProp(INVENTORIES::Sheet, item->getSheetId().asInt());
+			itemSlot.setItemProp(INVENTORIES::Quality, item->quality());
+			itemSlot.setItemProp(INVENTORIES::Quantity, item->getStackSize());
+			itemSlot.setItemProp(INVENTORIES::UserColor, item->color());
+			itemSlot.setItemProp(INVENTORIES::CharacBuffs, item->buffFlags());
+			itemSlot.setItemProp(INVENTORIES::Weight, item->weight() / 10);
+			itemSlot.setItemProp(INVENTORIES::NameId, item->sendNameId(this));
+			itemSlot.setItemProp(INVENTORIES::Enchant, item->getClientEnchantValue());
+			itemSlot.setItemProp(INVENTORIES::ItemClass, item->getItemClass());
+			itemSlot.setItemProp(INVENTORIES::ItemBestStat,
+				item->getCraftParameters() ? item->getCraftParameters()->getBestItemStat() : RM_FABER_STAT_TYPE::Unknown);
+			// An inspector's own skill requirements must not appear as those of the owner.
+			itemSlot.setItemProp(INVENTORIES::PrerequisitValid, 1);
+			slots.push_back(itemSlot);
+		}
+	}
+	uint8 count = (uint8)slots.size();
+	bms.serial(count);
+	for (uint i = 0; i < slots.size(); ++i)
+		slots[i].serialAll<INVENTORIES::CInventoryCategoryForCharacter>(bms);
+
+	CMessage msgout("IMPULSION_ID");
+	CEntityId destination = getId();
+	msgout.serial(destination);
+	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+	sendMessageViaMirror(NLNET::TServiceId(destination.getDynamicId()), msgout);
+
+	if (allowed)
+	{
+		for (uint i = 0; i < slots.size(); ++i)
+		{
+			const uint32 n = slots[i].getSlotIndex();
+			const bool hand = n >= SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT;
+			const uint32 realSlot = hand ? n - SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT : n;
+			const uint16 sourceSlotId = (uint16)(((hand ? INVENTORIES::handling : INVENTORIES::equipment)
+				<< CItemInfos::SlotIdIndexBitSize) | realSlot);
+			const uint16 inspectSlotId = (uint16)((INVENTORIES::NUM_ALL_INVENTORY
+				<< CItemInfos::SlotIdIndexBitSize) | n);
+			target->sendItemInfos(sourceSlotId, getId(), inspectSlotId, requestToken);
+		}
+	}
+}
+
+// ****************************************************************************
+void CCharacter::sendEquipmentInspectionMode()
+{
+	CBitMemStream bms;
+	if (!GenericMsgManager.pushNameToStream("PLAYER_INSPECT:MODE_STATE", bms))
+		return;
+	uint8 mode = _EquipmentInspectionMode;
+	bms.serial(mode);
+	CMessage msgout("IMPULSION_ID");
+	CEntityId destination = getId();
+	msgout.serial(destination);
+	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+	sendMessageViaMirror(NLNET::TServiceId(destination.getDynamicId()), msgout);
+}
+
+// ****************************************************************************
+void CCharacter::sendItemInfos( uint16 slotId, const NLMISC::CEntityId &recipientId, uint16 recipientSlotId, uint32 inspectToken )
 {
 	TLogNoContext_Item	noContext;
 	try
@@ -2387,7 +2502,8 @@ void CCharacter::sendItemInfos( uint16 slotId )
 			 = nameIndex();
 		}
 */
-		infos.slotId = slotId;
+		infos.slotId = inspectToken == 0 ? slotId : recipientSlotId;
+		if (inspectToken != 0) infos.versionInfo = 1;
 		sint32 skillVal = 0;
 		const CStaticItem * form = item->getStaticForm();
 		if( form )
@@ -2415,6 +2531,8 @@ void CCharacter::sendItemInfos( uint16 slotId )
 				}
 			}
 		}
+		// An inspection shows the nominal quality-based damage, never the owner's skill.
+		if (inspectToken != 0) skillVal = item->quality();
 		item->damage( skillVal, infos.CurrentDamage, infos.MaxDamage );
 
 		infos.HitRate = (uint16)(item->hitRate() * 6); //nb hit per minute
@@ -2471,18 +2589,21 @@ void CCharacter::sendItemInfos( uint16 slotId )
 
 		CMessage msgout( "IMPULSION_ID" );
 		CBitMemStream bms;
-		msgout.serial( _Id );
-		if ( ! GenericMsgManager.pushNameToStream( "ITEM_INFO:SET", bms) )
+		CEntityId destination = inspectToken == 0 ? _Id : recipientId;
+		msgout.serial( destination );
+		const char *messageName = inspectToken == 0 ? "ITEM_INFO:SET" : "PLAYER_INSPECT:ITEM_INFO";
+		if ( ! GenericMsgManager.pushNameToStream( messageName, bms) )
 		{
-			nlwarning("<CCharacter sendItemInfos> Msg name ITEM_INFO:SET not found");
+			nlwarning("<CCharacter sendItemInfos> Msg name %s not found", messageName);
 			return;
 		}
+		if (inspectToken != 0) bms.serial(inspectToken);
 		bms.serial(infos);
 		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
-		sendMessageViaMirror( NLNET::TServiceId(_Id.getDynamicId()), msgout );	
+		sendMessageViaMirror( NLNET::TServiceId(destination.getDynamicId()), msgout );	
 
 		// Call the onItemChanged only on character's inventories (trading is not an inventory)
-		if ((inventory != INVENTORIES::guild) &&
+		if (inspectToken == 0 && (inventory != INVENTORIES::guild) &&
 			(inventory != INVENTORIES::player_room) &&
 			(inventory != INVENTORIES::exchange_proposition) &&
 			(inventory != INVENTORIES::exchange) &&
