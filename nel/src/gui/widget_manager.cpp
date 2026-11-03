@@ -1697,6 +1697,15 @@ namespace NLGUI
 		if (!getPointer() || !_ContextHelpActive)
 			return;
 
+        // Respect the persistent global tooltip preference.
+        NLMISC::CCDBNodeLeaf *tooltipSetting =
+            CDBManager::getInstance()->getDbProp("UI:SAVE:TOOLTIP:ENABLED", false);
+        if (tooltipSetting && !tooltipSetting->getValueBool())
+        {
+            disableContextHelp();
+            return;
+        }
+
 
 		sint32 x = getPointer()->getX();
 		sint32 y = getPointer()->getY();
@@ -1765,7 +1774,7 @@ namespace NLGUI
 				{
 					// get the text
 					//newCtrl->getContextHelpToolTip(_ContextHelpText);
-					newCtrl->getContextHelp( getContextHelpText() );
+					newCtrl->getContextHelpToolTip( getContextHelpText() );
 					// UserDefined context help
 					if( !newCtrl->getContextHelpActionHandler().empty() )
 					{

@@ -3770,6 +3770,50 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 
 	// Default
 	getContextHelp(help);
+
+    // Only action phrases have a visual stanza composition.
+    if (getType() != CCtrlSheetInfo::SheetType_SPhraseId)
+        return;
+
+    CSPhraseManager *phraseManager = CSPhraseManager::getInstance();
+    CSBrickManager *brickManager = CSBrickManager::getInstance();
+    NLGUI::CDBManager *db = NLGUI::CDBManager::getInstance();
+    if (!phraseManager || !brickManager || !db)
+        return;
+
+    const CSPhraseCom &phrase = phraseManager->getPhrase(getSPhraseId());
+    const uint32 maxEffectBricks = 16;
+    uint32 effectCount = 0;
+    CCDBNodeLeaf *extendedSetting = db->getDbProp("UI:SAVE:TOOLTIP:EXTENDED", false);
+    const bool showExtendedEffects = !extendedSetting || extendedSetting->getValueBool();
+    if (showExtendedEffects && !phrase.empty())
+    {
+        for (uint i = 0; i < phrase.Bricks.size() && effectCount < maxEffectBricks; ++i)
+        {
+            const CSBrickSheet *brick = brickManager->getBrick(phrase.Bricks[i]);
+            if (!brick || brick->isRoot() || brick->isCredit())
+                continue;
+
+            CCDBNodeLeaf *node = db->getDbProp(
+                toString("UI:VARIABLES:PHRASE_TOOLTIP_EFFECTS:%u:SHEET", effectCount), false);
+            if (!node)
+                break;
+            node->setValue32(phrase.Bricks[i].asInt());
+            ++effectCount;
+        }
+    }
+
+    // Clear old entries when switching spells or disabling the extended tooltip.
+    for (uint32 i = effectCount; i < maxEffectBricks; ++i)
+    {
+        CCDBNodeLeaf *node = db->getDbProp(
+            toString("UI:VARIABLES:PHRASE_TOOLTIP_EFFECTS:%u:SHEET", i), false);
+        if (node)
+            node->setValue32(0);
+    }
+
+    if (effectCount != 0)
+        help += "\n\n@{CCCF}" + CI18N::get("uiPhraseCOMPOSITION") + "@{FFFF}";
 }
 
 // ***************************************************************************
