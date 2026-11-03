@@ -3649,6 +3649,10 @@ void			CInventoryManager::updateItemInfoQueue()
 	{
 		IItemInfoWaiter *waiter=*it;
 		uint	itemSlotId= waiter->ItemSlotId;
+		// Virtual inspection entries are populated only by the server's
+		// inspection response. Never issue ITEM_INFO:GET for those slots.
+		if ((itemSlotId >> CItemInfos::SlotIdIndexBitSize) == INVENTORIES::NUM_ALL_INVENTORY)
+			continue;
 		TItemInfoMap::iterator	it= _ItemInfoMap.find(itemSlotId);
 		bool	isItemFromTrading= (itemSlotId>>CItemInfos::SlotIdIndexBitSize)==INVENTORIES::trading;
 		if(it!=_ItemInfoMap.end())

@@ -3010,10 +3010,10 @@ void cbClientPlayerInspectSetMode(NLNET::CMessage &msgin, const std::string &, N
 		return;
 	if (mode <= 3 && mode != character->getEquipmentInspectionMode())
 	{
+		// This mode is stored with the character. Do not allow toggling a UI
+		// setting to trigger full character (and linked trader) saves.
+		// The normal periodic and disconnect saves persist the change.
 		character->setEquipmentInspectionMode(mode);
-		PlayerManager.savePlayerChar(
-			PlayerManager.getPlayerId(characterId),
-			PlayerManager.getCharIndex(characterId));
 	}
 	character->sendEquipmentInspectionMode();
 }
@@ -3023,6 +3023,10 @@ void cbClientItemInfos( NLNET::CMessage& msgin, const std::string & serviceName,
 	CEntityId	userId;
 	uint16		slotId;
 	msgin.serial(userId,slotId);
+	// This ID is reserved for read-only client inspection snapshots.
+	// Normal item-info requests must never address it.
+	if ((slotId >> CItemInfos::SlotIdIndexBitSize) == INVENTORIES::NUM_ALL_INVENTORY)
+		return;
 	CCharacter * user = PlayerManager.getChar(userId);
 	if ( user && user->getEnterFlag() && TheDataset.isAccessible( user->getEntityRowId() ) )
 		user->sendItemInfos( slotId );

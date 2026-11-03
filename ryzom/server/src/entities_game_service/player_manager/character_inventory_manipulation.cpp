@@ -2298,6 +2298,10 @@ void CCharacter::sendItemInfos( uint16 slotId, const NLMISC::CEntityId &recipien
 		nlassert( SkillsTree );
 
 		INVENTORIES::TInventory inventory = INVENTORIES::TInventory(slotId >> CItemInfos::SlotIdIndexBitSize);
+		// Inspect must never use trading or other item-info paths that can
+		// create temporary items. Only actual equipment and hands are allowed.
+		if (inspectToken != 0 && inventory != INVENTORIES::equipment && inventory != INVENTORIES::handling)
+			return;
 		uint32 slot = ( slotId & CItemInfos::SlotIdIndexBitMask );
 		CItemInfos infos;
 
