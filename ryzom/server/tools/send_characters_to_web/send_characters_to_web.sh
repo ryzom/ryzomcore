@@ -8,6 +8,7 @@ TP=$TEMP_PATH/toprocess.txt
 
 while inotifywait -e close_write $F; do
 	echo "File changed..."
+	echo -e "INFO\n🟢" > $1
 	mv $F $TP
 	touch $F
 
@@ -30,9 +31,9 @@ while inotifywait -e close_write $F; do
 	done
 	#rm $TP
 	rm $TEMP_PATH/*.bin
-	echo "	Sent to app server"	
-	scp -p -C -r $TEMP_PATH/* app@app.ryzom.com:/home/app/www/api/server/scripts/achievement_script/new_xml/ 
-
+	echo "	Sent to app server"
+	scp -p -C -r $TEMP_PATH/* app@app.ryzom.com:/home/app/www/api/server/scripts/achievement_script/new_xml/
 	rm -f $TEMP_PATH/*
+	echo -e "INFO\n🟠" > $1
 done
 
