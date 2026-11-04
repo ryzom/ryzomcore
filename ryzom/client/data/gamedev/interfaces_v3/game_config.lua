@@ -112,7 +112,7 @@ function game:configHideAll()
 	local	uiList = {
 		'explanation', 'general', 'landscape', 'fx', 'char', 'hud', 'language', 'alpha_colors',
 		'chat_colors', 'entity_colors', 'in_scene_user', 'in_scene_friend', 'in_scene_enemy',
-		'in_scene_chat_messages', 'win_colors', 'win_colors_r2', 'mouse', 'keyb', 'vr', 'sound', 'landmark_colors', 'help'
+		'in_scene_chat_messages', 'win_colors', 'win_colors_r2', 'mouse', 'keyb', 'vr', 'sound', 'landmark_colors', 'help', 'inspection_privacy'
 	};
 
 	for k,v in pairs(uiList) do
@@ -129,7 +129,7 @@ function game:configShowOne(strUIToShow)
 	-- special case : if the display tab was shown, update the aspect ratio if needed
 	local generalGrp = getUI('ui:interface:game_config:content:general');
 	local uiGrp = getUI('ui:interface:game_config:content:' .. strUIToShow);
-	-- Removed the following code to solve RT n°14720
+	-- Removed the following code to solve RT nÂ°14720
 	-- The 'game_config_change_screen_ratio_custom' action handler
 	-- should only be called if the user changed the apect ratio himself
 	-- (else the edit box containing the aspect ratio may not have been initiliazed here)

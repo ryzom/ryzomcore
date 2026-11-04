@@ -2986,11 +2986,47 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 //		CLIENT:ITEM_INFO
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// Read-only target equipment inspection. The server derives the target from
+// its own current targeting state, never from a client-supplied character ID.
+void cbClientPlayerInspectGet(NLNET::CMessage &msgin, const std::string &, NLNET::TServiceId)
+{
+	CEntityId characterId;
+	uint32 token;
+	msgin.serial(characterId);
+	msgin.serial(token);
+	CCharacter *character = PlayerManager.getChar(characterId);
+	if (character && character->getEnterFlag())
+		character->sendEquipmentInspection(token);
+}
+
+void cbClientPlayerInspectSetMode(NLNET::CMessage &msgin, const std::string &, NLNET::TServiceId)
+{
+	CEntityId characterId;
+	uint8 mode;
+	msgin.serial(characterId);
+	msgin.serial(mode);
+	CCharacter *character = PlayerManager.getChar(characterId);
+	if (!character || !character->getEnterFlag())
+		return;
+	if (mode <= 3 && mode != character->getEquipmentInspectionMode())
+	{
+		// This mode is stored with the character. Do not allow toggling a UI
+		// setting to trigger full character (and linked trader) saves.
+		// The normal periodic and disconnect saves persist the change.
+		character->setEquipmentInspectionMode(mode);
+	}
+	character->sendEquipmentInspectionMode();
+}
+
 void cbClientItemInfos( NLNET::CMessage& msgin, const std::string & serviceName, NLNET::TServiceId serviceId )
 {
 	CEntityId	userId;
 	uint16		slotId;
 	msgin.serial(userId,slotId);
+	// This ID is reserved for read-only client inspection snapshots.
+	// Normal item-info requests must never address it.
+	if ((slotId >> CItemInfos::SlotIdIndexBitSize) == INVENTORIES::NUM_ALL_INVENTORY)
+		return;
 	CCharacter * user = PlayerManager.getChar(userId);
 	if ( user && user->getEnterFlag() && TheDataset.isAccessible( user->getEntityRowId() ) )
 		user->sendItemInfos( slotId );
@@ -3598,6 +3634,8 @@ TUnifiedCallbackItem CbClientArray[]=
 	{ "CLIENT:ITEM:WRITE",                  cbClientItemWrite },
 
 
+	{ "CLIENT:PLAYER_INSPECT:GET",             cbClientPlayerInspectGet },
+	{ "CLIENT:PLAYER_INSPECT:SET_MODE",        cbClientPlayerInspectSetMode },
 	{ "CLIENT:ITEM_INFO:GET",				cbClientItemInfos },
 	{ "CLIENT:MISSION_PREREQ:GET",			cbClientMissionPrereq },
 

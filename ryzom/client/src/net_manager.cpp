@@ -107,6 +107,14 @@ using namespace NL3D;
 using namespace std;
 
 
+// Last client-originated inspection request. Stale answers are discarded.
+uint32 PlayerInspectCurrentToken = 0;
+uint8 PlayerInspectConfirmedMode = 255;
+static uint8 PlayerInspectExpectedInfos = 0;
+static uint8 PlayerInspectReceivedInfos = 0;
+static uint32 PlayerInspectReceivedMask = 0;
+static bool PlayerInspectAllowed = false;
+
 extern bool	FirstFrame;
 extern void selectTipsOfTheDay (uint tips);
 
@@ -2960,6 +2968,117 @@ void impulseInitInventory (NLMISC::CBitMemStream &impulse)
 	getInventory().onUpdateEquipHands();
 }
 
+// Read-only equipment inspection; no writes to the actual inventory or trade DB.
+static void openPlayerInspectWindow()
+{
+	CGroupContainer *window = dynamic_cast<CGroupContainer *>(
+		CWidgetManager::getInstance()->getWindowFromId("ui:interface:player_inspect"));
+	if (window)
+	{
+		window->setActive(true);
+		CWidgetManager::getInstance()->setTopWindow(window);
+	}
+}
+
+void impulsePlayerInspectModeState(NLMISC::CBitMemStream &impulse)
+{
+	uint8 mode;
+	impulse.serial(mode);
+	if (mode > 3) return;
+	// Set confirmed value first to avoid a response triggering a redundant SET_MODE.
+	PlayerInspectConfirmedMode = mode;
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:PLAYER_INSPECT_MODE")->setValue32(mode);
+}
+
+void impulsePlayerInspectResult(NLMISC::CBitMemStream &impulse)
+{
+	uint32 token;
+	bool allowed;
+	uint8 count;
+	impulse.serial(token);
+	impulse.serial(allowed);
+	impulse.serial(count);
+	const bool current = token != 0 && token == PlayerInspectCurrentToken;
+	if (current)
+	{
+		PlayerInspectAllowed = allowed;
+		PlayerInspectReceivedInfos = 0;
+		PlayerInspectExpectedInfos = allowed ? count : 0;
+		PlayerInspectReceivedMask = 0;
+		getInventory().resetPlayerInspectItemInfos();
+		for (uint32 n = 0; n < 21; ++n)
+		{
+			const std::string prefix = "LOCAL:PLAYER_INSPECT:" + toString(n) + ":";
+			for (uint prop = 0; prop < INVENTORIES::NbItemPropId; ++prop)
+			{
+				NLMISC::CCDBNodeLeaf *leaf = NLGUI::CDBManager::getInstance()->
+					getDbProp(prefix + INVENTORIES::CItemSlot::ItemPropStr[prop], false);
+				if (leaf) leaf->setValue32(0);
+			}
+			NLMISC::CCDBNodeLeaf *version =
+				NLGUI::CDBManager::getInstance()->getDbProp(prefix + "INFO_VERSION", false);
+			if (version) version->setValue32(0);
+		}
+	}
+	for (uint32 i = 0; i < count; ++i)
+	{
+		INVENTORIES::CItemSlot slot;
+		slot.serialAll<INVENTORIES::CInventoryCategoryForCharacter>(impulse);
+		const uint32 index = slot.getSlotIndex();
+		if (!current || !allowed || index >= 21)
+			continue;
+		const std::string prefix = "LOCAL:PLAYER_INSPECT:" + toString(index) + ":";
+		for (uint prop = 0; prop < INVENTORIES::NbItemPropId; ++prop)
+		{
+			NLMISC::CCDBNodeLeaf *leaf = NLGUI::CDBManager::getInstance()->
+				getDbProp(prefix + INVENTORIES::CItemSlot::ItemPropStr[prop], false);
+			if (leaf) leaf->setValue32(slot.getItemProp((INVENTORIES::TItemPropId)prop));
+		}
+		NLMISC::CCDBNodeLeaf *version =
+			NLGUI::CDBManager::getInstance()->getDbProp(prefix + "INFO_VERSION", false);
+		if (version) version->setValue32(1);
+		const uint16 itemSlotId = (uint16)((INVENTORIES::NUM_ALL_INVENTORY
+			<< CItemInfos::SlotIdIndexBitSize) | index);
+		getInventory().setPlayerInspectSlotVersion(itemSlotId);
+	}
+	if (!current) return;
+	if (!allowed)
+	{
+		PlayerInspectAllowed = false;
+		// Do not keep a previous snapshot visible when a request is denied.
+		CGroupContainer *window = dynamic_cast<CGroupContainer *>(
+			CWidgetManager::getInstance()->getWindowFromId("ui:interface:player_inspect"));
+		if (window) window->setActive(false);
+		CInterfaceManager::getInstance()->displaySystemInfo(
+			CI18N::get("uiInspectDenied"));
+	}
+	else if (count == 0)
+	{
+		openPlayerInspectWindow();
+	}
+}
+
+void impulsePlayerInspectItemInfo(NLMISC::CBitMemStream &impulse)
+{
+	uint32 token;
+	CItemInfos itemInfo;
+	impulse.serial(token);
+	impulse.serial(itemInfo);
+	if (!PlayerInspectAllowed || token == 0 || token != PlayerInspectCurrentToken)
+		return;
+	const uint32 inv = itemInfo.slotId >> CItemInfos::SlotIdIndexBitSize;
+	const uint32 index = itemInfo.slotId & CItemInfos::SlotIdIndexBitMask;
+	if (inv != INVENTORIES::NUM_ALL_INVENTORY || index >= 21)
+		return;
+	const uint32 mask = 1u << index;
+	if (PlayerInspectReceivedMask & mask)
+		return;
+	PlayerInspectReceivedMask |= mask;
+	getInventory().onReceiveItemInfo(itemInfo);
+	if (++PlayerInspectReceivedInfos == PlayerInspectExpectedInfos)
+		openPlayerInspectWindow();
+}
+
 //-----------------------------------------------
 // impulseItemInfoSet:
 //-----------------------------------------------
@@ -3711,6 +3830,9 @@ void initializeNetwork()
 	GenericMsgHeaderMngr.setCallback("PHRASE:EXEC_CYCLIC_ACK", impulsePhraseAckExecuteCyclic);
 	GenericMsgHeaderMngr.setCallback("PHRASE:EXEC_NEXT_ACK", impulsePhraseAckExecuteNext);
 
+	GenericMsgHeaderMngr.setCallback("PLAYER_INSPECT:RESULT", impulsePlayerInspectResult);
+	GenericMsgHeaderMngr.setCallback("PLAYER_INSPECT:ITEM_INFO", impulsePlayerInspectItemInfo);
+	GenericMsgHeaderMngr.setCallback("PLAYER_INSPECT:MODE_STATE", impulsePlayerInspectModeState);
 	GenericMsgHeaderMngr.setCallback("ITEM_INFO:SET", impulseItemInfoSet);
 	GenericMsgHeaderMngr.setCallback("ITEM_INFO:REFRESH_VERSION", impulseItemInfoRefreshVersion);
 	GenericMsgHeaderMngr.setCallback("MISSION_PREREQ:SET", impulsePrereqInfoSet);

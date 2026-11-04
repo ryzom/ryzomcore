@@ -149,6 +149,7 @@
 	<action handler="tree_reset" params="ui:interface:game_config:content:sbtree:tree_list" />
 	<action handler="lua" params="game:configShowOne('explanation')" />
 	<action handler="lua" params="game:configInit()" />
+	<action handler="player_inspect_query_mode" />
 </proc>
 
 <proc id="game_config_uninit">
@@ -221,6 +222,7 @@
 					</node>
 					<node id="landmarkco" name="uigcLandmarkColor" handler="lua" params="game:configShowOne('landmark_colors')" fontsize="10" y_decal="-1" />
 					<node id="help" name="uimHelp" handler="lua" params="game:configShowOne('help')" fontsize="10" y_decal="-1" />
+						<node id="inspection_privacy" name="uiInspectPrivacyTitle" handler="lua" params="game:configShowOne('inspection_privacy')" fontsize="10" y_decal="-1" />
 				</node>
 
 				<node id="input" name="uigcInput" handler="" params="" fontsize="11" y_decal="-1">
@@ -742,6 +744,24 @@
 		</group>
 		<ctrl style="skin_scroll" id="sb_landmark_colors" align="T" target="landmark_colors" posparent="crop" posref="TL TR" x="-8" y="0" />
 		<!-- *** -->
+		<!-- Independent server-owned per-character privacy option. -->
+		<group id="inspection_privacy" active="false" posparent="crop" posref="TM TM"
+			x="0" y="-8" sizeref="w" w="-4" child_resize_h="true" child_resize_hmargin="4">
+			<view style="sgc_title" type="text" id="title" posref="TL TL" hardtext="uiInspectPrivacyTitle" />
+			<view style="sgc_title2" type="text" id="description" posref="BL TL" posparent="title"
+				x="0" y="-8" hardtext="uiInspectPrivacyDescription" />
+			<group type="combo_box" id="inspect_mode" w="190" h="20" value="UI:TEMP:PLAYER_INSPECT_MODE"
+				posparent="description" posref="BL TL" x="0" y="-12">
+				<instance template="combo_box_def1" />
+				<combo_text name="uiInspectNobody" />
+				<combo_text name="uiInspectGuild" />
+				<combo_text name="uiInspectCult" />
+				<combo_text name="uiInspectEveryone" />
+			</group>
+			<link expr="@UI:TEMP:PLAYER_INSPECT_MODE" action="player_inspect_set_mode" />
+		</group>
+		<ctrl style="skin_scroll" id="sb_inspection_privacy" align="T" target="inspection_privacy" posparent="crop" posref="TL TR" x="-8" y="0" />
+
 		<group id="help" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 
 			<!-- Entities Names -->

@@ -65,6 +65,9 @@ void setupSheetHelp(CSheetHelpSetup &setup);
 
 // Refresh help for an item
 void refreshItemHelp(CSheetHelpSetup &setup);
+
+// Reuse the normal item-help formatter in the inspection-only mouseover.
+std::string buildPlayerInspectTooltip(CDBCtrlSheet *item);
 // refresh help for a mission
 void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos);
 

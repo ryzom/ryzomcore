@@ -2124,6 +2124,30 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 
 
 // ***************************************************************************
+// Reuse the full, existing item format (including protection and damage values)
+// for a contextual mouseover. This never opens or modifies a help window.
+std::string buildPlayerInspectTooltip(CDBCtrlSheet *item)
+{
+	if (!item || !item->asItemSheet())
+		return std::string();
+
+	std::string text;
+	getItemText(item, text, item->asItemSheet());
+
+	// Enchantments are formatted in a separate step by the normal help window.
+	// Reuse the same phrase description instead of showing a raw %enchantment tag.
+	const CClientItemInfo &info = getInventory().getItemInfo(getInventory().getItemSlotId(item));
+	std::string enchantment;
+	if (!info.Enchantment.empty())
+	{
+		CSPhraseManager::getInstance()->buildPhraseDesc(
+			enchantment, info.Enchantment, 0, false, "uihelpPhraseEnchantmentFormat");
+	}
+	strFindReplace(text, "%enchantment", enchantment);
+	return item->getItemActualName() + "\n" + text;
+}
+
+// ***************************************************************************
 static void	setupEnchantedItem(CSheetHelpSetup &setup, string &itemText)
 {
 	// if don't find the tag in the text (eg: if not useful), no-op
