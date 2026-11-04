@@ -699,6 +699,10 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerPlayerInspectSetMode, "player_inspect_set_mode");
 
+// ***************************************************************************
+// GCM Duel
+// ***************************************************************************
+
 class CHandlerContextDuel : public IActionHandler
 {
 public:
