@@ -1094,11 +1094,11 @@ void CInterfaceManager::initInGame()
 	// Interface config
 	loadInterfaceConfig();
 
-	// Player inspection is a transient view, not a persistent UI window.
-	// Explicitly close it after loading saved window states, including older
-	// interface configs that previously stored it as active.
+	// The inspection snapshot must not reappear after loading a saved UI layout.
+	// Use element lookup, as does the interface config restore code: this group
+	// need not be registered as a top-level window yet.
 	CGroupContainer *inspectWindow = dynamic_cast<CGroupContainer*>(
-		CWidgetManager::getInstance()->getWindowFromId("ui:interface:player_inspect"));
+		CWidgetManager::getInstance()->getElementFromId("ui:interface:player_inspect"));
 	if (inspectWindow)
 		inspectWindow->setActive(false);
 
@@ -1416,6 +1416,13 @@ void CInterfaceManager::uninitInGame0 ()
 	// Autosave of the interface in interface.cfg
 	if (_ConfigLoaded)
 	{
+		// Persist a closed transient inspection window, even when an older
+		// user XML override or UI layout still treats its active state as savable.
+		CGroupContainer *inspectWindow = dynamic_cast<CGroupContainer*>(
+			CWidgetManager::getInstance()->getElementFromId("ui:interface:player_inspect"));
+		if (inspectWindow)
+			inspectWindow->setActive(false);
+
 		saveConfig();
 
 		_ConfigLoaded = false;
