@@ -1,7 +1,7 @@
 <interface_config>
 <!-- Read-only snapshot; use direct sheet controls rather than zero-sized equip template. -->
 <group type="container" id="player_inspect" w="364" h="310" title="uimGcmInspect" title_class="text"
-       locked="true" movable="true" active="false" opened="true" openable="false" resizer="false"
+       locked="true" movable="true" active="false" active_savable="false" opened="true" openable="false" resizer="false"
        escapable="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:INV">
   <group id="header_opened" x="0" y="0" w="0" h="12" posref="TL TL"/>
   <group id="content" posref="TL TL" x="0" y="0" w="354" h="268">

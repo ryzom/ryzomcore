@@ -1094,6 +1094,14 @@ void CInterfaceManager::initInGame()
 	// Interface config
 	loadInterfaceConfig();
 
+	// Player inspection is a transient view, not a persistent UI window.
+	// Explicitly close it after loading saved window states, including older
+	// interface configs that previously stored it as active.
+	CGroupContainer *inspectWindow = dynamic_cast<CGroupContainer*>(
+		CWidgetManager::getInstance()->getWindowFromId("ui:interface:player_inspect"));
+	if (inspectWindow)
+		inspectWindow->setActive(false);
+
 	//Load user landmarks
 	loadLandmarks();
 
