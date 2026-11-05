@@ -15,7 +15,7 @@ rem copy "C:\2026q4_external_v143_x64\vorbis\bin\vorbisfile.dll" "vorbisfile.dll
 rem copy "C:\2026q4_external_v143_x64\libjpeg\bin\jpeg62.dll" "jpeg62.dll"
 rem copy "C:\2026q4_external_v143_x64\giflib\bin\gif.dll" "gif.dll"
 rem copy "C:\2026q4_external_v143_x64\libxml2\bin\libxml2.dll" "libxml2.dll"
-rem copy "C:\2026q4_external_v143_x64\zlib\bin\z.dll" "z.dll"
+rem copy "C:\2026q4_external_v143_x64\zlib\bin\libz.dll" "libz.dll"
 rem copy "C:\2026q4_external_v143_x64\freetype\bin\freetype.dll" "freetype.dll"
 mkdir plugins
 cd plugins

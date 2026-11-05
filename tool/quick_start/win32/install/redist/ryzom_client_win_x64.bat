@@ -23,7 +23,7 @@ copy %RC_ROOT%\build_win32\client_dev\bin\Release\crash_report.exe crash_report.
 copy "C:\2026q4_external_v143_x64\libjpeg\bin\jpeg62.dll" "jpeg62.dll"
 copy "C:\2026q4_external_v143_x64\giflib\bin\gif.dll" "gif.dll"
 copy "C:\2026q4_external_v143_x64\libpng\bin\libpng16.dll" "libpng16.dll"
-copy "C:\2026q4_external_v143_x64\zlib\bin\z.dll" "z.dll"
+copy "C:\2026q4_external_v143_x64\zlib\bin\libz.dll" "libz.dll"
 copy "C:\2026q4_external_v143_x64\openal-soft\bin\OpenAL32.dll" "OpenAL32.dll"
 copy "C:\2026q4_external_v143_x64\openssl\bin\libcrypto-3-x64.dll" "libcrypto-3-x64.dll"
 copy "C:\2026q4_external_v143_x64\openssl\bin\libssl-3-x64.dll" "libssl-3-x64.dll"
