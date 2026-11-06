@@ -71,7 +71,7 @@ jobs:
           path: |
             ~/toolchain_v90_prefix
             ~/2026q4_external_v90_x86
-          key: vs2008-toolchain-v2-2026q4
+          key: vs2008-toolchain-v3-2026q4
 
       - name: Download and extract toolchain
         if: steps.cache-toolchain.outputs.cache-hit != 'true'

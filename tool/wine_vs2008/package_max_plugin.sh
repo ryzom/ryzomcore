@@ -35,7 +35,7 @@ cp "$EXT/giflib/bin/gif.dll" "$OUT/"
 cp "$EXT/libxml2/bin/libxml2.dll" "$OUT/"
 cp "$EXT/libiconv/bin/libiconv.dll" "$OUT/"
 cp "$EXT/libiconv/bin/libcharset.dll" "$OUT/"
-cp "$EXT/zlib/bin/z.dll" "$OUT/"
+cp "$EXT/zlib/bin/libz.dll" "$OUT/"
 cp "$EXT/freetype/bin/freetype.dll" "$OUT/"
 
 # plugin binaries, renamed per the historical install convention
