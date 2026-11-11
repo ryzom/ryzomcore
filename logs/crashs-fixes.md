@@ -1,5 +1,18 @@
 # Crash fixes
 
+## 2026-11-11 — 🐛 CGlobalRetriever::waitEndOfAsyncLoading: do not load a retriever whose file was not found
+
+One dump (6576819) crashed with an unhandled `EStreamOverflow` while teleporting:
+`CContinent::select` -> `refreshLrAroundNow` -> `waitEndOfAsyncLoading` ->
+`CLocalRetriever::serial` -> `serialVersion`. When the `.lr` file is not found,
+`CLrLoader::run()` clears the buffer and sets `Finished = true` with
+`Successful = false`. `waitEndOfAsyncLoading()` only tested `Finished`, so it
+streamed the empty buffer into the retriever bank and the read overflowed. It now
+skips the load when `Successful` is false, logs a warning with the file name and
+still removes the loader from the list (otherwise the wait loop would never end).
+The non blocking `refreshLrAround` is unchanged. A truncated or too old `.lr` still
+throws. Not compiled.
+
 ## 2026-10-30 — 🐛 submitBuffer: log invalid buffer/source state for crash group 6435168
 
 Not a fix: debug logging for the 18 `EXCEPTION_BREAKPOINT` reports raised inside
