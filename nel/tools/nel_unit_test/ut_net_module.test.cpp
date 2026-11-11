@@ -436,6 +436,46 @@ public:
 };
 NLMISC_REGISTER_OBJECT(NLNET::CGatewaySecurity, CTestSecurity2, std::string, "TestSecurity2");
 
+/** a sample security plug-in that refuses the modules of class 'ModuleAsync' disclosed by the routes
+ *	of a firewalled transport, and accepts any other module
+ */
+class CTestSecurity3 : public NLNET::CGatewaySecurity
+{
+public:
+	/// Number of modules refused since the test reset it
+	static uint32 RefusedCount;
+
+	CTestSecurity3(const TCtorParam &params)
+	    : NLNET::CGatewaySecurity(params)
+	{
+	}
+
+	bool acceptModule(NLNET::CGatewayRoute *from, const std::string &moduleFullName, const std::string &moduleClass, const std::string &moduleManifest) NL_OVERRIDE
+	{
+		if (from->getTransport()->Firewalled && moduleClass == "ModuleAsync")
+		{
+			++RefusedCount;
+			return false;
+		}
+		return true;
+	}
+
+	void onNewProxy(NLNET::IModuleProxy *proxy) NL_OVERRIDE
+	{
+	}
+
+	void onNewSecurityData(NLNET::CGatewayRoute *from, NLNET::IModuleProxy *proxy, NLNET::TSecurityData *firstSecurityData) NL_OVERRIDE
+	{
+		replaceAllSecurityDatas(proxy, firstSecurityData);
+	}
+
+	void onDelete() NL_OVERRIDE
+	{
+	}
+};
+NLMISC_REGISTER_OBJECT(NLNET::CGatewaySecurity, CTestSecurity3, std::string, "TestSecurity3");
+
+uint32 CTestSecurity3::RefusedCount = 0;
 
 // A module interceptor
 class CInterceptor : public NLNET::IModuleInterceptable
@@ -1956,6 +1996,230 @@ protected:
 		mm.deleteModule(master);
 		mm.deleteModule(other);
 
+	}
+
+	TEST_F(CUTNetModule, securityAcceptModule)
+	{
+		// check that a module refused by the security plug-in of a gateway (acceptModule) is not taken
+		// by this gateway and not disclosed further, that what its route sends later for it is
+		// discarded, and that the other modules of the same route are not affected.
+		//
+		// for this test, we have the following context :
+		// 'master' : a gateway with two transports, one 'firewalled', the other one normal, and the
+		//			  'TestSecurity3' plug-in, which refuses the modules of class 'ModuleAsync' that
+		//			  come from a firewalled transport
+		// 'peer' : gateway connected to gateway 'master' on the firewalled transport,
+		//			with modules 'modGood' (ModuleType0) and 'modBad' (ModuleAsync)
+		// 'other' : gateway connected to gateway 'master' on the normal transport,
+		//			 with modules 'modOther' (ModuleType0) and 'modOtherAsync' (ModuleAsync)
+		//
+		//	peer (l3c) ----- (l3s1/Firewalled) master (l3s2) ----- (l3c) other
+		//
+		//	'master' and 'other' must see 'modGood', 'modOther' and 'modOtherAsync', and not 'modBad'
+
+		NLNET::IModuleManager &mm = NLNET::IModuleManager::getInstance();
+		NLMISC::CCommandRegistry &cr = NLMISC::CCommandRegistry::getInstance();
+
+		CTestSecurity3::RefusedCount = 0;
+
+		// create the gateways
+		NLNET::IModule *peer = mm.createModule("StandardGateway", "peer", "");
+		NLNET::IModule *master = mm.createModule("StandardGateway", "master", "");
+		NLNET::IModule *other = mm.createModule("StandardGateway", "other", "");
+		ASSERT_TRUE(peer != nullptr);
+		ASSERT_TRUE(master != nullptr);
+		ASSERT_TRUE(other != nullptr);
+
+		NLNET::IModuleGateway *gPeer = dynamic_cast<NLNET::IModuleGateway *>(peer);
+		NLNET::IModuleGateway *gMaster = dynamic_cast<NLNET::IModuleGateway *>(master);
+		NLNET::IModuleGateway *gOther = dynamic_cast<NLNET::IModuleGateway *>(other);
+		ASSERT_TRUE(gPeer != nullptr);
+		ASSERT_TRUE(gMaster != nullptr);
+		ASSERT_TRUE(gOther != nullptr);
+
+		NLNET::IModuleSocket *sPeer = mm.getModuleSocket("peer");
+		NLNET::IModuleSocket *sOther = mm.getModuleSocket("other");
+		ASSERT_TRUE(sPeer != nullptr);
+		ASSERT_TRUE(sOther != nullptr);
+
+		// create the modules and plug them
+		NLNET::IModule *modGood = mm.createModule("ModuleType0", "modGood", "");
+		NLNET::IModule *modBad = mm.createModule("ModuleAsync", "modBad", "");
+		NLNET::IModule *modOther = mm.createModule("ModuleType0", "modOther", "");
+		NLNET::IModule *modOtherAsync = mm.createModule("ModuleAsync", "modOtherAsync", "");
+		ASSERT_TRUE(modGood != nullptr);
+		ASSERT_TRUE(modBad != nullptr);
+		ASSERT_TRUE(modOther != nullptr);
+		ASSERT_TRUE(modOtherAsync != nullptr);
+
+		CModuleType0 *mGood = dynamic_cast<CModuleType0 *>(modGood);
+		CModuleType0 *mOther = dynamic_cast<CModuleType0 *>(modOther);
+		ASSERT_TRUE(mGood != nullptr);
+		ASSERT_TRUE(mOther != nullptr);
+
+		modGood->plugModule(sPeer);
+		modBad->plugModule(sPeer);
+		modOther->plugModule(sOther);
+		modOtherAsync->plugModule(sOther);
+
+		string cmd;
+		// create the security plug-in and the transports
+		cmd = "master.securityCreate TestSecurity3";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "peer.transportAdd L3Client l3c";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "master.transportAdd L3Server l3s1";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "master.transportAdd L3Server l3s2";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "other.transportAdd L3Client l3c";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+
+		// set option and connect transport
+		cmd = "master.transportOptions l3s1(Firewalled)";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "master.transportCmd l3s1(open port=8065)";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "master.transportCmd l3s2(open port=8066)";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "peer.transportCmd l3c(connect addr=localhost:8065)";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+		cmd = "other.transportCmd l3c(connect addr=localhost:8066)";
+		ASSERT_TRUE(cr.execute(cmd, NLMISC::InfoLog()));
+
+		// update the network
+		for (uint i=0; i<7; ++i)
+		{
+			mm.updateModules();
+			NLMISC::nlSleep(100);
+		}
+
+		// the refused module is not known by 'master', nor by 'other'. The module of the same class
+		// that comes from the normal transport is accepted.
+		ASSERT_EQ(CTestSecurity3::RefusedCount, 1u);
+
+		vector<NLNET::IModuleProxy*> proxList;
+		gMaster->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 3u);
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modGood"));
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modOther"));
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modOtherAsync"));
+		ASSERT_FALSE(lookForModuleProxy(proxList, "modBad"));
+
+		proxList.clear();
+		gOther->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 3u);
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modGood"));
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modOther"));
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modOtherAsync"));
+		ASSERT_FALSE(lookForModuleProxy(proxList, "modBad"));
+
+		// behind the firewall, 'peer' only knows its own modules
+		proxList.clear();
+		gPeer->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 2u);
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modGood"));
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modBad"));
+
+		// 'modOther' sends a message to 'modGood', which discloses 'modOther' to 'peer'
+		{
+			NLNET::CMessage ping("DEBUG_MOD_PING");
+			NLNET::IModuleProxy *goodProx = retrieveModuleProxy(gOther, "modGood");
+			ASSERT_TRUE(goodProx != nullptr);
+			goodProx->sendModuleMessage(modOther, ping);
+		}
+
+		// update the network
+		for (uint i=0; i<7; ++i)
+		{
+			mm.updateModules();
+			NLMISC::nlSleep(100);
+		}
+
+		ASSERT_EQ(mGood->PingCount, 1u);
+		proxList.clear();
+		gPeer->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 3u);
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modOther"));
+
+		// the refused module sends a message to 'modOther': 'master' discards it
+		{
+			NLNET::CMessage ping("DEBUG_MOD_PING");
+			NLNET::IModuleProxy *otherProx = retrieveModuleProxy(gPeer, "modOther");
+			ASSERT_TRUE(otherProx != nullptr);
+			otherProx->sendModuleMessage(modBad, ping);
+		}
+
+		// update the network
+		for (uint i=0; i<7; ++i)
+		{
+			mm.updateModules();
+			NLMISC::nlSleep(100);
+		}
+
+		ASSERT_EQ(mOther->PingCount, 0u);
+
+		// the accepted module of the same route still sends its messages
+		{
+			NLNET::CMessage ping("DEBUG_MOD_PING");
+			NLNET::IModuleProxy *otherProx = retrieveModuleProxy(gPeer, "modOther");
+			ASSERT_TRUE(otherProx != nullptr);
+			otherProx->sendModuleMessage(modGood, ping);
+		}
+
+		// update the network
+		for (uint i=0; i<7; ++i)
+		{
+			mm.updateModules();
+			NLMISC::nlSleep(100);
+		}
+
+		ASSERT_EQ(mOther->PingCount, 1u);
+
+		// the refused module is removed: its removal is discarded by 'master', which keeps the
+		// accepted module
+		mm.deleteModule(modBad);
+
+		// update the network
+		for (uint i=0; i<7; ++i)
+		{
+			mm.updateModules();
+			NLMISC::nlSleep(100);
+		}
+
+		proxList.clear();
+		gMaster->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 3u);
+		ASSERT_TRUE(lookForModuleProxy(proxList, "modGood"));
+
+		// the route is closed: 'master' and 'other' lose the accepted module
+		mm.deleteModule(peer);
+
+		// update the network
+		for (uint i=0; i<7; ++i)
+		{
+			mm.updateModules();
+			NLMISC::nlSleep(100);
+		}
+
+		proxList.clear();
+		gMaster->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 2u);
+		ASSERT_FALSE(lookForModuleProxy(proxList, "modGood"));
+
+		proxList.clear();
+		gOther->getModuleProxyList(proxList);
+		ASSERT_EQ(proxList.size(), 2u);
+		ASSERT_FALSE(lookForModuleProxy(proxList, "modGood"));
+
+		ASSERT_EQ(CTestSecurity3::RefusedCount, 1u);
+
+		// cleanup
+		mm.deleteModule(modGood);
+		mm.deleteModule(modOther);
+		mm.deleteModule(modOtherAsync);
+		mm.deleteModule(master);
+		mm.deleteModule(other);
 	}
 
 	TEST_F(CUTNetModule, peerInvisible)

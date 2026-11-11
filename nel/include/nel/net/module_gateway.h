@@ -492,6 +492,18 @@ namespace NLNET
 		/** the gateway send a command to the security module */
 		virtual void onCommand(const TParsedCommandLine &/* command */)	{}
 
+		/** A route discloses a module to the gateway, with the name, the class and the manifest
+		 *	that the other end of the route gives for it. The security plug-in can refuse the module
+		 *	by returning false: the gateway then keeps nothing of it. No proxy is created, so the
+		 *	module is disclosed to no module and to no other route, and what the route sends later
+		 *	from or about this module is discarded as for a module the gateway never heard of.
+		 *	Called each time a route discloses a module, before the gateway stores anything from
+		 *	that disclosure (and so before onNewProxy for a module it did not know yet). Modules
+		 *	that the gateway knew before the plug-in was created are not put to it.
+		 *	The default accepts every module.
+		 */
+		virtual bool acceptModule(CGatewayRoute * /* from */, const std::string & /* moduleFullName */, const std::string & /* moduleClass */, const std::string & /* moduleManifest */) { return true; }
+
 		/** A new proxy is available, the security plug-in can add security data */
 		virtual void onNewProxy(IModuleProxy *proxy) =0;
 

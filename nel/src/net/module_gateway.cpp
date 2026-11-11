@@ -952,6 +952,22 @@ namespace NLNET
 			TModuleDescCodec modDesc;
 			nlRead(msgin, serial, modDesc);
 
+			// The security plug-in can refuse the module, from what the route declares for it. Nothing is kept of a
+			// refused module: no module info, no proxy and no entry in the route's translation table. It is then
+			// disclosed to no module and to no route, and what the route sends later from or about it (a message, a
+			// removal, a distance or security update) finds no translation for its id and is discarded with a warning.
+			if (_SecurityPlugin != nullptr
+				&& !_SecurityPlugin->acceptModule(from, modDesc.ModuleFullName, modDesc.ModuleClass, modDesc.ModuleManifest))
+			{
+				nlwarning("NLNETL5 : Gateway '%s' : the security plug-in refused module '%s' of class '%s' with foreign id %u, ignored",
+					getGatewayName().c_str(),
+					modDesc.ModuleFullName.c_str(),
+					modDesc.ModuleClass.c_str(),
+					modDesc.ModuleProxyId);
+				delete modDesc.SecDesc.SecurityData;
+				return;
+			}
+
 			// for each received module info
 			TStringId modNameId = CStringMapper::map(modDesc.ModuleFullName);
 
