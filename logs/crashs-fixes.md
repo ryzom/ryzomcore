@@ -1,5 +1,16 @@
 # Crash fixes
 
+## 2026-11-11 — ✨ needcheck.flag: ask the launcher to rescan the files when a required file is missing
+
+Follow-up of the `waitEndOfAsyncLoading` fix (dump 6576819): the missing `.lr`
+file is a symptom of an incomplete installation. New global method
+`CPath::requestFileCheck(missingFile)`: logs a warning and creates an empty
+`needcheck.flag` in `getLogDirectory()` (once per run). The launcher (ryztart)
+rescans all the files with their hash and removes the flag. It is called by
+`CLrLoader::run` when the `.lr` is not found. It is not called from
+`CPath::lookup`, to avoid a rescan at every start because of optional files:
+other call sites are added one by one. See `docs/needcheck-flag.md`. Not compiled.
+
 ## 2026-11-11 — 🐛 CGlobalRetriever::waitEndOfAsyncLoading: do not load a retriever whose file was not found
 
 One dump (6576819) crashed with an unhandled `EStreamOverflow` while teleporting:

@@ -2693,6 +2693,7 @@ void	NLPACS::CGlobalRetriever::CLrLoader::run()
 	if (!f.open(CPath::lookup(LoadFile, false)))
 	{
 		nlwarning("Couldn't find file '%s' to load, retriever loading aborted", LoadFile.c_str());
+		CPath::requestFileCheck(LoadFile);
 		_Buffer.clear();
 		Finished = true;
 		return;
