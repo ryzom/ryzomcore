@@ -22,6 +22,9 @@
  *   --setup-password=PASS     Setup password (required unless --dev)
  *   --admin-user=USER         Shard admin username (default: admin)
  *   --admin-pass=PASS         Shard admin password (required unless --dev)
+ *   --admin-login=LOGIN       Administrator account: the first game account, with the
+ *   --admin-password=PASS       :DEV: privilege. All three or none; without them no
+ *   --admin-email=ADDRESS       game account exists.
  *   --private-php=PATH        Private PHP directory (default: ../private_php/)
  *   --no-role-service         Disable service role
  *   --no-role-domain          Disable domain role
@@ -124,6 +127,9 @@ function cli_known_options($command)
 		'setup-password'   => true,
 		'admin-user'       => true,
 		'admin-pass'       => true,
+		'admin-login'      => true,
+		'admin-password'   => true,
+		'admin-email'      => true,
 		'private-php'      => true,
 		'no-role-service'  => false,
 		'no-role-domain'   => false,
@@ -199,6 +205,9 @@ Install options:
   --setup-password=PASS     Setup password (required unless --dev)
   --admin-user=USER         Shard admin username (default: admin)
   --admin-pass=PASS         Shard admin password (required unless --dev)
+  --admin-login=LOGIN       Administrator account: the first game account, with the
+  --admin-password=PASS       :DEV: privilege. All three or none; without them no
+  --admin-email=ADDRESS       game account exists.
   --private-php=PATH        Private PHP directory (default: ../private_php/)
   --no-role-service         Disable service role
   --no-role-domain          Disable domain role
@@ -281,6 +290,37 @@ function run_install($opts)
 		cli_warn("Development install: setup and/or admin password left at 'admin'.");
 	}
 
+	// The administrator account, the first game account: all three options
+	// or none of them. Checked here, before anything is created, since the
+	// install cannot be run again once config.php is written. The password
+	// is not printed anywhere below.
+	$accountOptions = array('admin-login', 'admin-password', 'admin-email');
+	$accountMissing = array();
+	foreach ($accountOptions as $name) {
+		if (!isset($opts[$name]))
+			$accountMissing[] = '--' . $name;
+	}
+	$createAccount = empty($accountMissing);
+	if (!$createAccount && count($accountMissing) < count($accountOptions)) {
+		cli_err("The administrator account needs --admin-login, --admin-password and --admin-email together; missing: " . implode(', ', $accountMissing));
+		exit(1);
+	}
+	$accountLogin = $createAccount ? trim($opts['admin-login']) : '';
+	$accountEmail = $createAccount ? trim($opts['admin-email']) : '';
+	$accountPassword = $createAccount ? $opts['admin-password'] : '';
+	if ($createAccount) {
+		if (!$roleService) {
+			cli_err("The administrator account goes into the NeL database, which the service role installs: drop --no-role-service or the --admin-login, --admin-password and --admin-email options.");
+			exit(1);
+		}
+		require_once('setup/database.php');
+		$accountError = admin_account_error($accountLogin, $accountPassword, $accountEmail);
+		if ($accountError !== '') {
+			cli_err("Administrator account: " . $accountError);
+			exit(1);
+		}
+	}
+
 	// Check already installed
 	if (file_exists('config.php')) {
 		cli_err("Already installed. Use 'upgrade' to update, or remove config.php to reinstall.");
@@ -325,6 +365,7 @@ function run_install($opts)
 	))) . "\n";
 	if ($roleService) echo "  NeL DB:        $nelDb\n  Tool DB:       $toolDb\n";
 	if ($roleDomain) echo "  Domain:        $domainName\n  Domain DB:     $domainDb\n";
+	if ($roleService) echo "  Game account:  " . ($createAccount ? "$accountLogin <$accountEmail> (:DEV:)" : "none") . "\n";
 	echo "\n";
 
 	// Connect to MySQL
@@ -448,6 +489,12 @@ function run_install($opts)
 		$continue = configure_shard_dev($continue);
 	}
 
+	// Create the administrator account, after the development shard so that
+	// its domain is there to get a permission row
+	if ($continue && $createAccount) {
+		$continue = create_admin_account($continue, $accountLogin, $accountPassword, $accountEmail);
+	}
+
 	// Write role flags
 	if ($continue && $roleService) file_put_contents('role_service', '1');
 	if ($continue && $roleDomain) file_put_contents('role_domain', '1');
@@ -455,6 +502,25 @@ function run_install($opts)
 	echo "\n";
 	if ($continue) {
 		cli_ok("Installation complete!");
+		if ($createAccount) {
+			cli_ok("Game account '$accountLogin' <$accountEmail> is the administrator, with the :DEV: privilege.");
+			$accountNotes = admin_account_notes($accountLogin, $nelDb);
+			$accountStatement = array_pop($accountNotes); // kept on one line, to copy
+			foreach ($accountNotes as $line) {
+				echo "       " . str_replace("\n", "\n       ", wordwrap($line, 88, "\n", false)) . "\n";
+			}
+			echo "         $accountStatement\n";
+		} else if ($roleService) {
+			cli_warn("No game account exists: --admin-login, --admin-password and --admin-email were not given.");
+			echo "       Registration is closed by default, and only an account with the :DEV: privilege\n";
+			echo "       can open it. An install that passes the three options creates that account. On\n";
+			echo "       this one, make it by hand in the '$nelDb' database:\n";
+			echo "         1. UPDATE setting SET value = '1' WHERE setting = 'registration_open';\n";
+			echo "         2. register in the account tool (account/?page=register)\n";
+			echo "         3. UPDATE user SET Privilege = ':DEV:' WHERE Login = '<the login you registered>';\n";
+			echo "         4. close the registration again on the Dev page of the account tool, unless\n";
+			echo "            it is meant to stay open\n";
+		}
 	} else {
 		cli_err("Installation completed with errors.");
 		exit(1);

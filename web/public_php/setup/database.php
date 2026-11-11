@@ -123,6 +123,72 @@ function configure_shard_dev($continue_r) {
 	return $continue;
 }
 
+// The administrator account is the first game account of a fresh install: a
+// row in the nel user table with the :DEV: privilege, made by the account
+// tool's own code (tools/account_common.php), so it is an account like any
+// registered one. Registration is closed by default and only a :DEV: account
+// can open it, so without this account the first one has to be written into
+// the database by hand.
+
+// What is wrong with the fields of the administrator account, as a message,
+// or '' when they can be used. Does not touch the database: the installers
+// ask before they create anything, since an install cannot be taken back
+// once config.php is written.
+function admin_account_error($login, $password, $email) {
+	require_once(dirname(__DIR__) . '/tools/account_common.php');
+	// the installers ask for the password once
+	return accountNewFieldsError($login, $email, $password, $password);
+}
+
+// Create the administrator account. Install only, never part of an upgrade.
+// An account that already has the login or the e-mail address is left as it
+// is, and the step fails. The account gets a permission row for every domain
+// that exists by now, which is the dev domain when the development shard was
+// configured. A new production install has no domain yet, so the account can
+// sign in to the account tool and cannot enter a shard: a domain that is
+// added later needs its own permission row (admin_account_notes).
+function create_admin_account($continue_r, $login, $password, $email) {
+	$continue = $continue_r;
+
+	global $cfg;
+	if ($continue) {
+		require_once(dirname(__DIR__) . '/tools/account_common.php');
+		try {
+			$db = getDatabase(
+				$cfg['db']['shard']['host'],
+				$cfg['db']['shard']['port'],
+				$cfg['db']['shard']['user'],
+				$cfg['db']['shard']['pass'],
+				$cfg['db']['shard']['name']);
+			$created = accountCreate($db, $login, $email, $password, $password,
+				':DEV:', array('ds_open', 'ds_dev', 'ds_restricted'));
+			if ($created['error'] !== '') {
+				printalert("danger", "Administrator account <em>" . htmlentities($login) . "</em> not created: " . htmlentities($created['error']));
+				$continue = false;
+			} else {
+				printalert("success", "Administrator account <em>" . htmlentities($login) . "</em> (" . htmlentities($email) . ") created with the :DEV: privilege");
+			}
+		} catch (PDOException $e) {
+			printalert("danger", "Failed to create the administrator account <em>" . htmlentities($login) . "</em>: " . htmlentities($e->getMessage()));
+			$continue = false;
+		}
+	}
+
+	return $continue;
+}
+
+// What the administrator account is good for once the install is done, for
+// the last lines of both installers: plain text, one line per entry, the
+// statement on a line of its own.
+function admin_account_notes($login, $nelDatabase) {
+	return array(
+		"Sign in with it in the account tool (account/). Its Dev page opens the registration for everybody else.",
+		"In the game it can enter the shards of the domains that existed at install time: the development shard when this install configured one, and none on a new production install, where the domains are still to be added.",
+		"For a domain that is added later, any account gets its permission row with one statement in the '" . $nelDatabase . "' database, with OPEN for a domain whose status is ds_open, DEV for ds_dev and RESTRICTED for ds_restricted. Other accounts can also be given the row on the admin page of the account tool. For this account:",
+		"INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES ((SELECT UId FROM user WHERE Login = '" . $login . "'), <domain_id>, 'OPEN');",
+	);
+}
+
 // These lived in header.php, which is the HTML page shell: the CLI
 // installer includes this file without it and died on the undefined
 // function the first time a migration had to run.

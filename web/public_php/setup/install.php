@@ -53,6 +53,26 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			$continue = false;
 		}
 	}
+
+	// The administrator account, the first game account, goes into the NeL
+	// database of the service role. Its fields are checked here, before
+	// anything is created: once config.php is written the install cannot be
+	// run again. The password is never printed back.
+	$accountAdminLogin = (isset($_POST["accountAdminLogin"]) && is_string($_POST["accountAdminLogin"])) ? trim($_POST["accountAdminLogin"]) : '';
+	$accountAdminEmail = (isset($_POST["accountAdminEmail"]) && is_string($_POST["accountAdminEmail"])) ? trim($_POST["accountAdminEmail"]) : '';
+	$accountAdminPassword = (isset($_POST["accountAdminPassword"]) && is_string($_POST["accountAdminPassword"])) ? $_POST["accountAdminPassword"] : '';
+	// database.php also puts mysqli back into its classic reporting mode,
+	// which the connection check below counts on: required further down
+	// only, an unreachable SQL server ended this page in an uncaught
+	// exception on php 8.1 instead of the alert.
+	require_once('database.php');
+	if ($roleService) {
+		$accountAdminError = admin_account_error($accountAdminLogin, $accountAdminPassword, $accountAdminEmail);
+		if ($accountAdminError !== '') {
+			printalert("danger", "Administrator Account: " . htmlentities($accountAdminError));
+			$continue = false;
+		}
+	}
     
 	if ($continue) {
 		try {
@@ -258,6 +278,12 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		}
 	}
 
+	if ($roleService) {
+		// Create the administrator account, after the development shard so
+		// that its domain is there to get a permission row
+		$continue = create_admin_account($continue, $accountAdminLogin, $accountAdminPassword, $accountAdminEmail) && $continue;
+	}
+
 	if ($continue && $roleService) {
 		if (file_put_contents("role_service", "1")) {
 			printalert("success", "Service role successfully installed");
@@ -274,6 +300,15 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			printalert("danger", "Failed to flag installation success");
 			$continue = false;
 		}
+	}
+
+	if ($continue && $roleService) {
+		// the last word of the install: the one game account that exists
+		// now, and what it can and cannot do
+		$accountAdminNotes = admin_account_notes($accountAdminLogin, $cfg['db']['shard']['name']);
+		$accountAdminStatement = array_pop($accountAdminNotes);
+		printalert("info", "The game account <em>" . htmlentities($accountAdminLogin) . "</em> (" . htmlentities($accountAdminEmail) . ") is the administrator, with the :DEV: privilege. "
+			. htmlentities(implode(' ', $accountAdminNotes)) . "<br><code>" . htmlentities($accountAdminStatement) . "</code>");
 	}
 ?>
 
@@ -293,6 +328,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 					? visiblePanelClass
 					: hiddenPanelClass;
 				document.getElementById("panelAdmin").className = panelClass;
+				document.getElementById("panelAccount").className = panelClass;
 			}
 
 			function checkDomain() {
@@ -414,6 +450,31 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 							<label for="toolsAdminPassword" class="col-sm-3 control-label">Admin Password</label>
 							<div class="col-sm-6">
 								<input type="password" class="form-control" id="toolsAdminPassword" name="toolsAdminPassword" value="" required autocomplete="new-password" placeholder="Required">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="panelAccount" class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">Administrator Account <small>(the first game account, with the :DEV: privilege)</small></h2>
+					</div>
+					<div class="panel-body">
+						<div class="form-group">
+							<label for="accountAdminLogin" class="col-sm-3 control-label">Login</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="accountAdminLogin" name="accountAdminLogin" value="" autocomplete="off" placeholder="Required, 3 to 64 letters, digits or underscores">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="accountAdminEmail" class="col-sm-3 control-label">E-mail</label>
+							<div class="col-sm-6">
+								<input type="email" class="form-control" id="accountAdminEmail" name="accountAdminEmail" value="" autocomplete="off" placeholder="Required">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="accountAdminPassword" class="col-sm-3 control-label">Password</label>
+							<div class="col-sm-6">
+								<input type="password" class="form-control" id="accountAdminPassword" name="accountAdminPassword" value="" autocomplete="new-password" placeholder="Required, at least 8 characters">
 							</div>
 						</div>
 					</div>
