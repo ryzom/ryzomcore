@@ -111,9 +111,9 @@ RYZOM_SETUP_PREFIX_PATHS()
 
 #-----------------------------------------------------------------------------
 # Default values for URL's
-SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Create Account URL")
-SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Edit Account URL")
-SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/ams/" CACHE STRING "Ryzom Client Forget Password URL")
+SET(RYZOM_CLIENT_CREATE_ACCOUNT_URL     "https://core.ryzom.dev/account/?page=register" CACHE STRING "Ryzom Client Create Account URL")
+SET(RYZOM_CLIENT_EDIT_ACCOUNT_URL       "https://core.ryzom.dev/account/?page=settings" CACHE STRING "Ryzom Client Edit Account URL")
+SET(RYZOM_CLIENT_FORGET_PASSWORD_URL    "https://core.ryzom.dev/account/" CACHE STRING "Ryzom Client Forget Password URL")
 SET(RYZOM_CLIENT_PATCH_URL              "https://cdn.ryzom.dev/core4/patch/" CACHE STRING "Ryzom Client Patch URL")
 SET(RYZOM_CLIENT_APP_NAME               "core4")
 
