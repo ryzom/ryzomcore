@@ -231,6 +231,48 @@ function admin_account_notes($login, $nelDatabase) {
 	);
 }
 
+// Runs a script of several statements in one call and looks at the result of
+// every one of them. Returns '' when all of them ran, else which statement
+// failed, counted from 1, with the error of the server. The server stops at
+// the first statement that fails: the ones before it have been applied, the
+// ones after it have not been run.
+//
+// Only the result of the first statement comes back from the call itself;
+// each later one has to be fetched, and a failure shows as the fetch failing.
+// "Query was empty" (1065) is the answer for a statement with nothing in it,
+// which can only be what is left at the end of a script: it ends the script
+// and is not a failure.
+function run_sql_script($con, $sql) {
+	$emptyQuery = 1065;
+	$index = 1;
+	if (!$con->multi_query($sql)) {
+		if ($con->errno == $emptyQuery) {
+			return '';
+		}
+		return "statement 1: " . $con->error . ". Nothing of the script was applied.";
+	}
+	while (true) {
+		// take what the statement returned, if it returns rows
+		$result = $con->store_result();
+		if ($result) {
+			$result->free();
+		} else if ($con->errno) {
+			return "statement " . $index . ": " . $con->error . ". The statements before it were applied, the ones after it were not run.";
+		}
+		if (!$con->more_results()) {
+			break;
+		}
+		$index++;
+		if (!$con->next_result()) {
+			if ($con->errno == $emptyQuery) {
+				break;
+			}
+			return "statement " . $index . ": " . $con->error . ". The statements before it were applied, the ones after it were not run.";
+		}
+	}
+	return '';
+}
+
 // These lived in header.php, which is the HTML page shell: the CLI
 // installer includes this file without it and died on the undefined
 // function the first time a migration had to run.
@@ -244,13 +286,11 @@ function update_database_structure($continue_r, $con, $file) {
 			$continue = false;
 		} else {
 			printalert("info", "Running script <em>" . htmlentities($file) . "</em>");
-			if (mysqli_multi_query($con, $sql)) {
+			$scriptError = run_sql_script($con, $sql);
+			if ($scriptError === '') {
 				printalert("success", "Database structure updated using <em>" . htmlentities($file) . "</em>");
-				while (mysqli_more_results($con) && mysqli_next_result($con)) {
-					// no-op
-				}
 			} else {
-				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>: " . htmlentities(mysqli_error($con)));
+				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>, " . htmlentities($scriptError));
 				$continue = false;
 			}
 		}
@@ -269,13 +309,11 @@ function update_database_configure($continue_r, $con, $file) {
 			printalert("danger", "Cannot read <em>" . htmlentities($file) . "</em>");
 			$continue = false;
 		} else {
-			if (mysqli_multi_query($con, $sql)) {
+			$scriptError = run_sql_script($con, $sql);
+			if ($scriptError === '') {
 				printalert("success", "Database updated using <em>" . htmlentities($file) . "</em>");
-				while (mysqli_more_results($con) && mysqli_next_result($con)) {
-					// no-op
-				}
 			} else {
-				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>: " . htmlentities(mysqli_error($con)));
+				printalert("danger", "Error updating database using <em>" . htmlentities($file) . "</em>, " . htmlentities($scriptError));
 				$continue = false;
 			}
 		}
