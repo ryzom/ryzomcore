@@ -181,15 +181,27 @@ void CCurlHttpClient::pushReceivedData(uint8 *buffer, uint size)
 }
 
 // ***************************************************************************
+// The url of a GET request with params added to its query string: after '?',
+// or after '&' when the url carries a query string already.
+static string urlWithParams(const string &url, const string &params)
+{
+	if (params.empty())
+		return url;
+	if (url.find('?') == string::npos)
+		return url + "?" + params;
+	return url + "&" + params;
+}
+
+// ***************************************************************************
 bool CCurlHttpClient::sendGet(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
+	return sendRequest("GET", urlWithParams(url, params), string(), string(), string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendGetWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
+	return sendRequest("GET", urlWithParams(url, params), name, value, string(), verbose);
 }
 
 // ***************************************************************************
