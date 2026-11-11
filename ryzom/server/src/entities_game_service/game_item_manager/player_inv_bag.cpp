@@ -44,6 +44,20 @@ uint32 CBagInventory::getMaxSlot() const
 // ****************************************************************************
 void CBagInvView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags)
 {
+	// A worn or held item that leaves the bag is taken off first, which removes its modifiers and
+	// its wear malus from the character. The views are called before the item is unlinked and only
+	// when the whole stack leaves, so the item is still in the slot and is not locked.
+	if (changeFlags.checkEnumValue(INVENTORIES::itc_removed) && getCharacter() != NULL)
+	{
+		const CGameItemPtr item = getInventory()->getItem(slot);
+		if (item != NULL && item->getRefInventory() != NULL)
+		{
+			INVENTORIES::TInventory refInvId = item->getRefInventory()->getInventoryId();
+			if (refInvId == INVENTORIES::handling || refInvId == INVENTORIES::equipment)
+				getCharacter()->unequipCharacter(refInvId, item->getRefInventorySlot());
+		}
+	}
+
 	// Call the parent before the specific code
 	CCharacterInvView::onItemChanged(slot, changeFlags);
 

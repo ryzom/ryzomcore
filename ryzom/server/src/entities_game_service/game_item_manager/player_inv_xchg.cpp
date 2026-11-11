@@ -94,6 +94,10 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	if (item->getLockedByOwner())
 		return false;
 
+	// Can't trade an item that is worn or held, it has to be taken off first
+	if (item->getRefInventory() != NULL)
+		return false;
+
 	// You cannot exchange genesis named items
 	if (item->getPhraseId().find("genesis_") == 0)
 	{
@@ -155,6 +159,10 @@ bool CExchangeView::putItemInFirstEmptyExchangeSlot(uint32 bagSlot, uint32 quant
 
 	quantity = min(quantity, item->getNonLockedStackSize());
 	if (quantity == 0)
+		return false;
+
+	// an item that is worn or held is never given away
+	if (item->getRefInventory() != NULL)
 		return false;
 
 	if (getExchangeItem(exchangeSlot) != NULL)
