@@ -46,6 +46,20 @@ string removePort (const string &addr)
 	return addr.substr (0, addr.find (":"));
 }
 
+bool isValidAccountName(const string &login)
+{
+	// nel.user.Login is varchar(64)
+	if (login.size() < 3 || login.size() > 64)
+		return false;
+	for (string::size_type i = 0; i < login.size(); ++i)
+	{
+		char c = login[i];
+		if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'))
+			return false;
+	}
+	return true;
+}
+
 void checkClients ()
 {
 	nldebug ("checkClients ()");
