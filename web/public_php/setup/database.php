@@ -177,6 +177,33 @@ function create_admin_account($continue_r, $login, $password, $email) {
 	return $continue;
 }
 
+// configure_shard_dev.sql names the databases it writes to itself, so the
+// development shard can only be configured into an install that uses those
+// names. Returns what does not match, one entry per database, none when the
+// names fit.
+function shard_dev_database_problems($nelDatabase, $toolDatabase, $domainDatabase) {
+	$fixed = array(
+		array("NeL database", $nelDatabase, "nel"),
+		array("NeL tools database", $toolDatabase, "nel_tool"),
+		array("domain database", $domainDatabase, "ring_dev"),
+	);
+	$problems = array();
+	foreach ($fixed as $entry) {
+		if ($entry[1] !== $entry[2]) {
+			$problems[] = "the " . $entry[0] . " has to be '" . $entry[2] . "' and not '" . $entry[1] . "'";
+		}
+	}
+	return $problems;
+}
+
+// What has to be undone before an install that failed after it wrote
+// config.php can be run again, as plain text.
+function failed_install_notes($databases) {
+	return "config.php was written before the install failed, so the installer answers \"Already installed\" from now on. "
+		. "Before running the install again: fix what failed, drop the databases of this install (" . implode(", ", $databases) . "), "
+		. "and delete config.php and the db_version_* and role_* files from the public PHP directory.";
+}
+
 // What the administrator account is good for once the install is done, for
 // the last lines of both installers: plain text, one line per entry, the
 // statement on a line of its own.

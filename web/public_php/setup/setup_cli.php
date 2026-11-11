@@ -290,6 +290,19 @@ function run_install($opts)
 		cli_warn("Development install: setup and/or admin password left at 'admin'.");
 	}
 
+	// The development shard is configured by a script that names its
+	// databases itself. Other names used to fail in that script, after
+	// config.php was written; refuse them now.
+	if ($configureShardDev) {
+		require_once('setup/database.php');
+		$shardDevProblems = shard_dev_database_problems($nelDb, $toolDb, $domainDb);
+		if (!empty($shardDevProblems)) {
+			cli_err("--dev configures the development shard, and for that " . implode(', ', $shardDevProblems) . ".");
+			cli_err("Leave --nel-db, --tool-db, --domain-db and --domain-name (the default of --domain-db is made from it) at their defaults, or install without --dev or with --no-role-domain.");
+			exit(1);
+		}
+	}
+
 	// The administrator account, the first game account: all three options
 	// or none of them. Checked here, before anything is created, since the
 	// install cannot be run again once config.php is written. The password
@@ -323,7 +336,10 @@ function run_install($opts)
 
 	// Check already installed
 	if (file_exists('config.php')) {
-		cli_err("Already installed. Use 'upgrade' to update, or remove config.php to reinstall.");
+		cli_err("Already installed. Use 'upgrade' to update.");
+		echo "       To install again from scratch, first drop the databases of the installation and\n";
+		echo "       delete config.php and the db_version_* and role_* files from the public PHP\n";
+		echo "       directory: $publicPhpDir\n";
 		exit(1);
 	}
 
@@ -523,6 +539,17 @@ function run_install($opts)
 		}
 	} else {
 		cli_err("Installation completed with errors.");
+		// config.php is on disk by now: the install cannot simply be run again
+		$installDatabases = array();
+		if ($roleService) {
+			$installDatabases[] = $nelDb;
+			$installDatabases[] = $toolDb;
+		}
+		if ($roleDomain) {
+			$installDatabases[] = $domainDb;
+		}
+		echo "       " . str_replace("\n", "\n       ", wordwrap(failed_install_notes($installDatabases), 88, "\n", false)) . "\n";
+		echo "       Public PHP directory: $publicPhpDir\n";
 		exit(1);
 	}
 }

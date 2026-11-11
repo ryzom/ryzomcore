@@ -73,6 +73,24 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			$continue = false;
 		}
 	}
+
+	// The development shard is configured by a script that names its
+	// databases itself. Other names used to fail in that script, after
+	// config.php was written; refuse them now.
+	if ($roleDomain && $configureShardDev) {
+		$shardDevProblems = shard_dev_database_problems(
+			isset($_POST["nelDatabase"]) ? (string)$_POST["nelDatabase"] : '',
+			isset($_POST["toolDatabase"]) ? (string)$_POST["toolDatabase"] : '',
+			isset($_POST["domainDatabase"]) ? (string)$_POST["domainDatabase"] : '');
+		if (!empty($shardDevProblems)) {
+			printalert("danger", "Configure Development Shard: " . htmlentities(implode(', ', $shardDevProblems)) . ". Keep these database names, or untick <em>Configure Development Shard</em>.");
+			$continue = false;
+		}
+	}
+
+	// set once config.php is on disk: a failure after that leaves an
+	// install behind that has to be undone by hand
+	$configWritten = false;
     
 	if ($continue) {
 		try {
@@ -191,6 +209,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			$continue = false;
 		} else {
 			if (file_put_contents("config.php", $config)) {
+				$configWritten = true;
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");
@@ -309,6 +328,19 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		$accountAdminStatement = array_pop($accountAdminNotes);
 		printalert("info", "The game account <em>" . htmlentities($accountAdminLogin) . "</em> (" . htmlentities($accountAdminEmail) . ") is the administrator, with the :DEV: privilege. "
 			. htmlentities(implode(' ', $accountAdminNotes)) . "<br><code>" . htmlentities($accountAdminStatement) . "</code>");
+	}
+
+	if (!$continue && $configWritten) {
+		// the install cannot simply be run again from here
+		$installDatabases = array();
+		if ($roleService) {
+			$installDatabases[] = $_POST["nelDatabase"];
+			$installDatabases[] = $_POST["toolDatabase"];
+		}
+		if ($roleDomain) {
+			$installDatabases[] = $_POST["domainDatabase"];
+		}
+		printalert("danger", htmlentities(failed_install_notes($installDatabases)));
 	}
 ?>
 
