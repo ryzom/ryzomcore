@@ -1,9 +1,9 @@
 {
   "Domains": { "default": {} },
   "Defaults": {
-    "ClientCreateAccountUrl": "https://core.ryzom.dev/ams/",
-    "ClientEditAccountUrl": "https://core.ryzom.dev/ams/",
-    "ClientForgetPasswordUrl": "https://core.ryzom.dev/ams/",
+    "ClientCreateAccountUrl": "https://core.ryzom.dev/account/?page=register",
+    "ClientEditAccountUrl": "https://core.ryzom.dev/account/?page=settings",
+    "ClientForgetPasswordUrl": "https://core.ryzom.dev/account/",
     "ClientPatchUrl": "https://cdn.ryzom.dev/default/patch/",
     "ClientReleaseNotesUrl": "https://default.ryzom.dev/releasenotes/index.php",
     "ClientReleaseNotesRingUrl": "https://default.ryzom.dev/releasenotes_ring/index.php",
