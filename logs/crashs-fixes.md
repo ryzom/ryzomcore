@@ -1,5 +1,19 @@
 # Crash fixes
 
+## 2026-11-11 — 🐛 XAudio2 voice lifecycle: crash logs for crash group 6524326
+
+Not a fix: debug logging for the `CSourceXAudio2::updateState` crash group (8
+reports, first 6524326, `GetState` at `source_xaudio2.cpp:268`, with another
+thread inside `submitBuffer` in 3 of them). The hypothesis is a race between the
+main thread (`commit3DChanges` -> `updateState`) and the stream thread
+(`submitStreamingBuffer` -> `preparePlay`) destroying the voice. New `nlcrashdbg`
+lines in `client.log`: when a voice is destroyed in `release()` or in
+`preparePlay()` (format change), and when `updateState` finds a playing source
+without voice; each one with the source, the voice, the thread id, `_IsPlaying`
+and the streaming flag. One more line gives the thread id of the driver creation
+(main thread) to compare with. Nothing is logged on the normal path. Remove with
+`grep nlcrashdbg` once the group is fixed. Not compiled (XAudio2 is Windows only).
+
 ## 2026-11-11 — 🐛 CWidgetManager::checkCoords: iterate on a copy of the window lists
 
 12 dumps (first 6540032) still crashed in the first loop of `checkCoords()`

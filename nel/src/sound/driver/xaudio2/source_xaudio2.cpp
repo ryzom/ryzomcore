@@ -113,7 +113,12 @@ void CSourceXAudio2::release() // called by driver or destructor, whichever is f
 	if (_SoundDriver) 
 	{
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-		if (_SourceVoice) { _SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL; }
+		if (_SourceVoice)
+		{
+			nlcrashdbg(6524326, "release: destroy voice, source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
+			_SoundDriver->destroySourceVoice(_SourceVoice);
+			_SourceVoice = NULL;
+		}
 	}
 	if (_AdpcmUtility) { delete _AdpcmUtility; _AdpcmUtility = NULL; }
 	stop();
@@ -242,6 +247,7 @@ void CSourceXAudio2::updateState()
 	// the voice may already be destroyed (see release())
 	if (_IsPlaying && !_SourceVoice)
 	{
+		nlcrashdbg(6524326, "updateState: playing without voice, source=%p thread=%u streaming=%d", (void *)this, (unsigned int)getThreadId(), (int)_BufferStreaming);
 		_IsPlaying = false;
 		return;
 	}
@@ -578,6 +584,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 		// nlwarning(NLSOUND_XAUDIO2_PREFIX "Switching format %u to %u!", (uint32)_Format, (uint32)bufferFormat);
 		// destroy existing voice
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+		nlcrashdbg(6524326, "preparePlay: destroy voice (format change), source=%p voice=%p thread=%u playing=%d streaming=%d", (void *)this, (void *)_SourceVoice, (unsigned int)getThreadId(), (int)_IsPlaying, (int)_BufferStreaming);
 		_SoundDriver->destroySourceVoice(_SourceVoice); _SourceVoice = NULL;
 		// destroy adpcm utility (if it exists)
 		delete _AdpcmUtility; _AdpcmUtility = NULL;
