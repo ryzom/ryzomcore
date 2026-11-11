@@ -60,6 +60,18 @@
 		return (bool)preg_match('/^[a-zA-Z0-9_]+$/', $login);
 	}
 
+	/*
+	 * Placeholder address of an account created on first login. nel.user.Email
+	 * is unique and not null and there is no address to write, so the row gets
+	 * one made from the login, as unique as the login itself. Same form and
+	 * domain as the ring login (web/public_php/tools/account_name.php), whose
+	 * account tool refuses addresses in this domain.
+	 */
+	function placeholderEmail($login)
+	{
+		return $login . '@example.ryzom.dev';
+	}
+
 	// $reason contains the reason why the check failed or success
 	// return true if the check is ok
 	function checkUserValidity ($login, $password, $clientApplication, $cp, &$id, &$reason, &$priv, &$extended)
@@ -89,13 +101,11 @@
 				}
 
 				// login doesn't exist, create it
-				// FIXME: same trap as the ring login: nel.user.Email is
-				// `UNIQUE NOT NULL DEFAULT ''`, so only the first account ever
-				// created this way inserts; the next one collides on the empty
-				// email. Write a unique placeholder or relax EmailIndex before
-				// leaning on $AcceptUnknownUser beyond a single dev account.
+				// with a placeholder address: left empty, only the first
+				// account created this way would insert (see placeholderEmail)
 				$password = mysqli_real_escape_string($link, $password);
-				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
+				$email = mysqli_real_escape_string($link, placeholderEmail($rawLogin));
+				$query = "INSERT INTO user (Login, Password, Email) VALUES ('$login', '$password', '$email')";
 				$result = mysqli_query ($link, $query) or die ("Database error");
 
 				// get the user to have his UId

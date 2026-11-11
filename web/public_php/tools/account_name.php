@@ -54,6 +54,38 @@ if (!function_exists('nel_is_valid_account_name'))
 			. nel_account_name_max_length()
 			. ' characters, and may only contain letters, numbers and underscores.';
 	}
+
+	/*
+	 * The one place that names the mail domain of placeholder addresses.
+	 *
+	 * nel.user.Email is unique and not null, and the login scripts create an
+	 * account on first login when $ALLOW_UNKNOWN is set, with no address to
+	 * write. Such an account gets <login>@<this domain>, which is as unique
+	 * as the login it is made from. The account tool refuses addresses in
+	 * this domain at registration and at the e-mail change, so nobody can
+	 * hold the placeholder that belongs to another account.
+	 */
+	function nel_account_placeholder_email_domain()
+	{
+		return 'example.ryzom.dev';
+	}
+
+	/** The placeholder address of the account named $login. */
+	function nel_account_placeholder_email($login)
+	{
+		return $login . '@' . nel_account_placeholder_email_domain();
+	}
+
+	/** True when $email is in the placeholder domain, in any letter case. */
+	function nel_is_account_placeholder_email($email)
+	{
+		if (!is_string($email))
+			return false;
+		$at = strrpos($email, '@');
+		if ($at === false)
+			return false;
+		return strtolower(substr($email, $at + 1)) === nel_account_placeholder_email_domain();
+	}
 }
 
 /* end of file */

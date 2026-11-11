@@ -33,6 +33,9 @@ if (!$registrationOpen) {
 		$error = 'Username may only contain letters, numbers, and underscores.';
 	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
 		$error = 'Please enter a valid email address.';
+	} elseif (nel_is_account_placeholder_email($email)) {
+		// reserved for the accounts the login scripts create on first login
+		$error = 'This email address cannot be used.';
 	} elseif (!accountPasswordAcceptable($password)) {
 		$error = 'Password must be between ' . accountPasswordMinLength()
 			. ' and ' . accountPasswordMaxLength() . ' characters.';
