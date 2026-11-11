@@ -197,11 +197,26 @@ function shard_dev_database_problems($nelDatabase, $toolDatabase, $domainDatabas
 }
 
 // What has to be undone before an install that failed after it wrote
-// config.php can be run again, as plain text.
-function failed_install_notes($databases) {
-	return "config.php was written before the install failed, so the installer answers \"Already installed\" from now on. "
-		. "Before running the install again: fix what failed, drop the databases of this install (" . implode(", ", $databases) . "), "
-		. "and delete config.php and the db_version_* and role_* files from the public PHP directory.";
+// config.php can be run again, as plain text. Only a database that this run
+// created is named as one to drop: $createdDatabases. A database that was
+// there before the run ($existingDatabases) may belong to a working
+// installation and is never to be dropped on account of the failure.
+function failed_install_notes($createdDatabases, $existingDatabases) {
+	$note = "config.php was written before the install failed, so the installer answers \"Already installed\" from now on. ";
+	if (empty($existingDatabases)) {
+		return $note
+			. "Before running the install again: fix what failed, drop the databases this run created (" . implode(", ", $createdDatabases) . "), "
+			. "and delete config.php and the db_version_* and role_* files from the public PHP directory.";
+	}
+	if (empty($createdDatabases)) {
+		$note .= "This run created no database. ";
+	} else {
+		$note .= "This run created " . implode(", ", $createdDatabases) . ": drop " . (count($createdDatabases) > 1 ? "them" : "it") . " before running the install again. ";
+	}
+	return $note
+		. implode(", ", $existingDatabases) . " existed before this run: do not drop " . (count($existingDatabases) > 1 ? "them" : "it") . " on account of this failure. "
+		. "If a working installation uses " . (count($existingDatabases) > 1 ? "them" : "it") . ", this was not a fresh install: remove the config.php that this run wrote, put the config.php of that installation back and leave its db_version_* and role_* files as they are. "
+		. "If " . (count($existingDatabases) > 1 ? "they were" : "it was") . " empty before this run, empty " . (count($existingDatabases) > 1 ? "them" : "it") . " again, fix what failed, delete config.php and the db_version_* and role_* files from the public PHP directory, and run the install again.";
 }
 
 // What the administrator account is good for once the install is done, for

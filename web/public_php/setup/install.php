@@ -174,6 +174,12 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]) && $continue;
 	}
 
+	if ($con && !$continue && !empty($installCreatedDatabases)) {
+		// stopped between two databases: the next attempt refuses the ones
+		// that are there, so say which ones this attempt left
+		printalert("danger", "This run created " . htmlentities(implode(", ", $installCreatedDatabases)) . " before it stopped. The installer does not use a database that is there already: drop what this run created before running the install again.");
+	}
+
 	if ($con) {
 		mysqli_close($con);
 		printalert("info", "Disconnected from the Service SQL server");
@@ -331,16 +337,9 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 	}
 
 	if (!$continue && $configWritten) {
-		// the install cannot simply be run again from here
-		$installDatabases = array();
-		if ($roleService) {
-			$installDatabases[] = $_POST["nelDatabase"];
-			$installDatabases[] = $_POST["toolDatabase"];
-		}
-		if ($roleDomain) {
-			$installDatabases[] = $_POST["domainDatabase"];
-		}
-		printalert("danger", htmlentities(failed_install_notes($installDatabases)));
+		// the install cannot simply be run again from here. This installer
+		// only gets this far with databases it created itself.
+		printalert("danger", htmlentities(failed_install_notes($installCreatedDatabases, array())));
 	}
 ?>
 

@@ -92,11 +92,17 @@ function validate_writable($continue, $path) {
 	}
 	return $continue;
 }
+// The names of the databases that create_use_database() created in this
+// request. A database that exists already makes the creation fail, so the
+// install never works in one it did not create.
+$installCreatedDatabases = array();
 function create_use_database($continue_r, $con, $database) {
+	global $installCreatedDatabases;
 	$continue = $continue_r;
 	if ($continue) {
 		$sql = "CREATE DATABASE `" . mysqli_real_escape_string($con, $database) . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;";
 		if (mysqli_query($con, $sql)) {
+			$installCreatedDatabases[] = $database;
 			printalert("success", "Database <em>" . htmlentities($database) . "</em> created");
 		} else {
 			printalert("danger", "Error creating <em>" . htmlentities($database) . "</em> database: " . htmlentities(mysqli_error($con)));

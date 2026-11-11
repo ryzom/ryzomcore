@@ -399,19 +399,26 @@ function run_install($opts)
 	}
 	cli_ok("Connected to MySQL server");
 
-	// Create databases
+	// Create databases. One that is there already is used as it is, and
+	// the install keeps track of which ones it made itself: after a failure
+	// only those may be named as safe to drop.
+	$createdDatabases = array();
+	$existingDatabases = array();
 	if ($roleService) {
-		$continue = cli_create_database($con, $nelDb) && $continue;
-		$continue = cli_create_database($con, $toolDb) && $continue;
+		$continue = cli_create_database($con, $nelDb, $createdDatabases, $existingDatabases) && $continue;
+		$continue = cli_create_database($con, $toolDb, $createdDatabases, $existingDatabases) && $continue;
 	}
 	if ($roleDomain) {
-		$continue = cli_create_database($con, $domainDb) && $continue;
+		$continue = cli_create_database($con, $domainDb, $createdDatabases, $existingDatabases) && $continue;
 	}
 
 	mysqli_close($con);
 
 	if (!$continue) {
 		cli_err("Database creation failed.");
+		if (!empty($createdDatabases)) {
+			echo "       This run created " . implode(', ', $createdDatabases) . " before it stopped; the next run uses them as they are.\n";
+		}
 		exit(1);
 	}
 
@@ -542,15 +549,7 @@ function run_install($opts)
 	} else {
 		cli_err("Installation completed with errors.");
 		// config.php is on disk by now: the install cannot simply be run again
-		$installDatabases = array();
-		if ($roleService) {
-			$installDatabases[] = $nelDb;
-			$installDatabases[] = $toolDb;
-		}
-		if ($roleDomain) {
-			$installDatabases[] = $domainDb;
-		}
-		echo "       " . str_replace("\n", "\n       ", wordwrap(failed_install_notes($installDatabases), 88, "\n", false)) . "\n";
+		echo "       " . str_replace("\n", "\n       ", wordwrap(failed_install_notes($createdDatabases, $existingDatabases), 88, "\n", false)) . "\n";
 		echo "       Public PHP directory: $publicPhpDir\n";
 		exit(1);
 	}
@@ -656,13 +655,28 @@ function cli_validate_writable($path)
 	return true;
 }
 
-function cli_create_database($con, $name)
+// Makes sure the database is there. The name goes into $createdDatabases
+// when this call created it and into $existingDatabases when it was there
+// already, in which case it is used as it is.
+function cli_create_database($con, $name, &$createdDatabases, &$existingDatabases)
 {
 	$escaped = mysqli_real_escape_string($con, $name);
-	// Try to create, ignore if already exists
-	$sql = "CREATE DATABASE IF NOT EXISTS `$escaped` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+	$result = mysqli_query($con, "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$escaped'");
+	if (!$result) {
+		cli_err("Error looking for database '$name': " . mysqli_error($con));
+		return false;
+	}
+	$exists = mysqli_num_rows($result) > 0;
+	mysqli_free_result($result);
+	if ($exists) {
+		$existingDatabases[] = $name;
+		cli_ok("Database '$name' exists already, using it as it is");
+		return true;
+	}
+	$sql = "CREATE DATABASE `$escaped` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
 	if (mysqli_query($con, $sql)) {
-		cli_ok("Database '$name' ready");
+		$createdDatabases[] = $name;
+		cli_ok("Database '$name' created");
 		return true;
 	} else {
 		cli_err("Error creating database '$name': " . mysqli_error($con));
