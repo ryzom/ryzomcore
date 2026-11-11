@@ -57,7 +57,9 @@
 		$len = strlen($login);
 		if ($len < 3 || $len > 64)
 			return false;
-		return (bool)preg_match('/^[a-zA-Z0-9_]+$/', $login);
+		// \z, not $: without the D modifier $ also matches before a final
+		// newline, and "name\n" is not a name the client can send back
+		return (bool)preg_match('/^[a-zA-Z0-9_]+\z/', $login);
 	}
 
 	/*

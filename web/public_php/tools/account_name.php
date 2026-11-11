@@ -44,7 +44,9 @@ if (!function_exists('nel_is_valid_account_name'))
 	{
 		if (!nel_account_name_length_ok($login))
 			return false;
-		return (bool)preg_match('/^[a-zA-Z0-9_]+$/', $login);
+		// \z, not $: without the D modifier $ also matches before a final
+		// newline, and "name\n" is not a name the client can send back
+		return (bool)preg_match('/^[a-zA-Z0-9_]+\z/', $login);
 	}
 
 	/** One line describing the rule, for messages shown to a person. */
