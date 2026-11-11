@@ -1,5 +1,20 @@
 # Crash fixes
 
+## 2026-11-11 — 🐛 CWidgetManager::checkCoords: iterate on a copy of the window lists
+
+12 dumps (first 6540032) still crashed in the first loop of `checkCoords()`
+(`widget_manager.cpp:1088` and `:1090`) with builds that already contain the NULL
+checks of the 2026-10-26 fix, with garbage fault addresses (`0xffffffffffff0010`,
+`0xffffffffffffffff`...), not NULL. The loop keeps an iterator on the next window
+of `PrioritizedWindows` while `pIG->checkCoords()` runs scripts (lua `on_draw`,
+action handlers) that can move (`setTopWindow`, `setWindowPriority`), remove
+(`delWindow`, `unMakeWindow`) or destroy windows: the saved node is then freed. Both
+`checkCoords` loops (check and updateCoords) now iterate on a copy of the list and
+skip a window that is no longer in it. Not proven that a script is the cause (no
+script identified in the reports). The other loops over `PrioritizedWindows`
+(new screen size, invalidate, draw) call no external code and are unchanged. Not
+compiled.
+
 ## 2026-11-11 — ✨ needcheck.flag: ask the launcher to rescan the files when a required file is missing
 
 Follow-up of the `waitEndOfAsyncLoading` fix (dump 6576819): the missing `.lr`
