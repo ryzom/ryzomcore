@@ -1787,6 +1787,10 @@ public:
 	// player accept resurrection by other character
 	void resurrected();
 
+	/// Hit points of a dead character: they go from -Max/2 to -Max over the coma delay, counted from the
+	/// date the coma began, and the character can be healed back to life as long as they are above -Max
+	sint32 comaHitPoints() const;
+
 	// player revives at full health at his location without death penalty
 	void revive();
 	
@@ -3467,6 +3471,9 @@ private:
 
 	// is character in a coma ("dead" but can still be healed and resurrected)
 	bool						_IsInAComa;
+
+	// date the coma began, in seconds since 1970, 0 when the character is not dead; saved with the character
+	uint32						m_ComaStartDate;
 
 	// Aggroable override (-1=computed, 0=not aggroable, 1=aggroable)
 	sint8							_AggroableOverride;

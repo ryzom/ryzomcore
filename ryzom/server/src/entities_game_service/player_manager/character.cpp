@@ -557,6 +557,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_AdversaryParryModifier	= 0;
 
 	_IsInAComa				= false;
+	m_ComaStartDate			= 0;
 	_IntangibleEndDate		= 0;
 	uint64 NOT_TELEPORTING_FLAG= (((uint64)0x12345678)<<32)| (uint64)0x87654321;
 	_WhoSeesMeBeforeTP		= 	NOT_TELEPORTING_FLAG;
@@ -1132,6 +1133,11 @@ uint32 CCharacter::tickUpdate()
 	// test again as effects can kill the entity (dots...)
 	if (!isDead())
 	{
+		// a living character has no coma date: one loaded dead can come back to life without dying
+		// again (god mode, or hit points regenerated while a teleport is in progress)
+		if (currentHp() > 0)
+			m_ComaStartDate = 0;
+
 		{
 			H_AUTO(CharacterComputeMaxValue);
 			// Compute max values after apply modifier
@@ -1644,7 +1650,11 @@ void CCharacter::kill(TDataSetRow killerRowId)
 	removeAllSpells();
 	_ForbidPowerDates.clearConsumable();
 
-	_PhysScores._PhysicalScores[SCORES::hit_points].Current = -_PhysScores._PhysicalScores[SCORES::hit_points].Max / 2;
+	// A character saved while dead has kept the date its coma began: the coma goes on from there,
+	// the time spent logged out included, and does not start again at the login
+	if (m_ComaStartDate == 0)
+		m_ComaStartDate = CTime::getSecondsSince1970();
+	_PhysScores._PhysicalScores[SCORES::hit_points].Current = comaHitPoints();
 	setBars();
 
 	_TimeDeath = CTickEventHandler::getGameTime() + 5.0;
@@ -1815,7 +1825,10 @@ void CCharacter::deathOccurs( void )
 			{
 				float currentRegen = - _PhysScores._PhysicalScores[ i ].Max / (CommaDelayBeforeDeath * 0.2f );
 				_PhysScores._PhysicalScores[ i ].CurrentRegenerate = currentRegen;
-				_PhysScores._PhysicalScores[ i ].Current = - _PhysScores._PhysicalScores[ i ].Max / 2;
+				_PhysScores._PhysicalScores[ i ].Current = comaHitPoints();
+				// the value counts all the time up to now, the drain below goes on from this tick
+				_PhysScores._PhysicalScores[ i ].RegenerateTickUpdate = CTickEventHandler::getGameCycle();
+				_PhysScores._PhysicalScores[ i ].KeepRegenerateDecimal = 0;
 			}
 			else
 			{
@@ -1861,6 +1874,28 @@ void CCharacter::deathOccurs( void )
 	setBars();
 }
 
+
+//---------------------------------------------------
+// hit points of a dead character, from the date its coma began
+//
+//---------------------------------------------------
+sint32 CCharacter::comaHitPoints() const
+{
+	const sint32 maxHp = _PhysScores._PhysicalScores[SCORES::hit_points].Max;
+
+	// part of the coma delay that has passed, 0 to 1
+	double elapsedRatio = 0.0;
+	const uint32 now = CTime::getSecondsSince1970();
+	if (m_ComaStartDate != 0 && now > m_ComaStartDate)
+	{
+		const double comaDelay = (double)CommaDelayBeforeDeath.get() * CTickEventHandler::getGameTimeStep();
+		const double elapsed = (double)(now - m_ComaStartDate);
+		elapsedRatio = (comaDelay > 0.0 && elapsed < comaDelay) ? elapsed / comaDelay : 1.0;
+	}
+
+	const sint32 startHp = -maxHp / 2;
+	return startHp + (sint32)((double)(-maxHp - startHp) * elapsedRatio);
+}
 
 //---------------------------------------------------
 // player choose a re-spawn for his death character
@@ -1955,6 +1990,7 @@ void CCharacter::applyRespawnEffects()
 	_Behaviour = MBEHAV::IDLE;
 	_IsDead = false;
 	_IsInAComa = false;
+	m_ComaStartDate = 0;
 }
 
 //---------------------------------------------------
@@ -1967,6 +2003,7 @@ void CCharacter::resurrected()
 	_Behaviour = MBEHAV::IDLE;
 	_IsDead = false;
 	_IsInAComa = false;
+	m_ComaStartDate = 0;
 	resetNextDeathPenaltyFactor();
 
 	PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->playerResurrected(this);
@@ -1988,6 +2025,7 @@ void CCharacter::revive()
 	_Behaviour = MBEHAV::IDLE;
 	_IsDead = false;
 	_IsInAComa = false;
+	m_ComaStartDate = 0;
 	_RegionKilledInPvp = 0xffff;
 
 	_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = _PhysScores._PhysicalScores[ SCORES::hit_points ].Base;
