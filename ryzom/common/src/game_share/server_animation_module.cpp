@@ -2442,6 +2442,29 @@ CAnimationSession* CServerAnimationModule::getSessionByCharId(TCharId charId) co
 	return getSession(getSessionIdByCharId(charId));
 }
 
+bool CServerAnimationModule::isAnimator(TCharId charId, const char *operation) const
+{
+	TSessionId sessionId;
+	TUserRole role;
+	bool allowed = getEditionModule()->isCharAnimator(charId, sessionId, role);
+
+	// A request acts on the animation session the character is attached to here, so the role only counts if it was
+	// given for that session: a character that the edition module has moved to another session can still be
+	// attached to the animation of the session it left.
+	TSessionId animSessionId = getSessionIdByCharId(charId);
+	if (allowed && animSessionId.asInt() != 0 && getSession(animSessionId) != getSession(sessionId))
+	{
+		allowed = false;
+	}
+
+	if (!allowed)
+	{
+		nlwarning("R2An: char %u (role '%s' in session %u, attached to the animation of session %u) is not allowed to use '%s', request refused",
+			charId, role.toString().c_str(), sessionId.asInt(), animSessionId.asInt(), operation);
+	}
+	return allowed;
+}
+
 void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 {
 	CAnimationSession* session = getSession(sessionId);
@@ -2534,6 +2557,8 @@ void CServerAnimationModule::onDssTarget( IModuleProxy *senderModuleProxy, const
 
 	bool ok =  checkSecurityInfo(senderModuleProxy, charId, eid, userPriv, extendedPriv);
 	if (!ok) { return ; }
+
+	if (!isAnimator(charId, "onDssTarget")) { return; }
 
 	DROP_IF(!_CharacterControlProxy, "Try to send message to EGS must he is down", return);
 
@@ -3017,6 +3042,24 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 	std::vector<std::string> args(param);
 	TCharId charId = static_cast<TCharId>(eid.getShortId());
 
+	// This is the answer of the EGS to onDssTarget. It names the character it acts for, so it is not taken from a
+	// client (a module that carries the security data of a client), and the character named must be an animator
+	// like the one onDssTarget accepts.
+	if (senderModuleProxy)
+	{
+		uint32 senderCharId;
+		NLMISC::CEntityId senderEid;
+		std::string userPriv;
+		std::string extendedPriv;
+		if (getCharInfo(senderModuleProxy, senderCharId, senderEid, userPriv, extendedPriv))
+		{
+			nlwarning("R2An: the client module '%s' (char %u) sent onCharTargetReceived for char %u, request refused",
+				senderModuleProxy->getModuleName().c_str(), senderCharId, charId);
+			return;
+		}
+	}
+	if (!isAnimator(charId, "onCharTargetReceived")) { return; }
+
 	const NLNET::TModuleProxyPtr * foundModule = getEditionModule()->getClientProxyPtr(charId);
 	DROP_IF(!foundModule, NLMISC::toString("Invalid Char %u", charId), return);
 
@@ -3386,6 +3429,18 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 		bool ok =  checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 		if (!ok) { return true; }
 
+		// The requests that drive the animation are for the animators of the session. The string queries
+		// (requestStringValue, requestIdList, requestStringTable) stay open to every member.
+		if (operationName == "requestStartAct"
+			|| operationName == "requestStopAct"
+			|| operationName == "requestSetSeason"
+			|| operationName == "requestSetWeather"
+			|| operationName == "talk_as"
+			|| operationName == "stopTalk"
+			|| operationName == "requestSetValue")
+		{
+			if (!isAnimator(charId, operationName.c_str())) { return true; }
+		}
 
 		if (operationName == "requestStartAct")
 		{
@@ -4008,6 +4063,8 @@ void CServerAnimationModule::onUserTriggerTriggered(NLNET::IModuleProxy *senderM
 
 	bool ok =  checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
+
+	if (!isAnimator(charId, "onUserTriggerTriggered")) { return; }
 
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	CAnimationSession* session = getSession(sessionId);

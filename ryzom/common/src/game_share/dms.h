@@ -85,6 +85,9 @@ namespace R2
 		// getEditing position (use AdminModule::getPosition for having a position in editing and animation mode)
 		virtual	bool getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 locationIndex = 0) = 0;
 		virtual TSessionId getSessionIdByCharId(TCharId charId) const = 0;
+		// true if the character may use the animator and DM functions of the session it is connected to
+		// (sessionId and role receive that session and the role of the character in it)
+		virtual bool isCharAnimator(TCharId charId, TSessionId &sessionId, TUserRole &role) const = 0;
 		virtual bool isClientAuthorized(uint32 charId) const = 0;
 		virtual void disconnectChar(uint32 charId) = 0;
 		virtual const NLNET::TModuleProxyPtr * getClientProxyPtr(TCharId charId) const = 0;

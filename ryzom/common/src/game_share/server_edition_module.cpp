@@ -1446,7 +1446,7 @@ void CServerEditionModule::connectChar(TSessionId sessionId, TCharId charId, TUs
 		}
 	}
 
-	onMapConnectionAsked(clientEditionProxy, sessionId, true, true, userRole);
+	onMapConnectionAskedImpl(clientEditionProxy, sessionId, true, true, userRole);
 
 
 }
@@ -1716,6 +1716,34 @@ void CServerEditionModule::stopTestRequested(NLNET::IModuleProxy *senderModulePr
 
 
 void CServerEditionModule::onMapConnectionAsked( NLNET::IModuleProxy * clientEditionProxy,
+	TSessionId sessionId, bool updateHighLevel, bool mustTp, TUserRole role)
+{
+	TCharId charId;
+	CEntityId clientEid;
+	std::string userPriv;
+	std::string extendedPriv;
+
+	bool ok = checkSecurityInfo(clientEditionProxy, charId, clientEid, userPriv, extendedPriv);
+	if (!ok) { return; }
+
+	// The session a character is in and its role there are decided by the session manager (addCharacterInSession).
+	// A client only asks to be connected again to the session it is already in (when a test stops, or when a
+	// scenario failed to start): it stays in that session and keeps the role it has there, whatever it sends.
+	TPioneersSessions::const_iterator connected = _PioneersSessions.find(charId);
+	TSessionId connectedSessionId = (connected != _PioneersSessions.end()) ? connected->second : TSessionId(0);
+	CEditionSession *session = (connectedSessionId == sessionId) ? getSession(sessionId) : nullptr;
+	TUserRole connectedRole = session ? session->getCharRole(charId) : TUserRole(TUserRole::invalid);
+	if (connectedRole == TUserRole::invalid)
+	{
+		nlwarning("R2Ed: char %u asked to be connected to session %u as '%s' but it is connected to session %u, request refused",
+			charId, sessionId.asInt(), role.toString().c_str(), connectedSessionId.asInt());
+		return;
+	}
+
+	onMapConnectionAskedImpl(clientEditionProxy, sessionId, updateHighLevel, mustTp, connectedRole);
+}
+
+void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clientEditionProxy,
 	TSessionId sessionId, bool updateHighLevel, bool mustTp, TUserRole role)
 {
 
@@ -2567,7 +2595,7 @@ TSessionId CServerEditionModule::getSessionIdByCharId(TCharId charId) const
 TUserRole CServerEditionModule::getRoleByCharId(TCharId charId) const
 {
 	TPioneersSessionsAlloweds::const_iterator found = _PioneersSessionsAllowed.find(charId);
-	if (found == _PioneersSessionsAllowed.end()) return found->second.Role;
+	if (found != _PioneersSessionsAllowed.end()) return found->second.Role;
 
 	CEditionSession* session = getSessionByCharId(charId);
 	if (session)
@@ -2578,6 +2606,28 @@ TUserRole CServerEditionModule::getRoleByCharId(TCharId charId) const
 	return TUserRole::invalid;
 
 
+}
+
+bool CServerEditionModule::isCharAnimator(TCharId charId, TSessionId &sessionId, TUserRole &role) const
+{
+	sessionId = TSessionId(0);
+	role = TUserRole::invalid;
+
+	// The role that counts is the one the character holds in the session it is connected to. An entry of
+	// _PioneersSessionsAllowed does not tell it: the entry is consumed when the character connects, and one that
+	// is left over names the session the character was last allowed into, which is not always the one it is in.
+	TPioneersSessions::const_iterator found = _PioneersSessions.find(charId);
+	if (found == _PioneersSessions.end()) { return false; }
+	sessionId = found->second;
+
+	CEditionSession *session = getSession(sessionId);
+	if (!session) { return false; }
+	role = session->getCharRole(charId);
+
+	if (role == TUserRole::ur_animator || role == TUserRole::ur_outland_owner) { return true; }
+
+	// The editors of an edition session animate their scenario while they test it
+	return role == TUserRole::ur_editor && session->getSessionType() == RSMGR::TSessionType::st_edit;
 }
 
 
@@ -3020,7 +3070,7 @@ void CServerEditionModule::resetSession(NLNET::IModuleProxy *sender, TSessionId 
 		TUserRole role =  (*first)->getRole();
 		if (proxy)
 		{
-			onMapConnectionAsked(*proxy, sessionId, true, true, role);
+			onMapConnectionAskedImpl(*proxy, sessionId, true, true, role);
 		}
 	}
 }
@@ -4633,6 +4683,24 @@ void CServerEditionModule::onCharModeUpdateAsked(NLNET::IModuleProxy *senderModu
 
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
+
+	// The DM and editor modes make the EGS treat the character as a DM (invisible, never attacked), so they are
+	// only given to a character whose role in its session carries them: the DM mode to an animator, or to an
+	// editor who tests in an edition session, and the editor mode to an editor. The player and tester modes take
+	// these rights away and are open to every member.
+	if (mode == TCharMode::Dm || mode == TCharMode::Editer)
+	{
+		TSessionId sessionId;
+		TUserRole role;
+		bool animator = isCharAnimator(charId, sessionId, role);
+		bool allowed = (mode == TCharMode::Dm) ? animator : (role == TUserRole::ur_editor);
+		if (!allowed)
+		{
+			nlwarning("R2Ed: char %u (role '%s' in session %u) asked for the mode '%s', request refused",
+				charId, role.toString().c_str(), sessionId.asInt(), mode.toString().c_str());
+			return;
+		}
+	}
 
 	nldebug("R2Ed: Char %u is now in mode '%s'", charId, mode.toString().c_str());
 

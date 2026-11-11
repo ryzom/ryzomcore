@@ -299,6 +299,9 @@ namespace R2
 		/////////////////////////////////////////////////////
 		CEditionSession* getSession(TSessionId sessionId) const;
 		TSessionId getSessionIdByCharId(TCharId charId) const NL_OVERRIDE;
+		// connect a character to the map of a session with the role given (implementation of onMapConnectionAsked,
+		// also used for the connections that the server decides itself)
+		void onMapConnectionAskedImpl(NLNET::IModuleProxy *clientEditionProxy, TSessionId sessionId, bool updateHighLevel, bool mustTp, TUserRole role);
 		// implement private task CTaskConnectPlayer
 		void connectChar(TSessionId sessionId, TCharId charId, TUserRole userRole, const std::string& ringAccess, bool newcomer);
 		// implement private task CTaskTryConnectPlayer
@@ -475,6 +478,9 @@ namespace R2
 		CScenario* getScenarioById(TSessionId sessionId) const NL_OVERRIDE;
 		// get the current session (available from the moment when the client module is connected)
 		TUserRole getRoleByCharId(TCharId charId) const;
+		// true if the character is an animator or the outland owner of the session it is connected to, or an editor
+		// of an edition session (sessionId and role receive that session and the role of the character in it)
+		virtual bool isCharAnimator(TCharId charId, TSessionId &sessionId, TUserRole &role) const NL_OVERRIDE;
 
 		// get the session that is about to be joined by a client, or NULL if not found
 		TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const NL_OVERRIDE;

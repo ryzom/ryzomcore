@@ -325,6 +325,9 @@ namespace R2
 		void requestLoadTable(CAnimationSession* session);
 		void requestUnloadTable(TSessionId sessionId);
 		TSessionId getScenarioId(TCharId charId);
+		// true if the character may use the animator and DM functions of the animation session it is attached to;
+		// if not, logs the refusal of the operation named
+		bool isAnimator(TCharId charId, const char *operation) const;
 		void broadcastMessage(CAnimationSession* session, const NLNET::CMessage& msg);
 		NLMISC::CEntityId getEid(NLNET::TModuleProxyPtr senderModuleProxy);
 		// message from  Server Admin Module for starting Animation Session (calle queueSession)
