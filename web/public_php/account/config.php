@@ -496,6 +496,87 @@ function setSetting($key, $value)
 	}
 }
 
+/*
+ * Permission rows that name no shard.
+ *
+ * A permission row gives an account access to a domain. When it names no
+ * shard, ShardId is -1, the default of the column: that is what the setup,
+ * the registration and the login script write. Earlier versions of the admin
+ * page wrote 0 for the same thing, and an account can have both rows for one
+ * domain. The functions below treat a 0 row as a -1 row everywhere, and the
+ * admin page leaves exactly one row, with -1, whenever it touches one.
+ */
+
+/**
+ * The permission rows of an account for the pages that list them, in the
+ * order the login script reads them. Where a domain has a 0 row beside its -1
+ * row, only the -1 row is listed; a 0 row on its own is listed as -1.
+ */
+function loadAccountPermissions($db, $uid)
+{
+	$stmt = $db->prepare('SELECT perm.DomainId, perm.ShardId, perm.AccessPrivilege, d.domain_name FROM permission perm LEFT JOIN domain d ON perm.DomainId = d.domain_id WHERE perm.UId = :uid ORDER BY perm.DomainId, perm.ShardId');
+	$stmt->execute(array(':uid' => $uid));
+	$perms = array();
+	$domainsListed = array();
+	foreach ($stmt->fetchAll() as $perm) {
+		if ((int)$perm['ShardId'] <= 0) {
+			if (isset($domainsListed[$perm['DomainId']])) {
+				continue;
+			}
+			$domainsListed[$perm['DomainId']] = true;
+			$perm['ShardId'] = -1;
+		}
+		$perms[] = $perm;
+	}
+	return $perms;
+}
+
+/**
+ * Give an account the permission row of a domain that names no shard, or
+ * change its access privilege. Afterwards the account has exactly one such
+ * row for the domain, with ShardId -1: a 0 row on its own is turned into it,
+ * a 0 row beside a -1 row is deleted. One transaction.
+ */
+function setDomainPermission($db, $uid, $domainId, $accessPriv)
+{
+	$key = array(':uid' => $uid, ':did' => $domainId);
+	$db->beginTransaction();
+	try {
+		$stmt = $db->prepare('SELECT ShardId FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId IN (-1, 0) FOR UPDATE');
+		$stmt->execute($key);
+		$found = array();
+		foreach ($stmt->fetchAll() as $row) {
+			$found[] = (int)$row['ShardId'];
+		}
+		if (in_array(-1, $found, true)) {
+			$stmt = $db->prepare('DELETE FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = 0');
+			$stmt->execute($key);
+			$stmt = $db->prepare('UPDATE permission SET AccessPrivilege = :priv WHERE UId = :uid AND DomainId = :did AND ShardId = -1');
+			$stmt->execute($key + array(':priv' => $accessPriv));
+		} elseif (in_array(0, $found, true)) {
+			$stmt = $db->prepare('UPDATE permission SET ShardId = -1, AccessPrivilege = :priv WHERE UId = :uid AND DomainId = :did AND ShardId = 0');
+			$stmt->execute($key + array(':priv' => $accessPriv));
+		} else {
+			$stmt = $db->prepare('INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES (:uid, :did, -1, :priv)');
+			$stmt->execute($key + array(':priv' => $accessPriv));
+		}
+		$db->commit();
+	} catch (PDOException $e) {
+		$db->rollBack();
+		throw $e;
+	}
+}
+
+/**
+ * Take away the permission row of a domain that names no shard: the -1 row,
+ * and a 0 row if there is one.
+ */
+function removeDomainPermission($db, $uid, $domainId)
+{
+	$stmt = $db->prepare('DELETE FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId IN (-1, 0)');
+	$stmt->execute(array(':uid' => $uid, ':did' => $domainId));
+}
+
 /**
  * Check if the current session is impersonating another user.
  */

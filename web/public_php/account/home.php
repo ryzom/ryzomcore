@@ -27,9 +27,7 @@ try {
 	$shards = $stmt->fetchAll();
 
 	// Fetch user permissions
-	$stmt = $db->prepare('SELECT perm.DomainId, perm.ShardId, perm.AccessPrivilege, d.domain_name FROM permission perm LEFT JOIN domain d ON perm.DomainId = d.domain_id WHERE perm.UId = :uid');
-	$stmt->execute(array(':uid' => $uid));
-	$permissions = $stmt->fetchAll();
+	$permissions = loadAccountPermissions($db, $uid);
 } catch (PDOException $e) {
 	$error = 'Could not load account information.';
 }
@@ -44,10 +42,13 @@ foreach ($shards as $shard) {
 	$shardsByDomain[$did][] = $shard;
 }
 
-// Index permissions by domain
+// Index permissions by domain: the first row of a domain is the one the
+// login script reads, so that is the access shown for the domain
 $permsByDomain = array();
 foreach ($permissions as $perm) {
-	$permsByDomain[$perm['DomainId']] = $perm;
+	if (!isset($permsByDomain[$perm['DomainId']])) {
+		$permsByDomain[$perm['DomainId']] = $perm;
+	}
 }
 
 ob_start();

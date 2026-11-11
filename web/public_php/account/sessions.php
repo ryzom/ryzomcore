@@ -174,8 +174,9 @@ if (isset($_SESSION['flash_success'])) {
 try {
 	$db = getNelDatabase();
 
-	// Get all domains the user has access to
-	$stmt = $db->prepare('SELECT d.domain_id, d.domain_name, d.ring_db_name, d.session_manager_address FROM permission p JOIN domain d ON p.DomainId = d.domain_id WHERE p.UId = :uid');
+	// Get all domains the user has access to, each once: an account can
+	// have more than one permission row for a domain
+	$stmt = $db->prepare('SELECT DISTINCT d.domain_id, d.domain_name, d.ring_db_name, d.session_manager_address FROM permission p JOIN domain d ON p.DomainId = d.domain_id WHERE p.UId = :uid');
 	$stmt->execute(array(':uid' => $uid));
 	$userDomains = $stmt->fetchAll();
 

@@ -124,9 +124,9 @@ try {
 			if (!in_array($accessPriv, $validAccess, true)) {
 				$accessPriv = 'OPEN';
 			}
-			// Domain must exist; shard 0 means all shards, otherwise it must
-			// exist (and preferably belong to the domain — still enforced as
-			// "known shard id" so we never invent orphan references).
+			// Domain must exist. "All Shards" is a row that names no shard
+			// (-1, and the 0 this form used to send); a shard must exist and
+			// be a shard of that domain.
 			$domainOk = false;
 			foreach ($domains as $d) {
 				if ((int)$d['domain_id'] === $domainId) {
@@ -134,17 +134,22 @@ try {
 					break;
 				}
 			}
-			$shardOk = ($shardId === 0);
+			$allShards = ($shardId <= 0);
+			$shardOk = $allShards;
 			if (!$shardOk) {
 				foreach ($shards as $s) {
-					if ((int)$s['ShardId'] === $shardId) {
+					if ((int)$s['ShardId'] === $shardId && (int)$s['domain_id'] === $domainId) {
 						$shardOk = true;
 						break;
 					}
 				}
 			}
 			if (!$domainOk || !$shardOk) {
-				$error = 'Unknown domain or shard.';
+				$error = 'Unknown domain or shard, or the shard is not one of that domain.';
+			} elseif ($allShards) {
+				// one row per domain, with ShardId -1, whatever was there
+				setDomainPermission($db, $targetUid, $domainId, $accessPriv);
+				$success = 'Permission added.';
 			} else {
 				// Check if permission already exists
 				$stmt = $db->prepare('SELECT COUNT(*) as cnt FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
@@ -173,8 +178,14 @@ try {
 			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
-			$stmt = $db->prepare('DELETE FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
-			$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
+			if ($shardId <= 0) {
+				// "All Shards": the -1 row, and a 0 row an earlier version
+				// of this page may have left beside it
+				removeDomainPermission($db, $targetUid, $domainId);
+			} else {
+				$stmt = $db->prepare('DELETE FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
+				$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
+			}
 			$success = 'Permission removed.';
 			}
 			$editUid = $targetUid;
@@ -196,9 +207,7 @@ try {
 				$editUser = null;
 				$editUid = 0;
 			} else {
-				$stmt = $db->prepare('SELECT perm.DomainId, perm.ShardId, perm.AccessPrivilege, d.domain_name FROM permission perm LEFT JOIN domain d ON perm.DomainId = d.domain_id WHERE perm.UId = :uid');
-				$stmt->execute(array(':uid' => $editUid));
-				$editPerms = $stmt->fetchAll();
+				$editPerms = loadAccountPermissions($db, $editUid);
 			}
 		}
 	}
@@ -359,18 +368,18 @@ ob_start();
 				<div class="form-inline">
 					<div class="form-group">
 						<label>Domain</label>
-						<select name="domain_id">
+						<select name="domain_id" id="permission_domain">
 							<?php foreach ($domains as $d): ?>
 								<option value="<?php echo (int)$d['domain_id']; ?>"><?php echo h($d['domain_name']); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</div>
 					<div class="form-group">
-						<label>Shard (0 = all)</label>
-						<select name="shard_id">
-							<option value="0">All Shards</option>
+						<label>Shard</label>
+						<select name="shard_id" id="permission_shard">
+							<option value="-1">All Shards</option>
 							<?php foreach ($shards as $s): ?>
-								<option value="<?php echo (int)$s['ShardId']; ?>"><?php echo h($s['Name']); ?></option>
+								<option value="<?php echo (int)$s['ShardId']; ?>" data-domain="<?php echo (int)$s['domain_id']; ?>"><?php echo h($s['Name']); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</div>
@@ -385,6 +394,25 @@ ob_start();
 					<button type="submit" name="add_permission" class="btn btn-primary btn-sm">Add</button>
 				</div>
 			</form>
+			<script>
+			// offer the shards of the chosen domain only; the server checks it again
+			(function () {
+				var domain = document.getElementById('permission_domain');
+				var shard = document.getElementById('permission_shard');
+				if (!domain || !shard) return;
+				function showShardsOfDomain() {
+					for (var i = 0; i < shard.options.length; i++) {
+						var option = shard.options[i];
+						var show = !option.hasAttribute('data-domain') || option.getAttribute('data-domain') === domain.value;
+						option.hidden = !show;
+						option.disabled = !show;
+					}
+					if (shard.options[shard.selectedIndex].disabled) shard.selectedIndex = 0;
+				}
+				domain.addEventListener('change', showShardsOfDomain);
+				showShardsOfDomain();
+			})();
+			</script>
 		</div>
 		<?php endif; ?>
 	</div>
