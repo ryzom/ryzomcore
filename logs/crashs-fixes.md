@@ -1,5 +1,9 @@
 # Crash fixes
 
+## 2026-11-11 — 🐛 CCharacter3D::createInstance: delete the advantage fx before its parent instance
+
+Crash group `CParticleSystemModel::traverseClip` (3 reports, all in the character selection screen, `globalMenu` -> `CInterface3DScene::draw`). `AdvantageFx` is a Hrc son of the part instance (`parent(_Instances[i])`). `createInstance` deleted the instance first; `~CTransform` then `hrcUnlink`s its sons without relinking them to the scene root, so the fx became an orphan outside the Hrc graph, never refreshed, with a `_AncestorSkeletonModel` that became stale when the skeleton was later deleted by `setSkeleton`. If the new instance was not created (empty name, `none.shape`, failure), the function returned before the old fx was handled. The advantage fx is now deleted before the instance. Cause not proven (no crash log); not compiled or tested.
+
 ## 2026-11-11 — 🐛 XAudio2 voice lifecycle: crash logs for crash group 6524326
 
 Not a fix: debug logging for the `CSourceXAudio2::updateState` crash group (8
