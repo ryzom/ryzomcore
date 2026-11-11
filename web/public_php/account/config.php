@@ -6,6 +6,9 @@
 require_once(dirname(dirname(__FILE__)) . '/config.php');
 // the shared account name rule, enforced wherever an account is created
 require_once(dirname(dirname(__FILE__)) . '/tools/account_name.php');
+// the database connection, the password functions and the account creation
+// that the setup shares with this tool
+require_once(dirname(dirname(__FILE__)) . '/tools/account_common.php');
 
 // NEL shard database (contains `user`, `domain`, `shard`, `permission` tables)
 $nel_db_host = $cfg['db']['shard']['host'];
@@ -20,24 +23,6 @@ $ring_db_port = $cfg['db']['ring']['port'];
 $ring_db_user = $cfg['db']['ring']['user'];
 $ring_db_pass = $cfg['db']['ring']['pass'];
 $ring_db_name = $cfg['db']['ring']['name'];
-
-/**
- * Get a PDO connection to a database.
- */
-function getDatabase($host, $port, $user, $pass, $name)
-{
-	static $connections = array();
-	$key = $host . ':' . $port . '/' . $name;
-	if (!isset($connections[$key])) {
-		$dsn = "mysql:host=$host;port=$port;dbname=$name;charset=utf8mb4";
-		$connections[$key] = new PDO($dsn, $user, $pass, array(
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-			PDO::ATTR_EMULATE_PREPARES => false,
-		));
-	}
-	return $connections[$key];
-}
 
 /**
  * Get a PDO connection to the NEL shard database.
@@ -145,84 +130,6 @@ function connectToRSM($sessionManagerAddress)
 		return false;
 	}
 	return $rsm;
-}
-
-/**
- * Generate a crypt-compatible salt.
- */
-function generateSalt()
-{
-	$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
-	$salt = '$6$';
-	for ($i = 0; $i < 16; $i++) {
-		$salt .= $chars[random_int(0, strlen($chars) - 1)];
-	}
-	$salt .= '$';
-	return $salt;
-}
-
-/** Minimum accepted password length for this tool. */
-function accountPasswordMinLength()
-{
-	return 8;
-}
-
-/** Cap password length to bound crypt()/DoS cost. */
-function accountPasswordMaxLength()
-{
-	return 256;
-}
-
-/**
- * True when a candidate password meets length policy (not complexity).
- */
-function accountPasswordAcceptable($password)
-{
-	if (!is_string($password)) {
-		return false;
-	}
-	$len = strlen($password);
-	return $len >= accountPasswordMinLength() && $len <= accountPasswordMaxLength();
-}
-
-/**
- * Hash a password using crypt().
- */
-function hashPassword($password)
-{
-	return crypt($password, generateSalt());
-}
-
-/**
- * Verify a password against a crypt hash.
- */
-function verifyPassword($password, $hash)
-{
-	$password = (string)$password;
-	$hash = (string)$hash;
-	// An account row with no password must never authenticate, and indexing
-	// an empty string is an error on php 8.
-	if (strlen($hash) < 2) {
-		return false;
-	}
-	// Bound work even on failure paths with absurdly long inputs.
-	if (strlen($password) > accountPasswordMaxLength()) {
-		return false;
-	}
-	if ($hash[0] === '$') {
-		// Modern crypt hash (SHA-256 or SHA-512)
-		$last = strrpos($hash, '$');
-		if ($last === false || $last < 1) {
-			return false;
-		}
-		$salt = substr($hash, 0, $last + 1);
-	} else {
-		// Legacy DES-based crypt
-		$salt = substr($hash, 0, 2);
-	}
-	// Constant time, like the login service does: a plain comparison leaks
-	// where the two values stop matching.
-	return hash_equals($hash, (string)crypt($password, $salt));
 }
 
 /**

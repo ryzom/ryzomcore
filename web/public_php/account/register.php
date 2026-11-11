@@ -24,106 +24,45 @@ if (!$registrationOpen) {
 		$confirm = isset($_POST['confirm']) ? $_POST['confirm'] : '';
 
 	// Validate inputs
-	if ($login === '' || $email === '' || $password === '' || $confirm === '') {
-		$error = 'All fields are required.';
-	} elseif (!nel_account_name_length_ok($login)) {
-		$error = 'Username must be between ' . nel_account_name_min_length()
-			. ' and ' . nel_account_name_max_length() . ' characters.';
-	} elseif (!nel_is_valid_account_name($login)) {
-		$error = 'Username may only contain letters, numbers, and underscores.';
-	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
-		$error = 'Please enter a valid email address.';
-	} elseif (nel_is_account_placeholder_email($email)) {
-		// reserved for the accounts the login scripts create on first login
-		$error = 'This email address cannot be used.';
-	} elseif (!accountPasswordAcceptable($password)) {
-		$error = 'Password must be between ' . accountPasswordMinLength()
-			. ' and ' . accountPasswordMaxLength() . ' characters.';
-	} elseif ($password !== $confirm) {
-		$error = 'Passwords do not match.';
-	} else {
+	$error = accountNewFieldsError($login, $email, $password, $confirm);
+	if ($error === '') {
 		// Count this attempt before the uniqueness probes so enumeration
 		// still burns the rate limit.
 		accountActionRecordFailure('register');
 		try {
 			$db = getNelDatabase();
 
-			// Check if username already exists
-			$stmt = $db->prepare('SELECT UId FROM user WHERE Login = :login');
-			$stmt->execute(array(':login' => $login));
-			if ($stmt->fetch()) {
-				$error = 'This username is already taken.';
+			// Default privileges for self-registration: known codes
+			// only, and never staff ranks (those come from admin).
+			$lowRisk = array_values(array_diff(knownPrivilegeCodes(), highRiskPrivilegeCodes()));
+			$defaultPriv = sanitizePrivilegeString(
+				getSetting('default_privileges', ''),
+				$lowRisk
+			);
+
+			// Default permissions based on domain access setting
+			$accessSetting = getSetting('default_access_domains', 'ds_open');
+
+			// Refuses a taken username or email, else creates the user in
+			// the nel user table with its permissions
+			$created = accountCreate($db, $login, $email, $password, $confirm,
+				$defaultPriv, explode(',', $accessSetting));
+			if ($created['error'] !== '') {
+				$error = $created['error'];
 			} else {
-				// Check if email already exists
-				$stmt = $db->prepare('SELECT UId FROM user WHERE Email = :email');
-				$stmt->execute(array(':email' => $email));
-				if ($stmt->fetch()) {
-					$error = 'This email is already registered.';
-				} else {
-					// Create the user directly in the nel user table
-					$hashedPassword = hashPassword($password);
+				$uid = $created['uid'];
 
-					// Default privileges for self-registration: known codes
-					// only, and never staff ranks (those come from admin).
-					$lowRisk = array_values(array_diff(knownPrivilegeCodes(), highRiskPrivilegeCodes()));
-					$defaultPriv = sanitizePrivilegeString(
-						getSetting('default_privileges', ''),
-						$lowRisk
-					);
-
-					$stmt = $db->prepare('INSERT INTO user (Login, Password, Email, Privilege) VALUES (:login, :pass, :email, :priv)');
-					$stmt->execute(array(
-						':login' => $login,
-						':pass' => $hashedPassword,
-						':email' => $email,
-						':priv' => $defaultPriv,
-					));
-					$uid = (int)$db->lastInsertId();
-
-					// Create default permissions based on domain access setting
-					$accessSetting = getSetting('default_access_domains', 'ds_open');
-					$allowedStatuses = array('ds_open', 'ds_dev', 'ds_restricted', 'ds_close');
-					$accessStatuses = array();
-					foreach (array_map('trim', explode(',', $accessSetting)) as $st) {
-						if (in_array($st, $allowedStatuses, true)) {
-							$accessStatuses[] = $st;
-						}
-					}
-					if (!empty($accessStatuses)) {
-						$domains = $db->query("SELECT domain_id, status FROM domain");
-						foreach ($domains as $domain) {
-							if (in_array($domain['status'], $accessStatuses, true)) {
-								// The login service turns the domain status into the
-								// access privilege it then looks for (ds_dev => DEV),
-								// so a row written as OPEN on a dev domain refuses
-								// the very account it was meant to admit. It is also
-								// a SET column: only its own members may be stored.
-								$accessPriv = strtoupper(substr((string)$domain['status'], 3));
-								if (!in_array($accessPriv, array('OPEN', 'DEV', 'RESTRICTED'), true)) {
-									continue;
-								}
-								$pstmt = $db->prepare('INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES (:uid, :did, :priv)');
-								$pstmt->execute(array(
-									':uid' => $uid,
-									':did' => (int)$domain['domain_id'],
-									':priv' => $accessPriv,
-								));
-							}
-						}
-					}
-
-					// Log the user in immediately
-					accountActionClearFailures('register');
-					session_regenerate_id(true);
-					$_SESSION['account_uid'] = $uid;
-					$_SESSION['account_login'] = $login;
-					$_SESSION['account_email'] = $email;
-					// The session carries the privilege everything else gates
-					// on; leaving the key out is a session in a state no other
-					// entry point produces
-					$_SESSION['account_privilege'] = $defaultPriv;
-					redirect('home');
-				}
+				// Log the user in immediately
+				accountActionClearFailures('register');
+				session_regenerate_id(true);
+				$_SESSION['account_uid'] = $uid;
+				$_SESSION['account_login'] = $login;
+				$_SESSION['account_email'] = $email;
+				// The session carries the privilege everything else gates
+				// on; leaving the key out is a session in a state no other
+				// entry point produces
+				$_SESSION['account_privilege'] = $defaultPriv;
+				redirect('home');
 			}
 		} catch (PDOException $e) {
 			$error = 'Registration failed. Please try again later.';
