@@ -13,3 +13,8 @@ Temporary logs added to investigate a crash report use the `nlcrashdbg` macro (`
 
 - Add: `nlcrashdbg(6539800, "SubmitSourceBuffer hr=0x%08x", (unsigned int)hr);`
 - Remove all of them once the crash is fixed: `grep -rn nlcrashdbg` and delete the lines.
+
+## Privacy (GDPR)
+
+- Only the `CRASHDBG #<id>` lines of `client.log` are sent with a crash report, never the whole log (the user did not consent to send it).
+- So a `nlcrashdbg` line must never contain personal data: no character or account name or id, no IP address, no chat text, no path that holds a user name. Pointers, sizes, formats, codes, flags and thread ids are fine.
