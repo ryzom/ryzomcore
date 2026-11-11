@@ -456,6 +456,7 @@ function run_install($opts)
 		cli_err("Cannot write config.php");
 		exit(1);
 	}
+	forget_cached_script('config.php');
 	cli_ok("Generated config.php");
 
 	// Copy config_user.php
@@ -610,6 +611,7 @@ function run_upgrade()
 			$continue = false;
 		} else {
 			if (file_put_contents('config.php', $config)) {
+				forget_cached_script('config.php');
 				cli_ok("Updated config.php to version $NEL_SETUP_VERSION");
 			} else {
 				cli_err("Cannot write config.php");
@@ -630,6 +632,10 @@ function run_upgrade()
 	echo "\n";
 	if ($continue) {
 		cli_ok("Upgrade complete!");
+		// this process cannot reach the opcode cache of the web server
+		echo "       If the site still answers that an upgrade is pending, the web server is serving\n";
+		echo "       the previous config.php from its opcode cache: it picks the new one up after its\n";
+		echo "       revalidation interval, or after a reload when it does not check timestamps.\n";
 	} else {
 		cli_err("Upgrade completed with errors.");
 		exit(1);

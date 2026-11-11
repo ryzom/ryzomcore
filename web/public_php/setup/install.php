@@ -216,6 +216,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		} else {
 			if (file_put_contents("config.php", $config)) {
 				$configWritten = true;
+				forget_cached_script("config.php");
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");

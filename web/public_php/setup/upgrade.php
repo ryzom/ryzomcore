@@ -10,17 +10,38 @@ try {
 $pageTitle = "Upgrade";
 include('header.php');
 
+// Read config.php as it is on disk: right after an upgrade the opcode cache
+// may still hold the copy from before it, and this page would take the
+// installation for one that still has to be upgraded.
+require_once('config_generation.php');
+forget_cached_script('config.php');
 require_once('config.php');
 require_once('setup/version.php');
 if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 	$NEL_SETUP_VERSION_CONFIGURED = 1;
 }
+$upToDate = ($NEL_SETUP_VERSION_CONFIGURED >= $NEL_SETUP_VERSION);
 
 ?>
 
 			<div style="margin-left: auto; margin-right: auto; max-width: 1024px;">
 
-<?php if ($_POST) { ?>
+<?php if ($upToDate) { ?>
+
+<?php
+
+	// Nothing to do, and nothing is run: not the database steps, and
+	// config.php is not written again.
+	printalert("info", "This installation is up to date, at setup version " . (int)$NEL_SETUP_VERSION_CONFIGURED . "."
+		. ($_POST ? " The upgrade was not run again." : ""));
+
+?>
+
+				<p>
+					<a class="btn btn-primary" href="index.php">Continue</a>
+				</p>
+
+<?php } else if ($_POST) { ?>
 
 <?php
 
@@ -52,6 +73,7 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 			$continue = false;
 		} else {
 			if (file_put_contents("config.php", $config)) {
+				forget_cached_script("config.php");
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");

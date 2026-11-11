@@ -8,6 +8,27 @@
  */
 
 /**
+ * Drop a script from PHP's opcode cache, for a file that was just written.
+ *
+ * The cache can go on serving the compiled copy of the previous file: for
+ * its revalidation interval, or until the server is restarted when timestamp
+ * validation is off. With config.php that means the old setup version, so a
+ * site that was just upgraded still answers "maintenance pending". This only
+ * reaches the cache of the server that runs it: a command line run has a
+ * cache of its own and cannot clear the web server's.
+ *
+ * @param string $path   Path of the file that was written.
+ */
+function forget_cached_script($path) {
+	if (function_exists('opcache_invalidate')) {
+		$resolved = realpath($path);
+		// answers false, with a warning, when opcache.restrict_api keeps
+		// this script away from the cache: nothing more can be done from here
+		@opcache_invalidate($resolved !== false ? $resolved : $path, true);
+	}
+}
+
+/**
  * Apply a set of values to the config.php template using str_replace.
  *
  * @param string $template   The raw config.php template content.
