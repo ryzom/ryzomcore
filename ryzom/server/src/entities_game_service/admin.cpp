@@ -47,7 +47,9 @@
 #include "nel/net/admin.h"
 #include "nel/net/service.h"
 
+#ifdef RYZOM_FORGE
 #include "nel/web/http_post_task.h"
+#endif
 
 #include "game_share/scores.h"
 #include "game_share/send_chat.h"
@@ -137,7 +139,9 @@ extern NLMISC::CVariable<uint32> FixedSessionId;
 
 using namespace NLMISC;
 using namespace NLNET;
+#ifdef RYZOM_FORGE
 using namespace NLWEB;
+#endif
 using namespace std;
 
 extern CVariable<string>	BannerPriv;
@@ -3009,6 +3013,10 @@ NLMISC_DYNVARIABLE (uint32, RyzomDate, "Current ryzom date")
 //
 //
 //
+// Posting a record of each audited admin command to a web page, only with RYZOM_FORGE. Without it the
+// commands are written to the service log, where the ones flagged 'audit' in the privileges file are marked.
+#ifdef RYZOM_FORGE
+
 // One audit record on its way to the audit page: the thread that posts it and its task
 struct CAuditPost
 {
@@ -3098,6 +3106,8 @@ void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &
 	post.Thread->start();
 	s_AuditPosts.push_back(post);
 }
+
+#endif // RYZOM_FORGE
 
 // Number of commands NLMISC::ICommand::execute() would run for this line, following its parser: a ';' outside
 // quotes separates two commands, '\' escapes the next character and a '"' only opens a quoted argument at the
@@ -3252,8 +3262,10 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 			if (onTarget)
 				forwardTargetName = NLMISC::toString("(%s,%s)", c->getTarget().toString().c_str(), CEntityIdTranslator::getInstance()->getByEntity(c->getTarget()).toString().c_str());
 			std::string forwardName = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
-			nlinfo("ADMIN: Player (%s,%s) forwards client admin command '%s %s' to '%s' on target %s", eid.toString().c_str(), forwardName.c_str(), cmdName.c_str(), arg.c_str(), cmd->ForwardToservice.c_str(), forwardTargetName.c_str());
+			nlinfo("ADMIN: Player (%s,%s) forwards client admin command '%s %s' to '%s' on target %s%s", eid.toString().c_str(), forwardName.c_str(), cmdName.c_str(), arg.c_str(), cmd->ForwardToservice.c_str(), forwardTargetName.c_str(), cmd->Audit ? " [audit]" : "");
+#ifdef RYZOM_FORGE
 			audit(cmd, cmdName + " " + arg, eid, forwardName, forwardTargetName);
+#endif
 
 			IClientCommandForwader::getInstance()->sendCommand(cmd->ForwardToservice, cmdName, eid, onTarget, onTarget ? c->getTarget() : CEntityId::Unknown, arg);
 		}
@@ -3312,9 +3324,11 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 			strFindReplace(res, "#target", c->getTarget().toString().c_str());
 			strFindReplace(res, "#gtarget", string("#"+c->getTarget().toString()).c_str());
 		}
-		nlinfo ("ADMIN: Player (%s,%s) will execute client admin command '%s' on target %s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str());
+		nlinfo ("ADMIN: Player (%s,%s) will execute client admin command '%s' on target %s%s", eid.toString().c_str(), csName.c_str(), res.c_str(), targetName.c_str(), cmd->Audit ? " [audit]" : "");
 
+#ifdef RYZOM_FORGE
 		audit(cmd, res, eid, csName, targetName);
+#endif
 
 		CLightMemDisplayer *CmdDisplayer = new CLightMemDisplayer("CmdDisplayer");
 		CLog *CmdLogger = new CLog( CLog::LOG_NO );

@@ -108,10 +108,14 @@ TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 						Ryzom::gameplaymodule
 						NeL::misc
 						NeL::net
-						NeL::web
 						NeL::georges
 						NeL::ligo
 )
+
+# only the code guarded by RYZOM_FORGE makes web requests (the admin command audit post)
+IF(WITH_RYZOM_FORGE)
+	TARGET_LINK_LIBRARIES(ryzom_entities_game_service PRIVATE NeL::web)
+ENDIF()
 
 NL_DEFAULT_PROPS(ryzom_entities_game_service "Ryzom, Services: Entities Game Service (EGS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)

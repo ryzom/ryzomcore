@@ -139,6 +139,13 @@ IF(WITH_RYZOM_LIVE)
 ENDIF()
 
 #-----------------------------------------------------------------------------
+# code guarded by RYZOM_FORGE
+IF(WITH_RYZOM_FORGE)
+  MESSAGE("Building the code guarded by RYZOM_FORGE")
+  ADD_DEFINITIONS(-DRYZOM_FORGE)
+ENDIF()
+
+#-----------------------------------------------------------------------------
 #Platform specifics
 
 SETUP_EXTERNAL()

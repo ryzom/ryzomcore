@@ -1865,8 +1865,10 @@ void CPlayerService::release()
 	if (!packingSheets) CStatDB::getInstance()->saveAll();
 	if (!packingSheets) COutpostManager::getInstance().saveAll();
 
+#ifdef RYZOM_FORGE
 	// wait for the admin command audit records that are still being posted
 	releaseAdmin();
+#endif
 
 	CSingletonRegistry::getInstance()->release();
 
