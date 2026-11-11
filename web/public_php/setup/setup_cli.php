@@ -91,7 +91,9 @@ chdir($publicPhpDir);
 // Define printalert for CLI mode (used by database.php and header.php functions)
 function printalert($type, $message)
 {
-	$message = strip_tags($message);
+	// the messages are written for the web page: take the markup out, then
+	// turn the entities back into the characters they stand for
+	$message = html_entity_decode(strip_tags($message), ENT_QUOTES, 'UTF-8');
 	switch ($type) {
 		case 'success': cli_ok($message); break;
 		case 'danger': cli_err($message); break;
