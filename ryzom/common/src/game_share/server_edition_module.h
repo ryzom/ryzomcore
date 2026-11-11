@@ -481,6 +481,16 @@ namespace R2
 		// true if the character is an animator or the outland owner of the session it is connected to, or an editor
 		// of an edition session (sessionId and role receive that session and the role of the character in it)
 		virtual bool isCharAnimator(TCharId charId, TSessionId &sessionId, TUserRole &role) const NL_OVERRIDE;
+		// true if the character may use the animator and DM functions (isCharAnimator) of the session that its
+		// requests act on; if not, logs the refusal of the operation named
+		bool isAnimator(TCharId charId, const char *operation) const;
+		// true if the character may change, start and stop the scenario of the session that its requests act on: the
+		// characters isCharAnimator accepts, and the owner of an animation session, who uploads its scenario and starts
+		// it whatever its role; if not, logs the refusal of the operation named
+		bool isAuthor(TCharId charId, const char *operation) const;
+		// true if the sender may send the parts of a multi-part message for the character: a client only sends its
+		// own; if not, logs the refusal of the operation named
+		bool isMultiPartSender(NLNET::IModuleProxy *sender, TCharId charId, const char *operation) const;
 
 		// get the session that is about to be joined by a client, or NULL if not found
 		TPioneersSessionsAllowed * getSessionAllowedForChar(TCharId charId) const NL_OVERRIDE;

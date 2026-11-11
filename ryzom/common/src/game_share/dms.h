@@ -190,6 +190,15 @@ namespace R2
 	// get the security info of the module and verify that the su has allowed the client to connect to the dss
 	bool checkSecurityInfo(NLNET::IModuleProxy *senderModuleProxy, uint32 & charId, NLMISC::CEntityId & clientEid, std::string & userPriv, std::string &extendedPriv);
 
+	// true if the module is one of a game client: the frontend attaches the client info to every module of its clients,
+	// and a client can neither set nor remove it. Always false when there is no network (the DSS runs inside the
+	// client and all the modules are in one process).
+	bool isClientModule(NLNET::IModuleProxy *moduleProxy);
+
+	// true if what the module sends comes from a game client: the module is one of a client, or it is the session
+	// browser server, which forwards the messages that its clients give it. Always false when there is no network.
+	bool isClientSender(NLNET::IModuleProxy *moduleProxy);
+
 } // namespace R2
 
 #endif //R2_DMS_H

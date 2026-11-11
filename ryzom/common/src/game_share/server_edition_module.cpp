@@ -1229,6 +1229,16 @@ void CServerEditionModule::simulateSU(CEntityId clientEid)
 void CServerEditionModule::onModuleUp(NLNET::IModuleProxy *senderModuleProxy)
 {
 	const std::string &moduleName = senderModuleProxy->getModuleClassName();
+
+	// The modules of the services are known by the class name they declare. A module of a game client declares the
+	// class it wants: it is only taken as a client edition module, never as one of the service modules below.
+	if (moduleName != "ClientEditionModule" && isClientModule(senderModuleProxy))
+	{
+		nlwarning("R2Ed: the client module '%s' declares the class '%s', it is not taken as a module of a service",
+			senderModuleProxy->getModuleName().c_str(), moduleName.c_str());
+		return;
+	}
+
 	if (moduleName == "RingSessionManager")
 	{
 		nlassert(_SessionManager == nullptr);
@@ -1535,6 +1545,8 @@ void CServerEditionModule::onModuleDown(NLNET::IModuleProxy *moduleProxy)
 {
 	std::string moduleName = moduleProxy->getModuleClassName();
 
+	// A service module is only forgotten when the module that goes down is the one that was stored: any module can
+	// declare its class name.
 	if (moduleName == "RingSessionManager")
 	{
 		if (_SessionManager == moduleProxy)
@@ -1542,19 +1554,23 @@ void CServerEditionModule::onModuleDown(NLNET::IModuleProxy *moduleProxy)
 	}
 	else if (moduleName == "ServerAnimationModule")
 	{
-		_ServerAnimationProxy = nullptr;
+		if (_ServerAnimationProxy == moduleProxy)
+			_ServerAnimationProxy = nullptr;
 	}
 	else if (moduleName== "ServerAdminModule")
 	{
-		_ServerAdminProxy = nullptr;
+		if (_ServerAdminProxy == moduleProxy)
+			_ServerAdminProxy = nullptr;
 	}
 	else if (moduleName == "CharacterControl")
 	{
-		_CharacterControlProxy = nullptr;
+		if (_CharacterControlProxy == moduleProxy)
+			_CharacterControlProxy = nullptr;
 	}
 	else if (moduleName == "SessionBackupModule")
 	{
-		_R2SessionBackupModule = nullptr;
+		if (_R2SessionBackupModule == moduleProxy)
+			_R2SessionBackupModule = nullptr;
 	}
 	else if (moduleProxy == _IOSRingProxy)
 	{
@@ -1639,6 +1655,8 @@ void CServerEditionModule::rtScenarioUpdateRequested(NLNET::IModuleProxy *sender
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
 
+	if (!isAuthor(charId, "requestUpdateRtScenario")) { return; }
+
 	CScenario* scenario = getScenarioByCharId(charId);
 	if (!scenario)
 	{
@@ -1652,6 +1670,7 @@ void CServerEditionModule::rtScenarioUpdateRequested(NLNET::IModuleProxy *sender
 
 void CServerEditionModule::onMessageReceivedCreatePrimitives(NLNET::IModuleProxy *senderModuleProxy, TCharId charId)
 {
+	if (!isAuthor(charId, "DBG_CREATE_PRIMITIVES")) { return; }
 
 	CScenario* scenario = getScenarioByCharId(charId);
 	if (!scenario)
@@ -1709,6 +1728,9 @@ void CServerEditionModule::stopTest(TSessionId sessionId)
 
 void CServerEditionModule::stopTestRequested(NLNET::IModuleProxy *senderModuleProxy, TCharId charId)
 {
+	// The test of an edition session is stopped by its editors (the animators of an animation session can stop
+	// their animation as well; its players cannot)
+	if (!isAnimator(charId, "STOP_TEST")) { return; }
 
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	stopTest(sessionId);
@@ -2134,6 +2156,11 @@ void CServerEditionModule::onScenarioUploadAsked(NLNET::IModuleProxy *senderModu
 	if (!ok) { return; }
 	CShareClientEditionItfProxy sender(senderModuleProxy);
 
+	if (!isAuthor(charId, "onScenarioUploadAsked"))
+	{
+		sender.ackMsg(this, msgId, false);
+		return;
+	}
 
 	CScenario* scenario = getScenarioByCharId(charId);
 	if (!scenario)
@@ -2212,6 +2239,11 @@ void CServerEditionModule::onNodeInsertAsked(NLNET::IModuleProxy *senderModulePr
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	CEditionSession* session = getSession(sessionId) ;
 	CShareClientEditionItfProxy sender(senderModuleProxy);
+	if (!isAuthor(charId, "onNodeInsertAsked"))
+	{
+		sender.ackMsg(this, messageId, false);
+		return;
+	}
 	if (!session)
 	{
 		nlwarning("R2Ed: char %u insert node an empty scenario %u", charId, sessionId.asInt());
@@ -2259,6 +2291,11 @@ void CServerEditionModule::onNodeSetAsked(NLNET::IModuleProxy *senderModuleProxy
 	CEditionSession* session = getSession(sessionId);
 	CScenario* scenario = session ? session->getScenario() : nullptr;
 	CShareClientEditionItfProxy sender(senderModuleProxy);
+	if (!isAuthor(charId, "onNodeSetAsked"))
+	{
+		sender.ackMsg(this, messageId, false);
+		return;
+	}
 	if (!session)
 	{
 		nlwarning("R2Ed: char %u insert node an empty session %u", charId, sessionId.asInt());
@@ -2300,6 +2337,11 @@ void CServerEditionModule::onNodeEraseAsked(NLNET::IModuleProxy *senderModulePro
 	CEditionSession* session = getSession(sessionId);
 
 	CShareClientEditionItfProxy sender(senderModuleProxy);
+	if (!isAuthor(charId, "onNodeEraseAsked"))
+	{
+		sender.ackMsg(this, messageId, false);
+		return;
+	}
 	if (!session)
 	{
 		nlwarning("R2Ed: char %u insert node an empty scenario %u", charId, sessionId.asInt());
@@ -2341,6 +2383,11 @@ void CServerEditionModule::onNodeMoveAsked(NLNET::IModuleProxy *senderModuleProx
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	CEditionSession* session = getSession(sessionId);
 	CShareClientEditionItfProxy sender(senderModuleProxy);
+	if (!isAuthor(charId, "onNodeMoveAsked"))
+	{
+		sender.ackMsg(this, messageId, false);
+		return;
+	}
 	if (!session)
 	{
 		nlwarning("R2Ed: char %u move node an empty scenario %u", charId, sessionId.asInt());
@@ -2553,6 +2600,27 @@ bool CServerEditionModule::onProcessModuleMessage(NLNET::IModuleProxy *senderMod
 		}
 	}
 
+	// What comes from a game client is only given to the interface for the clients. The other interface of this
+	// module is for the session manager: returning false here would hand the message to its skeleton, which calls
+	// the handler of a message whoever sent it.
+	if (isClientSender(senderModuleProxy))
+	{
+		// The handlers answer through the interface of the client edition module, which only takes a module of
+		// that class: a client module of another class is refused. The session browser server carries no client
+		// info: from it, the handlers only take the parts of a multi-part message.
+		bool handled = false;
+		if (!isClientModule(senderModuleProxy) || senderModuleProxy->getModuleClassName() == "ClientEditionModule")
+		{
+			handled = CShareServerEditionItfSkel::fwdOnProcessModuleMessage(senderModuleProxy, message);
+		}
+		if (!handled)
+		{
+			nlwarning("R2Ed: the module '%s' (class '%s') sent the message '%s', which it cannot send to the interface for the clients, message refused",
+				senderModuleProxy->getModuleName().c_str(), senderModuleProxy->getModuleClassName().c_str(), operationName.c_str());
+		}
+		return true;
+	}
+
 	return false;
 }
 
@@ -2628,6 +2696,70 @@ bool CServerEditionModule::isCharAnimator(TCharId charId, TSessionId &sessionId,
 
 	// The editors of an edition session animate their scenario while they test it
 	return role == TUserRole::ur_editor && session->getSessionType() == RSMGR::TSessionType::st_edit;
+}
+
+bool CServerEditionModule::isAnimator(TCharId charId, const char *operation) const
+{
+	TSessionId sessionId;
+	TUserRole role;
+	bool allowed = isCharAnimator(charId, sessionId, role);
+
+	// The handlers act on the session that getSessionIdByCharId names (the one the character was last allowed into),
+	// so the role only counts if that is the session the character is connected to
+	TSessionId requestSessionId = getSessionIdByCharId(charId);
+	if (requestSessionId != sessionId) { allowed = false; }
+
+	if (!allowed)
+	{
+		nlwarning("R2Ed: char %u (role '%s' in session %u, request for session %u) is not allowed to use '%s', request refused",
+			charId, role.toString().c_str(), sessionId.asInt(), requestSessionId.asInt(), operation);
+	}
+	return allowed;
+}
+
+bool CServerEditionModule::isAuthor(TCharId charId, const char *operation) const
+{
+	TSessionId sessionId;
+	TUserRole role;
+	bool allowed = isCharAnimator(charId, sessionId, role);
+
+	// The owner of an animation session uploads its scenario and starts it. It is connected as an animator, or as a
+	// player when the scenario runs without a game master.
+	if (!allowed && role != TUserRole::invalid)
+	{
+		CEditionSession *session = getSession(sessionId);
+		allowed = session
+			&& session->getSessionType() == RSMGR::TSessionType::st_anim
+			&& session->getOwnerCharId() == charId;
+	}
+
+	// As in isAnimator, the role only counts for the session the handlers act on
+	TSessionId requestSessionId = getSessionIdByCharId(charId);
+	if (requestSessionId != sessionId) { allowed = false; }
+
+	if (!allowed)
+	{
+		nlwarning("R2Ed: char %u (role '%s' in session %u, request for session %u) is not allowed to use '%s', request refused",
+			charId, role.toString().c_str(), sessionId.asInt(), requestSessionId.asInt(), operation);
+	}
+	return allowed;
+}
+
+bool CServerEditionModule::isMultiPartSender(NLNET::IModuleProxy *sender, TCharId charId, const char *operation) const
+{
+	// The complete message is given to the handlers as sent by the character that its parts name. The session browser
+	// server only forwards the parts of the character it has authenticated; a client module sends its own.
+	if (!isClientModule(sender)) { return true; }
+
+	TCharId senderCharId = 0;
+	CEntityId senderEid;
+	std::string userPriv;
+	std::string extendedPriv;
+	if (getCharInfo(sender, senderCharId, senderEid, userPriv, extendedPriv) && senderCharId == charId) { return true; }
+
+	nlwarning("R2Ed: the client module '%s' (char %u) sent '%s' for char %u, message refused",
+		sender->getModuleName().c_str(), senderCharId, operation, charId);
+	return false;
 }
 
 
@@ -3606,7 +3738,26 @@ void CServerEditionModule::characterUnkicked(NLNET::IModuleProxy *sender, TSessi
 // Session manager report that a character has been kicked by the web
 void CServerEditionModule::teleportOneCharacterToAnother(NLNET::IModuleProxy *sender, TSessionId sessionId, TCharId source, TCharId dest)
 {
-	// sender is SU
+	// The message is in the interface of the session manager and, with the same name, in the interface for the
+	// clients. A client only teleports its own character, to a character of the session it animates.
+	if (sender && isClientSender(sender))
+	{
+		TCharId charId;
+		CEntityId clientEid;
+		std::string userPriv;
+		std::string extendedPriv;
+
+		if (!checkSecurityInfo(sender, charId, clientEid, userPriv, extendedPriv)) { return; }
+
+		if (!isAnimator(charId, "teleportOneCharacterToAnother")) { return; }
+
+		if (source != charId || sessionId != getSessionIdByCharId(charId))
+		{
+			nlwarning("R2Ed: char %u (connected to session %u) asked to teleport char %u to char %u in session %u, request refused",
+				charId, getSessionIdByCharId(charId).asInt(), source, dest, sessionId.asInt());
+			return;
+		}
+	}
 
 	std::string msg;
 	bool ok = teleportOneCharacterToAnotherImpl(sessionId, source, dest, msg);
@@ -3774,6 +3925,7 @@ void CServerEditionModule::startingScenario(NLNET::IModuleProxy *senderModulePro
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
 
+	if (!isAuthor(charId, "startingScenario")) { return; }
 
 	CEditionSession* session = getSessionByCharId(charId);
 	if (!session)
@@ -3803,6 +3955,9 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 		return;
 	}
 
+	// A scenario is started by the editors of an edition session, and in an animation session by its owner, who
+	// uploads it (as a player when the scenario runs without a game master), or by an animator
+	if (!isAuthor(charId, "startScenario")) { return; }
 
 	if (ok)
 	{
@@ -5711,6 +5866,10 @@ void CServerEditionModule::onTpPositionAsked( NLNET::IModuleProxy *senderModuleP
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
 
+	// The teleport to a position chosen on the map is a tool of the editors and of the animators. The players of an
+	// animation session are only teleported by the server (entry points, respawn).
+	if (!isAnimator(charId, "onTpPositionAsked")) { return; }
+
 	uint8 season;
 	TSessionId sessionId = this->_Server->getEditionModule()->getSessionIdByCharId(charId);
 	//TSessionId sessionId = this->getSessionIdByCharId(charId);
@@ -5768,6 +5927,7 @@ void CServerEditionModule::setStartingAct(NLNET::IModuleProxy *senderModuleProxy
 
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
+	if (!isAuthor(charId, "setStartingAct")) { return; }
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	if (sessionId.asInt()==0) { return ;}
 	CScenario* scenario = getScenarioById(sessionId);
@@ -5833,6 +5993,8 @@ void CServerEditionModule::onScenarioRingAccessUpdated(NLNET::IModuleProxy *send
 
 	if (! checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv) ) { return; }
 
+	// The ring access a scenario needs is reported by the clients that edit or upload it
+	if (!isAuthor(charId, "onScenarioRingAccessUpdated")) { return; }
 
 	TSessionId sessionId = getSessionIdByCharId(charId);
 	CEditionSession* session = getSession(sessionId);
@@ -6166,6 +6328,8 @@ void CServerEditionModule::teleportWhileUploadingScenario(NLNET::IModuleProxy *s
 	bool ok = checkSecurityInfo(sender, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
 
+	// This teleports every character of the session
+	if (!isAuthor(charId, "teleportWhileUploadingScenario")) { return; }
 
 	TSessionId  sessionId =  getSessionIdByCharId(charId);
 	CEditionSession* session = getSession(sessionId);
@@ -6358,6 +6522,7 @@ CServerEditionModule::CPioneerInfo* CServerEditionModule::getPioneerInfo(TCharId
 void CServerEditionModule::multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 charId, const std::string &msgName, uint32 nbPacket, uint32 size)
 {
 	nldebug(" Received a multi-part message %s (Start, part=%u, size=%u)", msgName.c_str(), nbPacket, size);
+	if (!isMultiPartSender(sbs, charId, "multiPartMsgHead")) { return; }
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
 	if (info->WaitingMsg)
@@ -6385,6 +6550,7 @@ void CServerEditionModule::multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 cha
 void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 charId, uint32 partId, const std::vector<uint8> &data)
 {
 	nldebug("Received a multi-part message from %u (Body, part=%u, size=%u)", charId, partId, data.size());
+	if (!isMultiPartSender(sbs, charId, "multiPartMsgBody")) { return; }
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
 
@@ -6406,6 +6572,7 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 void CServerEditionModule::multiPartMsgFoot(NLNET::IModuleProxy *sbs, uint32 charId)
 {
 	nldebug("Received a multi-part message from  %u (End)", charId);
+	if (!isMultiPartSender(sbs, charId, "multiPartMsgFoot")) { return; }
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
 

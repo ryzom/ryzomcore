@@ -1257,11 +1257,44 @@ public:
 
 
 
+	// Read the character that a part of a multi-part message for the DSS is for (its first field).
+	// Returns false if the message is not such a part.
+	static bool readMultiPartCharId(const NLNET::CMessage &msg, uint32 &msgCharId)
+	{
+		std::string name = msg.getName();
+		if (name != "DSS_HEAD" && name != "DSS_MSG" && name != "DSS_FOOT")
+			return false;
+
+		NLNET::CMessage body(msg);
+		if (!body.isReading())
+			body.invert();
+		try
+		{
+			body.serial(msgCharId);
+		}
+		catch (const NLMISC::EStream &)
+		{
+			return false;
+		}
+		return true;
+	}
+
 	// Send the Footer message of a multi-part message that will be forwarded to DSS via sbs
 	void on_forwardToDss(NLNET::TSockId from, uint32 charId, const NLNET::CMessage& msg)
 	{		
 		CHECK_AUTH_WITH_CHARID(from, charId);
 		BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);	
+
+		// The edition module takes the character of a multi-part message from the message itself, and gives the
+		// complete message to its handlers as sent by that character. Only the parts of a multi-part message are
+		// forwarded, and only for the character this connection is authenticated for.
+		uint32 msgCharId = 0;
+		if (!readMultiPartCharId(msg, msgCharId) || msgCharId != charId)
+		{
+			nlwarning("forwardToDss: %s (char %u) sent the message '%s' for char %u, only the parts of its own multi-part messages are forwarded, message refused",
+				from->getTcpSock()->remoteAddr().asString().c_str(), charId, msg.getName().c_str(), msgCharId);
+			return;
+		}
 
 		NLNET::CMessage message(msg);		
 		/*

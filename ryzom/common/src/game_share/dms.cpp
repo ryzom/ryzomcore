@@ -253,6 +253,23 @@ namespace R2
 	}
 
 
+	bool isClientModule(NLNET::IModuleProxy *moduleProxy)
+	{
+		if (!CDynamicMapService::getInstance()->useNetwork()) { return false; }
+
+		return moduleProxy->findSecurityData(rmst_client_info) != nullptr;
+	}
+
+
+	bool isClientSender(NLNET::IModuleProxy *moduleProxy)
+	{
+		if (!CDynamicMapService::getInstance()->useNetwork()) { return false; }
+
+		return moduleProxy->findSecurityData(rmst_client_info) != nullptr
+			|| moduleProxy->getModuleClassName() == "SessionBrowserServerMod";
+	}
+
+
 } // namespace R2
 
 

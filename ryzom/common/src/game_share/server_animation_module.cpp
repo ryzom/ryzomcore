@@ -2206,6 +2206,15 @@ void CServerAnimationModule::onModuleUp(NLNET::IModuleProxy *senderModuleProxy)
 	std::string moduleName = senderModuleProxy->getModuleClassName();
 	// send back a message to the client to open the firewall
 
+	// The modules of the services are known by the class name they declare. A module of a game client declares the
+	// class it wants: it is never taken as one of the service modules below.
+	if (moduleName != "ClientEditionModule" && isClientModule(senderModuleProxy))
+	{
+		nlwarning("R2An: the client module '%s' declares the class '%s', it is not taken as a module of a service",
+			senderModuleProxy->getModuleName().c_str(), moduleName.c_str());
+		return;
+	}
+
 	if ( moduleName == "StringManagerModule")
 	{
 		_StringManagerProxy = senderModuleProxy;
@@ -2226,14 +2235,20 @@ void  CServerAnimationModule::onModuleDown(NLNET::IModuleProxy *senderModuleProx
 {
 	std::string moduleName = senderModuleProxy->getModuleClassName();
 
+	// A service module is only forgotten when the module that goes down is the one that was stored: any module can
+	// declare its class name.
 	if ( moduleName == "StringManagerModule")
 	{
-		_StringManagerProxy = nullptr;
-		nlinfo("StringManagerModule disconnected!");
+		if (_StringManagerProxy == senderModuleProxy)
+		{
+			_StringManagerProxy = nullptr;
+			nlinfo("StringManagerModule disconnected!");
+		}
 	}
 	else if ( moduleName == "CharacterControl")
 	{
-		_CharacterControlProxy = nullptr;
+		if (_CharacterControlProxy == senderModuleProxy)
+			_CharacterControlProxy = nullptr;
 	}
 	else if ( moduleName == "ClientEditionModule") // a client has disconnected
 	{
@@ -2492,8 +2507,9 @@ void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 			if (previousCharSessionId != sessionId)
 			{
 
+				// the previous session can be gone, or still be in the queue of the sessions to start
 				CAnimationSession* previousSession = getSession(previousCharSessionId);
-				if (previousSession != session)
+				if (previousSession && previousSession != session)
 				{
 					std::vector<uint32> & chars = previousSession->ConnectedChars;
 					chars.erase(std::remove(chars.begin(), chars.end(), charId ), chars.end());
@@ -3042,22 +3058,9 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 	std::vector<std::string> args(param);
 	TCharId charId = static_cast<TCharId>(eid.getShortId());
 
-	// This is the answer of the EGS to onDssTarget. It names the character it acts for, so it is not taken from a
-	// client (a module that carries the security data of a client), and the character named must be an animator
-	// like the one onDssTarget accepts.
-	if (senderModuleProxy)
-	{
-		uint32 senderCharId;
-		NLMISC::CEntityId senderEid;
-		std::string userPriv;
-		std::string extendedPriv;
-		if (getCharInfo(senderModuleProxy, senderCharId, senderEid, userPriv, extendedPriv))
-		{
-			nlwarning("R2An: the client module '%s' (char %u) sent onCharTargetReceived for char %u, request refused",
-				senderModuleProxy->getModuleName().c_str(), senderCharId, charId);
-			return;
-		}
-	}
+	// This is the answer of the EGS to onDssTarget. It names the character it acts for: it is never taken from a
+	// client (onProcessModuleMessage keeps the messages of the clients away from this interface), and the character
+	// named must be an animator like the one onDssTarget accepts.
 	if (!isAnimator(charId, "onCharTargetReceived")) { return; }
 
 	const NLNET::TModuleProxyPtr * foundModule = getEditionModule()->getClientProxyPtr(charId);
@@ -3078,7 +3081,9 @@ void CServerAnimationModule::onCharTargetReceived( NLNET::IModuleProxy *senderMo
 
 	TSessionId sessionId = charSessionFound->second;
 
+	// a session that is still in the queue of the sessions to start has its characters, but is not found yet
 	CAnimationSession* session = getSession(sessionId);
+	DROP_IF(!session, NLMISC::toString("Session %u of Char %u is not started yet", sessionId.asInt(), charId), return);
 	DROP_IF(session->Acts.empty() , NLMISC::toString("Invalid Session %u for Char %u (No act available)",charSessionFound->second.asInt(),  charId), return);
 
 
@@ -3613,7 +3618,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 		}
 
 	}
-	else if (senderModuleProxy->getModuleClassName() == "ServerEditionModule")
+	else if (senderModuleProxy->getModuleClassName() == "ServerEditionModule" && !isClientSender(senderModuleProxy))
 	{
 
 		if (operationName == "DBG_CREATE_PRIMITIVES")
@@ -3634,6 +3639,27 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 			return true;
 		}
 	}
+
+	// What comes from a game client is only given to the interface for the clients. The other interface of this
+	// module is for the services (EGS, AIS): returning false here would hand the message to its skeleton, which
+	// calls the handler of a message whoever sent it.
+	if (isClientSender(senderModuleProxy))
+	{
+		// The handlers answer through the interface of the client edition module, which only takes a module of
+		// that class: a client module of another class is refused
+		bool handled = false;
+		if (senderModuleProxy->getModuleClassName() == "ClientEditionModule")
+		{
+			handled = CShareServerAnimationItfSkel::fwdOnProcessModuleMessage(senderModuleProxy, msgin);
+		}
+		if (!handled)
+		{
+			nlwarning("R2An: the module '%s' (class '%s') sent the message '%s', which it cannot send to the interface for the clients, message refused",
+				senderModuleProxy->getModuleName().c_str(), senderModuleProxy->getModuleClassName().c_str(), operationName.c_str());
+		}
+		return true;
+	}
+
 	return false;
 }
 

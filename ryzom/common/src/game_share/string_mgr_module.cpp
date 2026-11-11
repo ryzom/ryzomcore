@@ -199,6 +199,16 @@ bool CStringManagerModule::onProcessModuleMessage(NLNET::IModuleProxy *senderMod
 	nlassert(message.isReading());
 
 	std::string operationName = message.getName();
+
+	// This module has no message for the game clients: its messages come from the animation module, which checks
+	// and forwards what the clients ask
+	if (senderModuleProxy && isClientSender(senderModuleProxy))
+	{
+		nlwarning("R2Str: the module '%s' (class '%s') sent the message '%s', this module takes no message from a client, message refused",
+			senderModuleProxy->getModuleName().c_str(), senderModuleProxy->getModuleClassName().c_str(), operationName.c_str());
+		return true;
+	}
+
 	if(operationName == "registerTable")
 	{
 		registerTableRequested(message);
