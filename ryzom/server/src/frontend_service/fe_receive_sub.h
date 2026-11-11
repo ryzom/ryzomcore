@@ -75,7 +75,9 @@ enum TBadMessageFormatType
 	MisplacedImpulse = 16384,
 	InvalidStringRequest = 32768,
 	TextTooLong = 65536,
-	RefusedClientMessage = 131072
+	RefusedClientMessage = 131072,
+	RefusedModuleClass = 262144,
+	RefusedModuleManifest = 524288
 };
 
 /// Return the string for the message invalidity reasons

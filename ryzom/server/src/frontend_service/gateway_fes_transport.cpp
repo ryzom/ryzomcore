@@ -566,6 +566,16 @@ NLMISC_REGISTER_OBJECT(IGatewayTransport, CGatewayFEServerTransport, std::string
 
 #define FE_SECURITY_CLASS_NAME "FESecurity"
 
+// The classes of the modules that a game client creates and plugs in the gateway it connects to the frontend: the
+// ring editor's CClientEditionModule (ryzom/client/src/r2/dmc), the only one. A client route discloses these modules
+// only (CFESecurity::acceptModule): the modules of the services know each other by their class, and some by an entry
+// in the manifest.
+// A client module declares no manifest entry. CModuleBase::getModuleManifest writes the entry of each interceptor of
+// the module followed by a space: with empty entries that leaves spaces only, one less than there are interceptors.
+static const char *const s_ClientModuleClasses[] = {
+	"ClientEditionModule",
+};
+
 class CFESecurity : public CGatewaySecurity
 {
 public:
@@ -581,6 +591,49 @@ public:
 	~CFESecurity() NL_OVERRIDE
 	{
 		Instance = NULL;
+	}
+
+	/** A route discloses a module. From a client route, only a module that the game client creates is accepted: its
+	 *	class is one of s_ClientModuleClasses and its manifest holds no entry. The gateway keeps nothing of a refused
+	 *	one, so no service hears of it. The modules that come through the other routes are those of the services, all
+	 *	accepted.
+	 */
+	bool acceptModule(CGatewayRoute *from, const std::string &moduleFullName, const std::string &moduleClass, const std::string &moduleManifest) NL_OVERRIDE
+	{
+		CFEServerRoute *route = dynamic_cast<CFEServerRoute *>(from);
+		if (route == NULL)
+			return true;
+
+		bool clientClass = false;
+		for (uint i = 0; i < sizeofarray(s_ClientModuleClasses); ++i)
+		{
+			if (moduleClass == s_ClientModuleClasses[i])
+			{
+				clientClass = true;
+				break;
+			}
+		}
+		if (clientClass && moduleManifest.find_first_not_of(' ') == std::string::npos)
+			return true;
+
+		// The stock client never does this: logged, and counted as a rejected message of the client (the module comes
+		// in a gateway message of the datagram being processed, as in onDispatchMessage)
+		CFeReceiveSub *frs = CFrontEndService::instance()->receiveSub();
+		TClientId clientId = route->ClientId;
+		CClientHost *client = clientId < frs->clientIdCont().size() ? frs->clientIdCont()[clientId] : NULL;
+		if (!clientClass)
+		{
+			nlwarning("FEHACK: client %u (uid %u) disclosed module '%s' of class '%s' on its gateway route, a class no client creates, refused",
+			    (uint)clientId, client != NULL ? client->Uid : 0, moduleFullName.c_str(), moduleClass.c_str());
+			frs->rejectReceivedMessage(RefusedModuleClass, client != NULL ? client->Uid : 0);
+		}
+		else
+		{
+			nlwarning("FEHACK: client %u (uid %u) disclosed module '%s' of class '%s' on its gateway route with the manifest '%s', a client module declares no entry, refused",
+			    (uint)clientId, client != NULL ? client->Uid : 0, moduleFullName.c_str(), moduleClass.c_str(), moduleManifest.c_str());
+			frs->rejectReceivedMessage(RefusedModuleManifest, client != NULL ? client->Uid : 0);
+		}
+		return false;
 	}
 
 	/** A new proxy is available, the security plug-in can add security data */

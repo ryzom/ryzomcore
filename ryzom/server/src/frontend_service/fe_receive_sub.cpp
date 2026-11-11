@@ -132,6 +132,10 @@ string getBadMessageString( uint32 reasons )
 		s += " Text above the length limit;";
 	if (reasons & RefusedClientMessage)
 		s += " Message a service refused;";
+	if (reasons & RefusedModuleClass)
+		s += " Module of a class no client creates;";
+	if (reasons & RefusedModuleManifest)
+		s += " Module with a manifest no client declares;";
 	return s;
 }
 
