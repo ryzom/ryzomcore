@@ -4569,31 +4569,9 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 			return;
 		}
 
-		_BrickFamilyBitField[brickForm->Family] |= ( (sint64)1 << (sint64)pos);
-//		_PropertyDatabase.setProp( _DataIndexReminder->KnownBricksFamilies[brickForm->Family], _BrickFamilyBitField[brickForm->Family]);
+		// clear the brick's bit, the client then no longer shows the brick as known
+		_BrickFamilyBitField[brickForm->Family] &= ~((sint64)1 << (sint64)pos);
 		CBankAccessor_PLR::getBRICK_FAMILY().getArray(brickForm->Family).setBRICKS(_PropertyDatabase, _BrickFamilyBitField[brickForm->Family]);
-
-		// unlock the relative interface if it's the first brick of this type
-		INTERFACE_FLAGS::TInterfaceFlag flag = INTERFACE_FLAGS::Unknown;
-		switch( BRICK_FAMILIES::brickType(brickForm->Family))
-		{
-		case BRICK_TYPE::COMBAT:
-			flag = INTERFACE_FLAGS::Combat;
-			break;
-		case BRICK_TYPE::MAGIC:
-			flag = INTERFACE_FLAGS::Magic;
-			break;
-		case BRICK_TYPE::COMMERCE:
-			flag = INTERFACE_FLAGS::Commerce;
-			break;
-		default:
-			flag = INTERFACE_FLAGS::Special;
-			break;
-		};
-
-		_InterfacesFlagsBitField |= SINT64_CONSTANT(1) << uint8(flag);
-//		_PropertyDatabase.setProp( "INTERFACES:FLAGS", _InterfacesFlagsBitField);
-		CBankAccessor_PLR::getINTERFACES().setFLAGS(_PropertyDatabase, _InterfacesFlagsBitField);
 	}
 	else
 	{
