@@ -24,6 +24,7 @@
 #include "stdpch.h"
 
 #include "object.h"
+#include "scenario_text_parser.h"
 #include "utils.h"
 
 #include <zlib.h>
@@ -70,6 +71,10 @@ private:
 
 //CObjectFactory *CObjectSerializer::Factory = NULL;
 CObjectFactory *CObjectSerializerClient::_ClientObjecFactory = nullptr;
+
+// a scenario that is loaded from its text form can be sent, and one that was received can be saved and loaded
+nlctassert(CObjectSerializer::MaxDepth == CScenarioTextParser::MaxDepth);
+nlctassert(CObjectSerializer::MaxNodes == CScenarioTextParser::MaxNodes);
 
 
 static CObject *newTable(CObjectFactory *factory)
@@ -2189,10 +2194,21 @@ static void writeInteger( NLMISC::IStream& stream, sint64 theValue)
 	}
 
 	// Default case
-	type = ObjectNumberSInt32;
-	sint32 fValue = (sint32)value;
+	if (sint32Min <= value && value <= sint32Max)
+	{
+		type = ObjectNumberSInt32;
+		sint32 fValue = (sint32)value;
+		stream.serial(type);
+		stream.serial(fValue);
+		return;
+	}
+
+	// No form holds an integer of more than 32 bits. It is written as a double, which is exact up to 2^53,
+	// rather than cut to its low 32 bits.
+	type = ObjectNumberDouble;
+	double dValue = (double)value;
 	stream.serial(type);
-	stream.serial(fValue);
+	stream.serial(dValue);
 }
 
 static void serialStringInstanceId( NLMISC::IStream& stream, CObject*& data)
@@ -2247,7 +2263,7 @@ static void serialNumberFixedPoint( NLMISC::IStream& stream, CObject*& data, COb
 {
 	if (serializer->getVersion() == 0)
 	{
-		nlwarning("Using oldScenario Version (must only be use when loading) old scenarios scenario session");
+		// the form of old scenario sessions, which are only read: the read says so once (readTree)
 		if (!stream.isReading())
 		{
 			sint32 v = static_cast<sint32>(data->toNumber()* 64);
@@ -2282,6 +2298,110 @@ static void serialNumberFixedPoint( NLMISC::IStream& stream, CObject*& data, COb
 
 }
 
+// The class forms below write some properties in a form of their own (an instance id as a number, a coordinate
+// as a fixed point number, the id of a run time object as its number). A tree comes from the other side of a
+// connection and is written again by the side that received it, so a property can hold anything: these tell
+// whether a value has the form its property is written in. A table with a value that has not is written as a
+// table without a class (CClassSerializer::fitsClass).
+
+// true for a string that is not a reference id, which is read back as a plain string
+static bool isPlainString(const CObject *value)
+{
+	return value && value->isString() && !value->isRefId();
+}
+
+// true for the decimal form of a number up to maxValue, as "%d" prints it: digits only, no leading zero
+static bool isCanonicalNumber(const std::string &str, uint32 maxValue)
+{
+	if (str.empty() || str.size() > 10) return false;
+	if (str.size() > 1 && str[0] == '0') return false;
+	uint64 number = 0;
+	for (std::string::size_type i = 0; i != str.size(); ++i)
+	{
+		if (str[i] < '0' || str[i] > '9') return false;
+		number = number * 10 + (uint64)(str[i] - '0');
+	}
+	return number <= maxValue;
+}
+
+// true for an instance id that serialStringInstanceId reads back as it was: the empty string, or
+// "Client<0..255>_<0..16777215>" other than "Client0_0", whose number stands for the empty string
+static bool fitsInstanceId(const CObject *value)
+{
+	if (!isPlainString(value)) return false;
+	std::string str = value->toString();
+	if (str.empty()) return true;
+	if (str.compare(0, 6, "Client") != 0) return false;
+	std::string::size_type separator = str.find('_', 6);
+	if (separator == std::string::npos) return false;
+	if (!isCanonicalNumber(str.substr(6, separator - 6), 0xff)) return false;
+	if (!isCanonicalNumber(str.substr(separator + 1), 0x00ffffff)) return false;
+	return CObject::uint32ToInstanceId(CObject::instanceIdToUint32(str)) == str;
+}
+
+// true for a number that serialNumberFixedPoint can write: its thousandths fit in 32 bits (it is read back
+// rounded to the thousandth, which is what the form is for)
+static bool fitsFixedPoint(const CObject *value)
+{
+	if (!value || !(value->isNumber() || value->isInteger())) return false;
+	double number = value->toNumber();
+	// what serialNumberFixedPoint converts to 32 bits, which cuts the fraction: false for a NaN too
+	double thousandths = number * 1000.0 + (number >= 0.0 ? 0.5 : -0.5);
+	return -2147483649.0 < thousandths && thousandths < 2147483648.0;
+}
+
+// A table that is being read, which belongs to no table yet: deleted with all it holds when the read of one of
+// its values throws, unless it was released
+class CReadHold
+{
+public:
+	explicit CReadHold(CObject *object) : m_Object(object) { }
+	~CReadHold() { delete m_Object; }
+	CObject *get() const { return m_Object; }
+	CObject *release()
+	{
+		CObject *object = m_Object;
+		m_Object = nullptr;
+		return object;
+	}
+
+private:
+	CReadHold(const CReadHold &);
+	CReadHold &operator=(const CReadHold &);
+
+	CObject *m_Object;
+};
+
+// One more table open in the tree that is being read, for as long as this object lives. The read and
+// everything that walks the tree afterwards (clone, destructor, instance map, the writer) recurse once per
+// table, so a tree nested deeper than CObjectSerializer::MaxDepth is refused.
+class CReadDepth
+{
+public:
+	explicit CReadDepth(CObjectSerializer *serializer) : m_Serializer(serializer)
+	{
+		if (m_Serializer->m_ReadDepth >= CObjectSerializer::MaxDepth)
+		{
+			nlwarning("R2Share: the tree read has tables nested deeper than %u, refused", (uint)CObjectSerializer::MaxDepth);
+			throw NLMISC::EStream("R2 tree: tables nested too deep");
+		}
+		++m_Serializer->m_ReadDepth;
+	}
+	~CReadDepth() { --m_Serializer->m_ReadDepth; }
+
+private:
+	CReadDepth(const CReadDepth &);
+	CReadDepth &operator=(const CReadDepth &);
+
+	CObjectSerializer *m_Serializer;
+};
+
+// the needed properties without a value that are logged one by one in a read; the read gives the count of the others
+static const uint32 s_MaxMissingLogged = 8;
+
+// the key of the entries of a table that have none
+static const std::string s_NoKey;
+
 class CClassSerializer;
 
 class CObjectSerializerImpl : public NLMISC::CSingleton<CObjectSerializerImpl>
@@ -2298,6 +2418,38 @@ public:
 
 	void serialImpl(NLMISC::IStream& stream, CObject*& data, CObjectSerializer* serializer, bool init = false);
 
+	// Reads a whole tree, with its header, into data: NULL for the tree that is no value. Throws
+	// NLMISC::EStream, after a warning that says why, when the stream is not a tree within the limits of
+	// CObjectSerializer; nothing of what was read is kept then.
+	void readTree(NLMISC::IStream &stream, CObject *&data, CObjectSerializer *serializer);
+
+	// Adds a value that was read to the table that is being read, and counts it. A stream with an entry that
+	// has no value, a key that is too long or more entries than CObjectSerializer::MaxNodes is refused: the
+	// value is deleted and NLMISC::EStream is thrown.
+	static void addReadValue(CObject *table, const std::string &key, CObject *value, CObjectSerializer *serializer);
+
+private:
+	// Writes, or reads when its kind readType was read, a value that holds no other value. The tables are
+	// read and written by the functions below, which serialImpl calls.
+	void serialValue(NLMISC::IStream& stream, CObject*& data, CObjectSerializer* serializer, uint8 readType);
+
+	// the header that is in front of a tree: the version of the form
+	void writeHeader(NLMISC::IStream &stream, CObjectSerializer *serializer);
+	// reads the kind of the value that comes, after the header if this is the start of a tree (init)
+	uint8 readKind(NLMISC::IStream &stream, CObjectSerializer *serializer, bool init);
+
+	void writeTable(NLMISC::IStream &stream, CObject *data, CObjectSerializer *serializer);
+	// the form of the class that the table names, if it names one and fits its form (fitsClass), else NULL
+	CClassSerializer *findClassForm(const CObject *data) const;
+	void logClassSent(const CClassSerializer *classSerializer, CObjectSerializer *serializer, uint length);
+	// the form of the class that has this id on the wire, NULL if the id is of no class
+	CClassSerializer *findClassForm(uint8 type) const;
+	void writeTableKey(NLMISC::IStream &stream, const CObject *data, uint32 index, CObjectSerializer *serializer);
+	void logTableSent(const CObject *data, CObjectSerializer *serializer, uint length);
+
+	void readTable(NLMISC::IStream &stream, CObject *&data, CObjectSerializer *serializer);
+	void readTableEntry(NLMISC::IStream &stream, CObject *table, CObject *&value, CObjectSerializer *serializer);
+
 private:
 	std::map<uint8, CClassSerializer*> _ClassSerializersById;
 	std::map<std::string, CClassSerializer*> _ClassSerializersByName;
@@ -2307,273 +2459,399 @@ private:
 class CClassSerializer
 {
 public:
-	virtual void serialClass(NLMISC::IStream& stream, CObject*& data, CObjectSerializer* serializer)
+	// True if writeClass can write this table and readClass read back the same entries (the named ones in the order of
+	// the class). The form has one "Class" that is a string, each needed property once at most, 8 bit and 16
+	// bit counts for the other kinds of entries, and forms of their own for some properties (fitsProperty).
+	// The writer writes a table that does not fit as a table without a class, which holds anything.
+	bool fitsClass(const CObject *data) const
 	{
-		if (!stream.isReading())
+		uint32 classCount = 0;
+		uint32 optionalCount = 0;
+		uint32 valueCount = 0;
+		uint32 otherCount = 0;
+		std::vector<bool> neededFound(_NeededProp.size(), false);
+
+		uint32 size = data->getSize();
+		for (uint32 first = 0; first != size; ++first)
 		{
-			//serial other prop;
+			std::string key = data->getKey(first);
+			const CObject *value = data->getValueAtPos(first);
+			if (!value) return false;
 
-			std::vector<uint32> optionalPropFoundIndex;
-			std::vector<uint32> otherPropFoundIndex;
-			std::vector<uint32> valuePropFoundIndex;
-
-
-			/*
-				make difference between properties
-			*/
+			if (key == "Class")
 			{
-				uint32  first=0;
-				uint	last=data->getSize();
-
-				for (; first != last; ++first)
+				if (++classCount > 1 || !isPlainString(value)) return false;
+			}
+			else if (key.empty())
+			{
+				++valueCount;
+			}
+			else
+			{
+				std::vector<std::string>::const_iterator neededIt = std::find(_NeededProp.begin(), _NeededProp.end(), key);
+				if (neededIt != _NeededProp.end())
 				{
-					std::string key = data->getKey(first);
-					if (key == "Class")
-					{
-
-					}
-					else if ( key.empty() )
-					{
-						valuePropFoundIndex.push_back(first);
-					}
-					else if (std::find(_NeededProp.begin(), _NeededProp.end(), key) == _NeededProp.end())
-					{
-						std::vector<std::string>::const_iterator optionalFound = std::find(_OptionalProp.begin(), _OptionalProp.end(), key);
-						if (optionalFound != _OptionalProp.end())
-						{
-							optionalPropFoundIndex.push_back(first);
-						}
-						else
-						{
-							otherPropFoundIndex.push_back(first);
-						}
-					}
-
+					// only the first one of a needed property that is there twice would be written
+					std::vector<bool>::size_type index = neededIt - _NeededProp.begin();
+					if (neededFound[index]) return false;
+					neededFound[index] = true;
+					if (!fitsProperty(key, value)) return false;
+				}
+				else if (std::find(_OptionalProp.begin(), _OptionalProp.end(), key) != _OptionalProp.end())
+				{
+					++optionalCount;
+					if (!fitsProperty(key, value)) return false;
+				}
+				else
+				{
+					// A property that is not of the class is written as any value. The readers before this
+					// one read it by its key all the same, so a key that has a form of its own in onSerial
+					// (the "InstanceId" in a run time class) is misread by them: not in the class form.
+					if (!fitsProperty(key, nullptr)) return false;
+					++otherCount;
 				}
 			}
-
-			uint8 id = getId();
-			stream.serial(id);
-
-			uint8 next = 0;
-			if (!_NeededProp.empty()) next |= 1;
-			if (!optionalPropFoundIndex.empty()) next |= 2;
-			if (!valuePropFoundIndex.empty()) next |= 4;
-			if (!otherPropFoundIndex.empty()) next |= 8;
-
-
-			stream.serial(next);
-			/*
-				Serial needed property
-			*/
-			if (!_NeededProp.empty())
-			{
-				//no need to put a number we already known how meany object must be
-				std::vector<std::string>::const_iterator  first(_NeededProp.begin()), last(_NeededProp.end());
-
-				uint initLength = stream.getPos();
-				serializer->Level +=2;
-				for ( ; first != last ; ++first)
-				{
-					//*first => Property key ()
-					CObject* value = data->getAttr(*first);
-					if( !value )
-					{
-						nlwarning( "About to serialize a NULL value at key %s, className %s!",
-							first->c_str(), _ClassName.c_str() );
-					}
-					if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, first->c_str());}
-					onSerial(stream, *first, value, serializer);
-				}
-				serializer->Level -=2;
-				uint endLength = stream.getPos();
-				if (serializer->Log) { nldebug("R2NET: (%u) Needed Properties sent %u bytes", serializer->Level +1, endLength - initLength);}
-
-			}
-
-			// serial optional properties
-			if (!optionalPropFoundIndex.empty())
-			{
-				uint initLength = stream.getPos();
-				serializer->Level +=2;
-				uint32 first = 0, last = (uint32)optionalPropFoundIndex.size();
-				uint8 optionalSize = static_cast<uint8>(last);
-				stream.serial(optionalSize);
-				for (; first != last; ++first)
-				{
-					std::string key = data->getKey(optionalPropFoundIndex[first]);
-					uint32 uiKey = 0, lastLocal = (uint32)_OptionalProp.size();
-
-					for ( ; uiKey != lastLocal && _OptionalProp[uiKey]!=key ; ++uiKey){}
-
-					uint8 shortKey = static_cast<uint8>(uiKey);
-					stream.serial(shortKey);
-
-					CObject*value = data->getValueAtPos(optionalPropFoundIndex[first]);
-					if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
-					onSerial(stream, key, value, serializer);
-				}
-
-				serializer->Level -=2;
-				uint endLength = stream.getPos();
-				if (serializer->Log) { nldebug("R2NET: (%u) Optional Properties sent %u bytes", serializer->Level +1, endLength - initLength);}
-
-			}
-
-			// serial value properties
-			if (!valuePropFoundIndex.empty())
-			{
-				uint initLength = stream.getPos();
-				serializer->Level +=2;
-
-				uint32 first = 0, last = (uint32)valuePropFoundIndex.size();
-				uint16 last16 = static_cast<uint16>(last);
-				stream.serial(last16);
-				for (; first != last; ++first)
-				{
-					CObject* value = data->getValueAtPos(valuePropFoundIndex[first]);
-					if (serializer->Log) { nldebug("R2NET: (%u) Field [%u]", serializer->Level, first);}
-					CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
-				}
-
-
-				serializer->Level -=2;
-				uint endLength = stream.getPos();
-				if (serializer->Log) { nldebug("R2NET: (%u) Values Properties sent %u bytes", serializer->Level +1, endLength - initLength);}
-
-			}
-
-			// serial other properties
-			if (!otherPropFoundIndex.empty())
-			{
-				uint initLength = stream.getPos();
-				serializer->Level +=2;
-
-
-				uint32 first = 0, last = (uint32)otherPropFoundIndex.size();
-				uint16 last16 = static_cast<uint16>(last);
-				stream.serial(last16);
-				for (; first != last; ++first)
-				{
-					uint32 keyIndex = otherPropFoundIndex[first];
-					std::string key = data->getKey(keyIndex);
-					CObject* value = data->getValueAtPos(keyIndex);
-					stream.serial(key);
-					if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
-					CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
-				}
-
-
-				serializer->Level -=2;
-				uint endLength = stream.getPos();
-				if (serializer->Log) { nldebug("R2NET: (%u) Other Properties sent %u bytes", serializer->Level +1, endLength - initLength);}
-
-			}
-
 		}
-		else
+
+		if (classCount != 1 || optionalCount > 0xff || valueCount > 0xffff || otherCount > 0xffff) return false;
+
+		// A needed property that is not there is written as the value that is none, which the forms of their own
+		// do not have. (A name that is twice in the list of a class is found at its first place only.)
+		for (std::vector<std::string>::size_type index = 0; index != _NeededProp.size(); ++index)
 		{
-			data = newTable(serializer->Factory);
-			data->add("Class", new CObjectString(_ClassName));
-
-			uint8 next;
-			stream.serial(next);
-
-			// Needed pop
-			if( (next & 1) )
+			if (!neededFound[index]
+				&& std::find(_NeededProp.begin(), _NeededProp.begin() + index, _NeededProp[index]) == _NeededProp.begin() + index
+				&& !fitsProperty(_NeededProp[index], nullptr))
 			{
-
-				std::vector<std::string>::const_iterator  first(_NeededProp.begin()), last(_NeededProp.end());
-				for ( ; first != last ; ++first)
-				{
-					//*first => Property key ()
-					CObject* value = nullptr;
-					std::string key = *first;
-					onSerial(stream, key, value, serializer);
-					if (!value)
-					{
-						nlwarning( "Error the needed param '%s' of Class '%s' is a NULL value.",
-							_ClassName.c_str(), first->c_str() );
-					}
-					else
-					{
-						data->add(key, value);
-					}
-
-				}
+				return false;
 			}
+		}
+		return true;
+	}
 
-			// Optional value
-			if ( (next & 2) )
+	// True if onSerial writes this value of a needed or optional property in a form that it reads back; value
+	// is NULL for a needed property that is not in the table, so false with NULL tells a key that onSerial has
+	// a form of its own for. To override with onSerial.
+	virtual bool fitsProperty(const std::string &key, const CObject *value) const
+	{
+		if (key == "InstanceId") return fitsInstanceId(value);
+		return true;
+	}
+
+private:
+	// the entries of a table that are not its needed properties, by kind, as positions in the table
+	struct CEntries
+	{
+		std::vector<uint32> Optional;
+		std::vector<uint32> Other;
+		std::vector<uint32> Value;
+	};
+
+public:
+	// writeClass and readClass are on the stack once per table of a class that is open, as serialImpl is: what
+	// needs room (the keys, the log) is in the functions below them, which return before a value is read or
+	// written.
+	void writeClass(NLMISC::IStream& stream, CObject* data, CObjectSerializer* serializer)
+	{
+		CEntries entries;
+		uint initLength = writeHead(stream, data, entries);
+
+		/*
+			Serial needed property
+		*/
+		if (!_NeededProp.empty())
+		{
+			//no need to put a number we already known how meany object must be
+			serializer->Level +=2;
+			for (uint32 first = 0, last = (uint32)_NeededProp.size(); first != last ; ++first)
 			{
-				uint8 optionalSize;
-				stream.serial(optionalSize);
-				uint first(0), last(optionalSize);
-				for ( ; first != last ; ++first)
-				{
-					CObject* value;
-					uint8 keyIndex;
-					stream.serial(keyIndex);
-					if (keyIndex >= _OptionalProp.size())
-					{
-						nlwarning("CClassSerializer: optional property index %u out of %u", (uint)keyIndex, (uint)_OptionalProp.size());
-						throw NLMISC::EStream("optional property index out of range");
-					}
-					std::string key = _OptionalProp[keyIndex];
-					onSerial(stream, key, value, serializer);
-					if (!value)
-					{
-						nlwarning("R2Share: Stream error");
-					}
-					data->add(key, value);
-				}
+				//_NeededProp[first] => Property key ()
+				CObject* value = getNeeded(data, first, serializer);
+				onSerial(stream, _NeededProp[first], value, serializer);
 			}
+			serializer->Level -=2;
+			if (serializer->Log) { initLength = logSent(stream, serializer, "Needed", initLength); }
+		}
 
-			// Table value
-			if ( (next & 4) )
+		// serial optional properties
+		if (!entries.Optional.empty())
+		{
+			serializer->Level +=2;
+			uint32 first = 0, last = (uint32)entries.Optional.size();
+			uint8 optionalSize = static_cast<uint8>(last);
+			stream.serial(optionalSize);
+			for (; first != last; ++first)
 			{
-				uint16 arrayValuesSize;
-				stream.serial(arrayValuesSize);
-				uint first(0), last(arrayValuesSize);
-				for ( ; first != last ; ++first)
-				{
-					CObject* value;
-					onSerial(stream, "", value, serializer);
-					if (!value)
-					{
-						nlwarning("R2Share: Stream error");
-					}
-					data->add("", value);
-				}
+				uint32 uiKey = writeOptionalKey(stream, data, entries.Optional[first], serializer);
+				CObject*value = data->getValueAtPos(entries.Optional[first]);
+				onSerial(stream, _OptionalProp[uiKey], value, serializer);
 			}
+			serializer->Level -=2;
+			if (serializer->Log) { initLength = logSent(stream, serializer, "Optional", initLength); }
+		}
 
-			// Other Value
-			if ( (next & 8) )
+		// serial value properties
+		if (!entries.Value.empty())
+		{
+			serializer->Level +=2;
+			uint32 first = 0, last = (uint32)entries.Value.size();
+			uint16 last16 = static_cast<uint16>(last);
+			stream.serial(last16);
+			for (; first != last; ++first)
 			{
-				uint16 otherPropSize;
-				stream.serial(otherPropSize);
-				uint first(0), last(otherPropSize);
-				for ( ; first != last ; ++first)
-				{
-					std::string key;
-					stream.serial(key);
-					CObject* value=nullptr;
-					onSerial(stream, key, value, serializer);
-					if (!value)
-					{
-						nlwarning("R2Share: Stream error");
-					}
-					else
-					{
-						data->add(key, value);
-					}
-				}
-
+				CObject* value = data->getValueAtPos(entries.Value[first]);
+				if (serializer->Log) { logValue(serializer, first); }
+				CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
 			}
+			serializer->Level -=2;
+			if (serializer->Log) { initLength = logSent(stream, serializer, "Values", initLength); }
+		}
 
+		// serial other properties
+		if (!entries.Other.empty())
+		{
+			serializer->Level +=2;
+			uint32 first = 0, last = (uint32)entries.Other.size();
+			uint16 last16 = static_cast<uint16>(last);
+			stream.serial(last16);
+			for (; first != last; ++first)
+			{
+				writeOtherKey(stream, data, entries.Other[first], serializer);
+				CObject* value = data->getValueAtPos(entries.Other[first]);
+				CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
+			}
+			serializer->Level -=2;
+			if (serializer->Log) { initLength = logSent(stream, serializer, "Other", initLength); }
 		}
 	}
 
+private:
+	void logValue(CObjectSerializer* serializer, uint32 index)
+	{
+		nldebug("R2NET: (%u) Field [%u]", serializer->Level, index);
+	}
+
+	// Sorts the entries of the table by kind and writes the id of the class and the kinds it has entries of.
+	// Returns the position of the stream after them, for the log.
+	uint writeHead(NLMISC::IStream& stream, const CObject* data, CEntries &entries)
+	{
+		/*
+			make difference between properties
+		*/
+		{
+			uint32  first=0;
+			uint	last=data->getSize();
+
+			for (; first != last; ++first)
+			{
+				std::string key = data->getKey(first);
+				if (key == "Class")
+				{
+
+				}
+				else if ( key.empty() )
+				{
+					entries.Value.push_back(first);
+				}
+				else if (std::find(_NeededProp.begin(), _NeededProp.end(), key) == _NeededProp.end())
+				{
+					std::vector<std::string>::const_iterator optionalFound = std::find(_OptionalProp.begin(), _OptionalProp.end(), key);
+					if (optionalFound != _OptionalProp.end())
+					{
+						entries.Optional.push_back(first);
+					}
+					else
+					{
+						entries.Other.push_back(first);
+					}
+				}
+
+			}
+		}
+
+		uint8 id = getId();
+		stream.serial(id);
+
+		uint8 next = 0;
+		if (!_NeededProp.empty()) next |= 1;
+		if (!entries.Optional.empty()) next |= 2;
+		if (!entries.Value.empty()) next |= 4;
+		if (!entries.Other.empty()) next |= 8;
+
+
+		stream.serial(next);
+		return stream.getPos();
+	}
+
+	// the value of a needed property of the table, NULL if the table does not have it
+	CObject *getNeeded(const CObject *data, uint32 index, CObjectSerializer* serializer)
+	{
+		const std::string &key = _NeededProp[index];
+		CObject* value = data->getAttr(key);
+		if( !value )
+		{
+			nlwarning( "About to serialize a NULL value at key %s, className %s!",
+				key.c_str(), _ClassName.c_str() );
+		}
+		if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
+		return value;
+	}
+
+	// writes which optional property the entry of the table is, and returns it as an index in the list of the class
+	uint32 writeOptionalKey(NLMISC::IStream& stream, const CObject *data, uint32 position, CObjectSerializer* serializer)
+	{
+		std::string key = data->getKey(position);
+		uint32 uiKey = 0, lastLocal = (uint32)_OptionalProp.size();
+
+		for ( ; uiKey != lastLocal && _OptionalProp[uiKey]!=key ; ++uiKey){}
+
+		uint8 shortKey = static_cast<uint8>(uiKey);
+		stream.serial(shortKey);
+		if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
+		return uiKey;
+	}
+
+	void writeOtherKey(NLMISC::IStream& stream, const CObject *data, uint32 position, CObjectSerializer* serializer)
+	{
+		std::string key = data->getKey(position);
+		stream.serial(key);
+		if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
+	}
+
+	// logs the size of a kind of entries that were written since the position initLength; returns the position now
+	uint logSent(NLMISC::IStream& stream, CObjectSerializer* serializer, const char *kind, uint initLength)
+	{
+		uint endLength = stream.getPos();
+		nldebug("R2NET: (%u) %s Properties sent %u bytes", serializer->Level +1, kind, endLength - initLength);
+		return endLength;
+	}
+
+public:
+	void readClass(NLMISC::IStream& stream, CObject*& data, CObjectSerializer* serializer)
+	{
+		// The table is held until it is complete: if the read of one of its values throws, it is deleted with
+		// what it holds and data is left as it was.
+		CReadDepth depth(serializer);
+		CReadHold hold(newTable(serializer->Factory));
+		CObject *table = hold.get();
+		addClassName(table, serializer);
+
+		uint8 next;
+		stream.serial(next);
+
+		// Needed pop
+		if( (next & 1) )
+		{
+			for (uint32 first = 0, last = (uint32)_NeededProp.size(); first != last ; ++first)
+			{
+				//_NeededProp[first] => Property key ()
+				CObject* value = nullptr;
+				onSerial(stream, _NeededProp[first], value, serializer);
+				addNeeded(table, first, value, serializer);
+			}
+		}
+
+		// Optional value
+		if ( (next & 2) )
+		{
+			uint8 optionalSize;
+			stream.serial(optionalSize);
+			uint first(0), last(optionalSize);
+			for ( ; first != last ; ++first)
+			{
+				CObject* value = nullptr;
+				uint8 keyIndex = readOptionalKey(stream);
+				onSerial(stream, _OptionalProp[keyIndex], value, serializer);
+				CObjectSerializerImpl::addReadValue(table, _OptionalProp[keyIndex], value, serializer);
+			}
+		}
+
+		// Table value
+		if ( (next & 4) )
+		{
+			uint16 arrayValuesSize;
+			stream.serial(arrayValuesSize);
+			uint first(0), last(arrayValuesSize);
+			for ( ; first != last ; ++first)
+			{
+				CObject* value = nullptr;
+				onSerial(stream, s_NoKey, value, serializer);
+				CObjectSerializerImpl::addReadValue(table, s_NoKey, value, serializer);
+			}
+		}
+
+		// Other Value
+		if ( (next & 8) )
+		{
+			uint16 otherPropSize;
+			stream.serial(otherPropSize);
+			uint first(0), last(otherPropSize);
+			for ( ; first != last ; ++first)
+			{
+				readOther(stream, table, serializer);
+			}
+
+		}
+
+		data = hold.release();
+	}
+
+private:
+	void addClassName(CObject* table, CObjectSerializer* serializer)
+	{
+		CObjectSerializerImpl::addReadValue(table, "Class", new CObjectString(_ClassName), serializer);
+	}
+
+	// Adds the value that was read for a needed property to the table that is being read
+	void addNeeded(CObject* table, uint32 index, CObject* value, CObjectSerializer* serializer)
+	{
+		const std::string &key = _NeededProp[index];
+		if (!value)
+		{
+			// this is how a needed property that the table does not have is written
+			if (serializer->m_ReadMissing < s_MaxMissingLogged)
+			{
+				nlwarning("R2Share: the needed property '%s' of class '%s' has no value in the tree read",
+					key.c_str(), _ClassName.c_str());
+			}
+			++serializer->m_ReadMissing;
+		}
+		else if (std::find(_NeededProp.begin(), _NeededProp.begin() + index, key) != _NeededProp.begin() + index)
+		{
+			// a name that is twice in the list of the class has its value written twice: one entry is made of it
+			CObject::TSmartPtr drop(value);
+		}
+		else
+		{
+			CObjectSerializerImpl::addReadValue(table, key, value, serializer);
+		}
+	}
+
+	// reads which optional property of the class comes, as an index in its list
+	uint8 readOptionalKey(NLMISC::IStream& stream)
+	{
+		uint8 keyIndex;
+		stream.serial(keyIndex);
+		if (keyIndex >= _OptionalProp.size())
+		{
+			nlwarning("CClassSerializer: optional property index %u out of %u", (uint)keyIndex, (uint)_OptionalProp.size());
+			throw NLMISC::EStream("optional property index out of range");
+		}
+		return keyIndex;
+	}
+
+	void readOther(NLMISC::IStream& stream, CObject* table, CObjectSerializer* serializer)
+	{
+		std::string key;
+		stream.serial(key);
+		CObject* value=nullptr;
+		// As the writer does, whatever the key: onSerial would read a property that has a form of its own in
+		// another class (the "InstanceId" of a run time class) in a form it was not written in.
+		CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
+		CObjectSerializerImpl::addReadValue(table, key, value, serializer);
+	}
+
+public:
 	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer)
 	{
 		if (key == "InstanceId") { serialStringInstanceId(stream, data); return;	}
@@ -2602,6 +2880,7 @@ public:
 	CNpcSerializer();
 
 	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE;
+	virtual bool fitsProperty(const std::string &key, const CObject *value) const NL_OVERRIDE;
 };
 
 
@@ -2629,6 +2908,12 @@ void CNpcSerializer::onSerial(NLMISC::IStream& stream, const std::string& key, C
 	if (key == "Angle") { serialNumberFixedPoint(stream, data, serializer); return; }
 	this->CClassSerializer::onSerial(stream, key, data, serializer);
 }
+
+bool CNpcSerializer::fitsProperty(const std::string &key, const CObject *value) const
+{
+	if (key == "Angle") return fitsFixedPoint(value);
+	return this->CClassSerializer::fitsProperty(key, value);
+}
 //------------------
 class CNpcCustomSerializer : public CClassSerializer
 {
@@ -2636,6 +2921,7 @@ public:
 	CNpcCustomSerializer();
 
 	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE;
+	virtual bool fitsProperty(const std::string &key, const CObject *value) const NL_OVERRIDE;
 };
 
 
@@ -2664,6 +2950,12 @@ void CNpcCustomSerializer::onSerial(NLMISC::IStream& stream, const std::string& 
 	//H_AUTO(R2_CNpcCustomSerializer_onSerial)
 	if (key == "Angle") { serialNumberFixedPoint(stream, data, serializer); return; }
 	this->CClassSerializer::onSerial(stream, key, data, serializer);
+}
+
+bool CNpcCustomSerializer::fitsProperty(const std::string &key, const CObject *value) const
+{
+	if (key == "Angle") return fitsFixedPoint(value);
+	return this->CClassSerializer::fitsProperty(key, value);
 }
 
 //--------------------------------
@@ -2734,6 +3026,7 @@ public:
 	CPositionSerializer();
 
 	virtual void onSerial(NLMISC::IStream& stream, const std::string& key, CObject*& data, CObjectSerializer* serializer) NL_OVERRIDE;
+	virtual bool fitsProperty(const std::string &key, const CObject *value) const NL_OVERRIDE;
 };
 
 
@@ -2752,6 +3045,12 @@ void CPositionSerializer::onSerial(NLMISC::IStream& stream, const std::string& k
 	//H_AUTO(R2_CPositionSerializer_onSerial)
 	if (key == "x" || key == "y" || key == "z")  { serialNumberFixedPoint(stream, data, serializer); return; }
 	this->CClassSerializer::onSerial(stream, key, data, serializer);
+}
+
+bool CPositionSerializer::fitsProperty(const std::string &key, const CObject *value) const
+{
+	if (key == "x" || key == "y" || key == "z") return fitsFixedPoint(value);
+	return this->CClassSerializer::fitsProperty(key, value);
 }
 
 //--------------------------------
@@ -2852,6 +3151,20 @@ public:
 	{
 		if (key == "Id")  { serialRtId(stream, data); return; }
 		this->CClassSerializer::onSerial(stream, key, data, serializer);
+	}
+
+	// The id of a run time object is written as the number in "<class>_<number>" and read back printed with
+	// "%d": any other string, or a number that has another decimal form, is not read back as it was.
+	bool fitsProperty(const std::string &key, const CObject *value) const NL_OVERRIDE
+	{
+		if (key == "Id")
+		{
+			if (!isPlainString(value)) return false;
+			std::string str = value->toString();
+			std::string prefix = _ClassName + "_";
+			return str.compare(0, prefix.size(), prefix) == 0 && isCanonicalNumber(str.substr(prefix.size()), 0x7fffffff);
+		}
+		return this->CClassSerializer::fitsProperty(key, value);
 	}
 
 
@@ -3094,23 +3407,309 @@ public:
 
 
 
+// a string of the tree read that the writer would refuse to write again is refused
+static void checkReadString(const std::string &value)
+{
+	if (value.size() > CObjectSerializer::MaxStringLength)
+	{
+		nlwarning("R2Share: the tree read has a string of %u bytes, more than %u, refused",
+			(uint)value.size(), (uint)CObjectSerializer::MaxStringLength);
+		throw NLMISC::EStream("R2 tree: string too long");
+	}
+}
+
+void CObjectSerializerImpl::addReadValue(CObject *table, const std::string &key, CObject *value, CObjectSerializer *serializer)
+{
+	// the value is held from here, and deleted if it does not go in the table
+	CObject::TSmartPtr hold(value);
+
+	if (!table)
+	{
+		nlwarning("R2Share: no table could be made for the tree read, refused");
+		throw NLMISC::EStream("R2 tree: no table");
+	}
+	if (!value)
+	{
+		// only a needed property of a class is written without a value, and it is not given here
+		nlwarning("R2Share: the tree read has a table entry without a value, refused");
+		throw NLMISC::EStream("R2 tree: table entry without a value");
+	}
+	if (key.size() > CObjectSerializer::MaxStringLength)
+	{
+		nlwarning("R2Share: the tree read has a key of %u bytes, more than %u, refused",
+			(uint)key.size(), (uint)CObjectSerializer::MaxStringLength);
+		throw NLMISC::EStream("R2 tree: key too long");
+	}
+	if (serializer->m_ReadNodes >= CObjectSerializer::MaxNodes)
+	{
+		nlwarning("R2Share: the tree read has more than %u table entries, refused", (uint)CObjectSerializer::MaxNodes);
+		throw NLMISC::EStream("R2 tree: too many table entries");
+	}
+	++serializer->m_ReadNodes;
+
+	table->add(key, hold);
+}
+
+void CObjectSerializerImpl::readTree(NLMISC::IStream &stream, CObject *&data, CObjectSerializer *serializer)
+{
+	serializer->m_ReadDepth = 0;
+	serializer->m_ReadNodes = 0;
+	serializer->m_ReadMissing = 0;
+	// a stream without a header is in the first version
+	serializer->setVersion(0);
+
+	CObject *tree = nullptr;
+	serialImpl(stream, tree, serializer, true);
+	data = tree;
+
+	if (serializer->m_ReadMissing > s_MaxMissingLogged)
+	{
+		nlwarning("R2Share: %u needed properties have no value in the tree read, the first %u are given above",
+			serializer->m_ReadMissing, s_MaxMissingLogged);
+	}
+	if (serializer->getVersion() == 0)
+	{
+		nlwarning("R2Share: a tree was read in the first version of its binary form, which is only kept to load old scenario sessions");
+	}
+}
+
+static bool measureImpl(const CObject *tree, uint32 level, uint32 &depth, uint32 &nodes, const CObject *part, uint32 *partNodes)
+{
+	if (!tree || !tree->isTable()) return true;
+
+	if (level >= CObjectSerializer::MaxDepth) return false;
+	++level;
+	if (level > depth) depth = level;
+
+	uint32 nodesBefore = nodes;
+	uint32 size = tree->getSize();
+	if (size > CObjectSerializer::MaxNodes - nodes)
+	{
+		nodes = CObjectSerializer::MaxNodes;
+		return false;
+	}
+	nodes += size;
+
+	for (uint32 first = 0; first != size; ++first)
+	{
+		if (!measureImpl(tree->getValueAtPos(first), level, depth, nodes, part, partNodes)) return false;
+	}
+	if (tree == part && partNodes)
+	{
+		*partNodes = nodes - nodesBefore;
+	}
+	return true;
+}
+
+bool CObjectSerializer::measure(const CObject *tree, uint32 &depth, uint32 &nodes, const CObject *part, uint32 *partNodes)
+{
+	depth = 0;
+	nodes = 0;
+	if (partNodes) *partNodes = 0;
+	return measureImpl(tree, 0, depth, nodes, part, partNodes);
+}
+
+// the stream has a header where it has a value, see serialImpl
+static void refuseHeader()
+{
+	nlwarning("R2Share: the tree read has a header where a value is expected, refused");
+	throw NLMISC::EStream("R2 tree: header where a value is expected");
+}
+
 void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, CObjectSerializer* serializer, bool init)
 {
 	//H_AUTO(R2_CObjectSerializerImpl_serialImpl)
+
+	// This function is on the stack once per table that is open, with the function that reads or writes the
+	// table, and a tree has up to CObjectSerializer::MaxDepth tables in each other: they hold as little as they
+	// can. What needs room (the strings, the log) is in the functions that return before a table goes deeper.
+	if (!stream.isReading())
+	{
+		if (init)
+		{
+			writeHeader(stream, serializer);
+		}
+
+		if (data != nullptr && data->isTable())
+		{
+			writeTable(stream, data, serializer);
+		}
+		else
+		{
+			serialValue(stream, data, serializer, ObjectNull);
+		}
+	}
+	else
+	{
+		uint8 type = readKind(stream, serializer, init);
+
+		if (type == ObjectTable)
+		{
+			readTable(stream, data, serializer);
+		}
+		else
+		{
+			CClassSerializer *classSerializer = findClassForm(type);
+			if (classSerializer)
+			{
+				classSerializer->readClass(stream, data, serializer);
+			}
+			else
+			{
+				serialValue(stream, data, serializer, type);
+			}
+		}
+	}
+}
+
+void CObjectSerializerImpl::writeHeader(NLMISC::IStream &stream, CObjectSerializer *serializer)
+{
+	uint8 type = ObjectHeaderTag;
+	uint32 version = 1;
+	stream.serial(type);
+	stream.serial(version);
+	serializer->setVersion(version);
+}
+
+uint8 CObjectSerializerImpl::readKind(NLMISC::IStream &stream, CObjectSerializer *serializer, bool init)
+{
+	uint8 type = ObjectNull;
+	stream.serial(type);
+
+	if (type == ObjectHeaderTag)
+	{
+		// The header is written once, in front of the tree. It is not read anywhere else, and not by a call
+		// of serialImpl for each header of a stream of headers.
+		if (!init) refuseHeader();
+		uint32 version = 0;
+		stream.serial(version);
+		serializer->setVersion(version);
+		stream.serial(type);
+		if (type == ObjectHeaderTag) refuseHeader();
+	}
+	return type;
+}
+
+CClassSerializer *CObjectSerializerImpl::findClassForm(uint8 type) const
+{
+	std::map<uint8, CClassSerializer*>::const_iterator found(_ClassSerializersById.find(type));
+	return found != _ClassSerializersById.end() ? found->second : nullptr;
+}
+
+void CObjectSerializerImpl::writeTable(NLMISC::IStream &stream, CObject *data, CObjectSerializer *serializer)
+{
+	uint initLength = stream.getPos();
+	CClassSerializer *classSerializer = findClassForm(data);
+	if (classSerializer)
+	{
+		classSerializer->writeClass(stream, data, serializer);
+		if (serializer->Log)
+		{
+			logClassSent(classSerializer, serializer, stream.getPos() - initLength);
+		}
+		return;
+	}
+
+	uint8 type = ObjectTable;
+	stream.serial(type);
+	uint32 size = data->getSize();
+	stream.serial(size);
+	for (uint first = 0; first != size; ++first)
+	{
+		writeTableKey(stream, data, first, serializer);
+		CObject* value = data->getValueAtPos(first);
+		++ (serializer->Level);
+		serialImpl(stream, value, serializer);
+		-- (serializer->Level);
+	}
+	if (serializer->Log)
+	{
+		logTableSent(data, serializer, stream.getPos() - initLength);
+	}
+}
+
+void CObjectSerializerImpl::logClassSent(const CClassSerializer *classSerializer, CObjectSerializer *serializer, uint length)
+{
+	nldebug("R2NET: (%u) Class '%s' sent %u bytes", serializer->Level, classSerializer->getClassName().c_str(), length);
+}
+
+CClassSerializer *CObjectSerializerImpl::findClassForm(const CObject *data) const
+{
+	std::string className;
+	if ( data->isString("Class"))
+	{
+		className = data->toString("Class");
+	}
+	if (className.empty())
+	{
+		return nullptr;
+	}
+
+	// a table that names a class and has not the form of the class is written as a table without a class
+	std::map<std::string, CClassSerializer*>::const_iterator found(_ClassSerializersByName.find(className));
+	if (found != _ClassSerializersByName.end() && found->second->fitsClass(data))
+	{
+		return found->second;
+	}
+	return nullptr;
+}
+
+void CObjectSerializerImpl::writeTableKey(NLMISC::IStream &stream, const CObject *data, uint32 index, CObjectSerializer *serializer)
+{
+	std::string key = data->getKey(index);
+	stream.serial(key);
+	if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level + 1, key.c_str());}
+}
+
+void CObjectSerializerImpl::logTableSent(const CObject *data, CObjectSerializer *serializer, uint length)
+{
+	std::string className;
+	if ( data->isString("Class"))
+	{
+		className = data->toString("Class");
+	}
+	if (className.empty())
+	{
+		nldebug("R2NET: (%u) Table sent %u bytes",serializer->Level, length);
+	}
+	else
+	{
+		nldebug("R2NET: (%u) Generic Class(%s) sent %u bytes", serializer->Level, className.c_str(), length);
+	}
+}
+
+void CObjectSerializerImpl::readTable(NLMISC::IStream &stream, CObject *&data, CObjectSerializer *serializer)
+{
+	uint32 size;
+	stream.serial(size);
+	// The table is held until it is complete: if the read of one of its values throws, it is deleted with what
+	// it holds and data is left as it was. The size is not trusted for anything: a table that is said larger
+	// than it is ends with the stream, or with the limit of entries.
+	CReadDepth depth(serializer);
+	CReadHold table(newTable(serializer->Factory));
+	for (uint32 first = 0 ; first != size; ++first)
+	{
+		CObject* value=nullptr;
+		readTableEntry(stream, table.get(), value, serializer);
+	}
+	data = table.release();
+}
+
+void CObjectSerializerImpl::readTableEntry(NLMISC::IStream &stream, CObject *table, CObject *&value, CObjectSerializer *serializer)
+{
+	std::string key;
+	stream.serial(key);
+	serialImpl(stream, value, serializer);
+	addReadValue(table, key, value, serializer);
+}
+
+void CObjectSerializerImpl::serialValue(NLMISC::IStream& stream, CObject*& data, CObjectSerializer* serializer, uint8 readType)
+{
 	uint8 type;
 
 
 	if (!stream.isReading())
 	{
-		if (init)
-		{
-			type = ObjectHeaderTag;
-			uint32 version = 1;
-			stream.serial(type);
-			stream.serial(version);
-			serializer->setVersion(version);
-		}
-
 		if (data == nullptr)
 		{
 			type = ObjectNull;
@@ -3191,67 +3790,12 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			if (serializer->Log) { nldebug("R2NET: (%u) String Send %u bytes", serializer->Level, endLength - initLength); }
 			return;
 		}
-		else if (data->isTable())
-		{
-			uint initLength = stream.getPos();
-			std::string className;
-			if ( data->isString("Class"))
-			{
-				className = data->toString("Class");
-			}
-
-
-
-			if (!className.empty())
-			{
-				std::map<std::string, CClassSerializer*>::const_iterator found(_ClassSerializersByName.find(className));
-				if (found != _ClassSerializersByName.end() )
-				{
-					found->second->serialClass(stream, data, serializer);
-					uint endLength = stream.getPos();
-					if (serializer->Log) { nldebug("R2NET: (%u) Class '%s' sent %u bytes", serializer->Level, className.c_str(), endLength - initLength); }
-					return;
-				}
-			}
-
-
-
-			type = ObjectTable;
-			stream.serial(type);
-			uint32 size = data->getSize();
-			stream.serial(size);
-			for (uint first = 0; first != size; ++first)
-			{
-				std::string key = data->getKey(first);
-				CObject* value = data->getValueAtPos(first);
-				stream.serial(key);
-				++ (serializer->Level);
-				if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
-				serialImpl(stream, value, serializer);
-				-- (serializer->Level);
-			}
-			uint endLength = stream.getPos();
-			if (serializer->Log)
-			{
-				if (className.empty())
-				{
-					nldebug("R2NET: (%u) Table sent %u bytes",serializer->Level, endLength - initLength);
-				}
-				else
-				{
-					nldebug("R2NET: (%u) Generic Class(%s) sent %u bytes", serializer->Level, className.c_str(), endLength - initLength);
-				}
-			}
-
-
-
-		//	nlstop;
-		}
+		// a table is written by writeTable
 	}
 	else
 	{
-		uint8 type = ObjectNull;
-		stream.serial(type);
+		// the kind was read by serialImpl, which reads the tables and the header itself
+		uint8 type = readType;
 
 		// NB nico : use factory here instead of plain 'new' because client may use derived classes internally
 		// NB 2 : if server is created locally, not a problem because derived object fonctinnality
@@ -3259,14 +3803,6 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 
 		switch(type)
 		{
-			case ObjectHeaderTag:
-			{
-				uint32 version = 0;
-				stream.serial(version);
-				serializer->setVersion(version);
-				this->serialImpl(stream,  data, serializer);
-				return;
-			}
 			case ObjectNull:
 			{
 				data = nullptr;
@@ -3395,6 +3931,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 				std::string value;
 
 				stream.serial(value);
+				checkReadString(value);
 				data = serializer->Factory ? serializer->Factory->newBasic("String") : new CObjectString("");
 				((CObjectString *) data)->set("", value);
 				break;
@@ -3404,6 +3941,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			{
 				std::string value;
 				stream.serial(value);
+				checkReadString(value);
 				data = serializer->Factory ? serializer->Factory->newBasic("RefId") : new CObjectRefId("");
 				((CObjectRefId *) data)->set("", value);
 				break;
@@ -3440,32 +3978,10 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 				((CObjectRefId *) data)->set("", value);
 			}
 			break;
-			case ObjectTable:
-			{
-
-				uint32 size;
-				stream.serial(size);
-				data = newTable(serializer->Factory);
-				uint32 first;
-				for (first = 0 ; first != size; ++first)
-				{
-					std::string key;
-					stream.serial(key);
-					CObject* value=nullptr;
-					serialImpl(stream,value, serializer);
-					data->add(key, value);
-				}
-			}
-			break;
 			default:
-				std::map<uint8, CClassSerializer*>::const_iterator found(_ClassSerializersById.find(type));
-				if (found != _ClassSerializersById.end())
-				{
-					found->second->serialClass(stream, data, serializer);
-					return;
-				}
-
-				BOMB("ClassSerializer not found: can not read data", return);
+				// not a table, not a class that is registered (serialImpl), and none of the kinds above
+				nlwarning("R2Share: the tree read has a value of the unknown kind %u, refused", (uint)type);
+				throw NLMISC::EStream("R2 tree: unknown kind of value");
 		}
 	}
 }
@@ -3479,29 +3995,65 @@ void CObjectSerializer::releaseInstance()
 void CObjectSerializer::serial(NLMISC::IStream& stream)
 {
 	//H_AUTO(R2_CObjectSerializer_serial)
-	stream.serial(_Compressed);
-
-
 	if ( stream.isReading() )
 	{
-		_MustUncompress = _Compressed;
+		// What comes is from the other side of a connection. What this object held is dropped first, and it only
+		// holds something again once that was read whole: a read that throws leaves it without a tree.
+		_Data = nullptr;
+		delete [] _CompressedBuffer;
+		_CompressedBuffer = nullptr;
+		_CompressedLen = 0;
+		_UncompressedLen = 0;
+		_Compressed = false;
+		_MustUncompress = false;
+
+		bool compressed = false;
+		stream.serial(compressed);
+		if (!compressed)
+		{
+			CObject* rawData = nullptr;
+			CObjectSerializerImpl::getInstance().readTree(stream, rawData, this);
+			_Data = rawData;
+		}
+		else
+		{
+			uint32 compressedLen = 0;
+			uint32 uncompressedLen = 0;
+			stream.serial(compressedLen);
+			stream.serial(uncompressedLen);
+
+			// The sizes are checked before anything is allocated for them. The data is only expanded when the
+			// tree is asked for (uncompressImpl), or never when it is sent on as it is.
+			if (compressedLen > MaxCompressedSize || uncompressedLen > MaxUncompressedSize
+				|| (uint64)uncompressedLen > (uint64)compressedLen * 1032)
+			{
+				nlwarning("R2Share: compressed tree of %u bytes said to expand to %u bytes, refused (at most %u bytes, expanding to %u bytes and to 1032 times the size)",
+					compressedLen, uncompressedLen, (uint)MaxCompressedSize, (uint)MaxUncompressedSize);
+				throw NLMISC::EStream("R2 tree: size of the compressed data out of range");
+			}
+
+			// the buffer belongs to this object from here: it is not lost if the stream ends before its end
+			_CompressedBuffer = new uint8[compressedLen];
+			stream.serialBuffer(_CompressedBuffer, compressedLen);
+			_CompressedLen = compressedLen;
+			_UncompressedLen = uncompressedLen;
+			_Compressed = true;
+			_MustUncompress = true;
+		}
+		return;
 	}
+
+	stream.serial(_Compressed);
 
 	if (!_Compressed)
 	{
 		CObject* rawData = _Data.getPtr();
 		CObjectSerializerImpl::getInstance().serialImpl(stream, rawData, this, true);
-		_Data = rawData;
 	}
 	else
 	{
 		stream.serial(_CompressedLen);
 		stream.serial(_UncompressedLen);
-
-		if ( stream.isReading() )
-		{
-			_CompressedBuffer = new uint8[_CompressedLen];
-		}
 		stream.serialBuffer(_CompressedBuffer, _CompressedLen);
 	}
 }
@@ -3528,6 +4080,9 @@ CObjectSerializer::CObjectSerializer(CObjectFactory *factory, CObject* data)
 	_Compressed = false;
 	_MustUncompress = false;
 	_Version = 0;
+	m_ReadDepth = 0;
+	m_ReadNodes = 0;
+	m_ReadMissing = 0;
 	if (data)
 	{
 		_Data = data->clone();
@@ -3587,6 +4142,14 @@ void CObjectSerializer::compress()
 	CObjectSerializerImpl::getInstance().serialImpl(buffer, rawData, this, true);
 	uint32 length =  buffer.length() - init;
 
+	// The reader refuses compressed data above these sizes, and it reads this tree when it is not compressed
+	// (it has its limits of tables and entries, none on the size): the tree is then sent as it is.
+	if (length > MaxUncompressedSize)
+	{
+		nlwarning("R2Share: a tree of %u bytes is not compressed, the reader expands %u bytes at most", length, (uint)MaxUncompressedSize);
+		return;
+	}
+
 	uLongf destLen = length + length / 1000 + 12;
 
 
@@ -3606,6 +4169,13 @@ void CObjectSerializer::compress()
 	if ( length < destLen)
 	{
 		delete [] dest;
+		return;
+	}
+	if (destLen > MaxCompressedSize)
+	{
+		delete [] dest;
+		nlwarning("R2Share: a tree of %u bytes is not compressed, it compresses to %u bytes and the reader takes %u bytes at most",
+			length, (uint)destLen, (uint)MaxCompressedSize);
 		return;
 	}
 
@@ -3632,34 +4202,53 @@ void CObjectSerializer::uncompressImpl()
 		_MustUncompress = false;
 		_Data = nullptr;
 
-		Bytef* data = new Bytef[_UncompressedLen];
+		// The data was read from a stream (serial checks the sizes it gives) and is from the other side of a
+		// connection. Whatever is wrong with it, this object is left without a tree, which is what the
+		// callers of getData() test: nothing is thrown from here.
+		if (!_CompressedBuffer || _CompressedLen == 0 || _UncompressedLen == 0
+			|| _CompressedLen > MaxCompressedSize || _UncompressedLen > MaxUncompressedSize
+			|| (uint64)_UncompressedLen > (uint64)_CompressedLen * 1032)
+		{
+			nlwarning("R2Share: compressed tree of %u bytes said to expand to %u bytes, refused", _CompressedLen, _UncompressedLen);
+			return;
+		}
+
+		std::vector<uint8> data(_UncompressedLen);
 		uLongf dataLen = _UncompressedLen;
-		sint32 state = ::uncompress (data, &dataLen ,
+		sint32 state = ::uncompress (reinterpret_cast<Bytef*>(&data[0]), &dataLen ,
 			reinterpret_cast<Bytef*>(_CompressedBuffer), _CompressedLen);
 
 		if (state != Z_OK)
 		{
-			delete[] data;
-			nlwarning("Error while uncompressing data stream.");
+			nlwarning("R2Share: compressed tree of %u bytes said to expand to %u bytes does not expand (zlib error %d), refused",
+				_CompressedLen, _UncompressedLen, (int)state);
 			return;
 		}
 		if (_UncompressedLen != dataLen)
 		{
-			nlwarning("Error error in data stream.");
+			nlwarning("R2Share: compressed tree of %u bytes said to expand to %u bytes expands to %u bytes, refused",
+				_CompressedLen, _UncompressedLen, (uint)dataLen);
+			return;
 		}
 
-		_UncompressedLen = dataLen;
 		NLMISC::CMemStream buffer;
 		if (buffer.isReading()) buffer.invert();
-		buffer.serialBuffer((uint8*)data, _UncompressedLen);
+		buffer.serialBuffer(&data[0], _UncompressedLen);
 		buffer.invert();
 		buffer.seek(0, NLMISC::IStream::begin);
 
-		CObject* rawData = nullptr;
-		CObjectSerializerImpl::getInstance().serialImpl(buffer, rawData, this, true);
-		_Data = rawData;
-
-		delete[] data;
+		try
+		{
+			CObject* rawData = nullptr;
+			CObjectSerializerImpl::getInstance().readTree(buffer, rawData, this);
+			_Data = rawData;
+		}
+		catch (const NLMISC::EStream &e)
+		{
+			// the read has said what was wrong, and has deleted what it had read
+			nlwarning("R2Share: the tree of the compressed data (%u bytes, expanded to %u bytes) is refused: %s",
+				_CompressedLen, _UncompressedLen, e.what());
+		}
 	}
 }
 }

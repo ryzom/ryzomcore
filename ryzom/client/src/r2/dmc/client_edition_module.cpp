@@ -1761,6 +1761,12 @@ void CClientEditionModule::onNodeSet(NLNET::IModuleProxy * /* sender */, const s
 	//H_AUTO(R2_CClientEditionModule_onNodeSet)
 	if (_Mute) return;
 	CObject::TSmartPtr temp = value.getData();
+	// the message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!temp)
+	{
+		nlwarning("R2CED: the server set no value in '%s' of '%s', refused", attrName.c_str(), instanceId.c_str());
+		return;
+	}
 	_Client->nodeSet(instanceId, attrName, temp);
 }
 
@@ -1769,7 +1775,14 @@ void CClientEditionModule::onNodeInserted(NLNET::IModuleProxy * /* sender */, co
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeInserted)
 	if (_Mute) return;
-	_Client->nodeInserted( instanceId, attrName, position, key, value.getData()); //todo ownership
+	CObject::TSmartPtr temp = value.getData();
+	// the message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!temp)
+	{
+		nlwarning("R2CED: the server inserted no value in '%s' of '%s', refused", attrName.c_str(), instanceId.c_str());
+		return;
+	}
+	_Client->nodeInserted( instanceId, attrName, position, key, temp); //todo ownership
 }
 
 // The ServerEditionMode erases a node on a hl scenario.

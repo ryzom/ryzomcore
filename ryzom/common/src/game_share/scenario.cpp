@@ -152,6 +152,64 @@ CScenario::~CScenario()
 
 
 
+// A scenario is changed one value at a time, and each value that is received is within the limits of the reader
+// (CObjectSerializer::MaxDepth, MaxNodes). The whole tree is kept within them too: it is cloned, walked and
+// written by code that recurses once per table, and what is written of it (to the clients that connect, to the
+// file of a session) is read back with these limits.
+//
+// How a value goes in the tree, for fitsInTree
+enum TTreeChange
+{
+	// the value becomes one more entry of the table
+	TreeAdd,
+	// the entries of the table are replaced by the entries of the value (setObject on a table)
+	TreeReplace,
+	// the value becomes an entry of the table, and is a value of the tree already
+	TreeMove
+};
+
+// True if the tree is within the limits once value is in the table into, in the way that change tells; if not,
+// a warning says for which operation it is refused. The tree is walked once, for its number of entries and
+// the number of them that are replaced.
+static bool fitsInTree(const CObject *tree, const CObject *into, const CObject *value, TTreeChange change, const char *operation)
+{
+	uint32 valueDepth = 0;
+	uint32 valueNodes = 0;
+	bool fits = CObjectSerializer::measure(value, valueDepth, valueNodes);
+
+	// the tables from the root of the tree to the table, the table included
+	uint32 intoDepth = 0;
+	for (const CObject *table = into; table; table = table->getParent())
+	{
+		++intoDepth;
+	}
+	// the table that the entries of the value go in stands for the value itself, when it is a table
+	uint32 newDepth = intoDepth + valueDepth;
+	if (change == TreeReplace && valueDepth != 0)
+	{
+		--newDepth;
+	}
+	fits = fits && newDepth <= CObjectSerializer::MaxDepth;
+
+	uint32 treeDepth = 0;
+	uint32 treeNodes = 0;
+	uint32 replacedNodes = 0;
+	if (fits && change != TreeMove)
+	{
+		fits = CObjectSerializer::measure(tree, treeDepth, treeNodes, change == TreeReplace ? into : nullptr, &replacedNodes);
+		// the value is an entry itself when it is added
+		uint32 addedNodes = valueNodes + (change == TreeAdd ? 1 : 0);
+		fits = fits && treeNodes - replacedNodes + addedNodes <= CObjectSerializer::MaxNodes;
+	}
+
+	if (!fits)
+	{
+		nlwarning("CScenario::%s : refused, the scenario would have tables nested deeper than %u or more than %u table entries (value: %u deep, %u entries, in a table %u deep; scenario: %u entries, %u replaced)",
+			operation, (uint)CObjectSerializer::MaxDepth, (uint)CObjectSerializer::MaxNodes, valueDepth, valueNodes, intoDepth, treeNodes, replacedNodes);
+	}
+	return fits;
+}
+
 bool CScenario::setNode( const std::string& instanceId, const std::string& attrName, CObject* value)
 {
 	_Clean = false;
@@ -160,6 +218,34 @@ bool CScenario::setNode( const std::string& instanceId, const std::string& attrN
 	if (!found)
 	{
 		nlwarning("CScenario::setNode : couldn't find object with id = %s", instanceId.c_str());
+		return false;
+	}
+	// a message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!value)
+	{
+		nlwarning("CScenario::setNode : no value to set in object with id = %s", instanceId.c_str());
+		return false;
+	}
+
+	// What setObject below does: without an attribute name the entries of the object are replaced; an
+	// attribute that is a table has its entries replaced; one that the object does not have is added; one
+	// that is a string or a number takes the value, or refuses it, and the tree keeps its shape.
+	const CObject *into = found;
+	TTreeChange change = TreeReplace;
+	if (!attrName.empty())
+	{
+		const CObject *attr = found->getAttr(attrName);
+		if (!attr)
+		{
+			change = TreeAdd;
+		}
+		else
+		{
+			into = attr->isTable() ? attr : nullptr;
+		}
+	}
+	if (into && !fitsInTree(_HighLevel, into, value, change, "setNode"))
+	{
 		return false;
 	}
 	return found->setObject(attrName, value);
@@ -184,6 +270,16 @@ bool  CScenario::insertNode(const std::string&  instanceId, const std::string & 
 	if (!found)
 	{
 		nlwarning("CScenario::insertNode : couldn't find attribute '%s' in object with id = %s", attrName.c_str(), instanceId.c_str());
+		return false;
+	}
+	// a message can come with the tree that is no value, or with compressed data that gives no tree
+	if (!value)
+	{
+		nlwarning("CScenario::insertNode : no value to insert in object with id = %s", instanceId.c_str());
+		return false;
+	}
+	if (!fitsInTree(_HighLevel, found, value, TreeAdd, "insertNode"))
+	{
 		return false;
 	}
 
@@ -292,6 +388,24 @@ bool CScenario::moveNode( const std::string& instanceId1, const std::string& att
 	if (! from->canTake(position1))
 	{
 		nlwarning("<CScenario::moveNode> Can not move node from (%s, %s, %d)", instanceId1.c_str(), attrName1.c_str(), position1);
+		return false;
+	}
+
+	// The value that take() below removes from the tree. It is not moved into itself or under one of its own
+	// values, which would make a loop of it that nothing can walk to an end, and not to a place that nests
+	// the tables of the scenario deeper than they are read.
+	const CObject *moved = position1 == -1 ? from : from->getValueAtPos(static_cast<uint32>(position1)).getPtr();
+	for (const CObject *table = to; table; table = table->getParent())
+	{
+		if (table == moved)
+		{
+			nlwarning("<CScenario::moveNode> Can not move node (%s, %s, %d) under itself, to (%s, %s, %d)",
+				instanceId1.c_str(), attrName1.c_str(), position1, instanceId2.c_str(), attrName2.c_str(), position2);
+			return false;
+		}
+	}
+	if (!fitsInTree(_HighLevel, to, moved, TreeMove, "moveNode"))
+	{
 		return false;
 	}
 
