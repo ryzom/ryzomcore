@@ -49,8 +49,12 @@ void CHttpPostTask::run(void)
 		return;
 	}
 
+	// the task runs unattended on its own thread, it must end when the host does not answer
+	httpClient.setTimeout(10, 30);
+
 	if (!httpClient.sendPost(m_Host + m_Page, m_Params))
 	{
+		httpClient.disconnect();
 		return;
 	}
 

@@ -220,6 +220,18 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 }
 
 // ***************************************************************************
+void CCurlHttpClient::setTimeout(uint connectSeconds, uint requestSeconds)
+{
+	if (!_Curl)
+		return;
+
+	// the client may run on a worker thread: libcurl must not time out name lookups with a signal
+	curl_easy_setopt(_Curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(_Curl, CURLOPT_CONNECTTIMEOUT, (long)connectSeconds);
+	curl_easy_setopt(_Curl, CURLOPT_TIMEOUT, (long)requestSeconds);
+}
+
+// ***************************************************************************
 void CCurlHttpClient::disconnect()
 {
 	if (_Curl)

@@ -63,6 +63,9 @@ public:
 	/// Wait for a response
 	bool receive(std::string &res, bool verbose = false);
 
+	/// Limit the time to connect and the time of a whole request, in seconds, 0 for no limit (call after connect)
+	void setTimeout(uint connectSeconds, uint requestSeconds);
+
 	/// Disconnect if connected (otherwise does nothing)
 	void disconnect();
 
