@@ -42,6 +42,7 @@ struct CAdminCommand
 //
 
 void initAdmin ();
+void releaseAdmin();
 void initCommandsPrivileges(const std::string & fileName);
 void initPositionFlags(const std::string & fileName);
 void getUCstringFromHash(const std::string & hash, ucstring & finaltext);

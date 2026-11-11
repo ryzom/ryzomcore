@@ -587,6 +587,8 @@ static void loadCommandsPrivileges(const string & fileName, bool init)
 	for (uint i = 0; i < nbCommands; i++)
 	{
 		AdminCommands[i].Priv = DefaultPriv;
+		AdminCommands[i].ForwardToservice.clear();
+		AdminCommands[i].Audit = false;
 	}
 
 	// load file content
@@ -3007,9 +3009,52 @@ NLMISC_DYNVARIABLE (uint32, RyzomDate, "Current ryzom date")
 //
 //
 //
+// One audit record on its way to the audit page: the thread that posts it and its task
+struct CAuditPost
+{
+	NLMISC::IThread *Thread;
+	NLWEB::CHttpPostTask *Task;
+};
+
+// the audit records being posted
+static std::vector<CAuditPost> s_AuditPosts;
+
+// the longest raw command kept in an audit record, in bytes
+static const uint s_AuditMaxRawLength = 512;
+
+// how many audit records may be on their way at once, more are dropped with a warning
+static const uint s_AuditMaxPosts = 16;
+
+// Deletes the threads and tasks of the audit records that have been posted
+static void reapAuditPosts(bool waitForAll)
+{
+	for (uint i = 0; i < s_AuditPosts.size();)
+	{
+		if (waitForAll)
+			s_AuditPosts[i].Thread->wait();
+
+		if (s_AuditPosts[i].Thread->isRunning())
+		{
+			++i;
+			continue;
+		}
+
+		delete s_AuditPosts[i].Thread;
+		delete s_AuditPosts[i].Task;
+		s_AuditPosts[i] = s_AuditPosts.back();
+		s_AuditPosts.pop_back();
+	}
+}
+
+void releaseAdmin()
+{
+	reapAuditPosts(true);
+}
+
 void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &eid, const string &name, const string &targetName)
 {
-	if (cmd == NULL)
+	// only the commands flagged 'audit' in the privileges file
+	if (cmd == NULL || !cmd->Audit)
 		return;
 
 	CConfigFile::CVar *varHost = IService::getInstance()->ConfigFile.getVarPtr("AdminCommandAuditHost");
@@ -3024,11 +3069,34 @@ void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &
 	if (host.empty() || page.empty())
 		return;
 
-	char params[1024];
-	sprintf(params, "action=audit&cmd=%s&raw=%s&name=(%s,%s)&target=%s", cmd->Name.c_str(), rawCommand.c_str(), eid.toString().c_str(), name.c_str(), targetName.c_str());
+	reapAuditPosts(false);
+	if (s_AuditPosts.size() >= s_AuditMaxPosts)
+	{
+		nlwarning("ADMIN: audit of command '%s' by %s dropped, %u records are still being posted to '%s'", cmd->Name.c_str(), eid.toString().c_str(), (uint)s_AuditPosts.size(), host.c_str());
+		return;
+	}
 
-	IThread *thread = IThread::create(new CHttpPostTask(host, page, params));
-	thread->start();
+	// the raw command comes from the client: keep a bounded part, cut between two UTF-8 characters
+	string raw = rawCommand;
+	if (raw.size() > s_AuditMaxRawLength)
+	{
+		string::size_type cut = s_AuditMaxRawLength;
+		while (cut > 0 && ((uint8)raw[cut] & 0xC0) == 0x80)
+			--cut;
+		raw.resize(cut);
+		raw += " [cut]";
+	}
+
+	string params = "action=audit&cmd=" + encodeURIComponent(cmd->Name)
+	    + "&raw=" + encodeURIComponent(raw)
+	    + "&name=" + encodeURIComponent("(" + eid.toString() + "," + name + ")")
+	    + "&target=" + encodeURIComponent(targetName);
+
+	CAuditPost post;
+	post.Task = new NLWEB::CHttpPostTask(host, page, params);
+	post.Thread = IThread::create(post.Task);
+	post.Thread->start();
+	s_AuditPosts.push_back(post);
 }
 
 // Number of commands NLMISC::ICommand::execute() would run for this line, following its parser: a ';' outside
@@ -3180,6 +3248,13 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 		// we need to forward the command to another service
 		if (IClientCommandForwader::getInstance())
 		{
+			std::string forwardTargetName = "implicite";
+			if (onTarget)
+				forwardTargetName = NLMISC::toString("(%s,%s)", c->getTarget().toString().c_str(), CEntityIdTranslator::getInstance()->getByEntity(c->getTarget()).toString().c_str());
+			std::string forwardName = CEntityIdTranslator::getInstance()->getByEntity(eid).toString();
+			nlinfo("ADMIN: Player (%s,%s) forwards client admin command '%s %s' to '%s' on target %s", eid.toString().c_str(), forwardName.c_str(), cmdName.c_str(), arg.c_str(), cmd->ForwardToservice.c_str(), forwardTargetName.c_str());
+			audit(cmd, cmdName + " " + arg, eid, forwardName, forwardTargetName);
+
 			IClientCommandForwader::getInstance()->sendCommand(cmd->ForwardToservice, cmdName, eid, onTarget, onTarget ? c->getTarget() : CEntityId::Unknown, arg);
 		}
 	}
@@ -5877,7 +5952,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		if (command_args.size () != 3) return false;
 		string arg = command_args[1]+" "+command_args[2];
 		const CAdminCommand * cmd = findAdminCommand("renamePlayer");
-		if (!cmd->ForwardToservice.empty())
+		if (cmd != NULL && !cmd->ForwardToservice.empty())
 		{
 			// we need to forward the command to another service
 			if (IClientCommandForwader::getInstance())
