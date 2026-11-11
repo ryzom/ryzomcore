@@ -28,13 +28,12 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 <?php
 
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
-	$roleSupport = isset($_POST["roleSupport"]) && $_POST["roleSupport"] == "on";
 	$roleDomain = isset($_POST["roleDomain"]) && $_POST["roleDomain"] == "on";
 	$configureShardDev = isset($_POST["configureShardDev"]) && $_POST["configureShardDev"] == "on";
 	
 	$continue = true;
 
-	if (!$roleService && !$roleSupport && !$roleDomain) {
+	if (!$roleService && !$roleDomain) {
 		printalert("danger", "No server roles selected");
 		$continue = false;
 	}
@@ -47,7 +46,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 	// since the browser is not the thing to trust with that.
 	$passwordFields = array('nelSetupPassword' => 'Setup Password');
 	if ($roleService)	$passwordFields['toolsAdminPassword'] = 'Admin Password (shard tools)';
-	if ($roleSupport)	$passwordFields['amsAdminPassword'] = 'Admin Password (AMS)';
 	foreach ($passwordFields as $field => $label) {
 		$value = isset($_POST[$field]) ? (string)$_POST[$field] : '';
 		if ($value === '' || strtolower($value) === 'admin' || strlen($value) < 8) {
@@ -107,10 +105,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			$continue = validate_writable($continue, "admin/graphs_output/") && $continue;
 			$continue = validate_writable($continue, "admin/templates/default_c/") && $continue;
 		}
-		if ($roleSupport) {
-			$continue = validate_writable($continue, "ams/cache/") && $continue;
-			$continue = validate_writable($continue, "ams/templates_c/") && $continue;
-		}
 		$continue = validate_writable($continue, "./");
 		if ($continue) {
 			printalert("success", "Paths are writable");
@@ -142,14 +136,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]) && $continue;
 	}
 
-	if ($roleSupport) {
-		// Create AMS database
-		$continue = create_use_database($continue, $con, $_POST["amsDatabase"]) && $continue;
-
-		// Create AMS Library database
-		$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]) && $continue;
-	}
-
 	if ($con) {
 		mysqli_close($con);
 		printalert("info", "Disconnected from the Service SQL server");
@@ -173,8 +159,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 				'nelSqlPassword'      => $_POST["nelSqlPassword"],
 				'nelDatabase'         => $_POST["nelDatabase"],
 				'toolDatabase'        => $_POST["toolDatabase"],
-				'amsDatabase'         => $_POST["amsDatabase"],
-				'amsLibDatabase'      => $_POST["amsLibDatabase"],
 				'nelSetupPassword'    => $_POST["nelSetupPassword"],
 				'domainDatabase'      => $_POST["domainDatabase"],
 				'domainUsersDir'      => $_POST["domainUsersDir"],
@@ -222,10 +206,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 	require_once('database.php');
 
-	if ($roleSupport) {
-		$continue = upgrade_support_databases($continue) && $continue;
-	}
-
 	if ($roleService) {
 		$continue = upgrade_service_databases($continue) && $continue;
 	}
@@ -272,39 +252,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		}
 	}
 
-	if ($roleSupport) {
-		// Load AMS Library
-		if ($continue) {
-			try {
-				require_once($AMS_LIB . '/libinclude.php');
-			} catch (Exception $e) {
-				printalert("danger", "Failed to include AMS <em>libinclude.php</em>");
-				$continue = false;
-			}
-		}
-
-		// Create AMS Admin user
-		if ($continue) {
-			$hashpass = crypt($_POST["amsAdminPassword"], Users::generateSALT());
-			$params = array(
-			  'Login' => $_POST["amsAdminUsername"],
-			  'Password' => $hashpass,
-			  'Email' => "localhost@localhost", // TODO
-			);
-			try {
-				$user_id = WebUsers::createWebuser($params['Login'], $params['Password'],$params['Email']);
-				$result = Webusers::createUser($params, $user_id);
-				Users::createPermissions(array($params['Login']));
-				$dbl = new DBLayer("lib");
-				$dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));
-				printalert("success", "AMS Admin account <em>" . htmlentities($_POST["amsAdminUsername"]) . "</em> created");
-			} catch (PDOException $e) {
-				printalert("danger", "Failed to create AMS Admin account");
-				$continue = false;
-			}
-		}
-	}
-
 	if ($continue && $roleDomain) {
 		if ($configureShardDev) {
 			$continue = configure_shard_dev($continue) && $continue;
@@ -314,15 +261,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 	if ($continue && $roleService) {
 		if (file_put_contents("role_service", "1")) {
 			printalert("success", "Service role successfully installed");
-		} else {
-			printalert("danger", "Failed to flag installation success");
-			$continue = false;
-		}
-	}
-
-	if ($continue && $roleSupport) {
-		if (file_put_contents("role_support", "1")) {
-			printalert("success", "Support role successfully installed");
 		} else {
 			printalert("danger", "Failed to flag installation success");
 			$continue = false;
@@ -357,13 +295,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 				document.getElementById("panelAdmin").className = panelClass;
 			}
 
-			function checkSupport() {
-				var panelClass = document.getElementById('roleSupport').checked
-					? visiblePanelClass
-					: hiddenPanelClass;
-				document.getElementById("panelAMS").className = panelClass;
-			}
-
 			function checkDomain() {
 				var panelClass = document.getElementById('roleDomain').checked
 					? visiblePanelClass
@@ -384,15 +315,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 								<div class="checkbox">
 									<label>
 										<input id="roleService" name="roleService" type="checkbox" onclick="checkService();" checked> Service <small>(NeL Login, Shard Admin, Domain Database, ...)</small>
-									</label>
-								</div>
-							</div>
-						</div>
-						<div class="form-group">
-							<div class="col-sm-offset-3 col-sm-8">
-								<div class="checkbox">
-									<label>
-										<input id="roleSupport" name="roleSupport" type="checkbox" onclick="checkSupport();" checked> Support <small>(AMS, ...)</small>
 									</label>
 								</div>
 							</div>
@@ -496,37 +418,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						</div>
 					</div>
 				</div>
-				<div id="panelAMS" class="panel panel-default">
-					<div class="panel-heading">
-						<h2 class="panel-title">AMS <small>(Account Management System)</small></h2>
-					</div>
-					<div class="panel-body">
-						<div class="form-group">
-							<label for="amsDatabase" class="col-sm-3 control-label">AMS Database</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsDatabase" name="amsDatabase" value="nel_ams">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsLibDatabase" class="col-sm-3 control-label">Library Database</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsLibDatabase" name="amsLibDatabase" value="nel_ams_lib">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsAdminUsername" class="col-sm-3 control-label">Admin Username</label>
-							<div class="col-sm-6">
-								<input type="text" class="form-control" id="amsAdminUsername" name="amsAdminUsername" value="admin">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="amsAdminPassword" class="col-sm-3 control-label">Admin Password</label>
-							<div class="col-sm-6">
-								<input type="password" class="form-control" id="amsAdminPassword" name="amsAdminPassword" value="" required autocomplete="new-password" placeholder="Required">
-							</div>
-						</div>
-					</div>
-				</div>
 				<div id="panelDomain" class="panel panel-default hide">
 					<div class="panel-heading">
 						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
@@ -543,7 +434,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 								<!-- IMPORTANT: This setup must NEVER be modified to configure the domains, it is not it's responsibility. -->
 								<p>It is required to use separate virtual hosts for multiple domains, in order to allow domain-specific script to run at different versions.</p>
 								<p>It is recommended, when planning to use multiple domains, to use a separate virtual host for each web service role.</p>
-								<p>There can be multiple instances of the domain role, there can only be one support and one service role setup.</p>
+								<p>There can be multiple instances of the domain role, there can only be one service role setup.</p>
 							</div>
 						</div>
 						<?php } ?>
@@ -597,7 +488,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			<script>
 
 			checkService();
-			checkSupport();
 			checkDomain();
 
 			</script>

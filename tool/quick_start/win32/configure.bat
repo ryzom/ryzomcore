@@ -139,7 +139,7 @@ powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localho
 echo | set /p=.
 powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localhost_admin.lnk');$s.TargetPath='http://localhost:9042/admin/';$s.Save()"
 echo | set /p=.
-powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localhost_ams.lnk');$s.TargetPath='http://localhost:9042/ams/';$s.Save()"
+powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localhost_account.lnk');$s.TargetPath='http://localhost:9042/account/';$s.Save()"
 echo | set /p=.
 echo .
 echo(

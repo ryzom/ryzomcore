@@ -9,10 +9,6 @@ if (function_exists('mysqli_report'))
 $db_nel = 7;
 $db_nel_tool = 3;
 
-// Support
-$db_nel_ams = 2;
-$db_nel_ams_lib = 7;
-
 // Domain
 $db_ring_domain = 3;
 
@@ -93,36 +89,6 @@ function upgrade_service_databases($continue_r) {
 		}
 	}
 	disconnect_database($con, "tool");
-
-	return $continue;
-}
-
-function upgrade_support_databases($continue_r) {
-	$continue = $continue_r;
-
-	$con = null;
-	$con = connect_database($continue, "web");
-	$continue = ($con != null);
-	global $db_nel_ams;
-	for ($i = 1; $i <= $db_nel_ams; $i++) {
-		if ($continue && get_db_version("web") < $i) {
-			$continue = update_database_structure($continue, $con, "nel_ams_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
-			$continue = set_db_version($continue, "web", $i);
-		}
-	}
-	disconnect_database($con, "web");
-
-	$con = null;
-	$con = connect_database($continue, "lib");
-	$continue = ($con != null);
-	global $db_nel_ams_lib;
-	for ($i = 1; $i <= $db_nel_ams_lib; $i++) {
-		if ($continue && get_db_version("lib") < $i) {
-			$continue = update_database_structure($continue, $con, "nel_ams_lib_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
-			$continue = set_db_version($continue, "lib", $i);
-		}
-	}
-	disconnect_database($con, "lib");
 
 	return $continue;
 }

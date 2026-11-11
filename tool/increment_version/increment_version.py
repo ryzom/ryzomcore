@@ -51,15 +51,6 @@ for line in fileinput.input("CMakeLists.txt", inplace = True):
 		print(line.rstrip())
 
 os.chdir(RootDir)
-os.chdir("web/public_php/ams/templates/")
-
-for line in fileinput.input("layout.tpl", inplace = True):
-	if (" Powered by: " in line):
-		print("\t\t\t{if $permission > 1}<p class=\"pull-right\">AMS " + VersionString + " Powered by: <a href=\"http://usman.it/free-responsive-admin-template\">Charisma</a></p>{/if}")
-	else:
-		print(line.rstrip())
-
-os.chdir(RootDir)
 os.chdir("ryzom/common/src/game_share/")
 
 for line in fileinput.input("ryzom_version.h", inplace = True):

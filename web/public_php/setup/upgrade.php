@@ -29,10 +29,6 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 
 	require_once('database.php');
 
-	if (file_exists("role_support")) {
-		$continue = upgrade_support_databases($continue);
-	}
-
 	if (file_exists("role_service")) {
 		$continue = upgrade_service_databases($continue);
 	}
@@ -48,7 +44,6 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 			$PRIVATE_PHP_PATH . "/setup/config/config.php",
 			$cfg, $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH,
 			$NEL_SETUP_PASSWORD, $NEL_DOMAIN_NAME, $NEL_SETUP_VERSION,
-			$cfg['crypt']['key'], $SUPPORT_GROUP_IMAP_CRYPTKEY,
 			$cfg['db']['ring']['name'], $USERS_DIR,
 			$NEL_SETUP_VERSION_CONFIGURED
 		);

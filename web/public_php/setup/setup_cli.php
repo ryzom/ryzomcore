@@ -16,8 +16,6 @@
  *   --sql-pass=PASS           SQL password (default: empty)
  *   --nel-db=NAME             NeL database name (default: nel)
  *   --tool-db=NAME            NeL Tool database name (default: nel_tool)
- *   --ams-db=NAME             AMS database name (default: nel_ams)
- *   --ams-lib-db=NAME         AMS Library database name (default: nel_ams_lib)
  *   --domain-db=NAME          Ring domain database name (default: ring_dev or ring_HOSTNAME)
  *   --domain-name=NAME        Domain name (default: dev or HOSTNAME)
  *   --users-dir=PATH          Users directory for MFS (auto-detected)
@@ -28,7 +26,6 @@
  *   --role-service            Enable service role (default: enabled)
  *   --role-domain             Enable domain role (default: enabled)
  *   --no-role-service         Disable service role
- *   --no-role-support         Disable support role
  *   --no-role-domain          Disable domain role
  */
 
@@ -128,8 +125,6 @@ Install options:
   --sql-pass=PASS           SQL password (default: empty)
   --nel-db=NAME             NeL database name (default: nel)
   --tool-db=NAME            NeL Tool database name (default: nel_tool)
-  --ams-db=NAME             AMS database name (default: nel_ams)
-  --ams-lib-db=NAME         AMS Library database name (default: nel_ams_lib)
   --domain-db=NAME          Ring domain database name
   --domain-name=NAME        Domain name
   --users-dir=PATH          Users directory for MFS
@@ -138,7 +133,6 @@ Install options:
   --admin-pass=PASS         Shard admin password (required unless --dev)
   --private-php=PATH        Private PHP directory (default: ../private_php/)
   --no-role-service         Disable service role
-  --no-role-support         Disable support role
   --no-role-domain          Disable domain role
 
 USAGE;
@@ -154,7 +148,7 @@ function run_install($opts)
 	// a bare require makes them locals: the connects got nulls and every
 	// migration loop silently ran zero times.
 	global $cfg, $NEL_SETUP_VERSION;
-	global $db_nel, $db_nel_tool, $db_nel_ams, $db_nel_ams_lib, $db_ring_domain;
+	global $db_nel, $db_nel_tool, $db_ring_domain;
 	global $db, $tpl;
 	// set at the top of this script; the config paths that config.php
 	// assigns are read back by the migration helpers (global $PRIVATE_PHP_PATH)
@@ -171,8 +165,6 @@ function run_install($opts)
 	$sqlPass = isset($opts['sql-pass']) ? $opts['sql-pass'] : '';
 	$nelDb = isset($opts['nel-db']) ? $opts['nel-db'] : 'nel';
 	$toolDb = isset($opts['tool-db']) ? $opts['tool-db'] : 'nel_tool';
-	$amsDb = isset($opts['ams-db']) ? $opts['ams-db'] : 'nel_ams';
-	$amsLibDb = isset($opts['ams-lib-db']) ? $opts['ams-lib-db'] : 'nel_ams_lib';
 	$domainName = isset($opts['domain-name']) ? $opts['domain-name'] : ($isDev ? 'dev' : gethostname());
 	$domainDb = isset($opts['domain-db']) ? $opts['domain-db'] : 'ring_' . $domainName;
 	$setupPass = isset($opts['setup-password']) ? $opts['setup-password'] : 'admin';
@@ -193,11 +185,10 @@ function run_install($opts)
 	}
 
 	$roleService = !isset($opts['no-role-service']);
-	$roleSupport = !isset($opts['no-role-support']);
 	$roleDomain = !isset($opts['no-role-domain']);
 	$configureShardDev = $isDev && $roleDomain;
 
-	if (!$roleService && !$roleSupport && !$roleDomain) {
+	if (!$roleService && !$roleDomain) {
 		cli_err("No server roles enabled. At least one role must be active.");
 		exit(1);
 	}
@@ -249,10 +240,6 @@ function run_install($opts)
 		$continue = cli_validate_writable('admin/graphs_output/') && $continue;
 		$continue = cli_validate_writable('admin/templates/default_c/') && $continue;
 	}
-	if ($roleSupport) {
-		$continue = cli_validate_writable('ams/cache/') && $continue;
-		$continue = cli_validate_writable('ams/templates_c/') && $continue;
-	}
 	$continue = cli_validate_writable('./') && $continue;
 	if (!$continue) {
 		cli_err("Required directories are not writable. Fix permissions and retry.");
@@ -266,11 +253,9 @@ function run_install($opts)
 	echo "  SQL User:      $sqlUser\n";
 	echo "  Roles:         " . implode(', ', array_filter(array(
 		$roleService ? 'Service' : null,
-		$roleSupport ? 'Support' : null,
 		$roleDomain ? 'Domain' : null,
 	))) . "\n";
 	if ($roleService) echo "  NeL DB:        $nelDb\n  Tool DB:       $toolDb\n";
-	if ($roleSupport) echo "  AMS DB:        $amsDb\n  AMS Lib DB:    $amsLibDb\n";
 	if ($roleDomain) echo "  Domain:        $domainName\n  Domain DB:     $domainDb\n";
 	echo "\n";
 
@@ -294,10 +279,6 @@ function run_install($opts)
 	}
 	if ($roleDomain) {
 		$continue = cli_create_database($con, $domainDb) && $continue;
-	}
-	if ($roleSupport) {
-		$continue = cli_create_database($con, $amsDb) && $continue;
-		$continue = cli_create_database($con, $amsLibDb) && $continue;
 	}
 
 	mysqli_close($con);
@@ -325,8 +306,6 @@ function run_install($opts)
 			'nelSqlPassword'      => $sqlPass,
 			'nelDatabase'         => $nelDb,
 			'toolDatabase'        => $toolDb,
-			'amsDatabase'         => $amsDb,
-			'amsLibDatabase'      => $amsLibDb,
 			'nelSetupPassword'    => $setupPass,
 			'domainDatabase'      => $domainDb,
 			'domainUsersDir'      => $usersDir,
@@ -358,9 +337,6 @@ function run_install($opts)
 	require_once('setup/database.php');
 
 	// Run database migrations
-	if ($roleSupport) {
-		$continue = upgrade_support_databases($continue);
-	}
 	if ($roleService) {
 		$continue = upgrade_service_databases($continue);
 	}
@@ -406,7 +382,6 @@ function run_install($opts)
 
 	// Write role flags
 	if ($continue && $roleService) file_put_contents('role_service', '1');
-	if ($continue && $roleSupport) file_put_contents('role_support', '1');
 	if ($continue && $roleDomain) file_put_contents('role_domain', '1');
 
 	echo "\n";
@@ -423,9 +398,9 @@ function run_upgrade()
 	// Same scope story as run_install(): the required files' top-level
 	// assignments must land in the globals their functions read back.
 	global $cfg, $NEL_SETUP_VERSION, $NEL_SETUP_VERSION_CONFIGURED;
-	global $db_nel, $db_nel_tool, $db_nel_ams, $db_nel_ams_lib, $db_ring_domain;
+	global $db_nel, $db_nel_tool, $db_ring_domain;
 	global $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH, $NEL_SETUP_PASSWORD;
-	global $NEL_DOMAIN_NAME, $SUPPORT_GROUP_IMAP_CRYPTKEY, $USERS_DIR;
+	global $NEL_DOMAIN_NAME, $USERS_DIR;
 
 	if (!file_exists('config.php')) {
 		cli_err("Not installed. Run 'install' first.");
@@ -451,9 +426,6 @@ function run_upgrade()
 
 	$continue = true;
 
-	if (file_exists('role_support')) {
-		$continue = upgrade_support_databases($continue);
-	}
 	if (file_exists('role_service')) {
 		$continue = upgrade_service_databases($continue);
 	}
@@ -468,7 +440,6 @@ function run_upgrade()
 			$PRIVATE_PHP_PATH . '/setup/config/config.php',
 			$cfg, $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH,
 			$NEL_SETUP_PASSWORD, $NEL_DOMAIN_NAME, $NEL_SETUP_VERSION,
-			$cfg['crypt']['key'], $SUPPORT_GROUP_IMAP_CRYPTKEY,
 			$cfg['db']['ring']['name'], $USERS_DIR,
 			$NEL_SETUP_VERSION_CONFIGURED
 		);
