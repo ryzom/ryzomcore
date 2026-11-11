@@ -23,8 +23,6 @@
  *   --admin-user=USER         Shard admin username (default: admin)
  *   --admin-pass=PASS         Shard admin password (required unless --dev)
  *   --private-php=PATH        Private PHP directory (default: ../private_php/)
- *   --role-service            Enable service role (default: enabled)
- *   --role-domain             Enable domain role (default: enabled)
  *   --no-role-service         Disable service role
  *   --no-role-domain          Disable domain role
  */
@@ -59,24 +57,22 @@ if (empty($args)) {
 
 $command = array_shift($args);
 
-if ($command === 'help' || $command === '--help' || $command === '-h') {
-	print_usage();
-	exit(0);
+if ($command === '--help' || $command === '-h') {
+	$command = 'help';
 }
 
-if ($command !== 'install' && $command !== 'upgrade') {
+if ($command !== 'install' && $command !== 'upgrade' && $command !== 'help') {
 	cli_err("Unknown command: $command");
 	print_usage();
 	exit(1);
 }
 
 // Parse options
-$opts = array();
-foreach ($args as $arg) {
-	if (substr($arg, 0, 2) === '--') {
-		$parts = explode('=', substr($arg, 2), 2);
-		$opts[$parts[0]] = isset($parts[1]) ? $parts[1] : true;
-	}
+$opts = cli_parse_options($command, $args);
+
+if ($command === 'help') {
+	print_usage();
+	exit(0);
 }
 
 // Determine paths
@@ -105,6 +101,78 @@ if ($command === 'upgrade') {
 	run_upgrade();
 } else {
 	run_install($opts);
+}
+
+// The options each command accepts: name => true when the option takes a
+// value (--name=VALUE), false when it is a switch.
+function cli_known_options($command)
+{
+	if ($command !== 'install') {
+		return array(); // upgrade and help take none
+	}
+	return array(
+		'dev'              => false,
+		'sql-host'         => true,
+		'sql-port'         => true,
+		'sql-user'         => true,
+		'sql-pass'         => true,
+		'nel-db'           => true,
+		'tool-db'          => true,
+		'domain-db'        => true,
+		'domain-name'      => true,
+		'users-dir'        => true,
+		'setup-password'   => true,
+		'admin-user'       => true,
+		'admin-pass'       => true,
+		'private-php'      => true,
+		'no-role-service'  => false,
+		'no-role-domain'   => false,
+	);
+}
+
+// Anything on the command line that the command does not know is refused.
+// It used to be ignored without a word: a mistyped option installed with the
+// default in its place, and "--sql-pass secret" set the password to "1".
+function cli_parse_options($command, $args)
+{
+	$known = cli_known_options($command);
+	// these went away with the AMS account management system
+	$removedWithAms = array('no-role-support', 'ams-db', 'ams-lib-db');
+	// these were listed in this file's header and never did anything: both
+	// roles are installed unless the --no-role- option says otherwise. They
+	// get their own message on install, the command they were listed for.
+	$neverDidAnything = array('role-service', 'role-domain');
+	$opts = array();
+	$errors = array();
+	foreach ($args as $arg) {
+		if (substr($arg, 0, 2) !== '--') {
+			$errors[] = "Unexpected argument: $arg";
+			continue;
+		}
+		$parts = explode('=', substr($arg, 2), 2);
+		$name = $parts[0];
+		if (in_array($name, $removedWithAms, true)) {
+			$errors[] = "Option --$name no longer exists: the AMS account management system was removed, and the support role and the AMS databases with it. Drop the option.";
+		} else if ($command === 'install' && in_array($name, $neverDidAnything, true)) {
+			$errors[] = "Option --$name does not exist: the role is installed by default, and --no-$name leaves it out. Drop the option.";
+		} else if (!array_key_exists($name, $known)) {
+			$errors[] = "Unknown option: --$name";
+		} else if ($known[$name] && !isset($parts[1])) {
+			$errors[] = "Option --$name needs a value: --$name=VALUE";
+		} else if (!$known[$name] && isset($parts[1])) {
+			$errors[] = "Option --$name does not take a value";
+		} else {
+			$opts[$name] = isset($parts[1]) ? $parts[1] : true;
+		}
+	}
+	if (!empty($errors)) {
+		foreach ($errors as $error) {
+			cli_err($error);
+		}
+		echo "Run 'php setup_cli.php help' for the options of each command.\n";
+		exit(1);
+	}
+	return $opts;
 }
 
 function print_usage()
