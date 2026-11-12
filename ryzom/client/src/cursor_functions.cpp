@@ -283,8 +283,9 @@ void checkUnderCursor()
 		entity= EntitiesMngr.getEntityUnderPos(cursX, cursY, ClientCfg.SelectionDist, isPlayerUnderCursor);
 
 		// If the mouse is over the player make the player transparent
-		CCDBNodeLeaf *pNL = s_UserCharFade ? &*s_UserCharFade
-			: &*(s_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
+		if (!s_UserCharFade)
+			s_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false);
+		CCDBNodeLeaf *pNL = s_UserCharFade;
 		if ((pNL != nullptr) && (pNL->getValue32() == 1) && UserEntity->selectable())
 		{
 			// If the nearest entity is the player, hide!

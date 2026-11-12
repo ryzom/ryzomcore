@@ -605,8 +605,9 @@ void CTool::handleMouseOverPlayer(bool over)
 {
 	//H_AUTO(R2_CTool_handleMouseOverPlayer)
 	// If the mouse is over the player make the player transparent
-	CCDBNodeLeaf *pNL = _UserCharFade ? &*_UserCharFade
-		: &*(_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
+	if (!_UserCharFade)
+		_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false);
+	CCDBNodeLeaf *pNL = _UserCharFade;
 	if ((pNL != nullptr) && (pNL->getValue32() == 1) && UserEntity->selectable())
 	{
 		// If the nearest entity is the player, hide!
