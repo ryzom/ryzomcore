@@ -29,6 +29,21 @@ target_link_libraries(ryzom_game_share_scenario_text_parser
         NeL::misc
 )
 
+add_test_executable(ryzom_game_share_rt_scenario_check
+        rt_scenario_check_test.cpp
+)
+
+target_include_directories(ryzom_game_share_rt_scenario_check
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/ryzom/common/src
+)
+
+target_link_libraries(ryzom_game_share_rt_scenario_check
+        PRIVATE
+        Ryzom::gameshare
+        NeL::misc
+)
+
 add_test_executable(ryzom_game_share_object_serializer
         object_serializer_test.cpp
 )

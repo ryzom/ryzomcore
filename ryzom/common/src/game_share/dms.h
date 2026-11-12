@@ -102,6 +102,13 @@ namespace R2
 		virtual void updateCharPioneerRight(TCharId charId) = 0;
 		virtual void characterReady(TCharId charId) =0;
 		virtual void returnToPreviousSession(TCharId charId) = 0;
+		// true if the run time scenario and the act it is to start in pass the checks of rt_scenario_check.h with
+		// the limits of this service; if not, error receives what is refused. overQuota, when given, receives
+		// whether the refusal is for a scenario that is well formed and too large.
+		virtual bool checkRtScenario(CObject *rtScenario, uint32 startingAct, std::string &error, bool *overQuota = nullptr) const = 0;
+		// a scenario that was accepted for the session, and whose start was answered to the clients, could not be
+		// started by the animation module: the session leaves the test mode and its clients are told
+		virtual void animationSessionStartFailed(TSessionId sessionId, uint32 startingAct, const std::string &errorReason) = 0;
 
 
 	};
@@ -124,6 +131,9 @@ namespace R2
 		virtual NLNET::IModule* getModule() const = 0;
 
 		virtual bool isSessionRunning(TSessionId sessionId) const = 0;
+		// true if an animation of this very session (not of a session linked to it) runs, or was asked for with
+		// scheduleStartSession and is not made yet
+		virtual bool isSessionStartingOrRunning(TSessionId sessionId) const = 0;
 		virtual uint32 getCurrentAct(TSessionId sessionId) const = 0;
 		virtual void stopControlNpcs(TCharId charId) = 0;
 		virtual void setSessionStartParams(TSessionId sessionId, sint32 x, sint32 y, uint8 season) = 0;

@@ -56,6 +56,7 @@
 #include "game_share/r2_messages.h"
 #include "game_share/scenario_entry_points.h"
 #include "game_share/ring_access.h"
+#include "game_share/rt_scenario_check.h"
 
 #include "game_share/ai_wrapper.h"
 
@@ -237,6 +238,12 @@ namespace R2
 		uint32 DateSinceNoPlayer;
 		std::string RingAccess;
 		bool IsAnimationStopped;
+		// true when the EGS was told that the animation of this session starts (animSessionStarted), for the
+		// start that was asked for last
+		bool AnimationStartAnnounced;
+		// true when the file of this session could not be read and no copy of it could be kept: the session
+		// is not saved, so that the file stays as it is, until the file is read or is no longer there
+		bool SaveRefused;
 		sint32 InitialX, InitialY;
 		uint8 InitialSeason;
 		std::set<TCharId> CharsToVerify;
@@ -756,6 +763,8 @@ _Scenario(scenario), SessionId(sessionId), _AiInstance(aiInstanceId),_EditSlotId
 	}
 
 	IsAnimationStopped = false;
+	AnimationStartAnnounced = false;
+	SaveRefused = false;
 	DateSinceNoPlayer = 0;
 	_LastSaveTime = 0;
 	_SessionType = sessionType;
@@ -771,6 +780,8 @@ CEditionSession::CEditionSession(RSMGR::TSessionType sessionType, TSessionId ses
 : SessionId(sessionId), _EditSlotIdMaker(1)
 {
 	IsAnimationStopped = false;
+	AnimationStartAnnounced = false;
+	SaveRefused = false;
 	DateSinceNoPlayer = 0;
 	_LastSaveTime = 0;
 	_AiInstance = edit->_AiInstance;
@@ -1663,6 +1674,16 @@ void CServerEditionModule::rtScenarioUpdateRequested(NLNET::IModuleProxy *sender
 		nlwarning("R2Ed: char %u is trying to act on an invalid scenario", charId);
 		return;
 	}
+
+	// The message can come without a tree (empty, or compressed data that could not be read). The tree that is
+	// kept here is checked by the animation module before it makes primitives of it.
+	if (!rtScenario)
+	{
+		nlwarning("R2Ed: char %u (session %u) sent an update of the run time scenario without a scenario, update refused",
+		    charId, getSessionIdByCharId(charId).asInt());
+		return;
+	}
+
 	CObject::TSmartPtr value2 = rtScenario->clone();
 	scenario->setRtData(value2);
 }
@@ -3842,77 +3863,92 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, teleportOneCharacterToAnother)
 	return true;
 }
 
-bool CServerEditionModule::checkScenario(CObject* scenario)
+bool CServerEditionModule::checkRtScenario(CObject *rtScenario, uint32 startingAct, std::string &error, bool *overQuota) const
 {
-	CObject* acts = scenario->findAttr("Acts");
+	CRtScenarioLimits limits;
 
-	uint32 maxNpcs = 0;
-	uint32 baseActCost = 0;
+	// The quota of an act: the npcs, the static objects, which are npcs for the services, and a margin of 5
+	// for the entities a component of the editor adds on its own. The limits of what the editor has no quota
+	// for are derived from it.
+	limits.setBotQuota(MaxNpcs + MaxStaticObjects + 5);
 
-	uint32 baseActStates = 0;
-	uint32 maxStates = 0;
-
-	if(acts&&acts->isTable())
+	// Every state, group, bot and event of an act takes an alias in the primitive file of the act, which gives
+	// out as many as the dynamic part of an alias can count and stops the service when it has none left.
+	const CLigoConfig *ligoConfig = CPrimitiveContext::instance().CurrentLigoConfig;
+	if (ligoConfig)
 	{
-		uint32 max = acts->getSize();
-		for(uint32 i = 0;i<max;i++)
+		limits.MaxAliasesPerAct = ligoConfig->getDynamicAliasMask();
+	}
+
+	// A position is in the rectangle that holds every island, and the origin, where the editor puts what has
+	// no position, with a margin. The base act is on every island of the scenario and the content of an act
+	// stays where it is when the act gets another island, so the rectangle is not the one of a single island.
+	// Without the list of the islands the default stays, which is what the AI service can hold.
+	const CScenarioEntryPoints::TCompleteIslands &islands = CScenarioEntryPoints::getInstance().getCompleteIslands();
+	if (!islands.empty())
+	{
+		sint32 minX = 0, maxX = 0, minY = 0, maxY = 0;
+		for (uint i = 0; i < islands.size(); ++i)
 		{
-			CObject * act = acts->getValueAtPos(i);
-			CObject * npcs = act->findAttr("Npcs");
-			CObject * states = act->findAttr("AiStates");
-			if (states && states->isTable())
-			{
-				uint32 max2 = states->getSize();
-				if (i==0)
-				{
-					baseActStates = max2;
-				}
-				else
-				{
-					if(baseActStates + max2 > maxStates)
-					{
-						maxStates = baseActStates + max2;
-					}
-				}
-			}
-			if(npcs && npcs->isTable())
-			{
-				uint32 max2 = npcs->getSize();
-				if(i==0)
-				{
-					baseActCost = max2;
-				}
-				else
-				{
-					// MaxNpcs
-					// MaxStaticObject (Static object are handel as Npc for the moment
-					// 5 Comptation error (error in a component)
-					if (baseActCost+max2 > MaxNpcs + MaxStaticObjects + 5)
-					{
-						nlwarning("R2Ed: checkScenario: too many npcs: %u",(baseActCost+max2));
-						return false;
-					}
+			minX = std::min(minX, islands[i].XMin);
+			maxX = std::max(maxX, islands[i].XMax);
+			minY = std::min(minY, islands[i].YMin);
+			maxY = std::max(maxY, islands[i].YMax);
+		}
+		limits.MinX = std::max(minX, limits.MinX + RtScenarioIslandMargin) - RtScenarioIslandMargin;
+		limits.MaxX = std::min(maxX, limits.MaxX - RtScenarioIslandMargin) + RtScenarioIslandMargin;
+		limits.MinY = std::max(minY, limits.MinY + RtScenarioIslandMargin) - RtScenarioIslandMargin;
+		limits.MaxY = std::min(maxY, limits.MaxY - RtScenarioIslandMargin) + RtScenarioIslandMargin;
+	}
 
-					if (maxNpcs < baseActCost+max2)
-					{
-						maxNpcs = baseActCost+max2;
-					}
+	TRtScenarioVerdict verdict = R2::checkRtScenario(rtScenario, limits, error);
+	if (verdict == RtScenarioOk)
+	{
+		verdict = checkRtScenarioStartingAct(rtScenario, startingAct, error);
+	}
 
-				}
-			}
-			else
-			{
-				return false;
-			}
+	if (overQuota)
+	{
+		*overQuota = verdict == RtScenarioOverQuota;
+	}
+	return verdict == RtScenarioOk;
+}
+
+void CServerEditionModule::animationSessionStartFailed(TSessionId sessionId, uint32 startingAct, const std::string &errorReason)
+{
+	CEditionSession *session = getSession(sessionId);
+	CScenario *scenario = session ? session->getScenario() : nullptr;
+	if (!scenario)
+	{
+		nlwarning("R2Ed: the scenario of session %u could not be started, and the session is gone: no client is told", sessionId.asInt());
+		return;
+	}
+
+	// When the start of an animation session was announced to the EGS, the EGS is told what the animation
+	// module tells it when an animation stops (stopTestImpl): the scenario of the session has ended. The EGS
+	// takes that for a scenario it has nothing of, which is the case here: the items of this one were never sent.
+	// The record the EGS keeps of the animation session, and the log the session manager opened for it, end
+	// when the session closes, as they do after an animation that ran and was stopped: animSessionEnded is for
+	// then, and the EGS takes it once.
+	if (session->AnimationStartAnnounced)
+	{
+		session->AnimationStartAnnounced = false;
+		if (_CharacterControlProxy)
+		{
+			CCharacterControlItfProxy proxy(_CharacterControlProxy);
+			proxy.scenarioEnded(this, sessionId);
 		}
 	}
-	else
-	{
-		return false;
-	}
-	nldebug("Max number of Npcs : %u",maxNpcs);
-	nldebug("Max number of states : %u",maxStates);
-	return true;
+
+	// startScenario has put the scenario in test mode and answered that it starts. The scenario goes back to
+	// edition as when a test stops, and the clients get the answer of a refused start: they leave the test or the
+	// wait screen and ask to be connected again.
+	scenario->setMode(1);
+
+	nlwarning("R2Ed: the scenario of session %u could not be started (%s), its clients are told", sessionId.asInt(), errorReason.c_str());
+
+	CMessage message;
+	broadcastToCharConnected(CShareClientEditionItfProxy::buildMessageFor_startScenario(message, false, startingAct, errorReason), session);
 }
 
 void CServerEditionModule::startingScenario(NLNET::IModuleProxy *senderModuleProxy)
@@ -3961,10 +3997,16 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 
 	if (ok)
 	{
-		if (!checkScenario(rtData))
+		// The run time scenario is what the client made of the scenario: everything in it is checked before it is
+		// kept or handed to the animation module. An upload without a tree (empty, or compressed data that could
+		// not be read) is refused here too, as a scenario that is not valid.
+		std::string error;
+		bool overQuota = false;
+		if (!checkRtScenario(rtData, startingAct, error, &overQuota))
 		{
-			nlwarning("R2Ed: char %u has too many elements in scenario!", charId);
-			errorReason = "uiR2EDTooManyElmements";
+			nlwarning("R2Ed: char %u (session %u) uploaded a run time scenario to start in act %u that is refused: %s",
+			    charId, getSessionIdByCharId(charId).asInt(), startingAct, error.c_str());
+			errorReason = overQuota ? "uiR2EDTooManyElmements" : "uiR2EDInvalidScenario";
 			rtData = nullptr;
 			ok = false;
 		}
@@ -4003,7 +4045,24 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			return;
 		}
 
+		// A session has one animation, and one start of it at a time. Two editors of a session can ask for a
+		// test at the same moment, and each of them uploads the scenario: the first upload starts, and the next
+		// one, like any start that comes while the animation of the session starts or runs, is dropped. Every
+		// client of the session is waiting for an answer by now: it is the answer of the start in progress, so
+		// they enter the test that runs or is about to. If that start fails, all of them are told.
+		TPioneersSessions::const_iterator startSessionIt = _PioneersSessions.find(charId);
+		if (startSessionIt != _PioneersSessions.end() && getAnimationModule()->isSessionStartingOrRunning(startSessionIt->second))
+		{
+			nlwarning("R2Ed: char %u asked to start the scenario of session %u in act %u while the animation of the session starts or runs: the scenario it uploaded is dropped",
+			    charId, startSessionIt->second.asInt(), startingAct);
+			scenario->setMode(2);
+			CMessage message;
+			replyToAll(senderModuleProxy, CShareClientEditionItfProxy::buildMessageFor_startScenario(message, true, startingAct, errorReason));
+			return;
+		}
+
 		scenario->setRtData(rtData);
+		session->AnimationStartAnnounced = false;
 
 
 		TPioneersSessions/*std::map<uint32, uint32>*/::const_iterator sessionIdIt = _PioneersSessions.find(charId);
@@ -4108,6 +4167,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					proxy.animSessionStarted(this, body.SessionId, info);
 					CEditionSession* session = getSession(body.SessionId);
 					BOMB_IF(!session, "ERROR: session must exist", return);
+					session->AnimationStartAnnounced = true;
 					// ie the animator and player that just arrived before the scenario has uploaded
 					CEditionSession::TCurrentChars::const_iterator first(session->getCurrentChars().begin()), last(session->getCurrentChars().end());
 					for (; first != last; ++first)
@@ -5300,10 +5360,74 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, removeCharOverrideRingAccess)
 
 
 
+// How many second names are asked for at once to keep the file of a session that cannot be read: the first
+// one that does not exist is taken, so that a file kept earlier is not written over
+static const uint s_UnreadableSessionFileNames = 10;
+
+// The file of a session could not be read and its bytes are held here. The backup service was asked which of
+// the second names exist: the bytes are saved under the first one that does not, with the request that the
+// saves of a session use, before the session is told that it is loaded and can be saved again.
+class CKeepUnreadableSessionFileCallback : public IBackupFileClassReceiveCallback
+{
+public:
+	// 'fileName' and 'names' are names in r2/sessions/; the content of 'data' is taken
+	CKeepUnreadableSessionFileCallback(CServerEditionModule *editionModule, TSessionId sessionId, const std::string &fileName, const std::vector<std::string> &names, std::vector<uint8> &data, const std::string &reason)
+	    : m_EditionModule(editionModule)
+	    , m_SessionId(sessionId)
+	    , m_FileName(fileName)
+	    , m_Names(names)
+	    , m_Reason(reason)
+	{
+		m_Data.swap(data);
+	}
+
+	void callback(const CFileDescriptionContainer &fileList) NL_OVERRIDE
+	{
+		std::set<std::string> existing;
+		for (uint32 i = 0; i < fileList.size(); ++i)
+		{
+			existing.insert(NLMISC::CFile::getFilename(fileList[i].FileName));
+		}
+		std::string name;
+		for (uint i = 0; i < m_Names.size(); ++i)
+		{
+			if (existing.find(m_Names[i]) == existing.end())
+			{
+				name = m_Names[i];
+				break;
+			}
+		}
+		if (name.empty() || m_Data.empty())
+		{
+			nlwarning("R2Ed: the file 'r2/sessions/%s' of session %u cannot be read (%s) and no copy of it is kept: the %u names from 'r2/sessions/%s' on exist. The session starts empty and is not saved, so that the file stays as it is, until the file is read or is removed",
+			    m_FileName.c_str(), m_SessionId.asInt(), m_Reason.c_str(), (uint)m_Names.size(), m_Names.empty() ? "" : m_Names[0].c_str());
+			m_EditionModule->wakeUpSessionFailed(m_SessionId, true);
+			return;
+		}
+		{
+			CBackupMsgSaveFile bsMsg(std::string("r2/sessions/") + name, CBackupMsgSaveFile::SaveFileCheck, BsiGlobal);
+			bsMsg.DataMsg.serialBuffer(&m_Data[0], (uint)m_Data.size());
+			BsiGlobal.sendFile(bsMsg);
+		}
+		nlwarning("R2Ed: the file 'r2/sessions/%s' of session %u cannot be read (%s): its %u bytes are kept in 'r2/sessions/%s', and the session starts empty",
+		    m_FileName.c_str(), m_SessionId.asInt(), m_Reason.c_str(), (uint)m_Data.size(), name.c_str());
+		m_EditionModule->wakeUpSessionFailed(m_SessionId, false);
+	}
+
+private:
+	CServerEditionModule *m_EditionModule;
+	TSessionId m_SessionId;
+	std::string m_FileName;
+	std::vector<std::string> m_Names;
+	std::vector<uint8> m_Data;
+	std::string m_Reason;
+};
+
 class CWakeUpHibernatingSessionCallback : public IBackupFileReceiveCallback
 {
 public:
-	CWakeUpHibernatingSessionCallback(CServerEditionModule* editionModule) :_EditionModule(editionModule){}
+	// 'fileName' is the name of the file in r2/sessions/
+	CWakeUpHibernatingSessionCallback(CServerEditionModule* editionModule, TSessionId sessionId, const std::string &fileName) :_EditionModule(editionModule), m_SessionId(sessionId), m_FileName(fileName){}
 
 	// call back for bs file asynchronous read
 	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
@@ -5313,16 +5437,94 @@ public:
 		if ( fileDescription.FileSize == 0)
 		{
 			nlwarning("ERROR: try to wakeup a session that does not exit or has been deleted" );
+			// the characters that wait for the session are not left waiting for a file that is not there
+			_EditionModule->wakeUpSessionFailed(m_SessionId, false);
 			return;
 		}
-		// Serial the Edition Session
-		CEditionSession* sessionPtr = new CEditionSession() ;
-		sessionPtr->serial(dataStream); // danger AIIntanceisNotYetSet
+		// where the file starts in the stream, to take its bytes again when they cannot be read as a session
+		sint32 start = 0;
+		bool startKnown = true;
+		try
+		{
+			start = dataStream.getPos();
+		}
+		catch (const NLMISC::EStream &)
+		{
+			startKnown = false;
+		}
+		// Serial the Edition Session. It is held here until it is handed over: the stream is a file, read
+		// outside of any message, and what cannot be read of it is refused with an exception that nothing on
+		// the way to this callback takes.
+		CUniquePtr<CEditionSession> sessionPtr(new CEditionSession());
+		try
+		{
+			sessionPtr->serial(dataStream); // danger AIIntanceisNotYetSet
+		}
+		catch (const NLMISC::EStream &e)
+		{
+			const std::string reason = e.what();
+			keepUnreadableFile(fileDescription, dataStream, startKnown, start, reason);
+			return;
+		}
 		//AiInstance Is not yet set
-  		_EditionModule->wakeUpSessionImpl(sessionPtr);
+		_EditionModule->wakeUpSessionImpl(sessionPtr.release());
+	}
+
+private:
+	// The file cannot be read as a session. The session that starts without it will be saved under the name of
+	// the file: the bytes of the file are first kept under a second name next to it, the name of the file with
+	// the date and time. The session is told that it is loaded when that is done (CKeepUnreadableSessionFileCallback).
+	void keepUnreadableFile(const CFileDescription &fileDescription, NLMISC::IStream &dataStream, bool startKnown, sint32 start, const std::string &reason)
+	{
+		std::vector<uint8> data;
+		bool dataRead = false;
+		if (startKnown)
+		{
+			try
+			{
+				if (dataStream.seek(start, NLMISC::IStream::begin))
+				{
+					data.resize(fileDescription.FileSize);
+					dataStream.serialBuffer(&data[0], (uint)data.size());
+					dataRead = true;
+				}
+			}
+			catch (const NLMISC::EStream &)
+			{
+			}
+		}
+		if (!dataRead)
+		{
+			nlwarning("R2Ed: the file 'r2/sessions/%s' of session %u cannot be read (%s) and its %u bytes cannot be taken from the stream again to keep a copy. The session starts empty and is not saved, so that the file stays as it is, until the file is read or is removed",
+			    m_FileName.c_str(), m_SessionId.asInt(), reason.c_str(), (uint)fileDescription.FileSize);
+			_EditionModule->wakeUpSessionFailed(m_SessionId, true);
+			return;
+		}
+		// "2026-01-31 23:59:59" gives "20260131_235959": a file name has letters, digits, '.', '_' and '/'
+		std::string stamp;
+		const std::string now = NLMISC::timestampToHumanReadable(NLMISC::CTime::getSecondsSince1970());
+		for (std::string::size_type i = 0; i < now.size(); ++i)
+		{
+			if (now[i] >= '0' && now[i] <= '9')
+				stamp += now[i];
+			else if (now[i] == ' ')
+				stamp += '_';
+		}
+		if (stamp.empty())
+			stamp = NLMISC::toString("%u", NLMISC::CTime::getSecondsSince1970());
+		std::vector<CBackupFileClass> classes(1);
+		std::vector<std::string> &names = classes[0].Patterns;
+		names.push_back(m_FileName + ".unreadable_" + stamp);
+		for (uint i = 1; i < s_UnreadableSessionFileNames; ++i)
+		{
+			names.push_back(NLMISC::toString("%s_%u", names[0].c_str(), i));
+		}
+		BsiGlobal.requestFileClass("r2/sessions/", classes, new CKeepUnreadableSessionFileCallback(_EditionModule, m_SessionId, m_FileName, names, data, reason));
 	}
 
 	CServerEditionModule* _EditionModule;
+	TSessionId m_SessionId;
+	std::string m_FileName;
 };
 
 
@@ -5340,9 +5542,30 @@ bool CServerEditionModule::wakeUpSession(TSessionId sessionId, TCharId ownerChar
 	if (!CDynamicMapService::getInstance()->useNetwork()){ return true; }
 	std::string filename = getSessionFilename(sessionId, ownerCharId);
 	nldebug("WAKING session %u - BSI requesting file: %s",sessionId.asInt(),filename.c_str());
-	BsiGlobal.requestFile(std::string("r2/sessions/")+filename, new CWakeUpHibernatingSessionCallback(this));
+	BsiGlobal.requestFile(std::string("r2/sessions/")+filename, new CWakeUpHibernatingSessionCallback(this, sessionId, filename));
 
 	return true;
+}
+
+
+void CServerEditionModule::wakeUpSessionFailed(TSessionId sessionId, bool refuseSave)
+{
+	CEditionSession *session = getSession(sessionId);
+	if (!session)
+	{
+		return;
+	}
+	if (refuseSave)
+	{
+		session->SaveRefused = true;
+	}
+	// An edition session that was created while its file was asked for waits for it: it is told that it is
+	// loaded, as it is when it has no file (CTestIfMustWakeUpSession), and the characters that wait for it
+	// get their start parameters. It keeps the scenario it has, which is none.
+	if (session->getSessionType() == RSMGR::TSessionType::st_edit && !session->isLoaded())
+	{
+		session->setLoaded(true);
+	}
 }
 
 
@@ -5383,6 +5606,8 @@ void CServerEditionModule::wakeUpSessionImpl(CEditionSession* session)
 
 	}
 	session->setSessionType(RSMGR::TSessionType::st_edit);
+	// the file of the session was read: it is what the session is saved over again
+	session->SaveRefused = false;
 	session->setLoaded(true);
 
 }
@@ -5427,6 +5652,14 @@ bool CServerEditionModule::saveSessionImpl(TSessionId sessionId, std::string& ms
 		return false;
 	}
 	uint32 owner = session->getOwnerCharId();
+	if (session->SaveRefused)
+	{
+		// the time of the save was taken above: this is said once for each save that was due
+		nlwarning("R2Ed: session %u is not saved: its file 'r2/sessions/%s' could not be read and no copy of it could be kept, the file stays as it is until it is read or is removed",
+			sessionId.asInt(), getSessionFilename(sessionId, owner).c_str());
+		msg = NLMISC::toString("Session %u is not saved: its file could not be read and is kept as it is", sessionId.asInt());
+		return false;
+	}
 	{
 		nldebug("SAVING session %u - BSI send file: %s",sessionId.asInt(), getSessionFilename(sessionId, owner).c_str());
 		CBackupMsgSaveFile bsMsg( std::string("r2/sessions/")+ getSessionFilename(sessionId, owner), CBackupMsgSaveFile::SaveFileCheck, BsiGlobal );
@@ -5568,6 +5801,19 @@ bool CServerEditionModule::hibernateSessionImpl  (TSessionId sessionId, std::str
 	nldebug("ADD HIBERNATE SESSION: CServerEditionModule::hibernateSessionImpl(): sessionId=%u ",sessionId.asInt());
 	_HibernatingSessions[sessionId] = THibernatingSession( hibernationDate, rsmSessionType, positionX, positionY, orient, season );
 
+	if (!session->isLoaded())
+	{
+		// The file of this edit session was asked for and has not been read yet: the session holds nothing of its
+		// own, and saving it now would write an empty scenario over the file
+		nlwarning("R2Ed: session %u hibernates without being saved: its file 'r2/sessions/%s' has not been read yet, the file stays as it is",
+			sessionId.asInt(), getSessionFilename(sessionId, ownerCharId).c_str());
+	}
+	else if (session->SaveRefused)
+	{
+		nlwarning("R2Ed: session %u hibernates without being saved: its file 'r2/sessions/%s' could not be read and no copy of it could be kept, the file stays as it is until it is read or is removed",
+			sessionId.asInt(), getSessionFilename(sessionId, ownerCharId).c_str());
+	}
+	else
 	{
 		nldebug("HIBERNATE - SAVING session %u - BSI send file: %s",sessionId.asInt(),getSessionFilename(sessionId, ownerCharId).c_str());
 		CBackupMsgSaveFile bsMsg( std::string("r2/sessions/")+getSessionFilename(sessionId, ownerCharId), CBackupMsgSaveFile::SaveFileCheck, BsiGlobal );

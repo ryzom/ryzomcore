@@ -318,6 +318,9 @@ namespace R2
 
 		// wakeUp a session
 		void wakeUpSessionImpl(CEditionSession* session);
+		// The file of a session could not be loaded: the session starts as when it has no file. With 'refuseSave'
+		// the file is there, could not be read and could not be copied: the session is not saved over it.
+		void wakeUpSessionFailed(TSessionId sessionId, bool refuseSave);
 
 		void getStartParams(uint32 charId, TSessionId lastStoredSessionId) NL_OVERRIDE;
 		void getStartParamsImpl(uint32 charId, TSessionId lastStoredSessionId);
@@ -419,8 +422,11 @@ namespace R2
 
 	// privates methodes
 	private:
-		// Check if a scenario is ok (not to much element)
-		bool checkScenario(CObject* scenario);
+		// Check the run time scenario a client uploaded and the act it is to start in (rt_scenario_check.h), with
+		// the limits of this service: the quotas MaxNpcs and MaxStaticObjects and the aliases of the ligo configuration
+		virtual bool checkRtScenario(CObject *rtScenario, uint32 startingAct, std::string &error, bool *overQuota = nullptr) const NL_OVERRIDE;
+		// The animation module could not start the scenario of the session after its start was answered
+		virtual void animationSessionStartFailed(TSessionId sessionId, uint32 startingAct, const std::string &errorReason) NL_OVERRIDE;
 
 		// Backup current Secenarios (obsolete)
 		void saveToDb();
