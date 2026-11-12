@@ -143,7 +143,7 @@ powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localho
 echo | set /p=.
 echo .
 echo(
-set PATH=%RC_PYTHON27_DIR%;%RC_ORIG_PATH%
+set PATH=%RC_PYTHON3_DIR%;%RC_ORIG_PATH%
 cd /d %RC_ROOT%\code\nel\tools\build_gamedata
 title Ryzom Core Configuration: Build Pipeline Setup
 python 0_setup.py -p

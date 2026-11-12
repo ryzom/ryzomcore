@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../configuration")
 from scripts import *
 from buildsite import *
@@ -40,7 +40,7 @@ printLog(log, "")
 TranslationTools = findTool(log, ToolDirectories, TranslationToolsTool, ToolSuffix)
 try:
 	subprocess.call([ TranslationTools, "make_string_diff" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 
@@ -51,4 +51,4 @@ if os.path.isfile("c1_make_string_diff.log"):
 shutil.copy("log.log", "c1_make_string_diff_" + time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + ".log")
 shutil.move("log.log", "c1_make_string_diff.log")
 
-raw_input("PRESS ANY KEY TO EXIT")
+input("PRESS ANY KEY TO EXIT")

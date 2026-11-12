@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../configuration")
 if os.path.isfile("generate_all.log"):
 	os.remove("generate_all.log")
@@ -43,21 +43,21 @@ printLog(log, "")
 
 try:
 	subprocess.call([ "python", "generate_simple_max_exporters.py" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 
 
 try:
 	subprocess.call([ "python", "generate_tagged_max_exporters.py" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 
 
 try:
 	subprocess.call([ "python", "generate_ecosystem_projects.py" ])
-except Exception, e:
+except Exception as e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 

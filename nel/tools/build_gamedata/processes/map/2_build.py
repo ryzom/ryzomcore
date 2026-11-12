@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -76,9 +76,9 @@ if MapPanoplyFileList != None:
 			printLog(log, ">>> Panoply " + panoplyCfg[1] + " <<<")
 			mkPath(log, DatabaseDirectory + "/" + panoplyCfg[2])
 			mkPath(log, DatabaseDirectory + "/" + panoplyCfg[3])
-			cfg = open(ActiveProjectDirectory + "/generated/current_panoply.cfg", "w")
-			cfgCommon = open(ActiveProjectDirectory + "/" + panoplyCfg[0], "r")
-			cfgRace = open(ActiveProjectDirectory + "/" + panoplyCfg[1], "r")
+			cfg = open(ActiveProjectDirectory + "/generated/current_panoply.cfg", "w", encoding="utf-8", errors="surrogateescape")
+			cfgCommon = open(ActiveProjectDirectory + "/" + panoplyCfg[0], "r", encoding="utf-8", errors="surrogateescape")
+			cfgRace = open(ActiveProjectDirectory + "/" + panoplyCfg[1], "r", encoding="utf-8", errors="surrogateescape")
 			cfg.write("\n")
 			cfg.write("// CURRENT PANOPLY CONFIGURATION\n")
 			cfg.write("\n")

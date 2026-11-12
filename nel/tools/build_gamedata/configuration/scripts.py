@@ -23,7 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, multiprocessing, math, socket
+import time, sys, os, shutil, subprocess, multiprocessing, math, socket
 
 NeLQuickStartDir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))), os.path.normcase("tool/quick_start"))
 
@@ -58,7 +58,7 @@ sys.path.append(ActiveProjectDirectory)
 
 def printLog(log, text):
 	log.write(text + "\n")
-	print text
+	print(text)
 
 pendingProcesses = []
 processLimit = math.ceil(multiprocessing.cpu_count() * 0.75)
@@ -83,7 +83,7 @@ def flushParallelProcesses():
 
 def mkPath(log, path):
 	printLog(log, "DIR " + path)
-	distutils.dir_util.mkpath(path)
+	os.makedirs(path, exist_ok=True)
 
 def needUpdate(log, source, dest):
 	if (os.path.isfile(source)):
@@ -608,7 +608,7 @@ def findFileMultiDir(log, dirs_where, file_name):
 				file = findFile(log, dir, file_name)
 				if file != "":
 					return file
-	except Exception, e:
+	except Exception as e:
 		printLog(log, "EXCEPTION " + str(e))
 	printLog(log, "FILE NOT FOUND " + file_name)
 	return ""
@@ -621,7 +621,7 @@ def findTool(log, dirs_where, file_name, suffix):
 				if tool != "":
 					printLog(log, "TOOL " + tool)
 					return tool
-	except Exception, e:
+	except Exception as e:
 		printLog(log, "EXCEPTION " + str(e))
 	printLog(log, "TOOL NOT FOUND " + file_name + suffix)
 	return ""
@@ -639,6 +639,7 @@ def toolLogFail(log, tool, suffix):
 
 def askVar(log, name, default):
 	sys.stdout.write(name + " (" + default + "): ")
+	sys.stdout.flush()
 	line = sys.stdin.readline()
 	linestrip = line.strip()
 	if linestrip == "--":

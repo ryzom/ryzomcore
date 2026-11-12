@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -89,8 +89,8 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 		
 		tagDiff = 1
 		printLog(log, "WRITE " + scriptDst)
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
+		sSrc = open(scriptSrc, "r", encoding="latin-1")
+		sDst = open(scriptDst, "w", encoding="latin-1")
 		for line in sSrc:
 			newline = line.replace("%OutputLogfile%", outputLogfile)
 			newline = newline.replace("%TagDirectory%", tagDirectory)
@@ -108,7 +108,7 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 			subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-mip" ])
 			if os.path.exists(outputLogfile):
 				try:
-					lSrc = open(outputLogfile, "r")
+					lSrc = open(outputLogfile, "r", encoding="latin-1")
 					for line in lSrc:
 						lineStrip = line.strip()
 						if (len(lineStrip) > 0):

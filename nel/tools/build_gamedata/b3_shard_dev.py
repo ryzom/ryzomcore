@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("configuration")
 
 if os.path.isfile("log.log"):
@@ -132,12 +132,12 @@ for execDir in InstallShardDataExecutables:
 	for cfgName in execDir[2]:
 		cfgPath = ShardDevDirectory + "/live/" + dstDir + "/" + cfgName
 		found = False
-		with open(cfgPath, "r") as f:
+		with open(cfgPath, "r", encoding="utf-8", errors="surrogateescape") as f:
 			for l in f:
 				if "Paths += {" in l:
 					found = True
 		if not found:
-			with open(cfgPath, "a") as cfg:
+			with open(cfgPath, "a", encoding="utf-8", errors="surrogateescape") as cfg:
 				cfg.write("\n")
 				cfg.write("Paths += {\n")
 				cfg.write("	\"" + ShardDevDirectory + "/live/" + dstDir + "\",\n")
@@ -157,7 +157,7 @@ else:
 		os.remove("log.log")
 	subprocess.call([ PatchmanService, "-C.", "-L." ])
 	if os.path.isfile("log.log"):
-		f = open("log.log", "r")
+		f = open("log.log", "r", encoding="utf-8", errors="replace")
 		for l in f:
 			printLog(log, l.rstrip())
 		f.close()
