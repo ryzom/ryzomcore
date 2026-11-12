@@ -1698,69 +1698,117 @@ NLMISC_COMMAND(createNamedItemInBag, "create a named item in bag", "<eId> <item>
 	return true;
 }
 
-NLMISC_COMMAND (createFullArmorSet, "Create and equip player with chosen full armor set","<eid> <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality>")
+NLMISC_COMMAND(createFullArmorSet, "Create a full armor set in the bag of a player", "<eid> <race (fyros/matis/zorai/tryker)> <type (light/medium/heavy)> <quality> [<variant (1/2/3)>]")
 {
-	static string armors[]=
-	{
-		"boots",
-		"gloves",
-		"pants",
-		"sleeves",
-		"vest",
-	};
-	static string heavyArmors[]=
-	{
-		"boots",
-		"gloves",
-		"helmet",
-		"pants",
-		"sleeves",
-		"vest",
-	};
+	// The craftable armor sheets are named ic<race>a<type><piece>[_2|_3].sitem, _2 and _3 being the
+	// medium and high quality variants of a piece. The origin and item type of a sheet are the same
+	// for the three variants (and for the caster pants), so the name selects the sheet and the
+	// origin and item type confirm it. Only heavy armor has a helmet.
+	static const char *const s_PieceNames[] = { "boots", "gloves", "pants", "sleeves", "vest", "helmet" };
+	static const char s_PieceLetters[] = { 'b', 'g', 'p', 's', 'v', 'h' };
+	static const ITEM_TYPE::TItemType s_LightPieces[] = { ITEM_TYPE::LIGHT_BOOTS, ITEM_TYPE::LIGHT_GLOVES, ITEM_TYPE::LIGHT_PANTS, ITEM_TYPE::LIGHT_SLEEVES, ITEM_TYPE::LIGHT_VEST };
+	static const ITEM_TYPE::TItemType s_MediumPieces[] = { ITEM_TYPE::MEDIUM_BOOTS, ITEM_TYPE::MEDIUM_GLOVES, ITEM_TYPE::MEDIUM_PANTS, ITEM_TYPE::MEDIUM_SLEEVES, ITEM_TYPE::MEDIUM_VEST };
+	static const ITEM_TYPE::TItemType s_HeavyPieces[] = { ITEM_TYPE::HEAVY_BOOTS, ITEM_TYPE::HEAVY_GLOVES, ITEM_TYPE::HEAVY_PANTS, ITEM_TYPE::HEAVY_SLEEVES, ITEM_TYPE::HEAVY_VEST, ITEM_TYPE::HEAVY_HELMET };
 
-	if (args.size () != 4) return false;
+	if (args.size() != 4 && args.size() != 5) return false;
 	GET_CHARACTER
 
-	const string &race = args[1];
-	const string &type = args[2];
+	const ITEM_ORIGIN::EItemOrigin origin = ITEM_ORIGIN::stringToEnum(args[1]);
+	char raceLetter = 0;
+	switch (origin)
+	{
+	case ITEM_ORIGIN::FYROS: raceLetter = 'f'; break;
+	case ITEM_ORIGIN::MATIS: raceLetter = 'm'; break;
+	case ITEM_ORIGIN::TRYKER: raceLetter = 't'; break;
+	case ITEM_ORIGIN::ZORAI: raceLetter = 'z'; break;
+	default:
+		log.displayNL("Unknown race '%s', expected fyros, matis, tryker or zorai", args[1].c_str());
+		return false;
+	}
+
+	char typeLetter = 0;
+	const ITEM_TYPE::TItemType *pieceTypes = NULL;
+	uint nbPieces = 0;
+	switch (ARMORTYPE::toArmorType(args[2]))
+	{
+	case ARMORTYPE::LIGHT:
+		typeLetter = 'l';
+		pieceTypes = s_LightPieces;
+		nbPieces = sizeof(s_LightPieces) / sizeof(s_LightPieces[0]);
+		break;
+	case ARMORTYPE::MEDIUM:
+		typeLetter = 'm';
+		pieceTypes = s_MediumPieces;
+		nbPieces = sizeof(s_MediumPieces) / sizeof(s_MediumPieces[0]);
+		break;
+	case ARMORTYPE::HEAVY:
+		typeLetter = 'h';
+		pieceTypes = s_HeavyPieces;
+		nbPieces = sizeof(s_HeavyPieces) / sizeof(s_HeavyPieces[0]);
+		break;
+	default:
+		log.displayNL("Unknown armor type '%s', expected light, medium or heavy", args[2].c_str());
+		return false;
+	}
+
 	uint16 quality;
-	NLMISC::fromString(args[3], quality);
-
-	const uint16 min = quality - (quality-1)%5;
-	const string minStr = (min < 10) ? string("0") + toString(min) : toString(min);
-	const uint16 max = min+4;
-	const string maxStr = (max < 10) ? string("0") + toString(max) : toString(max);
-
-	const string endName = string("_") + minStr + string("_") + maxStr + string(".item");
-
-	// create the armor pieces
-	if (type == "heavy")
+	if (!NLMISC::fromString(args[3], quality))
 	{
-		for ( int i = 0 ; i < sizeof(heavyArmors)/sizeof(heavyArmors[0]) ; ++i)
-		{
-			const string sheetName = race + string("_") + type + string("_") + heavyArmors[i] + endName;
-			CSheetId sheetId(sheetName);
+		log.displayNL("Quality '%s' is not a number from 1 to 65535", args[3].c_str());
+		return false;
+	}
+	if (quality < 1)
+	{
+		log.displayNL("Quality must be > 0");
+		return false;
+	}
 
-			if ( !c->createItemInInventory(INVENTORIES::bag, quality, 1, sheetId, eid) )
-			{
-				log.displayNL ("For entity %s Failed to create item %s", eid.toString().c_str(), sheetName.c_str() );
-			}
+	const char *variantSuffix = "";
+	if (args.size() == 5)
+	{
+		if (args[4] == "2")
+			variantSuffix = "_2";
+		else if (args[4] == "3")
+			variantSuffix = "_3";
+		else if (args[4] != "1")
+		{
+			log.displayNL("Unknown variant '%s', expected 1, 2 or 3", args[4].c_str());
+			return false;
 		}
 	}
-	else
-	{
-		for ( int i = 0 ; i < sizeof(armors)/sizeof(armors[0]) ; ++i)
-		{
-			const string sheetName = race + string("_") + type + string("_") + armors[i] + endName;
-			CSheetId sheetId(sheetName);
 
-			if ( !c->createItemInInventory(INVENTORIES::bag, quality, 1, sheetId, eid) )
-			{
-				log.displayNL ("For entity %s Failed to create item %s", eid.toString().c_str(), sheetName.c_str() );
-			}
+	// create the armor pieces, and say which ones could not be created and why
+	uint nbCreated = 0;
+	for (uint i = 0; i < nbPieces; ++i)
+	{
+		const string sheetName = toString("ic%ca%c%c%s.sitem", raceLetter, typeLetter, s_PieceLetters[i], variantSuffix);
+		CSheetId sheetId;
+		const CStaticItem *form = sheetId.buildSheetId(sheetName) ? CSheets::getForm(sheetId) : NULL;
+		if (form == NULL)
+		{
+			log.displayNL("%s not created: there is no item sheet '%s'", s_PieceNames[i], sheetName.c_str());
+			continue;
 		}
+		if (form->Family != ITEMFAMILY::ARMOR || form->Origin != origin || form->Type != pieceTypes[i])
+		{
+			log.displayNL("%s not created: the item sheet '%s' has family %s, origin %s and item type %s, expected %s, %s and %s",
+			    s_PieceNames[i], sheetName.c_str(),
+			    ITEMFAMILY::toString(form->Family).c_str(), ITEM_ORIGIN::enumToString(form->Origin).c_str(), ITEM_TYPE::toString(form->Type).c_str(),
+			    ITEMFAMILY::toString(ITEMFAMILY::ARMOR).c_str(), ITEM_ORIGIN::enumToString(origin).c_str(), ITEM_TYPE::toString(pieceTypes[i]).c_str());
+			continue;
+		}
+		if (!c->createItemInInventory(INVENTORIES::bag, quality, 1, sheetId, eid))
+		{
+			log.displayNL("%s not created: the item '%s' could not be created or does not fit in the bag of the player %s", s_PieceNames[i], sheetName.c_str(), eid.toString().c_str());
+			continue;
+		}
+		++nbCreated;
 	}
-	return true;
+
+	log.displayNL("%u of the %u pieces of the %s %s armor set created at quality %u in the bag of the player %s", nbCreated, nbPieces, args[1].c_str(), args[2].c_str(), (uint)quality, eid.toString().c_str());
+
+	// as createItemInBag: the command failed when nothing was created
+	return nbCreated != 0;
 }
 
 NLMISC_COMMAND (displayInfosOnTarget, "display info on entity target", "<eid>")
