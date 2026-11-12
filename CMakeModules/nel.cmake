@@ -1174,6 +1174,11 @@ MACRO(NL_SETUP_BUILD)
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
 
+    # 64-bit off_t on 32-bit systems, for fseeko and ftello (nlfseek64 and nlftell64)
+    IF(NOT WIN32)
+      ADD_PLATFORM_FLAGS("-D_FILE_OFFSET_BITS=64")
+    ENDIF()
+
     # hardening
     IF(NOT EMSCRIPTEN)
       ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")

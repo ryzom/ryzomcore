@@ -1721,35 +1721,16 @@ int	nlfseek64( FILE *stream, sint64 offset, int origin )
 	return fsetpos (stream, &pos64);
 
 #else // NL_OS_WINDOWS
-	// TODO: to fix for Linux and Mac OS X
 
-	// This code doesn't work under windows : fseek() implementation uses a signed 32 bits offset. What ever we do, it can't seek more than 2 Go.
-	// For the moment, i don't know if it works under linux for seek of more than 2 Go.
-
-	nlassert ((offset < SINT64_CONSTANT(2147483647)) && (offset > SINT64_CONSTANT(-2147483648)));
-
-	bool first = true;
-	do
+	// off_t is 64 bits wide on 64-bit systems, and on 32-bit systems when built with _FILE_OFFSET_BITS=64
+	if ((sint64)(off_t)offset != offset)
 	{
-		// Get the size of the next fseek
-		sint nextSeek;
-		if (offset > 0)
-			nextSeek = (sint)std::min ((sint64)SINT64_CONSTANT(2147483647), offset);
-		else
-			nextSeek = (sint)std::max ((sint64)-SINT64_CONSTANT(2147483648), offset);
-
-		// Make a seek
-		int result = fseek ( stream, nextSeek, first?origin:SEEK_CUR );
-		if (result != 0)
-			return result;
-
-		// Remaining
-		offset -= nextSeek;
-		first = false;
+		nlwarning("nlfseek64: offset %" NL_I64 "d does not fit in the %u bit off_t of this build, build with _FILE_OFFSET_BITS=64", offset, (uint)(sizeof(off_t) * 8));
+		errno = EOVERFLOW;
+		return -1;
 	}
-	while (offset);
 
-	return 0;
+	return fseeko(stream, (off_t)offset, origin);
 
 #endif // NL_OS_WINDOWS
 }
@@ -1764,11 +1745,8 @@ sint64 nlftell64(FILE *stream)
 	}
 	else return -1;
 #else
-	nlunreferenced(stream);
-
-	// TODO: implement for Linux and Mac OS X
-	nlerror("Not implemented");
-	return -1;
+	// see nlfseek64 for the width of off_t
+	return (sint64)ftello(stream);
 #endif
 }
 
