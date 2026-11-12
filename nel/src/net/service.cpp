@@ -1777,7 +1777,7 @@ void IService::unregisterUpdatable(IServiceUpdatable *updatable)
 NLMISC_CATEGORISED_DYNVARIABLE(nel, string, LaunchingDate, "date of the launching of the program")
 {
 	nlunreferenced(human);
-	if (get) *pointer = asctime (localtime ((time_t*)&LaunchingDate));
+	if (get) *pointer = timestampToHumanReadable(LaunchingDate);
 }
 
 NLMISC_CATEGORISED_DYNVARIABLE(nel, string, Uptime, "time from the launching of the program")
