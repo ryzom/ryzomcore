@@ -290,6 +290,7 @@
  <!--  Communication 
   --> 
 	<key name="N/A" action="show_hide" params="target" />
+	<key name="N/A" action="show_hide" params="target_of_target" />
 	<key name="KeyF" action="show_hide" params="contact_list" />
 	<key name="N/A" action="show_hide" params="team_list" />
 	<key name="KeyX" action="show_hide" params="main_chat" />

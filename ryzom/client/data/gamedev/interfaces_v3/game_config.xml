@@ -415,6 +415,16 @@
 			<instance template="tgcw_checkbox" id="show_clock_12h" text="uiShowClock12h" tooltip="uittShowClock12h" posref="BL TL" posparent="show_clock" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="show_reticle" text="uiShowReticle" tooltip="uittShowReticle" posref="BL TL" posparent="show_clock_12h" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="radar_use_camera" text="uiRadarUseCamera" tooltip="uittRadarUseCamera" posref="BL TL" posparent="show_reticle" x="0" y="-12" />
+        <!-- OMEGA_TOT -->
+        <instance template="tgcw_checkbox" id="show_target_of_target" text="uiTargetOfTargetTitle" posref="BL TL" posparent="radar_use_camera" x="0" y="-12" />
+        <!-- ToT: independent bar checkboxes, HUD page scrolls -->
+        <instance template="tgcw_checkbox" id="tgt_hp" text="uiTargetOfTargetSettingTargetHP" posref="BL TL" posparent="show_target_of_target" x="0" y="-12" />
+        <instance template="tgcw_checkbox" id="tgt_sap" text="uiTargetOfTargetSettingTargetSAP" posref="BL TL" posparent="tgt_hp" x="0" y="-12" />
+        <instance template="tgcw_checkbox" id="tgt_sta" text="uiTargetOfTargetSettingTargetStamina" posref="BL TL" posparent="tgt_sap" x="0" y="-12" />
+        <instance template="tgcw_checkbox" id="tot_hp" text="uiTargetOfTargetSettingHP" posref="BL TL" posparent="tgt_sta" x="0" y="-12" />
+        <instance template="tgcw_checkbox" id="tot_sap" text="uiTargetOfTargetSettingSAP" posref="BL TL" posparent="tot_hp" x="0" y="-12" />
+        <instance template="tgcw_checkbox" id="tot_sta" text="uiTargetOfTargetSettingStamina" posref="BL TL" posparent="tot_sap" x="0" y="-12" />
+
 		</group>
 		<ctrl style="skin_scroll" id="sb_hud" align="T" target="hud" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -806,6 +816,13 @@
 			<param ui="hud:show_clock_12h:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_CLOCK_12H" realtime="true" />
 			<param ui="hud:show_reticle:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_RETICLE" realtime="true" />
 			<param ui="hud:radar_use_camera:c" type="db" widget="boolbut" link="UI:SAVE:RADAR:USE_CAMERA" realtime="true" />
+        <param ui="hud:show_target_of_target:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_TARGET_OF_TARGET" realtime="true" />
+        <param ui="hud:tgt_hp:c" type="db" widget="boolbut" link="UI:SAVE:TARGET:BARS:SHOW_HP" realtime="true" />
+        <param ui="hud:tgt_sap:c" type="db" widget="boolbut" link="UI:SAVE:TARGET:BARS:SHOW_SAP" realtime="true" />
+        <param ui="hud:tgt_sta:c" type="db" widget="boolbut" link="UI:SAVE:TARGET:BARS:SHOW_STA" realtime="true" />
+        <param ui="hud:tot_hp:c" type="db" widget="boolbut" link="UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_HP" realtime="true" />
+        <param ui="hud:tot_sap:c" type="db" widget="boolbut" link="UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_SAP" realtime="true" />
+        <param ui="hud:tot_sta:c" type="db" widget="boolbut" link="UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_STA" realtime="true" />
 			<param ui="alpha_colors:col_day:c" type="db" widget="colbut" link="UI:SAVE:DAY_COLOR" realtime="true" />
 			<param ui="alpha_colors:col_night:c" type="db" widget="colbut" link="UI:SAVE:NIGHT_COLOR" realtime="true" />
 			<param ui="alpha_colors:ga_win:c" type="db" widget="sbint" link="UI:SAVE:CONTAINER_ALPHA" min="0" max="255" realtime="true" />

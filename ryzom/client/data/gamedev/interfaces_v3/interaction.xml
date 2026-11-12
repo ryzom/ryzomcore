@@ -9,6 +9,17 @@
         <variable entry="UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE" type="sint32" value="0" />
         <!-- The Target selected -->
         <define id="target_name_id" value="SERVER:Entities:E[UI:VARIABLES:TARGET:SLOT]:P6" />
+  <!-- ToT: separately visible target-of-target -->
+  <define id="target_of_target_slot" value="SERVER:Entities:E[UI:VARIABLES:TARGET:SLOT]:P7" />
+  <define id="target_of_target_name_id" value="SERVER:Entities:E[UI:VARIABLES:TARGET_OF_TARGET:SLOT]:P6" />
+  <variable entry="UI:VARIABLES:TARGET_OF_TARGET:SLOT" type="sint32" value="0" />
+  <!-- ToT: client-calculated 0..127 bar ratios for secondary target -->
+  <variable entry="UI:VARIABLES:BARS:TARGET_OF_TARGET:HP" type="sint32" value="0" />
+  <variable entry="UI:VARIABLES:BARS:TARGET_OF_TARGET:SAP" type="sint32" value="0" />
+  <variable entry="UI:VARIABLES:BARS:TARGET_OF_TARGET:STA" type="sint32" value="0" />
+  <define id="tot_hp" value="UI:VARIABLES:BARS:TARGET_OF_TARGET:HP" />
+  <define id="tot_sap" value="UI:VARIABLES:BARS:TARGET_OF_TARGET:SAP" />
+  <define id="tot_sta" value="UI:VARIABLES:BARS:TARGET_OF_TARGET:STA" />
         <define id="target_uid" value="SERVER:TARGET:BARS:UID" />
         <define id="target_player_level" value="SERVER:TARGET:BARS:PLAYER_LEVEL" />
         <define id="region_force_1" value="113 170 138 255" />
@@ -47,6 +58,10 @@
         <!-- detect when the user PVP mode has changed -->
         <link expr="depends(@UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE)" action="proc" params="proc_target_changed" />
         <!-- detect when the target PVP mode has changed -->
+  <!-- ToT: listen to selected target, secondary slot, and delayed name -->
+  <link expr="depends(@UI:VARIABLES:TARGET:SLOT)" action="lua" params="game:updateTargetOfTargetUI()" />
+  <link expr="depends(@%target_of_target_slot)" action="lua" params="game:updateTargetOfTargetUI()" />
+  <link expr="depends(@%target_of_target_name_id)" action="lua" params="game:updateTargetOfTargetUI()" />
         <!-- Target bars and tooltips -->
         <template name="jauges_target" x="0" y="0" posref="TR TR">
                 <view type="bar3" id="jauges" posref="TR TR" color1="%focus_color" value1="%target_focus" range1="UI:CONST:127" color2="%sap_color" value2="%target_sap" range2="UI:CONST:127" color3="%sta_color" value3="%target_sta" range3="UI:CONST:127" />
@@ -62,6 +77,21 @@
                         <link expr="depends(@#val)" action="set" params="target='ui:interface:target:content:#id:jauge_bar:w'|value=div(mul(@#val, 156), @UI:CONST:127)" />
                 </group>
         </template>
+  <!-- ToT: same gauge texture and ratio scale as normal target -->
+  <template name="jauge_score_target_of_target"
+            posparent="parent" x="0" y="0" h="10" posref="TL TL"
+            id="" w="84" color="" val="">
+    <group id="#id" posparent="#posparent" posref="#posref"
+           w="#w" h="#h" x="#x" y="#y">
+      <group id="jauge_bar" posref="TL TL" w="84" h="10">
+        <view type="bitmap" id="jauge_graph" posref="TL TL"
+              texture="jauge.tga" color="#color" global_color="false"
+              scale="true" w="84" h="10" />
+      </group>
+      <link expr="depends(@#val)" action="set"
+            params="target='ui:interface:target_of_target:content:#id:jauge_bar:w'|value=div(mul(@#val, 84), @UI:CONST:127)" />
+    </group>
+  </template>
         <!-- the Main Group -->
         <group type="container" id="target" w="182" h="512" title="" min_w="182" max_w="182" min_h="56" max_h="82" resizer="false" global_color="false" global_color_over="true" movable="true" active="false" opened="true" openable="false" right_button="false" on_active="set" on_active_params="dblink=UI:VARIABLES:ISACTIVE:TARGET|value=1" on_deactive="set" on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:TARGET|value=0" help_page="interf_target.html" header_active="false" title_delta_max_w="-44" title_over_extend_view_text="true">
                 <group id="header_closed" x="0" y="0" h="28" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
@@ -94,11 +124,23 @@
                         <view type="bitmap" id="tag_6" posref="TR TL" posparent="tag_4" x="2" y="0" texture="alpha_10.tga" global_color="false" inherit_gc_alpha="false" />
                 </group>
 
-                <group id="content" x="0" y="-26" w="164" h="20" posref="TL TL">
+                <group id="content" x="0" y="-26" w="164" h="52" posref="TL TL">
                         <!-- new Jauges -->
                         <view type="bitmap" id="b_life" posref="TL TL" x="0" y="0" texture="slot_jauge.tga" inherit_gc_alpha="false" />
                         <instance template="jauge_score_target" id="jlife" posparent="b_life" posref="TL TL" color="214 56 7 255" text="uiHP" val="%target_hp" />
                         <instance template="text_tt" posparent="jlife" tooltip="uittTargetHp" tooltip_parent="win" />
+      <!-- ToT: SAP and stamina for the selected target -->
+      <view type="bitmap" id="b_sap" posref="TL TL" y="-16"
+            texture="slot_jauge.tga" inherit_gc_alpha="false" />
+      <view type="bitmap" id="b_sta" posref="TL TL" y="-32"
+            texture="slot_jauge.tga" inherit_gc_alpha="false" />
+      <instance template="jauge_score_target" id="jsap" posparent="b_sap"
+                posref="TL TL" color="133 189 5 255" text="uiSap"
+                val="%target_sap" />
+      <instance template="jauge_score_target" id="jsta" posparent="b_sta"
+                posref="TL TL" color="202 67 152 255" text="uiStamina"
+                val="%target_sta" />
+
                 </group>
 
                 <!-- when the level of the player change, we should update the consider widget, so add an observer to each of its skills -->
@@ -118,6 +160,94 @@
                 <link expr="depends(@SERVER:GROUP:7:PRESENT)" action="lua" params="game:updateTargetConsiderUI()" />
         </group>
         <tree node="target" />
+  <!-- ToT: independent, optional window, original target group unchanged -->
+  <proc id="proc_target_of_target_active">
+    <action handler="set" params="dblink=UI:SAVE:SHOW_TARGET_OF_TARGET|value=1" />
+    <action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:TARGET_OF_TARGET|value=1" />
+  </proc>
+  <proc id="proc_target_of_target_inactive">
+    <action handler="set" params="dblink=UI:SAVE:SHOW_TARGET_OF_TARGET|value=0" />
+    <action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:TARGET_OF_TARGET|value=0" />
+  </proc>
+  <!-- ToT: match original Omega target transparency, spacing and text -->
+  <group type="container" id="target_of_target"
+         w="100" h="512" title="" x="205" y="-180"
+         min_w="100" max_w="100" min_h="50" max_h="82"
+         resizer="false" global_color="false" global_color_over="true"
+         movable="true" active="false" opened="true" openable="false"
+         right_button="false" header_active="false"
+         group_onclick_l="target_of_target_select"
+         title_delta_max_w="-44" title_over_extend_view_text="true"
+         on_active="proc" on_active_params="proc_target_of_target_active"
+         on_deactive="proc" on_deactive_params="proc_target_of_target_inactive">
+    <group id="header_closed" x="0" y="0" h="28" posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color"
+           group_onclick_l="target_of_target_select" />
+    <group id="header_opened" x="0" y="0" h="45" posref="TL TL"
+           group_onclick_r="active_menu"
+           group_params_r="menu=ui:interface:base_menu_with_color"
+           group_onclick_l="target_of_target_select">
+      <view type="text" id="empty" posref="TL TL" x="0" y="-16"
+            color="255 255 255 255" global_color="true"
+            fontsize="10" shadow="true" hardtext="uiTargetOfTargetNoVisibleTarget"
+            line_maxw="92" over_extend_view_text="true" />
+      <group id="target_info" x="0" y="0" posref="TL TL" w="96" h="45" active="false">
+        <view type="text" id="name" posref="TL TL" x="0" y="-16"
+              color="255 255 255 255" global_color="true"
+              fontsize="10" shadow="true" hardtext="uiTargetOfTargetLoadingName"
+              line_maxw="92" over_extend_view_text="true" />
+      </group>
+      <view type="text" id="tot_caption" posref="TL TL" x="0" y="-30"
+            hardtext="uiTargetOfTargetTitle" fontsize="9" shadow="true"
+            color="255 255 255 255" global_color="true" />
+    </group>
+    <group id="content" x="0" y="-24" w="96" h="36" posref="TL TL"
+           group_onclick_l="target_of_target_select">
+      <view type="bitmap" id="b_life" posref="TL TL" x="0" y="0"
+            texture="slot_jauge.tga" inherit_gc_alpha="false"
+            scale="true" w="84" h="10" />
+      <view type="bitmap" id="b_sap" posref="TL TL" y="-12"
+            texture="slot_jauge.tga" inherit_gc_alpha="false"
+            scale="true" w="84" h="10" />
+      <view type="bitmap" id="b_sta" posref="TL TL" y="-24"
+            texture="slot_jauge.tga" inherit_gc_alpha="false"
+            scale="true" w="84" h="10" />
+      <instance template="jauge_score_target_of_target" id="jlife"
+                posparent="b_life" posref="TL TL"
+                color="214 56 7 255" val="%tot_hp" />
+      <instance template="jauge_score_target_of_target" id="jsap"
+                posparent="b_sap" posref="TL TL"
+                color="133 189 5 255" val="%tot_sap" />
+      <instance template="jauge_score_target_of_target" id="jsta"
+                posparent="b_sta" posref="TL TL"
+                color="202 67 152 255" val="%tot_sta" />
+    </group>
+  </group>
+  <tree node="target_of_target" />
+  <link expr="@UI:SAVE:SHOW_TARGET_OF_TARGET" target="ui:interface:target_of_target:active" />
+  <!-- ToT: independently show and stack each gauge with no gaps -->
+  <link expr="@UI:SAVE:TARGET:BARS:SHOW_HP" target="ui:interface:target:content:b_life:active,ui:interface:target:content:jlife:active" />
+  <link expr="@UI:SAVE:TARGET:BARS:SHOW_SAP" target="ui:interface:target:content:b_sap:active,ui:interface:target:content:jsap:active" />
+  <link expr="@UI:SAVE:TARGET:BARS:SHOW_STA" target="ui:interface:target:content:b_sta:active,ui:interface:target:content:jsta:active" />
+  <link expr="ifthenelse(@UI:SAVE:TARGET:BARS:SHOW_HP,-16,0)" target="ui:interface:target:content:b_sap:y" />
+  <link expr="sub(0,add(ifthenelse(@UI:SAVE:TARGET:BARS:SHOW_HP,16,0),ifthenelse(@UI:SAVE:TARGET:BARS:SHOW_SAP,16,0)))" target="ui:interface:target:content:b_sta:y" />
+  <link expr="add(add(ifthenelse(@UI:SAVE:TARGET:BARS:SHOW_HP,16,0),ifthenelse(@UI:SAVE:TARGET:BARS:SHOW_SAP,16,0)),ifthenelse(@UI:SAVE:TARGET:BARS:SHOW_STA,16,0))" target="ui:interface:target:content:h" />
+  <link expr="@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_HP" target="ui:interface:target_of_target:content:b_life:active,ui:interface:target_of_target:content:jlife:active" />
+  <link expr="@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_SAP" target="ui:interface:target_of_target:content:b_sap:active,ui:interface:target_of_target:content:jsap:active" />
+  <link expr="@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_STA" target="ui:interface:target_of_target:content:b_sta:active,ui:interface:target_of_target:content:jsta:active" />
+  <link expr="ifthenelse(@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_HP,-12,0)" target="ui:interface:target_of_target:content:b_sap:y" />
+  <link expr="sub(0,add(ifthenelse(@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_HP,12,0),ifthenelse(@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_SAP,12,0)))" target="ui:interface:target_of_target:content:b_sta:y" />
+  <link expr="add(add(ifthenelse(@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_HP,12,0),ifthenelse(@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_SAP,12,0)),ifthenelse(@UI:SAVE:TARGET_OF_TARGET:BARS:SHOW_STA,12,0))" target="ui:interface:target_of_target:content:h" />
+  <!-- Borderless ToT: only the NEW window gets local alpha; no global mouseover changes. -->
+  <link expr="ifthenelse(@UI:SAVE:SHOW_TARGET_OF_TARGET,0,0)" target="ui:interface:target_of_target:use_global_alpha_settings" />
+  <link expr="ifthenelse(@UI:SAVE:SHOW_TARGET_OF_TARGET,0,0)" target="ui:interface:target_of_target:container_alpha" />
+  <link expr="ifthenelse(@UI:SAVE:SHOW_TARGET_OF_TARGET,255,255)" target="ui:interface:target_of_target:content_alpha" />
+  <link expr="ifthenelse(@UI:SAVE:SHOW_TARGET_OF_TARGET,0,0)" target="ui:interface:target_of_target:rollover_content_alpha" />
+  <!-- ToT: read the existing per-entity BarManager cache on server ticks -->
+  <link expr="depends(@UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK)"
+        action="lua" params="game:updateTargetOfTargetBars()" />
+
         <!-- **************************************** -->
         <!-- * PEOPLE LISTS BASE CONTAINER TEMPLATE * -->
         <!-- **************************************** -->
