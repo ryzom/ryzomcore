@@ -9086,6 +9086,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 		{
 			if ((*itAttachedFxToStart).MaxNumAnimCount == index)
 				return;
+			++itAttachedFxToStart;
 		}
 		// remove previous aura
 		_AuraFX[index] = nullptr;
