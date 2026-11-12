@@ -238,11 +238,10 @@ int main(int argc, char **argv)
 		LoginShardId = std::numeric_limits<uint32>::max();
 
 	// if client_default.cfg is not in current directory, use application default directory.
-	// Same when the current directory can't be written to (an install in a protected location started from its own folder):
-	// client.cfg, the logs and the saves are written to the current directory, the defaults are still found in the startup directory.
+	// Where the client keeps its files is decided by these two rules only: a startup directory that holds
+	// client_default.cfg and can't be written to is an error (CClientConfig::init), not a reason to go elsewhere.
 	// The reason is logged once the log file exists, which is created in the directory chosen here.
 	const char *profileDirectoryReason = nullptr;
-	bool startupDirectoryNotWritable = false;
 	if (Args.haveArg("p"))
 	{
 		profileDirectoryReason = "a profile is given on the command line";
@@ -250,11 +249,6 @@ int main(int argc, char **argv)
 	else if (!CFile::isExists("client_default.cfg"))
 	{
 		profileDirectoryReason = "the startup directory has no client_default.cfg";
-	}
-	else if (!CFile::isDirectoryWritable("."))
-	{
-		profileDirectoryReason = "the startup directory can't be written to";
-		startupDirectoryNotWritable = true;
 	}
 
 	if (profileDirectoryReason)
@@ -333,13 +327,7 @@ int main(int argc, char **argv)
 	// initialize log
 	initLog();
 
-	// A startup directory that can't be written to gives the player another profile than the one next to the install
-	if (startupDirectoryNotWritable)
-	{
-		nlwarning("The client files (client.cfg, logs, saves) are in '%s' and not in the startup directory '%s': %s",
-		    CPath::getCurrentPath().c_str(), Args.getStartupPath().c_str(), profileDirectoryReason);
-	}
-	else if (profileDirectoryReason)
+	if (profileDirectoryReason)
 	{
 		nlinfo("The client files (client.cfg, logs, saves) are in '%s' and not in the startup directory '%s': %s",
 		    CPath::getCurrentPath().c_str(), Args.getStartupPath().c_str(), profileDirectoryReason);

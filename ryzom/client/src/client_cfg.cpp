@@ -2079,7 +2079,8 @@ void CClientConfig::init(const string &configFileName)
 		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == nullptr)
-			nlerror("CFG::init: Can't create config file '%s' in directory '%s'", configFileName.c_str(), CPath::getCurrentPath().c_str());
+			nlerror("CFG::init: Can't create config file '%s' in directory '%s'. The client keeps its files (client.cfg, logs, saves) in the directory it is started from when that directory holds client_default.cfg: make that directory writable, or start the client with the option --profile to keep them in the per-user directory",
+			    configFileName.c_str(), CPath::getCurrentPath().c_str());
 		else
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
 
