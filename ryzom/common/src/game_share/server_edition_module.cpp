@@ -5050,7 +5050,7 @@ static std::string getSecondesAsString(uint32 secondes)
 	secondes /= 60;
 	uint32 m = secondes %60;
 	secondes /= 60;
-	uint32 h = secondes / 24;
+	uint32 h = secondes % 24;
 	secondes /= 24;
 	uint32 d = secondes;
 
