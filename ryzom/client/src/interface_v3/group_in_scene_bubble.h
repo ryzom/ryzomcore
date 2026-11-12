@@ -203,8 +203,12 @@ public:
 	// Unlink a bubble
 	void unlink ();
 
-	// Set text
-	void setText (const std::string &text);
+	// Set text, split in pages at each "{break}".
+	// Return false and leave the bubble as it is when the text has no page to show.
+	bool setText(const std::string &text);
+
+	// Split a text in the pages setText would show. No page for an empty text or a text made of "{break}" only.
+	static void splitText(const std::string &text, std::vector<std::string> &textParts);
 
 	// Called from action handler
 	void next();
