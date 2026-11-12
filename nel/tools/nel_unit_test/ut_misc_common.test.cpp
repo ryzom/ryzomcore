@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -174,6 +175,34 @@ TEST_F(CUTMiscCommonTest, humanReadableToBytes)
 	bytes = NLMISC::humanReadableToBytes("-1 B");
 	EXPECT_EQ(bytes, 0);
 }
+
+#ifdef NL_OS_WINDOWS
+TEST_F(CUTMiscCommonTest, launchProgramSearchesPath)
+{
+	// a bare program name is searched for in the system directories and PATH, and gets .exe
+	EXPECT_EQ(7, NLMISC::launchProgramAndWaitForResult("cmd", "/c exit 7"));
+	EXPECT_EQ(0, NLMISC::launchProgramAndWaitForResult("where.exe", "cmd"));
+	EXPECT_TRUE(NLMISC::launchProgram("cmd", "/c exit 0"));
+	vector<string> arguments;
+	arguments.push_back("/c");
+	arguments.push_back("exit 0");
+	EXPECT_TRUE(NLMISC::launchProgramArray("cmd", arguments));
+
+	// a program name with a directory is launched as is
+	const char *comSpec = getenv("ComSpec");
+	ASSERT_TRUE(comSpec != NULL);
+	EXPECT_EQ(3, NLMISC::launchProgramAndWaitForResult(comSpec, "/c exit 3"));
+
+	// a program that does not exist fails
+	EXPECT_EQ(-1, NLMISC::launchProgramAndWaitForResult("nel_unit_test_no_such_program", "", false));
+	EXPECT_FALSE(NLMISC::launchProgram("nel_unit_test_no_such_program", "", false));
+	EXPECT_FALSE(NLMISC::launchProgram("C:\\nel_unit_test_no_such_directory\\no_such_program.exe", "", false));
+
+	// a program name longer than MAX_PATH fails as well
+	EXPECT_EQ(-1, NLMISC::launchProgramAndWaitForResult(string(400, 'a'), "", false));
+	EXPECT_EQ(-1, NLMISC::launchProgramAndWaitForResult("C:\\" + string(400, 'a') + ".exe", "", false));
+}
+#endif
 
 TEST_F(CUTMiscCommonTest, encodeURIComponent)
 {

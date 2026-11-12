@@ -1127,35 +1127,26 @@ static bool createProcess(const std::string &programName, const std::string &arg
 		SetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, NULL);
 	}
 
-	wchar_t *sProgramName = NULL;
-	
-	std::string args;
+	// The first parameter of CreateProcess names one file and is not searched for. It is used for a
+	// program name with a directory, and for a bare name that names a file in the current directory.
+	// With the first parameter NULL, CreateProcess takes the program name from the command line: a bare
+	// name is searched for (application directory, current directory, system directories, PATH, as
+	// execvp searches PATH on Unix) and gets .exe when it has no extension, and a .bat file is run by
+	// the command interpreter.
+	bool useApplicationName = CFile::getExtension(programName) != "bat"
+	    && (!CFile::getPath(programName).empty() || CFile::fileExists(programName));
+	std::wstring wProgramName;
+	if (useApplicationName)
+		wProgramName = utf8ToWide(programName);
 
-	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
-	if (CFile::getExtension(programName) == "bat")
-	{
-		args = "\"" + programName + "\" " + arguments;
-	}
-	else
-	{
-		ucstring ucProgramName;
-		ucProgramName.fromUtf8(programName);
+	// the program name is the first argument of the command line, quoted since it may contain spaces
+	std::string args = "\"" + programName + "\" " + arguments;
 
-		sProgramName = new wchar_t[MAX_PATH];
-		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
-
-		// important! we need to specify the executable full path as first argument
-		args = toString("\"%s\" ", programName.c_str()) + arguments;
-	}
+	// CreateProcess may modify the command line in place
+	std::wstring wArgs = utf8ToWide(args);
 
 	// or 0 for a window
-	BOOL res = CreateProcessW(sProgramName, (LPWSTR)nlUtf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
-
-	if (sProgramName)
-	{
-		delete [] sProgramName;
-		sProgramName = NULL;
-	}
+	BOOL res = CreateProcessW(useApplicationName ? wProgramName.c_str() : NULL, &wArgs[0], NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
 
 	if (!res)
 	{
@@ -1165,8 +1156,7 @@ static bool createProcess(const std::string &programName, const std::string &arg
 			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
 		}
 
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
+		// no process was created, there are no handles to close
 
 		return false;
 	}

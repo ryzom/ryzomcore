@@ -473,6 +473,8 @@ std::string formatThousands(const std::string& s);
 
 /// This function executes a program in the background and returns instantly (used for example to launch services in AES).
 /// The program will be launched in the current directory
+/// A program name without a directory is searched for in PATH (on Windows: after the application directory,
+/// the current directory and the system directories)
 bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
 
 /// Same but with an array of strings for arguments
