@@ -17200,6 +17200,8 @@ void CCharacter::onDisconnection(bool bCrashed)
 	CBuildingManager::getInstance()->removePlayerFromRoom(this);
 	// TODO : check if it's not an exploit to disconnect the player from PVP now (not waiting the disconnection time)
 	CPVPManager2::getInstance()->playerDisconnects(this);
+	// the team invitations this character sent or waits on
+	TeamManager.playerDisconnects(this);
 
 	// Remove handledAIGroups for all missions of the player
 	despawnAllHandledAIGroup();

@@ -1777,6 +1777,19 @@ void impulseTeamInvitation(NLMISC::CBitMemStream &impulse)
 }// impulseTeamInvitation //
 
 //-----------------------------------------------
+// impulseTeamCancelInvitation :
+// The invitation ended on the server (no answer in time, or the invitor left): close its window
+//-----------------------------------------------
+void impulseTeamCancelInvitation(NLMISC::CBitMemStream &impulse)
+{
+	if (PermanentlyBanned) return;
+
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_team_proposal"));
+	if (pGC == nullptr) return;
+	pGC->setActive(false);
+}// impulseTeamCancelInvitation //
+
+//-----------------------------------------------
 // impulseTeamShareOpen
 // The server request that the client opens the team sharing system
 //-----------------------------------------------
@@ -3665,6 +3678,7 @@ void initializeNetwork()
 
 	GenericMsgHeaderMngr.setCallback("CASTING:BEGIN",			impulseBeginCast);
 	GenericMsgHeaderMngr.setCallback("TEAM:INVITATION",			impulseTeamInvitation);
+	GenericMsgHeaderMngr.setCallback("TEAM:CANCEL_INVITATION",	impulseTeamCancelInvitation);
 	GenericMsgHeaderMngr.setCallback("TEAM:SHARE_OPEN",			impulseTeamShareOpen);
 	GenericMsgHeaderMngr.setCallback("TEAM:SHARE_INVALID",		impulseTeamShareInvalid);
 	GenericMsgHeaderMngr.setCallback("TEAM:SHARE_CLOSE",		impulseTeamShareClose);

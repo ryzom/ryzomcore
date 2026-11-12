@@ -124,6 +124,7 @@
     <leaf name="JOIN" sendto="EGS" format="" />
     <leaf name="LEAVE" sendto="EGS" format="" />
     <leaf name="INVITATION" />
+    <leaf name="CANCEL_INVITATION" description="cancel invitation popup (no param)" />
     <leaf name="JOIN_PROPOSAL" sendto="EGS" format="" />
     <!--<leaf name="JOIN_PROPOSAL"/>-->
     <leaf name="JOIN_PROPOSAL_DECLINE" sendto="EGS" format="" />

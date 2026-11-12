@@ -50,6 +50,8 @@ extern CPlayerManager				PlayerManager;
 extern uint8						TeamMembersStatusMaxValue;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
+CVariable<NLMISC::TGameCycle> TeamInvitationDuration("egs", "TeamInvitationDuration", "duration in ticks of an invitation to join a team (0: no limit)", 1200, 0, true);
+
 //---------------------------------------------------
 // addAllTeamsToChatGroup :
 //---------------------------------------------------
@@ -329,6 +331,12 @@ void CTeamManager::joinProposal( CCharacter * leader, const CEntityId &targetId)
 	//set the target's invitor
 	invitedPlayer->setTeamInvitor(leaderId);
 
+	// the invitation ends in update() when it gets no answer
+	CTeamInvitation invitation;
+	invitation.Invited = targetId;
+	invitation.Invitor = leaderId;
+	invitation.Date = CTickEventHandler::getGameCycle();
+	m_Invitations.push_back(invitation);
 
 	//send the appropriate string to the client
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
@@ -388,7 +396,7 @@ void CTeamManager::joinDecline( const NLMISC::CEntityId &charId)
 	PHRASE_UTILITIES::sendDynamicSystemMessage(invited->getEntityRowId(), "TEAM_YOU_DECLINE", params);
 
 	//cancel the proposal
-	invited->setTeamInvitor( CEntityId::Unknown );
+	removeInvitation( invited );
 } // joinDecline //
 
 //---------------------------------------------------
@@ -417,7 +425,7 @@ void CTeamManager::joinAccept( const NLMISC::CEntityId &charId)
 	if ( invitor == NULL  )
 	{
 		nlwarning("<CTeamManager joinAccept>character %s, Invalid invitor id %s",charId.toString().c_str(),invitorId.toString().c_str());
-		invited->setTeamInvitor( CEntityId::Unknown );
+		removeInvitation( invited );
 		return;
 	}
 	invitor->setAfkState(false);
@@ -427,12 +435,12 @@ void CTeamManager::joinAccept( const NLMISC::CEntityId &charId)
 	if ( invitorTeam && invitorTeam->getLeader() != invitorId )
 	{
 		nlwarning("<CTeamManager joinAccept>character %s accepted an invitation from %s, who is no longer the leader of team %u", charId.toString().c_str(), invitorId.toString().c_str(), invitor->getTeamId());
-		invited->setTeamInvitor( CEntityId::Unknown );
+		removeInvitation( invited );
 		return;
 	}
 
 	//cancel the proposal
-	invited->setTeamInvitor( CEntityId::Unknown );
+	removeInvitation( invited );
 
 	CTeam *team;
 	//if the invited player had a fake team, remove it
@@ -496,6 +504,95 @@ void CTeamManager::joinAccept( const NLMISC::CEntityId &charId)
 
 	CMissionManager::getInstance()->updateEscortTeam( charId );
 } // joinAccept //
+
+//---------------------------------------------------
+// removeInvitation :
+//---------------------------------------------------
+void CTeamManager::removeInvitation( CCharacter * invited )
+{
+	nlassert(invited);
+
+	invited->setTeamInvitor( CEntityId::Unknown );
+
+	// a character has one invitation at most (isInvitableBy)
+	for ( std::list<CTeamInvitation>::iterator it = m_Invitations.begin(); it != m_Invitations.end(); ++it )
+	{
+		if ( (*it).Invited == invited->getId() )
+		{
+			m_Invitations.erase(it);
+			return;
+		}
+	}
+} // removeInvitation //
+
+//---------------------------------------------------
+// endInvitation :
+//---------------------------------------------------
+void CTeamManager::endInvitation( const CTeamInvitation &invitation, const char *invitedPhrase, const char *invitorPhrase )
+{
+	CCharacter * invited = PlayerManager.getOnlineChar( invitation.Invited );
+	if ( invited == NULL || invited->getTeamInvitor() != invitation.Invitor )
+	{
+		// joinDecline, joinAccept and playerDisconnects remove the invitation with its answer
+		nlwarning("<CTeamManager endInvitation> the invitation of %s by %s is no longer the one this character waits on", invitation.Invited.toString().c_str(), invitation.Invitor.toString().c_str());
+		return;
+	}
+	invited->setTeamInvitor( CEntityId::Unknown );
+
+	// close the invitation window of the invited character
+	CMessage msgout( "IMPULSION_ID" );
+	CBitMemStream bms;
+	CEntityId invitedIdToSerial = invitation.Invited;
+	msgout.serial( invitedIdToSerial );
+	if ( GenericMsgManager.pushNameToStream( "TEAM:CANCEL_INVITATION", bms) )
+	{
+		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+		sendMessageViaMirror( NLNET::TServiceId(invitation.Invited.getDynamicId()), msgout );
+	}
+	else
+	{
+		nlwarning("<CTeamManager endInvitation> Msg name TEAM:CANCEL_INVITATION not found");
+	}
+
+	// inform both players
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
+	params[0].setEIdAIAlias( invitation.Invitor, CAIAliasTranslator::getInstance()->getAIAlias( invitation.Invitor ) );
+	PHRASE_UTILITIES::sendDynamicSystemMessage(invited->getEntityRowId(), invitedPhrase, params);
+
+	CCharacter * invitor = PlayerManager.getOnlineChar( invitation.Invitor );
+	if ( invitorPhrase != NULL && invitor != NULL )
+	{
+		params[0].setEIdAIAlias( invitation.Invited, CAIAliasTranslator::getInstance()->getAIAlias( invitation.Invited ) );
+		PHRASE_UTILITIES::sendDynamicSystemMessage(invitor->getEntityRowId(), invitorPhrase, params);
+	}
+} // endInvitation //
+
+//---------------------------------------------------
+// playerDisconnects :
+//---------------------------------------------------
+void CTeamManager::playerDisconnects( CCharacter * user )
+{
+	nlassert(user);
+
+	const CEntityId &userId = user->getId();
+	for ( std::list<CTeamInvitation>::iterator it = m_Invitations.begin(); it != m_Invitations.end(); )
+	{
+		std::list<CTeamInvitation>::iterator itErase = it;
+		++it;
+		if ( (*itErase).Invitor == userId )
+		{
+			// nobody is left to accept for: the invited character is free for other invitations
+			const CTeamInvitation invitation = (*itErase);
+			m_Invitations.erase(itErase);
+			endInvitation( invitation, "TEAM_PROPOSAL_WITHDRAWN", NULL );
+		}
+		else if ( (*itErase).Invited == userId )
+		{
+			user->setTeamInvitor( CEntityId::Unknown );
+			m_Invitations.erase(itErase);
+		}
+	}
+} // playerDisconnects //
 
 //---------------------------------------------------
 // quitTeam :
@@ -877,6 +974,16 @@ void CTeamManager::pvpHelpOccursInTeam( CCharacter * actor, CCharacter * target 
 void CTeamManager::update()
 {
 	const TGameCycle time = CTickEventHandler::getGameCycle();
+
+	// end the invitations that got no answer in time (they are in the order they were sent in, so the oldest is the
+	// only one looked at)
+	const TGameCycle invitationDuration = TeamInvitationDuration.get();
+	while ( invitationDuration != 0 && !m_Invitations.empty() && time - m_Invitations.front().Date >= invitationDuration )
+	{
+		const CTeamInvitation invitation = m_Invitations.front();
+		m_Invitations.pop_front();
+		endInvitation( invitation, "TEAM_PROPOSAL_EXPIRED", "TEAM_INVITE_EXPIRED" );
+	}
 
 	// update team members position every 5s
 	const uint size = (uint)_Teams.size();

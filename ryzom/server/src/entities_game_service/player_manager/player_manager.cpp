@@ -1750,6 +1750,11 @@ void CPlayerManager::tickUpdate()
 
 					// remove the char from its team
 					TeamManager.removeCharacter( charId );
+
+					// the team invitations this character sent or waits on (this path does not go through
+					// CCharacter::onDisconnection; the id and the row were restored above, and the entity is still
+					// in the mirror)
+					TeamManager.playerDisconnects( c );
 					
 					// remove fame row for the player
 					CFameManager::getInstance().removePlayer( charId );
