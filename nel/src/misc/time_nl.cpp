@@ -28,6 +28,7 @@
 #elif defined (NL_OS_UNIX)
 #	include <sys/time.h>
 #	include <unistd.h>
+#	include <cerrno>
 #endif
 
 #ifdef NL_OS_MAC
@@ -442,18 +443,20 @@ TTicks CTime::getPerformanceTime ()
 	// reads Counter-timer Virtual Count Register
 	__asm__ volatile ("mrs %0, cntvct_el0" : "=r" (x));
 	return x;
-#elif defined(__EMSCRIPTEN__)
+#else // HAVE_X86 / HAVE_AARCH64
+	// Any other processor, and Emscripten: the monotonic clock, in nanoseconds
 	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (TTicks)ts.tv_sec * (TTicks)1000000000ULL + (TTicks)ts.tv_nsec;
-#else // HAVE_X86 / __EMSCRIPTEN__
-	static bool firstWarn = true;
-	if (firstWarn)
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
 	{
-		nlwarning ("TTicks CTime::getPerformanceTime () is not implemented for your processor, returning 0");
-		firstWarn = false;
+		static bool firstWarn = true;
+		if (firstWarn)
+		{
+			nlwarning("TTicks CTime::getPerformanceTime (): clock_gettime(CLOCK_MONOTONIC) failed with errno %d, returning 0", errno);
+			firstWarn = false;
+		}
+		return 0;
 	}
-	return 0;
+	return (TTicks)ts.tv_sec * (TTicks)1000000000ULL + (TTicks)ts.tv_nsec;
 #endif // HAVE_X86
 
 #endif // NL_OS_WINDOWS
