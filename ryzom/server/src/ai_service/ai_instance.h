@@ -76,6 +76,8 @@ public:
 	CNpcZone* getZone(NLMISC::TStringId zoneName);
 	// Trig Event if player in zone
 	void updateZoneTrigger(CBotPlayer* player);
+	/// The player leaves every trigger zone it is counted in (it logs out or changes instance)
+	void removePlayerFromZoneTriggers(CBotPlayer *player);
 	
  	// overloads for IManagerParent virtuals
 	CAIInstance* getAIInstance() const NL_OVERRIDE { return const_cast<CAIInstance*>(this); }
@@ -221,6 +223,12 @@ public:
 
 private:
 	void sendInstanceInfoToEGS();
+
+	/// The npc managers that hold the trigger zones of the instance (their name ends with ".zone_trigger")
+	void getZoneTriggerManagers(std::list<CMgrNpc *> &zoneTriggerManager);
+	/// Count the player out of the given trigger zones (group aliases) and send their leave event,
+	/// the one place where a zone loses a player
+	void processZoneTriggerLeave(const std::list<CMgrNpc *> &zoneTriggerManager, const CBotPlayer *player, const std::vector<uint32> &leaveZone);
 	
 private:
 	/// @name AI service hierarchy

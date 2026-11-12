@@ -94,10 +94,8 @@ void CAIInstance::removeZone(string const& zoneName, CNpcZone* zone)
 	zoneList.erase(it);
 }
 
-void CAIInstance::updateZoneTrigger(CBotPlayer* player)
+void CAIInstance::getZoneTriggerManagers(std::list<CMgrNpc *> &zoneTriggerManager)
 {
-	std::list<CMgrNpc*> zoneTriggerManager;
-
 	FOREACH(it, CCont<CManager>, _Managers)
 	{
 		std::string name = it->getName();
@@ -112,6 +110,66 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 			}
 		}
 	}
+}
+
+void CAIInstance::processZoneTriggerLeave(const std::list<CMgrNpc *> &zoneTriggerManager, const CBotPlayer *player, const std::vector<uint32> &leaveZone)
+{
+	static NLMISC::TStringId s_NbPlayer = CStringMapper::map("NbPlayer");
+
+	FOREACHC(zoneIt, std::vector<uint32>, leaveZone)
+	{
+		FOREACHC(it, std::list<CMgrNpc *>, zoneTriggerManager)
+		{
+			// A zone that is gone (its act was unloaded) has no count left to keep
+			CGroup *grp = (*it)->groups().getChildByAlias(*zoneIt);
+			if (grp)
+			{
+				CGroupNpc *grpNpc = dynamic_cast<CGroupNpc *>(grp);
+				CPersistentStateInstance *sa = grpNpc->getPersistentStateInstance();
+				if (sa)
+				{
+					float count = sa->getLogicVar(s_NbPlayer);
+					if (count < 1.f)
+					{
+						// The player was counted in when it entered, a count that does not hold it is a bookkeeping error
+						nlwarning("Trigger zone '%s' %s of AI instance %u: player %s leaves the zone while its NbPlayer count is %g, the count is set to 0",
+						    grpNpc->getName().c_str(), grpNpc->getAliasString().c_str(), getInstanceNumber(),
+						    player->getEntityId().toString().c_str(), count);
+						count = 0.f;
+					}
+					else
+					{
+						count -= 1.f;
+					}
+					sa->setLogicVar(s_NbPlayer, count);
+				}
+				grpNpc->processStateEvent(grpNpc->getEventContainer().EventPlayerLeaveTriggerZone);
+			}
+		}
+	}
+}
+
+void CAIInstance::removePlayerFromZoneTriggers(CBotPlayer *player)
+{
+	// the player is in no zone anymore
+	std::set<uint32> insideZone;
+	std::vector<uint32> enterZone;
+	std::vector<uint32> leaveZone;
+	player->updateInsideTriggerZones(insideZone, enterZone, leaveZone);
+	if (leaveZone.empty())
+	{
+		return;
+	}
+
+	std::list<CMgrNpc *> zoneTriggerManager;
+	getZoneTriggerManagers(zoneTriggerManager);
+	processZoneTriggerLeave(zoneTriggerManager, player, leaveZone);
+}
+
+void CAIInstance::updateZoneTrigger(CBotPlayer* player)
+{
+	std::list<CMgrNpc*> zoneTriggerManager;
+	getZoneTriggerManagers(zoneTriggerManager);
 	if ( zoneTriggerManager.empty() )
 	{
 		return;
@@ -120,7 +178,14 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 	uint64 whoSeesMe = CMirrors::whoSeesMe(player->dataSetRow());
 	if (!R2_VISION::isEntityVisibleToPlayers(whoSeesMe))
 	{
-		// The player is invisible, its a Dm / Gm: no zone event must be triggered
+		// The player is invisible, its a Dm / Gm: its moves trigger no zone event. A player who
+		// became invisible inside zones is not there anymore for the scenario, it leaves them;
+		// visible again, its next position update counts it back in
+		std::set<uint32> insideZone;
+		std::vector<uint32> enterZone;
+		std::vector<uint32> leaveZone;
+		player->updateInsideTriggerZones(insideZone, enterZone, leaveZone);
+		processZoneTriggerLeave(zoneTriggerManager, player, leaveZone);
 		return;
 	}
 
@@ -177,24 +242,7 @@ void CAIInstance::updateZoneTrigger(CBotPlayer* player)
 		}
 	}
 
-	FOREACH(zoneIt, std::vector<uint32>, leaveZone)
-	{
-		FOREACH(it, std::list<CMgrNpc*>, zoneTriggerManager)
-		{
-			CGroup* grp = (*it)->groups().getChildByAlias(*zoneIt);
-			if (grp)
-			{
-				CGroupNpc* grpNpc = dynamic_cast<CGroupNpc*>(grp);
-				CPersistentStateInstance* sa = grpNpc->getPersistentStateInstance();
-				if (sa)
-				{
-					sa->setLogicVar(nbPlayer, sa->getLogicVar(nbPlayer) - 1);
-				}
-				grpNpc->processStateEvent(grpNpc->getEventContainer().EventPlayerLeaveTriggerZone);
-			}
-		}
-	}
-
+	processZoneTriggerLeave(zoneTriggerManager, player, leaveZone);
 }
 
 CNpcZone* CAIInstance::getZone(TStringId zoneName)
