@@ -70,6 +70,9 @@ namespace NLMISC
 	struct TCoTaskData
 #endif //NL_USE_THREAD_COTASK
 	{
+		/// The stack size asked for by the constructor of the task
+		uint m_StackSize;
+
 #if  defined(NL_USE_THREAD_COTASK)
 		/// The thread id for the co task
 //		TThreadId	*_TaskThreadId;
@@ -89,8 +92,9 @@ namespace NLMISC
 		NLMISC::CAtomicBool _TaskHasYield;
 
 
-		TCoTaskData(CCoTask *task)
-			:	_TaskThread(nullptr)
+		TCoTaskData(CCoTask *task, uint stackSize)
+			:	m_StackSize(stackSize),
+				_TaskThread(nullptr)
 	        ,
 				_CoTask(task),
 				_ResumeTask(false),
@@ -250,18 +254,16 @@ namespace NLMISC
 		NL_CT_DEBUG("CoTask : creating task %p", this);
 #if defined(NL_USE_THREAD_COTASK)
 		// allocate platform specific data storage
-		_PImpl = new TCoTaskData(this);
+		_PImpl = new TCoTaskData(this, stackSize);
 //		_PImpl->_TaskThreadId = 0;
 //		_PImpl->_ParentThreadId = 0;
-		nlunreferenced(stackSize);
 #else //NL_USE_THREAD_COTASK
 		// allocate platform specific data storage
 		_PImpl = new TCoTaskData;
-		nlunreferenced(stackSize);
+		_PImpl->m_StackSize = stackSize;
 #if defined (NL_OS_WINDOWS)
 		_PImpl->_Fiber = NULL;
 		_PImpl->_ParentFiber = NULL;
-		nlunreferenced(stackSize);
 #elif defined(NL_OS_UNIX)
 		// allocate the stack
 		_PImpl->_Stack = new uint8[stackSize];
@@ -308,7 +310,7 @@ namespace NLMISC
 #if defined(NL_USE_THREAD_COTASK)
 
 		// create the thread
-		_PImpl->_TaskThread = IThread::create(_PImpl);
+		_PImpl->_TaskThread = IThread::create(_PImpl, _PImpl->m_StackSize);
 
 		NL_CT_DEBUG("CoTask : start() task %p entering mutex", this);
 		// get the mutex
@@ -381,7 +383,7 @@ namespace NLMISC
 		}
 
 		_PImpl->_ParentFiber = mainFiber;
-		_PImpl->_Fiber = CreateFiber(NL_TASK_STACK_SIZE, TCoTaskData::startFunc, this);
+		_PImpl->_Fiber = CreateFiber(_PImpl->m_StackSize, TCoTaskData::startFunc, this);
 		nlassert(_PImpl->_Fiber != NULL);
   #elif defined (NL_OS_UNIX)
 		// store the parent ctx
@@ -391,7 +393,7 @@ namespace NLMISC
 
 		// change the task context
 		_PImpl->_Ctx.uc_stack.ss_sp = _PImpl->_Stack;
-		_PImpl->_Ctx.uc_stack.ss_size = NL_TASK_STACK_SIZE;
+		_PImpl->_Ctx.uc_stack.ss_size = _PImpl->m_StackSize;
 
 		_PImpl->_Ctx.uc_link = NULL;
 		_PImpl->_Ctx.uc_stack.ss_flags = 0;
