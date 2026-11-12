@@ -787,9 +787,13 @@ std::string CLigoConfig::aliasToString(uint32 fullAlias)
 
 uint32 CLigoConfig::aliasFromString(const std::string &fullAlias)
 {
-	uint32 staticPart;
-	uint32 dynPart;
-	sscanf(fullAlias.c_str(), "(A:%u:%u)", &staticPart, &dynPart);
+	uint32 staticPart = 0;
+	uint32 dynPart = 0;
+	if (sscanf(fullAlias.c_str(), "(A:%u:%u)", &staticPart, &dynPart) != 2)
+	{
+		// not an alias string: 0 is the alias of what has none
+		return 0;
+	}
 
 	return ((staticPart<<getDynamicAliasSize()) & getStaticAliasMask()) | (dynPart & getDynamicAliasMask());
 
