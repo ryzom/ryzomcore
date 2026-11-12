@@ -1490,7 +1490,7 @@ CCaseTracer::CCaseTracer(const CSmartPtr<CSubRuleTracer> &tracer, const string &
 			const string &strRef=valChldTracer->_TextValue;
 			float f;
 			NLMISC::fromString(strRef, f);
-			_sortValue=*((size_t*)&f);
+			_sortValue = AIVM::floatToOpcode(f);
 			break;
 		}
 		if (!valChldTracer)
@@ -1957,7 +1957,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 					string &strRef=_childTracers[index]->_TextValue;
 					float f;
 					NLMISC::fromString(strRef, f);
-					byteCode.push_back(*((size_t*)&f));
+					byteCode.push_back(AIVM::floatToOpcode(f));
 					jumpTable.newCodeBlock();
 					break;
 				}

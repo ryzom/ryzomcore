@@ -24,6 +24,7 @@
 //#include "ai_grp.h"
 
 #include <limits>
+#include <cstring>
 
 namespace AIVM
 {
@@ -72,6 +73,18 @@ public:
 	std::vector<size_t> _opcodes;
 	std::string const _sourceName;
 };
+
+/// The byte code word of a float constant: the bits of the float, zero-extended to the word.
+/// This is what the VM reads back: PUSH_ON_STACK takes the float from the first four bytes of
+/// the word, and SWITCH compares the whole word of a case with the zero-extended bits of the
+/// tested value. Reading the float through a size_t pointer instead takes four bytes that are
+/// not part of it into a 64-bit word, and such a case never matches.
+inline size_t floatToOpcode(float value)
+{
+	uint32 bits;
+	memcpy(&bits, &value, sizeof(bits));
+	return (size_t)bits;
+}
 
 class CByteCodeEntry {
 public:

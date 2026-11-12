@@ -120,7 +120,7 @@ onchildren	{ return TOKEN_ONCHILDREN; }
 {double}	{				
 				float f;
 				NLMISC::fromString(yytext, f);
-				INIT(*((size_t*)&f));
+				INIT(floatToOpcode(f));
 				return TOKEN_NUMBER;
 			}
 {string}	{ INIT(makeStringId (yytext)); return TOKEN_CHAIN; }

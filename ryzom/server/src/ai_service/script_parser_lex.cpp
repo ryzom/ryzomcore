@@ -4478,7 +4478,7 @@ YY_RULE_SETUP
 {				
 				float f;
 				NLMISC::fromString(yytext, f);
-				INIT(*((size_t*)&f));
+				INIT(floatToOpcode(f));
 				return TOKEN_NUMBER;
 			}
 	YY_BREAK
