@@ -2331,11 +2331,6 @@ void CStaticSkillsTree::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 						}
 						SkillsTree[ skill ].Skill = skill;
 
-						if( ! SkillElt->getValueByName( SkillsTree[ skill ].SkillCode, "SkillCode" ) )
-						{
-							nlwarning("<CStaticSkillsTree::readGeorges> can't get node SkillCode in sheet %s", sheetId.toString().c_str() );
-						}
-
 						// Skill Code
 						if( ! SkillElt->getValueByName( SkillsTree[ skill ].SkillCode, "SkillCode" ) )
 						{
