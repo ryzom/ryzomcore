@@ -20,15 +20,19 @@
 #include "registry.h"
 
 #include <QByteArray>
+#include <QElapsedTimer>
 #include <QHash>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLocalSocket>
 #include <QMap>
 #include <QObject>
+#include <QSet>
 #include <QString>
 #include <QStringList>
 #include <QVector>
+
+class QTimer;
 
 /// One line of a mirrored process log.
 struct CMirrorLine
@@ -80,8 +84,32 @@ struct CProcInfo
 	quint64 NextIdx = 0;
 	quint64 FirstIdx = 0;
 	int ChannelVersion = 0;
+	/// How often the dashboard started the process since it opened.
+	int StartCount = 0;
+	/// Milliseconds from the start of the run to its ready state.
+	bool HasReadyMs = false;
+	qint64 ReadyMs = 0;
+	/// How the last run that ended went out, in the words of the dashboard; empty when it did not say.
+	QString LastExit;
 
 	static CProcInfo fromJson(const QJsonObject &o);
+	/// How the last run ended: what the dashboard says, or the exit code alone from one older
+	/// than that field; empty when no run ended.
+	QString exitText() const;
+};
+
+/// A run of a process began or ended, as the mirror saw it in the process states. The waits
+/// watch these, so an exit between two looks at the state is not missed.
+struct CMirrorEvent
+{
+	quint64 Seq = 0;
+	QString Name;
+	/// A run began; otherwise one ended.
+	bool Began = false;
+	/// How the run ended; empty when the dashboard did not say.
+	QString How;
+	/// How long the run that ended had been up, in milliseconds; -1 when unknown.
+	qint64 UpMs = -1;
 };
 
 struct CMirrorProcess
@@ -106,6 +134,15 @@ public:
 
 	void open();
 	bool isConnected() const { return m_Connected; }
+	/// The state the dashboard sends to a new client has arrived in full. Until then the mirror
+	/// is a part of the dashboard, and no tool answers from it.
+	bool isSynced() const { return m_Synced; }
+	/// Milliseconds since the client was opened.
+	qint64 sinceOpenedMs() const { return m_OpenedAt.isValid() ? m_OpenedAt.elapsed() : 0; }
+	/// The runs that began and ended since the client attached, the last ones of them.
+	const QVector<CMirrorEvent> &events() const { return m_Events; }
+	/// The sequence number of the newest event so far, 0 before the first.
+	quint64 eventSeq() const { return m_EventSeq; }
 	/// Whether the endpoint ever answered; a record of a dashboard that is gone never does.
 	bool everConnected() const { return m_EverConnected; }
 	const Registry::CRecord &record() const { return m_Record; }
@@ -130,9 +167,12 @@ private slots:
 	void onReadyRead();
 	void onDisconnected();
 	void onError(QLocalSocket::LocalSocketError error);
+	void onSettled();
 
 private:
 	void apply(const QString &variant, const QJsonObject &fields);
+	void pushEvent(const QString &name, bool began, const QString &how, qint64 upMs);
+	void checkSyncedWithoutMarker();
 
 	Registry::CRecord m_Record;
 	QString m_Title;
@@ -144,6 +184,17 @@ private:
 	bool m_Connected = false;
 	bool m_EverConnected = false;
 	bool m_Gone = false;
+	bool m_Synced = false;
+	QElapsedTimer m_OpenedAt;
+	/// The processes whose Snapshot has not come since the Processes message; a dashboard older
+	/// than the Synced message counts as synced when this runs empty.
+	QSet<QString> m_Awaiting;
+	bool m_GotProcesses = false;
+	/// Such a dashboard sent its last Snapshot; what follows it, or a moment without anything, ends the state.
+	bool m_Settling = false;
+	QTimer *m_SettleTimer = nullptr;
+	QVector<CMirrorEvent> m_Events;
+	quint64 m_EventSeq = 0;
 };
 
 #endif // SERVDASH_DASH_CLIENT_H

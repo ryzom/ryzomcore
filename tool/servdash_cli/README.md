@@ -156,12 +156,13 @@ while one dashboard runs.
 | Tool | What it does |
 | --- | --- |
 | `list_dashboards`, `start_dashboard`, `shutdown_dashboard` | The dashboards running; start the daemon of an ini file; stop everything and exit a daemon. |
-| `list_processes`, `get_process` | State, pid, uptime, launch control value, pending restart, log line range; the service's status labels and buttons. |
-| `start_process`, `stop_process`, `kill_process`, `restart_process`, `start_all`, `stop_all`, `wait_for_state` | The buttons, each with an optional wait for the resulting state. |
+| `list_processes`, `get_process` | State, pid, uptime, launch control value, pending restart, log line range; how often the dashboard started the process (start count), how long it took from start to ready, how its last run ended; the service's status labels and buttons. |
+| `start_process`, `stop_process`, `kill_process`, `restart_process`, `start_all`, `stop_all` | The buttons, each with an optional wait for the resulting state. |
+| `wait_for_state` | Waits until a process, or without `process` every process of the dashboard, is ready, running or stopped; returns early when one of them exits, crashes or is relaunched meanwhile, naming it with the way it ended and its last lines. |
 | `list_commands` | The command table of a service: commands, variables, handler instances and member commands with argument syntax and help, filtered by prefix or word. |
 | `run_command` | A NeL command with its arguments as a list, run over the console channel without parsing; returns what the command logged, cut out between the request and its `done` marker. |
 | `send_input` | A line on the stdin of a plain process, with the output that follows. |
-| `get_log` | Lines of a process, or of all processes merged by time: by index range, time range or last N, then optionally following for a while up to a line cap; filtered by log type or regex. |
+| `get_log` | Lines of a process, or without `process` of all processes merged by time and tagged with their process: by index range, time range, since the last start or last N, then optionally following for a while up to a line cap; filtered by log type or regex. |
 | `clear_log` | Drops the held lines. |
 
 Every log line carries an index, per process from 1 and never reused, and its arrival time
@@ -173,9 +174,32 @@ function) left out to keep the answer short; `prefix: compact` adds file, line a
 dashboard's own notes (started, exited, restarting) as `dash`. The daemon holds the last
 10000 lines per process; older indices are reported as no longer held.
 
+To follow a shard coming up, three calls do it. `wait_for_state` with `state: ready` and no
+`process` waits for every process of the dashboard and returns the moment one exits, with
+the manner of its exit (`code 1`, `killed`, `crashed, 0xC0000005` on Windows, `crashed, signal 11`
+elsewhere), what it is doing now (stopped, restart pending, started again) and its last 15
+lines; `stop_on_exit: false` keeps waiting instead. Only an exit during the wait ends it: a
+process that was down before shows in the list of what is not ready, with its last exit.
+`list_processes` then gives the boot of
+each process in a line: `start count 2, ready after 3.4 s, last exit: code 1`. The start
+count is the number of launches since the dashboard opened, the one a launch control section
+writes to `<alias>.start_count`; the last exit stays on the line while the next run goes on.
+`get_log` without `process`, with `levels: ["WRN", "ERR", "AST"]` and `since_start: true`,
+gives the warnings and errors of all processes since each was last started, by time, as
+`idx time [process] type message`; `match` narrows them by a regular expression. A log type
+that does not exist is refused, so a filter that matches nothing means a quiet log.
+
+A dashboard sends its whole state to a client that attaches: the processes, the lines it
+holds of each and the command tables, then a marker that the state is complete. The server
+holds a tool call until the dashboard the call names has got that far, or every dashboard it
+found when the call names none, and until the dashboards of its own command line have
+registered. So the first call to a server that just started answers from the whole state,
+however much log there is to send; a dashboard that has not sent its state 15 seconds after
+the connection is reported as not answering, and nothing is served from the part that came.
+
 ## Building
 
-Rust 1.75 or later. `cargo build --release` gives a single binary with no runtime files
+Rust 1.82 or later. `cargo build --release` gives a single binary with no runtime files
 (linked against the system C library on Linux; use a musl target for a fully static one).
 Cross-building the Windows binary from Linux or WSL works with cargo-xwin and needs no
 Visual Studio:

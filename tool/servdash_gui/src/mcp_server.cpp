@@ -56,6 +56,16 @@ const int s_MaxLogLines = 5000;
 const int s_MaxLineChars = 2000;
 /// send_input returns once the process has been quiet this long after answering.
 const int s_InputIdleMs = 400;
+/// How long a tool call waits for a dashboard to send its state after the connection; a
+/// dashboard that takes longer is reported as not answering instead of being served half known.
+const int s_SyncTimeoutMs = 15000;
+/// Lines of a process shown with a run that ended during a wait.
+const int s_EventLines = 15;
+/// A dashboard says what it does about an exit (a restart, a pending one) right after the exit
+/// itself; a wait that ends on the exit gives that this long to arrive before it reports.
+const int s_EventSettleMs = 200;
+/// The log types get_log filters by: those of NeL, plain output, dashboard notes, console lines without a prefix.
+const char *const s_LogTypes[] = { "INF", "WRN", "ERR", "DBG", "AST", "STT", "UKN", "out", "dash", "log" };
 
 const char *const s_Instructions = "Service dashboards of Ryzom Core on this machine, one per ini file: a shard "
                                    "(its services), or the patchman services of a server. The processes of a dashboard are the sections of "
@@ -64,7 +74,12 @@ const char *const s_Instructions = "Service dashboards of Ryzom Core on this mac
                                    "their arrival time; get_log selects by index range, time range or count and can keep following for a "
                                    "while, so a window of a log is reproducible. Run NeL commands with run_command and the arguments as a "
                                    "list: they reach the service already split, nothing is parsed, so values with spaces, quotes or "
-                                   "semicolons are safe. The dashboard parameter can be left out while one dashboard runs.";
+                                   "semicolons are safe. To follow a shard coming up: wait_for_state without a process waits for every "
+                                   "process of the dashboard and returns as soon as one exits, crashes or is relaunched, with its last "
+                                   "lines; list_processes gives the time each took to get ready, its start count and its last exit; "
+                                   "get_log without a process, with levels WRN, ERR, AST and since_start, gives the warnings and errors "
+                                   "of every process, each line tagged with its process. The dashboard parameter can be left out while "
+                                   "one dashboard runs.";
 
 // *** arguments ***
 
@@ -104,6 +119,24 @@ bool argU64(const QJsonObject &args, const QString &key, quint64 &value)
 		return false;
 	value = (quint64)d;
 	return true;
+}
+
+bool argBool(const QJsonObject &args, const QString &key, bool defaultValue)
+{
+	const QJsonValue v = args.value(key);
+	if (v.isBool())
+		return v.toBool();
+	if (v.isDouble())
+		return v.toDouble() != 0.0;
+	if (v.isString())
+	{
+		const QString text = v.toString().trimmed().toLower();
+		if (text == "true" || text == "1" || text == "yes")
+			return true;
+		if (text == "false" || text == "0" || text == "no")
+			return false;
+	}
+	return defaultValue;
 }
 
 QStringList argStrs(const QJsonObject &args, const QString &key)
@@ -353,7 +386,27 @@ QString dashSummary(const CDashClient *dash)
 	return QString("'%1' (id %2, %3, %4)").arg(dash->title(), dash->record().Id, dash->record().Tool, dash->record().IniPath);
 }
 
-QString processLine(const CMirrorProcess &p)
+/// Seconds with the precision a boot time needs.
+QString formatSecs(qint64 ms)
+{
+	return QString("%1 s").arg(qMax<qint64>(0, ms) / 1000.0, 0, 'f', 1);
+}
+
+/// What a process is doing now, for the report of a run that ended or began during a wait.
+QString nowText(const CProcInfo &info, int daemonVersion)
+{
+	QString out = QString("now %1").arg(displayState(info));
+	if (info.HasPid)
+		out += QString(", pid %1").arg(info.Pid);
+	if (info.RelaunchPending)
+		out += ", restart pending";
+	if (daemonVersion >= 3)
+		out += QString(", start count %1").arg(info.StartCount);
+	return out;
+}
+
+/// `daemonVersion` tells whether the dashboard reports the start count at all.
+QString processLine(const CMirrorProcess &p, int daemonVersion)
 {
 	const CProcInfo &info = p.Info;
 	QStringList flags;
@@ -367,8 +420,12 @@ QString processLine(const CMirrorProcess &p)
 		flags.append(QString("launch_ctrl %1").arg(info.CtrlValue));
 	if (info.RelaunchPending)
 		flags.append(QString("restart pending (%1 quick exits)").arg(info.CrashChain));
-	if (info.HasExitCode && !info.Started)
-		flags.append(QString("last exit code %1").arg(info.ExitCode));
+	if (daemonVersion >= 3)
+		flags.append(QString("start count %1").arg(info.StartCount));
+	if (info.HasReadyMs)
+		flags.append(QString("ready after %1").arg(formatSecs(info.ReadyMs)));
+	if (!info.exitText().isEmpty())
+		flags.append(QString("last exit: %1").arg(info.exitText()));
 	if (p.Lines.isEmpty())
 		flags.append("no lines");
 	else
@@ -502,7 +559,12 @@ void CMcpServer::start(const QStringList &inis)
 	{
 		QString error;
 		if (!startDashboardProcess(ini, error) && !error.isEmpty())
+		{
 			std::fprintf(stderr, "%s\n", qPrintable(error));
+			continue;
+		}
+		// its record takes a moment to appear; the first tool call waits for it
+		m_Expected.insert(Registry::idFor(QFileInfo(ini).absoluteFilePath()), QDeadlineTimer(s_SyncTimeoutMs));
 	}
 	onDiscoveryTick();
 	m_DiscoveryTimer->start();
@@ -637,8 +699,11 @@ QJsonValue CMcpServer::toolList() const
 	    props({ { "ini_path", prop("string", "Path of the dashboard ini file.") }, { "wait_seconds", waitProp("the dashboard to answer (default 15)") } }), { "ini_path" }));
 	tools.append(tool("shutdown_dashboard", "Stops every process of a dashboard and exits it, like the Shutdown All button followed by closing the window.",
 	    props({ { "dashboard", dashboardProp() }, { "wait_seconds", waitProp("the dashboard to exit (default 60)") } }), {}));
-	tools.append(tool("list_processes", "The processes of a dashboard with their state, pid, uptime, launch control and log line range.", props({ { "dashboard", dashboardProp() } }), {}));
-	tools.append(tool("get_process", "Everything about one process: configuration, state, the service's status labels and buttons, its log range and command table size.",
+	tools.append(tool("list_processes",
+	    "The processes of a dashboard, one per line: state, pid, uptime, console and launch control, how often the dashboard started it (start count), how long it took from start to ready, how its last run ended, and the log line range.",
+	    props({ { "dashboard", dashboardProp() } }), {}));
+	tools.append(tool("get_process",
+	    "Everything about one process: configuration, state, start count, time from start to ready, how the last run ended, the service's status labels and buttons, its log range and command table size.",
 	    props({ { "dashboard", dashboardProp() }, { "process", processProp() } }), { "process" }));
 	tools.append(tool("start_process", "Starts a process, through its launch control file when it has one so the admin executor stays in step; the Start button.",
 	    props({ { "dashboard", dashboardProp() }, { "process", processProp() }, { "wait_seconds", waitProp("the process to be ready (default 0)") } }), { "process" }));
@@ -651,8 +716,14 @@ QJsonValue CMcpServer::toolList() const
 	tools.append(tool("stop_all", "Stops every running process of a dashboard; the Shutdown All button.", props({ { "dashboard", dashboardProp() }, { "wait_seconds", waitProp("every process to exit (default 0)") } }), {}));
 	QJsonObject stateProp = prop("string", "The state to wait for.");
 	stateProp["enum"] = QJsonArray { "ready", "running", "stopped" };
-	tools.append(tool("wait_for_state", "Waits until a process reaches a state: ready (the service is up), running (started, console attached or not), stopped.",
-	    props({ { "dashboard", dashboardProp() }, { "process", processProp() }, { "state", stateProp }, { "wait_seconds", waitProp("the state (default 60)") } }), { "process", "state" }));
+	tools.append(tool("wait_for_state",
+	    "Waits until a process, or without the process parameter every process of the dashboard, reaches a state: ready (the service is up), running (started, console attached or not), stopped. Returns early when a watched process exits, crashes or is relaunched meanwhile (for stopped: when one is started again), naming it with the way it ended and its last log lines.",
+	    props({ { "dashboard", dashboardProp() },
+	        { "process", prop("string", "The process: its section name in the ini, or its label. Leave out to wait for every process of the dashboard.") }, { "state", stateProp },
+	        { "wait_seconds", waitProp("the state (default 60)") },
+	        { "stop_on_exit", prop("boolean", "Return as soon as a watched process exits or is relaunched while waiting (default true); false keeps waiting for the state.") },
+	        { "prefix", prefixProp() } }),
+	    { "state" }));
 	tools.append(tool("list_commands",
 	    "The command table of a NeL service as it reports it: commands and variables with their argument syntax and help, named handler instances and their member commands (instance.command). Filter by prefix or a word of the name or help.",
 	    props({ { "dashboard", dashboardProp() }, { "process", processProp() }, { "prefix", prop("string", "Only names starting with this (case sensitive, as the commands are).") },
@@ -668,22 +739,69 @@ QJsonValue CMcpServer::toolList() const
 	        { "prefix", prefixProp() } }),
 	    { "process", "text" }));
 	tools.append(tool("get_log",
-	    "Lines of a process log, or of every process of the dashboard merged by time. Select by index range (from_idx, to_idx), by time range (from_time, to_time), or the last N lines; then optionally keep following for follow_seconds, up to max_lines in total. Each line: index, time, log type, message. Indices are per process, from 1, never reused.",
+	    "Lines of a process log, or without the process parameter of every process of the dashboard merged by time, each line tagged with its process. Select by index range (from_idx, to_idx), by time range (from_time, to_time), since the process started (since_start), or the last N lines, and filter by log type (levels) and regular expression (match): levels WRN, ERR, AST with since_start and no process gives every warning and error of a shard since it came up. Then optionally keep following for follow_seconds, up to max_lines in total. Each line: index, time, [process], log type, message. Indices are per process, from 1, never reused.",
 	    props({ { "dashboard", dashboardProp() }, { "process", prop("string", "The process; leave out for every process of the dashboard, each line then names its process.") },
-	        { "last", prop("integer", "The last N lines of the selection (default 100 when no range is given).") }, { "from_idx", prop("integer", "First line index, inclusive.") },
+	        { "last", prop("integer", "The last N lines of the selection, per process (default 100 when no range is given).") }, { "from_idx", prop("integer", "First line index, inclusive.") },
 	        { "to_idx", prop("integer", "Last line index, inclusive.") },
 	        { "from_time", prop("string", "Earliest arrival time: HH:MM[:SS[.mmm]] today, an ISO 8601 date and time, Unix seconds or milliseconds, or relative such as -90s, -5m, -2h.") },
 	        { "to_time", prop("string", "Latest arrival time, same forms.") },
+	        { "since_start", prop("boolean", "Only the lines since the last start of each process, as far as they are still held.") },
 	        { "follow_seconds", prop("number", "After the selection, keep collecting new lines for this long (at most 300), stopping early at max_lines.") },
-	        { "max_lines", prop("integer", "At most this many lines in the answer (default 200, at most 5000).") }, { "prefix", prefixProp() },
-	        { "levels", stringArrayProp("Only these log types: INF, WRN, ERR, DBG, AST, STT; out (plain output of the process), dash (notes of the dashboard).") },
+	        { "max_lines", prop("integer", "At most this many lines in the answer, the newest of the selection (default 200, at most 5000).") }, { "prefix", prefixProp() },
+	        { "levels", stringArrayProp("Only these log types: INF, WRN, ERR, DBG, AST, STT, UKN of NeL; out (plain output of the process), dash (notes of the dashboard), log (a console line without a NeL prefix).") },
 	        { "match", prop("string", "Only lines matching this regular expression (case insensitive).") } }),
 	    {}));
 	tools.append(tool("clear_log", "Drops the held lines of a process; indices keep counting.", props({ { "dashboard", dashboardProp() }, { "process", processProp() } }), { "process" }));
 	return tools;
 }
 
+bool CMcpServer::mirrorsSettled(const QJsonObject &args) const
+{
+	// the dashboard the call names, or all of them when it names none or its selector does not resolve
+	QString error;
+	const CDashClient *only = argStr(args, "dashboard").isEmpty() ? nullptr : findDashAny(args, error);
+	for (const CDashClient *client : m_Dashes)
+		if ((only == nullptr || client == only) && !client->isSynced() && client->sinceOpenedMs() < s_SyncTimeoutMs)
+			return false;
+	return true;
+}
+
+bool CMcpServer::expectedAttached()
+{
+	for (int round = 0; round < 2; ++round)
+	{
+		for (QHash<QString, QDeadlineTimer>::iterator it = m_Expected.begin(); it != m_Expected.end();)
+		{
+			if (m_Dashes.contains(it.key()) || it.value().hasExpired())
+				it = m_Expected.erase(it);
+			else
+				++it;
+		}
+		if (m_Expected.isEmpty())
+			return true;
+		// the registry is read as often as the waiters are polled while one is missing
+		if (round == 0)
+			onDiscoveryTick();
+	}
+	return false;
+}
+
 void CMcpServer::callTool(const QString &name, const QJsonObject &args, const TReply &reply)
+{
+	// The call is held until the mirror it answers from is whole: the dashboards this server
+	// started itself are attached, and the dashboard the call names (every dashboard, when it
+	// names none) has sent its state, or has had its time to do so. A server asked right after
+	// its start (a client that runs one call per process does nothing else) would otherwise
+	// answer from the part of the state that happened to have arrived.
+	addWaiter(
+	    s_SyncTimeoutMs, 0, [this, args]() { return expectedAttached() && mirrorsSettled(args) ? (int)CWaiter::Done : (int)CWaiter::Wait; },
+	    [this, name, args, reply](bool reached) {
+		    Q_UNUSED(reached);
+		    runTool(name, args, reply);
+	    });
+}
+
+void CMcpServer::runTool(const QString &name, const QJsonObject &args, const TReply &reply)
 {
 	if (name == "list_dashboards")
 		toolListDashboards(reply);
@@ -747,38 +865,52 @@ void CMcpServer::addWaiter(int waitMs, int idleMs, const std::function<int()> &c
 
 void CMcpServer::pollWaiters()
 {
-	// a finish may add waiters of its own (a restart waits twice), so this walks a copy
-	const QList<CWaiter *> waiters = m_Waiters;
-	for (CWaiter *waiter : waiters)
+	// A check may change a mirror (the wait for a new dashboard attaches to it), which polls
+	// again from inside: that would finish and delete the waiter whose check is still running.
+	// So a poll during a poll only asks for another round.
+	if (m_Polling)
 	{
-		if (!m_Waiters.contains(waiter))
-			continue;
-		const int result = waiter->Check();
-		bool finished = false;
-		bool reached = false;
-		if (result == CWaiter::Done)
-		{
-			finished = true;
-			reached = true;
-		}
-		else
-		{
-			if (result == CWaiter::Progress)
-			{
-				waiter->Progressed = true;
-				if (waiter->IdleMs > 0)
-					waiter->Idle = QDeadlineTimer(waiter->IdleMs);
-			}
-			if (waiter->Deadline.hasExpired() || (waiter->IdleMs > 0 && waiter->Progressed && waiter->Idle.hasExpired()))
-				finished = true;
-		}
-		if (finished)
-		{
-			m_Waiters.removeOne(waiter);
-			waiter->Finish(reached);
-			delete waiter;
-		}
+		m_PollAgain = true;
+		return;
 	}
+	m_Polling = true;
+	do
+	{
+		m_PollAgain = false;
+		// a finish may add waiters of its own (a restart waits twice), so this walks a copy
+		const QList<CWaiter *> waiters = m_Waiters;
+		for (CWaiter *waiter : waiters)
+		{
+			if (!m_Waiters.contains(waiter))
+				continue;
+			const int result = waiter->Check();
+			bool finished = false;
+			bool reached = false;
+			if (result == CWaiter::Done)
+			{
+				finished = true;
+				reached = true;
+			}
+			else
+			{
+				if (result == CWaiter::Progress)
+				{
+					waiter->Progressed = true;
+					if (waiter->IdleMs > 0)
+						waiter->Idle = QDeadlineTimer(waiter->IdleMs);
+				}
+				if (waiter->Deadline.hasExpired() || (waiter->IdleMs > 0 && waiter->Progressed && waiter->Idle.hasExpired()))
+					finished = true;
+			}
+			if (finished)
+			{
+				m_Waiters.removeOne(waiter);
+				waiter->Finish(reached);
+				delete waiter;
+			}
+		}
+	} while (m_PollAgain);
+	m_Polling = false;
 }
 
 void CMcpServer::onWaiterTick()
@@ -860,6 +992,18 @@ bool CMcpServer::startDashboardProcess(const QString &iniPath, QString &error)
 // *** resolution ***
 
 CDashClient *CMcpServer::findDash(const QJsonObject &args, QString &error) const
+{
+	CDashClient *dash = findDashAny(args, error);
+	if (dash != nullptr && !dash->isSynced())
+	{
+		// its mirror is a part of it at best
+		error = QString("the dashboard %1 is connected but has not sent its state in the %2 s since; it may be busy or hung, ask again in a moment").arg(dashSummary(dash)).arg(dash->sinceOpenedMs() / 1000);
+		return nullptr;
+	}
+	return dash;
+}
+
+CDashClient *CMcpServer::findDashAny(const QJsonObject &args, QString &error) const
 {
 	QList<CDashClient *> dashes;
 	for (CDashClient *client : m_Dashes)
@@ -960,6 +1104,11 @@ void CMcpServer::toolListDashboards(const TReply &reply)
 	QString out = QString("%1 dashboard(s):\n").arg(dashes.size());
 	for (const CDashClient *dash : dashes)
 	{
+		if (!dash->isSynced())
+		{
+			out += QString("- %1: connected, but it has not sent its state in the %2 s since; dashboard pid %3\n").arg(dashSummary(dash)).arg(dash->sinceOpenedMs() / 1000).arg(dash->record().Pid);
+			continue;
+		}
 		int started = 0;
 		int ready = 0;
 		for (const CMirrorProcess &p : dash->processes())
@@ -1011,7 +1160,7 @@ void CMcpServer::toolStartDashboard(const QJsonObject &args, const TReply &reply
 		    CDashClient *dash = m_Dashes.value(id, nullptr);
 		    if (dash == nullptr)
 			    onDiscoveryTick();
-		    return dash != nullptr && dash->isConnected() ? (int)CWaiter::Done : (int)CWaiter::Wait;
+		    return dash != nullptr && dash->isSynced() ? (int)CWaiter::Done : (int)CWaiter::Wait;
 	    },
 	    [this, id, started, path, wait, reply](bool reached) {
 		    CDashClient *dash = m_Dashes.value(id, nullptr);
@@ -1025,7 +1174,7 @@ void CMcpServer::toolStartDashboard(const QJsonObject &args, const TReply &reply
 void CMcpServer::toolShutdownDashboard(const QJsonObject &args, const TReply &reply)
 {
 	QString error;
-	CDashClient *dash = findDash(args, error);
+	CDashClient *dash = findDashAny(args, error);
 	if (dash == nullptr)
 	{
 		reply(error, true);
@@ -1048,12 +1197,17 @@ void CMcpServer::toolShutdownDashboard(const QJsonObject &args, const TReply &re
 			    reply(QString("The dashboard %1 stopped its processes and exited.").arg(summary), false);
 			    return;
 		    }
-		    QStringList left;
+		    // what still runs is known of a dashboard that has sent its state
 		    CDashClient *dash = m_Dashes.value(id, nullptr);
-		    if (dash != nullptr)
-			    for (const CMirrorProcess &p : dash->processes())
-				    if (p.Info.Started)
-					    left.append(p.Info.Name);
+		    if (dash == nullptr || !dash->isSynced())
+		    {
+			    reply(QString("The dashboard %1 has not exited after %2 s; it has not sent its state, so what still runs is not known.").arg(summary).arg(wait / 1000.0), false);
+			    return;
+		    }
+		    QStringList left;
+		    for (const CMirrorProcess &p : dash->processes())
+			    if (p.Info.Started)
+				    left.append(p.Info.Name);
 		    reply(QString("The dashboard %1 is still stopping after %2 s; still running: %3. It exits when they are gone.").arg(summary).arg(wait / 1000.0).arg(left.join(", ")), false);
 	    });
 }
@@ -1071,7 +1225,7 @@ void CMcpServer::toolListProcesses(const QJsonObject &args, const TReply &reply)
 	}
 	QString out = QString("%1: %2 processes\n").arg(dashSummary(dash)).arg(dash->processes().size());
 	for (const CMirrorProcess &p : dash->processes())
-		out += processLine(p) + "\n";
+		out += processLine(p, dash->daemonVersion()) + "\n";
 	reply(out, false);
 }
 
@@ -1097,8 +1251,16 @@ void CMcpServer::toolGetProcess(const QJsonObject &args, const TReply &reply)
 		out += QString("pid: %1\n").arg(info.Pid);
 	if (info.HasStartedAt)
 		out += QString("started: %1 (up %2)\n").arg(formatDateTime(info.StartedAt), formatDuration(nowMs() - info.StartedAt));
-	if (info.HasExitCode)
-		out += QString("last exit code: %1\n").arg(info.ExitCode);
+	if (dash->daemonVersion() >= 3)
+	{
+		out += QString("start count: %1%2\n").arg(info.StartCount).arg(info.HasLaunchCtrl ? " (since the dashboard opened; it writes the count to the start_count file of the launch control)" : " (since the dashboard opened)");
+		if (info.HasReadyMs)
+			out += QString("ready after: %1%2\n").arg(formatSecs(info.ReadyMs), info.HasPid ? "" : " (the last run)");
+		else if (info.HasPid)
+			out += "ready after: not ready yet\n";
+	}
+	if (!info.exitText().isEmpty())
+		out += QString("last exit: %1\n").arg(info.exitText());
 	out += QString("priority: %1\n").arg(info.HasPriority ? QString::number(info.Priority) : "none (starts one at a time)");
 	out += QString("auto start: %1\n").arg(info.AutoStart ? "true" : "false");
 	if (info.Control)
@@ -1311,29 +1473,141 @@ void CMcpServer::toolWaitForState(const QJsonObject &args, const TReply &reply)
 		return;
 	}
 	QString error;
-	int index = -1;
-	CDashClient *dash = findTarget(args, index, error);
+	CDashClient *dash = findDash(args, error);
 	if (dash == nullptr)
 	{
 		reply(error, true);
 		return;
 	}
-	const QString name = dash->processes()[index].Info.Name;
+	// one process, or without the parameter every process of the dashboard
+	const bool whole = argStr(args, "process").isEmpty();
+	QVector<int> indices;
+	if (whole)
+	{
+		for (int i = 0; i < dash->processes().size(); ++i)
+			indices.append(i);
+	}
+	else
+	{
+		int index = -1;
+		if (findTarget(args, index, error) == nullptr)
+		{
+			reply(error, true);
+			return;
+		}
+		indices.append(index);
+	}
+	QStringList names;
+	for (int index : indices)
+		names.append(dash->processes()[index].Info.Name);
+	const bool stopOnExit = argBool(args, "stop_on_exit", true);
+	const TPrefixMode mode = prefixMode(args);
+	// waiting for the stop, a run that begins is the surprise; otherwise one that ends
+	const bool watchBegan = wanted == "stopped";
+	const quint64 seq0 = dash->eventSeq();
+	const QString summary = dashSummary(dash);
 	const int wait = waitMs(args, 60.0);
+	QElapsedTimer begun;
+	begun.start();
 	QPointer<CDashClient> guard(dash);
+	const std::function<bool(const CMirrorEvent &)> relevant = [seq0, watchBegan, names](const CMirrorEvent &e) { return e.Seq > seq0 && e.Began == watchBegan && names.contains(e.Name); };
+	const std::function<bool()> reachedNow = [guard, indices, pred]() {
+		for (int index : indices)
+			if (index < guard->processes().size() && !pred(guard->processes()[index].Info))
+				return false;
+		return true;
+	};
+	std::shared_ptr<QElapsedTimer> eventSeen(new QElapsedTimer());
 	addWaiter(
 	    wait, 0,
-	    [guard, index, pred]() {
-		    if (guard.isNull() || index >= guard->processes().size())
+	    [guard, stopOnExit, relevant, reachedNow, eventSeen]() {
+		    if (guard.isNull())
 			    return (int)CWaiter::Done;
-		    return pred(guard->processes()[index].Info) ? (int)CWaiter::Done : (int)CWaiter::Wait;
+		    if (stopOnExit)
+		    {
+			    for (const CMirrorEvent &e : guard->events())
+			    {
+				    if (!relevant(e))
+					    continue;
+				    if (!eventSeen->isValid())
+					    eventSeen->start();
+				    return eventSeen->elapsed() >= s_EventSettleMs ? (int)CWaiter::Done : (int)CWaiter::Wait;
+			    }
+		    }
+		    return reachedNow() ? (int)CWaiter::Done : (int)CWaiter::Wait;
 	    },
-	    [guard, index, name, wanted, wait, reply](bool reached) {
-		    const QString state = guard.isNull() || index >= guard->processes().size() ? "gone" : displayState(guard->processes()[index].Info);
-		    if (reached)
-			    reply(QString("'%1' is %2 (state %3).").arg(name, wanted, state), false);
+	    [guard, indices, names, whole, wanted, pred, mode, summary, begun, relevant, reachedNow, reply](bool finished) {
+		    Q_UNUSED(finished);
+		    if (guard.isNull())
+		    {
+			    reply(QString("The dashboard %1 went away while waiting.").arg(summary), false);
+			    return;
+		    }
+		    const QVector<CMirrorProcess> &procs = guard->processes();
+		    const QString waited = QString::number(begun.elapsed() / 1000.0, 'f', 1);
+		    QString out;
+		    // the runs that ended (or began) meanwhile come first: they are why the wait is over early
+		    QStringList shown;
+		    for (const CMirrorEvent &e : guard->events())
+		    {
+			    if (!relevant(e))
+				    continue;
+			    const int at = guard->indexOf(e.Name);
+			    const QString now = at >= 0 ? nowText(procs[at].Info, guard->daemonVersion()) : QString("now gone");
+			    if (e.Began)
+				    out += QString("'%1' was started while waiting; %2.\n").arg(e.Name, now);
+			    else
+				    out += QString("'%1' exited while waiting%2%3; %4.\n").arg(e.Name, e.How.isEmpty() ? QString() : QString(" (%1)").arg(e.How), e.UpMs >= 0 ? QString(", after %1 up").arg(formatDuration(e.UpMs)) : QString(), now);
+			    if (!shown.contains(e.Name))
+				    shown.append(e.Name);
+		    }
+		    const bool reached = reachedNow();
+		    QStringList notThere;
+		    int count = 0;
+		    for (int index : indices)
+		    {
+			    if (index >= procs.size())
+				    continue;
+			    ++count;
+			    if (!pred(procs[index].Info))
+			    {
+				    // a process that is down comes with the way its last run ended: an exit from
+				    // before the wait is no event of it, and this is where it shows
+				    const CProcInfo &info = procs[index].Info;
+				    const QString exit = wanted != "stopped" && !info.HasPid ? info.exitText() : QString();
+				    notThere.append(QString("%1 %2%3").arg(info.Name, displayState(info), exit.isEmpty() ? QString() : QString(" (last exit: %1)").arg(exit)));
+			    }
+		    }
+		    if (whole)
+		    {
+			    if (reached)
+				    out += QString("Every process of %1 is %2 (%3 processes, waited %4 s).\n").arg(summary, wanted).arg(count).arg(waited);
+			    else
+				    out += QString("Not every process of %1 is %2 after %3 s: %4 of %5 are; not %2: %6.\n").arg(summary, wanted, waited).arg(count - notThere.size()).arg(count).arg(notThere.join(", "));
+		    }
 		    else
-			    reply(QString("'%1' is not %2 after %3 s (state %4).").arg(name, wanted).arg(wait / 1000.0).arg(state), false);
+		    {
+			    const QString state = indices.first() < procs.size() ? displayState(procs[indices.first()].Info) : QString("gone");
+			    // a stop that was waited for comes with the way the run ended
+			    const QString exit = wanted == "stopped" && indices.first() < procs.size() ? procs[indices.first()].Info.exitText() : QString();
+			    if (reached)
+				    out += QString("'%1' is %2 (state %3%4).\n").arg(names.first(), wanted, state, exit.isEmpty() ? QString() : QString(", last exit: %1").arg(exit));
+			    else
+				    out += QString("'%1' is not %2 after %3 s (state %4).\n").arg(names.first(), wanted, waited, state);
+		    }
+		    for (int i = 0; i < shown.size() && i < 3; ++i)
+		    {
+			    const int at = guard->indexOf(shown[i]);
+			    if (at < 0)
+				    continue;
+			    const QVector<CMirrorLine> &lines = procs[at].Lines;
+			    out += QString("Last lines of '%1' (idx time type message):\n").arg(shown[i]);
+			    for (int l = qMax(0, (int)lines.size() - s_EventLines); l < lines.size(); ++l)
+				    out += formatLine(lines[l], QString(), mode) + "\n";
+		    }
+		    if (shown.size() > 3)
+			    out += QString("The lines of %1 are in get_log.\n").arg(QStringList(shown.mid(3)).join(", "));
+		    reply(out, false);
 	    });
 }
 
@@ -1577,6 +1851,16 @@ struct CPicked
 	QString Text;
 };
 
+/// The index of the note the dashboard wrote at the last start of the process; the lines of
+/// the current run follow it. When that note is no longer held, every held line is of this run.
+quint64 runStartIdx(const CMirrorProcess &p)
+{
+	for (int i = p.Lines.size() - 1; i >= 0; --i)
+		if (p.Lines[i].Raw && p.Lines[i].Text == "> Process Started")
+			return p.Lines[i].Idx;
+	return 0;
+}
+
 struct CLogFollow
 {
 	QString Header;
@@ -1622,10 +1906,28 @@ void CMcpServer::toolGetLog(const QJsonObject &args, const TReply &reply)
 		}
 		filter.HasToTs = true;
 	}
-	for (const QString &level : argStrs(args, "levels"))
+	// a list, or one string with commas or spaces; an unknown type is an error, since it would
+	// match nothing and read as a quiet log
+	for (const QString &entry : argStrs(args, "levels"))
 	{
-		const QString lowered = level.toLower();
-		filter.Levels.append(lowered == "out" || lowered == "dash" || lowered == "log" ? lowered : level.toUpper());
+		static const QRegularExpression s_Separators("[,\\s]+");
+		for (const QString &word : entry.split(s_Separators, Qt::SkipEmptyParts))
+		{
+			QString known;
+			QStringList all;
+			for (const char *type : s_LogTypes)
+			{
+				all.append(type);
+				if (word.compare(QLatin1String(type), Qt::CaseInsensitive) == 0)
+					known = type;
+			}
+			if (known.isEmpty())
+			{
+				reply(QString("unknown log type '%1' in levels; one of %2").arg(word, all.join(", ")), true);
+				return;
+			}
+			filter.Levels.append(known);
+		}
 	}
 	const QString match = argStr(args, "match");
 	if (!match.isEmpty())
@@ -1637,7 +1939,8 @@ void CMcpServer::toolGetLog(const QJsonObject &args, const TReply &reply)
 			return;
 		}
 	}
-	const bool hasRange = filter.HasFromIdx || filter.HasToIdx || filter.HasFromTs || filter.HasToTs;
+	const bool sinceStart = argBool(args, "since_start", false);
+	const bool hasRange = sinceStart || filter.HasFromIdx || filter.HasToIdx || filter.HasFromTs || filter.HasToTs;
 	quint64 maxLines = 200;
 	argU64(args, "max_lines", maxLines);
 	follow->MaxLines = (int)qBound<quint64>(1, maxLines, s_MaxLogLines);
@@ -1676,12 +1979,14 @@ void CMcpServer::toolGetLog(const QJsonObject &args, const TReply &reply)
 			follow->ProcIndices.append(i);
 	}
 	follow->Several = follow->ProcIndices.size() > 1;
+	QStringList without;
 	for (int pi : follow->ProcIndices)
 	{
 		const CMirrorProcess &p = dash->processes()[pi];
+		const quint64 runStart = sinceStart ? runStartIdx(p) : 0;
 		QVector<const CMirrorLine *> matching;
 		for (const CMirrorLine &line : p.Lines)
-			if (filter.accepts(line))
+			if (line.Idx >= runStart && filter.accepts(line))
 				matching.append(&line);
 		const int total = matching.size();
 		int from = 0;
@@ -1689,13 +1994,21 @@ void CMcpServer::toolGetLog(const QJsonObject &args, const TReply &reply)
 			from = matching.size() - (int)last;
 		const quint64 firstHeld = p.Lines.isEmpty() ? 0 : p.Lines.first().Idx;
 		const quint64 lastHeld = p.Lines.isEmpty() ? 0 : p.Lines.last().Idx;
-		follow->Header += QString("# %1: %2 of %3 matching lines, held %4..%5, next idx %6\n")
-		                      .arg(follow->Several ? QString("[%1]").arg(p.Info.Name) : p.Info.Name)
-		                      .arg(matching.size() - from)
-		                      .arg(total)
-		                      .arg(firstHeld)
-		                      .arg(lastHeld)
-		                      .arg(p.Info.NextIdx);
+		if (follow->Several && total == 0)
+		{
+			// the processes a selection over the dashboard finds nothing in share one line
+			without.append(p.Info.Name);
+		}
+		else
+		{
+			follow->Header += QString("# %1: %2 of %3 matching lines, held %4..%5, next idx %6\n")
+			                      .arg(follow->Several ? QString("[%1]").arg(p.Info.Name) : p.Info.Name)
+			                      .arg(matching.size() - from)
+			                      .arg(total)
+			                      .arg(firstHeld)
+			                      .arg(lastHeld)
+			                      .arg(p.Info.NextIdx);
+		}
 		for (int i = from; i < matching.size(); ++i)
 		{
 			CPicked picked;
@@ -1707,6 +2020,8 @@ void CMcpServer::toolGetLog(const QJsonObject &args, const TReply &reply)
 		}
 		follow->Cursors.append(qMax<quint64>(lastHeld, p.Info.NextIdx > 0 ? p.Info.NextIdx - 1 : 0));
 	}
+	if (!without.isEmpty())
+		follow->Header += QString("# no matching lines: %1\n").arg(without.join(", "));
 	// to_time in the past makes following pointless; a to_idx too
 	follow->CanFollow = follow->FollowSeconds > 0 && !filter.HasToIdx && (!filter.HasToTs || filter.ToTs > nowMs());
 

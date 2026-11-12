@@ -18,13 +18,19 @@
 
 #include "wire.h"
 
+#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QTimer>
 
 namespace {
 
 /// Lines kept per process in the mirror; a dashboard holds as many.
 const int s_MaxMirrorLines = 10000;
+/// Run starts and ends kept per dashboard for the waits that watch them.
+const int s_MaxEvents = 256;
+/// How long a dashboard older than the Synced message may take to send what follows its last Snapshot.
+const int s_SettleWithoutMarkerMs = 250;
 
 CMirrorLine lineFromJson(const QJsonObject &o)
 {
@@ -79,7 +85,18 @@ CProcInfo CProcInfo::fromJson(const QJsonObject &o)
 	info.NextIdx = (quint64)o.value("next_idx").toDouble();
 	info.FirstIdx = (quint64)o.value("first_idx").toDouble();
 	info.ChannelVersion = o.value("channel_version").toInt();
+	info.StartCount = o.value("start_count").toInt();
+	info.HasReadyMs = o.value("ready_ms").isDouble();
+	info.ReadyMs = (qint64)o.value("ready_ms").toDouble();
+	info.LastExit = o.value("last_exit").toString();
 	return info;
+}
+
+QString CProcInfo::exitText() const
+{
+	if (!LastExit.isEmpty())
+		return LastExit;
+	return HasExitCode ? QString("code %1").arg(ExitCode) : QString();
 }
 
 void CMirrorProcess::trackIndices()
@@ -99,11 +116,52 @@ CDashClient::CDashClient(const Registry::CRecord &record, QObject *parent)
 	connect(m_Socket, &QLocalSocket::readyRead, this, &CDashClient::onReadyRead);
 	connect(m_Socket, &QLocalSocket::disconnected, this, &CDashClient::onDisconnected);
 	connect(m_Socket, &QLocalSocket::errorOccurred, this, &CDashClient::onError);
+	m_SettleTimer = new QTimer(this);
+	m_SettleTimer->setSingleShot(true);
+	m_SettleTimer->setInterval(s_SettleWithoutMarkerMs);
+	connect(m_SettleTimer, &QTimer::timeout, this, &CDashClient::onSettled);
 }
 
 void CDashClient::open()
 {
+	m_OpenedAt.start();
 	m_Socket->connectToServer(m_Record.Endpoint);
+}
+
+void CDashClient::pushEvent(const QString &name, bool began, const QString &how, qint64 upMs)
+{
+	CMirrorEvent event;
+	event.Seq = ++m_EventSeq;
+	event.Name = name;
+	event.Began = began;
+	event.How = how;
+	event.UpMs = upMs;
+	m_Events.append(event);
+	if (m_Events.size() > s_MaxEvents)
+		m_Events.remove(0, m_Events.size() - s_MaxEvents);
+}
+
+void CDashClient::checkSyncedWithoutMarker()
+{
+	// A dashboard that sends no Synced message is at the end of its state once every process got
+	// its Snapshot, but for the command table of the last process, which follows its Snapshot
+	// when it has one. So the state counts as whole with the next message, whatever it is, or
+	// when none comes for a moment.
+	if (!m_Synced && !m_Settling && m_Version < 3 && m_GotProcesses && m_Awaiting.isEmpty())
+	{
+		m_Settling = true;
+		m_SettleTimer->start();
+	}
+}
+
+void CDashClient::onSettled()
+{
+	if (!m_Settling)
+		return;
+	m_Settling = false;
+	m_SettleTimer->stop();
+	m_Synced = true;
+	emit changed();
 }
 
 int CDashClient::indexOf(const QString &name) const
@@ -183,7 +241,15 @@ void CDashClient::onReadyRead()
 		QJsonObject fields;
 		if (!Wire::decode(msg, variant, fields))
 			continue;
+		const bool wasSettling = m_Settling;
 		apply(variant, fields);
+		if (wasSettling)
+		{
+			// what followed the last Snapshot of a dashboard without the Synced message
+			m_Settling = false;
+			m_SettleTimer->stop();
+			m_Synced = true;
+		}
 		any = true;
 		if (variant == "Bye")
 		{
@@ -225,6 +291,15 @@ void CDashClient::apply(const QString &variant, const QJsonObject &fields)
 			}
 			m_Procs.append(process);
 		}
+		m_GotProcesses = true;
+		m_Awaiting.clear();
+		for (const CMirrorProcess &process : m_Procs)
+			m_Awaiting.insert(process.Info.Name);
+		checkSyncedWithoutMarker();
+	}
+	else if (variant == "Synced")
+	{
+		m_Synced = true;
 	}
 	else if (variant == "Process")
 	{
@@ -238,8 +313,16 @@ void CDashClient::apply(const QString &variant, const QJsonObject &fields)
 		}
 		else
 		{
+			// a run is known by its start time, which a dashboard reports while the process runs;
+			// a change of it ends one run and begins another
+			const CProcInfo old = m_Procs[at].Info;
+			const bool changed = old.HasStartedAt != info.HasStartedAt || old.StartedAt != info.StartedAt;
 			m_Procs[at].Info = info;
 			m_Procs[at].trackIndices();
+			if (changed && old.HasStartedAt)
+				pushEvent(info.Name, false, info.exitText(), qMax<qint64>(0, QDateTime::currentMSecsSinceEpoch() - old.StartedAt));
+			if (changed && info.HasStartedAt)
+				pushEvent(info.Name, true, QString(), -1);
 		}
 	}
 	else if (variant == "Label")
@@ -256,6 +339,8 @@ void CDashClient::apply(const QString &variant, const QJsonObject &fields)
 	}
 	else if (variant == "Snapshot")
 	{
+		m_Awaiting.remove(name);
+		checkSyncedWithoutMarker();
 		if (idx < 0)
 			return;
 		m_Procs[idx].Lines.clear();
