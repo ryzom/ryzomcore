@@ -226,7 +226,7 @@ bool		CIFile::open(const std::string &path, bool text)
 			std::string filePath;
 			if (CStreamedPackageManager::getInstance().getFile (filePath, path.substr(pos+1)))
 			{
-				_F = fopen (filePath.c_str(), mode);
+				_F = nlfopen(filePath, mode);
 				if (_F != nullptr)
 				{
 					_FileSize=CFile::getFileSize(_F);
