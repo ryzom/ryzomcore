@@ -425,19 +425,20 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 						MYSQL_ROW row =  sqlResult.fetchRow();
 						if (sqlResult.numFields() == 1)
 						{
-							if (strlen(row[0]) > 2)
+							// the stored hash starts with its salt: 19 characters if it starts with '$', else 2
+							const char *storedHash = row[0];
+							size_t hashLength = storedHash != NULL ? strlen(storedHash) : 0;
+							size_t saltLength = (hashLength != 0 && storedHash[0] == '$') ? 19 : 2;
+							if (hashLength <= saltLength)
 							{
-								std::string salt;
-								if (row[0][0] == '$')
-								{
-									salt = std::string(row[0], row[0] + 19);
-								}
-								else
-								{
-									salt = std::string(row[0], row[0] + 2);
-								}
+								nlwarning("The password stored for the login '%s' is too short for its scheme (%u characters), authentication refused",
+								    login.c_str(), (uint)hashLength);
+							}
+							else
+							{
+								std::string salt(storedHash, storedHash + saltLength);
 								std::string cryptedVersion = CCrypt::crypt(password, salt);
-								if (cryptedVersion == row[0])
+								if (cryptedVersion == storedHash)
 								{
 									Clients[i]->Authentificated = true;
 									// password is  good
