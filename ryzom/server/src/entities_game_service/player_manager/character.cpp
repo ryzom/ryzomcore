@@ -20239,6 +20239,10 @@ std::vector<SItemSpecialEffect> CCharacter::lookForSpecialItemEffects(ITEM_SPECI
 //-----------------------------------------------------------------------------
 bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 {
+	// what setToNone may reset below
+	const PVP_CLAN::TPVPClan oldCult = _DeclaredCult;
+	const PVP_CLAN::TPVPClan oldCiv = _DeclaredCiv;
+
 	// Allow changes to guild 0 (no guild)
 	if (guildId == 0)
 	{
@@ -20279,6 +20283,23 @@ bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 			{
 				return false;
 			}
+		}
+
+		if (_DeclaredCult != oldCult || _DeclaredCiv != oldCiv)
+		{
+			// The allegiance was reset. setDeclaredCult and setDeclaredCiv are not used for it, as they check the
+			// guild again; what they tell the client and the shard unifier is done here. A character that has not
+			// entered the game yet gets its database and its fame caps when it does (finalizeClientReady).
+			if (getEnterFlag())
+			{
+				CBankAccessor_PLR::getFAME().setCULT_ALLEGIANCE(_PropertyDatabase, _DeclaredCult);
+				CBankAccessor_PLR::getFAME().setCIV_ALLEGIANCE(_PropertyDatabase, _DeclaredCiv);
+				resetFameDatabase();
+				// the faction channels follow the allegiance in a RYZOM_FORGE build
+				CPVPManager2::getInstance()->updateFactionChannel(this);
+			}
+			if (IShardUnifierEvent::getInstance() != NULL)
+				IShardUnifierEvent::getInstance()->onUpdateCharAllegiance(_Id, _DeclaredCult, _DeclaredCiv);
 		}
 
 		return true;
