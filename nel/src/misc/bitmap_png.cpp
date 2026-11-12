@@ -436,6 +436,18 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 					row_pointers[y][dstOffset+1] = _Data[0][srcOffset+3];
 				}
 			}
+			else if (srcChannels == 1 && sig_bit.alpha)
+			{
+				// a source of one channel has no second byte per pixel to take the other channel from (it was read
+				// from the next pixel, and past the bitmap for the last one): luminance is opaque, and alpha is white
+				// as in alphaToRGBA
+				const uint8 gray = PixelFormat == Alpha ? 255 : _Data[0][srcOffset];
+				for (i = 0; i < (sint)dstChannels - 1; ++i)
+				{
+					row_pointers[y][dstOffset + i] = gray;
+				}
+				row_pointers[y][dstOffset + dstChannels - 1] = PixelFormat == Alpha ? _Data[0][srcOffset] : 255;
+			}
 			else if (dstChannels >= 3 && srcChannels <= 2)
 			{
 				// convert gray to colors
@@ -447,8 +459,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 				if (sig_bit.alpha)
 				{
 					// copy alpha value
-					row_pointers[y][dstOffset+3] = PixelFormat ==
-						Luminance ? 255:_Data[0][srcOffset+1];
+					row_pointers[y][dstOffset + 3] = _Data[0][srcOffset + 1];
 				}
 			}
 			else

@@ -906,3 +906,47 @@ TEST(CUTMiscBitmap, untrustedLoadRefusesEverythingElse)
 	const char text[] = "<html>404</html>";
 	EXPECT_FALSE(loadUntrusted(bitmap, TBytes(text, text + sizeof(text) - 1), 64));
 }
+
+TEST(CUTMiscBitmap, pngOfOneChannelSource)
+{
+	// 4x4 of one channel, written with a gray and an alpha channel, then as RGBA: the channel the source does not have
+	// was the value of the next pixel, read past the end of the bitmap for the last one
+	uint8 values[16];
+	for (uint i = 0; i < 16; ++i)
+		values[i] = (uint8)(10 + i * 15);
+	for (uint format = 0; format < 2; ++format)
+	{
+		SCOPED_TRACE(format);
+		const bool alpha = format != 0;
+		CBitmap source;
+		source.resize(4, 4, alpha ? CBitmap::Alpha : CBitmap::Luminance);
+		memcpy(source.getPixels().getPtr(), values, sizeof(values));
+
+		CMemStream grayAlpha(false);
+		ASSERT_TRUE(source.writePNG(grayAlpha, 16));
+		CBitmap read16;
+		EXPECT_EQ(16, loadImage(read16, TBytes(grayAlpha.buffer(), grayAlpha.buffer() + grayAlpha.length())));
+		ASSERT_EQ(CBitmap::AlphaLuminance, read16.getPixelFormat());
+		ASSERT_EQ(4u, read16.getWidth());
+		ASSERT_EQ(4u, read16.getHeight());
+		for (uint i = 0; i < 16; ++i)
+		{
+			EXPECT_EQ(alpha ? 255 : values[i], read16.getPixels()[i * 2]) << "gray of pixel " << i;
+			EXPECT_EQ(alpha ? values[i] : 255, read16.getPixels()[i * 2 + 1]) << "alpha of pixel " << i;
+		}
+
+		CMemStream rgba(false);
+		ASSERT_TRUE(source.writePNG(rgba, 32));
+		CBitmap read32;
+		EXPECT_EQ(32, loadImage(read32, TBytes(rgba.buffer(), rgba.buffer() + rgba.length())));
+		ASSERT_EQ(CBitmap::RGBA, read32.getPixelFormat());
+		ASSERT_EQ(4u, read32.getWidth());
+		ASSERT_EQ(4u, read32.getHeight());
+		for (uint i = 0; i < 16; ++i)
+		{
+			for (uint channel = 0; channel < 3; ++channel)
+				EXPECT_EQ(alpha ? 255 : values[i], read32.getPixels()[i * 4 + channel]) << "color of pixel " << i;
+			EXPECT_EQ(alpha ? values[i] : 255, read32.getPixels()[i * 4 + 3]) << "alpha of pixel " << i;
+		}
+	}
+}
