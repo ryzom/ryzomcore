@@ -1877,7 +1877,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 		{
 			string sTranslate = CI18N::get("uiCheckInt") + " " + rFilename;
 			setState(true, sTranslate);
-			CHashKey hkLocalSHA1 = getSHA1(sFilePath);
+			CHashKey hkLocalSHA1 = getSHA1(sFilePath, true);
 			for (j = 0; j < rFile.versionCount(); ++j)
 			{
 				const CBNPFileVersion &rVersion = rFile.getVersion(j);
