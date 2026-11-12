@@ -2079,7 +2079,7 @@ void CClientConfig::init(const string &configFileName)
 		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == nullptr)
-			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
+			nlerror("CFG::init: Can't create config file '%s' in directory '%s'", configFileName.c_str(), CPath::getCurrentPath().c_str());
 		else
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
 
