@@ -20253,8 +20253,7 @@ bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 		// guildAllegiance is a pair; first element = cult, second element = civilization.
 		std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> guildAllegiance = theGuild->getAllegiance();
 
-		if (guildAllegiance.first != _DeclaredCult
-			&& _DeclaredCult != PVP_CLAN::None && _DeclaredCult != PVP_CLAN::Neutral)
+		if (!CGuild::isAllegianceCompatible(guildAllegiance.first, _DeclaredCult))
 		{
 			// Check parameter.  Used to correct players just logging on if guild changed
 			//   allegiance.  If we change it, we should return true.
@@ -20268,8 +20267,7 @@ bool CCharacter::canBelongToGuild( uint32 guildId, bool setToNone /*= false*/ )
 			}
 		}
 
-		if (guildAllegiance.second != _DeclaredCiv
-		    && _DeclaredCiv != PVP_CLAN::None && _DeclaredCiv != PVP_CLAN::Neutral)
+		if (!CGuild::isAllegianceCompatible(guildAllegiance.second, _DeclaredCiv))
 		{
 			// Check parameter.  Used to correct players just logging on if guild changed
 			//   allegiance.  If we change it, we should return true.

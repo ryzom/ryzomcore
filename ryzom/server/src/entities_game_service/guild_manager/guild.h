@@ -299,6 +299,12 @@ public:
 	typedef std::pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan>	TAllegiances;
 	/// first member of pair is religion allegiance, second member of pair is people allegiance
 	TAllegiances getAllegiance() const;
+	/// true if a member who declared memberClan (as cult or as civ) fits in a guild that declared guildClan:
+	/// the same clan, or a member with no declared clan or a neutral one
+	static bool isAllegianceCompatible(PVP_CLAN::TPVPClan guildClan, PVP_CLAN::TPVPClan memberClan)
+	{
+		return memberClan == guildClan || memberClan == PVP_CLAN::None || memberClan == PVP_CLAN::Neutral;
+	}
 	/// Sets new declared cult, returns if parameter was within bounds, and thus if new clan as set.
 	bool setDeclaredCult(PVP_CLAN::TPVPClan newClan, bool noCheck = false);
 	/// Sets new declared civ, returns if parameter was within bounds, and thus if new clan as set.

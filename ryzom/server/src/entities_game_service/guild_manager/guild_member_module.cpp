@@ -336,7 +336,8 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 	if (invitedChar == NULL) return;
 	invitedAllegiance = invitedChar->getAllegiance();
 
-	if (invitedAllegiance.first != guildAllegiance.first && invitedAllegiance.first != PVP_CLAN::Neutral)
+	// the test the character passes again when it joins (CCharacter::canBelongToGuild)
+	if (!CGuild::isAllegianceCompatible(guildAllegiance.first, invitedAllegiance.first))
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
@@ -345,7 +346,7 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 		return;
 	}
 
-	if (invitedAllegiance.second != guildAllegiance.second && invitedAllegiance.second != PVP_CLAN::Neutral)
+	if (!CGuild::isAllegianceCompatible(guildAllegiance.second, invitedAllegiance.second))
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
