@@ -555,7 +555,11 @@ void CTeam::removeCharacter( CCharacter * player )
 
 //			sprintf(buffer, "GROUP:%d:PRESENT",pos );
 //			ch1->_PropertyDatabase.setProp( buffer, (uint8)0 );
+			// the slot the remaining members moved out of is empty now
+			groupItem.setPRESENT(ch1->_PropertyDatabase, false);
 			groupItem.setHP(ch1->_PropertyDatabase, 0);
+			groupItem.setSAP(ch1->_PropertyDatabase, 0);
+			groupItem.setSTA(ch1->_PropertyDatabase, 0);
 //			sprintf(buffer, "GROUP:%d:NAME",pos );
 //			ch1->_PropertyDatabase.setProp( buffer, (uint32)0 );
 			groupItem.setNAME(ch1->_PropertyDatabase, 0);
