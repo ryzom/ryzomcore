@@ -935,6 +935,15 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	nlassert(messageVersion==1);
 	msgin.serial(nbString);
 
+	// The two strings read below are in every form of this message: the content comes from
+	// a GM command line, a message that is too short is refused and not read past its end
+	if (nbString < 2)
+	{
+		nlwarning("EVENT_NPC_GROUP_SCRIPT from service '%s' refused: the message carries %u strings, an entity id and at least a script line or a group name are needed",
+		    serviceName.c_str(), nbString);
+		return;
+	}
+
 	string eid;
 	string firstCommand;
 	msgin.serial(eid); // Player or boteid
@@ -948,7 +957,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 		nlinfo("  %d '%s'", 0, strings[0].c_str());
 		strings[1] = firstCommand;
 		nlinfo("  %d '%s'", 1, strings[1].c_str());
-		for (uint32 i=2; i<nbString-2; ++i)
+		for (uint32 i = 2; i < nbString; ++i)
 		{
 			msgin.serial(strings[i]);
 			nlinfo("  %d '%s'", i, strings[i].c_str());

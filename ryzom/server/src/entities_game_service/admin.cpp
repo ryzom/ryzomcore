@@ -8286,7 +8286,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(eventNpcGroupScript, "executes a script on an event npc group", "<bot eid> <script>")
 {
-	if (args.size () < 1) return false;
+	if (args.size() < 2) return false;
 	GET_ENTITY
 
 	uint32 instanceNumber = e->getInstanceNumber();
