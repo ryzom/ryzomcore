@@ -109,21 +109,22 @@ class CProfileInState
 #endif
 {
 public:
-#ifdef NL_DEBUG
 	CProfileInState()
+	    : _MoveProfile(NULL)
+	    , _ActivityProfile(NULL)
 	{
-		_MoveProfile.setData( this );
-		_ActivityProfile.setData( this );
 	}
-#endif
 	void setMoveProfile(IAIProfileFactory* profile) { _MoveProfile = profile; }
 	IAIProfileFactory* moveProfile() const { return _MoveProfile; }
 	void setActivityProfile(IAIProfileFactory* profile) { _ActivityProfile = profile; }
 	IAIProfileFactory* activityProfile() const { return _ActivityProfile; }
 	
 private:
-	NLMISC::CDbgPtr<IAIProfileFactory> _MoveProfile;
-	NLMISC::CDbgPtr<IAIProfileFactory> _ActivityProfile;
+	// The profile factories are static objects, which live until the process exits, while the states are
+	// only released by the tick release of the service, which several exits skip. Plain pointers: a CDbgPtr
+	// left behind would make the destructor of the factory assert in debug builds.
+	IAIProfileFactory *_MoveProfile;
+	IAIProfileFactory *_ActivityProfile;
 };
 
 /****************************************************************************/
