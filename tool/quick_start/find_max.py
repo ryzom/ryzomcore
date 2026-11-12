@@ -66,7 +66,9 @@ def FindMaxSDK(version):
 		return os.path.normpath(os.path.join(path, "maxsdk"))
 	return
 
-def FindMaxSDKs():
+# The toolset, platform and binary compatibility of the SDKs found, as [ { Path, Version, Toolset, Platform, Compatible } ]
+# from [ { Path, Version } ]; the SDKs may come from several places (native, Wine prefixes)
+def DescribeMaxSDKs(found):
 	toolset = {
 		2022: "v141",
 		2021: "v141",
@@ -104,28 +106,36 @@ def FindMaxSDKs():
 	res = []
 	set = {}
 	remap = {}
-	for i in chain(range(3, 10), range(2008, 2039)):
-		found = FindMaxSDK(i)
-		if found:
-			set[i] = True
-			c = None
-			remap[i] = i
-			if i in compatible:
-				if compatible[i] in set:
-					c = remap[compatible[i]]
-					remap[i] = c
-			t = "v142"
-			if i in toolset:
-				t = toolset[i]
-			rv = { "Path": found, "Version": i, "Toolset": t }
-			if c:
-				rv["Compatible"] = c
-			if i >= 2015:
-				rv["Platform"] = "x64"
-			else:
-				rv["Platform"] = "x86"
-			res += [ rv ]
+	for sdk in sorted(found, key=lambda s: s["Version"]):
+		i = sdk["Version"]
+		set[i] = True
+		c = None
+		remap[i] = i
+		if i in compatible:
+			if compatible[i] in set:
+				c = remap[compatible[i]]
+				remap[i] = c
+		t = "v142"
+		if i in toolset:
+			t = toolset[i]
+		rv = dict(sdk)
+		rv["Toolset"] = t
+		if c:
+			rv["Compatible"] = c
+		if i >= 2015:
+			rv["Platform"] = "x64"
+		else:
+			rv["Platform"] = "x86"
+		res += [ rv ]
 	return res
+
+def FindMaxSDKs():
+	found = []
+	for i in chain(range(3, 10), range(2008, 2039)):
+		path = FindMaxSDK(i)
+		if path:
+			found += [ { "Path": path, "Version": i } ]
+	return DescribeMaxSDKs(found)
 
 FoundPluginMax = FindPluginMax()
 FoundPluginMaxLocal = FindMaxLocal(FoundPluginMax)

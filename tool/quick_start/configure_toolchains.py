@@ -251,7 +251,23 @@ for wine in FoundWine:
 			toolchain["OS"] = "Win98"
 		else:
 			continue
-		Toolchains[toolchain["OS"] + "/VS/" + ts + "/" + platform + "/W"] = toolchain
+		name = toolchain["OS"] + "/VS/" + ts + "/" + platform + "/W"
+		# Several prefixes with the same toolset: the one with the newest externals release (2026q4_external_v90_x86) wins
+		kept = None
+		dropped = None
+		if name in Toolchains and os.path.basename(Toolchains[name]["ExternalDir"].rstrip("/")) >= os.path.basename(external["Dir"].rstrip("/")):
+			kept = Toolchains[name]
+			dropped = toolchain
+		elif name in Toolchains:
+			kept = toolchain
+			dropped = Toolchains[name]
+		if dropped:
+			print("NOTE: " + dropped["DisplayName"] + " skipped, " + kept["DisplayName"] + " has newer externals")
+			if "MaxSDK" in dropped and not "MaxSDK" in kept:
+				print("WARNING: The 3ds Max SDK of " + dropped["WinePrefix"] + " is not used, " + kept["WinePrefix"] + " has none")
+		if dropped is toolchain:
+			continue
+		Toolchains[name] = toolchain
 
 with open(os.path.join(NeLConfigDir, "toolchains_" + NeLHostId + "_" + NeLPlatformId + "_default.json"), 'w') as fo:
 	json.dump(Toolchains, fo, indent=2)
