@@ -297,6 +297,90 @@ TEST(CUTMiscBitmap, truncatedTgaThrows)
 	EXPECT_THROW(loadImage(bitmap, tga), NLMISC::EStream);
 }
 
+TEST(CUTMiscBitmap, tgaRleOf24BitsIsOpaque)
+{
+	// 3x1, an RLE packet of 2 pixels and a raw packet of 1, stored blue, green, red: the alpha was left at 0
+	const uint8 expected24[] = { 0x30, 0x20, 0x10, 255, 0x30, 0x20, 0x10, 255, 0x60, 0x50, 0x40, 255 };
+	TBytes tga24 = makeTGAHeader(10, 3, 1, 24);
+	const uint8 data24[] = { 0x80 | 1, 0x10, 0x20, 0x30, 0x00, 0x40, 0x50, 0x60 };
+	tga24.insert(tga24.end(), data24, data24 + sizeof(data24));
+	CBitmap bitmap24;
+	EXPECT_EQ(24, loadImage(bitmap24, tga24));
+	ASSERT_EQ(sizeof(expected24), bitmap24.getPixels().size());
+	for (uint i = 0; i < sizeof(expected24); ++i)
+		EXPECT_EQ(expected24[i], bitmap24.getPixels()[i]) << "byte " << i;
+
+	// with 32 bits per pixel the alpha is the one of the file
+	const uint8 expected32[] = { 0x30, 0x20, 0x10, 0x70, 0x30, 0x20, 0x10, 0x70, 0x60, 0x50, 0x40, 0x00 };
+	TBytes tga32 = makeTGAHeader(10, 3, 1, 32);
+	const uint8 data32[] = { 0x80 | 1, 0x10, 0x20, 0x30, 0x70, 0x00, 0x40, 0x50, 0x60, 0x00 };
+	tga32.insert(tga32.end(), data32, data32 + sizeof(data32));
+	CBitmap bitmap32;
+	EXPECT_EQ(32, loadImage(bitmap32, tga32));
+	ASSERT_EQ(sizeof(expected32), bitmap32.getPixels().size());
+	for (uint i = 0; i < sizeof(expected32); ++i)
+		EXPECT_EQ(expected32[i], bitmap32.getPixels()[i]) << "byte " << i;
+}
+
+TEST(CUTMiscBitmap, tgaOf16BitsHasFiveBitsPerColor)
+{
+	// 2x2 of 16 bits per pixel (1 attribute bit, then 5 bits of red, green and blue), a row of each color:
+	// uncompressed and RLE, from the top and from the bottom, with and without the attribute bit. The attribute bit
+	// went into the red, the green was the blue for an uncompressed image from the top, and an RLE image was read as
+	// if it were of 24 bits.
+	const uint16 colors[2] = { (16 << 10) | (21 << 5) | 3, (5 << 10) | (10 << 5) | 20 };
+	const uint8 expected[2][4] = { { 132, 173, 24, 255 }, { 41, 82, 165, 255 } };
+	for (uint variant = 0; variant < 8; ++variant)
+	{
+		SCOPED_TRACE(variant);
+		const bool rle = (variant & 1) != 0;
+		const bool fromTop = (variant & 2) != 0;
+		const uint16 attribute = (variant & 4) ? 0x8000 : 0;
+		TBytes tga = makeTGAHeader(rle ? 10 : 2, 2, 2, 16);
+		tga[17] = fromTop ? 0x20 : 0x00;
+		for (uint row = 0; row < 2; ++row)
+		{
+			const uint16 color = colors[row] | attribute;
+			if (rle && row == 0)
+			{
+				// an RLE packet of 2 pixels
+				tga.push_back(0x80 | 1);
+				tga.push_back((uint8)color);
+				tga.push_back((uint8)(color >> 8));
+				continue;
+			}
+			if (rle)
+				tga.push_back(0x01); // a raw packet of 2 pixels
+			for (uint x = 0; x < 2; ++x)
+			{
+				tga.push_back((uint8)color);
+				tga.push_back((uint8)(color >> 8));
+			}
+		}
+		CBitmap bitmap;
+		EXPECT_EQ(16, loadImage(bitmap, tga));
+		ASSERT_EQ(CBitmap::RGBA, bitmap.getPixelFormat());
+		ASSERT_EQ(16u, bitmap.getPixels().size());
+		for (uint y = 0; y < 2; ++y)
+		{
+			// the first row of the file is the bottom row of the image unless the header says otherwise
+			const uint8 *row = expected[fromTop ? y : 1 - y];
+			for (uint i = 0; i < 8; ++i)
+				EXPECT_EQ(row[i % 4], bitmap.getPixels()[y * 8 + i]) << "row " << y << " byte " << i;
+		}
+	}
+}
+
+TEST(CUTMiscBitmap, tgaRleOf8BitsIsRefused)
+{
+	// an RLE RGB image of 8 bits per pixel was read as the blue of a transparent image
+	TBytes tga = makeTGAHeader(10, 4, 1, 8);
+	tga.push_back(0x80 | 3);
+	tga.push_back(0x7f);
+	CBitmap bitmap;
+	EXPECT_EQ(0, loadImage(bitmap, tga));
+}
+
 TEST(CUTMiscBitmap, truncatedPngFails)
 {
 	// libpng's error longjmp leaked the rows already allocated

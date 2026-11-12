@@ -2591,6 +2591,36 @@ static sint32 clampTGAPacket(const NLMISC::IStream &f, uint32 count, uint32 rema
 	return (sint32)count;
 }
 
+/** A TGA pixel of 16 bits to RGBA: an attribute bit, which is not read as alpha, then 5 bits of red, of green and of
+ *  blue.
+ */
+static void tga16ToRGBA(uint16 pixel, uint8 *rgba)
+{
+	uint r = (pixel >> 10) & 0x1f;
+	uint g = (pixel >> 5) & 0x1f;
+	uint b = pixel & 0x1f;
+	rgba[0] = uint8((r << 3) | (r >> 2));
+	rgba[1] = uint8((g << 3) | (g >> 2));
+	rgba[2] = uint8((b << 3) | (b >> 2));
+	rgba[3] = 255;
+}
+
+/// A TGA pixel of 16, 24 or 32 bits, as stored in an RLE image, to RGBA
+static void tgaPixelToRGBA(const uint8 *pixel, uint8 imageDepth, uint8 *rgba)
+{
+	if (imageDepth == 16)
+	{
+		tga16ToRGBA((uint16)(pixel[0] | (pixel[1] << 8)), rgba);
+	}
+	else
+	{
+		rgba[0] = pixel[2];
+		rgba[1] = pixel[1];
+		rgba[2] = pixel[0];
+		rgba[3] = imageDepth == 32 ? pixel[3] : 255;
+	}
+}
+
 /*-------------------------------------------------------------------*\
 							readTGA
 \*-------------------------------------------------------------------*/
@@ -2683,9 +2713,9 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 		return 0;
 	}
 
-	// an uncompressed RGB(A) image is converted from 16, 24 or 32 bits per pixel: with 8, the conversion read 3 bytes
-	// per pixel from scanlines of 1
-	if (imageType == 2 && imageDepth != 16 && imageDepth != 24 && imageDepth != 32)
+	// an RGB(A) image, uncompressed or RLE, is converted from 16, 24 or 32 bits per pixel: with 8, the conversion read
+	// 3 bytes per pixel from scanlines of 1, and an RLE pixel of more than 32 bits did not fit the pixel it was read into
+	if ((imageType == 2 || imageType == 10) && imageDepth != 16 && imageDepth != 24 && imageDepth != 32)
 	{
 		nlwarning("The TGA image '%s' is RGB with %u bits per pixel, which is not supported", f.getStreamName().c_str(),
 		    (uint)imageDepth);
@@ -2749,13 +2779,7 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 						{
 							uint16 toto = (uint16)scanline[k++];
 							toto |= scanline[k++]<<8;
-							uint _r = toto>>10;
-							uint _g = (toto>>5)&0x1f;
-							uint _b = toto&0x1f;
-							_Data[0][(height-y-1)*width*4 + 4*i] = uint8((_r<<3) | (_r>>2));
-							_Data[0][(height-y-1)*width*4 + 4*i + 1] = uint8((_g<<3) | (_g>>2));
-							_Data[0][(height-y-1)*width*4 + 4*i + 2] = uint8((_b<<3) | (_b>>2));
-							_Data[0][(height-y-1)*width*4 + 4*i + 3] = 255;
+							tga16ToRGBA(toto, &_Data[0][(height - y - 1) * width * 4 + 4 * i]);
 						}
 						else
 						{
@@ -2774,13 +2798,7 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 						{
 							uint16 toto = (uint16)scanline[k++];
 							toto |= scanline[k++]<<8;
-							int _r = toto>>10;
-							int _g = toto&(0x3e0)>>5;
-							int _b = toto&0x1f;
-							_Data[0][y*width*4 + 4*i] = uint8((_r<<3) | (_r>>2));
-							_Data[0][y*width*4 + 4*i + 1] = uint8((_g<<3) | (_g>>2));
-							_Data[0][y*width*4 + 4*i + 2] = uint8((_b<<3) | (_b>>2));
-							_Data[0][y*width*4 + 4*i + 3] = 255;
+							tga16ToRGBA(toto, &_Data[0][y * width * 4 + 4 * i]);
 						}
 						else
 						{
@@ -2852,10 +2870,8 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 					}
 					for (i = 0; i < count; i++)
 					{
-						_Data[0][dstId++]= pixel[2];
-						_Data[0][dstId++]= pixel[1];
-						_Data[0][dstId++]= pixel[0];
-						_Data[0][dstId++]= pixel[3];
+						tgaPixelToRGBA(pixel, imageDepth, &_Data[0][dstId]);
+						dstId += 4;
 					}
 				}
 				else	// packet Raw
@@ -2866,10 +2882,8 @@ uint8 CBitmap::readTGA(NLMISC::IStream &f, uint32 maxSize)
 						{
 							f.serial(pixel[j]);
 						}
-						_Data[0][dstId++]= pixel[2];
-						_Data[0][dstId++]= pixel[1];
-						_Data[0][dstId++]= pixel[0];
-						_Data[0][dstId++]= pixel[3];
+						tgaPixelToRGBA(pixel, imageDepth, &_Data[0][dstId]);
+						dstId += 4;
 					}
   				}
 				readSize += count;
