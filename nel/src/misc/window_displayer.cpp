@@ -209,8 +209,8 @@ void CWindowDisplayer::doDisplay (const NLMISC::CLog::TDisplayInfo &args, const 
 	if (args.LogType != CLog::LOG_NO)
 	{
 		if (args.LogType == CLog::LOG_ERROR || args.LogType == CLog::LOG_ASSERT) color = 0x00FF0000;
-		else if (args.LogType == CLog::LOG_WARNING) color = 0x00800000;
-		else if (args.LogType == CLog::LOG_DEBUG) color = 0x00808080;
+		else if (args.LogType == CLog::NL_LOG_WARNING) color = 0x00800000;
+		else if (args.LogType == CLog::NL_LOG_DEBUG) color = 0x00808080;
 		else color = 0;
 	}
 

@@ -1198,9 +1198,9 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 #endif //!NL_COMP_MINGW
 
 		INelContext::getInstance().setErrorLog(new CLog (CLog::LOG_ERROR));
-		INelContext::getInstance().setWarningLog(new CLog (CLog::LOG_WARNING));
-		INelContext::getInstance().setInfoLog(new CLog (CLog::LOG_INFO));
-		INelContext::getInstance().setDebugLog(new CLog (CLog::LOG_DEBUG));
+		INelContext::getInstance().setWarningLog(new CLog (CLog::NL_LOG_WARNING));
+		INelContext::getInstance().setInfoLog(new CLog (CLog::NL_LOG_INFO));
+		INelContext::getInstance().setDebugLog(new CLog (CLog::NL_LOG_DEBUG));
 		INelContext::getInstance().setAssertLog(new CLog (CLog::LOG_ASSERT));
 
 		sd = new CStdDisplayer ("DEFAULT_SD");

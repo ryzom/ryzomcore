@@ -46,7 +46,25 @@ class IDisplayer;
 class CLog {
 public:
 
-	typedef enum { LOG_NO=0, LOG_ERROR, LOG_WARNING, LOG_INFO, LOG_DEBUG, LOG_STAT, LOG_ASSERT, LOG_UNKNOWN } TLogType;
+	/** Log types. <syslog.h> defines LOG_WARNING, LOG_INFO and LOG_DEBUG as macros, so the NL_LOG_ names are the ones
+	 * that work whatever the include order. The former LOG_ names stay as aliases; those three are left out when the
+	 * syslog macros are already defined.
+	 * NeL's own code uses the NL_LOG_ names for those three.
+	 */
+	typedef enum
+	{
+		NL_LOG_NO = 0, NL_LOG_ERROR, NL_LOG_WARNING, NL_LOG_INFO, NL_LOG_DEBUG, NL_LOG_STAT, NL_LOG_ASSERT, NL_LOG_UNKNOWN,
+#ifndef LOG_WARNING
+		LOG_WARNING = NL_LOG_WARNING,
+#endif
+#ifndef LOG_INFO
+		LOG_INFO = NL_LOG_INFO,
+#endif
+#ifndef LOG_DEBUG
+		LOG_DEBUG = NL_LOG_DEBUG,
+#endif
+		LOG_NO = NL_LOG_NO, LOG_ERROR = NL_LOG_ERROR, LOG_STAT = NL_LOG_STAT, LOG_ASSERT = NL_LOG_ASSERT, LOG_UNKNOWN = NL_LOG_UNKNOWN
+	} TLogType;
 
 	// Debug information
 	struct TDisplayInfo

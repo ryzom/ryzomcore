@@ -75,7 +75,7 @@ void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
 	QColor color;
 	switch (args.LogType)
 	{
-	case CLog::LOG_DEBUG:
+	case CLog::NL_LOG_DEBUG:
 		color = Qt::gray;
 		break;
 	case CLog::LOG_STAT:
@@ -83,10 +83,10 @@ void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
 		break;
 	case CLog::LOG_NO:
 	case CLog::LOG_UNKNOWN:
-	case CLog::LOG_INFO:
+	case CLog::NL_LOG_INFO:
 		color = Qt::white;
 		break;
-	case CLog::LOG_WARNING:
+	case CLog::NL_LOG_WARNING:
 		color = Qt::yellow;
 		break;
 	case CLog::LOG_ERROR:

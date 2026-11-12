@@ -47,7 +47,7 @@ CMsgBoxDisplayer mbd;
 int main (int /* argc */, char ** /* argv */)
 {
 	// create a logger; it's an information logger.
-	CLog logger (CLog::LOG_INFO);
+	CLog logger (CLog::NL_LOG_INFO);
 
 	// the process name is used when we have more than one process logging stuffs
 	// in the same displayer (for example for centralized displayer)

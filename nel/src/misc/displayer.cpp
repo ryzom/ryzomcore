@@ -149,8 +149,8 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		if (StdDisplayerColor.get())
 		{
 			if (args.LogType == CLog::LOG_ERROR || args.LogType == CLog::LOG_ASSERT) { str += "\e[0;30m\e[41m"; colorSet = true; } // black text, red background
-			else if (args.LogType == CLog::LOG_WARNING) { str += "\e[0;91m"; colorSet = true; } // bright red text
-			else if (args.LogType == CLog::LOG_DEBUG) { str += "\e[0;34m"; colorSet = true; } // blue text
+			else if (args.LogType == CLog::NL_LOG_WARNING) { str += "\e[0;91m"; colorSet = true; } // bright red text
+			else if (args.LogType == CLog::NL_LOG_DEBUG) { str += "\e[0;34m"; colorSet = true; } // blue text
 		}
 #endif
 		//ss << logTypeToString(args.LogType);
