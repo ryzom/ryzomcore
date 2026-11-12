@@ -158,6 +158,15 @@ void CForm::readParent (const char *parent, CFormLoader &loader)
 		// Set the parent
 		if (!insertParent (getParentCount (), parent, theParent))
 		{
+			if (theParent->leadsToForm(this))
+			{
+				// insertParent has refused and logged a loop of parents, this form is read without that parent.
+				// No exception: the parent was given this form as its own parent while this form was being read,
+				// so this form must not be deleted.
+				xmlFree((void *)parent);
+				return;
+			}
+
 			// Make an error message
 			std::string parentName = parent;
 
@@ -286,10 +295,28 @@ bool CForm::insertParent (uint before, const std::string &filename, CForm *paren
 	// Set or reset ?
 	nlassert (parent);
 
+	// The parent must not lead back to this form, a lookup in the parents would never end
+	if (parent->leadsToForm(this))
+	{
+		if (parent == this)
+		{
+			nlwarning("ASSET ERROR: the form '%s' names itself as a parent, this parent is not used and is left out when the form is saved", _Filename.c_str());
+		}
+		else
+		{
+			nlwarning("ASSET ERROR: the form '%s' names the parent '%s', whose own parents lead back to '%s', this parent is not used and is left out when the form is saved",
+			    _Filename.c_str(), filename.c_str(), _Filename.c_str());
+		}
+		return false;
+	}
+
 	// Must have the same DFN
 	if (parent->Elements.FormDfn == Elements.FormDfn)
 	{
-		// Set members
+		// Set members. A caller that counts its parents itself can be ahead of the list after a refused parent:
+		// the parent then goes to the end.
+		if (before > ParentList.size())
+			before = (uint)ParentList.size();
 		std::vector<CParent>::iterator ite = ParentList.insert (ParentList.begin() + before, CParent());
 		ite->Parent = parent;
 		ite->ParentFilename = filename;
@@ -302,6 +329,32 @@ bool CForm::insertParent (uint before, const std::string &filename, CForm *paren
 		warning (false, "insertParent", "Can't insert parent form (%s) that has not the same DFN.", filename.c_str());
 	}
 
+	return false;
+}
+
+// ***************************************************************************
+
+bool CForm::leadsToForm(const CForm *form) const
+{
+	// Walk this form and its ancestors, each of them once
+	std::set<const CForm *> visited;
+	std::vector<const CForm *> toVisit;
+	toVisit.push_back(this);
+	while (!toVisit.empty())
+	{
+		const CForm *current = toVisit.back();
+		toVisit.pop_back();
+		if (current == form)
+			return true;
+		if (visited.insert(current).second)
+		{
+			for (uint i = 0; i < current->ParentList.size(); i++)
+			{
+				if (current->ParentList[i].Parent)
+					toVisit.push_back(current->ParentList[i].Parent);
+			}
+		}
+	}
 	return false;
 }
 

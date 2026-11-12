@@ -1,3 +1,13 @@
+if (WITH_GEORGES)
+    add_test_executable(nel_georges_test
+            ut_georges_form.test.cpp
+    )
+    target_link_libraries(nel_georges_test
+            PRIVATE
+            NeL::georges
+    )
+endif ()
+
 add_test_executable(nel_ligo_test
         ut_ligo_primitive.test.cpp
 )

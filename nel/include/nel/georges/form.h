@@ -123,6 +123,9 @@ private:
 	// Called by read
 	void				readParent (const char *parent, CFormLoader &loader);
 
+	// True if the form is this form or one of its ancestors
+	bool				leadsToForm (const CForm *form) const;
+
 	// The form filename
 	std::string			_Filename;
 

@@ -1371,6 +1371,13 @@ exit:;
 	// Node not found in get node ? Look in parents !
 	if ( ((*node) == nullptr) && (action == Return) && backupFirstElm )
 	{
+		// Backstop, each level of parents is one more round. CForm::insertParent refuses the parents that form a loop.
+		if (round > NLGEORGES_MAX_RECURSION)
+		{
+			warning(false, currentName, form->getFilename(), "getInternalNodeByName", "Too many levels of parent forms while looking for the node (%s), look for loop references or inheritances.", name.c_str());
+			return false;
+		}
+
 		// Get the path name
 		string formName;
 		backupFirstElm->getFormName (formName);
