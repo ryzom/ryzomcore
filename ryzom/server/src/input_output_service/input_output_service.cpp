@@ -634,11 +634,18 @@ void CInputOutputService::addCharacterName( const TDataSetRow& chId, const ucstr
 				// Remove the new name
 				_RenamedCharInfos.erase(charInfos->ShortName.toUtf8());
 			}
-			else
+			else if (CSString(oldname.toUtf8()) != CSString(charInfos->ShortName.toUtf8()))
 			{
 				// New name was not in the list, save old name
+				// (not when the same name is registered again, as for a new title: nothing was renamed)
 				_RenamedCharInfos.insert( make_pair(oldname.toUtf8(), charInfos) );
 			}
+		}
+		else
+		{
+			// A character that registers under this name for the first time owns it from now on:
+			// the name no longer leads to a renamed character that had it before
+			_RenamedCharInfos.erase(charInfos->ShortName.toUtf8());
 		}
 	}
 
@@ -850,6 +857,20 @@ void CInputOutputService::removeEntity( const TDataSetRow &chId )
 //		index = itInfos->second->OldNameIndex;
 
 		_NameToInfos.erase(itInfos->second->ShortName.toUtf8());
+
+		// erase the names this character had before it was renamed, they lead to the same infos
+		// (only players get such entries, see addCharacterName)
+		if (eid.getType() == RYZOMID::player)
+		{
+			TCharInfoCont::iterator itRenamed = _RenamedCharInfos.begin();
+			while (itRenamed != _RenamedCharInfos.end())
+			{
+				if (itRenamed->second == oldChar)
+					_RenamedCharInfos.erase(itRenamed++);
+				else
+					++itRenamed;
+			}
+		}
 
 		// erase the entry in _IdToInfos
 		delete itInfos->second;
