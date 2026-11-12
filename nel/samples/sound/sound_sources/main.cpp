@@ -94,6 +94,10 @@ void Init()
 		AudioMixer->getListener()->setPos( initpos );
 		AudioMixer->getListener()->setOrientation( frontvec, upvec );
 
+		/*
+		 * 3. Update the mixer, which commits the listener to the sound driver.
+		 */
+		AudioMixer->update();
 	}
 	catch(const Exception &e)
 	{
@@ -141,9 +145,10 @@ void OnMove( const CVector& listenerpos )
 	TTime time = CTime::getLocalTime();
 	while ( CTime::getLocalTime() < time+20 );
 
-	/* If we used spawned sources or "envsounds" or if we had
-	 * a large number of sources, we should call:
-	 * AudioMixer->update();
+	/* The caller then calls AudioMixer->update(), which is not optional:
+	 * the update commits the positions of the listener and of the sources
+	 * to the sound driver (some drivers apply them only then), and manages
+	 * the tracks, the spawned sources and the streams.
 	 */
 }
 
@@ -173,6 +178,9 @@ int main()
 	getchar();
 	USource *src1 = OnAddSource( "beep", 1.0f, 20.0f, 0.0f );  // Beep on the right, 20 meters ahead
 	USource *src2 = OnAddSource( "tuut", -2.0f, 5.0f, 0.0f ); // Tuut on the left, 5 meters ahead
+
+	// Commit the positions of the new sources before waiting for the key: nothing updates the mixer meanwhile
+	AudioMixer->update();
 
 	// Second step: we will move the listener ahead
 	printf( "Press ENTER again to start moving the listener\n" );
