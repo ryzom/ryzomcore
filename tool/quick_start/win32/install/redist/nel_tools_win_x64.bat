@@ -1,4 +1,5 @@
 call ..\.nel\path_config.bat
+if not defined RC_SIGNTOOL_SHA1 echo NOTE: SignTool Sha1 is not set in .nel\config.json, the files are not signed
 rmdir /s /q nel_tools_win_x64
 if %errorlevel% neq 0 pause
 mkdir nel_tools_win_x64
@@ -98,8 +99,8 @@ copy %RC_ROOT%\build_win32\tools\bin\Release\nel_drv_fmod_win_r.dll nel_drv_fmod
 copy %RC_ROOT%\build_win32\tools\bin\Release\nel_drv_xaudio2_win_r.dll nel_drv_xaudio2_win_r.dll
 copy %RC_ROOT%\build_win32\tools\bin\Release\nel_drv_dsound_win_r.dll nel_drv_dsound_win_r.dll
 
-"C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /v /t http://timestamp.comodoca.com/authenticode "*.exe"
-"C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /v /t http://timestamp.comodoca.com/authenticode "*.dll"
+if defined RC_SIGNTOOL_SHA1 "%RC_SIGNTOOL_EXE%" sign /sha1 %RC_SIGNTOOL_SHA1% /v /fd sha256 /tr %RC_SIGNTOOL_TIMESTAMP% /td sha256 "*.exe"
+if defined RC_SIGNTOOL_SHA1 "%RC_SIGNTOOL_EXE%" sign /sha1 %RC_SIGNTOOL_SHA1% /v /fd sha256 /tr %RC_SIGNTOOL_TIMESTAMP% /td sha256 "*.dll"
 
 copy %RC_ROOT%\code\nel\tools\3d\build_clod_bank\config_example.cfg build_clod_bank_config_example.cfg
 copy %RC_ROOT%\code\nel\tools\3d\build_clod_bank\path_config_example.cfg build_clod_bank_path_config_example.cfg

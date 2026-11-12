@@ -1,4 +1,5 @@
 call ..\.nel\path_config.bat
+if not defined RC_SIGNTOOL_SHA1 echo NOTE: SignTool Sha1 is not set in .nel\config.json, the files are not signed
 rmdir /s /q ryzom_server_win_x64
 if %errorlevel% neq 0 pause
 mkdir ryzom_server_win_x64
@@ -7,8 +8,8 @@ cd ryzom_server_win_x64
 xcopy %RC_ROOT%\build_win32\server_dev\bin\Release\*.exe .\
 del crash_report.exe
 
-"C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /v /t http://timestamp.comodoca.com/authenticode "*.exe"
-"C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /v /t http://timestamp.comodoca.com/authenticode "*.dll"
+if defined RC_SIGNTOOL_SHA1 "%RC_SIGNTOOL_EXE%" sign /sha1 %RC_SIGNTOOL_SHA1% /v /fd sha256 /tr %RC_SIGNTOOL_TIMESTAMP% /td sha256 "*.exe"
+if defined RC_SIGNTOOL_SHA1 "%RC_SIGNTOOL_EXE%" sign /sha1 %RC_SIGNTOOL_SHA1% /v /fd sha256 /tr %RC_SIGNTOOL_TIMESTAMP% /td sha256 "*.dll"
 
 copy "C:\2026q4_external_v143_x64\libjpeg\bin\jpeg62.dll" "jpeg62.dll"
 copy "C:\2026q4_external_v143_x64\giflib\bin\gif.dll" "gif.dll"

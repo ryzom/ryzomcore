@@ -324,7 +324,7 @@ if not args.noconf:
 		if SignToolExecutable:
 			SignToolExecutable = SignToolExecutable.replace("\\", "/")
 		else:
-			SignToolExecutable = "C:/Program Files/Microsoft SDKs/Windows/v6.0A/Bin/signtool.exe"
+			SignToolExecutable = "signtool.exe"
 	try:
 		if args.preset:
 			DummyUnknownName
@@ -340,7 +340,7 @@ if not args.noconf:
 	except NameError:
 		SignToolTimestamp = os.getenv('RC_SIGNTOOL_TIMESTAMP')
 		if not SignToolTimestamp:
-			SignToolTimestamp = "http://timestamp.comodoca.com/authenticode"
+			SignToolTimestamp = "http://timestamp.sectigo.com"
 	try:
 		if args.preset:
 			DummyUnknownName

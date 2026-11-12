@@ -288,6 +288,27 @@ def FilterPrefix(target, spec):
 				break
 	return res
 
+# The signtool of SignTool/Executable, or else the one of the newest Windows SDK (signing uses /fd, /tr and /td,
+# which the old SDKs do not have)
+def FindSignTool():
+	if NeLConfig["SignTool"]["Executable"]:
+		return NeLConfig["SignTool"]["Executable"]
+	if os.name != 'nt':
+		return ""
+	found = []
+	kitsBin = os.path.join(os.getenv("ProgramFiles(x86)", "C:\\Program Files (x86)"), "Windows Kits", "10", "bin")
+	if os.path.isdir(kitsBin):
+		for version in os.listdir(kitsBin):
+			signTool = os.path.join(kitsBin, version, "x64", "signtool.exe")
+			if version.startswith("10.") and os.path.isfile(signTool):
+				found += [ (tuple(int(v) for v in version.split(".") if v.isdigit()), signTool) ]
+	if not len(found):
+		if NeLConfig["SignTool"]["Sha1"]:
+			print("WARNING: SignTool/Sha1 is set but no signtool was found in " + kitsBin + ", set SignTool/Executable in .nel/config.json")
+		return ""
+	found.sort()
+	return found[-1][1]
+
 def GeneratePathScript():
 	fo = open(NeLPathScript, 'w')
 	fo.write("set " + EscapeArg("RC_ROOT=" + NeLRootDir) + "\n")
@@ -385,7 +406,7 @@ def GeneratePathScript():
 	fo.write("set " + EscapeArg("RC_EXEDLL_PROJECTS=" + " ".join(exedll)) + "\n")
 	fo.write("set " + EscapeArg("RC_3DSMAX_EXE=" + NeLConfig["3dsMax"]["Executable"]) + "\n")
 	fo.write("set " + EscapeArg("RC_3DSMAX_USER_DIR=" + NeLConfig["3dsMax"]["UserDirectory"]) + "\n")
-	fo.write("set " + EscapeArg("RC_SIGNTOOL_EXE=" + NeLConfig["SignTool"]["Executable"]) + "\n")
+	fo.write("set " + EscapeArg("RC_SIGNTOOL_EXE=" + FindSignTool()) + "\n")
 	fo.write("set " + EscapeArg("RC_SIGNTOOL_SHA1=" + NeLConfig["SignTool"]["Sha1"]) + "\n")
 	fo.write("set " + EscapeArg("RC_SIGNTOOL_TIMESTAMP=" + NeLConfig["SignTool"]["Timestamp"]) + "\n")
 	fo.write("call " + EscapeArg(os.path.join(NeLRootDir, os.path.normcase(".nel/web_config.bat"))))

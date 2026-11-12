@@ -14,9 +14,9 @@
     "UserDirectory": "C:\\Users\\Kaetemi\\AppData\\Local\\Autodesk\\3dsMax\\2011 - 32bit\\enu"
   },
   "SignTool": {
-    "Executable": "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\signtool.exe",
-    "Sha1": "f0ef3c22d0373d2d6e3735207194d097c8f69877",
-    "Timestamp": "http://timestamp.comodoca.com/authenticode"
+    "Executable": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\signtool.exe",
+    "Sha1": "E12F53D3B4E95F23D906BD49A117101F277B6194",
+    "Timestamp": "http://ts.ssl.com"
   },
   "Headless": false,
   "Toolchain": {

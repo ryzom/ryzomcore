@@ -14,9 +14,9 @@
     "UserDirectory": ""
   },
   "SignTool": {
-    "Executable": "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\signtool.exe",
+    "Executable": "",
     "Sha1": "",
-    "Timestamp": "http://timestamp.comodoca.com/authenticode"
+    "Timestamp": "http://timestamp.sectigo.com"
   },
   "UseNinja": true,
   "Headless": false,
