@@ -65,6 +65,10 @@ std::multimap<NLMISC::TTime, CRefPtr<CMonitorClient> > BadLoginClients;
 
 const NLMISC::TTime LOGIN_RETRY_DELAY_IN_MILLISECONDS = 4000;
 
+// Longest login accepted from a client, in bytes (the Login column of the user table holds 64 characters,
+// and the account tools only hand out ASCII logins)
+static const uint s_MaxLoginLength = 64;
+
 // Code taken from login service
 /**
  * Encapsulation of MySQL result
@@ -386,13 +390,33 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 		{
 			if (!Clients[i]->BadLogin) // don't allow new login attempt while this flag is set
 			{
-				// escape login
-				char escapedLogin[100];
-				size_t len = mysql_real_escape_string(DatabaseConnection, escapedLogin, login.c_str(), login.length());
+				// The login comes from a client that is not authenticated: a login that cannot be in the
+				// user table, or a missing database, fails like a wrong password, without a query
+				int result = -1;
+				if (login.empty())
+				{
+					nlinfo("Client %u (%s) sent an empty login, authentication refused", i, from->asString().c_str());
+				}
+				else if (login.size() > s_MaxLoginLength)
+				{
+					nlwarning("Client %u (%s) sent a login of %u bytes, the maximum is %u, authentication refused",
+					    i, from->asString().c_str(), (uint)login.size(), s_MaxLoginLength);
+				}
+				else if (DatabaseConnection == NULL)
+				{
+					nlwarning("Client %u (%s) cannot be authenticated, there is no database connection (LoginRequired needs DatabaseName, DatabaseHost, DatabaseLogin and DatabasePassword in the config file)",
+					    i, from->asString().c_str());
+				}
+				else
+				{
+					// escape login, which takes up to two bytes per byte and a terminating zero
+					std::vector<char> escapedLogin(login.size() * 2 + 1);
+					mysql_real_escape_string(DatabaseConnection, &escapedLogin[0], login.c_str(), (unsigned long)login.size());
 
-				// make a db request to to db to see if password is valid
-				std::string queryStr = toString("SELECT Password FROM user where Login='%s'", escapedLogin);
-				int result = mysql_query(DatabaseConnection, queryStr.c_str());
+					// make a db request to to db to see if password is valid
+					std::string queryStr = toString("SELECT Password FROM user where Login='%s'", &escapedLogin[0]);
+					result = mysql_query(DatabaseConnection, queryStr.c_str());
+				}
 				if (result == 0)
 				{
 					CMySQLResult sqlResult(DatabaseConnection);
