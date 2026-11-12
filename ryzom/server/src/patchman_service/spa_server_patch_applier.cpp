@@ -662,8 +662,8 @@ void CServerPatchApplier::cbDeploymentConfigurationSynchronised(NLNET::IModulePr
 			CSString cfgFileName= dirName+'/'+theApp.CmdLine.firstWord()+".cfg";
 			NLMISC::CSString(theApp.CfgFile+paths).writeToFileIfDifferent(cfgFileName);
 
-			// the naming and admin services read their cfg file without the ryzom_ prefix; the launcher script of
-			// the screen setup copies it on each launch, the dashboard runs the service directly, so write it here too
+			// the naming and welcome services read their cfg file without the ryzom_ prefix, so it is written under
+			// that name too, for a service started by the launcher script of the screen setup or by the dashboard
 			if (theApp.CmdLine.firstWord().left(6) == "ryzom_")
 				NLMISC::CSString(theApp.CfgFile + paths).writeToFileIfDifferent(dirName + '/' + theApp.CmdLine.firstWord().leftCrop(6) + ".cfg");
 
