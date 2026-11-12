@@ -234,7 +234,14 @@ struct CUCStringHashMapTraits
 	CUCStringHashMapTraits() { }
 	size_t operator()(const ucstring &id) const
 	{
-		return id.size();
+		// The 32-bit FNV-1a offset basis and prime, applied per 16-bit code unit (not per byte); 32-bit result
+		uint32 hash = 2166136261u;
+		for (ucstring::size_type i = 0; i < id.size(); ++i)
+		{
+			hash ^= (uint32)id[i];
+			hash *= 16777619u;
+		}
+		return (size_t)hash;
 	}
 	bool operator()(const ucstring &id1, const ucstring &id2) const
 	{
