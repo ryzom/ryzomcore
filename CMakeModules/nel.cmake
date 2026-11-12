@@ -135,9 +135,10 @@ MACRO(NL_DEFAULT_PROPS name label)
       SET(_SUBSYSTEM "CONSOLE")
     ENDIF()
 
+    # The image version comes from /VERSION, not from the VERSION property: on a Linux host (the Docker
+    # builds under Wine) CMake names an executable with VERSION <name>.exe-<version> and adds a symlink
+    # <name>.exe, which Windows cannot open
     SET_TARGET_PROPERTIES(${name} PROPERTIES
-      VERSION ${NL_VERSION}
-      SOVERSION ${NL_VERSION_MAJOR}
       COMPILE_FLAGS "/GA"
       LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR} /SUBSYSTEM:${_SUBSYSTEM},${_SUBSYSTEM_VERSION}")
 
