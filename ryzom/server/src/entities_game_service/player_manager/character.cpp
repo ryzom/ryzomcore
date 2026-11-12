@@ -17615,10 +17615,8 @@ void CCharacter::sendCustomEmote( const NLMISC::CEntityId& id, MBEHAV::EBehaviou
 
 	string sEmoteCustomText = emoteCustomText.toUtf8();
 
-	if ((behaviour != MBEHAV::IDLE) || (sEmoteCustomText == "none"))
-	{
-		setAfkState(false);
-	}
+	// an emote is an action of the player, with or without an animation, as in sendEmote
+	setAfkState(false);
 
 	if( sEmoteCustomText == "none" )
 	{
