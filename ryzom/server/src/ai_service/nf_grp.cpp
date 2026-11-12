@@ -1743,10 +1743,18 @@ Arguments:  f(alias),f(Coef), ->
 // CGroup
 void setBotHPScaleByAlias_fs_(CStateInstance* entity, CScriptStack& stack)
 {
-	uint32 alias =  LigoConfig.aliasFromString((string)stack.top()) ; stack.pop();
-		
+	string aliasStr = (string)stack.top(); stack.pop();
+	uint32 alias = LigoConfig.aliasFromString(aliasStr);
+
 	float coef = stack.top(); stack.pop();
-	
+
+	// 0 is the alias of the bots that have none: a string that is no alias must not select them
+	if (alias == 0)
+	{
+		nlwarning("setBotHPScaleByAlias: '%s' is not an alias, in group '%s'", aliasStr.c_str(), entity->getGroup()->getName().c_str());
+		return;
+	}
+
 	CChangeCreatureHPMsg& msgList = CAIS::instance().getCreatureChangeHP();
 	
 	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())

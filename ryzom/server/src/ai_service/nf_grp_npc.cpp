@@ -997,10 +997,18 @@ Arguments:  f(alias), ->
 // CGroup
 void despawnBotByAlias_s_(CStateInstance* entity, CScriptStack& stack)
 {
-	uint32 alias =  LigoConfig.aliasFromString((string)stack.top()); stack.pop();
+	string aliasStr = (string)stack.top(); stack.pop();
+	uint32 alias = LigoConfig.aliasFromString(aliasStr);
 	CGroup* group = entity->getGroup();
 	CGroupNpc* npcGroup = NLMISC::safe_cast<CGroupNpc*>(group);
-	
+
+	// 0 is the alias of the bots that have none: a string that is no alias must not select them
+	if (alias == 0)
+	{
+		nlwarning("despawnBotByAlias: '%s' is not an alias, in group '%s'", aliasStr.c_str(), group->getName().c_str());
+		return;
+	}
+
 	FOREACH(botIt, CCont<CBot>,	group->bots())
 	{
 
