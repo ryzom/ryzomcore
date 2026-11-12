@@ -1691,24 +1691,10 @@ int	nlfseek64( FILE *stream, sint64 offset, int origin )
 {
 #ifdef NL_OS_WINDOWS
 
-	//
-	fpos_t pos64 = 0;
-	switch (origin)
-	{
-	case SEEK_CUR:
-		if (fgetpos(stream, &pos64) != 0)
-			return -1;
-	case SEEK_END:
-		pos64 = _filelengthi64(_fileno(stream));
-		if (pos64 == -1L)
-			return -1;
-	};
-
-	// Seek
-	pos64 += offset;
-
-	// Set the final position
-	return fsetpos (stream, &pos64);
+	// The stream knows its position and its end with what it has buffered: the length of the file on disk
+	// does not include what was written and not flushed yet. _fseeki64 exists since Visual C++ 2005, and
+	// in mingw-w64.
+	return _fseeki64(stream, offset, origin);
 
 #else // NL_OS_WINDOWS
 
