@@ -5127,7 +5127,7 @@ void CServerEditionModule::onModuleUpdate()
 					if ( session->mustHibernate(nowSeconds))
 					{
 						std::string msg;
-						nlinfo("Hibernating Edition Session %u (because no player since %s)", sessionId.asInt(), getSecondesAsString(TimeBeforeCloseHibernatingEditionSession).c_str() );
+						nlinfo("Hibernating Edition Session %u (because no player since %s)", sessionId.asInt(), getSecondesAsString(TimeBeforeAutoHibernateEditionSessionWithNoPlayer).c_str() );
 						bool ok = hibernateSessionImpl(sessionId, msg);
 						debugInfo(ok, msg);
 						// session is remove from _Sessions here
