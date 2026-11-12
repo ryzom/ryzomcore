@@ -1088,7 +1088,14 @@ void prelogInit()
 		// first run (no client.cfg)
 		if (ClientCfg.Width == 0  || ClientCfg.Height == 0)
 		{
-			if (Driver->getCurrentScreenMode(mode))
+			if (ClientCfg.Windowed)
+			{
+				// a configuration that asks for a window (FullScreen = 0, like the development client of the
+				// quick start) keeps it, at the default window size
+				ClientCfg.Width = 1024;
+				ClientCfg.Height = 768;
+			}
+			else if (Driver->getCurrentScreenMode(mode))
 			{
 				// fullscreen, using monitor resolution
 				mode.Windowed = false;
@@ -1121,15 +1128,14 @@ void prelogInit()
 
 			ClientCfg.ConfigFile.save();
 		}
-		else
-		{
-			mode.DisplayDevice = ClientCfg.MonitorName;
-			mode.Windowed = ClientCfg.Windowed;
-			mode.Width = ClientCfg.Width;
-			mode.Height = ClientCfg.Height;
-			mode.Depth = ClientCfg.Depth;
-			mode.Frequency = ClientCfg.Frequency;
-		}
+
+		// the mode of the configuration, as detected above on a first run
+		mode.DisplayDevice = ClientCfg.MonitorName;
+		mode.Windowed = ClientCfg.Windowed;
+		mode.Width = ClientCfg.Width;
+		mode.Height = ClientCfg.Height;
+		mode.Depth = ClientCfg.Depth;
+		mode.Frequency = ClientCfg.Frequency;
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetup, "login_step_video_mode_setup"));
 
