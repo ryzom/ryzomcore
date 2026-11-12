@@ -74,8 +74,9 @@ public:
 	virtual void logSyntaxError(uint32 line, const vector<string> & script) = 0;
 	// Called when a substep is well processed
 	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex) = 0;
-	// Called when we constructs the text for all substeps
-	virtual string getStepDefaultText() = 0;
+	// Called when we constructs the text for all substeps. The caller keeps a pointer to the returned string:
+	// each kind of step returns a static of its own
+	virtual const std::string &getStepDefaultText() = 0;
 	// Provide the type of the substep for the string manager to be able to know it
 	virtual STRING_MANAGER::TParamType getStringManagerType() = 0;
 
@@ -199,8 +200,7 @@ public:
 	//*****************************************************
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
-		static const std::string stepText = getStepDefaultText();
-		textPtr = &stepText;
+		textPtr = &getStepDefaultText();
 		nlassert( _SubSteps.size() == subStepStates.size() );
 		for ( uint i  = 0; i < _SubSteps.size(); i++ )
 		{
@@ -264,9 +264,10 @@ class CMissionStepTargetFauna : public IMissionStepTarget
 		return STRING_MANAGER::creature_model;
 	}
 
-	virtual string getStepDefaultText() NL_OVERRIDE
+	virtual const std::string &getStepDefaultText() NL_OVERRIDE
 	{
-		return "MIS_TARGET_FAUNA_";
+		static const std::string s_StepText = "MIS_TARGET_FAUNA_";
+		return s_StepText;
 	}
 
 	MISSION_STEP_GETNEWPTR(CMissionStepTargetFauna)
@@ -322,9 +323,10 @@ class CMissionStepTargetRace : public IMissionStepTarget
 		return STRING_MANAGER::race;
 	}
 	
-	virtual string getStepDefaultText() NL_OVERRIDE
+	virtual const std::string &getStepDefaultText() NL_OVERRIDE
 	{
-		return "MIS_TARGET_SPECIES_";
+		static const std::string s_StepText = "MIS_TARGET_SPECIES_";
+		return s_StepText;
 	}
 	
 	MISSION_STEP_GETNEWPTR(CMissionStepTargetRace)
@@ -402,9 +404,10 @@ class CMissionStepTargetNpc : public IMissionStepTarget
 		return STRING_MANAGER::bot;
 	}
 	
-	virtual string getStepDefaultText() NL_OVERRIDE
+	virtual const std::string &getStepDefaultText() NL_OVERRIDE
 	{
-		return "MIS_TARGET_NPC_";
+		static const std::string s_StepText = "MIS_TARGET_NPC_";
+		return s_StepText;
 	}
 
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE
