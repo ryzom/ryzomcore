@@ -1048,33 +1048,24 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 
 	virtual void getTextParams( uint & nbSubSteps, const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
-		static const std::string stepText = "MIS_KILL_PLAYER";
-		static const std::string stepTextLoc = "MIS_KILL_PLAYER_LOC";
-		if ( _Place != 0xFFFF )
-			retParams.resize(3);
-		else
-			retParams.resize(2);
-		textPtr = &stepText;
+		// the number of clans left is appended to the text, as for kill_fauna (MIS_KILL_PLAYER_1, _2...)
+		static const std::string stepText = "MIS_KILL_PLAYER_";
+		static const std::string stepTextLoc = "MIS_KILL_PLAYER_LOC_";
 		nlassert( _SubSteps.size() == subStepStates.size() );
 		for ( uint i  = 0; i < subStepStates.size(); i++ )
 		{
 			if( subStepStates[i] != 0 )
 			{
 				nbSubSteps++;
-				retParams.push_back(STRING_MANAGER::TParam());
-				retParams.back().Type = STRING_MANAGER::faction;
+				// the clan as its faction (the type the string manager knows), the fame range as the mission
+				// gives it, and the remaining count
+				retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::faction));
 				retParams.back().Enum = _SubSteps[i].Clan;
-	
-				retParams.push_back(STRING_MANAGER::TParam());
-				retParams.back().Type = STRING_MANAGER::integer;
-				retParams.back().Int = _SubSteps[i].MinLevel;
-
-				retParams.push_back(STRING_MANAGER::TParam());
-				retParams.back().Type = STRING_MANAGER::integer;
-				retParams.back().Int = _SubSteps[i].MaxLevel;
+				retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::integer, sint32(_SubSteps[i].MinLevel / kFameMultipler)));
+				retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::integer, sint32(_SubSteps[i].MaxLevel / kFameMultipler)));
+				retParams.push_back(STRING_MANAGER::TParam(STRING_MANAGER::integer, sint32(subStepStates[i])));
 			}
 		}
-		/*
 		if ( _Place != 0xFFFF )
 		{
 			STRING_MANAGER::TParam param;
@@ -1092,8 +1083,7 @@ class CMissionStepKillPlayer : public IMissionStepTemplate
 			textPtr = &stepTextLoc;
 		}
 		else
-		*/
-		textPtr = &stepText;
+			textPtr = &stepText;
 	}
 
 	std::vector< CSubStep >	_SubSteps;
