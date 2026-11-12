@@ -19,7 +19,9 @@
 
 	if ((strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'))
 	{
-		define('NELTOOL_RRDTOOL', NELTOOL_SYSTEMBASE . '../../../../external/rrdtool/rrdtool.exe');
+		// the quick start passes the rrdtool of the externals package (RC_RRDTOOL_DIR), otherwise it comes from the PATH
+		$rrdToolDir = getenv('RC_RRDTOOL_DIR');
+		define('NELTOOL_RRDTOOL', $rrdToolDir ? escapeshellarg($rrdToolDir . '/bin/rrdtool.exe') : 'rrdtool.exe');
 	}
 	else
 	{

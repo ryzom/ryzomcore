@@ -71,7 +71,7 @@ function outgame:getTrykerLastName()
 	return trykerLastNames[math.random(nbTrykerLastNames)]
 end
 
--- Zoraï
+-- ZoraÃ¯
 function outgame:getZoraiFirstName()
 	local nbFirstNamesOne = #zoraiFirstNamesOne
 	local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)]
@@ -104,7 +104,7 @@ function outgame:procGenerateName()
 	local lastName = "test"
 
 	-- Fyros and Matis are using "first name, last name" order
-	-- Trykers and Zoraïs are using "last name, first name" order
+	-- Trykers and ZoraÃ¯s are using "last name, first name" order
 	if  tonumber(dbNameRace) == 1 then
 	-- Fyros
 		firstName = self:getFyrosFirstName()
@@ -192,7 +192,7 @@ end
 
 -- Name race slider update.
 function outgame:procUpdateNameRaceLabel()
-	local nameRaceType = { "Fyros", "Matis", "Tryker", "Zoraï", "uiCP_Maraudeur" }
+	local nameRaceType = { "Fyros", "Matis", "Tryker", "ZoraÃ¯", "uiCP_Maraudeur" }
 
 	local uiNameRaceText = getUI("ui:outgame:appear_name:name_race_slider:name_race")
 	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE")
@@ -231,7 +231,7 @@ local matisF = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Female")) )
 local matisM = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Male")) )):gsub("^%l", string.upper)
 
 function outgame:procUpdateNameSubRaceFirstNameLabel()
-	local nameSubRaceFirstNameType = { "Fyros", matisM, matisF, "Tryker", "Zoraï" }
+	local nameSubRaceFirstNameType = { "Fyros", matisM, matisF, "Tryker", "ZoraÃ¯" }
 	local uiNameSubRaceFirstNameText = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider:name_race")
 	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME")
 
@@ -239,7 +239,7 @@ function outgame:procUpdateNameSubRaceFirstNameLabel()
 end
 
 function outgame:procUpdateNameSubRaceLastNameLabel()
-	local nameSubRaceLastNameType = { "Fyros", "Matis", "Tryker", "Zoraï" }
+	local nameSubRaceLastNameType = { "Fyros", "Matis", "Tryker", "ZoraÃ¯" }
 	local uiNameSubRaceLastNameText = getUI("ui:outgame:appear_name:name_sub_race_last_name_slider:name_race")
 	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME")
 

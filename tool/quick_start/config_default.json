@@ -14,9 +14,9 @@
     "UserDirectory": ""
   },
   "SignTool": {
-    "Executable": "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\signtool.exe",
+    "Executable": "",
     "Sha1": "",
-    "Timestamp": "http://timestamp.comodoca.com/authenticode"
+    "Timestamp": "http://timestamp.sectigo.com"
   },
   "UseNinja": true,
   "Headless": false,
@@ -31,18 +31,20 @@
     }
   },
   "Paths": {
-    "Python27": "external/python27",
-    "Python3": "external/python3",
-    "Perl": "external/perl",
-    "RRDtool": "external/rrdtool",
-    "MariaDB": "external/mariadb",
-    "Nginx": "external/nginx",
-    "PHP": "external/php",
-    "phpMyAdmin": "external/phpmyadmin",
-    "Dependencies": "external/dependencies",
-    "Aria2": "external/utils",
-    "Ninja": "external/utils",
-    "Jom": "external/utils"
+    "External": "C:\\2026q4_external_v143_x64",
+    "Python3": "python315",
+    "Perl": "perl",
+    "RRDtool": "rrdtool",
+    "MariaDB": "mariadb",
+    "Nginx": "nginx",
+    "PHP": "php",
+    "phpMyAdmin": "phpmyadmin",
+    "Dependencies": "dependencies",
+    "Utils": "bin",
+    "Aria2": "bin",
+    "Ninja": "bin",
+    "Jom": "bin",
+    "Web": "pipeline/shard_dev/web"
   },
   "WorkingDirs": {
     "crash_report": "pipeline/client_dev",
@@ -143,7 +145,9 @@
         ]
       }
     },
-    "PluginMax": { }
+    "PluginMax": {
+      "Versions": [ 2010 ]
+    }
   },
   "Fallback": {
     "PrefixBin": [ ],

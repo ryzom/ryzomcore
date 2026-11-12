@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, tarfile, argparse
+import time, sys, os, shutil, subprocess, tarfile, argparse
 sys.path.append("configuration")
 
 parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Shard Patch')

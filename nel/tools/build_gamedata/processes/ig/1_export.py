@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -62,8 +62,8 @@ def igExport(sourceDir, targetDir):
 		if os.path.isfile(scriptDst):
 			os.remove(scriptDst)
 		tagDiff = 1
-		sSrc = open(scriptSrc, "r")
-		sDst = open(scriptDst, "w")
+		sSrc = open(scriptSrc, "r", encoding="latin-1")
+		sDst = open(scriptDst, "w", encoding="latin-1")
 		for line in sSrc:
 			newline = line.replace("%OutputLogfile%", outputLogfile)
 			newline = newline.replace("%MaxSourceDirectory%", maxSourceDir)
@@ -81,7 +81,7 @@ def igExport(sourceDir, targetDir):
 			subprocess.call([ Max, "-U", "MAXScript", "ig_export.ms", "-q", "-mi", "-mip" ])
 			if os.path.exists(outputLogfile):
 				try:
-					lSrc = open(outputLogfile, "r")
+					lSrc = open(outputLogfile, "r", encoding="latin-1")
 					for line in lSrc:
 						lineStrip = line.strip()
 						if (len(lineStrip) > 0):

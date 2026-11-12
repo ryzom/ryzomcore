@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -78,8 +78,8 @@ if MaxAvailable:
 	#	tagDiff = 1
 	#	dummySourceDir = DatabaseDirectory + "/" + dir
 	#	mkPath(log, dummySourceDir)
-	#	sSrc = open(scriptSrc, "r")
-	#	sDst = open(scriptDst, "w")
+	#	sSrc = open(scriptSrc, "r", encoding="latin-1")
+	#	sDst = open(scriptDst, "w", encoding="latin-1")
 	#	for line in sSrc:
 	#		newline = line.replace("output_logfile", logFile)
 	#		newline = newline.replace("dummy_source_directory", dummySourceDir)

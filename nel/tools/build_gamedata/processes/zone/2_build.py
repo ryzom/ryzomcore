@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -79,8 +79,8 @@ if BuildQuality == 1:
 			printLog(log, "DETECT DECIDE UPDATE")
 			mkPath(log, ActiveProjectDirectory + "/generated")
 			configFile = ActiveProjectDirectory + "/generated/zone_dependencies.cfg"
-			templateCf = open(ActiveProjectDirectory + "/generated/properties.cfg", "r")
-			cf = open(configFile, "w")
+			templateCf = open(ActiveProjectDirectory + "/generated/properties.cfg", "r", encoding="utf-8", errors="surrogateescape")
+			cf = open(configFile, "w", encoding="utf-8", errors="surrogateescape")
 			for line in templateCf:
 				cf.write(line)
 			cf.write("\n");

@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, argparse
+import time, sys, os, shutil, subprocess, argparse
 sys.path.append("configuration")
 
 parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Client Patch')
@@ -82,8 +82,8 @@ else:
 		printLog(log, "")
 		printLog(log, ">>> Rewrite " + ProductName + ".xml <<<") # because we know better.
 		shutil.move(productXml, productXml + ".old")
-		oldCfg = open(productXml + ".old", "r")
-		cfg = open(productXml, "w")
+		oldCfg = open(productXml + ".old", "r", encoding="utf-8", errors="surrogateescape")
+		cfg = open(productXml, "w", encoding="utf-8", errors="surrogateescape")
 		inCategories = 0
 		for line in oldCfg:
 			if not inCategories:

@@ -1,4 +1,5 @@
 call ..\.nel\path_config.bat
+if not defined RC_SIGNTOOL_SHA1 echo NOTE: SignTool Sha1 is not set in .nel\config.json, the files are not signed
 rmdir /s /q nel_plugin_max_2012_x86
 if %errorlevel% neq 0 pause
 mkdir nel_plugin_max_2012_x86
@@ -7,7 +8,7 @@ copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\object_viewer_dll_r.dll" "ob
 copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\nel_3dsmax_shared_r.dll" "nel_3dsmax_shared_r.dll"
 copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\nel_drv_opengl_win_r.dll" "nel_drv_opengl_win_r.dll"
 copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\nel_drv_xaudio2_win_r.dll" "nel_drv_xaudio2_win_r.dll"
-"C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /t http://timestamp.comodoca.com/authenticode "*.dll"
+if defined RC_SIGNTOOL_SHA1 "%RC_SIGNTOOL_EXE%" sign /sha1 %RC_SIGNTOOL_SHA1% /fd sha256 /tr %RC_SIGNTOOL_TIMESTAMP% /td sha256 "*.dll"
 copy "C:\2026q4_external_v90_x86\ogg\bin\ogg.dll" "ogg.dll"
 copy "C:\2026q4_external_v90_x86\libpng\bin\libpng16.dll" "libpng16.dll"
 copy "C:\2026q4_external_v90_x86\vorbis\bin\vorbis.dll" "vorbis.dll"
@@ -32,7 +33,7 @@ copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\tile_utility_r.dlu" "neltile
 copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\nel_vertex_tree_paint_r.dlm" "nel_vertex_tree_paint_r.dlm"
 copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\ligoscape_utility_r.dlx" "nelligoscapeutility_r.dlx"
 copy "%RC_ROOT%\build_win32\plugin_max\2012_x86\bin\mapext198m3.dlm" "mapext198m3.dlm"
-"C:\Program Files\Microsoft SDKs\Windows\v6.0A\Bin\signtool.exe" sign /sha1 f0ef3c22d0373d2d6e3735207194d097c8f69877 /t http://timestamp.comodoca.com/authenticode "*.*"
+if defined RC_SIGNTOOL_SHA1 "%RC_SIGNTOOL_EXE%" sign /sha1 %RC_SIGNTOOL_SHA1% /fd sha256 /tr %RC_SIGNTOOL_TIMESTAMP% /td sha256 "*.*"
 copy "%RC_ROOT%\code\nel\tools\3d\plugin_max\nel_patch_paint\keys.cfg" "keys.cfg"
 copy "%RC_ROOT%\code\nel\tools\3d\ligo\ligoscape.cfg" "ligoscape.cfg"
 cd ..

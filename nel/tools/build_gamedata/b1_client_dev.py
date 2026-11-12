@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, socket
+import time, sys, os, shutil, subprocess, socket
 sys.path.append("configuration")
 
 if os.path.isfile("log.log"):
@@ -66,8 +66,8 @@ if not os.path.isfile(ClientDevLiveDirectory + "/client.cfg"):
 mkPath(log, ClientDevDirectory)
 if not os.path.isfile(ClientDevDirectory + "/client.cfg"):
 	printLog(log, ">>> Generate local dev client.cfg <<<")
-	cfg = open(ClientDevDirectory + "/client.cfg", "w")
-	cfgr = open(ClientDevLiveDirectory + "/client.cfg", "r")
+	cfg = open(ClientDevDirectory + "/client.cfg", "w", encoding="utf-8", errors="surrogateescape")
+	cfgr = open(ClientDevLiveDirectory + "/client.cfg", "r", encoding="utf-8", errors="surrogateescape")
 	for l in cfgr:
 		cfg.write(l)
 	cfgr.close()

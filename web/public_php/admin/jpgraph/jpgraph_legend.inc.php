@@ -171,7 +171,7 @@ class Legend {
     }
 
     function HasItems() {
-        return (boolean)(count($this->txtcol));
+        return (bool)(count($this->txtcol));
     }
 
     function Stroke($aImg) {

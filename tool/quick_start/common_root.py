@@ -1,5 +1,5 @@
 
-import os
+import os, sys
 
 NeLQuickStartDir = os.path.dirname(os.path.realpath(__file__))
 
@@ -9,7 +9,7 @@ def findNeLRootRecurse(dirPath):
 		return dirPath
 	parentPath = os.path.dirname(dirPath)
 	if parentPath == dirPath:
-		exit("NeL Root folder (.nel) not found in folder hierarchy.")
+		sys.exit("NeL Root folder (.nel) not found in folder hierarchy.")
 	return findNeLRootRecurse(parentPath)
 
 def findNeLRoot():

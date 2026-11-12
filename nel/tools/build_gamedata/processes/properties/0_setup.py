@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util
+import time, sys, os, shutil, subprocess
 sys.path.append("../../configuration")
 
 if os.path.isfile("log.log"):
@@ -46,7 +46,7 @@ printLog(log, "")
 
 
 mkPath(log, ActiveProjectDirectory + "/generated")
-zlp = open(ActiveProjectDirectory + "/generated/properties.cfg", "w")
+zlp = open(ActiveProjectDirectory + "/generated/properties.cfg", "w", encoding="utf-8", errors="surrogateescape")
 zlp.write("\n")
 zlp.write("// Search pathes\n")
 zlp.write("search_pathes = \n")
@@ -55,7 +55,7 @@ for searchPath in PropertiesExportBuildSearchPaths:
 	zlp.write("\t\"" + ExportBuildDirectory + "/" + searchPath + "\",\n")
 zlp.write("};\n")
 zlp.write("\n")
-ps = open(ActiveProjectDirectory + "/properties_base.cfg", "r")
+ps = open(ActiveProjectDirectory + "/properties_base.cfg", "r", encoding="utf-8", errors="surrogateescape")
 for line in ps:
 	try:
 		SmallbankExportDirectory
@@ -127,9 +127,9 @@ for line in ps:
 	zlp.write(newline)
 ps.close()
 if (BuildQuality == 1):
-	ps = open(ActiveProjectDirectory + "/properties_final.cfg", "r")
+	ps = open(ActiveProjectDirectory + "/properties_final.cfg", "r", encoding="utf-8", errors="surrogateescape")
 else:
-	ps = open(ActiveProjectDirectory + "/properties_draft.cfg", "r")
+	ps = open(ActiveProjectDirectory + "/properties_draft.cfg", "r", encoding="utf-8", errors="surrogateescape")
 for line in ps:
 	zlp.write(line)
 zlp.close()

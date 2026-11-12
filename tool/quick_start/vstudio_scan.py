@@ -32,6 +32,15 @@ VSMajor["2019"] = 16
 VSMajor["2022"] = 17
 VSMajor["2026"] = 18
 
+# The toolset each release brings, which Microsoft.VCToolsVersion.default.txt points at when no
+# Microsoft.VCToolsVersion.<toolset>.default.txt names it (a side-by-side toolset component of the same
+# toolset can take over that file, and then it is renamed out of the way)
+VSNativeToolset = {}
+VSNativeToolset["2017"] = "v141"
+VSNativeToolset["2019"] = "v142"
+VSNativeToolset["2022"] = "v143"
+VSNativeToolset["2026"] = "v145"
+
 VSPlatform = {}
 VSPlatform["v110"] = "v110"
 VSPlatform["v120"] = "v120"
@@ -140,15 +149,23 @@ def ScanYearPath(found, root, yearVersion, yearPath):
 		if auxBuildPath is None or not os.path.isdir(auxBuildPath):
 			continue
 		# v141 Toolset and up
+		toolsets = {}
+		defaultToolsVersion = None
 		for buildProps in ListDir(auxBuildPath):
 			if buildProps.startswith("Microsoft.VCToolsVersion.") and buildProps.endswith(".default.txt"):
 				toolchain = buildProps.split(".")[2]
-				if toolchain != "default":
-					fi = open(os.path.join(auxBuildPath, buildProps))
-					toolsVersion = fi.read().strip()
-					fi.close()
-					hasMFC = IsFileCI(editionPath, "VC/Tools/MSVC/" + toolsVersion + "/atlmfc/include/afx.h")
-					found += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": toolchain, "HasMFC": hasMFC } ]
+				fi = open(os.path.join(auxBuildPath, buildProps))
+				toolsVersion = fi.read().strip()
+				fi.close()
+				if toolchain == "default":
+					defaultToolsVersion = toolsVersion
+				else:
+					toolsets[toolchain] = toolsVersion
+		if defaultToolsVersion and yearVersion in VSNativeToolset and not VSNativeToolset[yearVersion] in toolsets:
+			toolsets[VSNativeToolset[yearVersion]] = defaultToolsVersion
+		for toolchain in sorted(toolsets):
+			hasMFC = IsFileCI(editionPath, "VC/Tools/MSVC/" + toolsets[toolchain] + "/atlmfc/include/afx.h")
+			found += [ { "Name": "Visual Studio " + str(VSMajor[yearVersion]) + " " + yearVersion, "DisplayName": "Visual Studio " + yearVersion + " " + edition, "Path": editionPath, "Version": VSMajor[yearVersion], "Toolset": toolchain, "HasMFC": hasMFC } ]
 		# v140 Toolset
 		for programFiles in ProgramFilesDirs(root):
 			vs14 = JoinCI(programFiles, "Microsoft Visual Studio 14.0")

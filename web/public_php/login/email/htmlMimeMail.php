@@ -608,7 +608,7 @@ class htmlMimeMail
 			$this->headers  = array_merge($this->headers, $output['headers']);
 
 			// Add message ID header
-			srand((double)microtime()*10000000);
+			srand((float)microtime()*10000000);
 			//$message_id = sprintf('<%s.%s@%s>', base_convert(time(), 10, 36), base_convert(rand(), 10, 36), !empty($GLOBALS['HTTP_SERVER_VARS']['HTTP_HOST']) ? $GLOBALS['HTTP_SERVER_VARS']['HTTP_HOST'] : $GLOBALS['HTTP_SERVER_VARS']['SERVER_NAME']);
 			// *** don't want to show atrium.ryzom.com in headers, so forcing to www.ryzom.com
 			$message_id = sprintf('<%s.%s@%s>', base_convert(time(), 10, 36), base_convert(rand(), 10, 36), 'www.ryzom.com');

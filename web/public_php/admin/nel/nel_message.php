@@ -61,8 +61,8 @@
 			{
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])*256;
-				$val += ord($this->Buffer[$this->Pos++])*(double)256*256;
-				$val += ord($this->Buffer[$this->Pos++])*(double)256*256*256;
+				$val += ord($this->Buffer[$this->Pos++])*(float)256*256;
+				$val += ord($this->Buffer[$this->Pos++])*(float)256*256*256;
 				debug(sprintf ("read uint32 '%d'<br>\n", $val));
 //				var_dump($val);
 			}

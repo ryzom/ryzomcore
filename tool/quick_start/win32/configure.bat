@@ -22,23 +22,15 @@ set RC_ROOT=%RC_ROOT_TEMP%
 for /f "delims=" %%A in ('cd') do (
 set RC_ROOT_NAME=%%~nxA
 )
-if not exist %RC_ROOT%\external\python27\python.exe goto :userpython27
-set RC_PYTHON27_DIR=%RC_ROOT%\external\python27
-goto :checkpython3
-:userpython27
-echo To use the defaults, simply hit ENTER, else type in the new value.
-echo Use -- if you need to insert an empty value.
-set RC_PYTHON27_DIR_TEMP=
-set /p RC_PYTHON27_DIR_TEMP=Python 2.7 (%RC_PYTHON27_DIR%): 
-if /I "%RC_PYTHON27_DIR_TEMP%"=="" set RC_PYTHON27_DIR_TEMP=%RC_PYTHON27_DIR%
-if /I "%RC_PYTHON27_DIR_TEMP%"=="--" set RC_PYTHON27_DIR_TEMP=
-set RC_PYTHON27_DIR=%RC_PYTHON27_DIR_TEMP%
-if not exist %RC_PYTHON27_DIR%\python.exe goto :config
+rem Python 3 of the externals package runs the quick start and the build pipeline. A previous configuration
+rem keeps the one it found (.nel\path_config.bat) while it is there, the configuration then writes the one of
+rem Paths in .nel\config.json
+if defined RC_PYTHON3_DIR if exist "%RC_PYTHON3_DIR%\python.exe" goto :apply
+set RC_PYTHON3_DIR=C:\2026q4_external_v143_x64\python315
+if exist "%RC_PYTHON3_DIR%\python.exe" goto :apply
+echo Python 3 was not found in %RC_PYTHON3_DIR%
+echo Extract the externals package from https://cdn.ryzom.dev/core/2026q4_external_v143_x64.7z to C:\
 echo(
-:checkpython3
-if not exist %RC_ROOT%\external\python3\python.exe goto :userpython3
-set RC_PYTHON3_DIR=%RC_ROOT%\external\python3
-goto :apply
 :userpython3
 echo To use the defaults, simply hit ENTER, else type in the new value.
 echo Use -- if you need to insert an empty value.
@@ -47,7 +39,7 @@ set /p RC_PYTHON3_DIR_TEMP=Python 3 (%RC_PYTHON3_DIR%):
 if /I "%RC_PYTHON3_DIR_TEMP%"=="" set RC_PYTHON3_DIR_TEMP=%RC_PYTHON3_DIR%
 if /I "%RC_PYTHON3_DIR_TEMP%"=="--" set RC_PYTHON3_DIR_TEMP=
 set RC_PYTHON3_DIR=%RC_PYTHON3_DIR_TEMP%
-if not exist %RC_PYTHON3_DIR%\python.exe goto :config
+if not exist "%RC_PYTHON3_DIR%\python.exe" goto :userpython3
 echo(
 :apply
 set RC_ORIG_PATH=%PATH%
@@ -68,9 +60,6 @@ echo(
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y
 rem the Model Context Protocol registration for Claude Code, next to the launcher it names
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\.mcp.json %RC_ROOT%\ /Y
-if %errorlevel% neq 0 pause
-mkdir %RC_ROOT%\external > nul 2> nul
-xcopy %RC_ROOT%\code\tool\quick_start\win32\install\external\* %RC_ROOT%\external\ /Y
 if %errorlevel% neq 0 pause
 mkdir %RC_ROOT%\redist > nul 2> nul
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\redist\*.bat %RC_ROOT%\redist\ /Y
@@ -143,7 +132,7 @@ powershell "$s=(New-Object -COM WScript.Shell).CreateShortcut('%RC_ROOT%\localho
 echo | set /p=.
 echo .
 echo(
-set PATH=%RC_PYTHON27_DIR%;%RC_ORIG_PATH%
+set PATH=%RC_PYTHON3_DIR%;%RC_ORIG_PATH%
 cd /d %RC_ROOT%\code\nel\tools\build_gamedata
 title Ryzom Core Configuration: Build Pipeline Setup
 python 0_setup.py -p
