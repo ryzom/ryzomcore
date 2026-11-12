@@ -123,6 +123,39 @@ function configure_shard_dev($continue_r) {
 	return $continue;
 }
 
+// Setup version 14: the development shard binds its service ports to 127.0.0.1, and its domain rows still name
+// this machine by its host name when configure_shard_dev.sql wrote them before that. Called for an installation
+// of the 'dev' domain only; the script only changes rows that hold exactly what the old one wrote for this
+// machine, so the domains of a production shard, whose services run on other machines, are left alone.
+function upgrade_shard_dev_localhost($continue_r) {
+	$continue = $continue_r;
+	global $PRIVATE_PHP_PATH;
+
+	$con = null;
+	$con = connect_database($continue, "shard");
+	$continue = ($con != null);
+	if ($continue) {
+		$file = "upgrade_shard_dev_localhost.sql";
+		$sql = file_get_contents($PRIVATE_PHP_PATH . "/setup/sql/" . $file);
+		if (!$sql) {
+			printalert("danger", "Cannot read <em>" . htmlentities($file) . "</em>");
+			$continue = false;
+		} else {
+			$sql = str_replace('%RC_HOSTNAME%', mysqli_real_escape_string($con, gethostname()), $sql);
+			$scriptError = run_sql_script($con, $sql);
+			if ($scriptError === '') {
+				printalert("success", "Development domain addresses updated using <em>" . htmlentities($file) . "</em>");
+			} else {
+				printalert("danger", "Error updating the development domain using <em>" . htmlentities($file) . "</em>, " . htmlentities($scriptError));
+				$continue = false;
+			}
+		}
+	}
+	disconnect_database($con, "shard");
+
+	return $continue;
+}
+
 // The administrator account is the first game account of a fresh install: a
 // row in the nel user table with the :DEV: privilege, made by the account
 // tool's own code (tools/account_common.php), so it is an account like any

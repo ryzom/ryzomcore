@@ -58,6 +58,10 @@ $upToDate = ($NEL_SETUP_VERSION_CONFIGURED >= $NEL_SETUP_VERSION);
 		$continue = upgrade_domain_databases($continue);
 	}
 
+	if (file_exists("role_service") && $NEL_SETUP_VERSION_CONFIGURED < 14 && $NEL_DOMAIN_NAME === 'dev') {
+		$continue = upgrade_shard_dev_localhost($continue);
+	}
+
 	// Rewrite config.php
 	if ($continue) {
 		require_once('config_generation.php');

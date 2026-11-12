@@ -1,11 +1,15 @@
+-- The development shard binds its service ports and the database to 127.0.0.1 (BindAddress in the patchman
+-- dev domain, --bind-address of MariaDB): the web reaches the login service, the session manager, the admin
+-- service and the database there. The addresses the clients get keep the host name (WsAddr, and the web host,
+-- which is host:port: the login page puts the scheme in front).
 -- Add the domain to the NeL database
 USE `nel`;
 INSERT INTO `domain` (`domain_id`, `domain_name`, `status`, `patch_version`, `backup_patch_url`, `patch_urls`, `login_address`, `session_manager_address`, `ring_db_name`, `web_host`, `web_host_php`, `description`)
-	VALUES ('90', 'dev', 'ds_open', '1', NULL, NULL, '%RC_HOSTNAME%:46993', '%RC_HOSTNAME%:46994', 'ring_dev', 'http://%RC_HOSTNAME%:9042', 'http://%RC_HOSTNAME%:9042', 'Development Domain');
+	VALUES ('90', 'dev', 'ds_open', '1', NULL, NULL, '127.0.0.1:46993', '127.0.0.1:46994', 'ring_dev', '%RC_HOSTNAME%:9042', '%RC_HOSTNAME%:9042', 'Development Domain');
 
 -- Add the domain to the NeL Admin Tool database
 USE `nel_tool`;
-INSERT INTO `neltool_domains` (`domain_id`, `domain_name`, `domain_as_host`, `domain_as_port`, `domain_rrd_path`, `domain_las_admin_path`, `domain_las_local_path`, `domain_application`, `domain_sql_string`, `domain_hd_check`, `domain_mfs_web`, `domain_cs_sql_string`) VALUES ('90', 'dev', '%RC_HOSTNAME%', '46999', '%RC_SHARD_DEV%/rrd_graphs', '', '', 'dev', 'mysql://root@%RC_HOSTNAME%:9040/ring_dev', '0', NULL, NULL);
+INSERT INTO `neltool_domains` (`domain_id`, `domain_name`, `domain_as_host`, `domain_as_port`, `domain_rrd_path`, `domain_las_admin_path`, `domain_las_local_path`, `domain_application`, `domain_sql_string`, `domain_hd_check`, `domain_mfs_web`, `domain_cs_sql_string`) VALUES ('90', 'dev', '127.0.0.1', '46999', '%RC_SHARD_DEV%/rrd_graphs', '', '', 'dev', 'mysql://root@127.0.0.1:9040/ring_dev', '0', NULL, NULL);
 
 -- Add the mainland shard to the NeL database
 use `nel`;

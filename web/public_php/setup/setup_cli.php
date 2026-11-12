@@ -595,6 +595,9 @@ function run_upgrade()
 	if (file_exists('role_domain')) {
 		$continue = upgrade_domain_databases($continue);
 	}
+	if (file_exists('role_service') && $NEL_SETUP_VERSION_CONFIGURED < 14 && $NEL_DOMAIN_NAME === 'dev') {
+		$continue = upgrade_shard_dev_localhost($continue);
+	}
 
 	// Rewrite config.php with updated version
 	if ($continue) {
