@@ -787,6 +787,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		exeMap["ai_service"] = "ryzom_ai_service";
 		exeMap["frontend_service"] = "ryzom_frontend_service";
 		exeMap["dynamic_scenario_service"] = "ryzom_dynamic_scenario_service";
+		exeMap["monitor_service"] = "ryzom_monitor_service";
 	}
 	const std::string &exeSuffix = DevExeSuffix.get();
 
@@ -800,7 +801,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		3: SU MFS
 		4: TICKS NS
 		5: MS IOS
-		6: GPMS EGS
+		6: GPMS EGS MOS
 		7: AI
 		8: DSS
 		9: FS SBS
@@ -817,6 +818,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		priorityMap["ryzom_ios_service"] = 5;
 		priorityMap["ryzom_entities_game_service"] = 6;
 		priorityMap["ryzom_gpm_service"] = 6;
+		priorityMap["ryzom_monitor_service"] = 6;
 		priorityMap["ryzom_ai_service"] = 7;
 		priorityMap["ryzom_dynamic_scenario_service"] = 8;
 		priorityMap["ryzom_frontend_service"] = 9;
