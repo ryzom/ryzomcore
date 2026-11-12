@@ -261,8 +261,8 @@ CMissionManager::CMissionManager()
 	// get the emote list
 	EMOTE_LIST_PARSER::initEmoteList(_Emotes);
 
-	// get the loaded primitives
-	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();
+	// get the loaded primitives (read again by the reloadMissions command)
+	const CPrimitivesParser::TPrimitivesList &primsList = CPrimitivesParser::getInstance().getMissionPrimitives();
 //	const vector<string> & primNamesVect = CPrimitivesParser::getInstance().getPrimitiveFiles();
 
 	// parse mission validation configuration file
@@ -291,6 +291,7 @@ CMissionManager::CMissionManager()
 	}
 	if (countBadMission != 0)
 		MISLOG("Bad missions total : %u", countBadMission);
+	m_NbRefusedMissions = countBadMission;
 
 	// build copy missions
 	for ( uint i = 0; i < globalData.CopyMissions.size(); i++ )
@@ -301,7 +302,7 @@ CMissionManager::CMissionManager()
 			MISLOG("copy mission alias %s references bad mission alias %s, which could not be built",
 				CPrimitivesParser::aliasToString(globalData.CopyMissions[i].first).c_str(),
 				CPrimitivesParser::aliasToString(globalData.CopyMissions[i].second).c_str());
-			_MissionTemplates.erase(globalData.CopyMissions[i].first);
+			m_NbRefusedMissions += (uint)_MissionTemplates.erase(globalData.CopyMissions[i].first);
 		}
 		else
 		{
@@ -348,6 +349,9 @@ CMissionManager::CMissionManager()
 				MISLOG("ref mission alias %s references bad mission alias %s, which could not be built",
 					CPrimitivesParser::aliasToString(refAlias).c_str(),
 					CPrimitivesParser::aliasToString(realAlias).c_str());
+
+			// the reference was built, and is refused here
+			++m_NbRefusedMissions;
 		}
 		else
 			MISLOG("ref mission alias %s was not found!!!", CPrimitivesParser::aliasToString(refAlias).c_str() );

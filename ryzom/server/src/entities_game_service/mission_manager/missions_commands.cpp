@@ -28,6 +28,7 @@
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "mission_manager/mission_manager.h"
+#include "mission_manager/mission_log.h"
 #include "primitives_parser.h"
 #include "team_manager/team.h"
 #include "team_manager/team_manager.h"
@@ -122,10 +123,33 @@ NLMISC_COMMAND(simMissionEvent,"simulate a mission event","<player> <event type>
 //-----------------------------------------------
 // reload missions
 //-----------------------------------------------
-NLMISC_COMMAND(reloadMissions,"reload the mission primitives. Picked missions are erased","[bool telling if we have tio reset aliases (default : false)]")
+NLMISC_COMMAND(reloadMissions, "read the primitive files again and rebuild the missions. Picked missions are erased, and the service is blocked meanwhile", "[<1 to read the mission, bot and group names again too, which a mission that uses a new name needs; the AI service must be restarted after it> (default: 0)]")
 {
 	if ( args.size() > 1 )
 		return true;
+
+	// Read the primitive files again, before anything is touched: the missions are built from what is read here,
+	// not from the primitives of the start of the service. This runs on the main loop of the service.
+	const TTime startTime = CTime::getLocalTime();
+	vector<string> failedFiles;
+	if (!CPrimitivesParser::getInstance().reloadMissionPrimitives(failedFiles))
+	{
+		const uint blockedMs = (uint)(CTime::getLocalTime() - startTime);
+		if (failedFiles.empty())
+		{
+			log.displayNL("missions not reloaded, nothing was changed: the used primitive maps (UsedPrimitives) have no primitive file");
+		}
+		else
+		{
+			log.displayNL("missions not reloaded, nothing was changed: %u primitive files could not be read again (the service log says why):", (uint)failedFiles.size());
+			for (uint i = 0; i < failedFiles.size(); ++i)
+				log.displayNL("  %s", failedFiles[i].c_str());
+		}
+		log.displayNL("the service was blocked for %u ms", blockedMs);
+		return true;
+	}
+	const TTime readTime = CTime::getLocalTime();
+
 	CPlayerManager::TMapPlayers::const_iterator itPlayer = PlayerManager.getPlayers().begin();
 
 	for (; itPlayer != PlayerManager.getPlayers().end(); ++itPlayer )
@@ -164,7 +188,24 @@ NLMISC_COMMAND(reloadMissions,"reload the mission primitives. Picked missions ar
 	if ( reloadAliases )
 		CAIAliasTranslator::init();
 	CMissionManager::init();
-	log.displayNL( "missions reloaded" );
+
+	// The mission manager and the alias translator keep nothing of the primitives they were built from
+	CPrimitivesParser::getInstance().releaseMissionPrimitives();
+
+	CMissionManager *missionManager = CMissionManager::getInstance();
+	const uint nbRefused = missionManager->getNbRefusedMissions();
+	log.displayNL("missions reloaded: %u missions and %u reference missions loaded, %u refused", (uint)missionManager->getMissionTemplates().size(), missionManager->getNbRefMissions(), nbRefused);
+	if (nbRefused != 0)
+	{
+		if (MissionLog.getLogFile().empty())
+			log.displayNL("the service log says why each mission was refused");
+		else
+			log.displayNL("the mission log '%s' says why each mission was refused", MissionLog.getLogFile().c_str());
+	}
+	if (!reloadAliases)
+		log.displayNL("the mission, bot and group names were not read again: a mission that uses a name added since the start of the service is refused. 'reloadMissions 1' reads them again, and the AI service must be restarted after it");
+	const TTime endTime = CTime::getLocalTime();
+	log.displayNL("the service was blocked for %u ms, %u ms of them to read the primitive files again", (uint)(endTime - startTime), (uint)(readTime - startTime));
 	return true;
 } // reloadMissions
 

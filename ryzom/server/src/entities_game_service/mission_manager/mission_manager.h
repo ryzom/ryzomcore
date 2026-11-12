@@ -224,6 +224,10 @@ public:
 	void dynChatChoice( CCharacter * user, const TDataSetRow & botRow,uint8 choice );	
 	/// const access to the template pool
 	const CHashMap< uint,CMissionTemplate* > &getMissionTemplates()	{ return _MissionTemplates;}
+	/// number of reference missions that were kept when the missions were built
+	uint getNbRefMissions() const { return (uint)_RefMissions.size(); }
+	/// number of missions that were refused when the missions were built (the mission log says why)
+	uint getNbRefusedMissions() const { return m_NbRefusedMissions; }
 
 	/// check the place constraints of a mission
 	void checkPlaceConstraints ( CMission* mission);
@@ -307,6 +311,9 @@ private:
 
 	/// map linking a referenced mission aliases to the real mission alias
 	CHashMap<uint,TAIAlias>					_RefMissions;
+
+	/// missions refused by the constructor: those that could not be built, and the copies and references of such
+	uint m_NbRefusedMissions;
 
 	/// npc groups being escorted. The key is the group alias. The data is the Alias of the mission linked to the group
 	CHashMap<uint,TAIAlias>					_EscortGroups;

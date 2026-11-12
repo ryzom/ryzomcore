@@ -56,8 +56,8 @@ CAIAliasTranslator::CAIAliasTranslator()
 		_KeepNames = false;
 	}
 	
-	// get the loaded primitives
-	const CPrimitivesParser::TPrimitivesList & primsList = CPrimitivesParser::getInstance().getPrimitives();
+	// get the loaded primitives (read again by the reloadMissions command)
+	const CPrimitivesParser::TPrimitivesList &primsList = CPrimitivesParser::getInstance().getMissionPrimitives();
 	nlinfo("loading bot names and mission names");
 	CPrimitivesParser::TPrimitivesList::const_iterator first, last;
 	for (first = primsList.begin(), last = primsList.end(); first != last; ++first)

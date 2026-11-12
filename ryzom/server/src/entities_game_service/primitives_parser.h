@@ -49,6 +49,26 @@ public:
 
 	void init();
 
+	/**
+	 * The primitives the missions, and the bot and mission names, are parsed from: those of init(), or, between
+	 * reloadMissionPrimitives() and releaseMissionPrimitives(), those that were read again. Its readers are the
+	 * constructors of CMissionManager and CAIAliasTranslator, which keep nothing of the list.
+	 */
+	inline const TPrimitivesList &getMissionPrimitives() { return m_MissionPrimitives.empty() ? _Primitives : m_MissionPrimitives; }
+
+	/**
+	 * Read the primitive files again, for the missions. The primitives of init() are left as they are: the zones,
+	 * buildings, outposts and PvP rewards were built from them, only getMissionPrimitives() gives the new ones.
+	 * The caller rebuilds what reads getMissionPrimitives(), then calls releaseMissionPrimitives().
+	 * \param failedFiles the files that could not be read again
+	 * \return false if a file could not be read again, or if the used primitive maps have no file (failedFiles
+	 * is empty then): nothing was read again, getMissionPrimitives() is unchanged
+	 */
+	bool reloadMissionPrimitives(std::vector<std::string> &failedFiles);
+
+	/// Free the primitives of reloadMissionPrimitives(): getMissionPrimitives() gives those of init() again
+	void releaseMissionPrimitives();
+
 	static bool getAlias(const NLLIGO::IPrimitive *prim, uint32 &alias);
 
 	static std::string aliasToString(uint32 alias);
@@ -68,8 +88,16 @@ private:
 	 */
 	bool loadPrimitive(const char* fileName,NLLIGO::CPrimitives & primitives);
 
+	/**
+	 * load the primitive files of the used primitive maps and add them to the list
+	 * \param failedFiles the files that could not be read are added to it
+	 */
+	void loadPrimitives(TPrimitivesList &primitives, std::vector<std::string> &failedFiles);
+
 	/// parsed primitives
 	TPrimitivesList				_Primitives;
+	/// primitives read again by reloadMissionPrimitives(), empty outside a reload
+	TPrimitivesList m_MissionPrimitives;
 	/// Parsed primitive file names
 //	std::vector<std::string>	_PrimitiveFiles;
 
