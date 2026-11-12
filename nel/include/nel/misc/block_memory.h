@@ -188,34 +188,6 @@ public:
 	}
 
 
-// ********************
-public:
-
-	// This is to be used with CSTLBlockAllocator only!!! It changes the size of an element!!
-	void		__stl_alloc_changeEltSize(uint eltSize)
-	{
-		CAutoMutex<CFastMutex> lock(_Mutex);
-
-		// must not be used with object ctor/dtor behavior.
-		nlassert(__ctor_dtor__ == false);
-		// format size.
-		eltSize= std::max((uint)eltSize, (uint)sizeof(void*));
-		// if not the same size as before
-		if(_EltSize!= eltSize)
-		{
-			// verify that rebind is made before any allocation!!
-			nlassert(_Blocks.empty());
-			// change the size.
-			_EltSize= eltSize;
-		}
-	};
-	// This is to be used with CSTLBlockAllocator only!!!
-	uint		__stl_alloc_getEltSize() const
-	{
-		return _EltSize;
-	}
-
-
 private:
 	/// size of a block.
 	uint		_BlockSize;

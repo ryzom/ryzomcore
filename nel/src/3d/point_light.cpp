@@ -36,11 +36,7 @@ namespace NL3D
 
 
 // ***************************************************************************
-//NLMISC::CBlockMemory<CTransform*, false>		CPointLight::_LightedModelListMemory(NL3D_LIGHTED_MODEL_ALLOC_BLOCKSIZE);
-
-
-// ***************************************************************************
-CPointLight::CPointLight() : _LightedModels(/*&_LightedModelListMemory*/)
+CPointLight::CPointLight() : _LightedModels()
 {
 	_Position= CVector::Null;
 	_Ambient= CRGBA::Black;
@@ -90,7 +86,7 @@ CPointLight::CPointLight() : _LightedModels(/*&_LightedModelListMemory*/)
 
 
 // ***************************************************************************
-CPointLight::CPointLight(const CPointLight &o) : _LightedModels(/*&_LightedModelListMemory*/)
+CPointLight::CPointLight(const CPointLight &o) : _LightedModels()
 {
 	// copy (no need to init)
 	operator=(o);
@@ -453,7 +449,6 @@ void			CPointLight::removeLightedModel(ItTransformList it)
 // ***************************************************************************
 void			CPointLight::purge ()
 {
-	//_LightedModelListMemory.purge();
 }
 
 // ***************************************************************************

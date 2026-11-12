@@ -97,7 +97,6 @@ FILE(GLOB NLMISC_GENERIC
 	../../include/nel/misc/singleton.h
 	speaker_listener.cpp ../../include/nel/misc/speaker_listener.h
 	../../include/nel/misc/static_map.h
-	../../include/nel/misc/stl_block_list.h
 )
 
 FILE(GLOB NLMISC_UTILITY
