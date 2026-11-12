@@ -185,9 +185,11 @@ bool		testWildCard(const std::string &strIn, const std::string &wildCard);
 // ***************************************************************************
 /** From a string with some separators, build a vector of string.
  *	eg: splitString("hello|bye|||bee", "|", list) return 3 string into list: "hello", "bye" and "bee".
+ *	An empty separator separates nothing: the list is the whole string, or empty for an empty string.
  */
 void		splitString(const std::string &str, const std::string &separator, std::vector<std::string> &retList);
 
+/// The same for a ucstring, the empty separator included.
 void		splitUCString(const ucstring &ucstr, const ucstring &separator, std::vector<ucstring> &retList);
 
 // ***************************************************************************

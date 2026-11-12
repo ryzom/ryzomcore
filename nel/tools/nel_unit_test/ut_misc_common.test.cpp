@@ -20,7 +20,9 @@
 #include <string>
 #include <vector>
 
+#include <nel/misc/algo.h>
 #include <nel/misc/common.h>
+#include <nel/misc/ucstring.h>
 
 using std::string;
 using std::vector;
@@ -192,4 +194,89 @@ TEST_F(CUTMiscCommonTest, decodeURIComponent)
 
 	EXPECT_EQ("a%A", NLMISC::decodeURIComponent("a%A"));
 	EXPECT_EQ("a%AX", NLMISC::decodeURIComponent("a%AX"));
+}
+
+TEST_F(CUTMiscCommonTest, splitStringEmptySeparator)
+{
+	vector<string> list;
+
+	// a separator splits, repeated separators give no empty string
+	NLMISC::splitString("hello|bye|||bee", "|", list);
+	ASSERT_EQ(3u, list.size());
+	EXPECT_EQ("hello", list[0]);
+	EXPECT_EQ("bye", list[1]);
+	EXPECT_EQ("bee", list[2]);
+
+	// an empty separator returns the whole string
+	NLMISC::splitString("hello|bye", "", list);
+	ASSERT_EQ(1u, list.size());
+	EXPECT_EQ("hello|bye", list[0]);
+
+	// an empty string with an empty separator returns nothing, and clears the list
+	NLMISC::splitString("", "", list);
+	EXPECT_TRUE(list.empty());
+}
+
+TEST_F(CUTMiscCommonTest, splitUCStringEmptySeparator)
+{
+	vector<ucstring> list;
+
+	// a separator splits, repeated separators give no empty string
+	NLMISC::splitUCString(ucstring("hello bye   bee"), ucstring(" "), list);
+	ASSERT_EQ(3u, list.size());
+	EXPECT_TRUE(list[0] == ucstring("hello"));
+	EXPECT_TRUE(list[1] == ucstring("bye"));
+	EXPECT_TRUE(list[2] == ucstring("bee"));
+
+	// an empty separator returns the whole string
+	NLMISC::splitUCString(ucstring("hello bye"), ucstring(), list);
+	ASSERT_EQ(1u, list.size());
+	EXPECT_TRUE(list[0] == ucstring("hello bye"));
+
+	// an empty string with an empty separator returns nothing, and clears the list
+	NLMISC::splitUCString(ucstring(), ucstring(), list);
+	EXPECT_TRUE(list.empty());
+}
+
+TEST_F(CUTMiscCommonTest, explodeEmptySeparator)
+{
+	vector<string> list;
+
+	// a separator splits, empty strings are kept unless skipEmpty is set
+	NLMISC::explode(string("a,,b"), string(","), list);
+	ASSERT_EQ(3u, list.size());
+	EXPECT_EQ("a", list[0]);
+	EXPECT_EQ("", list[1]);
+	EXPECT_EQ("b", list[2]);
+	NLMISC::explode(string("a,,b"), string(","), list, true);
+	ASSERT_EQ(2u, list.size());
+	EXPECT_EQ("a", list[0]);
+	EXPECT_EQ("b", list[1]);
+
+	// an empty separator returns the whole string
+	NLMISC::explode(string("a,,b"), string(), list);
+	ASSERT_EQ(1u, list.size());
+	EXPECT_EQ("a,,b", list[0]);
+	NLMISC::explode(string("a,,b"), string(), list, true);
+	ASSERT_EQ(1u, list.size());
+	EXPECT_EQ("a,,b", list[0]);
+
+	// an empty string with an empty separator is one empty string, or nothing with skipEmpty,
+	// as it is with a separator
+	NLMISC::explode(string(), string(","), list);
+	ASSERT_EQ(1u, list.size());
+	EXPECT_EQ("", list[0]);
+	NLMISC::explode(string(), string(), list);
+	ASSERT_EQ(1u, list.size());
+	EXPECT_EQ("", list[0]);
+	NLMISC::explode(string(), string(","), list, true);
+	EXPECT_TRUE(list.empty());
+	NLMISC::explode(string(), string(), list, true);
+	EXPECT_TRUE(list.empty());
+
+	// ucstring
+	vector<ucstring> uclist;
+	NLMISC::explode(ucstring("a,,b"), ucstring(), uclist);
+	ASSERT_EQ(1u, uclist.size());
+	EXPECT_TRUE(uclist[0] == ucstring("a,,b"));
 }

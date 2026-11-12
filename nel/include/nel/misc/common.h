@@ -555,6 +555,7 @@ inline std::string toString (const sint8 &t)
 
 /** Explode a string (or ucstring) into a vector of string with *sep* as separator. If sep can be more than 1 char, in this case,
  * we find the entire sep to separator (it s not a set of possible separator)
+ * An empty sep separates nothing: res is src as a whole.
  *
  * \param skipEmpty if true, we don't put in the res vector empty string
  */
@@ -563,6 +564,14 @@ template <class T> void explode (const T &src, const T &sep, std::vector<T> &res
 	std::string::size_type oldpos = 0, pos;
 
 	res.clear ();
+
+	// an empty separator separates nothing, and find() would never advance
+	if (sep.empty())
+	{
+		if (!skipEmpty || !src.empty())
+			res.push_back(src);
+		return;
+	}
 
 	do
 	{
