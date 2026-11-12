@@ -1,7 +1,5 @@
 /** \file zone_lighter.cpp
  * Class to light zones
- *
- * $Id$
  */
 
 /* Copyright, 2000 Nevrax Ltd.
