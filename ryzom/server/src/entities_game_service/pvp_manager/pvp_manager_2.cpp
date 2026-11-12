@@ -1498,6 +1498,10 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 	sendMessageViaMirror( NLNET::TServiceId(target->getId().getDynamicId()), msgout );
 
+	// tell the invitor that the invitation went out
+	params[0].setEIdAIAlias(target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()));
+	CCharacter::sendDynamicSystemMessage(userId, "DUEL_YOU_INVITE", params);
+
 } // askForDuel //
 
 

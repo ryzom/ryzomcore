@@ -912,6 +912,10 @@ void CPVPManager::askForPVPChallenge( const NLMISC::CEntityId & userId )
 	bms.serial( txt );
 	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 	sendMessageViaMirror( NLNET::TServiceId(msgTargetEId.getDynamicId()), msgout );
+
+	// tell the invitor that the invitation went out, naming the player who answers it (the leader of the target's team)
+	params[0].setEIdAIAlias(msgTargetEId, CAIAliasTranslator::getInstance()->getAIAlias(msgTargetEId));
+	CCharacter::sendDynamicSystemMessage(userId, "CHALLENGE_YOU_INVITE", params);
 }
 
 //----------------------------------------------------------------------------
