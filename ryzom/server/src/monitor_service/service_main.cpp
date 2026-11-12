@@ -315,8 +315,15 @@ void clientWantsToConnect ( TSockId from, void *arg )
 
 // ***************************************************************************
 
+// Clients removed by dropMalformedClient, until their disconnection event comes
+static std::set<TSockId> s_DroppedClients;
+
 void clientWantsToDisconnect ( TSockId from, void *arg )
 {
+	// a client that was dropped for a malformed message is removed already
+	if (s_DroppedClients.erase(from) != 0)
+		return;
+
 	// Called when a client wants to disconnect
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -332,14 +339,47 @@ void clientWantsToDisconnect ( TSockId from, void *arg )
 
 // ***************************************************************************
 
+// A client sent a message that cannot be read: it is refused and the client is disconnected
+static void dropMalformedClient(TSockId from, const char *messageName, const EStream &e)
+{
+	nlwarning("Client %s sent a malformed %s message (%s), the client is disconnected",
+	    from->asString().c_str(), messageName, e.what());
+
+	// Forget the client now: nothing is sent to it anymore, and its messages that are still in the
+	// receive queue find no client (BadLoginClients refers to it by CRefPtr, which becomes NULL)
+	for (uint i = 0; i < Clients.size(); ++i)
+	{
+		if (Clients[i]->getSock() == from)
+		{
+			nlinfo("Remove client %u", i);
+			Clients.erase(Clients.begin() + i);
+			s_DroppedClients.insert(from);
+			break;
+		}
+	}
+
+	// the disconnection event comes with a later update and calls clientWantsToDisconnect
+	Server->disconnect(from);
+}
+
+// ***************************************************************************
+
 void clientSetWindow (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 {
 	// Called when a client sent a WINDOW message
 	float xmin, ymin, xmax, ymax;
-	msgin.serial(xmin);
-	msgin.serial(ymin);
-	msgin.serial(xmax);
-	msgin.serial(ymax);
+	try
+	{
+		msgin.serial(xmin);
+		msgin.serial(ymin);
+		msgin.serial(xmax);
+		msgin.serial(ymax);
+	}
+	catch (const EStream &e)
+	{
+		dropMalformedClient(from, "WINDOW", e);
+		return;
+	}
 
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -359,7 +399,15 @@ void clientSetBandwidth (CMessage &msgin, TSockId from, CCallbackNetBase &netbas
 {
 	// Called when a client sent a WINDOW message
 	uint32	bandw;
-	msgin.serial(bandw);
+	try
+	{
+		msgin.serial(bandw);
+	}
+	catch (const EStream &e)
+	{
+		dropMalformedClient(from, "BANDW", e);
+		return;
+	}
 
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
@@ -380,9 +428,17 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 {
 	std::string login;
 	std::string password;
-	sint version = msgin.serialVersion(0);
-	msgin.serial(login);
-	msgin.serial(password);
+	try
+	{
+		msgin.serialVersion(0);
+		msgin.serial(login);
+		msgin.serial(password);
+	}
+	catch (const EStream &e)
+	{
+		dropMalformedClient(from, "AUTHENT", e);
+		return;
+	}
 
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
