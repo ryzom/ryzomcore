@@ -97,7 +97,7 @@ CVariable<uint32> TimeBeforeStopTestInEditionSessionWithNoPlayer("DSS", "TimeBef
 // 15 minutes
 CVariable<uint32> TimeBeforeAutoHibernateEditionSessionWithNoPlayer ("DSS", "TimeBeforeAutoHibernateEditionSessionWithNoPlayer", "Delay in secondes before an empty edition is hibernating", 15*60, 0, true);
 // 7 days
-CVariable<uint32> TimeBeforeCloseHibernatingEditionSession("DSS", "TimeBeforeCloseHibernatingEditionSession", "Delay in secondes before a empty hibernating edition is remove", 7*24*60, 0, true);
+CVariable<uint32> TimeBeforeCloseHibernatingEditionSession("DSS", "TimeBeforeCloseHibernatingEditionSession", "Delay in secondes before a empty hibernating edition is remove", 7*24*60*60, 0, true);
 
 // 15 minutes
 CVariable<uint32> TimeBeforeAutoCloseAnimationSessionWithNoPlayer("DSS", "TimeBeforeAutoCloseAnimationSessionWithNoPlayer", "Delay in secondes before a empty animation session is closed", 15*60, 0, true);
