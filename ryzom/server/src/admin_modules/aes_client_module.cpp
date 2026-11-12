@@ -255,6 +255,7 @@ namespace ADMIN
 					if (gvi.LastHighRezTimeStamp + gvi.MeanSamplePeriod < timer)
 					{
 						// it's time to get a sample
+						gvi.LastHighRezTimeStamp = timer;
 						// create a sample
 						gvi.Samples.push_back(TGraphSample());
 						TGraphSample &gs = gvi.Samples.back();
