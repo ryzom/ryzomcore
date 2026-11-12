@@ -104,7 +104,7 @@ void IBuffer::bufferFormatToSampleFormat(TBufferFormat bufferFormat, uint8 chann
 				break;
 			}
 			break;
-		default:
+		case 2:
 			switch (bitsPerSample)
 			{
 			case 8:
@@ -114,6 +114,11 @@ void IBuffer::bufferFormatToSampleFormat(TBufferFormat bufferFormat, uint8 chann
 				sampleFormat = Stereo16;
 				break;
 			}
+			break;
+		default:
+			// the sample formats are mono and stereo: any other channel count was stereo, and its data played as such
+			nlwarning("PCM audio of %u channels has no sample format, only mono and stereo are supported", (uint)channels);
+			sampleFormat = SampleFormatUnknown;
 			break;
 		}
 		break;

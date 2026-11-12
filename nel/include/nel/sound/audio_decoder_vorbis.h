@@ -72,8 +72,10 @@ protected:
 	sint32 _StreamSize;
 
 private:
-	/// False when the stream could not be opened as Ogg Vorbis
+	/// False when the stream could not be opened as Ogg Vorbis, or has more channels than can be mixed down
 	bool m_IsSupported;
+	/// The channels of the stream; getNextBytes mixes more than 2 down to stereo
+	uint m_Channels;
 
 public:
 	CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop);
@@ -82,7 +84,8 @@ public:
 	inline sint32 getStreamSize() { return _StreamSize; }
 	inline sint32 getStreamOffset() { return _StreamOffset; }
 
-	/// False when the stream could not be opened as Ogg Vorbis: it has ended, and nothing can be read from it
+	/// False when the stream could not be opened as Ogg Vorbis, or has more than 8 channels: it has ended, and nothing
+	/// can be read from it
 	bool isFormatSupported() const { return m_IsSupported; }
 
 	/// Get information on a music file (only artist and title at the moment).

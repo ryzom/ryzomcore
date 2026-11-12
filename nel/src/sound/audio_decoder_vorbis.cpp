@@ -104,8 +104,93 @@ static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
   (long (*)(void *))							vorbisTellFunc
 };
 
+/// The share of a channel in the left and in the right channel of a stereo mix
+struct CVorbisMixDownGain
+{
+	float Left;
+	float Right;
+};
+
+/// -3 dB, the share of the front center and of a side or rear channel
+#define NL_VORBIS_MIX_REDUCED 0.70710678f
+/// -6 dB, the share of the rear center on each side
+#define NL_VORBIS_MIX_REAR_CENTER 0.5f
+
+/** The channels of a stream of 3 to 8 channels, in the order the Vorbis I specification gives them, and their share in
+ *  the left and in the right channel of a stereo mix. The shares are those of ITU-R BS.775 for the layouts it has, and
+ *  of the resampler of ffmpeg with its default levels (center and surround at -3 dB, no low frequency channel) for all
+ *  of them:
+ *   - front left and front right: 1 on their own side
+ *   - front center: 0.7071 on both sides
+ *   - side or rear left, side or rear right: 0.7071 on their own side
+ *   - rear center (7 channels): a surround at 0.7071, split over both sides at another 0.7071, so 0.5 on both sides
+ *   - low frequency: left out
+ *  mixDownToStereo scales the shares of a side to a sum of 1.
+ */
+// clang-format off
+static const CVorbisMixDownGain s_MixDownGains[6][8] = {
+	// 3: left, center, right
+	{ { 1.f, 0.f }, { NL_VORBIS_MIX_REDUCED, NL_VORBIS_MIX_REDUCED }, { 0.f, 1.f } },
+	// 4: front left, front right, rear left, rear right
+	{ { 1.f, 0.f }, { 0.f, 1.f }, { NL_VORBIS_MIX_REDUCED, 0.f }, { 0.f, NL_VORBIS_MIX_REDUCED } },
+	// 5: front left, center, front right, rear left, rear right
+	{ { 1.f, 0.f }, { NL_VORBIS_MIX_REDUCED, NL_VORBIS_MIX_REDUCED }, { 0.f, 1.f },
+	  { NL_VORBIS_MIX_REDUCED, 0.f }, { 0.f, NL_VORBIS_MIX_REDUCED } },
+	// 6: front left, center, front right, rear left, rear right, low frequency
+	{ { 1.f, 0.f }, { NL_VORBIS_MIX_REDUCED, NL_VORBIS_MIX_REDUCED }, { 0.f, 1.f },
+	  { NL_VORBIS_MIX_REDUCED, 0.f }, { 0.f, NL_VORBIS_MIX_REDUCED }, { 0.f, 0.f } },
+	// 7: front left, center, front right, side left, side right, rear center, low frequency
+	{ { 1.f, 0.f }, { NL_VORBIS_MIX_REDUCED, NL_VORBIS_MIX_REDUCED }, { 0.f, 1.f },
+	  { NL_VORBIS_MIX_REDUCED, 0.f }, { 0.f, NL_VORBIS_MIX_REDUCED },
+	  { NL_VORBIS_MIX_REAR_CENTER, NL_VORBIS_MIX_REAR_CENTER }, { 0.f, 0.f } },
+	// 8: front left, center, front right, side left, side right, rear left, rear right, low frequency
+	{ { 1.f, 0.f }, { NL_VORBIS_MIX_REDUCED, NL_VORBIS_MIX_REDUCED }, { 0.f, 1.f },
+	  { NL_VORBIS_MIX_REDUCED, 0.f }, { 0.f, NL_VORBIS_MIX_REDUCED },
+	  { NL_VORBIS_MIX_REDUCED, 0.f }, { 0.f, NL_VORBIS_MIX_REDUCED }, { 0.f, 0.f } },
+};
+// clang-format on
+
+/// The most channels a stream can have: the specification gives the channels of a larger stream no meaning
+static const uint s_MaxChannels = 8;
+
+/// One sample of the mix as 16 bits. The range is checked on the float: a cast of a value that does not fit the integer
+/// is undefined.
+static sint16 mixToSint16(float sample)
+{
+	if (!(sample > -32768.f))
+		return -32768; // and for a NaN
+	if (sample >= 32767.f)
+		return 32767;
+	return (sint16)floorf(sample + 0.5f);
+}
+
+/** Mixes samples of 3 to 8 channels down to stereo of 16 bits. The shares of the channels in a side are scaled to a
+ *  sum of 1, the same on both sides: channels at full scale do not clip, and the mix is quieter than its loudest
+ *  channel was.
+ */
+static void mixDownToStereo(float **pcm, uint channels, uint samples, sint16 *stereo)
+{
+	const CVorbisMixDownGain *gains = s_MixDownGains[channels - 3];
+	float sum = 0.f;
+	for (uint c = 0; c < channels; ++c)
+		sum += gains[c].Left;
+	const float scale = 32768.f / sum;
+	for (uint i = 0; i < samples; ++i)
+	{
+		float left = 0.f;
+		float right = 0.f;
+		for (uint c = 0; c < channels; ++c)
+		{
+			left += pcm[c][i] * gains[c].Left;
+			right += pcm[c][i] * gains[c].Right;
+		}
+		stereo[i * 2] = mixToSint16(left * scale);
+		stereo[i * 2 + 1] = mixToSint16(right * scale);
+	}
+}
+
 CAudioDecoderVorbis::CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop) 
-: _Stream(stream), _Loop(loop), _IsMusicEnded(false), _StreamSize(0), m_IsSupported(false)
+: _Stream(stream), _Loop(loop), _IsMusicEnded(false), _StreamSize(0), m_IsSupported(false), m_Channels(0)
 {
 	_StreamOffset = stream->getPos();
 	stream->seek(0, NLMISC::IStream::end);
@@ -117,6 +202,16 @@ CAudioDecoderVorbis::CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop)
 	if (res != 0)
 	{
 		nlwarning("VORBIS: Cannot open '%s' as Ogg Vorbis (ov_open_callbacks returned %d)", stream->getStreamName().c_str(), res);
+		_IsMusicEnded = true;
+		return;
+	}
+
+	// more than 2 channels are mixed down to stereo, which takes a known channel layout
+	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
+	m_Channels = vi ? (uint)vi->channels : 0;
+	if (m_Channels > s_MaxChannels)
+	{
+		nlwarning("VORBIS: Cannot play '%s', it has %u channels and no more than %u are supported", stream->getStreamName().c_str(), m_Channels, s_MaxChannels);
 		_IsMusicEnded = true;
 		return;
 	}
@@ -173,12 +268,45 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 #endif
 	do
 	{
-		// signed 16-bit or unsigned 8-bit little-endian samples
-		sint br = ov_read(&_OggVorbisFile, (char *)&buffer[bytes_read], maximum - bytes_read, 
-			endianness, // Specifies big or little endian byte packing. 0 for little endian, 1 for b ig endian. Typical value is 0.
-			getBitsPerSample() == 8 ? 1 : 2, 
-			getBitsPerSample() == 8 ? 0 : 1, // Signed or unsigned data. 0 for unsigned, 1 for signed. Typically 1.
-			&current_section);
+		sint br;
+		if (m_Channels > 2)
+		{
+			// more than 2 channels are read as floats and mixed down to stereo of 16 bits, 4 bytes per sample
+			float **pcm = nullptr;
+			if (maximum - bytes_read < 4)
+			{
+				// No room for a sample. ov_read below fails with OV_EINVAL for that, which ends the stream: the same
+				// here, so that both paths return the minimum at least or end the stream (ov_read_float would return
+				// 0 samples, which reads as the end of the file).
+				br = OV_EINVAL;
+			}
+			else
+			{
+				br = (sint)ov_read_float(&_OggVorbisFile, &pcm, (int)((maximum - bytes_read) / 4), &current_section);
+			}
+			if (br > 0)
+			{
+				// the next stream of a chained file can have another channel count than the one the output was set up for
+				vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
+				if (!vi || vi->channels != (int)m_Channels)
+				{
+					nlwarning("VORBIS: '%s' goes on with %d channels after %u, which is not supported, the stream ends", _Stream->getStreamName().c_str(), vi ? vi->channels : 0, m_Channels);
+					_IsMusicEnded = true;
+					break;
+				}
+				mixDownToStereo(pcm, m_Channels, (uint)br, (sint16 *)&buffer[bytes_read]);
+				br *= 4;
+			}
+		}
+		else
+		{
+			// signed 16-bit or unsigned 8-bit little-endian samples
+			br = ov_read(&_OggVorbisFile, (char *)&buffer[bytes_read], maximum - bytes_read, 
+				endianness, // Specifies big or little endian byte packing. 0 for little endian, 1 for b ig endian. Typical value is 0.
+				getBitsPerSample() == 8 ? 1 : 2, 
+				getBitsPerSample() == 8 ? 0 : 1, // Signed or unsigned data. 0 for unsigned, 1 for signed. Typically 1.
+				&current_section);
+		}
 		// nlinfo(NLSOUND_XAUDIO2_PREFIX "current_section: %i", current_section);
 		if (br > 0)
 		{
@@ -247,7 +375,8 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 uint8 CAudioDecoderVorbis::getChannels()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
-	if (vi) return (uint8)vi->channels;
+	// getNextBytes mixes more than 2 channels down to stereo
+	if (vi) return (uint8)std::min(vi->channels, 2);
 	nlwarning("ov_info returned NULL");
 	return 0;
 }

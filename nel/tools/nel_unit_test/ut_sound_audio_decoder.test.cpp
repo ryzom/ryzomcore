@@ -27,6 +27,8 @@
 
 #include <nel/sound/audio_decoder.h>
 #include <nel/sound/audio_decoder_vorbis.h>
+#include <nel/sound/driver/buffer.h>
+#include <nel/sound/driver/sound_driver.h>
 
 #ifdef NL_UT_HAVE_VORBISENC
 #include <vorbis/vorbisenc.h>
@@ -35,6 +37,7 @@
 using NLMISC::CMemStream;
 using NLSOUND::CAudioDecoderVorbis;
 using NLSOUND::IAudioDecoder;
+using NLSOUND::IBuffer;
 
 // The audio decoders read from a stream and need no audio device. The streams are built in memory: bytes that are no
 // Ogg Vorbis stream by hand, Ogg Vorbis streams with the encoder library where it is installed.
@@ -470,4 +473,141 @@ TEST_F(CUTSoundAudioDecoder, vorbisStreamDecodesPastADamagedPage)
 	}
 }
 
+TEST_F(CUTSoundAudioDecoder, vorbisOfMoreThanTwoChannelsIsMixedDownToStereo)
+{
+	// Each channel carries a tone of its own, and the share of each tone in the left and in the right channel of the
+	// output is measured. The decoder gave all the channels as they are, which the sound drivers played as stereo.
+	// The channels of each count, in the order of the Vorbis specification: L and R are front left and right, C the
+	// front center, l and r a side or rear left and right, c the rear center, - the low frequency channel.
+	const char *layouts[] = { "LCR", "LRlr", "LCRlr", "LCRlr-", "LCRlrc-", "LCRlrlr-" };
+	const double pi = 3.14159265358979323846;
+	const double reduced = sqrt(0.5);
+	const uint frames = ToneWindow * 4;
+	for (uint channels = 3; channels <= 8; ++channels)
+	{
+		SCOPED_TRACE(channels);
+		const char *layout = layouts[channels - 3];
+		ASSERT_EQ((size_t)channels, strlen(layout));
+		const TBytes ogg = encodeVorbis(channels, frames, tone);
+		ASSERT_FALSE(ogg.empty());
+		CMemStream stream(true);
+		fillStream(stream, ogg);
+		CAudioDecoderVorbis decoder(&stream, false);
+		ASSERT_TRUE(decoder.isFormatSupported());
+		EXPECT_EQ(2, decoder.getChannels());
+		EXPECT_EQ(16, decoder.getBitsPerSample());
+		EXPECT_EQ(SampleRate, decoder.getSamplesPerSec());
+		const std::vector<sint16> samples = decodeAll(decoder);
+		ASSERT_EQ((size_t)frames * 2, samples.size());
+
+		// The shares: a front channel in full on its side, the front center and a side or rear channel at -3 dB, the
+		// rear center at -6 dB on both sides. They are scaled to add up to 1 in each output channel, so that the mix
+		// cannot clip.
+		double gains[8][2];
+		double sum = 0.0;
+		for (uint channel = 0; channel < channels; ++channel)
+		{
+			const char role = layout[channel];
+			const double both = role == 'C' ? reduced : (role == 'c' ? 0.5 : 0.0);
+			gains[channel][0] = role == 'L' ? 1.0 : (role == 'l' ? reduced : both);
+			gains[channel][1] = role == 'R' ? 1.0 : (role == 'r' ? reduced : both);
+			sum += gains[channel][0];
+		}
+
+		for (uint channel = 0; channel < channels; ++channel)
+		{
+			// the amplitude of the tone of this channel in the second window of the output, in phase with the input
+			double measured[2] = { 0.0, 0.0 };
+			for (uint i = 0; i < ToneWindow; ++i)
+			{
+				const double reference = sin(2.0 * pi * (double)toneBin(channel) * (double)i / (double)ToneWindow);
+				for (uint side = 0; side < 2; ++side)
+					measured[side] += reference * (double)samples[(ToneWindow + i) * 2 + side] / 32768.0;
+			}
+			for (uint side = 0; side < 2; ++side)
+			{
+				EXPECT_NEAR(0.5 * gains[channel][side] / sum, measured[side] * 2.0 / (double)ToneWindow, 0.01)
+				    << "channel " << channel << " in output channel " << side;
+			}
+		}
+	}
+}
+
+TEST_F(CUTSoundAudioDecoder, vorbisOfMoreThanEightChannelsIsRefused)
+{
+	// the Vorbis specification gives no meaning to the channels of such a stream
+	const TBytes ogg = encodeVorbis(9, ToneWindow, tone);
+	ASSERT_FALSE(ogg.empty());
+	CMemStream stream(true);
+	fillStream(stream, ogg);
+	CAudioDecoderVorbis decoder(&stream, false);
+	EXPECT_FALSE(decoder.isFormatSupported());
+	EXPECT_TRUE(decoder.isMusicEnded());
+	std::vector<uint8> buffer(4096);
+	EXPECT_EQ(0u, decoder.getNextBytes(&buffer[0], 1024, 4096));
+}
+
+TEST_F(CUTSoundAudioDecoder, vorbisMixDownReadsTheMinimumOrEnds)
+{
+	// A read gives the minimum at least, or the stream has ended: with a stream that is mixed down it gave less
+	// without an end when the room was no multiple of a sample of the output. The stereo stream is read by the
+	// library, and the stream that is mixed down must do the same.
+	const uint frames = SampleRate / 10;
+	for (uint channels = 2; channels <= 3; ++channels)
+	{
+		SCOPED_TRACE(channels);
+		const TBytes ogg = encodeVorbis(channels, frames, tone);
+		ASSERT_FALSE(ogg.empty());
+		std::vector<uint8> buffer(4096);
+		// room for a sample and a half, for less than a sample, and for nothing: what fits, then the stream ends,
+		// as no sample fits what is left
+		const uint32 requests[][3] = { { 6, 6, 4 }, { 2, 3, 0 }, { 0, 0, 0 } };
+		for (uint i = 0; i < 3; ++i)
+		{
+			SCOPED_TRACE(i);
+			CMemStream stream(true);
+			fillStream(stream, ogg);
+			CAudioDecoderVorbis decoder(&stream, false);
+			ASSERT_TRUE(decoder.isFormatSupported());
+			EXPECT_EQ(requests[i][2], decoder.getNextBytes(&buffer[0], requests[i][0], requests[i][1]));
+			EXPECT_TRUE(decoder.isMusicEnded());
+		}
+		// with room for whole samples, every read gives the minimum until the stream ends
+		CMemStream stream(true);
+		fillStream(stream, ogg);
+		CAudioDecoderVorbis decoder(&stream, false);
+		ASSERT_TRUE(decoder.isFormatSupported());
+		uint32 total = 0;
+		for (uint calls = 0; calls < 10000 && !decoder.isMusicEnded(); ++calls)
+		{
+			const uint32 bytes = decoder.getNextBytes(&buffer[0], 1000, 4096);
+			EXPECT_TRUE(bytes >= 1000 || decoder.isMusicEnded()) << bytes << " bytes in call " << calls;
+			total += bytes;
+		}
+		EXPECT_TRUE(decoder.isMusicEnded());
+		EXPECT_EQ(frames * 4, total);
+	}
+}
+
 #endif // NL_UT_HAVE_VORBISENC
+
+TEST_F(CUTSoundAudioDecoder, bufferFormatOfMoreThanTwoChannelsIsUnknown)
+{
+	// the sample format of the drivers that play mono and stereo only: any other channel count was stereo
+	NLSOUND::TSampleFormat format = NLSOUND::Mono8;
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 6, 16, format);
+	EXPECT_EQ(NLSOUND::SampleFormatUnknown, format);
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 3, 8, format);
+	EXPECT_EQ(NLSOUND::SampleFormatUnknown, format);
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 0, 16, format);
+	EXPECT_EQ(NLSOUND::SampleFormatUnknown, format);
+
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 2, 16, format);
+	EXPECT_EQ(NLSOUND::Stereo16, format);
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 2, 8, format);
+	EXPECT_EQ(NLSOUND::Stereo8, format);
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 1, 16, format);
+	EXPECT_EQ(NLSOUND::Mono16, format);
+	IBuffer::bufferFormatToSampleFormat(IBuffer::FormatPcm, 1, 8, format);
+	EXPECT_EQ(NLSOUND::Mono8, format);
+}

@@ -293,6 +293,15 @@ bool CStreamFileSource::prepareDecoder()
 			nlwarning("Failed to create IAudioDecoder, likely invalid format");
 			return false;
 		}
+		// the stream buffers of the sound drivers are mono or stereo, as in CAsyncFileManagerSound::CLoadWavFile::run
+		uint8 channels = m_AudioDecoder->getChannels();
+		if (channels != 1 && channels != 2)
+		{
+			nlwarning("Cannot play the music file '%s', its decoder gives %u channels and only mono and stereo are supported", m_LookupPath.c_str(), (uint)channels);
+			delete m_AudioDecoder;
+			m_AudioDecoder = nullptr;
+			return false;
+		}
 		this->setFormat(m_AudioDecoder->getChannels(), m_AudioDecoder->getBitsPerSample(), (uint32)m_AudioDecoder->getSamplesPerSec());
 	}
 	uint samples, bytes;
