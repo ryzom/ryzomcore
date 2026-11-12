@@ -8645,7 +8645,9 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	}
 	else
 	{
-		setWelcomeMissionDesc(mission, bot);
+		// a start point may have no welcome mission; an unknown mission name is reported when the start points are read
+		if (mission != CAIAliasTranslator::Invalid)
+			setWelcomeMissionDesc(mission, bot);
 		COfflineEntityState state;
 		zone->getRandomPoint( state.X,state.Y,state.Z,state.Heading );
 		setState( state );

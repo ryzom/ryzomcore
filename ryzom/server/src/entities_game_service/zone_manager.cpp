@@ -1284,10 +1284,15 @@ bool CZoneManager::parseStartPoints( const NLLIGO::IPrimitive* prim )
 				{
 					CStartPoint point;
 					child->getPropertyByName( "mission", value );
-					point.Mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( value );
-					if ( point.Mission == CAIAliasTranslator::Invalid )
+					// an empty name is a start point without a welcome mission
+					point.Mission = CAIAliasTranslator::Invalid;
+					if (!value.empty())
 					{
-						nlwarning("<parseStartPoints> invalid mission %s",value.c_str() );
+						point.Mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName(value);
+						if (point.Mission == CAIAliasTranslator::Invalid)
+						{
+							nlwarning("<parseStartPoints> invalid mission %s", value.c_str());
+						}
 					}
 					child->getPropertyByName( "welcomer", value );
 					point.Welcomer = CAIAliasTranslator::Invalid;
