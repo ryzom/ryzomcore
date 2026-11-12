@@ -512,6 +512,13 @@ public:
 	std::vector<TDataSetRow>	Entities;
 	std::string		ActionName;
 	std::string		Url;
+	/// true to remove the web page action of the bots, ActionName and Url are not used then
+	bool Clear;
+
+	CCreatureSetUrlMsg()
+	    : Clear(false)
+	{
+	}
 	
 	virtual void description () NL_OVERRIDE
 	{
@@ -519,6 +526,7 @@ public:
 		propertyCont ("Entities", PropDataSetRow, Entities);
 		property ("ActionName", PropString, std::string(), ActionName);
 		property ("Url", PropString, std::string(), Url);
+		property("Clear", PropBool, false, Clear);
 	}
 	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };

@@ -1629,6 +1629,8 @@ Arguments: s(actionName),s(url) ->
 @param[in] actionName of action when player mouse over
 @param[in] url of action when player mouse over
 
+The action is removed again with clearUrl.
+
 @code
 ()setUrl("Click on Me", "http://www.domain.com/script.php");
 @endcode
@@ -1652,6 +1654,38 @@ void setUrl_ss_(CStateInstance* entity, CScriptStack& stack)
 	
 	msg.ActionName = actionName;
 	msg.Url = url;
+	msg.send(egsString);
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection clearUrl__
+Removes the right-click web page action from every spawned bot of the group, whether it was
+set with setUrl or comes from the description of the bot. A bot that respawns has the web
+page of its description again, if it has one.
+
+Arguments:  ->
+
+@code
+()clearUrl();
+@endcode
+
+*/
+// CGroup
+void clearUrl__(CStateInstance *entity, CScriptStack &stack)
+{
+	CCreatureSetUrlMsg msg;
+	FOREACH(botIt, CCont<CBot>, entity->getGroup()->bots())
+	{
+		CSpawnBot *pbot = botIt->getSpawnObj();
+		if (pbot != NULL)
+		{
+			msg.Entities.push_back(pbot->dataSetRow());
+		}
+	}
+
+	msg.Clear = true;
 	msg.send(egsString);
 }
 
@@ -4821,6 +4855,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, setConditionSuccess_f_);
 	REGISTER_NATIVE_FUNC(functions, facing_f_);
 	REGISTER_NATIVE_FUNC(functions, setUrl_ss_);
+	REGISTER_NATIVE_FUNC(functions, clearUrl__);
 
 	// Boss functions (custom text)
 	REGISTER_NATIVE_FUNC(functions, phraseBegin__);

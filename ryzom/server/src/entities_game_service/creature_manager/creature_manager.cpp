@@ -259,6 +259,14 @@ void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 {
 	H_AUTO(CCreatureSetUrlImp);
 
+	// The AI script function clearUrl removes the web page action of the bots
+	bool clear = Clear;
+#ifdef RYZOM_FORGE
+	// "*" as the url removes it as well
+	if (Url == "*")
+		clear = true;
+#endif
+
 	// for each creature set url
 	for ( uint i = 0; i < Entities.size(); ++i )
 	{
@@ -266,26 +274,21 @@ void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 		if ( c )
 		{
 			uint32 program = c->getBotChatProgram();
-			if(!(program & (1<<BOTCHATTYPE::WebPageFlag)))
-			{
-				program |= 1 << BOTCHATTYPE::WebPageFlag;
-				c->setBotChatProgram(program);
-			}
-			
 			const string &wp = c->getWebPage();
-			if(Url == "*") {
+			const string &wpn = c->getWebPageName();
+			if (clear)
+			{
 				(string &)wp = "";
+				(string &)wpn = "";
 				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
-				c->setBotChatProgram(program);
-				return;
 			}
 			else
+			{
 				(string &)wp = Url;
-
-			const string &wpn = c->getWebPageName();
-			(string &)wpn = ActionName;
-
-			return;
+				(string &)wpn = ActionName;
+				program |= 1 << BOTCHATTYPE::WebPageFlag;
+			}
+			c->setBotChatProgram(program);
 		}
 	}
 }
