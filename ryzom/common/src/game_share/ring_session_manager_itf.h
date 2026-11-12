@@ -2478,6 +2478,23 @@ namespace RSMGR
 			_CallbackServer->init(port);
 		}
 
+		/// Open the interface socket on the specified address, whatever the BindAddress of the service is (a port for clients)
+		void openItf(const NLNET::CInetAddress &addr)
+		{
+			NLNET::TCallbackItem *arrayPtr;
+			uint32 arraySize;
+
+
+
+			getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+			_CallbackServer->setConnectionCallback (_cbConnection, this);
+			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
+
+			_CallbackServer->init(addr);
+		}
+
 		/** Must be called evenly, update the network subclass to receive message
 		 *	and dispatch method invokation.
 		 */
@@ -5403,6 +5420,27 @@ namespace RSMGR
 			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
 
 			_CallbackServer->init(port);
+		}
+
+		/// Open the interface socket on the specified address, whatever the BindAddress of the service is (a port for clients)
+		void openItf(const NLNET::CInetAddress &addr)
+		{
+			NLNET::TCallbackItem *arrayPtr;
+			uint32 arraySize;
+
+
+			// add callback array of the base interface class
+			CRingSessionManagerWebItf::getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+
+			getCallbakArray(arrayPtr, arraySize);
+			_CallbackServer->addCallbackArray(arrayPtr, arraySize);
+
+			_CallbackServer->setConnectionCallback (_cbConnection, this);
+			_CallbackServer->setDisconnectionCallback (_cbDisconnection, this);
+
+			_CallbackServer->init(addr);
 		}
 
 		/** Must be called evenly, update the network subclass to receive message

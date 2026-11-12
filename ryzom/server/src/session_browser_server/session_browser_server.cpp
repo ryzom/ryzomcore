@@ -129,8 +129,11 @@ public:
 		NLMISC::fromString(lp->ParamValue, port);
 		BOMB_IF(port == 0, "Invalid listen port '"<<lp->ParamValue<<"'", return false);
 
-		// open the server
-		openItf(port);
+		// open the server on all network interfaces: the clients connect to this port (the port of their frontend plus
+		// SBSPortOffset), the BindAddress setting of the service only applies to the service ports
+		CInetAddress anyAddress; // the dual stack any address
+		anyAddress.setPort(port);
+		openItf(anyAddress);
 
 		// init ring db
 		const TParsedCommandLine *initRingDb = initInfo.getParam("ring_db");
