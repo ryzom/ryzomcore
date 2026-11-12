@@ -333,6 +333,22 @@ int main(int argc, char **argv)
 		    CPath::getCurrentPath().c_str(), Args.getStartupPath().c_str(), profileDirectoryReason);
 	}
 
+	// The client keeps client.cfg, its logs and its saves in the current directory, which the rules above chose.
+	// It has to be able to write there: stop now and say what to do, and not later on the first file that fails.
+	if (!CFile::isDirectoryWritable("."))
+	{
+		if (profileDirectoryReason)
+		{
+			nlerror("The client can't write to '%s', the directory where it keeps its files (client.cfg, logs, saves): make that directory writable",
+			    CPath::getCurrentPath().c_str());
+		}
+		else
+		{
+			nlerror("The client can't write to '%s', the directory it is started from. It keeps its files (client.cfg, logs, saves) there because that directory holds client_default.cfg: make that directory writable, or start the client with the option --profile to keep them in the per-user directory",
+			    CPath::getCurrentPath().c_str());
+		}
+	}
+
 #ifdef RZ_USE_STEAM
 	CSteamClient steamClient;
 
