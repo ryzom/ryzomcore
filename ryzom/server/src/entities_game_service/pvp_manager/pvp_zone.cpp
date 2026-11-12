@@ -416,8 +416,10 @@ PVP_RELATION::TPVPRelation CPVPFreeZone::getPVPRelation( CCharacter * user, CEnt
 			return PVP_RELATION::Ally;
 		}
 
-		// If both not in safe zone => Ennemy
-		if (!targetSafe && !actorSafe)
+		// If both not in safe zone => Ennemy. The actor has to be a user of the zone too (inside it, or in its leave
+		// buffer): the relation is also asked for an actor who is not (CPVPManager2::getPVPRelation asks the session
+		// of the target), whom the target could not attack.
+		if (!targetSafe && !actorSafe && _Users.find(user->getEntityRowId()) != _Users.end())
 			return PVP_RELATION::Ennemy;
 	}
 
@@ -1197,8 +1199,10 @@ PVP_RELATION::TPVPRelation CPVPGuildZone::getPVPRelation( CCharacter * user, CEn
 			return PVP_RELATION::Ally;
 		}
 
-		// If both not in safe zone => Ennemy
-		if (!targetSafe && !actorSafe)
+		// If both not in safe zone => Ennemy. The actor has to be a user of the zone too (inside it, or in its leave
+		// buffer): the relation is also asked for an actor who is not (CPVPManager2::getPVPRelation asks the session
+		// of the target), whom the target could not attack.
+		if (!targetSafe && !actorSafe && _Users.find(user->getEntityRowId()) != _Users.end())
 			return PVP_RELATION::Ennemy;
 	}
 
