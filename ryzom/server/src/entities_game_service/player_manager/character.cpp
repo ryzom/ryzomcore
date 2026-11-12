@@ -18073,8 +18073,9 @@ void CCharacter::checkScoresValues( SCORES::TScores score, CHARACTERISTICS::TCha
 	sint32 base = (_PhysCharacs._PhysicalCharacteristics[ charac ].Base + PhysicalCharacteristicsBaseValue) * PhysicalCharacteristicsFactor + _ScorePermanentModifiers[ score ];
 	if(	_PhysScores._PhysicalScores[ score ].Base != base )
 	{
-		// TODO: What's this?
-		nlwarning("BADCHECK For player %s, for %s, player should have %u and he has %u !", _Id.toString().c_str(), SCORES::toString(score).c_str(), base, _PhysScores._PhysicalScores[ score ].Base);
+		// Expected for a character saved while a modifier was on the characteristic: computeMaxValue() derives the
+		// score from the current characteristic at every tick update, so the saved value does not last anyway
+		nldebug("Character %s was saved with a base %s of %d, its base characteristic gives %d (as when saved under a characteristic modifier; set again at the first tick update)", _Id.toString().c_str(), SCORES::toString(score).c_str(), _PhysScores._PhysicalScores[score].Base, base);
 //vl		_PhysScores._PhysicalScores[ score ].Base = base;
 	}
 
@@ -18085,8 +18086,8 @@ void CCharacter::checkScoresValues( SCORES::TScores score, CHARACTERISTICS::TCha
 	baseRegenerateAction += RegenOffset;
 	if(	fabs((_PhysScores._PhysicalScores[ score ].BaseRegenerateRepos * 100.0f) - (100.0f * baseRegenerateRepos)) > 0.001)
 	{
-		// TODO: What's this?
-		nlwarning("BADCHECK For player %s, for %s regen, player should have %f and he has %f !", _Id.toString().c_str(), SCORES::toString(score).c_str(), baseRegenerateRepos, _PhysScores._PhysicalScores[ score ].BaseRegenerateRepos);
+		// Expected as well, for the same reason
+		nldebug("Character %s was saved with a base %s regeneration of %f, its characteristic gives %f (as when saved under a characteristic modifier; set again at the first tick update)", _Id.toString().c_str(), SCORES::toString(score).c_str(), _PhysScores._PhysicalScores[score].BaseRegenerateRepos, baseRegenerateRepos);
 //vl		_PhysScores._PhysicalScores[ score ].BaseRegenerateRepos = baseRegenerateRepos;
 //vl		_PhysScores._PhysicalScores[ score ].BaseRegenerateAction = baseRegenerateAction;
 	}
@@ -18151,8 +18152,8 @@ void CCharacter::checkCharacAndScoresValues()
 		// compare
 		if (_PhysCharacs._PhysicalCharacteristics[charac].Base != tvalue)
 		{
-			// TODO: What's this?
-			nlwarning("BADCHECK For player %s, for charac %s, player should have %u and he has %u !", _Id.toString().c_str(), CHARACTERISTICS::toString(charac).c_str(), tvalue,_PhysCharacs._PhysicalCharacteristics[charac].Base);
+			// Diagnostic only, nothing is corrected: the base characteristic is not the one the bought upgrades give
+			nlwarning("BADCHECK: character %s has a base %s of %d, its starting value %d and its highest bought upgrade (level %u, %d per level) give %d; the value is kept", _Id.toString().c_str(), CHARACTERISTICS::toString(charac).c_str(), _PhysCharacs._PhysicalCharacteristics[charac].Base, (sint32)_StartingCharacteristicValues[charac], (uint)maxPhraseLvlValue[charac], (sint32)CharacteristicBrickStep, tvalue);
 
 //vl			_PhysCharacs._PhysicalCharacteristics[charac].Base = tvalue;
 //vl			_PhysCharacs._PhysicalCharacteristics[charac].Current = tvalue;
