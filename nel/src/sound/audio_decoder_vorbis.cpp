@@ -105,13 +105,22 @@ static ov_callbacks OV_CALLBACKS_NLMISC_STREAM = {
 };
 
 CAudioDecoderVorbis::CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop) 
-: _Stream(stream), _Loop(loop), _IsMusicEnded(false), _StreamSize(0)
+: _Stream(stream), _Loop(loop), _IsMusicEnded(false), _StreamSize(0), m_IsSupported(false)
 {
 	_StreamOffset = stream->getPos();
 	stream->seek(0, NLMISC::IStream::end);
 	_StreamSize = stream->getPos();
 	stream->seek(_StreamOffset, NLMISC::IStream::begin);
-	ov_open_callbacks(this, &_OggVorbisFile, nullptr, 0, OV_CALLBACKS_NLMISC_STREAM);
+
+	// a stream that is not Ogg Vorbis leaves the file closed, and every call on a closed file fails
+	int res = ov_open_callbacks(this, &_OggVorbisFile, nullptr, 0, OV_CALLBACKS_NLMISC_STREAM);
+	if (res != 0)
+	{
+		nlwarning("VORBIS: Cannot open '%s' as Ogg Vorbis (ov_open_callbacks returned %d)", stream->getStreamName().c_str(), res);
+		_IsMusicEnded = true;
+		return;
+	}
+	m_IsSupported = true;
 }
 
 CAudioDecoderVorbis::~CAudioDecoderVorbis()
@@ -123,6 +132,13 @@ CAudioDecoderVorbis::~CAudioDecoderVorbis()
 bool CAudioDecoderVorbis::getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title, float &length)
 {
 	CAudioDecoderVorbis mbv(stream, false); // just opens and closes the oggvorbisfile thing :)
+	if (!mbv.isFormatSupported())
+	{
+		title.clear();
+		artist.clear();
+		length = 0.f;
+		return false;
+	}
 	vorbis_comment *vc = ov_comment(&mbv._OggVorbisFile, -1);
 	char *title_c = vorbis_comment_query(vc, "title", 0);
 	if (title_c) title = title_c; else title.clear();
@@ -137,12 +153,19 @@ uint32 CAudioDecoderVorbis::getRequiredBytes()
 	return 0; // no minimum requirement of bytes to buffer out
 }
 
+/// How many interruptions in the data are passed over in a row before the stream ends
+static const uint s_MaxHoles = 32;
+
 uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 maximum)
 {
 	sint current_section = 0; // ???
 	if (_IsMusicEnded) return 0;
 	nlassert(minimum <= maximum); // can't have this..
 	uint32 bytes_read = 0;
+	// OV_HOLE results in a row
+	uint holes = 0;
+	// true from the rewind of a looping stream until samples are read: a stream without samples is rewound once
+	bool rewound = false;
 #ifdef NL_BIG_ENDIAN
 	sint endianness = 1;
 #else
@@ -160,16 +183,27 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 		if (br > 0)
 		{
 			bytes_read += (uint32)br;
+			holes = 0;
+			rewound = false;
 		}
 		else if (br == 0) // EOF
 		{
-			if (_Loop)
+			if (_Loop && !rewound)
 			{
-				ov_pcm_seek(&_OggVorbisFile, 0);
+				int res = ov_pcm_seek(&_OggVorbisFile, 0);
+				if (res != 0)
+				{
+					nlwarning("VORBIS: Cannot rewind '%s' to loop it (ov_pcm_seek returned %d)", _Stream->getStreamName().c_str(), res);
+					_IsMusicEnded = true;
+					break;
+				}
+				rewound = true;
 				//_Stream->seek(0, NLMISC::IStream::begin);
 			}
 			else 
 			{
+				if (_Loop)
+					nlwarning("VORBIS: '%s' has no samples to loop", _Stream->getStreamName().c_str());
 				_IsMusicEnded = true;
 				break; 
 			}
@@ -180,7 +214,14 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 			switch(br)
 			{
 			case OV_HOLE:
+				// an interruption in the data (a damaged page), after which the decoder goes on
 				nlwarning("ov_read returned OV_HOLE");
+				++holes;
+				if (holes >= s_MaxHoles)
+				{
+					nlwarning("VORBIS: '%s' has %u interruptions in a row, the stream ends", _Stream->getStreamName().c_str(), holes);
+					_IsMusicEnded = true;
+				}
 				break;
 			case OV_EINVAL:
 				_IsMusicEnded = true;
@@ -195,6 +236,9 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 				nlwarning("ov_read returned %d", br);
 				break;
 			}
+			// the break above leaves the switch only: after an error the same read would fail again, forever
+			if (_IsMusicEnded)
+				break;
 		}
 	} while (bytes_read < minimum);
 	return bytes_read;

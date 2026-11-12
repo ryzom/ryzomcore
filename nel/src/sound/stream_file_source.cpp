@@ -257,6 +257,9 @@ bool CStreamFileSource::isEnded()
 
 float CStreamFileSource::getLength()
 {
+	// there is no decoder before the source plays, and none when the file could not be opened
+	if (!m_AudioDecoder)
+		return 0.f;
 	return m_AudioDecoder->getLength();
 }
 

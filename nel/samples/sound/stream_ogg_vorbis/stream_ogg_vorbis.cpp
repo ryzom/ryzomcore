@@ -95,6 +95,12 @@ static void initSample()
 
 	string sample = SAMPLE_OGG;
 	s_AudioDecoder = IAudioDecoder::createAudioDecoder(sample, false, false);
+	if (!s_AudioDecoder)
+	{
+		// the file is missing or is not Ogg Vorbis, the log says which
+		printf("Cannot play '%s', no decoder could be created for it\n", sample.c_str());
+		return;
+	}
 	s_StreamSource->setFormat(s_AudioDecoder->getChannels(), s_AudioDecoder->getBitsPerSample(), (uint32)s_AudioDecoder->getSamplesPerSec());
 	//s_StreamSource->setPitch(2.0f);
 
@@ -128,6 +134,10 @@ static void bufferMore(uint bytes) // buffer from bytes to bytes * 2
 
 static void runSample()
 {
+	// nothing to play, initSample said why
+	if (!s_AudioDecoder)
+		return;
+
 	uint samples, bytes;
 	s_StreamSource->getRecommendedBufferSize(samples, bytes);
 

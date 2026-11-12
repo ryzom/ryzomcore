@@ -70,12 +70,20 @@ protected:
 	bool _IsMusicEnded;
 	sint32 _StreamOffset;
 	sint32 _StreamSize;
+
+private:
+	/// False when the stream could not be opened as Ogg Vorbis
+	bool m_IsSupported;
+
 public:
 	CAudioDecoderVorbis(NLMISC::IStream *stream, bool loop);
 	virtual ~CAudioDecoderVorbis() NL_OVERRIDE;
 	inline NLMISC::IStream *getStream() { return _Stream; }
 	inline sint32 getStreamSize() { return _StreamSize; }
 	inline sint32 getStreamOffset() { return _StreamOffset; }
+
+	/// False when the stream could not be opened as Ogg Vorbis: it has ended, and nothing can be read from it
+	bool isFormatSupported() const { return m_IsSupported; }
 
 	/// Get information on a music file (only artist and title at the moment).
 	static bool getInfo(NLMISC::IStream *stream, std::string &artist, std::string &title, float &length);
