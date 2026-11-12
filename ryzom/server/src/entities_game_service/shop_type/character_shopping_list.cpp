@@ -272,17 +272,18 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 			}
 		}
 
-		if( form->Family != ITEMFAMILY::PET_ANIMAL_TICKET &&
-			form->Family != ITEMFAMILY::HARVEST_TOOL &&
-			form->Family != ITEMFAMILY::FOOD &&
-			form->Family != ITEMFAMILY::HARVEST_TOOL &&
-			form->Family != ITEMFAMILY::CRAFTING_TOOL &&
-			form->Family != ITEMFAMILY::COSMETIC &&
-			form->Family != ITEMFAMILY::TELEPORT &&
-			form->Family != ITEMFAMILY::SERVICE && 
-			form->Family != ITEMFAMILY::GENERIC_ITEM &&
-			form->Family != ITEMFAMILY::CONSUMABLE
-			)
+		// the families that have no energy class (no craft stats) pass the class filter
+		const bool classFiltered = form->Family != ITEMFAMILY::PET_ANIMAL_TICKET
+		    && form->Family != ITEMFAMILY::FOOD
+		    && form->Family != ITEMFAMILY::HARVEST_TOOL
+		    && form->Family != ITEMFAMILY::CRAFTING_TOOL
+		    && form->Family != ITEMFAMILY::COSMETIC
+		    && form->Family != ITEMFAMILY::TELEPORT
+		    && form->Family != ITEMFAMILY::SERVICE
+		    && form->Family != ITEMFAMILY::GENERIC_ITEM
+		    && form->Family != ITEMFAMILY::CONSUMABLE;
+
+		if (classFiltered)
 		{
 			if( _Character->getMinClassItemFilter() != RM_CLASS_TYPE::Unknown && itemEnergy != ~0u )
 			{
@@ -333,7 +334,13 @@ bool CCharacterShoppingList::passThruFilter(TItemTradePtr itemTrade, bool dynnam
 					break;
 				}
 			}
-	
+		}
+
+		// The level filter applies to the families with a class and to the tools, which a merchant lists once
+		// per level. The other families keep passing it (haircuts, tattoos, mount tickets, food and stable
+		// services are listed at a single level).
+		if (classFiltered || form->Family == ITEMFAMILY::HARVEST_TOOL || form->Family == ITEMFAMILY::CRAFTING_TOOL)
+		{
 			if( _Character->getMinQualityFilter() > itemTrade->getLevel() )
 				return false;
 			if( _Character->getMaxQualityFilter() < itemTrade->getLevel() )
