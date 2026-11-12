@@ -701,8 +701,12 @@ void CToolCreateEntity::updateArray(CEntityCL *clonee)
 	if (!_ArrayElements.empty() && _ArrayElements[0])
 	{
 		arrayStepLength = 2.f * _ArrayElements[0]->getSelectionDecalRadius();
-		arraySize = (uint) floorf(extent.norm() / arrayStepLength) + 1;
-		arraySize = std::min(arraySize, (uint) 16);
+		// the radius is 0 while the first element has no selection box yet (still loading): one element until it has
+		if (arrayStepLength > 0.f)
+		{
+			arraySize = (uint)floorf(extent.norm() / arrayStepLength) + 1;
+			arraySize = std::min(arraySize, (uint)16);
+		}
 	}
 	while (!getEditor().verifyRoomLeft(0, arraySize))
 	{
