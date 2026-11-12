@@ -17,10 +17,16 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <vector>
 
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/common.h>
+
+#ifndef NL_OS_WINDOWS
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 using std::string;
 
@@ -170,4 +176,66 @@ TEST_F(CUTMiscFileTest, moveDifferentFileSize)
 		i += rand() % 10;
 		moveFileSize(i);
 	}
+}
+
+TEST_F(CUTMiscFileTest, isDirectoryWritable)
+{
+	const string dir = "__writable_test_dir";
+	const string kept = dir + "/kept.txt";
+	std::vector<string> content;
+
+	// start without the directory, a run that was stopped may have left it
+	if (NLMISC::CFile::isDirectory(dir))
+	{
+		NLMISC::CPath::getPathContent(dir, false, false, true, content, nullptr, true);
+		for (size_t i = 0; i < content.size(); ++i)
+			NLMISC::CFile::deleteFile(content[i]);
+		content.clear();
+		NLMISC::CFile::deleteDirectory(dir);
+	}
+	ASSERT_FALSE(NLMISC::CFile::isExists(dir));
+
+	// what is not a directory is not writable
+	EXPECT_FALSE(NLMISC::CFile::isDirectoryWritable(""));
+	EXPECT_FALSE(NLMISC::CFile::isDirectoryWritable(dir));
+	ASSERT_TRUE(NLMISC::CFile::createEmptyFile(_SrcFile));
+	EXPECT_FALSE(NLMISC::CFile::isDirectoryWritable(_SrcFile));
+	NLMISC::CFile::deleteFile(_SrcFile);
+
+	// a fresh directory is writable, with and without the final slash, and the test leaves nothing in it
+	ASSERT_TRUE(NLMISC::CFile::createDirectory(dir));
+	EXPECT_TRUE(NLMISC::CFile::isDirectoryWritable(dir));
+	EXPECT_TRUE(NLMISC::CFile::isDirectoryWritable(dir + "/"));
+	NLMISC::CPath::getPathContent(dir, false, true, true, content, nullptr, true);
+	EXPECT_TRUE(content.empty());
+
+	// the current directory, where the other tests write, as a relative and as an absolute path
+	EXPECT_TRUE(NLMISC::CFile::isDirectoryWritable("."));
+	EXPECT_TRUE(NLMISC::CFile::isDirectoryWritable(NLMISC::CPath::getCurrentPath()));
+
+	// a file in the directory is left alone, and stays the only one
+	FILE *fp = NLMISC::nlfopen(kept, "wb");
+	ASSERT_NE(fp, nullptr);
+	ASSERT_EQ(fwrite("keep", 1, 4, fp), (size_t)4);
+	fclose(fp);
+	EXPECT_TRUE(NLMISC::CFile::isDirectoryWritable(dir));
+	EXPECT_EQ(NLMISC::CFile::getFileSize(kept), 4u);
+	content.clear();
+	NLMISC::CPath::getPathContent(dir, false, true, true, content, nullptr, true);
+	ASSERT_EQ(content.size(), (size_t)1);
+	EXPECT_EQ(NLMISC::CFile::getFilename(content[0]), "kept.txt");
+	NLMISC::CFile::deleteFile(kept);
+
+#ifndef NL_OS_WINDOWS
+	// a directory without the write permission. The permission is not enforced for root,
+	// and some filesystems ignore the change: the test only runs where the system refuses the write.
+	if (chmod(dir.c_str(), S_IRUSR | S_IXUSR) == 0 && access(dir.c_str(), W_OK) != 0)
+	{
+		EXPECT_FALSE(NLMISC::CFile::isDirectoryWritable(dir));
+	}
+	chmod(dir.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
+	EXPECT_TRUE(NLMISC::CFile::isDirectoryWritable(dir));
+#endif
+
+	EXPECT_TRUE(NLMISC::CFile::deleteDirectory(dir));
 }

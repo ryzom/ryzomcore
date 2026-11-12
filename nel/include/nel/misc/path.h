@@ -770,6 +770,19 @@ struct CFile
 	  */
 	static bool	createDirectoryTree(const std::string &dirname);
 
+	/** Tell if files can be created in a directory.
+	 * The test writes to the directory: it creates an empty file named nl_wtest_<process id>_<n>.tmp
+	 * and removes it at once, which also covers read-only volumes and access rights that the permission
+	 * bits do not show. A file that exists is never opened or replaced. On Windows the file is deleted
+	 * by the system when it is closed, nothing can stay behind. Elsewhere it is unlinked, and a directory
+	 * where that fails is reported as not writable, with a warning that names the file left there.
+	 * The path is used as given: a relative path (".") is not turned into an absolute one first.
+	 * The answer is also false when the path of the directory leaves no room for the name of the test file
+	 * (up to 25 characters) within the path length limit of the system, even if a shorter name still fits.
+	 * \return true if the directory exists and a file can be created in it
+	 */
+	static bool isDirectoryWritable(const std::string &dirname);
+
 	/** Try to set the file access to read/write if not already set.
 	 * On linux/macOS also set +x on directory.
 	 * return true if the file doesn't exist or if the file already have RW access.
