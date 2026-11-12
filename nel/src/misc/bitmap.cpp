@@ -1345,6 +1345,9 @@ bool CBitmap::convertToType(CBitmap::TType type)
 \*-------------------------------------------------------------------*/
 bool CBitmap::decompressDXT1(bool alpha)
 {
+	// the blocks decode the same with and without an alpha channel
+	nlunreferenced(alpha);
+
 	uint32 i,j,k;
 	NLMISC::CRGBA	c[4];
 	CObjectVector<uint8> dataTmp[MAX_MIPMAP];
@@ -1385,34 +1388,19 @@ bool CBitmap::decompressDXT1(bool alpha)
 			uncompress(color0,c[0]);
 			uncompress(color1,c[1]);
 
-			if (alpha)
-			{
-				c[0].A= 0;
-				c[1].A= 0;
-				c[2].A= 0;
-				c[3].A= 0;
-			}
-			else
-			{
-				c[0].A= 255;
-				c[1].A= 255;
-				c[2].A= 255;
-				c[3].A= 255;
-			}
+			// the two colors of a block and their blends are opaque, with an alpha channel too (they were transparent
+			// then): only the fourth color of a block of three colors is transparent, as in getDXTCColorFromBlock
+			c[0].A = 255;
+			c[1].A = 255;
 
 			if(color0>color1)
 			{
 				c[2].blendFromui(c[0],c[1],85);
-				if(alpha) c[2].A= 255;
-
 				c[3].blendFromui(c[0],c[1],171);
-				if(alpha) c[3].A= 255;
 			}
 			else
 			{
 				c[2].blendFromui(c[0],c[1],128);
-				if(alpha) c[2].A= 255;
-
 				c[3].set(0,0,0,0);
 			}
 

@@ -237,6 +237,57 @@ TEST(CUTMiscBitmap, ddsHeaderIsChecked)
 	// clang-format on
 }
 
+TEST(CUTMiscBitmap, dxt1BlockColorsAreOpaque)
+{
+	// 8x4, a block of four colors (the first color above the second) and a block of three colors and a transparent
+	// one, every row with the indices 0, 1, 2, 3. Read as DXT1 with alpha, the two colors of a block were transparent.
+	const uint8 expectedAlpha[8] = { 255, 255, 255, 255, 255, 255, 255, 0 };
+	for (uint withAlpha = 0; withAlpha < 2; ++withAlpha)
+	{
+		SCOPED_TRACE(withAlpha);
+		TBytes dds = makeDDS(124, 8, 4, 1);
+		if (withAlpha)
+			putLE32(dds, 4 + 21 * 4, 1); // CBitmap reads a DXT1 file with this header field set as DXT1 with alpha
+		const size_t blocks = 4 + 124;
+		putLE16(dds, blocks, 0xf800); // red
+		putLE16(dds, blocks + 2, 0x001f); // blue
+		putLE16(dds, blocks + 8, 0x001f);
+		putLE16(dds, blocks + 8 + 2, 0xf800);
+		for (uint row = 0; row < 4; ++row)
+		{
+			dds[blocks + 4 + row] = 0xe4;
+			dds[blocks + 8 + 4 + row] = 0xe4;
+		}
+
+		CBitmap bitmap;
+		EXPECT_NE(0, loadImage(bitmap, dds));
+		ASSERT_EQ(withAlpha ? CBitmap::DXTC1Alpha : CBitmap::DXTC1, bitmap.getPixelFormat());
+
+		// the texels as read from the compressed blocks, then the same after decompression
+		NLMISC::CRGBA texels[8];
+		for (uint x = 0; x < 8; ++x)
+			texels[x] = bitmap.getPixelColor(x, 0);
+		ASSERT_TRUE(bitmap.convertToType(CBitmap::RGBA));
+		ASSERT_EQ(8u * 4u * 4u, bitmap.getPixels().size());
+		for (uint y = 0; y < 4; ++y)
+		{
+			for (uint x = 0; x < 8; ++x)
+			{
+				const uint8 *pixel = &bitmap.getPixels()[(y * 8 + x) * 4];
+				EXPECT_EQ(expectedAlpha[x], pixel[3]) << "alpha at " << x << ", " << y;
+				EXPECT_EQ(texels[x], NLMISC::CRGBA(pixel[0], pixel[1], pixel[2], pixel[3])) << "at " << x << ", " << y;
+			}
+		}
+		// the colors: red and blue, their blends, then blue and red, their blend and transparent black
+		const uint8 *row = &bitmap.getPixels()[0];
+		EXPECT_EQ(NLMISC::CRGBA(255, 0, 0, 255), NLMISC::CRGBA(row[0], row[1], row[2], row[3]));
+		EXPECT_EQ(NLMISC::CRGBA(0, 0, 255, 255), NLMISC::CRGBA(row[4], row[5], row[6], row[7]));
+		EXPECT_EQ(NLMISC::CRGBA(0, 0, 255, 255), NLMISC::CRGBA(row[16], row[17], row[18], row[19]));
+		EXPECT_EQ(NLMISC::CRGBA(255, 0, 0, 255), NLMISC::CRGBA(row[20], row[21], row[22], row[23]));
+		EXPECT_EQ(NLMISC::CRGBA(0, 0, 0, 0), NLMISC::CRGBA(row[28], row[29], row[30], row[31]));
+	}
+}
+
 TEST(CUTMiscBitmap, resizeBeyondMemoryThrows)
 {
 	CBitmap bitmap;
