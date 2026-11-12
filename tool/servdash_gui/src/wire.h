@@ -32,8 +32,11 @@
 /// both tools; every message a servdash_cli daemon sends, this writes the same way.
 namespace Wire {
 
-/// Protocol version 2: line indices and times, process details, Exec and ExecDone.
-const int Version = 2;
+/// Protocol version 2: line indices and times, process details, Exec and ExecDone. Version 3:
+/// Synced, which ends the state a client gets when it attaches, and the start count, the time
+/// to ready and the manner of the last exit in ProcessInfo. A client skips a message it does
+/// not know and a field it does not find takes its default, so the versions mix.
+const int Version = 3;
 
 QString stateName(CProcessEntry::TState state);
 QString commandKindName(CProcessEntry::TCommandKind kind);

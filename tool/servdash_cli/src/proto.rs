@@ -24,11 +24,15 @@
 //!
 //! Version 2 added the line index and time stamp, the process details in ProcessInfo, and
 //! Exec with ExecDone: a command with its arguments already split, answered when it ran.
+//!
+//! Version 3 added Synced, which ends the state a client gets when it attaches, and the start
+//! count, the time to ready and the manner of the last exit in ProcessInfo. A client skips a
+//! message it does not know, and a field it does not find takes its default, so the versions mix.
 
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncWrite, AsyncWriteExt};
 
-pub const VERSION: u32 = 2;
+pub const VERSION: u32 = 3;
 
 /// The process states of the Win32 tool, with the same meaning.
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
@@ -167,7 +171,8 @@ pub struct ProcessInfo {
 	/// When the current run started, milliseconds since the Unix epoch.
 	#[serde(default)]
 	pub started_at: Option<i64>,
-	/// The exit code of the last run, when it ended by itself with one.
+	/// The exit code of the last run that ended, when it ended by itself with one. It stays while
+	/// the next run goes on.
 	#[serde(default)]
 	pub exit_code: Option<i32>,
 	/// A RestartDelay relaunch is scheduled.
@@ -200,6 +205,18 @@ pub struct ProcessInfo {
 	/// The console channel protocol version the service announced, 0 when none is connected.
 	#[serde(default)]
 	pub channel_version: u32,
+	/// How often this dashboard started the process since it opened; for a launch control
+	/// section the number it writes to `<alias>.start_count` for the admin executor service.
+	#[serde(default)]
+	pub start_count: u32,
+	/// Milliseconds from the start of the current run to its ready state, or of the last run
+	/// once it ended; none while that run has not been ready.
+	#[serde(default)]
+	pub ready_ms: Option<i64>,
+	/// How the last run that ended went out, as the dashboard's note says it: `code 0`, `killed`,
+	/// `crashed, 0xC0000005`, `crashed, signal 11`. Empty before the first exit.
+	#[serde(default)]
+	pub last_exit: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -298,6 +315,9 @@ pub enum DaemonMsg {
 		id: String,
 		ok: bool,
 	},
+	/// The state a client gets when it attaches is complete: Hello, Processes, and a Snapshot
+	/// and the Commands of every process came before this. What follows are changes.
+	Synced,
 	Bye,
 }
 

@@ -291,6 +291,8 @@ void CProcessEntry::setLaunchBlocked(bool blocked)
 void CProcessEntry::setState(TState state)
 {
 	m_State = state;
+	if (state == Ready && m_ReadyMs < 0 && m_LaunchedAt.isValid())
+		m_ReadyMs = m_LaunchedAt.elapsed();
 	int value = -1;
 	switch (state)
 	{
@@ -392,7 +394,8 @@ void CProcessEntry::launch()
 	m_ReadyTriggered = false;
 	m_LaunchedAt.start();
 	m_StartedAt = QDateTime::currentMSecsSinceEpoch();
-	m_HasExitCode = false;
+	++m_StartCount;
+	m_ReadyMs = -1;
 	if (m_LaunchCtrl)
 		m_LaunchCtrl->countLaunch();
 
@@ -619,11 +622,25 @@ void CProcessEntry::onFinished(int exitCode, QProcess::ExitStatus status)
 	m_ExitCode = exitCode;
 	QString how;
 	if (status == QProcess::NormalExit)
+	{
 		how = QString("code %1").arg(exitCode);
+	}
 	else if (m_KillRequested)
+	{
 		how = "killed";
+	}
 	else
-		how = "crashed";
+	{
+#ifdef Q_OS_WIN
+		// the exit code of a crashed process is the status of the exception that ended it
+		how = QString("crashed, 0x%1").arg(QString::number((quint32)exitCode, 16).toUpper().rightJustified(8, QChar('0')));
+		m_HasExitCode = true;
+#else
+		// and elsewhere the signal
+		how = QString("crashed, signal %1").arg(exitCode);
+#endif
+	}
+	m_LastExit = how;
 	note(QString("Process Exited (%1)").arg(how));
 	setState(Stopped);
 	if (m_LaunchCtrl)

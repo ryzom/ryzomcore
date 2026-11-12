@@ -85,7 +85,15 @@ private:
 	void writeMessage(const QJsonValue &msg);
 	void reply(const QJsonValue &id, const QJsonValue &result);
 	void replyError(const QJsonValue &id, int code, const QString &message);
+	/// Runs the tool once the mirrors are whole.
 	void callTool(const QString &name, const QJsonObject &args, const TReply &reply);
+	void runTool(const QString &name, const QJsonObject &args, const TReply &reply);
+	/// Whether the dashboard a call with these arguments names (every dashboard, when it names
+	/// none) has sent its state, or has had its time to do so.
+	bool mirrorsSettled(const QJsonObject &args) const;
+	/// Whether the dashboards this server started from its command line are attached, or have
+	/// had their time; looks for them in the registry while they are not.
+	bool expectedAttached();
 	QJsonValue toolList() const;
 
 	/// A call that completes later: `check` runs on every change and on the tick, `finish` once.
@@ -96,8 +104,11 @@ private:
 	void attach(const Registry::CRecord &record);
 	bool startDashboardProcess(const QString &iniPath, QString &error);
 
-	// resolution; an empty id with an error text when the selector names nothing
+	// resolution; null with an error text when the selector names nothing, or names a dashboard
+	// that has not sent its state yet
 	CDashClient *findDash(const QJsonObject &args, QString &error) const;
+	/// The same for a dashboard in any condition, for what needs no mirror of it.
+	CDashClient *findDashAny(const QJsonObject &args, QString &error) const;
 	CDashClient *findTarget(const QJsonObject &args, int &index, QString &error) const;
 
 	// tools
@@ -123,7 +134,12 @@ private:
 	QMap<QString, CDashClient *> m_Dashes;
 	/// Records whose endpoint did not answer, and when to try them again.
 	QHash<QString, QDeadlineTimer> m_RetryAfter;
+	/// The dashboards of the command line that are not attached yet, and until when to wait for them.
+	QHash<QString, QDeadlineTimer> m_Expected;
 	QList<CWaiter *> m_Waiters;
+	/// The waiters are being polled; a poll asked for meanwhile runs as another round.
+	bool m_Polling = false;
+	bool m_PollAgain = false;
 	quint64 m_NextExecId = 0;
 };
 

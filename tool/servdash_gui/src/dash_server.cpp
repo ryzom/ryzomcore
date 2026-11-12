@@ -202,6 +202,8 @@ void CDashServer::sendHello(QLocalSocket *client)
 			send(client, Wire::message("Commands", commands));
 		}
 	}
+	// the client knows by this that it holds the whole state, and may answer from it
+	send(client, QJsonValue("Synced"));
 }
 
 CProcessEntry *CDashServer::findEntry(const QString &name) const

@@ -71,7 +71,9 @@ itself in the shared session directory (`%LOCALAPPDATA%\servdash\sessions` on Wi
 `$XDG_RUNTIME_DIR/servdash.sessions` or `/tmp/servdash.sessions.<uid>` elsewhere). So
 `servdash_cli --list` names it, `servdash_cli <title>` attaches a terminal to it, and the MCP
 servers of both tools reach it like a daemon. A client's Shutdown stops every process and
-closes the window, as closing it by hand does.
+closes the window, as closing it by hand does. A client that attaches gets the whole state:
+the processes, the lines held of each and the command tables, then the `Synced` message that
+says so.
 
 `servdash_gui --mcp [<ini>...]` runs no window but the [Model Context Protocol](https://modelcontextprotocol.io/)
 server over stdin and stdout, for an agent such as Claude Code: the same tools as
@@ -85,16 +87,22 @@ to the project does it:
 ```
 
 The tools: `list_dashboards`, `start_dashboard`, `shutdown_dashboard`; `list_processes`,
-`get_process` (state, pid, uptime, launch control, the service's status labels and buttons);
+`get_process` (state, pid, uptime, launch control, the start count, the time from start to
+ready and the way the last run ended, the service's status labels and buttons);
 `start_process`, `stop_process`, `kill_process`, `restart_process`, `start_all`, `stop_all`,
-`wait_for_state`, each with an optional wait; `list_commands` (the command table of a service,
-filtered by prefix or word); `run_command` (a NeL command with its arguments as a list, run
-over the console channel without parsing, with the lines it logged); `send_input` (a line on
-stdin, with the output that follows); `get_log` (lines by index range, time range or last N,
-optionally following for a while, filtered by log type or regex, with the NeL prefix left
+each with an optional wait; `wait_for_state` (one process, or without `process` every process
+of the dashboard, returning early when one exits, crashes or is relaunched, with its last
+lines); `list_commands` (the command table of a service, filtered by prefix or word);
+`run_command` (a NeL command with its arguments as a list, run over the console channel
+without parsing, with the lines it logged); `send_input` (a line on stdin, with the output
+that follows); `get_log` (lines of a process, or without `process` of all of them merged by
+time and tagged with their process, by index range, time range, since the last start or last
+N, optionally following for a while, filtered by log type or regex, with the NeL prefix left
 out, compacted or kept); `clear_log`. Every log line carries an index per process, from 1
-and never reused, and its arrival time in milliseconds. The servdash_cli README describes
-the tools in detail; the two servers answer alike.
+and never reused, and its arrival time in milliseconds. A tool call is held until the
+dashboard it names has sent its state, or every dashboard when it names none, so a server
+that just started answers from all of it. The
+servdash_cli README describes the tools in detail; the two servers answer alike.
 
 ## In the quick start package
 

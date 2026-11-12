@@ -121,9 +121,18 @@ public:
 	qint64 pid() const;
 	/// When the current run started, milliseconds since the Unix epoch; 0 when not running.
 	qint64 startedAt() const { return m_StartedAt; }
-	/// Whether the last run ended by itself with an exit code.
+	/// Whether the last run that ended left an exit code; it stays while the next run goes on.
 	bool hasExitCode() const { return m_HasExitCode; }
 	int exitCode() const { return m_ExitCode; }
+	/// How the last run that ended went out, as the exit note says it: `code 0`, `killed`,
+	/// `crashed, 0xC0000005`, `crashed, signal 11`. Empty before the first exit.
+	const QString &lastExit() const { return m_LastExit; }
+	/// How often the dashboard started the process since it opened; a launch control section
+	/// writes the same count to its start_count file.
+	int startCount() const { return m_StartCount; }
+	/// Milliseconds the current run took from its start to ready, or the last run once it
+	/// ended; -1 while that run has not been ready.
+	qint64 readyMs() const { return m_ReadyMs; }
 	bool relaunchPending() const { return m_RelaunchPending; }
 	int crashChain() const { return m_CrashChain; }
 	/// The console channel protocol version the service announced; 0 before its hello.
@@ -214,6 +223,9 @@ private:
 	qint64 m_StartedAt = 0;
 	int m_ExitCode = 0;
 	bool m_HasExitCode = false;
+	QString m_LastExit;
+	int m_StartCount = 0;
+	qint64 m_ReadyMs = -1;
 	int m_ChannelVersion = 0;
 	QRegularExpression m_ReadyPattern;
 	QProcess *m_Process = nullptr;

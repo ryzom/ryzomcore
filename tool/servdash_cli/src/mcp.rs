@@ -57,6 +57,22 @@ const MAX_MIRROR_LINES: usize = 10000;
 const MAX_LINE_CHARS: usize = 2000;
 /// send_input returns once the process has been quiet this long after answering.
 const INPUT_IDLE: Duration = Duration::from_millis(400);
+/// How long a tool call waits for a dashboard to send its state after the connection; a
+/// dashboard that takes longer is reported as not answering instead of being served half known.
+const SYNC_TIMEOUT: Duration = Duration::from_secs(15);
+/// Run starts and ends kept per dashboard for the waits that watch them.
+const MAX_EVENTS: usize = 256;
+/// Lines of a process shown with a run that ended during a wait.
+const EVENT_LINES: usize = 15;
+/// A dashboard says what it does about an exit (a restart, a pending one) right after the exit
+/// itself; a wait that ends on the exit gives that this long to arrive before it reports.
+const EVENT_SETTLE: Duration = Duration::from_millis(200);
+/// How long a dashboard older than the Synced message may take to send what follows its last Snapshot.
+const SETTLE_WITHOUT_MARKER: Duration = Duration::from_millis(250);
+/// The registry is read this often while a dashboard the server started has not shown up in it.
+const EXPECTED_INTERVAL: Duration = Duration::from_millis(100);
+/// The log types get_log filters by: those of NeL, plain output, dashboard notes, console lines without a prefix.
+const LOG_TYPES: &[&str] = &["INF", "WRN", "ERR", "DBG", "AST", "STT", "UKN", "out", "dash", "log"];
 
 const INSTRUCTIONS: &str = "Service dashboards of Ryzom Core on this machine, one per ini file: a shard \
 (its services), or the patchman services of a server. The processes of a dashboard are the sections of \
@@ -65,7 +81,12 @@ plain program only its output. Log lines are indexed per process from 1 and neve
 their arrival time; get_log selects by index range, time range or count and can keep following for a \
 while, so a window of a log is reproducible. Run NeL commands with run_command and the arguments as a \
 list: they reach the service already split, nothing is parsed, so values with spaces, quotes or \
-semicolons are safe. The dashboard parameter can be left out while one dashboard runs.";
+semicolons are safe. To follow a shard coming up: wait_for_state without a process waits for every \
+process of the dashboard and returns as soon as one exits, crashes or is relaunched, with its last \
+lines; list_processes gives the time each took to get ready, its start count and its last exit; \
+get_log without a process, with levels WRN, ERR, AST and since_start, gives the warnings and errors \
+of every process, each line tagged with its process. The dashboard parameter can be left out while \
+one dashboard runs.";
 
 // *** the mirror ***
 
@@ -103,6 +124,19 @@ impl ProcMirror {
 	}
 }
 
+/// A run of a process began or ended, as the mirror saw it in the process states. The waits
+/// watch these, so an exit between two looks at the state is not missed.
+struct ProcEvent {
+	seq: u64,
+	name: String,
+	/// A run began; otherwise one ended.
+	began: bool,
+	/// How the run ended, in the words of the dashboard; empty when it did not say.
+	how: String,
+	/// How long the run that ended had been up, in milliseconds.
+	up_ms: Option<i64>,
+}
+
 struct Dash {
 	record: Record,
 	title: String,
@@ -112,14 +146,89 @@ struct Dash {
 	tx: mpsc::UnboundedSender<ClientMsg>,
 	/// The ExecDone answers by id, taken by the run_command call that waits for them.
 	exec_results: HashMap<String, bool>,
+	/// The state the dashboard sends to a new client has arrived in full. Until then the mirror
+	/// is a part of the dashboard, and no tool answers from it.
+	synced: bool,
+	attached_at: Instant,
+	/// The processes whose Snapshot has not come since the Processes message; a dashboard older
+	/// than the Synced message counts as synced when this runs empty.
+	awaiting: HashSet<String>,
+	got_processes: bool,
+	/// Such a dashboard sent its last Snapshot; see check_synced_without_marker.
+	settling: bool,
+	events: VecDeque<ProcEvent>,
+	event_seq: u64,
+}
+
+/// How the last run of a process ended: what the dashboard says, or the exit code alone from
+/// one older than that field.
+fn exit_text(info: &ProcessInfo) -> Option<String> {
+	if !info.last_exit.is_empty() {
+		Some(info.last_exit.clone())
+	} else {
+		info.exit_code.map(|code| format!("code {}", code))
+	}
 }
 
 impl Dash {
+	fn new(record: Record, tx: mpsc::UnboundedSender<ClientMsg>) -> Dash {
+		let title = record.title.clone();
+		Dash {
+			record,
+			title,
+			daemon_version: 0,
+			procs: Vec::new(),
+			tx,
+			exec_results: HashMap::new(),
+			synced: false,
+			attached_at: Instant::now(),
+			awaiting: HashSet::new(),
+			got_processes: false,
+			settling: false,
+			events: VecDeque::new(),
+			event_seq: 0,
+		}
+	}
+
 	fn index_of(&self, name: &str) -> Option<usize> {
 		self.procs.iter().position(|p| p.info.name == name)
 	}
 
+	fn push_event(&mut self, name: &str, began: bool, how: String, up_ms: Option<i64>) {
+		self.event_seq += 1;
+		self.events.push_back(ProcEvent { seq: self.event_seq, name: name.to_string(), began, how, up_ms });
+		while self.events.len() > MAX_EVENTS {
+			self.events.pop_front();
+		}
+	}
+
+	/// A dashboard that sends no Synced message is at the end of its state once every process
+	/// got its Snapshot, but for the command table of the last process, which follows its
+	/// Snapshot when it has one. So the state counts as whole with the next message, whatever it
+	/// is, or when none comes for SETTLE_WITHOUT_MARKER.
+	fn check_synced_without_marker(&mut self) {
+		if !self.synced && self.daemon_version < 3 && self.got_processes && self.awaiting.is_empty() {
+			self.settling = true;
+		}
+	}
+
 	fn apply(&mut self, msg: DaemonMsg) {
+		let was_settling = self.settling;
+		self.apply_message(msg);
+		if was_settling {
+			self.settled();
+		}
+	}
+
+	/// The wait for what follows the last Snapshot is over.
+	fn settled(&mut self) {
+		if self.settling {
+			self.settling = false;
+			self.synced = true;
+		}
+	}
+
+	fn apply_message(&mut self, msg: DaemonMsg) {
 		match msg {
 			DaemonMsg::Hello { version, title } => {
 				self.daemon_version = version;
@@ -135,11 +244,30 @@ impl Dash {
 					}
 					self.procs.push(mirror);
 				}
+				self.got_processes = true;
+				self.awaiting = self.procs.iter().map(|p| p.info.name.clone()).collect();
+				self.check_synced_without_marker();
 			}
+			DaemonMsg::Synced => self.synced = true,
 			DaemonMsg::Process { info } => match self.index_of(&info.name) {
 				Some(idx) => {
+					// a run is known by its start time, which a dashboard reports while the process
+					// runs; a change of it ends one run and begins another
+					let old = &self.procs[idx].info;
+					let changed = old.started_at != info.started_at;
+					let ended = changed && old.started_at.is_some();
+					let began = changed && info.started_at.is_some();
+					let up_ms = old.started_at.map(|t| (now_ms() - t).max(0));
+					let how = exit_text(&info).unwrap_or_default();
+					let name = info.name.clone();
 					self.procs[idx].info = info;
 					self.procs[idx].track_indices();
+					if ended {
+						self.push_event(&name, false, how, up_ms);
+					}
+					if began {
+						self.push_event(&name, true, String::new(), None);
+					}
 				}
 				None => self.procs.push(ProcMirror::new(info)),
 			},
@@ -157,6 +285,8 @@ impl Dash {
 					self.procs[idx].lines = lines.iter().map(Line::from_proto).collect();
 					self.procs[idx].track_indices();
 				}
+				self.awaiting.remove(&name);
+				self.check_synced_without_marker();
 			}
 			DaemonMsg::Lines { name, lines } => {
 				if let Some(idx) = self.index_of(&name) {
@@ -200,6 +330,10 @@ impl Dash {
 struct State {
 	/// The attached dashboards by record id.
 	dashes: BTreeMap<String, Dash>,
+	/// The registry has been read once, so the dashboards that run are attached or being attached.
+	discovered: bool,
+	/// The dashboards of the command line that are not attached yet, and until when to wait for them.
+	expected: HashMap<String, Instant>,
 	/// Records being connected to right now.
 	attaching: HashSet<String>,
 	/// Records whose endpoint did not answer, and when to try them again.
@@ -264,6 +398,8 @@ async fn attach(shared: Shared, record: Record) {
 				s.attaching.remove(&id);
 				s.retry_after.insert(id.clone(), Instant::now() + RETRY_INTERVAL);
 			});
+			// a tool call may be waiting for this connection to stand or fail
+			shared.bump();
 			return;
 		}
 	};
@@ -280,12 +416,32 @@ async fn attach(shared: Shared, record: Record) {
 	shared.with(|s| {
 		s.attaching.remove(&id);
 		s.retry_after.remove(&id);
-		let title = record.title.clone();
-		s.dashes.insert(id.clone(), Dash { record, title, daemon_version: 0, procs: Vec::new(), tx, exec_results: HashMap::new() });
+		s.dashes.insert(id.clone(), Dash::new(record, tx));
 	});
 	shared.bump();
 	let mut lines = BufReader::new(reader).lines();
-	while let Ok(Some(line)) = lines.next_line().await {
+	loop {
+		// a dashboard without the Synced message: what follows its last Snapshot, or nothing
+		let settling = shared.with(|s| s.dashes.get(&id).is_some_and(|d| d.settling));
+		let next = if settling {
+			match tokio::time::timeout(SETTLE_WITHOUT_MARKER, lines.next_line()).await {
+				Ok(next) => next,
+				Err(_) => {
+					shared.with(|s| {
+						if let Some(dash) = s.dashes.get_mut(&id) {
+							dash.settled();
+						}
+					});
+					shared.bump();
+					continue;
+				}
+			}
+		} else {
+			lines.next_line().await
+		};
+		let Ok(Some(line)) = next else {
+			break;
+		};
 		let Ok(msg) = proto::parse_msg::<DaemonMsg>(&line) else {
 			continue;
 		};
@@ -324,7 +480,55 @@ async fn discover(shared: Shared) {
 				tokio::spawn(attach(shared.clone(), record));
 			}
 		}
-		tokio::time::sleep(DISCOVERY_INTERVAL).await;
+		// a dashboard this server started itself is looked for until it is there or its time is up
+		let (changed, expecting) = shared.with(|s| {
+			let before = s.expected.len();
+			let State { dashes, expected, .. } = &mut *s;
+			expected.retain(|id, until| !dashes.contains_key(id) && Instant::now() < *until);
+			let first = !std::mem::replace(&mut s.discovered, true);
+			(first || before != s.expected.len(), !s.expected.is_empty())
+		});
+		if changed {
+			shared.bump();
+		}
+		tokio::time::sleep(if expecting { EXPECTED_INTERVAL } else { DISCOVERY_INTERVAL }).await;
+	}
+}
+
+/// The dashboards a call still has to wait for, by the time each has left to send its state:
+/// the one the call names, or all of them when it names none or its selector does not resolve.
+/// One whose time is up is not waited for again.
+fn sync_pending(state: &State, selector: Option<&str>) -> Vec<Instant> {
+	let only = selector.and_then(|sel| find_dash_any(state, Some(sel)).ok());
+	let now = Instant::now();
+	state
+		.dashes
+		.values()
+		.filter(|d| !d.synced && only.as_ref().is_none_or(|id| *id == d.record.id))
+		.map(|d| d.attached_at + SYNC_TIMEOUT)
+		.filter(|until| *until > now)
+		.collect()
+}
+
+/// Holds a tool call until the mirror it answers from is whole: the registry read once, and
+/// the dashboard the call names (every dashboard, when it names none) has sent its state, or
+/// has had SYNC_TIMEOUT to do so. A server asked right after its start (a client that runs one
+/// call per process does nothing else) would otherwise answer from the part of the state that
+/// happened to have arrived.
+async fn wait_for_sync(shared: &Shared, selector: Option<&str>) {
+	let hard = Instant::now() + SYNC_TIMEOUT;
+	// which dashboards run is known once the registry was read, the connections stand, and the
+	// dashboards this server started itself have registered
+	shared.wait_until(hard, |s| s.discovered && s.attaching.is_empty() && s.expected.is_empty()).await;
+	loop {
+		let Some(until) = shared.with(|s| sync_pending(s, selector).into_iter().max()) else {
+			return;
+		};
+		let until = until.min(hard);
+		if Instant::now() >= until {
+			return;
+		}
+		shared.wait_until(until, |s| sync_pending(s, selector).is_empty()).await;
 	}
 }
 
@@ -332,13 +536,15 @@ async fn discover(shared: Shared) {
 
 pub async fn run(inis: Vec<PathBuf>) -> Result<()> {
 	// the dashboards named on the command line come up with the server
+	let shared = Shared::new();
 	for ini in &inis {
 		let session = Session::new(ini)?;
 		if crate::ensure_daemon(&session).await? {
 			log::note(&format!("started the dashboard for '{}'", session.ini_path.display()));
 		}
+		// its record may be a moment behind its endpoint; the first tool call waits for it
+		shared.with(|s| s.expected.insert(session.id.clone(), Instant::now() + SYNC_TIMEOUT));
 	}
-	let shared = Shared::new();
 	tokio::spawn(discover(shared.clone()));
 
 	let (out_tx, mut out_rx) = mpsc::unbounded_channel::<Value>();
@@ -428,6 +634,7 @@ async fn call_tool(shared: &Shared, params: &Value) -> Value {
 	let name = params.get("name").and_then(Value::as_str).unwrap_or("");
 	let empty = json!({});
 	let args = params.get("arguments").unwrap_or(&empty);
+	wait_for_sync(shared, arg_str(args, "dashboard").as_deref()).await;
 	let result = match name {
 		"list_dashboards" => tool_list_dashboards(shared),
 		"start_dashboard" => tool_start_dashboard(shared, args).await,
@@ -503,10 +710,15 @@ fn tool_list() -> Vec<Value> {
 			json!({ "dashboard": dashboard_prop(), "wait_seconds": wait_prop("the daemon to exit (default 60)") }),
 			&[],
 		),
-		tool("list_processes", "The processes of a dashboard with their state, pid, uptime, launch control and log line range.", json!({ "dashboard": dashboard_prop() }), &[]),
+		tool(
+			"list_processes",
+			"The processes of a dashboard, one per line: state, pid, uptime, console and launch control, how often the dashboard started it (start count), how long it took from start to ready, how its last run ended, and the log line range.",
+			json!({ "dashboard": dashboard_prop() }),
+			&[],
+		),
 		tool(
 			"get_process",
-			"Everything about one process: configuration, state, the service's status labels and buttons, its log range and command table size.",
+			"Everything about one process: configuration, state, start count, time from start to ready, how the last run ended, the service's status labels and buttons, its log range and command table size.",
 			json!({ "dashboard": dashboard_prop(), "process": process_prop() }),
 			&["process"],
 		),
@@ -533,14 +745,16 @@ fn tool_list() -> Vec<Value> {
 		tool("stop_all", "Stops every running process of a dashboard; the Shutdown All button.", json!({ "dashboard": dashboard_prop(), "wait_seconds": wait_prop("every process to exit (default 0)") }), &[]),
 		tool(
 			"wait_for_state",
-			"Waits until a process reaches a state: ready (the service is up), running (started, console attached or not), stopped.",
+			"Waits until a process, or without the process parameter every process of the dashboard, reaches a state: ready (the service is up), running (started, console attached or not), stopped. Returns early when a watched process exits, crashes or is relaunched meanwhile (for stopped: when one is started again), naming it with the way it ended and its last log lines.",
 			json!({
 				"dashboard": dashboard_prop(),
-				"process": process_prop(),
+				"process": prop("string", "The process: its section name in the ini, or its label. Leave out to wait for every process of the dashboard."),
 				"state": { "type": "string", "enum": ["ready", "running", "stopped"], "description": "The state to wait for." },
 				"wait_seconds": wait_prop("the state (default 60)"),
+				"stop_on_exit": prop("boolean", "Return as soon as a watched process exits or is relaunched while waiting (default true); false keeps waiting for the state."),
+				"prefix": prefix_prop,
 			}),
-			&["process", "state"],
+			&["state"],
 		),
 		tool(
 			"list_commands",
@@ -581,19 +795,20 @@ fn tool_list() -> Vec<Value> {
 		),
 		tool(
 			"get_log",
-			"Lines of a process log, or of every process of the dashboard merged by time. Select by index range (from_idx, to_idx), by time range (from_time, to_time), or the last N lines; then optionally keep following for follow_seconds, up to max_lines in total. Each line: index, time, log type, message. Indices are per process, from 1, never reused.",
+			"Lines of a process log, or without the process parameter of every process of the dashboard merged by time, each line tagged with its process. Select by index range (from_idx, to_idx), by time range (from_time, to_time), since the process started (since_start), or the last N lines, and filter by log type (levels) and regular expression (match): levels WRN, ERR, AST with since_start and no process gives every warning and error of a shard since it came up. Then optionally keep following for follow_seconds, up to max_lines in total. Each line: index, time, [process], log type, message. Indices are per process, from 1, never reused.",
 			json!({
 				"dashboard": dashboard_prop(),
 				"process": prop("string", "The process; leave out for every process of the dashboard, each line then names its process."),
-				"last": prop("integer", "The last N lines of the selection (default 100 when no range is given)."),
+				"last": prop("integer", "The last N lines of the selection, per process (default 100 when no range is given)."),
 				"from_idx": prop("integer", "First line index, inclusive."),
 				"to_idx": prop("integer", "Last line index, inclusive."),
 				"from_time": prop("string", "Earliest arrival time: HH:MM[:SS[.mmm]] today, an ISO 8601 date and time, Unix seconds or milliseconds, or relative such as -90s, -5m, -2h."),
 				"to_time": prop("string", "Latest arrival time, same forms."),
+				"since_start": prop("boolean", "Only the lines since the last start of each process, as far as they are still held."),
 				"follow_seconds": prop("number", "After the selection, keep collecting new lines for this long (at most 300), stopping early at max_lines."),
-				"max_lines": prop("integer", "At most this many lines in the answer (default 200, at most 5000)."),
+				"max_lines": prop("integer", "At most this many lines in the answer, the newest of the selection (default 200, at most 5000)."),
 				"prefix": prefix_prop,
-				"levels": { "type": "array", "items": { "type": "string" }, "description": "Only these log types: INF, WRN, ERR, DBG, AST, STT; out (plain output of the process), dash (notes of the dashboard)." },
+				"levels": { "type": "array", "items": { "type": "string" }, "description": "Only these log types: INF, WRN, ERR, DBG, AST, STT, UKN of NeL; out (plain output of the process), dash (notes of the dashboard), log (a console line without a NeL prefix)." },
 				"match": prop("string", "Only lines matching this regular expression (case insensitive)."),
 			}),
 			&[],
@@ -622,6 +837,19 @@ fn arg_f64(args: &Value, key: &str) -> Option<f64> {
 
 fn arg_u64(args: &Value, key: &str) -> Option<u64> {
 	arg_f64(args, key).filter(|v| *v >= 0.0).map(|v| v as u64)
+}
+
+fn arg_bool(args: &Value, key: &str) -> Option<bool> {
+	match args.get(key) {
+		Some(Value::Bool(b)) => Some(*b),
+		Some(Value::Number(n)) => n.as_f64().map(|v| v != 0.0),
+		Some(Value::String(s)) => match s.trim().to_lowercase().as_str() {
+			"true" | "1" | "yes" => Some(true),
+			"false" | "0" | "no" => Some(false),
+			_ => None,
+		},
+		_ => None,
+	}
 }
 
 fn arg_strs(args: &Value, key: &str) -> Vec<String> {
@@ -664,8 +892,23 @@ fn dash_summary(dash: &Dash) -> String {
 	format!("'{}' (id {}, {}, {})", dash.title, dash.record.id, tool, dash.record.ini_path)
 }
 
-/// The id of the dashboard a selector names; the only one when the selector is empty.
+/// The id of the dashboard a selector names; the only one when the selector is empty. A
+/// dashboard that has not sent its state is refused: its mirror is a part of it at best.
 fn find_dash(state: &State, selector: Option<&str>) -> Result<String> {
+	let id = find_dash_any(state, selector)?;
+	let dash = &state.dashes[&id];
+	if !dash.synced {
+		bail!(
+			"the dashboard {} is connected but has not sent its state in the {} s since; it may be busy or hung, ask again in a moment",
+			dash_summary(dash),
+			dash.attached_at.elapsed().as_secs()
+		);
+	}
+	Ok(id)
+}
+
+/// The same for a dashboard in any condition, for what needs no mirror of it.
+fn find_dash_any(state: &State, selector: Option<&str>) -> Result<String> {
 	let mut dashes: Vec<&Dash> = state.dashes.values().collect();
 	dashes.sort_by_key(|d| (d.record.started, d.record.id.clone()));
 	if dashes.is_empty() {
@@ -914,7 +1157,13 @@ fn parse_time(text: &str) -> Result<i64> {
 	bail!("cannot read the time '{}': use HH:MM[:SS[.mmm]], an ISO 8601 date and time, Unix seconds or a relative -30s, -5m, -2h", text)
 }
 
-fn process_line(p: &ProcMirror) -> String {
+/// Seconds with the precision a boot time needs.
+fn format_secs(ms: i64) -> String {
+	format!("{:.1} s", ms.max(0) as f64 / 1000.0)
+}
+
+/// `daemon_version` tells whether the dashboard reports the start count at all.
+fn process_line(p: &ProcMirror, daemon_version: u32) -> String {
 	let info = &p.info;
 	let mut flags = Vec::new();
 	if let Some(pid) = info.pid {
@@ -933,10 +1182,14 @@ fn process_line(p: &ProcMirror) -> String {
 	if info.relaunch_pending {
 		flags.push(format!("restart pending ({} quick exits)", info.crash_chain));
 	}
-	if let Some(code) = info.exit_code {
-		if !info.started {
-			flags.push(format!("last exit code {}", code));
-		}
+	if daemon_version >= 3 {
+		flags.push(format!("start count {}", info.start_count));
+	}
+	if let Some(ms) = info.ready_ms {
+		flags.push(format!("ready after {}", format_secs(ms)));
+	}
+	if let Some(exit) = exit_text(info) {
+		flags.push(format!("last exit: {}", exit));
 	}
 	let (first, last) = (p.lines.front().map(|l| l.idx).unwrap_or(0), p.lines.back().map(|l| l.idx).unwrap_or(0));
 	flags.push(if first == 0 { "no lines".to_string() } else { format!("lines {}..{}", first, last) });
@@ -960,6 +1213,15 @@ fn tool_list_dashboards(shared: &Shared) -> Result<String> {
 		dashes.sort_by_key(|d| (d.record.started, d.record.id.clone()));
 		let mut out = format!("{} dashboard(s):\n", dashes.len());
 		for dash in dashes {
+			if !dash.synced {
+				out.push_str(&format!(
+					"- {}: connected, but it has not sent its state in the {} s since; dashboard pid {}\n",
+					dash_summary(dash),
+					dash.attached_at.elapsed().as_secs(),
+					dash.record.pid
+				));
+				continue;
+			}
 			let running = dash.procs.iter().filter(|p| p.info.started).count();
 			let ready = dash.procs.iter().filter(|p| p.info.state == ProcState::Ready).count();
 			out.push_str(&format!(
@@ -982,7 +1244,7 @@ async fn tool_start_dashboard(shared: &Shared, args: &Value) -> Result<String> {
 	let started = crate::ensure_daemon(&session).await?;
 	let wait = wait_seconds(args, 15.0);
 	let id = session.id.clone();
-	let found = shared.wait_until(Instant::now() + wait, |s| s.dashes.contains_key(&id)).await;
+	let found = shared.wait_until(Instant::now() + wait, |s| s.dashes.get(&id).is_some_and(|d| d.synced)).await;
 	let summary = shared.with(|s| s.dashes.get(&id).map(dash_summary));
 	match (found, summary) {
 		(true, Some(summary)) => Ok(format!("{} the dashboard {}.", if started { "Started" } else { "Already running:" }, summary)),
@@ -998,7 +1260,7 @@ async fn tool_start_dashboard(shared: &Shared, args: &Value) -> Result<String> {
 
 async fn tool_shutdown_dashboard(shared: &Shared, args: &Value) -> Result<String> {
 	let (id, summary, endpoint) = shared.with(|s| {
-		let id = find_dash(s, arg_str(args, "dashboard").as_deref())?;
+		let id = find_dash_any(s, arg_str(args, "dashboard").as_deref())?;
 		let dash = &s.dashes[&id];
 		let _ = dash.tx.send(ClientMsg::Shutdown);
 		Ok::<_, anyhow::Error>((id, dash_summary(dash), dash.record.endpoint.clone()))
@@ -1016,14 +1278,20 @@ async fn tool_shutdown_dashboard(shared: &Shared, args: &Value) -> Result<String
 		}
 		Ok(format!("The dashboard {} stopped its processes and exited.", summary))
 	} else {
-		let left: Vec<String> =
-			shared.with(|s| s.dashes.get(&id).map(|d| d.procs.iter().filter(|p| p.info.started).map(|p| p.info.name.clone()).collect()).unwrap_or_default());
-		Ok(format!(
-			"The dashboard {} is still stopping after {} s; still running: {}. It exits when they are gone.",
-			summary,
-			wait.as_secs_f64(),
-			left.join(", ")
-		))
+		// what still runs is known of a dashboard that has sent its state
+		let left: Option<Vec<String>> =
+			shared.with(|s| s.dashes.get(&id).filter(|d| d.synced).map(|d| d.procs.iter().filter(|p| p.info.started).map(|p| p.info.name.clone()).collect()));
+		Ok(match left {
+			Some(left) => format!(
+				"The dashboard {} is still stopping after {} s; still running: {}. It exits when they are gone.",
+				summary,
+				wait.as_secs_f64(),
+				left.join(", ")
+			),
+			None => {
+				format!("The dashboard {} has not exited after {} s; it has not sent its state, so what still runs is not known.", summary, wait.as_secs_f64())
+			}
+		})
 	}
 }
 
@@ -1035,7 +1303,7 @@ fn tool_list_processes(shared: &Shared, args: &Value) -> Result<String> {
 		let dash = &s.dashes[&id];
 		let mut out = format!("{}: {} processes\n", dash_summary(dash), dash.procs.len());
 		for p in &dash.procs {
-			out.push_str(&process_line(p));
+			out.push_str(&process_line(p, dash.daemon_version));
 			out.push('\n');
 		}
 		Ok(out)
@@ -1065,8 +1333,24 @@ fn tool_get_process(shared: &Shared, args: &Value) -> Result<String> {
 				format_duration(Duration::from_millis((now_ms() - started_at).max(0) as u64))
 			));
 		}
-		if let Some(code) = info.exit_code {
-			out.push_str(&format!("last exit code: {}\n", code));
+		if dash.daemon_version >= 3 {
+			out.push_str(&format!(
+				"start count: {}{}\n",
+				info.start_count,
+				if info.has_launch_ctrl {
+					" (since the dashboard opened; it writes the count to the start_count file of the launch control)"
+				} else {
+					" (since the dashboard opened)"
+				}
+			));
+			match info.ready_ms {
+				Some(ms) => out.push_str(&format!("ready after: {}{}\n", format_secs(ms), if info.pid.is_some() { "" } else { " (the last run)" })),
+				None if info.pid.is_some() => out.push_str("ready after: not ready yet\n"),
+				None => {}
+			}
+		}
+		if let Some(exit) = exit_text(info) {
+			out.push_str(&format!("last exit: {}\n", exit));
 		}
 		out.push_str(&format!("priority: {}\n", info.priority.map(|p| p.to_string()).unwrap_or_else(|| "none (starts one at a time)".to_string())));
 		out.push_str(&format!("auto start: {}\n", info.auto_start));
@@ -1267,6 +1551,21 @@ async fn tool_all(shared: &Shared, args: &Value, start: bool) -> Result<String> 
 	Ok(out)
 }
 
+/// What a process is doing now, for the report of a run that ended or began during a wait.
+fn now_text(info: &ProcessInfo, daemon_version: u32) -> String {
+	let mut out = format!("now {}", state_name(info.state));
+	if let Some(pid) = info.pid {
+		out.push_str(&format!(", pid {}", pid));
+	}
+	if info.relaunch_pending {
+		out.push_str(", restart pending");
+	}
+	if daemon_version >= 3 {
+		out.push_str(&format!(", start count {}", info.start_count));
+	}
+	out
+}
+
 async fn tool_wait_for_state(shared: &Shared, args: &Value) -> Result<String> {
 	let wanted = arg_str(args, "state").ok_or_else(|| anyhow!("the state parameter is required"))?.to_lowercase();
 	let pred: fn(&ProcessInfo) -> bool = match wanted.as_str() {
@@ -1275,18 +1574,116 @@ async fn tool_wait_for_state(shared: &Shared, args: &Value) -> Result<String> {
 		"stopped" => is_stopped,
 		other => bail!("unknown state '{}'; ready, running or stopped", other),
 	};
-	let (dash_id, idx, name) = shared.with(|s| {
-		let (dash_id, idx) = find_target(s, args)?;
-		Ok::<_, anyhow::Error>((dash_id.clone(), idx, s.dashes[&dash_id].procs[idx].info.name.clone()))
+	let stop_on_exit = arg_bool(args, "stop_on_exit").unwrap_or(true);
+	let mode = prefix_mode(args);
+	// waiting for the stop, a run that begins is the surprise; otherwise one that ends
+	let watch_began = wanted == "stopped";
+	let (dash_id, summary, indices, names, whole, seq0) = shared.with(|s| {
+		let dash_id = find_dash(s, arg_str(args, "dashboard").as_deref())?;
+		let dash = &s.dashes[&dash_id];
+		let (indices, whole): (Vec<usize>, bool) = match arg_str(args, "process") {
+			Some(name) => (vec![find_proc(dash, &name)?], false),
+			None => ((0..dash.procs.len()).collect(), true),
+		};
+		let names: Vec<String> = indices.iter().map(|&i| dash.procs[i].info.name.clone()).collect();
+		Ok::<_, anyhow::Error>((dash_id.clone(), dash_summary(dash), indices, names, whole, dash.event_seq))
 	})?;
 	let wait = wait_seconds(args, 60.0);
-	let reached = shared.wait_until(Instant::now() + wait, |s| s.dashes.get(&dash_id).and_then(|d| d.procs.get(idx)).is_none_or(|p| pred(&p.info))).await;
-	let state = shared.with(|s| s.dashes.get(&dash_id).and_then(|d| d.procs.get(idx)).map(|p| state_name(p.info.state)).unwrap_or("gone"));
-	if reached {
-		Ok(format!("'{}' is {} (state {}).", name, wanted, state))
-	} else {
-		Ok(format!("'{}' is not {} after {} s (state {}).", name, wanted, wait.as_secs_f64(), state))
+	let begun = Instant::now();
+	let relevant = |e: &ProcEvent| e.seq > seq0 && e.began == watch_began && names.contains(&e.name);
+	shared
+		.wait_until(begun + wait, |s| {
+			let Some(dash) = s.dashes.get(&dash_id) else {
+				return true;
+			};
+			if stop_on_exit && dash.events.iter().any(relevant) {
+				return true;
+			}
+			indices.iter().all(|&i| dash.procs.get(i).is_none_or(|p| pred(&p.info)))
+		})
+		.await;
+	let waited = begun.elapsed().as_secs_f64();
+	if stop_on_exit && shared.with(|s| s.dashes.get(&dash_id).is_some_and(|d| d.events.iter().any(relevant))) {
+		tokio::time::sleep(EVENT_SETTLE).await;
 	}
+	shared.with(|s| {
+		let Some(dash) = s.dashes.get(&dash_id) else {
+			return Ok(format!("The dashboard {} went away while waiting.", summary));
+		};
+		let procs: Vec<&ProcMirror> = indices.iter().filter_map(|&i| dash.procs.get(i)).collect();
+		let reached = procs.iter().all(|p| pred(&p.info));
+		let mut out = String::new();
+		// the runs that ended (or began) meanwhile come first: they are why the wait is over early
+		let mut shown: Vec<&str> = Vec::new();
+		for e in dash.events.iter().filter(|e| relevant(e)) {
+			let now =
+				dash.procs.iter().find(|p| p.info.name == e.name).map(|p| now_text(&p.info, dash.daemon_version)).unwrap_or_else(|| "now gone".to_string());
+			if e.began {
+				out.push_str(&format!("'{}' was started while waiting; {}.\n", e.name, now));
+			} else {
+				out.push_str(&format!(
+					"'{}' exited while waiting{}{}; {}.\n",
+					e.name,
+					if e.how.is_empty() { String::new() } else { format!(" ({})", e.how) },
+					e.up_ms.map(|ms| format!(", after {} up", format_duration(Duration::from_millis(ms as u64)))).unwrap_or_default(),
+					now
+				));
+			}
+			if !shown.contains(&e.name.as_str()) {
+				shown.push(&e.name);
+			}
+		}
+		// a process that is down comes with the way its last run ended: an exit from before the
+		// wait is no event of it, and this is where it shows
+		let not_there: Vec<String> = procs
+			.iter()
+			.filter(|p| !pred(&p.info))
+			.map(|p| {
+				let exit = exit_text(&p.info).filter(|_| !watch_began && p.info.pid.is_none());
+				format!("{} {}{}", p.info.name, state_name(p.info.state), exit.map(|e| format!(" (last exit: {})", e)).unwrap_or_default())
+			})
+			.collect();
+		if whole {
+			let count = procs.len();
+			if reached {
+				out.push_str(&format!("Every process of {} is {} ({} processes, waited {:.1} s).\n", summary, wanted, count, waited));
+			} else {
+				out.push_str(&format!(
+					"Not every process of {} is {} after {:.1} s: {} of {} are; not {}: {}.\n",
+					summary,
+					wanted,
+					waited,
+					count - not_there.len(),
+					count,
+					wanted,
+					not_there.join(", ")
+				));
+			}
+		} else {
+			let state = procs.first().map(|p| state_name(p.info.state)).unwrap_or("gone");
+			// a stop that was waited for comes with the way the run ended
+			let exit = procs.first().and_then(|p| exit_text(&p.info)).filter(|_| watch_began);
+			if reached {
+				out.push_str(&format!("'{}' is {} (state {}{}).\n", names[0], wanted, state, exit.map(|e| format!(", last exit: {}", e)).unwrap_or_default()));
+			} else {
+				out.push_str(&format!("'{}' is not {} after {:.1} s (state {}).\n", names[0], wanted, waited, state));
+			}
+		}
+		for name in shown.iter().take(3) {
+			if let Some(p) = dash.procs.iter().find(|p| p.info.name == *name) {
+				let skip = p.lines.len().saturating_sub(EVENT_LINES);
+				out.push_str(&format!("Last lines of '{}' (idx time type message):\n", name));
+				for line in p.lines.iter().skip(skip) {
+					out.push_str(&format_line(line, None, mode));
+					out.push('\n');
+				}
+			}
+		}
+		if shown.len() > 3 {
+			out.push_str(&format!("The lines of {} are in get_log.\n", shown[3..].join(", ")));
+		}
+		Ok(out)
+	})
 }
 
 // *** command tools ***
@@ -1452,6 +1849,28 @@ struct LogFilter {
 	pattern: Option<Regex>,
 }
 
+/// The log types of the levels argument: a list, or one string with commas or spaces; NeL
+/// types in upper case, the others in lower case. An unknown one is an error, since it would
+/// match nothing and read as a quiet log.
+fn parse_levels(args: &Value) -> Result<Vec<String>> {
+	let mut levels = Vec::new();
+	for entry in arg_strs(args, "levels") {
+		for word in entry.split(|c: char| c == ',' || c.is_whitespace()).filter(|w| !w.is_empty()) {
+			match LOG_TYPES.iter().find(|t| t.eq_ignore_ascii_case(word)) {
+				Some(known) => levels.push(known.to_string()),
+				None => bail!("unknown log type '{}' in levels; one of {}", word, LOG_TYPES.join(", ")),
+			}
+		}
+	}
+	Ok(levels)
+}
+
+/// The index of the note the dashboard wrote at the last start of the process; the lines of
+/// the current run follow it. When that note is no longer held, every held line is of this run.
+fn run_start_idx(p: &ProcMirror) -> u64 {
+	p.lines.iter().rev().find(|l| l.raw && l.text == "> Process Started").map(|l| l.idx).unwrap_or(0)
+}
+
 impl LogFilter {
 	fn accepts(&self, line: &Line) -> bool {
 		if self.from_idx.is_some_and(|v| line.idx < v) || self.to_idx.is_some_and(|v| line.idx > v) {
@@ -1484,22 +1903,14 @@ async fn tool_get_log(shared: &Shared, args: &Value) -> Result<String> {
 		to_idx: arg_u64(args, "to_idx"),
 		from_ts: arg_str(args, "from_time").map(|t| parse_time(&t)).transpose()?,
 		to_ts: arg_str(args, "to_time").map(|t| parse_time(&t)).transpose()?,
-		levels: arg_strs(args, "levels")
-			.into_iter()
-			.map(|l| {
-				if l.eq_ignore_ascii_case("out") || l.eq_ignore_ascii_case("dash") || l.eq_ignore_ascii_case("log") {
-					l.to_lowercase()
-				} else {
-					l.to_uppercase()
-				}
-			})
-			.collect(),
+		levels: parse_levels(args)?,
 		pattern: match arg_str(args, "match") {
 			Some(p) => Some(Regex::new(&format!("(?i){}", p)).map_err(|e| anyhow!("bad match expression: {}", e))?),
 			None => None,
 		},
 	};
-	let has_range = filter.from_idx.is_some() || filter.to_idx.is_some() || filter.from_ts.is_some() || filter.to_ts.is_some();
+	let since_start = arg_bool(args, "since_start").unwrap_or(false);
+	let has_range = since_start || filter.from_idx.is_some() || filter.to_idx.is_some() || filter.from_ts.is_some() || filter.to_ts.is_some();
 	let max_lines = (arg_u64(args, "max_lines").unwrap_or(200) as usize).clamp(1, MAX_LOG_LINES);
 	let last = arg_u64(args, "last").map(|v| v as usize).or(if has_range { None } else { Some(DEFAULT_LOG_LINES) });
 	let follow = Duration::from_secs_f64(arg_f64(args, "follow_seconds").unwrap_or(0.0).clamp(0.0, MAX_WAIT));
@@ -1516,28 +1927,38 @@ async fn tool_get_log(shared: &Shared, args: &Value) -> Result<String> {
 		let mut picked: Vec<Picked> = Vec::new();
 		let mut header = String::new();
 		let mut cursors: Vec<u64> = Vec::new();
+		let mut without: Vec<&str> = Vec::new();
 		for &pi in &proc_indices {
 			let p = &dash.procs[pi];
-			let matching: Vec<&Line> = p.lines.iter().filter(|l| filter.accepts(l)).collect();
+			let run_start = if since_start { run_start_idx(p) } else { 0 };
+			let matching: Vec<&Line> = p.lines.iter().filter(|l| l.idx >= run_start && filter.accepts(l)).collect();
 			let total = matching.len();
 			let take: Vec<&Line> = match last {
 				Some(n) => matching.into_iter().rev().take(n).collect::<Vec<_>>().into_iter().rev().collect(),
 				None => matching,
 			};
 			let (first_held, last_held) = (p.lines.front().map(|l| l.idx).unwrap_or(0), p.lines.back().map(|l| l.idx).unwrap_or(0));
-			header.push_str(&format!(
-				"# {}: {} of {} matching lines, held {}..{}, next idx {}\n",
-				if several { format!("[{}]", p.info.name) } else { p.info.name.clone() },
-				take.len(),
-				total,
-				first_held,
-				last_held,
-				p.info.next_idx
-			));
+			if several && total == 0 {
+				// the processes a selection over the dashboard finds nothing in share one line
+				without.push(p.info.name.as_str());
+			} else {
+				header.push_str(&format!(
+					"# {}: {} of {} matching lines, held {}..{}, next idx {}\n",
+					if several { format!("[{}]", p.info.name) } else { p.info.name.clone() },
+					take.len(),
+					total,
+					first_held,
+					last_held,
+					p.info.next_idx
+				));
+			}
 			for l in take {
 				picked.push(Picked { ts: l.ts, idx: l.idx, proc_idx: pi, text: format_line(l, if several { Some(&p.info.name) } else { None }, mode) });
 			}
 			cursors.push(last_held.max(p.info.next_idx.saturating_sub(1)));
+		}
+		if !without.is_empty() {
+			header.push_str(&format!("# no matching lines: {}\n", without.join(", ")));
 		}
 		Ok::<_, anyhow::Error>((dash_id, proc_indices, picked, header, cursors))
 	})?;
@@ -1658,5 +2079,145 @@ mod tests {
 		assert!(parse_time("nonsense").is_err());
 		assert_eq!(parse_time("1700000000").expect("seconds"), 1_700_000_000_000);
 		assert_eq!(parse_time("1700000000123").expect("millis"), 1_700_000_000_123);
+	}
+
+	fn test_dash() -> Dash {
+		let record = Record {
+			id: "0".to_string(),
+			ini_path: "x.ini".to_string(),
+			title: "Test".to_string(),
+			endpoint: String::new(),
+			pid: 1,
+			started: 0,
+			tool: String::new(),
+		};
+		let (tx, _rx) = mpsc::unbounded_channel::<ClientMsg>();
+		Dash::new(record, tx)
+	}
+
+	fn test_info(name: &str, pid: Option<u32>, started_at: Option<i64>) -> ProcessInfo {
+		let json = json!({
+			"name": name, "label": name, "title": name, "state": if pid.is_some() { "Ready" } else { "Stopped" }, "started": pid.is_some(),
+			"control": false, "control_connected": false, "labels": [], "pid": pid, "started_at": started_at,
+		});
+		serde_json::from_value(json).expect("a process info with only the fields of version 1")
+	}
+
+	fn snapshot(name: &str) -> DaemonMsg {
+		DaemonMsg::Snapshot { name: name.to_string(), lines: Vec::new() }
+	}
+
+	#[test]
+	fn synced_by_the_marker() {
+		let mut dash = test_dash();
+		dash.apply(DaemonMsg::Hello { version: 3, title: "Test".to_string() });
+		dash.apply(DaemonMsg::Processes { processes: vec![test_info("a", Some(1), Some(10)), test_info("b", None, None)] });
+		dash.apply(snapshot("a"));
+		dash.apply(snapshot("b"));
+		// the command table of the last process may still follow
+		assert!(!dash.synced);
+		dash.apply(DaemonMsg::Synced);
+		assert!(dash.synced);
+	}
+
+	#[test]
+	fn synced_without_the_marker() {
+		// a dashboard of protocol version 2 ends its state with the Snapshot of its last process
+		// and, when that process has one, its command table
+		let mut dash = test_dash();
+		dash.apply(DaemonMsg::Hello { version: 2, title: "Test".to_string() });
+		// a line reset that was broadcast before the state does not count
+		dash.apply(snapshot("b"));
+		assert!(!dash.synced && !dash.settling);
+		dash.apply(DaemonMsg::Processes { processes: vec![test_info("a", Some(1), Some(10)), test_info("b", None, None)] });
+		dash.apply(snapshot("a"));
+		assert!(!dash.synced && !dash.settling);
+		dash.apply(snapshot("b"));
+		// the command table of b may follow: not yet
+		assert!(!dash.synced && dash.settling);
+		dash.apply(DaemonMsg::Commands { name: "b".to_string(), commands: Vec::new() });
+		assert!(dash.synced && !dash.settling);
+		// one whose last process has no command table: when nothing follows for a moment
+		let mut quiet = test_dash();
+		quiet.apply(DaemonMsg::Hello { version: 2, title: "Test".to_string() });
+		quiet.apply(DaemonMsg::Processes { processes: vec![test_info("a", None, None)] });
+		quiet.apply(snapshot("a"));
+		assert!(!quiet.synced && quiet.settling);
+		quiet.settled();
+		assert!(quiet.synced);
+		// and one without processes after the list itself
+		let mut empty = test_dash();
+		empty.apply(DaemonMsg::Hello { version: 2, title: "Test".to_string() });
+		empty.apply(DaemonMsg::Processes { processes: Vec::new() });
+		assert!(empty.settling);
+		empty.apply(DaemonMsg::Notice { text: String::new() });
+		assert!(empty.synced);
+		// the marker of a newer dashboard is not anticipated
+		let mut marked = test_dash();
+		marked.apply(DaemonMsg::Hello { version: 3, title: "Test".to_string() });
+		marked.apply(DaemonMsg::Processes { processes: Vec::new() });
+		assert!(!marked.synced && !marked.settling);
+	}
+
+	#[test]
+	fn the_synced_marker_is_a_bare_variant() {
+		assert!(matches!(proto::parse_msg::<DaemonMsg>("\"Synced\"").expect("parsed"), DaemonMsg::Synced));
+		assert_eq!(serde_json::to_string(&DaemonMsg::Synced).expect("written"), "\"Synced\"");
+	}
+
+	#[test]
+	fn runs_that_end_and_begin_are_events() {
+		let mut dash = test_dash();
+		dash.apply(DaemonMsg::Processes { processes: vec![test_info("a", Some(1), Some(10)), test_info("b", None, None)] });
+		assert!(dash.events.is_empty());
+		// a state change of the same run is none
+		dash.apply(DaemonMsg::Process { info: test_info("a", Some(1), Some(10)) });
+		assert!(dash.events.is_empty());
+		// the exit
+		let mut gone = test_info("a", None, None);
+		gone.exit_code = Some(3);
+		dash.apply(DaemonMsg::Process { info: gone });
+		assert_eq!(dash.events.len(), 1);
+		assert!(!dash.events[0].began);
+		assert_eq!(dash.events[0].name, "a");
+		assert_eq!(dash.events[0].how, "code 3");
+		// the relaunch, and the first start of another
+		dash.apply(DaemonMsg::Process { info: test_info("a", Some(2), Some(20)) });
+		dash.apply(DaemonMsg::Process { info: test_info("b", Some(3), Some(30)) });
+		assert_eq!(dash.events.len(), 3);
+		assert!(dash.events[1].began && dash.events[1].name == "a");
+		assert!(dash.events[2].began && dash.events[2].name == "b");
+		// a run replaced within one message is an end and a beginning
+		let mut again = test_info("a", Some(4), Some(40));
+		again.last_exit = "crashed, 0xC0000005".to_string();
+		dash.apply(DaemonMsg::Process { info: again });
+		assert_eq!(dash.events.len(), 5);
+		assert!(!dash.events[3].began && dash.events[3].how == "crashed, 0xC0000005");
+		assert!(dash.events[4].began);
+		assert_eq!(dash.events[4].seq, 5);
+		// a pid that goes missing while the start time stays is the same run
+		dash.apply(DaemonMsg::Process { info: test_info("a", None, Some(40)) });
+		assert_eq!(dash.events.len(), 5);
+	}
+
+	#[test]
+	fn levels_argument() {
+		assert_eq!(parse_levels(&json!({ "levels": ["wrn", "ERR", "Out"] })).expect("a list"), vec!["WRN", "ERR", "out"]);
+		assert_eq!(parse_levels(&json!({ "levels": "WRN, err ast" })).expect("a string"), vec!["WRN", "ERR", "AST"]);
+		assert!(parse_levels(&json!({})).expect("none").is_empty());
+		assert!(parse_levels(&json!({ "levels": ["WARN"] })).is_err());
+	}
+
+	#[test]
+	fn lines_since_the_last_start() {
+		let mut p = ProcMirror::new(test_info("a", Some(1), Some(10)));
+		let texts = ["> Process Started", "one", "> Process Exited (code 0)", "> Process Started", "two"];
+		for (i, text) in texts.iter().enumerate() {
+			p.lines.push_back(Line { idx: i as u64 + 1, ts: 0, raw: true, text: text.to_string() });
+		}
+		assert_eq!(run_start_idx(&p), 4);
+		// the start note rolled out of the held lines: all of them are of this run
+		p.lines.drain(..4);
+		assert_eq!(run_start_idx(&p), 0);
 	}
 }
