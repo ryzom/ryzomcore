@@ -1413,6 +1413,13 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 		nlwarning("LAUNCH: Failed launched '%s' with arg '%s' and error: %s", programName.c_str(), arguments.c_str(), error.c_str());
 	}
 
+	// the handles of a process whose wait failed are still open (closed after the error was read above)
+	if (ret != WAIT_OBJECT_0)
+	{
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	}
+
 	return -1;
 #else
 	// program name is the only required string
@@ -1875,7 +1882,13 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 				// create process
 				PROCESS_INFORMATION pi;
-				return createProcess(program, document, false, pi);
+				if (!createProcess(program, document, false, pi))
+					return false;
+
+				// the program runs on its own, its handles are not needed
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				return true;
 			}
 		}
 	}
