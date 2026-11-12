@@ -117,7 +117,8 @@ QJsonObject processInfo(const CProcessEntry *entry)
 	for (const QString &label : entry->labels())
 		labels.append(label);
 	o["labels"] = labels;
-	o["pid"] = entry->running() ? QJsonValue(entry->pid()) : QJsonValue();
+	// the process object outlives the process by a moment, in which it has no id any more
+	o["pid"] = entry->running() && entry->pid() > 0 ? QJsonValue(entry->pid()) : QJsonValue();
 	o["started_at"] = entry->running() ? QJsonValue(entry->startedAt()) : QJsonValue();
 	o["exit_code"] = entry->hasExitCode() ? QJsonValue(entry->exitCode()) : QJsonValue();
 	o["relaunch_pending"] = entry->relaunchPending();
@@ -132,6 +133,9 @@ QJsonObject processInfo(const CProcessEntry *entry)
 	o["next_idx"] = (qint64)entry->nextIdx();
 	o["first_idx"] = entry->lines().isEmpty() ? 0 : (qint64)entry->lines().first().Idx;
 	o["channel_version"] = entry->controlConnected() ? entry->channelVersion() : 0;
+	o["start_count"] = entry->startCount();
+	o["ready_ms"] = entry->readyMs() >= 0 ? QJsonValue(entry->readyMs()) : QJsonValue();
+	o["last_exit"] = entry->lastExit();
 	return o;
 }
 

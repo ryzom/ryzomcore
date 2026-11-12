@@ -482,6 +482,8 @@ impl App {
 			}
 			DaemonMsg::Notice { text } => self.notice(text),
 			DaemonMsg::ExecDone { .. } => {}
+			// the terminal draws what it has as it comes
+			DaemonMsg::Synced => {}
 			DaemonMsg::Bye => {}
 		}
 	}

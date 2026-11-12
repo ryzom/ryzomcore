@@ -86,7 +86,16 @@ struct Proc {
 	stdin: Option<UnboundedSender<String>>,
 	pid: Option<u32>,
 	started_at: Option<i64>,
+	/// The exit code of the last run that ended by itself with one; kept while the next run goes on.
 	exit_code: Option<i32>,
+	/// How the last run that ended went out, as the exit note says it; empty before the first exit.
+	last_exit: String,
+	/// Launches since the daemon started; a launch control section writes the same count to its file.
+	start_count: u32,
+	/// Milliseconds the current run took to get ready, or the last one once it ended.
+	ready_ms: Option<i64>,
+	/// The daemon killed the current run itself, so its exit is no crash.
+	kill_requested: bool,
 	/// The index the next line gets, from 1; never reused, so a client can name a range exactly.
 	next_idx: u64,
 	/// The console channel protocol version the service announced; 0 before its hello.
@@ -124,6 +133,9 @@ impl Proc {
 			pid: if self.running() { self.pid } else { None },
 			started_at: if self.running() { self.started_at } else { None },
 			exit_code: self.exit_code,
+			last_exit: self.last_exit.clone(),
+			start_count: self.start_count,
+			ready_ms: self.ready_ms,
 			relaunch_pending: self.relaunch_pending,
 			crash_chain: self.crash_chain,
 			has_launch_ctrl: self.launch_ctrl.is_some(),
@@ -174,6 +186,34 @@ fn escape_field(value: &str) -> String {
 		}
 	}
 	out
+}
+
+/// The exit code a run leaves, when it ended by itself with one, and how it ended in the words
+/// of the exit note: `code 0`, `killed`, `crashed, 0xC0000005`, `crashed, signal 11`. On Windows
+/// a negative exit code is the status of the exception that ended the process, and the exit
+/// code of a process the daemon killed is the one the kill gave it; elsewhere a process that
+/// still exited by itself after the kill was sent keeps its code.
+fn describe_exit(status: Option<std::process::ExitStatus>, killed: bool) -> (Option<i32>, String) {
+	if killed && (cfg!(windows) || status.is_none_or(|s| s.code().is_none())) {
+		return (None, "killed".to_string());
+	}
+	let Some(status) = status else {
+		return (None, "no exit status".to_string());
+	};
+	match status.code() {
+		Some(code) if cfg!(windows) && code < 0 => (Some(code), format!("crashed, 0x{:08X}", code as u32)),
+		Some(code) => (Some(code), format!("code {}", code)),
+		None => {
+			#[cfg(unix)]
+			{
+				use std::os::unix::process::ExitStatusExt;
+				if let Some(signal) = status.signal() {
+					return (None, format!("crashed, signal {}", signal));
+				}
+			}
+			(None, "no exit status".to_string())
+		}
+	}
 }
 
 fn unescape_field(value: &str) -> String {
@@ -367,6 +407,10 @@ impl Daemon {
 				pid: None,
 				started_at: None,
 				exit_code: None,
+				last_exit: String::new(),
+				start_count: 0,
+				ready_ms: None,
+				kill_requested: false,
 				next_idx: 1,
 				channel_version: 0,
 				lines: VecDeque::new(),
@@ -437,6 +481,9 @@ impl Daemon {
 	fn set_state(&mut self, idx: usize, state: ProcState) {
 		let p = &mut self.procs[idx];
 		p.state = state;
+		if state == ProcState::Ready && p.ready_ms.is_none() {
+			p.ready_ms = p.launched_at.map(|t| t.elapsed().as_millis() as i64);
+		}
 		let (value, started) = match state {
 			ProcState::New => (None, false),
 			ProcState::Launched | ProcState::Captured | ProcState::Ready => (Some(launch_ctrl::RUNNING), true),
@@ -534,7 +581,9 @@ impl Daemon {
 				p.relaunch_pending = false;
 				p.launched_at = Some(Instant::now());
 				p.started_at = Some(chrono::Local::now().timestamp_millis());
-				p.exit_code = None;
+				p.start_count += 1;
+				p.ready_ms = None;
+				p.kill_requested = false;
 				if let Some(lc) = &mut p.launch_ctrl {
 					lc.count_launch();
 				}
@@ -632,9 +681,11 @@ impl Daemon {
 	}
 
 	fn kill_child(&mut self, idx: usize) {
-		if let Some(child) = &mut self.procs[idx].child {
+		let p = &mut self.procs[idx];
+		if let Some(child) = &mut p.child {
+			p.kill_requested = true;
 			if let Err(e) = child.start_kill() {
-				log::note(&format!("[{}] kill failed: {}", self.procs[idx].cfg.name, e));
+				log::note(&format!("[{}] kill failed: {}", p.cfg.name, e));
 			}
 		}
 	}
@@ -655,15 +706,14 @@ impl Daemon {
 	}
 
 	/// ProcessHost.processExitedInvoked.
-	fn on_exit(&mut self, idx: usize, code: Option<i32>) {
+	fn on_exit(&mut self, idx: usize, status: Option<std::process::ExitStatus>) {
 		let p = &mut self.procs[idx];
 		p.child = None;
 		p.stdin = None;
+		let (code, how) = describe_exit(status, p.kill_requested);
 		p.exit_code = code;
-		let text = match code {
-			Some(code) => format!("> Process Exited (code {})", code),
-			None => "> Process Exited".to_string(),
-		};
+		p.last_exit = how.clone();
+		let text = format!("> Process Exited ({})", how);
 		self.push_output(idx, StyledLine::plain(text));
 		self.set_state(idx, ProcState::Stopped);
 		let shutting_down = self.shutting_down;
@@ -733,14 +783,14 @@ impl Daemon {
 	fn reap(&mut self, idx: usize) {
 		let exited = match &mut self.procs[idx].child {
 			Some(child) => match child.try_wait() {
-				Ok(Some(status)) => Some(status.code()),
+				Ok(Some(status)) => Some(Some(status)),
 				Ok(None) => None,
 				Err(_) => Some(None),
 			},
 			None => None,
 		};
-		if let Some(code) = exited {
-			self.on_exit(idx, code);
+		if let Some(status) = exited {
+			self.on_exit(idx, status);
 		}
 	}
 
@@ -950,6 +1000,8 @@ impl Daemon {
 				send(DaemonMsg::Commands { name: p.cfg.name.clone(), commands: p.commands.values().cloned().collect() });
 			}
 		}
+		// the client knows by this that it holds the whole state, and may answer from it
+		send(DaemonMsg::Synced);
 		self.clients.insert(id, tx);
 	}
 
@@ -1143,4 +1195,36 @@ pub async fn run(session: Session) -> Result<()> {
 	session.cleanup_runtime_dir();
 	log::note("daemon exited");
 	Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use std::process::ExitStatus;
+
+	#[test]
+	fn exits_in_words() {
+		assert_eq!(describe_exit(None, true), (None, "killed".to_string()));
+		assert_eq!(describe_exit(None, false), (None, "no exit status".to_string()));
+		#[cfg(unix)]
+		{
+			use std::os::unix::process::ExitStatusExt;
+			// a wait status: the exit code in the second byte, or the signal in the first
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(5 << 8)), false), (Some(5), "code 5".to_string()));
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(11)), false), (None, "crashed, signal 11".to_string()));
+			// the signal of a kill the daemon sent itself is no crash
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(9)), true), (None, "killed".to_string()));
+			// a process that exited by itself before the kill reached it
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(2 << 8)), true), (Some(2), "code 2".to_string()));
+		}
+		#[cfg(windows)]
+		{
+			use std::os::windows::process::ExitStatusExt;
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(3)), false), (Some(3), "code 3".to_string()));
+			// the exit code of a kill is the daemon's own
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(1)), true), (None, "killed".to_string()));
+			// an access violation
+			assert_eq!(describe_exit(Some(ExitStatus::from_raw(0xC0000005)), false), (Some(-1073741819), "crashed, 0xC0000005".to_string()));
+		}
+	}
 }

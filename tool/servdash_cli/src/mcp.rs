@@ -191,7 +191,7 @@ impl Dash {
 			DaemonMsg::ExecDone { id, ok, .. } => {
 				self.exec_results.insert(id, ok);
 			}
-			DaemonMsg::Notice { .. } | DaemonMsg::Bye => {}
+			DaemonMsg::Notice { .. } | DaemonMsg::Synced | DaemonMsg::Bye => {}
 		}
 	}
 }
