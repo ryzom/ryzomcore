@@ -266,7 +266,7 @@ def FilterPrefix(target, spec):
 	global NeLSpecTools
 	global NeLSpecSamples
 	global NeLSpecPluginMax
-	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua", "boost", "luabind" , "mariadb" ]
+	nelDirs = [ "zlib", "openssl", "curl", "libjpeg", "libpng", "giflib", "iconv", "libxml2", "freetype2", "ogg", "vorbis", "openal", "gl", "gles", "lua", "boost", "luabind" , "mariadb" ]
 	toolsDirs = [ "squish", "assimp" ]
 	serverClientDirs = [ "msquic" ]
 	tc = NeLToolchains[target["Toolchain"]]
