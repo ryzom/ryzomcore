@@ -231,7 +231,8 @@ public:
 	void setColour(uint8 colour);
 	
 	void setOutpostSide(OUTPOSTENUMS::TPVPSide side);
-	void setOutpostFactions(OUTPOSTENUMS::TPVPSide side);
+	/// \param outpostAlias the alias string of the outpost the group fights for (LigoConfig.aliasToString form)
+	void setOutpostFactions(const std::string &outpostAlias, OUTPOSTENUMS::TPVPSide side);
 	bool isRingGrp() const { return _RingGrp;}
 	
 private:

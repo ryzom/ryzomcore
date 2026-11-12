@@ -877,7 +877,7 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 	}*/
 	
 	grp->setOutpostSide(side);
-	grp->setOutpostFactions(side);
+	grp->setOutpostFactions(getAliasString(), side);
 
 	grp->_AggroRange = 25;
 	grp->_UpdateNbTicks = 10;

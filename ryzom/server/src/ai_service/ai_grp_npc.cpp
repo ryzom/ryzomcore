@@ -1116,26 +1116,29 @@ void CGroupNpc::setOutpostSide(OUTPOSTENUMS::TPVPSide side)
 	}
 }
 
-void CGroupNpc::setOutpostFactions(OUTPOSTENUMS::TPVPSide side)
+void CGroupNpc::setOutpostFactions(const std::string &outpostAlias, OUTPOSTENUMS::TPVPSide side)
 {
+	// The factions carry the alias of the outpost, not the one of the group: a squad is a
+	// dynamic group whose own alias is 0, and the players' side of the test
+	// (CGrpProfileFaction::entityHavePartOfFactions) is built from the outpost alias
 	// Attack only the declared ennemies of the outpost
 	if (side == OUTPOSTENUMS::OutpostOwner)
 	{
 		// Bots factions
-		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
-		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		faction().addProperty(NLMISC::toString("outpost:%s:bot_defender", outpostAlias.c_str()));
+		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", outpostAlias.c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", outpostAlias.c_str()));
 		// Players faction
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", outpostAlias.c_str()));
 	}
 	if (side == OUTPOSTENUMS::OutpostAttacker)
 	{
 		// Bots factions
-		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
-		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		faction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", outpostAlias.c_str()));
+		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", outpostAlias.c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", outpostAlias.c_str()));
 		// Players faction
-		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", outpostAlias.c_str()));
 	}
 }
 
