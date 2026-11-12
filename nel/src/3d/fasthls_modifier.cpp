@@ -117,7 +117,7 @@ CRGBA		CFastHLSModifier::convert(uint H, uint L, uint S)
 #	pragma warning( disable : 4799 )
 #endif
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(push, off)
 #endif
 
@@ -262,7 +262,7 @@ uint16		CFastHLSModifier::applyHLSMod(uint16 colorIn, uint8 dHue, uint dLum, uin
 
 	return retVal;
 }
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(pop)
 #endif
 
@@ -271,7 +271,7 @@ uint16		CFastHLSModifier::applyHLSMod(uint16 colorIn, uint8 dHue, uint dLum, uin
 #endif
 
 // ***************************************************************************
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(push, off)
 #endif
 void		CFastHLSModifier::convertDDSBitmapDXTC1Or1A(CBitmap &dst, const CBitmap &src, uint8 dh, uint dLum, uint dSat)
@@ -373,12 +373,12 @@ void		CFastHLSModifier::convertDDSBitmapDXTC1Or1A(CBitmap &dst, const CBitmap &s
 		_asm	emms;
 #endif
 }
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(pop)
 #endif
 
 // ***************************************************************************
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(push, off)
 #endif
 void		CFastHLSModifier::convertDDSBitmapDXTC3Or5(CBitmap &dst, const CBitmap &src, uint8 dh, uint dLum, uint dSat)
@@ -418,7 +418,7 @@ void		CFastHLSModifier::convertDDSBitmapDXTC3Or5(CBitmap &dst, const CBitmap &sr
 		_asm	emms;
 #endif
 }
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(pop)
 #endif
 

@@ -229,7 +229,7 @@ test_again:
 #endif
 
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(push, off)
 #endif
 
@@ -512,7 +512,7 @@ private:
 
 #endif
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 #pragma managed(pop)
 #endif
 
