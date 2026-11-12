@@ -7170,6 +7170,16 @@ bool CCharacter::addCatalyserXpBonus( uint32& slot, SSkill * skill, double xpGai
 } // addCatalyserXpBonus
 
 
+//---------------------------------------------------
+// refillScoresOnLevelUp : a new level refills hit points, stamina, sap and focus
+//---------------------------------------------------
+static void refillScoresOnLevelUp(CPhysicalScores &scores)
+{
+	scores._PhysicalScores[SCORES::hit_points].Current = scores._PhysicalScores[SCORES::hit_points].Max;
+	scores._PhysicalScores[SCORES::stamina].Current = scores._PhysicalScores[SCORES::stamina].Max;
+	scores._PhysicalScores[SCORES::sap].Current = scores._PhysicalScores[SCORES::sap].Max;
+	scores._PhysicalScores[SCORES::focus].Current = scores._PhysicalScores[SCORES::focus].Max;
+}
 
 //---------------------------------------------------
 // addXpToSkillInternal : Add amount of xp gain to a skill
@@ -7564,20 +7574,19 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 //			EGSPD::skillProgessed(_Id, skillName, skill->Base);
 			log_Character_LevelUp(_Id, skillName, skill->Base);
 			// resplenish the enrgies as player gets a new level
-			_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = _PhysScores._PhysicalScores[ SCORES::hit_points ].Max;
-			_PhysScores._PhysicalScores[ SCORES::stamina ].Current = _PhysScores._PhysicalScores[ SCORES::stamina ].Max;
-			_PhysScores._PhysicalScores[ SCORES::sap ].Current = _PhysScores._PhysicalScores[ SCORES::sap ].Max;
-			_PhysScores._PhysicalScores[ SCORES::focus ].Current = _PhysScores._PhysicalScores[ SCORES::focus ].Max;
+			refillScoresOnLevelUp(_PhysScores);
 		}
 		else
 		{
 			//check if skill have children skill
 			if ( ! SkillsTree->SkillsTree[ skillEnum ].ChildSkills.empty() )
 			{
+				bool childUnlocked = false;
 				for( vector<SKILLS::ESkills>::const_iterator it = SkillsTree->SkillsTree[ skillEnum ].ChildSkills.begin(); it != SkillsTree->SkillsTree[ skillEnum ].ChildSkills.end(); ++it )
 				{
 					if( _Skills._Skills[ *it ].Base == 0 )
 					{
+						childUnlocked = true;
 						_Skills._Skills[ *it ].Base = skill->Base + 1;
 						if(_Skills._Skills[ *it ].MaxLvlReached < (skill->Base + 1))
 							_Skills._Skills[ *it ].MaxLvlReached = skill->Base + 1;
@@ -7626,6 +7635,9 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 						processMissionEvent(event);
 					}
 				}
+				// the unlocked skills start one level above this one: a new level, as on the path above
+				if (childUnlocked)
+					refillScoresOnLevelUp(_PhysScores);
 				skill->Xp = stage->XpForPointSkill;
 			}
 			else
