@@ -453,6 +453,324 @@ TEST(CUTMiscBitmap, jpegScanCountIsLimited)
 	EXPECT_EQ(0, loadImage(many, makeProgressiveJPG(64, 600)));
 }
 
+// a JPEG segment: the marker, the length, which counts its own 2 bytes, and the data
+static void pushJPGSegment(TBytes &jpg, uint8 marker, const TBytes &data)
+{
+	jpg.push_back(0xff);
+	jpg.push_back(marker);
+	jpg.push_back((uint8)((data.size() + 2) >> 8));
+	jpg.push_back((uint8)(data.size() + 2));
+	jpg.insert(jpg.end(), data.begin(), data.end());
+}
+
+// the data of a JPEG frame header of one component
+static TBytes makeJPGFrame(uint32 width, uint32 height)
+{
+	TBytes frame(9, 0);
+	frame[0] = 8;
+	putBE16(frame, 1, height);
+	putBE16(frame, 3, width);
+	frame[5] = 1;
+	frame[6] = 1;
+	frame[7] = 0x11;
+	return frame;
+}
+
+// a JPEG file of the segments given, between the start and the end of image markers
+static TBytes makeJPG(const TBytes &segments)
+{
+	TBytes jpg;
+	jpg.push_back(0xff);
+	jpg.push_back(0xd8);
+	jpg.insert(jpg.end(), segments.begin(), segments.end());
+	jpg.push_back(0xff);
+	jpg.push_back(0xd9);
+	return jpg;
+}
+
+static void loadSize(const TBytes &bytes, uint32 &width, uint32 &height)
+{
+	CMemStream stream(true);
+	stream.fill(&bytes[0], (uint32)bytes.size());
+	width = ~0u;
+	height = ~0u;
+	CBitmap::loadSize(stream, width, height);
+}
+
+TEST(CUTMiscBitmap, jpegSizeIsNotTheOneOfTheThumbnail)
+{
+	// a photo of 1024x768 whose Exif segment holds a thumbnail of 160x120, which is a JPEG image of its own: the size
+	// read was the one of the thumbnail
+	const TBytes thumbnailFrame = makeJPGFrame(160, 120);
+	TBytes thumbnail;
+	pushJPGSegment(thumbnail, 0xc0, thumbnailFrame);
+	thumbnail = makeJPG(thumbnail);
+	const char exifHeader[] = "Exif\0\0II*\0\x08\0\0\0";
+	TBytes exif(exifHeader, exifHeader + sizeof(exifHeader) - 1);
+	exif.insert(exif.end(), thumbnail.begin(), thumbnail.end());
+	const char jfifHeader[] = "JFIF\0\x01\x01\0\0\x01\0\x01\0\0";
+	const TBytes jfif(jfifHeader, jfifHeader + sizeof(jfifHeader) - 1);
+
+	for (uint withJfif = 0; withJfif < 2; ++withJfif)
+	{
+		SCOPED_TRACE(withJfif);
+		TBytes segments;
+		if (withJfif)
+			pushJPGSegment(segments, 0xe0, jfif);
+		pushJPGSegment(segments, 0xe1, exif);
+		pushJPGSegment(segments, 0xdb, TBytes(65, 1));
+		pushJPGSegment(segments, 0xc0, makeJPGFrame(1024, 768));
+		uint32 width, height;
+		loadSize(makeJPG(segments), width, height);
+		EXPECT_EQ(1024u, width);
+		EXPECT_EQ(768u, height);
+	}
+
+	// a thumbnail that ends before any frame header ended the search
+	TBytes segments;
+	pushJPGSegment(segments, 0xe1, makeJPG(TBytes()));
+	pushJPGSegment(segments, 0xc2, makeJPGFrame(640, 480));
+	uint32 width, height;
+	loadSize(makeJPG(segments), width, height);
+	EXPECT_EQ(640u, width);
+	EXPECT_EQ(480u, height);
+}
+
+TEST(CUTMiscBitmap, jpegSizeOfEveryFrameType)
+{
+	// baseline, extended, progressive and lossless, then their differential and arithmetic coded variants, which
+	// were not known
+	const uint8 frames[] = { 0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf };
+	for (uint i = 0; i < sizeof(frames); ++i)
+	{
+		SCOPED_TRACE(i);
+		TBytes segments;
+		pushJPGSegment(segments, 0xdb, TBytes(65, 1));
+		pushJPGSegment(segments, frames[i], makeJPGFrame(300 + i, 200 + i));
+		uint32 width, height;
+		loadSize(makeJPG(segments), width, height);
+		EXPECT_EQ(300 + i, width);
+		EXPECT_EQ(200 + i, height);
+	}
+
+	// a Huffman table, a reserved segment and an arithmetic conditioning segment are no frame headers
+	const uint8 others[] = { 0xc4, 0xc8, 0xcc };
+	for (uint i = 0; i < sizeof(others); ++i)
+	{
+		SCOPED_TRACE(i);
+		TBytes segments;
+		pushJPGSegment(segments, others[i], makeJPGFrame(11, 22));
+		pushJPGSegment(segments, 0xc2, makeJPGFrame(640, 480));
+		uint32 width, height;
+		loadSize(makeJPG(segments), width, height);
+		EXPECT_EQ(640u, width);
+		EXPECT_EQ(480u, height);
+	}
+
+	{
+		// the frame header as the first segment, after fill bytes and a marker without data
+		TBytes segments;
+		segments.push_back(0xff);
+		segments.push_back(0xff);
+		segments.push_back(0x01);
+		segments.push_back(0xff);
+		pushJPGSegment(segments, 0xc0, makeJPGFrame(48, 32));
+		uint32 width, height;
+		loadSize(makeJPG(segments), width, height);
+		EXPECT_EQ(48u, width);
+		EXPECT_EQ(32u, height);
+	}
+
+	uint32 width, height;
+	loadSize(makeProgressiveJPG(64, 1), width, height);
+	EXPECT_EQ(64u, width);
+	EXPECT_EQ(64u, height);
+}
+
+TEST(CUTMiscBitmap, jpegSizeSearchStaysInTheSegments)
+{
+	TBytes frame;
+	pushJPGSegment(frame, 0xc0, makeJPGFrame(16, 16));
+	const TBytes dqt(65, 1);
+
+	// each of these has no size: 0x0
+	std::vector<TBytes> files;
+	{
+		// a segment that runs past the end of the file: its bytes were searched for a frame header
+		TBytes jpg = makeJPG(TBytes());
+		jpg.resize(2);
+		jpg.push_back(0xff);
+		jpg.push_back(0xe1);
+		jpg.push_back(0x00);
+		jpg.push_back(0x40);
+		jpg.insert(jpg.end(), frame.begin(), frame.end());
+		files.push_back(jpg);
+	}
+	for (uint8 length = 0; length < 2; ++length)
+	{
+		// a segment length that does not count its own 2 bytes
+		TBytes segments;
+		segments.push_back(0xff);
+		segments.push_back(0xe0);
+		segments.push_back(0x00);
+		segments.push_back(length);
+		segments.insert(segments.end(), frame.begin(), frame.end());
+		files.push_back(makeJPG(segments));
+	}
+	{
+		// the image data, or the end of the image, before a frame header
+		TBytes segments;
+		pushJPGSegment(segments, 0xda, TBytes(6, 0));
+		segments.insert(segments.end(), frame.begin(), frame.end());
+		files.push_back(makeJPG(segments));
+		TBytes ended;
+		ended.push_back(0xff);
+		ended.push_back(0xd9);
+		ended.insert(ended.end(), frame.begin(), frame.end());
+		files.push_back(makeJPG(ended));
+	}
+	{
+		// a frame header too short for the size, and one cut by the end of the file
+		TBytes segments;
+		pushJPGSegment(segments, 0xc0, TBytes(3, 0x10));
+		segments.insert(segments.end(), frame.begin(), frame.end());
+		files.push_back(makeJPG(segments));
+		TBytes cut = makeJPG(frame);
+		cut.resize(2 + 7);
+		files.push_back(cut);
+	}
+	{
+		// bytes that are no marker up to the end of the file, a file that ends in a marker, and fill bytes only
+		TBytes stray = makeJPG(TBytes());
+		stray.resize(2);
+		pushJPGSegment(stray, 0xdb, dqt);
+		stray.resize(stray.size() + 1000, 0x55);
+		files.push_back(stray);
+		TBytes cut = makeJPG(TBytes());
+		cut.resize(2);
+		pushJPGSegment(cut, 0xdb, dqt);
+		cut.push_back(0xff);
+		files.push_back(cut);
+		cut.resize(2);
+		cut.push_back(0xff);
+		cut.push_back(0xe0);
+		cut.push_back(0x00);
+		files.push_back(cut);
+		files.push_back(TBytes(100000, 0xff));
+		files[files.size() - 1][1] = 0xd8;
+	}
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		SCOPED_TRACE(i);
+		uint32 width, height;
+		loadSize(files[i], width, height);
+		EXPECT_EQ(0u, width);
+		EXPECT_EQ(0u, height);
+	}
+}
+
+TEST(CUTMiscBitmap, jpegSizeSearchPassesOverStrayBytesAsTheDecoder)
+{
+	// bytes that belong to no segment before a marker are passed over by the decoder, with a warning: the size is read
+	// from such a file too
+	const uint8 zeros[] = { 0x00, 0x00, 0x00 };
+	const uint8 stuffed[] = { 0xff, 0x00 };
+	const TBytes strays[] = { TBytes(zeros, zeros + sizeof(zeros)), TBytes(stuffed, stuffed + sizeof(stuffed)) };
+	for (uint i = 0; i < 2; ++i)
+	{
+		SCOPED_TRACE(i);
+
+		// an image as written, with the bytes before its frame header: it decodes, to the size loadSize gives
+		TBytes jpg = writeImage(FormatJPG, 40, 24);
+		size_t framePos = 0;
+		for (size_t pos = 2; pos + 1 < jpg.size() && !framePos; ++pos)
+		{
+			if (jpg[pos] == 0xff && jpg[pos + 1] == 0xc0)
+				framePos = pos;
+		}
+		ASSERT_NE((size_t)0, framePos);
+		jpg.insert(jpg.begin() + framePos, strays[i].begin(), strays[i].end());
+		uint32 width, height;
+		loadSize(jpg, width, height);
+		EXPECT_EQ(40u, width);
+		EXPECT_EQ(24u, height);
+		CBitmap bitmap;
+		EXPECT_NE(0, loadImage(bitmap, jpg));
+		EXPECT_EQ(40u, bitmap.getWidth());
+		EXPECT_EQ(24u, bitmap.getHeight());
+
+		// the body of a segment is still skipped by its length: the frame header in it is not the one of the image
+		TBytes thumbnail;
+		pushJPGSegment(thumbnail, 0xc0, makeJPGFrame(160, 120));
+		TBytes segments = strays[i];
+		pushJPGSegment(segments, 0xe1, makeJPG(thumbnail));
+		segments.insert(segments.end(), strays[i].begin(), strays[i].end());
+		pushJPGSegment(segments, 0xc2, makeJPGFrame(640, 480));
+		loadSize(makeJPG(segments), width, height);
+		EXPECT_EQ(640u, width);
+		EXPECT_EQ(480u, height);
+	}
+}
+
+namespace {
+
+// counts the reads and the seeks of a stream
+class CCountingMemStream : public CMemStream
+{
+public:
+	CCountingMemStream()
+	    : CMemStream(true)
+	    , Calls(0)
+	{
+	}
+
+	void serialBuffer(uint8 *buf, uint len) override
+	{
+		++Calls;
+		CMemStream::serialBuffer(buf, len);
+	}
+
+	bool seek(sint32 offset, TSeekOrigin origin) const override
+	{
+		++Calls;
+		return CMemStream::seek(offset, origin);
+	}
+
+	mutable uint Calls;
+};
+
+} // namespace
+
+TEST(CUTMiscBitmap, jpegSizeSearchReadsTheFileInBlocks)
+{
+	// 1 MiB of fill bytes, and 1 MiB of empty segments: every step of the search was a seek and a read of the stream,
+	// a million of them, which took seconds on the largest file a download can have
+	const size_t size = 1024 * 1024;
+	TBytes fill(size, 0xff);
+	fill[1] = 0xd8;
+	TBytes empty(size, 0);
+	for (size_t i = 0; i < size; i += 4)
+	{
+		empty[i] = 0xff;
+		empty[i + 1] = i ? 0xe0 : 0xd8;
+		empty[i + 2] = i ? 0x00 : 0xff;
+		empty[i + 3] = i ? 0x02 : 0xff;
+	}
+	const TBytes *files[] = { &fill, &empty };
+	for (uint i = 0; i < 2; ++i)
+	{
+		SCOPED_TRACE(i);
+		CCountingMemStream stream;
+		stream.fill(&(*files[i])[0], (uint32)files[i]->size());
+		uint32 width = ~0u, height = ~0u;
+		CBitmap::loadSize(stream, width, height);
+		EXPECT_EQ(0u, width);
+		EXPECT_EQ(0u, height);
+		// a read per block of the file, of 1 KiB at least
+		EXPECT_LE(stream.Calls, 1024u + 16u);
+	}
+}
+
 // a GIF of a 2x2 canvas whose 2x2 first frame is at left, top
 static TBytes makeGIF(uint32 left, uint32 top)
 {

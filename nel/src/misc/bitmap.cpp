@@ -3609,6 +3609,117 @@ CRGBAF CBitmap::getColor(float x, float y, bool tileU, bool tileV) const
 
 
 
+/** The bytes of a JPEG file in order, for loadSize. The file is read from the stream a block at a time, so that a file
+ *  of many small steps (fill bytes, empty segments) costs one pass over its blocks and not a seek and a read per step.
+ *  The body of a segment is skipped within the block, or with one seek when it ends beyond the block. Nothing is read
+ *  past the size given.
+ */
+class CJPGSizeReader
+{
+public:
+	CJPGSizeReader(NLMISC::IStream &f, uint32 fileSize, uint32 pos)
+	    : m_Stream(f)
+	    , m_FileSize(fileSize)
+	    , m_BlockPos(pos)
+	    , m_BlockSize(0)
+	    , m_Index(0)
+	    , m_StreamPos(~0u)
+	{
+	}
+
+	/// The position in the file of the next byte
+	uint32 getPos() const { return m_BlockPos + m_Index; }
+
+	/// Reads the next byte. Returns false at the end of the file.
+	bool readByte(uint8 &byte)
+	{
+		if (m_Index >= m_BlockSize && !readBlock())
+			return false;
+		byte = m_Block[m_Index++];
+		return true;
+	}
+
+	/// Skips count bytes. Returns false, and skips nothing, when the file has fewer left.
+	bool skip(uint32 count)
+	{
+		if (count > m_FileSize - getPos())
+			return false;
+		if (count <= m_BlockSize - m_Index)
+		{
+			m_Index += count;
+		}
+		else
+		{
+			// beyond the block: the next block is read from there
+			m_BlockPos = getPos() + count;
+			m_BlockSize = 0;
+			m_Index = 0;
+		}
+		return true;
+	}
+
+private:
+	/// Reads the block at the position of the next byte, which is past the current block
+	bool readBlock()
+	{
+		const uint32 pos = getPos();
+		if (pos >= m_FileSize)
+			return false;
+		const uint32 size = std::min((uint32)sizeof(m_Block), m_FileSize - pos);
+		// the stream is at the end of the last block read, unless a segment was skipped since
+		if (m_StreamPos != pos && !m_Stream.seek((sint32)pos, NLMISC::IStream::begin))
+			return false;
+		m_Stream.serialBuffer(m_Block, size);
+		m_BlockPos = pos;
+		m_BlockSize = size;
+		m_Index = 0;
+		m_StreamPos = pos + size;
+		return true;
+	}
+
+	NLMISC::IStream &m_Stream;
+	uint32 m_FileSize;
+	/// Position in the file, and size, of the block
+	uint32 m_BlockPos;
+	uint32 m_BlockSize;
+	/// The next byte of the block
+	uint32 m_Index;
+	/// Where the stream is, to seek only when the next block is elsewhere
+	uint32 m_StreamPos;
+	uint8 m_Block[4096];
+};
+
+/** Reads up to the next marker of a JPEG file, the way the decoder (next_marker of libjpeg) finds it, so that loadSize
+ *  reads a size from the files that decode: bytes that are not 0xff are passed over, then come any number of 0xff
+ *  fill bytes and the marker code, and 0xff 0x00 is no marker. The bytes passed over are counted in strayBytes.
+ *  Returns false at the end of the file.
+ */
+static bool nextJPGMarker(CJPGSizeReader &reader, uint8 &marker, uint32 &strayBytes)
+{
+	for (;;)
+	{
+		uint8 byte;
+		if (!reader.readByte(byte))
+			return false;
+		if (byte != 0xff)
+		{
+			++strayBytes;
+			continue;
+		}
+		do
+		{
+			if (!reader.readByte(byte))
+				return false;
+		} while (byte == 0xff);
+		if (byte != 0x00)
+		{
+			marker = byte;
+			return true;
+		}
+		strayBytes += 2;
+	}
+}
+
 void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 {
 	retWidth= 0;
@@ -3698,90 +3809,85 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 	}
 	else if(memcmp(&fileType, &JPG_HEADER, 2) == 0)
 	{
-		uint8 blockMarker1 = 0;
-		uint8 blockMarker2 = 0;
-		uint16 blockSize = 0;
-		bool eof = false;
-
-		do
+		// The segments are walked by their length from the one after the start of image marker, up to the frame header,
+		// which holds the size. Searching the bytes for a marker found the frame header of a thumbnail (itself a JPEG
+		// image) in an Exif segment, or the end of that thumbnail. Every read is checked against the size of the file
+		// and every step moves forward, so the walk ends whatever the file holds, after one pass over it at most.
+		if (!f.seek(0, IStream::end))
 		{
-			try
+			throw ESeekFailed();
+		}
+		const uint32 fileSize = (uint32)f.getPos();
+		CJPGSizeReader reader(f, fileSize, 2);
+		bool found = false;
+		const char *error = nullptr;
+		uint32 strayBytes = 0;
+
+		while (!found && !error)
+		{
+			uint8 marker;
+			if (!nextJPGMarker(reader, marker, strayBytes))
 			{
-				// marker of a block
-				f.serial(blockMarker1);
-
-				if (blockMarker1 == 0xff)
-				{
-					// marker of a block
-					f.serial(blockMarker2);
-
-					// 0xff00 is only found in image data
-					if (blockMarker2 == 0x00)
-					{
-						// image data 0xff
-					}
-					// 0xffda is image data
-					else if (blockMarker2 == 0xda)
-					{
-						// next data is image data which must end with 0xffd9
-					}
-					// 0xffd9 is the end of an image
-					else if (blockMarker2 == 0xd9)
-					{
-						// real end of file
-						break;
-					}
-					else if (blockMarker2 == 0xdd || blockMarker2 == 0xdc)
-					{
-						f.seek(4, IStream::current);
-					}
-					else if (blockMarker2 == 0xdf)
-					{
-						f.seek(3, IStream::current);
-					}
-					else if (blockMarker2 >= 0xd0 && blockMarker2 <= 0xd8)
-					{
-						// no content
-					}
-					else
-					{
-						// size of a block
-						f.serial(blockSize);
-						NLMISC_BSWAP16(blockSize);
-
-						// the size includes its own 2 bytes
-						if (blockSize < 2)
-						{
-							nlwarning("Invalid JPG block size %u in '%s'", (uint)blockSize, f.getStreamName().c_str());
-							break;
-						}
-
-						// frame marker (which contains image width and height)
-						if (blockMarker2 >= 0xc0 && blockMarker2 <= 0xc3)
-						{
-							uint8 imagePrecision = 0; // sample precision
-							uint32 imageSize = 0; // width and height
-							f.serial(imagePrecision); 
-							f.serial(imageSize);
-							NLMISC_BSWAP32(imageSize);
-
-							retWidth = imageSize & 0xffff;
-							retHeight = (imageSize & 0xffff0000) >> 16;
-
-							break;
-						}
-
-						// skip the block
-						f.seek(blockSize - 2, IStream::current);
-					}
-				}
+				error = "ends before a frame header";
+				break;
 			}
-			catch(...)
+
+			// the image data, or the end of the image
+			if (marker == 0xda || marker == 0xd9)
 			{
-				eof = true;
+				error = "has no frame header before its image data";
+				break;
+			}
+
+			// the markers without a length: restart, start of image and the temporary one
+			if ((marker >= 0xd0 && marker <= 0xd8) || marker == 0x01)
+			{
+				continue;
+			}
+
+			// the frame headers are 0xc0 to 0xcf, without the Huffman table, the reserved one and the arithmetic
+			// conditioning: their sample precision, height and width follow the length
+			const bool frame = marker >= 0xc0 && marker <= 0xcf && marker != 0xc4 && marker != 0xc8 && marker != 0xcc;
+
+			// the length of the segment, which counts its own 2 bytes
+			uint8 header[7];
+			const uint32 headerSize = frame ? 7 : 2;
+			uint32 headerRead = 0;
+			while (headerRead < headerSize && reader.readByte(header[headerRead]))
+				++headerRead;
+			if (headerRead < headerSize)
+			{
+				error = "ends in a segment";
+				break;
+			}
+			const uint32 length = ((uint32)header[0] << 8) | header[1];
+			if (length < headerSize)
+			{
+				error = "has a segment shorter than its content";
+				break;
+			}
+
+			if (frame)
+			{
+				retHeight = ((uint32)header[3] << 8) | header[4];
+				retWidth = ((uint32)header[5] << 8) | header[6];
+				found = true;
+			}
+			else if (!reader.skip(length - 2))
+			{
+				error = "has a segment longer than the file";
 			}
 		}
-		while(!eof);
+
+		if (error)
+		{
+			nlwarning("The JPG image '%s' %s (at byte %u of %u)", f.getStreamName().c_str(), error, reader.getPos(), fileSize);
+		}
+		if (strayBytes)
+		{
+			// the decoder passes over them with a warning too
+			nlwarning("The JPG image '%s' has %u bytes between its segments that belong to none", f.getStreamName().c_str(), strayBytes);
+		}
 	}
 	else if(fileType == GIF_HEADER)
 	{
