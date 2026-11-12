@@ -132,8 +132,8 @@ public:
 	//
 	CTargeterInfo					TargeterInfo;
 	uint8							TargeterUserBoneID;	// filled at setup
-	// eval pos from slot & stick mode
-	void evalTargeterStickPos(NLMISC::CVector &dest) const;
+	// eval pos from slot & stick mode. Not const: a bone index that no longer fits the targeter's skeleton is dropped.
+	void evalTargeterStickPos(NLMISC::CVector &dest);
 };
 
 
