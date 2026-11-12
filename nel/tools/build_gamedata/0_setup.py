@@ -108,7 +108,7 @@ if not args.noconf:
 			for i in range(len(ToolDirectories)):
 				ToolDirectories[i] = ToolDirectories[i].replace('\\', '/').replace(RemapLocalTo, RemapLocalFrom)
 		else:
-			ToolDirectories = [ "R:/build_win32/tools/bin/Release", "R:/build_win32/tools/bin", "R:/build_win32/server_dev/bin/Release", "R:/build_win32/server_dev/bin", "R:/external/dependencies" ]
+			ToolDirectories = [ "R:/build_win32/tools/bin/Release", "R:/build_win32/tools/bin", "R:/build_win32/server_dev/bin/Release", "R:/build_win32/server_dev/bin" ]
 	try:
 		ToolSuffix
 	except NameError:

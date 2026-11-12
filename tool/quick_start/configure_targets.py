@@ -293,8 +293,14 @@ def GeneratePathScript():
 	fo.write("set " + EscapeArg("RC_ROOT=" + NeLRootDir) + "\n")
 	fo.write("set " + EscapeArg("RC_ROOT_FW=" + NeLRootDir.replace("\\", "/")) + "\n")
 	fo.write("set " + EscapeArg("RC_CODE_DIR=" + NeLCodeDir) + "\n")
-	fo.write("set " + EscapeArg("RC_PYTHON27_DIR=" + NeLPython27Dir) + "\n")
 	fo.write("set " + EscapeArg("RC_PYTHON3_DIR=" + NeLPython3Dir) + "\n")
+	fo.write("set " + EscapeArg("RC_UTILS_DIR=" + NeLUtilsDir) + "\n")
+	fo.write("set " + EscapeArg("RC_RRDTOOL_DIR=" + NeLRRDtoolDir) + "\n")
+	fo.write("set " + EscapeArg("RC_MARIADB_DIR=" + NeLMariaDBDir) + "\n")
+	fo.write("set " + EscapeArg("RC_NGINX_DIR=" + NeLNginxDir) + "\n")
+	fo.write("set " + EscapeArg("RC_PHP_DIR=" + NeLPHPDir) + "\n")
+	fo.write("set " + EscapeArg("RC_PHPMYADMIN_DIR=" + NeLphpMyAdminDir) + "\n")
+	fo.write("set " + EscapeArg("RC_WEB_DIR=" + NeLWebDir) + "\n")
 	fo.write("set " + EscapeArg("RC_PERL_DIRS=" + os.path.join(NeLPerlDir, os.path.normcase("perl/site/bin")) + os.pathsep + os.path.join(NeLPerlDir, os.path.normcase("perl/bin")) + os.pathsep + NeLPerlDir) + "\n")
 	envPath = ""
 	for path in NeLEnvPaths:
@@ -512,7 +518,7 @@ def WriteHeader(fo):
 def WriteFooter(fo, title):
 	fo.write("title " + title + ": Ready\n")
 	fo.write("echo Ready\n")
-	fo.write("echo OK > " + EscapeArg("%RC_ROOT%\.nel\code_build.tag") + "\n")
+	fo.write("echo OK > " + EscapeArg("%RC_ROOT%\\.nel\\code_build.tag") + "\n")
 	fo.write("pause\n")
 
 def GenerateMsvcEnv(file, buildDir, generator, tc, filteredPrefix):

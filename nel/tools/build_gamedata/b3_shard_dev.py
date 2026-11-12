@@ -71,6 +71,17 @@ cfg.close()
 printLog(log, "")
 
 printLog(log, ">>> Generate shard dev local.cfg <<<")
+# rrdtool of the externals package, RC_RRDTOOL_DIR comes from .nel/path_config.bat
+rrdToolDir = os.getenv("RC_RRDTOOL_DIR")
+if not rrdToolDir:
+	printLog(log, "ERROR RC_RRDTOOL_DIR is not set, run this from the quick start (call .nel/path_config.bat first)")
+	log.close()
+	sys.exit(1)
+rrdToolPath = os.path.join(rrdToolDir, "bin", "rrdtool.exe").replace("\\", "/")
+if not os.path.isfile(rrdToolPath):
+	printLog(log, "ERROR rrdtool was not found at " + rrdToolPath)
+	log.close()
+	sys.exit(1)
 cfg = open(ShardDevDirectory + "/local.cfg", "w")
 cfg.write("WindowStyle = \"WIN\";\n")
 cfg.write("Paths += {\n")
@@ -87,7 +98,7 @@ for multiDir in InstallShardDataMultiDirectories:
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
 	cfg.write("	\"" + ShardInstallDirectory + "/" + dstDir + "\",\n")
 cfg.write("};\n")
-cfg.write("RRDToolPath = \"..\\..\\..\\external\\rrdtool\\rrdtool.exe\";\n")
+cfg.write("RRDToolPath = \"" + rrdToolPath + "\";\n")
 cfg.write("StartCommands += {\n")
 cfg.write("	// \"gw_aes.transportRemove aes_l3c\",\n")
 cfg.write("};\n")

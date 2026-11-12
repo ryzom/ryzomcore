@@ -23,16 +23,22 @@ NeLBuildRemoteDir = os.path.join(NeLRootDir, NeLBuildRemoteDirName)
 # Special folders
 NeLTempDir = os.path.join(NeLRootDir, os.path.normcase(".nel/temp"))
 
-# Tools for Windows only
-NeLPython27Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Python27"]))
-NeLPython3Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Python3"]))
-NeLPerlDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Perl"])) # Only need this to build OpenSSH with Hunter...
-NeLRRDtoolDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["RRDtool"]))
-NeLMariaDBDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["MariaDB"]))
-NeLNginxDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Nginx"]))
-NeLPHPDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["PHP"]))
-NeLphpMyAdminDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["phpMyAdmin"]))
-NeLDependenciesDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Dependencies"])) # Detect all dependencies of the build output and get them from externals
+# Tools for Windows only, from the externals package (Paths/External); a tool path set as an absolute path in
+# .nel/config.json replaces the one in the package
+NeLExternalToolsDir = os.path.join(NeLRootDir, os.path.normpath(NeLConfig["Paths"]["External"]))
+NeLPython3Dir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Python3"])) # Runs the quick start and the build pipeline
+NeLPerlDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Perl"])) # Only need this to build OpenSSH with Hunter...
+NeLRRDtoolDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["RRDtool"]))
+NeLMariaDBDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["MariaDB"]))
+NeLNginxDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Nginx"]))
+NeLPHPDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["PHP"]))
+NeLphpMyAdminDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["phpMyAdmin"]))
+NeLDependenciesDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Dependencies"])) # Detect all dependencies of the build output and get them from externals
+NeLUtilsDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Utils"])) # nircmd, msxsl, 7za, xdelta
+
+# The configuration and state of the development web stack of this root (nginx prefix, php.ini, phpMyAdmin), the
+# packaged programs stay as they are
+NeLWebDir = os.path.join(NeLRootDir, os.path.normpath(NeLConfig["Paths"]["Web"]))
 
 # Cross-platform tools that are not C++ (Rust crates), built in Docker for a generic Linux and for Windows
 NeLXplatToolsImage = "ryzombuild_xplat_tools"
@@ -41,9 +47,9 @@ NeLXplatToolsTargets = { "linux": "x86_64-unknown-linux-musl", "win": "x86_64-pc
 
 # Tools added to system path, for any platform
 # If these paths are wrong, tools from the system path may be used, which is okay
-NeLAria2Dir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Aria2"])) # Used for downloading SteamRT
-NeLNinjaDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Ninja"])) # Used to build faster
-NeLJomDir = os.path.join(NeLRootDir, os.path.normcase(NeLConfig["Paths"]["Jom"])) # Used to build faster if Ninja doesn't work
+NeLAria2Dir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Aria2"])) # Used for downloading SteamRT
+NeLNinjaDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Ninja"])) # Used to build faster
+NeLJomDir = os.path.join(NeLExternalToolsDir, os.path.normpath(NeLConfig["Paths"]["Jom"])) # Used to build faster if Ninja doesn't work
 
 # Deduplicate any paths, and add them to the system path variable
 NeLEnvPaths = {}
