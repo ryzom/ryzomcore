@@ -31,6 +31,7 @@
 #include "time_client.h"
 #include "input.h"
 #include "interface_v3/interface_manager.h"
+#include "interface_v3/action_handler_base.h"
 #include "global.h"
 #include "item_group_manager.h"
 
@@ -158,7 +159,28 @@ void CEventsListener::operator()(const CEvent& event)
 	// Window close button pressed.
 	if(event == EventCloseWindowId)
 	{
-		CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:quit_dialog");
+		// In game the close request asks for confirmation in the quit dialog. When the dialog does not exist
+		// (its interface XML is missing or failed to load) the request quits as the dialog's quit button does:
+		// it asks the server, which answers when the character may leave. The window that offers to quit at
+		// once while waiting does not exist either then, so a further close request while one is pending (the
+		// server does not answer, for example after a disconnection) quits at once.
+		if (CInterfaceManager::getInstance()->isInGame() && CWidgetManager::getInstance()->getElementFromId("ui:interface:quit_dialog") == nullptr)
+		{
+			if (game_exit_request)
+			{
+				nlwarning("Interface element 'ui:interface:quit_dialog' not found and a quit request is pending, the close request quits at once");
+				CAHManager::getInstance()->runActionHandler("quit_ryzom_now", nullptr, "");
+			}
+			else
+			{
+				nlwarning("Interface element 'ui:interface:quit_dialog' not found, the close request quits without confirmation");
+				CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr, "");
+			}
+		}
+		else
+		{
+			CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:quit_dialog");
+		}
 	}
 	// Event from the Mouse (MOVE)
 	else if(event == EventMouseMoveId)

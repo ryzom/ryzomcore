@@ -1293,6 +1293,12 @@ void CInterfaceManager::configureQuitDialogBox()
 			}
 		}
 	}
+	else
+	{
+		// The interface XML that declares the dialog is missing or failed to load
+		nlwarning("Interface element '%s' not found, the quit dialog box is not configured", quitDialogStr.c_str());
+		return;
+	}
 
 	// Make all controls have the same size
 	CInterfaceGroup *quitDlgMain = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(quitDialogMainStr));
