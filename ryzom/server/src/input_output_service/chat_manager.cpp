@@ -334,6 +334,35 @@ void CChatManager::removeGroup( TGroupId gId )
 			else
 				_GroupNames.erase(itGrp->second.GroupName);
 		}
+
+		// The members leave the group with it, as in removeFromGroup. The id can be given to a new group
+		// (team ids are reused): a member that kept it could talk in that one.
+		const CChatGroup &chatGrp = itGrp->second;
+		CChatGroup::TMemberCont::const_iterator itM;
+		for (itM = chatGrp.Members.begin(); itM != chatGrp.Members.end(); ++itM)
+		{
+			TClientInfoCont::iterator itCl = _Clients.find(*itM);
+			if (itCl == _Clients.end())
+			{
+				nlwarning("CChatManager::removeGroup : member %s:%x of the group %s is unknown",
+				    TheDataset.getEntityId(*itM).toString().c_str(),
+				    (*itM).getIndex(),
+				    gId.toString().c_str());
+				continue;
+			}
+
+			CChatClient *client = itCl->second;
+			client->unsubscribeInChatGroup(gId);
+
+			// a member that is already in another group of the same type keeps that one
+			if (chatGrp.Type == CChatGroup::team && client->getTeamChatGroup() == gId)
+				client->setTeamChatGroup(CEntityId::Unknown);
+			else if (chatGrp.Type == CChatGroup::guild && client->getGuildChatGroup() == gId)
+				client->setGuildChatGroup(CEntityId::Unknown);
+			else if (chatGrp.Type == CChatGroup::region && client->getRegionChatGroup() == gId)
+				client->setRegionChatGroup(CEntityId::Unknown);
+		}
+
 		_Groups.erase( itGrp );
 	}
 	else
@@ -815,6 +844,18 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 	if( itGrp != _Groups.end() )
 	{
 		CChatGroup &chatGrp = itGrp->second;
+
+		// Only its members talk in a team or guild group. A line of a service comes without a sender
+		// (cf cbSysChat) and is let through.
+		if ((chatGrp.Type == CChatGroup::team || chatGrp.Type == CChatGroup::guild)
+		    && sender.isValid() && chatGrp.Members.find(sender) == chatGrp.Members.end())
+		{
+			nlwarning("<CChatManager::chatInGroup> %s:%x is not a member of the %s group %s, message dropped",
+			    TheDataset.getEntityId(sender).toString().c_str(), sender.getIndex(),
+			    CChatGroup::groupTypeToString(chatGrp.Type).c_str(), grpId.toString().c_str());
+			return;
+		}
+
 		CChatGroup::TMemberCont::const_iterator itM;
 		list<CEntityId>	logDest;
 		for( itM = chatGrp.Members.begin(); itM != chatGrp.Members.end(); ++itM )
