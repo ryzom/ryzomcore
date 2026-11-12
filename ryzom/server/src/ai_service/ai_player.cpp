@@ -39,6 +39,7 @@ CBotPlayer::CBotPlayer(CManagerPlayer* owner, TDataSetRow const& DataSetRow, NLM
 	nlassert(owner->playerList().find(dataSetRow())==owner->playerList().end());
 #endif
 	owner->playerList().insert(std::make_pair(dataSetRow(), this));
+	m_WhoSeesMe.init(*CMirrors::DataSet, DataSetRow, DSPropertyWHO_SEES_ME);
 	NLMISC::CSheetId sheetId = CMirrors::sheet(DataSetRow);
 	_Sheet = AISHEETS::CSheets::getInstance()->lookupRaceStats(sheetId);
 }

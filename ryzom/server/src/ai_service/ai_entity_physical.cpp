@@ -18,10 +18,12 @@
 
 #include "stdpch.h"
 #include "server_share/r2_variables.h"
+#include "server_share/r2_vision.h"
 #include "ai_mgr.h"
 #include "ai_entity_physical.h"
 #include "ai_entity_physical_inline.h"
 #include "ai_instance.h"
+#include "ai_player.h"
 
 
 //	critical routine, get backward of weak technical design legacy.
@@ -261,6 +263,10 @@ CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
 				&&	entityPhysical->isAlive()
 				&&	entityPhysical!=this)
 			{
+				// an invisible player (GM, Ring DM) repulses nobody: a bot that steers around it gives its position away
+				if (!R2_VISION::isEntityVisibleToPlayers(NLMISC::safe_cast<const CBotPlayer *>(&*it)->whoSeesMe()))
+					continue;
+
 				nearbyEntities.push_back(entityPhysical);
 			}
 		}
@@ -319,6 +325,10 @@ bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& rep
 				&&	entityPhysical->isAlive()
 				&&	entityPhysical!=this)
 			{
+				// an invisible player (GM, Ring DM) repulses nobody: a bot that steers around it gives its position away
+				if (!R2_VISION::isEntityVisibleToPlayers(NLMISC::safe_cast<const CBotPlayer *>(&*it)->whoSeesMe()))
+					continue;
+
 				nearbyEntities.push_back(entityPhysical);
 			}
 		}
