@@ -22,10 +22,6 @@ LIST(REMOVE_ITEM SRC
 
 ADD_EXECUTABLE(ryzom_ai_service WIN32 ${SRC})
 
-IF (APPLE)
-    target_compile_options(ryzom_ai_service "-ftemplate-depth=100")
-ENDIF ()
-
 TARGET_INCLUDE_DIRECTORIES(ryzom_ai_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_ai_service
