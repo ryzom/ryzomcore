@@ -60,8 +60,8 @@
 
 namespace PHYSIQUESKIN {
 
-// Physique = Class_ID(0x100, 0) with SuperClassId 0x810 (OSModifier) — ClassId alone is shared
-// with Placement/Output/Shadow Map. Skin = Class_ID(0x0095c723, 0x00015666).
+// Physique = (0x100, 0) with SuperClassId 0x810 (object-space modifier); the class id alone is shared
+// with three classes of other superclasses. Skin = (0x0095c723, 0x00015666), SuperClassId 0x810.
 extern const NLMISC::CClassId CLASSID_PHYSIQUE;
 extern const NLMISC::CClassId CLASSID_SKIN;
 const PIPELINE::MAX::TSClassId SCLASS_OSMODIFIER = 0x00000810;
