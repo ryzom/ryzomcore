@@ -10,6 +10,14 @@ Run the scripts in this order to configure the toolchains:
 - configure_pipeline.py
 - configure_launchers.py
 
+The configuration runs `0_setup.py -p`, which writes `.nel/buildsite_*.py` from the defaults. A root
+configured before a newer pipeline lacks the settings that its new projects read, so run the
+configuration again after updating. On a root that has already built its data, the configuration
+skips the build steps, so install a new project from `cmd_build_gamedata.bat` afterwards. The
+`common/examples` project, which installs the example scenarios and the NPC name lists of the Ring
+editor (`ryzom/client/examples`) into the `examples` folder of the client, reads `ExamplesDirectory`:
+`python 3_install.py -ipj common/examples`, then `python b1_client_dev.py` for the development client.
+
 Python, MariaDB, nginx, PHP, phpMyAdmin, Perl, rrdtool, Dependencies and the command line utilities come
 from the externals package (`Paths` in `config_default.json`, C:\2026q4_external_v143_x64 by default); the
 quick start and the build pipeline run under its Python 3. Nothing is written into the externals folder: the
