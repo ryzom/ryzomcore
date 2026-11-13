@@ -59,8 +59,8 @@ using namespace std;
 #define PMB_MD_DEL_FACES_CHUNK_ID 0x0270
 #define PMB_MD_SUBOBJ_LEVEL_CHUNK_ID 0x0300
 #define PMB_MD_SEL_VERTS_CHUNK_ID 0x0400
-#define PMB_MD_SEL_FACES_CHUNK_ID 0x0410
-#define PMB_MD_SEL_EDGES_CHUNK_ID 0x0420
+#define PMB_MD_SEL_EDGES_CHUNK_ID 0x0410 // 3 bits per output face (zo_cn_mairie.max: 189, 510, 60 bits)
+#define PMB_MD_SEL_FACES_CHUNK_ID 0x0420 // 1 bit per output face
 #define PMB_MD_SEL_UNKNOWN430_CHUNK_ID 0x0430
 // The bit-array leaf inside 0x0170/0x0270/0x04x0 containers.
 #define PMB_MD_BIT_ARRAY_CHUNK_ID 0x2700

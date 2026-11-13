@@ -77,11 +77,11 @@ namespace MESHEVAL {
 // ---------------------------------------------------------------------------------------------
 // GeomBuffers (Mesh) decode
 
-// A bit-array chunk of the geom buffers: a container holding one 0x2700 leaf, uint32 bit count then
-// the bits, 32 per dword, least significant first.
-static bool readGeomBitArray(const STORAGE::CGeomBuffers *gb, uint16 id, std::vector<bool> &bits)
+// A bit-array chunk: a container holding one 0x2700 leaf, uint32 bit count then the bits, 32 per dword,
+// least significant first.
+static bool readBitArray(const CStorageContainer *parent, uint16 id, std::vector<bool> &bits)
 {
-	const CStorageContainer *c = dynamic_cast<const CStorageContainer *>(gb->findStorageObject(id));
+	const CStorageContainer *c = dynamic_cast<const CStorageContainer *>(parent->findStorageObject(id));
 	const CStorageRaw *raw = c ? dynamic_cast<const CStorageRaw *>(c->findStorageObject(0x2700)) : nullptr;
 	if (!raw || raw->Value.size() < 4) return false;
 	uint32 n;
@@ -93,52 +93,120 @@ static bool readGeomBitArray(const STORAGE::CGeomBuffers *gb, uint16 id, std::ve
 	return true;
 }
 
-// The vertices the deforming modifiers above the mesh act on, picked by the selection level the mesh was
-// saved in (0x092a: 1 object, every vertex; 2 vertex, the selected vertices; 4 face and 8 edge, the
-// vertices of the selected faces or edges).
-// The selections (0x092c vertices, 0x092d faces, 0x092e edges, 3 per face) are stored at every level;
-// they only scope the modifiers at their own level.
-// A selection that does not match the mesh only marks it unknown here; the deformers warn when they use it.
-static void readMeshVertexSelection(CSceneClass *obj, const STORAGE::CGeomBuffers *gb, SEvalMesh &out)
+// The selection the mesh was saved with: its level (0x092a: 1 object, 2 vertex, 4 face, 8 edge) and the
+// selections of every level (0x092c vertices, 0x092d faces, 0x092e edges, 3 per face), which are stored at
+// every level and only scope the modifiers at their own level.
+static void readMeshSelection(CSceneClass *obj, const STORAGE::CGeomBuffers *gb, SEvalMesh &out)
 {
 	const CStorageRaw *lvl = dynamic_cast<const CStorageRaw *>(gb->findStorageObject(0x092a));
-	uint32 selLevel = 1;
+	out.SelLevel = 1;
 	if (lvl && lvl->Value.size() >= 4)
-		memcpy(&selLevel, &lvl->Value[0], 4);
-	if (selLevel == 1)
-		return; // object level: the whole mesh
+		memcpy(&out.SelLevel, &lvl->Value[0], 4);
+	static const uint16 s_Ids[] = { 0x092c, 0x092d, 0x092e };
+	std::vector<bool> *const sels[] = { &out.SelVerts, &out.SelFaces, &out.SelEdges };
+	for (uint i = 0; i < 3; ++i)
+		if (gb->findStorageObject(s_Ids[i]) && !readBitArray(gb, s_Ids[i], *sels[i]))
+			out.SelBitsUnknown = true;
 	PIPELINE::MAX::UPDATE1::CEditableMesh *em = dynamic_cast<PIPELINE::MAX::UPDATE1::CEditableMesh *>(obj);
-	out.VertSelSoft = em && em->softSelection();
-	std::vector<bool> bits;
-	const uint nv = (uint)out.Verts.size();
-	if (selLevel == 2 && readGeomBitArray(gb, 0x092c, bits) && bits.size() == nv)
+	out.SelSoft = em && em->softSelection();
+}
+
+// The vertices the current selection covers, one flag per vertex: the selected vertices, or the vertices of
+// the selected faces or edges. False when the level is unknown or its selection does not match the mesh.
+static bool selectedVertices(const SEvalMesh &mesh, std::vector<bool> &verts)
+{
+	const uint nv = (uint)mesh.Verts.size();
+	const uint nf = (uint)mesh.Faces.size();
+	if (mesh.SelLevel == 2 && mesh.SelVerts.size() == nv)
 	{
-		out.VertSel = bits;
+		verts = mesh.SelVerts;
+		return true;
 	}
-	else if (selLevel == 4 && readGeomBitArray(gb, 0x092d, bits) && bits.size() == out.Faces.size())
+	if (mesh.SelLevel == 4 && mesh.SelFaces.size() == nf)
 	{
-		out.VertSel.assign(nv, false);
-		for (uint f = 0; f < out.Faces.size(); ++f)
-			if (bits[f])
+		verts.assign(nv, false);
+		for (uint f = 0; f < nf; ++f)
+			if (mesh.SelFaces[f])
 				for (uint c = 0; c < 3; ++c)
-					if (out.Faces[f].V[c] < nv) out.VertSel[out.Faces[f].V[c]] = true;
+					if (mesh.Faces[f].V[c] < nv) verts[mesh.Faces[f].V[c]] = true;
+		return true;
 	}
-	else if (selLevel == 8 && readGeomBitArray(gb, 0x092e, bits) && bits.size() == out.Faces.size() * 3)
+	if (mesh.SelLevel == 8 && mesh.SelEdges.size() == nf * 3)
 	{
-		out.VertSel.assign(nv, false);
-		for (uint e = 0; e < bits.size(); ++e)
+		verts.assign(nv, false);
+		for (uint e = 0; e < nf * 3; ++e)
 		{
-			if (!bits[e]) continue;
-			const SEvalFace &face = out.Faces[e / 3];
+			if (!mesh.SelEdges[e]) continue;
+			const SEvalFace &face = mesh.Faces[e / 3];
 			uint a = face.V[e % 3], b = face.V[(e % 3 + 1) % 3];
-			if (a < nv) out.VertSel[a] = true;
-			if (b < nv) out.VertSel[b] = true;
+			if (a < nv) verts[a] = true;
+			if (b < nv) verts[b] = true;
 		}
+		return true;
 	}
-	else
+	return false;
+}
+
+// A selection bit array of an Edit Mesh delta: absent means nothing selected (count bits, all clear); false
+// when the chunk is there but not readable.
+static bool readDeltaSelection(const CStorageContainer *delta, uint16 id, size_t count, std::vector<bool> &bits)
+{
+	if (!delta->findStorageObject(id))
 	{
-		out.VertSelUnknown = true;
+		bits.assign(count, false);
+		return true;
 	}
+	return readBitArray(delta, id, bits);
+}
+
+// The selection an Edit Mesh hands up the stack. Its level is the modifier's 0x2800 (int16: 0 object,
+// 1 vertex, 2 edge, 3 face, 4 polygon, 5 element) and its soft selection the modifier's 0x2820 (on at a
+// sub-object level only). The per-node data (mod-app 0x2512) has flags 0x2740, whose bit 2 says that the
+// delta 0x4000 holds data for this object; then the delta stores the selections over the output mesh as bit
+// arrays, 0x0400 vertices, 0x0410 edges (3 per face) and 0x0420 faces, each absent when nothing is selected.
+// Without that bit, the Edit Mesh was never edited on this object and passes the selections below through.
+// Validated on zo_cn_mairie.max (zo_mairie_globes, both cases).
+static void applyEditMeshSelection(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh)
+{
+	const CStorageRaw *lvl = findRawChunk(mod, 0x2800);
+	sint16 level = -1;
+	if (lvl && lvl->Value.size() >= 2)
+		memcpy(&level, &lvl->Value[0], 2);
+	static const uint32 s_Levels[] = { 1, 2, 8, 4, 4, 4 };
+	if (level < 0 || level > 5)
+	{
+		mesh.SelLevelUnknown = mesh.SelBitsUnknown = true;
+		return;
+	}
+	mesh.SelLevel = s_Levels[level];
+	mesh.SelLevelUnknown = false;
+	const CStorageRaw *ar = findRawChunk(mod, 0x2820);
+	uint32 soft = 0;
+	if (ar && ar->Value.size() >= 4)
+		memcpy(&soft, &ar->Value[0], 4);
+	const bool ownSoft = soft != 0 && level != 0;
+	const CStorageContainer *data = app ? dynamic_cast<const CStorageContainer *>(
+		CDerivedObject::modAppLocalModData(app)) : nullptr;
+	const CStorageRaw *flags = data ? dynamic_cast<const CStorageRaw *>(data->findStorageObject(0x2740)) : nullptr;
+	if (!flags || flags->Value.size() < 4)
+	{
+		mesh.SelBitsUnknown = true;
+		mesh.SelSoft = mesh.SelSoft || ownSoft;
+		return;
+	}
+	uint32 f;
+	memcpy(&f, &flags->Value[0], 4);
+	if (!(f & 4))
+	{
+		mesh.SelSoft = mesh.SelSoft || ownSoft; // not edited here: the input selections pass through
+		return;
+	}
+	mesh.SelSoft = ownSoft;
+	const CStorageContainer *delta = dynamic_cast<const CStorageContainer *>(data->findStorageObject(0x4000));
+	mesh.SelBitsUnknown = !delta
+		|| !readDeltaSelection(delta, 0x0400, mesh.Verts.size(), mesh.SelVerts)
+		|| !readDeltaSelection(delta, 0x0410, mesh.Faces.size() * 3, mesh.SelEdges)
+		|| !readDeltaSelection(delta, 0x0420, mesh.Faces.size(), mesh.SelFaces);
 }
 
 static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::string &name)
@@ -173,7 +241,7 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 		out.Faces.resize(ff->size());
 		if (!ff->empty()) memcpy(&out.Faces[0], &(*ff)[0], ff->size() * 20);
 	}
-	readMeshVertexSelection(obj, gb, out);
+	readMeshSelection(obj, gb, out);
 
 	// Map channels: the typed CGeomBuffers map-channel view (chunk groups in file order; a group
 	// whose 0x0959 announce is absent keeps Channel -1 and is dropped, matching the historical
@@ -529,12 +597,13 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 }
 
 // ---------------------------------------------------------------------------------------------
-// Gizmo deformers (Bend, Twist): reference 0 is the gizmo (a PRS controller), reference 1 the center (a
+// Gizmo deformers (Bend, Twist, Taper): reference 0 is the gizmo (a PRS controller), reference 1 the center (a
 // position controller), reference 2 the parameters, a ParamBlock2 or, in older files, an old ParamBlock
 // with the same parameter indices. The deformer maps a point into its space (Tm), deforms it there along
 // Z, and maps it back (InvTm); it moves the vertices of the current selection only. Validated against
 // reference exports, positions equal to float precision: zo_hom_cheveux_lead.max (two Bends and a Twist
-// on a vertex selection) and neutrecreature.max (a Twist with a moved center, on three meshes).
+// on a vertex selection), neutrecreature.max (a Twist with a moved center, on three meshes) and
+// zo_cn_mairie.max (zo_mairie_globes: a Bend, a Twist and three Tapers on Edit Mesh selections).
 
 // The constant parameters of reference 2, by index. False when any parameter is animated
 // (controller-backed), even one the settings leave unused, or the block is missing: the caller then
@@ -675,21 +744,23 @@ template <class TDeformer>
 static void deformSelected(SEvalMesh &mesh, const TDeformer &deformer, const char *what, const std::string &name,
                            std::vector<std::string> *warnings)
 {
-	if (mesh.VertSelUnknown)
+	std::vector<bool> sel;
+	bool all = mesh.SelLevel == 1;
+	if (mesh.SelLevelUnknown || (!all && (mesh.SelBitsUnknown || !selectedVertices(mesh, sel))))
 	{
 		fprintf(stderr, "WARNING: mesh '%s' %s applied to the whole mesh: the selection it sees is not known\n",
 		        name.c_str(), what);
 		if (warnings) warnings->push_back(std::string("selection:") + what);
+		all = true;
 	}
-	else if (mesh.VertSelSoft)
+	else if (!all && mesh.SelSoft)
 	{
 		fprintf(stderr, "WARNING: mesh '%s' %s applied to the selected vertices only: the soft selection falloff "
 		        "around them is not evaluated\n", name.c_str(), what);
 		if (warnings) warnings->push_back(std::string("softselection:") + what);
 	}
-	const bool all = mesh.VertSel.size() != mesh.Verts.size();
 	for (uint i = 0; i < mesh.Verts.size(); ++i)
-		if (all || mesh.VertSel[i])
+		if (all || sel[i])
 			mesh.Verts[i] = deformer.map(mesh.Verts[i]);
 }
 
@@ -853,6 +924,68 @@ static void applyTwist(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 	d.Angle = d.Height == 0.f ? 0.f : rad;
 	d.AnglePerUnit = d.Height == 0.f ? 0.f : rad / d.Height;
 	deformSelected(mesh, d, "Twist", name, warnings);
+}
+
+struct STaperDeformer
+{
+	Matrix3M Tm, InvTm;
+	float Length, Amount, Curve, Lower, Upper;
+	bool Limited, Symmetric, ScaleX, ScaleY;
+
+	Point3M map(Point3M p) const
+	{
+		if (Length == 0.f) return p;
+		p = transformPoint(p, Tm);
+		// the position along the axis as a share of the length; beyond the limits, the scale of the limit
+		float z;
+		if (Limited && p.z < Lower) z = Lower / Length;
+		else if (Limited && p.z > Upper) z = Upper / Length;
+		else z = p.z / Length;
+		if (Symmetric && z < 0.f) z = -z;
+		const float f = 1.f + z * Amount + Curve * z * (1.f - z);
+		if (ScaleX) p.x *= f;
+		if (ScaleY) p.y *= f;
+		return transformPoint(p, InvTm);
+	}
+};
+
+static void applyTaper(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh, const std::string &name,
+                       std::vector<std::string> *warnings)
+{
+	// 0 amount, 1 curve, 2 primary axis (0 X, 1 Y, 2 Z), 3 effect (0 X, 1 Y, 2 both), 4 symmetry, 5 limits on,
+	// 6 lower limit, 7 upper limit; the effect axes are those of the deformer space, where the primary axis is Z
+	std::map<sint32, float> p;
+	if (!readGizmoModParams(mod, p, name) || !hasParams(p, 8))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Taper parameters not readable; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:taper");
+		return;
+	}
+	const int naxis = (int)p[2];
+	const int effect = (int)p[3];
+	STaperDeformer d;
+	d.Amount = p[0];
+	d.Curve = p[1];
+	d.ScaleX = effect != 1;
+	d.ScaleY = effect != 0;
+	d.Symmetric = p[4] != 0.f;
+	d.Limited = p[5] != 0.f;
+	d.Lower = p[6];
+	d.Upper = p[7];
+	SGizmoModSpace space;
+	if (!gizmoModSpace(mod, app, gizmoModAxis(naxis), space))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Taper without a usable mod-context box; evaluated without it\n",
+		        name.c_str());
+		if (warnings) warnings->push_back("modifier:taper");
+		return;
+	}
+	d.Tm = space.Tm;
+	d.InvTm = space.InvTm;
+	// the taper spreads over the box extent along the primary axis, also with the limits on
+	const int ax = naxis < 0 || naxis > 2 ? 2 : naxis;
+	d.Length = space.Box[3 + ax] - space.Box[ax];
+	deformSelected(mesh, d, "Taper", name, warnings);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1135,7 +1268,7 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	{
 		if (!extractEditablePoly(base, out, name))
 			return false;
-		out.VertSelUnknown = true; // the poly mesh selection level and selections are not decoded
+		out.SelLevelUnknown = out.SelBitsUnknown = true; // the poly mesh selections are not decoded
 	}
 	else if (cid == PRIMMESH::CLASSID_BOX || cid == PRIMMESH::CLASSID_CYLINDER
 	         || cid == PRIMMESH::CLASSID_SPHERE || cid == PRIMMESH::CLASSID_PLANE)
@@ -1183,9 +1316,7 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 			EDITMESH::SEdits edits;
 			if (app && EDITMESH::readModApp(app, edits))
 				applyEditMeshEdits(edits, out, name);
-			// it passes its own selection up the stack, which is not decoded
-			out.VertSel.clear();
-			out.VertSelUnknown = true;
+			applyEditMeshSelection(mod, app, out);
 		}
 		else if (mcid == NLMISC::CClassId(0x25215824, 0x00000000)) // XForm
 		{
@@ -1200,6 +1331,11 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		         && mod->classDesc()->superClassId() == 0x810) // Twist
 		{
 			applyTwist(mod, app, out, name, warnings);
+		}
+		else if (mcid == NLMISC::CClassId(0x00000020, 0x00000000)
+		         && mod->classDesc()->superClassId() == 0x810) // Taper
+		{
+			applyTaper(mod, app, out, name, warnings);
 		}
 		else if (mcid == NLMISC::CClassId(0x40c7005e, 0x2a95082c)) // Nel VertexTreePaint
 		{
@@ -1303,16 +1439,12 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		}
 		else
 		{
-			fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated without it\n",
-			        name.c_str(), mcid.toString().c_str());
+			const ISceneClassDesc *desc = mod->classDesc();
+			fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s '%s' [%s]; evaluated without it\n",
+			        name.c_str(), mcid.toString().c_str(), ucstring(desc->displayName()).toUtf8().c_str(),
+			        ucstring(desc->dllPluginDesc()->internalName()).toUtf8().c_str());
 			if (warnings) warnings->push_back("modifier:" + mcid.toString());
-			out.VertSelUnknown = true; // it may be a selection modifier
-		}
-		if (!out.VertSel.empty() && out.VertSel.size() != out.Verts.size())
-		{
-			// the topology changed: the selection no longer matches the vertices
-			out.VertSel.clear();
-			out.VertSelUnknown = true;
+			out.SelLevelUnknown = out.SelBitsUnknown = true; // it may be a selection modifier
 		}
 		if (getenv("PMB_STACK_DUMP"))
 			fprintf(stderr, "PMB_STACK_DUMP '%s' after mod %s verts=%u faces=%u\n", name.c_str(),

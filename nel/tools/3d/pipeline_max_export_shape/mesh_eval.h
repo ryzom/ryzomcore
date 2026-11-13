@@ -72,18 +72,21 @@ struct SEvalMesh
 	std::vector<MAXMATH::Point3M> Verts; // object space
 	std::vector<SEvalFace> Faces;
 	std::map<int, SMapChannel> Maps;
-	// The vertices the deforming modifiers act on, as picked by the selection level the base Editable Mesh
-	// was saved in, one flag per vertex. Empty: the whole mesh (object level).
-	std::vector<bool> VertSel;
-	// A modifier that may change the selection or the vertices (Edit Mesh, or one the evaluator does not
-	// handle) ran, or the selection was not readable: VertSel no longer describes what the modifiers above
-	// see.
-	bool VertSelUnknown;
-	// The base mesh has soft selection on: the modifiers above also move the vertices around VertSel, by a
-	// falloff the evaluator does not compute.
-	bool VertSelSoft;
+	// The sub-object selection the deforming modifiers act on, as the base Editable Mesh or an Edit Mesh left
+	// it: the selection level (1 object, the whole mesh; 2 vertex; 4 face; 8 edge) and the selection of every
+	// level, one flag per vertex, per face and per face side (3 per face). A selection whose size does not
+	// match the mesh is not known.
+	uint32 SelLevel;
+	std::vector<bool> SelVerts, SelFaces, SelEdges;
+	// What the modifiers above see is not known: the level (after a modifier the evaluator does not handle, or
+	// over an Editable Poly base), or the selections (the same, or a selection chunk that was not readable).
+	// An Edit Mesh makes the level known again, and the selections when it stores its own.
+	bool SelLevelUnknown, SelBitsUnknown;
+	// Soft selection is on: the modifiers above also move the vertices around the selection, by a falloff
+	// the evaluator does not compute.
+	bool SelSoft;
 
-	SEvalMesh() : VertSelUnknown(false), VertSelSoft(false) { }
+	SEvalMesh() : SelLevel(1), SelLevelUnknown(false), SelBitsUnknown(false), SelSoft(false) { }
 	bool mapSupport(int channel) const { return Maps.find(channel) != Maps.end(); }
 };
 
