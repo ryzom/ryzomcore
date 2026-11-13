@@ -24,6 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <nel/misc/debug.h>
 #include <nel/misc/file.h>
 
+// Qt includes
+#include <QScrollBar>
+#include <QTextCursor>
+
 namespace NLQT 
 {
 
@@ -122,10 +126,14 @@ namespace NLQT
 
 
 
-		m_DlgDebug->textCursor().insertText(str.c_str(), format);
-		//m_DlgDebug->setCenterOnScroll(true);
-		m_DlgDebug->centerCursor();
-		//m_DlgDebug->ensureCursorVisible();
+		// append at the end whatever the user selected, and follow only when the view is at the bottom
+		QScrollBar *scrollBar = m_DlgDebug->verticalScrollBar();
+		bool atBottom = scrollBar->value() == scrollBar->maximum();
+		QTextCursor cursor(m_DlgDebug->document());
+		cursor.movePosition(QTextCursor::End);
+		cursor.insertText(QString::fromUtf8(str.c_str()), format);
+		if (atBottom)
+			scrollBar->setValue(scrollBar->maximum());
 
 	}
 
