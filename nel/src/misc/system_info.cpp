@@ -351,7 +351,7 @@ string CSystemInfo::getOS()
 
 	typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 	typedef BOOL (WINAPI *PGetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
-	typedef LONG (WINAPI* PRtlGetVersion)(OSVERSIONINFOEXA*);
+	typedef LONG (WINAPI* PRtlGetVersion)(OSVERSIONINFOEXW*);
 
 	const int BUFSIZE = 80;
 
@@ -374,8 +374,26 @@ string CSystemInfo::getOS()
 
 	if (pRtlGetVersion)
 	{
-		// try RtlGetVersion
-		bOsVersionInfoEx = pRtlGetVersion(&osvi) == 0;
+		// try RtlGetVersion, which takes the wide structure: called with the size of the narrow one, it filled the
+		// version numbers only and left the product type, the suite mask and the service pack at 0
+		OSVERSIONINFOEXW osviW;
+		ZeroMemory(&osviW, sizeof(osviW));
+		osviW.dwOSVersionInfoSize = sizeof(osviW);
+		bOsVersionInfoEx = pRtlGetVersion(&osviW) == 0;
+
+		if (bOsVersionInfoEx)
+		{
+			osvi.dwMajorVersion = osviW.dwMajorVersion;
+			osvi.dwMinorVersion = osviW.dwMinorVersion;
+			osvi.dwBuildNumber = osviW.dwBuildNumber;
+			osvi.dwPlatformId = osviW.dwPlatformId;
+			std::string csdVersion = wideToUtf8(osviW.szCSDVersion);
+			strncpy(osvi.szCSDVersion, csdVersion.c_str(), sizeof(osvi.szCSDVersion) - 1);
+			osvi.wServicePackMajor = osviW.wServicePackMajor;
+			osvi.wServicePackMinor = osviW.wServicePackMinor;
+			osvi.wSuiteMask = osviW.wSuiteMask;
+			osvi.wProductType = osviW.wProductType;
+		}
 	}
 
 	if (!bOsVersionInfoEx)
@@ -412,7 +430,26 @@ string CSystemInfo::getOS()
 		}
 		else if (osvi.dwMajorVersion == 10)
 		{
-			OSString += " Windows 10";
+			// Windows 11 and the servers from 2016 are version 10.0 too, the build number tells them apart
+			DWORD build = osvi.dwBuildNumber & 0xFFFF;
+
+			if (osvi.wProductType == VER_NT_WORKSTATION)
+			{
+				if (build >= 22000)
+					OSString += " Windows 11";
+				else
+					OSString += " Windows 10";
+			}
+			else if (build == 26100)
+				OSString += " Windows Server 2025";
+			else if (build == 20348)
+				OSString += " Windows Server 2022";
+			else if (build == 17763)
+				OSString += " Windows Server 2019";
+			else if (build == 14393)
+				OSString += " Windows Server 2016";
+			else
+				OSString += " Windows Server";
 		}
 		else if (osvi.dwMajorVersion == 6)
 		{
@@ -598,6 +635,9 @@ string CSystemInfo::getOS()
 		}
 
 		PGetProductInfo pGetProductInfo = (PGetProductInfo)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetProductInfo");
+
+		// where the edition is added, see after the switch
+		std::string::size_type editionPos = OSString.size();
 
 		DWORD dwType;
 
@@ -1063,6 +1103,10 @@ string CSystemInfo::getOS()
 				OSString += toString(" Unknown Edition (0x%04x)", dwType);
 			}
 		}
+
+		// the edition names of the servers start with "Server", which a server name above already says
+		if (OSString.find(" Windows Server") != std::string::npos && OSString.compare(editionPos, 7, " Server") == 0)
+			OSString.erase(editionPos, 7);
 
 		if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
 			OSString += " 64-bit";
