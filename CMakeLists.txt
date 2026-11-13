@@ -471,17 +471,22 @@ ENDIF()
 
 # To build the documention, you will have to enable it
 # and then do the equivalent of "make DoxygenDoc".
+OPTION(BUILD_DOCUMENTATION "Build the NeL documentation with Doxygen (target DoxygenDoc)" OFF)
 IF(BUILD_DOCUMENTATION)
-    IF(DOT)
+    FIND_PACKAGE(Doxygen OPTIONAL_COMPONENTS dot)
+    IF(NOT DOXYGEN_FOUND)
+        MESSAGE(FATAL_ERROR "BUILD_DOCUMENTATION needs Doxygen, which was not found: install it or turn BUILD_DOCUMENTATION off")
+    ENDIF()
+    IF(TARGET Doxygen::dot)
         SET(HAVE_DOT YES)
     ELSE()
         SET(HAVE_DOT NO)
     ENDIF()
     # This processes our Doxyfile.in and substitutes paths to generate
     # a final Doxyfile
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/nel/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 
-    ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN} ${CMAKE_BINARY_DIR}/doc/Doxyfile)
+    ADD_CUSTOM_TARGET(DoxygenDoc COMMAND Doxygen::doxygen ${CMAKE_BINARY_DIR}/doc/Doxyfile WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc)
 ENDIF()
 
 IF(WITH_NEL_TESTS)
