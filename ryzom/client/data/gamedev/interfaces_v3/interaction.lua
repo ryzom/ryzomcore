@@ -526,37 +526,6 @@ function twGroup(groupSize)
 end
 
 ------------------------------------------------------------------------------------------------------------
---
-function game:closeWebIGBrowserHeader()
-	local ui = getUI('ui:interface:webig');
-
-	-- save size
-	ui_webig_browser_h = ui.h;
-	ui_webig_browser_w = ui.w;
-
-	-- reduce window size
-	ui.pop_min_h = 32;
-	ui.h = 0;
-	ui.w = 150;
-end
-
-------------------------------------------------------------------------------------------------------------
---
-function game:openWebIGBrowserHeader()
-	local ui = getUI('ui:interface:webig');
-	ui.pop_min_h = 96;
-
-	-- set size from saved values
-	if (ui_webig_browser_h ~= nil) then
-		ui.h = ui_webig_browser_h;
-	end
-
-	 if (ui_webig_browser_w ~= nil) then
-		ui.w = ui_webig_browser_w;
-	end
-end
-
-------------------------------------------------------------------------------------------------------------
 local SavedUrl = "";
 function game:chatUrl(url)
 	SavedUrl = url
@@ -564,8 +533,5 @@ function game:chatUrl(url)
 end
 function game:chatUrlCopy()
 	runAH(nil, "copy_to_clipboard", SavedUrl)
-end
-function game:chatUrlBrowse()
-	runAH(nil, "browse", "name=ui:interface:webig:content:html|url=" .. SavedUrl)
 end
 

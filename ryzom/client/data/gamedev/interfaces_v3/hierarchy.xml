@@ -93,8 +93,6 @@
 
 <tree node="mailbox"/>
 
-<tree node="webig"/>
-
 <tree node="info_player_journal"/>
 
 <!-- info_player_career tree node auto generated (see info_player.xml) -->

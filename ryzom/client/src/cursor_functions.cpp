@@ -93,7 +93,6 @@ void contextTalk			(bool rightClick, bool dblClick);
 void contextExtractRM		(bool rightClick, bool dblClick);
 void contextMission			(bool rightClick, bool dblClick);
 void contextWebPage			(bool rightClick, bool dblClick);
-void contextWebIG			(bool rightClick, bool dblClick);
 void contextRingMission		(bool rightClick, bool dblClick);
 void contextOutpost			(bool rightClick, bool dblClick);
 void contextBuildTotem		(bool rightClick, bool dblClick);
@@ -131,7 +130,6 @@ void initContextualCursor()
 	ContextCur.add(true,	"EXTRACT_RM",		string("uimGcmExtractRM"),			0.0f,	checkUnderCursor,	contextExtractRM);
 	ContextCur.add(true,	"MISSION",			string(""),							0.0f,	checkUnderCursor,	contextMission);
 	ContextCur.add(true,	"WEB PAGE",			string(""),							0.0f,	checkUnderCursor,	contextWebPage);
-	ContextCur.add(true,	"WEBIG",			string(""),							0.0f,	checkUnderCursor,	contextWebIG);
 	ContextCur.add(true,	"OUTPOST",			string(""),							0.0f,	checkUnderCursor,	contextOutpost);
 	ContextCur.add(true,	"RING MISSION",		string(""),							0.0f,	checkUnderCursor,	contextRingMission);
 	ContextCur.add(true,	"BUILD_TOTEM",		string("uimGcmChooseBuilding"),		0.0f,	checkUnderCursor,	contextBuildTotem);
@@ -564,13 +562,6 @@ void checkUnderCursor()
 					cursor->setCursor("r2ed_tool_select_move_over.tga");
 					InstanceId = instance_idx;
 				}
-				else
-				{
-					cursor->setCursor("curs_pick.tga");
-					string contextText = instref.ContextText;
-					if (ContextCur.context("WEBIG", 0.f, contextText))
-						return;
-				}
 			} else {
 				if (!selectedInstanceURL.empty()) {
 					cursor->setCursor("curs_default.tga");
@@ -872,36 +863,6 @@ void contextWebPage(bool rightClick, bool dblClick)
 		return;
 	UserEntity->moveTo(SlotUnderCursor, 3.0, CUserEntity::WebPage);
 }// contextWebPage //
-
-//-----------------------------------------------
-// contextWebIG :
-//-----------------------------------------------
-void contextWebIG(bool rightClick, bool dblClick)
-{
-	if(rightClick)
-		return;
-	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
-	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
-	if (el != nullptr)
-	{
-		//TODO: Fix that
-		//el->setName(selectedInstance.getShapeName());
-		el->setPosX(0.0f);
-	}
-	if (selectedInstanceURL.empty())
-	{
-		if (pGC != nullptr)
-			pGC->setActive(true);
-	}
-	else
-	{
-		if (pGC != nullptr)
-			pGC->setActive(false);
-		CAHManager::getInstance()->runActionHandler("browse", nullptr, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
-	}
-	
-}// contextWebIG //
 
 //-----------------------------------------------
 // contextOutpost

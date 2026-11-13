@@ -1919,7 +1919,6 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:VARIABLES:ISACTIVE:TEAM_LIST" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:CONTACT_LIST" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:MAILBOX" type="sint32" value="0" />
-<variable entry="UI:VARIABLES:ISACTIVE:WEBIG" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:CHAT_GROUP" type="sint32" value="0" />
 
 <variable entry="UI:SAVE:ISDETACHED:MAIN_CHAT" type="sint32" value="0" />
