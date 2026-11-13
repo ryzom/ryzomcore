@@ -883,6 +883,13 @@ MACRO(NL_SETUP_BUILD)
 
     ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_WIN32 /DWIN32 /D_WINDOWS /wd4250")
 
+    # The sources are UTF-8: read them as UTF-8 whatever the code page of the build machine,
+    # and keep narrow string literals in UTF-8 (/utf-8 exists from VC++ 2015 Update 2 on; clang-cl
+    # does both by default, and its version is not the one of cl)
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0.23918)
+      ADD_PLATFORM_FLAGS("/utf-8")
+    ENDIF()
+
     # huge PCH
     ADD_PLATFORM_FLAGS("/Zm1000")
 
