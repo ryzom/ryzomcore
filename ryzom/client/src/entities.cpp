@@ -2488,8 +2488,12 @@ CEntityCL *CEntityManager::getEntityBySheetName (const std::string &sheet) const
 {
 	if (!sheet.empty())
 	{
+		// The text comes from the player (/target): one that names no sheet finds nothing and is no data error
+		NLMISC::CSheetId sheetRef;
+		if (!sheetRef.buildSheetId(sheet) || sheetRef == NLMISC::CSheetId::Unknown)
+			return nullptr;
+
 		uint i;
-		const CSheetId& sheetRef = NLMISC::CSheetId(sheet);
 		const uint count = (uint)_Entities.size();
 		for (i=0; i<count; i++)
 		{
