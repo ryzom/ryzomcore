@@ -68,9 +68,10 @@ bool isUvwMapModifier(CSceneClass *mod)
 // and S the gizmo size (width, length, height), halved on x and y for planar and cylindrical and on all axes
 // for spherical, ball and box. The face normal n goes through the linear part of tm. Corner values:
 //   planar: (1/2 + p.x/2, 1/2 + p.y/2, p.z)
-//   cylindrical: (1/2 + atan2(p.y, p.x) / 2pi, 1/2 + p.z), the u of corners 1 and 2 brought within 1/2 of
-//     corner 0 (strictly, in float); with the cap on, a face whose normal is mostly along z takes
-//     (1/2 + p.x/2, 1/2 + p.y/2) instead, without the seam fix
+//   cylindrical: (1/2 + atan2(p.y, p.x) / 2pi, 1/2 + p.z, |p.xy|); on a face across the seam (corners more
+//     than 1/2 apart in u) the corners more than 1/2 above the lowest take u - 1, each on a map vert of its
+//     own; with the cap on, a face whose normal is mostly along z takes (1/2 + p.x/2, 1/2 + p.y/2) instead,
+//     without the seam fix
 //   spherical: u as cylindrical, v = 1/2 + asin(p.z / |p|) / pi (not validated: only water shapes use it)
 //   box: by the main axis of n (ties go x, then y, then z): +X (1/2 + p.y/2, 1/2 + p.z/2), -X (1/2 - p.y/2,
 //     1/2 + p.z/2), +Y (1/2 - p.x/2, 1/2 + p.z/2), -Y (1/2 + p.x/2, 1/2 + p.z/2), +Z (1/2 + p.x/2, 1/2 + p.y/2),
@@ -79,7 +80,10 @@ bool isUvwMapModifier(CSceneClass *mod)
 //     end with the lower vertex index at (0, 0), the other at (1, 1), the third corner at (1, 0) or (0, 1)
 // then u, v and w times their tiles, and 1 - value where flipped (flips are not seen in the corpus).
 // The channel is parameter 13 (a 0 read as 1), or channel 0 when parameter 8 is 1. At face level only the
-// selected faces are mapped and the others keep their corners. Validated against the reference exports:
+// selected faces are mapped and the others keep their corners. The map verts are numbered as the modifier
+// numbers them, which Edit Mesh map records above index (pinned by the counts those record, and by the
+// map verts an Edit Mesh copied from MA_appart_palmier): see the comment in applyUvwMap; box and face
+// mapping give every corner a map vert of its own. Validated against the reference exports:
 // planar (Rectangle01, BatA01 with axis Y), cylindrical (de_horizon_dome on two channels, one with a scaled
 // gizmo, MA_appart_palmier on a face selection, TR_Piece_NPC_fond_marin with the cap), face
 // (mag_impact_pierce, Mag_Impact_Slash), and the box sides on the lightmap UVs (sanctuaire_part10/11,
@@ -112,23 +116,27 @@ static float cylinderU(const Point3M &p)
 	return 0.5f + atan2f(p.y, p.x) / (2.f * (float)M_PI);
 }
 
-// The u of corners 1 and 2 brought within half a turn of corner 0.
-static void seamFix(Point3M uvw[3])
+// A face across the seam (its corners more than half a turn apart in u): the corners more than half a turn
+// above the lowest one take u - 1, each on a map vert of its own.
+static void seamFix(Point3M uvw[3], bool own[3])
 {
-	for (int c = 1; c < 3; ++c)
+	const float minU = std::min(uvw[0].x, std::min(uvw[1].x, uvw[2].x));
+	for (int c = 0; c < 3; ++c)
 	{
-		const float d = uvw[c].x - uvw[0].x;
-		if (d > 0.5f) uvw[c].x -= 1.f;
-		else if (d < -0.5f) uvw[c].x += 1.f;
+		if (uvw[c].x - minU > 0.5f)
+		{
+			uvw[c].x -= 1.f;
+			own[c] = true;
+		}
 	}
 }
 
 // The corner values of one face, before tiling. False when the face cannot be mapped (face mapping without
-// one hidden edge).
+// one hidden edge). own[c] is set for a corner that takes a map vert of its own (across the seam).
 static bool mapFace(int type, int cap, const Point3M p[3], const Point3M &n, const uint32 v[3], uint32 flags,
-                    Point3M uvw[3])
+                    Point3M uvw[3], bool own[3])
 {
-	for (int c = 0; c < 3; ++c) { uvw[c].x = uvw[c].y = uvw[c].z = 0.f; }
+	for (int c = 0; c < 3; ++c) { uvw[c].x = uvw[c].y = uvw[c].z = 0.f; own[c] = false; }
 	switch (type)
 	{
 	case MAP_PLANAR:
@@ -153,8 +161,9 @@ static bool mapFace(int type, int cap, const Point3M p[3], const Point3M &n, con
 		{
 			uvw[c].x = cylinderU(p[c]);
 			uvw[c].y = 0.5f + p[c].z;
+			uvw[c].z = sqrtf(p[c].x * p[c].x + p[c].y * p[c].y);
 		}
-		seamFix(uvw);
+		seamFix(uvw, own);
 		return true;
 	case MAP_SPHERICAL:
 		for (int c = 0; c < 3; ++c)
@@ -163,7 +172,7 @@ static bool mapFace(int type, int cap, const Point3M p[3], const Point3M &n, con
 			uvw[c].x = cylinderU(p[c]);
 			uvw[c].y = r > 0.f ? 0.5f + asinf(std::max(-1.f, std::min(1.f, p[c].z / r))) / (float)M_PI : 0.5f;
 		}
-		seamFix(uvw);
+		seamFix(uvw, own);
 		return true;
 	case MAP_BOX:
 	{
@@ -339,19 +348,47 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh,
 		rn = rotateAxisM3(rn, 2, (maptype == MAP_PLANAR || maptype == MAP_BOX) ? M_PI : M_PI * 0.5);
 	const Matrix3M tm = inverseM3(s * ra * rn * gizmo * inverseM3(ctx));
 
-	// the channel: kept for the faces not mapped when only the selected ones are
+	// The map verts. Mapping the whole mesh (or a selection without an incoming channel) gives one map vert
+	// per vertex and map faces parallel to the faces; a face selection keeps the incoming channel and gives
+	// the selected faces one new map vert per vertex they use, numbered in face order after the incoming
+	// ones. A corner whose value differs from the one its map vert already took gets a map vert of its own.
+	// Map verts no face uses any more are dropped at the end, keeping the order of the others.
 	const uint nFaces = (uint)mesh.FaceVerts->size() / 3;
+	const uint nVerts = (uint)mesh.Verts->size();
 	const bool bySel = mesh.FaceSel && mesh.FaceSel->size() == nFaces;
 	SMeshView::SChannel &ch = (*mesh.Maps)[channel];
+	std::vector<bool> valueSet;
 	if (!bySel || ch.FaceUVs.size() != (size_t)nFaces * 3)
 	{
 		if (bySel)
-			fprintf(stderr, "WARNING: UVW Map on a face selection without an incoming channel %d; the other faces get "
-			        "(0, 0, 0) (not validated)\n", channel);
-		ch.UVs.clear();
-		ch.FaceUVs.assign((size_t)nFaces * 3, 0);
-		if (bySel)
-			ch.UVs.push_back(CVector(0.f, 0.f, 0.f));
+			fprintf(stderr, "WARNING: UVW Map on a face selection without an incoming channel %d; the other faces share "
+			        "the map verts of their vertices, (0, 0, 0) where no selected face maps one (not validated)\n", channel);
+		ch.UVs.assign(nVerts, CVector(0.f, 0.f, 0.f));
+		ch.FaceUVs.assign(mesh.FaceVerts->begin(), mesh.FaceVerts->end());
+		valueSet.assign(nVerts, false);
+	}
+	else
+	{
+		valueSet.assign(ch.UVs.size(), true);
+		std::vector<sint32> vmap(nVerts, -1);
+		for (uint f = 0; f < nFaces; ++f)
+		{
+			if (!(*mesh.FaceSel)[f])
+				continue;
+			for (uint c = 0; c < 3; ++c)
+			{
+				const sint32 v = (*mesh.FaceVerts)[f * 3 + c];
+				if (v < 0 || (uint)v >= nVerts)
+					continue;
+				if (vmap[v] < 0)
+				{
+					vmap[v] = (sint32)ch.UVs.size();
+					ch.UVs.push_back(CVector(0.f, 0.f, 0.f));
+					valueSet.push_back(false);
+				}
+				ch.FaceUVs[f * 3 + c] = vmap[v];
+			}
+		}
 	}
 	uint unmapped = 0;
 	for (uint f = 0; f < nFaces; ++f)
@@ -369,11 +406,14 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh,
 		const Point3M n = linearPart(faceNormalOf(obj[0], obj[1], obj[2]), tm);
 		const uint32 flags = mesh.FaceFlags && f < mesh.FaceFlags->size() ? (*mesh.FaceFlags)[f] : 7;
 		Point3M uvw[3];
-		if (!mapFace(maptype, cap, p, n, v, flags, uvw))
+		bool own[3];
+		if (!mapFace(maptype, cap, p, n, v, flags, uvw, own))
 		{
 			++unmapped;
-			for (uint c = 0; c < 3; ++c) { uvw[c].x = uvw[c].y = uvw[c].z = 0.f; }
+			for (uint c = 0; c < 3; ++c) { uvw[c].x = uvw[c].y = uvw[c].z = 0.f; own[c] = false; }
 		}
+		if (maptype == MAP_BOX || maptype == MAP_FACE)
+			own[0] = own[1] = own[2] = true; // a map vert per corner
 		for (uint c = 0; c < 3; ++c)
 		{
 			uvw[c].x *= utile;
@@ -382,9 +422,42 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh,
 			if (uflip) uvw[c].x = 1.f - uvw[c].x;
 			if (vflip) uvw[c].y = 1.f - uvw[c].y;
 			if (wflip) uvw[c].z = 1.f - uvw[c].z;
-			ch.FaceUVs[f * 3 + c] = (sint32)ch.UVs.size();
-			ch.UVs.push_back(CVector(uvw[c].x, uvw[c].y, uvw[c].z));
+			const CVector value(uvw[c].x, uvw[c].y, uvw[c].z);
+			sint32 &t = ch.FaceUVs[f * 3 + c];
+			if (t < 0 || (uint)t >= ch.UVs.size())
+				continue;
+			if (!valueSet[t] && !own[c])
+			{
+				ch.UVs[t] = value;
+				valueSet[t] = true;
+			}
+			else if (own[c] || !(ch.UVs[t] == value))
+			{
+				t = (sint32)ch.UVs.size();
+				ch.UVs.push_back(value);
+				valueSet.push_back(true);
+			}
 		}
+	}
+
+	// drop the map verts no face uses
+	{
+		std::vector<sint32> remap(ch.UVs.size(), -1);
+		for (uint i = 0; i < ch.FaceUVs.size(); ++i)
+			if (ch.FaceUVs[i] >= 0 && (uint)ch.FaceUVs[i] < ch.UVs.size())
+				remap[ch.FaceUVs[i]] = 0;
+		uint kept = 0;
+		for (uint i = 0; i < ch.UVs.size(); ++i)
+		{
+			if (remap[i] < 0)
+				continue;
+			remap[i] = (sint32)kept;
+			ch.UVs[kept++] = ch.UVs[i];
+		}
+		ch.UVs.resize(kept);
+		for (uint i = 0; i < ch.FaceUVs.size(); ++i)
+			if (ch.FaceUVs[i] >= 0 && (uint)ch.FaceUVs[i] < remap.size())
+				ch.FaceUVs[i] = remap[ch.FaceUVs[i]];
 	}
 	if (outUnmapped) *outUnmapped = unmapped;
 	return true;

@@ -143,6 +143,9 @@ bool readModApp(CStorageContainer *c2500, SEdits &out)
 		}
 	}
 	out.IrregularIds.insert(out.IrregularIds.end(), md.irregularIds().begin(), md.irregularIds().end());
+	out.HasInputCounts = md.hasInputVertCount() && md.hasInputFaceCount();
+	out.InputVertCount = md.inputVertCount();
+	out.InputFaceCount = md.inputFaceCount();
 	if (md.delVerts().Present) md.delVerts().bits(out.DelVerts);
 	if (md.delFaces().Present) md.delFaces().bits(out.DelFaces);
 	return true;

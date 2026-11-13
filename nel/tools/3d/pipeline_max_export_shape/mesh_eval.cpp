@@ -505,6 +505,7 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 {
 	const uint inFaces = (uint)mesh.Faces.size();
 	uint outOfRange = 0;
+	uint dropped = 0; // map channel records on input map verts or faces the channel does not have
 	if (!e.IrregularIds.empty())
 	{
 		std::string ids;
@@ -513,6 +514,16 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 		fprintf(stderr, "WARNING: mesh '%s' Edit Mesh data has unreadable chunks %s; their records are not applied\n",
 		        name.c_str(), ids.c_str());
 	}
+	// The mesh the delta was recorded on against the one evaluated here: when they differ, the edits land
+	// on other vertices and faces than intended (an unevaluated modifier below, or the asset changed below
+	// the Edit Mesh after it was edited).
+	// An Edit Mesh never edited on this object records 0 and 0 and has nothing to apply.
+	const bool recorded = e.HasInputCounts && (e.InputVertCount || e.InputFaceCount);
+	const bool geometryMatches = !recorded || (e.InputVertCount == mesh.Verts.size() && e.InputFaceCount == inFaces);
+	if (!geometryMatches)
+		fprintf(stderr, "WARNING: mesh '%s' Edit Mesh was recorded on %u vertices and %u faces, the evaluated mesh has "
+		                "%u and %u\n",
+		        name.c_str(), e.InputVertCount, e.InputFaceCount, (uint)mesh.Verts.size(), inFaces);
 
 	// (a) Face attribute rewrites and smoothing-group changes on the INPUT face set, before
 	// deletes/appends.
@@ -525,10 +536,25 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 		f.SmGroup = (f.SmGroup & ~s.Mask) | (s.Values & s.Mask);
 	}
 
-	// (a2) Map channel edits on the input map verts and faces. A group is applied only when its
-	// input counts match the channel as it reaches this modifier; otherwise the evaluation below
-	// differs from the one the delta was recorded on, and the channel is reported and left as is.
-	std::map<int, const EDITMESH::SMapEdits *> carried; // channels whose created faces have map faces
+	// (a2) Map channel edits on the input map verts and faces. The group applies to the channel as it
+	// reaches this modifier even when that has another map vert count than the one recorded (the
+	// original modifier works that way): the created map verts follow the actual input map verts, so a
+	// recorded index at or past the recorded count moves with them, and a record on an input map vert or
+	// face the channel does not have is dropped. A channel the delta carries but the mesh does not have
+	// starts in its default form, with the mesh's topology: white for vertex colour, the vertex
+	// positions for the others.
+	struct SCarried
+	{
+		const EDITMESH::SMapEdits *M;
+		uint32 InVNum; // the actual input map vert count
+		// a recorded map vert index in the output of this group, or -1 when there is none
+		sint64 adjust(uint32 i) const
+		{
+			if (i >= M->VertCount) return (sint64)i - M->VertCount + InVNum;
+			return i < InVNum ? (sint64)i : -1;
+		}
+	};
+	std::map<int, SCarried> carried; // channels whose created faces have map faces
 	std::set<int> seenChannels;
 	for (uint g = 0; g < e.Maps.size(); ++g)
 	{
@@ -544,36 +570,10 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 			        name.c_str(), (int)m.Channel);
 			continue;
 		}
-		std::map<int, SMapChannel>::iterator mt = mesh.Maps.find(m.Channel);
-		if (mt == mesh.Maps.end() && m.Channel == 0 && m.VertCount == mesh.Verts.size() && m.FaceCount == inFaces)
+		if (m.VertCount == 0xFFFFFFFF || m.FaceCount == 0xFFFFFFFF)
 		{
-			// A vertex colour channel the delta was recorded on but the incoming mesh does not have: it
-			// starts as a white map with the mesh's topology (as for OldVertexPaint), which is the
-			// one-map-vert-per-vertex shape the counts above describe.
-			SMapChannel &ch = mesh.Maps[0];
-			Point3M white = { 1.f, 1.f, 1.f };
-			ch.Verts.assign(mesh.Verts.size(), white);
-			ch.Faces.resize(inFaces);
-			for (uint f = 0; f < inFaces; ++f)
-				for (uint c = 0; c < 3; ++c)
-					ch.Faces[f].T[c] = mesh.Faces[f].V[c];
-			mt = mesh.Maps.find(0);
-		}
-		if (mt == mesh.Maps.end())
-		{
-			fprintf(stderr, "WARNING: mesh '%s' Edit Mesh edits map channel %d, which the evaluated mesh does "
-			                "not have; the channel edits are not applied\n",
-			        name.c_str(), (int)m.Channel);
-			continue;
-		}
-		SMapChannel &ch = mt->second;
-		if (ch.Verts.size() != m.VertCount || ch.Faces.size() != m.FaceCount || m.FaceCount != inFaces)
-		{
-			fprintf(stderr, "WARNING: mesh '%s' Edit Mesh map channel %d was recorded on %u map verts and %u map "
-			                "faces, the evaluated mesh has %u map verts and %u map faces on %u faces; the channel "
-			                "edits are not applied\n",
-			        name.c_str(), (int)m.Channel, m.VertCount, m.FaceCount, (uint)ch.Verts.size(),
-			        (uint)ch.Faces.size(), inFaces);
+			fprintf(stderr, "WARNING: mesh '%s' Edit Mesh map channel %d without its input counts; the channel edits "
+			                "are not applied\n", name.c_str(), (int)m.Channel);
 			continue;
 		}
 		if (m.CreatedFaces.size() != e.CreatedFacesA.size())
@@ -583,6 +583,37 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 			        name.c_str(), (int)m.Channel, (uint)m.CreatedFaces.size(), (uint)e.CreatedFacesA.size());
 			continue;
 		}
+		std::map<int, SMapChannel>::iterator mt = mesh.Maps.find(m.Channel);
+		if (mt == mesh.Maps.end())
+		{
+			SMapChannel &ch = mesh.Maps[m.Channel];
+			ch.Verts.resize(mesh.Verts.size());
+			for (uint v = 0; v < mesh.Verts.size(); ++v)
+			{
+				if (m.Channel == 0) { ch.Verts[v].x = ch.Verts[v].y = ch.Verts[v].z = 1.f; }
+				else ch.Verts[v] = mesh.Verts[v];
+			}
+			ch.Faces.resize(inFaces);
+			for (uint f = 0; f < inFaces; ++f)
+				for (uint c = 0; c < 3; ++c)
+					ch.Faces[f].T[c] = mesh.Faces[f].V[c];
+			mt = mesh.Maps.find(m.Channel);
+		}
+		SMapChannel &ch = mt->second;
+		if (ch.Faces.size() != inFaces)
+		{
+			fprintf(stderr, "WARNING: mesh '%s' map channel %d has %u map faces on %u faces; the Edit Mesh channel "
+			                "edits are not applied\n",
+			        name.c_str(), (int)m.Channel, (uint)ch.Faces.size(), inFaces);
+			continue;
+		}
+		SCarried cr;
+		cr.M = &m;
+		cr.InVNum = (uint32)ch.Verts.size();
+		if (geometryMatches && cr.InVNum != m.VertCount)
+			fprintf(stderr, "WARNING: mesh '%s' Edit Mesh map channel %d was recorded on %u map verts, the incoming "
+			                "channel has %u; applied with the created map verts after those (as the modifier does)\n",
+			        name.c_str(), (int)m.Channel, m.VertCount, cr.InVNum);
 		for (uint i = 0; i < m.CreatedVerts.size(); ++i)
 		{
 			MAXMATH::Point3M p;
@@ -593,8 +624,10 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 		}
 		for (uint i = 0; i < m.VertSets.size(); ++i)
 		{
-			if (m.VertSets[i].first >= ch.Verts.size()) { ++outOfRange; continue; }
-			MAXMATH::Point3M &p = ch.Verts[m.VertSets[i].first];
+			const sint64 t = cr.adjust(m.VertSets[i].first);
+			if (t < 0) { ++dropped; continue; }
+			if ((size_t)t >= ch.Verts.size()) { ++outOfRange; continue; }
+			MAXMATH::Point3M &p = ch.Verts[(size_t)t];
 			p.x = m.VertSets[i].second.x;
 			p.y = m.VertSets[i].second.y;
 			p.z = m.VertSets[i].second.z;
@@ -602,15 +635,17 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 		for (uint i = 0; i < m.FaceRemap.size(); ++i)
 		{
 			const EDITMESH::SFaceVertRemap &r = m.FaceRemap[i];
-			if (r.Index >= ch.Faces.size()) { ++outOfRange; continue; }
+			if (r.Index >= ch.Faces.size()) { ++dropped; continue; }
 			for (int c = 0; c < 3; ++c)
 			{
 				if (!r.applyCorner(c)) continue;
-				if (r.V[c] >= ch.Verts.size()) { ++outOfRange; continue; }
-				ch.Faces[r.Index].T[c] = r.V[c];
+				const sint64 t = cr.adjust(r.V[c]);
+				if (t < 0) { ++dropped; continue; }
+				if ((size_t)t >= ch.Verts.size()) { ++outOfRange; continue; }
+				ch.Faces[r.Index].T[c] = (uint32)t;
 			}
 		}
-		carried[m.Channel] = &m;
+		carried[m.Channel] = cr;
 	}
 
 	// (b) Reorder each map channel's face list in parallel with the base face-delete pass. The
@@ -654,16 +689,19 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 	for (std::map<int, SMapChannel>::iterator mt = mesh.Maps.begin(); mt != mesh.Maps.end(); ++mt)
 	{
 		SMapChannel &ch = mt->second;
-		std::map<int, const EDITMESH::SMapEdits *>::const_iterator ct = carried.find(mt->first);
-		if (ct != carried.end() && ch.Faces.size() + ct->second->CreatedFaces.size() == mesh.Faces.size())
+		std::map<int, SCarried>::const_iterator ct = carried.find(mt->first);
+		if (ct != carried.end() && ch.Faces.size() + ct->second.M->CreatedFaces.size() == mesh.Faces.size())
 		{
-			for (uint i = 0; i < ct->second->CreatedFaces.size(); ++i)
+			const std::vector<EDITMESH::SMapFaceIdx> &created = ct->second.M->CreatedFaces;
+			for (uint i = 0; i < created.size(); ++i)
 			{
 				SMapFace f;
 				for (int c = 0; c < 3; ++c)
 				{
-					f.T[c] = ct->second->CreatedFaces[i].T[c];
-					if (f.T[c] >= ch.Verts.size()) { ++outOfRange; f.T[c] = 0; }
+					const sint64 t = ct->second.adjust(created[i].T[c]);
+					if (t < 0) { ++dropped; f.T[c] = 0; }
+					else if ((size_t)t >= ch.Verts.size()) { ++outOfRange; f.T[c] = 0; }
+					else f.T[c] = (uint32)t;
 				}
 				ch.Faces.push_back(f);
 			}
@@ -683,6 +721,10 @@ static void applyEditMeshEdits(const EDITMESH::SEdits &e, SEvalMesh &mesh, const
 		fprintf(stderr, "WARNING: mesh '%s' Edit Mesh has %u smoothing, map vert or map face records outside "
 		                "the evaluated mesh; they are not applied\n",
 		        name.c_str(), outOfRange);
+	if (dropped && geometryMatches) // else the geometry warning above covers it
+		fprintf(stderr, "WARNING: mesh '%s' Edit Mesh has %u map channel records on map verts or faces the incoming "
+		                "channel does not have (recorded on another input); dropped, as the modifier does\n",
+		        name.c_str(), dropped);
 }
 
 // XForm modifier: gizmo PRS (modifier reference 0) over the mod-context TM (mod-app 0x2510),
@@ -2614,7 +2656,8 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 	// UV generation for Box + Plane (Cylinder/Sphere seam handling still open — §10z-cinq).
 	// Per-corner UVs (3 × nFaces); the mesh-build path dedups the final VB on (pos,n,uv).
 	std::vector<NLMISC::CVector> puvs;
-	if (!PRIMMESH::buildParametricMesh(base->classDesc()->classId(), params, pverts, ptris, &puvs))
+	std::vector<uint32> puvFaces;
+	if (!PRIMMESH::buildParametricMesh(base->classDesc()->classId(), params, pverts, ptris, &puvs, &puvFaces))
 		return false;
 
 	out.Verts.resize(pverts.size());
@@ -2634,10 +2677,19 @@ static bool extractParametricPrimitive(CSceneClass *base, SEvalMesh &out, const 
 		out.Faces[i].Flags = (ptris[i].MatId & 0xFFFFu) << MAX_FACE_MATID_SHIFT;
 		out.Faces[i].Flags |= 0x7; // all edges visible
 	}
-	// Map channel 1: per-corner UVs when the generator produced them (Box/Plane today). Face t's
-	// three corners map to indices t*3+{0,1,2} into the UV vert list — no UV-vert sharing here
-	// (matches how Max stores some multi-seg cases; the export VB dedup absorbs the redundancy).
-	if (!puvs.empty() && puvs.size() == ptris.size() * 3)
+	// Map channel 1: the primitive's own shared map verts when the generator numbers them (Box, hemisphere), else
+	// per-corner UVs: face t's three corners map to indices t*3+{0,1,2} into the UV vert list.
+	if (!puvs.empty() && puvFaces.size() == ptris.size() * 3)
+	{
+		SMapChannel &mc = out.Maps[1];
+		mc.Verts.resize(puvs.size());
+		memcpy(&mc.Verts[0], &puvs[0], puvs.size() * 12);
+		mc.Faces.resize(ptris.size());
+		for (uint i = 0; i < ptris.size(); ++i)
+			for (uint c = 0; c < 3; ++c)
+				mc.Faces[i].T[c] = puvFaces[i * 3 + c];
+	}
+	else if (!puvs.empty() && puvs.size() == ptris.size() * 3)
 	{
 		SMapChannel &mc = out.Maps[1];
 		mc.Verts.resize(puvs.size());
@@ -2859,6 +2911,16 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 				fprintf(stderr, "PMB_STACK_DUMP '%s' mod %s switched off, skipped\n", name.c_str(),
 				        mcid.toString().c_str());
 			continue;
+		}
+		if (getenv("PMB_STACK_DUMP"))
+		{
+			std::string maps;
+			for (std::map<int, SMapChannel>::const_iterator mt = out.Maps.begin(); mt != out.Maps.end(); ++mt)
+				maps += NLMISC::toString(" ch%d=%u/%u", mt->first, (uint)mt->second.Verts.size(),
+				                         (uint)mt->second.Faces.size());
+			fprintf(stderr, "PMB_STACK_DUMP '%s' before %s '%s': verts=%u faces=%u%s\n", name.c_str(),
+			        mcid.toString().c_str(), mod->className().c_str(), (uint)out.Verts.size(),
+			        (uint)out.Faces.size(), maps.c_str());
 		}
 		if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 		{

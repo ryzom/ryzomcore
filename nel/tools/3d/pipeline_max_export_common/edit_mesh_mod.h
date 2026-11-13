@@ -191,6 +191,10 @@ struct SEdits
 	std::vector<bool> DelVerts;                                   ///< 0x0170 → 0x2700 bit array
 	std::vector<bool> DelFaces;                                   ///< 0x0270 → 0x2700 bit array
 	std::vector<uint16> IrregularIds;                             ///< unreadable delta chunks
+	bool HasInputCounts;                                          ///< 0x0100 and 0x0110 present
+	uint32 InputVertCount, InputFaceCount;                        ///< the mesh the delta was recorded on
+
+	SEdits() : HasInputCounts(false), InputVertCount(0), InputFaceCount(0) { }
 };
 
 /// Read the `MeshDelta` sub-tree off one Edit Mesh mod-app container (the OSM Derived wrapper's
