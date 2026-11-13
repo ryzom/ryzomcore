@@ -62,6 +62,9 @@ struct Matrix3M
 Matrix3M operator*(const Matrix3M &a, const Matrix3M &b);
 Matrix3M inverseM3(const Matrix3M &m);
 Matrix3M quatToMatrix3(const QuatM &q); // Max Quat::MakeMatrix (rotation rows, zero translation)
+// Post-multiply by a rotation about X, Y or Z (0, 1, 2), row vectors (v' = v * M): the rotate-about-axis
+// step of the gizmo deformers and the Euler rotation controller.
+Matrix3M rotateAxisM3(const Matrix3M &m, int axis, double angle);
 
 // The Max ScaleValue (per-axis scale s + axis-system quat q).
 struct ScaleValueM

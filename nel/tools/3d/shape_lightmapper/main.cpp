@@ -327,7 +327,8 @@ int main(int argc, char **argv)
 		}
 		if (recv.AutoAnim)
 			meshBase->setAutoAnim(true);
-		meshBase->setDistMax(recv.DistMax);
+		if (!recv.MultiLod) // a multi-lod shape keeps the dist max its build takes from the last lod
+			meshBase->setDistMax(recv.DistMax);
 
 		std::string outPath = (recv.CoarseOutput ? outDirCoarse : outDir) + "/"
 			+ NLMISC::toLowerAscii(recv.NodeName) + ".shape";

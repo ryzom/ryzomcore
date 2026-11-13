@@ -707,11 +707,12 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_AUTOMATIC_ANIMATION, 0) != 0)
 		meshBase->setAutoAnim(true);
 
-	// Dist max — only for the mesh/multilod path, matching the reference exporter's
-	// buildShape which gates its setDistMax call on the mesh path (`!multiLodObject && buildLods`
-	// block at export_mesh.cpp:466) and returns early before that block for flare/water/
-	// remanence/wavemaker/particle-system builds. See the corresponding comment in exportFile.
-	meshBase->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
+	// Dist max: only for a plain mesh (and water, set in its builder), matching the reference
+	// exporter's buildShape, which sets it at its end when `!multiLodObject && buildLods` and returns
+	// early before that for flare/remanence/wavemaker/particle-system builds. A multi-lod shape keeps
+	// the dist max its build takes from the last lod. See the corresponding comment in exportFile.
+	if (lodCount == 0)
+		meshBase->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
 
 	if (lmCollect && !lmRecv.Geoms.empty())
 		lmc->Scene.Receivers.push_back(lmRecv);
@@ -834,12 +835,12 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		}
 
 		// setDistMax was previously called uniformly here; the reference exporter's
-		// CExportNel::buildShape gates it on the mesh path only (`!multiLodObject && buildLods`
-		// block at export_mesh.cpp:466) and RETURNS EARLY before that block for flare/water/
-		// remanence/wavemaker/particle-system builds, so those keep their shape ctor default
-		// (CFlareShape default = 1000). Discovered when flare export was off by exactly
-		// LOD_DIST_MAX on zo_flare (300 vs ref 1000) even though every other field matched
-		// byte-for-byte. Now applied inside the mesh/multi-lod branch of buildShapeForNode.
+		// CExportNel::buildShape gates it on its tri-object path (`!multiLodObject && buildLods`
+		// at its end) and RETURNS EARLY before that for flare/remanence/wavemaker/particle-system
+		// builds, so those keep their shape ctor default (CFlareShape default = 1000). Discovered
+		// when flare export was off by exactly LOD_DIST_MAX on zo_flare (300 vs ref 1000) even
+		// though every other field matched byte-for-byte. Now applied in the plain mesh branch of
+		// buildShapeForNode and in the water builder.
 
 		// The one shared .shape serializer (nel_gltf/shape_export_bytes.cpp): temp-COFile route
 		// for CMeshMRMGeom's seek-back-then-forward save, CMeshBase v10->v9 and CWaterShape

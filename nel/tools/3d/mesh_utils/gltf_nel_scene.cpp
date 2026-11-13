@@ -1161,7 +1161,8 @@ int exportNelGltfScene(const CMeshUtilsSettings &settings)
 		}
 		if (extras->getBool("nel_auto_anim", false))
 			meshBase->setAutoAnim(true);
-		meshBase->setDistMax((float)extras->getDouble("nel_lod_dist_max", 1000.0));
+		if (lodCount == 0) // a multi-lod shape keeps the dist max its build takes from the last lod
+			meshBase->setDistMax((float)extras->getDouble("nel_lod_dist_max", 1000.0));
 
 		std::string outPath = (extras->getBool("nel_coarse", false) ? coarseDir : outDir)
 			+ shapeName + ".shape";
