@@ -30,7 +30,11 @@ IF(WITH_3D)
   ENDIF() #hunter
 
   IF(WITH_NEL_CEGUI)
-    FIND_PACKAGE(CEGUI)
+    FIND_PACKAGE(CEGUI REQUIRED)
+    # FindCEGUI does not stop on its own
+    IF(NOT CEGUI_FOUND)
+      MESSAGE(FATAL_ERROR "WITH_NEL_CEGUI needs CEGUI (the CEGUIBase library and its headers), which was not found: set CEGUI_DIR, or CEGUI_LIBRARY and CEGUI_INCLUDE_DIRS, or turn WITH_NEL_CEGUI off")
+    ENDIF()
   ENDIF()
 ENDIF()
 

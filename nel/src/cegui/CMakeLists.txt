@@ -5,8 +5,8 @@ FILE(GLOB HEADERS ../../include/nel/cegui/*.h)
 # CMake gives a module on every platform
 ADD_LIBRARY(nelceguirenderer MODULE ${HEADERS} ${SRC} nelceguirenderer.def)
 
-TARGET_INCLUDE_DIRECTORIES(nelceguirenderer BEFORE ${FREETYPE_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(nelceguirenderer ${CEGUI_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(nelceguirenderer BEFORE PRIVATE ${FREETYPE_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(nelceguirenderer PRIVATE ${CEGUI_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(nelceguirenderer NeL::misc NeL::3d LibXml2::LibXml2 ${CEGUI_LIBRARY})
 NL_DEFAULT_PROPS(nelceguirenderer "NeL, Library: CEGUI Renderer")
 NL_ADD_RUNTIME_FLAGS(nelceguirenderer)
