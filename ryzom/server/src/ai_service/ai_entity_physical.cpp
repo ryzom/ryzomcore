@@ -231,7 +231,7 @@ bool	CModEntityPhysical::calcStraightRepulsionFrom(const CAIVector& pos, const s
 	return	true;
 }
 
-CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
+CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos, bool withPlayers)	const
 {
 	H_AUTO(CalcRepulsion)
 
@@ -256,7 +256,7 @@ CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
 		}
 
 		// get nearby players
-		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);!it.end();++it)
+		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);withPlayers && !it.end();++it)
 		{
 			const	CAIEntityPhysical*	entityPhysical=(*it).getSpawnObj();
 			if (	entityPhysical
@@ -275,7 +275,7 @@ CAIVector	CModEntityPhysical::calcRepulsion(const	CAIPos&	pos)	const
 	return	calcRepulsionFrom(pos, nearbyEntities);
 }
 
-bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& repulsion)	const
+bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& repulsion, bool withPlayers)	const
 {
 	H_AUTO(CalcStraightRepulsion)
 
@@ -318,7 +318,7 @@ bool	CModEntityPhysical::calcStraightRepulsion(CAIPos const& pos, CAIVector& rep
 		}
 
 		// get nearby players
-		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);!it.end();++it)
+		for (it=getAIInstance()->playerMatrix().beginEntities(CAIS::instance().bestLinearMatrixIteratorTbl((uint32) humanDist),pos);withPlayers && !it.end();++it)
 		{
 			const	CAIEntityPhysical*	entityPhysical=(*it).getSpawnObj();
 			if (	entityPhysical

@@ -1986,6 +1986,14 @@ void CGrpProfileFollowRoute::updateProfile(uint ticksSinceLastUpdate)
 		if	(botFollower.isBotAtDest())
 		{
 			nbAtDest++;
+			// Once the profile is over an arrived bot stands, like the ones still on their way below: left following
+			// its path it would be pushed by the players and bots against it, with nothing to bring it back.
+			if (_ProfileTerminated)
+			{
+				CSpawnBot *sbot = it->first->getSpawnObj();
+				if (sbot && sbot->isAlive() && sbot->getAIProfileType() == BOT_FOLLOW_POS)
+					sbot->setAIProfile(new CBotProfileStandAtPos(sbot));
+			}
 			continue;
 		}
 
