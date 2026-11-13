@@ -1,0 +1,3 @@
+// Entry points made up for the tests of the scenario chain tool (see r2_desert_islands.xml)
+a1	uiR2_Deserts05	uiR2EntryPoint01	10250	-1750	N
+a1	uiR2_Deserts07	uiR2EntryPoint01	30250	-1750	N

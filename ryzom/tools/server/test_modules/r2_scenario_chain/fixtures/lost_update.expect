@@ -1,0 +1,32 @@
+# The acts and the scenario lack what the update steps of their versions set: an earlier editor ran the
+# steps without their changes taking effect, and saved the versions as updated.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+absent: version_update_note
+scenario_at: Behavior.Class = LogicEntityBehavior
+scenario_at: PlotItems = <size 0>
+scenario_at: UserComponents = <size 0>
+scenario_at: Acts[0].Behavior.Class = LogicEntityBehavior
+scenario_at: Acts[0].Name = Permanent
+scenario_at: Acts[0].WeatherValue = 0
+scenario_at: Acts[1].Behavior.Class = LogicEntityBehavior
+scenario_at: Acts[1].Name = Act 1
+scenario_at: Acts[1].WeatherValue = 0
+rt_at: Acts[1].Name = Act 1
+rt: acts=2 texts=0 plot_items=0 locations=1 starting_act=1

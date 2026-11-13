@@ -1,0 +1,29 @@
+# The author loads a scenario of the versions before this editor, adds a bandit camp, which the scenario
+# had none of, and starts a test. When the test ends the scenario comes back from the server: the server
+# has the versions of all of it, the camp included, the update has nothing to look at, and the camp is
+# as the author made it.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+edit: ok class=BanditCamp
+server_at: Versions.BanditCamp = 2
+server_at: Acts[1].Features[1].Class = BanditCamp
+server_at: Acts[1].Features[1].BanditsLevel = 170
+server_at: Acts[1].Features[1].Ghosts = <size 0>
+scenario_at: Acts[1].Features[1].BanditsLevel = 170

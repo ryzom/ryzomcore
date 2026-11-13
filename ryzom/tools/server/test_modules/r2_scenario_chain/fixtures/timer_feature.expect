@@ -1,0 +1,33 @@
+# A timer of the class the first editors had for it, with the behavior that class had and actions under
+# the names of that class: it becomes the timer of this editor, and the actions get the names they have
+# now.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteConvertedClasses(1)
+scenario_at: Acts[1].Features[1].Class = Timer
+scenario_at: Acts[1].Features[1].InstanceId = Client1_870
+scenario_at: Acts[1].Features[1].Base = palette.entities.botobjects.timer
+scenario_at: Acts[1].Features[1].Secondes = 40
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Type = On Trigger
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = Deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[1].Action.Type = sub seconds
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[1].Action.ValueString = 60
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[2].Action.Type = Pause
+scenario_at: Versions.Timer = 1
+scenario_at: Versions.TimerFeature = <none>

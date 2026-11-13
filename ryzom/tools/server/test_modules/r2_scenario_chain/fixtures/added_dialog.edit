@@ -1,0 +1,45 @@
+scenario = {
+  InstanceId = [[Client1_700]],
+  Class = [[ChatSequence]],
+  Active = 0,
+  AutoStart = 1,
+  Base = [[palette.entities.botobjects.dialog]],
+  InheritPos = 1,
+  Name = [[Dialog 1]],
+  Repeating = 0,
+  Type = [[None]],
+  Behavior = {
+    InstanceId = [[Client1_603]],
+    Class = [[LogicEntityBehavior]],
+    Actions = {
+    }
+  },
+  Components = {
+    {
+      InstanceId = [[Client1_601]],
+      Class = [[ChatStep]],
+      Name = [[]],
+      Time = 3,
+      Actions = {
+        {
+          InstanceId = [[Client1_602]],
+          Class = [[ChatAction]],
+          Emote = [[]],
+          Facing = r2.RefId([[]]),
+          Says = [[Client1_850]],
+          Who = r2.RefId([[]]),
+          WhoNoEntity = [[_System]]
+        }
+      }
+    }
+  },
+  Position = {
+    InstanceId = [[Client1_604]],
+    Class = [[Position]],
+    x = 24375,
+    y = -1365,
+    z = 0
+  },
+  SubComponents = {
+  }
+}

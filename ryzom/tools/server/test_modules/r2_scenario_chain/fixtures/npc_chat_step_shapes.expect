@@ -1,0 +1,43 @@
+# A chat sequence with a step of two actions, a step without an action and a step of one. A step of a
+# dialog has one action: the step of two becomes two steps, the second at once after the first, and the
+# event of its end is the end of the second. The step without an action keeps its time. The activity
+# step that lasted as long as the sequence lasts the seven seconds its steps took and what a dialog of
+# four steps takes besides to its last line (43 ticks, see npc_chat_time_limit.expect): 12 seconds.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(1)
+version_update_note: uiR2EDVersionNoteChatStepEvents(1)
+scenario_at: Acts[1].Features[1].Name = Zora Talk
+scenario_at: Acts[1].Features[1].Components = <size 4>
+scenario_at: Acts[1].Features[1].Components[0].Time = 2
+scenario_at: Acts[1].Features[1].Components[0].Actions[0].Says = Client1_730
+scenario_at: Acts[1].Features[1].Components[1].Time = 0
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Says = Client1_731
+scenario_at: Acts[1].Features[1].Components[1].Actions[0].Who = Client1_701
+scenario_at: Acts[1].Features[1].Components[2].Time = 1
+scenario_at: Acts[1].Features[1].Components[2].Actions = <size 1>
+scenario_at: Acts[1].Features[1].Components[2].Actions[0].Says = <empty>
+scenario_at: Acts[1].Features[1].Components[3].Time = 4
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Type = end of chat
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Value = @Acts[1].Features[1].Components[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimitValue = 12
+# one dialog for the npc: nothing to deactivate before it starts
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions = <size 1>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = starts dialog

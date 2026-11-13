@@ -1,0 +1,26 @@
+# A proximity dialog its author made inactive, in a scenario without a plain dialog. The versions of
+# such a scenario do not list the class of the plain dialog, which the proximity dialog derives from,
+# and the update of the plain dialog from its first version must leave the proximity dialog as it is.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+scenario_vs_file: same
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Acts[1].Features[1].Class = ProximityDialog
+scenario_at: Acts[1].Features[1].Active = 0
+scenario_at: Acts[1].Features[1].AutoStart = 0

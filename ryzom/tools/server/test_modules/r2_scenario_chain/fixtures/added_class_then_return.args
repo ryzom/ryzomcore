@@ -1,0 +1,1 @@
+--edit-file @FIXTURES@/added_dialog.edit --return-before-test

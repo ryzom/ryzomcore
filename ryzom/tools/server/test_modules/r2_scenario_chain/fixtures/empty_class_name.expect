@@ -1,0 +1,24 @@
+# A table that has an empty text for the name of its class is no component of a class the editor does
+# not have: the update leaves it where it is, as it always did.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+scenario_vs_file: same
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Acts[1].Events = <size 1>
+scenario_at: Acts[1].Events[0].Name = Nameless

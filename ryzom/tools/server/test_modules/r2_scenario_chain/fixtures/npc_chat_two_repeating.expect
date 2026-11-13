@@ -1,0 +1,87 @@
+# An npc whose activity sequence has two steps, each with a chat sequence it repeats. The npc played one
+# sequence at a time: the second step took the first sequence away. So each step deactivates the dialog
+# of the other before it starts its own, and one dialog repeats at a time. Both sequences have the same
+# name, and the npc a long one: the names of the dialogs stay within the length of a name, and differ.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(2)
+scenario_at: Acts[1].Features = <size 3>
+scenario_at: Acts[1].Features[1].Name = Zora who keeps the gate of old T
+scenario_at: Acts[1].Features[2].Name = Zora who keeps the gate of old 1
+scenario_at: Acts[1].Features[1].Repeating = 1
+scenario_at: Acts[1].Features[2].Repeating = 1
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions = <size 2>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Event.Value = Client1_740
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions = <size 3>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[0].Entity = @Acts[1].Features[2].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[1].Action.Type = activate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[1].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[2].Action.Type = starts dialog
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[0].Actions[2].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Event.Value = Client1_741
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[0].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[1].Entity = @Acts[1].Features[2].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[2].Entity = @Acts[1].Features[2].InstanceId
+
+# The run-time scenario has the three actions of each handler in that order, in one action that runs
+# them one after the other when the step begins (the timer of the activity sequence of the npc, group
+# 3; the dialogs are the groups 4 and 5): the other dialog is deactivated when it is active, the own
+# dialog is activated when it is not, and then started.
+rt_at: Acts[1].Events[4].Event = timer_t0_triggered
+rt_at: Acts[1].Events[4].GroupsByName = RtNpcGrp_3
+rt_at: Acts[1].Events[4].ActionsId[0] = @Acts[1].Actions[4].Id
+rt_at: Acts[1].Actions[4].Parameters = oldActivityStepVar2 == 1
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Action = multi_actions
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children = <size 3>
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[0].Parameters = r2_0001_RtNpcGrp_5.Active == 1
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[0].Children[0].Action = multi_actions
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[0].Children[0].Children[0].Name = dialog_deactivate
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[0].Children[0].Children[1].Name = user_event_trigger
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[1].Parameters = r2_0001_RtNpcGrp_4.Active == 0
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[1].Children[0].Children[0].Name = set_value
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[2].Parameters = r2_0001_RtNpcGrp_4.Active == 1
+rt_at: Acts[1].Actions[4].Children[0].Children[0].Children[2].Children[0].Name = dialog_starts
+rt_at: Acts[1].Events[5].Event = timer_t0_triggered
+rt_at: Acts[1].Events[5].GroupsByName = RtNpcGrp_3
+rt_at: Acts[1].Events[5].ActionsId[0] = @Acts[1].Actions[5].Id
+rt_at: Acts[1].Actions[5].Parameters = oldActivityStepVar2 == 2
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Action = multi_actions
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children = <size 3>
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[0].Parameters = r2_0001_RtNpcGrp_4.Active == 1
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[0].Children[0].Action = multi_actions
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[0].Children[0].Children[0].Name = dialog_deactivate
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[0].Children[0].Children[1].Name = user_event_trigger
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[1].Parameters = r2_0001_RtNpcGrp_5.Active == 0
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[1].Children[0].Children[0].Name = set_value
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[2].Parameters = r2_0001_RtNpcGrp_5.Active == 1
+rt_at: Acts[1].Actions[5].Children[0].Children[0].Children[2].Children[0].Name = dialog_starts
+# what a deactivated dialog and a started one get
+rt_has: Parameters = [[r2_0001_RtNpcGrp_4.start = 0;
+rt_has: r2_0001_RtNpcGrp_4.Active = 0;
+rt_has: Parameters = [[r2_0001_RtNpcGrp_5.start = 0;
+rt_has: r2_0001_RtNpcGrp_5.Active = 0;
+rt_has: r2_0001_RtNpcGrp_4.start=1;
+rt_has: r2_0001_RtNpcGrp_5.start=1;
+# the dialogs are the groups 4 and 5
+rt_at: Acts[1].Events[7].Event = timer_t1_triggered
+rt_at: Acts[1].Events[7].GroupsByName = RtNpcGrp_4
+rt_at: Acts[1].Events[11].Event = timer_t1_triggered
+rt_at: Acts[1].Events[11].GroupsByName = RtNpcGrp_5

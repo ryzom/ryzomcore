@@ -1,0 +1,23 @@
+# A herd of the fauna feature saved before the feature managed its herds: it names no manager, and its
+# three creatures spawn with their act.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+scenario_vs_file: same
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+rt_at: Acts[1].Npcs = <size 3>

@@ -1,0 +1,102 @@
+scenario = {
+  InstanceId = [[Client1_700]],
+  Class = [[BanditCamp]],
+  BanditsCount = [[3]],
+  BanditsLevel = [[170]],
+  Base = [[palette.entities.botobjects.campfire]],
+  InheritPos = 1,
+  Name = [[Bandit camp 1]],
+  Race = [[Zorai]],
+  ZoneSize = [[10]],
+  _BanditsCount = 3,
+  _BanditsLevel = 3,
+  _Race = 3,
+  _Seed = 1154080571,
+  _Zone = [[Client1_705]],
+  Active = 1,
+  Cost = 0,
+  NoRespawn = 0,
+  SitDuration = 20,
+  WanderDuration = 20,
+  Behavior = {
+    InstanceId = [[Client1_601]],
+    Class = [[LogicEntityBehavior]],
+    Actions = {
+    }
+  },
+  Components = {
+    {
+      InstanceId = [[Client1_705]],
+      Class = [[Region]],
+      InheritPos = 0,
+      Name = [[Wander zone 1]],
+      Points = {
+        {
+          InstanceId = [[Client1_602]],
+          Class = [[RegionVertex]],
+          InheritPos = 1,
+          Position = {
+            InstanceId = [[Client1_603]],
+            Class = [[Position]],
+            x = 24370,
+            y = -1370,
+            z = 0
+          }
+        },
+        {
+          InstanceId = [[Client1_604]],
+          Class = [[RegionVertex]],
+          InheritPos = 1,
+          Position = {
+            InstanceId = [[Client1_605]],
+            Class = [[Position]],
+            x = 24380,
+            y = -1370,
+            z = 0
+          }
+        },
+        {
+          InstanceId = [[Client1_606]],
+          Class = [[RegionVertex]],
+          InheritPos = 1,
+          Position = {
+            InstanceId = [[Client1_607]],
+            Class = [[Position]],
+            x = 24380,
+            y = -1360,
+            z = 0
+          }
+        },
+        {
+          InstanceId = [[Client1_608]],
+          Class = [[RegionVertex]],
+          InheritPos = 1,
+          Position = {
+            InstanceId = [[Client1_609]],
+            Class = [[Position]],
+            x = 24370,
+            y = -1360,
+            z = 0
+          }
+        }
+      },
+      Position = {
+        InstanceId = [[Client1_610]],
+        Class = [[Position]],
+        x = 0,
+        y = 0,
+        z = 0
+      },
+      Deletable = 0
+    }
+  },
+  Ghosts = {
+  },
+  Position = {
+    InstanceId = [[Client1_611]],
+    Class = [[Position]],
+    x = 24375,
+    y = -1365,
+    z = 0
+  }
+}

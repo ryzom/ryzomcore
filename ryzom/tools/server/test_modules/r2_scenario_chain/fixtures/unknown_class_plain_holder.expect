@@ -1,0 +1,11 @@
+# An npc holds a list of tables without a class, and the second of them holds, by name, a table of a
+# class the editor does not have. The update fails as for any part held by name; what holds the part is
+# the npc, the nearest component with a class, and the tables on the way are named with the attribute
+# (the program ends with 4, which is what is expected here).
+result: 4
+upgrade: unknown_class
+version_update: failed
+version_update_failure: the 'Extras[2].Shape' of a component of the class 'Npc' is of the class 'MadeUpShape', which this editor does not have
+absent: save
+absent: translate
+absent: dropped_update

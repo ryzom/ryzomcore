@@ -1,0 +1,77 @@
+# An npc with two handlers of the end of a chat sequence: of one an activity step repeats, which begins
+# another sequence of the npc, and of one that plays once. The first editors did not all raise an event
+# at the end of a sequence that repeats; its dialog raises one at the end of each pass, unless it is
+# stopped before. The handler stays as it is, as a handler of the dialog, and the author is told of it
+# (and not of the other handler). In this scenario the handler does not come to run: the activity step
+# lasts until the last line of the first pass (its timer is 81 ticks), the next step then starts
+# another dialog of the npc, which stops the one that repeats, and the end of the first pass would have
+# come after that (10 + 51 + 34 ticks at the earliest).
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(3)
+version_update_note: uiR2EDVersionNoteChatSequenceEnds(1)
+scenario_at: Acts[1].Features = <size 4>
+scenario_at: Acts[1].Features[1].Name = Zora Round
+scenario_at: Acts[1].Features[1].Repeating = 1
+scenario_at: Acts[1].Features[2].Name = Zora Once
+scenario_at: Acts[1].Features[2].Repeating = 0
+scenario_at: Acts[1].Features[3].Name = Zora Aside
+
+# the handler of the end of the sequence that repeats: a handler of its dialog, with its action
+scenario_at: Acts[1].Features[1].Behavior.Actions = <size 1>
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Event.Type = end of dialog
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions = <size 4>
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[0].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[1].Action.Type = deactivate
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[1].Entity = @Acts[1].Features[2].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[2].Action.Type = activate
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[2].Entity = @Acts[1].Features[3].InstanceId
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[3].Action.Type = starts dialog
+scenario_at: Acts[1].Features[1].Behavior.Actions[0].Actions[3].Entity = @Acts[1].Features[3].InstanceId
+# the handler of the end of the sequence that plays once
+scenario_at: Acts[1].Features[2].Behavior.Actions = <size 1>
+scenario_at: Acts[1].Features[2].Behavior.Actions[0].Event.Type = end of dialog
+scenario_at: Acts[1].Features[2].Behavior.Actions[0].Actions[0].Action.Type = Sit Down
+
+# In the run-time scenario the dialog that repeats is the group 5: it raises the event of its end (2)
+# at the end of a pass, before it starts again, and the handler is on that event.
+rt_has: r2_0001_RtNpcGrp_5.repeat=1;
+rt_at: Acts[1].Actions[8].Children[0].Children[2].Name = chat_step_last
+rt_has: if (r2_0001_RtNpcGrp_5.repeat == 1) {
+rt_has: ()r2_0001_RtNpcGrp_5.setEvent(2);	//end of dialog
+rt_at: Acts[1].Events[11].Event = user_event_2
+rt_at: Acts[1].Events[11].GroupsByName = RtNpcGrp_5
+rt_at: Acts[1].Events[11].ActionsId[0] = @Acts[1].Actions[11].Id
+rt_at: Acts[1].Actions[11].Action = multi_actions
+rt_at: Acts[1].Actions[11].Children = <size 4>
+rt_at: Acts[1].Actions[11].Children[0].Parameters = r2_0001_RtNpcGrp_5.Active == 1
+rt_at: Acts[1].Actions[11].Children[0].Children[0].Children[0].Name = dialog_deactivate
+rt_at: Acts[1].Actions[11].Children[3].Parameters = r2_0001_RtNpcGrp_7.Active == 1
+rt_at: Acts[1].Actions[11].Children[3].Children[0].Name = dialog_starts
+
+# The step that lasted as long as the sequence it repeats lasts until the last line of one pass, 72
+# ticks: the step of a dialog that repeats does not wait for the end of a pass, whatever handler the
+# dialog has. The dialog would raise that end 34 ticks after its step.
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(51, 1);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(34, 1);
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimitValue = 8
+rt_has: ()setTimer(81, 0);
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].TimeLimitValue = 20

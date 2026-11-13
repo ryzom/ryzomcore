@@ -1,0 +1,63 @@
+# A scenario of the first format: no Versions table and no version name, one act, the island as a number
+# in the description, no behavior, plot items or texts, and a group without a member.
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNoteEmptyGroups(1)
+version_update_note: uiR2EDVersionNoteFirstAct()
+absent: version_update_failure
+absent: dropped_update
+absent: late_update
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+# The one act is the permanent act and keeps what it holds. An empty first act comes after it, which is
+# the act the test starts in.
+scenario_at: Acts = <size 2>
+scenario_at: Acts[0].InstanceId = Client1_3
+scenario_at: Acts[0].Name = The clearing
+scenario_at: Acts[0].WeatherValue = 0
+scenario_at: Acts[0].ManualWeather = 0
+scenario_at: Acts[0].Behavior.Class = LogicEntityBehavior
+scenario_at: Acts[0].LocationId = <empty>
+scenario_at: Acts[1].Class = Act
+scenario_at: Acts[1].Features = <size 1>
+scenario_at: Acts[1].Features[0].Class = DefaultFeature
+scenario_at: Acts[1].Features[0].Components = <size 0>
+rt: acts=2 texts=0 plot_items=0 locations=1 starting_act=1
+rt_at: Acts[0].Npcs = <size 2>
+rt_at: Acts[1].Npcs = <size 0>
+
+# the group without a member is gone
+scenario_at: Acts[0].Features = <size 1>
+scenario_lacks: Class = [[NpcGrpFeature]]
+
+# location number 2 of the first list is number 4 of the second, the fifth desert island; the first act
+# is on it
+scenario_at: Description.LocationId = 4
+scenario_at: Locations = <size 1>
+scenario_at: Locations[0].IslandName = uiR2_Deserts05
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint01
+scenario_at: Locations[0].ManualSeason = 0
+scenario_at: Locations[0].Season = Automatic
+rt_at: Locations[0].Season = 0
+scenario_at: Acts[1].LocationId = @Locations[0].InstanceId
+rt_at: Locations[0].Island = uiR2_Deserts05
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint01
+
+# what a scenario has since
+scenario_at: Behavior.Class = LogicEntityBehavior
+scenario_at: Texts.Class = TextManager
+scenario_at: PlotItems = <size 0>
+scenario_at: UserComponents = <size 0>
+scenario_at: Description.LevelId = 0
+scenario_at: Type = so_story_telling
+scenario_at: Versions.Scenario = 6
+scenario_at: Versions.Act = 7

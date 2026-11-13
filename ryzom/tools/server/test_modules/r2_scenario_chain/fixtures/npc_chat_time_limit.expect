@@ -1,0 +1,87 @@
+# An npc with four activity steps that each last as long as their chat sequence. A step lasts the times
+# of the steps of the sequence and what its dialog takes besides, so that the next step, which stops
+# the dialog when it starts its own, comes after the last line: until the end of the dialog when a
+# handler waits for that end, and never longer than the editor of a time limit can show.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteChatSequences(4)
+version_update_note: uiR2EDVersionNoteChatTimeLimits(1)
+scenario_at: Acts[1].Features = <size 5>
+scenario_at: Acts[1].Features[1].Name = Zora Line
+scenario_at: Acts[1].Features[2].Name = Zora Turn
+scenario_at: Acts[1].Features[3].Name = Zora Ended
+scenario_at: Acts[1].Features[4].Name = Zora Long
+
+# What the times below are made of, in ticks (tenths of a second). The timer of an activity step is ten
+# times its time limit and 1. A dialog starts 10 after the action that starts it, waits ten times the
+# time of its first step and 1, then ten times the time of each further step and 4; a line comes 2
+# after its step, 10 when the npc turns to someone first; the dialog ends 34 after its last step. Each
+# of these timers can come 3 late: the AI service looks at the timers of a group every 4 ticks.
+
+# One step of 5 seconds, one line: (10 + 3) + (51 + 3) + (2 + 3) = 72 ticks, 8 seconds
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].TimeLimitValue = 8
+rt_at: Acts[1].Actions[2].Children[0].Name = process_activity_step1
+rt_has: ()setTimer(81, 0);
+rt_at: Acts[1].Events[10].Event = timer_t1_triggered
+rt_at: Acts[1].Events[10].GroupsByName = RtNpcGrp_5
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(10, 1);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(51, 1);
+rt_has: ()r2_0001_RtNpcGrp_5.setTimer(2, 0);
+
+# Steps of 2 and 3 seconds, the npc of the second line turns to the other first:
+# (10 + 3) + (21 + 3) + (34 + 3) + (10 + 3) = 87 ticks, 9 seconds
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].TimeLimitValue = 9
+scenario_at: Acts[1].Features[2].Components[1].Actions[0].Facing = Client1_700
+rt_has: ()setTimer(91, 0);
+rt_at: Acts[1].Events[14].GroupsByName = RtNpcGrp_6
+rt_has: ()r2_0001_RtNpcGrp_6.setTimer(21, 1);
+rt_has: ()r2_0001_RtNpcGrp_6.setTimer(34, 1);
+rt_has: ()r2_0001_RtNpcGrp_6.setTimer(2, 0);
+rt_has: ()r2_0001_RtNpcGrp_6.setTimer(10, 0);
+
+# One step of 5 seconds, and a handler of the end of the sequence, which is one of the end of the dialog
+# now: the step lasts until that end, (10 + 3) + (51 + 3) + (34 + 3) = 104 ticks, 11 seconds
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[2].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[2].TimeLimitValue = 11
+scenario_at: Acts[1].Features[3].Behavior.Actions = <size 1>
+scenario_at: Acts[1].Features[3].Behavior.Actions[0].Event.Type = end of dialog
+rt_has: ()setTimer(111, 0);
+rt_at: Acts[1].Events[18].GroupsByName = RtNpcGrp_7
+rt_at: Acts[1].Events[21].Event = user_event_2
+rt_at: Acts[1].Events[21].GroupsByName = RtNpcGrp_7
+rt_has: ()r2_0001_RtNpcGrp_7.setTimer(51, 1);
+rt_has: ()r2_0001_RtNpcGrp_7.setTimer(34, 1);
+
+# One step of 40000 seconds: the step gets the longest time limit, 10 hours 59 minutes 59 seconds, and
+# the author is told
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[3].TimeLimit = Few Sec
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[3].TimeLimitValue = 39599
+rt_has: ()setTimer(395991, 0);
+rt_has: ()r2_0001_RtNpcGrp_8.setTimer(400001, 1);
+
+# each step stops the dialogs of the other steps before it starts its own
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions = <size 4>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Event.Value = Client1_741
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions = <size 5>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[0].Action.Type = deactivate
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[0].Entity = @Acts[1].Features[1].InstanceId
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[4].Action.Type = starts dialog
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Actions[1].Actions[4].Entity = @Acts[1].Features[2].InstanceId

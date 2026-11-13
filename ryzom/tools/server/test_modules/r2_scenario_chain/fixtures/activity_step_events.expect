@@ -1,0 +1,27 @@
+# The first editors gave an activity step events of its own, kept in the act: components of classes no
+# editor has had since. The events are removed, and the steps name none.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteRemovedClasses(Event (1))
+version_update_note: uiR2EDVersionNoteRemovedClassReferences(1)
+scenario_at: Acts[1].Events = <size 0>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[0].EventsIds = <size 0>
+scenario_at: Acts[1].Features[0].Components[0].Behavior.Activities[0].Components[1].EventsIds = <size 0>
+scenario_lacks: Class = [[Event]]
+scenario_lacks: Class = [[EventCondition]]

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- Islands made up for the tests of the scenario chain tool: the names are those of two islands of the
+     editor, the places are not. -->
+<islands>
+  <complete_island island="uiR2_Deserts05" continent="r2_desert" xmin="10000" ymin="-2000" xmax="10500" ymax="-1500">
+    <zone name="1_AA"/>
+  </complete_island>
+  <complete_island island="uiR2_Deserts07" continent="r2_desert" xmin="30000" ymin="-2000" xmax="30500" ymax="-1500">
+    <zone name="1_AB"/>
+  </complete_island>
+</islands>

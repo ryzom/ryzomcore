@@ -1,0 +1,24 @@
+# The location names an entry point as the first lists of entry points did. Its island does not have
+# an entry point of that name: the location gets the first entry point of the island, where the server
+# starts such a location, and the author is told. The islands of this test are in fixtures/islands.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(1)
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint01
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint01

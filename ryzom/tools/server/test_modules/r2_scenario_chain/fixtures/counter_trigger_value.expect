@@ -1,0 +1,21 @@
+# A counter without the value it triggers at.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Acts[1].Features[1].Class = Counter
+scenario_at: Acts[1].Features[1].TriggerValue = 0

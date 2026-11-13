@@ -1,0 +1,24 @@
+# The location has no season: it gets the name that stands for the season of the server, and the
+# run-time location has that season (0).
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+absent: version_update_note
+scenario_at: Locations[0].Season = Automatic
+rt_at: Locations = <size 1>
+rt_at: Locations[0].Season = 0

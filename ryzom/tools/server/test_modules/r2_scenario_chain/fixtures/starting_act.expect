@@ -1,0 +1,23 @@
+# The author has selected the second of three acts: the test starts in it.
+
+upgrade: unchanged
+version_update: unchanged
+absent: version_update_note
+scenario_vs_file: same
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+selected_act: 2
+rt: acts=4 texts=0 plot_items=0 locations=1 starting_act=2
