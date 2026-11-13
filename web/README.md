@@ -4,6 +4,10 @@ The web side of a Ryzom Core shard. `public_php` is the web root: `setup` (insta
 
 ## Upgrade notes
 
+### The web storage of a development install on Windows
+
+`php setup_cli.php install --dev` on Windows wrote the setup folder itself into `$USERS_DIR` of `config.php`, instead of the `pipeline/shard_dev/www` folder of the development shard, where the mail service writes the session files of the players. The in-game mail and forum pages (`webig`) then answered "ERROR: Not logged". A new install gets the right folder, and the next setup upgrade of such an install moves it; an install that is already at the current version needs the line corrected by hand.
+
 ### Account names of up to 64 characters
 
 The account tool registers names of up to 64 characters, and the login box of the client now takes that many. The `ring_users` table of the domain database kept 20, so the first login of an account with a longer name failed with the maintenance message (or, without strict SQL mode, stored a cut name). After updating the web installation of a shard, run the setup upgrade (`setup/upgrade.php`, or `php setup_cli.php upgrade`): the setup version is now 15, and the upgrade runs `ring_domain_00004.sql`, which widens `ring_users.user_name` to 64 characters.

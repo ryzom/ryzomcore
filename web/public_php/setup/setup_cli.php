@@ -255,10 +255,13 @@ function run_install($opts)
 	if (isset($opts['users-dir'])) {
 		$usersDir = $opts['users-dir'];
 	} else if ($isDev) {
-		$usersDir = str_replace('/code/web/public_php/setup', '/pipeline/shard_dev/www', dirname(__FILE__));
+		// forward slashes first: on Windows the path of this file has backslashes, and the replace
+		// below would not match, leaving the users directory on this setup folder
+		$usersDir = dirname(__FILE__);
 		if ($shardWin) {
 			$usersDir = str_replace('\\', '/', $usersDir);
 		}
+		$usersDir = str_replace('/code/web/public_php/setup', '/pipeline/shard_dev/www', $usersDir);
 	} else {
 		$usersDir = ($shardWin ? 'C:/nevrax/' : '/home/nevrax/') . $domainName . '/www';
 	}
@@ -597,6 +600,16 @@ function run_upgrade()
 	}
 	if (file_exists('role_service') && $NEL_SETUP_VERSION_CONFIGURED < 14 && $NEL_DOMAIN_NAME === 'dev') {
 		$continue = upgrade_shard_dev_localhost($continue);
+	}
+
+	// A development install on Windows took this setup folder for the shard web storage (its detection replaced
+	// the path before converting the backslashes); the storage is the www folder of the development shard.
+	$setupTail = '/code/web/public_php/setup';
+	$usersDirSlashes = str_replace('\\', '/', $USERS_DIR);
+	if ($NEL_DOMAIN_NAME === 'dev' && substr($usersDirSlashes, -strlen($setupTail)) === $setupTail) {
+		$fixedUsersDir = substr($usersDirSlashes, 0, -strlen($setupTail)) . '/pipeline/shard_dev/www';
+		cli_info("Shard web storage moved from $USERS_DIR to $fixedUsersDir");
+		$USERS_DIR = $fixedUsersDir;
 	}
 
 	// Rewrite config.php with updated version
