@@ -497,8 +497,12 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_DRIVER_DIRECT3D     "Build Direct3D Driver (3D)"                    OFF)
   OPTION(WITH_DRIVER_OPENAL       "Build OpenAL Driver (Sound)"                   ON )
   OPTION(WITH_DRIVER_FMOD         "Build FMOD Driver (Sound)"                     OFF)
-  OPTION(WITH_DRIVER_DSOUND       "Build DirectSound Driver (Sound)"              OFF)
-  OPTION(WITH_DRIVER_XAUDIO2      "Build XAudio2 Driver (Sound)"                  OFF)
+  IF(WIN32)
+    OPTION(WITH_DRIVER_DSOUND     "Build DirectSound Driver (Sound)"              OFF)
+    OPTION(WITH_DRIVER_XAUDIO2    "Build XAudio2 Driver (Sound)"                  OFF)
+  ELSEIF(WITH_DRIVER_DSOUND OR WITH_DRIVER_XAUDIO2)
+    MESSAGE(FATAL_ERROR "WITH_DRIVER_DSOUND and WITH_DRIVER_XAUDIO2 build Windows-only sound drivers: turn them off on this platform")
+  ENDIF()
 
   ###
   # Optional support
