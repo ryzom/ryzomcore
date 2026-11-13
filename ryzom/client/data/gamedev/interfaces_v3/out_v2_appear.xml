@@ -280,11 +280,15 @@
 	<action handler="reset_camera"	 params="target=ui:outgame:appear:char3d:cam" />
 	<action handler="reset_camera"	 params="target=ui:outgame:appear:char3d:camface" />
 
+	<if flags="bg_downloader" />
 	<action handler="lua" params="pauseBGDownloader()" />
+	<endif />
 </proc>
 
 <proc id="proc_release_CP">
+	<if flags="bg_downloader" />
 	<action handler="lua" params="unpauseBGDownloader()" />
+	<endif />
 </proc>
 
 

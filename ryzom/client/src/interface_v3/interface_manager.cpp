@@ -480,6 +480,11 @@ CInterfaceManager::CInterfaceManager()
 	for (size_t i = 0; i < ClientCfg.UiFeatureFlags.size(); ++i)
 		parser->addFeatureFlag(ClientCfg.UiFeatureFlags[i]);
 
+	// build options that the interface depends on, so that it only uses what this client has
+#ifdef RYZOM_BG_DOWNLOADER
+	parser->addFeatureFlag("bg_downloader");
+#endif
+
 	parser->setSetupOptionsCallback( this );
 	parser->addModule( "scene3d", new CIF3DSceneParser() );
 	parser->addModule( "ddx", new CIFDDXParser() );
