@@ -11,8 +11,8 @@
 #       * NL_SHARE_PREFIX (default: $CMAKE_INSTALL_PREFIX/share)
 #       * NL_BIN_PREFIX (default: $CMAKE_INSTALL_PREFIX/bin)
 #       * NL_SBIN_PREFIX  (default: $CMAKE_INSTALL_PREFIX/sbin)
-#       * NL_LIB_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib)
-#       * NL_DRIVER_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib (windows) or $CMAKE_INSTALL_PREFIX/lib/nel)
+#       * NL_LIB_PREFIX  (default: $CMAKE_INSTALL_PREFIX/$CMAKE_INSTALL_LIBDIR, or lib and lib64 on Windows)
+#       * NL_DRIVER_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib (windows) or $CMAKE_INSTALL_PREFIX/$CMAKE_INSTALL_LIBDIR/nel)
 #   * Enable building of documentation: add -DBUILD_DOCUMENTATION:BOOL=ON - new make target: DoxygenDoc
 #   * Updating version: update header (above) but also update NL_VERSION below.
 #   * To build binary archive, use the 'package' target.
