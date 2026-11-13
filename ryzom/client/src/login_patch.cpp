@@ -1456,7 +1456,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 				string s = CI18N::get("uiDLFailed");
 				setState(true, s);
 
-				throw Exception(e.what());
+				throw Exception(std::string(e.what()));
 			}
 
 			string s = CI18N::get("uiDLURIFailed") + " " + serverDisplayPath;
@@ -1490,6 +1490,18 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 	if (bZipped)
 		decompressFile (dstName);
 }
+
+#ifdef USE_CURL
+// ****************************************************************************
+// Why a download failed, for the player and the log: curl's own error text, and both codes for support staff
+static string curlDownloadError(const string &source, CURLcode res, long httpCode)
+{
+	string curlText;
+	if (res != CURLE_OK)
+		curlText = string(curl_easy_strerror(res)) + ", ";
+	return CI18N::get("uiDLFileErr") + " " + NLMISC::CFile::getFilename(source) + " (" + curlText + NLMISC::toString("curl %d, HTTP %ld", (int)res, httpCode) + ")";
+}
+#endif
 
 // ****************************************************************************
 void CPatchManager::downloadFileWithCurl (const string &source, const string &dest, NLMISC::IProgressCallback *progress)
@@ -1583,27 +1595,27 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		{
 			// file not found, delete local file
 			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException (NLMISC::toString("curl download failed: (ec %d %d)", res, r));
+			throw EPatchDownloadException(curlDownloadError(source, res, r));
 		}
 
 		if(CURLE_OK != res)
 		{
 			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException (NLMISC::toString("curl download failed: (ec %d %d)", res, r));
+			throw EPatchDownloadException(curlDownloadError(source, res, r));
 		}
 
 		if(r == 404)
 		{
 			// file not found, delete it
 			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException (NLMISC::toString("curl download failed: (ec %d %d)", res, r));
+			throw EPatchDownloadException(curlDownloadError(source, res, r));
 		}
 
 		if(r < 200 || r >= 300)
 		{
 			// file not found, delete it
 			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException (NLMISC::toString("curl download failed: (ec %d %d)", res, r));
+			throw EPatchDownloadException(curlDownloadError(source, res, r));
 		}
 
 #else

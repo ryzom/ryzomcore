@@ -160,6 +160,7 @@ struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 			"uiMb	[MiB]\n"
 			"uiLoginGetFile	[Getting File:]\n"
 			"uiDLWithCurl	[Downloading File With Curl:]\n"
+			"uiDLFileErr	[Cannot download file:]\n"
 			"uiDecompressing	[Decompressing File:]\n"
 			"uiCheckInt	[Checking Integrity:]\n"
 			"uiNoVersionFound	[No Version Found]\n"
