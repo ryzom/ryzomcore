@@ -42,13 +42,13 @@ foreach ($shards as $shard) {
 	$shardsByDomain[$did][] = $shard;
 }
 
-// Index permissions by domain: the first row of a domain is the one the
-// login script reads, so that is the access shown for the domain
+// Index permissions by domain. On a shard, the account has what its row for
+// all shards holds together with what its row for that shard holds
+// (tools/shard_access.php): the access shown for the domain is that of the row
+// for all shards, the access shown for a shard is the two together.
 $permsByDomain = array();
 foreach ($permissions as $perm) {
-	if (!isset($permsByDomain[$perm['DomainId']])) {
-		$permsByDomain[$perm['DomainId']] = $perm;
-	}
+	$permsByDomain[$perm['DomainId']][] = $perm;
 }
 
 ob_start();
@@ -116,11 +116,17 @@ ob_start();
 								}
 								?>
 								<span style="color:#ecf0f1;"><?php echo h($shardName ?: '#' . $perm['ShardId']); ?></span>
-							<?php else: ?>
+							<?php elseif (nel_permission_is_all_shards($perm['ShardId'])): ?>
 								<span class="badge badge-gray">All Shards</span>
+							<?php else: ?>
+								<span class="badge badge-red">unknown shard id <?php echo (int)$perm['ShardId']; ?></span>
 							<?php endif; ?>
 						</td>
+						<?php if ($perm['ShardId'] > 0 || nel_permission_is_all_shards($perm['ShardId'])): ?>
 						<td><span class="badge badge-green"><?php echo h($perm['AccessPrivilege']); ?></span></td>
+						<?php else: ?>
+						<td><span class="badge badge-gray"><?php echo h($perm['AccessPrivilege']); ?></span> <span style="color:#8899a6; font-size:0.85rem;">(gives no access)</span></td>
+						<?php endif; ?>
 					</tr>
 					<?php endforeach; ?>
 				</tbody>
@@ -136,7 +142,12 @@ ob_start();
 			<?php foreach ($domains as $domain): ?>
 				<?php
 				$did = $domain['domain_id'];
-				$hasPerm = isset($permsByDomain[$did]);
+				$domainPerms = isset($permsByDomain[$did]) ? $permsByDomain[$did] : array();
+				$allShardsAccess = implode(',', nel_account_all_shards_access($domainPerms));
+				$hasShardRows = false;
+				foreach ($domainPerms as $perm) {
+					if ($perm['ShardId'] > 0) { $hasShardRows = true; break; }
+				}
 				$domainShards = isset($shardsByDomain[$did]) ? $shardsByDomain[$did] : array();
 				$statusBadge = 'badge-gray';
 				$statusLabel = h($domain['status']);
@@ -149,8 +160,10 @@ ob_start();
 					<div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
 						<strong style="color:#ecf0f1;"><?php echo h($domain['domain_name']); ?></strong>
 						<span class="badge <?php echo $statusBadge; ?>"><?php echo $statusLabel; ?></span>
-						<?php if ($hasPerm): ?>
-							<span class="badge badge-green">Access: <?php echo h($permsByDomain[$did]['AccessPrivilege']); ?></span>
+						<?php if ($allShardsAccess !== ''): ?>
+							<span class="badge badge-green">Access: <?php echo h($allShardsAccess); ?></span>
+						<?php elseif ($hasShardRows): ?>
+							<span class="badge badge-gray">Access: by shard</span>
 						<?php else: ?>
 							<span class="badge badge-red">No Access</span>
 						<?php endif; ?>
@@ -162,6 +175,7 @@ ob_start();
 								<th>Shard</th>
 								<th>Status</th>
 								<th>Players</th>
+								<th>Your Access</th>
 								<th>Message</th>
 							</tr>
 						</thead>
@@ -177,6 +191,10 @@ ob_start();
 									<?php endif; ?>
 								</td>
 								<td><?php echo (int)$shard['NbPlayers']; ?></td>
+								<td><?php
+									$shardAccess = implode(',', nel_account_shard_access($domainPerms, $shard['ShardId']));
+									echo $shardAccess !== '' ? h($shardAccess) : '&mdash;';
+								?></td>
 								<td style="color:#8899a6; font-size:0.85rem;"><?php echo $shard['MOTD'] ? h($shard['MOTD']) : '&mdash;'; ?></td>
 							</tr>
 							<?php endforeach; ?>

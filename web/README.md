@@ -4,6 +4,31 @@ The web side of a Ryzom Core shard. `public_php` is the web root: `setup` (insta
 
 ## Upgrade notes
 
+### Permission rows for single shards
+
+An account can hold, for a domain, one permission row for all shards (`ShardId` -1, what the setup, the registration and the login write, and what the account tool edits by default) and rows for single shards. On a shard, the account has what its row for all shards holds together with what its row for that shard holds: either row can give the access, and a row for one shard gives nothing on the other shards. The login script and the shard unifier now both go by this. The login admits an account when its row for all shards, or any one of its rows for single shards, holds the access the domain status asks for; it does not look at which shards exist. The shard unifier, which knows the shards, sends an account, for the character selection and for every later join, only to shards on which it has the access that the level of that shard asks for (`rsm.setWSState`); an account whose only fitting row names a shard that is not up is refused there, with the reason in the answer. Before, one row counted for every shard of the domain, the row for all shards when the account had one and else the row of its lowest shard id, and the other rows of the account had no effect.
+
+Rows that had no effect now count, so look at the accounts that hold more than the one row for all shards before upgrading:
+
+* An account with a row for all shards and a row for one shard: the row of the shard now counts on that shard. With (-1: `OPEN`) and (302: `RESTRICTED`), and shard 302 at the restricted level, the account can now be sent to 302.
+* An account with a row with `ShardId` 0, which an earlier account tool wrote for all shards, beside its -1 row: what both hold now counts on every shard. The account tool lists the two as one row and leaves one -1 row when it is saved.
+* An account with several rows for single shards was admitted or refused at the login by the first of them alone, and is now admitted when any of them holds the access the domain status asks for.
+* An account with rows for single shards only was let onto every shard of the domain, and now stays on those shards. Give it the row for all shards if it has to reach the others too, as a character of a support shard that visits the game shards does.
+
+These two statements, in the NeL database, list the rows with `ShardId` 0, and the rows of every account that holds, for one domain, anything else than one row for all shards:
+
+```sql
+SELECT p.PermissionId, p.UId, u.Login, p.DomainId, p.ShardId, p.AccessPrivilege FROM permission p LEFT JOIN user u ON u.UId = p.UId WHERE p.ShardId = 0 ORDER BY p.UId, p.DomainId;
+SELECT p.PermissionId, p.UId, u.Login, p.DomainId, p.ShardId, p.AccessPrivilege FROM permission p JOIN (SELECT UId, DomainId FROM permission GROUP BY UId, DomainId HAVING COUNT(*) > 1 OR MAX(ShardId) <> -1) m ON m.UId = p.UId AND m.DomainId = p.DomainId LEFT JOIN user u ON u.UId = p.UId ORDER BY p.UId, p.DomainId, p.ShardId;
+```
+
+* To keep a shard to a team, give the shard a level that the other accounts do not hold there (`RESTRICTED` while the domain is open, say), and give the accounts of the team a row for that shard. An account that has no row for all shards needs both in that row: `OPEN` for the login of the open domain, `RESTRICTED` for the shard.
+* Scenario and edit sessions of the Ring run on the shard of a session server, so an account kept to single shards needs a row for that shard too to use the Ring.
+* The account tool offers the shards that the `shard` table of the NeL database lists for the domain, and nothing keeps that table in step with the shards that run. For a shard that is not listed, list it there (as `private_php/setup/sql/configure_shard_dev.sql` does for the mainland of the development shard), or write the row directly: ``INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ((SELECT UId FROM user WHERE Login = '<login>'), <domain_id>, <shard_id>, 'OPEN,RESTRICTED');``
+* A row with a `ShardId` below -1 names no shard and gives no access. The account tool lists it as an unknown shard id and offers its removal only.
+* An access that the login adds by itself (`$AcceptUnknownUser`) goes to the row for all shards, which is made when the account has none. It used to go to the first row, which could be the row of one shard.
+* Among the shards an account may use, the shard unifier takes the one the operator promotes (`ForceWelcomerShard`), else the home mainland of the character the account played last, else the one with the fewest players. A returning player so gets the character selection on the shard of the last played character, where it used to be the shard with the fewest players; the logins of returning players are no longer spread over the shards by load. The mainland of a new character is, as before, the one the player picks at the character creation from the list the game service offers (`Mainlands`). The variable `PreferLastPlayedShard` of the shard unifier, on by default, switches the preference off (`PreferLastPlayedShard = 0;` in its configuration, or at run time), which leaves the promoted shard and then the fewest players. When the shard of the last played character refuses the entry, the login goes on to the shard with the fewest players among the others. For the preference, `last_played_date` of the `characters` table of the domain database keeps the time a character last entered or left the game; it was set back to zero when the character left. A character that has not played since the update has no date, and the fewest players decide.
+
 ### The web storage of a development install on Windows
 
 `php setup_cli.php install --dev` on Windows wrote the setup folder itself into `$USERS_DIR` of `config.php`, instead of the `pipeline/shard_dev/www` folder of the development shard, where the mail service writes the session files of the players. The in-game mail and forum pages (`webig`) then answered "ERROR: Not logged". A new install gets the right folder, and the next setup upgrade of such an install moves it; an install that is already at the current version needs the line corrected by hand.

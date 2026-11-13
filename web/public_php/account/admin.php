@@ -32,9 +32,10 @@ $editUid = isset($_GET['uid']) ? (int)$_GET['uid'] : 0;
 $editCanManage = false;
 
 // The members of the SET column permission.AccessPrivilege, in its order. A
-// row may hold several: the login script admits the account when the row
-// holds the one that matches the domain status (OPEN for ds_open, and so on).
-$accessPrivilegeMembers = array('OPEN', 'DEV', 'RESTRICTED');
+// row may hold several: the login script admits the account when its rows give
+// it, on a shard of the domain, the one that matches the domain status (OPEN
+// for ds_open, and so on; the rule is in tools/shard_access.php).
+$accessPrivilegeMembers = nel_access_privilege_members();
 
 try {
 	$db = getNelDatabase();
@@ -140,7 +141,8 @@ try {
 			$accessPriv = $accessOk ? implode(',', array_values(array_intersect($accessPrivilegeMembers, $submittedAccess))) : '';
 			// Domain must exist. "All Shards" is a row that names no shard
 			// (-1, and the 0 this form used to send); a shard must exist and
-			// be a shard of that domain.
+			// be a shard of that domain. An id below -1 is neither: the row
+			// of such an id can only be removed.
 			$domainOk = false;
 			foreach ($domains as $d) {
 				if ((int)$d['domain_id'] === $domainId) {
@@ -148,7 +150,7 @@ try {
 					break;
 				}
 			}
-			$allShards = ($shardId <= 0);
+			$allShards = nel_permission_is_all_shards($shardId);
 			$shardOk = $allShards;
 			if (!$shardOk) {
 				foreach ($shards as $s) {
@@ -194,11 +196,12 @@ try {
 			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
-			if ($shardId <= 0) {
+			if (nel_permission_is_all_shards($shardId)) {
 				// "All Shards": the -1 row, and a 0 row an earlier version
 				// of this page may have left beside it
 				removeDomainPermission($db, $targetUid, $domainId);
 			} else {
+				// the row of one shard, or a row whose id names no shard
 				$stmt = $db->prepare('DELETE FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
 				$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId));
 			}
@@ -351,12 +354,16 @@ ob_start();
 								}
 							?>
 								<span style="color:#ecf0f1;"><?php echo h($shardName ?: '#' . $perm['ShardId']); ?></span>
-							<?php else: ?>
+							<?php elseif (nel_permission_is_all_shards($perm['ShardId'])): ?>
 								<span class="badge badge-gray">All Shards</span>
+							<?php else: ?>
+								<span class="badge badge-red">unknown shard id <?php echo (int)$perm['ShardId']; ?></span>
 							<?php endif; ?>
 						</td>
 						<td>
-							<?php if ($editCanManage):
+							<?php if ($perm['ShardId'] <= 0 && !nel_permission_is_all_shards($perm['ShardId'])): ?>
+							<span style="color:#8899a6; font-size:0.85rem;"><?php echo h($perm['AccessPrivilege']); ?> (this row names no shard and gives no access: remove it)</span>
+							<?php elseif ($editCanManage):
 								$permMembers = explode(',', (string)$perm['AccessPrivilege']);
 							?>
 							<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>" style="display:inline-flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
@@ -398,7 +405,9 @@ ob_start();
 			<p style="font-size:0.85rem; color:#8899a6; margin-bottom:0.75rem;">
 				The login needs the access that matches the domain status: OPEN while it is open, DEV while it is in development, RESTRICTED while it is restricted.
 				A row can hold several. Adding a row for a domain and shard that already have one replaces its access.
-				A row for all shards comes first: while an account has one for a domain, the login goes by it, and rows for single shards of that domain have no effect.
+				On a shard, an account has what its row for all shards holds together with what its row for that shard holds: either row can give the access, and a row for one shard gives nothing on the other shards.
+				Each shard asks for the access that matches its own level, so an account with rows for single shards only is never sent to another shard, and a shard for a team is kept to it by giving the shard a level that the other accounts do not hold on it.
+				An account meant for a restricted shard of an open domain needs both in the row of that shard: OPEN for the login, RESTRICTED for the shard.
 			</p>
 			<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>">
 				<?php echo csrfField(); ?>

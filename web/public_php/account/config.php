@@ -9,6 +9,9 @@ require_once(dirname(dirname(__FILE__)) . '/tools/account_name.php');
 // the database connection, the password functions and the account creation
 // that the setup shares with this tool
 require_once(dirname(dirname(__FILE__)) . '/tools/account_common.php');
+// what the permission rows of an account give it on a shard, the rule the
+// login script goes by
+require_once(dirname(dirname(__FILE__)) . '/tools/shard_access.php');
 
 // NEL shard database (contains `user`, `domain`, `shard`, `permission` tables)
 $nel_db_host = $cfg['db']['shard']['host'];
@@ -505,12 +508,17 @@ function setSetting($key, $value)
  * page wrote 0 for the same thing, and an account can have both rows for one
  * domain. The functions below treat a 0 row as a -1 row everywhere, and the
  * admin page leaves exactly one row, with -1, whenever it touches one.
+ *
+ * Only -1 and 0 name all shards (nel_permission_is_all_shards). A row with a
+ * ShardId below -1 names no shard and gives no access: the pages list it as
+ * what it is, and it can only be removed.
  */
 
 /**
  * The permission rows of an account for the pages that list them, in the
  * order the login script reads them. Where a domain has a 0 row beside its -1
- * row, only the -1 row is listed; a 0 row on its own is listed as -1.
+ * row, the two are listed as the one row for all shards they amount to, with
+ * what both hold; a 0 row on its own is listed as -1.
  */
 function loadAccountPermissions($db, $uid)
 {
@@ -519,11 +527,13 @@ function loadAccountPermissions($db, $uid)
 	$perms = array();
 	$domainsListed = array();
 	foreach ($stmt->fetchAll() as $perm) {
-		if ((int)$perm['ShardId'] <= 0) {
+		if (nel_permission_is_all_shards($perm['ShardId'])) {
 			if (isset($domainsListed[$perm['DomainId']])) {
+				$listed = $domainsListed[$perm['DomainId']];
+				$perms[$listed]['AccessPrivilege'] = implode(',', nel_access_privilege_set($perms[$listed]['AccessPrivilege'] . ',' . $perm['AccessPrivilege']));
 				continue;
 			}
-			$domainsListed[$perm['DomainId']] = true;
+			$domainsListed[$perm['DomainId']] = count($perms);
 			$perm['ShardId'] = -1;
 		}
 		$perms[] = $perm;
