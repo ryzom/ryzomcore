@@ -43,9 +43,12 @@
 #include <nel/misc/types_nl.h>
 #include "mesh_eval.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+
+#include <nel/misc/common.h>
 
 #include "../pipeline_max/builtin/geom_object.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
@@ -53,6 +56,8 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_transform.h"
+#include "../pipeline_max/builtin/param_block.h"
+#include "../pipeline_max/update1/editable_mesh.h"
 
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 #include "../pipeline_max_export_common/map_extender_mod.h"
@@ -71,6 +76,70 @@ namespace MESHEVAL {
 
 // ---------------------------------------------------------------------------------------------
 // GeomBuffers (Mesh) decode
+
+// A bit-array chunk of the geom buffers: a container holding one 0x2700 leaf, uint32 bit count then
+// the bits, 32 per dword, least significant first.
+static bool readGeomBitArray(const STORAGE::CGeomBuffers *gb, uint16 id, std::vector<bool> &bits)
+{
+	const CStorageContainer *c = dynamic_cast<const CStorageContainer *>(gb->findStorageObject(id));
+	const CStorageRaw *raw = c ? dynamic_cast<const CStorageRaw *>(c->findStorageObject(0x2700)) : nullptr;
+	if (!raw || raw->Value.size() < 4) return false;
+	uint32 n;
+	memcpy(&n, &raw->Value[0], 4);
+	if (raw->Value.size() < 4 + (((size_t)n + 31) / 32) * 4) return false;
+	bits.resize(n);
+	for (uint32 i = 0; i < n; ++i)
+		bits[i] = ((raw->Value[4 + i / 8] >> (i % 8)) & 1) != 0;
+	return true;
+}
+
+// The vertices the deforming modifiers above the mesh act on, picked by the selection level the mesh was
+// saved in (0x092a: 1 object, every vertex; 2 vertex, the selected vertices; 4 face and 8 edge, the
+// vertices of the selected faces or edges).
+// The selections (0x092c vertices, 0x092d faces, 0x092e edges, 3 per face) are stored at every level;
+// they only scope the modifiers at their own level.
+// A selection that does not match the mesh only marks it unknown here; the deformers warn when they use it.
+static void readMeshVertexSelection(CSceneClass *obj, const STORAGE::CGeomBuffers *gb, SEvalMesh &out)
+{
+	const CStorageRaw *lvl = dynamic_cast<const CStorageRaw *>(gb->findStorageObject(0x092a));
+	uint32 selLevel = 1;
+	if (lvl && lvl->Value.size() >= 4)
+		memcpy(&selLevel, &lvl->Value[0], 4);
+	if (selLevel == 1)
+		return; // object level: the whole mesh
+	PIPELINE::MAX::UPDATE1::CEditableMesh *em = dynamic_cast<PIPELINE::MAX::UPDATE1::CEditableMesh *>(obj);
+	out.VertSelSoft = em && em->softSelection();
+	std::vector<bool> bits;
+	const uint nv = (uint)out.Verts.size();
+	if (selLevel == 2 && readGeomBitArray(gb, 0x092c, bits) && bits.size() == nv)
+	{
+		out.VertSel = bits;
+	}
+	else if (selLevel == 4 && readGeomBitArray(gb, 0x092d, bits) && bits.size() == out.Faces.size())
+	{
+		out.VertSel.assign(nv, false);
+		for (uint f = 0; f < out.Faces.size(); ++f)
+			if (bits[f])
+				for (uint c = 0; c < 3; ++c)
+					if (out.Faces[f].V[c] < nv) out.VertSel[out.Faces[f].V[c]] = true;
+	}
+	else if (selLevel == 8 && readGeomBitArray(gb, 0x092e, bits) && bits.size() == out.Faces.size() * 3)
+	{
+		out.VertSel.assign(nv, false);
+		for (uint e = 0; e < bits.size(); ++e)
+		{
+			if (!bits[e]) continue;
+			const SEvalFace &face = out.Faces[e / 3];
+			uint a = face.V[e % 3], b = face.V[(e % 3 + 1) % 3];
+			if (a < nv) out.VertSel[a] = true;
+			if (b < nv) out.VertSel[b] = true;
+		}
+	}
+	else
+	{
+		out.VertSelUnknown = true;
+	}
+}
 
 static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::string &name)
 {
@@ -104,6 +173,7 @@ static bool extractEditableMesh(CSceneClass *obj, SEvalMesh &out, const std::str
 		out.Faces.resize(ff->size());
 		if (!ff->empty()) memcpy(&out.Faces[0], &(*ff)[0], ff->size() * 20);
 	}
+	readMeshVertexSelection(obj, gb, out);
 
 	// Map channels: the typed CGeomBuffers map-channel view (chunk groups in file order; a group
 	// whose 0x0959 announce is absent keeps Channel -1 and is dropped, matching the historical
@@ -459,6 +529,332 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 }
 
 // ---------------------------------------------------------------------------------------------
+// Gizmo deformers (Bend, Twist): reference 0 is the gizmo (a PRS controller), reference 1 the center (a
+// position controller), reference 2 the parameters, a ParamBlock2 or, in older files, an old ParamBlock
+// with the same parameter indices. The deformer maps a point into its space (Tm), deforms it there along
+// Z, and maps it back (InvTm); it moves the vertices of the current selection only. Validated against a
+// reference export of zo_hom_cheveux_lead.max (two Bends and a Twist on a vertex selection): positions
+// equal to float precision.
+
+// The constant parameters of reference 2, by index. False when any parameter is animated
+// (controller-backed), even one the settings leave unused, or the block is missing: the caller then
+// leaves the modifier out.
+static bool readGizmoModParams(CSceneClass *mod, std::map<sint32, float> &out, const std::string &name)
+{
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mod);
+	CSceneClass *pb = rm && rm->nbReferences() > 2 ? dynamic_cast<CSceneClass *>(rm->getReference(2)) : nullptr;
+	if (!pb)
+		return false;
+	if (pb->classDesc()->superClassId() == 0x82)
+	{
+		SPB2Block blk;
+		if (!readPB2Block(pb, blk))
+			return false;
+		for (std::map<uint16, SPB2Param>::const_iterator it = blk.Params.begin(); it != blk.Params.end(); ++it)
+		{
+			const SPB2Param &p = it->second;
+			if (p.IsTab)
+				continue;
+			if (!p.HasConstant)
+			{
+				fprintf(stderr, "WARNING: mesh '%s' modifier parameter %u is animated, not supported\n",
+				        name.c_str(), (uint)p.Id);
+				return false;
+			}
+			out[(sint32)p.Id] = (p.Type == PB2_INT || p.Type == PB2_BOOL) ? (float)p.I : p.F[0];
+		}
+		return true;
+	}
+	if (pb->classDesc()->superClassId() == SCLASS_PBLOCK)
+	{
+		typedef PIPELINE::MAX::BUILTIN::CParamBlock CParamBlock;
+		CParamBlock *opb = dynamic_cast<CParamBlock *>(pb);
+		if (!opb)
+			return false;
+		const std::vector<CParamBlock::SParam> &params = opb->params();
+		for (std::vector<CParamBlock::SParam>::const_iterator it = params.begin(); it != params.end(); ++it)
+		{
+			if (it->Index < 0)
+				continue;
+			if (!it->HasConstant)
+			{
+				fprintf(stderr, "WARNING: mesh '%s' modifier parameter %i is animated, not supported\n",
+				        name.c_str(), (int)it->Index);
+				return false;
+			}
+			const bool isInt = it->Kind == CParamBlock::KindInt || it->Kind == CParamBlock::KindBool;
+			out[it->Index] = isInt ? (float)it->I : it->F[0];
+		}
+		return true;
+	}
+	return false;
+}
+
+static bool hasParams(const std::map<sint32, float> &p, sint32 count)
+{
+	for (sint32 i = 0; i < count; ++i)
+		if (p.find(i) == p.end())
+			return false;
+	return true;
+}
+
+// Post-multiply by a rotation about X, Y or Z (row vectors, v' = v * M).
+static Matrix3M rotateM(const Matrix3M &m, int axis, double angle)
+{
+	Matrix3M r = Matrix3M::identity();
+	float c = (float)cos(angle), s = (float)sin(angle);
+	int a = (axis + 1) % 3, b = (axis + 2) % 3;
+	r.m[a][a] = c; r.m[a][b] = s;
+	r.m[b][a] = -s; r.m[b][b] = c;
+	return m * r;
+}
+
+static Matrix3M translateM(const Matrix3M &m, float x, float y, float z)
+{
+	Matrix3M r = m;
+	r.m[3][0] += x; r.m[3][1] += y; r.m[3][2] += z;
+	return r;
+}
+
+// The deformer space: object space -> mod context (the 0x2510 TM) -> gizmo -> center,
+// Tm = context * Inverse(Translate(center) * gizmo), then the deformer's axis matrix, which turns its
+// axis onto Z (Tm = Tm * axis, InvTm = Inverse(axis) * Inverse(Tm)).
+// The order of center and gizmo is not validated yet: the reference file has both at their defaults.
+struct SGizmoModSpace
+{
+	Matrix3M Tm, InvTm;
+	float Box[6]; // the mod-context box (0x2511), min then max
+};
+
+// False when the box is missing or empty (min above max, as stored for a modifier applied to an empty
+// selection): the deformers take their extent from it and would throw the vertices far away.
+static bool gizmoModSpace(CSceneClass *mod, CStorageContainer *app, const Matrix3M &axis, SGizmoModSpace &out)
+{
+	Matrix3M gizmo = Matrix3M::identity();
+	Point3M center = { 0.f, 0.f, 0.f };
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mod);
+	if (rm && rm->nbReferences() > 0)
+	{
+		if (CControlPRS *prs = dynamic_cast<CControlPRS *>(rm->getReference(0)))
+		{
+			gizmo = composePRS(posValueAt0(dynamic_cast<CSceneClass *>(prs->positionController())),
+			                   rotValueAt0(dynamic_cast<CSceneClass *>(prs->rotationController())),
+			                   scaleValueAt0(dynamic_cast<CSceneClass *>(prs->scaleController())));
+		}
+	}
+	if (rm && rm->nbReferences() > 1)
+	{
+		if (CSceneClass *pc = dynamic_cast<CSceneClass *>(rm->getReference(1)))
+			center = posValueAt0(pc);
+	}
+	Matrix3M ctx = Matrix3M::identity();
+	CDerivedObject::modAppContextTM(app, &ctx.m[0][0]);
+	Matrix3M centered = translateM(Matrix3M::identity(), center.x, center.y, center.z) * gizmo;
+	Matrix3M tm = ctx * inverseM3(centered);
+	out.Tm = tm * axis;
+	out.InvTm = inverseM3(axis) * inverseM3(tm);
+	if (!CDerivedObject::modAppContextBox(app, out.Box))
+		return false;
+	for (int i = 0; i < 3; ++i)
+		if (out.Box[3 + i] < out.Box[i])
+			return false;
+	return true;
+}
+
+// The axis matrix: the bend or twist axis turned onto Z (0 = X: -pi/2 about Y, 1 = Y: pi/2 about X).
+static Matrix3M gizmoModAxis(int axis)
+{
+	if (axis == 0) return rotateM(Matrix3M::identity(), 1, -NLMISC::Pi * 0.5);
+	if (axis == 1) return rotateM(Matrix3M::identity(), 0, NLMISC::Pi * 0.5);
+	return Matrix3M::identity();
+}
+
+// Move the selected vertices (all when the selection is the whole mesh) through \a deformer.
+template <class TDeformer>
+static void deformSelected(SEvalMesh &mesh, const TDeformer &deformer, const char *what, const std::string &name,
+                           std::vector<std::string> *warnings)
+{
+	if (mesh.VertSelUnknown)
+	{
+		fprintf(stderr, "WARNING: mesh '%s' %s applied to the whole mesh: the selection it sees is not known\n",
+		        name.c_str(), what);
+		if (warnings) warnings->push_back(std::string("selection:") + what);
+	}
+	else if (mesh.VertSelSoft)
+	{
+		fprintf(stderr, "WARNING: mesh '%s' %s applied to the selected vertices only: the soft selection falloff "
+		        "around them is not evaluated\n", name.c_str(), what);
+		if (warnings) warnings->push_back(std::string("softselection:") + what);
+	}
+	const bool all = mesh.VertSel.size() != mesh.Verts.size();
+	for (uint i = 0; i < mesh.Verts.size(); ++i)
+		if (all || mesh.VertSel[i])
+			mesh.Verts[i] = deformer.map(mesh.Verts[i]);
+}
+
+struct SBendDeformer
+{
+	Matrix3M Tm, InvTm, TmPastUpper, TmPastLower;
+	double Radius, Lower, Upper;
+	bool Limited;
+
+	Point3M map(Point3M p) const
+	{
+		if (Radius == 0 && !Limited) return p;
+		p = transformPoint(p, Tm);
+		if (Limited)
+		{
+			if (p.z < Lower) return transformPoint(transformPoint(p, TmPastLower), InvTm);
+			if (p.z > Upper) return transformPoint(transformPoint(p, TmPastUpper), InvTm);
+		}
+		if (Radius == 0) return transformPoint(p, InvTm);
+		double x = p.x, yr = p.z / Radius;
+		double c = cos(NLMISC::Pi - yr), s = sin(NLMISC::Pi - yr);
+		p.x = (float)(Radius * c + Radius - x * c);
+		p.z = (float)(Radius * s - x * s);
+		return transformPoint(p, InvTm);
+	}
+};
+
+static void applyBend(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh, const std::string &name,
+                      std::vector<std::string> *warnings)
+{
+	// 0 angle (degrees), 1 direction (degrees), 2 axis (0 X, 1 Y, 2 Z), 3 limits on, 4 lower limit, 5 upper limit
+	std::map<sint32, float> p;
+	if (!readGizmoModParams(mod, p, name) || !hasParams(p, 3))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Bend parameters not readable; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:bend");
+		return;
+	}
+	const float angle = p[0], dir = p[1];
+	const int naxis = (int)p[2];
+	SBendDeformer d;
+	d.Limited = p.count(3) && p[3] != 0.f;
+	d.Lower = p.count(4) ? p[4] : 0.f;
+	d.Upper = p.count(5) ? p[5] : 0.f;
+	Matrix3M axis = rotateM(gizmoModAxis(naxis), 2, dir * NLMISC::Pi / 180.0);
+	SGizmoModSpace space;
+	if (!gizmoModSpace(mod, app, axis, space))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Bend without a usable mod-context box; evaluated without it\n",
+		        name.c_str());
+		if (warnings) warnings->push_back("modifier:bend");
+		return;
+	}
+	d.Tm = space.Tm;
+	d.InvTm = space.InvTm;
+	// the bend radius: the arc length (the box extent along the bend axis, or the limit range) over the angle
+	const int ax = naxis < 0 || naxis > 2 ? 2 : naxis;
+	const double len = d.Limited ? d.Upper - d.Lower : (double)space.Box[3 + ax] - (double)space.Box[ax];
+	const double rad = angle * NLMISC::Pi / 180.0;
+	d.Radius = fabs(rad) < 0.000001 ? 0.0 : len / rad;
+	if (d.Limited)
+	{
+		// beyond the limits the part continues straight, turned and moved like the limit end; the limit
+		// ends are mapped with the limits off
+		d.Limited = false;
+		const double range = d.Upper - d.Lower;
+		const double upperShare = range == 0.0 ? 1.0 : d.Upper / range;
+		const double lowerShare = range == 0.0 ? 1.0 : d.Lower / range;
+		for (int k = 0; k < 2; ++k)
+		{
+			const float z = (float)(k == 0 ? d.Upper : d.Lower);
+			Matrix3M t = translateM(Matrix3M::identity(), 0.f, 0.f, -z);
+			t = rotateM(t, 1, angle * (k == 0 ? upperShare : lowerShare) * NLMISC::Pi / 180.0);
+			t = translateM(t, 0.f, 0.f, z);
+			Point3M pt = { 0.f, 0.f, z };
+			Point3M mapped = transformPoint(d.map(transformPoint(pt, d.InvTm)), d.Tm);
+			t = translateM(t, mapped.x - pt.x, mapped.y - pt.y, mapped.z - pt.z);
+			if (k == 0)
+				d.TmPastUpper = t;
+			else
+				d.TmPastLower = t;
+		}
+		d.Limited = true;
+	}
+	deformSelected(mesh, d, "Bend", name, warnings);
+}
+
+struct STwistDeformer
+{
+	Matrix3M Tm, InvTm;
+	float Angle, AnglePerUnit, Height, BiasExponent, Lower, Upper;
+	bool Biased, Limited;
+
+	Point3M map(Point3M p) const
+	{
+		if (Angle == 0.f) return p;
+		p = transformPoint(p, Tm);
+		float x = p.x, y = p.y, z = p.z;
+		if (Limited) z = z < Lower ? Lower : (z > Upper ? Upper : z);
+		float a;
+		if (Biased)
+		{
+			float u = z / Height;
+			a = Angle * (float)pow(fabs(u), BiasExponent);
+			if (u < 0.f) a = -a;
+		}
+		else
+		{
+			a = z * AnglePerUnit;
+		}
+		float c = (float)cos(a), s = (float)sin(a);
+		p.x = c * x + s * y;
+		p.y = -s * x + c * y;
+		return transformPoint(p, InvTm);
+	}
+};
+
+static void applyTwist(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh, const std::string &name,
+                       std::vector<std::string> *warnings)
+{
+	// 0 angle (degrees), 1 bias (-100..100), 2 axis (0 X, 1 Y, 2 Z), 3 limits on, 4 lower limit, 5 upper limit
+	std::map<sint32, float> p;
+	if (!readGizmoModParams(mod, p, name) || !hasParams(p, 3))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Twist parameters not readable; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:twist");
+		return;
+	}
+	const float angle = p[0], bias = p[1];
+	const int naxis = (int)p[2];
+	STwistDeformer d;
+	d.Limited = p.count(3) && p[3] != 0.f;
+	d.Lower = p.count(4) ? p[4] : 0.f;
+	d.Upper = p.count(5) ? p[5] : 0.f;
+	d.Biased = bias != 0.f;
+	if (d.Biased)
+	{
+		float b = 1.f - (bias + 100.f) / 200.f;
+		if (b < 0.00001f) b = 0.00001f;
+		if (b > 0.99999f) b = 0.99999f;
+		d.BiasExponent = (float)(log(b) / log(0.5));
+	}
+	else
+	{
+		d.BiasExponent = 1.f;
+	}
+	SGizmoModSpace space;
+	if (!gizmoModSpace(mod, app, gizmoModAxis(naxis), space))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Twist without a usable mod-context box; evaluated without it\n",
+		        name.c_str());
+		if (warnings) warnings->push_back("modifier:twist");
+		return;
+	}
+	d.Tm = space.Tm;
+	d.InvTm = space.InvTm;
+	// the twist spreads over the box extent along the twist axis
+	const int ax = naxis < 0 || naxis > 2 ? 2 : naxis;
+	d.Height = space.Box[3 + ax] - space.Box[ax];
+	const float rad = (float)(angle * NLMISC::Pi / 180.0);
+	d.Angle = d.Height == 0.f ? 0.f : rad;
+	d.AnglePerUnit = d.Height == 0.f ? 0.f : rad / d.Height;
+	deformSelected(mesh, d, "Twist", name, warnings);
+}
+
+// ---------------------------------------------------------------------------------------------
 
 // Extract a parametric primitive's mesh into SEvalMesh: use the shared PRIMMESH library for
 // GT-exact topology + per-face matId/smGroup (§10z-cinq). Map channel 1 is filled for Box and
@@ -738,6 +1134,7 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 	{
 		if (!extractEditablePoly(base, out, name))
 			return false;
+		out.VertSelUnknown = true; // the poly mesh selection level and selections are not decoded
 	}
 	else if (cid == PRIMMESH::CLASSID_BOX || cid == PRIMMESH::CLASSID_CYLINDER
 	         || cid == PRIMMESH::CLASSID_SPHERE || cid == PRIMMESH::CLASSID_PLANE)
@@ -785,10 +1182,23 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 			EDITMESH::SEdits edits;
 			if (app && EDITMESH::readModApp(app, edits))
 				applyEditMeshEdits(edits, out, name);
+			// it passes its own selection up the stack, which is not decoded
+			out.VertSel.clear();
+			out.VertSelUnknown = true;
 		}
 		else if (mcid == NLMISC::CClassId(0x25215824, 0x00000000)) // XForm
 		{
 			applyXForm(mod, app, out, name);
+		}
+		else if (mcid == NLMISC::CClassId(0x00000010, 0x00000000)
+		         && mod->classDesc()->superClassId() == 0x810) // Bend
+		{
+			applyBend(mod, app, out, name, warnings);
+		}
+		else if (mcid == NLMISC::CClassId(0x00000090, 0x00000000)
+		         && mod->classDesc()->superClassId() == 0x810) // Twist
+		{
+			applyTwist(mod, app, out, name, warnings);
 		}
 		else if (mcid == NLMISC::CClassId(0x40c7005e, 0x2a95082c)) // Nel VertexTreePaint
 		{
@@ -895,6 +1305,13 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 			fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated without it\n",
 			        name.c_str(), mcid.toString().c_str());
 			if (warnings) warnings->push_back("modifier:" + mcid.toString());
+			out.VertSelUnknown = true; // it may be a selection modifier
+		}
+		if (!out.VertSel.empty() && out.VertSel.size() != out.Verts.size())
+		{
+			// the topology changed: the selection no longer matches the vertices
+			out.VertSel.clear();
+			out.VertSelUnknown = true;
 		}
 		if (getenv("PMB_STACK_DUMP"))
 			fprintf(stderr, "PMB_STACK_DUMP '%s' after mod %s verts=%u faces=%u\n", name.c_str(),

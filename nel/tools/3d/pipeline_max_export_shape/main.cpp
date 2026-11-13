@@ -391,6 +391,13 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			// Physique: continue into the mesh path; skinning is applied after mesh eval.
 		}
 	}
+	if (hasPhysique && getenv("PMB_NO_SKIN"))
+	{
+		// Debug: export the evaluated mesh rigid, to compare its geometry with a reference export that
+		// came out without its skin
+		fprintf(stderr, "PMB_NO_SKIN: '%s' exported without its Physique skin\n", name.c_str());
+		hasPhysique = false;
+	}
 
 	// Multi-lod object detection (LOD_NAME_COUNT > 0 = the node has LOD slaves — LOD 0 is the
 	// node itself + up to 9 slaves resolved by NAME from the LOD_NAME + i appdata; each slave
@@ -1137,16 +1144,9 @@ static int dumpSkin(const std::string &path)
 	return 0;
 }
 
-// --dump-mesh: print a CMesh's VB (all values) + per-rdrpass index triples — GT extraction for
-// decode work (spline caps, UVW Map projections) against reference shapes.
-static int dumpMesh(const std::string &path)
+// Print every value of every vertex of a VB, one vertex per line.
+static void dumpVertexBuffer(const NL3D::CVertexBuffer &vb)
 {
-	NL3D::IShape *shape = loadShape(path);
-	if (!shape) { fprintf(stderr, "cannot load %s\n", path.c_str()); return 2; }
-	printf("class %s\n", shape->getClassName().c_str());
-	NL3D::CMesh *m = dynamic_cast<NL3D::CMesh *>(shape);
-	if (!m) { printf("(not a CMesh)\n"); delete shape; return 0; }
-	const NL3D::CVertexBuffer &vb = m->getVertexBuffer();
 	printf("verts %u format 0x%x size %u\n", vb.getNumVertices(), vb.getVertexFormat(), vb.getVertexSize());
 	NL3D::CVertexBufferRead vbr;
 	const_cast<NL3D::CVertexBuffer &>(vb).lock(vbr);
@@ -1181,6 +1181,25 @@ static int dumpMesh(const std::string &path)
 		}
 		printf("\n");
 	}
+}
+
+// --dump-mesh: print a CMesh's VB (all values) + per-rdrpass index triples — GT extraction for
+// decode work (spline caps, UVW Map projections) against reference shapes. A CMeshMRM prints its
+// full-detail VB only.
+static int dumpMesh(const std::string &path)
+{
+	NL3D::IShape *shape = loadShape(path);
+	if (!shape) { fprintf(stderr, "cannot load %s\n", path.c_str()); return 2; }
+	printf("class %s\n", shape->getClassName().c_str());
+	if (NL3D::CMeshMRM *mrm = dynamic_cast<NL3D::CMeshMRM *>(shape))
+	{
+		dumpVertexBuffer(mrm->getMeshGeom().getVertexBuffer());
+		delete shape;
+		return 0;
+	}
+	NL3D::CMesh *m = dynamic_cast<NL3D::CMesh *>(shape);
+	if (!m) { printf("(not a CMesh or CMeshMRM)\n"); delete shape; return 0; }
+	dumpVertexBuffer(m->getVertexBuffer());
 	for (uint mbk = 0; mbk < m->getNbMatrixBlock(); ++mbk)
 	{
 		for (uint rp = 0; rp < m->getNbRdrPass(mbk); ++rp)

@@ -72,7 +72,18 @@ struct SEvalMesh
 	std::vector<MAXMATH::Point3M> Verts; // object space
 	std::vector<SEvalFace> Faces;
 	std::map<int, SMapChannel> Maps;
+	// The vertices the deforming modifiers act on, as picked by the selection level the base Editable Mesh
+	// was saved in, one flag per vertex. Empty: the whole mesh (object level).
+	std::vector<bool> VertSel;
+	// A modifier that may change the selection or the vertices (Edit Mesh, or one the evaluator does not
+	// handle) ran, or the selection was not readable: VertSel no longer describes what the modifiers above
+	// see.
+	bool VertSelUnknown;
+	// The base mesh has soft selection on: the modifiers above also move the vertices around VertSel, by a
+	// falloff the evaluator does not compute.
+	bool VertSelSoft;
 
+	SEvalMesh() : VertSelUnknown(false), VertSelSoft(false) { }
 	bool mapSupport(int channel) const { return Maps.find(channel) != Maps.end(); }
 };
 
