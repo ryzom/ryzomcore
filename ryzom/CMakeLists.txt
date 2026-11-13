@@ -2,7 +2,31 @@ cmake_minimum_required(VERSION 3.28)
 
 project(Ryzom VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
 
-find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS misc net ligo georges 3d gui sound sevenzip pacs)
+# The NeL libraries the parts of Ryzom this configuration builds link, under the conditions of the directories
+# that link them: game_share (always), the client and its patcher, server_share and ai_share (server or tools),
+# the entities game service, prim_export, patch_gen and r2_islands_textures (tools), the world editor and its
+# plug-ins (tools, on Windows with MFC), the installer
+set(RYZOM_NEL_COMPONENTS misc net ligo georges)
+if(WITH_RYZOM_CLIENT)
+  list(APPEND RYZOM_NEL_COMPONENTS 3d gui sound pacs sevenzip web)
+endif()
+if(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
+  list(APPEND RYZOM_NEL_COMPONENTS pacs)
+endif()
+if(WITH_RYZOM_SERVER)
+  list(APPEND RYZOM_NEL_COMPONENTS web)
+endif()
+if(WITH_RYZOM_TOOLS)
+  list(APPEND RYZOM_NEL_COMPONENTS 3d sevenzip)
+  if(WIN32 AND WITH_MFC)
+    list(APPEND RYZOM_NEL_COMPONENTS sound snd_lowlevel)
+  endif()
+endif()
+if(WITH_QT5 AND WITH_RYZOM_INSTALLER)
+  list(APPEND RYZOM_NEL_COMPONENTS sevenzip)
+endif()
+list(REMOVE_DUPLICATES RYZOM_NEL_COMPONENTS)
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS ${RYZOM_NEL_COMPONENTS})
 
 #-----------------------------------------------------------------------------
 #Platform specifics

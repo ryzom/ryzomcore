@@ -2,13 +2,24 @@
 
 set(_@PROJECT_NAME@_supported_components @package_components@)
 
+# A component this NeL was not built with is not found: an error when it is required, and otherwise its target
+# is missing and its dependencies are not looked for
+set(_@PROJECT_NAME@_missing_components)
 foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
-  if (NOT _comp IN_LIST _@PROJECT_NAME@_supported_components)
-    set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
-  else ()
+  if (_comp IN_LIST _@PROJECT_NAME@_supported_components)
     set(@PROJECT_NAME@_${_comp}_FOUND TRUE)
+  else ()
+    set(@PROJECT_NAME@_${_comp}_FOUND FALSE)
+    if (@PROJECT_NAME@_FIND_REQUIRED_${_comp})
+      list(APPEND _@PROJECT_NAME@_missing_components ${_comp})
+    endif ()
   endif()
 endforeach()
+if (_@PROJECT_NAME@_missing_components)
+  string(REPLACE ";" ", " _@PROJECT_NAME@_missing "${_@PROJECT_NAME@_missing_components}")
+  string(REPLACE ";" ", " _@PROJECT_NAME@_has "${_@PROJECT_NAME@_supported_components}")
+  set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "This @PROJECT_NAME@ was built without the required component(s) ${_@PROJECT_NAME@_missing} (or there is no such library); it has ${_@PROJECT_NAME@_has}")
+endif ()
 
 
 check_required_components(@PROJECT_NAME@)

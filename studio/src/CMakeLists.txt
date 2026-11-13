@@ -74,13 +74,17 @@ add_dependencies(studio
 		studio_plugin_georges_editor
 		studio_plugin_landscape_editor
 		studio_plugin_log
-		studio_plugin_object_viewer
 		studio_plugin_sheet_builder
 		studio_plugin_tile_editor
 #		studio_plugin_translation_manager # requires QFtp which is removed in qt5
 		studio_plugin_world_editor
 #		studio_plugin_zone_painter
 )
+IF(TARGET studio_plugin_object_viewer)
+	add_dependencies(studio
+			studio_plugin_object_viewer
+	)
+ENDIF()
 IF(WITH_GUI)
 	add_dependencies(studio
 			studio_plugin_gui_editor

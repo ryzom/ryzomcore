@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.28..4.1.1)
 
 project(Snowballs VERSION 2.0.0 LANGUAGES CXX)
 
-find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS 3d misc net pacs sound)
+# the client and the collision service link 3d and pacs, the client sound when WITH_SOUND is on
+set(SNOWBALLS_NEL_COMPONENTS 3d misc net pacs)
+if(WITH_SNOWBALLS_CLIENT AND WITH_SOUND)
+  list(APPEND SNOWBALLS_NEL_COMPONENTS sound)
+endif()
+find_package(NeL ${RyzomCore_VERSION} REQUIRED COMPONENTS ${SNOWBALLS_NEL_COMPONENTS})
 
 IF(WIN32)
   SET(SNOWBALLS_CONFIG_FILE "." CACHE FILEPATH "Snowballs config file location")

@@ -1,17 +1,30 @@
 @PACKAGE_INIT@
 
 set(_@PROJECT_NAME@_supported_components @package_components@)
+set(_@PROJECT_NAME@_3d_dependencies @package_3d_dependencies@)
 set(_@PROJECT_NAME@_georges_dependencies @package_georges_dependencies@)
 set(_@PROJECT_NAME@_gui_dependencies @package_gui_dependencies@)
 set(_@PROJECT_NAME@_sound_dependencies @package_sound_dependencies@)
+set(_@PROJECT_NAME@_web_dependencies @package_web_dependencies@)
 
+# A component this NeL was not built with is not found: an error when it is required, and otherwise its target
+# is missing and its dependencies are not looked for
+set(_@PROJECT_NAME@_missing_components)
 foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
-  if (NOT _comp IN_LIST _@PROJECT_NAME@_supported_components)
-    set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
-  else ()
+  if (_comp IN_LIST _@PROJECT_NAME@_supported_components)
     set(@PROJECT_NAME@_${_comp}_FOUND TRUE)
+  else ()
+    set(@PROJECT_NAME@_${_comp}_FOUND FALSE)
+    if (@PROJECT_NAME@_FIND_REQUIRED_${_comp})
+      list(APPEND _@PROJECT_NAME@_missing_components ${_comp})
+    endif ()
   endif()
 endforeach()
+if (_@PROJECT_NAME@_missing_components)
+  string(REPLACE ";" ", " _@PROJECT_NAME@_missing "${_@PROJECT_NAME@_missing_components}")
+  string(REPLACE ";" ", " _@PROJECT_NAME@_has "${_@PROJECT_NAME@_supported_components}")
+  set(@PROJECT_NAME@_NOT_FOUND_MESSAGE "This @PROJECT_NAME@ was built without the required component(s) ${_@PROJECT_NAME@_missing} (or there is no such library); it has ${_@PROJECT_NAME@_has}")
+endif ()
 
 check_required_components(@PROJECT_NAME@)
 
@@ -21,10 +34,16 @@ foreach(_dependency IN ITEMS @package_required_dependencies@)
 endforeach()
 
 
-# Dependencies of the requested components, or of all of them when none are named,
+# Dependencies of the requested components this NeL has, or of all of them when none are named,
 # so that a project without the GUI does not need Lua and Luabind
-set(_@PROJECT_NAME@_dependent_components ${@PROJECT_NAME@_FIND_COMPONENTS})
-if(NOT _@PROJECT_NAME@_dependent_components)
+if(@PROJECT_NAME@_FIND_COMPONENTS)
+  set(_@PROJECT_NAME@_dependent_components)
+  foreach(_comp ${@PROJECT_NAME@_FIND_COMPONENTS})
+    if(@PROJECT_NAME@_${_comp}_FOUND)
+      list(APPEND _@PROJECT_NAME@_dependent_components ${_comp})
+    endif()
+  endforeach()
+else()
   set(_@PROJECT_NAME@_dependent_components ${_@PROJECT_NAME@_supported_components})
 endif()
 foreach(_comp ${_@PROJECT_NAME@_dependent_components})

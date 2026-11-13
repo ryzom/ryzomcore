@@ -95,10 +95,20 @@ include(CMakePackageConfigHelpers)
 
 set(project_namespace "${PROJECT_NAME}")
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-set(package_components 3d georges gui ligo misc net pacs sevenzip sound snd_lowlevel) # TODO append in components to have actual list of build targets
-set(package_required_dependencies CURL Freetype LibXml2) # LibXml2 for misc, which links it PUBLIC
-set(package_gui_dependencies Lua Luabind)
+# the components are the NeL libraries this build has
+set(package_components)
+foreach(package_component 3d georges gui ligo logic misc net pacs sevenzip snd_lowlevel sound web)
+  if(TARGET NeL::${package_component})
+    list(APPEND package_components ${package_component})
+  endif()
+endforeach()
+set(package_required_dependencies LibXml2) # LibXml2 for misc, which links it PUBLIC
+if(FREETYPE_FOUND)
+  set(package_3d_dependencies Freetype)
+endif()
+set(package_gui_dependencies CURL Lua Luabind)
 set(package_sound_dependencies Vorbis)
+set(package_web_dependencies CURL)
 
 
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
