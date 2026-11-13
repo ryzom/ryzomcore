@@ -28,6 +28,7 @@
 #include "server_entry_dialog.h"
 
 // NeL includes
+#include <nel/misc/debug.h>
 #include <nel/misc/path.h>
 
 // Qt includes
@@ -161,9 +162,8 @@ void MissionCompilerSettingsPage::readSettings()
 	m_ui.localPathEdit->setText(settings->value(Constants::SETTING_LOCAL_TEXT_PATH).toString());
 
 	QStringList items = settings->value(Constants::SETTING_SERVERS_TABLE_ITEMS).toStringList();
-	int column = 0;
-	int row = 0;
-	m_ui.serversTableWidget->insertRow(row);
+	int column = 3;
+	int row = -1;
 	Q_FOREACH(QString var, items)
 	{
 		// Check to see if we're starting a new row.
@@ -173,11 +173,20 @@ void MissionCompilerSettingsPage::readSettings()
 			row++;
 			m_ui.serversTableWidget->insertRow(row);
 		}
-		
+
 		QTableWidgetItem *item = new QTableWidgetItem(var);
 		m_ui.serversTableWidget->setItem(row, column, item);
 
 		column++;
+	}
+
+	// every row is edited as name, text path and primitive path, so a short last row gets empty cells
+	if (column < 3)
+	{
+		nlwarning("The mission compiler setting %s has %d entries, which is not a multiple of 3, the last server is incomplete",
+			Constants::SETTING_SERVERS_TABLE_ITEMS, items.size());
+		for (; column < 3; ++column)
+			m_ui.serversTableWidget->setItem(row, column, new QTableWidgetItem());
 	}
 	settings->endGroup();
 }
