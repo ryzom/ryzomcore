@@ -210,8 +210,7 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 // ***************************************************************************
 void CDriverGL::updateWindowFocus()
 {
-	// The focus is the key state of the window holding the view. In fullscreen that is a window of AppKit's,
-	// and the window the driver made resigns as the key window when the view moves there.
+	// The focus is the key state of the window holding the view, in fullscreen too.
 	if (_win == EmptyWindow)
 		return;
 
@@ -1560,8 +1559,8 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
 		NSMiniaturizableWindowMask | NSResizableWindowMask;
 
-	// create a cocoa window with the size provided by the mode parameter
-	NSWindow* cocoa_window = [[NSWindow alloc]
+	// create a cocoa window with the size provided by the mode parameter (it keeps the keyboard in fullscreen)
+	NSWindow* cocoa_window = [[CocoaWindow alloc]
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
 		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
 
@@ -1761,6 +1760,15 @@ bool CDriverGL::destroyWindow()
 
 	if (_DestroyWindow)
 	{
+		// the dock and the menu bar get their behaviour back, and a new window starts windowed
+		if (m_FullscreenWindow)
+		{
+#ifdef NL_MAC_VERSION_10_6_UP
+			[NSApp setPresentationOptions:m_WindowedPresentationOptions];
+#endif
+			m_FullscreenWindow = false;
+		}
+
 		// the delegate watches every window, it must not reach the driver any more (it is not released,
 		// as a window does not retain its delegate)
 		[m_WindowDelegate detachDriver];
@@ -1862,8 +1870,22 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 
 #elif defined(NL_OS_MAC)
 
+	NSWindow *window = [containerView() window];
+
+	// the bits of the title bar, the only ones fullscreen takes away and gives back
+	const NSUInteger titleBarMask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+
+#if defined(MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+	// in a full screen space of macOS (the green button), the style mask may only change in a transition of AppKit's
+	if ([window styleMask] & NSFullScreenWindowMask)
+	{
+		nlwarning("3D: The window is in a full screen space of macOS, it keeps its style until it leaves that space");
+		return false;
+	}
+#endif
+
 	// leave fullscreen mode, enter windowed mode
-	if (windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
+	if (windowStyle == EWSWindowed && m_FullscreenWindow)
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
@@ -1874,18 +1896,32 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
-		// pull the view back from fullscreen restoring window options
-		[containerView() exitFullScreenModeWithOptions:nil];
+		// give the dock, the menu bar and the window back what they had before fullscreen (the title is cleared
+		// when the title bar comes back)
+#ifdef NL_MAC_VERSION_10_6_UP
+		[NSApp setPresentationOptions:m_WindowedPresentationOptions];
+		NSString *title = [[window title] copy];
+		[window setStyleMask:([window styleMask] & ~titleBarMask) | m_WindowedStyleMask];
+		[window setTitle:title];
+		[title release];
+#endif
+		[window setFrame:m_WindowedFrame display:YES];
+		m_FullscreenWindow = false;
+
+		// the title bar may have new buttons, bind the close button to applicationShouldTerminate again
+		id closeButton = [window standardWindowButton:NSWindowCloseButton];
+		[closeButton setAction:@selector(applicationShouldTerminate:)];
+		[closeButton setTarget:[NSApp delegate]];
 
 		// let the gl view receive key events
-		[[containerView() window] makeFirstResponder:_glView];
+		[window makeFirstResponder:_glView];
 
 		// bring the window containing the gl view to the front
-		[[containerView() window] makeKeyAndOrderFront:nil];
+		[window makeKeyAndOrderFront:nil];
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if (windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	else if (windowStyle == EWSFullscreen && !m_FullscreenWindow)
 	{
 		// enable manual back buffer size for mode setting in fullscreen
 		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
@@ -1895,27 +1931,35 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
-		// put the view in fullscreen mode, hiding the dock but enabling the menubar
-		// to pop up if the mouse hits the top screen border.
-		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
+		// The window itself covers the screen, without a title bar; the dock is hidden and the menu bar pops up when
+		// the mouse hits the top screen border, and <CMD>+<Tab> still switches applications. NSView
+		// enterFullScreenMode moved the view to a window of its own and left this one on screen, empty.
 #ifdef NL_MAC_VERSION_10_6_UP
-		[containerView() enterFullScreenMode:[NSScreen mainScreen] withOptions:
-			[NSDictionary dictionaryWithObjectsAndKeys:
-				[NSNumber numberWithInt:
-					NSApplicationPresentationHideDock |
-					NSApplicationPresentationAutoHideMenuBar],
-				NSFullScreenModeApplicationPresentationOptions, nil]];
+		m_WindowedPresentationOptions = [NSApp presentationOptions];
+		m_WindowedStyleMask = [window styleMask] & titleBarMask;
+		m_WindowedFrame = [window frame];
+		m_FullscreenWindow = true;
+
+		// the screen of the window, the main screen (that of the key window) only for a window on no screen
+		NSScreen *screen = [window screen];
+		if (screen == nil)
+			screen = [NSScreen mainScreen];
+
+		// the title is cleared when the title bar goes
+		NSString *title = [[window title] copy];
+		[NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
+		[window setStyleMask:[window styleMask] & ~titleBarMask];
+		[window setTitle:title];
+		[title release];
+		[window setFrame:[screen frame] display:YES];
 #endif
-		/*
-			TODO check if simply using NSView enterFullScreenMode is a good idea.
-			 the context can be set to full screen as well, performance differences?
-		*/
 
 		// let the gl view receive key events
-		[[containerView() window] makeFirstResponder:_glView];
+		[window makeFirstResponder:_glView];
+		[window makeKeyAndOrderFront:nil];
 	}
 
-	// the view may have changed windows
+	// the key state of the window may have changed
 	updateWindowFocus();
 
 #elif defined(NL_OS_UNIX)
@@ -2514,7 +2558,7 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
 
 	// in fullscreen mode
-	if([containerView() isInFullScreenMode])
+	if (m_FullscreenWindow)
 	{
 		// return the size of the back buffer (like having switched monitor mode)
 		mode.Windowed  = false;
@@ -3142,7 +3186,7 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	else
 	{
 #ifdef NL_OS_MAC
-		if([containerView() isInFullScreenMode])
+		if (m_FullscreenWindow)
 		{
 			width = _backBufferWidth;
 			height = _backBufferHeight;
@@ -3196,7 +3240,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 #elif defined(NL_OS_MAC)
 
 	// for fullscreen mode, adjust the back buffer size to desired resolution
-	if([containerView() isInFullScreenMode])
+	if (m_FullscreenWindow)
 	{
 		// disable and re-enable fullscreen
 		// fixes #1062 (http://dev.ryzom.com/issues/1062)

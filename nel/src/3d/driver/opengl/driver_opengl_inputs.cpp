@@ -530,7 +530,7 @@ void CDriverGL::setMousePos(float x, float y)
 
 	// get the rect (position, size) of the window
 	NSRect windowRect;
-	if([containerView() isInFullScreenMode])
+	if (m_FullscreenWindow)
 		windowRect = [[[containerView() window] screen] frame];
 	else
 		windowRect = [[containerView() window] frame];

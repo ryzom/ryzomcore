@@ -847,6 +847,13 @@ private:
 	uint16                     _backBufferHeight;
 	uint16                     _backBufferWidth;
 
+	// in fullscreen the window covers the screen without a title bar (see setWindowStyle), and the title bar bits of
+	// its style mask, its frame and the presentation options it had before are kept
+	bool                       m_FullscreenWindow;
+	NSUInteger                 m_WindowedStyleMask;
+	NSRect                     m_WindowedFrame;
+	NSUInteger                 m_WindowedPresentationOptions;
+
 	NSView* containerView() { return (NSView*)_win; }
 	void setupApplicationMenu();
 

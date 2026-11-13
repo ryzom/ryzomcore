@@ -42,7 +42,7 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 	{
 		_driver = driver;
 
-		// in fullscreen the view is in a window of AppKit's, which has no delegate: watch every window
+		// the key state of the driver's window is read again whenever any window becomes or resigns key
 		NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
 		[center addObserver:self selector:@selector(anyWindowDidChangeKey:) name:NSWindowDidBecomeKeyNotification object:nil];
 		[center addObserver:self selector:@selector(anyWindowDidChangeKey:) name:NSWindowDidResignKeyNotification object:nil];
@@ -73,6 +73,20 @@ static void windowDidMove(NSWindow* window, CDriverGL* driver)
 		return;
 
 	_driver->updateWindowFocus();
+}
+
+@end
+
+@implementation CocoaWindow
+
+- (BOOL)canBecomeKeyWindow
+{
+	return YES;
+}
+
+- (BOOL)canBecomeMainWindow
+{
+	return YES;
 }
 
 @end

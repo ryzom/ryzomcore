@@ -203,6 +203,10 @@ CDriverGL::CDriverGL()
 	m_WindowDelegate    = nil;
 	_backBufferHeight   = 0;
 	_backBufferWidth    = 0;
+	m_FullscreenWindow  = false;
+	m_WindowedStyleMask = 0;
+	m_WindowedFrame     = NSZeroRect;
+	m_WindowedPresentationOptions = 0;
 
 #elif defined (NL_OS_UNIX)
 
