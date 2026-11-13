@@ -10,7 +10,8 @@
 		{
 			while (false !== ($file = readdir($handle)))
 			{
-				if ($file != '.' && $file != '..')
+				// files only: the viewer opens what is listed here
+				if ($file != '.' && $file != '..' && is_file($path . $file))
 				{
 					if (!is_array($file_list)) $file_list = array();
 
@@ -45,10 +46,12 @@
 
 	function tool_las_check_for_file($data, $name)
 	{
-		reset($data);
+		// no list (no admin path, or an empty directory) holds no file
+		if (!is_array($data))	return null;
+
 		foreach($data as $filedata)
 		{
-			if ($filedata['name'] == $name)	return $filedata;
+			if ($filedata['name'] === $name)	return $filedata;
 		}
 
 		return null;

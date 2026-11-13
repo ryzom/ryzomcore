@@ -73,7 +73,33 @@
 
 		$AS_LAS_AdminPath	= tool_main_get_domain_data($view_domain_id, 'domain_las_admin_path');
 		$AS_LAS_LocalPath	= tool_main_get_domain_data($view_domain_id, 'domain_las_local_path');
-		$tool_las_file_list	= tool_las_get_file_list($AS_LAS_AdminPath);
+
+		// The file list, which is also all the file viewer may open, comes
+		// from the LAS Admin Path only. An empty one used to be listed as
+		// '/', the root of the web server's filesystem.
+		$tool_las_file_list	= null;
+		$tool_las_errors	= array();
+		if ($AS_LAS_AdminPath == '')
+		{
+			$tool_las_errors[] = "The LAS Admin Path of this domain is empty: there are no log analyser files to list.";
+		}
+		elseif (!is_dir($AS_LAS_AdminPath))
+		{
+			$tool_las_errors[] = "The LAS Admin Path of this domain is not a directory on the web server: ". $AS_LAS_AdminPath;
+		}
+		else
+		{
+			$tool_las_file_list = tool_las_get_file_list($AS_LAS_AdminPath);
+		}
+		if ($AS_LAS_LocalPath == '')
+		{
+			$tool_las_errors[] = "The LAS Local Path of this domain is empty: no search can be run.";
+		}
+		if (sizeof($tool_las_errors))
+		{
+			$tool_las_errors[] = "Both paths are set under Admin, Domains.";
+		}
+		$tpl->assign('tool_las_error', implode(' ', $tool_las_errors));
 
 		if (isset($NELTOOL['GET_VARS']['fileview']))
 		{

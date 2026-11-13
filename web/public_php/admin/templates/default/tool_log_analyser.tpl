@@ -97,6 +97,14 @@
 		</table>
 		<br>
 {/if}
+{if $tool_las_error}
+		<table width="100%" border="0" cellpadding="1" bgcolor="#cccccc" class="view">
+		<tr>
+			<td class="row0"><span class="alert">{$tool_las_error}</span></td>
+		</tr>
+		</table>
+		<br>
+{/if}
 
 
 		<form action="tool_log_analyser.php" method="post" name="qlist">
