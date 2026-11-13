@@ -42,10 +42,10 @@ r2.registerHighLevel = function()
 		return nil
 	end
 
-	-- The island the content of a scenario stands on: the one whose rectangle holds the most positions of
-	-- the scenario. A position that is relative to a parent falls in no island and does not count.
-	-- Returns nil when nothing stands on an island.
-	local function getIslandFromPositions(scenario)
+	-- The island the content of acts stands on: the one whose rectangle holds the most positions of the
+	-- acts (the Acts of a scenario, or a list of some of them). A position that is relative to a parent
+	-- falls in no island and does not count. Returns nil when nothing stands on an island.
+	local function getIslandFromPositions(acts)
 		local islands = getCompleteIslands()
 		local counts = {}
 		local function visit(node)
@@ -65,7 +65,7 @@ r2.registerHighLevel = function()
 				k, v = next(node, k)
 			end
 		end
-		visit(scenario.Acts)
+		visit(acts)
 		local bestIsland = nil
 		local bestCount = 0
 		for islandName, count in pairs(counts) do
@@ -75,6 +75,267 @@ r2.registerHighLevel = function()
 			end
 		end
 		return bestIsland
+	end
+
+	-- The entry points of the lists of entry points before the one of this editor, as "Name x y" for
+	-- each: what tells where a scenario of that time starts. Derived from the lists of islands and entry
+	-- points of the alpha and beta clients, December 2005 to August 2006. The list of August 2006 is the
+	-- one of today: it gave every entry point a number for a name, uiR2EntryPoint01 and so on, and from
+	-- then on no entry point moved.
+	local oldEntryPoints = {
+		-- The first list, December 2005: 28 desert islands with one entry point each. A scenario of that
+		-- time has no entry point of its own: it starts at the one of its island. The islands have the
+		-- names the second list gave them (see getIslandFromOldLocationId); a name here is the one of
+		-- the entry point then, uiR2SouthEntryPoint for South.
+		First = {
+			uiR2_Deserts02 = "South 22383 -1512",
+			uiR2_Deserts04 = "NorthWest 23452 -1050",
+			uiR2_Deserts05 = "SouthWest 24257 -1520",
+			uiR2_Deserts06 = "SouthEast 25523 -1500",
+			uiR2_Deserts07 = "South 26051 -1405",
+			uiR2_Deserts08 = "South 26694 -1485",
+			uiR2_Deserts10 = "South 28923 -1434",
+			uiR2_Deserts12 = "SouthEast 30818 -1487",
+			uiR2_Deserts14 = "NorthEast 30629 -2300",
+			uiR2_Deserts15 = "West 21500 -1830",
+			uiR2_Deserts16 = "West 22304 -1856",
+			uiR2_Deserts17 = "East 23250 -1840",
+			uiR2_Deserts18 = "South 23730 -2280",
+			uiR2_Deserts19 = "South 24560 -2015",
+			uiR2_Deserts20 = "South 25206 -2118",
+			uiR2_Deserts21 = "West 25980 -2015",
+			uiR2_Deserts22 = "South 26950 -2015",
+			uiR2_Deserts23 = "South 27467 -2165",
+			uiR2_Deserts24 = "North 27915 -1875",
+			uiR2_Deserts25 = "North 21845 -2475",
+			uiR2_Deserts26 = "East 22627 -2480",
+			uiR2_Deserts27 = "West 23305 -2454",
+			uiR2_Deserts28 = "North 25050 -2650",
+			uiR2_Deserts29 = "West 25880 -2630",
+			uiR2_Deserts30 = "West 26650 -2650",
+			uiR2_Deserts31 = "South 27760 -2700",
+			uiR2_Deserts32 = "West 28070 -2340",
+			uiR2_Deserts33 = "North 29510 -2040",
+		},
+		-- The lists of spring 2006: several entry points to an island, with names of their own on the
+		-- desert, lake and prime roots islands. On the islands that have entry points today, every one
+		-- but one stands where an entry point of today stands, which has a number for its name;
+		-- uiR2SouthEntryPoint of uiR2_Primes10 stood 7 m from uiR2EntryPoint01. (The list of today had
+		-- the three entry points of uiR2_Lakes40 under the one name uiR2EntryPoint01 until it was
+		-- corrected, and the editor knew the last of them only.)
+		Named = {
+			uiR2_Deserts01 = "South 21570 -1363 NorthWest 21340 -1066 NorthEast 21678 -1129 Middle 21503 -1296",
+			uiR2_Deserts02 = "South 22383 -1512 NorthEast 22454 -1186 North 22062 -1050 West 22072 -1289",
+			uiR2_Deserts03 = "West 22791 -1289 SouthEast 23041 -1284 North 22873 -1110",
+			uiR2_Deserts04 = "NorthWest 23452 -1050 SouthEast 23846 -1435 South 23599 -1418 NorthEast 23927 -1163",
+			uiR2_Deserts05 = "SouthWest 24257 -1520 SouthEast 24593 -1447 NorthWest 24341 -1184 North 24535 -1054",
+			uiR2_Deserts06 = "SouthEast 25523 -1500 NorthEast 25419 -1142 South 25220 -1416 North 25168 -1168",
+			uiR2_Deserts07 = "South 26051 -1405 NorthEast 26153 -1044 West 25855 -1233 NorthWest 25818 -1027",
+			uiR2_Deserts08 = "South 26694 -1485 SouthEast 26949 -1512 SouthWest 26482 -1366 NorthEast 26875 -1010 West 26460 -1205",
+			uiR2_Deserts09 = "East 27814 -1375 SouthWest 27471 -1503 Middle 27609 -1197 NorthEast 27730 -1088 North 27529 -1014",
+			uiR2_Deserts10 = "South 28923 -1434 East 29217 -1371 North 28901 -1115",
+			uiR2_Deserts11 = "SouthWest 29554 -1468 East 29922 -1222 North 29622 -1048 West 29615 -1306 South 29755 -1447",
+			uiR2_Deserts12 = "SouthEast 30818 -1487 NorthEast 30726 -1023 NorthWest 30369 -1083 West 30389 -1307 South 30539 -1440",
+			uiR2_Deserts13 = "North 28942 -1919 SouthWest 28538 -2241 South 28814 -2251 East 28956 -2079 NorthWest 28794 -1912",
+			uiR2_Deserts14 = "South 30629 -2300 North 30577 -1836 West 30347 -2140",
+			uiR2_Deserts15 = "West 21500 -1830 East 21933 -1833 Middle 21763 -1839 South 21515 -1913",
+			uiR2_Deserts16 = "West 22304 -1856 South 22513 -1995 East 22687 -1891 Middle 22537 -1877",
+			uiR2_Deserts17 = "East 23250 -1840 South 23096 -1943 West 23034 -1839 North 23096 -1713",
+			uiR2_Deserts18 = "South 23730 -2280 SouthWest 23666 -2154 East 23871 -1977 West 23570 -2056 Middle 23834 -1997",
+			uiR2_Deserts19 = "Middle 24560 -2015 West 24267 -1998 East 24841 -2002 North 24562 -1914",
+			uiR2_Deserts20 = "West 25206 -2118 NorthEast 25435 -1997 Middle 25410 -2177 North 25532 -1942 East 25724 -2192",
+			uiR2_Deserts21 = "West 25980 -2015 East 26452 -1963 North 26353 -1872 Middle 26214 -1961",
+			uiR2_Deserts22 = "South 26950 -2015 North 26937 -1864 East 27089 -2042",
+			uiR2_Deserts23 = "West 27600 -1924 South 27575 -2351 SouthWest 27545 -2211 North 27442 -1866",
+			uiR2_Deserts24 = "West 27915 -1875 South 28136 -1960 North 28233 -1746 East 28324 -1841",
+			uiR2_Deserts25 = "NorthEast 21845 -2475 SouthEast 21891 -2836 SouthWest 21442 -2799 NorthWest 21460 -2447 North 21765 -2480",
+			uiR2_Deserts26 = "North 22627 -2480 West 22352 -2474 East 22925 -2483 South 22790 -2627",
+			uiR2_Deserts27 = "West 23305 -2454 South 23313 -2682 SouthEast 23464 -2611 NorthEast 23496 -2442",
+			uiR2_Deserts28 = "Middle 25050 -2650 South 24910 -2819 West 24881 -2720 North 24915 -2511",
+			uiR2_Deserts29 = "SouthWest 25880 -2630 North 26022 -2374 SouthEast 26156 -2560 NorthEast 26163 -2402",
+			uiR2_Deserts30 = "West 26650 -2650 East 27036 -2638 NorthEast 26922 -2433 North 26779 -2504",
+			uiR2_Deserts31 = "East 27760 -2700 West 27404 -2588 North 27538 -2606 SouthWest 27413 -2744",
+			uiR2_Deserts32 = "North 28070 -2340 South 28240 -2719 SouthEast 28318 -2643 NorthEast 28293 -2445",
+			uiR2_Deserts33 = "NorthWest 29510 -2040 West 29517 -2239 South 29712 -2523 East 29920 -2157 Middle 29758 -2318",
+			uiR2_Lakes01 = "South 31346 -1310 West 31269 -1238 North 31456 -1379",
+			uiR2_Lakes02 = "South 32059 -1392 East 32267 -1181 North 32053 -1159",
+			uiR2_Lakes03 = "South 32961 -1388 SouthWest 32784 -1507 SouthEast 33390 -1517 NorthEast 33365 -916 North 33033 -991",
+			uiR2_Lakes04 = "North 33740 -1068 SouthEast 34268 -1202 NorthEast 34145 -1045 South 33996 -1283 West 33691 -1206",
+			uiR2_Lakes05 = "South 34650 -1133 East 35018 -1280 North 34984 -889 SouthEast 34769 -1166",
+			uiR2_Lakes06 = "SouthWest 35468 -1272 East 35954 -1080 NorthEast 35764 -1026 NorthWest 35438 -890 South 35634 -1288",
+			uiR2_Lakes07 = "North 36264 -1103 South 36208 -1353 SouthEast 36478 -1269 NorthEast 36478 -1105",
+			uiR2_Lakes08 = "West 36991 -1311 South 37197 -1547 North 37230 -1035 Middle 37111 -1264 East 37393 -1285",
+			uiR2_Lakes09 = "North 37916 -1124 SouthWest 37709 -1451 NorthEast 38149 -1051 South 38073 -1412",
+			uiR2_Lakes10 = "West 38531 -1379 NorthEast 38962 -1092 North 38677 -1146 SouthEast 38953 -1444",
+			uiR2_Lakes11 = "SouthEast 31531 -2280 NorthEast 31517 -1946 West 31107 -2130 NorthWest 31203 -1938 North 31358 -2065",
+			uiR2_Lakes12 = "South 32040 -2368 East 32401 -2210 North 32019 -1939 West 31891 -2241",
+			uiR2_Lakes13 = "South 32479 -2298",
+			uiR2_Lakes14 = "South 33438 -2169",
+			uiR2_Lakes15 = "South 34634 -1872",
+			uiR2_Lakes16 = "South 35330 -2120",
+			uiR2_Lakes17 = "South 36150 -2310",
+			uiR2_Lakes18 = "South 36725 -1993",
+			uiR2_Lakes19 = "South 37681 -2167",
+			uiR2_Lakes20 = "South 38155 -2000",
+			uiR2_Lakes21 = "South 31247 -2790",
+			uiR2_Lakes22 = "South 32250 -2800",
+			uiR2_Lakes23 = "South 32727 -3120",
+			uiR2_Lakes24 = "South 33350 -3120",
+			uiR2_Lakes25 = "South 33980 -3110",
+			uiR2_Lakes26 = "South 34460 -3120",
+			uiR2_Lakes27 = "South 35605 -3080",
+			uiR2_Lakes28 = "South 36480 -3100",
+			uiR2_Lakes29 = "South 37500 -3110",
+			uiR2_Lakes30 = "South 38100 -2850",
+			uiR2_Lakes31 = "South 31295 -4080",
+			uiR2_Lakes32 = "South 31900 -3600",
+			uiR2_Lakes33 = "South 32370 -3880",
+			uiR2_Lakes34 = "South 33520 -3910",
+			uiR2_Lakes35 = "South 34200 -4080",
+			uiR2_Lakes36 = "South 34960 -3770",
+			uiR2_Lakes37 = "South 35760 -3750",
+			uiR2_Lakes38 = "South 36720 -3740",
+			uiR2_Lakes39 = "South 37510 -3900",
+			uiR2_Lakes40 = "South 38180 -3470",
+			uiR2_Primes01 = "South 31110 -21520",
+			uiR2_Primes02 = "South 31640 -21140",
+			uiR2_Primes03 = "South 32300 -21100",
+			uiR2_Primes04 = "South 33300 -21200",
+			uiR2_Primes05 = "South 34250 -21300",
+			uiR2_Primes06 = "South 34700 -21070",
+			uiR2_Primes07 = "South 35350 -21300",
+			uiR2_Primes08 = "South 36200 -21100",
+			uiR2_Primes09 = "South 36950 -21200",
+			uiR2_Primes10 = "South 38000 -21300",
+			uiR2_Primes11 = "South 38970 -21520",
+			uiR2_Primes12 = "South 39500 -21280",
+			uiR2_Primes13 = "South 40330 -21600",
+			uiR2_Primes14 = "South 31350 -21960",
+			uiR2_Primes15 = "South 31980 -21880",
+			uiR2_Primes16 = "South 32970 -22100",
+			uiR2_Primes17 = "South 33660 -22000",
+			uiR2_Primes18 = "South 34600 -22075",
+			uiR2_Primes19 = "South 35000 -22300",
+			uiR2_Primes20 = "South 35790 -22100",
+			uiR2_Primes21 = "South 37000 -22150",
+			uiR2_Primes22 = "South 37500 -21960",
+			uiR2_Primes23 = "South 38360 -21970",
+			uiR2_Primes24 = "South 39300 -21900",
+			uiR2_Primes25 = "South 39910 -22320",
+			uiR2_Primes26 = "South 40500 -22100",
+			uiR2_Primes27 = "South 31530 -22700",
+			uiR2_Primes28 = "South 32270 -23000",
+			uiR2_Primes29 = "South 33140 -22910",
+			uiR2_Primes30 = "South 33730 -22860",
+		},
+		-- Entry points that had their number in the lists of spring 2006 already and stood more than
+		-- 75 m from where the entry point of that number stands now, by number. Six more moved by 17 to
+		-- 58 m and are the nearest ones to their old places still.
+		Moved = {
+			uiR2_Forest03 = "02 23207 -11169",
+			uiR2_Jungle14 = "03 40845 -11388",
+		},
+	}
+
+	-- An entry point of an earlier list that is farther than this from every entry point of its island
+	-- is not taken for one of them, in metres. Ten places where the lists of 2006 had an entry point
+	-- have none today, on islands that have entry points: eight are 7 to 58 m from the nearest entry
+	-- point of today, two are 91 and 128 m from it. Of the eight, seven are the same entry point, moved
+	-- a little, and one (uiR2EntryPoint03 of uiR2_Jungle14, in Moved) is 36 m from another entry point
+	-- while the one of its number stands 164 m away. Of the two, one went (the entry point of the first
+	-- list on uiR2_Deserts23) and one moved by 128 m with no other nearer (uiR2EntryPoint02 of
+	-- uiR2_Forest03, in Moved). The limit lies between the eight and the two.
+	local entryPointMatchDistance = 75
+
+	-- The place of an entry point in a line of oldEntryPoints: x and y, or nil when the line does not
+	-- have the name. Without a name, the place of the first entry point of the line.
+	local function findOldEntryPoint(line, name)
+		if line == nil then return nil end
+		for entryName, x, y in string.gmatch(line, "(%w+) (%-?%d+) (%-?%d+)") do
+			if name == nil or entryName == name then return tonumber(x), tonumber(y) end
+		end
+		return nil
+	end
+
+	-- The entry point of an island (an entry of getCompleteIslands) that is the nearest to a place: its
+	-- name and its distance. Of two that are as near, the first by name. nil for an island without one.
+	local function getNearestEntryPoint(island, x, y)
+		local bestName = nil
+		local bestDistance = nil
+		for name, point in pairs(island.entrypoints) do
+			local dx = point.x - x
+			local dy = point.y - y
+			local distance = math.sqrt(dx * dx + dy * dy)
+			if bestName == nil or distance < bestDistance or (distance == bestDistance and name < bestName) then
+				bestName = name
+				bestDistance = distance
+			end
+		end
+		return bestName, bestDistance
+	end
+
+	-- The entry point of today for the one entry point the island had in the first list, which is where
+	-- a scenario without an entry point of its own starts, and the one a location names by the number
+	-- 0. Returns 'default' for an island that was not in the first list and for one the editor has no
+	-- data of. The author is told when the entry point is not the one 'default' names.
+	local function getFirstListEntryPoint(update, islandName, default)
+		local x, y = findOldEntryPoint(oldEntryPoints.First[islandName], nil)
+		local island = getCompleteIslands()[islandName]
+		if x == nil or type(island) ~= "table" or type(island.entrypoints) ~= "table" then return default end
+		local nearest, distance = getNearestEntryPoint(island, x, y)
+		if nearest == nil then return default end
+		if distance > entryPointMatchDistance then
+			update:count("uiR2EDVersionNoteEntryPointsFar", entryPointMatchDistance)
+		elseif nearest ~= default then
+			update:count("uiR2EDVersionNoteEntryPoints")
+		end
+		return nearest
+	end
+
+	-- The first entry point of an island (an entry of getCompleteIslands) by name, which is where the
+	-- server starts a location whose entry point the island does not have. nil for an island without
+	-- one.
+	local function getFirstEntryPoint(island)
+		local firstName = nil
+		for name, point in pairs(island.entrypoints) do
+			if firstName == nil or name < firstName then firstName = name end
+		end
+		return firstName
+	end
+
+	-- The first island the editor has, by name; nil without the island files
+	local function getFirstIsland()
+		local firstIsland = nil
+		for name, island in pairs(getCompleteIslands()) do
+			if firstIsland == nil or name < firstIsland then firstIsland = name end
+		end
+		return firstIsland
+	end
+
+	-- The island of a location that names none: the one the content of its acts stands on. When that
+	-- tells none, the first island the editor has, and the author is told to choose, as for a scenario
+	-- without a location. nil without the island files.
+	local function findLocationIsland(this, location, update)
+		local acts = {}
+		local locationId = update:getId(location.InstanceId)
+		if locationId ~= "" and type(this.Acts) == "table" then
+			for actIndex = 1, table.getn(this.Acts) do
+				local act = this.Acts[actIndex]
+				if type(act) == "table" and update:getId(act.LocationId) == locationId then
+					table.insert(acts, act)
+				end
+			end
+		end
+		local islandName = getIslandFromPositions(acts)
+		if islandName == nil then
+			islandName = getFirstIsland()
+			if islandName ~= nil then
+				local locationNumber = nil
+				if type(this.Description) == "table" then locationNumber = this.Description.LocationId end
+				update:note("uiR2EDVersionNoteIslandUnknown", tostring(locationNumber), islandName)
+			end
+		end
+		return islandName
 	end
 
 	-- Gives a scenario without a location the Location of its island, and the acts their LocationId.
@@ -88,19 +349,20 @@ r2.registerHighLevel = function()
 			local locationNumber = nil
 			if type(this.Description) == "table" then locationNumber = this.Description.LocationId end
 			local islandFromId = getIslandFromOldLocationId(locationNumber)
-			local islandFromPositions = getIslandFromPositions(this)
+			local islandFromPositions = getIslandFromPositions(this.Acts)
 			local islandName = islandFromPositions
 			if islandName == nil then islandName = islandFromId end
 			if islandName == nil then
-				-- nothing tells the island: the scenario gets the first one, and its author has to choose
-				islandName = "uiR2_Deserts01"
+				-- nothing tells the island: the scenario gets the first island the editor has, by name,
+				-- and its author has to choose
+				islandName = defaulting(getFirstIsland(), "uiR2_Deserts01")
 				update:note("uiR2EDVersionNoteIslandUnknown", tostring(locationNumber), islandName)
 			elseif islandFromId ~= nil and islandFromId ~= islandName then
 				update:note("uiR2EDVersionNoteIslandMismatch", islandFromId, islandName)
 			end
 			local location = update:newComponent("Location")
 			location.IslandName = islandName
-			location.EntryPoint = "uiR2EntryPoint01"
+			location.EntryPoint = getFirstListEntryPoint(update, islandName, "uiR2EntryPoint01")
 			location.Name = tostring(i18n.get(islandName))
 			-- the season of the server: "Automatic" says so to the translator, to the server and to the
 			-- editor, which all go by the name of the season and not by ManualSeason
@@ -701,34 +963,103 @@ r2.registerHighLevel = function()
 		end
 	end
 
-	-- The entry points of the islands had names of their own in the first lists (uiR2SouthEntryPoint and
-	-- so on); the list of this editor numbers them. The server starts a location whose entry point the
-	-- island does not have at the first entry point of the island, which is, for all but one of the 28
-	-- islands of the first list, the place the one named entry point of the island was. The location
-	-- names that entry point now, so that the editor shows where the scenario starts. Nothing is done for
-	-- an island the editor has no data of.
+	-- A location names the entry point of its island where the scenario starts. The lists of entry
+	-- points before the one of this editor had other names for them (uiR2SouthEntryPoint and so on), and
+	-- some entry points stood elsewhere. Such a location gets the entry point of today that is the
+	-- nearest to the place the one it names had (see oldEntryPoints), and the author is told: that the
+	-- entry point was found by its place, that its name had two places, or that the nearest entry point
+	-- is far from it.
+	--
+	-- Five names were of the first list and of the lists of spring 2006 for the same island at two
+	-- places, 80 to 343 m apart: uiR2SouthEntryPoint of uiR2_Deserts23, uiR2NorthEntryPoint of
+	-- uiR2_Deserts24, 25 and 28, uiR2EastEntryPoint of uiR2_Deserts26. The scenarios that are left do not
+	-- tell which list a scenario of the first months went by: those whose acts are of version 3 or 4
+	-- (March 2006) have names of the first list beside names only the later lists have and names of a
+	-- list that is lost; from version 5 on they have the names of spring 2006 only. Such a name means
+	-- the place of the first list in a scenario whose acts are of version 3 at most, which is a guess:
+	-- the author is told that the name had two places, whatever the distance, and to check. From
+	-- version 4 on it means the place of spring 2006.
+	-- A numbered name means its place of spring 2006 in a scenario whose acts are of version 5 at most:
+	-- version 6 came with the list of today.
+	--
+	-- A name no list that is left has for the island tells no place: the lists between December 2005
+	-- and April 2006 are lost. The location gets the first entry point of the island, where the server
+	-- starts a location whose entry point the island does not have, and the author is told.
+	--
+	-- A location without an entry point (none, or an empty name) is as a scenario of the first list,
+	-- which had none of its own: it gets the entry point its island had in that list, or the first
+	-- entry point of an island that was not in it.
+	--
+	-- A location without an island gets the one the content of its acts stands on, or the first island
+	-- the editor has, which the author is told (see findLocationIsland). The author is told as well of
+	-- a location on an island the editor does not have: nothing can be done about its entry point.
+	-- Without the island files the editor has no island at all, and nothing is done or told.
 	local function updateEntryPointNames(this, update)
 		if type(this.Locations) ~= "table" then return end
 		local islands = getCompleteIslands()
-		local count = 0
+		if next(islands) == nil then return end
+		local actVersion = 0
+		if type(this.Versions) == "table" then actVersion = defaulting(tonumber(this.Versions.Act), 0) end
+		local missingIslands = {}
 		for i = 1, table.getn(this.Locations) do
 			local location = this.Locations[i]
+			local islandName = location.IslandName
+			if islandName == nil or islandName == "" then
+				islandName = findLocationIsland(this, location, update)
+				update:set(location, "IslandName", islandName)
+			end
 			local entryPoint = location.EntryPoint
-			local island = islands[location.IslandName]
-			if type(entryPoint) == "string" and type(island) == "table" and type(island.entrypoints) == "table"
-				and island.entrypoints[entryPoint] == nil then
-				local firstName = nil
-				for name, point in pairs(island.entrypoints) do
-					if firstName == nil or name < firstName then firstName = name end
+			local island = islands[islandName]
+			if type(island) ~= "table" or type(island.entrypoints) ~= "table" then
+				if not missingIslands[tostring(islandName)] then
+					missingIslands[tostring(islandName)] = true
+					update:note("uiR2EDVersionNoteIslandMissing", tostring(islandName))
 				end
+			elseif entryPoint == nil or entryPoint == "" then
+				local firstName = getFirstEntryPoint(island)
 				if firstName ~= nil then
-					update:set(location, "EntryPoint", firstName)
-					count = count + 1
+					update:set(location, "EntryPoint", getFirstListEntryPoint(update, islandName, firstName))
+				end
+			elseif type(entryPoint) == "string" then
+				-- the place the entry point had, when a list tells
+				local x, y = nil, nil
+				local twoPlaces = false
+				local first, last, number = string.find(entryPoint, "^uiR2EntryPoint(%d+)$")
+				local first2, last2, name = string.find(entryPoint, "^uiR2(%a+)EntryPoint$")
+				if number ~= nil then
+					if actVersion <= 5 then
+						x, y = findOldEntryPoint(oldEntryPoints.Moved[islandName], number)
+					end
+				elseif name ~= nil then
+					x, y = findOldEntryPoint(oldEntryPoints.Named[islandName], name)
+					local firstX, firstY = findOldEntryPoint(oldEntryPoints.First[islandName], name)
+					if firstX ~= nil and (x == nil or actVersion <= 3) then
+						twoPlaces = x ~= nil and (x ~= firstX or y ~= firstY)
+						x, y = firstX, firstY
+					end
+				end
+				if x ~= nil then
+					local nearest, distance = getNearestEntryPoint(island, x, y)
+					if nearest ~= nil then
+						if twoPlaces then
+							update:count("uiR2EDVersionNoteEntryPointsUncertain")
+						elseif distance > entryPointMatchDistance then
+							update:count("uiR2EDVersionNoteEntryPointsFar", entryPointMatchDistance)
+						elseif nearest ~= entryPoint then
+							update:count("uiR2EDVersionNoteEntryPoints")
+						end
+						if nearest ~= entryPoint then
+							update:set(location, "EntryPoint", nearest)
+						end
+					end
+				elseif island.entrypoints[entryPoint] == nil then
+					local firstName = getFirstEntryPoint(island)
+					if firstName ~= nil then
+						update:set(location, "EntryPoint", firstName)
+						update:count("uiR2EDVersionNoteEntryPointsUnknown")
+					end
 				end
 			end
-		end
-		if count > 0 then
-			update:note("uiR2EDVersionNoteEntryPoints", count)
 		end
 	end
 
@@ -1786,10 +2117,16 @@ r2.registerHighLevel = function()
 			end
 			-- version 2
 			if patchValue < 2 then
-				-- an entry point saved as a number is its position in the list of the island
+				-- An entry point saved as a number is its position in the list of the island. The lists
+				-- of that time had one entry point to an island: number 0 on an island of the first list
+				-- is the entry point that list had for it.
 				local entryPoint = this.EntryPoint
 				if type(entryPoint) == "number" then
-					update:set(this, "EntryPoint", string.format("uiR2EntryPoint%02d", math.floor(entryPoint) + 1))
+					local name = string.format("uiR2EntryPoint%02d", math.floor(entryPoint) + 1)
+					if entryPoint == 0 then
+						name = getFirstListEntryPoint(update, this.IslandName, name)
+					end
+					update:set(this, "EntryPoint", name)
 				end
 				-- the season names of earlier versions, also for a location without a season of its own
 				if seasonNames[this.Season] then

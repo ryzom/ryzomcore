@@ -408,6 +408,32 @@ function Update:note(key, ...)
 	table.insert(self.Notes, { Key = key, Args = { ... } })
 end
 
+-- Something to tell the author once for several components: each call adds one to the number the note
+-- of 'key' has in the place of %1. What follows 'key' takes the places from %2 on, as the first call
+-- gives it. These notes come after the others, in the order of their keys.
+function Update:count(key, ...)
+	local counted = self._Counted[key]
+	if counted == nil then
+		counted = { Count = 0, Args = { ... } }
+		self._Counted[key] = counted
+	end
+	counted.Count = counted.Count + 1
+end
+
+-- Makes the notes of what Update:count counted
+function Update:addCountedNotes()
+	local keys = {}
+	for key, counted in pairs(self._Counted) do table.insert(keys, key) end
+	table.sort(keys)
+	for i = 1, table.getn(keys) do
+		local counted = self._Counted[keys[i]]
+		local args = { counted.Count }
+		for j = 1, table.getn(counted.Args) do table.insert(args, counted.Args[j]) end
+		table.insert(self.Notes, { Key = keys[i], Args = args })
+	end
+	self._Counted = {}
+end
+
 -- Calls 'visitor' with every table of the scenario from 'node' down, 'node' first, in the order of the
 -- update: the attributes of a table by their names, then its list. A visitor that returns false keeps
 -- the walk out of what the table holds. The visitor does not change the scenario: what it finds is
@@ -429,6 +455,7 @@ local function newUpdate(data)
 	update.Scenario = data
 	update.Changed = false
 	update.Notes = {}
+	update._Counted = {}
 	update._Parents = {}
 	update._Nodes = {}
 	update._Removed = {}
@@ -776,6 +803,7 @@ local function runUpdateSteps(data)
 		table.insert(result.Newer, className .. ":" .. tostring(scenarioVersion))
 	end
 	table.sort(result.Newer)
+	update:addCountedNotes()
 	result.Notes = update.Notes
 
 	-- the scenario is at the versions of this editor now; a class it has in a later version keeps it
@@ -851,6 +879,14 @@ local function tellUpdateDone(result, place, args)
 	end
 end
 
+-- Tells the author what an update found and could change nothing about (a location on an island the
+-- editor does not have): the notes alone, since the scenario is as it was
+local function tellUpdateNotes(result)
+	for k, note in pairs(result.Notes) do
+		displaySystemInfo(getUpdateText(note.Key, note.Args), "BC")
+	end
+end
+
 -- Tells the author that the scenario has classes in a later version than this editor
 local function tellNewerClasses(result)
 	if table.getn(result.Newer) > 0 then
@@ -873,7 +909,11 @@ function r2.Version.updateLoadedScenario(data, place)
 	end
 	tellNewerClasses(result)
 	if result.Status == "current" then return nil end
-	if result.Status == "changed" then tellUpdateDone(result, place) end
+	if result.Status == "changed" then
+		tellUpdateDone(result, place)
+	else
+		tellUpdateNotes(result)
+	end
 	return data
 end
 
@@ -930,6 +970,7 @@ function r2.Version.updateVersion()
 		return true
 	end
 	if result.Status ~= "changed" then
+		tellUpdateNotes(result)
 		if result.Versions ~= nil then
 			r2.requestSetScenarioVersions(result.Versions)
 		end

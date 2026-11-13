@@ -771,9 +771,17 @@ function r2.acts:openIslandCard(islandName)
 	islandBitmap.x = 6
 	islandBitmap.y = -6
 
-	-- entry points
-	local entryNb = 0
+	-- entry points, in the order of their names: the numbered ones first, of which the first is the one
+	-- selected, then those kept from earlier lists of entry points (uiR2EntryPointAlpha01 and so on)
+	local entryNames = {}
 	for location, entry in pairs(islandTable.entrypoints) do
+		table.insert(entryNames, location)
+	end
+	table.sort(entryNames)
+	local entryNb = 0
+	for entryIndex = 1, table.getn(entryNames) do
+		local location = entryNames[entryIndex]
+		local entry = islandTable.entrypoints[location]
 
 		local entryPoinButton = actsUI:find("entrypoint"..entryNb):find("flag")
 		entryPoinButton.active = true
