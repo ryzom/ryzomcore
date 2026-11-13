@@ -368,6 +368,16 @@
 
 		// convert the domain status enum into the privilege access set
 		$accessPriv = strtoupper(substr($domainInfo['status'], 3));
+		// permission.AccessPrivilege is a SET of these three. ds_close maps
+		// to none of them: a closed domain admits nobody, and the paths that
+		// write a permission row below must never try to store CLOSE.
+		$accessPrivMembers = array('OPEN', 'DEV', 'RESTRICTED');
+		if (!in_array($accessPriv, $accessPrivMembers, true))
+		{
+			$reason = errorMsg(3015, $domainName, $domainInfo['status']);
+			mysqli_close($link);
+			return false;
+		}
 
 		// now, retrieve the user infos
 		// keep the unescaped login: the account name rule below is about the
@@ -491,14 +501,20 @@
 				{
 					// check that the access privilege for the domain
 					$permission = mysqli_fetch_assoc($result);
+					// the members of the stored SET; an empty SET has none
+					$permissionPrivs = array_values(array_intersect(explode(',', (string)$permission['AccessPrivilege']), $accessPrivMembers));
 
-					if (!strstr($permission['AccessPrivilege'], $accessPriv))
+					if (!in_array($accessPriv, $permissionPrivs, true))
 					{
 						// no right to connect
 						if ($AcceptUnknownUser)
 						{
-							// set an additionnal privilege for this player
-							$query = "UPDATE permission set AccessPrivilege='".$permission['AccessPrivilege'].",$accessPriv' WHERE PermissionId=".$permission['PermissionId'];
+							// set an additionnal privilege for this player. The
+							// value is the list of members: appending to an empty
+							// SET wrote ",OPEN", an empty member, which strict
+							// mode refuses, so the row could never be repaired.
+							$permissionPrivs[] = $accessPriv;
+							$query = "UPDATE permission set AccessPrivilege='".implode(',', $permissionPrivs)."' WHERE PermissionId=".(int)$permission['PermissionId'];
 							$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 							$reason = errorMsg(3012, $accessPriv);

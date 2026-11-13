@@ -160,6 +160,12 @@ $ErrMsgs[3014]['en'] = "This account name cannot be used: letters, numbers and u
 $ErrMsgs[3014]['fr'] = "Ce nom de compte ne peut pas être utilisé : uniquement des lettres, des chiffres et des tirets bas";
 $ErrMsgs[3014]['de'] = "Dieser Accountname kann nicht verwendet werden: nur Buchstaben, Zahlen und Unterstriche";
 
+// The domain status maps to no member of permission.AccessPrivilege
+// (ds_close): nobody may enter, and no permission row is written.
+$ErrMsgs[3015]['dbg'] = "(domain: %1 status: %2)";
+$ErrMsgs[3015]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[3015]['log'] = false;
+
 // Translated Ring Session Manager (joinSession) error messages
 define('BASE_TRANSLATED_RSM_ERROR_NUM', 4000);
 
