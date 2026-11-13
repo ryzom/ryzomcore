@@ -164,7 +164,7 @@ namespace NLGUI
 		destStream.seek(0, NLMISC::IStream::begin);
 	}
 
-	std::string CInterfaceParser::lookup( const std::string &file )
+	std::string CInterfaceParser::lookup(const std::string &file, bool throwException)
 	{
 		std::string filename;
 		
@@ -175,7 +175,7 @@ namespace NLGUI
 				filename = wdpath;
 		}
 		if( filename.empty() )
-			filename = CPath::lookup( file );
+			filename = CPath::lookup(file, throwException);
 
 		return filename;
 	}
@@ -600,7 +600,11 @@ namespace NLGUI
 			{
 				if(!parseLUAScript(root))
 				{
-					nlerror ("could not parse 'lua'");
+					// the editor has no client Lua environment, so scripts can fail there
+					if (editorMode)
+						nlwarning("could not parse 'lua'");
+					else
+						nlerror ("could not parse 'lua'");
 				}
 			}
 			else
@@ -3183,7 +3187,7 @@ namespace NLGUI
 			needCheck = false;
 		#endif
 
-		string	pathName= CPath::lookup(fileName, false);
+		string pathName = lookup(fileName, false);
 		if(pathName.empty())
 		{
 			nlwarning("LUA Script '%s' not found", fileName.c_str());

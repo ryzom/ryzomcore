@@ -381,7 +381,7 @@ namespace NLGUI
 		void setWorkDir( const std::string &workdir ) NL_OVERRIDE{ _WorkDir = workdir; }
 
 		/// Looks up a file in either the working directory or using CPath::lookup
-		std::string lookup( const std::string &file );
+		std::string lookup(const std::string &file, bool throwException = true);
 
 		void initLUA() NL_OVERRIDE;
 		void uninitLUA() NL_OVERRIDE;
