@@ -1293,7 +1293,7 @@ int CEditor::luaSetEditorSeason(CLuaState &ls)
 	else if (strcmp(ls.toString(2), "Summer") == 0) getEditor()._Season = Summer;
 	else if (strcmp(ls.toString(2), "Autumn") == 0) getEditor()._Season = Autumn;
 	else if (strcmp(ls.toString(2), "Winter") == 0) getEditor()._Season = Winter;
-	else CLuaIHM::fails(ls, "%s, invalid season name : %s", ls.toString(2));
+	else CLuaIHM::fails(ls, "%s, invalid season name : %s", funcName, ls.toString(2));
 	// If season is changed while scenario is being received, we do not have received the tp command yet,
 	// so signal the weather system that the season should not be changed for now
 	if ((getEditor()._UpdatingScenario && getEditor()._WillTP)
