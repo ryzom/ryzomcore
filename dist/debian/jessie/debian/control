@@ -36,7 +36,9 @@ Package: libnel-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: ${misc:Depends}, libnel0 (= ${binary:Version})
+Depends: ${misc:Depends}, libnel0 (= ${binary:Version}),
+ libxml2-dev, zlib1g-dev, libpng12-dev, libjpeg-dev,
+ libfreetype6-dev, libogg-dev, libvorbis-dev, libcurl4-openssl-dev | libcurl-dev, libssl-dev
 Description: Massive multi-user 3D game environments library (development files)
  This is a software platform for creating and running massively multi-user
  entertainment in a 3D environment over the Internet.

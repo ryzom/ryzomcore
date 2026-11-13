@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: nel-sound
 Version: @NL_VERSION@
 Description: NeL @NL_VERSION@
-Requires:
-Libs: -L${libdir}
-Libs.private: @LIBS@ -lc -lpthread -lrt -ldl
-Cflags: -I${includedir} -lc -lpthread -lrt -ldl
+Requires: nel-misc nel-ligo nel-georges nel-3d
+Requires.private: @PC_REQUIRES_PRIVATE@
+Libs: -L${libdir} -lnelsound -lnelsnd_lowlevel
+Cflags: -I${includedir}

@@ -377,6 +377,41 @@ IF(WITH_SSE2)
   ENDIF()
 ENDIF()
 
+# The definitions of the whole build that the public NeL headers test, besides NL_DEBUG/NL_RELEASE and
+# NL_HAS_SSE2/3, which NeL::misc carries itself: types_nl.h derives NL_CPU_INTEL, NL_CPU_X86_64 and NL_HAS_SSE2
+# from HAVE_X86 and HAVE_X86_64, and FINAL_VERSION changes debug.h, report.h and transport_class.h. NeL::misc
+# gives them to the programs built against an installed NeL, and nel-config and the .pc files print them. A
+# macOS build for several architectures sets the HAVE_ ones per architecture: they are left out then.
+SET(NL_PUBLIC_DEFINITIONS)
+IF(NOT CMAKE_OSX_ARCHITECTURES OR TARGETS_COUNT EQUAL 1)
+  IF(TARGET_X64)
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_X86 HAVE_X64 HAVE_X86_64)
+  ELSEIF(TARGET_X86)
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_X86)
+  ENDIF()
+  IF(TARGET_ARM)
+    IF(TARGET_AARCH64)
+      LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_AARCH64)
+    ENDIF()
+    IF(TARGET_ARMV7S)
+      LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_ARMV7S)
+    ENDIF()
+    IF(TARGET_ARMV7)
+      LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_ARMV7)
+    ENDIF()
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_ARM)
+  ENDIF()
+  IF(TARGET_MIPS)
+    LIST(APPEND NL_PUBLIC_DEFINITIONS HAVE_MIPS)
+  ENDIF()
+ENDIF()
+# both values: CMustConsume in debug.h has another layout in a final version
+IF(FINAL_VERSION)
+  LIST(APPEND NL_PUBLIC_DEFINITIONS FINAL_VERSION=1)
+ELSE()
+  LIST(APPEND NL_PUBLIC_DEFINITIONS FINAL_VERSION=0)
+ENDIF()
+
 IF(APPLE)
   FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
   FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)

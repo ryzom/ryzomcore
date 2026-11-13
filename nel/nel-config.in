@@ -74,7 +74,7 @@ do
             echo_exec_prefix=yes
             ;;
         --version)
-            echo @VERSION@
+            echo @NL_VERSION@
             exit 0
             ;;
         --cflags)
@@ -137,7 +137,7 @@ fi
 
 if test "$echo_cflags" = "yes"
 then
-    cflags="-I$include_dir"
+    cflags="-I$include_dir @NL_PC_CFLAGS@"
     echo $cflags
 fi
 
@@ -149,7 +149,16 @@ fi
 
 if test "$echo_libs" = "yes"
 then
-    lib_misc="-lnelmisc"
+    case "@WITH_STATIC@" in
+        ON|on|TRUE|true|YES|yes|1)
+            # static libraries need their own dependencies after them, which only the .pc files list
+            echo "nel-config: this NeL is built as static libraries, which --libs cannot link: use pkg-config --static --libs nel-<library>" 1>&2
+            exit 1
+            ;;
+    esac
+
+    # nel_sevenzip is a library of its own, which nelmisc needs
+    lib_misc="-lnelmisc -lnel_sevenzip"
     lib_ligo="-lnelligo"
     lib_logic="-lnellogic"
     lib_georges="-lnelgeorges"
@@ -157,7 +166,6 @@ then
     lib_3d="-lnel3d"
     lib_pacs="-lnelpacs"
     lib_sound="-lnelsound -lnelsnd_lowlevel"
-    lib_ai="-lnelai"
 
     libs="$lib_misc"
 

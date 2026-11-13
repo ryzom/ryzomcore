@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: nel-web
 Version: @NL_VERSION@
 Description: NeL @NL_VERSION@
-Requires:
-Libs: -L${libdir}
-Libs.private: @LIBS@ -lc -lpthread -lrt -ldl
-Cflags: -I${includedir} -lc -lpthread -lrt -ldl
+Requires: nel-misc
+Requires.private: libcurl openssl libxml-2.0
+Libs: -L${libdir} -lnelweb
+Cflags: -I${includedir}
