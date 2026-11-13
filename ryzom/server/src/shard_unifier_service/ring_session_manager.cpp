@@ -35,6 +35,7 @@
 #include "game_share/security_check.h"
 
 #include "ring_session_manager.h"
+#include "shard_access.h"
 #include "database_mapping.h"
 #include "nel_database_mapping.h"
 #include "character_sync.h"
@@ -57,6 +58,7 @@ using namespace R2;
 
 CVariable<uint32>	ShardAssocTimeout( "su", "ShardAssocTimeout", "Timeout (in s)before a temporary shard assoc is removed after the session is closed", 10*60, 0, true );
 CVariable<uint32>	ForceWelcomerShard( "su", "ForceWelcomerShard", "SessionId of a shard to promote when joining any mainland (0=none)", 0, 0, true );
+CVariable<bool>	PreferLastPlayedShard( "su", "PreferLastPlayedShard", "When joining any mainland, promote the home shard of the character the account played last (after ForceWelcomerShard, before the load)", true, 0, true );
 CVariable<string>	DomainName("su", "DomainName", "The name of the domain", "ryzom", 0, true);
 CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privilege allowed to join any animation session", ":GM:SGM:", 0, true);
 
@@ -209,6 +211,11 @@ namespace RSMGR
 			uint32		CharId;
 			/// Optional Security Code
 			COptionalSecurityCode OptSecurityCode;
+			/// For a join of the mainland that went to the shard of the last played character: the mainland session
+			/// to go to when that shard refuses the entry (0 for none)
+			TSessionId MainlandFallback;
+			/// The client application of the join, for the join of the fallback
+			std::string ClientApplication;
 		};
 
 		typedef list<TPendingJoinSession>	TPendingJoins;
@@ -595,18 +602,37 @@ namespace RSMGR
 		}
 
 
-		bool checkAccessRight(const vector<string> &userAccessPriv, const TAccessLevel &accessLevel)
+		/** True when an account with these permission rows may enter the shard at the access level the shard asks for.
+		 *	Every join goes through here, and the choice of a shard for the character selection or for a new session
+		 *	(the rule itself is in shard_access.h): the access of an account on a shard is what its row for all shards
+		 *	holds together with what its row for that shard holds. A closed shard takes nobody, also when the
+		 *	permission table is not used.
+		 */
+		bool mayUseShard(const TPermissionRows &permissionRows, TShardId shardId, const TAccessLevel &accessLevel)
 		{
-			for (uint i=0; i<userAccessPriv.size(); ++i)
-			{
-				string access("ds_");
-				access += toLowerAscii(userAccessPriv[i]);
+			if (accessPrivilegeOfLevel(accessLevel.toString()).empty())
+				return false;
+			if (_DontUsePerm)
+				return true;
+			return hasShardAccess(permissionRows, shardId, accessLevel.toString());
+		}
 
-				if (accessLevel.toString() == access)
-					return true;
-			}
+		/** How a refusal names a shard: by its shard id, which is the id the permission rows go by, and by its mainland
+		 *	session too when the shard has one with another number: "shard 301 (session 302)".
+		 */
+		static std::string shardLabel(TShardId shardId, TSessionId mainlandSessionId)
+		{
+			if (mainlandSessionId.asInt() != 0 && mainlandSessionId.asInt() != shardId)
+				return toString("shard %u (session %u)", shardId, mainlandSessionId.asInt());
+			return toString("shard %u", shardId);
+		}
 
-			return false;
+		/// The reason given when mayUseShard refuses a shard
+		std::string shardRefusalReason(const TPermissionRows &permissionRows, TShardId shardId, const TAccessLevel &accessLevel)
+		{
+			if (accessPrivilegeOfLevel(accessLevel.toString()).empty())
+				return toString("closed (%s)", accessLevel.toString().c_str());
+			return toString("restricted to %s access, the account has %s there", accessLevel.toString().c_str(), describeShardAccess(permissionRows, shardId).c_str());
 		}
 
 
@@ -659,36 +685,90 @@ namespace RSMGR
 //			return CNelShard::load(_NelDb, prim, __FILE__, __LINE__);
 //		}
 
-		bool loadUserAccessPrivileges(uint32 userId, vector<string> &userAccessPriv)
+		/** Load the permission rows of an account for the domain: its row for all shards and its rows for single
+		 *	shards. What they give on a shard is for mayUseShard to say.
+		 *	\return false when the query failed; an account without any row gives true and no row
+		 */
+		bool loadUserPermissionRows(uint32 userId, TPermissionRows &permissionRows)
 		{
-			userAccessPriv.clear();
+			permissionRows.clear();
 			CSString query;
-			query << "SELECT AccessPrivilege FROM permission";
+			query << "SELECT ShardId, AccessPrivilege FROM permission";
 			query << " WHERE UId = " << userId << " AND DomainId = (SELECT domain_id FROM domain WHERE domain_name = '" << MSW::escapeString(DomainName, _NelDb) << "')";
-			// the row for all shards (ShardId -1) comes first, as in the login script: it is the one that counts when
-			// the account also has rows for single shards
 			query << " ORDER BY ShardId";
 
 			if (!_NelDb.query(query))
-			{
-				// can't find a permission record
-//				joinSessionResult(from, charId>>4, 0, 12, "failed to request for access permission", TSessionPartStatus::invalid_val);
 				return false;
-			}
 			CUniquePtr<CStoreResult> result(_NelDb.storeResult());
-			if (result->getNumRows() == 0)
+			uint32 nbRows = result->getNumRows();
+			for (uint32 i = 0; i < nbRows; ++i)
 			{
-				return false;
-				// can't find a permission record
-//				joinSessionResult(from, charId>>4, 0, 13, "can't find access permission for user and domain", TSessionPartStatus::invalid_val);
-//				return;
+				result->fetchRow();
+				CPermissionRow row;
+				result->getField(0, row.ShardId);
+				result->getField(1, row.AccessPrivilege);
+				permissionRows.push_back(row);
 			}
-			result->fetchRow();
-			string accessString;
-			result->getField(0, accessString);
 
-			NLMISC::explode(accessString, string(","), userAccessPriv, false);
+			return true;
+		}
 
+		/** Load the permission rows of an account for a join, and answer the join when there is nothing to go by.
+		 *	When the permission table is not used, nothing is read.
+		 *	\return false when the join has been refused and answered
+		 */
+		bool loadPermissionRowsForJoin(NLNET::TSockId from, uint32 userId, TSessionId sessionId, TPermissionRows &permissionRows)
+		{
+			permissionRows.clear();
+			if (_DontUsePerm)
+				return true;
+			BOMB_IF(!loadUserPermissionRows(userId, permissionRows), "RSM : failed to load the permission rows of user " << userId, joinSessionResult(from, userId, sessionId, 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return false;);
+			if (permissionRows.empty())
+			{
+				// No row: the account has no permission for the domain, or the nel database has no domain of the name
+				// this shard unifier is set to, which refuses every account. Say which of the two it is.
+				CSString query;
+				query << "SELECT domain_id FROM domain WHERE domain_name = '" << MSW::escapeString(DomainName, _NelDb) << "'";
+				BOMB_IF(!_NelDb.query(query), "RSM : failed to look for the domain of this shard unifier (DomainName) in the nel database", joinSessionResult(from, userId, sessionId, 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return false;);
+				CUniquePtr<CStoreResult> result(_NelDb.storeResult());
+				if (result->getNumRows() == 0)
+				{
+					nlwarning("RSM : the nel database has no domain named '%s', the DomainName of this shard unifier: no account can be given access to a shard", DomainName.get().c_str());
+					joinSessionResult(from, userId, sessionId, 12, toString("failed to request for access permission: the nel database has no domain named '%s'", DomainName.get().c_str()), TSessionPartStatus::invalid_val);
+					return false;
+				}
+				nlinfo("RSM : user %u has no permission row for the domain '%s', the join is refused", userId, DomainName.get().c_str());
+				joinSessionResult(from, userId, sessionId, 13, toString("can't find access permission for user %u and domain '%s'", userId, DomainName.get().c_str()), TSessionPartStatus::invalid_val);
+				return false;
+			}
+			return true;
+		}
+
+		/** The home mainland session of the character the account played last, 0 when no character of the account
+		 *	has a date of play (the entity locator writes it when a character enters or leaves the game).
+		 *	\return false when the query failed
+		 */
+		bool loadLastPlayedMainland(uint32 userId, uint32 &mainlandSessionId)
+		{
+			mainlandSessionId = 0;
+			CSString query;
+			// The characters of an account are found through the index on user_id. A character that never played has
+			// a date before any real one. A date after tomorrow is no date of play either (a row made outside the
+			// shard unifier with the zero date of the column reads back as one); the bound is written as the dates
+			// are, in the local time of this service.
+			query << "SELECT home_mainland_session_id FROM characters";
+			query << " WHERE user_id = " << userId << " AND last_played_date >= '2000-01-01 00:00:00'";
+			query << " AND last_played_date <= '" << MSW::encodeDate(CTime::getSecondsSince1970() + 24 * 60 * 60) << "'";
+			query << " ORDER BY last_played_date DESC LIMIT 1";
+
+			if (!_RingDb.query(query))
+				return false;
+			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
+			if (result->getNumRows() != 0)
+			{
+				result->fetchRow();
+				result->getField(0, mainlandSessionId);
+			}
 			return true;
 		}
 
@@ -1492,6 +1572,21 @@ restartLoop:
 							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
 						}
 					}
+					else if (pjs.MainlandFallback.asInt() != 0 && pjs.From != NULL)
+					{
+						// conn refused by the mainland of the last played character: the join goes on to the mainland
+						// chosen by load (see on_joinMainland), which answers the web. The pending record goes first,
+						// a welcome service in this process answers before the join returns.
+						nldebug("RSM : joinMainland : the mainland of the last played character of user %u refused the entry ('%s'), joining mainland %u instead (lowest load)",
+						    userId, errorMsg.c_str(), pjs.MainlandFallback.asInt());
+						TSockId fallbackFrom = pjs.From;
+						uint32 fallbackCharId = pjs.CharId;
+						TSessionId fallbackSessionId = pjs.MainlandFallback;
+						string fallbackClientApplication = pjs.ClientApplication;
+						_PendingJoins.erase(first);
+						_joinSessionCommon(fallbackFrom, fallbackCharId, fallbackSessionId, fallbackClientApplication, false);
+						return;
+					}
 					else
 					{
 						// conn refused
@@ -1976,14 +2071,19 @@ endOfWelcomeUserResult:
 //				nlassert(best != _SessionServers.end());
 //			}
 //			else
+			// why the session servers that are up were not taken, for the answer when none is
+			string refusedDetail;
 			if (best == _SessionServers.end())
 			{
 				// still no server choose, choose the best one
-				vector<string>	userAccessPriv;
+				TPermissionRows permissionRows;
 				// load the nel user for permissions
 				CNelUserPtr nelUser = CNelUser::load(_NelDb, character->getUserId(), __FILE__, __LINE__);
 				BOMB_IF(nelUser == NULL, "RSM:on_StartSession: failed to load ring user "<<character->getUserId()<<"from the database", invokeResult(from, charId>>4, 6, "Nel user not found"); return);
-				BOMB_IF(!loadUserAccessPrivileges(charId >> 4, userAccessPriv), "RSM:on_startSession : failed to load privileges for user "<<(charId >> 4), invokeResult(from, charId>>4, 6, "Nel user not found"); return);
+				if (!_DontUsePerm)
+				{
+					BOMB_IF(!loadUserPermissionRows(charId >> 4, permissionRows), "RSM:on_startSession : failed to load the permission rows of user " << (charId >> 4), invokeResult(from, charId >> 4, 5, "Database failure"); return);
+				}
 
 				// otherwise, look for the least loaded one
 				TSessionServers::iterator first(_SessionServers.begin()), last(_SessionServers.end());
@@ -1999,25 +2099,26 @@ endOfWelcomeUserResult:
 							continue;
 						if (shard->getWSOnline() && shard->getRequiredState() != TAccessLevel::ds_close)
 						{
-							// check the permission of the player
-							for (uint i=0; i<userAccessPriv.size(); ++i)
+							// check the permission of the player on this shard
+							if (mayUseShard(permissionRows, ssi.ShardId, shard->getRequiredState()))
 							{
-								if (_DontUsePerm || string("ds_")+toLowerAscii(userAccessPriv[i]) == shard->getRequiredState().toString())
-								{
-									// ok, this one is accessible
-									// this server is better (i.e had less player in it)
-									best = first;
+								// ok, this one is accessible
+								// this server is better (i.e had less player in it)
+								best = first;
 
-//									// Store the temporary assoc between character and shard
-//									TTemporaryShardAssoc tsa;
-//									tsa.SessionId = sessionId.asInt();
-//									tsa.SessionClosedDate = 0;
-//									tsa.DSSProxy = best->first;
-//									_TemporaryShardAssocs[charId] = tsa;
+//								// Store the temporary assoc between character and shard
+//								TTemporaryShardAssoc tsa;
+//								tsa.SessionId = sessionId.asInt();
+//								tsa.SessionClosedDate = 0;
+//								tsa.DSSProxy = best->first;
+//								_TemporaryShardAssocs[charId] = tsa;
 //
-									// stop iterating over user access
-									break;
-								}
+							}
+							else
+							{
+								if (!refusedDetail.empty())
+									refusedDetail += "; ";
+								refusedDetail += toString("%s is %s", shardLabel(ssi.ShardId, TSessionId(0)).c_str(), shardRefusalReason(permissionRows, ssi.ShardId, shard->getRequiredState()).c_str());
 							}
 						}
 					}
@@ -2026,7 +2127,10 @@ endOfWelcomeUserResult:
 			if (best == _SessionServers.end())
 			{
 				// oups! no server to host this session !
-				invokeResult(from, charId>>4, 5, "No server to host the session");
+				if (refusedDetail.empty())
+					invokeResult(from, charId >> 4, 5, "No server to host the session");
+				else
+					invokeResult(from, charId >> 4, 5, "No server to host the session (" + refusedDetail + ")");
 				return;
 			}
 
@@ -3196,7 +3300,10 @@ endOfWelcomeUserResult:
 			_joinSessionCommon(from, charId, sessionId, clientApplication,false);
 		}
 
-		void _joinSessionCommon(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::string &clientApplication,bool isEditSessionRequested)
+		/** \param mainlandFallback for a join of the mainland that goes to the shard of the last played character: the
+		 *	mainland session to join when the welcome service of that shard refuses the entry (0 for none)
+		 */
+		void _joinSessionCommon(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::string &clientApplication, bool isEditSessionRequested, TSessionId mainlandFallback = TSessionId(0))
 		{
 			nldebug("RSM : web asks char %u to join the session %u", charId, sessionId.asInt());
 
@@ -3209,12 +3316,10 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// load access privilege for the user
-			vector<string> userAccessPriv;
-			if (!_DontUsePerm)
-			{
-				BOMB_IF (!loadUserAccessPrivileges(userId, userAccessPriv), "RSM:on_joinSession : failed to load privileges for user "<<userId, joinSessionResult(from, userId, sessionId, 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return;);
-			}
+			// load the permission rows of the user: what they give depends on the shard, see mayUseShard
+			TPermissionRows permissionRows;
+			if (!loadPermissionRowsForJoin(from, userId, sessionId, permissionRows))
+				return;
 
 			// load the session
 			CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
@@ -3367,13 +3472,13 @@ endOfWelcomeUserResult:
 				if (!wsi.ShardInfo->getWSOnline())
 				{
 					// the shard reports itself as down
-					joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+					joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is down : %s", shardLabel(it3->first, wsi.FixedSessionId).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 					return;
 				}
-				if (!_DontUsePerm && !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+				if (!mayUseShard(permissionRows, it3->first, wsi.ShardInfo->getRequiredState()))
 				{
-					// the shard is up but restricted to another access level
-					joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
+					// the shard is up but the account does not have the access it asks for
+					joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is %s : %s", shardLabel(it3->first, wsi.FixedSessionId).c_str(), shardRefusalReason(permissionRows, it3->first, wsi.ShardInfo->getRequiredState()).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 					return;
 				}
 
@@ -3446,13 +3551,13 @@ endOfWelcomeUserResult:
 						if (!wsi.ShardInfo->getWSOnline())
 						{
 							// the shard reports itself as down
-							joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+							joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is down : %s", shardLabel(itws->first, wsi.FixedSessionId).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 							return;
 						}
-						if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						if (!mayUseShard(permissionRows, itws->first, wsi.ShardInfo->getRequiredState()))
 						{
-							// the shard is up but restricted to another access level
-							joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
+							// the shard is up but the account does not have the access it asks for
+							joinSessionResult(from, charId >> 4, sessionId, 14, toString("%s is %s : %s", shardLabel(itws->first, wsi.FixedSessionId).c_str(), shardRefusalReason(permissionRows, itws->first, wsi.ShardInfo->getRequiredState()).c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 							return;
 						}
 
@@ -3501,6 +3606,8 @@ endOfWelcomeUserResult:
 			pjs.CharId = charId;
 			pjs.From = from;
 			pjs.SessionId = TSessionId(storedSessionId);
+			pjs.MainlandFallback = mainlandFallback;
+			pjs.ClientApplication = clientApplication;
 
 			// (the code is made from the cookie, which the login service clears when the user leaves)
 			if (mustGrantFastDisconnection && cookie.isValid())
@@ -3526,17 +3633,21 @@ endOfWelcomeUserResult:
 		}
 
 		// A character asks to join a shard.
-		// The actual shard will be chosen according to current load.
+		// The actual shard is chosen among the mainland shards that are online and that the account may use (see
+		// mayUseShard): the shard the operator promotes (ForceWelcomerShard), else the home mainland of the character
+		// the account played last (unless PreferLastPlayedShard is off), else the one with the lowest load (see
+		// chooseMainland).
 		virtual void on_joinMainland(NLNET::TSockId from, uint32 charId, const std::string &clientApplication)
 		{
 			nldebug("RSM : web asks char %u to join mainland", charId);
 
 			uint32 userId = charId >> 4;
-			// load access privilege for the user
-			vector<string> userAccessPriv;
-			BOMB_IF (!loadUserAccessPrivileges(userId, userAccessPriv), "RSM:on_joinMainland : failed to load privileges for user "<<userId, joinSessionResult(from, userId, TSessionId(0), 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return;);
+			// load the permission rows of the user
+			TPermissionRows permissionRows;
+			if (!loadPermissionRowsForJoin(from, userId, TSessionId(0), permissionRows))
+				return;
 
-			multimap<uint32, TSessionId> mainlandShardsByAscLoad;
+			vector<CMainlandCandidate> candidates;
 			// remember why each candidate was rejected, so a failure can say
 			// whether the shard is down, closed or restricted instead of the
 			// ambiguous 'no shard available'
@@ -3557,29 +3668,18 @@ endOfWelcomeUserResult:
 						{
 							if (!rejectedDetail.empty())
 								rejectedDetail += "; ";
-							rejectedDetail += toString("shard %u is down (%s)", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getMOTD().c_str());
+							rejectedDetail += toString("%s is down (%s)", shardLabel(itw->first, wsi.FixedSessionId).c_str(), wsi.ShardInfo->getMOTD().c_str());
 						}
-						else if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						else if (!mayUseShard(permissionRows, itw->first, wsi.ShardInfo->getRequiredState()))
 						{
 							if (!rejectedDetail.empty())
 								rejectedDetail += "; ";
-							rejectedDetail += toString("shard %u is restricted to %s access", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getRequiredState().toString().c_str());
+							rejectedDetail += toString("%s is %s", shardLabel(itw->first, wsi.FixedSessionId).c_str(), shardRefusalReason(permissionRows, itw->first, wsi.ShardInfo->getRequiredState()).c_str());
 						}
 						else
 						{
-							if ( ForceWelcomerShard.get() != 0 )
-							{
-								// If ForceWelcomeShard set and found online, bypass remaining shards and select this one
-								if ( wsi.FixedSessionId.asInt() == ForceWelcomerShard.get() )
-								{
-									nlinfo( "Selecting mainland %u (ForceWelcomerShard)", ForceWelcomerShard.get() );
-									_joinSessionCommon(from, charId, wsi.FixedSessionId, clientApplication, false );
-									return;
-								}
-							}
-
 							// ok, the user is granted access
-							mainlandShardsByAscLoad.insert(make_pair(wsi.NbOnlinePlayers+wsi.NbPendingPlayers, wsi.FixedSessionId));
+							candidates.push_back(CMainlandCandidate(wsi.FixedSessionId.asInt(), wsi.NbOnlinePlayers + wsi.NbPendingPlayers));
 						}
 					}
 					else
@@ -3587,11 +3687,11 @@ endOfWelcomeUserResult:
 						nlwarning( "Ignoring mainland session %u (not registered in db)", wsi.FixedSessionId.asInt() );
 						if (!rejectedDetail.empty())
 							rejectedDetail += "; ";
-						rejectedDetail += toString("shard %u is not registered as a mainland session in the database", wsi.FixedSessionId.asInt());
+						rejectedDetail += toString("%s is not registered as a mainland session in the database", shardLabel(itw->first, wsi.FixedSessionId).c_str());
 					}
 				}
 			}
-			if (mainlandShardsByAscLoad.empty())
+			if (candidates.empty())
 			{
 				// a welcome service that dies is erased from _WelcomeServices,
 				// so 'nothing connected' and 'nothing configured' both end up
@@ -3604,7 +3704,38 @@ endOfWelcomeUserResult:
 				joinSessionResult(from, charId>>4, TSessionId(0), 10, reason, TSessionPartStatus::invalid_val);
 				return;
 			}
-			_joinSessionCommon(from, charId, (*mainlandShardsByAscLoad.begin()).second, clientApplication, false);
+
+			uint32 lastPlayedSessionId = 0;
+			TMainlandChoice choice;
+			uint chosen = chooseMainland(candidates, ForceWelcomerShard.get(), 0, choice);
+			if (choice == mc_lowest_load && candidates.size() > 1 && PreferLastPlayedShard.get())
+			{
+				// several shards and the load would decide: the home mainland of the character the account played
+				// last comes before it. When it cannot be looked up, the load decides as it does without the
+				// preference: the login does not depend on it.
+				if (loadLastPlayedMainland(userId, lastPlayedSessionId))
+					chosen = chooseMainland(candidates, ForceWelcomerShard.get(), lastPlayedSessionId, choice);
+				else
+					nlwarning("RSM : joinMainland : failed to look up the last played character of user %u in the ring database, the mainland is chosen by load", userId);
+			}
+			TSessionId chosenSessionId(candidates[chosen].SessionId);
+
+			// The shard of the last played character can refuse the entry where another shard would not (it is full, or
+			// its welcome service is closed): the choice by load among the other shards stands behind it
+			TSessionId fallbackSessionId(0);
+			if (choice == mc_last_played && candidates.size() > 1)
+			{
+				candidates.erase(candidates.begin() + chosen);
+				TMainlandChoice fallbackChoice;
+				fallbackSessionId = TSessionId(candidates[chooseMainland(candidates, 0, 0, fallbackChoice)].SessionId);
+			}
+
+			if (choice == mc_forced)
+				nlinfo("Selecting mainland %u (ForceWelcomerShard)", chosenSessionId.asInt());
+			nldebug("RSM : joinMainland : user %u goes to mainland %u, chosen by: %s (mainland of the last played character: %u, 0 when none or not asked for; fallback: %u, 0 for none)",
+			    userId, chosenSessionId.asInt(), mainlandChoiceName(choice), lastPlayedSessionId, fallbackSessionId.asInt());
+
+			_joinSessionCommon(from, charId, chosenSessionId, clientApplication, false, fallbackSessionId);
 		}
 
 		// Ask to join the edit session for the specified character.

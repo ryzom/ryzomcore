@@ -670,8 +670,9 @@ namespace ENTITYLOC
 			CCharacterPtr character = CCharacter::load(_RingDB, charId, __FILE__, __LINE__);
 			if (character !=NULL)
 			{
-				// update the last played date
-				character->setLastPlayedDate(0);
+				// update the last played date: it stays in the database when the character leaves, the ring session
+				// manager sends the account to the mainland of the character it played last (on_joinMainland)
+				character->setLastPlayedDate(CTime::getSecondsSince1970());
 				character->update(_RingDB);
 			}
 
