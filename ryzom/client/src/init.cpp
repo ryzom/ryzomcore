@@ -84,7 +84,6 @@
 //
 #include "gabarit.h"
 #include "hair_set.h"
-//#include "starting_roles.h"
 
 #include "init_main_loop.h"
 
