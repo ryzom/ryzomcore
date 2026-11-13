@@ -709,15 +709,6 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			}
 		}
 #endif
-		CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(nullptr);
-		if (!group) return;
-
-		// prepare the help window
-		CSheetHelpSetup setup;
-		setup.setupDefaultIDs();
-		setup.HelpWindow = group;
-		setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getElement(group->getId()+":content:ctrl_slot"));
-
 		// Get name and title
 		// ------------------
 		string name;
@@ -740,7 +731,11 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			title = UserEntity->getTitle();
 			reservedTitle = UserEntity->hasReservedTitle();
 		}
-		else return;
+		else
+		{
+			nlwarning("open_title_help: from=%s is not supported", sFrom.c_str());
+			return;
+		}
 
 		// Get Title info (bricks and skills needed)
 		// -----------------------------------------
@@ -750,6 +745,16 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			nlwarning("cant find unblock.titles");
 			return;
 		}
+
+		// open the help window only now that there is something to show in it
+		CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(nullptr);
+		if (!group) return;
+
+		// prepare the help window
+		CSheetHelpSetup setup;
+		setup.setupDefaultIDs();
+		setup.HelpWindow = group;
+		setup.DestSheet = dynamic_cast<CDBCtrlSheet *>(group->getElement(group->getId() + ":content:ctrl_slot"));
 
 		// get title id number from the title id
 		uint titleIDnb;
