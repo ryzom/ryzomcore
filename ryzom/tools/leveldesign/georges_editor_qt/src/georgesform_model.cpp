@@ -582,7 +582,7 @@ namespace NLQT
 					QString elmtType;
 
 					UFormElm *elmt = 0;
-					if(root->getArrayNode(&elmt,0) && elmt) 
+					if(root->getArrayNode(&elmt,num) && elmt)
 					{
 						if (elmt->isArray())
 							elmtType = "Array";
