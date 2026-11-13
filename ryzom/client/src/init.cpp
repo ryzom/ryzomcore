@@ -1644,7 +1644,8 @@ void postlogInit()
 			nmsg = "Initializing primitive classes...";
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
-			if (!LigoConfig.readPrimitiveClass (ClientCfg.LigoPrimitiveClass.c_str(), false))
+			// Empty means no primitive classes: FINAL_VERSION does not read the variable (READ_STRING_DEV)
+			if (!ClientCfg.LigoPrimitiveClass.empty() && !LigoConfig.readPrimitiveClass(ClientCfg.LigoPrimitiveClass.c_str(), false))
 			{
 				nlwarning ("Can't load primitive class file %s", ClientCfg.LigoPrimitiveClass.c_str());
 			}
