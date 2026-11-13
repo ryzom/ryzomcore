@@ -488,7 +488,7 @@ reStartFollowTopo:
 	const CAIVector ownMove = add + moveDecalage;
 	// A stuck bot (is_stuck in its primitive, an event bot spawned without dispersion) that is not moving by itself
 	// stays where it was placed: players standing against it do not push it away. Other bots still do, so stuck
-	// bots spawned on one point spread out.
+	// bots placed on top of each other spread out.
 	const bool pushedByPlayers = !(ownMove.isNull() && NLMISC::safe_cast<CSpawnBot *>(bot)->getPersistent().isStuck());
 
 	CAIVector rAdd;
