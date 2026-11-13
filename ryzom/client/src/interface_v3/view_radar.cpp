@@ -50,7 +50,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewRadar, std::string, "radar");
 // ----------------------------------------------------------------------------
 
 CViewRadar::CViewRadar(const TCtorParam &param)
-	: CViewBase(param)
+	: CViewBase(param), _WorldSize(100.0), _UseCamera(false)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pUIMI = CDBManager::getInstance()->getDbProp( "UI:SAVE:INSCENE:FRIEND:MISSION_ICON" );
@@ -58,6 +58,8 @@ CViewRadar::CViewRadar(const TCtorParam &param)
 	{
 		ICDBNode::CTextId textId;
 		pUIMI->addObserver( &_MissionIconsObs, textId);
+		// the observer only hears about later changes
+		_MissionIconsObs.update(pUIMI);
 	}
 	
 	CCDBNodeLeaf *pUIMMI = CDBManager::getInstance()->getDbProp( "UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON" );	
@@ -65,6 +67,25 @@ CViewRadar::CViewRadar(const TCtorParam &param)
 	{
 		ICDBNode::CTextId textId;
 		pUIMMI->addObserver( &_MiniMissionSpotsObs, textId);
+		_MiniMissionSpotsObs.update(pUIMMI);
+	}
+}
+
+CViewRadar::~CViewRadar()
+{
+	// A view replaced by /loadui is deleted while the UI branch stays, whose leaves would still call it
+	CCDBNodeLeaf *pUIMI = CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON", false);
+	if (pUIMI)
+	{
+		ICDBNode::CTextId textId;
+		pUIMI->removeObserver(&_MissionIconsObs, textId);
+	}
+
+	CCDBNodeLeaf *pUIMMI = CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON", false);
+	if (pUIMMI)
+	{
+		ICDBNode::CTextId textId;
+		pUIMMI->removeObserver(&_MiniMissionSpotsObs, textId);
 	}
 }
 
@@ -83,7 +104,6 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	}
 
 	// World size
-	_WorldSize = 100.0;
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"world_size" );
 	if (prop) fromString((const char*)prop, _WorldSize);
 
