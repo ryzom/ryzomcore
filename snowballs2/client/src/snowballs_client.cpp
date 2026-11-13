@@ -1005,8 +1005,15 @@ void initLoadingState()
 	LogoScene->setViewport(v);
 
 	Logo = LogoScene->createInstance("nel_logo.shape");
-	Logo.setPos(0.0f, 3.0f, 0.0f);
-	Logo.setTransformMode(UTransformable::RotEuler);
+	if (Logo.empty())
+	{
+		nlwarning("Snowballs data: 'nel_logo.shape' is not in the search paths or could not be loaded, the 3D NeL logo is not shown");
+	}
+	else
+	{
+		Logo.setPos(0.0f, 3.0f, 0.0f);
+		Logo.setTransformMode(UTransformable::RotEuler);
+	}
 }
 
 void releaseLoadingState()
@@ -1109,6 +1116,10 @@ void updateLoadingState(ucstring state, bool network, bool information)
 
 void update3dLogo()
 {
+	// without its shape there is no logo, see initLoadingState
+	if (Logo.empty())
+		return;
+
 	Driver->clearZBuffer();
 	static float angle = 0.0;
 	angle += 2.0f * (float)LocalTimeDelta;
