@@ -308,6 +308,7 @@ bool CParticleWorkspace::CNode::loadPS()
 	{
 		// Not a particle system
 		NL3D::CNELU::Scene->deleteInstance(trs);
+		NL3D::CNELU::Scene->setShapeBank(oldSB);
 		return false;
 	}
 	NL3D::CNELU::Scene->setShapeBank(oldSB);		

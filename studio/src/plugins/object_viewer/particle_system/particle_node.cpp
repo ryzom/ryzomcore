@@ -291,6 +291,7 @@ bool CWorkspaceNode::loadPS()
 	{
 		// Not a particle system
 		Modules::psEdit().getScene()->deleteInstance(trs);
+		Modules::psEdit().getScene()->setShapeBank(oldSB);
 		return false;
 	}
 	if (oldSB)
@@ -406,7 +407,8 @@ void CParticleWorkspace::save()
 void CParticleWorkspace::load()
 {
 	NLMISC::CIFile stream;
-	stream.open(_Filename);
+	if (!stream.open(_Filename))
+		throw NLMISC::EFileNotOpened(_Filename);
 	NLMISC::CIXml xmlStream;
 	xmlStream.init(stream);
 	this->serial(xmlStream);

@@ -83,7 +83,19 @@ void CWorkspacePage::loadWP()
 	setCursor(Qt::WaitCursor);
 	if (!fileName.isEmpty())
 	{
-		Modules::psEdit().loadWorkspace(fileName.toUtf8().constData());
+		try
+		{
+			Modules::psEdit().loadWorkspace(fileName.toUtf8().constData());
+		}
+		catch (const NLMISC::EStream &e)
+		{
+			nlwarning("%s", e.what());
+			setCursor(Qt::ArrowCursor);
+			QMessageBox::critical(this, tr("NeL particle system editor"),
+								  QString::fromUtf8(e.what()),
+								  QMessageBox::Ok);
+			return;
+		}
 		_treeModel->setupModelFromWorkSpace();
 		_ui.unloadToolButton->setEnabled(true);
 		_ui.saveToolButton->setEnabled(true);

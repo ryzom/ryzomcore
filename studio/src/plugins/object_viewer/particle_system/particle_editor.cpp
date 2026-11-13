@@ -108,16 +108,8 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 	CUniquePtr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(fullPath);
 
-	// save empty workspace
-	try
-	{
-		newPW->load();
-	}
-	catch(NLMISC::EStream &e)
-	{
-		nlerror("%s", e.what());
-		return;
-	}
+	// a workspace that cannot be read throws to the caller, the current workspace stays open
+	newPW->load();
 
 	// try to load each ps
 	CWorkspaceNode *firstLoadedNode = 0;
@@ -129,7 +121,7 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 		{
 			node->loadPS();
 		}
-		catch(NLMISC::EStream &e)
+		catch (const NLMISC::Exception &e)
 		{
 			nlwarning("%s", e.what());
 		}
