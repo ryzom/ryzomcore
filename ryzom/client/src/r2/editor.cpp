@@ -1621,8 +1621,11 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	struct CInstanceEnumerator
 	{
-		CSortedInstances *InstMap;
-		TInstanceByName::iterator Current;
+		// The instances of the class when the enumerator was made, in display name order. The Lua code may
+		// change the scenario between two calls, so no iterator into the editor's lists is kept across calls,
+		// and an instance deleted in the meantime is skipped.
+		std::vector<CInstance::TRefPtr> Instances;
+		uint Current;
 		static int next(CLuaState &ls)
 		{
 			const char *funcName = "InstanceEnumerator:next";
@@ -1630,32 +1633,38 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 			CLuaIHM::checkArgType(ls, funcName, 1, LUA_TUSERDATA);
 			CInstanceEnumerator *ie = (CInstanceEnumerator *) ls.toUserData(1);
 			CEditor &ed = getEditor();
-			while(ie->Current != ie->InstMap->end())
+			while (ie->Current < ie->Instances.size())
 			{
-				CInstance *inst = ie->Current->second;
-				if (!inst->getGhost())
+				CInstance *inst = ie->Instances[ie->Current];
+				++ie->Current;
+				if (inst && !inst->getGhost())
 				{
 					// object must be in current act or base act
 					CInstance *parentAct = inst->getParentAct();
 					if (!parentAct || parentAct == ed.getCurrentAct() || parentAct == ed.getBaseAct())
 					{
 						inst->getLuaProjection().push();
-						++ ie->Current;
 						return 1;
 					}
 				}
-				++ ie->Current;
 			}
+			ie->clear(); // nothing left: do not hold the list until the enumerator is collected
 			return 0;
+		}
+		// Frees the instance list and leaves the enumerator empty and valid, so a second call does no harm
+		void clear()
+		{
+			std::vector<CInstance::TRefPtr>().swap(Instances);
+			Current = 0;
 		}
 		//
 		static int gc(CLuaState &ls)
 		{
-			const char *funcName = "InstanceEnumerator:next";
+			const char *funcName = "InstanceEnumerator.__gc";
 			CLuaIHM::checkArgCount(ls, funcName, 1);
 			CLuaIHM::checkArgType(ls, funcName, 1, LUA_TUSERDATA);
 			CInstanceEnumerator *ie = (CInstanceEnumerator *) ls.toUserData(1);
-			ie->~CInstanceEnumerator(); // no real effect for now...
+			ie->clear();
 			return 0;
 		}
 		static int index(CLuaState &ls)
@@ -1677,6 +1686,11 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	{
 		CLuaIHM::fails(ls, "Trying to iterate over unknown class : %s", ls.toString(2));
 	}
+	if (classIndex >= (sint)getEditor()._InstancesByDispName.size())
+	{
+		// the editor was released, its class table is still there
+		CLuaIHM::fails(ls, "enumInstances : the editor holds no instances of the class %s", ls.toString(2));
+	}
 	ls.newTable();
 	CLuaObject mt;
 	mt.pop(ls);
@@ -1697,10 +1711,15 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 #define new DEBUG_NEW
 #endif
 
-	ie->InstMap = &getEditor()._InstancesByDispName[classIndex];
-	ie->Current = ie->InstMap->begin();
+	ie->Current = 0;
+	// the metatable first: its __gc frees the list when filling it throws
 	mt.push();
 	ls.setMetaTable(-2);
+	CSortedInstances &instMap = getEditor()._InstancesByDispName[classIndex];
+	for (TInstanceByName::iterator it = instMap.begin(); it != instMap.end(); ++it)
+	{
+		ie->Instances.push_back(it->second);
+	}
 	//
 	return 1;
 }

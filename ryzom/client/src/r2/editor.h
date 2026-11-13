@@ -617,7 +617,9 @@ private:
 	NLMISC::CArray2D<uint8>						 _KindOfTable;      // Table to test if one class derives from another (filled at init)
 	std::vector<sint>							 _BaseClassIndices; // for each class, give index of thebase class (vector ordered by classes indices)
 
-	typedef CHashMultiMap<ucstring, CInstance *, NLMISC::CUCStringHashMapTraits> TInstanceByName;
+	// an ordered map: inserting never invalidates its iterators, and erasing invalidates only those of the erased
+	// entries, so the iterators that CSortedInstances keeps stay valid (a hash map invalidates them all on a rehash)
+	typedef std::multimap<ucstring, CInstance *> TInstanceByName;
 
 	bool										_MaxVisibleEntityExceededFlag;
 
