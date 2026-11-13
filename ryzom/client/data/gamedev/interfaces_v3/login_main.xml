@@ -47,7 +47,7 @@
     text_ref="BM BM" text_y="0"
     reset_focus_on_hide="false"  max_historic="0"
     onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
-    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="64" color="135 243 28 255" />
 
     <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BM TM" w="240" h="26" fontsize="12" x="0" y="-4"
     text_ref="BM BM" text_y="0"

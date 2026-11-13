@@ -10,7 +10,7 @@ $db_nel = 8;
 $db_nel_tool = 3;
 
 // Domain
-$db_ring_domain = 3;
+$db_ring_domain = 4;
 
 
 function set_db_version($continue_r, $name, $version) {

@@ -4,6 +4,10 @@ The web side of a Ryzom Core shard. `public_php` is the web root: `setup` (insta
 
 ## Upgrade notes
 
+### Account names of up to 64 characters
+
+The account tool registers names of up to 64 characters, and the login box of the client now takes that many. The `ring_users` table of the domain database kept 20, so the first login of an account with a longer name failed with the maintenance message (or, without strict SQL mode, stored a cut name). After updating the web installation of a shard, run the setup upgrade (`setup/upgrade.php`, or `php setup_cli.php upgrade`): the setup version is now 15, and the upgrade runs `ring_domain_00004.sql`, which widens `ring_users.user_name` to 64 characters.
+
 ### The AMS account management system is removed
 
 The old account management system (AMS) is no longer part of the web stack. The account tool in `public_php/account` is the only account front end. A web server keeps serving files that the repository no longer has, so after updating the web installation of a shard:
