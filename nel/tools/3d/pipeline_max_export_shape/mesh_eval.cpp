@@ -1576,7 +1576,7 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		}
 		else if ((mcid == NLMISC::CClassId(0x00000100, 0x00000000)
 		          && mod->classDesc()->superClassId() == 0x810) // Physique (geometry-neutral)
-		         || mcid == NLMISC::CClassId(0x0095c6a3, 0x00015666)) // Skin (geometry-neutral)
+		         || mcid == NLMISC::CClassId(0x0095c723, 0x00015666)) // Skin (geometry-neutral)
 		{
 			// Skinning weights are applied after mesh eval (PHYSIQUESKIN); the modifier itself
 			// does not rewrite geometry at export time (the reference disables it first).

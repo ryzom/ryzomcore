@@ -226,7 +226,7 @@ static bool tryApplyPhysique(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	if (!PHYSIQUESKIN::applyPhysiqueSkinning(buildMesh, node, mods, modApps, ssc, &err))
 	{
 		stats.skip("skinned-physique");
-		fprintf(stderr, "SKIP shape '%s': Physique skinning failed: %s\n",
+		fprintf(stderr, "SKIP shape '%s': skinning failed: %s\n",
 		        nodeName(node).c_str(), err.c_str());
 		return false;
 	}
@@ -339,10 +339,10 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		return ws;
 	}
 
-	// Skinning detection (Physique/Skin). Physique has a production decode path (§10z-six /
-	// PHYSIQUESKIN); Skin (Max 4+) still skips — zero corpus hits under Max 3-era assets.
-	// Detection is on (ClassId, SuperClassId) — Max shares ClassId (0x100, 0) across four
-	// classes (Physique is SuperClassId 0x810).
+	// Skinning detection (Physique/Skin). Both decode in PHYSIQUESKIN (a Skin first when a node has
+	// both, as the reference export does); the skin is applied after the mesh evaluation, which leaves
+	// both modifiers out. Physique detection is on (ClassId, SuperClassId): the ClassId (0x100, 0) is
+	// shared by four classes (Physique is SuperClassId 0x810).
 	bool hasPhysique = false;
 	for (uint i = 0; i < mods.size(); ++i)
 	{
@@ -379,23 +379,15 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 					}
 				}
 			}
-			if (isSkin)
-			{
-				stats.skip("skinned-skin");
-				fprintf(stderr, "SKIP shape '%s': Skin modifier not implemented (Max 4+ ISkin path;"
-				                " corpus era is Physique-only — see design §10z-quat)\n",
-				        name.c_str());
-				return nullptr;
-			}
 			hasPhysique = true;
-			// Physique: continue into the mesh path; skinning is applied after mesh eval.
+			// continue into the mesh path; the skinning is applied after the mesh evaluation
 		}
 	}
 	if (hasPhysique && getenv("PMB_NO_SKIN"))
 	{
 		// Debug: export the evaluated mesh rigid, to compare its geometry with a reference export that
 		// came out without its skin
-		fprintf(stderr, "PMB_NO_SKIN: '%s' exported without its Physique skin\n", name.c_str());
+		fprintf(stderr, "PMB_NO_SKIN: '%s' exported without its skin\n", name.c_str());
 		hasPhysique = false;
 	}
 
@@ -573,7 +565,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			baseObjectOf(*slave, &sMods, &sApps);
 			bool slavePhys = false;
 			for (uint mi = 0; mi < sMods.size(); ++mi)
-				if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi])) { slavePhys = true; break; }
+				if (PHYSIQUESKIN::isPhysiqueModifier(sMods[mi]) || PHYSIQUESKIN::isSkinModifier(sMods[mi])) { slavePhys = true; break; }
 			NL3D::CMesh::CMeshBuild buildMesh;
 			if (!evalAndBuildMesh(*slave, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
 			                      slavePhys))
