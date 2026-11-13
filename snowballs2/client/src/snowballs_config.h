@@ -75,15 +75,12 @@
 #	define SBCLIENT_USE_LOG 1
 #endif
 
-// for compatibility with old configuration
+// the configuration with the changed settings, in the directory where the client keeps its files (see main)
 #ifndef SBCLIENT_CONFIG_FILE
-#	ifndef SNOWBALLS_CONFIG
-#		define SBCLIENT_CONFIG_FILE "snowballs_client.cfg"
-#	else
-#		define SBCLIENT_CONFIG_FILE SNOWBALLS_CONFIG "snowballs_client.cfg"
-#	endif
+#	define SBCLIENT_CONFIG_FILE "snowballs_client.cfg"
 #endif
 
+// the default configuration it links, in the startup directory, next to the executable or in SNOWBALLS_CONFIG
 #ifndef SBCLIENT_CONFIG_FILE_DEFAULT
 #	define SBCLIENT_CONFIG_FILE_DEFAULT "snowballs_client_default.cfg"
 #endif

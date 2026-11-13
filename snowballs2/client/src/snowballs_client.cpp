@@ -23,8 +23,10 @@
 
 // STL includes
 #include <ctime>
+#include <cerrno>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <stdio.h>
 #if defined(NL_OS_WINDOWS)
 #	include <direct.h>
@@ -42,6 +44,8 @@
 #include <nel/misc/time_nl.h>
 #include <nel/misc/command.h>
 #include <nel/misc/config_file.h>
+#include <nel/misc/cmd_args.h>
+#include <nel/misc/i18n.h>
 #include <nel/net/login_client.h>
 #include <nel/3d/u_scene.h>
 #include <nel/3d/u_camera.h>
@@ -174,7 +178,7 @@ void updateLoadingState(ucstring state, bool network, bool information);
 void displayLoadingState(ucstring state);
 void update3dLogo();
 void renderInformation();
-void switchGameState();
+bool switchGameState();
 void loopLogin();
 void loopIngame();
 void initCore();
@@ -197,7 +201,8 @@ void cbEnableFXAA(CConfigFile::CVar &var);
 // Functions
 //
 
-void switchGameState()
+/// returns false when the core could not be initialised, after showing why
+bool switchGameState()
 {
 SwitchNextGameState:
 	nlinfo("Switching to the next game state");
@@ -226,11 +231,12 @@ SwitchNextGameState:
 			catch (NLMISC::Exception e)
 			{
 #ifdef NL_OS_WINDOWS
-				MessageBox(NULL, e.what(), "NeL Exception", MB_OK | MB_ICONSTOP);
+				MessageBoxW(NULL, nlUtf8ToWide(e.what()), L"NeL Exception", MB_OK | MB_ICONSTOP);
 #else
 				printf("%s\n", e.what());
 #endif
-				return; // exit if driver loading failed
+				// exit if driver loading failed, releaseCore releases the part of the core that was initialised
+				return false;
 			}
 			break;
 		case GameStateUnload:
@@ -281,7 +287,7 @@ SwitchNextGameState:
 		NextGameState = GameStateLoad;
 		break;
 	case GameStateExit: // exit the loop
-		return;
+		return true;
 	case GameStateLogin: // loop the login screen
 		loopLogin(); // must loop by itself
 		break;
@@ -496,6 +502,8 @@ void releaseCore()
 	if (LoadedCore)
 	{
 		LoadedCore = false;
+		// After a failed initCore only a part of the core exists: the configuration file object always (made first,
+		// the callbacks below only need it), the loading state, text context and driver only when they were made.
 		// Release configuration callbacks
 		CConfiguration::dropCallback("OpenGL");
 
@@ -512,11 +520,15 @@ void releaseCore()
 		// Release the sound
 		releaseSound();
 		// Release the text context
-		Driver->deleteTextContext(TextContext);
+		if (TextContext)
+			Driver->deleteTextContext(TextContext);
 		TextContext = NULL;
 		// Release the 3d driver
-		Driver->release();
-		delete Driver;
+		if (Driver)
+		{
+			Driver->release();
+			delete Driver;
+		}
 		Driver = NULL;
 
 		// Release timing system
@@ -1018,6 +1030,10 @@ void initLoadingState()
 
 void releaseLoadingState()
 {
+	// not made when initCore failed before initLoadingState, which makes the scene after the textures
+	if (!LogoScene)
+		return;
+
 	LogoScene->deleteInstance(Logo); Logo = NULL;
 	Driver->deleteScene(LogoScene); LogoScene = NULL;
 
@@ -1137,8 +1153,7 @@ void CSnowballsClient::init()
 bool CSnowballsClient::run()
 {
 	// Run the game state loop switcher
-	switchGameState();
-	return true;
+	return switchGameState();
 }
 
 void CSnowballsClient::release()
@@ -1154,6 +1169,17 @@ void CSnowballsClient::release()
 
 } /* namespace SBCLIENT */
 
+/// Reports an error that stops the client before it has a window, in the log and to the user
+static void startupError(const std::string &message)
+{
+	nlwarning("%s", message.c_str());
+#ifdef NL_OS_WINDOWS
+	MessageBoxW(NULL, nlUtf8ToWide(message), L"Snowballs", MB_OK | MB_ICONSTOP);
+#else
+	fprintf(stderr, "%s\n", message.c_str());
+#endif
+}
+
 void end();
 #ifdef NL_OS_WINDOWS
 sint WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdline, int nCmdShow)
@@ -1164,47 +1190,106 @@ sint main(int argc, char **argv)
 	// must do this to allow deallocation when closing with X
 	atexit(end);
 
+	// the cookie and the frontend address come from a launcher
+	CCmdArgs args;
+	args.setDescription("Snowballs client");
+	args.addArg("p", "profile", "id", "Keep the files of the client in this profile of the per-user directory");
+	args.addAdditionalArg("cookie", "Login cookie", true, false);
+	args.addAdditionalArg("addr", "Frontend address", true, false);
 #ifdef NL_OS_WINDOWS
-
-	// extract the 2 first param (argv[1] and argv[2]) it must be cookie and addr
-
-	string cmd = cmdline;
-	string::size_type pos1 = cmd.find_first_not_of (' ');
-	string::size_type pos2;
-	if (pos1 != string::npos)
+	if (!args.parse(cmdline)) return EXIT_FAILURE;
+#else
+	if (!args.parse(argc, argv)) return EXIT_FAILURE;
+#endif
+	if (args.haveAdditionalArg("cookie") && args.haveAdditionalArg("addr"))
 	{
-		pos2 = cmd.find (' ', pos1);
-		if(pos2 != string::npos)
-		{
-			SBCLIENT::Cookie = cmd.substr (pos1, pos2-pos1);
+		SBCLIENT::Cookie = args.getAdditionalArg("cookie").front();
+		SBCLIENT::FSAddr = args.getAdditionalArg("addr").front();
+	}
 
-			pos1 = cmd.find_first_not_of (' ', pos2);
-			if (pos1 != string::npos)
+	// Where the client keeps its files (snowballs_client.cfg, the logs, the screenshots) is decided by two rules only,
+	// as for the Ryzom client: the per-user directory with a profile on the command line or when the startup directory
+	// has no snowballs_client_default.cfg, the startup directory otherwise. A directory it can't use is an error.
+	std::string profileDirectoryReason;
+	if (args.haveArg("p"))
+		profileDirectoryReason = "a profile is given on the command line";
+	else if (!CFile::isExists(SBCLIENT_CONFIG_FILE_DEFAULT))
+		profileDirectoryReason = "the startup directory has no " SBCLIENT_CONFIG_FILE_DEFAULT;
+
+	// snowballs_client.cfg links the default configuration, looked for before the working directory changes: in the
+	// startup directory, next to the executable, then where it is installed
+	std::vector<std::string> candidateDirectories;
+	candidateDirectories.push_back(args.getStartupPath());
+	candidateDirectories.push_back(args.getProgramPath()); // empty for a program found in the PATH
+#ifdef SNOWBALLS_CONFIG
+	candidateDirectories.push_back(CPath::makePathAbsolute(SNOWBALLS_CONFIG, args.getStartupPath(), true));
+#endif
+	std::vector<std::string> defaultConfigDirectories;
+	for (uint i = 0; i < candidateDirectories.size(); ++i)
+	{
+		const std::string directory = CPath::standardizePath(candidateDirectories[i]);
+		if (!directory.empty() && std::find(defaultConfigDirectories.begin(), defaultConfigDirectories.end(), directory) == defaultConfigDirectories.end())
+			defaultConfigDirectories.push_back(directory);
+	}
+	std::string defaultConfig;
+	for (uint i = 0; i < defaultConfigDirectories.size() && defaultConfig.empty(); ++i)
+	{
+		if (CFile::isExists(defaultConfigDirectories[i] + SBCLIENT_CONFIG_FILE_DEFAULT))
+			defaultConfig = defaultConfigDirectories[i] + SBCLIENT_CONFIG_FILE_DEFAULT;
+	}
+
+	// the client has no settings without it
+	if (defaultConfig.empty())
+	{
+		std::string directories;
+		for (uint i = 0; i < defaultConfigDirectories.size(); ++i)
+		{
+			if (i) directories += ", ";
+			directories += "'" + defaultConfigDirectories[i] + "'";
+		}
+		startupError(toString("Snowballs can't find " SBCLIENT_CONFIG_FILE_DEFAULT ", its default configuration. It looks for it in the startup directory, next to the program and in the directory it is installed to, here %s: start Snowballs from the directory that holds " SBCLIENT_CONFIG_FILE_DEFAULT ", or install it again",
+		    directories.c_str()));
+		return EXIT_FAILURE;
+	}
+
+	// a relative search path in the configuration is relative to the directory of the default configuration, not to the
+	// working directory, which is the per-user directory in that case (the Ryzom client also looks from its startup
+	// and program directories)
+	SBCLIENT::CConfiguration::setDefaultConfigDirectory(CFile::getPath(defaultConfig));
+
+	if (!profileDirectoryReason.empty())
+	{
+		std::string directory = CPath::getApplicationDirectory("snowballs");
+		if (args.haveArg("p"))
+		{
+			std::vector<std::string> profile = args.getArg("p");
+			if (profile.empty() || profile.front().empty())
 			{
-				pos2 = cmd.find (' ', pos1);
-				if(pos2 == string::npos)
-				{
-					SBCLIENT::FSAddr = cmd.substr (pos1);
-				}
-				else if (pos1 != pos2)
-				{
-					SBCLIENT::FSAddr = cmd.substr (pos1, pos2-pos1);
-				}
+				startupError("The option --profile needs a profile name, a plain directory name such as --profile test");
+				return EXIT_FAILURE;
 			}
+			if (!CFile::isSafeFilename(profile.front(), false))
+			{
+				startupError(toString("The option --profile needs a profile name that is a plain directory name, not '%s'", profile.front().c_str()));
+				return EXIT_FAILURE;
+			}
+			directory = CPath::standardizePath(directory) + profile.front();
+		}
+
+		if (!CFile::isDirectory(directory) && !CFile::createDirectoryTree(directory))
+		{
+			startupError(toString("Snowballs can't create '%s', the per-user directory where it keeps its files (snowballs_client.cfg, logs, screenshots) because %s",
+			    directory.c_str(), profileDirectoryReason.c_str()));
+			return EXIT_FAILURE;
+		}
+
+		if (!CPath::setCurrentPath(directory))
+		{
+			startupError(toString("Snowballs can't enter '%s', the per-user directory where it keeps its files (snowballs_client.cfg, logs, screenshots) because %s",
+			    directory.c_str(), profileDirectoryReason.c_str()));
+			return EXIT_FAILURE;
 		}
 	}
-
-#else
-
-	if (argc>=3)
-	{
-		SBCLIENT::Cookie = argv[1];
-		SBCLIENT::FSAddr = argv[2];
-	}
-
-#endif
-
-	nlinfo ("cookie '%s' addr '%s'", SBCLIENT::Cookie.c_str (), SBCLIENT::FSAddr.c_str());
 
 	// go nel!
 	{
@@ -1230,6 +1315,74 @@ sint main(int argc, char **argv)
 		nlinfo("Welcome to NeL!");
 	}
 
+	nlinfo("cookie '%s' addr '%s'", SBCLIENT::Cookie.c_str(), SBCLIENT::FSAddr.c_str());
+
+	if (!profileDirectoryReason.empty())
+	{
+		nlinfo("The client files (snowballs_client.cfg, logs, screenshots) are in '%s' and not in the startup directory '%s': %s",
+		    CPath::getCurrentPath().c_str(), args.getStartupPath().c_str(), profileDirectoryReason.c_str());
+	}
+
+	// The client has to be able to write there: stop now and say what to do, and not later on the first file that fails
+	if (!CFile::isDirectoryWritable("."))
+	{
+		if (profileDirectoryReason.empty())
+		{
+			startupError(toString("Snowballs can't write to '%s', the directory it is started from. It keeps its files (snowballs_client.cfg, logs, screenshots) there because that directory holds " SBCLIENT_CONFIG_FILE_DEFAULT ": make that directory writable, or start Snowballs with the option --profile to keep them in the per-user directory",
+			    CPath::getCurrentPath().c_str()));
+		}
+		else
+		{
+			startupError(toString("Snowballs can't write to '%s', the directory where it keeps its files (snowballs_client.cfg, logs, screenshots): make that directory writable",
+			    CPath::getCurrentPath().c_str()));
+		}
+		return EXIT_FAILURE;
+	}
+
+	// snowballs_client.cfg keeps the settings the user changed and links the default configuration. As in the Ryzom
+	// client, the link is written again at every start, in the first line, and the rest of the file is kept, so it
+	// follows a default configuration that moved. Next to it in the startup directory, the default is linked by name.
+	std::string configFile = CPath::standardizePath(CPath::getCurrentPath()) + SBCLIENT_CONFIG_FILE;
+	std::string rootConfig = profileDirectoryReason.empty() ? std::string(SBCLIENT_CONFIG_FILE_DEFAULT) : defaultConfig;
+	std::string oldConfig;
+	if (CFile::isExists(configFile))
+	{
+		ucstring text; // UTF-16 and UTF-8 text files
+		CI18N::readTextFile(configFile, text, false);
+		oldConfig = text.toUtf8();
+	}
+	std::string newConfig = oldConfig;
+	std::string::size_type lineStart = 0;
+	while (lineStart < newConfig.size())
+	{
+		std::string::size_type lineEnd = newConfig.find('\n', lineStart);
+		std::string::size_type nextLine = (lineEnd == std::string::npos) ? newConfig.size() : lineEnd + 1;
+		std::string::size_type firstChar = newConfig.find_first_not_of(" \t", lineStart);
+		if (firstChar < nextLine && newConfig.compare(firstChar, 18, "RootConfigFilename") == 0)
+			newConfig.erase(lineStart, nextLine - lineStart);
+		else
+			lineStart = nextLine;
+	}
+	newConfig.insert(0, "RootConfigFilename = \"" + rootConfig + "\";\n");
+	if (newConfig != oldConfig)
+	{
+		FILE *fp = nlfopen(configFile, "wb");
+		bool written = fp != NULL && fwrite(newConfig.data(), 1, newConfig.size(), fp) == newConfig.size();
+		int writeError = errno;
+		if (fp != NULL && fclose(fp) != 0 && written)
+		{
+			written = false;
+			writeError = errno;
+		}
+		if (!written)
+		{
+			startupError(toString("Snowballs can't write '%s' (%s). It keeps the settings changed by the user there, with the link to its default configuration: make that file writable",
+			    configFile.c_str(), strerror(writeError)));
+			return EXIT_FAILURE;
+		}
+		nlinfo("'%s' links the default configuration '%s'", configFile.c_str(), rootConfig.c_str());
+	}
+
 	SBCLIENT::CSnowballsClient::init();
 	exit(SBCLIENT::CSnowballsClient::run() ? EXIT_SUCCESS : EXIT_FAILURE);
 	return EXIT_FAILURE;
@@ -1240,6 +1393,10 @@ void end()
 	nlinfo("See you later!");
 
 #if SBCLIENT_USE_LOG
+	// not created when the client stopped before its log was set up
+	if (!SBCLIENT::_FileDisplayer)
+		return;
+
 	DebugLog->removeDisplayer(SBCLIENT::_FileDisplayer);
 	InfoLog->removeDisplayer(SBCLIENT::_FileDisplayer);
 	WarningLog->removeDisplayer(SBCLIENT::_FileDisplayer);

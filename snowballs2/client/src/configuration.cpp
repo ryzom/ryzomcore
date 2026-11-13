@@ -37,6 +37,13 @@ using namespace NLMISC;
 
 namespace SBCLIENT {
 
+std::string CConfiguration::s_DefaultConfigDirectory;
+
+void CConfiguration::setDefaultConfigDirectory(const std::string &directory)
+{
+	s_DefaultConfigDirectory = directory;
+}
+
 void CConfiguration::setAndCallback(const std::string &varName, void (*cb)(CConfigFile::CVar &var))
 {
 	ConfigFile->setCallback(varName, cb);
@@ -66,7 +73,13 @@ bool CConfiguration::init()
 	var = ConfigFile->getVarPtr("SearchPaths");
 	uint varsize = var->size();
 	for (uint i = 0; i < varsize; ++i)
-		CPath::addSearchPath(var->asString(i), true, false);
+	{
+		// relative to the directory of the default configuration, not to the working directory (see main)
+		std::string path = var->asString(i);
+		if (!s_DefaultConfigDirectory.empty() && !path.empty() && !CPath::isAbsolutePath(path))
+			path = CPath::makePathAbsolute(path, s_DefaultConfigDirectory, true);
+		CPath::addSearchPath(path, true, false);
+	}
 	var = ConfigFile->getVarPtr("RemapExtensions");
 	varsize = var->size();
 	for (uint i = 0; i < varsize; i += 2)
