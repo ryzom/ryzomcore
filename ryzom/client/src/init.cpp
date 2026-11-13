@@ -560,8 +560,8 @@ void checkDriverVersion()
 				break;
 			}
 		}
-		if (i==sizeof (driversVersion)/sizeof(uint))
-			nlwarning ("Unknown video card : %s", deviceName.c_str());
+		if (i == sizeofarray(driversVersion))
+			nldebug("Unknown video card : %s", deviceName.c_str());
 	}
 	else
 		nlwarning ("Can't check video driver version");
