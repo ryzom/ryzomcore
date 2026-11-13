@@ -1008,7 +1008,7 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 			}
 		}
 
-		if (values.size() >=2
+		if (values.size() >= 4
 			&& values[0].first == "Version"
 			&& values[1].first == "Signature"
 			&& values[2].first == "HeaderMD5" && values[3].first =="BodyMD5")
@@ -1263,7 +1263,7 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 			}
 		}
 
-		if (values.size() >=2
+		if (values.size() >= 4
 			&& values[0].first == "Version"
 			&& values[1].first == "Signature"
 			&& values[2].first == "HeaderMD5" && values[3].first =="BodyMD5")
