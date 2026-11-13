@@ -397,7 +397,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   # Features
   ###
-  OPTION(WITH_LOGGING             "With Logging"                                  ON )
+  OPTION(WITH_LOGGING             "With the standard output, memory and log.log displayers (asserts and errors still report without them)" ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
   OPTION(WITH_LOW_MEMORY          "With low memory (use the least of RAM)"        OFF)
@@ -819,10 +819,6 @@ MACRO(NL_SETUP_BUILD)
   IF(APPLE AND NOT IOS)
     SET(CMAKE_INCLUDE_PATH /opt/local/include ${CMAKE_INCLUDE_PATH})
     SET(CMAKE_LIBRARY_PATH /opt/local/lib ${CMAKE_LIBRARY_PATH})
-  ENDIF()
-
-  IF(WITH_LOGGING)
-    ADD_PLATFORM_FLAGS("-DENABLE_LOGS")
   ENDIF()
 
   SET(CUSTOM_FLAGS "" CACHE STRING "Custom compile flags (useful for /MPn)")

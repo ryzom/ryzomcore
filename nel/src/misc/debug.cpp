@@ -67,14 +67,14 @@ using namespace std;
 
 // If you don't want to add default displayer, put 0 instead of 1. In this case, you
 // have to manage yourself displayer (in final release for example, we have to put 0)
-// Alternatively, you can use --without-logging when using configure to set
+// Alternatively, you can configure with -DWITH_LOGGING=OFF to set
 // it to 0.
 #ifndef NEL_DEFAULT_DISPLAYER
 #define NEL_DEFAULT_DISPLAYER 1
 #endif // NEL_DEFAULT_DISPLAYER
 
 // Put 0 if you don't want to display in file "log.log"
-// Alternatively, you can use --without-logging when using configure to set
+// Alternatively, you can configure with -DWITH_LOGGING=OFF to set
 // it to 0.
 #ifndef NEL_LOG_IN_FILE
 #define NEL_LOG_IN_FILE 1
@@ -154,6 +154,26 @@ CMsgBoxDisplayer *DefaultMsgBoxDisplayer = nullptr;
 
 static CStdDisplayer *sd = nullptr;
 static CFileDisplayer *fd = nullptr;
+
+#if !DEFAULT_DISPLAYER
+// Without the default displayers a failed assert or a fatal error still says why, on the standard error output
+class CStdErrDisplayer : public IDisplayer
+{
+public:
+	CStdErrDisplayer() : IDisplayer("DEFAULT_ED") { }
+
+protected:
+	virtual void doDisplay(const CLog::TDisplayInfo &args, const char *message) NL_OVERRIDE
+	{
+		if (args.FileName != nullptr)
+			fprintf(stderr, "%s %s %d %s: %s", logTypeToString(args.LogType), CFile::getFilename(args.FileName).c_str(), args.Line, args.FuncName != nullptr ? args.FuncName : "", message);
+		else
+			fprintf(stderr, "%s", message);
+		fflush(stderr);
+	}
+};
+static CStdErrDisplayer *ed = nullptr;
+#endif // !DEFAULT_DISPLAYER
 
 static TCrashCallback CrashCallback = nullptr;
 
@@ -256,15 +276,23 @@ static void initDebug2 (bool logInFile)
 	}
 #endif // LOG_IN_FILE
 
+#else // DEFAULT_DISPLAYER
+
+	// a failed assert or a fatal error still says why
+	INelContext::getInstance().getAssertLog()->addDisplayer (ed);
+	INelContext::getInstance().getErrorLog()->addDisplayer (ed);
+
+#endif // DEFAULT_DISPLAYER
+
 	// put the message box only in release for error
+	// (with or without the default displayers: it reports asserts and fatal errors, and its report decides whether
+	// the program aborts or breaks)
 
 	if (DefaultMsgBoxDisplayer)
 	{
 		INelContext::getInstance().getAssertLog()->addDisplayer (DefaultMsgBoxDisplayer);
 		INelContext::getInstance().getErrorLog()->addDisplayer (DefaultMsgBoxDisplayer);
 	}
-
-#endif // DEFAULT_DISPLAYER
 }
 
 
@@ -1140,6 +1168,9 @@ std::string getLogDirectory()
 void destroyDebug()
 {
 	delete sd; sd = nullptr;
+#if !DEFAULT_DISPLAYER
+	delete ed; ed = nullptr;
+#endif
 	delete DefaultMsgBoxDisplayer; DefaultMsgBoxDisplayer = nullptr;
 	delete fd; fd = nullptr;
 	delete DefaultMemDisplayer; DefaultMemDisplayer = nullptr;
@@ -1204,6 +1235,9 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		INelContext::getInstance().setAssertLog(new CLog (CLog::LOG_ASSERT));
 
 		sd = new CStdDisplayer ("DEFAULT_SD");
+#if !DEFAULT_DISPLAYER
+		ed = new CStdErrDisplayer ();
+#endif
 
 #ifdef NL_OS_WINDOWS
 		if (TrapCrashInDebugger || !IsDebuggerPresent ())

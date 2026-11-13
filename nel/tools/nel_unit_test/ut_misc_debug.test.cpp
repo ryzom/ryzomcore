@@ -16,10 +16,16 @@
 
 #include <gtest/gtest.h>
 
+#include <atomic>
+#include <chrono>
+#include <future>
 #include <string>
+#include <thread>
 
 #include <nel/misc/debug.h>
+#include <nel/misc/displayer.h>
 #include <nel/misc/dynloadlib.h>
+#include <nel/misc/log.h>
 
 using std::string;
 
@@ -223,4 +229,92 @@ TEST_F(CUTMiscDebugTest, testInstanceCounterOutput)
 	nlinfo("%s", ref.c_str());
 	nlinfo("%s", ret.c_str());
 	ASSERT_TRUE(ref == ret);
+}
+
+// CSetLogPosition takes the log's mutex when the log has a displayer and must release exactly what it took,
+// whatever the displayers are when the message is done
+namespace
+{
+
+class CCountingDisplayer : public NLMISC::IDisplayer
+{
+public:
+	CCountingDisplayer() : NLMISC::IDisplayer("UT_COUNTING"), m_Count(0) { }
+	int count() const { return m_Count; }
+
+protected:
+	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo & /* args */, const char * /* message */) NL_OVERRIDE { ++m_Count; }
+
+private:
+	std::atomic<int> m_Count;
+};
+
+int removeDisplayer(NLMISC::CLog *log, NLMISC::IDisplayer *displayer)
+{
+	log->removeDisplayer(displayer);
+	return 1;
+}
+
+int addDisplayer(NLMISC::CLog *log, NLMISC::IDisplayer *displayer)
+{
+	log->addDisplayer(displayer);
+	return 1;
+}
+
+// Logs one message from another thread and waits for it at most a few seconds, so that a mutex left held fails
+// the test instead of hanging it. On a timeout the thread stays blocked: the log and the displayer are then
+// leaked on purpose, as the thread still uses them.
+bool logFromAnotherThread(NLMISC::CLog *log)
+{
+	std::packaged_task<void()> task([log]() { NLMISC::CSetLogPosition(log, __LINE__, __FILE__).log()->displayNL("from another thread"); });
+	std::future<void> done = task.get_future();
+	std::thread(std::move(task)).detach();
+	return done.wait_for(std::chrono::seconds(5)) == std::future_status::ready;
+}
+
+}
+
+TEST_F(CUTMiscDebugTest, logWithoutDisplayer)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CCountingDisplayer *displayer = new CCountingDisplayer();
+
+	NLMISC::CSetLogPosition(log, __LINE__, __FILE__).log()->displayNL("nobody listens");
+
+	log->addDisplayer(displayer);
+	ASSERT_TRUE(logFromAnotherThread(log));
+	ASSERT_EQ(displayer->count(), 1);
+	delete log;
+	delete displayer;
+}
+
+TEST_F(CUTMiscDebugTest, logLosesItsLastDisplayerDuringAMessage)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CCountingDisplayer *displayer = new CCountingDisplayer();
+	log->addDisplayer(displayer);
+
+	// the argument is evaluated once the position is set: the displayer goes away in the middle of the message
+	NLMISC::CSetLogPosition(log, __LINE__, __FILE__).log()->displayNL("removed %d", removeDisplayer(log, displayer));
+	ASSERT_TRUE(log->noDisplayer());
+
+	log->addDisplayer(displayer);
+	ASSERT_TRUE(logFromAnotherThread(log));
+	ASSERT_EQ(displayer->count(), 1);
+	delete log;
+	delete displayer;
+}
+
+TEST_F(CUTMiscDebugTest, logGainsItsFirstDisplayerDuringAMessage)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CCountingDisplayer *displayer = new CCountingDisplayer();
+
+	NLMISC::CSetLogPosition(log, __LINE__, __FILE__).log()->displayNL("added %d", addDisplayer(log, displayer));
+	ASSERT_FALSE(log->noDisplayer());
+
+	ASSERT_TRUE(logFromAnotherThread(log));
+	ASSERT_EQ(displayer->count(), 2);
+	delete log;
+	delete displayer;
 }

@@ -109,7 +109,7 @@ void CLog::setProcessName (const std::string &processName)
 	*_ProcessName = CFile::getFilename(processName);
 }
 
-void CLog::setPosition (sint line, const char *fileName, const char *funcName)
+bool CLog::setPosition (sint line, const char *fileName, const char *funcName)
 {
 	if ( !noDisplayer() )
 	{
@@ -118,14 +118,16 @@ void CLog::setPosition (sint line, const char *fileName, const char *funcName)
 		_FileName = fileName;
 		_Line = line;
 		_FuncName = funcName;
+		return true;
 	}
+	return false;
 }
 
-/// Symetric to setPosition(). Automatically called by display...(). Do not call if noDisplayer().
+/// Symetric to setPosition(): called by CSetLogPosition when its setPosition() took the mutex, whatever the
+/// displayers are by then (one may have been removed while the message was displayed). No nlassert here: it
+/// would log again while this log's mutex is held.
 void CLog::unsetPosition()
 {
-	nlassert( !noDisplayer() );
-
 	if ( _PosSet > 0 )
 	{
 		_FileName = nullptr;

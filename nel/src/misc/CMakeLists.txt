@@ -274,6 +274,14 @@ ENDIF()
 
 target_compile_definitions(nelmisc PUBLIC $<$<CONFIG:Debug>:NL_DEBUG> $<$<CONFIG:Release>:NL_RELEASE>)
 
+# without the default displayers, createDebug() attaches no standard output, memory or log.log displayer to the
+# logs, and the program adds its own; failed asserts and fatal errors still go to the standard error output and to
+# the message box displayer, which writes their report file (nel_report_<time>.log), may copy them to the clipboard
+# and may start the report tool, and acts on the report as with the default displayers
+IF(NOT WITH_LOGGING)
+  TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE NEL_DEFAULT_DISPLAYER=0 NEL_LOG_IN_FILE=0)
+ENDIF()
+
 NL_DEFAULT_PROPS(nelmisc "NeL, Library: NeL Misc")
 NL_ADD_RUNTIME_FLAGS(nelmisc)
 

@@ -211,10 +211,10 @@ public:
 private:
 	friend class CSetLogPosition;
 	
-	/// If !noDisplayer(), sets line and file parameters, and enters the mutex. If !noDisplayer(), don't forget to call display...() after, to release the mutex.
-	void setPosition (sint line, const char *fileName, const char *funcName = nullptr);
+	/// If !noDisplayer(), sets line and file parameters, enters the mutex and returns true; otherwise returns false.
+	bool setPosition (sint line, const char *fileName, const char *funcName = nullptr);
 
-	/// Symetric to setPosition(). Automatically called CSetLogPosition
+	/// Symetric to setPosition(): releases the mutex. Call it once for each setPosition() that returned true, and only then (CSetLogPosition does).
 	void unsetPosition();
 
 protected:
