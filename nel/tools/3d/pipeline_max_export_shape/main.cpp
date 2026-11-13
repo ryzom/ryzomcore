@@ -955,8 +955,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			// Memory output for the nel_lmscene blob. Serialize through a real file exactly like
 			// save() so the bytes cannot diverge from the direct --lm-scene write (the shape
 			// serializer above takes the same detour for CMemStream's seek limitation).
-			char tmpPath[256];
-			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.lmscene.tmp", (int)PMB_GETPID());
+			std::string tmpPath = NLMISC::CPath::getTemporaryDirectory() + NLMISC::toString("pipeline_max_export_shape.%d.lmscene.tmp", (int)PMB_GETPID());
 			try
 			{
 				lmc->Scene.save(tmpPath);

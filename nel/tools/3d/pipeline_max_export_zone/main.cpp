@@ -935,9 +935,7 @@ int pmbExportZonesForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
 	}
 
 	// The ligo flow into a private temp dir, collected back as blobs
-	char tmpBuf[256];
-	snprintf(tmpBuf, sizeof(tmpBuf), "/tmp/pipeline_max_export_gltf_zone.%d", (int)PMB_ZONE_GETPID());
-	std::string tmpDir = tmpBuf;
+	std::string tmpDir = NLMISC::CPath::getTemporaryDirectory() + NLMISC::toString("pipeline_max_export_gltf_zone.%d", (int)PMB_ZONE_GETPID());
 	NLLIGO::CLigoConfig config;
 	config.CellSize = cellSize;
 	config.Snap = snap;
