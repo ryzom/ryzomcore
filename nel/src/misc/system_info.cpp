@@ -189,6 +189,7 @@
 #	ifdef NL_OS_MAC
 #		include <sys/mount.h>
 #		include <sys/sysctl.h>
+#		include <mach/mach.h>
 #	else
 #		include <sys/vfs.h>
 #	endif
@@ -305,6 +306,13 @@ static sint64 getsysctlnum64(const string &name)
 	if(sysctlbyname(name.c_str(), &value, &len, NULL, 0) != 0)
 	{
 		nlwarning("SI: Can't get '%s' from sysctl: %s", name.c_str(), strerror (errno));
+	}
+	else if (len == sizeof(sint32))
+	{
+		// a 32 bit value, len is the size sysctl copied: it filled the first 4 bytes only
+		sint32 value32;
+		memcpy(&value32, &value, sizeof(value32));
+		value = value32;
 	}
 	return value;
 }
@@ -1479,7 +1487,20 @@ uint64 CSystemInfo::availablePhysicalMemory ()
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullAvailPhys;
 #elif defined NL_OS_MAC
-	return uint64(getsysctlnum64("hw.usermem"));
+	// the free pages and the inactive ones, which the system takes back first when memory is needed
+	mach_port_t host = mach_host_self();
+	vm_size_t pageSize = 0;
+	vm_statistics64_data_t vmStats;
+	mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+	kern_return_t pageResult = host_page_size(host, &pageSize);
+	kern_return_t statsResult = host_statistics64(host, HOST_VM_INFO64, (host_info64_t)&vmStats, &count);
+	mach_port_deallocate(mach_task_self(), host);
+	if (pageResult != KERN_SUCCESS || statsResult != KERN_SUCCESS)
+	{
+		nlwarning("SI: Can't get the available memory: host_page_size returned %d, host_statistics64 returned %d", (sint)pageResult, (sint)statsResult);
+		return 0;
+	}
+	return ((uint64)vmStats.free_count + (uint64)vmStats.inactive_count) * (uint64)pageSize;
 #elif defined NL_OS_UNIX
 	return getSystemMemory("MemFree:")+getSystemMemory("Buffers:")+getSystemMemory("Cached:");
 #else
@@ -1495,7 +1516,8 @@ uint64 CSystemInfo::totalPhysicalMemory ()
 	GlobalMemoryStatusEx(&ms);
 	return ms.ullTotalPhys;
 #elif defined NL_OS_MAC
-	return uint64(getsysctlnum64("hw.physmem"));
+	// hw.physmem is a 32 bit value, at most 2 GiB
+	return uint64(getsysctlnum64("hw.memsize"));
 #elif defined NL_OS_UNIX
 	return getSystemMemory("MemTotal:");
 #else
