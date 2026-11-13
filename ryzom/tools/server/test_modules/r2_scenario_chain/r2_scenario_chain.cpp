@@ -318,6 +318,8 @@ bool checkPathExpectation(const std::string &line, const std::string &key, const
 // Checks the run against the lines of an expectation file. Returns the number that are not met.
 //   key: value                   a reported line: the whole value, or its start up to the end of a word
 //   absent: key                  no reported line has this key
+//   no_line: key: start          no reported line starts with this text: a key and the start of a value,
+//                                as "version_update_note: uiR2EDVersionNoteIslandMissing("
 //   scenario_has: line           a line of the scenario as the started test saves it, in the text form,
 //   scenario_lacks: line         without its indentation and the comma at its end
 //   scenario_at: path = value    a node of that scenario (see checkPathExpectation)
@@ -355,6 +357,13 @@ uint checkExpectations(const std::string &path, bool &resultExpected)
 			found = true;
 			for (size_t j = 0; j < reported.size() && found; ++j)
 				found = reported[j].compare(0, key.size(), key) != 0;
+		}
+		else if (line.compare(0, 9, "no_line: ") == 0)
+		{
+			const std::string start = line.substr(9);
+			found = true;
+			for (size_t j = 0; j < reported.size() && found; ++j)
+				found = reported[j].compare(0, start.size(), start) != 0;
 		}
 		else if (!checkLineExpectation(line, "scenario", s_SavedScenarioText, found)
 		    && !checkLineExpectation(line, "rt", s_RtScenarioText, found)

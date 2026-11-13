@@ -1,0 +1,27 @@
+# The location names an entry point that no list of entry points has for its island. Nothing tells its
+# place: the location gets the first entry point of the island, where the server starts such a
+# location, and the author is told.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPointsUnknown(1)
+no_line: version_update_note: uiR2EDVersionNoteEntryPoints(
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUncertain
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint01
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint01

@@ -1,0 +1,32 @@
+# Two locations name no island: the first has an empty name for it, the second none at all.
+# The act of the first location has its content on uiR2_Deserts07: the location gets that island, and the
+# entry point a location without one gets there. No act is on the second location, so nothing tells its
+# island: it gets the first island the editor has, by name, and the author is told to choose, as for a
+# scenario without a location. Neither is taken for a location on an island the editor does not have.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteIslandUnknown(nil, uiR2_Deserts05)
+no_line: version_update_note: uiR2EDVersionNoteIslandMissing
+no_line: version_update_note: uiR2EDVersionNoteEntryPoints
+scenario_at: Locations[0].IslandName = uiR2_Deserts07
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint01
+scenario_at: Locations[1].IslandName = uiR2_Deserts05
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint02
+rt_at: Locations[0].Island = uiR2_Deserts07
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint01

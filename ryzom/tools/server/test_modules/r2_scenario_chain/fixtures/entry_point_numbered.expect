@@ -1,0 +1,27 @@
+# The same locations as entry_point_moved in a scenario whose acts are of version 6, which came with the
+# list of entry points of today: the numbers are those of today, and the locations keep their entry
+# points. As entry_point_moved, on fixtures/islands_restored: two islands the editor's island files lack
+# today.
+
+upgrade: unchanged
+version_update: unchanged
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+absent: version_update_note
+absent: update_note
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint03
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint02
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint03

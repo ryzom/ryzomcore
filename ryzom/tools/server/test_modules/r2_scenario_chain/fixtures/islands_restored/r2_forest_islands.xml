@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!-- Islands for the tests of the scenario chain tool: as fixtures/islands, and two islands the island
+     files of the editor do not have today, uiR2_Forest03 and uiR2_Jungle14, with the boxes and zones
+     the island file of 2006 had for them. The list of entry points has both. -->
+<islands>
+  <complete_island island="uiR2_Forest03" continent="r2_forest" xmin="22872" ymin="-11535" xmax="23526" ymax="-10872">
+    <zone name="69_FN"/>
+    <zone name="69_FO"/>
+    <zone name="69_FP"/>
+    <zone name="69_FQ"/>
+    <zone name="70_FN"/>
+    <zone name="70_FO"/>
+    <zone name="70_FP"/>
+    <zone name="70_FQ"/>
+    <zone name="71_FN"/>
+    <zone name="71_FO"/>
+    <zone name="71_FP"/>
+    <zone name="71_FQ"/>
+    <zone name="72_FN"/>
+    <zone name="72_FO"/>
+    <zone name="72_FP"/>
+    <zone name="72_FQ"/>
+  </complete_island>
+</islands>

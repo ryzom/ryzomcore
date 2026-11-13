@@ -1,0 +1,31 @@
+# The acts of this scenario are of version 3, of the first months of 2006.
+# uiR2SouthEntryPoint of uiR2_Deserts20 is a name only the first list of entry points had: the location
+# gets the entry point of today at its place, and counts among those found by their place.
+# uiR2NorthEntryPoint of uiR2_Deserts25 is a name of the first list and of the lists of spring 2006, at
+# two places 80 m apart. The location gets the entry point at the place of the first list, the first one
+# of today (entry_point_name has the other case), and the author is told that the name had two places.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(1)
+version_update_note: uiR2EDVersionNoteEntryPointsUncertain(1)
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUnknown
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint01
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint01
+rt_at: Locations[0].EntryPoint = uiR2EntryPoint01

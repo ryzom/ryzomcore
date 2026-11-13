@@ -41,8 +41,8 @@ scenario = {
               Position = {
                 InstanceId = [[Client1_7]],
                 Class = [[Position]],
-                x = 30100,
-                y = -1800,
+                x = 26000,
+                y = -1300,
                 z = 0
               }
             },
@@ -70,8 +70,8 @@ scenario = {
               Position = {
                 InstanceId = [[Client1_10]],
                 Class = [[Position]],
-                x = 30110,
-                y = -1810,
+                x = 26010,
+                y = -1310,
                 z = 0
               }
             }

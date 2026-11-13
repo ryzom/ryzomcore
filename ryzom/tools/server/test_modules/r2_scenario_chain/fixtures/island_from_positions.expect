@@ -13,7 +13,7 @@ save: ok
 roundtrip: ok
 reload_version_update: current
 translate: ok
-rt_check_limits: bots_per_act=205 aliases_per_act=1048575 (default) islands=2
+rt_check_limits: bots_per_act=205 aliases_per_act=1048575 (default) islands=7
 rt_check: ok
 rt_check_serial: ok
 return_version_before: current=yes

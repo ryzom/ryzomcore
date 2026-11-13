@@ -99,8 +99,8 @@ scenario = {
               Position = {
                 InstanceId = [[Client1_3]],
                 Class = [[Position]],
-                x = 10250,
-                y = -1750,
+                x = 26950,
+                y = -1900,
                 z = 0
               }
             },
@@ -128,8 +128,8 @@ scenario = {
               Position = {
                 InstanceId = [[Client1_6]],
                 Class = [[Position]],
-                x = 10260,
-                y = -1760,
+                x = 26960,
+                y = -1910,
                 z = 0
               }
             }
@@ -163,10 +163,32 @@ scenario = {
     {
       InstanceId = [[Client1_900]],
       Class = [[Location]],
-      EntryPoint = [[uiR2SouthEntryPoint]],
-      IslandName = [[uiR2_Deserts05]],
+      EntryPoint = [[uiR2NorthEntryPoint]],
+      IslandName = [[uiR2_Deserts22]],
       ManualSeason = 1,
       Name = [[The dunes]],
+      Season = [[Spring]],
+      ShortDescription = [[]],
+      Time = 0
+    },
+    {
+      InstanceId = [[Client1_901]],
+      Class = [[Location]],
+      EntryPoint = [[uiR2NorthEntryPoint]],
+      IslandName = [[uiR2_Deserts25]],
+      ManualSeason = 1,
+      Name = [[The long run]],
+      Season = [[Spring]],
+      ShortDescription = [[]],
+      Time = 0
+    },
+    {
+      InstanceId = [[Client1_902]],
+      Class = [[Location]],
+      EntryPoint = [[uiR2SouthEntryPoint]],
+      IslandName = [[uiR2_Lakes40]],
+      ManualSeason = 1,
+      Name = [[The shore]],
       Season = [[Spring]],
       ShortDescription = [[]],
       Time = 0

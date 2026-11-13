@@ -1,0 +1,29 @@
+# Two entry points found by their places, by two steps of the update: the number 0 of the first location
+# by the step of the location itself, the name of the second by the step of the scenario. The author gets
+# one note that counts both.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteEntryPoints(2)
+no_line: version_update_note: uiR2EDVersionNoteEntryPoints(1)
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsFar
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUncertain
+no_line: version_update_note: uiR2EDVersionNoteEntryPointsUnknown
+scenario_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint02
+rt_at: Locations[0].EntryPoint = uiR2EntryPointAlpha01

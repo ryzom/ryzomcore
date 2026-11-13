@@ -1,0 +1,30 @@
+# The locations are on islands that are not among the islands of the editor (fixtures/islands):
+# uiR2_Deserts01, which the list of entry points has switched off, and uiR2_Jungle14, which the list has
+# and the island files of today lack. Their entry points stay as they are, and the author is told of each
+# island, though the update has nothing else to change in the scenario.
+
+upgrade: unchanged
+version_update: unchanged
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+version_update_note: uiR2EDVersionNoteIslandMissing(uiR2_Deserts01)
+version_update_note: uiR2EDVersionNoteIslandMissing(uiR2_Jungle14)
+update_note: uiR2EDVersionNoteIslandMissing
+no_line: version_update_note: uiR2EDVersionNoteEntryPoints
+scenario_at: Locations[0].IslandName = uiR2_Deserts01
+scenario_at: Locations[0].EntryPoint = uiR2MiddleEntryPoint
+scenario_at: Locations[1].IslandName = uiR2_Jungle14
+scenario_at: Locations[1].EntryPoint = uiR2EntryPoint03

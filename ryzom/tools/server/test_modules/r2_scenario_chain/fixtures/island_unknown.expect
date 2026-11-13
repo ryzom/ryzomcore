@@ -1,0 +1,18 @@
+# A scenario of the first format whose location number is of no list the editor knows, and whose content
+# stands on no island. It gets the first island the editor has, by name, and the author is told to choose.
+# The islands of this test are in fixtures/islands.
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNoteIslandUnknown(99, uiR2_Deserts05)
+no_line: version_update_note: uiR2EDVersionNoteIslandMissing
+absent: version_update_failure
+save: ok
+roundtrip: ok
+reload_version_update: current
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+
+scenario_at: Locations = <size 1>
+scenario_at: Locations[0].IslandName = uiR2_Deserts05
+scenario_at: Locations[0].EntryPoint = uiR2EntryPoint01
