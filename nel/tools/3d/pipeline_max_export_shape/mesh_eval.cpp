@@ -532,9 +532,9 @@ static void applyXForm(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 // Gizmo deformers (Bend, Twist): reference 0 is the gizmo (a PRS controller), reference 1 the center (a
 // position controller), reference 2 the parameters, a ParamBlock2 or, in older files, an old ParamBlock
 // with the same parameter indices. The deformer maps a point into its space (Tm), deforms it there along
-// Z, and maps it back (InvTm); it moves the vertices of the current selection only. Validated against a
-// reference export of zo_hom_cheveux_lead.max (two Bends and a Twist on a vertex selection): positions
-// equal to float precision.
+// Z, and maps it back (InvTm); it moves the vertices of the current selection only. Validated against
+// reference exports, positions equal to float precision: zo_hom_cheveux_lead.max (two Bends and a Twist
+// on a vertex selection) and neutrecreature.max (a Twist with a moved center, on three meshes).
 
 // The constant parameters of reference 2, by index. False when any parameter is animated
 // (controller-backed), even one the settings leave unused, or the block is missing: the caller then
@@ -619,7 +619,8 @@ static Matrix3M translateM(const Matrix3M &m, float x, float y, float z)
 // The deformer space: object space -> mod context (the 0x2510 TM) -> gizmo -> center,
 // Tm = context * Inverse(Translate(center) * gizmo), then the deformer's axis matrix, which turns its
 // axis onto Z (Tm = Tm * axis, InvTm = Inverse(axis) * Inverse(Tm)).
-// The order of center and gizmo is not validated yet: the reference file has both at their defaults.
+// The order of a moved gizmo against the center is not validated yet: the reference files have the gizmo
+// at its default.
 struct SGizmoModSpace
 {
 	Matrix3M Tm, InvTm;
