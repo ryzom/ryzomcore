@@ -610,6 +610,7 @@ function game:updatePlayerBonusMalus()
 		mustShowBonus= true;
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", getSheetId('big_xpcat_' .. tostring(iconLevel) .. '.sbrick' ) );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.XPCatSlotAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -634,6 +635,7 @@ function game:updatePlayerBonusMalus()
 		mustShowBonus= true;
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", getSheetId('big_ring_xpcat_' .. tostring(iconLevel) .. '.sbrick' ) );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.RingXPCatSlotAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -661,6 +663,7 @@ function game:updatePlayerBonusMalus()
 		mustShowBonus= true;
 		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":SHEET", getSheetId('big_outpost_pvp_' .. tostring(pvpOutpostLevel) .. '.sbrick' ) );
 		setDbProp(dbLocalBonusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalBonusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.OutpostSlotAfter = destIndex;
 		destIndex= destIndex+1;
 	else
@@ -714,6 +717,7 @@ function game:updatePlayerBonusMalus()
 		mustShowMalus= true;
 		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":SHEET", getSheetId('death_penalty.sbrick' ) );
 		setDbProp(dbLocalMalusBase  .. tostring(destIndex) .. ":DISABLED", 0 );
+		setDbProp(dbLocalMalusBase .. tostring(destIndex) .. ":DISABLED_TIME", 0 );
 		self.BonusMalus.DeathPenaltyAfter = destIndex;
 		destIndex= destIndex+1;
 	else
