@@ -739,26 +739,35 @@ static Matrix3M gizmoModAxis(int axis)
 	return Matrix3M::identity();
 }
 
-// Move the selected vertices (all when the selection is the whole mesh) through \a deformer.
-template <class TDeformer>
-static void deformSelected(SEvalMesh &mesh, const TDeformer &deformer, const char *what, const std::string &name,
-                           std::vector<std::string> *warnings)
+// The vertices a modifier acting on the current selection moves: true for the whole mesh (object level,
+// or a selection that is not known, with a warning), else false with \a sel holding one flag per vertex.
+static bool modifierSelection(const SEvalMesh &mesh, std::vector<bool> &sel, const char *what,
+                              const std::string &name, std::vector<std::string> *warnings)
 {
-	std::vector<bool> sel;
 	bool all = mesh.SelLevel == 1;
 	if (mesh.SelLevelUnknown || (!all && (mesh.SelBitsUnknown || !selectedVertices(mesh, sel))))
 	{
 		fprintf(stderr, "WARNING: mesh '%s' %s applied to the whole mesh: the selection it sees is not known\n",
 		        name.c_str(), what);
 		if (warnings) warnings->push_back(std::string("selection:") + what);
-		all = true;
+		return true;
 	}
-	else if (!all && mesh.SelSoft)
+	if (!all && mesh.SelSoft)
 	{
 		fprintf(stderr, "WARNING: mesh '%s' %s applied to the selected vertices only: the soft selection falloff "
 		        "around them is not evaluated\n", name.c_str(), what);
 		if (warnings) warnings->push_back(std::string("softselection:") + what);
 	}
+	return all;
+}
+
+// Move the selected vertices (all when the selection is the whole mesh) through \a deformer.
+template <class TDeformer>
+static void deformSelected(SEvalMesh &mesh, const TDeformer &deformer, const char *what, const std::string &name,
+                           std::vector<std::string> *warnings)
+{
+	std::vector<bool> sel;
+	const bool all = modifierSelection(mesh, sel, what, name, warnings);
 	for (uint i = 0; i < mesh.Verts.size(); ++i)
 		if (all || sel[i])
 			mesh.Verts[i] = deformer.map(mesh.Verts[i]);
@@ -986,6 +995,217 @@ static void applyTaper(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 	const int ax = naxis < 0 || naxis > 2 ? 2 : naxis;
 	d.Length = space.Box[3 + ax] - space.Box[ax];
 	deformSelected(mesh, d, "Taper", name, warnings);
+}
+
+// ---------------------------------------------------------------------------------------------
+
+// A modifier switched off in its stack: the base container 0x39bf of the modifier holds an empty 0x0110 leaf
+// next to the empty 0x0100 every modifier has. The stack evaluation then passes it by. Corpus (all 2850
+// shape-batch files): seven modifiers carry it, five Morphers on the face meshes of haircut scenes, a
+// VertexTreePaint and an Edit Mesh. In fy_hof_cheveux_artistic01.max and ma_hom_cheveux_style01.max the
+// reference exports match only with the Morpher left out (the face feeds the haircut's border normals),
+// while the Morphers without it are applied (fy_hom_cheveux_artistic03.max); the other five give the same
+// result either way. The other states of a modifier (off in the viewport or the renderer only) are not seen;
+// any other leaf in 0x39bf, or a 0x0110 with a value, warns.
+static bool modifierSwitchedOff(CSceneClass *mod, const std::string &name)
+{
+	const CStorageContainer *base = dynamic_cast<const CStorageContainer *>(findChunk(mod, 0x39bf));
+	if (!base)
+		return false;
+	bool off = false;
+	const CStorageContainer::TStorageObjectContainer &chunks = base->chunks();
+	for (CStorageContainer::TStorageObjectConstIt it = chunks.begin(); it != chunks.end(); ++it)
+	{
+		const CStorageRaw *raw = dynamic_cast<const CStorageRaw *>(it->second);
+		const bool empty = raw && raw->Value.empty();
+		if (it->first == 0x0110)
+			off = true;
+		if ((it->first != 0x0100 && it->first != 0x0110) || !empty)
+			fprintf(stderr, "WARNING: mesh '%s' modifier %s has an unknown state chunk 0x%04x in its base data\n",
+			        name.c_str(), mod->classDesc()->classId().toString().c_str(), (uint)it->first);
+	}
+	return off;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Morpher: blends the incoming mesh towards stored target shapes, one per channel, by the channel
+// percentages at tick 0. Modelling uses it for variations, so it matters even without animation.
+// The channels are the modifier's containers 0x0200 + i (0x0191 the channel count in newer files):
+// 0x0101 (0x0100 in older files) the point count, 0x0140 the target points (three floats each), 0x0110
+// the channel's vertex selection (bit array), 0x0130 its flags (int32 active, modded, use limits, use
+// selection; float lower and upper limit; int32 active override), 0x0180 the number of progressive
+// targets. The channel percentage is a one-float ParamBlock at reference 1 + i (channels from 100 up:
+// 1 + i % 100 + i / 100 * 3000), the target node at reference 101 + i; reference 0 holds the global
+// options (0 use limits, 1 lower, 2 upper limit, 3 use the channel selections, 5 auto-load the targets).
+// A channel moves a point by (target - incoming) / 100 * percentage, the percentage cut to whole limits when
+// they are on, and the moves of all channels add up. A channel whose point count differs from the mesh is
+// left out, as the modifier does. At a sub-object level only the selected vertices move. The target shapes
+// are the saved ones: with auto-load on, the modifier would re-read them from target nodes still in the
+// scene, which warns.
+
+static bool readRawUInt32(const CStorageContainer *c, uint16 id, uint32 &out)
+{
+	const CStorageRaw *raw = dynamic_cast<const CStorageRaw *>(c->findStorageObject(id));
+	if (!raw || raw->Value.size() < 4) return false;
+	memcpy(&out, &raw->Value[0], 4);
+	return true;
+}
+
+static void applyMorpher(CSceneClass *mod, SEvalMesh &mesh, const std::string &name,
+                         std::vector<std::string> *warnings)
+{
+	typedef PIPELINE::MAX::BUILTIN::CParamBlock CParamBlock;
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mod);
+	if (!rm)
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Morpher without references; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:morpher");
+		return;
+	}
+	bool globalLimits = false, globalSel = false, autoLoad = false;
+	float globalLower = 0.f, globalUpper = 100.f;
+	CParamBlock *g = rm->nbReferences() > 0 ? dynamic_cast<CParamBlock *>(rm->getReference(0)) : nullptr;
+	sint32 v;
+	if (g && g->getInt(0, v) && g->getFloatAt0(1, globalLower) && g->getFloatAt0(2, globalUpper))
+	{
+		globalLimits = v != 0;
+		if (g->getInt(3, v)) globalSel = v != 0;
+		if (g->getInt(5, v)) autoLoad = v != 0;
+	}
+	else
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Morpher global options not readable; percentages not limited\n",
+		        name.c_str());
+		if (warnings) warnings->push_back("morpher:options");
+	}
+	uint32 channelCount = 0;
+	const CStorageRaw *countChunk = findRawChunk(mod, 0x0191);
+	const bool hasChannelCount = countChunk && countChunk->Value.size() >= 4;
+	if (hasChannelCount)
+		memcpy(&channelCount, &countChunk->Value[0], 4);
+
+	const uint nv = (uint)mesh.Verts.size();
+	const std::vector<MAXMATH::Point3M> &base = mesh.Verts; // only written after the channels
+	std::vector<MAXMATH::Point3M> moved = base;
+	std::vector<bool> touched(nv, false);
+	uint used = 0;
+	bool autoLoadWarned = false;
+	const CStorageContainer::TStorageObjectContainer &orphans = mod->orphanedChunks();
+	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
+	{
+		if (it->first < 0x0200 || it->first >= 0x2000) // not a channel (0x39bf is the base modifier data)
+			continue;
+		const CStorageContainer *ch = dynamic_cast<const CStorageContainer *>(it->second);
+		if (!ch)
+			continue;
+		const uint index = it->first - 0x0200;
+		if (hasChannelCount && index >= channelCount)
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher channel %u beyond the channel count %u; left out\n",
+			        name.c_str(), index, channelCount);
+			if (warnings) warnings->push_back("morpher:channel");
+			continue;
+		}
+		const uint refOffset = index % 100 + index / 100 * 3000;
+		const CStorageRaw *params = dynamic_cast<const CStorageRaw *>(ch->findStorageObject(0x0130));
+		if (!params || params->Value.size() < 28)
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher channel %u without its flags; left out\n", name.c_str(), index);
+			if (warnings) warnings->push_back("morpher:channel");
+			continue;
+		}
+		sint32 active, useLimit, useSel, activeOverride;
+		float lower, upper;
+		memcpy(&active, &params->Value[0], 4);
+		memcpy(&useLimit, &params->Value[8], 4);
+		memcpy(&useSel, &params->Value[12], 4);
+		memcpy(&lower, &params->Value[16], 4);
+		memcpy(&upper, &params->Value[20], 4);
+		memcpy(&activeOverride, &params->Value[24], 4);
+		if (!active || !activeOverride)
+			continue;
+		uint32 count = 0;
+		if (!readRawUInt32(ch, 0x0101, count) && !readRawUInt32(ch, 0x0100, count))
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher channel %u without its point count; left out\n",
+			        name.c_str(), index);
+			if (warnings) warnings->push_back("morpher:channel");
+			continue;
+		}
+		if (count != nv)
+			continue;
+		if (autoLoad && !autoLoadWarned && 101 + refOffset < rm->nbReferences()
+		    && dynamic_cast<INode *>(rm->getReference(101 + refOffset)))
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher loads its targets from their nodes; the saved targets are "
+			        "used\n", name.c_str());
+			if (warnings) warnings->push_back("morpher:autoload");
+			autoLoadWarned = true;
+		}
+		uint32 progressive = 0;
+		if (readRawUInt32(ch, 0x0180, progressive) && progressive != 0)
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher channel %u has progressive targets, not supported; "
+			        "channel left out\n", name.c_str(), index);
+			if (warnings) warnings->push_back("morpher:progressive");
+			continue;
+		}
+		const CStorageRaw *points = dynamic_cast<const CStorageRaw *>(ch->findStorageObject(0x0140));
+		if (!points || points->Value.size() < (size_t)count * 12)
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher channel %u without its target points; channel left out\n",
+			        name.c_str(), index);
+			if (warnings) warnings->push_back("morpher:points");
+			continue;
+		}
+		float percent = 0.f;
+		CParamBlock *cb = 1 + refOffset < rm->nbReferences()
+			? dynamic_cast<CParamBlock *>(rm->getReference(1 + refOffset)) : nullptr;
+		if (!cb || !cb->getFloatAt0(0, percent))
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Morpher channel %u percentage not readable; channel left out\n",
+			        name.c_str(), index);
+			if (warnings) warnings->push_back("morpher:percent");
+			continue;
+		}
+		if (useLimit || globalLimits)
+		{
+			const int upperLimit = globalLimits ? (int)globalUpper : (int)upper;
+			const int lowerLimit = globalLimits ? (int)globalLower : (int)lower;
+			if (percent > upperLimit) percent = (float)upperLimit;
+			if (percent < lowerLimit) percent = (float)lowerLimit;
+		}
+		std::vector<bool> chSel;
+		const bool bySel = useSel || globalSel;
+		if (bySel && (!readBitArray(ch, 0x0110, chSel) || chSel.size() < nv))
+			chSel.resize(nv, false);
+		if (getenv("PMB_STACK_DUMP"))
+			fprintf(stderr, "PMB_STACK_DUMP '%s' Morpher channel %u at %g%%\n", name.c_str(), index, percent);
+		for (uint p = 0; p < nv; ++p)
+		{
+			if (bySel && !chSel[p])
+				continue;
+			float target[3];
+			memcpy(target, &points->Value[p * 12], 12);
+			// the delta per percent in float, as the modifier rebuilds it from the incoming points
+			const float dx = (target[0] - base[p].x) / 100.0f;
+			const float dy = (target[1] - base[p].y) / 100.0f;
+			const float dz = (target[2] - base[p].z) / 100.0f;
+			moved[p].x += dx * percent;
+			moved[p].y += dy * percent;
+			moved[p].z += dz * percent;
+			touched[p] = true;
+		}
+		++used;
+	}
+	if (!used)
+		return;
+
+	std::vector<bool> sel;
+	const bool all = modifierSelection(mesh, sel, "Morpher", name, warnings);
+	for (uint p = 0; p < nv; ++p)
+		if (touched[p] && (all || sel[p]))
+			mesh.Verts[p] = moved[p];
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1311,6 +1531,13 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		CSceneClass *mod = mods[i - 1];
 		CStorageContainer *app = (i - 1) < modApps.size() ? modApps[i - 1] : nullptr;
 		NLMISC::CClassId mcid = mod->classDesc()->classId();
+		if (modifierSwitchedOff(mod, name))
+		{
+			if (getenv("PMB_STACK_DUMP"))
+				fprintf(stderr, "PMB_STACK_DUMP '%s' mod %s switched off, skipped\n", name.c_str(),
+				        mcid.toString().c_str());
+			continue;
+		}
 		if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 		{
 			EDITMESH::SEdits edits;
@@ -1336,6 +1563,10 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		         && mod->classDesc()->superClassId() == 0x810) // Taper
 		{
 			applyTaper(mod, app, out, name, warnings);
+		}
+		else if (mcid == NLMISC::CClassId(0x17bb6854, 0xa5cba2a3)) // Morpher
+		{
+			applyMorpher(mod, out, name, warnings);
 		}
 		else if (mcid == NLMISC::CClassId(0x40c7005e, 0x2a95082c)) // Nel VertexTreePaint
 		{
