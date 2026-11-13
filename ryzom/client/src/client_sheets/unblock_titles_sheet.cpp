@@ -88,7 +88,10 @@ void CUnblockTitlesSheet::build(const UFormElm &item)
 					CHARACTER_TITLE::ECharacterTitle title = CHARACTER_TITLE::toCharacterTitle ( TitleName );
 					//nlassert( skill != SKILLS::unknown );
 					if (title >= CHARACTER_TITLE::NB_CHARACTER_TITLE)
+					{
+						nlwarning("ASSET ERROR: entry %u of the titles sheet names the title '%s', which is not a character title, the entry is skipped", i, TitleName.c_str());
 						continue;
+					}
 
 					bool bReserved = false;
 					if( ! TUElt->getValueByName( bReserved, "Reserved" ) )
