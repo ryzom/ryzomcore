@@ -1525,7 +1525,8 @@ uint64 CSystemInfo::totalPhysicalMemory ()
 #endif
 }
 
-#ifndef NL_OS_WINDOWS
+// for /proc/self/stat in getAllocatedSystemMemory, macOS has its own branch there
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 static inline char *skipWS(const char *p)
 {
     while (isspace(*p)) p++;
@@ -1560,6 +1561,21 @@ uint64 CSystemInfo::getAllocatedSystemMemory ()
 				systemMemory += entry.cbData + entry.cbOverhead;
 			}
 		}
+	}
+
+#elif defined NL_OS_MAC
+
+	// the resident size: the virtual size of a macOS process counts the shared system regions, gigabytes for any process
+	mach_task_basic_info_data_t info;
+	mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+	kern_return_t result = task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &count);
+	if (result != KERN_SUCCESS)
+	{
+		nlwarning("HA: Can't get the memory used by the process: task_info returned %d", (sint)result);
+	}
+	else
+	{
+		systemMemory = info.resident_size;
 	}
 
 #elif defined NL_OS_UNIX
