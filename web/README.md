@@ -1,6 +1,6 @@
 # Ryzom Core web services
 
-The web side of a Ryzom Core shard. `public_php` is the web root: `setup` (install and upgrade), `login` (the login scripts the client talks to), `account` (the account tool), `admin` (the shard admin tool), `ring` (the Ring pages), `webig` (the in-game mail and forum pages), `stats` and `stats_query` (the client install statistics and their viewer), `crash_report` (the crash report receiver) and `tools` (code that these share). `private_php` stays outside the web root and holds the configuration template and the SQL scripts of the setup and the `webig` page templates; `docs` holds the shard admin how-to.
+The web side of a Ryzom Core shard. `public_php` is the web root: `setup` (install and upgrade), `login` (the login scripts the client talks to), `account` (the account tool), `admin` (the shard admin tool), `ring` (the Ring pages), `webig` (the in-game mail and forum pages), `ticket_system` (the page of the in-game Customer Support window, for now a placeholder that takes no tickets), `stats` and `stats_query` (the client install statistics and their viewer), `crash_report` (the crash report receiver) and `tools` (code that these share). `private_php` stays outside the web root and holds the configuration template and the SQL scripts of the setup and the `webig` page templates; `docs` holds the shard admin how-to.
 
 ## Upgrade notes
 
