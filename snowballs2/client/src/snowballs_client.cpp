@@ -1156,11 +1156,6 @@ void CSnowballsClient::release()
 
 void end();
 #ifdef NL_OS_WINDOWS
-#	ifdef _UNICODE
-#		define tstring wstring
-#	else
-#		define tstring string
-#	endif
 sint WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdline, int nCmdShow)
 #else
 sint main(int argc, char **argv)
@@ -1210,45 +1205,6 @@ sint main(int argc, char **argv)
 #endif
 
 	nlinfo ("cookie '%s' addr '%s'", SBCLIENT::Cookie.c_str (), SBCLIENT::FSAddr.c_str());
-
-
-#if defined(NL_OS_WINDOWS) && !FINAL_VERSION
-	// ensure paths are ok before powering up nel
-	{
-		OutputDebugString("    ********************************    \n");
-		OutputDebugString("    *        DEVELOPER MODE        *    \n");
-		OutputDebugString("    ********************************    \n\n");
-		FILE *f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
-		if (!f)
-		{
-			f = _tfopen(_T(SBCLIENT_CONFIG_FILE), _T("r"));
-			if (!f)
-			{
-				OutputDebugString("    ********************************    \n");
-				OutputDebugString("    *  CHANGING WORKING DIRECTORY  *    \n");
-				OutputDebugString("    ********************************    \n\n");
-				char cwd[256];
-				_tgetcwd(cwd, 256);
-				tstring workdir(cwd);
-				workdir = "R:\\build\\devw_x86\\bin\\Debug\\";
-				_tchdir(workdir.c_str());
-				f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
-				if (!f)
-				{
-					f = _tfopen(_T(SBCLIENT_CONFIG_FILE), _T("r"));
-					if (!f)
-					{
-						OutputDebugString("    ********************************    \n");
-						OutputDebugString("    *    DEFAULT CONFIG MISSING    *    \n");
-						OutputDebugString("    ********************************    \n\n");
-						return EXIT_FAILURE;
-					}
-				}
-			}
-		}
-		fclose(f);
-	}
-#endif
 
 	// go nel!
 	{

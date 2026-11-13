@@ -1,7 +1,8 @@
 
 RootConfigFilename = "common.cfg";
 
-DataPath = "data";
+// the data directory of the installation, set when the file is installed
+DataPath = "@database@";
 
 GlobalRetrieverName = "snowballs.gr";
 RetrieverBankName = "snowballs.rbank";
