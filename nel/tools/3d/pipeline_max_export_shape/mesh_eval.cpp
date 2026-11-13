@@ -992,6 +992,92 @@ static void applyTaper(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh
 	deformSelected(mesh, d, "Taper", name, warnings);
 }
 
+struct SStretchDeformer
+{
+	Matrix3M Tm, InvTm;
+	float Low, High, From, To, XY, ZS;
+	bool Limited;
+
+	Point3M map(Point3M p) const
+	{
+		p = transformPoint(p, Tm);
+		float z = p.z;
+		if (Limited) z = z > To ? To : (z < From ? From : z);
+		const float n = (z - Low) / (High - Low);
+		const float a = 4.f * (1.f - XY), b = -4.f * (1.f - XY);
+		const float f = (a * n + b) * n + 1.f;
+		p.x *= f;
+		p.y *= f;
+		if (!Limited) p.z *= ZS;
+		else if (p.z < From) p.z += (ZS - 1.f) * From;
+		else if (p.z > To) p.z += (ZS - 1.f) * To;
+		else p.z *= ZS;
+		return transformPoint(p, InvTm);
+	}
+};
+
+// Stretch: the same references as Bend (reference 2 an old ParamBlock: 0 amount, 1 amplify, 2 axis, 3 limits
+// on, 4 lower and 5 upper limit, values at tick 0). Along the axis, over the box extent (or the limits), the
+// height scales by amount + 1 when stretching (1 / (1 - amount) when squashing) and the cross section by a
+// parabola through 1 at both ends and 1 / (amplifier * amount + 1) in the middle (amplifier * -amount + 1
+// when squashing; amplifier = amplify + 1, or 1 / (1 - amplify) when negative). Corpus: medusea.max, where the
+// amount is 0 at tick 0, so the formula is not validated by a reference.
+static void applyStretch(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mesh, const std::string &name,
+                         std::vector<std::string> *warnings)
+{
+	typedef PIPELINE::MAX::BUILTIN::CParamBlock CParamBlock;
+	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mod);
+	CParamBlock *pb = rm && rm->nbReferences() > 2 ? dynamic_cast<CParamBlock *>(rm->getReference(2)) : nullptr;
+	float amount = 0.f, amplify = 0.f, from = 0.f, to = 0.f;
+	sint32 axis = 2, limited = 0;
+	if (!pb || !pb->getFloatAt0(0, amount) || !pb->getFloatAt0(1, amplify) || !pb->getInt(2, axis))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Stretch parameters not readable; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:stretch");
+		return;
+	}
+	pb->getInt(3, limited);
+	if (limited && (!pb->getFloatAt0(4, from) || !pb->getFloatAt0(5, to)))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Stretch limits not readable; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:stretch");
+		return;
+	}
+	if (amount == 0.f || (limited && to == from))
+		return; // no change, not even the round trip
+	SGizmoModSpace space;
+	if (!gizmoModSpace(mod, app, gizmoModAxis(axis), space))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Stretch without a usable mod-context box; evaluated without it\n",
+		        name.c_str());
+		if (warnings) warnings->push_back("modifier:stretch");
+		return;
+	}
+	const int ax = axis < 0 || axis > 2 ? 2 : axis;
+	SStretchDeformer d;
+	d.Tm = space.Tm;
+	d.InvTm = space.InvTm;
+	d.Limited = limited != 0;
+	d.From = from;
+	d.To = to;
+	d.Low = d.Limited ? from : space.Box[ax];
+	d.High = d.Limited ? to : space.Box[3 + ax];
+	if (d.High == d.Low)
+		return;
+	const float amplifier = amplify >= 0.f ? amplify + 1.f : 1.f / (1.f - amplify);
+	if (amount < 0.f)
+	{
+		d.XY = amplifier * -amount + 1.f;
+		d.ZS = -1.f / (amount - 1.f);
+	}
+	else
+	{
+		d.XY = 1.f / (amplifier * amount + 1.f);
+		d.ZS = amount + 1.f;
+	}
+	deformSelected(mesh, d, "Stretch", name, warnings);
+}
+
 // ---------------------------------------------------------------------------------------------
 
 // A modifier switched off in its stack: the base container 0x39bf of the modifier holds an empty 0x0110 leaf
@@ -1632,6 +1718,161 @@ static void applyMirror(CSceneClass *mod, CStorageContainer *app, SEvalMesh &mes
 		mesh.SelEdges.resize(nf * 3, false);
 		if (mesh.SelLevel == 2 || mesh.SelLevel == 8)
 			mesh.SelBitsUnknown = true; // what the copied vertices and edges hold is not known
+	}
+}
+
+// Unwrap UVW: the texture vertices and faces are stored on the modifier (the corpus has only this older
+// layout; the per-node data holds a face selection, not used): 0x0100 the vertex count N, 0x0270 N records
+// of 20 bytes (float x, y, z, float soft selection weight, flags byte, 3 padding bytes), 0x0230 the face
+// count F, 0x0310 F records (int32 count, count texture vertex indices, face index, material id, flags,
+// count geometry vertex indices, and 6 * count more int32 when flags has 0x20), 0x0260 the channel (0 map
+// channel 1, 1 channel 0, k from 2 up channel k), 0x0710 apply to the whole object. The data is used only when
+// F equals the incoming face count and every face is a triangle; at face level only the selected faces take
+// it (the texture vertices appended), otherwise every face. An instanced Unwrap gives its data to the first
+// node in storage order whose stack holds it; every other node keeps its incoming map (fungusa.max).
+// Validated against the reference exports (PapillonA01/B01, GE_Acc_CattleStick_A, Tr_Wea_Petit_Bouclier,
+// Tr_Wea_Pistolet_sousmarin, gun01, CricketA, FungusA01..06).
+static void applyUnwrapUvw(CSceneClass *mod, INode &node, SEvalMesh &mesh, const std::string &name,
+                           std::vector<std::string> *warnings)
+{
+	const NLMISC::CClassId mcid = mod->classDesc()->classId();
+	const CStorageRaw *nRaw = findRawChunk(mod, 0x0100);
+	const CStorageRaw *vRaw = findRawChunk(mod, 0x0270);
+	const CStorageRaw *fCount = findRawChunk(mod, 0x0230);
+	const CStorageRaw *fRaw = findRawChunk(mod, 0x0310);
+	sint32 nv = -1, nfStored = -1;
+	if (nRaw && nRaw->Value.size() >= 4) memcpy(&nv, &nRaw->Value[0], 4);
+	if (fCount && fCount->Value.size() >= 4) memcpy(&nfStored, &fCount->Value[0], 4);
+	if (nv < 0 || nfStored < 0 || !vRaw || vRaw->Value.size() != (size_t)nv * 20 || !fRaw)
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW data layout not supported; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	// the faces (a record takes at least 24 bytes)
+	if ((size_t)nfStored > fRaw->Value.size() / 24)
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW face count %i does not fit its records; evaluated without it\n",
+		        name.c_str(), (int)nfStored);
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	std::vector<uint32> tv((size_t)nfStored * 3);
+	bool triangles = true;
+	size_t at = 0;
+	const std::vector<uint8> &fr = fRaw->Value;
+	for (sint32 f = 0; f < nfStored; ++f)
+	{
+		sint32 count;
+		if (at + 4 > fr.size()) { at = (size_t)-1; break; }
+		memcpy(&count, &fr[at], 4);
+		at += 4;
+		if (count < 1 || count > 64 || at + ((size_t)count * 2 + 3) * 4 > fr.size()) { at = (size_t)-1; break; }
+		uint32 flags;
+		memcpy(&flags, &fr[at + ((size_t)count + 2) * 4], 4);
+		if (count == 3)
+			memcpy(&tv[(size_t)f * 3], &fr[at], 12);
+		else
+			triangles = false;
+		at += ((size_t)count * 2 + 3) * 4;
+		if (flags & 0x20)
+			at += (size_t)count * 6 * 4;
+	}
+	if (at != fr.size())
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW face records not readable; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	for (size_t i = 0; i < tv.size(); ++i)
+	{
+		if (tv[i] >= (uint32)nv)
+		{
+			fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW face uses texture vertex %u of %i; evaluated without it\n",
+			        name.c_str(), tv[i], (int)nv);
+			if (warnings) warnings->push_back("modifier:" + mcid.toString());
+			return;
+		}
+	}
+	// which node owns the data: the first in storage order whose derived objects hold the modifier (walked
+	// directly, without resolving references to other files)
+	CSceneClass *nodeClass = dynamic_cast<CSceneClass *>(&node);
+	if (!nodeClass || nodeClass->container() != mod->container())
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW comes from another file; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	INode *owner = nullptr;
+	const CStorageContainer::TStorageObjectContainer &objs = mod->container()->chunks();
+	for (CStorageContainer::TStorageObjectConstIt it = objs.begin(); it != objs.end() && !owner; ++it)
+	{
+		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
+		if (!n || n->nbReferences() < 2) continue;
+		for (CDerivedObject *d = dynamic_cast<CDerivedObject *>(n->getReference(1)); d && !owner;
+		     d = dynamic_cast<CDerivedObject *>(d->baseObject()))
+		{
+			for (uint i = 0; i < d->modifierCount(); ++i)
+				if (d->modifier(i) == mod) owner = n;
+		}
+	}
+	if (!owner)
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW owner not found; evaluated without it\n", name.c_str());
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	if (owner != &node)
+		return; // another node of the instanced modifier owns the data: the incoming map passes through
+	const uint nf = (uint)mesh.Faces.size();
+	if (!triangles || (uint)nfStored != nf)
+	{
+		// the modifier then passes its incoming map through
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW stores %i faces%s for %u in the mesh; its data is not used\n",
+		        name.c_str(), (int)nfStored, triangles ? "" : " (not all triangles)", nf);
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	const CStorageRaw *chRaw = findRawChunk(mod, 0x0260);
+	const CStorageRaw *wholeRaw = findRawChunk(mod, 0x0710);
+	sint32 sel = 0, whole = 0;
+	if (chRaw && chRaw->Value.size() >= 4) memcpy(&sel, &chRaw->Value[0], 4);
+	if (wholeRaw && wholeRaw->Value.size() >= 4) memcpy(&whole, &wholeRaw->Value[0], 4);
+	const int channel = sel == 0 ? 1 : (sel == 1 ? 0 : sel);
+	bool faceLevel = !whole && !mesh.SelLevelUnknown && mesh.SelLevel == 4;
+	if (!whole && (mesh.SelLevelUnknown || (faceLevel && (mesh.SelBitsUnknown || mesh.SelFaces.size() != nf))))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW applied to every face: the selection it sees is not known\n",
+		        name.c_str());
+		if (warnings) warnings->push_back("selection:unwrap");
+		faceLevel = false;
+	}
+	std::map<int, SMapChannel>::iterator existing = mesh.Maps.find(channel);
+	if (faceLevel && (existing == mesh.Maps.end() || existing->second.Faces.size() != nf))
+	{
+		fprintf(stderr, "WARNING: mesh '%s' Unwrap UVW on a face selection without an incoming channel %i not "
+		        "supported; evaluated without it\n", name.c_str(), channel);
+		if (warnings) warnings->push_back("modifier:" + mcid.toString());
+		return;
+	}
+	SMapChannel &ch = mesh.Maps[channel];
+	const uint32 offset = faceLevel ? (uint32)ch.Verts.size() : 0;
+	if (!faceLevel)
+	{
+		ch.Verts.clear();
+		ch.Faces.assign(nf, SMapFace());
+	}
+	for (sint32 i = 0; i < nv; ++i)
+	{
+		Point3M p;
+		memcpy(&p, &vRaw->Value[(size_t)i * 20], 12);
+		ch.Verts.push_back(p);
+	}
+	for (uint f = 0; f < nf; ++f)
+	{
+		if (faceLevel && !mesh.SelFaces[f]) continue;
+		for (uint c = 0; c < 3; ++c)
+			ch.Faces[f].T[c] = offset + tv[(size_t)f * 3 + c];
 	}
 }
 
@@ -2570,6 +2811,38 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		{
 			applyEditPoly(mod, app, out, name, warnings);
 		}
+		else if (mcid == NLMISC::CClassId(0x000100b0, 0x00bc2d21) && mod->classDesc()->superClassId() == 0x810)
+		{
+			applyStretch(mod, app, out, name, warnings);
+		}
+		else if (mcid == NLMISC::CClassId(0x8aad7d94, 0x80aae03e) && mod->classDesc()->superClassId() == 0x810)
+		{
+			// Copy Map: the reference exports of all seven corpus instances behave as if it were absent. On
+			// their lightmapped faces the lightmap UVs are a uniform scale of the channel 2 below it, not of
+			// channel 1 (Tr_mairie_lanterne_interne_village_a, FY_Acc_StatueFem, FY_CN_caravanserail_B), most
+			// likely because its plugin was missing where they were made. It is passed through to match them;
+			// its parameters (old ParamBlock 1, 2, 0, 0, 0 everywhere) are not decoded, and other values warn.
+			typedef PIPELINE::MAX::BUILTIN::CParamBlock CParamBlock;
+			CReferenceMaker *crm = dynamic_cast<CReferenceMaker *>(mod);
+			CParamBlock *cpb = crm && crm->nbReferences() > 0 ? dynamic_cast<CParamBlock *>(crm->getReference(0)) : nullptr;
+			static const sint32 s_Corpus[5] = { 1, 2, 0, 0, 0 };
+			bool asCorpus = cpb != nullptr;
+			for (sint32 k = 0; k < 5 && asCorpus; ++k)
+			{
+				sint32 v;
+				asCorpus = cpb->getInt(k, v) && v == s_Corpus[k];
+			}
+			if (!asCorpus)
+			{
+				fprintf(stderr, "WARNING: mesh '%s' Copy Map with other settings than the corpus has; passed through\n",
+				        name.c_str());
+				if (warnings) warnings->push_back("modifier:copymap");
+			}
+		}
+		else if (mcid == NLMISC::CClassId(0x02df2e3a, 0x72ba4e1f) && mod->classDesc()->superClassId() == 0x810)
+		{
+			applyUnwrapUvw(mod, node, out, name, warnings);
+		}
 		else if (mcid == NLMISC::CClassId(0xef92aa7c, 0x511bbe75) && mod->classDesc()->superClassId() == 0x810)
 		{
 			applyMirror(mod, app, out, name, warnings);
@@ -2597,59 +2870,76 @@ bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warning
 		}
 		else if (UVWMAP::isUvwMapModifier(mod))
 		{
-			// UVW Map library (pipeline_max_export_common/uvw_map_mod): pblock indices, gizmo
-			// PRS, mod-context TM, MapPoint projections. PLANAR is corpus-validated (the
-			// Rectangle01 GT pinned the sign convention: u = 0.5 − p.x, v = 0.5 − p.y under the
-			// stored Fit gizmo) and applied by default; the other projection types stay gated
-			// until their own corpus validation — PMB_UVW_APPLY=1 enables all types for probes.
+			// UVW Map (pipeline_max_export_common/uvw_map_mod): planar, cylindrical, spherical, box and face;
+			// ball and the newer types warn. At face level only the selected faces are mapped.
+			const uint typeMask = (1u << UVWMAP::MAP_PLANAR) | (1u << UVWMAP::MAP_CYLINDRICAL)
+				| (1u << UVWMAP::MAP_SPHERICAL) | (1u << UVWMAP::MAP_BOX) | (1u << UVWMAP::MAP_FACE);
+			const uint nf = (uint)out.Faces.size();
+			std::vector<sint32> faceVerts(nf * 3);
+			std::vector<uint32> faceFlags(nf);
+			for (uint f = 0; f < nf; ++f)
 			{
-				// Default planar only (Rectangle01 GT). Cyl/sphere/box formulas exist but
-				// still need corpus-side GT (enabling sphere on snowballs aim_sphere regressed
-				// vert count 559→482). PMB_UVW_APPLY=1|all enables every type; =cys enables
-				// cylindrical+spherical+ball+box in addition to planar.
-				uint typeMask = (1u << UVWMAP::MAP_PLANAR);
-				if (const char *e = getenv("PMB_UVW_APPLY"))
-				{
-					if (e[0] == '1' || e[0] == 'a' || e[0] == 'A')
-						typeMask = 0xFFFFFFFFu;
-					else if (e[0] == 'c' || e[0] == 'C')
-						typeMask = (1u << UVWMAP::MAP_PLANAR) | (1u << UVWMAP::MAP_CYLINDRICAL)
-							| (1u << UVWMAP::MAP_SPHERICAL) | (1u << UVWMAP::MAP_BALL)
-							| (1u << UVWMAP::MAP_BOX);
-				}
-				std::vector<sint32> faceVerts(out.Faces.size() * 3);
-				for (uint f = 0; f < out.Faces.size(); ++f)
+				for (uint c2 = 0; c2 < 3; ++c2)
+					faceVerts[f * 3 + c2] = (sint32)out.Faces[f].V[c2];
+				faceFlags[f] = out.Faces[f].Flags;
+			}
+			std::map<int, UVWMAP::SMeshView::SChannel> chans;
+			for (std::map<int, SMapChannel>::const_iterator it = out.Maps.begin(); it != out.Maps.end(); ++it)
+			{
+				if (it->second.Faces.size() != nf)
+					continue;
+				UVWMAP::SMeshView::SChannel &sc = chans[it->first];
+				sc.UVs.resize(it->second.Verts.size());
+				for (uint k = 0; k < it->second.Verts.size(); ++k)
+					sc.UVs[k] = NLMISC::CVector(it->second.Verts[k].x, it->second.Verts[k].y, it->second.Verts[k].z);
+				sc.FaceUVs.resize(nf * 3);
+				for (uint f = 0; f < nf; ++f)
 					for (uint c2 = 0; c2 < 3; ++c2)
-						faceVerts[f * 3 + c2] = (sint32)out.Faces[f].V[c2];
-				std::map<int, UVWMAP::SMeshView::SChannel> chans;
-				UVWMAP::SMeshView mv;
-				mv.Verts = reinterpret_cast<std::vector<MAXMATH::Point3M> *>(&out.Verts);
-				mv.FaceVerts = &faceVerts;
-				mv.FaceNormals = nullptr;
-				mv.Maps = &chans;
-				int mapType = -1;
-				if (UVWMAP::applyUvwMap(mod, app, mv, typeMask, &mapType))
+						sc.FaceUVs[f * 3 + c2] = (sint32)it->second.Faces[f].T[c2];
+			}
+			const bool faceLevel = !out.SelLevelUnknown && out.SelLevel == 4;
+			const bool faceSelKnown = faceLevel && !out.SelBitsUnknown && out.SelFaces.size() == nf;
+			if (out.SelLevelUnknown || (faceLevel && !faceSelKnown))
+			{
+				fprintf(stderr, "WARNING: mesh '%s' UVW Map applied to every face: the selection it sees is not known\n",
+				        name.c_str());
+				if (warnings) warnings->push_back("selection:uvwmap");
+			}
+			UVWMAP::SMeshView mv;
+			mv.Verts = reinterpret_cast<std::vector<MAXMATH::Point3M> *>(&out.Verts);
+			mv.FaceVerts = &faceVerts;
+			mv.FaceFlags = &faceFlags;
+			mv.FaceSel = faceSelKnown ? &out.SelFaces : nullptr;
+			mv.Maps = &chans;
+			int mapType = -1, channel = -1;
+			uint unmapped = 0;
+			if (UVWMAP::applyUvwMap(mod, app, mv, typeMask, &mapType, &channel, &unmapped))
+			{
+				if (unmapped)
 				{
-					for (std::map<int, UVWMAP::SMeshView::SChannel>::iterator ct = chans.begin();
-					     ct != chans.end(); ++ct)
-					{
-						SMapChannel &mc = out.Maps[ct->first];
-						mc.Verts.resize(ct->second.UVs.size());
-						if (!ct->second.UVs.empty())
-							memcpy(&mc.Verts[0], &ct->second.UVs[0], ct->second.UVs.size() * 12);
-						mc.Faces.resize(out.Faces.size());
-						for (uint f = 0; f < out.Faces.size(); ++f)
-							for (uint c2 = 0; c2 < 3; ++c2)
-								mc.Faces[f].T[c2] = (uint32)ct->second.FaceUVs[f * 3 + c2];
-					}
+					fprintf(stderr, "WARNING: mesh '%s' UVW Map face mapping: %u faces without exactly one hidden edge "
+					        "get (0, 0)\n", name.c_str(), unmapped);
+					if (warnings) warnings->push_back("modifier:uvwmap-face");
 				}
-				else
+				const UVWMAP::SMeshView::SChannel &sc = chans[channel];
+				SMapChannel &mc = out.Maps[channel];
+				mc.Verts.resize(sc.UVs.size());
+				for (uint k = 0; k < sc.UVs.size(); ++k)
 				{
-					fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated "
-					                "without it (UVW Map type %d not corpus-validated yet)\n",
-					        name.c_str(), mcid.toString().c_str(), mapType);
-					if (warnings) warnings->push_back("modifier:" + mcid.toString());
+					mc.Verts[k].x = sc.UVs[k].x;
+					mc.Verts[k].y = sc.UVs[k].y;
+					mc.Verts[k].z = sc.UVs[k].z;
 				}
+				mc.Faces.resize(nf);
+				for (uint f = 0; f < nf; ++f)
+					for (uint c2 = 0; c2 < 3; ++c2)
+						mc.Faces[f].T[c2] = (uint32)sc.FaceUVs[f * 3 + c2];
+			}
+			else
+			{
+				fprintf(stderr, "WARNING: mesh '%s' has unhandled modifier %s; evaluated without it (UVW Map type %d "
+				        "not supported, or an animated parameter)\n", name.c_str(), mcid.toString().c_str(), mapType);
+				if (warnings) warnings->push_back("modifier:" + mcid.toString());
 			}
 		}
 		else if (MAPEXT::isMapExtenderModifier(mod))
