@@ -398,6 +398,7 @@ ob_start();
 			<p style="font-size:0.85rem; color:#8899a6; margin-bottom:0.75rem;">
 				The login needs the access that matches the domain status: OPEN while it is open, DEV while it is in development, RESTRICTED while it is restricted.
 				A row can hold several. Adding a row for a domain and shard that already have one replaces its access.
+				A row for all shards comes first: while an account has one for a domain, the login goes by it, and rows for single shards of that domain have no effect.
 			</p>
 			<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>">
 				<?php echo csrfField(); ?>

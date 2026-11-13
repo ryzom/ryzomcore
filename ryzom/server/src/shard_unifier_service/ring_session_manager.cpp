@@ -665,6 +665,9 @@ namespace RSMGR
 			CSString query;
 			query << "SELECT AccessPrivilege FROM permission";
 			query << " WHERE UId = " << userId << " AND DomainId = (SELECT domain_id FROM domain WHERE domain_name = '" << MSW::escapeString(DomainName, _NelDb) << "')";
+			// the row for all shards (ShardId -1) comes first, as in the login script: it is the one that counts when
+			// the account also has rows for single shards
+			query << " ORDER BY ShardId";
 
 			if (!_NelDb.query(query))
 			{

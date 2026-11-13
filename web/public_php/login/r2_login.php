@@ -475,7 +475,9 @@
 				// check if the user can use this application
 
 				$clientApplication = mysqli_real_escape_string($link, $clientApplication);
-				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND DomainId='$domainId'";
+				// the row for all shards (ShardId -1) comes first: it is the one that counts, here and
+				// in the shard unifier, when the account also has rows for single shards
+				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND DomainId='$domainId' ORDER BY ShardId";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 				if (mysqli_num_rows ($result) == 0)
 				{
