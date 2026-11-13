@@ -487,9 +487,20 @@ double CTime::ticksToSecond (TTicks ticks)
 		static double factor = 0.0;
 		if (factor == 0.0)
 		{
+			// a tick is numer / denom nanoseconds, so there are 1e9 * denom / numer ticks in a second
+			// computed once, so a failure is reported once
 			mach_timebase_info_data_t tbInfo;
-			mach_timebase_info(&tbInfo);
-			factor = 1000000000.0 * (double)tbInfo.numer / (double)tbInfo.denom;
+			tbInfo.numer = 0;
+			tbInfo.denom = 0;
+			kern_return_t result = mach_timebase_info(&tbInfo);
+			if (result != KERN_SUCCESS || tbInfo.numer == 0 || tbInfo.denom == 0)
+			{
+				nlwarning("TIME: mach_timebase_info gave error %d and timebase %u/%u, a tick is taken as a nanosecond",
+				    (sint)result, (uint)tbInfo.numer, (uint)tbInfo.denom);
+				tbInfo.numer = 1;
+				tbInfo.denom = 1;
+			}
+			factor = 1000000000.0 * (double)tbInfo.denom / (double)tbInfo.numer;
 		}
 		return double(ticks / factor);
 	}
