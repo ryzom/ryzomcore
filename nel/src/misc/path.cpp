@@ -3026,11 +3026,11 @@ bool CFile::setRWAccess(const std::string &filename)
 #ifdef NL_OS_WINDOWS
 	std::wstring wideFile = NLMISC::utf8ToWide(filename);
 
-	// if the file exists and there's no write access
-	if (_waccess (wideFile.c_str(), 00) == 0 && _waccess (wideFile.c_str(), 06) == -1)
+	// if the file exists (the else below is for a file that does not exist, as on the other systems)
+	if (_waccess (wideFile.c_str(), 00) == 0)
 	{
-		// try to set the read/write access
-		if (_wchmod (wideFile.c_str(), _S_IREAD | _S_IWRITE) == -1)
+		// and there's no write access, try to set the read/write access
+		if (_waccess (wideFile.c_str(), 06) == -1 && _wchmod (wideFile.c_str(), _S_IREAD | _S_IWRITE) == -1)
 		{
 			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
 			{

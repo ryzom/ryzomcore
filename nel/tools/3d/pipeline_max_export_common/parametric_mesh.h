@@ -89,15 +89,21 @@ extern const NLMISC::CClassId CLASSID_PLANE;    ///< {0x081f1dfc, 0x77566f65}
 /// receives exactly `3 x tris.size()` entries, one UV per triangle corner in tri order (corner c
 /// of tri t is `(*uvVerts)[t*3 + c]`); the caller builds a map channel whose face t maps its 3
 /// corners to `t*3 + {0,1,2}`. No dedup here: the consuming mesh build dedups the final vertex
-/// buffer on (pos, normal, UV), so the per-corner VALUE is what matters. Box UVs derive
-/// geometrically per face (each face projects onto its two in-plane axes; validated against
-/// ~/shape_export_dataset primuv_box(_multiseg), generalises to multi-segment by vertex coord);
-/// Plane UVs are `(0.5+x/w, 0.5+y/l)`.
+/// buffer on (pos, normal, UV), so the per-corner VALUE is what matters. Box UVs come from the
+/// primitive's three grids, the side picked by the face normal (-X, +Y and -Z run u the other way;
+/// box01.shape byte-identical with it); Plane UVs are `(0.5+x/w, 0.5+y/l)`.
+///
+/// When `uvFaces` is also non-NULL, a generator that knows the primitive's own map vert numbering
+/// (the Box: three shared grids; the hemisphere Sphere: one grid) fills `uvVerts` with those map
+/// verts and `uvFaces` with three indices per triangle; the others leave `uvFaces` empty and keep
+/// the per-corner layout. Edit Mesh map channel records index the primitive's numbering, so they
+/// need the shared form.
 bool buildParametricMesh(const NLMISC::CClassId &cid,
                          const std::map<sint32, OLDPBLOCK::SParam> &params,
                          std::vector<NLMISC::CVector> &verts,
                          std::vector<SPrimTri> &tris,
-                         std::vector<NLMISC::CVector> *uvVerts = nullptr);
+                         std::vector<NLMISC::CVector> *uvVerts = nullptr,
+                         std::vector<uint32> *uvFaces = nullptr);
 
 } /* namespace PRIMMESH */
 

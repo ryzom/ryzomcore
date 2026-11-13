@@ -61,8 +61,7 @@ bool shapeToExportFileBytes(IShape *shape, std::vector<uint8> &out, std::string 
 	bool oldIB = CIndexBuffer::SerialOldPreferredMemory;
 	CVertexBuffer::SerialOldPreferredMemory = true;
 	CIndexBuffer::SerialOldPreferredMemory = true;
-	char tmpPath[256];
-	snprintf(tmpPath, sizeof(tmpPath), "/tmp/nel_gltf_shape_bytes.%d.tmp", (int)NLGLTF_SEB_GETPID());
+	std::string tmpPath = CPath::getTemporaryDirectory() + toString("nel_gltf_shape_bytes.%d.tmp", (int)NLGLTF_SEB_GETPID());
 	bool ok = false;
 	try
 	{

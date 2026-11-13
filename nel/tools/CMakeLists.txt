@@ -1,7 +1,8 @@
+# Always: misc builds crash_report, which NeL programs start when they crash (the client packages carry it), and
+# guards its other tools with WITH_NEL_TOOLS itself
+ADD_SUBDIRECTORY(misc)
+
 # Don't add other subdirectories if only max plugins are selected.
-IF(WITH_NEL_TOOLS)
-  ADD_SUBDIRECTORY(misc)
-ENDIF()
 
 IF(WITH_NEL_TOOLS)
   ADD_SUBDIRECTORY(memory)

@@ -73,13 +73,12 @@ using namespace NL3D;
 // CMeshBase version byte 10 -> 9 (the reference corpus era).
 static bool writeShapeCompat(NL3D::IShape *shape, const std::string &outPath)
 {
-	char tmpPath[256];
-	sprintf(tmpPath, "/tmp/shape_lightmapper.%d.tmp", (int)SLM_GETPID());
+	std::string tmpPath = CPath::getTemporaryDirectory() + toString("shape_lightmapper.%d.tmp", (int)SLM_GETPID());
 	{
 		NLMISC::COFile ofile;
 		if (!ofile.open(tmpPath))
 		{
-			fprintf(stderr, "ERROR: cannot open %s for writing\n", tmpPath);
+			fprintf(stderr, "ERROR: cannot open %s for writing\n", tmpPath.c_str());
 			return false;
 		}
 		NL3D::CShapeStream shapeStream(shape);
@@ -91,7 +90,7 @@ static bool writeShapeCompat(NL3D::IShape *shape, const std::string &outPath)
 		NLMISC::CIFile ifile;
 		if (!ifile.open(tmpPath))
 		{
-			fprintf(stderr, "ERROR: cannot open %s for reading\n", tmpPath);
+			fprintf(stderr, "ERROR: cannot open %s for reading\n", tmpPath.c_str());
 			return false;
 		}
 		memBuf.resize(ifile.getFileSize());
@@ -328,7 +327,8 @@ int main(int argc, char **argv)
 		}
 		if (recv.AutoAnim)
 			meshBase->setAutoAnim(true);
-		meshBase->setDistMax(recv.DistMax);
+		if (!recv.MultiLod) // a multi-lod shape keeps the dist max its build takes from the last lod
+			meshBase->setDistMax(recv.DistMax);
 
 		std::string outPath = (recv.CoarseOutput ? outDirCoarse : outDir) + "/"
 			+ NLMISC::toLowerAscii(recv.NodeName) + ".shape";

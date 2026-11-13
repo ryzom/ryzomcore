@@ -27,6 +27,8 @@
 #include <nel/misc/types_nl.h>
 #include "water_build.h"
 
+#include "../pipeline_max_export_common/export_ids.h"
+
 #include <cstdio>
 #include <cstring>
 
@@ -484,6 +486,9 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	// truncation (main.cpp) drops these fields entirely on write anyway. Kept documented for
 	// a future v15+ material corpus.
 
+	// The reference builds water inside the mesh path of buildShape, so it reaches the dist max at its end
+	// (not a multi-lod object there).
+	ws->setDistMax(getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f));
 	return ws;
 }
 

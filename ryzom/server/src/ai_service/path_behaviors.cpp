@@ -484,6 +484,13 @@ reStartFollowTopo:
 	bot->resetDecalage();
 	moveDecalage.normalize(modecalageDist*1000);
 	
+	// What the bot moves by itself, without the repulsion; its heading only follows a move of its own.
+	const CAIVector ownMove = add + moveDecalage;
+	// A stuck bot (is_stuck in its primitive, an event bot spawned without dispersion) that is not moving by itself
+	// stays where it was placed: players standing against it do not push it away. Other bots still do, so stuck
+	// bots placed on top of each other spread out.
+	const bool pushedByPlayers = !(ownMove.isNull() && NLMISC::safe_cast<CSpawnBot *>(bot)->getPersistent().isStuck());
+
 	CAIVector rAdd;
 	if (simulateBug(8))
 	{
@@ -492,7 +499,7 @@ reStartFollowTopo:
 		{
 			// straight repulsion
 			CAIVector repulsion;
-			if (bot->calcStraightRepulsion(startPos+rAdd, repulsion))
+			if (bot->calcStraightRepulsion(startPos+rAdd, repulsion, pushedByPlayers))
 			{
 				rAdd += moveDecalage;
 				rAdd += repulsion;
@@ -505,7 +512,7 @@ reStartFollowTopo:
 		else
 		{
 			// repulsion
-			CAIVector repulsion = bot->calcRepulsion(startPos+rAdd);
+			CAIVector repulsion = bot->calcRepulsion(startPos+rAdd, pushedByPlayers);
 			rAdd += moveDecalage;
 			repulsion.normalize((float)(std::max((float)rAdd.norm(),repulsSpeed)*710));	// minimum of 0.25m/s.
 			rAdd += repulsion;
@@ -518,7 +525,7 @@ reStartFollowTopo:
 		{
 			// straight repulsion
 			CAIVector repulsion;
-			if (bot->calcStraightRepulsion(startPos+rAdd, repulsion))
+			if (bot->calcStraightRepulsion(startPos+rAdd, repulsion, pushedByPlayers))
 			{
 				rAdd += repulsion;
 			}
@@ -530,7 +537,7 @@ reStartFollowTopo:
 		else
 		{
 			// repulsion
-			CAIVector repulsion = bot->calcRepulsion(startPos+rAdd);	
+			CAIVector repulsion = bot->calcRepulsion(startPos+rAdd, pushedByPlayers);	
 			repulsion.normalize((float)(std::max((float)rAdd.norm(),repulsSpeed)*710));	// minimum of 0.25m/s.
 			rAdd += repulsion;
 		}
@@ -564,7 +571,8 @@ reStartFollowTopo:
 	}
 	else
 	{
-		if (updateOrient && !rAdd.isNull())
+		// a bot that is only pushed keeps facing where it faced
+		if (updateOrient && !rAdd.isNull() && !ownMove.isNull())
 			bot->setTheta(rAdd.asAngle());
 	}
 	return returnStatus;

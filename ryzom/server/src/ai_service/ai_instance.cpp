@@ -732,6 +732,13 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	grp->clrBotsAreNamedFlag();
 
+	// Without dispersion several bots each get their own spot, on a circle around the point just wide enough for
+	// them not to overlap, starting across the facing direction (two bots stand side by side). A spot off the walkable
+	// map falls back to the point.
+	const bool orientationGiven = orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0);
+	const double circleStart = orientationGiven ? orientation + NLMISC::Pi / 2.0 : 0.0;
+	const double circleRadius = nbBots > 1 ? (2.0 * sheet->Scale() * sheet->Radius() + 0.5) / (2.0 * sin(NLMISC::Pi / nbBots)) : 0.0;
+
 	{
 		// build unnamed bot
 		for	(uint i=0; i<nbBots; ++i)
@@ -750,9 +757,17 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 			{
 				nlinfo("Stucked !");
 				bot->setStuck(true);
+				if (nbBots > 1)
+				{
+					const double a = circleStart + 2.0 * NLMISC::Pi * i / nbBots;
+					rpos += CAIVector(cos(a) * circleRadius, sin(a) * circleRadius);
+					RYAI_MAP_CRUNCH::CWorldPosition wp;
+					if (!CWorldContainer::getWorldMap().setWorldPosition(AITYPES::vp_auto, wp, rpos))
+						rpos = pos;
+				}
 			}
 			// Spawn all randomly except if only 1 bot
-			if (nbBots > 1)
+			else if (nbBots > 1)
 			{
 				RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
 				RYAI_MAP_CRUNCH::CWorldPosition	wp;
@@ -769,7 +784,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 			}
 
 			float angle = 0.f;
-			if (orientation < (NLMISC::Pi * 2.0) && orientation > (-NLMISC::Pi * 2.0))
+			if (orientationGiven)
 				angle = (float)orientation;
 			else
 				angle = randomAngle();
@@ -788,9 +803,17 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 		return NULL;
 	}
 
-	NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
-	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
-	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
+	if (dispersionRadius == 0)
+	{
+		// the bots stand on their spots (wandering in a zone of radius 0 sent them all back to its centre)
+		spawnGroup->movingProfile().setAIProfile(new CGrpProfileIdle(spawnGroup));
+	}
+	else
+	{
+		NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
+		destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
+		spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
+	}
 
 	if (spawnBots)
 		grp->getSpawnObj()->spawnBots();

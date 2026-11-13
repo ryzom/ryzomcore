@@ -56,11 +56,20 @@ using namespace std;
 #define PMB_MD_CREATED_FACES_CHUNK_ID 0x0208
 #define PMB_MD_FACE_REMAP_CHUNK_ID 0x0210
 #define PMB_MD_FACE_ATTRIBS_CHUNK_ID 0x0220
+#define PMB_MD_FACE_SMOOTH_CHUNK_ID 0x0230
 #define PMB_MD_DEL_FACES_CHUNK_ID 0x0270
-#define PMB_MD_SUBOBJ_LEVEL_CHUNK_ID 0x0300
+#define PMB_MD_MAP_COUNT_CHUNK_ID 0x0300
+// One map channel group: 0x0320 opens it, the others belong to the last opened group.
+#define PMB_MD_MAP_CHANNEL_CHUNK_ID 0x0320
+#define PMB_MD_MAP_INPUT_VERTS_CHUNK_ID 0x0324
+#define PMB_MD_MAP_INPUT_FACES_CHUNK_ID 0x0328
+#define PMB_MD_MAP_VERT_SETS_CHUNK_ID 0x0330
+#define PMB_MD_MAP_CREATED_VERTS_CHUNK_ID 0x0334
+#define PMB_MD_MAP_CREATED_FACES_CHUNK_ID 0x0338
+#define PMB_MD_MAP_FACE_REMAP_CHUNK_ID 0x033b
 #define PMB_MD_SEL_VERTS_CHUNK_ID 0x0400
-#define PMB_MD_SEL_FACES_CHUNK_ID 0x0410
-#define PMB_MD_SEL_EDGES_CHUNK_ID 0x0420
+#define PMB_MD_SEL_EDGES_CHUNK_ID 0x0410 // 3 bits per output face (zo_cn_mairie.max: 189, 510, 60 bits)
+#define PMB_MD_SEL_FACES_CHUNK_ID 0x0420 // 1 bit per output face
 #define PMB_MD_SEL_UNKNOWN430_CHUNK_ID 0x0430
 // The bit-array leaf inside 0x0170/0x0270/0x04x0 containers.
 #define PMB_MD_BIT_ARRAY_CHUNK_ID 0x2700
@@ -89,10 +98,12 @@ void CMeshDelta::clear()
 	m_CreatedFaces.clear();
 	m_FaceRemap.clear();
 	m_FaceAttribs.clear();
+	m_FaceSmooth.clear();
+	m_MapDeltas.clear();
 	m_DelVerts = SBitArray();
 	m_DelFaces = SBitArray();
-	m_HasInputVertCount = m_HasInputFaceCount = m_HasSubObjLevel = false;
-	m_InputVertCount = m_InputFaceCount = m_SubObjLevel = 0;
+	m_HasInputVertCount = m_HasInputFaceCount = m_HasMapCount = false;
+	m_InputVertCount = m_InputFaceCount = m_MapCount = 0;
 	m_LocalDataChildren.clear();
 	m_DeltaChildren.clear();
 	m_UnknownLocalDataIds.clear();
@@ -136,6 +147,13 @@ bool CMeshDelta::decodeRows(uint16 id, IStorageObject *obj, uint stride, uint ki
 	seg.Rows = n;
 	seg.Value = 0;
 	seg.Bits = nullptr;
+	seg.MapIdx = 0;
+	if (kind >= 8 && kind <= 11)
+	{
+		// a map channel record table outside a 0x0320 group
+		if (m_MapDeltas.empty()) return false;
+		seg.MapIdx = m_MapDeltas.size() - 1;
+	}
 	switch (kind)
 	{
 	case 0:
@@ -163,6 +181,43 @@ bool CMeshDelta::decodeRows(uint16 id, IStorageObject *obj, uint stride, uint ki
 		m_FaceAttribs.resize(m_FaceAttribs.size() + n);
 		if (n) memcpy(&m_FaceAttribs[seg.Row0], p, (size_t)n * stride);
 		break;
+	case 7:
+		seg.Row0 = m_FaceSmooth.size();
+		m_FaceSmooth.resize(m_FaceSmooth.size() + n);
+		if (n) memcpy(&m_FaceSmooth[seg.Row0], p, (size_t)n * stride);
+		break;
+	case 8:
+	{
+		std::vector<SMapVertSet> &t = m_MapDeltas[seg.MapIdx].VertSets;
+		seg.Row0 = t.size();
+		t.resize(t.size() + n);
+		if (n) memcpy(&t[seg.Row0], p, (size_t)n * stride);
+		break;
+	}
+	case 9:
+	{
+		std::vector<SMapVert> &t = m_MapDeltas[seg.MapIdx].CreatedVerts;
+		seg.Row0 = t.size();
+		t.resize(t.size() + n);
+		if (n) memcpy(&t[seg.Row0], p, (size_t)n * stride);
+		break;
+	}
+	case 10:
+	{
+		std::vector<SMapFace> &t = m_MapDeltas[seg.MapIdx].CreatedFaces;
+		seg.Row0 = t.size();
+		t.resize(t.size() + n);
+		if (n) memcpy(&t[seg.Row0], p, (size_t)n * stride);
+		break;
+	}
+	case 11:
+	{
+		std::vector<SFaceVertRemap> &t = m_MapDeltas[seg.MapIdx].FaceRemap;
+		seg.Row0 = t.size();
+		t.resize(t.size() + n);
+		if (n) memcpy(&t[seg.Row0], p, (size_t)n * stride);
+		break;
+	}
 	default:
 		return false;
 	}
@@ -184,6 +239,7 @@ bool CMeshDelta::decodeCountLeaf(uint16 id, IStorageObject *obj, uint32 &value, 
 	seg.Rows = 0;
 	seg.Value = value;
 	seg.Bits = nullptr;
+	seg.MapIdx = 0;
 	m_Segments.push_back(seg);
 	return true;
 }
@@ -217,6 +273,7 @@ bool CMeshDelta::decodeBitArray(uint16 id, IStorageObject *obj, SBitArray &out)
 	seg.Rows = 0;
 	seg.Value = n;
 	seg.Bits = &out;
+	seg.MapIdx = 0;
 	m_Segments.push_back(seg);
 	return true;
 }
@@ -264,37 +321,42 @@ bool CMeshDelta::decode(IStorageObject *localModData)
 		case PMB_MD_CREATED_FACES_CHUNK_ID: ok = decodeRows(it->first, it->second, 24, 2); break;
 		case PMB_MD_FACE_REMAP_CHUNK_ID: ok = decodeRows(it->first, it->second, 20, 3); break;
 		case PMB_MD_FACE_ATTRIBS_CHUNK_ID: ok = decodeRows(it->first, it->second, 12, 4); break;
+		case PMB_MD_FACE_SMOOTH_CHUNK_ID: ok = decodeRows(it->first, it->second, 12, 7); break;
 		case PMB_MD_INPUT_VERTS_CHUNK_ID: ok = decodeCountLeaf(it->first, it->second, m_InputVertCount, m_HasInputVertCount); break;
 		case PMB_MD_INPUT_FACES_CHUNK_ID: ok = decodeCountLeaf(it->first, it->second, m_InputFaceCount, m_HasInputFaceCount); break;
-		case PMB_MD_SUBOBJ_LEVEL_CHUNK_ID: ok = decodeCountLeaf(it->first, it->second, m_SubObjLevel, m_HasSubObjLevel); break;
+		case PMB_MD_MAP_COUNT_CHUNK_ID: ok = decodeCountLeaf(it->first, it->second, m_MapCount, m_HasMapCount); break;
 		case PMB_MD_DEL_VERTS_CHUNK_ID: ok = decodeBitArray(it->first, it->second, m_DelVerts); break;
 		case PMB_MD_DEL_FACES_CHUNK_ID: ok = decodeBitArray(it->first, it->second, m_DelFaces); break;
+		case PMB_MD_MAP_CHANNEL_CHUNK_ID:
+		{
+			// pushed even when the leaf is unreadable, so the records that follow do not land in the
+			// previous group
+			m_MapDeltas.push_back(SMapDelta());
+			ok = decodeCountLeaf(it->first, it->second, m_MapDeltas.back().Channel, m_MapDeltas.back().HasChannel);
+			break;
+		}
+		case PMB_MD_MAP_INPUT_VERTS_CHUNK_ID:
+			ok = !m_MapDeltas.empty()
+				&& decodeCountLeaf(it->first, it->second, m_MapDeltas.back().VertCount, m_MapDeltas.back().HasVertCount);
+			break;
+		case PMB_MD_MAP_INPUT_FACES_CHUNK_ID:
+			ok = !m_MapDeltas.empty()
+				&& decodeCountLeaf(it->first, it->second, m_MapDeltas.back().FaceCount, m_MapDeltas.back().HasFaceCount);
+			break;
+		case PMB_MD_MAP_VERT_SETS_CHUNK_ID: ok = decodeRows(it->first, it->second, 16, 8); break;
+		case PMB_MD_MAP_CREATED_VERTS_CHUNK_ID: ok = decodeRows(it->first, it->second, 12, 9); break;
+		case PMB_MD_MAP_CREATED_FACES_CHUNK_ID: ok = decodeRows(it->first, it->second, 12, 10); break;
+		case PMB_MD_MAP_FACE_REMAP_CHUNK_ID: ok = decodeRows(it->first, it->second, 20, 11); break;
 		case PMB_MD_SEL_VERTS_CHUNK_ID:
 		case PMB_MD_SEL_FACES_CHUNK_ID:
 		case PMB_MD_SEL_EDGES_CHUNK_ID:
 		case PMB_MD_SEL_UNKNOWN430_CHUNK_ID:
 			break; // recognized selection state, kept raw (ignored on evaluation)
-		// Recognized but untyped map-channel/UI sub-records; kept raw, ignored on evaluation.
-		// 0x0320/0x0324/0x0328 are 4-byte leaves on 4134/4379
-		// mod-apps (always the three together — per-map-channel counts/flags); the record
-		// tables are count-prefixed with corpus-uniform strides: 0x0230 (12 B, the created
-		// map-face shape, legacy TOPO_NTVFACES counterpart), 0x0334/0x0338 (12 B, Point3;
-		// the created map/tex-vert shape, legacy TOPO_NTVERTS), 0x033b (20 B, the same
-		// faceIdx+applyMask+v[3] shape as 0x0210, legacy TOPO_TVFACEMAP counterpart), 0x0330
-		// (16 B); 0x0340 is a container holding one tiny 0x2700 bit array (8 B corpus-wide);
-		// 0x0120 (52 B) and 0x0200 (44 B) are single-instance; 0x0360 (5 instances) is not
-		// count-prefixed at any common stride. Typing any of these waits for a consumer that
-		// needs them plus its own corpus proof.
+		// Recognized but untyped; kept raw, ignored on evaluation. 0x0340 is a container holding
+		// one tiny 0x2700 bit array (8 B corpus-wide); 0x0120 (52 B) and 0x0200 (44 B) are
+		// single-instance; 0x0360 (5 instances) is not count-prefixed at any common stride.
 		case 0x0120:
 		case 0x0200:
-		case 0x0230:
-		case 0x0320:
-		case 0x0324:
-		case 0x0328:
-		case 0x0330:
-		case 0x0334:
-		case 0x0338:
-		case 0x033b:
 		case 0x0340:
 		case 0x0360:
 			break;
@@ -313,7 +375,7 @@ bool CMeshDelta::selfTestReencode(std::string &err) const
 	{
 		const SSegment &seg = *it;
 		std::vector<uint8> enc;
-		if (seg.kind <= 4)
+		if (seg.kind <= 4 || (seg.kind >= 7 && seg.kind <= 11))
 		{
 			uint stride = 0;
 			const uint8 *rows = nullptr;
@@ -324,6 +386,11 @@ bool CMeshDelta::selfTestReencode(std::string &err) const
 			case 2: stride = 24; rows = seg.Rows ? (const uint8 *)&m_CreatedFaces[seg.Row0] : nullptr; break;
 			case 3: stride = 20; rows = seg.Rows ? (const uint8 *)&m_FaceRemap[seg.Row0] : nullptr; break;
 			case 4: stride = 12; rows = seg.Rows ? (const uint8 *)&m_FaceAttribs[seg.Row0] : nullptr; break;
+			case 7: stride = 12; rows = seg.Rows ? (const uint8 *)&m_FaceSmooth[seg.Row0] : nullptr; break;
+			case 8: stride = 16; rows = seg.Rows ? (const uint8 *)&m_MapDeltas[seg.MapIdx].VertSets[seg.Row0] : nullptr; break;
+			case 9: stride = 12; rows = seg.Rows ? (const uint8 *)&m_MapDeltas[seg.MapIdx].CreatedVerts[seg.Row0] : nullptr; break;
+			case 10: stride = 12; rows = seg.Rows ? (const uint8 *)&m_MapDeltas[seg.MapIdx].CreatedFaces[seg.Row0] : nullptr; break;
+			case 11: stride = 20; rows = seg.Rows ? (const uint8 *)&m_MapDeltas[seg.MapIdx].FaceRemap[seg.Row0] : nullptr; break;
 			}
 			enc.resize(4 + seg.Rows * stride);
 			uint32 n = (uint32)seg.Rows;

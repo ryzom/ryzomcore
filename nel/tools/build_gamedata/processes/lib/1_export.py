@@ -77,7 +77,7 @@ def processModule(file, filePath):
 		return
 	printLog(log, "DEPENDENCIES " + filePath)
 	output = None
-	cmd = [ "Dependencies.exe", "-json", "-chain", "-depth", "1", filePath ]
+	cmd = [ Dependencies, "-json", "-chain", "-depth", "1", filePath ]
 	try:
 		output = bytes.decode(subprocess.check_output(cmd))
 	except subprocess.CalledProcessError as e:

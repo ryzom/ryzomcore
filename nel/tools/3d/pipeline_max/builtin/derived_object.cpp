@@ -249,6 +249,24 @@ bool CDerivedObject::modAppContextTM(const CStorageContainer *modApp, float *tm1
 	return false;
 }
 
+bool CDerivedObject::modAppContextBox(const CStorageContainer *modApp, float *box6)
+{
+	if (!modApp) return false;
+	const CStorageContainer::TStorageObjectContainer &chunks = modApp->chunks();
+	for (CStorageContainer::TStorageObjectConstIt it = chunks.begin(); it != chunks.end(); ++it)
+	{
+		if (it->first != PMB_MOD_APP_CONTEXT_BBOX_CHUNK_ID) continue;
+		const CStorageRaw *raw = dynamic_cast<const CStorageRaw *>(it->second);
+		if (raw && raw->Value.size() >= PMB_MOD_APP_CONTEXT_BBOX_BYTES)
+		{
+			memcpy(box6, nlVectorData(raw->Value), PMB_MOD_APP_CONTEXT_BBOX_BYTES);
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+
 IStorageObject *CDerivedObject::modAppLocalModData(const CStorageContainer *modApp)
 {
 	if (!modApp) return nullptr;
