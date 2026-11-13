@@ -32,6 +32,7 @@
 #include <string>
 
 #include "nel/misc/types_nl.h"
+#include "nel/misc/common.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/config_file.h"
 #include "nel/misc/bit_mem_stream.h"
@@ -150,6 +151,9 @@ int main (int argc, char **argv)
 			}
 		}
 		Client->update();
+
+		// update() with no timeout does not wait, the loop would take a whole core
+		nlSleep(10);
 	}
 	while (Client->connected());
 
