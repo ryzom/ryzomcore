@@ -48,6 +48,9 @@ CMovePrimitive::CMovePrimitive (CMoveContainer* container, uint8 firstWorldImage
 	_Height=0;
 	_IterationCount=0;
 
+	// No user tag until the owner sets one
+	UserData=0;
+
 	_CollisionMask=0xffffffff;
 	_OcclusionMask=0xffffffff;
 	_Attenuation=1;
