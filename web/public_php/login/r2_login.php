@@ -17,6 +17,7 @@
 	include_once('login_translations.php');
 	include_once('../tools/nel_message.php');
 	include_once('../tools/domain_info.php');
+	include_once('../tools/shard_access.php');
 	include_once('login_service_itf.php');
 	include_once('../ring/join_shard.php');
 
@@ -366,13 +367,12 @@
 		// retreive the domain info
 		$domainInfo = getDomainInfo($domainId);
 
-		// convert the domain status enum into the privilege access set
-		$accessPriv = strtoupper(substr($domainInfo['status'], 3));
-		// permission.AccessPrivilege is a SET of these three. ds_close maps
-		// to none of them: a closed domain admits nobody, and the paths that
-		// write a permission row below must never try to store CLOSE.
-		$accessPrivMembers = array('OPEN', 'DEV', 'RESTRICTED');
-		if (!in_array($accessPriv, $accessPrivMembers, true))
+		// the access privilege the domain status asks for, a member of the
+		// SET permission.AccessPrivilege. ds_close asks for none of them: a
+		// closed domain admits nobody, and the paths that write a permission
+		// row below must never try to store CLOSE.
+		$accessPriv = nel_access_privilege_of_status($domainInfo['status']);
+		if ($accessPriv === '')
 		{
 			$reason = errorMsg(3015, $domainName, $domainInfo['status']);
 			mysqli_close($link);
@@ -422,8 +422,8 @@
 					$priv = $row["Privilege"];
 					$extended = $row["ExtendedPrivilege"];
 
-					// add the default permission
-					$query = "INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES ('$id', '$domainId', '$accessPriv')";
+					// add the default permission, a row for all shards of the domain
+					$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('$id', '$domainId', -1, '$accessPriv')";
 					$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 					$res = false;
@@ -437,6 +437,7 @@
 			else
 			{
 				$reason = errorMsg(2001, $login, 'checkUserValidity');
+				$res = false;
 			}
 		}
 		else
@@ -475,11 +476,21 @@
 				// check if the user can use this application
 
 				$clientApplication = mysqli_real_escape_string($link, $clientApplication);
-				// the row for all shards (ShardId -1) comes first: it is the one that counts, here and
-				// in the shard unifier, when the account also has rows for single shards
+				// The access of the account on a shard is what its row for all
+				// shards (ShardId -1) holds together with what its row for that
+				// shard holds (tools/shard_access.php). The login passes when
+				// the row for all shards, or a row for one shard, holds the
+				// access the domain status asks for. Which shards are up, and
+				// what each asks for, is known to the shard unifier, which
+				// applies the same rule to every shard it sends the account to.
 				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND DomainId='$domainId' ORDER BY ShardId";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
-				if (mysqli_num_rows ($result) == 0)
+				$permissionRows = array();
+				while ($permission = mysqli_fetch_assoc($result))
+				{
+					$permissionRows[] = $permission;
+				}
+				if (empty($permissionRows))
 				{
 					if ($AcceptUnknownUser)
 					{
@@ -501,22 +512,24 @@
 				}
 				else
 				{
-					// check that the access privilege for the domain
-					$permission = mysqli_fetch_assoc($result);
-					// the members of the stored SET; an empty SET has none
-					$permissionPrivs = array_values(array_intersect(explode(',', (string)$permission['AccessPrivilege']), $accessPrivMembers));
-
-					if (!in_array($accessPriv, $permissionPrivs, true))
+					// check the access privilege for the domain
+					if (!nel_account_domain_access($permissionRows, $accessPriv))
 					{
 						// no right to connect
 						if ($AcceptUnknownUser)
 						{
-							// set an additionnal privilege for this player. The
-							// value is the list of members: appending to an empty
-							// SET wrote ",OPEN", an empty member, which strict
-							// mode refuses, so the row could never be repaired.
-							$permissionPrivs[] = $accessPriv;
-							$query = "UPDATE permission set AccessPrivilege='".implode(',', $permissionPrivs)."' WHERE PermissionId=".(int)$permission['PermissionId'];
+							// set an additionnal privilege for this player, on
+							// the row for all shards (made when there is none):
+							// a row for one shard stays what the operator made
+							// it. The value is the list of members: appending
+							// to an empty SET wrote ",OPEN", an empty member,
+							// which strict mode refuses, so the row could never
+							// be repaired.
+							$grant = nel_account_all_shards_grant($permissionRows, $accessPriv);
+							if ($grant['row'] === null)
+								$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$domainId', -1, '".$grant['value']."')";
+							else
+								$query = "UPDATE permission set AccessPrivilege='".$grant['value']."' WHERE PermissionId=".(int)$grant['row']['PermissionId'];
 							$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 							$reason = errorMsg(3012, $accessPriv);
@@ -524,8 +537,8 @@
 						}
 						else
 						{
-							// no permission
-							$reason = errorMsg(3013, $clientApplication, $domainName, $accessPriv);
+							// no permission row that holds this access
+							$reason = errorMsg(3013, $clientApplication, $domainName, $accessPriv, nel_account_access_text($permissionRows));
 							$res = false;
 						}
 					}
