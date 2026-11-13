@@ -158,13 +158,23 @@ uint32 TotalPatchSize;
 
 CLoginStateMachine LoginSM;
 
+// Time limits, in seconds, of the login and create account requests. They run on the main thread, so a host that does
+// not answer must not hold the login screen for minutes. The request limit leaves room for the login script's own
+// waits on the login service and the shard unifier (a connection and a read of 10 s for each, 40 s at worst), so
+// that its error message reaches the player.
+static const uint s_LoginConnectTimeout = 10;
+static const uint s_LoginRequestTimeout = 60;
+
 // TODO : nico : put this in an external file, this way it isn't included by the background downloader
 #ifndef RY_BG_DOWNLOADER
 
 bool CStartupHttpClient::connectToLogin()
 {
-	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0))
-		&& verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
+	if (!connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0)))
+		return false;
+
+	setTimeout(s_LoginConnectTimeout, s_LoginRequestTimeout);
+	return verifyServer(ClientCfg.ConfigFile.getVar("StartupVerify").asBool(0));
 }
 
 CStartupHttpClient HttpClient;
@@ -2330,6 +2340,7 @@ bool initCreateAccount()
 			nlwarning("Can't connect");
 			return false;
 		}
+		CurlHttpClient.setTimeout(s_LoginConnectTimeout, s_LoginRequestTimeout);
 
 		std::string lang = ClientCfg.LanguageCode;
 		if(lang=="wk") lang = "uk";
@@ -2524,6 +2535,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 				nlwarning("%s", errorMessage.c_str());
 				return;
 			}
+			CurlHttpClient.setTimeout(s_LoginConnectTimeout, s_LoginRequestTimeout);
 
 			std::string params = "Username=" + results[0] + "&Password=" + results[1]
 				+ "&ConfirmPass=" + results[2] + "&Email=" + results[3];
