@@ -897,8 +897,7 @@ static int meshDeltaSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 								       kt->second && kt->second->isContainer());
 							}
 						}
-						else if (id == 0x0230 || id == 0x0330 || id == 0x0334 || id == 0x0338
-							|| id == 0x033b || id == 0x0360 || id == 0x0120 || id == 0x0200)
+						else if (id == 0x0360 || id == 0x0120 || id == 0x0200)
 						{
 							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(jt->second);
 							if (!raw) continue;
@@ -925,6 +924,23 @@ static int meshDeltaSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 				for (size_t k = bas[b]->BitCount; k < bas[b]->Packed.size() * 8; ++k)
 					if ((bas[b]->Packed[k / 8] >> (k % 8)) & 1) { padNonZero = true; break; }
 				if (padNonZero) ++nBitsPadNonZero;
+			}
+			// Map channel groups against the channel count and the base counts: one MDMAP line per
+			// delta (channel:inputMapVerts/inputMapFaces:vertSets/createdVerts/createdFaces/remap).
+			{
+				std::cout << "MDMAP mapcount=" << (md.hasMapCount() ? (int)md.mapCount() : -1)
+				          << " faces=" << md.inputFaceCount() << " cfaces=" << md.createdFaces().size()
+				          << " smooth=" << md.faceSmooth().size() << " groups=";
+				for (uint g = 0; g < md.mapDeltas().size(); ++g)
+				{
+					const BUILTIN::STORAGE::CMeshDelta::SMapDelta &m = md.mapDeltas()[g];
+					std::cout << (g ? "," : "") << (sint32)m.Channel << ":"
+					          << (m.HasVertCount ? (int)m.VertCount : -1) << "/"
+					          << (m.HasFaceCount ? (int)m.FaceCount : -1) << ":" << m.VertSets.size() << "/"
+					          << m.CreatedVerts.size() << "/" << m.CreatedFaces.size() << "/"
+					          << m.FaceRemap.size();
+				}
+				std::cout << "\n";
 			}
 			if (verbose)
 				std::cerr << "  meshdelta app " << nApps << ": " << md.moves().size() << " moves, "
