@@ -92,7 +92,7 @@ namespace NLGUI
 	// *****************
 
 
-	void CInterfaceProperty::readSInt64(const char * ptr,const string& id)
+	bool CInterfaceProperty::readSInt64(const char * ptr,const string& id)
 	{
 		string str (ptr);
 		//the value is volatile, and a database entry is created
@@ -102,11 +102,13 @@ namespace NLGUI
 			sint64 i;
 			fromString(ptr, i);
 			_VolatileValue->setValue64( i );
+			return true;
 		}
 		//the value is volatile and points to a db entry created elsewhere
 		else
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(str);
+			return false;
 		}
 	}
 
@@ -119,7 +121,7 @@ namespace NLGUI
 
 
 	// ----------------------------------------------------------------------------
-	void CInterfaceProperty::readDouble(const char * ptr,const string& id)
+	bool CInterfaceProperty::readDouble(const char * ptr,const string& id)
 	{
 		string str (ptr);
 		if ( isdigit(*ptr) || *ptr=='-')
@@ -128,10 +130,12 @@ namespace NLGUI
 			C64BitsParts buf;
 			fromString(ptr, buf.d[0]);
 			_VolatileValue->setValue64(buf.i64[0]);
+			return true;
 		}
 		else
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(str);
+			return false;
 		}
 	}
 
@@ -141,7 +145,7 @@ namespace NLGUI
 
 
 	// ----------------------------------------------------------------------------
-	void CInterfaceProperty::readSInt32 (const char *ptr, const string& id)
+	bool CInterfaceProperty::readSInt32 (const char *ptr, const string& id)
 	{
 		string str (ptr);
 		//the value is volatile, and a database entry is created
@@ -151,11 +155,13 @@ namespace NLGUI
 			sint32 i;
 			fromString(ptr, i);
 			_VolatileValue->setValue32( i );
+			return true;
 		}
 		//the value is volatile and points to a db entry created elsewhere
 		else
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(str);
+			return false;
 		}
 	}
 
@@ -182,7 +188,7 @@ namespace NLGUI
 	}
 
 
-	void CInterfaceProperty::readRGBA (const char *value,const string& id)
+	bool CInterfaceProperty::readRGBA (const char *value,const string& id)
 	{
 		string str (value);
 		if (isdigit(*value))
@@ -197,65 +203,77 @@ namespace NLGUI
 			sint64 val = r+(g<<8)+(b<<16)+(a<<24);
 			setSInt64(val);
 			CRGBA rgba = getRGBA();
+			return true;
 		}
 		else
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(str);
+			return false;
 		}
 	}
 
 
-	void CInterfaceProperty::readHotSpot (const char *ptr,const string& id)
+	bool CInterfaceProperty::readHotSpot (const char *ptr,const string& id)
 	{
 		string str(ptr);
 		if ( !strcmp(ptr,"TL") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64((sint64)Hotspot_TL );
+			return true;
 		}
 		else if ( !strcmp(ptr,"TM") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_TM );
+			return true;
 		}
 		else if ( !strcmp(ptr,"TR") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_TR );
+			return true;
 		}
 		else if ( !strcmp(ptr,"ML") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_ML );
+			return true;
 		}
 		else if ( !strcmp(ptr,"MM") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_MM );
+			return true;
 		}
 		else if ( !strcmp(ptr,"MR") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_MR );
+			return true;
 		}
 		else if ( !strcmp(ptr,"BL") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_BL );
+			return true;
 		}
 		else if ( !strcmp(ptr,"BM") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_BM );
+			return true;
 		}
 		else if ( !strcmp(ptr,"BR") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue64( (sint64)Hotspot_BR );
+			return true;
 		}
 
 		else
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(str);
+		return false;
 	}
 
 
@@ -269,18 +287,20 @@ namespace NLGUI
 		return _VolatileValue->getValue8() != 0 ? true : false;
 	}
 
-	void CInterfaceProperty::readBool (const char* value,const string& id)
+	bool CInterfaceProperty::readBool (const char* value,const string& id)
 	{
 		string str (value);
 		if ( !strcmp(value,"true") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue8( (sint8)true );
+			return true;
 		}
 		else if ( !strcmp(value,"false") )
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
 			_VolatileValue->setValue8( (sint8)false );
+			return true;
 		}
 		else if ( isdigit(*value) || *value=='-')
 		{
@@ -288,9 +308,11 @@ namespace NLGUI
 			sint8 value8;
 			fromString(value, value8);
 			_VolatileValue->setValue8( value8 );
+			return true;
 		}
 		else
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(str);
+		return false;
 	}
 
 

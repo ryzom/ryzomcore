@@ -1682,6 +1682,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:SHOW_CLOCK" type="bool" value="false" />
 <variable entry="UI:SAVE:SHOW_CLOCK_12H" type="bool" value="false" />
 <variable entry="UI:SAVE:SHOW_RETICLE" type="bool" value="true" />
+<variable entry="UI:SAVE:RADAR:USE_CAMERA" type="bool" value="false" />
 <variable entry="UI:VARIABLES:MISSION_SELECTED_PREV_SESSION" type="sint32" value="-1" />
 
 <!-- set to true if the current header that called a menu was a popup container -->

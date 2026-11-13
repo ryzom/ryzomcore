@@ -414,6 +414,30 @@ namespace NLGUI
 	};
 	REGISTER_ACTION_HANDLER (CAHSet, "set");
 
+	// ------------------------------------------------------------------------------------------------
+	/** Sets a DB entry, or every entry of a branch, back to the default of its <variable> declaration.
+	  * Params: entry=<DB entry or branch>
+	  */
+	class CAHResetVariables : public IActionHandler
+	{
+	public:
+		virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+		{
+			string entry = getParam (Params, "entry");
+
+			// Do not allow Write on SERVER: or LOCAL:, as the set handler
+			if ((entry == "SERVER" || entry == "LOCAL" || startsWith(entry, "SERVER:") || startsWith(entry, "LOCAL:")) && !startsWith(entry, "LOCAL:R2"))
+			{
+				nlwarning("<CAHResetVariables::execute> you are not allowed to write on 'SERVER:...' or 'LOCAL:...' database, '%s' is not reset", entry.c_str());
+				return;
+			}
+
+			if (CWidgetManager::getInstance()->getParser()->resetVariables(entry) == 0)
+				nlwarning("<CAHResetVariables::execute> no <variable> declaration gives '%s' or an entry below it a value, nothing is reset", entry.c_str());
+		}
+	};
+	REGISTER_ACTION_HANDLER (CAHResetVariables, "reset_variables");
+
 
 	// ------------------------------------------------------------------------------------------------
 	class CAHCopy : public IActionHandler

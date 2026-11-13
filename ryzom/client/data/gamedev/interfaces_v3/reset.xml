@@ -152,10 +152,12 @@
 	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPALLYINTEAM|value=makeRGB(140,200,140)" />
 	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPALLYINGUILD|value=makeRGB(100,150,100)" />
 	<action handler="set" params="dblink=UI:SAVE:ENTITY:COLORS:PVPNEUTRAL|value=makeRGB(64,128,128)" />
+	<action handler="reset_variables" params="entry=UI:SAVE:ENTITY:CONTEXT_HELP" />
 
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:GUILD_SYMBOL|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:NAME|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:TITLE|value=0" />
+	<action handler="reset_variables" params="entry=UI:SAVE:INSCENE:USER:RPTAGS" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:GUILD_NAME|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:HP|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:USER:STA|value=0" />
@@ -167,6 +169,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:GUILD_SYMBOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:NAME|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:TITLE|value=1" />
+	<action handler="reset_variables" params="entry=UI:SAVE:INSCENE:FRIEND:RPTAGS" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:GUILD_NAME|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:HP|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:STA|value=0" />
@@ -181,6 +184,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:GUILD_SYMBOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:NAME|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:TITLE|value=1" />
+	<action handler="reset_variables" params="entry=UI:SAVE:INSCENE:ENEMY:RPTAGS" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:GUILD_NAME|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:HP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:MESSAGES|value=1" />
@@ -232,6 +236,10 @@
 	<action handler="set" params="dblink=UI:SAVE:NIGHT_COLOR|value=makeRGB(127,190,254)" />
 	<action handler="set" params="dblink=UI:SAVE:SHOW_3D_ITEM_PREVIEW|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:SHOW_ICON_BUFFS|value=1" />
+	<action handler="reset_variables" params="entry=UI:SAVE:SHOW_CLOCK" />
+	<action handler="reset_variables" params="entry=UI:SAVE:SHOW_CLOCK_12H" />
+	<action handler="reset_variables" params="entry=UI:SAVE:SHOW_RETICLE" />
+	<action handler="reset_variables" params="entry=UI:SAVE:RADAR:USE_CAMERA" />
 
 	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_SAP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:PLAYER:DISP_STA|value=1" />
@@ -251,10 +259,11 @@
 	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:UNIVERSE_NEW|value=makeRGB(255,127,0)" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:REGION|value=makeRGB(255,200,200)" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:TELL|value=makeRGB(170,170,170)" />
-	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:DYN|value=makeRGB(162,255,173)" />
+	<action handler="reset_variables" params="entry=UI:SAVE:CHAT:COLORS:DYN" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:ENTER_DONT_QUIT_CB|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB|value=0" />
+	<action handler="reset_variables" params="entry=UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB" />
 
 	<action handler="set" params="dblink=UI:SAVE:INV_BAG:SORT_TYPE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_BAG:ICON_LIST|value=0" />

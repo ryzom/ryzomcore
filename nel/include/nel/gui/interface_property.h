@@ -74,34 +74,37 @@ namespace NLGUI
 		bool link( NLMISC::CCDBNodeLeaf *dbNode );
 		bool link( NLMISC::CCDBNodeBranch *dbNode, const std::string &leafId, NLMISC::CCDBNodeLeaf *defaultLeaf = nullptr);
 
+		// The read* functions write a literal value into the DB entry id and return true;
+		// any other value names a DB entry, which they only link to, and they return false.
+
 		/// float operations
 		void setDouble(double value);
 		double getDouble() const;
-		void readDouble (const char* value, const std::string& id);
+		bool readDouble (const char* value, const std::string& id);
 
 		/// sint32 operations
 		void setSInt32 (sint32 value) {_VolatileValue->setValue32 (value);}
 		sint32 getSInt32 () const {return _VolatileValue->getValue32();}
-		void readSInt32(const char* value, const std::string& id);
+		bool readSInt32(const char* value, const std::string& id);
 
 		/// sint64 operations
 		void setSInt64 (sint64 value) {_VolatileValue->setValue64(value);}
 		sint64 getSInt64 () const {return _VolatileValue->getValue64();}
-		void readSInt64(const char* value, const std::string& id);
+		bool readSInt64(const char* value, const std::string& id);
 
 		/// CRGBA operations
 		void setRGBA (const NLMISC::CRGBA & value);
 		NLMISC::CRGBA getRGBA () const;
-		void readRGBA (const char* value, const std::string& id);
+		bool readRGBA (const char* value, const std::string& id);
 
 		/// HotSpot operations
 
-		void readHotSpot (const char* value, const std::string& id);
+		bool readHotSpot (const char* value, const std::string& id);
 
 		/// bool operations
 		void setBool (bool value);
 		bool getBool () const;
-		void readBool (const char* value, const std::string& id);
+		bool readBool (const char* value, const std::string& id);
 
 		// Swap the content of this 2 property (no-op if one is NULL)
 		void	swap32(CInterfaceProperty &o);
