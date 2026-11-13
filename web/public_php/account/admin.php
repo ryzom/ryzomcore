@@ -31,6 +31,11 @@ $editUid = isset($_GET['uid']) ? (int)$_GET['uid'] : 0;
 
 $editCanManage = false;
 
+// The members of the SET column permission.AccessPrivilege, in its order. A
+// row may hold several: the login script admits the account when the row
+// holds the one that matches the domain status (OPEN for ds_open, and so on).
+$accessPrivilegeMembers = array('OPEN', 'DEV', 'RESTRICTED');
+
 try {
 	$db = getNelDatabase();
 
@@ -119,11 +124,20 @@ try {
 			} else {
 			$domainId = (int)$_POST['domain_id'];
 			$shardId = (int)$_POST['shard_id'];
-			$accessPriv = isset($_POST['access_privilege']) ? trim($_POST['access_privilege']) : '';
-			$validAccess = array('OPEN', 'DEV', 'RESTRICTED');
-			if (!in_array($accessPriv, $validAccess, true)) {
-				$accessPriv = 'OPEN';
+			// One or more members, each a known one: an unknown value is
+			// refused, not dropped or replaced.
+			$submittedAccess = isset($_POST['access_privilege']) ? $_POST['access_privilege'] : array();
+			if (!is_array($submittedAccess)) {
+				$submittedAccess = array($submittedAccess);
 			}
+			$accessOk = !empty($submittedAccess);
+			foreach ($submittedAccess as $member) {
+				if (!is_string($member) || !in_array($member, $accessPrivilegeMembers, true)) {
+					$accessOk = false;
+				}
+			}
+			// each member once, in the order of the SET
+			$accessPriv = $accessOk ? implode(',', array_values(array_intersect($accessPrivilegeMembers, $submittedAccess))) : '';
 			// Domain must exist. "All Shards" is a row that names no shard
 			// (-1, and the 0 this form used to send); a shard must exist and
 			// be a shard of that domain.
@@ -144,12 +158,14 @@ try {
 					}
 				}
 			}
-			if (!$domainOk || !$shardOk) {
+			if (!$accessOk) {
+				$error = 'Choose one or more of ' . implode(', ', $accessPrivilegeMembers) . ' for the access.';
+			} elseif (!$domainOk || !$shardOk) {
 				$error = 'Unknown domain or shard, or the shard is not one of that domain.';
 			} elseif ($allShards) {
 				// one row per domain, with ShardId -1, whatever was there
 				setDomainPermission($db, $targetUid, $domainId, $accessPriv);
-				$success = 'Permission added.';
+				$success = 'Permission saved.';
 			} else {
 				// Check if permission already exists
 				$stmt = $db->prepare('SELECT COUNT(*) as cnt FROM permission WHERE UId = :uid AND DomainId = :did AND ShardId = :sid');
@@ -162,7 +178,7 @@ try {
 					$stmt = $db->prepare('INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES (:uid, :did, :sid, :priv)');
 					$stmt->execute(array(':uid' => $targetUid, ':did' => $domainId, ':sid' => $shardId, ':priv' => $accessPriv));
 				}
-				$success = 'Permission added.';
+				$success = 'Permission saved.';
 			}
 			}
 			$editUid = $targetUid;
@@ -339,7 +355,24 @@ ob_start();
 								<span class="badge badge-gray">All Shards</span>
 							<?php endif; ?>
 						</td>
-						<td><span class="badge badge-green"><?php echo h($perm['AccessPrivilege']); ?></span></td>
+						<td>
+							<?php if ($editCanManage):
+								$permMembers = explode(',', (string)$perm['AccessPrivilege']);
+							?>
+							<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>" style="display:inline-flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+								<?php echo csrfField(); ?>
+								<input type="hidden" name="target_uid" value="<?php echo (int)$editUser['UId']; ?>">
+								<input type="hidden" name="domain_id" value="<?php echo (int)$perm['DomainId']; ?>">
+								<input type="hidden" name="shard_id" value="<?php echo (int)$perm['ShardId']; ?>">
+								<?php foreach ($accessPrivilegeMembers as $member): ?>
+									<label style="display:inline-flex; align-items:center; gap:0.25rem; color:#ecf0f1; font-size:0.85rem;"><input type="checkbox" name="access_privilege[]" value="<?php echo h($member); ?>"<?php echo in_array($member, $permMembers, true) ? ' checked' : ''; ?>> <?php echo h($member); ?></label>
+								<?php endforeach; ?>
+								<button type="submit" name="add_permission" class="btn btn-secondary btn-sm">Save</button>
+							</form>
+							<?php else: ?>
+							<span class="badge badge-green"><?php echo h($perm['AccessPrivilege']); ?></span>
+							<?php endif; ?>
+						</td>
 						<?php if ($editCanManage): ?>
 						<td>
 							<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>" style="display:inline;">
@@ -362,6 +395,10 @@ ob_start();
 		<?php if ($editCanManage): ?>
 		<div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #2c3e50;">
 			<h3 style="font-size:0.9rem; color:#ecf0f1; margin-bottom:0.5rem;">Add Permission</h3>
+			<p style="font-size:0.85rem; color:#8899a6; margin-bottom:0.75rem;">
+				The login needs the access that matches the domain status: OPEN while it is open, DEV while it is in development, RESTRICTED while it is restricted.
+				A row can hold several. Adding a row for a domain and shard that already have one replaces its access.
+			</p>
 			<form method="post" action="index.php?page=admin&amp;uid=<?php echo (int)$editUser['UId']; ?>">
 				<?php echo csrfField(); ?>
 				<input type="hidden" name="target_uid" value="<?php echo (int)$editUser['UId']; ?>">
@@ -385,11 +422,11 @@ ob_start();
 					</div>
 					<div class="form-group">
 						<label>Access</label>
-						<select name="access_privilege">
-							<option value="OPEN">OPEN</option>
-							<option value="DEV">DEV</option>
-							<option value="RESTRICTED">RESTRICTED</option>
-						</select>
+						<div style="display:flex; gap:0.75rem; padding:0.5rem 0;">
+							<?php foreach ($accessPrivilegeMembers as $member): ?>
+								<label style="display:inline-flex; align-items:center; gap:0.25rem; margin-bottom:0; color:#ecf0f1;"><input type="checkbox" name="access_privilege[]" value="<?php echo h($member); ?>"<?php echo $member === 'OPEN' ? ' checked' : ''; ?>> <?php echo h($member); ?></label>
+							<?php endforeach; ?>
+						</div>
 					</div>
 					<button type="submit" name="add_permission" class="btn btn-primary btn-sm">Add</button>
 				</div>
