@@ -590,8 +590,13 @@ function r2.ScenarioWindow:updateActProperties()
 	local season = actGr:find("season_name")
 	assert(season)
 	local seasonStr = seasons[location.Season]
-	local uc_season = i18n.get(seasonStr)
-	season.text = uc_season
+	-- a location without a season of its own has none to show
+	if seasonStr then
+		local uc_season = i18n.get(seasonStr)
+		season.text = uc_season
+	else
+		season.text = ""
+	end
 
 	-- manual weather
 	local weatherGr = actGr:find("weather")

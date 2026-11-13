@@ -1417,14 +1417,11 @@ local registerFeature = function ()
 --				{Name="Reactions", Type="Table"}
 
 		},
-		updateVersion = function(this, scenarioValue, currentValue)
+		updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
 			if patchValue < 1 then
 				-- Patch only for old save (not the 0.0.3)
-				if this.Reactions  ~= nil then
-					-- TODO use identifier instead				
-					r2.requestEraseNode(this.InstanceId, "Reactions", -1)
-				end	
+				update:erase(this, "Reactions")
 				patchValue = 1
 			end
 

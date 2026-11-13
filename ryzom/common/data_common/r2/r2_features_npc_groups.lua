@@ -99,11 +99,11 @@ local registerFeature = function ()
 				return i18n.get("uiR2EDScene")
 			end,
 
-			updateVersion = function(this, scenarioValue, currentValue )
-				local patchValue = scenarioValue			
+			updateVersion = function(this, scenarioValue, currentValue, update)
+				local patchValue = scenarioValue
 				-- version 1 : Remove the "Cost" field -> hold locally now
 				if patchValue < 1 then
-					r2.requestEraseNode(this.InstanceId, "Cost", -1)				
+					update:erase(this, "Cost")
 					patchValue = 1
 				end
 

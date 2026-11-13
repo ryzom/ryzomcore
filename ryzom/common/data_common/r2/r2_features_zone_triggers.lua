@@ -147,17 +147,17 @@ feature.Components.ZoneTrigger =
 		
 		end,
 
-	updateVersion = function(this, scenarioValue, currentValue )
+	updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
 			if patchValue < 1 then
-				if not this.Active then r2.requestSetNode(this.InstanceId, "Active", 1)	end
-				if not this.Cyclic then r2.requestSetNode(this.InstanceId, "Cyclic", 1)	end
+				if this.Active == nil then update:set(this, "Active", 1) end
+				if this.Cyclic == nil then update:set(this, "Cyclic", 1) end
 				patchValue = 1
 			end
-			
+
 			if patchValue == currentValue then return true end
 			return false
-		end,		
+		end,
 
 
 	}

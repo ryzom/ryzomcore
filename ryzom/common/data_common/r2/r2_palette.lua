@@ -6217,26 +6217,6 @@ r2.loadPalette = function()
 	}
 	r2.addPaletteElement("palette.entities.botobjects.fx_la_vent", entries.fx_la_vent);
 
-	entries.fx_ju_bibubirdb=
-	{
-		Base="palette.entities.botobjects.fx_base",
-		Name = "fx_ju_bibubirdb",
-		Ecosystem="",
-		SheetClient="object_fx_matis_ju_fo_bibubirdb.creature",
-		Level=1,
-	}
-	r2.addPaletteElement("palette.entities.botobjects.fx_ju_bibubirdb", entries.fx_ju_bibubirdb);
-
-    entries.fx_fo_bibubirdb=
-	{
-		Base="palette.entities.botobjects.fx_base",
-		Name = "fx_fo_bibubirdb",
-		Ecosystem="",
-		SheetClient="object_fx_matis_ju_fo_bibubirdb.creature",
-		Level=1,
-	}
-	r2.addPaletteElement("palette.entities.botobjects.fx_fo_bibubirdb", entries.fx_fo_bibubirdb);
-
 	entries.fx_tr_colibris=
 	{
 		Base="palette.entities.botobjects.fx_base",
@@ -6934,7 +6914,8 @@ r2.loadPalette = function()
 	--entries.creature_cbagf1 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbagf1.creature", Level=210, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.cbagf1", entries.creature_cbagf1)
 	--entries.creature_cbagf2 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbagf2.creature", Level=220, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.cbagf2", entries.creature_cbagf2)
 	--entries.creature_cbagf3 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbagf3.creature", Level=230, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.cbagf3", entries.creature_cbagf3)
-	--entries.creature_cbagf4 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbagf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.cbagf4", entries.creature_cbagf4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_cbagf4 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbagf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.cbagf4", entries.creature_cbagf4)
 	entries.creature_cbajb4 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbajb4.creature", Level=40, RingAccess="a1", Ecosystem="Jungle", Region="b" } r2.addPaletteElement("palette.entities.creatures.cbajb4", entries.creature_cbajb4)
 	entries.creature_cbajd1 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbajd1.creature", Level=110, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.cbajd1", entries.creature_cbajd1)
 	entries.creature_cbajd2 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="cbajd2.creature", Level=120, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.cbajd2", entries.creature_cbajd2)
@@ -7326,7 +7307,8 @@ r2.loadPalette = function()
 	--entries.creature_chkgf1 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkgf1.creature", Level=210, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.chkgf1", entries.creature_chkgf1)
 	--entries.creature_chkgf2 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkgf2.creature", Level=220, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.chkgf2", entries.creature_chkgf2)
 	--entries.creature_chkgf3 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkgf3.creature", Level=230, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.chkgf3", entries.creature_chkgf3)
-	--entries.creature_chkgf4 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkgf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.chkgf4", entries.creature_chkgf4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_chkgf4 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkgf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.chkgf4", entries.creature_chkgf4)
 	entries.creature_chkjd1 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkjd1.creature", Level=110, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.chkjd1", entries.creature_chkjd1)
 	entries.creature_chkjd2 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkjd2.creature", Level=120, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.chkjd2", entries.creature_chkjd2)
 	entries.creature_chkjd3 = { Class="Npc", Base="palette.entities.creatures.passive", SheetClient="chkjd3.creature", Level=130, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.chkjd3", entries.creature_chkjd3)
@@ -7537,7 +7519,8 @@ r2.loadPalette = function()
 	--entries.creature_ccagf1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccagf1.creature", Level=210, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccagf1", entries.creature_ccagf1)
 	--entries.creature_ccagf2 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccagf2.creature", Level=220, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccagf2", entries.creature_ccagf2)
 	--entries.creature_ccagf3 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccagf3.creature", Level=230, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccagf3", entries.creature_ccagf3)
-	--entries.creature_ccagf4 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccagf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccagf4", entries.creature_ccagf4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ccagf4 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccagf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccagf4", entries.creature_ccagf4)
 	entries.creature_ccajd1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccajd1.creature", Level=110, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.ccajd1", entries.creature_ccajd1)
 	entries.creature_ccajd2 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccajd2.creature", Level=120, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.ccajd2", entries.creature_ccajd2)
 	entries.creature_ccajd3 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccajd3.creature", Level=130, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.ccajd3", entries.creature_ccajd3)
@@ -7571,7 +7554,8 @@ r2.loadPalette = function()
 	--entries.creature_ccbgf1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbgf1.creature", Level=210, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccbgf1", entries.creature_ccbgf1)
 	--entries.creature_ccbgf2 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbgf2.creature", Level=220, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccbgf2", entries.creature_ccbgf2)
 	--entries.creature_ccbgf3 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbgf3.creature", Level=230, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccbgf3", entries.creature_ccbgf3)
-	--entries.creature_ccbgf4 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbgf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccbgf4", entries.creature_ccbgf4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ccbgf4 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbgf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccbgf4", entries.creature_ccbgf4)
 	entries.creature_ccbla1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbla1.creature", Level=10, RingAccess="a1", Ecosystem="Lacustre", Region="a" } r2.addPaletteElement("palette.entities.creatures.ccbla1", entries.creature_ccbla1)
 	entries.creature_ccbla2 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccbla2.creature", Level=10, RingAccess="a1", Ecosystem="Lacustre", Region="a" } r2.addPaletteElement("palette.entities.creatures.ccbla2", entries.creature_ccbla2)
 	entries.creature_ccblb1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccblb1.creature", Level=10, RingAccess="a1", Ecosystem="Lacustre", Region="b" } r2.addPaletteElement("palette.entities.creatures.ccblb1", entries.creature_ccblb1)
@@ -7690,7 +7674,8 @@ r2.loadPalette = function()
 	--entries.creature_ccegf1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccegf1.creature", Level=210, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccegf1", entries.creature_ccegf1)
 	--entries.creature_ccegf2 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccegf2.creature", Level=220, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccegf2", entries.creature_ccegf2)
 	--entries.creature_ccegf3 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccegf3.creature", Level=230, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccegf3", entries.creature_ccegf3)
-	--entries.creature_ccegf4 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccegf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccegf4", entries.creature_ccegf4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ccegf4 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccegf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ccegf4", entries.creature_ccegf4)
 	entries.creature_cceja1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="cceja1.creature", Level=10, RingAccess="a1", Ecosystem="Jungle", Region="a" } r2.addPaletteElement("palette.entities.creatures.cceja1", entries.creature_cceja1)
 	entries.creature_cceja2 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="cceja2.creature", Level=10, RingAccess="a1", Ecosystem="Jungle", Region="a" } r2.addPaletteElement("palette.entities.creatures.cceja2", entries.creature_cceja2)
 	entries.creature_ccejb1 = { Class="Npc", Base="palette.entities.creatures.predator", SheetClient="ccejb1.creature", Level=10, RingAccess="a1", Ecosystem="Jungle", Region="b" } r2.addPaletteElement("palette.entities.creatures.ccejb1", entries.creature_ccejb1)
@@ -8108,7 +8093,8 @@ r2.loadPalette = function()
 
 -- Degens (primitive tribes)
 	--entries.creature_cdagb1 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdagb1.creature", Level=10, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.cdagb1", entries.creature_cdagb1)
-	--entries.creature_cdagb2 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdagb2.creature", Level=20, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.cdagb2", entries.creature_cdagb2)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_cdagb2 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdagb2.creature", Level=20, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.cdagb2", entries.creature_cdagb2)
 	--entries.creature_cdagb3 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdagb3.creature", Level=30, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.cdagb3", entries.creature_cdagb3)
 	--entries.creature_cdagb4 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdagb4.creature", Level=40, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.cdagb4", entries.creature_cdagb4)
 	--entries.creature_cdagc1 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdagc1.creature", Level=60, RingAccess="g1", Ecosystem="Goo", Region="c" } r2.addPaletteElement("palette.entities.creatures.cdagc1", entries.creature_cdagc1)
@@ -8163,7 +8149,8 @@ r2.loadPalette = function()
 	--entries.creature_cdbgd2 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbgd2.creature", Level=120, RingAccess="g1", Ecosystem="Goo", Region="d" } r2.addPaletteElement("palette.entities.creatures.cdbgd2", entries.creature_cdbgd2)
 	--entries.creature_cdbgd3 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbgd3.creature", Level=130, RingAccess="g1", Ecosystem="Goo", Region="d" } r2.addPaletteElement("palette.entities.creatures.cdbgd3", entries.creature_cdbgd3)
 	--entries.creature_cdbgd4 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbgd4.creature", Level=140, RingAccess="g1", Ecosystem="Goo", Region="d" } r2.addPaletteElement("palette.entities.creatures.cdbgd4", entries.creature_cdbgd4)
-	--entries.creature_cdbge1 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbge1.creature", Level=160, RingAccess="g1", Ecosystem="Goo", Region="e" } r2.addPaletteElement("palette.entities.creatures.cdbge1", entries.creature_cdbge1)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_cdbge1 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbge1.creature", Level=160, RingAccess="g1", Ecosystem="Goo", Region="e" } r2.addPaletteElement("palette.entities.creatures.cdbge1", entries.creature_cdbge1)
 	--entries.creature_cdbge2 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbge2.creature", Level=170, RingAccess="g1", Ecosystem="Goo", Region="e" } r2.addPaletteElement("palette.entities.creatures.cdbge2", entries.creature_cdbge2)
 	--entries.creature_cdbge3 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbge3.creature", Level=180, RingAccess="g1", Ecosystem="Goo", Region="e" } r2.addPaletteElement("palette.entities.creatures.cdbge3", entries.creature_cdbge3)
 	--entries.creature_cdbge4 = { Class="Npc", Base="palette.entities.creatures.degen", SheetClient="cdbge4.creature", Level=190, RingAccess="g1", Ecosystem="Goo", Region="e" } r2.addPaletteElement("palette.entities.creatures.cdbge4", entries.creature_cdbge4)
@@ -8433,7 +8420,8 @@ r2.loadPalette = function()
 	--entries.creature_ckdgf1 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdgf1.creature", Level=210, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckdgf1", entries.creature_ckdgf1)
 	--entries.creature_ckdgf2 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdgf2.creature", Level=220, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckdgf2", entries.creature_ckdgf2)
 	--entries.creature_ckdgf3 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdgf3.creature", Level=230, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckdgf3", entries.creature_ckdgf3)
-	--entries.creature_ckdgf4 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdgf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckdgf4", entries.creature_ckdgf4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ckdgf4 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdgf4.creature", Level=240, RingAccess="g1", Ecosystem="Goo", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckdgf4", entries.creature_ckdgf4)
 	entries.creature_ckdjd1 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdjd1.creature", Level=110, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.ckdjd1", entries.creature_ckdjd1)
 	entries.creature_ckdjd2 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdjd2.creature", Level=120, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.ckdjd2", entries.creature_ckdjd2)
 	entries.creature_ckdjd3 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckdjd3.creature", Level=130, RingAccess="j5", Ecosystem="Jungle", Region="d" } r2.addPaletteElement("palette.entities.creatures.ckdjd3", entries.creature_ckdjd3)
@@ -8487,9 +8475,12 @@ r2.loadPalette = function()
 	entries.creature_ckeff3 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckeff3.creature", Level=230, RingAccess="f7", Ecosystem="Forest", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckeff3", entries.creature_ckeff3)
 	entries.creature_ckeff4 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckeff4.creature", Level=240, RingAccess="f7", Ecosystem="Forest", Region="f" } r2.addPaletteElement("palette.entities.creatures.ckeff4", entries.creature_ckeff4)
 	--entries.creature_ckegb1 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb1.creature", Level=10, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb1", entries.creature_ckegb1)
-	--entries.creature_ckegb2 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb2.creature", Level=20, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb2", entries.creature_ckegb2)
-	--entries.creature_ckegb3 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb3.creature", Level=30, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb3", entries.creature_ckegb3)
-	--entries.creature_ckegb4 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb4.creature", Level=40, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb4", entries.creature_ckegb4)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ckegb2 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb2.creature", Level=20, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb2", entries.creature_ckegb2)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ckegb3 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb3.creature", Level=30, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb3", entries.creature_ckegb3)
+	-- A creature of the goo, which scenarios of the first editors have: the editor knows it, the palette does not offer it (its entry in the tree below is a comment), and it is subject to the ring access g1 like the rest of its ecosystem.
+	entries.creature_ckegb4 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegb4.creature", Level=40, RingAccess="g1", Ecosystem="Goo", Region="b" } r2.addPaletteElement("palette.entities.creatures.ckegb4", entries.creature_ckegb4)
 	--entries.creature_ckegc1 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegc1.creature", Level=60, RingAccess="g1", Ecosystem="Goo", Region="c" } r2.addPaletteElement("palette.entities.creatures.ckegc1", entries.creature_ckegc1)
 	--entries.creature_ckegc2 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegc2.creature", Level=70, RingAccess="g1", Ecosystem="Goo", Region="c" } r2.addPaletteElement("palette.entities.creatures.ckegc2", entries.creature_ckegc2)
 	--entries.creature_ckegc3 = { Class="Npc", Base="palette.entities.creatures.kitin", SheetClient="ckegc3.creature", Level=80, RingAccess="g1", Ecosystem="Goo", Region="c" } r2.addPaletteElement("palette.entities.creatures.ckegc3", entries.creature_ckegc3)

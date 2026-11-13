@@ -24,6 +24,15 @@ Logic.ConditionTypes ={
 Logic.ChatTypes = {"None", "Repeating", "Non Repeating", "Continue"}
 Logic.InteractionTypes = {"Give", "Say"}
 
+-- The words of the logic editor for an event, a condition or an action of a class. A scenario of an earlier
+-- version can hold a type the class no longer lists: its name is shown as it is.
+local function getLogicAttributeText(class, logicCategory, value)
+	local attribute = r2.getLogicAttribute(class, logicCategory, value)
+	if attribute then
+		return attribute.text
+	end
+	return tostring(value)
+end
 Logic.Name = "Activity"
 Logic.Description = "A feature for describing activities sequences"
 
@@ -40,6 +49,39 @@ Logic.Components.LogicEntityAction =
 	{
 		BaseClass ="BaseClass",
 		Name = "LogicEntityAction",
+		-- version 1: "desactivation" is the name earlier versions gave the event a component has as
+		-- "deactivation" now. The classes that still have the event under the old name keep it.
+		Version = 1,
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			local patchValue = scenarioValue
+			if patchValue < 1 then
+				local event = this.Event
+				-- the entity that has the handler: the handler is in the behavior of the entity
+				local behavior = update:getOwner(this)
+				local logicEntity = nil
+				if behavior then logicEntity = update:getOwner(behavior) end
+				if type(event) == "table" and event.Type == "desactivation" and logicEntity and logicEntity.Class then
+					local hasOldName = false
+					local hasNewName = false
+					local class = r2.Classes[logicEntity.Class]
+					while class do
+						if class.Events then
+							for k, eventName in pairs(class.Events) do
+								if eventName == "desactivation" then hasOldName = true end
+								if eventName == "deactivation" then hasNewName = true end
+							end
+						end
+						class = r2.Classes[class.BaseClass]
+					end
+					if hasNewName and not hasOldName then
+						update:set(event, "Type", "deactivation")
+					end
+				end
+				patchValue = 1
+			end
+			if patchValue == currentValue then return true end
+			return false
+		end,
 		DisplayerProperties = "R2::CDisplayerLua",
 		DisplayerPropertiesParams = "logicEntityActionPropertySheetDisplayer",
 		Prop =
@@ -77,7 +119,7 @@ Logic.Components.LogicEntityAction =
 			eventType = eventType .. name .. " " 
 			eventType = eventType .. r2.events.communWordsColor 
 
-			eventType = eventType ..r2.getLogicAttribute(logicEntity.Class, "Events", this.Event.Type).text
+			eventType = eventType ..getLogicAttributeText(logicEntity.Class, "Events", this.Event.Type)
 			
 			if this.Event.Value~="" then
 				local instance = r2:getInstanceFromId(this.Event.Value)
@@ -121,7 +163,7 @@ Logic.Components.LogicEntityAction =
 					conditionsList = conditionsList .. conditionLogicEntity.Name .. " " 
 					conditionsList = conditionsList .. r2.events.communWordsColor 
 			
-					conditionsList = conditionsList ..r2.getLogicAttribute(conditionLogicEntity.Class, "Conditions", conditionInst.Condition.Type).text
+					conditionsList = conditionsList ..getLogicAttributeText(conditionLogicEntity.Class, "Conditions", conditionInst.Condition.Type)
 
 					if conditionInst.Condition.Value~="" then
 						local instance = r2:getInstanceFromId(conditionInst.Condition.Value)
@@ -162,7 +204,7 @@ Logic.Components.LogicEntityAction =
 					actionsList = actionsList .. name .. " " 
 					actionsList = actionsList .. r2.events.communWordsColor 
 					
-					actionsList = actionsList ..r2.getLogicAttribute(actionLogicEntity.Class, "ApplicableActions", actionInst.Action.Type).text
+					actionsList = actionsList ..getLogicAttributeText(actionLogicEntity.Class, "ApplicableActions", actionInst.Action.Type)
 					if actionInst.Action.Value~="" then
 						local instance = r2:getInstanceFromId(actionInst.Action.Value)
 						assert(instance)
@@ -360,7 +402,7 @@ Logic.Components.EventType =
 		}
 	}
 
-local classActionStepVersion = 2
+local classActionStepVersion = 3
 Logic.Components.ActionStep = {
 		BaseClass ="BaseClass",
 		Name = "ActionStep",
@@ -373,45 +415,67 @@ Logic.Components.ActionStep = {
 			{Name ="Action", Type ="ActionType"} -- sequence id
 		},
 
-		updateVersion = function(this, scenarioValue, currentValue )
-			
+		updateVersion = function(this, scenarioValue, currentValue, update)
+
 			local patchValue = scenarioValue
+			local action = this.Action
 			if patchValue < 1 then
+				-- the names earlier versions gave the action "deactivate" of a bandit camp
 				local invalidActions = {}
 				invalidActions["desactivate"] = "deactivate"
 				invalidActions["Desactivate"] = "deactivate"
-				r2.updateLogicActions(this, invalidActions, "BanditCamp")
+				local entity = update:getNode(this.Entity)
+				if entity and entity.Class == "BanditCamp" and type(action) == "table" and invalidActions[action.Type] then
+					update:set(action, "Type", invalidActions[action.Type])
+				end
 				patchValue = 1
 			end
 
 			if patchValue < 2 then
-
-				local action = this.Action
-				if action.Type == "Add 10 Seconds" then
-					r2.requestSetNode(action.InstanceId, "Type", "add seconds")
-					r2.requestInsertNode(action.InstanceId, "", -1, "ValueString", "10")
-				end
-
-				if action.Type == "Sub 10 seconds" then
-					r2.requestSetNode(action.InstanceId, "Type", "sub seconds")
-					r2.requestInsertNode(action.InstanceId, "", -1, "ValueString", "10")
-				end
-				if action.Type == "Add 1 minute" then
-					r2.requestSetNode(action.InstanceId, "Type", "add seconds")
-					r2.requestInsertNode(action.InstanceId, "", -1, "ValueString", "60")
-				end
-
-				if action.Type == "Sub 1 minute" then
-					r2.requestSetNode(action.InstanceId, "Type", "sub seconds")
-					r2.requestInsertNode(action.InstanceId, "", -1, "ValueString", "60")
+				local timerActions = {
+					["Add 10 Seconds"] = { "add seconds", "10" },
+					["Sub 10 seconds"] = { "sub seconds", "10" },
+					["Add 1 minute"] = { "add seconds", "60" },
+					["Sub 1 minute"] = { "sub seconds", "60" },
+				}
+				if type(action) == "table" and timerActions[action.Type] then
+					local timerAction = timerActions[action.Type]
+					update:set(action, "Type", timerAction[1])
+					update:set(action, "ValueString", timerAction[2])
 				end
 
 				patchValue = 2
 			end
-			
+
+			-- version 3: "Desactivate" is the name earlier versions gave the action a component has as
+			-- "Deactivate" or "deactivate" now. A class that still has the action under the old name
+			-- keeps it.
+			if patchValue < 3 then
+				if type(action) == "table" and (action.Type == "Desactivate" or action.Type == "desactivate") then
+					local entity = update:getNode(this.Entity)
+					local hasOldName = false
+					local newName = nil
+					local class = nil
+					if entity then class = r2.Classes[entity.Class] end
+					while class do
+						if class.ApplicableActions then
+							for k, actionName in pairs(class.ApplicableActions) do
+								if actionName == action.Type then hasOldName = true end
+								if actionName == "Deactivate" or actionName == "deactivate" then newName = actionName end
+							end
+						end
+						class = r2.Classes[class.BaseClass]
+					end
+					if newName ~= nil and not hasOldName then
+						update:set(action, "Type", newName)
+					end
+				end
+				patchValue = 3
+			end
+
 			if patchValue == currentValue then return true end
 			return false
-		end,	
+		end,
 	}
 
 
@@ -591,7 +655,7 @@ Logic.Components.ChatStep = {
 	}
 
 
-local classChatSequenceVersion = 1
+local classChatSequenceVersion = 2
 Logic.Components.ChatSequence = {
 		PropertySheetHeader = r2.getDisplayButtonHeader("r2.dialogs:openEditor()", "uiR2EdEditDialogButton"),
 		BaseClass = "LogicEntity",
@@ -764,17 +828,37 @@ Logic.Components.ChatSequence = {
 			r2.Translator.translateDialog( this, context)
 		end,
 
-		updateVersion = function(this, scenarioValue, currentValue )
+		updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
+			-- A dialog stands among the features of its act. The chat sequences of an npc, which the first
+			-- editors had, are in the behavior of the npc: they are no dialogs, and this step leaves them
+			-- as they are. The update of the scenario makes dialogs of them (version 6 of Scenario).
+			local owner = update:getOwner(this)
+			local ofNpc = owner ~= nil and owner.Class == "Behavior"
 			if patchValue < 1 then
-				local subComponents = {}
-				r2.requestInsertNode(this.InstanceId, "", -1, "SubComponents", subComponents)
-				r2.requestInsertNode(this.InstanceId, "", -1, "AutoStart", this.Active)
-				r2.requestSetNode(this.InstanceId, "Active", 1)
-				r2.requestSetNode(this.InstanceId, "Base", r2.Translator.getDebugBase("palette.entities.botobjects.dialog"))
+				-- A dialog that has AutoStart is of version 1 already. The scenario does not always say
+				-- so: its versions list the classes of its components, and a component of a class that
+				-- derives from this one (ProximityDialog) leaves this class out of the list.
+				if this.AutoStart == nil and not ofNpc then
+					if this.SubComponents == nil then
+						update:set(this, "SubComponents", {})
+					end
+					-- 'Active' said whether the dialog starts with its act
+					update:set(this, "AutoStart", defaulting(this.Active, 1))
+					update:set(this, "Active", 1)
+					update:set(this, "Base", r2.Translator.getDebugBase("palette.entities.botobjects.dialog"))
+				end
 				patchValue = 1
 			end
-			
+
+			-- version 2: the Base the step of version 1 sets. Earlier versions of the editor ran that
+			-- step without the Base taking effect, and saved the dialog as updated.
+			if patchValue < 2 then
+				if this.Base == nil and not ofNpc then
+					update:set(this, "Base", r2.Translator.getDebugBase("palette.entities.botobjects.dialog"))
+				end
+				patchValue = 2
+			end
 			if patchValue == currentValue then return true end
 			return false
 		end,
@@ -794,7 +878,7 @@ Logic.Components.ChatSequence = {
 	}
 
 
-local ActivityStepVersion = 1
+local ActivityStepVersion = 2
 Logic.Components.ActivityStep = {
 		BaseClass ="BaseClass",
 		Name ="ActivityStep",
@@ -911,17 +995,24 @@ Logic.Components.ActivityStep = {
 			return activityType
 		end,
 
-		updateVersion = function(this, scenarioValue, currentValue )
+		updateVersion = function(this, scenarioValue, currentValue, update)
 			local patchValue = scenarioValue
 
 			if patchValue < 1 then
 				local activity = this.Activity
 				if (activity and activity == "Inactive") then
-					r2.requestSetNode(this.InstanceId, "Activity", "Stand Still")
+					update:set(this, "Activity", "Stand Still")
 				end
-				local name = this.Name
-				
+
 				patchValue = 1
+			end
+			-- version 2: the first editors gave an activity step events of its own, kept in the act and
+			-- named here. No editor since has run them, and a step that names one can not be translated.
+			if patchValue < 2 then
+				if type(this.EventsIds) == "table" and table.getn(this.EventsIds) > 0 then
+					update:set(this, "EventsIds", {})
+				end
+				patchValue = 2
 			end
 			if patchValue == currentValue then return true end
 			return false
@@ -2162,7 +2253,6 @@ Logic.translateActivityStep = function(context,  hlComponent, activitySequence, 
 
 	end
 
-	assert(State ~= "")
 	return aiState
 end
 

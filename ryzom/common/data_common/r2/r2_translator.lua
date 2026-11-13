@@ -168,7 +168,19 @@ Translator.translateEquipment = function(hlNpc)
 	local instance = r2:getInstanceFromId(instanceId)
 
 	if instance:isKindOf("NpcCustom") then
-		equipment = equipment..r2.getVisualPropertiesFromInstanceId(instanceId);
+		-- the editor gives nothing for an npc whose sheet it does not know
+		local visualProperties = r2.getVisualPropertiesFromInstanceId(instanceId)
+		if visualProperties ~= nil then
+			equipment = equipment..visualProperties
+		else
+			-- the npc goes into the test as its sheet alone makes it: the author is told which one
+			local arguments = { tostring(instance.Name), tostring(instance.SheetClient) }
+			local text = string.gsub(tostring(i18n.get("uiR2EDTranslateUnknownSheet")), "%%(%d)", function(index)
+				return defaulting(arguments[tonumber(index)], "")
+			end)
+			debugInfo(colorTag(255, 255, 0) .. text)
+			displaySystemInfo(text, "BC")
+		end
 	end
 
 	if equipment == nil then
@@ -469,7 +481,9 @@ Translator.translateEventHandler = function(context, hlNpc, eventHandler, rtNpcG
 				end
 
 				if multiAction then
-					table.insert(multiAction.Children, firstAction2)
+					if firstAction2 then
+						table.insert(multiAction.Children, firstAction2)
+					end
 				else
 					firstAction = firstAction2
 				end
@@ -484,7 +498,8 @@ Translator.translateEventHandler = function(context, hlNpc, eventHandler, rtNpcG
 	end
 
 	-- if there is actions then the first executed npc_event_handler_action are the dynamic_if from  [firstCondition, lastCondition]
-	if lastCondition then
+	-- A handler without an action that can be translated does nothing, whatever its conditions.
+	if lastCondition and firstAction then
 		table.insert(lastCondition.Children, firstAction)
 		firstAction = firstCondition
 	end
@@ -579,16 +594,18 @@ function Translator.initStartingActIndex(startingAct)
 
 	local actId, act = next(acts, nil)
 	local actIndex = 0
+	-- The test starts in the act that is selected. The base act (index 0) is always loaded and is not an
+	-- act to start in: the first act is taken for it.
+	local startingActIndex = 1
 	while (actId ~= nil)
 	do
-		if startingAct and tostring(act.InstanceId) == startingAct then
-			r2.setStartingActIndex(actIndex )
-		else 
-			r2.setStartingActIndex(1)
+		if actIndex > 0 and startingAct and tostring(act.InstanceId) == startingAct then
+			startingActIndex = actIndex
 		end
 		actIndex = actIndex + 1
 		actId, act = next(acts, actId)
 	end
+	r2.setStartingActIndex(startingActIndex)
 end
 Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	local scenario = r2:getInstanceFromId(scenarioInstanceId)
@@ -842,6 +859,10 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 		rtLocation.EntryPoint = location.EntryPoint
 		local  enumToInt = {Automatic=0, Spring=1, Summer=2, Autumn=3, Winter=4}
 		rtLocation.Season = enumToInt[ location.Season ]
+		-- a location without a season of its own has the season of the server
+		if rtLocation.Season == nil then
+			rtLocation.Season = enumToInt.Automatic
+		end
 		locationMap[location.InstanceId] = locationIndex
 
 		table.insert(rtScenario.Locations, rtLocation)
@@ -855,6 +876,8 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	-- Act Name, position
 	local actId, act = next(acts, nil)
 	local actIndex = 0
+	-- as Translator.initStartingActIndex
+	local startingActIndex = 1
 	while (actId ~= nil)
 	do
 
@@ -863,14 +886,14 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 
 		rtAct.LocationId = locationMap[ act.LocationId ]
 
-		if startingAct and tostring(act.InstanceId) == startingAct then
-			r2.setStartingActIndex(actIndex )
-		else 
-			r2.setStartingActIndex(1)
+		-- the base act (index 0) is always loaded and is not an act to start in
+		if actIndex > 0 and startingAct and tostring(act.InstanceId) == startingAct then
+			startingActIndex = actIndex
 		end
 		actIndex = actIndex + 1
 		actId, act = next(acts, actId)
 	end
+	r2.setStartingActIndex(startingActIndex)
 	-- Ring accss
 	if ( r2.getMustVerifyRingAccessWhileLoadingAnimation()) then
 		do
@@ -4137,7 +4160,7 @@ function Translator.getDialogLogicEvent(entity, context, event)
 		local action =  Translator.createEvent("timer_t2_triggered", states,  rtNpcGrp.Id)
 		local index = Translator.getChatPositionFromDialog(component, event.Event.Value)
 		if index ==  -1  then return nil end
-		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index + 2, firstCondition)
+		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index + 2)
 		return action, firstCondition, firstCondition
 
 	elseif eventType == 'end of dialog' then
@@ -4147,7 +4170,7 @@ function Translator.getDialogLogicEvent(entity, context, event)
 		local action =  Translator.createEvent("user_event_4", states,  rtNpcGrp.Id)
 		local index = Translator.getChatPositionFromDialog(component, event.Event.Value)
 		if index == -1  then return nil end
-		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index+2, firstCondition)
+		local firstCondition = Translator.createAction("if_value_equal", rtNpcGrp.Id, "v1", index+2)
 		return action, firstCondition, firstCondition
 	
 	elseif eventType == 'start of dialog' then

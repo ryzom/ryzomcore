@@ -125,6 +125,8 @@ namespace R2 {
 	{
 	public:
 		virtual void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) = 0;
+		// the server refused the request: nothing changes on the client
+		virtual void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) {}
 		virtual ~IServerAnswerMsg()	{}
 	};
 
@@ -138,6 +140,12 @@ namespace R2 {
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onScenarioUploaded(server, _Value.getPtr());
+		}
+		// The editor keeps the scenario it has. The author is told: the scenario that was sent, a file that
+		// was loaded or a scenario brought up to date, is not the one of the session.
+		void refused(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		{
+			client->systemMsg(server, "ERR", "", "uiR2EDScenarioUploadRefused");
 		}
 	private:
 		R2::CObject::TSmartPtr _Value;
@@ -248,6 +256,10 @@ void CServerAnswerForseener::ack(CClientEditionModule* client, NLNET::IModulePro
 	if (ok)
 	{
 		msg->ok(client, server);
+	}
+	else
+	{
+		msg->refused(client, server);
 	}
 	delete msg;
 	_Answers.erase(found);
@@ -1101,6 +1113,7 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 	//H_AUTO(R2_CClientEditionModule_startingScenario)
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	bool ok = false;
+	bool updateFailed = false;
 	CObjectSerializerServer hlData;
 	CObjectSerializerServer rtData;
 
@@ -1118,6 +1131,16 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_LastReadHeader = values;
 			uint32 lastActIndex = _StartingActIndex;
 			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
+			// The file is read as a file that is loaded is: a scenario of an earlier version of the editor
+			// is brought up to date for the test. (The save leaves a scenario at the versions it has when an
+			// update would change it, see r2.Version.updateScenarioVersions.)
+			// When the update fails the author has been told, and the test does not start: the scenario
+			// the editor has is the one of before the save, which is not the one to translate.
+			if (hlScenario2)
+			{
+				hlScenario2 = _Client->getComLuaModule().updateLoadedScenario(hlScenario2, "Test");
+				if (!hlScenario2) updateFailed = true;
+			}
 			_StartingActIndex  = lastActIndex;
 			if (hlScenario2)
 			{
@@ -1155,7 +1178,15 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_Factory->setMaxId("RtEntryText", 0);
 			_Factory->setMaxId("RtPlotItem", 0);
 
-			CObject::TSmartPtr rtDataPtr = _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg);
+			CObject::TSmartPtr rtDataPtr;
+			if (updateFailed)
+			{
+				errorMsg = "R2: the scenario of the test could not be brought up to date, the test does not start";
+			}
+			else
+			{
+				rtDataPtr = _Client->getComLuaModule().translateFeatures(hlScenario, errorMsg);
+			}
 			rtData.setData(rtDataPtr.getPtr());
 
 			if (rtDataPtr.getPtr())

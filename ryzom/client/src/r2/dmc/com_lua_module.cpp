@@ -40,6 +40,7 @@
 #include "../object_factory_client.h"
 #include "../editor.h"
 #include "../../net_manager.h"
+#include "../../interface_v3/interface_manager.h"
 #include "nel/gui/lua_ihm.h"
 #include "../../interface_v3/lua_ihm_ryzom.h"
 
@@ -76,6 +77,29 @@ std::map<lua_State*, CComLuaModule*> CComLuaModule::_Instance;
 
 
 extern uint8 PlayerSelectedSlot;
+
+// Set when a conversion between objects and Lua values had to leave a part out (setObjectToLua,
+// getObjectFromLua), for the callers, which must not go on with an incomplete tree
+static bool s_ConversionIncomplete = false;
+
+// Pushes an object as a Lua value for a function the scripts call. Returns false, with nothing pushed,
+// when a part of the object had to be left out: the function then ends with failIncompleteObject, once
+// it holds no C++ object any more (a Lua error does not run destructors).
+static bool pushWholeObject(lua_State *state, CObject *object, bool withGhosts = true)
+{
+	s_ConversionIncomplete = false;
+	CComLuaModule::setObjectToLua(state, object, withGhosts);
+	if (!s_ConversionIncomplete) return true;
+	s_ConversionIncomplete = false;
+	lua_pop(state, 1);
+	return false;
+}
+
+// Raises the Lua error of a function of the scripts that could not give its value as a whole
+static sint failIncompleteObject(lua_State *state, const char *function)
+{
+	return luaL_error(state, "%s: the value is nested too deep to be given to Lua as a whole", function);
+}
 
 CComLuaModule::CComLuaModule(CDynamicMapClient* client, lua_State *luaState /*= NULL*/)
 {
@@ -161,6 +185,7 @@ void CComLuaModule::initLuaLib()
 
 		{"getPropertyValue", CComLuaModule::luaGetPropertyValue},
 		{"getScenarioObj",CComLuaModule::luaGetScenarioObj},
+		{"requestSetScenarioVersions", CComLuaModule::luaRequestSetScenarioVersions},
 		/*{"getPropertyList", CComLuaModule::luaGetPropertyList},*/
 		{"doFile2", CComLuaModule::luaDoFile2},
 		{"print", CComLuaModule::luaPrint},
@@ -348,7 +373,13 @@ void CComLuaModule::callTranslateFeatures(CObject* scenario)
 	lua_getglobal(_LuaState, "r2");
 	lua_pushstring(_LuaState, "translateFeatures");
 	lua_gettable(_LuaState, -2);
-	setObjectToLua(_LuaState, scenario);
+	if (!pushWholeObject(_LuaState, scenario))
+	{
+		// the function would get a part of the scenario only
+		nlwarning("R2: the scenario could not be given to r2.translateFeatures as a whole, it is not translated");
+		lua_pop(_LuaState, 2);
+		return;
+	}
 	lua_call(_LuaState, 1, 0);
 }
 
@@ -364,13 +395,26 @@ CObject::TSmartPtr CComLuaModule::translateFeatures(CObject* hlScenario, std::st
 	lua_getglobal(_LuaState, "r2");
 	lua_pushstring(_LuaState, "doTranslateFeatures");
 	lua_gettable(_LuaState, -2);
-	setObjectToLua(_LuaState, hlScenario);
+	if (!pushWholeObject(_LuaState, hlScenario))
+	{
+		// the function would get a part of the scenario only
+		errorMsg = "the scenario could not be given to 'doTranslateFeatures' as a whole: it is nested too deep";
+		lua_pop(_LuaState, 2);
+		return nullptr;
+	}
 	if ( lua_pcall(_LuaState, 1, 1, 0) !=0 )
 	{
 		errorMsg = NLMISC::toString( "error running function 'doTranslateFeatures': %s", lua_tostring(_LuaState, -1));
 		return nullptr;
 	}
+	s_ConversionIncomplete = false;
 	CObject::TSmartPtr ret = getObjectFromLua(_LuaState, -1);
+	if (s_ConversionIncomplete)
+	{
+		// a run-time scenario that lacks a part is no scenario to play
+		errorMsg = "the scenario 'doTranslateFeatures' returned could not be taken as a whole: it is nested too deep";
+		return nullptr;
+	}
 	return ret;
 }
 
@@ -488,10 +532,14 @@ sint CComLuaModule::luaGetPropertyValue(lua_State* state)
 	luaL_checktype(state, 2, LUA_TSTRING);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
-	std::string attrName( lua_tostring(state, 2) );
-	CObject* toRet = this2->_Client->getPropertyValue(object, attrName);
-	this2->setObjectToLua(state, toRet);
+	bool whole;
+	{
+		CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
+		std::string attrName( lua_tostring(state, 2) );
+		CObject* toRet = this2->_Client->getPropertyValue(object, attrName);
+		whole = pushWholeObject(state, toRet);
+	}
+	if (!whole) return failIncompleteObject(state, "r2.getPropertyValue");
 	return  1;
 }
 
@@ -502,9 +550,13 @@ sint CComLuaModule::luaGetPaletteElement(lua_State* state)
 	luaL_checktype(state, 1, LUA_TSTRING);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	std::string key( lua_tostring(state, 1) );
-	CObject* object = this2->_Client->getPaletteElement(key);
-	this2->setObjectToLua(state, object);
+	bool whole;
+	{
+		std::string key( lua_tostring(state, 1) );
+		CObject* object = this2->_Client->getPaletteElement(key);
+		whole = pushWholeObject(state, object);
+	}
+	if (!whole) return failIncompleteObject(state, "r2.getPaletteElement");
 	return  1;
 }
 
@@ -605,15 +657,19 @@ sint CComLuaModule::luaNewComponent(lua_State* state)
 	nlassert(this2);
 
 	luaL_checktype(state, 1, LUA_TSTRING);
-	std::string key(lua_tostring(state, 1));
-	CObject* object = this2->_Client->newComponent(key);
-	if (!object)
+	bool whole;
 	{
-		lua_pushnil(state);
-		return 1;
+		std::string key(lua_tostring(state, 1));
+		CObject* object = this2->_Client->newComponent(key);
+		if (!object)
+		{
+			lua_pushnil(state);
+			return 1;
+		}
+		whole = pushWholeObject(state, object);
+		delete object;
 	}
-	setObjectToLua(state, object);
-	delete object;
+	if (!whole) return failIncompleteObject(state, "r2.newComponent");
 	return 1;
 }
 
@@ -1050,9 +1106,19 @@ sint CComLuaModule::luaRequestTpPosition(lua_State* state)
 }
 
 
-void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
+void CComLuaModule::setObjectToLua(lua_State* state, CObject* object, bool withGhosts)
 {
 	//H_AUTO(R2_CComLuaModule_setObjectToLua)
+	// A table within a table takes stack slots of its own, down to the deepest one. No Lua error is
+	// raised when the stack can not grow: the callers hold C++ objects, and one of them runs outside of a
+	// protected call. (Every level asks for more slots than it uses before the next one: the nil fits.)
+	if (!lua_checkstack(state, 8))
+	{
+		nlwarning("R2: an object is nested too deep for the Lua stack, it is left out");
+		s_ConversionIncomplete = true;
+		lua_pushnil(state);
+		return;
+	}
 	if (!object)
 	{
 		lua_pushnil(state);
@@ -1124,17 +1190,19 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 		{
 			std::string key = object->getKey(first);
 			CObject *value =  object->getValueAtPos(first);
+			// what the editor adds to the scenario for itself is left out when asked
+			if (!withGhosts && value && value->getGhost()) continue;
 			if (!key.empty())
 			{
 				lua_pushstring(state, key.c_str());
-				setObjectToLua(state, value);
+				setObjectToLua(state, value, withGhosts);
 				lua_settable(state, -3);
 				keys.push_back(key);
 			}
 			else
 			{
 				++arrayIndex;
-				setObjectToLua(state, value);
+				setObjectToLua(state, value, withGhosts);
 				lua_rawseti(state, -2, arrayIndex);
 			}
 		}
@@ -1176,6 +1244,14 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 CObject::TSmartPtr CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 {
 	//H_AUTO(R2_CComLuaModule_getObjectFromLua)
+	// a table within a table takes stack slots of its own, down to the deepest one (no Lua error here
+	// either, see setObjectToLua)
+	if (!lua_checkstack(state, 8))
+	{
+		nlwarning("R2: a table is nested too deep for the Lua stack, it is left out");
+		s_ConversionIncomplete = true;
+		return nullptr;
+	}
 	lua_pushvalue(state, idx);
 
 	// special case for RefID
@@ -1402,7 +1478,105 @@ bool CComLuaModule::loadUserComponent(const std::string& filename)
 CObject::TSmartPtr CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	//H_AUTO(R2_CComLuaModule_loadFromBuffer)
-	return parseScenario(data, filename, values);
+	// A file can be of an earlier version of the editor. Its scenario is brought up to date here, as data,
+	// before the caller uploads it or builds the editor's instances from it.
+	CObject::TSmartPtr scenario = parseScenario(data, filename, values);
+	if (!scenario) return nullptr;
+	return updateLoadedScenario(scenario, "File");
+}
+
+// Message handler of the call below: the message with the stack under it, when the scripts have
+// debug.traceback
+static int updateLoadedScenarioErrorHandler(lua_State *state)
+{
+	lua_getglobal(state, "debug");
+	if (lua_istable(state, -1))
+	{
+		lua_pushstring(state, "traceback");
+		lua_gettable(state, -2);
+		if (lua_isfunction(state, -1))
+		{
+			lua_pushvalue(state, 1);
+			lua_pushnumber(state, 2);
+			lua_call(state, 2, 1);
+			return 1;
+		}
+	}
+	lua_settop(state, 1);
+	return 1;
+}
+
+CObject::TSmartPtr CComLuaModule::updateLoadedScenario(CObject *scenario, const char *place)
+{
+	if (!scenario) return nullptr;
+	CObject::TSmartPtr result;
+	int top = lua_gettop(_LuaState);
+	lua_pushcfunction(_LuaState, updateLoadedScenarioErrorHandler);
+	int handler = lua_gettop(_LuaState);
+	lua_getglobal(_LuaState, "r2");
+	if (lua_istable(_LuaState, -1))
+	{
+		lua_pushstring(_LuaState, "Version");
+		lua_gettable(_LuaState, -2);
+	}
+	if (lua_istable(_LuaState, -1))
+	{
+		lua_pushstring(_LuaState, "updateLoadedScenario");
+		lua_gettable(_LuaState, -2);
+	}
+	if (!lua_isfunction(_LuaState, -1))
+	{
+		// scripts without the version update: the scenario is used as it was read
+		nlwarning("R2: r2.Version.updateLoadedScenario is not defined, the scenario is not brought up to date");
+		lua_settop(_LuaState, top);
+		result = scenario;
+		return result;
+	}
+	s_ConversionIncomplete = false;
+	setObjectToLua(_LuaState, scenario);
+	lua_pushstring(_LuaState, place);
+	bool told = false;
+	if (s_ConversionIncomplete)
+	{
+		// the function would get a part of the scenario only
+		nlwarning("R2: the scenario could not be given to r2.Version.updateLoadedScenario as a whole");
+	}
+	else if (lua_pcall(_LuaState, 2, 1, handler) != 0)
+	{
+		// the function tells the author when a step fails; an error in the function itself is told here
+		const char *message = lua_tostring(_LuaState, -1);
+		nlwarning("R2: error in r2.Version.updateLoadedScenario: %s", message ? message : "(no message)");
+	}
+	else if (lua_isnil(_LuaState, -1))
+	{
+		// nothing to change
+		result = scenario;
+		told = true;
+	}
+	else if (lua_istable(_LuaState, -1))
+	{
+		// the scenario with what the update changed in it
+		s_ConversionIncomplete = false;
+		result = getObjectFromLua(_LuaState, -1);
+		if (s_ConversionIncomplete) result = nullptr;
+		told = result != nullptr;
+		if (!told) nlwarning("R2: r2.Version.updateLoadedScenario returned a table that gives no scenario");
+	}
+	else if (lua_isboolean(_LuaState, -1) && !lua_toboolean(_LuaState, -1))
+	{
+		// the update failed, and the function has told the author
+		told = true;
+	}
+	else
+	{
+		nlwarning("R2: r2.Version.updateLoadedScenario returned a value of the type %s", lua_typename(_LuaState, lua_type(_LuaState, -1)));
+	}
+	lua_settop(_LuaState, top);
+	if (!told)
+	{
+		R2::getEditor().getUI().displaySystemInfo(CI18N::get(std::string("uiR2EDVersionUpdateError") + place), "BC");
+	}
+	return result;
 }
 
 
@@ -1411,13 +1585,17 @@ sint CComLuaModule::luaUpdateScenario(lua_State* state)
 	//H_AUTO(R2_CComLuaModule_luaUpdateScenario)
 	luaL_checktype(state, 1, LUA_TTABLE);
 
-	CObject::TSmartPtr object = getObjectFromLua(state);
-	lua_pushliteral(state, "tmp1");
-	lua_pushliteral(state, "tmp1");
-	lua_pushliteral(state, "tmp1");
+	bool whole;
+	{
+		CObject::TSmartPtr object = getObjectFromLua(state);
+		lua_pushliteral(state, "tmp1");
+		lua_pushliteral(state, "tmp1");
+		lua_pushliteral(state, "tmp1");
 
-	lua_getglobal(state, "write_table");
-	setObjectToLua(state, object);
+		lua_getglobal(state, "write_table");
+		whole = pushWholeObject(state, object);
+	}
+	if (!whole) return failIncompleteObject(state, "r2.updateScenario");
 	lua_call(state, 1, 0);
 
 	nlinfo("updateScenario");
@@ -1683,8 +1861,41 @@ sint CComLuaModule::luaGetScenarioObj(lua_State* state)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	CObject* obj = this2->_Client->getCurrentScenario()->getHighLevel();
-	setObjectToLua(state,obj);
+	// getScenarioObj(true): without the components the editor adds for itself (the ghosts). An attribute
+	// that is named for the editor alone ("Ghost_...") stays, which a save leaves out.
+	bool withGhosts = !(lua_gettop(state) >= 1 && lua_toboolean(state, 1));
+	// a script that saves, updates or translates the scenario must not get it with parts left out
+	if (!pushWholeObject(state, obj, withGhosts)) return failIncompleteObject(state, "r2.getScenarioObj");
 	return 1;
+}
+
+sint CComLuaModule::luaRequestSetScenarioVersions(lua_State* state)
+{
+	// requestSetScenarioVersions(versions): gives the scenario the list of the versions of its classes, in
+	// the editor and on the server. The list says what the content is: setting it is no action of the
+	// author, so it does not go through the action historic (nothing to undo, and nothing a clear of the
+	// historic can drop). The editor sets its own scenario here: it does not apply the answers of the
+	// server to its requests (CDynamicMapClient::setInstantFeedBackFlag). The list is no component, and
+	// the editor has no instance or displayer that goes by it, so the scenario is set as CEditor::nodeSet
+	// sets it at its core, in whatever mode the editor is: the event forwarder would drop the set while
+	// the editor goes back to edition (CDynamicMapClientEventForwarder::nodeSet). Without a connection
+	// to the server the list is set in the editor alone. When the server refuses the list, the editor has
+	// it and the server does not: the scenario is looked at again the next time it comes from the server.
+	luaL_checktype(state, 1, LUA_TTABLE);
+	CComLuaModule* this2 = getInstance(state);
+	nlassert(this2);
+	CObject* scenario = this2->_Client->getCurrentScenario()->getHighLevel();
+	if (!scenario || !scenario->isString("InstanceId")) return 0;
+	CObject::TSmartPtr versions = getObjectFromLua(state, 1);
+	if (!versions) return 0;
+	std::string instanceId = scenario->toString("InstanceId");
+	if (this2->_Client->getEditionModule().isServerEditionModuleUp())
+	{
+		this2->_Client->getEditionModule().requestSetNodeNoTest(instanceId, "Versions", versions);
+	}
+	// (the scenario takes copies of the entries: CObjectTable::setObject)
+	this2->_Client->CDynamicMapClient::nodeSet(instanceId, "Versions", versions);
+	return 0;
 }
 
 sint CComLuaModule::luaGetNamespace(lua_State* state)
@@ -1811,13 +2022,17 @@ sint CComLuaModule::luaGetIslandsLocation(lua_State* state)
 sint CComLuaModule::luaObjectToLua(lua_State* state)
 {
 	//H_AUTO(R2_CComLuaModule_luaObjectToLua)
-	CObject::TSmartPtr ret = getObjectFromLua(state, -1);
-	if(!ret)
+	bool whole;
 	{
-		nlwarning("objectToLua : not an object");
-		return 0;
+		CObject::TSmartPtr ret = getObjectFromLua(state, -1);
+		if(!ret)
+		{
+			nlwarning("objectToLua : not an object");
+			return 0;
+		}
+		whole = pushWholeObject(state, ret);
 	}
-	setObjectToLua(state, ret);
+	if (!whole) return failIncompleteObject(state, "r2.objectToLua");
 	return 1;
 }
 

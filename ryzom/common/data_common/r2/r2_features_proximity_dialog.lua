@@ -40,9 +40,10 @@ feature.Components.ProximityDialog =
 			},	
 		},
 		
-		updateVersion = function(this, scenarioValue, currentValue )
-			
-		end,		
+		-- the class has had one version
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			return true
+		end,
 	}
 
 local component = feature.Components.ProximityDialog  

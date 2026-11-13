@@ -1100,46 +1100,6 @@ function r2.getDisplayButtonHeader(func, buttonText)
 	return header
 end
 
-function r2.updateLogicEvents(this, invalidEvents)
-	assert(invalidEvents)
-	assert(this)
-	
-	local actions = this.Behavior.Actions
-	assert(actions)
-	
-
-	local function updateLogicEvent(k, action)
-
-		local event = action.Event
-		assert(event)
-		if invalidEvents[event.Type] then
-			local instanceId = tostring(event.InstanceId)
-			r2.requestSetNode(instanceId, "Type", tostring(invalidEvents[event.Type]))
-		end
-	end
-
-	forEach(actions, updateLogicEvent)
-
-end
-
-function r2.updateLogicActions(this, invalidActions, entityClass)
-	assert(invalidActions)
-	assert(this)
-	assert(entityClass)
-	
-	local instance = r2:getInstanceFromId(this.Entity)
-	if not instance or not instance:isKindOf(entityClass) then
-		return
-	end
-
-	local action = this.Action
-	assert(action)
-	
-	if invalidActions[action.Type] then
-		r2.requestSetNode(action.InstanceId, "Type", invalidActions[action.Type])
-	end
-end
-
 
 function r2.onRingAccessUpdated(access)
 	r2:buildPaletteUI()

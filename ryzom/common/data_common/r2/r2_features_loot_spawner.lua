@@ -17,6 +17,19 @@ feature.Components.LootSpawner =
 	{
 		BaseClass="LogicEntity",			
 		Name="LootSpawner",
+		-- version 2: the number of npcs to kill was kept as '_TriggerValue' by earlier versions
+		Version = 2,
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			local patchValue = scenarioValue
+			if patchValue < 2 then
+				if this.TriggerValue == nil then
+					update:set(this, "TriggerValue", defaulting(this._TriggerValue, 0))
+				end
+				patchValue = 2
+			end
+			if patchValue == currentValue then return true end
+			return false
+		end,
 		InEventUI = true,
 		Menu="ui:interface:r2ed_feature_menu",
 		

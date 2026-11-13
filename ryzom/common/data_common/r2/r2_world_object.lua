@@ -31,15 +31,13 @@ local worldObject =
 
 
 ------------------------------------------------------------------
-function worldObject.updateVersion(this, scenarioValue, currentValue)
+function worldObject.updateVersion(this, scenarioValue, currentValue, update)
 	local patchValue = scenarioValue
-	if patchValue < 1 then						
+	if patchValue < 1 then
 		-- display mode removed in version 1
-		if this.DisplayMode then
-			r2.requestEraseNode(this.InstanceId, "DisplayMode", -1)
-		end
+		update:erase(this, "DisplayMode")
 		patchValue = 1
-	end	
+	end
 	if patchValue == currentValue then return true end
 	return false
 end

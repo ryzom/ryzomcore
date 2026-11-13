@@ -220,7 +220,7 @@ component.getLogicEvent = function(this, context, event)
 
 	local eventType = tostring(event.Event.Type)
 	
-	local eventHandler, lastCondition = nil, nil
+	local eventHandler, firstCondition, lastCondition = nil, nil, nil
 
 	if eventType == "On Trigger" then 
 		eventHandler, firstCondition, lastCondition = r2.Translator.createEvent("timer_t0_triggered", "",  rtNpcGrp.Id)

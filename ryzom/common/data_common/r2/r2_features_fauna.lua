@@ -400,9 +400,14 @@ component.createGhostComponents= function(this, act)
 			npc.Angle = 2 * math.pi * math.random(0, 100)/100.0
 			
 			if i == 1 then 
-				local manager = r2:getInstanceFromId(comp.ManagerId)
-				assert(manager)
-				if manager.Active == 1 then npc.AutoSpawn = 1 else npc.AutoSpawn = 0 end
+				-- A herd saved before the fauna feature managed its herds names no manager: nothing
+				-- keeps it from spawning with its act.
+				local manager = nil
+				if comp.ManagerId ~= nil and tostring(comp.ManagerId) ~= "" then
+					manager = r2:getInstanceFromId(comp.ManagerId)
+					assert(manager)
+				end
+				if manager == nil or manager.Active == 1 then npc.AutoSpawn = 1 else npc.AutoSpawn = 0 end
 				leader = npc
 				r2.requestSetGhostNode(comp.InstanceId, "_LeaderId",npc.InstanceId)
 				isHerbivore = r2.getPropertyValue(npc, "IsHerbivore")

@@ -133,7 +133,13 @@ function r2:group(src, target)
 		-- create a new group
 		-- debugInfo(colorTag(255, 255, 0) .. "Creating new group")
 		local newGroup = r2.newComponent("NpcGrpFeature")
-		local groupName = r2:genInstanceName(r2.PaletteIdToGroupTranslation[src.Base].. " " .. i18n.get("uiR2EDNameGroup"))
+		-- (a creature the palette does not offer has no name for its kind there)
+		local groupBaseName = i18n.get("uiR2EDNameGroup")
+		local kindName = r2.PaletteIdToGroupTranslation[src.Base]
+		if kindName ~= nil then
+			groupBaseName = kindName .. " " .. groupBaseName
+		end
+		local groupName = r2:genInstanceName(groupBaseName)
 		newGroup.Name = groupName
 
 		--r2.requestSetNode(target.Behavior.InstanceId, "Type", "")	

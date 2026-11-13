@@ -104,9 +104,10 @@ feature.Components.Ambush =
 			r2.Translator.translateFeatureActivation(this, context)
 		end,
 
-		updateVersion = function(this, scenarioValue, currentValue )
-			
-		end,		
+		-- the class has had one version
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			return true
+		end,
 
 
 	}

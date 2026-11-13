@@ -33,6 +33,19 @@ feature.Components.Counter =
 	{
 		BaseClass="LogicEntity",			
 		Name="Counter",
+		-- version 2: a counter saved without the value it triggers at gets the one a new counter starts with
+		Version = 2,
+		updateVersion = function(this, scenarioValue, currentValue, update)
+			local patchValue = scenarioValue
+			if patchValue < 2 then
+				if this.TriggerValue == nil then
+					update:set(this, "TriggerValue", 0)
+				end
+				patchValue = 2
+			end
+			if patchValue == currentValue then return true end
+			return false
+		end,
 		Menu="ui:interface:r2ed_feature_menu",
 	
 		DisplayerUI = "R2::CDisplayerLua",
