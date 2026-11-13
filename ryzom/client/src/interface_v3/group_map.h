@@ -212,8 +212,15 @@ public:
 	void				removeUserLandMark(CCtrlButton *button);
 	// update a user landmark from a pointer on its button
 	void				updateUserLandMark(CCtrlButton *button, const ucstring &newName, const CUserLandMark::EUserLandMarkType lmType);
+	// Show a position shared in chat on the most detailed map of its continent.
+	bool				showChatPosition(const NLMISC::CVector2f &worldPos, const std::string &continent,
+							const ucstring &title, NLMISC::CRGBA color);
+	// Open the landmark name dialog for a position, prefilled with title.
+	void				createUserLandMarkAt(const NLMISC::CVector2f &worldPos, const ucstring &title);
 	// get a user landmark from a pointer on its button
 	CUserLandMark			getUserLandMark(CCtrlButton *button) const;
+	// remember the right clicked position or landmark for sharing it in chat
+	void				captureChatPosition(CCtrlButton *button = NULL) const;
 	// get pos on the map of the last right click (in map coords)
 	NLMISC::CVector2f		getRightClickLastPos() const { return _RightClickLastPos; }
 	// get number of user landmarks
@@ -492,6 +499,9 @@ private:
 		TLandMarkTextVect	_ContinentText;
 		// landmarks from user
 		TLandMarkButtonVect	_UserLM;
+		// Position shown from the chat, until _ChatPositionEnd
+		TLandMarkButtonVect	_ChatPositionLM;
+		sint64				_ChatPositionEnd;
 		// landmarks for mission (one for each db entry)
 		TLandMarkButtonVect	_MissionLM;
 		// landmark for target

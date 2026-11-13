@@ -28,6 +28,7 @@
 #include "nel/misc/smart_ptr.h"
 
 class CPeopleList;
+class CChatMessage;
 
 
 // ***************************************************************************
@@ -45,10 +46,12 @@ public:
 	  * Listening windows will blick only if there isnt a single visible listening window, so that the player can know if there's a message
 	  * \param windowVisible is not NULL, points a bool that will be filled with true if one of the window on the which the msg was displayed is visible.
 	  */
-	void displayMessage(const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL);
+	void displayMessage(const std::string &msg, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL,
+		const CChatMessage *sharedMessage = NULL, const std::string &senderName = std::string());
 	/** The same as displayMessage, but with sender name, so that the msg will be displayed in attached people lists as well
 	  */
-	void displayTellMessage(/*TDataSetIndex &senderIndex, */const std::string &msg, const std::string &sender, NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL);
+	void displayTellMessage(/*TDataSetIndex &senderIndex, */const std::string &msg, const std::string &sender,
+		NLMISC::CRGBA col, uint numBlinks = 0, bool *windowVisible = NULL, const CChatMessage *sharedMessage = NULL);
 	/** Clear the messages in all registered chat windows
 	 */
 	void clearMessages();

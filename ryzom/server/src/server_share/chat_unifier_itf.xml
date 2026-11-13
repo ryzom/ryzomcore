@@ -1,6 +1,7 @@
 <generator header_tag="CHAT_UNIFIER_ITF">
 
 	<include file="nel/misc/entity_id.h"/>
+	<include file="game_share/chat_message.h"/>
 	<cpp-include file="stdpch.h"/>
 
 	<namespace name="CHATUNI">
@@ -112,6 +113,15 @@
 			</method>
 
 			<!-- ========================================================== -->
+			<method name="farGuildChatShared" msg="CURFGCS" broadcast="true">
+				<doc line="IOS forwards a shared guild chat message to the IOS"/>
+
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="uint32" name="guildId"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
 			<method name="farGuildChat2" msg="CURFGC2" broadcast="true">
 				<doc line="IOS forward a guild chat message to the IOS"/>
 
@@ -139,12 +149,30 @@
 			</method>
 
 			<!-- ========================================================== -->
+			<method name="universeBroadcastShared" msg="CURUBS" broadcast="true">
+				<doc line="IOS forwards a shared universe chat message to the IOSs"/>
+
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="uint32" name="senderHomeSession"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
 			<method name="dynChanBroadcast" msg="CUDCB" broadcast="true">
 				<doc line="IOS forward a dyn chat chat message to the IOSs"/>
 
 				<param type="NLMISC::CEntityId"	name="chanId"		byref="true"/>
 				<param type="ucstring"			name="senderName"	byref="true"/>
 				<param type="ucstring"			name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="dynChanBroadcastShared" msg="CUDCBS" broadcast="true">
+				<doc line="IOS forwards a shared dynamic chat message to the IOSs"/>
+
+				<param type="NLMISC::CEntityId" name="chanId" byref="true"/>
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
 			</method>
 
 			<!-- ========================================================== -->
