@@ -42,6 +42,15 @@ CMovePrimitive::CMovePrimitive (CMoveContainer* container, uint8 firstWorldImage
 	_FirstWorldImage=firstWorldImage;
 	_NumWorldImage=numWorldImage;
 
+	// A box until setPrimitiveType says otherwise, of no size until setSize or setRadius and setHeight
+	_Length[0]=0;
+	_Length[1]=0;
+	_Height=0;
+	_IterationCount=0;
+
+	// No user tag until the owner sets one
+	UserData=0;
+
 	_CollisionMask=0xffffffff;
 	_OcclusionMask=0xffffffff;
 	_Attenuation=1;

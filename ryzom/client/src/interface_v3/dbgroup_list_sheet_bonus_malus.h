@@ -44,11 +44,13 @@ public:
 	{
 		CSheetChildTimer();
 		virtual void init(CDBGroupListSheet *pFather, uint index) NL_OVERRIDE;
+		virtual bool isInvalidated(CDBGroupListSheet *pFather) NL_OVERRIDE;
 		virtual void update(CDBGroupListSheet *pFather) NL_OVERRIDE;
 
 		NLMISC::CCDBNodeLeaf *TimerDB;
 		NLMISC::CCDBNodeLeaf *DisabledDB;
 		uint TimerCache;
+		sint32 DisabledCache;
 
 		NLMISC::CRGBA _RegenTextColor;
 		NLMISC::CRGBA _RegenTextDisabledColor;

@@ -497,6 +497,10 @@ void CDoorManager::getPACSTriggers()
 			if (rTI.CollisionType != UTriggerInfo::Inside)
 				continue;
 
+			// only entities open doors, not the other primitives that reach a door volume
+			if ((nUserDataEntity & 0xffff) != UserDataEntity)
+				continue;
+
 			// Retrieve the door pointer
 			SDoor *pDoor = nullptr;
 			CEntityCL *pEntity = nullptr;

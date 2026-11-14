@@ -254,6 +254,12 @@ if not args.noconf:
 	try:
 		if args.preset:
 			DummyUnknownName
+		ExamplesDirectory
+	except NameError:
+		ExamplesDirectory = "R:/code/ryzom/client/examples"
+	try:
+		if args.preset:
+			DummyUnknownName
 		DataCommonDirectory
 	except NameError:
 		DataCommonDirectory = "R:/code/ryzom/common/data_common"
@@ -415,6 +421,7 @@ if not args.noconf:
 		LeveldesignWorldDirectory = askVar(log, "[IN] Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
 		PrimitivesDirectory = askVar(log, "[IN] Primitives Directory", PrimitivesDirectory).replace("\\", "/")
 		GamedevDirectory = askVar(log, "[IN] Gamedev Directory", GamedevDirectory).replace("\\", "/")
+		ExamplesDirectory = askVar(log, "[IN] Examples Directory", ExamplesDirectory).replace("\\", "/")
 		DataShardDirectory = askVar(log, "[IN] Data Shard Directory", DataShardDirectory).replace("\\", "/")
 		DataCommonDirectory = askVar(log, "[IN] Data Common Directory", DataCommonDirectory).replace("\\", "/")
 		TranslationDirectory = askVar(log, "[IN] Translation Directory", TranslationDirectory).replace("\\", "/")
@@ -567,6 +574,7 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("# Misc data directories\n")
 	sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
+	sf.write("ExamplesDirectory = \"" + str(ExamplesDirectory) + "\"\n")
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("ExeDllCfgDirectories = " + str(ExeDllCfgDirectories) + "\n")
