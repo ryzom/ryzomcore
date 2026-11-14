@@ -64,7 +64,8 @@ function printMsgML(str)
 	end
 end
 --local devMode = false
-local devMode =   config.R2EDExtendedDebug
+-- config gives the number in the cfg file: 0, the shipped value, is true in Lua
+local devMode = (config.R2EDExtendedDebug == 1)
 local dataDevMode = false
 
 function printWarning( str)
@@ -576,12 +577,13 @@ Translator.translateEventHandlers = function(context, hlNpc, eventHandlers, rtNp
 			else
 				caller = pcall			
 			end
-			if not caller(Translator.translateEventHandler, context, hlNpc, v, rtNpcGrp) then
+			local ok, err = caller(Translator.translateEventHandler, context, hlNpc, v, rtNpcGrp)
+			if not ok then
 				local eventType = v.Event.Type
 				if eventType == nil then eventType = "" end
 				local componentName = hlNpc.Name
 				if componentName == nil then componentName = "" end
-				printWarning("Error in event handler '"..eventType.."' In component "..componentName)
+				printWarning("Error in event handler '"..eventType.."' In component "..componentName..": "..tostring(err))
 			end
 			k, v = next (eventHandlers, k)
 		end	
@@ -937,13 +939,14 @@ end
 --first parameter: action type
 Translator.createAction = function(...)
 	local arg = {...}
-	local debug=config.R2EDExtendedDebug
+	local debug = devMode
 	local function header(toto)
 
 		if debug then
 			return "print(\"<"..toto..">\");\n"
 		end
-		return "//"..toto
+		-- a comment line of its own: without the debug prints it is the first line of the script
+		return "//"..toto.."\n"
 	end
 
 	local function footer(toto)
