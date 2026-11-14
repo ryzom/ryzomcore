@@ -1894,7 +1894,13 @@ void CMagicPhrase::enchantPhrase(CCharacter * user,float successFactor)
 		intensity = 249;
 	behav.Spell.SpellIntensity = 1 + (intensity/50);
 
-	// update caster behaviour
+	// the caster is the only target of the cast (must be done before behaviour): the list still holds the targets
+	// of the previous spell or attack, and the client plays the cast FX on what it finds there
+	CMirrorPropValueList<uint32>	targetList(TheDataset, _ActorRowId, DSPropertyTARGET_LIST);
+	targetList.clear();
+	PHRASE_UTILITIES::updateMirrorTargetList( targetList, _ActorRowId, 0.0f, false );
+
+	// update caster behaviour (must be done after target list)
 	if ( behav.Behaviour != MBEHAV::UNKNOWN_BEHAVIOUR )
 		PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
 	else
