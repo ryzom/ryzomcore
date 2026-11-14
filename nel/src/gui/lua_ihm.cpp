@@ -1628,7 +1628,8 @@ namespace NLGUI
 		ls.newTable();
 		for(uint k = 0; k < files.size(); ++k)
 		{
-			ls.push(k);
+			// keys from 1, the start of a Lua sequence: # and table.sort see only the sequence
+			ls.push(k + 1);
 			ls.push(files[k]);
 			ls.setTable(-3);
 		}
