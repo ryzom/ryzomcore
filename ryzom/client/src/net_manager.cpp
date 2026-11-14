@@ -1530,6 +1530,7 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 	if (SoundMngr)
 	{
 		LoadingMusic.clear();
+		bool keepEventMusic = false;
 		switch (LoadingBackground)
 		{
 		case TeleportKamiBackground:
@@ -1541,6 +1542,9 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		case ResurectKamiBackground:
 		case ResurectKaravanBackground:
 			// TODO: Resurrect music
+			// Until there is one, the death music keeps playing through the loading screen (an empty
+			// event music would stop it): CUserEntity::updatePreCollision stops it once the player is alive.
+			keepEventMusic = true;
 			break;
 		default:
 			LoadingMusic = ClientCfg.TeleportLoadingMusic;
@@ -1548,7 +1552,8 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		}
 
 		// start to play
-		SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
+		if (!keepEventMusic)
+			SoundMngr->playEventMusic(LoadingMusic, CSoundManager::LoadingMusicXFade, true);
 	}
 
 	// Create the loading texture.
