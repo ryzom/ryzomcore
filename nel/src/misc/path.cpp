@@ -2892,7 +2892,8 @@ bool CFile::replaceFile(const std::string &dest, const std::string &src)
 
 	// Three ways to replace, each one rename by the file system without a copy, so the destination is never
 	// seen missing or half written, and a failure changes nothing. The next one is used when the system, an
-	// emulation of it or the file system says that it does not know the one before:
+	// emulation of it or the file system says that it does not know the one before, or refuses a read-only
+	// destination in the first:
 	// 0. the rename with POSIX semantics that ignores the read-only flag. It also replaces a destination that
 	//    scanners, indexers or sync agents hold open, as they share it for deletion, and a read-only one as
 	//    it is;
@@ -2906,6 +2907,7 @@ bool CFile::replaceFile(const std::string &dest, const std::string &src)
 	// from 1 ms: such a hold usually lasts milliseconds. The time is measured, as a wait lasts up to a timer
 	// tick longer than asked; the waits asked for are counted too, so that a clock that steps cannot prolong
 	// the tries. What waiting cannot cure (access rights, a missing file, another volume) fails at once.
+	const bool destReadOnly = destAttributes != INVALID_FILE_ATTRIBUTES && (destAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 	uint way = 0;
 	bool destFlagCleared = false;
 	DWORD lastError = 0;
@@ -2918,10 +2920,16 @@ bool CFile::replaceFile(const std::string &dest, const std::string &src)
 		{
 			bool unsupported;
 			lastError = posixReplaceFile(wideSrc, wideDest, way == 0, unsupported);
+			// A system that does not know the bit for the read-only flag may ignore the bit instead of
+			// refusing the call: the read-only destination is then what it refuses, with "access is denied".
+			// That is taken as not knowing the bit. If the refusal has another cause the next way meets it
+			// as well: it then fails with the same error, and the flag it cleared is put back.
+			if (way == 0 && destReadOnly && lastError == ERROR_ACCESS_DENIED)
+				unsupported = true;
 			if (unsupported)
 			{
 				++way;
-				if (!destFlagCleared && destAttributes != INVALID_FILE_ATTRIBUTES && (destAttributes & FILE_ATTRIBUTE_READONLY) != 0)
+				if (!destFlagCleared && destReadOnly)
 				{
 					DWORD writableAttributes = destAttributes & ~(DWORD)FILE_ATTRIBUTE_READONLY;
 					if (writableAttributes == 0)
