@@ -703,6 +703,9 @@ void CNelExport::viewMesh (TimeValue time)
 			}*/
 		}
 
+		// One message for the animated controllers that gave no track
+		_ExportNel->outputUnexportedAnimations();
+
 		// Reset the camera
 		view->resetCamera ();
 
