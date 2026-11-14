@@ -1024,7 +1024,14 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
 
 	if (!format)
-		nlerror("cannot create NSOpenGLPixelFormat");
+	{
+		// no fatal error: the application says in its own words that it has no display. What was made so
+		// far goes: the window, if it is the driver's (no view of this display exists yet)
+		nlwarning("3D: Cannot create the NSOpenGLPixelFormat, no renderer gives the pixel format the driver asks for");
+		_glView = nil;
+		destroyWindow();
+		return false;
+	}
 
 	// intially set height/width, further updates through CocoaOpenGLView
 	_CurrentMode.Height = mode.Height;
@@ -1036,7 +1043,12 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		pixelFormat:format];
 
 	if (!_glView)
-		nlerror("cannot create view");
+	{
+		nlwarning("3D: Cannot create the OpenGL view");
+		[format release];
+		destroyWindow();
+		return false;
+	}
 
 	// tell the view about the driver so the view is able to update "window" size
 	[_glView setDriver:this];
@@ -1054,7 +1066,17 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	_ctx = [_glView openGLContext];
 
 	if (!_ctx)
-		nlerror("cannot create context");
+	{
+		// the view is in the container by now, which for a view of the application is not the driver's to
+		// release: the view leaves it here
+		nlwarning("3D: Cannot create the OpenGL context of the view");
+		[format release];
+		[_glView removeFromSuperview];
+		[_glView release];
+		_glView = nil;
+		destroyWindow();
+		return false;
+	}
 
 	// free the pixel format object
 	[format release];
@@ -1537,7 +1559,7 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 
 	if (!cocoa_window)
 	{
-		nlerror("cannot create cocoa window");
+		nlwarning("3D: Cannot create the Cocoa window");
 		return false;
 	}
 

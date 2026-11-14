@@ -1073,8 +1073,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	NSOpenGLPixelFormat* format =
 		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
 
-	if(!format)
-		nlerror("cannot create NSOpenGLPixelFormat");
+	if (!format)
+	{
+		// no fatal error: the application says in its own words that it has no display. What was made so
+		// far goes: the window, if it is the driver's (no view of this display exists yet)
+		nlwarning("3D: Cannot create the NSOpenGLPixelFormat, no renderer gives the pixel format the driver asks for");
+		_glView = nil;
+		destroyWindow();
+		return false;
+	}
 
 	// intially set height/width, further updates through CocoaOpenGLView
 	_CurrentMode.Height = mode.Height;
@@ -1085,8 +1092,13 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)
 		pixelFormat:format];
 
-	if(!_glView)
-		nlerror("cannot create view");
+	if (!_glView)
+	{
+		nlwarning("3D: Cannot create the OpenGL view");
+		[format release];
+		destroyWindow();
+		return false;
+	}
 
 	// tell the view about the driver so the view is able to update "window" size
 	[_glView setDriver:this];
@@ -1103,8 +1115,18 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// create a opengl context for the view
 	_ctx = [_glView openGLContext];
 
-	if(!_ctx)
-		nlerror("cannot create context");
+	if (!_ctx)
+	{
+		// the view is in the container by now, which for a view of the application is not the driver's to
+		// release: the view leaves it here
+		nlwarning("3D: Cannot create the OpenGL context of the view");
+		[format release];
+		[_glView removeFromSuperview];
+		[_glView release];
+		_glView = nil;
+		destroyWindow();
+		return false;
+	}
 
 	// free the pixel format object
 	[format release];
@@ -1682,7 +1704,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	if(!cocoa_window)
 	{
-		nlerror("cannot create cocoa window");
+		nlwarning("3D: Cannot create the Cocoa window");
 		return false;
 	}
 
