@@ -306,6 +306,7 @@ int main(int argc, char **argv)
 	args.addArg("g", "grayscale", "", "Don't load grayscape images as alpha but as grayscale");
 	args.addArg("m", "mipmap", "", "Create MipMap");
 	args.addArg("r", "reduce", "FACTOR", "Reduce the bitmap size before compressing\n  FACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8");
+	args.addArg("", "strict", "", "Return 1 when an ASSET ERROR was printed, the files are still written\n  ASSET ERRORs are printed only for the files that are converted");
 	args.addAdditionalArg("input", "PNG or TGA files to convert", false);
 
 	if (!args.parse(argc, argv)) return 1;
@@ -314,6 +315,8 @@ int main(int argc, char **argv)
 	uint8 OptAlgo = NOT_DEFINED;
 	bool OptMipMap = false;
 	bool OptGrayscale = false;
+	bool OptStrict = false;
+	bool AssetError = false;
 	uint Reduce = 0;
 
 	if (args.haveArg("o"))
@@ -324,6 +327,9 @@ int main(int argc, char **argv)
 
 	if (args.haveArg("g"))
 		OptGrayscale = true;
+
+	if (args.haveLongArg("strict"))
+		OptStrict = true;
 
 	if (args.haveArg("a"))
 	{
@@ -371,7 +377,7 @@ int main(int argc, char **argv)
 
 		if(inputFileName.find("_usercolor")<inputFileName.length())
 		{
-			return 0;
+			return (OptStrict && AssetError) ? 1 : 0;
 		}
 
 		NLMISC::CIFile input;
@@ -451,7 +457,7 @@ int main(int argc, char **argv)
 		if(dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
 		{
 			cout<<outputFileName<<" : a recent dds file already exists"<<endl;
-			return 0;
+			return (OptStrict && AssetError) ? 1 : 0;
 		}
 
 
@@ -683,6 +689,22 @@ int main(int argc, char **argv)
 			}
 			cout<<"compressing ("<<algostr<<") "<<inputFileName<<" to "<<outputFileName<<endl;
 
+			// the size that is compressed, after any reduction
+			const uint32 compressedWidth = picSrc.getWidth();
+			const uint32 compressedHeight = picSrc.getHeight();
+			if ((compressedWidth % 4) != 0 || (compressedHeight % 4) != 0)
+			{
+				cerr << "ASSET ERROR: " << inputFileName << " is compressed at " << compressedWidth << "x" << compressedHeight
+				     << ", DXTC needs a multiple of 4 on each side, it stores blocks of 4x4 pixels" << endl;
+				AssetError = true;
+			}
+			if (OptMipMap && (!isPowerOf2(compressedWidth) || !isPowerOf2(compressedHeight)))
+			{
+				cerr << "ASSET ERROR: " << inputFileName << " is compressed at " << compressedWidth << "x" << compressedHeight
+				     << ", mipmaps need a power of two on each side, so it gets none" << endl;
+				AssetError = true;
+			}
+
 
 			// Saving compressed DDS file
 			// =================
@@ -707,5 +729,5 @@ int main(int argc, char **argv)
 		}
 	}
 
-	return 0;
+	return (OptStrict && AssetError) ? 1 : 0;
 }
