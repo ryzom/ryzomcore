@@ -79,7 +79,7 @@ inline const char *getReportPostURL()
 #endif
 }
 
-TReportResult report(const std::string &title, const std::string &subject, const std::string &body, const std::string &attachment, bool synchronous, bool sendReport, TReportResult defaultResult)
+TReportResult report(const std::string &title, const std::string &subject, const std::string &body, bool synchronous, bool sendReport, TReportResult defaultResult)
 {
 	std::string reportPath;
 	if (!body.empty())
@@ -119,9 +119,6 @@ TReportResult report(const std::string &title, const std::string &subject, const
 
 		if (!reportPath.empty())
 			params += NLMISC::toString(" -log \"%s\"", reportPath.c_str());
-
-		if (!subject.empty())
-			params += NLMISC::toString(" -attachment \"%s\"", attachment.c_str());
 
 		if (!title.empty())
 			params += NLMISC::toString(" -title \"%s\"", title.c_str());
@@ -190,8 +187,6 @@ TReportResult report(const std::string &title, const std::string &subject, const
 				printf("\tsubject: '%s'\n", subject.c_str());
 			if (!body.empty())
 				printf("\tbody: '%s'\n", reportPath.c_str());
-			if (!attachment.empty())
-				printf("\tattachment: '%s'\n", attachment.c_str());
 			for (;;)
 			{
 				printf("\n");

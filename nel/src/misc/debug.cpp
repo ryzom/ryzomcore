@@ -582,7 +582,7 @@ public:
 			{
 				// yoyo: allow only to send the crash report once. Because users usually click ignore,
 				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
-				report(progname + shortExc, subject, _Reason, NL_CRASH_DUMP_FILE, true, !isCrashAlreadyReported(), ReportAbort);
+				report(progname + shortExc, subject, _Reason, true, !isCrashAlreadyReported(), ReportAbort);
 				// TODO: Does this need to be synchronous? Why does this not handle the report result?
 
 				// no more sent mail for crash
