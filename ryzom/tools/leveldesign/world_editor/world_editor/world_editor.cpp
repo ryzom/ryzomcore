@@ -824,7 +824,7 @@ void CMyLigoConfig::errorMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	theApp.errorMessage (buffer);
+	theApp.errorMessage("%s", buffer);
 }
 
 // ***************************************************************************

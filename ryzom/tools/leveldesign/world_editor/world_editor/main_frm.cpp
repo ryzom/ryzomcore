@@ -491,7 +491,7 @@ bool CMainFrame::yesNoMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	return theApp.yesNoMessage (buffer);
+	return theApp.yesNoMessage("%s", buffer);
 }
 
 // ***************************************************************************
@@ -512,7 +512,7 @@ void CMainFrame::errorMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	theApp.errorMessage (buffer);
+	theApp.errorMessage("%s", buffer);
 }
 
 // ***************************************************************************
@@ -533,7 +533,7 @@ void CMainFrame::infoMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	theApp.infoMessage (buffer);
+	theApp.infoMessage("%s", buffer);
 }
 
 // ***************************************************************************
