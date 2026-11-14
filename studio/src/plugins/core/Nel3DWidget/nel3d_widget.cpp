@@ -110,64 +110,36 @@ void Nel3DWidget::resizeEvent( QResizeEvent *evnt )
 	Q_EMIT resize(evnt->size().width(), evnt->size().height());
 }
 
-#if defined ( NL_OS_WINDOWS )
+// The driver does not subclass a window it did not create, so on Windows the messages of this
+// window are passed on to it: mouse and size reach it, the keyboard does not, as Qt 5 keeps the
+// Win32 keyboard focus on the top-level window, so key messages are sent there and not to this
+// window. On X11 the driver gets no input from this window, since its event emitter asks for all
+// input in one selection, which the X server refuses on a window whose button presses Qt already
+// takes. On macOS nothing is passed on: Qt delivers NSEvent objects and the window proc of the
+// driver takes a Carbon EventRef.
+#if defined(NL_OS_WINDOWS)
 
-typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-bool Nel3DWidget::winEvent( MSG *message, long *result )
+bool Nel3DWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
-	if( driver != NULL ) 
+	if (driver != NULL && eventType == "windows_generic_MSG")
 	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( iDriver != NULL )
+		NL3D::IDriver *iDriver = dynamic_cast<NL3D::CDriverUser *>(driver)->getDriver();
+		if (iDriver != NULL)
 		{
+			MSG *msg = static_cast<MSG *>(message);
 			winProc proc = (winProc)iDriver->getWindowProc();
-			return proc( iDriver, message->hwnd, message->message, message->wParam, message->lParam );
+			if (proc(iDriver, msg->hwnd, msg->message, msg->wParam, msg->lParam))
+			{
+				*result = 0;
+				return true;
+			}
 		}
 	}
 
-	return false;
+	return QWidget::nativeEvent(eventType, message, result);
 }
 
-#elif defined( NL_OS_MAC )
-
-typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
-
-bool Nel3DWidget::macEvent( EventHandlerCallRef caller, EventRef event )
-{
-	if( caller )
-		nlerror( "You are using QtCarbon! Only QtCocoa supported, please upgrade Qt" );
-
-	if( driver != NULL )
-	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( iDriver != NULL )
-		{
-			cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
-			return proc( iDriver, event );
-		}
-	}
-
-	return false;
-}
-
-#elif defined( NL_OS_UNIX )
-
-typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
-
-bool Nel3DWidget::x11Event( XEvent *event )
-{
-	if( driver != NULL )
-	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( driver != NULL )
-		{
-			x11Proc proc = ( x11Proc )iDriver->getWindowProc();
-			return proc( iDriver, event );
-		}
-	}
-
-	return false;
-}
-#endif 
+#endif
 

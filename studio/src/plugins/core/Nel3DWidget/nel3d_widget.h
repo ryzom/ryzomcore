@@ -35,10 +35,6 @@ typedef QGLWidget Nel3DWidgetBase;
 
 #include "../core_global.h"
 
-#ifdef NL_OS_UNIX
-#include <X11/Xlib.h>
-#endif
-
 namespace NL3D
 {
 	class UDriver;
@@ -77,11 +73,7 @@ protected:
 	void resizeEvent( QResizeEvent *evnt );
 
 #if defined(NL_OS_WINDOWS)
-	bool winEvent( MSG *message, long *result );
-#elif defined(NL_OS_MAC)
-	bool macEvent( EventHandlerCallRef caller, EventRef event );
-#elif defined(NL_OS_UNIX)
-	bool x11Event( XEvent *event );
+	bool nativeEvent(const QByteArray &eventType, void *message, long *result) NL_OVERRIDE;
 #endif
 
 private:

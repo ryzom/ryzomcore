@@ -38,7 +38,6 @@ typedef QWidget QNeLWidget;
 typedef QWidget QNeLWidget;
 #elif defined(NL_OS_UNIX)
 typedef QGLWidget QNeLWidget;
-#include <X11/Xlib.h>
 #endif // NL_OS_UNIX
 
 namespace NL3D
@@ -102,11 +101,7 @@ protected:
 	virtual void hideEvent(QHideEvent *hideEvent);
 
 #if defined(NL_OS_WINDOWS)
-	virtual bool winEvent(MSG *message, long *result);
-#elif defined(NL_OS_MAC)
-	virtual bool macEvent(EventHandlerCallRef caller, EventRef event);
-#elif defined(NL_OS_UNIX)
-	virtual bool x11Event(XEvent *event);
+	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) NL_OVERRIDE;
 #endif
 
 private:
