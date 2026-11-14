@@ -283,8 +283,10 @@ function r2.setCurrSelectedFileToLoad(filename, path)
 					r2.CurrentForm.Env.FormInstance.RingAccess = 0
 					r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = i18n.get("uiR2EDLoadScenario_No")
 				end
-			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel then
-				r2.CurrentForm.Env.FormInstance.RingAccess = 0
+			else
+				-- a scenario without a header (the first editors wrote none) has no level to compare here: the
+				-- editor checks its content once it is loaded (r2.RingAccess.verifyScenario)
+				r2.CurrentForm.Env.FormInstance.RingAccess = 1
 				r2.CurrentForm.Env.FormInstance.LoadScenario_RingPointsLevel = ""	
 			end
 
