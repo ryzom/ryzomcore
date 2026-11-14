@@ -611,7 +611,7 @@ function r2.events:updateElementEditor()
 				end
 				if actionInst.Action.ValueString and actionInst.Action.ValueString ~= "" then
 					if string.find(actionType, "%%1") then
-						actionType = string.gsub(actionType, "%%1", "'"..tostring(actionInst.Action.ValueString).."'")
+						actionType = replaceTag(actionType, "%%1", "'"..tostring(actionInst.Action.ValueString).."'")
 					else
 						actionType = actionType .. " '" .. tostring(actionInst.Action.ValueString).. "'"
 					end

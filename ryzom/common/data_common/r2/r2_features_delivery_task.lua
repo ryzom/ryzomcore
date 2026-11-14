@@ -179,12 +179,12 @@ function component:textAdapter(text)
 	-- a text that the component does not have (one of an older editor) is an empty text
 	if text == nil then text = "" end
 	local str = text
-	str=string.gsub (str, "<qt1>", tostring(qts[1]))
-	str=string.gsub (str, "<qt2>", tostring(qts[2]))
-	str=string.gsub (str, "<qt3>", tostring(qts[3]))
-	str=string.gsub (str, "<item1>", tostring(items[1]))
-	str=string.gsub (str, "<item2>", tostring(items[2]))
-	str=string.gsub (str, "<item3>", tostring(items[3]))
+	str = replaceTag(str, "<qt1>", tostring(qts[1]))
+	str = replaceTag(str, "<qt2>", tostring(qts[2]))
+	str = replaceTag(str, "<qt3>", tostring(qts[3]))
+	str = replaceTag(str, "<item1>", tostring(items[1]))
+	str = replaceTag(str, "<item2>", tostring(items[2]))
+	str = replaceTag(str, "<item3>", tostring(items[3]))
 
 	local mission_giver = ""
 	if self.MissionGiver == nil then return end
@@ -192,7 +192,7 @@ function component:textAdapter(text)
 	if npc then
 		mission_giver = npc.Name
 	end
-	str=string.gsub(str, "<mission_giver>", tostring(mission_giver))
+	str = replaceTag(str, "<mission_giver>", tostring(mission_giver))
 
 	local mission_target = ""
 	if self.MissionTarget == nil then return end
@@ -200,7 +200,7 @@ function component:textAdapter(text)
 	if npc then
 		mission_target = npc.Name
 	end
-	str=string.gsub(str, "<mission_target>", tostring(mission_target))
+	str = replaceTag(str, "<mission_target>", tostring(mission_target))
 
 	return str
 end

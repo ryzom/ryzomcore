@@ -176,7 +176,7 @@ function component:textAdapter(text)
 	end
 	
 
-	str=string.gsub(str, "<object_name>", object)
+	str = replaceTag(str, "<object_name>", object)
 	return str
 end
 

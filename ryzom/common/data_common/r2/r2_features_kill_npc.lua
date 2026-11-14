@@ -218,8 +218,8 @@ function component:textAdapter(text)
 		if target then mission_target = target.Name end
 	end
 
-	str=string.gsub(str, "<mission_giver>", mission_giver)
-	str=string.gsub(str, "<mission_target>", mission_target)
+	str = replaceTag(str, "<mission_giver>", mission_giver)
+	str = replaceTag(str, "<mission_target>", mission_target)
 	return str
 end
 

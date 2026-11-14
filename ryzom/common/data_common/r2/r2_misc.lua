@@ -183,6 +183,15 @@ function clamp(value, min, max)
 end	
 		
 -------------------------------------------------------------------------------------------------
+-- 'text' with 'value' in the place of every 'tag', as it is. A name or a text of the author does not go
+-- into string.gsub as a replacement string: "%" is an escape there, which Lua 5.1 drops and which is an
+-- error from Lua 5.2 on ("invalid use of '%' in replacement string"). 'tag' is a pattern; the tags of
+-- the texts ("<mission_giver>") have no magic character. A nil 'value' leaves the tag where it is.
+function replaceTag(text, tag, value)
+	return (string.gsub(text, tag, function() return value end))
+end
+
+-------------------------------------------------------------------------------------------------
 -- enclose a string by double quotes
 function strify(str) 
 	return [["]] .. tostring(str) .. [["]]

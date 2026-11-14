@@ -217,8 +217,8 @@ function component:textAdapter(text)
 		if giver then 	mission_giver = giver.Name end
 	end
 
-	str=string.gsub(str, "<object_name>", object)
-	str=string.gsub(str, "<mission_giver>", mission_giver)
+	str = replaceTag(str, "<object_name>", object)
+	str = replaceTag(str, "<mission_giver>", mission_giver)
 
 	return str
 end

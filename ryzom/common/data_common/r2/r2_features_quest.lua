@@ -119,7 +119,7 @@ function component:textAdapter(text)
 	assert(type(text) == "string")
 	local str =  text
 	
-	str=string.gsub(str, "<quest_name>", self.Name)
+	str = replaceTag(str, "<quest_name>", self.Name)
 	return str
 end
 

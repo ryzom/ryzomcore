@@ -183,7 +183,7 @@ function component:textAdapter(text)
 		if giver then 	reward_giver = giver.Name end
 	end
 	
-	str=string.gsub(str, "<reward_giver>", reward_giver)
+	str = replaceTag(str, "<reward_giver>", reward_giver)
 	return str
 end
 
