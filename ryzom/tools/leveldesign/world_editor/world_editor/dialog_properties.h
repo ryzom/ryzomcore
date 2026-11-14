@@ -88,6 +88,12 @@ public:
 	bool equalsSelection( std::list<NLLIGO::IPrimitive*> &locators );
 	bool removePrimitives( std::list<NLLIGO::IPrimitive*> &locators );
 
+	// Forget a primitive that is being freed, the dialog is closed or rebuilt once the change is done
+	void forgetPrimitive(const NLLIGO::IPrimitive *primitive);
+
+	// DoModal, with the dialog reached by the purge of freed primitives while it runs
+	INT_PTR doModalWithPurge();
+
 	inline int getOriginalHeight() { return m_originalHeight; }
 
 private:
@@ -103,6 +109,27 @@ private:
 
 	// locators
 	std::vector<CDatabaseLocatorPointer>		_PropDlgLocators;
+
+	// A close or rebuild is posted for primitives freed meanwhile
+	bool m_PrimitivesForgotten;
+
+	// Depth of the widget commands running, they can run modal loops (selectors, external editor, message boxes)
+	uint m_CommandDepth;
+
+	// The posted close or rebuild came during a widget command, it is posted again when the command returns
+	bool m_RebuildAfterCommand;
+
+	// Find the locators of the primitives again, from their pointers
+	void refreshLocators();
+
+	// Post the close or rebuild for freed primitives
+	void postPrimitivesForgotten();
+
+	// The dialog is open, modeless in PropertiesDialogs or modal in doModalWithPurge
+	bool isOpen() const;
+
+	// The widget commands, called by OnCommand
+	BOOL handleCommand(WPARAM wParam, LPARAM lParam);
 
 	// Class for a widget
 	class CWidget
@@ -261,7 +288,7 @@ private:
 	CWidget *getWidget (uint widgetId);
 
 	// Rebuild the dialog
-	void rebuildDialog ();
+	void rebuildDialog(bool takeFocus = true);
 	void ApplyAutoname();
 	void SelectFolder(CWidget *widget);
 		
@@ -341,11 +368,33 @@ protected:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI );
 	afx_msg void OnMove(int x, int y);
 	//}}AFX_MSG
+	afx_msg LRESULT OnPrimitivesForgotten(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 };
 
 //extern CDialogProperties PropertyDialog;
 extern std::list<CDialogProperties*> PropertiesDialogs;
+
+// Tells code that keeps a primitive pointer across a modal loop whether the primitive was freed meanwhile
+class CPrimitiveWatch
+{
+public:
+	explicit CPrimitiveWatch(const NLLIGO::IPrimitive *primitive);
+	~CPrimitiveWatch();
+
+	// Called for every primitive that is freed
+	void onFreed(const NLLIGO::IPrimitive *primitive)
+	{
+		if (primitive == m_Primitive)
+			m_Freed = true;
+	}
+
+	bool freed() const { return m_Freed; }
+
+private:
+	const NLLIGO::IPrimitive *m_Primitive;
+	bool m_Freed;
+};
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

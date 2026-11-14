@@ -1501,6 +1501,9 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 		// Insert the primitive
 		insertPrimitive (locator, primitive);
 
+		// The property dialogs below run modal loops, in which a reload of the file can free the primitive
+		CPrimitiveWatch primitiveWatch(primitive);
+
 		// The new pos
 		CVector newPos = initPos;
 		newPos.x += deltaPos;
@@ -1519,9 +1522,18 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 			// Create the child
 			const NLLIGO::IPrimitive *childPrim = createPrimitive (childLocator, child.ClassName.c_str (), 
 				child.Name.c_str (), newPos, deltaPos, primClass->StaticChildren[c].Parameters);
+			if (primitiveWatch.freed())
+				break;
 
 			// The new pos
 			newPos.y += deltaPos;
+		}
+
+		// Freed while a child was edited ?
+		if (primitiveWatch.freed())
+		{
+			theApp.errorMessage("The new %s was removed while the properties of its children were edited, for example by a reload of its file, it is not added", className.c_str());
+			return NULL;
 		}
 
 		// Canceled ?
@@ -1537,10 +1549,15 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 			// Create a dialog file
 			CFileDialogEx dialog(BASE_REGISTRY_KEY, _T("image"), TRUE, nlUtf8ToTStr(primClass->FileExtension), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 			    nlUtf8ToTStr(toString("%s (*.%s)|*.%s|All Files (*.*)|*.*||", primClass->FileType.c_str(), primClass->FileExtension.c_str(), primClass->FileExtension.c_str())), getMainFrame());
-			if (dialog.DoModal() == IDOK)
+			if ((dialog.DoModal() == IDOK) && !primitiveWatch.freed())
 			{
 				// Save filename
 				static_cast<CPrimBitmap*>(primitive)->init (tStrToUtf8(dialog.GetPathName ()));
+			}
+			if (primitiveWatch.freed())
+			{
+				theApp.errorMessage("The new %s was removed while its image was chosen, for example by a reload of its file, it is not added", className.c_str());
+				return NULL;
 			}
 		}
 
@@ -1558,7 +1575,14 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 
 				// Yes, go
 				CDialogProperties dialogProperty (locators, getMainFrame ());
-				dialogProperty.DoModal ();
+				dialogProperty.doModalWithPurge();
+
+				// Freed while it was edited ?
+				if (primitiveWatch.freed())
+				{
+					theApp.errorMessage("The new %s was removed while its properties were edited, for example by a reload of its file, it is not added", className.c_str());
+					return NULL;
+				}
 			}
 
 			// Eval the default name property

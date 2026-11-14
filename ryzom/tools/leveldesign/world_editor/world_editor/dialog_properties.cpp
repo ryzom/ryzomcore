@@ -63,6 +63,44 @@ using namespace NLMISC;
 std::list<CDialogProperties*> PropertiesDialogs;
 CPoint CDialogProperties::s_lastPosition = CPoint( -1, -1 );
 
+// posted to a dialog that lost some of its primitives, it is closed or rebuilt once the primitive tree is consistent again
+#define WM_PROPERTIES_PRIMITIVES_FORGOTTEN (WM_APP + 1)
+
+// ***************************************************************************
+
+// The modal property dialogs, from doModalWithPurge
+static std::list<CDialogProperties *> s_ModalPropertiesDialogs;
+
+// The pointers kept across modal loops, from CPrimitiveWatch
+static std::list<CPrimitiveWatch *> s_PrimitiveWatches;
+
+// ***************************************************************************
+
+void RemovePrimitiveFromPropertiesDialogs(const NLLIGO::IPrimitive *primitive)
+{
+	for (std::list<CDialogProperties *>::iterator it = PropertiesDialogs.begin(); it != PropertiesDialogs.end(); ++it)
+		(*it)->forgetPrimitive(primitive);
+	for (std::list<CDialogProperties *>::iterator it = s_ModalPropertiesDialogs.begin(); it != s_ModalPropertiesDialogs.end(); ++it)
+		(*it)->forgetPrimitive(primitive);
+	for (std::list<CPrimitiveWatch *>::iterator it = s_PrimitiveWatches.begin(); it != s_PrimitiveWatches.end(); ++it)
+		(*it)->onFreed(primitive);
+}
+
+// ***************************************************************************
+
+CPrimitiveWatch::CPrimitiveWatch(const NLLIGO::IPrimitive *primitive)
+    : m_Primitive(primitive)
+    , m_Freed(false)
+{
+	s_PrimitiveWatches.push_back(this);
+}
+
+// ***************************************************************************
+
+CPrimitiveWatch::~CPrimitiveWatch()
+{
+	s_PrimitiveWatches.remove(this);
+}
 
 BOOL CScrollPane::OnCommand(WPARAM wParam, LPARAM lParam)
 {
@@ -92,6 +130,9 @@ CDialogProperties::CDialogProperties()
 	_Modal = false;
 	_Cancel = true;
 	_ScrollBar = false;
+	m_PrimitivesForgotten = false;
+	m_CommandDepth = 0;
+	m_RebuildAfterCommand = false;
 }
 
 // ***************************************************************************
@@ -120,6 +161,9 @@ CDialogProperties::CDialogProperties(std::list<NLLIGO::IPrimitive*> &locators, C
 
 	_Modal = true;
 	_Cancel = false;
+	m_PrimitivesForgotten = false;
+	m_CommandDepth = 0;
+	m_RebuildAfterCommand = false;
 }
 
 // ***************************************************************************
@@ -150,6 +194,7 @@ BEGIN_MESSAGE_MAP(CDialogProperties, CDialog)
 	ON_WM_SETFOCUS()
 	ON_WM_MOVE()
 	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_PROPERTIES_PRIMITIVES_FORGOTTEN, OnPrimitivesForgotten)
 END_MESSAGE_MAP()
 
 // ***************************************************************************
@@ -1586,7 +1631,24 @@ bool CDialogProperties::CWidget::OnSize( int cx, int cy, int decY )
 
 // ***************************************************************************
 
-BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam) 
+BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	// A command can run a modal loop that dispatches the posted rebuild, which would free the widgets the
+	// command works on: the rebuild waits until the command returns
+	++m_CommandDepth;
+	BOOL result = handleCommand(wParam, lParam);
+	--m_CommandDepth;
+	if ((m_CommandDepth == 0) && m_RebuildAfterCommand)
+	{
+		m_RebuildAfterCommand = false;
+		postPrimitivesForgotten();
+	}
+	return result;
+}
+
+// ***************************************************************************
+
+BOOL CDialogProperties::handleCommand(WPARAM wParam, LPARAM lParam)
 {
 	WORD wNotifyCode = HIWORD(wParam); // notification code 
 
@@ -1900,7 +1962,8 @@ bool CDialogProperties::containsSelection( std::vector<CDatabaseLocatorPointer> 
 		bool ok = false;
 		while ( !ok && ( itDB != _PropDlgLocators.end() ) )
 		{
-			ok = ( (*itDB) == (*ite) );
+			// the pointers, the paths of another dialog can be older than these
+			ok = ((*itDB).Primitive == (*ite).Primitive);
 			itDB++;
 		}
 
@@ -1925,8 +1988,10 @@ bool CDialogProperties::equalsSelection( std::list<NLLIGO::IPrimitive*> &locator
 
 // ***************************************************************************
 
-void CDialogProperties::rebuildDialog ()
+void CDialogProperties::rebuildDialog(bool takeFocus)
 {
+	refreshLocators();
+
 	// Remove widgets
 	removeWidgets ();
 
@@ -2364,7 +2429,7 @@ void CDialogProperties::rebuildDialog ()
 	}
 
 	// focus the first control
-	if (!Widgets.empty())
+	if (takeFocus && !Widgets.empty())
 	{
 		HWND toFocus = Widgets.begin()->getNextWindow(0);
 		//(*Widgets.begin()).setFocus();
@@ -2421,7 +2486,8 @@ void CDialogProperties::rebuildDialog ()
 
 	}
 
-	SetActiveWindow();
+	if (takeFocus)
+		SetActiveWindow();
 	// trigger a global redraw of the dialog
 	Invalidate();
 }
@@ -2460,6 +2526,9 @@ void CDialogProperties::OnUpdate()
 
 void CDialogProperties::updateModification ()
 {
+	// the actions find the primitives through their locators
+	refreshLocators();
+
 	// Get the document
 	CWorldEditorDoc *doc = getDocument ();
 
@@ -3710,6 +3779,110 @@ bool CDialogProperties::removePrimitives( list<NLLIGO::IPrimitive*> &locators )
 		OnUpdate();
 		return false;
 	}
+}
+
+// ***************************************************************************
+
+void CDialogProperties::forgetPrimitive(const NLLIGO::IPrimitive *primitive)
+{
+	bool forgotten = false;
+	std::vector<CDatabaseLocatorPointer>::iterator it = _PropDlgLocators.begin();
+	while (it != _PropDlgLocators.end())
+	{
+		if (it->Primitive == primitive)
+		{
+			it = _PropDlgLocators.erase(it);
+			forgotten = true;
+		}
+		else
+		{
+			++it;
+		}
+	}
+
+	// the primitive tree is being changed, so the dialog is closed or rebuilt afterwards
+	if (forgotten && !m_PrimitivesForgotten)
+		postPrimitivesForgotten();
+}
+
+// ***************************************************************************
+
+void CDialogProperties::postPrimitivesForgotten()
+{
+	if (!::IsWindow(GetSafeHwnd()))
+	{
+		m_PrimitivesForgotten = false;
+		return;
+	}
+	m_PrimitivesForgotten = true;
+	if (!PostMessage(WM_PROPERTIES_PRIMITIVES_FORGOTTEN))
+	{
+		m_PrimitivesForgotten = false;
+		nlwarning("A properties dialog could not post its update after its primitives changed (error %u), it shows them as they were until it is rebuilt", (uint)GetLastError());
+	}
+}
+
+// ***************************************************************************
+
+bool CDialogProperties::isOpen() const
+{
+	CDialogProperties *self = const_cast<CDialogProperties *>(this);
+	return (std::find(PropertiesDialogs.begin(), PropertiesDialogs.end(), self) != PropertiesDialogs.end())
+	    || (std::find(s_ModalPropertiesDialogs.begin(), s_ModalPropertiesDialogs.end(), self) != s_ModalPropertiesDialogs.end());
+}
+
+// ***************************************************************************
+
+INT_PTR CDialogProperties::doModalWithPurge()
+{
+	s_ModalPropertiesDialogs.push_back(this);
+	INT_PTR result = DoModal();
+	s_ModalPropertiesDialogs.remove(this);
+	return result;
+}
+
+// ***************************************************************************
+
+LRESULT CDialogProperties::OnPrimitivesForgotten(WPARAM /* wParam */, LPARAM /* lParam */)
+{
+	// a widget command runs a modal loop and holds a widget, the rebuild comes when it returns
+	if (m_CommandDepth > 0)
+	{
+		m_RebuildAfterCommand = true;
+		return 0;
+	}
+	m_PrimitivesForgotten = false;
+
+	// nothing to do for a dialog that was closed meanwhile
+	if (!isOpen())
+		return 0;
+
+	// the primitives the unsaved edits belonged to were removed or moved, the edits cannot be applied any more
+	const bool dropped = isModified();
+	if (_PropDlgLocators.empty())
+	{
+		if (dropped)
+			nlwarning("A properties dialog closes with unsaved changes: its primitives were removed");
+		OnCancel();
+	}
+	else if (IsWindowVisible())
+	{
+		if (dropped)
+			nlwarning("A properties dialog drops its unsaved changes: some of its primitives were removed, it now shows the %u left", (uint)_PropDlgLocators.size());
+		// the user works elsewhere, after a delete or an undo
+		rebuildDialog(false);
+	}
+	return 0;
+}
+
+// ***************************************************************************
+
+void CDialogProperties::refreshLocators()
+{
+	// the primitives can have moved in the tree since the dialog got them, find their place again from the pointers
+	CWorldEditorDoc *doc = getDocument();
+	for (uint i = 0; i < _PropDlgLocators.size(); ++i)
+		doc->getLocator(_PropDlgLocators[i], _PropDlgLocators[i].Primitive);
 }
 
 
