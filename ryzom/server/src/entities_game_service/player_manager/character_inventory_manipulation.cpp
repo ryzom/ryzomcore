@@ -191,8 +191,7 @@ void CCharacter::initInventoriesDb()
 	_WearEquipmentMalus += pHand->getWearMalus();
 	CEquipInventory *pEquip = (CEquipInventory*)(CInventoryBase*)_Inventory[INVENTORIES::equipment];
 	_WearEquipmentMalus += pEquip->getWearMalus();
-//	_PropertyDatabase.setProp( _DataIndexReminder->Modifiers.TotalMalusEquip, (uint32)(_WearEquipmentMalus * 50) );
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50) );
+	updateWearMalusDBEntry();
 
 	// update parry skill if no item in right hand
 	if (getRightHandItem() == NULL)
@@ -1064,8 +1063,7 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		//if( form->Family == ITEMFAMILY::ARMOR || form->Family == ITEMFAMILY::MELEE_WEAPON || form->Family == ITEMFAMILY::RANGE_WEAPON )
 		_WearEquipmentMalus -= form->WearEquipmentMalus;
 	}
-//	_PropertyDatabase.setProp(_DataIndexReminder->Modifiers.TotalMalusEquip, uint32(_WearEquipmentMalus * 50));
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50));
+	updateWearMalusDBEntry();
 
 	// remove item modifiers
 	removeItemModifiers(item);

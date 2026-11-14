@@ -21180,8 +21180,17 @@ void CCharacter::updateBrickFlagsDBEntry()
 void CCharacter::addWearMalus( float m )
 {
 	_WearEquipmentMalus += m;
-//	_PropertyDatabase.setProp( _DataIndexReminder->Modifiers.TotalMalusEquip, (uint32)(_WearEquipmentMalus * 50) );
-	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 50) );
+	updateWearMalusDBEntry();
+}
+
+
+//------------------------------------------------------------------------------
+
+void CCharacter::updateWearMalusDBEntry()
+{
+	// The client shows this value as it is, and takes it as a percentage for the cast time, range and costs of its
+	// action previews. It is rounded to the nearest, so that a piece with a sheet value of 0.05 reads 5.
+	CBankAccessor_PLR::getMODIFIERS().setTOTAL_MALUS_EQUIP(_PropertyDatabase, checkedCast<uint8>(_WearEquipmentMalus * 100.0f + 0.5f) );
 }
 
 

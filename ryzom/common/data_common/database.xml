@@ -445,7 +445,7 @@
   </branch>
   <branch name="MODIFIERS" bank="PLR">
     <leaf name="TOTAL_MALUS_EQUIP" type="I8" />
-    <!-- This is the malus ratio*50 (ie percentage/2) -->
+    <!-- This is the malus as a whole percentage (ratio*100, rounded to the nearest) -->
     <branch name="BONUS">
       <branch name="" count="12">
         <leaf name="SHEET" type="I32" nullable="1" cppType="NLMISC::CSheetId" />

@@ -317,11 +317,11 @@
 				<view type="text" id="cm" posref="TL TL" x="0" y="0" hardtext="uiCaracMisc" shadow="true" color="255 255 255 255" global_color="false" fontsize="12"/>
 				<group id="black" posref="TL TL" x="0" sizeref="w" y="-14" w="0" h="67" inherit_gc_alpha="true" >
 						
-					<!-- Total Malus: Must multiply by 2 the Equip Malus that is in Server DB, to have it in percentage -->
+					<!-- Total Malus: the Equip Malus that is in Server DB is a percentage, rounded to the nearest -->
 					<instance template="tipc_charac" id="total_malus" posref="TL TL" x="8" y="-4" w="-8"
 													text="uiTotalMalus" val="UI:VARIABLES:TOTAL_MALUS_EQUIP" tooltip="uittIdentityTotalMalus" />
 					<link expr="depends(@SERVER:MODIFIERS:TOTAL_MALUS_EQUIP)" action="set" 
-						params="dblink=UI:VARIABLES:TOTAL_MALUS_EQUIP|value=mul(@SERVER:MODIFIERS:TOTAL_MALUS_EQUIP,2)" />
+						params="dblink=UI:VARIABLES:TOTAL_MALUS_EQUIP|value=@SERVER:MODIFIERS:TOTAL_MALUS_EQUIP" />
 					<!-- Bag Bulk special: Current / Max -->
 					<group id="bag_bulk" posparent="total_malus" posref="BL TL" w="0" h="16" x="0" y="0" sizeref="w" >
 						<view type="text" id="t" posref="TL TL"  y="-1" color="255 255 255 255" fontsize="12" shadow="true" hardtext="uiBagBulk" />

@@ -1889,6 +1889,9 @@ public:
 
 	float wearMalus();
 
+	/// write the equipment wear malus in the database of the client, as a percentage rounded to the nearest
+	void updateWearMalusDBEntry();
+
 	/// modify current dodge modifier
 	void incDodgeModifier(sint32 inc);
 	/// modify current dodge modifier
