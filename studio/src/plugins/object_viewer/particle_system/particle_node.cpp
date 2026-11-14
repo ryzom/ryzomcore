@@ -386,7 +386,8 @@ void CParticleWorkspace::removeNode(CWorkspaceNode *ptr)
 void CParticleWorkspace::save()
 {
 	NLMISC::COFile stream;
-	stream.open(_Filename);
+	if (!stream.open(_Filename))
+		throw NLMISC::EFileNotOpened(_Filename);
 	NLMISC::COXml xmlStream;
 	xmlStream.init(&stream);
 	this->serial(xmlStream);
