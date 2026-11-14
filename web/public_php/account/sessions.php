@@ -11,10 +11,11 @@ $actionError = '';
 $error = '';
 $success = '';
 
-// Handle session actions (close, invite, remove) -- process before loading data
+// Handle session actions (close, invite, remove, kick, unkick) -- process
+// before loading data
 // Viewing as another user is for looking, the same stance settings.php takes:
-// these three actions close someone's session, invite a character into it and
-// throw a participant out, all under their name.
+// these actions close someone's session, invite a character into it and
+// throw a participant out or let it back in, all under their name.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate() && isImpersonating()) {
 	$actionError = 'Session changes are disabled while viewing as another user.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate()) {
@@ -143,6 +144,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrfValidate() && isImpersonating()
 								$actionResult = 'Participant removed from session.';
 							} else {
 								$actionError = 'Remove failed: ' . ($rsm->resultString ?: 'RSM rejected the request (code: ' . $rsm->resultCode . ').');
+							}
+						} else {
+							$actionError = 'Could not connect to the session manager service. Please try again later.';
+						}
+					} else {
+						$actionError = 'You can only manage your own sessions.';
+					}
+				}
+			} elseif ($action === 'kick' || $action === 'unkick') {
+				// A participant that entered the session cannot be removed any more:
+				// it is kicked, which makes it leave the session and keeps it out
+				// until it is unkicked.
+				$kickCharId = isset($_POST['kick_char_id']) ? (int)$_POST['kick_char_id'] : 0;
+				if ($kickCharId && $sessionId) {
+					// Verify the user owns this session and get the owner char_id
+					$stmt = $ringDb->prepare('SELECT s.session_id, s.owner FROM sessions s JOIN characters c ON s.owner = c.char_id WHERE s.session_id = :sid AND c.user_id = :uid');
+					$stmt->execute(array(':sid' => $sessionId, ':uid' => $uid));
+					$sess = $stmt->fetch();
+					if ($sess) {
+						// Route through the RSM: it marks the participation and tells
+						// the service that hosts the session
+						$rsm = connectToRSM($rsmAddress);
+						if ($rsm !== false) {
+							if ($action === 'kick') {
+								$rsm->kickCharacter((int)$sess['owner'], $sessionId, $kickCharId);
+							} else {
+								$rsm->unkickCharacter((int)$sess['owner'], $sessionId, $kickCharId);
+							}
+							if ($rsm->waitCallback() && $rsm->resultCode == 0) {
+								$actionResult = ($action === 'kick') ? 'Participant kicked from session.' : 'Participant unkicked.';
+							} else {
+								$actionError = (($action === 'kick') ? 'Kick failed: ' : 'Unkick failed: ') . ($rsm->resultString ?: 'RSM rejected the request (code: ' . $rsm->resultCode . ').');
 							}
 						} else {
 							$actionError = 'Could not connect to the session manager service. Please try again later.';
@@ -296,6 +329,16 @@ function formatParticipantStatus($status)
 	return isset($statuses[$status]) ? $statuses[$status] : array($status, 'badge-gray');
 }
 
+/**
+ * Whether a participant has entered the session: the session manager only
+ * removes an invitation that was never used, a participant that came in is
+ * kicked instead.
+ */
+function participantHasEntered($status)
+{
+	return $status === 'sps_playing' || $status === 'sps_editing' || $status === 'sps_animating';
+}
+
 ob_start();
 ?>
 <div class="container">
@@ -382,14 +425,34 @@ ob_start();
 														</td>
 														<td>
 															<?php if ($sess['state'] !== 'ss_closed' && (int)$part['user_id'] !== $uid): ?>
-																<form method="post" action="index.php?page=sessions" style="display:inline;">
-																	<?php echo csrfField(); ?>
-																	<input type="hidden" name="session_action" value="remove">
-																	<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
-																	<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
-																	<input type="hidden" name="remove_char_id" value="<?php echo (int)$part['char_id']; ?>">
-																	<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this participant?');" style="padding:0.1rem 0.4rem; font-size:0.75rem;">Remove</button>
-																</form>
+																<?php if ($part['kicked']): ?>
+																	<form method="post" action="index.php?page=sessions" style="display:inline;">
+																		<?php echo csrfField(); ?>
+																		<input type="hidden" name="session_action" value="unkick">
+																		<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
+																		<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
+																		<input type="hidden" name="kick_char_id" value="<?php echo (int)$part['char_id']; ?>">
+																		<button type="submit" class="btn btn-sm btn-secondary" style="padding:0.1rem 0.4rem; font-size:0.75rem;">Unkick</button>
+																	</form>
+																<?php elseif (participantHasEntered($part['status'])): ?>
+																	<form method="post" action="index.php?page=sessions" style="display:inline;">
+																		<?php echo csrfField(); ?>
+																		<input type="hidden" name="session_action" value="kick">
+																		<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
+																		<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
+																		<input type="hidden" name="kick_char_id" value="<?php echo (int)$part['char_id']; ?>">
+																		<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Kick this participant? They leave the session and cannot enter it again until you unkick them.');" style="padding:0.1rem 0.4rem; font-size:0.75rem;">Kick</button>
+																	</form>
+																<?php else: ?>
+																	<form method="post" action="index.php?page=sessions" style="display:inline;">
+																		<?php echo csrfField(); ?>
+																		<input type="hidden" name="session_action" value="remove">
+																		<input type="hidden" name="domain_id" value="<?php echo (int)$entry['domain']['domain_id']; ?>">
+																		<input type="hidden" name="session_id" value="<?php echo $sid; ?>">
+																		<input type="hidden" name="remove_char_id" value="<?php echo (int)$part['char_id']; ?>">
+																		<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this participant?');" style="padding:0.1rem 0.4rem; font-size:0.75rem;">Remove</button>
+																	</form>
+																<?php endif; ?>
 															<?php endif; ?>
 														</td>
 													</tr>
