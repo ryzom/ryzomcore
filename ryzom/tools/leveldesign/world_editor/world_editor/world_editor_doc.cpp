@@ -564,12 +564,13 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 								COXml xmlOut;
 								xmlOut.init (&fileOut);
 								_DataHierarchy[i].ZoneRegion.serial (xmlOut);
-
-								// Done
-								_DataHierarchy[i].Modified = false;
 							}
 
 							fileOut.close();
+
+							// Done: the file is saved once the close has put it in its place. A close that
+							// throws leaves the landscape modified, so that it is saved again.
+							_DataHierarchy[i].Modified = false;
 						}
 						else
 						{
@@ -584,6 +585,9 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
+
+						// the save failed: a close that asked to save first does not go on
+						result = FALSE;
 					}
 				}
 				else
@@ -630,14 +634,15 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 							// Flush it
 							xmlOut.flush ();
 
-							// Done
+							// Last time
+							fileOut.close ();
+
+							// Done: the file is saved once the close has put it in its place. A close that
+							// throws leaves the primitive modified, so that it is saved again.
 							_DataHierarchy[i].Modified = false;
 
 							// Invalidate tools
 							getMainFrame ()->invalidateToolsParam ();
-
-							// Last time
-							fileOut.close ();
 						}
 						else
 						{
@@ -652,6 +657,9 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
+
+						// the save failed: a close that asked to save first does not go on
+						result = FALSE;
 					}
 				}
 
@@ -715,13 +723,13 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 							}
 						}
 					}
-
-					// Not modified
-					_Modified = false;
 				}
 
 				// Last time
 				file.close ();
+
+				// Not modified: the file is saved once the close has put it in its place
+				_Modified = false;
 			}
 			catch (const Exception &e)
 			{
@@ -738,9 +746,24 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 		_LastModifedTime = NLMISC::CFile::getFileModificationDate (tStrToUtf8(lpszPathName));
 	}
 
-	// No modification is for this level of undo
-	_LastSaveUndo = _Undo;
-	_NoModificationUndo = false;
+	// What is still marked modified here was not saved: a file that could not be written, or one the user gave
+	// no name or chose not to write.
+	bool unsaved = _Modified;
+	for (uint i = 0; i < _DataHierarchy.size () && !unsaved; i++)
+		unsaved = _DataHierarchy[i].Editable && _DataHierarchy[i].Modified;
+
+	if (unsaved)
+	{
+		// The document stays modified, whatever the level of undo: Save is only done for a modified document,
+		// and closing only asks for one. The next save that writes everything clears this again.
+		_NoModificationUndo = true;
+	}
+	else
+	{
+		// No modification is for this level of undo
+		_LastSaveUndo = _Undo;
+		_NoModificationUndo = false;
+	}
 
 	updateModifiedState ();
 
