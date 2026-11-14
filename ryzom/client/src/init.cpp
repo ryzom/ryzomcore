@@ -348,6 +348,15 @@ void ExitClientError (const char *format, ...)
 	*/
 #else
 	fprintf (stderr, "%s\n", str);
+
+	// A client started from a desktop launcher has no terminal to print to: the message is also shown in a
+	// window, by the crash report tool, as NeL shows its own reports. The tool is not waited for. As in the
+	// dialog on Windows, the title is the name of the game once the translations are loaded; before that the
+	// window keeps its own title.
+	std::string title;
+	if (CI18N::hasTranslation("TheSagaOfRyzom"))
+		title = CI18N::get("TheSagaOfRyzom");
+	NLMISC::report(title, std::string(), str, false, false, NLMISC::ReportAbort);
 #endif
 	// Exit
 	extern void quitCrashReport ();

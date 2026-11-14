@@ -1592,6 +1592,18 @@ void markEndOfProgramReported()
 #endif
 }
 
+#ifdef NL_OS_UNIX
+std::string getCrashReportToolPath()
+{
+#if !defined(__EMSCRIPTEN__)
+	resolveCrashReportTool();
+	return s_CrashToolPath;
+#else
+	return std::string();
+#endif
+}
+#endif
+
 void getCallStack(std::string &result, sint skipNFirst)
 {
 #ifdef NL_OS_WINDOWS

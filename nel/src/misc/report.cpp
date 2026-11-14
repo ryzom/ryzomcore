@@ -31,6 +31,15 @@
 #include "nel/misc/file.h"
 #include "nel/misc/system_utils.h"
 
+#ifdef NL_OS_UNIX
+#	include <errno.h>
+#	include <signal.h>
+#	include <string.h>
+#	include <unistd.h>
+#	include <sys/types.h>
+#	include <sys/wait.h>
+#endif
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -79,6 +88,81 @@ inline const char *getReportPostURL()
 #endif
 }
 
+// One more argument of the tool, and its value if it has one: for the command line that the launchers of Windows
+// take, and for the list of arguments that Unix gives the tool as it is.
+static void addReportArgument(std::string &params, std::vector<std::string> &arguments, const char *name, const char *value = nullptr)
+{
+	params += " ";
+	params += name;
+	arguments.push_back(name);
+	if (value != nullptr)
+	{
+		params += NLMISC::toString(" \"%s\"", value);
+		arguments.push_back(value);
+	}
+}
+
+#ifdef NL_OS_UNIX
+// Starts the tool with these arguments and waits for its answer, which is its exit code. There is no shell in
+// between: every argument reaches the tool as it is, whatever characters a path, a title or an address has.
+// Returns -1 when the tool cannot be started or does not end by itself.
+static sint launchReportToolAndWait(const std::string &tool, const std::vector<std::string> &arguments)
+{
+	std::vector<char *> argv;
+	argv.push_back(const_cast<char *>(tool.c_str()));
+	for (size_t i = 0; i < arguments.size(); ++i)
+		argv.push_back(const_cast<char *>(arguments[i].c_str()));
+	argv.push_back(nullptr);
+
+	// A process that ignores SIGCHLD cannot wait for a child: the system takes the child away when it ends, and
+	// its answer with it. launchProgram makes the process ignore that signal from its first use on. For the time
+	// of this wait the signal has its default action then.
+	struct sigaction previousAction;
+	const bool ignored = sigaction(SIGCHLD, nullptr, &previousAction) == 0
+		&& ((previousAction.sa_flags & SA_NOCLDWAIT) || (!(previousAction.sa_flags & SA_SIGINFO) && previousAction.sa_handler == SIG_IGN));
+	if (ignored)
+	{
+		struct sigaction defaultAction;
+		memset(&defaultAction, 0, sizeof(defaultAction));
+		defaultAction.sa_handler = SIG_DFL;
+		sigemptyset(&defaultAction.sa_mask);
+		sigaction(SIGCHLD, &defaultAction, nullptr);
+	}
+
+	sint result = -1;
+	pid_t child = fork();
+	if (child == 0)
+	{
+		execv(tool.c_str(), &argv[0]);
+		_exit(127);
+	}
+	else if (child > 0)
+	{
+		int status = 0;
+		pid_t ended;
+		do
+		{
+			ended = waitpid(child, &status, 0);
+		} while (ended == -1 && errno == EINTR);
+
+		if (ended == child && WIFEXITED(status))
+			result = WEXITSTATUS(status);
+	}
+
+	if (ignored)
+	{
+		// the children that ended meanwhile, which the system would have taken away, and the signal is ignored
+		// again
+		while (waitpid(-1, nullptr, WNOHANG) > 0)
+		{
+		}
+		sigaction(SIGCHLD, &previousAction, nullptr);
+	}
+
+	return result;
+}
+#endif
+
 TReportResult report(const std::string &title, const std::string &subject, const std::string &body, bool synchronous, bool sendReport, TReportResult defaultResult)
 {
 	std::string reportPath;
@@ -110,35 +194,49 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 	}
 
+	// The tool. On Windows it is started from the current directory. On Unix it is the one beside the running
+	// program, else the one in PATH, by its full path: a bare name is only looked for in PATH, and a file of
+	// that name in the current directory can be anything.
+#ifdef NL_OS_UNIX
+	const std::string reportTool = getCrashReportToolPath();
+#else
+	const std::string reportTool = CFile::isExists(NL_CRASH_REPORT_TOOL) ? NL_CRASH_REPORT_TOOL : "";
+#endif
+
 	if (((INelContext::isContextInitialised()
 		&& INelContext::getInstance().isWindowedApplication())
 		|| CSystemUtils::detectWindowedApplication())
-		&& CFile::isExists(NL_CRASH_REPORT_TOOL))
+		&& !reportTool.empty())
 	{
 		std::string params;
+		std::vector<std::string> arguments;
 
 		if (!reportPath.empty())
-			params += NLMISC::toString(" -log \"%s\"", reportPath.c_str());
+			addReportArgument(params, arguments, "-log", reportPath.c_str());
 
 		if (!title.empty())
-			params += NLMISC::toString(" -title \"%s\"", title.c_str());
+			addReportArgument(params, arguments, "-title", title.c_str());
 
 		if (!subject.empty())
-			params += NLMISC::toString(" -subject \"%s\"", subject.c_str());
+			addReportArgument(params, arguments, "-subject", subject.c_str());
 
 		const char *reportPostUrl = getReportPostURL();
 		if (reportPostUrl)
-			params += NLMISC::toString(" -host \"%s\"", reportPostUrl);
+			addReportArgument(params, arguments, "-host", reportPostUrl);
 
 		if (synchronous)
-			params += " -dev";
+			addReportArgument(params, arguments, "-dev");
 
 		if (sendReport)
-			params += " -sendreport";
+			addReportArgument(params, arguments, "-sendreport");
 
 		if (synchronous)
 		{
-			TReportResult result = (TReportResult)NLMISC::launchProgramAndWaitForResult(NL_CRASH_REPORT_TOOL, params);
+#ifdef NL_OS_UNIX
+			TReportResult result = (TReportResult)launchReportToolAndWait(reportTool, arguments);
+#else
+			TReportResult result = (TReportResult)NLMISC::launchProgramAndWaitForResult(reportTool, params);
+#endif
 
 			if (result != ReportAlwaysIgnore
 				&& result != ReportIgnore
@@ -155,15 +253,21 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 		else
 		{
-			NLMISC::launchProgram(NL_CRASH_REPORT_TOOL, params,
-				NL_DEBUG_REPORT ? INelContext::isContextInitialised() : false); // Only log if required, avoid infinite loop
+			// Only log if required, avoid infinite loop
+			const bool log = NL_DEBUG_REPORT ? INelContext::isContextInitialised() : false;
+#ifdef NL_OS_UNIX
+			// the list of arguments there: taken apart again, a command line loses an argument at a quote in it
+			NLMISC::launchProgramArray(reportTool, arguments, log);
+#else
+			NLMISC::launchProgram(reportTool, params, log);
+#endif
 			return defaultResult;
 		}
 	}
 	else
 	{
 #if NL_DEBUG_REPORT
-		if (INelContext::isContextInitialised() && !CFile::isExists(NL_CRASH_REPORT_TOOL))
+		if (INelContext::isContextInitialised() && reportTool.empty())
 			nldebug("Crash report tool '%s' does not exist", NL_CRASH_REPORT_TOOL);
 #endif
 #if defined(NL_OS_WINDOWS) && !FINAL_VERSION && !NL_REPORT_CONSOLE_DEBUGGER

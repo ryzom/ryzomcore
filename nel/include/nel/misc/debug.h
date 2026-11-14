@@ -132,6 +132,14 @@ void setCrashReportLogFile(const std::string &fileName);
  */
 void markEndOfProgramReported();
 
+#ifdef NL_OS_UNIX
+/**
+ * The crash report tool on Unix, as report() and the handler of crash signals start it: crash_report beside the
+ * running program, else in a directory of PATH. Looked for once. Empty when the tool is in neither place.
+ */
+std::string getCrashReportToolPath();
+#endif
+
 
 // This very amazing macro __FUNCTION__ doesn't exist on VC6, map it to NULL
 #ifdef NL_COMP_VC6
