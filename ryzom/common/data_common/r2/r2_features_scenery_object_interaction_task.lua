@@ -309,7 +309,7 @@ function component:translate(context)
 	--Contextual text
 	do	
 		if sceneryObject then
-			local actionContextual = r2.Translator.createAction("talk_to", rtGrp.Id, self:textAdapter(tostring(self.ContextualText)))
+			local actionContextual = r2.Translator.createAction("talk_to", rtGrp.Id, self:textAdapter(self.ContextualText))
 			
 			local rtAction = r2.Translator.createAction("if_value_equal", rtGrp.Id, "Active", 1,  -- Active
 				 r2.Translator.createAction("if_value_equal", rtGrp.Id, "v2", 1,  actionContextual))

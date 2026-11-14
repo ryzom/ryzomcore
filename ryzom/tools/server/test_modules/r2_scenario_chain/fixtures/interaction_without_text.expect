@@ -1,0 +1,14 @@
+# A scenery object interaction without a contextual text, as a component of an older editor has it.
+# A missing text is an empty text, for which the "talk_to" action writes "Ok", as for the other
+# missions: the choice the player gets does not read "nil".
+
+upgrade: unchanged
+save: ok
+roundtrip: ok
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+
+scenario_at: Acts[1].Features[1].ContextualText = <none>
+rt_has: ()talkTo("Ok", @groupToNotify);
+rt_lacks: ()talkTo("nil", @groupToNotify);
