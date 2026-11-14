@@ -1494,15 +1494,25 @@ end
 function userComponentManager:loadUserComponent(fileName, body, header)
 	--TODO : loading md5
 	--local ok = loadfile(fileName)
-	local ok = loadstring(body)
-	if not ok then
-		messageBox("UserComponentManager: Couldn't load file '" ..fileName.."'.")
+	-- a file listed for the start that can not be loaded still counts as answered, or init runs again every second
+	local function notLoaded(text)
+		messageBox(text)
+		if self.IsInitialized == false then
+			self.InitialComponentToLoad = self.InitialComponentToLoad - 1
+		end
 		return false
 	end
-	ok()
-
-	assert(header["CurrentFeatureName"])
+	-- the header of a user component file names the feature its body defines: a file without that name is not a
+	-- user component, and its body is not run
 	local currentFeatureName = header["CurrentFeatureName"]
+	if not currentFeatureName or currentFeatureName == "" then
+		return notLoaded("UserComponentManager: '" .. fileName .. "' is not a user component file, its header does not name the component it defines.")
+	end
+	local ok = loadstring(body)
+	if not ok then
+		return notLoaded("UserComponentManager: Couldn't load file '" ..fileName.."'.")
+	end
+	ok()
 		
 	local userFeature = r2.Features[currentFeatureName]
 
