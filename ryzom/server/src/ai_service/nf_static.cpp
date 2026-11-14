@@ -1304,6 +1304,9 @@ void debug_s_(CStateInstance* entity, CScriptStack& stack)
 {
 	std::string msg = (std::string)stack.top();
 	stack.pop();
+	// a function of a scenario: for the group of a Ring session it is a line of its session
+	if (CRingScenarioGuard::logForSession(entity, msg))
+		return;
 	nldebug("%s", msg.c_str());
 }
 
@@ -1325,6 +1328,9 @@ void debug_f_(CStateInstance* entity, CScriptStack& stack)
 {
 	float val = (float)stack.top();
 	stack.pop();
+	// a function of a scenario: for the group of a Ring session it is a line of its session
+	if (CRingScenarioGuard::logForSession(entity, NLMISC::toString("%f", val)))
+		return;
 	nldebug("%f", val);
 }
 

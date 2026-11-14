@@ -172,7 +172,15 @@ public:
 
 	std::map<NLMISC::TStringId, float> Floats;
 	std::map<NLMISC::TStringId, std::string> Strings;
+	// the lines of 'print' and 'log' are kept here
+	virtual bool logScriptLine(std::string const &line) NL_OVERRIDE
+	{
+		Lines.push_back(line);
+		return true;
+	}
+
 	uint NativeCalls;
+	std::vector<std::string> Lines;
 };
 
 /// Compiles the lines of a script the way the service does: between braces
@@ -388,6 +396,33 @@ TEST(AiScriptMachine, AValueOfTheWrongTypeStopsTheScript)
 	EXPECT_EQ(4.f, context.getFloat("v0"));
 }
 
+// The lines of 'print' and 'log' go to the group, and the text of one line has a largest size
+TEST(AiScriptMachine, ALineOfAScriptGoesToItsGroupAndHasASize)
+{
+	CTestContext context;
+	compileAndRun(context, "v0 = 3;\nlog(\"the value is \", v0);");
+	ASSERT_EQ(1u, context.Lines.size());
+	EXPECT_NE(std::string::npos, context.Lines[0].find("the value is "));
+
+	std::vector<size_t> code;
+	ASSERT_TRUE(compile("$text = \"" + std::string(40000, 'a') + "\";\nlog($text, $text);", code));
+	EXPECT_THROW(run(context, code), EScriptStop);
+	EXPECT_EQ(1u, context.Lines.size());
+}
+
+TEST(AiScriptMachine, TheOperationsLeftAreKnown)
+{
+	std::vector<size_t> plain;
+	ASSERT_TRUE(compile("v0 = 7;", plain));
+	CTestContext context;
+	CScriptVM::setOpcodeBudget(1000);
+	EXPECT_EQ(1000u, CScriptVM::getOpcodesLeft());
+	run(context, plain);
+	EXPECT_LT(CScriptVM::getOpcodesLeft(), 1000u);
+	EXPECT_GT(CScriptVM::getOpcodesLeft(), 900u);
+	CScriptVM::clearOpcodeBudget();
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // The compiler and the scripts of a scenario that are too much
 
@@ -464,6 +499,105 @@ TEST(AiScriptCompiler, AScenarioScriptThatDoesNotCompileIsRefusedOnce)
 	EXPECT_TRUE(s_RefusedScripts.empty());
 	EXPECT_TRUE(compilesForAScenario("v0 = 1;"));
 	EXPECT_TRUE(s_RefusedScripts.empty());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// What a session logs and uses, counted
+
+TEST(RingLogBudget, ASessionHasItsLinesAMinute)
+{
+	CRingLogBudget budget(3, 5, 100);
+	CRingLogBudget::TForgotten forgotten;
+	uint32 notLogged = 99;
+	NLMISC::TTime now = 1000000;
+	for (uint i = 0; i < 3; ++i)
+	{
+		EXPECT_TRUE(budget.take(7, now + i, notLogged, forgotten));
+		EXPECT_EQ(0u, notLogged);
+	}
+	// the lines past its number are counted
+	EXPECT_FALSE(budget.take(7, now + 10, notLogged, forgotten));
+	EXPECT_FALSE(budget.take(7, now + 11, notLogged, forgotten));
+	// another session has its own lines, up to the number of all sessions
+	EXPECT_TRUE(budget.take(8, now + 12, notLogged, forgotten));
+	EXPECT_TRUE(budget.take(8, now + 13, notLogged, forgotten));
+	EXPECT_FALSE(budget.take(8, now + 14, notLogged, forgotten));
+	EXPECT_FALSE(budget.take(9, now + 15, notLogged, forgotten));
+	// a minute later the session writes again, and is told what was not written
+	EXPECT_TRUE(budget.take(7, now + 60000, notLogged, forgotten));
+	EXPECT_EQ(2u, notLogged);
+	EXPECT_TRUE(budget.take(7, now + 60001, notLogged, forgotten));
+	EXPECT_EQ(0u, notLogged);
+	EXPECT_TRUE(forgotten.empty());
+}
+
+TEST(RingLogBudget, TheCountsOfSessionsThatAreQuietAreNotKept)
+{
+	CRingLogBudget budget(1, 1000, 4);
+	CRingLogBudget::TForgotten forgotten;
+	uint32 notLogged = 0;
+	NLMISC::TTime now = 5000000;
+	for (uint32 session = 1; session <= 4; ++session)
+	{
+		EXPECT_TRUE(budget.take(session, now, notLogged, forgotten));
+		EXPECT_FALSE(budget.take(session, now + 1, notLogged, forgotten));
+	}
+	EXPECT_EQ(4u, budget.getSessionsCounted());
+	// more sessions than are counted, after the minute of the first ones
+	for (uint32 session = 5; session <= 8; ++session)
+		EXPECT_TRUE(budget.take(session, now + 70000, notLogged, forgotten));
+	EXPECT_LE(budget.getSessionsCounted(), 5u);
+	// what the forgotten sessions did not write is handed out
+	ASSERT_EQ(4u, forgotten.size());
+	for (size_t i = 0; i < forgotten.size(); ++i)
+		EXPECT_EQ(1u, forgotten[i].second);
+}
+
+TEST(RingUpdateBudget, AWorkIsGivenWhatTheUpdateHasLeft)
+{
+	CRingUpdateBudget budget;
+	EXPECT_EQ(100u, budget.grant(100, 250));
+	budget.use(100);
+	EXPECT_EQ(100u, budget.grant(100, 250));
+	budget.use(100);
+	EXPECT_EQ(50u, budget.grant(100, 250));
+	budget.use(50);
+	EXPECT_EQ(0u, budget.grant(100, 250));
+	EXPECT_EQ(250u, budget.getUsed());
+	// said once for the update
+	EXPECT_TRUE(budget.reportOnce());
+	EXPECT_FALSE(budget.reportOnce());
+	// no limit for the update
+	EXPECT_EQ(100u, budget.grant(100, 0));
+	// the count does not wrap
+	budget.use(0xfffffff0u);
+	budget.use(0xfffffff0u);
+	EXPECT_EQ(0xffffffffu, budget.getUsed());
+	EXPECT_EQ(0u, budget.grant(100, 0xfffffffeu));
+	// the next update
+	budget.reset();
+	EXPECT_EQ(0u, budget.getUsed());
+	EXPECT_EQ(100u, budget.grant(100, 250));
+	EXPECT_TRUE(budget.reportOnce());
+
+	// an event without a number of its own has what the update has left
+	CRingUpdateBudget other;
+	other.use(100);
+	EXPECT_EQ(150u, other.grant(0xffffffffu, 250));
+	EXPECT_EQ(0xffffffffu, other.grant(0xffffffffu, 0));
+}
+
+TEST(RingLogText, ATextOfAScenarioIsOneLineOfASize)
+{
+	EXPECT_EQ("a text", ringLogText("a text", 64));
+	std::string lines = ringLogText("one\ntwo\r\nthree\tfour", 64);
+	EXPECT_EQ(std::string::npos, lines.find('\n'));
+	EXPECT_EQ(std::string::npos, lines.find('\r'));
+	EXPECT_NE(std::string::npos, lines.find("one"));
+	EXPECT_NE(std::string::npos, lines.find("four"));
+	std::string longText = ringLogText(std::string(1000, 'x'), 64);
+	EXPECT_LE(longText.size(), 64u + 3u);
+	EXPECT_EQ(0u, longText.find(std::string(64, 'x')));
 }
 
 //////////////////////////////////////////////////////////////////////////////

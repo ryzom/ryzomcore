@@ -123,7 +123,7 @@ void setFactionProp_ss_(CStateInstance* entity, CScriptStack& stack)
 			grpNpc->friendFaction() = tmpSet;
 			break;
 		}
-		nlwarning("'%s' is not a correct faction name", CStringMapper::unmap(factionType).c_str());
+		RYAI_SCRIPT_WARNING(entity, toString("'%s' is not a correct faction name", CStringMapper::unmap(factionType).c_str()));
 		return;
 	}
 }
@@ -309,7 +309,7 @@ void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
 	}
 	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
-	{	nlwarning("setActivity failed: no spawned group");
+	{	RYAI_SCRIPT_WARNING(entity, "setActivity failed: no spawned group");
 		return;
 	}
 	
@@ -357,7 +357,7 @@ void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
 			break;
 		}
 
-		nlwarning("trying to set activity profile to an unknown profile name");
+		RYAI_SCRIPT_WARNING(entity, "trying to set activity profile to an unknown profile name");
 	}
 }
 
@@ -457,7 +457,7 @@ void stopMoving__(CStateInstance* entity, CScriptStack& stack)
 	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{
-		nlwarning("stopMoving failed: no spawned group");
+		RYAI_SCRIPT_WARNING(entity, "stopMoving failed: no spawned group");
 		return;
 	}
 	
@@ -650,7 +650,7 @@ void wander__(CStateInstance* entity, CScriptStack& stack)
 	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{
-		nlwarning("wander failed: no spawned group");
+		RYAI_SCRIPT_WARNING(entity, "wander failed: no spawned group");
 		return;
 	}
 	
@@ -1666,15 +1666,13 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 
 	if (groupToNotify == NULL)
 	{
-		nlwarning("receiveMissionItems failed: groupToNotify is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "receiveMissionItems failed: groupToNotify is NULL");
 		return;
 	}
 
 	if (missionItems.empty())
 	{
-		nlwarning("receiveMissionItems failed: missionItems is empty");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "receiveMissionItems failed: missionItems is empty");
 		return;
 	}
 
@@ -1684,8 +1682,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (aiInstance == NULL)
 	{
-		nlwarning("receiveMissionItems failed: the AI instance of the entity is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "receiveMissionItems failed: the AI instance of the entity is NULL");
 		return;
 	}
 
@@ -1695,8 +1692,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		||	talkingNpc == NULL
 		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
 	{
-		nlwarning("receiveMissionItems failed: invalid interlocutors");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "receiveMissionItems failed: invalid interlocutors");
 		return;
 	}
 
@@ -1722,8 +1718,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	NLMISC::splitString(missionItems, ";", itemAndQtyList);
 	if (itemAndQtyList.empty())
 	{
-		nlwarning("receiveMissionItems failed: the provided mission items string is invalid");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "receiveMissionItems failed: the provided mission items string is invalid");
 		return;
 	}
 	FOREACHC(it, std::vector<std::string>, itemAndQtyList)
@@ -1732,16 +1727,14 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		NLMISC::splitString(*it, ":", itemAndQty);
 		if (itemAndQty.size() != 2)
 		{
-			nlwarning("receiveMissionItems failed: the provided mission items string is invalid");
-			DEBUG_STOP;
+			RYAI_SCRIPT_WARNING_STOP(entity, "receiveMissionItems failed: the provided mission items string is invalid");
 			return;
 		}
 
 		const CSheetId sheetId(itemAndQty[0]);
 		if (sheetId == CSheetId::Unknown)
 		{
-			nlwarning("receiveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str());
-			DEBUG_STOP;
+			RYAI_SCRIPT_WARNING_STOP(entity, toString("receiveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str()));
 			return;
 		}
 
@@ -1749,8 +1742,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		NLMISC::fromString(itemAndQty[1], quantity);
 		if (quantity == 0)
 		{
-			nlwarning("receiveMissionItems failed: invalid quantity '%s'", itemAndQty[1].c_str());
-			DEBUG_STOP;
+			RYAI_SCRIPT_WARNING_STOP(entity, toString("receiveMissionItems failed: invalid quantity '%s'", itemAndQty[1].c_str()));
 			return;
 		}
 
@@ -1802,15 +1794,13 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 
 	if (groupToNotify == NULL)
 	{
-		nlwarning("giveMissionItems failed: groupToNotify is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveMissionItems failed: groupToNotify is NULL");
 		return;
 	}
 
 	if (missionItems.empty())
 	{
-		nlwarning("giveMissionItems failed: missionItems is empty");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveMissionItems failed: missionItems is empty");
 		return;
 	}
 
@@ -1820,8 +1810,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (aiInstance == NULL)
 	{
-		nlwarning("giveMissionItems failed: the AI instance of the entity is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveMissionItems failed: the AI instance of the entity is NULL");
 		return;
 	}
 
@@ -1831,8 +1820,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		||	talkingNpc == NULL
 		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
 	{
-		nlwarning("giveMissionItems failed: invalid interlocutors");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveMissionItems failed: invalid interlocutors");
 		return;
 	}
 
@@ -1858,8 +1846,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	NLMISC::splitString(missionItems, ";", itemAndQtyList);
 	if (itemAndQtyList.empty())
 	{
-		nlwarning("giveMissionItems failed: the provided mission items string is invalid");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveMissionItems failed: the provided mission items string is invalid");
 		return;
 	}
 	FOREACHC(it, std::vector<std::string>, itemAndQtyList)
@@ -1868,16 +1855,14 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		NLMISC::splitString(*it, ":", itemAndQty);
 		if (itemAndQty.size() != 2)
 		{
-			nlwarning("giveMissionItems failed: the provided mission items string is invalid");
-			DEBUG_STOP;
+			RYAI_SCRIPT_WARNING_STOP(entity, "giveMissionItems failed: the provided mission items string is invalid");
 			return;
 		}
 
 		const CSheetId sheetId(itemAndQty[0]);
 		if (sheetId == CSheetId::Unknown)
 		{
-			nlwarning("giveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str());
-			DEBUG_STOP;
+			RYAI_SCRIPT_WARNING_STOP(entity, toString("giveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str()));
 			return;
 		}
 
@@ -1885,8 +1870,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 		NLMISC::fromString(itemAndQty[1], quantity);
 		if (quantity == 0)
 		{
-			nlwarning("giveMissionItems failed: invalid quantity '%s'", itemAndQty[1].c_str());
-			DEBUG_STOP;
+			RYAI_SCRIPT_WARNING_STOP(entity, toString("giveMissionItems failed: invalid quantity '%s'", itemAndQty[1].c_str()));
 			return;
 		}
 
@@ -1932,8 +1916,7 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 
 	if (groupToNotify == NULL)
 	{
-		nlwarning("talkTo failed: groupToNotify is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "talkTo failed: groupToNotify is NULL");
 		return;
 	}
 
@@ -1943,8 +1926,7 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (aiInstance == NULL)
 	{
-		nlwarning("talkTo failed: the AI instance of the entity is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "talkTo failed: the AI instance of the entity is NULL");
 		return;
 	}
 
@@ -1954,8 +1936,7 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 		||	talkingNpc == NULL
 		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
 	{
-		nlwarning("talkTo failed: invalid interlocutors");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "talkTo failed: invalid interlocutors");
 		return;
 	}
 
@@ -2004,8 +1985,7 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	
 	if (groupToNotify == NULL)
 	{
-		nlwarning("giveReward failed: groupToNotify is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: groupToNotify is NULL");
 		return;
 	}
 
@@ -2015,8 +1995,7 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (aiInstance == NULL)
 	{
-		nlwarning("giveReward failed: the AI instance of the entity is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: the AI instance of the entity is NULL");
 		return;
 	}
 
@@ -2025,8 +2004,7 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 
 	if (charEid == CEntityId::Unknown || npcEid == CEntityId::Unknown)
 	{
-		nlwarning("giveReward failed: the chareter or npc can't be retrreived from the event parameter");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: the chareter or npc can't be retrreived from the event parameter");
 		return;
 	}
 
@@ -2051,8 +2029,7 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	if	(	talkingPlayer == NULL
 		||	talkingNpc == NULL)
 	{
-		nlwarning("giveReward failed: invalid interlocutors");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: invalid interlocutors");
 		return;
 	}
 
@@ -2099,8 +2076,7 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	
 	if (groupToNotify == NULL)
 	{
-		nlwarning("teleportNear failed: groupToNotify is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "teleportNear failed: groupToNotify is NULL");
 		return;
 	}
 
@@ -2110,8 +2086,7 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
 	if (aiInstance == NULL)
 	{
-		nlwarning("giveReward failed: the AI instance of the entity is NULL");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: the AI instance of the entity is NULL");
 		return;
 	}
 
@@ -2120,8 +2095,7 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 
 	if (charEid == CEntityId::Unknown || npcEid == CEntityId::Unknown)
 	{
-		nlwarning("giveReward failed: the character or npc can't be retreived from the event parameter");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: the character or npc can't be retreived from the event parameter");
 		return;
 	}
 
@@ -2146,8 +2120,7 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	if	(	talkingPlayer == NULL
 		||	talkingNpc == NULL)
 	{
-		nlwarning("giveReward failed: invalid interlocutors");
-		DEBUG_STOP;
+		RYAI_SCRIPT_WARNING_STOP(entity, "giveReward failed: invalid interlocutors");
 		return;
 	}
 
@@ -2310,7 +2283,8 @@ void execSayHelper(CSpawnBot *spawnBot, NLMISC::CSString text, CChatGroup::TGrou
 			uint32 scenarioId = atoi(idStr.c_str());
 			// the text is one of the texts of the session of the npc
 			if (!CRingScenarioGuard::checkSession(spawnBot->getAIInstance(), TSessionId(scenarioId), "npcSay (a text of a session)")) { return; }
-			forwardToDss(spawnBot->dataSetRow(), mode, phrase, scenarioId);
+			if (!CRingScenarioGuard::forwardToDss(spawnBot->getPersistent().getOwner(), spawnBot->dataSetRow(), mode, phrase, scenarioId))
+				forwardToDss(spawnBot->dataSetRow(), mode, phrase, scenarioId);
 			return;
 		}
 		

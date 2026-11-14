@@ -42,6 +42,7 @@
 
 #include "script_vm.h"
 #include "script_compiler.h"
+#include "ring_scenario_guard.h"
 
 extern bool simulateBug(int bugId);
 
@@ -199,7 +200,7 @@ public:
 
 		if (_states.empty())
 		{
-			nlwarning("begin_state failed because state list is empty");
+			RYAI_SCRIPT_WARNING(entity, "begin_state failed because state list is empty");
 			return false;
 		}
 		uint i=CAIS::rand16((uint32)_states.size());
@@ -269,7 +270,7 @@ public:
 				}
 				if (grps.empty())
 				{
-					nlwarning("Can't find group(s) for the name '%s'", _groupsName[i].c_str());
+					RYAI_SCRIPT_WARNING(entity, "Can't find group(s) for the name '" + _groupsName[i] + "'");
 					continue;
 				}
 				
@@ -281,7 +282,7 @@ public:
 
 		if (_groups.empty())
 		{
-			nlwarning("user_event failed because group list is empty");
+			RYAI_SCRIPT_WARNING(entity, "user_event failed because group list is empty");
 			return false;
 		}
 
@@ -472,7 +473,7 @@ public:
 	{
 		if (_subActions.empty())
 		{
-			nlwarning("multi_action failed because sub-action list is empty");
+			RYAI_SCRIPT_WARNING(entity, "multi_action failed because sub-action list is empty");
 			return false;
 		}
 
@@ -483,7 +484,7 @@ public:
 		{
 			if(_subActions[i]==NULL)
 			{
-				nlwarning("multi actions : _subActions[%d] NULL ! ",i);
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("multi actions : _subActions[%d] NULL ! ", i));
 				continue;
 			}
 			if (!_subActions[i]->executeAction(entity,event))
@@ -531,7 +532,7 @@ public:
 	{
 		if (_states.empty())
 		{
-			nlwarning("begin_punctual_state failed because state list is empty");
+			RYAI_SCRIPT_WARNING(entity, "begin_punctual_state failed because state list is empty");
 			return false;
 		}
 		entity->setNextPunctualState(_states[CAIS::rand16((uint32)_states.size())]); 
@@ -611,7 +612,7 @@ public:
 	{
 		if (_subActions.empty())
 		{
-			nlwarning("random_select failed because sub-action list is empty");
+			RYAI_SCRIPT_WARNING(entity, "random_select failed because sub-action list is empty");
 			return false;
 		}
 		IAILogicAction *const action = _subActions[CAIS::rand16((uint32)_subActions.size())];
@@ -1358,7 +1359,7 @@ public:
 		case constant:
 			return var.Value;
 		default:
-			nlwarning("retreiveValue from invalid var type ! returning 0");
+			RYAI_SCRIPT_WARNING(stateInstance, "retreiveValue from invalid var type ! returning 0");
 			return 0;
 		}
 
@@ -1382,7 +1383,7 @@ public:
 		case not_equal:
 			return retreiveValue(stateInstance, var1) != retreiveValue(stateInstance, var2);
 		}
-		nlwarning("evalCondition invalid operator %u", op);
+		RYAI_SCRIPT_WARNING(stateInstance, NLMISC::toString("evalCondition invalid operator %u", (uint)op));
 		return false;
 	}
 
@@ -1994,7 +1995,7 @@ public:
 		else
 		{
 			if(group)
-				nlwarning("action emote for GroupAlias %s Group name %s : no bots can play the emot ! ", group->getAliasString().c_str(), group->getFullName().c_str());
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("action emote for GroupAlias %s Group name %s : no bots can play the emot ! ", group->getAliasString().c_str(), group->getFullName().c_str()));
 			else
 				nlwarning("action emote: no bots can play the emot !");
 		}
@@ -3046,7 +3047,7 @@ public:
 	{
 		if(_Sentence == "")
 		{
-			nlwarning("npc has nothing to say!");
+			RYAI_SCRIPT_WARNING(entity, "npc has nothing to say!");
 			return false;
 		}
 
@@ -3055,7 +3056,7 @@ public:
 		if ((aliasDesc && aliasDesc->getType() != AITypeGrp)
 		    || !entity->getGroup())
 		{
-			nlwarning("group can't have 'npc_say' action !");
+			RYAI_SCRIPT_WARNING(entity, "group can't have 'npc_say' action !");
 			return	true;
 		}
 
@@ -3070,7 +3071,7 @@ public:
 			CAliasCont<CBot> const& bots = grp->bots();
 			if(bots.size()==0)
 			{
-				nlwarning("group empty! say nothing! ");
+				RYAI_SCRIPT_WARNING(entity, "group empty! say nothing! ");
 				return true;
 			}
 
@@ -3078,7 +3079,7 @@ public:
 			if(!chld)
 			{
 				std::string tmp= "no npc named "+_Npc+"! say nothing!";
-				nlwarning("%s", tmp.c_str());
+				RYAI_SCRIPT_WARNING(entity, tmp);
 				return true;
 			}
 			bot= chld->getSpawnObj();
@@ -3109,7 +3110,9 @@ public:
 		{
 			if(!_Arg)
 			{
-				forwardToDss(bot->dataSetRow(),CChatGroup::say,_Sentence,_ScenarioId);
+				// for the group of a Ring session the line of each sentence is a line of that session
+				if (!CRingScenarioGuard::forwardToDss(entity->getGroup(), bot->dataSetRow(), CChatGroup::say, _Sentence, _ScenarioId))
+					forwardToDss(bot->dataSetRow(),CChatGroup::say,_Sentence,_ScenarioId);
 			}
 			else
 			{
@@ -3216,7 +3219,7 @@ public:
 
 		if (_FacerNames.size()  !=2 ) 
 		{
-			nlwarning("Warning CAILogicActionFacing: need two Npc name !");
+			RYAI_SCRIPT_WARNING(entity, "Warning CAILogicActionFacing: need two Npc name !");
 			return false;
 		}
 
@@ -3229,7 +3232,7 @@ public:
 			CAliasCont<CBot> const& bots = grp->bots();
 			if(bots.size()==0)
 			{
-				nlwarning("Warning CAILogicActionFacing: group empty! unable to face !");
+				RYAI_SCRIPT_WARNING(entity, "Warning CAILogicActionFacing: group empty! unable to face !");
 				return false;
 			}
 
@@ -3239,7 +3242,7 @@ public:
 			chld=bots.getChildByName(_FacerNames[0]);
 			if(!chld)
 			{
-				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !",_FacerNames[0].c_str());
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("Warning CAILogicActionFacing: no npc named %s ! unable to face !", _FacerNames[0].c_str()));
 				return false;
 			}
 			botFaced= chld->getSpawnObj();
@@ -3257,7 +3260,7 @@ public:
 			CAliasCont<CBot> const& bots = grp->bots();
 			if(bots.size()==0)
 			{
-				nlwarning("Warning CAILogicActionFacing: group empty! unable to face !");
+				RYAI_SCRIPT_WARNING(entity, "Warning CAILogicActionFacing: group empty! unable to face !");
 				return false;
 			}
 
@@ -3267,7 +3270,7 @@ public:
 			chld=bots.getChildByName(_FacerNames[1]);
 			if(!chld)
 			{
-				nlwarning("Warning CAILogicActionFacing: no npc named %s ! unable to face !",_FacerNames[1].c_str());
+				RYAI_SCRIPT_WARNING(entity, NLMISC::toString("Warning CAILogicActionFacing: no npc named %s ! unable to face !", _FacerNames[1].c_str()));
 				return false;
 			}
 			botFacer= chld->getSpawnObj();

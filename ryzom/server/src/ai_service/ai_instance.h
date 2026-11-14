@@ -31,6 +31,7 @@
 #include "continent.h"
 #include "ai_grp.h"
 #include "service_dependencies.h"
+#include "ring_scenario_guard.h"
 
 #include "sheets.h"
 
@@ -192,6 +193,9 @@ public:
 	/// the scenario service sends the scenario, and is what CRingScenarioGuard tests.
 	TSessionId getRingSession() const { return _RingSession; }
 	void setRingSession(TSessionId sessionId);
+	/// The operations of the script machine the scenario of the Ring session ran since the update
+	/// of this instance began (CScenarioWorkScope counts them, update() begins the count again)
+	CRingUpdateBudget &ringUpdateBudget() { return _RingUpdateBudget; }
 
 	/// Main squad family accessor
 	COutpostSquadFamily *getSquadFamily() { return _SquadFamily; }
@@ -252,6 +256,8 @@ private:
 	uint32 _InstanceNumber;
 	/// The Ring session whose scenario is loaded in this instance, 0 for none
 	TSessionId _RingSession;
+	/// What the scripts of that scenario ran since the update of this instance began
+	CRingUpdateBudget _RingUpdateBudget;
 	
 	CAIEntity* tryToGetEntity(char const* str);
 	

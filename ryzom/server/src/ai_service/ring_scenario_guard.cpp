@@ -23,6 +23,7 @@
 #include "script_compiler.h"
 
 #include "game_share/rt_scenario_check.h"
+#include "game_share/send_chat.h"
 
 using namespace NLMISC;
 
@@ -36,42 +37,45 @@ const uint32 s_MaxRefusalsLoggedPerMinute = 100;
 const uint32 s_MaxScriptsLoggedPerLoad = 4;
 /// Sessions whose count of refusals is kept; over this, the counts of the minutes that are over go
 const uint32 s_MaxSessionsCounted = 256;
+/// Lines the scenario of one session causes while it runs that are logged in one minute
+const uint32 s_MaxLinesLoggedPerSessionMinute = 10;
+/// Lines the scenarios of all sessions cause while they run that are logged in one minute
+const uint32 s_MaxLinesLoggedPerMinute = 100;
+/// Bytes of a text of a scenario, and of the name of its group, that are written in such a line
+const size_t s_MaxLineTextSize = 512;
+const size_t s_MaxLineNameSize = 64;
 
-/// The refusals of one session in the minute that runs, or of all of them
-struct CRefusalCount
+/// The refusals, the lines the scenarios cause while they run, and the lines of the sentences
+/// their bots say: each has its own count
+CRingLogBudget s_Refusals(s_MaxRefusalsLoggedPerSessionMinute, s_MaxRefusalsLoggedPerMinute, s_MaxSessionsCounted);
+CRingLogBudget s_Lines(s_MaxLinesLoggedPerSessionMinute, s_MaxLinesLoggedPerMinute, s_MaxSessionsCounted);
+CRingLogBudget s_Sentences(s_MaxLinesLoggedPerSessionMinute, s_MaxLinesLoggedPerMinute, s_MaxSessionsCounted);
+
+/// Writes a line the scenario of the session of the group causes while it runs, when budget has
+/// one for it. False when the group is of no Ring session: nothing is written or counted.
+bool logLine(CRingLogBudget &budget, const CGroup *group, const std::string &text)
 {
-	TTime WindowStart;
-	uint32 Logged;
-	uint32 NotLogged;
+	const CAIInstance *instance = group ? group->getAIInstance() : NULL;
+	const uint32 session = instance ? instance->getRingSession().asInt() : 0;
+	if (session == 0)
+		return false;
 
-	CRefusalCount()
-	    : WindowStart(0)
-	    , Logged(0)
-	    , NotLogged(0)
-	{
-	}
+	uint32 notLogged;
+	CRingLogBudget::TForgotten forgotten;
+	const bool logged = budget.take(session, CTime::getLocalTime(), notLogged, forgotten);
 
-	/// True when a line can be logged now; it is counted, or counted as not logged
-	bool take(TTime now, uint32 maxPerMinute)
-	{
-		if (now < WindowStart || now - WindowStart >= 60 * 1000)
-		{
-			WindowStart = now;
-			Logged = 0;
-		}
-		if (Logged >= maxPerMinute)
-		{
-			++NotLogged;
-			return false;
-		}
-		++Logged;
+	for (size_t i = 0; i < forgotten.size(); ++i)
+		nlinfo("RING: session %u: %u more lines of its scenario were not logged", forgotten[i].first, forgotten[i].second);
+	if (!logged)
 		return true;
-	}
-};
 
-typedef std::map<uint32, CRefusalCount> TSessionRefusals;
-TSessionRefusals s_SessionRefusals;
-CRefusalCount s_AllRefusals;
+	if (notLogged != 0)
+		nlinfo("RING: session %u: %u more lines of its scenario were not logged", session, notLogged);
+	// The text and the name are given by the scenario: they are written as one line of a size
+	nlinfo("RING: session %u (AI instance %u) group '%s': %s", session, instance->getInstanceNumber(),
+	    ringLogText(group->getName(), s_MaxLineNameSize).c_str(), ringLogText(text, s_MaxLineTextSize).c_str());
+	return true;
+}
 
 } // namespace
 
@@ -159,43 +163,53 @@ void CRingScenarioGuard::refuseScript(const std::string &name, const std::string
 // ****************************************************************************
 void CRingScenarioGuard::logRefusal(TSessionId sessionId, uint32 instanceNumber, const std::string &what)
 {
-	TTime now = CTime::getLocalTime();
+	// A session has its own number of lines a minute, so that the refusals of one session leave the
+	// lines of the others; all of them together have a larger one (CRingLogBudget)
+	uint32 notLogged;
+	CRingLogBudget::TForgotten forgotten;
+	const bool logged = s_Refusals.take(sessionId.asInt(), CTime::getLocalTime(), notLogged, forgotten);
 
 	// The counts of the sessions that had no refusal for a minute are not kept for ever
-	if (s_SessionRefusals.size() > s_MaxSessionsCounted)
-	{
-		TSessionRefusals::iterator it = s_SessionRefusals.begin();
-		while (it != s_SessionRefusals.end())
-		{
-			TSessionRefusals::iterator current = it++;
-			if (current->first != sessionId.asInt() && (now < current->second.WindowStart || now - current->second.WindowStart >= 60 * 1000))
-			{
-				if (current->second.NotLogged != 0)
-					nlwarning("RING: session %u: %u more refusals were not logged", current->first, current->second.NotLogged);
-				s_SessionRefusals.erase(current);
-			}
-		}
-	}
-
-	// A session has its own number of lines a minute, so that the refusals of one session leave the
-	// lines of the others; all of them together have a larger one
-	CRefusalCount &session = s_SessionRefusals[sessionId.asInt()];
-	if (!session.take(now, s_MaxRefusalsLoggedPerSessionMinute))
+	for (size_t i = 0; i < forgotten.size(); ++i)
+		nlwarning("RING: session %u: %u more refusals were not logged", forgotten[i].first, forgotten[i].second);
+	if (!logged)
 		return;
-	if (!s_AllRefusals.take(now, s_MaxRefusalsLoggedPerMinute))
-	{
-		// the line of the session is not written: it counts as not logged for the session
-		--session.Logged;
-		++session.NotLogged;
-		return;
-	}
 
-	if (session.NotLogged != 0)
-	{
-		nlwarning("RING: session %u: %u more refusals were not logged", sessionId.asInt(), session.NotLogged);
-		session.NotLogged = 0;
-	}
+	if (notLogged != 0)
+		nlwarning("RING: session %u: %u more refusals were not logged", sessionId.asInt(), notLogged);
 	nlwarning("RING: session %u (AI instance %u) refused: %s", sessionId.asInt(), instanceNumber, what.c_str());
+}
+
+// ****************************************************************************
+void CRingScenarioGuard::logLoadRefusal(const std::string &what)
+{
+	logRefusal(s_LoadSession, s_LoadInstance, what);
+}
+
+// ****************************************************************************
+bool CRingScenarioGuard::logForSession(const CStateInstance *caller, const std::string &text)
+{
+	// These lines are what a scenario says or does wrong for itself, not what it was refused: they
+	// are lines for who looks at a session, and have a count of their own
+	return caller && logLine(s_Lines, const_cast<CStateInstance *>(caller)->getGroup(), text);
+}
+
+// ****************************************************************************
+bool CRingScenarioGuard::logForGroup(const CGroup *group, const std::string &text)
+{
+	return logLine(s_Lines, group, text);
+}
+
+// ****************************************************************************
+bool CRingScenarioGuard::forwardToDss(const CGroup *group, const TDataSetRow &senderId, CChatGroup::TGroupType groupType, const std::string &sentenceId, uint32 scenarioId)
+{
+	if (!logLine(s_Sentences, group, "forwarding to DSS : id: " + sentenceId))
+		return false;
+
+	// the line of the sentence was written or counted above
+	std::string sentence = sentenceId;
+	::forwardToDss(senderId, groupType, sentence, scenarioId, false);
+	return true;
 }
 
 // ****************************************************************************

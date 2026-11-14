@@ -22,6 +22,7 @@
 #include "visual_properties_interface.h"
 #include "server_share/msg_brick_service.h"
 #include "server_share/r2_variables.h"
+#include "ring_scenario_guard.h"
 
 using namespace MULTI_LINE_FORMATER;
 
@@ -599,7 +600,7 @@ bool CBot::spawn()
 		return true;
 	if (getSheet()->SheetId() == NLMISC::CSheetId::Unknown)
 	{
-		nlwarning("Bot '%s'%s: invalid sheet id", getAliasFullName().c_str(), getAliasString().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("Bot '%s'%s: invalid sheet id", getAliasFullName().c_str(), getAliasString().c_str()));
 		return false;
 	}
 	if (!getSpawnCounter().remainToMax())
@@ -614,7 +615,7 @@ bool CBot::spawn()
 	// Check the initial position is valid
 	if (!botWPos.isValid() && !isStuck())
 	{
-		nlwarning("Bot '%s'%s: invalid spawn pos and not stuck", getAliasFullName().c_str(), getAliasString().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("Bot '%s'%s: invalid spawn pos and not stuck", getAliasFullName().c_str(), getAliasString().c_str()));
 		return false;
 	}
 	

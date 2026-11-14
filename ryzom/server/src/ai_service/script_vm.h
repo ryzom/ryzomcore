@@ -224,6 +224,12 @@ public:
 	virtual CByteCodeEntry const* getScriptCallBackPtr(NLMISC::TStringId const& eventName) const = 0;
 	virtual void callScriptCallBack(IScriptContext* caller, NLMISC::TStringId const& funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", CScriptStack* stack = NULL) = 0;
 	virtual void callNativeCallBack(IScriptContext* caller, std::string const&       funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", CScriptStack* stack = NULL) = 0;
+
+	/// A line the script of this context causes in the log of the service while it runs: what it
+	/// prints, or what the machine says about a value it gave. True when the context took the line:
+	/// the lines of some contexts are limited in number, and the context writes or counts them
+	/// itself. False when the machine is to write the line as it did.
+	virtual bool logScriptLine(std::string const& line) { return false; }
 };
 
 class CScriptVM
@@ -319,6 +325,8 @@ public:
 	}
 	/// True when a budget was set and is used up: the scripts end at their next operation
 	static bool isOpcodeBudgetSpent() { return _OpcodeBudgetSet && _OpcodesLeft == 0; }
+	/// The operations that are left of the budget that was set, 0 when none is set
+	static uint32 getOpcodesLeft() { return _OpcodesLeft; }
 
 private:
 	static bool _OpcodeBudgetSet;

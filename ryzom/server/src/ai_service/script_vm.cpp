@@ -124,6 +124,27 @@ void scriptStop(const char *reason)
 	throw EScriptStop(std::string(reason));
 }
 
+/// A line of the log a script causes while it runs. The context of the script takes the line when
+/// its lines are limited in number (IScriptContext::logScriptLine); if not, it is written here as
+/// it was, with logger (nlinfo, nlwarning). text is a string.
+#define SCRIPT_LOG_LINE(logger, context, text) \
+	do \
+	{ \
+		const std::string &scriptLogLine_ = (text); \
+		if (!(context) || !(context)->logScriptLine(scriptLogLine_)) \
+		{ \
+			logger("%s", scriptLogLine_.c_str()); \
+		} \
+	} while (false)
+
+/// Joins a part to the text a print or a log of a script writes: the text stays of a size
+static void appendPrintText(std::string &text, const std::string &part)
+{
+	if (text.size() > MaxScriptTextSize || part.size() > MaxScriptTextSize - text.size())
+		scriptStop("a text is made longer than a script can make one");
+	text += part;
+}
+
 void CScriptVM::interpretCode(
 	IScriptContext* thisContext,
 	IScriptContext* parentContext,
@@ -162,7 +183,7 @@ void CScriptVM::interpretCode(
 		{
 		default:
 		case	INVALID_OPCODE:
-			nlwarning("Invalid Opcode for Group '%s' with code in '%s'", thisContext ? thisContext->getContextName().c_str() : "", byteCode->_sourceName.c_str());
+			SCRIPT_LOG_LINE(nlwarning, thisContext, toString("Invalid Opcode for Group '%s' with code in '%s'", thisContext ? thisContext->getContextName().c_str() : "", byteCode->_sourceName.c_str()));
 			scriptStop("the code of the script has an operation the service does not know");
 			break;
 		case	EOP:
@@ -343,7 +364,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				thisContext->setLogicVar(*((TStringId*)&opcodes[index+1]), f);
@@ -366,7 +387,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 					thisContext->setStrLogicVar(*((TStringId*)&opcodes[index+1]),std::string());
 				}
 				stack.pop();
@@ -383,7 +404,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 					thisContext->setCtxLogicVar(*((TStringId*)&opcodes[index+1]), (IScriptContext*)0);
 				}
 				stack.pop();
@@ -621,7 +642,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				
@@ -640,7 +661,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				if (otherContext)
 					otherContext->setLogicVar(*((TStringId*)&opcodes[index+1]), f);
@@ -659,7 +680,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				
@@ -678,7 +699,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				if (otherContext)
 					otherContext->setStrLogicVar(*((TStringId*)&opcodes[index+1]), str);
@@ -697,7 +718,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				
@@ -710,7 +731,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				if (otherContext)
 					otherContext->setCtxLogicVar(*((TStringId*)&opcodes[index+1]), ctx);
@@ -729,7 +750,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				
@@ -754,7 +775,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				
@@ -777,7 +798,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value!");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value!");
 				}
 				stack.pop();
 				
@@ -814,21 +835,21 @@ void CScriptVM::interpretCode(
 			continue;
 		case	PUSH_PRINT_STRING:
 			{
-				currentString+=CStringMapper::unmap(*((TStringId*)&opcodes[index+1]));	//	strPt.substr(1,strPt.size()-2);
+				appendPrintText(currentString, CStringMapper::unmap(*((TStringId*)&opcodes[index+1])));	//	strPt.substr(1,strPt.size()-2);
 				index+=2;
 			}
 			continue;
 		case	PUSH_PRINT_VAR:
 			{
 				float const val = thisContext->getLogicVar(*((TStringId*)&opcodes[index+1]));
-				currentString += NLMISC::toString("%g", val);
+				appendPrintText(currentString, NLMISC::toString("%g", val));
 				index += 2;
 			}
 			continue;
 		case	PUSH_PRINT_STR_VAR:
 			{
 				string const str = thisContext->getStrLogicVar(*((TStringId*)&opcodes[index+1]));
-				currentString += str;
+				appendPrintText(currentString, str);
 				index += 2;
 			}
 			continue;
@@ -836,7 +857,7 @@ void CScriptVM::interpretCode(
 			{
 				if (AIScriptDisplayPrint)
 				{
-					nlinfo("%s", currentString.c_str());
+					SCRIPT_LOG_LINE(nlinfo, thisContext, currentString);
 				}
 				currentString.resize(0);
 				++index;
@@ -846,7 +867,7 @@ void CScriptVM::interpretCode(
 			{
 				if (AIScriptDisplayLog)
 				{
-					nlinfo("%s", currentString.c_str());
+					SCRIPT_LOG_LINE(nlinfo, thisContext, currentString);
 				}
 				currentString.resize(0);
 				++index;
@@ -902,7 +923,7 @@ void CScriptVM::interpretCode(
 					otherContext = thisContext->findContext(strId);
 				}
 				if (!otherContext)
-					nlinfo("Group %s unknown, pushing a NULL context on the stack, this may lead to bad behaviours", CStringMapper::unmap(strId).c_str());
+					SCRIPT_LOG_LINE(nlinfo, thisContext, toString("Group %s unknown, pushing a NULL context on the stack, this may lead to bad behaviours", CStringMapper::unmap(strId).c_str()));
 				
 				stack.push(otherContext);
 				index+=2;
@@ -953,7 +974,7 @@ void CScriptVM::interpretCode(
 				}
 				else
 				{
-					nlwarning("Calling a native function (%s) on a NULL group/context, rebuilding stack (this situation previously led to unknown behaviour, most of the time crashes)", funcName.c_str());
+					SCRIPT_LOG_LINE(nlwarning, thisContext, toString("Calling a native function (%s) on a NULL group/context, rebuilding stack (this situation previously led to unknown behaviour, most of the time crashes)", funcName.c_str()));
 					// If we have parameters we got to rebuild the stack
 					if (!inParamsSig.empty())
 					{
@@ -1025,7 +1046,7 @@ void CScriptVM::interpretCode(
 					}
 					break;
 				default:
-					nlwarning("Stack top type invalid, poping top value");
+					SCRIPT_LOG_LINE(nlwarning, thisContext, "Stack top type invalid, poping top value");
 					stack.pop();
 				}
 				

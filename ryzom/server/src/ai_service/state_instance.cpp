@@ -196,12 +196,73 @@ void CStateInstance::setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContex
 
 namespace {
 
+/// The scripts that are interpreted now, one inside another. What ends a script
+/// (AIVM::EScriptStop) is caught by CStateInstance::interpretCode, so it is thrown only while one
+/// is.
+uint32 s_ScriptsRunning = 0;
+
+struct CScriptRunning
+{
+	CScriptRunning() { ++s_ScriptsRunning; }
+	~CScriptRunning() { --s_ScriptsRunning; }
+};
+
+} // namespace
+
+bool CStateInstance::refuseStrLogicVar(size_t valueSize)
+{
+	const TSessionId session = CRingScenarioGuard::getSession(this);
+	if (session.asInt() == 0)
+		return false;
+
+	const char *const why = valueSize > AIVM::MaxScriptTextSize
+	    ? "a text longer than a script can make one is given to a text variable"
+	    : "the text variables of the group would hold more text than the group of a scenario keeps";
+	// in a script: the script ends there, which is logged for the session where it is caught
+	if (s_ScriptsRunning != 0)
+		AIVM::scriptStop(why);
+
+	CGroup *group = getGroup();
+	CRingScenarioGuard::logRefusal(session, group->getAIInstance()->getInstanceNumber(),
+	    "a text variable of the group '" + group->getName() + "' is not set: " + why);
+	return true;
+}
+
+bool CStateInstance::logScriptLine(std::string const& line)
+{
+	return CRingScenarioGuard::logForSession(this, line);
+}
+
+// The operations of the script machine a Ring session has: for all its events between two updates
+// of its AI instance, whatever their number is, and for the work one event starts
+// (CScenarioWorkScope).
+// Neither default was measured on a shard. What was measured is the script machine alone, in a
+// Debug build, the native functions replaced by functions that do nothing: 2,000,000 operations
+// took 90 to 430 ms and 20,000,000 took 0.9 to 4.2 s, where an update of the service has 100 ms.
+// A native function is counted as the one operation that calls it, also when it sends a message
+// to another service or spawns a group, which costs far more: there is no second count for
+// those. A script of the editor has no loop, so it runs each of its operations once at most, and
+// one event runs a handful of scripts: the defaults are many times what the long scripts of a
+// scenario come to.
+CVariable<uint32> RingSessionOpcodesPerUpdate("ai", "RingSessionOpcodesPerUpdate",
+    "Operations of the script machine the scripts of the scenario of one Ring session run in one update of the AI service. "
+    "Past it, the events and the scripts of that session do not run until the next update. "
+    "0: no limit for an update, an event keeps its own (RingSessionOpcodesPerEvent). "
+    "Not measured on a shard. Measured: the script machine alone, native calls replaced by stubs, a Debug build: 2,000,000 operations took 90 to 430 ms, 20,000,000 took 0.9 to 4.2 s. A native call counts as one operation, whatever it sends or spawns.",
+    2000000, 0, true);
+CVariable<uint32> RingSessionOpcodesPerEvent("ai", "RingSessionOpcodesPerEvent",
+    "Operations of the script machine the scripts run that one event of the scenario of a Ring session starts, the events it triggers included. "
+    "Past it, the scripts of that event end and it starts nothing more. "
+    "0: no limit of its own, the event has what its session has left for the update (RingSessionOpcodesPerUpdate). "
+    "Not measured on a shard. Measured: the script machine alone, native calls replaced by stubs, a Debug build: 2,000,000 operations took 90 to 430 ms, 20,000,000 took 0.9 to 4.2 s. A native call counts as one operation, whatever it sends or spawns.",
+    200000, 0, true);
+
+namespace {
+
 /// Events and scripts of a scenario that are started from inside one another
 const uint32 s_MaxWorkNesting = 64;
 /// Events one event of a scenario starts, itself included
 const uint32 s_MaxWorkEvents = 2000;
-/// Operations of the scripts one event of a scenario starts
-const uint32 s_MaxWorkOpcodes = 2000000;
 
 uint32 s_WorkNesting = 0;
 uint32 s_WorkEvents = 0;
@@ -210,6 +271,14 @@ uint32 s_WorkSession = 0;
 /// The number of the AI instance of that group
 uint32 s_WorkInstance = 0;
 bool s_WorkReported = false;
+/// The AI instance of that group, which counts the operations of its session in one update. It is
+/// not held: it reads as none if the instance is removed while the work runs.
+NLMISC::CRefPtr<CAIInstance> s_WorkAIInstance;
+/// The operations one event had when the work began (RingSessionOpcodesPerEvent), the largest
+/// number when it has no limit of its own
+uint32 s_WorkMaxOpcodes = 0;
+/// The operations the work was given: s_WorkMaxOpcodes, or what its session had left for the update
+uint32 s_WorkOpcodes = 0;
 
 /// stateInstance is NULL when the work is over
 void reportWorkLimit(CStateInstance *stateInstance, const char *what)
@@ -221,6 +290,24 @@ void reportWorkLimit(CStateInstance *stateInstance, const char *what)
 	std::string where = group ? " at the group '" + group->getName() + "'" : std::string();
 	CRingScenarioGuard::logRefusal(TSessionId(s_WorkSession), s_WorkInstance,
 	    "the work an event started was stopped" + where + ": " + what);
+}
+
+/// The scripts of the work have no operation left. When the work was given less than one event has,
+/// it is the session that has none left for this update: that is said once for the update, not for
+/// each event that does not run. stateInstance is NULL when the work is over.
+void reportOpcodesSpent(CStateInstance *stateInstance)
+{
+	if (s_WorkOpcodes >= s_WorkMaxOpcodes)
+	{
+		reportWorkLimit(stateInstance, "its scripts ran the operations one event has (RingSessionOpcodesPerEvent)");
+		return;
+	}
+	CAIInstance *instance = s_WorkAIInstance;
+	if (!instance || !instance->ringUpdateBudget().reportOnce())
+		return;
+	CRingScenarioGuard::logRefusal(TSessionId(s_WorkSession), s_WorkInstance,
+	    toString("the scripts of the scenario ran the %u operations a session has in one update of the service (RingSessionOpcodesPerUpdate): its events and its scripts do not run until the next update",
+	        RingSessionOpcodesPerUpdate.get()));
 }
 
 } // namespace
@@ -237,7 +324,13 @@ CScenarioWorkScope::CScenarioWorkScope(CStateInstance *stateInstance, bool isEve
 		{
 			CGroup *group = stateInstance->getGroup();
 			s_WorkInstance = group ? group->getAIInstance()->getInstanceNumber() : 0;
-			AIVM::CScriptVM::setOpcodeBudget(s_MaxWorkOpcodes);
+			// The work has the operations of one event, or what its session has left for this
+			// update of the service when that is less. A native function is counted by the
+			// operation of the script that calls it.
+			s_WorkAIInstance = group ? group->getAIInstance() : (CAIInstance *)NULL;
+			s_WorkMaxOpcodes = RingSessionOpcodesPerEvent.get() != 0 ? RingSessionOpcodesPerEvent.get() : 0xffffffffu;
+			s_WorkOpcodes = s_WorkAIInstance ? s_WorkAIInstance->ringUpdateBudget().grant(s_WorkMaxOpcodes, RingSessionOpcodesPerUpdate.get()) : s_WorkMaxOpcodes;
+			AIVM::CScriptVM::setOpcodeBudget(s_WorkOpcodes);
 		}
 	}
 	++s_WorkNesting;
@@ -259,7 +352,7 @@ CScenarioWorkScope::CScenarioWorkScope(CStateInstance *stateInstance, bool isEve
 	else if (AIVM::CScriptVM::isOpcodeBudgetSpent())
 	{
 		m_Allowed = false;
-		reportWorkLimit(stateInstance, "its scripts ran too long");
+		reportOpcodesSpent(stateInstance);
 	}
 }
 
@@ -270,7 +363,12 @@ CScenarioWorkScope::~CScenarioWorkScope()
 	{
 		// the script that used the last operation ended there: that is said once for the work
 		if (AIVM::CScriptVM::isOpcodeBudgetSpent())
-			reportWorkLimit(NULL, "its scripts ran too long");
+			reportOpcodesSpent(NULL);
+		// what the work used is counted for its session in this update of the service
+		CAIInstance *instance = s_WorkAIInstance;
+		if (instance)
+			instance->ringUpdateBudget().use(s_WorkOpcodes - AIVM::CScriptVM::getOpcodesLeft());
+		s_WorkAIInstance = (CAIInstance *)NULL;
 		AIVM::CScriptVM::clearOpcodeBudget();
 		s_WorkSession = 0;
 	}
@@ -285,6 +383,7 @@ void CStateInstance::interpretCode(IScriptContext* caller, CByteCodeEntry const&
 	AIVM::IScriptContext* parent = getPersistentStateInstance()->getParentStateInstance();
 	try
 	{
+		CScriptRunning running;
 		AIVM::CScriptVM::getInstance()->interpretCode(this, parent, caller, codeScriptEntry);
 	}
 	catch (const AIVM::EScriptStop &e)

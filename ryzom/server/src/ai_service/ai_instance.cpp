@@ -431,6 +431,11 @@ std::string const& CAIInstance::findMissionName(uint32 alias)
 
 void CAIInstance::update()
 {
+	// The scripts of the scenario of a Ring session have a number of operations from one update of
+	// the instance to the next: what they run in this update, and for the messages and the tasks
+	// that come before the next one
+	_RingUpdateBudget.reset();
+
 	// Call the player manager's updates
 	{
 		H_AUTO(PlayerMgrUpdate)

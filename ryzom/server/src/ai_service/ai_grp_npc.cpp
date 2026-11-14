@@ -27,6 +27,7 @@
 #include "ai_player.h"
 #include "ai_profile_npc.h"
 #include "server_share/r2_variables.h"
+#include "ring_scenario_guard.h"
 
 extern bool simulateBug(int bugId);
 
@@ -357,7 +358,7 @@ void CSpawnGroupNpc::despawnBots(bool immediately)
 			continue;
 		
 		if (TheDataset.getOnlineTimestamp( bot->getSpawnObj()->dataSetRow()) >= CTickEventHandler::getGameCycle())
-			nlwarning("Bots %s:%s spawn/despawn in the same tick ! despawn ignored", getPersistent().getName().c_str(), bot->getName().c_str());
+			RYAI_GROUP_WARNING(&getPersistent(), NLMISC::toString("Bots %s:%s spawn/despawn in the same tick ! despawn ignored", getPersistent().getName().c_str(), bot->getName().c_str()));
 		else
 			bot->despawnBot();
 	}

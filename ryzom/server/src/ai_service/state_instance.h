@@ -37,6 +37,11 @@ class CAliasTreeOwner;
 
 extern NLLIGO::CLigoConfig LigoConfig;
 
+/// Largest total of the texts the text variables of the group of a Ring session hold, in bytes; the
+/// names are not counted. One text is no longer than AIVM::MaxScriptTextSize. The number is a
+/// chosen one, not a measured one: four texts of the largest size.
+const size_t MaxRingStrLogicVarSize = 262144;
+
 //////////////////////////////////////////////////////////////////////////////
 // CStateInstance                                                           //
 //////////////////////////////////////////////////////////////////////////////
@@ -150,6 +155,9 @@ public:
 	virtual AIVM::CByteCodeEntry const* getScriptCallBackPtr(NLMISC::TStringId const& eventName) const NL_OVERRIDE;
 	virtual void callScriptCallBack(AIVM::IScriptContext* caller, NLMISC::TStringId const& funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL) NL_OVERRIDE;
 	virtual void callNativeCallBack(AIVM::IScriptContext* caller, std::string const&       funcName, int mode = 0, std::string const& inParamsSig = "", std::string const& outParamsSig = "", AIVM::CScriptStack* stack = NULL) NL_OVERRIDE;
+	/// The lines the group of a Ring session causes are lines of its session, which are limited in
+	/// number (CRingScenarioGuard::logForSession); false for the group of a shard
+	virtual bool logScriptLine(std::string const& line) NL_OVERRIDE;
 
 	void blockUserEvent(uint32 eventId);
 	void unblockUserEvent(uint32 eventId);
@@ -166,6 +174,13 @@ protected:
 	TLogicVarList    _LogicVar;
 	TStrLogicVarList _StrLogicVar;
 	TCtxLogicVarList _CtxLogicVar;
+	/// The bytes of the texts _StrLogicVar holds, the names not counted (setStrLogicVar)
+	size_t _StrLogicVarSize;
+	/// Called by setStrLogicVar for a text that passes one of the sizes the group of a Ring
+	/// session has. For such a group the text is not kept: the script that sets it ends there
+	/// (AIVM::EScriptStop); outside a script the refusal is logged and true is returned. False
+	/// for the group of a shard, which has no limit.
+	bool refuseStrLogicVar(size_t valueSize);
 
 	// Nel variables
 	typedef	std::map<std::string, NLMISC::CVariable<float>*>       TNelVarList;
@@ -265,6 +280,7 @@ inline
 CStateInstance::CStateInstance(CAIState* startState)
 {
 	_UserEventBlocked = 0;
+	_StrLogicVarSize = 0;
 	init(startState);
 }
 
@@ -347,7 +363,17 @@ std::string CStateInstance::getStrLogicVar(NLMISC::TStringId varId)
 inline
 void CStateInstance::setStrLogicVar(NLMISC::TStringId varId, std::string const& value)
 {
-	_StrLogicVar[varId] = value;
+	// The bytes of the texts are counted for every group. The group of a Ring session has a limit
+	// on them: the session is looked up only for a text that passes it.
+	TStrLogicVarList::iterator it = _StrLogicVar.find(varId);
+	const size_t size = _StrLogicVarSize - (it != _StrLogicVar.end() ? it->second.size() : 0) + value.size();
+	if ((size > MaxRingStrLogicVarSize || value.size() > AIVM::MaxScriptTextSize) && refuseStrLogicVar(value.size()))
+		return;
+	if (it != _StrLogicVar.end())
+		it->second = value;
+	else
+		_StrLogicVar.insert(std::make_pair(varId, value));
+	_StrLogicVarSize = size;
 	_LogicVarChanged = true;
 	if (varId && varId->size() == 2 && (*varId)[0] == 'v')
 	{
@@ -477,9 +503,14 @@ bool CStateInstance::advanceUserTimer(uint32 nbTicks)
  * Bounds the work one event or one script of a scenario of a Ring session starts. The handler of
  * an event can trigger other events and run scripts, which can trigger events again: the events
  * and the scripts that are started from inside one another, the events in all, and the operations
- * of the scripts in all have a limit. Past a limit nothing more is started for that work, one line
- * is logged with the session and the group, and the scenario goes on with its next event.
- * The scripts and events of a shard that is no Ring shard are not counted.
+ * of the scripts in all (RingSessionOpcodesPerEvent) have a limit. Past a limit nothing more is
+ * started for that work, one line is logged with the session and the group, and the scenario goes
+ * on with its next event.
+ * The scripts of one session also have a number of operations in all from one update of its AI
+ * instance to the next (RingSessionOpcodesPerUpdate, CRingUpdateBudget): a work is given what is
+ * left of it when that is less than what one event has, and when nothing is left the events and
+ * the scripts of the session do not run until the next update, which one line says for that update.
+ * The scripts and events of a group whose AI instance has no Ring session are not counted.
  */
 class CScenarioWorkScope
 {
@@ -531,15 +562,23 @@ void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState cons
 
 		if (!reaction.getAction())
 		{
+			// for the group of a Ring session the two lines are one line of its session
+			const std::string failed = "Failed to find action for event: " + reaction.getAliasNode()->fullName();
+			if (logScriptLine(failed))
+				continue;
 			nldebug("Failed to find action for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
-			nlwarning("Failed to find action for event: %s",reaction.getAliasNode()->fullName().c_str());
+			nlwarning("%s", failed.c_str());
 			continue;
 		}
 		if (!reaction.getAction()->executeAction(this, NULL))
 		{
+			// for the group of a Ring session the two lines are one line of its session
+			const std::string failed = NLMISC::toString("Failed to execute action for event '%s': for stateInstance:'%s' in state:'%s'", stateEvent.getName().c_str(),
+			    aliasTreeOwner()->getAliasNode()->fullName().c_str(), state->getAliasNode()->fullName().c_str());
+			if (logScriptLine(failed))
+				continue;
 			nldebug("Failed to execute action for event"); // FIXME: https://github.com/kaetemi/ryzomclassic/issues/152
-			nlwarning("Failed to execute action for event '%s': for stateInstance:'%s' in state:'%s'",	stateEvent.getName().c_str(),
-				aliasTreeOwner()->getAliasNode()->fullName().c_str(),	state->getAliasNode()->fullName().c_str());
+			nlwarning("%s", failed.c_str());
 			continue;
 		}
 

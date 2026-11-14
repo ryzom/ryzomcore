@@ -20,6 +20,7 @@
 #include "ai_grp.h"
 #include "visual_properties_interface.h"
 #include "ai_profile_npc.h"
+#include "ring_scenario_guard.h"
 
 using namespace MULTI_LINE_FORMATER;
 
@@ -338,7 +339,9 @@ void CSpawnGroup::incSpawnedBot(CBot& spawnBot)
 	{
 		if (_BotsToRespawn[i].getBotIndex()==botIndex)
 		{
-			nldebug("Removing bot from _BotsToRespawn because they just respawned: %s",spawnBot.getFullName().c_str());
+			const std::string text = NLMISC::toString("Removing bot from _BotsToRespawn because they just respawned: %s",spawnBot.getFullName().c_str());
+			if (!CRingScenarioGuard::logForGroup(&getPersistent(), text))
+				nldebug("%s", text.c_str());
 //			nlwarning("WARNING!!! Old assert \"_BotsToRespawn[i].getBotIndex()!=botIndex\" would have failed");
 			_BotsToRespawn[i]=_BotsToRespawn.back();
 			_BotsToRespawn.pop_back();
@@ -348,7 +351,9 @@ void CSpawnGroup::incSpawnedBot(CBot& spawnBot)
 	{
 		if (_BotsToDespawn[i].getBotIndex()==botIndex)
 		{
-			nldebug("Removing bot from _BotsToDespawn because they just respawned: %s",spawnBot.getFullName().c_str());
+			const std::string text = NLMISC::toString("Removing bot from _BotsToDespawn because they just respawned: %s",spawnBot.getFullName().c_str());
+			if (!CRingScenarioGuard::logForGroup(&getPersistent(), text))
+				nldebug("%s", text.c_str());
 //			nlwarning("WARNING!!! Old assert \"_BotsToDespawn[i].getBotIndex()!=botIndex\" would have failed");
 			_BotsToDespawn[i]=_BotsToDespawn.back();
 			_BotsToDespawn.pop_back();
@@ -393,7 +398,7 @@ void CSpawnGroup::checkRespawn()
 
 			if (botPt->isSpawned())
 			{
-				nlwarning("CSpawnGroup::checkRespawn : trying to respawn a spawned bot");
+				RYAI_GROUP_WARNING(&getPersistent(), "CSpawnGroup::checkRespawn : trying to respawn a spawned bot");
 			}
 			if (botPt->isSpawned() || botPt->reSpawn(false))
 			{

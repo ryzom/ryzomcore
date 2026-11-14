@@ -32,6 +32,7 @@
 
 #include "ais_user_models.h"
 #include "dyn_grp_inline.h"
+#include "ring_scenario_guard.h"
 
 using namespace MULTI_LINE_FORMATER;
 
@@ -514,7 +515,7 @@ void CBotNpc::calcSpawnPos(RYAI_MAP_CRUNCH::CWorldMap const& worldMap)
 	}
 
 	if (!wp.isValid() && !isStuck())
-		nlwarning("Cannot generate a valid position for Npc %s", getFullName().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("Cannot generate a valid position for Npc %s", getFullName().c_str()));
 }
 
 CGroupNpc& CBotNpc::grp() const
@@ -665,7 +666,7 @@ bool CBotNpc::spawn()
 {
 	if (!isSheetValid())
 	{
-		nlwarning("spawn() Aborted for bot '%s' due to bad sheet", getFullName().c_str());
+		RYAI_GROUP_WARNING(getOwner(), NLMISC::toString("spawn() Aborted for bot '%s' due to bad sheet", getFullName().c_str()));
 		return false;
 	}
 	

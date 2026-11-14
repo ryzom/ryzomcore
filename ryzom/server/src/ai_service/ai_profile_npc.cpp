@@ -30,6 +30,7 @@
 #include "ai_generic_fight.h"
 #include "ai_profile_npc.h"
 #include "group_profile.h"
+#include "ring_scenario_guard.h"
 
 extern bool simulateBug(int bugId);
 
@@ -1773,7 +1774,7 @@ void	CGrpProfileFollowRoute::assignGeometryFromState()
 			nlassertex(_Geometry, ("CGrpProfileFollowRoute : NULL geometry data for group '%s'", persGrp.getFullName().c_str()));
 			if (_Geometry->empty())
 			{
-				nlwarning("CGrpProfileFollowRoute : missing geometry data for group '%s'", persGrp.getFullName().c_str());
+				RYAI_GROUP_WARNING(&persGrp, NLMISC::toString("CGrpProfileFollowRoute : missing geometry data for group '%s'", persGrp.getFullName().c_str()));
 			}
 		}
 		else
@@ -1793,9 +1794,9 @@ void	CGrpProfileFollowRoute::assignGeometryFromState()
 	const	CAIStatePositional	*const	sp = static_cast<const	CAIStatePositional	*const>(state);
 	if	(!sp->shape().hasPoints() && (_GeometryComeFromState))
 	{
-		nlwarning("Error, no position in state '%s'%s", 
+		RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("Error, no position in state '%s'%s",
 			sp->getAliasFullName().c_str(),
-			sp->getAliasString().c_str());
+			sp->getAliasString().c_str()));
 	}
 	else
 	{
@@ -2145,9 +2146,9 @@ void CGrpProfileStandOnVertices::beginProfile()
 		||	!grpState->isPositional())
 	{
 		if (grpState)
-			nlwarning("CGrpProfileStandOnVertices::beginProfile : grpState without valid points %s for group %s", grpState->getAliasFullName().c_str(), NpcGrp->getPersistent().getFullName().c_str());
+			RYAI_GROUP_WARNING(&NpcGrp->getPersistent(), NLMISC::toString("CGrpProfileStandOnVertices::beginProfile : grpState without valid points %s for group %s", grpState->getAliasFullName().c_str(), NpcGrp->getPersistent().getFullName().c_str()));
 		else
-			nlwarning("CGrpProfileStandOnVertices::beginProfile : invalid no grpState for group %s", NpcGrp->getPersistent().getFullName().c_str());
+			RYAI_GROUP_WARNING(&NpcGrp->getPersistent(), NLMISC::toString("CGrpProfileStandOnVertices::beginProfile : invalid no grpState for group %s", NpcGrp->getPersistent().getFullName().c_str()));
 	}
 	setCurrentValidPos	(grpState);
 	_Finished=false;
@@ -2208,7 +2209,7 @@ void	CGrpProfileStandOnVertices::addBot	(CBot	*bot)
 	
 	if ( grpState->shape().numPoints() < 1 )
 	{
-		nlwarning("CGrpProfileStandOnVertices : group state '%s'%s: no vertice !", grpState->getAliasFullName().c_str(),  grpState->getAliasString().c_str());
+		RYAI_GROUP_WARNING(&grp, NLMISC::toString("CGrpProfileStandOnVertices : group state '%s'%s: no vertice !", grpState->getAliasFullName().c_str(),  grpState->getAliasString().c_str()));
 		return;
 	}
 	
@@ -2552,9 +2553,9 @@ void CGrpProfileWander::affectZoneFromStateMachine()
 	if	(!sp->shape().hasPoints())
 	{
 		if (sp->getAliasNode())
-			nlwarning("Error, no position in state %s", sp->getAliasNode()->fullName().c_str());
+			RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("Error, no position in state %s", sp->getAliasNode()->fullName().c_str()));
 		else
-			nlwarning("Error, no position in state %s", sp->getName().c_str());
+			RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("Error, no position in state %s", sp->getName().c_str()));
 	}
 	if (sp->shape().hasPatat())
 		_RandomPos=&(sp->shape());
@@ -2791,7 +2792,7 @@ void CGrpProfileWander::updateProfile(uint ticksSinceLastUpdate)
 				CAIState const* const state = pgrp.getActiveState();
 				if (state != NULL)
 					stateName = state->getAliasFullName();
-				nlwarning("No valid wander position for state '%s'", stateName.c_str());
+				RYAI_GROUP_WARNING(&pgrp, NLMISC::toString("No valid wander position for state '%s'", stateName.c_str()));
 				return;
 			}
 		}
