@@ -292,7 +292,27 @@ bool CPeopleList::isPeopleChatVisible(uint index) const
 		nlwarning("Bad index");
 		return false;
 	}
-	return (_Peoples[index].Chat != nullptr);
+	return isChatOfPeople(index);
+}
+
+//==================================================================
+bool CPeopleList::isChatOfPeople(uint index) const
+{
+	const CPeople &people = _Peoples[index];
+	if (people.Chat == NULL || people.Container == NULL)
+		return false;
+	// The chat is the window of the name the entry had when it was opened. A team slot gets the name of another team
+	// mate when the team changes: the window then still belongs to the former one, who may be reached through it.
+	CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
+	return pCGW != NULL && pCGW->findFreeTeller(people.getName()) == people.Chat;
+}
+
+//==================================================================
+CGroupContainer *CPeopleList::getValidChat(uint index)
+{
+	if (!isChatOfPeople(index))
+		_Peoples[index].Chat = NULL;
+	return _Peoples[index].Chat;
 }
 /*
 bool CPeopleList::isPeopleWindowVisible(uint index) const
@@ -457,7 +477,7 @@ void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, con
 		return;
 	}
 	// get the chat box inside the container
-	CGroupContainer *gc = _Peoples[index].Chat;
+	CGroupContainer *gc = getValidChat(index);
 	if (gc == nullptr)
 		return;
 	CGroupList *gl = dynamic_cast<CGroupList *>(gc->getGroup("text_list"));
@@ -504,8 +524,8 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 		nlwarning("<CPeopleList::displayMessage> bad index.");
 		return;
 	}
-	// get the chat box inside the container
-	CGroupContainer *gcChat = _Peoples[index].Chat;
+	// get the chat box inside the container (the one of the name the entry has now)
+	CGroupContainer *gcChat = getValidChat(index);
 	CGroupContainer *gcName = _Peoples[index].Container;
 	if (gcName == nullptr)
 	{

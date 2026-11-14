@@ -723,13 +723,41 @@ const string CChatGroupWindow::getValidUiStringId(const string &stringId)
 }
 
 //=================================================================================
-CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
+// The title of the window of a free teller, from the name of the entity
+static string getFreeTellerTitle(const string &winNameIn)
 {
 	// must parse the entity name, and eventually make it Full with shard name (eg: 'ani.yoyo' becomes 'yoyo(Aniro)')
 	string winNameFull= CShardNames::getInstance().makeFullNameFromRelative(PlayerSelectedMainland, winNameIn);
 
 	// remove shard name if necessary
-	string winName= CEntityCL::removeShardFromName(winNameFull);
+	return CEntityCL::removeShardFromName(winNameFull);
+}
+
+//=================================================================================
+uint CChatGroupWindow::getFreeTellerIndex(const string &winNameIn) const
+{
+	uint i;
+	string sWinName = toLower(getFreeTellerTitle(winNameIn));
+	for (i = 0; i < _FreeTellers.size(); ++i)
+	{
+		CGroupContainer *pGC = _FreeTellers[i];
+		if (toLower(pGC->getTitle()) == sWinName)
+			break;
+	}
+	return i;
+}
+
+//=================================================================================
+CGroupContainer *CChatGroupWindow::findFreeTeller(const string &winName) const
+{
+	uint i = getFreeTellerIndex(winName);
+	return i < _FreeTellers.size() ? _FreeTellers[i] : NULL;
+}
+
+//=================================================================================
+CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
+{
+	string winName = getFreeTellerTitle(winNameIn);
 
 	// get the color
 	string sWinColor = winColor;
@@ -737,15 +765,8 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		sWinColor = "UI:SAVE:WIN:COLORS:COM";
 
 	// Look if the free teller do not already exists
-	uint32 i;
-	string sWinName = winName;
-	sWinName = toLower(sWinName);
-	for (i = 0; i < _FreeTellers.size(); ++i)
-	{
-		CGroupContainer *pGC = _FreeTellers[i];
-		if (toLower(pGC->getTitle()) == sWinName)
-			break;
-	}
+	string sWinName = toLower(winName);
+	uint i = getFreeTellerIndex(winNameIn);
 	// Create container if not present
 	if (i == _FreeTellers.size())
 	{

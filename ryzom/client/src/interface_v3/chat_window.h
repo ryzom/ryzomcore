@@ -194,6 +194,8 @@ public:
 
 	// Free Teller
 	NLGUI::CGroupContainer *createFreeTeller(const std::string &winName, const std::string &winColor="");
+	// The window createFreeTeller gives for this name if it exists, else NULL: nothing is created
+	NLGUI::CGroupContainer *findFreeTeller(const std::string &winName) const;
 	void setActiveFreeTeller(const std::string &winName, bool bActive=true);
 	std::string getFreeTellerName(const std::string &containerID);
 	bool removeFreeTeller(const std::string &containerID); // Return true if free teller found
@@ -218,6 +220,8 @@ private:
 	  * \return valid string
 	 **/
 	const std::string getValidUiStringId(const std::string &stringId);
+	// Index in _FreeTellers of the window of this name, _FreeTellers.size() if it has none
+	uint getFreeTellerIndex(const std::string &winName) const;
 };
 
 
