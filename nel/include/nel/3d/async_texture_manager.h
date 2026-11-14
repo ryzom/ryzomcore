@@ -87,6 +87,12 @@ public:
 	/// tells if a texture is loaded in the driver (ie. ready to use)
 	bool			isTextureUpLoaded(uint id) const;
 
+	/** tells if the manager did put the texture in the driver. false while the texture is not uploaded, and also
+	 *	for an uploaded texture that is not DXTC with mipmaps: the manager uploads nothing for such a file, whoever
+	 *	uses the texture loads it.
+	 */
+	bool			isTextureInDriver(uint id) const;
+
 	/** get the RAM LowDef version of a texture. Used For CLodCharacters
 	 *	return NULL if bad Id or if the texture is still not loaded.
 	 *	The bitmap returned has no mipmaps and should be in DXTC1 (not guaranteed).
@@ -169,6 +175,8 @@ private:
 		bool								Loaded;
 		// true if the texture is loaded in the driver (at least the coarsest level).
 		bool								UpLoaded;
+		// true if UpLoaded and the texture really is in the driver: nothing is uploaded if not DXTC with mipmap
+		bool								InDriver;
 		// true if first loading ended, and if DXTC with mipmap
 		bool								CanHaveLOD;
 		// true if this texture must be built from the HLSManager (at first load)
