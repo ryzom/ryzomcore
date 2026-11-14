@@ -386,6 +386,7 @@ void CCombatPhrase::init()
 	
 	_ExecutionEndDate				= 0;
 	_LatencyEndDate					= 0.0;
+	_PreviousLatencyEndDate			= 0.0;
 
 	_SabrinaCost					= 0;
 	_SabrinaRelativeCost			= 1.0f;
@@ -1708,6 +1709,10 @@ bool CCombatPhrase::launch()
 	_LatencyEndDate = 0.0;
 	_ApplyDate = 0;
 
+	// handed over by the phrase manager for this launch only
+	const double previousLatencyEndDate = _PreviousLatencyEndDate;
+	_PreviousLatencyEndDate = 0.0;
+
 	if ( !_Attacker ) 
 	{
 		nlwarning("<CCombatPhrase::launch> found NULL attacker or defender.");
@@ -2179,10 +2184,18 @@ bool CCombatPhrase::launch()
 	}
 	
 	// set latency end date
+	// An action ends at the first tick at or after its latency end date, and the next one is launched in that
+	// same tick. When this action follows the previous combat action of the attacker that way, its latency
+	// counts from that end date: counted from the tick, every swing would last its latency rounded up to whole
+	// ticks (a hit every 31 ticks for a weapon with a latency of 30.3). In any other case (first swing, a tick
+	// or more spent on something else) the latency counts from the current tick. A latency under one tick is
+	// left to the tick as well: carried over, it would launch several actions in one tick.
+	// Either way the end date is in ]time + latency - 1, time + latency].
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	if (_LatencyEndDate > 0) 
+	const double sincePreviousEnd = (double)time - previousLatencyEndDate;
+	if (previousLatencyEndDate > 0.0 && sincePreviousEnd >= 0.0 && sincePreviousEnd < 1.0 && latency >= 1.0)
 	{
-		_LatencyEndDate += latency;
+		_LatencyEndDate = previousLatencyEndDate + latency;
 	}
 	else
 	{

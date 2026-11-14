@@ -72,6 +72,7 @@ void CEntityPhrases::stopCyclicAction(const TDataSetRow &entityRowId)
 		_CyclicAction->cyclic(false);
 		_CyclicAction = NULL;
 		_CyclicActionInfos.reset();
+		clearCombatLatencyEndDate();
 		
 		CCharacter *character = PlayerManager.getChar(entityRowId);
 		if (character)
@@ -88,6 +89,9 @@ bool CEntityPhrases::cancelCombatActions(const TDataSetRow &entityRowId, bool di
 {
 	H_AUTO(CEntityPhrases_cancelCombatActions);
 	
+	// the next combat action starts a new sequence, whether the current one is stopped now or at its end
+	clearCombatLatencyEndDate();
+
 	bool returnValue = true;
 	if (_CurrentAction != NULL && _CurrentAction->getType() ==  BRICK_TYPE::COMBAT)
 	{
@@ -205,15 +209,20 @@ CSPhrasePtr &CEntityPhrases::renewCyclicAction()
 		if (_NextAction == _CyclicAction)
 			_NextAction = NULL;
 		
+		// executePhrase() adds the copy as a new cyclic action, which clears the latency end date of the last
+		// combat action (CPhraseManager::addPhrase). The copy is the same action going on: it follows that date.
+		const double combatLatencyEndDate = _CombatLatencyEndDate;
 		CSPhrasePtr ptr = CPhraseManager::getInstance().executePhrase( _CyclicActionInfos.ActorRowId, _CyclicActionInfos.TargetRowId, _CyclicActionInfos.CyclicActionBricks, true );
 		if (ptr.isNull())
 		{
 			_CyclicAction = NULL;
 			_CyclicActionInfos.reset();
+			clearCombatLatencyEndDate();
 		}
 		else
 		{
 			setCyclicAction( ptr, _CyclicActionInfos );
+			_CombatLatencyEndDate = combatLatencyEndDate;
 		}
 	}
 	
@@ -531,6 +540,13 @@ void CPhraseManager::updateEntityCurrentAction(const TDataSetRow &entityId, CEnt
 			case CSPhrase::SecondValidated:
 				if ( phrase->executionEndDate() <= time && !phrase->idle())
 				{
+					// a combat action is told where the latency of the previous one ended (see CEntityPhrases::getCombatLatencyEndDate)
+					CCombatPhrase *combatPhrase = NULL;
+					if (phrase->getType() == BRICK_TYPE::COMBAT)
+						combatPhrase = dynamic_cast<CCombatPhrase*>( static_cast<CSPhrase*> (phrase));
+					if (combatPhrase)
+						combatPhrase->previousLatencyEndDate(entityPhrases.getCombatLatencyEndDate());
+
 					if (!phrase->launch())
 					{
 						deletePhrase = true;
@@ -538,6 +554,11 @@ void CPhraseManager::updateEntityCurrentAction(const TDataSetRow &entityId, CEnt
 					}
 					else
 					{
+						// the next combat action follows this one, unless this is another kind of action
+						if (combatPhrase)
+							entityPhrases.setCombatLatencyEndDate(phrase->latencyEndDate());
+						else
+							entityPhrases.clearCombatLatencyEndDate();
 						phrase->setState(CSPhrase::Latent);
 					}
 				}
@@ -887,6 +908,9 @@ bool CPhraseManager::addPhrase( const TDataSetRow &actorRowId, CSPhrasePtr &phra
 			//egs_pminfo( "Set next cyclic action" );
 			entityPhrases.setNextPhrase(phrase); // ensure no time is lost when switching action
 			entityPhrases.setCyclicAction(phrase, cyclicInfos);
+			// the new cyclic action does not follow the latency of the one it replaces
+			// (CEntityPhrases::renewCyclicAction comes through here too, and puts the date back)
+			entityPhrases.clearCombatLatencyEndDate();
 		}
 		else
 		{

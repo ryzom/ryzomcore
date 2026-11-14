@@ -227,6 +227,13 @@ public:
 	/// get the disengageOnEnd flag
 	inline bool disengageOnEnd() const { return _DisengageOnEnd; }
 
+	/**
+	 * set the end date of the latency of the previous combat action of the attacker (0 if this action follows none),
+	 * for the launch() that comes next: when the action is launched in the tick this date falls in, its latency
+	 * counts from the date. Called by the phrase manager, which keeps the date per entity.
+	 */
+	inline void previousLatencyEndDate(double date) { _PreviousLatencyEndDate = date; }
+
 	/// get PhraseSuccessDamageFactor
 //	inline float getPhraseSuccessDamageFactor() const { return _PhraseSuccessDamageFactor; }
 
@@ -497,6 +504,9 @@ protected:
 
 	/// latency factor
 	CDynValue<float,1>		_LatencyFactorDyn;
+
+	/// end date of the latency of the previous combat action of the attacker, for the next launch() only (0 if none)
+	double					_PreviousLatencyEndDate;
 
 	/// modifier on dealt damage (whatever the success factor (the factor is applied on damage + damage mod afterwards))
 	sint32					_DamageModifier;
