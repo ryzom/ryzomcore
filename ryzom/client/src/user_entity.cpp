@@ -2186,6 +2186,7 @@ void CUserEntity::applyBehaviour(const CBehaviourContext &behaviourContext)	// v
 			animState (MOVE, CAnimationStateSheet::FirstPersonAttack);
 			animIndex (MOVE, CAnimation::UnknownAnim);
 			animOffset(MOVE, 0.0);
+			_SoundId[MOVE] = NLSOUND::CSoundAnimationNoId;
 			_CurrentState = EAM->mState(_CurrentAutomaton, animState(MOVE));
 			if(_CurrentState && _CurrentAnimSet[MOVE])
 			{
@@ -2195,6 +2196,10 @@ void CUserEntity::applyBehaviour(const CBehaviourContext &behaviourContext)	// v
 					animIndex(MOVE, animStatePtr->chooseAnim(_AnimJobSpecialisation, people(), getGender(), 0.0));
 					if(animIndex(MOVE) != CAnimation::UnknownAnim)
 					{
+						// The sound of this animation: without this, the one of the animation set before is played with it
+						const ::CAnimation *anim = animStatePtr->getAnimation(animIndex(MOVE));
+						if(anim)
+							_SoundId[MOVE] = anim->soundId();
 						if(_PlayList)
 						{
 							_PlayList->setAnimation  (MOVE, animId(MOVE));
@@ -2460,15 +2465,16 @@ void CUserEntity::updateSound(const TTime &time)
 				const ::CAnimation *anim = animStatePtr->getAnimation (animId);
 				if(anim)
 				{
-					// Select the sound ID
-					_SoundId[MOVE] = anim->soundId();
+					// The sound of the walk or run animation, only to find the steps: _SoundId[MOVE] stays
+					// the sound of the animation that is played (CCharacterCL::animEventsProcessing).
+					NLSOUND::TSoundAnimId stepSoundId = anim->soundId();
 
-					if (_SoundId[MOVE] != NLSOUND::CSoundAnimationNoId)
+					if (stepSoundId != NLSOUND::CSoundAnimationNoId)
 					{
 						// retrieve the anim
 						NLSOUND::CSoundAnimManager	*mgr = NLSOUND::CSoundAnimManager::instance();
 
-						string name = mgr->idToName(_SoundId[MOVE]);
+						string name = mgr->idToName(stepSoundId);
 
 						if (!name.empty())
 						{
