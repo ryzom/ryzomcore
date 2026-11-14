@@ -962,11 +962,16 @@ public:
 		// The list is for the characters of the session: its owner, a character that has a participation in it and
 		// is not kicked from it, and a character that is in it (an account that enters by its privilege has no
 		// participation). The session id is the one the client names, so it is checked against the character.
+		// A participation counts as it does for the join of the session manager, when its role is one of the type
+		// of the session: an editor's in an edit session, an animator's or a player's in an animation session.
 		CSString check;
 		check << "SELECT COUNT(*) FROM sessions WHERE sessions.session_id = " << sessionId.asInt();
 		check << " AND (sessions.owner = " << charId;
 		check << " OR EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
-		check << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0)";
+		check << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
+		check << " AND ((sessions.session_type = 'st_edit' AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
+		check << " OR (sessions.session_type = 'st_anim' AND session_participant.status NOT IN ('sps_edit_invited', 'sps_editing'))";
+		check << " OR sessions.session_type NOT IN ('st_edit', 'st_anim')))";
 		check << " OR EXISTS (SELECT * FROM characters WHERE characters.char_id = " << charId;
 		check << " AND characters.current_session = sessions.session_id))";
 		BOMB_IF(!_RingDB.query(check), "getCharList : error executing the access request in database", charList(from, charId, sessionId, vector<TCharDesc>()); return);
