@@ -131,6 +131,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_TextPvpChallenge = "ui:interface:" + menuId + ":pvp_challenge";
 	_TextUnPvpChallenge = "ui:interface:" + menuId + ":unpvp_challenge";
 	_TextExchange = "ui:interface:" + menuId + ":exchange";
+	_TextInspect = "ui:interface:" + menuId + ":inspect";
 	_TextMount = "ui:interface:" + menuId + ":mount";
 	_TextFreeLook = "ui:interface:" + menuId + ":free_look";
 	_TextMove = "ui:interface:" + menuId + ":move";
@@ -413,6 +414,10 @@ void		CGameContextMenu::update()
 				_TextExtractRM->setActive(true);
 		}
 	}
+
+	// Inspection is valid for another player; server checks sharing policy.
+	if (_TextInspect)
+		_TextInspect->setActive(selection && selection->Type == CEntityCL::Player && selection != UserEntity);
 
 	// Enable attack mode
 	if (_TextAttack)

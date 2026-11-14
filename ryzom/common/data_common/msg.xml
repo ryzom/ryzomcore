@@ -407,6 +407,14 @@
     <leaf name="EXEC_CYCLIC_ACK" description="server send an ack on cyclic phrase execution :$b $u8" />
     <leaf name="EXEC_NEXT_ACK" description="server send an ack on 'next' phrase execution :$b $u8" />
   </branch>
+  <!-- Read-only inspection of the equipment another character has chosen to share. -->
+  <branch name="PLAYER_INSPECT">
+    <leaf name="GET" sendto="EGS" format="u32" description="Request inspected equipment of the current target, with client request token" />
+    <leaf name="SET_MODE" sendto="EGS" format="u8" description="Set per-character access (0 nobody, 1 guild, 2 cult, 3 everyone); 255 queries current mode" />
+    <leaf name="MODE_STATE" description="Server-validated access mode" />
+    <leaf name="RESULT" description="Request token, allowed flag and equipped-item snapshot as CItemSlot entries" />
+    <leaf name="ITEM_INFO" description="Request token and existing CItemInfos for a displayed equipment slot" />
+  </branch>
   <branch name="ITEM_INFO">
     <leaf name="GET" sendto="EGS" format="u16" description="the client ask for a special item info in a inventory slot: inventoryId(u8HIGH)/slotId(u8LOW)" />
     <leaf name="SET" description="Server answer to the previous message. A CItemInfos class is filled" />

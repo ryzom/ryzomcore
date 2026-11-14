@@ -111,6 +111,7 @@ private:
 	CViewTextMenuPtr _TextPvpChallenge;
 	CViewTextMenuPtr _TextUnPvpChallenge;
 	CViewTextMenuPtr _TextExchange;
+	CViewTextMenuPtr _TextInspect;
 	CViewTextMenuPtr _TextMount;
 	CViewTextMenuPtr _TextFreeLook;
 	CViewTextMenuPtr _TextMove;

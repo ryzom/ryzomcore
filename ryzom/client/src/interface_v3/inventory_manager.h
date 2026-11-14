@@ -307,6 +307,16 @@ public:
 		// Called on impulse
 		void				onReceiveItemInfo(const CItemInfos &itemInfo);
 		void				onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion);
+		/// Only the read-only virtual inspection slots; keep the user's inventory cache intact.
+		void resetPlayerInspectItemInfos()
+		{
+			for (uint32 n = 0; n < 21; ++n)
+				_ItemInfoMap.erase((INVENTORIES::NUM_ALL_INVENTORY << CItemInfos::SlotIdIndexBitSize) | n);
+		}
+		void setPlayerInspectSlotVersion(uint16 slotId)
+		{
+			_ItemInfoMap[slotId].InfoVersionFromSlot = 1;
+		}
 		void				onUpdateEquipHands();
 		// Log for debug
 		void				debugItemInfoWaiters();

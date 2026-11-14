@@ -37,6 +37,7 @@
 #include "../string_manager_client.h"
 #include "nel/gui/interface_options.h"
 #include "inventory_manager.h"
+#include "action_handler_help.h"
 #include "skill_manager.h"
 #include "../user_entity.h"
 #include "../entities.h"
@@ -3560,6 +3561,14 @@ void	CDBCtrlSheet::setupItemInfoWaiter()
 // ***************************************************************************
 void	CDBCtrlSheet::getContextHelp(std::string &help) const
 {
+	// Only the inspection view uses the full item details as mouseover text.
+	// All ordinary inventory, trade and PadUI-style context help stays unchanged.
+	if (getType() == CCtrlSheetInfo::SheetType_Item &&
+		getSheet().find("LOCAL:PLAYER_INSPECT:") == 0)
+	{
+		help = buildPlayerInspectTooltip(const_cast<CDBCtrlSheet *>(this));
+		return;
+	}
 	if (getType() == CCtrlSheetInfo::SheetType_Skill)
 	{
 		// just show the name of the skill
