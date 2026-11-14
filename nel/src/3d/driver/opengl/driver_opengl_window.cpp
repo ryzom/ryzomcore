@@ -422,12 +422,13 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	if (_dpy == nullptr)
 	{
-		nlerror ("XOpenDisplay failed on '%s'", getenv("DISPLAY"));
+		// no fatal error: setDisplay refuses the display, and the application says so in its own words
+		const char *displayName = getenv("DISPLAY");
+		nlwarning("3D: XOpenDisplay failed on '%s', there is no connection to an X server", displayName ? displayName : "(DISPLAY is not set)");
+		return false;
 	}
-	else
-	{
-		nldebug("3D: XOpenDisplay on '%s' OK", getenv("DISPLAY"));
-	}
+
+	nldebug("3D: XOpenDisplay on '%s' OK", XDisplayString(_dpy));
 
 	_xrandr_version = 0;
 
@@ -1148,6 +1149,12 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		None
 	};
 
+	if (_dpy == nullptr)
+	{
+		nlwarning("3D: The display cannot be set up, init() got no connection to an X server");
+		return false;
+	}
+
 	XVisualInfo *visual_info = nullptr;
 
 	if (wnd == EmptyWindow)
@@ -1158,7 +1165,12 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
 		if (visual_info == nullptr)
 		{
-			nlerror("glXChooseVisual() failed");
+			int errorBase = 0, eventBase = 0;
+			if (!glXQueryExtension(_dpy, &errorBase, &eventBase))
+				nlwarning("3D: The X server has no GLX extension, OpenGL cannot be used on this display");
+			else
+				nlwarning("3D: glXChooseVisual() failed, the X server has no visual with RGBA colour, double buffering, a depth buffer and a stencil buffer");
+			return false;
 		}
 	}
 	else
@@ -1226,13 +1238,22 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	_ctx = glXCreateContext (_dpy, visual_info, None, GL_TRUE);
 	if (_ctx == nullptr)
 	{
-		nlerror("glXCreateContext() failed");
+		nlwarning("3D: glXCreateContext() failed");
+		XFree(_visual_info);
+		_visual_info = nullptr;
+		return false;
 	}
 
 	if (wnd == EmptyWindow)
 	{
 		if (!createWindow(mode))
+		{
+			glXDestroyContext(_dpy, _ctx);
+			_ctx = nullptr;
+			XFree(_visual_info);
+			_visual_info = nullptr;
 			return false;
+		}
 	}
 	else
 	{
@@ -1727,7 +1748,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 	if (window == EmptyWindow)
 	{
-		nlerror("3D: XCreateWindow() failed");
+		nlwarning("3D: XCreateWindow() failed");
 		return false;
 	}
 
@@ -2121,6 +2142,10 @@ bool CDriverGL::getMonitorByName(const std::string &name, sint32 &x, sint32 &y, 
 	bool found = false;
 
 #if HAVE_XRANDR
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return false;
+
 	int screen = DefaultScreen(_dpy);
 
 	// xrandr 1.5+
@@ -2692,6 +2717,10 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 	}
 
 #elif defined(NL_OS_UNIX)
+
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return false;
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);

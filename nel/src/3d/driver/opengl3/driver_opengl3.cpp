@@ -954,7 +954,19 @@ bool CDriverGL3::release()
 	H_AUTO_OGL(CDriverGL3_release)
 
 	// release only if the driver was initialized
-	if (!_Initialized) return true;
+	if (!_Initialized)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+		// a display that was refused, or never set up, still has the X connection and the error
+		// handler of init(), and what setDisplay did before it stopped
+		if (_dpy)
+		{
+			destroyWindow();
+			unInit();
+		}
+#endif
+		return true;
+	}
 
 	// hide window
 	showWindow(false);

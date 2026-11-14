@@ -573,7 +573,11 @@ void checkDriverDepth ()
 	{
 		nlassert (Driver);
 		UDriver::CMode mode;
-		Driver->getCurrentScreenMode(mode);
+
+		// a driver that cannot tell the mode of the screen has no display to check (no X server): the display
+		// setup that follows says so
+		if (!Driver->getCurrentScreenMode(mode))
+			return;
 #ifdef NL_OS_WINDOWS
 		if (mode.Depth != 32)
 #else
@@ -1145,6 +1149,7 @@ void prelogInit()
 		}
 
 		UDriver::CMode mode;
+		bool saveDetectedMode = false;
 		// first run (no client.cfg)
 		if (ClientCfg.Width == 0  || ClientCfg.Height == 0)
 		{
@@ -1184,7 +1189,8 @@ void prelogInit()
 			// enable auto UI scale for new install
 			ClientCfg.writeBool("InterfaceScaleAuto", true, true);
 
-			ClientCfg.ConfigFile.save();
+			// saved once the display is set up with it: a mode guessed without a display is not kept
+			saveDetectedMode = true;
 		}
 
 		// the mode of the configuration, as detected above on a first run
@@ -1236,6 +1242,9 @@ void prelogInit()
 			// ExitClientError() call exit() so the code after is never called
 			return;
 		}
+
+		if (saveDetectedMode)
+			ClientCfg.ConfigFile.save();
 
 		// Enable or disable VSync
 		if (ClientCfg.WaitVBL)

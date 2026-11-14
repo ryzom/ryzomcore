@@ -212,6 +212,11 @@ static Atom XA_WM_WINDOW_TYPE = 0;
 static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
 static Atom XA_FRAME_EXTENTS = 0;
 
+// The X error handler is for the whole process, while each driver opens its own display: the handler
+// is set when a display opens, and the one it replaced is set back when the last display closes
+static uint s_OpenDisplays = 0;
+static XErrorHandler s_PreviousXErrorsHandler = nullptr;
+
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
 	char buf[80];
@@ -359,12 +364,13 @@ bool CDriverGL3::init(uintptr_t windowIcon, emptyProc exitFunc)
 
 	if (_dpy == nullptr)
 	{
-		nlerror ("XOpenDisplay failed on '%s'", getenv("DISPLAY"));
+		// no fatal error: setDisplay refuses the display, and the application says so in its own words
+		const char *displayName = getenv("DISPLAY");
+		nlwarning("3D: XOpenDisplay failed on '%s', there is no connection to an X server", displayName ? displayName : "(DISPLAY is not set)");
+		return false;
 	}
-	else
-	{
-		nldebug("3D: XOpenDisplay on '%s' OK", getenv("DISPLAY"));
-	}
+
+	nldebug("3D: XOpenDisplay on '%s' OK", XDisplayString(_dpy));
 
 	_xrandr_version = 0;
 
@@ -424,7 +430,9 @@ bool CDriverGL3::init(uintptr_t windowIcon, emptyProc exitFunc)
 	}
 
 	// set default X errors handler
-	XSetErrorHandler(nelXErrorsHandler);
+	XErrorHandler previousXErrorsHandler = XSetErrorHandler(nelXErrorsHandler);
+	if (s_OpenDisplays++ == 0)
+		s_PreviousXErrorsHandler = previousXErrorsHandler;
 
 	// define Atoms
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
@@ -478,11 +486,16 @@ bool CDriverGL3::unInit()
 #elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 #ifndef __EMSCRIPTEN__
-	// restore default X errors handler
-	XSetErrorHandler(nullptr);
+	if (_dpy)
+	{
+		// restore the X errors handler when no other driver has a display open
+		nlassert(s_OpenDisplays > 0);
+		if (--s_OpenDisplays == 0)
+			XSetErrorHandler(s_PreviousXErrorsHandler);
 
-	XCloseDisplay(_dpy);
-	_dpy = nullptr;
+		XCloseDisplay(_dpy);
+		_dpy = nullptr;
+	}
 #endif
 
 #endif // NL_OS_UNIX
@@ -1083,13 +1096,24 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		None
 	};
 
+	if (_dpy == nullptr)
+	{
+		nlwarning("3D: The display cannot be set up, init() got no connection to an X server");
+		return false;
+	}
+
 	// first try 24bpp and if that fails 16bpp
 	XVisualInfo *visual_info = glXChooseVisual (_dpy, DefaultScreen(_dpy), sAttribList24bpp);
 	if (visual_info == nullptr)
 		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
 	if (visual_info == nullptr)
 	{
-		nlerror("glXChooseVisual() failed");
+		int errorBase = 0, eventBase = 0;
+		if (!glXQueryExtension(_dpy, &errorBase, &eventBase))
+			nlwarning("3D: The X server has no GLX extension, OpenGL cannot be used on this display");
+		else
+			nlwarning("3D: glXChooseVisual() failed, the X server has no visual with RGBA colour, double buffering, a depth buffer and a stencil buffer");
+		return false;
 	}
 
 	_visual_info = visual_info;
@@ -1101,13 +1125,22 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	_ctx = glXCreateContext (_dpy, visual_info, None, GL_TRUE);
 	if (_ctx == nullptr)
 	{
-		nlerror("glXCreateContext() failed");
+		nlwarning("3D: glXCreateContext() failed");
+		XFree(_visual_info);
+		_visual_info = nullptr;
+		return false;
 	}
 
 	if (wnd == EmptyWindow)
 	{
 		if (!createWindow(mode))
+		{
+			glXDestroyContext(_dpy, _ctx);
+			_ctx = nullptr;
+			XFree(_visual_info);
+			_visual_info = nullptr;
 			return false;
+		}
 	}
 	else
 	{
@@ -1567,7 +1600,7 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 
 	if (window == EmptyWindow)
 	{
-		nlerror("3D: XCreateWindow() failed");
+		nlwarning("3D: XCreateWindow() failed");
 		return false;
 	}
 
@@ -2081,6 +2114,10 @@ bool CDriverGL3::getModes(std::vector<GfxMode> &modes)
 
 #elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return false;
+
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
 
@@ -2214,6 +2251,10 @@ bool CDriverGL3::getCurrentScreenMode(GfxMode &mode)
 	}
 
 #elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
+
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return false;
 
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
