@@ -178,24 +178,35 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 		{
 			//if (wParam < KeyCount)
 			//nlinfo("WM_CHAR with %u", wParam);
+			// A character outside the basic plane (an emoji, or a rare ideograph composed by an IME) comes as
+			// two messages, the two halves of a UTF-16 surrogate pair. Half a pair is not a character.
 			wchar_t c = (wchar_t)wParam;
 			if ((c & 0xFC00) == 0xD800)
 			{
+				if (_Utf16Pair)
+					nlwarning("WM_CHAR: the first half 0x%04X of a UTF-16 pair was not followed by its second half, dropped", (uint)_Utf16Pair);
 				_Utf16Pair = c;
 			}
-			else if (_Utf16Pair && (c & 0xFC00) == 0xDC00)
+			else if ((c & 0xFC00) == 0xDC00)
 			{
-				wchar_t cc[] = { _Utf16Pair, c, 0 };
-				_Utf16Pair = 0;
-				CUtfStringView cv = CUtfStringView(cc);
-				for (CUtfStringView::iterator it(cv.begin()), end(cv.end()); it != end; ++it)
-					server->postEvent(new CEventChar(*it, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+				if (_Utf16Pair)
+				{
+					wchar_t cc[] = { _Utf16Pair, c, 0 };
+					_Utf16Pair = 0;
+					CUtfStringView cv = CUtfStringView(cc);
+					for (CUtfStringView::iterator it(cv.begin()), end(cv.end()); it != end; ++it)
+						server->postEvent(new CEventChar(*it, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+				}
+				else
+				{
+					nlwarning("WM_CHAR: the second half 0x%04X of a UTF-16 pair came without its first half, dropped", (uint)c);
+				}
 			}
 			else
 			{
 				if (_Utf16Pair)
 				{
-					server->postEvent(new CEventChar(_Utf16Pair, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
+					nlwarning("WM_CHAR: the first half 0x%04X of a UTF-16 pair was not followed by its second half, dropped", (uint)_Utf16Pair);
 					_Utf16Pair = 0;
 				}
 				server->postEvent(new CEventChar(c, getKeyButton(_AltButton, _ShiftButton, _CtrlButton), this));
@@ -333,8 +344,10 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 			TMouseButton button=getButtons();
 
 			server->postEvent (new CEventMouseWheel (fX, fY, button, (short) HIWORD(wParam)>=0, this));
-			break;
 		}
+		break;
+	// Not trapped unless the application asked for the IME events (see enableIMEEvents): DefWindowProc
+	// shows the composition window and turns the composed text into WM_CHAR.
 	case WM_IME_SETCONTEXT:
 	case WM_IME_STARTCOMPOSITION:
 	case WM_IME_COMPOSITION:
