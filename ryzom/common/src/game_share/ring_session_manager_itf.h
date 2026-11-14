@@ -2391,6 +2391,7 @@ namespace RSMGR
 				{	"STSS",	CRingSessionManagerWebItf::cb_startSession	},
 				{	"CLSS",	CRingSessionManagerWebItf::cb_closeSession	},
 				{	"CLESS",	CRingSessionManagerWebItf::cb_closeEditSession	},
+				{	"CLANSS",	CRingSessionManagerWebItf::cb_closeAnimSessions	},
 				{	"AFC",	CRingSessionManagerWebItf::cb_addFriendCharacter	},
 				{	"RFC",	CRingSessionManagerWebItf::cb_removeFriendCharacter	},
 				{	"ABC",	CRingSessionManagerWebItf::cb_addBannedCharacter	},
@@ -2940,6 +2941,31 @@ namespace RSMGR
 
 
 			callback->on_closeEditSession(from, charId);
+
+		}
+
+		static void cb_closeAnimSessions (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+			H_AUTO(closeAnimSessions_on_closeAnimSessions);
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWeb::cb_closeAnimSessions received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
+
+			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			nlRead(message, serial, charId);
+
+
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWeb::cb_closeAnimSessions : calling on_closeAnimSessions");
+#endif
+
+
+			callback->on_closeAnimSessions(from, charId);
 
 		}
 
@@ -3660,6 +3686,13 @@ namespace RSMGR
 		//                         5 : internal error
 		virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId) =0;
 
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+		virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId) =0;
+
 		// Add a character in a user friend list
 		// Return 'invokeResult' : 0 : ok
 		//                         1 : user not found
@@ -4132,6 +4165,22 @@ namespace RSMGR
 			nldebug("CRingSessionManagerWebClient::closeEditSession called");
 #endif
 			NLNET::CMessage message("CLESS");
+			nlWrite(message, serial, charId);
+
+			_CallbackClient->send(message);
+		}
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+
+		void closeAnimSessions(uint32 charId)
+		{
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWebClient::closeAnimSessions called");
+#endif
+			NLNET::CMessage message("CLANSS");
 			nlWrite(message, serial, charId);
 
 			_CallbackClient->send(message);

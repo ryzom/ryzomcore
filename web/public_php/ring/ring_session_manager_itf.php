@@ -1006,6 +1006,19 @@
 
 		}
 
+		function closeAnimSessions($charId)
+		{
+			$msg = new CMessage;
+			$msg->setName("CLANSS");
+
+
+			$msg->serialUint32($charId);
+	
+			return parent::sendMessage($msg);
+
+
+		}
+
 		function addFriendCharacter($userId, $friendCharId)
 		{
 			$msg = new CMessage;

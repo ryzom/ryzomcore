@@ -2361,63 +2361,116 @@ endOfWelcomeUserResult:
 
 			// Close anim sessions
 			{
-
-				CSString query;
-				query << "SELECT session_id FROM sessions";
-				query << " WHERE owner = "<<charId<<" AND session_type ='st_anim'";
-				BOMB_IF(!_RingDb.query(query), "on_hibernateEditSession : Failed to request in database", invokeResult(from, charId>>4, 1, "Database error"); return);
-				CUniquePtr<CStoreResult> result(_RingDb.storeResult());
-
-				// 1.1 : if no session so no need to hibernate (not an error)
-				if (result->getNumRows() > 1)
+				uint32 nbClosed;
+				if (!closeAnimSessionsOfOwner(charId, "on_hibernateEditSession", nbClosed))
 				{
-					nlwarning("RSM : on_hibernateEditSession : character %u has %u anim session in DB, should only have 1",
-						charId, result->getNumRows());
-				}
-
-
-				unsigned int firstSession = 0;
-				unsigned int lastSession = result->getNumRows();
-
-
-				for (;firstSession != lastSession; ++firstSession)
-				{
-					result->fetchRow();
-					// get the session id
-
-					uint32 sessionNum;
-					result->getField(0, sessionNum);
-					TSessionId sessionId(sessionNum);
-
-					CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
-					if (session != NULL)
-					{
-
-						if ( session->getState() != TSessionState::ss_closed && session->getState() != TSessionState::ss_planned)
-						{
-							// ask the session server to close this session
-							TSessionServersIdx::iterator it(_SessionIndex.find(sessionId));
-							if (it == _SessionIndex.end())
-							{
-								nlwarning("RSM:closeSession : could not find server for opened session %u, closing the session", sessionId.asInt());
-
-								closeSession(sessionId);
-							}
-							else
-							{
-								TModuleProxyPtr proxy = it->second;
-
-								CRingSessionManagerClientProxy ss(proxy);
-
-								ss.closeSession(this, sessionId);
-							}
-
-						}
-					}
+					invokeResult(from, charId >> 4, 1, "Database error");
+					return;
 				}
 			}
 			// ok, all is good
 			invokeResult(from, charId>>4, 0, "");
+		}
+
+		/** Close the animation sessions that a character owns and that are not closed or only planned: the session
+		 *	server that hosts one is asked to close it, as closeSession asks it, and one that no server hosts is
+		 *	closed here.
+		 *	\param requestName the request this is done for, for the log
+		 *	\param nbClosed the number of sessions that were closed or that a session server was asked to close
+		 *	\return false when the sessions of the character could not be read from the database
+		 */
+		bool closeAnimSessionsOfOwner(uint32 charId, const char *requestName, uint32 &nbClosed)
+		{
+			nbClosed = 0;
+
+			CSString query;
+			query << "SELECT session_id FROM sessions";
+			query << " WHERE owner = "<<charId<<" AND session_type ='st_anim'";
+			BOMB_IF(!_RingDb.query(query), requestName << " : Failed to request in database", return false);
+			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
+
+			// 1.1 : if no session so no need to hibernate (not an error)
+			if (result->getNumRows() > 1)
+			{
+				nlwarning("RSM : %s : character %u has %u anim session in DB, should only have 1",
+					requestName, charId, result->getNumRows());
+			}
+
+
+			unsigned int firstSession = 0;
+			unsigned int lastSession = result->getNumRows();
+
+
+			for (;firstSession != lastSession; ++firstSession)
+			{
+				result->fetchRow();
+				// get the session id
+
+				uint32 sessionNum;
+				result->getField(0, sessionNum);
+				TSessionId sessionId(sessionNum);
+
+				CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
+				if (session != NULL)
+				{
+
+					if ( session->getState() != TSessionState::ss_closed && session->getState() != TSessionState::ss_planned)
+					{
+						// ask the session server to close this session
+						TSessionServersIdx::iterator it(_SessionIndex.find(sessionId));
+						if (it == _SessionIndex.end())
+						{
+							nlwarning("RSM:closeSession : could not find server for opened session %u, closing the session", sessionId.asInt());
+
+							closeSession(sessionId);
+						}
+						else
+						{
+							TModuleProxyPtr proxy = it->second;
+
+							CRingSessionManagerClientProxy ss(proxy);
+
+							ss.closeSession(this, sessionId);
+						}
+						++nbClosed;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+		virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId)
+		{
+			nldebug("RSM : web close the animation sessions of char %u", charId);
+
+			CCharacterPtr character = CCharacter::load(_RingDb, charId, __FILE__, __LINE__);
+			if (character == NULL)
+			{
+				invokeResult(from, charId >> 4, 1, "Character not found");
+				return;
+			}
+
+			// The sessions are looked up by their owner: the request names the character and no session
+			uint32 nbClosed;
+			if (!closeAnimSessionsOfOwner(charId, "on_closeAnimSessions", nbClosed))
+			{
+				invokeResult(from, charId >> 4, 2, "Database error");
+				return;
+			}
+			if (nbClosed == 0)
+			{
+				invokeResult(from, charId >> 4, 3, "No open animation session found");
+				return;
+			}
+
+			// ok, all is good
+			invokeResult(from, charId >> 4, 0, "");
 		}
 
 		// Add a character in a user friend list

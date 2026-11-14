@@ -498,6 +498,18 @@
 			</invoke>
 
 			<!-- __________________________________________________________ -->
+			<invoke name="closeAnimSessions" msg="CLANSS">
+				<doc line="Close the animation sessions that the character owns and that are open, and nothing else"/>
+				<doc line="Return 'invokeResult' : 0 : ok, sessions closed (or about to close)"/>
+				<doc line="                        1 : char not found"/>
+				<doc line="                        2 : failed to close the sessions, internal error"/>
+				<doc line="                        3 : the character owns no open animation session"/>
+
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
 			<!-- known_users managment -->
 			<!-- __________________________________________________________ -->
 			<invoke name="addFriendCharacter" msg="AFC">

@@ -311,6 +311,17 @@ public:
 		CRingSessionManagerWebClientItf::closeEditSession(charId);
 	}
 
+	// Close the animation sessions that the character owns and that are open, and nothing else
+	// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+	//                         1 : char not found
+	//                         2 : failed to close the sessions, internal error
+	//                         3 : the character owns no open animation session
+	virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId)
+	{
+		CHECK_AUTH_WITH_CHARID(from, charId);
+		CRingSessionManagerWebClientItf::closeAnimSessions(charId);
+	}
+
 	// Hibernat an edit session (if open)
 	// Return 'invokeResult' : 0 : ok
 	//                         1 : not ok
