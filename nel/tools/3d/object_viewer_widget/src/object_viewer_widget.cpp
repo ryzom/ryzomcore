@@ -44,6 +44,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Qt includes
 #include <QIcon>
+#include <QResizeEvent>
+#include <QSurfaceFormat>
+#include <QWindow>
 
 // Project includes
 
@@ -61,6 +64,19 @@ using namespace std;
 
 namespace NLQT
 {
+	// The mode of the driver for a size of the widget: on X11 the driver takes the size of the window
+	// from the mode, and the native window is in device pixels
+	static NL3D::UDriver::CMode driverMode(const QWidget *widget, const QSize &size)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		const qreal ratio = widget->devicePixelRatioF();
+		return NL3D::UDriver::CMode((uint16)qRound(size.width() * ratio), (uint16)qRound(size.height() * ratio), 32);
+#else
+		nlunreferenced(widget);
+		return NL3D::UDriver::CMode((uint16)size.width(), (uint16)size.height(), 32);
+#endif
+	}
+
 	CObjectViewerWidget *CObjectViewerWidget::_objectViewerWidget = NULL;
 
 	CObjectViewerWidget::CObjectViewerWidget(QWidget *parent)
@@ -72,6 +88,20 @@ namespace NLQT
 		setMouseTracking(true);
 		setFocusPolicy(Qt::StrongFocus);
 		_objectViewerWidget = this;
+
+		// the driver renders into the native window of this widget with its own context
+		setAttribute(Qt::WA_NativeWindow);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		// on X11 the driver renders with the visual of this window, so a depth and stencil buffer
+		// are asked for before the window is created
+		if (QWindow *window = windowHandle())
+		{
+			QSurfaceFormat format = window->requestedFormat();
+			format.setDepthBufferSize(24);
+			format.setStencilBufferSize(8);
+			window->setFormat(format);
+		}
+#endif
 
 		_isGraphicsEnabled = true;
 
@@ -95,6 +125,17 @@ namespace NLQT
 		{
 			_mainTimer->start(25);
 		}
+	}
+
+	void CObjectViewerWidget::resizeEvent(QResizeEvent *resizeEvent)
+	{
+		QWidget::resizeEvent(resizeEvent);
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		// on X11 the driver gets no events of this window, it takes its size from setMode
+		if (_Driver && resizeEvent->size().width() > 0 && resizeEvent->size().height() > 0)
+			_Driver->setMode(driverMode(this, resizeEvent->size()));
+#endif
 	}
 
 	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext)
@@ -148,7 +189,7 @@ namespace NLQT
 		nlassert(_Driver);
 
 		// initialize the window with config file values
-		if (!_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32)))
+		if (!_Driver->setDisplay(wnd, driverMode(this, size())))
 		{
 			// graphics are switched off, so that the 3D view is not set up again on every update
 			nlwarning("The 3D driver cannot render into the window of the object viewer widget, the 3D view stays empty");

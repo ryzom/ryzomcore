@@ -20,6 +20,8 @@
 // Qt includes
 #include <QtCore/QTimer>
 #include <QtGui/QResizeEvent>
+#include <QtGui/QSurfaceFormat>
+#include <QtGui/QWindow>
 
 #include "qnel_widget.h"
 
@@ -31,8 +33,25 @@
 #include <nel/3d/u_driver.h>
 #include <nel/3d/driver_user.h>
 
+#ifdef NL_OS_WINDOWS
+#include <windows.h>
+#endif
+
 namespace NLQT
 {
+
+// The mode of the driver for a size of the widget: on X11 the driver takes the size of the window
+// from the mode, and the native window is in device pixels
+static NL3D::UDriver::CMode driverMode(const QWidget *widget, const QSize &size)
+{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	const qreal ratio = widget->devicePixelRatioF();
+	return NL3D::UDriver::CMode((uint16)qRound(size.width() * ratio), (uint16)qRound(size.height() * ratio), 32);
+#else
+	nlunreferenced(widget);
+	return NL3D::UDriver::CMode((uint16)size.width(), (uint16)size.height(), 32);
+#endif
+}
 
 QNLWidget::QNLWidget(QWidget *parent)
 	: QNeLWidget(parent),
@@ -40,6 +59,19 @@ QNLWidget::QNLWidget(QWidget *parent)
 	  m_initialized(false),
 	  m_interval(25)
 {
+	// the driver renders into the native window of this widget with its own context
+	setAttribute(Qt::WA_NativeWindow);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// on X11 the driver renders with the visual of this window, so a depth and stencil buffer
+	// are asked for before the window is created
+	if (QWindow *window = windowHandle())
+	{
+		QSurfaceFormat format = window->requestedFormat();
+		format.setDepthBufferSize(24);
+		format.setStencilBufferSize(8);
+		window->setFormat(format);
+	}
+#endif
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_PaintOnScreen);
@@ -47,9 +79,6 @@ QNLWidget::QNLWidget(QWidget *parent)
 	setFocusPolicy(Qt::StrongFocus);
 
 	init();
-#ifdef Q_OS_LINUX
-	makeCurrent();
-#endif
 	m_mainTimer = new QTimer(this);
 	connect(m_mainTimer, SIGNAL(timeout()), this, SLOT(updateRender()));
 }
@@ -66,7 +95,11 @@ void QNLWidget::init()
 	nlassert(m_driver);
 
 	// initialize the nel 3d viewport
-	m_driver->setDisplay((nlWindow)winId(), NL3D::UDriver::CMode(width(), height(), 32));
+	if (!m_driver->setDisplay((nlWindow)winId(), driverMode(this, size())))
+	{
+		nlwarning("The 3D driver cannot render into the window of the example widget");
+		return;
+	}
 
 	// set the cache size for the font manager(in bytes)
 	m_driver->setFontManagerMaxMemory(2097152);
@@ -78,12 +111,13 @@ void QNLWidget::release()
 {
 	m_mainTimer->stop();
 	delete m_mainTimer;
-	if (m_initialized)
+	if (m_driver)
 	{
 		m_driver->release();
 		delete m_driver;
 		m_driver = NULL;
 	}
+	m_initialized = false;
 }
 
 void QNLWidget::setInterval(int msec)
@@ -127,7 +161,8 @@ void QNLWidget::updateRender()
 void QNLWidget::showEvent(QShowEvent *showEvent)
 {
 	QWidget::showEvent(showEvent);
-	m_driver->activate();
+	if (m_initialized)
+		m_driver->activate();
 	m_mainTimer->start(m_interval);
 }
 
@@ -137,13 +172,24 @@ void QNLWidget::hideEvent(QHideEvent *hideEvent)
 	QWidget::hideEvent(hideEvent);
 }
 
+void QNLWidget::resizeEvent(QResizeEvent *resizeEvent)
+{
+	QWidget::resizeEvent(resizeEvent);
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// on X11 the driver gets no events of this window, it takes its size from setMode
+	if (m_initialized && resizeEvent->size().width() > 0 && resizeEvent->size().height() > 0)
+		m_driver->setMode(driverMode(this, resizeEvent->size()));
+#endif
+}
+
 // The driver does not subclass a window it did not create, so on Windows the messages of this
 // window are passed on to it: mouse and size reach it, the keyboard does not, as Qt 5 keeps the
 // Win32 keyboard focus on the top-level window, so key messages are sent there and not to this
-// window. On X11 the driver gets no input from this window, since its event emitter asks for all
-// input in one selection, which the X server refuses on a window whose button presses Qt already
-// takes. On macOS nothing is passed on: Qt delivers NSEvent objects and the window proc of the
-// driver takes a Carbon EventRef.
+// window. On X11 the driver draws at the size given through setMode but gets no input, since its
+// event emitter asks for all input in one selection, which the X server refuses on a window whose
+// button presses Qt already takes. On macOS nothing is passed on: Qt delivers NSEvent objects and
+// the window proc of the driver takes a Carbon EventRef.
 #if defined(NL_OS_WINDOWS)
 
 typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
