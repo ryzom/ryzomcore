@@ -236,9 +236,12 @@ bool CStateInstance::logScriptLine(std::string const& line)
 // The operations of the script machine a Ring session has: for all its events between two updates
 // of its AI instance, whatever their number is, and for the work one event starts
 // (CScenarioWorkScope).
-// Neither default was measured on a shard. What was measured is the script machine alone, in a
-// Debug build, the native functions replaced by functions that do nothing: 2,000,000 operations
-// took 90 to 430 ms and 20,000,000 took 0.9 to 4.2 s, where an update of the service has 100 ms.
+// What was measured is the script machine alone, in a Debug build, the native functions replaced
+// by functions that do nothing: 2,000,000 operations took 90 to 430 ms and 20,000,000 took 0.9 to
+// 4.2 s, where an update of the service has 100 ms. On a development shard, the heaviest of 36
+// scenarios of players (35 groups) ran between 200 and 2,000 operations in its heaviest update.
+// The defaults leave a scenario of the largest size the room of that one a hundred times over,
+// and keep a session that uses all of it within about half an update.
 // A native function is counted as the one operation that calls it, also when it sends a message
 // to another service or spawns a group, which costs far more: there is no second count for
 // those. A script of the editor has no loop, so it runs each of its operations once at most, and
@@ -248,14 +251,14 @@ CVariable<uint32> RingSessionOpcodesPerUpdate("ai", "RingSessionOpcodesPerUpdate
     "Operations of the script machine the scripts of the scenario of one Ring session run in one update of the AI service. "
     "Past it, the events and the scripts of that session do not run until the next update. "
     "0: no limit for an update, an event keeps its own (RingSessionOpcodesPerEvent). "
-    "Not measured on a shard. Measured: the script machine alone, native calls replaced by stubs, a Debug build: 2,000,000 operations took 90 to 430 ms, 20,000,000 took 0.9 to 4.2 s. A native call counts as one operation, whatever it sends or spawns.",
-    2000000, 0, true);
+    "Measured: the script machine alone, native calls replaced by stubs, a Debug build: 2,000,000 operations took 90 to 430 ms. On a development shard a scenario of 35 groups ran 200 to 2,000 in its heaviest update. A native call counts as one operation, whatever it sends or spawns.",
+    200000, 0, true);
 CVariable<uint32> RingSessionOpcodesPerEvent("ai", "RingSessionOpcodesPerEvent",
     "Operations of the script machine the scripts run that one event of the scenario of a Ring session starts, the events it triggers included. "
     "Past it, the scripts of that event end and it starts nothing more. "
     "0: no limit of its own, the event has what its session has left for the update (RingSessionOpcodesPerUpdate). "
-    "Not measured on a shard. Measured: the script machine alone, native calls replaced by stubs, a Debug build: 2,000,000 operations took 90 to 430 ms, 20,000,000 took 0.9 to 4.2 s. A native call counts as one operation, whatever it sends or spawns.",
-    200000, 0, true);
+    "Measured: the script machine alone, native calls replaced by stubs, a Debug build: 2,000,000 operations took 90 to 430 ms. On a development shard a scenario of 35 groups ran 200 to 2,000 in its heaviest update. A native call counts as one operation, whatever it sends or spawns.",
+    100000, 0, true);
 
 namespace {
 
