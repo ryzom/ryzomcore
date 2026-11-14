@@ -1776,10 +1776,9 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 			bool trialPlayer = false;
 			CPlayer *player = PlayerManager.getPlayer( PlayerManager.getPlayerId(user->getId()));
 			if (!player)
-			{
 				nlwarning("Error %s was not found in player manager.",user->getId().toString().c_str());
+			else
 				trialPlayer = player->isTrialPlayer();
-			}
 //			user->_PropertyDatabase.setProp("USER:IS_TRIAL", trialPlayer);
 			CBankAccessor_PLR::getUSER().setIS_TRIAL(user->_PropertyDatabase, trialPlayer);
 
