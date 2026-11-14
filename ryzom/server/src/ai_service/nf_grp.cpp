@@ -3506,7 +3506,7 @@ The value *Must* be an number and only few type are handled.
 - integer
 - time
 
-Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting fonction that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
+Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting function that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
 - skill
 - faction
 - power_type
@@ -3535,7 +3535,7 @@ void phrasePushValue_sf_(CStateInstance* entity, CScriptStack& stack)
 {
 	float f = (float)stack.top();stack.pop(); // get the value as float 
 	std::string typeStr = (std::string)stack.top(); stack.pop(); // get the param type
-	// create the good STRING_MANAGER::TParam in fonction of its type and is value
+	// create the good STRING_MANAGER::TParam depending on its type and is value
 	STRING_MANAGER::TParamType type = STRING_MANAGER::stringToParamType(typeStr);
 	STRING_MANAGER::TParam param;
 	param.Type = type;
@@ -3632,7 +3632,7 @@ Input as stringId (number): *WARNING* LD must as coder to do function that retur
 
 
 Input must be a enum value:
-Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting fonction that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
+Some value other can be handled *BUT* the value *MUST*  be  the C++ code enum value. So LD must ask to coder to do a scripting function that have as input a string that contains enum value as string eg "matis" and that return the C++ enum value as int (eg 4).
 - skill
 - faction
 - power_type
@@ -3667,7 +3667,7 @@ void phrasePushString_ss_(CStateInstance* entity, CScriptStack& stack )
 	std::string s = (std::string)stack.top(); stack.pop(); // get the param value
 	std::string typeStr = (std::string)stack.top(); stack.pop(); // get the param type
 
-	// construct a STRING_MANAGER::TParam in fonction of its type and its value
+	// construct a STRING_MANAGER::TParam depending on its type and its value
 	STRING_MANAGER::TParamType type = STRING_MANAGER::stringToParamType(typeStr);
 	STRING_MANAGER::TParam param;
 	param.Type = type;

@@ -33,10 +33,10 @@ namespace NL3D
 {
 
 /**
- * A track is a fonction that interpolate a value over the time.
+ * A track is a function that interpolate a value over the time.
  *
  * Kind of interpolation is hidden to the user. It can be Bezier, TCB, linear, noise interpolation.
- * This interface give access to the interpolation fonction.
+ * This interface give access to the interpolation function.
  *
  * \author Cyril 'Hulud' Corvazier
  * \author Nevrax France

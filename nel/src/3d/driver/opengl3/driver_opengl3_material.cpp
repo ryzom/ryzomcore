@@ -995,7 +995,7 @@ void CDriverGL3::setupLightMapPass(uint pass)
 
 			activateTexture(stage, text);
 
-			// If texture not NULL, Change texture env fonction.
+			// If texture not NULL, Change texture env function.
 			//==================================================
 			if (text)
 			{

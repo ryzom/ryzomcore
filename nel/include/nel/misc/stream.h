@@ -621,7 +621,7 @@ public:
 		xmlPop ();
 	}
 
-	/// \name Seek fonctionnality
+	/// \name Seek functionality
 
 	/**
 	 * Parameters for seek().
@@ -634,7 +634,7 @@ public:
 	/**
 	 * Moves the stream pointer to a specified location.
 	 *
-	 * NB: If the stream doesn't support the seek fonctionnality, it throw ESeekNotSupported.
+	 * NB: If the stream doesn't support the seek functionality, it throw ESeekNotSupported.
 	 * Default implementation:
 	 * { throw ESeekNotSupported; }
 	 * \param offset is the wanted offset from the origin.
@@ -648,7 +648,7 @@ public:
 	/**
 	 * Get the location of the stream pointer.
 	 *
-	 * NB: If the stream doesn't support the seek fonctionnality, it throw ESeekNotSupported.
+	 * NB: If the stream doesn't support the seek functionality, it throw ESeekNotSupported.
 	 * Default implementation:
 	 * { throw ESeekNotSupported; }
 	 * \param offset is the wanted offset from the origin.

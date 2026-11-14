@@ -946,7 +946,7 @@ bool CPersistentDataRecord::fromXML(const std::string& s)
 	H_AUTO(CPersistentDataRecordFromXML);
 
 	// we need to treat our input data as a CSString - we static cast because CSStrings are not supposed
-	// to contain any data of their own - they are just a fonctionality wrapper round a std::string
+	// to contain any data of their own - they are just a functionality wrapper round a std::string
 	nlctassert(sizeof(string)==sizeof(CSString));
 	const CSString& buff= static_cast<const CSString&>(s);
 	uint32 len=(uint32)s.size();

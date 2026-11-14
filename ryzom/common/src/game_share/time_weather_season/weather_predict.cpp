@@ -271,7 +271,7 @@ float CPredictWeather::predictWeather(uint64 day, float hour, const CWeatherFunc
 	{
 		EGSPD::CSeason::TSeason season = CRyzomTime::getSeasonByDay((uint32)day);
 
-		// must recompute fonction
+		// must recompute function
 		lastDesc  = wfp;
 		lastCycle = cycle;
 		lastWf = wf;

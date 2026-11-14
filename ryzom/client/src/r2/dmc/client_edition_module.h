@@ -941,7 +941,7 @@ public:
 
 
 	/*!
-	Get the list of all property of an object. Mainly used for debug fonction (to dump an object)
+	Get the list of all property of an object. Mainly used for debug function (to dump an object)
 	\param component The object.
 	\return the list of property (an ObjectTable)
 	*/

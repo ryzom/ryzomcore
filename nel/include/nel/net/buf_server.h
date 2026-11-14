@@ -463,7 +463,7 @@ public:
 			// - The set is locked by a receive thread which is removing the closed connections.
 			//   When the set gets unlocked, it is empty so the value is inserted. It means the
 			//   value could be already in the set before it was cleared.
-			//   Note: with a fonction such as tryAcquire(), we could avoid to enter the mutex
+			//   Note: with a function such as tryAcquire(), we could avoid to enter the mutex
 			//   when it is already locked
 			// See clearClosedConnections().
 			NLMISC::CSynchronized<CConnections>::CAccessor removesetsync( &_RemoveSet );
