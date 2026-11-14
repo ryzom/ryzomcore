@@ -2168,10 +2168,10 @@ bool CCombatPhrase::launch()
 	if (latency>600.0f || latency < 0.0f)
 	{
 		nlwarning("<CCombatPhrase::launch> entity %s, combat action latency = %f ticks ! set it to 30 ticks only", actingEntity->getId().toString().c_str(), latency);
-		nlwarning("\t\tweapon latency : %u",_RightWeapon.LatencyInTicks);
+		nlwarning("\t\tweapon latency : %.2f",_RightWeapon.LatencyInTicks);
 		nlwarning("\t\t_LatencyFactorOnSuccess : %f",_LatencyFactorDyn.applyValue(_WeaponSabrinaValue));
-		nlwarning("\t\tlatencyMod : %u",latencyMod);
-		nlwarning("\t\t_HitRateModifier : %u",_HitRateModifier);
+		nlwarning("\t\tlatencyMod : %d",latencyMod);
+		nlwarning("\t\t_HitRateModifier : %d",_HitRateModifier);
 		nlwarning("\t\tcombatAttackSlow effect mod value : %d",combatAttackSlowMod);
 		nlwarning("\t\tslowMelee effect value : %d",slowMeleeMod);
 					
