@@ -3884,11 +3884,19 @@ public:
 		CSheetHelpSetup		dummy;
 		dummy.setupDefaultIDs();
 
-		// common method for info and botchat
-		if(infoWindow.CtrlSheet)
+		// The sheet comes from the window's own copy of the item (the icon it displays), not from the slot the window was
+		// opened from: that slot may hold another item or nothing by now, while the window still shows the first one.
+		if (!infoWindow.Window)
+			return;
+		CDBCtrlSheet *ctrlCopy = dynamic_cast<CDBCtrlSheet *>(infoWindow.Window->getElement(infoWindow.Window->getId() + ":content:ctrl_slot"));
+		if (!ctrlCopy)
 		{
-			onMpChangeItemPart(infoWindow.Window, infoWindow.CtrlSheet->getSheetId(), dummy.PrefixForExtra);
+			nlwarning("item_help_mp_change_item_part: the info window '%s' has no 'content:ctrl_slot' sheet", infoWindow.Window->getId().c_str());
+			return;
 		}
+
+		// common method for info and botchat
+		onMpChangeItemPart(infoWindow.Window, ctrlCopy->getSheetId(), dummy.PrefixForExtra);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHItemHelpMpChangeItemPart, "item_help_mp_change_item_part");
