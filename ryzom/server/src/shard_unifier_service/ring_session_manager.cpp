@@ -3459,8 +3459,11 @@ endOfWelcomeUserResult:
 
 				if (sessionPart == NULL)
 				{
-					// if the session is public, automatically create an invitation as player
-					if (session->getAccessType() == TAccessType::at_public)
+					// if the session is a public animation session, automatically create an invitation as player
+					// (public access is the players' way into an animation: an edit session has no players, and
+					// the client and the ring web pages schedule every edit session with public access)
+					if (session->getAccessType() == TAccessType::at_public
+					    && session->getSessionType() == TSessionType::st_anim)
 					{
 						sessionPart = CSessionParticipant::createTransient(__FILE__, __LINE__);
 						sessionPart->setCharId(charId);
