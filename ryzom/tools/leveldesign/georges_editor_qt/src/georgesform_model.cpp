@@ -162,6 +162,10 @@ namespace NLQT
 					{
 						if (Modules::objViewInt())
 						{
+							// the driver is made when the 3D view is first shown, there is no preview before
+							if (!Modules::objViewInt()->getDriver())
+								return QIcon(":/images/pqrticles.png");
+
 							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
@@ -201,6 +205,9 @@ namespace NLQT
 					{
 						if (Modules::objViewInt()) 
 						{
+							if (!Modules::objViewInt()->getDriver())
+								return tr("3D view not shown");
+
 							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{

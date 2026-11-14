@@ -57,7 +57,7 @@ CGraphicsViewport::~CGraphicsViewport()
 	
 }
 
-void CGraphicsViewport::init(CGraphicsConfig *graphicsConfig)
+bool CGraphicsViewport::init(CGraphicsConfig *graphicsConfig)
 {
 	//H_AUTO2
 	nldebug("CGraphicsViewport::init");
@@ -84,7 +84,15 @@ void CGraphicsViewport::init(CGraphicsConfig *graphicsConfig)
 	nlassert(m_Driver);
 
 	// initialize the window with config file values
-	m_Driver->setDisplay(winId(), NL3D::UDriver::CMode(width(), height(), 32));
+	if (!m_Driver->setDisplay((nlWindow)winId(), NL3D::UDriver::CMode(width(), height(), 32)))
+	{
+		nlwarning("The 3D driver cannot render into the window of the viewport");
+		m_Driver->release();
+		delete m_Driver;
+		m_Driver = NULL;
+		m_GraphicsConfig = NULL;
+		return false;
+	}
 
 	// register config callbacks
 	connect(m_GraphicsConfig, SIGNAL(onBackgroundColor(NLMISC::CRGBA)), 
@@ -102,6 +110,7 @@ void CGraphicsViewport::init(CGraphicsConfig *graphicsConfig)
 	connect(m_GraphicsConfig, SIGNAL(onFontShadow(bool)), 
 		this, SLOT(cfcbFontShadow(bool)));
 	m_TextContext->setShaded(m_GraphicsConfig->getFontShadow());	
+	return true;
 }
 
 void CGraphicsViewport::release()

@@ -50,7 +50,10 @@ namespace NLQT
 		{
 			_nlw = dynamic_cast<QNLWidget*>(Modules::objViewInt()->getWidget());
 			//_nlw->setObjectName(QString::fromUtf8("nlwidget"));
-			_ui.gridLayout->addWidget(_nlw, 0, 0);
+			if (_nlw)
+				_ui.gridLayout->addWidget(_nlw, 0, 0);
+			else
+				nlwarning("The object viewer plugin gave no widget for the 3D view");
 		}
 	}
 

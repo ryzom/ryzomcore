@@ -148,7 +148,16 @@ namespace NLQT
 		nlassert(_Driver);
 
 		// initialize the window with config file values
-		_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
+		if (!_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32)))
+		{
+			// graphics are switched off, so that the 3D view is not set up again on every update
+			nlwarning("The 3D driver cannot render into the window of the object viewer widget, the 3D view stays empty");
+			_Driver->release();
+			delete _Driver;
+			_Driver = NULL;
+			_isGraphicsEnabled = false;
+			return;
+		}
 
 		//_Light = ULight::createLight();
 
@@ -202,6 +211,10 @@ namespace NLQT
 		//H_AUTO2
 		nldebug("");
 
+		// the driver is made when the 3D view is first shown, before that there is nothing to release
+		if (!_Driver)
+			return;
+
 		_Driver->delete3dMouseListener(_MouseListener);
 
 		// delete all entities
@@ -211,9 +224,11 @@ namespace NLQT
 
 		// delete the scene
 		_Driver->deleteScene(_Scene);
+		_Scene = NULL;
 
 		// delete the light
 		delete _Light;
+		_Light = NULL;
 
 		// release driver
 		nlassert(_Driver);
@@ -269,7 +284,8 @@ namespace NLQT
 
 
 			//updateAnimation(_AnimationDialog->getTime());
-			updateAnimatePS();
+			if (_isGraphicsInitialized)
+				updateAnimatePS();
 			// 10. Update Camera (depends on entities)
 			// ...
 
@@ -348,7 +364,7 @@ namespace NLQT
 				if (wantGraphics)
 				{
 					init();
-					_isGraphicsInitialized = true;
+					_isGraphicsInitialized = (_Driver != NULL);
 					_mainTimer->start(25);
 					//done = false;
 				}
@@ -397,6 +413,13 @@ namespace NLQT
 	{
 		//H_AUTO2
 
+		// without a driver there is nothing to take
+		if (!_Driver)
+		{
+			nlwarning("The 3D view is not shown, no screenshot is taken");
+			return;
+		}
+
 		// FIXME: create screenshot path if it doesn't exist!
 
 		// empty bitmap
@@ -431,6 +454,12 @@ namespace NLQT
 
 	bool CObjectViewerWidget::loadMesh(const std::string &meshFileName, const std::string &skelFileName)
 	{
+		if (!_Driver || !_Scene)
+		{
+			nlwarning("The 3D view is not shown yet, cannot load '%s'", meshFileName.c_str());
+			return false;
+		}
+
 		std::string fileName = CFile::getFilenameWithoutExtension(meshFileName);
 		if ( _Entities.count(fileName) != 0)
 			return false;
@@ -487,6 +516,10 @@ namespace NLQT
 
 	void CObjectViewerWidget::resetScene()
 	{
+		// before the 3D view is first shown there is no scene and nothing in it
+		if (!_Scene)
+			return;
+
 		deleteEntities();
 
 		// Reset camera.
@@ -523,6 +556,10 @@ namespace NLQT
 
 	void CObjectViewerWidget::setSizeViewport(uint16 w, uint16 h)
 	{
+		// without a driver there is no scene and no camera
+		if (!_Scene)
+			return;
+
 		_Scene->getCam().setPerspective(_CameraFocal * (float)Pi/180.f, (float)w/h, 0.1f, 1000);
 	}
 
@@ -663,6 +700,10 @@ namespace NLQT
 	{
 		int output_width = 128;
 		int output_height = 128;
+
+		// the driver is made when the 3D view is first shown, there is no preview before
+		if (!_Driver)
+			return 0;
 
 		// Create a scene
 		NL3D::UScene* Scene = _Driver->createScene(true);
