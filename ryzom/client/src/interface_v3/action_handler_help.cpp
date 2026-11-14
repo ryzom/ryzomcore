@@ -124,6 +124,35 @@ std::vector<CInterfaceHelp::CInfoWindow>	CInterfaceHelp::_InfoWindows;
 bool										CInterfaceHelp::_InfoWindowInit= false;
 CInterfaceHelp::CFittedWeaponWeightObserver CInterfaceHelp::_FittedWeaponWeightObserver;
 
+// ***************************************************************************
+/** A raw material shows nothing of the item info but a custom text, and only an item of its own can carry one: the
+ *	info is asked for the slots of the inventories that hold such items. Not for the list of a merchant: the goods of
+ *	the NPC itself come from the sheet, and the server builds an item for each info request on them. A raw material a
+ *	player resells there is an item of its own, and its text is not shown in that list. Nor for a sheet outside of
+ *	the inventories (a craft requirement, a mission reward), which has no slot to ask for.
+ */
+static bool isItemInfoAskedForRawMaterial(uint itemSlotId)
+{
+	nlctassert(MAX_INVENTORY_ANIMAL == 4);
+	switch (itemSlotId >> CItemInfos::SlotIdIndexBitSize)
+	{
+	case INVENTORIES::bag:
+	case INVENTORIES::pet_animal1:
+	case INVENTORIES::pet_animal2:
+	case INVENTORIES::pet_animal3:
+	case INVENTORIES::pet_animal4:
+	case INVENTORIES::temporary:
+	case INVENTORIES::exchange:
+	case INVENTORIES::exchange_proposition:
+	case INVENTORIES::reward_sharing:
+	case INVENTORIES::guild:
+	case INVENTORIES::player_room:
+		return true;
+	default:
+		return false;
+	}
+}
+
 
 // ***************************************************************************
 void	CInterfaceHelp::CInfoWindow::infoReceived()
@@ -376,9 +405,9 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 			_InfoWindows[newIndexWindow].ItemSheet= elt->getSheetId();
 			_InfoWindows[newIndexWindow].ItemSlotId= getInventory().getItemSlotId(elt);
 
-			// Add the waiter only if really needed (not for raw materials)
+			// Add the waiter only if really needed (for a raw material: only in the inventories that hold items of their own)
 			const CItemSheet	*itemSheet= elt->asItemSheet();
-			if(itemSheet && itemSheet->Family != ITEMFAMILY::RAW_MATERIAL )
+			if (itemSheet && (itemSheet->Family != ITEMFAMILY::RAW_MATERIAL || isItemInfoAskedForRawMaterial(_InfoWindows[newIndexWindow].ItemSlotId)))
 				getInventory().addItemInfoWaiter(&_InfoWindows[newIndexWindow]);
 		}
 		else if ( elt->getType() == CCtrlSheetInfo::SheetType_Mission )
@@ -1913,18 +1942,25 @@ void getItemText (CDBCtrlSheet *item, string &itemText, const CItemSheet*pIS)
 		strFindReplace(itemText, "%desc", string() );
 
 	// Custom text
-	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(getInventory().getItemSlotId(item) );
-	if (NLMISC::startsWith(itemInfo.CustomText, "@WEB"))
+	uint itemSlotId = getInventory().getItemSlotId(item);
+	const	CClientItemInfo	&itemInfo = getInventory().getItemInfo(itemSlotId);
+	// The text is shown when the info held for the slot is this item's, not the one of a former item of the slot: the
+	// refresh that follows the answer of the server shows it. A slot whose info is never asked (a raw material in the
+	// list of a merchant) has no info or never a current one.
+	string customText;
+	if (getInventory().isItemInfoUpToDate(itemSlotId))
+		customText = itemInfo.CustomText;
+	if (NLMISC::startsWith(customText, "@WEB"))
 	{
 		// "@WEB<url> text": the url is the item's web action, which the item reading window opens; only the text
 		// after it is for the player
-		string::size_type delimiter = itemInfo.CustomText.find(' ');
-		string text = delimiter == string::npos ? string() : itemInfo.CustomText.substr(delimiter + 1);
+		string::size_type delimiter = customText.find(' ');
+		string text = delimiter == string::npos ? string() : customText.substr(delimiter + 1);
 		strFindReplace(itemText, "%custom_text", text.empty() ? string() : "\n@{FFFF}" + text + "\n");
 	}
-	else if (!itemInfo.CustomText.empty())
+	else if (!customText.empty())
 	{
-		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + itemInfo.CustomText + "\n");
+		strFindReplace(itemText, "%custom_text", "\n@{FFFF}" + customText + "\n");
 		const string &itemMFC = CI18N::get("uiItemTextMessageFromCrafter");
 		strFindReplace(itemText, "%mfc", itemMFC);
 	}
