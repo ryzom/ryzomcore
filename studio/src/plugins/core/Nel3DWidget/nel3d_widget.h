@@ -24,16 +24,13 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 
-#ifdef NEL3DWIDGET
-#undef NEL3DWIDGET
-#endif
-
+// moc does not see NL_OS_WINDOWS, so the base class is a typedef, which moc names as it is
 #ifdef NL_OS_WINDOWS
 #include <QWidget>
-#define NEL3DWIDGET QWidget
+typedef QWidget Nel3DWidgetBase;
 #else
 #include <QGLWidget>
-#define NEL3DWIDGET QGLWidget
+typedef QGLWidget Nel3DWidgetBase;
 #endif
 
 #include "../core_global.h"
@@ -49,7 +46,7 @@ namespace NL3D
 }
 
 /// Nel 3D interface to Qt
-class CORE_EXPORT Nel3DWidget : public NEL3DWIDGET
+class CORE_EXPORT Nel3DWidget : public Nel3DWidgetBase
 {
 	Q_OBJECT
 public:

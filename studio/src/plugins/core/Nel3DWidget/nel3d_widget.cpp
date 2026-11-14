@@ -31,8 +31,8 @@
 #include <Windows.h>
 #endif
 
-Nel3DWidget::Nel3DWidget( QWidget *parent ) :
-NEL3DWIDGET( parent )
+Nel3DWidget::Nel3DWidget(QWidget *parent)
+    : Nel3DWidgetBase(parent)
 {
 	driver = NULL;
 	textContext = NULL;
@@ -66,7 +66,7 @@ void Nel3DWidget::init()
 	nlassert( driver == NULL );
 
 	driver = NL3D::UDriver::createDriver( 0, false, 0 );
-	driver->setDisplay( winId(), NL3D::UDriver::CMode( width(), height(), 32, true ) );
+	driver->setDisplay((nlWindow)winId(), NL3D::UDriver::CMode(width(), height(), 32, true));
 }
 
 void Nel3DWidget::createTextContext( std::string fontFile )
