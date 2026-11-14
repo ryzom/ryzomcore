@@ -473,6 +473,7 @@ CClientConfig::CClientConfig()
 	// SOUND //
 	SoundOn				= true;						// Default is with sound.
 	DriverSound			= SoundDrvAuto;
+	SoundDevice			= "";						// Default device of the sound driver
 	SoundForceSoftwareBuffer = true;
 	StartMusic = "main theme air.ogg"; // Use at game startup (originally no music)
 	EmptySlotMusic = "loading music loop.ogg"; // Use in character selection for empty slots
@@ -1306,6 +1307,8 @@ void CClientConfig::setValues()
 	}
 	else
 		cfgWarning ("Default value used for 'DriverSound' !!!");
+	// SoundDevice
+	READ_STRING_FV(SoundDevice)
 	// SoundForceSoftwareBuffer
 	READ_BOOL_FV(SoundForceSoftwareBuffer);
 	// SoundOutGameMusic

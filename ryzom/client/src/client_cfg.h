@@ -374,6 +374,9 @@ struct CClientConfig
 	/// Sound Driver
 	TDriverSound	DriverSound;
 
+	/// Sound output device, by the name the sound driver gives it. Empty: the default device.
+	std::string		SoundDevice;
+
 	/// SoundForceSoftwareBuffer
 	bool			SoundForceSoftwareBuffer;
 

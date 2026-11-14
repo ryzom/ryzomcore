@@ -35,6 +35,12 @@
 #include "time_client.h"
 #include "weather.h"
 #include "global.h"
+#include "interface_v3/interface_manager.h"
+// misc
+#include "nel/misc/i18n.h"
+#include "nel/misc/algo.h"
+// sound
+#include "nel/sound/driver/sound_driver.h"
 // game share
 #include "game_share/cst_loader.h"
 
@@ -80,6 +86,9 @@ extern NL3D::UScene		*Scene;
 
 // The interpolation distance for the portals : 1 m
 const float PORTAL_INTERPOLATE = 1.0f;
+
+// The value of 'SoundDevice' the player was last told is not a device of the sound driver (CSoundManager::init)
+static std::string s_SoundDeviceNotFoundTold;
 
 // Filter mapping
 enum TFilterMapping
@@ -472,16 +481,65 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		else
 			_AudioMixer->setPackedSheetOption("", false);
 
-		UAudioMixer::TDriver	driverType= UAudioMixer::DriverAuto;
+		// The driver, by the name the mixer knows it by
+		const char	*driverName= "Auto";
 		if(ClientCfg.DriverSound==CClientConfig::SoundDrvFMod)
-			driverType= UAudioMixer::DriverFMod;
+			driverName= "FMod";
 		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
-			driverType= UAudioMixer::DriverOpenAl;
+			driverName= "OpenAL";
 		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvDirectSound)
-			driverType= UAudioMixer::DriverDSound;
+			driverName= "DSound";
 		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvXAudio2)
-			driverType= UAudioMixer::DriverXAudio2;
-		_AudioMixer->init(ClientCfg.MaxTrack, ClientCfg.UseEax, ClientCfg.UseADPCM, progressCallBack, false, driverType, ClientCfg.SoundForceSoftwareBuffer);
+			driverName= "XAudio2";
+		_AudioMixer->initDriver(driverName);
+
+		// The devices of the driver go to the log: the SoundDevice key takes one of these names
+		std::vector<std::string>	devices;
+		_AudioMixer->getDevices(devices);
+		uint	numNamedDevices= 0;
+		for(uint i=0; i<devices.size(); i++)
+		{
+			if(!devices[i].empty())
+			{
+				nlinfo("SND: sound device '%s'", devices[i].c_str());
+				numNamedDevices++;
+			}
+		}
+		if(numNamedDevices==0)
+			nlinfo("SND: the sound driver lists no device by name, it only opens its default device ('SoundDevice' must be empty)");
+		if(!ClientCfg.SoundDevice.empty())
+			nlinfo("SND: the sound device asked by 'SoundDevice' is '%s'", ClientCfg.SoundDevice.c_str());
+
+		// Open the device: the default one when SoundDevice is empty. The mixer throws when the driver
+		// does not list the name (the default device is not taken in its place).
+		UAudioMixer::CInitInfo	initInfo;
+		initInfo.MaxTrack= ClientCfg.MaxTrack;
+		initInfo.EnableReverb= ClientCfg.UseEax;
+		initInfo.EnableOcclusionObstruction= ClientCfg.UseEax;
+		initInfo.UseADPCM= ClientCfg.UseADPCM;
+		initInfo.ForceSoftware= ClientCfg.SoundForceSoftwareBuffer;
+		initInfo.ManualRolloff= true;
+		initInfo.AutoLoadSample= false;
+		try
+		{
+			_AudioMixer->initDevice(ClientCfg.SoundDevice, initInfo, progressCallBack);
+		}
+		catch(const ESoundDriverDeviceNotFound &)
+		{
+			// The sound does not start (the caller logs the reason and deletes the manager): the player is
+			// told why in the interface, once for a name. The start of the client tries twice.
+			if(s_SoundDeviceNotFoundTold!=ClientCfg.SoundDevice)
+			{
+				s_SoundDeviceNotFoundTold= ClientCfg.SoundDevice;
+				string	text= CI18N::get("uiSoundDeviceNotFound");
+				strFindReplace(text, "%device", ClientCfg.SoundDevice);
+				// the system info window shows it, at once in game and else when the game interface starts
+				CInterfaceManager::getInstance()->displaySystemInfo(text, "SYS");
+			}
+			throw;
+		}
+		// the device is open: a later failure with the same name is told again
+		s_SoundDeviceNotFoundTold.clear();
 /*		int nbVoice = _AudioMixer->getPolyphony();
 		_AudioMixer->setPriorityReserve(HighPri, max(1, nbVoice /2));
 		nbVoice -= nbVoice /2;

@@ -49,6 +49,24 @@ void initStereoDisplayDevice(); // from init.cpp
 void releaseStereoDisplayDevice(); // from release.cpp
 
 //---------------------------------------------------
+// Reset the sound manager. It makes its mixer again, and that fails as at startup when the sound
+// driver or the device of 'SoundDevice' is gone: the sound is off then, the warning tells why.
+//---------------------------------------------------
+static void resetSoundManager()
+{
+	try
+	{
+		SoundMngr->reset();
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("reset : Error when creating 'SoundMngr' : %s", e.what());
+		delete SoundMngr;
+		SoundMngr = NULL;
+	}
+}
+
+//---------------------------------------------------
 // Compare ClientCfg and LastClientCfg to know what we must update
 //---------------------------------------------------
 void updateFromClientCfg()
@@ -340,10 +358,11 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound
+		|| ClientCfg.SoundDevice != LastClientCfg.SoundDevice)
 	{
-		// changing sound driver
-		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		// changing sound driver or output device
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound || ClientCfg.SoundDevice != LastClientCfg.SoundDevice)
 		{
 			if (SoundMngr)
 			{
@@ -401,7 +420,7 @@ void updateFromClientCfg()
 	if ( SoundMngr && LastClientCfg.SoundOn &&
 		(ClientCfg.UseEax != LastClientCfg.UseEax) )
 	{
-		SoundMngr->reset();
+		resetSoundManager();
 
 		mustReloadSoundMngrContinent= true;
 	}
@@ -410,7 +429,7 @@ void updateFromClientCfg()
 	if ( SoundMngr && LastClientCfg.SoundOn &&
 		(ClientCfg.SoundForceSoftwareBuffer != LastClientCfg.SoundForceSoftwareBuffer) )
 	{
-		SoundMngr->reset();
+		resetSoundManager();
 
 		mustReloadSoundMngrContinent= true;
 	}

@@ -457,6 +457,9 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 		nlctassert(NumDrivers == UAudioMixer::TDriver(ISoundDriver::NumDrivers));
 		_SoundDriver = ISoundDriver::createDriver(this, driverType);
 		nlassert(_SoundDriver);
+		m_SoundDriverName = _SoundDriver->getDllName();
+		if (m_SoundDriverName.empty())
+			m_SoundDriverName = ISoundDriver::getDriverName(driverType);
 	}
 	catch (const ESoundDriver &e)
 	{
@@ -517,6 +520,32 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 		if (forceSoftware) driverOptions |= ISoundDriver::OptionSoftwareBuffer;
 		if (manualRolloff) driverOptions |= ISoundDriver::OptionManualRolloff;
 		if (_AutoLoadSample) driverOptions |= ISoundDriver::OptionLocalBufferCopy;
+
+		// A device asked by name must be one the driver lists. The drivers open the default device for a
+		// name they do not know: that is refused here, the caller asked for another device.
+		if (!deviceName.empty())
+		{
+			std::vector<std::string> devices;
+			_SoundDriver->getDevices(devices);
+			if (std::find(devices.begin(), devices.end(), deviceName) == devices.end())
+			{
+				std::string available;
+				for (uint i = 0; i < devices.size(); ++i)
+				{
+					if (devices[i].empty())
+						continue;
+					if (!available.empty())
+						available += ", ";
+					available += "'" + devices[i] + "'";
+				}
+				std::string reason = "AM: The sound driver '" + m_SoundDriverName + "' has no device named '" + deviceName + "'. ";
+				if (available.empty())
+					reason += "It lists no device by name: it only opens its default device, with an empty device name";
+				else
+					reason += "Its devices are: " + available;
+				throw ESoundDriverDeviceNotFound(reason);
+			}
+		}
 
 		// init the driver with selected device and needed options
 		_SoundDriver->initDevice(deviceName, (ISoundDriver::TSoundOptions)driverOptions);
