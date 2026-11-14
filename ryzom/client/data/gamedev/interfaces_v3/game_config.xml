@@ -645,11 +645,11 @@
 		<group id="mouse" active="false" posparent="crop" posref="TM TM" x="0" y="-8" sizeref="w" child_resize_h="true" child_resize_hmargin="4" w="-4" max_sizeparent="crop" max_sizeref="h" max_h="-4">
 
 			<view style="sgc_title" id="mouseopt" posref="TM TM" x="0" y="0" hardtext="uiMouseOptions" />
-			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TM TL" x="0" y="-35" />
+			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TL TL" x="0" y="-20" />
 			<instance template="tgcw_checkbox" id="inverted" text="uiMouseInverted" posparent="hard" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="dbl" text="uiMouseDblClickMode" posparent="inverted" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="tablet" text="uiFreeViewTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
-			<view style="sgc_title2" type="text" id="inter" posref="TL TL" x="0" y="-20" hardtext="uiMouseInterface" />
+			<view style="sgc_title2" type="text" id="inter" posparent="tablet" posref="BL TL" x="0" y="-12" hardtext="uiMouseInterface" />
 			<instance template="tgcw_scrollbarint" id="dcspeed" text="uiDoubleClickSpeed" posparent="inter" posref="BL TL" x="20" y="-2" />
 
 			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="dcspeed" x="-20" y="-12" />
