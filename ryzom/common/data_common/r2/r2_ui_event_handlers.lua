@@ -556,7 +556,6 @@ end
 ------------------------------------------------------------------------------------
 -- called by C++ when copy has been pressed (key or ui button)
 function r2:paste()	
-	r2.requestNewAction(concatString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
 	if r2.ClipBoard == nil then
 		displaySystemInfo(i18n.get("uiR2EDEmptyClipBoard"), "BC")
 		return
@@ -740,8 +739,9 @@ function r2:popMainMenu()
 	if r2.Mode ~= "Edit" then
 		menu:find("live").active = not (r2.AccessMode == "Editor") 
 		menu:find("stop_live").active = not (r2.AccessMode == "Editor")
-		menu:find("player_admin").active = not (r2.AccessMode == "Editor")
 	end
+	-- (player control is in both menus for everyone who has them: the window leaves an editor that does not own
+	-- the edit session the list and the tell, see CharTracking:isListOnly)
 
 	menu:find("map_key").t.text = buildKeyName("show_hide", "map")
 	menu:find("debug_console").active = (config.R2EDExtendedDebug == 1)

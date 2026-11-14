@@ -2391,6 +2391,7 @@ namespace RSMGR
 				{	"STSS",	CRingSessionManagerWebItf::cb_startSession	},
 				{	"CLSS",	CRingSessionManagerWebItf::cb_closeSession	},
 				{	"CLESS",	CRingSessionManagerWebItf::cb_closeEditSession	},
+				{	"CLANSS",	CRingSessionManagerWebItf::cb_closeAnimSessions	},
 				{	"AFC",	CRingSessionManagerWebItf::cb_addFriendCharacter	},
 				{	"RFC",	CRingSessionManagerWebItf::cb_removeFriendCharacter	},
 				{	"ABC",	CRingSessionManagerWebItf::cb_addBannedCharacter	},
@@ -2606,6 +2607,7 @@ namespace RSMGR
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 
 		void joinSessionResult(NLNET::TSockId dest, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const TSessionPartStatus &participantStatus)
 		{
@@ -2939,6 +2941,31 @@ namespace RSMGR
 
 
 			callback->on_closeEditSession(from, charId);
+
+		}
+
+		static void cb_closeAnimSessions (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+			H_AUTO(closeAnimSessions_on_closeAnimSessions);
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWeb::cb_closeAnimSessions received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
+
+			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			nlRead(message, serial, charId);
+
+
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWeb::cb_closeAnimSessions : calling on_closeAnimSessions");
+#endif
+
+
+			callback->on_closeAnimSessions(from, charId);
 
 		}
 
@@ -3659,6 +3686,13 @@ namespace RSMGR
 		//                         5 : internal error
 		virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId) =0;
 
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+		virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId) =0;
+
 		// Add a character in a user friend list
 		// Return 'invokeResult' : 0 : ok
 		//                         1 : user not found
@@ -3740,7 +3774,7 @@ namespace RSMGR
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
 		//                5 : character banned
 		//                6 : no place left, session is full
 		//                7 : session owner not found
@@ -3790,6 +3824,7 @@ namespace RSMGR
 		//                3 : kicked character has no participation in the session
 		//                4 : internal error
 		//                5 : owner char don't own the session
+		//                6 : the owner of the session can't be kicked
 		virtual void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId) =0;
 
 		// Unkick a character from a session
@@ -4134,6 +4169,22 @@ namespace RSMGR
 
 			_CallbackClient->send(message);
 		}
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+
+		void closeAnimSessions(uint32 charId)
+		{
+#ifdef NL_DEBUG
+			nldebug("CRingSessionManagerWebClient::closeAnimSessions called");
+#endif
+			NLNET::CMessage message("CLANSS");
+			nlWrite(message, serial, charId);
+
+			_CallbackClient->send(message);
+		}
 		// Add a character in a user friend list
 		// Return 'invokeResult' : 0 : ok
 		//                         1 : user not found
@@ -4310,7 +4361,7 @@ namespace RSMGR
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
 		//                5 : character banned
 		//                6 : no place left, session is full
 		//                7 : session owner not found
@@ -4429,6 +4480,7 @@ namespace RSMGR
 		//                3 : kicked character has no participation in the session
 		//                4 : internal error
 		//                5 : owner char don't own the session
+		//                6 : the owner of the session can't be kicked
 
 		void kickCharacter(uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId)
 		{
@@ -4807,6 +4859,7 @@ namespace RSMGR
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 		virtual void on_joinSessionResult(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const TSessionPartStatus &participantStatus) =0;
 
 		// See joinSessionResult.

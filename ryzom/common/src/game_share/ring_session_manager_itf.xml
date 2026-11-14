@@ -498,6 +498,18 @@
 			</invoke>
 
 			<!-- __________________________________________________________ -->
+			<invoke name="closeAnimSessions" msg="CLANSS">
+				<doc line="Close the animation sessions that the character owns and that are open, and nothing else"/>
+				<doc line="Return 'invokeResult' : 0 : ok, sessions closed (or about to close)"/>
+				<doc line="                        1 : char not found"/>
+				<doc line="                        2 : failed to close the sessions, internal error"/>
+				<doc line="                        3 : the character owns no open animation session"/>
+
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
 			<!-- known_users managment -->
 			<!-- __________________________________________________________ -->
 			<invoke name="addFriendCharacter" msg="AFC">
@@ -635,7 +647,7 @@
 				<doc line="               1 : char not found"/>
 				<doc line="               2 : session not found"/>
 				<doc line="               3 : character already subscribed to or invited in the session"/>
-				<doc line="               4 : session not public"/>
+				<doc line="               4 : session not public (not an animation session, not of public access, or its subscription is closed)"/>
 				<doc line="               5 : character banned"/>
 				<doc line="               6 : no place left, session is full"/>
 				<doc line="               7 : session owner not found"/>
@@ -698,6 +710,7 @@
 					<doc line="        18 : Can't find session log to validate session access"/>
 					<doc line="        19 : Can't find scenario info to validate session access"/>
 					<doc line="        20 : Scenario is not allowed to free trial players"/>
+					<doc line="        21 : Character is kicked from the session"/>
 
 					<param type="uint32"		name="userId"/>
 					<param type="TSessionId"	name="sessionId"/>
@@ -784,6 +797,7 @@
 				<doc line="               3 : kicked character has no participation in the session"/>
 				<doc line="               4 : internal error"/>
 				<doc line="               5 : owner char don't own the session"/>
+				<doc line="               6 : the owner of the session can't be kicked"/>
 
 				<param type="uint32"		name="ownerCharId"/>
 				<param type="TSessionId"	name="sessionId"/>

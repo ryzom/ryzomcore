@@ -238,6 +238,14 @@ function r2:adjustToolbarGap()
 end
 
 ----------------------------------------------------------------------------------------------------------
+-- The player control window: the owner of a session administers its characters there, and the other editors
+-- of an edit session see in it who is in the session (the window leaves them the list and the tell, see
+-- CharTracking:isListOnly)
+function r2:canTrackCharacters()
+	return r2.isSessionOwner() or r2.AccessMode == "Editor"
+end
+
+----------------------------------------------------------------------------------------------------------
 -- common to r2:onChangeDesktop & r2:resetDesktop
 function r2:resetDesktopVisibleWindows(desktopIndex)		
 	-- reset the EDIT desktop
@@ -408,7 +416,7 @@ function r2:onChangeDesktop(desktopIndex)
 		local toolbarWindow = getUI("ui:interface:r2ed_toolbar_window")
 		toolbarWindow:find("r2ed_anim_dm_mode").active = (r2.AccessMode == "Editor")
 		toolbarWindow:find("r2ed_stop_live").active = not (r2.AccessMode == "Editor") and r2.isSessionOwner()
-		toolbarWindow:find("player_control").active = (not (r2.AccessMode == "Editor")) and r2.isSessionOwner()
+		toolbarWindow:find("player_control").active = r2:canTrackCharacters()
 		toolbarWindow:find("r2ed_live").active = false
 		
 		-- resize the toolbarWindow depending on content
@@ -417,7 +425,7 @@ function r2:onChangeDesktop(desktopIndex)
 		local windowsDMBar = getUI("ui:interface:r2ed_windows_dm_bar")		
 		if windowsDMBar then			
 			windowsDMBar.r2ed_live.active = (not (r2.AccessMode == "Editor")) and r2.isSessionOwner() 
-			windowsDMBar.player_control.active = (not (r2.AccessMode == "Editor")) and r2.isSessionOwner()			
+			windowsDMBar.player_control.active = r2:canTrackCharacters()
 			windowsDMBar:invalidateCoords()			
 			windowsDMBar:updateCoords()			
 		end	
@@ -464,7 +472,7 @@ function r2:onChangeDesktop(desktopIndex)
 		if windowsDMBar then
 			windowsDMBar.active=true
 			windowsDMBar.r2ed_live.active = (not (r2.AccessMode == "Editor")) and r2.isSessionOwner() 
-			windowsDMBar.player_control.active = (not (r2.AccessMode == "Editor")) and r2.isSessionOwner()			
+			windowsDMBar.player_control.active = r2:canTrackCharacters()
 
 			windowsDMBar:invalidateCoords()
 			windowsDMBar:updateCoords()

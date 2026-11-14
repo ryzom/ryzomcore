@@ -143,6 +143,25 @@ function CharTracking:isKicked(flags)
 end
 
 --***********************************************************************
+-- An editor of an edit session that does not own it gets the list and the tell: inviting, kicking, unkicking
+-- and teleporting to a character are the owner's (the session manager refuses the first three from anyone else)
+function CharTracking:isListOnly()
+	return r2 ~= nil and r2.AccessMode == "Editor" and not r2.isSessionOwner()
+end
+
+--***********************************************************************
+-- show the buttons of the window that the character may use (the invite button stays where it is, frozen: the
+-- tell button is placed against it)
+function CharTracking:updateAdminButtons()
+	local admin = not self:isListOnly()
+	local win = self:getWindow()
+	win:find("invite").frozen = not admin
+	win:find("teleport").active = admin
+	win:find("kick").active = admin
+	win:find("unkick").active = admin
+end
+
+--***********************************************************************
 function CharTracking:getColumn(name)
 	return getUI("ui:interface:ring_chars_tracking:content:main:enclosing:columns:getw:column_group:" .. name .. ":values")
 end
@@ -492,6 +511,11 @@ function CharTracking:onLineRightClick()
 	menu:find("kick").text = i18n.get("uiRAP_MenuKick") .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'"
 	menu:find("unkick").text = i18n.get("uiRAP_MenuUnkick") .. "'" .. self:getCharFromId(self.SelectedCharId).Char.."'"
 
+	local admin = not self:isListOnly()
+	menu:find("teleport").active = admin
+	menu:find("kick").active = admin
+	menu:find("unkick").active = admin
+
 	menu:find("unkick").grayed = not self:isKicked(self:getCharFromId(self.SelectedCharId).Flags)
 	menu:find("kick").grayed = not self:isConnected(self:getCharFromId(self.SelectedCharId).Flags)
 	menu:find("teleport").grayed = not self:isConnected(self:getCharFromId(self.SelectedCharId).Flags) or (r2.Mode=="r2ed_anim_test")
@@ -523,7 +547,7 @@ end
 function CharTracking:onLineLeftDblClick()
 	local char = self:getCharFromId(self.SelectedCharId)
 	if self:isConnected(char.Flags) then
-		onTell()		
+		self:onTell()
 	end
 end
 
@@ -566,6 +590,7 @@ function CharTracking:onShow()
 	setOnDraw(self:getWindow(), "CharTracking:onDraw()")		
 	self:clear()
 	self:enableButtons(false)	
+	self:updateAdminButtons()
 	self:refresh()	
 end
 

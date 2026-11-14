@@ -60,7 +60,7 @@ CVariable<uint32>	ShardAssocTimeout( "su", "ShardAssocTimeout", "Timeout (in s)b
 CVariable<uint32>	ForceWelcomerShard( "su", "ForceWelcomerShard", "SessionId of a shard to promote when joining any mainland (0=none)", 0, 0, true );
 CVariable<bool>	PreferLastPlayedShard( "su", "PreferLastPlayedShard", "When joining any mainland, promote the home shard of the character the account played last (after ForceWelcomerShard, before the load)", true, 0, true );
 CVariable<string>	DomainName("su", "DomainName", "The name of the domain", "ryzom", 0, true);
-CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privilege allowed to join any animation session", ":GM:SGM:", 0, true);
+CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privileges whose accounts enter any Ring session by its id (an animation session as a player, an edit session as an editor) and may kick and unkick the characters of any Ring session", ":GM:SGM:", 0, true);
 
 namespace RSMGR
 {
@@ -2361,63 +2361,116 @@ endOfWelcomeUserResult:
 
 			// Close anim sessions
 			{
-
-				CSString query;
-				query << "SELECT session_id FROM sessions";
-				query << " WHERE owner = "<<charId<<" AND session_type ='st_anim'";
-				BOMB_IF(!_RingDb.query(query), "on_hibernateEditSession : Failed to request in database", invokeResult(from, charId>>4, 1, "Database error"); return);
-				CUniquePtr<CStoreResult> result(_RingDb.storeResult());
-
-				// 1.1 : if no session so no need to hibernate (not an error)
-				if (result->getNumRows() > 1)
+				uint32 nbClosed;
+				if (!closeAnimSessionsOfOwner(charId, "on_hibernateEditSession", nbClosed))
 				{
-					nlwarning("RSM : on_hibernateEditSession : character %u has %u anim session in DB, should only have 1",
-						charId, result->getNumRows());
-				}
-
-
-				unsigned int firstSession = 0;
-				unsigned int lastSession = result->getNumRows();
-
-
-				for (;firstSession != lastSession; ++firstSession)
-				{
-					result->fetchRow();
-					// get the session id
-
-					uint32 sessionNum;
-					result->getField(0, sessionNum);
-					TSessionId sessionId(sessionNum);
-
-					CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
-					if (session != NULL)
-					{
-
-						if ( session->getState() != TSessionState::ss_closed && session->getState() != TSessionState::ss_planned)
-						{
-							// ask the session server to close this session
-							TSessionServersIdx::iterator it(_SessionIndex.find(sessionId));
-							if (it == _SessionIndex.end())
-							{
-								nlwarning("RSM:closeSession : could not find server for opened session %u, closing the session", sessionId.asInt());
-
-								closeSession(sessionId);
-							}
-							else
-							{
-								TModuleProxyPtr proxy = it->second;
-
-								CRingSessionManagerClientProxy ss(proxy);
-
-								ss.closeSession(this, sessionId);
-							}
-
-						}
-					}
+					invokeResult(from, charId >> 4, 1, "Database error");
+					return;
 				}
 			}
 			// ok, all is good
 			invokeResult(from, charId>>4, 0, "");
+		}
+
+		/** Close the animation sessions that a character owns and that are not closed or only planned: the session
+		 *	server that hosts one is asked to close it, as closeSession asks it, and one that no server hosts is
+		 *	closed here.
+		 *	\param requestName the request this is done for, for the log
+		 *	\param nbClosed the number of sessions that were closed or that a session server was asked to close
+		 *	\return false when the sessions of the character could not be read from the database
+		 */
+		bool closeAnimSessionsOfOwner(uint32 charId, const char *requestName, uint32 &nbClosed)
+		{
+			nbClosed = 0;
+
+			CSString query;
+			query << "SELECT session_id FROM sessions";
+			query << " WHERE owner = "<<charId<<" AND session_type ='st_anim'";
+			BOMB_IF(!_RingDb.query(query), requestName << " : Failed to request in database", return false);
+			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
+
+			// 1.1 : if no session so no need to hibernate (not an error)
+			if (result->getNumRows() > 1)
+			{
+				nlwarning("RSM : %s : character %u has %u anim session in DB, should only have 1",
+					requestName, charId, result->getNumRows());
+			}
+
+
+			unsigned int firstSession = 0;
+			unsigned int lastSession = result->getNumRows();
+
+
+			for (;firstSession != lastSession; ++firstSession)
+			{
+				result->fetchRow();
+				// get the session id
+
+				uint32 sessionNum;
+				result->getField(0, sessionNum);
+				TSessionId sessionId(sessionNum);
+
+				CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
+				if (session != NULL)
+				{
+
+					if ( session->getState() != TSessionState::ss_closed && session->getState() != TSessionState::ss_planned)
+					{
+						// ask the session server to close this session
+						TSessionServersIdx::iterator it(_SessionIndex.find(sessionId));
+						if (it == _SessionIndex.end())
+						{
+							nlwarning("RSM:closeSession : could not find server for opened session %u, closing the session", sessionId.asInt());
+
+							closeSession(sessionId);
+						}
+						else
+						{
+							TModuleProxyPtr proxy = it->second;
+
+							CRingSessionManagerClientProxy ss(proxy);
+
+							ss.closeSession(this, sessionId);
+						}
+						++nbClosed;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		// Close the animation sessions that the character owns and that are open, and nothing else
+		// Return 'invokeResult' : 0 : ok, sessions closed (or about to close)
+		//                         1 : char not found
+		//                         2 : failed to close the sessions, internal error
+		//                         3 : the character owns no open animation session
+		virtual void on_closeAnimSessions(NLNET::TSockId from, uint32 charId)
+		{
+			nldebug("RSM : web close the animation sessions of char %u", charId);
+
+			CCharacterPtr character = CCharacter::load(_RingDb, charId, __FILE__, __LINE__);
+			if (character == NULL)
+			{
+				invokeResult(from, charId >> 4, 1, "Character not found");
+				return;
+			}
+
+			// The sessions are looked up by their owner: the request names the character and no session
+			uint32 nbClosed;
+			if (!closeAnimSessionsOfOwner(charId, "on_closeAnimSessions", nbClosed))
+			{
+				invokeResult(from, charId >> 4, 2, "Database error");
+				return;
+			}
+			if (nbClosed == 0)
+			{
+				invokeResult(from, charId >> 4, 3, "No open animation session found");
+				return;
+			}
+
+			// ok, all is good
+			invokeResult(from, charId >> 4, 0, "");
 		}
 
 		// Add a character in a user friend list
@@ -3062,6 +3115,27 @@ endOfWelcomeUserResult:
 					return;
 				}
 			}
+			else
+			{
+				// A character invites itself: that is how the owner of a session takes its place in it, as an editor
+				// of its edit session, or as the animator or a player of its animation session. It is the owner's
+				// alone, with a role of the type of the session.
+				if (session->getOwnerId() != ownerCharId)
+				{
+					invokeResult(from, ownerCharId >> 4, 4, "Only the owner of a session invites itself in it");
+					return;
+				}
+				bool roleFitsSession = false;
+				if (session->getSessionType() == TSessionType::st_edit)
+					roleFitsSession = (role == TSessionPartStatus::sps_edit_invited);
+				else if (session->getSessionType() == TSessionType::st_anim)
+					roleFitsSession = (role == TSessionPartStatus::sps_anim_invited || role == TSessionPartStatus::sps_play_invited);
+				if (!roleFitsSession)
+				{
+					invokeResult(from, ownerCharId >> 4, 6, "The role of the invitation and the type of the session don't match");
+					return;
+				}
+			}
 
 			// TODO : check for role and session type coherency
 
@@ -3174,7 +3248,7 @@ endOfWelcomeUserResult:
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
 		//                5 : character banned
 		//				  6 : no place left, session is full
 		//				  7 : session owner not found
@@ -3190,6 +3264,34 @@ endOfWelcomeUserResult:
 			// load the session
 			CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
 			BOMB_IF(session == NULL, "RSM:on_subscribeSession : failed to load session "<<sessionId<<" from database", invokeResult(from, charId>>4, 2, "session not found"); return);
+
+			// a subscription is for an animation session of public access that takes subscriptions
+			if (session->getSessionType() != TSessionType::st_anim)
+			{
+				invokeResult(from, charId >> 4, 4, "not an animation session");
+				return;
+			}
+			if (session->getAccessType() != TAccessType::at_public)
+			{
+				invokeResult(from, charId >> 4, 4, "session not public");
+				return;
+			}
+			if (session->getSubscriptionClosed())
+			{
+				invokeResult(from, charId >> 4, 4, "the subscription of the session is closed");
+				return;
+			}
+
+			// a character that has an entry in the session, subscribed or invited, gets no second one
+			BOMB_IF(!character->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "RSM:on_subscribeSession : failed to load the participations of character " << charId, invokeResult(from, charId >> 4, 8, "failed to load the participations of the character"); return);
+			for (uint i = 0; i < character->getSessionParticipants().size(); ++i)
+			{
+				if (character->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
+				{
+					invokeResult(from, charId >> 4, 3, "character already subscribed to or invited in the session");
+					return;
+				}
+			}
 
 			// check for free slot before more time consuming processing
 			if (session->getReservedSlots() >= session->getSubscriptionSlots() )
@@ -3266,8 +3368,10 @@ endOfWelcomeUserResult:
 				const CSessionParticipantPtr &part = session->getSessionParticipantsByIndex(i);
 				BOMB_IF(part == NULL, "RSM:on_unsubsribeSession : error accessing participants at index " << i << ", part is NULL", invokeResult(from, charId >> 4, 4, "failed to accesss participants record"); return);
 
+				// (the entry of a kicked character stays: removing it would remove the kick with it)
 				if (part->getCharId() == charId
-					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed)
+					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed
+					&& !part->getKicked())
 				{
 					// ok, we found it, we can erase it
 					if (CSessionParticipant::removeById(_RingDb, part->getObjectId()))
@@ -3329,8 +3433,12 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// Make sure that we don't enter an edit sessino when we wanted to go to an anim / mainland and vice versa
-			if ( (session->getSessionType()==TSessionType::st_edit) != isEditSessionRequested )
+			// Make sure that a request for the edit session of a character does not end in an anim session or on a
+			// mainland. The other way round is allowed: an edit session is entered by its id too, which is how the
+			// editors its owner invited come in (and the owner, from the ring web pages). What lets a character into
+			// an edit session is checked below: the participation of its owner, or an editor's participation in
+			// it from which the character is not kicked, or the session access privilege of its account.
+			if (isEditSessionRequested && session->getSessionType() != TSessionType::st_edit)
 			{
 				STOP("We have a BUG - character trying to go to a session of the wrong type "<<charId);
 				joinSessionResult(from, charId>>4, sessionId, 2, "Session type error", TSessionPartStatus::invalid_val);
@@ -3408,20 +3516,52 @@ endOfWelcomeUserResult:
 				charac->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
 
 				CSessionParticipantPtr sessionPart;
-				// look for the entry pertaining to the session
+				bool kicked = false;
+				// look for the entry pertaining to the session (the first one that counts is the participation, and
+				// a kick counts on any of them: a character can have more than one from the time when subscribing
+				// did not look for an entry that is already there)
 				for (uint i=0; i<charac->getSessionParticipants().size(); ++i)
 				{
 					if (charac->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
 					{
-						// we found it
-						sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
-						break;
+						// we found one
+						// An entry counts when its role is one of the type of the session. The session server makes
+						// an editor of every character it is told about for an edit session, and an animator of one
+						// that is announced as an editor for an animation session, whatever the entry says. So an
+						// edit session takes the entries of editors, and its owner; an animation session takes the
+						// entries of animators and players.
+						TSessionPartStatus partStatus = charac->getSessionParticipants()[i]->getStatus();
+						bool editorPart = (partStatus == TSessionPartStatus::sps_edit_invited || partStatus == TSessionPartStatus::sps_editing);
+						bool partCounts = true;
+						if (session->getSessionType() == TSessionType::st_edit)
+							partCounts = editorPart || session->getOwnerId() == charId;
+						else if (session->getSessionType() == TSessionType::st_anim)
+							partCounts = !editorPart;
+						if (sessionPart == NULL && partCounts)
+							sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
+						if (charac->getSessionParticipants()[i]->getKicked())
+							kicked = true;
 					}
 				}
+
+				// A character that was kicked from the session stays out of it until it is unkicked. The session
+				// server lets in whoever is announced to it, so this is the place that refuses: without it a kick
+				// lasts until the character asks to join again. The owner of a session is never kicked from it, and
+				// an account that enters any session by its privilege is not held back by a kick either.
+				if (kicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(userId))
+				{
+					nlinfo("RSM : char %u asks to join session %u, from which it was kicked: refused", charId, sessionId.asInt());
+					joinSessionResult(from, charId >> 4, sessionId, 21, "Character is kicked from the session", TSessionPartStatus::invalid_val);
+					return;
+				}
+
 				if (sessionPart == NULL)
 				{
-					// if the session is public, automatically create an invitation as player
-					if (session->getAccessType() == TAccessType::at_public)
+					// if the session is a public animation session, automatically create an invitation as player
+					// (public access is the players' way into an animation: an edit session has no players, and
+					// the client and the ring web pages schedule every edit session with public access)
+					if (session->getAccessType() == TAccessType::at_public
+					    && session->getSessionType() == TSessionType::st_anim)
 					{
 						sessionPart = CSessionParticipant::createTransient(__FILE__, __LINE__);
 						sessionPart->setCharId(charId);
@@ -3494,7 +3634,9 @@ endOfWelcomeUserResult:
 				if (sessionPart != NULL)
 				{
 					// normal user with participation
-					if (	sessionPart->getStatus() == TSessionPartStatus::sps_edit_invited
+					// (the participation that counts in an edit session is an editor's or the owner's, see above)
+					if (	session->getSessionType() == TSessionType::st_edit
+						||	sessionPart->getStatus() == TSessionPartStatus::sps_edit_invited
 						||	sessionPart->getStatus() == TSessionPartStatus::sps_editing)
 					{
 						// warn the session server that an editor come in
@@ -3528,7 +3670,8 @@ endOfWelcomeUserResult:
 				}
 				else
 				{
-					// this is for a GM without participation
+					// this is for a GM without participation (an account with a privilege of PrivilegeForSessionAccess):
+					// it enters an edit session as an editor, and any other Ring session as a player
 					if (session->getSessionType() == TSessionType::st_edit)
 						enterAs = WS::TUserRole::ur_editor;
 					else
@@ -3873,6 +4016,7 @@ endOfWelcomeUserResult:
 		//                3 : character has no participation in the session
 		//                4 : internal error
 		//				  5 : owner char don't own the session
+		//				  6 : the owner of the session can't be kicked
 		void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 charId)
 		{
 			nldebug("RSM : on_kickCharacter : web ask to kick character %u from session %u",
@@ -3892,6 +4036,13 @@ endOfWelcomeUserResult:
 					invokeResult(from, ownerCharId>>4, 5, "Owner char don't own the session");
 					return;
 				}
+			}
+
+			// a kicked character is refused when it asks to join: the owner is the one character that always comes in
+			if (session->getOwnerId() == charId)
+			{
+				invokeResult(from, ownerCharId >> 4, 6, "The owner of the session can't be kicked");
+				return;
 			}
 
 			// load the participants

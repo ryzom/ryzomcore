@@ -1715,6 +1715,59 @@ public:
 };
 REGISTER_ACTION_HANDLER (CAHLaunchGame, "launch_game");
 
+// Close the animation session that the character of a slot launched and left running (the slot offers to resume it)
+// ------------------------------------------------------------------------------------------------
+class CAHCloseRingSession : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	{
+		// Get the selected slot
+		string sSlot = getParam(Params, "slot");
+		CInterfaceExprValue result;
+		if (!CInterfaceExpr::eval(sSlot, result))
+			return;
+		sint64 slot = result.getInteger();
+		if (slot < 0 || slot >= (sint64)CharacterSummaries.size())
+			return;
+		if (ClientCfg.Local || !CharacterSummaries[(uint)slot].InRingSession)
+			return;
+
+		// The request names the character and no session: the session browser checks the character against the
+		// account of the connection, and the session manager closes the open animation sessions that the
+		// character owns, and nothing else. It answers 3 when there is none: the session is closed already, which
+		// is what the player asked for.
+		uint32 charId = (NetMngr.getLoginCookie().getUserId() << 4) + (uint32)slot;
+		CSessionBrowserImpl &sb = CSessionBrowserImpl::getInstance();
+		sb.init(NULL);
+		sb.closeAnimSessions(charId);
+		bool answered = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+		if (!answered || (sb._LastInvokeResult != 0 && sb._LastInvokeResult != 3))
+		{
+			if (answered)
+				nlwarning("The session manager did not close the Ring session of char %u: result %u, '%s'", charId, sb._LastInvokeResult, sb._LastInvokeResultMsg.c_str());
+			else
+				nlwarning("The session browser did not answer the request to close the Ring session of char %u", charId);
+			CInterfaceManager::getInstance()->messageBoxWithHelp(CI18N::get("uiCharSel_CloseSessionFailed"), "ui:outgame");
+			return;
+		}
+
+		// The character summaries are only sent when the account connects. The session is closed, or about to be,
+		// which is what the next summary will say: the slot stops offering to resume it.
+		CharacterSummaries[(uint)slot].InRingSession = false;
+
+		// The buttons of the slot follow the selected slot: select it again
+		CCDBNodeLeaf *selectedSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:CHARSELSLOT", false);
+		if (selectedSlot != NULL)
+		{
+			sint64 selected = selectedSlot->getValue64();
+			selectedSlot->setValue64(-1);
+			selectedSlot->setValue64(selected);
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CAHCloseRingSession, "close_ring_session");
+
 
 // Ask the server to create a character
 // ------------------------------------------------------------------------------------------------
