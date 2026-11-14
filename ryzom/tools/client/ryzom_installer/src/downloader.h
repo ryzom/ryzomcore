@@ -94,8 +94,8 @@ protected:
 	QString m_contentType;
 	QMap<QString, QString> m_firstContentTypes;
 
-	// The status of the running GET was checked at its first data
-	bool m_getStatusChecked;
+	// Status of the running GET, read at its first data, 0 before
+	int m_getStatus;
 
 	// Failure found while the GET runs, reported when it has finished
 	QString m_getFailure;

@@ -28,7 +28,7 @@
 #endif
 
 CDownloader::CDownloader(QObject *parent, IOperationProgressListener *listener):QObject(parent), m_listener(listener), m_manager(NULL), m_timer(NULL),
-	m_offset(0), m_size(0), m_sizeKnown(false), m_getStatusChecked(false), m_supportsAcceptRanges(false), m_supportsContentRange(false),
+	m_offset(0), m_size(0), m_sizeKnown(false), m_getStatus(0), m_supportsAcceptRanges(false), m_supportsContentRange(false),
 	m_downloadAfterHead(false), m_file(NULL)
 {
 	m_manager = new QNetworkAccessManager(this);
@@ -249,7 +249,7 @@ void CDownloader::downloadFile()
 		return;
 	}
 
-	m_getStatusChecked = false;
+	m_getStatus = 0;
 	m_getFailure.clear();
 
 	QNetworkRequest request(m_url);
@@ -553,24 +553,49 @@ void CDownloader::onDownloadRead()
 
 	if (!m_file || !reply) return;
 
-	// a server that ignores the range sends the whole file, which replaces the part instead of following it
-	if (!m_getStatusChecked)
+	if (m_getStatus == 0)
 	{
-		m_getStatusChecked = true;
-		const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-		if ((status == 200) && supportsResume() && (m_offset > 0))
+		m_getStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+		// a server that ignores the range sends the whole file, which replaces the part instead of following it,
+		// but an answer that is not the file, such as an error page sent with 200, leaves the part as it is
+		if ((m_getStatus == 200) && supportsResume() && (m_offset > 0))
 		{
+			const QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
+			const QString contentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+			const QString firstContentType = m_firstContentTypes.value(m_fullPath);
+			const bool wholeFile = m_sizeKnown ? (contentLength.isValid() && (contentLength.toLongLong() == m_size)) : (contentType == firstContentType);
+			if (!wholeFile)
+			{
+				const QString announced = contentLength.isValid() ? tr("%1 bytes").arg(contentLength.toLongLong()) : tr("no length");
+				const QString expected = m_sizeKnown ? tr("%1 bytes").arg(m_size) : tr("an unknown length");
+				nlwarning("%s answers the range from byte %" NL_I64 "d of %s with status %d, %s of '%s', where the file has %s of '%s': the part %s is kept", Q2C(QUrl(m_url).host()), m_offset,
+				    Q2C(m_url), m_getStatus, Q2C(announced), Q2C(contentType), Q2C(expected), Q2C(firstContentType), Q2C(m_fullPath));
+				m_getFailure = tr("%1 answers the range from byte %2 of %3 with status %4, %5 of '%6', where the file has %7 of '%8': the part %9 is kept")
+				                   .arg(QUrl(m_url).host(), QString::number(m_offset), m_url, QString::number(m_getStatus), announced, contentType, expected, firstContentType, m_fullPath);
+				closeFile();
+				reply->abort();
+				return;
+			}
+
 			nlwarning("The server sends the whole of %s instead of the range from byte %" NL_I64 "d, the part %s is downloaded again", Q2C(m_url), m_offset, Q2C(m_fullPath));
 			if (!m_file->resize(0) || !m_file->seek(0))
 			{
 				nlwarning("Unable to empty %s: %s", Q2C(m_fullPath), Q2C(m_file->errorString()));
-				m_getFailure = tr("Unable to empty %1 for the whole file the server sends: %2").arg(m_fullPath).arg(m_file->errorString());
+				m_getFailure = tr("Unable to empty %1 for the whole file the server sends: %2").arg(m_fullPath, m_file->errorString());
 				closeFile();
 				reply->abort();
 				return;
 			}
 			m_offset = 0;
 		}
+	}
+
+	// the body of an answer that is neither the file nor its range, such as an error page, stays out of the part
+	if ((m_getStatus != 200) && (m_getStatus != 206))
+	{
+		reply->readAll();
+		return;
 	}
 
 	m_file->write(reply->readAll());
