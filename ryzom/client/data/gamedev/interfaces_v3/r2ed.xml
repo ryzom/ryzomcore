@@ -1575,7 +1575,7 @@ text_y="-2"
 	
 	<separator/>
 
-	<action id="toggle_fixed_lighting" name="uiR2EDDivineLight" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
+	<action id="toggle_fixed_lighting" name="uiR2EDTurnLightOn" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
 	<separator/>
 
 	<action id="reset windows"		name="uiR2EDResetWindows"	handler="lua"   params="r2:resetDesktop(getDesktopIndex())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_resetwindows.tga"/>
@@ -1620,7 +1620,7 @@ text_y="-2"
 
 <group type="menu" id="r2ed_palette_menu" extends="r2ed_base_menu">
 	<!-- TMP for debug -->		
-	<action id="dump_lua_table"		name="uimR2EDDumpLuaTable"		handler="lua"  params="r2:onShowPaletteLuaTable(30)" />
+	<action id="dump_lua_table"		name="uimR2EDMenuDumpLuaTable"		handler="lua"  params="r2:onShowPaletteLuaTable(30)" />
 </group>
 
 

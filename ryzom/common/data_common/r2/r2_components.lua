@@ -11,16 +11,16 @@ r2.registerHighLevel = function()
 		{			
 			{Name="Title", Type="String", Category="uiR2EDRollout_Scenario"},
 			{Name="LevelId", Type="String"},
-			{Name="ShortDescription", Type="String", Category="uiREDRollout_"},
-			{Name="OptimalNumberOfPlayer", Type="Number", Category="uiREDRollout_", Min="1", Max="10", Default="1"},
-			{Name="Creator", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText"},
-			{Name="CreatorMD5", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText"},
+			{Name="ShortDescription", Type="String", Category="uiR2EDRollout_Description"},
+			{Name="OptimalNumberOfPlayer", Type="Number", Category="uiR2EDRollout_Description", Min="1", Max="10", Default="1"},
+			{Name="Creator", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText"},
+			{Name="CreatorMD5", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText"},
 
-			{Name="CreationDate", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText"},
-			{Name="OtherCharAccess", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText", DefaultValue="Full", DefaultInBase = 1 },
-			{Name="NevraxScenario", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText", DefaultValue="0", DefaultInBase = 1 },
-			{Name="TrialAllowed", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText", DefaultValue="0", DefaultInBase = 1 },
-			{Name="ScenarioTag", Type="String", Category="uiREDRollout_", WidgetStyle = "StaticText", DefaultValue="", DefaultInBase = 1 },
+			{Name="CreationDate", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText"},
+			{Name="OtherCharAccess", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText", DefaultValue="Full", DefaultInBase = 1 },
+			{Name="NevraxScenario", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText", DefaultValue="0", DefaultInBase = 1 },
+			{Name="TrialAllowed", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText", DefaultValue="0", DefaultInBase = 1 },
+			{Name="ScenarioTag", Type="String", Category="uiR2EDRollout_Description", WidgetStyle = "StaticText", DefaultValue="", DefaultInBase = 1 },
 		},
 		
 	
@@ -54,7 +54,7 @@ r2.registerHighLevel = function()
 			{Name="Type", Type="String", DefaultValue="so_story_telling", Visible=false},
 			--{Name="TestRefId", Type="RefId", Category="uiR2EDRollout_Test"},
 			{Name="ScenarioScore", Type="Number", DefaultValue="0", Min="0", Visible=false},
-			{Name="Score", Type="Number"},
+			{Name="Score", Type="Number", Visible=false},
 		},
 		Parameters = {},
 		ApplicableActions = { 
