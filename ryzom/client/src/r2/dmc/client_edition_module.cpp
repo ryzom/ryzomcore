@@ -1100,9 +1100,21 @@ void CClientEditionModule::startScenario(class NLNET::IModuleProxy * proxy, bool
 		requestReconnection();
 	}
 
-	if (!ok && errorReason.empty())
+	if (!ok && !errorReason.empty())
 	{
-		systemMsg(proxy, "ERR", "", errorReason);
+		// The reason is a text id that the service chose, and it is shown: one line of 256 bytes at most, cut
+		// before a character and not inside one, without control characters
+		std::string::size_type len = errorReason.size();
+		if (len > 256)
+		{
+			for (len = 256; len > 0 && ((uint8)errorReason[len] & 0xC0) == 0x80; --len) { }
+		}
+		std::string reason = errorReason.substr(0, len);
+		for (std::string::size_type i = 0; i < len; ++i)
+		{
+			if ((uint8)reason[i] < 0x20 || reason[i] == 0x7f) { reason[i] = ' '; }
+		}
+		systemMsg(proxy, "ERR", "", reason);
 	}
 }
 
