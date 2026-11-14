@@ -559,6 +559,7 @@ public:
 	virtual void			getBuffer (CBitmap &bitmap) = 0;
 
 	/** get the ZBuffer (back buffer).
+	  * NB: the first row is the top one, like in the bitmap of getBuffer().
 	  *
 	  * \param zbuffer the returned array of Z. size of getWindowSize() .
 	  */

@@ -553,15 +553,25 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 
 // ***************************************************************************
 
-void getBuffer (CBitmap &btm)
+// The picture of a screenshot. When z is given, it gets the depth of the same picture, row by row from the top like
+// the bitmap; it is left empty when the driver gives no depth.
+void getBuffer(CBitmap &btm, std::vector<float> *z = NULL)
 {
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	//
+	if (z)
+		z->clear();
 	if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
 	{
 		// Destination image
 		CBitmap temp;
 		btm.resize (ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight, CBitmap::RGBA);
+
+		// Destination depth: every tile of the picture is a frame of its own, with a depth buffer of its own
+		std::vector<float> tempZ;
+		bool zComplete = z != NULL;
+		if (z)
+			z->resize((size_t)ClientCfg.ScreenShotWidth * ClientCfg.ScreenShotHeight, 1.f);
 
 		uint top;
 		uint bottom = std::min (Driver->getWindowHeight (), ClientCfg.ScreenShotHeight);
@@ -575,8 +585,29 @@ void getBuffer (CBitmap &btm)
 				renderSceneScreenShot (left, right, top, bottom, ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 				// Get the bitmap
 				Driver->getBuffer (temp);
+				// Get the depth, before the swap leaves the back buffer undefined
+				if (zComplete)
+					Driver->getZBuffer(tempZ);
 				Driver->swapBuffers ();
 				btm.blit (temp, 0, Driver->getWindowHeight ()-(bottom-top), right-left, bottom-top, left, top);
+				if (zComplete)
+				{
+					// the same part of the window as the blit above
+					uint windowWidth = Driver->getWindowWidth();
+					uint windowHeight = Driver->getWindowHeight();
+					if (tempZ.size() == (size_t)windowWidth * windowHeight)
+					{
+						for (uint y = 0; y < bottom - top; ++y)
+						{
+							std::vector<float>::const_iterator src = tempZ.begin() + (size_t)(windowHeight - (bottom - top) + y) * windowWidth;
+							std::copy(src, src + (right - left), z->begin() + (size_t)(top + y) * ClientCfg.ScreenShotWidth + left);
+						}
+					}
+					else
+					{
+						zComplete = false;
+					}
+				}
 
 				// Next
 				right = std::min (right+Driver->getWindowWidth (), ClientCfg.ScreenShotWidth);
@@ -585,10 +616,15 @@ void getBuffer (CBitmap &btm)
 			// Next
 			bottom = std::min (bottom+Driver->getWindowHeight (), ClientCfg.ScreenShotHeight);
 		}
+
+		if (z && !zComplete)
+			z->clear();
 	}
 	else
 	{
 		Driver->getBuffer(btm);
+		if (z)
+			Driver->getZBuffer(*z);
 	}
 }
 
@@ -599,48 +635,56 @@ void displayScreenShotSavedInfo(const string &filename)
 	pIM->displaySystemInfo(msg);
 }
 
-bool screenshotZBuffer(const std::string &filename)
+// Writes the depth of a screenshot (getBuffer) beside it as a gray picture of the same size and file format, from
+// the nearest depth of the picture (black) to its farthest (white). The depth is the one of the back buffer: with
+// FXAA or Bloom on, the scene is drawn into an effect target and the back buffer has no depth of it
+bool screenshotZBuffer(const std::string &filename, const std::vector<float> &z, uint width, uint height)
 {
-	std::string::size_type pos = filename.find(".");
+	// the extension of the file, not a dot of its directory
+	std::string::size_type pos = filename.find_last_of('.');
 
 	if (pos == std::string::npos)
 		return false;
 
+	// the name keeps the extension: the screenshots are numbered per extension
 	std::string filename_z = filename.substr(0, pos) + "_z" + filename.substr(pos);
 	std::string ext = filename.substr(pos+1);
 
-	std::vector<float> z;
-	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-
-	Driver->getZBuffer(z);
-
-	float min = std::numeric_limits<float>::max();
-	float max = std::numeric_limits<float>::min();
-
-	// get min and max values
-	for(uint i = 0; i < z.size(); ++i)
+	if (width == 0 || height == 0 || z.size() != (size_t)width * height)
 	{
-		float value = z[i];
-		if (value > max)
-		{
-			max = value;
-		}
-		else if (value < min)
-		{
-			min = value;
-		}
+		nlwarning("No depth buffer for the screenshot '%s': the driver gave %u values for %ux%u", filename.c_str(), (uint)z.size(), width, height);
+		return false;
 	}
 
-	max = max - min;
+	// get min and max values
+	float zMin = z[0];
+	float zMax = z[0];
+	for (uint i = 1; i < z.size(); ++i)
+	{
+		float value = z[i];
+		if (value > zMax)
+			zMax = value;
+		if (value < zMin)
+			zMin = value;
+	}
+
+	float range = zMax - zMin;
+	bool flat = !(range > 0.f);
+	if (flat)
+	{
+		nlwarning("The depth buffer of the screenshot '%s' is %f everywhere. With FXAA or Bloom on (FXAA = %d, Bloom = %d) the scene is drawn into an effect target, not into the back buffer this depth is read from: switch both off for a depth picture",
+		    filename.c_str(), zMin, ClientCfg.FXAA ? 1 : 0, ClientCfg.Bloom ? 1 : 0);
+	}
 
 	CBitmap zi;
-	zi.resize(Driver->getWindowWidth(), Driver->getWindowHeight());
+	zi.resize(width, height);
 	CRGBA *dest = (CRGBA *) &zi.getPixels()[0];
 
 	for(uint k = 0; k < z.size(); ++k)
 	{
-		// normalize values
-		uint8 i = (uint8) ((z[k] - min) * 255.f / max);
+		// normalize values (a depth that is no number is far)
+		float value = flat ? 255.f : (z[k] - zMin) * 255.f / range;
+		uint8 i = (value >= 0.f && value <= 255.f) ? (uint8)value : 255;
 		dest->set(i, i, i, i);
 		++ dest;
 	}
@@ -648,14 +692,27 @@ bool screenshotZBuffer(const std::string &filename)
 	try
 	{
 		COFile f;
-		f.open(filename_z);
+		if (!f.open(filename_z))
+		{
+			nlwarning("Cannot write the depth buffer of the screenshot to '%s'", filename_z.c_str());
+			return false;
+		}
+		bool written;
 		if (ext == "png")
-			zi.writePNG(f, 32);
+			written = zi.writePNG(f, 32);
+		else if (ext == "jpg")
+			written = zi.writeJPG(f, 100);
 		else
-			zi.writeTGA(f, 32);
+			written = zi.writeTGA(f, 32);
+		if (!written)
+		{
+			nlwarning("Cannot write the depth buffer of the screenshot to '%s'", filename_z.c_str());
+			return false;
+		}
 	}
-	catch(...)
+	catch (const Exception &e)
 	{
+		nlwarning("Cannot write the depth buffer of the screenshot to '%s': %s", filename_z.c_str(), e.what());
 		return false;
 	}
 
@@ -693,7 +750,8 @@ static std::string findNewScreenShotFileName(std::string filename)
 void screenShotTGA()
 {
 	CBitmap btm;
-	getBuffer (btm);
+	std::vector<float> z;
+	getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL);
 
 	string filename = findNewScreenShotFileName("screenshot.tga");
 	COFile fs(filename);
@@ -706,7 +764,7 @@ void screenShotTGA()
 	}
 
 	if (ClientCfg.ScreenShotZBuffer)
-		screenshotZBuffer(filename);
+		screenshotZBuffer(filename, z, btm.getWidth(), btm.getHeight());
 
 	nlinfo("Screenshot '%s' saved in tga format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 	displayScreenShotSavedInfo(filename);
@@ -715,7 +773,8 @@ void screenShotTGA()
 void screenShotPNG()
 {
 	CBitmap btm;
-	getBuffer (btm);
+	std::vector<float> z;
+	getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL);
 
 	string filename = findNewScreenShotFileName("screenshot.png");
 	COFile fs(filename);
@@ -728,7 +787,7 @@ void screenShotPNG()
 	}
 
 	if (ClientCfg.ScreenShotZBuffer)
-		screenshotZBuffer(filename);
+		screenshotZBuffer(filename, z, btm.getWidth(), btm.getHeight());
 
 	nlinfo("Screenshot '%s' saved in png format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 	displayScreenShotSavedInfo(filename);
@@ -737,7 +796,8 @@ void screenShotPNG()
 void screenShotJPG()
 {
 	CBitmap btm;
-	getBuffer (btm);
+	std::vector<float> z;
+	getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL);
 
 	string filename = findNewScreenShotFileName("screenshot.jpg");
 	COFile fs(filename);
@@ -750,7 +810,7 @@ void screenShotJPG()
 	}
 
 	if (ClientCfg.ScreenShotZBuffer)
-		screenshotZBuffer(filename);
+		screenshotZBuffer(filename, z, btm.getWidth(), btm.getHeight());
 
 	nlinfo("Screenshot '%s' saved in jpg format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 	displayScreenShotSavedInfo(filename);

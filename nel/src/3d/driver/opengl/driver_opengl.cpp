@@ -1376,6 +1376,16 @@ void CDriverGL::getZBuffer (std::vector<float>  &zbuffer)
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
+
+	// OpenGL reads the rows from the bottom of the window: the first row is the top one, as in getBuffer
+	if (zbuffer.size() == (size_t)rect.Width * rect.Height)
+	{
+		for (uint32 y = 0; y < rect.Height / 2; ++y)
+		{
+			std::swap_ranges(zbuffer.begin() + (size_t)y * rect.Width, zbuffer.begin() + (size_t)(y + 1) * rect.Width,
+			    zbuffer.begin() + (size_t)(rect.Height - 1 - y) * rect.Width);
+		}
+	}
 }
 
 void CDriverGL::getBuffer (CBitmap &bitmap)
