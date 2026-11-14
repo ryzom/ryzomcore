@@ -1625,10 +1625,16 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 		{
 			const CShardNames::TSessionName &sn = shardNames[i];
 
-			// create an unified dynamic channel with a well known chanId; its title is the display name the shard
-			// configuration gives the mainland (HomeMainlandNames), sent as it is, since an operator names shards freely
-			// and no phrase can exist for every name
-			DynChatEGS.addChan("RING_" + toUpper(sn.ShortName), ucstring::makeFromUtf8(sn.DisplayName), CEntityId(RYZOMID::dynChatGroup, RingDynChanOffset + sn.SessionId.asInt()), false, false, true);
+			// create an unified dynamic channel with a well known chanId; its title is the phrase RING_CHANNEL ("Ring
+			// Channel <name>") with the display name the shard configuration gives the mainland (HomeMainlandNames),
+			// since an operator names shards freely; a mainland without a display name shows its short name
+			if (sn.DisplayName.empty())
+			{
+				nlwarning("HomeMainlandNames: the mainland of session %u has no display name, its Ring channel is titled with its short name '%s'",
+				    sn.SessionId.asInt(), sn.ShortName.c_str());
+			}
+			const std::string &titleName = sn.DisplayName.empty() ? sn.ShortName : sn.DisplayName;
+			DynChatEGS.addChan("RING_" + toUpper(sn.ShortName), ucstring::makeFromUtf8(titleName), CEntityId(RYZOMID::dynChatGroup, RingDynChanOffset + sn.SessionId.asInt()), false, false, true, "RING_CHANNEL");
 		}
 	}
 
