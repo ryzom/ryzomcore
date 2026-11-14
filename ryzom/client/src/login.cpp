@@ -471,6 +471,9 @@ void loginMainLoop()
 		// Display
 		Driver->swapBuffers();
 
+		// This screen needs no more frames than a display shows
+		limitOutgameFrameRate();
+
 //		sint32 screen = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
 		if (LoginSM.getCurrentState() == CLoginStateMachine::st_check_patch)
 //		if (screen == UI_VARIABLES_SCREEN_CHECKING) // If we are in checking mode

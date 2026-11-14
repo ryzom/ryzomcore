@@ -1122,6 +1122,9 @@ TInterfaceState globalMenu()
 		// Display
 		Driver->swapBuffers();
 
+		// This screen needs no more frames than a display shows
+		limitOutgameFrameRate();
+
 		// SERVER INTERACTIONS WITH INTERFACE
 		if (WaitServerAnswer)
 		{

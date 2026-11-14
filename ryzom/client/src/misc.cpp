@@ -30,6 +30,7 @@
 #include "entities.h"
 #include "sheet_manager.h"
 #include "interface_v3/interface_manager.h"
+#include "interface_v3/input_handler_manager.h"
 #include "continent_manager.h"
 #include "world_database_manager.h"
 #include "client_cfg.h"
@@ -1378,6 +1379,32 @@ void setVideoMode(const UDriver::CMode &mode)
 
 		Driver->setWindowPos(posX, posY);
 	}
+}
+
+void limitOutgameFrameRate()
+{
+	// when the last frame left this function
+	static TTime s_LastFrameEnd = 0;
+
+	// a sleep of the configuration (Sleep >= 0) is done by the loops themselves and is all there is
+	if (ClientCfg.Sleep < 0)
+	{
+		if (CViewRenderer::getInstance()->isMinimized() || !CInputHandlerManager::getInstance()->hasFocus())
+		{
+			// nobody looks
+			nlSleep(50);
+		}
+		else if (!ClientCfg.WaitVBL)
+		{
+			// the vertical sync paces the frames when it is on: otherwise the rest of a 60th of a second
+			const TTime frameTime = 16;
+			TTime elapsed = CTime::getLocalTime() - s_LastFrameEnd;
+			if (elapsed >= 0 && elapsed < frameTime)
+				nlSleep((uint32)(frameTime - elapsed));
+		}
+	}
+
+	s_LastFrameEnd = CTime::getLocalTime();
 }
 
 uint getCurrentColorDepth()
