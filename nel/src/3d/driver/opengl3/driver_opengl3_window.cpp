@@ -1659,10 +1659,20 @@ bool CDriverGL3::destroyWindow()
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
-	if (_DestroyWindow && _ctx)
+	// the context is the driver's own, also on a window of the application
+	if (_ctx)
+	{
+		glXMakeCurrent(_dpy, None, nullptr);
 		glXDestroyContext(_dpy, _ctx);
+		_ctx = nullptr;
+	}
 
-	_ctx = nullptr;
+	// and so is the description of the visual it was made with
+	if (_visual_info)
+	{
+		XFree(_visual_info);
+		_visual_info = nullptr;
+	}
 
 #endif
 

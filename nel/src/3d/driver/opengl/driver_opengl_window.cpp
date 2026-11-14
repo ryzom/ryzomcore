@@ -1251,7 +1251,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	{
 		nlwarning("3D: glXMakeCurrent() failed on window 0x%lx", (unsigned long)_win);
 
-		// what this function acquired goes, destroyWindow does not destroy the context of a window it did not create
+		// what this function acquired goes here, so that a window of the application is not touched again
 		glXDestroyContext(_dpy, _ctx);
 		_ctx = nullptr;
 		XFree(_visual_info);
@@ -1838,10 +1838,20 @@ bool CDriverGL::destroyWindow()
 
 #elif defined(NL_OS_UNIX)
 
-	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
+	// the context is the driver's own, also on a window of the application
+	if (_ctx)
+	{
+		glXMakeCurrent(_dpy, None, nullptr);
 		glXDestroyContext(_dpy, _ctx);
+		_ctx = nullptr;
+	}
 
-	_ctx = nullptr;
+	// and so is the description of the visual it was made with
+	if (_visual_info)
+	{
+		XFree(_visual_info);
+		_visual_info = nullptr;
+	}
 
 #endif
 
