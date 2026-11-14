@@ -2488,7 +2488,24 @@ bool CDriverGL3::keepWindowPosOnMonitors(sint32 &x, sint32 &y)
 
 #elif defined(NL_OS_MAC)
 
-	// no monitors: the position is kept
+	// Cocoa counts y upwards from the bottom of the screen with the menu bar, which is the first one; NeL counts
+	// it downwards from the top of that screen (see setWindowPos)
+	NSArray *screens = [NSScreen screens];
+	if ([screens count] == 0)
+		return false;
+
+	CGFloat menuScreenHeight = [(NSScreen *)[screens objectAtIndex:0] frame].size.height;
+	for (NSUInteger i = 0; i < [screens count]; ++i)
+	{
+		// the screen without the menu bar and the Dock
+		NSRect visible = [(NSScreen *)[screens objectAtIndex:i] visibleFrame];
+		monitors.push_back(NLMISC::CRect((sint32)visible.origin.x, (sint32)(menuScreenHeight - visible.origin.y - visible.size.height),
+		    (uint32)visible.size.width, (uint32)visible.size.height));
+	}
+
+	NSRect windowFrame = [[containerView() window] frame];
+	width = (uint32)windowFrame.size.width;
+	height = (uint32)windowFrame.size.height;
 
 #elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
