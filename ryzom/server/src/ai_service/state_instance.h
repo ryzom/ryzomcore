@@ -486,9 +486,34 @@ bool CStateInstance::advanceUserTimer(uint32 nbTicks)
 	return	true;
 }
 
+/**
+ * Bounds the work one event or one script of a scenario of a Ring session starts. The handler of
+ * an event can trigger other events and run scripts, which can trigger events again: the events
+ * and the scripts that are started from inside one another, the events in all, and the operations
+ * of the scripts in all have a limit. Past a limit nothing more is started for that work, one line
+ * is logged with the session and the group, and the scenario goes on with its next event.
+ * The scripts and events of a shard that is no Ring shard are not counted.
+ */
+class CScenarioWorkScope
+{
+public:
+	/// isEvent: an event of the group is dispatched; else a script is interpreted for it
+	CScenarioWorkScope(CStateInstance *stateInstance, bool isEvent);
+	~CScenarioWorkScope();
+	/// False when the event must not be dispatched, or the script not interpreted
+	bool isAllowed() const { return m_Allowed; }
+
+private:
+	bool m_Allowed;
+};
+
 inline
 void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState const* state)
 {
+	CScenarioWorkScope work(this, true);
+	if (!work.isAllowed())
+		return;
+
 	//	NOTE: This is a quick and inefficient implementation of event treatment - needs to be re-worked
 	//	note that it is OK for state to be 'NULL'
 	if	(!state)

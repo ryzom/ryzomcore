@@ -55,7 +55,7 @@ Arguments: f(EventId) ->
 // CStateInstance
 void setEvent_f_(CStateInstance* entity, CScriptStack& stack)
 {
-	size_t const eventIndex = (size_t)(float)stack.top();
+	float const eventArg = (float)stack.top();
 	stack.pop();
 	
 	if (!entity)
@@ -64,7 +64,14 @@ void setEvent_f_(CStateInstance* entity, CScriptStack& stack)
 		return;
 	}
 	
-	nlassert(eventIndex<10);
+	// The number comes from a script, which can be the script of a scenario a client uploaded: a
+	// number that is not one of the user events is refused, and does not stop the service
+	if (!(eventArg >= 0.f && eventArg < 10.f))
+	{
+		nlwarning("setEvent: %g is not a user event (0 to 9), nothing is triggered", (double)eventArg);
+		return;
+	}
+	size_t const eventIndex = (size_t)eventArg;
 
 
 	if (IsRingShard.get())
@@ -113,10 +120,12 @@ void setTimer_ff_(CStateInstance* si, CScriptStack& stack)
 	
 	if (timerId<0 || timerId>3)
 	{
+		// the script can be the script of a scenario a client uploaded: the timer is not set, and
+		// the service goes on, as the other timer functions do
 		string errStr("critical, native function setTimer used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning("%s", errStr.c_str());
-		nlassert(false);
+		return;
 	}
 	
 	si->timerUser((uint)timerId).set((uint32)deltaTime);
@@ -209,9 +218,11 @@ void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
 	stack.pop();
 	
 	
+	// the script takes a result from the stack whatever happens here
 	if (!si)
 	{
 		nlwarning("timerIsEnabled failed");
+		stack.push(0.f);
 		return;
 	}
 	
@@ -220,6 +231,7 @@ void timerIsEnabled_f_f(CStateInstance* si, CScriptStack& stack)
 		string errStr("critical, native function timerIsEnabled used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning("%s", errStr.c_str());
+		stack.push(0.f);
 		return;
 	}
 	
@@ -249,9 +261,11 @@ void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
 	stack.pop();
 	
 	
+	// the script takes a result from the stack whatever happens here
 	if (!si)
 	{
 		nlwarning("timerIsSuspended failed");
+		stack.push(0.f);
 		return;
 	}
 	
@@ -260,6 +274,7 @@ void timerIsSuspended_f_f(CStateInstance* si, CScriptStack& stack)
 		string errStr("critical, native function timerIsSuspended used with out of bound parameter (0-3) equals to ");
 		errStr += toString(timerId);
 		nlwarning("%s", errStr.c_str());
+		stack.push(0.f);
 		return;
 	}
 	

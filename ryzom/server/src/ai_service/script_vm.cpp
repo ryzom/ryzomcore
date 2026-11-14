@@ -116,6 +116,14 @@ void CScriptVM::destroyInstance()
 	}
 }
 
+bool CScriptVM::_OpcodeBudgetSet = false;
+uint32 CScriptVM::_OpcodesLeft = 0;
+
+void scriptStop(const char *reason)
+{
+	throw EScriptStop(std::string(reason));
+}
+
 void CScriptVM::interpretCode(
 	IScriptContext* thisContext,
 	IScriptContext* parentContext,
@@ -141,12 +149,21 @@ void CScriptVM::interpretCode(
 		EOpcode	op = (EOpcode)opcodes[index];
 	#endif
 		
+		// The scripts of a scenario of a Ring session have a number of operations for the work one
+		// event starts: when it is used up, every script of that work ends here
+		if (_OpcodeBudgetSet)
+		{
+			if (_OpcodesLeft == 0)
+				return;
+			--_OpcodesLeft;
+		}
+
 		switch (opcodes[index])
 		{
 		default:
 		case	INVALID_OPCODE:
-			nlwarning("Invalid Opcode for Group '%s' with code in '%s'", thisContext->getContextName().c_str(), byteCode->_sourceName.c_str());
-			nlassert(false);
+			nlwarning("Invalid Opcode for Group '%s' with code in '%s'", thisContext ? thisContext->getContextName().c_str() : "", byteCode->_sourceName.c_str());
+			scriptStop("the code of the script has an operation the service does not know");
 			break;
 		case	EOP:
 			return;		//	End Of Program
@@ -204,9 +221,19 @@ void CScriptVM::interpretCode(
 				CScriptStack::CStackEntry	&entry0=stack.top();
 				CScriptStack::CStackEntry	&entry1=stack.top(1);
 
-				nlassert((entry0.type()==CScriptStack::EFloat||entry0.type()==CScriptStack::EString)
-						&&(entry1.type()==CScriptStack::EFloat||entry1.type()==CScriptStack::EString));
-					
+				if (!((entry0.type()==CScriptStack::EFloat||entry0.type()==CScriptStack::EString)
+						&&(entry1.type()==CScriptStack::EFloat||entry1.type()==CScriptStack::EString)))
+					scriptStop("a value that is neither a number nor a text is added");
+
+				// two texts, or a text and a number, are joined: the text that makes stays of a size
+				if (entry0.type()==CScriptStack::EString || entry1.type()==CScriptStack::EString)
+				{
+					size_t size0 = entry0.type()==CScriptStack::EString ? ((string&)entry0).size() : 32;
+					size_t size1 = entry1.type()==CScriptStack::EString ? ((string&)entry1).size() : 32;
+					if (size0 > MaxScriptTextSize || size1 > MaxScriptTextSize - size0)
+						scriptStop("a text is made longer than a script can make one");
+				}
+
 				breakable
 				{
 					if (entry0.type()==entry1.type())

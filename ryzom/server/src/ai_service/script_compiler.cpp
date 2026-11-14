@@ -1121,6 +1121,12 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 				if ( !inQuote && ('/' == str[i]) )
 				{
 					++i;
+					// a '/' that ends the line: there is no character after it to copy
+					if (str.size() == i)
+					{
+						code += '/';
+						break;
+					}
 					if ('/' == str[i])
 						break;
 
@@ -1245,8 +1251,8 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCodeYacc (const string &sourc
 
 		return tmp;
 	}
-	else if (debug)
-		nlstop;
+	else if (debug && !CRingScenarioGuard::isLoadingScenario())
+		nlstop; // the debugging stop is for the scripts of the shard: a scenario is made by a client
 
 	return NULL;
 }

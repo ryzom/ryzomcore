@@ -20,6 +20,11 @@ using namespace AICOMP;
 using namespace AIVM;
 
 extern void aiClean ();
+extern bool aiTooManyErrors ();
+extern void aiUnknownCharacter (char c);
+
+// A character no rule begins with (the lexer would write it to the standard output)
+#define ECHO aiUnknownCharacter (yytext[0])
 
 int	aiErrorCount;
 int	aiLine;
@@ -88,6 +93,12 @@ comment2	\/\/[^\n]*\n
 string		\"([^\n"]|(\\\"))*\"
 	
 %%
+
+%{
+	// The text of a scenario that has too many errors ends here
+	if (aiTooManyErrors ())
+		yyterminate ();
+%}
 
 (\ |\t)		{ }
 
@@ -161,4 +172,12 @@ int aiwrap()
 {
 	// ai_delete_buffer (yy_current_buffer);
 	return 1;
+}
+
+// Drops what the lexer has read of a text and not handed out as tokens, so that the next text is
+// read from its beginning. The lexer only empties its buffer by itself when it reaches the end of a
+// text, and the parser can stop before that.
+void aiResetLexer()
+{
+	YY_FLUSH_BUFFER;
 }

@@ -4720,7 +4720,11 @@ Arguments: ->
 // CStateInstance
 void setConditionSuccess_f_(CStateInstance* entity, CScriptStack& stack)
 {
-	bool conditionState = (uint32)((float)stack.top()) != 0;
+	// true for a number whose whole part is not 0
+	float const conditionValue = (float)stack.top();
+	bool conditionState = conditionValue >= 1.f || conditionValue <= -1.f;
+	// the parameter is taken from the stack, as every function takes its own
+	stack.pop();
 	CGroup* group = entity->getGroup();
 	if (!group)
 	{

@@ -23,6 +23,8 @@
 #include "event_reaction_container.h"
 #include "ai_grp.h"
 #include "ai_outpost.h"
+#include "ai_instance.h"
+#include "ring_scenario_guard.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -167,10 +169,112 @@ void CStateInstance::dumpVarsAndFunctions(CStringWriter& sw) const
 		sw.append(" "+CStringMapper::unmap(varIt->first));
 }
 
+namespace {
+
+/// Events and scripts of a scenario that are started from inside one another
+const uint32 s_MaxWorkNesting = 64;
+/// Events one event of a scenario starts, itself included
+const uint32 s_MaxWorkEvents = 2000;
+/// Operations of the scripts one event of a scenario starts
+const uint32 s_MaxWorkOpcodes = 2000000;
+
+uint32 s_WorkNesting = 0;
+uint32 s_WorkEvents = 0;
+/// The Ring session of the group the work began with, 0 when it has none: nothing is counted then
+uint32 s_WorkSession = 0;
+/// The number of the AI instance of that group
+uint32 s_WorkInstance = 0;
+bool s_WorkReported = false;
+
+/// stateInstance is NULL when the work is over
+void reportWorkLimit(CStateInstance *stateInstance, const char *what)
+{
+	if (s_WorkReported)
+		return;
+	s_WorkReported = true;
+	CGroup *group = stateInstance ? stateInstance->getGroup() : NULL;
+	std::string where = group ? " at the group '" + group->getName() + "'" : std::string();
+	CRingScenarioGuard::logRefusal(TSessionId(s_WorkSession), s_WorkInstance,
+	    "the work an event started was stopped" + where + ": " + what);
+}
+
+} // namespace
+
+CScenarioWorkScope::CScenarioWorkScope(CStateInstance *stateInstance, bool isEvent)
+    : m_Allowed(true)
+{
+	if (s_WorkNesting == 0)
+	{
+		s_WorkSession = CRingScenarioGuard::getSession(stateInstance).asInt();
+		s_WorkEvents = 0;
+		s_WorkReported = false;
+		if (s_WorkSession != 0)
+		{
+			CGroup *group = stateInstance->getGroup();
+			s_WorkInstance = group ? group->getAIInstance()->getInstanceNumber() : 0;
+			AIVM::CScriptVM::setOpcodeBudget(s_MaxWorkOpcodes);
+		}
+	}
+	++s_WorkNesting;
+	if (s_WorkSession == 0)
+		return;
+
+	if (isEvent)
+		++s_WorkEvents;
+	if (s_WorkNesting > s_MaxWorkNesting)
+	{
+		m_Allowed = false;
+		reportWorkLimit(stateInstance, "its events and scripts start one another too deep");
+	}
+	else if (s_WorkEvents > s_MaxWorkEvents)
+	{
+		m_Allowed = false;
+		reportWorkLimit(stateInstance, "it started too many events");
+	}
+	else if (AIVM::CScriptVM::isOpcodeBudgetSpent())
+	{
+		m_Allowed = false;
+		reportWorkLimit(stateInstance, "its scripts ran too long");
+	}
+}
+
+CScenarioWorkScope::~CScenarioWorkScope()
+{
+	--s_WorkNesting;
+	if (s_WorkNesting == 0 && s_WorkSession != 0)
+	{
+		// the script that used the last operation ended there: that is said once for the work
+		if (AIVM::CScriptVM::isOpcodeBudgetSpent())
+			reportWorkLimit(NULL, "its scripts ran too long");
+		AIVM::CScriptVM::clearOpcodeBudget();
+		s_WorkSession = 0;
+	}
+}
+
 void CStateInstance::interpretCode(IScriptContext* caller, CByteCodeEntry const& codeScriptEntry)
 {
+	CScenarioWorkScope work(this, false);
+	if (!work.isAllowed())
+		return;
+
 	AIVM::IScriptContext* parent = getPersistentStateInstance()->getParentStateInstance();
-	AIVM::CScriptVM::getInstance()->interpretCode(this, parent, caller, codeScriptEntry);
+	try
+	{
+		AIVM::CScriptVM::getInstance()->interpretCode(this, parent, caller, codeScriptEntry);
+	}
+	catch (const AIVM::EScriptStop &e)
+	{
+		// The script used a value as what it is not, or took one that is not there: its run ends,
+		// and the service goes on
+		CGroup *group = getGroup();
+		TSessionId session = CRingScenarioGuard::getSession(this);
+		std::string what = "the script '" + (codeScriptEntry.code().isNull() ? std::string() : codeScriptEntry.code()->_sourceName)
+		    + "' of the group '" + (group ? group->getName() : std::string()) + "' was stopped: " + e.what();
+		if (session.asInt() != 0)
+			CRingScenarioGuard::logRefusal(session, group->getAIInstance()->getInstanceNumber(), what);
+		else
+			nlwarning("%s", what.c_str());
+	}
 }
 
 void CStateInstance::interpretCode(IScriptContext* caller, CSmartPtr<CByteCode const> const& codeScript)
