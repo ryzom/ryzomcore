@@ -60,7 +60,7 @@ CVariable<uint32>	ShardAssocTimeout( "su", "ShardAssocTimeout", "Timeout (in s)b
 CVariable<uint32>	ForceWelcomerShard( "su", "ForceWelcomerShard", "SessionId of a shard to promote when joining any mainland (0=none)", 0, 0, true );
 CVariable<bool>	PreferLastPlayedShard( "su", "PreferLastPlayedShard", "When joining any mainland, promote the home shard of the character the account played last (after ForceWelcomerShard, before the load)", true, 0, true );
 CVariable<string>	DomainName("su", "DomainName", "The name of the domain", "ryzom", 0, true);
-CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privilege allowed to join any animation session", ":GM:SGM:", 0, true);
+CVariable<string>	PrivilegeForSessionAccess("su", "PrivilegeForSessionAccess", "A list of privileges whose accounts enter any Ring session by its id (an animation session as a player, an edit session as an editor) and may kick and unkick the characters of any Ring session", ":GM:SGM:", 0, true);
 
 namespace RSMGR
 {
@@ -3670,7 +3670,8 @@ endOfWelcomeUserResult:
 				}
 				else
 				{
-					// this is for a GM without participation
+					// this is for a GM without participation (an account with a privilege of PrivilegeForSessionAccess):
+					// it enters an edit session as an editor, and any other Ring session as a player
 					if (session->getSessionType() == TSessionType::st_edit)
 						enterAs = WS::TUserRole::ur_editor;
 					else
