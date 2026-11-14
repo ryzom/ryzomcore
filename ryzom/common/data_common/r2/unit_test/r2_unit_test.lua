@@ -767,10 +767,10 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 		str=string.gsub (str, "<Package>", category)
 	end
 	if entityLevel then
-		str=string.gsub (str, "<EntityLevel>", tostring(entityLevel))
+		str=string.gsub (str, "<EntityLevel>", tostring(math.floor(entityLevel)))
 	end
 	if charLevel then
-		str=string.gsub (str, "<CharLevel>", tostring(charLevel))
+		str=string.gsub (str, "<CharLevel>", tostring(math.floor(charLevel)))
 	end
 	if entityName then
 		str=string.gsub (str, "<EntityName>", entityName)
