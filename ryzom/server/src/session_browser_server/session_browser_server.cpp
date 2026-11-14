@@ -948,6 +948,32 @@ public:
 	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
 
+		// The list is for the characters of the session: its owner, a character that has a participation in it and
+		// is not kicked from it, and a character that is in it (an account that enters by its privilege has no
+		// participation). The session id is the one the client names, so it is checked against the character.
+		CSString check;
+		check << "SELECT COUNT(*) FROM sessions WHERE sessions.session_id = " << sessionId.asInt();
+		check << " AND (sessions.owner = " << charId;
+		check << " OR EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
+		check << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0)";
+		check << " OR EXISTS (SELECT * FROM characters WHERE characters.char_id = " << charId;
+		check << " AND characters.current_session = sessions.session_id))";
+		BOMB_IF(!_RingDB.query(check), "getCharList : error executing the access request in database", charList(from, charId, sessionId, vector<TCharDesc>()); return);
+		CUniquePtr<CStoreResult> checkResult(_RingDB.storeResult());
+		uint32 nbAllowed = 0;
+		if (checkResult->getNumRows() == 1)
+		{
+			checkResult->fetchRow();
+			checkResult->getField(0, nbAllowed);
+		}
+		if (nbAllowed == 0)
+		{
+			nlwarning("SBS : getCharList : char %u asks for the characters of session %u and is not one of them, an empty list is sent",
+			    charId, sessionId.asInt());
+			charList(from, charId, sessionId, vector<TCharDesc>());
+			return;
+		}
+
 		// do the 'request of the death' !
 		CSString query;
 		//                             0                                                                                                      1

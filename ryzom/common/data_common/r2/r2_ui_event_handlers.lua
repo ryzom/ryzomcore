@@ -741,8 +741,8 @@ function r2:popMainMenu()
 		menu:find("live").active = not (r2.AccessMode == "Editor") 
 		menu:find("stop_live").active = not (r2.AccessMode == "Editor")
 	end
-	-- player control, in both menus: in an edit session it is for the owner of the session
-	menu:find("player_admin").active = r2.isSessionOwner() or not (r2.AccessMode == "Editor")
+	-- (player control is in both menus for everyone who has them: the window leaves an editor that does not own
+	-- the edit session the list and the tell, see CharTracking:isListOnly)
 
 	menu:find("map_key").t.text = buildKeyName("show_hide", "map")
 	menu:find("debug_console").active = (config.R2EDExtendedDebug == 1)
