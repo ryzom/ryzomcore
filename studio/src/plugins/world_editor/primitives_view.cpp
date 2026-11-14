@@ -19,6 +19,7 @@
 #include "primitives_model.h"
 #include "world_editor_actions.h"
 #include "world_editor_constants.h"
+#include "world_editor_misc.h"
 
 #include "../core/core_constants.h"
 #include "../landscape_editor/landscape_editor_constants.h"
@@ -45,7 +46,8 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	  m_undoStack(0),
 	  m_worldEditorScene(0),
 	  m_zoneBuilder(0),
-	  m_primitivesTreeModel(0)
+	  m_primitivesTreeModel(0),
+	  m_notLoaded(0)
 {
 	setContextMenuPolicy(Qt::DefaultContextMenu);
 
@@ -119,6 +121,11 @@ void PrimitivesView::setModel(PrimitivesTreeModel *model)
 	m_primitivesTreeModel = model;
 }
 
+void PrimitivesView::setNotLoadedFiles(std::set<std::string> *notLoaded)
+{
+	m_notLoaded = notLoaded;
+}
+
 void PrimitivesView::loadRootPrimitive()
 {
 	nlassert(m_undoStack);
@@ -137,7 +144,10 @@ void PrimitivesView::loadRootPrimitive()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this));
+			LoadRootPrimitiveCommand *command = new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this, m_notLoaded);
+			m_undoStack->push(command);
+			if (!command->isLoaded())
+				QMessageBox::warning(this, tr("Error opening primitive file"), tr("%1 is not loaded: it cannot be read, the log says why.").arg(fileName));
 		}
 
 		if (fileNames.count() > 1)
@@ -165,7 +175,10 @@ void PrimitivesView::loadLandscape()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			m_undoStack->push(new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder));
+			LoadLandscapeCommand *command = new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder, m_notLoaded);
+			m_undoStack->push(command);
+			if (!command->isLoaded())
+				QMessageBox::warning(this, tr("Error opening land file"), tr("%1 is not loaded: %2.").arg(fileName, command->error()));
 		}
 
 		if (fileNames.count() > 1)
@@ -205,8 +218,9 @@ void PrimitivesView::save()
 
 	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
 	{
-		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toUtf8().constData()))
-			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(node->fileName()));
+		std::string error;
+		if (!Utils::savePrimitivesFile(*node->primitives(), node->fileName().toUtf8().constData(), error))
+			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
 		else
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
 	}
@@ -230,8 +244,9 @@ void PrimitivesView::saveAs()
 
 		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
 
-		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toUtf8().constData()))
-			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(fileName));
+		std::string error;
+		if (!Utils::savePrimitivesFile(*node->primitives(), fileName.toUtf8().constData(), error))
+			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
 		else
 		{
 			node->setFileName(fileName);

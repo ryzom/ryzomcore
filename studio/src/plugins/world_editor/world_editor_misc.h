@@ -58,6 +58,22 @@ std::string getLastError();
 // Load *.worldedit file and return list primitives and landscapes.
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList);
 
+// The absolute name of a land or primitive file named in a *.worldedit, from the folder of that *.worldedit
+std::string worldEditFilePath(const std::string &fileName, const std::string &worldEditFolder);
+
+// The content of a file; false when it cannot be read
+bool readFile(const std::string &fileName, std::string &content);
+
+// Writes a file through a temporary file, so that a failed write leaves it as it was, and leaves a file
+// that already has this content untouched; false with the reason, which names the file, in error
+bool writeFileIfChanged(const std::string &fileName, const std::string &content, std::string &error);
+
+// The content of a primitive file, as NLLIGO::saveXmlPrimitiveFile writes it
+std::string primitivesFileContent(NLLIGO::CPrimitives &primitives, const std::string &fileName);
+
+// Saves a primitive file through writeFileIfChanged; false with the reason, which names the file, in error
+bool savePrimitivesFile(NLLIGO::CPrimitives &primitives, const std::string &fileName, std::string &error);
+
 // Get root primitive
 NLLIGO::IPrimitive *getRootPrimitive(NLLIGO::IPrimitive *primitive);
 

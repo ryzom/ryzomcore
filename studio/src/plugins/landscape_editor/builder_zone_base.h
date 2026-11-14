@@ -85,7 +85,8 @@ public:
 
 	/// Zone Region
 	/// @{
-	int loadZoneRegion(const QString &fileName, int defaultId = -1);
+	/// The id of the land, or -1 when it was not loaded, error then saying why when it is given
+	int loadZoneRegion(const QString &fileName, int defaultId = -1, QString *error = NULL);
 	void deleteZoneRegion(int id);
 	int countZoneRegion() const;
 	ZoneRegionObject *zoneRegion(int id) const;
@@ -108,7 +109,8 @@ private:
 
 	void calcMask();
 
-	bool checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion);
+	/// False when the land overlaps a loaded one, overlapping then naming the file of that land when it is given
+	bool checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion, std::string *overlapping = NULL);
 
 	struct LandscapeItem
 	{

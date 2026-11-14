@@ -36,6 +36,8 @@
 #include "../landscape_editor/builder_zone_base.h"
 
 // NeL includes
+#include <nel/misc/file.h>
+#include <nel/misc/path.h>
 
 // Qt includes
 #include <QtCore/QSettings>
@@ -69,6 +71,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
 	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
+	m_ui.treePrimitivesView->setNotLoadedFiles(&m_notLoaded);
 
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
@@ -186,32 +189,121 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 		return;
 	}
 
+	// as the MFC editor does, ask before going on without the folders and files that cannot be found
+	std::vector<bool> found(worldEditList.size(), true);
+	QStringList missing;
+	for (size_t i = 0; i < worldEditList.size(); ++i)
+	{
+		const std::string &path = worldEditList[i].second;
+		QString name = path.empty() ? tr("(empty name)") : QString::fromUtf8(path.c_str());
+		if (worldEditList[i].first == Utils::DataDirectoryType)
+		{
+			found[i] = NLMISC::CFile::isDirectory(path);
+			if (!found[i])
+				missing << tr("Data directory: %1").arg(name);
+		}
+		else if (worldEditList[i].first == Utils::LandscapeType)
+		{
+			found[i] = NLMISC::CFile::fileExists(path);
+			if (!found[i])
+				missing << tr("Landscape: %1").arg(name);
+		}
+		else if (worldEditList[i].first == Utils::PrimitiveType)
+		{
+			found[i] = NLMISC::CFile::fileExists(path);
+			if (!found[i])
+				missing << tr("Primitive: %1").arg(name);
+		}
+	}
+	if (!missing.isEmpty())
+	{
+		QMessageBox box(QMessageBox::Question, tr("Error opening world editor file"),
+			tr("%1 names %2 folders and files that cannot be found, they are listed in the details. Continue loading without them?")
+				.arg(fileName, QString::number(missing.size())),
+			QMessageBox::Yes | QMessageBox::Cancel, this);
+		box.setDefaultButton(QMessageBox::Cancel);
+		box.setDetailedText(missing.join("\n"));
+		if (box.exec() != QMessageBox::Yes)
+			return;
+	}
+
+	// what Save keeps of the file: its content, and the entries that are not loaded, those that cannot
+	// be found here and those that do not load in the commands
+	m_loadedFileName.clear();
+	m_loadedContent.clear();
+	m_notLoaded.clear();
+	if (!Utils::readFile(fileName.toUtf8().constData(), m_loadedContent) || m_loadedContent.empty())
+	{
+		m_loadedContent.clear();
+		QMessageBox::critical(this, tr("Error opening world editor file"), tr("%1 cannot be read.").arg(fileName));
+		return;
+	}
+	m_loadedFileName = fileName;
+	m_loadedDataDir = m_dataDir;
+	m_loadedContext = m_context;
+	for (size_t i = 0; i < worldEditList.size(); ++i)
+	{
+		if (!found[i] && worldEditList[i].first != Utils::DataDirectoryType)
+			m_notLoaded.insert(worldEditList[i].second);
+	}
+
 	m_undoStack->beginMacro(tr("Load %1").arg(fileName));
 
 	checkCurrentWorld();
 
 	m_undoStack->push(new CreateWorldCommand(fileName, m_primitivesModel));
+	QStringList failed;
 	for (size_t i = 0; i < worldEditList.size(); ++i)
 	{
 		switch (worldEditList[i].first)
 		{
 		case Utils::DataDirectoryType:
-			m_zoneBuilderBase->init(QString(worldEditList[i].second.c_str()), true);
 			m_dataDir = worldEditList[i].second.c_str();
+			m_loadedDataDir = m_dataDir;
+			if (found[i] && !m_zoneBuilderBase->init(QString(worldEditList[i].second.c_str()), true))
+			{
+				QMessageBox::warning(this, tr("Error opening world editor file"),
+					tr("The landscape data in %1 could not be loaded.").arg(m_dataDir));
+			}
 			break;
 		case Utils::ContextType:
 			m_context = worldEditList[i].second.c_str();
+			m_loadedContext = m_context;
 			break;
 		case Utils::LandscapeType:
-			m_undoStack->push(new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel, m_zoneBuilderBase));
+			if (found[i])
+			{
+				LoadLandscapeCommand *command = new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel,
+					m_zoneBuilderBase, &m_notLoaded);
+				m_undoStack->push(command);
+				if (!command->isLoaded())
+					failed << tr("Landscape: %1 (%2)").arg(QString::fromUtf8(worldEditList[i].second.c_str()), command->error());
+			}
 			break;
 		case Utils::PrimitiveType:
-			m_undoStack->push(new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()),
-							  m_worldEditorScene, m_primitivesModel, m_ui.treePrimitivesView));
+			if (found[i])
+			{
+				LoadRootPrimitiveCommand *command = new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()),
+					m_worldEditorScene, m_primitivesModel, m_ui.treePrimitivesView, &m_notLoaded);
+				m_undoStack->push(command);
+				if (!command->isLoaded())
+					failed << tr("Primitive: %1 (it cannot be read)").arg(QString::fromUtf8(worldEditList[i].second.c_str()));
+			}
 			break;
 		};
 	}
 	m_undoStack->endMacro();
+
+	// as the MFC editor does, name the files that exist but could not be read
+	if (!failed.isEmpty())
+	{
+		QMessageBox box(QMessageBox::Warning, tr("Error opening world editor file"),
+			tr("%1 files of %2 are not loaded, they are listed in the details with the reason and Save keeps them in the file. The log says more.")
+				.arg(QString::number(failed.size()), fileName),
+			QMessageBox::Ok, this);
+		box.setDetailedText(failed.join("\n"));
+		box.exec();
+	}
 }
 
 void WorldEditorWindow::checkCurrentWorld()
@@ -221,21 +313,50 @@ void WorldEditorWindow::checkCurrentWorld()
 void WorldEditorWindow::newWorldEditFile()
 {
 	checkCurrentWorld();
+	m_loadedFileName.clear();
+	m_loadedContent.clear();
+	m_notLoaded.clear();
 	m_undoStack->push(new CreateWorldCommand("NewWorldEdit", m_primitivesModel));
 }
 
 void WorldEditorWindow::saveWorldEditFile()
 {
+	// Save rewrites the world file from its content as it was loaded, so what another program changed
+	// in it since then would be lost
+	if (m_primitivesModel->isWorldEditNodeLoaded() && !m_loadedFileName.isEmpty())
+	{
+		const std::string loadedFileName = m_loadedFileName.toUtf8().constData();
+		std::string current;
+		if (NLMISC::CFile::fileExists(loadedFileName) && (!Utils::readFile(loadedFileName, current) || current != m_loadedContent))
+		{
+			QMessageBox::StandardButton answer = QMessageBox::question(this, tr("Save world editor files"),
+				tr("%1 has been changed, or cannot be read, since it was loaded. Saving replaces it with the world as it is in the editor. Save anyway?")
+					.arg(m_loadedFileName),
+				QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel);
+			if (answer != QMessageBox::Save)
+				return;
+		}
+	}
+
 	WorldSaver saver( m_primitivesModel, m_zoneBuilderBase, m_dataDir.toUtf8().constData(), m_context.toUtf8().constData() );
+	saver.setLoadedFile(m_loadedFileName.toUtf8().constData(), m_loadedContent, m_loadedDataDir.toUtf8().constData(),
+		m_loadedContext.toUtf8().constData(), m_notLoaded);
 	bool ok = saver.save();
-	QString error = saver.getLastError().c_str();
+	QString error = QString::fromUtf8(saver.getLastError().c_str());
 
 	if( !ok )
 	{
 		QMessageBox::critical( this,
 								tr( "Failed to save world editor files" ),
 								tr( "Failed to save world editor files.\nError:\n " ) + error  );
+		return;
 	}
+
+	// the next save starts from the file as it is now
+	m_loadedFileName = QString::fromUtf8(saver.worldEditFileName().c_str());
+	m_loadedContent = saver.worldEditContent();
+	m_loadedDataDir = m_dataDir;
+	m_loadedContext = m_context;
 }
 
 void WorldEditorWindow::openProjectSettings()

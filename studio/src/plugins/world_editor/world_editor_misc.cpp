@@ -24,6 +24,7 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/i_xml.h>
 #include <nel/misc/o_xml.h>
 #include <nel/ligo/primitive_utils.h>
@@ -53,6 +54,87 @@ uint32 getUniqueId()
 	}
 
 	return (uint32)time2;
+}
+
+std::string worldEditFilePath(const std::string &fileName, const std::string &worldEditFolder)
+{
+	// makePathAbsolute ends what it returns with a slash, which only a directory may have
+	std::string path = NLMISC::CPath::makePathAbsolute(fileName, worldEditFolder);
+	if (!path.empty() && path[path.size() - 1] == '/')
+		path.resize(path.size() - 1);
+	return path;
+}
+
+bool readFile(const std::string &fileName, std::string &content)
+{
+	try
+	{
+		NLMISC::CIFile file;
+		if (!file.open(fileName))
+			return false;
+		content.resize(file.getFileSize());
+		if (!content.empty())
+			file.serialBuffer((uint8 *)&content[0], (uint)content.size());
+	}
+	catch (const NLMISC::Exception &)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool writeFileIfChanged(const std::string &fileName, const std::string &content, std::string &error)
+{
+	// a file that already has this content is not written again
+	std::string current;
+	if (NLMISC::CFile::fileExists(fileName) && NLMISC::CFile::getFileSize(fileName) == content.size()
+		&& readFile(fileName, current) && current == content)
+		return true;
+
+	try
+	{
+		// the temporary file replaces the file only when close() is reached
+		NLMISC::COFile file;
+		if (!file.open(fileName, false, false, true))
+		{
+			error = "Cannot open " + fileName + " for writing.";
+			return false;
+		}
+		if (!content.empty())
+			file.serialBuffer((uint8 *)&content[0], (uint)content.size());
+		file.close();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		error = "Error writing " + fileName + ": " + e.what();
+		return false;
+	}
+	return true;
+}
+
+std::string primitivesFileContent(NLLIGO::CPrimitives &primitives, const std::string &fileName)
+{
+	NLMISC::CMemStream stream;
+	NLMISC::COXml xml;
+	xml.init(&stream);
+	primitives.write(xml.getDocument(), fileName.c_str());
+	xml.flush();
+	return std::string((const char *)stream.buffer(), stream.length());
+}
+
+bool savePrimitivesFile(NLLIGO::CPrimitives &primitives, const std::string &fileName, std::string &error)
+{
+	std::string content;
+	try
+	{
+		content = primitivesFileContent(primitives, fileName);
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		error = "Error writing " + fileName + ": " + e.what();
+		return false;
+	}
+	return writeFileIfChanged(fileName, content, error);
 }
 
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList)
@@ -156,7 +238,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 											if ( NLMISC::CIXml::getPropertyString(filenameChild, node, "FILENAME"))
 											{
 
-												filenameChild = NLMISC::CPath::makePathAbsolute( filenameChild, p );
+												filenameChild = worldEditFilePath(filenameChild, p);
 
 												// Is it a landscape ?
 												if (type == "landscape")

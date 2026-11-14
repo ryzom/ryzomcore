@@ -24,6 +24,10 @@
 // NeL includes
 #include <nel/ligo/primitive.h>
 
+// STL includes
+#include <set>
+#include <string>
+
 // Qt includes
 #include <QAction>
 #include <QTreeView>
@@ -60,6 +64,9 @@ public:
 	void setZoneBuilder(LandscapeEditor::ZoneBuilderBase *zoneBuilder);
 	void setWorldScene(WorldEditorScene *worldEditorScene);
 	virtual void setModel(PrimitivesTreeModel *model);
+
+	/// The files named in the loaded .worldedit that are not loaded, which the load commands keep in step
+	void setNotLoadedFiles(std::set<std::string> *notLoaded);
 
 private Q_SLOTS:
 	void loadLandscape();
@@ -105,6 +112,7 @@ private:
 	WorldEditorScene *m_worldEditorScene;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
 	PrimitivesTreeModel *m_primitivesTreeModel;
+	std::set<std::string> *m_notLoaded;
 };
 
 } /* namespace WorldEditor */

@@ -55,7 +55,9 @@ bool ZoneBuilderBase::init(const QString &pathName, bool displayProgress)
 		return false;
 	if (pathName != m_lastPathName)
 	{
-		m_lastPathName = pathName;
+		// the zone bank is reset below, so until this directory has loaded no directory is
+		m_lastPathName.clear();
+
 		QString zoneBankPath = pathName;
 		zoneBankPath += "/zoneligos/";
 
@@ -75,18 +77,32 @@ bool ZoneBuilderBase::init(const QString &pathName, bool displayProgress)
 			m_zoneBank.reset();
 			return false;
 		}
+
+		// only a directory that loaded is remembered, so a corrected one is read again
+		m_lastPathName = pathName;
 	}
 	return true;
 }
 
-int ZoneBuilderBase::loadZoneRegion(const QString &fileName, int defaultId)
+int ZoneBuilderBase::loadZoneRegion(const QString &fileName, int defaultId, QString *error)
 {
 	LandscapeItem landItem;
 	landItem.zoneRegionObject = new ZoneRegionObject();
-	landItem.zoneRegionObject->load(fileName.toUtf8().constData());
-
-	if (!checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion()))
+	if (!landItem.zoneRegionObject->load(fileName.toUtf8().constData()))
 	{
+		// load() has logged why
+		if (error)
+			*error = QObject::tr("it cannot be read, the log says why");
+		delete landItem.zoneRegionObject;
+		return -1;
+	}
+
+	std::string overlapping;
+	if (!checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion(), &overlapping))
+	{
+		nlwarning("The land %s overlaps the loaded land %s", fileName.toUtf8().constData(), overlapping.c_str());
+		if (error)
+			*error = QObject::tr("it overlaps the loaded land %1").arg(QString::fromUtf8(overlapping.c_str()));
 		delete landItem.zoneRegionObject;
 		return -1;
 	}
@@ -131,6 +147,12 @@ ZoneRegionObject *ZoneBuilderBase::zoneRegion(int id) const
 bool ZoneBuilderBase::initZoneBank (const QString &pathName)
 {
 	QDir *dir = new QDir(pathName);
+	if (!dir->exists())
+	{
+		nlwarning("The zone bank folder %s does not exist", pathName.toUtf8().constData());
+		delete dir;
+		return false;
+	}
 	QStringList filters;
 	filters << "*.ligozone";
 
@@ -183,7 +205,7 @@ void ZoneBuilderBase::calcMask()
 	}
 }
 
-bool ZoneBuilderBase::checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion)
+bool ZoneBuilderBase::checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion, std::string *overlapping)
 {
 	QMapIterator<int, LandscapeItem> it(m_landscapeMap);
 	while (it.hasNext())
@@ -198,7 +220,11 @@ bool ZoneBuilderBase::checkOverlaps(const NLLIGO::CZoneRegion &newZoneRegion)
 				{
 					const std::string &zoneName = newZoneRegion.getName(x, y);
 					if ((zoneName != STRING_UNUSED) && (zoneName != STRING_OUT_OF_BOUND))
+					{
+						if (overlapping)
+							*overlapping = it.value().zoneRegionObject->fileName();
 						return false;
+					}
 				}
 			}
 	}

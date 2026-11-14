@@ -23,6 +23,10 @@
 // Project includes
 #include "ui_world_editor_window.h"
 
+// STL includes
+#include <set>
+#include <string>
+
 // Qt includes
 #include <QUndoStack>
 #include <QLabel>
@@ -82,6 +86,13 @@ private:
 
 	QString m_context;
 	QString m_dataDir;
+
+	// the .worldedit as it was loaded, for Save to keep what it does not change
+	QString m_loadedFileName;
+	std::string m_loadedContent;
+	QString m_loadedDataDir;
+	QString m_loadedContext;
+	std::set<std::string> m_notLoaded;
 
 	QString m_lastDir;
 
