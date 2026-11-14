@@ -1933,6 +1933,9 @@ float	CEntityCL::updateAsyncTexture()
 
 			// additionally, if their is no skeleton (bot objects), may enable cast shadow here
 			updateCastShadowMap();
+
+			// the new current instances are shown: let the entity hide what its view hides
+			onInstancesLoaded();
 		}
 	}
 

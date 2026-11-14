@@ -356,6 +356,9 @@ public:
 
 	void updateVisualDisplay();
 
+	/// Body parts that finished loading are shown: apply the visibility of the view again (first person view).
+	virtual void onInstancesLoaded() NL_OVERRIDE;
+
 	/// Return 'true' is an attack animation is currently playing.
 	bool isAttacking() const {return _AnimAttackOn;}
 

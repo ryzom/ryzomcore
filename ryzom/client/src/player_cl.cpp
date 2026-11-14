@@ -1196,6 +1196,7 @@ float	CPlayerCL::updateAsyncTexture()
 		{
 			_PlayerCLAsyncTextureLoading= false;
 			_Face.updateCurrentFromLoading(_Skeleton);
+			onInstancesLoaded();
 		}
 	}
 

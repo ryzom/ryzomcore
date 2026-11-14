@@ -3491,6 +3491,15 @@ void CUserEntity::updateVisualDisplay()
 }// updateVisualDisplay //
 
 //---------------------------------------------------
+// onInstancesLoaded :
+// Body parts whose textures finished loading became the current ones, and are shown.
+//---------------------------------------------------
+void CUserEntity::onInstancesLoaded()	// virtual
+{
+	updateVisualDisplay();
+}// onInstancesLoaded //
+
+//---------------------------------------------------
 // light:
 // Show/Hide the user light.
 //---------------------------------------------------
