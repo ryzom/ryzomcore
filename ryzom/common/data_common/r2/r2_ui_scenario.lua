@@ -527,7 +527,7 @@ function r2.ScenarioWindow:setActNotes()
 	local actNotes = actGr:find("act_notes"):find("small_description").input_string
 
 	if act==nil then act = r2:getCurrentAct() end
-	if actNotes~=act.ShortDescription then
+	if actNotes ~= (act.ShortDescription or "") then
 		r2.requestSetNode(act.InstanceId, "ShortDescription", actNotes)
 	end
 
@@ -623,7 +623,8 @@ function r2.ScenarioWindow:updateActProperties()
 		assert(notesGr)
 		local notesAct = notesGr:find("small_description")
 		assert(notesAct)
-		notesAct.input_string = act.ShortDescription
+		-- an act of an older editor may have no notes: the window shows an empty text (setActNotes compares with it)
+		notesAct.input_string = act.ShortDescription or ""
 	end
 	
 	-- pre act notes
@@ -728,18 +729,20 @@ function r2.ScenarioWindow:updateScenarioProperties()
 	end
 
 	-- scenario title
-	getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string = scenario.Description.Title
+	-- a scenario of an older editor may have no title, notes or name: the window shows an empty text
+	-- (setScenarioNotes and onTitleChanged compare with it)
+	getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string = scenario.Description.Title or ""
 
 	-- scenario notes
 	local notesGr = scenarioGr:find("scenario_notes")
 	assert(notesGr)
 	local notesScenario = notesGr:find("small_description")
 	assert(notesScenario)
-	notesScenario.input_string = scenario.Description.ShortDescription
+	notesScenario.input_string = scenario.Description.ShortDescription or ""
 	
 	-- scenario name
 	local scenarioName = scenarioUI:find("scenario_name_text")
-	scenarioName.text = i18n.get("uiR2EDScenarioFilename") .. " " ..scenario:getName()
+	scenarioName.text = i18n.get("uiR2EDScenarioFilename") .. " " .. (scenario:getName() or "")
 
 	self.lockComboBoxes = false
 end
@@ -755,7 +758,7 @@ function r2.ScenarioWindow:setScenarioNotes()
 
 	local scenarioNotes = scenarioGr:find("scenario_notes"):find("small_description").input_string
 
-	if r2.Scenario and scenarioNotes~= r2.Scenario.Description.ShortDescription then
+	if r2.Scenario and scenarioNotes ~= (r2.Scenario.Description.ShortDescription or "") then
 		r2.requestNewAction(i18n.get("uiR2EDChangeScenarioDescription"))
 		r2.requestSetNode(r2.Scenario.Description.InstanceId, "ShortDescription", scenarioNotes)
 		r2.requestEndAction()
@@ -850,7 +853,7 @@ end
 function r2.ScenarioWindow:onTitleChanged()
 	if self.lockComboBoxes then return end	
 	local newTitle = getUI("ui:interface:r2ed_scenario"):find("title_eb").eb.input_string
-	if newTitle ~= r2.Scenario.Description.Title then
+	if newTitle ~= (r2.Scenario.Description.Title or "") then
 		r2.requestNewAction(i18n.get("uiR2EDChangeScenarioTitle"))	
 		r2.requestSetNode(r2.Scenario.Description.InstanceId, "Title", newTitle)
 		r2.requestEndAction()
