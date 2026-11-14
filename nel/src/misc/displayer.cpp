@@ -732,6 +732,8 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 				_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #		endif
 #		endif
+				// this abort is reported: the handler of crash signals does not report it again
+				markEndOfProgramReported();
 				abort();
 				break;
 

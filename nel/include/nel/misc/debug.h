@@ -118,6 +118,20 @@ void setCrashCallback(TCrashCallback crashCallback);
 bool	isCrashAlreadyReported();
 void	setCrashAlreadyReported(bool state);
 
+/**
+ * The log file whose end goes into the report that the handler of crash signals writes (Unix). By default that is
+ * the log.log of createDebug; a program that logs to a file of its own instead names that file here. A relative
+ * name is taken from the current directory of the moment of the call.
+ */
+void setCrashReportLogFile(const std::string &fileName);
+
+/**
+ * Tells the handler of crash signals (Unix) that the end of the program that follows, by abort() or by the trap of
+ * NLMISC_BREAKPOINT, is reported already, as a fatal error is: such an end writes no second report. Only for code
+ * that ends the program right after its report. A report the program survives says nothing about a later crash.
+ */
+void markEndOfProgramReported();
+
 
 // This very amazing macro __FUNCTION__ doesn't exist on VC6, map it to NULL
 #ifdef NL_COMP_VC6
@@ -435,6 +449,14 @@ extern bool _assertex_stop_1(bool &ignoreNextTime);
 
 // Linux set of asserts is reduced due to that there is no message box displayer
 
+// In a debug build these asserts end the program at their breakpoint whatever the answer to their report was, so
+// they say first that this end is reported: the handler of crash signals writes no second report of it.
+#ifdef NL_DEBUG
+#define NLMISC_ASSERT_BREAKPOINT do { NLMISC::markEndOfProgramReported(); NLMISC_BREAKPOINT; } while (0)
+#else
+#define NLMISC_ASSERT_BREAKPOINT NLMISC_BREAKPOINT
+#endif
+
 #define nlassert(exp) \
 do { \
 	bool _expResult_ = (exp) ? true : false; \
@@ -442,22 +464,24 @@ do { \
 		NLMISC::createDebug (); \
 		NLMISC::CSetLogPosition logPos__(NLMISC::INelContext::getInstance().getAssertLog(), __LINE__, __FILE__, __FUNCTION__); \
 		NLMISC::INelContext::getInstance().getAssertLog()->displayNL ("\"%s\" ", #exp); \
-		NLMISC_BREAKPOINT; \
+		NLMISC_ASSERT_BREAKPOINT; \
 	} \
 	nlassume(_expResult_); \
 } while(0)
 
 #define nlassertonce(exp) nlassert(exp)
 
+// The expression and the message of the program are one line of the assert log: the message box displayer makes
+// a report of every line, and this is one failed assert.
 #define nlassertex(exp, str) \
 do { \
 	bool _expResult_ = (exp) ? true : false; \
 	if (!(_expResult_)) { \
 		NLMISC::createDebug (); \
 		NLMISC::CSetLogPosition logPos__(NLMISC::INelContext::getInstance().getAssertLog(), __LINE__, __FILE__, __FUNCTION__); \
-		NLMISC::INelContext::getInstance().getAssertLog()->displayNL ("\"%s\" ", #exp); \
+		NLMISC::INelContext::getInstance().getAssertLog()->display ("\"%s\" ", #exp); \
 		NLMISC::INelContext::getInstance().getAssertLog()->displayRawNL str; \
-		NLMISC_BREAKPOINT; \
+		NLMISC_ASSERT_BREAKPOINT; \
 	} \
 	nlassume(_expResult_); \
 } while(0)

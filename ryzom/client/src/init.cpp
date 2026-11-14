@@ -844,6 +844,9 @@ void initLog()
 	// Client.Log displayer
 	nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
 	CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
+
+	// the log a crash report ends with: there is no log.log
+	setCrashReportLogFile(getLogDirectory() + "client.log");
 	DebugLog->addDisplayer (ClientLogDisplayer);
 	InfoLog->addDisplayer (ClientLogDisplayer);
 	WarningLog->addDisplayer (ClientLogDisplayer);
