@@ -281,6 +281,8 @@ Changes the activity of the group. Valid activities are:
 - "faction_no_assist"
 - "bandit"
 
+The group of a Ring session takes "faction" only.
+
 Arguments: s(Activity) ->
 @param[in] Activity is an activity name the group will take
 
@@ -310,6 +312,15 @@ void setActivity_s_(CStateInstance* entity, CScriptStack& stack)
 	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
 	if (!spawnGroup)
 	{	RYAI_SCRIPT_WARNING(entity, "setActivity failed: no spawned group");
+		return;
+	}
+
+	// The script the editor writes for a group gives it this one activity (r2_translator.lua).
+	// The profiles of the other words are made for the groups of a shard: the group of a Ring
+	// session does not take them.
+	if (aiInstance->getRingSession().asInt() != 0 && activity != "faction")
+	{
+		RYAI_SCRIPT_WARNING(entity, "setActivity: '" + activity + "' is not an activity of a scenario, the activity of the group is not changed");
 		return;
 	}
 	
