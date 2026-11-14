@@ -192,27 +192,14 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 #ifdef NL_OS_WINDOWS
 	if (OpenClipboard(NULL))
 	{
-		// check if unicode format is supported by clipboard
-		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
+		// The text is always stored as CF_UNICODETEXT: the system converts it for a program that asks for
+		// CF_TEXT. What the clipboard held before says nothing about what it can take.
+		std::wstring textWide = NLMISC::utf8ToWide(text); // Prefer system for API
+		if (text.size() && !textWide.size())
+			textWide = CUtfStringView(text).toWide();
 
 		// allocates a buffer to copy text in global memory
-		std::string textMbcs;
-		std::wstring textWide;
-		if (!isUnicode)
-		{
-			textMbcs = NLMISC::utf8ToMbcs(text); // Prefer system for API
-			if (text.size() && !textMbcs.size()) 
-				textMbcs = CUtfStringView(text).toAscii(); // Fallback to 7-bit ASCII
-		}
-		else
-		{
-			textWide = NLMISC::utf8ToWide(text); // Prefer system for API
-			if (text.size() && !textWide.size()) 
-				textWide = CUtfStringView(text).toWide();
-		}
-		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, isUnicode 
-			? ((textWide.size() + 1) * sizeof(wchar_t))
-			: (textMbcs.size() + 1));
+		HGLOBAL mem = GlobalAlloc(GHND | GMEM_DDESHARE, (textWide.size() + 1) * sizeof(wchar_t));
 
 		if (mem)
 		{
@@ -221,10 +208,7 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 			if (hLock)
 			{
 				// copy text to this buffer
-				if (isUnicode)
-					wcscpy((wchar_t *)hLock, textWide.c_str());
-				else
-					strcpy((char *)hLock, textMbcs.c_str());
+				wcscpy((wchar_t *)hLock, textWide.c_str());
 
 				// unlock buffer
 				GlobalUnlock(mem);
@@ -232,11 +216,21 @@ bool CSystemUtils::copyTextToClipboard(const std::string &text)
 				// empty clipboard
 				EmptyClipboard();
 
-				// set new data to clipboard in the right format
-				SetClipboardData(isUnicode ? CF_UNICODETEXT : CF_TEXT, mem);
-
-				res = true;
+				// set new data to clipboard, which owns the buffer from then on
+				if (SetClipboardData(CF_UNICODETEXT, mem))
+				{
+					mem = NULL;
+					res = true;
+				}
+				else
+				{
+					nlwarning("SetClipboardData failed: %s", NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
+				}
 			}
+
+			// not taken by the clipboard
+			if (mem)
+				GlobalFree(mem);
 		}
 
 		CloseClipboard();

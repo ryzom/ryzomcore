@@ -752,3 +752,32 @@ TEST_F(CUTMiscStringCommonTest, startsWithCaseInsensitiveAscii)
 	EXPECT_FALSE(NLMISC::startsWithCaseInsensitiveAscii("\xC3\x89x", "\xC3\xA9x")); // E acute vs e acute in UTF-8
 	EXPECT_TRUE(NLMISC::startsWithCaseInsensitiveAscii("\xC3\xA9X", "\xC3\xA9x"));
 }
+
+// The wide text CSystemUtils::copyTextToClipboard stores on Windows (CF_UNICODETEXT) and
+// pasteTextFromClipboard reads back: nothing outside the ANSI code page turns into '?'.
+TEST_F(CUTMiscStringCommonTest, utf8ToWideAndBack)
+{
+	// "a", CYRILLIC ZHE, CYRILLIC DE, two CJK ideographs, U+1F600
+	const std::string utf8 = "a\xD0\x96\xD0\xB4\xE6\x97\xA5\xE6\x9C\xAC\xF0\x9F\x98\x80";
+
+	std::wstring expected;
+	expected += (wchar_t)'a';
+	expected += (wchar_t)0x0416;
+	expected += (wchar_t)0x0434;
+	expected += (wchar_t)0x65E5;
+	expected += (wchar_t)0x672C;
+#ifdef NL_OS_WINDOWS
+	// UTF-16: a surrogate pair
+	expected += (wchar_t)0xD83D;
+	expected += (wchar_t)0xDE00;
+#else
+	expected += (wchar_t)0x1F600;
+#endif
+
+	std::wstring wide = NLMISC::utf8ToWide(utf8);
+	EXPECT_TRUE(expected == wide);
+	EXPECT_EQ(utf8, NLMISC::wideToUtf8(wide));
+
+	EXPECT_TRUE(NLMISC::utf8ToWide(std::string()).empty());
+	EXPECT_TRUE(NLMISC::wideToUtf8(std::wstring()).empty());
+}
