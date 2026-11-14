@@ -963,8 +963,6 @@ bool login()
 	Driver->showCursor (false);
 	SetMouseFreeLook ();
 	SetMouseCursor (false);
-	SetMouseSpeed (ClientCfg.CursorSpeed);
-	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 	SetMousePosFirstTime = true;
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 

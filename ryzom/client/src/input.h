@@ -53,12 +53,6 @@ bool	IsMouseFreeLook();
 // Use this method to toggle the mouse (freelook -> cursor)
 void	SetMouseCursor (bool updatePos = true);
 
-// Use this method to set the cursor speed
-void	SetMouseSpeed (float speed);
-
-// Use this method to set the cursor acceleration
-void	SetMouseAcceleration (uint accel);
-
 // reset mouse capture state (release capture, clear button state)
 void ResetMouseCaptureState();
 

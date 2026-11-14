@@ -1431,8 +1431,6 @@ void initMainLoop()
 	}*/
 
 	SetMouseCursor ();
-	SetMouseSpeed (ClientCfg.CursorSpeed);
-	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 	FPU_CHECKER_ONCE
 

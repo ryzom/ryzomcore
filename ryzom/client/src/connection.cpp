@@ -206,8 +206,6 @@ void connectionRestoreVideoMode ()
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	SetMouseFreeLook ();
 	SetMouseCursor ();
-	SetMouseSpeed (ClientCfg.CursorSpeed);
-	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 	// Restore user UI scaling
 	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
@@ -428,8 +426,6 @@ bool connection (const string &cookie, const string &fsaddr)
 		// no ui init if character selection is automatic
 		//SetMouseFreeLook ();
 		//SetMouseCursor ();
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
@@ -598,8 +594,6 @@ bool reconnection()
 		// no ui init if character selection is automatic
 		SetMouseFreeLook ();
 		SetMouseCursor ();
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}

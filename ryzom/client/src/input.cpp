@@ -61,8 +61,6 @@ extern CActionsManager			Actions;		// Actions Manager.
 ////////////
 bool							MouseHardware = false;
 bool							MouseFreeLook = false;
-float							MouseCursorSpeed = 1.f;
-uint							MouseCursorAcceleration = 0;
 bool							InitMouseFirstTime = true;
 bool							SetMousePosFirstTime = true;
 
@@ -239,20 +237,6 @@ void	SetMouseCursor (bool updatePos)
 			}
 		}
 	}
-}
-
-// *********************************************************************************
-// Use this method to set the cursor speed
-void	SetMouseSpeed (float speed)
-{
-	MouseCursorSpeed = speed;
-}
-
-// *********************************************************************************
-// Use this method to set the cursor acceleration
-void	SetMouseAcceleration (uint accel)
-{
-	MouseCursorAcceleration = accel;
 }
 
 // *********************************************************************************

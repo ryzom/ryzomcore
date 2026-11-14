@@ -336,12 +336,6 @@ void updateFromClientCfg()
 
 	// INPUTS
 	//---------------------------------------------------
-	if (ClientCfg.CursorSpeed != LastClientCfg.CursorSpeed)
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-
-	if (ClientCfg.CursorAcceleration != LastClientCfg.CursorAcceleration)
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
-
 	if (ClientCfg.HardwareCursor != LastClientCfg.HardwareCursor)
 	{
 		if (ClientCfg.HardwareCursor != IsMouseCursorHardware())

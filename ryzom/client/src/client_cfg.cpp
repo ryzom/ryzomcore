@@ -360,10 +360,7 @@ CClientConfig::CClientConfig()
 
 	HardwareCursor			= true;					// Default HardwareCursor
 	HardwareCursorScale     = 1.f;
-	CursorSpeed				= 1.f;					// Default CursorSpeed
-	CursorAcceleration		= 0;					// Default CursorAcceleration
 	FreeLookSpeed			= 0.001f;				// Default FreeLookSpeed
-	FreeLookAcceleration    = 0;					// Default FreeLookAcceleration
 	FreeLookSmoothingPeriod = 0.f;                  // when in absolute mode, free look factor is used instead of speed, the mouse gives the absolute angle
 	FreeLookInverted		= false;
 	FreeLookTablet			= false;                // Mouse reports absolute coordinates, so avoid mouse recentering
@@ -918,10 +915,7 @@ void CClientConfig::setValues()
 	// INPUTS //
 	READ_BOOL_FV(HardwareCursor)
 	READ_FLOAT_FV(HardwareCursorScale)
-	READ_FLOAT_FV(CursorSpeed)
-	READ_INT_FV(CursorAcceleration)
 	READ_FLOAT_FV(FreeLookSpeed)
-	READ_INT_FV(FreeLookAcceleration)
 	READ_FLOAT_FV(FreeLookSmoothingPeriod)
 	READ_BOOL_FV(FreeLookInverted)
 	READ_BOOL_FV(FreeLookTablet)

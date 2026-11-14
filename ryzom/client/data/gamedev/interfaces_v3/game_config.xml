@@ -651,12 +651,9 @@
 			<instance template="tgcw_checkbox" id="tablet" text="uiFreeViewTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
 			<view style="sgc_title2" type="text" id="inter" posref="TL TL" x="0" y="-20" hardtext="uiMouseInterface" />
 			<instance template="tgcw_scrollbarint" id="dcspeed" text="uiDoubleClickSpeed" posparent="inter" posref="BL TL" x="20" y="-2" />
-			<instance template="tgcw_scrollbarfloat" id="curspeed" text="uiCursorSpeed" posparent="dcspeed" posref="BL TL" x="0" y="-2" />
-			<instance template="tgcw_scrollbarint" id="curaccel" text="uiCursorAccel" posparent="curspeed" posref="BL TL" x="0" y="-2" />
 
-			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="curaccel" x="-20" y="-12" />
+			<view style="sgc_title2" type="text" id="head" posref="BL TL" hardtext="uiMouseHead" posparent="dcspeed" x="-20" y="-12" />
 			<instance template="tgcw_scrollbarfloat" id="headspeed" text="uiHeadSpeed" posparent="head" posref="BL TL" x="20" y="-2" />
-			<instance template="tgcw_scrollbarint" id="headaccel" text="uiHeadAccel" posparent="headspeed" posref="BL TL" x="0" y="-2" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_mouse" align="T" target="mouse" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -927,10 +924,7 @@
 			<param ui="mouse:dbl:c" type="cfg" widget="boolbut" link="DblClickMode" realtime="true" />
 			<param ui="mouse:tablet:c" type="cfg" widget="boolbut" link="FreeLookTablet" realtime="true" />
 			<param ui="mouse:dcspeed:c" type="db" widget="sbint" link="UI:SAVE:DOUBLE_CLICK_SPEED" min="0" max="100" realtime="true" />
-			<param ui="mouse:curspeed:c" type="cfg" widget="sbfloat" link="CursorSpeed" realtime="true" />
-			<param ui="mouse:curaccel:c" type="cfg" widget="sbint" link="CursorAcceleration" realtime="true" />
 			<param ui="mouse:headspeed:c" type="cfg" widget="sbfloat" link="FreeLookSpeed" realtime="true" />
-			<param ui="mouse:headaccel:c" type="cfg" widget="sbint" link="FreeLookAcceleration" realtime="true" />
 
 			<param ui="keyb:speedmax:c" type="cfg" widget="sbfloat" link="RotKeySpeedMax" realtime="true" />
 			<param ui="keyb:speedmin:c" type="cfg" widget="sbfloat" link="RotKeySpeedMin" realtime="true" />
