@@ -3432,14 +3432,26 @@ endOfWelcomeUserResult:
 
 				CSessionParticipantPtr sessionPart;
 				bool kicked = false;
-				// look for the entry pertaining to the session (the first one is the participation, and a kick
-				// counts on any of them: subscribing never looked for an entry that is already there)
+				// look for the entry pertaining to the session (the first one that counts is the participation, and
+				// a kick counts on any of them: subscribing never looked for an entry that is already there)
 				for (uint i=0; i<charac->getSessionParticipants().size(); ++i)
 				{
 					if (charac->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
 					{
-						// we found it
-						if (sessionPart == NULL)
+						// we found one
+						// An entry counts when its role is one of the type of the session. The session server makes
+						// an editor of every character it is told about for an edit session, and an animator of one
+						// that is announced as an editor for an animation session, whatever the entry says. So an
+						// edit session takes the entries of editors, and its owner; an animation session takes the
+						// entries of animators and players.
+						TSessionPartStatus partStatus = charac->getSessionParticipants()[i]->getStatus();
+						bool editorPart = (partStatus == TSessionPartStatus::sps_edit_invited || partStatus == TSessionPartStatus::sps_editing);
+						bool partCounts = true;
+						if (session->getSessionType() == TSessionType::st_edit)
+							partCounts = editorPart || session->getOwnerId() == charId;
+						else if (session->getSessionType() == TSessionType::st_anim)
+							partCounts = !editorPart;
+						if (sessionPart == NULL && partCounts)
 							sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
 						if (charac->getSessionParticipants()[i]->getKicked())
 							kicked = true;
@@ -3536,7 +3548,9 @@ endOfWelcomeUserResult:
 				if (sessionPart != NULL)
 				{
 					// normal user with participation
-					if (	sessionPart->getStatus() == TSessionPartStatus::sps_edit_invited
+					// (the participation that counts in an edit session is an editor's or the owner's, see above)
+					if (	session->getSessionType() == TSessionType::st_edit
+						||	sessionPart->getStatus() == TSessionPartStatus::sps_edit_invited
 						||	sessionPart->getStatus() == TSessionPartStatus::sps_editing)
 					{
 						// warn the session server that an editor come in
