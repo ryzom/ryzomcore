@@ -6947,11 +6947,24 @@ namespace NLGUI
 
 		_Cells.back()->NewLine = getTR();
 
+		// The grid of <table border> is drawn in the border colours of the table (its bordercolor attribute or
+		// the default grey, or its own CSS border colour), side by side. Without that grid a border the cell
+		// sets through CSS takes the text colour unless the CSS gives one.
 		CSSRect<CSSBorder> border;
-		border.Top.set(   table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Right.set( table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Bottom.set(table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
-		border.Left.set(  table->CellBorder ? 1 : 0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		if (table->CellBorder)
+		{
+			border.Top.set(1, CSS_LINE_STYLE_INSET, table->Border->getTopColor());
+			border.Right.set(1, CSS_LINE_STYLE_INSET, table->Border->getRightColor());
+			border.Bottom.set(1, CSS_LINE_STYLE_INSET, table->Border->getBottomColor());
+			border.Left.set(1, CSS_LINE_STYLE_INSET, table->Border->getLeftColor());
+		}
+		else
+		{
+			border.Top.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Right.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Bottom.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+			border.Left.set(0, CSS_LINE_STYLE_INSET, _Style.Current.TextColor);
+		}
 
 		if (_Style.hasStyle("border-top-width"))	border.Top.Width = _Style.Current.Border.Top.Width;
 		if (_Style.hasStyle("border-right-width"))	border.Right.Width = _Style.Current.Border.Right.Width;
