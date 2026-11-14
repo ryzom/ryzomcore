@@ -195,7 +195,7 @@ public:
 	{
 		if (module->getModuleClassName() == "CharacterSynchronisation")
 		{
-			WARN_IF(_CharacterSynch != NULL, ("CShardUnifierClient::onModuleUp : receiving module for class CharacterSynchronisation as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _CharacterSynch->getModuleName().c_str()));
+			WARN_IF(_CharacterSynch != NULL, "CShardUnifierClient::onModuleUp : receiving module for class CharacterSynchronisation as '" << module->getModuleName() << "', but already have one as '" << _CharacterSynch->getModuleName() << "', replacing");
 			_CharacterSynch = module;
 
 			// register us in the server
@@ -214,7 +214,7 @@ public:
 		}
 		else if (module->getModuleClassName() == "EntityLocator")
 		{
-			WARN_IF(_EntityLocator != NULL, ("CShardUnifierClient::onModuleUp : receiving module for class EntityLocator as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _EntityLocator->getModuleName().c_str()));
+			WARN_IF(_EntityLocator != NULL, "CShardUnifierClient::onModuleUp : receiving module for class EntityLocator as '" << module->getModuleName() << "', but already have one as '" << _EntityLocator->getModuleName() << "', replacing");
 			_EntityLocator = module;
 
 			// send the initial state

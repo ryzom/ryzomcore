@@ -71,7 +71,7 @@ public:
 	{
 		if (module->getModuleClassName() == "ServerAnimationModule")
 		{
-			WARN_IF(_ServerAnimationProxy != NULL, ("CCharacterControl::onModuleUp : receiving module for class CharacterSynchronisation as '%s', but already have one as '%s', replacing", module->getModuleName().c_str(), _ServerAnimationProxy->getModuleName().c_str()));
+			WARN_IF(_ServerAnimationProxy != NULL, "CCharacterControl::onModuleUp : receiving module for class CharacterSynchronisation as '" << module->getModuleName() << "', but already have one as '" << _ServerAnimationProxy->getModuleName() << "', replacing");
 			_ServerAnimationProxy = module;
 		}
 	}
