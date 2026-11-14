@@ -294,6 +294,9 @@ private:
 	/// The local time before which the access is not executed again, 0 when it does not wait
 	NLMISC::TTime m_NextTryTime;
 
+	/// Delete the temporary file kept after a failed replacement, for an access that stays in the queue with its data
+	void deleteKeptTemporaryFile(const std::string &tempFilename);
+
 	// @}
 };
 

@@ -340,6 +340,12 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	memcpy(&(Data[0]), data, dataSize);
 }
 
+void CWriteFile::deleteKeptTemporaryFile(const std::string &tempFilename)
+{
+	if (!NLMISC::CFile::deleteFile(tempFilename))
+		nlwarning("WRITE: can't delete the temporary file '%s' of file '%s'", tempFilename.c_str(), Filename.c_str());
+}
+
 IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 {
 	// an access that waits before it writes its file again does nothing until then. A wait longer than the
@@ -487,14 +493,14 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	catch (const NLMISC::ERenameError &e)
 	{
 		// The file was written, but could not take the place of the old one: another process holds one of the
-		// two. The data is still in this access, so the temporary file that was kept is a copy nobody reads.
-		if (!NLMISC::CFile::deleteFile(e.TempFilename))
-			nlwarning("WRITE: can't delete the temporary file '%s' of file '%s'", e.TempFilename.c_str(), Filename.c_str());
+		// two. The temporary file was kept. Where the access stays in the queue, its data is still here and that
+		// file is a copy nobody reads: it is deleted. Where the access is discarded, it is the only copy: it stays.
 
 		// Such a hold usually ends within a second, and a stalled shard needs an operator: the access is
 		// executed again on later updates before it fails. It stays first in the queue, the accesses keep their order.
 		if (m_ReplaceFailures < s_ReplaceRetryCount)
 		{
+			deleteKeptTemporaryFile(e.TempFilename);
 			const uint waitMs = s_ReplaceRetryFirstWaitMs << m_ReplaceFailures;
 			++m_ReplaceFailures;
 			m_NextTryTime = NLMISC::CTime::getLocalTime() + waitMs;
@@ -508,9 +514,11 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		nlwarning("WRITE: can't replace file '%s' after %u tries: %s", Filename.c_str(), s_ReplaceRetryCount + 1, e.what());
 		if (checkFailureMode(MajorFailureIfFileUnwritable))
 		{
+			deleteKeptTemporaryFile(e.TempFilename);
 			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't replace file '%s': %s", Filename.c_str(), e.what());
 			return MajorFailure;
 		}
+		// the text of the exception names the temporary file, which now holds what the access was to write
 		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't replace file '%s': %s", Filename.c_str(), e.what());
 		return MinorFailure;
 	}
