@@ -242,7 +242,8 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 		if (m_LostIM)
 			createIM();
 
-		if (allWindows || Event.xany.window == _win)
+		// a keyboard mapping change is for every window, its event has none
+		if (allWindows || Event.xany.window == _win || Event.type == MappingNotify)
 		{
 			// nlinfo("event: %d", Event.type);
 			if (_driver)
@@ -539,16 +540,189 @@ TKey getKeyFromKeySym (KeySym keysym)
 	return KeyNOKEY;
 }
 
-// the key of a key event: by its keysym, then by its keycode for the keys whose keysym depends on the layout,
-// then by the keysym of its first level for the keys that give an unknown keysym with modifiers (Ctrl+Pause gives Break)
-static TKey getKeyFromKeyEvent(Display *dpy, uint keycode, KeySym keysym)
+// the keys of the character block of the keyboard besides the letters and the digits, in the order they are
+// given out to the keys whose position belongs to another key
+static const TKey s_PunctuationKeys[] = { KeySEMICOLON, KeyEQUALS, KeyCOMMA, KeyDASH, KeyPERIOD, KeySLASH, KeyTILDE,
+	KeyLBRACKET, KeyBACKSLASH, KeyRBRACKET, KeyAPOSTROPHE, KeyPARAGRAPH, KeyOEM_102 };
+
+// whether a key is one of the character keys: a letter, a digit or punctuation. Which TKey each of these keys
+// has depends on the keyboard layout, and each has one TKey whatever the modifiers.
+static bool isCharacterKey(TKey key)
 {
+	if ((key >= KeyA && key <= KeyZ) || (key >= Key0 && key <= Key9))
+		return true;
+
+	for (uint i = 0; i < sizeof(s_PunctuationKeys) / sizeof(s_PunctuationKeys[0]); ++i)
+	{
+		if (s_PunctuationKeys[i] == key)
+			return true;
+	}
+
+	return false;
+}
+
+// the key named after a punctuation character, for a key that cannot have the key of its position
+static TKey getPunctuationKeyFromKeySym(KeySym keysym)
+{
+	switch (keysym)
+	{
+	case XK_semicolon: return KeySEMICOLON;
+	case XK_equal: return KeyEQUALS;
+	case XK_comma: return KeyCOMMA;
+	case XK_minus: return KeyDASH;
+	case XK_period: return KeyPERIOD;
+	case XK_slash: return KeySLASH;
+	case XK_grave: return KeyTILDE;
+	case XK_bracketleft: return KeyLBRACKET;
+	case XK_backslash: return KeyBACKSLASH;
+	case XK_bracketright: return KeyRBRACKET;
+	case XK_apostrophe: return KeyAPOSTROPHE;
+	default: break;
+	}
+	return KeyNOKEY;
+}
+
+// The character key of each keycode, for one group (layout) of the keyboard.
+// A letter key is the key of its letter. The other keys are the key of their position (getKeyFromKeycode),
+// which for a letter position means that the layout has no key for that letter (Cyrillic, Greek). A key whose
+// position belongs to another key gets a key of its own: without that, on AZERTY the comma was KeyM like the
+// m key, and on BEPO seven keys shared their key with a letter.
+const std::vector<TKey> &CUnixEventEmitter::getKeycodeKeys(uint group)
+{
+	std::vector<TKey> &keys = m_KeycodeKeys[group & 3];
+	if (!keys.empty())
+		return keys;
+
+	keys.resize(256, KeyNOKEY);
+
+	int minKeycode = 8, maxKeycode = 255;
+	XDisplayKeycodes(_dpy, &minKeycode, &maxKeycode);
+	if (minKeycode < 0)
+		minKeycode = 0;
+	if (maxKeycode > 255)
+		maxKeycode = 255;
+
+	// the keys that are given, and those among them that a letter key has
+	std::vector<bool> taken(KeyCount, false);
+	std::vector<bool> letter(KeyCount, false);
+	std::vector<KeySym> keysyms(256, NoSymbol);
+
+	// the letters
+	for (int keycode = minKeycode; keycode <= maxKeycode; ++keycode)
+	{
+		KeySym keysym = XkbKeycodeToKeysym(_dpy, (KeyCode)keycode, group & 3, 0);
+
+		// a key with fewer groups than the keyboard has
+		if (keysym == NoSymbol && (group & 3) != 0)
+			keysym = XkbKeycodeToKeysym(_dpy, (KeyCode)keycode, 0, 0);
+
+		keysyms[keycode] = keysym;
+
+		TKey key = getKeyFromKeySym(keysym);
+		if (key >= KeyA && key <= KeyZ)
+		{
+			keys[keycode] = key;
+			taken[key] = true;
+			letter[key] = true;
+		}
+	}
+
+	// the keys of their position
+	std::vector<int> displaced;
+	for (int keycode = minKeycode; keycode <= maxKeycode; ++keycode)
+	{
+		if (keys[keycode] != KeyNOKEY || keysyms[keycode] == NoSymbol)
+			continue;
+
+		TKey key = getKeyFromKeycode(keycode);
+		if (key == KeyNOKEY)
+			continue;
+
+		if (!isCharacterKey(key))
+		{
+			// the decimal key of the keypad: nothing else is at its position
+			keys[keycode] = key;
+		}
+		else if (getKeyFromKeySym(keysyms[keycode]) != KeyNOKEY)
+		{
+			// no character key in this layout (Zenkaku_Hankaku): its keysym names it, its position stays free
+		}
+		else if (!letter[key])
+		{
+			// two positions have the same key where a keyboard has only one of them (LSGT and AB11)
+			keys[keycode] = key;
+			taken[key] = true;
+		}
+		else
+		{
+			displaced.push_back(keycode);
+		}
+	}
+
+	// the keys whose position is taken: the key named after their character when it is free
+	for (uint i = 0; i < displaced.size(); ++i)
+	{
+		TKey key = getPunctuationKeyFromKeySym(keysyms[displaced[i]]);
+		if (key != KeyNOKEY && !taken[key])
+		{
+			keys[displaced[i]] = key;
+			taken[key] = true;
+		}
+	}
+
+	// then the first punctuation key that is free
+	for (uint i = 0; i < displaced.size(); ++i)
+	{
+		int keycode = displaced[i];
+
+		for (uint j = 0; j < sizeof(s_PunctuationKeys) / sizeof(s_PunctuationKeys[0]) && keys[keycode] == KeyNOKEY; ++j)
+		{
+			if (!taken[s_PunctuationKeys[j]])
+			{
+				keys[keycode] = s_PunctuationKeys[j];
+				taken[s_PunctuationKeys[j]] = true;
+			}
+		}
+
+		const char *keysymName = XKeysymToString(keysyms[keycode]);
+		if (keys[keycode] == KeyNOKEY)
+		{
+			// more character keys than there are keys for them: shared, as all of these were before
+			keys[keycode] = getKeyFromKeycode(keycode);
+			nlwarning("3D: No key is left for X keycode %d (%s) of keyboard group %u, it shares %s with another key", keycode, keysymName ? keysymName : "", group & 3, CEventKey::getStringFromKey(keys[keycode]).c_str());
+		}
+		else
+		{
+			nldebug("3D: X keycode %d (%s) of keyboard group %u is %s, as %s is another key of this layout", keycode, keysymName ? keysymName : "", group & 3, CEventKey::getStringFromKey(keys[keycode]).c_str(), CEventKey::getStringFromKey(getKeyFromKeycode(keycode)).c_str());
+		}
+	}
+
+	return keys;
+}
+
+// the key of a key event
+TKey CUnixEventEmitter::getKeyFromKeyEvent(uint keycode, KeySym keysym, uint state)
+{
+	// the keys that are no characters follow their keysym, which follows the modifiers: the keypad with Num Lock,
+	// Shift+Tab
 	TKey key = getKeyFromKeySym(keysym);
-	if (key == KeyNOKEY)
-		key = getKeyFromKeycode(keycode);
-	if (key == KeyNOKEY)
-		key = getKeyFromKeySym(XkbKeycodeToKeysym(dpy, keycode, 0, 0));
-	return key;
+	if (key != KeyNOKEY && !isCharacterKey(key))
+		return key;
+
+	// a character key is the same key at all its levels, the one the layout of the group gives its keycode
+	if (keycode < 256)
+	{
+		TKey layoutKey = getKeycodeKeys(XkbGroupForCoreState(state))[keycode];
+		if (layoutKey != KeyNOKEY)
+			return layoutKey;
+	}
+
+	// a letter from a key that has none at its first level
+	if (key != KeyNOKEY)
+		return key;
+
+	// the keys that give an unknown keysym with modifiers (Ctrl+Pause gives Break): by the keysym of their first level
+	return getKeyFromKeySym(XkbKeycodeToKeysym(_dpy, keycode, 0, 0));
 }
 
 // check if the next pressed key is the same
@@ -691,7 +865,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		// send CEventKeyDown event only if keyCode is defined
 		if (keyCode)
 		{
-			TKey key = getKeyFromKeyEvent(_dpy, keyCode, k);
+			TKey key = getKeyFromKeyEvent(keyCode, k, event.xkey.state);
 
 			// An input method server gives back the key presses it does not use: the same press, with the
 			// same time, comes a second time and is not filtered then. Its key down was posted the first time.
@@ -767,7 +941,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			else
 			{
 				// pressed before the window had the focus: the key without modifiers
-				key = getKeyFromKeyEvent(_dpy, event.xkey.keycode, XkbKeycodeToKeysym(_dpy, event.xkey.keycode, 0, 0));
+				key = getKeyFromKeyEvent(event.xkey.keycode, XkbKeycodeToKeysym(_dpy, event.xkey.keycode, 0, 0), event.xkey.state);
 			}
 
 			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
@@ -946,6 +1120,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	case MappingNotify:
 		// update keymap
 		XRefreshKeyboardMapping((XMappingEvent *)&event);
+
+		// the keys of the layout are read again when the next key needs them
+		for (uint i = 0; i < sizeof(m_KeycodeKeys) / sizeof(m_KeycodeKeys[0]); ++i)
+			m_KeycodeKeys[i].clear();
 		break;
 	case DestroyNotify:
 		// XIM server has crashed
