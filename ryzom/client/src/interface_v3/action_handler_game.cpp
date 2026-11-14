@@ -3584,19 +3584,30 @@ class CHandlerGameConfigApply : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// **** Apply the video mode
+		// Get Fullscreen
+		bool bFullscreen = false;
+		{
+			CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
+			if (pBut != nullptr)
+				bFullscreen = pBut->getPushed();
+		}
+
+		// A window needs no mode of the list. Without a mode picked in the list (none of them is the configured
+		// or the current one), a fullscreen mode stays as it is
 		sint nVideModeNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
-		if (nVideModeNb != -1)
+		if (nVideModeNb != -1 || !bFullscreen)
 		{
 			sint nVideoFreqNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->getValue32();
-			if (nVideoFreqNb != -1)
+			if (nVideoFreqNb != -1 || !bFullscreen)
 			{
 				// Get W, H
 				sint w = 1024, h = 768;
-				string name;
+				string name = ClientCfg.MonitorName;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
-					if( pCB != nullptr)
+					if (pCB != nullptr && nVideModeNb != -1)
 					{
+						name.clear();
 						string vidModeStr = pCB->getText(nVideModeNb);
 						string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
 						fromString(tmp, w);
@@ -3614,19 +3625,11 @@ class CHandlerGameConfigApply : public IActionHandler
 				sint freq = 60;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
-					if( pCB != nullptr)
+					if (pCB != nullptr && nVideoFreqNb != -1)
 					{
 						string vidFreqStr = pCB->getText(nVideoFreqNb);
 						fromString(vidFreqStr, freq);
 					}
-				}
-
-				// Get Fullscreen
-				bool bFullscreen = false;
-				{
-					CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
-					if (pBut != nullptr)
-						bFullscreen = pBut->getPushed();
 				}
 
 				ClientCfg.Windowed = !bFullscreen;

@@ -1448,12 +1448,12 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	NL3D::UDriver::CMode currentMode;
 	Driver->getCurrentScreenMode(currentMode);
 
-	// TODO: for resolutions below 1024x768, could use automatic UI scaling like in login/outgame
-	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
+	// Remove modes under 800x600 (the login and character selection screens scale themselves down to the
+	// screen, the interface of the game needs this much) and get the unique strings
 	sint i, j;
 	for (i = 0; i < (sint)videoModes.size(); ++i)
 	{
-		if ((videoModes[i].Width < 1024) || (videoModes[i].Height < 768))
+		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
 		{
 			videoModes.erase(videoModes.begin()+i);
 			--i;
@@ -1508,10 +1508,10 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 				else
 				if (videoModes[i].Width == currentMode.Width &&
 					videoModes[i].Height == currentMode.Height &&
-					videoModes[i].Frequency == currentMode.Frequency &&
 					videoModes[i].DisplayDevice == currentMode.DisplayDevice)
 				{
-					// use current (active) monitor resolution
+					// use current (active) monitor resolution, at whichever frequency (this is the first
+					// mode of that resolution in the list, the frequencies are listed below)
 					nFoundMode = i;
 					nFoundStringMode = j;
 				}
@@ -1519,12 +1519,11 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 		}
 	}
 
-	// If no modes are available, fallback to windowed mode
+	// No mode of the list is the configured or the current one: the caller keeps the mode there is. The
+	// configuration is not touched here, a mode that cannot be set is refused where it is set (setVideoMode)
 	if (nFoundStringMode == -1)
 	{
-		nlwarning("Mode %ux%u not found, fall back to windowed", (uint)ClientCfg.Width, (uint)ClientCfg.Height);
-		ClientCfg.Windowed = true;
-		ClientCfg.writeInt("FullScreen", 0);
+		nlwarning("No video mode of the driver is the configured %ux%u or the current %ux%u", (uint)ClientCfg.Width, (uint)ClientCfg.Height, (uint)currentMode.Width, (uint)currentMode.Height);
 	}
 	else
 	{

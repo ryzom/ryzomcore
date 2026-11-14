@@ -1968,9 +1968,13 @@ class CAHInitResLod : public IActionHandler
 		// If the client is in windowed mode, still in windowed mode and do not change anything
 		if (ClientCfg.Windowed)
 			CurrentMode = 0;
-		// If we have not found the mode so it can be an error or machine change, so propose the first available
+		// The configured mode is not in the list (a mode the list leaves out, another machine): it is listed
+		// as it is, so that leaving this screen keeps the configuration unless the player picks another mode
 		else if (CurrentMode == -1)
+		{
+			StringModeList.insert(StringModeList.begin() + 1, toString(ClientCfg.Width) + " x " + toString(ClientCfg.Height));
 			CurrentMode = 1;
+		}
 		// We inserted 'Windowed' as first mode, so index needs to move too
 		else
 			++CurrentMode;
