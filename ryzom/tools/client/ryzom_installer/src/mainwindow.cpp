@@ -302,7 +302,7 @@ void CMainWindow::onAbout()
 		br+br+
 		tr("Author: %1").arg("C&eacute;dric 'Kervala' OCHS") + br +
 		tr("Copyright: %1").arg(COPYRIGHT) + br +
-		tr("Support: %1").arg("<a href=\"https://bitbucket.org/ryzom/ryzomcore/issues?status=new&status=open\">Ryzom Core on Bitbucket</a>"));
+		tr("Support: %1").arg("<a href=\"https://github.com/ryzom/ryzomcore/issues\">Ryzom Core on GitHub</a>"));
 }
 
 void CMainWindow::onAboutQt()

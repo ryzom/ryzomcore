@@ -58,7 +58,7 @@
 	<!-- #####         Root template matcher  (cpp-server) ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="database_description" mode="cpp-server">
-// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+// Ryzom - MMORPG Framework &lt;https://wiki.ryzom.dev/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -140,7 +140,7 @@ void CBankAccessor_<xsl:value-of select="@name"/>::init()
 	<!-- ######################################################### -->
 	<xsl:template match="database_description" mode="header-server">
 
-// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+// Ryzom - MMORPG Framework &lt;https://wiki.ryzom.dev/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify

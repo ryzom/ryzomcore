@@ -18,7 +18,7 @@ Nevrax is a company dedicated to Free Software, which is why their tools are
 covered by the GPL. See the attached license file. They built NeL to create 
 their massively multiplayer online role playing game called The Saga of Ryzom.
 
-You should visit our website at http://www.opennel.org/ for more information.
+You should visit https://wiki.ryzom.dev/nel/snowballs for more information.
 
 
 3. What's in the package?
@@ -135,5 +135,5 @@ Type text followed by ENTER to broadcast messages
    -------------
 
 For comments and problems relating to SNOWBALLS or NeL 
-you can go to the forums at http://www.opennel.org/jforum/forums/list.page
-or use the issue tracker at http://www.opennel.org/jira/secure/Dashboard.jspa
+you can go to https://wiki.ryzom.dev/
+or use the issue tracker at https://github.com/ryzom/ryzomcore/issues

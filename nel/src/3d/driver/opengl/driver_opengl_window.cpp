@@ -1037,7 +1037,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		 * parent and [NSView bounds.origin] is relative to it's own coordinate
 		 * system. This are incompatible notations. Qt should handle the conversion.
 		 * Fixes: #1013 Viewport size when embedding NeL Cocoa view in Qt
-		 *   (http://dev.ryzom.com/issues/1013)
+		 *   (issue 1013 of the former issue tracker)
 		 */
 		NSView* view = (NSView*)wnd;
 		if(view.frame.origin.x != 0 || view.frame.origin.y != 0) {
@@ -3243,7 +3243,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 	if (m_FullscreenWindow)
 	{
 		// disable and re-enable fullscreen
-		// fixes #1062 (http://dev.ryzom.com/issues/1062)
+		// fixes #1062 of the former issue tracker
 		setWindowStyle(EWSWindowed);
 		setWindowStyle(EWSFullscreen);
 

@@ -31,7 +31,7 @@
 	<!-- #####         Root template matcher               ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="generator">
-<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;https://wiki.ryzom.dev/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify

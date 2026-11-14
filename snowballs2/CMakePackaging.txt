@@ -16,9 +16,9 @@ SET(CPACK_NSIS_MUI_ICON ${PROJECT_SOURCE_DIR}/resources/nevraxpill.ico)
 SET(CPACK_NSIS_MUI_UNIICON ${PROJECT_SOURCE_DIR}/resources/nevraxpill.ico)
 SET(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} Snowballs")
-SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel")
-SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel")
-SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
+SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\wiki.ryzom.dev\\\\nel\\\\snowballs")
+SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\wiki.ryzom.dev\\\\nel\\\\snowballs")
+SET(CPACK_NSIS_CONTACT "https://wiki.ryzom.dev/")
 
 ## Source Packages
 SET(CPACK_PACKAGE_FILE_NAME "snowballs-${PROJECT_VERSION}")

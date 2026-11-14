@@ -488,9 +488,6 @@ IF(WITH_NEL_TESTS)
   ENABLE_TESTING()
   IF(BUILD_DASHBOARD)
     INCLUDE(Dart)
-    SET(SVNCOMMAND svn)
-    SET(SVNSOURCEDIR http://dev.ryzom.com/svn/trunk/nel)
-    SET(GENERATELOGS svn2cl)
   ENDIF()
 ENDIF()
 
@@ -512,9 +509,9 @@ SET(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
 SET(CPACK_NSIS_MUI_UNIICON ${CMAKE_SOURCE_DIR}/nel/resources/nevraxpill.ico)
 SET(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/nel/resources\\\\nel.bmp)
 SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} RyzomCore")
-SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\dev.ryzom.com")
-SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\dev.ryzom.com\\\\projects\\\\nel\\\\wiki")
-SET(CPACK_NSIS_CONTACT "matt.raykowski@gmail.com")
+SET(CPACK_NSIS_HELP_LINK "https:\\\\\\\\wiki.ryzom.dev")
+SET(CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\wiki.ryzom.dev")
+SET(CPACK_NSIS_CONTACT "https://wiki.ryzom.dev/")
 
 ## Source Packages
 # remove os part of file name

@@ -90,7 +90,7 @@ void CPrimitiveView::OnSize(UINT nType, int cx, int cy)
 	MoveWindow (&iniRect, TRUE);	
 
 	// We commented this line because it generates infinite loops on some computers
-	// http://dev.ryzom.com/issues/show/310
+	// (issue 310 of the former issue tracker)
 	//GetTreeCtrl().MoveWindow (&iniRect);
 
 	/* iniRect.top = 45; iniRect.left = 10;

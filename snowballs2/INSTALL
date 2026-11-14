@@ -1,9 +1,9 @@
 
-If you find any bugs or have any suggestions use the OpenNeL Issue Tracker:
-   <URL:http://www.opennel.org/jira/secure/Dashboard.jspa>
+If you find any bugs or have any suggestions use the Ryzom Core issue tracker:
+   <URL:https://github.com/ryzom/ryzomcore/issues>
 
-If you need any help contact us on the OpenNeL Forums:
-   <URL:http://www.opennel.org/jforum/forums/list.page>
+If you need any help, see the Ryzom Core wiki:
+   <URL:https://wiki.ryzom.dev/>
 
 
 Requirements
@@ -11,17 +11,17 @@ Requirements
 
    Snowballs need the folowing libraries :
 
-      - NeL                   <URL:http://www.opennel.org/>
+      - NeL                   <URL:https://wiki.ryzom.dev/nel>
             Default install plus NeL Sound.
             You need to launch the configure script with the '--enable-sound'
             option.
-      - NeLNS                 <URL:http://www.opennel.org/>
+      - NeLNS                 <URL:https://wiki.ryzom.dev/nel>
             This is mandatory to run the Snowballs server but it isn't for
             the Snowballs client.
 
    And the lastest Snowballs data pack available :
 
-                              <URL:http://www.opennel.org/>
+                              <URL:https://wiki.ryzom.dev/nel/snowballs>
 
 
 Compilation
@@ -32,9 +32,7 @@ Compilation
 
       Visit the following urls for the most recent information:
       
-         http://www.opennel.org/confluence/display/NEL/NeLRequiredLibrariesWindows
-         http://www.opennel.org/confluence/display/NEL/CompilingNelWindows
-         http://www.opennel.org/confluence/display/NEL/NeLSetupQuickStart
+         https://wiki.ryzom.dev/nel/compile_windows
 
 
    2. GNU/Linux compilation

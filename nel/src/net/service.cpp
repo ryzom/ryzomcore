@@ -676,7 +676,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 				ConfigFile.getVar("DefaultEmailSMTP").asString(),
 				ConfigFile.exists("DefaultEmailFrom")
 				? ConfigFile.getVar("DefaultEmailFrom").asString()
-				: "service@opennel.org",
+				: "service@example.ryzom.dev",
 				ConfigFile.getVar("DefaultEmailTo").asString());
 
 		//
