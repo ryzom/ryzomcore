@@ -74,17 +74,9 @@ void Nel3DWidget::createTextContext( std::string fontFile )
 	if( driver == NULL )
 		return;
 		
-	std::string font;
-
-	try
-	{
-		font = NLMISC::CPath::lookup( fontFile );
-	}
-	catch( ... )
-	{
-		nlinfo( "Font %s cannot be found, cannot create textcontext!", fontFile.c_str() );
-		exit( EXIT_FAILURE );
-	}
+	std::string font = NLMISC::CPath::lookup(fontFile, false);
+	if (font.empty())
+		throw NLMISC::Exception(std::string("The font '") + fontFile + "' is not in the search paths");
 
 	if( textContext != NULL )
 	{

@@ -115,7 +115,10 @@ void CObjectViewer::init( NL3D::UDriver *driver )
 
 	// create the text context
 	nlassert(!_TextContext);
-	_TextContext = _Driver->createTextContext(NLMISC::CPath::lookup(_FontName));
+	std::string fontFile = NLMISC::CPath::lookup(_FontName, false);
+	if (fontFile.empty())
+		throw NLMISC::Exception(std::string("The object viewer font '") + _FontName + "' (setting " + Constants::FONT + ") is not in the search paths");
+	_TextContext = _Driver->createTextContext(fontFile);
 	nlassert(_TextContext);
 
 	NL3D::CBloomEffect::instance().setDriver(_Driver);
@@ -460,7 +463,7 @@ void CObjectViewer::loadConfig()
 #endif
 
 	_CameraFocal = settings->value("CameraFocal", 75).toInt();
-	_FontName = settings->value(Constants::FONT, "uiFontSans").toString().toUtf8().constData();
+	_FontName = settings->value(Constants::FONT, "andbasr.ttf").toString().toUtf8().constData();
 	_BloomEffect = settings->value(Constants::ENABLE_BLOOM, false).toBool();
 	_BloomDensity = settings->value(Constants::BLOOM_DENSITY, 0).toInt();
 	_BloomSquare = settings->value(Constants::ENABLE_SQUARE_BLOOM, false).toBool();

@@ -74,7 +74,6 @@ namespace GUIEditor
 
 		widgetInfoTree = new CWidgetInfoTree;
 
-		createMenus();
 		readSettings();
 
 		CWidgetPropParser parser;
@@ -102,6 +101,9 @@ namespace GUIEditor
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 
 		GUICtrl->init();
+
+		// the menu and the core actions come once the 3D view is set up, as that can throw and leave no window
+		createMenus();
 
 		connect( GUICtrl, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
 		connect( widgetProps, SIGNAL( treeChanged() ), this, SLOT( onTreeChanged() ) );

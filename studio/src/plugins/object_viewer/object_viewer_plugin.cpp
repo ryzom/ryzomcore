@@ -31,11 +31,18 @@ ObjectViewerPlugin::~ObjectViewerPlugin()
 
 bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
-	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
 
 	NL3D::init3d();
-	Modules::init();
+	try
+	{
+		Modules::init();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		*errorString = QString::fromUtf8(e.what());
+		return false;
+	}
 	addAutoReleasedObject(new CObjectViewerContext());
 	addAutoReleasedObject(new GraphicsSettingsPage());
 	addAutoReleasedObject(new SoundSettingsPage());
