@@ -4404,7 +4404,10 @@ void CCharacter::fillCharInfo(CHARSYNC::TCharInfo &charInfo) const
 	charInfo.setCult(charSyncAll.first);
 	charInfo.setCivilisation(charSyncAll.second);
 	charInfo.setRespawnPoints(getRespawnPoints().buildRingPoints());
-	charInfo.setNewcomer(isNewbie());
+	// a shard that cannot tell the newcomer flag says so, and the shard unifier keeps the flag it has
+	bool newcomer = true;
+	charInfo.setNewcomerKnown(findNewbie(newcomer));
+	charInfo.setNewcomer(newcomer);
 }
 
 //---------------------------------------------------
@@ -7847,17 +7850,24 @@ void CCharacter::setHomeMainlandSessionId(TSessionId homeSessionId)
 // check if the character is a newbie by checking the base of the position stack
 bool CCharacter::isNewbie() const
 {
-	// default to newbie in case of position stack error
+	// default to newbie when this shard cannot tell (position stack error, or a continent it does not load)
 	bool newbie = true;
-	if (!PositionStack.empty())
-	{
-		const COfflineEntityState& state = (PositionStack[0].SessionId == sessionId()) ? getState() : PositionStack[0].PosState;
-		CContinent *homeCont= CZoneManager::getInstance().getContinent(state.X, state.Y);
-		if (homeCont != NULL)
-			newbie = (((CONTINENT::TContinent)homeCont->getId()) == CONTINENT::NEWBIELAND) ? 1 : 0;
-	}
-
+	findNewbie(newbie);
 	return newbie;
+}
+
+// the character is a newbie while the base of its position stack is in Newbieland; only a shard that loads the
+// continent of that position can tell, and a Ring shard loads no mainland continent
+bool CCharacter::findNewbie(bool &newbie) const
+{
+	if (PositionStack.empty())
+		return false;
+	const COfflineEntityState& state = (PositionStack[0].SessionId == sessionId()) ? getState() : PositionStack[0].PosState;
+	CContinent *homeCont= CZoneManager::getInstance().getContinent(state.X, state.Y);
+	if (homeCont == NULL)
+		return false;
+	newbie = ((CONTINENT::TContinent)homeCont->getId()) == CONTINENT::NEWBIELAND;
+	return true;
 }
 
 //-----------------------------------------------

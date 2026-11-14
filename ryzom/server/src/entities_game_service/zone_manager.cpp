@@ -1768,7 +1768,8 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 			// notify player respawn points system that continent changed
 			user->getRespawnPoints().cbContinentChanged(oldContinent);
 			// update newbieland flag (defailt to 1 if there's aproblem determining the true value)
-			bool newbie = user->isNewbie();
+			bool newbie = true;
+			bool newbieKnown = user->findNewbie(newbie);
 //			user->_PropertyDatabase.setProp("USER:IS_NEWBIE", newbie);
 			CBankAccessor_PLR::getUSER().setIS_NEWBIE(user->_PropertyDatabase, newbie);
 
@@ -1782,7 +1783,8 @@ void CZoneManager::updateCharacterPosition( CCharacter * user )
 //			user->_PropertyDatabase.setProp("USER:IS_TRIAL", trialPlayer);
 			CBankAccessor_PLR::getUSER().setIS_TRIAL(user->_PropertyDatabase, trialPlayer);
 
-			if (updateSU)
+			// the shard unifier only hears a flag this shard can tell
+			if (updateSU && newbieKnown)
 			{
 				if (IShardUnifierEvent::getInstance() != NULL)
 					IShardUnifierEvent::getInstance()->onUpdateCharNewbieFlag(user->getId(), newbie);

@@ -1171,6 +1171,9 @@ public:
 
 	// check if the character is a newbie by checking the base of the position stack
 	virtual bool isNewbie() const NL_OVERRIDE;
+	// set newbie and return true when this shard loads the continent of the base of the position stack; false when
+	// it cannot tell (a Ring shard does not load the mainland continents)
+	bool findNewbie(bool &newbie) const;
 
 	// See in character_interface.h
 	void applyTopOfPositionStack() NL_OVERRIDE;
