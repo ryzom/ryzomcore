@@ -152,6 +152,172 @@ static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 	return NLMISC::KeyNOKEY;
 }
 
+/// the punctuation keys, in the order they are given out to the keys whose position belongs to another key
+static const NLMISC::TKey s_PunctuationKeys[] = { NLMISC::KeySEMICOLON, NLMISC::KeyEQUALS, NLMISC::KeyCOMMA,
+	NLMISC::KeyDASH, NLMISC::KeyPERIOD, NLMISC::KeySLASH, NLMISC::KeyTILDE, NLMISC::KeyLBRACKET,
+	NLMISC::KeyBACKSLASH, NLMISC::KeyRBRACKET, NLMISC::KeyAPOSTROPHE, NLMISC::KeyPARAGRAPH, NLMISC::KeyOEM_102 };
+
+/// the key named after a punctuation character, for a key that cannot have the key of its position
+static NLMISC::TKey punctuationCharacterToNelKey(UniChar character)
+{
+	switch (character)
+	{
+		case ';':  return NLMISC::KeySEMICOLON;
+		case '=':  return NLMISC::KeyEQUALS;
+		case ',':  return NLMISC::KeyCOMMA;
+		case '-':  return NLMISC::KeyDASH;
+		case '.':  return NLMISC::KeyPERIOD;
+		case '/':  return NLMISC::KeySLASH;
+		case '`':  return NLMISC::KeyTILDE;
+		case '[':  return NLMISC::KeyLBRACKET;
+		case '\\': return NLMISC::KeyBACKSLASH;
+		case ']':  return NLMISC::KeyRBRACKET;
+		case '\'': return NLMISC::KeyAPOSTROPHE;
+		default:break;
+	}
+	return NLMISC::KeyNOKEY;
+}
+
+/// Reads the key of each virtual key code from the current keyboard layout.
+/// A letter key is the key of its letter (the virtual key codes are positions on a US keyboard, so on AZERTY
+/// the key printed A has the code of Q). The other keys keep the key of their position, unless a letter key of
+/// the layout has that key: such a key gets the key named after its character when it is free, else the first
+/// punctuation key that is free. Without a layout every key has the key of its position.
+void CCocoaEventEmitter::readKeyboardLayout()
+{
+	const uint keycodeCount = 128;
+
+	m_LayoutKeys.clear();
+	m_LayoutKeys.resize(keycodeCount, NLMISC::KeyNOKEY);
+
+	// the character each key gives without modifiers, 0 when it gives none
+	std::vector<UniChar> characters(keycodeCount, 0);
+
+	// the keys that are given, and those among them that a letter key has
+	std::vector<bool> taken(NLMISC::KeyCount, false);
+	std::vector<bool> letter(NLMISC::KeyCount, false);
+
+	TISInputSourceRef source = TISCopyCurrentKeyboardLayoutInputSource();
+	const UCKeyboardLayout *layout = NULL;
+	if (source)
+	{
+		// not every input source has this data, and the data belongs to the source
+		CFDataRef layoutData = (CFDataRef)TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData);
+		if (layoutData)
+			layout = (const UCKeyboardLayout *)CFDataGetBytePtr(layoutData);
+	}
+
+	// the letters
+	for (uint keycode = 0; keycode < keycodeCount; ++keycode)
+	{
+		if (layout)
+		{
+			UInt32 deadKeyState = 0;
+			UniChar text[4];
+			UniCharCount length = 0;
+			OSStatus status = UCKeyTranslate(layout, (UInt16)keycode, kUCKeyActionDisplay, 0, LMGetKbdType(),
+				kUCKeyTranslateNoDeadKeysMask, &deadKeyState, sizeof(text) / sizeof(text[0]), &length, text);
+			if (status == noErr && length > 0)
+				characters[keycode] = text[0];
+		}
+
+		NLMISC::TKey key = NLMISC::KeyNOKEY;
+		UniChar character = characters[keycode];
+		if (character >= 'a' && character <= 'z')
+			key = (NLMISC::TKey)(NLMISC::KeyA + (character - 'a'));
+		else if (character >= 'A' && character <= 'Z')
+			key = (NLMISC::TKey)(NLMISC::KeyA + (character - 'A'));
+
+		if (key != NLMISC::KeyNOKEY)
+		{
+			m_LayoutKeys[keycode] = key;
+			taken[key] = true;
+			letter[key] = true;
+		}
+	}
+
+	if (source)
+		CFRelease(source);
+
+	// the keys of their position
+	std::vector<uint> displaced;
+	for (uint keycode = 0; keycode < keycodeCount; ++keycode)
+	{
+		if (m_LayoutKeys[keycode] != NLMISC::KeyNOKEY)
+			continue;
+
+		NLMISC::TKey key = virtualKeycodeToNelKey((unsigned short)keycode);
+		if (key == NLMISC::KeyNOKEY)
+			continue;
+
+		if (!letter[key])
+		{
+			m_LayoutKeys[keycode] = key;
+			taken[key] = true;
+		}
+		else
+		{
+			displaced.push_back(keycode);
+		}
+	}
+
+	// the keys whose position is taken: the key named after their character when it is free
+	for (uint i = 0; i < displaced.size(); ++i)
+	{
+		NLMISC::TKey key = punctuationCharacterToNelKey(characters[displaced[i]]);
+		if (key != NLMISC::KeyNOKEY && !taken[key])
+		{
+			m_LayoutKeys[displaced[i]] = key;
+			taken[key] = true;
+		}
+	}
+
+	// then the first punctuation key that is free, and when none is left the key of the position, shared
+	for (uint i = 0; i < displaced.size(); ++i)
+	{
+		uint keycode = displaced[i];
+
+		for (uint j = 0; j < sizeof(s_PunctuationKeys) / sizeof(s_PunctuationKeys[0]) && m_LayoutKeys[keycode] == NLMISC::KeyNOKEY; ++j)
+		{
+			if (!taken[s_PunctuationKeys[j]])
+			{
+				m_LayoutKeys[keycode] = s_PunctuationKeys[j];
+				taken[s_PunctuationKeys[j]] = true;
+			}
+		}
+
+		if (m_LayoutKeys[keycode] == NLMISC::KeyNOKEY)
+			m_LayoutKeys[keycode] = virtualKeycodeToNelKey((unsigned short)keycode);
+	}
+}
+
+/// The key of a virtual key code in the current keyboard layout
+NLMISC::TKey CCocoaEventEmitter::layoutKeycodeToNelKey(unsigned short keycode)
+{
+	// the layout the keys were read for: the user can change it at any time
+	char identifier[256];
+	identifier[0] = '\0';
+	TISInputSourceRef source = TISCopyCurrentKeyboardLayoutInputSource();
+	if (source)
+	{
+		CFStringRef sourceId = (CFStringRef)TISGetInputSourceProperty(source, kTISPropertyInputSourceID);
+		if (!sourceId || !CFStringGetCString(sourceId, identifier, sizeof(identifier), kCFStringEncodingUTF8))
+			identifier[0] = '\0';
+		CFRelease(source);
+	}
+
+	if (m_LayoutKeys.empty() || m_LayoutId != identifier)
+	{
+		m_LayoutId = identifier;
+		readKeyboardLayout();
+	}
+
+	if (keycode < m_LayoutKeys.size())
+		return m_LayoutKeys[keycode];
+
+	return virtualKeycodeToNelKey(keycode);
+}
+
 bool CCocoaEventEmitter::pasteTextFromClipboard(std::string &text)
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
@@ -400,9 +566,14 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSMouseExited:break;
 	case NSKeyDown:
 	{
+		// the key of the current keyboard layout, which the release reports too
+		unsigned short keycode = [event keyCode];
+		NLMISC::TKey key = layoutKeycodeToNelKey(keycode);
+		m_PressedKeycodes[keycode] = key;
+
 		// push the key press event to the event server
 		server->postEvent(new NLMISC::CEventKeyDown(
-			virtualKeycodeToNelKey([event keyCode]),
+			key,
 			modifiers,
 			[event isARepeat] == NO, this));
 
@@ -422,9 +593,23 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	}
 	case NSKeyUp:
 	{
+		// the key its press reported, also when the keyboard layout changed in between
+		unsigned short keycode = [event keyCode];
+		NLMISC::TKey key;
+		std::map<unsigned short, NLMISC::TKey>::iterator it = m_PressedKeycodes.find(keycode);
+		if (it != m_PressedKeycodes.end())
+		{
+			key = it->second;
+			m_PressedKeycodes.erase(it);
+		}
+		else
+		{
+			key = layoutKeycodeToNelKey(keycode);
+		}
+
 		// push the key release event to the event server
 		server->postEvent(new NLMISC::CEventKeyUp(
-			virtualKeycodeToNelKey([event keyCode]),
+			key,
 			modifiers, this));
 		break;
 	}
