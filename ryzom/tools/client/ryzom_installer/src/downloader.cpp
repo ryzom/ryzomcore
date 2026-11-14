@@ -123,6 +123,9 @@ bool CDownloader::openFile()
 	// otherwise the whole file comes again and replaces it
 	QIODevice::OpenMode mode = (supportsResume() && m_offset > 0) ? QIODevice::OpenMode(QFile::Append) : (QFile::WriteOnly | QFile::Truncate);
 
+	// unbuffered, so that a write the disk cannot take fails in write() and not unseen when the file is closed
+	mode |= QIODevice::Unbuffered;
+
 	if (m_file->open(mode)) return true;
 
 	closeFile();
@@ -177,7 +180,9 @@ void CDownloader::getFileHead()
 				const QString serverDate = m_lastModified.toString(Qt::ISODate);
 				nlwarning("%s disagrees again with %s: the part has %" NL_I64 "d bytes dated %s, the server announces %" NL_I64 "d bytes dated %s", Q2C(m_fullPath), Q2C(m_url), m_offset,
 				    Q2C(partDate), m_size, Q2C(serverDate));
-				if (m_listener) m_listener->operationFail(tr("%1 disagrees again with the file on %2: the part has %3 bytes dated %4, the server announces %5 bytes dated %6").arg(m_fullPath).arg(QUrl(m_url).host()).arg(m_offset).arg(partDate).arg(m_size).arg(serverDate));
+				if (m_listener)
+					m_listener->operationFail(tr("%1 disagrees again with the file on %2: the part has %3 bytes dated %4, the server announces %5 bytes dated %6")
+					        .arg(m_fullPath, QUrl(m_url).host(), QString::number(m_offset), partDate, QString::number(m_size), serverDate));
 				return;
 			}
 
@@ -291,7 +296,9 @@ bool CDownloader::refusesToReplacePart()
 	const QString host = QUrl(m_url).host();
 	nlwarning("%s answers for %s with %" NL_I64 "d bytes of '%s' where it first answered with '%s', the part %s of %" NL_I64 "d bytes is kept", Q2C(host), Q2C(m_url), m_size,
 	    Q2C(m_contentType), Q2C(firstContentType), Q2C(m_fullPath), partSize);
-	if (m_listener) m_listener->operationFail(tr("%1 now answers for %2 with %3 bytes of '%4' where it first answered with '%5', the part %6 of %7 bytes is kept").arg(host).arg(m_url).arg(m_size).arg(m_contentType).arg(firstContentType).arg(m_fullPath).arg(partSize));
+	if (m_listener)
+		m_listener->operationFail(tr("%1 now answers for %2 with %3 bytes of '%4' where it first answered with '%5', the part %6 of %7 bytes is kept")
+		        .arg(host, m_url, QString::number(m_size), m_contentType, firstContentType, m_fullPath, QString::number(partSize)));
 	return true;
 }
 
@@ -327,8 +334,11 @@ void CDownloader::onHeadFinished()
 
 	// only the Content-Length of a 200 is the size of the file, a 206 announces the length of its range
 	const QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
-	m_lastModified = reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toUTC();
 	const QString contentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
+
+	// an answer without a date, such as a 416, keeps the one an earlier answer for the file gave
+	const QDateTime lastModified = reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toUTC();
+	if (lastModified.isValid()) m_lastModified = lastModified;
 
 	QString acceptRanges = QString::fromLatin1(reply->rawHeader("Accept-Ranges"));
 	QString contentRange = QString::fromLatin1(reply->rawHeader("Content-Range"));
@@ -435,6 +445,29 @@ void CDownloader::onHeadFinished()
 		}
 	}
 
+	// the range starts at or after the end of the file, whose size the answer gives
+	else if (status == 416)
+	{
+		QRegExp regexp("^bytes \\*/([0-9]+)$");
+
+		// with the size known, the part is complete or larger than the file, the rules for such a part apply
+		if (m_supportsAcceptRanges && regexp.exactMatch(contentRange) && (m_offset >= regexp.cap(1).toLongLong()))
+		{
+			m_size = regexp.cap(1).toLongLong();
+			m_sizeKnown = true;
+			m_supportsContentRange = false;
+
+			nlinfo("The range from byte %" NL_I64 "d of %s is past the end of the file, which has %" NL_I64 "d bytes", m_offset, Q2C(url), m_size);
+
+			getFileHead();
+			return;
+		}
+
+		nlwarning("%s answers the range from byte %" NL_I64 "d with 416 and the Content-Range '%s'", Q2C(url), m_offset, Q2C(contentRange));
+		if (m_listener) m_listener->operationFail(tr("%1 answers the range from byte %2 with 416 and the Content-Range '%3'").arg(url, QString::number(m_offset), contentRange));
+		return;
+	}
+
 	// other status
 	else
 	{
@@ -470,6 +503,7 @@ void CDownloader::onDownloadFinished()
 	int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 	QString url = reply->url().toString();
 	const bool noError = reply->error() == QNetworkReply::NoError;
+	const QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
 
 	reply->deleteLater();
 
@@ -492,6 +526,13 @@ void CDownloader::onDownloadFinished()
 	}
 	else
 	{
+		// a HEAD without Content-Length leaves the size of the file to the GET, when it gives one
+		if (!m_sizeKnown && (status == 200) && contentLength.isValid())
+		{
+			m_size = contentLength.toLongLong();
+			m_sizeKnown = true;
+		}
+
 		const qint64 fileSize = QFileInfo(m_fullPath).size();
 
 		// without a known size, a 200 that ends without an error is the whole file
@@ -598,5 +639,13 @@ void CDownloader::onDownloadRead()
 		return;
 	}
 
-	m_file->write(reply->readAll());
+	// a short or failed write ends the download, the file would be accepted without the missing data
+	const QByteArray data = reply->readAll();
+	if (m_file->write(data) != data.size())
+	{
+		nlwarning("Unable to write to %s: %s", Q2C(m_fullPath), Q2C(m_file->errorString()));
+		m_getFailure = tr("Unable to write to %1: %2").arg(m_fullPath, m_file->errorString());
+		closeFile();
+		reply->abort();
+	}
 }
