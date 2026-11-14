@@ -310,6 +310,8 @@ public:
 	float eyesHeight();
 	/// Set Eyes Height.
 	inline void eyesHeight(float h) {_EyesHeight = h;}
+	/// The eyes height on a mount, where EyesHeight is the one on foot (before the scale of the character).
+	static float mountEyesHeight() {return 2.5f;}
 
 	/// Head Pitch methods
 	void	setHeadPitch(double hp);

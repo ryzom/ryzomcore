@@ -437,14 +437,11 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 
 //-----------------------------------------------
 // eyesHeight :
-// \todo GUIGUI : do it better in mount mode
+// The mount mode of the controls sets the height of the eyes on a mount (mountEyesHeight()).
 //-----------------------------------------------
 float CUserEntity::eyesHeight()
 {
-	if(!_OnMount)
-		return _EyesHeight * _CharacterScalePos;
-	else
-		return _EyesHeight * _CharacterScalePos;
+	return _EyesHeight * _CharacterScalePos;
 }// eyesHeight //
 
 
