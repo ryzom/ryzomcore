@@ -1572,9 +1572,11 @@ void	CActionPhraseFaber::updateItemResult()
 	uint32		bestItemColor[RM_COLOR::NumColors];
 	for(i=0;i<RM_COLOR::NumColors;i++)
 		bestItemColor[i]= 0;
-	// Stat energy is computed like server
+	// Stat energy is computed like server (CFaberActionMakeGeneric::specializedApply): every MP counts once per stat its
+	// item part is relevant for, so a blade MP (9 stats) weighs more than a grip MP (8 stats)
 	float	statEnergy= 0;
 	uint32 statEnergyPoints = 0;
+	uint32 statEnergyWeightReq = 0;
 
 	// **** Parse all Bricks of the phrase executed, to get min level
 	// take The brick with the lowest CR_RECOMMENDED
@@ -1609,6 +1611,14 @@ void	CActionPhraseFaber::updateItemResult()
 		// --- ItemPart requirement?
 		if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 		{
+			// number of stats this item part is relevant for: the weight of each of its MPs in the energy mean
+			uint32 numRelevantStats = 0;
+			for (uint k = 0; k < RM_FABER_STAT_TYPE::NumRMStatType; k++)
+			{
+				if (RM_FABER_STAT_TYPE::isStatRelevant(mpBuild.FaberTypeRequired, (RM_FABER_STAT_TYPE::TRMStatType)k))
+					numRelevantStats++;
+			}
+
 			// For all slots setuped
 			uint	nSlot= min((uint)MAX_MP_SLOT, mpBuild.NumMpSlot);
 			for(uint j=0;j<nSlot;j++)
@@ -1633,8 +1643,8 @@ void	CActionPhraseFaber::updateItemResult()
 						}
 					}
 
-					// Same for total energy
-					statEnergyPoints += numMps * mp->Mp.StatEnergy;
+					// Same for total energy, once per relevant stat
+					statEnergyPoints += numMps * numRelevantStats * mp->Mp.StatEnergy;
 
 					// Increment color stat
 					if(mp->Mp.MpColor>=0 && mp->Mp.MpColor<RM_COLOR::NumColors)
@@ -1662,6 +1672,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 			// Total MP Req
 			totalItemPartMPReq+= mpBuild.QuantityReq;
+			statEnergyWeightReq += mpBuild.QuantityReq * numRelevantStats;
 		}
 
 		// --- Specific Item requirement?
@@ -1692,10 +1703,10 @@ void	CActionPhraseFaber::updateItemResult()
 		clamp(statArray[i], 0.f, 1.f);
 	}
 
-	// Mean stat energy
-	if(totalItemPartMPReq)
+	// Mean stat energy, over the weights of all the MPs the plan requires
+	if (statEnergyWeightReq)
 	{
-		statEnergy = statEnergyPoints / (100.f * totalItemPartMPReq);
+		statEnergy = statEnergyPoints / (100.f * statEnergyWeightReq);
 		clamp(statEnergy, 0.f, 1.f);
 	}
 
