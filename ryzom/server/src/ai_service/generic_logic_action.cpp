@@ -241,6 +241,17 @@ public:
 	// depending on the whim of the level designers
 	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
+		// a group of the list that was removed (the act of a scenario that ended) makes the names
+		// be looked up again
+		for (uint i = 0; i < _groups.size(); ++i)
+		{
+			if (_groups[i] == NULL)
+			{
+				_groups.clear();
+				break;
+			}
+		}
+
 		if	(	_groups.empty()
 			&&	!_groupsName.empty())
 		{
@@ -262,12 +273,10 @@ public:
 					continue;
 				}
 				
-				// retreive persistent state instance pointer.
+				// keep the groups: an entry reads as NULL once its group is removed
 				for (uint j=0; j<grps.size(); ++j)
-					_groups.push_back(grps[j]->getPersistentStateInstance());
+					_groups.push_back(grps[j]);
 			}
-			// clear the groupName vector to not redo the job
-			_groupsName.clear();
 		}
 
 		if (_groups.empty())
@@ -278,7 +287,8 @@ public:
 
 		for (uint i=0;i<_groups.size();++i)
 		{
-			CPersistentStateInstance *grp=_groups[i];
+			CGroup *const group = _groups[i];
+			CPersistentStateInstance *grp = group ? group->getPersistentStateInstance() : NULL;
 			if	(!grp)
 				continue;
 			
@@ -294,7 +304,7 @@ protected:
 	virtual uint32 getIndex()=0;
 
 private:	
-	std::vector<CPersistentStateInstance*>	_groups;
+	std::vector<NLMISC::CRefPtr<CGroup> > _groups;
 	std::vector<std::string>				_groupsName;
 };
 
@@ -474,6 +484,7 @@ public:
 			if(_subActions[i]==NULL)
 			{
 				nlwarning("multi actions : _subActions[%d] NULL ! ",i);
+				continue;
 			}
 			if (!_subActions[i]->executeAction(entity,event))
 				result=false;
@@ -560,7 +571,7 @@ public:
 	// depending on the whim of the level designers
 	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
-		if (entity->getDebugHistory()->isRecording())
+		if (entity->getDebugHistory()->isRecording() && entity->getPunctualState())
 		{
 			entity->getDebugHistory()->addHistory("GRP End Punctual State: %s",
 				entity->getPunctualState()->getAliasNode()->fullName().c_str());
@@ -603,7 +614,9 @@ public:
 			nlwarning("random_select failed because sub-action list is empty");
 			return false;
 		}
-		_subActions[CAIS::rand16((uint32)_subActions.size())]->executeAction(entity,event);
+		IAILogicAction *const action = _subActions[CAIS::rand16((uint32)_subActions.size())];
+		if (action)
+			action->executeAction(entity, event);
 
 		return true;
 	}
@@ -751,6 +764,11 @@ public:
 		}
 		std::vector<std::string> strs;
 		NLMISC::explode(args[0], string(" "), strs, true);
+		if (strs.empty())
+		{
+			nlwarning("Invalid arguments for 'set timer'(%s) : %s", args[0].c_str(), eventNode->fullName().c_str());
+			return;
+		}
 
 		if (strs[0] == "day_time" || strs[0] == "daytime")
 		{
@@ -772,6 +790,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing weekday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_weekday;
 
@@ -785,6 +804,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing monthday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_monthday;
 
@@ -798,6 +818,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing seasonday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_seasonday;
 
@@ -811,6 +832,7 @@ public:
 			if (strs.size() < 2)
 			{
 				nlwarning("Missing yearday argument for set timer '%s' : '%s'", eventNode->fullName().c_str(), args[0].c_str());
+				return;
 			}
 			_Mode = tm_yearday;
 
@@ -1160,9 +1182,9 @@ public:
 
 		{
 			const	CSpawnGroup	*const	grp = entity->getGroup()->getSpawnObj();
-#if !FINAL_VERSION
-			nlassert(grp);
-#endif
+			// a group that is not spawned has no bot to speak
+			if (!grp)
+				return true;
 			CSpawnBot	*bot = NULL;
 
 			if	(	TempSpeaker
@@ -1543,11 +1565,13 @@ public:
 
 		if ( CAILogicDynamicIfHelper::getConditionSuccess() )
 		{
-			_SubActions[0]->executeAction(entity, event);
+			if (_SubActions[0] != NULL)
+				_SubActions[0]->executeAction(entity, event);
 		}
 		else if (_SubActions.size() == 2)
 		{
-			_SubActions[1]->executeAction(entity, event);
+			if (_SubActions[1] != NULL)
+				_SubActions[1]->executeAction(entity, event);
 		}
 		return true;
 	}
@@ -1563,6 +1587,7 @@ public:
 	CAILogicActionConditionIf (const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
 								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{
+		_Op = invalid_operator;
 		if (args.empty())
 		{
 			nlwarning("condition_if (%s) need arguments !", eventNode->fullName().c_str());
@@ -1582,6 +1607,9 @@ public:
 		if (strs.size() != 3)
 		{
 			nlwarning("condition_if (%s) invalid condition format '%s'. Need 3 parts, found %u", eventNode->fullName().c_str(), args[0].c_str(), strs.size());
+			// the three parts are read below
+			if (strs.size() < 3)
+				return;
 		}
 
 		if (!parseVar(_Var1, strs[0],container))
@@ -1606,7 +1634,7 @@ public:
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
-			if (!_subActions.empty())
+			if (!_subActions.empty() && _subActions[0] != NULL)
 				_subActions[0]->executeAction(entity, event);
 		}
 		return true;
@@ -1639,10 +1667,10 @@ public:
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
-			if (!_subActions.empty())
+			if (!_subActions.empty() && _subActions[0] != NULL)
 				_subActions[0]->executeAction(entity, event);
 		}
-		else if (_subActions.size() > 1)
+		else if (_subActions.size() > 1 && _subActions[1] != NULL)
 		{
 			_subActions[1]->executeAction(entity, event);
 		}
@@ -1767,6 +1795,9 @@ public:
 									CStateMachine *container)
 	{
 		uint32 emot = std::numeric_limits<uint32>::max();
+		// without an emot, the action does nothing
+		_EmotNumber = MBEHAV::NUMBER_OF_BEHAVIOURS;
+		_R2 = false;
 
 		if (!subActions.empty())
 		{
@@ -1790,7 +1821,6 @@ public:
 			// offset to emot behavior
 			_EmotNumber = (MBEHAV::EBehaviour)(emot + MBEHAV::EMOTE_BEGIN);
 		}
-		_R2 = false;
 		// parse the bots filter (if any)
 		for (uint i=1; i<args.size(); ++i)
 		{
@@ -1798,7 +1828,7 @@ public:
 			if	(s.empty())
 				continue;
 
-			if (isdigit(s[0]))
+			if (isdigit((unsigned char)s[0]))
 			{
 				// extract a bot number
 				_BotNumber.push_back(NLMISC::atoui(s.c_str()));
@@ -1834,7 +1864,7 @@ public:
 		if	(	!_BotNames.empty()
 			&&	!_BotNumber.empty())
 		{
-			nlwarning("emot (%) : mixing bot name and bot number is dangerous !", eventNode->fullName().c_str());
+			nlwarning("emot (%s) : mixing bot name and bot number is dangerous !", eventNode->fullName().c_str());
 		}
 
 	}
@@ -2238,9 +2268,13 @@ public:
 			}
 			else
 			{
-				_Labels.resize(nbArgs);
+				// a label selects the sub-action of its index: there are as many labels as sub-actions
+				if (nbArgs > subActions.size() + 1)
+					nlwarning("switch_actions (%s) has more labels than sub actions, the last ones are ignored", eventNode->fullName().c_str());
+				const uint32 nbLabels = (uint32)subActions.size();
+				_Labels.resize(nbLabels);
 
-				for(uint32 i=0; i<nbArgs-1; ++i)
+				for (uint32 i = 0; i < nbLabels; ++i)
 				{
 					std::string label = args[i+1];
 					if(label =="default")
@@ -2288,7 +2322,9 @@ public:
 			//not found so use the default value
 			if (!action) { action = _DefaultAction; }
 		}
-		BOMB_IF(!action,"ERROR: Bad action pointer!",return false);
+		// no label has the value and there is no default: nothing is selected
+		if (!action)
+			return false;
 
 		return action->executeAction(entity, event);
 	}
@@ -3014,8 +3050,8 @@ public:
 
 		const CAIAliasDescriptionNode	*const aliasDesc=entity->aliasTreeOwner()->getAliasNode();
 
-		if	(	aliasDesc->getType() != AITypeGrp
-			||	!entity->getGroup()	)
+		if ((aliasDesc && aliasDesc->getType() != AITypeGrp)
+		    || !entity->getGroup())
 		{
 			nlwarning("group can't have 'npc_say' action !");
 			return	true;
@@ -3047,6 +3083,9 @@ public:
 		}
 		else
 		{
+			// a group that is not spawned has no leader to speak
+			if (!grp->getSpawnObj())
+				return true;
 			CBot *b = grp->getSpawnObj()->getPersistent().getLeader();
 			if (b && b->isSpawned())
 			{
