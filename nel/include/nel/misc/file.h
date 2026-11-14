@@ -254,8 +254,10 @@ public:		// Advanced Usage.
 	 *	\throw ERenameError the temporary file could not take the place of the file. The file is left as it
 	 *	was, and the temporary file is kept: the exception names it.
 	 *	After any of these the stream is closed, and neither a second close() nor the destructor does more.
+	 *	\return false if a file opened without useTempFile was not written completely, true otherwise: also
+	 *	when no file was open.
 	 */
-	void	close();
+	bool close();
 	/// flush the file. A flush that fails is not reported here: close() reports it, as described there.
 	void	flush();
 	/// Seek the file
@@ -270,8 +272,8 @@ public:		// Advanced Usage.
 	virtual void		serialBuffer(uint8 *buf, uint len) NL_OVERRIDE;
 
 protected:
-	/// Internal close.
-	void	internalClose(bool success);
+	/// Internal close. Returns what close() returns.
+	bool internalClose(bool success);
 	virtual void		serialBit(bool &bit) NL_OVERRIDE;
 
 private:

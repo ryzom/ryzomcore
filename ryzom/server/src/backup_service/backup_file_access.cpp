@@ -477,10 +477,12 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	// disk can first show there), and the temporary file takes the place of the file there. A close that throws is
 	// a write that failed, and the file is as it was: the access is not done. As a major failure it stays in the
 	// queue with its data, and is executed again when the stall is lifted.
-	// Without UseTempFile close() does not throw, and a file that is not written completely is only logged there.
+	// Without UseTempFile close() does not throw: it returns that the file, which was written in place, is not
+	// written completely. That is the failure of a write that failed.
+	bool fileClosed = true;
 	try
 	{
-		f.close();
+		fileClosed = f.close();
 	}
 	catch (const NLMISC::ERenameError &e)
 	{
@@ -521,6 +523,16 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 			return MajorFailure;
 		}
 		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+		return MinorFailure;
+	}
+	if (!fileClosed)
+	{
+		if (checkFailureMode(MajorFailureIfFileUnwritable))
+		{
+			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't write file '%s'", Filename.c_str());
+			return MajorFailure;
+		}
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't write file '%s'", Filename.c_str());
 		return MinorFailure;
 	}
 	m_ReplaceFailures = 0;

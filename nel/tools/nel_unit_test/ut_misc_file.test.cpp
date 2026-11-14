@@ -611,7 +611,9 @@ TEST_F(CUTMiscTempFileTest, replacesTarget)
 		out.flush();
 		EXPECT_EQ(tempReadFile(m_Target), s_TempOld);
 		EXPECT_EQ(tempReadFile(m_Temp), s_TempNew);
-		EXPECT_NO_THROW(out.close());
+		bool closed = false;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_TRUE(closed);
 		EXPECT_FALSE(out.isOpen());
 		EXPECT_EQ(tempReadFile(m_Target), s_TempNew);
 		EXPECT_EQ(dirContent(), "target.foo");
@@ -1124,7 +1126,8 @@ TEST_F(CUTMiscTempFileTest, failedWriteKeepsTarget)
 }
 
 // Without a temporary file nothing can be kept from being lost, and close() is called where no exception is
-// expected: neither close() nor the destructor throws, and both log one warning that names the file
+// expected: neither close() nor the destructor throws, both log one warning that names the file, and close()
+// returns false
 TEST_F(CUTMiscTempFileTest, plainFileFailedWriteIsLogged)
 {
 	const string logged = "The file '" + m_Target + "' is not written completely";
@@ -1137,11 +1140,14 @@ TEST_F(CUTMiscTempFileTest, plainFileFailedWriteIsLogged)
 		CTempFileTestHandle lock;
 		ASSERT_TRUE(lock.lockStart(m_Target));
 		EXPECT_NO_THROW(tempSerial(out, s_TempNew));
-		EXPECT_NO_THROW(out.close());
+		bool closed = true;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_FALSE(closed);
 		EXPECT_FALSE(out.isOpen());
 		EXPECT_EQ(warnings.count(), 1u);
 		// a second close has nothing to close, and nothing to say
-		EXPECT_NO_THROW(out.close());
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_TRUE(closed);
 		EXPECT_EQ(warnings.count(), 1u);
 	}
 	EXPECT_EQ(tempReadFile(m_Target), "");
@@ -1171,7 +1177,9 @@ TEST_F(CUTMiscTempFileTest, plainFileFailedWriteIsLogged)
 		EXPECT_NO_THROW(out.flush());
 		lock.close();
 		EXPECT_EQ(warnings.count(), 0u);
-		EXPECT_NO_THROW(out.close());
+		bool closed = true;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_FALSE(closed);
 		EXPECT_EQ(warnings.count(), 1u);
 	}
 
@@ -1185,7 +1193,9 @@ TEST_F(CUTMiscTempFileTest, plainFileFailedWriteIsLogged)
 		const string big(256 * 1024, 'x');
 		EXPECT_THROW(tempSerial(out, big), NLMISC::EWriteError);
 		lock.close();
-		EXPECT_NO_THROW(out.close());
+		bool closed = true;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_FALSE(closed);
 		EXPECT_EQ(warnings.count(), 1u);
 	}
 
@@ -1196,7 +1206,9 @@ TEST_F(CUTMiscTempFileTest, plainFileFailedWriteIsLogged)
 		ASSERT_TRUE(out.open(m_Target));
 		EXPECT_NO_THROW(tempSerial(out, s_TempNew));
 		out.flush();
-		EXPECT_NO_THROW(out.close());
+		bool closed = false;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_TRUE(closed);
 		EXPECT_EQ(warnings.count(), 0u);
 	}
 	EXPECT_EQ(tempReadFile(m_Target), s_TempNew);
@@ -1239,17 +1251,22 @@ TEST_F(CUTMiscTempFileTest, diskFull)
 		ASSERT_TRUE(out.open(full));
 		const string big(256 * 1024, 'x');
 		EXPECT_THROW(tempSerial(out, big), NLMISC::EDiskFullError);
-		EXPECT_NO_THROW(out.close());
+		bool closed = true;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_FALSE(closed);
 		EXPECT_EQ(warnings.count(), 1u);
 	}
 
-	// less than the buffer: the close meets it. Without a temporary file it does not throw, and logs.
+	// less than the buffer: the close meets it. Without a temporary file it does not throw: it logs, and
+	// returns that the file is not written.
 	{
 		CTempFileTestWarnings warnings(logged);
 		NLMISC::COFile out;
 		ASSERT_TRUE(out.open(full));
 		EXPECT_NO_THROW(tempSerial(out, s_TempNew));
-		EXPECT_NO_THROW(out.close());
+		bool closed = true;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_FALSE(closed);
 		EXPECT_EQ(warnings.count(), 1u);
 	}
 
@@ -1261,7 +1278,9 @@ TEST_F(CUTMiscTempFileTest, diskFull)
 		EXPECT_NO_THROW(tempSerial(out, s_TempNew));
 		EXPECT_NO_THROW(out.flush());
 		EXPECT_EQ(warnings.count(), 0u);
-		EXPECT_NO_THROW(out.close());
+		bool closed = true;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_FALSE(closed);
 		EXPECT_EQ(warnings.count(), 1u);
 	}
 

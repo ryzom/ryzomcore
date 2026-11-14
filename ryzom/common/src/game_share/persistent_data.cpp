@@ -762,6 +762,13 @@ bool CPersistentDataRecord::writeToBinFile(const std::string &fileName)
 		DROP(NLMISC::toString("Failed to write output file: %s", fileName.c_str()),return false);
 	}
 
+	// the file is written once it is closed: what the stream has buffered is written there
+	if (!f.close())
+	{
+		nlwarning("Failed to write output file: %s", fileName.c_str());
+		return false;
+	}
+
 	// rewind the read pointer 'cos it's at the end of file
 	rewind();
 
@@ -789,6 +796,13 @@ bool CPersistentDataRecord::writeToTxtFile(const std::string &fileName,TStringFo
 	catch(...)
 	{
 		DROP(NLMISC::toString("Failed to write output file: %s", fileName.c_str()), return false);
+	}
+
+	// the file is written once it is closed: what the stream has buffered is written there
+	if (!f.close())
+	{
+		nlwarning("Failed to write output file: %s", fileName.c_str());
+		return false;
 	}
 
 	// rewind the read pointer 'cos it's at the end of file

@@ -700,9 +700,9 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 	return _F != nullptr;
 }
 // ======================================================================================================
-void	COFile::close()
+bool COFile::close()
 {
-	internalClose(true);
+	return internalClose(true);
 }
 // ======================================================================================================
 // ENOSPC, and the quota of a user where the system has one: there is no room for the data
@@ -725,9 +725,10 @@ void COFile::rememberWriteError(int error) const
 	}
 }
 // ======================================================================================================
-void	COFile::internalClose(bool success)
+bool COFile::internalClose(bool success)
 {
 	resetPtrTable();
+	bool written = true;
 	if(_F)
 	{
 		// What was written reaches the disk here at the latest: a small file is still entirely in the buffer
@@ -754,11 +755,13 @@ void	COFile::internalClose(bool success)
 		if (tempFileName.empty())
 		{
 			// A plain file: nothing can be kept from being lost here, and close() is called from destructors
-			// and from code that expects no exception of it. close() and the destructor log the failure.
+			// and from code that expects no exception of it. close() and the destructor log the failure,
+			// and close() returns it to the callers that ask.
 			if (writeFailed)
 			{
 				nlwarning("FILE: The file '%s' is not written completely, a write to it or its close failed, error %d : %s",
 				    _FileName.c_str(), writeErrno, writeErrno != 0 ? strerror(writeErrno) : "no error code was kept");
+				written = false;
 			}
 		}
 		else if (!success || writeFailed)
@@ -782,6 +785,7 @@ void	COFile::internalClose(bool success)
 				throw ERenameError(_FileName, tempFileName);
 		}
 	}
+	return written;
 }
 // ======================================================================================================
 void	COFile::flush()
