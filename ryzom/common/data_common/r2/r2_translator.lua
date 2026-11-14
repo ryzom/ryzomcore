@@ -2384,7 +2384,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			end
 		elseif category == "Bandit" then
 			if botAttackable == 0 then
-				code = code.."()setFactionProp(\"faction\", \"civil\");\n"
+				code = code.."()"..prefix.."setFactionProp(\"faction\", \"civil\");\n"
 				if playerAttackable == 1 then
 					code = code.."()"..prefix.."setFactionProp(\"ennemyFaction\", \"Player\");\n"
 					code = code.."()"..prefix.."setFactionProp(\"friendFaction\", \"\");\n"
