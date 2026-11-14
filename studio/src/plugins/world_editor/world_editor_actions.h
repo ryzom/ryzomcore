@@ -22,6 +22,7 @@
 
 // Project includes
 #include "primitives_model.h"
+#include "world_editor_misc.h"
 
 // NeL includes
 
@@ -30,6 +31,7 @@
 #include <string>
 
 // Qt includes
+#include <QStringList>
 #include <QUndoCommand>
 #include <QGraphicsScene>
 #include <QTreeView>
@@ -80,9 +82,17 @@ private:
 };
 
 
-/// The files named in the loaded .worldedit that are not loaded, by their absolute names: the load
-/// commands keep it in step, and Save keeps their elements in the file
-typedef std::set<std::string> NotLoadedFiles;
+/// What the window shares with the load commands
+struct WorldFiles
+{
+	/// The files named in the loaded .worldedit that are not loaded, by their absolute names: the load
+	/// commands keep it in step, and Save keeps their elements in the file
+	Utils::FilePathSet NotLoaded;
+
+	/// The files that a redo of a load command did not load, which the window reports in one message
+	/// once the redo is over
+	QStringList RedoFailures;
+};
 
 class WorldSaver
 {
@@ -92,7 +102,7 @@ public:
 	/// The .worldedit as it was loaded: Save then rewrites that file and keeps what it does not change,
 	/// the elements of the files that are not loaded among them
 	void setLoadedFile(const std::string &fileName, const std::string &content, const std::string &dataDir,
-		const std::string &context, const NotLoadedFiles &notLoaded);
+		const std::string &context, const Utils::FilePathSet &notLoaded);
 
 	/// Writes the land and primitive files of the model, then the .worldedit; a file that already has
 	/// its content is not written again
@@ -118,7 +128,7 @@ private:
 	std::string m_loadedContent;
 	std::string m_loadedDataDir;
 	std::string m_loadedContext;
-	NotLoadedFiles m_notLoaded;
+	Utils::FilePathSet m_notLoaded;
 	PrimitivesTreeModel *m_model;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
 
@@ -142,7 +152,7 @@ class LoadLandscapeCommand: public QUndoCommand
 {
 public:
 	LoadLandscapeCommand(const QString &fileName, PrimitivesTreeModel *model,
-						 LandscapeEditor::ZoneBuilderBase *zoneBuilder, NotLoadedFiles *notLoaded, QUndoCommand *parent = 0);
+						 LandscapeEditor::ZoneBuilderBase *zoneBuilder, WorldFiles *files, QUndoCommand *parent = 0);
 	virtual ~LoadLandscapeCommand();
 
 	virtual void undo();
@@ -160,7 +170,7 @@ private:
 	const QString m_fileName;
 	PrimitivesTreeModel *const m_model;
 	LandscapeEditor::ZoneBuilderBase *const m_zoneBuilder;
-	NotLoadedFiles *const m_notLoaded;
+	WorldFiles *const m_files;
 	bool m_loaded;
 	bool m_notLoadedChanged;
 	bool m_firstRedo;
@@ -221,7 +231,7 @@ class LoadRootPrimitiveCommand: public QUndoCommand
 public:
 	LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
 							 PrimitivesTreeModel *model, QTreeView *view,
-							 NotLoadedFiles *notLoaded, QUndoCommand *parent = 0);
+							 WorldFiles *files, QUndoCommand *parent = 0);
 	virtual ~LoadRootPrimitiveCommand();
 
 	virtual void undo();
@@ -236,7 +246,7 @@ private:
 	WorldEditorScene *const m_scene;
 	PrimitivesTreeModel *const m_model;
 	QTreeView *m_view;
-	NotLoadedFiles *const m_notLoaded;
+	WorldFiles *const m_files;
 	bool m_loaded;
 	bool m_notLoadedChanged;
 	bool m_firstRedo;

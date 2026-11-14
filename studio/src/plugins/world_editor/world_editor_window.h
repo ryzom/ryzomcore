@@ -22,9 +22,9 @@
 
 // Project includes
 #include "ui_world_editor_window.h"
+#include "world_editor_actions.h"
 
 // STL includes
-#include <set>
 #include <string>
 
 // Qt includes
@@ -71,6 +71,9 @@ private Q_SLOTS:
 	void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
 	void selectedItemsInScene(const QList<QGraphicsItem *> &selected);
 
+	// the files a redo did not load, in one message once the redo is over
+	void reportRedoFailures();
+
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
 	virtual void hideEvent(QHideEvent *hideEvent);
@@ -92,7 +95,7 @@ private:
 	std::string m_loadedContent;
 	QString m_loadedDataDir;
 	QString m_loadedContext;
-	std::set<std::string> m_notLoaded;
+	WorldFiles m_worldFiles;
 
 	QString m_lastDir;
 

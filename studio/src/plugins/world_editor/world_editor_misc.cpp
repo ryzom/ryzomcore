@@ -32,6 +32,9 @@
 
 #include <libxml/tree.h>
 
+// Qt includes
+#include <QtCore/QDir>
+
 namespace WorldEditor
 {
 namespace Utils
@@ -58,11 +61,31 @@ uint32 getUniqueId()
 
 std::string worldEditFilePath(const std::string &fileName, const std::string &worldEditFolder)
 {
-	// makePathAbsolute ends what it returns with a slash, which only a directory may have
+	// makePathAbsolute keeps the "." and ".." of a name relative to the folder, which a file dialog does
+	// not give, and ends what it returns with a slash, which only a directory may have; cleanPath
+	// resolves the first and takes off the second
 	std::string path = NLMISC::CPath::makePathAbsolute(fileName, worldEditFolder);
-	if (!path.empty() && path[path.size() - 1] == '/')
-		path.resize(path.size() - 1);
-	return path;
+	if (path.empty())
+		return path;
+	return QDir::cleanPath(QString::fromUtf8(path.c_str())).toUtf8().constData();
+}
+
+bool sameFilePath(const std::string &a, const std::string &b)
+{
+#ifdef NL_OS_WINDOWS
+	return NLMISC::compareCaseInsensitive(a, b) == 0;
+#else
+	return a == b;
+#endif
+}
+
+bool FilePathLess::operator()(const std::string &a, const std::string &b) const
+{
+#ifdef NL_OS_WINDOWS
+	return NLMISC::ltCaseInsensitive(a, b);
+#else
+	return a < b;
+#endif
 }
 
 bool readFile(const std::string &fileName, std::string &content)

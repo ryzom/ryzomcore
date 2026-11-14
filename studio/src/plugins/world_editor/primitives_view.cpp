@@ -47,7 +47,7 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	  m_worldEditorScene(0),
 	  m_zoneBuilder(0),
 	  m_primitivesTreeModel(0),
-	  m_notLoaded(0)
+	  m_files(0)
 {
 	setContextMenuPolicy(Qt::DefaultContextMenu);
 
@@ -121,9 +121,9 @@ void PrimitivesView::setModel(PrimitivesTreeModel *model)
 	m_primitivesTreeModel = model;
 }
 
-void PrimitivesView::setNotLoadedFiles(std::set<std::string> *notLoaded)
+void PrimitivesView::setWorldFiles(WorldFiles *files)
 {
-	m_notLoaded = notLoaded;
+	m_files = files;
 }
 
 void PrimitivesView::loadRootPrimitive()
@@ -144,7 +144,7 @@ void PrimitivesView::loadRootPrimitive()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			LoadRootPrimitiveCommand *command = new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this, m_notLoaded);
+			LoadRootPrimitiveCommand *command = new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this, m_files);
 			m_undoStack->push(command);
 			if (!command->isLoaded())
 				QMessageBox::warning(this, tr("Error opening primitive file"), tr("%1 is not loaded: it cannot be read, the log says why.").arg(fileName));
@@ -175,7 +175,7 @@ void PrimitivesView::loadLandscape()
 		Q_FOREACH(QString fileName, fileNames)
 		{
 			m_lastDir = QFileInfo(fileName).absolutePath();
-			LoadLandscapeCommand *command = new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder, m_notLoaded);
+			LoadLandscapeCommand *command = new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder, m_files);
 			m_undoStack->push(command);
 			if (!command->isLoaded())
 				QMessageBox::warning(this, tr("Error opening land file"), tr("%1 is not loaded: %2.").arg(fileName, command->error()));

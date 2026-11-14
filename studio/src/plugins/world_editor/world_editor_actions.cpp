@@ -45,8 +45,6 @@
 #include <QModelIndex>
 #include <QGraphicsView>
 #include <QPersistentModelIndex>
-#include <QApplication>
-#include <QMessageBox>
 
 // libxml
 #include <libxml/xmlstring.h>
@@ -231,7 +229,7 @@ WorldSaver::WorldSaver( PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilder
 }
 
 void WorldSaver::setLoadedFile(const std::string &fileName, const std::string &content, const std::string &dataDir,
-	const std::string &context, const NotLoadedFiles &notLoaded)
+	const std::string &context, const Utils::FilePathSet &notLoaded)
 {
 	m_loadedFileName = fileName;
 	m_loadedContent = content;
@@ -466,7 +464,7 @@ struct _xmlDoc *WorldSaver::updateLoadedFile(const std::string &fn)
 					bool keep = false;
 					for (size_t i = 0; i < m_data.size() && !keep; ++i)
 					{
-						if (!written[i] && m_data[i].second == path)
+						if (!written[i] && Utils::sameFilePath(m_data[i].second, path))
 						{
 							written[i] = true;
 							keep = true;
@@ -509,36 +507,36 @@ struct _xmlDoc *WorldSaver::updateLoadedFile(const std::string &fn)
 }
 
 // Keeps the files that are not loaded in step with a load: true when it changed them
-static bool updateNotLoaded(NotLoadedFiles *notLoaded, const QString &fileName, bool loaded)
+static bool updateNotLoaded(WorldFiles *files, const QString &fileName, bool loaded)
 {
-	if (notLoaded == NULL)
+	if (files == NULL)
 		return false;
 	const std::string name = fileName.toUtf8().constData();
 	if (loaded)
-		return notLoaded->erase(name) != 0;
-	return notLoaded->insert(name).second;
+		return files->NotLoaded.erase(name) != 0;
+	return files->NotLoaded.insert(name).second;
 }
 
 // Undoes what updateNotLoaded changed
-static void restoreNotLoaded(NotLoadedFiles *notLoaded, const QString &fileName, bool loaded, bool changed)
+static void restoreNotLoaded(WorldFiles *files, const QString &fileName, bool loaded, bool changed)
 {
-	if (notLoaded == NULL || !changed)
+	if (files == NULL || !changed)
 		return;
 	const std::string name = fileName.toUtf8().constData();
 	if (loaded)
-		notLoaded->insert(name);
+		files->NotLoaded.insert(name);
 	else
-		notLoaded->erase(name);
+		files->NotLoaded.erase(name);
 }
 
 LoadLandscapeCommand::LoadLandscapeCommand(const QString &fileName, PrimitivesTreeModel *model,
-		LandscapeEditor::ZoneBuilderBase *zoneBuilder, NotLoadedFiles *notLoaded, QUndoCommand *parent)
+		LandscapeEditor::ZoneBuilderBase *zoneBuilder, WorldFiles *files, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_id(-1),
 	  m_fileName(fileName),
 	  m_model(model),
 	  m_zoneBuilder(zoneBuilder),
-	  m_notLoaded(notLoaded),
+	  m_files(files),
 	  m_loaded(false),
 	  m_notLoadedChanged(false),
 	  m_firstRedo(true)
@@ -552,7 +550,7 @@ LoadLandscapeCommand::~LoadLandscapeCommand()
 
 void LoadLandscapeCommand::undo()
 {
-	restoreNotLoaded(m_notLoaded, m_fileName, m_loaded, m_notLoadedChanged);
+	restoreNotLoaded(m_files, m_fileName, m_loaded, m_notLoadedChanged);
 	m_notLoadedChanged = false;
 
 	if (!m_loaded)
@@ -568,19 +566,16 @@ void LoadLandscapeCommand::redo()
 	m_error.clear();
 	int id = m_zoneBuilder->loadZoneRegion(m_fileName, m_id, &m_error);
 	m_loaded = (id != -1);
-	m_notLoadedChanged = updateNotLoaded(m_notLoaded, m_fileName, m_loaded);
+	m_notLoadedChanged = updateNotLoaded(m_files, m_fileName, m_loaded);
 	bool firstRedo = m_firstRedo;
 	m_firstRedo = false;
 	if (!m_loaded)
 	{
 		// a land that did not load gets no node, so that saving does not write it back empty; the code
-		// that pushed the command says so the first time
+		// that pushed the command says so the first time, the window after a later redo
 		nlwarning("The land file %s could not be loaded", m_fileName.toUtf8().constData());
-		if (!firstRedo)
-		{
-			QMessageBox::warning(QApplication::activeWindow(), QObject::tr("Error opening land file"),
-				QObject::tr("%1 is not loaded: %2.").arg(m_fileName, m_error));
-		}
+		if (!firstRedo && m_files)
+			m_files->RedoFailures << QObject::tr("Landscape: %1 (%2)").arg(m_fileName, m_error);
 		return;
 	}
 
@@ -653,13 +648,13 @@ void CreateRootPrimitiveCommand::redo()
 
 
 LoadRootPrimitiveCommand::LoadRootPrimitiveCommand(const QString &fileName, WorldEditorScene *scene,
-		PrimitivesTreeModel *model, QTreeView *view, NotLoadedFiles *notLoaded, QUndoCommand *parent)
+		PrimitivesTreeModel *model, QTreeView *view, WorldFiles *files, QUndoCommand *parent)
 	: QUndoCommand(parent),
 	  m_fileName(fileName),
 	  m_scene(scene),
 	  m_model(model),
 	  m_view(view),
-	  m_notLoaded(notLoaded),
+	  m_files(files),
 	  m_loaded(false),
 	  m_notLoadedChanged(false),
 	  m_firstRedo(true)
@@ -673,7 +668,7 @@ LoadRootPrimitiveCommand::~LoadRootPrimitiveCommand()
 
 void LoadRootPrimitiveCommand::undo()
 {
-	restoreNotLoaded(m_notLoaded, m_fileName, m_loaded, m_notLoadedChanged);
+	restoreNotLoaded(m_files, m_fileName, m_loaded, m_notLoadedChanged);
 	m_notLoadedChanged = false;
 
 	if (!m_loaded)
@@ -709,20 +704,17 @@ void LoadRootPrimitiveCommand::redo()
 	// unset the context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
 
-	m_notLoadedChanged = updateNotLoaded(m_notLoaded, m_fileName, m_loaded);
+	m_notLoadedChanged = updateNotLoaded(m_files, m_fileName, m_loaded);
 	bool firstRedo = m_firstRedo;
 	m_firstRedo = false;
 	if (!m_loaded)
 	{
 		// a primitive file that did not load gets no node, so that saving does not write it back empty;
-		// the code that pushed the command says so the first time
+		// the code that pushed the command says so the first time, the window after a later redo
 		nlwarning("The primitive file %s could not be loaded", m_fileName.toUtf8().constData());
 		delete primitives;
-		if (!firstRedo)
-		{
-			QMessageBox::warning(QApplication::activeWindow(), QObject::tr("Error opening primitive file"),
-				QObject::tr("%1 is not loaded: it cannot be read, the log says why.").arg(m_fileName));
-		}
+		if (!firstRedo && m_files)
+			m_files->RedoFailures << QObject::tr("Primitive: %1 (it cannot be read)").arg(m_fileName);
 		return;
 	}
 

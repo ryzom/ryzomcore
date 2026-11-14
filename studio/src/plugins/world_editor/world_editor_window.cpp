@@ -71,7 +71,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
 	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
-	m_ui.treePrimitivesView->setNotLoadedFiles(&m_notLoaded);
+	m_ui.treePrimitivesView->setWorldFiles(&m_worldFiles);
 
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
@@ -102,6 +102,9 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	connect(m_modeMapper, SIGNAL(mapped(int)), this, SLOT(setMode(int)));
 	connect(m_ui.pointsAction, SIGNAL(triggered(bool)), m_worldEditorScene, SLOT(setEnabledEditPoints(bool)));
+
+	// queued, so that the message comes once the undo stack is done with the redo
+	connect(m_undoStack, SIGNAL(indexChanged(int)), this, SLOT(reportRedoFailures()), Qt::QueuedConnection);
 
 	connect(m_ui.settingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
@@ -231,7 +234,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 	// be found here and those that do not load in the commands
 	m_loadedFileName.clear();
 	m_loadedContent.clear();
-	m_notLoaded.clear();
+	m_worldFiles.NotLoaded.clear();
 	if (!Utils::readFile(fileName.toUtf8().constData(), m_loadedContent) || m_loadedContent.empty())
 	{
 		m_loadedContent.clear();
@@ -244,7 +247,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 	for (size_t i = 0; i < worldEditList.size(); ++i)
 	{
 		if (!found[i] && worldEditList[i].first != Utils::DataDirectoryType)
-			m_notLoaded.insert(worldEditList[i].second);
+			m_worldFiles.NotLoaded.insert(worldEditList[i].second);
 	}
 
 	m_undoStack->beginMacro(tr("Load %1").arg(fileName));
@@ -274,7 +277,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 			if (found[i])
 			{
 				LoadLandscapeCommand *command = new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel,
-					m_zoneBuilderBase, &m_notLoaded);
+					m_zoneBuilderBase, &m_worldFiles);
 				m_undoStack->push(command);
 				if (!command->isLoaded())
 					failed << tr("Landscape: %1 (%2)").arg(QString::fromUtf8(worldEditList[i].second.c_str()), command->error());
@@ -284,7 +287,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 			if (found[i])
 			{
 				LoadRootPrimitiveCommand *command = new LoadRootPrimitiveCommand(QString(worldEditList[i].second.c_str()),
-					m_worldEditorScene, m_primitivesModel, m_ui.treePrimitivesView, &m_notLoaded);
+					m_worldEditorScene, m_primitivesModel, m_ui.treePrimitivesView, &m_worldFiles);
 				m_undoStack->push(command);
 				if (!command->isLoaded())
 					failed << tr("Primitive: %1 (it cannot be read)").arg(QString::fromUtf8(worldEditList[i].second.c_str()));
@@ -315,7 +318,7 @@ void WorldEditorWindow::newWorldEditFile()
 	checkCurrentWorld();
 	m_loadedFileName.clear();
 	m_loadedContent.clear();
-	m_notLoaded.clear();
+	m_worldFiles.NotLoaded.clear();
 	m_undoStack->push(new CreateWorldCommand("NewWorldEdit", m_primitivesModel));
 }
 
@@ -340,7 +343,7 @@ void WorldEditorWindow::saveWorldEditFile()
 
 	WorldSaver saver( m_primitivesModel, m_zoneBuilderBase, m_dataDir.toUtf8().constData(), m_context.toUtf8().constData() );
 	saver.setLoadedFile(m_loadedFileName.toUtf8().constData(), m_loadedContent, m_loadedDataDir.toUtf8().constData(),
-		m_loadedContext.toUtf8().constData(), m_notLoaded);
+		m_loadedContext.toUtf8().constData(), m_worldFiles.NotLoaded);
 	bool ok = saver.save();
 	QString error = QString::fromUtf8(saver.getLastError().c_str());
 
@@ -357,6 +360,21 @@ void WorldEditorWindow::saveWorldEditFile()
 	m_loadedContent = saver.worldEditContent();
 	m_loadedDataDir = m_dataDir;
 	m_loadedContext = m_context;
+}
+
+void WorldEditorWindow::reportRedoFailures()
+{
+	if (m_worldFiles.RedoFailures.isEmpty())
+		return;
+
+	QStringList failures = m_worldFiles.RedoFailures;
+	m_worldFiles.RedoFailures.clear();
+	QMessageBox box(QMessageBox::Warning, tr("Error opening world editor file"),
+		tr("%1 files could not be loaded again and are not loaded, they are listed in the details with the reason and Save keeps them in the world file. The log says more.")
+			.arg(QString::number(failures.size())),
+		QMessageBox::Ok, this);
+	box.setDetailedText(failures.join("\n"));
+	box.exec();
 }
 
 void WorldEditorWindow::openProjectSettings()

@@ -29,6 +29,7 @@
 #include <nel/ligo/primitive_class.h>
 
 // STL includes
+#include <set>
 #include <string>
 #include <vector>
 
@@ -58,8 +59,21 @@ std::string getLastError();
 // Load *.worldedit file and return list primitives and landscapes.
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList);
 
-// The absolute name of a land or primitive file named in a *.worldedit, from the folder of that *.worldedit
+// The absolute name of a land or primitive file named in a *.worldedit, from the folder of that *.worldedit,
+// without "." or ".." components
 std::string worldEditFilePath(const std::string &fileName, const std::string &worldEditFolder);
+
+// Whether two file paths name the same file: on Windows without regard to case, as its file systems do
+bool sameFilePath(const std::string &a, const std::string &b);
+
+// Orders file paths, two paths that sameFilePath takes for the same file being equivalent
+struct FilePathLess
+{
+	bool operator()(const std::string &a, const std::string &b) const;
+};
+
+// A set of file paths, matched as sameFilePath matches them
+typedef std::set<std::string, FilePathLess> FilePathSet;
 
 // The content of a file; false when it cannot be read
 bool readFile(const std::string &fileName, std::string &content);
