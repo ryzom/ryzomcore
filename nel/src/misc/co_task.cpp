@@ -245,6 +245,15 @@ namespace NLMISC
 		return CCurrentCoTask::getInstance().getCurrentTask();
 	}
 
+	bool CCoTask::isThreaded()
+	{
+#if defined(NL_USE_THREAD_COTASK)
+		return true;
+#else
+		return false;
+#endif
+	}
+
 
 	CCoTask::CCoTask(uint stackSize)
 		: _Started(false),

@@ -24,6 +24,7 @@
 #include "time_client.h"
 #include "global.h"
 #include "nel/misc/events.h"
+#include "nel/misc/co_task.h"
 #include "nel/3d/u_texture.h"
 #include "nel/misc/i18n.h"
 #include "continent.h"
@@ -166,6 +167,15 @@ void drawLoadingBitmap (float progress)
 
 void CProgress::internalProgress (float value)
 {
+	// This draws the loading screen, pumps the window events and swaps the buffers: work of the main thread. Where a
+	// co-task is a thread of its own (every platform but Windows) no OpenGL context is current in it, so a call
+	// from there is a defect of the caller, which has to leave the work to the main thread
+	if (CCoTask::isThreaded() && CCoTask::getCurrentTask() != NULL)
+	{
+		nlwarning("PROGRESS: called from a co-task that runs in a thread of its own, the loading screen is not drawn ('%s')", _ProgressMessage.c_str());
+		return;
+	}
+
 	// Get croped value
 	value = getCropedValue (value);
 

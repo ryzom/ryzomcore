@@ -171,13 +171,15 @@ public:
 private:
 	TState				_CurrentState;
 	std::list<TEvent>	_NextEvents;
+	bool _HoldEvents;
 public:
 
 	// Create the state machine with the wanted start.
 	// Note that, because it is a co-task, restarting the state machine after it has finished
 	// require to delete then recreate this object
 	CLoginStateMachine() :
-		_CurrentState(st_start)
+		_CurrentState(st_start),
+		_HoldEvents(false)
 	{
 
 	}
@@ -188,6 +190,11 @@ public:
 	}
 
 	void pushEvent(TEvent eventId);
+
+	/// Hold the events while the main thread does the work of the current state, which waits for it: pushEvent() only
+	/// queues them, as it does when the co-task itself does the work of a state. When the hold ends, the state
+	/// machine gets them in the order they came.
+	void holdEvents(bool hold);
 
 	TEvent waitEvent();
 

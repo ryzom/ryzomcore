@@ -236,7 +236,19 @@ void CLoginStateMachine::pushEvent(TEvent eventId)
 	// set the next event
 	_NextEvents.push_back(eventId);
 
-	if (CCoTask::getCurrentTask() != this)
+	if (CCoTask::getCurrentTask() != this && !_HoldEvents)
+	{
+		/// resume the state machine to advance state
+		resume();
+	}
+}
+
+void CLoginStateMachine::holdEvents(bool hold)
+{
+	nlassert(CCoTask::getCurrentTask() != this);
+
+	_HoldEvents = hold;
+	if (!hold && !_NextEvents.empty())
 	{
 		/// resume the state machine to advance state
 		resume();
@@ -620,8 +632,15 @@ void CLoginStateMachine::run()
 			SM_END_EVENT_TABLE
 			break;
 		case st_disconnect:
-			// Far TP part 2: disconnect from the FS and unload shard-specific data (called from farTPmainLoop())
-			FarTP.disconnectFromPreviousShard();
+			// Server Hop part 2: disconnect from the FS and unload shard-specific data. Out of game (character selection)
+			//   this state comes straight from st_leave_shard and nothing but this co-task makes the call; it draws
+			//   nothing and releases no driver object there.
+			// Far TP part 2: in game the call draws the loading screen and releases scene and driver objects, the work
+			//   of the main thread (where the co-task is a thread of its own, no OpenGL context is current in it). So
+			//   this state only waits, and farTPmainLoop(), which sent ev_far_tp_main_loop_entered, makes the call.
+			//   In both cases disconnectFromPreviousShard() ends with ev_connect.
+			if (!FarTP.isIngame())
+				FarTP.disconnectFromPreviousShard();
 
 			SM_BEGIN_EVENT_TABLE
 				SM_EVENT(ev_connect, st_reconnect_fs);
@@ -1552,7 +1571,18 @@ void CFarTP::farTPmainLoop()
 	ConnectionReadySent = false;
 	LoginSM.pushEvent(CLoginStateMachine::ev_far_tp_main_loop_entered);
 
-	// disconnectFromPreviousShard();
+	// Far TP part 2: the state machine now waits in st_disconnect (see there) for the main thread to leave the shard.
+	// The events of the call (it updates the network, and ends with ev_connect) are held until it is over, as when
+	// the co-task made the call: the co-task then connects to the new shard (st_reconnect_fs) before holdEvents()
+	// returns here.
+	if (LoginSM.getCurrentState() == CLoginStateMachine::st_disconnect)
+	{
+		LoginSM.holdEvents(true);
+		disconnectFromPreviousShard();
+		LoginSM.holdEvents(false);
+	}
+	else
+		nlwarning("FarTP: the login state machine is in state %s instead of st_disconnect, the previous shard is not left from the main loop", CLoginStateMachine::toString(LoginSM.getCurrentState()).c_str());
 
 	uint nbRecoSelectCharReceived = 0;
 
