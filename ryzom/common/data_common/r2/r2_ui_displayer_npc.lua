@@ -1663,10 +1663,12 @@ function r2:selectBodySets()
 	if bodySetsCombo.view_text == r2.emptyComboLine then 
 		return
 	else
-		r2.requestNewAction(i18n.get("uiR2EDSelectNpcBodySetsAction"))
-
+		-- the action opens once the preset is known to be there: a return between requestNewAction and
+		-- requestEndAction leaves an action open
 		local bodySetsValue = r2.tableBodySets[bodySetsCombo.selection_text] 
 		if bodySetsValue == nil then return end
+
+		r2.requestNewAction(i18n.get("uiR2EDSelectNpcBodySetsAction"))
 
 		-- update sliders values
 		for i = 1,r2.bodyAttNb do
@@ -1817,10 +1819,11 @@ function r2:selectFaceSets()
 	if faceSetsCombo.view_text == r2.emptyComboLine then 
 		return
 	else
-		r2.requestNewAction(i18n.get("uiR2EDSelectNpcFaceSetsAction"))
-
+		-- as in r2:selectBodySets: no action for a preset that is not there
 		local faceSetsValue = r2.tableFaceSets[faceSetsCombo.selection_text] 
 		if faceSetsValue == nil then return end
+
+		r2.requestNewAction(i18n.get("uiR2EDSelectNpcFaceSetsAction"))
 
 		-- update sliders values
 		for i = 1,r2.faceAttNb do
@@ -1972,10 +1975,11 @@ function r2:selectMorphSets()
 	if faceMorphCombo.view_text == r2.emptyComboLine then 
 		return
 	else
-		r2.requestNewAction(i18n.get("uiR2EDSelectNPCMorphSetsAction"))
-
+		-- as in r2:selectBodySets: no action for a preset that is not there
 		local faceMorphValue = r2.tableFaceMorph[faceMorphCombo.selection_text] 
 		if faceMorphValue == nil then return end
+
+		r2.requestNewAction(i18n.get("uiR2EDSelectNPCMorphSetsAction"))
 
 		-- update sliders values
 		for i = 1,r2.morphAttNb do
