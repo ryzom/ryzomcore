@@ -386,7 +386,9 @@ bool CDriverGL::setupDisplay()
 	// Driver caps.
 	//=============
 	// Retrieve the extensions for the current context.
-	registerGlExtensions (_Extensions);
+	if (!registerGlExtensions(_Extensions))
+		return false;
+
 	vector<string> lines;
 	explode(_Extensions.toString(), string("\n"), lines);
 	for(uint i = 0; i < lines.size(); i++)
@@ -1008,7 +1010,19 @@ bool CDriverGL::release()
 	H_AUTO_OGL(CDriverGL_release)
 
 	// release only if the driver was initialized
-	if (!_Initialized) return true;
+	if (!_Initialized)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(USE_OPENGLES)
+		// a display that was refused, or never set up, still has the X connection and the error
+		// handler of init(), and what setDisplay did before it stopped
+		if (_dpy)
+		{
+			destroyWindow();
+			unInit();
+		}
+#endif
+		return true;
+	}
 
 	// hide window
 	showWindow(false);

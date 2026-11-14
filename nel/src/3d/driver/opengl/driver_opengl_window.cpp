@@ -234,6 +234,11 @@ static Atom XA_WM_WINDOW_TYPE = 0;
 static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
 static Atom XA_FRAME_EXTENTS = 0;
 
+// The X error handler is for the whole process, while each driver opens its own display: the handler
+// is set when a display opens, and the one it replaced is set back when the last display closes
+static uint s_OpenDisplays = 0;
+static XErrorHandler s_PreviousXErrorsHandler = nullptr;
+
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
 	char buf[80];
@@ -482,7 +487,9 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	}
 
 	// set default X errors handler
-	XSetErrorHandler(nelXErrorsHandler);
+	XErrorHandler previousXErrorsHandler = XSetErrorHandler(nelXErrorsHandler);
+	if (s_OpenDisplays++ == 0)
+		s_PreviousXErrorsHandler = previousXErrorsHandler;
 
 	// define Atoms
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
@@ -552,11 +559,13 @@ bool CDriverGL::unInit()
 
 #elif defined (NL_OS_UNIX)
 
-	// restore default X errors handler
-	XSetErrorHandler(nullptr);
-
 	if (_dpy)
 	{
+		// restore the X errors handler when no other driver has a display open
+		nlassert(s_OpenDisplays > 0);
+		if (--s_OpenDisplays == 0)
+			XSetErrorHandler(s_PreviousXErrorsHandler);
+
 		XCloseDisplay(_dpy);
 		_dpy = nullptr;
 	}
@@ -1139,13 +1148,77 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		None
 	};
 
-	// first try 24bpp and if that fails 16bpp
-	XVisualInfo *visual_info = glXChooseVisual (_dpy, DefaultScreen(_dpy), sAttribList24bpp);
-	if (visual_info == nullptr)
-		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
-	if(visual_info == nullptr)
+	XVisualInfo *visual_info = nullptr;
+
+	if (wnd == EmptyWindow)
 	{
-		nlerror("glXChooseVisual() failed");
+		// first try 24bpp and if that fails 16bpp
+		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList24bpp);
+		if (visual_info == nullptr)
+			visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
+		if (visual_info == nullptr)
+		{
+			nlerror("glXChooseVisual() failed");
+		}
+	}
+	else
+	{
+		// a context can only be made current on a window with its visual, so the window
+		// of the application decides the visual
+		XWindowAttributes windowAttributes;
+		if (!XGetWindowAttributes(_dpy, wnd, &windowAttributes))
+		{
+			nlwarning("3D: XGetWindowAttributes() failed on window 0x%lx", (unsigned long)wnd);
+			return false;
+		}
+
+		// the driver gets no events of such a window, its size comes from the window and then from setMode
+		_CurrentMode.Width = (uint16)windowAttributes.width;
+		_CurrentMode.Height = (uint16)windowAttributes.height;
+
+		XVisualInfo visualTemplate;
+		visualTemplate.visualid = XVisualIDFromVisual(windowAttributes.visual);
+		visualTemplate.screen = XScreenNumberOfScreen(windowAttributes.screen);
+		int visualCount = 0;
+		visual_info = XGetVisualInfo(_dpy, VisualIDMask | VisualScreenMask, &visualTemplate, &visualCount);
+
+		// what the driver needs of the visual of the window
+		std::string lacking;
+		int depthSize = 0, stencilSize = 0;
+		if (visual_info == nullptr)
+		{
+			lacking = "visual info";
+		}
+		else
+		{
+			int useGl = 0, rgba = 0, doubleBuffer = 0;
+			if (glXGetConfig(_dpy, visual_info, GLX_USE_GL, &useGl) != 0 || !useGl)
+				lacking += ", OpenGL support";
+			if (glXGetConfig(_dpy, visual_info, GLX_RGBA, &rgba) != 0 || !rgba)
+				lacking += ", RGBA mode";
+			if (glXGetConfig(_dpy, visual_info, GLX_DOUBLEBUFFER, &doubleBuffer) != 0 || !doubleBuffer)
+				lacking += ", double buffering";
+			if (glXGetConfig(_dpy, visual_info, GLX_DEPTH_SIZE, &depthSize) != 0)
+				depthSize = 0;
+			if (glXGetConfig(_dpy, visual_info, GLX_STENCIL_SIZE, &stencilSize) != 0)
+				stencilSize = 0;
+			if (!lacking.empty())
+				lacking = lacking.substr(2);
+		}
+
+		if (!lacking.empty())
+		{
+			nlwarning("3D: The visual 0x%lx of window 0x%lx has no %s, the driver cannot render into it", (unsigned long)visualTemplate.visualid, (unsigned long)wnd, lacking.c_str());
+			if (visual_info != nullptr)
+				XFree(visual_info);
+			return false;
+		}
+
+		// the driver can draw without a depth buffer, but what it draws is not depth tested
+		if (depthSize == 0)
+			nlwarning("3D: The visual 0x%lx of window 0x%lx has no depth buffer, depth testing has no effect in it", (unsigned long)visualTemplate.visualid, (unsigned long)wnd);
+
+		nlinfo("3D: Rendering into window 0x%lx with its visual 0x%lx, %d depth bits and %d stencil bits", (unsigned long)wnd, (unsigned long)visualTemplate.visualid, depthSize, stencilSize);
 	}
 
 	_visual_info = visual_info;
@@ -1174,7 +1247,23 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		XChangeWindowAttributes(_dpy, _win, attr_flags, &attr);
 	}
 
-	glXMakeCurrent (_dpy, _win, _ctx);
+	if (!glXMakeCurrent(_dpy, _win, _ctx))
+	{
+		nlwarning("3D: glXMakeCurrent() failed on window 0x%lx", (unsigned long)_win);
+
+		// what this function acquired goes, destroyWindow does not destroy the context of a window it did not create
+		glXDestroyContext(_dpy, _ctx);
+		_ctx = nullptr;
+		XFree(_visual_info);
+		_visual_info = nullptr;
+		if (_DestroyWindow)
+		{
+			XDestroyWindow(_dpy, _win);
+			_DestroyWindow = false;
+		}
+		_win = EmptyWindow;
+		return false;
+	}
 
 	_EventEmitter.init (_dpy, _win, this);
 
@@ -2102,7 +2191,18 @@ bool CDriverGL::setMode(const GfxMode& amode)
 
 	// don't modify window or screen if managed by a 3rd party library
 	if (!_DestroyWindow)
+	{
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		// on X11 the driver gets no events of such a window, so its owner gives its size here,
+		// as WM_SIZE does on Windows
+		if (amode.Windowed && amode.Width != 0 && amode.Height != 0)
+		{
+			_CurrentMode.Width = amode.Width;
+			_CurrentMode.Height = amode.Height;
+		}
+#endif
 		return true;
+	}
 
 	// a window has a size (the size of a minimized window is empty, and the cursor position is relative to it)
 	if (amode.Windowed && (amode.Width == 0 || amode.Height == 0))

@@ -1588,7 +1588,7 @@ static bool	setupATIMeminfo(const char *glext)
 
 // ***************************************************************************
 // Extension Check.
-void	registerGlExtensions(CGlExtensions &ext)
+bool registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
 
@@ -1625,6 +1625,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Extensions.
 	const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
+	if (glext == NULL)
+	{
+		nlwarning("3D: glGetString(GL_EXTENSIONS) failed, there is no current OpenGL context");
+		return false;
+	}
+
 	GLint	ntext;
 
 	nldebug("3D: Available OpenGL Extensions:");
@@ -1842,6 +1848,8 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);
 	ext.ATIMeminfo = setupATIMeminfo(glext);
 #endif
+
+	return true;
 }
 
 

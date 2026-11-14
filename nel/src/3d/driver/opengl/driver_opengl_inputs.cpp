@@ -275,8 +275,14 @@ void CDriverGL::releaseCursors()
 	SetClassLongPtr(_win, GCLP_HCURSOR, 0);
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
-	XUndefineCursor(_dpy, _win);
-	XFreeCursor(_dpy, _BlankCursor);
+	// a display that was refused can have neither a window nor the blank cursor
+	if (_win != EmptyWindow)
+		XUndefineCursor(_dpy, _win);
+	if (_BlankCursor != EmptyCursor)
+	{
+		XFreeCursor(_dpy, _BlankCursor);
+		_BlankCursor = EmptyCursor;
+	}
 #endif
 
 	_Cursors.clear();
