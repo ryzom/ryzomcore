@@ -1132,7 +1132,9 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	case ClientMessage:
 		if ((event.xclient.format == 32) && ((Atom)event.xclient.data.l[0] == XA_WM_DELETE_WINDOW))
 		{
-			server->postEvent(new CEventDestroyWindow(this));
+			// the window manager asks to close the window (close box, Alt+F4): a request, as WM_CLOSE on
+			// Windows. The window is still there and the application decides what to do.
+			server->postEvent(new CEventCloseWindow(this));
 		}
 		break;
 	default:

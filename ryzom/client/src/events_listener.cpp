@@ -116,6 +116,13 @@ void CEventsListener::removeFromServer (CEventServer& server)
 	server.removeListener(EventSetFocusId,		this);
 }// removeFromServer //
 
+/// Whether a master group of the interface (ui:login, ui:outgame, ui:interface) exists and is shown
+static bool isMasterGroupActive(const char *name)
+{
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getMasterGroupFromId(name);
+	return group != nullptr && group->getActive();
+}
+
 static bool s_MouseFreeLookReady = false;
 static sint s_MouseFreeLookLastX;
 static sint s_MouseFreeLookLastY;
@@ -176,6 +183,17 @@ void CEventsListener::operator()(const CEvent& event)
 				nlwarning("Interface element 'ui:interface:quit_dialog' not found, the close request quits without confirmation");
 				CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr, "");
 			}
+		}
+		else if (!CInterfaceManager::getInstance()->isInGame() && isMasterGroupActive("ui:login"))
+		{
+			// The login screens have no quit dialog: the close request leaves as their exit button does
+			CAHManager::getInstance()->runActionHandler("login_quit", nullptr, "");
+		}
+		else if (!CInterfaceManager::getInstance()->isInGame() && isMasterGroupActive("ui:outgame"))
+		{
+			// Nor have the character selection and creation screens: the close request quits as their quit
+			// button does
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr, "");
 		}
 		else
 		{
