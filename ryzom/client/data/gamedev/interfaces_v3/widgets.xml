@@ -751,6 +751,7 @@
     <!-- Define varaibles for the list sheet of the root brick selection modal-->
     <!--<define id="phrase_brick_selection_max" value_from_code="getPhraseBrickSelectionMax()" />-->
     <variable entry="UI:VARIABLES:CRYSTALBRICKS:$i:SHEET" type="sint32" value="0" size="64" />
+    <variable entry="UI:VARIABLES:PHRASE_TOOLTIP_EFFECTS:$i:SHEET" type="sint32" value="0" size="16" />
 
     <!-- Over Text used for buttons or controls -->
     <group id="context_help" posref="BL BL" child_resize_w="true" child_resize_wmargin="12" child_resize_h="true" child_resize_hmargin="9">
@@ -781,7 +782,8 @@
         <view type="bitmap" id="br" avoid_resize_parent="true" posref="BR BR" w="8" h="8" scale="true" color="%over_border_color" global_color="false" texture="W_hl_br.tga" />
         <!--System, don'change the ids -->
         <view type="text" id="text" posref="TL TL" y="-6" x="5" color="255 255 255 255" global_color="false" fontsize="10" shadow="true" multi_line="true" multi_line_space="1" line_maxw="300" multi_line_maxw_only="true" />
-        <view type="text" id="success_rate" y="0" posparent="text" posref="BL TL" hardtext="success_rate" active="false" global_color="false" />
+        <group type="list_sheet" id="effect_list" nature="sbrick" value="UI:VARIABLES:PHRASE_TOOLTIP_EFFECTS" posparent="text" posref="BL TL" x="0" y="0" w="150" h="0" child_resize_h="true" array="false" column_max="2" wspace="4" hspace="2" rowmin="0" rowmax="16" dragable="false" global_color="false" />
+        <view type="text" id="success_rate" y="0" posparent="effect_list" posref="BL TL" hardtext="success_rate" active="false" global_color="false" />
         <view type="bitmap" id="hp_cost" texture="ico_heal.tga" global_color="false" posref="BL TL" posparent="success_rate" />
         <view type="bitmap" id="sta_cost" y="0" texture="ico_stamina.tga" global_color="false" posref="BL TL" posparent="hp_cost" />
         <view type="bitmap" id="sap_cost" y="0" texture="ico_sap.tga" global_color="false" posref="BL TL" posparent="sta_cost" />

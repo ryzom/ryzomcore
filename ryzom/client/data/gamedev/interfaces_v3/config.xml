@@ -88,6 +88,10 @@
 
 <variable entry="UI:SAVE:ENTITY:CONTEXT_HELP" type="bool" value="true" />
 
+<!-- Tooltip preferences (also saved in the character interface configuration). -->
+<variable entry="UI:SAVE:TOOLTIP:ENABLED" type="bool" value="true" />
+<variable entry="UI:SAVE:TOOLTIP:EXTENDED" type="bool" value="true" />
+
 <!-- ****************************** -->
 <!-- *	ENTITIES COLORS      * -->
 <!-- ****************************** -->
