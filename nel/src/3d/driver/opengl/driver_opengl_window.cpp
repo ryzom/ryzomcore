@@ -1890,7 +1890,9 @@ bool CDriverGL::destroyWindow()
 	// the context is the driver's own, also on a window of the application
 	if (_ctx)
 	{
-		glXMakeCurrent(_dpy, None, nullptr);
+		// the current context can be the one of another driver, of another window of the application
+		if (glXGetCurrentContext() == _ctx)
+			glXMakeCurrent(_dpy, None, nullptr);
 		glXDestroyContext(_dpy, _ctx);
 		_ctx = nullptr;
 	}
