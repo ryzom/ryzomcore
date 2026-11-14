@@ -1528,6 +1528,7 @@
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 
 		function joinSessionResult($userId, $sessionId, $result, $shardAddr, $participantStatus)
 		{

@@ -2606,6 +2606,7 @@ namespace RSMGR
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 
 		void joinSessionResult(NLNET::TSockId dest, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const TSessionPartStatus &participantStatus)
 		{
@@ -3790,6 +3791,7 @@ namespace RSMGR
 		//                3 : kicked character has no participation in the session
 		//                4 : internal error
 		//                5 : owner char don't own the session
+		//                6 : the owner of the session can't be kicked
 		virtual void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId) =0;
 
 		// Unkick a character from a session
@@ -4429,6 +4431,7 @@ namespace RSMGR
 		//                3 : kicked character has no participation in the session
 		//                4 : internal error
 		//                5 : owner char don't own the session
+		//                6 : the owner of the session can't be kicked
 
 		void kickCharacter(uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId)
 		{
@@ -4807,6 +4810,7 @@ namespace RSMGR
 		//         18 : Can't find session log to validate session access
 		//         19 : Can't find scenario info to validate session access
 		//         20 : Scenario is not allowed to free trial players
+		//         21 : Character is kicked from the session
 		virtual void on_joinSessionResult(NLNET::TSockId from, uint32 userId, TSessionId sessionId, uint32 result, const std::string &shardAddr, const TSessionPartStatus &participantStatus) =0;
 
 		// See joinSessionResult.

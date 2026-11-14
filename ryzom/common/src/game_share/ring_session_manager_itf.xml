@@ -698,6 +698,7 @@
 					<doc line="        18 : Can't find session log to validate session access"/>
 					<doc line="        19 : Can't find scenario info to validate session access"/>
 					<doc line="        20 : Scenario is not allowed to free trial players"/>
+					<doc line="        21 : Character is kicked from the session"/>
 
 					<param type="uint32"		name="userId"/>
 					<param type="TSessionId"	name="sessionId"/>
@@ -784,6 +785,7 @@
 				<doc line="               3 : kicked character has no participation in the session"/>
 				<doc line="               4 : internal error"/>
 				<doc line="               5 : owner char don't own the session"/>
+				<doc line="               6 : the owner of the session can't be kicked"/>
 
 				<param type="uint32"		name="ownerCharId"/>
 				<param type="TSessionId"	name="sessionId"/>

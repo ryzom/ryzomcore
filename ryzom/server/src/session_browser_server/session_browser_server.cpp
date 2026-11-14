@@ -509,6 +509,7 @@ public:
 	//                3 : kicked character has no participation in the session
 	//                4 : internal error
 	//                5 : owner char don't own the session
+	//                6 : the owner of the session can't be kicked
 	virtual void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 kickedCharId)
 	{
 		CHECK_AUTH_WITH_CHARID(from, ownerCharId);

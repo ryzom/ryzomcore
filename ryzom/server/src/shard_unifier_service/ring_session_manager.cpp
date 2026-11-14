@@ -3266,8 +3266,10 @@ endOfWelcomeUserResult:
 				const CSessionParticipantPtr &part = session->getSessionParticipantsByIndex(i);
 				BOMB_IF(part == NULL, "RSM:on_unsubsribeSession : error accessing participants at index " << i << ", part is NULL", invokeResult(from, charId >> 4, 4, "failed to accesss participants record"); return);
 
+				// (the entry of a kicked character stays: removing it would remove the kick with it)
 				if (part->getCharId() == charId
-					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed)
+					&& part->getStatus() == TSessionPartStatus::sps_play_subscribed
+					&& !part->getKicked())
 				{
 					// ok, we found it, we can erase it
 					if (CSessionParticipant::removeById(_RingDb, part->getObjectId()))
@@ -3408,16 +3410,32 @@ endOfWelcomeUserResult:
 				charac->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
 
 				CSessionParticipantPtr sessionPart;
-				// look for the entry pertaining to the session
+				bool kicked = false;
+				// look for the entry pertaining to the session (the first one is the participation, and a kick
+				// counts on any of them: subscribing never looked for an entry that is already there)
 				for (uint i=0; i<charac->getSessionParticipants().size(); ++i)
 				{
 					if (charac->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
 					{
 						// we found it
-						sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
-						break;
+						if (sessionPart == NULL)
+							sessionPart.assign(charac->getSessionParticipants()[i], __FILE__, __LINE__);
+						if (charac->getSessionParticipants()[i]->getKicked())
+							kicked = true;
 					}
 				}
+
+				// A character that was kicked from the session stays out of it until it is unkicked. The session
+				// server lets in whoever is announced to it, so this is the place that refuses: without it a kick
+				// lasts until the character asks to join again. The owner of a session is never kicked from it, and
+				// an account that enters any session by its privilege is not held back by a kick either.
+				if (kicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(userId))
+				{
+					nlinfo("RSM : char %u asks to join session %u, from which it was kicked: refused", charId, sessionId.asInt());
+					joinSessionResult(from, charId >> 4, sessionId, 21, "Character is kicked from the session", TSessionPartStatus::invalid_val);
+					return;
+				}
+
 				if (sessionPart == NULL)
 				{
 					// if the session is public, automatically create an invitation as player
@@ -3873,6 +3891,7 @@ endOfWelcomeUserResult:
 		//                3 : character has no participation in the session
 		//                4 : internal error
 		//				  5 : owner char don't own the session
+		//				  6 : the owner of the session can't be kicked
 		void on_kickCharacter(NLNET::TSockId from, uint32 ownerCharId, TSessionId sessionId, uint32 charId)
 		{
 			nldebug("RSM : on_kickCharacter : web ask to kick character %u from session %u",
@@ -3892,6 +3911,13 @@ endOfWelcomeUserResult:
 					invokeResult(from, ownerCharId>>4, 5, "Owner char don't own the session");
 					return;
 				}
+			}
+
+			// a kicked character is refused when it asks to join: the owner is the one character that always comes in
+			if (session->getOwnerId() == charId)
+			{
+				invokeResult(from, ownerCharId >> 4, 6, "The owner of the session can't be kicked");
+				return;
 			}
 
 			// load the participants
