@@ -514,8 +514,11 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	{
 		// save keycode because XFilterEvent could set it to 0
 		uint keyCode = event.xkey.keycode;
-		KeySym k;
-		static char Text[256];
+		KeySym k = NoSymbol;
+		char Text[256];
+		// the text of the key: Text, or longText when an input method commits more than Text holds
+		std::vector<char> longText;
+		const char *text = Text;
 		int c = 0;
 
 		// check if event is filtered
@@ -528,11 +531,28 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 #ifdef X_HAVE_UTF8_STRING
 			if (_ic)
+			{
 				c = Xutf8LookupString(_ic, &event.xkey, Text, sizeof(Text), &k, &status);
+
+				if (status == XBufferOverflow && c > 0)
+				{
+					// nothing was written, c is the size the text needs
+					longText.resize(c);
+					c = Xutf8LookupString(_ic, &event.xkey, &longText[0], (int)longText.size(), &k, &status);
+					text = &longText[0];
+				}
+
+				// no text with these two, and a text that still does not fit is dropped
+				if (status == XLookupKeySym || status == XBufferOverflow)
+					c = 0;
+			}
 #endif
 
 			if (status == XLookupNone)
+			{
 				c = XLookupString(&event.xkey, Text, sizeof(Text), &k, nullptr);
+				text = Text;
+			}
 		}
 		else
 		{
@@ -560,24 +580,28 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			if (key == KeyDELETE) c = 0;
 		}
 
-		Text[c] = '\0';
-
 		if (c > 0)
 		{
 #ifdef X_HAVE_UTF8_STRING
-			::u32string ucstr = NLMISC::CUtfStringView(Text).toUtf32();
+			// One event for each character: an input method commits whole words. The text is taken by its
+			// length, as it is not terminated and Xlib gives a NUL byte for Ctrl+Space, Ctrl+2 and Ctrl+@, which
+			// is posted as the character it is, as before.
+			::u32string ucstr = NLMISC::CUtfStringView(std::string(text, (size_t)c)).toUtf32();
 
-			CEventChar *charEvent = new CEventChar (ucstr[0], getKeyButton(event.xbutton.state), this);
+			for (size_t i = 0; i < ucstr.size(); ++i)
+			{
+				CEventChar *charEvent = new CEventChar(ucstr[i], getKeyButton(event.xbutton.state), this);
 
-			// raw if not processed by IME
-			charEvent->setRaw(keyCode != 0);
+				// raw if not processed by IME
+				charEvent->setRaw(keyCode != 0);
 
-			server->postEvent (charEvent);
+				server->postEvent(charEvent);
+			}
 #else
 			// FIXME: Convert locale to UTF-32
 			for (int i = 0; i < c; i++)
 			{
-				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)Text[i], getKeyButton(event.xbutton.state), this);
+				CEventChar *charEvent = new CEventChar ((u32char)(unsigned char)text[i], getKeyButton(event.xbutton.state), this);
 
 				// raw if not processed by IME
 				charEvent->setRaw(keyCode != 0);
