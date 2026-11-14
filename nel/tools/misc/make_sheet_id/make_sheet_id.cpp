@@ -559,16 +559,23 @@ int main( int argc, char ** argv )
 	
 	// load the config files
 	CConfigFile	configFile;
+	bool configFileGiven = !configFileName.empty();
 	if( configFileName.empty() )
 	{
 		configFileName = "make_sheet_id.cfg";
 	}
 	if(!CFile::fileExists(configFileName))
 	{
-		nlinfo( "config file '%s' not found, working whithout filter", configFileName.c_str() );
+		if (configFileGiven)
+		{
+			nlwarning("Config file '%s' not found", configFileName.c_str());
+			return EXIT_FAILURE;
+		}
+		nlinfo("No config file '%s' in the working directory '%s'", configFileName.c_str(), CPath::getCurrentPath().c_str());
 	}
 	else
 	{
+		nlinfo("Using config file '%s'", CPath::getFullPath(configFileName, false).c_str());
 		configFile.load (configFileName);
 		CConfigFile::CVar * varPtr = configFile.getVarPtr("ExtensionsAllowed");
 		if(varPtr)										
@@ -578,6 +585,21 @@ int main( int argc, char ** argv )
 				ExtensionsAllowed.insert( varPtr->asString(i) );
 			}												
 		}
+	}
+	if (ExtensionsAllowed.empty())
+	{
+		nlinfo("No extension filter, every file with an extension gets an id");
+	}
+	else
+	{
+		std::string extensions;
+		for (set<string>::const_iterator it = ExtensionsAllowed.begin(); it != ExtensionsAllowed.end(); ++it)
+		{
+			if (!extensions.empty())
+				extensions += ", ";
+			extensions += *it;
+		}
+		nlinfo("Extension filter from ExtensionsAllowed: only files with these extensions get an id: %s", extensions.c_str());
 	}
 		
 	// get the current associations (read the sheet_id and fill the working structures)
