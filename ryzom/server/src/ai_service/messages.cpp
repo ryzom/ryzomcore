@@ -129,6 +129,7 @@ static void cbAddEntities( NLNET::CMessage& msgin, const std::string &serviceNam
 static void cbR2GoLive( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 static void cbR2StopLive( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 static void cbR2StartInstance( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
+static void cbR2GroupUserEvent( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 extern void cbR2NpcBotScriptById( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 extern void cbR2NpcGroupScriptByName( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 static void cbValidateSourceSpawn( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
@@ -162,6 +163,7 @@ TUnifiedCallbackItem CbArray[] =
 	{	"R2_GOLIVE",						cbR2GoLive						},
 	{	"R2_STOPLIVE",						cbR2StopLive					},
 	{	"R2_STARTINSTANCE",					cbR2StartInstance				},
+	{	"R2_GROUP_USER_EVENT",				cbR2GroupUserEvent				},
 	{	"R2_NPC_BOT_SCRIPT_BY_ID",			cbR2NpcBotScriptById			},
 	{	"R2_NPC_GROUP_SCRIPT_BY_NAME",		cbR2NpcGroupScriptByName		},
 	{	"OUTPOST_CREATE_SQUAD",				cbOutpostCreateSquad			},
@@ -228,6 +230,8 @@ void CMessages::notifyBotStopNpcControl(NLNET::TServiceId serviceId, uint32 botA
 
 #include "game_share/task_list.h"
 
+#include "script_compiler.h"
+
 
 
 
@@ -283,7 +287,7 @@ public:
 		dataRec.init(&Pdr);
 
 		dataRec.applyToExecutor(*executer);
-		{			
+		{
 			std::string cmd = toString("spawnManagers r2.%04d.%s", _SessionId.asInt(), _IsBase?"base":"act");
 			ICommand::execute(cmd, *InfoLog);
 		}
@@ -433,6 +437,65 @@ static void cbR2StartInstance( NLNET::CMessage& msgin, const std::string &servic
 	CAIS::instance().addTickedTask(tick ,task1);
 
 	
+}
+
+// A user event of a group of a scenario, asked by the scenario service: a user trigger of the
+// animator, or a chest that was looted. The group is named by the instance of its session and by
+// its alias, which the scenario service gave it: no name of the scenario is looked up for it.
+class CTaskR2GroupUserEvent : public CTask<uint32>
+{
+public:
+	CTaskR2GroupUserEvent(uint32 aiInstance, uint32 groupAlias, uint32 eventId)
+	    : m_AiInstance(aiInstance)
+	    , m_GroupAlias(groupAlias)
+	    , m_EventId(eventId)
+	{
+	}
+
+	virtual void doOperation() NL_OVERRIDE
+	{
+		CAIInstance *instance = CAIS::instance().getAIInstance(m_AiInstance);
+		CGroup *group = instance ? instance->findGroup(m_GroupAlias) : NULL;
+		if (!group || !group->getPersistentStateInstance())
+		{
+			// the act of the group can have been stopped since the event was asked
+			nlwarning("RING: user event %u for the group %s of AI instance %u: the %s is not there, nothing is triggered",
+			    m_EventId, LigoConfig.aliasToString(m_GroupAlias).c_str(), m_AiInstance, instance ? "group" : "instance");
+			return;
+		}
+
+		// the event is triggered as a script of the group does it
+		std::vector<std::string> codeLines;
+		codeLines.push_back(toString("()setEvent(%u);", m_EventId));
+		CSmartPtr<const AIVM::CByteCode> code = AICOMP::CCompiler::getInstance().compileCode(codeLines, "user event of the scenario service");
+		group->getPersistentStateInstance()->interpretCode(NULL, code);
+	}
+
+private:
+	uint32 m_AiInstance;
+	uint32 m_GroupAlias;
+	uint32 m_EventId;
+};
+
+static void cbR2GroupUserEvent(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	uint32 aiInstance;
+	uint32 groupAlias;
+	uint32 eventId;
+	msgin.serial(aiInstance);
+	msgin.serial(groupAlias);
+	msgin.serial(eventId);
+
+	// a group has the user events 0 to 9
+	if (eventId > 9)
+	{
+		nlwarning("RING: R2_GROUP_USER_EVENT from service '%s' refused: user event %u, a group has the events 0 to 9", serviceName.c_str(), eventId);
+		return;
+	}
+
+	// run with the other tasks of the update, where a script can be interpreted
+	uint32 tick = CTimeInterface::gameCycle();
+	CAIS::instance().addTickedTask(tick, new CTaskR2GroupUserEvent(aiInstance, groupAlias, eventId));
 }
 
 //--------------------------------------------------------------------------

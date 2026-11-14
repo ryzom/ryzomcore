@@ -129,7 +129,14 @@ public:
 class CRtUserTrigger
 {
 public:
+	CRtUserTrigger()
+	    : GrpAlias(0)
+	{
+	}
+
 	std::string FullName;
+	// the alias of the group that gets the event of the trigger: the AI service is given this, not a name
+	TAIAlias GrpAlias;
 	std::string Grp;
 	std::string Name;
 };
@@ -143,8 +150,8 @@ public:
 	typedef std::map<std::string, NLMISC::CSmartPtr<R2::CRtGrp> > TRtGrpsById;
 	typedef std::vector<CRtUserTrigger> TRtUserTriggers;
 	typedef uint32 TEggId;
-	typedef std::string TFullGrpName;
-	typedef std::map<TEggId, TFullGrpName> TActiveEasterEggs;
+	// an active easter egg, and the alias of the group of this act that gets the event when it is looted
+	typedef std::map<TEggId, TAIAlias> TActiveEasterEggs;
 
 public:
 	R2::CRtGrp* getRtGrpByName(const std::string& name) const;
@@ -162,7 +169,8 @@ public:
 			nlwarning("SAM: Error while activating easter egg. The controler grp is not valid.");
 			return false;
 		}
-		return ActiveEasterEggs.insert(std::make_pair(easterEggId, grpControler)).second;
+		// the group is one of this act: it is kept by its alias, the name the script gave is not used again
+		return ActiveEasterEggs.insert(std::make_pair(easterEggId, first->second->Alias)).second;
 	}
 	bool deactivateEasterEgg(uint32 easterEggId);
 
@@ -219,6 +227,7 @@ void CRtAct::addUserTrigger(const CRtUserTrigger& userTrigger)
 	{
 		UserTriggers.push_back(userTrigger);
 		UserTriggers.back().FullName = rtGrp->FullName;
+		UserTriggers.back().GrpAlias = rtGrp->Alias;
 	}
 	else
 	{
@@ -463,9 +472,10 @@ void CAnimationSession::easterEggLooted(uint32 easterEggId, TSessionId /* scenar
 
 	CRtAct::TActiveEasterEggs::const_iterator found2 = rtAct->ActiveEasterEggs.find(easterEggId);
 	DROP_IF(found2 == rtAct->ActiveEasterEggs.end(), "Error try to loot an unactive easter egg", return);
-	std::string fullname = found2->second;
-
-	CAiWrapper::getInstance().triggerUserTrigger(fullname, 2);
+	// The acts after the base act give out the same aliases, and one of them is loaded at a time:
+	// the alias of a group of another act would name a group of the current one
+	DROP_IF(actId != 0 && actId != CurrentAct, "Error try to loot an easter egg of an act that is not loaded", return);
+	CAiWrapper::getInstance().triggerUserTrigger(AiInstance, found2->second, 2);
 
 
 }
@@ -4210,10 +4220,19 @@ void CServerAnimationModule::triggerUserTrigger( TSessionId sessionId, uint32 ac
 {
 	CAnimationSession* animationSession = getSession(sessionId);
 
+	// The acts after the base act give out the same aliases, and one of them is loaded at a time: a
+	// trigger of an act that is not loaded has no group to trigger, and its alias would name a group
+	// of the current act
+	if (animationSession && actId < animationSession->Acts.size() && actId != 0 && actId != animationSession->CurrentAct)
+	{
+		nlwarning("R2An: session %u: user trigger %u of act %u asked while act %u is the current one, nothing is triggered",
+		    sessionId.asInt(), triggerId, actId, animationSession->CurrentAct);
+		return;
+	}
+
 	if (animationSession && actId < animationSession->Acts.size() && triggerId < animationSession->Acts[actId]->UserTriggers.size())
 	{
-		std::string groupName  = animationSession->Acts[actId]->UserTriggers[triggerId].FullName;
-		CAiWrapper::getInstance().triggerUserTrigger(groupName, 1);
+		CAiWrapper::getInstance().triggerUserTrigger(animationSession->AiInstance, animationSession->Acts[actId]->UserTriggers[triggerId].GrpAlias, 1);
 	}
 	else
 	{
