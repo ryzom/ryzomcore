@@ -38,8 +38,13 @@
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	define IsDebuggerPresent() false
-#   if !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+#   if !defined(__EMSCRIPTEN__)
 #	    include <execinfo.h>
+#   endif
+#   if defined(NL_OS_MAC)
+#	    include <mach-o/dyld.h>
+#	    include <stdint.h>
+#	    include <limits.h>
 #   endif
 //#	include <malloc.h>
 #	include <errno.h>
@@ -1195,7 +1200,15 @@ static std::string getRunningProgramPath()
 {
 	char path[1024];
 	path[0] = '\0';
-#if !defined(NL_OS_MAC)
+#if defined(NL_OS_MAC)
+	// what macOS gives can be relative to the directory the program was started from, and can name a symbolic
+	// link: realpath makes it the absolute path of the file, now, while that directory is still the current one
+	char given[1024];
+	uint32_t givenSize = sizeof(given);
+	char resolved[PATH_MAX];
+	if (_NSGetExecutablePath(given, &givenSize) == 0 && realpath(given, resolved) != nullptr && strlen(resolved) < sizeof(path))
+		strcpy(path, resolved);
+#else
 	// a path that fills the buffer may be cut, and what is left names a directory above the program: unknown
 	ssize_t length = readlink("/proc/self/exe", path, sizeof(path) - 1);
 	if (length <= 0 || (size_t)length >= sizeof(path) - 1)
@@ -1337,13 +1350,11 @@ static void writeCrashSignalReport(int sig, siginfo_t *info)
 	crashAppend(line, sizeof(line), " (seconds since 1970-01-01 00:00 UTC)\n");
 	crashWrite(out, line);
 
-#if !defined(NL_OS_MAC)
 	crashWrite(out, "\nCallstack:\n-------------------------------\n");
 	void *frames[64];
 	int frameCount = backtrace(frames, 64);
 	backtrace_symbols_fd(frames, frameCount, out);
 	crashWrite(out, "-------------------------------\n");
-#endif
 
 	// the end of the log file: a file displayer flushes every line it writes
 	if (s_CrashLogFile[0] != '\0')
@@ -1519,11 +1530,9 @@ static void installCrashSignalHandlers()
 		return;
 	s_CrashHandlersInstalled = true;
 
-#if !defined(NL_OS_MAC)
 	// the first backtrace() loads the unwinder, which allocates memory: not in the handler
 	void *frame[1];
 	backtrace(frame, 1);
-#endif
 
 	resolveCrashReportTool();
 
