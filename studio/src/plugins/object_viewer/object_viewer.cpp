@@ -420,6 +420,10 @@ void CObjectViewer::setGraphicsDriver(bool Direct3D)
 
 void CObjectViewer::setSizeViewport(uint16 w, uint16 h)
 {
+	// a view collapsed to no width or height has no aspect ratio, the camera keeps the last one
+	if (w == 0 || h == 0)
+		return;
+
 	_Scene->getCam().setPerspective(_CameraFocal * (float)NLMISC::Pi/180.f, (float)w/h, 0.1f, 1000);
 }
 

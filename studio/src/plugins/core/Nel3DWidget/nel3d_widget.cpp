@@ -107,7 +107,7 @@ void Nel3DWidget::resizeEvent( QResizeEvent *evnt )
 {
 	QWidget::resizeEvent( evnt );
 
-	Q_EMIT( evnt->size().width(), evnt->size().height() );
+	Q_EMIT resize(evnt->size().width(), evnt->size().height());
 }
 
 #if defined ( NL_OS_WINDOWS )
