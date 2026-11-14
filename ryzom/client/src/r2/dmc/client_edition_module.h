@@ -851,6 +851,8 @@ public:
 	virtual void saveUserComponentFileAccepted(NLNET::IModuleProxy *senderModuleProxy, const std::string& md5, const std::string& signature, bool ok) NL_OVERRIDE;
 	virtual void loadUserComponentFileAccepted(NLNET::IModuleProxy *senderModuleProxy, const std::string& md5, bool ok) NL_OVERRIDE;
 	virtual bool addToUserComponentLoadList( const std::string& filename, CUserComponentValidatorLoadSuccededCallback* cb=nullptr);
+	/// Tells the scripts that the load of a user component file ended without the file (r2.onUserComponentLoadEnded)
+	void userComponentLoadEnded(const std::string &filename, const std::string &messageId);
 	/*!
 	*/
 	void loadScenarioSucceded(const std::string& filename, const std::string& body, const CScenarioValidator::TValues& values);

@@ -22,7 +22,14 @@ userComponentManager.CurrentDesc = ""
 
 userComponentManager.IsInitialized = false
 
-userComponentManager.InitialComponentToLoad = 0
+-- The start of the manager (init) asks the client once for every file that
+-- save/r2_core_user_component_table.lua lists. InitialPending has the files whose load has not ended,
+-- [file name] = true. A load ends with the file loaded or with the reason it is not, which the author is
+-- told once; each way it ends goes through initialLoadEnded. The manager is initialized when no file is
+-- left, and the start is not run a second time: the main loop calls init for as long as the manager
+-- is not initialized, and a file that asked again on every call told the author again each time.
+userComponentManager.InitStarted = false
+userComponentManager.InitialPending = {}
 
 
 --------------------------------------------------------------------------------------------------
@@ -237,7 +244,24 @@ end
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
+-- The load of a file listed for the start has ended, with the file or without it
+function userComponentManager:initialLoadEnded(fileName)
+	self.InitialPending[fileName] = nil
+	if self.IsInitialized == false and next(self.InitialPending, nil) == nil then
+		debugInfo("# UserComponentManager init done.")
+		self.IsInitialized = true
+	end
+end
+
+-- A translated text about a user component file, with the name of the file in the place of %1
+local function userComponentFileText(textId, fileName)
+	return replaceTag(tostring(i18n.get(textId)), "%%1", tostring(fileName))
+end
+
 function userComponentManager:init()
+	-- the listed files are asked for once
+	if self.InitStarted then return end
+	self.InitStarted = true
 	--init usercomponent table & retrieves entries from file if not empty
 	r2_core.UserComponentTable = {}
 	local userComponentTableOk = loadfile("save/r2_core_user_component_table.lua")
@@ -246,11 +270,20 @@ function userComponentManager:init()
 	end
 	--doFile on previously loaded user component files
 	local ucTable = r2_core.UserComponentTable
-	self.InitialComponentToLoad = table.getn(ucTable)
+	-- every listed file waits, before the first is asked for: a load can end inside the call
 	local k, v = next(ucTable, nil)
 	while k do
+		self.InitialPending[v[2]] = true
+		k, v = next(ucTable, k)
+	end
+	k, v = next(ucTable, nil)
+	while k do
 		--local fun = loadfile(v[2])
-		r2.loadUserComponentFile(v[2])
+		-- false: the file is not there, is not a signed user component file or the server is not
+		-- connected. The client has told the author which.
+		if r2.loadUserComponentFile(v[2]) == false then
+			self:initialLoadEnded(v[2])
+		end
 		--if not fun then
 		--	debugInfo("Couldn't load file '"..v[2].."' while initializing UserComponentManager.")
 		--else
@@ -263,8 +296,9 @@ function userComponentManager:init()
 		k, v = next(ucTable, k)
 	end
 
-	if r2_core.UserComponentManager.IsInitialized == false and r2_core.UserComponentManager.InitialComponentToLoad == 0 then
-		r2_core.UserComponentManager.IsInitialized = true
+	-- nothing listed, or every load ended at once
+	if self.IsInitialized == false and next(self.InitialPending, nil) == nil then
+		self.IsInitialized = true
 	end
 
 end
@@ -1495,27 +1529,36 @@ end
 function userComponentManager:loadUserComponent(fileName, body, header)
 	--TODO : loading md5
 	--local ok = loadfile(fileName)
-	-- a file listed for the start that can not be loaded still counts as answered, or init runs again every second
-	local function notLoaded(text)
-		messageBox(text)
-		if self.IsInitialized == false then
-			self.InitialComponentToLoad = self.InitialComponentToLoad - 1
+	-- a file that can not be loaded: the author is told once, with the name of the file, and the load of a
+	-- file listed for the start has ended
+	local function notLoaded(textId, reason)
+		if reason ~= nil then
+			debugInfo("UserComponentManager: '" .. tostring(fileName) .. "' is not loaded: " .. tostring(reason))
 		end
+		messageBox(userComponentFileText(textId, fileName))
+		self:initialLoadEnded(fileName)
 		return false
 	end
 	-- the header of a user component file names the feature its body defines: a file without that name is not a
 	-- user component, and its body is not run
 	local currentFeatureName = header["CurrentFeatureName"]
 	if not currentFeatureName or currentFeatureName == "" then
-		return notLoaded("UserComponentManager: '" .. fileName .. "' is not a user component file, its header does not name the component it defines.")
+		return notLoaded("uiR2EDUserComponentNoName")
 	end
-	local ok = loadstring(body)
+	local ok, compileError = loadstring(body)
 	if not ok then
-		return notLoaded("UserComponentManager: Couldn't load file '" ..fileName.."'.")
+		return notLoaded("uiR2EDUserComponentNotLoaded", compileError)
 	end
-	ok()
-		
+	-- a body that raises when it runs, or that does not define the feature its header names
+	local ran, runError = pcall(ok)
+	if not ran then
+		return notLoaded("uiR2EDUserComponentNotLoaded", runError)
+	end
+
 	local userFeature = r2.Features[currentFeatureName]
+	if userFeature == nil or userFeature.Components == nil then
+		return notLoaded("uiR2EDUserComponentNotLoaded", "its body does not define the feature '" .. tostring(currentFeatureName) .. "'")
+	end
 
 	local componentId, component = next(userFeature.Components, nil)
 	while (component ~= nil)
@@ -1538,7 +1581,7 @@ function userComponentManager:loadUserComponent(fileName, body, header)
 	
 	r2.FeatureTree.addUserComponentNode(currentFeatureName)
 	if self.IsInitialized == false then
-		self.InitialComponentToLoad = self.InitialComponentToLoad - 1
+		self:initialLoadEnded(fileName)
 	else
 		userComponentManager:registerUserComponentData(fileName)
 	end
@@ -1657,10 +1700,18 @@ end
 
 function r2.loadUserComponentCallback(filename, body, header)
 	r2_core.UserComponentManager:loadUserComponent(filename, body, header)
-	if r2_core.UserComponentManager.IsInitialized == false and r2_core.UserComponentManager.InitialComponentToLoad == 0 then
-		debugInfo("# UserComponentManager init done.")
-		r2_core.UserComponentManager.IsInitialized = true
+end
+
+--------------------------------------------------------------------------------------------------------------------
+-- The client calls this when the load of a user component file has ended without the file and without
+-- r2.loadUserComponentCallback: the scenario service refused it, or the load of another file took its
+-- place. 'messageId' is the id of the text for the author, or "" when the client has told the author
+-- already.
+function r2.onUserComponentLoadEnded(filename, messageId)
+	if messageId ~= nil and messageId ~= "" then
+		messageBox(userComponentFileText(messageId, filename))
 	end
+	r2_core.UserComponentManager:initialLoadEnded(filename)
 end
 
 --------------------------------------------------------------------------------------------------------------------

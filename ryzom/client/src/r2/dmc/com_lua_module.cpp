@@ -1642,8 +1642,10 @@ sint CComLuaModule::luaLoadUserComponent(lua_State* state)
 	nlassert(this2);
 	std::string filename( lua_tostring(state, 1) );
 
-	this2->loadUserComponent(filename);
-	return 0;
+	// true: the load waits for the answer of the scenario service, and ends in r2.loadUserComponentCallback
+	// or r2.onUserComponentLoadEnded. false: the file is not loaded, and the author has been told why.
+	lua_pushboolean(state, this2->loadUserComponent(filename) ? 1 : 0);
+	return 1;
 }
 
 

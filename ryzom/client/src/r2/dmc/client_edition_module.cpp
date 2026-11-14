@@ -2452,8 +2452,16 @@ bool CClientEditionModule::addToUserComponentLoadList( const std::string& filena
 	if (found != _UserComponentToLoad.end())
 	{
 		nldebug("The load of the user component file '%s' takes the place of a load still waiting for the scenario service", filename.c_str());
+		// Another file with the same header md5 (two files without a header have the same, empty, one): the
+		// file that waited gets no answer any more. The scripts are told that its load has ended, with the
+		// text for the author.
+		const std::string replaced = found->second->getFilename();
 		delete found->second;
 		found->second = ucv;
+		if (replaced != filename)
+		{
+			userComponentLoadEnded(replaced, "uiR2EDUserComponentNotLoaded");
+		}
 	}
 	else
 	{
@@ -2465,6 +2473,16 @@ bool CClientEditionModule::addToUserComponentLoadList( const std::string& filena
 	return true;
 }
 
+
+void CClientEditionModule::userComponentLoadEnded(const std::string &filename, const std::string &messageId)
+{
+	// r2.onUserComponentLoadEnded(filename, messageId): the load of a user component file has ended without
+	// the file. messageId is the id of the text for the author, with the file name as %1, or empty when the
+	// author has been told already.
+	R2::getEditor().getLua().push(filename);
+	R2::getEditor().getLua().push(messageId);
+	R2::getEditor().callEnvFunc("onUserComponentLoadEnded", 2, 0);
+}
 
 void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /* senderModuleProxy */, const std::string& md5, bool ok)
 {
@@ -2486,6 +2504,8 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 		// the key policies of the scenario service refuse the signature of the file
 		nlinfo("The scenario service refuses to load a user component file (md5 '%s')", md5.c_str());
 		this->systemMsg(nullptr, "ERR", "", "uiR2EDServerRefuseToLoad");
+		// the author has the message above: the scripts are told that the load of the file has ended
+		userComponentLoadEnded(userComponentToLoad->getFilename(), "");
 		return;
 	}
 
