@@ -2173,7 +2173,33 @@ void CClientConfig::init(const string &configFileName)
 
 
 //-----------------------------------------------
-// init :
+// writeWindowPos :
+//-----------------------------------------------
+void CClientConfig::writeWindowPos ()
+{
+#ifndef RZ_NO_CLIENT
+	// Driver still alive ?
+	if (ClientCfg.SaveConfig && Driver && Driver->isActive ())
+	{
+		sint32 x, y;
+		uint32 width, height;
+
+		Driver->getWindowPos(x, y);
+		Driver->getWindowSize(width, height);
+
+		// Are we in window mode ? A minimized window has an empty size, and Windows moves it off the screen.
+		if (ClientCfg.Windowed && width != 0 && height != 0 /* && !isWindowMaximized() */)
+		{
+			// Save windows position. width/height are saved when leaving ingame.
+			writeInt("PositionX", x);
+			writeInt("PositionY", y);
+		}
+	}
+#endif
+}
+
+//-----------------------------------------------
+// release :
 //-----------------------------------------------
 void CClientConfig::release ()
 {
@@ -2186,23 +2212,8 @@ void CClientConfig::release ()
 		{
 			CConfigFile::CVar *varPtr = nullptr;
 
-			// Driver still alive ?
-			if (Driver && Driver->isActive ())
-			{
-				sint32 x, y;
-				uint32 width, height;
-
-				Driver->getWindowPos(x, y);
-				Driver->getWindowSize(width, height);
-
-				// Are we in window mode ? A minimized window has an empty size, and Windows moves it off the screen.
-				if (ClientCfg.Windowed && width != 0 && height != 0 /* && !isWindowMaximized() */)
-				{
-					// Save windows position. width/height are saved when leaving ingame.
-					writeInt("PositionX", x);
-					writeInt("PositionY", y);
-				}
-			}
+			// The driver is gone already when the client quits from the character selection: releaseOutGame() did this
+			writeWindowPos();
 
 			// Save if in FPV or TPV.
 			writeBool("FPV", ClientCfg.FPV);

@@ -523,6 +523,9 @@ void releaseOutGame()
 	// Delete the driver.
 	if(Driver)
 	{
+		// The position of the window is saved by release(), which comes after the driver is gone
+		ClientCfg.writeWindowPos();
+
 		// Stop any async loading. Actually nohting should be async loaded in outgame.
 		CAsyncFileManager::terminate();
 

@@ -911,6 +911,9 @@ public:
 	/// End process
 	void release ();
 
+	/// Put the position of the window into the configuration, which release() saves. To call while the driver has its window.
+	void writeWindowPos ();
+
 	bool readBool (const std::string &varName);
 	void writeBool (const std::string &varName, bool val, bool bForce = false);
 	sint32 readInt (const std::string &varName);
