@@ -614,7 +614,14 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 		// set the correct profile, if its not the case, otherwise, just change the target.
 		if	(profileType!=AITYPES::BOT_FIGHT)
 		{
+			// The begin of a fight is an event of the group of the bot, and the handlers of an event
+			// are script. A script can despawn the bot, which is kept here until the event returned
+			// (CBot::releaseSpawnObj), and it can despawn the group of the ennemy.
+			NLMISC::CSmartPtr<CSpawnBot> const keptForEvent(spawnBot);
+			NLMISC::CRefPtr<CAIEntityPhysical> const ennemyRef(ennemy);
 			setFight(spawnBot, ennemy);
+			if (spawnBot->isDespawned() || !ennemyRef)
+				return true;
 		}
 		spawnBot->setTarget(ennemy);
 	}

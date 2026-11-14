@@ -118,6 +118,11 @@ void CSpawnBotNpc::processEvent(CCombatInterface::CEvent const& event)
 	++AISStat::BotTotalUpdCtr;
 	++AISStat::BotNpcUpdCtr;
 	
+	// The update raises events of the group (the hp triggers, the events of the fight profile). The
+	// handlers of an event are script, and a script can despawn this bot: the object, and with it
+	// the profile that is being updated, then lives until this function returns (CBot::releaseSpawnObj).
+	NLMISC::CSmartPtr<CSpawnBot> const keptForUpdate(this);
+
 	{
 		H_AUTO(AIHpTrig);
 		// Fix for HP triggers
@@ -129,6 +134,8 @@ void CSpawnBotNpc::processEvent(CCombatInterface::CEvent const& event)
 			if (_OldHpPercentage>=0.f && newHpPercentage!=_OldHpPercentage)
 			{
 				persGrp.hpTriggerCb(_OldHpPercentage, newHpPercentage);
+				if (isDespawned())
+					return;
 			}
 			_OldHpPercentage = newHpPercentage;
 		}
@@ -169,6 +176,8 @@ void CSpawnBotNpc::processEvent(CCombatInterface::CEvent const& event)
 		{
 			H_AUTO(BotNpcUpdateProfile);
 			updateProfile(ticks); // then we can update the current bot profile.
+			if (isDespawned())
+				return;
 		}
 	}
 	else
@@ -1225,7 +1234,7 @@ void CBotNpc::sheetChanged()
 		
 		// Delete old bot
 		CMirrors::removeEntity(getSpawnObj()->getEntityId());
-		setSpawn(NULL); // automatic smart pointer deletion
+		releaseSpawnObj();
 		notifyBotDespawn();
 		
 		// Finalize spawn object creation

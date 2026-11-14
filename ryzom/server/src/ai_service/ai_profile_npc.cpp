@@ -547,7 +547,9 @@ void CGrpProfileFight::updateProfile(uint ticksSinceLastUpdate)
 		}
 		i++;
 	}
-	reorganize(_NpcList.begin(), _NpcList.end());
+	// The list is walked by index: the begin of a fight is an event of the group, and a handler
+	// that despawns or spawns bots of the group changes the list (removeBot, addBot).
+	reorganize(_NpcList);
 	
 	// check groups around
 	if (_CheckAround.test())
@@ -1060,7 +1062,7 @@ void CGrpProfileGuard::updateProfile(uint ticksSinceLastUpdate)
 		for (; first != last; ++first)
 		{
 			const	CAIEntityPhysical *const	ep = (*first)->getSpawnObj();
-			if	(ep->isAlive())
+			if	(ep && ep->isAlive())
 			{
 				switch	(ep->getRyzomType())
 				{
@@ -1243,7 +1245,8 @@ void CGrpProfileTribu::updateProfile(uint ticksSinceLastUpdate)
 			case BOT_STAND_AT_POS:
 				{
 					CMoveProfile	*moveProf=NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile());
-					moveProf->resumeBot(bot);
+					if (moveProf)
+						moveProf->resumeBot(bot);
 				}							
 				break;
 			case BOT_FIGHT:
@@ -3477,7 +3480,8 @@ void CGrpProfileEscorted::updateProfile(uint ticksSinceLastUpdate)
 			setGroupFighting	(false);
 
 			_Grp->fightProfile().setAIProfile(NULL);
-			(NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile()))->resumeProfile	();
+			if (_Grp->movingProfile().getAIProfile())
+				(NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile()))->resumeProfile	();
 		}
 	}
 	else

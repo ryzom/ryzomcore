@@ -322,6 +322,22 @@ public:
 		}
 	}
 	
+	/// The same for a list that an iteration can change: the begin of a fight is an event of the
+	/// group, and a handler that despawns or spawns bots takes them out of the list or adds them.
+	/// No iterator is kept: each step reads the size and the element again. The walk has at most
+	/// as many steps as the list had bots when it began.
+	void reorganize(std::vector<CBot*> const& bots)
+	{
+		H_AUTO(CFightOrganizer_reorganize);
+		_HaveEnnemy = false;
+		
+		for (size_t i=0, count=bots.size(); i<count && i<bots.size(); ++i)
+		{
+			if (!reorganizeIteration(bots[i]))
+				break;
+		}
+	}
+	
 	/// @name Virtual interface
 	//@{
 	virtual void setFight(CSpawnBot* bot, CAIEntityPhysical* ennemy) = 0;

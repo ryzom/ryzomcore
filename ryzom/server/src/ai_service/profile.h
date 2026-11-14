@@ -136,6 +136,9 @@ public:
 	
 public:
 	CProfilePtr();
+	/// A copy takes the profiles of the other holder, not the update that runs for it (_DeletedInUpdate)
+	CProfilePtr(CProfilePtr const& other);
+	CProfilePtr& operator=(CProfilePtr const& other);
 	
 	virtual ~CProfilePtr();
 	
@@ -159,6 +162,9 @@ public:
 	
 	void mayUpdateProfile(uint ticks) const;
 	
+	/// Forgets the profile that waits for the end of the update that runs (see setAIProfile)
+	void dropNextAIProfile() const { _NextAiProfile = NULL; }
+	
 	IAIProfile* getAIProfile() const { return _AiProfile; }
 	NLMISC::CSmartPtr<IAIProfile> const& getAISpawnProfile() const { return _AiProfile; }
 	
@@ -169,6 +175,8 @@ private:
 	
 	mutable	TStartProfileType	_NextStartType;
 	mutable	bool				_IsUpdating;
+	/// Set while updateProfile runs: where the destructor notes that this holder is gone
+	mutable	bool*				_DeletedInUpdate;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -192,12 +200,38 @@ CProfilePtr::CProfilePtr()
 , _NextAiProfile(NULL)
 , _NextStartType(START_BEGIN)
 , _IsUpdating(false)
+, _DeletedInUpdate(NULL)
 {
+}
+
+inline
+CProfilePtr::CProfilePtr(CProfilePtr const& other)
+: _AiProfile(other._AiProfile)
+, _NextAiProfile(other._NextAiProfile)
+, _NextAiProfileCallStateChangedIfSame(other._NextAiProfileCallStateChangedIfSame)
+, _NextStartType(other._NextStartType)
+, _IsUpdating(other._IsUpdating)
+, _DeletedInUpdate(NULL)
+{
+}
+
+inline
+CProfilePtr& CProfilePtr::operator=(CProfilePtr const& other)
+{
+	// _DeletedInUpdate stays: it is of the update that runs for this holder, if one does
+	_AiProfile = other._AiProfile;
+	_NextAiProfile = other._NextAiProfile;
+	_NextAiProfileCallStateChangedIfSame = other._NextAiProfileCallStateChangedIfSame;
+	_NextStartType = other._NextStartType;
+	_IsUpdating = other._IsUpdating;
+	return *this;
 }
 
 inline
 CProfilePtr::~CProfilePtr()
 {
+	if (_DeletedInUpdate)
+		*_DeletedInUpdate = true;
 	_NextAiProfile = NULL;
 	_AiProfile = NULL;
 }
@@ -258,14 +292,31 @@ void CProfilePtr::updateProfile(uint ticks) const
 {
 	BOMB_IF(_AiProfile.isNull(),"Attempting updateProfile() with _AiProfile.isNull()",return);
 
+	// An update raises events, the handlers of an event are script, and what a script does can take
+	// the profile out of this holder (another holder is assigned to it) or remove the holder with
+	// its owner. The profile lives until its update returns, and a holder that is gone is not used.
+	NLMISC::CSmartPtr<IAIProfile> const profile = _AiProfile;
+	bool deleted = false;
+	bool* const outerDeleted = _DeletedInUpdate;
+	_DeletedInUpdate = &deleted;
+
 	_IsUpdating = true;
-	_AiProfile->updateProfile(ticks);
+	profile->updateProfile(ticks);
+	if (deleted)
+	{
+		if (outerDeleted)
+			*outerDeleted = true;
+		return;
+	}
+	_DeletedInUpdate = outerDeleted;
 	_IsUpdating = false;
 	
 	if	(!_NextAiProfile.isNull())
 	{
-		setAIProfile(_NextAiProfile, _NextAiProfileCallStateChangedIfSame, _NextStartType);
+		// the holder is not used after the call: the begin of a profile can raise an event too
+		NLMISC::CSmartPtr<IAIProfile> const nextProfile = _NextAiProfile;
 		_NextAiProfile = NULL;
+		setAIProfile(nextProfile, _NextAiProfileCallStateChangedIfSame, _NextStartType);
 	}
 }
 
