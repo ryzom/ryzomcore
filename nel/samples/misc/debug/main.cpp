@@ -48,7 +48,8 @@ int main(int /* argc */, char ** /* argv */)
 
 	// enable the crash report tool
 	NLMISC::INelContext::getInstance().setWindowedApplication(true);
-	NLMISC::setReportPostUrl("http://ryzomcore.org/crash_report/");
+	// placeholder, the address of a crash report server goes here
+	NLMISC::setReportPostUrl("https://example.ryzom.dev/crash_report/");
 
 	// display debug information, that will be skipped in release mode.
 	nldebug("nldebug() %d", 1);

@@ -552,7 +552,7 @@ plugin material NelMaterial
 	rollout nelBasicParameters "NeL Basic Parameters" rolledUp:false
 	(
 		Label lblNlbpA "NeL Material" align:#center across:3
-		Label lblNlbpB "http://www.ryzomcore.org/" align:#center
+		Label lblNlbpB "https://wiki.ryzom.dev/" align:#center
 		CheckBox cbTwoSided "2-Sided" checked:false align:#right
 		
 		group "Standard Lighting"
