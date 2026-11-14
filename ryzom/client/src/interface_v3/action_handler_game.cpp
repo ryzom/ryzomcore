@@ -4005,20 +4005,70 @@ class CHandlerSetMouseScale : public IActionHandler
 REGISTER_ACTION_HANDLER(CHandlerSetMouseScale, "set_mouse_scale");
 
 // ***************************************************************************
+// The Abandon button of the journal. An unfinished mission is abandoned only after a confirmation; on a finished one
+// the same button (then labelled "Finished") takes the mission off the journal, which loses nothing.
+// Params is the index of the mission in dbMissions; ahConfirmed gets "mission=<index>|title=<title text id>".
+static void askMissionAbandon(const string &Params, const string &dbMissions, const string &ahConfirmed)
+{
+	uint8 nMissionNb;
+	fromString(Params, nMissionNb);
+
+	string dbMission = dbMissions + ":" + toString((uint)nMissionNb);
+	CCDBNodeLeaf *pFinished = NLGUI::CDBManager::getInstance()->getDbProp(dbMission + ":FINISHED", false);
+	CCDBNodeLeaf *pTitle = NLGUI::CDBManager::getInstance()->getDbProp(dbMission + ":TITLE", false);
+	if (pFinished == NULL || pTitle == NULL)
+	{
+		nlwarning("%s: no mission '%s' in the database (params '%s')", ahConfirmed.c_str(), dbMission.c_str(), Params.c_str());
+		return;
+	}
+
+	string confirmedParams = "mission=" + toString((uint)nMissionNb) + "|title=" + toString(pTitle->getValue32());
+	if (pFinished->getValue32() != 0)
+		CAHManager::getInstance()->runActionHandler(ahConfirmed, NULL, confirmedParams);
+	else
+		CInterfaceManager::getInstance()->validMessageBox(CInterfaceManager::QuestionIconMsg, CI18N::get("uiQConfirmMissionAbandon"), ahConfirmed, confirmedParams);
+}
+
+// The request itself. The mission that was asked about must still be the one in the slot: a mission that ended while
+// the question was open may have left its place to another one.
+static void sendMissionAbandon(const string &Params, const string &dbMissions, const char *msgName)
+{
+	uint8 nMissionNb;
+	fromString(IActionHandler::getParam(Params, "mission"), nMissionNb);
+	sint32 title;
+	fromString(IActionHandler::getParam(Params, "title"), title);
+
+	CCDBNodeLeaf *pTitle = NLGUI::CDBManager::getInstance()->getDbProp(dbMissions + ":" + toString((uint)nMissionNb) + ":TITLE", false);
+	if (pTitle == NULL || pTitle->getValue32() != title)
+	{
+		nlinfo("%s: the mission of slot %u changed since the question, nothing is abandoned", msgName, (uint)nMissionNb);
+		return;
+	}
+
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON", false);
+	if (pNL != NULL) pNL->setValue64(0);
+
+	sendMsgToServer(msgName, nMissionNb);
+}
+
+// ***************************************************************************
 class CHandlerGameMissionAbandon : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
-		uint8 nMissionNb;
-		fromString(Params, nMissionNb);
-
-		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-		if (pNL != nullptr) pNL->setValue64(0);
-
-		sendMsgToServer("JOURNAL:MISSION_ABANDON", nMissionNb);
+		askMissionAbandon(Params, "SERVER:MISSIONS", "mission_abandon_confirmed");
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameMissionAbandon, "mission_abandon");
+
+class CHandlerGameMissionAbandonConfirmed : public IActionHandler
+{
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	{
+		sendMissionAbandon(Params, "SERVER:MISSIONS", "JOURNAL:MISSION_ABANDON");
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerGameMissionAbandonConfirmed, "mission_abandon_confirmed");
 
 
 // ***************************************************************************
@@ -4026,16 +4076,19 @@ class CHandlerGameGroupMissionAbandon : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
-		uint8 nMissionNb;
-		fromString(Params, nMissionNb);
-
-		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-		if (pNL != nullptr) pNL->setValue64(0);
-
-		sendMsgToServer("JOURNAL:GROUP_MISSION_ABANDON", nMissionNb);
+		askMissionAbandon(Params, "SERVER:GROUP:MISSIONS", "group_mission_abandon_confirmed");
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameGroupMissionAbandon, "group_mission_abandon");
+
+class CHandlerGameGroupMissionAbandonConfirmed : public IActionHandler
+{
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	{
+		sendMissionAbandon(Params, "SERVER:GROUP:MISSIONS", "JOURNAL:GROUP_MISSION_ABANDON");
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerGameGroupMissionAbandonConfirmed, "group_mission_abandon_confirmed");
 
 
 // ***************************************************************************
