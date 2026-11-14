@@ -2141,6 +2141,13 @@ class CAHUninitResLod : public IActionHandler
 		// If the mode requested is a windowed mode do nothnig
 		if (CurrentMode == 0)
 		{
+			if (!ClientCfg.Windowed)
+			{
+				// leaving fullscreen: the size of the screen is no size for a window
+				getWindowSizeLeavingFullscreen(ClientCfg.Width, ClientCfg.Height);
+				ClientCfg.writeInt("Width", ClientCfg.Width);
+				ClientCfg.writeInt("Height", ClientCfg.Height);
+			}
 			ClientCfg.Windowed = true;
 			ClientCfg.writeBool("FullScreen", false);
 		}

@@ -26,6 +26,7 @@
 #include "stdpch.h"
 // Client
 #include "misc.h"
+#include "init.h"
 #include "entity_animation_manager.h"
 #include "entities.h"
 #include "sheet_manager.h"
@@ -1340,18 +1341,57 @@ void makeInstanceTransparent(UInstance	&inst, uint8 opacity, bool disableZWrite)
 	}
 }
 
+// The size of the window when the client last went from a window to fullscreen in this run (0: it did not)
+static uint16 s_LastWindowWidth = 0;
+static uint16 s_LastWindowHeight = 0;
+
+void getWindowSizeLeavingFullscreen(uint16 &width, uint16 &height)
+{
+	if (s_LastWindowWidth != 0 && s_LastWindowHeight != 0)
+	{
+		width = s_LastWindowWidth;
+		height = s_LastWindowHeight;
+	}
+	else
+	{
+		getDefaultWindowSize(Driver, width, height);
+	}
+}
+
 void setVideoMode(const UDriver::CMode &mode)
 {
 	UDriver::CMode oldMode, newMode = mode;
 	oldMode.Windowed = true; // getCurrentScreenMode may fail if first init ...
 	Driver->getCurrentScreenMode(oldMode);
 	bool wasMaximized = isWindowMaximized();
+	uint32 oldWindowWidth, oldWindowHeight;
+	Driver->getWindowSize(oldWindowWidth, oldWindowHeight);
+	if (oldMode.Windowed && !newMode.Windowed && !wasMaximized && oldWindowWidth != 0 && oldWindowHeight != 0)
+	{
+		// going to fullscreen: the window has this size again on the way back
+		s_LastWindowWidth = (uint16)oldWindowWidth;
+		s_LastWindowHeight = (uint16)oldWindowHeight;
+	}
 	if (!Driver->setMode(newMode) && !newMode.Windowed)
 	{
-		// failed to switch to mode, fall back to windowed
+		// failed to switch to mode, fall back to windowed: the window there was, or the one a client that
+		// leaves fullscreen gets (the size of the refused mode is the size of a screen, not of a window)
 		newMode.Windowed = true;
+		if (oldMode.Windowed && oldWindowWidth != 0 && oldWindowHeight != 0)
+		{
+			newMode.Width = (uint16)oldWindowWidth;
+			newMode.Height = (uint16)oldWindowHeight;
+		}
+		else
+		{
+			getWindowSizeLeavingFullscreen(newMode.Width, newMode.Height);
+		}
 		ClientCfg.Windowed = true;
+		ClientCfg.Width = newMode.Width;
+		ClientCfg.Height = newMode.Height;
 		ClientCfg.writeInt("FullScreen", 0);
+		ClientCfg.writeInt("Width", newMode.Width);
+		ClientCfg.writeInt("Height", newMode.Height);
 
 		// set the window mode
 		Driver->setMode(newMode);
@@ -1367,14 +1407,15 @@ void setVideoMode(const UDriver::CMode &mode)
 	{
 		UDriver::CMode screenMode;
 
-		uint32 posX = 0;
-		uint32 posY = 0;
+		sint32 posX = 0;
+		sint32 posY = 0;
 
 		if (Driver->getCurrentScreenMode(screenMode))
 		{
-			// position is not saved in config so center the window
-			posX = (screenMode.Width - Driver->getWindowWidth())/2;
-			posY = (screenMode.Height - Driver->getWindowHeight())/2;
+			// position is not saved in config so center the window (a window larger than the screen starts
+			// at the corner of the screen)
+			posX = std::max((sint32)0, ((sint32)screenMode.Width - (sint32)Driver->getWindowWidth()) / 2);
+			posY = std::max((sint32)0, ((sint32)screenMode.Height - (sint32)Driver->getWindowHeight()) / 2);
 		}
 
 		Driver->setWindowPos(posX, posY);

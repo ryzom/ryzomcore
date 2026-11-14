@@ -926,7 +926,7 @@ static float getDisplayScale()
 // The default window size (the client area), 1024x768 scaled for the display, shrunk to the room a window has:
 // on Windows the work area (the screen without the taskbar) less the frame the driver adds around the client area,
 // elsewhere the screen
-static void getDefaultWindowSize(UDriver *driver, uint16 &width, uint16 &height)
+void getDefaultWindowSize(UDriver *driver, uint16 &width, uint16 &height)
 {
 	float scale = getDisplayScale();
 	float w = 1024.f * scale;

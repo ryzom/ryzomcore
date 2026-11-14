@@ -227,6 +227,11 @@ void makeInstanceTransparent(NL3D::UInstance	&inst, uint8 opacity, bool disableZ
 // change the video mode, possibly centering the software mouse cursor if going to fullscreen
 void setVideoMode(const NL3D::UDriver::CMode &mode);
 
+// The size (of the client area) of the window of a client that leaves fullscreen: the size the window had when
+// the client went to fullscreen in this run, else the default window size. The size of the fullscreen mode is the
+// size of a screen: a window of that size does not fit on it
+void getWindowSizeLeavingFullscreen(uint16 &width, uint16 &height);
+
 // The frame limiter of the login and character selection loops, called once per frame after the swap. These
 // screens (an interface, and the characters of the selection) need no more frames than a display shows: without
 // the sleep of the configuration (Sleep >= 0) and without vertical sync, a frame waits here for the rest of a

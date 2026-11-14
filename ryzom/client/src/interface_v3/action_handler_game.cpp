@@ -3642,10 +3642,19 @@ class CHandlerGameConfigApply : public IActionHandler
 					ClientCfg.Depth = screenMode.Depth;
 					ClientCfg.Frequency = freq;
 				}
-				else
+				else if (screenMode.Windowed)
 				{
+					// the window stays as the player has it (it may span several screens)
 					uint32 width, height;
 					Driver->getWindowSize(width, height);
+					w = width;
+					h = height;
+				}
+				else
+				{
+					// leaving fullscreen: the size of the screen is no size for a window
+					uint16 width, height;
+					getWindowSizeLeavingFullscreen(width, height);
 					w = width;
 					h = height;
 				}
