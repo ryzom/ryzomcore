@@ -162,7 +162,6 @@ function component.getLogicActionActivate(entity, context, action, rtNpcGrp)
 
 	local time = entity.Secondes + entity.Minutes * 60
 	local action1 =  r2.Translator.createAction("timer_set", rtNpcGrp.Id, 0, time)
---	local action1 = r2.Translator.createAction("timer_enable", rtNpcGrp.Id, 0)
 	local action2 = r2.Translator.createAction("generic_event_trigger", rtNpcGrp.Id, 0)
 	local actionIfInactive = r2.Translator.createAction("if_value_equal", rtNpcGrp.Id, "Active", 0, 
 			r2.Translator.createAction("multi_actions", {action1, action2}))

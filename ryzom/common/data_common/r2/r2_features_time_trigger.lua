@@ -95,7 +95,8 @@ feature.Components.TimeTriggerFeature =
 local component = feature.Components.TimeTriggerFeature  
 
 function feature.getLogicActionActivate(entity, context, action, rtNpcGrp)
-	local action1 = r2.Translator.createAction("timer_enable", rtNpcGrp.Id, 0)
+	-- the timer is set to the hour of the trigger again, as at the start (feature.Translator)
+	local action1 = r2.Translator.createAction("timer_set_daytime", rtNpcGrp.Id, 0, entity.Hours, entity.Minutes)
 	local action2 = r2.Translator.createAction("generic_event_trigger", rtNpcGrp.Id, 0)
 	local retAction = r2.Translator.createAction("multi_actions", {action1, action2})
 	return retAction, retAction

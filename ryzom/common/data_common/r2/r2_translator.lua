@@ -9,6 +9,27 @@ local Translator = r2.Translator
 
 Translator.PredatorEnemyFaction = "Player|guard|bandit|herbivore|karavan";
 
+-- A text of the author as the translator writes it between quotes into a script of the AI service.
+-- A text of a script ends at a double quote, stays on its line, and has no escape for either. A
+-- backslash is a character of the text like any other, and the script language reads one that a
+-- double quote follows together with that quote. A script has no control character but the tab and
+-- the ends of its lines, and a text that was pasted can hold others. A double quote becomes two
+-- apostrophes; a line break, and every other character below the space but the tab, becomes a
+-- space; a backslash that is the last character of the text becomes a slash, and a backslash
+-- anywhere else stays. The tab and the character 127 stay, a text of a script can hold them. nil
+-- gives "".
+-- The name of a run-time npc is such a text too (translateNpc, the "npc_say" action,
+-- r2.Utils.getNpcParam): the scripts and actions of a dialog name the npc that speaks, and the AI
+-- service looks for the npc that has this name.
+function Translator.scriptText(text)
+	if text == nil then return "" end
+	local str = tostring(text)
+	str = string.gsub(str, '"', "''")
+	str = string.gsub(str, "\\$", "/")
+	str = string.gsub(str, "[\001-\008\010-\031]", " ")
+	return str
+end
+
 -- Namespace global
 function printMsg(str)	
 	messageBox(str)	
@@ -234,7 +255,8 @@ Translator.translateNpc = function(hlNpc, context)
 	local RtNpc = r2.newComponent("RtNpc")
 	
 
-	RtNpc.Name = hlNpc.Name
+	-- the name as the scripts of the scenario write it (Translator.scriptText)
+	RtNpc.Name = Translator.scriptText(hlNpc.Name)
 	
 	
 	RtNpc.SheetClient = hlNpc.SheetClient
@@ -1248,7 +1270,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			item3Str		= tostring(item3Id)..":"..tostring(item3Qty)
 		end
 
-		local name = arg[17]
+		local name = Translator.scriptText(arg[17])
 
 		local sum12			= tostring(item1Weight + item2Weight)
 		local sum123			= tostring(item1Weight + item2Weight + item3Weight)
@@ -1289,10 +1311,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		local y = tostring(tonumber(arg[7]))
 		local z = tostring(tonumber(arg[8]))
 		local heading = tostring(tonumber(arg[9]))
-		local name = tostring(arg[10])
-		if not name then name = "" end
-		local look = arg[11]
-		if not look then look = "" end
+		local name = Translator.scriptText(arg[10])
+		local look = Translator.scriptText(arg[11])
 		local scenario =tostring( r2:getScenarioId())
 
 
@@ -1506,7 +1526,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			facing = "//facing\n" ..
 				"(@group1)"..r2:getNamespace()..param.WhoGrp..".context();\n"
 				.. "(@group2)"..r2:getNamespace()..param.FacingGrp..".context();\n"
-				.. "()"..r2:getNamespace()..rtGrpId..".facing(@group1,\""..param.Who.."\", @group2, \"".. param.Facing.."\");\n \n"
+				.. "()"..r2:getNamespace()..rtGrpId..".facing(@group1,\""..Translator.scriptText(param.Who).."\", @group2, \"".. Translator.scriptText(param.Facing).."\");\n \n"
 			startChat = "()"..prefix.."setTimer(10, 0);\n \n" -- timer 0.4 in on seconde
 
 		end
@@ -1604,13 +1624,13 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			elseif rtGrpId and param.Whos[i] and param.Whos[i] ~= "" and param.Grps[i] and param.Grps[i] ~= "" then
 				local say = ""
 				if param.Says[i] ~= nil and param.Says[i] ~= "" then
-					say = "\t\t\t" .. "()".. r2:getNamespace() .. rtGrpId .. ".npcSay(@group,\"" .. param.Whos[i] .. "\", \"DSS_" .. tostring(r2:getScenarioId()) .. " " .. param.Says[i] .. "\");\n \n"
+					say = "\t\t\t" .. "()".. r2:getNamespace() .. rtGrpId .. ".npcSay(@group,\"" .. Translator.scriptText(param.Whos[i]) .. "\", \"DSS_" .. tostring(r2:getScenarioId()) .. " " .. param.Says[i] .. "\");\n \n"
 				end
 
 				local emote = ""
 				if param.Emotes[i] ~= "" and param.Emotes[i] ~= nil then
 					local behaviorValue = r2.getEmoteBehaviorFromEmoteId(param.Emotes[i])
-					emote =  "\t\t\t" .. "()"..r2:getNamespace()..rtGrpId..".emote(@group,\""..param.Whos[i].."\", \""..behaviorValue.."\");\n"
+					emote =  "\t\t\t" .. "()"..r2:getNamespace()..rtGrpId..".emote(@group,\""..Translator.scriptText(param.Whos[i]).."\", \""..behaviorValue.."\");\n"
 				end
 
 		
@@ -1649,7 +1669,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		local who = ""
 
 		action.Parameters = "()".. r2:getNamespace() .. baseActRtGrpId .. ".dssMessage(  "..tostring(r2:getScenarioId()) .. ", "
-						.."\"SYS\", \"".. who.. "\", \"" .. msg .. "\");\n"
+						.."\"SYS\", \"".. who.. "\", \"" .. Translator.scriptText(msg) .. "\");\n"
 
 		action.Action = "code"
 		return action
@@ -1773,7 +1793,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		action.Parameters =
 			"// request_item\n"
 			.. "(@groupToNotify)".. grpName ..".context();\n"
-			.."()receiveMissionItems(\"".. items.."\", \"".. phrase .."\", @groupToNotify);\n"
+			.."()receiveMissionItems(\"".. items.."\", \"".. Translator.scriptText(phrase) .."\", @groupToNotify);\n"
 
 
 		action.Action = "code"
@@ -1801,7 +1821,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		action.Parameters =
 			"// give_item\n"
 			.. "(@groupToNotify)".. grpName ..".context();\n"
-			.."()giveMissionItems(\"".. items.."\", \"".. phrase .."\", @groupToNotify);\n"
+			.."()giveMissionItems(\"".. items.."\", \"".. Translator.scriptText(phrase) .."\", @groupToNotify);\n"
 
 
 		
@@ -1823,12 +1843,12 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		local inventoryFullText = texts["inventoryFullText"]
 		local notEnoughPointsText = texts["notEnoughPointsText"]
 
-		local textsArgs = "\""..rewardText.."\", "
-			.."\""..rareRewardText.. "\", "
-			.."\""..inventoryFullText.. "\", "
-			.."\""..notEnoughPointsText.."\""
+		local textsArgs = "\""..Translator.scriptText(rewardText).."\", "
+			.."\""..Translator.scriptText(rareRewardText).. "\", "
+			.."\""..Translator.scriptText(inventoryFullText).. "\", "
+			.."\""..Translator.scriptText(notEnoughPointsText).."\""
 
-		action.Parameters = "//Give reward (giver : '".. rtGiverName.."')\n"
+		action.Parameters = "//Give reward (giver : '".. Translator.scriptText(rtGiverName).."')\n"
 			.."(@groupToNotify)".. rtGiverGrpName..".context();\n"
 			.."()giveReward("..textsArgs..", @groupToNotify);\n"
 
@@ -1869,7 +1889,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		action.Parameters =
 			"// talk_to\n"
 			.. "(@groupToNotify)".. grpName ..".context();\n"
-			.."()talkTo(\"".. phrase .."\", @groupToNotify);\n"
+			.."()talkTo(\"".. Translator.scriptText(phrase) .."\", @groupToNotify);\n"
 
 
 		action.Action = "code"
@@ -2037,9 +2057,6 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			action.Parameters = "()"..prefix.."timerSuspend("..timer..");\n"
 		elseif actionType == "timer_resume" then
 			action.Parameters = "()"..prefix.."timerResume("..timer..");\n"
-		elseif actionType == "timer_enable" then
-			printWarning("timerEnable is not implemented in AIS!")
-			action.Parameters = "()"..prefix.."timerEnable("..timer..");\n" -- !!!NOT IMPLEMENTED IN AIS!!!
 		elseif actionType == "timer_is_enable" then
 			action.Parameters = "("..prefix.."is_enable"..")"..prefix.."timerIsEnabled("..timer..");\n"
 		elseif actionType == "timer_is_suspended" then
@@ -2691,7 +2708,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		then
 			assert(arg[3])
 			assert( tostring(arg[3]) )
-			action.Parameters = tostring(arg[3]).."\n"
+			-- "<group>:<name of the npc>", the name as the run-time npc has it
+			action.Parameters = Translator.scriptText(arg[3]).."\n"
 		end
 		action.Parameters = action.Parameters..str
 		return action

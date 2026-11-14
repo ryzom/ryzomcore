@@ -465,7 +465,8 @@ r2.Utils.getNpcParam = function(npcId, context)
 		return nil
 	end
 
-	return rtNpcGrp.Name..":"..tostring(who.Name)
+	-- the name as the run-time npc has it (r2.Translator.translateNpc)
+	return rtNpcGrp.Name..":"..r2.Translator.scriptText(who.Name)
 end
 
 

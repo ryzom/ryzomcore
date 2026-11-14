@@ -1,0 +1,25 @@
+# The npc that speaks in a dialog has a name with double quotes in it, a backslash in the middle and
+# a backslash at its end. A text of a script ends at a double quote and has no escape, so the
+# translator writes two apostrophes for a double quote and a slash for the backslash that ends the
+# name; the backslash in the middle stays. It does so in the script of the dialog line and in the
+# name of the run-time npc, which the service finds by the name the script gives. The scenario keeps
+# the name as the author typed it.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: version_update_failure
+return_version_before: current=yes
+
+scenario_at: Acts[1].Features[0].Components[0].Components[0].Name = Zora "the guard" \ north\
+rt_has: ()r2_0001_RtNpcGrp_4.npcSay(@group,"Zora ''the guard'' \ north/", "DSS_1 RtEntryText_1");
+rt_has: Name = [[Zora ''the guard'' \ north/]]
+rt_lacks: Name = [[Zora "the guard" \ north\]]
+rt: acts=2 texts=1
