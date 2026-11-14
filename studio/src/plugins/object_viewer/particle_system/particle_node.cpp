@@ -263,7 +263,11 @@ void CWorkspaceNode::savePSAs(const std::string &fullPath)
 std::string CWorkspaceNode::getFullPath() const
 {
 	nlassert(_WS);
-	return _WS->getPath() + _RelativePath.c_str();
+	// workspaces written by the MFC object viewer separate their relative paths with backslashes
+	std::string path = NLMISC::CPath::standardizePath(_RelativePath, false);
+	if (NLMISC::CPath::isAbsolutePath(path))
+		return path;
+	return _WS->getPath() + path;
 }
 
 bool CWorkspaceNode::loadPS()
@@ -352,24 +356,9 @@ CWorkspaceNode *CParticleWorkspace::addNode(const std::string &filenameWithFullP
 	{
 		if (NLMISC::nlstricmp(_Nodes[k]->getFilename(), fileName) == 0) return NULL;
 	}
-//	char resultPath[MAX_PATH];
-//	std::string dosPath = NLMISC::CPath::standardizeDosPath(getPath());
-	std::string relativePath;
-//	if (!PathRelativePathTo(resultPath, dosPath.c_str(), FILE_ATTRIBUTE_DIRECTORY, filenameWithFullPath.c_str(), 0))
-//	{
-	relativePath = filenameWithFullPath;
-//	}
-//	else
-//	{
-//		relativePath = resultPath;
-//	}
-	if (relativePath.size() >= 2)
-	{
-		if (relativePath[0] == '\\' && relativePath[1] != '\\')
-		{
-			relativePath = relativePath.substr(1);
-		}
-	}
+	// relative to the workspace when possible, else (such as on another drive) absolute
+	std::string relativePath = NLMISC::CPath::standardizePath(filenameWithFullPath, false);
+	NLMISC::CPath::makePathRelative(getPath(), relativePath);
 	CWorkspaceNode *newNode = new CWorkspaceNode();
 	newNode->init(this);
 	newNode->setRelativePath(relativePath);

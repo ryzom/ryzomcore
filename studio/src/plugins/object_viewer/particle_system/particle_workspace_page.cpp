@@ -137,7 +137,7 @@ void CWorkspacePage::insertPS()
 	if (!fileName.isEmpty())
 	{
 		// TODO: create method particle editor insertNewPS and multiple add
-		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toUtf8().constData()));
+		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(fileName.toUtf8().constData());
 		if (node != 0)
 		{
 			try
@@ -177,7 +177,7 @@ void CWorkspacePage::createPS()
 								  QMessageBox::Ok);
 			return;
 		}
-		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toUtf8().constData()));
+		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(fileName.toUtf8().constData());
 		// should always succeed because we tested if file already exists
 		nlassert(node);
 		node->createEmptyPS();
