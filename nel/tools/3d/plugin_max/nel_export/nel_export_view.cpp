@@ -194,7 +194,7 @@ void CNelExport::viewMesh (TimeValue time)
 		// Init it
 		if (!view->initUI())
 		{
-			::MessageBox(NULL, _T("Failed to initialize object viewer ui, this may be a driver init issue, check your log.log files"), _T("NeL Export"), MB_OK|MB_ICONEXCLAMATION);
+			// the viewer has said why in a message box
 			IObjectViewer::releaseInterface(view);
 			return;
 		}

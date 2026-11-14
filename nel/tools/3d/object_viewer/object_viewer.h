@@ -643,8 +643,8 @@ private:
 	void	loadConfigFile();
 	// get path of the dll
 	std::string getModulePath() const;
-	// load driver name from the config file
-	void	loadDriverName();
+	// load driver name from the config file, false with a message box when it cannot be read
+	bool	loadDriverName();
 
 	void	drawFXUserMatrix();	
 	void	drawFXMatrix();
