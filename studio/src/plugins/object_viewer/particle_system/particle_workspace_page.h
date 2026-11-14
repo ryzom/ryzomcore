@@ -58,6 +58,8 @@ private Q_SLOTS:
 	void unloadWP();
 
 private:
+	/// Saves the workspace and its modified systems, false with a message when that fails
+	bool saveWorkspace();
 
 	Ui::CWorkspacePage _ui;
 

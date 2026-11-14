@@ -63,7 +63,18 @@ void CWorkspacePage::newWP()
 					   tr("pws files (*.pws)"));
 	if (!fileName.isEmpty())
 	{
-		Modules::psEdit().createNewWorkspace(fileName.toUtf8().constData());
+		try
+		{
+			Modules::psEdit().createNewWorkspace(fileName.toUtf8().constData());
+		}
+		catch (const NLMISC::EStream &e)
+		{
+			nlwarning("%s", e.what());
+			QMessageBox::critical(this, tr("NeL particle system editor"),
+								  QString::fromUtf8(e.what()),
+								  QMessageBox::Ok);
+			return;
+		}
 		_treeModel->setupModelFromWorkSpace();
 		_ui.saveToolButton->setEnabled(true);
 		_ui.saveAsToolButton->setEnabled(true);
@@ -110,8 +121,25 @@ void CWorkspacePage::loadWP()
 void CWorkspacePage::saveWP()
 {
 	//checkModifiedWorkSpace();
-	Modules::psEdit().saveWorkspaceStructure();
-	Modules::psEdit().saveWorkspaceContent();
+	saveWorkspace();
+}
+
+bool CWorkspacePage::saveWorkspace()
+{
+	try
+	{
+		Modules::psEdit().saveWorkspaceStructure();
+		Modules::psEdit().saveWorkspaceContent();
+	}
+	catch (const NLMISC::EStream &e)
+	{
+		nlwarning("%s", e.what());
+		QMessageBox::critical(this, tr("NeL particle system editor"),
+							  QString::fromUtf8(e.what()),
+							  QMessageBox::Ok);
+		return false;
+	}
+	return true;
 }
 
 void CWorkspacePage::saveAsWP()
@@ -121,9 +149,15 @@ void CWorkspacePage::saveAsWP()
 					   tr("pws files (*.pws)"));
 	if (!fileName.isEmpty())
 	{
-		Modules::psEdit().getParticleWorkspace()->setFileName(fileName.toUtf8().constData());
-		Modules::psEdit().saveWorkspaceStructure();
-		Modules::psEdit().saveWorkspaceContent();
+		CParticleWorkspace *workspace = Modules::psEdit().getParticleWorkspace();
+		const std::string previousFileName = workspace->getPath() + workspace->getFilename();
+		workspace->setFileName(fileName.toUtf8().constData());
+		if (!saveWorkspace())
+		{
+			// the workspace keeps the file name it was saved or loaded with
+			workspace->setFileName(previousFileName);
+			return;
+		}
 		_treeModel->setupModelFromWorkSpace();
 	}
 }

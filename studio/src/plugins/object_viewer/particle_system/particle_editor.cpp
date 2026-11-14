@@ -136,32 +136,22 @@ void CParticleEditor::loadWorkspace(const std::string &fullPath)
 
 void CParticleEditor::createNewWorkspace(const std::string &fullPath)
 {
-	CParticleWorkspace *newPW = new CParticleWorkspace;
+	CUniquePtr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(fullPath);
-	// save empty workspace
-	try
-	{
-		newPW->save();
-	}
-	catch(NLMISC::EStream &e)
-	{
-		nlerror("%s", e.what());
-	}
+
+	// save empty workspace, a workspace that cannot be written throws to the caller and the current one stays open
+	newPW->save();
+
 	closeWorkspace();
-	_PW = newPW;
+	_PW = newPW.release();
 }
 
 void CParticleEditor::saveWorkspaceStructure()
 {
 	nlassert(_PW);
-	try
-	{
-		_PW->save();
-	}
-	catch(NLMISC::EStream &e)
-	{
-		nlerror("%s", e.what());
-	}
+
+	// a workspace that cannot be written throws to the caller
+	_PW->save();
 }
 
 
