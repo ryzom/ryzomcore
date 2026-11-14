@@ -78,8 +78,9 @@ const std::string	FaberPhraseItemResultGroup= FaberPhraseWindow + ":header_opene
 // ***************************************************************************
 CActionPhraseFaber::CActionPhraseFaber()
 {
-	uint size = MAX_PLAYER_INV_ENTRIES + (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL) +
-		MAX_GUILDINV_ENTRIES + MAX_ROOMINV_ENTRIES;
+	// the bag, the pack animals and the apartment: the inventories the server takes craft materials from
+	// (CCharacter::fillFaberMaterialArray). The guild inventory is not one of them.
+	uint size = MAX_PLAYER_INV_ENTRIES + (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL) + MAX_ROOMINV_ENTRIES;
 	_InventoryMirror.resize(size);
 	_InventoryObsSetup= false;
 	_ExecuteFromItemPlanBrick = nullptr;
@@ -209,6 +210,12 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		if(branch) NLGUI::CDBManager::getInstance()->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
 	}
 
+	// and for the apartment, whose slots are read from the server database (getInvMirrorItemImage). A craft puts its
+	// result in the temporary inventory, so without this nothing reports the room stack it used up.
+	branch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM");
+	if (branch) NLGUI::CDBManager::getInstance()->removeBranchObserver(SERVER_INVENTORY ":ROOM", &_DBInventoryObs);
+	if (branch) NLGUI::CDBManager::getInstance()->addBranchObserver(SERVER_INVENTORY ":ROOM", &_DBInventoryObs);
+
 	// Add observers on animal status, cause inventory may become unavailabe during the process
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
@@ -253,6 +260,9 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 		branch= NLGUI::CDBManager::getInstance()->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
 		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
 	}
+	// and for the apartment
+	branch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM");
+	if (branch) branch->removeBranchObserver(&_DBInventoryObs);
 
 	// remove observers on animal status, cause inventory may become unavailabe during the process
 	for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
@@ -329,22 +339,6 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 		return &getInventory().getPAItem(animal, index);
 	}
 	slotIndex -= (MAX_ANIMALINV_ENTRIES * MAX_INVENTORY_ANIMAL);
-
-	if (slotIndex < MAX_GUILDINV_ENTRIES)
-	{
-		if (getInventory().isInventoryAvailable(INVENTORIES::guild))
-		{
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
-			static CItemImage image;
-			image.build(itemBranch);
-			invId = INVENTORIES::guild;
-			indexInInv = slotIndex;
-			return &image;
-		}
-		return nullptr;
-	}
-	slotIndex -= MAX_GUILDINV_ENTRIES;
 
 	if (slotIndex < MAX_ROOMINV_ENTRIES)
 	{
