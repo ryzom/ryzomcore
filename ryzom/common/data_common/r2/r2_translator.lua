@@ -255,6 +255,28 @@ Translator.getAiActivity = function(hlNpc)
 	return str;
 end
 
+-- An entity gets what it is from its palette entry (Base). One whose entry this editor does not have,
+-- as in a file edited by hand or made for another palette, has no sheet for the client: the scenario
+-- service refuses the act it is in. The test does not start, and the author is told which entity it
+-- is. The entity stays as it is: what becomes of it is the author's choice.
+-- doTranslateFeatures checks every entity of the scenario before the first step of the translation,
+-- which would stop at the missing sheet with an error of its own (r2:isBotObject reads the sheet).
+Translator.checkEntitySheet = function(hlNpc)
+	local sheetClient = hlNpc.SheetClient
+	if sheetClient ~= nil and sheetClient ~= "" then
+		return
+	end
+	local base = hlNpc.Base
+	local key = "uiR2EDTranslateNoSheetClient"
+	if base ~= nil and base ~= "" and not r2.isInPalette(base) then
+		key = "uiR2EDTranslateUnknownBase"
+	end
+	local arguments = { tostring(hlNpc.Name), tostring(defaulting(base, "")) }
+	printWarning((string.gsub(tostring(i18n.get(key)), "%%(%d)", function(index)
+		return defaulting(arguments[tonumber(index)], "")
+	end)))
+end
+
 --  get rtNpc from hlNpc
 Translator.translateNpc = function(hlNpc, context)
 
@@ -268,22 +290,8 @@ Translator.translateNpc = function(hlNpc, context)
 	
 	assert(hlNpc and type(hlNpc) == "userdata")
 
-	-- An entity gets what it is from its palette entry (Base). One whose entry this editor does not have,
-	-- as in a file edited by hand or made for another palette, has no sheet for the client: the scenario
-	-- service refuses the act it is in. The test does not start, and the author is told which entity it
-	-- is. The entity stays as it is: what becomes of it is the author's choice.
-	local sheetClient = hlNpc.SheetClient
-	if sheetClient == nil or sheetClient == "" then
-		local base = hlNpc.Base
-		local key = "uiR2EDTranslateNoSheetClient"
-		if base ~= nil and base ~= "" and not r2.isInPalette(base) then
-			key = "uiR2EDTranslateUnknownBase"
-		end
-		local arguments = { tostring(hlNpc.Name), tostring(defaulting(base, "")) }
-		printWarning((string.gsub(tostring(i18n.get(key)), "%%(%d)", function(index)
-			return defaulting(arguments[tonumber(index)], "")
-		end)))
-	end
+	-- an entity the translation made itself: the ones of the scenario were checked before the first step
+	Translator.checkEntitySheet(hlNpc)
 
 	local RtNpc = r2.newComponent("RtNpc")
 	
@@ -684,6 +692,34 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	local first=true
 
 
+
+	-- every entity of the scenario has a sheet for the client, or the translation stops here with the
+	-- name of the one that has none (Translator.checkEntitySheet)
+	local function recursiveCheckEntities(components)
+		if (components == nil) then
+			return
+		end
+		local k, v = next(components, nil)
+		while k do
+			if v.isKindOf and v:isKindOf("Npc") then
+				Translator.checkEntitySheet(v)
+			end
+			if v.Components then
+				recursiveCheckEntities(v.Components)
+			end
+			if v.SubComponents then
+				recursiveCheckEntities(v.SubComponents)
+			end
+			k, v = next(components, k)
+		end
+	end
+	do
+		local actId, act = next(acts, nil)
+		while (actId ~= nil) do
+			recursiveCheckEntities(act.Features)
+			actId, act = next(acts, actId)
+		end
+	end
 
 	--
 	-- Recursive method that call a specific function (ie createGhostComponent, pretranslate) on a component
