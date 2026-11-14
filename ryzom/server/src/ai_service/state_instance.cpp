@@ -117,7 +117,7 @@ void CStateInstance::callScriptCallBack(IScriptContext* caller, TStringId const&
 void CStateInstance::callNativeCallBack(IScriptContext* caller, std::string const& funcName, int mode, std::string const& inParamsSig, std::string const& outParamsSig, AIVM::CScriptStack* stack)
 {
 	// :FIXME: caller is unused
-	CScriptNativeFuncParams* funcParam = CCompiler::getNativeFunc(funcName, inParamsSig, outParamsSig);
+	CScriptNativeFuncParams *funcParam = CCompiler::getNativeFuncForCall(funcName, inParamsSig, outParamsSig);
 	if (funcParam!=NULL)
 	{
 		bool varArg = (mode & 1)!=0; // :KLUDGE: Hardcoded 1 :TODO: Replace with a names constant (see script_compiler.cpp)

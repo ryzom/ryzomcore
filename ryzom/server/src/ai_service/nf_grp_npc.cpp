@@ -33,6 +33,7 @@
 
 #include "ai_script_data_manager.h"
 #include "ais_control.h"
+#include "ring_scenario_guard.h"
 
 using std::string;
 using std::vector;
@@ -1585,8 +1586,13 @@ void activateEasterEgg_fffsffffsss_(CStateInstance* si, CScriptStack& stack)
 	
 	string items = (string)stack.top(); stack.pop();
 	uint32 actId = static_cast<uint32>( (float)stack.top()); stack.pop();
-	TSessionId scenarioId( static_cast<uint32>( (float)stack.top())); stack.pop();
+	float scenarioArg = (float)stack.top();
+	stack.pop();
 	uint32 easterEgg = static_cast<uint32>( (float)stack.top()); stack.pop();
+
+	// the session is the one of the caller
+	TSessionId scenarioId;
+	if (!CRingScenarioGuard::checkScriptSession(si, scenarioArg, "activateEasterEgg", scenarioId)) { return; }
 
 	IAisControl::getInstance()->activateEasterEgg(easterEgg, scenarioId, actId, items, x, y, z, heading, grpCtrl, name, clientSheet);
 }
@@ -1608,8 +1614,13 @@ Arguments: f(easterEggId), f(scenarioId), f(actId) ->
 void deactivateEasterEgg_fff_(CStateInstance* si, CScriptStack& stack)
 {
 	uint32 actId = static_cast<uint32>( (float)stack.top()); stack.pop();
-	TSessionId scenarioId( static_cast<uint32>( (float)stack.top())); stack.pop();
+	float scenarioArg = (float)stack.top();
+	stack.pop();
 	uint32 easterEgg = static_cast<uint32>( (float)stack.top()); stack.pop();
+
+	// the session is the one of the caller
+	TSessionId scenarioId;
+	if (!CRingScenarioGuard::checkScriptSession(si, scenarioArg, "deactivateEasterEgg", scenarioId)) { return; }
 
 	IAisControl::getInstance()->deactivateEasterEgg(easterEgg, scenarioId, actId);
 }
@@ -2023,7 +2034,7 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	CAIEntityPhysical	*charEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(charEid));
 	if	(!charEntity)
 		return;
-	CBotPlayer	*talkingPlayer=NLMISC::safe_cast<CBotPlayer*>(charEntity);
+	CBotPlayer *talkingPlayer = dynamic_cast<CBotPlayer *>(charEntity);
 	if	(!talkingPlayer)
 		return;
 
@@ -2031,7 +2042,7 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	CAIEntityPhysical	*npcEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(npcEid));
 	if	(!npcEntity)
 		return;
-	CSpawnBotNpc	*talkingNpc=NLMISC::safe_cast<CSpawnBotNpc*>(npcEntity);
+	CSpawnBotNpc *talkingNpc = dynamic_cast<CSpawnBotNpc *>(npcEntity);
 	if	(!talkingNpc)
 		return;
 
@@ -2042,6 +2053,15 @@ void giveReward_ssssc_(CStateInstance* entity, CScriptStack& stack)
 	{
 		nlwarning("giveReward failed: invalid interlocutors");
 		DEBUG_STOP;
+		return;
+	}
+
+	// The two are named by entity ids, which are the same for the whole shard: they are the
+	// player and the npc of an event of this group, so both are in the instance of the group
+	if (talkingPlayer->getAIInstance() != aiInstance || talkingNpc->getAIInstance() != aiInstance)
+	{
+		CRingScenarioGuard::logRefusal(aiInstance->getRingSession(), aiInstance->getInstanceNumber(),
+		    "the group '" + group->getName() + "' called giveReward for " + charEid.toString() + " and " + npcEid.toString() + ", which are not both in its instance");
 		return;
 	}
 
@@ -2109,7 +2129,7 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	CAIEntityPhysical	*charEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(charEid));
 	if	(!charEntity)
 		return;
-	CBotPlayer	*talkingPlayer=NLMISC::safe_cast<CBotPlayer*>(charEntity);
+	CBotPlayer *talkingPlayer = dynamic_cast<CBotPlayer *>(charEntity);
 	if	(!talkingPlayer)
 		return;
 
@@ -2117,7 +2137,7 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	CAIEntityPhysical	*npcEntity=CAIS::instance().getEntityPhysical(TheDataset.getDataSetRow(npcEid));
 	if	(!npcEntity)
 		return;
-	CSpawnBotNpc	*talkingNpc=NLMISC::safe_cast<CSpawnBotNpc*>(npcEntity);
+	CSpawnBotNpc *talkingNpc = dynamic_cast<CSpawnBotNpc *>(npcEntity);
 	if	(!talkingNpc)
 		return;
 
@@ -2128,6 +2148,15 @@ void teleportNear_fffc_(CStateInstance* entity, CScriptStack& stack)
 	{
 		nlwarning("giveReward failed: invalid interlocutors");
 		DEBUG_STOP;
+		return;
+	}
+
+	// The two are named by entity ids, which are the same for the whole shard: they are the
+	// player and the npc of an event of this group, so both are in the instance of the group
+	if (talkingPlayer->getAIInstance() != aiInstance || talkingNpc->getAIInstance() != aiInstance)
+	{
+		CRingScenarioGuard::logRefusal(aiInstance->getRingSession(), aiInstance->getInstanceNumber(),
+		    "the group '" + group->getName() + "' called teleportNear for " + charEid.toString() + " and " + npcEid.toString() + ", which are not both in its instance");
 		return;
 	}
 
@@ -2279,6 +2308,8 @@ void execSayHelper(CSpawnBot *spawnBot, NLMISC::CSString text, CChatGroup::TGrou
 			NLMISC::CSString phrase = text.right(text.length() - 4);
 			NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
 			uint32 scenarioId = atoi(idStr.c_str());
+			// the text is one of the texts of the session of the npc
+			if (!CRingScenarioGuard::checkSession(spawnBot->getAIInstance(), TSessionId(scenarioId), "npcSay (a text of a session)")) { return; }
 			forwardToDss(spawnBot->dataSetRow(), mode, phrase, scenarioId);
 			return;
 		}
@@ -2382,9 +2413,14 @@ void dssMessage_fsss_(CStateInstance* entity, CScriptStack& stack)
 	string msg = (string)stack.top(); stack.pop();	
 	string who = (string)stack.top(); stack.pop();	
 	string mode = (string)stack.top(); stack.pop();	
-	float instance = (float)stack.top(); stack.pop();	
+	float instance = (float)stack.top();
+	stack.pop();
 	
-	IAisControl::getInstance()->dssMessage(TSessionId(uint32(instance)), mode, who, msg);
+	// the message is for the players of the session of the caller
+	TSessionId sessionId;
+	if (!CRingScenarioGuard::checkScriptSession(entity, instance, "dssMessage", sessionId)) { return; }
+
+	IAisControl::getInstance()->dssMessage(sessionId, mode, who, msg);
 	return;
 }
 
@@ -2407,9 +2443,14 @@ Arguments: f(scenarioInstance), f(scenarioPoints) ->
 void setScenarioPoints_ff_(CStateInstance* entity, CScriptStack& stack)
 {
 	float scenarioPoints = (float)stack.top(); stack.pop();	
-	float instance = (float)stack.top(); stack.pop();	
+	float instance = (float)stack.top();
+	stack.pop();
 	
-	IAisControl::getInstance()->setScenarioPoints(TSessionId(uint32(instance)), scenarioPoints);
+	// the points are those of the session of the caller
+	TSessionId sessionId;
+	if (!CRingScenarioGuard::checkScriptSession(entity, instance, "setScenarioPoints", sessionId)) { return; }
+
+	IAisControl::getInstance()->setScenarioPoints(sessionId, scenarioPoints);
 	return;
 }
 
@@ -2430,9 +2471,14 @@ Arguments: f(scenarioInstance),
 
 void startScenarioTiming_f_(CStateInstance* entity, CScriptStack& stack)
 {	
-	float instance = (float)stack.top(); stack.pop();	
+	float instance = (float)stack.top();
+	stack.pop();
 	
-	IAisControl::getInstance()->startScenarioTiming(TSessionId(uint32(instance)));
+	// the timing is the one of the session of the caller
+	TSessionId sessionId;
+	if (!CRingScenarioGuard::checkScriptSession(entity, instance, "startScenarioTiming", sessionId)) { return; }
+
+	IAisControl::getInstance()->startScenarioTiming(sessionId);
 	return;
 }
 
@@ -2453,9 +2499,14 @@ Arguments: f(scenarioInstance),
 
 void endScenarioTiming_f_(CStateInstance* entity, CScriptStack& stack)
 {	
-	float instance = (float)stack.top(); stack.pop();	
+	float instance = (float)stack.top();
+	stack.pop();
 	
-	IAisControl::getInstance()->endScenarioTiming(TSessionId(uint32(instance)));
+	// the timing is the one of the session of the caller
+	TSessionId sessionId;
+	if (!CRingScenarioGuard::checkScriptSession(entity, instance, "endScenarioTiming", sessionId)) { return; }
+
+	IAisControl::getInstance()->endScenarioTiming(sessionId);
 	return;
 }
 

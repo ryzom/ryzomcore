@@ -255,6 +255,19 @@ std::string CAIInstance::getManagerIndexString(CManager const* manager) const
 	return getIndexString()+NLMISC::toString(":m%u", manager->getChildIndex());
 }
 
+void CAIInstance::setRingSession(TSessionId sessionId)
+{
+	if (_RingSession.asInt() != 0 && _RingSession != sessionId)
+	{
+		// The edition session and the animation session of one owner have one instance, and the scenario
+		// of the one is unloaded when the other goes live: the instance is then of the session that
+		// goes live. This is the usual course, and is only noted.
+		nlinfo("RING: AI instance %u goes from the scenario of session %u to the scenario of session %u",
+		    _InstanceNumber, _RingSession.asInt(), sessionId.asInt());
+	}
+	_RingSession = sessionId;
+}
+
 void CAIInstance::initInstance(string const& continentName, uint32 instanceNumber)
 {
 	_ContinentName = continentName;

@@ -34,6 +34,8 @@
 
 #include "sheets.h"
 
+#include "game_share/r2_basic_types.h"
+
 class CBot;
 class CGroup;
 class CManager;
@@ -186,6 +188,11 @@ public:
 	
 	void initInstance(std::string const& continentName, uint32 instanceNumber);
 	
+	/// The Ring session whose scenario is loaded in this instance, 0 for none. It is set when
+	/// the scenario service sends the scenario, and is what CRingScenarioGuard tests.
+	TSessionId getRingSession() const { return _RingSession; }
+	void setRingSession(TSessionId sessionId);
+
 	/// Main squad family accessor
 	COutpostSquadFamily *getSquadFamily() { return _SquadFamily; }
 
@@ -243,6 +250,8 @@ private:
 	std::string _ContinentName;
 	/// The ai instance number (multi ai system)
 	uint32 _InstanceNumber;
+	/// The Ring session whose scenario is loaded in this instance, 0 for none
+	TSessionId _RingSession;
 	
 	CAIEntity* tryToGetEntity(char const* str);
 	

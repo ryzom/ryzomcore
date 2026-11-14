@@ -28,6 +28,7 @@
 
 #include "ai_script_data_manager.h"
 #include "ai_logic_action.h"
+#include "ring_scenario_guard.h"
 using std::string;
 using std::vector;
 using namespace NLMISC;
@@ -460,12 +461,16 @@ void dssStartAct_ff_(CStateInstance* si, CScriptStack& stack)
 	stack.pop();
 
 	
-	if ( !(0 <= actId && 0 <= sessionId) )
+	// the act is one of the scenario of the caller, and an index the scenario service can test
+	if (!(0 <= actId && actId < 65536.f))
 	{
 		return;
 	}
 
-	CAILogicActionDssStartActHelper::dssStartAct(TSessionId(static_cast<uint32>(sessionId)), static_cast<uint32>(actId));
+	TSessionId session;
+	if (!CRingScenarioGuard::checkScriptSession(si, sessionId, "dssStartAct", session)) { return; }
+
+	CAILogicActionDssStartActHelper::dssStartAct(session, static_cast<uint32>(actId));
 }
 
 //----------------------------------------------------------------------------

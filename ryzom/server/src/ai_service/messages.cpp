@@ -230,6 +230,7 @@ void CMessages::notifyBotStopNpcControl(NLNET::TServiceId serviceId, uint32 botA
 
 #include "game_share/task_list.h"
 
+#include "ring_scenario_guard.h"
 #include "script_compiler.h"
 
 
@@ -283,10 +284,25 @@ public:
 
 		ICommand::execute(toString("createDynamicAIInstance %d", _AiInstance), *InfoLog);
 
+		// The instance is of this session from here on: the functions that act for a session
+		// compare the session they are called for with it
+		CAIInstance *instance = CAIS::instance().getAIInstance(_AiInstance);
+		if (!instance)
+		{
+			nlwarning("RING: the AI instance %u of session %u could not be made, its scenario is not loaded", _AiInstance, _SessionId.asInt());
+			return;
+		}
+		instance->setRingSession(_SessionId);
+
 		AI_SHARE::CAIActionsDataRecordPtr dataRec;
 		dataRec.init(&Pdr);
 
-		dataRec.applyToExecutor(*executer);
+		{
+			// What is in the record was made from the upload of a client: the scripts in it are
+			// compiled as the scripts of a scenario
+			CRingScenarioGuard::CLoadScope loadScope(_SessionId, _AiInstance);
+			dataRec.applyToExecutor(*executer);
+		}
 		{
 			std::string cmd = toString("spawnManagers r2.%04d.%s", _SessionId.asInt(), _IsBase?"base":"act");
 			ICommand::execute(cmd, *InfoLog);
