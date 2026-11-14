@@ -94,7 +94,10 @@ function printWarning( str)
 	if devMode then
 		assert(nil)
 	else
-		error(str) -- force to exit current translation
+		-- force to exit current translation. The message is for the author: it goes up as it is, without
+		-- the place of this line in front of it (level 0), and doTranslateFeatures knows it by this
+		Translator.LastWarning = str
+		error(str, 0)
 	end
 end
 
@@ -631,9 +634,15 @@ Translator.doTranslateFeatures = function(scenarioInstanceId)
 	local result
 
 	r2.LastTranslationErrorMsg = nil
+	Translator.LastWarning = nil
 	ok, result = pcall(Translator.doTranslateFeaturesProtected, scenarioInstanceId)
 	if not ok then
-		printWarning(result)
+		if result ~= nil and result == Translator.LastWarning then
+			-- printWarning has told the author and the log: the same message goes on to the client, once
+			error(result, 0)
+		end
+		-- an error of the scripts themselves, with its place
+		printWarning(tostring(result))
 	end
 
 	return result
