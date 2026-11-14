@@ -742,6 +742,16 @@ namespace R2
 }
 
 
+/// A request of requestFarTPToSession() that the session browser did not answer, or did not grant. The reason is
+/// displayed to the player after the translated message, and logged.
+struct EFarTPRequestFailed : public NLMISC::Exception
+{
+	EFarTPRequestFailed(const char *reason)
+	    : NLMISC::Exception(std::string(reason))
+	{
+	}
+};
+
 /*
  * requestFarTPToSession
  */
@@ -781,24 +791,24 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw "Protocol error";
+					throw EFarTPRequestFailed("Protocol error");
 				if (sb._LastJoinSessionResult == 2)
 				{
 					// the edit session did not exist, create a new one
 					sb.scheduleSession(charId, TSessionType::st_edit, "", "", TSessionLevel::sl_a, /*TAccessType::at_private, */TRuleType::rt_strict, TEstimatedDuration::et_long, 0, TAnimMode(), TRaceFilter(), TReligionFilter(), TGuildFilter(), TShardFilter(), TLevelFilter(), std::string(), TSessionOrientation(), true, true);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_scheduleSessionResult"));
-					if (!ret || sb._LastScheduleSessionResult!= 0)	throw "schedule error";
+					if (!ret || sb._LastScheduleSessionResult!= 0)	throw EFarTPRequestFailed("schedule error");
 					sessionId = sb._LastScheduleSessionId;
 
 					// invite the char in the session
 					sb.inviteCharacter(charId, sessionId, charId, TSessionPartStatus::sps_edit_invited);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw "Invitation Error";
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("Invitation Error");
 
 					// now, start the edit session
 					sb.startSession(charId, sessionId);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw "start session error";
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error");
 
 					// retry to join
 					goto retryJoinEdit;
@@ -809,14 +819,14 @@ retryJoinEdit:
 					// the session was closed, the SU has put it in planned state, start it
 					sb.startSession(charId, sessionId);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw "start session error (2), no DSS available";
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error (2), no DSS available");
 					// retry to join
 					goto retryJoinEdit;
 				}
 				else if (sb._LastJoinSessionResult != 0)
 				{
 					// any other error are not recoverable from here
-					throw "join session error";
+					throw EFarTPRequestFailed("join session error");
 				}
 
 				// ok, the join is accepted !, the other far TP work is done in the callback
@@ -829,15 +839,15 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw "Protocol error";
+					throw EFarTPRequestFailed("Protocol error");
 				if (sb._LastJoinSessionResult == 16)
 				{
 //	#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
-					throw "User ban from the ring";
+					throw EFarTPRequestFailed("User ban from the ring");
 				}
 				if (sb._LastJoinSessionResult != 0)
 				{
-					throw "Join session error";
+					throw EFarTPRequestFailed("Join session error");
 				}
 				// ok, the join is accepted !, the other far TP work is done in the callback
 			}
@@ -851,11 +861,11 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw "Protocol error";
+					throw EFarTPRequestFailed("Protocol error");
 				if (sb._LastJoinSessionResult != 0)
 				{
 					// some error during the join
-					throw "Error joining session";
+					throw EFarTPRequestFailed("Error joining session");
 				}
 				// ok, the join is accepted !, the other far TP work is done in the callback
 			}
@@ -905,8 +915,9 @@ retryJoinEdit:
 //		pIM->executeLuaScript(res, true);
 //		return true;
 //	}
-	catch ( char *errorMsg )
+	catch (const EFarTPRequestFailed &e)
 	{
+		const char *errorMsg = e.what();
 //		// Get more details on the error
 //		string httpErrorStr;
 //		if (errorNum < 4) // we didn't receive an answer
