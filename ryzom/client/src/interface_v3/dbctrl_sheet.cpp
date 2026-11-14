@@ -2508,6 +2508,27 @@ static inline CRGBA	fastMulRGB(CRGBA sheetColor, CRGBA iconColor)
 }
 
 // ----------------------------------------------------------------------------
+// True if the phrase is a special power with a taunt brick.
+// Called for each drawn phrase while nothing is targeted: the root brick is tested first (one lookup),
+// only the few bricks of a special power are walked.
+static bool isTauntPhrase(const CSPhraseCom &phrase)
+{
+	CSBrickManager *pBM = CSBrickManager::getInstance();
+	if (phrase.Bricks.empty())
+		return false;
+	const CSBrickSheet *rootBrick = pBM->getBrick(phrase.Bricks[0]);
+	if (!rootBrick || !rootBrick->isSpecialPower())
+		return false;
+	for (uint i = 0; i < phrase.Bricks.size(); i++)
+	{
+		const CSBrickSheet *brick = pBM->getBrick(phrase.Bricks[i]);
+		if (brick && brick->BrickFamily == BRICK_FAMILIES::BSFMA)
+			return true;
+	}
+	return false;
+}
+
+// ----------------------------------------------------------------------------
 void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelectionBorder /*= true*/)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2891,8 +2912,8 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 										maxRange= min(maxRange, (uint)brick->MaxRange);
 										if(brick->BrickFamily == BRICK_FAMILIES::BSFMA)
 										{
-
-											forceGrayed = target->isNeutral();
+											// a taunt is for an attackable creature or NPC: the server refuses it on any player
+											forceGrayed = target->isNeutral() || target->isPlayer() || target->isUser();
 											isTaunt = true;
 										}
 									}
@@ -2910,6 +2931,9 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 							}
 						}
 					}
+					// a taunt needs a target: the server refuses it without one
+					if ((targetSlot >= CLFECOMMON::INVALID_SLOT || EntitiesMngr.entity(targetSlot) == NULL) && isTauntPhrase(phrase))
+						forceGrayed = true;
 					// in every cases, test against current gauges to see if the action is possible
 					if (UserEntity)
 					{
