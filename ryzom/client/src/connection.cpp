@@ -2606,14 +2606,15 @@ static void setTextField(CInterfaceGroup* scenarioWnd, const std::string &uiName
 {
 	setTextField(scenarioWnd, uiName, text.toUtf8());
 }
-// helper function for "setScenarioInformation"
-static std::string fieldLookup(const vector< pair< string, string > > &values, const std::string &id)
+// helper function for "setScenarioInformation": the value of a field of the header, or 'missing' when the header has
+// no such field (a scenario without a header has none)
+static std::string fieldLookup(const vector< pair< string, string > > &values, const std::string &id, const std::string &missing = "--")
 {
 	for(uint i=0; i<values.size(); i++)
 	{
 		if (values[i].first == id) return values[i].second;
 	}
-	return "--";
+	return missing;
 }
 //
 static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string scenarioName)
@@ -2644,9 +2645,16 @@ static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string sc
 		case 250: levelRange = 5; break;
 	}
 	setTextField(scenarioWnd, "level_value_text",			CI18N::get("uiRAP_Level" + toString(levelRange)));
-	setTextField(scenarioWnd, "language_value_text",		CI18N::get("uiR2ED" + fieldLookup(values, "Language")));
-	setTextField(scenarioWnd, "type_value_text",			CI18N::get("uiR2ED" + fieldLookup(values, "Type")));
-	setTextField(scenarioWnd, "edit_small_description",		fieldLookup(values, "ShortDescription"));
+	// a session of a header without a language is listed in English (the "load_scenario" handler), and one without a
+	// type as other (the default orientation of the ring database)
+	std::string language = fieldLookup(values, "Language", "");
+	if (language.empty()) language = "en";
+	std::string type = fieldLookup(values, "Type", "");
+	if (type.empty()) type = "so_other";
+	setTextField(scenarioWnd, "language_value_text",		CI18N::get("uiR2ED" + language));
+	setTextField(scenarioWnd, "type_value_text",			CI18N::get("uiR2ED" + type));
+	// the text of this box becomes the description of the session, so no placeholder goes in it
+	setTextField(scenarioWnd, "edit_small_description",		fieldLookup(values, "ShortDescription", ""));
 	if(R2::getEditor().isInitialized())
 	{
 		setTextField(scenarioWnd, "scenario_value_text",		"'" + fieldLookup(values, "Title") + "'");
