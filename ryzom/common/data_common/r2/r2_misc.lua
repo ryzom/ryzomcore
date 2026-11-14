@@ -192,6 +192,22 @@ function replaceTag(text, tag, value)
 end
 
 -------------------------------------------------------------------------------------------------
+-- A number as the text that goes into an id, a command or a script: the same text on every Lua
+-- version, the one Lua 5.1 writes. From Lua 5.3 on tostring and ".." write a float with a whole value
+-- as "25.0" where Lua 5.1 writes "25" (the result of a division is such a float, and so is a number the
+-- client hands over as one), and Lua 5.5 writes a fraction with up to 17 digits where the others write
+-- 14. What is not a number comes out as tostring gives it.
+function numberText(value)
+	if type(value) ~= "number" then
+		return tostring(value)
+	end
+	if math.type ~= nil and math.type(value) == "integer" then
+		return tostring(value)
+	end
+	return string.format("%.14g", value)
+end
+
+-------------------------------------------------------------------------------------------------
 -- enclose a string by double quotes
 function strify(str) 
 	return [["]] .. tostring(str) .. [["]]

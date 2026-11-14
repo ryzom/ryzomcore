@@ -234,9 +234,9 @@ function component:textAdapter(text)
 		id = id + 1
 	end
 	local str = text
-	str = replaceTag(str, "<qt1>", tostring(qts[1]))
-	str = replaceTag(str, "<qt2>", tostring(qts[2]))
-	str = replaceTag(str, "<qt3>", tostring(qts[3]))
+	str = replaceTag(str, "<qt1>", numberText(qts[1]))
+	str = replaceTag(str, "<qt2>", numberText(qts[2]))
+	str = replaceTag(str, "<qt3>", numberText(qts[3]))
 	str = replaceTag(str, "<item1>", tostring(items[1]))
 	str = replaceTag(str, "<item2>", tostring(items[2]))
 	str = replaceTag(str, "<item3>", tostring(items[3]))

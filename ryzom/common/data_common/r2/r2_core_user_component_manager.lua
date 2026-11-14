@@ -725,13 +725,14 @@ local function generateReverseIdTable(tmpComponents, texts, currentMaxId)
 	local reverseIdTable = {}
 	local maxId, maxPlotItemId = findMaxId(tmpComponents, 0, 0)
 
+	-- the highest id of the scenario comes from the client as a float: "Client1_13", not "Client1_13.0"
 	local i = 1
 	local id = 0
 	while i <= maxId do
 		id = i + currentMaxId
 		local ucName = "UserComponent_" ..i
 		--reverseIdTable[ucName] = "Client1_" ..id
-		reverseIdTable[ucName] = tostring(r2.getUserSlot()).."_"..id
+		reverseIdTable[ucName] = tostring(r2.getUserSlot()).."_"..numberText(id)
 		i = i + 1
 	end
 
@@ -740,7 +741,7 @@ local function generateReverseIdTable(tmpComponents, texts, currentMaxId)
 		id = i + currentMaxId
 		local ucName = "UserItem_" ..j
 		--reverseIdTable[ucName] = "Client1_" ..id
-		reverseIdTable[ucName] = tostring(r2.getUserSlot()).."_"..id
+		reverseIdTable[ucName] = tostring(r2.getUserSlot()).."_"..numberText(id)
 		j = j + 1
 		i = i + 1
 	end

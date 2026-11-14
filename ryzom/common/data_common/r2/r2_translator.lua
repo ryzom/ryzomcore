@@ -1260,11 +1260,11 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		if rtGrpId and rtGrpId ~= "" then
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
-		local x = tostring(tonumber(arg[5]))
-		local y = tostring(tonumber(arg[6]))
-		local z = tostring(tonumber(arg[7]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
+		local x = numberText(tonumber(arg[5]))
+		local y = numberText(tonumber(arg[6]))
+		local z = numberText(tonumber(arg[7]))
 		local scenario = tostring( r2:getScenarioId())
 
 		local item1Weight	= arg[8]
@@ -1293,16 +1293,17 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 
 		local name = Translator.scriptText(arg[17])
 
-		local sum12			= tostring(item1Weight + item2Weight)
-		local sum123			= tostring(item1Weight + item2Weight + item3Weight)
+		-- the weights are shares of 100, the result of a division: whole ones are written as whole numbers
+		local sum12			= numberText(item1Weight + item2Weight)
+		local sum123			= numberText(item1Weight + item2Weight + item3Weight)
 
 		action.Parameters = "//random_chest_activate\n"
 			.."(" ..prefix.."r)rndm(0,100);\n"
-			.."if (" ..prefix.. "r > 0 && "..prefix.."r <= "..tostring(item1Weight)..")\n"
+			.."if (" ..prefix.. "r > 0 && "..prefix.."r <= "..numberText(item1Weight)..")\n"
 			.."{\n\t"
 			.."()"..prefix.."activateEasterEgg(" .. eggId .. ", " .. scenario .."," .. actId .. ", \"" .. item1Str.. "\", " .. x.. ", " .. y.. ", " .. z .. ", 0, \""..r2:getNamespace() .. rtGrpId.."\", \""..name.."\", \"\");\n"
 			.."}\n"
-			.."if (" ..prefix.. "r > "..item1Weight.." && "..prefix.."r <= "..sum12..")\n"
+			.."if (" ..prefix.. "r > "..numberText(item1Weight).." && "..prefix.."r <= "..sum12..")\n"
 			.."{\n\t"
 			.."()"..prefix.."activateEasterEgg(" .. eggId .. ", " .. scenario .."," .. actId .. ", \"" .. item2Str.. "\", " .. x.. ", " .. y.. ", " .. z .. ", 0, \""..r2:getNamespace() .. rtGrpId.."\", \""..name.."\", \"\");\n"
 			.."}\n"
@@ -1324,14 +1325,14 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
 
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
 
 		local items = tostring(arg[5])
-		local x = tostring(tonumber(arg[6]))
-		local y = tostring(tonumber(arg[7]))
-		local z = tostring(tonumber(arg[8]))
-		local heading = tostring(tonumber(arg[9]))
+		local x = numberText(tonumber(arg[6]))
+		local y = numberText(tonumber(arg[7]))
+		local z = numberText(tonumber(arg[8]))
+		local heading = numberText(tonumber(arg[9]))
 		local name = Translator.scriptText(arg[10])
 		local look = Translator.scriptText(arg[11])
 		local scenario =tostring( r2:getScenarioId())
@@ -1355,8 +1356,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
 
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
 		local scenario =tostring( r2:getScenarioId())
 		assert(eggId and scenario)
 		

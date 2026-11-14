@@ -141,7 +141,7 @@ function component:textAdapter(text)
 	end
 
 	if tostring(self.TargetNumber) ~= "" then
-		nbTargets = tostring(self.TargetNumber)
+		nbTargets = numberText(self.TargetNumber)
 	end
 	
 	str = replaceTag(str, "<mission_giver>", mission_giver)
