@@ -2248,7 +2248,9 @@ void CUserEntity::setDead()	// virtual
 	uint kamiFameIndex = CStaticFames::getInstance().getFactionIndex("kami");
 	if (pIM && kamiFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
-		CCDBNodeLeaf *pLeafKamiFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", kamiFameIndex - 1), false);
+		// the slot of a faction in the database is given by the fame table, as for the fame observers
+		uint kamiFameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex(kamiFameIndex);
+		CCDBNodeLeaf *pLeafKamiFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%u:VALUE", kamiFameIndexInDatabase), false);
 		if (pLeafKamiFame != nullptr)
 			kamiFame = pLeafKamiFame->getValue8();
 	}
@@ -2258,7 +2260,8 @@ void CUserEntity::setDead()	// virtual
 	uint karavanFameIndex = CStaticFames::getInstance().getFactionIndex("karavan");
 	if (pIM && karavanFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
-		CCDBNodeLeaf *pLeafKaravanFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", karavanFameIndex - 1), false);
+		uint karavanFameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex(karavanFameIndex);
+		CCDBNodeLeaf *pLeafKaravanFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%u:VALUE", karavanFameIndexInDatabase), false);
 		if (pLeafKaravanFame != nullptr)
 			karavanFame = pLeafKaravanFame->getValue8();
 	}
