@@ -377,7 +377,8 @@ void CParticleEditor::update()
 			while(itr != _PlayingNodes.end())
 			{
 				CWorkspaceNode *node = (*itr);
-				if (node->isLoaded())
+				// the weak reference to a node removed from the workspace while it plays is NULL
+				if (node && node->isLoaded())
 				{
 					if (isRunning(node))
 					{

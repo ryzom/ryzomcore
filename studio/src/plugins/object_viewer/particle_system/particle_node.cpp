@@ -370,7 +370,7 @@ CWorkspaceNode *CParticleWorkspace::addNode(const std::string &filenameWithFullP
 void CParticleWorkspace::removeNode(uint index)
 {
 	nlassert(index < _Nodes.size());
-	_Nodes[index] = NULL; // delete the smart-ptr target
+	// the vector holds weak references, so the node is deleted here, which also unloads its system
 	delete _Nodes[index];
 	_Nodes.erase(_Nodes.begin() + index);
 	touch();
