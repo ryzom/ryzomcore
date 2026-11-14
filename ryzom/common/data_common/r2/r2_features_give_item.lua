@@ -230,6 +230,8 @@ function component:textAdapter(text)
 		end
 		id = id + 1
 	end
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	local str = text
 	str=string.gsub (str, "<qt1>", tostring(qts[1]))
 	str=string.gsub (str, "<qt2>", tostring(qts[2]))
