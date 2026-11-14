@@ -1078,8 +1078,24 @@ public:
 		uint32 invitedCharId;
 		result->getField(0, invitedCharId);
 
-		// do the real invitation with the SU
-		CRingSessionManagerWebClientItf::inviteCharacter(charId, sessionId, invitedCharId, TSessionPartStatus::sps_play_invited);
+		// The requester names no role: an edit session takes editors (the session manager only lets its owner
+		// invite them), any other session takes players
+		TSessionPartStatus role(TSessionPartStatus::sps_play_invited);
+		query = "";
+		query << "SELECT session_type FROM sessions WHERE session_id = " << sessionId.asInt();
+		BOMB_IF(!_RingDB.query(query), "invitedCharacterByName : failed request 3 in database", invokeResult(from, charId >> 4, 103, "Database request failed"); return);
+		result = CUniquePtr<CStoreResult>(_RingDB.storeResult());
+		if (result->getNumRows() != 0)
+		{
+			string sessionType;
+			result->fetchRow();
+			result->getField(0, sessionType);
+			if (TSessionType(sessionType) == TSessionType::st_edit)
+				role = TSessionPartStatus::sps_edit_invited;
+		}
+
+		// do the real invitation with the SU (which answers "session not found" when the requester is in none)
+		CRingSessionManagerWebClientItf::inviteCharacter(charId, sessionId, invitedCharId, role);
 
 		// the return is done with SU return
 	}

@@ -1539,6 +1539,7 @@ text_y="-2"
 	<action id="chat_window"		name="uiR2EDChatWindow"		handler="lua"   params="r2:switchChatWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_chat_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=chat_window_key"/>
 	<action id="mail_box"			name="uiR2EDMailBox"		handler="lua"   params="r2:switchMailBoxWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_mail_box_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=mail_box_key"/>
 	<action id="guild_forum"		name="uiR2EDGuildForum"		cond="ne(@SERVER:GUILD:NAME,0)" handler="lua"   params="r2:switchGuildForumWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=TB_Forum_ring.tga" usergroup_r="r2_keyname" usergroup_params_r="id=guild_forum_key"/>
+	<action id="player_admin"		name="uiR2EDPlayerAdmin"	handler="lua"   params="r2:switchPlayerAdminWindow()" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_player_admin_small.tga" usergroup_r="r2_keyname" usergroup_params_r="id=r2_player_admin_key"/>
 	<separator/>
 	<action id="toggle_fixed_lighting" name="uiR2EDTurnLightOn" handler="lua" params="r2:setFixedLighting(not r2:getFixedLighting())" usergroup_l="r2_menu_button" usergroup_params_l="bitmap=r2_icon_light_off_small.tga|id=fixed_lighting_bm"/>
 	<separator/>

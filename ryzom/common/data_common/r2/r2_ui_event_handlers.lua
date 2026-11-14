@@ -740,8 +740,9 @@ function r2:popMainMenu()
 	if r2.Mode ~= "Edit" then
 		menu:find("live").active = not (r2.AccessMode == "Editor") 
 		menu:find("stop_live").active = not (r2.AccessMode == "Editor")
-		menu:find("player_admin").active = not (r2.AccessMode == "Editor")
 	end
+	-- player control, in both menus: in an edit session it is for the owner of the session
+	menu:find("player_admin").active = r2.isSessionOwner() or not (r2.AccessMode == "Editor")
 
 	menu:find("map_key").t.text = buildKeyName("show_hide", "map")
 	menu:find("debug_console").active = (config.R2EDExtendedDebug == 1)
