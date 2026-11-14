@@ -26,6 +26,13 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/misc/algo.h"
 
+#ifdef NL_OS_WINDOWS
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
+#endif // NL_OS_WINDOWS
+
 //#include <cstdio>
 
 using namespace NLMISC;
@@ -468,6 +475,71 @@ void IDriver::profileTextureUsage(std::vector<std::string> &result)
 	result.push_back(toString("**** Total ****"));
 	result.push_back(toString("Total: %d Ko", totalSize/1024));
 }
+
+// ***************************************************************************
+bool IDriver::keepWindowOnMonitors(const std::vector<NLMISC::CRect> &monitors, sint32 &x, sint32 &y, uint32 width, uint32 height)
+{
+	if (monitors.empty() || width == 0 || height == 0)
+		return false;
+
+	// the strip along the top edge of the window, where its title bar is, and the grip: how much of that strip
+	// has to be on a monitor for the mouse to move the window
+	const sint64 stripHeight = std::min((sint64)height, (sint64)32);
+	const sint64 gripWidth = std::min((sint64)width, (sint64)48);
+	const sint64 gripHeight = std::min(stripHeight, (sint64)8);
+
+	for (size_t i = 0; i < monitors.size(); ++i)
+	{
+		const CRect &monitor = monitors[i];
+
+		// a window that covers the whole monitor is where it is wanted, with its title bar above the monitor
+		// (a client area as large as the screen)
+		if ((sint64)x <= (sint64)monitor.X && (sint64)x + (sint64)width >= (sint64)monitor.X + (sint64)monitor.Width
+		    && (sint64)y <= (sint64)monitor.Y && (sint64)y + (sint64)height >= (sint64)monitor.Y + (sint64)monitor.Height)
+			return false;
+
+		sint64 left = std::max((sint64)x, (sint64)monitor.X);
+		sint64 right = std::min((sint64)x + (sint64)width, (sint64)monitor.X + (sint64)monitor.Width);
+		sint64 top = std::max((sint64)y, (sint64)monitor.Y);
+		sint64 bottom = std::min((sint64)y + stripHeight, (sint64)monitor.Y + (sint64)monitor.Height);
+		if (right - left >= gripWidth && bottom - top >= gripHeight)
+			return false;
+	}
+
+	// centered on the first monitor; a window larger than the monitor starts at the corner of the monitor
+	const CRect &first = monitors[0];
+	x = first.X + std::max((sint32)0, ((sint32)first.Width - (sint32)width) / 2);
+	y = first.Y + std::max((sint32)0, ((sint32)first.Height - (sint32)height) / 2);
+	return true;
+}
+
+#ifdef NL_OS_WINDOWS
+
+// ***************************************************************************
+static BOOL CALLBACK addMonitorWorkArea(HMONITOR monitor, HDC /* dc */, LPRECT /* rect */, LPARAM param)
+{
+	std::vector<NLMISC::CRect> *monitors = (std::vector<NLMISC::CRect> *)param;
+	MONITORINFO info;
+	info.cbSize = sizeof(info);
+	if (GetMonitorInfoW(monitor, &info))
+	{
+		NLMISC::CRect area(info.rcWork.left, info.rcWork.top, info.rcWork.right - info.rcWork.left, info.rcWork.bottom - info.rcWork.top);
+		if (info.dwFlags & MONITORINFOF_PRIMARY)
+			monitors->insert(monitors->begin(), area);
+		else
+			monitors->push_back(area);
+	}
+	return TRUE;
+}
+
+// ***************************************************************************
+void IDriver::getMonitorWorkAreas(std::vector<NLMISC::CRect> &monitors)
+{
+	monitors.clear();
+	EnumDisplayMonitors(NULL, NULL, addMonitorWorkArea, (LPARAM)&monitors);
+}
+
+#endif // NL_OS_WINDOWS
 
 // ***************************************************************************
 

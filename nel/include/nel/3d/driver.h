@@ -1588,6 +1588,26 @@ protected:
 	void					removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt);
 	void					removeUBDrvInfoPtr(ItUBDrvInfoPtrList ubDrvInfoIt);
 
+	/** For the drivers: keeps a window of the application within reach of the mouse.
+	  * A position saved under another monitor layout can be on no monitor at all. When less than a grip of the
+	  * strip along the top edge of the window (where its title bar is) lies on one of the monitors, the position
+	  * becomes the one that centers the window on the first monitor. A window that covers a whole monitor is
+	  * kept where it is, also with its top edge above that monitor.
+	  *
+	  * \param monitors the usable rectangles of the monitors in desktop coordinates, the primary monitor first
+	  * \param x the in/out left of the window with its frame, in desktop coordinates
+	  * \param y the in/out top of the window with its frame, in desktop coordinates
+	  * \param width the width of the window with its frame
+	  * \param height the height of the window with its frame
+	  * \return true if the position was changed
+	  */
+	static bool				keepWindowOnMonitors(const std::vector<NLMISC::CRect> &monitors, sint32 &x, sint32 &y, uint32 width, uint32 height);
+
+#ifdef NL_OS_WINDOWS
+	/// For the drivers: the work areas of the monitors of the desktop, the primary monitor first.
+	static void				getMonitorWorkAreas(std::vector<NLMISC::CRect> &monitors);
+#endif
+
 private:
 	bool					_StaticMemoryToVRAM;
 };

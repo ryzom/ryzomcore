@@ -2483,6 +2483,20 @@ void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 // ***************************************************************************
 void CDriverD3D::setWindowPos(sint32 x, sint32 y)
 {
+	// a position on no monitor (saved under another monitor layout) leaves the window out of reach. Only a top
+	// level window of the driver has a place of its own on the desktop, and a minimized one is nowhere (Windows
+	// reports it at -32000,-32000)
+	RECT frame;
+	if (_HWnd && _DestroyWindow && !_FullScreen && !IsIconic(_HWnd) && GetWindowRect(_HWnd, &frame))
+	{
+		std::vector<NLMISC::CRect> monitors;
+		getMonitorWorkAreas(monitors);
+		sint32 wantedX = x;
+		sint32 wantedY = y;
+		if (keepWindowOnMonitors(monitors, x, y, (uint32)(frame.right - frame.left), (uint32)(frame.bottom - frame.top)))
+			nlinfo("3D: The window position %d,%d is on no monitor: the window is centered on the primary monitor, at %d,%d", wantedX, wantedY, x, y);
+	}
+
 	_WindowX = x;
 	_WindowY = y;
 	SetWindowPos(_HWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);

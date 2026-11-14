@@ -3008,6 +3008,97 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 #endif // NL_OS_WINDOWS
 }
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+
+// ***************************************************************************
+void CDriverGL::getMonitorRects(std::vector<NLMISC::CRect> &monitors) const
+{
+	monitors.clear();
+
+	// init() got no connection to an X server
+	if (_dpy == nullptr)
+		return;
+
+	int screen = DefaultScreen(_dpy);
+
+#ifdef HAVE_XRANDR
+	if (_xrandr_version >= 105)
+	{
+		int nmonitors = 0;
+		XRRMonitorInfo *monitor = XRRGetMonitors(_dpy, RootWindow(_dpy, screen), 1, &nmonitors);
+		if (monitor)
+		{
+			for (sint i = 0; i < nmonitors; ++i)
+			{
+				if (monitor[i].width <= 0 || monitor[i].height <= 0)
+					continue;
+
+				NLMISC::CRect rect(monitor[i].x, monitor[i].y, monitor[i].width, monitor[i].height);
+				if (monitor[i].primary)
+					monitors.insert(monitors.begin(), rect);
+				else
+					monitors.push_back(rect);
+			}
+
+			XRRFreeMonitors(monitor);
+		}
+	}
+#endif // HAVE_XRANDR
+
+	// without the monitors of XRandR 1.5, the X screen is the one rectangle there is
+	if (monitors.empty())
+		monitors.push_back(NLMISC::CRect(0, 0, DisplayWidth(_dpy, screen), DisplayHeight(_dpy, screen)));
+}
+
+#endif // NL_OS_UNIX && !NL_OS_MAC
+
+// ***************************************************************************
+bool CDriverGL::keepWindowPosOnMonitors(sint32 &x, sint32 &y)
+{
+	// only a top level window of the driver has a place of its own on the desktop
+	if (_win == EmptyWindow || !_DestroyWindow)
+		return false;
+
+	// the monitors, and the size of the window with its frame
+	std::vector<NLMISC::CRect> monitors;
+	uint32 width = 0;
+	uint32 height = 0;
+
+#ifdef NL_OS_WINDOWS
+
+	// a minimized window is nowhere (Windows reports it at -32000,-32000): its position is left alone
+	RECT frame;
+	if (IsIconic(_win) || !GetWindowRect(_win, &frame))
+		return false;
+
+	width = (uint32)(frame.right - frame.left);
+	height = (uint32)(frame.bottom - frame.top);
+	getMonitorWorkAreas(monitors);
+
+#elif defined(NL_OS_MAC)
+
+	// no monitors: the position is kept
+
+#elif defined (NL_OS_UNIX)
+
+	// the frame of the window manager as far as it is known: its left and top sizes
+	sint32 frameLeft = std::max(_DecorationWidth, (sint32)0);
+	sint32 frameTop = std::max(_DecorationHeight, (sint32)0);
+	width = (uint32)_CurrentMode.Width + 2 * frameLeft;
+	height = (uint32)_CurrentMode.Height + frameTop + frameLeft;
+	getMonitorRects(monitors);
+
+#endif // NL_OS_WINDOWS
+
+	sint32 wantedX = x;
+	sint32 wantedY = y;
+	if (!keepWindowOnMonitors(monitors, x, y, width, height))
+		return false;
+
+	nlinfo("3D: The window position %d,%d is on no monitor: the window is centered on the primary monitor, at %d,%d", wantedX, wantedY, x, y);
+	return true;
+}
+
 // ***************************************************************************
 void CDriverGL::setWindowPos(sint32 x, sint32 y)
 {
@@ -3018,6 +3109,13 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 	if (_win == EmptyWindow || !_CurrentMode.Windowed)
 		return;
+
+	// a position on no monitor (saved under another monitor layout) leaves the window out of reach
+	if (keepWindowPosOnMonitors(x, y))
+	{
+		_WindowX = x;
+		_WindowY = y;
+	}
 
 #ifdef NL_OS_WINDOWS
 

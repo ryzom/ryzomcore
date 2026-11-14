@@ -1268,6 +1268,15 @@ private:
 	bool					createWindow(const GfxMode& mode);
 	bool					destroyWindow();
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+	// The rectangles of the monitors of the X screen, the primary monitor first.
+	void					getMonitorRects(std::vector<NLMISC::CRect> &monitors) const;
+#endif
+
+	// Brings a position of the window of the driver that is on no monitor back onto the primary monitor
+	// (IDriver::keepWindowOnMonitors). Returns true if the position was changed.
+	bool					keepWindowPosOnMonitors(sint32 &x, sint32 &y);
+
 	enum EWindowStyle { EWSWindowed, EWSFullscreen };
 
 	void					setWindowSize(uint32 width, uint32 height);
