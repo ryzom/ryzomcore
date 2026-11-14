@@ -662,6 +662,11 @@ public:
 protected:
 #ifdef RYZOM_FORGE
 	inline bool useItemInfoForFamily(ITEMFAMILY::EItemFamily family) const;
+#else
+	/** True if this is a crystallized spell in a slot the server has an item info for:
+	 *	its tooltip lists the bricks of the spell. Gives the item slot id (CInventoryManager::getItemSlotId).
+	 */
+	bool getCrystallizedSpellInfoSlot(uint &itemSlotId) const;
 #endif
 
 	void setupItem();

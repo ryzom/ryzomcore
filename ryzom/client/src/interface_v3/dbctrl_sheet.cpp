@@ -142,6 +142,71 @@ string CControlSheetInfoWaiter::infoValidated() const
 	return help;
 }
 
+#else
+
+// ***************************************************************************
+// The tooltip of a crystallized spell lists the bricks of the spell. They come with the item info
+// of the slot, which is asked to the server when the tooltip opens. There is one tooltip at a time,
+// so one waiter. (With RYZOM_FORGE the waiter of the control does this, with the item info cache.)
+class CCrystallizedSpellTooltipWaiter : public IItemInfoWaiter
+{
+public:
+	// The control the tooltip was opened for (NULL once it is deleted)
+	NLMISC::CRefPtr<CDBCtrlSheet> CtrlSheet;
+
+public:
+	// Let game:updateCrystallizedSpellTooltip fill the tooltip window, return the text of the tooltip
+	static std::string fillTooltip(CDBCtrlSheet *ctrlSheet);
+	virtual void infoReceived() NL_OVERRIDE;
+};
+
+static CCrystallizedSpellTooltipWaiter s_CrystallizedSpellTooltipWaiter;
+
+void CCrystallizedSpellTooltipWaiter::infoReceived()
+{
+	getInventory().removeItemInfoWaiter(this);
+
+	// Fill the tooltip again with the info, if it is still the tooltip of this control
+	CDBCtrlSheet *ctrlSheet = CtrlSheet;
+	CtrlSheet = NULL;
+	if (ctrlSheet && CWidgetManager::getInstance()->getCurContextHelp() == ctrlSheet)
+		fillTooltip(ctrlSheet);
+}
+
+std::string CCrystallizedSpellTooltipWaiter::fillTooltip(CDBCtrlSheet *ctrlSheet)
+{
+	std::string help;
+
+	// delegate setup of context help ( & window ) to lua
+	CLuaState *ls = CLuaManager::getInstance().getLuaState();
+	{
+		CLuaStackRestorer lsr(ls, 0);
+
+		CLuaIHM::pushReflectableOnStack(*ls, (CReflectableRefPtrTarget *)ctrlSheet);
+		ls->pushGlobalTable();
+		CLuaObject game(*ls);
+		game = game["game"];
+		game.callMethodByNameNoThrow("updateCrystallizedSpellTooltip", 1, 1);
+
+		// retrieve result from stack
+		if (!ls->empty())
+		{
+#ifdef RYZOM_LUA_UCSTRING
+			CLuaIHM::getUCStringOnStack(*ls, -1, help); // Compatibility
+#else
+			ls->toString(-1, help);
+#endif
+			ls->pop();
+		}
+		else
+		{
+			nlwarning("String result expected when calling 'game:updateCrystallizedSpellTooltip', possible script error");
+		}
+	}
+
+	return help;
+}
+
 #endif
 
 // ***************************************************************************
@@ -268,7 +333,10 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 
 	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
-	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
+	// Until the info of the slot is up to date it may be the info of an item that was there before: no brick then
+	CClientItemInfo itemInfo;
+	if (getInventory().isItemInfoUpToDate(itemSlotId))
+		itemInfo = getInventory().getItemInfo(itemSlotId);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSBrickManager		*pBM= CSBrickManager::getInstance();
@@ -3762,15 +3830,64 @@ void	CDBCtrlSheet::getContextHelpToolTip(std::string &help) const
 			{
 				_ItemInfoWaiter.sendRequest();
 				help = _ItemInfoWaiter.infoValidated();
+				// its expected to get at least item name back: the waiter has no script to call
+				// for a control without serial, and the interface drops an empty tooltip
+				if (help.empty())
+					help = getItemActualName();
 				return;
 			}
 		}
+	}
+#else
+	// Special case for spell crystals, only for tooltips: the window lists the bricks of the spell
+	uint itemSlotId;
+	if (getCrystallizedSpellInfoSlot(itemSlotId))
+	{
+		CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet *>(this);
+		if (!getInventory().isItemInfoUpToDate(itemSlotId))
+		{
+			// Ask the server for the info: the tooltip is filled again when it arrives
+			s_CrystallizedSpellTooltipWaiter.ItemSheet = getSheetId();
+			s_CrystallizedSpellTooltipWaiter.ItemSlotId = itemSlotId;
+			s_CrystallizedSpellTooltipWaiter.CtrlSheet = ctrlSheet;
+			getInventory().addItemInfoWaiter(&s_CrystallizedSpellTooltipWaiter);
+		}
+
+		help = CCrystallizedSpellTooltipWaiter::fillTooltip(ctrlSheet);
+		// the script returns the name of the item: without it (script error, logged) the name is still shown
+		if (help.empty())
+			help = getItemActualName();
+		return;
 	}
 #endif
 
 	// Default
 	getContextHelp(help);
 }
+
+#ifndef RYZOM_FORGE
+// ***************************************************************************
+bool	CDBCtrlSheet::getCrystallizedSpellInfoSlot(uint &itemSlotId) const
+{
+	if (getType() != CCtrlSheetInfo::SheetType_Item)
+		return false;
+	const CItemSheet *item = asItemSheet();
+	if (!item || item->Family != ITEMFAMILY::CRYSTALLIZED_SPELL)
+		return false;
+
+	// The item info is the info of a slot of an inventory the server knows. A control on another branch
+	// of the database has none: it must be the slot that holds this item (the trade list is not checked,
+	// as for the item info waiters).
+	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet *>(this);
+	uint slotId = getInventory().getItemSlotId(ctrlSheet);
+	bool isItemFromTrading = (slotId >> CItemInfos::SlotIdIndexBitSize) == INVENTORIES::trading;
+	if (!isItemFromTrading && getInventory().getItemSheetForSlotId(slotId) != (uint)getSheetId())
+		return false;
+
+	itemSlotId = slotId;
+	return true;
+}
+#endif
 
 // ***************************************************************************
 bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
@@ -4976,6 +5093,10 @@ std::string CDBCtrlSheet::getContextHelpWindowName() const
 			}
 		}
 	}
+#else
+	uint itemSlotId;
+	if (getCrystallizedSpellInfoSlot(itemSlotId))
+		return "crystallized_spell_context_help";
 #endif
 	return CCtrlBase::getContextHelpWindowName();
 }

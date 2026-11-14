@@ -1801,9 +1801,8 @@ namespace NLGUI
 				// if present, get the ctx help text.
 				if(newCtrl)
 				{
-					// get the text
-					//newCtrl->getContextHelpToolTip(_ContextHelpText);
-					newCtrl->getContextHelp( getContextHelpText() );
+					// get the text, with what a control does only for its tooltip (as asking for the info of an item)
+					newCtrl->getContextHelpToolTip( getContextHelpText() );
 					// UserDefined context help
 					if( !newCtrl->getContextHelpActionHandler().empty() )
 					{
