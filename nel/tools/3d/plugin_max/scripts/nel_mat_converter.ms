@@ -26,8 +26,25 @@ Fn convertsinglemat thisoldmat =
 (
 	print "converting : "
 	tempmat = NelMaterial()
-	for i in getpropnames tempmat.standard do (setproperty tempmat.standard i  (getproperty thisoldmat i))
+	-- NelMaterial extends Standard, the Standard part is its delegate
+	for i in getpropnames tempmat.delegate do
+	(
+		try (setproperty tempmat.delegate i (getproperty thisoldmat i))
+		catch (format "nel mat converter: % of % not copied\n" i thisoldmat.name)
+	)
 	tempmat.name = thisoldmat.name
+
+	-- The NeL basic parameters are what the material shows and exports, they take the colors of the Standard part
+	tempmat.bTwoSided = tempmat.delegate.twoSided
+	tempmat.cAmbient = tempmat.delegate.ambient
+	tempmat.cDiffuse = tempmat.delegate.diffuse
+	tempmat.pOpacity = tempmat.delegate.opacity
+	tempmat.cSpecular = tempmat.delegate.specular
+	tempmat.pSpecularLevel = tempmat.delegate.specularLevel
+	tempmat.pGlossiness = tempmat.delegate.glossiness
+	tempmat.cSelfIllumColor = tempmat.delegate.selfIllumColor
+	tempmat.pSelfIllumAmount = tempmat.delegate.selfIllumAmount
+	tempmat.bUseSelfIllumColor = tempmat.delegate.useSelfIllumColor
 
 	-- Convert the material
 	if classof thisoldmat == Standard then
@@ -125,8 +142,25 @@ Fn unconvertsinglemat thisoldmat =
 	(
 	print "un converting : "
 	tempmat = Standard()
-	for i in getpropnames tempmat do (setproperty tempmat i  (getproperty thisoldmat.standard i))
+	-- NelMaterial extends Standard, the Standard part is its delegate
+	for i in getpropnames tempmat do
+	(
+		try (setproperty tempmat i (getproperty thisoldmat.delegate i))
+		catch (format "nel mat converter: % of % not copied\n" i thisoldmat.name)
+	)
 	tempmat.name = thisoldmat.name
+
+	-- The NeL basic parameters are the colors the material exports
+	tempmat.twoSided = thisoldmat.bTwoSided
+	tempmat.ambient = thisoldmat.cAmbient
+	tempmat.diffuse = thisoldmat.cDiffuse
+	tempmat.opacity = thisoldmat.pOpacity
+	tempmat.specular = thisoldmat.cSpecular
+	tempmat.specularLevel = thisoldmat.pSpecularLevel
+	tempmat.glossiness = thisoldmat.pGlossiness
+	tempmat.selfIllumColor = thisoldmat.cSelfIllumColor
+	tempmat.selfIllumAmount = thisoldmat.pSelfIllumAmount
+	tempmat.useSelfIllumColor = thisoldmat.bUseSelfIllumColor
 	return tempmat
 	)
 
@@ -191,7 +225,7 @@ Fn Showmapinviewport obj booltoset =
 		for u = 1 to obj.material.count do 
 			(
 			if classof obj.material[u] == NelMaterial
-			then try (showTextureMap obj.material[u] obj.material[u].standard.diffusemap booltoset) catch(print "no texture map")
+			then try (showTextureMap obj.material[u] obj.material[u].tTexture_1 booltoset) catch(print "no texture map")
 			else try (showTextureMap obj.material[u] obj.material[u].diffusemap booltoset) catch(print "no texture map")
 			)
 		)
@@ -199,7 +233,7 @@ Fn Showmapinviewport obj booltoset =
 		(
 		print "pas multimat"
 		if classof obj.material == NelMaterial
-		then try (showTextureMap obj.material obj.material.standard.diffusemap booltoset) catch(print "no texture map")
+		then try (showTextureMap obj.material obj.material.tTexture_1 booltoset) catch(print "no texture map")
 		else try (showTextureMap obj.material obj.material.diffusemap booltoset) catch(print "no texture map")
 		)
 	)
