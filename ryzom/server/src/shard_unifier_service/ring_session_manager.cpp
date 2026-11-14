@@ -3352,8 +3352,12 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// Make sure that we don't enter an edit sessino when we wanted to go to an anim / mainland and vice versa
-			if ( (session->getSessionType()==TSessionType::st_edit) != isEditSessionRequested )
+			// Make sure that a request for the edit session of a character does not end in an anim session or on a
+			// mainland. The other way round is allowed: an edit session is entered by its id too, which is how the
+			// editors its owner invited come in (and the owner, from the ring web pages). What lets a character into
+			// an edit session is checked below: the participation of its owner, or an editor's participation in
+			// it from which the character is not kicked, or the session access privilege of its account.
+			if (isEditSessionRequested && session->getSessionType() != TSessionType::st_edit)
 			{
 				STOP("We have a BUG - character trying to go to a session of the wrong type "<<charId);
 				joinSessionResult(from, charId>>4, sessionId, 2, "Session type error", TSessionPartStatus::invalid_val);
