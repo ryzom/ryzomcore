@@ -311,6 +311,11 @@ namespace NLQT
 		{
 			QModelIndex in2 = m->index(in.row(),in.column()-1,in.parent());
 			CFormItem *item = m->getItem(in2);
+
+			// the value column of a virtual struct holds the name of its DFN, not a file to open
+			if (item->getFormElm() && item->getFormElm()->isVirtualStruct())
+				return;
+
 			QString value = item->data(1).toString();
 
 			QString path = CPath::lookup(value.toUtf8().constData(),false).c_str();

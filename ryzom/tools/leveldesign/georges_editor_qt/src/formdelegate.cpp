@@ -65,6 +65,10 @@ namespace NLQT
 			// TODO: create new Element
 			return 0;
 		}
+
+		// only an atom has a value to edit, the value column of a virtual struct holds the name of its DFN
+		if (!curElm->isAtom())
+			return 0;
 		const NLGEORGES::UType *type = curElm->getType();
 		if(type) 
 		{
