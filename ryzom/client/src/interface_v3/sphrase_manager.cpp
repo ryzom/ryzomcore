@@ -1512,6 +1512,94 @@ void				CSPhraseManager::getPhraseHpCost(const CSPhraseCom &phrase, uint32 total
 }
 
 // ***************************************************************************
+// The cast time of a magic phrase depends on the item in the right hand, whose casting speed factors
+// come with its item info: this waiter asks the server for the info when it is not up to date.
+class CCastTimeItemInfoWaiter : public IItemInfoWaiter
+{
+public:
+	virtual void infoReceived() NL_OVERRIDE;
+};
+
+static CCastTimeItemInfoWaiter s_CastTimeItemInfoWaiter;
+
+void CCastTimeItemInfoWaiter::infoReceived()
+{
+	getInventory().removeItemInfoWaiter(this);
+
+	// The tooltip of an action shows the cast time: fill the one that is open again, with the info
+	CDBCtrlSheet *ctrl = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getCurContextHelp());
+	if (ctrl && ctrl->isSPhraseId())
+	{
+		std::string help;
+		ctrl->getContextHelpToolTip(help);
+	}
+}
+
+// ***************************************************************************
+// The casting speed factor the item in the right hand gives to a magic phrase, as the server computes it
+// (CMagicPhrase::computeCastingTime and CMagicFocusItemFactor::getCastingTimeFactor): the mean, over the
+// skills of the bricks, of the factor of the item for the family of the skill. The item gives nothing
+// to a phrase with a brick that costs more than its quality.
+static float getPhraseCastingSpeedFactor(const CSPhraseCom &phrase)
+{
+	CSBrickManager *pBM = CSBrickManager::getInstance();
+	CInventoryManager &inv = getInventory();
+
+	// The item in the right hand, and its slot in the bag
+	CItemImage *handItem = inv.getHandItem(0);
+	if (!handItem || handItem->getSheetID() == 0)
+		return 0.f;
+	uint bagIndex = (uint)(handItem - &inv.getBagItem(0));
+	uint itemSlotId = inv.getItemSlotId(LOCAL_INVENTORY ":BAG", bagIndex);
+	// the slot of the server must hold this item (not so while an item is moved), else its info is not the one of the item
+	if (inv.getItemSheetForSlotId(itemSlotId) != handItem->getSheetID())
+		return 0.f;
+
+	// The factors do not change during the life of an item: the info of the slot is used as it is,
+	// and asked again when the server has a newer one (the open tooltip is filled again when it arrives).
+	if (!inv.isItemInfoUpToDate(itemSlotId))
+	{
+		s_CastTimeItemInfoWaiter.ItemSheet = handItem->getSheetID();
+		s_CastTimeItemInfoWaiter.ItemSlotId = itemSlotId;
+		inv.addItemInfoWaiter(&s_CastTimeItemInfoWaiter);
+	}
+	const CClientItemInfo &itemInfo = inv.getItemInfo(itemSlotId);
+
+	// The server compares the largest cost of a brick with the recommended level of the item, its quality
+	sint brickMaxSabrinaCost = 0;
+	float sumFactor = 0.f;
+	uint numSkill = 0;
+	for (uint i = 0; i < phrase.Bricks.size(); i++)
+	{
+		const CSBrickSheet *brick = pBM->getBrick(phrase.Bricks[i]);
+		if (!brick)
+			continue;
+		brickMaxSabrinaCost = std::max(brickMaxSabrinaCost, (sint)brick->SabrinaCost);
+		for (uint j = 0; j < brick->UsedSkills.size(); j++)
+		{
+			SKILLS::ESkills skill = brick->UsedSkills[j].Skill;
+			if (skill == SKILLS::unknown)
+				continue;
+			numSkill++;
+			// the family of the skill is the start of its name
+			const std::string &skillName = SKILLS::toString(skill);
+			if (skillName.compare(0, 4, "SMOE") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::OffensiveElemental];
+			else if (skillName.compare(0, 4, "SMOA") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::OffensiveAffliction];
+			else if (skillName.compare(0, 4, "SMDH") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::DefensiveHeal];
+			else if (skillName.compare(0, 4, "SMDA") == 0)
+				sumFactor += itemInfo.CastingSpeedFactor[CItemInfos::DefensiveAffliction];
+		}
+	}
+	if (numSkill == 0 || brickMaxSabrinaCost > (sint)handItem->getQuality())
+		return 0.f;
+
+	return std::max(sumFactor / (float)numSkill, 0.f);
+}
+
+// ***************************************************************************
 void				CSPhraseManager::getPhraseCastTime(const CSPhraseCom &phrase, uint32 totalActionMalus, float &castTime, float &castTimeMalus)
 {
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
@@ -1571,8 +1659,14 @@ void				CSPhraseManager::getPhraseCastTime(const CSPhraseCom &phrase, uint32 tot
 	if(maxCastTime < minCastTime)
 		maxCastTime = minCastTime;
 
+	// The item in the right hand shortens the cast time of a magic phrase. As on the server, its casting
+	// speed factor divides the minimum time only, not the time the cast time credit adds.
+	float	itemSpeedFactor= 0.f;
+	if(rootBrick->isMagic())
+		itemSpeedFactor= getPhraseCastingSpeedFactor(phrase);
+
 	// Compute the casting time.
-	castTime= (float)(maxCastTime-minCastTime)*castingTimeFactor+(float)minCastTime;
+	castTime= (float)(maxCastTime-minCastTime)*castingTimeFactor+(float)minCastTime/(1.f+itemSpeedFactor);
 
 	// Compute the malus (positive value)
 	castTimeMalus= (float)(maxCastTime-minCastTime)*castingTimeFactor*totalActionMalus/100;
