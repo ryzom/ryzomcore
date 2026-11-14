@@ -466,10 +466,18 @@ end
 -- until the editor comes back from it: they are free again, and the author is told ('msg' is the id of
 -- a translated text).
 function r2.onTestStartFailed(msg)
-	local goTestButton = getUI("ui:interface:r2ed_toolbar"):find("r2ed_tool_start").unselected.button
-	local goTestMenu = getUI("ui:interface:r2ed_main_menu"):find("go_test")
-	goTestButton.frozen = false
-	goTestMenu.grayed = false
+	-- (an animation that is loaded starts the same way, without these controls in use: the message is
+	-- shown whether they are found or not)
+	local toolbar = getUI("ui:interface:r2ed_toolbar")
+	local goTestTool = toolbar and toolbar:find("r2ed_tool_start")
+	if goTestTool then
+		goTestTool.unselected.button.frozen = false
+	end
+	local mainMenu = getUI("ui:interface:r2ed_main_menu")
+	local goTestMenu = mainMenu and mainMenu:find("go_test")
+	if goTestMenu then
+		goTestMenu.grayed = false
+	end
 	r2.onSystemMessageReceived("ERR", "", msg)
 end
 
