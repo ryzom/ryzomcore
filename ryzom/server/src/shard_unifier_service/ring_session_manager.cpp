@@ -3248,7 +3248,7 @@ endOfWelcomeUserResult:
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
-		//                4 : session not public
+		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
 		//                5 : character banned
 		//				  6 : no place left, session is full
 		//				  7 : session owner not found
@@ -3264,6 +3264,34 @@ endOfWelcomeUserResult:
 			// load the session
 			CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
 			BOMB_IF(session == NULL, "RSM:on_subscribeSession : failed to load session "<<sessionId<<" from database", invokeResult(from, charId>>4, 2, "session not found"); return);
+
+			// a subscription is for an animation session of public access that takes subscriptions
+			if (session->getSessionType() != TSessionType::st_anim)
+			{
+				invokeResult(from, charId >> 4, 4, "not an animation session");
+				return;
+			}
+			if (session->getAccessType() != TAccessType::at_public)
+			{
+				invokeResult(from, charId >> 4, 4, "session not public");
+				return;
+			}
+			if (session->getSubscriptionClosed())
+			{
+				invokeResult(from, charId >> 4, 4, "the subscription of the session is closed");
+				return;
+			}
+
+			// a character that has an entry in the session, subscribed or invited, gets no second one
+			BOMB_IF(!character->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "RSM:on_subscribeSession : failed to load the participations of character " << charId, invokeResult(from, charId >> 4, 8, "failed to load the participations of the character"); return);
+			for (uint i = 0; i < character->getSessionParticipants().size(); ++i)
+			{
+				if (character->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())
+				{
+					invokeResult(from, charId >> 4, 3, "character already subscribed to or invited in the session");
+					return;
+				}
+			}
 
 			// check for free slot before more time consuming processing
 			if (session->getReservedSlots() >= session->getSubscriptionSlots() )
@@ -3490,7 +3518,8 @@ endOfWelcomeUserResult:
 				CSessionParticipantPtr sessionPart;
 				bool kicked = false;
 				// look for the entry pertaining to the session (the first one that counts is the participation, and
-				// a kick counts on any of them: subscribing never looked for an entry that is already there)
+				// a kick counts on any of them: a character can have more than one from the time when subscribing
+				// did not look for an entry that is already there)
 				for (uint i=0; i<charac->getSessionParticipants().size(); ++i)
 				{
 					if (charac->getSessionParticipants()[i]->getSessionId() == sessionId.asInt())

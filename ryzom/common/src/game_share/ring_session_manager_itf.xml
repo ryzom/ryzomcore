@@ -647,7 +647,7 @@
 				<doc line="               1 : char not found"/>
 				<doc line="               2 : session not found"/>
 				<doc line="               3 : character already subscribed to or invited in the session"/>
-				<doc line="               4 : session not public"/>
+				<doc line="               4 : session not public (not an animation session, not of public access, or its subscription is closed)"/>
 				<doc line="               5 : character banned"/>
 				<doc line="               6 : no place left, session is full"/>
 				<doc line="               7 : session owner not found"/>
