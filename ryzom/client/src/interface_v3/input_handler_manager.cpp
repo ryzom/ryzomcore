@@ -455,11 +455,40 @@ bool		CInputHandlerManager::CComboKey::operator<(const CComboKey &c) const
 
 
 // ***************************************************************************
+// Tell if this very combo is the shortcut of an action that can run now
+static bool isComboOfUsableAction(const CActionsManager &actionsManager, const CCombo &combo)
+{
+	const CActionsManager::TComboActionMap &comboActions = actionsManager.getComboActionMap();
+	CActionsManager::TComboActionMap::const_iterator it = comboActions.find(combo);
+	return it != comboActions.end() && actionsManager.isActionPresentInContext(it->second);
+}
+
+// ***************************************************************************
 bool CInputHandlerManager::isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const
 {
 	CComboKey	ckey;
 	ckey.init(edk);
-	return _ComboKeyChat.find(ckey)!=_ComboKeyChat.end();
+	if (_ComboKeyChat.find(ckey) != _ComboKeyChat.end())
+		return true;
+
+	// AltGr types the third character of a key, and Windows reports AltGr as Ctrl+Alt. So with both pressed, a key
+	// that types without them still types. Left to the actions, the key would make valid the actions bound to it
+	// with fewer modifiers (CActionsManager::updateKeyButton): typing AltGr+S would walk the character backward.
+	// A Ctrl+Alt combo that is itself the shortcut of a usable action stays a shortcut.
+	const uint32 altGrFlags = CComboKey::CtrlKey | CComboKey::AltKey;
+	if ((ckey.CtrlFlags & altGrFlags) == altGrFlags)
+	{
+		CComboKey typedKey = ckey;
+		typedKey.CtrlFlags &= ~altGrFlags;
+		if (_ComboKeyChat.find(typedKey) != _ComboKeyChat.end())
+		{
+			CCombo combo;
+			combo.init(ckey.Key, (TKeyButton)(ctrlKeyButton | altKeyButton | ((ckey.CtrlFlags & CComboKey::ShiftKey) ? shiftKeyButton : noKeyButton)));
+			return !isComboOfUsableAction(EditActions, combo) && !isComboOfUsableAction(Actions, combo);
+		}
+	}
+
+	return false;
 }
 
 
