@@ -374,7 +374,7 @@ protected:
 						}
 						else
 						{
-							actor->addLink( effect );
+							phrase->addLink( actor, effect );
 							target->addSabrinaEffect( effect );
 
 							// if partial resist, break link

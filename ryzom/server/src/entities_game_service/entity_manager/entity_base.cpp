@@ -2030,7 +2030,7 @@ bool CEntityBase::removeSabrinaEffect( CSEffect *effect, bool activateSleepingEf
 //-----------------------------------------------
 // CEntityBase::addLink
 //-----------------------------------------------
-void CEntityBase::addLink( CSLinkEffect *effect )
+void CEntityBase::addLink( CSLinkEffect *effect, bool /* newStaticAction */ )
 {
 	if (!effect || !TheDataset.isAccessible(effect->getCreatorRowId()) )
 		return;

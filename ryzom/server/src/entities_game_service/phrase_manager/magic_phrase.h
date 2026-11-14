@@ -29,6 +29,8 @@
 #include "phrase_manager/area_effect.h"
 #include "magic_focus_item.h"
 
+class CEntityBase;
+class CSLinkEffect;
 
 /**
  * This class represents a magic phrase in the Sabrina system. See CSPhrase for methods definitions.
@@ -90,6 +92,8 @@ public:
 	, _MaxTargets(1)
 	, _MultiTargetFactor(1.f)
 	, _BreakNewLink(false)
+	, _AddingLink(false)
+	, _LinkAdded(false)
 	, _IsProc(false)
 	, _DivineInterventionOccured(false)
 	, _ShootAgainOccured(false)
@@ -196,6 +200,16 @@ public:
 
 	/// if true, new link created by this phrase will be broken
 	inline void breakNewLink(bool b) { _BreakNewLink = b; }
+
+	/// true while addLink() gives the actor a link of this phrase
+	inline bool addingLink() const { return _AddingLink; }
+
+	/**
+	 * give the actor a link created by an action of this phrase, called by the actions from apply().
+	 * The links of one phrase are one static action: the first link starts it, the later ones join it,
+	 * up to the number of links that the database of a character shows (NB_LINK_SLOT).
+	 */
+	void addLink( CEntityBase * actor, CSLinkEffect * effect );
 
 private:
 	struct CActionApplyParams
@@ -312,6 +326,10 @@ private:
 
 	/// if the phrase creates a new link, it will be broken
 	bool						_BreakNewLink;
+	/// true while addLink() gives the actor a link of this phrase
+	bool						_AddingLink;
+	/// true once an action gave the actor a link in the apply() in progress
+	bool						_LinkAdded;
 
 	bool						_DivineInterventionOccured;
 	bool						_ShootAgainOccured;

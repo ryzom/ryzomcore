@@ -106,6 +106,9 @@ typedef EGSPD::CMissionPD CMission;
 // Max number of pact character can be have
 #define NB_MAX_PACT				5
 
+// number of links that the database of a character shows (EXECUTE_PHRASE:LINK in database.xml)
+#define NB_LINK_SLOT			10
+
 static const uint8 MaxSoloMissionCount = 15;
 static const uint8 MaxGroupMissionCount = 4;
 static const uint8 MaxGuildMissionCount = 4;
@@ -1847,8 +1850,8 @@ public:
 	/// update brick flags DB value
 	void updateBrickFlagsDBEntry();
 
-	// add a link cast by this player
-	virtual void addLink( CSLinkEffect * effect) NL_OVERRIDE;
+	// add a link cast by this player. A new static action cancels the one in progress, with the links it holds.
+	virtual void addLink( CSLinkEffect * effect, bool newStaticAction = true) NL_OVERRIDE;
 
 	// remove a link cast by this player
 	virtual void removeLink( CSLinkEffect * effect, float factorOnSurvivalTime) NL_OVERRIDE;

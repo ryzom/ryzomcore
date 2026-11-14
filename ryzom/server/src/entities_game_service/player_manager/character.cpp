@@ -14161,13 +14161,15 @@ void CCharacter::memorize(uint8 memorizationSet, uint8 index, uint16 phraseId, c
 //-----------------------------------------------
 // addLink
 //-----------------------------------------------
-void CCharacter::addLink( CSLinkEffect * effect)
+void CCharacter::addLink( CSLinkEffect * effect, bool newStaticAction)
 {
 	if (!effect)
 		return;
 
-	// set the static action flag
-	staticActionInProgress(true,STATIC_ACT_TYPES::Casting);
+	// set the static action flag. The later links of a phrase join the static action of its first link:
+	// starting another one would cancel it and stop the links it holds.
+	if (newStaticAction)
+		staticActionInProgress(true,STATIC_ACT_TYPES::Casting);
 
 	const uint8 size = (uint8)_SEffectLinks.size();
 
@@ -14220,7 +14222,7 @@ void CCharacter::stopAllLinks(float factorOnSurvivalTime)
 {
 	CEntityBase::stopAllLinks(factorOnSurvivalTime);
 
-	for (uint i = 0; i < 10 ; ++i)
+	for (uint i = 0; i < NB_LINK_SLOT ; ++i)
 	{
 //		ICDBStructNode *node = _PropertyDatabase.getICDBStructNodeFromName( NLMISC::toString( "EXECUTE_PHRASE:LINK:%u", i ) );
 //		if ( node )

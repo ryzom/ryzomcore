@@ -1986,6 +1986,11 @@ void CPhraseManager::breakLaunchingLinks(CEntityBase * entity)
 			continue
 			);
 		
+		// a phrase that applies from this list is still in it: the static action that one of its own links starts
+		// must not break the links it gives after that one
+		if (magicPhrase->addingLink())
+			continue;
+
 		magicPhrase->breakNewLink(true);
 	}
 	
