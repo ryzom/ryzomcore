@@ -805,27 +805,28 @@ void CExportNel::outputUnexportedAnimations()
 	if (_UnexportedAnimations.empty())
 		return;
 
-	// The dialog lists the first ones, the listener and the log get them all
+	// The dialog lists the first ones, the listener and the log get them all, one line each: a log line is cut at 1024 characters
 	const size_t maxListed = 30;
 	const std::string header = "These controllers are animated, but the exporter does not read them, their animation is not exported:";
-	std::string all = header;
 	std::string listed = header;
-	for (size_t i = 0; i < _UnexportedAnimations.size(); ++i)
-	{
-		all += "\n" + _UnexportedAnimations[i];
-		if (i < maxListed)
-			listed += "\n" + _UnexportedAnimations[i];
-	}
+	for (size_t i = 0; i < _UnexportedAnimations.size() && i < maxListed; ++i)
+		listed += "\n" + _UnexportedAnimations[i];
 	if (_UnexportedAnimations.size() > maxListed)
 		listed += NLMISC::toString("\n... and %u more in the log", (uint)(_UnexportedAnimations.size() - maxListed));
-	_UnexportedAnimations.clear();
 
 	if (_ErrorInDialog)
 	{
 		MessageBoxW(_Ip->GetMAXHWnd(), nlUtf8ToWide(listed), nlUtf8ToWide(_ErrorTitle), MB_OK | MB_ICONEXCLAMATION);
 	}
-	mprintf(_M("%s\n"), MaxTStrFromUtf8(all).data());
-	nlwarning("%s: %s", MaxTStrToUtf8(_Ip->GetCurFilePath()).c_str(), all.c_str());
+
+	const std::string filePath = MaxTStrToUtf8(_Ip->GetCurFilePath());
+	mprintf(_M("%s\n"), MaxTStrFromUtf8(header).data());
+	for (size_t i = 0; i < _UnexportedAnimations.size(); ++i)
+	{
+		mprintf(_M("%s\n"), MaxTStrFromUtf8(_UnexportedAnimations[i]).data());
+		nlwarning("%s: animated controller the exporter does not read, its animation is not exported: %s", filePath.c_str(), _UnexportedAnimations[i].c_str());
+	}
+	_UnexportedAnimations.clear();
 }
 
 // --------------------------------------------------
