@@ -2441,7 +2441,7 @@ bool CClientEditionModule::addToUserComponentLoadList( const std::string& filena
 	if (_ServerEditionProxy == NULL)
 	{
 		nlwarning("The user component file '%s' is not loaded: the scenario service is not connected", filename.c_str());
-		systemMsg(nullptr, "ERR", "", "uiR2EDServerNotConnected");
+		systemMsg(NULL, "ERR", "", "uiR2EDServerNotConnected");
 		delete ucv;
 		return false;
 	}
@@ -2543,7 +2543,7 @@ bool CClientEditionModule::addToLoadList( const std::string& filename, CScenario
 	if (_ServerEditionProxy == NULL)
 	{
 		nlwarning("The scenario file '%s' is not loaded: the scenario service is not connected", filename.c_str());
-		systemMsg(nullptr, "ERR", "", "uiR2EDServerNotConnected");
+		systemMsg(NULL, "ERR", "", "uiR2EDServerNotConnected");
 		delete sv;
 		return false;
 	}
