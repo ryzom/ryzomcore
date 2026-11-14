@@ -99,10 +99,11 @@ function r2.Version.save(filename)
 		end
 
 		if r2.Scenario and r2.Scenario.Description then
-			-- A scenario of an older editor, or one made outside the editor, can lack a title, a level or
-			-- its access rules: the save goes on, with the header entry of a scenario that has none.
+			-- A scenario of an older editor, or one made outside the editor, can lack a title, a short
+			-- description (its notes), a level or its access rules. A text that is not there is an empty
+			-- text, and the save goes on.
 			--shortDescription =string.gsub(r2.Scenario.Description.ShortDescription, "\n", "\\n")
-			shortDescription = r2.Scenario.Description.ShortDescription
+			shortDescription = defaulting(r2.Scenario.Description.ShortDescription, "")
 			level = string.gsub(tostring(defaulting(r2.Scenario.Description.LevelId, "")), "\n", "\\n")
 			level = levelToString[tonumber(level)]
 			rules = string.gsub(tostring(defaulting(r2.Scenario.AccessRules, "")), "\n", "\\n")

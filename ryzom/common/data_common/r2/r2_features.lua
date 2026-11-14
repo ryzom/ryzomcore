@@ -447,6 +447,19 @@ function r2.showPendingErrorMessage()
 	messageBox(pending)
 end
 
+-- The client calls this when a test cannot start and nothing has been sent to the server: the save of
+-- the scenario for the test failed (CClientEditionModule::requestStartScenario). The editor stays in
+-- edition with its scenario. r2:tryGoTest has frozen the button and the menu entry that start a test
+-- until the editor comes back from it: they are free again, and the author is told ('msg' is the id of
+-- a translated text).
+function r2.onTestStartFailed(msg)
+	local goTestButton = getUI("ui:interface:r2ed_toolbar"):find("r2ed_tool_start").unselected.button
+	local goTestMenu = getUI("ui:interface:r2ed_main_menu"):find("go_test")
+	goTestButton.frozen = false
+	goTestMenu.grayed = false
+	r2.onSystemMessageReceived("ERR", "", msg)
+end
+
 function r2.onSystemMessageReceived(msgType, msgWho, msg)
 	if string.len(msg) > 2 and string.sub(msg, 1, 2) == "ui" then
 		msg = i18n.get(msg)

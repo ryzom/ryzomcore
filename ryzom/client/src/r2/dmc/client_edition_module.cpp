@@ -1267,9 +1267,22 @@ bool CClientEditionModule::requestStartScenario()
 
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
+	// The test runs the scenario that r2.Version.save writes to save/r2_buffer.dat: startingScenario reads
+	// that file back, makes it the scenario of the editor and translates it. When the save raises, the file
+	// is what it was before, the scenario as it was loaded or tested last: the test would run without the
+	// changes made since, and the editor would take that scenario for its own. The test does not start, the
+	// author is told, and the scenario of the editor stays. (A save that the scripts refuse without an
+	// error, as for a scenario that must not be changed, goes on to the test as before.)
+	if (!R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")"))
+	{
+		nlwarning("R2: the scenario could not be saved for the test, the test does not start");
+		R2::getEditor().getLua().push(std::string("uiR2EDTestSaveFailed"));
+		R2::getEditor().callEnvFunc("onTestStartFailed", 1, 0);
+		return false;
+	}
+
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.startingScenario(this);
 	return true;
