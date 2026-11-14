@@ -1244,7 +1244,7 @@ void CGrpProfileTribu::updateProfile(uint ticksSinceLastUpdate)
 			{
 			case BOT_STAND_AT_POS:
 				{
-					CMoveProfile	*moveProf=NLMISC::safe_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile());
+					CMoveProfile	*moveProf=NLMISC::type_cast<CMoveProfile*>(_Grp->movingProfile().getAIProfile());
 					if (moveProf)
 						moveProf->resumeBot(bot);
 				}							
