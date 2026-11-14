@@ -1293,9 +1293,15 @@ bool CDriverGL3::restoreScreenMode()
 // ***************************************************************************
 
 #ifdef XF86VIDMODE
+// the refresh rate of a mode line, 0 for one without totals
+static sint modeLineToFrequency(uint dotClock, uint hTotal, uint vTotal)
+{
+	return (hTotal && vTotal) ? (sint)(1000 * dotClock / (hTotal * vTotal)) : 0;
+}
+
 static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 {
-	return (info->htotal && info->vtotal) ? (1000 * info->dotclock / (info->htotal * info->vtotal)) : 0;
+	return modeLineToFrequency(info->dotclock, info->htotal, info->vtotal);
 }
 #endif // XF86VIDMODE
 
@@ -2255,9 +2261,14 @@ bool CDriverGL3::getCurrentScreenMode(GfxMode &mode)
 			mode.Windowed = _CurrentMode.Windowed;
 			mode.OffScreen = false;
 			mode.Depth = (uint) DefaultDepth(_dpy, screen);
-			mode.Frequency = 1000 * pixelClock / (xmode.htotal * xmode.vtotal) ;
+			mode.Frequency = modeLineToFrequency(pixelClock > 0 ? (uint)pixelClock : 0, xmode.htotal, xmode.vtotal);
 			mode.Width = xmode.hdisplay;
 			mode.Height = xmode.vdisplay;
+
+			// the mode line comes with private data of the driver, which is the caller's to free
+			if (xmode.privsize > 0)
+				XFree(xmode.c_private);
+
 			nlinfo("3D: Current XF86VidMode mode: %dx%d, %d Hz, %dbit", mode.Width, mode.Height, mode.Frequency, mode.Depth);
 
 			found = true;
