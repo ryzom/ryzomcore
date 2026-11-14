@@ -3208,12 +3208,19 @@ class CAHLoadScenario : public IActionHandler
 		R2::TSessionLevel sessionLevel = R2::TSessionLevel::TValues(nLevel/50 + 1);
 
 		// ---- fix for old scenarii
+		// They name the language (the former ScenarioLanguages were French, Deutsch, English and Other). A scenario
+		// of today has one of the codes of ScenarioLanguages (fr, de, en, other_lang), which is sent as it is, and
+		// a header without a language has the default of the Scenario class, en.
 		if (lang == "French")
 			lang = "fr";
 		else if (lang == "German" || lang == "Deutsch")
 			lang = "de";
-		else //if (lang == "English")
+		else if (lang == "English" || lang.empty())
 			lang = "en";
+		else if (lang == "Other")
+			lang = "other_lang";
+		else if (std::find(ClientCfg.ScenarioLanguages.begin(), ClientCfg.ScenarioLanguages.end(), lang) == ClientCfg.ScenarioLanguages.end())
+			nlwarning("The language '%s' of the scenario is not one of ScenarioLanguages, the session is listed with it", lang.c_str());
 
 		if (nlstricmp(scenarioType, "Roleplay") == 0 || nlstricmp(scenarioType, "Role play") == 0)
 			scenarioType = "so_story_telling";
