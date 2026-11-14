@@ -556,7 +556,6 @@ end
 ------------------------------------------------------------------------------------
 -- called by C++ when copy has been pressed (key or ui button)
 function r2:paste()	
-	r2.requestNewAction(concatString(i18n.get("uiR2EDPasteAction"), r2.ClipBoardDisplayName))
 	if r2.ClipBoard == nil then
 		displaySystemInfo(i18n.get("uiR2EDEmptyClipBoard"), "BC")
 		return
