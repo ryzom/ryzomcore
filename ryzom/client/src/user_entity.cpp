@@ -3250,8 +3250,10 @@ void CUserEntity::toggleCamera()
 	if(!UserEntity->forceIndoorFPV())
 	{
 		// Leave the 1st Person Mode -> Enter the 3rd Person View Mode
+		// The kept distance is below the minimum when the first person view was entered by zooming in:
+		// the third person view starts at the minimum then, as when zooming out (CView::increaseCameraDist).
 		if     (UserEntity->viewMode() == CUserEntity::FirstPV)
-			UserEntity->viewMode(CUserEntity::ThirdPV);
+			View.cameraDistance(std::max(ClientCfg.CameraDistance, ClientCfg.CameraDistMin));
 		// Leave the 3rd Person Mode -> Enter the 1st Person View Mode
 		else
 			UserEntity->viewMode(CUserEntity::FirstPV);
