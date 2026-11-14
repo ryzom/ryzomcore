@@ -648,7 +648,7 @@
 			<instance template="tgcw_checkbox" id="hard" text="uiMouseHardware" posref="TM TL" x="0" y="-35" />
 			<instance template="tgcw_checkbox" id="inverted" text="uiMouseInverted" posparent="hard" posref="BL TL" x="0" y="-2" />
 			<instance template="tgcw_checkbox" id="dbl" text="uiMouseDblClickMode" posparent="inverted" posref="BL TL" x="0" y="-2" />
-			<instance template="tgcw_checkbox" id="tablet" text="uiMouseTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
+			<instance template="tgcw_checkbox" id="tablet" text="uiFreeViewTablet" posparent="dbl" posref="BL TL" x="0" y="-2" />
 			<view style="sgc_title2" type="text" id="inter" posref="TL TL" x="0" y="-20" hardtext="uiMouseInterface" />
 			<instance template="tgcw_scrollbarint" id="dcspeed" text="uiDoubleClickSpeed" posparent="inter" posref="BL TL" x="20" y="-2" />
 			<instance template="tgcw_scrollbarfloat" id="curspeed" text="uiCursorSpeed" posparent="dcspeed" posref="BL TL" x="0" y="-2" />
