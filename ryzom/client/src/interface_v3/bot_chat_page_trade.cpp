@@ -1705,8 +1705,8 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 		// Setup quantity view in this group
 		setupPriceGroupQuantity(fpGroup, defaultQuantity);
 
-		// setup faction name according to pvp clan
-		string		factionName= PVP_CLAN::toString(fpType);
+		// setup faction name according to pvp clan (the translated name is displayed, the enum name only builds keys)
+		string factionName = CI18N::get("uiFactionPoint_" + PVP_CLAN::toString(fpType));
 		CViewText	*vt= dynamic_cast<CViewText*>(fpGroup->getView("unit_price_header"));
 		if(vt)
 		{
@@ -1724,8 +1724,8 @@ void	CBotChatPageTrade::setupFactionPointPrice(bool /* sellMode */, uint default
 
 		// setup icon according to pvp clan
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		factionName = NLMISC::toLowerAscii(factionName);
-		string	factionIcon= CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionName.c_str()));
+		string factionIconName = NLMISC::toLowerAscii(PVP_CLAN::toString(fpType));
+		string factionIcon = CWidgetManager::getInstance()->getParser()->getDefine(toString("faction_icon_%s", factionIconName.c_str()));
 		CViewBitmap		*vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("unit_price:item_price:icone"));
 		if(vBmp)	vBmp->setTexture(factionIcon);
 		vBmp= dynamic_cast<CViewBitmap*>(fpGroup->getView("total_price:item_price:icone"));
