@@ -691,6 +691,8 @@ void	COFile::internalClose(bool success)
 	if(_F)
 	{
 		fclose(_F);
+		// closed, whatever follows: a rename that fails throws, and the destructor must not close it again
+		_F = nullptr;
 
 		// Temporary filename ?
 		if (!_TempFileName.empty())
@@ -715,8 +717,6 @@ void	COFile::internalClose(bool success)
 			else
 				CFile::deleteFile (_TempFileName);
 		}
-
-		_F = nullptr;
 	}
 	resetPtrTable();
 }
