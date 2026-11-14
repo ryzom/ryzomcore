@@ -1492,6 +1492,19 @@ void CServerEditionModule::connectChar(TSessionId sessionId, TCharId charId, TUs
 		}
 	}
 
+	// An override of the ring access that an operator saved for this character (setCharOverrideRingAccess)
+	// takes the place of the access the character has of its own, which is kept for the day the override
+	// is removed.
+	{
+		CPioneerInfo &info = _PioneersInfo[charId];
+		info.RingAccessWithoutOverride = info.RingAccess;
+		TOverrideRingAccess::const_iterator overridden = _OverrideRingAccess.find(charId);
+		if (overridden != _OverrideRingAccess.end())
+		{
+			info.RingAccess = overridden->second;
+		}
+	}
+
 	onMapConnectionAskedImpl(clientEditionProxy, sessionId, true, true, userRole);
 
 
@@ -5386,6 +5399,17 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, removeCharOverrideRingAccess)
 		log.displayNL("The Overridden ring access charId %u, access='%s' has been removed", found->first, found->second.c_str());
 		_OverrideRingAccess.erase(found);
 
+		// A character that is connected gets back the access it has of its own, and its client is told, as
+		// setCharOverrideRingAccess tells it of the access it sets.
+		TPionnerInfos::iterator info(_PioneersInfo.find(charId));
+		const NLNET::TModuleProxyPtr *clientEditionProxyPtr = getClientProxyPtr(charId);
+		if (info != _PioneersInfo.end() && clientEditionProxyPtr)
+		{
+			info->second.RingAccess = info->second.RingAccessWithoutOverride;
+			CShareClientEditionItfProxy proxy(*clientEditionProxyPtr);
+			proxy.onRingAccessUpdated(this, info->second.RingAccess);
+			log.displayNL("The char %u is connected: its ring access is '%s' again", charId, info->second.RingAccess.c_str());
+		}
 	}
 	else
 	{
