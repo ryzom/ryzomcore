@@ -1595,6 +1595,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 
 		local i = 0
 		local n = table.getn(param.Emotes)
+		local cases = 0
 		while i ~=  n do
 			i = i +1
 
@@ -1623,6 +1624,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 					"\t\t"..	"{\n" ..
 					say ..
 					"\t\t"..	"}\n \n"
+				cases = cases + 1
 		
 			elseif rtGrpId and param.Whos[i] and param.Whos[i] ~= "" and param.Grps[i] and param.Grps[i] ~= "" then
 				local say = ""
@@ -1645,9 +1647,14 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 					say ..
 					emote ..
 					"\t\t"..	"}\n \n"
+				cases = cases + 1
 			end
 
 		end
+
+		-- the script language has no switch without a case: a dialog none of whose steps has a speaker gets no
+		-- action, as a dialog without steps
+		if cases == 0 then return nil end
 
 		code = code .. "\t}\n}"
 
