@@ -2421,16 +2421,31 @@ bool CClientEditionModule::addToUserComponentLoadList( const std::string& filena
 	{
 		R2::getEditor().callEnvFunc( "displayModifiedUserComponentFileError", 0, 0);
 		nlwarning("setUserComponentToLoad failed");
-		return false;
-	}
-
-	if ( !_UserComponentToLoad.insert( std::make_pair(md5, ucv)).second )
-	{
-		nlwarning("Ask 2 time the load of the same user component?"); //or the same empty uc file
 		delete ucv;
 		return false;
 	}
-	DROP_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+
+	if (_ServerEditionProxy == NULL)
+	{
+		nlwarning("The user component file '%s' is not loaded: the scenario service is not connected", filename.c_str());
+		systemMsg(nullptr, "ERR", "", "uiR2EDServerNotConnected");
+		delete ucv;
+		return false;
+	}
+
+	// as for the scenario files (addToLoadList): a newer load of the same header md5 takes the place of the one
+	// still waiting for the answer of the scenario service
+	TUserComponentToLoad::iterator found(_UserComponentToLoad.find(md5));
+	if (found != _UserComponentToLoad.end())
+	{
+		nldebug("The load of the user component file '%s' takes the place of a load still waiting for the scenario service", filename.c_str());
+		delete found->second;
+		found->second = ucv;
+	}
+	else
+	{
+		_UserComponentToLoad.insert(std::make_pair(md5, ucv));
+	}
 
 	CShareServerEditionItfProxy serverEditionModule(_ServerEditionProxy);
 	serverEditionModule.loadUserComponentFile(this, md5, signature);
@@ -2445,7 +2460,8 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 	TUserComponentToLoad::iterator found(_UserComponentToLoad.find(md5));
 	if (found == _UserComponentToLoad.end())
 	{
-		nlwarning("The client has ask more than one time to save the same file");
+		// the answer to a load that a newer one replaced, which had its answer already
+		nldebug("An answer to the load of a user component file finds no load waiting (md5 '%s')", md5.c_str());
 		return;
 	}
 
@@ -2454,8 +2470,9 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 
 	if (!ok)
 	{
-		nlwarning("The server has refuse the client to load the a file"); //should (can) not happen
-		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
+		// the key policies of the scenario service refuse the signature of the file
+		nlinfo("The scenario service refuses to load a user component file (md5 '%s')", md5.c_str());
+		this->systemMsg(nullptr, "ERR", "", "uiR2EDServerRefuseToLoad");
 		return;
 	}
 
@@ -2504,15 +2521,36 @@ bool CClientEditionModule::addToLoadList( const std::string& filename, CScenario
 	std::string signature;
 	bool ok = true;
 	ok = sv->setScenarioToLoad(filename, values, md5, signature, ClientCfg.CheckR2ScenarioMD5);
-	if (!ok){ return false; }
-
-	if ( !_ScenarioToLoad.insert( std::make_pair(md5, sv)).second )
+	if (!ok)
 	{
-		nlwarning("Ask 2 time the load of the same scenario?"); //or the same empty scenario
 		delete sv;
 		return false;
 	}
-	DROP_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+
+	if (_ServerEditionProxy == NULL)
+	{
+		nlwarning("The scenario file '%s' is not loaded: the scenario service is not connected", filename.c_str());
+		systemMsg(nullptr, "ERR", "", "uiR2EDServerNotConnected");
+		delete sv;
+		return false;
+	}
+
+	// A load waits for the answer of the scenario service, which names it by the md5 of the header. Every file
+	// without a header (all the scenarios of the first editors) has the same, empty, md5: a newer load of such a
+	// file, or of the same file, takes the place of the one still waiting, and the first answer goes to the newer
+	// one. That answer is for the signature of the first request, which files of one md5 share unless one was
+	// signed with another key or its header edited by hand.
+	TScenarioToLoad::iterator found(_ScenarioToLoad.find(md5));
+	if (found != _ScenarioToLoad.end())
+	{
+		nldebug("The load of the scenario file '%s' takes the place of a load still waiting for the scenario service", filename.c_str());
+		delete found->second;
+		found->second = sv;
+	}
+	else
+	{
+		_ScenarioToLoad.insert(std::make_pair(md5, sv));
+	}
 
 	CShareServerEditionItfProxy serverEditionModule(_ServerEditionProxy);
 	serverEditionModule.loadScenarioFile(this, md5, signature);
@@ -2593,7 +2631,8 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 	TScenarioToLoad::iterator found(_ScenarioToLoad.find(md5));
 	if (found == _ScenarioToLoad.end())
 	{
-		nlwarning("The client has ask more than one time to save the same file");
+		// the answer to a load that a newer one replaced, which had its answer already
+		nldebug("An answer to the load of a scenario file finds no load waiting (md5 '%s')", md5.c_str());
 		return;
 	}
 
@@ -2602,8 +2641,9 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 
 	if (!ok)
 	{
-		nlwarning("The server has refuse the client to load the a file"); //should (can) not append
-		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
+		// the key policies of the scenario service refuse the signature of the file
+		nlinfo("The scenario service refuses to load a scenario file (md5 '%s')", md5.c_str());
+		this->systemMsg(nullptr, "ERR", "", "uiR2EDServerRefuseToLoad");
 		return;
 	}
 
