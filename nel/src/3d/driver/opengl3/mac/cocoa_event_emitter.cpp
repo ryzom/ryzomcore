@@ -633,7 +633,9 @@ bool CCocoaEventEmitter::handleQuitRequest()
 {
 	if(_server)
 	{
-		_server->postEvent(new CEventDestroyWindow(this));
+		// the close box and Cmd+Q ask to close the window, which is still there: a request, as on Windows
+		// and X11, and the application decides what to do
+		_server->postEvent(new CEventCloseWindow(this));
 		return true;
 	}
 
