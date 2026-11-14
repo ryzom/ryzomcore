@@ -44,8 +44,8 @@ using namespace AITYPES;
 using namespace RYAI_MAP_CRUNCH;
 
 // a big bad global var !
-extern CAIEntityPhysical	*TempSpeaker;
-extern CBotPlayer			*TempPlayer;
+extern NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+extern NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 
 /****************************************************************************/
 /* CGroupNpc methods                                                        */
@@ -1690,7 +1690,7 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	CBotPlayer* const talkingPlayer = TempPlayer;
-	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
+	CSpawnBotNpc *const talkingNpc = dynamic_cast<CSpawnBotNpc *>((CAIEntityPhysical *)TempSpeaker);
 	if	(	talkingPlayer == NULL
 		||	talkingNpc == NULL
 		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
@@ -1826,7 +1826,7 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	CBotPlayer* const talkingPlayer = TempPlayer;
-	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
+	CSpawnBotNpc *const talkingNpc = dynamic_cast<CSpawnBotNpc *>((CAIEntityPhysical *)TempSpeaker);
 	if	(	talkingPlayer == NULL
 		||	talkingNpc == NULL
 		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group
@@ -1949,7 +1949,7 @@ void talkTo_sc_(CStateInstance* entity, CScriptStack& stack)
 	}
 
 	CBotPlayer* const talkingPlayer = TempPlayer;
-	CSpawnBotNpc* const talkingNpc = dynamic_cast<CSpawnBotNpc*>(TempSpeaker);
+	CSpawnBotNpc *const talkingNpc = dynamic_cast<CSpawnBotNpc *>((CAIEntityPhysical *)TempSpeaker);
 	if	(	talkingPlayer == NULL
 		||	talkingNpc == NULL
 		||	talkingNpc->getPersistent().getOwner() != group) // check if the talking npc is in this group

@@ -162,11 +162,36 @@ void CStateInstance::dumpVarsAndFunctions(CStringWriter& sw) const
 	
 	sw.append("context variables:");
 	FOREACHC(varIt, TCtxLogicVarList, _CtxLogicVar)
-		sw.append(" "+CStringMapper::unmap(varIt->first)+" = "+NLMISC::toStringPtr(varIt->second));
+		sw.append(" " + CStringMapper::unmap(varIt->first) + " = " + NLMISC::toStringPtr((CGroup *)varIt->second));
 	
 	sw.append("callBacks:");
 	FOREACHC(varIt, TCallBackList, _CallBacks)
 		sw.append(" "+CStringMapper::unmap(varIt->first));
+}
+
+AIVM::IScriptContext *CStateInstance::getCtxLogicVar(NLMISC::TStringId varId)
+{
+	TCtxLogicVarList::const_iterator it = _CtxLogicVar.find(varId);
+	if (it != _CtxLogicVar.end())
+	{
+		CGroup *const group = it->second;
+		if (!group)
+			return NULL;
+		return group->getPersistentStateInstance();
+	}
+	// a state instance is its own "@this", until a script gives that name to another group
+	static const NLMISC::TStringId thisId = NLMISC::CStringMapper::map("@this");
+	if (varId == thisId)
+		return this;
+	return NULL;
+}
+
+void CStateInstance::setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext *value)
+{
+	// every script context is a state instance of a group, and the variable holds the group
+	CStateInstance *const instance = static_cast<CStateInstance *>(value);
+	_CtxLogicVar[varId] = instance ? instance->getGroup() : NULL;
+	_LogicVarChanged = true;
 }
 
 namespace {

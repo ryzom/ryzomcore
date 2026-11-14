@@ -30,8 +30,8 @@ class CModEntityPhysical;
 class CBotPlayer;
 
 // a big bad global var !
-extern CAIEntityPhysical	*TempSpeaker;
-extern CBotPlayer			*TempPlayer;
+extern NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+extern NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 extern float getDistBetWeen(CAIEntityPhysical& creat1, CAIEntityPhysical& creat2);
 
 template <class TVectorSrc, class TVectorDst>

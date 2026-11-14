@@ -1105,8 +1105,10 @@ private:
 };
 
 // a big bad global var !
-CAIEntityPhysical	*TempSpeaker = NULL;
-CBotPlayer			*TempPlayer = NULL;
+// The bot that speaks and the player it speaks to, for the time of one event: they read as NULL
+// once the event removed them
+NLMISC::CRefPtr<CAIEntityPhysical> TempSpeaker;
+NLMISC::CRefPtr<CBotPlayer> TempPlayer;
 
 //-------------------------------------------------------------------------------------------
 class CAILogicActionSay : public IAILogicAction
@@ -1189,7 +1191,7 @@ public:
 
 			if	(	TempSpeaker
 				&&	TempSpeaker->isAlive())
-				bot = NLMISC::safe_cast<CSpawnBot*>(TempSpeaker);
+				bot = NLMISC::safe_cast<CSpawnBot *>((CAIEntityPhysical *)TempSpeaker);
 
 			if	(!bot)
 			{
@@ -1877,9 +1879,9 @@ public:
 
 		vector<CAIEntityPhysical *>	eps;
 
-		if	(	TempSpeaker
-			&&	TempSpeaker->getEntityId().getType()==group->getRyzomType()
-			&&	safe_cast<CSpawnBot*>(TempSpeaker)->getPersistent().getOwner() == group)	// check that the tempSpeaker entitiy is in this group
+		if (TempSpeaker
+		    && TempSpeaker->getEntityId().getType() == group->getRyzomType()
+		    && safe_cast<CSpawnBot *>((CAIEntityPhysical *)TempSpeaker)->getPersistent().getOwner() == group) // check that the tempSpeaker entitiy is in this group
 		{
 			
 			// ok, this is a good 'speaker', it will play the emot
@@ -1888,7 +1890,7 @@ public:
 			// turn it to face the first targeter
 			CAIEntityPhysical *targeter = TempSpeaker->firstTargeter();
 			if (targeter)
-				safe_cast<CSpawnBot*>(TempSpeaker)->setTheta(TempSpeaker->pos().angleTo(targeter->pos()));
+				safe_cast<CSpawnBot *>((CAIEntityPhysical *)TempSpeaker)->setTheta(TempSpeaker->pos().angleTo(targeter->pos()));
 		}
 		else
 		{

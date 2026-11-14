@@ -318,7 +318,7 @@ void CBotProfileFightNpc::noMoreTarget()
 
 void CBotProfileFightNpc::eventBeginFight()
 {
-	TempSpeaker = _Bot;
+	TempSpeaker = _Bot.ptr();
 	CSpawnBotNpc* spawnable = NLMISC::safe_cast<CSpawnBotNpc*>(_Bot.ptr());
 	CGroupNpc* grpNpc = static_cast<CGroupNpc*>(spawnable->getPersistent().getOwner());
 	grpNpc->processStateEvent(grpNpc->getEventContainer().EventBotBeginFight);
@@ -326,7 +326,7 @@ void CBotProfileFightNpc::eventBeginFight()
 }
 void CBotProfileFightNpc::eventTargetKilled()
 {
-	TempSpeaker = _Bot;
+	TempSpeaker = _Bot.ptr();
 	CSpawnBotNpc* spawnable= NLMISC::safe_cast<CSpawnBotNpc*>(_Bot.ptr());
 	CGroupNpc* grpNpc = static_cast<CGroupNpc*>(spawnable->getPersistent().getOwner());
 	grpNpc->processStateEvent(grpNpc->getEventContainer().EventBotTargetKilled);

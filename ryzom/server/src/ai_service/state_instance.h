@@ -161,7 +161,8 @@ protected:
 	typedef	std::map<NLMISC::TStringId, float>           TLogicVarList;
 	typedef	std::map<NLMISC::TStringId, std::string>     TStrLogicVarList;
 	typedef std::map<NLMISC::TStringId, uint32>		 TLogicVarIndex;
-	typedef	std::map<NLMISC::TStringId, AIVM::IScriptContext*> TCtxLogicVarList;
+	/// A context variable holds a group: it reads as no group once the group is removed
+	typedef std::map<NLMISC::TStringId, NLMISC::CRefPtr<CGroup> > TCtxLogicVarList;
 	TLogicVarList    _LogicVar;
 	TStrLogicVarList _StrLogicVar;
 	TCtxLogicVarList _CtxLogicVar;
@@ -264,7 +265,6 @@ inline
 CStateInstance::CStateInstance(CAIState* startState)
 {
 	_UserEventBlocked = 0;
-	_CtxLogicVar[NLMISC::CStringMapper::map("@this")] = this;
 	init(startState);
 }
 
@@ -360,19 +360,6 @@ void CStateInstance::setStrLogicVar(NLMISC::TStringId varId, std::string const& 
 
 	}
 	//_LogicVarChangedList[_VarIndex[varId]] = true;
-}
-
-inline
-AIVM::IScriptContext* CStateInstance::getCtxLogicVar(NLMISC::TStringId varId)
-{
-	return _CtxLogicVar[varId];
-}
-
-inline
-void CStateInstance::setCtxLogicVar(NLMISC::TStringId varId, AIVM::IScriptContext* value)
-{
-	_CtxLogicVar[varId] = value;
-	_LogicVarChanged = true;
 }
 
 inline
