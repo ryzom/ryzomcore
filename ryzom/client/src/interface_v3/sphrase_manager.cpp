@@ -1423,6 +1423,11 @@ sint				CSPhraseManager::getPhraseSuccessRate(const CSPhraseCom &phrase)
 		skillValue= pSM->getSkillValueMaxBranch(rootBrick->getSkill());
 		sTable= STExtract;
 	}
+	// A power, an aura or the activation of an enchantment has no success roll: no rate (the tooltip hides a rate of 0)
+	else if(rootBrick->isSpecialPower() || rootBrick->isProcEnchantment())
+	{
+		return 0;
+	}
 	// Default
 	else
 	{
