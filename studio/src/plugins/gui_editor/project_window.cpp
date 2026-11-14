@@ -168,7 +168,8 @@ namespace GUIEditor
 		
 		if( reply == QMessageBox::Yes )
 		{
-			fileTree->currentItem()->parent()->removeChild( fileTree->currentItem() );
+			// deleting the item takes it out of its category
+			delete fileTree->currentItem();
 			filesChanged = true;
 		}
 
