@@ -2417,7 +2417,8 @@ void CCharacter::sendItemInfos( uint16 slotId )
 		}
 		item->damage( skillVal, infos.CurrentDamage, infos.MaxDamage );
 
-		infos.HitRate = (uint16)(item->hitRate() * 6); //nb hit per minute
+		// nb hit per minute, to one decimal: the latency of an attack follows the float hit rate (CCombatWeapon)
+		infos.HitRate = floorf(item->hitRate() * 60.0f + 0.5f) / 10.0f;
 		
 		infos.SapLoadCurrent = item->sapLoad();
 		infos.SapLoadMax = item->maxSapLoad();
