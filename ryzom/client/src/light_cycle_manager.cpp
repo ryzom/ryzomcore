@@ -111,6 +111,8 @@ CLightCycleManager::CLightCycleManager() :
 					_State(StateUnknown),
 					_PrevState(StateUnknown)
 {
+	_LastDiffuse.set(0, 0, 0, 0);
+	_LastAmbient.set(0, 0, 0, 0);
 	H_AUTO_USE(RZ_LightCycleManager)
 }
 
@@ -289,7 +291,9 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 		hour -= ::floorf(hour / _Desc.NumHours) * _Desc.NumHours;
 	}
 	float updateDuration = getUpdateDuration();
-	if (fabs(_Hour - hour) >= (4.f * updateDuration))
+	// a jump of the hour relights the whole landscape. Without an update frequency (a continent whose landscape
+	// light is the same by day and by night) there is no step to tell a jump by: every frame would be one
+	if (updateDuration != 0.f && fabs(_Hour - hour) >= (4.f * updateDuration))
 	{
 		touch();
 	}
@@ -321,8 +325,10 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 	CRGBA diffuse, ambiant;
 	getLandscapeLightColor(diffuse, ambiant);
 
+	// a touched setup is a landscape that has not seen the light yet (a new landscape, another continent):
+	// it gets the light whether the colors changed or not
 	bool colorTouched = diffuse != _LastDiffuse || ambiant != _LastAmbient;
-	if (colorTouched)
+	if (colorTouched || _Touched)
 	{
 		_LastDiffuse = diffuse;
 		_LastAmbient = ambiant;
@@ -335,8 +341,9 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 			else
 				Landscape->setupStaticLight(diffuse, ambiant, 1.f);
 			_UpdateFreq = getLandscapePatchUpdateFreq();
-			if (_Touched)
+			if (_Touched || _UpdateFreq == 0.f)
 			{
+				// without an update frequency a change of the colors has no other way to the patches
 				Landscape->updateLightingAll();
 				Landscape->setUpdateLightingFrequency(0);
 			}

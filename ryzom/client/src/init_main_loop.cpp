@@ -811,6 +811,9 @@ void initMainLoop()
 			if(Landscape == nullptr)
 				nlerror("initMainLoop : Cannot create a Landscape.");
 
+			// the new landscape has not seen the light of the light cycle yet
+			LightCycleManager.touch();
+
 			if (!ClientCfg.Light)
 			{
 				// Setting Landscape UpdateLighting Frequency
