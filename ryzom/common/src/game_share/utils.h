@@ -126,8 +126,9 @@ inline std::string capitalizeFirst(const std::string &s)
 #define ON_BOMB
 
 // info and warning macros
-#define INFO(msg) nlinfo((NLMISC::CSString()<<msg).c_str());
-#define WARN(msg) nlwarning((NLMISC::CSString()<<msg).c_str());
+// The message is built with <<, and is logged as text: it is not a printf format, a % in it is a %.
+#define INFO(msg) nlinfo("%s", (NLMISC::CSString()<<msg).c_str());
+#define WARN(msg) nlwarning("%s", (NLMISC::CSString()<<msg).c_str());
 
 // unconditional abort macros
 #define STOP(msg) { WARN(msg) DEBUG_STOP }
