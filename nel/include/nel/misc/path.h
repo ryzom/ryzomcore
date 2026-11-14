@@ -760,6 +760,23 @@ struct CFile
 	  */
 	static bool moveFile(const std::string &dest, const std::string &src);
 
+	/** Move a file over another one, which it replaces
+	 * A destination that exists is replaced in one step and is never deleted first: under its name there is
+	 * the old file or the new one, and when the move fails, the old one. A read-only destination is replaced
+	 * too. A destination that does not exist is no error, the file is then only moved.
+	 * Both paths must be on the same volume: there is no copy when a rename is not possible.
+	 * NB this keeps the attributes of the moved file, those of the replaced file are lost
+	 * On Windows a destination that other processes have open is replaced as long as they share it for
+	 * deletion, as scanners and indexers do (they keep the old file until they close it); where the system
+	 * or the file system does not know the rename that allows this, any open handle refuses the move.
+	 * A move refused because another process holds one of the two files (a scanner reading the file just
+	 * written) is tried again for a short time: with waits that double from 1 ms, for 100 ms in all.
+	 * What waiting cannot cure (access rights, a directory in the place of the destination) fails at once.
+	 * On the other systems a rename that fails is not tried again.
+	 * \return true if the destination is now the moved file. If false, both files are as they were.
+	 */
+	static bool replaceFile(const std::string &dest, const std::string &src);
+
 	/** Create a directory
 	  *	\return true if success
 	  */
@@ -810,6 +827,12 @@ struct CFile
 	*	Call this method to get a temporary output filename. If you have successfully saved your data, delete the old filename and move the new one.
 	*/
 	static void getTemporaryOutputFilename (const std::string &originalFilename, std::string &tempFilename);
+
+	/** Tell if a name is one getTemporaryOutputFilename() gives: a file name followed by ".tmp" and a number.
+	 * Such a file is being written, or was kept because it could not take the place of its file: code that
+	 * lists a directory of saves leaves it out.
+	 */
+	static bool isTemporaryOutputFilename(const std::string &filename);
 };
 
 } // NLMISC

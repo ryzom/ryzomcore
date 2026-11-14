@@ -88,7 +88,12 @@ void	CFileAccessManager::update()
 		IFileAccess*				access = _Accesses.front();
 		IFileAccess::TReturnCode	rc = access->execute(*this);
 
-		if (rc == IFileAccess::MajorFailure)
+		if (rc == IFileAccess::RetryLater)
+		{
+			// the access is not done and has not failed yet: it stays first, and is executed again by a later update
+			break;
+		}
+		else if (rc == IFileAccess::MajorFailure)
 		{
 			nlwarning("Failed to execute access to file '%s', setting to STALLED mode", access->Filename.c_str());
 			setMode(Stalled, access->FailureReason);
@@ -109,8 +114,14 @@ void	CFileAccessManager::update()
 // Release File manager
 void	CFileAccessManager::release()
 {
-	if (!_Accesses.empty())
+	// An access that waits to be tried again is waited for here: it ends within seconds, done, discarded or as
+	// the failure that stalls the manager
+	while (_Mode == Normal && !_Accesses.empty())
+	{
 		update();
+		if (_Mode == Normal && !_Accesses.empty())
+			NLMISC::nlSleep(50);
+	}
 
 	if (!_Accesses.empty())
 	{
@@ -308,6 +319,8 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	Append = false;
 	CreateDir = true;
 	FailureMode = MajorFailureMode;
+	m_ReplaceFailures = 0;
+	m_NextTryTime = 0;
 	uint32 startPos = (uint32)data.getPos();
 	uint32 actualLen = data.length()-startPos;
 	Data.resize(actualLen);
@@ -321,12 +334,25 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	Append = false;
 	CreateDir = true;
 	FailureMode = MajorFailureMode;
+	m_ReplaceFailures = 0;
+	m_NextTryTime = 0;
 	Data.resize(dataSize);
 	memcpy(&(Data[0]), data, dataSize);
 }
 
 IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 {
+	// an access that waits before it writes its file again does nothing until then. A wait longer than the
+	// longest one asked for means that the clock was set back: the access is then executed at once.
+	if (m_NextTryTime != 0)
+	{
+		const NLMISC::TTime now = NLMISC::CTime::getLocalTime();
+		const NLMISC::TTime longestWait = (NLMISC::TTime)s_ReplaceRetryFirstWaitMs << s_ReplaceRetryCount;
+		if (now < m_NextTryTime && m_NextTryTime - now <= longestWait)
+			return RetryLater;
+		m_NextTryTime = 0;
+	}
+
 	// a name that is not a safe relative path (one could leave SaveShardRoot) is discarded, whatever the failure mode:
 	// it is no disk problem to stall for
 	if (!NLMISC::CFile::isSafeFilename(NLMISC::CFile::normalizeRelativePath(Filename), true))
@@ -418,8 +444,8 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	}
 
 	// if can't write in file, file is unwritable, failure in all cases (and no backup)
-	// file is kept untouched
-	if (!fileSaved && checkFailureMode(MajorFailureIfFileUnwritable))
+	// file is kept untouched: f is not closed, so its temporary file is deleted and never takes the place of the file
+	if (!fileSaved)
 	{
 		if (checkFailureMode(MajorFailureIfFileUnwritable))
 		{
@@ -447,7 +473,57 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		}
 	}
 
-	f.close();
+	// With UseTempFile the file is only written once it is closed: what is still buffered is written there (a full
+	// disk can first show there), and the temporary file takes the place of the file there. A close that throws is
+	// a write that failed, and the file is as it was: the access is not done. As a major failure it stays in the
+	// queue with its data, and is executed again when the stall is lifted.
+	// Without UseTempFile close() does not throw, and a file that is not written completely is only logged there.
+	try
+	{
+		f.close();
+	}
+	catch (const NLMISC::ERenameError &e)
+	{
+		// The file was written, but could not take the place of the old one: another process holds one of the
+		// two. The data is still in this access, so the temporary file that was kept is a copy nobody reads.
+		if (!NLMISC::CFile::deleteFile(e.TempFilename))
+			nlwarning("WRITE: can't delete the temporary file '%s' of file '%s'", e.TempFilename.c_str(), Filename.c_str());
+
+		// Such a hold usually ends within a second, and a stalled shard needs an operator: the access is
+		// executed again on later updates before it fails. It stays first in the queue, the accesses keep their order.
+		if (m_ReplaceFailures < s_ReplaceRetryCount)
+		{
+			const uint waitMs = s_ReplaceRetryFirstWaitMs << m_ReplaceFailures;
+			++m_ReplaceFailures;
+			m_NextTryTime = NLMISC::CTime::getLocalTime() + waitMs;
+			FailureReason = NLMISC::toString("RETRY:WRITE: can't replace file '%s', try %u of %u in %u ms: %s", Filename.c_str(), m_ReplaceFailures + 1, s_ReplaceRetryCount + 1, waitMs, e.what());
+			nlwarning("WRITE: can't replace file '%s', it is written again in %u ms (try %u of %u): %s", Filename.c_str(), waitMs, m_ReplaceFailures + 1, s_ReplaceRetryCount + 1, e.what());
+			return RetryLater;
+		}
+
+		// given up: if the access is executed again after a stall, it gets all its tries again
+		m_ReplaceFailures = 0;
+		nlwarning("WRITE: can't replace file '%s' after %u tries: %s", Filename.c_str(), s_ReplaceRetryCount + 1, e.what());
+		if (checkFailureMode(MajorFailureIfFileUnwritable))
+		{
+			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't replace file '%s': %s", Filename.c_str(), e.what());
+			return MajorFailure;
+		}
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't replace file '%s': %s", Filename.c_str(), e.what());
+		return MinorFailure;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		nlwarning("WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+		if (checkFailureMode(MajorFailureIfFileUnwritable))
+		{
+			FailureReason = NLMISC::toString("MAJOR_FAILURE:WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+			return MajorFailure;
+		}
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: can't close file '%s': %s", Filename.c_str(), e.what());
+		return MinorFailure;
+	}
+	m_ReplaceFailures = 0;
 
 	if (!fileBackuped)
 	{
@@ -455,13 +531,27 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		return MinorFailure;
 	}
 
-	NLMISC::COFile flog;
 	std::string str = getBackupFileName(Filename)+"\n";
 	if(str.find("characters")!=std::string::npos)
 	{
-		flog.open(getBackupFileName("new_save.txt"), true);
-		flog.serialBuffer((uint8*)&(str[0]), str.size());
-		flog.close();
+		// the file is written: failing to add it to this list does not fail the access
+		try
+		{
+			NLMISC::COFile flog;
+			if (flog.open(getBackupFileName("new_save.txt"), true))
+			{
+				flog.serialBuffer((uint8 *)&(str[0]), (uint)str.size());
+				flog.close();
+			}
+			else
+			{
+				nlwarning("WRITE: can't add file '%s' to the list of new saves: the list can't be opened", Filename.c_str());
+			}
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			nlwarning("WRITE: can't add file '%s' to the list of new saves: %s", Filename.c_str(), e.what());
+		}
 	}
 
 	return Success;

@@ -3691,6 +3691,9 @@ class CAHExportCharacter : public IActionHandler
 			{
 				fd.serial(CS);
 				fd.flush();
+				// the temporary file takes the place of the file here, and only when all of it is written:
+				// after a failed write fd is not closed, its destructor deletes the temporary file
+				fd.close();
 				// validate
 				success = true;
 			}
@@ -3698,7 +3701,6 @@ class CAHExportCharacter : public IActionHandler
 			{
 				nlwarning("%s", e.what());
 			}
-			fd.close();
 		}
 		else
 			nlwarning("Failed to open file: save/character_%s.save", name.c_str());

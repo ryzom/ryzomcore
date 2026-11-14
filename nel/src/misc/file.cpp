@@ -28,9 +28,7 @@
 #include "nel/misc/xml_pack.h"
 #include "nel/misc/streamed_package_manager.h"
 
-#ifndef NL_OS_WINDOWS
 #include <errno.h>
-#endif
 
 using namespace std;
 
@@ -629,12 +627,16 @@ uint	CIFile::getDbgStreamSize() const
 COFile::COFile() : IStream(false)
 {
 	_F = nullptr;
+	m_WriteFailed = false;
+	m_WriteErrno = 0;
 }
 
 // ======================================================================================================
 COFile::COFile(const std::string &path, bool append, bool text, bool useTempFile) : IStream(false)
 {
 	_F = nullptr;
+	m_WriteFailed = false;
+	m_WriteErrno = 0;
 	open(path, append, text, useTempFile);
 }
 
@@ -654,6 +656,8 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 
 	_FileName = path;
 	_TempFileName.clear();
+	m_WriteFailed = false;
+	m_WriteErrno = 0;
 
 	char mode[3];
 	mode[0] = (append)?'a':'w';
@@ -669,14 +673,29 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 	}
 
 	// if appending to file and using a temporary file, copycat temporary file from original...
+	bool copied = false;
 	if (append && useTempFile && CFile::fileExists(_FileName))
 	{
 		// open fails if can't copy original content
-		if (!CFile::copyFile(_TempFileName, _FileName))
+		copied = CFile::copyFile(_TempFileName, _FileName);
+		if (!copied)
+		{
+			// a part of the copy is not left behind
+			if (CFile::isExists(_TempFileName))
+				CFile::deleteFile(_TempFileName);
+			_TempFileName.clear();
 			return false;
+		}
 	}
 
 	_F = nlfopen(fileToOpen, mode);
+	if (_F == nullptr && useTempFile)
+	{
+		// nor is the copy when it cannot be opened
+		if (copied)
+			CFile::deleteFile(_TempFileName);
+		_TempFileName.clear();
+	}
 
 	return _F != nullptr;
 }
@@ -686,46 +705,92 @@ void	COFile::close()
 	internalClose(true);
 }
 // ======================================================================================================
+// ENOSPC, and the quota of a user where the system has one: there is no room for the data
+static bool isDiskFullErrno(int error)
+{
+#ifdef EDQUOT
+	if (error == EDQUOT)
+		return true;
+#endif
+	return error == ENOSPC;
+}
+// ======================================================================================================
+void COFile::rememberWriteError(int error) const
+{
+	// the first failure is the one that tells why
+	if (!m_WriteFailed)
+	{
+		m_WriteFailed = true;
+		m_WriteErrno = error;
+	}
+}
+// ======================================================================================================
 void	COFile::internalClose(bool success)
 {
+	resetPtrTable();
 	if(_F)
 	{
-		fclose(_F);
-		// closed, whatever follows: a rename that fails throws, and the destructor must not close it again
-		_F = nullptr;
-
-		// Temporary filename ?
-		if (!_TempFileName.empty())
+		// What was written reaches the disk here at the latest: a small file is still entirely in the buffer
+		// of the stream, so a full disk first shows when the close fails. A failed close is a failed write,
+		// and so is an earlier write, flush or seek that failed: after a failed flush the close itself
+		// succeeds, so those are remembered in the object and in the error flag of the stream.
+		bool writeFailed = m_WriteFailed || ferror(_F) != 0;
+		int writeErrno = m_WriteErrno;
+		if (fclose(_F) != 0)
 		{
-			// Delete old
+			if (writeErrno == 0)
+				writeErrno = errno;
+			writeFailed = true;
+		}
+
+		// closed, whatever follows: the temporary file is dealt with below, and the destructor has nothing
+		// left to close, to move or to delete
+		_F = nullptr;
+		m_WriteFailed = false;
+		m_WriteErrno = 0;
+		std::string tempFileName;
+		tempFileName.swap(_TempFileName);
+
+		if (tempFileName.empty())
+		{
+			// A plain file: nothing can be kept from being lost here, and close() is called from destructors
+			// and from code that expects no exception of it. close() and the destructor log the failure.
+			if (writeFailed)
+			{
+				nlwarning("FILE: The file '%s' is not written completely, a write to it or its close failed, error %d : %s",
+				    _FileName.c_str(), writeErrno, writeErrno != 0 ? strerror(writeErrno) : "no error code was kept");
+			}
+		}
+		else if (!success || writeFailed)
+		{
+			// given up or incomplete: the temporary file goes, the file is not touched
+			CFile::deleteFile(tempFileName);
+			// The caller asked for the file to be replaced safely and has to know that it was not.
+			// The destructor does not throw: it gives the writing up, which is what happened.
 			if (success)
 			{
-				// Bug under windows, sometimes the file is not deleted
-				uint retry = 1000;
-				while (--retry)
-				{
-					if (CFile::fileExists(_FileName))
-						CFile::deleteFile (_FileName);
-
-					if (CFile::moveFile(_FileName, _TempFileName))
-						break;
-					nlSleep (0);
-				}
-				if (!retry)
-					throw ERenameError (_FileName, _TempFileName);
+				if (isDiskFullErrno(writeErrno))
+					throw EDiskFullError(_FileName);
+				throw EWriteError(_FileName);
 			}
-			else
-				CFile::deleteFile (_TempFileName);
+		}
+		else
+		{
+			// The file is replaced in one step and is never deleted first. If it cannot be replaced it is
+			// left as it was, and the temporary file is kept: it is the only copy of what was written.
+			if (!CFile::replaceFile(_FileName, tempFileName))
+				throw ERenameError(_FileName, tempFileName);
 		}
 	}
-	resetPtrTable();
 }
 // ======================================================================================================
 void	COFile::flush()
 {
 	if(_F)
 	{
-		fflush(_F);
+		// nothing tells the caller that a flush failed, and the close after it succeeds: it is remembered
+		if (fflush(_F) != 0)
+			rememberWriteError(errno);
 	}
 }
 
@@ -738,9 +803,12 @@ void		COFile::serialBuffer(uint8 *buf, uint len)
 	if(fwrite(buf, len, 1, _F) != 1)
 //	if(fwrite(buf, 1, len, _F) != len)
 	{
-		if (ferror(_F) && errno == 28 /*ENOSPC*/)
+		const int writeErrno = errno;
+		if (ferror(_F))
 		{
-			throw EDiskFullError(_FileName);
+			rememberWriteError(writeErrno);
+			if (isDiskFullErrno(writeErrno))
+				throw EDiskFullError(_FileName);
 		}
 		throw	EWriteError(_FileName);
 	}
@@ -773,9 +841,14 @@ bool		COFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 			nlstop;
 		}
 
-		if (nlfseek64 (_F, offset, origin_c)!=0)
-			return false;
-		return true;
+		// A seek first writes what the stream has buffered. When that write fails the data is lost, and the
+		// callers that seek back to fill in a size do not look at what the seek returns: the error flag of
+		// the stream tells, and close() reports it.
+		const bool seekFailed = nlfseek64(_F, offset, origin_c) != 0;
+		const int seekErrno = errno;
+		if (ferror(_F))
+			rememberWriteError(seekErrno);
+		return !seekFailed;
 	}
 	return false;
 }

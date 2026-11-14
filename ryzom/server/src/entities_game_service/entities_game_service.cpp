@@ -499,6 +499,28 @@ struct CPlayerCharId
 };
 
 /*
+ * Take the temporary files out of a listing of a directory of saves: the backup service writes a save to
+ * "<file>.tmp<n>" before it puts it in the place of the file, and such a file can be seen while it is written
+ * or stay behind after a failure. It is not a save, and its name would be read as that of its file.
+ */
+static void removeTemporaryOutputFiles(std::vector<string> &files)
+{
+	uint kept = 0;
+	for (uint i = 0; i < files.size(); ++i)
+	{
+		if (CFile::isTemporaryOutputFilename(files[i]))
+		{
+			nlinfo("Skipping the temporary file '%s'", files[i].c_str());
+			continue;
+		}
+		if (kept != i)
+			files[kept] = files[i];
+		++kept;
+	}
+	files.resize(kept);
+}
+
+/*
  * loadAndResaveCheckCharacters
  */
 bool loadAndResaveCheckCharacters( const std::vector<string>& files, NLMISC::CLog& log, bool restoreOriginal )
@@ -1639,6 +1661,7 @@ NLMISC_COMMAND(loadAndReSaveCharacters,"load and resave the complete set of play
 
 	vector< string > files;
 	CPath::getPathContent( BsiGlobal.getLocalPath() + "characters", true, false, true, files );
+	removeTemporaryOutputFiles(files);
 
 	for( uint32 i = 0; i < files.size(); ++i )
 	{
@@ -5630,6 +5653,7 @@ NLMISC_COMMAND( loadResaveAndCheckCharacters, "Check EGS can load all saves, and
 {
 	vector< string > files;
 	CPath::getPathContent( BsiGlobal.getLocalPath() + "characters", true, false, true, files );
+	removeTemporaryOutputFiles(files);
 	loadAndResaveCheckCharacters( files, log, true );
 	return true;
 }

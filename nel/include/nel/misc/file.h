@@ -66,9 +66,20 @@ struct EDiskFullError : public EWriteError
 	EDiskFullError( const std::string& filename ) : EWriteError(filename) {}
 };
 
+/** A file written through a temporary file could not take the place of its target: the target (Filename) is
+ * left as it was, and the temporary file (TempFilename) is kept, it holds what was written.
+ */
 struct ERenameError : public EFile
 {
-	ERenameError( const std::string& dest, const std::string& src ) : EFile( dest, "Rename Error from the file '" +src+"' to the file '" +dest+"'", true ) {}
+	ERenameError(const std::string &dest, const std::string &src)
+	    : EFile(dest, "Rename Error from the file '" + src + "' to the file '" + dest + "': '" + dest + "' is left as it was, what was written is kept in '" + src + "'", true)
+	    , TempFilename(src)
+	{
+	}
+
+	virtual ~ERenameError() NL_OVERRIDE { }
+
+	std::string TempFilename;
 };
 
 
@@ -209,15 +220,20 @@ private:
 class COFile : public IStream
 {
 public:		// Basic Usage.
-	/// Object. NB: destructor close() the stream.
+	/** Object. NB: destructor close() the stream.
+	 *	The destructor does not throw. With the flag useTempFile it gives the writing up: the temporary file
+	 *	is deleted and the file is left as it was.
+	 */
 	COFile();
 	COFile(const std::string &path, bool append=false, bool text=false, bool useTempFile=false);
 	~COFile() NL_OVERRIDE;
 
 	/** Open a file for writing. false if failed. close() if a file was opened.
-	*	If you open the file with the flag useTempFile, you MUST close explicitly the file
-	*	with close() if the writing as been successed.
-	*/
+	 *	If you open the file with the flag useTempFile, you MUST close explicitly the file
+	 *	with close() if the writing as been successed.
+	 *	With useTempFile the writing goes to a temporary file beside the file, which takes the place of the
+	 *	file in close() in one step: the file is the old one or the new one, never a part of the new one.
+	 */
 	bool	open(const std::string &path, bool append=false, bool text=false, bool useTempFile=false);
 
 	bool	isOpen	()	const
@@ -226,9 +242,21 @@ public:		// Basic Usage.
 	}
 
 public:		// Advanced Usage.
-	/// Explicit close.
+	/** Explicit close.
+	 *	What is still buffered is written here, so this is where a small file meets a full disk. The file is
+	 *	not written completely when this write or the close fails, or when a write, a flush or a seek failed
+	 *	before.
+	 *	A file opened without useTempFile: close() does not throw. A file that is not written completely is
+	 *	logged as a warning that names it, by close() and by the destructor alike.
+	 *	A file opened with useTempFile: close() throws, and only then:
+	 *	\throw EDiskFullError, EWriteError the file could not be written completely. The temporary file is
+	 *	deleted and the file it was for is left as it was.
+	 *	\throw ERenameError the temporary file could not take the place of the file. The file is left as it
+	 *	was, and the temporary file is kept: the exception names it.
+	 *	After any of these the stream is closed, and neither a second close() nor the destructor does more.
+	 */
 	void	close();
-	/// flush the file.
+	/// flush the file. A flush that fails is not reported here: close() reports it, as described there.
 	void	flush();
 	/// Seek the file
 	bool	seek (sint32 offset, IStream::TSeekOrigin origin) const NL_OVERRIDE;
@@ -247,9 +275,15 @@ protected:
 	virtual void		serialBit(bool &bit) NL_OVERRIDE;
 
 private:
+	/// Remember that a write, a flush or the flush of a seek failed, with the error of the first one.
+	void rememberWriteError(int error) const;
+
 	FILE	*_F;
 	std::string _FileName;
 	std::string _TempFileName;
+	// A write that failed, for close(): the close after a failed flush succeeds. seek() is const.
+	mutable bool m_WriteFailed;
+	mutable int m_WriteErrno;
 };
 
 

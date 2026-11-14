@@ -1980,13 +1980,20 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			{
 				// create placeholder player landmarks file so saveLandmarks will use it
 				// even if shared landmarks file exists
-				COFile f;
-				if (f.open(lmfile, false, false, true))
+				try
 				{
-					std::string xml;
-					xml = "<?xml version=\"1.0\"?>\n<interface_config />";
-					f.serialBuffer((uint8 *)xml.c_str(), xml.size());
-					f.close();
+					COFile f;
+					if (f.open(lmfile, false, false, true))
+					{
+						std::string xml;
+						xml = "<?xml version=\"1.0\"?>\n<interface_config />";
+						f.serialBuffer((uint8 *)xml.c_str(), xml.size());
+						f.close();
+					}
+				}
+				catch (const Exception &e)
+				{
+					nlwarning("Error while writing the file %s : %s.", lmfile.c_str(), e.what());
 				}
 			}
 		}
@@ -2286,9 +2293,9 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 		f.close();
 	}
-	catch(const NLMISC::EStream &)
+	catch (const NLMISC::EStream &e)
 	{
-		nlwarning("Config saving failed.");
+		nlwarning("Config saving failed: %s", e.what());
 		return false;
 	}
 

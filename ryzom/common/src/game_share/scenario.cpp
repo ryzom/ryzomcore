@@ -1160,7 +1160,11 @@ bool CScenarioValidator::applySave(const std::string& signature)
 		out2 += _ScenarioBody;
 
 		out.serialBuffer((uint8*)out2.c_str(), (uint)out2.size());
-		if (_Filename != std::string("save/r2_buffer.dat") )
+
+		// the file is saved once the close has put it in its place: only then does the signature match it
+		out.close();
+
+		if (_Filename != std::string("save/r2_buffer.dat"))
 		{
 			nlinfo("Scenario %s saved", _Filename.c_str());
 		}
@@ -1169,14 +1173,19 @@ bool CScenarioValidator::applySave(const std::string& signature)
 			AutoSaveSignature = signature;
 		}
 
-		out.close();
-
 		return true;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		// out is not closed here: a close would put what was written so far in the place of the file.
+		// Its destructor deletes the temporary file and leaves the file as it was.
+		nlwarning("Can't save: the file %s can not be saved: %s", _Filename.c_str(), e.what());
+
+		return false;
 	}
 	catch (...)
 	{
 		nlwarning("Can't save: the file %s can not be saved.", _Filename.c_str());
-		out.close();
 
 		return false;
 	}
@@ -1427,19 +1436,28 @@ bool CUserComponentValidator::applySave(const std::string& signature)
 
 
 		out.serialBuffer((uint8*)out2.c_str(),(uint)out2.size());
-		if (_Filename != std::string("save/r2_buffer.dat") )
+
+		// the file is saved once the close has put it in its place
+		out.close();
+
+		if (_Filename != std::string("save/r2_buffer.dat"))
 		{
 			nlinfo("UserComponent %s saved", _Filename.c_str());
 		}
 
-		out.close();
-
 		return true;
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		// out is not closed here: a close would put what was written so far in the place of the file.
+		// Its destructor deletes the temporary file and leaves the file as it was.
+		nlwarning("Can't save user component: the file %s can not be saved: %s", _Filename.c_str(), e.what());
+
+		return false;
 	}
 	catch (...)
 	{
 		nlwarning("Can't save user component: the file %s can not be saved.", _Filename.c_str());
-		out.close();
 
 		return false;
 	}
