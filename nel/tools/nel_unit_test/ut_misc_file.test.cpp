@@ -774,6 +774,71 @@ TEST_F(CUTMiscTempFileTest, isTemporaryOutputFilename)
 	EXPECT_FALSE(NLMISC::CFile::isTemporaryOutputFilename("characters\\.tmp0"));
 }
 
+// A write of no bytes writes nothing and is no failed write, with or without a temporary file: a file that
+// only gets such writes is written without content
+TEST_F(CUTMiscTempFileTest, zeroLengthWrite)
+{
+	const string logged = "The file '" + m_Target + "' is not written completely";
+	uint8 unused = 0;
+
+	// without a temporary file: the file is created, and is complete
+	{
+		CTempFileTestWarnings warnings(logged);
+		NLMISC::COFile out;
+		ASSERT_TRUE(out.open(m_Target));
+		EXPECT_NO_THROW(out.serialBuffer(&unused, 0));
+		EXPECT_NO_THROW(out.serialBuffer(NULL, 0));
+		bool closed = false;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_TRUE(closed);
+		EXPECT_EQ(warnings.count(), 0u);
+	}
+	EXPECT_TRUE(NLMISC::CFile::isExists(m_Target));
+	EXPECT_EQ(NLMISC::CFile::getFileSize(m_Target), 0u);
+
+	// between other writes it changes nothing
+	{
+		NLMISC::COFile out;
+		ASSERT_TRUE(out.open(m_Target));
+		EXPECT_NO_THROW(tempSerial(out, s_TempOld));
+		EXPECT_NO_THROW(out.serialBuffer(&unused, 0));
+		EXPECT_NO_THROW(tempSerial(out, " and more"));
+		EXPECT_TRUE(out.close());
+	}
+	EXPECT_EQ(tempReadFile(m_Target), string(s_TempOld) + " and more");
+
+	// with a temporary file: the file without content takes the place of the target
+	{
+		NLMISC::COFile out;
+		ASSERT_TRUE(out.open(m_Target, false, false, true));
+		EXPECT_NO_THROW(out.serialBuffer(&unused, 0));
+		EXPECT_EQ(tempReadFile(m_Target), string(s_TempOld) + " and more");
+		bool closed = false;
+		EXPECT_NO_THROW(closed = out.close());
+		EXPECT_TRUE(closed);
+	}
+	EXPECT_TRUE(NLMISC::CFile::isExists(m_Target));
+	EXPECT_EQ(NLMISC::CFile::getFileSize(m_Target), 0u);
+	EXPECT_EQ(dirContent(), "target.foo");
+
+	// appending nothing through a temporary file leaves the content as it was
+	tempWriteFile(m_Target, s_TempOld);
+	{
+		NLMISC::COFile out;
+		ASSERT_TRUE(out.open(m_Target, true, false, true));
+		EXPECT_NO_THROW(out.serialBuffer(&unused, 0));
+		EXPECT_NO_THROW(out.close());
+	}
+	EXPECT_EQ(tempReadFile(m_Target), s_TempOld);
+	EXPECT_EQ(dirContent(), "target.foo");
+
+	// a file that is not open is still an error
+	{
+		NLMISC::COFile out;
+		EXPECT_THROW(out.serialBuffer(&unused, 0), NLMISC::EFileNotOpened);
+	}
+}
+
 #ifdef NL_OS_WINDOWS
 
 // A handle on a file, closed when the test leaves its scope, passed or failed

@@ -804,6 +804,9 @@ void		COFile::serialBuffer(uint8 *buf, uint len)
 {
 	if(!_F)
 		throw	EFileNotOpened(_FileName);
+	// nothing to write, as in CIFile::serialBuffer: fwrite returns 0 for it, which is no failed write
+	if (len == 0)
+		return;
 	if(fwrite(buf, len, 1, _F) != 1)
 //	if(fwrite(buf, 1, len, _F) != len)
 	{

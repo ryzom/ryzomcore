@@ -324,7 +324,9 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	uint32 startPos = (uint32)data.getPos();
 	uint32 actualLen = data.length()-startPos;
 	Data.resize(actualLen);
-	memcpy(&(Data[0]), data.buffer()+startPos, actualLen);
+	// a message can end after the file name: there is then no first byte to take the address of
+	if (actualLen != 0)
+		memcpy(&(Data[0]), data.buffer() + startPos, actualLen);
 }
 
 CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester, uint32 requestid, uint8* data, uint dataSize)
@@ -337,7 +339,8 @@ CWriteFile::CWriteFile(const std::string& filename, const TRequester &requester,
 	m_ReplaceFailures = 0;
 	m_NextTryTime = 0;
 	Data.resize(dataSize);
-	memcpy(&(Data[0]), data, dataSize);
+	if (dataSize != 0)
+		memcpy(&(Data[0]), data, dataSize);
 }
 
 void CWriteFile::deleteKeptTemporaryFile(const std::string &tempFilename)
@@ -365,6 +368,24 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 	{
 		nlwarning("WRITE: refused file name '%s' from %s, not a safe relative path", Filename.c_str(), Requester.toString().c_str());
 		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: file name '%s' is not a safe relative path", Filename.c_str());
+		return MinorFailure;
+	}
+
+	if (Data.empty())
+	{
+		// An append without data has nothing to add: it is done. The file is not opened for it, which would create
+		// a missing file without content, or with UseTempFile copy the whole file and put the copy in its place.
+		if (Append)
+			return Success;
+
+		// A save without data is refused, and the file that is there is left as it is. No requester of this
+		// service has a save without content to send, so it comes from a faulty or a foreign sender. A file
+		// without content cannot be read back through this service either: a load answers for it as for a file
+		// that is missing. And a save that comes by message keeps no backup copy, so writing it would destroy
+		// the last good content. It is a minor failure whatever the failure mode of the access: this is no disk
+		// problem that an operator can solve, and a stalled shard would stall again each time it is resumed.
+		nlwarning("WRITE: refused to save file '%s' from %s without content, the file is left as it is", Filename.c_str(), Requester.toString().c_str());
+		FailureReason = NLMISC::toString("MINOR_FAILURE:WRITE: file '%s' is not saved without content", Filename.c_str());
 		return MinorFailure;
 	}
 
@@ -439,6 +460,7 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 
 	try
 	{
+		// Data is not empty here: an access without data ended above
 		f.serialBuffer(&(Data[0]), (uint)Data.size());
 		fileSaved = true;
 
