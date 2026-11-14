@@ -157,8 +157,7 @@ void SearchPathsSettingsPage::addPath()
 void SearchPathsSettingsPage::delPath()
 {
 	QListWidgetItem *removeItem = m_ui.pathsListWidget->takeItem(m_ui.pathsListWidget->currentRow());
-	if (!removeItem)
-		delete removeItem;
+	delete removeItem;
 
 	checkEnabledButton();
 }

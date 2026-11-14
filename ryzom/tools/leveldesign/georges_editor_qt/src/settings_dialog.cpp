@@ -111,7 +111,7 @@ namespace NLQT
 	void CSettingsDialog::removePath()
 	{
 		QListWidgetItem *removeItem = ui.pathsListWidget->takeItem(ui.pathsListWidget->currentRow());
-		if (!removeItem) delete removeItem;
+		delete removeItem;
 	}
 
 	void CSettingsDialog::upPath()
