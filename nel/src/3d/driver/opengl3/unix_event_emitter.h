@@ -52,8 +52,9 @@ public:
 
 	/**
 	 * initialize CUnixEventEmitter
+	 * \param ownWindow false for a window of the application, which keeps the window manager protocols it has
 	 */
-	void init(Display *dpy, Window win, NL3D::IDriver *driver = nullptr);
+	void init(Display *dpy, Window win, NL3D::IDriver *driver = nullptr, bool ownWindow = true);
 
 	/**
 	 * sends all events to server

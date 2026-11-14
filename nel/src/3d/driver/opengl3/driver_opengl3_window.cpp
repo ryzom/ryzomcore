@@ -1160,7 +1160,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 //	XMapWindow(_dpy, _win);
 
-	_EventEmitter.init (_dpy, _win, this);
+	_EventEmitter.init(_dpy, _win, this, _DestroyWindow);
 
 //	XEvent event;
 //	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
@@ -1666,8 +1666,14 @@ bool CDriverGL3::destroyWindow()
 	releaseCursors();
 
 	// make sure window icons are deleted
-	std::vector<NLMISC::CBitmap> bitmaps;
-	setWindowIcon(bitmaps);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+	// on X11 the icon is a property of the window: a window of the application keeps the one it has
+	if (_DestroyWindow)
+#endif
+	{
+		std::vector<NLMISC::CBitmap> bitmaps;
+		setWindowIcon(bitmaps);
+	}
 
 #if defined(NL_OS_WINDOWS)
 

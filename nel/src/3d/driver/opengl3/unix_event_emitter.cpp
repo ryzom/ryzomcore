@@ -62,7 +62,7 @@ CUnixEventEmitter::~CUnixEventEmitter()
 	closeIM();
 }
 
-void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
+void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver, bool ownWindow)
 {
 	_dpy = dpy;
 	_win = win;
@@ -78,7 +78,11 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 
 	// define Atom used by delete window
 	XA_WM_DELETE_WINDOW = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	XSetWMProtocols(dpy, win, &XA_WM_DELETE_WINDOW, 1);
+
+	// The property is replaced as a whole: on a window of the application this took away the protocols its
+	// toolkit had set (WM_TAKE_FOCUS, _NET_WM_PING), and its owner gets the close request anyway.
+	if (ownWindow)
+		XSetWMProtocols(dpy, win, &XA_WM_DELETE_WINDOW, 1);
 
 /*
 	TODO: implements all useful events processing

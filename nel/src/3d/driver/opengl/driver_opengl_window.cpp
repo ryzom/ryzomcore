@@ -1286,7 +1286,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		return false;
 	}
 
-	_EventEmitter.init (_dpy, _win, this);
+	_EventEmitter.init(_dpy, _win, this, _DestroyWindow);
 
 	// KDE/GNOME has issues selecting correct fullscreen monitor if window is not visible before setMode()
 	if (!mode.Windowed)
@@ -1820,8 +1820,14 @@ bool CDriverGL::destroyWindow()
 	releaseCursors();
 
 	// make sure window icons are deleted
-	std::vector<NLMISC::CBitmap> bitmaps;
-	setWindowIcon(bitmaps);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	// on X11 the icon is a property of the window: a window of the application keeps the one it has
+	if (_DestroyWindow)
+#endif
+	{
+		std::vector<NLMISC::CBitmap> bitmaps;
+		setWindowIcon(bitmaps);
+	}
 
 #ifdef USE_OPENGLES
 
