@@ -31,7 +31,9 @@
 #include "nel/pacs/retriever_bank.h"
 #include "nel/pacs/global_retriever.h"
 
+#ifndef NL_EXPORT_NO_OBJECT_VIEWER
 #include "../../object_viewer/object_viewer_interface.h"
+#endif
 
 // For lighting ig with pacs.
 #include "../../ig_lighter_lib/ig_lighter_lib.h"
@@ -99,6 +101,8 @@ public:
 
 // -----------------------------------------------------------------------------------------------
 
+#ifndef NL_EXPORT_NO_OBJECT_VIEWER
+
 void regsiterOVPath ()
 {
 // must test it first, because NL_DEBUG_FAST and NL_DEBUG are declared at same time.
@@ -161,8 +165,14 @@ void regsiterOVPath ()
 	}
 }
 
+#endif // NL_EXPORT_NO_OBJECT_VIEWER
+
 void CNelExport::viewMesh (TimeValue time)
 {
+#ifdef NL_EXPORT_NO_OBJECT_VIEWER
+	// the object viewer needs MFC, which this build did not have
+	::MessageBox(NULL, _T("This exporter plugin was built without the object viewer, which needs MFC, so it cannot view the scene."), _T("NeL Export"), MB_OK | MB_ICONEXCLAMATION);
+#else
 	// Register classes
 	// done in dllentry registerSerial3d ();
 
@@ -722,6 +732,7 @@ void CNelExport::viewMesh (TimeValue time)
 		delete slInfo.RetrieverBank;
 		delete slInfo.GlobalRetriever;
 	}
+#endif // NL_EXPORT_NO_OBJECT_VIEWER
 }
 
 

@@ -15,7 +15,6 @@ TARGET_LINK_LIBRARIES(nel_export
 							nel_mesh_lib 
 							nel_patch_lib
 							nel_3dsmax_shared 
-							object_viewer_dll 
 							${MAXSDK_LIBRARIES} 
 							Version.lib
 							comctl32.lib)
@@ -26,6 +25,14 @@ NL_ADD_LIB_SUFFIX(nel_export)
 SET_TARGET_PROPERTIES(nel_export PROPERTIES SUFFIX ".dlu")
 
 TARGET_COMPILE_DEFINITIONS(nel_export PRIVATE ${MAXSDK_DEFINITIONS})
+
+# The View command shows the scene in the object viewer, which needs MFC
+IF(TARGET object_viewer_dll)
+  TARGET_LINK_LIBRARIES(nel_export object_viewer_dll)
+ELSE()
+  TARGET_COMPILE_DEFINITIONS(nel_export PRIVATE NL_EXPORT_NO_OBJECT_VIEWER)
+  MESSAGE(STATUS "nel_export is built without the object viewer (MFC not found), its View command only shows a message")
+ENDIF()
 
 IF(WITH_PCH)
   target_precompile_headers(nel_export PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h)
