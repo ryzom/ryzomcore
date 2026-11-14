@@ -2090,6 +2090,8 @@ namespace NLGUI
 		_Space = 3;
 		_CaseMode = CaseUpper;
 		_Formatted = false;
+		// as for a menu opened with enableModalWindow: whoever pushes the menu over another modal sets it
+		_CloseSubMenuUsingPopModal = false;
 	}
 
 	// ------------------------------------------------------------------------------------------------
