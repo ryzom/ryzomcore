@@ -64,7 +64,7 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	m_settings = m_pluginManager->settings();
 	m_coreImpl = new CoreImpl(this);
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	m_menuBar = new QMenuBar(0);
 #else
 	m_menuBar = new QMenuBar(this);
@@ -99,6 +99,12 @@ MainWindow::~MainWindow()
 
 	delete m_coreImpl;
 	m_coreImpl = 0;
+
+#ifdef Q_OS_MAC
+	// on macOS the menu bar has no parent, see the constructor
+	delete m_menuBar;
+	m_menuBar = 0;
+#endif
 }
 
 bool MainWindow::initialize(QString *errorString)
@@ -389,7 +395,7 @@ void MainWindow::createActions()
 	menuManager()->registerAction(m_pluginViewAction, Constants::ABOUT_PLUGINS);
 	connect(m_pluginViewAction, SIGNAL(triggered()), m_pluginView, SLOT(show()));
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	m_exitAction->setMenuRole(QAction::QuitRole);
 	m_settingsAction->setMenuRole(QAction::PreferencesRole);
 	m_aboutAction->setMenuRole(QAction::AboutRole);
