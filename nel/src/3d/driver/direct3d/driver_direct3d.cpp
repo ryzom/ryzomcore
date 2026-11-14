@@ -515,7 +515,7 @@ void CDriverD3D::resetRenderVariables()
 
 // ***************************************************************************
 
-void CDriverD3D::initRenderVariables()
+bool CDriverD3D::initRenderVariables()
 {
 	H_AUTO_D3D(CDriver3D_initRenderVariables);
 	uint i;
@@ -624,7 +624,7 @@ void CDriverD3D::initRenderVariables()
 	_CurrentShader = NULL;
 
 	// Shaders
-	initInternalShaders();
+	bool shadersOk = initInternalShaders();
 
 	// Fog default values
 	_FogStart = 0;
@@ -652,6 +652,8 @@ void CDriverD3D::initRenderVariables()
 
 	// Flush caches
 	updateRenderVariablesInternal();
+
+	return shadersOk;
 }
 
 // ***************************************************************************
@@ -1715,7 +1717,21 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	}
 
 	// Reset render state cache
-	initRenderVariables();
+	if (!initRenderVariables())
+	{
+		// Without its internal effects the driver cannot draw lightmaps, clouds or water
+		// d3dx9_42.dll and d3dx9_43.dll load the effect compiler from a DLL of its own when it is first needed;
+		// the versions before them have it built in.
+#if defined(D3DX_SDK_VERSION) && (D3DX_SDK_VERSION >= 42)
+		nlwarning("Can't create the internal effects of the Direct3D driver. d3dx9_%d.dll compiles them with D3DCompiler_%d.dll, which the DirectX end-user runtime installs: check that it is there", D3DX_SDK_VERSION, D3DX_SDK_VERSION);
+#elif defined(D3DX_SDK_VERSION)
+		nlwarning("Can't create the internal effects of the Direct3D driver (compiled by d3dx9_%d.dll)", D3DX_SDK_VERSION);
+#else
+		nlwarning("Can't create the internal effects of the Direct3D driver");
+#endif
+		release();
+		return false;
+	}
 
 	// *** Event init
 

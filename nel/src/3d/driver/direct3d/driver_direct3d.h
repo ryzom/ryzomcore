@@ -1604,7 +1604,8 @@ public:
 	friend class CVolatileIndexBuffer;
 
 	// Init render states
-	void initRenderVariables();
+	// false when the internal shaders could not be created
+	bool initRenderVariables();
 
 	// Reset render states
 	void resetRenderVariables();
@@ -2213,7 +2214,8 @@ public:
 
 	// *** Multipass helpers
 
-	void initInternalShaders();
+	// false when an effect could not be created (the log names it)
+	bool initInternalShaders();
 	void releaseInternalShaders();
 	bool setShaderTexture (uint textureHandle, ITexture *texture, CFXCache *cache);
 
