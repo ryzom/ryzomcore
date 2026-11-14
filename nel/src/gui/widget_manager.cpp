@@ -765,6 +765,44 @@ namespace NLGUI
 		}
 	}
 
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::setModalExitLauncherHidden(CInterfaceGroup *pIG)
+	{
+		if (!_ModalStack.empty() && _ModalStack.back().ModalWindow == pIG)
+			_ModalStack.back().ModalExitLauncherHidden = true;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::closeModalsOfHiddenLaunchers()
+	{
+		while (!_ModalStack.empty() && _ModalStack.back().ModalExitLauncherHidden)
+		{
+			// The launching control shows when it still exists and it and all its parents are active
+			bool launcherShown = false;
+			CCtrlBase *ctrl = _ModalStack.back().CtrlLaunchingModal;
+			if (ctrl)
+			{
+				launcherShown = true;
+				for (CInterfaceElement *elm = ctrl; elm; elm = elm->getParent())
+				{
+					if (!elm->getActive())
+					{
+						launcherShown = false;
+						break;
+					}
+				}
+			}
+			if (launcherShown)
+				break;
+
+			// Close it the way it was launched: a modal pushed over another one leaves that one in place
+			if (_ModalStack.size() > 1)
+				popModalWindow();
+			else
+				disableModalWindow();
+		}
+	}
+
 	// ***************************************************************************
 	void CWidgetManager::hideAllWindows()
 	{
@@ -2113,7 +2151,10 @@ namespace NLGUI
 			}
 			while (cb);
 		}
-		
+
+		// The same for a modal window that follows its launching control (the list of a combo box)
+		closeModalsOfHiddenLaunchers();
+
 		// Check if screen size changed
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();

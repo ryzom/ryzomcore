@@ -151,6 +151,8 @@ namespace NLGUI
 			bool ModalExitClickL;
 			bool ModalExitClickR;
 			bool ModalExitKeyPushed;
+			// The modal is closed when the control that launched it is hidden or deleted, see setModalExitLauncherHidden()
+			bool ModalExitLauncherHidden;
 			std::string ModalHandlerClickOut;
 			std::string ModalClickOutParams;
 
@@ -162,6 +164,7 @@ namespace NLGUI
 				ModalExitClickL = false;
 				ModalExitClickR = false;
 				ModalExitKeyPushed = false;
+				ModalExitLauncherHidden = false;
 			}
 		};
 
@@ -242,7 +245,13 @@ namespace NLGUI
 		void popModalWindow();
 		// pop all top modal windows with the given category (a string stored in the modal)
 		void popModalWindowCategory(const std::string &category);
-		
+		/** Make the current modal window follow the control that launched it: the modal is closed once that
+		  * control is hidden (itself or one of its parents) or deleted. For a modal that has no meaning without
+		  * its control, the list of a combo box for instance. To call right after the modal was launched;
+		  * does nothing if pIG is not the current modal window.
+		  */
+		void setModalExitLauncherHidden(CInterfaceGroup *pIG);
+
 		void hideAllWindows();
 		void hideAllNonSavableWindows();
 
@@ -557,6 +566,9 @@ namespace NLGUI
 	private:
 		CWidgetManager();
 		~CWidgetManager() NL_OVERRIDE;
+
+		// Close the top modal windows that follow their launching control (see setModalExitLauncherHidden()) once that control is hidden or deleted
+		void closeModalsOfHiddenLaunchers();
 
 		IParser *_Parser;
 
