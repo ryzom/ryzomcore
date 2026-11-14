@@ -670,10 +670,18 @@ bool screenshotZBuffer(const std::string &filename, const std::vector<float> &z,
 
 	float range = zMax - zMin;
 	bool flat = !(range > 0.f);
-	if (flat)
+	// the test the main loop makes before it draws the scene into an effect target (the FXAA effect exists when
+	// its setting is on); what is drawn over the scene afterwards may still write some depth into the back buffer,
+	// so the depth is not the same everywhere then
+	NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
+	if (driver->getPolygonMode() == UDriver::Filled && driver->supportBloomEffect() && (ClientCfg.Bloom || ClientCfg.FXAA))
 	{
-		nlwarning("The depth buffer of the screenshot '%s' is %f everywhere. With FXAA or Bloom on (FXAA = %d, Bloom = %d) the scene is drawn into an effect target, not into the back buffer this depth is read from: switch both off for a depth picture",
-		    filename.c_str(), zMin, ClientCfg.FXAA ? 1 : 0, ClientCfg.Bloom ? 1 : 0);
+		nlwarning("The depth picture of the screenshot '%s' does not show the scene. With FXAA or Bloom on (FXAA = %d, Bloom = %d) the scene is drawn into an effect target, not into the back buffer this depth is read from: switch both off for a depth picture",
+			filename.c_str(), ClientCfg.FXAA ? 1 : 0, ClientCfg.Bloom ? 1 : 0);
+	}
+	else if (flat)
+	{
+		nlwarning("The depth buffer of the screenshot '%s' is %f everywhere", filename.c_str(), zMin);
 	}
 
 	CBitmap zi;
