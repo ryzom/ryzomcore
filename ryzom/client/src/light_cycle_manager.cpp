@@ -157,27 +157,27 @@ bool CLightCycleManager::setLightDesc(const CLightCycleDesc &desc)
 	H_AUTO_USE(RZ_LightCycleManager)
 	if (desc.NightTransitionStartHour > desc.NumHours)
 	{
-		nlwarning ("NightTransitionStartHour (%d) > NumHours (%d)", desc.NightTransitionStartHour, desc.NumHours);
+		nlwarning("NightTransitionStartHour (%f) > NumHours (%f)", desc.NightTransitionStartHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
 
 	if (desc.NightTransitionEndHour > desc.NumHours)
 	{
-		nlwarning ("NightTransitionEndHour (%d) > NumHours (%d)", desc.NightTransitionEndHour, desc.NumHours);
+		nlwarning("NightTransitionEndHour (%f) > NumHours (%f)", desc.NightTransitionEndHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
 	//
 	if (desc.DawnTransitionStartHour > desc.NumHours)
 	{
-		nlwarning ("DawnTransitionStartHour (%d) > NumHours (%d)", desc.DawnTransitionStartHour, desc.NumHours);
+		nlwarning("DawnTransitionStartHour (%f) > NumHours (%f)", desc.DawnTransitionStartHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
 	if (desc.DawnTransitionEndHour > desc.NumHours)
 	{
-		nlwarning ("DawnTransitionEndHour (%d) > NumHours (%d)", desc.DawnTransitionEndHour, desc.NumHours);
+		nlwarning("DawnTransitionEndHour (%f) > NumHours (%f)", desc.DawnTransitionEndHour, desc.NumHours);
 		_State = StateUnknown;
 		return false;
 	}
@@ -188,7 +188,7 @@ bool CLightCycleManager::setLightDesc(const CLightCycleDesc &desc)
 		 )
 	   )
 	{
-		nlwarning("!(DawnTransitionStartHour (%d) >= NightTransitionEndHour (%d) || DawnTransitionEndHour (%d) <= NightTransitionStartHour (%d))",
+		nlwarning("!(DawnTransitionStartHour (%f) >= NightTransitionEndHour (%f) || DawnTransitionEndHour (%f) <= NightTransitionStartHour (%f))",
 		          desc.DawnTransitionStartHour, desc.NightTransitionEndHour, desc.DawnTransitionEndHour, desc.NightTransitionStartHour);
 		_State = StateUnknown;
 		return false;
