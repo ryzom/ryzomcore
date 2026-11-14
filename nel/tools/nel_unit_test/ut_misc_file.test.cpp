@@ -914,8 +914,8 @@ private:
 	HANDLE m_Handle;
 };
 
-// Tell if the file system of a directory knows the rename with POSIX semantics (Windows 10 1607 and later,
-// NTFS), which replaces a file that other handles hold open. Where it does not, such a file cannot be replaced.
+// Tell if the system and the file system of a directory know the rename with POSIX semantics, which replaces
+// a file that other handles hold open, by trying it. Where they do not, such a file cannot be replaced.
 static bool tempPosixRenameKnown(const string &dir)
 {
 	struct CRenameInfo

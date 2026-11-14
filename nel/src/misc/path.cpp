@@ -2772,10 +2772,10 @@ bool CFile::moveFile(const std::string &dest, const std::string &src)
 // include the main loop of a service, which cannot wait for seconds.
 static const sint64 s_ReplaceFileRetryMs = 100;
 
-// The rename with POSIX semantics of Windows 10 1607 and later (its flag for a read-only destination: 1809
-// and later). It is declared here because the SDK only declares it when such a system is the minimal one.
-// Whether the running system knows it shows when the call is made: by a function that is missing, or by
-// the error it gives.
+// The rename with POSIX semantics. The SDK declares it (FileRenameInfoEx, the Flags member of FILE_RENAME_INFO
+// and the two flags named below) only when the minimal system of the build is Windows 10 RS1 or later, which
+// it is not here, so it is declared again. Whether the running system and the file system know it shows when
+// the call is made: by a function that is missing, or by the error it gives.
 struct CFileRenameInfoEx // FILE_RENAME_INFO
 {
 	DWORD Flags;
@@ -2786,15 +2786,17 @@ struct CFileRenameInfoEx // FILE_RENAME_INFO
 static const int s_FileRenameInfoEx = 22; // FileRenameInfoEx of FILE_INFO_BY_HANDLE_CLASS
 static const DWORD s_FileRenameReplaceIfExists = 0x1; // FILE_RENAME_FLAG_REPLACE_IF_EXISTS
 static const DWORD s_FileRenamePosixSemantics = 0x2; // FILE_RENAME_FLAG_POSIX_SEMANTICS
-static const DWORD s_FileRenameIgnoreReadOnly = 0x40; // FILE_RENAME_FLAG_IGNORE_READONLY_ATTRIBUTE
+// Bit 0x40 of the same flags: a read-only destination is replaced as it is. The SDK headers have no name for
+// this bit and do not say from which version of the system it is known.
+static const DWORD s_FileRenameIgnoreReadOnly = 0x40;
 typedef BOOL(WINAPI *TSetFileInformationByHandle)(HANDLE, int, LPVOID, DWORD);
 
 /** Rename a file over another one with POSIX semantics, in one step of the file system.
  * A destination that other handles have open is replaced as long as they share it for deletion, which a plain
  * replacing move refuses: they keep the old file, which is gone when the last of them is closed. When this
  * fails nothing is changed.
- * \param ignoreReadOnly replace a read-only destination as it is (Windows 10 1809 and later). Without it a
- * read-only destination is refused.
+ * \param ignoreReadOnly ask for a read-only destination to be replaced as it is, which not every version of
+ * the system knows. Without it a read-only destination is refused.
  * \param unsupported set when the error says that the system, an emulation of it or the file system does not
  * know this rename: the caller then uses the next way to replace
  * \return 0 or the error of the system
@@ -2891,10 +2893,11 @@ bool CFile::replaceFile(const std::string &dest, const std::string &src)
 	// Three ways to replace, each one rename by the file system without a copy, so the destination is never
 	// seen missing or half written, and a failure changes nothing. The next one is used when the system, an
 	// emulation of it or the file system says that it does not know the one before:
-	// 0. the rename with POSIX semantics that ignores the read-only flag (Windows 10 1809 and later, NTFS).
-	//    It also replaces a destination that scanners, indexers or sync agents hold open, as they share it
-	//    for deletion, and a read-only one as it is;
-	// 1. the same rename without that flag (Windows 10 1607 and later);
+	// 0. the rename with POSIX semantics that ignores the read-only flag. It also replaces a destination that
+	//    scanners, indexers or sync agents hold open, as they share it for deletion, and a read-only one as
+	//    it is;
+	// 1. the same rename without the bit for the read-only flag, for a system that knows the rename and not
+	//    that bit;
 	// 2. the plain replacing move (no MOVEFILE_COPY_ALLOWED), which any other handle on the destination
 	//    refuses.
 	// The last two do not replace a read-only file: its flag is cleared first, as deleteFile() clears it
