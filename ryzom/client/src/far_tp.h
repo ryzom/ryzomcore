@@ -171,7 +171,7 @@ public:
 private:
 	TState				_CurrentState;
 	std::list<TEvent>	_NextEvents;
-	bool _HoldEvents;
+	bool				_HoldEvents;
 public:
 
 	// Create the state machine with the wanted start.
