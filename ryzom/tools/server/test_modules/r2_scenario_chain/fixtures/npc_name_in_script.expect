@@ -1,0 +1,20 @@
+# The npc that speaks in a dialog has a name with parentheses, a semicolon, a comma and a point in it.
+# The translator writes the name between quotes into the script of the dialog line: it is a text
+# there, the script calls the functions of a scenario, and the service accepts the run-time scenario.
+
+upgrade: ok
+version_update: changed
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+absent: version_update_failure
+return_version_before: current=yes
+
+scenario_at: Acts[1].Features[0].Components[0].Components[0].Name = Zora (the guard); cheer(1), a.b
+rt_has: ()r2_0001_RtNpcGrp_4.npcSay(@group,"Zora (the guard); cheer(1), a.b", "DSS_1 RtEntryText_1");
+rt: acts=2 texts=1

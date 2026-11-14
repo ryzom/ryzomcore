@@ -1436,3 +1436,652 @@ TEST(RtScenarioCheckTime, NestedActions)
 	addTable(addTable(events, ""), "ActionsId")->add("", std::string("RtNpcEventHandlerAction_60"));
 	expectCheckedInTime("an action of a chain that an event names too", tree, RtScenarioInvalid);
 }
+
+namespace {
+
+/// The text with every occurrence of a part of it replaced
+std::string replaceAll(std::string text, const std::string &what, const std::string &replacement)
+{
+	std::string::size_type pos = 0;
+	uint32 count = 0;
+	while ((pos = text.find(what, pos)) != std::string::npos)
+	{
+		text.replace(pos, what.size(), replacement);
+		pos += replacement.size();
+		++count;
+	}
+	EXPECT_NE(0u, count) << "not in the scenario: " << what;
+	return text;
+}
+
+/// The scenario with the action of its act, a begin_state, made a script
+std::string withScript(const std::string &action, const std::string &script)
+{
+	return replaceAll(with("Action = [[begin_state]]", "Action = [[" + action + "]]"), "Parameters = [[RtAiState_2]]", "Parameters = [[" + script + "]]");
+}
+
+void expectScriptAccepted(const std::string &script, bool isCondition = false)
+{
+	std::string function;
+	EXPECT_TRUE(checkRtScenarioScript(script, isCondition, function)) << "refused for '" << function << "': " << script;
+}
+
+/// The script is refused, and the refusal names this (a function, a keyword) between quotes
+void expectScriptRefused(const std::string &script, const std::string &name, bool isCondition = false)
+{
+	std::string refusal;
+	EXPECT_FALSE(checkRtScenarioScript(script, isCondition, refusal)) << "accepted: " << script;
+	EXPECT_NE(std::string::npos, refusal.find("'" + name + "'")) << refusal << "\nfor: " << script;
+}
+
+/// The script is refused, and the refusal has this text
+void expectScriptRefusedFor(const std::string &script, const std::string &text, bool isCondition = false)
+{
+	std::string refusal;
+	EXPECT_FALSE(checkRtScenarioScript(script, isCondition, refusal)) << "accepted, a script of " << script.size() << " bytes";
+	EXPECT_NE(std::string::npos, refusal.find(text)) << refusal;
+}
+
+/// The beginning of a statement, this many tokens of it: "v0 = 1 + 1 + 1 ..."
+std::string tokensOf(uint32 tokens)
+{
+	std::string statement = "v0 =";
+	for (uint32 i = 2; i < tokens; ++i)
+		statement += (i % 2 == 0) ? " 1" : " +";
+	return statement;
+}
+
+} // namespace
+
+TEST(RtScenarioCheck, IdsAreNamesTheServiceMakesNamesOf)
+{
+	const char *rule = "an id has letters, digits and '_'";
+
+	// every reference to the id is changed with it: the id is what is refused
+	expectAccepted(replaceAll(s_Scenario, "RtNpcGrp_1", "Group_1_of_the_Base_Act"));
+	expectAccepted(replaceAll(s_Scenario, "RtNpcGrp_1", std::string(RtScenarioMaxIdSize, 'g')));
+	expectRefused(replaceAll(s_Scenario, "RtNpcGrp_1", std::string(RtScenarioMaxIdSize + 1, 'g')), rule);
+
+	const char *const groupIds[] = { "RtNpcGrp_1;x", "RtNpcGrp 1", "RtNpcGrp_1.x", "RtNpcGrp_1:x", "RtNpcGrp_*", "RtNpcGrp_?", "RtNpcGrp\\\"1", "1002_RtNpcGrp-1", "RtNpcGrp_1\xc3\xa9" };
+	for (uint32 i = 0; i < sizeof(groupIds) / sizeof(groupIds[0]); ++i)
+	{
+		expectRefused(replaceAll(s_Scenario, "RtNpcGrp_1", groupIds[i]), "Acts[0].AiStates[0].Children[0] is the id");
+		expectRefused(replaceAll(s_Scenario, "RtNpcGrp_1", groupIds[i]), rule);
+	}
+
+	// an npc, a state and an event
+	expectRefused(replaceAll(s_Scenario, "RtNpc_3", "RtNpc_3 x"), "Acts[1].AiStates[0]: the group 'RtNpcGrp_2'.Children[0] is the id");
+	expectRefused(with("Id = [[RtAiState_1]], Name", "Id = [[RtAiState_1;x]], Name"), "Acts[0].AiStates[0].Id is 'RtAiState_1;x'");
+	expectRefused(with("Id = [[RtNpcEventHandler_2]]", "Id = [[r2_0002_x.y]]"), "Acts[1].Events[0].Id is 'r2_0002_x.y'");
+	expectRefused(with("Id = [[RtNpcEventHandler_2]]", "Id = [[]]"), "Acts[1].Events[0].Id is ''");
+}
+
+TEST(RtScenarioCheck, AnActionIsOfATypeOfAScenario)
+{
+	// the parameter of the action of the scenario, the name of a state, is one these types can have
+	const char *const types[] = {
+		"begin_state", "code", "dynamic_if", "emot", "facing",
+		"multi_actions", "null_action", "punctual_state", "punctual_state_end", "random_select",
+		"sit_down", "stand_up", "switch_actions", "trigger_event_0", "trigger_event_9"
+	};
+	for (uint32 i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
+	{
+		EXPECT_TRUE(isRtScenarioActionType(types[i])) << types[i];
+		expectAccepted(with("Action = [[begin_state]]", std::string("Action = [[") + types[i] + "]]"));
+	}
+	const char *const withParameters[][2] = {
+		{ "condition_if", "v0 == 1" }, { "condition_if_else", "RtNpcGrp_2:v1 != 0" }, { "modify_variable", "v0 + 1" },
+		{ "set_timer_t0", "100" }, { "set_timer_t3", "2.5" }, { "npc_say", "RtNpcGrp_2:Yubo\nRtEntryText_1\n" }
+	};
+	for (uint32 i = 0; i < sizeof(withParameters) / sizeof(withParameters[0]); ++i)
+	{
+		EXPECT_TRUE(isRtScenarioActionType(withParameters[i][0])) << withParameters[i][0];
+		expectAccepted(withScript(withParameters[i][0], withParameters[i][1]));
+	}
+
+	// a say action is written "say: <phrase>": the word before the colon is the channel the npc talks in
+	EXPECT_TRUE(isRtScenarioActionType("say"));
+	expectAccepted(withScript("say", "say: a_phrase"));
+	expectRefused(withScript("say", "shout: a_phrase"), "Acts[1].Events[0]: the action 'RtNpcEventHandlerAction_4'.Parameters is 'shout: a_phrase', a say action begins with 'say:'");
+	expectRefused(withScript("say", "a_phrase"), "a say action begins with 'say:'");
+	expectRefused(withScript("say", ""), "a say action begins with 'say:'");
+
+	// types of action the AI service has for the primitives of a shard, and names it would read as one
+	const char *const others[] = {
+		"send_message", "spawn_dyn_group", "set_flags_on_dyn_zones", "outpost_send_squad_status", "outpost_report_squad_death",
+		"set_fauna_activity", "random_select_state", "set_state_timeout", "spawn", "despawn", "CODE", "Code", "code ", "", "trigger_event_10", "set_timer_t4"
+	};
+	for (uint32 i = 0; i < sizeof(others) / sizeof(others[0]); ++i)
+	{
+		EXPECT_FALSE(isRtScenarioActionType(others[i])) << others[i];
+		expectRefused(with("Action = [[begin_state]]", std::string("Action = [[") + others[i] + "]]"), "which is not an action of a scenario");
+	}
+	expectRefused(with("Action = [[begin_state]]", "Action = [[send_message]]"), "Acts[1].Events[0]: the action 'RtNpcEventHandlerAction_4'.Action is 'send_message'");
+
+	// an action below another one
+	expectRefused(with("Action = [[npc_say]]", "Action = [[send_message]]"), "Acts[0].Events[0]: the action 'RtNpcEventHandlerAction_3'.Action is 'send_message'");
+}
+
+TEST(RtScenarioCheck, TheFunctionsOfAScenarioAreAListInOrder)
+{
+	uint32 count = 0;
+	const char *const *functions = getRtScenarioScriptFunctions(count);
+	ASSERT_GT(count, 0u);
+	for (uint32 i = 0; i < count; ++i)
+	{
+		if (i != 0)
+			EXPECT_LT(strcmp(functions[i - 1], functions[i]), 0) << functions[i] << " is not after " << functions[i - 1] << ": it is not found";
+		EXPECT_TRUE(isRtScenarioScriptFunction(functions[i])) << functions[i];
+	}
+
+	// the same name with other parameters is another function
+	EXPECT_TRUE(isRtScenarioScriptFunction("emote_css_"));
+	EXPECT_FALSE(isRtScenarioScriptFunction("emote_ss_"));
+	EXPECT_TRUE(isRtScenarioScriptFunction("npcSay_css_"));
+	EXPECT_FALSE(isRtScenarioScriptFunction("npcSay_ss_"));
+	EXPECT_FALSE(isRtScenarioScriptFunction("setEvent"));
+	EXPECT_FALSE(isRtScenarioScriptFunction("setEvent_f_ "));
+	EXPECT_FALSE(isRtScenarioScriptFunction(""));
+
+	// functions for the scripts of a shard
+	const char *const others[] = {
+		"setGlobalNelVar_ss_", "setGlobalNelVar_sf_", "loadFile_s_", "import_s_", "teleportPlayer_sffff_", "summonPlayer_fs_",
+		"setPlayerController_ss_", "clearPlayerController_s_", "addBotChat_s_", "setSimplePhrase_ss_", "dataSetVar_ss_", "dataGetVar_s_s",
+		"setZoneState_sf_", "queryEgs_sscfs_", "getPlayerStat_ss_f", "setDynEnergy_sff_", "setNamedEntityPropCb_sss_", "spawnManager_s_",
+		"despawnBotByAlias_s_", "setBotHPScaleByAlias_fs_", "rename_s_", "followPlayer_sf_", "setUrl_ss_"
+	};
+	for (uint32 i = 0; i < sizeof(others) / sizeof(others[0]); ++i)
+		EXPECT_FALSE(isRtScenarioScriptFunction(others[i])) << others[i];
+}
+
+TEST(RtScenarioCheck, AScriptCallsTheFunctionsOfAScenario)
+{
+	// what the translator of the editor writes
+	expectScriptAccepted("()setEvent(1);");
+	expectScriptAccepted("()r2_0001_RtNpcGrp_1.setEvent(1);\n");
+	expectScriptAccepted("v2 = 3;\n()setTimer(31, 0);\n");
+	expectScriptAccepted("(r2_0001_RtNpcGrp_1.is_enable)r2_0001_RtNpcGrp_1.timerIsEnabled(0);\n");
+	expectScriptAccepted("(@group)r2_0001_RtNpcGrp_2.context();\n \n()r2_0001_RtNpcGrp_1.npcSay(@group,\"Bob\", \"DSS_1 RtEntryText_1\");\n \n");
+	expectScriptAccepted("(@group1)r2_0001_RtNpcGrp_1.context();\n(@group2)r2_0001_RtNpcGrp_2.context();\n()r2_0001_RtNpcGrp_1.facing(@group1,\"Bob\", @group2, \"Ann\");\n");
+	expectScriptAccepted("//next_road\nif (  3 == 0  || r2_0001_RtNpcGrp_1.RoadCountLimit < 3 - 1) {\n\tif ( 3 != 0) { r2_0001_RtNpcGrp_1.RoadCountLimit = r2_0001_RtNpcGrp_1.RoadCountLimit + 1; }\n\t()r2_0001_RtNpcGrp_1.postNextState(\"r2_0001_RtAiState_4\");\n} else {\n\t()setEvent(9);\n}\n");
+	expectScriptAccepted("if (nextState == 1) {\n\t()stopMoving();\n\t()setMode(\"Rest\");\n} else {\n\tlog(\"unknown state=\", nextState, \", zone=z\");\n\t()break();\n}\n");
+	expectScriptAccepted("print(\"<dialog_starts>\");\n()setTimer(10, 1);\n");
+	expectScriptAccepted("()setScenarioPoints(1, r2_0001_RtNpcGrp_1.ScenarioPoints);\n()r2_0001_RtNpcGrp_1.setTimer(300,1);\n");
+	expectScriptAccepted("(r)rndm(0, 3);\nswitch(v2)\n{\n\tcase 1 :\n\t\t()setEvent(5);\n}\n");
+	expectScriptAccepted("r2_0001_RtNpcGrp_1.Active == 1 && r2_0001_RtNpcGrp_1.NbPlayer >= 2", true);
+	expectScriptAccepted("v0 == 1", true);
+	expectScriptAccepted("", true);
+	expectScriptAccepted("");
+
+	// a function the AI service does not have
+	expectScriptRefused("()r2_0001_RtNpcGrp_1.timerEnable(1);\n", "timerEnable");
+
+	// A script of a scenario defines and calls no function of its own, and has no loop, no block
+	// one statement of which is picked at random and no block for the groups below a group
+	expectScriptRefusedFor("step()\n{\n\t()setEvent(1);\n}\n", "defines or calls the script function 'step'");
+	expectScriptRefusedFor("()setEvent(1);\nstep();\n", "defines or calls the script function 'step'");
+	expectScriptRefusedFor("r2_0001_RtNpcGrp_1.step();\n", "defines or calls the script function 'step'");
+	expectScriptRefusedFor("a() = r2_0001_RtNpcGrp_1.b();\n", "defines or calls the script function");
+	expectScriptRefused("while (v0 == 0) { v1 = v1 + 1; }", "while");
+	expectScriptRefused("rand { ()setEvent(1); ()setEvent(2); }", "rand");
+	expectScriptRefused("onchildren() { ()setEvent(1); }", "onchildren");
+	expectScriptRefused("if (v0 == 1) { v1 = 1; } while (v1 == 1) ()setEvent(1);", "while");
+	// a word that only begins like one of these, and the same words in a text
+	expectScriptAccepted("whilev = 1;\nrandom = 2;\n()setEvent(1);\nlog(\"while rand onchildren\");\n");
+
+	// the size of a script, and how deep its parentheses and braces are
+	expectScriptAccepted(std::string(RtScenarioMaxScriptSize - 16, ' ') + "()setEvent(1);");
+	expectScriptRefusedFor(std::string(RtScenarioMaxScriptSize, ' ') + "()setEvent(1);", "a script has 65536 at most");
+	expectScriptAccepted("v0 = " + std::string(RtScenarioMaxScriptDepth, '(') + "1" + std::string(RtScenarioMaxScriptDepth, ')') + ";");
+	expectScriptRefusedFor("v0 = " + std::string(RtScenarioMaxScriptDepth + 1, '(') + "1" + std::string(RtScenarioMaxScriptDepth + 1, ')') + ";", "more than 32 deep");
+	expectScriptAccepted(repeat("if (v0 == 1) {", RtScenarioMaxScriptDepth) + repeat("}", RtScenarioMaxScriptDepth));
+	expectScriptRefusedFor(repeat("if (v0 == 1) {", RtScenarioMaxScriptDepth + 1) + repeat("}", RtScenarioMaxScriptDepth + 1), "more than 32 deep");
+
+	// functions for the scripts of a shard
+	expectScriptRefused("()setGlobalNelVar(\"a\", \"b\");", "setGlobalNelVar");
+	expectScriptRefused("()setEvent(1);\n()r2_0001_RtNpcGrp_1.teleportPlayer(\"(0x0000000001:00:00:00)\", 1, 2, 3, 4);", "teleportPlayer");
+	expectScriptRefused("(@child)newNpcChildGroup(\"a\", \"b\", \"c\");", "newNpcChildGroup");
+	expectScriptRefused("(v0, $name, @ctx)@other.queryEgs(\"a\", \"b\", @ctx, 1, \"c\");", "queryEgs");
+	expectScriptRefused("( v0 , r2_0001_RtNpcGrp_1.v1 )\n\tgetPlayerStat ( \"a\" , \"b\" ) ;", "getPlayerStat");
+	expectScriptRefused("if (v0 == 1) { ()loadFile(\"x\"); }", "loadFile");
+	expectScriptRefused("()setevent(1);", "setevent");
+	expectScriptRefused("()set(1);", "set");
+	expectScriptRefused("()timer(1);", "timer");
+	// the condition of a dynamic_if is a script too
+	expectScriptRefused("()getPlayerStat(\"a\", \"b\") == 1", "getPlayerStat", true);
+}
+
+TEST(RtScenarioCheck, AScriptIsReadAsTheAiServiceReadsIt)
+{
+	// What is a text, a comment or script is told here with a row of parentheses deeper than a script
+	// can have: it is refused where it is read as script, and nowhere else
+	const std::string deep(RtScenarioMaxScriptDepth + 1, '(');
+	const char *tooDeep = "more than 32 deep";
+	expectScriptRefusedFor("v0 = " + deep + "1;", tooDeep);
+
+	// what is in a text or in a comment is not read
+	expectScriptAccepted("()npcSay(@group, \"Bob\", \"RAW " + deep + "\");");
+	expectScriptAccepted("// " + deep + "\n()setEvent(1);");
+	expectScriptAccepted("()setEvent(1); // " + deep);
+	expectScriptAccepted("# " + deep + "\n()setEvent(1);");
+
+	// a text ends at its quote: what follows it on the line is read
+	expectScriptRefusedFor("$name = \"Bob\" " + deep + ";", tooDeep);
+	// a quote after a backslash is inside its text
+	expectScriptAccepted("$name = \"Bob \\\" " + deep + "\";");
+	// a quote without its end is no text: what follows it is read
+	expectScriptRefusedFor("()setEvent(1); \" " + deep, tooDeep);
+	// a comment line is one that begins the script: the others begin with the space the compiler joins them with
+	expectScriptRefusedFor("()setEvent(1);\n# " + deep, tooDeep);
+	// what follows a comment is on the next line
+	expectScriptRefusedFor("// a\nv0 = " + deep + "1;", tooDeep);
+
+	// The compiler joins the lines it is given, the empty ones too. The animation module gives it none
+	// that is empty: a line that begins with '#' after empty lines is a comment when it comes from
+	// there, and script when the empty lines are compiled with it, which is how it is read.
+	expectScriptAccepted("\n\n()setEvent(1);\n\n\n()setEvent(2);\n\n");
+	expectScriptRefusedFor("\n\n# " + deep + "\n()setEvent(1);", tooDeep);
+	expectScriptRefusedFor("\n# " + deep, tooDeep);
+
+	// The compiler cuts a line at the "//" that is outside a text, and looks for the quotes in its own
+	// way: it does not look at the character after a '/' that is alone
+	expectScriptAccepted("print(\"a/\", \"b//c\"); ()setEvent(1);");
+	expectScriptRefusedFor("print(\"a\\\"/\", \"b//c\"); v0 = " + deep + "1;", tooDeep);
+	expectScriptAccepted("()setEvent(1); v0 = 4 /");
+	expectScriptAccepted("v0 = \"//\"; v1 = 1 /");
+
+	// The condition of a dynamic_if is put between the parentheses of an if by the AI service: it is
+	// one level deep, and a condition of one line does not begin a line
+	expectScriptAccepted("v0 == " + std::string(RtScenarioMaxScriptDepth - 1, '(') + "1" + std::string(RtScenarioMaxScriptDepth - 1, ')'), true);
+	expectScriptRefusedFor("v0 == " + std::string(RtScenarioMaxScriptDepth, '(') + "1" + std::string(RtScenarioMaxScriptDepth, ')'), tooDeep, true);
+	expectScriptRefusedFor("# " + deep, tooDeep, true);
+	expectScriptAccepted("# " + deep + "\nv0 == 1", true);
+	// its lines are the ones that are not empty, as the animation module makes them
+	expectScriptAccepted("\n\n# " + deep + "\n\nv0 == 1\n\n", true);
+	// and they get the prefix of the session when the condition has a colon: no line begins with a
+	// '#' then
+	expectScriptRefusedFor("# : " + deep + "\nv0 == 1", tooDeep, true);
+}
+
+TEST(RtScenarioCheck, AScriptHasNoControlCharacterButTheTabAndTheEndsOfItsLines)
+{
+	expectScriptAccepted("\t()setEvent(1);\r\n\t()setEvent(2);\n");
+	// the bytes of a text of the author in another script than latin
+	expectScriptAccepted("()npcSay(@group, \"Zo\xc3\xa9 \xe9\xbe\x8d\", \"DSS_1 RtEntryText_1\");");
+	expectScriptAccepted("()npcSay(@group, \"\x7f\", \"DSS_1 RtEntryText_1\");");
+
+	// the lexer of the AI service reads a script up to its first zero byte
+	std::string script = "()setEvent(1);";
+	script += '\0';
+	script += "()setEvent(2);";
+	expectScriptRefusedFor(script, "has the control character 0x00 at byte 14, a script has the tab and the ends of its lines only");
+
+	// the others, where they are script, in a text and in a comment, and in a condition
+	const char others[] = { '\x00', '\x01', '\x08', '\x0b', '\x0c', '\x0e', '\x1b', '\x1f' };
+	for (uint32 i = 0; i < sizeof(others) / sizeof(others[0]); ++i)
+	{
+		const std::string character(1, others[i]);
+		const std::string rule = NLMISC::toString("has the control character 0x%02x", (uint32)(uint8)others[i]);
+		expectScriptRefusedFor("()setEvent(1); " + character, rule);
+		expectScriptRefusedFor(character + "()setEvent(1);", rule + " at byte 0");
+		expectScriptRefusedFor("$a = \"a" + character + "b\";", rule);
+		expectScriptRefusedFor("// a" + character + "\n()setEvent(1);", rule);
+		expectScriptRefusedFor("v0 == 1" + character, rule, true);
+	}
+}
+
+TEST(RtScenarioCheck, AStatementOfAScriptHasALargestNumberOfTokens)
+{
+	const uint32 most = RtScenarioMaxScriptStatementTokens;
+	const char *rule = "has a statement of more than 256 tokens";
+
+	// the ';' that ends a statement is not one of its tokens
+	expectScriptAccepted(tokensOf(most - 1) + ";");
+	expectScriptAccepted(tokensOf(most) + ";");
+	expectScriptRefusedFor(tokensOf(most + 1) + ";", rule);
+
+	// each statement is counted alone: a ';', a '{' and a '}' end it
+	expectScriptAccepted(repeat(tokensOf(most - 1) + ";\n", 20));
+	expectScriptAccepted("if (v0 == 1) { " + tokensOf(most - 1) + "; } " + tokensOf(most - 1) + ";");
+	expectScriptRefusedFor("if (v0 == 1) { " + tokensOf(most - 1) + "; } " + tokensOf(most + 1) + ";", rule);
+
+	// the parameters and the results of a call, and the parts of a print
+	expectScriptAccepted("()setTimer(" + repeat("1 + ", 100) + "1, 0);");
+	expectScriptRefusedFor("()setTimer(" + repeat("1, ", most / 2) + "1);", rule);
+	expectScriptRefusedFor("(" + repeat("v0, ", most / 2) + "v0)rndm(0, 3);", rule);
+	expectScriptRefusedFor("print(" + repeat("\"a\", ", most / 2) + "\"a\");", rule);
+	expectScriptRefusedFor("v0 = " + repeat("1 * ", most / 2) + "1;", rule);
+
+	// ifs without braces, one inside the other, are one statement
+	expectScriptAccepted(repeat("if (v0 == 1) ", 10) + "()setEvent(1);");
+	expectScriptRefusedFor(repeat("if (v0 == 1) ", most / 7 + 1) + "()setEvent(1);", rule);
+
+	// a text is one token whatever it holds, and a comment none
+	expectScriptAccepted("$a = \"" + repeat("1 + ", most) + "\";");
+	expectScriptAccepted("v0 = 1 // " + repeat("+ 1 ", most) + "\n + 1;");
+
+	// the condition of a dynamic_if is a statement with the "if (" and the ")" the AI service puts
+	// around it
+	expectScriptAccepted(tokensOf(most - 3), true);
+	expectScriptRefusedFor(tokensOf(most - 2), rule, true);
+}
+
+TEST(RtScenarioCheck, ElseAfterElseHasALargestNumber)
+{
+	const uint32 most = RtScenarioMaxScriptElseChain;
+	const char *rule = "has more than 32 'else' that follow one another";
+
+	expectScriptAccepted("if (v0 == 1) { ()setEvent(1); } else if (v0 == 2) { ()setEvent(2); } else { ()setEvent(3); }");
+
+	// with braces and without
+	expectScriptAccepted(repeat("if (v0 == 1) { ()setEvent(1); } else ", most) + "{ ()setEvent(2); }");
+	expectScriptRefusedFor(repeat("if (v0 == 1) { ()setEvent(1); } else ", most + 1) + "{ ()setEvent(2); }", rule);
+	expectScriptAccepted(repeat("if (v0 == 1) v1 = 1; else ", most) + "v1 = 2;");
+	expectScriptRefusedFor(repeat("if (v0 == 1) v1 = 1; else ", most + 1) + "v1 = 2;", rule);
+
+	// a statement that does not follow an else ends the chain
+	expectScriptAccepted(repeat("if (v0 == 1) { v1 = 1; } else { v1 = 2; }\n", 200));
+	expectScriptAccepted(repeat(repeat("if (v0 == 1) v1 = 1; else ", most) + "v1 = 2;\n", 4));
+	expectScriptAccepted(repeat(repeat("if (v0 == 1) { v1 = 1; } else ", most) + "{ v1 = 2; }\n{ v1 = 3; }\n", 4));
+
+	// the chain between the braces of a statement of a chain is another chain
+	expectScriptAccepted(repeat("if (v0 == 1) { " + repeat("if (v0 == 1) v1 = 1; else ", most) + "v1 = 2; } else ", most) + "v1 = 3;");
+	expectScriptRefusedFor("if (v0 == 1) { " + repeat("if (v0 == 1) v1 = 1; else ", most + 1) + "v1 = 2; } else v1 = 3;", rule);
+
+	// the else of ifs without braces one inside the other
+	expectScriptRefusedFor(repeat("if (v0 == 1) ", most + 1) + "v1 = 1;" + repeat(" else v1 = 2;", most + 1), rule);
+
+	// the else the AI service puts after the condition of a dynamic_if is the only one of its chain
+	expectScriptAccepted("v0 == 1", true);
+}
+
+TEST(RtScenarioCheck, ATextOfAScriptHasALargestSize)
+{
+	const uint32 most = RtScenarioMaxScriptTextSize;
+	const char *rule = "a text of a script has 4096 at most";
+
+	// the bytes between the quotes
+	expectScriptAccepted("()npcSay(@group, \"" + std::string(most, 'a') + "\", \"t\");");
+	expectScriptRefusedFor("()npcSay(@group, \"" + std::string(most + 1, 'a') + "\", \"t\");", "has a text of 4097 bytes between quotes, a text of a script has 4096 at most");
+	expectScriptRefusedFor("print(\"" + std::string(most + 1, 'a') + "\");", rule);
+	expectScriptRefusedFor("$a = \"" + std::string(RtScenarioMaxScriptSize - 16, 'a') + "\";", rule);
+
+	// each text is measured alone
+	expectScriptAccepted(repeat("$a = \"" + std::string(most, 'a') + "\";\n", 8));
+
+	// a quote after a backslash is inside its text, which goes on to the quote that ends it
+	expectScriptAccepted("$a = \"" + std::string(most - 2, 'a') + "\\\"\";");
+	expectScriptRefusedFor("$a = \"" + std::string(most / 2, 'a') + "\\\"" + std::string(most / 2, 'a') + "\";", "has a text of 4098 bytes between quotes");
+
+	// what is in a comment is no text
+	expectScriptAccepted("// \"" + std::string(most + 1, 'a') + "\"\n()setEvent(1);");
+
+	// in the condition of a dynamic_if
+	expectScriptAccepted("$a == \"" + std::string(most, 'a') + "\"", true);
+	expectScriptRefusedFor("$a == \"" + std::string(most + 1, 'a') + "\"", rule, true);
+}
+
+TEST(RtScenarioCheck, TheScriptsOfAScenarioAreChecked)
+{
+	expectAccepted(withScript("code", "()setEvent(1);\n()r2_0001_RtNpcGrp_2.setTimer(30, 0);\n"));
+	expectAccepted(withScript("dynamic_if", "r2_0001_RtNpcGrp_2.Active == 1"));
+
+	expectRefused(withScript("code", "()setEvent(1);\n()setGlobalNelVar(\"a\", \"b\");\n"),
+	    "Acts[1].Events[0]: the action 'RtNpcEventHandlerAction_4'.Parameters calls the function 'setGlobalNelVar', which is not a function of a scenario");
+	expectRefused(withScript("dynamic_if", "()getPlayerStat(\"a\", \"b\") == 1"), "calls the function 'getPlayerStat'");
+
+	// the parameters of the other actions are no script: what a script cannot have is a text there
+	const std::string deep(RtScenarioMaxScriptDepth + 1, '(');
+	expectRefused(withScript("code", "v0 = " + deep + "1;"), "Parameters has parentheses and braces more than 32 deep");
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2:Yubo\n" + deep));
+
+	// what a script of a scenario does not have
+	expectRefused(withScript("code", "while (v0 == 0) { v0 = 0; }"), "Parameters uses 'while', which a script of a scenario does not have");
+	expectRefused(withScript("code", "step() { ()setEvent(1); }"), "Parameters defines or calls the script function 'step'");
+	expectRefused(withScript("code", std::string(RtScenarioMaxScriptSize + 1, ' ')), "a script has 65536 at most");
+	expectRefused(withScript("code", "()setEvent(1);\x01"), "Parameters has the control character 0x01 at byte 14, a script has the tab and the ends of its lines only");
+	expectRefused(withScript("dynamic_if", "v0 == 1\x1f"), "Parameters has the control character 0x1f at byte 7");
+	expectRefused(withScript("code", tokensOf(RtScenarioMaxScriptStatementTokens + 1) + ";"), "Parameters has a statement of more than 256 tokens");
+	expectRefused(withScript("code", repeat("if (v0 == 1) v1 = 1; else ", RtScenarioMaxScriptElseChain + 1) + "v1 = 2;"), "Parameters has more than 32 'else' that follow one another");
+	expectRefused(withScript("code", "$a = \"" + std::string(RtScenarioMaxScriptTextSize + 1, 'a') + "\";"), "Parameters has a text of 4097 bytes between quotes, a text of a script has 4096 at most");
+
+	// an action below another one
+	expectRefused(replaceAll(with("Action = [[npc_say]]", "Action = [[code]]"), "Parameters = [[RtNpcGrp_1:Guard\nRtEntryText_1]]", "Parameters = [[()summonPlayer(0, \"x\");]]"),
+	    "Acts[0].Events[0]: the action 'RtNpcEventHandlerAction_3'.Parameters calls the function 'summonPlayer'");
+}
+
+TEST(RtScenarioCheck, TheParametersOfAnActionHaveTheShapeOfItsType)
+{
+	// names of states and of groups
+	expectAccepted(withScript("begin_state", "RtAiState_2\nClient1_20.init\nRtAiState_2|wander"));
+	expectRefused(withScript("begin_state", "RtAiState_2;x"), "Parameters has the line 'RtAiState_2;x'");
+	expectRefused(withScript("punctual_state", "a state"), "Parameters has the line 'a state'");
+	expectRefused(withScript("trigger_event_3", "RtNpcGrp_2\nRtNpcGrp:2"), "Parameters has the line 'RtNpcGrp:2'");
+
+	// The npc that talks, of a group that has an id, on a line and the id of the text on the next. The
+	// lines are the ones the animation module makes of the parameters: the empty ones too, and without
+	// the '\r'. (The text of a scenario leaves out a line end that follows its "[[".)
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2:Yubo the \"brave\"\nRtEntryText_1"));
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2:Yubo\nRtEntryText_1\n"));
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2:Yubo\r\nRtEntryText_1\r\n"));
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2\r:Yubo\nRtEntryText_1"));
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2:Yubo\nRtEntryText_1\nmore\n\nlines"));
+	// the translator leaves the second line empty for a text the user of the editor did not write
+	expectAccepted(withScript("npc_say", "RtNpcGrp_2:Yubo\n\n"));
+	// without a group the leader of the group of the action talks
+	expectAccepted(withScript("npc_say", "Yubo\nRtEntryText_1"));
+	expectAccepted(withScript("npc_say", "\n\nRtEntryText_1"));
+	expectRefused(withScript("npc_say", "RtNpcGrp 2:Yubo\nRtEntryText_1"), "Parameters names the group 'RtNpcGrp 2'");
+	expectRefused(withScript("npc_say", ":Yubo\nRtEntryText_1"), "Parameters names the group ''");
+	expectRefused(withScript("npc_say", "RtNpcGrp_2;x:Yubo\n\n"), "Parameters names the group 'RtNpcGrp_2;x'");
+	// With less than two lines the animation module gives the AI service an action that has nothing to
+	// say, whatever the line is
+	const char *sayRule = "an npc_say action has the npc on a line and the text on the next";
+	const char *const oneLine[] = { "", "RtEntryText_1", "Welcome: to the gate", "RtNpcGrp_2:Yubo", "RtNpcGrp_2:Yubo\n", "RtNpcGrp_2:Yubo\r\r", "RtNpcGrp_2:Yubo\r\n\r", "RtNpcGrp 2:Yubo", " \n", "\r\r" };
+	for (uint32 i = 0; i < sizeof(oneLine) / sizeof(oneLine[0]); ++i)
+		expectRefused(withScript("npc_say", oneLine[i]), sayRule);
+	expectRefused(withScript("npc_say", "RtNpcGrp_2:Yubo\n"), "Acts[1].Events[0]: the action 'RtNpcEventHandlerAction_4'.Parameters is 'RtNpcGrp_2:Yubo?', an npc_say action has the npc on a line and the text on the next");
+	expectRefused(replaceAll(with("Action = [[begin_state]]", "Action = [[npc_say]]"), "Parameters = [[RtAiState_2]]", "Parameters = 12"), "Parameters is the number 12, an npc_say action has the npc on a line and the text on the next");
+	expectRefused(replaceAll(with("Action = [[begin_state]]", "Action = [[npc_say]]"), "Parameters = [[RtAiState_2]], ", ""), "Parameters is missing, an npc_say action has the npc on a line and the text on the next");
+	expectAccepted(withScript("facing", "RtNpcGrp_2:Yubo\nRtNpcGrp_2:Yubo"));
+	expectRefused(withScript("facing", "RtNpcGrp_2:Yubo\nRtNpcGrp.2:Yubo"), "Parameters names the group 'RtNpcGrp.2'");
+	expectAccepted(withScript("emot", "Bow\nRtNpcGrp_2:Yubo"));
+	expectRefused(withScript("emot", ""), "an emot action begins with the name of the emote");
+	expectRefused(withScript("emot", "Bow\nRtNpcGrp;2:Yubo"), "Parameters names the group 'RtNpcGrp;2'");
+
+	// a variable, an operator and a value
+	const char *const conditions[] = { "condition_if", "condition_if_else", "modify_variable" };
+	for (uint32 i = 0; i < sizeof(conditions) / sizeof(conditions[0]); ++i)
+	{
+		expectAccepted(withScript(conditions[i], "v0 == 1"));
+		expectAccepted(withScript(conditions[i], "  v0   ==   1  "));
+		expectRefused(withScript(conditions[i], ""), "a variable, an operator and a value are needed");
+		expectRefused(withScript(conditions[i], "v0"), "a variable, an operator and a value are needed");
+		expectRefused(withScript(conditions[i], "v0 =="), "a variable, an operator and a value are needed");
+		expectRefused(withScript(conditions[i], "v0 == 1 2"), "a variable, an operator and a value are needed");
+		expectRefused(withScript(conditions[i], "v0 == 1\nv1 == 2"), "a variable, an operator and a value are needed");
+	}
+
+	// a time
+	expectAccepted(withScript("set_timer_t1", "0"));
+	expectAccepted(withScript("set_timer_t2", "36000"));
+	expectRefused(withScript("set_timer_t0", ""), "a number is needed");
+	expectRefused(withScript("set_timer_t0", " "), "a number is needed");
+	expectRefused(withScript("set_timer_t0", "ten"), "a number is needed");
+	expectRefused(withScript("set_timer_t0", "10 20"), "a number is needed");
+	expectRefused(withScript("set_timer_t0", "1.2.3"), "a number is needed");
+	expectRefused(withScript("set_timer_t0", "-1"), "a number is needed");
+	expectRefused(withScript("set_timer_t0", "10\n20"), "a number is needed");
+
+	// the variable of a switch
+	expectAccepted(withScript("switch_actions", "v2"));
+	expectAccepted(withScript("switch_actions", "oldChatStepVar"));
+	expectRefused(withScript("switch_actions", ""), "the name of a variable is needed");
+	expectRefused(withScript("switch_actions", "v2 v3"), "the name of a variable is needed");
+	expectRefused(withScript("switch_actions", "2v"), "the name of a variable is needed");
+	expectRefused(withScript("switch_actions", "v2\n1\n2"), "the name of a variable is needed");
+}
+
+TEST(RtScenarioCheck, AnEventIsOfATypeOfAScenarioAndNamesStatesAndGroups)
+{
+	const char *const types[] = {
+		"start_of_state", "end_of_state", "group_spawned", "group_despawned", "group_eliminated", "group_under_attack", "bot_killed",
+		"bot_target_killed", "destination_reached", "destination_reached_all", "player_target_npc", "player_arrived_trigger_zone",
+		"player_left_trigger_zone", "timer_t0_triggered", "timer_t3_triggered", "user_event_0", "user_event_9", "variable_changed",
+		"variable_v0_changed", "variable_v3_changed"
+	};
+	for (uint32 i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
+		expectAccepted(with("Event = [[user_event_1]]", std::string("Event = [[") + types[i] + "]]"));
+
+	const char *const others[] = { "state_timeout", "punctual_state_timeout", "user_event_10", "timer_t4_triggered", "Start_Of_State", "", "outpost_peace_state_begin" };
+	for (uint32 i = 0; i < sizeof(others) / sizeof(others[0]); ++i)
+		expectRefused(with("Event = [[user_event_1]]", std::string("Event = [[") + others[i] + "]]"), "which is not an event of a scenario");
+	expectRefused(with("Event = [[user_event_1]]", "Event = [[state_timeout]]"), "Acts[1].Events[0].Event is 'state_timeout'");
+
+	// the states and the groups of an event: a name on each line, or none
+	expectAccepted(with("StatesByName = [[RtAiState_2]]", "StatesByName = [[]]"));
+	expectAccepted(with("StatesByName = [[RtAiState_2]]", "StatesByName = [[RtAiState_2\nall_sequence_states\nClient1_20.init]]"));
+	expectRefused(with("StatesByName = [[RtAiState_2]]", "StatesByName = [[RtAiState_2\nRtAiState 3]]"), "Acts[1].Events[0].StatesByName has the line 'RtAiState 3'");
+	expectAccepted(with("GroupsByName = [[RtNpcGrp_2]]", "GroupsByName = [[RtNpcGrp_2\nRtNpcGrp_1]]"));
+	expectRefused(with("GroupsByName = [[RtNpcGrp_2]]", "GroupsByName = [[RtNpcGrp_2.x]]"), "Acts[1].Events[0].GroupsByName has the line 'RtNpcGrp_2.x'");
+	expectRefused(with("GroupsByName = [[RtNpcGrp_2]]", "GroupsByName = [[r2_0002_*]]"), "GroupsByName has the line 'r2_0002_*'");
+}
+
+TEST(RtScenarioCheck, TheTextsOfAGroupAnNpcAndAStateAreWhatTheEditorWrites)
+{
+	// a group
+	expectAccepted(with("GrpParameters = [[ring\n]]", "GrpParameters = [[ring\nbot_attackable\nplayer_attackable\naggro range: 30\nrespawn time:-1\ndenied_astar_flags:WaterAndNoGo\n]]"));
+	expectAccepted(with("GrpParameters = [[ring\n]]", "GrpParameters = [[ring\naggro range: 0\n\naggro range: 120\naggro range: 12.5\n]]"));
+	const char *const groupLines[] = { "Ring", "ring ", "aggro range: -1", "aggro range:30", "aggro range: 30 ", "aggro range: 1e9", "respawn time:10", "denied_astar_flags:Water", "faction:tribe", "nb_bots:4" };
+	for (uint32 i = 0; i < sizeof(groupLines) / sizeof(groupLines[0]); ++i)
+		expectRefused(with("GrpParameters = [[ring\n]]", std::string("GrpParameters = [[ring\n") + groupLines[i] + "\n]]"), "which is not a parameter of a group of a scenario");
+	expectRefused(with("GrpParameters = [[ring\n]]", "GrpParameters = [[ring\nnb_bots:4\n]]"), "Acts[0].AiStates[0]: the group 'RtNpcGrp_1'.GrpParameters has the line 'nb_bots:4'");
+	expectAccepted(with("Children = { [[RtNpc_3]] }, AutoSpawn = 0,\n					BotChat_parameters = [[]], BotEquipment = [[]], BotSheetClient = [[]], BotVerticalPos = [[auto]], Count = 0,\n					GrpKeywords = [[]], GrpParameters = [[]], AiProfilParams = [[]]",
+	    "Children = { [[RtNpc_3]] }, AutoSpawn = 0,\n					BotChat_parameters = [[]], BotEquipment = [[]], BotSheetClient = [[]], BotVerticalPos = [[auto]], Count = 0,\n					GrpKeywords = [[]], GrpParameters = [[]], AiProfilParams = [[running\n]]"));
+	expectRefused(with("Children = { [[RtNpc_3]] }, AutoSpawn = 0,\n					BotChat_parameters = [[]], BotEquipment = [[]], BotSheetClient = [[]], BotVerticalPos = [[auto]], Count = 0,\n					GrpKeywords = [[]], GrpParameters = [[]], AiProfilParams = [[]]",
+	    "Children = { [[RtNpc_3]] }, AutoSpawn = 0,\n					BotChat_parameters = [[]], BotEquipment = [[]], BotSheetClient = [[]], BotVerticalPos = [[auto]], Count = 0,\n					GrpKeywords = [[]], GrpParameters = [[]], AiProfilParams = [[faction:tribe]]"),
+	    "AiProfilParams has the line 'faction:tribe'");
+
+	// an npc: no chat, no keywords, the equipment of its look
+	const char *npc = "Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[]], IsStuck = 0,\n					Keywords = [[]]";
+	expectAccepted(with(npc, "Name = [[Yubo]], Children = { }, ChatParameters = [[\n]], Equipment = [[VPA:1234567890\nVPB:00ff00FF\nVPC:42\nFAUNA_BOT_USE_BOTNAME\n]], IsStuck = 0,\n					Keywords = [[]]"));
+	expectRefused(with(npc, "Name = [[Yubo]], Children = { }, ChatParameters = [[shop:items]], Equipment = [[]], IsStuck = 0,\n					Keywords = [[]]"),
+	    "Acts[1].AiStates[0]: the group 'RtNpcGrp_2': the npc 'RtNpc_3'.ChatParameters is 'shop:items', an npc of a scenario has none");
+	expectRefused(with(npc, "Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[]], IsStuck = 0,\n					Keywords = [[boss]]"),
+	    "Keywords is 'boss', an npc of a scenario has none");
+	const char *const equipment[] = { "VPD:12", "VPA:", "VPA:1 2", "CHANDS: 1", "ri:icfalb.sitem", "a b" };
+	for (uint32 i = 0; i < sizeof(equipment) / sizeof(equipment[0]); ++i)
+		expectRefused(with(npc, std::string("Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[") + equipment[i] + "]], IsStuck = 0,\n					Keywords = [[]]"),
+		    "which is not the equipment of an npc of a scenario");
+
+	// a state: no keywords and no parameters of a profile (its movement and its activity have a test
+	// of their own)
+	const char *state = "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[]]";
+	expectRefused(with(state, "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[patrol]]"),
+	    "Acts[1].AiStates[0].Keywords is 'patrol', a state of a scenario has none");
+	expectAccepted(with(state, "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[\n\n]]"));
+	expectAccepted(with(state, "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[]], AiProfilesParams = [[]]"));
+	expectAccepted(with(state, "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[]], AiProfilesParams = [[\n\n\n]]"));
+	// what is not a text is not given to the AI service
+	expectAccepted(with(state, "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[]], AiProfilesParams = 0"));
+	const char *const profileParameters[] = { "running", "faction:tribe", "\nevent_bot_killed:1\n", " ", "\n\n\t" };
+	for (uint32 i = 0; i < sizeof(profileParameters) / sizeof(profileParameters[0]); ++i)
+		expectRefused(with(state, std::string("AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[]], AiProfilesParams = [[\n") + profileParameters[i] + "]]"),
+		    "a state of a scenario has none");
+	expectRefused(with(state, "AiActivity = [[normal]], AiMovement = [[follow_route]], AiProfileParams = 0, Keywords = [[]], AiProfilesParams = [[running]]"),
+	    "Acts[1].AiStates[0].AiProfilesParams is 'running', a state of a scenario has none");
+}
+
+TEST(RtScenarioCheck, TheMovementAndTheActivityOfAStateAreWordsTheEditorWrites)
+{
+	const char *state = "AiActivity = [[normal]], AiMovement = [[follow_route]]";
+
+	// what the translator of the editor writes
+	const char *const movements[] = { "", "idle", "follow_route", "stand_on_vertices", "wander", "stand_on_start_point" };
+	for (uint32 i = 0; i < sizeof(movements) / sizeof(movements[0]); ++i)
+		expectAccepted(with(state, std::string("AiActivity = [[normal]], AiMovement = [[") + movements[i] + "]]"));
+	const char *const activities[] = { "", "no_change", "normal" };
+	for (uint32 i = 0; i < sizeof(activities) / sizeof(activities[0]); ++i)
+		expectAccepted(with(state, std::string("AiActivity = [[") + activities[i] + "]], AiMovement = [[follow_route]]"));
+	// a state without an activity is given none
+	expectAccepted(with(state, "AiMovement = [[follow_route]]"));
+	expectAccepted(with(state, "AiActivity = 0, AiMovement = [[follow_route]]"));
+
+	// The other profiles the AI service finds by a word: of a bot, of the groups of a shard, and the
+	// words of one list in the other. A word of the right shape is not enough.
+	const char *const otherMovements[] = {
+		"bot_flee", "bot_fight", "squad", "faction", "tribu", "escorted", "guard_escorted", "guard", "bandit", "normal", "no_change",
+		"patrol_route", "repeat_road", "follow route", "Wander", "wander ", " wander", "wander\n", "wander\nidle", "idle_", "x"
+	};
+	for (uint32 i = 0; i < sizeof(otherMovements) / sizeof(otherMovements[0]); ++i)
+		expectRefused(with(state, std::string("AiActivity = [[normal]], AiMovement = [[") + otherMovements[i] + "]]"), "which is not a movement of a state of a scenario");
+	const char *const otherActivities[] = {
+		"bot_flee", "bot_fight", "squad", "faction", "tribu", "escorted", "guard_escorted", "guard", "bandit", "idle", "wander", "follow_route",
+		"stand_on_start_point", "Normal", "normal:1", "normal ", "no change", "normal\n", "civil", "x"
+	};
+	for (uint32 i = 0; i < sizeof(otherActivities) / sizeof(otherActivities[0]); ++i)
+		expectRefused(with(state, std::string("AiActivity = [[") + otherActivities[i] + "]], AiMovement = [[follow_route]]"), "which is not an activity of a state of a scenario");
+
+	expectRefused(with(state, "AiActivity = [[normal]], AiMovement = [[bot_fight]]"), "Acts[1].AiStates[0].AiMovement is 'bot_fight', which is not a movement of a state of a scenario");
+	expectRefused(with(state, "AiActivity = [[bot_flee]], AiMovement = [[follow_route]]"), "Acts[1].AiStates[0].AiActivity is 'bot_flee', which is not an activity of a state of a scenario");
+	// the movement is read whatever it is: it must be a text
+	expectRefused(with(state, "AiActivity = [[normal]], AiMovement = 0"), "Acts[1].AiStates[0].AiMovement is the number 0, a text is needed");
+}
+
+TEST(RtScenarioCheck, NamesAndWordsHaveALargestSize)
+{
+	const std::string id(RtScenarioMaxIdSize, 'n');
+	const std::string longId(RtScenarioMaxIdSize + 1, 'n');
+	const char *idRule = "an id has letters, digits and '_', 64 at most";
+	const char *stateRule = "the name of a state or a group has letters, digits, '_', '.' and '|', 128 at most";
+
+	// the id of a state, an npc and an event (IdsAreNamesTheServiceMakesNamesOf has the one of a group)
+	expectAccepted(with("Id = [[RtAiState_1]], Name", "Id = [[" + id + "]], Name"));
+	expectRefused(with("Id = [[RtAiState_1]], Name", "Id = [[" + longId + "]], Name"), "Acts[0].AiStates[0].Id is");
+	expectRefused(with("Id = [[RtAiState_1]], Name", "Id = [[" + longId + "]], Name"), idRule);
+	expectAccepted(replaceAll(s_Scenario, "RtNpc_3", id));
+	expectRefused(replaceAll(s_Scenario, "RtNpc_3", longId), idRule);
+	expectAccepted(with("Id = [[RtNpcEventHandler_2]]", "Id = [[" + id + "]]"));
+	expectRefused(with("Id = [[RtNpcEventHandler_2]]", "Id = [[" + longId + "]]"), idRule);
+
+	// the name of a state where an event or an action names one: two ids and what joins them
+	const std::string stateName(RtScenarioMaxIdSize * 2, 's');
+	expectAccepted(with("StatesByName = [[RtAiState_2]]", "StatesByName = [[" + stateName + "]]"));
+	expectRefused(with("StatesByName = [[RtAiState_2]]", "StatesByName = [[" + stateName + "s]]"), stateRule);
+	expectAccepted(withScript("begin_state", stateName));
+	expectRefused(withScript("begin_state", stateName + "s"), stateRule);
+	expectAccepted(withScript("trigger_event_0", "RtNpcGrp_2\n" + stateName));
+	expectRefused(withScript("trigger_event_0", "RtNpcGrp_2\n" + stateName + "s"), stateRule);
+	// the name of a group where an event names one
+	expectAccepted(with("GroupsByName = [[RtNpcGrp_2]]", "GroupsByName = [[" + id + "]]"));
+	expectRefused(with("GroupsByName = [[RtNpcGrp_2]]", "GroupsByName = [[" + longId + "]]"), idRule);
+
+	// the group of the npc of an action
+	expectAccepted(withScript("npc_say", id + ":Yubo\nRtEntryText_1"));
+	expectRefused(withScript("npc_say", longId + ":Yubo\nRtEntryText_1"), idRule);
+	expectAccepted(withScript("facing", id + ":Yubo\n" + id + ":Yubo"));
+	expectRefused(withScript("facing", id + ":Yubo\n" + longId + ":Yubo"), idRule);
+	expectAccepted(withScript("emot", "Bow\n" + id + ":Yubo"));
+	expectRefused(withScript("emot", "Bow\n" + longId + ":Yubo"), idRule);
+
+	// the name of an emote and of the variable of a switch
+	expectAccepted(withScript("emot", std::string(RtScenarioMaxIdSize, 'e') + "\nRtNpcGrp_2:Yubo"));
+	expectRefused(withScript("emot", std::string(RtScenarioMaxIdSize + 1, 'e') + "\nRtNpcGrp_2:Yubo"), "an emot action begins with the name of the emote");
+	expectAccepted(withScript("switch_actions", std::string(RtScenarioMaxIdSize, 'v')));
+	expectRefused(withScript("switch_actions", std::string(RtScenarioMaxIdSize + 1, 'v')), "the name of a variable is needed");
+
+	// a number: 16 characters
+	expectAccepted(withScript("set_timer_t0", "1234567890123456"));
+	expectRefused(withScript("set_timer_t0", "12345678901234567"), "a number is needed");
+	expectAccepted(withScript("set_timer_t0", "12345678.1234567"));
+	expectRefused(withScript("set_timer_t0", "12345678.12345678"), "a number is needed");
+	expectAccepted(with("GrpParameters = [[ring\n]]", "GrpParameters = [[ring\naggro range: 1234567890123456\n]]"));
+	expectRefused(with("GrpParameters = [[ring\n]]", "GrpParameters = [[ring\naggro range: 12345678901234567\n]]"), "which is not a parameter of a group of a scenario");
+
+	// the equipment of an npc: a visual property of 32 characters, a word of 64
+	const char *npc = "Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[]], IsStuck = 0,\n					Keywords = [[]]";
+	const char *equipmentRule = "which is not the equipment of an npc of a scenario";
+	expectAccepted(with(npc, "Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[VPA:" + std::string(32, '7') + "\n" + std::string(RtScenarioMaxIdSize, 'W') + "]], IsStuck = 0,\n					Keywords = [[]]"));
+	expectRefused(with(npc, "Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[VPA:" + std::string(33, '7') + "]], IsStuck = 0,\n					Keywords = [[]]"), equipmentRule);
+	expectRefused(with(npc, "Name = [[Yubo]], Children = { }, ChatParameters = [[]], Equipment = [[" + std::string(RtScenarioMaxIdSize + 1, 'W') + "]], IsStuck = 0,\n					Keywords = [[]]"), equipmentRule);
+}

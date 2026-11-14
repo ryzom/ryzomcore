@@ -40,6 +40,36 @@ const sint32 RtScenarioMaxCoordinate = 2147483;
 const sint32 RtScenarioMaxAngle = 65536;
 /// Margin in metres around the islands when positions are bounded by them: one zone of the landscape
 const sint32 RtScenarioIslandMargin = 160;
+/// Bytes in the id of a state, a group, an npc or an event. The translator of the editor makes
+/// them from the class and a counter ("RtNpcGrp_18").
+const uint32 RtScenarioMaxIdSize = 64;
+/// Bytes in the script of an action. The translator of the editor writes a few statements for each
+/// thing its user sets up, and the script of a dialog grows with the steps of the dialog: the limit
+/// is far above the scripts it writes, and bounds what the AI service compiles at once.
+const uint32 RtScenarioMaxScriptSize = 65536;
+/// Parentheses and braces inside one another in a script. The translator of the editor writes a
+/// handful; the parser of the AI service keeps what is open on a stack of a fixed largest size, and
+/// builds the code of each level from a copy of the code of the level below.
+const uint32 RtScenarioMaxScriptDepth = 32;
+/// Tokens of one statement of a script: the names, numbers, texts, operators and parentheses between
+/// two of ';', '{' and '}'. The longest statement the translator of the editor writes is a call with
+/// its parameters, a few dozen tokens. The lists of a statement (the parameters of a call, the terms
+/// of an expression, the parts of a print) are what the compiler of the AI service works longest
+/// on, element by element: the limit keeps them short whatever the size of the script, and with
+/// them the ifs without braces that are inside one another, which are one statement.
+const uint32 RtScenarioMaxScriptStatementTokens = 256;
+/// "else" after "else" in a script, each one for the statement that ends before it ("if (a) { }
+/// else if (b) { } else ..."). The translator of the editor writes a few; the parser of the AI
+/// service keeps every one of them open until the last, and the code of each holds a copy of the
+/// code of the ones after it.
+const uint32 RtScenarioMaxScriptElseChain = 32;
+/// Bytes of one text between quotes in a script. The texts the translator of the editor writes there
+/// are names and the phrases of a feature (of a mission, a reward, a message), which its user types
+/// into a box of 255 characters at most (r2_ui_property_sheet.lua): four bytes for each character
+/// are 1020 bytes, and the names of the items and npcs a phrase names are put into it. The AI
+/// service keeps the text variables of a group for as long as the group: the limit bounds what one
+/// statement of a script adds to them.
+const uint32 RtScenarioMaxScriptTextSize = 4096;
 
 /**
  * Limits a run time scenario is checked against. The defaults are the limits that exist elsewhere
@@ -201,11 +231,54 @@ enum TRtScenarioVerdict
  * rtScenario can be NULL (an empty upload, or one whose compressed data could not be read), which
  * is refused like any other tree that is not a scenario.
  *
+ * What the scenario is given to the AI service as is what the editor makes, and nothing else the
+ * AI service could be given: the id of a state, a group, an npc or an event has the characters of
+ * a name in a script (the service makes the names in the AI service from them), an action is of a
+ * type of a scenario (isRtScenarioActionType), and a script calls the native functions of a
+ * scenario (checkRtScenarioScript).
+ *
  * Returns RtScenarioOk, or the reason for the refusal with a description in error (one line, that
  * names the place in the tree and the value; text taken from the tree is shortened and has its
  * control characters replaced, so it can go to the log).
  */
 TRtScenarioVerdict checkRtScenario(const CObject *rtScenario, const CRtScenarioLimits &limits, std::string &error);
+
+/// True for a type of action the translator of the editor gives the actions of a scenario. The AI
+/// service has others, which are for the primitives of a shard.
+bool isRtScenarioActionType(const std::string &action);
+
+/// True for the signature (name_parameters_results, as "setEvent_f_") of a native function of the
+/// AI service the scripts of a scenario call. The AI service compiles the scripts of a scenario
+/// with these functions only.
+bool isRtScenarioScriptFunction(const std::string &signature);
+
+/// The signatures isRtScenarioScriptFunction() is true for, sorted
+const char *const *getRtScenarioScriptFunctions(uint32 &count);
+
+/**
+ * Tells whether the script of a "code" action, or the condition of a "dynamic_if" action
+ * (isCondition), is what the translator of the editor writes, as the client uploaded it (its lines
+ * separated by '\n'). The text is read as the AI service compiles it: a condition gets the prefix
+ * of the session before its lines when it has a colon, and its last line is put inside an if.
+ * A script of a scenario
+ * - has RtScenarioMaxScriptSize bytes at most, and parentheses and braces RtScenarioMaxScriptDepth
+ *   deep at most;
+ * - has no control character but the tab and the ends of its lines (the lexer of the AI service
+ *   stops at a zero byte);
+ * - has statements of RtScenarioMaxScriptStatementTokens tokens at most, RtScenarioMaxScriptElseChain
+ *   "else" one after the other at most, and texts between quotes of RtScenarioMaxScriptTextSize
+ *   bytes at most;
+ * - has no loop ("while"), no "rand" block and no "onchildren" block;
+ * - defines and calls no function of its own;
+ * - calls the native functions whose name is the name of a function of a scenario. The
+ *   parameters of a call are not looked at here: the AI service compiles the script, and tests the
+ *   whole signature.
+ * Returns false at the first thing that is not so, with what it is in refusal (the rest of a
+ * sentence that begins with the place of the script).
+ *
+ * The AI service makes the same test on the text of a script of a scenario before it compiles it.
+ */
+bool checkRtScenarioScript(const std::string &script, bool isCondition, std::string &refusal);
 
 /**
  * Checks the act a client asks the scenario to start in: it is one of the acts of the tree and not
