@@ -1625,8 +1625,10 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 		{
 			const CShardNames::TSessionName &sn = shardNames[i];
 
-			// create an unified dynamic channel with a well known chanId
-			DynChatEGS.addLocalizedChan("RING_"+toUpper(sn.ShortName), CEntityId(RYZOMID::dynChatGroup, RingDynChanOffset+sn.SessionId.asInt()), false, false, true);
+			// create an unified dynamic channel with a well known chanId; its title is the display name the shard
+			// configuration gives the mainland (HomeMainlandNames), sent as it is, since an operator names shards freely
+			// and no phrase can exist for every name
+			DynChatEGS.addChan("RING_" + toUpper(sn.ShortName), ucstring::makeFromUtf8(sn.DisplayName), CEntityId(RYZOMID::dynChatGroup, RingDynChanOffset + sn.SessionId.asInt()), false, false, true);
 		}
 	}
 

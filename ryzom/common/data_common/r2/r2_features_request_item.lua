@@ -204,6 +204,8 @@ function component:getItems()
 end
 
 function component:textAdapter(text)
+	-- a text that the component does not have (one of an older editor) is an empty text
+	if text == nil then text = "" end
 	assert(text)
 	if type(text) ~= "string" then
 		debugInfo("Wrong type "..type(text))

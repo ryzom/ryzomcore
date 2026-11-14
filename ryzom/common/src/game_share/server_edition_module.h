@@ -250,13 +250,12 @@ namespace R2
 		/////////////////////////////////////////////////////
 		//// Handle key policies
 		/////////////////////////////////////////////////////
-		// eg of conf
+		// e.g. a shard that accepts only headers signed with its private key (the default accepts every file, see init)
 		// setDefaultKey(0, "PROD");
 		//	addKeyPolicy(0, "DEFAULT", "EMPTY", "REFUSE");
-		//	addKeyPolicy(0, "EMPTY", "EMPTY", "REFUSE"); // Deprecated (scenario older than 22 juin 2006)
-		//	addKeyPolicy(0, "PROD", "PROD:098085b10aa27157d57587464e3b2390 ", "TEST");
-		//	addKeyPolicy(0, "DEV", "DEV:26289fe9502f4db1fa3229e4fb2d8803", "TEST"); // accept current dev key
-		//	addKeyPolicy(0, "DEVOBSOLETE", "DEVOBSOLETE:26289fe9502f4db1fa3229e4fb2d8803", "REFUSE");  // refuse old dev key
+		//	addKeyPolicy(0, "EMPTY", "EMPTY", "REFUSE"); // no signature: the scenarios before 22 June 2006
+		//	addKeyPolicy(0, "PROD", "PROD:098085b10aa27157d57587464e3b2390", "TEST");
+		//	addKeyPolicy(0, "DEV", "DEV:26289fe9502f4db1fa3229e4fb2d8803", "REFUSE"); // the dev key is public: anyone signs with it
 		// reset all policies
 		virtual void resetKeyPolicies(NLNET::IModuleProxy *sender);
 		// set the default key to use e.g. "DEV01" for dev "PROD01" for prod
@@ -371,7 +370,7 @@ namespace R2
 
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, resetKeyPolicies, "reset all key policies", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setDefaultKey, "set the default key use eg 'DEV'", "<theKey>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addKeyPolicy, "add a key Policy(eg 'DEV DEV:01234567890123 Accept' or 'DEFAULT DEFAULT Refuse' or 'EMPTY EMPTY Refuse'  )", "<keyName> <keyValue> <policy>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addKeyPolicy, "add a key policy, ACCEPT, REFUSE or TEST (eg 'PROD PROD:01234567890123 TEST', 'DEFAULT EMPTY REFUSE' or 'EMPTY EMPTY REFUSE')", "<keyName> <keyValue> <policy>")
 
 		NLMISC_COMMAND_HANDLER_TABLE_END
 

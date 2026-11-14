@@ -754,7 +754,7 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 		trad =  i18n.get("uiR2EDErrMessageDataCorrupted")
 		package = nil
 		entityLevel = nil
-		chatLevel = nil
+		charLevel = nil
 		entityName = nil
 	end
 
@@ -762,18 +762,24 @@ function RingAccess.errorMessageImpl(errorType, name, package, entityLevel, char
 
 	local str = trad
 
+	-- the texts go in as they are: in a replacement string of string.gsub "%" is an escape, and the name of an NPC
+	-- that holds one raises an error
+	local function insert(text, tag, value)
+		return (string.gsub(text, tag, function() return value end))
+	end
+
 	if package  and string.len(package) ~= 0 then
 		local category = i18n.get(string.format("uiR2EDRingAccessCategory_%s", package))
-		str=string.gsub (str, "<Package>", category)
+		str = insert(str, "<Package>", category)
 	end
 	if entityLevel then
-		str=string.gsub (str, "<EntityLevel>", tostring(math.floor(entityLevel)))
+		str = insert(str, "<EntityLevel>", tostring(math.floor(entityLevel)))
 	end
 	if charLevel then
-		str=string.gsub (str, "<CharLevel>", tostring(math.floor(charLevel)))
+		str = insert(str, "<CharLevel>", tostring(math.floor(charLevel)))
 	end
 	if entityName then
-		str=string.gsub (str, "<EntityName>", entityName)
+		str = insert(str, "<EntityName>", entityName)
 	end
 
 	local err = {}
@@ -980,7 +986,7 @@ function RingAccess.verifyEntityRec(node, level, allowed, ok, err )
 				local test = RingAccess.updateLevel(node.RingAccess, level, allowed)
 				if not test and  ok then
 					ok = false
-					err = RingAccess.errorMessageGeneric(node.access, allowed)
+					err = RingAccess.errorMessageGeneric(node.RingAccess, allowed)
 				end
 
 			end

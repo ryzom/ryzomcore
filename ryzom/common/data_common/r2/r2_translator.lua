@@ -64,7 +64,8 @@ function printMsgML(str)
 	end
 end
 --local devMode = false
-local devMode =   config.R2EDExtendedDebug
+-- config gives the number in the cfg file: 0, the shipped value, is true in Lua
+local devMode = (config.R2EDExtendedDebug == 1)
 local dataDevMode = false
 
 function printWarning( str)
@@ -576,12 +577,13 @@ Translator.translateEventHandlers = function(context, hlNpc, eventHandlers, rtNp
 			else
 				caller = pcall			
 			end
-			if not caller(Translator.translateEventHandler, context, hlNpc, v, rtNpcGrp) then
+			local ok, err = caller(Translator.translateEventHandler, context, hlNpc, v, rtNpcGrp)
+			if not ok then
 				local eventType = v.Event.Type
 				if eventType == nil then eventType = "" end
 				local componentName = hlNpc.Name
 				if componentName == nil then componentName = "" end
-				printWarning("Error in event handler '"..eventType.."' In component "..componentName)
+				printWarning("Error in event handler '"..eventType.."' In component "..componentName..": "..tostring(err))
 			end
 			k, v = next (eventHandlers, k)
 		end	
@@ -937,13 +939,14 @@ end
 --first parameter: action type
 Translator.createAction = function(...)
 	local arg = {...}
-	local debug=config.R2EDExtendedDebug
+	local debug = devMode
 	local function header(toto)
 
 		if debug then
 			return "print(\"<"..toto..">\");\n"
 		end
-		return "//"..toto
+		-- a comment line of its own: without the debug prints it is the first line of the script
+		return "//"..toto.."\n"
 	end
 
 	local function footer(toto)
@@ -1592,6 +1595,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 
 		local i = 0
 		local n = table.getn(param.Emotes)
+		local cases = 0
 		while i ~=  n do
 			i = i +1
 
@@ -1620,6 +1624,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 					"\t\t"..	"{\n" ..
 					say ..
 					"\t\t"..	"}\n \n"
+				cases = cases + 1
 		
 			elseif rtGrpId and param.Whos[i] and param.Whos[i] ~= "" and param.Grps[i] and param.Grps[i] ~= "" then
 				local say = ""
@@ -1642,9 +1647,14 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 					say ..
 					emote ..
 					"\t\t"..	"}\n \n"
+				cases = cases + 1
 			end
 
 		end
+
+		-- the script language has no switch without a case: a dialog none of whose steps has a speaker gets no
+		-- action, as a dialog without steps
+		if cases == 0 then return nil end
 
 		code = code .. "\t}\n}"
 
