@@ -3062,6 +3062,27 @@ endOfWelcomeUserResult:
 					return;
 				}
 			}
+			else
+			{
+				// A character invites itself: that is how the owner of a session takes its place in it, as an editor
+				// of its edit session, or as the animator or a player of its animation session. It is the owner's
+				// alone, with a role of the type of the session.
+				if (session->getOwnerId() != ownerCharId)
+				{
+					invokeResult(from, ownerCharId >> 4, 4, "Only the owner of a session invites itself in it");
+					return;
+				}
+				bool roleFitsSession = false;
+				if (session->getSessionType() == TSessionType::st_edit)
+					roleFitsSession = (role == TSessionPartStatus::sps_edit_invited);
+				else if (session->getSessionType() == TSessionType::st_anim)
+					roleFitsSession = (role == TSessionPartStatus::sps_anim_invited || role == TSessionPartStatus::sps_play_invited);
+				if (!roleFitsSession)
+				{
+					invokeResult(from, ownerCharId >> 4, 6, "The role of the invitation and the type of the session don't match");
+					return;
+				}
+			}
 
 			// TODO : check for role and session type coherency
 
