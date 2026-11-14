@@ -156,7 +156,7 @@ bool CDamageFactor::entityMatchRequirements(CEntityBase *entity)
 				return false;
 		}
 	}
-	if (Season != EGSPD::CSeason::EndSeason && EGSPD::CSeason::Invalid && CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason() != Season)
+	if (Season != EGSPD::CSeason::EndSeason && CTimeDateSeasonManager::getRyzomTimeReference().getRyzomSeason() != Season)
 		return false;
 
 	return true;
@@ -2633,8 +2633,8 @@ void CCombatPhrase::launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool
 		// apply area damage reduction
 		factor += _Targets[targetIndex].DamageFactor - 1.0f;
 
-		// brick damage modifiers (only on right hand attack)
-		if (rightHand)
+		// brick damage modifiers (only on right hand attack, and only on a target that matches the restrictions of the brick)
+		if (rightHand && _DamageFactorOnSuccess.entityMatchRequirements(defender))
 			factor += _DamageFactorOnSuccess.applyValue(_WeaponSabrinaValue) - 1.0f;
 
 		// if PVP, apply PVP damage factor
