@@ -30,6 +30,17 @@ function Translator.scriptText(text)
 	return str
 end
 
+-- A text of the author that goes into the run-time scenario outside a script: a text the npcs say
+-- (the entries of the text manager, the "npc_say" action), the name and the texts of a plot item, the
+-- name of an act or of a user trigger. Nothing ends such a text, and it can have several lines. A text
+-- that was pasted can hold control characters, which the client draws as a glyph when the text is
+-- said: every character below the space but the tab and the two of a line end becomes a space, as in
+-- a text of a script. What is not a text (nil) comes back as it is.
+function Translator.plainText(text)
+	if type(text) ~= "string" then return text end
+	return (string.gsub(text, "[\001-\008\011\012\014-\031]", " "))
+end
+
 -- Namespace global
 function printMsg(str)	
 	messageBox(str)	
@@ -745,10 +756,10 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 			local rtPlotItem = r2.newComponent("RtPlotItem")
 			rtPlotItem.SheetId = plotItem.SheetId
 			
-			rtPlotItem.Description = plotItem.Desc
+			rtPlotItem.Description = Translator.plainText(plotItem.Desc)
 			
-			rtPlotItem.Name = plotItem.Name
-			rtPlotItem.Comment = plotItem.Comment
+			rtPlotItem.Name = Translator.plainText(plotItem.Name)
+			rtPlotItem.Comment = Translator.plainText(plotItem.Comment)
 			table.insert(rtScenario.PlotItems, rtPlotItem)
 			plotItemId, plotItem = next(scenario.PlotItems, plotItemId)
 		end
@@ -924,7 +935,7 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	do
 
 		local rtAct = context.ActIdToRtAct[act.InstanceId]
-		rtAct.Name = act.Name
+		rtAct.Name = Translator.plainText(act.Name)
 
 		rtAct.LocationId = locationMap[ act.LocationId ]
 
@@ -2726,7 +2737,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 	then
 		action.Parameters = ""
 
-		local str = arg[2]
+		-- what the npc says: a text of the author
+		local str = Translator.plainText(arg[2])
 
 		if str == nil then str = "\n" end
 		if (string.find(str, "\n") == nil) then
