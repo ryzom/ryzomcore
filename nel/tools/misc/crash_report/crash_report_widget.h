@@ -66,8 +66,6 @@ private Q_SLOTS:
 	void onReportFailed();
 
 private:
-	void removeAndQuit();
-
 	Ui::CrashReportWidget m_ui;
 	QString m_fileName;
 	CCrashReportSocket *m_socket;
