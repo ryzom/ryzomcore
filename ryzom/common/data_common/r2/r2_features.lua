@@ -438,6 +438,19 @@ local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = tr
 -- shown once the editor is in a mode the author works in: r2.UIMainLoop asks each frame.
 r2.PendingErrorMessage = nil
 
+-- A message the author must see, from the scripts: in a message box now when the editor is in a mode
+-- the author works in, and kept for that moment otherwise (while the editor starts, or between two
+-- modes). Several messages that wait are shown together.
+function r2.showErrorMessage(text)
+	if workingModes[r2.Mode] then
+		messageBox(text)
+	elseif r2.PendingErrorMessage ~= nil then
+		r2.PendingErrorMessage = tostring(r2.PendingErrorMessage) .. "\n\n" .. tostring(text)
+	else
+		r2.PendingErrorMessage = text
+	end
+end
+
 function r2.showPendingErrorMessage()
 	local pending = r2.PendingErrorMessage
 	if pending == nil or not workingModes[r2.Mode] then
@@ -485,7 +498,7 @@ function r2.onSystemMessageReceived(msgType, msgWho, msg)
 		messageBox(msg)
 		if not workingModes[r2.Mode] then
 			-- the box does not outlive the wait: it comes back when the wait is over
-			r2.PendingErrorMessage = msg
+			r2.showErrorMessage(msg)
 		end
 	end
 end

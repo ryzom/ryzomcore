@@ -874,41 +874,80 @@ function r2:initNpcEditor()
 	r2:initItemIndexToSliderValueTable()
 end
 
--- SAVE TABLE ------------------------------------------------------------------------------
+-- NPC LOOK PRESETS AND NAME LISTS ---------------------------------------------------------
+--
+-- The look presets of the author (body, face, morph and equipment sets) and the lists of npc names are
+-- files. The scripts have no file access of their own: the client reads and writes these files for them
+-- (CNpcEditorFiles), and a script names a table or a list, never a file:
+--   r2:loadNpcPresets(name)         the presets of save/<name>.txt, {} when there is no such file; nil,
+--                                   the path and a reason when the file is there and cannot be read
+--   r2:saveNpcPresets(name, table)  true; false, the path and a reason when the file is not written
+--   r2:loadNpcNames(list)           the names of <list>.txt of the client data; nil and a reason when
+--                                   the client does not have the list
+-- 'name' is the name of the table in r2: equipmentSets, tableBodySets, tableFaceSets, tableFaceMorph.
 
-function r2:saveTable(fileName, t)
-	io.output(io.open(fileName,"w"))
-	r2:serialize(t)
-	io.close()
+-- The preset tables whose file is there and could not be read, [name] = the text for the author. Such a
+-- table is empty for the session and is not written: the file keeps what the author saved in it.
+r2.NpcPresetsUnreadable = {}
+
+-- A translated text with its arguments in the place of %1, %2
+local function npcFileText(textId, arguments)
+	return (string.gsub(tostring(i18n.get(textId)), "%%(%d)", function(index)
+		return tostring(defaulting(arguments[tonumber(index)], ""))
+	end))
 end
 
-function r2:serialize(o)
+-- A failure the author must act on: in the system info, and in a message box that waits for the editor
+-- when it is not in a mode the author works in (the presets are read while the editor starts)
+local function tellNpcFileError(text)
+	displaySystemInfo(text, "BC")
+	r2.showErrorMessage(text)
+end
 
-	if type(o) == "number" then
-		io.write(o)
-	elseif type(o) == "string" then
-		--io.write(string.format('%q', o))
-		io.write("["..o.."]")
-	elseif type(o) == "table" then
-		io.write("{\n")
-		for k,v in pairs(o) do
-			r2:serialize(k)
-			io.write(" = ")
-			r2:serialize(v)
-			io.write("\n")
-		end
-		io.write("}")
+-- The presets of one table, read from its file
+function r2:loadNpcPresetTable(name)
+	local presets, path, reason = r2:loadNpcPresets(name)
+	if presets == nil then
+		local text = npcFileText("uiR2EDNpcPresetsNotRead", { path, reason })
+		r2.NpcPresetsUnreadable[name] = text
+		tellNpcFileError(text)
+		return {}
 	end
+	return presets
 end
 
--- LOAD TABLE ------------------------------------------------------------------------------
+-- Writes the preset table r2[name] to its file. Returns false when it is not written: the author has
+-- been told why, with the path of the file.
+function r2:saveNpcPresetTable(name)
+	local unreadable = r2.NpcPresetsUnreadable[name]
+	if unreadable ~= nil then
+		tellNpcFileError(unreadable)
+		return false
+	end
+	local ok, path, reason = r2:saveNpcPresets(name, r2[name])
+	if not ok then
+		tellNpcFileError(npcFileText("uiR2EDNpcPresetsNotSaved", { path, reason }))
+		return false
+	end
+	return true
+end
+
+-- The name the author gives a preset is a name in the preset file, which has one entry to a line and
+-- ends a name with "] = ": a name with a control character or with that sequence is refused.
+function r2:checkNpcPresetName(name)
+	if string.find(name, "%c") ~= nil or string.find(name, "] = ", 1, true) ~= nil then
+		messageBox(i18n.get("uiR2EDInvalidName"))
+		return false
+	end
+	return true
+end
 
 function r2:loadTables()
 
-	r2.equipmentSets = r2:loadTable("save\\equipmentSets.txt")
-	r2.tableBodySets = r2:loadTable("save\\tableBodySets.txt")
-	r2.tableFaceSets = r2:loadTable("save\\tableFaceSets.txt")
-	r2.tableFaceMorph = r2:loadTable("save\\tableFaceMorph.txt")
+	r2.equipmentSets = r2:loadNpcPresetTable("equipmentSets")
+	r2.tableBodySets = r2:loadNpcPresetTable("tableBodySets")
+	r2.tableFaceSets = r2:loadNpcPresetTable("tableFaceSets")
+	r2.tableFaceMorph = r2:loadNpcPresetTable("tableFaceMorph")
 
 	r2:loadRaceSexNames(r2.fyros, r2.male)
 	r2:loadRaceSexNames(r2.fyros, r2.female)
@@ -917,78 +956,33 @@ function r2:loadTables()
 	r2:loadRaceSexNames(r2.tryker, r2.male)
 	r2:loadRaceSexNames(r2.tryker, r2.female)
 	r2:loadRaceSexNames(r2.zorai, r2.male)
-	r2:loadRaceSexNames(r2.zorai, r2.female) 
+	r2:loadRaceSexNames(r2.zorai, r2.female)
 end
 
-function r2:loadTable(fileName)
+-- The lists of npc names of the client, [list] = names, read once each; false for a list the client
+-- does not have
+r2.NpcNameLists = {}
 
-	function loadTableR(file)
-
-		local resultT = {}
-		local s, e, l, line, key, value
-		local line = file:read("*l")
-
-		while line ~= "}" do
-
-			s, e = string.find(line, " = ")
-
-			key = string.sub(line, 1, s-1)
-			value = string.sub(line, e+1)
-
-			-- KEY
-			-- string key
-			if string.sub(key, 1, 1) == "[" then  
-				l = string.len(key)
-				key= string.sub(key, 2, l-1)
-			-- number key
-			else
-				key = tonumber(key)
-			end
-
-			-- VALUE
-			-- string value
-			if string.sub(value, 1, 1) == "[" then  
-				l = string.len(value)
-				value= string.sub(value, 2, l-1)
-			-- number value
-			elseif value == "{" then
-				value = loadTableR(file)
-			else
-				value = tonumber(value)
-			end
-
-			resultT[key] = value
-			line = file:read("*l")
-		end
-		return resultT
-	end
-
-	local file = io.open(fileName, "r")
-
-	if file == nil then return {} end
-
-	if file:read("*l") ~= "{" then
-		io.close(file)
-		return {}
-	end
-
-	local resultT = loadTableR(file)
-	io.close(file)
-	return resultT
-end
-
-
+-- The names of one race and sex, as a list of its own for the caller (r2:randomNPCName takes the names
+-- it gives out of its list). nil when the client does not have the list.
 function r2:loadRaceSexNamesImpl(race, sex)
-	local fileName = fileLookup(race.."_" .. sex .. ".txt")
-	if fileName == "" then
-		debugWarning("ASSET ERROR: the NPC name list '" .. string.lower(race .. "_" .. sex) .. ".txt' is not in the search paths; it is installed with the examples of the client")
+	local listName = string.lower(race .. "_" .. sex)
+	local names = r2.NpcNameLists[listName]
+	if names == nil then
+		local reason
+		names, reason = r2:loadNpcNames(listName)
+		if names == nil then
+			debugWarning("ASSET ERROR: the NPC name list '" .. listName .. ".txt' is not read (" .. tostring(reason) .. "); it is installed with the examples of the client")
+			names = false
+		end
+		r2.NpcNameLists[listName] = names
+	end
+	if names == false then
 		return
 	end
 	local resultT = {}
-	local count = 1
-	for line in io.lines(fileName) do 
-		resultT[count] = line
-		count = count + 1
+	for index, name in ipairs(names) do
+		resultT[index] = name
 	end
 	return resultT
 end
@@ -1004,7 +998,9 @@ function r2:loadAllRaceSexNames(race, sex)
 end
 
 function r2:getAllNames()
-	if (table.getn(r2.NPCAllNames) == 0) then
+	-- once: the table has a list per race and sex, by name, so its length says nothing
+	if not r2.NPCAllNamesLoaded then
+		r2.NPCAllNamesLoaded = true
 		r2:loadAllRaceSexNames(r2.fyros, r2.male)
 		r2:loadAllRaceSexNames(r2.fyros, r2.female)
 		r2:loadAllRaceSexNames(r2.matis, r2.male)
@@ -1012,7 +1008,7 @@ function r2:getAllNames()
 		r2:loadAllRaceSexNames(r2.tryker, r2.male)
 		r2:loadAllRaceSexNames(r2.tryker, r2.female)
 		r2:loadAllRaceSexNames(r2.zorai, r2.male)
-		r2:loadAllRaceSexNames(r2.zorai, r2.female)	
+		r2:loadAllRaceSexNames(r2.zorai, r2.female)
 	end
 
 	return r2.NPCAllNames
@@ -1573,7 +1569,7 @@ function r2:addBodySets()
 	assert(addBodySets)
 	local editText = addBodySets:find("new_sets").edit_box_group
 	assert(editText)
-	if editText.input_string~="" then
+	if editText.input_string~="" and r2:checkNpcPresetName(editText.input_string) then
 		local updateBodySetsCombo = addBodySets:find("update_sets").combo_box
 		assert(updateBodySetsCombo)
 
@@ -1595,7 +1591,7 @@ function r2:addBodySets()
 			sliderValue = bodySets:find(r2.bodySliders[i]):find("slider").value 
 			r2.tableBodySets[editText.input_string][r2.bodyKeys[i]] = sliderValue
 		end
-		r2:saveTable("save\\tableBodySets.txt", r2.tableBodySets)
+		r2:saveNpcPresetTable("tableBodySets")
 
 		-- update set of main window combo box
 		bodySetsCombo.selection_text = editText.input_string
@@ -1623,7 +1619,7 @@ function r2:updateBodySets()
 		sliderValue = bodySets:find(r2.bodySliders[i]):find("slider").value 
 		r2.tableBodySets[bodySetsName][r2.bodyKeys[i]] = sliderValue
 	end
-	r2:saveTable("save\\tableBodySets.txt", r2.tableBodySets)
+	r2:saveNpcPresetTable("tableBodySets")
 
 	-- update set of main window combo box
 	local bodySetsCombo = npcUI:find("body_sets").combo_box
@@ -1640,7 +1636,7 @@ function r2:removeBodySets()
 
 	-- delete sets in table
 	r2.tableBodySets[bodySetsName] = nil
-	r2:saveTable("save\\tableBodySets.txt", r2.tableBodySets)
+	r2:saveNpcPresetTable("tableBodySets")
 
 	-- delete sets in combo box
 	updateBodySetsCombo:removeSelection(updateBodySetsCombo.selection)
@@ -1730,7 +1726,7 @@ function r2:addFaceSets()
 	assert(addFaceSets)
 	local editText = addFaceSets:find("new_sets").edit_box_group
 	assert(editText)
-	if editText.input_string~="" then
+	if editText.input_string~="" and r2:checkNpcPresetName(editText.input_string) then
 		local updateFaceSetsCombo = addFaceSets:find("update_sets").combo_box
 		assert(updateFaceSetsCombo)
 
@@ -1752,7 +1748,7 @@ function r2:addFaceSets()
 			sliderValue = faceSets:find(r2.faceSliders[i]):find("slider").value 
 			r2.tableFaceSets[editText.input_string][r2.faceKeys[i] ] = sliderValue
 		end
-		r2:saveTable("save\\tableFaceSets.txt", r2.tableFaceSets)
+		r2:saveNpcPresetTable("tableFaceSets")
 
 		-- update set of main window combo box
 		faceSetsCombo.selection_text = editText.input_string
@@ -1780,7 +1776,7 @@ function r2:updateFaceSets()
 		sliderValue = faceSets:find(r2.faceSliders[i]):find("slider").value 
 		r2.tableFaceSets[faceSetsName][r2.faceKeys[i] ] = sliderValue
 	end
-	r2:saveTable("save\\tableFaceSets.txt", r2.tableFaceSets)
+	r2:saveNpcPresetTable("tableFaceSets")
 
 	-- update set of main window combo box
 	local faceSetsCombo = npcUI:find("face_sets").combo_box
@@ -1797,7 +1793,7 @@ function r2:removeFaceSets()
 
 	-- delete sets in table
 	r2.tableFaceSets[faceSetsName] = nil
-	r2:saveTable("save\\tableFaceSets.txt", r2.tableFaceSets)
+	r2:saveNpcPresetTable("tableFaceSets")
 
 	-- delete sets in combo box
 	updateFaceSetsCombo:removeSelection(updateFaceSetsCombo.selection)
@@ -1885,7 +1881,7 @@ function r2:addFaceMorph()
 	assert(addFaceMorph)
 	local editText = addFaceMorph:find("new_sets").edit_box_group
 	assert(editText)
-	if editText.input_string~="" then
+	if editText.input_string~="" and r2:checkNpcPresetName(editText.input_string) then
 		local updateFaceMorphCombo = addFaceMorph:find("update_sets").combo_box
 		assert(updateFaceMorphCombo)
 
@@ -1907,7 +1903,7 @@ function r2:addFaceMorph()
 			sliderValue = faceMorph:find(r2.morphSliders[i]):find("slider").value 
 			r2.tableFaceMorph[editText.input_string][r2.morphKeys[i] ] = sliderValue
 		end
-		r2:saveTable("save\\tableFaceMorph.txt", r2.tableFaceMorph)
+		r2:saveNpcPresetTable("tableFaceMorph")
 
 		-- update set of main window combo box
 		faceMorphCombo.selection_text = editText.input_string
@@ -1935,7 +1931,7 @@ function r2:updateFaceMorph()
 		sliderValue = faceMorph:find(r2.morphSliders[i]):find("slider").value 
 		r2.tableFaceMorph[faceMorphName][r2.morphKeys[i] ] = sliderValue
 	end
-	r2:saveTable("save\\tableFaceMorph.txt", r2.tableFaceMorph)
+	r2:saveNpcPresetTable("tableFaceMorph")
 
 	-- update set of main window combo box
 	local faceMorphCombo = npcUI:find("face_morph").combo_box
@@ -1952,7 +1948,7 @@ function r2:removeFaceMorph()
 
 	-- delete sets in table
 	r2.tableFaceMorph[faceMorphName] = nil
-	r2:saveTable("save\\tableFaceMorph.txt", r2.tableFaceMorph)
+	r2:saveNpcPresetTable("tableFaceMorph")
 
 	-- delete sets in combo box
 	updateFaceMorphCombo:removeSelection(updateFaceMorphCombo.selection)
@@ -2433,7 +2429,7 @@ function r2:addEquipmentSet()
 	assert(addEquSet)
 	local editText = addEquSet:find("new_sets").edit_box_group
 	assert(editText)
-	if editText.input_string~="" then
+	if editText.input_string~="" and r2:checkNpcPresetName(editText.input_string) then
 		local updateEquSetCombo = addEquSet:find("update_sets").combo_box
 		assert(updateEquSetCombo)
 
@@ -2458,7 +2454,7 @@ function r2:addEquipmentSet()
 				comboSelection = comboBox.selection_text, color = slider.value}
 		end
 
-		r2:saveTable("save\\equipmentSets.txt", r2.equipmentSets)
+		r2:saveNpcPresetTable("equipmentSets")
 
 		equSetCombo.selection_text = editText.input_string
 		
@@ -2557,7 +2553,7 @@ function r2:updateEquipmentSet()
 		r2.equipmentSets[selection.Equipment][equSetsName][r2.equipementComboB[i] ].color = slider.value
 	end
 
-	r2:saveTable("save\\equipmentSets.txt", r2.equipmentSets)
+	r2:saveNpcPresetTable("equipmentSets")
 
 	local equSetCombo = npcUI:find("equipment_sets").combo_box
 	assert(equSetCombo)
@@ -2576,7 +2572,7 @@ function r2:removeEquipment()
 
 	-- delete sets in table
 	r2.equipmentSets[selection.Equipment][equSetsName] = nil
-	r2:saveTable("save\\equipmentSets.txt", r2.equipmentSets)
+	r2:saveNpcPresetTable("equipmentSets")
 
 	-- delete sets in combo box
 	updateEquSetsCombo:removeSelection(updateEquSetsCombo.selection)
@@ -2763,12 +2759,13 @@ function r2:randomNPCName(race, sex)
 	local tableNames = r2.NPCNames[race .."_" .. sex]
 
 	local name = ""
-	if table.getn(tableNames) == 0 then
+	if tableNames == nil or table.getn(tableNames) == 0 then
 		r2:loadRaceSexNames(race, sex)
 		tableNames = r2.NPCNames[race .."_" .. sex]
 	end
 
-	if table.getn(tableNames) > 0 then
+	-- no list (the client lacks the file, which the log says): no name
+	if tableNames ~= nil and table.getn(tableNames) > 0 then
 		local indexName = math.random(1, table.getn(tableNames))
 		name = tableNames[indexName]
 		tableNames[indexName] = tableNames[table.getn(tableNames)]
@@ -2781,6 +2778,7 @@ end
 function r2:isRandomizedNPCName(name, race, sex)
 
 	local tableNames = r2:loadRaceSexNamesImpl(race, sex)
+	if tableNames == nil then return false end
 
 	for k, vName in pairs(tableNames) do
 		if vName==name then return true end

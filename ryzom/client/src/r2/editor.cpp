@@ -49,6 +49,7 @@
 #include "../client_sheets/item_sheet.h"
 
 #include "editor.h"
+#include "npc_editor_files.h"
 //
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/group_tree.h"
@@ -2167,6 +2168,10 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("teleportToCharacter", luaTeleportToCharacter);
 	registerEnvMethod("enumInstances", luaEnumInstances);
 	registerEnvMethod("isClearingContent", luaIsClearingContent);
+	// the files of the NPC editor: its scripts have no other file access
+	registerEnvMethod("loadNpcNames", CNpcEditorFiles::luaLoadNpcNames);
+	registerEnvMethod("loadNpcPresets", CNpcEditorFiles::luaLoadNpcPresets);
+	registerEnvMethod("saveNpcPresets", CNpcEditorFiles::luaSaveNpcPresets);
 }
 
 /*
