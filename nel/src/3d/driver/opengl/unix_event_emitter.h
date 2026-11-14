@@ -77,6 +77,9 @@ public:
 	void createIM();
 	void closeIM();
 
+	/// The input method stopped and Xlib frees it: forget it, the next events open another one
+	void lostIM();
+
 private:
 
 	// Private internal server message
@@ -105,6 +108,10 @@ private:
 	std::map<uint, TKey>	m_PressedKeycodes; // key reported for each held keycode
 	XIM						_im;
 	XIC						_ic;
+	bool					m_LostIM; // the input method stopped, another one is to be opened
+	bool					m_Focus; // the window has the keyboard focus
+	uint					m_FilteredKeycode; // last key press an input method took, 0 when the last one was not
+	Time					m_FilteredTime; // and its time
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
 	std::string				_CopiedString;

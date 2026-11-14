@@ -28,6 +28,9 @@
 #include <X11/keysym.h>
 #include <X11/Xutil.h>
 #include <X11/XKBlib.h>
+#include <clocale>
+#include <cstdlib>
+#include <cstring>
 #include "nel/misc/debug.h"
 #include "nel/misc/utf_string_view.h"
 
@@ -51,6 +54,10 @@ CUnixEventEmitter::CUnixEventEmitter ():_dpy(nullptr)
     , _driver(nullptr)
 {
 	_SelectionOwned = false;
+	m_LostIM = false;
+	m_Focus = false;
+	m_FilteredKeycode = 0;
+	m_FilteredTime = 0;
 }
 
 CUnixEventEmitter::~CUnixEventEmitter()
@@ -87,40 +94,109 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver)
 	createIM();
 }
 
+#ifdef X_HAVE_UTF8_STRING
+// Xlib calls this when the input method stops, for example when its server is restarted
+static void inputMethodDestroyed(XIM /* im */, XPointer clientData, XPointer /* callData */)
+{
+	((CUnixEventEmitter *)clientData)->lostIM();
+}
+#endif
+
 void CUnixEventEmitter::createIM()
 {
 #ifdef X_HAVE_UTF8_STRING
 
-	_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
+	m_LostIM = false;
 
-	if (_im == nullptr)
+	if (_ic != nullptr)
+		return;
+
+	// Xlib chooses the input method, and the encoding of what it gives, by the locale LC_CTYPE has while the
+	// input method and its context are made. When LC_CTYPE is the C locale, this function takes the locale of
+	// the environment from here to where the input context exists, and then sets LC_CTYPE back to what it
+	// found, so that opening the input method changes the locale of nothing else: with the LC_CTYPE of the
+	// user, tolower() and the comparisons that ignore case follow the language of the user (in a Turkish
+	// locale "QUIT" and "quit" are not the same word). What LC_CTYPE is for the rest of the process is not
+	// decided here. The input method keeps the locale it was opened with. The string setlocale returns does
+	// not survive the next call.
+	const char *ctype = setlocale(LC_CTYPE, nullptr);
+	const std::string savedCtype = ctype ? ctype : "";
+	if (savedCtype.empty() || savedCtype == "C" || savedCtype == "POSIX")
 	{
-		XSetLocaleModifiers("@im=local");
- 
+		if (setlocale(LC_CTYPE, "") == nullptr)
+			nlwarning("3D: The locale of the environment (LC_ALL, LC_CTYPE or LANG) is not installed, text input uses the C locale");
+	}
+
+	if (!XSupportsLocale())
+	{
+		ctype = setlocale(LC_CTYPE, nullptr);
+		nlwarning("3D: Xlib does not support the locale '%s', text input uses the C locale", ctype ? ctype : "");
+		setlocale(LC_CTYPE, "C");
+	}
+
+	// The input methods to try. "" is the one of the environment: the server named by XMODIFIERS (such as
+	// "@im=ibus"), or without XMODIFIERS the dead keys and compose sequences of the locale, handled by Xlib.
+	// The others are for a server that does not answer or cannot give the input style asked for below: a
+	// modifier given here goes before the one of XMODIFIERS, so they are Xlib's own handling whatever the
+	// environment says.
+	static const char *const s_Modifiers[] = { "", "@im=local", "@im=" };
+	uint firstModifiers = 0;
+
+	// In the C locale the text an input method server commits is lost: the letter of a dead key never
+	// arrives, which is how dead keys broke with ibus when its server was asked for whatever the locale.
+	// Xlib's own handling gives them there.
+	ctype = setlocale(LC_CTYPE, nullptr);
+	if (ctype == nullptr || strcmp(ctype, "C") == 0 || strcmp(ctype, "POSIX") == 0)
+	{
+		firstModifiers = 1;
+
+		const char *xmodifiers = getenv("XMODIFIERS");
+		if (xmodifiers != nullptr && xmodifiers[0] != '\0')
+			nlwarning("3D: LC_CTYPE is the C locale, the input method of XMODIFIERS (%s) is not used: its text would be lost. Set LANG or LC_CTYPE to a UTF-8 locale to use it", xmodifiers);
+	}
+
+	for (uint i = firstModifiers; i < sizeof(s_Modifiers) / sizeof(s_Modifiers[0]) && _ic == nullptr; ++i)
+	{
+		if (XSetLocaleModifiers(s_Modifiers[i]) == nullptr)
+			continue;
+
 		_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
-
 		if (_im == nullptr)
+			continue;
+
+		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
+		if (_ic == nullptr)
 		{
-			XSetLocaleModifiers("@im=");
-
-			_im = XOpenIM(_dpy, nullptr, nullptr, nullptr);
-
-			if (_im == nullptr)
-			{
-				nlwarning("XOpenIM failed");
-			}
+			XCloseIM(_im);
+			_im = nullptr;
 		}
 	}
- 
- 	if (_im)
- 	{
- 		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
 
-		if (!_ic)
-		{
-			nlwarning("XCreateIC failed");
-		}
+	// the modifiers the input method was opened with are those of the locale it was opened in
+	const char *modifiers = XSetLocaleModifiers(nullptr);
+	const std::string imModifiers = modifiers ? modifiers : "";
+
+	// LC_CTYPE as the process had it
+	if (!savedCtype.empty())
+		setlocale(LC_CTYPE, savedCtype.c_str());
+
+	if (_ic == nullptr)
+	{
+		nlwarning("3D: No X input method could be opened (XOpenIM or XCreateIC failed), dead keys and compose sequences do not work");
+		return;
 	}
+
+	// when the input method stops, Xlib frees it and its context: lostIM() forgets them
+	XIMCallback destroyCallback;
+	destroyCallback.client_data = (XPointer)this;
+	destroyCallback.callback = inputMethodDestroyed;
+	XSetIMValues(_im, XNDestroyCallback, &destroyCallback, NULL);
+
+	if (m_Focus)
+		XSetICFocus(_ic);
+
+	const char *imLocale = XLocaleOfIM(_im);
+	nlinfo("3D: X input method opened with the locale '%s' and the modifiers '%s'", imLocale ? imLocale : "", imModifiers.c_str());
 #endif
 }
 
@@ -138,7 +214,17 @@ void CUnixEventEmitter::closeIM()
 		XCloseIM(_im);
 		_im = nullptr;
 	}
+
+	m_LostIM = false;
 #endif
+}
+
+void CUnixEventEmitter::lostIM()
+{
+	// Xlib has freed them, or is about to: they must not be used, closed or destroyed any more
+	_im = nullptr;
+	_ic = nullptr;
+	m_LostIM = true;
 }
 
 void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
@@ -147,6 +233,18 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 	{
 		XEvent	Event;
 		XNextEvent(_dpy, &Event);
+
+		// An input method takes its events first, whatever their window: the connection to an input method
+		// server has a window of its own. Key presses are filtered in processMessage, which posts the key
+		// before the input method takes it, and key releases are never filtered, so that every key that went
+		// down for the application also goes up.
+		if (Event.type != KeyPress && Event.type != KeyRelease && XFilterEvent(&Event, None))
+			continue;
+
+		// the input method stopped: open the next one that answers
+		if (m_LostIM)
+			createIM();
+
 		if (allWindows || Event.xany.window == _win)
 		{
 			// nlinfo("event: %d", Event.type);
@@ -556,7 +654,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		}
 		else
 		{
-			k = XkbKeycodeToKeysym(_dpy, keyCode, 0, 0);
+			// the keysym the key has with the modifiers held (the keypad follows Num Lock), as a lookup gives it
+			unsigned int unusedModifiers = 0;
+			if (!XkbLookupKeySym(_dpy, (KeyCode)keyCode, event.xkey.state, &unusedModifiers, &k))
+				k = XkbKeycodeToKeysym(_dpy, keyCode, 0, 0);
 		}
 
 		// send CEventKeyDown event only if keyCode is defined
@@ -564,17 +665,26 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		{
 			TKey key = getKeyFromKeyEvent(_dpy, keyCode, k);
 
-			// search for key in map
-			std::map<TKey, bool>::const_iterator it = _PressedKeys.find(key);
+			// An input method server gives back the key presses it does not use: the same press, with the
+			// same time, comes a second time and is not filtered then. Its key down was posted the first time.
+			bool givenBack = !filtered && keyCode == m_FilteredKeycode && event.xkey.time == m_FilteredTime;
+			m_FilteredKeycode = filtered ? keyCode : 0;
+			m_FilteredTime = event.xkey.time;
 
-			// if key is not found or value is false, that's the first time
-			bool firstTime = (it == _PressedKeys.end()) || !it->second;
+			if (!givenBack)
+			{
+				// search for key in map
+				std::map<TKey, bool>::const_iterator it = _PressedKeys.find(key);
 
-			server->postEvent (new CEventKeyDown (key, getKeyButton(event.xbutton.state), firstTime, this));
-			_PressedKeys[key] = true;
+				// if key is not found or value is false, that's the first time
+				bool firstTime = (it == _PressedKeys.end()) || !it->second;
 
-			// its release reports the same key, whatever the modifiers are by then
-			m_PressedKeycodes[keyCode] = key;
+				server->postEvent(new CEventKeyDown(key, getKeyButton(event.xbutton.state), firstTime, this));
+				_PressedKeys[key] = true;
+
+				// its release reports the same key, whatever the modifiers are by then
+				m_PressedKeycodes[keyCode] = key;
+			}
 
 			// don't send a control character when deleting
 			if (key == KeyDELETE) c = 0;
@@ -787,6 +897,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case FocusIn:
 		// keyboard focus
+		m_Focus = true;
 #ifdef X_HAVE_UTF8_STRING
 		if (_ic) XSetICFocus(_ic);
 #endif
@@ -795,6 +906,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		break;
 	case FocusOut:
 		// keyboard focus
+		m_Focus = false;
 #ifdef X_HAVE_UTF8_STRING
 		if (_ic) XUnsetICFocus(_ic);
 #endif
