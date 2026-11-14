@@ -87,6 +87,10 @@ private:
 	void loadWorldEditFile(const QString &fileName);
 	void checkCurrentWorld();
 
+	// records what Save would write for the world now and what the world file had when it was loaded
+	// or last written, from which Save tells whether the editor or another program changed it
+	void updateWorldEditBaseline();
+
 	QString m_context;
 	QString m_dataDir;
 

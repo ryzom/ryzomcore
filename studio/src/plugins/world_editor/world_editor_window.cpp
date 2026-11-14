@@ -44,6 +44,7 @@
 #include <QFileDialog>
 #include <QStatusBar>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QPersistentModelIndex>
 
 namespace WorldEditor
@@ -235,6 +236,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 	m_loadedFileName.clear();
 	m_loadedContent.clear();
 	m_worldFiles.NotLoaded.clear();
+	m_worldFiles.Baselines.clear();
 	if (!Utils::readFile(fileName.toUtf8().constData(), m_loadedContent) || m_loadedContent.empty())
 	{
 		m_loadedContent.clear();
@@ -296,6 +298,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 		};
 	}
 	m_undoStack->endMacro();
+	updateWorldEditBaseline();
 
 	// as the MFC editor does, name the files that exist but could not be read
 	if (!failed.isEmpty())
@@ -319,47 +322,97 @@ void WorldEditorWindow::newWorldEditFile()
 	m_loadedFileName.clear();
 	m_loadedContent.clear();
 	m_worldFiles.NotLoaded.clear();
+	m_worldFiles.Baselines.clear();
 	m_undoStack->push(new CreateWorldCommand("NewWorldEdit", m_primitivesModel));
+}
+
+void WorldEditorWindow::updateWorldEditBaseline()
+{
+	if (m_loadedFileName.isEmpty())
+		return;
+
+	WorldSaver saver(m_primitivesModel, m_zoneBuilderBase, m_dataDir.toUtf8().constData(), m_context.toUtf8().constData(), &m_worldFiles);
+	saver.setLoadedFile(m_loadedFileName.toUtf8().constData(), m_loadedContent, m_loadedDataDir.toUtf8().constData(),
+		m_loadedContext.toUtf8().constData());
+	Utils::FileBaseline &baseline = m_worldFiles.Baselines[m_loadedFileName.toUtf8().constData()];
+	baseline.DiskKey = Utils::fileContentKey(m_loadedContent);
+	if (saver.makeWorldEdit())
+	{
+		baseline.EditorKey = Utils::fileContentKey(saver.worldEditContent());
+	}
+	else
+	{
+		// Save then fails the same way
+		nlwarning("%s", saver.getLastError().c_str());
+		baseline.EditorKey.clear();
+	}
 }
 
 void WorldEditorWindow::saveWorldEditFile()
 {
-	// Save rewrites the world file from its content as it was loaded, so what another program changed
-	// in it since then would be lost
-	if (m_primitivesModel->isWorldEditNodeLoaded() && !m_loadedFileName.isEmpty())
-	{
-		const std::string loadedFileName = m_loadedFileName.toUtf8().constData();
-		std::string current;
-		if (NLMISC::CFile::fileExists(loadedFileName) && (!Utils::readFile(loadedFileName, current) || current != m_loadedContent))
-		{
-			QMessageBox::StandardButton answer = QMessageBox::question(this, tr("Save world editor files"),
-				tr("%1 has been changed, or cannot be read, since it was loaded. Saving replaces it with the world as it is in the editor. Save anyway?")
-					.arg(m_loadedFileName),
-				QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel);
-			if (answer != QMessageBox::Save)
-				return;
-		}
-	}
-
-	WorldSaver saver( m_primitivesModel, m_zoneBuilderBase, m_dataDir.toUtf8().constData(), m_context.toUtf8().constData() );
+	WorldSaver saver(m_primitivesModel, m_zoneBuilderBase, m_dataDir.toUtf8().constData(), m_context.toUtf8().constData(), &m_worldFiles);
 	saver.setLoadedFile(m_loadedFileName.toUtf8().constData(), m_loadedContent, m_loadedDataDir.toUtf8().constData(),
-		m_loadedContext.toUtf8().constData(), m_worldFiles.NotLoaded);
-	bool ok = saver.save();
-	QString error = QString::fromUtf8(saver.getLastError().c_str());
-
-	if( !ok )
+		m_loadedContext.toUtf8().constData());
+	if (!saver.prepare())
 	{
-		QMessageBox::critical( this,
-								tr( "Failed to save world editor files" ),
-								tr( "Failed to save world editor files.\nError:\n " ) + error  );
+		QMessageBox::critical(this, tr("Failed to save world editor files"),
+			tr("Failed to save world editor files.\nError:\n ") + QString::fromUtf8(saver.getLastError().c_str()) + "\n\n" + tr("No file was written."));
 		return;
 	}
 
-	// the next save starts from the file as it is now
-	m_loadedFileName = QString::fromUtf8(saver.worldEditFileName().c_str());
-	m_loadedContent = saver.worldEditContent();
-	m_loadedDataDir = m_dataDir;
-	m_loadedContext = m_context;
+	// a file the editor changed that another program changed too since it was loaded or written is
+	// replaced only when the user says so
+	bool replaceConflicts = false;
+	const std::vector<std::string> conflicts = saver.conflicts();
+	if (!conflicts.empty())
+	{
+		QStringList names;
+		for (size_t i = 0; i < conflicts.size(); ++i)
+			names << QString::fromUtf8(conflicts[i].c_str());
+		QMessageBox box(QMessageBox::Question, tr("Save world editor files"),
+			tr("These files changed on disk since they were loaded or saved, and are also changed in the editor:\n\n%1\n\nReplace them with the editor version, or skip them and save the other files?")
+				.arg(names.join("\n")),
+			QMessageBox::Cancel, this);
+		QPushButton *replaceButton = box.addButton(tr("Replace"), QMessageBox::DestructiveRole);
+		QPushButton *skipButton = box.addButton(tr("Skip"), QMessageBox::AcceptRole);
+		box.setDefaultButton(QMessageBox::Cancel);
+		box.exec();
+		if (box.clickedButton() == replaceButton)
+			replaceConflicts = true;
+		else if (box.clickedButton() != skipButton)
+			return;
+	}
+
+	if (!saver.write(replaceConflicts))
+	{
+		// the files written before the error stay written, the world file is written last
+		QString message = tr("Failed to save world editor files.\nError:\n ") + QString::fromUtf8(saver.getLastError().c_str());
+		const std::vector<std::string> &written = saver.writtenFiles();
+		if (written.empty())
+		{
+			message += "\n\n" + tr("No file was written.");
+		}
+		else
+		{
+			QStringList names;
+			for (size_t i = 0; i < written.size(); ++i)
+				names << QString::fromUtf8(written[i].c_str());
+			message += "\n\n" + tr("These files were written before the error:\n%1").arg(names.join("\n"));
+		}
+		message += "\n\n" + tr("The world file %1 was not written.").arg(QString::fromUtf8(saver.worldEditFileName().c_str()));
+		QMessageBox::critical(this, tr("Failed to save world editor files"), message);
+		return;
+	}
+
+	// the next save starts from the world file as it is now, when it has what the editor has
+	if (saver.worldEditSaved())
+	{
+		m_loadedFileName = QString::fromUtf8(saver.worldEditFileName().c_str());
+		m_loadedContent = saver.worldEditContent();
+		m_loadedDataDir = m_dataDir;
+		m_loadedContext = m_context;
+		updateWorldEditBaseline();
+	}
 }
 
 void WorldEditorWindow::reportRedoFailures()

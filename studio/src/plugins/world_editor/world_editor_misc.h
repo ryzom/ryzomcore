@@ -29,9 +29,15 @@
 #include <nel/ligo/primitive_class.h>
 
 // STL includes
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+namespace NLLIGO
+{
+class CZoneRegion;
+}
 
 #define WORLD_EDITOR_FILE_VERSION 2
 #define WORLD_EDITOR_DATABASE_SIZE 100
@@ -78,15 +84,51 @@ typedef std::set<std::string, FilePathLess> FilePathSet;
 // The content of a file; false when it cannot be read
 bool readFile(const std::string &fileName, std::string &content);
 
-// Writes a file through a temporary file, so that a failed write leaves it as it was, and leaves a file
-// that already has this content untouched; false with the reason, which names the file, in error
-bool writeFileIfChanged(const std::string &fileName, const std::string &content, std::string &error);
+// Writes a file through a temporary file, so that a failed write leaves it as it was; false with the
+// reason, which names the file, in error
+bool writeFile(const std::string &fileName, const std::string &content, std::string &error);
 
 // The content of a primitive file, as NLLIGO::saveXmlPrimitiveFile writes it
 std::string primitivesFileContent(NLLIGO::CPrimitives &primitives, const std::string &fileName);
 
-// Saves a primitive file through writeFileIfChanged; false with the reason, which names the file, in error
-bool savePrimitivesFile(NLLIGO::CPrimitives &primitives, const std::string &fileName, std::string &error);
+// The content of a land file, as LandscapeEditor::ZoneRegionObject::save writes it
+std::string landFileContent(NLLIGO::CZoneRegion &zoneRegion);
+
+// The size and SHA-1 of a file content, to compare contents without keeping them
+std::string fileContentKey(const std::string &content);
+
+// What Save knows of a file of the world: the keys of the content the editor had for it and of the
+// content on disk, when it was loaded or last written
+struct FileBaseline
+{
+	std::string EditorKey;
+	std::string DiskKey;
+};
+
+// The baselines of the files of the world, by file name
+typedef std::map<std::string, FileBaseline, FilePathLess> FileBaselines;
+
+// The baseline of a file, NULL when the editor neither loaded nor wrote it
+const FileBaseline *findFileBaseline(const FileBaselines &baselines, const std::string &fileName);
+
+// Records that the editor and the disk both have this content for a file
+void setFileBaseline(FileBaselines &baselines, const std::string &fileName, const std::string &content);
+
+enum FileAction
+{
+	// the editor did not change the file since it was loaded or written, what is on disk stays
+	FileUnchanged,
+	// the file on disk already has the content
+	FileUpToDate,
+	// the editor changed the file, which is on disk as it was loaded or written, or is not there and
+	// was not expected
+	FileToWrite,
+	// the editor changed the file, which also changed on disk, or is there unexpected, or cannot be read
+	FileConflict
+};
+
+// What saving content to a file needs, from its baseline, which is NULL when there is none
+FileAction fileAction(const std::string &fileName, const std::string &content, const FileBaseline *baseline);
 
 // Get root primitive
 NLLIGO::IPrimitive *getRootPrimitive(NLLIGO::IPrimitive *primitive);

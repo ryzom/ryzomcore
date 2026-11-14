@@ -220,25 +220,28 @@ void CreateWorldCommand::redo()
 }
 
 
-WorldSaver::WorldSaver( PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context )
+WorldSaver::WorldSaver(PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context,
+	WorldFiles *files)
 {
+	nlassert(files);
 	m_model = model;
 	m_zoneBuilder = zoneBuilder;
 	m_dataDir = dataDir;
 	m_context = context;
+	m_worldFiles = files;
+	m_worldEditSaved = false;
 }
 
 void WorldSaver::setLoadedFile(const std::string &fileName, const std::string &content, const std::string &dataDir,
-	const std::string &context, const Utils::FilePathSet &notLoaded)
+	const std::string &context)
 {
 	m_loadedFileName = fileName;
 	m_loadedContent = content;
 	m_loadedDataDir = dataDir;
 	m_loadedContext = context;
-	m_notLoaded = notLoaded;
 }
 
-bool WorldSaver::save()
+bool WorldSaver::makeWorldEdit()
 {
 	QModelIndex pidx = m_model->index( 0, 0 );
 	if( !pidx.isValid() )
@@ -247,51 +250,66 @@ bool WorldSaver::save()
 		return false;
 	}
 
+	m_data.clear();
+	int rows = m_model->rowCount(pidx);
+	for (int i = 0; i < rows; i++)
+	{
+		QModelIndex idx = m_model->index(i, 0, pidx);
+		Node *node = reinterpret_cast<Node *>(idx.internalPointer());
+		if (LandscapeNode *land = dynamic_cast<LandscapeNode *>(node))
+			m_data.push_back(std::make_pair(std::string("landscape"), std::string(land->fileName().toUtf8().constData())));
+		else if (RootPrimitiveNode *primitive = dynamic_cast<RootPrimitiveNode *>(node))
+			m_data.push_back(std::make_pair(std::string("primitive"), std::string(primitive->fileName().toUtf8().constData())));
+	}
+
 	try
 	{
-		m_data.clear();
-		std::vector<Node *> nodes;
+		return makeWorldEditFile();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		lastError = "Cannot make the content of " + m_currentFile + ": " + e.what();
+		return false;
+	}
+}
+
+bool WorldSaver::prepare()
+{
+	m_savedFiles.clear();
+
+	// the .worldedit content is made first, so that nothing is written when it cannot be made
+	if (!makeWorldEdit())
+		return false;
+
+	try
+	{
+		QModelIndex pidx = m_model->index(0, 0);
 		int rows = m_model->rowCount(pidx);
 		for (int i = 0; i < rows; i++)
 		{
 			QModelIndex idx = m_model->index(i, 0, pidx);
 			Node *node = reinterpret_cast<Node *>(idx.internalPointer());
-			if (LandscapeNode *land = dynamic_cast<LandscapeNode *>(node))
-			{
-				m_data.push_back(std::make_pair(std::string("landscape"), std::string(land->fileName().toUtf8().constData())));
-				nodes.push_back(node);
-			}
-			else if (RootPrimitiveNode *primitive = dynamic_cast<RootPrimitiveNode *>(node))
-			{
-				m_data.push_back(std::make_pair(std::string("primitive"), std::string(primitive->fileName().toUtf8().constData())));
-				nodes.push_back(node);
-			}
-		}
-
-		// the .worldedit content is made first, so that nothing is written when it cannot be made
-		if (!makeWorldEditFile())
-			return false;
-
-		for (size_t i = 0; i < nodes.size(); ++i)
-		{
-			bool ok = (nodes[i]->type() == Node::LandscapeNodeType) ? saveLandscapeNode(nodes[i]) : savePrimitiveNode(nodes[i]);
+			bool ok = true;
+			if (node->type() == Node::LandscapeNodeType)
+				ok = prepareLandscapeNode(node);
+			else if (node->type() == Node::RootPrimitiveNodeType)
+				ok = preparePrimitiveNode(node);
 			if (!ok)
 				return false;
 		}
-
-		m_currentFile = m_worldEditFileName;
-		if (!Utils::writeFileIfChanged(m_worldEditFileName, m_worldEditContent, lastError))
-			return false;
 	}
 	catch (const NLMISC::Exception &e)
 	{
-		lastError = "Error writing " + m_currentFile + ": " + e.what();
+		lastError = "Cannot make the content of " + m_currentFile + ": " + e.what();
 		return false;
 	}
+
+	// the .worldedit is written last
+	addSavedFile(m_worldEditFileName, m_worldEditContent, NULL);
 	return true;
 }
 
-bool WorldSaver::saveLandscapeNode( Node *node )
+bool WorldSaver::prepareLandscapeNode(Node *node)
 {
 	LandscapeNode *n = dynamic_cast< LandscapeNode* >( node );
 	if( n == NULL )
@@ -309,23 +327,11 @@ bool WorldSaver::saveLandscapeNode( Node *node )
 
 	m_currentFile = n->fileName().toUtf8().constData();
 	z->setFileName(m_currentFile);
-
-	// the land file as ZoneRegionObject::save writes it
-	NLMISC::CMemStream stream;
-	{
-		NLMISC::COXml xml;
-		xml.init(&stream);
-		z->ligoZoneRegion().serial(xml);
-	}
-	const std::string content((const char *)stream.buffer(), stream.length());
-
-	if (!Utils::writeFileIfChanged(m_currentFile, content, lastError))
-		return false;
-	z->setModified(false);
+	addSavedFile(m_currentFile, Utils::landFileContent(z->ligoZoneRegion()), node);
 	return true;
 }
 
-bool WorldSaver::savePrimitiveNode( Node *node )
+bool WorldSaver::preparePrimitiveNode(Node *node)
 {
 	RootPrimitiveNode *n = dynamic_cast< RootPrimitiveNode* >( node );
 	if( n == NULL )
@@ -335,9 +341,68 @@ bool WorldSaver::savePrimitiveNode( Node *node )
 	}
 
 	m_currentFile = n->fileName().toUtf8().constData();
-	if (!Utils::savePrimitivesFile(*(n->primitives()), m_currentFile, lastError))
-		return false;
-	n->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+	addSavedFile(m_currentFile, Utils::primitivesFileContent(*(n->primitives()), m_currentFile), node);
+	return true;
+}
+
+void WorldSaver::addSavedFile(const std::string &fileName, const std::string &content, Node *node)
+{
+	SavedFile file;
+	file.FileName = fileName;
+	file.Content = content;
+	file.Action = Utils::fileAction(fileName, content, Utils::findFileBaseline(m_worldFiles->Baselines, fileName));
+	file.FileNode = node;
+	m_savedFiles.push_back(file);
+}
+
+std::vector<std::string> WorldSaver::conflicts() const
+{
+	std::vector<std::string> result;
+	for (size_t i = 0; i < m_savedFiles.size(); ++i)
+	{
+		if (m_savedFiles[i].Action == Utils::FileConflict)
+			result.push_back(m_savedFiles[i].FileName);
+	}
+	return result;
+}
+
+bool WorldSaver::write(bool replaceConflicts)
+{
+	m_writtenFiles.clear();
+	m_worldEditSaved = false;
+
+	for (size_t i = 0; i < m_savedFiles.size(); ++i)
+	{
+		const SavedFile &file = m_savedFiles[i];
+
+		// a file the editor did not change keeps what is on disk, and a file that changed on disk as
+		// well is replaced only when the user said so
+		if (file.Action == Utils::FileUnchanged || (file.Action == Utils::FileConflict && !replaceConflicts))
+			continue;
+
+		if (file.Action != Utils::FileUpToDate)
+		{
+			if (!Utils::writeFile(file.FileName, file.Content, lastError))
+				return false;
+			m_writtenFiles.push_back(file.FileName);
+		}
+
+		// the file on disk now has what the editor has
+		Utils::setFileBaseline(m_worldFiles->Baselines, file.FileName, file.Content);
+		if (file.FileNode == NULL)
+		{
+			m_worldEditSaved = true;
+		}
+		else if (LandscapeNode *land = dynamic_cast<LandscapeNode *>(file.FileNode))
+		{
+			if (LandscapeEditor::ZoneRegionObject *z = m_zoneBuilder->zoneRegion(land->id()))
+				z->setModified(false);
+		}
+		else
+		{
+			file.FileNode->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+		}
+	}
 	return true;
 }
 
@@ -471,7 +536,7 @@ struct _xmlDoc *WorldSaver::updateLoadedFile(const std::string &fn)
 						}
 					}
 					if (!keep)
-						keep = m_notLoaded.count(path) != 0;
+						keep = m_worldFiles->NotLoaded.count(path) != 0;
 
 					// the others were unloaded in the editor
 					if (!keep)
@@ -515,6 +580,15 @@ static bool updateNotLoaded(WorldFiles *files, const QString &fileName, bool loa
 	if (loaded)
 		return files->NotLoaded.erase(name) != 0;
 	return files->NotLoaded.insert(name).second;
+}
+
+// Records what the editor and the disk had for a file a load command loaded
+static void setLoadedBaseline(WorldFiles *files, const std::string &fileName, bool diskRead, const std::string &diskContent,
+	const std::string &editorContent)
+{
+	Utils::FileBaseline &baseline = files->Baselines[fileName];
+	baseline.EditorKey = Utils::fileContentKey(editorContent);
+	baseline.DiskKey = diskRead ? Utils::fileContentKey(diskContent) : std::string();
 }
 
 // Undoes what updateNotLoaded changed
@@ -562,6 +636,11 @@ void LoadLandscapeCommand::undo()
 
 void LoadLandscapeCommand::redo()
 {
+	// what is on disk, read before the land, for Save to tell whether the file changed on disk
+	const std::string fileName = m_fileName.toUtf8().constData();
+	std::string diskContent;
+	bool diskRead = (m_files != NULL) && Utils::readFile(fileName, diskContent);
+
 	// the first load gives the land a new id, the next ones keep it
 	m_error.clear();
 	int id = m_zoneBuilder->loadZoneRegion(m_fileName, m_id, &m_error);
@@ -581,6 +660,20 @@ void LoadLandscapeCommand::redo()
 
 	m_id = id;
 	landIndex = m_model->createLandscapeNode(m_fileName, m_id);
+
+	if (m_files)
+	{
+		try
+		{
+			setLoadedBaseline(m_files, fileName, diskRead, diskContent, Utils::landFileContent(m_zoneBuilder->zoneRegion(m_id)->ligoZoneRegion()));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			// without a baseline Save asks before it replaces a file whose content differs
+			nlwarning("Cannot make the content of %s: %s", fileName.c_str(), e.what());
+			m_files->Baselines.erase(fileName);
+		}
+	}
 }
 
 
@@ -694,6 +787,11 @@ void LoadRootPrimitiveCommand::redo()
 {
 	m_scene->setEnabledEditPoints(false);
 
+	// what is on disk, read before the primitives, for Save to tell whether the file changed on disk
+	const std::string fileName = m_fileName.toUtf8().constData();
+	std::string diskContent;
+	bool diskRead = (m_files != NULL) && Utils::readFile(fileName, diskContent);
+
 	NLLIGO::CPrimitives *primitives = new NLLIGO::CPrimitives();
 
 	// set the primitive context
@@ -731,6 +829,21 @@ void LoadRootPrimitiveCommand::redo()
 	m_rootPrimIndex = m_model->createRootPrimitiveNode(m_fileName, primitives);
 
 	addNewGraphicsItems(m_model->pathToIndex(m_rootPrimIndex), m_model, m_scene);
+
+	// after the default values, which Save then writes only with a change made in the editor
+	if (m_files)
+	{
+		try
+		{
+			setLoadedBaseline(m_files, fileName, diskRead, diskContent, Utils::primitivesFileContent(*primitives, fileName));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			// without a baseline Save asks before it replaces a file whose content differs
+			nlwarning("Cannot make the content of %s: %s", fileName.c_str(), e.what());
+			m_files->Baselines.erase(fileName);
+		}
+	}
 }
 
 

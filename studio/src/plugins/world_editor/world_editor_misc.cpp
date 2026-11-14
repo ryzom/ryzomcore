@@ -27,8 +27,10 @@
 #include <nel/misc/mem_stream.h>
 #include <nel/misc/i_xml.h>
 #include <nel/misc/o_xml.h>
+#include <nel/misc/sha1.h>
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/ligo_config.h>
+#include <nel/ligo/zone_region.h>
 
 #include <libxml/tree.h>
 
@@ -106,14 +108,8 @@ bool readFile(const std::string &fileName, std::string &content)
 	return true;
 }
 
-bool writeFileIfChanged(const std::string &fileName, const std::string &content, std::string &error)
+bool writeFile(const std::string &fileName, const std::string &content, std::string &error)
 {
-	// a file that already has this content is not written again
-	std::string current;
-	if (NLMISC::CFile::fileExists(fileName) && NLMISC::CFile::getFileSize(fileName) == content.size()
-		&& readFile(fileName, current) && current == content)
-		return true;
-
 	try
 	{
 		// the temporary file replaces the file only when close() is reached
@@ -145,19 +141,54 @@ std::string primitivesFileContent(NLLIGO::CPrimitives &primitives, const std::st
 	return std::string((const char *)stream.buffer(), stream.length());
 }
 
-bool savePrimitivesFile(NLLIGO::CPrimitives &primitives, const std::string &fileName, std::string &error)
+std::string landFileContent(NLLIGO::CZoneRegion &zoneRegion)
 {
-	std::string content;
-	try
+	NLMISC::CMemStream stream;
 	{
-		content = primitivesFileContent(primitives, fileName);
+		NLMISC::COXml xml;
+		xml.init(&stream);
+		zoneRegion.serial(xml);
 	}
-	catch (const NLMISC::Exception &e)
-	{
-		error = "Error writing " + fileName + ": " + e.what();
-		return false;
-	}
-	return writeFileIfChanged(fileName, content, error);
+	return std::string((const char *)stream.buffer(), stream.length());
+}
+
+std::string fileContentKey(const std::string &content)
+{
+	return NLMISC::toString((uint64)content.size()) + ":"
+		+ NLMISC::getSHA1((const uint8 *)content.data(), (uint32)content.size()).toString();
+}
+
+const FileBaseline *findFileBaseline(const FileBaselines &baselines, const std::string &fileName)
+{
+	FileBaselines::const_iterator it = baselines.find(fileName);
+	return it == baselines.end() ? NULL : &it->second;
+}
+
+void setFileBaseline(FileBaselines &baselines, const std::string &fileName, const std::string &content)
+{
+	FileBaseline &baseline = baselines[fileName];
+	baseline.EditorKey = fileContentKey(content);
+	baseline.DiskKey = baseline.EditorKey;
+}
+
+FileAction fileAction(const std::string &fileName, const std::string &content, const FileBaseline *baseline)
+{
+	// the content the editor would write is compared with what it had for the file, not with the disk,
+	// so that a file another program changed or wrote in another layout stays as it is
+	if (baseline && fileContentKey(content) == baseline->EditorKey)
+		return FileUnchanged;
+
+	if (!NLMISC::CFile::fileExists(fileName))
+		return (baseline && !baseline->DiskKey.empty()) ? FileConflict : FileToWrite;
+
+	std::string current;
+	if (!readFile(fileName, current))
+		return FileConflict;
+	if (current == content)
+		return FileUpToDate;
+	if (baseline && fileContentKey(current) == baseline->DiskKey)
+		return FileToWrite;
+	return FileConflict;
 }
 
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList)

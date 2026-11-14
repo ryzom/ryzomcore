@@ -218,11 +218,42 @@ void PrimitivesView::save()
 
 	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
 	{
-		std::string error;
-		if (!Utils::savePrimitivesFile(*node->primitives(), node->fileName().toUtf8().constData(), error))
-			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
-		else
+		const std::string fileName = node->fileName().toUtf8().constData();
+		std::string content;
+		try
+		{
+			content = Utils::primitivesFileContent(*node->primitives(), fileName);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file %1: %2").arg(node->fileName(), QString::fromUtf8(e.what())));
+			return;
+		}
+
+		// as the world Save does: a file the editor did not change keeps what is on disk, and one that
+		// changed on disk too is replaced only when the user says so
+		const Utils::FileBaseline *baseline = m_files ? Utils::findFileBaseline(m_files->Baselines, fileName) : NULL;
+		Utils::FileAction action = Utils::fileAction(fileName, content, baseline);
+		if (action == Utils::FileUnchanged)
+		{
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+			return;
+		}
+		if (action == Utils::FileConflict
+			&& QMessageBox::question(this, "World Editor Qt",
+				tr("%1 changed on disk since it was loaded or saved, and is also changed in the editor. Replace it with the editor version?").arg(node->fileName()),
+				QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel) != QMessageBox::Save)
+			return;
+
+		std::string error;
+		if (action != Utils::FileUpToDate && !Utils::writeFile(fileName, content, error))
+		{
+			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
+			return;
+		}
+		if (m_files)
+			Utils::setFileBaseline(m_files->Baselines, fileName, content);
+		node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
 	}
 	else
 		saveAs();
@@ -244,14 +275,27 @@ void PrimitivesView::saveAs()
 
 		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
 
+		// the file dialog asked before a file is replaced
+		const std::string name = fileName.toUtf8().constData();
+		std::string content;
 		std::string error;
-		if (!Utils::savePrimitivesFile(*node->primitives(), fileName.toUtf8().constData(), error))
+		try
+		{
+			content = Utils::primitivesFileContent(*node->primitives(), name);
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			error = "Error writing " + name + ": " + e.what();
+		}
+		if (!error.empty() || !Utils::writeFile(name, content, error))
 			QMessageBox::warning(this, "World Editor Qt", QString::fromUtf8(error.c_str()));
 		else
 		{
 			node->setFileName(fileName);
 			node->setData(Constants::PRIMITIVE_FILE_IS_CREATED, true);
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
+			if (m_files)
+				Utils::setFileBaseline(m_files->Baselines, name, content);
 		}
 	}
 	setCursor(Qt::ArrowCursor);

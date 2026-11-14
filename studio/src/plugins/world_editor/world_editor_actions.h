@@ -82,12 +82,16 @@ private:
 };
 
 
-/// What the window shares with the load commands
+/// What the window shares with the load commands and Save
 struct WorldFiles
 {
 	/// The files named in the loaded .worldedit that are not loaded, by their absolute names: the load
 	/// commands keep it in step, and Save keeps their elements in the file
 	Utils::FilePathSet NotLoaded;
+
+	/// What the editor and the disk had for each file when it was loaded or last written, from which
+	/// Save tells the files the editor changed and the files that changed on disk
+	Utils::FileBaselines Baselines;
 
 	/// The files that a redo of a load command did not load, which the window reports in one message
 	/// once the redo is over
@@ -97,26 +101,57 @@ struct WorldFiles
 class WorldSaver
 {
 public:
-	WorldSaver( PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context );
+	WorldSaver(PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context,
+		WorldFiles *files);
 
-	/// The .worldedit as it was loaded: Save then rewrites that file and keeps what it does not change,
-	/// the elements of the files that are not loaded among them
+	/// The .worldedit as it was loaded or last saved: Save then rewrites that file and keeps what it does
+	/// not change, the elements of the files that are not loaded among them
 	void setLoadedFile(const std::string &fileName, const std::string &content, const std::string &dataDir,
-		const std::string &context, const Utils::FilePathSet &notLoaded);
+		const std::string &context);
 
-	/// Writes the land and primitive files of the model, then the .worldedit; a file that already has
-	/// its content is not written again
-	bool save();
+	/// Makes the content of the .worldedit for the world as it is in the model, which worldEditContent
+	/// then gives; false with the reason in getLastError when it cannot be made
+	bool makeWorldEdit();
+
+	/// Makes the content of every land and primitive file of the model and of the .worldedit, and finds
+	/// what each file needs from its baseline in the world files; nothing is written. False with the
+	/// reason in getLastError when a content cannot be made
+	bool prepare();
+
+	/// After prepare, the files the editor changed that also changed on disk since they were loaded or
+	/// last written
+	std::vector<std::string> conflicts() const;
+
+	/// After prepare, writes the files the editor changed, the land and primitive files first and the
+	/// .worldedit last, the conflicting ones only when replaceConflicts, and updates their baselines;
+	/// false with the reason in getLastError at the first file that cannot be written
+	bool write(bool replaceConflicts);
+
+	/// The files that write wrote, also when it failed
+	const std::vector<std::string> &writtenFiles() const { return m_writtenFiles; }
+
+	/// After write, whether the .worldedit on disk has the content made for it, written or already there
+	bool worldEditSaved() const { return m_worldEditSaved; }
 
 	std::string getLastError() const{ return lastError; }
 
-	/// After a successful save, the name and the content of the .worldedit
+	/// After makeWorldEdit or prepare, the name and the content of the .worldedit
 	const std::string &worldEditFileName() const { return m_worldEditFileName; }
 	const std::string &worldEditContent() const { return m_worldEditContent; }
 
 private:
-	bool saveLandscapeNode( Node *node );
-	bool savePrimitiveNode( Node *node );
+	struct SavedFile
+	{
+		std::string FileName;
+		std::string Content;
+		Utils::FileAction Action;
+		/// The land or root primitive node, NULL for the .worldedit
+		Node *FileNode;
+	};
+
+	bool prepareLandscapeNode(Node *node);
+	bool preparePrimitiveNode(Node *node);
+	void addSavedFile(const std::string &fileName, const std::string &content, Node *node);
 	bool makeWorldEditFile();
 	void addDatabaseElement(struct _xmlNode *rootNode, const std::pair<std::string, std::string> &entry, const std::string &folder);
 	struct _xmlDoc *updateLoadedFile(const std::string &fn);
@@ -128,7 +163,7 @@ private:
 	std::string m_loadedContent;
 	std::string m_loadedDataDir;
 	std::string m_loadedContext;
-	Utils::FilePathSet m_notLoaded;
+	WorldFiles *m_worldFiles;
 	PrimitivesTreeModel *m_model;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
 
@@ -137,7 +172,11 @@ private:
 	std::string m_worldEditFileName;
 	std::string m_worldEditContent;
 
-	// the file being written, for the error
+	std::vector<SavedFile> m_savedFiles;
+	std::vector<std::string> m_writtenFiles;
+	bool m_worldEditSaved;
+
+	// the file whose content is being made, for the error
 	std::string m_currentFile;
 
 	std::string lastError;
