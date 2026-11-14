@@ -405,6 +405,8 @@ public:
 
 	TLocations Locations;
 	TActiveEasterEggs ActiveEasterEggs;
+	uint32 RefusedEasterEggs; // activations refused because the session has MaxActiveEasterEggs
+	std::set<uint32> EasterEggIds; // the ids of the chests the session activated since it began
 
 	CBotControler	IncarningBots;
 	CBotControler	TalkingAsBots;
@@ -438,6 +440,7 @@ public:
 
 		TimingIsFinished = false;
 		ScenarioScore = 0;
+		RefusedEasterEggs = 0;
 	}
 
 	void setStartParams(sint32 x, sint32 y, uint8 season) { InitialX = x; InitialY = y; InitialSeason = season; }
@@ -4119,6 +4122,11 @@ void CServerAnimationModule::deactivateEasterEgg(class NLNET::IModuleProxy * /* 
 	proxy.deactivateEasterEgg(this,  easterEggId, scenarioId);
 }
 
+// The most chests a session has active at a time. A chest takes one unit of the quota of the editor, which the
+// base act and one other act share (MaxNpcs of the edition module, 100 by default); the editor has 10 other
+// acts, and the chests of an act stay active when another act is started: 10 * 100, with some room.
+static const uint32 MaxActiveEasterEggs = 1024;
+
 void CServerAnimationModule::activateEasterEgg(class NLNET::IModuleProxy * /* aisControl */, uint32 easterEggId, TSessionId scenarioId, uint32 actId ,const std::string & items, float x, float y, float z, float heading, const std::string& grpControler, const std::string& name, const std::string& look)
 {
 	DROP_IF(_CharacterControlProxy.isNull(), "No CharacterControlProxy", return);
@@ -4160,6 +4168,33 @@ void CServerAnimationModule::activateEasterEgg(class NLNET::IModuleProxy * /* ai
 
 
 	DROP_IF(actId >= session->Acts.size(), "Error in activateEasterEgg ", return );
+
+	// A chest that is not active in its act is one more. The chests are counted in the acts: the session has
+	// one entry for an id, in whatever number of acts the id is active.
+	uint32 nbActive = 0;
+	for (uint32 i = 0; i < session->Acts.size(); ++i)
+	{
+		nbActive += (uint32)session->Acts[i]->ActiveEasterEggs.size();
+	}
+	// The ids are counted too: a chest has the id the translation gave its group, so a scenario of the
+	// editor uses the ids of its chests again and again. The service that makes the chest can keep one
+	// this module no longer counts as active (a chest removed before it was there); with a largest
+	// number of ids, the chests a session leaves there have that number at most.
+	const bool knownId = session->EasterEggIds.count(easterEggId) != 0;
+	if ((nbActive >= MaxActiveEasterEggs && session->Acts[actId]->ActiveEasterEggs.count(easterEggId) == 0)
+	    || (!knownId && session->EasterEggIds.size() >= MaxActiveEasterEggs))
+	{
+		// the 1st, 2nd, 4th, 8th... refusal of the session is logged
+		++session->RefusedEasterEggs;
+		if ((session->RefusedEasterEggs & (session->RefusedEasterEggs - 1)) == 0)
+		{
+			nlwarning("R2An: session %u: the chest %u is not activated, the session has %u active chests and has used %u chest ids, %u is the most of each (refusal %u)",
+			    scenarioId.asInt(), easterEggId, nbActive, (uint32)session->EasterEggIds.size(), MaxActiveEasterEggs, session->RefusedEasterEggs);
+		}
+		return;
+	}
+	session->EasterEggIds.insert(easterEggId);
+
 	bool ok = session->Acts[actId]->activateEasterEgg(easterEggId, grpControler);
 
 	if (!ok)
