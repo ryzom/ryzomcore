@@ -204,8 +204,7 @@ void connectionRestoreVideoMode ()
 	// And setup hardware mouse if we have to
 	ResetMouseCaptureState();
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
-	SetMouseFreeLook ();
-	SetMouseCursor ();
+	ResetMouseCursor();
 
 	// Restore user UI scaling
 	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
@@ -592,8 +591,7 @@ bool reconnection()
 		InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
-		SetMouseFreeLook ();
-		SetMouseCursor ();
+		ResetMouseCursor();
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}

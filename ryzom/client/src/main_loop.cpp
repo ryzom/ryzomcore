@@ -1030,8 +1030,7 @@ bool mainLoop()
 
 	updateLightDesc();
 
-	SetMouseFreeLook ();
-	SetMouseCursor ();
+	ResetMouseCursor();
 	// Set the cursor.
 	ContextCur.context("STAND BY");
 	UserControls.reset();
@@ -2611,8 +2610,7 @@ bool mainLoop()
 				T1		= ryzomGetLocalTime();
 				TSend	= ((T1+DTSend)/DTSend)*DTSend;
 
-				SetMouseFreeLook ();
-				SetMouseCursor ();
+				ResetMouseCursor();
 				// Set the cursor.
 				ContextCur.context("STAND BY");
 				UserControls.reset();

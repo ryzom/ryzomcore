@@ -119,6 +119,12 @@ public:
 	*/
 	void	resetPos (sint x, sint y);
 
+	/** The pointer may not be where the system cursor is (the interface saw no mouse move for a while, as during
+	 *	a loading screen): a click that comes before the next mouse move first brings the pointer to its own
+	 *	position, as the click that gives the window the focus does. A click acts where the pointer is.
+	 */
+	void	recoverMousePos() { _RecoverFocusLost = true; }
+
 
 	bool hasFocus() const { return _Focus; }
 
