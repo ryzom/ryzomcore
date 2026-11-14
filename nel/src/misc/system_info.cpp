@@ -1585,27 +1585,66 @@ static inline char *skipToken(const char *p)
 }
 #endif
 
+#ifdef NL_OS_WINDOWS
+// PROCESS_MEMORY_COUNTERS_EX of <psapi.h>, declared here so that neither that header nor psapi.lib is needed:
+// the function is looked up when it is called (kernel32 from Windows 7 on, psapi.dll before)
+struct CProcessMemoryCountersEx
+{
+	DWORD cb;
+	DWORD PageFaultCount;
+	SIZE_T PeakWorkingSetSize;
+	SIZE_T WorkingSetSize;
+	SIZE_T QuotaPeakPagedPoolUsage;
+	SIZE_T QuotaPagedPoolUsage;
+	SIZE_T QuotaPeakNonPagedPoolUsage;
+	SIZE_T QuotaNonPagedPoolUsage;
+	SIZE_T PagefileUsage;
+	SIZE_T PeakPagefileUsage;
+	SIZE_T PrivateUsage;
+};
+#endif
+
 uint64 CSystemInfo::getAllocatedSystemMemory ()
 {
 	uint64 systemMemory = 0;
 #ifdef NL_OS_WINDOWS
-	// Get system memory information
-	HANDLE hHeap[100];
-	DWORD heapCount = GetProcessHeaps (100, hHeap);
-
-	uint heap;
-	for (heap = 0; heap < heapCount; heap++)
+	// The private bytes of the process (its commit charge), from the counters the system keeps for it.
+	// The heaps are not walked for this: HeapWalk on a heap that other threads use can go astray without a
+	// lock, and was seen never to return then; a lock would stop every thread that allocates, and a walk of
+	// the heaps of a large process takes long. This is read every minute by a service that lists ProcessUsedMemory in its GraphVars.
+	typedef BOOL(WINAPI *TGetProcessMemoryInfo)(HANDLE, CProcessMemoryCountersEx *, DWORD);
+	TGetProcessMemoryInfo getProcessMemoryInfo = NULL;
+	HMODULE psapi = NULL;
+	HMODULE kernel = GetModuleHandleW(L"kernel32.dll");
+	if (kernel != NULL)
+		getProcessMemoryInfo = (TGetProcessMemoryInfo)GetProcAddress(kernel, "K32GetProcessMemoryInfo");
+	if (getProcessMemoryInfo == NULL)
 	{
-		PROCESS_HEAP_ENTRY entry;
-		entry.lpData = NULL;
-		while (HeapWalk (hHeap[heap], &entry))
-		{
-			if (entry.wFlags & PROCESS_HEAP_ENTRY_BUSY)
-			{
-				systemMemory += entry.cbData + entry.cbOverhead;
-			}
-		}
+		// before Windows 7 the function is in psapi.dll
+		psapi = LoadLibraryW(L"psapi.dll");
+		if (psapi != NULL)
+			getProcessMemoryInfo = (TGetProcessMemoryInfo)GetProcAddress(psapi, "GetProcessMemoryInfo");
 	}
+
+	CProcessMemoryCountersEx counters;
+	memset(&counters, 0, sizeof(counters));
+	counters.cb = sizeof(counters);
+	if (getProcessMemoryInfo == NULL)
+	{
+		nlwarning("HA: Can't get the memory used by the process: GetProcessMemoryInfo is not found");
+	}
+	else if (getProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)) == 0)
+	{
+		const DWORD error = GetLastError();
+		nlwarning("HA: Can't get the memory used by the process: GetProcessMemoryInfo failed, error %u", (uint)error);
+	}
+	else
+	{
+		systemMemory = counters.PrivateUsage;
+	}
+
+	if (psapi != NULL)
+		FreeLibrary(psapi);
 
 #elif defined NL_OS_MAC
 

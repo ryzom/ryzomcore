@@ -32,6 +32,7 @@ add_test_executable(nel_misc_test
         ut_misc_sstring.test.cpp
         ut_misc_stream.test.cpp
         ut_misc_string_common.test.cpp
+        ut_misc_system_info.test.cpp
         ut_misc_types.test.cpp
         ut_misc_variable.test.cpp
         ut_misc_win_event_emitter.test.cpp
