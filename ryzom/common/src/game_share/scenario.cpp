@@ -230,19 +230,29 @@ bool CScenario::setNode( const std::string& instanceId, const std::string& attrN
 	// What setObject below does: without an attribute name the entries of the object are replaced; an
 	// attribute that is a table has its entries replaced; one that the object does not have is added; one
 	// that is a string or a number takes the value, or refuses it, and the tree keeps its shape.
+	// What is replaced takes a value of its own kind, and setObject stops on another one: a table takes the
+	// entries of a table, a number a number, a text a text or a number.
 	const CObject *into = found;
 	TTreeChange change = TreeReplace;
+	bool sameKind = value->isTable();
 	if (!attrName.empty())
 	{
 		const CObject *attr = found->getAttr(attrName);
 		if (!attr)
 		{
 			change = TreeAdd;
+			sameKind = true;
 		}
 		else
 		{
 			into = attr->isTable() ? attr : nullptr;
+			sameKind = attr->isTable() == value->isTable() && (attr->isString() || !value->isString());
 		}
+	}
+	if (!sameKind)
+	{
+		nlwarning("CScenario::setNode : the value is not of the kind of '%s' in object with id = %s", attrName.c_str(), instanceId.c_str());
+		return false;
 	}
 	if (into && !fitsInTree(_HighLevel, into, value, change, "setNode"))
 	{
@@ -276,6 +286,12 @@ bool  CScenario::insertNode(const std::string&  instanceId, const std::string & 
 	if (!value)
 	{
 		nlwarning("CScenario::insertNode : no value to insert in object with id = %s", instanceId.c_str());
+		return false;
+	}
+	// the attribute can be a text or a number, and the position is -1 or one the table has: insert stops on others
+	if (!found->isTable() || position < -1 || position > static_cast<sint32>(found->getSize()))
+	{
+		nlwarning("CScenario::insertNode : no table '%s', or no position %d in it, in object with id = %s", attrName.c_str(), (int)position, instanceId.c_str());
 		return false;
 	}
 	if (!fitsInTree(_HighLevel, found, value, TreeAdd, "insertNode"))

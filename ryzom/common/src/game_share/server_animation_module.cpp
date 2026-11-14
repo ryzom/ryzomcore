@@ -1321,7 +1321,9 @@ void CServerAnimationModule::startAct(TSessionId sessionId, uint32 actId)
 		}
 
 		nlwarning("ERROR: you must check the backup : session_%d_?.r2", sessionId.asInt());
-		BOMB( NLMISC::toString("BIG ERROR: Scenario was not found for session %u, it previously lead to dss crash", sessionId.asInt()), return);
+		// The two scenarios of a session are uploaded apart, and a session can have the run time one alone: the
+		// act is not started, and the service has nothing of its own to stop on
+		nlwarning("BIG ERROR: Scenario was not found for session %u, it previously lead to dss crash", sessionId.asInt());
 		return;
 	}
 
@@ -2465,6 +2467,12 @@ void CServerAnimationModule::stopAct(TSessionId sessionId)
 
 bool CServerAnimationModule::getPosition(TSessionId sessionId, double& x, double& y, double& orient, uint8& season, uint32 actIndex)
 {
+	// a caller that does not test the result has a defined position
+	x = 0;
+	y = 0;
+	orient = 0;
+	season = 0;
+
 	CAnimationSession *animSession = getSession( sessionId );
 
 	if(! animSession) { return false; } // normal case when getStart position while creating scenario

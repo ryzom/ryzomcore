@@ -230,6 +230,19 @@ namespace R2
 		bool isLoaded() const;
 		void setLoaded(bool value);
 
+		// The entry position of a session is read from the scenario its authors sent, for each connection and
+		// teleport of its characters. A read that this scenario refuses is counted, and the 1st, 2nd, 4th, 8th...
+		// of the session is logged. Returns false.
+		bool refusePosition(const char *reason)
+		{
+			++RefusedPositions;
+			if ((RefusedPositions & (RefusedPositions - 1)) == 0)
+			{
+				nlwarning("R2Ed: session %u: no entry position is read from the scenario of the session: %s (refusal %u)", SessionId.asInt(), reason, RefusedPositions);
+			}
+			return false;
+		}
+
 	public:
 		NLMISC::CSmartPtr<CScenario> _Scenario;
 		TSessionId SessionId;
@@ -245,6 +258,7 @@ namespace R2
 		bool SaveRefused;
 		sint32 InitialX, InitialY;
 		uint8 InitialSeason;
+		uint32 RefusedPositions; // reads of the entry position that the scenario of the session refused
 		std::set<TCharId> CharsToVerify;
 
 
@@ -770,6 +784,7 @@ _Scenario(scenario), SessionId(sessionId), _AiInstance(aiInstanceId),_EditSlotId
 	_OwnerCharId = ownerCharId;
 	InitialX = InitialY = 0;
 	InitialSeason = 0;
+	RefusedPositions = 0;
 	_Loaded = false;
 	nldebug("Creating new CEditionSession - ownerCharId=%u, aiInstanceId=%u, sessionId=%u", ownerCharId, aiInstanceId, sessionId.asInt());
 }
@@ -790,6 +805,7 @@ CEditionSession::CEditionSession(RSMGR::TSessionType sessionType, TSessionId ses
 	InitialX = edit->InitialX;
 	InitialY = edit->InitialY;
 	InitialSeason = edit->InitialSeason;
+	RefusedPositions = 0;
 	_Loaded = edit->_Loaded;
 	nldebug("Creating new CEditionSession - ownerCharId=%u, aiInstanceId=%u, sessionId=%u", _OwnerCharId, _AiInstance, sessionId.asInt());
 }
@@ -2999,7 +3015,12 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 		}
 		else
 		{
+			// The header is the one a client sent with the start, and the class gives these two no value. Without
+			// a BodyMD5 that is an md5 the key is the one of all zeros; without Rules the scenario is masterless,
+			// as it is with every text but "Mastered".
 			TRunningScenarioInfo info;
+			info.getScenarioKey().clear();
+			info.setDMLess(true);
 			TScenarioHeaderSerializer::TValueType::const_iterator first(values.begin()), last(values.end());
 			bool nevraxScenario = false;
 			bool trialAllowed = false;
@@ -3011,8 +3032,8 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				if (first->first == "BodyMD5" )
 				{
 					CHashKeyMD5 md5;
-					md5.fromString(first->second);
-					info.setScenarioKey(md5);
+					if (md5.fromString(first->second)) { info.setScenarioKey(md5); }
+					else { nlwarning("R2Ed: session %u: the BodyMD5 of the header of the start is no md5, the key of the scenario stays the one of all zeros", sessionId.asInt()); }
 				}
 
 				else if (first->first == "Title" )	{ info.setScenarioTitle(first->second); }
@@ -4114,15 +4135,18 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			/*Informs EGS that the animation has started*/
 			if ( getLinkedSessionId(body.SessionId) == TSessionId(0) && session->getSessionType() == RSMGR::TSessionType::st_anim )
 			{
+				// no key and masterless when the header lacks them, as in createSession
 				TRunningScenarioInfo info;
+				info.getScenarioKey().clear();
+				info.setDMLess(true);
 				TScenarioHeaderSerializer::TValueType::const_iterator first(header.Value.begin()), last(header.Value.end());
 				for ( ; first != last; ++first)
 				{
 					if (first->first == "BodyMD5" )
 					{
 						CHashKeyMD5 md5;
-						md5.fromString(first->second);
-						info.setScenarioKey(md5);
+						if (md5.fromString(first->second)) { info.setScenarioKey(md5); }
+						else { nlwarning("R2Ed: session %u: the BodyMD5 of the header of the start is no md5, the key of the scenario stays the one of all zeros", body.SessionId.asInt()); }
 					}
 					else if (first->first == "Title" )	{ info.setScenarioTitle(first->second); }
 					else if (first->first == "ShortDescription" )	{ info.setScenarioDesc(first->second); }
@@ -4283,9 +4307,11 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 
 	} // Map selection (non tp)
 
+	// The scenario is what an author of the session sent: what this needs of it can be absent or of another type
+	CEditionSession* session = getSession(sessionId);
 	CObject* locations = hl->getAttr("Locations");
 
-	BOMB_IF(!locations || !locations->isTable(), "Invalid location.", return false);
+	if (!locations || !locations->isTable()) { return session->refusePosition("it has no table of locations"); }
 
 	uint32 locationId = 0;
 
@@ -4296,10 +4322,10 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 	}
 
 	CObject* acts = hl->getAttr("Acts");
-	BOMB_IF(!acts || !acts->isTable() || actIndex >= acts->getSize(), "Invalid acts.", return false);
+	if (!acts || !acts->isTable() || actIndex >= acts->getSize()) { return session->refusePosition("it has no table of acts, or not the act asked for"); }
 
 	CObject* selectedAct = acts->getValueAtPos(actIndex);
-	BOMB_IF(!selectedAct || !selectedAct->isString("LocationId"), "Invalid act.", return false);
+	if (!selectedAct || !selectedAct->isString("LocationId")) { return session->refusePosition("the act names no location"); }
 	std::string locationInstanceId = selectedAct->toString("LocationId");
 
 	uint32 firstLocationIndex = 0, lastLocationIndex = locations->getSize();
@@ -4315,24 +4341,27 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 
 
 
-	BOMB_IF(locationId >= locations->getSize(), "Invalid location.", return false);
+	if (locationId >= locations->getSize()) { return session->refusePosition("it has no location"); }
 
 
 
 	CObject* firstLocation = locations->getValueAtPos(locationId);
-	BOMB_IF(!firstLocation || !firstLocation->isTable(), "Invalid location.", return false);
+	if (!firstLocation || !firstLocation->isTable()) { return session->refusePosition("the location is no table"); }
 
+	// each of the three is a text or a number; a season that is no season name is the automatic one, and an entry
+	// point that the island does not have is its first one, below
 	CObject* entryPointObj = firstLocation->getAttr("EntryPoint");
 	CObject* islandName = firstLocation->getAttr("IslandName");
 	CObject* seasonObj = firstLocation->getAttr("Season");
-	bool locationInfo = !entryPointObj || !islandName || !seasonObj ||
-		islandName->isString() || !islandName->isString() || !seasonObj->isString();
-	BOMB_IF(!locationInfo, "Invalid Loction infos", return false);
+	if (!entryPointObj || entryPointObj->isTable() || !islandName || islandName->isTable() || !seasonObj || seasonObj->isTable())
+	{
+		return session->refusePosition("the location lacks its island, its entry point or its season");
+	}
 
 	CScenarioEntryPoints& epManager = CScenarioEntryPoints::getInstance();
 
 	CScenarioEntryPoints::CCompleteIsland * island = epManager.getIslandFromId(islandName->toString());
-	BOMB_IF(!island, NLMISC::toString("Session %u No Island '%s'.", sessionId.asInt(), islandName->toString().c_str()), return false);
+	if (!island) { return session->refusePosition("the island of the location is not known"); }
 
 	CScenarioEntryPoints::CShortEntryPoint *entryPoint = epManager.getEntryPointFromIds(islandName->toString(), entryPointObj->toString());
 
@@ -4341,7 +4370,7 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 		entryPoint = epManager.getEntryPointFromIds(islandName->toString(), island->EntryPoints[0].Location); //Evil Hack must be removed
 	}
 
-	BOMB_IF(!entryPoint, NLMISC::toString("Session %u: No EntryPoint '%s' '%s'.", sessionId.asInt(), islandName->toString().c_str(), entryPointObj->toString().c_str()), return false);
+	if (!entryPoint) { return session->refusePosition("the island of the location has no entry point"); }
 
 	x = entryPoint->X;
 	y = entryPoint->Y;
