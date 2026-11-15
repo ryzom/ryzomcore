@@ -1689,6 +1689,21 @@ REGISTER_ACTION_HANDLER (CAHResetPushed, "reset_pushed");
 
 
 
+// A launch from character selection that stops before its far TP: the outro has made the screen black and the
+// buttons were hidden for the launch (proc_charsel_play2). They come back, as after a far TP that fails
+// (CFarTP::requestFarTPToSession), so that the player can retry or choose another character.
+static void showCharSelAfterStoppedLaunch()
+{
+	CViewBase *blackScreen = dynamic_cast<CViewBase *>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen"));
+	if (blackScreen)
+		blackScreen->setAlpha(0);
+	CAHManager::getInstance()->runActionHandler("proc", nullptr, "charsel_enable_buttons");
+	CAHManager::getInstance()->runActionHandler("set", nullptr, "target_property=ui:outgame:charsel:create_new_but:active|value=0");
+	CInterfaceGroup *charselGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
+	if (charselGroup)
+		CAHManager::getInstance()->runActionHandler("proc", charselGroup, "charsel_init_buttons");
+}
+
 // Launch the game given a slot (slot is reference to the character summaries
 // ------------------------------------------------------------------------------------------------
 class CAHLaunchGame : public IActionHandler
@@ -1721,6 +1736,7 @@ public:
 				else
 				{
 					im->messageBoxWithHelp(CI18N::get("uiBGD_FullPatchNeeded"), "ui:outgame");
+					showCharSelAfterStoppedLaunch();
 				}
 				return;
 			}
@@ -1769,7 +1785,14 @@ public:
 				CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 				sb.init(nullptr);
 				sb.closeEditSession(sb.getCharId());
-				sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+				// without an answer the session may still be open: the new scenario does not start in it
+				if (!sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult")))
+				{
+					nlwarning("The session browser did not answer the request to close the edit session of char %u", sb.getCharId());
+					CInterfaceManager::getInstance()->messageBoxWithHelp(CI18N::get("uiCharSel_CloseSessionFailed"), "ui:outgame");
+					showCharSelAfterStoppedLaunch();
+					return;
+				}
 			}
 			if (FarTP.requestFarTPToSession( (TSessionId)0, PlayerSelectedSlot, CFarTP::LaunchEditor, false ))
 			{
@@ -3038,7 +3061,11 @@ class CAHScenarioControl : public IActionHandler
 			}
 			else
 			{
+				// the buttons would show the filters of no session, and an update would send them: the window closes
 				nlwarning("getSessionInfo callback return false");
+				pIM->messageBoxWithHelp(CI18N::get("uiRingUpdateScenarioFiltersError"));
+				scenarioWnd->setActive(false);
+				return;
 			}
 		}
 		else
@@ -3479,7 +3506,10 @@ class CAHLoadScenario : public IActionHandler
 				sessionBrowser.hibernateEditSession(charId);
 				if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 				{
+					// without an answer the edit session may still be open: no animation session is scheduled
 					nlwarning("hibernateEditSession callback return false");
+					pIM->messageBoxWithHelp(CI18N::get("uiRingLaunchScenarioError"));
+					return;
 				}
 
 			}
@@ -3529,28 +3559,30 @@ class CAHLoadScenario : public IActionHandler
 							// request session
 							FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
 								!R2::getEditor().isInitialized());
+
+							if (sessionBrowser._LastInvokeResult != 0)
+							{
+								nlwarning("inviteCharacter callback use error values %d", sessionBrowser._LastInvokeResult);
+							}
+
+							if(sessionBrowser._LastInvokeResult == 14)
+							{
+								CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
+								if (pVT != nullptr)
+									pVT->setTextLocalized("uiRingWarningFreeTrial", true);
+								CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							}
 						}
 						else
 						{
+							// _LastInvokeResult is that of an earlier request
 							nlwarning("inviteCharacter callback return false");
-						}
-
-						if (sessionBrowser._LastInvokeResult != 0)
-						{
-							nlwarning("inviteCharacter callback use error values %d", sessionBrowser._LastInvokeResult);
-						}
-
-						if(sessionBrowser._LastInvokeResult == 14)
-						{
-							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-							if (pVT != nullptr)
-								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
-							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							launchSuccess = false;
 						}
 
 
-						// invite team
-						if(inviteTeam)
+						// invite team, into the session the player enters
+						if(inviteTeam && launchSuccess)
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
@@ -3566,7 +3598,12 @@ class CAHLoadScenario : public IActionHandler
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 										{
+											// the next ones would wait as long: the team members are not invited
 											nlwarning("inviteCharacterByName callback return false");
+											string text = CI18N::get("uiRingInviteNoAnswer");
+											strFindReplace(text, "%name", charName);
+											pIM->displaySystemInfo(text, "BC");
+											break;
 										}
 
 										if(sessionBrowser._LastInvokeResult == 14)

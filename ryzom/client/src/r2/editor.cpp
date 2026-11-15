@@ -1447,7 +1447,10 @@ int CEditor::luaKickCharacter(CLuaState &ls)
 		(uint32)ls.toInteger(2));
 
 	if(!sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
+	{
 		nlwarning("kickCharacter callback return false");
+		getUI().displaySystemInfo(CI18N::get("uiRingRequestNoAnswer"), "BC");
+	}
 
 	return 0;
 }
@@ -1465,7 +1468,10 @@ int CEditor::luaUnkickCharacter(CLuaState &ls)
 		(uint32)ls.toInteger(2));
 
 	if(!sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
+	{
 		nlwarning("unkickCharacter callback return false");
+		getUI().displaySystemInfo(CI18N::get("uiRingRequestNoAnswer"), "BC");
+	}
 
 	return 0;
 }
@@ -7525,7 +7531,9 @@ class CAHR2StopLive : public IActionHandler
 			}
 			else
 			{
+				// without an answer the session may still be live: the player stays in it
 				nlwarning("closeSession callback return false");
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiRingRequestNoAnswer"), "BC");
 			}
 		}
 	}
@@ -7539,7 +7547,6 @@ class CAHInviteCharacter : public IActionHandler
 	{
 		CHECK_EDITOR
 
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
 
 		if(pCaller)
@@ -7561,26 +7568,8 @@ class CAHInviteCharacter : public IActionHandler
 				if (geb && !geb->getInputString().empty())
 				{
 					string charName = geb->getInputString();
-					CSessionBrowserImpl & sessionBrowser = CSessionBrowserImpl::getInstance();
-					sessionBrowser.inviteCharacterByName(sessionBrowser.getCharId(), charName);
-
-					if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
-					{
-						nlwarning("inviteCharacterByName callback return false");
-					}
-
-					if(sessionBrowser._LastInvokeResult == 14)
-					{
-						CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-						if (pVT != nullptr)
-							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
-
-						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
-					}
-					else if(sessionBrowser._LastInvokeResult == 12)
-					{
-						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
-					}
+					// tells the player a refusal or a missing answer
+					CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(charName, pCaller);
 
 					geb->setInputString(std::string());
 				}
