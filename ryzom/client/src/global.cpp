@@ -86,6 +86,8 @@ std::vector<std::pair<
 /// Ring main page
 string						RingMainURL;
 
+string						ClientInstanceSuffix;
+
 void resetTextContext (const char *font, bool resetInterfaceManager)
 {
 	if (TextContext != nullptr)

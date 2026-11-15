@@ -172,7 +172,7 @@ function r2Headless.selectAct(startingActIndexText)
 end
 
 -- What r2.Version.save (r2_version.lua) does to the scenario before it writes the file, with the
--- configuration and the file name of a started test ("save/r2_buffer.dat", no extended debug). It
+-- configuration and the file name of a started test ("save/r2_buffer_<character>.dat", no extended debug). It
 -- starts with r2.Version.updateScenarioVersions, which is called here as it is. A scenario with the
 -- "RoSOnly" access or marked as a Nevrax scenario is not saved: the function changes those properties
 -- and returns. The rest of it builds the file header and asks the ring access of the character, which

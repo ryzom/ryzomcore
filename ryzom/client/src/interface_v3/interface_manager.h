@@ -228,15 +228,11 @@ public:
 	// Save config to default location, if verbose is true, display message in game sysinfo
 	bool saveConfig (bool verbose = false);
 	bool saveConfig (const std::string &filename);
-	// delete the user config (give the player ident fileName)
-	bool deletePlayerConfig (const std::string &playerFileIdent);
 
 	// Save keys to default location, if verbose is true, display message in game sysinfo
 	bool saveKeys (bool verbose = false);
 	// Save the keys config file
 	bool saveKeys (const std::string &filename);
-	// delete the user Keysconfig (give the player ident fileName)
-	bool deletePlayerKeys (const std::string &playerFileIdent);
 
 	// Log system (all chat/tell
 	void setLogState(bool state) { _LogState = state; }

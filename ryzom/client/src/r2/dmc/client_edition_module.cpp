@@ -603,11 +603,14 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 				CScenarioValidator::TValues values;
 				std::string md5, signature;
 
-				if ( sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true)
+				// the copy of the character that this process saved itself
+				std::map<std::string, std::string>::const_iterator ownSignature = CScenarioValidator::AutoSaveSignatures.find(getScenarioBufferFileName());
+				if ( sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true)
 					&& !md5.empty()
-					&& CScenarioValidator::AutoSaveSignature == signature)
+					&& ownSignature != CScenarioValidator::AutoSaveSignatures.end()
+					&& ownSignature->second == signature)
 				{
-					data = _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", values);
+					data = _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), values);
 				}
 				else
 				{
@@ -1139,10 +1142,10 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			std::string md5, signature;
 			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
 
-			sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true);
+			sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true);
 			_LastReadHeader = values;
 			uint32 lastActIndex = _StartingActIndex;
-			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
+			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), _LastReadHeader);
 			// The file is read as a file that is loaded is: a scenario of an earlier version of the editor
 			// is brought up to date for the test. (The save leaves a scenario at the versions it has when an
 			// update would change it, see r2.Version.updateScenarioVersions.)
@@ -1267,13 +1270,13 @@ bool CClientEditionModule::requestStartScenario()
 
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
-	// The test runs the scenario that r2.Version.save writes to save/r2_buffer.dat: startingScenario reads
+	// The test runs the scenario that r2.Version.save writes to the buffer file of the character: startingScenario reads
 	// that file back, makes it the scenario of the editor and translates it. When the save raises, the file
 	// is what it was before, the scenario as it was loaded or tested last: the test would run without the
 	// changes made since, and the editor would take that scenario for its own. The test does not start, the
 	// author is told, and the scenario of the editor stays. (A save that the scripts refuse without an
 	// error, as for a scenario that must not be changed, goes on to the test as before.)
-	if (!R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")"))
+	if (!R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript()))
 	{
 		nlwarning("R2: the scenario could not be saved for the test, the test does not start");
 		R2::getEditor().getLua().push(std::string("uiR2EDTestSaveFailed"));
@@ -2645,7 +2648,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	// only a file that parsed becomes the local copy, which is read back the same way
 	if (object && CFile::fileExists(filename))
 	{
-		CFile::copyFile("save/r2_buffer.dat", filename);
+		CFile::copyFile(getScenarioBufferFileName(), filename);
 	}
 }
 

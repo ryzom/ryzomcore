@@ -1002,7 +1002,9 @@ public:
 		query << " characters.cult, session_participant.status, characters.home_mainland_session_id, ";
 		//                    11
 		query << " session_participant.kicked";
-		query << " FROM sessions, session_participant, characters, ring_users LEFT JOIN guilds ON characters.guild_id = guilds.guild_id";
+		// the comma joined tables go in parentheses: an outer join binds tighter than a comma, so its ON clause
+		// could only name ring_users and guilds, and the database refuses the request
+		query << " FROM (sessions, session_participant, characters, ring_users) LEFT JOIN guilds ON characters.guild_id = guilds.guild_id";
 		query << " WHERE sessions.session_id = "<<sessionId;
 		query << " AND sessions.session_id = session_participant.session_id";
 		query << " AND characters.char_id = session_participant.char_id";

@@ -128,13 +128,34 @@ namespace STRING_MANAGER
 
 		if (_CacheInited)
 		{
+			// clear all current data: they belong to the shard and the timestamp of before, whether the cache is
+			// used or not
+			_ReceivedStrings.clear();
+			_ReceivedDynStrings.clear();
+			_CacheStringToSave.clear();
+			// NB : we keep the waiting strings and dyn strings
+
+			// insert the empty string.
+			_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
+
 			bool readingRecords = false;
+			// the clients of a folder share the cache of a shard and a language: each reads, resets and deletes it
+			// under the lock (held until the end of this function, also when the load fails)
+			CFileLock cacheLock;
 			try
 			{
 				const uint currentVersion = 1;
 
 				string clientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 				_CacheFilename = string("save/") + clientApp + "_" + toString(shardId) + "_" + m_LanguageCode + ".string_cache";
+
+				if (cacheLock.lock(_CacheFilename + ".lock", 5000) != CFileLock::Locked)
+				{
+					nlwarning("SM : the string cache %s is not used, the strings come from the server: its lock %s.lock can't be taken (%s)",
+						_CacheFilename.c_str(), _CacheFilename.c_str(), cacheLock.getError().c_str());
+					_CacheFilename.erase();
+					return;
+				}
 
 				nlinfo("SM : Try to open the string cache : %s", _CacheFilename.c_str());
 
@@ -172,15 +193,6 @@ namespace STRING_MANAGER
 					file.serialVersion(currentVersion);
 					file.serial(timestamp);
 				}
-
-				// clear all current data.
-				_ReceivedStrings.clear();
-				_ReceivedDynStrings.clear();
-				_CacheStringToSave.clear();
-				// NB : we keep the waiting strings and dyn strings
-
-				// insert the empty string.
-				_ReceivedStrings.insert(make_pair((uint)EmptyStringId, string()));
 
 				// load the cache file
 				NLMISC::CIFile file(_CacheFilename);
@@ -564,9 +576,39 @@ restartLoop:
 	{
 		if (!_CacheStringToSave.empty() && !_CacheFilename.empty())
 		{
+			// another client of this folder may have reset the cache for a new timestamp of the server since this one
+			// loaded it: the strings received here belong to the timestamp loaded then, and are only added to a cache
+			// that still has it. The check and the write are under the lock of the cache.
+			CFileLock cacheLock;
+			if (cacheLock.lock(_CacheFilename + ".lock", 5000) != CFileLock::Locked)
+			{
+				nlwarning("SM : the %u strings received are not added to the string cache %s: its lock %s.lock can't be taken (%s)",
+					(uint)_CacheStringToSave.size(), _CacheFilename.c_str(), _CacheFilename.c_str(), cacheLock.getError().c_str());
+				_CacheStringToSave.clear();
+				return;
+			}
+
 			// the cache is only an optimization, a write error (disk full, file locked) must not be fatal
 			try
 			{
+				uint32 fileTimestamp = ~_Timestamp;
+				{
+					NLMISC::CIFile header;
+					if (header.open(_CacheFilename))
+					{
+						header.setVersionException(false, false);
+						header.serialVersion(1);
+						if (header.getPos() + sizeof(fileTimestamp) <= header.getFileSize())
+							header.serial(fileTimestamp);
+					}
+				}
+				if (fileTimestamp != _Timestamp)
+				{
+					nlinfo("SM : the %u strings received are not added to the string cache %s: another client reset it for another timestamp of the server, or removed it", (uint)_CacheStringToSave.size(), _CacheFilename.c_str());
+					_CacheStringToSave.clear();
+					return;
+				}
+
 				NLMISC::COFile file(_CacheFilename, true);
 				for (uint i = 0; i < _CacheStringToSave.size(); i++)
 				{

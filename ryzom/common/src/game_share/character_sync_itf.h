@@ -495,6 +495,8 @@ namespace CHARSYNC
 		TCult	_Cult;
 		//
 		bool	_Newcomer;
+		// Whether the sending shard could tell the newcomer flag: it follows the continent of the home position, and a Ring shard does not load the mainland continents
+		bool	_NewcomerKnown;
 	public:
 		// The entity id of the character
 		const NLMISC::CEntityId &getCharEId() const
@@ -611,6 +613,16 @@ namespace CHARSYNC
 		{
 				_Newcomer = value;
 		}
+		// Whether the sending shard could tell the newcomer flag: it follows the continent of the home position, and a Ring shard does not load the mainland continents
+		bool getNewcomerKnown() const
+		{
+			return _NewcomerKnown;
+		}
+
+		void setNewcomerKnown(bool value)
+		{
+				_NewcomerKnown = value;
+		}
 
 		bool operator == (const TCharInfo &other) const
 		{
@@ -623,7 +635,8 @@ namespace CHARSYNC
 				&& _Race == other._Race
 				&& _Civilisation == other._Civilisation
 				&& _Cult == other._Cult
-				&& _Newcomer == other._Newcomer;
+				&& _Newcomer == other._Newcomer
+				&& _NewcomerKnown == other._NewcomerKnown;
 		}
 
 
@@ -644,6 +657,7 @@ namespace CHARSYNC
 			s.serial(_Civilisation);
 			s.serial(_Cult);
 			s.serial(_Newcomer);
+			s.serial(_NewcomerKnown);
 		}
 
 

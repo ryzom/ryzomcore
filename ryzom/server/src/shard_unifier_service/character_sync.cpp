@@ -1156,7 +1156,9 @@ namespace CHARSYNC
 					character->setRace(charInfo.getRace());
 					character->setCivilisation(charInfo.getCivilisation());
 					character->setCult(charInfo.getCult());
-					character->setNewcomer(charInfo.getNewcomer());
+					// a shard that cannot tell the newcomer flag (a Ring shard) leaves the one stored
+					if (charInfo.getNewcomerKnown())
+						character->setNewcomer(charInfo.getNewcomer());
 					
 
 
