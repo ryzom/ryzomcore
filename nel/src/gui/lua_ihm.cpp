@@ -1776,8 +1776,11 @@ namespace NLGUI
 					}
 					return;
 				}
+			case CReflectedProperty::LuaMethod:
+				// a method of the element: a script that assigns to its name gets the error, with its own call stack
+				throw ELuaIHMException("Trying to set a value to '%s', which is a method of the UI element", property.Name.c_str());
 			default:
-				nlstop;
+				throw ELuaIHMException("Trying to set a value to UI property '%s', whose type cannot be set from Lua", property.Name.c_str());
 		}
 	}
 
