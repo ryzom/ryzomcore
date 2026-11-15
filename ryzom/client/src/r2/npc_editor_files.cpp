@@ -107,13 +107,41 @@ void splitLines(const std::string &text, std::vector<std::string> &lines)
 	}
 }
 
-// A number as a preset file has it. False when the text is not a number and nothing else.
+// The place after the decimal digits that start at 'start'
+size_t skipDigits(const std::string &text, size_t start)
+{
+	while (start < text.size() && text[start] >= '0' && text[start] <= '9') ++start;
+	return start;
+}
+
+// A number as a preset file has it: what numberText writes, a finite decimal number with a sign, a
+// fraction and an exponent when it needs them. False for anything else, which includes what strtod
+// takes beyond that: a hexadecimal number, "inf", "nan", spaces in front.
 bool parseNumber(const std::string &text, double &value)
 {
 	if (text.empty() || text.size() > 64) return false;
-	char *end = NULL;
-	value = strtod(text.c_str(), &end);
-	return end == text.c_str() + text.size();
+	size_t pos = text[0] == '-' ? 1 : 0;
+	size_t end = skipDigits(text, pos);
+	if (end == pos) return false; // no digit
+	pos = end;
+	if (pos < text.size() && text[pos] == '.')
+	{
+		end = skipDigits(text, pos + 1);
+		if (end == pos + 1) return false; // no digit after the point
+		pos = end;
+	}
+	if (pos < text.size() && (text[pos] == 'e' || text[pos] == 'E'))
+	{
+		++pos;
+		if (pos < text.size() && (text[pos] == '+' || text[pos] == '-')) ++pos;
+		end = skipDigits(text, pos);
+		if (end == pos) return false; // no digit in the exponent
+		pos = end;
+	}
+	if (pos != text.size()) return false;
+	value = strtod(text.c_str(), NULL);
+	if (!isValidDouble(value)) return false; // too large for a double
+	return true;
 }
 
 void pushNumber(CLuaState &ls, double value)
@@ -260,7 +288,13 @@ bool serializePresetTable(CLuaState &ls, int index, uint32 depth, std::string &t
 		}
 		else if (keyType == LUA_TNUMBER)
 		{
-			text += numberText(ls.toNumber(-2));
+			double number = ls.toNumber(-2);
+			if (!isValidDouble(number))
+			{
+				error = "the name of an entry is a number that is not finite, which a preset file cannot hold";
+				ok = false;
+			}
+			text += numberText(number);
 		}
 		else
 		{
@@ -274,7 +308,13 @@ bool serializePresetTable(CLuaState &ls, int index, uint32 depth, std::string &t
 			int valueType = ls.type(-1);
 			if (valueType == LUA_TNUMBER)
 			{
-				text += numberText(ls.toNumber(-1));
+				double number = ls.toNumber(-1);
+				if (!isValidDouble(number))
+				{
+					error = "the value of an entry is a number that is not finite, which a preset file cannot hold";
+					ok = false;
+				}
+				text += numberText(number);
 			}
 			else if (valueType == LUA_TSTRING)
 			{
