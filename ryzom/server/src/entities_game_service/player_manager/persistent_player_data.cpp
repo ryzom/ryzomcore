@@ -1487,7 +1487,7 @@ private:
 		{\
 			CMissionRespawnPoints& missionRespawnPoints = _MissionRespawnPointsByContinent[sint32(continent)];\
 			missionRespawnPoints.apply(pdr, _Char);\
-			if (missionRespawnPoints.empty())\
+			if (missionRespawnPoints.empty() && !missionRespawnPoints.hasPointsNotLoaded())\
 			{\
 				_MissionRespawnPointsByContinent.erase(sint32(continent));\
 				( nlwarning("<SPAWN_ZONE> %s has lost all mission respawn points of continent '%s'", _Char.getId().toString().c_str(), key.c_str()) );\
@@ -1519,6 +1519,7 @@ private:
 		else\
 			STOP( NLMISC::toString("<SPAWN_ZONE> %s lost the mission respawn point with index %hu", c.getId().toString().c_str(), (*this)[i]) );\
 	}\
+	respawnPointNames.insert(respawnPointNames.end(), m_PointsNotLoaded.begin(), m_PointsNotLoaded.end());\
 
 #define PERSISTENT_DATA\
 	LPROP_VECT2(MissionRespawnPoints, string, VECT_LOGIC(respawnPointNames), respawnPointNames[i],\
@@ -1526,6 +1527,8 @@ private:
 	TRespawnPoint respawnPoint = CZoneManager::getInstance().getTpSpawnZoneIdByName(val);\
 	if (respawnPoint != InvalidSpawnZoneId)\
 		push_back(respawnPoint);\
+	else if (IsRingShard)\
+		m_PointsNotLoaded.push_back(val);\
 	else\
 		( nlwarning("<SPAWN_ZONE> %s lost the mission respawn point '%s'", c.getId().toString().c_str(), val.c_str()) );\
 }\

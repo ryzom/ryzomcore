@@ -1198,6 +1198,8 @@ namespace CHARSYNC
 					character->setBestCombatLevel(charInfo.getBestCombatLevel());
 					character->setGuildId(charInfo.getGuildId());
 					character->setHomeMainlandSessionId(charInfo.getHomeSessionId());
+					// a new record has no ring access to keep: from a shard that could not find the respawn points (a
+					// Ring shard, RespawnPointsKnown false) it is the least one, "A1:", until a mainland shard syncs it
 					character->setRingAccess(makeRingAccessString(charInfo.getRespawnPoints()));
 					character->setRace(charInfo.getRace());
 					character->setCivilisation(charInfo.getCivilisation());

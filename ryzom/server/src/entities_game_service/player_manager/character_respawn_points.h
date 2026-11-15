@@ -120,9 +120,15 @@ private:
 		bool getHideOthers() const			{ return _HideOthers;		}
 		void setHideOthers(bool hideOthers)	{ _HideOthers = hideOthers;	}
 
+		/// points of the save whose places a Ring shard does not load are kept by name and saved again
+		bool hasPointsNotLoaded() const		{ return !m_PointsNotLoaded.empty(); }
+
 	private:
 		/// if true these mission respawn points will hide the other respawn points
 		bool _HideOthers;
+
+		/// the points of the save whose places a Ring shard does not load (it loads none of the mainland)
+		std::vector<std::string> m_PointsNotLoaded;
 	};
 
 	/// get mission respawn points of the given continent
