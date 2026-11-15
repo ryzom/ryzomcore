@@ -1102,12 +1102,13 @@ public:
 		CPHWeb	web;
 		web.connectItf(NLNET::CInetAddress("localhost", 49999));
 
-		// unsubscribe from the session
+		// unsubscribe from the session: the character has no subscription in it (subscribeInSession), which
+		// is result 3
 		web.unsubscribeSession(subscriberCharId, sessionId);
 		updateNetwork(web);
 		// check the result
 		TEST_ASSERT(web.LastResults.size() == 1);
-		TEST_ASSERT(web.LastResults.back() == 0);
+		TEST_ASSERT(web.LastResults.back() == 3);
 
 		// check the subscribed slot count
 		CSessionPtr session = CSession::load(_Conn, sessionId, __FILE__, __LINE__);
@@ -1128,17 +1129,19 @@ public:
 	}
 	void subscribeInSession()
 	{
-		// try to subscribe a character in a session
+		// try to subscribe a character in a session. The session of these tests is an edit session
+		// (scheduleSession), and a subscription is for an animation session of public access that takes
+		// subscriptions: the answer is 4, 'session not public', with or without a free slot.
 		TEST_ASSERT(sessionId != 0);
 		CPHWeb	web;
 		web.connectItf(NLNET::CInetAddress("localhost", 49999));
 
-		// subscribe in the session, must fail because no slot available
+		// subscribe in the session, must fail: the type of the session is checked before its slots
 		web.subscribeSession(subscriberCharId, sessionId);
 		updateNetwork(web);
 		// check the result
 		TEST_ASSERT(web.LastResults.size() == 1);
-		TEST_ASSERT(web.LastResults.back() == 6);
+		TEST_ASSERT(web.LastResults.back() == 4);
 
 		// update the session info, allowing some place for subscriber
 		web.updateSessionInfo(charId, 
@@ -1165,20 +1168,20 @@ public:
 		TEST_ASSERT(web.LastResults.size() == 2);
 		TEST_ASSERT(web.LastResults.back() == 0);
 
-		// retry to subscribe in the session
+		// retry to subscribe in the session: it has slots now, and is still an edit session
 		web.subscribeSession(subscriberCharId, sessionId);
 		updateNetwork(web);
 		// check the result
 		TEST_ASSERT(web.LastResults.size() == 3);
-		TEST_ASSERT(web.LastResults.back() == 0);
+		TEST_ASSERT(web.LastResults.back() == 4);
 
-		// check the subscribed slot count
+		// check the subscribed slot count: no slot is taken
 		CSessionPtr session = CSession::load(_Conn, sessionId, __FILE__, __LINE__);
 		TEST_ASSERT(session != NULL);
 		TEST_ASSERT(session->getSubscriptionSlots() == 5);
-		TEST_ASSERT(session->getReservedSlots() == 1);
+		TEST_ASSERT(session->getReservedSlots() == 0);
 
-		// check the invitation
+		// check the invitation: the character has no entry in the session
 		TEST_ASSERT(session->loadSessionParticipants(_Conn, __FILE__, __LINE__));
 		const vector<CSessionParticipantPtr> &parts = session->getSessionParticipants();
 		uint i;
@@ -1187,7 +1190,7 @@ public:
 			if (parts[i]->getCharId() == subscriberCharId)
 				break;
 		}
-		TEST_ASSERT(i != parts.size());
+		TEST_ASSERT(i == parts.size());
 
 	}
 
