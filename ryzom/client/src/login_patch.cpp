@@ -2021,10 +2021,29 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 				throw NLMISC::EWriteError(dest);
 			}
 
-			// The server did not send the rest of the content the kept bytes came from (it has another
-			// content, knows no ranges, or the range is beyond its file): nothing was written behind
-			// them, and the file is asked for from its start
-			if (resumed && (transfer.ContentChanged || res == CURLE_RANGE_ERROR || r == 416))
+			// A transfer that went on from kept bytes is taken on one answer only: a part of the file (206)
+			// whose first byte passed the test of the write callback, and which ends where the file ends when
+			// its size is known. curl also reports success for an answer without a body, which never
+			// reaches that test: a 200 as long as the kept bytes ("already downloaded"), an empty 206.
+			// Such an answer, like one that names another content, no range, or a range beyond the file
+			// (416), is not the rest of the kept bytes: the file is asked for from its start. A transfer
+			// that an error cut is not judged here; its kept bytes stay for the next attempt.
+			bool startOver = false;
+			if (resumed)
+			{
+				if (res == CURLE_OK && r >= 200 && r < 300)
+				{
+					const sint64 total = transfer.ResumeTotal >= 0 ? transfer.ResumeTotal : transfer.RangeTotal;
+					startOver = r != 206 || !transfer.BodyStarted || transfer.ContentChanged
+					    || (total >= 0 && (sint64)(transfer.ResumeFrom + transfer.Written) != total);
+				}
+				else
+				{
+					startOver = transfer.ContentChanged || res == CURLE_RANGE_ERROR || r == 416;
+				}
+			}
+
+			if (startOver)
 			{
 				nlwarning("PATCH: The server no longer gives the rest of '%s' (curl %d, HTTP %ld), downloading it from the start", source.c_str(), (int)res, r);
 				NLMISC::CFile::deleteFile(dest.c_str());
