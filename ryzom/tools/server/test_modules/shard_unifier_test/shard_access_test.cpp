@@ -19,6 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 #include "shard_unifier_service/shard_access.h"
+// hasPrivilegeOfList, which the session manager uses for its session access privilege
+#include "game_share/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -69,7 +71,7 @@ TEST(ShardAccess, AccessPrivilegeOfLevel)
 	EXPECT_EQ("", accessPrivilegeOfLevel("invalid"));
 }
 
-TEST(ShardAccess, PrivilegeOfList)
+TEST(PrivilegeList, PrivilegeOfList)
 {
 	const char *list = ":GM:SGM:";
 	EXPECT_TRUE(hasPrivilegeOfList(":GM:", list));
@@ -97,6 +99,33 @@ TEST(ShardAccess, PrivilegeOfList)
 	// a list of one name, with and without its colons
 	EXPECT_TRUE(hasPrivilegeOfList(":GM:", ":GM:"));
 	EXPECT_TRUE(hasPrivilegeOfList(":GM:", "GM"));
+}
+
+TEST(PrivilegeList, OnePrivilege)
+{
+	// the tests of the scenario service for one privilege among those of an account
+	EXPECT_TRUE(hasPrivilegeOfList(":TRIAL:", ":TRIAL:"));
+	EXPECT_TRUE(hasPrivilegeOfList(":R2A_a1:TRIAL:", ":TRIAL:"));
+	EXPECT_TRUE(hasPrivilegeOfList("TRIAL", ":TRIAL:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":NOTRIAL:", ":TRIAL:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":TRIAL_OVER:", ":TRIAL:"));
+	EXPECT_FALSE(hasPrivilegeOfList("", ":TRIAL:"));
+	EXPECT_TRUE(hasPrivilegeOfList(":DEV:", ":DEV:"));
+	EXPECT_TRUE(hasPrivilegeOfList(":GM:DEV:", ":DEV:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":DEVELOPER:", ":DEV:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":GM:", ":DEV:"));
+}
+
+TEST(PrivilegeList, OpenGroups)
+{
+	// the welcome service: the groups a shard is open for
+	EXPECT_TRUE(hasPrivilegeOfList(":GM:", ":GM:SGM:"));
+	EXPECT_TRUE(hasPrivilegeOfList(":SGM:GM:", ":GM:SGM:"));
+	EXPECT_TRUE(hasPrivilegeOfList(":GM:OTHER:", ":GM:SGM:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":", ":GM:SGM:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":G", ":GM:SGM:"));
+	EXPECT_FALSE(hasPrivilegeOfList(":GM:", ""));
+	EXPECT_FALSE(hasPrivilegeOfList("", ":GM:SGM:"));
 }
 
 TEST(ShardAccess, AllShardsRowIds)

@@ -33,10 +33,34 @@
 #include "nel/misc/sstring.h"
 
 #include <list>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 //-------------------------------------------------------------------------------------------------
 // UTILITY FUNCTIONS
 //-------------------------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+/** True when an account holds one of the privileges of a list. Both are names between colons, as the
+ *	privilege columns of an account and the privilege variables of the services have them (":GM:",
+ *	":GM:SGM:"). A name of the account counts when it is a whole name of the list, never when it is a part
+ *	of one: "G" is not in ":GM:SGM:". The case counts. Without a name on either side the answer is false.
+ *	To test for one privilege, give it as the list: hasPrivilegeOfList(privileges, ":DEV:").
+ */
+inline bool hasPrivilegeOfList(const std::string &accountPrivileges, const std::string &privilegeList)
+{
+	std::vector<std::string> held;
+	NLMISC::explode(accountPrivileges, std::string(":"), held, true);
+	std::vector<std::string> listed;
+	NLMISC::explode(privilegeList, std::string(":"), listed, true);
+	for (uint i = 0; i < held.size(); ++i)
+	{
+		if (std::find(listed.begin(), listed.end(), held[i]) != listed.end())
+			return true;
+	}
+	return false;
+}
 
 //-----------------------------------------------------------------------------
 inline std::string capitalize(const std::string & s)

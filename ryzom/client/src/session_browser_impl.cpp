@@ -223,7 +223,11 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 
 	if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_joinSessionResult")))
 	{
-		nlwarning("joinSession callback return false");
+		// No answer: the connection is lost, or the service kept silent. The player is told that the join
+		// failed, and the result of an earlier join is not read.
+		nlwarning("SB: no answer to the request to join session %u", (uint32)ls.toInteger(1));
+		sessionBrowser.callRingAccessPointMethod("onJoinFailed", 0, 0);
+		return 0;
 	}
 
 	if(sessionBrowser._LastJoinSessionResult == 20)

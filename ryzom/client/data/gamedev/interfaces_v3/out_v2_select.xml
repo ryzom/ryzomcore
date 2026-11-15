@@ -955,6 +955,10 @@
 <proc id="proc_message_box_with_help_ok" >
 	<action handler="leave_modal" />	    <!-- must leave modal first if another modal is to be displayed after this one -->
 	<action handler="" params=""/>				
+	<!-- The box runs this when it closes (on_deactive): a user that hid the OK button (the far TP, while
+	     the client returns to the mainland by itself) leaves the box whole for the next one. The second
+	     action is the one CInterfaceManager::messageBoxWithHelp replaces: this one stays the third. -->
+	<action handler="set" params="target_property=ui:outgame:message_box_with_help:ok:active|value=1" />
 </proc>
 
 

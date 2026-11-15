@@ -363,22 +363,28 @@ end
 -- called when a gm/ai has do a scheduleStartAct (Animation or test time)
 function r2.onScheduleStartAct(errorId, actId, nbSeconds)
 	if (r2.Mode == "DM" or r2.Mode == "AnimationModeDm") then
+		-- the translated text 'textId' with the number of the act in the place of %1
+		local function actText(textId)
+			return replaceTag(tostring(i18n.get(textId)), "%%1", numberText(actId))
+		end
 		if errorId == 0 then
-			local str = "Act " .. actId 
+			local str
 			if nbSeconds ~= 0 then
-				str = str .. " will start in " .. nbSeconds .. " seconds"
+				str = replaceTag(actText("uiR2EDActStartsIn"), "%%2", numberText(nbSeconds))
+			else
+				str = actText("uiR2EDActStartsNow")
 			end
 			displaySystemInfo(str, "BC")
 		elseif errorId == 1 then
-			messageBox("Act ".. actId .." can not be started because another act is already starting.")
+			messageBox(actText("uiR2EDActStartBusy"))
 		elseif errorId == 2 then
-			messageBox("Act ".. actId .." can not be started because this act does not exist.")		
+			messageBox(actText("uiR2EDActStartUnknown"))
 		end
 	end
 end
 
 function r2.onDisconnected()
-	local str = "You have been disconnected by the server."
+	local str = tostring(i18n.get("uiR2EDDisconnected"))
 	messageBox(str)
 	displaySystemInfo(str, "BC")
 end
@@ -426,14 +432,28 @@ function r2.onScenarioHeaderUpdated(scenario)
 	-- or use r2.getScenarioHeader();
 end
 
--- The modes of the editor in which the author is there to read a message (r2.Mode, set by
--- CEditor::setMode): the ones the author works in, and the one in which the author of an animation
--- chooses the file to load. No change of mode comes by itself in these. The others are the waits between
--- them, behind the connection window.
-local workingModes = {
-	Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true,
-	AnimationModeLoading = true
-}
+-- The modes of the editor in which the author works (r2.Mode, set by CEditor::setMode). The others are
+-- the waits between them, behind the connection window, and the mode in which an animation gets its
+-- file (see authorIsThere).
+local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true }
+
+-- True when the author is there to read a message, and no change of mode that comes by itself is about
+-- to close its box: in the modes the author works in, and in AnimationModeLoading while the form in
+-- which the author of an animation chooses the file to load is shown.
+-- That form is not shown while a file is loaded and started: the one the author has just chosen in it,
+-- or the one an animation was launched with at the Ring terminal (r2:getStartingAnimationFilename,
+-- loaded by UnitTest.testLoadAnimationScenarioUi without a word from the author). The start changes
+-- the mode at once. The form comes back when the file is refused, and the author is at the choice.
+local function authorIsThere()
+	if workingModes[r2.Mode] then
+		return true
+	end
+	if r2.Mode ~= "AnimationModeLoading" then
+		return false
+	end
+	local form = r2:getForm("LoadScenario")
+	return form ~= nil and form.active == true
+end
 
 -- An error message of the server that came during such a wait, if there is one. The refusal of a
 -- scenario comes while the editor waits for its test, and it is back in edition a moment later; every
@@ -442,13 +462,13 @@ local workingModes = {
 -- shown once the editor is in a mode the author works in: r2.UIMainLoop asks each frame.
 r2.PendingErrorMessage = nil
 
--- A message the author must see, from the scripts: in a message box, once. Now when the editor is in a
--- mode in which the author reads it, and kept for that moment otherwise (while the editor starts, or
--- between two modes). Several messages that wait are shown together. A wait ends in one of those modes,
--- the choice of a file included: a message about a file that was refused is shown when the author is
--- back at that choice, before another file is loaded.
+-- A message the author must see, from the scripts: in a message box, once. Now when the author is there
+-- to read it (authorIsThere), and kept for that moment otherwise (while the editor starts, between two
+-- modes, while the file of an animation is loaded). Several messages that wait are shown together. A
+-- message about a file that was refused is shown when the author is back at the choice of a file,
+-- before another file is loaded.
 function r2.showErrorMessage(text)
-	if workingModes[r2.Mode] then
+	if authorIsThere() then
 		messageBox(text)
 	elseif r2.PendingErrorMessage ~= nil then
 		r2.PendingErrorMessage = tostring(r2.PendingErrorMessage) .. "\n\n" .. tostring(text)
@@ -459,7 +479,7 @@ end
 
 function r2.showPendingErrorMessage()
 	local pending = r2.PendingErrorMessage
-	if pending == nil or not workingModes[r2.Mode] then
+	if pending == nil or not authorIsThere() then
 		return
 	end
 	r2.PendingErrorMessage = nil
@@ -488,6 +508,7 @@ function r2.onTestStartFailed(msg)
 end
 
 function r2.onSystemMessageReceived(msgType, msgWho, msg)
+	local msgId = msg -- the id of a translated text, when the message is one
 	if string.len(msg) > 2 and string.sub(msg, 1, 2) == "ui" then
 		msg = i18n.get(msg)
 	end
@@ -509,6 +530,15 @@ function r2.onSystemMessageReceived(msgType, msgWho, msg)
 		printMsgML(msg)
 	elseif msgType == "ERR" then
 		printMsgML(msg)
+		if msgId == "uiR2EDServerRefuseToLoad" and r2.Mode == "AnimationModeLoading" then
+			-- The scenario service refuses the file of the animation. The load ends with this message
+			-- and no start follows (CClientEditionModule::loadScenarioFileAccepted); the client
+			-- brings the form back for the other ways a load fails (CDynamicMapClient::
+			-- loadAnimationFromBuffer), and not for this one. The author would sit behind the
+			-- connection window with a message that waits for a form: the form comes back here, and
+			-- the message is shown with it.
+			UnitTest.testLoadAnimationScenarioUi(true)
+		end
 		-- in a message box, once: now, or when the wait is over (a box opened during a wait is closed
 		-- by the change of mode that ends it)
 		r2.showErrorMessage(msg)

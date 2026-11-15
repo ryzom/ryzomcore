@@ -159,6 +159,15 @@ function CharTracking:updateAdminButtons()
 	win:find("teleport").active = admin
 	win:find("kick").active = admin
 	win:find("unkick").active = admin
+	-- the tooltip of the name column names what the character can do with a line: the tell alone for an
+	-- editor that does not own the session (the header has a button for each sort order)
+	local tooltipId = "uiRAP_CharNameTooltip"
+	if not admin then
+		tooltipId = "uiRAP_CharNameTooltipListOnly"
+	end
+	local nameHeader = win:find("header_line"):find("char")
+	nameHeader:find("tup").tooltip = i18n.get(tooltipId)
+	nameHeader:find("tdown").tooltip = i18n.get(tooltipId)
 end
 
 --***********************************************************************

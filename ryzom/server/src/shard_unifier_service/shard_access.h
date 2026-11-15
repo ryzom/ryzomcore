@@ -79,13 +79,6 @@ std::string describeShardAccess(const TPermissionRows &rows, uint32 shardId);
 /// True when the rows give the account, on that shard, the access the level ("ds_open", ...) asks for
 bool hasShardAccess(const TPermissionRows &rows, uint32 shardId, const std::string &accessLevel);
 
-/** True when an account holds one of the privileges of a list. Both are names between colons, as the privilege
- *	column of an account and the privilege variables of the services have them (":GM:", ":GM:SGM:"). A name of the
- *	account counts when it is a whole name of the list, never when it is a part of one: "G" is not in ":GM:SGM:".
- *	The case counts. Without a name on either side the answer is false.
- */
-bool hasPrivilegeOfList(const std::string &accountPrivileges, const std::string &privilegeList);
-
 /// A mainland shard an account may be sent to: it is online and the account has the access it asks for
 struct CMainlandCandidate
 {

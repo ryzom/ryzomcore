@@ -41,6 +41,7 @@
 #include "ryzom_welcome_service.h"
 
 #include "game_share/welcome_service_itf.h"
+#include "game_share/utils.h"
 #include "game_share/mirror.h"
 
 using namespace std;
@@ -994,7 +995,8 @@ std::string lsChooseShard (const std::string &userName,
 	else if (ShardOpen != ClosedForAll)
 	{
 		const std::string&	allowedGroups = OpenGroups;
-		bool				userInOpenGroups = (!userPriv.empty() && !allowedGroups.empty() && allowedGroups.find(userPriv) != std::string::npos);
+		// one of the privileges of the account is, as a whole name, one of the groups
+		bool				userInOpenGroups = hasPrivilegeOfList(userPriv, allowedGroups);
 
 		// open for all or user is privileged
 		authorizeUser = (ShardOpen == OpenForAll || userInOpenGroups);

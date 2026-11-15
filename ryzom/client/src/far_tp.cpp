@@ -952,12 +952,6 @@ retryJoinEdit:
 //			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
 //			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
 
-			// The box shown below is the one with the help button, a group of the outgame interface itself (the
-			// 'charsel' group has the plain message box, and no box of this name)
-			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:message_box_with_help:ok");
-			if (btnOk)
-				btnOk->setActive( ! requestRetToMainland );
-
 			// Hide the black screen i.e. force showing the interface
 			CInterfaceElement *charSelBlackScreen = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen");
 			if (charSelBlackScreen)
@@ -970,6 +964,17 @@ retryJoinEdit:
 		pIM->messageBoxWithHelp(
 			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
 			letReturnToCharSelect ? "ui:outgame" : "ui:interface");
+		if ( letReturnToCharSelect && requestRetToMainland )
+		{
+			// The client goes back to the mainland by itself: the box that was just shown has no use for its
+			// OK button. It is the box with the help button, a group of the outgame interface itself (the
+			// 'charsel' group has the plain message box, and no box of this name). The button is hidden once
+			// the box is up, and the procedure the box runs when it closes shows it again
+			// (proc_message_box_with_help_ok of out_v2_select.xml): the other users of the box find it whole.
+			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:message_box_with_help:ok");
+			if (btnOk)
+				btnOk->setActive(false);
+		}
 
 		// Info in the log
 		string outErrorMsg = toString("Could not join %ssession %u: '%s' error\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg );

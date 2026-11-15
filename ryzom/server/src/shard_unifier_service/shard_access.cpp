@@ -114,20 +114,6 @@ bool hasShardAccess(const TPermissionRows &rows, uint32 shardId, const std::stri
 	return std::find(access.begin(), access.end(), accessPrivilege) != access.end();
 }
 
-bool hasPrivilegeOfList(const std::string &accountPrivileges, const std::string &privilegeList)
-{
-	vector<string> held;
-	explode(accountPrivileges, string(":"), held, true);
-	vector<string> listed;
-	explode(privilegeList, string(":"), listed, true);
-	for (uint i = 0; i < held.size(); ++i)
-	{
-		if (std::find(listed.begin(), listed.end(), held[i]) != listed.end())
-			return true;
-	}
-	return false;
-}
-
 const char *mainlandChoiceName(TMainlandChoice choice)
 {
 	switch (choice)

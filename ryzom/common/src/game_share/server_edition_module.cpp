@@ -3117,7 +3117,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				getCharInfo(*ownerModule, charId, clientEid, userPriv, extendedPriv);
 			}
 
-			if (!trialAllowed && getIsCharRoS(ownerCharId) && extendedPriv.find("TRIAL") != std::string::npos)
+			if (!trialAllowed && getIsCharRoS(ownerCharId) && hasPrivilegeOfList(extendedPriv, ":TRIAL:"))
 			{
 				nlwarning("ERROR: A client %u(CharId) (RoS) try to launch an animation that is not RoS. That means that the client has not check the RoS Flags or that this user is trying to hack use. So we will close he animation session (%u) so he will be kicked back to edition.", ownerCharId, sessionId.asInt());
 				return;
@@ -4219,7 +4219,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 
 				if  ( isCharRoS )
 				{
-					if (extendedPriv.find("TRIAL") != std::string::npos && !trialAllowed)
+					if (hasPrivilegeOfList(extendedPriv, ":TRIAL:") && !trialAllowed)
 					{
 						errorReason = "uiR2EDRoSTryMainland";
 						ok = false;
@@ -4938,6 +4938,15 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 	CShareClientEditionItfProxy proxy(*clientEditionProxyPtr);
 	proxy.onRingAccessUpdated(this, newRingAccess);
 	log.displayNL("Ring Access changed to '%s' for user %u", newRingAccess.c_str(),charId);
+
+	// An override of the character stays saved, and is listed, but is not what the character has now: the
+	// last command wins until the character connects again, when the override is applied anew
+	TOverrideRingAccess::const_iterator overridden = _OverrideRingAccess.find(charId);
+	if (overridden != _OverrideRingAccess.end())
+	{
+		log.displayNL("The char %u has the overridden ring access '%s' (setCharOverrideRingAccess), which is not in effect any more: it is applied again when the character connects next. To keep '%s' beyond that, remove the override (removeCharOverrideRingAccess).",
+		    charId, overridden->second.c_str(), newRingAccess.c_str());
+	}
 	return true;
 }
 
@@ -6404,7 +6413,7 @@ void CServerEditionModule::saveScenarioFile(NLNET::IModuleProxy *sender, const s
 	{
 		volatile static bool override = false;
 
- 		if (value[i].first == "NevraxScenario" && value[i].second == "1" && userPriv.find("DEV") == std::string::npos && !override)
+		if (value[i].first == "NevraxScenario" && value[i].second == "1" && !hasPrivilegeOfList(userPriv, ":DEV:") && !override)
 		{
 			nlwarning("The client %u(CharId) try to save a scenario that is RoSOnly so it means that the gui has let the user the possibility to try or that the user is trying to hack us", charId);
 			ok = false;

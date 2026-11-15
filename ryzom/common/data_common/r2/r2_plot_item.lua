@@ -79,12 +79,41 @@ r2.registerComponent(plotItem)
 -- // PRIVATE //
 -- /////////////
 
-local plotItemSheetToDBPath = {}
+-- The reference plot item sheets are the item sheets of the client that are named r2_plot_item*
+-- (CEditor::initReferencePlotItems puts them in LOCAL:R2:REFERENCE_PLOT_ITEMS). r2.PlotItemsPanel:reinit
+-- reads them when a scenario is created, before the plot items of that scenario are.
+--
+-- A plot item of a scenario can have a sheet that is not one of them: the scenario was made with other
+-- game data (it holds the number of the sheet, which belongs to the sheet_id.bin it was made with), or
+-- this client has no plot item sheets. Such an item is an item of the scenario like the others: it is
+-- counted when it is created and released when it is erased. It has no slot in the list of the item
+-- chooser to mark as taken, and the client has no icon for it; the log says so once for each sheet.
+
+local plotItemSheetToDBPath = {} -- for each reference sheet, its slot in the list of the item chooser
 
 local plotItemSheetNbRef = {} -- for each plot item sheet, store the number of references on it
+							  -- (0 for a reference sheet no plot item has; no entry for any other sheet
+							  -- until a plot item has it)
 							  -- each sheet must be use 0 or 1 time in the scenario
 							  -- a ref count > 1 may happen during concurrent edition
 							  -- in which case the user should be warned that some items are duplicated
+
+local nbReferenceSheets = 0 -- how many reference sheets the client had when the scenario was created
+
+local foreignSheetsTold = {} -- the sheets that are not reference sheets and that the log has named
+
+-- The slot of a reference sheet in the list of the item chooser shows the sheet while no plot item has
+-- it, and is empty while one has. A sheet that is not a reference sheet has no slot.
+local function setSheetAvailable(sheetId, available)
+	local dbPath = plotItemSheetToDBPath[sheetId]
+	if dbPath ~= nil then
+		if available then
+			setDbProp(dbPath, sheetId)
+		else
+			setDbProp(dbPath, 0)
+		end
+	end
+end
 
 local validItemColor = CRGBA(255, 255, 255)
 local duplicatedItemColor = CRGBA(255, 0, 0)
@@ -101,23 +130,41 @@ r2.PlotItemDisplayerCommon = {}
 ----------------------------------------------------------------------------
 -- update name for tooltip display + availability
 function r2.PlotItemDisplayerCommon:updateNameAndAvailability(instance, sheetId)
+	if plotItemSheetToDBPath[sheetId] == nil then
+		-- Not a reference sheet: the client has no item of this sheet to name (r2:setPlotItemInfos takes
+		-- the plot item sheets of the client and raises for any other number), and the item chooser has
+		-- no slot for it. The item keeps its name in the scenario.
+		return
+	end
 	if plotItemSheetNbRef[sheetId] == 0 then
 		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDPlotItemDefaultName"), "", "")
-		setDbProp(plotItemSheetToDBPath[sheetId], sheetId) -- available again
+		setSheetAvailable(sheetId, true) -- available again
 	elseif plotItemSheetNbRef[sheetId] > 1 then
 		-- duplicated slot, may happen during concurrent edition (bad luck)
 		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDDuplicatedPlotItemName"), "", "")
-		setDbProp(plotItemSheetToDBPath[sheetId], 0) -- available again
+		setSheetAvailable(sheetId, false)
 		r2.PlotItemDisplayerCommon:touch() -- force to refresh the icon display
 	else
 		r2:setPlotItemInfos(sheetId, instance.Name, instance.Desc, instance.Comment)
-		setDbProp(plotItemSheetToDBPath[sheetId], 0) -- available again
+		setSheetAvailable(sheetId, false)
 	end
 end
 
 ----------------------------------------------------------------------------
 -- add a reference on a sheet id for a r2 plot item
 function r2.PlotItemDisplayerCommon:addRef(sheetId)
+	if plotItemSheetNbRef[sheetId] == nil then
+		-- not a reference sheet (see the top of this part): counted from here on
+		plotItemSheetNbRef[sheetId] = 0
+		if not foreignSheetsTold[sheetId] then
+			foreignSheetsTold[sheetId] = true
+			debugWarning("ASSET ERROR: a plot item of the scenario has the sheet " .. tostring(sheetId)
+				.. ", which is not one of the " .. tostring(nbReferenceSheets) .. " plot item sheets of this client"
+				.. " (the item sheets named r2_plot_item*). The item is kept, without an icon and without a place"
+				.. " in the item chooser. The scenario was made with other game data, or the plot item sheets"
+				.. " are missing from the data of this client: choose another icon for the item, or add the sheets.")
+		end
+	end
 	assert(plotItemSheetNbRef[sheetId] >= 0)
 	plotItemSheetNbRef[sheetId] = plotItemSheetNbRef[sheetId] + 1
 end
@@ -126,8 +173,11 @@ end
 -- remove a reference on a sheet id for a r2 plot item
 -- add a reference on a sheet id
 function r2.PlotItemDisplayerCommon:decRef(sheetId)
-	assert(plotItemSheetNbRef[sheetId] > 0)
-	plotItemSheetNbRef[sheetId] = plotItemSheetNbRef[sheetId] - 1
+	-- every plot item is counted when it is created (onPostCreate) and when its sheet changes
+	-- (onAttrModified): a sheet that is released has a count
+	local nbRef = plotItemSheetNbRef[sheetId]
+	assert(nbRef ~= nil and nbRef > 0, "the plot item sheet " .. tostring(sheetId) .. " is released and was not counted")
+	plotItemSheetNbRef[sheetId] = nbRef - 1
 end
 
 
@@ -150,22 +200,24 @@ end
 
 ----------------------------------------------------------------------------
 function r2.PlotItemDisplayerCommon:onPostCreate(instance)
-	self:touch()	
-	setDbProp(plotItemSheetToDBPath[instance.SheetId], 0)  -- not available for other plot items
+	self:touch()
+	-- The count first: the item is counted once here and released once in onErase, whatever the steps
+	-- below come to
+	instance.User.OldSheetId = instance.SheetId
+	self:addRef(instance.SheetId)
+	setSheetAvailable(instance.SheetId, false)  -- not available for other plot items
 	-- if created by this client, prompt to enter the name
-	if instance.User.SelfCreate then			
+	if instance.User.SelfCreate then
 		instance.User.SelfCreate = nil
-		self:editPlotItemName(instance)		
+		self:editPlotItemName(instance)
 	end
 	--
 	if instance.User.AddedMsg then
 		instance.User.AddedMsg = nil
-		displaySystemInfo(i18n.get("uiR2EDPlotItemAdded"), "BC")      
-      r2.PlotItemsPanel:pop()
+		displaySystemInfo(i18n.get("uiR2EDPlotItemAdded"), "BC")
+		r2.PlotItemsPanel:pop()
 	end
-	--	
-    instance.User.OldSheetId = instance.SheetId	
-	self:addRef(instance.SheetId)
+	--
 	self:updateNameAndAvailability(instance, instance.SheetId)
 	if instance == r2:getSelectedInstance() then
 		self:updatePropWindow(instance)
@@ -208,18 +260,21 @@ end
 
 ----------------------------------------------------------------------------
 function r2.PlotItemDisplayerCommon:onAttrModified(instance, attributeName, indexInArray)
-   self:touch()   
-   if attributeName == "SheetId" then
-	  self:decRef(instance.User.OldSheetId)
-	  self:updateNameAndAvailability(instance, instance.User.OldSheetId)
-	  self:addRef(instance.SheetId)
-	  instance.User.OldSheetId = instance.SheetId
-	  self:updateNameAndAvailability(instance, instance.SheetId)
-	  if instance == r2:getSelectedInstance() then
-		self:updatePropWindow(instance)
-	  end
-   end
-   if attributeName == "Name" or attributeName == "Desc" or attributeName == "Comment" then
+	self:touch()
+	if attributeName == "SheetId" then
+		-- The counts first, the old sheet released and the new one taken in one go: what is shown for the
+		-- two sheets comes after, and cannot leave the item counted for a sheet it no longer has
+		local oldSheetId = instance.User.OldSheetId
+		self:decRef(oldSheetId)
+		self:addRef(instance.SheetId)
+		instance.User.OldSheetId = instance.SheetId
+		self:updateNameAndAvailability(instance, oldSheetId)
+		self:updateNameAndAvailability(instance, instance.SheetId)
+		if instance == r2:getSelectedInstance() then
+			self:updatePropWindow(instance)
+		end
+	end
+	if attributeName == "Name" or attributeName == "Desc" or attributeName == "Comment" then
 		self:updateNameAndAvailability(instance, instance.SheetId)
 	end
 end
@@ -425,6 +480,8 @@ function r2.PlotItemsPanel:reinit()
 	-- map sheetid to the good slot in the db
 	plotItemSheetToDBPath = {}
 	plotItemSheetNbRef = {}
+	nbReferenceSheets = 0
+	foreignSheetsTold = {}
 	--local window = getUI("ui:interface:r2ed_scenario")
 	--local groupListSheet = window:find("plot_items_list")   
 	for k = 0, maxNumPlotItemSheets - 1 do
@@ -435,11 +492,17 @@ function r2.PlotItemsPanel:reinit()
 		if sheetId ~= 0 then
 			plotItemSheetToDBPath[sheetId] = availableDbPath
 			plotItemSheetNbRef[sheetId] = 0
+			nbReferenceSheets = nbReferenceSheets + 1
 			r2:setPlotItemInfos(sheetId, defaultPlotItemName, "", "")
 			setDbProp(availableDbPath, getDbProp(refDbPath))
 		end
 		--local slot = groupListSheet["item_" .. tostring(k)]
 		--slot.active = false	
+	end
+	if nbReferenceSheets == 0 then
+		debugWarning("ASSET ERROR: this client has no plot item sheet (no item sheet named r2_plot_item*):"
+			.. " the item chooser of the Ring editor is empty and no plot item can be made. The sheets come with"
+			.. " the game data (sitem sheets and sheet_id.bin).")
 	end
 	-- empty all slots
 	for k = 0, maxNumPlotItems - 1 do		
