@@ -334,8 +334,8 @@ private:
 	/// Delete what is kept of a download that a network error cut (m_PartialDownload)
 	void discardPartialDownload();
 
-	/// True if the file at path is this version of the file in the description (SHA1)
-	bool isFileOfDesc(const std::string &fileName, uint32 version, const std::string &path);
+	/// True if sha1 is the hash that the description gives for this version of the file
+	bool isHashOfDesc(const std::string &fileName, uint32 version, const NLMISC::CHashKey &sha1);
 	// Decompress zipped file override destination file
 	void decompressFile (const std::string &filename);
 	void applyDate (const std::string &sFilename, uint32 nDate);
@@ -450,9 +450,6 @@ private:
 		}
 	};
 	CPartialDownload m_PartialDownload;
-
-	/// Set by getServerFile(): a transfer of the file had failed before the one that gave it
-	bool m_LastDownloadInterrupted;
 
 	/// Description file
 	std::string						DescFilename;

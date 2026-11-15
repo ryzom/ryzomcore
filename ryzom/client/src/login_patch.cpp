@@ -205,7 +205,6 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 
 	DownloadInProgress = false;
 	m_WaitForServers = true;
-	m_LastDownloadInterrupted = false;
 	_AsyncDownloader = nullptr;
 	_StateListener = nullptr;
 	_StartRyzomAtEnd = true;
@@ -1542,9 +1541,6 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 	}
 	std::vector<bool> asked(PatchServers.size(), false);
 
-	// set once a transfer of this file has failed, whatever came of it
-	bool interrupted = false;
-
 	bool	downloadSuccess = false;
 
 	while (!downloadSuccess)
@@ -1577,7 +1573,6 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			downloadFile (serverPath+srcName, dstName, progress);
 
 			downloadSuccess = true;
-			m_LastDownloadInterrupted = interrupted;
 			if (server >= 0)
 			{
 				PatchServers[server].OnProbation = false;
@@ -1593,8 +1588,6 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 				discardPartialDownload();
 				throw EPatchDownloadAborted(e.what());
 			}
-
-			interrupted = true;
 
 			// An attempt that went on from the kept bytes and added to them was not in vain: the count starts
 			// again. A connection that drops now and then gets a large file all the same, each drop costing
@@ -2264,7 +2257,7 @@ void CPatchManager::decompressFile (const string &filename)
 }
 
 // ****************************************************************************
-bool CPatchManager::isFileOfDesc(const std::string &fileName, uint32 version, const std::string &path)
+bool CPatchManager::isHashOfDesc(const std::string &fileName, uint32 version, const NLMISC::CHashKey &sha1)
 {
 	const CBNPFile *file = DescFile.getFiles().getFileByName(fileName);
 	if (file == nullptr)
@@ -2273,7 +2266,7 @@ bool CPatchManager::isFileOfDesc(const std::string &fileName, uint32 version, co
 	for (uint32 i = 0; i < file->versionCount(); ++i)
 	{
 		if (file->getVersion(i).getVersionNumber() == version)
-			return getSHA1(path, true) == file->getVersion(i).getHashKey();
+			return sha1 == file->getVersion(i).getHashKey();
 	}
 	return false;
 }
@@ -3381,8 +3374,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			// compute the seven zip filename
 			string lzmaFile = rFTP.FileName+".lzma";
 
-			// the archive did not come with the first transfer that was started for it
-			bool archiveInterrupted = false;
+			// the archive was downloaded, and not left by a session before
+			bool archiveDownloaded = false;
 
 			// download the 7zip file
 			try
@@ -3395,7 +3388,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					if (!rFTP.Patches.empty())
 					{
 						pPM->getServerFile(toString("%05u/", rFTP.Patches.back())+lzmaFile, false, "", &progress);
-						archiveInterrupted = pPM->m_LastDownloadInterrupted;
+						archiveDownloaded = true;
 					}
 					// else -> file comes from a previous download (with .tmp extension, and is up to date)
 					// the remaining code will just rename it with good name and exit
@@ -3414,7 +3407,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				{
 					// failed with version subfolder, try in the root patch directory
 					pPM->getServerFile(lzmaFile, false, "", &progress);
-					archiveInterrupted = pPM->m_LastDownloadInterrupted;
+					archiveDownloaded = true;
 				}
 			}
 			catch (const NLMISC::EWriteError &)
@@ -3435,10 +3428,11 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			}
 
 			OutFilename = pPM->ClientPatchPath + NLMISC::CFile::getFilename(rFTP.FileName);
-			// try to unpack the file
+			// try to unpack the file, taking the SHA1 of what it holds on the way
+			CHashKey archiveSHA1;
 			try
 			{
-				if (!unpackLZMA(pPM->ClientPatchPath+lzmaFile, OutFilename+".tmp"))
+				if (!unpackLZMA(pPM->ClientPatchPath + lzmaFile, OutFilename + ".tmp", archiveSHA1))
 				{
 					// fallback to standard patch method
 					pPM->deleteFile(pPM->ClientPatchPath + lzmaFile, false, false);
@@ -3459,12 +3453,12 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				break;
 			}
 
-			// The archive format has no checksum. An archive whose download was interrupted (asked for
-			// again, gone on with, or taken from another server) is used only when the file it gives is the
-			// one of the description; the delta files are the other way to that file.
-			if (archiveInterrupted && !pPM->isFileOfDesc(rFTP.FileName, rFTP.Patches.back(), OutFilename + ".tmp"))
+			// The archive format has no checksum. A downloaded archive is used only when the file it gives
+			// is the one of the description, whatever the server sent under its name; the delta files, which
+			// carry checksums, are the other way to that file.
+			if (archiveDownloaded && !pPM->isHashOfDesc(rFTP.FileName, rFTP.Patches.back(), archiveSHA1))
 			{
-				nlwarning("PATCH: The download of '%s' was interrupted and it does not give the file of the description, using the delta files", lzmaFile.c_str());
+				nlwarning("PATCH: '%s' does not give the file of the description (SHA1 %s), using the delta files", lzmaFile.c_str(), archiveSHA1.toString().c_str());
 				pPM->deleteFile(OutFilename + ".tmp", false, false);
 				pPM->deleteFile(pPM->ClientPatchPath + lzmaFile, false, false);
 				usePatchFile = true;
