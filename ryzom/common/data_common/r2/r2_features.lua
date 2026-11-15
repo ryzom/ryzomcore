@@ -383,18 +383,17 @@ function r2.onDisconnected()
 	displaySystemInfo(str, "BC")
 end
 
+-- The server tells a character that the owner of the session kicked it, with the seconds it has left to
+-- leave by itself, or that the kick was lifted
 function r2.onKicked(timeBeforeDisconnection, kicked)
+	local str
 	if kicked then
-		local str = "You have been kicked. You must come back to mainland or leave this session otherwise you will be disconnected in "
-			.. tostring(timeBeforeDisconnection) .. " secondes."
-		messageBox(str)
-		displaySystemInfo(str, "BC")
+		str = replaceTag(tostring(i18n.get("uiR2EDKicked")), "%%1", numberText(timeBeforeDisconnection))
 	else
-		local str = "You have been unkicked."
-		messageBox(str)
-		displaySystemInfo(str, "BC")
+		str = tostring(i18n.get("uiR2EDUnkicked"))
 	end
-
+	messageBox(str)
+	displaySystemInfo(str, "BC")
 end
 
 -- called in start mode of a dm
