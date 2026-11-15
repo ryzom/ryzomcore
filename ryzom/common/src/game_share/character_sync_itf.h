@@ -497,6 +497,8 @@ namespace CHARSYNC
 		bool	_Newcomer;
 		// Whether the sending shard could tell the newcomer flag: it follows the continent of the home position, and a Ring shard does not load the mainland continents
 		bool	_NewcomerKnown;
+		// Whether the sending shard found every respawn point of the character: a Ring shard does not load the mainland continents, and counts none
+		bool	_RespawnPointsKnown;
 	public:
 		// The entity id of the character
 		const NLMISC::CEntityId &getCharEId() const
@@ -623,6 +625,16 @@ namespace CHARSYNC
 		{
 				_NewcomerKnown = value;
 		}
+		// Whether the sending shard found every respawn point of the character: a Ring shard does not load the mainland continents, and counts none
+		bool getRespawnPointsKnown() const
+		{
+			return _RespawnPointsKnown;
+		}
+
+		void setRespawnPointsKnown(bool value)
+		{
+				_RespawnPointsKnown = value;
+		}
 
 		bool operator == (const TCharInfo &other) const
 		{
@@ -636,7 +648,8 @@ namespace CHARSYNC
 				&& _Civilisation == other._Civilisation
 				&& _Cult == other._Cult
 				&& _Newcomer == other._Newcomer
-				&& _NewcomerKnown == other._NewcomerKnown;
+				&& _NewcomerKnown == other._NewcomerKnown
+				&& _RespawnPointsKnown == other._RespawnPointsKnown;
 		}
 
 
@@ -658,6 +671,7 @@ namespace CHARSYNC
 			s.serial(_Cult);
 			s.serial(_Newcomer);
 			s.serial(_NewcomerKnown);
+			s.serial(_RespawnPointsKnown);
 		}
 
 

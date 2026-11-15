@@ -1152,7 +1152,9 @@ namespace CHARSYNC
 					// the character already exist, just update the record
 					character->setBestCombatLevel(charInfo.getBestCombatLevel());
 					character->setGuildId(charInfo.getGuildId());
-					character->setRingAccess(makeRingAccessString(charInfo.getRespawnPoints()));
+					// a shard that cannot find every respawn point (a Ring shard) leaves the ring access stored
+					if (charInfo.getRespawnPointsKnown())
+						character->setRingAccess(makeRingAccessString(charInfo.getRespawnPoints()));
 					character->setRace(charInfo.getRace());
 					character->setCivilisation(charInfo.getCivilisation());
 					character->setCult(charInfo.getCult());

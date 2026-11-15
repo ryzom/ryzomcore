@@ -4403,7 +4403,10 @@ void CCharacter::fillCharInfo(CHARSYNC::TCharInfo &charInfo) const
 	std::pair<CHARSYNC::TCult, CHARSYNC::TCivilisation> charSyncAll = IShardUnifierEvent::convertAllegiance(allegiance);
 	charInfo.setCult(charSyncAll.first);
 	charInfo.setCivilisation(charSyncAll.second);
-	charInfo.setRespawnPoints(getRespawnPoints().buildRingPoints());
+	// a shard that cannot find every respawn point (a Ring shard) says so, and the shard unifier keeps the ring access it has
+	bool respawnPointsKnown;
+	charInfo.setRespawnPoints(getRespawnPoints().buildRingPoints(respawnPointsKnown));
+	charInfo.setRespawnPointsKnown(respawnPointsKnown);
 	// a shard that cannot tell the newcomer flag says so, and the shard unifier keeps the flag it has
 	bool newcomer = true;
 	charInfo.setNewcomerKnown(findNewbie(newcomer));

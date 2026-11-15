@@ -1462,6 +1462,7 @@ private:
 		else\
 			STOP( NLMISC::toString("<SPAWN_ZONE> %s lost the respawn point with index %hu", _Char.getId().toString().c_str(), _RegularRespawnPoints[i]) );\
 	}\
+	respawnPointNames.insert(respawnPointNames.end(), m_RespawnPointsNotLoaded.begin(), m_RespawnPointsNotLoaded.end());\
 
 #define PERSISTENT_DATA\
 	FLAG0(CLEAR,clearRespawnPoints())\
@@ -1470,6 +1471,8 @@ private:
 	TRespawnPoint respawnPoint = CZoneManager::getInstance().getTpSpawnZoneIdByName(val);\
 	if (respawnPoint != InvalidSpawnZoneId)\
 		_RegularRespawnPoints.push_back(respawnPoint);\
+	else if (IsRingShard)\
+		m_RespawnPointsNotLoaded.push_back(val);\
 	else\
 		( nlwarning("<SPAWN_ZONE> %s lost the respawn point '%s'", _Char.getId().toString().c_str(), val.c_str()) );\
 }\
