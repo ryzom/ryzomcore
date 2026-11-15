@@ -1654,14 +1654,18 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			throw EPatchDownloadException(curlDownloadError(source, res, r));
 		}
 
-		if(r == 404)
+		// Only an HTTP answer has a status to judge. A transfer over file: that worked reports 0 and one
+		// over ftp: reports 226, and curl has said in its own result above whether they worked.
+		const bool httpSource = startsWithCaseInsensitiveAscii(source, "http:") || startsWithCaseInsensitiveAscii(source, "https:");
+
+		if (httpSource && r == 404)
 		{
 			// file not found, delete it
 			NLMISC::CFile::deleteFile(dest.c_str());
 			throw EPatchDownloadException(curlDownloadError(source, res, r));
 		}
 
-		if(r < 200 || r >= 300)
+		if (httpSource && (r < 200 || r >= 300))
 		{
 			// file not found, delete it
 			NLMISC::CFile::deleteFile(dest.c_str());
