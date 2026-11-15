@@ -109,6 +109,9 @@ struct EPatchDownloadException : public Exception
 	{
 		// The server answered and does not have the file: nothing to wait for, another server may have it
 		FileNotOnServer,
+		// The server answered that it can't serve the file now (HTTP 5xx, 408, 429): worth asking the same
+		// server again, and the file may still be had under another path
+		ServerBusy,
 		// No answer, or only a part of one: worth asking the same server again
 		NetworkError,
 		// Anything else: the server is of no use to this patch
@@ -132,8 +135,9 @@ struct EPatchDownloadException : public Exception
 	virtual ~EPatchDownloadException() throw() NL_OVERRIDE{}
 };
 
-// No server gave the file, for a reason that another path on the same servers would not change (the network,
-// a fault of the server, a stop request). The callers that try a second path for a missing file let it through.
+// No server gave the file and the last one did not answer at all (the network, a fault on the way to the
+// server, a stop request): another path on the same servers would end the same way. The callers that try a
+// second path for a file let it through. A server that answered, with whatever error, does not end here.
 struct EPatchDownloadAborted : public Exception
 {
 	EPatchDownloadAborted(const std::string &str)
@@ -1587,8 +1591,9 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 					PatchServers[server].OnProbation = false;
 			}
 
-			// A network error: the same server again, after a delay that grows with each attempt
-			if (e.Failure == EPatchDownloadException::NetworkError && retries < maxRetries
+			// A network error or a server that is busy: the same server again, after a delay that grows with
+			// each attempt
+			if ((e.Failure == EPatchDownloadException::NetworkError || e.Failure == EPatchDownloadException::ServerBusy) && retries < maxRetries
 			    && (server < 0 || !PatchServers[server].OnProbation))
 			{
 				const uint delay = s_RetryDelays[retries];
@@ -1620,9 +1625,9 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 				string s = CI18N::get("uiDLFailed");
 				setState(true, s);
 
-				// A file that no server has may be there under another path, which the caller asks for
-				// next. After any other failure a second path would only fail the same way.
-				if (e.Failure == EPatchDownloadException::FileNotOnServer)
+				// The server answered: the file may be there under another path, or be had as delta files,
+				// which the caller asks for next. Without any answer those would only fail the same way.
+				if (e.Failure == EPatchDownloadException::FileNotOnServer || e.Failure == EPatchDownloadException::ServerBusy)
 					throw Exception(std::string(e.what()));
 				throw EPatchDownloadAborted(e.what());
 			}
@@ -1698,7 +1703,7 @@ static EPatchDownloadException::TFailure curlDownloadFailure(CURLcode res, long 
 	if (httpSource && httpCode >= 300)
 	{
 		if (httpCode >= 500 || httpCode == 408 || httpCode == 429)
-			return EPatchDownloadException::NetworkError;
+			return EPatchDownloadException::ServerBusy;
 		return EPatchDownloadException::FileNotOnServer;
 	}
 
@@ -2072,9 +2077,10 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 				const EPatchDownloadException::TFailure failure = curlDownloadFailure(res, r, httpSource);
 
 				// What a network error left of the file is kept when the rest can be asked for: the answer
-				// was the file (200) and named its content, or it was the rest of a file kept before
+				// was the file (200) and named its content, or it was the rest of a file kept before. A
+				// server that is busy when asked for the rest has not touched the kept bytes.
 				const uint64 size = transfer.ResumeFrom + transfer.Written;
-				bool keep = failure == EPatchDownloadException::NetworkError && httpSource && size > 0;
+				bool keep = (failure == EPatchDownloadException::NetworkError || failure == EPatchDownloadException::ServerBusy) && httpSource && size > 0;
 				if (keep && !resumed)
 				{
 					keep = r == 200 && (!transfer.ETag.empty() || !transfer.LastModified.empty());
