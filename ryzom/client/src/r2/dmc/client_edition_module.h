@@ -1199,6 +1199,8 @@ private:
 
 	std::string _RingAccess;
 	bool _Mute;
+	// the buffer of the scenario was written since the last requestStartScenario, so a test may read it back
+	bool m_TestBufferSaved;
 
 	bool _MustStartScenario;
 	bool _ScenarioUpToDate;

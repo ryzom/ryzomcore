@@ -137,16 +137,14 @@ function r2.Version.save(filename)
 			if r2.Scenario.Description.OtherCharAccess then
 				otherCharAccess = r2.Scenario.Description.OtherCharAccess
 				if otherCharAccess == "RoSOnly" then
-					if config.R2EDExtendedDebug ~= 1 then					
-						if filename == "data/r2_buffer.dat" then
-							return false
-						else
-							r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
-							r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioToDefaultAccess"))
-							r2.requestSetNode(r2.Scenario.Description.InstanceId, "OtherCharAccess", "Full")
-							r2.requestEndAction()						
-							return false
-						end
+					if config.R2EDExtendedDebug ~= 1 then
+						-- not saved: the scenario takes the default access, and is saved at the next try; the
+						-- buffer of a test as well, whose start stops on this refusal (requestStartScenario)
+						r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
+						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioToDefaultAccess"))
+						r2.requestSetNode(r2.Scenario.Description.InstanceId, "OtherCharAccess", "Full")
+						r2.requestEndAction()
+						return false
 					else
 						r2.onSystemMessageReceived("BC_ML", "", "Updating the system of Trial limitation")
 						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
@@ -170,19 +168,14 @@ function r2.Version.save(filename)
 				createUserName = userName
 
 				if config.R2EDExtendedDebug ~= 1  then
-					
-					if filename == "data/r2_buffer.dat" then
-						return false
-					else
-						r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
-						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
-						r2.requestSetNode(r2.Scenario.Description.InstanceId, "NevraxScenario", "0")
-						r2.requestSetNode(r2.Scenario.Description.InstanceId, "TrialAllowed", "0")
-						r2.requestSetNode(r2.Scenario.Description.InstanceId, "ScenarioTag", "")
-						r2.requestEndAction()
-						
-						return false
-					end
+					-- not saved: the scenario is no longer marked as Nevrax's, and is saved at the next try (see above)
+					r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
+					r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
+					r2.requestSetNode(r2.Scenario.Description.InstanceId, "NevraxScenario", "0")
+					r2.requestSetNode(r2.Scenario.Description.InstanceId, "TrialAllowed", "0")
+					r2.requestSetNode(r2.Scenario.Description.InstanceId, "ScenarioTag", "")
+					r2.requestEndAction()
+					return false
 
 
 				end

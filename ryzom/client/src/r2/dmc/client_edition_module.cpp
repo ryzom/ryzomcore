@@ -429,6 +429,7 @@ CClientEditionModule::CClientEditionModule()
 	_Initialized = false;
 	_ChannelId = TChanID::Unknown;
 	_Mute = false;
+	m_TestBufferSaved = false;
 
 	_ServerAnswerForseener = nullptr;
 }
@@ -632,7 +633,11 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 				}
 				else
 				{
-					nlinfo("Data corrupted (the server has refused to accept the scenario).");
+					// the file is not the copy this process saved (another editor started the test, or the file is
+					// older): the scenario of the session is asked from the server, instead of an editor without one
+					nlinfo("R2CED: %s is not the scenario of the session, it is asked from the server", getScenarioBufferFileName().c_str());
+					requestMapConnection(bodyConnection.SessionId.asInt(), bodyConnection.MustTp, true);
+					return true;
 				}
 			}
 			_Client->onEditionModeConnected(bodyConnection.EditSlotId, bodyConnection.SessionId.asInt(), data, bodyConnection.VersionName, bodyConnection.MustTp,  bodyConnection.InitialActIndex);
@@ -956,7 +961,7 @@ void CClientEditionModule::requestMapConnection( uint32 scenarioId, bool mustTp,
 	//	CSerialFactoryBackup fb;
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
-	proxy.onMapConnectionAsked(this, (TSessionId)scenarioId, mustTp, mustUpdateHighLevel,  R2::TUserRole::ur_editor);
+	proxy.onMapConnectionAsked(this, (TSessionId)scenarioId, mustUpdateHighLevel, mustTp, R2::TUserRole::ur_editor);
 }
 
 
@@ -1153,7 +1158,22 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 
 	if (_Scenario)
 	{
-		// Some times save is refused: be NevraxScenario must not be changed
+		// The message goes to every editor of the session. The one that started the test reads back the scenario
+		// that it saved for the test (requestStartScenario), when the save was written. The others keep the
+		// scenario they show, which is the session's, and do not read their buffer file, which is not of this
+		// start (an autosave, the buffer of an earlier session). Each editor saves its buffer again as it leaves
+		// edition (CEditor::onEditionModeDisconnected), and the return from the test reads that copy; when this
+		// process has no copy of its own there (the save was refused or not written), the return asks the server
+		// for the scenario instead (ADV_CONN in onProcessModuleMessage).
+		uint32 myUserId = NetMngr.getUserId();
+		bool starter = myUserId == (charId>>4) || ClientCfg.Local;
+		bool notSaved = starter && !m_TestBufferSaved && !ClientCfg.Local;
+		m_TestBufferSaved = false;
+		if (!starter || notSaved)
+		{
+			CScenarioValidator::AutoSaveSignatures.erase(getScenarioBufferFileName());
+		}
+		else
 		{
 			CScenarioValidator sv;
 			CScenarioValidator::TValues values;
@@ -1181,15 +1201,11 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 				_Client->scenarioUpdated(hlScenario2, false, lastActIndex);
 			}
 			_StartingActIndex  = lastActIndex;
-
-
 		}
 
-
-		uint32 myUserId = NetMngr.getUserId();
 		std::string connectionState;
 
-		if (myUserId == (charId>>4) || ClientCfg.Local)
+		if (starter)
 		{
 
 			std::string errorMsg;
@@ -1212,7 +1228,11 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_Factory->setMaxId("RtPlotItem", 0);
 
 			CObject::TSmartPtr rtDataPtr;
-			if (updateFailed)
+			if (notSaved)
+			{
+				errorMsg = "R2: the scenario was not saved for the test (the save was refused, or the file could not be written), the test does not start";
+			}
+			else if (updateFailed)
 			{
 				errorMsg = "R2: the scenario of the test could not be brought up to date, the test does not start";
 			}
@@ -1289,12 +1309,15 @@ bool CClientEditionModule::requestStartScenario()
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	// The test runs the scenario that r2.Version.save writes to the buffer file of the character: startingScenario reads
-	// that file back, makes it the scenario of the editor and translates it. When the save raises, the file
-	// is what it was before, the scenario as it was loaded or tested last: the test would run without the
-	// changes made since, and the editor would take that scenario for its own. The test does not start, the
-	// author is told, and the scenario of the editor stays. (A save that the scripts refuse without an
-	// error, as for a scenario that must not be changed, goes on to the test as before.)
-	if (!R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript()))
+	// that file back, makes it the scenario of the editor and translates it. When the save raises, or the
+	// scripts refuse it (a scenario reserved to Ruins of Silan or marked as Nevrax's: the author is told, and
+	// the scenario takes the default access for the next try), the file is what it was before, the scenario
+	// as it was loaded or tested last: the test would run without the changes made since, and the editor would
+	// take that scenario for its own. The test does not start, the author is told, and the scenario of the
+	// editor stays. The save is written when the server accepts it, which it answers before its broadcast of the
+	// start: startingScenario reads the file only when it was written (m_TestBufferSaved).
+	m_TestBufferSaved = false;
+	if (!R2::getEditor().getLua().executeScriptNoThrow("if not " + getScenarioBufferSaveScript() + " then error('the scenario may not be saved') end"))
 	{
 		nlwarning("R2: the scenario could not be saved for the test, the test does not start");
 		R2::getEditor().getLua().push(std::string("uiR2EDTestSaveFailed"));
@@ -2585,7 +2608,11 @@ void CClientEditionModule::saveScenarioFileAccepted(NLNET::IModuleProxy *senderM
 
 	if (ok)
 	{
-		scenarioToSave->applySave(signature);
+		// the buffer of the scenario is what a test reads back (startingScenario)
+		if (scenarioToSave->applySave(signature) && scenarioToSave->getFilename() == getScenarioBufferFileName())
+		{
+			m_TestBufferSaved = true;
+		}
 	}
 	else
 	{

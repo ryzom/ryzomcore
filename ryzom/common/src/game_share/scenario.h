@@ -321,6 +321,7 @@ public:
 	bool applySave(const std::string& signature);
 	void applyLoad(std::string& filename, std::string& body, CScenarioValidator::TValues& values);
 	std::string getBodyMd5() const { return _BodyMd5; }
+	std::string getFilename() const { return _Filename; }
 
 private:
 	std::string _HeaderBody;
