@@ -643,16 +643,8 @@ namespace RSMGR
 			CNelUserPtr user = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 			if (user != NULL)
 			{
-				vector<string> userPriv;
-				explode(user->getPrivilege(), string(":"), userPriv, true);
-				for (uint i=0; i<userPriv.size(); ++i)
-				{
-					if (PrivilegeForSessionAccess.toString().find(userPriv[i]) != string::npos)
-					{
-						// ok, the user have the required access
-						return true;
-					}
-				}
+				// a privilege of the account counts when it is a whole name of the list, not a part of one
+				return hasPrivilegeOfList(user->getPrivilege(), PrivilegeForSessionAccess.toString());
 			}
 
 			return false;
@@ -2383,16 +2375,20 @@ endOfWelcomeUserResult:
 		{
 			nbClosed = 0;
 
+			// The sessions to close are the ones that are open or locked. A closed session stays in the database,
+			// and a character can have several planned ones: neither is closed below, and neither counts for
+			// the warning.
 			CSString query;
 			query << "SELECT session_id FROM sessions";
-			query << " WHERE owner = "<<charId<<" AND session_type ='st_anim'";
+			query << " WHERE owner = " << charId << " AND session_type ='st_anim'";
+			query << " AND state NOT IN ('ss_closed', 'ss_planned')";
 			BOMB_IF(!_RingDb.query(query), requestName << " : Failed to request in database", return false);
 			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
 
 			// 1.1 : if no session so no need to hibernate (not an error)
 			if (result->getNumRows() > 1)
 			{
-				nlwarning("RSM : %s : character %u has %u anim session in DB, should only have 1",
+				nlwarning("RSM : %s : character %u has %u open anim sessions in DB, should only have 1",
 					requestName, charId, result->getNumRows());
 			}
 

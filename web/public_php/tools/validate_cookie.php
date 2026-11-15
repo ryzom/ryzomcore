@@ -145,6 +145,15 @@
 		return $slot & 0xf;
 	}
 
+	// The address of the Ring start page for the character slot of this
+	// request. The start page shows the sessions and the invitations of one
+	// character: a link to it without the slot shows those of slot 0, which
+	// is another character or none.
+	function ringStartPage()
+	{
+		return 'web_start.php?charSlot='.getCharSlot();
+	}
+
 	/*
 	 * Front-end service addresses from the session manager land in the
 	 * client action-handler string and the login "1#..." protocol line.

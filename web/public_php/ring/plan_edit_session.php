@@ -51,4 +51,4 @@
 </form>
 <br>	
 <br>	
-<a href="web_start.php">Return to start menu</a>
+<a href="<?php echo ringStartPage(); ?>">Return to start menu</a>

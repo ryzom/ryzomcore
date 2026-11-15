@@ -30,7 +30,7 @@ function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 	if ($sessionType != "st_edit" && $sessionType != "st_anim")
 	{
 		echo "Invalid session type<br>";
-		echo '<a href="web_start.php">Return to start menu</a>';
+		echo '<a href="'.ringStartPage().'">Return to start menu</a>';
 		die();
 	}
 
@@ -45,7 +45,7 @@ function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 	if ($res != "")
 	{
 		echo "Error connecting to session manager<br>";
-		echo '<a href="web_start.php">Return to start menu</a>';
+		echo '<a href="'.ringStartPage().'">Return to start menu</a>';
 		die();
 	}
 
@@ -210,7 +210,7 @@ class StartSessionCb extends CRingSessionManagerWeb
 		{
 			$SessionToolsResult = false;
 			echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' while trying to start the session ".htmlspecialchars($SessionId, ENT_QUOTES)."</h1>";
-			echo '<p><p><a href="web_start.php">Back to menu</a>';
+			echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 		}
 		else
 		{
@@ -243,7 +243,7 @@ class InviteOwnerCb extends CRingSessionManagerWeb
 			echo "<h1>Failed to invite you in the started session !</h1>";
 			echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' while trying to join the session ".htmlspecialchars($SessionId, ENT_QUOTES)."</h1>";
 		}
-		echo '<p><p><a href="web_start.php">Back to menu</a>';
+		echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 	}
 }
 

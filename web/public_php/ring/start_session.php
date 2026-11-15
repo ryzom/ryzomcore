@@ -28,4 +28,4 @@
 		die();
 	}
 ?>
-<p><a href="web_start.php">Return to main</a> </p>
+<p><a href="<?php echo ringStartPage(); ?>">Return to main</a> </p>

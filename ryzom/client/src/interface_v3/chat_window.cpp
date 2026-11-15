@@ -1434,8 +1434,11 @@ public:
 		string playerName = ::getFreeTellerName(pCaller);
 		if (!playerName.empty())
 		{
-			// ask the SBS to invite the character in the session
-			CSessionBrowserImpl::getInstance().inviteCharacterByName(CSessionBrowserImpl::getInstance().getCharId(), playerName);
+			// ask the SBS to invite the character in the session, and wait for the answer: the session manager
+			// can refuse (the character is already invited, a newcomer or free trial rule, a scenario that is
+			// not started). The player is told a refusal, and the other player is told nothing.
+			if (!CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(playerName, pCaller))
+				return;
 			// additionaly, send a tell to signal the player he has been invited to a ring session
 			ChatMngr.tell(playerName, CI18N::get("uiRingInviteNotification"));
 			//

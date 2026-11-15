@@ -379,7 +379,16 @@ end
 --***********************************************************************
 function CharTracking:onLineCharacterTooltip()
 
-	if self:isConnected(self.CurrActiveList[self:getSelectList():getElementIndex(getUICaller().parent) + 1].Flags) then
+	local connected = self:isConnected(self.CurrActiveList[self:getSelectList():getElementIndex(getUICaller().parent) + 1].Flags)
+	if self:isListOnly() then
+		-- an editor that does not own the session has the list and the tell: its text names neither the
+		-- kick and teleport buttons, which it does not have, nor an invitation, which was not its own
+		if connected then
+			setContextHelpText(i18n.get("uiRAP_ListedAndConnected"))
+		else
+			setContextHelpText(i18n.get("uiRAP_ListedAndNotConnected"))
+		end
+	elseif connected then
 		setContextHelpText(i18n.get("uiRAP_InvitedAndConnected"))
 	else
 		setContextHelpText(i18n.get("uiRAP_InvitedAndNotConnected"))

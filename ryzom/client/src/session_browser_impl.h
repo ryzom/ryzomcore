@@ -26,6 +26,10 @@
 #include "nel/gui/lua_helper.h"
 #include "far_tp.h"
 
+namespace NLGUI {
+class CCtrlBase;
+}
+
 class CSessionBrowserImpl : public CSessionBrowser,
 							public NLMISC::CSingleton<CSessionBrowserImpl>
 {
@@ -62,6 +66,14 @@ public:
 	virtual void on_scenarioAverageScores(NLNET::TSockId from, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection, uint32 rrpTotal) NL_OVERRIDE;
 
 	static uint32 getCharId();
+
+	/** Invite a character, by its name, into the session this character is in, and wait for what the session
+	  * manager answers. A refusal is told to the player: the message box of the free trial or of the newcomer
+	  * rule, or a line of system info with the reason. No answer (the connection is gone) is told as well.
+	  * \param caller the control the request comes from, for the message boxes (may be NULL)
+	  * \return true when the character is invited
+	  */
+	bool inviteCharacterByNameAndWait(const std::string &charName, NLGUI::CCtrlBase *caller);
 
 	// tmp, for local test
 	void testFill();

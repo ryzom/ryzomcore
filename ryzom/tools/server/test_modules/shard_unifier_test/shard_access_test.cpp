@@ -69,6 +69,36 @@ TEST(ShardAccess, AccessPrivilegeOfLevel)
 	EXPECT_EQ("", accessPrivilegeOfLevel("invalid"));
 }
 
+TEST(ShardAccess, PrivilegeOfList)
+{
+	const char *list = ":GM:SGM:";
+	EXPECT_TRUE(hasPrivilegeOfList(":GM:", list));
+	EXPECT_TRUE(hasPrivilegeOfList(":SGM:", list));
+	// one of several privileges of the account is enough
+	EXPECT_TRUE(hasPrivilegeOfList(":DEV:SGM:", list));
+	EXPECT_TRUE(hasPrivilegeOfList("GM", list));
+	// a name that is only a part of a name of the list gives nothing
+	EXPECT_FALSE(hasPrivilegeOfList(":G:", list));
+	EXPECT_FALSE(hasPrivilegeOfList(":M:", list));
+	EXPECT_FALSE(hasPrivilegeOfList(":SG:", list));
+	EXPECT_FALSE(hasPrivilegeOfList(":S:G:M:", list));
+	// nor does a name that a name of the list is a part of
+	EXPECT_FALSE(hasPrivilegeOfList(":SGMX:", list));
+	EXPECT_FALSE(hasPrivilegeOfList(":DEV:", list));
+	// the case counts, as it does where the privileges are compared elsewhere
+	EXPECT_FALSE(hasPrivilegeOfList(":gm:", list));
+	// no name on one side or the other
+	EXPECT_FALSE(hasPrivilegeOfList("", list));
+	EXPECT_FALSE(hasPrivilegeOfList(":", list));
+	EXPECT_FALSE(hasPrivilegeOfList("::", list));
+	EXPECT_FALSE(hasPrivilegeOfList(":GM:", ""));
+	EXPECT_FALSE(hasPrivilegeOfList(":GM:", "::"));
+	EXPECT_FALSE(hasPrivilegeOfList("", ""));
+	// a list of one name, with and without its colons
+	EXPECT_TRUE(hasPrivilegeOfList(":GM:", ":GM:"));
+	EXPECT_TRUE(hasPrivilegeOfList(":GM:", "GM"));
+}
+
 TEST(ShardAccess, AllShardsRowIds)
 {
 	EXPECT_TRUE(isAllShardsPermission(-1));

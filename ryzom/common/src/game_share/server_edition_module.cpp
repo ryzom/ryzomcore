@@ -1521,7 +1521,9 @@ void CServerEditionModule::connectChar(TSessionId sessionId, TCharId charId, TUs
 		TOverrideRingAccess::const_iterator overridden = _OverrideRingAccess.find(charId);
 		if (overridden != _OverrideRingAccess.end())
 		{
-			info.RingAccess = overridden->second;
+			// in lower case, as the access of the character itself is above: the accesses are compared as texts
+			// (an override saved before the command put it in lower case can have capitals)
+			info.RingAccess = toLowerAscii(overridden->second);
 		}
 	}
 
@@ -4908,7 +4910,8 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 
 	TUserId charId;
 	fromString(args[0], charId);
-	std::string newRingAccess = args[1];
+	// in lower case, as connectChar has the access of a character: the accesses are compared as texts
+	std::string newRingAccess = toLowerAscii(args[1]);
 
 	TPionnerInfos::iterator found( _PioneersInfo.find(charId) );
 
@@ -4918,7 +4921,10 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 		return false;
 	}
 
+	// This is the access the character has of its own from now on: it is the one the character gets back when
+	// an override of its ring access is removed (removeCharOverrideRingAccess)
 	found->second.RingAccess =  newRingAccess;
+	found->second.RingAccessWithoutOverride = newRingAccess;
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 
@@ -5362,7 +5368,8 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharOverrideRingAccess)
 	TCharId charId;
 	fromString(args[0], charId);
 
-	std::string newRingAccess(args[1]);
+	// in lower case, as connectChar has the access of a character: the accesses are compared as texts
+	std::string newRingAccess(toLowerAscii(args[1]));
 
 	{
 		TOverrideRingAccess::iterator found = _OverrideRingAccess.find(charId);

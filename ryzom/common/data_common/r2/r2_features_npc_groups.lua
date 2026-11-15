@@ -246,8 +246,13 @@ local registerFeature = function ()
 							
 							local baseName = r2.PaletteIdToTranslation[this.Components[k-1].Base]
 							if counterNames[baseName]==nil then
-								local name = r2:genInstanceName(baseName)
-								counterName = string.gsub(name, tostring(baseName), "")
+								-- The number genInstanceName put at the end of the name. The name is not taken
+								-- apart with the base name: a translated palette name is no pattern ("-", "("
+								-- and "%" mean something in one), and genInstanceName drops the digits and
+								-- spaces a base name ends with before it adds " " and the number.
+								local name = tostring(r2:genInstanceName(baseName))
+								local _, _, counterName = string.find(name, "(%d+)$")
+								assert(counterName ~= nil, "genInstanceName gave '" .. name .. "', which does not end with a number")
 								counterNames[baseName] = tonumber(counterName)
 							else
 								counterNames[baseName] = counterNames[baseName]+1

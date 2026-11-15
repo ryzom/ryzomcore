@@ -1,6 +1,7 @@
 <?php
 	// Ring web start page: the session management menu the in-game browser
-	// opens (RingMainURL from the login reply; the /webAdmin client command).
+	// opens (RingMainURL from the login reply; the /openRingWindow client
+	// command, which adds the slot of the character in game).
 	// Every other page in this directory links back here. This is the web
 	// route for getting several players into one edit or anim session:
 	// plan and start a session, invite characters into it, join what you
@@ -112,7 +113,13 @@
 	// Sessions this character is invited in / participates in
 	//
 	echo "<h2>Your invitations</h2>";
-	$query = "SELECT sp.session_id, sp.status, s.session_type, s.title, s.state, c.char_name AS owner_name"
+	// A kick marks one participation of the character in the session and
+	// keeps the character out whatever its other participations say (the
+	// session manager refuses the join with "Character is kicked from the
+	// session"), so it is read over all of them.
+	$query = "SELECT sp.session_id, sp.status, s.session_type, s.title, s.state, c.char_name AS owner_name,"
+		. " (SELECT MAX(k.kicked) FROM session_participant AS k"
+		. " WHERE k.session_id = sp.session_id AND k.char_id = sp.char_id) AS kicked"
 		. " FROM session_participant AS sp"
 		. " JOIN sessions AS s ON s.session_id = sp.session_id"
 		. " LEFT JOIN characters AS c ON c.char_id = s.owner"
@@ -127,20 +134,34 @@
 	}
 	else
 	{
+		// Four columns: the in-game browser has no horizontal scroll bar, and
+		// with a column for each value the last one, with the Join button,
+		// was cut at the right edge of the window at its default width.
 		echo "<table border=1 cellpadding=4>";
-		echo "<tr><th>Id</th><th>Type</th><th>Title</th><th>Owner</th><th>State</th><th>Your role</th><th>Actions</th></tr>";
+		echo "<tr><th>Id</th><th>Session</th><th>State, your role</th><th>Actions</th></tr>";
 		while ($row = mysqli_fetch_assoc($result))
 		{
 			$sid = intval($row['session_id']);
+			$kicked = intval($row['kicked']) != 0;
 			echo "<tr>";
 			echo "<td>".$sid."</td>";
-			echo "<td>".esc($row['session_type'])."</td>";
-			echo "<td>".esc($row['title'])."</td>";
-			echo "<td>".esc($row['owner_name'])."</td>";
-			echo "<td>".esc($row['state'])."</td>";
-			echo "<td>".esc($row['status'])."</td>";
+			echo "<td>".esc($row['session_type']);
+			if ($row['title'] != '')
+				echo "<br>".esc($row['title']);
+			echo "<br>of ".esc($row['owner_name'])."</td>";
+			echo "<td>".esc($row['state'])."<br>";
+			if ($kicked)
+				echo "<b>kicked</b> (was ".esc($row['status']).")";
+			else
+				echo esc($row['status']);
+			echo "</td>";
 			echo "<td>";
-			if ($row['state'] == 'ss_open')
+			if ($kicked)
+			{
+				// the session manager refuses the join until the kick is lifted
+				echo "no join until the kick is lifted";
+			}
+			else if ($row['state'] == 'ss_open')
 			{
 				echo "<form action='join_session.php' method='post'>".actionFields($sid)
 					. "<input type='submit' value='Join'></form>";

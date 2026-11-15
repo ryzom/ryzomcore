@@ -317,6 +317,8 @@ bool checkPathExpectation(const std::string &line, const std::string &key, const
 
 // Checks the run against the lines of an expectation file. Returns the number that are not met.
 //   key: value                   a reported line: the whole value, or its start up to the end of a word
+//   key:                         a reported line with this key, whatever its value (a text that is a
+//                                translation in one run and its label in another)
 //   absent: key                  no reported line has this key
 //   no_line: key: start          no reported line starts with this text: a key and the start of a value,
 //                                as "version_update_note: uiR2EDVersionNoteIslandMissing("

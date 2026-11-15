@@ -284,6 +284,58 @@ void CSessionBrowserImpl::on_invokeResult(NLNET::TSockId /* from */, uint32 /* u
 }
 
 // ****************************************************************************
+bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charName, NLGUI::CCtrlBase *caller)
+{
+	CInterfaceManager *im = CInterfaceManager::getInstance();
+	inviteCharacterByName(getCharId(), charName);
+	if (!waitOneMessage(getMessageName("on_invokeResult")))
+	{
+		// the connection to the session browser is gone: _LastInvokeResult is that of an earlier request
+		nlwarning("SB: no answer to the invitation of '%s' into the session", charName.c_str());
+		string text = CI18N::get("uiRingInviteNoAnswer");
+		strFindReplace(text, "%name", charName);
+		im->displaySystemInfo(text, "BC");
+		return false;
+	}
+	if (_LastInvokeResult == 0)
+		return true;
+
+	nlinfo("SB: the invitation of '%s' into the session is refused: %u '%s'", charName.c_str(), _LastInvokeResult, _LastInvokeResultMsg.c_str());
+	const char *textId = "uiRingInviteRefused";
+	switch (_LastInvokeResult)
+	{
+	case 14: // a free trial account, and the scenario is not one free trial players may enter
+	{
+		CViewText *pVT = dynamic_cast<CViewText *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
+		if (pVT != nullptr)
+			pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
+		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_free_trial");
+		return false;
+	}
+	case 12: // one of the two is a newcomer and the other is not
+		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_newcomer");
+		return false;
+	case 3: // the session manager, then the session browser: no character of that name
+	case 104:
+		textId = "uiRingInviteCharNotFound";
+		break;
+	case 5: // the character has a participation in the session, which a kick keeps
+		textId = "uiRingInviteAlreadyInvited";
+		break;
+	case 13: // the scenario of the animation is not started: its rules cannot be checked
+		textId = "uiRingInviteNotStarted";
+		break;
+	default:
+		break;
+	}
+	string text = CI18N::get(textId);
+	strFindReplace(text, "%name", charName);
+	strFindReplace(text, "%code", toString(_LastInvokeResult));
+	im->displaySystemInfo(text, "BC");
+	return false;
+}
+
+// ****************************************************************************
 void CSessionBrowserImpl::on_scheduleSessionResult(NLNET::TSockId /* from */, uint32 charId, TSessionId sessionId, uint8 result, const std::string &resultString)
 {
 	nldebug("SB: on_scheduleSessionResult : result = %u, msg = '%s'", result, resultString.c_str());

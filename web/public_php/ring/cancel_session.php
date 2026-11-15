@@ -14,7 +14,7 @@
 			if ($resultCode != 0)
 			{
 				echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' will trying to cancel the session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."</h1>";
-				echo '<p><p><a href="web_start.php">Back to menu</a>';
+				echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 			}
 			else
 			{
@@ -54,4 +54,4 @@
 		$cancelSessionCb->waitCallback();
 	}
 ?>
-<p><a href="web_start.php">Return to main</a> </p>
+<p><a href="<?php echo ringStartPage(); ?>">Return to main</a> </p>
