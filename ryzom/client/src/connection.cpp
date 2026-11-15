@@ -2009,8 +2009,11 @@ public:
 		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
 		// The files of the old name, without the home mainland, stay: a character of that name on another mainland,
 		// or of another account that uses this folder, may not have had its copy yet. A new character of this name
-		// and mainland does not get them again (copyCharacterFilesOfOldName).
-		deleteCharacterFiles(buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland));
+		// and mainland does not get them (copyCharacterFilesOfOldName), even when this one was never selected.
+		string fileName = buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland);
+		deleteCharacterFiles(fileName);
+		if (!characterFilesCopied(fileName))
+			recordCharacterFilesCopied(fileName);
 
 		// Send the message to the server
 		if (!ClientCfg.Local/*ace!ClientCfg.Light*/)
