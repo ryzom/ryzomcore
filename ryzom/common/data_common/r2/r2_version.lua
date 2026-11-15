@@ -138,8 +138,13 @@ function r2.Version.save(filename)
 				otherCharAccess = r2.Scenario.Description.OtherCharAccess
 				if otherCharAccess == "RoSOnly" then
 					if config.R2EDExtendedDebug ~= 1 then
-						-- not saved: the scenario takes the default access, and is saved at the next try; the
-						-- buffer of a test as well, whose start stops on this refusal (requestStartScenario)
+						if string.sub(filename, 1, 15) == "save/r2_buffer_" then
+							-- the buffer of the editor (getScenarioBufferFileName in the client) is not written for
+							-- a scenario that may not be saved, and the scenario keeps its access: a test or an
+							-- animation starts the scenario the editor shows (requestStartScenario)
+							return "protected"
+						end
+						-- not saved: the scenario takes the default access, and is saved at the next try
 						r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
 						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioToDefaultAccess"))
 						r2.requestSetNode(r2.Scenario.Description.InstanceId, "OtherCharAccess", "Full")
@@ -168,7 +173,11 @@ function r2.Version.save(filename)
 				createUserName = userName
 
 				if config.R2EDExtendedDebug ~= 1  then
-					-- not saved: the scenario is no longer marked as Nevrax's, and is saved at the next try (see above)
+					if string.sub(filename, 1, 15) == "save/r2_buffer_" then
+						-- the buffer of the editor: not written, and the scenario stays Nevrax's (see above)
+						return "protected"
+					end
+					-- not saved: the scenario is no longer marked as Nevrax's, and is saved at the next try
 					r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
 					r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
 					r2.requestSetNode(r2.Scenario.Description.InstanceId, "NevraxScenario", "0")

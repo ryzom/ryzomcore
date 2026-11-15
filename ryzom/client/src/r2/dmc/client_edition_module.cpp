@@ -430,6 +430,7 @@ CClientEditionModule::CClientEditionModule()
 	_ChannelId = TChanID::Unknown;
 	_Mute = false;
 	m_TestBufferSaved = false;
+	m_TestBufferProtected = false;
 
 	_ServerAnswerForseener = nullptr;
 }
@@ -592,6 +593,8 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 		onRingAccessUpdated(nullptr, bodyConnection.RingAccess);
 
 		nlinfo("R2CED: user Connected as Client %d In Mode %d", bodyConnection.EditSlotId, bodyConnection.Mode);
+		// the return from a test, in the session this connection joined (init sets no session)
+		bool sameSession = (_SessionId == bodyConnection.SessionId);
 		_SessionId = bodyConnection.SessionId;
 		_AiInstanceId = bodyConnection.AiInstance;
 		_SessionType = bodyConnection.SessionType;
@@ -615,6 +618,12 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 
 
 			CObject::TSmartPtr data = bodyConnection.HighLevel.getData();
+			// The header of the scenario the editor has (what a test of a scenario that may not be saved sends,
+			// see startingScenario): the one of the buffer read below. A scenario of the server keeps the one read
+			// in this session: the return from the test of such a scenario, whose buffer is not written, gets
+			// the scenario from the server. In another session, none.
+			if (!sameSession)
+				_LastReadHeader.clear();
 			if (!data && bodyConnection.InCache)
 			{
 
@@ -630,6 +639,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 					&& ownSignature->second == signature)
 				{
 					data = _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), values);
+					_LastReadHeader = values;
 				}
 				else
 				{
@@ -1164,12 +1174,20 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 		// start (an autosave, the buffer of an earlier session). Each editor saves its buffer again as it leaves
 		// edition (CEditor::onEditionModeDisconnected), and the return from the test reads that copy; when this
 		// process has no copy of its own there (the save was refused or not written), the return asks the server
-		// for the scenario instead (ADV_CONN in onProcessModuleMessage).
+		// for the scenario instead (ADV_CONN in onProcessModuleMessage). A scenario that may not be saved (reserved
+		// to Ruins of Silan, or Nevrax's) is not written to the buffer: the starter translates the scenario it
+		// shows, as loaded for an animation, with the header it was loaded with.
 		uint32 myUserId = NetMngr.getUserId();
 		bool starter = myUserId == (charId>>4) || ClientCfg.Local;
-		bool notSaved = starter && !m_TestBufferSaved && !ClientCfg.Local;
+		bool protectedScenario = starter && m_TestBufferProtected;
+		bool notSaved = starter && !protectedScenario && !m_TestBufferSaved && !ClientCfg.Local;
 		m_TestBufferSaved = false;
-		if (!starter || notSaved)
+		m_TestBufferProtected = false;
+		if (starter && !notSaved)
+		{
+			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
+		}
+		if (!starter || notSaved || protectedScenario)
 		{
 			CScenarioValidator::AutoSaveSignatures.erase(getScenarioBufferFileName());
 		}
@@ -1178,7 +1196,6 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			CScenarioValidator sv;
 			CScenarioValidator::TValues values;
 			std::string md5, signature;
-			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
 
 			sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true);
 			_LastReadHeader = values;
@@ -1309,21 +1326,24 @@ bool CClientEditionModule::requestStartScenario()
 	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	// The test runs the scenario that r2.Version.save writes to the buffer file of the character: startingScenario reads
-	// that file back, makes it the scenario of the editor and translates it. When the save raises, or the
-	// scripts refuse it (a scenario reserved to Ruins of Silan or marked as Nevrax's: the author is told, and
-	// the scenario takes the default access for the next try), the file is what it was before, the scenario
-	// as it was loaded or tested last: the test would run without the changes made since, and the editor would
-	// take that scenario for its own. The test does not start, the author is told, and the scenario of the
-	// editor stays. The save is written when the server accepts it, which it answers before its broadcast of the
-	// start: startingScenario reads the file only when it was written (m_TestBufferSaved).
+	// that file back, makes it the scenario of the editor and translates it. When the save raises or returns false,
+	// the file is what it was before, the scenario as it was loaded or tested last: the test would run without
+	// the changes made since, and the editor would take that scenario for its own. The test does not start, the
+	// author is told, and the scenario of the editor stays. The save is written when the server accepts it, which
+	// it answers before its broadcast of the start: startingScenario reads the file only when it was written
+	// (m_TestBufferSaved). A scenario that may not be saved (reserved to Ruins of Silan, or Nevrax's, as an
+	// animation loaded from such a file) is not written there, and keeps its access: the save returns
+	// "protected", and the scenario the editor shows is started (m_TestBufferProtected).
 	m_TestBufferSaved = false;
-	if (!R2::getEditor().getLua().executeScriptNoThrow("if not " + getScenarioBufferSaveScript() + " then error('the scenario may not be saved') end"))
+	if (!R2::getEditor().getLua().executeScriptNoThrow("local saved = " + getScenarioBufferSaveScript()
+		+ " if not saved then error('the scenario was not saved') end r2.TestBufferProtected = (saved == 'protected')"))
 	{
 		nlwarning("R2: the scenario could not be saved for the test, the test does not start");
 		R2::getEditor().getLua().push(std::string("uiR2EDTestSaveFailed"));
 		R2::getEditor().callEnvFunc("onTestStartFailed", 1, 0);
 		return false;
 	}
+	m_TestBufferProtected = R2::getEditor().getEnv()["TestBufferProtected"].toBoolean();
 
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
