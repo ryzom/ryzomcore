@@ -289,6 +289,57 @@ private:
 };
 
 
+// ======================================================================================================
+/**
+ * An exclusive lock between processes, held on a file of its own: processes that use the same file (several
+ * clients run from one folder) take the lock around their reads and writes of that file. The lock file is created
+ * when it is missing, and its content is not used. The system releases the lock when the process ends, also when
+ * the process stops without releasing it.
+ * The lock is on a file other than the one it protects: a lock on a file that is replaced through a temporary file
+ * would stay on the replaced file, and on Unix an fcntl lock ends when the process closes any handle of the file.
+ */
+class CFileLock
+{
+public:
+	enum TResult
+	{
+		/// the lock is taken
+		Locked,
+		/// another process holds it
+		Held,
+		/// the file can't be created, opened or locked: getError() says why
+		Failed
+	};
+
+	CFileLock();
+	/// Releases the lock
+	~CFileLock();
+
+	/// Takes the lock of the file once no other process holds it, waiting at most timeoutMs milliseconds (0 waits
+	/// without end). Held when the time ran out.
+	TResult lock(const std::string &path, uint32 timeoutMs);
+	/// Takes the lock of the file when no other process holds it
+	TResult tryLock(const std::string &path);
+	/// Releases the lock, when one is held
+	void unlock();
+	bool isLocked() const;
+	/// Why the last lock() or tryLock() failed, with the message of the system
+	const std::string &getError() const { return m_Error; }
+
+private:
+	CFileLock(const CFileLock &);
+	CFileLock &operator=(const CFileLock &);
+	TResult lockImpl(const std::string &path, bool wait);
+
+#ifdef NL_OS_WINDOWS
+	void *m_Handle;
+#else
+	int m_Fd;
+#endif
+	std::string m_Error;
+};
+
+
 }
 
 

@@ -27,8 +27,16 @@
 #include "nel/misc/sstring.h"
 #include "nel/misc/xml_pack.h"
 #include "nel/misc/streamed_package_manager.h"
+#include "nel/misc/time_nl.h"
 
 #include <errno.h>
+
+#ifndef NL_OS_WINDOWS
+#	include <fcntl.h>
+#	include <sys/file.h>
+#	include <unistd.h>
+#	include <cstring>
+#endif
 
 using namespace std;
 
@@ -960,6 +968,146 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 	log.displayNL("-- FILE ACCESS LOG END (%d Unique Files Accessed) --",count);
 
 	return true;
+}
+
+// ======================================================================================================
+
+CFileLock::CFileLock()
+#ifdef NL_OS_WINDOWS
+	: m_Handle(INVALID_HANDLE_VALUE)
+#else
+	: m_Fd(-1)
+#endif
+{
+}
+
+CFileLock::~CFileLock()
+{
+	unlock();
+}
+
+CFileLock::TResult CFileLock::lock(const std::string &path, uint32 timeoutMs)
+{
+	if (timeoutMs == 0)
+		return lockImpl(path, true);
+
+	// a wait of the system can't be given a time: try again until the time runs out
+	TTime start = CTime::getLocalTime();
+	for (;;)
+	{
+		TResult result = lockImpl(path, false);
+		if (result != Held)
+			return result;
+		if (CTime::getLocalTime() - start >= (TTime)timeoutMs)
+		{
+			m_Error = toString("another process held it for more than %u ms", timeoutMs);
+			return Held;
+		}
+		nlSleep(20);
+	}
+}
+
+CFileLock::TResult CFileLock::tryLock(const std::string &path)
+{
+	return lockImpl(path, false);
+}
+
+bool CFileLock::isLocked() const
+{
+#ifdef NL_OS_WINDOWS
+	return m_Handle != INVALID_HANDLE_VALUE;
+#else
+	return m_Fd != -1;
+#endif
+}
+
+CFileLock::TResult CFileLock::lockImpl(const std::string &path, bool wait)
+{
+	unlock();
+	m_Error.clear();
+#ifdef NL_OS_WINDOWS
+	// the file is shared in every way: what excludes the other processes is the locked range below. A file that
+	// can't be opened for writing (made by another user) is locked through a handle for reading.
+	HANDLE handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	DWORD openError = handle == INVALID_HANDLE_VALUE ? GetLastError() : 0;
+	if (handle == INVALID_HANDLE_VALUE && openError == ERROR_ACCESS_DENIED)
+	{
+		handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		// a file that isn't there can't be read either: the denied creation is the error to tell
+		if (handle == INVALID_HANDLE_VALUE && GetLastError() != ERROR_FILE_NOT_FOUND)
+			openError = GetLastError();
+	}
+	if (handle == INVALID_HANDLE_VALUE)
+	{
+		m_Error = "it can't be created or opened: " + formatErrorMessage(openError);
+		return Failed;
+	}
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(overlapped));
+	if (!LockFileEx(handle, LOCKFILE_EXCLUSIVE_LOCK | (wait ? 0 : LOCKFILE_FAIL_IMMEDIATELY), 0, MAXDWORD, MAXDWORD, &overlapped))
+	{
+		DWORD error = GetLastError();
+		CloseHandle(handle);
+		if (!wait && error == ERROR_LOCK_VIOLATION)
+			return Held;
+		m_Error = "it can't be locked: " + formatErrorMessage(error);
+		return Failed;
+	}
+	m_Handle = handle;
+#else
+	// a file that can't be opened for writing (made by another user) is locked through a descriptor for reading
+	int fd = ::open(path.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+	int openError = fd == -1 ? errno : 0;
+	if (fd == -1 && (openError == EACCES || openError == EROFS))
+	{
+		fd = ::open(path.c_str(), O_RDONLY | O_CLOEXEC);
+		// a file that isn't there can't be read either: the denied creation is the error to tell
+		if (fd == -1 && errno != ENOENT)
+			openError = errno;
+	}
+	if (fd == -1)
+	{
+		m_Error = std::string("it can't be created or opened: ") + strerror(openError);
+		return Failed;
+	}
+	// flock and not fcntl: an fcntl lock ends when the process closes any handle of the file
+	int res;
+	do
+	{
+		res = flock(fd, LOCK_EX | (wait ? 0 : LOCK_NB));
+	} while (res == -1 && errno == EINTR);
+	if (res == -1)
+	{
+		int error = errno;
+		::close(fd);
+		if (!wait && error == EWOULDBLOCK)
+			return Held;
+		m_Error = std::string("it can't be locked: ") + strerror(error);
+		return Failed;
+	}
+	m_Fd = fd;
+#endif
+	return Locked;
+}
+
+void CFileLock::unlock()
+{
+	if (!isLocked())
+		return;
+#ifdef NL_OS_WINDOWS
+	// the lock is released before the handle is closed: the release that the close does may come later
+	OVERLAPPED overlapped;
+	memset(&overlapped, 0, sizeof(overlapped));
+	UnlockFileEx((HANDLE)m_Handle, 0, MAXDWORD, MAXDWORD, &overlapped);
+	CloseHandle((HANDLE)m_Handle);
+	m_Handle = INVALID_HANDLE_VALUE;
+#else
+	// closing the descriptor releases the lock
+	::close(m_Fd);
+	m_Fd = -1;
+#endif
 }
 
 }
