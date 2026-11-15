@@ -254,7 +254,21 @@ bool CScenario::setNode( const std::string& instanceId, const std::string& attrN
 	{
 		return false;
 	}
-	return _InstanceMap->find(instanceId)->setObject(attrName, value);
+	CObject *found = _InstanceMap->find(instanceId);
+	// setObject replaces the entries of a table: the ids of what it replaces leave the instance map, and those
+	// of the value, which it copies, come in
+	CObject *replaced = attrName.empty() ? found : found->getAttr(attrName).getPtr();
+	if (replaced && replaced->isTable())
+	{
+		_InstanceMap->remove(replaced);
+	}
+	bool set = found->setObject(attrName, value);
+	CObject *taken = attrName.empty() ? found : found->getAttr(attrName).getPtr();
+	if (taken && taken->isTable())
+	{
+		_InstanceMap->add(taken);
+	}
+	return set;
 }
 
 bool CScenario::canSetNode(const std::string& instanceId, const std::string& attrName, const CObject* value) const
@@ -298,6 +312,13 @@ bool CScenario::canSetNode(const std::string& instanceId, const std::string& att
 	if (!sameKind)
 	{
 		nlwarning("CScenario::setNode : the value is not of the kind of '%s' in object with id = %s", attrName.c_str(), instanceId.c_str());
+		return false;
+	}
+	// the entries of a whole object are replaced by a value of its own id: what names the object by its id (the
+	// edits of the other editors, references, the instances of a client) goes on naming it
+	if (attrName.empty() && (!value->isString("InstanceId") || value->toString("InstanceId") != instanceId))
+	{
+		nlwarning("CScenario::setNode : refused, the value of the whole object '%s' does not carry its instance id", instanceId.c_str());
 		return false;
 	}
 	if (into && !fitsInTree(_HighLevel, into, value, change, "setNode"))
@@ -538,7 +559,9 @@ void CInstanceMap::add(CObject* root)
 		if ( root->isString(_IdName) )
 		{
 			std::string instanceId = root->toString(_IdName);
-			if ( _Map.find(instanceId) != _Map.end())
+			// an entry whose node was deleted is free (the entries keep weak pointers)
+			std::map<std::string, CObject::TRefPtr>::const_iterator found = _Map.find(instanceId);
+			if (found != _Map.end() && (CObject *)found->second != nullptr)
 			{
 				nlwarning("Trying to add object to the instance map but object already exist. Objec t is :");
 				root->dump();
@@ -588,7 +611,11 @@ void CInstanceMap::remove(CObject* root)
 				root->dump();
 				return;
 			}
-			_Map.erase(found);
+			// the entry of another node of the same id (which the map kept first) stays
+			if ((CObject *)found->second == root || (CObject *)found->second == nullptr)
+			{
+				_Map.erase(found);
+			}
 		}
 		sint32 size = root->getSize() ;
 		sint32 first = 0;
