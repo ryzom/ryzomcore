@@ -57,6 +57,7 @@
 #include "client_cfg.h"
 #include "far_tp.h"
 #include "user_agent.h"
+#include "global.h"
 
 #ifdef RZ_USE_STEAM
 #include "steam_client.h"
@@ -68,6 +69,9 @@
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
+
+// The instance file this client holds while it runs (ClientInstanceSuffix)
+static CFileLock ClientInstanceLock;
 
 //
 // Macros
@@ -269,6 +273,48 @@ int main(int argc, char **argv)
 		if (!CPath::setCurrentPath(currentPath)) return 1;
 	}
 
+	// The client keeps client.cfg, its logs and its saves in the current directory, which the rules above chose.
+	// It has to be able to write there: stop now and say what to do, and not later on the first file that fails.
+	// (This is before the log file exists: the error is shown, and can't be written to that directory anyway.)
+	if (!CFile::isDirectoryWritable("."))
+	{
+		if (profileDirectoryReason)
+		{
+			nlerror("The client can't write to '%s', the directory where it keeps its files (client.cfg, logs, saves): make that directory writable",
+			    CPath::getCurrentPath().c_str());
+		}
+		else
+		{
+			nlerror("The client can't write to '%s', the directory it is started from. It keeps its files (client.cfg, logs, saves) there because that directory holds client_default.cfg: make that directory writable, or start the client with the option --profile to keep them in the per-user directory",
+			    CPath::getCurrentPath().c_str());
+		}
+	}
+
+	// Several clients may run from this directory. Each holds the lock of an instance file while it runs, the first
+	// one that no other client holds, and names the files of its process after it: client.lock and client.log, then
+	// clientb.lock and clientb.log, up to clientz (a log that grows too big goes to client000.log, clientb000.log ...).
+	// This is before anything of the process is written there, its log first.
+	for (char instance = 'a'; instance <= 'z' && !ClientInstanceLock.isLocked(); ++instance)
+	{
+		std::string suffix = instance == 'a' ? std::string() : std::string(1, instance);
+		std::string lockFileName = "client" + suffix + ".lock";
+		CFileLock::TResult result = ClientInstanceLock.tryLock(lockFileName);
+		if (result == CFileLock::Locked)
+		{
+			ClientInstanceSuffix = suffix;
+		}
+		else if (result == CFileLock::Failed)
+		{
+			nlerror("The client can't lock its instance file '%s' in '%s' (%s). The clients of a directory each hold one of client.lock and clientb.lock to clientz.lock while they run. On a drive where files can't be locked, start the client with the option --profile to keep its files in a per-user directory",
+			    lockFileName.c_str(), CPath::getCurrentPath().c_str(), ClientInstanceLock.getError().c_str());
+		}
+	}
+	if (!ClientInstanceLock.isLocked())
+	{
+		nlerror("The client can't take any of the instance files client.lock and clientb.lock to clientz.lock in '%s': 26 clients run from this directory already. Close one of them, or start this one with the option --profile to keep its files in a per-user directory",
+		    CPath::getCurrentPath().c_str());
+	}
+
 #ifdef TEST_CRASH_COUNTER
 	if (Args.haveLongArg("crash"))
 	{
@@ -308,7 +354,9 @@ int main(int argc, char **argv)
 
 	pump ();
 
-	// Delete all the .ttf file in the /data directory
+	// Delete all the .ttf file in the /data directory: only the client holding client.lock does, the clients started
+	// beside it don't (ClientInstanceSuffix)
+	if (ClientInstanceSuffix.empty())
 	{
 		vector<string> files;
 		NLMISC::CPath::getPathContent ("data", false, false, true, files, NULL, true);
@@ -331,22 +379,6 @@ int main(int argc, char **argv)
 	{
 		nlinfo("The client files (client.cfg, logs, saves) are in '%s' and not in the startup directory '%s': %s",
 		    CPath::getCurrentPath().c_str(), Args.getStartupPath().c_str(), profileDirectoryReason);
-	}
-
-	// The client keeps client.cfg, its logs and its saves in the current directory, which the rules above chose.
-	// It has to be able to write there: stop now and say what to do, and not later on the first file that fails.
-	if (!CFile::isDirectoryWritable("."))
-	{
-		if (profileDirectoryReason)
-		{
-			nlerror("The client can't write to '%s', the directory where it keeps its files (client.cfg, logs, saves): make that directory writable",
-			    CPath::getCurrentPath().c_str());
-		}
-		else
-		{
-			nlerror("The client can't write to '%s', the directory it is started from. It keeps its files (client.cfg, logs, saves) there because that directory holds client_default.cfg: make that directory writable, or start the client with the option --profile to keep them in the per-user directory",
-			    CPath::getCurrentPath().c_str());
-		}
 	}
 
 #ifdef RZ_USE_STEAM

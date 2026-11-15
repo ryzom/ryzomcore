@@ -3777,7 +3777,7 @@ class CHandlerGameConfigApply : public IActionHandler
 
 		// **** Save the config
 		if (ClientCfg.SaveConfig)
-			ClientCfg.ConfigFile.save ();
+			ClientCfg.saveConfigFile ();
 		ClientCfg.IsInvalidated = true;
 	}
 };

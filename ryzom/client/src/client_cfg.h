@@ -911,6 +911,11 @@ public:
 	/// End process
 	void release ();
 
+	/// Save ConfigFile (client.cfg) under the lock of the file: the clients of a directory share it, and none reads
+	/// it while another writes it (init() reads and fixes it under the same lock). A lock that another client holds
+	/// for more than five seconds is warned about, and the file is saved without it.
+	void saveConfigFile ();
+
 	/// Put the position of the window into the configuration, which release() saves. To call while the driver has its window.
 	void writeWindowPos ();
 

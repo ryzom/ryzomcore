@@ -1696,7 +1696,7 @@ public:
 
 			ClientCfg.writeInt("SelectedSlot",PlayerSelectedSlot);
 			if (ClientCfg.SaveConfig)
-				ClientCfg.ConfigFile.save();
+				ClientCfg.saveConfigFile();
 		}
 
 

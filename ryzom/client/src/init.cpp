@@ -61,6 +61,7 @@
 #include "init.h"
 #include "input.h"
 #include "client_cfg.h"			// Configuration of the client.
+#include "global.h"				// ClientInstanceSuffix
 #include "actions_client.h"
 #include "color_slot_manager.h"
 #include "movie_shooter.h"
@@ -850,12 +851,14 @@ void initLog()
 	// Add a displayer for Debug Infos.
 	createDebug();
 
-	// Client.Log displayer
+	// Client.Log displayer: client.log for the first client of the directory, clientb.log and on for the others
+	// (ClientInstanceSuffix); the start erases the logs a log of this name grew into (client000.log, clientb000.log ...)
+	std::string clientLogFileName = getLogDirectory() + "client" + ClientInstanceSuffix + ".log";
 	nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
-	CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
+	CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(clientLogFileName, true, "CLIENT.LOG");
 
 	// the log a crash report ends with: there is no log.log
-	setCrashReportLogFile(getLogDirectory() + "client.log");
+	setCrashReportLogFile(clientLogFileName);
 	DebugLog->addDisplayer (ClientLogDisplayer);
 	InfoLog->addDisplayer (ClientLogDisplayer);
 	WarningLog->addDisplayer (ClientLogDisplayer);
@@ -864,6 +867,8 @@ void initLog()
 
 	// Display the client version.
 	nlinfo("RYZOM VERSION: %s", getDebugVersion().c_str());
+	if (!ClientInstanceSuffix.empty())
+		nlinfo("Another client runs from this directory: this one holds client%s.lock and logs to %s", ClientInstanceSuffix.c_str(), clientLogFileName.c_str());
 	nlinfo("Memory: %s/%s", bytesToHumanReadable(CSystemInfo::availablePhysicalMemory()).c_str(), bytesToHumanReadable(CSystemInfo::totalPhysicalMemory()).c_str());
 	nlinfo("OS: %s", CSystemInfo::getOS().c_str());
 	nlinfo("Processor: %s", CSystemInfo::getProc().c_str());
@@ -1256,7 +1261,7 @@ void prelogInit()
 		}
 
 		if (saveDetectedMode)
-			ClientCfg.ConfigFile.save();
+			ClientCfg.saveConfigFile();
 
 		// Enable or disable VSync
 		if (ClientCfg.WaitVBL)

@@ -1689,7 +1689,7 @@ void initHardwareCursor(bool secondCall)
 			if(ClientCfg.SaveConfig)
 			{
 				ClientCfg.writeBool("HardwareCursor", true);
-				ClientCfg.ConfigFile.save ();
+				ClientCfg.saveConfigFile ();
 				ClientCfg.IsInvalidated = true;
 			}
 			// else, only the first time after this patch, open popup to propose hardare cursor mode

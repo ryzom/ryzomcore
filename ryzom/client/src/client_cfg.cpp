@@ -2069,6 +2069,15 @@ void CClientConfig::serial(NLMISC::IStream &f)
 //-----------------------------------------------
 void CClientConfig::init(const string &configFileName)
 {
+	// The clients of a directory share client.cfg: it is created, read and fixed here under its lock, held until
+	// the end of this function (the saves here don't take it again), and every other save takes it (saveConfigFile).
+	// Without the lock the file is read as it was before there was one: another client may be writing it.
+	std::string lockFileName = configFileName + ".lock";
+	CFileLock configLock;
+	if (configLock.lock(lockFileName, 10000) != CFileLock::Locked)
+		nlwarning("CFG::init: %s is read without its lock %s in '%s' (%s): another client of the directory may be writing it",
+		    configFileName.c_str(), lockFileName.c_str(), CPath::getCurrentPath().c_str(), configLock.getError().c_str());
+
 	// if the users client config does not exist
 	if(!CFile::fileExists(configFileName))
 	{
@@ -2227,9 +2236,22 @@ void CClientConfig::release ()
 		}
 
 		// Save it
-		ClientCfg.ConfigFile.save ();
+		ClientCfg.saveConfigFile ();
 	}
 #endif
+}
+
+//-----------------------------------------------
+// saveConfigFile :
+//-----------------------------------------------
+void CClientConfig::saveConfigFile ()
+{
+	// without the lock the file is saved as it was before there was one: another client may be reading it
+	std::string lockFileName = ConfigFile.getFilename() + ".lock";
+	CFileLock configLock;
+	if (configLock.lock(lockFileName, 5000) != CFileLock::Locked)
+		nlwarning("CFG: %s is saved without its lock %s (%s): another client of the directory may be reading it", ConfigFile.getFilename().c_str(), lockFileName.c_str(), configLock.getError().c_str());
+	ConfigFile.save();
 }
 
 bool CClientConfig::readBool (const std::string &varName)
