@@ -130,6 +130,12 @@ r2.PlotItemDisplayerCommon = {}
 ----------------------------------------------------------------------------
 -- update name for tooltip display + availability
 function r2.PlotItemDisplayerCommon:updateNameAndAvailability(instance, sheetId)
+	if plotItemSheetToDBPath[sheetId] == nil then
+		-- Not a reference sheet: the client has no item of this sheet to name (r2:setPlotItemInfos takes
+		-- the plot item sheets of the client and raises for any other number), and the item chooser has
+		-- no slot for it. The item keeps its name in the scenario.
+		return
+	end
 	if plotItemSheetNbRef[sheetId] == 0 then
 		r2:setPlotItemInfos(sheetId, i18n.get("uiR2EDPlotItemDefaultName"), "", "")
 		setSheetAvailable(sheetId, true) -- available again
@@ -194,22 +200,24 @@ end
 
 ----------------------------------------------------------------------------
 function r2.PlotItemDisplayerCommon:onPostCreate(instance)
-	self:touch()	
+	self:touch()
+	-- The count first: the item is counted once here and released once in onErase, whatever the steps
+	-- below come to
+	instance.User.OldSheetId = instance.SheetId
+	self:addRef(instance.SheetId)
 	setSheetAvailable(instance.SheetId, false)  -- not available for other plot items
 	-- if created by this client, prompt to enter the name
-	if instance.User.SelfCreate then			
+	if instance.User.SelfCreate then
 		instance.User.SelfCreate = nil
-		self:editPlotItemName(instance)		
+		self:editPlotItemName(instance)
 	end
 	--
 	if instance.User.AddedMsg then
 		instance.User.AddedMsg = nil
-		displaySystemInfo(i18n.get("uiR2EDPlotItemAdded"), "BC")      
-      r2.PlotItemsPanel:pop()
+		displaySystemInfo(i18n.get("uiR2EDPlotItemAdded"), "BC")
+		r2.PlotItemsPanel:pop()
 	end
-	--	
-    instance.User.OldSheetId = instance.SheetId	
-	self:addRef(instance.SheetId)
+	--
 	self:updateNameAndAvailability(instance, instance.SheetId)
 	if instance == r2:getSelectedInstance() then
 		self:updatePropWindow(instance)
@@ -252,18 +260,21 @@ end
 
 ----------------------------------------------------------------------------
 function r2.PlotItemDisplayerCommon:onAttrModified(instance, attributeName, indexInArray)
-   self:touch()   
-   if attributeName == "SheetId" then
-	  self:decRef(instance.User.OldSheetId)
-	  self:updateNameAndAvailability(instance, instance.User.OldSheetId)
-	  self:addRef(instance.SheetId)
-	  instance.User.OldSheetId = instance.SheetId
-	  self:updateNameAndAvailability(instance, instance.SheetId)
-	  if instance == r2:getSelectedInstance() then
-		self:updatePropWindow(instance)
-	  end
-   end
-   if attributeName == "Name" or attributeName == "Desc" or attributeName == "Comment" then
+	self:touch()
+	if attributeName == "SheetId" then
+		-- The counts first, the old sheet released and the new one taken in one go: what is shown for the
+		-- two sheets comes after, and cannot leave the item counted for a sheet it no longer has
+		local oldSheetId = instance.User.OldSheetId
+		self:decRef(oldSheetId)
+		self:addRef(instance.SheetId)
+		instance.User.OldSheetId = instance.SheetId
+		self:updateNameAndAvailability(instance, oldSheetId)
+		self:updateNameAndAvailability(instance, instance.SheetId)
+		if instance == r2:getSelectedInstance() then
+			self:updatePropWindow(instance)
+		end
+	end
+	if attributeName == "Name" or attributeName == "Desc" or attributeName == "Comment" then
 		self:updateNameAndAvailability(instance, instance.SheetId)
 	end
 end
