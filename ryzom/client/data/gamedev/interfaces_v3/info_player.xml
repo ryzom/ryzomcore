@@ -1239,7 +1239,11 @@
 
 	<group id="content" x="0" y="0" w="0" h="0" posref="TL TL" >
 
-		<group type="html" id="html" posref="TL TL" posparent="parent" url="home" title_prefix=""
+		<!-- This window has no home page: it shows what it is asked to browse, and asks for nothing
+		     when the interface starts (no url, browse_next_time="false"). With url="home" and an empty
+		     home it made a request without an address at the start, and the error page of that
+		     request was in the window when it was first opened. -->
+		<group type="html" id="html" posref="TL TL" posparent="parent" title_prefix=""
 			sizeref="wh" x="0" y="0" w="0" h="0"
 			background_color="0 0 0 255"
 			error_color="255 240 48 255"
@@ -1272,7 +1276,7 @@
 			checkbox_bitmap_over=""
 			background_bitmap_view="black2"
 			home=""
-			browse_next_time="true"
+			browse_next_time="false"
 			form_text_area_group="edit_box_widget_multiline"
 			browse_undo="ui:interface:npc_web_browser:header_opened:browse_undo"
 			browse_redo="ui:interface:npc_web_browser:header_opened:browse_redo"
