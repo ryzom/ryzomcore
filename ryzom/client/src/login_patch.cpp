@@ -1612,6 +1612,13 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 
 		//CurrentFilesToGet++;
 
+		// A server that does not answer is given up after 15 seconds
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+
+		// A transfer that stays below 1 KB/s for 30 seconds has stalled: curl ends it with a timeout
+		curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1024L);
+		curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 30L);
+
 		res = curl_easy_perform(curl);
 
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
