@@ -23,6 +23,10 @@
 #include "nel/misc/thread.h"
 #include "nel/misc/singleton.h"
 #include "nel/misc/mutex.h"
+#include "nel/misc/atomic.h"
+
+#include <map>
+#include <string>
 #include "game_share/ring_session_manager_itf.h"
 
 /** Interface class to implement in order to be called back
@@ -75,6 +79,15 @@ class CSessionBrowser : public RSMGR::CSessionBrowserServerWebClientItf,
 	// disconnection timeout
 	bool						_WaitingForMessage;
 
+	// Set by a wait that gave up (waitOneMessage), read by the comm thread under the mutex of the adaptor:
+	// it closes the connection before it sends anything else
+	NLMISC::CAtomicBool			_DropConnection;
+
+	// The answers that waits which gave up are still owed, [message name] = how many. The messages carry
+	// nothing that tells which request they answer, and the service sends an answer to the connection its
+	// client has when the answer comes: one that comes late is not the answer to a later request.
+	std::map<std::string, uint32>	_OwedAnswers;
+
 
 
 	CCallbackClientAdaptor *getCallbackAdaptor();
@@ -88,6 +101,12 @@ private:
 
 	// called before each message is dispatched
 	void on_preDispatchMessage(NLNET::CMessage &msgin, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase);
+
+	// closes the connection when a wait that gave up asked for it; true when it did
+	bool dropConnectionIfAsked();
+
+	// counts a received message against the answers owed to waits that gave up
+	void settleOwedAnswer(const std::string &name);
 
 
 protected:
@@ -120,9 +139,12 @@ public:
 	// The connection has been closed.
 //	virtual void on_connectionClosed() =0;
 
-	/** Wait until the client receive the specified message OR a disconnection is signaled.
+	/** Wait until the client receive the specified message OR a disconnection is signaled, for 30 seconds
+	 *	at most (WaitMessageTimeout).
 	 *	The messages of other names that come during the wait are dispatched to their callbacks.
-	 *	Return true if the specified message is received, false in case of disconnection.
+	 *	Return true if the specified message is received, false in case of disconnection or when the
+	 *	time is over: the caller tells the player that the request got no answer. The values the
+	 *	callback of the message stores are those of an earlier request then.
 	 */
 	bool waitOneMessage(const std::string &msgName);
 
