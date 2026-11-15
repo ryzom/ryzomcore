@@ -1026,14 +1026,16 @@ CFileLock::TResult CFileLock::lockImpl(const std::string &path, bool wait)
 	unlock();
 	m_Error.clear();
 #ifdef NL_OS_WINDOWS
-	// the file is shared in every way: what excludes the other processes is the locked range below. A file that
-	// can't be opened for writing (made by another user) is locked through a handle for reading.
-	HANDLE handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+	// the file is shared for reading and writing: what excludes the other processes is the locked range below. It
+	// is not shared for deletion: a held lock file that could be deleted would let another process create and lock
+	// a new file of the name. A file that can't be opened for writing (made by another user) is locked through a
+	// handle for reading.
+	HANDLE handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	DWORD openError = handle == INVALID_HANDLE_VALUE ? GetLastError() : 0;
 	if (handle == INVALID_HANDLE_VALUE && openError == ERROR_ACCESS_DENIED)
 	{
-		handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+		handle = CreateFileW(nlUtf8ToWide(path), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
 			NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		// a file that isn't there can't be read either: the denied creation is the error to tell
 		if (handle == INVALID_HANDLE_VALUE && GetLastError() != ERROR_FILE_NOT_FOUND)
