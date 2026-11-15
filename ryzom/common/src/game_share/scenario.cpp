@@ -210,9 +210,55 @@ static bool fitsInTree(const CObject *tree, const CObject *into, const CObject *
 	return fits;
 }
 
+// True if no instance id that the value or a table in it carries names a node of the scenario outside replaced
+// (the part of the tree that the value takes the place of, or null), and none is carried twice; if not, a
+// warning says for which operation it is refused. An id names one node: a client creates one instance per id,
+// and another node with the id of one it shows would be the same instance twice.
+static bool idsAreFree(CInstanceMap &instances, const CObject *value, const CObject *replaced, std::set<std::string> &carried, const char *operation)
+{
+	if (!value->isTable())
+	{
+		return true;
+	}
+	if (value->isString("InstanceId"))
+	{
+		std::string id = value->toString("InstanceId");
+		const CObject *named = instances.find(id);
+		bool inScenario = named != nullptr;
+		// an id that the scenario has is free for a node of the part that the value replaces only
+		while (named && named != replaced)
+		{
+			named = named->getParent();
+		}
+		if (!carried.insert(id).second || (inScenario && named == nullptr))
+		{
+			nlwarning("CScenario::%s : refused, the instance id '%s' is already in the scenario or twice in the value", operation, id.c_str());
+			return false;
+		}
+	}
+	for (uint32 k = 0; k < value->getSize(); ++k)
+	{
+		const CObject *entry = value->getValueAtPos(k).getPtr();
+		if (entry && !idsAreFree(instances, entry, replaced, carried, operation))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool CScenario::setNode( const std::string& instanceId, const std::string& attrName, CObject* value)
 {
 	_Clean = false;
+	if (!canSetNode(instanceId, attrName, value))
+	{
+		return false;
+	}
+	return _InstanceMap->find(instanceId)->setObject(attrName, value);
+}
+
+bool CScenario::canSetNode(const std::string& instanceId, const std::string& attrName, const CObject* value) const
+{
 	CObject* found= _InstanceMap->find(instanceId);
 
 	if (!found)
@@ -258,8 +304,8 @@ bool CScenario::setNode( const std::string& instanceId, const std::string& attrN
 	{
 		return false;
 	}
-	return found->setObject(attrName, value);
-
+	std::set<std::string> carried;
+	return idsAreFree(*_InstanceMap, value, change == TreeReplace ? into : nullptr, carried, "setNode");
 }
 
 bool  CScenario::insertNode(const std::string&  instanceId, const std::string & attrName, sint32 position,
@@ -295,6 +341,11 @@ bool  CScenario::insertNode(const std::string&  instanceId, const std::string & 
 		return false;
 	}
 	if (!fitsInTree(_HighLevel, found, value, TreeAdd, "insertNode"))
+	{
+		return false;
+	}
+	std::set<std::string> carried;
+	if (!idsAreFree(*_InstanceMap, value, nullptr, carried, "insertNode"))
 	{
 		return false;
 	}

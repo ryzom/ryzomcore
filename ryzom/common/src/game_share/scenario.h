@@ -139,6 +139,11 @@ public:
 
 	bool setNode( const std::string& instanceId, const std::string& attrName, CObject* value);
 
+	/// Whether setNode takes the value, without changing anything; a warning says why when it does not.
+	/// Refused: an unknown object, no value, a value of another kind, a tree beyond the reader's limits, and
+	/// an instance id that names a node outside the part of the tree the value replaces.
+	bool canSetNode(const std::string& instanceId, const std::string& attrName, const CObject* value) const;
+
 	bool insertNode(const std::string&  instanceId, const std::string & attrName, sint32 position,
 		const std::string& key, const CObject::TSmartPtr &value);
 
