@@ -144,6 +144,16 @@ bool parseNumber(const std::string &text, double &value)
 	return true;
 }
 
+// True when the file opens and has no byte. CIFile does not open such a file.
+bool isEmptyFile(const std::string &path)
+{
+	FILE *file = nlfopen(path, "rb");
+	if (file == NULL) return false;
+	bool empty = fgetc(file) == EOF && feof(file) != 0;
+	fclose(file);
+	return empty;
+}
+
 void pushNumber(CLuaState &ls, double value)
 {
 	// a whole number is an integer for the scripts, as the number of a slider or of a colour is
@@ -463,7 +473,8 @@ int CNpcEditorFiles::luaLoadNpcPresets(CLuaState &ls)
 	}
 	std::string content;
 	std::string error;
-	if (readFile(path, content, error) && parsePresets(ls, content, error))
+	// a file without a byte is a file without presets, as a file of blank lines is: there is nothing to read
+	if ((isEmptyFile(path) || readFile(path, content, error)) && parsePresets(ls, content, error))
 	{
 		return 1;
 	}
