@@ -302,7 +302,9 @@ public:
 	typedef std::vector< std::pair<std::string, std::string> >  TValues;
 
 public:
-	static std::string AutoSaveSignature;
+	/// The signature of each buffer of the editor this process saved (save/r2_buffer_<character>.dat), by file name:
+	/// the editor reads its own copy back, and a client may play several characters one after the other
+	static std::map<std::string, std::string> AutoSaveSignatures;
 
 public:
 	TValues _Values;

@@ -1124,7 +1124,7 @@ bool CScenarioValidator::setScenarioToSave(const std::string& filename, CObject*
 	return true;
 }
 
-std::string CScenarioValidator::AutoSaveSignature;
+std::map<std::string, std::string> CScenarioValidator::AutoSaveSignatures;
 
 bool CScenarioValidator::applySave(const std::string& signature)
 {
@@ -1180,13 +1180,15 @@ bool CScenarioValidator::applySave(const std::string& signature)
 		// the file is saved once the close has put it in its place: only then does the signature match it
 		out.close();
 
-		if (_Filename != std::string("save/r2_buffer.dat"))
+		// the editor's buffer of the scenario of a character, save/r2_buffer_<character>.dat (getScenarioBufferFileName
+		// in the client), keeps its signature for this process to recognise its own copy
+		if (!NLMISC::startsWith(_Filename, "save/r2_buffer_"))
 		{
 			nlinfo("Scenario %s saved", _Filename.c_str());
 		}
 		else
 		{
-			AutoSaveSignature = signature;
+			AutoSaveSignatures[_Filename] = signature;
 		}
 
 		return true;

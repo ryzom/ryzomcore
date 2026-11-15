@@ -603,11 +603,14 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 				CScenarioValidator::TValues values;
 				std::string md5, signature;
 
-				if ( sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true)
+				// the copy of the character that this process saved itself
+				std::map<std::string, std::string>::const_iterator ownSignature = CScenarioValidator::AutoSaveSignatures.find(getScenarioBufferFileName());
+				if ( sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true)
 					&& !md5.empty()
-					&& CScenarioValidator::AutoSaveSignature == signature)
+					&& ownSignature != CScenarioValidator::AutoSaveSignatures.end()
+					&& ownSignature->second == signature)
 				{
-					data = _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", values);
+					data = _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), values);
 				}
 				else
 				{
@@ -1139,10 +1142,10 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			std::string md5, signature;
 			R2::getEditor().getLua().executeScriptNoThrow("r2.Translator.initStartingActIndex()");
 
-			sv.setScenarioToLoad("save/r2_buffer.dat", values, md5, signature, true);
+			sv.setScenarioToLoad(getScenarioBufferFileName(), values, md5, signature, true);
 			_LastReadHeader = values;
 			uint32 lastActIndex = _StartingActIndex;
-			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal("save/r2_buffer.dat", _LastReadHeader);
+			CObject::TSmartPtr hlScenario2 =  _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), _LastReadHeader);
 			// The file is read as a file that is loaded is: a scenario of an earlier version of the editor
 			// is brought up to date for the test. (The save leaves a scenario at the versions it has when an
 			// update would change it, see r2.Version.updateScenarioVersions.)
@@ -1269,7 +1272,7 @@ bool CClientEditionModule::requestStartScenario()
 
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
+	R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript());
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.startingScenario(this);
 	return true;
@@ -2612,7 +2615,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	// only a file that parsed becomes the local copy, which is read back the same way
 	if (object && CFile::fileExists(filename))
 	{
-		CFile::copyFile("save/r2_buffer.dat", filename);
+		CFile::copyFile(getScenarioBufferFileName(), filename);
 	}
 }
 

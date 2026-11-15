@@ -3165,7 +3165,7 @@ void CEditor::reset()
 	TAccessMode oldAccessMode = _AccessMode;
 	if (_Mode == EditionMode)
 	{
-		R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
+		R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript());
 	}
 	release();
 	clearDebugWindow();
@@ -4829,10 +4829,11 @@ void CEditor::autoSave()
 
 	uint32 i = maxAutoSave -1;
 
+	// the autosaves of the selected character, named as its buffer is (getScenarioBufferFileName)
 	for ( ; i != 0  ; --i )
 	{
-		std::string current = NLMISC::toString("autosave_%02u.r2", i);
-		std::string next = NLMISC::toString("autosave_%02u.r2", i+1);
+		std::string current = NLMISC::toString("autosave_%s_%02u.r2", PlayerSelectedFileName.c_str(), i);
+		std::string next = NLMISC::toString("autosave_%s_%02u.r2", PlayerSelectedFileName.c_str(), i+1);
 
 		if (CFile::fileExists(current))
 		{
@@ -4844,14 +4845,26 @@ void CEditor::autoSave()
 		}
 	}
 
-	if (CFile::fileExists("save/r2_buffer.dat"))
+	if (CFile::fileExists(getScenarioBufferFileName()))
 	{
-		CFile::copyFile("autosave_01.r2", "save/r2_buffer.dat");
+		CFile::copyFile(NLMISC::toString("autosave_%s_01.r2", PlayerSelectedFileName.c_str()), getScenarioBufferFileName());
 	}
 
-	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
+	R2::getEditor().getLua().executeScriptNoThrow(getScenarioBufferSaveScript());
 
 
+}
+
+// *********************************************************************************************************
+std::string getScenarioBufferFileName()
+{
+	return "save/r2_buffer_" + PlayerSelectedFileName + ".dat";
+}
+
+std::string getScenarioBufferSaveScript()
+{
+	// the character part of the name has letters, digits and '_' only (buildCharacterFileName): no escaping
+	return "r2.Version.save(\"" + getScenarioBufferFileName() + "\")";
 }
 
 // *********************************************************************************************************
@@ -5374,7 +5387,7 @@ void  CEditor::onEditionModeDisconnected()
 	// Because avec using the button the currentScenario = 0
 	try
 	{
-		R2::getEditor().getLua().executeScript("r2.Version.save(\"save/r2_buffer.dat\")");
+		R2::getEditor().getLua().executeScript(getScenarioBufferSaveScript());
 	}
 	catch (const std::exception& e)
 	{

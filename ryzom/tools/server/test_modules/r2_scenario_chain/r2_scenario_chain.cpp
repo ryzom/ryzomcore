@@ -704,7 +704,7 @@ void scenarioReturns(CHeadlessHost &host, const std::string &prefix)
 }
 
 // Reads a scenario file as CClientEditionModule::addToLoadList and CComLuaModule::parseScenario do. body
-// gets the text of the file, which the client also keeps as save/r2_buffer.dat.
+// gets the text of the file, which the client also keeps as save/r2_buffer_<character>.dat.
 CObject::TSmartPtr parseScenarioFile(const std::string &filename, bool checkMd5, std::string &body, std::string &error)
 {
 	CScenarioValidator validator;
@@ -1025,7 +1025,7 @@ int run(const CArgs &args)
 		scenarioReturns(host, "early_return_");
 
 	// 4. A test is started. CClientEditionModule::requestStartScenario saves the scenario to
-	// save/r2_buffer.dat with r2.Version.save. When that fails the file keeps what it had, which is the
+	// save/r2_buffer_<character>.dat with r2.Version.save. When that fails the file keeps what it had, which is the
 	// scenario file as it was loaded (loadScenarioSucceded copies it there).
 	host.setPhase("save");
 	size_t firstLine = host.getLog().size();

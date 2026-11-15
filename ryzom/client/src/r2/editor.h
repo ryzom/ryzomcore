@@ -997,6 +997,14 @@ public:
 // shortcut function to get the editor
 inline CEditor &getEditor() { return CEditor::getInstance(); }
 
+// The file where the editor keeps the scenario of the selected character: save/r2_buffer_<character>.dat, the
+// character named as for its other files (PlayerSelectedFileName), as two clients may run from one folder. A test
+// is translated from it, it is read back when the server does not send the scenario again after a test, and the
+// autosaves are copies of it.
+std::string getScenarioBufferFileName();
+// The Lua that saves the scenario of the editor in that file
+std::string getScenarioBufferSaveScript();
+
 // test whether editor is currently enabled and is in EDITION mode. (In this mode, selection is managed by the editor rather than by the entity manager)
 bool isEditionCurrent();
 
