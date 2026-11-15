@@ -104,11 +104,58 @@ extern NLMISC::CCmdArgs Args;
 
 struct EPatchDownloadException : public Exception
 {
-	EPatchDownloadException() : Exception( "Download Error" ) {}
-	EPatchDownloadException( const std::string& str ) : Exception( str ) {}
+	// What a failed download says about the server that was asked
+	enum TFailure
+	{
+		// The server answered and does not have the file: nothing to wait for, another server may have it
+		FileNotOnServer,
+		// The server answered that it can't serve the file now (HTTP 5xx, 408, 429): worth asking the same
+		// server again, and the file may still be had under another path
+		ServerBusy,
+		// No answer, or only a part of one: worth asking the same server again
+		NetworkError,
+		// Anything else: the server is of no use to this patch
+		ServerError,
+		// The thread was asked to stop
+		Stopped
+	};
+
+	TFailure Failure;
+
+	EPatchDownloadException()
+	    : Exception("Download Error")
+	    , Failure(ServerError)
+	{
+	}
+	EPatchDownloadException(const std::string &str, TFailure failure = ServerError)
+	    : Exception(str)
+	    , Failure(failure)
+	{
+	}
 	virtual ~EPatchDownloadException() throw() NL_OVERRIDE{}
 };
 
+// No server gave the file and the last one did not answer at all (the network, a fault on the way to the
+// server, a stop request): another path on the same servers would end the same way. The callers that try a
+// second path for a file let it through. A server that answered, with whatever error, does not end here.
+struct EPatchDownloadAborted : public Exception
+{
+	EPatchDownloadAborted(const std::string &str)
+	    : Exception(str)
+	{
+	}
+	virtual ~EPatchDownloadAborted() throw() NL_OVERRIDE { }
+};
+
+// A directory the patcher writes to can't be written to: the message is the whole text for the player
+struct EPatchNotWritable : public Exception
+{
+	EPatchNotWritable(const std::string &str)
+	    : Exception(str)
+	{
+	}
+	virtual ~EPatchNotWritable() throw() NL_OVERRIDE { }
+};
 
 CPatchManager *CPatchManager::_Instance = nullptr;
 
@@ -157,6 +204,7 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	MustLaunchBatFile = false;
 
 	DownloadInProgress = false;
+	m_WaitForServers = true;
 	_AsyncDownloader = nullptr;
 	_StateListener = nullptr;
 	_StartRyzomAtEnd = true;
@@ -179,13 +227,53 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 #ifdef NL_OS_MAC
 	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
 #elif defined(NL_OS_UNIX)
+	// the data of an installed client, which can only be read: used as the source of a patch when it exists
 	ReadableClientDataPath = CPath::standardizePath(getRyzomSharePrefix() + "/data");
-	if (CFile::isDirectory(ReadableClientDataPath))	ReadableClientDataPath.clear();
+	if (!CFile::isDirectory(ReadableClientDataPath)) ReadableClientDataPath.clear();
 #else
 	ReadableClientDataPath.clear();
 #endif
 
 	if (ReadableClientDataPath.empty()) ReadableClientDataPath = WritableClientDataPath;
+}
+
+// ****************************************************************************
+bool CPatchManager::checkWritableDirectories()
+{
+	// ClientRootPath gets the update script and the files of the categories that are unpacked, ClientPatchPath
+	// the downloads, WritableClientDataPath the game data. The two below the root are created here when missing.
+	m_NotWritableDirectory.clear();
+	if (!CFile::isDirectoryWritable(ClientRootPath))
+	{
+		m_NotWritableDirectory = ClientRootPath;
+	}
+	else
+	{
+		NLMISC::CFile::createDirectory(ClientPatchPath);
+		NLMISC::CFile::createDirectory(WritableClientDataPath);
+		if (!CFile::isDirectoryWritable(ClientPatchPath))
+			m_NotWritableDirectory = ClientPatchPath;
+		else if (!CFile::isDirectoryWritable(WritableClientDataPath))
+			m_NotWritableDirectory = WritableClientDataPath;
+	}
+
+	if (m_NotWritableDirectory.empty())
+		return true;
+
+	// The text for the player says to make the directory writable or to install the game elsewhere. What a
+	// packager needs to know is said here only: a player has no reason to turn the patcher off.
+	nlwarning("PATCH: Can't write to '%s': the patcher keeps its files in '%s' (downloads in '%s', game data in '%s') and writes nowhere else, nothing is downloaded. An install that another program keeps up to date, data and program files together, turns the in-client patcher off with PatchWanted = 0 in its client configuration.",
+	    m_NotWritableDirectory.c_str(), ClientRootPath.c_str(), ClientPatchPath.c_str(), WritableClientDataPath.c_str());
+	return false;
+}
+
+// ****************************************************************************
+std::string CPatchManager::getNotWritableMessage(const std::string &directory)
+{
+	// The text states where the patcher keeps its files and what to do, the directory is the one that failed
+	std::string message = CI18N::get("uiPatchNotWritable");
+	strFindReplace(message, "%dir", directory);
+	return message;
 }
 
 // ****************************************************************************
@@ -195,15 +283,24 @@ void CPatchManager::setErrorMessage(const std::string &message)
 }
 
 // ****************************************************************************
+bool CPatchManager::isStopAsked() const
+{
+	// read by the thread that downloads; the flags are set through the two functions below
+	return (CheckThread && CheckThread->StopAsked) || (PatchThread && PatchThread->StopAsked);
+}
+
+// ****************************************************************************
 void CPatchManager::forceStopCheckThread()
 {
-	PatchThread->StopAsked = true;
+	if (CheckThread)
+		CheckThread->StopAsked = true;
 }
 
 // ****************************************************************************
 void CPatchManager::forceStopPatchThread()
 {
-	CheckThread->StopAsked = true;
+	if (PatchThread)
+		PatchThread->StopAsked = true;
 }
 
 // ****************************************************************************
@@ -229,11 +326,15 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	else
 		DisplayedServerPath = ServerPath;
 
-	NLMISC::CFile::createDirectory(ClientPatchPath);
-	NLMISC::CFile::createDirectory(WritableClientDataPath);
-
+	// The patcher writes to its own directories and nowhere else. They are tested before anything is
+	// downloaded, the version file included; when one fails the check thread ends at once with the error.
+	if (!checkWritableDirectories())
+		return;
 
 	// try to read the version file from the server (that will replace the version number)
+	// init() runs in the thread of the caller, which draws the interface: its downloads are asked for once
+	// and not waited for. The check thread asks the servers again.
+	m_WaitForServers = false;
 	try
 	{
 		CConfigFile *cf;
@@ -323,7 +424,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	{
 		// no version file
 	}
-
+	m_WaitForServers = true;
 
 	// retrieve the current client version, according to .idx
 	readClientVersionAndDescFile();
@@ -1251,7 +1352,7 @@ void CPatchManager::readDescFile(sint32 nVersion)
 	string srcName = ClientPatchPath + DescFilename;
 	DescFile.clear();
 	if (!DescFile.load(srcName))
-		throw Exception ("Can't open file '%s'", srcName.c_str ());
+		throw Exception("Can't read the description file '%s': it is missing or damaged", srcName.c_str());
 
 	// The description came from the patch server: every file name must be a bare file name, and every
 	// unpack path must stay below the client directory, or the files written from it could land anywhere.
@@ -1408,6 +1509,40 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 	}
 	if (bZipped) dstName += ".ngz";
 
+	// Seconds to wait before the same server is asked again after a network error. A short drop of the
+	// player's connection ends by itself within that time. init() does not wait.
+	static const uint s_RetryDelays[] = { 2, 4, 8, 16 };
+	const uint maxRetries = m_WaitForServers ? (uint)(sizeof(s_RetryDelays) / sizeof(s_RetryDelays[0])) : 0;
+	uint retries = 0;
+
+	// The file is asked from the main servers first, starting with the one that gave the file before
+	// (UsedServer), then from the emergency server (-1). A main server that failed is passed over, by this
+	// file and the following ones, until its time has come to be asked again: once per file, until it works.
+	sint server = -1;
+	if (!PatchServers.empty())
+	{
+		const TTime now = CTime::getLocalTime();
+		for (uint i = 0; i < PatchServers.size(); ++i)
+		{
+			if (!PatchServers[i].Available && now >= PatchServers[i].AskAgainTime)
+			{
+				nlinfo("PATCH: The main server '%s' is asked again", PatchServers[i].DisplayedServerPath.c_str());
+				PatchServers[i].Available = true;
+				PatchServers[i].OnProbation = true;
+			}
+		}
+
+		if (UsedServer < 0 || UsedServer >= (sint)PatchServers.size())
+			UsedServer = 0;
+		for (uint i = 0; i < PatchServers.size() && server < 0; ++i)
+		{
+			const sint candidate = (UsedServer + (sint)i) % (sint)PatchServers.size();
+			if (PatchServers[candidate].Available)
+				server = candidate;
+		}
+	}
+	std::vector<bool> asked(PatchServers.size(), false);
+
 	bool	downloadSuccess = false;
 
 	while (!downloadSuccess)
@@ -1415,22 +1550,24 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 		std::string	serverPath;
 		std::string	serverDisplayPath;
 
-		if (UsedServer >= 0 && !PatchServers.empty())
+		if (server >= 0)
 		{
 			// first use main patch servers
-			serverPath = PatchServers[UsedServer].ServerPath;
-			serverDisplayPath = PatchServers[UsedServer].DisplayedServerPath;
+			serverPath = PatchServers[server].ServerPath;
+			serverDisplayPath = PatchServers[server].DisplayedServerPath;
 		}
 		else
 		{
 			// else use alternative emergency patch server
 			serverPath = ServerPath;
 			serverDisplayPath = DisplayedServerPath;
-			UsedServer = -1;
 		}
 
 		try
 		{
+			if (isStopAsked())
+				throw EPatchDownloadException(CI18N::get("uiDLFileErr") + " " + NLMISC::CFile::getFilename(srcName), EPatchDownloadException::Stopped);
+
 			string s = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename(srcName);
 			setState(true, s);
 
@@ -1438,50 +1575,109 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			downloadFile (serverPath+srcName, dstName, progress);
 
 			downloadSuccess = true;
+			if (server >= 0)
+			{
+				PatchServers[server].OnProbation = false;
+				PatchServers[server].Failures = 0;
+				UsedServer = server;
+			}
 		}
 		catch (const EPatchDownloadException& e)
 		{
-			//nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative: %i: %s",UsedServer,PatchServers[UsedServer].DisplayedServerPath.c_str());
-
-			nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative :");
-			nlwarning("%i", UsedServer);
-			if (UsedServer >= 0 && UsedServer < (int) PatchServers.size())
+			if (e.Failure == EPatchDownloadException::Stopped)
 			{
-				nlwarning("%s", PatchServers[UsedServer].DisplayedServerPath.c_str());
+				nlinfo("PATCH: The download of '%s' ends on a stop request", srcName.c_str());
+				discardPartialDownload();
+				throw EPatchDownloadAborted(e.what());
 			}
 
+			// An attempt that went on from the kept bytes and added to them was not in vain: the count starts
+			// again. A connection that drops now and then gets a large file all the same, each drop costing
+			// the shortest wait. Bytes kept by a transfer that started the file over do not count: they add
+			// nothing to what the attempt before had.
+			if (m_PartialDownload.Size > 0 && m_PartialDownload.Appended)
+			{
+				retries = 0;
+				if (server >= 0)
+					PatchServers[server].OnProbation = false;
+			}
+
+			// A network error or a server that is busy: the same server again, after a delay that grows with
+			// each attempt
+			if ((e.Failure == EPatchDownloadException::NetworkError || e.Failure == EPatchDownloadException::ServerBusy) && retries < maxRetries
+			    && (server < 0 || !PatchServers[server].OnProbation))
+			{
+				const uint delay = s_RetryDelays[retries];
+				++retries;
+
+				setState(true, e.what());
+				string s = CI18N::get("uiDLRetry");
+				strFindReplace(s, "%delay", toString(delay));
+				strFindReplace(s, "%attempt", toString(retries + 1));
+				strFindReplace(s, "%max", toString(maxRetries + 1));
+				setState(true, s);
+				nlwarning("PATCH: %s. Attempt %u of %u on '%s' in %u s", e.what(), retries + 1, maxRetries + 1, serverDisplayPath.c_str(), delay);
+
+				// a stop request ends the wait, and the test above ends the download
+				for (uint waited = 0; waited < delay * 10 && !isStopAsked(); ++waited)
+					nlSleep(100);
+				continue;
+			}
+			retries = 0;
+
+			// What a transfer that was cut left of the file is of use to the same server only
+			discardPartialDownload();
+
+			nlwarning("PATCH: %s. No further attempt on '%s' (%s)", e.what(), serverDisplayPath.c_str(), server < 0 ? "the emergency server" : "a main server");
+
 			// if emergency patch server, this is a real issue, rethrow exception
-			if (UsedServer < 0)
+			if (server < 0)
 			{
 				string s = CI18N::get("uiDLFailed");
 				setState(true, s);
 
-				throw Exception(std::string(e.what()));
+				// The server answered: the file may be there under another path, or be had as delta files,
+				// which the caller asks for next. Without any answer those would only fail the same way.
+				if (e.Failure == EPatchDownloadException::FileNotOnServer || e.Failure == EPatchDownloadException::ServerBusy)
+					throw Exception(std::string(e.what()));
+				throw EPatchDownloadAborted(e.what());
 			}
 
 			string s = CI18N::get("uiDLURIFailed") + " " + serverDisplayPath;
 			setState(true, s);
 
-			// this server is unavailable
-			PatchServers[UsedServer].Available = false;
+			// A server that does not have this file is passed over for this file only. After any other
+			// failure it is passed over by the files that follow too: for a minute at first, and twice as
+			// long after each further failure, up to 16 minutes. A server that does not answer costs its
+			// connection timeout once in that time, not once per file.
+			asked[server] = true;
+			if (e.Failure != EPatchDownloadException::FileNotOnServer)
+			{
+				CPatchServer &failed = PatchServers[server];
+				const uint minutes = 1u << std::min(failed.Failures, 4u);
+				failed.Available = false;
+				failed.AskAgainTime = CTime::getLocalTime() + (TTime)minutes * 60 * 1000;
+				++failed.Failures;
+				nlwarning("PATCH: The main server '%s' is passed over for %u min", failed.DisplayedServerPath.c_str(), minutes);
+			}
 
-			sint	nextServer = (UsedServer+1) % PatchServers.size();
+			sint nextServer = (server + 1) % PatchServers.size();
 
-			while (nextServer != UsedServer && !PatchServers[nextServer].Available)
-				nextServer = (nextServer+1) % PatchServers.size();
+			while (nextServer != server && (!PatchServers[nextServer].Available || asked[nextServer]))
+				nextServer = (nextServer + 1) % PatchServers.size();
 
 			// scanned all servers? use alternative
-			if (nextServer == UsedServer)
+			if (nextServer == server)
 			{
 				string s = CI18N::get("uiNoMoreURI");
 				setState(true, s);
-				UsedServer = -1;
-				nlwarning("EXCEPTION CATCH: getServerFile() failed - no alternative found");
+				server = -1;
+				nlwarning("PATCH: No main server left for '%s', asking the emergency server", srcName.c_str());
 			}
 			else
 			{
-				UsedServer = nextServer;
-				nlwarning("EXCEPTION CATCH: getServerFile() failed - trying server: %i: %s",UsedServer,PatchServers[UsedServer].DisplayedServerPath.c_str());
+				server = nextServer;
+				nlwarning("PATCH: Asking server %i for '%s': %s", server, srcName.c_str(), PatchServers[server].DisplayedServerPath.c_str());
 			}
 		}
 	}
@@ -1501,7 +1697,192 @@ static string curlDownloadError(const string &source, CURLcode res, long httpCod
 		curlText = string(curl_easy_strerror(res)) + ", ";
 	return CI18N::get("uiDLFileErr") + " " + NLMISC::CFile::getFilename(source) + " (" + curlText + NLMISC::toString("curl %d, HTTP %ld", (int)res, httpCode) + ")";
 }
+
+// ****************************************************************************
+// What a failed transfer says about the server that was asked, see EPatchDownloadException::TFailure
+static EPatchDownloadException::TFailure curlDownloadFailure(CURLcode res, long httpCode, bool httpSource)
+{
+	// An HTTP status from 300 on is the server's answer about this file. A server that is overloaded or
+	// restarting passes; the other answers mean that the file is not to be had there under this name.
+	if (httpSource && httpCode >= 300)
+	{
+		if (httpCode >= 500 || httpCode == 408 || httpCode == 429)
+			return EPatchDownloadException::ServerBusy;
+		return EPatchDownloadException::FileNotOnServer;
+	}
+
+	switch (res)
+	{
+	case CURLE_COULDNT_RESOLVE_PROXY:
+	case CURLE_COULDNT_RESOLVE_HOST:
+	case CURLE_COULDNT_CONNECT:
+	case CURLE_PARTIAL_FILE:
+	case CURLE_OPERATION_TIMEDOUT:
+	case CURLE_SEND_ERROR:
+	case CURLE_RECV_ERROR:
+	case CURLE_GOT_NOTHING:
+	case CURLE_SSL_CONNECT_ERROR:
+#if LIBCURL_VERSION_NUM >= 0x072600
+	case CURLE_HTTP2:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073100
+	case CURLE_HTTP2_STREAM:
+#endif
+		return EPatchDownloadException::NetworkError;
+	case CURLE_FTP_COULDNT_RETR_FILE:
+	case CURLE_FILE_COULDNT_READ_FILE:
+	case CURLE_REMOTE_FILE_NOT_FOUND:
+	case CURLE_REMOTE_ACCESS_DENIED:
+		return EPatchDownloadException::FileNotOnServer;
+	default:
+		return EPatchDownloadException::ServerError;
+	}
+}
+
+// ****************************************************************************
+// One transfer of a download, for the callbacks of curl
+struct CPatchDownloadTransfer
+{
+	CURL *Curl;
+	FILE *File;
+	NLMISC::IProgressCallback *Progress;
+
+	// Bytes of the file that were kept from a transfer a network error cut, 0 for a transfer from the start,
+	// and what the server said about the content those bytes came from
+	uint64 ResumeFrom;
+	std::string ResumeETag;
+	std::string ResumeLastModified;
+	sint64 ResumeTotal;
+
+	// From the headers of the answer: a strong entity tag, the modification date, the size of the body and,
+	// for a part of a file, the size of the whole. -1 when the server did not say.
+	std::string ETag;
+	std::string LastModified;
+	sint64 ContentLength;
+	sint64 RangeTotal;
+
+	// What the transfer did
+	uint64 Written;
+	bool BodyStarted;
+	bool ContentChanged; // the answer was not the rest of the content the kept bytes came from
+	bool WriteFailed;
+	int WriteErrno;
+
+	CPatchDownloadTransfer()
+	    : Curl(nullptr)
+	    , File(nullptr)
+	    , Progress(nullptr)
+	    , ResumeFrom(0)
+	    , ResumeTotal(-1)
+	    , ContentLength(-1)
+	    , RangeTotal(-1)
+	    , Written(0)
+	    , BodyStarted(false)
+	    , ContentChanged(false)
+	    , WriteFailed(false)
+	    , WriteErrno(0)
+	{
+	}
+};
+
+// ****************************************************************************
+static size_t patchDownloadHeader(char *buffer, size_t size, size_t nitems, void *userdata)
+{
+	CPatchDownloadTransfer *transfer = (CPatchDownloadTransfer *)userdata;
+	const size_t length = size * nitems;
+	const std::string line(buffer, length);
+
+	// a status line starts the headers of another answer
+	if (startsWithCaseInsensitiveAscii(line, "HTTP/"))
+	{
+		transfer->ETag.clear();
+		transfer->LastModified.clear();
+		transfer->ContentLength = -1;
+		transfer->RangeTotal = -1;
+		return length;
+	}
+
+	const std::string::size_type colon = line.find(':');
+	if (colon == std::string::npos)
+		return length;
+
+	const std::string name = toLowerAscii(line.substr(0, colon));
+	const std::string value = trim(line.substr(colon + 1));
+	if (name == "etag")
+	{
+		// Only a strong tag stands for the bytes of the file. A weak one (W/"...") may stay the same when
+		// they change, so it can't be used to ask for the rest of a file.
+		if (!value.empty() && value[0] == '"')
+			transfer->ETag = value;
+	}
+	else if (name == "last-modified")
+	{
+		transfer->LastModified = value;
+	}
+	else if (name == "content-length")
+	{
+		if (!fromString(value, transfer->ContentLength))
+			transfer->ContentLength = -1;
+	}
+	else if (name == "content-range")
+	{
+		// bytes first-last/total, where the total may be '*'
+		const std::string::size_type slash = value.rfind('/');
+		if (slash == std::string::npos || !fromString(value.substr(slash + 1), transfer->RangeTotal))
+			transfer->RangeTotal = -1;
+	}
+	return length;
+}
+
+// ****************************************************************************
+static size_t patchDownloadWrite(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	CPatchDownloadTransfer *transfer = (CPatchDownloadTransfer *)userdata;
+	if (!transfer->BodyStarted)
+	{
+		transfer->BodyStarted = true;
+		if (transfer->ResumeFrom > 0)
+		{
+			// These bytes go behind the ones that were kept: they have to be the rest of that same content.
+			// The server was asked on that condition (If-Range), and what it says about its answer has to
+			// agree: a part of a file (206), the same entity tag, or the same date when there was no tag,
+			// and the same size of the whole.
+			long status = 0;
+			curl_easy_getinfo(transfer->Curl, CURLINFO_RESPONSE_CODE, &status);
+			bool same = status == 206;
+			if (!transfer->ResumeETag.empty())
+				same = same && transfer->ETag == transfer->ResumeETag;
+			else
+				same = same && (transfer->LastModified.empty() || transfer->LastModified == transfer->ResumeLastModified);
+			if (transfer->ResumeTotal >= 0 && transfer->RangeTotal >= 0)
+				same = same && transfer->RangeTotal == transfer->ResumeTotal;
+			transfer->ContentChanged = !same;
+		}
+	}
+
+	// nothing of another content is written; curl ends the transfer with a write error
+	if (transfer->ContentChanged)
+		return 0;
+
+	const size_t length = size * nmemb;
+	const size_t written = fwrite(ptr, 1, length, transfer->File);
+	transfer->Written += written;
+	if (written != length)
+	{
+		transfer->WriteFailed = true;
+		transfer->WriteErrno = errno;
+	}
+	return written;
+}
+#endif
+
+// ****************************************************************************
+void CPatchManager::discardPartialDownload()
+{
+	if (m_PartialDownload.Size > 0)
+		NLMISC::CFile::deleteFile(m_PartialDownload.Dest);
+	m_PartialDownload = CPartialDownload();
+}
 
 // ****************************************************************************
 void CPatchManager::downloadFileWithCurl (const string &source, const string &dest, NLMISC::IProgressCallback *progress)
@@ -1515,107 +1896,226 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 
 		// user agent = nel_launcher
 
-		CURL *curl;
-		CURLcode res;
-
 		string sTranslate = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename (source);
 		setState(true, sTranslate);
 		CurrentFile = NLMISC::CFile::getFilename (source);
 
-		curl_global_init(CURL_GLOBAL_ALL);
-		curl = curl_easy_init();
-		if(curl == nullptr)
-		{
-			// file not found, delete local file
-			throw Exception ("curl init failed");
-		}
+		// Only an HTTP answer has a status to judge. A transfer over file: that worked reports 0 and one
+		// over ftp: reports 226, and curl says in its own result whether they worked.
+		const bool httpSource = startsWithCaseInsensitiveAscii(source, "http:") || startsWithCaseInsensitiveAscii(source, "https:");
 
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
-		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, downloadProgressFunc);
-		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *) progress);
-		curl_easy_setopt(curl, CURLOPT_URL, source.c_str());
-		if (source.length() > 8 && (source[4] == 's' || source[4] == 'S')) // 01234 https
+		// When a network error cuts a transfer, the bytes that arrived stay in the file if the server said
+		// which content they belong to (m_PartialDownload), and the next attempt asks for the rest of that
+		// content. A second pass is made here only when such an attempt has to start from the beginning.
+		for (;;)
 		{
-			NLWEB::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
-			NLWEB::CCurlCertificates::useCertificates(curl);
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
-		}
+			CPatchDownloadTransfer transfer;
+			transfer.Progress = progress;
 
-		// create the local file
-		if (NLMISC::CFile::fileExists(dest))
-		{
-			setRWAccess(dest, false);
-			NLMISC::CFile::deleteFile(dest.c_str());
-		}
+			// The kept bytes are used for the same source and file only, and only when the file still has
+			// exactly that many bytes
+			FILE *fp = nullptr;
+			if (m_PartialDownload.Size > 0 && m_PartialDownload.Source == source && m_PartialDownload.Dest == dest)
+			{
+				fp = nlfopen(dest, "ab");
+				if (fp != nullptr && (nlfseek64(fp, 0, SEEK_END) != 0 || (uint64)nlftell64(fp) != m_PartialDownload.Size))
+				{
+					fclose(fp);
+					fp = nullptr;
+				}
+			}
+			const bool resumed = fp != nullptr;
 
-		FILE *fp = nlfopen (dest, "wb");
+			if (resumed)
+			{
+				transfer.ResumeFrom = m_PartialDownload.Size;
+				transfer.ResumeETag = m_PartialDownload.ETag;
+				transfer.ResumeLastModified = m_PartialDownload.LastModified;
+				transfer.ResumeTotal = m_PartialDownload.Total;
+			}
+			else
+			{
+				m_PartialDownload = CPartialDownload();
 
-		if (fp == nullptr)
-		{
+				// create the local file
+				if (NLMISC::CFile::fileExists(dest))
+				{
+					setRWAccess(dest, false);
+					NLMISC::CFile::deleteFile(dest.c_str());
+				}
+
+				fp = nlfopen(dest, "wb");
+
+				if (fp == nullptr)
+				{
+					throw Exception("Can't open file '%s' for writing: code=%d %s (error code 37)", dest.c_str(), errno, strerror(errno));
+				}
+			}
+
+			curl_global_init(CURL_GLOBAL_ALL);
+			CURL *curl = curl_easy_init();
+			if (curl == nullptr)
+			{
+				fclose(fp);
+				throw Exception("curl init failed");
+			}
+
+			transfer.Curl = curl;
+			transfer.File = fp;
+
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
+			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, downloadProgressFunc);
+			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *)&transfer);
+			curl_easy_setopt(curl, CURLOPT_URL, source.c_str());
+			if (source.length() > 8 && (source[4] == 's' || source[4] == 'S')) // 01234 https
+			{
+				NLWEB::CCurlCertificates::addCertificateFile(ClientCfg.CurlCABundle);
+				NLWEB::CCurlCertificates::useCertificates(curl);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+			}
+
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&transfer);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patchDownloadWrite);
+			curl_easy_setopt(curl, CURLOPT_HEADERDATA, (void *)&transfer);
+			curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, patchDownloadHeader);
+
+			// The page of an HTTP error is no part of the file: curl ends such an answer as a failure
+			curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+
+			// CurrentFilesToGet++;
+
+			// A server that does not answer is given up after 15 seconds
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+
+			// A transfer that stays below 1 KB/s for 30 seconds has stalled: curl ends it with a timeout
+			curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1024L);
+			curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 30L);
+
+			struct curl_slist *headers = nullptr;
+			if (resumed)
+			{
+				// Ask for the rest, on the condition that the server still has the content the kept bytes
+				// came from. A server that has another content by now sends the whole of it, and so does
+				// one that knows no ranges: curl ends both as a range error.
+				const std::string ifRange = "If-Range: " + (transfer.ResumeETag.empty() ? transfer.ResumeLastModified : transfer.ResumeETag);
+				headers = curl_slist_append(headers, ifRange.c_str());
+				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+				curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, (curl_off_t)transfer.ResumeFrom);
+				nlinfo("PATCH: The download of '%s' goes on at byte %" NL_I64 "u", source.c_str(), transfer.ResumeFrom);
+			}
+
+			CURLcode res = curl_easy_perform(curl);
+
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
-			throw Exception ("Can't open file '%s' for writing: code=%d %s (error code 37)", dest.c_str (), errno, strerror(errno));
-		}
 
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+			long r = 0;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &r);
 
-		//CurrentFilesToGet++;
+			curl_easy_cleanup(curl);
+			if (headers)
+				curl_slist_free_all(headers);
 
-		res = curl_easy_perform(curl);
+			fclose(fp);
+			curl_global_cleanup();
 
-		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
+			if (transfer.WriteFailed)
+			{
+				CurrentFile.clear();
+				NLMISC::CFile::deleteFile(dest.c_str());
+				m_PartialDownload = CPartialDownload();
+				if (transfer.WriteErrno == 28 /*ENOSPC*/)
+					throw NLMISC::EDiskFullError(dest);
+				throw NLMISC::EWriteError(dest);
+			}
 
-		long r;
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &r);
+			// A transfer that went on from kept bytes is taken on one answer only: a part of the file (206)
+			// whose first byte passed the test of the write callback, and which ends where the file ends when
+			// its size is known. curl also reports success for an answer without a body, which never
+			// reaches that test: a 200 as long as the kept bytes ("already downloaded"), an empty 206.
+			// Such an answer, like one that names another content, no range, or a range beyond the file
+			// (416), is not the rest of the kept bytes: the file is asked for from its start. A transfer
+			// that an error cut is not judged here; its kept bytes stay for the next attempt.
+			bool startOver = false;
+			if (resumed)
+			{
+				if (res == CURLE_OK && r >= 200 && r < 300)
+				{
+					const sint64 total = transfer.ResumeTotal >= 0 ? transfer.ResumeTotal : transfer.RangeTotal;
+					startOver = r != 206 || !transfer.BodyStarted || transfer.ContentChanged
+					    || (total >= 0 && (sint64)(transfer.ResumeFrom + transfer.Written) != total);
+				}
+				else
+				{
+					startOver = transfer.ContentChanged || res == CURLE_RANGE_ERROR || r == 416;
+				}
+			}
 
-		curl_easy_cleanup(curl);
+			if (startOver)
+			{
+				nlwarning("PATCH: The server no longer gives the rest of '%s' (curl %d, HTTP %ld), downloading it from the start", source.c_str(), (int)res, r);
+				NLMISC::CFile::deleteFile(dest.c_str());
+				m_PartialDownload = CPartialDownload();
+				continue;
+			}
 
-		bool diskFull = ferror(fp) && errno == 28 /*ENOSPC*/;
+			CurrentFile.clear();
 
-		fclose(fp);
-		curl_global_cleanup();
+			if (CURLE_WRITE_ERROR == res)
+			{
+				NLMISC::CFile::deleteFile(dest.c_str());
+				m_PartialDownload = CPartialDownload();
+				throw NLMISC::EWriteError(dest);
+			}
 
-		CurrentFile.clear();
+			// the progress function ended the transfer on a stop request
+			if (CURLE_ABORTED_BY_CALLBACK == res && isStopAsked())
+			{
+				NLMISC::CFile::deleteFile(dest.c_str());
+				m_PartialDownload = CPartialDownload();
+				throw EPatchDownloadException(curlDownloadError(source, res, r), EPatchDownloadException::Stopped);
+			}
 
-		if (diskFull)
-		{
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw NLMISC::EDiskFullError(dest);
-		}
+			if (CURLE_OK != res || (httpSource && (r < 200 || r >= 300)))
+			{
+				const EPatchDownloadException::TFailure failure = curlDownloadFailure(res, r, httpSource);
 
-		if(CURLE_WRITE_ERROR == res)
-		{
-			// file not found, delete local file
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw NLMISC::EWriteError(dest);
-		}
+				// What a network error left of the file is kept when the rest can be asked for: the answer
+				// was the file (200) and named its content, or it was the rest of a file kept before. A
+				// server that is busy when asked for the rest has not touched the kept bytes.
+				const uint64 size = transfer.ResumeFrom + transfer.Written;
+				bool keep = (failure == EPatchDownloadException::NetworkError || failure == EPatchDownloadException::ServerBusy) && httpSource && size > 0;
+				if (keep && !resumed)
+				{
+					keep = r == 200 && (!transfer.ETag.empty() || !transfer.LastModified.empty());
+					if (keep)
+					{
+						m_PartialDownload.Source = source;
+						m_PartialDownload.Dest = dest;
+						m_PartialDownload.ETag = transfer.ETag;
+						m_PartialDownload.LastModified = transfer.LastModified;
+						m_PartialDownload.Total = transfer.ContentLength;
+					}
+				}
 
-		if(CURLE_FTP_COULDNT_RETR_FILE == res)
-		{
-			// file not found, delete local file
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
-		}
+				if (keep)
+				{
+					m_PartialDownload.Size = size;
+					m_PartialDownload.Appended = resumed && transfer.Written > 0;
+					nlinfo("PATCH: %" NL_I64 "u bytes of '%s' are kept for the next attempt", size, source.c_str());
+				}
+				else
+				{
+					// no file, or a part that can't be completed: delete what was written
+					NLMISC::CFile::deleteFile(dest.c_str());
+					m_PartialDownload = CPartialDownload();
+				}
 
-		if(CURLE_OK != res)
-		{
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
-		}
+				throw EPatchDownloadException(curlDownloadError(source, res, r), failure);
+			}
 
-		if(r == 404)
-		{
-			// file not found, delete it
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
-		}
-
-		if(r < 200 || r >= 300)
-		{
-			// file not found, delete it
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
+			m_PartialDownload = CPartialDownload();
+			break;
 		}
 
 #else
@@ -1756,6 +2256,21 @@ void CPatchManager::decompressFile (const string &filename)
 	deleteFile(filename);
 
 	//if(isVerboseLog()) nlinfo("Exiting the decompressing file");
+}
+
+// ****************************************************************************
+bool CPatchManager::isHashOfDesc(const std::string &fileName, uint32 version, const NLMISC::CHashKey &sha1)
+{
+	const CBNPFile *file = DescFile.getFiles().getFileByName(fileName);
+	if (file == nullptr)
+		return false;
+
+	for (uint32 i = 0; i < file->versionCount(); ++i)
+	{
+		if (file->getVersion(i).getVersionNumber() == version)
+			return sha1 == file->getVersion(i).getHashKey();
+	}
+	return false;
 }
 
 // ****************************************************************************
@@ -2016,12 +2531,20 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 // ****************************************************************************
 int CPatchManager::downloadProgressFunc(void *foo, double t, double d, double ultotal, double ulnow)
 {
+	// a stop request ends the transfer
+	if (CPatchManager::getInstance()->isStopAsked())
+		return 1;
+
+#ifdef USE_CURL
 	if (d != t)
 	{
 		// In the case of progress = 1, don't update because, this will be called in case of error to signal the end of the download, though
 		// no download actually occurred. Instead, we set progress to 1.f at the end of downloadWithCurl if everything went fine
-		return validateProgress(foo, t, d, ultotal, ulnow);
+		// The bytes kept from a transfer that was cut count as downloaded.
+		const CPatchDownloadTransfer *transfer = (const CPatchDownloadTransfer *)foo;
+		return validateProgress((void *)transfer->Progress, t + (double)transfer->ResumeFrom, d + (double)transfer->ResumeFrom, ultotal, ulnow);
 	}
+#endif
 	return 0;
 }
 
@@ -2263,6 +2786,10 @@ void CCheckThread::run ()
 	pPM->MustLaunchBatFile = false;
 	try
 	{
+		// init() found a directory of the patcher that can't be written to and downloaded nothing
+		if (!pPM->m_NotWritableDirectory.empty())
+			throw EPatchNotWritable(CPatchManager::getNotWritableMessage(pPM->m_NotWritableDirectory));
+
 		nlwarning("CCheckThread : get version");
 		uint32 i, j, k;
 		// Check if the client version is the same as the server version
@@ -2293,6 +2820,11 @@ void CCheckThread::run ()
 				// The client version is different from the server version : download new description file
 				pPM->getServerFile(pPM->DescFilename, false); // For the moment description file is not zipped
 			}
+			catch (const EPatchDownloadAborted &)
+			{
+				// no server could be asked: the other path would fail the same way
+				throw;
+			}
 			catch (...)
 			{
 				// fallback to patch root directory
@@ -2306,6 +2838,26 @@ void CCheckThread::run ()
 
 		// Read the description file
 		pPM->readDescFile(nServerVersion);
+
+		// The description names the directories below the client directory that categories are unpacked to.
+		// One that exists has to be writable too, before any file of the patch is downloaded; one that does
+		// not exist yet is created below a directory that was tested.
+		for (i = 0; i < pPM->DescFile.getCategories().categoryCount(); ++i)
+		{
+			const CBNPCategory &rCat = pPM->DescFile.getCategories().getCategory(i);
+			if (rCat.getUnpackTo().empty() || rCat.fileCount() == 0)
+				continue;
+
+			std::string unpackTo = rCat.getUnpackTo();
+			while (!CFile::isDirectory(unpackTo) && unpackTo.size() > ClientRootPath.size())
+				unpackTo = CFile::getPath(unpackTo.substr(0, unpackTo.size() - 1));
+
+			if (!CFile::isDirectoryWritable(unpackTo))
+			{
+				nlwarning("PATCH: Can't write to '%s', where the files of category '%s' are unpacked to. An install that another program keeps up to date, data and program files together, turns the in-client patcher off with PatchWanted = 0 in its client configuration.", unpackTo.c_str(), rCat.getName().c_str());
+				throw EPatchNotWritable(CPatchManager::getNotWritableMessage(unpackTo));
+			}
+		}
 
 		nlwarning("CCheckThread : check files");
 
@@ -2506,6 +3058,14 @@ void CCheckThread::run ()
 		CheckOk = false;
 		Ended = true;
 	}
+	catch (const EPatchNotWritable &e)
+	{
+		// the message says which directory, why the patcher writes there and what to do
+		pPM->setState(true, CI18N::get("uiCheckEndWithErr"));
+		pPM->setErrorMessage(e.what());
+		CheckOk = false;
+		Ended = true;
+	}
 	catch (const Exception &e)
 	{
 		nlwarning("EXCEPTION CATCH: CCheckThread::run() failed");
@@ -2638,7 +3198,8 @@ void CPatchThread::run()
 	{
 		nlwarning("EXCEPTION CATCH: CPatchThread::run() failed");
 		pPM->setState(true, string(e.what()));
-		sTranslate = CI18N::get("uiPatchEndWithErr");
+		// the reason goes into the error box too, as for the check thread
+		sTranslate = CI18N::get("uiPatchEndWithErr") + " " + e.what();
 		bErr = true;
 	}
 
@@ -2704,6 +3265,10 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	// Destination File Name (in writable directory)
 	string DestinationName;
 
+	// The source is the installed copy in the directory that is only read: it stays there, whatever
+	// the rights on that directory are, and the patched file is written to the writable directory
+	bool sourceIsInstalledData = false;
+
 	if (rFTP.ExtractPath.empty())
 	{
 		DestinationName = pPM->WritableClientDataPath + rFTP.FileName;
@@ -2720,6 +3285,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			else if (NLMISC::CFile::fileExists(pPM->ReadableClientDataPath + rFTP.FileName))
 			{
 				SourceName = pPM->ReadableClientDataPath + rFTP.FileName;
+				sourceIsInstalledData = true;
 			}
 
 			// version from previous download
@@ -2745,7 +3311,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	if (rFTP.LocalFileToDelete)
 	{
 		// corrupted or invalid file ? ....
-		NLMISC::CFile::deleteFile(SourceName);
+		if (!sourceIsInstalledData)
+			NLMISC::CFile::deleteFile(SourceName);
 		rFTP.LocalFileExists = false;
 	}
 
@@ -2771,7 +3338,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	{
 		// corrupted or invalid file ? ....
 		rFTP.LocalFileExists = false;
-		NLMISC::CFile::deleteFile(tmpSourceName);
+		if (!sourceIsInstalledData || tmpSourceName != SourceName)
+			NLMISC::CFile::deleteFile(tmpSourceName);
 	}
 
 	string OutFilename;
@@ -2808,6 +3376,9 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			// compute the seven zip filename
 			string lzmaFile = rFTP.FileName+".lzma";
 
+			// the archive was downloaded, and not left by a session before
+			bool archiveDownloaded = false;
+
 			// download the 7zip file
 			try
 			{
@@ -2819,6 +3390,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					if (!rFTP.Patches.empty())
 					{
 						pPM->getServerFile(toString("%05u/", rFTP.Patches.back())+lzmaFile, false, "", &progress);
+						archiveDownloaded = true;
 					}
 					// else -> file comes from a previous download (with .tmp extension, and is up to date)
 					// the remaining code will just rename it with good name and exit
@@ -2828,15 +3400,26 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					// this is a local error, rethrow ...
 					throw;
 				}
+				catch (const EPatchDownloadAborted &)
+				{
+					// no server could be asked: the other path would fail the same way
+					throw;
+				}
 				catch(...)
 				{
 					// failed with version subfolder, try in the root patch directory
 					pPM->getServerFile(lzmaFile, false, "", &progress);
+					archiveDownloaded = true;
 				}
 			}
 			catch (const NLMISC::EWriteError &)
 			{
 				// this is a local error, rethrow ...
+				throw;
+			}
+			catch (const EPatchDownloadAborted &)
+			{
+				// no server could be asked: the patch files would fail the same way
 				throw;
 			}
 			catch (...)
@@ -2847,12 +3430,14 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			}
 
 			OutFilename = pPM->ClientPatchPath + NLMISC::CFile::getFilename(rFTP.FileName);
-			// try to unpack the file
+			// try to unpack the file, taking the SHA1 of what it holds on the way
+			CHashKey archiveSHA1;
 			try
 			{
-				if (!unpackLZMA(pPM->ClientPatchPath+lzmaFile, OutFilename+".tmp"))
+				if (!unpackLZMA(pPM->ClientPatchPath + lzmaFile, OutFilename + ".tmp", archiveSHA1))
 				{
 					// fallback to standard patch method
+					pPM->deleteFile(pPM->ClientPatchPath + lzmaFile, false, false);
 					usePatchFile = true;
 					break;
 				}
@@ -2865,15 +3450,29 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			{
 				nlwarning("Failed to unpack lzma file %s", (pPM->ClientPatchPath+lzmaFile).c_str());
 				// fallback to standard patch method
+				pPM->deleteFile(pPM->ClientPatchPath + lzmaFile, false, false);
 				usePatchFile = true;
 				break;
 			}
 
-			if (rFTP.LocalFileExists)
+			// The archive format has no checksum. A downloaded archive is used only when the file it gives
+			// is the one of the description, whatever the server sent under its name; the delta files, which
+			// carry checksums, are the other way to that file.
+			if (archiveDownloaded && !pPM->isHashOfDesc(rFTP.FileName, rFTP.Patches.back(), archiveSHA1))
+			{
+				nlwarning("PATCH: '%s' does not give the file of the description (SHA1 %s), using the delta files", lzmaFile.c_str(), archiveSHA1.toString().c_str());
+				pPM->deleteFile(OutFilename + ".tmp", false, false);
+				pPM->deleteFile(pPM->ClientPatchPath + lzmaFile, false, false);
+				usePatchFile = true;
+				break;
+			}
+
+			if (rFTP.LocalFileExists && !sourceIsInstalledData)
 				pPM->deleteFile(SourceName);
 
 			pPM->deleteFile(pPM->ClientPatchPath+lzmaFile);	// delete the archive file
-			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
+			if (!sourceIsInstalledData)
+				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
 			if (_CommitPatch)
 			{
 				pPM->renameFile(OutFilename+".tmp", DestinationName);
@@ -2902,6 +3501,11 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			}
 			catch (const NLMISC::EWriteError &)
 			{
+				throw;
+			}
+			catch (const EPatchDownloadAborted &)
+			{
+				// no server could be asked: the other path would fail the same way
 				throw;
 			}
 			catch (...)
@@ -2976,7 +3580,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 			xDeltaPatch(PatchName, SourceNameXD, OutFilename);
 
-			if (rFTP.LocalFileExists)
+			if (rFTP.LocalFileExists && !sourceIsInstalledData)
 				pPM->deleteFile(SourceName);
 			pPM->deleteFile(PatchName);
 
@@ -2991,7 +3595,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 		if (tmpSourceName != DestinationName)
 		{
-			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
+			if (!sourceIsInstalledData)
+				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
 			if (!_CommitPatch)
 			{
 				// let the patch in the unpack directory
