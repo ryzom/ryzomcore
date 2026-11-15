@@ -143,7 +143,9 @@ We send a message to the Server. If the node modification is accepted by the ser
 ( so the client can apply the message with _ServerAnswerForseener backuped message). The server forward the message to other client connected to edition.
 
 - setMute
-Because multiEdition is disable, most of the time the server answer is not listen. We use the setMute function to not listen server result.
+With instant feedback (CDynamicMapClient::setInstantFeedBackFlag) the editor shows its own edits when they are made, and
+setMute keeps the answer of the server from applying them a second time (onOwnNode(Set|Inserted|Erased|Moved)). The edits of
+the other editors (onNode(Set|Inserted|Erased|Moved)) are always applied, and reach the undo history too.
 
 
   Heavy modifications:
@@ -540,26 +542,23 @@ public:
 		\param hlScenario The edition scenario (compressed)
 	*/
 	virtual void onScenarioUploaded(NLNET::IModuleProxy *sender, const R2::CObjectSerializerClient &hlScenario) NL_OVERRIDE ;
-	/*! Server answer from a requestSetNode.
-		Broadcast to all co-editor when a node is set
+	/*! Another editor of the session set a node: the server sends the edit to every editor but the one that made it.
+		Applied whether the client is mute or not.
 		Same options than requestSetNode
 		\see requestSetNode
 	*/
 	virtual void onNodeSet(NLNET::IModuleProxy *sender, const std::string &instanceId, const std::string &attrName, const R2::CObjectSerializerClient &value) NL_OVERRIDE;
-	/*! Server answer from a requestInsertNode.
-		Broadcast to all co-editor when a node is insert
+	/*! Another editor of the session inserted a node (see onNodeSet).
 		Same options than requestInsertNode
 		\see requestInsertNode
 	*/
 	virtual void onNodeInserted(NLNET::IModuleProxy *sender, const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObjectSerializerClient &value) NL_OVERRIDE;
-	/*! Server answer from a requestEraseNode
-		Broadcast to all co-editor when a node is erased
+	/*! Another editor of the session erased a node (see onNodeSet).
 		Same options than requestEraseNode
 		\see requestEraseNode
 	*/
 	virtual void onNodeErased(NLNET::IModuleProxy *sender, const std::string &instanceId, const std::string &attrName, sint32 position) NL_OVERRIDE;
-	/*! Server answer from a requestMoveNode
-		Broadcast to all co-editor when a node is moved
+	/*! Another editor of the session moved a node (see onNodeSet).
 		Same options than requestMoveNode
 		\see requestMoveNode
 	*/
@@ -603,10 +602,19 @@ public:
 	*/
 	virtual void multiPartMsgFoot(NLNET::IModuleProxy *sender) NL_OVERRIDE;
 
-	/*! setMute Mode. When mute is true then client do not apply scenario update messages. It is not necessary when ther is only on editor
-	\param mute If true the client do not apply onNode(Set|Inset|Moved)
+	/*! setMute Mode. When mute is true the client does not apply the answers of the server to its own edits, which the
+		editor showed when they were made (instant feedback). The edits of the other editors are applied either way.
+	\param mute If true the client do not apply onOwnNode(Set|Inserted|Erased|Moved)
 	*/
 	void setMute(bool mute);
+
+	/*! The server accepted an edit of this editor (see CServerAnswerForseener): it is applied now, unless the client
+		is mute.
+	*/
+	void onOwnNodeSet(const std::string &instanceId, const std::string &attrName, const R2::CObject *value);
+	void onOwnNodeInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject *value);
+	void onOwnNodeErased(const std::string &instanceId, const std::string &attrName, sint32 position);
+	void onOwnNodeMoved(const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2);
 	//! }
 
 	/////////////////////////////////////////////////////

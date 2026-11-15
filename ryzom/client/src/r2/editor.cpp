@@ -242,7 +242,9 @@ void CDynamicMapClientEventForwarder::nodeInserted(const std::string& instanceId
 		&& getEditor().getMode() != CEditor::AnimationModeLoading /* Loading animation scenario from terminal, ghost nodes created by translator */)
 	{
 		nldebug("Node inserted, but not in edition mode");
-		delete value;
+		// the value is given to the scenario, which holds it by reference: a caller that keeps a reference of
+		// its own (an edit of another editor) keeps it alive, a new value is deleted here
+		CObject::TSmartPtr dropped(value);
 		return;
 	}
 	getEditor().nodeInserted(instanceId, attrName, position, key, value);
@@ -5423,6 +5425,9 @@ void CEditor::nodeInserted(const std::string& instanceId, const std::string& att
 {
 	//H_AUTO(R2_CEditor_nodeInserted)
 	CHECK_EDITOR
+	// the scenario holds the value it inserts by reference, and releases one it refuses: keep it for the
+	// reads below, it is released when this returns if the scenario does not have it
+	CObject::TSmartPtr keep(value);
 	_DMC->CDynamicMapClient::nodeInserted(instanceId, attrName, position, key, value);
 	if (value->isTable())
 	{
@@ -5430,8 +5435,9 @@ void CEditor::nodeInserted(const std::string& instanceId, const std::string& att
  		if (!id.empty())
 		{
 			const CObject *clonedValue = _DMC->find(id);
-			// bad insert
-			if (clonedValue)
+			// the scenario took the value only if its id names it: a refused value is not in the scenario,
+			// and the id may name another node, which has its instance already
+			if (clonedValue == value)
 			{
 				createNewInstanceForObjectTable(clonedValue);
 
@@ -5733,6 +5739,8 @@ void CEditor::nodeSet(const std::string& instanceId, const std::string& attrName
 	CHECK_EDITOR
 	CObject *obj = _DMC->find(instanceId);
 	if (!obj) return;
+	// a value that the scenario refuses changes nothing, and the instances of the old one stay
+	if (!_DMC->getCurrentScenario()->canSetNode(instanceId, attrName, value)) return;
 	// erase previous object
 	nlassert(obj->isTable());
 	//
@@ -5756,7 +5764,14 @@ void CEditor::nodeSet(const std::string& instanceId, const std::string& attrName
 		if (!id.empty())
 		{
 			const CObject *clonedValue = _DMC->find(id);
-			if (clonedValue)
+			// the id names the node that took the value, or a node in it (canSetNode), whose instances were erased above
+			const CObject *target = attrName.empty() ? _DMC->find(instanceId) : _DMC->find(instanceId, attrName);
+			const CObject *within = clonedValue;
+			while (within && within != target)
+			{
+				within = within->getParent();
+			}
+			if (clonedValue && within)
 			{
 				createNewInstanceForObjectTable(clonedValue);	// if the created object is a table, warn him that he has been created
 				onAttrModified(clonedValue);
