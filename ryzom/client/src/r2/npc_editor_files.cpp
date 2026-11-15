@@ -465,9 +465,10 @@ int CNpcEditorFiles::luaLoadNpcPresets(CLuaState &ls)
 	std::string name = checkedName(ls, funcName, s_PresetTables, sizeof(s_PresetTables) / sizeof(s_PresetTables[0]), false);
 
 	std::string path = presetPath(name);
-	if (!CFile::fileExists(path))
+	if (!CFile::isExists(path))
 	{
-		// no presets were saved yet
+		// no presets were saved yet (a file that is there and does not open is not this case: it is
+		// reported below, and its table is not saved over it)
 		ls.newTable();
 		return 1;
 	}
