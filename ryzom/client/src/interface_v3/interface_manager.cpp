@@ -3081,22 +3081,6 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 }
 
 // ***************************************************************************
-bool CInterfaceManager::deletePlayerConfig (const std::string &playerFileIdent)
-{
-	string fileName= "save/interface_" + playerFileIdent + ".icfg";
-	return CFile::deleteFile(fileName);
-}
-
-
-// ***************************************************************************
-bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
-{
-	string fileName = "save/keys_"+playerFileIdent+".xml";
-	string fileNameEditor = "save/keys_r2ed_"+playerFileIdent+".xml";
-	return CFile::deleteFile(fileName) && CFile::deleteFile(fileNameEditor);
-}
-
-// ***************************************************************************
 void CInterfaceManager::log(const std::string &str, const std::string &cat)
 {
 	if (_LogState)

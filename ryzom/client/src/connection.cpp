@@ -839,6 +839,63 @@ std::string	buildPlayerNameForSaveFile(const std::string &playerNameIn)
 	return ret;
 }
 
+// ------------------------------------------------------------------------------------------------
+std::string buildCharacterFileName(const std::string &playerNameIn, TSessionId homeSessionId)
+{
+	return buildPlayerNameForSaveFile(playerNameIn) + "_" + NLMISC::toString(homeSessionId.asInt());
+}
+
+// ------------------------------------------------------------------------------------------------
+// The files a character keeps in save/, %s standing for its file name (buildCharacterFileName): its keys, the
+// layouts of the game and of the Ring editor (the editor's in animation play has no prefix), its landmarks, its item
+// groups, and last its chat log, which is the player's record and stays when the character is deleted.
+static const char *const CharacterFilePatterns[] = {
+	"save/keys_%s.xml", "save/keys_r2ed_%s.xml", "save/interface_%s.icfg", "save/r2ed_interface_%s.icfg",
+	"save/%s.icfg", "save/landmarks_%s.xml", "save/groups_%s.xml", "save/log_%s.txt" };
+static const uint CharacterFilePatternCount = sizeof(CharacterFilePatterns) / sizeof(CharacterFilePatterns[0]);
+
+// The files of a character were named after the character alone before the name of their home mainland was
+// part of the name (buildCharacterFileName). The files of the old name are copied to the new name once, and left
+// where they are: two characters of the same name on two mainlands used the same files, and each gets a copy.
+static void copyCharacterFilesOfOldName(const std::string &oldName, const std::string &newName)
+{
+	for (uint i = 0; i < CharacterFilePatternCount; ++i)
+	{
+		std::string oldFile = NLMISC::toString(CharacterFilePatterns[i], oldName.c_str());
+		std::string newFile = NLMISC::toString(CharacterFilePatterns[i], newName.c_str());
+		if (CFile::fileExists(newFile) || !CFile::fileExists(oldFile))
+			continue;
+		if (CFile::copyFile(newFile, oldFile))
+			nlinfo("The file %s of the character is copied to %s, the name with its home mainland", oldFile.c_str(), newFile.c_str());
+		else
+			nlwarning("The file %s of the character could not be copied to %s, the name with its home mainland: the character starts without it", oldFile.c_str(), newFile.c_str());
+	}
+}
+
+// Deletes the files of a deleted character, but its chat log (the last of CharacterFilePatterns): a new character
+// of the same name starts with none of them
+static void deleteCharacterFiles(const std::string &fileName)
+{
+	for (uint i = 0; i + 1 < CharacterFilePatternCount; ++i)
+	{
+		std::string file = NLMISC::toString(CharacterFilePatterns[i], fileName.c_str());
+		if (CFile::fileExists(file) && !CFile::deleteFile(file))
+			nlwarning("The file %s of the deleted character could not be deleted", file.c_str());
+	}
+}
+
+// The display name of a mainland, or its session id when the shard names have none for it
+static std::string getMainlandDisplayName(TSessionId mainland)
+{
+	const std::vector<CShardNames::TSessionName> &sessionNames = CShardNames::getInstance().getSessionNames();
+	for (uint i = 0; i < sessionNames.size(); ++i)
+	{
+		if (sessionNames[i].SessionId == mainland)
+			return sessionNames[i].DisplayName;
+	}
+	return NLMISC::toString(mainland.asInt());
+}
+
 
 #ifdef RYZOM_BG_DOWNLOADER
 static bool LuaBGDSuccessFlag = true; // tmp, for debug
@@ -1304,7 +1361,8 @@ TInterfaceState globalMenu()
 
 	//  Init the current Player Name (for interface.cfg and sentence.name save). Make a good File Name.
 	string playerName = CharacterSummaries[PlayerSelectedSlot].Name.toUtf8();
-	PlayerSelectedFileName = buildPlayerNameForSaveFile(playerName);
+	PlayerSelectedFileName = buildCharacterFileName(playerName, CharacterSummaries[PlayerSelectedSlot].Mainland);
+	copyCharacterFilesOfOldName(buildPlayerNameForSaveFile(playerName), PlayerSelectedFileName);
 
 	// Init the current Player Home shard Id and name
 	CharacterHomeSessionId = CharacterSummaries[PlayerSelectedSlot].Mainland;
@@ -1892,8 +1950,6 @@ public:
 		}
 
 		// Get the selected slot
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-
 		string sSlot = getParam(Params, "slot");
 
 		CInterfaceExprValue result;
@@ -1908,10 +1964,19 @@ public:
 
 		// Yoyo: delete the Local files. To avoid problem if recreate a character with same name.
 		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
-		string playerDeletedFileName = buildPlayerNameForSaveFile(playerName);
-		// Delete the 2 Local files
-		pIM->deletePlayerConfig(playerDeletedFileName);
-		pIM->deletePlayerKeys(playerDeletedFileName);
+		deleteCharacterFiles(buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland));
+		// The files of the old name, without the home mainland, would be copied to a new character of that name at its
+		// first selection (copyCharacterFilesOfOldName): they go too, unless another character of the account has the
+		// name, on another mainland, and may not have had its copy yet
+		string oldFileName = buildPlayerNameForSaveFile(playerName);
+		bool oldNameShared = false;
+		for (uint k = 0; k < CharacterSummaries.size(); ++k)
+		{
+			if (k != nSelectedSlot && buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()) == oldFileName)
+				oldNameShared = true;
+		}
+		if (!oldNameShared)
+			deleteCharacterFiles(oldFileName);
 
 		// Send the message to the server
 		if (!ClientCfg.Local/*ace!ClientCfg.Light*/)
@@ -2489,12 +2554,22 @@ public:
 				}
 				else
 				{
-					// search matching utf-8 string name from character summaries
-					for (uint k = 0; k < CharacterSummaries.size(); ++k)
+					// The character of the account whose keys these are. Its file carries its home mainland
+					// (buildCharacterFileName); a character not selected since has its file of the old name, of its name
+					// alone, offered while it has none of the new name. The entry shows the name with the mainland, as two
+					// characters on two mainlands may have the same name (the name of a summary carries its mainland in
+					// parentheses, as at the character selection; one that has none gets it here).
+					for (uint k = 0; k < CharacterSummaries.size() && name.empty(); ++k)
 					{
-						if (it->first == buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()))
+						std::string summaryName = CharacterSummaries[k].Name.toUtf8();
+						if (summaryName.empty())
+							continue;
+						std::string newFileName = buildCharacterFileName(summaryName, CharacterSummaries[k].Mainland);
+						if (it->first == newFileName || (it->first == buildPlayerNameForSaveFile(summaryName) && !keySetFiles.count(newFileName)))
 						{
-							name = CharacterSummaries[k].Name.toUtf8();
+							name = summaryName;
+							if (summaryName.find('(') == std::string::npos)
+								name += " (" + getMainlandDisplayName(CharacterSummaries[k].Mainland) + ")";
 						}
 					}
 				}
@@ -2505,7 +2580,7 @@ public:
 						addSeparator();
 						separatorAdded = true;
 					}
-					addKeySet(it->first, it->first, CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
+					addKeySet(it->first, name, CI18N::get(std::string("uiCP_KeysetImport") + (it->second & GameKeys ? "_Game" : "")
 																						  + (it->second & EditorKeys ? "_Editor" : "")));
 				}
 			}

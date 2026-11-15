@@ -359,7 +359,7 @@ void copyKeySet(const std::string &srcPath, const std::string &destPath)
 	srcStr.resize(CFile::getFileSize(srcPath));
 	if (srcStr.empty())
 	{
-		nlwarning("Can't copy keys from %s : file not found or empty");
+		nlwarning("Can't copy keys from %s : file not found or empty", srcPath.c_str());
 		return;
 	}
 	try
@@ -418,14 +418,20 @@ void impulseUserChars(NLMISC::CBitMemStream &impulse)
 
 	if (!NewKeysCharNameValidated.empty())
 	{
-		// if there's a new char for which a key set was wanted, create it now
+		// if there's a new char for which a key set was wanted, create it now: the character of that name on the
+		// mainland it was created for (the names are compared without the mainland in parentheses they may carry)
+		std::string newCharFileName = buildPlayerNameForSaveFile(NewKeysCharNameValidated);
 		for (uint k = 0; k < CharacterSummaries.size(); ++k)
 		{
-			if (toLower(CharacterSummaries[k].Name.toUtf8()) == toLower(NewKeysCharNameValidated))
+			if (buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()) == newCharFileName && CharacterSummaries[k].Mainland == MainlandSelected)
 			{
-				// first, stripes server name
-				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
-				copyKeySet(lookupSrcKeyFile(RingEditorKeySet), "save/keys_r2ed_" + buildPlayerNameForSaveFile(NewKeysCharNameValidated) + ".xml");
+				// the file of the new character carries its home mainland (buildCharacterFileName)
+				std::string charFileName = buildCharacterFileName(NewKeysCharNameValidated, CharacterSummaries[k].Mainland);
+				copyKeySet(lookupSrcKeyFile(GameKeySet), "save/keys_" + charFileName + ".xml");
+				copyKeySet(lookupSrcKeyFile(RingEditorKeySet), "save/keys_r2ed_" + charFileName + ".xml");
+				// once: the list of characters comes again after a far TP or a return to the selection, and the
+				// keys of the character are its own by then
+				NewKeysCharNameValidated.clear();
 				break;
 			}
 		}
