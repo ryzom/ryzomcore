@@ -363,22 +363,28 @@ end
 -- called when a gm/ai has do a scheduleStartAct (Animation or test time)
 function r2.onScheduleStartAct(errorId, actId, nbSeconds)
 	if (r2.Mode == "DM" or r2.Mode == "AnimationModeDm") then
+		-- the translated text 'textId' with the number of the act in the place of %1
+		local function actText(textId)
+			return replaceTag(tostring(i18n.get(textId)), "%%1", numberText(actId))
+		end
 		if errorId == 0 then
-			local str = "Act " .. actId 
+			local str
 			if nbSeconds ~= 0 then
-				str = str .. " will start in " .. nbSeconds .. " seconds"
+				str = replaceTag(actText("uiR2EDActStartsIn"), "%%2", numberText(nbSeconds))
+			else
+				str = actText("uiR2EDActStartsNow")
 			end
 			displaySystemInfo(str, "BC")
 		elseif errorId == 1 then
-			messageBox("Act ".. actId .." can not be started because another act is already starting.")
+			messageBox(actText("uiR2EDActStartBusy"))
 		elseif errorId == 2 then
-			messageBox("Act ".. actId .." can not be started because this act does not exist.")		
+			messageBox(actText("uiR2EDActStartUnknown"))
 		end
 	end
 end
 
 function r2.onDisconnected()
-	local str = "You have been disconnected by the server."
+	local str = tostring(i18n.get("uiR2EDDisconnected"))
 	messageBox(str)
 	displaySystemInfo(str, "BC")
 end
