@@ -619,9 +619,10 @@
 <group type="modal" id="invite_character" exit_click_out="true" posref="MM MR" w="212" child_resize_h="true" child_resize_hmargin="8" options="skin_modal"
 	on_active="" on_active_params="" >
 
-	<view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiPeopleAddContact" />
+	<view type="text" id="text" case_mode="%case_first_word_letter_up" posref="TL TL" x="6" y="-4" color="255 255 255 255" global_color="false" fontsize="14" shadow="true" hardtext="uiRAP_InviteTitle" />
 
-	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="add_contact" max_num_bytes="255" entry_type="playername" />
+	<!-- Enter in the edit box invites, as the OK button does. The box keeps the id the handler looks for. -->
+	<instance template="edit_box_widget" id="add_contact_eb" posref="TL TL" x="6" y="-24" child_resize_h="true" w="200" onenter="r2ed_invite_character" max_num_bytes="255" entry_type="playername" />
 	
 	<instance template="button_ok_cancel" posparent="add_contact_eb" posref="BR TR" x="0" y="-4" 
 				onclick_ok="r2ed_invite_character" 
