@@ -12,6 +12,7 @@ local plotItem =
 {
 	BaseClass          = "BaseClass",
 	Name			   = "PlotItem",
+	Version			   = 1,						-- Version 1 : a plot item that named an item of the game has a plot item sheet (see updateVersion)
 	DisplayerUI		   = "R2::CDisplayerLua",	-- name of the C++ class that displays this object in the ui
 	DisplayerUIParams  = "plotItemDisplayer",	-- parameters passed to the ui displayer when it is created
    Menu="ui:interface:r2ed_base_menu",
@@ -69,6 +70,91 @@ end
 
 function plotItem.getSelectBarIcon(this)
 	return "ICO_mission_purse.tga"
+end
+
+-- ////////////////////
+-- // VERSION UPDATE //
+-- ////////////////////
+
+-- A plot item holds the number of its sheet (sheet_id.bin), and the version update works on the scenario
+-- as plain data, in the client and outside of it: no sheet is there to ask. The plot item sheets are
+-- known by their numbers here. They are the 185 sheets r2_plot_item_0.sitem to r2_plot_item_184.sitem,
+-- the ones the scenario service accepts when a scenario starts (CRingAccess::init), and their numbers
+-- have not changed since 2006. A number is 256 times the place of the sheet among the sheets of its type,
+-- plus the type; the 185 sheets stand in a row there, in the order of their names (0, 1, 10, 100 ...).
+-- Sheets of other types have numbers in between: the step of 256 is part of the test.
+local firstPlotItemSheet = 8630062 -- r2_plot_item_0.sitem
+local lastPlotItemSheet = 8677166 -- r2_plot_item_99.sitem
+
+local function isPlotItemSheet(sheetId)
+	return type(sheetId) == "number" and sheetId >= firstPlotItemSheet and sheetId <= lastPlotItemSheet
+		and (sheetId - firstPlotItemSheet) % 256 == 0
+end
+
+-- Scenarios of the beta of 2006, and a few of early 2007, have plot items that name an item of the game
+-- where a plot item sheet belongs: a piece of armor, a raw material, a tool. The scenario service does
+-- not start such a scenario. For the items found in those scenarios, the plot item sheet that shows the
+-- icon of the item, by sheet number:
+--     [item] = plot item sheet, -- item (its icon) > plot item sheet
+-- The numbers are those of sheet_id.bin; the icons are those of the item sheets and of the plot item
+-- sheets (the table of the sheet generator, sitem_plot_items.tsv in the leveldesign data).
+local plotItemSheetOfItem =
+{
+	[8386350] = 8673582, -- system_mp_choice.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8386606] = 8673582, -- system_mp_excellent.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8386862] = 8673582, -- system_mp_extra.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8387374] = 8673582, -- system_mp_supreme.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8450094] = 8654894, -- iccalg.sitem, light gloves (ar_hand) > r2_plot_item_2.sitem
+	[8451374] = 8660526, -- iccalp.sitem, light pants (ar_pantabotte) > r2_plot_item_4.sitem
+	[8452654] = 8630062, -- iccals.sitem, light sleeves (ar_armpad) > r2_plot_item_0.sitem
+	[8453934] = 8630318, -- iccalv.sitem, light vest (ar_gilet) > r2_plot_item_1.sitem
+	[8456494] = 8654894, -- iccamg.sitem, medium gloves (ar_hand) > r2_plot_item_2.sitem
+	[8457774] = 8660526, -- iccamp.sitem, medium pants (ar_pantabotte) > r2_plot_item_4.sitem
+	[8459054] = 8630062, -- iccams.sitem, medium sleeves (ar_armpad) > r2_plot_item_0.sitem
+	[8460334] = 8630318, -- iccamv.sitem, medium vest (ar_gilet) > r2_plot_item_1.sitem
+	[8461614] = 8660526, -- iccacp.sitem, caster pants (ar_pantabotte) > r2_plot_item_4.sitem
+	[8629550] = 8651822, -- newbie_tool.sitem (to_melee) > r2_plot_item_175.sitem
+}
+-- Found in those scenarios too, and not in the table: iccalb.sitem (8448814) and iccamb.sitem (8455214),
+-- light and medium boots. No plot item sheet shows their icon (ar_botte).
+
+-- Version 1. A plot item that names an item of the table gets the plot item sheet with the icon of that
+-- item, unless another plot item of the scenario has that sheet: each plot item sheet is the sheet of
+-- one plot item of a scenario, which is how a player's item is known to be this plot item or that one.
+-- The first plot item of the list that asks for an icon gets it. A plot item that is left as it is, for
+-- that reason or because its sheet is not in the table, stays what the scenario service refuses: the
+-- author is told which plot item it is, and chooses an icon for it.
+local function updatePlotItemSheet(this, update)
+	local sheetId = this.SheetId
+	if type(sheetId) ~= "number" or isPlotItemSheet(sheetId) then return end
+	local name = tostring(defaulting(this.Name, ""))
+	local newSheetId = plotItemSheetOfItem[sheetId]
+	if newSheetId == nil then
+		update:note("uiR2EDVersionNotePlotItemUnknown", name, string.format("%.0f", sheetId))
+		return
+	end
+	local plotItems = update:getParent(this)
+	if type(plotItems) == "table" then
+		for i = 1, table.getn(plotItems) do
+			local other = plotItems[i]
+			if type(other) == "table" and not rawequal(other, this) and other.SheetId == newSheetId then
+				update:note("uiR2EDVersionNotePlotItemIconTaken", name, tostring(defaulting(other.Name, "")))
+				return
+			end
+		end
+	end
+	update:set(this, "SheetId", newSheetId)
+	update:note("uiR2EDVersionNotePlotItemIcon", name)
+end
+
+function plotItem.updateVersion(this, scenarioValue, currentValue, update)
+	local patchValue = scenarioValue
+	if patchValue < 1 then
+		updatePlotItemSheet(this, update)
+		patchValue = 1
+	end
+	if patchValue == currentValue then return true end
+	return false
 end
 
 r2.registerComponent(plotItem)
