@@ -427,9 +427,14 @@ function r2.onScenarioHeaderUpdated(scenario)
 	-- or use r2.getScenarioHeader();
 end
 
--- The modes of the editor in which the author works (r2.Mode, set by CEditor::setMode). The others are
--- the waits between them, behind the connection window.
-local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true }
+-- The modes of the editor in which the author is there to read a message (r2.Mode, set by
+-- CEditor::setMode): the ones the author works in, and the one in which the author of an animation
+-- chooses the file to load. No change of mode comes by itself in these. The others are the waits between
+-- them, behind the connection window.
+local workingModes = {
+	Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true,
+	AnimationModeLoading = true
+}
 
 -- An error message of the server that came during such a wait, if there is one. The refusal of a
 -- scenario comes while the editor waits for its test, and it is back in edition a moment later; every
@@ -438,9 +443,11 @@ local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = tr
 -- shown once the editor is in a mode the author works in: r2.UIMainLoop asks each frame.
 r2.PendingErrorMessage = nil
 
--- A message the author must see, from the scripts: in a message box now when the editor is in a mode
--- the author works in, and kept for that moment otherwise (while the editor starts, or between two
--- modes). Several messages that wait are shown together.
+-- A message the author must see, from the scripts: in a message box, once. Now when the editor is in a
+-- mode in which the author reads it, and kept for that moment otherwise (while the editor starts, or
+-- between two modes). Several messages that wait are shown together. A wait ends in one of those modes,
+-- the choice of a file included: a message about a file that was refused is shown when the author is
+-- back at that choice, before another file is loaded.
 function r2.showErrorMessage(text)
 	if workingModes[r2.Mode] then
 		messageBox(text)
@@ -503,11 +510,9 @@ function r2.onSystemMessageReceived(msgType, msgWho, msg)
 		printMsgML(msg)
 	elseif msgType == "ERR" then
 		printMsgML(msg)
-		messageBox(msg)
-		if not workingModes[r2.Mode] then
-			-- the box does not outlive the wait: it comes back when the wait is over
-			r2.showErrorMessage(msg)
-		end
+		-- in a message box, once: now, or when the wait is over (a box opened during a wait is closed
+		-- by the change of mode that ends it)
+		r2.showErrorMessage(msg)
 	end
 end
 
