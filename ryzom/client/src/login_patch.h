@@ -330,6 +330,12 @@ private:
 	void getServerFile (const std::string &name, bool bZipped = false, const std::string& destName="", NLMISC::IProgressCallback *progress = nullptr);
 	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = nullptr);
 	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = nullptr);
+
+	/// Delete what is kept of a download that a network error cut (m_PartialDownload)
+	void discardPartialDownload();
+
+	/// True if the file at path is this version of the file in the description (SHA1)
+	bool isFileOfDesc(const std::string &fileName, uint32 version, const std::string &path);
 	// Decompress zipped file override destination file
 	void decompressFile (const std::string &filename);
 	void applyDate (const std::string &sFilename, uint32 nDate);
@@ -418,6 +424,27 @@ private:
 
 	/// False while init() downloads in the thread of its caller: a failed download is not waited for
 	bool m_WaitForServers;
+
+	/// What a network error left of a download. The bytes stay in the file, and the next attempt on the
+	/// same server asks for the rest of the content they came from. Nothing is kept when Size is 0.
+	struct CPartialDownload
+	{
+		std::string Source; // the address that was asked
+		std::string Dest; // the file that holds the bytes
+		std::string ETag; // what the server said about the content: a strong entity tag,
+		std::string LastModified; // and its modification date
+		uint64 Size; // bytes kept
+		sint64 Total; // size of the whole file, -1 if the server did not say
+		CPartialDownload()
+		    : Size(0)
+		    , Total(-1)
+		{
+		}
+	};
+	CPartialDownload m_PartialDownload;
+
+	/// Set by getServerFile(): a transfer of the file had failed before the one that gave it
+	bool m_LastDownloadInterrupted;
 
 	/// Description file
 	std::string						DescFilename;
