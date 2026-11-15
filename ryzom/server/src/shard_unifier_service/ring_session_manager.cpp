@@ -643,16 +643,8 @@ namespace RSMGR
 			CNelUserPtr user = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 			if (user != NULL)
 			{
-				vector<string> userPriv;
-				explode(user->getPrivilege(), string(":"), userPriv, true);
-				for (uint i=0; i<userPriv.size(); ++i)
-				{
-					if (PrivilegeForSessionAccess.toString().find(userPriv[i]) != string::npos)
-					{
-						// ok, the user have the required access
-						return true;
-					}
-				}
+				// a privilege of the account counts when it is a whole name of the list, not a part of one
+				return hasPrivilegeOfList(user->getPrivilege(), PrivilegeForSessionAccess.toString());
 			}
 
 			return false;
