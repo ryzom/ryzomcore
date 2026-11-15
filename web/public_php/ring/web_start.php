@@ -112,7 +112,13 @@
 	// Sessions this character is invited in / participates in
 	//
 	echo "<h2>Your invitations</h2>";
-	$query = "SELECT sp.session_id, sp.status, s.session_type, s.title, s.state, c.char_name AS owner_name"
+	// A kick marks one participation of the character in the session and
+	// keeps the character out whatever its other participations say (the
+	// session manager refuses the join with "Character is kicked from the
+	// session"), so it is read over all of them.
+	$query = "SELECT sp.session_id, sp.status, s.session_type, s.title, s.state, c.char_name AS owner_name,"
+		. " (SELECT MAX(k.kicked) FROM session_participant AS k"
+		. " WHERE k.session_id = sp.session_id AND k.char_id = sp.char_id) AS kicked"
 		. " FROM session_participant AS sp"
 		. " JOIN sessions AS s ON s.session_id = sp.session_id"
 		. " LEFT JOIN characters AS c ON c.char_id = s.owner"
@@ -132,15 +138,26 @@
 		while ($row = mysqli_fetch_assoc($result))
 		{
 			$sid = intval($row['session_id']);
+			$kicked = intval($row['kicked']) != 0;
 			echo "<tr>";
 			echo "<td>".$sid."</td>";
 			echo "<td>".esc($row['session_type'])."</td>";
 			echo "<td>".esc($row['title'])."</td>";
 			echo "<td>".esc($row['owner_name'])."</td>";
 			echo "<td>".esc($row['state'])."</td>";
-			echo "<td>".esc($row['status'])."</td>";
 			echo "<td>";
-			if ($row['state'] == 'ss_open')
+			if ($kicked)
+				echo "<b>kicked</b> (was ".esc($row['status']).")";
+			else
+				echo esc($row['status']);
+			echo "</td>";
+			echo "<td>";
+			if ($kicked)
+			{
+				// the session manager refuses the join until the kick is lifted
+				echo "no join until the kick is lifted";
+			}
+			else if ($row['state'] == 'ss_open')
 			{
 				echo "<form action='join_session.php' method='post'>".actionFields($sid)
 					. "<input type='submit' value='Join'></form>";
