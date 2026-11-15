@@ -3117,7 +3117,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				getCharInfo(*ownerModule, charId, clientEid, userPriv, extendedPriv);
 			}
 
-			if (!trialAllowed && getIsCharRoS(ownerCharId) && extendedPriv.find("TRIAL") != std::string::npos)
+			if (!trialAllowed && getIsCharRoS(ownerCharId) && hasPrivilegeOfList(extendedPriv, ":TRIAL:"))
 			{
 				nlwarning("ERROR: A client %u(CharId) (RoS) try to launch an animation that is not RoS. That means that the client has not check the RoS Flags or that this user is trying to hack use. So we will close he animation session (%u) so he will be kicked back to edition.", ownerCharId, sessionId.asInt());
 				return;
@@ -4219,7 +4219,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 
 				if  ( isCharRoS )
 				{
-					if (extendedPriv.find("TRIAL") != std::string::npos && !trialAllowed)
+					if (hasPrivilegeOfList(extendedPriv, ":TRIAL:") && !trialAllowed)
 					{
 						errorReason = "uiR2EDRoSTryMainland";
 						ok = false;
@@ -6413,7 +6413,7 @@ void CServerEditionModule::saveScenarioFile(NLNET::IModuleProxy *sender, const s
 	{
 		volatile static bool override = false;
 
- 		if (value[i].first == "NevraxScenario" && value[i].second == "1" && userPriv.find("DEV") == std::string::npos && !override)
+		if (value[i].first == "NevraxScenario" && value[i].second == "1" && !hasPrivilegeOfList(userPriv, ":DEV:") && !override)
 		{
 			nlwarning("The client %u(CharId) try to save a scenario that is RoSOnly so it means that the gui has let the user the possibility to try or that the user is trying to hack us", charId);
 			ok = false;

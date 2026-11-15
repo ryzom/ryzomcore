@@ -10,6 +10,8 @@ target_include_directories(ryzom_shard_unifier_shard_access
         PRIVATE
         ${RZ_SERVER_SRC_DIR}
         ${RZ_SERVER_SRC_DIR}/shard_unifier_service
+        # game_share/utils.h (hasPrivilegeOfList, all in the header)
+        ${CMAKE_SOURCE_DIR}/ryzom/common/src
 )
 
 target_link_libraries(ryzom_shard_unifier_shard_access
