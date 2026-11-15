@@ -2772,6 +2772,11 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 	{
 		// the key policies of the scenario service refuse the signature of the file
 		nlinfo("The scenario service refuses to load a scenario file (md5 '%s')", md5.c_str());
+		// an animation launched from the terminal starts no more from that file, as when its data is invalid
+		// (CDynamicMapClient::loadAnimationFromBuffer): a later return to the mode would try it again. The form
+		// comes back with the message (r2.onSystemMessageReceived), as the author left it.
+		if (R2::getEditor().getMode() == CEditor::AnimationModeLoading)
+			R2::getEditor().setStartingAnimationFilename("");
 		this->systemMsg(nullptr, "ERR", "", "uiR2EDServerRefuseToLoad");
 		return;
 	}
