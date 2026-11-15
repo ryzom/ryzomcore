@@ -1351,7 +1351,7 @@ void CPatchManager::readDescFile(sint32 nVersion)
 	string srcName = ClientPatchPath + DescFilename;
 	DescFile.clear();
 	if (!DescFile.load(srcName))
-		throw Exception ("Can't open file '%s'", srcName.c_str ());
+		throw Exception("Can't read the description file '%s': it is missing or damaged", srcName.c_str());
 
 	// The description came from the patch server: every file name must be a bare file name, and every
 	// unpack path must stay below the client directory, or the files written from it could land anywhere.

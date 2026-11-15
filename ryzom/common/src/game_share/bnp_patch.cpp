@@ -769,7 +769,11 @@ bool CProductDescriptionForClient::load(const std::string& filePath)
 	clear();
 	static CPersistentDataRecord pdr;
 	pdr.clear();
-	pdr.readFromBinFile(filePath);
+
+	// a file that can't be read or parsed is not a description: it must not load as an empty one
+	if (!pdr.readFromBinFile(filePath))
+		return false;
+
 	apply(pdr);
 
 	return true;
