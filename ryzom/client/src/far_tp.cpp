@@ -952,7 +952,9 @@ retryJoinEdit:
 //			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
 //			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
 
-			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:message_box:ok");
+			// The box shown below is the one with the help button, a group of the outgame interface itself (the
+			// 'charsel' group has the plain message box, and no box of this name)
+			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:message_box_with_help:ok");
 			if (btnOk)
 				btnOk->setActive( ! requestRetToMainland );
 
@@ -967,7 +969,7 @@ retryJoinEdit:
 		}
 		pIM->messageBoxWithHelp(
 			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
-			letReturnToCharSelect ? "ui:outgame:charsel" : "ui:interface");
+			letReturnToCharSelect ? "ui:outgame" : "ui:interface");
 
 		// Info in the log
 		string outErrorMsg = toString("Could not join %ssession %u: '%s' error\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg );
