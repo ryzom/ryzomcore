@@ -109,6 +109,15 @@ struct EPatchDownloadException : public Exception
 	virtual ~EPatchDownloadException() throw() NL_OVERRIDE{}
 };
 
+// A directory the patcher writes to can't be written to: the message is the whole text for the player
+struct EPatchNotWritable : public Exception
+{
+	EPatchNotWritable(const std::string &str)
+	    : Exception(str)
+	{
+	}
+	virtual ~EPatchNotWritable() throw() NL_OVERRIDE { }
+};
 
 CPatchManager *CPatchManager::_Instance = nullptr;
 
@@ -190,6 +199,43 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 }
 
 // ****************************************************************************
+bool CPatchManager::checkWritableDirectories()
+{
+	// ClientRootPath gets the update script and the files of the categories that are unpacked, ClientPatchPath
+	// the downloads, WritableClientDataPath the game data. The two below the root are created here when missing.
+	m_NotWritableDirectory.clear();
+	if (!CFile::isDirectoryWritable(ClientRootPath))
+	{
+		m_NotWritableDirectory = ClientRootPath;
+	}
+	else
+	{
+		NLMISC::CFile::createDirectory(ClientPatchPath);
+		NLMISC::CFile::createDirectory(WritableClientDataPath);
+		if (!CFile::isDirectoryWritable(ClientPatchPath))
+			m_NotWritableDirectory = ClientPatchPath;
+		else if (!CFile::isDirectoryWritable(WritableClientDataPath))
+			m_NotWritableDirectory = WritableClientDataPath;
+	}
+
+	if (m_NotWritableDirectory.empty())
+		return true;
+
+	nlwarning("PATCH: Can't write to '%s': the patcher keeps its files in '%s' (downloads in '%s', game data in '%s') and writes nowhere else, nothing is downloaded",
+	    m_NotWritableDirectory.c_str(), ClientRootPath.c_str(), ClientPatchPath.c_str(), WritableClientDataPath.c_str());
+	return false;
+}
+
+// ****************************************************************************
+std::string CPatchManager::getNotWritableMessage(const std::string &directory)
+{
+	// The text states where the patcher keeps its files and what to do, the directory is the one that failed
+	std::string message = CI18N::get("uiPatchNotWritable");
+	strFindReplace(message, "%dir", directory);
+	return message;
+}
+
+// ****************************************************************************
 void CPatchManager::setErrorMessage(const std::string &message)
 {
 	_ErrorMessage = message;
@@ -230,9 +276,10 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	else
 		DisplayedServerPath = ServerPath;
 
-	NLMISC::CFile::createDirectory(ClientPatchPath);
-	NLMISC::CFile::createDirectory(WritableClientDataPath);
-
+	// The patcher writes to its own directories and nowhere else. They are tested before anything is
+	// downloaded, the version file included; when one fails the check thread ends at once with the error.
+	if (!checkWritableDirectories())
+		return;
 
 	// try to read the version file from the server (that will replace the version number)
 	try
@@ -2264,6 +2311,10 @@ void CCheckThread::run ()
 	pPM->MustLaunchBatFile = false;
 	try
 	{
+		// init() found a directory of the patcher that can't be written to and downloaded nothing
+		if (!pPM->m_NotWritableDirectory.empty())
+			throw EPatchNotWritable(CPatchManager::getNotWritableMessage(pPM->m_NotWritableDirectory));
+
 		nlwarning("CCheckThread : get version");
 		uint32 i, j, k;
 		// Check if the client version is the same as the server version
@@ -2307,6 +2358,26 @@ void CCheckThread::run ()
 
 		// Read the description file
 		pPM->readDescFile(nServerVersion);
+
+		// The description names the directories below the client directory that categories are unpacked to.
+		// One that exists has to be writable too, before any file of the patch is downloaded; one that does
+		// not exist yet is created below a directory that was tested.
+		for (i = 0; i < pPM->DescFile.getCategories().categoryCount(); ++i)
+		{
+			const CBNPCategory &rCat = pPM->DescFile.getCategories().getCategory(i);
+			if (rCat.getUnpackTo().empty() || rCat.fileCount() == 0)
+				continue;
+
+			std::string unpackTo = rCat.getUnpackTo();
+			while (!CFile::isDirectory(unpackTo) && unpackTo.size() > ClientRootPath.size())
+				unpackTo = CFile::getPath(unpackTo.substr(0, unpackTo.size() - 1));
+
+			if (!CFile::isDirectoryWritable(unpackTo))
+			{
+				nlwarning("PATCH: Can't write to '%s', where the files of category '%s' are unpacked to", unpackTo.c_str(), rCat.getName().c_str());
+				throw EPatchNotWritable(CPatchManager::getNotWritableMessage(unpackTo));
+			}
+		}
 
 		nlwarning("CCheckThread : check files");
 
@@ -2504,6 +2575,14 @@ void CCheckThread::run ()
 		nlwarning("EXCEPTION CATCH: disk full");
 		pPM->setState(true, CI18N::get("uiCheckEndWithErr"));
 		pPM->setErrorMessage(CI18N::get("uiPatchDiskFull"));
+		CheckOk = false;
+		Ended = true;
+	}
+	catch (const EPatchNotWritable &e)
+	{
+		// the message says which directory, why the patcher writes there and what to do
+		pPM->setState(true, CI18N::get("uiCheckEndWithErr"));
+		pPM->setErrorMessage(e.what());
 		CheckOk = false;
 		Ended = true;
 	}

@@ -307,6 +307,13 @@ private:
 	// Rename src to dst throw an exception if we cant
 	void renameFile (const std::string &src, const std::string &dst);
 
+	/// Test that the directories the patcher writes to can be written to, creating the two below the client
+	/// directory when they are missing. The first one that fails is kept in m_NotWritableDirectory.
+	bool checkWritableDirectories();
+
+	/// The text for the player when the patcher can't write to this directory
+	static std::string getNotWritableMessage(const std::string &directory);
+
 	// Accessors used by the patch thread
 	const std::string &getDescFilename() { return DescFilename; }
 	const std::string &getUpdateBatchFilename() { return UpdateBatchFilename; }
@@ -445,6 +452,9 @@ private:
 	std::string ClientPatchPath; // Temporary path
 	std::string ReadableClientDataPath; // Where original data can be found
 	std::string WritableClientDataPath; // Where data can be written
+
+	/// Set by init(): the directory of the patcher that can't be written to, empty when all of them can
+	std::string m_NotWritableDirectory;
 
 	/// Output useful information for debugging in the log file
 	bool VerboseLog;
