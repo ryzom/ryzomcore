@@ -4938,6 +4938,15 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 	CShareClientEditionItfProxy proxy(*clientEditionProxyPtr);
 	proxy.onRingAccessUpdated(this, newRingAccess);
 	log.displayNL("Ring Access changed to '%s' for user %u", newRingAccess.c_str(),charId);
+
+	// An override of the character stays saved, and is listed, but is not what the character has now: the
+	// last command wins until the character connects again, when the override is applied anew
+	TOverrideRingAccess::const_iterator overridden = _OverrideRingAccess.find(charId);
+	if (overridden != _OverrideRingAccess.end())
+	{
+		log.displayNL("The char %u has the overridden ring access '%s' (setCharOverrideRingAccess), which is not in effect any more: it is applied again when the character connects next. To keep '%s' beyond that, remove the override (removeCharOverrideRingAccess).",
+		    charId, overridden->second.c_str(), newRingAccess.c_str());
+	}
 	return true;
 }
 
