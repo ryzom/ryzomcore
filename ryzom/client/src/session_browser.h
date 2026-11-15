@@ -66,8 +66,10 @@ class CSessionBrowser : public RSMGR::CSessionBrowserServerWebClientItf,
 	// received message counter
 	uint32						_NBReceivedMessage;
 
-	// A list of last received message name, in order of arrival
-	std::list<std::string>		_LastReceivedMessageNames;
+	// The name of the message waitOneMessage waits for (empty outside of it), and how many messages of
+	// that name were received since the wait began
+	std::string					_WaitedMessageName;
+	uint32						_NbWaitedMessageReceived;
 
 	// a flag set when we are waiting for a message. This bypass the
 	// disconnection timeout
@@ -118,9 +120,9 @@ public:
 	// The connection has been closed.
 //	virtual void on_connectionClosed() =0;
 
-	/** Wait until the client receive a message OR a disconnection is signaled
-	 *	Return true if the specified message is received, false in case of
-	 *	disconnection or if another message is received.
+	/** Wait until the client receive the specified message OR a disconnection is signaled.
+	 *	The messages of other names that come during the wait are dispatched to their callbacks.
+	 *	Return true if the specified message is received, false in case of disconnection.
 	 */
 	bool waitOneMessage(const std::string &msgName);
 

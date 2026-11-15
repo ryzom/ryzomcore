@@ -109,6 +109,7 @@ CSessionBrowser::CSessionBrowser()
 		_TerminateComm(false),
 		_SignalConnFail(false),
 		_NBReceivedMessage(0),
+		_NbWaitedMessageReceived(0),
 		_WaitingForMessage(false)
 {
 	// start the comm thread
@@ -282,10 +283,18 @@ sendMessages:
 	}
 }
 
+// True when a message of the name 'received' is the answer a wait for 'waited' waits for
+static bool answersWait(const std::string &received, const std::string &waited)
+{
+	// hardcoded: JSSRE may replace JSSR in some responses
+	return received == waited || (received == "JSSRE" && waited == "JSSR");
+}
+
 void CSessionBrowser::on_preDispatchMessage(CMessage &msgin, TSockId /* from */, CCallbackNetBase &/* netbase */)
 {
 	++_NBReceivedMessage;
-	_LastReceivedMessageNames.push_back(msgin.getName());
+	if (_WaitingForMessage && answersWait(msgin.getName(), _WaitedMessageName))
+		++_NbWaitedMessageReceived;
 }
 
 
@@ -306,16 +315,19 @@ void CSessionBrowser::update()
 
 bool CSessionBrowser::waitOneMessage(const std::string &msgName)
 {
-	nldebug("SB: Waiting for message");
+	nldebug("SB: Waiting for message '%s'", msgName.c_str());
+	// the messages of this name are counted from here on (on_preDispatchMessage)
+	_WaitedMessageName = msgName;
+	_NbWaitedMessageReceived = 0;
 	_WaitingForMessage = true;
-	// cleanup the list of received messages
-	_LastReceivedMessageNames.clear();
 
 	CCallbackClientAdaptor	*adaptor = getCallbackAdaptor();
 
 
-	// loop while no message received, still connected or having message to send
-	while (_LastReceivedMessageNames.empty()
+	// Loop while the message is not received, still connected or having message to send. A message of another
+	// name that comes first is no answer to this wait: it is dispatched as it would be in any frame (the list
+	// of the player control window, asked for every few seconds), and the wait goes on.
+	while (_NbWaitedMessageReceived == 0
 		&& (adaptor->getCallback().connected() || !adaptor->_SendQueue.empty()))
 	{
 		update();
@@ -326,19 +338,10 @@ bool CSessionBrowser::waitOneMessage(const std::string &msgName)
 	}
 
 	_WaitingForMessage = false;
+	_WaitedMessageName.clear();
 
-	if (!_LastReceivedMessageNames.empty())
-	{
-		// check the first received message match the requested one
-		bool receivedExpected =
-				(_LastReceivedMessageNames.front() == msgName) ||
-				(_LastReceivedMessageNames.front() == "JSSRE" && (msgName == "JSSR")); // harcoded: JSSRE may replace JSSR in some responses
-		STOP_IF(!receivedExpected, "BIG BAD BUG - Expected SBS message '"+msgName+"' but received '"+_LastReceivedMessageNames.front()+"'");
-		return receivedExpected;
-	}
-
-	// sorry, wait failed
-	return false;
+	// false: the connection was lost, or could not be made, before the message came
+	return _NbWaitedMessageReceived != 0;
 }
 
 bool CSessionBrowser::connected()
