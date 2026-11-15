@@ -179,8 +179,9 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 #ifdef NL_OS_MAC
 	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
 #elif defined(NL_OS_UNIX)
+	// the data of an installed client, which can only be read: used as the source of a patch when it exists
 	ReadableClientDataPath = CPath::standardizePath(getRyzomSharePrefix() + "/data");
-	if (CFile::isDirectory(ReadableClientDataPath))	ReadableClientDataPath.clear();
+	if (!CFile::isDirectory(ReadableClientDataPath)) ReadableClientDataPath.clear();
 #else
 	ReadableClientDataPath.clear();
 #endif
@@ -2704,6 +2705,10 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	// Destination File Name (in writable directory)
 	string DestinationName;
 
+	// The source is the installed copy in the directory that is only read: it stays there, whatever
+	// the rights on that directory are, and the patched file is written to the writable directory
+	bool sourceIsInstalledData = false;
+
 	if (rFTP.ExtractPath.empty())
 	{
 		DestinationName = pPM->WritableClientDataPath + rFTP.FileName;
@@ -2720,6 +2725,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			else if (NLMISC::CFile::fileExists(pPM->ReadableClientDataPath + rFTP.FileName))
 			{
 				SourceName = pPM->ReadableClientDataPath + rFTP.FileName;
+				sourceIsInstalledData = true;
 			}
 
 			// version from previous download
@@ -2745,7 +2751,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	if (rFTP.LocalFileToDelete)
 	{
 		// corrupted or invalid file ? ....
-		NLMISC::CFile::deleteFile(SourceName);
+		if (!sourceIsInstalledData)
+			NLMISC::CFile::deleteFile(SourceName);
 		rFTP.LocalFileExists = false;
 	}
 
@@ -2771,7 +2778,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	{
 		// corrupted or invalid file ? ....
 		rFTP.LocalFileExists = false;
-		NLMISC::CFile::deleteFile(tmpSourceName);
+		if (!sourceIsInstalledData || tmpSourceName != SourceName)
+			NLMISC::CFile::deleteFile(tmpSourceName);
 	}
 
 	string OutFilename;
@@ -2869,11 +2877,12 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				break;
 			}
 
-			if (rFTP.LocalFileExists)
+			if (rFTP.LocalFileExists && !sourceIsInstalledData)
 				pPM->deleteFile(SourceName);
 
 			pPM->deleteFile(pPM->ClientPatchPath+lzmaFile);	// delete the archive file
-			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
+			if (!sourceIsInstalledData)
+				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
 			if (_CommitPatch)
 			{
 				pPM->renameFile(OutFilename+".tmp", DestinationName);
@@ -2976,7 +2985,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 			xDeltaPatch(PatchName, SourceNameXD, OutFilename);
 
-			if (rFTP.LocalFileExists)
+			if (rFTP.LocalFileExists && !sourceIsInstalledData)
 				pPM->deleteFile(SourceName);
 			pPM->deleteFile(PatchName);
 
@@ -2991,7 +3000,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 		if (tmpSourceName != DestinationName)
 		{
-			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
+			if (!sourceIsInstalledData)
+				pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
 			if (!_CommitPatch)
 			{
 				// let the patch in the unpack directory
