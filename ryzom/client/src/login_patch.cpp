@@ -1546,9 +1546,6 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			serverDisplayPath = DisplayedServerPath;
 		}
 
-		// what is kept of the file from the attempts before this one
-		const uint64 keptBefore = m_PartialDownload.Size;
-
 		try
 		{
 			if (isStopAsked())
@@ -1579,9 +1576,11 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 
 			interrupted = true;
 
-			// An attempt that brought more of the file was not in vain: the count starts again. A connection
-			// that drops now and then gets a large file all the same, each drop costing the shortest wait.
-			if (m_PartialDownload.Size > keptBefore)
+			// An attempt that went on from the kept bytes and added to them was not in vain: the count starts
+			// again. A connection that drops now and then gets a large file all the same, each drop costing
+			// the shortest wait. Bytes kept by a transfer that started the file over do not count: they add
+			// nothing to what the attempt before had.
+			if (m_PartialDownload.Size > 0 && m_PartialDownload.Appended)
 			{
 				retries = 0;
 				if (server >= 0)
@@ -2092,6 +2091,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 				if (keep)
 				{
 					m_PartialDownload.Size = size;
+					m_PartialDownload.Appended = resumed && transfer.Written > 0;
 					nlinfo("PATCH: %" NL_I64 "u bytes of '%s' are kept for the next attempt", size, source.c_str());
 				}
 				else

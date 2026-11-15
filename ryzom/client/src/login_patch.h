@@ -435,9 +435,11 @@ private:
 		std::string LastModified; // and its modification date
 		uint64 Size; // bytes kept
 		sint64 Total; // size of the whole file, -1 if the server did not say
+		bool Appended; // the last transfer went on from kept bytes and added to them
 		CPartialDownload()
 		    : Size(0)
 		    , Total(-1)
+		    , Appended(false)
 		{
 		}
 	};
