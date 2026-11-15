@@ -158,9 +158,14 @@ namespace R2 {
 			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeSet(server, _InstanceId, _AttrName, _Value.getPtr());
+			client->onOwnNodeSet(_InstanceId, _AttrName, _Value.getPtr());
+		}
+		// With instant feedback the editor showed the edit already, and keeps it.
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to set '%s' of '%s', the scenario of this editor and the one of the session may differ", _AttrName.c_str(), _InstanceId.c_str());
 		}
 	private:
 		std::string _InstanceId;
@@ -175,9 +180,13 @@ namespace R2 {
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeInserted(server, _InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
+			client->onOwnNodeInserted(_InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
+		}
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to insert in '%s' of '%s' at %d, the scenario of this editor and the one of the session may differ", _AttrName.c_str(), _InstanceId.c_str(), (int)_Position);
 		}
 	private:
 		std::string _InstanceId;
@@ -193,9 +202,13 @@ namespace R2 {
 		CServerAnswerMsgErased(const std::string &instanceId, const std::string &attrName, sint32 position)
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeErased(server, _InstanceId, _AttrName, _Position);
+			client->onOwnNodeErased(_InstanceId, _AttrName, _Position);
+		}
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to erase '%s' of '%s' at %d, the scenario of this editor and the one of the session may differ", _AttrName.c_str(), _InstanceId.c_str(), (int)_Position);
 		}
 	private:
 		std::string _InstanceId;
@@ -211,9 +224,14 @@ namespace R2 {
 			:_InstanceId1(instanceId1), _AttrName1(attrName1), _Position1(position1),
 			_InstanceId2(instanceId2), _AttrName2(attrName2), _Position2(position2){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
 		{
-			client->onNodeMoved(server, _InstanceId1, _AttrName1, _Position1, _InstanceId2, _AttrName2, _Position2);
+			client->onOwnNodeMoved(_InstanceId1, _AttrName1, _Position1, _InstanceId2, _AttrName2, _Position2);
+		}
+		void refused(CClientEditionModule* /* client */, NLNET::IModuleProxy * /* server */) NL_OVERRIDE
+		{
+			nlwarning("R2CED: the server refused to move '%s' of '%s' at %d to '%s' of '%s' at %d, the scenario of this editor and the one of the session may differ",
+				_AttrName1.c_str(), _InstanceId1.c_str(), (int)_Position1, _AttrName2.c_str(), _InstanceId2.c_str(), (int)_Position2);
 		}
 	private:
 		std::string _InstanceId1;
@@ -1814,11 +1832,14 @@ void CClientEditionModule::onScenarioUploaded(NLNET::IModuleProxy * /* sender */
 	_Client->scenarioUpdated(hlScenario.getData(), false, 1);//give ownership
 }
 
-// The client request to set a node on a hl scenario.
+// The server sends the edits it accepts to the other editors of the session, and only an answer to the
+// editor that made it (CServerAnswerForseener): these four come from another editor, and are shown even
+// when the answers to this editor's own edits are muted.
+
+// Another editor set a node on the hl scenario.
 void CClientEditionModule::onNodeSet(NLNET::IModuleProxy * /* sender */, const std::string &instanceId, const std::string &attrName, const R2::CObjectSerializerClient &value)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeSet)
-	if (_Mute) return;
 	CObject::TSmartPtr temp = value.getData();
 	// the message can come with the tree that is no value, or with compressed data that gives no tree
 	if (!temp)
@@ -1826,14 +1847,13 @@ void CClientEditionModule::onNodeSet(NLNET::IModuleProxy * /* sender */, const s
 		nlwarning("R2CED: the server set no value in '%s' of '%s', refused", attrName.c_str(), instanceId.c_str());
 		return;
 	}
-	_Client->nodeSet(instanceId, attrName, temp);
+	_Client->otherEditorNodeSet(instanceId, attrName, temp);
 }
 
-// The ServerEditionMode inserts a node on a hl scenario.
+// Another editor inserted a node in the hl scenario.
 void CClientEditionModule::onNodeInserted(NLNET::IModuleProxy * /* sender */, const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObjectSerializerClient &value)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeInserted)
-	if (_Mute) return;
 	CObject::TSmartPtr temp = value.getData();
 	// the message can come with the tree that is no value, or with compressed data that gives no tree
 	if (!temp)
@@ -1841,24 +1861,50 @@ void CClientEditionModule::onNodeInserted(NLNET::IModuleProxy * /* sender */, co
 		nlwarning("R2CED: the server inserted no value in '%s' of '%s', refused", attrName.c_str(), instanceId.c_str());
 		return;
 	}
-	_Client->nodeInserted( instanceId, attrName, position, key, temp); //todo ownership
+	_Client->otherEditorNodeInserted(instanceId, attrName, position, key, temp); //todo ownership
 }
 
-// The ServerEditionMode erases a node on a hl scenario.
+// Another editor erased a node of the hl scenario.
 void CClientEditionModule::onNodeErased(NLNET::IModuleProxy * /* sender */, const std::string &instanceId, const std::string &attrName, sint32 position)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeErased)
-	if (_Mute) return;
-	_Client->nodeErased( instanceId, attrName, position);
+	_Client->otherEditorNodeErased(instanceId, attrName, position);
 }
 
-// The ServerEditionMode a move node on a hl scenario.
+// Another editor moved a node of the hl scenario.
 void CClientEditionModule::onNodeMoved(NLNET::IModuleProxy * /* sender */, const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2)
 {
 	//H_AUTO(R2_CClientEditionModule_onNodeMoved)
-	if (_Mute) return;
-	_Client->nodeMoved(instanceId1, attrName1, position1,
+	_Client->otherEditorNodeMoved(instanceId1, attrName1, position1,
 			instanceId2, attrName2, position2);
+}
+
+// The server accepted an edit of this editor. With instant feedback (setMute) the editor showed it when it
+// was made; else it is shown now.
+void CClientEditionModule::onOwnNodeSet(const std::string &instanceId, const std::string &attrName, const R2::CObject *value)
+{
+	if (_Mute || !value) return;
+	CObject::TSmartPtr temp = value->clone();
+	_Client->nodeSet(instanceId, attrName, temp);
+}
+
+void CClientEditionModule::onOwnNodeInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject *value)
+{
+	if (_Mute || !value) return;
+	CObject::TSmartPtr temp = value->clone();
+	_Client->nodeInserted(instanceId, attrName, position, key, temp);
+}
+
+void CClientEditionModule::onOwnNodeErased(const std::string &instanceId, const std::string &attrName, sint32 position)
+{
+	if (_Mute) return;
+	_Client->nodeErased(instanceId, attrName, position);
+}
+
+void CClientEditionModule::onOwnNodeMoved(const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2)
+{
+	if (_Mute) return;
+	_Client->nodeMoved(instanceId1, attrName1, position1, instanceId2, attrName2, position2);
 }
 
 void CClientEditionModule::onQuotaUpdated(NLNET::IModuleProxy * /* senderModuleProxy */, uint32 maxNpcs, uint32 maxStaticObjects)
