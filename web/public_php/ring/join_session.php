@@ -15,7 +15,7 @@ class JoinSessionCb extends CRingSessionManagerWeb
 		if ($result != 0)
 		{
 			echo "<h1>Error ".htmlspecialchars($result, ENT_QUOTES)." : '".htmlspecialchars($shardAddr, ENT_QUOTES)."' while trying to join a session </h1>";
-			echo '<p><p><a href="web_start.php">Back to menu</a>';
+			echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 		}
 		else
 		{
@@ -25,7 +25,7 @@ class JoinSessionCb extends CRingSessionManagerWeb
 			if (!validShardAddr($shardAddr))
 			{
 				echo "<h1>Error: invalid shard address from session manager</h1>";
-				echo '<p><p><a href="web_start.php">Back to menu</a>';
+				echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 				return;
 			}
 			$cookie=convertCookieForActionHandler($_COOKIE["ryzomId"]);

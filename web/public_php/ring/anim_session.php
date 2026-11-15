@@ -1,3 +1,4 @@
+<?php require_once('../tools/validate_cookie.php'); ?>
 <html>
    <head>
       <title>Enter the title of your HTML document here</title>
@@ -7,6 +8,6 @@
       <hr/>
       <br/>
       <hr/>
-      <a href="web_start.php">Back to main menu</a> 
+      <a href="<?php echo ringStartPage(); ?>">Back to main menu</a>
    </body>
 </html>

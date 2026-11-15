@@ -4119,7 +4119,8 @@ NLMISC_COMMAND(browse, "Browse a HTML document with the internal help web browse
 NLMISC_COMMAND(openRingWindow, "Browse the main page in the ring web browser.", "")
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url="+RingMainURL);
+	// the page shows the sessions and invitations of one character: the one that is in game
+	CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:r2ed_web_admin:content:admin_web_page|url=" + RingMainURL + toString("?charSlot=%u", (uint)PlayerSelectedSlot));
 	return true;
 }
 

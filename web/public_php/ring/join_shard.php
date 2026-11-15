@@ -22,7 +22,7 @@ class JoinShardCb extends CRingSessionManagerWeb
 			if ($FSHostLuaMode)
 			{
 				echo htmlspecialchars($FSHostResultStr, ENT_QUOTES);
-				echo '<p><p><a href="web_start.php">Back to menu</a>';
+				echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 			}
 		}
 		else
@@ -37,7 +37,7 @@ class JoinShardCb extends CRingSessionManagerWeb
 				if ($FSHostLuaMode)
 				{
 					echo htmlspecialchars($FSHostResultStr, ENT_QUOTES);
-					echo '<p><p><a href="web_start.php">Back to menu</a>';
+					echo '<p><p><a href="'.ringStartPage().'">Back to menu</a>';
 				}
 				return;
 			}

@@ -23,6 +23,6 @@
 		isset($_POST["description"]) ? strval($_POST["description"]) : "");
 	
 	echo "Finish<br>";
-	echo '<a href="web_start.php">Return to start menu</a>';
+	echo '<a href="'.ringStartPage().'">Return to start menu</a>';
 
 ?>
