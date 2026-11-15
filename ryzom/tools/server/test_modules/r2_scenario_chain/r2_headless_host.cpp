@@ -1840,6 +1840,56 @@ R2H_FUNCTION(luaFileLookup)
 }
 
 // ***************************************************************************
+R2H_FUNCTION(luaLoadNpcNames)
+{
+	// r2:loadNpcNames(list), as CNpcEditorFiles::luaLoadNpcNames of the client: the names of the list
+	// <race>_<sex>.txt of the search paths as a table, nil and a reason when there is no such file. The
+	// lists are in ryzom/client/examples: a run has them when that directory is a --data-dir.
+	static const char *const s_NameLists[] = {
+		"fyros_male", "fyros_female", "matis_male", "matis_female",
+		"tryker_male", "tryker_female", "zorai_male", "zorai_female"
+	};
+	if (lua_gettop(state) != 2 || lua_type(state, 2) != LUA_TSTRING)
+		return fail(state, std::string("loadNpcNames: string expected, got ") + luaL_typename(state, 2));
+	std::string name = toLowerAscii(luaArgString(state, 2));
+	bool known = false;
+	for (size_t i = 0; i < sizeof(s_NameLists) / sizeof(s_NameLists[0]) && !known; ++i)
+		known = name == s_NameLists[i];
+	if (!known)
+		return fail(state, "loadNpcNames: '" + name + "' is not one of the names this function takes");
+
+	std::string path = CPath::lookup(name + ".txt", false, false);
+	CIFile file;
+	if (path.empty() || !file.open(path))
+	{
+		lua_pushnil(state);
+		lua_pushstring(state, path.empty() ? "it is not in the search paths" : "the file cannot be opened");
+		return 2;
+	}
+	std::string content;
+	content.resize(file.getFileSize());
+	if (!content.empty())
+		file.serialBuffer((uint8 *)&content[0], (uint)content.size());
+	lua_newtable(state);
+	lua_Integer count = 0;
+	std::string::size_type start = 0;
+	while (start < content.size())
+	{
+		std::string::size_type end = content.find('\n', start);
+		if (end == std::string::npos) end = content.size();
+		std::string::size_type last = end;
+		if (last > start && content[last - 1] == '\r') --last;
+		if (last > start)
+		{
+			lua_pushlstring(state, content.data() + start, last - start);
+			lua_rawseti(state, -2, ++count);
+		}
+		start = end + 1;
+	}
+	return 1;
+}
+
+// ***************************************************************************
 R2H_FUNCTION(luaGetSheetId)
 {
 	std::string name = luaValueText(state, 1);
@@ -2166,6 +2216,7 @@ void CHeadlessHost::registerFunctions()
 		{ "getScenarioObj", luaGetScenarioObj },
 		{ "requestSetScenarioVersions", luaRequestSetScenarioVersions },
 		{ "getInstanceFromId", luaGetInstanceFromId },
+		{ "loadNpcNames", luaLoadNpcNames },
 		{ "genInstanceName", luaGenInstanceName },
 		{ "getNamespace", luaGetNamespace },
 		{ "setStartingActIndex", luaSetStartingActIndex },

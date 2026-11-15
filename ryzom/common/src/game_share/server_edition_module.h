@@ -110,6 +110,8 @@ namespace R2
 			NLMISC::CEntityId EntityId;
 			bool              WaitingTp; // Client is waiting the tp command + the season after he joined a session
 			std::string		RingAccess;
+			// the access of the character without the override an operator set for it (connectChar)
+			std::string		RingAccessWithoutOverride;
 			bool	EgsReloadPos;
 			TCharMode Mode;
 			bool Newcomer;

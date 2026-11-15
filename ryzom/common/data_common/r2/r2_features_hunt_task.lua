@@ -141,11 +141,11 @@ function component:textAdapter(text)
 	end
 
 	if tostring(self.TargetNumber) ~= "" then
-		nbTargets = tostring(self.TargetNumber)
+		nbTargets = numberText(self.TargetNumber)
 	end
 	
-	str=string.gsub(str, "<mission_giver>", mission_giver)
-	str=string.gsub(str, "<target_number>", nbTargets)
+	str = replaceTag(str, "<mission_giver>", mission_giver)
+	str = replaceTag(str, "<target_number>", nbTargets)
 	return str
 end
 

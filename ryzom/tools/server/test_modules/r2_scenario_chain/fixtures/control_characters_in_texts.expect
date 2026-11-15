@@ -1,0 +1,22 @@
+# The texts of the scenario that do not go into a script hold control characters, as a pasted text can:
+# a BEL (7) in the text of a dialog step, in a mission text, in the name of a plot item and in the name
+# of an act, a vertical tab (11) in the dialog text and in another mission text. The run-time scenario
+# has a space for each, as the texts of the scripts have: the client draws such a character as a glyph
+# when the npc says the text. The tab and the line ends stay. The scenario keeps what the author typed.
+
+upgrade: unchanged
+scenario_vs_file: same
+save: ok
+roundtrip: ok
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+
+scenario_lacks: Text = [[Ring the	bell now]]
+scenario_lacks: Name = [[Old key]]
+rt_has: Text = [[Ring the	bell now]]
+rt_has: Find Ann	now
+rt_has: Well done
+rt_has: Name = [[Old key]]
+rt_has: Name = [[Act one]]
+rt: acts=2 texts=1 plot_items=1

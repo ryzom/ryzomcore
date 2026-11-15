@@ -254,6 +254,7 @@ private:
 	R2H_DECLARE(luaGetR2PlayerRace)
 	R2H_DECLARE(luaIsR2PlayerMale)
 	R2H_DECLARE(luaFileLookup)
+	R2H_DECLARE(luaLoadNpcNames)
 	R2H_DECLARE(luaGetDefine)
 	R2H_DECLARE(luaGetClientCfgVar)
 	R2H_DECLARE(luaGetCompleteIslands)

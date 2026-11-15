@@ -30,6 +30,17 @@ function Translator.scriptText(text)
 	return str
 end
 
+-- A text of the author that goes into the run-time scenario outside a script: a text the npcs say
+-- (the entries of the text manager, the "npc_say" action), the name and the texts of a plot item, the
+-- name of an act or of a user trigger. Nothing ends such a text, and it can have several lines. A text
+-- that was pasted can hold control characters, which the client draws as a glyph when the text is
+-- said: every character below the space but the tab and the two of a line end becomes a space, as in
+-- a text of a script. What is not a text (nil) comes back as it is.
+function Translator.plainText(text)
+	if type(text) ~= "string" then return text end
+	return (string.gsub(text, "[\001-\008\011\012\014-\031]", " "))
+end
+
 -- Namespace global
 function printMsg(str)	
 	messageBox(str)	
@@ -83,7 +94,10 @@ function printWarning( str)
 	if devMode then
 		assert(nil)
 	else
-		error(str) -- force to exit current translation
+		-- force to exit current translation. The message is for the author: it goes up as it is, without
+		-- the place of this line in front of it (level 0), and doTranslateFeatures knows it by this
+		Translator.LastWarning = str
+		error(str, 0)
 	end
 end
 
@@ -241,6 +255,28 @@ Translator.getAiActivity = function(hlNpc)
 	return str;
 end
 
+-- An entity gets what it is from its palette entry (Base). One whose entry this editor does not have,
+-- as in a file edited by hand or made for another palette, has no sheet for the client: the scenario
+-- service refuses the act it is in. The test does not start, and the author is told which entity it
+-- is. The entity stays as it is: what becomes of it is the author's choice.
+-- doTranslateFeatures checks every entity of the scenario before the first step of the translation,
+-- which would stop at the missing sheet with an error of its own (r2:isBotObject reads the sheet).
+Translator.checkEntitySheet = function(hlNpc)
+	local sheetClient = hlNpc.SheetClient
+	if sheetClient ~= nil and sheetClient ~= "" then
+		return
+	end
+	local base = hlNpc.Base
+	local key = "uiR2EDTranslateNoSheetClient"
+	if base ~= nil and base ~= "" and not r2.isInPalette(base) then
+		key = "uiR2EDTranslateUnknownBase"
+	end
+	local arguments = { tostring(hlNpc.Name), tostring(defaulting(base, "")) }
+	printWarning((string.gsub(tostring(i18n.get(key)), "%%(%d)", function(index)
+		return defaulting(arguments[tonumber(index)], "")
+	end)))
+end
+
 --  get rtNpc from hlNpc
 Translator.translateNpc = function(hlNpc, context)
 
@@ -253,6 +289,10 @@ Translator.translateNpc = function(hlNpc, context)
 	
 	
 	assert(hlNpc and type(hlNpc) == "userdata")
+
+	-- an entity the translation made itself: the ones of the scenario were checked before the first step
+	Translator.checkEntitySheet(hlNpc)
+
 	local RtNpc = r2.newComponent("RtNpc")
 	
 
@@ -602,9 +642,15 @@ Translator.doTranslateFeatures = function(scenarioInstanceId)
 	local result
 
 	r2.LastTranslationErrorMsg = nil
+	Translator.LastWarning = nil
 	ok, result = pcall(Translator.doTranslateFeaturesProtected, scenarioInstanceId)
 	if not ok then
-		printWarning(result)
+		if result ~= nil and result == Translator.LastWarning then
+			-- printWarning has told the author and the log: the same message goes on to the client, once
+			error(result, 0)
+		end
+		-- an error of the scripts themselves, with its place
+		printWarning(tostring(result))
 	end
 
 	return result
@@ -646,6 +692,34 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	local first=true
 
 
+
+	-- every entity of the scenario has a sheet for the client, or the translation stops here with the
+	-- name of the one that has none (Translator.checkEntitySheet)
+	local function recursiveCheckEntities(components)
+		if (components == nil) then
+			return
+		end
+		local k, v = next(components, nil)
+		while k do
+			if v.isKindOf and v:isKindOf("Npc") then
+				Translator.checkEntitySheet(v)
+			end
+			if v.Components then
+				recursiveCheckEntities(v.Components)
+			end
+			if v.SubComponents then
+				recursiveCheckEntities(v.SubComponents)
+			end
+			k, v = next(components, k)
+		end
+	end
+	do
+		local actId, act = next(acts, nil)
+		while (actId ~= nil) do
+			recursiveCheckEntities(act.Features)
+			actId, act = next(acts, actId)
+		end
+	end
 
 	--
 	-- Recursive method that call a specific function (ie createGhostComponent, pretranslate) on a component
@@ -727,10 +801,10 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 			local rtPlotItem = r2.newComponent("RtPlotItem")
 			rtPlotItem.SheetId = plotItem.SheetId
 			
-			rtPlotItem.Description = plotItem.Desc
+			rtPlotItem.Description = Translator.plainText(plotItem.Desc)
 			
-			rtPlotItem.Name = plotItem.Name
-			rtPlotItem.Comment = plotItem.Comment
+			rtPlotItem.Name = Translator.plainText(plotItem.Name)
+			rtPlotItem.Comment = Translator.plainText(plotItem.Comment)
 			table.insert(rtScenario.PlotItems, rtPlotItem)
 			plotItemId, plotItem = next(scenario.PlotItems, plotItemId)
 		end
@@ -906,7 +980,7 @@ Translator.doTranslateFeaturesProtected = function(scenarioInstanceId)
 	do
 
 		local rtAct = context.ActIdToRtAct[act.InstanceId]
-		rtAct.Name = act.Name
+		rtAct.Name = Translator.plainText(act.Name)
 
 		rtAct.LocationId = locationMap[ act.LocationId ]
 
@@ -1242,11 +1316,11 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 		if rtGrpId and rtGrpId ~= "" then
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
-		local x = tostring(tonumber(arg[5]))
-		local y = tostring(tonumber(arg[6]))
-		local z = tostring(tonumber(arg[7]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
+		local x = numberText(tonumber(arg[5]))
+		local y = numberText(tonumber(arg[6]))
+		local z = numberText(tonumber(arg[7]))
 		local scenario = tostring( r2:getScenarioId())
 
 		local item1Weight	= arg[8]
@@ -1275,16 +1349,17 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 
 		local name = Translator.scriptText(arg[17])
 
-		local sum12			= tostring(item1Weight + item2Weight)
-		local sum123			= tostring(item1Weight + item2Weight + item3Weight)
+		-- the weights are shares of 100, the result of a division: whole ones are written as whole numbers
+		local sum12			= numberText(item1Weight + item2Weight)
+		local sum123			= numberText(item1Weight + item2Weight + item3Weight)
 
 		action.Parameters = "//random_chest_activate\n"
 			.."(" ..prefix.."r)rndm(0,100);\n"
-			.."if (" ..prefix.. "r > 0 && "..prefix.."r <= "..tostring(item1Weight)..")\n"
+			.."if (" ..prefix.. "r > 0 && "..prefix.."r <= "..numberText(item1Weight)..")\n"
 			.."{\n\t"
 			.."()"..prefix.."activateEasterEgg(" .. eggId .. ", " .. scenario .."," .. actId .. ", \"" .. item1Str.. "\", " .. x.. ", " .. y.. ", " .. z .. ", 0, \""..r2:getNamespace() .. rtGrpId.."\", \""..name.."\", \"\");\n"
 			.."}\n"
-			.."if (" ..prefix.. "r > "..item1Weight.." && "..prefix.."r <= "..sum12..")\n"
+			.."if (" ..prefix.. "r > "..numberText(item1Weight).." && "..prefix.."r <= "..sum12..")\n"
 			.."{\n\t"
 			.."()"..prefix.."activateEasterEgg(" .. eggId .. ", " .. scenario .."," .. actId .. ", \"" .. item2Str.. "\", " .. x.. ", " .. y.. ", " .. z .. ", 0, \""..r2:getNamespace() .. rtGrpId.."\", \""..name.."\", \"\");\n"
 			.."}\n"
@@ -1306,14 +1381,14 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
 
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
 
 		local items = tostring(arg[5])
-		local x = tostring(tonumber(arg[6]))
-		local y = tostring(tonumber(arg[7]))
-		local z = tostring(tonumber(arg[8]))
-		local heading = tostring(tonumber(arg[9]))
+		local x = numberText(tonumber(arg[6]))
+		local y = numberText(tonumber(arg[7]))
+		local z = numberText(tonumber(arg[8]))
+		local heading = numberText(tonumber(arg[9]))
 		local name = Translator.scriptText(arg[10])
 		local look = Translator.scriptText(arg[11])
 		local scenario =tostring( r2:getScenarioId())
@@ -1337,8 +1412,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			prefix = r2:getNamespace() .. rtGrpId.."."
 		end
 
-		local eggId =tostring( tonumber(arg[3]))
-		local actId =tostring( tonumber(arg[4]))
+		local eggId =numberText(tonumber(arg[3]))
+		local actId =numberText(tonumber(arg[4]))
 		local scenario =tostring( r2:getScenarioId())
 		assert(eggId and scenario)
 		
@@ -2384,7 +2459,7 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 			end
 		elseif category == "Bandit" then
 			if botAttackable == 0 then
-				code = code.."()setFactionProp(\"faction\", \"civil\");\n"
+				code = code.."()"..prefix.."setFactionProp(\"faction\", \"civil\");\n"
 				if playerAttackable == 1 then
 					code = code.."()"..prefix.."setFactionProp(\"ennemyFaction\", \"Player\");\n"
 					code = code.."()"..prefix.."setFactionProp(\"friendFaction\", \"\");\n"
@@ -2707,7 +2782,8 @@ if (  ParamRepeatCount == 0  || ParamGroup.RoadCountLimit < ParamRepeatCount - 1
 	then
 		action.Parameters = ""
 
-		local str = arg[2]
+		-- what the npc says: a text of the author
+		local str = Translator.plainText(arg[2])
 
 		if str == nil then str = "\n" end
 		if (string.find(str, "\n") == nil) then

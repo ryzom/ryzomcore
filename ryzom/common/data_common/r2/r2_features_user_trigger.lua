@@ -148,7 +148,7 @@ feature.Components.UserTrigger =
 			
 			local rt = r2.newComponent("RtUserTrigger")
 			assert(rt)
-			rt.Name = this.Name
+			rt.Name = r2.Translator.plainText(this.Name)
 			rt.TriggerId = 1
 			rt.Grp = rtNpcGrp.Id
 			

@@ -427,6 +427,60 @@ function r2.onScenarioHeaderUpdated(scenario)
 	-- or use r2.getScenarioHeader();
 end
 
+-- The modes of the editor in which the author works (r2.Mode, set by CEditor::setMode). The others are
+-- the waits between them, behind the connection window.
+local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true }
+
+-- An error message of the server that came during such a wait, if there is one. The refusal of a
+-- scenario comes while the editor waits for its test, and it is back in edition a moment later; every
+-- change of mode closes the message box (CEditor::setMode disables the modal window), so the author
+-- saw the box for an instant or not at all, and the system line scrolls away. The message is kept and
+-- shown once the editor is in a mode the author works in: r2.UIMainLoop asks each frame.
+r2.PendingErrorMessage = nil
+
+-- A message the author must see, from the scripts: in a message box now when the editor is in a mode
+-- the author works in, and kept for that moment otherwise (while the editor starts, or between two
+-- modes). Several messages that wait are shown together.
+function r2.showErrorMessage(text)
+	if workingModes[r2.Mode] then
+		messageBox(text)
+	elseif r2.PendingErrorMessage ~= nil then
+		r2.PendingErrorMessage = tostring(r2.PendingErrorMessage) .. "\n\n" .. tostring(text)
+	else
+		r2.PendingErrorMessage = text
+	end
+end
+
+function r2.showPendingErrorMessage()
+	local pending = r2.PendingErrorMessage
+	if pending == nil or not workingModes[r2.Mode] then
+		return
+	end
+	r2.PendingErrorMessage = nil
+	messageBox(pending)
+end
+
+-- The client calls this when a test cannot start and nothing has been sent to the server: the save of
+-- the scenario for the test failed (CClientEditionModule::requestStartScenario). The editor stays in
+-- edition with its scenario. r2:tryGoTest has frozen the button and the menu entry that start a test
+-- until the editor comes back from it: they are free again, and the author is told ('msg' is the id of
+-- a translated text).
+function r2.onTestStartFailed(msg)
+	-- (an animation that is loaded starts the same way, without these controls in use: the message is
+	-- shown whether they are found or not)
+	local toolbar = getUI("ui:interface:r2ed_toolbar")
+	local goTestTool = toolbar and toolbar:find("r2ed_tool_start")
+	if goTestTool then
+		goTestTool.unselected.button.frozen = false
+	end
+	local mainMenu = getUI("ui:interface:r2ed_main_menu")
+	local goTestMenu = mainMenu and mainMenu:find("go_test")
+	if goTestMenu then
+		goTestMenu.grayed = false
+	end
+	r2.onSystemMessageReceived("ERR", "", msg)
+end
+
 function r2.onSystemMessageReceived(msgType, msgWho, msg)
 	if string.len(msg) > 2 and string.sub(msg, 1, 2) == "ui" then
 		msg = i18n.get(msg)
@@ -450,6 +504,10 @@ function r2.onSystemMessageReceived(msgType, msgWho, msg)
 	elseif msgType == "ERR" then
 		printMsgML(msg)
 		messageBox(msg)
+		if not workingModes[r2.Mode] then
+			-- the box does not outlive the wait: it comes back when the wait is over
+			r2.showErrorMessage(msg)
+		end
 	end
 end
 

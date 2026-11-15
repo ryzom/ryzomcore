@@ -116,6 +116,26 @@ namespace
 	{
 		if (ok) { nlinfo("Ed: %s", msg.c_str()); } else { nlwarning("Ed: %s", msg.c_str()); }
 	}
+
+	// The longest text of a client that goes into a line of the log (a header md5 has 32 characters)
+	const uint32 s_MaxClientTextInLog = 80;
+
+	// A text that a client sent, as it goes into a line of the log: its start, without control characters, so
+	// that it stays one line of a known length
+	static std::string clientTextForLog(const std::string &text)
+	{
+		std::string out;
+		uint32 size = (uint32)std::min((size_t)s_MaxClientTextInLog, text.size());
+		out.reserve(size + 3);
+		for (uint32 i = 0; i < size; ++i)
+		{
+			char c = text[i];
+			out += ((uint8)c < 0x20 || (uint8)c == 0x7f) ? '?' : c;
+		}
+		if (text.size() > size)
+			out += "...";
+		return out;
+	}
 }
 
 namespace R2
@@ -1489,6 +1509,19 @@ void CServerEditionModule::connectChar(TSessionId sessionId, TCharId charId, TUs
 				}
 			}
 
+		}
+	}
+
+	// An override of the ring access that an operator saved for this character (setCharOverrideRingAccess)
+	// takes the place of the access the character has of its own, which is kept for the day the override
+	// is removed.
+	{
+		CPioneerInfo &info = _PioneersInfo[charId];
+		info.RingAccessWithoutOverride = info.RingAccess;
+		TOverrideRingAccess::const_iterator overridden = _OverrideRingAccess.find(charId);
+		if (overridden != _OverrideRingAccess.end())
+		{
+			info.RingAccess = overridden->second;
 		}
 	}
 
@@ -5386,6 +5419,17 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, removeCharOverrideRingAccess)
 		log.displayNL("The Overridden ring access charId %u, access='%s' has been removed", found->first, found->second.c_str());
 		_OverrideRingAccess.erase(found);
 
+		// A character that is connected gets back the access it has of its own, and its client is told, as
+		// setCharOverrideRingAccess tells it of the access it sets.
+		TPionnerInfos::iterator info(_PioneersInfo.find(charId));
+		const NLNET::TModuleProxyPtr *clientEditionProxyPtr = getClientProxyPtr(charId);
+		if (info != _PioneersInfo.end() && clientEditionProxyPtr)
+		{
+			info->second.RingAccess = info->second.RingAccessWithoutOverride;
+			CShareClientEditionItfProxy proxy(*clientEditionProxyPtr);
+			proxy.onRingAccessUpdated(this, info->second.RingAccess);
+			log.displayNL("The char %u is connected: its ring access is '%s' again", charId, info->second.RingAccess.c_str());
+		}
 	}
 	else
 	{
@@ -6389,9 +6433,10 @@ void CServerEditionModule::loadScenarioFile(NLNET::IModuleProxy *senderModulePro
 	bool ok = _KeysHolder->verifyKey(md5, signature, policy);
 	if (!ok)
 	{
-		// the file stays on the client: the service knows it by the md5 and the signature of its header
+		// the file stays on the client: the service knows it by the md5 and the signature of its header, which
+		// are texts of the client
 		nlinfo("R2Ed: char %u may not load a scenario file (header md5 '%s', signature '%s'): refused by the key policy %s",
-		    charId, md5.c_str(), signature.c_str(), policy.c_str());
+		    charId, clientTextForLog(md5).c_str(), clientTextForLog(signature).c_str(), policy.c_str());
 	}
 	CShareClientEditionItfProxy client(senderModuleProxy);
 	client.loadScenarioFileAccepted(this, md5, ok);
@@ -6430,7 +6475,7 @@ void CServerEditionModule::loadUserComponentFile(NLNET::IModuleProxy *senderModu
 	if (!ok)
 	{
 		nlinfo("R2Ed: char %u may not load a user component file (header md5 '%s', signature '%s'): refused by the key policy %s",
-		    charId, md5.c_str(), signature.c_str(), policy.c_str());
+		    charId, clientTextForLog(md5).c_str(), clientTextForLog(signature).c_str(), policy.c_str());
 	}
 	CShareClientEditionItfProxy client(senderModuleProxy);
 	client.loadUserComponentFileAccepted(this, md5, ok);

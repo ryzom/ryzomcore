@@ -1821,7 +1821,7 @@ function r2:buildReactionTitle(reactionUI, erase)
 
 		if actionStep.Action.ValueString and actionStep.Action.ValueString ~= "" then
 			if string.find(eventType, "%%1") then
-				eventType = string.gsub(eventType, "%%1", "'"..tostring(actionStep.Action.ValueString).."'")
+				eventType = replaceTag(eventType, "%%1", "'"..tostring(actionStep.Action.ValueString).."'")
 			else
 				eventType = eventType .. " '" .. tostring(actionStep.Action.ValueString).. "'"
 			end
@@ -1883,7 +1883,7 @@ function r2:getReactionName(reactionInst)
 
 	if actionStep.Action.ValueString and actionStep.Action.ValueString ~= "" then
 		if string.find(eventType, "%%1") then
-			eventType = string.gsub(eventType, "%%1", "'"..tostring(actionStep.Action.ValueString).."'")
+			eventType = replaceTag(eventType, "%%1", "'"..tostring(actionStep.Action.ValueString).."'")
 		else
 			eventType = eventType .. " '" .. tostring(actionStep.Action.ValueString).. "'"
 		end

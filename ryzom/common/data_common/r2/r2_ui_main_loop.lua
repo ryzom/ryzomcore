@@ -16,6 +16,8 @@ local lastTime = 0
 --------------------------------------------------------------------------------
 -- Called by the C++ framework just after scene has been rendered and before ui rendering
 function r2.UIMainLoop:onPostSceneRender()   
+	-- an error message that came while the editor was changing mode is shown now that it has
+	r2.showPendingErrorMessage()
 	-- if left quota has been modified then update scenario window
 	if r2.Mode == "Edit" then
 		if self.LeftQuotaModified then		
