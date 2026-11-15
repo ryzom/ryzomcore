@@ -854,11 +854,53 @@ static const char *const CharacterFilePatterns[] = {
 	"save/%s.icfg", "save/landmarks_%s.xml", "save/groups_%s.xml", "save/log_%s.txt" };
 static const uint CharacterFilePatternCount = sizeof(CharacterFilePatterns) / sizeof(CharacterFilePatterns[0]);
 
+// The new names (buildCharacterFileName) that had their copy of the files of the old name, one per line. The copy
+// is made once: a file the player deletes or moves away does not come back from the old name, and a new character
+// of the name of a deleted one starts without them.
+static const char *const CharacterFilesCopiedList = "save/character_files_copied.txt";
+
+static bool characterFilesCopied(const std::string &newName)
+{
+	CIFile in;
+	if (!CFile::fileExists(CharacterFilesCopiedList) || !in.open(CharacterFilesCopiedList))
+		return false;
+	std::string content;
+	content.resize(in.getFileSize());
+	if (!content.empty())
+		in.serialBuffer((uint8 *)&content[0], (uint)content.size());
+	std::vector<std::string> names;
+	NLMISC::explode(content, std::string("\n"), names, true);
+	for (uint i = 0; i < names.size(); ++i)
+	{
+		std::string name = names[i];
+		if (!name.empty() && name[name.size() - 1] == '\r')
+			name.resize(name.size() - 1);
+		if (name == newName)
+			return true;
+	}
+	return false;
+}
+
+static void recordCharacterFilesCopied(const std::string &newName)
+{
+	COFile out;
+	if (!out.open(CharacterFilesCopiedList, true))
+	{
+		nlwarning("The list %s could not be written: the files of the old name of %s may be copied again", CharacterFilesCopiedList, newName.c_str());
+		return;
+	}
+	std::string line = newName + "\n";
+	out.serialBuffer((uint8 *)&line[0], (uint)line.size());
+}
+
 // The files of a character were named after the character alone before the name of their home mainland was
-// part of the name (buildCharacterFileName). The files of the old name are copied to the new name once, and left
-// where they are: two characters of the same name on two mainlands used the same files, and each gets a copy.
+// part of the name (buildCharacterFileName). The files of the old name are copied to the new name once
+// (CharacterFilesCopiedList), and left where they are: two characters of the same name on two mainlands, or of two
+// accounts that use this folder, used the same files, and each gets a copy.
 static void copyCharacterFilesOfOldName(const std::string &oldName, const std::string &newName)
 {
+	if (characterFilesCopied(newName))
+		return;
 	for (uint i = 0; i < CharacterFilePatternCount; ++i)
 	{
 		std::string oldFile = NLMISC::toString(CharacterFilePatterns[i], oldName.c_str());
@@ -870,6 +912,7 @@ static void copyCharacterFilesOfOldName(const std::string &oldName, const std::s
 		else
 			nlwarning("The file %s of the character could not be copied to %s, the name with its home mainland: the character starts without it", oldFile.c_str(), newFile.c_str());
 	}
+	recordCharacterFilesCopied(newName);
 }
 
 // Deletes the files of a deleted character, but its chat log (the last of CharacterFilePatterns): a new character
@@ -1964,19 +2007,10 @@ public:
 
 		// Yoyo: delete the Local files. To avoid problem if recreate a character with same name.
 		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
+		// The files of the old name, without the home mainland, stay: a character of that name on another mainland,
+		// or of another account that uses this folder, may not have had its copy yet. A new character of this name
+		// and mainland does not get them again (copyCharacterFilesOfOldName).
 		deleteCharacterFiles(buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland));
-		// The files of the old name, without the home mainland, would be copied to a new character of that name at its
-		// first selection (copyCharacterFilesOfOldName): they go too, unless another character of the account has the
-		// name, on another mainland, and may not have had its copy yet
-		string oldFileName = buildPlayerNameForSaveFile(playerName);
-		bool oldNameShared = false;
-		for (uint k = 0; k < CharacterSummaries.size(); ++k)
-		{
-			if (k != nSelectedSlot && buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()) == oldFileName)
-				oldNameShared = true;
-		}
-		if (!oldNameShared)
-			deleteCharacterFiles(oldFileName);
 
 		// Send the message to the server
 		if (!ClientCfg.Local/*ace!ClientCfg.Light*/)
