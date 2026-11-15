@@ -1,6 +1,7 @@
 <?php
 	// Ring web start page: the session management menu the in-game browser
-	// opens (RingMainURL from the login reply; the /webAdmin client command).
+	// opens (RingMainURL from the login reply; the /openRingWindow client
+	// command, which adds the slot of the character in game).
 	// Every other page in this directory links back here. This is the web
 	// route for getting several players into one edit or anim session:
 	// plan and start a session, invite characters into it, join what you
@@ -133,19 +134,22 @@
 	}
 	else
 	{
+		// Four columns: the in-game browser has no horizontal scroll bar, and
+		// with a column for each value the last one, with the Join button,
+		// was cut at the right edge of the window at its default width.
 		echo "<table border=1 cellpadding=4>";
-		echo "<tr><th>Id</th><th>Type</th><th>Title</th><th>Owner</th><th>State</th><th>Your role</th><th>Actions</th></tr>";
+		echo "<tr><th>Id</th><th>Session</th><th>State, your role</th><th>Actions</th></tr>";
 		while ($row = mysqli_fetch_assoc($result))
 		{
 			$sid = intval($row['session_id']);
 			$kicked = intval($row['kicked']) != 0;
 			echo "<tr>";
 			echo "<td>".$sid."</td>";
-			echo "<td>".esc($row['session_type'])."</td>";
-			echo "<td>".esc($row['title'])."</td>";
-			echo "<td>".esc($row['owner_name'])."</td>";
-			echo "<td>".esc($row['state'])."</td>";
-			echo "<td>";
+			echo "<td>".esc($row['session_type']);
+			if ($row['title'] != '')
+				echo "<br>".esc($row['title']);
+			echo "<br>of ".esc($row['owner_name'])."</td>";
+			echo "<td>".esc($row['state'])."<br>";
 			if ($kicked)
 				echo "<b>kicked</b> (was ".esc($row['status']).")";
 			else
