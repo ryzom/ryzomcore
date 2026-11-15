@@ -2652,7 +2652,14 @@ void CServerAnimationModule::addPioneer( TSessionId sessionId, TCharId charId)
 		}
 
 	}
-	nlinfo("R2An: Char %u is connected as animator", charId);
+	{
+		// with the role the character holds in the session it is connected to: a player, an animator, or an
+		// editor that tests its scenario ('invalid' when the edition module has the character in no session)
+		TSessionId roleSessionId;
+		TUserRole role;
+		getEditionModule()->isCharAnimator(charId, roleSessionId, role);
+		nlinfo("R2An: Char %u is connected to the animation of session %u as '%s'", charId, sessionId.asInt(), role.toString().c_str());
+	}
 	// update weather for that char
 	if ( !isLocal )
 	{
