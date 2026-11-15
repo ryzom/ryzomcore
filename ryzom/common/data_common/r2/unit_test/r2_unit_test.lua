@@ -21,7 +21,12 @@ UnitTest.testAddSecondaryActUi = function()
 end
 
 
-UnitTest.testLoadAnimationScenarioUi = function()
+-- The author of an animation gets the file to load: the file the animation was launched with at the Ring
+-- terminal is loaded, and the form in which a file is chosen comes up when there is none or when it
+-- cannot be loaded.
+-- With 'formOnly' no file is loaded: the load of a file has ended without a start (the scenario service
+-- refused it, see r2.onSystemMessageReceived), and the form comes back for another choice.
+UnitTest.testLoadAnimationScenarioUi = function(formOnly)
 	
 	local function onOk(form)
 		if (form.LoadScenario_Name ~= nil and type(form.LoadScenario_Name) == "string") then						
@@ -85,6 +90,19 @@ UnitTest.testLoadAnimationScenarioUi = function()
 
 	end
 	
+	if formOnly then
+		local ui = r2:getForm("LoadScenario")
+		if r2.CurrentForm == ui then
+			-- the form the author chose the file in, hidden since: it comes back as it was
+			ui.active = true
+			ui.Env.Choice = nil
+		else
+			-- the file was the one of the Ring terminal, which is not tried again: the form comes up
+			r2:doForm("LoadScenario", {}, onOk, onCancel)
+		end
+		return
+	end
+
 	local str = r2:getStartingAnimationFilename();
 	local ok, errStr = r2.RingAccess.loadAnimation(str)
 

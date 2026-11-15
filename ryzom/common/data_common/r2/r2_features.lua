@@ -508,6 +508,7 @@ function r2.onTestStartFailed(msg)
 end
 
 function r2.onSystemMessageReceived(msgType, msgWho, msg)
+	local msgId = msg -- the id of a translated text, when the message is one
 	if string.len(msg) > 2 and string.sub(msg, 1, 2) == "ui" then
 		msg = i18n.get(msg)
 	end
@@ -529,6 +530,15 @@ function r2.onSystemMessageReceived(msgType, msgWho, msg)
 		printMsgML(msg)
 	elseif msgType == "ERR" then
 		printMsgML(msg)
+		if msgId == "uiR2EDServerRefuseToLoad" and r2.Mode == "AnimationModeLoading" then
+			-- The scenario service refuses the file of the animation. The load ends with this message
+			-- and no start follows (CClientEditionModule::loadScenarioFileAccepted); the client
+			-- brings the form back for the other ways a load fails (CDynamicMapClient::
+			-- loadAnimationFromBuffer), and not for this one. The author would sit behind the
+			-- connection window with a message that waits for a form: the form comes back here, and
+			-- the message is shown with it.
+			UnitTest.testLoadAnimationScenarioUi(true)
+		end
 		-- in a message box, once: now, or when the wait is over (a box opened during a wait is closed
 		-- by the change of mode that ends it)
 		r2.showErrorMessage(msg)
