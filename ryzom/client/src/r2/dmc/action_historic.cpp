@@ -732,6 +732,28 @@ void CActionHistoric::CRequestInsertNode::undo(IDynamicMapClient *dmc, CScenario
 	//H_AUTO(R2_CRequestInsertNode_undo)
 	nlassert(scenario.getHighLevel()); // if this assert fires, then 'clear' was called with a NULL pointer ! The action historic need a start scenario to have undo capability
 	nlassert(dmc);
+	// A node that has an instance id is erased by it. Its position may name another node by now: an insert at the
+	// end erases the last entry of the table, which is the node of another editor when one was added after it.
+	if (_Value->isTable() && _Value->isString("InstanceId"))
+	{
+		std::string id = _Value->toString("InstanceId");
+		if (!scenario.find(id))
+		{
+			nlwarning("R2Ed: can't undo the insert of '%s', the node is not in the scenario", id.c_str());
+			return;
+		}
+		// modify local version
+		scenario.eraseNode(id, "", -1);
+		// send to network
+		dmc->doRequestEraseNode(id, "", -1);
+#ifdef RYZOM_LUA_UCSTRING
+		CLuaIHM::pushUCString(getEditor().getLua(), id); // Compatibility
+#else
+		getEditor().getLua().push(id);
+#endif
+		getEditor().callEnvMethod("setUndoRedoInstances", 1, 0);
+		return;
+	}
 	// if there's a key here, not good for us :(
 	// so try to find another shorter name for this object...
 	if (!_Key.empty())
