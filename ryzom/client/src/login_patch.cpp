@@ -104,9 +104,43 @@ extern NLMISC::CCmdArgs Args;
 
 struct EPatchDownloadException : public Exception
 {
-	EPatchDownloadException() : Exception( "Download Error" ) {}
-	EPatchDownloadException( const std::string& str ) : Exception( str ) {}
+	// What a failed download says about the server that was asked
+	enum TFailure
+	{
+		// The server answered and does not have the file: nothing to wait for, another server may have it
+		FileNotOnServer,
+		// No answer, or only a part of one: worth asking the same server again
+		NetworkError,
+		// Anything else: the server is of no use to this patch
+		ServerError,
+		// The thread was asked to stop
+		Stopped
+	};
+
+	TFailure Failure;
+
+	EPatchDownloadException()
+	    : Exception("Download Error")
+	    , Failure(ServerError)
+	{
+	}
+	EPatchDownloadException(const std::string &str, TFailure failure = ServerError)
+	    : Exception(str)
+	    , Failure(failure)
+	{
+	}
 	virtual ~EPatchDownloadException() throw() NL_OVERRIDE{}
+};
+
+// No server gave the file, for a reason that another path on the same servers would not change (the network,
+// a fault of the server, a stop request). The callers that try a second path for a missing file let it through.
+struct EPatchDownloadAborted : public Exception
+{
+	EPatchDownloadAborted(const std::string &str)
+	    : Exception(str)
+	{
+	}
+	virtual ~EPatchDownloadAborted() throw() NL_OVERRIDE { }
 };
 
 // A directory the patcher writes to can't be written to: the message is the whole text for the player
@@ -166,6 +200,7 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	MustLaunchBatFile = false;
 
 	DownloadInProgress = false;
+	m_WaitForServers = true;
 	_AsyncDownloader = nullptr;
 	_StateListener = nullptr;
 	_StartRyzomAtEnd = true;
@@ -242,6 +277,13 @@ void CPatchManager::setErrorMessage(const std::string &message)
 }
 
 // ****************************************************************************
+bool CPatchManager::isStopAsked() const
+{
+	// read by the thread that downloads; the flags are set through the two functions below
+	return (CheckThread && CheckThread->StopAsked) || (PatchThread && PatchThread->StopAsked);
+}
+
+// ****************************************************************************
 void CPatchManager::forceStopCheckThread()
 {
 	if (CheckThread)
@@ -284,6 +326,9 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		return;
 
 	// try to read the version file from the server (that will replace the version number)
+	// init() runs in the thread of the caller, which draws the interface: its downloads are asked for once
+	// and not waited for. The check thread asks the servers again.
+	m_WaitForServers = false;
 	try
 	{
 		CConfigFile *cf;
@@ -373,7 +418,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	{
 		// no version file
 	}
-
+	m_WaitForServers = true;
 
 	// retrieve the current client version, according to .idx
 	readClientVersionAndDescFile();
@@ -1458,6 +1503,25 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 	}
 	if (bZipped) dstName += ".ngz";
 
+	// Seconds to wait before the same server is asked again after a network error. A short drop of the
+	// player's connection ends by itself within that time. init() does not wait.
+	static const uint s_RetryDelays[] = { 2, 4, 8, 16 };
+	const uint maxRetries = m_WaitForServers ? (uint)(sizeof(s_RetryDelays) / sizeof(s_RetryDelays[0])) : 0;
+	uint retries = 0;
+
+	// The file is asked from the main servers first, starting with the one that gave the file before
+	// (UsedServer), then from the emergency server, which stands in for this file only (-1)
+	sint server = -1;
+	if (!PatchServers.empty())
+	{
+		if (UsedServer < 0 || UsedServer >= (sint)PatchServers.size())
+			UsedServer = 0;
+		for (uint i = 0; i < PatchServers.size() && !PatchServers[UsedServer].Available; ++i)
+			UsedServer = (UsedServer + 1) % (sint)PatchServers.size();
+		server = UsedServer;
+	}
+	std::vector<bool> asked(PatchServers.size(), false);
+
 	bool	downloadSuccess = false;
 
 	while (!downloadSuccess)
@@ -1465,22 +1529,24 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 		std::string	serverPath;
 		std::string	serverDisplayPath;
 
-		if (UsedServer >= 0 && !PatchServers.empty())
+		if (server >= 0)
 		{
 			// first use main patch servers
-			serverPath = PatchServers[UsedServer].ServerPath;
-			serverDisplayPath = PatchServers[UsedServer].DisplayedServerPath;
+			serverPath = PatchServers[server].ServerPath;
+			serverDisplayPath = PatchServers[server].DisplayedServerPath;
 		}
 		else
 		{
 			// else use alternative emergency patch server
 			serverPath = ServerPath;
 			serverDisplayPath = DisplayedServerPath;
-			UsedServer = -1;
 		}
 
 		try
 		{
+			if (isStopAsked())
+				throw EPatchDownloadException(CI18N::get("uiDLFileErr") + " " + NLMISC::CFile::getFilename(srcName), EPatchDownloadException::Stopped);
+
 			string s = CI18N::get("uiLoginGetFile") + " " + NLMISC::CFile::getFilename(srcName);
 			setState(true, s);
 
@@ -1488,50 +1554,99 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			downloadFile (serverPath+srcName, dstName, progress);
 
 			downloadSuccess = true;
+			if (server >= 0)
+			{
+				PatchServers[server].OnProbation = false;
+				UsedServer = server;
+			}
 		}
 		catch (const EPatchDownloadException& e)
 		{
-			//nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative: %i: %s",UsedServer,PatchServers[UsedServer].DisplayedServerPath.c_str());
-
-			nlwarning("EXCEPTION CATCH: getServerFile() failed - try to find an alternative :");
-			nlwarning("%i", UsedServer);
-			if (UsedServer >= 0 && UsedServer < (int) PatchServers.size())
+			if (e.Failure == EPatchDownloadException::Stopped)
 			{
-				nlwarning("%s", PatchServers[UsedServer].DisplayedServerPath.c_str());
+				nlinfo("PATCH: The download of '%s' ends on a stop request", srcName.c_str());
+				throw EPatchDownloadAborted(e.what());
 			}
 
+			// A network error: the same server again, after a delay that grows with each attempt
+			if (e.Failure == EPatchDownloadException::NetworkError && retries < maxRetries
+			    && (server < 0 || !PatchServers[server].OnProbation))
+			{
+				const uint delay = s_RetryDelays[retries];
+				++retries;
+
+				setState(true, e.what());
+				string s = CI18N::get("uiDLRetry");
+				strFindReplace(s, "%delay", toString(delay));
+				strFindReplace(s, "%attempt", toString(retries + 1));
+				strFindReplace(s, "%max", toString(maxRetries + 1));
+				setState(true, s);
+				nlwarning("PATCH: %s. Attempt %u of %u on '%s' in %u s", e.what(), retries + 1, maxRetries + 1, serverDisplayPath.c_str(), delay);
+
+				// a stop request ends the wait, and the test above ends the download
+				for (uint waited = 0; waited < delay * 10 && !isStopAsked(); ++waited)
+					nlSleep(100);
+				continue;
+			}
+			retries = 0;
+
+			nlwarning("PATCH: %s. No further attempt on '%s' (%s)", e.what(), serverDisplayPath.c_str(), server < 0 ? "the emergency server" : "a main server");
+
 			// if emergency patch server, this is a real issue, rethrow exception
-			if (UsedServer < 0)
+			if (server < 0)
 			{
 				string s = CI18N::get("uiDLFailed");
 				setState(true, s);
 
-				throw Exception(std::string(e.what()));
+				// A file that no server has may be there under another path, which the caller asks for
+				// next. After any other failure a second path would only fail the same way.
+				if (e.Failure == EPatchDownloadException::FileNotOnServer)
+					throw Exception(std::string(e.what()));
+				throw EPatchDownloadAborted(e.what());
 			}
 
 			string s = CI18N::get("uiDLURIFailed") + " " + serverDisplayPath;
 			setState(true, s);
 
-			// this server is unavailable
-			PatchServers[UsedServer].Available = false;
+			// A server that does not have this file is passed over for this file only. After any other
+			// failure it is unavailable for the files that follow too.
+			asked[server] = true;
+			if (e.Failure != EPatchDownloadException::FileNotOnServer)
+				PatchServers[server].Available = false;
 
-			sint	nextServer = (UsedServer+1) % PatchServers.size();
+			sint nextServer = (server + 1) % PatchServers.size();
 
-			while (nextServer != UsedServer && !PatchServers[nextServer].Available)
-				nextServer = (nextServer+1) % PatchServers.size();
+			while (nextServer != server && (!PatchServers[nextServer].Available || asked[nextServer]))
+				nextServer = (nextServer + 1) % PatchServers.size();
 
 			// scanned all servers? use alternative
-			if (nextServer == UsedServer)
+			if (nextServer == server)
 			{
 				string s = CI18N::get("uiNoMoreURI");
 				setState(true, s);
-				UsedServer = -1;
-				nlwarning("EXCEPTION CATCH: getServerFile() failed - no alternative found");
+				server = -1;
+				nlwarning("PATCH: No main server left for '%s', asking the emergency server", srcName.c_str());
+
+				// When no main server is available any more, they all are again for the next file, or it
+				// would have the emergency server only for the rest of the patch. Each gets one attempt per
+				// file until it has worked once: the servers come back after an outage on the player's
+				// side, and a server that is really down costs one attempt per file.
+				bool anyAvailable = false;
+				for (uint i = 0; i < PatchServers.size(); ++i)
+					anyAvailable = anyAvailable || PatchServers[i].Available;
+				if (!anyAvailable)
+				{
+					for (uint i = 0; i < PatchServers.size(); ++i)
+					{
+						PatchServers[i].Available = true;
+						PatchServers[i].OnProbation = true;
+					}
+				}
 			}
 			else
 			{
-				UsedServer = nextServer;
-				nlwarning("EXCEPTION CATCH: getServerFile() failed - trying server: %i: %s",UsedServer,PatchServers[UsedServer].DisplayedServerPath.c_str());
+				server = nextServer;
+				nlwarning("PATCH: Asking server %i for '%s': %s", server, srcName.c_str(), PatchServers[server].DisplayedServerPath.c_str());
 			}
 		}
 	}
@@ -1550,6 +1665,47 @@ static string curlDownloadError(const string &source, CURLcode res, long httpCod
 	if (res != CURLE_OK)
 		curlText = string(curl_easy_strerror(res)) + ", ";
 	return CI18N::get("uiDLFileErr") + " " + NLMISC::CFile::getFilename(source) + " (" + curlText + NLMISC::toString("curl %d, HTTP %ld", (int)res, httpCode) + ")";
+}
+
+// ****************************************************************************
+// What a failed transfer says about the server that was asked, see EPatchDownloadException::TFailure
+static EPatchDownloadException::TFailure curlDownloadFailure(CURLcode res, long httpCode, bool httpSource)
+{
+	// An HTTP status from 300 on is the server's answer about this file. A server that is overloaded or
+	// restarting passes; the other answers mean that the file is not to be had there under this name.
+	if (httpSource && httpCode >= 300)
+	{
+		if (httpCode >= 500 || httpCode == 408 || httpCode == 429)
+			return EPatchDownloadException::NetworkError;
+		return EPatchDownloadException::FileNotOnServer;
+	}
+
+	switch (res)
+	{
+	case CURLE_COULDNT_RESOLVE_PROXY:
+	case CURLE_COULDNT_RESOLVE_HOST:
+	case CURLE_COULDNT_CONNECT:
+	case CURLE_PARTIAL_FILE:
+	case CURLE_OPERATION_TIMEDOUT:
+	case CURLE_SEND_ERROR:
+	case CURLE_RECV_ERROR:
+	case CURLE_GOT_NOTHING:
+	case CURLE_SSL_CONNECT_ERROR:
+#if LIBCURL_VERSION_NUM >= 0x072600
+	case CURLE_HTTP2:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073100
+	case CURLE_HTTP2_STREAM:
+#endif
+		return EPatchDownloadException::NetworkError;
+	case CURLE_FTP_COULDNT_RETR_FILE:
+	case CURLE_FILE_COULDNT_READ_FILE:
+	case CURLE_REMOTE_FILE_NOT_FOUND:
+	case CURLE_REMOTE_ACCESS_DENIED:
+		return EPatchDownloadException::FileNotOnServer;
+	default:
+		return EPatchDownloadException::ServerError;
+	}
 }
 #endif
 
@@ -1623,7 +1779,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
 
-		long r;
+		long r = 0;
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &r);
 
 		curl_easy_cleanup(curl);
@@ -1648,35 +1804,22 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			throw NLMISC::EWriteError(dest);
 		}
 
-		if(CURLE_FTP_COULDNT_RETR_FILE == res)
-		{
-			// file not found, delete local file
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
-		}
-
-		if(CURLE_OK != res)
+		// the progress function ended the transfer on a stop request
+		if (CURLE_ABORTED_BY_CALLBACK == res && isStopAsked())
 		{
 			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
+			throw EPatchDownloadException(curlDownloadError(source, res, r), EPatchDownloadException::Stopped);
 		}
 
 		// Only an HTTP answer has a status to judge. A transfer over file: that worked reports 0 and one
-		// over ftp: reports 226, and curl has said in its own result above whether they worked.
+		// over ftp: reports 226, and curl has said in its own result whether they worked.
 		const bool httpSource = startsWithCaseInsensitiveAscii(source, "http:") || startsWithCaseInsensitiveAscii(source, "https:");
 
-		if (httpSource && r == 404)
+		if (CURLE_OK != res || (httpSource && (r < 200 || r >= 300)))
 		{
-			// file not found, delete it
+			// no file, or not the whole of it: delete what was written
 			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
-		}
-
-		if (httpSource && (r < 200 || r >= 300))
-		{
-			// file not found, delete it
-			NLMISC::CFile::deleteFile(dest.c_str());
-			throw EPatchDownloadException(curlDownloadError(source, res, r));
+			throw EPatchDownloadException(curlDownloadError(source, res, r), curlDownloadFailure(res, r, httpSource));
 		}
 
 #else
@@ -2077,6 +2220,10 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 // ****************************************************************************
 int CPatchManager::downloadProgressFunc(void *foo, double t, double d, double ultotal, double ulnow)
 {
+	// a stop request ends the transfer
+	if (CPatchManager::getInstance()->isStopAsked())
+		return 1;
+
 	if (d != t)
 	{
 		// In the case of progress = 1, don't update because, this will be called in case of error to signal the end of the download, though
@@ -2357,6 +2504,11 @@ void CCheckThread::run ()
 				pPM->DescFilename = toString("%05d/ryzom_%05d.idx", nServerVersion, nServerVersion);
 				// The client version is different from the server version : download new description file
 				pPM->getServerFile(pPM->DescFilename, false); // For the moment description file is not zipped
+			}
+			catch (const EPatchDownloadAborted &)
+			{
+				// no server could be asked: the other path would fail the same way
+				throw;
 			}
 			catch (...)
 			{
@@ -2731,7 +2883,8 @@ void CPatchThread::run()
 	{
 		nlwarning("EXCEPTION CATCH: CPatchThread::run() failed");
 		pPM->setState(true, string(e.what()));
-		sTranslate = CI18N::get("uiPatchEndWithErr");
+		// the reason goes into the error box too, as for the check thread
+		sTranslate = CI18N::get("uiPatchEndWithErr") + " " + e.what();
 		bErr = true;
 	}
 
@@ -2928,6 +3081,11 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					// this is a local error, rethrow ...
 					throw;
 				}
+				catch (const EPatchDownloadAborted &)
+				{
+					// no server could be asked: the other path would fail the same way
+					throw;
+				}
 				catch(...)
 				{
 					// failed with version subfolder, try in the root patch directory
@@ -2937,6 +3095,11 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			catch (const NLMISC::EWriteError &)
 			{
 				// this is a local error, rethrow ...
+				throw;
+			}
+			catch (const EPatchDownloadAborted &)
+			{
+				// no server could be asked: the patch files would fail the same way
 				throw;
 			}
 			catch (...)
@@ -3003,6 +3166,11 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			}
 			catch (const NLMISC::EWriteError &)
 			{
+				throw;
+			}
+			catch (const EPatchDownloadAborted &)
+			{
+				// no server could be asked: the other path would fail the same way
 				throw;
 			}
 			catch (...)

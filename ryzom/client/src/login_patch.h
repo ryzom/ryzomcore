@@ -275,6 +275,11 @@ public:
 	void fatalError(const std::string& errorId, const std::string& param1, const std::string& param2);
 
 	const std::string &	getServerVersion () { return ServerVersion; }
+
+	/// True once the check or the patch thread was asked to stop: a download ends, and so does the wait
+	/// before another attempt
+	bool isStopAsked() const;
+
 private:
 
 	// Methods used by patch & check threads
@@ -381,6 +386,7 @@ private:
 		{
 			ServerPath = serverPath;
 			Available = true;
+			OnProbation = false;
 
 			if (!ServerPath.empty() && ServerPath[ServerPath.size()-1] != '/')
 				ServerPath += '/';
@@ -395,6 +401,8 @@ private:
 		std::string	ServerPath;
 		std::string	DisplayedServerPath;
 		bool		Available;
+		// Made available again after every main server had failed: one attempt per file until one works
+		bool		OnProbation;
 	};
 
 	// Patch Servers
@@ -407,6 +415,9 @@ private:
 	std::string ServerVersion;
 
 	bool DownloadInProgress;
+
+	/// False while init() downloads in the thread of its caller: a failed download is not waited for
+	bool m_WaitForServers;
 
 	/// Description file
 	std::string						DescFilename;
