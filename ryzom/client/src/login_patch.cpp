@@ -260,7 +260,9 @@ bool CPatchManager::checkWritableDirectories()
 	if (m_NotWritableDirectory.empty())
 		return true;
 
-	nlwarning("PATCH: Can't write to '%s': the patcher keeps its files in '%s' (downloads in '%s', game data in '%s') and writes nowhere else, nothing is downloaded",
+	// The text for the player says to make the directory writable or to install the game elsewhere. What a
+	// packager needs to know is said here only: a player has no reason to turn the patcher off.
+	nlwarning("PATCH: Can't write to '%s': the patcher keeps its files in '%s' (downloads in '%s', game data in '%s') and writes nowhere else, nothing is downloaded. An install that another program keeps up to date, data and program files together, turns the in-client patcher off with PatchWanted = 0 in its client configuration.",
 	    m_NotWritableDirectory.c_str(), ClientRootPath.c_str(), ClientPatchPath.c_str(), WritableClientDataPath.c_str());
 	return false;
 }
@@ -2852,7 +2854,7 @@ void CCheckThread::run ()
 
 			if (!CFile::isDirectoryWritable(unpackTo))
 			{
-				nlwarning("PATCH: Can't write to '%s', where the files of category '%s' are unpacked to", unpackTo.c_str(), rCat.getName().c_str());
+				nlwarning("PATCH: Can't write to '%s', where the files of category '%s' are unpacked to. An install that another program keeps up to date, data and program files together, turns the in-client patcher off with PatchWanted = 0 in its client configuration.", unpackTo.c_str(), rCat.getName().c_str());
 				throw EPatchNotWritable(CPatchManager::getNotWritableMessage(unpackTo));
 			}
 		}
