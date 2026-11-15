@@ -393,6 +393,8 @@ private:
 			ServerPath = serverPath;
 			Available = true;
 			OnProbation = false;
+			AskAgainTime = 0;
+			Failures = 0;
 
 			if (!ServerPath.empty() && ServerPath[ServerPath.size()-1] != '/')
 				ServerPath += '/';
@@ -407,8 +409,12 @@ private:
 		std::string	ServerPath;
 		std::string	DisplayedServerPath;
 		bool		Available;
-		// Made available again after every main server had failed: one attempt per file until one works
+		// A server that failed is not available until AskAgainTime (CTime::getLocalTime). Then it is on
+		// probation: one attempt per file until one works. Failures counts the failures in a row, and
+		// the time until the server is asked again doubles with each.
 		bool		OnProbation;
+		NLMISC::TTime	AskAgainTime;
+		uint		Failures;
 	};
 
 	// Patch Servers

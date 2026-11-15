@@ -1515,15 +1515,30 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 	uint retries = 0;
 
 	// The file is asked from the main servers first, starting with the one that gave the file before
-	// (UsedServer), then from the emergency server, which stands in for this file only (-1)
+	// (UsedServer), then from the emergency server (-1). A main server that failed is passed over, by this
+	// file and the following ones, until its time has come to be asked again: once per file, until it works.
 	sint server = -1;
 	if (!PatchServers.empty())
 	{
+		const TTime now = CTime::getLocalTime();
+		for (uint i = 0; i < PatchServers.size(); ++i)
+		{
+			if (!PatchServers[i].Available && now >= PatchServers[i].AskAgainTime)
+			{
+				nlinfo("PATCH: The main server '%s' is asked again", PatchServers[i].DisplayedServerPath.c_str());
+				PatchServers[i].Available = true;
+				PatchServers[i].OnProbation = true;
+			}
+		}
+
 		if (UsedServer < 0 || UsedServer >= (sint)PatchServers.size())
 			UsedServer = 0;
-		for (uint i = 0; i < PatchServers.size() && !PatchServers[UsedServer].Available; ++i)
-			UsedServer = (UsedServer + 1) % (sint)PatchServers.size();
-		server = UsedServer;
+		for (uint i = 0; i < PatchServers.size() && server < 0; ++i)
+		{
+			const sint candidate = (UsedServer + (sint)i) % (sint)PatchServers.size();
+			if (PatchServers[candidate].Available)
+				server = candidate;
+		}
 	}
 	std::vector<bool> asked(PatchServers.size(), false);
 
@@ -1566,6 +1581,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			if (server >= 0)
 			{
 				PatchServers[server].OnProbation = false;
+				PatchServers[server].Failures = 0;
 				UsedServer = server;
 			}
 		}
@@ -1636,10 +1652,19 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 			setState(true, s);
 
 			// A server that does not have this file is passed over for this file only. After any other
-			// failure it is unavailable for the files that follow too.
+			// failure it is passed over by the files that follow too: for a minute at first, and twice as
+			// long after each further failure, up to 16 minutes. A server that does not answer costs its
+			// connection timeout once in that time, not once per file.
 			asked[server] = true;
 			if (e.Failure != EPatchDownloadException::FileNotOnServer)
-				PatchServers[server].Available = false;
+			{
+				CPatchServer &failed = PatchServers[server];
+				const uint minutes = 1u << std::min(failed.Failures, 4u);
+				failed.Available = false;
+				failed.AskAgainTime = CTime::getLocalTime() + (TTime)minutes * 60 * 1000;
+				++failed.Failures;
+				nlwarning("PATCH: The main server '%s' is passed over for %u min", failed.DisplayedServerPath.c_str(), minutes);
+			}
 
 			sint nextServer = (server + 1) % PatchServers.size();
 
@@ -1653,22 +1678,6 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 				setState(true, s);
 				server = -1;
 				nlwarning("PATCH: No main server left for '%s', asking the emergency server", srcName.c_str());
-
-				// When no main server is available any more, they all are again for the next file, or it
-				// would have the emergency server only for the rest of the patch. Each gets one attempt per
-				// file until it has worked once: the servers come back after an outage on the player's
-				// side, and a server that is really down costs one attempt per file.
-				bool anyAvailable = false;
-				for (uint i = 0; i < PatchServers.size(); ++i)
-					anyAvailable = anyAvailable || PatchServers[i].Available;
-				if (!anyAvailable)
-				{
-					for (uint i = 0; i < PatchServers.size(); ++i)
-					{
-						PatchServers[i].Available = true;
-						PatchServers[i].OnProbation = true;
-					}
-				}
 			}
 			else
 			{
