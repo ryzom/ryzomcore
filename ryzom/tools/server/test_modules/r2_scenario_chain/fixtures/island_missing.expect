@@ -22,7 +22,10 @@ absent: return_upload
 
 version_update_note: uiR2EDVersionNoteIslandMissing(uiR2_Deserts01)
 version_update_note: uiR2EDVersionNoteIslandMissing(uiR2_Jungle14)
-update_note: uiR2EDVersionNoteIslandMissing
+# The author is told. The text is the translation of uiR2EDVersionNoteIslandMissing with the name of the
+# island in it, or the label alone in a run without the translations: a line is expected, whatever it
+# says. Which notes there are is in the two lines above.
+update_note:
 no_line: version_update_note: uiR2EDVersionNoteEntryPoints
 scenario_at: Locations[0].IslandName = uiR2_Deserts01
 scenario_at: Locations[0].EntryPoint = uiR2MiddleEntryPoint
