@@ -266,7 +266,10 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 
   <!-- Html -->
 
-	<group type="html" id="html" posref="TM TM" url="home" title_prefix=""
+	<!-- This group has no home page: it shows the release note it is asked to browse, and asks for
+	     nothing when the interface starts (no url, browse_next_time="false"). With url="home" and an
+	     empty home it made a request without an address on the first frame of the login screen. -->
+	<group type="html" id="html" posref="TM TM" title_prefix=""
 		x="0" y="-8" w="624" h="342"
 		background_color="0 0 0 0"
 		error_color="255 240 48 255"
@@ -297,7 +300,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		checkbox_bitmap_over=""
 		background_bitmap_view=""
 		home=""
-		browse_next_time="true"
+		browse_next_time="false"
 		form_text_area_group="edit_box_widget_multiline"
 	>
 		<group id="black" posref="BL BL" sizeref="hw" w="0" h="0" inherit_gc_alpha="true"/>
@@ -482,7 +485,10 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     </group>
 -->
 
-    <group type="html" id="release_txt" posparent="release_win" posref="TL TL" url="home" title_prefix=""
+    <!-- This group has no home page: it shows the release note it is asked to browse, and asks for
+         nothing when the interface starts (no url, browse_next_time="false"). With url="home" and an
+         empty home it made a request without an address on the first frame of the login screen. -->
+    <group type="html" id="release_txt" posparent="release_win" posref="TL TL" title_prefix=""
 		x="8" y="-8" w="620" h="308"
 		background_color="0 0 0 0"
 		error_color="255 240 48 255"
@@ -513,7 +519,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		checkbox_bitmap_over=""
 		background_bitmap_view=""
 		home=""
-		browse_next_time="true"
+		browse_next_time="false"
 		form_text_area_group="edit_box_widget_multiline"
 	>
 		<group id="black" posref="BL BL" sizeref="hw" w="0" h="0" inherit_gc_alpha="true"/>
