@@ -244,13 +244,15 @@ void CPatchManager::setErrorMessage(const std::string &message)
 // ****************************************************************************
 void CPatchManager::forceStopCheckThread()
 {
-	PatchThread->StopAsked = true;
+	if (CheckThread)
+		CheckThread->StopAsked = true;
 }
 
 // ****************************************************************************
 void CPatchManager::forceStopPatchThread()
 {
-	CheckThread->StopAsked = true;
+	if (PatchThread)
+		PatchThread->StopAsked = true;
 }
 
 // ****************************************************************************
