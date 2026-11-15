@@ -4918,7 +4918,10 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 		return false;
 	}
 
+	// This is the access the character has of its own from now on: it is the one the character gets back when
+	// an override of its ring access is removed (removeCharOverrideRingAccess)
 	found->second.RingAccess =  newRingAccess;
+	found->second.RingAccessWithoutOverride = newRingAccess;
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 
