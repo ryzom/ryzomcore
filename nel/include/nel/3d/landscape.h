@@ -377,6 +377,20 @@ public:
 	  */
 	void setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant, float multiply);
 	/**
+	 *  Scale the static lighting of the landscape when it is drawn. Unlike setupStaticLight(), which reaches the
+	 *  patches only as their lighting is updated (updateLighting(), updateLightingAll()), the scale applies to
+	 *  the whole landscape from the next render, at no cost: for a light that changes fast (the weather).
+	 *
+	 *  The scale multiplies the tile and far textures, hence all the light of the ground: the light of
+	 *  setupStaticLight(), the static point lights, and the dynamic lights on the near tiles (the dynamic lights
+	 *  on the far tiles are added after it). Additive tiles and vegetables are not scaled.
+	 *
+	 *  \param scale from 0 (black) to 1 (the default: the landscape is drawn exactly as without a scale).
+	 */
+	void setStaticLightScale(float scale);
+	/// \see setStaticLightScale
+	float getStaticLightScale() const { return m_StaticLightScale; }
+	/**
 	  *  Get the light color by shading table.
 	  *
 	  *  \return a CRGBA[256] array. It give the static light color for a shading value.
@@ -811,6 +825,8 @@ private:
 
 	// *** Lighting
 	CRGBA			_LightValue[256];
+	/// The scale of the static lighting applied at render, see setStaticLightScale()
+	float m_StaticLightScale;
 
 	bool			_AutomaticLighting;
 	CVector			_AutomaticLightDir;

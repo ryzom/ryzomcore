@@ -19,6 +19,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/bsphere.h"
+#include "nel/misc/rgba.h"
 #include "nel/3d/landscapevb_info.h"
 #include "nel/3d/index_buffer.h"
 
@@ -95,6 +96,9 @@ public:
 
 	// The center of the landscape (near CameraCenter), for better ZBuffer precision.
 	static	CVector PZBModelPosition;
+
+	// The static light scale of the landscape as a diffuse color (alpha 255), see CLandscape::setStaticLightScale()
+	static NLMISC::CRGBA StaticLightScaleColor;
 
 
 	// Tile Global Info.
