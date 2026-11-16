@@ -2886,9 +2886,10 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, createSession)
 
 	if (args.size() > 2) fromString(args[2], sessionType);
 
-	if (args.size() != 3 || sessionType < 0 || sessionType > 2)
+	// the two types of session this service hosts (CServerEditionModule::createSession refuses the others)
+	if (args.size() != 3 || sessionType < 0 || sessionType > 1)
 	{
-		log.displayNL("3 Parameters needed: ownerCharId sessionId sessionType");
+		log.displayNL("3 Parameters needed: ownerCharId sessionId sessionType (0 for an edition session, 1 for an animation session)");
 		return false;
 	}
 
@@ -3165,7 +3166,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addCharacterInSession)
 {
 	if (args.size() <3  || args.size() > 5)
 	{
-		log.displayNL("addCharacterInSession.addCharacterInSession <sessionId> <clientId> <roleAsString> <[ringAcess]> <[isnewcomer]>");
+		log.displayNL("ServerEditionModule.addCharacterInSession <sessionId> <charId> <role> [<ringAccess> [<isNewcomer>]]");
 		return false;
 	}
 	uint32 id;
@@ -3184,8 +3185,9 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addCharacterInSession)
 		return false;
 	}
 
+	// the ring access is the fourth argument, with or without the fifth
 	std::string ringAccess;
-	if (args.size() == 4 )
+	if (args.size() >= 4 )
 	{
 		ringAccess = args[3];
 	}
@@ -4917,6 +4919,13 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharMode)
 	fromString(args[0], charId);
 	TCharMode charMode(args[1]);
 
+	// the modes are named as the logs name them (TCharMode::toString); another text gives no mode
+	if (charMode == TCharMode::Invalid)
+	{
+		log.displayNL("'%s' is no mode: the modes are Player, Tester, Editer and Dm", args[1].c_str());
+		return false;
+	}
+
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 
@@ -5337,7 +5346,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, wakeUpSession)
 {
 	if (args.size() != 2)
 	{
-		log.displayNL("Wrong parameters: 1 parameter needed: the Session to hibernate");
+		log.displayNL("Wrong parameters: 2 parameters needed: the session to wake up and the character that owns it");
 		return false;
 	}
 
