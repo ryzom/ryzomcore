@@ -2437,6 +2437,13 @@ bool mainLoop()
 				nlSleep(50);
 				nldebug("lost device");
 			}
+			// Nothing is drawn for a window without area either (minimized, or resized down to its title bar), and
+			// the swap does not wait then: the same time is left to other applications. Network, sound and game
+			// logic then run at the rate this leaves, about 20 frames per second
+			else if (Driver->getWindowWidth() == 0 || Driver->getWindowHeight() == 0)
+			{
+				nlSleep(50);
+			}
 		}
 		else
 		{
