@@ -7515,19 +7515,30 @@ class CAHR2StopLive : public IActionHandler
 		else
 		{
 			CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
-			sb.closeSession(sb.getCharId(), R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId());
+			CClientEditionModule &editionModule = R2::getEditor().getDMC().getEditionModule();
+			TSessionId editSessionLink = editionModule.getEditSessionLink();
+			if (editSessionLink != 0 && editionModule.isSessionOwner())
+			{
+				// The close makes the DSS send a FAR_TP to the mainland, which is replaced by a Far TP to the
+				// edition session. It is set before the request: a close carried out after the wait has given
+				// up sends the player there as well. Only the owner closes the session (the others are refused).
+				nldebug("Will return to editing session %u", editSessionLink.asInt());
+				FarTP.hookNextFarTPForEditor();
+			}
+			// otherwise, let accomplish the FAR_TP to mainland (returnToPreviousSession)
+			// triggered by the DSS.
+			sb.closeSession(sb.getCharId(), editionModule.getCurrentAdventureId());
 
 			if(sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
 			{
-				if(R2::getEditor().getDMC().getEditionModule().getEditSessionLink()!=0)
+				// refused (1: no such session, 2: not the owner): the session goes on, and no Far TP of its close
+				// follows. 3, the session is no longer open, is the answer to a second stop after a first one
+				// that is carried out late: its Far TP is to come.
+				if (sb._LastInvokeResult == 1 || sb._LastInvokeResult == 2)
 				{
-					// Now we expect to receive an impulsion FAR_TP to mainland, triggered
-					// by the DSS. We'll disobey it by FarTPing to the Edition session instead!
-					nldebug( "Will return to editing session %u", R2::getEditor().getDMC().getEditionModule().getEditSessionLink().asInt() );
-					FarTP.hookNextFarTPForEditor();
+					nlwarning("closeSession refused: %u '%s'", sb._LastInvokeResult, sb._LastInvokeResultMsg.c_str());
+					FarTP.unhookNextFarTPForEditor();
 				}
-				// otherwise, let accomplish the FAR_TP to mainland (returnToPreviousSession)
-				// triggered by the DSS.
 			}
 			else
 			{

@@ -1289,6 +1289,8 @@ class CAHReturnToMainland : public IActionHandler
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
+		// a stop of the live session that got no answer has set the Far TP to the editor: the player chose the mainland
+		FarTP.unhookNextFarTPForEditor();
 		FarTP.requestReturnToPreviousSession();
 	}
 };
@@ -1303,6 +1305,8 @@ class CAHReselectCharacter : public IActionHandler
 public:
 	void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
+		// the Far TP of the reconnection goes to the character selection, not to the editor (see return_to_mainland)
+		FarTP.unhookNextFarTPForEditor();
 		if (getParam(sParams, "limbo") == "1")
 		{
 			if (!IsInRingSession)
