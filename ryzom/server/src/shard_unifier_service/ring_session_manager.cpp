@@ -1487,14 +1487,15 @@ restartLoop:
 							{
 								nlwarning("welcomeUserResult : character %u is not found", pjs.CharId);
 
-								// char not found
+								// char not found (the join failed: the ring user is not recorded as entering the session)
+								ok = false;
 								joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 1, "Character not found", TSessionPartStatus::invalid_val);
 							}
 							else
 							{
 								// load the session info
 								CSessionPtr session = CSession::load(_RingDb, pjs.SessionId, __FILE__, __LINE__);
-								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); ok = false; goto endOfWelcomeUserResult;);
 								// The character is let in: the participation its join went by says so from now on (the
 								// join only noted which one, see _joinSessionCommon)
 								if (pjs.EnteredPartId != 0)
@@ -1597,7 +1598,7 @@ restartLoop:
 									break;
 								}
 							}
-							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); ok = false; goto endOfWelcomeUserResult;);
 						}
 					}
 					else if (pjs.MainlandFallback.asInt() != 0 && pjs.From != NULL)
