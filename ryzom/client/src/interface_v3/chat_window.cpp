@@ -755,6 +755,19 @@ CGroupContainer *CChatGroupWindow::findFreeTeller(const string &winName) const
 }
 
 //=================================================================================
+// True when the user owns the animation session of the Ring he is in, from the load of its scenario on: a
+// tell window has its INVITE button then.
+static bool userCanInviteToRingSession()
+{
+	R2::CEditor::TMode mode = R2::getEditor().getMode();
+	if (mode == R2::CEditor::NotInitialized)
+		return false;
+	return R2::getEditor().getDMC().getEditionModule().isSessionOwner()
+		&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
+		&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
+}
+
+//=================================================================================
 CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, const string &winColor)
 {
 	string winName = getFreeTellerTitle(winNameIn);
@@ -804,22 +817,14 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		pGC->center();
 		_FreeTellers.push_back(pGC);
 
-		CInterfaceElement *result = pRoot->findFromShortId(string("invite"));
-		if(result)
+		// The INVITE button of this window. (It was looked up from the root of the interface, by its short
+		// id: that finds the first control named 'invite' of all the windows, and the Invite button of the
+		// Ring's list of characters comes before any tell window. The button of this window stayed hidden
+		// until a contact list changed.)
+		CCtrlBaseButton *inviteButton = dynamic_cast<CCtrlBaseButton *>(pGC->getCtrl("invite"));
+		if (inviteButton)
 		{
-			CCtrlBaseButton * inviteButton = dynamic_cast<CCtrlBaseButton*>(result);
-			if(inviteButton)
-			{
-				bool isDM = false;
-				R2::CEditor::TMode mode = R2::getEditor().getMode();
-				if (mode != R2::CEditor::NotInitialized )
-				{
-					isDM =  R2::getEditor().getDMC().getEditionModule().isSessionOwner()
-						&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
-						&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
-				}
-				inviteButton->setActive(isDM);
-			}
+			inviteButton->setActive(userCanInviteToRingSession());
 		}
 
 		// the group is only active on the current desktop
@@ -863,14 +868,7 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 
 	if (inviteBut)
 	{
-		bool isDM = false;
-		R2::CEditor::TMode mode = R2::getEditor().getMode();
-		if (mode != R2::CEditor::NotInitialized )
-		{
-			isDM =  R2::getEditor().getDMC().getEditionModule().isSessionOwner()
-				&& uint32(R2::CEditor::AnimationModeLoading) <= uint32(mode)
-				&& uint32(mode) <= uint32(R2::CEditor::AnimationModeGoingToPlay);
-		}
+		bool isDM = userCanInviteToRingSession();
 
 		inviteBut->setActive(isDM);
 		if (isDM)
@@ -1450,4 +1448,17 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerInviteToRingSession, "invite_to_ring_session");
+
+// ***************************************************************************************
+// The buttons in the header of the tell windows are set again: the INVITE button depends on the mode of the
+// Ring editor, whose scripts run this at each change of mode (r2:onModeChanged).
+class CHandlerUpdateFreeTellerHeaders : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
+	{
+		PeopleInterraction.updateAllFreeTellerHeaders();
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerUpdateFreeTellerHeaders, "update_free_teller_headers");
 
