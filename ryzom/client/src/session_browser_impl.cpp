@@ -75,6 +75,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 		game.setValue("joinRingSession", luaJoinRingSession);
 		game.setValue("checkRingAccess", luaCheckRingAccess);
 		game.setValue("getFileHeader", luaGetFileHeader);
+		game.setValue("getScenarioSavePath", luaGetScenarioSavePath);
 	}
 
 	if (!ClientCfg.Local)
@@ -269,6 +270,15 @@ int CSessionBrowserImpl::luaGetFileHeader(CLuaState &ls)
 {
 	lua_State* state = ls.getStatePointer();
 	return R2::CComLuaModule::luaGetFileHeader(state);
+}
+
+// *****************************************************************************
+// The folder the editor saves the scenarios in (ScenarioSavePath of the client configuration, with its final
+// slash), for the window of the Ring terminal: it lists the files the editor saved (r2.getScenarioSavePath)
+int CSessionBrowserImpl::luaGetScenarioSavePath(CLuaState &ls)
+{
+	lua_State* state = ls.getStatePointer();
+	return R2::CComLuaModule::luaGetScenarioSavePath(state);
 }
 
 

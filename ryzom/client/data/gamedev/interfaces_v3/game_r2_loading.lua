@@ -355,17 +355,19 @@ function GameR2Loading:buildScenarioTree()
 		local destNode = rootNode:getNodeFromId(nodeId)
 		local autosaveNode = rootNode:getNodeFromId("autosave")
 		local files = getPathContent(searchPath)
+		-- the path goes into a script: a path of the configuration may have backslashes or a quote
+		local searchPathEscape = string.gsub(string.gsub(searchPath, "\\", "\\\\"), "'", "\\'")
 		table.sort(files)
 		for k, v in pairs(files) do
-			if string.lower(nlfile.getExtension(v)) == "r2" then			
+			if string.lower(nlfile.getExtension(v)) == "r2" then
 				local shortFilename = nlfile.getFilename(v)
-				local shortFileEscape=string.gsub(shortFilename, "'", "\\'")				
+				local shortFileEscape=string.gsub(shortFilename, "'", "\\'")
 				local fileLeaf= SNode()
 				fileLeaf.Id = shortFilename
 				local len = string.len(shortFilename) - 3
 				fileLeaf.Text = string.sub(shortFilename,0, len)
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. shortFileEscape .. "', '"..searchPath.."')"				
+				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. shortFileEscape .. "', '"..searchPathEscape.."')"
 				
 				--if autosave file, plug it in the autosave branch
 				if string.find(shortFilename, "autosave") ~= nil then 
@@ -396,7 +398,7 @@ function GameR2Loading:buildScenarioTree()
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './Examples/')"				
+				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './examples/')"				
 				parentNode:addChild(fileLeaf)
 			end
 		end 
@@ -421,7 +423,7 @@ function GameR2Loading:buildScenarioTree()
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './Examples/')"				
+				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './examples/')"				
 				parentNode:addChild(fileLeaf)
 			end
 		end 
@@ -447,7 +449,7 @@ function GameR2Loading:buildScenarioTree()
 					local len = string.len(v[1]) - 3
 					fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 					fileLeaf.AHName = "lua"
-					fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './Examples/')"				
+					fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './examples/')"				
 					parentNode:addChild(fileLeaf)
 				end
 			end
@@ -469,7 +471,8 @@ function GameR2Loading:buildScenarioTree()
 	addNodeToParent("My Files", "my_files", "root")
 	addNodeToParent("Autosave", "autosave", "my_files")
 	addNodeToParent("My scenarios", "my_scenarios", "my_files")
-	parseDirectory("my_scenarios", "./My_scenarios/")
+	-- the folder the editor saves in (ScenarioSavePath of the client configuration)
+	parseDirectory("my_scenarios", game.getScenarioSavePath())
 
 	--Tmp branch for old scenarios
 	addNodeToParent("Old scenarios", "old", "root")
@@ -629,7 +632,7 @@ function GameR2Loading:buildNewbielandScenarioTree()
 				local len = string.len(v[1]) - 3
 				fileLeaf.Text = string.gsub(string.sub(v[1],0, len), "_", " ")
 				fileLeaf.AHName = "lua"
-				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './Examples/')"				
+				fileLeaf.AHParams = "GameR2Loading:setCurrSelectedFile('" .. v[1] .. "', './examples/')"				
 				parentNode:addChild(fileLeaf)
 			end
 		end 

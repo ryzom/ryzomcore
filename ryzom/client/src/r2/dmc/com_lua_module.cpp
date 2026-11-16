@@ -2771,8 +2771,8 @@ sint CComLuaModule::luaHasCharacterSameCharacterIdMd5(lua_State* state)
 
 sint CComLuaModule::luaGetScenarioSavePath(lua_State* state)
 {
-	CComLuaModule* this2 = getInstance(state);
-	nlassert(this2);
+	// (no instance of the module is used: the window of the Ring terminal calls this as well, without an
+	// editor, see CSessionBrowserImpl::luaGetScenarioSavePath)
 	sint args = lua_gettop(state);
 	CHECK_LUA_ARG_COUNT(0, "luaGetScenarioSavePath");
 

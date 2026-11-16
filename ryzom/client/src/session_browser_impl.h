@@ -141,6 +141,7 @@ private:
 	static int luaJoinRingSession(NLGUI::CLuaState &ls);
 	static int luaCheckRingAccess(NLGUI::CLuaState &ls);
 	static int luaGetFileHeader(NLGUI::CLuaState &ls);
+	static int luaGetScenarioSavePath(NLGUI::CLuaState &ls);
 	static int luaGetRingStats(NLGUI::CLuaState &ls);
 	static int luaGetScenarioScores(NLGUI::CLuaState &ls);
 	static int luaUpdateScenarioScores(NLGUI::CLuaState &ls);
