@@ -2809,6 +2809,19 @@ static std::string fieldLookup(const vector< pair< string, string > > &values, c
 	}
 	return missing;
 }
+
+// The Rules of a header, "Mastered" or "Masterless" in every language (also from the words older clients wrote,
+// see CScenarioValidator::normalizeRules), in the language of this client. Another text as it is.
+static std::string rulesText(const std::string &rules)
+{
+	std::string word = R2::CScenarioValidator::normalizeRules(rules);
+	if (word == "Mastered")
+		return CI18N::get("uiR2EDstrict");
+	if (word == "Masterless")
+		return CI18N::get("uiR2EDliberal");
+	return rules;
+}
+
 //
 static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string scenarioName)
 {
@@ -2824,7 +2837,7 @@ static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string sc
 		sv.setScenarioToLoad(scenarioName, values, md5, signature, false);
 	}
 	//
-	setTextField(scenarioWnd, "rules_value_text",			fieldLookup(values, "Rules"));
+	setTextField(scenarioWnd, "rules_value_text",			rulesText(fieldLookup(values, "Rules")));
 	uint levelRange = 0;
 	uint32 nLevel;
 	fromString(fieldLookup(values, "Level"), nLevel);
@@ -3428,19 +3441,11 @@ class CAHLoadScenario : public IActionHandler
 			scenarioType = "so_hack_slash";
 		// --------------------------
 
+		// "Mastered" or "Masterless" whatever the language of the client that saved the file (a header the server
+		// sent may come from an older client); another text is mastered, as before
 		TRuleType ruleType(TRuleType::rt_strict);
-		if(rules==CI18N::get("uiR2EDliberal"))
+		if (R2::CScenarioValidator::normalizeRules(rules) == "Masterless")
 			ruleType = TRuleType(TRuleType::rt_liberal);
-		else if(rules == CI18N::get("uiR2EDstrict"))
-			ruleType = TRuleType(TRuleType::rt_strict);
-		volatile static bool override = false;
-		if (override)
-		{
-			if(rules== "Masterless")
-				ruleType = TRuleType(TRuleType::rt_liberal);
-			else if(rules == "Mastered")
-				ruleType = TRuleType(TRuleType::rt_strict);
-		}
 
 		TRaceFilter raceFilter;
 		if(races["fyros"])

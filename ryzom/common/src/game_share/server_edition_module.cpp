@@ -3059,7 +3059,8 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 		{
 			// The header is the one a client sent with the start, and the class gives these two no value. Without
 			// a BodyMD5 that is an md5 the key is the one of all zeros; without Rules the scenario is masterless,
-			// as it is with every text but "Mastered".
+			// as it is with every text but "Mastered" (or the translation of it an older client wrote, see
+			// CScenarioValidator::normalizeRules).
 			TRunningScenarioInfo info;
 			info.getScenarioKey().clear();
 			info.setDMLess(true);
@@ -3089,7 +3090,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 					info.setSessionLevel(level);
 				}
 				else if (first->first == "CreateBy" )	{ info.setScenarioAuthorName( first->second); }
-				else if (first->first == "Rules" ) { info.setDMLess( first->second != "Mastered"); }
+				else if (first->first == "Rules" ) { info.setDMLess(CScenarioValidator::normalizeRules(first->second) != "Mastered"); }
 				else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
 				else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
 				else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
@@ -4201,7 +4202,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 						info.setSessionLevel(level);
 					}
 					else if (first->first == "CreateBy" )	{ info.setScenarioAuthorName( first->second); }
-					else if (first->first == "Rules" ) { info.setDMLess( first->second != "Mastered"); }
+					else if (first->first == "Rules" ) { info.setDMLess(CScenarioValidator::normalizeRules(first->second) != "Mastered"); }
 					else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
 					else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
 					else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }

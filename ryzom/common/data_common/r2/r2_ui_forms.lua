@@ -171,6 +171,14 @@ local scenarioTreeXML =
 ]]
 
 
+-- The Rules of a file header, "Mastered" or "Masterless" in every language (r2.Version.save; the header reader
+-- reads the translated words older clients wrote as these), in the language of this client. Another text as it is.
+local function rulesText(rules)
+	if rules == "Mastered" then return i18n.get("uiR2EDstrict") end
+	if rules == "Masterless" then return i18n.get("uiR2EDliberal") end
+	return rules
+end
+
 function r2.setCurrSelectedFile(filename, path)
 
 	local formInstance = r2.CurrentForm.Env.FormInstance
@@ -198,7 +206,7 @@ function r2.setCurrSelectedFile(filename, path)
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Description = ""	
 			end
 			if header.Rules then
-				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = header.Rules
+				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = rulesText(header.Rules)
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_Rules then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = ""	
 			end
@@ -261,7 +269,7 @@ function r2.setCurrSelectedFileToLoad(filename, path)
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Description = ""	
 			end
 			if header.Rules then
-				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = header.Rules
+				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = rulesText(header.Rules)
 			elseif r2.CurrentForm.Env.FormInstance.LoadScenario_Rules then
 				r2.CurrentForm.Env.FormInstance.LoadScenario_Rules = ""	
 			end
