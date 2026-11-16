@@ -1715,17 +1715,20 @@ endOfWelcomeUserResult:
 
 			uint32 userId = charId >> 4;
 
+			// The scenario service hosts edition and animation sessions only (CServerEditionModule::createSession)
 			TSessionType st(sessionType);
-			if (st == TSessionType::invalid_val)
+			if (st != TSessionType::st_edit && st != TSessionType::st_anim)
 			{
 				// failed !, invalid session type
 				scheduleSessionResult(from, charId, TSessionId(0), 1, "Invalid session type");
+				return;
 			}
 			TSessionLevel sl(sessionLevel);
 			if (sl == TSessionLevel::invalid_val)
 			{
 				// failed !, invalid level
 				scheduleSessionResult(from, charId, TSessionId(0), 2, "Invalid level");
+				return;
 			}
 //			TAccessType at(accessType);
 //			if (at == TAccessType::invalid_val)
@@ -1738,12 +1741,14 @@ endOfWelcomeUserResult:
 			{
 				// failed !, invalid rule type
 				scheduleSessionResult(from, charId, TSessionId(0), 6, "Invalid rule type");
+				return;
 			}
 			TEstimatedDuration ed(estimatedDuration);
 			if (ed == TEstimatedDuration::invalid_val)
 			{
 				// failed !, invalid estimated duration
 				scheduleSessionResult(from, charId, TSessionId(0), 7, "Invalid estimated duration");
+				return;
 			}
 
 			// first, check for session already in hands of this character
@@ -2004,6 +2009,7 @@ endOfWelcomeUserResult:
 		//                         4 : user already has a runnning session of this type
 		//                         5 : database/internal failure
 		//                         6 : nel user not found
+		//                         8 : a session type the scenario service does not host
 		virtual void on_startSession(NLNET::TSockId from, uint32 charId, TSessionId sessionId)
 		{
 			nldebug("RSM : web start session %u with char %u", sessionId.asInt(), charId);
@@ -2025,6 +2031,15 @@ endOfWelcomeUserResult:
 			if (session->getOwnerId() != charId)
 			{
 				invokeResult(from, charId>>4, 3, "Character not owner of session");
+				return;
+			}
+
+			// The scenario service hosts edition and animation sessions only (CServerEditionModule::createSession)
+			if (session->getSessionType() != TSessionType::st_edit && session->getSessionType() != TSessionType::st_anim)
+			{
+				nlwarning("RSM : on_startSession : session %u of char %u is of type '%s', which no scenario service hosts: not started",
+				    sessionId.asInt(), charId, session->getSessionType().toString().c_str());
+				invokeResult(from, charId>>4, 8, "Session type not hosted");
 				return;
 			}
 
