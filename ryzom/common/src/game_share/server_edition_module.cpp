@@ -3865,7 +3865,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 	if (session) { scenario = session->getScenario(); }
 	if (!session || !scenario)
 	{
-		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, session);
+		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, sessionId.asInt());
 		return false;
 	}
 
@@ -3879,7 +3879,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 		msg = toString("Try to teleport a character %u %sto another character %u %sin the session  %u",
 			source,  sourceCharOk?"":"that is not present in the current session ",
 			dest,  destCharOk?"":"that is not present in the current session ",
-			session);
+			sessionId.asInt());
 
 		if (srcClient)
 		{
