@@ -4938,7 +4938,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 
 	CShareClientEditionItfProxy proxy(*clientEditionProxyPtr);
 	proxy.onRingAccessUpdated(this, newRingAccess);
-	log.displayNL("Ring Access changed to '%s' for user %u", newRingAccess.c_str(),charId);
+	log.displayNL("Ring Access changed to '%s' for character %u", newRingAccess.c_str(),charId);
 
 	// An override of the character stays saved, and is listed, but is not what the character has now: the
 	// last command wins until the character connects again, when the override is applied anew

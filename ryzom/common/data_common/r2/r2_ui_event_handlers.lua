@@ -898,6 +898,9 @@ end
 -- 'BackToEditing' when switching from dm/test mode to editing (when the transition screen is displayed)
 
 function r2:onModeChanged()
+	-- the INVITE button of the tell windows is for the owner of an animation: it follows the mode
+	runAH(nil, "update_free_teller_headers", "")
+
 	-- if a form was displayed, just cancel it
 	if r2.CurrentForm and r2.CurrentForm.active then
 		r2:cancelForm(r2.CurrentForm)

@@ -25,6 +25,7 @@
 #include "net_manager.h"
 #include "connection.h"
 #include "interface_v3/interface_manager.h"
+#include "nel/gui/group_modal.h"
 #include "login_patch.h"
 #include "init_main_loop.h"
 #include "weather.h"
@@ -743,14 +744,56 @@ namespace R2
 
 
 /// A request of requestFarTPToSession() that the session browser did not answer, or did not grant. The reason is
-/// displayed to the player after the translated message, and logged.
+/// logged, with the code of the refusal. The player is told the translated text of TextId, in which %code is the
+/// code.
 struct EFarTPRequestFailed : public NLMISC::Exception
 {
-	EFarTPRequestFailed(const char *reason)
+	EFarTPRequestFailed(const char *reason, const char *textId, uint32 code = 0)
 	    : NLMISC::Exception(std::string(reason))
+	    , TextId(textId)
+	    , Code(code)
 	{
 	}
+
+	std::string TextId;
+	uint32 Code;
 };
+
+/// The text for the player of a request to the session browser that failed: it got no answer in time ('answered'
+/// is false), or the server refused it with a code that has no text of its own.
+static const char *failedRequestTextId(bool answered)
+{
+	return answered ? "uiFarTPRefused" : "uiFarTPNoAnswer";
+}
+
+/// The text for the player of a join that the session manager refused (the results of joinSession, joinEditSession
+/// and joinMainland in ring_session_manager.cpp). The results that say nothing a player can act on (a character,
+/// a user or a database record that is not found, a welcome service that fails) share the text with the code.
+static const char *joinRefusalTextId(uint32 result)
+{
+	switch (result)
+	{
+	case 2: // the session is not found
+	case 4: // no server hosts the session
+	case 15: // the session is not open
+		return "uiFarTPSessionClosed";
+	case 3: // the character has no invitation to the session
+		return "uiFarTPNotInvited";
+	case 5: // the shard is closed, or has no welcome service
+	case 14: // the shard is down, or restricted
+		return "uiSessionUnreachable";
+	case 16:
+		return "uiFarTPBanned";
+	case 17: // a newcomer and a session that is not for newcomers, or the reverse
+		return "uiFarTPNewcomer";
+	case 20: // a free trial account and a scenario that does not allow them
+		return "uiFarTPFreeTrial";
+	case 21:
+		return "uiFarTPKicked";
+	default:
+		return "uiFarTPRefused";
+	}
+}
 
 /*
  * requestFarTPToSession
@@ -791,24 +834,24 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw EFarTPRequestFailed("Protocol error");
+					throw EFarTPRequestFailed("Protocol error", failedRequestTextId(false));
 				if (sb._LastJoinSessionResult == 2)
 				{
 					// the edit session did not exist, create a new one
 					sb.scheduleSession(charId, TSessionType::st_edit, "", "", TSessionLevel::sl_a, /*TAccessType::at_private, */TRuleType::rt_strict, TEstimatedDuration::et_long, 0, TAnimMode(), TRaceFilter(), TReligionFilter(), TGuildFilter(), TShardFilter(), TLevelFilter(), std::string(), TSessionOrientation(), true, true);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_scheduleSessionResult"));
-					if (!ret || sb._LastScheduleSessionResult!= 0)	throw EFarTPRequestFailed("schedule error");
+					if (!ret || sb._LastScheduleSessionResult!= 0)	throw EFarTPRequestFailed("schedule error", failedRequestTextId(ret), sb._LastScheduleSessionResult);
 					sessionId = sb._LastScheduleSessionId;
 
 					// invite the char in the session
 					sb.inviteCharacter(charId, sessionId, charId, TSessionPartStatus::sps_edit_invited);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("Invitation Error");
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("Invitation Error", failedRequestTextId(ret), sb._LastInvokeResult);
 
 					// now, start the edit session
 					sb.startSession(charId, sessionId);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error");
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error", failedRequestTextId(ret), sb._LastInvokeResult);
 
 					// retry to join
 					goto retryJoinEdit;
@@ -819,14 +862,14 @@ retryJoinEdit:
 					// the session was closed, the SU has put it in planned state, start it
 					sb.startSession(charId, sessionId);
 					ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
-					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error (2), no DSS available");
+					if (!ret || sb._LastInvokeResult != 0)	throw EFarTPRequestFailed("start session error (2), no DSS available", failedRequestTextId(ret), sb._LastInvokeResult);
 					// retry to join
 					goto retryJoinEdit;
 				}
 				else if (sb._LastJoinSessionResult != 0)
 				{
 					// any other error are not recoverable from here
-					throw EFarTPRequestFailed("join session error");
+					throw EFarTPRequestFailed("join session error", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 
 				// ok, the join is accepted !, the other far TP work is done in the callback
@@ -839,15 +882,14 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw EFarTPRequestFailed("Protocol error");
+					throw EFarTPRequestFailed("Protocol error", failedRequestTextId(false));
 				if (sb._LastJoinSessionResult == 16)
 				{
-//	#pragma message (NL_LOC_WRN "inform the player that he is banned from the ring")
-					throw EFarTPRequestFailed("User ban from the ring");
+					throw EFarTPRequestFailed("User ban from the ring", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 				if (sb._LastJoinSessionResult != 0)
 				{
-					throw EFarTPRequestFailed("Join session error");
+					throw EFarTPRequestFailed("Join session error", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 				// ok, the join is accepted !, the other far TP work is done in the callback
 			}
@@ -861,11 +903,11 @@ retryJoinEdit:
 				bool ret = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_joinSessionResult"));
 
 				if (!ret)
-					throw EFarTPRequestFailed("Protocol error");
+					throw EFarTPRequestFailed("Protocol error", failedRequestTextId(false));
 				if (sb._LastJoinSessionResult != 0)
 				{
 					// some error during the join
-					throw EFarTPRequestFailed("Error joining session");
+					throw EFarTPRequestFailed("Error joining session", joinRefusalTextId(sb._LastJoinSessionResult), sb._LastJoinSessionResult);
 				}
 				// ok, the join is accepted !, the other far TP work is done in the callback
 			}
@@ -961,9 +1003,23 @@ retryJoinEdit:
 					charSelBlackScreenBitmap->setAlpha(0);
 			}
 		}
-		pIM->messageBoxWithHelp(
-			CI18N::get(requestRetToMainland ? "uiSessionVanishedFarTP" : "uiSessionUnreachable") + errorMsg,
-			letReturnToCharSelect ? "ui:outgame" : "ui:interface");
+		// What the player is told: what happened, in his language (the reason of the exception is English, for
+		// the log), and that the client goes back to the mainland when it does so by itself. The text of a
+		// session that is closed says both.
+		string message = CI18N::get(e.TextId);
+		strFindReplace(message, "%code", toString(e.Code));
+		if (requestRetToMainland)
+		{
+			if (e.TextId == "uiFarTPSessionClosed")
+				message = CI18N::get("uiSessionVanishedFarTP");
+			else
+				message += " " + CI18N::get("uiFarTPBackToMainland");
+			// The return follows at once, and the box goes with the interface it is in: at the character
+			// selection it is gone when the game is entered, a moment later. The player reads the message on
+			// arrival (showReturnMessage).
+			m_ReturnMessage = message;
+		}
+		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface");
 		if ( letReturnToCharSelect && requestRetToMainland )
 		{
 			// The client goes back to the mainland by itself: the box that was just shown has no use for its
@@ -977,7 +1033,7 @@ retryJoinEdit:
 		}
 
 		// Info in the log
-		string outErrorMsg = toString("Could not join %ssession %u: '%s' error\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg );
+		string outErrorMsg = toString("Could not join %ssession %u: '%s' error (code %u)\n", joinMode==CFarTP::LaunchEditor ? "editing " : "", sessionId.asInt(), errorMsg, e.Code );
 		nlwarning("%s", outErrorMsg.c_str());
 //		if ( httpErrorStr.empty() )
 //		{
@@ -1469,6 +1525,10 @@ void CFarTP::sendReady()
 
 	LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
 
+	// the end of a far TP in game (after a character reselect the main loop is entered anew, and shows it)
+	if (!isReselectingChar())
+		showReturnMessage();
+
 	if (_DSSDown)
 	{
 		_DSSDown = false;
@@ -1547,7 +1607,23 @@ void CFarTP::onDssDown(bool forceReturn)
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
 	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"));
+	// the interface of the Ring goes with the return: the message is shown again on arrival
+	m_ReturnMessage = CI18N::get("uiDisconnected");
 	requestReturnToPreviousSession();
+}
+
+void CFarTP::showReturnMessage()
+{
+	if (m_ReturnMessage.empty())
+		return;
+
+	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage);
+	m_ReturnMessage.clear();
+	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
+	// this one comes up while the game is still loading: it stays until its OK button is used.
+	CGroupModal *box = dynamic_cast<CGroupModal *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:message_box_with_help"));
+	if (box)
+		box->ExitClickOut = false;
 }
 
 extern bool loginFinished;

@@ -303,6 +303,10 @@ public:
 	/// that wait for the new shard on the main thread (farTPmainLoop, sendReady, initMainLoop on a reselect).
 	void exitIfFailedOrDisconnected();
 	void onDssDown(bool forceReturn=false);
+	/// Shows again, in the interface of the game, what the player was told when the client was sent back to the
+	/// mainland by itself (m_ReturnMessage), with an OK button. Called when the main loop is entered and at the end
+	/// of a far TP in game: the first box is gone with the interface it was shown in.
+	void showReturnMessage();
 
 	void setIngame() { _InGameMode = true; }
 	void setOutgame() { _InGameMode = false; }
@@ -311,6 +315,7 @@ public:
 		setIngame();
 		_ReselectingChar = false;
 		m_ReselectThroughLimbo = false;
+		showReturnMessage();
 	}
 	void beginEmbeddedServerHop()
 	{
@@ -347,6 +352,7 @@ private:
 //	bool _SelfReconnecting; // allows to disconnect after character selection and reconnect until the player can choose another character
 	bool m_ReselectThroughLimbo; // the current character reselect keeps the connection (see requestReselectThroughLimbo)
 	std::string m_FailureMessage; // set by onFailure (see exitIfFailed)
+	std::string m_ReturnMessage; // the message of an automatic return to the mainland, until it is shown on arrival (see showReturnMessage)
 
 };
 
