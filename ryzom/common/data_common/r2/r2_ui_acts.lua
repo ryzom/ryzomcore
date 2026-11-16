@@ -257,7 +257,7 @@ function r2.acts:initActsEditor()
 	newLocationMode.Env.Name = self.newLocation
 
 	local ringLevel = actsUI:find("ring_level")
-	ringLevel.hardtext = "Ring level :    " .. r2.getCharacterRingAccess()
+	ringLevel.hardtext = i18n.get("uiR2EDActsRingLevel") .. "    " .. r2.getCharacterRingAccess()
 end
 
 --------------------------------------------------------------------------------------

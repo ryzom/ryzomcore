@@ -774,7 +774,8 @@ function r2:tryGoTest()
 	-- freeze go test in menu & button
 	local goTestButton = getUI("ui:interface:r2ed_toolbar"):find("r2ed_tool_start").unselected.button
 	local goTestMenu = getUI("ui:interface:r2ed_main_menu"):find("go_test")
-	if not goTestButton.frozen or goTest.grayed then	
+	-- (both are freed together when the editor is back in edition: a test that has been asked for is not asked twice)
+	if not goTestButton.frozen and not goTestMenu.grayed then
 		goTestButton.frozen = true
 		goTestMenu.grayed = true
 		runAH(nil, "r2ed_go_test", "")

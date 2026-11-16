@@ -170,7 +170,10 @@ public:
 		nldebug("characterLeaveAnimSession : character %u leave anim session %u", charId, sessionId);
 		// remove the current session (if already stored with this session)
 		TCharCurrentAnimSession::iterator it(_CharCurrentAnimSession.find(charId));
-		if (it != _CharCurrentAnimSession.end() && it->second == sessionId)
+		if (it == _CharCurrentAnimSession.end())
+			nlwarning("characterLeaveAnimSession : the character %u is currently in no session, not in %u",
+				charId, sessionId);
+		else if (it->second == sessionId)
 			_CharCurrentAnimSession.erase(it);
 		else
 			nlwarning("characterLeaveAnimSession : the character %u is currently in session %u, not %u",

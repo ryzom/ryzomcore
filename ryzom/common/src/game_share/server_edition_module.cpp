@@ -136,6 +136,21 @@ namespace
 			out += "...";
 		return out;
 	}
+
+	// The largest multi-part message taken from a client, in bytes of the whole message: the size that the head
+	// of the message announces, which is the length of the message the client cuts in parts.
+	// It is derived from what a client sends to this module (the methods of CShareServerEditionItf in
+	// r2_share_itf.xml, and SUCU and requestUpdateRtScenario in onProcessModuleMessage). No message carries more
+	// than one piece of bulk data. That piece is a tree (startScenario, onScenarioUploadAsked, onNodeSetAsked,
+	// onNodeInsertAsked, requestUpdateRtScenario), which the client compresses and which is read up to
+	// CObjectSerializer::MaxCompressedSize, or the body of a user component (SUCU), which is read up to
+	// CUserComponent::MaxUserComponentDataLength, the same size. The other fields are numbers and short texts
+	// (the header of a scenario, ids, names): the allowance for all of them is the longest single text a
+	// stream reads, CObjectSerializer::MaxStringLength.
+	// (A tree that the client cannot compress under MaxCompressedSize goes uncompressed and can be longer than
+	// this: that is far above a scenario within the quotas of this service, and its message is refused.)
+	const uint32 s_MaxMultiPartMsgTrees = 1;
+	const uint32 s_MaxMultiPartMsgSize = s_MaxMultiPartMsgTrees * R2::CObjectSerializer::MaxCompressedSize + R2::CObjectSerializer::MaxStringLength;
 }
 
 namespace R2
@@ -273,6 +288,9 @@ namespace R2
 		// true when the EGS was told that the animation of this session starts (animSessionStarted), for the
 		// start that was asked for last
 		bool AnimationStartAnnounced;
+		// true once the EGS was told of this animation session (animSessionStarted): it keeps its record until it
+		// is told of the end, which is only reported for a session it knows
+		bool AnimationKnownToEgs;
 		// true from the announce createSession makes for a linked animation session that has its scenario when it
 		// is created, to the start of that scenario (startScenario), which then does not announce it again
 		bool AnimationAnnouncedAtCreation;
@@ -805,6 +823,7 @@ _Scenario(scenario), SessionId(sessionId), _AiInstance(aiInstanceId),_EditSlotId
 
 	IsAnimationStopped = false;
 	AnimationStartAnnounced = false;
+	AnimationKnownToEgs = false;
 	AnimationAnnouncedAtCreation = false;
 	SaveRefused = false;
 	DateSinceNoPlayer = 0;
@@ -824,6 +843,7 @@ CEditionSession::CEditionSession(RSMGR::TSessionType sessionType, TSessionId ses
 {
 	IsAnimationStopped = false;
 	AnimationStartAnnounced = false;
+	AnimationKnownToEgs = false;
 	AnimationAnnouncedAtCreation = false;
 	SaveRefused = false;
 	DateSinceNoPlayer = 0;
@@ -1036,6 +1056,10 @@ CServerEditionModule::CPioneerInfo::CPioneerInfo()
 	Mode = TCharMode::Invalid;
 	Newcomer = false;
 	WaitingMsg = nullptr;
+	WaitingMsgSize = 0;
+	WaitingMsgReceived = 0;
+	WaitingMsgIsStart = false;
+	WaitingMsgRefused = false;
 }
 
 CServerEditionModule::CPioneerInfo::~CPioneerInfo()
@@ -1145,10 +1169,9 @@ public:
 			{
 				firstLoop = false;
 
-				uint32 fileVersion;
-				fromString(tokens[1], fileVersion);
-
-				if (tokens.size() != 2 || tokens[0] != "Version" || fileVersion != FileVersion)
+				// the first line is "Version", a tab and the version of the file
+				uint32 fileVersion = 0;
+				if (tokens.size() != 2 || tokens[0] != "Version" || !fromString(tokens[1], fileVersion) || fileVersion != FileVersion)
 				{
 					nlwarning("Obsolete File Discard '%s'", fileDescription.FileName.c_str());
 					return;
@@ -1172,7 +1195,10 @@ public:
 				}
 				else
 				{
-					nlstop;
+					// a line that is not a character id, a tab and an access: the line is left out and the others
+					// of the file are read
+					nlwarning("R2Ed: the file '%s' has a line of %u fields, where a character id, a tab and a ring access are expected: the line '%s' is left out",
+						fileDescription.FileName.c_str(), (uint)tokens.size(), clientTextForLog(*first).c_str());
 				}
 
 			}
@@ -2884,9 +2910,10 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, createSession)
 
 	if (args.size() > 2) fromString(args[2], sessionType);
 
-	if (args.size() != 3 || sessionType < 0 || sessionType > 2)
+	// the two types of session this service hosts (CServerEditionModule::createSession refuses the others)
+	if (args.size() != 3 || sessionType < 0 || sessionType > 1)
 	{
-		log.displayNL("3 Parameters needed: ownerCharId sessionId sessionType");
+		log.displayNL("3 Parameters needed: ownerCharId sessionId sessionType (0 for an edition session, 1 for an animation session)");
 		return false;
 	}
 
@@ -3120,6 +3147,11 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 			if (!trialAllowed && getIsCharRoS(ownerCharId) && hasPrivilegeOfList(extendedPriv, ":TRIAL:"))
 			{
 				nlwarning("ERROR: A client %u(CharId) (RoS) try to launch an animation that is not RoS. That means that the client has not check the RoS Flags or that this user is trying to hack use. So we will close he animation session (%u) so he will be kicked back to edition.", ownerCharId, sessionId.asInt());
+				// The session was made above and the session manager was told that it is created. It is closed as
+				// any session of this service is: the animation it is linked to stops, which sends the editors of
+				// the edition session back to edition, the EGS is told that the two are no longer linked, and the
+				// session manager is told that the session closes. Nothing was announced for it as a running scenario.
+				closeSession(nullptr, sessionId);
 				return;
 			}
 
@@ -3134,6 +3166,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				// (animationSessionStartFailed), and the start of the scenario does not announce it again
 				// (startScenario). Without the EGS there is no announce to count on: the start makes it.
 				session->AnimationStartAnnounced = true;
+				session->AnimationKnownToEgs = true;
 				session->AnimationAnnouncedAtCreation = true;
 				// ie the animator and player that just arrived before the scenario has uploaded
 				CEditionSession::TCurrentChars::const_iterator first(session->getCurrentChars().begin()), last(session->getCurrentChars().end());
@@ -3163,7 +3196,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addCharacterInSession)
 {
 	if (args.size() <3  || args.size() > 5)
 	{
-		log.displayNL("addCharacterInSession.addCharacterInSession <sessionId> <clientId> <roleAsString> <[ringAcess]> <[isnewcomer]>");
+		log.displayNL("ServerEditionModule.addCharacterInSession <sessionId> <charId> <role> [<ringAccess> [<isNewcomer>]]");
 		return false;
 	}
 	uint32 id;
@@ -3182,8 +3215,9 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addCharacterInSession)
 		return false;
 	}
 
+	// the ring access is the fourth argument, with or without the fifth
 	std::string ringAccess;
-	if (args.size() == 4 )
+	if (args.size() >= 4 )
 	{
 		ringAccess = args[3];
 	}
@@ -3343,6 +3377,8 @@ bool CServerEditionModule::closeSessionImpl(TSessionId sessionId,  std::string& 
 	TSessionId animationSessionId = 0;
 	bool isLinkedAnimSession = false;
 	TSessionId linkedSessionId = sessionId;
+	TSessionId unlinkedEditionSessionId = TSessionId(0);
+	TSessionId unlinkedAnimationSessionId = TSessionId(0);
 	// Closing edit session linked to animation close the animation.
 	if (session)
 	{
@@ -3364,7 +3400,8 @@ bool CServerEditionModule::closeSessionImpl(TSessionId sessionId,  std::string& 
 		}
 		if (session->getSessionType() == RSMGR::TSessionType::st_anim)
 		{
-			if (_CharacterControlProxy)
+			// (an animation session that closes before the EGS was told of its start has no record there)
+			if (_CharacterControlProxy && session->AnimationKnownToEgs)
 			{
 				CCharacterControlItfProxy proxy(_CharacterControlProxy);
 				uint32 score;
@@ -3397,11 +3434,11 @@ bool CServerEditionModule::closeSessionImpl(TSessionId sessionId,  std::string& 
 					linkedSessionId = it->second.EditionSessionId;
 				}
 
-				if (it->second.EditionSessionId && _CharacterControlProxy)
-				{
-					CCharacterControlItfProxy proxy(_CharacterControlProxy);
-					proxy.reportUnlinkedSession(this, it->second.EditionSessionId, oldAnimationSession);
-				}
+				// (the EGS is told that the two are no longer linked once the animation has stopped, below: the end
+				// of the scenario is reported for the edition session, and the characters of this one are found
+				// through the link)
+				unlinkedEditionSessionId = it->second.EditionSessionId;
+				unlinkedAnimationSessionId = oldAnimationSession;
 
 			}
 			if (it->second.EditionSessionId == TSessionId(0) && it->second.AnimationSessionId == TSessionId(0))
@@ -3444,6 +3481,12 @@ bool CServerEditionModule::closeSessionImpl(TSessionId sessionId,  std::string& 
 		{
 			stopTest(linkedSessionId);
 		}
+	}
+
+	if (unlinkedEditionSessionId && _CharacterControlProxy)
+	{
+		CCharacterControlItfProxy proxy(_CharacterControlProxy);
+		proxy.reportUnlinkedSession(this, unlinkedEditionSessionId, unlinkedAnimationSessionId);
 	}
 
 
@@ -3717,13 +3760,40 @@ void CServerEditionModule::verifyRingAccess(TSessionId sessionId, TCharId charId
 	{
 		return;
 	}
+	// The check is for a character that is connected to the session. One that left, or that is on its way back in
+	// and has no ring access here yet (connectChar sets it), is left alone: its client reports again when it has
+	// loaded the scenario.
+	TPioneersSessions::const_iterator connected = _PioneersSessions.find(charId);
+	if (connected == _PioneersSessions.end() || connected->second != sessionId) { return; }
+
 	TPionnerInfos::const_iterator found = _PioneersInfo.find(charId);
 
 	if (found != _PioneersInfo.end())
 	{
 		if (! CRingAccess::getInstance().verifyRight(session->RingAccess, found->second.RingAccess))
 		{
-			 resetSession(nullptr, sessionId, false); //TODO kick if invited, reset if owner
+			// what the scenario uses is the text the clients of the session reported; both go into the log as they are
+			// compared, cut to one line (removing the character below frees its entry)
+			const std::string scenarioAccess = clientTextForLog(session->RingAccess);
+			const std::string charAccess = clientTextForLog(found->second.RingAccess);
+			if (charId == session->getOwnerCharId())
+			{
+				// The scenario of the owner's own session is above the owner's ring access: the session is emptied
+				nlwarning("R2Ed: char %u owns session %u and has the ring access '%s', the scenario of the session uses '%s': the session is reset",
+					charId, sessionId.asInt(), charAccess.c_str(), scenarioAccess.c_str());
+				resetSession(nullptr, sessionId, false);
+			}
+			else
+			{
+				// A character that was invited leaves the session, and the scenario stays as it is for the others. Its
+				// client was told why when it reported the scenario (onScenarioRingAccessUpdated), and is told now that
+				// it is disconnected, as a client that is removed from a session is.
+				nlwarning("R2Ed: char %u has the ring access '%s', the scenario of session %u uses '%s': the character is removed from the session",
+					charId, charAccess.c_str(), sessionId.asInt(), scenarioAccess.c_str());
+				std::string msg;
+				bool ok = removeCharacterFromSessionImpl(sessionId, charId, msg);
+				debugInfo(ok, msg);
+			}
 		}
 	}
 }
@@ -3863,7 +3933,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 	if (session) { scenario = session->getScenario(); }
 	if (!session || !scenario)
 	{
-		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, session);
+		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, sessionId.asInt());
 		return false;
 	}
 
@@ -3877,7 +3947,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 		msg = toString("Try to teleport a character %u %sto another character %u %sin the session  %u",
 			source,  sourceCharOk?"":"that is not present in the current session ",
 			dest,  destCharOk?"":"that is not present in the current session ",
-			session);
+			sessionId.asInt());
 
 		if (srcClient)
 		{
@@ -4266,6 +4336,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					CEditionSession* session = getSession(body.SessionId);
 					BOMB_IF(!session, "ERROR: session must exist", return);
 					session->AnimationStartAnnounced = true;
+					session->AnimationKnownToEgs = true;
 					// ie the animator and player that just arrived before the scenario has uploaded
 					CEditionSession::TCurrentChars::const_iterator first(session->getCurrentChars().begin()), last(session->getCurrentChars().end());
 					for (; first != last; ++first)
@@ -4539,7 +4610,25 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, listConnectedPioneers)
 {
 	if (args.size() != 0) return false;
 
-
+	// The characters whose client edition module is connected to this service, with the session they are in.
+	// A character is listed here before listPioneers has it: its module is up, and it is connected to its session
+	// once the backup service and the EGS are there (tryCharConnection).
+	typedef NLMISC::CTwinMap<TCharId, NLNET::TModuleProxyPtr>::TAToBMap TClientModules;
+	const TClientModules &clients = _ClientsEditionModule.getAToBMap();
+	log.displayNL("%u chars have a client edition module connected", (uint)clients.size());
+	TClientModules::const_iterator first(clients.begin()), last(clients.end());
+	for ( ; first != last ; ++first)
+	{
+		TPioneersSessions::const_iterator session = _PioneersSessions.find(first->first);
+		if (session != _PioneersSessions.end())
+		{
+			log.displayNL("Chars: %u, module '%s', Session: %u", first->first, first->second->getModuleName().c_str(), session->second.asInt());
+		}
+		else
+		{
+			log.displayNL("Chars: %u, module '%s', not connected to a session", first->first, first->second->getModuleName().c_str());
+		}
+	}
 	return true;
 }
 
@@ -4914,6 +5003,13 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharMode)
 	TUserId charId;
 	fromString(args[0], charId);
 	TCharMode charMode(args[1]);
+
+	// the modes are named as the logs name them (TCharMode::toString); another text gives no mode
+	if (charMode == TCharMode::Invalid)
+	{
+		log.displayNL("'%s' is no mode: the modes are Player, Tester, Editer and Dm", args[1].c_str());
+		return false;
+	}
 
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
@@ -5335,7 +5431,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, wakeUpSession)
 {
 	if (args.size() != 2)
 	{
-		log.displayNL("Wrong parameters: 1 parameter needed: the Session to hibernate");
+		log.displayNL("Wrong parameters: 2 parameters needed: the session to wake up and the character that owns it");
 		return false;
 	}
 
@@ -5814,6 +5910,12 @@ bool CServerEditionModule::hibernateSessionImpl  (TSessionId sessionId, std::str
 
 
 	TSessions::iterator found = _Sessions.find(sessionId);
+
+	if (found == _Sessions.end())
+	{
+		msg = NLMISC::toString("Try to hibernate a non existing session %u", sessionId.asInt());
+		return false;
+	}
 
 	CEditionSession* session = found->second;
 	nlassert(session);
@@ -6920,10 +7022,23 @@ void CServerEditionModule::multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 cha
 		info->WaitingMsg = nullptr;
 	}
 
+	// What the head announces is kept for the parts that follow. The size is the length in bytes of the whole
+	// message, which the client cuts in parts; "RSS2" is the start of a scenario (startScenario).
+	info->WaitingMsgSize = size;
+	info->WaitingMsgReceived = 0;
+	info->WaitingMsgName = clientTextForLog(msgName);
+	info->WaitingMsgIsStart = msgName == "RSS2";
+	info->WaitingMsgRefused = false;
+
+	if (size > s_MaxMultiPartMsgSize)
+	{
+		nlwarning("R2Ed: char %u announced the multi-part message '%s' of %u bytes in %u parts, the largest message taken is %u bytes: the message is refused",
+			charId, info->WaitingMsgName.c_str(), size, nbPacket, s_MaxMultiPartMsgSize);
+		refuseMultiPartMsg(charId, *info);
+		return;
+	}
+
 	info->WaitingMsg = new NLNET::CMessage(); //Message name is directly in the data
-	//info->WaitingMsgCurrentSize = 0;
-	//info->WaitingMsgSize = size;
-	//info->WaitingMsgName = msgName;
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 	if (clientEditionProxyPtr)
@@ -6935,6 +7050,28 @@ void CServerEditionModule::multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 cha
 }
 
 
+void CServerEditionModule::refuseMultiPartMsg(TCharId charId, CPioneerInfo &info)
+{
+	delete info.WaitingMsg;
+	info.WaitingMsg = nullptr;
+	info.WaitingMsgRefused = true;
+
+	// The clients of a session wait for the answer to the start of a scenario, the one that sent it and the others
+	// that were told that it is being sent. A start that is not taken is answered as startScenario answers a
+	// scenario that is too large, so that they leave the wait and ask to be connected again. It is the answer
+	// to a request of an author, like the start itself.
+	if (info.WaitingMsgIsStart)
+	{
+		const NLNET::TModuleProxyPtr *clientEditionProxyPtr = getClientProxyPtr(charId);
+		if (clientEditionProxyPtr && isAuthor(charId, "startScenario"))
+		{
+			CMessage message;
+			replyToAll(*clientEditionProxyPtr, CShareClientEditionItfProxy::buildMessageFor_startScenario(message, false, 0, "uiR2EDTooManyElmements"));
+		}
+	}
+}
+
+
 void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 charId, uint32 partId, const std::vector<uint8> &data)
 {
 	nldebug("Received a multi-part message from %u (Body, part=%u, size=%u)", charId, partId, data.size());
@@ -6942,10 +7079,38 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
 
+	// the parts of a message that was refused are dropped: the refusal was logged once
+	if (info->WaitingMsgRefused) { return; }
+
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message  part but the first part seems to have been lost.", charId) ;return;	}
 
+	// A part carries bytes of the message (the client cuts a message in parts of 512 bytes, and the last one has
+	// what is left). A part without any has nothing to add, and no first byte to take the address of.
+	if (data.empty())
+	{
+		nlwarning("R2Ed: char %u sent part %u of a multi-part message with %u bytes, the part is left out", charId, partId, (uint)data.size());
+		return;
+	}
+
+	// The parts of a message add up to the size its head announced, which was checked. A message that goes
+	// beyond it is given up: what was received of it is freed, and the parts that still come are dropped.
+	if (data.size() > info->WaitingMsgSize - info->WaitingMsgReceived)
+	{
+		nlwarning("R2Ed: char %u sent the multi-part message '%s' with more than the %u bytes its head announced (%u bytes received, then part %u of %u bytes): the message is given up",
+			charId, info->WaitingMsgName.c_str(), info->WaitingMsgSize, info->WaitingMsgReceived, partId, (uint)data.size());
+		refuseMultiPartMsg(charId, *info);
+		// the client was told of the head and of the parts so far: it is told that the message is over
+		const NLNET::TModuleProxyPtr* givenUpClientProxyPtr = getClientProxyPtr(charId);
+		if (givenUpClientProxyPtr)
+		{
+			CShareClientEditionItfProxy proxy( *givenUpClientProxyPtr );
+			proxy.multiPartMsgFoot(this);
+		}
+		return;
+	}
+
 	info->WaitingMsg->serialBuffer(const_cast<uint8*>(&data[0]), (uint)data.size());
-	//info->WaitingMsgCurrentSize += data.size();
+	info->WaitingMsgReceived += (uint32)data.size();
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 	if (clientEditionProxyPtr)
@@ -6964,26 +7129,71 @@ void CServerEditionModule::multiPartMsgFoot(NLNET::IModuleProxy *sbs, uint32 cha
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
 
+	// the end of a message that was refused: nothing of it is kept, the next message starts with its head
+	if (info->WaitingMsgRefused)
+	{
+		info->WaitingMsgRefused = false;
+		return;
+	}
+
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message end but the first part seems to have been lost.", charId) ;return;	}
 
-
-	info->WaitingMsg->invert();
-
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
+
+	// A message is handed on when it is whole: all the bytes its head announced, and at least one. What a
+	// client ends before that is refused like a message that goes beyond its size.
+	if (info->WaitingMsgReceived == 0 || info->WaitingMsgReceived != info->WaitingMsgSize)
+	{
+		nlwarning("R2Ed: char %u ended the multi-part message '%s' with %u of the %u bytes its head announced: the message is refused",
+			charId, info->WaitingMsgName.c_str(), info->WaitingMsgReceived, info->WaitingMsgSize);
+		refuseMultiPartMsg(charId, *info);
+		// this is the end of the refused message: the next one starts with its head
+		info->WaitingMsgRefused = false;
+		if (clientEditionProxyPtr)
+		{
+			CShareClientEditionItfProxy proxy( *clientEditionProxyPtr);
+			proxy.multiPartMsgFoot(this);
+		}
+		return;
+	}
+
+	// The message leaves the entry of the character before it is read: whatever happens below (its header can
+	// be one no message has, and the read throws), nothing of it stays, and the entry is not used again (what
+	// the message asks for can remove the character).
+	CUniquePtr<NLNET::CMessage> waitingMsg(info->WaitingMsg);
+	info->WaitingMsg = nullptr;
+
+	try
+	{
+		waitingMsg->invert();
+	}
+	catch (const NLMISC::EStream &e)
+	{
+		nlwarning("R2Ed: char %u ended the multi-part message '%s' of %u bytes with a header that cannot be read (%s): the message is refused",
+			charId, info->WaitingMsgName.c_str(), info->WaitingMsgSize, e.what());
+		refuseMultiPartMsg(charId, *info);
+		info->WaitingMsgRefused = false;
+		if (clientEditionProxyPtr)
+		{
+			CShareClientEditionItfProxy proxy( *clientEditionProxyPtr);
+			proxy.multiPartMsgFoot(this);
+		}
+		return;
+	}
+	info = nullptr;
+
 	if (clientEditionProxyPtr)
 	{
-		CShareClientEditionItfProxy proxy( *clientEditionProxyPtr);
+		// (a copy: the pointer is into the list of the clients)
+		NLNET::TModuleProxyPtr clientEditionProxy = *clientEditionProxyPtr;
+		CShareClientEditionItfProxy proxy(clientEditionProxy);
 		proxy.multiPartMsgFoot(this);
-		onReceiveModuleMessage(*clientEditionProxyPtr, *info->WaitingMsg);
+		onReceiveModuleMessage(clientEditionProxy, *waitingMsg);
 	}
 	else
 	{
 		nlwarning("Error: Char %u was ask to receive the last part of  a multi-part message  part but the player seem to not be connected.", charId) ;
 	}
-
-	delete info->WaitingMsg;
-	info->WaitingMsg = nullptr;
-
 }
 // Simulate the dss
 void CServerEditionModule::forwardToDss(NLNET::IModuleProxy *senderModuleProxy, uint32 charId, const NLNET::CMessage& msg)

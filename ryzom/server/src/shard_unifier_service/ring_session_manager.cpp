@@ -216,6 +216,11 @@ namespace RSMGR
 			TSessionId MainlandFallback;
 			/// The client application of the join, for the join of the fallback
 			std::string ClientApplication;
+			/// The participation the join goes by (0 for none: a mainland, or an account that enters by its
+			/// privilege), which gets EnteredStatus when the welcome service lets the character in
+			uint32 EnteredPartId;
+			/// The status of a character that is in the session with the role of the join
+			TSessionPartStatus EnteredStatus;
 		};
 
 		typedef list<TPendingJoinSession>	TPendingJoins;
@@ -563,7 +568,10 @@ namespace RSMGR
 			}
 
 			session->setState(TSessionState::ss_closed);
-			session->setFinalDuration(uint32(session->getStartDate() - NLMISC::CTime::getSecondsSince1970()));
+			// the time the session ran, from its start to now (none without a start date, or with one after now)
+			uint32 startDate = session->getStartDate();
+			uint32 closeDate = NLMISC::CTime::getSecondsSince1970();
+			session->setFinalDuration((startDate != 0 && closeDate > startDate) ? closeDate - startDate : 0);
 			session->update(_RingDb);
 
 //			// update the temporary shard assocs if needed
@@ -590,8 +598,9 @@ namespace RSMGR
 							session->getSessionParticipants()[i]->getCharId() & 0xf,
 							charId);
 					}
-					else
+					else if (character->getCurrentSession() == sessionId.asInt())
 					{
+						// (a participant that has gone on to another session keeps that one)
 						character->setCurrentSession(0);
 						character->update(_RingDb);
 					}
@@ -1169,8 +1178,8 @@ restartLoop:
 			DROP_IF(session == NULL, ("RSM : reportCharacterKicked : failed to load the session "+toString(sessionId)+" from database"), return);
 			DROP_IF(!session->loadSessionParticipants(_RingDb, __FILE__, __LINE__), ("RSM : reportCharacterKicked : failed to load particpants of session "+toString(sessionId)), return);
 
-			// a little survival check
-			DROP_IF(session->getOwnerId() == (charId >> 4), ("RSM : reportCharacterKicked : session server "+sender->getModuleName()+" try to kick a character of the session owner, forbidden"), return);
+			// a little survival check (the owner of a session is a character, as for the kick the web asks for)
+			DROP_IF(session->getOwnerId() == charId, ("RSM : reportCharacterKicked : session server "+sender->getModuleName()+" try to kick the owner "+toString(charId)+" of the session "+toString(sessionId)+", forbidden"), return);
 
 			// iterate over the participation, looking for the kicked character
 			const std::vector<CSessionParticipantPtr> &parts = session->getSessionParticipants();
@@ -1479,14 +1488,32 @@ restartLoop:
 							{
 								nlwarning("welcomeUserResult : character %u is not found", pjs.CharId);
 
-								// char not found
+								// char not found (the join failed: the ring user is not recorded as entering the session)
+								ok = false;
 								joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 1, "Character not found", TSessionPartStatus::invalid_val);
 							}
 							else
 							{
 								// load the session info
 								CSessionPtr session = CSession::load(_RingDb, pjs.SessionId, __FILE__, __LINE__);
-								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); ok = false; goto endOfWelcomeUserResult;);
+								// The character is let in: the participation its join went by says so from now on (the
+								// join only noted which one, see _joinSessionCommon)
+								if (pjs.EnteredPartId != 0)
+								{
+									CSessionParticipantPtr enteredPart = CSessionParticipant::load(_RingDb, pjs.EnteredPartId, __FILE__, __LINE__);
+									if (enteredPart != NULL && enteredPart->getPersistentState() != NOPE::os_removed
+									    && enteredPart->getCharId() == pjs.CharId && enteredPart->getSessionId() == pjs.SessionId.asInt())
+									{
+										enteredPart->setStatus(pjs.EnteredStatus);
+										enteredPart->update(_RingDb);
+									}
+									else
+									{
+										nlwarning("RSM : welcomeUserResult : the participation %u that the join of char %u in session %u went by is gone, no participation gets the status '%s'",
+										    pjs.EnteredPartId, pjs.CharId, pjs.SessionId.asInt(), pjs.EnteredStatus.toString().c_str());
+									}
+								}
 								// retrieve the session participant
 								character->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
 								TSessionPartStatus status;
@@ -1572,7 +1599,7 @@ restartLoop:
 									break;
 								}
 							}
-							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+							BOMB_IF(itw == _WelcomeServices.end(), "RSM:welcomeUserResult: WSModule sender not found", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Unknown welcome service responded", TSessionPartStatus::invalid_val); ok = false; goto endOfWelcomeUserResult;);
 						}
 					}
 					else if (pjs.MainlandFallback.asInt() != 0 && pjs.From != NULL)
@@ -1783,7 +1810,8 @@ endOfWelcomeUserResult:
 				}
 				*/
 
-				if (nelUser->getExtendedPrivilege().find(":R2_BAN:") != string::npos)
+				// (a privilege counts as a whole name of the list, as for the scenario service)
+				if (hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":R2_BAN:"))
 				{
 					// this guy is banned from ring anim session
 					scheduleSessionResult(from, charId, TSessionId(0), 10, "User is banned from ring animation session");
@@ -2016,10 +2044,11 @@ endOfWelcomeUserResult:
 		//                         1 : char not found
 		//                         2 : session not found
 		//                         3 : session not owned by char
-		//                         4 : user already has a runnning session of this type
+		//                         4 : user already has a runnning session of this type, or this session runs already
 		//                         5 : database/internal failure
 		//                         6 : nel user not found
 		//                         8 : a session type the scenario service does not host
+		//                         9 : the session is closed
 		virtual void on_startSession(NLNET::TSockId from, uint32 charId, TSessionId sessionId)
 		{
 			nldebug("RSM : web start session %u with char %u", sessionId.asInt(), charId);
@@ -2051,6 +2080,45 @@ endOfWelcomeUserResult:
 				    sessionId.asInt(), charId, session->getSessionType().toString().c_str());
 				invokeResult(from, charId>>4, 8, "Session type not hosted");
 				return;
+			}
+
+			// Only a planned session is started. One that is open or locked runs already, and a closed one is
+			// planned again before its start, which the join of the edit session of its owner does
+			// (on_joinEditSession).
+			if (session->getState() != TSessionState::ss_planned)
+			{
+				nlwarning("RSM : on_startSession : session %u of char %u is in state '%s', only a planned session is started: not started",
+				    sessionId.asInt(), charId, session->getState().toString().c_str());
+				if (session->getState() == TSessionState::ss_closed)
+					invokeResult(from, charId>>4, 9, "Session is closed");
+				else
+					invokeResult(from, charId>>4, 4, "Session is already running");
+				return;
+			}
+
+			// A locked session of the owner has lost its session server. It is closed here, as closeAnimSessionsOfOwner
+			// closes one, so that it does not keep the owner from starting a session for as long as that server
+			// stays away. (A session server that comes back with it is told to close it, see registerDSS.)
+			CSString lockedQuery;
+			lockedQuery << "SELECT session_id FROM sessions WHERE owner = "<<charId<<" AND state = '"<<TSessionState::toString(TSessionState::ss_locked)<<"' AND session_type = '"<<session->getSessionType().toString()<<"'";
+			BOMB_IF(!_RingDb.query(lockedQuery), "Failed to look for the locked sessions of character "<<charId, invokeResult(from, charId>>4, 5, "Database failure"); return);
+			std::vector<uint32> lockedSessions;
+			{
+				CUniquePtr<MSW::CStoreResult> lockedResult(_RingDb.storeResult());
+				for (uint32 i = 0; i < lockedResult->getNumRows(); ++i)
+				{
+					uint32 lockedId;
+					lockedResult->fetchRow();
+					lockedResult->getField(0, lockedId);
+					lockedSessions.push_back(lockedId);
+				}
+			}
+			for (uint i = 0; i < lockedSessions.size(); ++i)
+			{
+				nlinfo("RSM : on_startSession : char %u starts session %u, its locked session %u of the same type is closed",
+				    charId, sessionId.asInt(), lockedSessions[i]);
+				closeSession(TSessionId(lockedSessions[i]));
+				_TemporaryLockedSession.erase(TSessionId(lockedSessions[i]));
 			}
 
 			// check that the user don't run more one session of the same type
@@ -2246,9 +2314,11 @@ endOfWelcomeUserResult:
 
 
 		// Close the current edit session of the character
-		// Return 'invokeResult' : 0 : ok, session closed (or about to close)
-		//                         1 : char not found
-		//                         2 : failed to close the session, internal error
+		// Return 'invokeResult' : 0 : ok, session closed (or about to close), or the removal of its saved file asked for
+		//                         2 : the edit session could not be looked up, database error
+		//                         3 : no session server to remove the saved file of a session that does not run
+		//                         4 : the character has no edit session
+		//                         5 : the edit session could not be loaded
 		virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId)
 		{
 			nldebug("RSM : web close edit session of char %u", charId);
@@ -3082,24 +3152,31 @@ endOfWelcomeUserResult:
 				else if (role == TSessionPartStatus::sps_play_invited)
 				{
 					// check that free trial account can't access non authorised scenarios
-					CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
-					if (sessionLog == NULL)
+					// (The scenario of the session is looked up for such an invitee only: it is known once it has
+					// started, when the session gets its session log. Any other character is invited before that
+					// too, as the team of the owner is right after the launch.)
+					if (hasPrivilegeOfList(invitedNelUser->getExtendedPrivilege(), ":TRIAL:"))
 					{
-						// the scenario is not started, can't accept invitation now
-						invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
-						return;
-					}
+						CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
+						if (sessionLog == NULL)
+						{
+							// the scenario is not started, can't accept invitation now
+							nlwarning("RSM : on_inviteCharacter : char %u invites char %u, of a free trial account, in session %u whose scenario has not started: the invitation can't be validated now, refused",
+							    ownerCharId, invitedCharId, sessionId.asInt());
+							invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
+							return;
+						}
 
-					CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-					BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
+						CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
+						BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
 
-					if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
-						&& !scenario->getAllowFreeTrial())
-					{
-						// free trial are not allowed in this scenario
-						invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
-						return;
+						if (!scenario->getAllowFreeTrial())
+						{
+							// free trial are not allowed in this scenario
+							invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
+							return;
 
+						}
 					}
 
 					if (session->getOwnerId() != ownerCharId)
@@ -3481,6 +3558,9 @@ endOfWelcomeUserResult:
 			uint32 storedSessionId = sessionId.asInt();
 			WS::TUserRole enterAs = WS::TUserRole::invalid_val;
 			uint32 instanceId = INVALID_AI_INSTANCE;
+			// the participation that says the character is in the session once the welcome service lets it in
+			uint32 enteredPartId = 0;
+			TSessionPartStatus enteredStatus;
 			if (session->getSessionType() != TSessionType::st_mainland)
 			{
 				// This is a Ring session
@@ -3509,7 +3589,7 @@ endOfWelcomeUserResult:
 
 					CNelUserPtr nelUser = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 					BOMB_IF(nelUser == NULL, "Failed to load nel user "<<userId, joinSessionResult(from, charId>>4, sessionId, 7, "Nel user not found", TSessionPartStatus::invalid_val); return;);
-					if (nelUser->getExtendedPrivilege().find(":R2_BAN:") != string::npos)
+					if (hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":R2_BAN:"))
 					{
 						// this guy is banned from ring anim session
 						joinSessionResult(from, charId>>4, sessionId, 16, "User is banned from ring", TSessionPartStatus::invalid_val);
@@ -3517,7 +3597,7 @@ endOfWelcomeUserResult:
 					}
 
 					if (session->getOwnerId() != charId
-						&& nelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos)
+						&& hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":TRIAL:"))
 					{
 						// check that the scenario launched allow free trials players
 						CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
@@ -3673,8 +3753,8 @@ endOfWelcomeUserResult:
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
 
 
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_editing);
+						// the participant status of an editor that is in
+						enteredStatus = TSessionPartStatus::sps_editing;
 					}
 					else if (	sessionPart->getStatus() == TSessionPartStatus::sps_anim_invited
 						||	sessionPart->getStatus() == TSessionPartStatus::sps_animating)
@@ -3682,20 +3762,22 @@ endOfWelcomeUserResult:
 						// warn the session server that an animator come in
 						enterAs = WS::TUserRole::ur_animator;
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_animating);
+						// the participant status of an animator that is in
+						enteredStatus = TSessionPartStatus::sps_animating;
 						mustGrantFastDisconnection = true;
 					}
 					else
 					{
 						enterAs = WS::TUserRole::ur_player;
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_playing);
+						// the participant status of a player that is in
+						enteredStatus = TSessionPartStatus::sps_playing;
 						mustGrantFastDisconnection = true;
 					}
-					// save the participant status
-					sessionPart->update(_RingDb);
+					// The participation gets this status when the welcome service lets the character in
+					// (welcomeUserResult). Until then, and when the entry is refused or gets no answer, it stays the
+					// invitation it is, which the owner of the session can still remove.
+					enteredPartId = sessionPart->getObjectId();
 				}
 				else
 				{
@@ -3780,6 +3862,8 @@ endOfWelcomeUserResult:
 			pjs.SessionId = TSessionId(storedSessionId);
 			pjs.MainlandFallback = mainlandFallback;
 			pjs.ClientApplication = clientApplication;
+			pjs.EnteredPartId = enteredPartId;
+			pjs.EnteredStatus = enteredStatus;
 
 			// (the code is made from the cookie, which the login service clears when the user leaves)
 			if (mustGrantFastDisconnection && cookie.isValid())
@@ -3788,6 +3872,19 @@ endOfWelcomeUserResult:
 				securityCheck.setSessionId(sessionId);
 				securityCheck.setCookie(cookie); // must not be changed by joinSession(), because the client sends the one he knows before Far TPing
 				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(getFastDisconnectionSecret().c_str()));
+			}
+			// One pending join per user: a welcome service answers for a user, not for a join, so an older join
+			// that got no answer would take the answer of this one, and its participation the status
+			for (TPendingJoins::iterator itp = _PendingJoins.begin(); itp != _PendingJoins.end();)
+			{
+				if (itp->UserId == userId)
+				{
+					nlwarning("RSM : char %u joins session %u : the join of char %u in session %u of the same user got no answer of its welcome service, it is dropped",
+					    charId, storedSessionId, itp->CharId, itp->SessionId.asInt());
+					itp = _PendingJoins.erase(itp);
+				}
+				else
+					++itp;
 			}
 			_PendingJoins.push_back(pjs);
 
@@ -4518,7 +4615,7 @@ endOfWelcomeUserResult:
 
 			// load the scenario data
 			CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-			BOMB_IF(sessionLog == NULL, "Failed to load the scenario "<<sessionLog->getScenarioId(), invokeResult(from, charId>>4, 7, "No scenario info found for the session"); return);
+			BOMB_IF(scenario == NULL, "Failed to load the scenario "<<sessionLog->getScenarioId()<<" of session "<<sessionId.asInt()<<" for the rating of char "<<charId, invokeResult(from, charId>>4, 7, "No scenario info found for the session"); return);
 
 			// lookup for an existing rating to update
 			CPlayerRatingPtr playerRating;
@@ -4775,7 +4872,8 @@ endOfWelcomeUserResult:
 
 		NLMISC_CLASS_COMMAND_DECL(forceSessionCleanup)
 		{
-			if (!_RingDb.query(string("SELECT session_id FROM sessions WHERE state = ")+toString(uint32(TSessionState::ss_open))))
+			// (the state by its name, as the column holds it)
+			if (!_RingDb.query(string("SELECT session_id FROM sessions WHERE state = '")+TSessionState::toString(TSessionState::ss_open)+"'"))
 			{
 				log.displayNL("Error while running database query");
 				return true;
@@ -4802,10 +4900,10 @@ endOfWelcomeUserResult:
 			{
 				TSessionId sessionId(*sessionToClose.begin());
 				log.displayNL("Closing session %u", sessionId.asInt());
-				CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
-
-				session->setState(TSessionState::ss_closed);
-				session->update(_RingDb);
+				// closed as a session whose server reports its end: with its duration, and the characters of an
+				// edit session are no longer in it
+				if (!closeSession(sessionId))
+					log.displayNL("Session %u is not closed: it is gone, or no longer open", sessionId.asInt());
 
 				sessionToClose.erase(sessionToClose.begin());
 			}

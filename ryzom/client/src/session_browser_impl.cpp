@@ -27,6 +27,7 @@
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/skill_manager.h"
+#include "client_chat_manager.h"
 #include "far_tp.h"
 #include "r2/dmc/com_lua_module.h"
 //
@@ -48,6 +49,8 @@ using namespace RSMGR;
 using namespace CHARSYNC;
 using namespace NLNET;
 using namespace R2;
+
+extern CClientChatManager ChatMngr;
 
 CVariable<uint16> SBSPortOffset("client", "SBSPortOffset", "Offset of the SBS port from the FS port", 1000, 0, true);
 
@@ -72,6 +75,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 		game.setValue("joinRingSession", luaJoinRingSession);
 		game.setValue("checkRingAccess", luaCheckRingAccess);
 		game.setValue("getFileHeader", luaGetFileHeader);
+		game.setValue("getScenarioSavePath", luaGetScenarioSavePath);
 	}
 
 	if (!ClientCfg.Local)
@@ -237,6 +241,18 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 		CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:warning_free_trial");
 	}
+	else if (sessionBrowser._LastJoinSessionResult != 0)
+	{
+		// The session manager refused for another reason (the list of the window is older than the session:
+		// a kick, an invitation that is gone, a session that is closed, or a rule the list does not show).
+		// The player is told why, with the texts of a Far TP that is refused. The answer has the reason of
+		// the server in place of the address.
+		uint32 result = sessionBrowser._LastJoinSessionResult;
+		nlinfo("SB: the request to join session %u is refused: %u '%s'", (uint32)ls.toInteger(1), result, sessionBrowser._LastJoinSessionShardAddr.c_str());
+		string text = CI18N::get(CFarTP::joinRefusalTextId(result));
+		strFindReplace(text, "%code", toString(result));
+		pIM->messageBoxWithHelp(text, "ui:interface");
+	}
 
 	return 0;
 }
@@ -254,6 +270,15 @@ int CSessionBrowserImpl::luaGetFileHeader(CLuaState &ls)
 {
 	lua_State* state = ls.getStatePointer();
 	return R2::CComLuaModule::luaGetFileHeader(state);
+}
+
+// *****************************************************************************
+// The folder the editor saves the scenarios in (ScenarioSavePath of the client configuration, with its final
+// slash), for the window of the Ring terminal: it lists the files the editor saved (r2.getScenarioSavePath)
+int CSessionBrowserImpl::luaGetScenarioSavePath(CLuaState &ls)
+{
+	lua_State* state = ls.getStatePointer();
+	return R2::CComLuaModule::luaGetScenarioSavePath(state);
 }
 
 
@@ -290,6 +315,32 @@ void CSessionBrowserImpl::on_invokeResult(NLNET::TSockId /* from */, uint32 /* u
 // ****************************************************************************
 bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charName, NLGUI::CCtrlBase *caller)
 {
+	if (inviteCharacterByNameAndTellRefusal(charName, caller) != InviteGranted)
+		return false;
+	// the session is the one the editor is connected to
+	bool animationSession = R2::getEditor().getMode() != R2::CEditor::NotInitialized
+	    && R2::getEditor().getDMC().getEditionModule().getSessionType() == R2::st_anim;
+	tellCharacterInvited(charName, animationSession);
+	// the list of the characters of the session is asked for again
+	CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
+	return true;
+}
+
+// ****************************************************************************
+void CSessionBrowserImpl::tellCharacterInvited(const std::string &charName, bool animationSession)
+{
+	// The player invited into an animation session gets a tell: it says that the session is in the list of
+	// the Ring terminals, and its tag makes the list of his terminal ask for the sessions again
+	// (CInterfaceChatDisplayer::displayTell). An edit session is in no terminal: the editor invited into
+	// one gets no tell that would send him there.
+	if (animationSession)
+		ChatMngr.tell(charName, CI18N::get("uiRingInviteNotification"));
+	CInterfaceManager::getInstance()->displaySystemInfo("@{6F6F}" + charName + " @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
+}
+
+// ****************************************************************************
+CSessionBrowserImpl::TInviteResult CSessionBrowserImpl::inviteCharacterByNameAndTellRefusal(const std::string &charName, NLGUI::CCtrlBase *caller)
+{
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	inviteCharacterByName(getCharId(), charName);
 	if (!waitOneMessage(getMessageName("on_invokeResult")))
@@ -299,10 +350,10 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 		string text = CI18N::get("uiRingInviteNoAnswer");
 		strFindReplace(text, "%name", charName);
 		im->displaySystemInfo(text, "BC");
-		return false;
+		return InviteNoAnswer;
 	}
 	if (_LastInvokeResult == 0)
-		return true;
+		return InviteGranted;
 
 	nlinfo("SB: the invitation of '%s' into the session is refused: %u '%s'", charName.c_str(), _LastInvokeResult, _LastInvokeResultMsg.c_str());
 	const char *textId = "uiRingInviteRefused";
@@ -314,11 +365,12 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 		if (pVT != nullptr)
 			pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_free_trial");
-		return false;
+		// (the box says why, the line below says who: a team is invited one member after the other)
+		break;
 	}
 	case 12: // one of the two is a newcomer and the other is not
 		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_newcomer");
-		return false;
+		break;
 	case 3: // the session manager, then the session browser: no character of that name
 	case 104:
 		textId = "uiRingInviteCharNotFound";
@@ -336,7 +388,7 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 	strFindReplace(text, "%name", charName);
 	strFindReplace(text, "%code", toString(_LastInvokeResult));
 	im->displaySystemInfo(text, "BC");
-	return false;
+	return InviteRefused;
 }
 
 // ****************************************************************************
@@ -469,23 +521,10 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 			else
 				session.setValue("OwnerRating",		_LastMasterlessRating);
 
-			// calculate the difference between local time and gmt
-			time_t rawtime;
-			struct tm * timeinfo;
-
-			rawtime= sd.getLaunchDate();
-			timeinfo = localtime ( &rawtime );
-			time_t localTime = mktime( timeinfo );
-			//nldebug("local time %02d:%02d",timeinfo->tm_hour,timeinfo->tm_min);
-
-			rawtime= sd.getLaunchDate();
-			timeinfo = gmtime ( &rawtime );
-			time_t gmtTime = mktime( timeinfo );
-			//nldebug("gm time %02d:%02d",timeinfo->tm_hour,timeinfo->tm_min);
-
-			// convert GMT time value from server to local time
-			time_t adjustedTime= sd.getLaunchDate() + localTime - gmtTime;
-			session.setValue("LaunchDate", (sint64)adjustedTime);
+			// The launch date is in seconds since 1970 (UTC), as the server sends it: the scripts of the window
+			// format it with os.date, which gives the local time of this machine. (The difference between the
+			// local time and UTC was added here as well, and the window showed the date that much off.)
+			session.setValue("LaunchDate", (sint64)sd.getLaunchDate());
 
 			session.setValue("ScenarioType", (uint32)sd.getOrientation().getValue());
 			session.push();
@@ -672,6 +711,8 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop());
 		_Lua->newTable();
+		// the character of this client is left out: the list has its own index, without a hole (Lua sorts it)
+		uint listed = 0;
 		for (uint k = 0; k < chars.size(); ++k)
 		{
 			const RSMGR::TCharDesc &cd = chars[k];
@@ -708,7 +749,8 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 
 				luaChar.setValue("Flags",		flags);
 				luaChar.push();
- 				_Lua->rawSetI(-2, k +1); // set in chars list
+				++listed;
+				_Lua->rawSetI(-2, listed); // set in chars list
 			}
 		}
 		// call into lua

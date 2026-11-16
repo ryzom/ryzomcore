@@ -67,9 +67,31 @@ public:
 
 	static uint32 getCharId();
 
-	/** Invite a character, by its name, into the session this character is in, and wait for what the session
-	  * manager answers. A refusal is told to the player: the message box of the free trial or of the newcomer
-	  * rule, or a line of system info with the reason. No answer (the connection is gone) is told as well.
+	/// What the session manager answered to an invitation
+	enum TInviteResult
+	{
+		InviteGranted,
+		InviteRefused,
+		InviteNoAnswer
+	};
+
+	/** Invite a character, by its name, into the session this character is in (the one the session manager has
+	  * as its current session), and wait for what the session manager answers. A refusal is told to the player:
+	  * the message box of the free trial or of the newcomer rule, or a line of system info with the reason. No
+	  * answer (the connection is gone) is told as well. An invitation that is granted is told by
+	  * tellCharacterInvited().
+	  * \param caller the control the request comes from, for the message boxes (may be NULL)
+	  */
+	TInviteResult inviteCharacterByNameAndTellRefusal(const std::string &charName, NLGUI::CCtrlBase *caller);
+
+	/** An invitation that is granted is told: a line of system info for the player, and for the character invited
+	  * into an animation session a tell that says where the session is found.
+	  */
+	void tellCharacterInvited(const std::string &charName, bool animationSession);
+
+	/** The INVITE of the interface of the session the editor is connected to: inviteCharacterByNameAndTellRefusal(),
+	  * then for an invitation that is granted tellCharacterInvited(), and the list of the characters of the session
+	  * is asked for again.
 	  * \param caller the control the request comes from, for the message boxes (may be NULL)
 	  * \return true when the character is invited
 	  */
@@ -119,6 +141,7 @@ private:
 	static int luaJoinRingSession(NLGUI::CLuaState &ls);
 	static int luaCheckRingAccess(NLGUI::CLuaState &ls);
 	static int luaGetFileHeader(NLGUI::CLuaState &ls);
+	static int luaGetScenarioSavePath(NLGUI::CLuaState &ls);
 	static int luaGetRingStats(NLGUI::CLuaState &ls);
 	static int luaGetScenarioScores(NLGUI::CLuaState &ls);
 	static int luaUpdateScenarioScores(NLGUI::CLuaState &ls);

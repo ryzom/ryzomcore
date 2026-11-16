@@ -717,7 +717,8 @@ end
 function RingAccessPoint:onTell()
 	--debugInfo("tell to owner of session" .. self.SelectedSessionId)
 	player = self:getSessionFromId(self.SelectedSessionId).Owner
-	tell(player, i18n.get("uiRAP_AskForInvite"))	
+	-- the line the owner reads (the button's own label was sent before)
+	tell(player, i18n.get("uiRAP_AskForInviteMsg"))
 	displaySystemInfo(concatString(i18n.get("uiRAP_TellSentTo"), player), "BC")	
 end
 
