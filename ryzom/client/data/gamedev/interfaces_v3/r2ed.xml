@@ -876,7 +876,7 @@
 	<instance template="r2ed_tool" id="r2ed_tool_go_test" tooltip="uimR2EDTooltipGoTest" onclick_l="r2ed_go_test" params_l="" posparent="parent" 
 	posref="TL TL" x="0" y="0" 
 	icon="r2ed_go_test.tga" icon_over="r2ed_go_test_over.tga" icon_pushed="r2ed_go_test_pushed.tga"/>-->
-	<instance template="r2ed_tool" id="r2ed_tool_go_edition" tooltip="uimR2EDTooltipGoEdition" onclick_l="r2ed_go_test" params_l="" posparent="parent" 
+	<instance template="r2ed_tool" id="r2ed_tool_go_edition" tooltip="uimR2EDTooltipGoEdition" onclick_l="r2ed_stop_test" params_l="" posparent="parent" 
 	posref="TL TL" x="0" y="0" 
 	icon="r2ed_go_edition.tga" icon_over="r2ed_go_edition_over.tga" icon_pushed="r2ed_go_edition_pushed.tga"/>
 </group>
