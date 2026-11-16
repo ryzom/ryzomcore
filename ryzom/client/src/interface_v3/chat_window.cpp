@@ -1433,16 +1433,9 @@ public:
 		{
 			// ask the SBS to invite the character in the session, and wait for the answer: the session manager
 			// can refuse (the character is already invited, a newcomer or free trial rule, a scenario that is
-			// not started). The player is told a refusal, and the other player is told nothing.
-			if (!CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(playerName, pCaller))
-				return;
-			// additionaly, send a tell to signal the player he has been invited to a ring session
-			ChatMngr.tell(playerName, CI18N::get("uiRingInviteNotification"));
-			//
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			im->displaySystemInfo("@{6F6F}" +  playerName +" @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
-			// force a refresh of the ui
-			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
+			// not started). The player is told a refusal, and the other player is told nothing. An invitation
+			// that is granted is told to both, and the list of the characters of the session is asked for again.
+			CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(playerName, pCaller);
 		}
 	}
 };

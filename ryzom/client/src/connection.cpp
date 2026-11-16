@@ -2850,19 +2850,13 @@ static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string sc
 	// fields get what a file without a header gives)
 	//
 	setTextField(scenarioWnd, "rules_value_text",			rulesText(fieldLookup(values, "Rules")));
-	uint levelRange = 0;
+	// the level the session is listed with: the one the launch sends (the "load_scenario" handler) and the
+	// scenario service makes from the same header when the scenario starts
 	uint32 nLevel;
 	fromString(fieldLookup(values, "Level"), nLevel);
-	switch(nLevel)
-	{
-		case 20:  levelRange = 0; break;
-		case 50:  levelRange = 1; break;
-		case 100: levelRange = 2; break;
-		case 150: levelRange = 3; break;
-		case 200: levelRange = 4; break;
-		case 250: levelRange = 5; break;
-	}
-	setTextField(scenarioWnd, "level_value_text",			CI18N::get("uiRAP_Level" + toString(levelRange)));
+	R2::TSessionLevel sessionLevel;
+	sessionLevel.fromCharacterLevel(nLevel);
+	setTextField(scenarioWnd, "level_value_text",			CI18N::get("uiRAP_Level" + toString(sessionLevel.asIndex())));
 	// a session of a header without a language is listed in English (the "load_scenario" handler), and one without a
 	// type as other (the default orientation of the ring database)
 	std::string language = fieldLookup(values, "Language", "");
@@ -3442,9 +3436,12 @@ class CAHLoadScenario : public IActionHandler
 			else if(pair.first == "TrialAllowed")	trialAllowed = pair.second;
 		}
 
-		uint nLevel;
+		// The level of the session, made from the level of the header as the scenario service makes it when the
+		// scenario starts: a header whose level is none of those the editor writes still gives a session level.
+		uint32 nLevel;
 		fromString(level, nLevel);
-		R2::TSessionLevel sessionLevel = R2::TSessionLevel::TValues(nLevel/50 + 1);
+		R2::TSessionLevel sessionLevel;
+		sessionLevel.fromCharacterLevel(nLevel);
 
 		// ---- fix for old scenarii
 		// They name the language (the former ScenarioLanguages were French, Deutsch, English and Other). A scenario
@@ -3591,10 +3588,12 @@ class CAHLoadScenario : public IActionHandler
 							sessionBrowser._LastScheduleSessionCharId,
 							sessionStatus.toString());
 
+						// (a join that is refused has told the player why: the launch itself did not fail)
+						bool joinGranted = false;
 						if(sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 						{
 							// request session
-							FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
+							joinGranted = FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
 								!R2::getEditor().isInitialized());
 
 							if (sessionBrowser._LastInvokeResult != 0)
@@ -3618,8 +3617,9 @@ class CAHLoadScenario : public IActionHandler
 						}
 
 
-						// invite team, into the session the player enters
-						if(inviteTeam && launchSuccess)
+						// invite team, into the session the player enters: the session manager invites into the
+						// session the character is in, which is the new one once the join is granted
+						if(inviteTeam && launchSuccess && joinGranted)
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
@@ -3631,25 +3631,18 @@ class CAHLoadScenario : public IActionHandler
 									if (pSMC->getString(val,res))
 									{
 										string charName = CEntityCL::removeTitleAndShardFromName(res);
-										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
-
-										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
+										// The player is told a refusal, with its reason, and a missing answer. The
+										// session manager refuses the invitation of a player as long as the scenario
+										// of the session has not started, which is the case here: the scenario
+										// starts once this client is in the session.
+										CSessionBrowserImpl::TInviteResult invited = sessionBrowser.inviteCharacterByNameAndTellRefusal(charName, pCaller);
+										if (invited == CSessionBrowserImpl::InviteNoAnswer)
 										{
 											// the next ones would wait as long: the team members are not invited
-											nlwarning("inviteCharacterByName callback return false");
-											string text = CI18N::get("uiRingInviteNoAnswer");
-											strFindReplace(text, "%name", charName);
-											pIM->displaySystemInfo(text, "BC");
 											break;
 										}
-
-										if(sessionBrowser._LastInvokeResult == 14)
-										{
-											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-											if (pVT != nullptr)
-												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
-											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
-										}
+										if (invited == CSessionBrowserImpl::InviteGranted)
+											sessionBrowser.tellCharacterInvited(charName, true);
 									}
 								}
 							}

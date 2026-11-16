@@ -7634,7 +7634,8 @@ class CAHInviteCharacter : public IActionHandler
 				if (geb && !geb->getInputString().empty())
 				{
 					string charName = geb->getInputString();
-					// tells the player a refusal or a missing answer
+					// tells the player the answer, or that there is none, and tells the invited player of an
+					// animation session
 					CSessionBrowserImpl::getInstance().inviteCharacterByNameAndWait(charName, pCaller);
 
 					geb->setInputString(std::string());

@@ -318,8 +318,8 @@
 					<instance template="header_but" tooltip="uiRAP_LevelTooltip" color="%rap_col_odd_color" w="60" id="level" criterion="Level" text="uiRAP_Level" target="%rap_column_path:level"/>					
 					<instance template="header_but" tooltip="uiRAP_PlayerCountTooltip" color="%rap_col_even_color" w="60" id="player_count" criterion="PlayerCount" text="uiRAP_PlayerCount" target="%rap_column_path:player_count"/>
 					<instance template="header_but" tooltip="uiRAP_LanguageTooltip" color="%rap_col_odd_color" w="70" id="language" criterion="Language" text="uiRAP_Language" target="%rap_column_path:language"/>
-					<instance template="header_but" tooltip="uiRAP_ScenarioTypeTooltip" color="%rap_col_even_color" w="40" id="launch_date" criterion="ScenarioType" text="uiRAP_ScenarioType" target="%rap_column_path:scenario_type"/>
-					<instance template="header_but" tooltip="uiRAP_LaunchDateTooltip" color="%rap_col_odd_color" w="120" id="scenario_type" criterion="LaunchDate" text="uiRAP_LaunchDate" target="%rap_column_path:launch_date"/>
+					<instance template="header_but" tooltip="uiRAP_ScenarioTypeTooltip" color="%rap_col_even_color" w="40" id="scenario_type" criterion="ScenarioType" text="uiRAP_ScenarioType" target="%rap_column_path:scenario_type"/>
+					<instance template="header_but" tooltip="uiRAP_LaunchDateTooltip" color="%rap_col_odd_color" w="120" id="launch_date" criterion="LaunchDate" text="uiRAP_LaunchDate" target="%rap_column_path:launch_date"/>
 
 					<!--
 					<instance template="header_but" tooltip="uiRAP_AuthorRRPRatingTooltip" color="%rap_col_even_color" w="120" id="author_rrp_rating" criterion="AuthorRRPRating" text="uiRAP_AuthorRRPRating" target="%rap_column_path:author_rrp_rating"/>

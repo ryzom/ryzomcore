@@ -542,8 +542,9 @@ end
 
 --***********************************************************************
 function CharTracking:onTell()
-	debugInfo("tell to owner of session" .. self.SelectedCharId)
-	tell(self:getCharFromId(self.SelectedCharId).Char, i18n.get("uiRAP_AskForTall"))
+	-- the chat gets the start of a tell to the character, for the player to write the message (a tell with a
+	-- fixed text was sent here)
+	tell(self:getCharFromId(self.SelectedCharId).Char, "")
 end
 
 --***********************************************************************

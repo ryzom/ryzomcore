@@ -255,6 +255,10 @@ public:
 	// Get the address of a front-end service via http, then begin Far TP
 	bool requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP::TJoinMode joinMode, bool bailOutIfSessionVanished);
 
+	/// The id of the text that tells the player why the session manager refused a join with 'result' (not 0).
+	/// A result without a text of its own gets the text that has %code in it, to replace with the result.
+	static const char *joinRefusalTextId(uint32 result);
+
 	// Ask the EGS to pop the top position if applicable
 	void requestReturnToPreviousSession(TSessionId rejectedSessionId=TSessionId(0));
 
