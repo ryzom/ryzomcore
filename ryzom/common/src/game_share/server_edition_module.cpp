@@ -6979,6 +6979,14 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message  part but the first part seems to have been lost.", charId) ;return;	}
 
+	// A part carries bytes of the message (the client cuts a message in parts of 512 bytes, and the last one has
+	// what is left). A part without any has nothing to add, and no first byte to take the address of.
+	if (data.empty())
+	{
+		nlwarning("R2Ed: char %u sent part %u of a multi-part message with %u bytes, the part is left out", charId, partId, (uint)data.size());
+		return;
+	}
+
 	info->WaitingMsg->serialBuffer(const_cast<uint8*>(&data[0]), (uint)data.size());
 	//info->WaitingMsgCurrentSize += data.size();
 
