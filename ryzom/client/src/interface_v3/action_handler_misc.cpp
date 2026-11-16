@@ -555,12 +555,19 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 
 // The picture of a screenshot. When z is given, it gets the depth of the same picture, row by row from the top like
 // the bitmap; it is left empty when the driver gives no depth.
-void getBuffer(CBitmap &btm, std::vector<float> *z = NULL)
+// Returns false, with a warning, when the window has no area (minimized, or resized down to its title bar): there
+// is no picture then, and the tiles of a custom size screenshot are counted in steps of the window size.
+bool getBuffer(CBitmap &btm, std::vector<float> *z = NULL)
 {
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	//
 	if (z)
 		z->clear();
+	if (Driver->getWindowWidth() == 0 || Driver->getWindowHeight() == 0)
+	{
+		nlwarning("Screenshot not taken: the window has no area (%ux%u)", Driver->getWindowWidth(), Driver->getWindowHeight());
+		return false;
+	}
 	if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
 	{
 		// Destination image
@@ -626,6 +633,7 @@ void getBuffer(CBitmap &btm, std::vector<float> *z = NULL)
 		if (z)
 			Driver->getZBuffer(*z);
 	}
+	return true;
 }
 
 void displayScreenShotSavedInfo(const string &filename)
@@ -759,7 +767,8 @@ void screenShotTGA()
 {
 	CBitmap btm;
 	std::vector<float> z;
-	getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL);
+	if (!getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL))
+		return;
 
 	string filename = findNewScreenShotFileName("screenshot.tga");
 	COFile fs(filename);
@@ -782,7 +791,8 @@ void screenShotPNG()
 {
 	CBitmap btm;
 	std::vector<float> z;
-	getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL);
+	if (!getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL))
+		return;
 
 	string filename = findNewScreenShotFileName("screenshot.png");
 	COFile fs(filename);
@@ -805,7 +815,8 @@ void screenShotJPG()
 {
 	CBitmap btm;
 	std::vector<float> z;
-	getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL);
+	if (!getBuffer(btm, ClientCfg.ScreenShotZBuffer ? &z : NULL))
+		return;
 
 	string filename = findNewScreenShotFileName("screenshot.jpg");
 	COFile fs(filename);
