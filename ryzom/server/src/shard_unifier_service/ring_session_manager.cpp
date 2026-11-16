@@ -2250,9 +2250,11 @@ endOfWelcomeUserResult:
 
 
 		// Close the current edit session of the character
-		// Return 'invokeResult' : 0 : ok, session closed (or about to close)
-		//                         1 : char not found
-		//                         2 : failed to close the session, internal error
+		// Return 'invokeResult' : 0 : ok, session closed (or about to close), or the removal of its saved file asked for
+		//                         2 : the edit session could not be looked up, database error
+		//                         3 : no session server to remove the saved file of a session that does not run
+		//                         4 : the character has no edit session
+		//                         5 : the edit session could not be loaded
 		virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId)
 		{
 			nldebug("RSM : web close edit session of char %u", charId);
