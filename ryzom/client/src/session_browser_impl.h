@@ -70,6 +70,8 @@ public:
 	/** Invite a character, by its name, into the session this character is in, and wait for what the session
 	  * manager answers. A refusal is told to the player: the message box of the free trial or of the newcomer
 	  * rule, or a line of system info with the reason. No answer (the connection is gone) is told as well.
+	  * An invitation that is granted is told to the player, the list of the characters of the session is asked
+	  * for again, and the character invited into an animation session gets a tell that says so.
 	  * \param caller the control the request comes from, for the message boxes (may be NULL)
 	  * \return true when the character is invited
 	  */

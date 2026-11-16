@@ -27,6 +27,7 @@
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/skill_manager.h"
+#include "client_chat_manager.h"
 #include "far_tp.h"
 #include "r2/dmc/com_lua_module.h"
 //
@@ -48,6 +49,8 @@ using namespace RSMGR;
 using namespace CHARSYNC;
 using namespace NLNET;
 using namespace R2;
+
+extern CClientChatManager ChatMngr;
 
 CVariable<uint16> SBSPortOffset("client", "SBSPortOffset", "Offset of the SBS port from the FS port", 1000, 0, true);
 
@@ -302,7 +305,19 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 		return false;
 	}
 	if (_LastInvokeResult == 0)
+	{
+		// The player invited into an animation session gets a tell: it says that the session is in the list of
+		// the Ring terminals, and its tag makes the list of his terminal ask for the sessions again
+		// (CInterfaceChatDisplayer::displayTell). An edit session is in no terminal: the editor invited into
+		// one gets no tell that would send him there.
+		if (R2::getEditor().getMode() != R2::CEditor::NotInitialized
+		    && R2::getEditor().getDMC().getEditionModule().getSessionType() == R2::st_anim)
+			ChatMngr.tell(charName, CI18N::get("uiRingInviteNotification"));
+		im->displaySystemInfo("@{6F6F}" + charName + " @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
+		// the list of the characters of the session is asked for again
+		CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
 		return true;
+	}
 
 	nlinfo("SB: the invitation of '%s' into the session is refused: %u '%s'", charName.c_str(), _LastInvokeResult, _LastInvokeResultMsg.c_str());
 	const char *textId = "uiRingInviteRefused";
