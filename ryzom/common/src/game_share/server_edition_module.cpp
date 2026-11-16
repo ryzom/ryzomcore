@@ -3726,13 +3726,40 @@ void CServerEditionModule::verifyRingAccess(TSessionId sessionId, TCharId charId
 	{
 		return;
 	}
+	// The check is for a character that is connected to the session. One that left, or that is on its way back in
+	// and has no ring access here yet (connectChar sets it), is left alone: its client reports again when it has
+	// loaded the scenario.
+	TPioneersSessions::const_iterator connected = _PioneersSessions.find(charId);
+	if (connected == _PioneersSessions.end() || connected->second != sessionId) { return; }
+
 	TPionnerInfos::const_iterator found = _PioneersInfo.find(charId);
 
 	if (found != _PioneersInfo.end())
 	{
 		if (! CRingAccess::getInstance().verifyRight(session->RingAccess, found->second.RingAccess))
 		{
-			 resetSession(nullptr, sessionId, false); //TODO kick if invited, reset if owner
+			// what the scenario uses is the text the clients of the session reported; both go into the log as they are
+			// compared, cut to one line (removing the character below frees its entry)
+			const std::string scenarioAccess = clientTextForLog(session->RingAccess);
+			const std::string charAccess = clientTextForLog(found->second.RingAccess);
+			if (charId == session->getOwnerCharId())
+			{
+				// The scenario of the owner's own session is above the owner's ring access: the session is emptied
+				nlwarning("R2Ed: char %u owns session %u and has the ring access '%s', the scenario of the session uses '%s': the session is reset",
+					charId, sessionId.asInt(), charAccess.c_str(), scenarioAccess.c_str());
+				resetSession(nullptr, sessionId, false);
+			}
+			else
+			{
+				// A character that was invited leaves the session, and the scenario stays as it is for the others. Its
+				// client was told why when it reported the scenario (onScenarioRingAccessUpdated), and is told now that
+				// it is disconnected, as a client that is removed from a session is.
+				nlwarning("R2Ed: char %u has the ring access '%s', the scenario of session %u uses '%s': the character is removed from the session",
+					charId, charAccess.c_str(), sessionId.asInt(), scenarioAccess.c_str());
+				std::string msg;
+				bool ok = removeCharacterFromSessionImpl(sessionId, charId, msg);
+				debugInfo(ok, msg);
+			}
 		}
 	}
 }
