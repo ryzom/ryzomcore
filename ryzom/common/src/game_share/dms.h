@@ -109,6 +109,9 @@ namespace R2
 		// a scenario that was accepted for the session, and whose start was answered to the clients, could not be
 		// started by the animation module: the session leaves the test mode and its clients are told
 		virtual void animationSessionStartFailed(TSessionId sessionId, uint32 startingAct, const std::string &errorReason) = 0;
+		// stop the animation of a session: the scenario of the session goes back to edition, the animation module
+		// stops the animation (IServerAnimationModule::stopTest) and the clients of the session are told
+		virtual void stopTest(TSessionId sessionId) = 0;
 
 
 	};

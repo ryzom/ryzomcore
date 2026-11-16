@@ -468,7 +468,7 @@ namespace R2
 		virtual bool isSessionHibernating(TSessionId sessionId, RSMGR::TSessionType& sessionType, double& x, double& y, double& orient, uint8& season) NL_OVERRIDE;
 
 		// stop the session
-		void stopTest(TSessionId sessionId);
+		void stopTest(TSessionId sessionId) NL_OVERRIDE;
 		// Simulate autoConnection without SU
 		virtual void createSessionWithoutSu(TCharId charId, NLMISC::CEntityId clientEid) NL_OVERRIDE;
 		// Simulate Set Start AiInstance by SU

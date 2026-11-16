@@ -4577,7 +4577,17 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, stopTest)
 	uint32 dummyLastAct = 0;
 	uint32 id;
 	fromString(args[0], id);
-	stopTest(TSessionId(id), dummyLastAct );
+	TSessionId sessionId(id);
+	// The animation that runs for a session of the edition module is stopped through that module, as every other
+	// stop is: it puts the scenario of the session back in edition, stops the animation here and tells the clients
+	// of the session. Stopped from here alone, the session stays in test mode and its clients in a test that is gone.
+	if (getSession(sessionId) && getEditionModule()->getScenarioById(sessionId))
+	{
+		getEditionModule()->stopTest(sessionId);
+		log.displayNL("The animation of session %u is stopped, the clients of the session are told", id);
+		return true;
+	}
+	stopTest(sessionId, dummyLastAct );
 	return true;
 }
 
