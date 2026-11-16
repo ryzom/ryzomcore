@@ -4905,7 +4905,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 {
 	if (args.size() != 2)
 	{
-		log.displayNL("wrong usage ServerEditionModule.setCharRingAccess <charId> <RingAccess>");
+		log.displayNL("wrong usage ServerEditionModule.setCharRingAccess <charId> <ringAccess> (the character must be connected to this Ring shard)");
 		return false;
 	}
 
@@ -4918,7 +4918,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharRingAccess)
 
 	if ( found == _PioneersInfo.end())
 	{
-		log.displayNL("Char not found");
+		log.displayNL("The character %u is not connected to this Ring shard: the ring access is known here only while the character is in the editor or in a session", charId);
 		return false;
 	}
 
@@ -4955,7 +4955,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, displayCharRingAccess)
 {
 	if (args.size() != 1)
 	{
-		log.displayNL("wrong usage ServerEditionModule.displayCharRingAccess <charId>");
+		log.displayNL("wrong usage ServerEditionModule.displayCharRingAccess <charId> (the character must be connected to this Ring shard)");
 		return false;
 	}
 
@@ -4966,7 +4966,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, displayCharRingAccess)
 
 	if ( found == _PioneersInfo.end())
 	{
-		log.displayNL("Char not found");
+		log.displayNL("The character %u is not connected to this Ring shard: the ring access is known here only while the character is in the editor or in a session", charId);
 		return false;
 	}
 

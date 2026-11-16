@@ -359,8 +359,8 @@ namespace R2
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listAllowedPioneers, "list allowed Pioneers","no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listConnectedPioneers, "list connected Pioneers", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharMode, "set the mode of a char mode are 'editor' 'tester' 'player' 'dm' )", "<charId> <mode>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharRingAccess, "display the RingAccess of a character", "<charId>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character", "<charId> <ringAccess>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharRingAccess, "display the ring access of a character that is connected to this Ring shard", "<charId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character that is connected to this Ring shard, until it connects again", "<charId> <ringAccess>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setSessionStartParams, "simulate a SU message", "<userId> <sessionId> <initialIslandLocation> <initialEntryPoint> <initialSeason>")
 
 
