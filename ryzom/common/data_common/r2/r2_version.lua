@@ -108,10 +108,12 @@ function r2.Version.save(filename)
 			level = string.gsub(tostring(defaulting(r2.Scenario.Description.LevelId, "")), "\n", "\\n")
 			level = levelToString[tonumber(level)]
 			rules = string.gsub(tostring(defaulting(r2.Scenario.AccessRules, "")), "\n", "\\n")
-			if rules=="liberal" then 
-				rules=i18n.get("uiR2EDliberal")
+			-- the same word in every language: the readers translate it to show it (uiR2EDstrict, uiR2EDliberal),
+			-- and read the translated words older clients wrote as these (CScenarioValidator::normalizeRules)
+			if rules=="liberal" then
+				rules="Masterless"
 			elseif rules == "strict" then
-				rules=i18n.get("uiR2EDstrict")
+				rules="Mastered"
 			end
 			title = string.gsub(tostring(defaulting(r2.Scenario.Description.Title, "")), "\n", "\\n")
 			language = r2.Scenario.Language 

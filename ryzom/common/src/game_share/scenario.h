@@ -320,6 +320,11 @@ public:
 
 	bool applySave(const std::string& signature);
 	void applyLoad(std::string& filename, std::string& body, CScenarioValidator::TValues& values);
+
+	/// The Rules of a header as one of the two words a header carries, "Mastered" or "Masterless", also from the
+	/// translated words older clients wrote; any other text as it is
+	static std::string normalizeRules(const std::string &rules);
+
 	std::string getBodyMd5() const { return _BodyMd5; }
 	std::string getFilename() const { return _Filename; }
 

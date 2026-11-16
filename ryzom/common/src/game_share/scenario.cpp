@@ -1028,6 +1028,40 @@ void CEmoteBehavior::load() const
 
 
 
+std::string CScenarioValidator::normalizeRules(const std::string &rules)
+{
+	// A header carries "Mastered" or "Masterless" (r2.Version.save). Older clients wrote the text of uiR2EDstrict
+	// or uiR2EDliberal in the language of the client: these are those texts in the shipped languages (r2_<lang>.uxt),
+	// so that a file saved in one language is read right in another.
+	static const char *masteredWords[] =
+	{
+		"Mastered",
+		"Anim\xc3\xa9", // fr, Animé
+		"Gemeistert", // de
+		"Dominado", // es
+		"\xd0\xa3\xd0\xbf\xd1\x80\xd0\xb0\xd0\xb2\xd0\xbb\xd1\x8f\xd0\xb5\xd0\xbc\xd1\x8b\xd0\xb9", // ru, Управляемый
+	};
+	static const char *masterlessWords[] =
+	{
+		"Masterless",
+		"Autonome", // fr
+		"Meisterlos", // de
+		"Sin amo", // es
+		"\xd0\x9d\xd0\xb5\xd1\x83\xd0\xbf\xd1\x80\xd0\xb0\xd0\xb2\xd0\xbb\xd1\x8f\xd0\xb5\xd0\xbc\xd1\x8b\xd0\xb9", // ru, Неуправляемый
+	};
+	for (uint i = 0; i < sizeof(masteredWords) / sizeof(masteredWords[0]); ++i)
+	{
+		if (rules == masteredWords[i])
+			return "Mastered";
+	}
+	for (uint i = 0; i < sizeof(masterlessWords) / sizeof(masterlessWords[0]); ++i)
+	{
+		if (rules == masterlessWords[i])
+			return "Masterless";
+	}
+	return rules;
+}
+
 bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenarioValidator::TValues& values, std::string& md5,  std::string& signature, bool checkMD5)
 {
 
@@ -1098,6 +1132,9 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 					tmp = tmp.replace("\\n", "\n");
 
 					values.push_back( std::make_pair( result[0].substr(commentLen), tmp));
+					// whatever the language of the client that saved it (the md5s below are of the text as it is)
+					if (values.back().first == "Rules")
+						values.back().second = normalizeRules(values.back().second);
 				}
 			}
 		}

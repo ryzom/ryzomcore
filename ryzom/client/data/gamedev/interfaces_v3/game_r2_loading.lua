@@ -76,7 +76,13 @@ function GameR2Loading:setScenarioRules(header)
 	local win = self:getLoadingWindow()
 	assert(win)
 	local rulesWidget = win:find("Rules")
-	if header.Rules then
+	-- "Mastered" or "Masterless" in every language (the header reader reads the translated words older clients
+	-- wrote as these), shown in the language of this client; another text as it is
+	if header.Rules == "Mastered" then
+		rulesWidget.hardtext = i18n.get("uiR2EDstrict")
+	elseif header.Rules == "Masterless" then
+		rulesWidget.hardtext = i18n.get("uiR2EDliberal")
+	elseif header.Rules then
 		rulesWidget.hardtext = header.Rules
 	else
 		rulesWidget.hardtext = ""
