@@ -1786,7 +1786,8 @@ endOfWelcomeUserResult:
 				}
 				*/
 
-				if (nelUser->getExtendedPrivilege().find(":R2_BAN:") != string::npos)
+				// (a privilege counts as a whole name of the list, as for the scenario service)
+				if (hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":R2_BAN:"))
 				{
 					// this guy is banned from ring anim session
 					scheduleSessionResult(from, charId, TSessionId(0), 10, "User is banned from ring animation session");
@@ -3096,7 +3097,7 @@ endOfWelcomeUserResult:
 					CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
 					BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
 
-					if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
+					if (hasPrivilegeOfList(invitedNelUser->getExtendedPrivilege(), ":TRIAL:")
 						&& !scenario->getAllowFreeTrial())
 					{
 						// free trial are not allowed in this scenario
@@ -3512,7 +3513,7 @@ endOfWelcomeUserResult:
 
 					CNelUserPtr nelUser = CNelUser::load(_NelDb, userId, __FILE__, __LINE__);
 					BOMB_IF(nelUser == NULL, "Failed to load nel user "<<userId, joinSessionResult(from, charId>>4, sessionId, 7, "Nel user not found", TSessionPartStatus::invalid_val); return;);
-					if (nelUser->getExtendedPrivilege().find(":R2_BAN:") != string::npos)
+					if (hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":R2_BAN:"))
 					{
 						// this guy is banned from ring anim session
 						joinSessionResult(from, charId>>4, sessionId, 16, "User is banned from ring", TSessionPartStatus::invalid_val);
@@ -3520,7 +3521,7 @@ endOfWelcomeUserResult:
 					}
 
 					if (session->getOwnerId() != charId
-						&& nelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos)
+						&& hasPrivilegeOfList(nelUser->getExtendedPrivilege(), ":TRIAL:"))
 					{
 						// check that the scenario launched allow free trials players
 						CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
