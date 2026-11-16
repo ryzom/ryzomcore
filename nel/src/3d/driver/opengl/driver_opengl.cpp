@@ -369,6 +369,7 @@ CDriverGL::CDriverGL()
 
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
+	m_ZeroAreaRenderTargetReported = false;
 }
 
 // ***************************************************************************

@@ -947,6 +947,9 @@ private:
 	// Current FBO render target
 	CSmartPtr<ITexture>		_RenderTargetFBO;
 
+	// A render target without area was refused and reported (setRenderTarget reports it once)
+	bool					m_ZeroAreaRenderTargetReported;
+
 	// Share the same backbuffer for FBO render targets with window size
 	std::vector<CDepthStencilFBO *>	_DepthStencilFBOs;
 

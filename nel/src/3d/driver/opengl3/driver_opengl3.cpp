@@ -266,6 +266,7 @@ CDriverGL3::CDriverGL3()
 	_FogColorOverrideBlack = false;
 
 	_RenderTargetFBO = nullptr;
+	m_ZeroAreaRenderTargetReported = false;
 
 	uint i;
 

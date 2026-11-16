@@ -2263,6 +2263,19 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 		{
 			// NOTE: No support for mip map level here!
 
+			// A texture without area has no image (setupTextureEx uploads nothing for it), and a frame buffer
+			// that has it attached is never complete: it is refused before anything is allocated for it, and
+			// the render target stays what it is
+			if (tex->getWidth() == 0 || tex->getHeight() == 0)
+			{
+				if (!m_ZeroAreaRenderTargetReported)
+				{
+					m_ZeroAreaRenderTargetReported = true;
+					nlwarning("3D: A render target of %ux%u pixels was asked for; a render target needs an area, it is not set (reported once)", tex->getWidth(), tex->getHeight());
+				}
+				return false;
+			}
+
 			uint32 w, h;
 			getWindowSize(w, h);
 
