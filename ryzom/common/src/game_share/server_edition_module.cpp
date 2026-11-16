@@ -273,6 +273,9 @@ namespace R2
 		// true when the EGS was told that the animation of this session starts (animSessionStarted), for the
 		// start that was asked for last
 		bool AnimationStartAnnounced;
+		// true from the announce createSession makes for a linked animation session that has its scenario when it
+		// is created, to the start of that scenario (startScenario), which then does not announce it again
+		bool AnimationAnnouncedAtCreation;
 		// true when the file of this session could not be read and no copy of it could be kept: the session
 		// is not saved, so that the file stays as it is, until the file is read or is no longer there
 		bool SaveRefused;
@@ -802,6 +805,7 @@ _Scenario(scenario), SessionId(sessionId), _AiInstance(aiInstanceId),_EditSlotId
 
 	IsAnimationStopped = false;
 	AnimationStartAnnounced = false;
+	AnimationAnnouncedAtCreation = false;
 	SaveRefused = false;
 	DateSinceNoPlayer = 0;
 	_LastSaveTime = 0;
@@ -820,6 +824,7 @@ CEditionSession::CEditionSession(RSMGR::TSessionType sessionType, TSessionId ses
 {
 	IsAnimationStopped = false;
 	AnimationStartAnnounced = false;
+	AnimationAnnouncedAtCreation = false;
 	SaveRefused = false;
 	DateSinceNoPlayer = 0;
 	_LastSaveTime = 0;
@@ -3131,6 +3136,9 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 
 				CEditionSession* session = getSession(sessionId);
 				BOMB_IF(!session, "ERROR: session must exist", return);
+				// the start of this animation is announced to the EGS: a failure of its start tells it
+				// (animationSessionStartFailed)
+				session->AnimationStartAnnounced = true;
 				// ie the animator and player that just arrived before the scenario has uploaded
 				CEditionSession::TCurrentChars::const_iterator first(session->getCurrentChars().begin()), last(session->getCurrentChars().end());
 				for (; first != last; ++first)
@@ -3147,6 +3155,10 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				nldebug("Scenario Started %d %s", sessionId.asInt(), info.getScenarioKey().toString().c_str());
 			}
 
+			// the start of the scenario does not announce this animation again (startScenario)
+			CEditionSession* announcedSession = getSession(sessionId);
+			if (announcedSession)
+				announcedSession->AnimationAnnouncedAtCreation = true;
 		}
 
 	}
@@ -4128,7 +4140,6 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 		}
 
 		scenario->setRtData(rtData);
-		session->AnimationStartAnnounced = false;
 
 
 		TPioneersSessions/*std::map<uint32, uint32>*/::const_iterator sessionIdIt = _PioneersSessions.find(charId);
@@ -4175,8 +4186,18 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			bool nevraxScenario = false;
 			std::string missionTag;
 
-			/*Informs EGS that the animation has started*/
-			if ( getLinkedSessionId(body.SessionId) == TSessionId(0) && session->getSessionType() == RSMGR::TSessionType::st_anim )
+			// The start of a linked animation session whose scenario was there when the session was created was
+			// announced then (createSession), once; any other start is announced below. AnimationStartAnnounced
+			// says whether the EGS was told of this start.
+			const bool announcedAtCreation = session->AnimationAnnouncedAtCreation;
+			session->AnimationAnnouncedAtCreation = false;
+			if (!announcedAtCreation)
+				session->AnimationStartAnnounced = false;
+
+			// Informs EGS that the animation has started: every animation session, the one launched at a terminal
+			// and the one an editor starts live (linked to its edit session; its scenario comes with this start, so
+			// createSession had nothing to announce), unless createSession announced this one
+			if ( session->getSessionType() == RSMGR::TSessionType::st_anim && !announcedAtCreation )
 			{
 				// no key and masterless when the header lacks them, as in createSession
 				TRunningScenarioInfo info;
