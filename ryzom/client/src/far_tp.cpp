@@ -1638,11 +1638,32 @@ void CFarTP::showReturnMessage()
 
 	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage, "ui:interface", "", "", CaseNormal);
 	m_ReturnMessage.clear();
-	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
-	// this one comes up while the game is still loading: it stays until its OK button is used.
 	CGroupModal *box = dynamic_cast<CGroupModal *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:message_box_with_help"));
-	if (box)
-		box->ExitClickOut = false;
+	if (!box)
+		return;
+
+	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
+	// this one comes up while the game is still loading: it stays until its OK button is used. The widget
+	// manager takes that setting when the modal is enabled, so the box is enabled again with it.
+	box->ExitClickOut = false;
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, box);
+
+	// A modal of the game opens on the mouse pointer: CGroupModal spawns there unless its mouse_pos is off,
+	// with its parent hotspot at the bottom left, whatever posref its definition has. That suits a box that
+	// answers a click. Nobody clicked for this one, and when the main loop is entered the pointer has no
+	// position yet (CViewPointerBase starts it at InvalidCoord): the box was clipped into the bottom left
+	// corner of the screen. It gets the centre of the interface as its spawn point, for this showing: the next
+	// box takes the pointer again (CWidgetManager::pushModalWindow).
+	CInterfaceGroup *parent = box->getParent();
+	if (parent)
+	{
+		box->SpawnMouseX = parent->getWReal() / 2;
+		box->SpawnMouseY = parent->getHReal() / 2;
+	}
+	// (twice, as CInterfaceManager::messageBoxInternal does for a box it has just given a text)
+	box->invalidateCoords();
+	box->updateCoords();
+	box->updateCoords();
 }
 
 extern bool loginFinished;
