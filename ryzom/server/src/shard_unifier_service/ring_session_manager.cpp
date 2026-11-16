@@ -1309,8 +1309,9 @@ restartLoop:
 				author->update(_RingDb);
 			}
 
-			// update the animator
-			if (scenarioInfo.getDMLess())
+			// update the animator: the rating of the session's scheduled rule type, the one it was listed and
+			// joined with (the start's header can say otherwise, for a file whose header and body disagree)
+			if (session->getRuleType() == TRuleType::rt_liberal)
 				animator->setRRPMasterless(animator->getRRPMasterless() + rrpScored);
 			else
 				animator->setRRPAM(animator->getRRPAM() + rrpScored);
