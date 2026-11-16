@@ -3137,8 +3137,10 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				CEditionSession* session = getSession(sessionId);
 				BOMB_IF(!session, "ERROR: session must exist", return);
 				// the start of this animation is announced to the EGS: a failure of its start tells it
-				// (animationSessionStartFailed)
+				// (animationSessionStartFailed), and the start of the scenario does not announce it again
+				// (startScenario). Without the EGS there is no announce to count on: the start makes it.
 				session->AnimationStartAnnounced = true;
+				session->AnimationAnnouncedAtCreation = true;
 				// ie the animator and player that just arrived before the scenario has uploaded
 				CEditionSession::TCurrentChars::const_iterator first(session->getCurrentChars().begin()), last(session->getCurrentChars().end());
 				for (; first != last; ++first)
@@ -3154,11 +3156,6 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				rsm.scenarioStarted(this, sessionId, info);
 				nldebug("Scenario Started %d %s", sessionId.asInt(), info.getScenarioKey().toString().c_str());
 			}
-
-			// the start of the scenario does not announce this animation again (startScenario)
-			CEditionSession* announcedSession = getSession(sessionId);
-			if (announcedSession)
-				announcedSession->AnimationAnnouncedAtCreation = true;
 		}
 
 	}
