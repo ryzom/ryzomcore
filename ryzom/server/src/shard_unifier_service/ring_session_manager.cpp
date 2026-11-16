@@ -216,6 +216,11 @@ namespace RSMGR
 			TSessionId MainlandFallback;
 			/// The client application of the join, for the join of the fallback
 			std::string ClientApplication;
+			/// The participation the join goes by (0 for none: a mainland, or an account that enters by its
+			/// privilege), which gets EnteredStatus when the welcome service lets the character in
+			uint32 EnteredPartId;
+			/// The status of a character that is in the session with the role of the join
+			TSessionPartStatus EnteredStatus;
 		};
 
 		typedef list<TPendingJoinSession>	TPendingJoins;
@@ -1490,6 +1495,23 @@ restartLoop:
 								// load the session info
 								CSessionPtr session = CSession::load(_RingDb, pjs.SessionId, __FILE__, __LINE__);
 								BOMB_IF(session == NULL, "welcomeUserResult : the session "<<pjs.SessionId<<" cannot be loaded from database", joinSessionResult(pjs.From, pjs.UserId, pjs.SessionId, 11, "Failed to load the session", TSessionPartStatus::invalid_val); goto endOfWelcomeUserResult;);
+								// The character is let in: the participation its join went by says so from now on (the
+								// join only noted which one, see _joinSessionCommon)
+								if (pjs.EnteredPartId != 0)
+								{
+									CSessionParticipantPtr enteredPart = CSessionParticipant::load(_RingDb, pjs.EnteredPartId, __FILE__, __LINE__);
+									if (enteredPart != NULL && enteredPart->getPersistentState() != NOPE::os_removed
+									    && enteredPart->getCharId() == pjs.CharId && enteredPart->getSessionId() == pjs.SessionId.asInt())
+									{
+										enteredPart->setStatus(pjs.EnteredStatus);
+										enteredPart->update(_RingDb);
+									}
+									else
+									{
+										nlwarning("RSM : welcomeUserResult : the participation %u that the join of char %u in session %u went by is gone, no participation gets the status '%s'",
+										    pjs.EnteredPartId, pjs.CharId, pjs.SessionId.asInt(), pjs.EnteredStatus.toString().c_str());
+									}
+								}
 								// retrieve the session participant
 								character->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
 								TSessionPartStatus status;
@@ -3503,6 +3525,9 @@ endOfWelcomeUserResult:
 			uint32 storedSessionId = sessionId.asInt();
 			WS::TUserRole enterAs = WS::TUserRole::invalid_val;
 			uint32 instanceId = INVALID_AI_INSTANCE;
+			// the participation that says the character is in the session once the welcome service lets it in
+			uint32 enteredPartId = 0;
+			TSessionPartStatus enteredStatus;
 			if (session->getSessionType() != TSessionType::st_mainland)
 			{
 				// This is a Ring session
@@ -3695,8 +3720,8 @@ endOfWelcomeUserResult:
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
 
 
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_editing);
+						// the participant status of an editor that is in
+						enteredStatus = TSessionPartStatus::sps_editing;
 					}
 					else if (	sessionPart->getStatus() == TSessionPartStatus::sps_anim_invited
 						||	sessionPart->getStatus() == TSessionPartStatus::sps_animating)
@@ -3704,20 +3729,22 @@ endOfWelcomeUserResult:
 						// warn the session server that an animator come in
 						enterAs = WS::TUserRole::ur_animator;
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_animating);
+						// the participant status of an animator that is in
+						enteredStatus = TSessionPartStatus::sps_animating;
 						mustGrantFastDisconnection = true;
 					}
 					else
 					{
 						enterAs = WS::TUserRole::ur_player;
 						ss.addCharacterInSession(this, sessionId, charId, enterAs, charac->getRingAccess(), charac->getNewcomer());
-						// update the participant status
-						sessionPart->setStatus(TSessionPartStatus::sps_playing);
+						// the participant status of a player that is in
+						enteredStatus = TSessionPartStatus::sps_playing;
 						mustGrantFastDisconnection = true;
 					}
-					// save the participant status
-					sessionPart->update(_RingDb);
+					// The participation gets this status when the welcome service lets the character in
+					// (welcomeUserResult). Until then, and when the entry is refused or gets no answer, it stays the
+					// invitation it is, which the owner of the session can still remove.
+					enteredPartId = sessionPart->getObjectId();
 				}
 				else
 				{
@@ -3802,6 +3829,8 @@ endOfWelcomeUserResult:
 			pjs.SessionId = TSessionId(storedSessionId);
 			pjs.MainlandFallback = mainlandFallback;
 			pjs.ClientApplication = clientApplication;
+			pjs.EnteredPartId = enteredPartId;
+			pjs.EnteredStatus = enteredStatus;
 
 			// (the code is made from the cookie, which the login service clears when the user leaves)
 			if (mustGrantFastDisconnection && cookie.isValid())
