@@ -3912,7 +3912,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, teleportOneCharacterToAnother)
 
 	if (args.size() != 3)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.teleportPioneer <sessionId> <sourceCharId> <destCharId>");
+		log.displayNL("Wrong parameters ServerEditionModule.teleportPioneer <sessionId> <sourceCharId> <destCharId>");
 		return false;
 	}
 
@@ -5326,7 +5326,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, listCharOverrideRingAccess)
 
 	if (args.size() != 0)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.listCharOverrideRingAccess (no parameter)");
+		log.displayNL("Wrong parameters ServerEditionModule.listCharOverrideRingAccess (no parameter)");
 		return false;
 	}
 
@@ -5345,7 +5345,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, displayCharOverrideRingAccess)
 
 	if (args.size() != 1)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.displayCharOverrideRingAccess <charId>");
+		log.displayNL("Wrong parameters ServerEditionModule.displayCharOverrideRingAccess <charId>");
 		return false;
 	}
 
@@ -5371,7 +5371,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharOverrideRingAccess)
 
 	if (args.size() != 2)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.setCharOverrideRingAccess <charId> <ringAccess>");
+		log.displayNL("Wrong parameters ServerEditionModule.setCharOverrideRingAccess <charId> <ringAccess>");
 		return false;
 	}
 
@@ -5423,7 +5423,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, removeCharOverrideRingAccess)
 
 	if (args.size() != 1)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.removeCharOverrideRingAccess <charId>");
+		log.displayNL("Wrong parameters ServerEditionModule.removeCharOverrideRingAccess <charId>");
 		return false;
 	}
 
@@ -6512,7 +6512,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, resetKeyPolicies)
 
 	if (args.size() != 0)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.resetKeyPolicies");
+		log.displayNL("Wrong parameters ServerEditionModule.resetKeyPolicies");
 		return false;
 	}
 	resetKeyPolicies(nullptr);
@@ -6533,7 +6533,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setDefaultKey)
 
 	if (args.size() != 1)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.setDefaultKey <defaultKey>");
+		log.displayNL("Wrong parameters ServerEditionModule.setDefaultKey <defaultKey>");
 		return false;
 	}
 	setDefaultKey(nullptr, args[0]);
@@ -6583,7 +6583,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addKeyPolicy)
 
 	if (args.size() != 3)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.addKeyPolicy <key|EMPTY|DEFAULT> <privatekey|EMPTY> <ACCEPT|REFUSE|TEST>");
+		log.displayNL("Wrong parameters ServerEditionModule.addKeyPolicy <key|EMPTY|DEFAULT> <privatekey|EMPTY> <ACCEPT|REFUSE|TEST>");
 		return false;
 	}
 	addKeyPolicy(nullptr, args[0], args[1], args[2]);
@@ -6611,7 +6611,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setSessionStartParams)
 
 	if (args.size() != 5)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.setSessionStartParams charId, sessionId, initialIslandLocation, initialEntryPoint, initialSeason");
+		log.displayNL("Wrong parameters ServerEditionModule.setSessionStartParams charId, sessionId, initialIslandLocation, initialEntryPoint, initialSeason");
 		return false;
 	}
 
