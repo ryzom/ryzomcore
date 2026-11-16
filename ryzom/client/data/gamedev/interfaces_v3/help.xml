@@ -575,8 +575,9 @@
 <!--    ADMIN WINDOW    -->
 <!-- ****************** -->
 <!-- The Ring window: the web pages of the Ring. The 'Ring' key action shows it (show_hide), and so do
-     /openRingWindow and /browseRingAdmin. The first time it is shown it gets the start page of the Ring
-     pages (ring_window.lua); a page it is asked to browse right after takes that place. -->
+     /openRingWindow and /browseRingAdmin. When it is drawn without a page it gets the start page of the
+     Ring pages (ring_window.lua): on_active only arms that, because the interface also makes the window
+     active when nobody sees it. A page it is asked to browse before it is drawn takes that place. -->
 <group type="container" id="r2ed_web_admin" w="410" h="400" title="uiR2EDRingWindow" global_color="false" resizer="true" pop_min_w="100" pop_min_h="96" pop_max_w="2000" pop_max_h="1600" title_bar_open="false" open_button="false" force_open_out="true" lockable="true" openable="false" opened="true" movable="true" active="false" on_active="lua" on_active_params="onRingWindowShown()">
 	<!--
   <group id="header_closed" x="0" y="0" h="12" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:base_menu_with_color">
