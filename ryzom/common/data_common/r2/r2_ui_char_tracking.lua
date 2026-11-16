@@ -549,11 +549,26 @@ end
 --***********************************************************************
 function CharTracking:onKick()
 	r2:kickCharacter(self.SelectedCharId)
+	self:onKickOrUnkickAnswered()
 end
 
 --***********************************************************************
 function CharTracking:onUnkick()
 	r2:unkickCharacter(self.SelectedCharId)
+	self:onKickOrUnkickAnswered()
+end
+
+--***********************************************************************
+-- r2:kickCharacter and r2:unkickCharacter return when the server has answered (or has not, in time). The
+-- list still shows the character as it was: the kick and unkick buttons follow the list, so the one
+-- that undoes what was just done stayed frozen until the next periodic refresh. They are both frozen
+-- until the list comes, and the list is asked for now: refresh keeps the minimum time between two
+-- requests (updatePendingRefresh), which forceRefresh does not, so a series of kicks and unkicks asks
+-- for the list no more often than before.
+function CharTracking:onKickOrUnkickAnswered()
+	self:getWindow():find("kick").frozen = true
+	self:getWindow():find("unkick").frozen = true
+	self:refresh()
 end
 
 --***********************************************************************
