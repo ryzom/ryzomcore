@@ -1022,6 +1022,14 @@ retryJoinEdit:
 		// (as it is written: the default case mode of the box puts "Ring" and every other word after the
 		// first of a sentence in lower case)
 		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface", "", "", CaseNormal);
+		if (!requestRetToMainland)
+		{
+			// The client stays where it is: at the character selection, or in the game. No return is under way
+			// any more, also when this request was the return itself (the join of the mainland that follows
+			// CONNECTION:RET_MAINLAND): a message kept for the arrival would be shown to whichever character
+			// enters the game next.
+			m_ReturnMessage.clear();
+		}
 		if ( letReturnToCharSelect && requestRetToMainland )
 		{
 			// The client goes back to the mainland by itself: the box that was just shown has no use for its
@@ -1130,6 +1138,9 @@ void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
  */
 void CFarTP::requestReconnection()
 {
+	// the player goes back to the character selection: a message kept for the arrival of this character is not
+	// for the one that is chosen there
+	m_ReturnMessage.clear();
 	_ReselectingChar = true;
 	if (!requestFarTPToSession(TSessionId(std::numeric_limits<uint16>::max()), std::numeric_limits<uint8>::max(), CFarTP::JoinMainland, false))
 		_ReselectingChar = false;
@@ -1153,6 +1164,7 @@ void CFarTP::requestReselectThroughLimbo()
 
 	// The same sequence as requestReconnection() once the shard unifier has answered, but for the same shard and
 	// connection: no fast disconnection, the quit countdown applies (see disconnectFromPreviousShard)
+	m_ReturnMessage.clear(); // as in requestReconnection
 	_ReselectingChar = true;
 	m_ReselectThroughLimbo = true;
 	_SessionIdToJoinFast = 0;
