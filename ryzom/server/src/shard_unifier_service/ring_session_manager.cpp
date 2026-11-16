@@ -1130,11 +1130,14 @@ restartLoop:
 
 			// The session log record, one per session: the scenario service announces every start of the scenario
 			// of a session, and a second one (a start after one that failed, a restart) finds the record and keeps
-			// it, as scenarioEnded creates it only when it is missing
+			// it, as scenarioEnded creates it only when it is missing. It names the scenario of the latest start,
+			// which the free trial checks and the ratings read.
 			CSessionLogPtr existingLog = CSessionLog::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
 			if (existingLog != NULL)
 			{
-				nldebug("scenarioStarted : session %u has its session log already, it is kept", sessionId.asInt());
+				nldebug("scenarioStarted : session %u has its session log already, it is kept with the scenario %u", sessionId.asInt(), scenario->getObjectId());
+				existingLog->setScenarioId(scenario->getObjectId());
+				existingLog->update(_RingDb);
 				return;
 			}
 			CSessionLogPtr sessionLog = CSessionLog::createTransient(__FILE__, __LINE__);
