@@ -99,7 +99,7 @@ function joinSessionFromId( $userId, $domainId, $destSessionId )
 
 //		$charSlot = getCharSlot(); // if ingame (!=15), the RSM will check if this character has the right to connect to the specified session
 //		$charId = ($userId<<4) + $charSlot;
-		echo htmlspecialchars($charId, ENT_QUOTES)." of user ".htmlspecialchars($userId, ENT_QUOTES)." joigning session ".htmlspecialchars($destSessionId, ENT_QUOTES)."<br>";
+		echo htmlspecialchars($charId, ENT_QUOTES)." of user ".htmlspecialchars($userId, ENT_QUOTES)." joining session ".htmlspecialchars($destSessionId, ENT_QUOTES)."<br>";
 		$joinSession->joinSession($charId, $destSessionId, $domainInfo["domain_name"]);
 		
 		// wait the the return message
