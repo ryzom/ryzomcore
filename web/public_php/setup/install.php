@@ -225,7 +225,11 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 		}
 	}
 
-	if ($continue) {
+	// The overrides of an existing config_user.php stay, as with setup_cli.php (the quick start writes one before
+	// the setup runs)
+	if ($continue && file_exists("config_user.php")) {
+		printalert("info", "Kept the existing <em>config_user.php</em>");
+	} else if ($continue) {
 		$configUser = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config_user.php");
 		if (!$configUser) {
 			printalert("danger", "Cannot read <em>config_user.php</em>");
@@ -234,7 +238,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 			if (file_put_contents("config_user.php", $configUser)) {
 				printalert("success", "Copied <em>config_user.php</em>");
 			} else {
-				printalert("danger", "Cannot write to <em>config.php</em>");
+				printalert("danger", "Cannot write to <em>config_user.php</em>");
 				$continue = false;
 			}
 		}

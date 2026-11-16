@@ -22,7 +22,11 @@ Python, MariaDB, nginx, PHP, phpMyAdmin, Perl, rrdtool, Dependencies and the com
 from the externals package (`Paths` in `config_default.json`, C:\2026q4_external_v143_x64 by default); the
 quick start and the build pipeline run under its Python 3. Nothing is written into the externals folder: the
 development web keeps its configuration, logs and phpMyAdmin copy in `pipeline/shard_dev/web`
-(`configure_web.py`), and its database in `pipeline/shard_dev/mysql`.
+(`configure_web.py`), and its database in `pipeline/shard_dev/mysql`. `configure_web.py` also writes
+`code/web/public_php/config_user.php` when it is missing, with 127.0.0.1 as the database host of the web
+pages: MariaDB listens on 127.0.0.1 only, and with the default 'localhost' PHP on Windows tries ::1 first
+and waits about 2 seconds at each connection. An existing `config_user.php` is not changed, by the
+script nor by the web setup; the script prints the lines it lacks.
 
 The shard scripts (shard_mainland.bat and the others, web_on.bat) open servdash_gui from the tools
 build. Set `"Headless": true` in `.nel/config.json` to get servdash_cli in the console instead, for a
