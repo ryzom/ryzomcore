@@ -496,23 +496,10 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 			else
 				session.setValue("OwnerRating",		_LastMasterlessRating);
 
-			// calculate the difference between local time and gmt
-			time_t rawtime;
-			struct tm * timeinfo;
-
-			rawtime= sd.getLaunchDate();
-			timeinfo = localtime ( &rawtime );
-			time_t localTime = mktime( timeinfo );
-			//nldebug("local time %02d:%02d",timeinfo->tm_hour,timeinfo->tm_min);
-
-			rawtime= sd.getLaunchDate();
-			timeinfo = gmtime ( &rawtime );
-			time_t gmtTime = mktime( timeinfo );
-			//nldebug("gm time %02d:%02d",timeinfo->tm_hour,timeinfo->tm_min);
-
-			// convert GMT time value from server to local time
-			time_t adjustedTime= sd.getLaunchDate() + localTime - gmtTime;
-			session.setValue("LaunchDate", (sint64)adjustedTime);
+			// The launch date is in seconds since 1970 (UTC), as the server sends it: the scripts of the window
+			// format it with os.date, which gives the local time of this machine. (The difference between the
+			// local time and UTC was added here as well, and the window showed the date that much off.)
+			session.setValue("LaunchDate", (sint64)sd.getLaunchDate());
 
 			session.setValue("ScenarioType", (uint32)sd.getOrientation().getValue());
 			session.push();
