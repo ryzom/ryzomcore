@@ -187,7 +187,9 @@ void CGuildManager::release()
 		_Instance = NULL;
 	}
 
-	IGuildUnifier::getInstance()->guildManagerReleased();
+	// (a service without the guild unifier module has no one to tell)
+	if (IGuildUnifier::isInitialized())
+		IGuildUnifier::getInstance()->guildManagerReleased();
 }
 
 //----------------------------------------------------------------------------
