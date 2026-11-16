@@ -1785,10 +1785,15 @@ public:
 				CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 				sb.init(nullptr);
 				sb.closeEditSession(sb.getCharId());
-				// without an answer the session may still be open: the new scenario does not start in it
-				if (!sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult")))
+				// Without an answer, or with a failure of the session manager (2, 3, 5), the session may still be
+				// open: the new scenario does not start in it. 4: the character has no edit session to close.
+				bool answered = sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+				if (!answered || (sb._LastInvokeResult != 0 && sb._LastInvokeResult != 4))
 				{
-					nlwarning("The session browser did not answer the request to close the edit session of char %u", sb.getCharId());
+					if (answered)
+						nlwarning("The session manager did not close the edit session of char %u: result %u, '%s'", sb.getCharId(), sb._LastInvokeResult, sb._LastInvokeResultMsg.c_str());
+					else
+						nlwarning("The session browser did not answer the request to close the edit session of char %u", sb.getCharId());
 					CInterfaceManager::getInstance()->messageBoxWithHelp(CI18N::get("uiCharSel_CloseSessionFailed"), "ui:outgame");
 					showCharSelAfterStoppedLaunch();
 					return;
