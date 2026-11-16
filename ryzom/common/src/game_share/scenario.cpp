@@ -1032,7 +1032,10 @@ std::string CScenarioValidator::normalizeRules(const std::string &rules)
 {
 	// A header carries "Mastered" or "Masterless" (r2.Version.save). Older clients wrote the text of uiR2EDstrict
 	// or uiR2EDliberal in the language of the client: these are those texts in the shipped languages (r2_<lang>.uxt),
-	// so that a file saved in one language is read right in another.
+	// so that a file saved in one language is read right in another. An empty text (a scenario without access
+	// rules, saved by an older client) is masterless, as the editor shows it and the scenario service runs it.
+	if (rules.empty())
+		return "Masterless";
 	static const char *masteredWords[] =
 	{
 		"Mastered",
@@ -1060,6 +1063,35 @@ std::string CScenarioValidator::normalizeRules(const std::string &rules)
 			return "Masterless";
 	}
 	return rules;
+}
+
+std::string CScenarioValidator::getRulesOfBody() const
+{
+	// The scenario is the table of the file, and AccessRules a property of its first level only: two spaces of
+	// indent, then a long string or a quoted one, as the serializer writes them
+	static const std::string key("\n  AccessRules = ");
+	std::string::size_type pos = _ScenarioBody.find(key);
+	if (pos != std::string::npos)
+	{
+		pos += key.size();
+		std::string value;
+		if (_ScenarioBody.compare(pos, 2, "[[") == 0)
+		{
+			std::string::size_type end = _ScenarioBody.find("]]", pos + 2);
+			if (end != std::string::npos)
+				value = _ScenarioBody.substr(pos + 2, end - (pos + 2));
+		}
+		else if (_ScenarioBody.compare(pos, 1, "\"") == 0)
+		{
+			std::string::size_type end = _ScenarioBody.find('"', pos + 1);
+			if (end != std::string::npos)
+				value = _ScenarioBody.substr(pos + 1, end - (pos + 1));
+		}
+		if (value == "strict")
+			return "Mastered";
+	}
+	// no access rules, empty ones or "liberal": masterless, as the save writes them and the editor shows them
+	return "Masterless";
 }
 
 bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenarioValidator::TValues& values, std::string& md5,  std::string& signature, bool checkMD5)

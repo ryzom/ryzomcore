@@ -2656,7 +2656,16 @@ sint CComLuaModule::luaGetFileHeader(lua_State* state)
 	CClientEditionModule::TScenarioHeader header;
 
 	R2::CScenarioValidator sv;
-	sv.setScenarioToLoad(scenarioName, header, md5, signature, false);
+	bool read = sv.setScenarioToLoad(scenarioName, header, md5, signature, false);
+	// a header without Rules (or no header): those of the body, as the launch at a Ring terminal takes them
+	bool hasRules = !read;
+	for (CClientEditionModule::TScenarioHeader::const_iterator it(header.begin()); it != header.end(); ++it)
+	{
+		if (it->first == "Rules")
+			hasRules = true;
+	}
+	if (!hasRules)
+		header.push_back(std::make_pair(std::string("Rules"), sv.getRulesOfBody()));
 
 	lua_newtable(state);
 

@@ -109,11 +109,13 @@ function r2.Version.save(filename)
 			level = levelToString[tonumber(level)]
 			rules = string.gsub(tostring(defaulting(r2.Scenario.AccessRules, "")), "\n", "\\n")
 			-- the same word in every language: the readers translate it to show it (uiR2EDstrict, uiR2EDliberal),
-			-- and read the translated words older clients wrote as these (CScenarioValidator::normalizeRules)
-			if rules=="liberal" then
-				rules="Masterless"
-			elseif rules == "strict" then
-				rules="Mastered"
+			-- and read the translated words older clients wrote as these (CScenarioValidator::normalizeRules).
+			-- Only "strict" is mastered: an empty or other value is masterless, as in the scenario window
+			-- (r2_ui_scenario.lua) and for the scenario service (TRunningScenarioInfo::setDMLess)
+			if rules == "strict" then
+				rules = "Mastered"
+			else
+				rules = "Masterless"
 			end
 			title = string.gsub(tostring(defaulting(r2.Scenario.Description.Title, "")), "\n", "\\n")
 			language = r2.Scenario.Language 
