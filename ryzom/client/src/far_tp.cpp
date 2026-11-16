@@ -769,7 +769,7 @@ static const char *failedRequestTextId(bool answered)
 /// The text for the player of a join that the session manager refused (the results of joinSession, joinEditSession
 /// and joinMainland in ring_session_manager.cpp). The results that say nothing a player can act on (a character,
 /// a user or a database record that is not found, a welcome service that fails) share the text with the code.
-static const char *joinRefusalTextId(uint32 result)
+const char *CFarTP::joinRefusalTextId(uint32 result)
 {
 	switch (result)
 	{

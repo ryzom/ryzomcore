@@ -240,6 +240,18 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
 		CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:warning_free_trial");
 	}
+	else if (sessionBrowser._LastJoinSessionResult != 0)
+	{
+		// The session manager refused for another reason (the list of the window is older than the session:
+		// a kick, an invitation that is gone, a session that is closed, or a rule the list does not show).
+		// The player is told why, with the texts of a Far TP that is refused. The answer has the reason of
+		// the server in place of the address.
+		uint32 result = sessionBrowser._LastJoinSessionResult;
+		nlinfo("SB: the request to join session %u is refused: %u '%s'", (uint32)ls.toInteger(1), result, sessionBrowser._LastJoinSessionShardAddr.c_str());
+		string text = CI18N::get(CFarTP::joinRefusalTextId(result));
+		strFindReplace(text, "%code", toString(result));
+		pIM->messageBoxWithHelp(text, "ui:interface");
+	}
 
 	return 0;
 }
