@@ -332,10 +332,14 @@ public:
 	/// Get the render target manager
 	virtual CRenderTargetManager	&getRenderTargetManager() =0;
 
-	/// Set a texture of specified size or of the size of the window as render target
-	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) =0;
+	/** Set a texture of specified size or of the size of the window as render target.
+	  * Returns false, and sets no render target, when that size has no area (the window is minimized, or resized
+	  * to nothing): there is no picture to apply an effect to then. The frame goes to the back buffer, and
+	  * endDefaultRenderTarget is not called for it.
+	  */
+	virtual bool					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) =0;
 
-	/// Draw the render target to the back buffer
+	/// Draw the render target to the back buffer. Only after a beginDefaultRenderTarget that returned true
 	virtual void					endDefaultRenderTarget(UScene *scene) =0;
 
 

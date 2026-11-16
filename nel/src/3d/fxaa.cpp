@@ -337,6 +337,11 @@ void CFXAA::applyEffect()
 	if (!m_PP)
 		return;
 
+	// like the bloom: a window without area has no picture to apply the effect to, and no render target the
+	// size of the window is set for it
+	if (m_Driver->getWindowWidth() == 0 || m_Driver->getWindowHeight() == 0)
+		return;
+
 	CDriverUser *dru = static_cast<CDriverUser *>(m_Driver);
 	IDriver *drv = dru->getDriver();
 

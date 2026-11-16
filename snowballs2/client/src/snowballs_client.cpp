@@ -763,8 +763,11 @@ void loopIngame()
 				bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
 				if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
 				{
-					Driver->beginDefaultRenderTarget();
-					defaultRenderTarget = true;
+					// no effect render target is made for a window without area (minimized): the effects
+					// have no picture to work on then
+					defaultRenderTarget = Driver->beginDefaultRenderTarget();
+					if (!defaultRenderTarget)
+						haveEffects = false;
 				}
 
 				if (StereoDisplay->wantSceneReflections())

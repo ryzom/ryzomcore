@@ -264,8 +264,8 @@ public:
 	/// Get the render target manager
 	virtual CRenderTargetManager	&getRenderTargetManager() NL_OVERRIDE { return _RenderTargetManager; }
 
-	/// Set a texture the size of the window as render target
-	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) NL_OVERRIDE;
+	/// Set a texture the size of the window as render target, false and no render target when it has no area
+	virtual bool					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) NL_OVERRIDE;
 
 	/// Draw the render target to the back buffer
 	virtual void					endDefaultRenderTarget(UScene *scene) NL_OVERRIDE;
