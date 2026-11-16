@@ -437,49 +437,16 @@ end
 -- file (see authorIsThere).
 local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true }
 
--- A working mode is not always one the editor stays in, and the scripts are not told which it is:
+-- A working mode is not always one the editor stays in, nor one the author sees the game in:
 -- * The mode the editor starts in is chosen from the role of the user (CEditor::autoConfigInit) before
 --   the server has said what the session is doing. The server's word follows and sets the mode again
 --   (CEditor::onEditionModeConnected, CEditor::onAnimationModeConnected). An animation launched at the
 --   Ring terminal goes AnimationModeDm (AnimationModePlay when it has no master), AnimationModeLoading,
---   AnimationModeGoingToDM, and then AnimationModeDm or AnimationModePlay for good; the first of these
---   lasts for as long as the server takes, a second on a shard next door.
--- * After a teleport the client draws frames it does not show (RYZOM_FIRST_FRAME_TO_SKIP, 30 of them),
---   with the loading screen left on the screen. These frames come as fast as the machine draws them.
--- So a mode counts as settled once the scripts have seen it for SettledFrames frames in a row, and the
--- mode the editor started in only after ProvisionalModeMs as well. A box opened later than that under
--- a loading screen stays open until the author closes it: only a change of mode closes it.
-local SettledFrames = 40
-local ProvisionalModeMs = 5000
-
-local seenMode = nil -- r2.Mode at the last frame
-local seenFrames = 0 -- the frames it has been seen for
-local seenSince = 0 -- nltime.getLocalTime() at the first of them
-local seenModes = 0 -- how many modes have been seen since these scripts were loaded (CEditor::init)
-
--- Called each frame (r2.showPendingErrorMessage). A mode set again to what it was is not seen here.
-local function watchMode()
-	local now = nltime.getLocalTime()
-	if r2.Mode ~= seenMode then
-		seenMode = r2.Mode
-		seenFrames = 0
-		seenSince = now
-		if seenMode ~= nil then
-			seenModes = seenModes + 1
-		end
-	elseif now < seenSince then
-		-- the clock of nltime.getLocalTime is 32 bits of milliseconds and has started again
-		seenSince = now
-	end
-	seenFrames = seenFrames + 1
-end
-
-local function modeIsSettled()
-	if r2.Mode == nil or r2.Mode ~= seenMode or seenFrames < SettledFrames then
-		return false
-	end
-	return seenModes > 1 or nltime.getLocalTime() - seenSince >= ProvisionalModeMs
-end
+--   AnimationModeGoingToDM, and then AnimationModeDm or AnimationModePlay for good.
+-- * After a teleport the client draws frames it does not show, with the loading screen left on the
+--   screen.
+-- The client knows both, and the wait screen and the start of a test it is about to go to:
+-- r2:isModeSettled (CEditor::isModeSettled).
 
 -- True when the author is there to read a message, and no change of mode that comes by itself is about
 -- to close its box: in a mode the author works in, once it is settled, and in AnimationModeLoading while
@@ -488,10 +455,10 @@ end
 -- or the one an animation was launched with at the Ring terminal (r2:getStartingAnimationFilename,
 -- loaded by UnitTest.testLoadAnimationScenarioUi without a word from the author). The start changes
 -- the mode at once. The form comes back when the file is refused, and the author is at the choice: the
--- editor waits there for the author, however long the mode has lasted.
+-- editor waits there for the author.
 local function authorIsThere()
 	if workingModes[r2.Mode] then
-		return modeIsSettled()
+		return r2:isModeSettled()
 	end
 	if r2.Mode ~= "AnimationModeLoading" then
 		return false
@@ -509,7 +476,7 @@ r2.PendingErrorMessage = nil
 
 -- A message the author must see, from the scripts: in a message box, once. Now when the author is there
 -- to read it (authorIsThere), and kept for that moment otherwise (while the editor starts, between two
--- modes, in a mode that has only just been set, while the file of an animation is loaded). Several
+-- modes, in a mode that is not settled, while the file of an animation is loaded). Several
 -- messages that wait are shown together. A message about a file that was refused is shown when the
 -- author is back at the choice of a file, before another file is loaded.
 function r2.showErrorMessage(text)
@@ -524,7 +491,6 @@ end
 
 -- Called each frame by r2.UIMainLoop, in every mode.
 function r2.showPendingErrorMessage()
-	watchMode()
 	local pending = r2.PendingErrorMessage
 	if pending == nil or not authorIsThere() then
 		return

@@ -16,8 +16,8 @@ local lastTime = 0
 --------------------------------------------------------------------------------
 -- Called by the C++ framework just after scene has been rendered and before ui rendering
 function r2.UIMainLoop:onPostSceneRender()   
-	-- the mode is watched each frame, and an error message that waits for the author is shown once the
-	-- editor has been for a while in a mode the author works in
+	-- an error message that waits for the author is shown once the editor is in a mode the author works
+	-- in and stays in (r2:isModeSettled)
 	r2.showPendingErrorMessage()
 	-- if left quota has been modified then update scenario window
 	if r2.Mode == "Edit" then
