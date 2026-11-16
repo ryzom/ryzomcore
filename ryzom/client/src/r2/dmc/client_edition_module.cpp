@@ -593,8 +593,6 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 		onRingAccessUpdated(nullptr, bodyConnection.RingAccess);
 
 		nlinfo("R2CED: user Connected as Client %d In Mode %d", bodyConnection.EditSlotId, bodyConnection.Mode);
-		// the return from a test, in the session this connection joined (init sets no session)
-		bool sameSession = (_SessionId == bodyConnection.SessionId);
 		_SessionId = bodyConnection.SessionId;
 		_AiInstanceId = bodyConnection.AiInstance;
 		_SessionType = bodyConnection.SessionType;
@@ -618,12 +616,6 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 
 
 			CObject::TSmartPtr data = bodyConnection.HighLevel.getData();
-			// The header of the scenario the editor has (what a test of a scenario that may not be saved sends,
-			// see startingScenario): the one of the buffer read below. A scenario of the server keeps the one read
-			// in this session: the return from the test of such a scenario, whose buffer is not written, gets
-			// the scenario from the server. In another session, none.
-			if (!sameSession)
-				_LastReadHeader.clear();
 			if (!data && bodyConnection.InCache)
 			{
 
@@ -639,7 +631,6 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 					&& ownSignature->second == signature)
 				{
 					data = _Client->getComLuaModule().loadLocal(getScenarioBufferFileName(), values);
-					_LastReadHeader = values;
 				}
 				else
 				{
@@ -1176,7 +1167,7 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 		// process has no copy of its own there (the save was refused or not written), the return asks the server
 		// for the scenario instead (ADV_CONN in onProcessModuleMessage). A scenario that may not be saved (reserved
 		// to Ruins of Silan, or Nevrax's) is not written to the buffer: the starter translates the scenario it
-		// shows, as loaded for an animation, with the header it was loaded with.
+		// shows, with the header its save would have written (requestStartScenario).
 		uint32 myUserId = NetMngr.getUserId();
 		bool starter = myUserId == (charId>>4) || ClientCfg.Local;
 		bool protectedScenario = starter && m_TestBufferProtected;
@@ -1190,6 +1181,8 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 		if (!starter || notSaved || protectedScenario)
 		{
 			CScenarioValidator::AutoSaveSignatures.erase(getScenarioBufferFileName());
+			if (protectedScenario)
+				_LastReadHeader = m_ProtectedHeader;
 		}
 		else
 		{
@@ -1344,6 +1337,35 @@ bool CClientEditionModule::requestStartScenario()
 		return false;
 	}
 	m_TestBufferProtected = R2::getEditor().getEnv()["TestBufferProtected"].toBoolean();
+
+	// The header such a start sends is the one its save would have written (addToSaveList): the values that
+	// r2.Version.save made for it, after the md5 of the body of the scenario, which is its key at the service.
+	m_ProtectedHeader.clear();
+	if (m_TestBufferProtected)
+	{
+		CScenarioValidator::TValues values;
+		NLGUI::CLuaObject header = R2::getEditor().getEnv()["Version"]["ProtectedHeader"];
+		if (header.isTable())
+		{
+			// a table of tables of one entry, as r2.save takes them (CComLuaModule::luaSave)
+			for (NLGUI::CLuaEnumeration entry = header.enumerate(); entry.hasNext(); entry.next())
+			{
+				NLGUI::CLuaObject &field = entry.nextValue();
+				if (!field.isTable())
+					continue;
+				for (NLGUI::CLuaEnumeration pair = field.enumerate(); pair.hasNext(); pair.next())
+				{
+					if (pair.nextKey().isString() && pair.nextValue().isString())
+						values.push_back(std::make_pair(pair.nextKey().toString(), pair.nextValue().toString()));
+				}
+			}
+		}
+		CScenarioValidator sv;
+		std::string headerMd5;
+		if (sv.setScenarioToSave(getScenarioBufferFileName(), getCurrentScenario()->getHighLevel(), values, headerMd5))
+			m_ProtectedHeader.push_back(std::make_pair(std::string("BodyMD5"), sv.getBodyMd5()));
+		m_ProtectedHeader.insert(m_ProtectedHeader.end(), values.begin(), values.end());
+	}
 
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 

@@ -1204,6 +1204,8 @@ private:
 	// the last requestStartScenario did not write the buffer, as the scenario may not be saved: the test starts the
 	// scenario the editor shows
 	bool m_TestBufferProtected;
+	// the header that such a start sends: the one its save would have written
+	TScenarioHeader m_ProtectedHeader;
 
 	bool _MustStartScenario;
 	bool _ScenarioUpToDate;
