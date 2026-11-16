@@ -3632,9 +3632,9 @@ class CAHLoadScenario : public IActionHandler
 									{
 										string charName = CEntityCL::removeTitleAndShardFromName(res);
 										// The player is told a refusal, with its reason, and a missing answer. The
-										// session manager refuses the invitation of a player as long as the scenario
-										// of the session has not started, which is the case here: the scenario
-										// starts once this client is in the session.
+										// scenario of the session has not started yet (it starts once this client is
+										// in the session): the session manager takes the invitation all the same,
+										// except that of a free trial player, whose rules it cannot check before.
 										CSessionBrowserImpl::TInviteResult invited = sessionBrowser.inviteCharacterByNameAndTellRefusal(charName, pCaller);
 										if (invited == CSessionBrowserImpl::InviteNoAnswer)
 										{

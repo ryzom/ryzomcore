@@ -365,11 +365,12 @@ CSessionBrowserImpl::TInviteResult CSessionBrowserImpl::inviteCharacterByNameAnd
 		if (pVT != nullptr)
 			pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_free_trial");
-		return InviteRefused;
+		// (the box says why, the line below says who: a team is invited one member after the other)
+		break;
 	}
 	case 12: // one of the two is a newcomer and the other is not
 		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_newcomer");
-		return InviteRefused;
+		break;
 	case 3: // the session manager, then the session browser: no character of that name
 	case 104:
 		textId = "uiRingInviteCharNotFound";
