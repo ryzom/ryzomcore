@@ -1726,10 +1726,12 @@ endOfWelcomeUserResult:
 				scheduleSessionResult(from, charId, TSessionId(0), 1, "Invalid session type");
 				return;
 			}
+			// A value outside an enum (serialEnum takes any number) is refused: the database would store the default
 			TSessionLevel sl(sessionLevel);
-			if (sl == TSessionLevel::invalid_val)
+			if (!sl.isValid())
 			{
 				// failed !, invalid level
+				nlwarning("RSM : on_scheduleSession : char %u sent the session level %d, which is not a session level: refused", charId, (sint32)sl.getValue());
 				scheduleSessionResult(from, charId, TSessionId(0), 2, "Invalid level");
 				return;
 			}
@@ -1740,16 +1742,18 @@ endOfWelcomeUserResult:
 //				scheduleSessionResult(from, charId, TSessionId(0), 5, "Invalid access type");
 //			}
 			TRuleType rt(ruleType);
-			if (rt == TRuleType::invalid_val)
+			if (!rt.isValid())
 			{
 				// failed !, invalid rule type
+				nlwarning("RSM : on_scheduleSession : char %u sent the rule type %d, which is not a rule type: refused", charId, (sint32)rt.getValue());
 				scheduleSessionResult(from, charId, TSessionId(0), 6, "Invalid rule type");
 				return;
 			}
 			TEstimatedDuration ed(estimatedDuration);
-			if (ed == TEstimatedDuration::invalid_val)
+			if (!ed.isValid())
 			{
 				// failed !, invalid estimated duration
+				nlwarning("RSM : on_scheduleSession : char %u sent the estimated duration %d, which is not an estimated duration: refused", charId, (sint32)ed.getValue());
 				scheduleSessionResult(from, charId, TSessionId(0), 7, "Invalid estimated duration");
 				return;
 			}
@@ -1891,11 +1895,14 @@ endOfWelcomeUserResult:
 			TSessionLevel level(sessionLevel);
 //			TAccessType	access(accessType);
 			TEstimatedDuration duration(estimatedDuration);
-			if (level == TSessionLevel::invalid_val
+			// a value outside an enum (serialEnum takes any number) is refused, as in on_scheduleSession
+			if (!level.isValid()
 //				|| access == TAccessType::invalid_val
-				|| duration == TEstimatedDuration::invalid_val)
+				|| !duration.isValid())
 			{
 				// invalid parameters
+				nlwarning("RSM : on_updateSessionInfo : char %u sent the session level %d and the estimated duration %d for session %u, one of which is out of range: refused",
+				    charId, (sint32)level.getValue(), (sint32)duration.getValue(), sessionId.asInt());
 				invokeResult(from, charId>>4, 5, "Invalid parameters");
 				return;
 			}
