@@ -2575,8 +2575,13 @@ namespace NLGUI
 		viewText->setModulateGlobalColor(ErrorColorGlobalColor);
 		viewText->setMultiLine (true);
 		getParagraph()->addChild (viewText);
+		// the error has taken the place of the page: the window has its prefix alone (setTitle would put
+		// the prefix before the prefix)
 		if(!_TitlePrefix.empty())
-			setTitle (_TitlePrefix);
+		{
+			_TitleString = _TitlePrefix;
+			setContainerTitle (_TitleString);
+		}
 
 		updateRefreshButton();
 		invalidateCoords();
@@ -3853,11 +3858,13 @@ namespace NLGUI
 		releaseDownloads();
 		updateRefreshButton();
 
-		// Reset the title
+		// The title bar says that the page is on its way. That text is not the title of a page and is not
+		// kept as one (_TitleString): a page that gives no title would leave it in the title bar for good,
+		// and an answer that is not a page puts the title of the page that stays back.
 		if(_TitlePrefix.empty())
-			setTitle (CI18N::get("uiPleaseWait"));
+			setContainerTitle (CI18N::get("uiPleaseWait"));
 		else
-			setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
+			setContainerTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
 
 		url = upgradeInsecureUrl(url);
 
@@ -4211,7 +4218,8 @@ namespace NLGUI
 		}
 		else if (_TrustedDomain && type.find("text/lua") == 0)
 		{
-			setTitle(_TitleString);
+			// the page stays, and its title comes back in place of the wait text
+			setContainerTitle(_TitleString);
 
 			_LuaScript = "\nlocal __CURRENT_WINDOW__=\""+this->_Id+"\" \n"+content;
 			CLuaManager::getInstance().executeLuaScript(_LuaScript, true);
@@ -4403,6 +4411,9 @@ namespace NLGUI
 	void CGroupHTML::beginBuild ()
 	{
 		_Browsing = true;
+
+		// a new page: it has no title until it gives one (htmlTITLE)
+		_TitleString.clear();
 	}
 
 	void CGroupHTML::endBuild ()
@@ -4411,11 +4422,12 @@ namespace NLGUI
 		_Browsing = false;
 		updateRefreshButton();
 
-		// check that the title is set, or reset it (in the case the page
-		// does not provide a title)
+		// The page gave no title: the window has its prefix alone, in place of the title of the page
+		// before or of the wait text (setTitle would put the prefix before the prefix).
 		if (_TitleString.empty())
 		{
-			setTitle(_TitlePrefix);
+			_TitleString = _TitlePrefix;
+			setContainerTitle(_TitleString);
 		}
 
 		invalidateCoords();
