@@ -3126,24 +3126,31 @@ endOfWelcomeUserResult:
 				else if (role == TSessionPartStatus::sps_play_invited)
 				{
 					// check that free trial account can't access non authorised scenarios
-					CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
-					if (sessionLog == NULL)
+					// (The scenario of the session is looked up for such an invitee only: it is known once it has
+					// started, when the session gets its session log. Any other character is invited before that
+					// too, as the team of the owner is right after the launch.)
+					if (hasPrivilegeOfList(invitedNelUser->getExtendedPrivilege(), ":TRIAL:"))
 					{
-						// the scenario is not started, can't accept invitation now
-						invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
-						return;
-					}
+						CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
+						if (sessionLog == NULL)
+						{
+							// the scenario is not started, can't accept invitation now
+							nlwarning("RSM : on_inviteCharacter : char %u invites char %u, of a free trial account, in session %u whose scenario has not started: the invitation can't be validated now, refused",
+							    ownerCharId, invitedCharId, sessionId.asInt());
+							invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
+							return;
+						}
 
-					CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-					BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
+						CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
+						BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
 
-					if (hasPrivilegeOfList(invitedNelUser->getExtendedPrivilege(), ":TRIAL:")
-						&& !scenario->getAllowFreeTrial())
-					{
-						// free trial are not allowed in this scenario
-						invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
-						return;
+						if (!scenario->getAllowFreeTrial())
+						{
+							// free trial are not allowed in this scenario
+							invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
+							return;
 
+						}
 					}
 
 					if (session->getOwnerId() != ownerCharId)
