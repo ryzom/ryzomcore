@@ -1004,22 +1004,32 @@ retryJoinEdit:
 			}
 		}
 		// What the player is told: what happened, in his language (the reason of the exception is English, for
-		// the log), and that the client goes back to the mainland when it does so by itself. The text of a
-		// session that is closed says both.
+		// the log), and that the client goes back to the mainland when it does so by itself.
 		string message = CI18N::get(e.TextId);
 		strFindReplace(message, "%code", toString(e.Code));
 		if (requestRetToMainland)
 		{
-			if (e.TextId == "uiFarTPSessionClosed")
-				message = CI18N::get("uiSessionVanishedFarTP");
-			else
-				message += " " + CI18N::get("uiFarTPBackToMainland");
+			message += " " + CI18N::get("uiFarTPBackToMainland");
 			// The return follows at once, and the box goes with the interface it is in: at the character
 			// selection it is gone when the game is entered, a moment later. The player reads the message on
 			// arrival (showReturnMessage).
 			m_ReturnMessage = message;
+			// The box shown now, for a session that is closed, has the text it always had, which says both
+			// and that the teleport is under way: on arrival that would read as if it were still to come.
+			if (e.TextId == "uiFarTPSessionClosed")
+				message = CI18N::get("uiSessionVanishedFarTP");
 		}
-		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface");
+		// (as it is written: the default case mode of the box puts "Ring" and every other word after the
+		// first of a sentence in lower case)
+		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface", "", "", CaseNormal);
+		if (!requestRetToMainland)
+		{
+			// The client stays where it is: at the character selection, or in the game. No return is under way
+			// any more, also when this request was the return itself (the join of the mainland that follows
+			// CONNECTION:RET_MAINLAND): a message kept for the arrival would be shown to whichever character
+			// enters the game next.
+			m_ReturnMessage.clear();
+		}
 		if ( letReturnToCharSelect && requestRetToMainland )
 		{
 			// The client goes back to the mainland by itself: the box that was just shown has no use for its
@@ -1128,6 +1138,9 @@ void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
  */
 void CFarTP::requestReconnection()
 {
+	// the player goes back to the character selection: a message kept for the arrival of this character is not
+	// for the one that is chosen there
+	m_ReturnMessage.clear();
 	_ReselectingChar = true;
 	if (!requestFarTPToSession(TSessionId(std::numeric_limits<uint16>::max()), std::numeric_limits<uint8>::max(), CFarTP::JoinMainland, false))
 		_ReselectingChar = false;
@@ -1151,6 +1164,7 @@ void CFarTP::requestReselectThroughLimbo()
 
 	// The same sequence as requestReconnection() once the shard unifier has answered, but for the same shard and
 	// connection: no fast disconnection, the quit countdown applies (see disconnectFromPreviousShard)
+	m_ReturnMessage.clear(); // as in requestReconnection
 	_ReselectingChar = true;
 	m_ReselectThroughLimbo = true;
 	_SessionIdToJoinFast = 0;
@@ -1349,6 +1363,11 @@ void CFarTP::connectToNewShard()
 	// Through limbo, the connection is kept (still quitting until the frontend synchronizes it again)
 	if (!m_ReselectThroughLimbo)
 	{
+		// The id of the shard that is left is not the one of the shard that is joined, which sends its own, and
+		// its web server with it, when the client is ready (impulseShardId). Until then there is none: the
+		// scripts that wait for the id before they ask the web server for a page (getShardId) wait again.
+		ShardId = 0;
+
 		// Connect to the next FS
 		NetMngr.initCookie(Cookie, FSAddr);
 
@@ -1606,7 +1625,7 @@ void CFarTP::onDssDown(bool forceReturn)
 	}
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"));
+	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"), "ui:interface", "", "", CaseNormal);
 	// the interface of the Ring goes with the return: the message is shown again on arrival
 	m_ReturnMessage = CI18N::get("uiDisconnected");
 	requestReturnToPreviousSession();
@@ -1617,13 +1636,34 @@ void CFarTP::showReturnMessage()
 	if (m_ReturnMessage.empty())
 		return;
 
-	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage);
+	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage, "ui:interface", "", "", CaseNormal);
 	m_ReturnMessage.clear();
-	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
-	// this one comes up while the game is still loading: it stays until its OK button is used.
 	CGroupModal *box = dynamic_cast<CGroupModal *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:message_box_with_help"));
-	if (box)
-		box->ExitClickOut = false;
+	if (!box)
+		return;
+
+	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
+	// this one comes up while the game is still loading: it stays until its OK button is used. The widget
+	// manager takes that setting when the modal is enabled, so the box is enabled again with it.
+	box->ExitClickOut = false;
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, box);
+
+	// A modal of the game opens on the mouse pointer: CGroupModal spawns there unless its mouse_pos is off,
+	// with its parent hotspot at the bottom left, whatever posref its definition has. That suits a box that
+	// answers a click. Nobody clicked for this one, and when the main loop is entered the pointer has no
+	// position yet (CViewPointerBase starts it at InvalidCoord): the box was clipped into the bottom left
+	// corner of the screen. It gets the centre of the interface as its spawn point, for this showing: the next
+	// box takes the pointer again (CWidgetManager::pushModalWindow).
+	CInterfaceGroup *parent = box->getParent();
+	if (parent)
+	{
+		box->SpawnMouseX = parent->getWReal() / 2;
+		box->SpawnMouseY = parent->getHReal() / 2;
+	}
+	// (twice, as CInterfaceManager::messageBoxInternal does for a box it has just given a text)
+	box->invalidateCoords();
+	box->updateCoords();
+	box->updateCoords();
 }
 
 extern bool loginFinished;

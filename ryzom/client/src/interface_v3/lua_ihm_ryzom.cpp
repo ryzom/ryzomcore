@@ -550,13 +550,20 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &)) &messageBox),
 		luabind::def("messageBox", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBox),
 #endif
+		// (text), (text, master group) and (text, master group, case mode: the case_* defines of the interface).
+		// The last two were registered for CLuaUCString only, which no build has: a script that named the
+		// master group or the case mode got "No matching overload found".
 		luabind::def("messageBox", (void(*)(const std::string &)) &messageBox),
+		luabind::def("messageBox", (void(*)(const std::string &, const std::string &)) &messageBox),
+		luabind::def("messageBox", (void(*)(const std::string &, const std::string &, int caseMode)) &messageBox),
 #ifdef RYZOM_LUA_UCSTRING
 		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &)) &messageBoxWithHelp), // TODO: Lua UTF-8
 		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &)) &messageBoxWithHelp), // TODO: Lua UTF-8
 		luabind::def("messageBoxWithHelp", (void(*)(const CLuaUCString &, const std::string &, int caseMode)) &messageBoxWithHelp), // TODO: Lua UTF-8
 #endif
 		luabind::def("messageBoxWithHelp", (void(*)(const std::string &)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp", (void(*)(const std::string &, const std::string &)) &messageBoxWithHelp),
+		luabind::def("messageBoxWithHelp", (void(*)(const std::string &, const std::string &, int caseMode)) &messageBoxWithHelp),
 		LUABIND_FUNC(replacePvpEffectParam),
 		LUABIND_FUNC(secondsSince1970ToHour),
 #ifdef RYZOM_BG_DOWNLOADER

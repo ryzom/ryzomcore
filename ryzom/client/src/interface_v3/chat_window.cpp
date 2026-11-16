@@ -821,11 +821,10 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 		// id: that finds the first control named 'invite' of all the windows, and the Invite button of the
 		// Ring's list of characters comes before any tell window. The button of this window stayed hidden
 		// until a contact list changed.)
-		CCtrlBaseButton *inviteButton = dynamic_cast<CCtrlBaseButton *>(pGC->getCtrl("invite"));
-		if (inviteButton)
-		{
-			inviteButton->setActive(userCanInviteToRingSession());
-		}
+		// The FRIEND and IGNORE buttons are set with it: they were set only when a contact list changed, so the
+		// tell window of a friend had a FRIEND button to press until then (in an animation, where the lists
+		// rarely change, for as long as the window was there).
+		updateFreeTellerHeader(*pGC);
 
 		// the group is only active on the current desktop
 		pGC->setActive(true);

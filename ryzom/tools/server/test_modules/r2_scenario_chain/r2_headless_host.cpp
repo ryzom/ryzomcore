@@ -23,6 +23,7 @@
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/string_common.h"
 #include "nel/misc/time_nl.h"
+#include "nel/gui/string_case.h"
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
@@ -205,6 +206,7 @@ const char *const s_Defines[][2] = {
 	{ "r2ed_max_num_additionnal_acts", "10" },
 	{ "r2ed_max_num_plot_items", "32" },
 	{ "r2ed_max_num_plot_item_sheets", "200" },
+	{ "case_normal", "0" }, // config.xml: the case mode of a text that is shown as it is written
 };
 
 // Variables of the client configuration the scripts read, with the values of client_default.cfg
@@ -1664,6 +1666,24 @@ R2H_FUNCTION(luaDebugInfo)
 
 R2H_FUNCTION(luaMessageBox)
 {
+	// The client has messageBox(text), (text, master group) and (text, master group, case mode), with strings
+	// and a case mode below CaseCount (CLuaIHMRyzom). Any other call is "No matching overload found" there: it is
+	// an error here too, so that a script that calls a shape the client lacks fails in the fixtures.
+	int count = lua_gettop(state);
+	if (count < 1 || count > 3)
+		return fail(state, NLMISC::toString("messageBox: %d arguments, the client has (text), (text, masterGroup) and (text, masterGroup, caseMode)", count));
+	if (lua_type(state, 1) != LUA_TSTRING)
+		return fail(state, std::string("messageBox: the text is a ") + lua_typename(state, lua_type(state, 1)) + ", the client takes a string");
+	if (count >= 2 && lua_type(state, 2) != LUA_TSTRING)
+		return fail(state, std::string("messageBox: the master group is a ") + lua_typename(state, lua_type(state, 2)) + ", the client takes a string");
+	if (count == 3)
+	{
+		if (lua_type(state, 3) != LUA_TNUMBER)
+			return fail(state, std::string("messageBox: the case mode is a ") + lua_typename(state, lua_type(state, 3)) + ", the client takes a number");
+		lua_Number caseMode = lua_tonumber(state, 3);
+		if (caseMode != (lua_Number)(int)caseMode || caseMode < 0 || caseMode >= (lua_Number)NLGUI::CaseCount)
+			return fail(state, NLMISC::toString("messageBox: %s is not a case mode (0 to %d)", luaValueText(state, 3).c_str(), (int)NLGUI::CaseCount - 1));
+	}
 	s_Host->log("messageBox", luaValueText(state, 1));
 	return 0;
 }
@@ -1917,7 +1937,7 @@ R2H_FUNCTION(luaGetDefine)
 	{
 		if (name == s_Defines[i][0])
 		{
-			s_Host->recordStubCall(state, "getDefine('" + name + "') = '" + s_Defines[i][1] + "' (the value of r2ed_scenario.xml, built in)");
+			s_Host->recordStubCall(state, "getDefine('" + name + "') = '" + s_Defines[i][1] + "' (the value of the interface files, built in)");
 			lua_pushstring(state, s_Defines[i][1]);
 			return 1;
 		}

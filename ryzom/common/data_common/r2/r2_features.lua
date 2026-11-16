@@ -437,6 +437,13 @@ end
 -- file (see authorIsThere).
 local workingModes = { Edit = true, Test = true, DM = true, AnimationModeDm = true, r2ed_anim_test = true }
 
+-- A message box with its text as it is written. The default of messageBox puts every letter after the
+-- first of a sentence in lower case: the name of a file, of a character, of a component or of the Ring
+-- came out changed ("tablebodysets.txt", "this ring session").
+function r2.messageBoxAsWritten(text)
+	messageBox(text, "ui:interface", tonumber(getDefine("case_normal")))
+end
+
 -- A working mode is not always one the editor stays in, nor one the author sees the game in:
 -- * The mode the editor starts in is chosen from the role of the user (CEditor::autoConfigInit) before
 --   the server has said what the session is doing. The server's word follows and sets the mode again
@@ -481,7 +488,7 @@ r2.PendingErrorMessage = nil
 -- author is back at the choice of a file, before another file is loaded.
 function r2.showErrorMessage(text)
 	if authorIsThere() then
-		messageBox(text)
+		r2.messageBoxAsWritten(text)
 	elseif r2.PendingErrorMessage ~= nil then
 		r2.PendingErrorMessage = tostring(r2.PendingErrorMessage) .. "\n\n" .. tostring(text)
 	else
@@ -496,7 +503,7 @@ function r2.showPendingErrorMessage()
 		return
 	end
 	r2.PendingErrorMessage = nil
-	messageBox(pending)
+	r2.messageBoxAsWritten(pending)
 end
 
 -- The client calls this when a test cannot start and nothing has been sent to the server: the save of
