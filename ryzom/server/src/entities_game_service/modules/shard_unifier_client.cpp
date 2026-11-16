@@ -255,6 +255,29 @@ public:
 		}
 	}
 
+	/// Refuses the name validations and the character creations that wait for the unifier: when it goes down, and
+	/// when the service stops (IShardUnifierEvent::refusePendingNameRequests).
+	void refusePendingNameRequests() NL_OVERRIDE
+	{
+		while (!_PendingNameToValidate.empty())
+		{
+			TCharacterNameValidationInfo &cnvi = _PendingNameToValidate.begin()->second;
+
+			sendIfNameIsValide( cnvi.UserId, false);
+
+			_PendingNameToValidate.erase(_PendingNameToValidate.begin());
+		}
+
+		while (!_CreateCharPending.empty())
+		{
+			TCreatePendingInfo &cpi = _CreateCharPending.begin()->second;
+
+			cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
+
+			_CreateCharPending.erase(_CreateCharPending.begin());
+		}
+	}
+
 	void onModuleDown(IModuleProxy *module) NL_OVERRIDE
 	{
 		if (module == _CharacterSynch)
@@ -262,23 +285,7 @@ public:
 			_CharacterSynch = NULL;
 
 			// fail all validation and character creation pending
-			while (!_PendingNameToValidate.empty())
-			{
-				TCharacterNameValidationInfo &cnvi = _PendingNameToValidate.begin()->second;
-
-				sendIfNameIsValide( cnvi.UserId, false);
-
-				_PendingNameToValidate.erase(_PendingNameToValidate.begin());
-			}
-
-			while (!_CreateCharPending.empty())
-			{
-				TCreatePendingInfo &cpi = _CreateCharPending.begin()->second;
-
-				cbCreateChar_part2(cpi.UserId, cpi.CreateCharMsg, false);
-
-				_CreateCharPending.erase(_CreateCharPending.begin());
-			}
+			refusePendingNameRequests();
 		}
 		else if (module == _EntityLocator)
 		{

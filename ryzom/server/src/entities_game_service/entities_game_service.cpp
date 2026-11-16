@@ -125,6 +125,7 @@
 #include "pvp_manager/pvp_faction_reward_manager/pvp_faction_reward_manager.h"
 #include "player_manager/player_manager.h"
 #include "modules/r2_give_item.h"
+#include "modules/shard_unifier_client.h"
 
 #include "server_share/logger_service_client.h"
 #include "server_share/stl_allocator_checker.h"
@@ -1890,6 +1891,11 @@ void CPlayerService::release()
 
 	// release the world instance callback
 	CWorldInstances::instance().registerAiInstanceReadyCallback(NULL);
+
+	// The modules are released after this function. What waits in one of them for another service, and would
+	// be answered when that service is taken down, is answered now, while the managers the answer reads are there.
+	if (!packingSheets && IShardUnifierEvent::getInstance() != NULL)
+		IShardUnifierEvent::getInstance()->refusePendingNameRequests();
 
 	if (!packingSheets) PlayerManager.saveAllPlayer(); // this can produce huge network messages and needs that the FlushSendingQueuesOnExit variable is on!
 	if (!packingSheets) CDynamicItems::getInstance()->saveAll(); // same
