@@ -373,7 +373,7 @@ public:
 			return;
 		}
 		bms.serialBuffer(msg.bufferToFill(len), len);
-		// readType asserts (in setType) that the name is not empty, and ignores a short format, which the L5 transport of
+		// readType throws on a name that is empty (the check here names the client), and ignores a short format, which the L5 transport of
 		// the service the message goes to fails on (nlerror in readTypeAtCurrentPos). The header is read on a stream of
 		// its own: the message has no read length before readType.
 		CMessage::TFormat format;

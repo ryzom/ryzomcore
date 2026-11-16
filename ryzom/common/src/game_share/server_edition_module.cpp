@@ -7162,9 +7162,25 @@ void CServerEditionModule::multiPartMsgFoot(NLNET::IModuleProxy *sbs, uint32 cha
 	// the message asks for can remove the character).
 	CUniquePtr<NLNET::CMessage> waitingMsg(info->WaitingMsg);
 	info->WaitingMsg = nullptr;
-	info = nullptr;
 
-	waitingMsg->invert();
+	try
+	{
+		waitingMsg->invert();
+	}
+	catch (const NLMISC::EStream &e)
+	{
+		nlwarning("R2Ed: char %u ended the multi-part message '%s' of %u bytes with a header that cannot be read (%s): the message is refused",
+			charId, info->WaitingMsgName.c_str(), info->WaitingMsgSize, e.what());
+		refuseMultiPartMsg(charId, *info);
+		info->WaitingMsgRefused = false;
+		if (clientEditionProxyPtr)
+		{
+			CShareClientEditionItfProxy proxy( *clientEditionProxyPtr);
+			proxy.multiPartMsgFoot(this);
+		}
+		return;
+	}
+	info = nullptr;
 
 	if (clientEditionProxyPtr)
 	{
