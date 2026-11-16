@@ -305,6 +305,32 @@ void CSessionBrowserImpl::on_invokeResult(NLNET::TSockId /* from */, uint32 /* u
 // ****************************************************************************
 bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charName, NLGUI::CCtrlBase *caller)
 {
+	if (inviteCharacterByNameAndTellRefusal(charName, caller) != InviteGranted)
+		return false;
+	// the session is the one the editor is connected to
+	bool animationSession = R2::getEditor().getMode() != R2::CEditor::NotInitialized
+	    && R2::getEditor().getDMC().getEditionModule().getSessionType() == R2::st_anim;
+	tellCharacterInvited(charName, animationSession);
+	// the list of the characters of the session is asked for again
+	CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
+	return true;
+}
+
+// ****************************************************************************
+void CSessionBrowserImpl::tellCharacterInvited(const std::string &charName, bool animationSession)
+{
+	// The player invited into an animation session gets a tell: it says that the session is in the list of
+	// the Ring terminals, and its tag makes the list of his terminal ask for the sessions again
+	// (CInterfaceChatDisplayer::displayTell). An edit session is in no terminal: the editor invited into
+	// one gets no tell that would send him there.
+	if (animationSession)
+		ChatMngr.tell(charName, CI18N::get("uiRingInviteNotification"));
+	CInterfaceManager::getInstance()->displaySystemInfo("@{6F6F}" + charName + " @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
+}
+
+// ****************************************************************************
+CSessionBrowserImpl::TInviteResult CSessionBrowserImpl::inviteCharacterByNameAndTellRefusal(const std::string &charName, NLGUI::CCtrlBase *caller)
+{
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	inviteCharacterByName(getCharId(), charName);
 	if (!waitOneMessage(getMessageName("on_invokeResult")))
@@ -314,22 +340,10 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 		string text = CI18N::get("uiRingInviteNoAnswer");
 		strFindReplace(text, "%name", charName);
 		im->displaySystemInfo(text, "BC");
-		return false;
+		return InviteNoAnswer;
 	}
 	if (_LastInvokeResult == 0)
-	{
-		// The player invited into an animation session gets a tell: it says that the session is in the list of
-		// the Ring terminals, and its tag makes the list of his terminal ask for the sessions again
-		// (CInterfaceChatDisplayer::displayTell). An edit session is in no terminal: the editor invited into
-		// one gets no tell that would send him there.
-		if (R2::getEditor().getMode() != R2::CEditor::NotInitialized
-		    && R2::getEditor().getDMC().getEditionModule().getSessionType() == R2::st_anim)
-			ChatMngr.tell(charName, CI18N::get("uiRingInviteNotification"));
-		im->displaySystemInfo("@{6F6F}" + charName + " @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
-		// the list of the characters of the session is asked for again
-		CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
-		return true;
-	}
+		return InviteGranted;
 
 	nlinfo("SB: the invitation of '%s' into the session is refused: %u '%s'", charName.c_str(), _LastInvokeResult, _LastInvokeResultMsg.c_str());
 	const char *textId = "uiRingInviteRefused";
@@ -341,11 +355,11 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 		if (pVT != nullptr)
 			pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_free_trial");
-		return false;
+		return InviteRefused;
 	}
 	case 12: // one of the two is a newcomer and the other is not
 		CAHManager::getInstance()->runActionHandler("enter_modal", caller, "group=ui:interface:warning_newcomer");
-		return false;
+		return InviteRefused;
 	case 3: // the session manager, then the session browser: no character of that name
 	case 104:
 		textId = "uiRingInviteCharNotFound";
@@ -363,7 +377,7 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 	strFindReplace(text, "%name", charName);
 	strFindReplace(text, "%code", toString(_LastInvokeResult));
 	im->displaySystemInfo(text, "BC");
-	return false;
+	return InviteRefused;
 }
 
 // ****************************************************************************

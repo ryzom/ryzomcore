@@ -3591,10 +3591,12 @@ class CAHLoadScenario : public IActionHandler
 							sessionBrowser._LastScheduleSessionCharId,
 							sessionStatus.toString());
 
+						// (a join that is refused has told the player why: the launch itself did not fail)
+						bool joinGranted = false;
 						if(sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 						{
 							// request session
-							FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
+							joinGranted = FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
 								!R2::getEditor().isInitialized());
 
 							if (sessionBrowser._LastInvokeResult != 0)
@@ -3618,8 +3620,9 @@ class CAHLoadScenario : public IActionHandler
 						}
 
 
-						// invite team, into the session the player enters
-						if(inviteTeam && launchSuccess)
+						// invite team, into the session the player enters: the session manager invites into the
+						// session the character is in, which is the new one once the join is granted
+						if(inviteTeam && launchSuccess && joinGranted)
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
@@ -3631,25 +3634,18 @@ class CAHLoadScenario : public IActionHandler
 									if (pSMC->getString(val,res))
 									{
 										string charName = CEntityCL::removeTitleAndShardFromName(res);
-										sessionBrowser.inviteCharacterByName(sessionBrowser._LastScheduleSessionCharId, charName);
-
-										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
+										// The player is told a refusal, with its reason, and a missing answer. The
+										// session manager refuses the invitation of a player as long as the scenario
+										// of the session has not started, which is the case here: the scenario
+										// starts once this client is in the session.
+										CSessionBrowserImpl::TInviteResult invited = sessionBrowser.inviteCharacterByNameAndTellRefusal(charName, pCaller);
+										if (invited == CSessionBrowserImpl::InviteNoAnswer)
 										{
 											// the next ones would wait as long: the team members are not invited
-											nlwarning("inviteCharacterByName callback return false");
-											string text = CI18N::get("uiRingInviteNoAnswer");
-											strFindReplace(text, "%name", charName);
-											pIM->displaySystemInfo(text, "BC");
 											break;
 										}
-
-										if(sessionBrowser._LastInvokeResult == 14)
-										{
-											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-											if (pVT != nullptr)
-												pVT->setTextLocalized("uiRingWarningInviteFreeTrial", true);
-											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
-										}
+										if (invited == CSessionBrowserImpl::InviteGranted)
+											sessionBrowser.tellCharacterInvited(charName, true);
 									}
 								}
 							}
