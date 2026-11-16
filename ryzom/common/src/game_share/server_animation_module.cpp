@@ -2240,8 +2240,10 @@ bool CServerAnimationModule::stopTestImpl(TSessionId sessionId, uint32 & lastAct
 		return false;
 	}
 	uint32 aiInstance = session->AiInstance;
-	requestUnloadTable(sessionId);
-	requestReleaseChannels(sessionId);
+	// (under the id the animation runs for, which the texts and the channels were given under: the id asked for
+	// can be that of an animation session linked to it)
+	requestUnloadTable(session->SessionId);
+	requestReleaseChannels(session->SessionId);
 
 	if ( !_CharacterControlProxy.isNull())
 	{
@@ -4570,10 +4572,14 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, stopTest)
 	// The animation that runs for a session of the edition module is stopped through that module, as every other
 	// stop is: it puts the scenario of the session back in edition, stops the animation here and tells the clients
 	// of the session. Stopped from here alone, the session stays in test mode and its clients in a test that is gone.
-	if (getSession(sessionId) && getEditionModule()->getScenarioById(sessionId))
+	// (the id given can be that of an animation session linked to the session the animation runs for: the stop is
+	// made for that one, whose clients are in the test)
+	CAnimationSession *running = getSession(sessionId);
+	if (running && getEditionModule()->getScenarioById(running->SessionId))
 	{
-		getEditionModule()->stopTest(sessionId);
-		log.displayNL("The animation of session %u is stopped, the clients of the session are told", id);
+		TSessionId runningId = running->SessionId;
+		getEditionModule()->stopTest(runningId);
+		log.displayNL("The animation of session %u is stopped, the clients of the session are told", runningId.asInt());
 		return true;
 	}
 	stopTest(sessionId, dummyLastAct );
