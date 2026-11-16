@@ -672,6 +672,8 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop());
 		_Lua->newTable();
+		// the character of this client is left out: the list has its own index, without a hole (Lua sorts it)
+		uint listed = 0;
 		for (uint k = 0; k < chars.size(); ++k)
 		{
 			const RSMGR::TCharDesc &cd = chars[k];
@@ -708,7 +710,8 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 
 				luaChar.setValue("Flags",		flags);
 				luaChar.push();
- 				_Lua->rawSetI(-2, k +1); // set in chars list
+				++listed;
+				_Lua->rawSetI(-2, listed); // set in chars list
 			}
 		}
 		// call into lua
