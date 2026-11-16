@@ -693,7 +693,7 @@
 >
 	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" 
 	 color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" 
-	 multi_line_space="0" case_mode="%case_first_sentence_letter_up" hardtext="uiRingWarningFreeTrial"/>
+	 multi_line_space="0" case_mode="%case_normal" hardtext="uiRingWarningFreeTrial"/>
 	<ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
 </group>
 
@@ -704,7 +704,7 @@
 >
 	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" 
 	 color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" 
-	 multi_line_space="0" case_mode="%case_first_sentence_letter_up" hardtext="uiRingWarningNewcomer"/>
+	 multi_line_space="0" case_mode="%case_normal" hardtext="uiRingWarningNewcomer"/>
 	<ctrl style="button_ok" posref="BM BM" x="0" y="8" onclick_l="leave_modal" hardtext="uittOK" avoid_resize_parent="true" />
 </group>
 

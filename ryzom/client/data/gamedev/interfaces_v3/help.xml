@@ -564,7 +564,7 @@
 </proc>
 <!-- The dialog box -->
 <group type="modal" id="stat_report_message_box" exit_click_out="false" posref="MM MM" w="266" child_resize_h="true" child_resize_hmargin="12" options="skin_modal" mouse_pos="false" win_priority="%win_priority_highest">
-	<view type="text" id="text" posref="TM TM" w="250" y="-8" color="255 255 255 255" fontsize="12" shadow="true" multi_line_space="0" multi_line="true" case_mode="%case_first_sentence_letter_up" hardtext="uiStatReport" />
+	<view type="text" id="text" posref="TM TM" w="250" y="-8" color="255 255 255 255" fontsize="12" shadow="true" multi_line_space="0" multi_line="true" case_mode="%case_normal" hardtext="uiStatReport" />
 	<group id="buttons" posparent="text" posref="BL TL" child_resize_w="true" child_resize_wmargin="8" child_resize_h="true" x="-4" y="-4">
 		<ctrl style="button_ok" x="4" y="0" posref="TL TL" text_y="0" onclick_l="proc" params_l="proc_stat_report_yes" hardtext="uiYes" />
 		<ctrl style="button_cancel" x="4" posparent="ok" text_y="0" posref="TR TL" onclick_l="leave_modal" hardtext="uiNo" />
