@@ -3123,6 +3123,11 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 			if (!trialAllowed && getIsCharRoS(ownerCharId) && hasPrivilegeOfList(extendedPriv, ":TRIAL:"))
 			{
 				nlwarning("ERROR: A client %u(CharId) (RoS) try to launch an animation that is not RoS. That means that the client has not check the RoS Flags or that this user is trying to hack use. So we will close he animation session (%u) so he will be kicked back to edition.", ownerCharId, sessionId.asInt());
+				// The session was made above and the session manager was told that it is created. It is closed as
+				// any session of this service is: the animation it is linked to stops, which sends the editors of
+				// the edition session back to edition, the EGS is told that the two are no longer linked, and the
+				// session manager is told that the session closes. Nothing was announced for it as a running scenario.
+				closeSession(nullptr, sessionId);
 				return;
 			}
 
