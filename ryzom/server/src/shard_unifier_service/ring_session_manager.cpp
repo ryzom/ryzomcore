@@ -563,7 +563,10 @@ namespace RSMGR
 			}
 
 			session->setState(TSessionState::ss_closed);
-			session->setFinalDuration(uint32(session->getStartDate() - NLMISC::CTime::getSecondsSince1970()));
+			// the time the session ran, from its start to now (none without a start date, or with one after now)
+			uint32 startDate = session->getStartDate();
+			uint32 closeDate = NLMISC::CTime::getSecondsSince1970();
+			session->setFinalDuration((startDate != 0 && closeDate > startDate) ? closeDate - startDate : 0);
 			session->update(_RingDb);
 
 //			// update the temporary shard assocs if needed
