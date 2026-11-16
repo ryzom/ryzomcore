@@ -4779,7 +4779,8 @@ endOfWelcomeUserResult:
 
 		NLMISC_CLASS_COMMAND_DECL(forceSessionCleanup)
 		{
-			if (!_RingDb.query(string("SELECT session_id FROM sessions WHERE state = ")+toString(uint32(TSessionState::ss_open))))
+			// (the state by its name, as the column holds it)
+			if (!_RingDb.query(string("SELECT session_id FROM sessions WHERE state = '")+TSessionState::toString(TSessionState::ss_open)+"'"))
 			{
 				log.displayNL("Error while running database query");
 				return true;
@@ -4806,10 +4807,10 @@ endOfWelcomeUserResult:
 			{
 				TSessionId sessionId(*sessionToClose.begin());
 				log.displayNL("Closing session %u", sessionId.asInt());
-				CSessionPtr session = CSession::load(_RingDb, sessionId.asInt(), __FILE__, __LINE__);
-
-				session->setState(TSessionState::ss_closed);
-				session->update(_RingDb);
+				// closed as a session whose server reports its end: with its duration, and the characters of an
+				// edit session are no longer in it
+				if (!closeSession(sessionId))
+					log.displayNL("Session %u is not closed: it is gone, or no longer open", sessionId.asInt());
 
 				sessionToClose.erase(sessionToClose.begin());
 			}
