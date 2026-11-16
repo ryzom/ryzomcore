@@ -3424,7 +3424,7 @@ Translator.getGenericLogicEventEndOfActivitySequence = function(hlComponent, val
 		local id, id2 = tab[1], tab[2]
 
 		if (id == -1 or id2 == -1) then
-			printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+			printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 				"': the selected activity step can not be found");
 			return nil, nil, nil
 
@@ -3473,7 +3473,7 @@ Translator.getGenericLogicEventStartOfActivitySequence = function(value, rtNpcGr
 		local id, id2 = tab[1], tab[2]
 
 		if (id == -1 or id2 == -1) then
-			printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+			printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 				"': the selected activity step can not be found");
 			return nil, nil, nil
 
@@ -3529,7 +3529,7 @@ Translator.getNpcLogicEventEndOfActivityStepImpl = function(value, rtNpcGrp)
 	local id, id2 = tab[1], tab[2]
 
 	if (id == -1 or id2 == -1) then
-		printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+		printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 			"': the selected activity step can not be found");
 		return nil, nil, nil
 
@@ -3567,7 +3567,7 @@ Translator.getNpcLogicEventBeginOfActivityStepImpl = function(value, rtNpcGrp)
 	local id, id2 = tab[1], tab[2]
 
 	if (id == -1 or id2 == -1) then
-		printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+		printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 			"': the selected activity step can not be found");
 		return nil, nil, nil
 
@@ -3603,7 +3603,7 @@ Translator.getNpcLogicEventEndOfChatStepImpl = function(hlComponent, context, ev
 
 
 	if (id ==-1 or id2 == -1) then
-		printWarning("error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
+		printWarning("Error in translation: the event '"..event.Name .. "' in component '" .. hlComponent.Name ..
 			"': the selected chat step can not be found");
 		return nil, nil, nil
 

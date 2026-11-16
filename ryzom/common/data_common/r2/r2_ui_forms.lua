@@ -594,7 +594,7 @@ function r2:userComponentOk(shortFilename, msg)
 end
 
 function r2:userComponentKo(shortFilename, msg)
-	r2.messageBoxAsWritten(msg.." in " .. shortFilename)
+	messageBox(msg.." in " .. shortFilename)
 	r2.setCurrSelectedFile("")
 end
 

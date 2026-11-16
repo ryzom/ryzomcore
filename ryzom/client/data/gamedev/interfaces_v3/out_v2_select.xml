@@ -735,7 +735,7 @@
 	 display="false">
 		<instance template="outgame_popup" id="back" posref="TL TL" />
 
-		<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+		<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 		<ctrl style="valid_txt_button" id="ok" posref="BM BM" x="0" y="8" hardtext="uittOK" 
 						avoid_resize_parent="true" 
 						onover="play_sound" params_over="name=specie_but_over" 
@@ -971,7 +971,7 @@
 >
 	<instance template="outgame_popup" id="back" posref="TL TL" />
 
-	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+	<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
 	<ctrl style="valid_txt_button" id="ok" posref="BM BL" x="0" y="8" hardtext="uittOK" 
 					avoid_resize_parent="true" 
 					onover="play_sound" params_over="name=specie_but_over" 

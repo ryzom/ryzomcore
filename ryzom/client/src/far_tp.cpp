@@ -1019,9 +1019,7 @@ retryJoinEdit:
 			if (e.TextId == "uiFarTPSessionClosed")
 				message = CI18N::get("uiSessionVanishedFarTP");
 		}
-		// (as it is written: the default case mode of the box puts "Ring" and every other word after the
-		// first of a sentence in lower case)
-		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface", "", "", CaseNormal);
+		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface");
 		if (!requestRetToMainland)
 		{
 			// The client stays where it is: at the character selection, or in the game. No return is under way
@@ -1625,7 +1623,7 @@ void CFarTP::onDssDown(bool forceReturn)
 	}
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"), "ui:interface", "", "", CaseNormal);
+	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"));
 	// the interface of the Ring goes with the return: the message is shown again on arrival
 	m_ReturnMessage = CI18N::get("uiDisconnected");
 	requestReturnToPreviousSession();
@@ -1636,7 +1634,7 @@ void CFarTP::showReturnMessage()
 	if (m_ReturnMessage.empty())
 		return;
 
-	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage, "ui:interface", "", "", CaseNormal);
+	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage);
 	m_ReturnMessage.clear();
 	CGroupModal *box = dynamic_cast<CGroupModal *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:message_box_with_help"));
 	if (!box)

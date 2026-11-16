@@ -133,7 +133,7 @@ function featureTree.addUserComponentNode(userComponentName)
 	
 	local presentNode = root:getNodeFromId(userComponentName)
 	if presentNode ~= nil then 
-		r2.messageBoxAsWritten("The user component '"..userComponentName.."' is already loaded. Please unload it before loading a user component with the same name.")
+		messageBox("The user component '"..userComponentName.."' is already loaded. Please unload it before loading a user component with the same name.")
 		return false
 	end
 
