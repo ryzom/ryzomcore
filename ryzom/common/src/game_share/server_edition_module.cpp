@@ -1145,10 +1145,9 @@ public:
 			{
 				firstLoop = false;
 
-				uint32 fileVersion;
-				fromString(tokens[1], fileVersion);
-
-				if (tokens.size() != 2 || tokens[0] != "Version" || fileVersion != FileVersion)
+				// the first line is "Version", a tab and the version of the file
+				uint32 fileVersion = 0;
+				if (tokens.size() != 2 || tokens[0] != "Version" || !fromString(tokens[1], fileVersion) || fileVersion != FileVersion)
 				{
 					nlwarning("Obsolete File Discard '%s'", fileDescription.FileName.c_str());
 					return;
@@ -1172,7 +1171,10 @@ public:
 				}
 				else
 				{
-					nlstop;
+					// a line that is not a character id, a tab and an access: the line is left out and the others
+					// of the file are read
+					nlwarning("R2Ed: the file '%s' has a line of %u fields, where a character id, a tab and a ring access are expected: the line '%s' is left out",
+						fileDescription.FileName.c_str(), (uint)tokens.size(), clientTextForLog(*first).c_str());
 				}
 
 			}
