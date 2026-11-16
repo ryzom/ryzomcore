@@ -2910,6 +2910,16 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 	// sender == NULL <=> test the command
 
 	nldebug("R2Ed: createSession char %u, session %u, %u", ownerCharId, sessionId.asInt(), static_cast<uint32>(type.getValue()) );
+
+	// This service hosts edition and animation sessions only; the shard unifier starts no other (on_startSession).
+	// Another type is not created and not reported as created.
+	if (type.getValue() != RSMGR::TSessionType::st_edit && type.getValue() != RSMGR::TSessionType::st_anim)
+	{
+		nlwarning("R2Ed: createSession: session %u of char %u is of type '%s', which this service does not host: not created",
+		    sessionId.asInt(), ownerCharId, type.toString().c_str());
+		return;
+	}
+
 	// create an aiInstanceId
 
 
@@ -3016,10 +3026,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 		}
 
 	}
-	else // outland session are not implemented yet
-	{
-		nlstop;
-	}
+	// (no other type comes here, see the start of the function)
 
 	// send MSG to session manager
 	if (sender)
@@ -3028,19 +3035,6 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 
 		// you need to report the creation to session manager :
 		RSMGR::CRingSessionManagerProxy rsm(_SessionManager);
-
-
-		if (type.getValue() == RSMGR::TSessionType::st_edit)
-		{
-		}
-		else if (type.getValue() == RSMGR::TSessionType::st_anim)
-		{
-		}
-		else
-		{
-			nlstop;
-			return;
-		}
 
 		RSMGR::TRunningSessionInfo sessionInfo;
 		sessionInfo.setInstanceId(aiInstanceId);
