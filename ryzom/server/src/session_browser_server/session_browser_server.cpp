@@ -936,7 +936,7 @@ public:
 			query << " AND current_session="<< sd.getSessionId();
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 			CUniquePtr<CStoreResult> result3(_RingDB.storeResult());
-			BOMB_IF(result2->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
+			BOMB_IF(result3->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
 			uint32 nbPlayers;
 			result3->fetchRow();
 			result3->getField(0, nbPlayers);
