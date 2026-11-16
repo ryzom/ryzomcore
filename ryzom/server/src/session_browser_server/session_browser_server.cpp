@@ -302,9 +302,11 @@ public:
 	}
 
 	// Close the current edit session of the character
-	// Return 'invokeResult' : 0 : ok, session closed (or about to close)
-	//                         1 : char not found
-	//                         2 : failed to close the session, internal error
+	// Return 'invokeResult' : 0 : ok, session closed (or about to close), or the removal of its saved file asked for
+	//                         2 : the edit session could not be looked up, database error
+	//                         3 : no session server to remove the saved file of a session that does not run
+	//                         4 : the character has no edit session
+	//                         5 : the edit session could not be loaded
 	virtual void on_closeEditSession(NLNET::TSockId from, uint32 charId)
 	{
 		CHECK_AUTH_WITH_CHARID(from, charId);
@@ -936,7 +938,7 @@ public:
 			query << " AND current_session="<< sd.getSessionId();
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 			CUniquePtr<CStoreResult> result3(_RingDB.storeResult());
-			BOMB_IF(result2->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
+			BOMB_IF(result3->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
 			uint32 nbPlayers;
 			result3->fetchRow();
 			result3->getField(0, nbPlayers);
