@@ -5326,7 +5326,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, listCharOverrideRingAccess)
 
 	if (args.size() != 0)
 	{
-		log.displayNL("Wrong parameters");
+		log.displayNL("Wrong parameters CServerEditionModule.listCharOverrideRingAccess (no parameter)");
 		return false;
 	}
 
@@ -5371,7 +5371,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharOverrideRingAccess)
 
 	if (args.size() != 2)
 	{
-		log.displayNL("Wrong parameters CServerEditionModule.removeCharOverrideRingAccess <charId> <newValue>");
+		log.displayNL("Wrong parameters CServerEditionModule.setCharOverrideRingAccess <charId> <ringAccess>");
 		return false;
 	}
 
