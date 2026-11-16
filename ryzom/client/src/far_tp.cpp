@@ -1363,6 +1363,11 @@ void CFarTP::connectToNewShard()
 	// Through limbo, the connection is kept (still quitting until the frontend synchronizes it again)
 	if (!m_ReselectThroughLimbo)
 	{
+		// The id of the shard that is left is not the one of the shard that is joined, which sends its own, and
+		// its web server with it, when the client is ready (impulseShardId). Until then there is none: the
+		// scripts that wait for the id before they ask the web server for a page (getShardId) wait again.
+		ShardId = 0;
+
 		// Connect to the next FS
 		NetMngr.initCookie(Cookie, FSAddr);
 
