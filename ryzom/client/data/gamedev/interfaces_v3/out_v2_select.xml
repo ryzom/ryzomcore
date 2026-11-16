@@ -853,7 +853,7 @@
 	mouse_pos="false">
 
 	<action id="new_scenario" name="uiR2EDNewScenario" handler="proc" params="proc_charsel_new_scenario_warning" />
-	<action id="new_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario"/>
+	<action id="edit_scenario" name="uiR2EDEditScenario" handler="proc" params="proc_charsel_edit_scenario"/>
 
 </group>
 
