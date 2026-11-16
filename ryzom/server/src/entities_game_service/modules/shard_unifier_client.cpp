@@ -332,8 +332,11 @@ public:
 					character->setContactOnlineStatus(charEid, online);
 				}
 			}
-			// update the guild member list
-			IGuildManager::getInstance().characterConnectionEvent(charEid, online);
+			// update the guild member list. When the service stops, the guild manager is released before the
+			// modules are (CPlayerService::release), and the entity locator that goes down after that brings
+			// onModuleDown here for every character that was online elsewhere: no member list is left to update.
+			if (IGuildManager::hasInstance())
+				IGuildManager::getInstance().characterConnectionEvent(charEid, online);
 		}
 	}
 

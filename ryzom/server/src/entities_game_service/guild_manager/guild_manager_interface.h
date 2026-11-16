@@ -36,6 +36,9 @@ class IGuildManager
 public:
 
 	static IGuildManager &getInstance();
+	/// False before the guild manager is made and after it is released. When the service stops, it is released
+	/// before the modules: what a module does when another service goes down then finds no guild manager.
+	static bool hasInstance();
 
 	/// A member have been changed in some way
 	virtual void	guildMemberChanged		(EGSPD::CGuildMemberPD *guildMemberPd) =0;

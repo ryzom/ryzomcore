@@ -125,6 +125,11 @@ IGuildManager &IGuildManager::getInstance()
 	return *(CGuildManager::getInstance());
 }
 
+bool IGuildManager::hasInstance()
+{
+	return CGuildManager::isInitialized();
+}
+
 const std::string &CGuildManager::getCommandHandlerName() const
 {
 	static string name("guildManager");
