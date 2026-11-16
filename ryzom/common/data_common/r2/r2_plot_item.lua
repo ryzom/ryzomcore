@@ -231,66 +231,137 @@ local plotItemSheetOfItem =
 
 -- Version 1. A plot item that names an item of the table gets a plot item sheet, so that the scenario
 -- starts. Each plot item sheet is the sheet of one plot item of a scenario, which is how a player's item
--- is known to be this plot item or that one: a sheet another plot item of the scenario has is not taken,
--- whether that one had it before or got it earlier in this update (the plot items are updated in the
--- order of their list). The choice, in this order:
---   * the plot item sheet with the icon of the item (Same);
---   * the first sheet of the list of the same kind (Kind) that no plot item has;
---   * the first of the 185 plot item sheets, in the order of their numbers, that no plot item has.
+-- is known to be this plot item or that one: a sheet another plot item of the scenario has is not taken.
+-- The plot items of the scenario that name an item of the table get their sheets in two passes over the
+-- list of plot items, each in the order of the list:
+--   * first, every one whose item has a plot item sheet with its icon (Same) gets that sheet, unless a
+--     plot item has it already: one that had it before the update, or one earlier in this pass;
+--   * then each of the others gets the first sheet of the list of the same kind (Kind) that no plot item
+--     has after the first pass or got earlier in this pass, and when the list has none, the first of the
+--     185 plot item sheets, in the order of their numbers, that no plot item has.
+-- So no plot item gets another icon while a later one of the list could have had that icon as its own.
 -- The author is told which plot item it is, and for a sheet that does not show the icon of the item, why,
 -- and that the icon can be changed. A scenario has 32 plot items at most (r2ed_max_num_plot_items, and
 -- the check of an upload): one of the 185 sheets is always free. Should none be, the plot item is left as
 -- it is, like one whose sheet is not in the table: nothing is guessed for a sheet the table does not have.
 -- Such a plot item stays what the scenario service refuses, and the author is told to choose an icon.
-local function updatePlotItemSheet(this, update)
-	local sheetId = this.SheetId
-	if type(sheetId) ~= "number" or isPlotItemSheet(sheetId) then return end
-	local name = tostring(defaulting(this.Name, ""))
-	local choice = plotItemSheetOfItem[sheetId]
-	if choice == nil then
-		update:note("uiR2EDVersionNotePlotItemUnknown", name, string.format("%.0f", sheetId))
-		return
+
+-- The name of a plot item, for a note
+local function plotItemName(plotItem)
+	return tostring(defaulting(plotItem.Name, ""))
+end
+
+-- What a plot item has for its sheet, for a note: a number as the editor writes numbers (a fraction and
+-- a number too large for a sheet number show as they are, in a few characters), anything else as it is,
+-- cut to 40 characters
+local function plotItemSheetText(sheetId)
+	if type(sheetId) == "number" then return numberText(sheetId) end
+	local text = tostring(sheetId)
+	if string.len(text) > 40 then
+		-- (not in the middle of a character of several bytes)
+		text = string.gsub(string.sub(text, 1, 40), "[\128-\255]+$", "") .. "..."
 	end
-	-- the plot item sheets the other plot items of the scenario have, each with the name of the first
-	-- plot item that has it
-	local used = {}
-	local plotItems = update:getParent(this)
-	if type(plotItems) == "table" then
-		for i = 1, table.getn(plotItems) do
-			local other = plotItems[i]
-			if type(other) == "table" and not rawequal(other, this) and isPlotItemSheet(other.SheetId)
-				and used[other.SheetId] == nil then
-				used[other.SheetId] = tostring(defaulting(other.Name, ""))
+	return text
+end
+
+-- The table entry of the item a plot item names, nil for a plot item that has a plot item sheet or a
+-- sheet the table does not have
+local function plotItemChoice(plotItem)
+	if type(plotItem) ~= "table" then return nil end
+	local sheetId = plotItem.SheetId
+	if type(sheetId) ~= "number" or isPlotItemSheet(sheetId) then return nil end
+	return plotItemSheetOfItem[sheetId]
+end
+
+-- The sheets the plot items of a list get, as said above. Returns a table: for each plot item of the
+-- list that names an item of the table and gets a sheet,
+--     { Sheet = the plot item sheet, Note = the note for the author, Other = the name of the plot item
+--       that has the sheet with the icon of the item, when that is why it gets another }
+-- The update of each plot item asks for the whole list and takes its own part: the plot items updated
+-- before it have their sheets by then, and what is left comes out the same.
+local function planPlotItemSheets(plotItems)
+	local plan = {}
+	-- the plot item sheets the plot items have, each with the name of the first plot item that has it
+	local held = {}
+	for i = 1, table.getn(plotItems) do
+		local plotItem = plotItems[i]
+		if type(plotItem) == "table" and isPlotItemSheet(plotItem.SheetId) and held[plotItem.SheetId] == nil then
+			held[plotItem.SheetId] = plotItemName(plotItem)
+		end
+	end
+	-- first pass: the sheet with the icon of the item
+	local others = {}
+	for i = 1, table.getn(plotItems) do
+		local plotItem = plotItems[i]
+		local choice = plotItemChoice(plotItem)
+		if choice ~= nil then
+			if choice.Same ~= nil and held[choice.Same] == nil then
+				held[choice.Same] = plotItemName(plotItem)
+				plan[plotItem] = { Sheet = choice.Same, Note = "uiR2EDVersionNotePlotItemIcon" }
+			else
+				table.insert(others, plotItem)
 			end
 		end
 	end
-	if choice.Same ~= nil and used[choice.Same] == nil then
-		update:set(this, "SheetId", choice.Same)
-		update:note("uiR2EDVersionNotePlotItemIcon", name)
-		return
-	end
-	local newSheetId = nil
-	for i = 1, table.getn(choice.Kind) do
-		if newSheetId == nil and used[choice.Kind[i]] == nil then
-			newSheetId = choice.Kind[i]
+	-- second pass: a sheet of the same kind, or any sheet
+	for i = 1, table.getn(others) do
+		local plotItem = others[i]
+		local choice = plotItemChoice(plotItem)
+		local newSheetId = nil
+		for j = 1, table.getn(choice.Kind) do
+			if newSheetId == nil and held[choice.Kind[j]] == nil then
+				newSheetId = choice.Kind[j]
+			end
+		end
+		local candidate = firstPlotItemSheet
+		while newSheetId == nil and candidate <= lastPlotItemSheet do
+			if held[candidate] == nil then
+				newSheetId = candidate
+			end
+			candidate = candidate + 256
+		end
+		if newSheetId ~= nil then
+			if choice.Same ~= nil then
+				plan[plotItem] = { Sheet = newSheetId, Note = "uiR2EDVersionNotePlotItemIconTaken", Other = held[choice.Same] }
+			else
+				plan[plotItem] = { Sheet = newSheetId, Note = "uiR2EDVersionNotePlotItemIconNone" }
+			end
+			held[newSheetId] = plotItemName(plotItem)
 		end
 	end
-	local candidate = firstPlotItemSheet
-	while newSheetId == nil and candidate <= lastPlotItemSheet do
-		if used[candidate] == nil then
-			newSheetId = candidate
-		end
-		candidate = candidate + 256
-	end
-	if newSheetId == nil then
-		update:note("uiR2EDVersionNotePlotItemUnknown", name, string.format("%.0f", sheetId))
+	return plan
+end
+
+local function updatePlotItemSheet(this, update)
+	local sheetId = this.SheetId
+	if isPlotItemSheet(sheetId) then return end
+	local name = plotItemName(this)
+	if plotItemChoice(this) == nil then
+		-- a sheet the table does not have, or no sheet number at all (the scenario does not translate
+		-- with such a plot item): left as it is, and the author knows which plot item it is
+		update:note("uiR2EDVersionNotePlotItemUnknown", name, plotItemSheetText(sheetId))
 		return
 	end
-	update:set(this, "SheetId", newSheetId)
-	if choice.Same ~= nil then
-		update:note("uiR2EDVersionNotePlotItemIconTaken", name, used[choice.Same])
+	-- the list of plot items the plot item is in
+	local plotItems = update:getParent(this)
+	local inList = false
+	if type(plotItems) == "table" then
+		for i = 1, table.getn(plotItems) do
+			if rawequal(plotItems[i], this) then inList = true end
+		end
+	end
+	if not inList then plotItems = { this } end
+	local planned = planPlotItemSheets(plotItems)[this]
+	if planned == nil then
+		-- every plot item sheet has its plot item
+		update:note("uiR2EDVersionNotePlotItemUnknown", name, plotItemSheetText(sheetId))
+		return
+	end
+	update:set(this, "SheetId", planned.Sheet)
+	if planned.Other ~= nil then
+		update:note(planned.Note, name, planned.Other)
 	else
-		update:note("uiR2EDVersionNotePlotItemIconNone", name)
+		update:note(planned.Note, name)
 	end
 end
 

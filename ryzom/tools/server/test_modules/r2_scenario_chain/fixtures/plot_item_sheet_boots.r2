@@ -159,14 +159,6 @@ scenario = {
       Desc = [[]],
       Name = [[Medium boots]],
       SheetId = 8455214
-    },
-    {
-      InstanceId = [[Client1_862]],
-      Class = [[PlotItem]],
-      Comment = [[]],
-      Desc = [[]],
-      Name = [[Medium pants]],
-      SheetId = 8457774
     }
   },
   Position = {
