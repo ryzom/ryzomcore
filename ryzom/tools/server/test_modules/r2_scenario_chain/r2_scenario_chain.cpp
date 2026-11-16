@@ -17,7 +17,8 @@
 // Runs one Ring scenario file through the editor's chain without the client, in the order the client
 // does it: the file is parsed, brought to the versions of the editor as a table (the version update) and
 // becomes the edited scenario; a test is started, which saves the scenario, reads it back and translates
-// it to the run-time form; the run-time tree is checked as the scenario service checks an upload.
+// it to the run-time form; the run-time tree is checked as the scenario service checks an upload, and
+// with sheet_id.bin the sheets of its plot items as the service checks them when the scenario starts.
 // Prints one "key: value" line per result.
 
 #include "r2_headless_host.h"
@@ -33,6 +34,7 @@
 #include "nel/ligo/ligo_config.h"
 
 #include "game_share/object.h"
+#include "game_share/ring_access.h"
 #include "game_share/rt_scenario_check.h"
 #include "game_share/scenario.h"
 #include "game_share/scenario_entry_points.h"
@@ -798,6 +800,57 @@ TRtScenarioVerdict reportRtCheck(const CObject *rt, const CRtScenarioLimits &lim
 	return verdict;
 }
 
+// The sheets of the plot items of a run-time tree, as the scenario service checks them when the scenario
+// starts (CServerAnimationModule: a plot item has one of the sheets r2_plot_item_0.sitem to
+// r2_plot_item_184.sitem, CRingAccess::isPlotItemSheetId, or the scenario does not start). The service
+// knows the sheets by their names, so this needs sheet_id.bin: without it nothing is checked, and the
+// line says so. Printed under "rt_plot_item_sheets"; what the run comes to does not depend on it, since
+// the check is not part of the check of an upload and can not be made without the data.
+void reportPlotItemSheets(const CObject *rt, bool sheetIdLoaded)
+{
+	const std::string key = "rt_plot_item_sheets";
+	if (!sheetIdLoaded)
+	{
+		report(key, "not_checked: no sheet_id.bin");
+		return;
+	}
+	const CObject *plotItems = rt->getAttr("PlotItems");
+	if (!plotItems || !plotItems->isTable())
+	{
+		report(key, "refused: the scenario has no PlotItems table");
+		return;
+	}
+	CRingAccess::getInstance().init();
+	uint32 count = plotItems->getSize();
+	uint32 refusedCount = 0;
+	std::string refused;
+	for (uint32 i = 0; i < count; ++i)
+	{
+		const CObject *plotItem = plotItems->getValueAtPos(i);
+		std::string reason;
+		if (!plotItem || !plotItem->isTable() || !plotItem->isInteger("SheetId"))
+		{
+			reason = "has no sheet number";
+		}
+		else
+		{
+			CSheetId sheetId((uint32)plotItem->toInteger("SheetId"));
+			if (!CRingAccess::getInstance().isPlotItemSheetId(sheetId))
+				reason = toString("has the sheet %u (%s), which is not a plot item sheet", sheetId.asInt(), sheetId.toString().c_str());
+		}
+		if (!reason.empty())
+		{
+			++refusedCount;
+			if (!refused.empty()) refused += "; ";
+			refused += toString("PlotItems[%u] ", i) + reason;
+		}
+	}
+	if (refusedCount == 0)
+		report(key, toString("ok (%u)", count));
+	else
+		report(key, toString("refused: %u of %u: ", refusedCount, count) + refused);
+}
+
 // The tree as it arrives at the service: through the serial form, compressed as the client sends it
 CObject::TSmartPtr throughSerialForm(CObject *tree, std::string &error)
 {
@@ -1193,6 +1246,9 @@ int run(const CArgs &args)
 			writeFile(args.RtOut + ".serial.txt", copyText);
 		serialVerdict = reportRtCheck(copy, limits, host.getStartingActIndex(), "rt_check_serial");
 	}
+
+	// and its check of the plot item sheets when the scenario starts
+	reportPlotItemSheets(rt, CPath::exists("sheet_id.bin"));
 
 	// 7. The test ends, and the scenario comes back from the server
 	scenarioReturns(host, "return_");

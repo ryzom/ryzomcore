@@ -1,0 +1,42 @@
+# A plot item that names the newbie tool, in a scenario whose other plot items have the icon of that tool
+# and every sheet of the list of the same kind (the tools of the other crafts), and the first plot item
+# sheet by number as well. The plot items that come after it in the list count like those before it. It
+# gets the first plot item sheet no plot item has, in the order of the sheet numbers: r2_plot_item_1.
+# A second plot item with the same tool gets the next one in that order, r2_plot_item_10 (the numbers
+# follow the names of the sheets, where 10 comes before 2).
+
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNotePlotItemIconTaken(Flute, Melee tool)
+version_update_note: uiR2EDVersionNotePlotItemIconTaken(Old flute, Melee tool)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon(
+no_line: version_update_note: uiR2EDVersionNotePlotItemIconNone
+no_line: version_update_note: uiR2EDVersionNotePlotItemUnknown
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: refused
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems = <size 13>
+scenario_at: PlotItems[0].Name = Flute
+scenario_at: PlotItems[0].SheetId = 8630318
+scenario_at: PlotItems[1].SheetId = 8651822
+scenario_at: PlotItems[2].SheetId = 8652590
+scenario_at: PlotItems[10].SheetId = 8654382
+scenario_at: PlotItems[11].SheetId = 8630062
+scenario_at: PlotItems[12].Name = Old flute
+scenario_at: PlotItems[12].SheetId = 8630574
+rt_at: PlotItems[0].SheetId = 8630318
+rt_at: PlotItems[12].SheetId = 8630574
+rt: acts=2 texts=0 plot_items=13

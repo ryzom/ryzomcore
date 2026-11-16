@@ -1,0 +1,43 @@
+# The boots stand before the pants in the list of plot items. The first sheet of the list of the boots is
+# the one with the icon of the pants: the boots do not take it from a plot item that comes later and has
+# it as the icon of its own item. The sheets with the icon of the item are given first, over the whole
+# list (the medium pants), and the others after that: the boots get the next sheets of their list, the
+# armor tool and the helmet, and the light pants, whose icon the medium pants have, the first of theirs.
+
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNotePlotItemIconNone(Light boots)
+version_update_note: uiR2EDVersionNotePlotItemIconNone(Medium boots)
+version_update_note: uiR2EDVersionNotePlotItemIcon(Medium pants)
+version_update_note: uiR2EDVersionNotePlotItemIconTaken(Light pants, Medium pants)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIconTaken(Medium pants
+no_line: version_update_note: uiR2EDVersionNotePlotItemUnknown
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: refused
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems = <size 4>
+scenario_at: PlotItems[0].Name = Light boots
+scenario_at: PlotItems[0].SheetId = 8649518
+scenario_at: PlotItems[1].Name = Medium boots
+scenario_at: PlotItems[1].SheetId = 8657710
+scenario_at: PlotItems[2].Name = Medium pants
+scenario_at: PlotItems[2].SheetId = 8660526
+scenario_at: PlotItems[3].Name = Light pants
+scenario_at: PlotItems[3].SheetId = 8662062
+rt_at: PlotItems[0].SheetId = 8649518
+rt_at: PlotItems[1].SheetId = 8657710
+rt_at: PlotItems[2].SheetId = 8660526
+rt_at: PlotItems[3].SheetId = 8662062

@@ -1,0 +1,47 @@
+# Plot items that name an item of the game where a plot item sheet belongs, as scenarios of 2006 have
+# them: a medium vest (iccamv.sitem), the newbie tool and a raw material. Each gets the plot item sheet
+# that shows the icon of its item, and the author is told for each, by the name of the plot item. The
+# plot item that has a plot item sheet is left alone. With sheet_id.bin the sheets pass the check the
+# scenario service makes when the scenario starts (rt_plot_item_sheets).
+
+upgrade: ok
+version_update: changed
+version_update_note: uiR2EDVersionNotePlotItemIcon(Medium vest)
+version_update_note: uiR2EDVersionNotePlotItemIcon(Flute)
+version_update_note: uiR2EDVersionNotePlotItemIcon(Choice material)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIcon(Old key)
+no_line: version_update_note: uiR2EDVersionNotePlotItemIconTaken
+no_line: version_update_note: uiR2EDVersionNotePlotItemUnknown
+
+save: ok
+roundtrip: ok
+reload_version_update: current
+reload_version_before: current=yes
+translate: ok
+rt_check: ok
+rt_check_serial: ok
+rt_plot_item_sheets:
+no_line: rt_plot_item_sheets: refused
+absent: dropped_update
+absent: late_update
+absent: version_update_failure
+return_version_before: current=yes
+absent: return_version_update
+absent: return_upload
+
+scenario_at: Versions.PlotItem = 1
+scenario_at: PlotItems = <size 4>
+scenario_at: PlotItems[0].Name = Medium vest
+scenario_at: PlotItems[0].SheetId = 8630318
+scenario_at: PlotItems[1].Name = Old key
+scenario_at: PlotItems[1].SheetId = 8632366
+scenario_at: PlotItems[2].Name = Flute
+scenario_at: PlotItems[2].Desc = A flute, by its first name
+scenario_at: PlotItems[2].SheetId = 8651822
+scenario_at: PlotItems[3].Name = Choice material
+scenario_at: PlotItems[3].SheetId = 8673582
+rt_at: PlotItems[0].SheetId = 8630318
+rt_at: PlotItems[1].SheetId = 8632366
+rt_at: PlotItems[2].SheetId = 8651822
+rt_at: PlotItems[3].SheetId = 8673582
+rt: acts=2 texts=0 plot_items=4
