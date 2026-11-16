@@ -678,8 +678,11 @@ void updateWeather()
 	// Update the weather manager
 	updateWeatherManager(MainCam.getMatrix(), ContinentMngr.cur());
 
-	// compute thunder color
-	ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
+	// compute thunder color: the flash of a lightning, which the light cycle manager adds to the landscape light groups
+	if (ClientCfg.WeatherLightningFlash)
+		ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
+	else
+		ThunderColor.set(0, 0, 0, 0);
 
 	// Update the lighting
 	LightCycleManager.setHour(DayNightCycleHour, WeatherManager, ThunderColor);

@@ -401,6 +401,7 @@ CClientConfig::CClientConfig()
 
 	WeatherLightingEntities		= true;
 	WeatherLightingLandscape	= false;
+	WeatherLightningFlash		= true;
 
 	Bloom				= true;
 	SquareBloom			= true;
@@ -1052,6 +1053,7 @@ void CClientConfig::setValues()
 	// Weather lighting
 	READ_BOOL_FV(WeatherLightingEntities)
 	READ_BOOL_FV(WeatherLightingLandscape)
+	READ_BOOL_FV(WeatherLightningFlash)
 
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)

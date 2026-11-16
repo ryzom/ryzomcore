@@ -295,6 +295,8 @@ struct CClientConfig
 	bool			WeatherLightingEntities;
 	/// The lighting of the weather dims the landscape light and its light groups: the ground and what is lit with it
 	bool			WeatherLightingLandscape;
+	/// A lightning of a thunder storm flashes on what the landscape light groups light
+	bool			WeatherLightningFlash;
 
 	// Is bloom effect activated
 	bool			Bloom;
