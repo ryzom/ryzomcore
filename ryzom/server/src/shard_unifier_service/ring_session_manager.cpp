@@ -598,8 +598,9 @@ namespace RSMGR
 							session->getSessionParticipants()[i]->getCharId() & 0xf,
 							charId);
 					}
-					else
+					else if (character->getCurrentSession() == sessionId.asInt())
 					{
+						// (a participant that has gone on to another session keeps that one)
 						character->setCurrentSession(0);
 						character->update(_RingDb);
 					}
@@ -2095,10 +2096,34 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// check that the user don't run more one session of the same type (a locked session runs too: its
-			// session server is out of reach, and takes it up again when it comes back)
+			// A locked session of the owner has lost its session server. It is closed here, as closeAnimSessionsOfOwner
+			// closes one, so that it does not keep the owner from starting a session for as long as that server
+			// stays away. (A session server that comes back with it is told to close it, see registerDSS.)
+			CSString lockedQuery;
+			lockedQuery << "SELECT session_id FROM sessions WHERE owner = "<<charId<<" AND state = '"<<TSessionState::toString(TSessionState::ss_locked)<<"' AND session_type = '"<<session->getSessionType().toString()<<"'";
+			BOMB_IF(!_RingDb.query(lockedQuery), "Failed to look for the locked sessions of character "<<charId, invokeResult(from, charId>>4, 5, "Database failure"); return);
+			std::vector<uint32> lockedSessions;
+			{
+				CUniquePtr<MSW::CStoreResult> lockedResult(_RingDb.storeResult());
+				for (uint32 i = 0; i < lockedResult->getNumRows(); ++i)
+				{
+					uint32 lockedId;
+					lockedResult->fetchRow();
+					lockedResult->getField(0, lockedId);
+					lockedSessions.push_back(lockedId);
+				}
+			}
+			for (uint i = 0; i < lockedSessions.size(); ++i)
+			{
+				nlinfo("RSM : on_startSession : char %u starts session %u, its locked session %u of the same type is closed",
+				    charId, sessionId.asInt(), lockedSessions[i]);
+				closeSession(TSessionId(lockedSessions[i]));
+				_TemporaryLockedSession.erase(TSessionId(lockedSessions[i]));
+			}
+
+			// check that the user don't run more one session of the same type
 			CSString query;
-			query << "SELECT COUNT(*) FROM sessions WHERE owner = "<<charId<<" AND state IN ('"<<TSessionState::toString(TSessionState::ss_open)<<"', '"<<TSessionState::toString(TSessionState::ss_locked)<<"') AND session_type = '"<<session->getSessionType().toString()<<"'";
+			query << "SELECT COUNT(*) FROM sessions WHERE owner = "<<charId<<" AND state = '"<<TSessionState::toString(TSessionState::ss_open)<<"' AND session_type = '"<<session->getSessionType().toString()<<"'";
 			BOMB_IF(!_RingDb.query(query), "Failed to count number of edit session for character "<<charId, invokeResult(from, charId>>4, 5, "Database failure"); return);
 			CUniquePtr<MSW::CStoreResult> result(_RingDb.storeResult());
 
@@ -3847,6 +3872,19 @@ endOfWelcomeUserResult:
 				securityCheck.setSessionId(sessionId);
 				securityCheck.setCookie(cookie); // must not be changed by joinSession(), because the client sends the one he knows before Far TPing
 				pjs.OptSecurityCode.setSecurityCode(securityCheck.encode(getFastDisconnectionSecret().c_str()));
+			}
+			// One pending join per user: a welcome service answers for a user, not for a join, so an older join
+			// that got no answer would take the answer of this one, and its participation the status
+			for (TPendingJoins::iterator itp = _PendingJoins.begin(); itp != _PendingJoins.end();)
+			{
+				if (itp->UserId == userId)
+				{
+					nlwarning("RSM : char %u joins session %u : the join of char %u in session %u of the same user got no answer of its welcome service, it is dropped",
+					    charId, storedSessionId, itp->CharId, itp->SessionId.asInt());
+					itp = _PendingJoins.erase(itp);
+				}
+				else
+					++itp;
 			}
 			_PendingJoins.push_back(pjs);
 
