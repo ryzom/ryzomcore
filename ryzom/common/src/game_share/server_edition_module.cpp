@@ -4543,7 +4543,25 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, listConnectedPioneers)
 {
 	if (args.size() != 0) return false;
 
-
+	// The characters whose client edition module is connected to this service, with the session they are in.
+	// A character is listed here before listPioneers has it: its module is up, and it is connected to its session
+	// once the backup service and the EGS are there (tryCharConnection).
+	typedef NLMISC::CTwinMap<TCharId, NLNET::TModuleProxyPtr>::TAToBMap TClientModules;
+	const TClientModules &clients = _ClientsEditionModule.getAToBMap();
+	log.displayNL("%u chars have a client edition module connected", (uint)clients.size());
+	TClientModules::const_iterator first(clients.begin()), last(clients.end());
+	for ( ; first != last ; ++first)
+	{
+		TPioneersSessions::const_iterator session = _PioneersSessions.find(first->first);
+		if (session != _PioneersSessions.end())
+		{
+			log.displayNL("Chars: %u, module '%s', Session: %u", first->first, first->second->getModuleName().c_str(), session->second.asInt());
+		}
+		else
+		{
+			log.displayNL("Chars: %u, module '%s', not connected to a session", first->first, first->second->getModuleName().c_str());
+		}
+	}
 	return true;
 }
 
