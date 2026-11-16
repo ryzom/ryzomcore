@@ -2020,10 +2020,11 @@ endOfWelcomeUserResult:
 		//                         1 : char not found
 		//                         2 : session not found
 		//                         3 : session not owned by char
-		//                         4 : user already has a runnning session of this type
+		//                         4 : user already has a runnning session of this type, or this session runs already
 		//                         5 : database/internal failure
 		//                         6 : nel user not found
 		//                         8 : a session type the scenario service does not host
+		//                         9 : the session is closed
 		virtual void on_startSession(NLNET::TSockId from, uint32 charId, TSessionId sessionId)
 		{
 			nldebug("RSM : web start session %u with char %u", sessionId.asInt(), charId);
@@ -2057,9 +2058,24 @@ endOfWelcomeUserResult:
 				return;
 			}
 
-			// check that the user don't run more one session of the same type
+			// Only a planned session is started. One that is open or locked runs already, and a closed one is
+			// planned again before its start, which the join of the edit session of its owner does
+			// (on_joinEditSession).
+			if (session->getState() != TSessionState::ss_planned)
+			{
+				nlwarning("RSM : on_startSession : session %u of char %u is in state '%s', only a planned session is started: not started",
+				    sessionId.asInt(), charId, session->getState().toString().c_str());
+				if (session->getState() == TSessionState::ss_closed)
+					invokeResult(from, charId>>4, 9, "Session is closed");
+				else
+					invokeResult(from, charId>>4, 4, "Session is already running");
+				return;
+			}
+
+			// check that the user don't run more one session of the same type (a locked session runs too: its
+			// session server is out of reach, and takes it up again when it comes back)
 			CSString query;
-			query << "SELECT COUNT(*) FROM sessions WHERE owner = "<<charId<<" AND state = '"<<TSessionState::toString(TSessionState::ss_open)<<"' AND session_type = '"<<session->getSessionType().toString()<<"'";
+			query << "SELECT COUNT(*) FROM sessions WHERE owner = "<<charId<<" AND state IN ('"<<TSessionState::toString(TSessionState::ss_open)<<"', '"<<TSessionState::toString(TSessionState::ss_locked)<<"') AND session_type = '"<<session->getSessionType().toString()<<"'";
 			BOMB_IF(!_RingDb.query(query), "Failed to count number of edit session for character "<<charId, invokeResult(from, charId>>4, 5, "Database failure"); return);
 			CUniquePtr<MSW::CStoreResult> result(_RingDb.storeResult());
 
