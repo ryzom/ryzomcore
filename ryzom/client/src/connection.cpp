@@ -2826,15 +2826,25 @@ static std::string rulesText(const std::string &rules)
 static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string scenarioName)
 {
 	vector< pair< string, string > > values;
-	if(R2::getEditor().isInitialized())
+	if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
 	{
+		// the scenario the editor shows, with the changes made since it was loaded or started (the header the
+		// session keeps is the one of then): the header a save of it would write, as a test sends it
+		if (!R2::getEditor().getDMC().getEditionModule().makeCurrentScenarioHeader(values))
+			nlwarning("The header of the scenario of the editor could not be made: the window shows none");
+	}
+	else if (R2::getEditor().isInitialized())
+	{
+		// a test or an animation: the header of the scenario it runs
 		values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 	}
 	else if (!scenarioName.empty())
 	{
 		R2::CScenarioValidator sv;
 		std::string md5, signature;
-		sv.setScenarioToLoad(scenarioName, values, md5, signature, false);
+		// a header without Rules (or no header): those of the body, as the launch takes them (load_scenario)
+		if (sv.setScenarioToLoad(scenarioName, values, md5, signature, false) && fieldLookup(values, "Rules", "").empty())
+			values.push_back(std::make_pair(std::string("Rules"), sv.getRulesOfBody()));
 	}
 	// (without a name no file is chosen yet: the window of the Ring terminal has just been opened, and its
 	// fields get what a file without a header gives)
@@ -3383,7 +3393,17 @@ class CAHLoadScenario : public IActionHandler
 		bool launchScenarioFromRingAccessPoint = false;
 
 		vector< pair< string, string > > values;
-		if(R2::getEditor().isInitialized())
+		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		{
+			// the session is listed with the scenario the editor shows, as it is now (see setScenarioInformation)
+			if (!R2::getEditor().getDMC().getEditionModule().makeCurrentScenarioHeader(values))
+			{
+				nlwarning("The header of the scenario of the editor could not be made: no session is scheduled");
+				pIM->messageBoxWithHelp(CI18N::get("uiRingLaunchScenarioError"));
+				return;
+			}
+		}
+		else if (R2::getEditor().isInitialized())
 		{
 			values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 		}
@@ -3391,7 +3411,11 @@ class CAHLoadScenario : public IActionHandler
 		{
 			R2::CScenarioValidator sv;
 			std::string md5, signature;
-			sv.setScenarioToLoad(ScenarioFileName, values, md5, signature, false);
+			// A header without Rules (or no header, as for the files of the first editors): those of the body. The
+			// scenario service takes the header of the start, which r2.Version.save makes from the body as well.
+			// (setScenarioToLoad gives a Rules that is there as "Mastered" or "Masterless", never empty.)
+			if (sv.setScenarioToLoad(ScenarioFileName, values, md5, signature, false) && fieldLookup(values, "Rules", "").empty())
+				values.push_back(std::make_pair(std::string("Rules"), sv.getRulesOfBody()));
 			launchScenarioFromRingAccessPoint = true;
 		}
 
@@ -3444,10 +3468,11 @@ class CAHLoadScenario : public IActionHandler
 		// --------------------------
 
 		// "Mastered" or "Masterless" whatever the language of the client that saved the file (a header the server
-		// sent may come from an older client); another text is mastered, as before
-		TRuleType ruleType(TRuleType::rt_strict);
-		if (R2::CScenarioValidator::normalizeRules(rules) == "Masterless")
-			ruleType = TRuleType(TRuleType::rt_liberal);
+		// sent may come from an older client). Only "Mastered" is mastered: an empty or other text is masterless,
+		// as the scenario service records the session (TRunningScenarioInfo::setDMLess) and as the editor shows it
+		TRuleType ruleType(TRuleType::rt_liberal);
+		if (R2::CScenarioValidator::normalizeRules(rules) == "Mastered")
+			ruleType = TRuleType(TRuleType::rt_strict);
 
 		TRaceFilter raceFilter;
 		if(races["fyros"])

@@ -637,6 +637,9 @@ public:
 	void startingScenario(class NLNET::IModuleProxy * proxy, uint32 charId) NL_OVERRIDE;
 	//! The User ask the dss to start an animation/test scenario (the user click on the "Go Test" button)
 	bool requestStartScenario();
+	/// The header of the scenario the editor shows, with the changes made since it was loaded or started: the one a
+	/// save of it would write (r2.Version.save with headerOnly, which writes nothing). False when it could not be made.
+	bool makeCurrentScenarioHeader(TScenarioHeader &header);
 	//!}
 
 	/////////////////////////////////////////////////////
@@ -1206,6 +1209,9 @@ private:
 	bool m_TestBufferProtected;
 	// the header that such a start sends: the one its save would have written
 	TScenarioHeader m_ProtectedHeader;
+	// the header of the values the last r2.Version.save made without writing them (r2.Version.ProtectedHeader),
+	// after the md5 of the body of the scenario of the editor
+	void makeHeaderFromSaveValues(TScenarioHeader &header);
 
 	bool _MustStartScenario;
 	bool _ScenarioUpToDate;

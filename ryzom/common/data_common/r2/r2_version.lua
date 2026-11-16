@@ -51,9 +51,16 @@ local levelToString =
 	[5] = "250"
 }
 
-function r2.Version.save(filename)
+-- headerOnly: nothing is written, the values of the header are made (r2.Version.ProtectedHeader), as for a scenario
+-- that may not be saved; the session the editor schedules is listed with them (CClientEditionModule::
+-- makeCurrentScenarioHeader). False when there is no scenario.
+function r2.Version.save(filename, headerOnly)
 
 	local scenario = r2.Scenario
+
+	if headerOnly and not scenario then
+		return false
+	end
 
 	if scenario then
 		r2.Version.updateScenarioVersions()
@@ -109,11 +116,13 @@ function r2.Version.save(filename)
 			level = levelToString[tonumber(level)]
 			rules = string.gsub(tostring(defaulting(r2.Scenario.AccessRules, "")), "\n", "\\n")
 			-- the same word in every language: the readers translate it to show it (uiR2EDstrict, uiR2EDliberal),
-			-- and read the translated words older clients wrote as these (CScenarioValidator::normalizeRules)
-			if rules=="liberal" then
-				rules="Masterless"
-			elseif rules == "strict" then
-				rules="Mastered"
+			-- and read the translated words older clients wrote as these (CScenarioValidator::normalizeRules).
+			-- Only "strict" is mastered: an empty or other value is masterless, as in the scenario window
+			-- (r2_ui_scenario.lua) and for the scenario service (TRunningScenarioInfo::setDMLess)
+			if rules == "strict" then
+				rules = "Mastered"
+			else
+				rules = "Masterless"
 			end
 			title = string.gsub(tostring(defaulting(r2.Scenario.Description.Title, "")), "\n", "\\n")
 			language = r2.Scenario.Language 
@@ -140,7 +149,8 @@ function r2.Version.save(filename)
 			if r2.Scenario.Description.OtherCharAccess then
 				otherCharAccess = r2.Scenario.Description.OtherCharAccess
 				if otherCharAccess == "RoSOnly" then
-					if config.R2EDExtendedDebug ~= 1 then
+					-- (a header made without a save changes nothing: the branch of the buffer, below)
+					if config.R2EDExtendedDebug ~= 1 or headerOnly then
 						if string.sub(filename, 1, 15) == "save/r2_buffer_" then
 							-- the buffer of the editor (getScenarioBufferFileName in the client) is not written for
 							-- a scenario that may not be saved, and the scenario keeps its access: a test or an
@@ -224,11 +234,15 @@ function r2.Version.save(filename)
 			table.insert(values, {ScenarioTag = scenarioTag})
 		end
 
-		if protectedScenario then
+		if protectedScenario or headerOnly then
 			-- not written (see above): the start of the test sends the header the file would have had
-			-- (CClientEditionModule::requestStartScenario)
+			-- (CClientEditionModule::requestStartScenario), and the schedule of a session in the editor
+			-- lists the session with it
 			r2.Version.ProtectedHeader = values
-			return "protected"
+			if protectedScenario then
+				return "protected"
+			end
+			return true
 		end
 
 		r2.save(filename, values)

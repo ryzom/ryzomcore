@@ -1338,39 +1338,64 @@ bool CClientEditionModule::requestStartScenario()
 	}
 	m_TestBufferProtected = R2::getEditor().getEnv()["TestBufferProtected"].toBoolean();
 
-	// The header such a start sends is the one its save would have written (addToSaveList): the values that
-	// r2.Version.save made for it, after the md5 of the body of the scenario, which is its key at the service.
+	// The header such a start sends is the one its save would have written (addToSaveList)
 	m_ProtectedHeader.clear();
 	if (m_TestBufferProtected)
-	{
-		CScenarioValidator::TValues values;
-		NLGUI::CLuaObject header = R2::getEditor().getEnv()["Version"]["ProtectedHeader"];
-		if (header.isTable())
-		{
-			// a table of tables of one entry, as r2.save takes them (CComLuaModule::luaSave)
-			for (NLGUI::CLuaEnumeration entry = header.enumerate(); entry.hasNext(); entry.next())
-			{
-				NLGUI::CLuaObject &field = entry.nextValue();
-				if (!field.isTable())
-					continue;
-				for (NLGUI::CLuaEnumeration pair = field.enumerate(); pair.hasNext(); pair.next())
-				{
-					if (pair.nextKey().isString() && pair.nextValue().isString())
-						values.push_back(std::make_pair(pair.nextKey().toString(), pair.nextValue().toString()));
-				}
-			}
-		}
-		CScenarioValidator sv;
-		std::string headerMd5;
-		if (sv.setScenarioToSave(getScenarioBufferFileName(), getCurrentScenario()->getHighLevel(), values, headerMd5))
-			m_ProtectedHeader.push_back(std::make_pair(std::string("BodyMD5"), sv.getBodyMd5()));
-		m_ProtectedHeader.insert(m_ProtectedHeader.end(), values.begin(), values.end());
-	}
+		makeHeaderFromSaveValues(m_ProtectedHeader);
 
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.startingScenario(this);
+	return true;
+}
+
+void CClientEditionModule::makeHeaderFromSaveValues(TScenarioHeader &header)
+{
+	// the values that r2.Version.save made, after the md5 of the body of the scenario, which is its key at the service
+	header.clear();
+	CScenarioValidator::TValues values;
+	NLGUI::CLuaObject saveValues = R2::getEditor().getEnv()["Version"]["ProtectedHeader"];
+	if (saveValues.isTable())
+	{
+		// a table of tables of one entry, as r2.save takes them (CComLuaModule::luaSave)
+		for (NLGUI::CLuaEnumeration entry = saveValues.enumerate(); entry.hasNext(); entry.next())
+		{
+			NLGUI::CLuaObject &field = entry.nextValue();
+			if (!field.isTable())
+				continue;
+			for (NLGUI::CLuaEnumeration pair = field.enumerate(); pair.hasNext(); pair.next())
+			{
+				if (pair.nextKey().isString() && pair.nextValue().isString())
+					values.push_back(std::make_pair(pair.nextKey().toString(), pair.nextValue().toString()));
+			}
+		}
+	}
+	CScenarioValidator sv;
+	std::string headerMd5;
+	if (sv.setScenarioToSave(getScenarioBufferFileName(), getCurrentScenario()->getHighLevel(), values, headerMd5))
+		header.push_back(std::make_pair(std::string("BodyMD5"), sv.getBodyMd5()));
+	header.insert(header.end(), values.begin(), values.end());
+}
+
+bool CClientEditionModule::makeCurrentScenarioHeader(TScenarioHeader &header)
+{
+	//H_AUTO(R2_CClientEditionModule_makeCurrentScenarioHeader)
+	header.clear();
+	if (!getCurrentScenario() || !getCurrentScenario()->getHighLevel())
+	{
+		nlwarning("R2: no scenario in the editor, no header to make");
+		return false;
+	}
+	// The name of the buffer, as for a test: a scenario that may not be saved there gives its values as well
+	// (see requestStartScenario). The character part of the name has letters, digits and '_' only.
+	if (!R2::getEditor().getLua().executeScriptNoThrow("if not r2.Version.save(\"" + getScenarioBufferFileName()
+		+ "\", true) then error('the header of the scenario could not be made') end"))
+	{
+		nlwarning("R2: the header of the scenario of the editor could not be made");
+		return false;
+	}
+	makeHeaderFromSaveValues(header);
 	return true;
 }
 

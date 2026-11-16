@@ -251,4 +251,43 @@ dashIni = [
 with open(os.path.join(NeLWebDir, "web_dash.ini"), 'w') as fo:
 	fo.write("\n".join(dashIni))
 
+# The web pages reach the database at 127.0.0.1. MariaDB listens there only (mysqldArgs), and with the
+# 'localhost' of the default configuration PHP on Windows tries ::1 first: each connection then waits about
+# 2 seconds before it falls back, and a page of the Ring window connects four times. The web setup copies
+# config_user.php only when it is missing (setup_cli.php), so the quick start writes it first; the default stays
+# 'localhost', which on Linux means the local socket. A config_user.php that is there already is not changed.
+configUserFile = os.path.join(NeLCodeDir, "web", "public_php", "config_user.php")
+configUserHosts = [ "$cfg['db']['" + db + "']['host'] = '127.0.0.1';" for db in [ "shard", "ring", "tool" ] ]
+if not os.path.isfile(configUserFile):
+	configUser = [
+		"<?php",
+		"",
+		"// Add overrides for config.php into this file",
+		"//",
+		"// To lock the /setup/ web UI after install, create an empty file next to",
+		"// the generated public config: public_php/setup.disabled",
+		"// (see web/public_php/setup/header.php).",
+		"//",
+		"// Installer stats viewer (stats_query.php):",
+		"//   $cfg['stats_query']['private_network'] = '/^10\\\\.0\\\\.0\\\\./'; // REMOTE_ADDR regex",
+		"//   $cfg['stats_query']['secret'] = 'long-random-token';       // ?token= or X-Stats-Token",
+		"",
+		"// Written by the quick start (tool/quick_start/configure_web.py): its MariaDB listens on 127.0.0.1 only, and",
+		"// with 'localhost' PHP on Windows tries ::1 first and waits about 2 seconds at each connection",
+	] + configUserHosts + [
+		"",
+		"/* end of file */",
+	]
+	with open(configUserFile, 'w', encoding='utf-8', newline='\n') as fo:
+		fo.write("\n".join(configUser) + "\n")
+else:
+	with open(configUserFile, 'r', encoding='utf-8') as fi:
+		configUserText = fi.read()
+	missing = [ line for line in configUserHosts if line not in configUserText ]
+	if missing:
+		print("NOTE: " + configUserFile + " does not set the database hosts to 127.0.0.1, and each connection of a web")
+		print("      page waits about 2 seconds (PHP tries ::1 first, MariaDB listens on 127.0.0.1). Add these lines:")
+		for line in missing:
+			print("      " + line)
+
 # end of file
