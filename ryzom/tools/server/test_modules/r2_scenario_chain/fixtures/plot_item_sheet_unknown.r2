@@ -149,8 +149,8 @@ scenario = {
       Class = [[PlotItem]],
       Comment = [[]],
       Desc = [[]],
-      Name = [[Light boots]],
-      SheetId = 8448814
+      Name = [[Nothing]],
+      SheetId = 12345
     },
     {
       InstanceId = [[Client1_861]],

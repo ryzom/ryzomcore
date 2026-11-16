@@ -93,58 +93,205 @@ end
 
 -- Scenarios of the beta of 2006, and a few of early 2007, have plot items that name an item of the game
 -- where a plot item sheet belongs: a piece of armor, a raw material, a tool. The scenario service does
--- not start such a scenario. For the items found in those scenarios, the plot item sheet that shows the
--- icon of the item, by sheet number:
---     [item] = plot item sheet, -- item (its icon) > plot item sheet
+-- not start such a scenario. The table below has the items found in those scenarios, by sheet number,
+-- each with the plot item sheet that shows the icon of the item (Same; the boots have none: no plot item
+-- sheet shows their icon) and a list of plot item sheets with icons of the same kind (Kind), the nearest
+-- first, for a plot item that can not get the icon of its item:
+--     [item] = { Same = plot item sheet, Kind = list }, -- item (its icon) > plot item sheet
 -- The numbers are those of sheet_id.bin; the icons are those of the item sheets and of the plot item
 -- sheets (the table of the sheet generator, sitem_plot_items.tsv in the leveldesign data).
+
+-- a vest: clothes, the parts of an armor, the helmet and the armor tool, the glove, then the other pieces and the shields
+local vestIcons =
+{
+	8630574, -- r2_plot_item_10.sitem (ico_clothes)
+	8656686, -- r2_plot_item_26.sitem (ico_lining)
+	8662062, -- r2_plot_item_45.sitem (ico_stuffing)
+	8657710, -- r2_plot_item_3.sitem (ar_helmet)
+	8649518, -- r2_plot_item_167.sitem (to_armor)
+	8663086, -- r2_plot_item_49.sitem (mg_glove)
+	8630062, -- r2_plot_item_0.sitem (ar_armpad)
+	8654894, -- r2_plot_item_2.sitem (ar_hand)
+	8660526, -- r2_plot_item_4.sitem (ar_pantabotte)
+	8648750, -- r2_plot_item_164.sitem (sh_buckler)
+	8649006, -- r2_plot_item_165.sitem (sh_large_shield)
+}
+
+-- sleeves: as for a vest, the lining first
+local sleevesIcons =
+{
+	8656686, -- r2_plot_item_26.sitem (ico_lining)
+	8630574, -- r2_plot_item_10.sitem (ico_clothes)
+	8662062, -- r2_plot_item_45.sitem (ico_stuffing)
+	8657710, -- r2_plot_item_3.sitem (ar_helmet)
+	8649518, -- r2_plot_item_167.sitem (to_armor)
+	8663086, -- r2_plot_item_49.sitem (mg_glove)
+	8630318, -- r2_plot_item_1.sitem (ar_gilet)
+	8654894, -- r2_plot_item_2.sitem (ar_hand)
+	8660526, -- r2_plot_item_4.sitem (ar_pantabotte)
+	8648750, -- r2_plot_item_164.sitem (sh_buckler)
+	8649006, -- r2_plot_item_165.sitem (sh_large_shield)
+}
+
+-- gloves: the other glove first
+local glovesIcons =
+{
+	8663086, -- r2_plot_item_49.sitem (mg_glove)
+	8630574, -- r2_plot_item_10.sitem (ico_clothes)
+	8656686, -- r2_plot_item_26.sitem (ico_lining)
+	8662062, -- r2_plot_item_45.sitem (ico_stuffing)
+	8657710, -- r2_plot_item_3.sitem (ar_helmet)
+	8649518, -- r2_plot_item_167.sitem (to_armor)
+	8630062, -- r2_plot_item_0.sitem (ar_armpad)
+	8630318, -- r2_plot_item_1.sitem (ar_gilet)
+	8660526, -- r2_plot_item_4.sitem (ar_pantabotte)
+	8648750, -- r2_plot_item_164.sitem (sh_buckler)
+	8649006, -- r2_plot_item_165.sitem (sh_large_shield)
+}
+
+-- pants: as for a vest, the stuffing first
+local pantsIcons =
+{
+	8662062, -- r2_plot_item_45.sitem (ico_stuffing)
+	8630574, -- r2_plot_item_10.sitem (ico_clothes)
+	8656686, -- r2_plot_item_26.sitem (ico_lining)
+	8657710, -- r2_plot_item_3.sitem (ar_helmet)
+	8649518, -- r2_plot_item_167.sitem (to_armor)
+	8663086, -- r2_plot_item_49.sitem (mg_glove)
+	8630062, -- r2_plot_item_0.sitem (ar_armpad)
+	8630318, -- r2_plot_item_1.sitem (ar_gilet)
+	8654894, -- r2_plot_item_2.sitem (ar_hand)
+	8648750, -- r2_plot_item_164.sitem (sh_buckler)
+	8649006, -- r2_plot_item_165.sitem (sh_large_shield)
+}
+
+-- boots: the pants with their boots first, then the armor tool and the helmet
+local bootsIcons =
+{
+	8660526, -- r2_plot_item_4.sitem (ar_pantabotte)
+	8649518, -- r2_plot_item_167.sitem (to_armor)
+	8657710, -- r2_plot_item_3.sitem (ar_helmet)
+	8662062, -- r2_plot_item_45.sitem (ico_stuffing)
+	8656686, -- r2_plot_item_26.sitem (ico_lining)
+	8630574, -- r2_plot_item_10.sitem (ico_clothes)
+	8663086, -- r2_plot_item_49.sitem (mg_glove)
+	8630062, -- r2_plot_item_0.sitem (ar_armpad)
+	8630318, -- r2_plot_item_1.sitem (ar_gilet)
+	8654894, -- r2_plot_item_2.sitem (ar_hand)
+	8648750, -- r2_plot_item_164.sitem (sh_buckler)
+	8649006, -- r2_plot_item_165.sitem (sh_large_shield)
+}
+
+-- a raw material: the first raw materials of the list of icons, without the parts of buildings
+local rawMaterialIcons =
+{
+	8664622, -- r2_plot_item_54.sitem (mp_amber)
+	8664878, -- r2_plot_item_55.sitem (mp_bark)
+	8667694, -- r2_plot_item_65.sitem (mp_beak)
+	8667950, -- r2_plot_item_66.sitem (mp_blood)
+	8668206, -- r2_plot_item_67.sitem (mp_bone)
+	8668462, -- r2_plot_item_68.sitem (mp_bud)
+	8669486, -- r2_plot_item_71.sitem (mp_cereal)
+	8669742, -- r2_plot_item_72.sitem (mp_claw)
+}
+
+-- a tool: the tools of the other crafts
+local toolIcons =
+{
+	8652590, -- r2_plot_item_178.sitem (to_range)
+	8649262, -- r2_plot_item_166.sitem (to_ammo)
+	8649518, -- r2_plot_item_167.sitem (to_armor)
+	8651310, -- r2_plot_item_173.sitem (to_jewels)
+	8650798, -- r2_plot_item_171.sitem (to_hammer)
+	8651054, -- r2_plot_item_172.sitem (to_jewelry_hammer)
+	8651566, -- r2_plot_item_174.sitem (to_leathercutter)
+	8652078, -- r2_plot_item_176.sitem (to_needle)
+	8654382, -- r2_plot_item_184.sitem (to_wrench)
+}
+
 local plotItemSheetOfItem =
 {
-	[8386350] = 8673582, -- system_mp_choice.sitem (mp_generic) > r2_plot_item_86.sitem
-	[8386606] = 8673582, -- system_mp_excellent.sitem (mp_generic) > r2_plot_item_86.sitem
-	[8386862] = 8673582, -- system_mp_extra.sitem (mp_generic) > r2_plot_item_86.sitem
-	[8387374] = 8673582, -- system_mp_supreme.sitem (mp_generic) > r2_plot_item_86.sitem
-	[8450094] = 8654894, -- iccalg.sitem, light gloves (ar_hand) > r2_plot_item_2.sitem
-	[8451374] = 8660526, -- iccalp.sitem, light pants (ar_pantabotte) > r2_plot_item_4.sitem
-	[8452654] = 8630062, -- iccals.sitem, light sleeves (ar_armpad) > r2_plot_item_0.sitem
-	[8453934] = 8630318, -- iccalv.sitem, light vest (ar_gilet) > r2_plot_item_1.sitem
-	[8456494] = 8654894, -- iccamg.sitem, medium gloves (ar_hand) > r2_plot_item_2.sitem
-	[8457774] = 8660526, -- iccamp.sitem, medium pants (ar_pantabotte) > r2_plot_item_4.sitem
-	[8459054] = 8630062, -- iccams.sitem, medium sleeves (ar_armpad) > r2_plot_item_0.sitem
-	[8460334] = 8630318, -- iccamv.sitem, medium vest (ar_gilet) > r2_plot_item_1.sitem
-	[8461614] = 8660526, -- iccacp.sitem, caster pants (ar_pantabotte) > r2_plot_item_4.sitem
-	[8629550] = 8651822, -- newbie_tool.sitem (to_melee) > r2_plot_item_175.sitem
+	[8386350] = { Same = 8673582, Kind = rawMaterialIcons }, -- system_mp_choice.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8386606] = { Same = 8673582, Kind = rawMaterialIcons }, -- system_mp_excellent.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8386862] = { Same = 8673582, Kind = rawMaterialIcons }, -- system_mp_extra.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8387374] = { Same = 8673582, Kind = rawMaterialIcons }, -- system_mp_supreme.sitem (mp_generic) > r2_plot_item_86.sitem
+	[8448814] = { Kind = bootsIcons }, -- iccalb.sitem, light boots (ar_botte) > no plot item sheet shows it
+	[8450094] = { Same = 8654894, Kind = glovesIcons }, -- iccalg.sitem, light gloves (ar_hand) > r2_plot_item_2.sitem
+	[8451374] = { Same = 8660526, Kind = pantsIcons }, -- iccalp.sitem, light pants (ar_pantabotte) > r2_plot_item_4.sitem
+	[8452654] = { Same = 8630062, Kind = sleevesIcons }, -- iccals.sitem, light sleeves (ar_armpad) > r2_plot_item_0.sitem
+	[8453934] = { Same = 8630318, Kind = vestIcons }, -- iccalv.sitem, light vest (ar_gilet) > r2_plot_item_1.sitem
+	[8455214] = { Kind = bootsIcons }, -- iccamb.sitem, medium boots (ar_botte) > no plot item sheet shows it
+	[8456494] = { Same = 8654894, Kind = glovesIcons }, -- iccamg.sitem, medium gloves (ar_hand) > r2_plot_item_2.sitem
+	[8457774] = { Same = 8660526, Kind = pantsIcons }, -- iccamp.sitem, medium pants (ar_pantabotte) > r2_plot_item_4.sitem
+	[8459054] = { Same = 8630062, Kind = sleevesIcons }, -- iccams.sitem, medium sleeves (ar_armpad) > r2_plot_item_0.sitem
+	[8460334] = { Same = 8630318, Kind = vestIcons }, -- iccamv.sitem, medium vest (ar_gilet) > r2_plot_item_1.sitem
+	[8461614] = { Same = 8660526, Kind = pantsIcons }, -- iccacp.sitem, caster pants (ar_pantabotte) > r2_plot_item_4.sitem
+	[8629550] = { Same = 8651822, Kind = toolIcons }, -- newbie_tool.sitem (to_melee) > r2_plot_item_175.sitem
 }
--- Found in those scenarios too, and not in the table: iccalb.sitem (8448814) and iccamb.sitem (8455214),
--- light and medium boots. No plot item sheet shows their icon (ar_botte).
 
--- Version 1. A plot item that names an item of the table gets the plot item sheet with the icon of that
--- item, unless another plot item of the scenario has that sheet: each plot item sheet is the sheet of
--- one plot item of a scenario, which is how a player's item is known to be this plot item or that one.
--- The first plot item of the list that asks for an icon gets it. A plot item that is left as it is, for
--- that reason or because its sheet is not in the table, stays what the scenario service refuses: the
--- author is told which plot item it is, and chooses an icon for it.
+-- Version 1. A plot item that names an item of the table gets a plot item sheet, so that the scenario
+-- starts. Each plot item sheet is the sheet of one plot item of a scenario, which is how a player's item
+-- is known to be this plot item or that one: a sheet another plot item of the scenario has is not taken,
+-- whether that one had it before or got it earlier in this update (the plot items are updated in the
+-- order of their list). The choice, in this order:
+--   * the plot item sheet with the icon of the item (Same);
+--   * the first sheet of the list of the same kind (Kind) that no plot item has;
+--   * the first of the 185 plot item sheets, in the order of their numbers, that no plot item has.
+-- The author is told which plot item it is, and for a sheet that does not show the icon of the item, why,
+-- and that the icon can be changed. A scenario has 32 plot items at most (r2ed_max_num_plot_items, and
+-- the check of an upload): one of the 185 sheets is always free. Should none be, the plot item is left as
+-- it is, like one whose sheet is not in the table: nothing is guessed for a sheet the table does not have.
+-- Such a plot item stays what the scenario service refuses, and the author is told to choose an icon.
 local function updatePlotItemSheet(this, update)
 	local sheetId = this.SheetId
 	if type(sheetId) ~= "number" or isPlotItemSheet(sheetId) then return end
 	local name = tostring(defaulting(this.Name, ""))
-	local newSheetId = plotItemSheetOfItem[sheetId]
-	if newSheetId == nil then
+	local choice = plotItemSheetOfItem[sheetId]
+	if choice == nil then
 		update:note("uiR2EDVersionNotePlotItemUnknown", name, string.format("%.0f", sheetId))
 		return
 	end
+	-- the plot item sheets the other plot items of the scenario have, each with the name of the first
+	-- plot item that has it
+	local used = {}
 	local plotItems = update:getParent(this)
 	if type(plotItems) == "table" then
 		for i = 1, table.getn(plotItems) do
 			local other = plotItems[i]
-			if type(other) == "table" and not rawequal(other, this) and other.SheetId == newSheetId then
-				update:note("uiR2EDVersionNotePlotItemIconTaken", name, tostring(defaulting(other.Name, "")))
-				return
+			if type(other) == "table" and not rawequal(other, this) and isPlotItemSheet(other.SheetId)
+				and used[other.SheetId] == nil then
+				used[other.SheetId] = tostring(defaulting(other.Name, ""))
 			end
 		end
 	end
+	if choice.Same ~= nil and used[choice.Same] == nil then
+		update:set(this, "SheetId", choice.Same)
+		update:note("uiR2EDVersionNotePlotItemIcon", name)
+		return
+	end
+	local newSheetId = nil
+	for i = 1, table.getn(choice.Kind) do
+		if newSheetId == nil and used[choice.Kind[i]] == nil then
+			newSheetId = choice.Kind[i]
+		end
+	end
+	local candidate = firstPlotItemSheet
+	while newSheetId == nil and candidate <= lastPlotItemSheet do
+		if used[candidate] == nil then
+			newSheetId = candidate
+		end
+		candidate = candidate + 256
+	end
+	if newSheetId == nil then
+		update:note("uiR2EDVersionNotePlotItemUnknown", name, string.format("%.0f", sheetId))
+		return
+	end
 	update:set(this, "SheetId", newSheetId)
-	update:note("uiR2EDVersionNotePlotItemIcon", name)
+	if choice.Same ~= nil then
+		update:note("uiR2EDVersionNotePlotItemIconTaken", name, used[choice.Same])
+	else
+		update:note("uiR2EDVersionNotePlotItemIconNone", name)
+	end
 end
 
 function plotItem.updateVersion(this, scenarioValue, currentValue, update)
