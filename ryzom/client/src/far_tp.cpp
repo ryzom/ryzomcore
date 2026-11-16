@@ -1019,7 +1019,9 @@ retryJoinEdit:
 			// arrival (showReturnMessage).
 			m_ReturnMessage = message;
 		}
-		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface");
+		// (as it is written: the default case mode of the box puts "Ring" and every other word after the
+		// first of a sentence in lower case)
+		pIM->messageBoxWithHelp(message, letReturnToCharSelect ? "ui:outgame" : "ui:interface", "", "", CaseNormal);
 		if ( letReturnToCharSelect && requestRetToMainland )
 		{
 			// The client goes back to the mainland by itself: the box that was just shown has no use for its
@@ -1606,7 +1608,7 @@ void CFarTP::onDssDown(bool forceReturn)
 	}
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
-	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"));
+	pIM->messageBoxWithHelp(CI18N::get("uiDisconnected"), "ui:interface", "", "", CaseNormal);
 	// the interface of the Ring goes with the return: the message is shown again on arrival
 	m_ReturnMessage = CI18N::get("uiDisconnected");
 	requestReturnToPreviousSession();
@@ -1617,7 +1619,7 @@ void CFarTP::showReturnMessage()
 	if (m_ReturnMessage.empty())
 		return;
 
-	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage);
+	CInterfaceManager::getInstance()->messageBoxWithHelp(m_ReturnMessage, "ui:interface", "", "", CaseNormal);
 	m_ReturnMessage.clear();
 	// A box without an action on OK closes at a click beside it (CInterfaceManager::messageBoxWithHelp), and
 	// this one comes up while the game is still loading: it stays until its OK button is used.

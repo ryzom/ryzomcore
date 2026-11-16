@@ -968,7 +968,7 @@ function r2.activities:newElementInst(tableInit)
 
 	elseif not existZone then
 		local message = i18n.get("uiR2EdCreateZone") .. actionToInitDefaultActivity .. i18n.get("uiR2EdFor") .. " " .. selectedInst.Name
-		messageBox(message)	
+		r2.messageBoxAsWritten(message)
 	end
 	r2.requestForceEndMultiAction()
 end

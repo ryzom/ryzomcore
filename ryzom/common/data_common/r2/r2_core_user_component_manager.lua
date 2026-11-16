@@ -1395,7 +1395,7 @@ function userComponentManager:registerUserComponentData(fileName)
 		local k, v = next(ucTable, nil)
 		while k do
 			if v[1] == entry[1] and self:isInitialized() == true then
-				messageBox("A UserComponent called '"..entry[1].."' is already loaded. Unload it before loading another component with the same name.")
+				r2.messageBoxAsWritten("A UserComponent called '"..entry[1].."' is already loaded. Unload it before loading another component with the same name.")
 				return false
 			end
 			if v[2] == entry[2] and self:isInitialized() == true then
@@ -1535,7 +1535,7 @@ function userComponentManager:loadUserComponent(fileName, body, header)
 		if reason ~= nil then
 			debugInfo("UserComponentManager: '" .. tostring(fileName) .. "' is not loaded: " .. tostring(reason))
 		end
-		messageBox(userComponentFileText(textId, fileName))
+		r2.messageBoxAsWritten(userComponentFileText(textId, fileName))
 		self:initialLoadEnded(fileName)
 		return false
 	end
@@ -1709,7 +1709,7 @@ end
 -- already.
 function r2.onUserComponentLoadEnded(filename, messageId)
 	if messageId ~= nil and messageId ~= "" then
-		messageBox(userComponentFileText(messageId, filename))
+		r2.messageBoxAsWritten(userComponentFileText(messageId, filename))
 	end
 	r2_core.UserComponentManager:initialLoadEnded(filename)
 end
