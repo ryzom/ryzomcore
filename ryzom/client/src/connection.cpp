@@ -2830,12 +2830,14 @@ static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string sc
 	{
 		values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 	}
-	else
+	else if (!scenarioName.empty())
 	{
 		R2::CScenarioValidator sv;
 		std::string md5, signature;
 		sv.setScenarioToLoad(scenarioName, values, md5, signature, false);
 	}
+	// (without a name no file is chosen yet: the window of the Ring terminal has just been opened, and its
+	// fields get what a file without a header gives)
 	//
 	setTextField(scenarioWnd, "rules_value_text",			rulesText(fieldLookup(values, "Rules")));
 	uint levelRange = 0;
