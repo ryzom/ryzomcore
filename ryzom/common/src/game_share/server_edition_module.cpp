@@ -4108,6 +4108,39 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 
 	}
 
+	// A trial character (RoS) starts an animation only of a scenario of Nevrax that is open to trial accounts. The
+	// start of another is refused as the checks above refuse an upload, before anything of it is kept or scheduled:
+	// the session stays as it was before the request, and nothing is announced. A start that comes while the
+	// animation of the session starts or runs is not one: it is dropped below, and answered as the start in
+	// progress, whoever sent it.
+	if (ok)
+	{
+		CEditionSession* trialSession = getSessionByCharId(charId);
+		TPioneersSessions::const_iterator trialSessionIt = _PioneersSessions.find(charId);
+		bool animationStartingOrRunning = trialSessionIt != _PioneersSessions.end()
+			&& getAnimationModule()->isSessionStartingOrRunning(trialSessionIt->second);
+		if (trialSession && trialSession->getSessionType() == RSMGR::TSessionType::st_anim && !animationStartingOrRunning
+			&& getIsCharRoS(charId) && hasPrivilegeOfList(extendedPriv, ":TRIAL:"))
+		{
+			bool nevraxScenario = false;
+			bool trialAllowed = false;
+			TScenarioHeaderSerializer::TValueType::const_iterator first(header.Value.begin()), last(header.Value.end());
+			for (; first != last; ++first)
+			{
+				if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
+				else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
+			}
+			if (!nevraxScenario || !trialAllowed)
+			{
+				nlwarning("R2Ed: char %u (RoS, trial account) asked to start an animation of session %u whose scenario is not open to trial accounts: refused",
+				    charId, trialSession->SessionId.asInt());
+				errorReason = "uiR2EDRoSTryMainland";
+				rtData = nullptr;
+				ok = false;
+			}
+		}
+	}
+
 
 	if (ok)
 	{
@@ -4179,7 +4212,6 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			body.ScenarioHeader = header;
 
 			getAnimationModule()->scheduleStartSession(body);
-			bool trialAllowed = false;
 			bool nevraxScenario = false;
 			std::string missionTag;
 
@@ -4222,7 +4254,6 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					else if (first->first == "CreateBy" )	{ info.setScenarioAuthorName( first->second); }
 					else if (first->first == "Rules" ) { info.setDMLess(CScenarioValidator::normalizeRules(first->second) != "Mastered"); }
 					else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
-					else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
 					else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 				}
 
@@ -4230,24 +4261,10 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 				if ( !nevraxScenario )
 				{
 					missionTag.clear();
-					trialAllowed = false;
 				}
 
 
-				bool isCharRoS = getIsCharRoS(charId);
-
-				if  ( isCharRoS )
-				{
-					if (hasPrivilegeOfList(extendedPriv, ":TRIAL:") && !trialAllowed)
-					{
-						errorReason = "uiR2EDRoSTryMainland";
-						ok = false;
-						nlwarning("ERROR: A client %u(CharId) (RoS) try to launch an animation (from the born) that is not RoS. That means that the client has not check the RoS Flags or that this user is trying to hack use. So we will close he animation session (%u) so he will be kicked back to edition.", charId, body.SessionId.asInt());
-					}
-
-				}
-
-
+				// (a trial character's start of a scenario that is not open to trial accounts was refused above)
 				if(ok &&_CharacterControlProxy)
 				{
 					CCharacterControlItfProxy proxy(_CharacterControlProxy);
@@ -4263,7 +4280,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					}
 				}
 
-				if (_SessionManager)
+				if (ok && _SessionManager)
 				{
 					RSMGR::CRingSessionManagerProxy rsm(_SessionManager);
 					rsm.scenarioStarted(this, body.SessionId, info);
