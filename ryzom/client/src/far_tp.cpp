@@ -1046,6 +1046,14 @@ void CFarTP::hookNextFarTPForEditor()
 }
 
 /*
+ * unhookNextFarTPForEditor
+ */
+void CFarTP::unhookNextFarTPForEditor()
+{
+	_HookedForEditor = false;
+}
+
+/*
  * requestReturnToPreviousSession
  */
 void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)

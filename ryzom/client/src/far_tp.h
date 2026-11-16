@@ -263,6 +263,8 @@ public:
 
 	// Tell to ignore the next Far TP request, it will be replaced by a Far TP to the edition session (allows to shortcut anim-mainland-edition by anim-edition)
 	void hookNextFarTPForEditor();
+	// The next Far TP request is followed (a stop of the live session refused, or the player leaves on their own)
+	void unhookNextFarTPForEditor();
 
 	/// Begin a Character Reselect sequence
 	void requestReconnection();

@@ -91,6 +91,7 @@ function r2.Version.save(filename)
 		local nevraxScenario = "0"
 		local trialAllowed = "0"
 		local scenarioTag = ""
+		local protectedScenario = false
 
 
 		if r2.Scenario and r2.Scenario.Locations 
@@ -141,15 +142,17 @@ function r2.Version.save(filename)
 						if string.sub(filename, 1, 15) == "save/r2_buffer_" then
 							-- the buffer of the editor (getScenarioBufferFileName in the client) is not written for
 							-- a scenario that may not be saved, and the scenario keeps its access: a test or an
-							-- animation starts the scenario the editor shows (requestStartScenario)
-							return "protected"
+							-- animation starts the scenario the editor shows (requestStartScenario), with the
+							-- header made below
+							protectedScenario = true
+						else
+							-- not saved: the scenario takes the default access, and is saved at the next try
+							r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
+							r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioToDefaultAccess"))
+							r2.requestSetNode(r2.Scenario.Description.InstanceId, "OtherCharAccess", "Full")
+							r2.requestEndAction()
+							return false
 						end
-						-- not saved: the scenario takes the default access, and is saved at the next try
-						r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
-						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioToDefaultAccess"))
-						r2.requestSetNode(r2.Scenario.Description.InstanceId, "OtherCharAccess", "Full")
-						r2.requestEndAction()
-						return false
 					else
 						r2.onSystemMessageReceived("BC_ML", "", "Updating the system of Trial limitation")
 						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
@@ -175,16 +178,17 @@ function r2.Version.save(filename)
 				if config.R2EDExtendedDebug ~= 1  then
 					if string.sub(filename, 1, 15) == "save/r2_buffer_" then
 						-- the buffer of the editor: not written, and the scenario stays Nevrax's (see above)
-						return "protected"
+						protectedScenario = true
+					else
+						-- not saved: the scenario is no longer marked as Nevrax's, and is saved at the next try
+						r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
+						r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
+						r2.requestSetNode(r2.Scenario.Description.InstanceId, "NevraxScenario", "0")
+						r2.requestSetNode(r2.Scenario.Description.InstanceId, "TrialAllowed", "0")
+						r2.requestSetNode(r2.Scenario.Description.InstanceId, "ScenarioTag", "")
+						r2.requestEndAction()
+						return false
 					end
-					-- not saved: the scenario is no longer marked as Nevrax's, and is saved at the next try
-					r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
-					r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
-					r2.requestSetNode(r2.Scenario.Description.InstanceId, "NevraxScenario", "0")
-					r2.requestSetNode(r2.Scenario.Description.InstanceId, "TrialAllowed", "0")
-					r2.requestSetNode(r2.Scenario.Description.InstanceId, "ScenarioTag", "")
-					r2.requestEndAction()
-					return false
 
 
 				end
@@ -218,7 +222,13 @@ function r2.Version.save(filename)
 			table.insert(values, {ScenarioTag = scenarioTag})
 		end
 
-		
+		if protectedScenario then
+			-- not written (see above): the start of the test sends the header the file would have had
+			-- (CClientEditionModule::requestStartScenario)
+			r2.Version.ProtectedHeader = values
+			return "protected"
+		end
+
 		r2.save(filename, values)
 	end
 	return true
