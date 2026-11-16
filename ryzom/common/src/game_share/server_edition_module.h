@@ -340,7 +340,7 @@ namespace R2
 		NLMISC_COMMAND_HANDLER_TABLE_EXTEND_BEGIN(CServerEditionModule, CModuleBase)
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listSessions, "display the list of session", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, hibernateSession, "Hibernate a session", "<sesionId>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, wakeUpSession, "Wake up an hibernating session", "<sesionId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, wakeUpSession, "Wake up an hibernating session (its file is named by the session and the character that owns it)", "<sessionId> <ownerCharId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displaySession, "display a session", "<sessionId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, dumpSession, "dump infos on a session", "<sesionId>")
 
@@ -354,11 +354,11 @@ namespace R2
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayPioneer, "display a pionnieer", "<charId>")
 
 
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addCharacterInSession, "simulates the msg addCharacterInSessuion", "<sessionId> <charId> ")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, createSession, "simulates the msg CreateSession", "<ownerCharId> <sessionId> <charId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, addCharacterInSession, "simulates the msg addCharacterInSession", "<sessionId> <charId> <role: ur_editor | ur_animator | ur_player> [<ringAccess> [<isNewcomer: 0 | 1>]]")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, createSession, "simulates the msg CreateSession", "<ownerCharId> <sessionId> <sessionType: 0 (edition) | 1 (animation)>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listAllowedPioneers, "list allowed Pioneers","no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listConnectedPioneers, "list connected Pioneers", "no args")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharMode, "set the mode of a char mode are 'editor' 'tester' 'player' 'dm' )", "<charId> <mode>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharMode, "tell the client of a character that it is in a mode (the rights of the character on the shard stay as they are)", "<charId> <mode: Player | Tester | Editer | Dm>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharRingAccess, "display the ring access of a character that is connected to this Ring shard", "<charId>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character that is connected to this Ring shard, until it connects again", "<charId> <ringAccess>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setSessionStartParams, "simulate a SU message", "<userId> <sessionId> <initialIslandLocation> <initialEntryPoint> <initialSeason>")
@@ -468,7 +468,7 @@ namespace R2
 		virtual bool isSessionHibernating(TSessionId sessionId, RSMGR::TSessionType& sessionType, double& x, double& y, double& orient, uint8& season) NL_OVERRIDE;
 
 		// stop the session
-		void stopTest(TSessionId sessionId);
+		void stopTest(TSessionId sessionId) NL_OVERRIDE;
 		// Simulate autoConnection without SU
 		virtual void createSessionWithoutSu(TCharId charId, NLMISC::CEntityId clientEid) NL_OVERRIDE;
 		// Simulate Set Start AiInstance by SU

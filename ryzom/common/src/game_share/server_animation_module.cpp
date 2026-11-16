@@ -3587,6 +3587,24 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 			if (!isAnimator(charId, operationName.c_str())) { return true; }
 		}
 
+		// The string manager keeps the texts of a scenario under the id of its animation session (requestLoadTable).
+		// A request about the texts acts on those of the animation the character is attached to.
+		TSessionId textsSessionId(0);
+		if (operationName == "requestStringValue"
+			|| operationName == "requestIdList"
+			|| operationName == "requestStringTable"
+			|| operationName == "requestSetValue")
+		{
+			CAnimationSession *textsSession = getSessionByCharId(charId);
+			if (!textsSession)
+			{
+				nlwarning("R2An: char %u sent '%s' but is attached to no running animation (session %u), request refused",
+					charId, operationName.c_str(), getSessionIdByCharId(charId).asInt());
+				return true;
+			}
+			textsSessionId = textsSession->SessionId;
+		}
+
 		if (operationName == "requestStartAct")
 		{
 			// from users
@@ -3686,7 +3704,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName == "requestStringValue")
 		{
-			TSessionId scenarioId=(TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			std::string stringId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			nlRead(msgin,serial,stringId);
@@ -3700,7 +3718,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName == "requestIdList")
 		{
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			CMessage msg("requestIdList");
 			msg.serial(scenarioId);
@@ -3733,7 +3751,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 		if(operationName == "requestStringTable")
 		{
 			CMessage msg("requestStringTable");
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			nlwarning("string table requested!!");
 			msg.serial(scenarioId);
@@ -3744,15 +3762,17 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName=="requestSetValue")
 		{
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			std::string stringId;
 			std::string value;
 			nlRead(msgin,serial,stringId);
 			nlRead(msgin,serial,value);
+			// the character is named for the string manager, which says for whom it refuses a text
 			CMessage msg("requestSetValue");
-			nlRead(msg,serial,scenarioId);
-			nlRead(msg,serial,stringId);
-			nlRead(msg,serial,value);
+			msg.serial(scenarioId);
+			msg.serial(charId);
+			msg.serial(stringId);
+			msg.serial(value);
 			_StringManagerProxy->sendModuleMessage(this,msg);
 			return true;
 		}
@@ -4557,7 +4577,17 @@ NLMISC_CLASS_COMMAND_IMPL(CServerAnimationModule, stopTest)
 	uint32 dummyLastAct = 0;
 	uint32 id;
 	fromString(args[0], id);
-	stopTest(TSessionId(id), dummyLastAct );
+	TSessionId sessionId(id);
+	// The animation that runs for a session of the edition module is stopped through that module, as every other
+	// stop is: it puts the scenario of the session back in edition, stops the animation here and tells the clients
+	// of the session. Stopped from here alone, the session stays in test mode and its clients in a test that is gone.
+	if (getSession(sessionId) && getEditionModule()->getScenarioById(sessionId))
+	{
+		getEditionModule()->stopTest(sessionId);
+		log.displayNL("The animation of session %u is stopped, the clients of the session are told", id);
+		return true;
+	}
+	stopTest(sessionId, dummyLastAct );
 	return true;
 }
 

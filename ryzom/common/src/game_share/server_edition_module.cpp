@@ -1145,10 +1145,9 @@ public:
 			{
 				firstLoop = false;
 
-				uint32 fileVersion;
-				fromString(tokens[1], fileVersion);
-
-				if (tokens.size() != 2 || tokens[0] != "Version" || fileVersion != FileVersion)
+				// the first line is "Version", a tab and the version of the file
+				uint32 fileVersion = 0;
+				if (tokens.size() != 2 || tokens[0] != "Version" || !fromString(tokens[1], fileVersion) || fileVersion != FileVersion)
 				{
 					nlwarning("Obsolete File Discard '%s'", fileDescription.FileName.c_str());
 					return;
@@ -1172,7 +1171,10 @@ public:
 				}
 				else
 				{
-					nlstop;
+					// a line that is not a character id, a tab and an access: the line is left out and the others
+					// of the file are read
+					nlwarning("R2Ed: the file '%s' has a line of %u fields, where a character id, a tab and a ring access are expected: the line '%s' is left out",
+						fileDescription.FileName.c_str(), (uint)tokens.size(), clientTextForLog(*first).c_str());
 				}
 
 			}
@@ -2884,9 +2886,10 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, createSession)
 
 	if (args.size() > 2) fromString(args[2], sessionType);
 
-	if (args.size() != 3 || sessionType < 0 || sessionType > 2)
+	// the two types of session this service hosts (CServerEditionModule::createSession refuses the others)
+	if (args.size() != 3 || sessionType < 0 || sessionType > 1)
 	{
-		log.displayNL("3 Parameters needed: ownerCharId sessionId sessionType");
+		log.displayNL("3 Parameters needed: ownerCharId sessionId sessionType (0 for an edition session, 1 for an animation session)");
 		return false;
 	}
 
@@ -3120,6 +3123,11 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 			if (!trialAllowed && getIsCharRoS(ownerCharId) && hasPrivilegeOfList(extendedPriv, ":TRIAL:"))
 			{
 				nlwarning("ERROR: A client %u(CharId) (RoS) try to launch an animation that is not RoS. That means that the client has not check the RoS Flags or that this user is trying to hack use. So we will close he animation session (%u) so he will be kicked back to edition.", ownerCharId, sessionId.asInt());
+				// The session was made above and the session manager was told that it is created. It is closed as
+				// any session of this service is: the animation it is linked to stops, which sends the editors of
+				// the edition session back to edition, the EGS is told that the two are no longer linked, and the
+				// session manager is told that the session closes. Nothing was announced for it as a running scenario.
+				closeSession(nullptr, sessionId);
 				return;
 			}
 
@@ -3163,7 +3171,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addCharacterInSession)
 {
 	if (args.size() <3  || args.size() > 5)
 	{
-		log.displayNL("addCharacterInSession.addCharacterInSession <sessionId> <clientId> <roleAsString> <[ringAcess]> <[isnewcomer]>");
+		log.displayNL("ServerEditionModule.addCharacterInSession <sessionId> <charId> <role> [<ringAccess> [<isNewcomer>]]");
 		return false;
 	}
 	uint32 id;
@@ -3182,8 +3190,9 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, addCharacterInSession)
 		return false;
 	}
 
+	// the ring access is the fourth argument, with or without the fifth
 	std::string ringAccess;
-	if (args.size() == 4 )
+	if (args.size() >= 4 )
 	{
 		ringAccess = args[3];
 	}
@@ -3863,7 +3872,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 	if (session) { scenario = session->getScenario(); }
 	if (!session || !scenario)
 	{
-		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, session);
+		msg = toString("Try to teleport a character %u to another character %u but in a session  %u that do not exist", source, dest, sessionId.asInt());
 		return false;
 	}
 
@@ -3877,7 +3886,7 @@ bool CServerEditionModule::teleportOneCharacterToAnotherImpl(TSessionId sessionI
 		msg = toString("Try to teleport a character %u %sto another character %u %sin the session  %u",
 			source,  sourceCharOk?"":"that is not present in the current session ",
 			dest,  destCharOk?"":"that is not present in the current session ",
-			session);
+			sessionId.asInt());
 
 		if (srcClient)
 		{
@@ -4539,7 +4548,25 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, listConnectedPioneers)
 {
 	if (args.size() != 0) return false;
 
-
+	// The characters whose client edition module is connected to this service, with the session they are in.
+	// A character is listed here before listPioneers has it: its module is up, and it is connected to its session
+	// once the backup service and the EGS are there (tryCharConnection).
+	typedef NLMISC::CTwinMap<TCharId, NLNET::TModuleProxyPtr>::TAToBMap TClientModules;
+	const TClientModules &clients = _ClientsEditionModule.getAToBMap();
+	log.displayNL("%u chars have a client edition module connected", (uint)clients.size());
+	TClientModules::const_iterator first(clients.begin()), last(clients.end());
+	for ( ; first != last ; ++first)
+	{
+		TPioneersSessions::const_iterator session = _PioneersSessions.find(first->first);
+		if (session != _PioneersSessions.end())
+		{
+			log.displayNL("Chars: %u, module '%s', Session: %u", first->first, first->second->getModuleName().c_str(), session->second.asInt());
+		}
+		else
+		{
+			log.displayNL("Chars: %u, module '%s', not connected to a session", first->first, first->second->getModuleName().c_str());
+		}
+	}
 	return true;
 }
 
@@ -4914,6 +4941,13 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, setCharMode)
 	TUserId charId;
 	fromString(args[0], charId);
 	TCharMode charMode(args[1]);
+
+	// the modes are named as the logs name them (TCharMode::toString); another text gives no mode
+	if (charMode == TCharMode::Invalid)
+	{
+		log.displayNL("'%s' is no mode: the modes are Player, Tester, Editer and Dm", args[1].c_str());
+		return false;
+	}
 
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
@@ -5335,7 +5369,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerEditionModule, wakeUpSession)
 {
 	if (args.size() != 2)
 	{
-		log.displayNL("Wrong parameters: 1 parameter needed: the Session to hibernate");
+		log.displayNL("Wrong parameters: 2 parameters needed: the session to wake up and the character that owns it");
 		return false;
 	}
 
@@ -5814,6 +5848,12 @@ bool CServerEditionModule::hibernateSessionImpl  (TSessionId sessionId, std::str
 
 
 	TSessions::iterator found = _Sessions.find(sessionId);
+
+	if (found == _Sessions.end())
+	{
+		msg = NLMISC::toString("Try to hibernate a non existing session %u", sessionId.asInt());
+		return false;
+	}
 
 	CEditionSession* session = found->second;
 	nlassert(session);
@@ -6943,6 +6983,14 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
 
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message  part but the first part seems to have been lost.", charId) ;return;	}
+
+	// A part carries bytes of the message (the client cuts a message in parts of 512 bytes, and the last one has
+	// what is left). A part without any has nothing to add, and no first byte to take the address of.
+	if (data.empty())
+	{
+		nlwarning("R2Ed: char %u sent part %u of a multi-part message with %u bytes, the part is left out", charId, partId, (uint)data.size());
+		return;
+	}
 
 	info->WaitingMsg->serialBuffer(const_cast<uint8*>(&data[0]), (uint)data.size());
 	//info->WaitingMsgCurrentSize += data.size();
