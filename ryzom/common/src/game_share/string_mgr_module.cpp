@@ -42,6 +42,26 @@ using namespace std;
 
 NLNET_REGISTER_MODULE_FACTORY(CStringManagerModule, "StringManagerModule");
 
+// The longest id of a text, sent by a client, that goes into a line of the log
+static const uint32 s_MaxTextIdInLog = 80;
+
+// An id that a client sent, as it goes into a line of the log: its start, without control characters, so that it
+// stays one line of a known length
+static std::string textIdForLog(const std::string &text)
+{
+	std::string out;
+	uint32 size = (uint32)std::min((size_t)s_MaxTextIdInLog, text.size());
+	out.reserve(size + 3);
+	for (uint32 i = 0; i < size; ++i)
+	{
+		char c = text[i];
+		out += ((uint8)c < 0x20 || (uint8)c == 0x7f) ? '?' : c;
+	}
+	if (text.size() > size)
+		out += "...";
+	return out;
+}
+
 
 /**
 *Send a npc chat
@@ -300,11 +320,23 @@ bool CStringManagerModule::onProcessModuleMessage(NLNET::IModuleProxy *senderMod
 	else if(operationName=="requestSetValue")
 	{
 		TSessionId scenarioId;
+		uint32 charId;
 		std::string localId;
 		std::string value;
 		nlRead(message, serial, scenarioId);
+		nlRead(message, serial, charId);
 		nlRead(message, serial, localId);
 		nlRead(message, serial, value);
+		// An animator changes a text its scenario has (the ids requestIdList and requestStringTable give): a text
+		// under another id is not added, the table of a scenario only has the texts the scenario was started with.
+		TLocalTable *localTable = getLocalTable(scenarioId.asInt());
+		if (!localTable || localTable->find(localId) == localTable->end())
+		{
+			nlwarning("R2Str: char %u asked to set the text '%s' (id of %u bytes, text of %u bytes) of session %u, which has %s, request refused",
+				charId, textIdForLog(localId).c_str(), (uint)localId.size(), (uint)value.size(), scenarioId.asInt(),
+				localTable ? "no text of this id" : "no table of texts");
+			return true;
+		}
 		setValue(scenarioId.asInt(),localId,value);
 
 	}

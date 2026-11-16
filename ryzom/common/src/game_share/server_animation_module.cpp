@@ -3587,6 +3587,24 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 			if (!isAnimator(charId, operationName.c_str())) { return true; }
 		}
 
+		// The string manager keeps the texts of a scenario under the id of its animation session (requestLoadTable).
+		// A request about the texts acts on those of the animation the character is attached to.
+		TSessionId textsSessionId(0);
+		if (operationName == "requestStringValue"
+			|| operationName == "requestIdList"
+			|| operationName == "requestStringTable"
+			|| operationName == "requestSetValue")
+		{
+			CAnimationSession *textsSession = getSessionByCharId(charId);
+			if (!textsSession)
+			{
+				nlwarning("R2An: char %u sent '%s' but is attached to no running animation (session %u), request refused",
+					charId, operationName.c_str(), getSessionIdByCharId(charId).asInt());
+				return true;
+			}
+			textsSessionId = textsSession->SessionId;
+		}
+
 		if (operationName == "requestStartAct")
 		{
 			// from users
@@ -3686,7 +3704,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName == "requestStringValue")
 		{
-			TSessionId scenarioId=(TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			std::string stringId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			nlRead(msgin,serial,stringId);
@@ -3700,7 +3718,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName == "requestIdList")
 		{
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			CMessage msg("requestIdList");
 			msg.serial(scenarioId);
@@ -3733,7 +3751,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 		if(operationName == "requestStringTable")
 		{
 			CMessage msg("requestStringTable");
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			nlwarning("string table requested!!");
 			msg.serial(scenarioId);
@@ -3744,15 +3762,17 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 		if(operationName=="requestSetValue")
 		{
-			TSessionId scenarioId = (TSessionId)1;
+			TSessionId scenarioId = textsSessionId;
 			std::string stringId;
 			std::string value;
 			nlRead(msgin,serial,stringId);
 			nlRead(msgin,serial,value);
+			// the character is named for the string manager, which says for whom it refuses a text
 			CMessage msg("requestSetValue");
-			nlRead(msg,serial,scenarioId);
-			nlRead(msg,serial,stringId);
-			nlRead(msg,serial,value);
+			msg.serial(scenarioId);
+			msg.serial(charId);
+			msg.serial(stringId);
+			msg.serial(value);
 			_StringManagerProxy->sendModuleMessage(this,msg);
 			return true;
 		}
