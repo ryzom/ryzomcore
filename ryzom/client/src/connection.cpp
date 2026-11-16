@@ -2826,8 +2826,16 @@ static std::string rulesText(const std::string &rules)
 static void setScenarioInformation(CInterfaceGroup* scenarioWnd, const string scenarioName)
 {
 	vector< pair< string, string > > values;
-	if(R2::getEditor().isInitialized())
+	if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
 	{
+		// the scenario the editor shows, with the changes made since it was loaded or started (the header the
+		// session keeps is the one of then): the header a save of it would write, as a test sends it
+		if (!R2::getEditor().getDMC().getEditionModule().makeCurrentScenarioHeader(values))
+			nlwarning("The header of the scenario of the editor could not be made: the window shows none");
+	}
+	else if (R2::getEditor().isInitialized())
+	{
+		// a test or an animation: the header of the scenario it runs
 		values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 	}
 	else if (!scenarioName.empty())
@@ -3385,7 +3393,17 @@ class CAHLoadScenario : public IActionHandler
 		bool launchScenarioFromRingAccessPoint = false;
 
 		vector< pair< string, string > > values;
-		if(R2::getEditor().isInitialized())
+		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		{
+			// the session is listed with the scenario the editor shows, as it is now (see setScenarioInformation)
+			if (!R2::getEditor().getDMC().getEditionModule().makeCurrentScenarioHeader(values))
+			{
+				nlwarning("The header of the scenario of the editor could not be made: no session is scheduled");
+				pIM->messageBoxWithHelp(CI18N::get("uiRingLaunchScenarioError"));
+				return;
+			}
+		}
+		else if (R2::getEditor().isInitialized())
 		{
 			values = R2::getEditor().getDMC().getEditionModule().getScenarioHeader();
 		}
