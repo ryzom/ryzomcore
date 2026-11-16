@@ -245,6 +245,15 @@ public:
 	void	setMode(TMode mode);
 	TMode	getMode() const { return _Mode; }
 
+	/** True when the current mode is one the editor stays in until the user or the session changes it, and
+	  * the user sees the game: false while the mode is the one chosen from the role of the user and the server
+	  * has not said yet what the session is doing (it sets the mode again), while the wait screen for a
+	  * scenario is wanted or shown, while the start of a test or of an animation is wanted, and while the
+	  * first frames after a teleport are drawn without being shown. Every change of mode closes the message
+	  * box: the scripts hold a message for the author until this is true (r2:isModeSettled).
+	  */
+	bool	isModeSettled() const;
+
 	// test if user is DMing (be it masterless or not)
 	bool isDMing() const;
 
@@ -728,6 +737,7 @@ private:
 	bool										_TPReceivedFlag; // for the wait screen ...
 	bool										_WaitScenarioScreenWanted;	// lua requests that we display the 'wait scenario' screen
 	bool										_WaitScenarioScreenActive;	// the 'wait scenario' screen is being displayed
+	bool										m_ModeConfirmed;	// false while the server's word on the session is awaited, which sets the mode again (see isModeSettled)
 	bool										_EditionModeDisconnectedFlag;
 	CObject::TSmartPtr							_NewScenario; // new scenario that will be updated just after the wait screen is over
 	uint32										_NewScenarioInitialAct;// the start at which the user start an edition session (can be ~= from 1 after a test session)
@@ -868,6 +878,7 @@ private:
 
 	static int luaWaitScenarioScreen(CLuaState &ls); // display the wait screen after the scenario creation has been launched
 	static int luaIsScenarioUpdating(CLuaState &ls);
+	static int luaIsModeSettled(CLuaState &ls);
 
 	// undo / redo possible ?
 	static int luaCanUndo(CLuaState &ls);

@@ -468,6 +468,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("setLuaBreakPoint", setLuaBreakPoint);
 	ls.registerFunc("getMainPageURL", getMainPageURL);
 	ls.registerFunc("getCharSlot", getCharSlot);
+	ls.registerFunc("getShardId", getShardId);
 	ls.registerFunc("getServerSeason", getServerSeason);
 	ls.registerFunc("computeCurrSeason", computeCurrSeason);
 	ls.registerFunc("getAutoSeason", getAutoSeason);
@@ -1166,6 +1167,20 @@ int	CLuaIHMRyzom::getCharSlot(CLuaState &ls)
 	const char *funcName = "getCharSlot";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	ls.push(PlayerSelectedSlot);
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getShardId(CLuaState &ls)
+{
+	//H_AUTO(Lua_CLuaIHM_getShardId)
+	const char *funcName = "getShardId";
+	CLuaIHM::checkArgCount(ls, funcName, 0);
+	// 0 until the first shard this client connects to has sent its id, and with it its web server
+	// (impulseShardId): the web pages of the shard are trusted, and get the login cookie, from then on.
+	// It is not set back to 0 for a later connection: it is the id of the shard before until the next
+	// shard sends its own.
+	ls.push(ShardId);
 	return 1;
 }
 

@@ -59,6 +59,7 @@ private:
 	static int  setLuaBreakPoint(CLuaState &ls); // set a breakpoint in lua external debugger (file, line)
 	static int	getMainPageURL(CLuaState &ls);
 	static int	getCharSlot(CLuaState &ls);
+	static int	getShardId(CLuaState &ls); // the id the shard has sent (0 before the first shard has)
 	static int	displaySystemInfo(CLuaState &ls);
 	static int	displayChatMessage(CLuaState &ls);
 	static int	setWeatherValue(CLuaState &ls); // first value is a boolean to say automatic, second value ranges from of to 1 and gives the weather

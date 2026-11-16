@@ -346,6 +346,7 @@ CEditor::CEditor()
 	_TPReceivedFlag = false;
 	_WaitScenarioScreenWanted = false;
 	_WaitScenarioScreenActive = false;
+	m_ModeConfirmed = true;
 	_NewScenario = nullptr;
 	_NewScenarioInitialAct = 0;
 	_EditionModeDisconnectedFlag = true;
@@ -398,6 +399,10 @@ void CEditor::autoConfigInit(bool serverIsRingSession)
 			initialMode = R2::CEditor::EditionMode;
 			initialAccessMode = R2::CEditor::AccessEditor;
 		}
+		// The mode is a guess from the role. The server says next what the session is doing, which sets
+		// the mode again (onEditionModeConnected, onAnimationModeConnected): until then the mode is not
+		// one the editor stays in. A local client has no server to wait for.
+		m_ModeConfirmed = ClientCfg.Local;
 		init(initialMode, initialAccessMode);
 	}
 	else
@@ -1514,6 +1519,31 @@ int CEditor::luaIsScenarioUpdating(CLuaState &ls)
 	return 1;
 }
 
+// *********************************************************************************************************
+int CEditor::luaIsModeSettled(CLuaState &ls)
+{
+	//H_AUTO(R2_CEditor_luaIsModeSettled)
+	const char *funcName = "isModeSettled";
+	CLuaIHM::checkArgCount(ls, funcName, 1); // method with no args
+	ls.push(getEditor().isModeSettled());
+	return 1;
+}
+
+// *********************************************************************************************************
+bool CEditor::isModeSettled() const
+{
+	//H_AUTO(R2_CEditor_isModeSettled)
+	// the server has not said yet what the session is doing: its word sets the mode again
+	if (!m_ModeConfirmed) return false;
+	// the wait screen for a scenario is wanted or shown: it changes the mode when it comes and when it goes
+	if (_WaitScenarioScreenWanted || _WaitScenarioScreenActive) return false;
+	// the start of a test or of an animation is wanted: the next frame asks for it (connect)
+	if (ConnectionWanted) return false;
+	// a teleport: its first frames are drawn and not shown, the loading screen is still on the screen
+	if (FirstFrame || SkipFrame != 0) return false;
+	return true;
+}
+
 
 /*
 
@@ -2167,6 +2197,7 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("getCurrentIslandName", luaGetCurrentIslandName);
 	registerEnvMethod("waitScenarioScreen", luaWaitScenarioScreen);
 	registerEnvMethod("isScenarioUpdating", luaIsScenarioUpdating);
+	registerEnvMethod("isModeSettled", luaIsModeSettled);
 	registerEnvMethod("canUndo", luaCanUndo);
 	registerEnvMethod("canRedo", luaCanRedo);
 	registerEnvMethod("getUserEntityName", luaGetUserEntityName);
@@ -3189,12 +3220,22 @@ void CEditor::reset()
 		setForceDesktopReset(true); // next changes of desktop should force a reset, since ui has been reloaded
 		ReloadUIFlag = false;
 	}
+	// the editor comes back in the mode it was in, and stays in it unless a reconnection is asked for below
+	m_ModeConfirmed = true;
 	init(oldMode, oldAccessMode);
 
 	if (oldMode == EditionMode)
 	{
 		CVerboseClock clock("Request reconnection ");
 		getLua().executeScriptNoThrow("r2.requestReconnection()");
+		// The request goes out when the server module is there and the session is known
+		// (CClientEditionModule::requestReconnection). The answer sets the edition mode again
+		// (onEditionModeConnected).
+		const CClientEditionModule &editionModule = getDMC().getEditionModule();
+		if (!ClientCfg.Local && editionModule.isServerEditionModuleUp() && editionModule.getCurrentAdventureId().asInt() != 0)
+		{
+			m_ModeConfirmed = false;
+		}
 	}
 	// try to return to the act with the same title
 	_SerializeUIConfig = true;
@@ -5322,6 +5363,9 @@ void CEditor::onEditionModeConnected( uint32 userSlotId, uint32 adventureId, COb
 {
 	//H_AUTO(R2_CEditor_onEditionModeConnected)
 	CHECK_EDITOR
+	// the server has said what the session is doing: the mode set here, or by the wait screen when it goes,
+	// is one the editor stays in (see isModeSettled)
+	m_ModeConfirmed = true;
 	if (!_WaitScenarioScreenActive)
 	{
 		setMode(EditionMode);
@@ -5367,6 +5411,9 @@ void CEditor::onAnimationModeConnected(const CClientMessageAdventureUserConnecti
 	// TMP PATCH
 	// _WillTP = true;
 	CHECK_EDITOR
+	// the server has said what the session is doing (see isModeSettled). The modes that follow the load of
+	// an animation are waits, up to the one the scenario starts in (CClientEditionModule::startScenario).
+	m_ModeConfirmed = true;
 	switch(connected.Mode)
 	{
 		case 0: setMode(AnimationModeLoading); break;
@@ -5423,6 +5470,14 @@ void  CEditor::onTestModeDisconnected(TSessionId sessionId, uint32 lastAct, TSce
 {
 	//H_AUTO(R2_CEditor_onTestModeDisconnected)
 	CHECK_EDITOR
+	// The test of an edit session is over. The editor that stopped it waits already (GoingToEditionMode);
+	// another editor of the session is still in its test mode. The edition module asks for a reconnection
+	// right after this (CClientEditionModule::onTestModeDisconnected), and the answer sets the edition mode
+	// (onEditionModeConnected): the test mode is not one the editor stays in any more.
+	if (sessionType == st_edit && !ClientCfg.Local)
+	{
+		m_ModeConfirmed = false;
+	}
 	_DMC->CDynamicMapClient::onTestModeDisconnected(sessionId, lastAct, sessionType);
 }
 

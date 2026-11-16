@@ -360,15 +360,15 @@ namespace R2
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listConnectedPioneers, "list connected Pioneers", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharMode, "set the mode of a char mode are 'editor' 'tester' 'player' 'dm' )", "<charId> <mode>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharRingAccess, "display the RingAccess of a character", "<charId>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character", "<charId> <mode>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharRingAccess, "change the ring access of a character", "<charId> <ringAccess>")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setSessionStartParams, "simulate a SU message", "<userId> <sessionId> <initialIslandLocation> <initialEntryPoint> <initialSeason>")
 
 
 
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharOverrideRingAccess, "Set the overrigde of ring access (for dev only)", "<charId> <mode>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharOverrideRingAccess, "Set the overrigde of ring access (for dev only)", "<charId> <mode>")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listCharOverrideRingAccess, "list the override of ring access", "no args")
-			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, removeCharOverrideRingAccess, "remove the override of ring access", "no args")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setCharOverrideRingAccess, "set the override of the ring access of a character (for dev only)", "<charId> <ringAccess>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, displayCharOverrideRingAccess, "display the override of the ring access of a character", "<charId>")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, listCharOverrideRingAccess, "list the overrides of ring access", "no args")
+			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, removeCharOverrideRingAccess, "remove the override of the ring access of a character", "<charId>")
 
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, resetKeyPolicies, "reset all key policies", "no args")
 			NLMISC_COMMAND_HANDLER_ADD(CServerEditionModule, setDefaultKey, "set the default key use eg 'DEV'", "<theKey>")

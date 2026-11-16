@@ -53,6 +53,12 @@ enum TScreenshotRequest
 extern TScreenshotRequest   ScreenshotRequest;
 extern bool					ShowInterface;	// Do the Chat OSD have to be displayed.
 
+// A teleport sets FirstFrame. The main loop then draws a number of frames without showing them, counted
+// down in SkipFrame, while the loading screen stays on the screen: the game is shown again when both are
+// clear.
+extern bool					FirstFrame;
+extern uint					SkipFrame;
+
 
 void destroyLoadingBitmap ();
 void drawLoadingBitmap (float progress);
