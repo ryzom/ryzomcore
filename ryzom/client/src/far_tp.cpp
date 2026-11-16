@@ -1004,20 +1004,20 @@ retryJoinEdit:
 			}
 		}
 		// What the player is told: what happened, in his language (the reason of the exception is English, for
-		// the log), and that the client goes back to the mainland when it does so by itself. The text of a
-		// session that is closed says both.
+		// the log), and that the client goes back to the mainland when it does so by itself.
 		string message = CI18N::get(e.TextId);
 		strFindReplace(message, "%code", toString(e.Code));
 		if (requestRetToMainland)
 		{
-			if (e.TextId == "uiFarTPSessionClosed")
-				message = CI18N::get("uiSessionVanishedFarTP");
-			else
-				message += " " + CI18N::get("uiFarTPBackToMainland");
+			message += " " + CI18N::get("uiFarTPBackToMainland");
 			// The return follows at once, and the box goes with the interface it is in: at the character
 			// selection it is gone when the game is entered, a moment later. The player reads the message on
 			// arrival (showReturnMessage).
 			m_ReturnMessage = message;
+			// The box shown now, for a session that is closed, has the text it always had, which says both
+			// and that the teleport is under way: on arrival that would read as if it were still to come.
+			if (e.TextId == "uiFarTPSessionClosed")
+				message = CI18N::get("uiSessionVanishedFarTP");
 		}
 		// (as it is written: the default case mode of the box puts "Ring" and every other word after the
 		// first of a sentence in lower case)
