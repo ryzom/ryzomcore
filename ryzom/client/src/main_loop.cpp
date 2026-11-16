@@ -589,6 +589,8 @@ void clearBuffers()
 void renderScene(bool forceFullDetail, bool bloom)
 {
 	CTextureUser *effectRenderTarget = nullptr;
+	// no effect render target is made for a window without area: the bloom has no picture to work on then
+	bool defaultRenderTarget = false;
 	if (bloom && Driver->supportBloomEffect())
 	{
 		// set bloom parameters before applying bloom effect
@@ -596,7 +598,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 
 		// init effect render target
-		Driver->beginDefaultRenderTarget();
+		defaultRenderTarget = Driver->beginDefaultRenderTarget();
 	}
 	if (forceFullDetail)
 	{
@@ -609,7 +611,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 	{
 		s_ForceFullDetail.restore();
 	}
-	if (bloom && Driver->supportBloomEffect())
+	if (defaultRenderTarget)
 	{
 		// apply bloom effect
 		CBloomEffect::getInstance().applyBloom();
@@ -1741,8 +1743,11 @@ bool mainLoop()
 			bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
 			if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
 			{
-				Driver->beginDefaultRenderTarget();
-				defaultRenderTarget = true;
+				// No effect render target is made for a window without area (minimized, or resized down to its
+				// title bar): the frame has no effects then, there is no picture to apply them to
+				defaultRenderTarget = Driver->beginDefaultRenderTarget();
+				if (!defaultRenderTarget)
+					haveEffects = false;
 			}
 
 			if (StereoDisplay->wantClear())

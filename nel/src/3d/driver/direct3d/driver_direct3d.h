@@ -2689,6 +2689,9 @@ private:
 	// Backup frame buffer
 	IDirect3DSurface9		*_BackBuffer;
 
+	// A render target without area was refused and reported (setRenderTarget reports it once)
+	bool					m_ZeroAreaRenderTargetReported;
+
 	// Static bitmap buffer to convert rgba to bgra
 	static std::vector<uint8>	_TempBuffer;
 

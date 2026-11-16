@@ -196,6 +196,7 @@ CDriverD3D::CDriverD3D()
 	_CurrentMaterialInfo = NULL;
 	_CurrentShader = NULL;
 	_BackBuffer = NULL;
+	m_ZeroAreaRenderTargetReported = false;
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
 	_WindowFocus = true;

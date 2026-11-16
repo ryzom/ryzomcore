@@ -1142,6 +1142,19 @@ bool CDriverD3D::setRenderTarget (ITexture *tex, uint32 /* x */, uint32 /* y */,
 	}
 	else
 	{
+		// No texture can be created without area, and without texture there is no surface to render into: an
+		// offscreen texture without area is refused before anything is asked of the device, and the render
+		// target stays what it is (the size of the other kinds of texture may only be known once generated)
+		if (tex->isOffscreenTexture() && (tex->getWidth() == 0 || tex->getHeight() == 0))
+		{
+			if (!m_ZeroAreaRenderTargetReported)
+			{
+				m_ZeroAreaRenderTargetReported = true;
+				nlwarning("3D: A render target of %ux%u pixels was asked for; a render target needs an area, it is not set (reported once)", tex->getWidth(), tex->getHeight());
+			}
+			return false;
+		}
+
 		_InvertCullMode = true;
 		if (!_BackBuffer)
 		{
