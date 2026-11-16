@@ -300,15 +300,17 @@ public:
 
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok button
 	 *	ui:interface:message_box must be defined in xml, with a "text" ViewText son
+	 *	The text is shown as it is written (a translated text has the case its language wants, and a
+	 *	name or a path has its own), unless another case mode is given.
 	 */
-	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseFirstSentenceLetterUp);
+	void	messageBox(const std::string &text, const std::string &masterGroup="ui:interface", TCaseMode caseMode = CaseNormal);
 	/** Open a MessageBox. this is a simple ModalWindow with a Ok and a HELP button.
 	 *  The help button with open a browser on ryzom.com faq
 	 *	ui:interface:message_box_with_help must be defined in xml, with a "text" ViewText son
 	 */
 	void	messageBoxWithHelp(const std::string &text, const std::string &masterGroup="ui:interface",
 							   const std::string &ahOnOk = std::string(), const std::string &paramsOnOk= std::string(),
-							   TCaseMode caseMode = CaseFirstSentenceLetterUp);
+							   TCaseMode caseMode = CaseNormal);
 
 	/** Open a MessageBox with validation question. this is a simple ModalWindow with a Ok / Cancel button
 	 *	ui:interface:valid_message_box must be defined in xml, with a "text" ViewText son, and a "ok" button
