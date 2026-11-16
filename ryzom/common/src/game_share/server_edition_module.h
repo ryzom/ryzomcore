@@ -116,6 +116,17 @@ namespace R2
 			TCharMode Mode;
 			bool Newcomer;
 			NLNET::CMessage* WaitingMsg;
+			// The multi-part message that the character is sending: the size in bytes that its head announced, the
+			// bytes of it received so far, its name as the head gave it (cut for the log), and whether it is the
+			// start of a scenario
+			uint32 WaitingMsgSize;
+			uint32 WaitingMsgReceived;
+			std::string WaitingMsgName;
+			bool WaitingMsgIsStart;
+			// true from the refusal of a multi-part message (by its head, or by parts that go beyond the size the
+			// head announced) to its foot or to the next head: the parts that still come are dropped without a line
+			// of log each
+			bool WaitingMsgRefused;
 		};
 
 
@@ -533,6 +544,10 @@ namespace R2
 		bool closeSessionImpl(TSessionId sessionId, std::string& msg);
 
 		CServerEditionModule::CPioneerInfo* getPioneerInfo(TCharId charId);
+		// The multi-part message that the character is sending is refused (the refusal is logged by the caller):
+		// what was received of it is freed, the parts that still come are dropped, and when it is the start of a
+		// scenario the clients of the session get the answer of a refused start
+		void refuseMultiPartMsg(TCharId charId, CPioneerInfo &info);
 
 
 	private: // private types

@@ -136,6 +136,21 @@ namespace
 			out += "...";
 		return out;
 	}
+
+	// The largest multi-part message taken from a client, in bytes of the whole message: the size that the head
+	// of the message announces, which is the length of the message the client cuts in parts.
+	// It is derived from what a client sends to this module (the methods of CShareServerEditionItf in
+	// r2_share_itf.xml, and SUCU and requestUpdateRtScenario in onProcessModuleMessage). No message carries more
+	// than one piece of bulk data. That piece is a tree (startScenario, onScenarioUploadAsked, onNodeSetAsked,
+	// onNodeInsertAsked, requestUpdateRtScenario), which the client compresses and which is read up to
+	// CObjectSerializer::MaxCompressedSize, or the body of a user component (SUCU), which is read up to
+	// CUserComponent::MaxUserComponentDataLength, the same size. The other fields are numbers and short texts
+	// (the header of a scenario, ids, names): the allowance for all of them is the longest single text a
+	// stream reads, CObjectSerializer::MaxStringLength.
+	// (A tree that the client cannot compress under MaxCompressedSize goes uncompressed and can be longer than
+	// this: that is far above a scenario within the quotas of this service, and its message is refused.)
+	const uint32 s_MaxMultiPartMsgTrees = 1;
+	const uint32 s_MaxMultiPartMsgSize = s_MaxMultiPartMsgTrees * R2::CObjectSerializer::MaxCompressedSize + R2::CObjectSerializer::MaxStringLength;
 }
 
 namespace R2
@@ -1036,6 +1051,10 @@ CServerEditionModule::CPioneerInfo::CPioneerInfo()
 	Mode = TCharMode::Invalid;
 	Newcomer = false;
 	WaitingMsg = nullptr;
+	WaitingMsgSize = 0;
+	WaitingMsgReceived = 0;
+	WaitingMsgIsStart = false;
+	WaitingMsgRefused = false;
 }
 
 CServerEditionModule::CPioneerInfo::~CPioneerInfo()
@@ -6987,10 +7006,23 @@ void CServerEditionModule::multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 cha
 		info->WaitingMsg = nullptr;
 	}
 
+	// What the head announces is kept for the parts that follow. The size is the length in bytes of the whole
+	// message, which the client cuts in parts; "RSS2" is the start of a scenario (startScenario).
+	info->WaitingMsgSize = size;
+	info->WaitingMsgReceived = 0;
+	info->WaitingMsgName = clientTextForLog(msgName);
+	info->WaitingMsgIsStart = msgName == "RSS2";
+	info->WaitingMsgRefused = false;
+
+	if (size > s_MaxMultiPartMsgSize)
+	{
+		nlwarning("R2Ed: char %u announced the multi-part message '%s' of %u bytes in %u parts, the largest message taken is %u bytes: the message is refused",
+			charId, info->WaitingMsgName.c_str(), size, nbPacket, s_MaxMultiPartMsgSize);
+		refuseMultiPartMsg(charId, *info);
+		return;
+	}
+
 	info->WaitingMsg = new NLNET::CMessage(); //Message name is directly in the data
-	//info->WaitingMsgCurrentSize = 0;
-	//info->WaitingMsgSize = size;
-	//info->WaitingMsgName = msgName;
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 	if (clientEditionProxyPtr)
@@ -7002,12 +7034,37 @@ void CServerEditionModule::multiPartMsgHead(NLNET::IModuleProxy *sbs, uint32 cha
 }
 
 
+void CServerEditionModule::refuseMultiPartMsg(TCharId charId, CPioneerInfo &info)
+{
+	delete info.WaitingMsg;
+	info.WaitingMsg = nullptr;
+	info.WaitingMsgRefused = true;
+
+	// The clients of a session wait for the answer to the start of a scenario, the one that sent it and the others
+	// that were told that it is being sent. A start that is not taken is answered as startScenario answers a
+	// scenario that is too large, so that they leave the wait and ask to be connected again. It is the answer
+	// to a request of an author, like the start itself.
+	if (info.WaitingMsgIsStart)
+	{
+		const NLNET::TModuleProxyPtr *clientEditionProxyPtr = getClientProxyPtr(charId);
+		if (clientEditionProxyPtr && isAuthor(charId, "startScenario"))
+		{
+			CMessage message;
+			replyToAll(*clientEditionProxyPtr, CShareClientEditionItfProxy::buildMessageFor_startScenario(message, false, 0, "uiR2EDTooManyElmements"));
+		}
+	}
+}
+
+
 void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 charId, uint32 partId, const std::vector<uint8> &data)
 {
 	nldebug("Received a multi-part message from %u (Body, part=%u, size=%u)", charId, partId, data.size());
 	if (!isMultiPartSender(sbs, charId, "multiPartMsgBody")) { return; }
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
+
+	// the parts of a message that was refused are dropped: the refusal was logged once
+	if (info->WaitingMsgRefused) { return; }
 
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message  part but the first part seems to have been lost.", charId) ;return;	}
 
@@ -7019,8 +7076,25 @@ void CServerEditionModule::multiPartMsgBody(NLNET::IModuleProxy *sbs, uint32 cha
 		return;
 	}
 
+	// The parts of a message add up to the size its head announced, which was checked. A message that goes
+	// beyond it is given up: what was received of it is freed, and the parts that still come are dropped.
+	if (data.size() > info->WaitingMsgSize - info->WaitingMsgReceived)
+	{
+		nlwarning("R2Ed: char %u sent the multi-part message '%s' with more than the %u bytes its head announced (%u bytes received, then part %u of %u bytes): the message is given up",
+			charId, info->WaitingMsgName.c_str(), info->WaitingMsgSize, info->WaitingMsgReceived, partId, (uint)data.size());
+		refuseMultiPartMsg(charId, *info);
+		// the client was told of the head and of the parts so far: it is told that the message is over
+		const NLNET::TModuleProxyPtr* givenUpClientProxyPtr = getClientProxyPtr(charId);
+		if (givenUpClientProxyPtr)
+		{
+			CShareClientEditionItfProxy proxy( *givenUpClientProxyPtr );
+			proxy.multiPartMsgFoot(this);
+		}
+		return;
+	}
+
 	info->WaitingMsg->serialBuffer(const_cast<uint8*>(&data[0]), (uint)data.size());
-	//info->WaitingMsgCurrentSize += data.size();
+	info->WaitingMsgReceived += (uint32)data.size();
 
 	const NLNET::TModuleProxyPtr* clientEditionProxyPtr = getClientProxyPtr(charId);
 	if (clientEditionProxyPtr)
@@ -7038,6 +7112,13 @@ void CServerEditionModule::multiPartMsgFoot(NLNET::IModuleProxy *sbs, uint32 cha
 	if (!isMultiPartSender(sbs, charId, "multiPartMsgFoot")) { return; }
 	CPioneerInfo* info = getPioneerInfo(charId);
 	if (!info) { nlwarning("Error: received a multipartMsgHead from a unknown char %u", charId); return;}
+
+	// the end of a message that was refused: nothing of it is kept, the next message starts with its head
+	if (info->WaitingMsgRefused)
+	{
+		info->WaitingMsgRefused = false;
+		return;
+	}
 
 	if (!info->WaitingMsg) { nlwarning("Error: Char %u was ask to receive a multi-part message end but the first part seems to have been lost.", charId) ;return;	}
 
