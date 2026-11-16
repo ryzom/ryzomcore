@@ -854,11 +854,53 @@ static const char *const CharacterFilePatterns[] = {
 	"save/%s.icfg", "save/landmarks_%s.xml", "save/groups_%s.xml", "save/log_%s.txt" };
 static const uint CharacterFilePatternCount = sizeof(CharacterFilePatterns) / sizeof(CharacterFilePatterns[0]);
 
+// The new names (buildCharacterFileName) that had their copy of the files of the old name, one per line. The copy
+// is made once: a file the player deletes or moves away does not come back from the old name, and a new character
+// of the name of a deleted one starts without them.
+static const char *const CharacterFilesCopiedList = "save/character_files_copied.txt";
+
+static bool characterFilesCopied(const std::string &newName)
+{
+	CIFile in;
+	if (!CFile::fileExists(CharacterFilesCopiedList) || !in.open(CharacterFilesCopiedList))
+		return false;
+	std::string content;
+	content.resize(in.getFileSize());
+	if (!content.empty())
+		in.serialBuffer((uint8 *)&content[0], (uint)content.size());
+	std::vector<std::string> names;
+	NLMISC::explode(content, std::string("\n"), names, true);
+	for (uint i = 0; i < names.size(); ++i)
+	{
+		std::string name = names[i];
+		if (!name.empty() && name[name.size() - 1] == '\r')
+			name.resize(name.size() - 1);
+		if (name == newName)
+			return true;
+	}
+	return false;
+}
+
+static void recordCharacterFilesCopied(const std::string &newName)
+{
+	COFile out;
+	if (!out.open(CharacterFilesCopiedList, true))
+	{
+		nlwarning("The list %s could not be written: the files of the old name of %s may be copied again", CharacterFilesCopiedList, newName.c_str());
+		return;
+	}
+	std::string line = newName + "\n";
+	out.serialBuffer((uint8 *)&line[0], (uint)line.size());
+}
+
 // The files of a character were named after the character alone before the name of their home mainland was
-// part of the name (buildCharacterFileName). The files of the old name are copied to the new name once, and left
-// where they are: two characters of the same name on two mainlands used the same files, and each gets a copy.
+// part of the name (buildCharacterFileName). The files of the old name are copied to the new name once
+// (CharacterFilesCopiedList), and left where they are: two characters of the same name on two mainlands, or of two
+// accounts that use this folder, used the same files, and each gets a copy.
 static void copyCharacterFilesOfOldName(const std::string &oldName, const std::string &newName)
 {
+	if (characterFilesCopied(newName))
+		return;
 	for (uint i = 0; i < CharacterFilePatternCount; ++i)
 	{
 		std::string oldFile = NLMISC::toString(CharacterFilePatterns[i], oldName.c_str());
@@ -870,6 +912,7 @@ static void copyCharacterFilesOfOldName(const std::string &oldName, const std::s
 		else
 			nlwarning("The file %s of the character could not be copied to %s, the name with its home mainland: the character starts without it", oldFile.c_str(), newFile.c_str());
 	}
+	recordCharacterFilesCopied(newName);
 }
 
 // Deletes the files of a deleted character, but its chat log (the last of CharacterFilePatterns): a new character
@@ -1646,6 +1689,21 @@ REGISTER_ACTION_HANDLER (CAHResetPushed, "reset_pushed");
 
 
 
+// A launch from character selection that stops before its far TP: the outro has made the screen black and the
+// buttons were hidden for the launch (proc_charsel_play2). They come back, as after a far TP that fails
+// (CFarTP::requestFarTPToSession), so that the player can retry or choose another character.
+static void showCharSelAfterStoppedLaunch()
+{
+	CViewBase *blackScreen = dynamic_cast<CViewBase *>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen"));
+	if (blackScreen)
+		blackScreen->setAlpha(0);
+	CAHManager::getInstance()->runActionHandler("proc", nullptr, "charsel_enable_buttons");
+	CAHManager::getInstance()->runActionHandler("set", nullptr, "target_property=ui:outgame:charsel:create_new_but:active|value=0");
+	CInterfaceGroup *charselGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
+	if (charselGroup)
+		CAHManager::getInstance()->runActionHandler("proc", charselGroup, "charsel_init_buttons");
+}
+
 // Launch the game given a slot (slot is reference to the character summaries
 // ------------------------------------------------------------------------------------------------
 class CAHLaunchGame : public IActionHandler
@@ -1678,6 +1736,7 @@ public:
 				else
 				{
 					im->messageBoxWithHelp(CI18N::get("uiBGD_FullPatchNeeded"), "ui:outgame");
+					showCharSelAfterStoppedLaunch();
 				}
 				return;
 			}
@@ -1726,7 +1785,14 @@ public:
 				CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 				sb.init(nullptr);
 				sb.closeEditSession(sb.getCharId());
-				sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult"));
+				// without an answer the session may still be open: the new scenario does not start in it
+				if (!sb.waitOneMessage(CSessionBrowserImpl::getMessageName("on_invokeResult")))
+				{
+					nlwarning("The session browser did not answer the request to close the edit session of char %u", sb.getCharId());
+					CInterfaceManager::getInstance()->messageBoxWithHelp(CI18N::get("uiCharSel_CloseSessionFailed"), "ui:outgame");
+					showCharSelAfterStoppedLaunch();
+					return;
+				}
 			}
 			if (FarTP.requestFarTPToSession( (TSessionId)0, PlayerSelectedSlot, CFarTP::LaunchEditor, false ))
 			{
@@ -1964,19 +2030,13 @@ public:
 
 		// Yoyo: delete the Local files. To avoid problem if recreate a character with same name.
 		string playerName = CharacterSummaries[nSelectedSlot].Name.toUtf8();
-		deleteCharacterFiles(buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland));
-		// The files of the old name, without the home mainland, would be copied to a new character of that name at its
-		// first selection (copyCharacterFilesOfOldName): they go too, unless another character of the account has the
-		// name, on another mainland, and may not have had its copy yet
-		string oldFileName = buildPlayerNameForSaveFile(playerName);
-		bool oldNameShared = false;
-		for (uint k = 0; k < CharacterSummaries.size(); ++k)
-		{
-			if (k != nSelectedSlot && buildPlayerNameForSaveFile(CharacterSummaries[k].Name.toUtf8()) == oldFileName)
-				oldNameShared = true;
-		}
-		if (!oldNameShared)
-			deleteCharacterFiles(oldFileName);
+		// The files of the old name, without the home mainland, stay: a character of that name on another mainland,
+		// or of another account that uses this folder, may not have had its copy yet. A new character of this name
+		// and mainland does not get them (copyCharacterFilesOfOldName), even when this one was never selected.
+		string fileName = buildCharacterFileName(playerName, CharacterSummaries[nSelectedSlot].Mainland);
+		deleteCharacterFiles(fileName);
+		if (!characterFilesCopied(fileName))
+			recordCharacterFilesCopied(fileName);
 
 		// Send the message to the server
 		if (!ClientCfg.Local/*ace!ClientCfg.Light*/)
@@ -3001,7 +3061,11 @@ class CAHScenarioControl : public IActionHandler
 			}
 			else
 			{
+				// the buttons would show the filters of no session, and an update would send them: the window closes
 				nlwarning("getSessionInfo callback return false");
+				pIM->messageBoxWithHelp(CI18N::get("uiRingUpdateScenarioFiltersError"));
+				scenarioWnd->setActive(false);
+				return;
 			}
 		}
 		else
@@ -3442,7 +3506,10 @@ class CAHLoadScenario : public IActionHandler
 				sessionBrowser.hibernateEditSession(charId);
 				if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 				{
+					// without an answer the edit session may still be open: no animation session is scheduled
 					nlwarning("hibernateEditSession callback return false");
+					pIM->messageBoxWithHelp(CI18N::get("uiRingLaunchScenarioError"));
+					return;
 				}
 
 			}
@@ -3492,28 +3559,30 @@ class CAHLoadScenario : public IActionHandler
 							// request session
 							FarTP.requestFarTPToSession(sessionBrowser._LastScheduleSessionId, PlayerSelectedSlot, CFarTP::JoinSession,
 								!R2::getEditor().isInitialized());
+
+							if (sessionBrowser._LastInvokeResult != 0)
+							{
+								nlwarning("inviteCharacter callback use error values %d", sessionBrowser._LastInvokeResult);
+							}
+
+							if(sessionBrowser._LastInvokeResult == 14)
+							{
+								CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
+								if (pVT != nullptr)
+									pVT->setTextLocalized("uiRingWarningFreeTrial", true);
+								CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							}
 						}
 						else
 						{
+							// _LastInvokeResult is that of an earlier request
 							nlwarning("inviteCharacter callback return false");
-						}
-
-						if (sessionBrowser._LastInvokeResult != 0)
-						{
-							nlwarning("inviteCharacter callback use error values %d", sessionBrowser._LastInvokeResult);
-						}
-
-						if(sessionBrowser._LastInvokeResult == 14)
-						{
-							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
-							if (pVT != nullptr)
-								pVT->setTextLocalized("uiRingWarningFreeTrial", true);
-							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							launchSuccess = false;
 						}
 
 
-						// invite team
-						if(inviteTeam)
+						// invite team, into the session the player enters
+						if(inviteTeam && launchSuccess)
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
@@ -3529,7 +3598,12 @@ class CAHLoadScenario : public IActionHandler
 
 										if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_invokeResult")))
 										{
+											// the next ones would wait as long: the team members are not invited
 											nlwarning("inviteCharacterByName callback return false");
+											string text = CI18N::get("uiRingInviteNoAnswer");
+											strFindReplace(text, "%name", charName);
+											pIM->displaySystemInfo(text, "BC");
+											break;
 										}
 
 										if(sessionBrowser._LastInvokeResult == 14)

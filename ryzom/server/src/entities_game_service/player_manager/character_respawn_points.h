@@ -80,7 +80,9 @@ public:
 	void getUsableRespawnPoints(CONTINENT::TContinent continent, std::vector<TRespawnPoint> & respawnPoints) const;
 
 	/// Build a container with 
-	CONTINENT::TRespawnPointCounters buildRingPoints() const;
+	/// allKnown tells whether every regular respawn point was found: a shard that does not load the continent of a
+	/// point (a Ring shard loads none of the mainland) can't count it, and the shard unifier keeps what it has
+	CONTINENT::TRespawnPointCounters buildRingPoints(bool &allKnown) const;
 
 	/// clear all respawn points (regular and mission)
 	void clearRespawnPoints();
@@ -118,9 +120,15 @@ private:
 		bool getHideOthers() const			{ return _HideOthers;		}
 		void setHideOthers(bool hideOthers)	{ _HideOthers = hideOthers;	}
 
+		/// points of the save whose places a Ring shard does not load are kept by name and saved again
+		bool hasPointsNotLoaded() const		{ return !m_PointsNotLoaded.empty(); }
+
 	private:
 		/// if true these mission respawn points will hide the other respawn points
 		bool _HideOthers;
+
+		/// the points of the save whose places a Ring shard does not load (it loads none of the mainland)
+		std::vector<std::string> m_PointsNotLoaded;
 	};
 
 	/// get mission respawn points of the given continent
@@ -139,6 +147,11 @@ private:
 
 	/// regular respawn points validated by the player
 	std::vector<TRespawnPoint> _RegularRespawnPoints;
+
+	/// the regular respawn points of the save whose places a Ring shard does not load (it loads none of the
+	/// mainland): kept by name and saved again, so that the character has them on the mainland, and not
+	/// counted by buildRingPoints
+	std::vector<std::string> m_RespawnPointsNotLoaded;
 
 	/// mission respawn points of the player by continent
 	std::map<sint32, CMissionRespawnPoints> _MissionRespawnPointsByContinent;

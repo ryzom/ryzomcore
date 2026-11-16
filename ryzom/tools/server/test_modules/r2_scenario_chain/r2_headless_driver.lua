@@ -174,30 +174,20 @@ end
 -- What r2.Version.save (r2_version.lua) does to the scenario before it writes the file, with the
 -- configuration and the file name of a started test ("save/r2_buffer_<character>.dat", no extended debug). It
 -- starts with r2.Version.updateScenarioVersions, which is called here as it is. A scenario with the
--- "RoSOnly" access or marked as a Nevrax scenario is not saved: the function changes those properties
--- and returns. The rest of it builds the file header and asks the ring access of the character, which
--- the host does not have.
--- Returns "saved", or why the function returns before it writes.
+-- "RoSOnly" access or marked as a Nevrax scenario is not written to the buffer, and keeps those properties:
+-- the function returns "protected", and the test starts the scenario the editor shows. The rest of it
+-- builds the file header and asks the ring access of the character, which the host does not have.
+-- Returns "saved", or "protected: " and why the function returns before it writes.
 function r2Headless.save()
 	local scenario = r2.Scenario
 	r2.Version.updateScenarioVersions()
 	local description = scenario.Description
 	if description then
 		if description.OtherCharAccess == "RoSOnly" then
-			r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
-			r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioToDefaultAccess"))
-			r2.requestSetNode(description.InstanceId, "OtherCharAccess", "Full")
-			r2.requestEndAction()
-			return "OtherCharAccess is RoSOnly"
+			return "protected: OtherCharAccess is RoSOnly"
 		end
 		if description.NevraxScenario == tostring(1) then
-			r2.onSystemMessageReceived("BC_ML", "", "uiR2EDErrorRefuseToSaveRoS")
-			r2.requestNewAction(i18n.get("uiR2EDUpdatingScenarioAccess"))
-			r2.requestSetNode(description.InstanceId, "NevraxScenario", "0")
-			r2.requestSetNode(description.InstanceId, "TrialAllowed", "0")
-			r2.requestSetNode(description.InstanceId, "ScenarioTag", "")
-			r2.requestEndAction()
-			return "NevraxScenario is 1"
+			return "protected: NevraxScenario is 1"
 		end
 	end
 	return "saved"

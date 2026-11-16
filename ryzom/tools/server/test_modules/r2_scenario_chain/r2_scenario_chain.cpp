@@ -1027,8 +1027,10 @@ int run(const CArgs &args)
 		scenarioReturns(host, "early_return_");
 
 	// 4. A test is started. CClientEditionModule::requestStartScenario saves the scenario to
-	// save/r2_buffer_<character>.dat with r2.Version.save. When that fails the file keeps what it had, which is the
-	// scenario file as it was loaded (loadScenarioSucceded copies it there).
+	// save/r2_buffer_<character>.dat with r2.Version.save. A scenario that may not be saved is not written there,
+	// and the test starts the scenario the editor shows, not read back: here the scenario file as it was loaded,
+	// which is what the editor shows when nothing was edited (loadScenarioSucceded copies it to the buffer too).
+	// A save that fails stops the test in the client; the chain goes on with the file as it was loaded.
 	host.setPhase("save");
 	size_t firstLine = host.getLog().size();
 	std::string buffer = fileText;
@@ -1047,12 +1049,12 @@ int run(const CArgs &args)
 		else
 		{
 			// r2.Version.save returned before it wrote the file
-			report("save", "refused (" + saved + "): the test reads back the scenario file as it was loaded");
+			report("save", "not written (" + saved + "): the test starts the scenario as it was loaded");
 		}
 	}
 	else
 	{
-		report("save", "failed: the test reads back the scenario file as it was loaded");
+		report("save", "failed: the client does not start the test, the chain goes on with the file as it was loaded");
 		reportBlock("save_error", error);
 	}
 	reportPhaseLog(host, "save", firstLine, false);

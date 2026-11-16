@@ -85,10 +85,13 @@ void CCharacterRespawnPoints::addRespawnPoint(TRespawnPoint respawnPoint)
 		}
 	}
 
-	// update the ring database
+	// update the ring database, when this shard found every point
 	if (IShardUnifierEvent::getInstance() != NULL)
 	{
-		IShardUnifierEvent::getInstance()->onUpdateCharRespawnPoints(_Char.getId(), buildRingPoints());
+		bool allKnown;
+		CONTINENT::TRespawnPointCounters ringPoints = buildRingPoints(allKnown);
+		if (allKnown)
+			IShardUnifierEvent::getInstance()->onUpdateCharRespawnPoints(_Char.getId(), ringPoints);
 	}
 }
 
@@ -286,18 +289,23 @@ void CCharacterRespawnPoints::getUsableRespawnPoints(CONTINENT::TContinent conti
 }
 
 //-----------------------------------------------------------------------------
-CONTINENT::TRespawnPointCounters CCharacterRespawnPoints::buildRingPoints() const
+CONTINENT::TRespawnPointCounters CCharacterRespawnPoints::buildRingPoints(bool &allKnown) const
 {
 	CONTINENT::TRespawnPointCounters ret;
 
 	CONTINENT::TRespawnPointCounters capital;
 
+	allKnown = m_RespawnPointsNotLoaded.empty();
 	for (uint i=0; i<_RegularRespawnPoints.size(); ++i)
 	{
 		const TRespawnPoint &rp = _RegularRespawnPoints[i];
 
 		const CTpSpawnZone *tsz = CZoneManager::getInstance().getTpSpawnZone(rp);
-		if (tsz != NULL 
+		if (tsz == NULL)
+		{
+			allKnown = false;
+		}
+		if (tsz != NULL
 			/*&& (tsz->getType() == RESPAWN_POINT::KAMI || tsz->getType() == RESPAWN_POINT::KARAVAN)*/)
 		{
 			ret[tsz->getContinent()]++;
@@ -322,6 +330,7 @@ CONTINENT::TRespawnPointCounters CCharacterRespawnPoints::buildRingPoints() cons
 void CCharacterRespawnPoints::clearRespawnPoints()
 {
 	_RegularRespawnPoints.clear();
+	m_RespawnPointsNotLoaded.clear();
 	_MissionRespawnPointsByContinent.clear();
 	resetUserDb();
 }
