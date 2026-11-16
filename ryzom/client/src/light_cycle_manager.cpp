@@ -47,6 +47,7 @@
 #include "sound_manager.h"
 #include "weather_manager_client.h"
 #include "misc.h"
+#include "time_client.h"
 #include "interface_v3/interface_manager.h"
 
 //#include "sound_manager.h"	// \todo GUIGUI : uncomment after new FE done and class modified
@@ -78,6 +79,14 @@ extern EGSPD::CSeason::TSeason   CurrSeason;
 ////////////
 extern ULandscape		*Landscape;
 
+// Landscape update frequency (all patches per second) after a change of the landscape light outside of a day/night
+// transition, which comes from the weather: every patch is updated within 20 seconds
+static const float s_WeatherRelightFrequency = 1.f / 20.f;
+
+// A change of the weather lighting (0 to 1) between two frames above which the weather did not blend but was set
+// (the weather of a Ring scenario, a manual weather value): the whole landscape is relit at once
+static const float s_WeatherLightingJump = 0.05f;
+
 static uint diffColors(CRGBA c1, CRGBA c2)
 {
 	return (uint) maxof(abs((sint) c1.R - c2.R), abs((sint) c1.G - c2.G), abs((sint) c1.B - c2.B));
@@ -106,10 +115,11 @@ CLightCycleManager::CLightCycleManager() :
                                         _ValidDesc(false),
 					_LightLevel(0),
 					_WeatherLighting(0),
-					_LastWeatherLighting(0),
 					_UpdateFreq(0),
 					_State(StateUnknown),
-					_PrevState(StateUnknown)
+					_PrevState(StateUnknown),
+					m_LandscapeWeatherLighting(1.f),
+					m_RelightEndTime(0)
 {
 	_LastDiffuse.set(0, 0, 0, 0);
 	_LastAmbient.set(0, 0, 0, 0);
@@ -302,7 +312,16 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 	clamp(_LightLevel, 0.f, 1.f); // should not be necessary, but we avoid imprecisions
 	updateState();
 
+	// a weather that blends moves its lighting a little every frame, and the landscape follows patch by patch
+	// (see below). A weather that is set makes it jump: patch by patch would be a sweep over the terrain
+	// Switching WeatherLightingLandscape in bad weather is such a jump too
 	_WeatherLighting = wm.getCurrWeatherState().Lighting;
+	float landscapeWeatherLighting = ClientCfg.WeatherLightingLandscape ? _WeatherLighting : 1.f;
+	if (fabs(landscapeWeatherLighting - m_LandscapeWeatherLighting) > s_WeatherLightingJump)
+	{
+		touch();
+	}
+	m_LandscapeWeatherLighting = landscapeWeatherLighting;
 
 	// Change water lighting
 	NL3D::UWaterHeightMapManager::setBlendFactor(Driver, _LightLevel);
@@ -318,12 +337,19 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 
 	// directionnal lights
 	// (override the global light by the light in the weather manager : during bad weather, the scene can be darker)
-	setupCanopyLight(_WeatherLighting);
-	setupMainLight(_WeatherLighting);
+	float entitiesWeatherLighting = ClientCfg.WeatherLightingEntities ? _WeatherLighting : 1.f;
+	setupCanopyLight(entitiesWeatherLighting);
+	setupMainLight(entitiesWeatherLighting);
 
 	// landscape lighting
 	CRGBA diffuse, ambiant;
 	getLandscapeLightColor(diffuse, ambiant);
+
+	// bad weather darkens the landscape, and the instance groups lit through its light groups, like the
+	// directional lights above (the alpha is no light level)
+	uint weatherLevel = (uint)(256.f * m_LandscapeWeatherLighting);
+	diffuse.modulateFromuiRGBOnly(diffuse, weatherLevel);
+	ambiant.modulateFromuiRGBOnly(ambiant, weatherLevel);
 
 	// a touched setup is a landscape that has not seen the light yet (a new landscape, another continent):
 	// it gets the light whether the colors changed or not
@@ -341,15 +367,18 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 			else
 				Landscape->setupStaticLight(diffuse, ambiant, 1.f);
 			_UpdateFreq = getLandscapePatchUpdateFreq();
-			if (_Touched || _UpdateFreq == 0.f)
+			if (_Touched)
 			{
-				// without an update frequency a change of the colors has no other way to the patches
 				Landscape->updateLightingAll();
 				Landscape->setUpdateLightingFrequency(0);
+				m_RelightEndTime = 0;
 			}
 			else
 			{
 				Landscape->setUpdateLightingFrequency(_UpdateFreq);
+				// every patch has to be updated once after this change, also outside of a day/night transition
+				// and without an update frequency of the day/night cycle
+				m_RelightEndTime = TimeInSec + 1.0 / (double)s_WeatherRelightFrequency;
 			}
 		}
 	}
@@ -380,11 +409,18 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 
 	if (Landscape)
 	{
+		// a change of the light that has not reached every patch yet (outside of the transitions: the weather)
+		bool relightPending = TimeInSec < m_RelightEndTime;
 		if (!isInInterval(_Desc.DawnTransitionStartHour, _Desc.DawnTransitionEndHour + 4.f * updateDuration, hour)
 			&& !isInInterval(_Desc.NightTransitionStartHour, _Desc.NightTransitionEndHour + 4.f * updateDuration, hour)
 		   )
 		{
-			Landscape->setUpdateLightingFrequency(0);
+			Landscape->setUpdateLightingFrequency(relightPending ? s_WeatherRelightFrequency : 0.f);
+		}
+		else if (relightPending && _UpdateFreq < s_WeatherRelightFrequency)
+		{
+			// a transition of a continent without day/night steps
+			Landscape->setUpdateLightingFrequency(s_WeatherRelightFrequency);
 		}
 	}
 

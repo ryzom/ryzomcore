@@ -291,6 +291,11 @@ struct CClientConfig
 	// FXAA
 	bool			FXAA;
 
+	/// The lighting of the weather (darker in bad weather) dims the directional lights: the entities and the canopy
+	bool			WeatherLightingEntities;
+	/// The lighting of the weather dims the landscape light and its light groups: the ground and what is lit with it
+	bool			WeatherLightingLandscape;
+
 	// Is bloom effect activated
 	bool			Bloom;
 	bool			SquareBloom;

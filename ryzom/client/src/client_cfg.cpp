@@ -399,6 +399,9 @@ CClientConfig::CClientConfig()
 
 	FXAA				= true;
 
+	WeatherLightingEntities		= true;
+	WeatherLightingLandscape	= false;
+
 	Bloom				= true;
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
@@ -1045,6 +1048,10 @@ void CClientConfig::setValues()
 
 	// FXAA
 	READ_BOOL_FV(FXAA)
+
+	// Weather lighting
+	READ_BOOL_FV(WeatherLightingEntities)
+	READ_BOOL_FV(WeatherLightingLandscape)
 
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)
