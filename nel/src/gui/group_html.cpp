@@ -2575,13 +2575,11 @@ namespace NLGUI
 		viewText->setModulateGlobalColor(ErrorColorGlobalColor);
 		viewText->setMultiLine (true);
 		getParagraph()->addChild (viewText);
-		// the error has taken the place of the page: the window has its prefix alone (setTitle would put
-		// the prefix before the prefix)
-		if(!_TitlePrefix.empty())
-		{
-			_TitleString = _TitlePrefix;
-			setContainerTitle (_TitleString);
-		}
+		// The error has taken the place of the page: the window has its prefix alone (setTitle would put
+		// the prefix before the prefix), as after a page that gives no title (endBuild). Without a prefix
+		// that is no title, and not the wait text of the request that failed.
+		_TitleString = _TitlePrefix;
+		setContainerTitle (_TitleString);
 
 		updateRefreshButton();
 		invalidateCoords();
