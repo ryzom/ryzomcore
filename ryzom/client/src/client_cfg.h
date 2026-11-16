@@ -293,7 +293,8 @@ struct CClientConfig
 
 	/// The lighting of the weather (darker in bad weather) dims the directional lights: the entities and the canopy
 	bool			WeatherLightingEntities;
-	/// The lighting of the weather dims the landscape light and its light groups: the ground and what is lit with it
+	/// The lighting of the weather scales the light on the ground when the landscape is drawn (the sun and the lamps
+	/// on the ground alike) and dims the landscape light groups. The grass follows WeatherLightingEntities
 	bool			WeatherLightingLandscape;
 	/// A lightning of a thunder storm flashes on what the landscape light groups light
 	bool			WeatherLightningFlash;

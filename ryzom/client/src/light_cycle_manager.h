@@ -136,10 +136,6 @@ private:
 	float			_UpdateFreq;
 	TLightState     _State;
 	TLightState     _PrevState;
-	/// The weather lighting the landscape light was last made with (1 when WeatherLightingLandscape is off)
-	float			m_LandscapeWeatherLighting;
-	/// Until this time (TimeInSec) a change of the landscape light has not reached every landscape patch
-	double			m_RelightEndTime;
 private:
 	void			getLandscapeLightColor(NLMISC::CRGBA &diffuse, NLMISC::CRGBA &ambiant);
 	static  bool	isInInterval(float start, float end, float value);
