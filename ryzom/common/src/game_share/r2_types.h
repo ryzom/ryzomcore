@@ -365,12 +365,16 @@ namespace R2
 			else
 			{
 				f.serial(size);
-				Value.resize(size);
+				// The entries are added as they are read: the count comes from the sender, and a stream
+				// that ends before it (the read throws) has only made the entries it really holds.
+				Value.clear();
 			}
 
 			uint32 first = 0;
 			for ( ; first != size; ++first)
 			{
+				if (f.isReading())
+					Value.push_back(TValueType::value_type());
 				f.serial( Value[first].first );
 				f.serial( Value[first].second );
 			}
