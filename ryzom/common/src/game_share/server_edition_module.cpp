@@ -5815,6 +5815,12 @@ bool CServerEditionModule::hibernateSessionImpl  (TSessionId sessionId, std::str
 
 	TSessions::iterator found = _Sessions.find(sessionId);
 
+	if (found == _Sessions.end())
+	{
+		msg = NLMISC::toString("Try to hibernate a non existing session %u", sessionId.asInt());
+		return false;
+	}
+
 	CEditionSession* session = found->second;
 	nlassert(session);
 	TAiInstanceId aiInstanceId = session->getAiInstanceId();
