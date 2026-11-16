@@ -3574,14 +3574,24 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 		bool ok =  checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 		if (!ok) { return true; }
 
+		// "talk_as" (with the name of an NPC) and "stopTalk" (with nothing) are the requests of an earlier way to
+		// talk as an NPC. The string manager, which they were passed on to, has no message "talk_as", and reads the
+		// NPC of a "stopTalk" that these do not name. An animator talks as an NPC, and stops, with the action on
+		// its target (onDssTarget with TALK_AS and STOP_TALK, the buttons of the animation bar), which gives the
+		// string manager the NPC. These two are refused, and nothing is passed on.
+		if (operationName == "talk_as" || operationName == "stopTalk")
+		{
+			nlwarning("R2An: char %u sent '%s', a request that is not served any more (talking as an NPC is asked with the action on a target, TALK_AS and STOP_TALK), request refused",
+				charId, operationName.c_str());
+			return true;
+		}
+
 		// The requests that drive the animation are for the animators of the session. The string queries
 		// (requestStringValue, requestIdList, requestStringTable) stay open to every member.
 		if (operationName == "requestStartAct"
 			|| operationName == "requestStopAct"
 			|| operationName == "requestSetSeason"
 			|| operationName == "requestSetWeather"
-			|| operationName == "talk_as"
-			|| operationName == "stopTalk"
 			|| operationName == "requestSetValue")
 		{
 			if (!isAnimator(charId, operationName.c_str())) { return true; }
@@ -3722,27 +3732,6 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 			TModuleId id = senderModuleProxy->getModuleProxyId();
 			CMessage msg("requestIdList");
 			msg.serial(scenarioId);
-			msg.serial(id);
-			_StringManagerProxy->sendModuleMessage(this,msg);
-			return true;
-		}
-
-		if(operationName =="talk_as")
-		{
-			std::string name ;
-			nlRead(msgin,serial,name);
-			CMessage msg("talk_as");
-			TModuleId tmp = senderModuleProxy->getModuleProxyId();
-			msg.serial(tmp);
-			msg.serial(name);
-			_StringManagerProxy->sendModuleMessage(this,msg);
-			return true;
-		}
-
-		if(operationName == "stopTalk")
-		{
-			CMessage msg("stopTalk");
-			TModuleId id = senderModuleProxy->getModuleProxyId();
 			msg.serial(id);
 			_StringManagerProxy->sendModuleMessage(this,msg);
 			return true;
