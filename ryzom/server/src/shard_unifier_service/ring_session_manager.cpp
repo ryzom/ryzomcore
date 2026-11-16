@@ -1172,8 +1172,8 @@ restartLoop:
 			DROP_IF(session == NULL, ("RSM : reportCharacterKicked : failed to load the session "+toString(sessionId)+" from database"), return);
 			DROP_IF(!session->loadSessionParticipants(_RingDb, __FILE__, __LINE__), ("RSM : reportCharacterKicked : failed to load particpants of session "+toString(sessionId)), return);
 
-			// a little survival check
-			DROP_IF(session->getOwnerId() == (charId >> 4), ("RSM : reportCharacterKicked : session server "+sender->getModuleName()+" try to kick a character of the session owner, forbidden"), return);
+			// a little survival check (the owner of a session is a character, as for the kick the web asks for)
+			DROP_IF(session->getOwnerId() == charId, ("RSM : reportCharacterKicked : session server "+sender->getModuleName()+" try to kick the owner "+toString(charId)+" of the session "+toString(sessionId)+", forbidden"), return);
 
 			// iterate over the participation, looking for the kicked character
 			const std::vector<CSessionParticipantPtr> &parts = session->getSessionParticipants();
