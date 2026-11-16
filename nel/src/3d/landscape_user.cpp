@@ -361,17 +361,17 @@ void	CLandscapeUser::setupStaticLight (const CRGBA &diffuse, const CRGBA &ambian
 }
 
 // ****************************************************************************
-void CLandscapeUser::setStaticLightScale(float scale)
+void CLandscapeUser::setLightScale(float scale)
 {
 	NL3D_HAUTO_UI_LANDSCAPE;
-	_Landscape->Landscape.setStaticLightScale(scale);
+	_Landscape->Landscape.setLightScale(scale);
 }
 
 // ****************************************************************************
-float CLandscapeUser::getStaticLightScale() const
+float CLandscapeUser::getLightScale() const
 {
 	NL3D_HAUTO_UI_LANDSCAPE;
-	return _Landscape->Landscape.getStaticLightScale();
+	return _Landscape->Landscape.getLightScale();
 }
 
 

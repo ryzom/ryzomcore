@@ -377,19 +377,23 @@ public:
 	  */
 	void setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant, float multiply);
 	/**
-	 *  Scale the static lighting of the landscape when it is drawn. Unlike setupStaticLight(), which reaches the
-	 *  patches only as their lighting is updated (updateLighting(), updateLightingAll()), the scale applies to
-	 *  the whole landscape from the next render, at no cost: for a light that changes fast (the weather).
+	 *  Scale the light on the ground when the landscape is drawn. The default is 1, which costs nothing: the
+	 *  landscape is then drawn exactly as without a scale.
 	 *
-	 *  The scale multiplies the tile and far textures, hence all the light of the ground: the light of
-	 *  setupStaticLight(), the static point lights, and the dynamic lights on the near tiles (the dynamic lights
-	 *  on the far tiles are added after it). Additive tiles and vegetables are not scaled.
+	 *  Unlike setupStaticLight(), which reaches the patches only as their lighting is updated (updateLighting(),
+	 *  updateLightingAll()), the scale applies to the whole landscape from the next render, and a change of it
+	 *  costs nothing: for a light that changes fast (the weather).
 	 *
-	 *  \param scale from 0 (black) to 1 (the default: the landscape is drawn exactly as without a scale).
+	 *  Scaled: the tile and far textures, hence all the light they receive: the light of setupStaticLight(), the
+	 *  static point lights and, on the near tiles, the dynamic lights.
+	 *  Not scaled: the dynamic lights on the far tiles (they are added after the scale), the additive tiles, the
+	 *  vegetation and the water.
+	 *
+	 *  \param scale from 0 (black) to 1.
 	 */
-	void setStaticLightScale(float scale);
-	/// \see setStaticLightScale
-	float getStaticLightScale() const { return m_StaticLightScale; }
+	void setLightScale(float scale);
+	/// \see setLightScale
+	float getLightScale() const { return m_LightScale; }
 	/**
 	  *  Get the light color by shading table.
 	  *
@@ -825,8 +829,8 @@ private:
 
 	// *** Lighting
 	CRGBA			_LightValue[256];
-	/// The scale of the static lighting applied at render, see setStaticLightScale()
-	float m_StaticLightScale;
+	/// The scale of the light on the ground applied at render, see setLightScale()
+	float m_LightScale;
 
 	bool			_AutomaticLighting;
 	CVector			_AutomaticLightDir;

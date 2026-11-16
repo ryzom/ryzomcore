@@ -193,8 +193,8 @@ CLandscape::CLandscape() :
 
 	// Init far lighting with White/black
 	setupStaticLight (CRGBA(255,255,255), CRGBA(0,0,0), 1.f);
-	// Default: the static lighting is not scaled at render
-	m_StaticLightScale = 1.f;
+	// Default: the light on the ground is not scaled at render
+	m_LightScale = 1.f;
 	// Default material for pointLights
 	_PointLightDiffuseMaterial= CRGBA::White;
 
@@ -862,9 +862,9 @@ void			CLandscape::updateGlobalsAndLockBuffers (const CVector &refineCenter)
 	// PZBModelPosition
 	CLandscapeGlobals::PZBModelPosition= _PZBModelPosition;
 
-	// The static light scale, as a diffuse color
-	uint8 staticLightScale = (uint8)(m_StaticLightScale * 255.f + 0.5f);
-	CLandscapeGlobals::StaticLightScaleColor.set(staticLightScale, staticLightScale, staticLightScale, 255);
+	// The light scale, as a diffuse color
+	uint8 lightScale = (uint8)(m_LightScale * 255.f + 0.5f);
+	CLandscapeGlobals::LightScaleColor.set(lightScale, lightScale, lightScale, 255);
 
 	// VB Allocators.
 	CLandscapeGlobals::CurrentFar0VBAllocator= &_Far0VB;
@@ -1237,13 +1237,13 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	unlockBuffers(true);
 
 
-	// The static light scale (see setStaticLightScale()) is the diffuse color of the vertices, which the tile and
+	// The light scale (see setLightScale()) is the diffuse color of the vertices, which the tile and
 	// far materials modulate their texture with when the light is scaled. With a VertexProgram the diffuse color
 	// is a constant of the program. Without, it is the color of the materials, and the color of the vertices in
 	// the Far1 VB (see CPatch::computeGeomorphAlphaFar1VertexListVB()).
-	bool scaleStaticLight = m_StaticLightScale < 1.f;
-	TileMaterial.setColor(CLandscapeGlobals::StaticLightScaleColor);
-	FarMaterial.setColor(CLandscapeGlobals::StaticLightScaleColor);
+	bool scaleLight = m_LightScale < 1.f;
+	TileMaterial.setColor(CLandscapeGlobals::LightScaleColor);
+	FarMaterial.setColor(CLandscapeGlobals::LightScaleColor);
 
 
 	// If VertexShader enabled, setup VertexProgram Constants.
@@ -1282,8 +1282,8 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 					driver->setUniform3f(IDriver::VertexProgram, program->idx().RefineCenter, refineCenter);
 					// c[6] take info for Geomorph trnasition to TileNear.
 					driver->setUniform2f(IDriver::VertexProgram, program->idx().TileDist, CLandscapeGlobals::TileDistFarSqr, CLandscapeGlobals::OOTileDistDeltaSqr);
-					// c[7] take the static light scale, the diffuse color of the vertices
-					driver->setUniform4f(IDriver::VertexProgram, program->idx().StaticLightScale, m_StaticLightScale, m_StaticLightScale, m_StaticLightScale, 1);
+					// c[7] take the light scale, the diffuse color of the vertices
+					driver->setUniform4f(IDriver::VertexProgram, program->idx().LightScale, m_LightScale, m_LightScale, m_LightScale, 1);
 					// c[10] take the fog vector.
 					driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 					// c[12] take the current landscape Center / delta Pos to apply
@@ -1375,15 +1375,15 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 		TileMaterial.texEnvOpAlpha(0, CMaterial::Replace);
 		TileMaterial.texEnvArg0Alpha(0, CMaterial::Texture, CMaterial::SrcAlpha);
 		// NB: important to set Replace and not modulate, because in case of VerexProgram enabled,
-		// Diffuse o[COL0] is undefined in the lightmap pass, and is the static light scale in the others.
+		// Diffuse o[COL0] is undefined in the lightmap pass, and is the light scale in the others.
 
 		// Copy from stage 0 to stage 1.
 		TileMaterial.setTexEnvMode(1, TileMaterial.getTexEnvMode(0));
 
-		// If the static light is scaled, the RGB passes modulate the tile with the diffuse color, which is the
+		// If the light is scaled, the RGB passes modulate the tile with the diffuse color, which is the
 		// scale. Hence the lightmap pass, which modulates the result, lights a darker tile. The additive pass
 		// is not scaled.
-		if (scaleStaticLight && (passOrder == NL3D_TILE_PASS_RGB0 || passOrder == NL3D_TILE_PASS_RGB1 || passOrder == NL3D_TILE_PASS_RGB2))
+		if (scaleLight && (passOrder == NL3D_TILE_PASS_RGB0 || passOrder == NL3D_TILE_PASS_RGB1 || passOrder == NL3D_TILE_PASS_RGB2))
 		{
 			// NB: the previous of stage 0 is the diffuse color
 			TileMaterial.texEnvOpRGB(0, CMaterial::Modulate);
@@ -1655,9 +1655,9 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	FarMaterial.setBlend(false);
 	// set the DLM texture.
 	FarMaterial.setTexture(1, _TextureDLM);
-	// If the static light is scaled, modulate the far texture with the diffuse color, which is the scale. The
+	// If the light is scaled, modulate the far texture with the diffuse color, which is the scale. The
 	// dynamic lightmap is added after it. Else replace, as a landscape without scale (for Far0 and Far1).
-	if (scaleStaticLight)
+	if (scaleLight)
 	{
 		// NB: the previous of stage 0 is the diffuse color
 		FarMaterial.texEnvOpRGB(0, CMaterial::Modulate);
@@ -2966,10 +2966,10 @@ void			CLandscape::setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant,
 }
 
 // ***************************************************************************
-void CLandscape::setStaticLightScale(float scale)
+void CLandscape::setLightScale(float scale)
 {
 	clamp(scale, 0.f, 1.f);
-	m_StaticLightScale = scale;
+	m_LightScale = scale;
 }
 
 // ***************************************************************************

@@ -132,20 +132,24 @@ public:
 	virtual	void	setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant, float multiply) =0;
 
 	/**
-	 *  Scale the static lighting of the landscape when it is drawn. Unlike setupStaticLight(), which reaches the
-	 *  patches only as their lighting is updated (setUpdateLightingFrequency(), updateLightingAll()), the scale
-	 *  applies to the whole landscape from the next render, at no cost: for a light that changes fast (the weather).
+	 *  Scale the light on the ground when the landscape is drawn. The default is 1, which costs nothing: the
+	 *  landscape is then drawn exactly as without a scale.
 	 *
-	 *  The scale multiplies the tile and far textures, hence all the light of the ground: the light of
-	 *  setupStaticLight(), the static point lights, and the dynamic lights on the near tiles (the dynamic lights
-	 *  on the far tiles are added after it). Additive tiles and vegetables are not scaled.
+	 *  Unlike setupStaticLight(), which reaches the patches only as their lighting is updated
+	 *  (setUpdateLightingFrequency(), updateLightingAll()), the scale applies to the whole landscape from the next
+	 *  render, and a change of it costs nothing: for a light that changes fast (the weather).
 	 *
-	 *  \param scale from 0 (black) to 1 (the default: the landscape is drawn exactly as without a scale).
+	 *  Scaled: the tile and far textures, hence all the light they receive: the light of setupStaticLight(), the
+	 *  static point lights and, on the near tiles, the dynamic lights.
+	 *  Not scaled: the dynamic lights on the far tiles (they are added after the scale), the additive tiles, the
+	 *  vegetation and the water.
+	 *
+	 *  \param scale from 0 (black) to 1.
 	 */
-	virtual void setStaticLightScale(float scale) = 0;
-	/**	 \see setStaticLightScale
+	virtual void setLightScale(float scale) = 0;
+	/**	 \see setLightScale
 	 */
-	virtual float getStaticLightScale() const = 0;
+	virtual float getLightScale() const = 0;
 
 	/**	 Setup the equivalent material diffuse component used for both Static and Dynamic PointLights.
 	  *	 Default is White.

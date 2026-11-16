@@ -40,7 +40,7 @@ float		CLandscapeGlobals::OORefineThreshold= 1.0f / CLandscapeGlobals::RefineThr
 
 CVector		CLandscapeGlobals::PZBModelPosition= CVector::Null;
 
-CRGBA CLandscapeGlobals::StaticLightScaleColor(255, 255, 255, 255);
+CRGBA CLandscapeGlobals::LightScaleColor(255, 255, 255, 255);
 
 float		CLandscapeGlobals::TileDistNear= 50;
 float		CLandscapeGlobals::TileDistFar= CLandscapeGlobals::TileDistNear+20;

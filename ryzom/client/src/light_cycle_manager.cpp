@@ -335,7 +335,7 @@ void CLightCycleManager::setHour(float hour, const CWeatherManagerClient &wm, NL
 	clamp(landscapeWeatherLighting, 0.f, 1.f);
 	if (Landscape)
 	{
-		Landscape->setStaticLightScale(landscapeWeatherLighting);
+		Landscape->setLightScale(landscapeWeatherLighting);
 	}
 
 	// a touched setup is a landscape that has not seen the light yet (a new landscape, another continent):

@@ -197,7 +197,7 @@ public:
 		uint ProgramConstants0;
 		uint RefineCenter;
 		uint TileDist;
-		uint StaticLightScale;
+		uint LightScale;
 		uint PZBModelPosition;
 	};
 	CVertexProgramLandscape(CLandscapeVBAllocator::TType type, bool lightMap = false);

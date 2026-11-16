@@ -97,8 +97,8 @@ public:
 	// The center of the landscape (near CameraCenter), for better ZBuffer precision.
 	static	CVector PZBModelPosition;
 
-	// The static light scale of the landscape as a diffuse color (alpha 255), see CLandscape::setStaticLightScale()
-	static NLMISC::CRGBA StaticLightScaleColor;
+	// The light scale of the landscape as a diffuse color (alpha 255), see CLandscape::setLightScale()
+	static NLMISC::CRGBA LightScaleColor;
 
 
 	// Tile Global Info.
