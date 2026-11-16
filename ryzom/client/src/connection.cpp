@@ -3655,8 +3655,9 @@ class CAHLoadScenario : public IActionHandler
 		}
 		else
 		{
-			// update session
-			sessionBrowser.updateSessionInfo(charId, sessionBrowser._LastScheduleSessionId, title, 0, description, sessionLevel,
+			// update the session the DM is in (the one init_scenario_control read the filters of), which this process
+			// did not necessarily schedule
+			sessionBrowser.updateSessionInfo(charId, R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId(), title, 0, description, sessionLevel,
 				/*TAccessType::at_public, */TEstimatedDuration::et_medium, 0, raceFilter, religionFilter,
 				guildFilter, shardFilter, levelFilter, !globalAccess, autoInvite, lang, RSMGR::TSessionOrientation(scenarioType));
 
