@@ -2014,11 +2014,15 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 			}
 
 			//(*) Remove animation Session and kill AI Instance
+			// The test is stopped, and the scenario is back in edition for every editor of the session: the one
+			// that connects, after a client that was lost during the test or as an editor that joins the others,
+			// and those that were in the test, who are told that it ended. (With the mode alone set back to
+			// edition, the animation kept running behind an editor in edition, and the stop of a test that
+			// nobody is in, which looks at the mode, never came.)
 			if (animationSessionExist)
 			{
-
-			//	stopTest(sessionId);
-				scenario->setMode(1);
+				nlinfo("R2Ed: char %u connects to edit session %u while its test runs: the test is stopped", charId, sessionId.asInt());
+				stopTest(sessionId);
 			}
 			else
 			{
