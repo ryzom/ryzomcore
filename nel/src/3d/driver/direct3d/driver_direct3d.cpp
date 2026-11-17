@@ -1961,6 +1961,13 @@ bool CDriverD3D::isActive ()
 }
 
 // ***************************************************************************
+bool CDriverD3D::isWindowMinimized() const
+{
+	// the driver keeps the size the window had before it was minimized, so that getWindowSize does not tell
+	return _HWnd != NULL && IsIconic(_HWnd) != FALSE;
+}
+
+// ***************************************************************************
 nlWindow CDriverD3D::getDisplay()
 {
 	return _HWnd;
