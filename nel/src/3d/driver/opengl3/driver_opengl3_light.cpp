@@ -165,9 +165,9 @@ void	CDriverGL3::enableLightTableMode(bool enable)
 	if (_LightTableMode != enable)
 	{
 		// Each mode has a light block of its own, which keeps its lights while the other
-		// mode draws. setLights, which belongs to the table mode, sets user lights and
-		// their enable states without marking them: the block of the user lights is
-		// compared with them when the mode without a table draws again.
+		// mode draws. The table mode sets user lights and their enable states for every
+		// object (setLights): the block of the user lights is compared with them when
+		// the mode without a table draws again.
 		_UserLightUBODirty = true;
 	}
 	_LightTableMode = enable;
@@ -201,6 +201,11 @@ void	CDriverGL3::setLights(
 	NLMISC::CRGBA ambient)
 {
 	H_AUTO_OGL(CDriverGL3_setLights)
+
+	// The user lights and their enable states are set below. In the table mode, which
+	// this call belongs to, nothing reads the mark; a caller in the other mode gets the
+	// block of the user lights brought up to date for it.
+	_UserLightUBODirty = true;
 
 	// Clear all lights
 	for (uint i = 0; i < MaxLight; ++i)

@@ -198,12 +198,14 @@ void			CLandscapeVBAllocator::deleteVertex(uint vid)
 	if (_UnsynchronizedMode && _Driver)
 	{
 		// Defer the free until the GPU is done with this vertex.
-		// Stamp with counter-1: the vertex was last drawn in the previous frame.
-		uint64 counter = _Driver->getSwapBufferCounter();
-		uint64 stamp = (counter > 0) ? counter - 1 : 0;
+		// Stamp with the current frame: a frame may render the landscape more than once
+		// (the water reflection passes clip and render it again), so the vertex may have
+		// been drawn earlier in this very frame. processDeferredFrees() hands it out
+		// again when the stamp is below IDriver::getSwapBufferInFlight(), which is when
+		// the GPU has finished the frame of the stamp.
 		SDeferredFree df;
 		df.VertexId = vid;
-		df.FrameCounter = stamp;
+		df.FrameCounter = _Driver->getSwapBufferCounter();
 		_DeferredFreeVertices.push_back(df);
 	}
 	else
@@ -243,7 +245,15 @@ void			CLandscapeVBAllocator::processDeferredFrees(uint64 swapBufferInFlight)
 void			CLandscapeVBAllocator::forceReallocation()
 {
 	if (_NumVerticesAllocated > 0)
+	{
+		// Giving the vertex buffer the usage and the number of vertices it has changes
+		// nothing. It is emptied first: that destroys its driver side, and the next time
+		// it is made active it gets a new one, with storage that no issued draw reads.
+		// Until then the vertices are written to the local memory of the vertex buffer,
+		// as after a growth.
+		deleteVertexBuffer();
 		allocateVertexBuffer(_NumVerticesAllocated);
+	}
 }
 
 

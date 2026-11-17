@@ -571,6 +571,7 @@ bool CDriverGL3::setupDisplay()
 	// a part of it has data (see useUniformBlock): WebGL 2.0 requires what is bound to
 	// be at least as large as the corresponding uniform block in the shader.
 	_StreamMode = false;
+	_VertexStorageFailureWarned = false;
 	{
 		const char *reason;
 #if defined(USE_OPENGLES3)

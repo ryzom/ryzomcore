@@ -94,6 +94,7 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 	m_ReadLockWriteWarned = false;
 	m_Size = size;
 	m_Persistent = false;
+	m_InLostVBList = false;
 
 	// Allocate shadow buffer for CpuReadWrite and PartialWrite (CPU reads/writes go here)
 	if (preferred == CVertexBuffer::CpuReadWrite || preferred == CVertexBuffer::PartialWrite)
@@ -142,16 +143,22 @@ CVertexBufferGL3::~CVertexBufferGL3()
 	{
 		nglDeleteBuffers(1, &m_StagingBufferId);
 	}
-	if (m_Driver)
+	// The location of the vertex buffer does not tell whether the object is in the list:
+	// the engine makes a vertex buffer not resident before it destroys its driver side
+	leaveLostVBList();
+}
+
+// ***************************************************************************
+
+void CVertexBufferGL3::leaveLostVBList()
+{
+	H_AUTO_OGL(CVertexBufferGL3_leaveLostVBList);
+
+	if (m_InLostVBList)
 	{
-		if (m_Invalid)
-		{
-			if (VB->getLocation() != CVertexBuffer::NotResident)
-			{
-				// when the vb is put in tthe NotResident state, it is removed from that list
-				m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
-			}
-		}
+		m_InLostVBList = false;
+		if (m_Driver)
+			m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
 	}
 }
 
@@ -193,7 +200,7 @@ void *CVertexBufferGL3::lock()
 			}
 			NLMISC::contReset(m_DummyVB);
 			m_Invalid = false;
-			m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
+			leaveLostVBList();
 			return lockPersistent();
 		}
 #endif
@@ -217,7 +224,8 @@ void *CVertexBufferGL3::lock()
 		for (GLsizei i = 0; i < nbBuff; ++i)
 		{
 			m_Driver->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
-			nglBufferData(GL_ARRAY_BUFFER, size, nullptr, m_Driver->vertexBufferUsageGL3(m_MemType));
+			// (of the size the buffers had: the engine writes up to the capacity of the vertex buffer through this lock)
+			nglBufferData(GL_ARRAY_BUFFER, m_Size, nullptr, m_Driver->vertexBufferUsageGL3(m_MemType));
 			if (glGetError() != GL_NO_ERROR)
 			{
 				m_Driver->incrementResetCounter();
@@ -238,7 +246,7 @@ void *CVertexBufferGL3::lock()
 		nlassert(m_VertexObjectId[m_CurrentIndex]);
 
 		m_Invalid = false;
-		m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
+		leaveLostVBList();
 		// Shadow needs re-upload to the new GL buffer
 		if (!m_ShadowData.empty())
 			m_ShadowDirty = true;
@@ -426,18 +434,15 @@ void CVertexBufferGL3::deleteBuffer(GLsizei slot)
 	if (!id)
 		return;
 
+#ifdef NL_DEBUG
+	// (a call that returns a value waits for the GL library to have worked off the commands before it)
 	nlassert(nglIsBuffer(id));
+#endif
+	// GL takes the buffer out of its bindings, the state cache follows
 	if (m_Driver)
-	{
-		if (m_Mapping[slot])
-		{
-			m_Driver->_DriverGLStates.bindArrayBuffer(id);
-			nglUnmapBuffer(GL_ARRAY_BUFFER);
-		}
-		// GL takes the buffer out of its bindings, the state cache follows
 		m_Driver->_DriverGLStates.arrayBufferDeleted(id);
-	}
-	// GL keeps the storage for the draws that still read it
+	// GL unmaps a buffer that is deleted while it is mapped, and keeps the storage for
+	// the draws that still read it
 	nglDeleteBuffers(1, &id);
 	m_VertexObjectId[slot] = 0;
 	m_Mapping[slot] = nullptr;
@@ -473,17 +478,25 @@ bool CVertexBufferGL3::createPersistentBuffer(GLsizei slot)
 	m_FrameInFlight[slot] = NL3D_GL3_BUFFER_NOT_IN_FLIGHT;
 	if (!m_Mapping[slot])
 	{
+		// Once for the driver: a vertex buffer that gets no storage is set up again in
+		// every frame, by another object of this class each time
 		if (!m_Driver->_VertexStorageFailureWarned)
 		{
 			m_Driver->_VertexStorageFailureWarned = true;
 			nlwarning("3D: cannot create and map a buffer of %u bytes with glBufferStorage for the vertex buffer '%s'. "
-			          "It is not drawn until it gets one",
+			          "It is not drawn until it gets one. This is logged for the first vertex buffer that it happens to",
 			    m_Size, VB->getName().c_str());
+		}
+		// The errors of the storage that GL refused, and of the map of a buffer without
+		// storage, are taken out of the error state: they are not for whoever reads it next
+		for (uint i = 0; i < 8; ++i)
+		{
+			if (glGetError() == GL_NO_ERROR)
+				break;
 		}
 		deleteBuffer(slot);
 		return false;
 	}
-	m_Driver->_VertexStorageFailureWarned = false;
 	return true;
 }
 
@@ -822,6 +835,7 @@ void CVertexBufferGL3::invalidate()
 	// insert in lost vb list
 	m_Driver->_LostVBList.push_front(this);
 	m_IteratorInLostVBList = m_Driver->_LostVBList.begin();
+	m_InLostVBList = true;
 }
 
 // ***************************************************************************
