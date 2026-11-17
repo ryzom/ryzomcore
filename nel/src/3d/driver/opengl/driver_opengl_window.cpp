@@ -3862,6 +3862,19 @@ void CDriverGL::updateMinimizedPictureMode()
 		if (!enterMinimizedPictureMode())
 			m_MinimizedPicture.setSupplied(_win, false);
 	}
+	else if (wanted && m_MinimizedPictureMode)
+	{
+		// the window was shown at another size and minimized again since the mode was entered: the frame
+		// buffer object is made again at the size the window has now
+		uint32 width, height;
+		m_MinimizedPicture.getWindowSize(width, height);
+		if (width != m_MinimizedPictureWidth || height != m_MinimizedPictureHeight)
+		{
+			leaveMinimizedPictureMode();
+			if (!enterMinimizedPictureMode())
+				m_MinimizedPicture.setSupplied(_win, false);
+		}
+	}
 	else if (!wanted && m_MinimizedPictureMode)
 	{
 		leaveMinimizedPictureMode();
@@ -3906,6 +3919,21 @@ bool CDriverGL::enterMinimizedPictureMode()
 			activeFrameBufferObject(_RenderTargetFBO.getPtr());
 		return false;
 	}
+
+	// What new render buffers hold is undefined, and a frame does not have to draw over all of the window, nor
+	// to clear its stencil buffer: the three buffers start cleared. A clear goes by the scissor, which is set
+	// again below, and by the write masks, which are those of the defaults that swapBuffers sets after this
+	GLboolean colorMask[4];
+	glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+	glDisable(GL_SCISSOR_TEST);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	_DriverGLStates.enableZWrite(true);
+	_DriverGLStates.stencilMask(std::numeric_limits<GLuint>::max());
+	glClearColor(0.f, 0.f, 0.f, 0.f);
+	glClearDepth(1.0);
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
 
 	// From here it stands for the frame buffer of the window, and is left bound as that; a texture that is the
 	// render target is bound again, and binds it when it is left

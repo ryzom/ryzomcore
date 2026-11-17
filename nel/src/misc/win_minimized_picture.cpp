@@ -65,6 +65,21 @@ TDwmInvalidateIconicBitmaps s_DwmInvalidateIconicBitmaps = NULL;
 // It was said in the log that the compositor refuses the attributes of a window
 bool s_AttributeRefusalReported = false;
 
+// It was said in the log that the compositor does not take the notice that a picture is out of date
+bool s_OutOfDateRefusalReported = false;
+
+// The compositor is told that the pictures it has of the window are out of date. One that does not take the
+// notice keeps the picture it has until it asks by itself; that is said once
+void invalidatePictures(HWND wnd)
+{
+	HRESULT hr = s_DwmInvalidateIconicBitmaps(wnd);
+	if (FAILED(hr) && !s_OutOfDateRefusalReported)
+	{
+		s_OutOfDateRefusalReported = true;
+		nlinfo("Minimized window: the desktop compositor does not take the notice that the picture of a window is out of date (DwmInvalidateIconicBitmaps, error 0x%08x): a picture stays until the compositor asks for a new one", (uint)hr);
+	}
+}
+
 } // anonymous namespace
 
 // ***************************************************************************
@@ -250,9 +265,7 @@ void CWinMinimizedPicture::declarePictures(HWND wnd)
 	m_PreviewRefusalReported = false;
 
 	// what the compositor may have kept from the last time the window was minimized is out of date
-	hr = s_DwmInvalidateIconicBitmaps(wnd);
-	if (FAILED(hr))
-		nlwarning("Minimized window: DwmInvalidateIconicBitmaps failed (error 0x%08x)", (uint)hr);
+	invalidatePictures(wnd);
 
 	nldebug("Minimized window: the pictures of the window are supplied (%ux%u before it was minimized)", m_Width, m_Height);
 }
@@ -375,9 +388,7 @@ bool CWinMinimizedPicture::endFrame(HWND wnd)
 		if (elapsed < 0 || elapsed >= (TTime)MinIntervalMs)
 		{
 			m_OutOfDatePending = false;
-			HRESULT hr = s_DwmInvalidateIconicBitmaps(wnd);
-			if (FAILED(hr))
-				nlwarning("Minimized window: DwmInvalidateIconicBitmaps failed (error 0x%08x)", (uint)hr);
+			invalidatePictures(wnd);
 			m_Lingering = true;
 			m_OutOfDateTime = now;
 		}

@@ -347,8 +347,9 @@ public:
 	 *  supplied like one the driver made, as far as the messages of that window reach the driver
 	 *  (getWindowProc). No picture is supplied either where the driver cannot read the frames back: without
 	 *  frame buffer objects (OpenGL), with a back buffer that cannot be locked, which is the case with
-	 *  multisampling, and of a fullscreen window, whose device is lost while it is minimized (Direct3D). Each
-	 *  of these is said once in the log, and the window keeps the pictures of the window system.
+	 *  multisampling, and of a fullscreen window, whose device is lost while it is minimized (Direct3D). The
+	 *  window then keeps the pictures of the window system; this is said once in the log, except for the
+	 *  fullscreen window, which is never supplied.
 	 */
 	// @{
 	/** The pictures of the minimized window are supplied by the driver, out of the frames the application
