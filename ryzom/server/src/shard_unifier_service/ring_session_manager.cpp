@@ -1844,7 +1844,11 @@ endOfWelcomeUserResult:
 			session->setEstimatedDuration(ed);
 			session->setFinalDuration(0);
 			session->setFolderId(0);
-			session->setAnimMode(animMode);
+			// The animation mode follows the rule type: a mastered session (rt_strict) is one an animator runs, a
+			// masterless one (rt_liberal) runs by itself. The animMode of the request is not stored: the client and
+			// the ring web pages send am_dm with every session, whatever its rules, so it says nothing, and the
+			// session list would show every session as one with an animator.
+			session->setAnimMode(TAnimMode(rt == TRuleType::rt_liberal ? TAnimMode::am_autonomous : TAnimMode::am_dm));
 			session->setRaceFilter(raceFilter);
 			session->setReligionFilter(religionFilter);
 			session->setGuildFilter(guildFilter);
