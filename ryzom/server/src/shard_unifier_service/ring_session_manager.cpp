@@ -3372,7 +3372,7 @@ endOfWelcomeUserResult:
 		/** Whether a character of the account is kicked from the session: a kick holds for the account (see
 		 *	_joinSessionCommon). The ids of the characters of an account are the sixteen that follow its user id
 		 *	shifted by four bits.
-		 *	\return false when the database gave no answer, kicked is not set then
+		 *	\return false when the request failed or gave no count, kicked is not set then
 		 */
 		bool isAccountKickedFromSession(uint32 userId, TSessionId sessionId, bool &kicked)
 		{
@@ -3397,7 +3397,7 @@ endOfWelcomeUserResult:
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
 		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
-		//                5 : character banned
+		//                5 : character banned, or a character of its account is kicked from the session
 		//				  6 : no place left, session is full
 		//				  7 : session owner not found
 		//				  8 : internal error
@@ -3443,9 +3443,11 @@ endOfWelcomeUserResult:
 
 			// an account that has a character kicked from the session does not subscribe to it with another one:
 			// it would hold a place of the session and be refused at the join (the answer is the one of a ban)
+			// (the owner of the session and an account with the session access privilege are not held back, as
+			// at the join)
 			bool accountKicked = false;
 			BOMB_IF(!isAccountKickedFromSession(charId >> 4, sessionId, accountKicked), "RSM:on_subscribeSession : failed to look for the kicks of the account of character " << charId << " in session " << sessionId, invokeResult(from, charId >> 4, 8, "failed to look for the kicks of the account"); return);
-			if (accountKicked)
+			if (accountKicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(charId >> 4))
 			{
 				invokeResult(from, charId >> 4, 5, "a character of the account is kicked from the session");
 				return;

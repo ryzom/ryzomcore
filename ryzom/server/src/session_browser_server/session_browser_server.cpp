@@ -448,7 +448,7 @@ public:
 	//                2 : session not found
 	//                3 : character already subscribed to or invited in the session
 	//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
-	//                5 : character banned
+	//                5 : character banned, or a character of its account is kicked from the session
 	//                6 : no place left, session is full
 	//                7 : session owner not found
 	//                8 : internal error
