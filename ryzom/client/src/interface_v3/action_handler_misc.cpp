@@ -783,7 +783,7 @@ void screenShotTGA()
 	if (ClientCfg.ScreenShotZBuffer)
 		screenshotZBuffer(filename, z, btm.getWidth(), btm.getHeight());
 
-	nlinfo("Screenshot '%s' saved in tga format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
+	nlinfo("Screenshot '%s' saved in tga format (%ux%u)", filename.c_str(), btm.getWidth(), btm.getHeight());
 	displayScreenShotSavedInfo(filename);
 }
 
@@ -807,7 +807,7 @@ void screenShotPNG()
 	if (ClientCfg.ScreenShotZBuffer)
 		screenshotZBuffer(filename, z, btm.getWidth(), btm.getHeight());
 
-	nlinfo("Screenshot '%s' saved in png format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
+	nlinfo("Screenshot '%s' saved in png format (%ux%u)", filename.c_str(), btm.getWidth(), btm.getHeight());
 	displayScreenShotSavedInfo(filename);
 }
 
@@ -831,7 +831,7 @@ void screenShotJPG()
 	if (ClientCfg.ScreenShotZBuffer)
 		screenshotZBuffer(filename, z, btm.getWidth(), btm.getHeight());
 
-	nlinfo("Screenshot '%s' saved in jpg format (%ux%u)", filename.c_str(), ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
+	nlinfo("Screenshot '%s' saved in jpg format (%ux%u)", filename.c_str(), btm.getWidth(), btm.getHeight());
 	displayScreenShotSavedInfo(filename);
 }
 
