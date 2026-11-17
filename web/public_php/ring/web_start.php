@@ -113,13 +113,15 @@
 	// Sessions this character is invited in / participates in
 	//
 	echo "<h2>Your invitations</h2>";
-	// A kick marks one participation of the character in the session and
-	// keeps the character out whatever its other participations say (the
-	// session manager refuses the join with "Character is kicked from the
-	// session"), so it is read over all of them.
+	// A kick marks one participation in the session and keeps out every
+	// character of the account, whatever their other participations say
+	// (the session manager refuses the join with "Character is kicked from
+	// the session"), so it is read over the participations of the sixteen
+	// character ids of the account.
 	$query = "SELECT sp.session_id, sp.status, s.session_type, s.title, s.state, c.char_name AS owner_name,"
 		. " (SELECT MAX(k.kicked) FROM session_participant AS k"
-		. " WHERE k.session_id = sp.session_id AND k.char_id = sp.char_id) AS kicked"
+		. " WHERE k.session_id = sp.session_id"
+		. " AND k.char_id >= (sp.char_id DIV 16) * 16 AND k.char_id <= (sp.char_id DIV 16) * 16 + 15) AS kicked"
 		. " FROM session_participant AS sp"
 		. " JOIN sessions AS s ON s.session_id = sp.session_id"
 		. " LEFT JOIN characters AS c ON c.char_id = s.owner"

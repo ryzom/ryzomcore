@@ -448,7 +448,7 @@ public:
 	//                2 : session not found
 	//                3 : character already subscribed to or invited in the session
 	//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
-	//                5 : character banned
+	//                5 : character banned, or a character of its account is kicked from the session
 	//                6 : no place left, session is full
 	//                7 : session owner not found
 	//                8 : internal error
@@ -742,9 +742,14 @@ public:
 
 		{
 
+			// The participations of the character say where it is invited. A kick holds for the account, as at the
+			// join of the session manager: the kicks are those of every character of the account of the requester
+			// (the sixteen ids that follow its user id shifted by four bits). The answer goes to the requester
+			// alone.
+			uint32 firstCharIdOfAccount = (charId >> 4) << 4;
 			CSString query;
-			query << "SELECT session_id, kicked";
-			query << " FROM session_participant WHERE char_id = "<< charId;
+			query << "SELECT session_id, kicked, char_id";
+			query << " FROM session_participant WHERE char_id >= " << firstCharIdOfAccount << " AND char_id <= " << (firstCharIdOfAccount + 15);
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 			CUniquePtr<CStoreResult> result(_RingDB.storeResult());	
 			uint32 row = result->getNumRows();
@@ -756,11 +761,14 @@ public:
 				uint32 kicked;
 				
 				result->fetchRow();
+				uint32 partCharId;
 				result->getField(0, session_id);
 				result->getField(1, kicked);
+				result->getField(2, partCharId);
 				if (kicked == 0)
 				{
-					allowedSessions.insert(session_id);
+					if (partCharId == charId)
+						allowedSessions.insert(session_id);
 				}
 				else
 				{
@@ -929,7 +937,10 @@ public:
 			sd.setLaunchDate(startDate);
 			
 			sd.setRequesterCharInvited(allowedSessions.find(sessionNum) != allowedSessions.end() || accessType == TAccessType::at_public || autoInvite);
-			sd.setRequesterCharKicked(kickedSessions.find(sessionNum) != kickedSessions.end());
+			// (the owner of a session is not held back by a kick of another character of its account)
+			uint32 ownerCharId;
+			result2->getField(4, ownerCharId);
+			sd.setRequesterCharKicked(ownerCharId != charId && kickedSessions.find(sessionNum) != kickedSessions.end());
 			
 			// Calculate number of connected players
 			// TODO : do this a bit faster
@@ -963,7 +974,7 @@ public:
 		CHECK_AUTH_WITH_CHARID(from, charId);
 
 		// The edit session of another character is listed for the editors its owner invited: the session is open,
-		// the character has an editor's participation in it and is kicked from none of its participations in it,
+		// the character has an editor's participation in it and no character of its account is kicked from it,
 		// which is what the session manager asks of the join (_joinSessionCommon). The edit session of the
 		// character itself is not listed: its owner enters it with the editor button, which also opens it again
 		// when it is closed. The filters of an animation session (newcomer, race, religion, guild, shard, level)
@@ -983,7 +994,8 @@ public:
 		query << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
 		query << " AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
 		query << " AND NOT EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
-		query << " AND session_participant.char_id = " << charId << " AND session_participant.kicked <> 0)";
+		query << " AND session_participant.char_id >= " << ((charId >> 4) << 4) << " AND session_participant.char_id <= " << (((charId >> 4) << 4) + 15);
+		query << " AND session_participant.kicked <> 0)";
 
 		BOMB_IF(!_RingDB.query(query), "getEditSessionList : error executing request in database", editSessionList(from, charId, vector<TSessionDesc>()); return);
 		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
@@ -1072,7 +1084,11 @@ public:
 		check << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
 		check << " AND ((sessions.session_type = 'st_edit' AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
 		check << " OR (sessions.session_type = 'st_anim' AND session_participant.status NOT IN ('sps_edit_invited', 'sps_editing'))";
-		check << " OR sessions.session_type NOT IN ('st_edit', 'st_anim')))";
+		check << " OR sessions.session_type NOT IN ('st_edit', 'st_anim'))";
+		// (a kick holds for the account, as at the join: no character of the account of the requester is kicked)
+		check << " AND NOT EXISTS (SELECT * FROM session_participant AS account_kick WHERE account_kick.session_id = sessions.session_id";
+		check << " AND account_kick.char_id >= " << ((charId >> 4) << 4) << " AND account_kick.char_id <= " << (((charId >> 4) << 4) + 15);
+		check << " AND account_kick.kicked <> 0))";
 		check << " OR EXISTS (SELECT * FROM characters WHERE characters.char_id = " << charId;
 		check << " AND characters.current_session = sessions.session_id))";
 		BOMB_IF(!_RingDB.query(check), "getCharList : error executing the access request in database", charList(from, charId, sessionId, vector<TCharDesc>()); return);

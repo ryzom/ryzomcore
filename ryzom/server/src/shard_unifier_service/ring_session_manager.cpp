@@ -3369,13 +3369,35 @@ endOfWelcomeUserResult:
 			invokeResult(from, ownerCharId>>4, 0, "");
 		}
 
+		/** Whether a character of the account is kicked from the session: a kick holds for the account (see
+		 *	_joinSessionCommon). The ids of the characters of an account are the sixteen that follow its user id
+		 *	shifted by four bits.
+		 *	\return false when the request failed or gave no count, kicked is not set then
+		 */
+		bool isAccountKickedFromSession(uint32 userId, TSessionId sessionId, bool &kicked)
+		{
+			CSString kickQuery;
+			kickQuery << "SELECT COUNT(*) FROM session_participant WHERE session_id = " << sessionId.asInt();
+			kickQuery << " AND kicked <> 0 AND char_id >= " << (userId << 4) << " AND char_id <= " << ((userId << 4) + 15);
+			if (!_RingDb.query(kickQuery))
+				return false;
+			CUniquePtr<MSW::CStoreResult> kickResult(_RingDb.storeResult());
+			if (kickResult->getNumRows() != 1)
+				return false;
+			uint32 nbKicks = 0;
+			kickResult->fetchRow();
+			kickResult->getField(0, nbKicks);
+			kicked = nbKicks > 0;
+			return true;
+		}
+
 		// A character subscribe to a public animation session
 		// invokeReturn : 0 : ok, subscription accepted
 		//                1 : char not found
 		//                2 : session not found
 		//                3 : character already subscribed to or invited in the session
 		//                4 : session not public (not an animation session, not of public access, or its subscription is closed)
-		//                5 : character banned
+		//                5 : character banned, or a character of its account is kicked from the session
 		//				  6 : no place left, session is full
 		//				  7 : session owner not found
 		//				  8 : internal error
@@ -3417,6 +3439,18 @@ endOfWelcomeUserResult:
 					invokeResult(from, charId >> 4, 3, "character already subscribed to or invited in the session");
 					return;
 				}
+			}
+
+			// an account that has a character kicked from the session does not subscribe to it with another one:
+			// it would hold a place of the session and be refused at the join (the answer is the one of a ban)
+			// (the owner of the session and an account with the session access privilege are not held back, as
+			// at the join)
+			bool accountKicked = false;
+			BOMB_IF(!isAccountKickedFromSession(charId >> 4, sessionId, accountKicked), "RSM:on_subscribeSession : failed to look for the kicks of the account of character " << charId << " in session " << sessionId, invokeResult(from, charId >> 4, 8, "failed to look for the kicks of the account"); return);
+			if (accountKicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(charId >> 4))
+			{
+				invokeResult(from, charId >> 4, 5, "a character of the account is kicked from the session");
+				return;
 			}
 
 			// check for free slot before more time consuming processing
@@ -3673,13 +3707,25 @@ endOfWelcomeUserResult:
 					}
 				}
 
+				// The kick holds for the account: a character is kept out as well while another character of its
+				// account is kicked from the session (the ids of the characters of an account are the sixteen that
+				// follow its user id shifted by four bits). It is tested here, at the join, and nowhere written: the
+				// participations of the other characters stay as they are, so the list of the session shows the
+				// kick on the character that was kicked and says nothing about which characters share its account,
+				// and an invitation of one of them is taken as any other.
+				if (!kicked)
+				{
+					BOMB_IF(!isAccountKickedFromSession(userId, sessionId, kicked), "RSM : joinSession : failed to look for the kicks of the account of char " << charId << " in session " << sessionId,
+					    joinSessionResult(from, charId >> 4, sessionId, 11, "Database error", TSessionPartStatus::invalid_val); return);
+				}
+
 				// A character that was kicked from the session stays out of it until it is unkicked. The session
 				// server lets in whoever is announced to it, so this is the place that refuses: without it a kick
 				// lasts until the character asks to join again. The owner of a session is never kicked from it, and
 				// an account that enters any session by its privilege is not held back by a kick either.
 				if (kicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(userId))
 				{
-					nlinfo("RSM : char %u asks to join session %u, from which it was kicked: refused", charId, sessionId.asInt());
+					nlinfo("RSM : char %u asks to join session %u, from which it or another character of its account was kicked: refused", charId, sessionId.asInt());
 					joinSessionResult(from, charId >> 4, sessionId, 21, "Character is kicked from the session", TSessionPartStatus::invalid_val);
 					return;
 				}
