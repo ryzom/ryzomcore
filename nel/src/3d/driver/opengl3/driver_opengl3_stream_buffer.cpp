@@ -163,6 +163,10 @@ void CStreamBufferGL3::bindBuffer(GLuint buffer)
 	case GL_ARRAY_BUFFER:
 		m_States->bindArrayBuffer(buffer);
 		break;
+	case GL_PIXEL_UNPACK_BUFFER:
+		// (the caller of the stream binds 0 again when it is done, see CDriverGLStates3::bindPixelUnpackBuffer)
+		m_States->bindPixelUnpackBuffer(buffer);
+		break;
 	default:
 		// Any other target is bound directly, which is right for the targets that the state cache does not track
 		nglBindBuffer(m_Target, buffer);
@@ -183,6 +187,9 @@ void CStreamBufferGL3::bufferDeleted(GLuint buffer)
 		break;
 	case GL_ARRAY_BUFFER:
 		m_States->arrayBufferDeleted(buffer);
+		break;
+	case GL_PIXEL_UNPACK_BUFFER:
+		m_States->pixelUnpackBufferDeleted(buffer);
 		break;
 	default:
 		break;

@@ -144,6 +144,19 @@ using NLMISC::CVector;
 #define NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when none can be given up
 
+// 1: in stream mode, the pixels of a rectangle of a texture that is updated in part are
+// written into a stream, and GL reads them from there (CDriverGL3::setupTextureEx): no GL
+// call returns anything on the way. 0: they go through a GL buffer that gets new storage
+// and is mapped and unmapped for every rectangle, as in per-buffer mode, for comparison.
+#define NL3D_GL3_TEXTURE_UPLOAD_STREAM 1
+
+// The stream that holds those pixels. A rectangle of more bytes than a chunk goes the
+// other way.
+#define NL3D_GL3_PIXEL_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
+#define NL3D_GL3_PIXEL_STREAM_ALIGNMENT (16) // The pixels of a rectangle start at a multiple of this (GL asks for a multiple of the size of a component, which is a byte for every format the driver uploads)
+#define NL3D_GL3_PIXEL_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
+#define NL3D_GL3_PIXEL_STREAM_MAX_CHUNKS (16) // More chunks are only created when none can be given up
+
 // 1: in stream mode, a vertex buffer of the FullRewrite or UnsynchronizedWrite usage has
 // buffer storage that stays mapped for as long as it lives, and a lock of it costs no GL
 // call (CVertexBufferGL3). 0: its GL buffer is mapped for every lock, as in per-buffer
@@ -2007,8 +2020,32 @@ private:
 		uint32 VertexLocksPersistent; // Locks of a vertex buffer whose storage stays mapped: no GL call
 		uint32 VertexRingAdds; // Buffers added to the rings of such vertex buffers
 		uint32 VertexRingDiscards; // Times that a buffer of such a ring got new storage, the ring being at its limit
+		uint32 TextureWholeUploads; // Textures that setupTextureEx gave to GL as a whole
+		uint64 TextureWholeBytes; // Bytes of their pixels, all mipmaps (none for a texture that only got its storage)
+		uint32 TexturePartUploads; // Textures of which setupTextureEx gave rectangles to GL
+		uint32 TexturePartRects; // Those rectangles, one for each mipmap they were given for
+		uint64 TexturePartBytes; // Bytes of their pixels
+		uint32 TexturePartStreamRects; // Of those rectangles, the ones that GL read from the pixel stream
+		uint32 TexturePartRefusedRects; // And the ones that were for the pixel stream and went through the mapped buffer: more bytes than a chunk, or the stream had no storage
+		uint32 TextureDirectUploads; // Calls of uploadTexture that gave pixels to GL
+		uint64 TextureDirectBytes; // Bytes of those
 		NLMISC::TTime LastTime;
 	} _StreamStats;
+	// The uploads of textures since the last log line, by the name the log gives them
+	struct CTextureUploadStats
+	{
+		uint32 Uploads; // Times that pixels of a texture of the name were given to GL: once for a whole texture, once for the rectangles of one setup, once per uploadTexture
+		uint64 Bytes; // Bytes of those pixels
+		std::set<const ITexture *> Textures; // The textures of the name
+		CTextureUploadStats()
+		    : Uploads(0)
+		    , Bytes(0)
+		{
+		}
+	};
+	std::map<std::string, CTextureUploadStats> _TextureUploadStats;
+	/// Count an upload of a texture under its name: the share name of a texture that is shared, else its class and size
+	void countTextureUpload(ITexture &tex, uint64 bytes);
 	void displayStreamStats();
 #endif
 
@@ -2059,7 +2096,12 @@ protected:
 private:
 	uint64					_SwapBufferInFlight;
 	GLsync					_SwapBufferSync[NL3D_GL3_FRAME_QUEUE_MAX];
+	// The buffer that the pixels of a rectangle of a texture go through where they do not go
+	// through _PixelStream: it gets new storage and is mapped for each rectangle
 	GLuint					_PixelUploadPBO;
+	// Stream mode, with NL3D_GL3_TEXTURE_UPLOAD_STREAM: the pixels of the rectangles of the
+	// textures that are updated in part are written into this stream (see setupTextureEx)
+	CStreamBufferGL3		_PixelStream;
 public:
 	void incrementResetCounter() { ++_ResetCounter; }
 	bool isWndActive() const { return _WndActive; }
