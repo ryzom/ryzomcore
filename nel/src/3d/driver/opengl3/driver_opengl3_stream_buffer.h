@@ -149,6 +149,15 @@ public:
 	CStreamHandleGL3 write(const void *data, uint32 size, uint32 allocSize);
 
 	/**
+	 * Copy size bytes to the range of a valid handle, offset bytes from its start,
+	 * where the range was reserved larger than what was written to it. The range
+	 * stays where it is and the handle stays valid: this is a write to memory that
+	 * the draws that were given the range may still read from. It is for bytes that
+	 * none of those draws reads, which the caller has to know; the stream cannot.
+	 */
+	void writePart(const CStreamHandleGL3 &handle, uint32 offset, const void *data, uint32 size);
+
+	/**
 	 * Reserve a range of size bytes for a caller that writes it through lock().
 	 * The range holds undefined bytes.
 	 * \return the handle of the range, not valid when the reservation failed (see write)

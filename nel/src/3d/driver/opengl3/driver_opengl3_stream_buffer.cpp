@@ -486,6 +486,21 @@ CStreamHandleGL3 CStreamBufferGL3::write(const void *data, uint32 size, uint32 a
 	return handle;
 }
 
+void CStreamBufferGL3::writePart(const CStreamHandleGL3 &handle, uint32 offset, const void *data, uint32 size)
+{
+	H_AUTO_OGL(CStreamBufferGL3_writePart)
+
+	nlassert(isValid(handle));
+	nlassert(offset <= handle.Size && size <= handle.Size - offset);
+
+	CChunk &chunk = m_Chunks[handle.Chunk];
+	memcpy(chunk.Mapped + handle.Offset + offset, data, size);
+	markWritten(chunk);
+#if NL3D_GL3_STREAM_STATS
+	m_Stats.Bytes += size;
+#endif
+}
+
 uint8 *CStreamBufferGL3::lock(const CStreamHandleGL3 &handle)
 {
 	nlassert(isValid(handle));

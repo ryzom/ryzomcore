@@ -116,6 +116,11 @@ using NLMISC::CVector;
 #define NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (16) // More chunks are only created when a single draw needs them
 
+// 1: in stream mode, entries that are added to the light table are written behind the ones
+// the block has, where it is (CDriverGL3::useLightTableBlock). 0: the whole table is written
+// to a new range of the full size of the block whenever it has more entries, for comparison.
+#define NL3D_GL3_LIGHT_TABLE_IN_PLACE 1
+
 // The stream that holds the indices of the draws
 #define NL3D_GL3_INDEX_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
 #define NL3D_GL3_INDEX_STREAM_ALIGNMENT (4) // A multiple of both index sizes, so that an index is never split over two words
@@ -1268,7 +1273,11 @@ private:
 	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
+	CLightTableUBOEntry			_LightTableUBOWritten[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // The entries that _LightTableUBOBlock holds, when the driver still has the block
+	uint						_LightTableUBOWrittenCount; // How many of them
 	void						uploadLightTableUBO();
+	/// Bring _LightTableUBOBlock to the given entries, writing no more than differs (see the function), and bind it
+	void						useLightTableBlock(const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
 
 	// Per-object light table selection (set by setLights, used by setupUniforms)
 	sint16						_LightTableObjIndices[MaxLight];
@@ -1866,6 +1875,22 @@ private:
 		uint32 ObjectWritten; // Object blocks written
 		uint32 ObjectSkipped; // Object blocks that were the same as the one before
 		uint32 MaterialWritten; // Material slots written
+		// Stream mode: the writes of each kind of uniform block, and the bytes that were
+		// reserved for them (the size of the block; the stream adds what the alignment takes)
+		enum TBlockKind
+		{
+			BlockCamera = 0,
+			BlockLightTable,
+			BlockLightMapLight,
+			BlockObject,
+			BlockMaterial,
+			BlockUser,
+			BlockKindCount
+		};
+		uint32 BlockWrites[BlockKindCount];
+		uint64 BlockReserved[BlockKindCount];
+		uint32 LightTableAppends; // Stream mode: times that entries were added to the light table where it is
+		uint64 LightTableAppendBytes; // Bytes of those entries
 		uint32 BufferWrites; // Per-buffer mode: uniform blocks written, each to its GL buffer
 		uint64 BufferBytes; // Per-buffer mode: bytes of those writes
 		uint32 IndexBufferWrites; // Per-buffer mode: writes of indices to a GL buffer
