@@ -224,10 +224,22 @@ public:
 	/// the default VAO will be rebound before modifying attrib state.
 	void enableVertexAttribArray(uint glIndex, bool enable);
 
-	/// glBindBuffer(GL_ARRAY_BUFFER). Context state, not per-VAO.
+	/// glVertexAttribPointer() for an attribute that reads from a buffer, on the default
+	/// VAO (see enableVertexAttribArray). The call is issued, with the buffer bound to
+	/// GL_ARRAY_BUFFER, when the attribute does not already read this buffer in this way.
+	void vertexAttribPointer(uint glIndex, GLuint buffer, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
+
+	/// glBindBuffer(GL_ARRAY_BUFFER). Context state, not per-VAO. Nothing draws from this
+	/// binding: it is what glVertexAttribPointer and the buffer commands on the target
+	/// take, and each of them binds the buffer it needs first.
 	void bindArrayBuffer(uint objectID);
 	void forceBindArrayBuffer(uint objectID);
 	uint getCurrBoundArrayBuffer() const { return m_CurrArrayBuffer; }
+
+	/// To call when a buffer that was bound to GL_ARRAY_BUFFER gets deleted: GL sets the
+	/// binding back to zero and takes the buffer out of the attributes of the bound vertex
+	/// array object, and the cache forgets it in both. No GL call.
+	void arrayBufferDeleted(uint objectID);
 
 	/// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER). State of the vertex array object: like the
 	/// attrib arrays it is kept for the default VAO, which is bound again when another one is.
@@ -381,6 +393,16 @@ private:
 	GLuint m_DefaultVAO;
 	GLuint m_CurVAO;
 	bool m_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
+	struct CVertexAttribPointer
+	{
+		GLuint Buffer; // 0: not known, the next call is issued
+		GLint Size;
+		GLenum Type;
+		GLboolean Normalized;
+		GLsizei Stride;
+		const GLvoid *Pointer;
+	};
+	CVertexAttribPointer m_VertexAttribPointer[CVertexBuffer::NumValue]; // of the default VAO
 	uint m_CurrArrayBuffer;
 	GLuint m_CurElementArrayBuffer; // of the default VAO
 

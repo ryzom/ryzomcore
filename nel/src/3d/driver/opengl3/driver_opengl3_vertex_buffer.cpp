@@ -108,7 +108,6 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 	{
 		drv->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
 		nglBufferData(GL_ARRAY_BUFFER, size, nullptr, drv->vertexBufferUsageGL3(preferred));
-		drv->_DriverGLStates.forceBindArrayBuffer(0);
 	}
 }
 
@@ -117,23 +116,15 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 CVertexBufferGL3::~CVertexBufferGL3()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
-	if (m_Driver && m_VertexObjectId)
-	{
-		GLsizei nbBuff = vbgl3BufferForType(m_MemType);
-		for (GLsizei i = 0; i < nbBuff; ++i)
-		{
-			if (m_Driver->_DriverGLStates.getCurrBoundArrayBuffer() == m_VertexObjectId[i])
-			{
-				m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
-			}
-		}
-	}
 	for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
 	{
 		if (m_VertexObjectId[i])
 		{
 			GLuint id = m_VertexObjectId[i];
 			nlassert(nglIsBuffer(id));
+			// GL takes the buffer out of its bindings, the state cache follows
+			if (m_Driver)
+				m_Driver->_DriverGLStates.arrayBufferDeleted(id);
 			nglDeleteBuffers(1, &id);
 		}
 	}
@@ -198,10 +189,11 @@ void *CVertexBufferGL3::lock()
 		{
 			m_Driver->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
 			nglBufferData(GL_ARRAY_BUFFER, size, nullptr, m_Driver->vertexBufferUsageGL3(m_MemType));
-			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 			if (glGetError() != GL_NO_ERROR)
 			{
 				m_Driver->incrementResetCounter();
+				for (GLsizei j = 0; j < nbBuff; ++j)
+					m_Driver->_DriverGLStates.arrayBufferDeleted(m_VertexObjectId[j]);
 				nglDeleteBuffers(nbBuff, m_VertexObjectId);
 				for (GLsizei j = 0; j < nbBuff; ++j)
 					m_VertexObjectId[j] = 0;
@@ -305,7 +297,7 @@ void *CVertexBufferGL3::lock()
 	#ifdef NL_DEBUG
 		// Vertex array range tracking removed in GL3 driver
 	#endif
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
+	// The buffer stays bound: the unlock binds it, and nothing reads the binding in between
 	// Lock Profile?
 	if (m_Driver->_VBHardProfiling)
 	{
@@ -349,7 +341,6 @@ void CVertexBufferGL3::unlock()
 		afterLock= CTime::getPerformanceTime();
 		m_Driver->appendVBHardLockProfile(afterLock-beforeLock, VB);
 	}
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 	if (!unmapOk)
 	{
 		invalidate();
@@ -439,7 +430,6 @@ void CVertexBufferGL3::flush()
 		// No explicit dirty ranges: full orphan+upload
 		m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 		nglBufferData(GL_ARRAY_BUFFER, size, &m_ShadowData[0], fullUploadHint);
-		m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 	}
 	else
 	{
@@ -485,7 +475,6 @@ void CVertexBufferGL3::flush()
 			// Too much dirty: full orphan+upload from CPU, data persists for many frames
 			m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 			nglBufferData(GL_ARRAY_BUFFER, size, &m_ShadowData[0], fullUploadHint);
-			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 		}
 		else
 		{
@@ -591,17 +580,13 @@ CVertexBufferAMDPinned::CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint 
 CVertexBufferAMDPinned::~CVertexBufferAMDPinned()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_CVertexBufferAMDPinnedDtor)
-	if (m_Driver && m_VertexObjectId)
-	{
-		if (m_Driver->_DriverGLStates.getCurrBoundArrayBuffer() == m_VertexObjectId)
-		{
-			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
-		}
-	}
 	if (m_VertexObjectId)
 	{
 		GLuint id = (GLuint)m_VertexObjectId;
 		nlassert(nglIsBuffer(id));
+		// GL takes the buffer out of its bindings, the state cache follows
+		if (m_Driver)
+			m_Driver->_DriverGLStates.arrayBufferDeleted(id);
 		nglDeleteBuffers(1, &id);
 	}
 	delete[] static_cast<char *>(m_VertexPtrAllocated);
@@ -653,7 +638,6 @@ void *CVertexBufferAMDPinned::lock()
 #endif
 		break;
 	}
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 	nlassert(m_VertexPtr);
 
 	// May actually return a different virtual address on some systems
@@ -691,7 +675,6 @@ void CVertexBufferAMDPinned::unlock()
 	// Unlock
 	m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId);
 	nglUnmapBuffer(GL_ARRAY_BUFFER);
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 
 	// Profiling
 	if (m_Driver->_VBHardProfiling)
