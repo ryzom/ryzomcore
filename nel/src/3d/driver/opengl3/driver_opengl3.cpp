@@ -330,6 +330,7 @@ CDriverGL3::CDriverGL3()
 		_SwapBufferSync[i] = nullptr;
 	_PixelUploadPBO = 0;
 	_StreamMode = false;
+	_VertexStorageFailureWarned = false;
 
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
@@ -632,6 +633,18 @@ bool CDriverGL3::setupDisplay()
 	if (_StreamMode)
 		nlinfo("3D: uniform buffer ranges are bound one per call, NL3D_GL3_MULTI_BIND is 0");
 #endif
+#endif
+
+	// The vertex buffers that are written where they are drawn from (see CVertexBufferGL3)
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+	{
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS
+		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages have storage that stays mapped");
+#else
+		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages are mapped for every lock, NL3D_GL3_PERSISTENT_VERTEX_BUFFERS is 0");
+#endif
+	}
 #endif
 
 	nglGenBuffers(1, &_PixelUploadPBO);
@@ -1079,6 +1092,18 @@ void CDriverGL3::displayStreamStats()
 	    (float)_StreamStats.IndexStreamDraws * perFrame, (float)_StreamStats.IndexStreamDrawBytes * perFrame,
 	    (float)_StreamStats.IndexObjectUploads * perFrame, (float)_StreamStats.IndexObjectUploadBytes * perFrame,
 	    (float)_StreamStats.ShadowUploads * perFrame, (float)_StreamStats.ShadowUploadBytes * perFrame);
+
+	// Both modes: what the locks of the vertex buffers without a shadow copy cost. (The
+	// SmallStream and FullStream ones have a GL buffer of their own in per-buffer mode only.)
+	nlinfo("3D: vertex buffer locks, per frame: %.1f of storage that stays mapped, without a GL call; with a map of the GL buffer: "
+	       "%.1f Immutable, %.1f FullRewrite, %.1f UnsynchronizedWrite, %.1f SmallStream and FullStream; "
+	       "rings of FullRewrite vertex buffers with storage that stays mapped: %u buffers added, %u given new storage at the limit of the ring",
+	    (float)_StreamStats.VertexLocksPersistent * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::Immutable] * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::FullRewrite] * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::UnsynchronizedWrite] * perFrame,
+	    (float)(_StreamStats.VertexLocksMapped[CVertexBuffer::SmallStream] + _StreamStats.VertexLocksMapped[CVertexBuffer::FullStream]) * perFrame,
+	    _StreamStats.VertexRingAdds, _StreamStats.VertexRingDiscards);
 
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
 	_StreamStats.LastTime = now;

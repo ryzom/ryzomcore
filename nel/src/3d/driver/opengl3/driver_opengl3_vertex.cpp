@@ -507,19 +507,8 @@ void CDriverGL3::updateLostBuffers()
 	{
 		for (std::list<CVertexBufferGL3 *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
-			nlassert((*it)->m_VertexObjectId[0]);
-			for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
-			{
-				GLuint id = (*it)->m_VertexObjectId[i];
-				if (id)
-				{
-					nlassert(nglIsBuffer(id));
-					// GL takes the buffer out of its bindings, the state cache follows
-					_DriverGLStates.arrayBufferDeleted(id);
-					nglDeleteBuffers(1, &id);
-					(*it)->m_VertexObjectId[i] = 0;
-				}
-			}
+			// (one that could not get its buffers is in the list without any)
+			(*it)->deleteBuffers();
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
 		_LostVBList.clear();
