@@ -1084,7 +1084,11 @@ public:
 		check << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
 		check << " AND ((sessions.session_type = 'st_edit' AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
 		check << " OR (sessions.session_type = 'st_anim' AND session_participant.status NOT IN ('sps_edit_invited', 'sps_editing'))";
-		check << " OR sessions.session_type NOT IN ('st_edit', 'st_anim')))";
+		check << " OR sessions.session_type NOT IN ('st_edit', 'st_anim'))";
+		// (a kick holds for the account, as at the join: no character of the account of the requester is kicked)
+		check << " AND NOT EXISTS (SELECT * FROM session_participant AS account_kick WHERE account_kick.session_id = sessions.session_id";
+		check << " AND account_kick.char_id >= " << ((charId >> 4) << 4) << " AND account_kick.char_id <= " << (((charId >> 4) << 4) + 15);
+		check << " AND account_kick.kicked <> 0))";
 		check << " OR EXISTS (SELECT * FROM characters WHERE characters.char_id = " << charId;
 		check << " AND characters.current_session = sessions.session_id))";
 		BOMB_IF(!_RingDB.query(check), "getCharList : error executing the access request in database", charList(from, charId, sessionId, vector<TCharDesc>()); return);

@@ -3369,6 +3369,28 @@ endOfWelcomeUserResult:
 			invokeResult(from, ownerCharId>>4, 0, "");
 		}
 
+		/** Whether a character of the account is kicked from the session: a kick holds for the account (see
+		 *	_joinSessionCommon). The ids of the characters of an account are the sixteen that follow its user id
+		 *	shifted by four bits.
+		 *	\return false when the database gave no answer, kicked is not set then
+		 */
+		bool isAccountKickedFromSession(uint32 userId, TSessionId sessionId, bool &kicked)
+		{
+			CSString kickQuery;
+			kickQuery << "SELECT COUNT(*) FROM session_participant WHERE session_id = " << sessionId.asInt();
+			kickQuery << " AND kicked <> 0 AND char_id >= " << (userId << 4) << " AND char_id <= " << ((userId << 4) + 15);
+			if (!_RingDb.query(kickQuery))
+				return false;
+			CUniquePtr<MSW::CStoreResult> kickResult(_RingDb.storeResult());
+			if (kickResult->getNumRows() != 1)
+				return false;
+			uint32 nbKicks = 0;
+			kickResult->fetchRow();
+			kickResult->getField(0, nbKicks);
+			kicked = nbKicks > 0;
+			return true;
+		}
+
 		// A character subscribe to a public animation session
 		// invokeReturn : 0 : ok, subscription accepted
 		//                1 : char not found
@@ -3417,6 +3439,16 @@ endOfWelcomeUserResult:
 					invokeResult(from, charId >> 4, 3, "character already subscribed to or invited in the session");
 					return;
 				}
+			}
+
+			// an account that has a character kicked from the session does not subscribe to it with another one:
+			// it would hold a place of the session and be refused at the join (the answer is the one of a ban)
+			bool accountKicked = false;
+			BOMB_IF(!isAccountKickedFromSession(charId >> 4, sessionId, accountKicked), "RSM:on_subscribeSession : failed to look for the kicks of the account of character " << charId << " in session " << sessionId, invokeResult(from, charId >> 4, 8, "failed to look for the kicks of the account"); return);
+			if (accountKicked)
+			{
+				invokeResult(from, charId >> 4, 5, "a character of the account is kicked from the session");
+				return;
 			}
 
 			// check for free slot before more time consuming processing
@@ -3681,19 +3713,8 @@ endOfWelcomeUserResult:
 				// and an invitation of one of them is taken as any other.
 				if (!kicked)
 				{
-					CSString kickQuery;
-					kickQuery << "SELECT COUNT(*) FROM session_participant WHERE session_id = " << sessionId.asInt();
-					kickQuery << " AND kicked <> 0 AND char_id >= " << (userId << 4) << " AND char_id <= " << ((userId << 4) + 15);
-					BOMB_IF(!_RingDb.query(kickQuery), "RSM : joinSession : failed to look for the kicks of the account of char " << charId << " in session " << sessionId,
+					BOMB_IF(!isAccountKickedFromSession(userId, sessionId, kicked), "RSM : joinSession : failed to look for the kicks of the account of char " << charId << " in session " << sessionId,
 					    joinSessionResult(from, charId >> 4, sessionId, 11, "Database error", TSessionPartStatus::invalid_val); return);
-					CUniquePtr<MSW::CStoreResult> kickResult(_RingDb.storeResult());
-					uint32 nbKicks = 0;
-					if (kickResult->getNumRows() == 1)
-					{
-						kickResult->fetchRow();
-						kickResult->getField(0, nbKicks);
-					}
-					kicked = nbKicks > 0;
 				}
 
 				// A character that was kicked from the session stays out of it until it is unkicked. The session
