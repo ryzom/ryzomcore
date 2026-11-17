@@ -418,6 +418,14 @@ bool			CDriverUser::isActive()
 	return _Driver->isActive();
 }
 
+// ***************************************************************************
+bool			CDriverUser::isWindowMinimized() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->isWindowMinimized();
+}
+
 
 // ***************************************************************************
 nlWindow		CDriverUser::getDisplay ()

@@ -211,6 +211,7 @@ CDriverGL::CDriverGL()
 #elif defined (NL_OS_UNIX)
 
 	_dpy = nullptr;
+	_WindowMinimized = false;
 	_visual_info = nullptr;
 
 #	ifdef XF86VIDMODE

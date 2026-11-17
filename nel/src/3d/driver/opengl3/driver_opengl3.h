@@ -736,6 +736,8 @@ public:
 
 	virtual bool			isActive () NL_OVERRIDE;
 
+	virtual bool			isWindowMinimized() const NL_OVERRIDE;
+
 	virtual uint8			getBitPerPixel () NL_OVERRIDE;
 
 	virtual void			showCursor (bool b) NL_OVERRIDE;
@@ -1082,6 +1084,9 @@ private:
 	friend bool GlWndProc(CDriverGL3 *driver, XEvent &e);
 
 	Display*					_dpy;
+	// the window manager lists the window as hidden in _NET_WM_STATE, which is how it states a minimized window;
+	// kept up to date by the changes of that property (see GlWndProc)
+	bool						_WindowMinimized;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 	XVisualInfo*				_visual_info;
 	uint32						_xrandr_version;

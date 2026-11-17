@@ -200,6 +200,7 @@ CDriverGL3::CDriverGL3()
 #elif defined (NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 	_dpy = nullptr;
+	_WindowMinimized = false;
 	_visual_info = nullptr;
 
 #	ifdef XF86VIDMODE

@@ -207,6 +207,7 @@ bool GlWndProc(CDriverGL3 *driver, const void* e)
 
 static Atom XA_WM_STATE = 0;
 static Atom XA_WM_STATE_FULLSCREEN = 0;
+static Atom XA_WM_STATE_HIDDEN = 0;
 static Atom XA_WM_ICON = 0;
 static Atom XA_WM_WINDOW_TYPE = 0;
 static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
@@ -223,6 +224,44 @@ sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 	XGetErrorText(dpy, e->error_code, buf, sizeof(buf));
 	nlwarning("3D: XError: %s", buf);
 	return 1;
+}
+
+// A window manager that follows the Extended Window Manager Hints lists _NET_WM_STATE_HIDDEN in the _NET_WM_STATE
+// property of a window while the window is minimized, and not while the window is only on another desktop. This
+// reads the list from the X server: the changes of the property are events of the window (PropertyNotify), so
+// that it is read when it changed and not every frame.
+static bool isWindowStateHidden(Display *dpy, Window win)
+{
+	Atom type_return = 0;
+	int format_return = 0;
+	unsigned long nitems_return = 0;
+	unsigned long bytes_after_return = 0;
+	unsigned char *data = nullptr;
+
+	// the list has a few atoms, one for each state the window is in
+	int status = XGetWindowProperty(dpy, win, XA_WM_STATE, 0, 1024, False, XA_ATOM, &type_return, &format_return, &nitems_return, &bytes_after_return, &data);
+
+	bool hidden = false;
+
+	// a window without the property is in none of the states
+	if (status == Success && type_return == XA_ATOM && format_return == 32 && data)
+	{
+		// Xlib gives the items of a property of format 32 as long, which is the size of an Atom
+		const Atom *states = (const Atom *)data;
+		for (unsigned long i = 0; i < nitems_return; ++i)
+		{
+			if (states[i] == XA_WM_STATE_HIDDEN)
+			{
+				hidden = true;
+				break;
+			}
+		}
+	}
+
+	if (data)
+		XFree(data);
+
+	return hidden;
 }
 
 bool GlWndProc(CDriverGL3 *driver, XEvent &e)
@@ -258,6 +297,12 @@ bool GlWndProc(CDriverGL3 *driver, XEvent &e)
 
 		case UnmapNotify:
 		driver->_WndActive = false;
+		break;
+
+		case PropertyNotify:
+		// the window manager minimized or restored the window, or changed another of its states
+		if (e.xproperty.window == (Window)driver->_win && e.xproperty.atom == XA_WM_STATE)
+			driver->_WindowMinimized = e.xproperty.state == PropertyNewValue && isWindowStateHidden(driver->_dpy, driver->_win);
 		break;
 
 		case Expose:
@@ -437,6 +482,7 @@ bool CDriverGL3::init(uintptr_t windowIcon, emptyProc exitFunc)
 	// define Atoms
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
 	XA_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	XA_WM_STATE_HIDDEN = XInternAtom(_dpy, "_NET_WM_STATE_HIDDEN", False);
 	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
 	XA_WM_WINDOW_TYPE = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
 	XA_WM_WINDOW_TYPE_NORMAL = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
@@ -1183,6 +1229,10 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 //	XMapWindow(_dpy, _win);
 
 	_EventEmitter.init(_dpy, _win, this, _DestroyWindow);
+
+	// the state the window is in by now (a window of the application may be minimized already): the events
+	// selected just above tell every change after this
+	_WindowMinimized = isWindowStateHidden(_dpy, _win);
 
 //	XEvent event;
 //	XIfEvent(dpy, &event, WaitForNotify, (char *)this);
@@ -2975,6 +3025,40 @@ bool CDriverGL3::isActive()
 	Status status = XGetWindowAttributes(_dpy, _win, &attr);
 
 	res = (status == 1);
+
+#endif // NL_OS_UNIX
+
+	return res;
+}
+
+// --------------------------------------------------
+bool CDriverGL3::isWindowMinimized() const
+{
+	H_AUTO_OGL(CDriverGL3_isWindowMinimized)
+
+	if (_win == EmptyWindow)
+		return false;
+
+	bool res = false;
+
+#if defined(__EMSCRIPTEN__)
+
+	// the canvas of a page is no window of a window system and is never minimized: the browser decides by itself
+	// how often a page that is not shown gets a frame
+
+#elif defined(NL_OS_WINDOWS)
+
+	res = (IsIconic(_win) != FALSE);
+
+#elif defined(NL_OS_MAC)
+
+	// the window that holds the view of the driver, also in fullscreen
+	res = ([[(NSView *)_win window] isMiniaturized] == YES);
+
+#elif defined (NL_OS_UNIX)
+
+	// what the window manager states in the _NET_WM_STATE property of the window, see GlWndProc
+	res = _WindowMinimized;
 
 #endif // NL_OS_UNIX
 

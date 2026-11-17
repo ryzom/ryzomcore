@@ -860,6 +860,7 @@ public:
 	virtual void			endDialogMode();
 	virtual bool			activate();
 	virtual bool			isActive ();
+	virtual bool			isWindowMinimized() const;
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
 	// Windows interface

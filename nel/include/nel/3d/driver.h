@@ -213,6 +213,13 @@ public:
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive() = 0;
 
+	/** Return true while the window of the driver is minimized (iconified) by the window system, whatever size
+	 *  getWindowSize reports then: with some drivers and window systems a minimized window keeps its size, with
+	 *  others it has no area. Return false when there is no window.
+	 *  The calling application may leave time to other applications when it is the case, as nothing of it is shown.
+	 */
+	virtual bool			isWindowMinimized() const = 0;
+
 
 
 	/** Return the driver reset counter.

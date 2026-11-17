@@ -68,7 +68,8 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver, bo
 	_win = win;
 	_driver = driver;
 
-	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask|FocusChangeMask);
+	// the property changes are for the driver: the window manager states a minimized window in a property
+	XSelectInput (_dpy, _win, KeyPressMask|KeyReleaseMask|ButtonPressMask|ButtonReleaseMask|PointerMotionMask|StructureNotifyMask|ExposureMask|EnterWindowMask|LeaveWindowMask|FocusChangeMask|PropertyChangeMask);
 
 	// define Atoms used by clipboard
 	XA_CLIPBOARD = XInternAtom(dpy, "CLIPBOARD", False);

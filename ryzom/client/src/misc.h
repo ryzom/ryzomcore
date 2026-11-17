@@ -235,8 +235,14 @@ void getWindowSizeLeavingFullscreen(uint16 &width, uint16 &height);
 // The frame limiter of the login and character selection loops, called once per frame after the swap. These
 // screens (an interface, and the characters of the selection) need no more frames than a display shows: without
 // the sleep of the configuration (Sleep >= 0) and without vertical sync, a frame waits here for the rest of a
-// 60th of a second, and for longer while the window is minimized or has not the focus
+// 60th of a second, and for longer while the window is minimized or has no area. A window that has not the focus
+// is not slowed: several clients run side by side
 void limitOutgameFrameRate();
+
+// Nothing of the window is shown: it is minimized (with some drivers and window systems a minimized window keeps
+// its size), or it has no area (resized down to its title bar). The frame loops leave time to other applications
+// then
+bool isWindowMinimizedOrWithoutArea();
 
 // Get the current color depth (8, 16, or 32). In windowed mode, this will be the desktop color depth, in fullscreen mode, the color depth of the framebuffer.
 uint getCurrentColorDepth();
