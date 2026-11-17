@@ -1065,6 +1065,13 @@ void CDriverGL3::displayStreamStats()
 		    (float)_StreamStats.IndexBufferWrites * perFrame, (float)_StreamStats.IndexBufferBytes * perFrame);
 	}
 
+	// Both modes: where the indices of the render calls with an index buffer came from
+	nlinfo("3D: index buffers, per frame: %.1f render calls drawn from the GL buffer of their index buffer, "
+	       "%.1f with their indices written for them (%.0f bytes); %.1f times an index buffer gave its GL buffer its indices (%.0f bytes)",
+	    (float)_StreamStats.IndexObjectDraws * perFrame,
+	    (float)_StreamStats.IndexStreamDraws * perFrame, (float)_StreamStats.IndexStreamDrawBytes * perFrame,
+	    (float)_StreamStats.IndexObjectUploads * perFrame, (float)_StreamStats.IndexObjectUploadBytes * perFrame);
+
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
 	_StreamStats.LastTime = now;
 }

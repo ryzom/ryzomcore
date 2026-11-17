@@ -94,9 +94,14 @@ bool CDriverGL3::streamIndices(uint32 firstIndex, uint32 count, CIndexRange &ran
 	// A new render call: the index stream no longer has to keep the indices of the one before
 	_IndexStream.nextDraw();
 
-	// The indices are written for this call only. Nothing is kept per index buffer:
-	// in stream mode a large body of indices that do not change would be written again
-	// every few frames, as the stream moves on.
+#if NL3D_GL3_STREAM_STATS
+	++_StreamStats.IndexStreamDraws;
+	_StreamStats.IndexStreamDrawBytes += count * (_LastIB._Format == CIndexBuffer::Indices16 ? sizeof(uint16) : sizeof(uint32));
+#endif
+
+	// The indices are written for this call only. Nothing is kept in the stream per index
+	// buffer: a large body of indices that do not change would be written again every
+	// few frames, as the stream moves on. (Those have a GL buffer, see useDrawIndices.)
 	if (_LastIB._Format == CIndexBuffer::Indices16)
 	{
 		type = GL_UNSIGNED_SHORT;
@@ -108,6 +113,33 @@ bool CDriverGL3::streamIndices(uint32 firstIndex, uint32 count, CIndexRange &ran
 		type = GL_UNSIGNED_INT;
 		return useIndices(_ScratchIndices, ((const uint32 *)_LastIB._Values) + firstIndex, count * (uint32)sizeof(uint32), true, range);
 	}
+}
+
+bool CDriverGL3::useDrawIndices(uint32 firstIndex, uint32 count, CIndexRange &range, GLenum &type)
+{
+	H_AUTO_OGL(CDriverGL3_useDrawIndices)
+
+	// The GL buffer of the index buffer, when it has one with the indices as they are
+	// now: not when they were written since it got them, which may be after the index
+	// buffer was made active
+	const CIBDrvInfosGL3 *info = _LastIB._Info;
+	if (info)
+	{
+		const uint32 indexSize = _LastIB._Format == CIndexBuffer::Indices16 ? (uint32)sizeof(uint16) : (uint32)sizeof(uint32);
+		if (info->inBuffer((firstIndex + count) * indexSize))
+		{
+			type = _LastIB._Format == CIndexBuffer::Indices16 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+			range.Buffer = info->getBuffer();
+			range.Offset = firstIndex * indexSize;
+#if NL3D_GL3_STREAM_STATS
+			++_StreamStats.IndexObjectDraws;
+#endif
+			return true;
+		}
+	}
+
+	// Else they are written for this render call, from _LastIB._Values
+	return streamIndices(firstIndex, count, range, type);
 }
 
 void CDriverGL3::drawIndices(GLenum mode, GLsizei count, GLenum type, const CIndexRange &range, uint32 offset)
@@ -134,7 +166,7 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	// the indices, once for all passes
 	CIndexRange indices;
 	GLenum indexType = GL_UNSIGNED_SHORT;
-	if (nlines && !streamIndices(firstIndex, 2 * nlines, indices, indexType))
+	if (nlines && !useDrawIndices(firstIndex, 2 * nlines, indices, indexType))
 		return false;
 
 	// render primitives.
@@ -181,7 +213,7 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	// the indices, once for all passes
 	CIndexRange indices;
 	GLenum indexType = GL_UNSIGNED_SHORT;
-	if (ntris && !streamIndices(firstIndex, 3 * ntris, indices, indexType))
+	if (ntris && !useDrawIndices(firstIndex, 3 * ntris, indices, indexType))
 		return false;
 
 	// render primitives.
@@ -241,7 +273,7 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 
 	CIndexRange indices;
 	GLenum indexType = GL_UNSIGNED_SHORT;
-	if (!streamIndices(firstTri, 3 * ntris, indices, indexType))
+	if (!useDrawIndices(firstTri, 3 * ntris, indices, indexType))
 		return false;
 	drawIndices(GL_TRIANGLES, 3 * ntris, indexType, indices);
 
