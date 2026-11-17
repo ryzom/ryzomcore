@@ -228,6 +228,20 @@ void	setCrashAlreadyReported(bool state);
 #endif // NL_NO_DEBUG
 
 /**
+ * \def nlcrashdbg(id, fmt, ...)
+ * Temporary log added to investigate a crash report. It is an nlinfo prefixed with "CRASHDBG #<id>", where
+ * <id> is the id of the first report of the crash group, so the tool that sends crash reports can pick these
+ * lines up in client.log. The first argument after id must be a string literal (the format).
+ * To remove them all once the crash is fixed: grep nlcrashdbg.
+ *
+ * Example:
+ *\code
+	nlcrashdbg(6539800, "SubmitSourceBuffer hr=0x%08x", (unsigned int)hr);
+ *\endcode
+ */
+#define nlcrashdbg(id, ...) nlinfo("CRASHDBG #" #id " " __VA_ARGS__)
+
+/**
  * \def nlerror(exp)
  * Same as nlinfo but you have to call it when you have a fatal error, this macro display the text and \b exit the application
  * automatically. nlerror must be in a try/catch because it generates an EFatalError exception to exit the application.

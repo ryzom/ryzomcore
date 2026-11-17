@@ -596,6 +596,23 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 	return "";
 }
 
+void CPath::requestFileCheck (const std::string &missingFile)
+{
+	nlwarning ("PATH: Missing file '%s', a files check is requested to the launcher", missingFile.c_str());
+
+	static bool flagCreated = false;
+	if (flagCreated)
+		return;
+	flagCreated = true;
+
+	string flagFile = getLogDirectory() + "needcheck.flag";
+	FILE *file = nlfopen (flagFile, "wb");
+	if (file)
+		fclose (file);
+	else
+		nlwarning ("PATH: Cannot create '%s'", flagFile.c_str());
+}
+
 bool CPath::exists (const std::string &filename)
 {
 	return getInstance()->_FileContainer.exists(filename);

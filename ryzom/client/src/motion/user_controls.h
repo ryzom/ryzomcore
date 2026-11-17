@@ -315,6 +315,9 @@ private:
 	/// when true user has to release forward key before he can go forward again
 	bool _NeedReleaseForward;
 
+	/// true once a move input has requested to leave afk (avoids re-sending the request every frame)
+	bool _AfkExitRequested;
+
 	/// when true the next forward action will cancel any moveto
 	bool _NextForwardCancelMoveTo;
 

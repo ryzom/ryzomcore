@@ -1308,6 +1308,8 @@ void CCharacter3D::createInstance (TChar3DPart i, const SCharacter3DSetup::SChar
 	}
 
 	// Clear effects even when the replacement has no model.
+	// The advantage fx is a Hrc son of the instance: delete it BEFORE its parent, otherwise ~CTransform
+	// leaves it orphan (not in the Hrc graph) with a stale _AncestorSkeletonModel (crash in CParticleSystemModel::traverseClip)
 	if (!_InstancesFx[i].AdvantageFx.empty())
 		_Scene->deleteInstance (_InstancesFx[i].AdvantageFx);
 	uint32 fx;

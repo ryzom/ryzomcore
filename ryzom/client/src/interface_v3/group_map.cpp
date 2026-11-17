@@ -4400,7 +4400,7 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// pop the rename dialog
 	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-	if (LastClickedMap->isInDeathMode()) return;
+	if (!LastClickedMap || LastClickedMap->isInDeathMode()) return;
 	LastSelectedLandMark = NULL;
 	popupLandMarkNameDialog();
 }
