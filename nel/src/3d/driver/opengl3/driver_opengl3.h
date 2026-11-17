@@ -1348,17 +1348,25 @@ private:
 	bool						_LightTableMode;
 	std::vector<CLight>			_LightTable;
 
-	// Light UBO (shared by light table mode and non-table fallback)
-	CUniformBlockGL3			_LightTableUBOBlock; // Where the driver has the block, always _MaxLightTableSize entries
+	// Light UBO. The light table mode and the mode without a table each have a block with
+	// their lights, and the draw binds the one of its mode: draws of the two modes follow
+	// each other within a frame (the scenes against what is drawn outside of them), and
+	// neither block is written because the other mode drew.
+	CUniformBlockGL3			_LightTableUBOBlock; // Where the driver has the block of the light table, always _MaxLightTableSize entries
+	CUniformBlockGL3			_UserLightUBOBlock; // Where it has the block of the mode without a table: the user lights as its first MaxLight entries
 	bool						_LightTableDirty; // Light table entries changed
-	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
+	bool						_UserLightUBODirty; // _UserLight[] or _LightEnable[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
 	CLightTableUBOEntry			_LightTableUBOWritten[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // The entries that _LightTableUBOBlock holds, when the driver still has the block
 	uint						_LightTableUBOWrittenCount; // How many of them
+	CLightTableUBOEntry			_UserLightUBOWritten[MaxLight]; // The entries that _UserLightUBOBlock holds, when the driver still has the block
+	uint						_UserLightUBOWrittenCount; // How many of them
 	void						uploadLightTableUBO();
-	/// Bring _LightTableUBOBlock to the given entries, writing no more than differs (see the function), and bind it
-	void						useLightTableBlock(const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
+	/// Bring a block of lights to the given entries, writing no more than differs (see the function), and bind it.
+	/// written and writtenCount are the entries that the block holds: the copy that is kept for this block.
+	void						useLightTableBlock(CUniformBlockGL3 &block, CLightTableUBOEntry *written, uint &writtenCount,
+								    const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
 
 	// Per-object light table selection (set by setLights, used by setupUniforms)
 	sint16						_LightTableObjIndices[MaxLight];
@@ -1972,6 +1980,7 @@ private:
 		{
 			BlockCamera = 0,
 			BlockLightTable,
+			BlockUserLights,
 			BlockLightMapLight,
 			BlockObject,
 			BlockMaterial,

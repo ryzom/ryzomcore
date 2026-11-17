@@ -341,6 +341,7 @@ CDriverGL3::CDriverGL3()
 	_LightTableMode= false;
 	_LightTableDirty = false;
 	_LightTableUBOWrittenCount = 0;
+	_UserLightUBOWrittenCount = 0;
 	_UserLightUBODirty = true;
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
 	_CameraUBODirty = true;
@@ -1065,10 +1066,11 @@ void CDriverGL3::displayStreamStats()
 	{
 		displayOneStreamStats("uniform", _UniformStream, perFrame, true);
 		nlinfo("3D: uniform stream by kind of block, per frame, writes / bytes reserved: camera %.1f / %.0f, light table %.1f / %.0f, "
-		       "lightmap light %.1f / %.0f, object %.1f / %.0f, material %.1f / %.0f, user %.1f / %.0f; "
+		       "user lights %.1f / %.0f, lightmap light %.1f / %.0f, object %.1f / %.0f, material %.1f / %.0f, user %.1f / %.0f; "
 		       "light table entries added in place: %.1f times, %.0f bytes",
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockCamera] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockCamera] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightTable] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightTable] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockUserLights] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockUserLights] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightMapLight] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightMapLight] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockObject] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockObject] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockMaterial] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockMaterial] * perFrame,
@@ -1155,6 +1157,7 @@ bool CDriverGL3::release()
 	// buffers go with their owners.
 	releaseUniformBlock(_CameraUBOBlock);
 	releaseUniformBlock(_LightTableUBOBlock);
+	releaseUniformBlock(_UserLightUBOBlock);
 	releaseUniformBlock(_LightMapDynUBOBlock);
 	releaseUniformBlock(_ObjectUBOBlock);
 	releaseIndexBlock(_ScratchIndices);
