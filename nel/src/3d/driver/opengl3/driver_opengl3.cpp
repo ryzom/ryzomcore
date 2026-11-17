@@ -37,6 +37,10 @@
 #include "driver_opengl3_vertex_buffer.h"
 #include "driver_opengl3_uniform_buffer.h"
 
+#if NL3D_GL3_STREAM_STATS
+#include <typeinfo>
+#endif
+
 
 using namespace std;
 using namespace NLMISC;
@@ -1050,6 +1054,15 @@ static void displayOneStreamStats(const char *name, CStreamBufferGL3 &stream, fl
 }
 
 // --------------------------------------------------
+// Orders the names of textures by their uploads, most first; names with as many by name
+static bool textureUploadStatsMore(const std::pair<uint32, const std::string *> &a, const std::pair<uint32, const std::string *> &b)
+{
+	if (a.first != b.first)
+		return a.first > b.first;
+	return *a.second < *b.second;
+}
+
+// --------------------------------------------------
 void CDriverGL3::displayStreamStats()
 {
 	++_StreamStats.Frames;
@@ -1108,8 +1121,53 @@ void CDriverGL3::displayStreamStats()
 	    (float)(_StreamStats.VertexLocksMapped[CVertexBuffer::SmallStream] + _StreamStats.VertexLocksMapped[CVertexBuffer::FullStream]) * perFrame,
 	    _StreamStats.VertexRingAdds, _StreamStats.VertexRingDiscards);
 
+	// Both modes: the pixels of textures that were given to GL, by the three ways they get there
+	nlinfo("3D: texture uploads, per frame: %.1f whole textures in setupTextureEx (%.0f bytes); "
+	       "%.1f textures in part, in %.1f rectangles of a mipmap (%.0f bytes); %.1f calls of uploadTexture (%.0f bytes)",
+	    (float)_StreamStats.TextureWholeUploads * perFrame, (float)_StreamStats.TextureWholeBytes * perFrame,
+	    (float)_StreamStats.TexturePartUploads * perFrame, (float)_StreamStats.TexturePartRects * perFrame, (float)_StreamStats.TexturePartBytes * perFrame,
+	    (float)_StreamStats.TextureDirectUploads * perFrame, (float)_StreamStats.TextureDirectBytes * perFrame);
+	if (!_TextureUploadStats.empty())
+	{
+		// The names with the most uploads since the last lines
+		std::vector<std::pair<uint32, const std::string *> > most;
+		most.reserve(_TextureUploadStats.size());
+		for (std::map<std::string, CTextureUploadStats>::const_iterator it = _TextureUploadStats.begin(); it != _TextureUploadStats.end(); ++it)
+			most.push_back(std::make_pair(it->second.Uploads, &it->first));
+		std::sort(most.begin(), most.end(), textureUploadStatsMore);
+		std::string line;
+		for (size_t i = 0; i < most.size() && i < 6; ++i)
+		{
+			const CTextureUploadStats &stats = _TextureUploadStats[*most[i].second];
+			if (i)
+				line += "; ";
+			line += NLMISC::toString("'%s' %u uploads, %" NL_I64 "u bytes, %u textures",
+			    most[i].second->c_str(), stats.Uploads, stats.Bytes, (uint)stats.Textures.size());
+		}
+		nlinfo("3D: textures uploaded most often over these %u frames, of %u names: %s",
+		    _StreamStats.Frames, (uint)_TextureUploadStats.size(), line.c_str());
+		_TextureUploadStats.clear();
+	}
+
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
 	_StreamStats.LastTime = now;
+}
+
+// --------------------------------------------------
+void CDriverGL3::countTextureUpload(ITexture &tex, uint64 bytes)
+{
+	// A texture that is shared has a name of its own. One that is not is named by its
+	// class, which says who fills it, and its size.
+	std::string name;
+	if (tex.supportSharing())
+		name = tex.getShareName();
+	else
+		name = NLMISC::toString("%s %ux%u", typeid(tex).name(), (uint)tex.getWidth(), (uint)tex.getHeight());
+
+	CTextureUploadStats &stats = _TextureUploadStats[name];
+	++stats.Uploads;
+	stats.Bytes += bytes;
+	stats.Textures.insert(&tex);
 }
 #endif
 

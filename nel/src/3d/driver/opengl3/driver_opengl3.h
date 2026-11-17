@@ -2007,8 +2007,30 @@ private:
 		uint32 VertexLocksPersistent; // Locks of a vertex buffer whose storage stays mapped: no GL call
 		uint32 VertexRingAdds; // Buffers added to the rings of such vertex buffers
 		uint32 VertexRingDiscards; // Times that a buffer of such a ring got new storage, the ring being at its limit
+		uint32 TextureWholeUploads; // Textures that setupTextureEx gave to GL as a whole
+		uint64 TextureWholeBytes; // Bytes of their pixels, all mipmaps (none for a texture that only got its storage)
+		uint32 TexturePartUploads; // Textures of which setupTextureEx gave rectangles to GL
+		uint32 TexturePartRects; // Those rectangles, one for each mipmap they were given for
+		uint64 TexturePartBytes; // Bytes of their pixels
+		uint32 TextureDirectUploads; // Calls of uploadTexture that gave pixels to GL
+		uint64 TextureDirectBytes; // Bytes of those
 		NLMISC::TTime LastTime;
 	} _StreamStats;
+	// The uploads of textures since the last log line, by the name the log gives them
+	struct CTextureUploadStats
+	{
+		uint32 Uploads; // Times that pixels of a texture of the name were given to GL: once for a whole texture, once for the rectangles of one setup, once per uploadTexture
+		uint64 Bytes; // Bytes of those pixels
+		std::set<const ITexture *> Textures; // The textures of the name
+		CTextureUploadStats()
+		    : Uploads(0)
+		    , Bytes(0)
+		{
+		}
+	};
+	std::map<std::string, CTextureUploadStats> _TextureUploadStats;
+	/// Count an upload of a texture under its name: the share name of a texture that is shared, else its class and size
+	void countTextureUpload(ITexture &tex, uint64 bytes);
 	void displayStreamStats();
 #endif
 

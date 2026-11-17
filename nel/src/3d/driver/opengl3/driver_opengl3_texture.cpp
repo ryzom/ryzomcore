@@ -887,6 +887,10 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			_AllocatedTextureMemory-= gltext->TextureMemory;
 			gltext->TextureMemory= 0;
 
+#if NL3D_GL3_STREAM_STATS
+			// The bytes of the pixels that are given to GL below
+			uint64 statBytes = 0;
+#endif
 
 			if (tex.isTextureCube())
 			{
@@ -946,6 +950,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							glTexImage2D (NLCubeFaceToGLCubeFace[nText], i, glfmt, w, h, 0, glSrcFmt, glSrcType, ptr);
 							bAllUploaded = true;
 							NEL_MEASURE_UPLOAD_TIME_END
+#if NL3D_GL3_STREAM_STATS
+							statBytes += pTInTC->getPixels(i).size();
+#endif
 						}
 						else
 						{
@@ -1001,6 +1008,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 								nglCompressedTexImage2D(GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
 															tex.getWidth(i),tex.getHeight(i), 0, size, ptr);
 								bAllUploaded = true;
+#if NL3D_GL3_STREAM_STATS
+								statBytes += size;
+#endif
 							}
 							else
 							{
@@ -1076,6 +1086,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 								glTexImage2D (gltext->TextureMode, i, glfmt, w, h, 0,glSrcFmt, glSrcType, ptr);
 								NEL_MEASURE_UPLOAD_TIME_END
 								bAllUploaded = true;
+#if NL3D_GL3_STREAM_STATS
+								statBytes += uploadTex.getPixels(i).size();
+#endif
 							}
 							else
 							{
@@ -1093,6 +1106,12 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 
 			// profiling. add new TextureMemory usage.
 			_AllocatedTextureMemory+= gltext->TextureMemory;
+
+#if NL3D_GL3_STREAM_STATS
+			++_StreamStats.TextureWholeUploads;
+			_StreamStats.TextureWholeBytes += statBytes;
+			countTextureUpload(tex, statBytes);
+#endif
 		}
 		// b. Load part of the texture case.
 		//==================================
@@ -1114,6 +1133,11 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				GLint glfmt = getGlTextureFormat(tex, dummy);
 				GLint glSrcFmt = getGlSrcTextureFormat(tex, glfmt);
 				GLenum glSrcType = getGlSrcTextureComponentType(tex, glSrcFmt);
+
+#if NL3D_GL3_STREAM_STATS
+				// The bytes of the pixels that are given to GL below
+				uint64 statBytes = 0;
+#endif
 
 				sint nMipMaps;
 #ifndef USE_OPENGLES3
@@ -1160,6 +1184,11 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						if (bUpload)
 						{
 							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
+
+#if NL3D_GL3_STREAM_STATS
+							++_StreamStats.TexturePartRects;
+							statBytes += (uint64)(rectW * rectH * pixelSize);
+#endif
 
 							// Check if we need to convert Alpha/Luminance to RGBA
 							if (pixelSize == 1 && glSrcFmt == GL_RGBA)
@@ -1276,6 +1305,11 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
 							sint rectBytes = rectW * rectH * pixelSize;
 
+#if NL3D_GL3_STREAM_STATS
+							++_StreamStats.TexturePartRects;
+							statBytes += (uint64)rectBytes;
+#endif
+
 							// Orphan PBO (driver allocates fresh storage, no sync needed)
 							nglBufferData(GL_PIXEL_UNPACK_BUFFER, rectBytes, nullptr, GL_STREAM_DRAW);
 
@@ -1316,6 +1350,12 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#endif
+
+#if NL3D_GL3_STREAM_STATS
+				++_StreamStats.TexturePartUploads;
+				_StreamStats.TexturePartBytes += statBytes;
+				countTextureUpload(tex, statBytes);
 #endif
 			}
 		}
@@ -1445,6 +1485,11 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
 										glfmt, w, h, 0, imageSize, ptr);
 		}
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.TextureDirectUploads;
+		_StreamStats.TextureDirectBytes += (uint64)imageSize;
+		countTextureUpload(tex, (uint64)imageSize);
+#endif
 	}
 	else
 	{
@@ -1463,6 +1508,17 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 		glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+
+#if NL3D_GL3_STREAM_STATS
+		{
+			// The bytes of a pixel, from the size of the mipmap
+			const uint64 pixelSize = (w > 0 && h > 0) ? (uint64)tex.getPixels(nNumMipMap).size() / ((uint64)w * (uint64)h) : 0;
+			const uint64 statBytes = (uint64)(x1 - x0) * (uint64)(y1 - y0) * pixelSize;
+			++_StreamStats.TextureDirectUploads;
+			_StreamStats.TextureDirectBytes += statBytes;
+			countTextureUpload(tex, statBytes);
+		}
+#endif
 	}
 
 	// Disable texture 0
