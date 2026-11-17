@@ -68,6 +68,7 @@
 #include "../global.h"
 #include "../connection.h"
 #include "../main_loop.h"
+#include "../misc.h"
 #include "../interface_v3/people_interraction.h"
 #include "../time_client.h"
 #include "../pacs_client.h"
@@ -1927,6 +1928,8 @@ void CEditor::waitScenarioScreen()
 
 		// Display
 		Driver->swapBuffers();
+		// (a screen of the interface alone, as the login and character selection screens: paced as they are)
+		limitOutgameFrameRate();
 		//
 		if (NetMngr.getConnectionState() == CNetManager::Disconnect)
 		{
