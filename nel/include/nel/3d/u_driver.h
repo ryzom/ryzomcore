@@ -236,6 +236,8 @@ public:
 	 *  reports then: with some drivers and window systems a minimized window keeps its size, with others it has
 	 *  no area. Return false when there is no window.
 	 *  The calling application may leave time to other applications when it is the case, as nothing of it is shown.
+	 *  The answer is for a window of the driver's own; for a window handed to the driver that is a part of another
+	 *  window, see IDriver::isWindowMinimized.
 	 */
 	virtual bool			isWindowMinimized() const = 0;
 

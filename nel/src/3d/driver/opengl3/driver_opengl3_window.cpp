@@ -303,7 +303,9 @@ bool GlWndProc(CDriverGL3 *driver, XEvent &e)
 		// the window manager minimized or restored the window, or changed another of its states
 		if (e.xproperty.window == (Window)driver->_win && e.xproperty.atom == XA_WM_STATE)
 			driver->_WindowMinimized = e.xproperty.state == PropertyNewValue && isWindowStateHidden(driver->_dpy, driver->_win);
-		break;
+		// (not answered as handled: the change of a property is nothing the driver takes from an application
+		// that looks at the answer for its own handling)
+		return false;
 
 		case Expose:
 //		nlwarning("Expose event");

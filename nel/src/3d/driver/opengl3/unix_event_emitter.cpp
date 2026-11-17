@@ -89,7 +89,7 @@ void CUnixEventEmitter::init(Display *dpy, Window win, NL3D::IDriver *driver, bo
 	TODO: implements all useful events processing
 	ButtonMotionMask|Button1MotionMask|Button2MotionMask|
 	Button3MotionMask|Button4MotionMask|Button5MotionMask|KeymapStateMask|
-	SubstructureNotifyMask|VisibilityChangeMask|PropertyChangeMask|
+	SubstructureNotifyMask|VisibilityChangeMask|
 	ColormapChangeMask|OwnerGrabButtonMask
 */
 
