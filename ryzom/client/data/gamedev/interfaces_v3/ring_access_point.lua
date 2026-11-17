@@ -214,7 +214,8 @@ function RingAccessPoint:isAllowedSession(allowFreeTrial)
 	
 	local freeTrial = isPlayerFreeTrial()
 
-	return (not freeTrial or (freeTrial and allowFreeTrial~=0))
+	-- (AllowFreeTrial is a boolean: the test against 0 it had was true for every session)
+	return (not freeTrial or allowFreeTrial == true)
 end
 
 --***********************************************************************
