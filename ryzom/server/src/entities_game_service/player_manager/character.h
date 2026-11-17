@@ -3045,6 +3045,9 @@ public:
 	/// apply regenerate and clip currents value
 	void applyRegenAndClipCurrentValue();
 
+	/// compute the current walk/run speed
+	void applyCurrentSpeed();
+
 	/// Kill the player
 	void killMe();
 

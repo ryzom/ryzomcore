@@ -179,6 +179,7 @@ void CUserControls::init()
 	_MouseCaptured = false;
 
 	_NeedReleaseForward = false;
+	_AfkExitRequested = false;
 	_NextForwardCancelMoveTo = false;
 
 }// init //
@@ -1045,9 +1046,24 @@ void CUserControls::commonMove()
 //-----------------------------------------------
 void CUserControls::move()
 {
-	// If the user is sit(), remove any move
+	// If the user is sit() or afk, remove any move
 	if( UserEntity->isSit() || UserEntity->isAFK() )
+	{
+		// but any move input (forward, backward, strafe, autowalk) leaves afk
+		if( _DirectionMove & (forward|backward|left|right|autowalk) )
+		{
+			if( !_AfkExitRequested )
+			{
+				_AfkExitRequested = true;
+				UserEntity->setAFK(false);
+			}
+		}
+		else
+			_AfkExitRequested = false;
 		_DirectionMove= none;
+	}
+	else
+		_AfkExitRequested = false;
 
 	if( _DirectionMove != none )
 	{
@@ -1365,7 +1381,8 @@ void CUserControls::checkSpeedFactor()
 {
 	if (!IngameDbMngr.initInProgress())
 	{
-		if (UserEntity->isSit())
+		// the server sets the speed to zero when sit or afk: not a speed problem
+		if (UserEntity->isSit() || UserEntity->isAFK())
 			return;
 
 		// check if speed factor is zero, and if yes, notify the player

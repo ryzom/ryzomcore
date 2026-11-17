@@ -133,6 +133,25 @@ public:
 
 	bool											ForceDontUsePrimitive;	// forces entity not to use a primitive temporarily (mount, etc.)
 	bool											CheckMotion;
+
+	/// Speed budget used by CWorldPositionManager::movePlayer() to validate player motion (see docs/gpms-player-speed-check.md)
+	struct CSpeedBudget
+	{
+		CSpeedBudget() { reset(); }
+		void reset() { Valid = false; Credit = 0.0; MovedTime = 0.0; LastTime = 0.0; StallSeen = 0.0; LastCycle = 0; StillCount = 0; InRun = false; RunTime = RunDist = RunAllowed = 0.0; }
+
+		bool				Valid;		// false until the first message after a reset (creation, teleport, control change)
+		double				Credit;		// seconds of motion (at the current speed limit) the entity is currently allowed
+		double				MovedTime;	// seconds of accepted motion, raises the cap of the credit; reset when the entity stands still
+		double				LastTime;	// real time (s) of the arrival of the last message of the entity
+		double				StallSeen;	// server stall (s, see StallTotal) seen at the last message of the entity
+		NLMISC::TGameCycle	LastCycle;	// game cycle at the last message of the entity
+		sint32				StillCount;	// consecutive messages without motion
+		bool				InRun;		// the entity is in a run: a suite of messages with motion, ended by SpeedBudgetStillMessages messages without
+		double				RunTime;	// real time (s) of the run
+		double				RunDist;	// (x,y) distance (m) requested by the client during the run
+		double				RunAllowed;	// distance (m) the speed limit alone (without SecuritySpeedFactor) allowed during the run
+	} SpeedBudget;
 	bool											HasVision;				// Entity has vision
 
 	std::vector<CEntitySheetId>						Content;
