@@ -415,18 +415,21 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	// The indices of the call go to the driver's buffers before the passes, once for all of them
 	_IndexStream.nextDraw();
 
+	// startIndex is the first vertex of the first quad (IDriver::renderRawQuads)
 	uint32 currIndex = startIndex;
 	uint32 numLeftQuads = numQuads;
 
-	// first batch of quads using the static setupped array
+	// first batch of quads using the static setupped array, which has quad k at vertex 4 * k:
+	// it serves a first vertex that is a multiple of 4
 	CIndexRange tableRange;
 	uint tableFirst = 0;
 	uint tableQuads = 0;
-	if (startIndex < QUAD_BATCH_SIZE)
+	const uint32 startQuad = startIndex / 4;
+	if ((startIndex & 3) == 0 && startQuad < QUAD_BATCH_SIZE)
 	{
 		// first quads (as pair of tri to have guaranteed orientation)
-		tableFirst = startIndex;
-		tableQuads = std::min(QUAD_BATCH_SIZE - startIndex, numQuads);
+		tableFirst = startQuad;
+		tableQuads = std::min(QUAD_BATCH_SIZE - startQuad, numQuads);
 		// The whole table, the same for every call: written when the driver does not have it
 		if (!useIndices(_QuadIndices, defaultIndices, sizeof(defaultIndices), false, tableRange))
 			return false;
