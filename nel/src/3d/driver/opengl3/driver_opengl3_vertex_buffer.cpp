@@ -92,23 +92,40 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 	m_ReadLockDirtyRanges = 0;
 	m_ReadLockSum = 0;
 	m_ReadLockWriteWarned = false;
+	m_Size = size;
+	m_Persistent = false;
 
 	// Allocate shadow buffer for CpuReadWrite and PartialWrite (CPU reads/writes go here)
 	if (preferred == CVertexBuffer::CpuReadWrite || preferred == CVertexBuffer::PartialWrite)
 		m_ShadowData.resize(size, 0);
 
-	for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	for (GLsizei i = 0; i < NL3D_GL3_VERTEX_BUFFER_RING_MAX; ++i)
 	{
 		m_VertexObjectId[i] = 0;
 		m_FrameInFlight[i] = NL3D_GL3_BUFFER_NOT_IN_FLIGHT;
+		m_Mapping[i] = nullptr;
 	}
+	m_RingSize = vbgl3BufferForType(preferred);
+
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
+	// Stream mode has buffer storage. A vertex buffer that is written where it is drawn
+	// from gets storage that stays mapped: one buffer, to which the locks of the
+	// FullRewrite usage add the others of the ring as they need them.
+	if (drv->_StreamMode && (preferred == CVertexBuffer::FullRewrite || preferred == CVertexBuffer::UnsynchronizedWrite))
+	{
+		m_Persistent = true;
+		m_RingSize = 1;
+		if (!createPersistentBuffer(0))
+			invalidate(); // nothing is drawn, and the vertex buffer is set up again after the frame
+		return;
+	}
+#endif
 
 	// Create ids
-	GLsizei nbBuff = vbgl3BufferForType(preferred);
-	nglGenBuffers(nbBuff, m_VertexObjectId);
+	nglGenBuffers(m_RingSize, m_VertexObjectId);
 
 	// Initialize
-	for (GLsizei i = 0; i < nbBuff; ++i)
+	for (GLsizei i = 0; i < m_RingSize; ++i)
 	{
 		drv->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
 		nglBufferData(GL_ARRAY_BUFFER, size, nullptr, drv->vertexBufferUsageGL3(preferred));
@@ -120,18 +137,7 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 CVertexBufferGL3::~CVertexBufferGL3()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
-	for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
-	{
-		if (m_VertexObjectId[i])
-		{
-			GLuint id = m_VertexObjectId[i];
-			nlassert(nglIsBuffer(id));
-			// GL takes the buffer out of its bindings, the state cache follows
-			if (m_Driver)
-				m_Driver->_DriverGLStates.arrayBufferDeleted(id);
-			nglDeleteBuffers(1, &id);
-		}
-	}
+	deleteBuffers();
 	if (m_StagingBufferId)
 	{
 		nglDeleteBuffers(1, &m_StagingBufferId);
@@ -172,6 +178,25 @@ void *CVertexBufferGL3::lock()
 			nlassert(!m_DummyVB.empty());
 			return &m_DummyVB[0];
 		}
+
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
+		if (m_Persistent)
+		{
+			// The first buffer of the ring again, with storage that stays mapped
+			m_RingSize = 1;
+			m_CurrentIndex = 0;
+			m_CurrentInFlight = false;
+			if (!createPersistentBuffer(0))
+			{
+				m_Driver->incrementResetCounter();
+				return &m_DummyVB[0];
+			}
+			NLMISC::contReset(m_DummyVB);
+			m_Invalid = false;
+			m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
+			return lockPersistent();
+		}
+#endif
 
 		// Create ids
 		glGetError();
@@ -227,11 +252,21 @@ void *CVertexBufferGL3::lock()
 		return m_VertexPtr;
 	}
 
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
+	// Storage that stays mapped: no GL interaction needed either
+	if (m_Persistent)
+		return lockPersistent();
+#endif
+
 	TTicks	beforeLock = 0;
 	if (m_Driver->_VBHardProfiling)
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
+
+#if NL3D_GL3_STREAM_STATS
+	++m_Driver->_StreamStats.VertexLocksMapped[m_MemType];
+#endif
 
 	// Invalidate when updating volatile buffers, framerate from 24fps to 38fps in reference test on AMD platform
 	switch (m_MemType)
@@ -328,6 +363,9 @@ void CVertexBufferGL3::unlock()
 		return;
 	}
 
+	// Storage that stays mapped: the draws that follow see what was written
+	if (m_Persistent) return;
+
 	if (!m_VertexObjectId[m_CurrentIndex]) return;
 	TTicks	beforeLock = 0;
 	if (m_Driver->_VBHardProfiling)
@@ -366,6 +404,152 @@ void CVertexBufferGL3::unlock(uint /* startVert */,uint /* endVert */)
 	H_AUTO_OGL(CVertexBufferGLARB_unlock)
 	unlock(); // can't do a lock on a range of the vb..
 }
+
+// ***************************************************************************
+
+void *CVertexBufferGL3::getArrayPointer()
+{
+	H_AUTO_OGL(CVertexBufferGL3_getArrayPointer);
+
+	// The vertices start at the first byte of the GL buffer, also while a lock is held:
+	// a buffer whose storage stays mapped can be drawn from then
+	return nullptr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferGL3::deleteBuffer(GLsizei slot)
+{
+	H_AUTO_OGL(CVertexBufferGL3_deleteBuffer);
+
+	GLuint id = m_VertexObjectId[slot];
+	if (!id)
+		return;
+
+	nlassert(nglIsBuffer(id));
+	if (m_Driver)
+	{
+		if (m_Mapping[slot])
+		{
+			m_Driver->_DriverGLStates.bindArrayBuffer(id);
+			nglUnmapBuffer(GL_ARRAY_BUFFER);
+		}
+		// GL takes the buffer out of its bindings, the state cache follows
+		m_Driver->_DriverGLStates.arrayBufferDeleted(id);
+	}
+	// GL keeps the storage for the draws that still read it
+	nglDeleteBuffers(1, &id);
+	m_VertexObjectId[slot] = 0;
+	m_Mapping[slot] = nullptr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferGL3::deleteBuffers()
+{
+	H_AUTO_OGL(CVertexBufferGL3_deleteBuffers);
+
+	for (GLsizei i = 0; i < NL3D_GL3_VERTEX_BUFFER_RING_MAX; ++i)
+		deleteBuffer(i);
+}
+
+// ***************************************************************************
+
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
+
+bool CVertexBufferGL3::createPersistentBuffer(GLsizei slot)
+{
+	H_AUTO_OGL(CVertexBufferGL3_createPersistentBuffer);
+
+	nlassert(!m_VertexObjectId[slot]);
+
+	nglGenBuffers(1, &m_VertexObjectId[slot]);
+	m_Driver->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[slot]);
+	// Persistent: GL allows drawing from the buffer while it is mapped. Coherent: what
+	// is written through the mapping is seen by the draws that follow, without a flush.
+	const GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+	nglBufferStorage(GL_ARRAY_BUFFER, m_Size, nullptr, flags);
+	m_Mapping[slot] = nglMapBufferRange(GL_ARRAY_BUFFER, 0, m_Size, flags);
+	m_FrameInFlight[slot] = NL3D_GL3_BUFFER_NOT_IN_FLIGHT;
+	if (!m_Mapping[slot])
+	{
+		if (!m_Driver->_VertexStorageFailureWarned)
+		{
+			m_Driver->_VertexStorageFailureWarned = true;
+			nlwarning("3D: cannot create and map a buffer of %u bytes with glBufferStorage for the vertex buffer '%s'. "
+			          "It is not drawn until it gets one",
+			    m_Size, VB->getName().c_str());
+		}
+		deleteBuffer(slot);
+		return false;
+	}
+	m_Driver->_VertexStorageFailureWarned = false;
+	return true;
+}
+
+// ***************************************************************************
+
+void *CVertexBufferGL3::lockPersistent()
+{
+	H_AUTO_OGL(CVertexBufferGL3_lockPersistent);
+
+	if (m_MemType == CVertexBuffer::FullRewrite && m_CurrentInFlight)
+	{
+		// The vertices have been drawn since the last lock: the buffer is left to those
+		// draws. The caller writes all its vertices again, into the buffer of the ring
+		// that was drawn longest ago: the one after the current (in a ring of one, the
+		// current one itself).
+		GLsizei next = (m_CurrentIndex + 1) % m_RingSize;
+		if (m_FrameInFlight[next] != NL3D_GL3_BUFFER_NOT_IN_FLIGHT
+		    && m_FrameInFlight[next] >= m_Driver->getSwapBufferInFlight())
+		{
+			// The GPU has not finished the frame that drew it last, and then none of the ring is free
+			if (m_RingSize < NL3D_GL3_VERTEX_BUFFER_RING_MAX)
+			{
+				// One more buffer, behind the current one
+				next = m_CurrentIndex + 1;
+				for (GLsizei i = m_RingSize; i > next; --i)
+				{
+					m_VertexObjectId[i] = m_VertexObjectId[i - 1];
+					m_FrameInFlight[i] = m_FrameInFlight[i - 1];
+					m_Mapping[i] = m_Mapping[i - 1];
+				}
+				++m_RingSize;
+				m_VertexObjectId[next] = 0;
+				m_Mapping[next] = nullptr;
+#if NL3D_GL3_STREAM_STATS
+				++m_Driver->_StreamStats.VertexRingAdds;
+#endif
+			}
+			else
+			{
+				// The ring is at its limit: that buffer is made again, with new storage
+				deleteBuffer(next);
+#if NL3D_GL3_STREAM_STATS
+				++m_Driver->_StreamStats.VertexRingDiscards;
+#endif
+			}
+			if (!createPersistentBuffer(next))
+			{
+				// As a map that fails: nothing is drawn, and the vertex buffer is set up again after the frame
+				m_CurrentIndex = next;
+				invalidate();
+				return &m_DummyVB[0];
+			}
+		}
+		m_CurrentIndex = next;
+		m_FrameInFlight[next] = NL3D_GL3_BUFFER_NOT_IN_FLIGHT;
+		m_CurrentInFlight = false;
+	}
+
+#if NL3D_GL3_STREAM_STATS
+	++m_Driver->_StreamStats.VertexLocksPersistent;
+#endif
+	m_VertexPtr = m_Mapping[m_CurrentIndex];
+	return m_VertexPtr;
+}
+
+#endif
 
 // ***************************************************************************
 
@@ -633,7 +817,8 @@ void CVertexBufferGL3::invalidate()
 	// Buffer is deleted at end of frame only
 	m_Invalid = true;
 	m_Driver->incrementResetCounter();
-	m_DummyVB.resize(VB->getNumVertices() * VB->getVertexSize(), 0);
+	// As large as the GL buffers: the engine writes up to the capacity of the vertex buffer through a lock
+	m_DummyVB.resize(m_Size, 0);
 	// insert in lost vb list
 	m_Driver->_LostVBList.push_front(this);
 	m_IteratorInLostVBList = m_Driver->_LostVBList.begin();

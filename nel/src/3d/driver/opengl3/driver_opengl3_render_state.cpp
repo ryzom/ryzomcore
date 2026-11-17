@@ -370,6 +370,7 @@ bool CDriverGL3::useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const 
 				CStreamStats::TBlockKind kind = CStreamStats::BlockUser;
 				if (&block == &_CameraUBOBlock) kind = CStreamStats::BlockCamera;
 				else if (&block == &_LightTableUBOBlock) kind = CStreamStats::BlockLightTable;
+				else if (&block == &_UserLightUBOBlock) kind = CStreamStats::BlockUserLights;
 				else if (&block == &_LightMapDynUBOBlock) kind = CStreamStats::BlockLightMapLight;
 				else if (&block == &_ObjectUBOBlock) kind = CStreamStats::BlockObject;
 				else if (binding == NL_BUILTIN_MATERIAL_BINDING) kind = CStreamStats::BlockMaterial;

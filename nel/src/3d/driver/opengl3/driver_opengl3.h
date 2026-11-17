@@ -144,6 +144,14 @@ using NLMISC::CVector;
 #define NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when none can be given up
 
+// 1: in stream mode, a vertex buffer of the FullRewrite or UnsynchronizedWrite usage has
+// buffer storage that stays mapped for as long as it lives, and a lock of it costs no GL
+// call (CVertexBufferGL3). 0: its GL buffer is mapped for every lock, as in per-buffer
+// mode, for comparison.
+#define NL3D_GL3_PERSISTENT_VERTEX_BUFFERS 1
+// The most buffers that the ring of a FullRewrite vertex buffer with such storage grows to
+#define NL3D_GL3_PERSISTENT_RING_MAX (4 * NL3D_GL3_BUFFER_QUEUE_MAX)
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -1340,17 +1348,25 @@ private:
 	bool						_LightTableMode;
 	std::vector<CLight>			_LightTable;
 
-	// Light UBO (shared by light table mode and non-table fallback)
-	CUniformBlockGL3			_LightTableUBOBlock; // Where the driver has the block, always _MaxLightTableSize entries
+	// Light UBO. The light table mode and the mode without a table each have a block with
+	// their lights, and the draw binds the one of its mode: draws of the two modes follow
+	// each other within a frame (the scenes against what is drawn outside of them), and
+	// neither block is written because the other mode drew.
+	CUniformBlockGL3			_LightTableUBOBlock; // Where the driver has the block of the light table, always _MaxLightTableSize entries
+	CUniformBlockGL3			_UserLightUBOBlock; // Where it has the block of the mode without a table: the user lights as its first MaxLight entries
 	bool						_LightTableDirty; // Light table entries changed
-	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
+	bool						_UserLightUBODirty; // _UserLight[] or _LightEnable[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
 	CLightTableUBOEntry			_LightTableUBOWritten[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // The entries that _LightTableUBOBlock holds, when the driver still has the block
 	uint						_LightTableUBOWrittenCount; // How many of them
+	CLightTableUBOEntry			_UserLightUBOWritten[MaxLight]; // The entries that _UserLightUBOBlock holds, when the driver still has the block
+	uint						_UserLightUBOWrittenCount; // How many of them
 	void						uploadLightTableUBO();
-	/// Bring _LightTableUBOBlock to the given entries, writing no more than differs (see the function), and bind it
-	void						useLightTableBlock(const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
+	/// Bring a block of lights to the given entries, writing no more than differs (see the function), and bind it.
+	/// written and writtenCount are the entries that the block holds: the copy that is kept for this block.
+	void						useLightTableBlock(CUniformBlockGL3 &block, CLightTableUBOEntry *written, uint &writtenCount,
+								    const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
 
 	// Per-object light table selection (set by setLights, used by setupUniforms)
 	sint16						_LightTableObjIndices[MaxLight];
@@ -1916,6 +1932,9 @@ private:
 	 */
 	bool _StreamMode;
 
+	// The log has the line about storage that stays mapped that a vertex buffer could not get (see CVertexBufferGL3)
+	bool _VertexStorageFailureWarned;
+
 	// Stream mode: the uniform blocks are written into this stream, and bound as ranges of its buffers
 	CStreamBufferGL3 _UniformStream;
 	/** The one way to use a uniform block: writes the data when asked to (write) or when
@@ -1961,6 +1980,7 @@ private:
 		{
 			BlockCamera = 0,
 			BlockLightTable,
+			BlockUserLights,
 			BlockLightMapLight,
 			BlockObject,
 			BlockMaterial,
@@ -1982,6 +2002,10 @@ private:
 		uint64 IndexObjectUploadBytes; // Bytes of those
 		uint32 ShadowUploads; // Times that a vertex buffer with a shadow copy gave its GL buffer vertices
 		uint64 ShadowUploadBytes; // Bytes of those
+		uint32 VertexLocksMapped[CVertexBuffer::UsageCount]; // Locks of a vertex buffer that mapped its GL buffer, by the usage of the vertex buffer
+		uint32 VertexLocksPersistent; // Locks of a vertex buffer whose storage stays mapped: no GL call
+		uint32 VertexRingAdds; // Buffers added to the rings of such vertex buffers
+		uint32 VertexRingDiscards; // Times that a buffer of such a ring got new storage, the ring being at its limit
 		NLMISC::TTime LastTime;
 	} _StreamStats;
 	void displayStreamStats();
