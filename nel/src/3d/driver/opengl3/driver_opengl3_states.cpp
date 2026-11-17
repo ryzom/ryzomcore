@@ -89,6 +89,7 @@ CDriverGLStates3::CDriverGLStates3()
 	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
 		m_VertexAttribArrayEnabled[i] = false;
 	m_CurrArrayBuffer = 0;
+	m_CurElementArrayBuffer = 0;
 
 	// Texture state
 	m_CurrentActiveTexture = 0;
@@ -581,6 +582,38 @@ void CDriverGLStates3::bindArrayBuffer(uint objectID)
 	{
 		forceBindArrayBuffer(objectID);
 	}
+}
+
+void CDriverGLStates3::forceBindElementArrayBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_forceBindElementArrayBuffer)
+
+	// The binding belongs to the bound VAO, and the cache is the one of the default VAO
+	if (m_CurVAO != m_DefaultVAO)
+		forceBindVertexArray(m_DefaultVAO);
+
+	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+	m_CurElementArrayBuffer = id;
+}
+
+void CDriverGLStates3::bindElementArrayBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_bindElementArrayBuffer)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (id != m_CurElementArrayBuffer || m_CurVAO != m_DefaultVAO)
+#endif
+	{
+		forceBindElementArrayBuffer(id);
+	}
+}
+
+void CDriverGLStates3::elementArrayBufferDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_elementArrayBufferDeleted)
+	// With another VAO bound, GL leaves the buffer in the default VAO. The cache
+	// forgets it all the same: the next bind is then issued, which is right in both cases.
+	if (id && m_CurElementArrayBuffer == id)
+		m_CurElementArrayBuffer = 0;
 }
 
 // ===========================================================================

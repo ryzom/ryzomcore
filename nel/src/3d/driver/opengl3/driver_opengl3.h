@@ -112,6 +112,12 @@ using NLMISC::CVector;
 #define NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (16) // More chunks are only created when a single draw needs them
 
+// The stream that holds the indices of the draws
+#define NL3D_GL3_INDEX_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
+#define NL3D_GL3_INDEX_STREAM_ALIGNMENT (4) // A multiple of both index sizes, so that an index is never split over two words
+#define NL3D_GL3_INDEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
+#define NL3D_GL3_INDEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when a single render call needs them
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -1398,12 +1404,68 @@ private:
 	CVertexBufferInfo		_LastVB;
 	CIndexBufferInfo		_LastIB;
 
-#ifdef USE_OPENGLES3
-	/// Scratch element buffer for WebGL 2.0 (client-side index arrays not supported)
-	GLuint					_ScratchElementBuffer;
-	GLsizeiptr				_ScratchElementBufferSize;
-	void					drawElementsWebGL(GLenum mode, GLsizei count, GLenum type, const void *indices);
-#endif
+	/// \name Indices of the draws
+	// A core profile and WebGL 2.0 have no client-side index arrays: glDrawElements reads
+	// the indices from a buffer. Every render call gives the indices it draws to the
+	// driver's buffers, once for all the passes of its material, and draws from there.
+	// @{
+	/** Where the driver has a piece of index data.
+	 * In stream mode (_StreamMode) it is a range of the index stream, which the stream may
+	 * give to other data. In per-buffer mode it is a GL buffer that holds nothing else.
+	 * Only useIndices and releaseIndexBlock know which of the two it is.
+	 */
+	struct CIndexBlock
+	{
+		CStreamHandleGL3 Handle; // stream mode
+		GLuint Buffer; // per-buffer mode; 0 until the first write
+
+		CIndexBlock()
+		    : Buffer(0)
+		{
+		}
+	};
+	/// What glDrawElements reads the indices of a draw from
+	struct CIndexRange
+	{
+		GLuint Buffer;
+		uint32 Offset;
+
+		CIndexRange()
+		    : Buffer(0)
+		    , Offset(0)
+		{
+		}
+	};
+	/// One glDrawElements of a render call that has several
+	struct CIndexDraw
+	{
+		uint32 Offset; // of the indices in the data of the call
+		GLsizei Count;
+		GLenum Type;
+	};
+	/// Stream mode: the indices of the draws are written into this stream
+	CStreamBufferGL3		_IndexStream;
+	/// The indices of the render call that is going on. In per-buffer mode this is the one
+	/// buffer that every render call gives new storage with its indices.
+	CIndexBlock				_ScratchIndices;
+	/// The index table of renderRawQuads, the same for every call: written again only when the driver no longer has it
+	CIndexBlock				_QuadIndices;
+	/// The quads of a renderRawQuads call that the table does not cover: their indices, and the draws
+	std::vector<uint8>		_QuadIndexData;
+	std::vector<CIndexDraw>	_QuadDraws;
+	/** The one way to get indices to the GPU for the draws of a render call: writes them when
+	 * asked to (write) or when the driver no longer has them, and tells where they are.
+	 * In stream mode, to call after _IndexStream.nextDraw(), which begins the render call.
+	 * \return false when the write failed, which the stream has logged: the render call then draws nothing
+	 */
+	bool					useIndices(CIndexBlock &block, const void *data, uint32 size, bool write, CIndexRange &range);
+	/// Begin a render call that draws count indices of the active index buffer from firstIndex on, and write them
+	bool					streamIndices(uint32 firstIndex, uint32 count, CIndexRange &range, GLenum &type);
+	/// glDrawElements with the indices at an offset from a range
+	void					drawIndices(GLenum mode, GLsizei count, GLenum type, const CIndexRange &range, uint32 offset = 0);
+	/// Delete the GL buffer of a piece of index data, if it has one
+	void					releaseIndexBlock(CIndexBlock &block);
+	// @}
 
 	/// Sets up the rendering parameters for the normal shader
 	void setupNormalMaterial();
@@ -1709,7 +1771,7 @@ private:
 	 * Per-buffer mode (false): every owner of such data has a GL buffer of its own, which
 	 * gets new storage with the data for every write.
 	 * The code that uses the data does not know the mode: it goes through one function per
-	 * kind of data (useUniformBlock).
+	 * kind of data (useUniformBlock, useIndices).
 	 */
 	bool _StreamMode;
 
@@ -1754,6 +1816,8 @@ private:
 		uint32 MaterialWritten; // Material slots written
 		uint32 BufferWrites; // Per-buffer mode: uniform blocks written, each to its GL buffer
 		uint64 BufferBytes; // Per-buffer mode: bytes of those writes
+		uint32 IndexBufferWrites; // Per-buffer mode: writes of indices to a GL buffer
+		uint64 IndexBufferBytes; // Per-buffer mode: bytes of those writes
 		NLMISC::TTime LastTime;
 	} _StreamStats;
 	void displayStreamStats();

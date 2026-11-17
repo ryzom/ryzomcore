@@ -321,11 +321,6 @@ CDriverGL3::CDriverGL3()
 	_PixelUploadPBO = 0;
 	_StreamMode = false;
 
-#ifdef USE_OPENGLES3
-	_ScratchElementBuffer = 0;
-	_ScratchElementBufferSize = 0;
-#endif
-
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
 	memset(&_LightMapDynUBOEntry, 0, sizeof(_LightMapDynUBOEntry));
@@ -584,27 +579,31 @@ bool CDriverGL3::setupDisplay()
 				nlwarning("3D: GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT is %d, 256 is used, the largest value an implementation may ask for", (int)uniformAlignment);
 				uniformAlignment = 256;
 			}
-			// A stream that cannot be created has logged why
+			// The mode is one for all the data: a stream that cannot be created has logged
+			// why, and the ones that were created are given up
 			_StreamMode = _UniformStream.init(&_DriverGLStates, "uniform", GL_UNIFORM_BUFFER,
-			    NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE, (uint32)uniformAlignment,
-			    NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS, NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS,
-			    _SwapBufferCounter, _SwapBufferInFlight);
+			                  NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE, (uint32)uniformAlignment,
+			                  NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS, NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS,
+			                  _SwapBufferCounter, _SwapBufferInFlight)
+			    && _IndexStream.init(&_DriverGLStates, "index", GL_ELEMENT_ARRAY_BUFFER,
+			        NL3D_GL3_INDEX_STREAM_CHUNK_SIZE, NL3D_GL3_INDEX_STREAM_ALIGNMENT,
+			        NL3D_GL3_INDEX_STREAM_MIN_CHUNKS, NL3D_GL3_INDEX_STREAM_MAX_CHUNKS,
+			        _SwapBufferCounter, _SwapBufferInFlight);
+			if (!_StreamMode)
+			{
+				_UniformStream.release();
+				_IndexStream.release();
+			}
 			reason = "a stream buffer could not be created";
 		}
 #endif
 		if (_StreamMode)
-			nlinfo("3D: stream mode, the uniform blocks are written into stream buffers");
+			nlinfo("3D: stream mode, the uniform blocks and the indices of the draws are written into stream buffers");
 		else
-			nlinfo("3D: per-buffer mode, every uniform block has a GL buffer of its own: %s", reason);
+			nlinfo("3D: per-buffer mode, every uniform block has a GL buffer of its own and the indices of the draws have one: %s", reason);
 	}
 
 	nglGenBuffers(1, &_PixelUploadPBO);
-
-#ifdef USE_OPENGLES3
-	// WebGL 2.0 does not support client-side index arrays.
-	// Create a scratch element buffer for uploading index data before draw calls.
-	nglGenBuffers(1, &_ScratchElementBuffer);
-#endif
 
 	if (m_UseMegaShaders)
 	{
@@ -954,9 +953,10 @@ bool CDriverGL3::swapBuffers()
 	nldebug("Swap buffer: %u, in flight: %u", (unsigned int)_SwapBufferCounter, (unsigned int)_SwapBufferInFlight);
 #endif
 
-	// A stream goes on to the new frame, and learns which frames the GPU has finished:
+	// The streams go on to the new frame, and learn which frames the GPU has finished:
 	// their chunks can be written again. Nothing to do for a stream that is not in use.
 	_UniformStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+	_IndexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 #if NL3D_GL3_STREAM_STATS
 	displayStreamStats();
 #endif
@@ -992,11 +992,13 @@ void CDriverGL3::displayStreamStats()
 	if (_StreamMode)
 	{
 		displayOneStreamStats("uniform", _UniformStream, perFrame);
+		displayOneStreamStats("index", _IndexStream, perFrame);
 	}
 	else
 	{
-		nlinfo("3D: uniform blocks in GL buffers, per frame: %.1f writes, %.0f bytes",
-		    (float)_StreamStats.BufferWrites * perFrame, (float)_StreamStats.BufferBytes * perFrame);
+		nlinfo("3D: uniform blocks in GL buffers, per frame: %.1f writes, %.0f bytes; indices in a GL buffer, per frame: %.1f writes, %.0f bytes",
+		    (float)_StreamStats.BufferWrites * perFrame, (float)_StreamStats.BufferBytes * perFrame,
+		    (float)_StreamStats.IndexBufferWrites * perFrame, (float)_StreamStats.IndexBufferBytes * perFrame);
 	}
 
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
@@ -1043,14 +1045,18 @@ bool CDriverGL3::release()
 		delete it->PixelProgram;
 	m_PPBuiltinCache.clear();
 
-	// Delete the buffers of the uniform blocks: the ones of the blocks of the driver in
-	// per-buffer mode, the stream in stream mode. The handles into the stream go stale
-	// with it. The blocks of the materials and of the uniform buffers go with their owners.
+	// Delete the buffers of the uniform blocks and of the indices: the ones of the
+	// driver itself in per-buffer mode, the streams in stream mode. The handles into
+	// a stream go stale with it. The blocks of the materials and of the uniform
+	// buffers go with their owners.
 	releaseUniformBlock(_CameraUBOBlock);
 	releaseUniformBlock(_LightTableUBOBlock);
 	releaseUniformBlock(_LightMapDynUBOBlock);
 	releaseUniformBlock(_ObjectUBOBlock);
+	releaseIndexBlock(_ScratchIndices);
+	releaseIndexBlock(_QuadIndices);
 	_UniformStream.release();
+	_IndexStream.release();
 	// Replaced by per-material UBO slots
 	// if (_OverrideMaterialUBOId)
 	// {
@@ -1062,14 +1068,6 @@ bool CDriverGL3::release()
 		nglDeleteBuffers(1, &_PixelUploadPBO);
 		_PixelUploadPBO = 0;
 	}
-
-#ifdef USE_OPENGLES3
-	if (_ScratchElementBuffer)
-	{
-		nglDeleteBuffers(1, &_ScratchElementBuffer);
-		_ScratchElementBuffer = 0;
-	}
-#endif
 
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();

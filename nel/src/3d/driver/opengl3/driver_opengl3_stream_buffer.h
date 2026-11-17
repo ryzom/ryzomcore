@@ -64,7 +64,8 @@ struct CStreamHandleGL3
 
 /**
  * Buffer memory for data that is written once and drawn from soon after. The
- * driver keeps its uniform blocks in one.
+ * driver keeps its uniform blocks in one, and the indices of its draws in
+ * another.
  *
  * A stream is a ring of chunks, a chunk is one GL buffer. A write takes the
  * next free bytes of the head chunk. Nothing is ever written over a range that

@@ -47,7 +47,7 @@ namespace NLDRIVERGL3 {
  * - Depth range: glDepthRange()
  * - Clip planes: glEnable/glDisable(GL_CLIP_DISTANCE0..5)
  * - Vertex input: glEnableVertexAttribArray(), glDisableVertexAttribArray(),
- *   glBindBuffer(GL_ARRAY_BUFFER)
+ *   glBindBuffer(GL_ARRAY_BUFFER), glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)
  * - Textures: glActiveTexture(), glBindTexture()
  * - Framebuffer: glBindFramebuffer(GL_FRAMEBUFFER)
  * - Shader programs: glUseProgram(), glBindProgramPipeline()
@@ -229,6 +229,17 @@ public:
 	void forceBindArrayBuffer(uint objectID);
 	uint getCurrBoundArrayBuffer() const { return m_CurrArrayBuffer; }
 
+	/// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER). State of the vertex array object: like the
+	/// attrib arrays it is kept for the default VAO, which is bound again when another one is.
+	void bindElementArrayBuffer(GLuint id);
+	void forceBindElementArrayBuffer(GLuint id);
+	GLuint getCurrBoundElementArrayBuffer() const { return m_CurElementArrayBuffer; }
+
+	/// To call when a buffer that may be bound to GL_ELEMENT_ARRAY_BUFFER gets deleted: GL
+	/// takes a deleted buffer out of the bound vertex array object, and the cache forgets
+	/// it. No GL call.
+	void elementArrayBufferDeleted(GLuint id);
+
 	/// @}
 
 	/// @name Texture state
@@ -371,6 +382,7 @@ private:
 	GLuint m_CurVAO;
 	bool m_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
 	uint m_CurrArrayBuffer;
+	GLuint m_CurElementArrayBuffer; // of the default VAO
 
 	// Texture state
 	uint m_CurrentActiveTexture;

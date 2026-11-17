@@ -150,18 +150,35 @@ void CStreamBufferGL3::releaseChunks()
 
 void CStreamBufferGL3::bindBuffer(GLuint buffer)
 {
-	// Any other target is bound directly, which is right for the targets that the state cache does not track
-	if (m_Target == GL_UNIFORM_BUFFER)
+	switch (m_Target)
+	{
+	case GL_UNIFORM_BUFFER:
 		m_States->bindUniformBuffer(buffer);
-	else
+		break;
+	case GL_ELEMENT_ARRAY_BUFFER:
+		m_States->bindElementArrayBuffer(buffer);
+		break;
+	default:
+		// Any other target is bound directly, which is right for the targets that the state cache does not track
 		nglBindBuffer(m_Target, buffer);
+		break;
+	}
 }
 
 void CStreamBufferGL3::bufferDeleted(GLuint buffer)
 {
 	// GL sets the bindings of a deleted buffer back to zero, the state cache follows
-	if (m_Target == GL_UNIFORM_BUFFER)
+	switch (m_Target)
+	{
+	case GL_UNIFORM_BUFFER:
 		m_States->uniformBufferDeleted(buffer);
+		break;
+	case GL_ELEMENT_ARRAY_BUFFER:
+		m_States->elementArrayBufferDeleted(buffer);
+		break;
+	default:
+		break;
+	}
 }
 
 bool CStreamBufferGL3::warnFailure(bool &warned)
