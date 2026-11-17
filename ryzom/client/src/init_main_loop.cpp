@@ -1777,8 +1777,8 @@ void initGPUSkinningConfigUI()
 	CCtrlBaseButton *button = dynamic_cast<CCtrlBaseButton *>(
 		CWidgetManager::getInstance()->getElementFromId(
 			"ui:interface:game_config:content:char:gpu_skinning:c"));
-	// The setting cannot be changed with a driver that has no GPU skinning. Its value is not: it is the one
-	// of the configuration, which another driver uses (the scene is given the driver's answer with it).
+	// A driver that has no GPU skinning freezes the checkbox. The value of the setting is left as it is in the
+	// configuration, for a driver that has it; the scene is given the setting together with the driver's answer.
 	if (button)
 		button->setFrozen(!supported);
 }
