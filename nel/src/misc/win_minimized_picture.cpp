@@ -54,13 +54,16 @@ typedef HRESULT (WINAPI *TDwmSetIconicThumbnail)(HWND hwnd, HBITMAP hbmp, DWORD 
 typedef HRESULT (WINAPI *TDwmSetIconicLivePreviewBitmap)(HWND hwnd, HBITMAP hbmp, POINT *pptClient, DWORD dwSITFlags);
 typedef HRESULT (WINAPI *TDwmInvalidateIconicBitmaps)(HWND hwnd);
 
-// The functions were looked for, and found
+// The functions were looked for, and found. s_FunctionsTried is set last, once the rest says what was found
 bool s_FunctionsTried = false;
 bool s_FunctionsLoaded = false;
 TDwmSetWindowAttribute s_DwmSetWindowAttribute = NULL;
 TDwmSetIconicThumbnail s_DwmSetIconicThumbnail = NULL;
 TDwmSetIconicLivePreviewBitmap s_DwmSetIconicLivePreviewBitmap = NULL;
 TDwmInvalidateIconicBitmaps s_DwmInvalidateIconicBitmaps = NULL;
+
+// It was said in the log that the compositor refuses the attributes of a window
+bool s_AttributeRefusalReported = false;
 
 } // anonymous namespace
 
@@ -78,6 +81,11 @@ CWinMinimizedPicture::CWinMinimizedPicture()
 	m_PreviewWanted = false;
 	m_OutOfDatePending = false;
 	m_HandOverTime = 0;
+	m_Lingering = false;
+	m_OutOfDateTime = 0;
+	m_ThumbnailRefusalReported = false;
+	m_PreviewRefusalReported = false;
+	m_FrameStart = 0;
 }
 
 // ***************************************************************************
@@ -85,7 +93,8 @@ bool CWinMinimizedPicture::loadFunctions()
 {
 	if (s_FunctionsTried)
 		return s_FunctionsLoaded;
-	s_FunctionsTried = true;
+
+	bool loaded = false;
 
 	// The library of the system, by its full path
 	static const wchar_t fileName[] = L"\\dwmapi.dll";
@@ -96,51 +105,59 @@ bool CWinMinimizedPicture::loadFunctions()
 	{
 		DWORD error = GetLastError();
 		nlwarning("The picture of a minimized window is not available: the directory of the system is not known (error %u)", (uint)error);
-		return false;
 	}
-	if (length + fileNameLength > MAX_PATH)
+	else if (length + fileNameLength > MAX_PATH)
 	{
 		nlwarning("The picture of a minimized window is not available: the path of the directory of the system is too long (%u characters)", (uint)length);
-		return false;
 	}
-	memcpy(path + length, fileName, sizeof(fileName));
-
-	HMODULE library = LoadLibraryW(path);
-	if (!library)
+	else
 	{
-		DWORD error = GetLastError();
-		nlinfo("The picture of a minimized window is not available on this system: it has no dwmapi.dll (error %u)", (uint)error);
-		return false;
+		memcpy(path + length, fileName, sizeof(fileName));
+
+		HMODULE library = LoadLibraryW(path);
+		if (!library)
+		{
+			DWORD error = GetLastError();
+			nlinfo("The picture of a minimized window is not available on this system: it has no dwmapi.dll (error %u)", (uint)error);
+		}
+		else
+		{
+			TDwmSetWindowAttribute setWindowAttribute = (TDwmSetWindowAttribute)GetProcAddress(library, "DwmSetWindowAttribute");
+			TDwmSetIconicThumbnail setIconicThumbnail = (TDwmSetIconicThumbnail)GetProcAddress(library, "DwmSetIconicThumbnail");
+			TDwmSetIconicLivePreviewBitmap setIconicLivePreviewBitmap = (TDwmSetIconicLivePreviewBitmap)GetProcAddress(library, "DwmSetIconicLivePreviewBitmap");
+			TDwmInvalidateIconicBitmaps invalidateIconicBitmaps = (TDwmInvalidateIconicBitmaps)GetProcAddress(library, "DwmInvalidateIconicBitmaps");
+
+			const char *missing = NULL;
+			if (!setWindowAttribute)
+				missing = "DwmSetWindowAttribute";
+			else if (!setIconicThumbnail)
+				missing = "DwmSetIconicThumbnail";
+			else if (!setIconicLivePreviewBitmap)
+				missing = "DwmSetIconicLivePreviewBitmap";
+			else if (!invalidateIconicBitmaps)
+				missing = "DwmInvalidateIconicBitmaps";
+			if (missing)
+			{
+				nlinfo("The picture of a minimized window is not available on this system: its dwmapi.dll has no %s", missing);
+				FreeLibrary(library);
+			}
+			else
+			{
+				// the library stays loaded for as long as the process runs
+				s_DwmSetWindowAttribute = setWindowAttribute;
+				s_DwmSetIconicThumbnail = setIconicThumbnail;
+				s_DwmSetIconicLivePreviewBitmap = setIconicLivePreviewBitmap;
+				s_DwmInvalidateIconicBitmaps = invalidateIconicBitmaps;
+				loaded = true;
+			}
+		}
 	}
 
-	s_DwmSetWindowAttribute = (TDwmSetWindowAttribute)GetProcAddress(library, "DwmSetWindowAttribute");
-	s_DwmSetIconicThumbnail = (TDwmSetIconicThumbnail)GetProcAddress(library, "DwmSetIconicThumbnail");
-	s_DwmSetIconicLivePreviewBitmap = (TDwmSetIconicLivePreviewBitmap)GetProcAddress(library, "DwmSetIconicLivePreviewBitmap");
-	s_DwmInvalidateIconicBitmaps = (TDwmInvalidateIconicBitmaps)GetProcAddress(library, "DwmInvalidateIconicBitmaps");
-
-	const char *missing = NULL;
-	if (!s_DwmSetWindowAttribute)
-		missing = "DwmSetWindowAttribute";
-	else if (!s_DwmSetIconicThumbnail)
-		missing = "DwmSetIconicThumbnail";
-	else if (!s_DwmSetIconicLivePreviewBitmap)
-		missing = "DwmSetIconicLivePreviewBitmap";
-	else if (!s_DwmInvalidateIconicBitmaps)
-		missing = "DwmInvalidateIconicBitmaps";
-	if (missing)
-	{
-		nlinfo("The picture of a minimized window is not available on this system: its dwmapi.dll has no %s", missing);
-		s_DwmSetWindowAttribute = NULL;
-		s_DwmSetIconicThumbnail = NULL;
-		s_DwmSetIconicLivePreviewBitmap = NULL;
-		s_DwmInvalidateIconicBitmaps = NULL;
-		FreeLibrary(library);
-		return false;
-	}
-
-	// the library stays loaded for as long as the process runs
-	s_FunctionsLoaded = true;
-	return true;
+	// What was found is complete before it is said to be known: a thread that comes in meanwhile looks the
+	// functions up for itself, with the same result
+	s_FunctionsLoaded = loaded;
+	s_FunctionsTried = true;
+	return loaded;
 }
 
 // ***************************************************************************
@@ -178,16 +195,11 @@ void CWinMinimizedPicture::release(HWND wnd)
 }
 
 // ***************************************************************************
-bool CWinMinimizedPicture::setAttribute(HWND wnd, DWORD attribute, const char *name, bool value)
+bool CWinMinimizedPicture::setAttribute(HWND wnd, DWORD attribute, bool value, HRESULT &hr)
 {
 	BOOL attributeValue = value ? TRUE : FALSE;
-	HRESULT hr = s_DwmSetWindowAttribute(wnd, attribute, &attributeValue, sizeof(attributeValue));
-	if (FAILED(hr))
-	{
-		nlwarning("Minimized window: the attribute %s of the window is not set to %s (error 0x%08x)", name, value ? "true" : "false", (uint)hr);
-		return false;
-	}
-	return true;
+	hr = s_DwmSetWindowAttribute(wnd, attribute, &attributeValue, sizeof(attributeValue));
+	return SUCCEEDED(hr);
 }
 
 // ***************************************************************************
@@ -203,12 +215,28 @@ void CWinMinimizedPicture::declarePictures(HWND wnd)
 	}
 
 	// With the first attribute the compositor shows the bitmaps of the window in place of what it kept of
-	// the window itself, with the second it asks the window for them
-	if (!setAttribute(wnd, s_AttributeForceIconicRepresentation, "DWMWA_FORCE_ICONIC_REPRESENTATION", true))
-		return;
-	if (!setAttribute(wnd, s_AttributeHasIconicBitmap, "DWMWA_HAS_ICONIC_BITMAP", true))
+	// the window itself, with the second it asks the window for them. A compositor that refuses them (one
+	// that does not compose, on an older system) is the absence of the feature: it is said once
+	HRESULT hr;
+	const char *refused = NULL;
+	if (!setAttribute(wnd, s_AttributeForceIconicRepresentation, true, hr))
 	{
-		setAttribute(wnd, s_AttributeForceIconicRepresentation, "DWMWA_FORCE_ICONIC_REPRESENTATION", false);
+		refused = "DWMWA_FORCE_ICONIC_REPRESENTATION";
+	}
+	else if (!setAttribute(wnd, s_AttributeHasIconicBitmap, true, hr))
+	{
+		refused = "DWMWA_HAS_ICONIC_BITMAP";
+		HRESULT hrBack;
+		if (!setAttribute(wnd, s_AttributeForceIconicRepresentation, false, hrBack))
+			nlwarning("Minimized window: the attribute DWMWA_FORCE_ICONIC_REPRESENTATION of the window is not cleared (error 0x%08x)", (uint)hrBack);
+	}
+	if (refused)
+	{
+		if (!s_AttributeRefusalReported)
+		{
+			s_AttributeRefusalReported = true;
+			nlinfo("The picture of a minimized window is not available: the desktop compositor refuses the attribute %s of the window (error 0x%08x)", refused, (uint)hr);
+		}
 		return;
 	}
 
@@ -216,13 +244,17 @@ void CWinMinimizedPicture::declarePictures(HWND wnd)
 	m_ThumbnailWanted = false;
 	m_PreviewWanted = false;
 	m_OutOfDatePending = false;
+	m_HandOverTime = 0;
+	m_Lingering = false;
+	m_ThumbnailRefusalReported = false;
+	m_PreviewRefusalReported = false;
 
 	// what the compositor may have kept from the last time the window was minimized is out of date
-	HRESULT hr = s_DwmInvalidateIconicBitmaps(wnd);
+	hr = s_DwmInvalidateIconicBitmaps(wnd);
 	if (FAILED(hr))
 		nlwarning("Minimized window: DwmInvalidateIconicBitmaps failed (error 0x%08x)", (uint)hr);
 
-	nldebug("Minimized window: the application supplies the pictures of the window (%ux%u before it was minimized)", m_Width, m_Height);
+	nldebug("Minimized window: the pictures of the window are supplied (%ux%u before it was minimized)", m_Width, m_Height);
 }
 
 // ***************************************************************************
@@ -233,14 +265,18 @@ void CWinMinimizedPicture::withdrawPictures(HWND wnd)
 		m_Declared = false;
 		if (wnd)
 		{
-			setAttribute(wnd, s_AttributeHasIconicBitmap, "DWMWA_HAS_ICONIC_BITMAP", false);
-			setAttribute(wnd, s_AttributeForceIconicRepresentation, "DWMWA_FORCE_ICONIC_REPRESENTATION", false);
+			HRESULT hr;
+			if (!setAttribute(wnd, s_AttributeHasIconicBitmap, false, hr))
+				nlwarning("Minimized window: the attribute DWMWA_HAS_ICONIC_BITMAP of the window is not cleared (error 0x%08x)", (uint)hr);
+			if (!setAttribute(wnd, s_AttributeForceIconicRepresentation, false, hr))
+				nlwarning("Minimized window: the attribute DWMWA_FORCE_ICONIC_REPRESENTATION of the window is not cleared (error 0x%08x)", (uint)hr);
 		}
 		nldebug("Minimized window: the pictures of the window are those of the compositor again");
 	}
 	m_ThumbnailWanted = false;
 	m_PreviewWanted = false;
 	m_OutOfDatePending = false;
+	m_Lingering = false;
 }
 
 // ***************************************************************************
@@ -314,6 +350,7 @@ void CWinMinimizedPicture::processMessage(HWND wnd, UINT message, WPARAM wParam,
 		m_ThumbnailWanted = false;
 		m_PreviewWanted = false;
 		m_OutOfDatePending = false;
+		m_Lingering = false;
 		break;
 
 	default:
@@ -322,48 +359,63 @@ void CWinMinimizedPicture::processMessage(HWND wnd, UINT message, WPARAM wParam,
 }
 
 // ***************************************************************************
-bool CWinMinimizedPicture::isPictureWanted(HWND wnd, uint32 &maxWidth, uint32 &maxHeight, bool &preview)
+bool CWinMinimizedPicture::endFrame(HWND wnd)
 {
 	if (!m_Declared)
 		return false;
+
+	m_FrameStart = CTime::getPerformanceTime();
+	TTime now = CTime::getLocalTime();
 
 	// The picture handed over is out of date once the interval has passed. The compositor then asks for a new
 	// one if the thumbnail or the preview is on screen, and else when it next shows one
 	if (m_OutOfDatePending)
 	{
-		TTime elapsed = CTime::getLocalTime() - m_HandOverTime;
+		TTime elapsed = now - m_HandOverTime;
 		if (elapsed < 0 || elapsed >= (TTime)MinIntervalMs)
 		{
 			m_OutOfDatePending = false;
 			HRESULT hr = s_DwmInvalidateIconicBitmaps(wnd);
 			if (FAILED(hr))
 				nlwarning("Minimized window: DwmInvalidateIconicBitmaps failed (error 0x%08x)", (uint)hr);
+			m_Lingering = true;
+			m_OutOfDateTime = now;
 		}
 	}
 
-	if (m_PreviewWanted)
-	{
-		preview = true;
-		maxWidth = m_Width;
-		maxHeight = m_Height;
+	// Picture mode: while the compositor waits for a picture, while it is yet to be told that the last one is
+	// out of date, and for some time after it was told, in which it asks again when a picture is on screen
+	if (m_ThumbnailWanted || m_PreviewWanted || m_OutOfDatePending)
 		return true;
-	}
-	if (m_ThumbnailWanted)
+	if (m_Lingering)
 	{
-		preview = false;
-		maxWidth = m_ThumbnailMaxWidth;
-		maxHeight = m_ThumbnailMaxHeight;
-		return true;
+		TTime elapsed = now - m_OutOfDateTime;
+		if (elapsed >= 0 && elapsed < (TTime)LingerMs)
+			return true;
+		m_Lingering = false;
 	}
 	return false;
+}
+
+// ***************************************************************************
+bool CWinMinimizedPicture::isPictureDue() const
+{
+	if (!m_Declared || (!m_ThumbnailWanted && !m_PreviewWanted))
+		return false;
+
+	// (no picture was handed over yet at time 0)
+	TTime elapsed = CTime::getLocalTime() - m_HandOverTime;
+	return elapsed < 0 || elapsed >= (TTime)MinIntervalMs;
 }
 
 // ***************************************************************************
 HBITMAP CWinMinimizedPicture::createBitmap(const CBitmap &picture, uint32 maxWidth, uint32 maxHeight, uint32 &width, uint32 &height)
 {
 	// The picture as it is when it fits, else the largest one of its aspect ratio that does
-	width = picture.getWidth();
-	height = picture.getHeight();
+	const uint32 srcWidth = picture.getWidth();
+	const uint32 srcHeight = picture.getHeight();
+	width = srcWidth;
+	height = srcHeight;
 	if (width > maxWidth || height > maxHeight)
 	{
 		if ((uint64)width * maxHeight > (uint64)height * maxWidth)
@@ -379,15 +431,6 @@ HBITMAP CWinMinimizedPicture::createBitmap(const CBitmap &picture, uint32 maxWid
 		}
 		if (width == 0) width = 1;
 		if (height == 0) height = 1;
-	}
-
-	CBitmap scaled;
-	const CBitmap *source = &picture;
-	if (width != picture.getWidth() || height != picture.getHeight())
-	{
-		scaled = picture;
-		scaled.resample((sint32)width, (sint32)height);
-		source = &scaled;
 	}
 
 	// The compositor wants a bitmap with a color depth of 32 bits. It is made the way the sample of the
@@ -413,37 +456,91 @@ HBITMAP CWinMinimizedPicture::createBitmap(const CBitmap &picture, uint32 maxWid
 	}
 
 	// The alpha of a frame buffer is whatever the blending of the frame left in it: the picture is opaque
-	const uint8 *src = source->getPixels().getPtr();
+	const uint8 *src = picture.getPixels().getPtr();
 	uint8 *dst = (uint8 *)bits;
-	const uint32 count = width * height;
-	for (uint32 i = 0; i < count; ++i)
+
+	if (width == srcWidth && height == srcHeight)
 	{
-		dst[0] = src[2];
-		dst[1] = src[1];
-		dst[2] = src[0];
-		dst[3] = 255;
-		src += 4;
-		dst += 4;
+		// the picture as it is
+		const uint32 count = width * height;
+		for (uint32 i = 0; i < count; ++i)
+		{
+			dst[0] = src[2];
+			dst[1] = src[1];
+			dst[2] = src[0];
+			dst[3] = 255;
+			src += 4;
+			dst += 4;
+		}
+		return bitmap;
+	}
+
+	// Scaled down: each pixel of the bitmap is the mean of the block of pixels of the picture that falls onto
+	// it. In whole numbers and straight from the picture into the bitmap: the picture is a frame of the size
+	// of the window, read on every picture, and is neither copied nor filtered in floating point.
+	// The picture is never enlarged, so that every block has a pixel at least
+	std::vector<uint32> columns(width + 1);
+	for (uint32 x = 0; x <= width; ++x)
+		columns[x] = (uint32)((uint64)x * srcWidth / width);
+	std::vector<uint64> sums(width * 3);
+	for (uint32 y = 0; y < height; ++y)
+	{
+		const uint32 rowBegin = (uint32)((uint64)y * srcHeight / height);
+		const uint32 rowEnd = (uint32)((uint64)(y + 1) * srcHeight / height);
+		std::fill(sums.begin(), sums.end(), (uint64)0);
+		for (uint32 row = rowBegin; row < rowEnd; ++row)
+		{
+			const uint8 *srcRow = src + (size_t)row * srcWidth * 4;
+			for (uint32 x = 0; x < width; ++x)
+			{
+				// (a row of a block is at most the width of the picture: its sum fits in 32 bits)
+				uint32 r = 0, g = 0, b = 0;
+				const uint8 *pixel = srcRow + (size_t)columns[x] * 4;
+				const uint8 *pixelEnd = srcRow + (size_t)columns[x + 1] * 4;
+				for (; pixel < pixelEnd; pixel += 4)
+				{
+					r += pixel[0];
+					g += pixel[1];
+					b += pixel[2];
+				}
+				sums[x * 3] += r;
+				sums[x * 3 + 1] += g;
+				sums[x * 3 + 2] += b;
+			}
+		}
+		const uint32 rows = rowEnd - rowBegin;
+		for (uint32 x = 0; x < width; ++x)
+		{
+			const uint64 count = (uint64)rows * (columns[x + 1] - columns[x]);
+			const uint64 half = count / 2;
+			dst[0] = (uint8)((sums[x * 3 + 2] + half) / count);
+			dst[1] = (uint8)((sums[x * 3 + 1] + half) / count);
+			dst[2] = (uint8)((sums[x * 3] + half) / count);
+			dst[3] = 255;
+			dst += 4;
+		}
 	}
 
 	return bitmap;
 }
 
 // ***************************************************************************
-bool CWinMinimizedPicture::setPicture(HWND wnd, const CBitmap &picture)
+bool CWinMinimizedPicture::setPicture(HWND wnd, const CBitmap &picture, TTicks readStart)
 {
 	if (!m_Declared || !wnd || (!m_ThumbnailWanted && !m_PreviewWanted))
 		return false;
 
-	// No picture could be drawn this time: the requests stay open for a later frame
+	// The frame could not be read back this time: the requests stay open for a later frame
 	if (picture.getWidth() == 0 || picture.getHeight() == 0)
 	{
-		nldebug("Minimized window: no picture was drawn, the requests stay open");
+		nldebug("Minimized window: no picture was read back, the requests stay open");
 		return false;
 	}
 
-	// From here the requests are closed whatever comes of them: a picture that the system refuses is not
-	// tried again, the compositor asks anew when the window is next minimized
+	// From here the requests are closed whatever comes of them. When the compositor takes none of the
+	// bitmaps, it is not told that its pictures are out of date, and nothing is tried again until it asks by
+	// itself. When it takes one and refuses the other, it asks for both again with the next picture: the
+	// refusal of each kind is said once for as long as the window is minimized
 	bool thumbnail = m_ThumbnailWanted;
 	bool preview = m_PreviewWanted;
 	m_ThumbnailWanted = false;
@@ -466,7 +563,11 @@ bool CWinMinimizedPicture::setPicture(HWND wnd, const CBitmap &picture)
 			HRESULT hr = s_DwmSetIconicThumbnail(wnd, bitmap, 0);
 			if (FAILED(hr))
 			{
-				nlwarning("Minimized window: DwmSetIconicThumbnail failed for a bitmap of %ux%u (error 0x%08x)", width, height, (uint)hr);
+				if (!m_ThumbnailRefusalReported)
+				{
+					m_ThumbnailRefusalReported = true;
+					nlwarning("Minimized window: DwmSetIconicThumbnail failed for a bitmap of %ux%u (error 0x%08x)", width, height, (uint)hr);
+				}
 			}
 			else
 			{
@@ -490,7 +591,11 @@ bool CWinMinimizedPicture::setPicture(HWND wnd, const CBitmap &picture)
 			HRESULT hr = s_DwmSetIconicLivePreviewBitmap(wnd, bitmap, NULL, flags);
 			if (FAILED(hr))
 			{
-				nlwarning("Minimized window: DwmSetIconicLivePreviewBitmap failed for a bitmap of %ux%u (error 0x%08x)", width, height, (uint)hr);
+				if (!m_PreviewRefusalReported)
+				{
+					m_PreviewRefusalReported = true;
+					nlwarning("Minimized window: DwmSetIconicLivePreviewBitmap failed for a bitmap of %ux%u (error 0x%08x)", width, height, (uint)hr);
+				}
 			}
 			else
 			{
@@ -503,10 +608,17 @@ bool CWinMinimizedPicture::setPicture(HWND wnd, const CBitmap &picture)
 
 	if (handedOver)
 	{
-		// isPictureWanted tells the compositor that this picture is out of date, MinIntervalMs from now
+		// endFrame tells the compositor that this picture is out of date, MinIntervalMs from now
 		m_OutOfDatePending = true;
+		m_Lingering = false;
 		m_HandOverTime = CTime::getLocalTime();
 	}
+
+	// What the picture cost: the whole frame, from the end of the frame before it, and in it the read-back of
+	// the frame by the driver, its scaling and the hand-over
+	TTicks now = CTime::getPerformanceTime();
+	nldebug("Minimized window: the frame of this picture took %u ms, of which %u ms to read it back, scale it and hand it over",
+	    (uint)(CTime::ticksToSecond(now - m_FrameStart) * 1000.0), (uint)(CTime::ticksToSecond(now - readStart) * 1000.0));
 
 	return handedOver;
 }
