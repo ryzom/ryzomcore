@@ -72,6 +72,16 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	if (!driver)
 		return false;
 
+	if (hWnd == driver->_win)
+	{
+		// The pictures of the minimized window: the window declares that it supplies them when it is minimized,
+		// until it is restored, and the requests of the desktop compositor are recorded. Nothing else is done
+		// from here: the driver enters and leaves its picture mode between two frames (see swapBuffers). The
+		// size the window had before it was minimized is the one the driver has before this message (the
+		// client area of a minimized window is empty)
+		driver->m_MinimizedPicture.processMessage(hWnd, message, wParam, lParam, driver->_CurrentMode.Width, driver->_CurrentMode.Height);
+	}
+
 	if(message == WM_SIZE)
 	{
 		if (driver->_CurrentMode.Windowed)
@@ -1891,6 +1901,15 @@ bool CDriverGL::destroyWindow()
 {
 	H_AUTO_OGL(CDriverGL_destroyWindow)
 
+#ifdef NL_OS_WINDOWS
+	// The picture mode of a minimized window is left while the context is there to release its frame buffer
+	// object, and a window that lives on (one of the application) has its pictures from the desktop compositor
+	// again
+	if (m_MinimizedPictureMode)
+		leaveMinimizedPictureMode();
+	m_MinimizedPicture.release(_win);
+#endif // NL_OS_WINDOWS
+
 	releaseCursors();
 
 	// make sure window icons are deleted
@@ -3516,6 +3535,17 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getWindowSize)
 
+#ifdef NL_OS_WINDOWS
+	// In the picture mode of a minimized window, the size of the window is the one it had before it was
+	// minimized, which is the size of the frame buffer object the frames are drawn into
+	if (m_MinimizedPictureMode)
+	{
+		width = m_MinimizedPictureWidth;
+		height = m_MinimizedPictureHeight;
+		return;
+	}
+#endif // NL_OS_WINDOWS
+
 	if (_CurrentMode.OffScreen)
 	{
 #ifdef NL_OS_WINDOWS
@@ -3730,6 +3760,233 @@ bool CDriverGL::isWindowMinimized() const
 
 	return res;
 }
+
+// --------------------------------------------------
+void CDriverGL::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	H_AUTO_OGL(CDriverGL_setMinimizedWindowPictureSupplied)
+
+#ifdef NL_OS_WINDOWS
+
+	// Nothing that is drawn into the frame buffer of a minimized window can be read back, and its client area
+	// is empty: in picture mode the frames are drawn into a frame buffer object that stands for the window,
+	// with the depth and the stencil in one render buffer (see enterMinimizedPictureMode). Without these no
+	// picture can be supplied, and the pictures stay those of the desktop compositor
+#ifdef USE_OPENGLES
+	bool frameBufferObject = false;
+#else
+	bool frameBufferObject = supportFrameBufferObject() && supportPackedDepthStencil();
+#endif
+	if (supplied && !frameBufferObject)
+	{
+		if (!m_MinimizedPictureUnsupportedReported)
+		{
+			m_MinimizedPictureUnsupportedReported = true;
+			nlinfo("3D: The picture of the minimized window is not available with this display adapter: the driver has no frame buffer object with a depth and stencil buffer to draw the frames into");
+		}
+		return;
+	}
+
+	// (when it is withdrawn, picture mode is left at the end of the frame, see updateMinimizedPictureMode)
+	m_MinimizedPicture.setSupplied(_win, supplied);
+
+#endif // NL_OS_WINDOWS
+}
+
+// --------------------------------------------------
+bool CDriverGL::isMinimizedWindowPictureWanted() const
+{
+	H_AUTO_OGL(CDriverGL_isMinimizedWindowPictureWanted)
+
+#ifdef NL_OS_WINDOWS
+
+	return m_MinimizedPictureMode;
+
+#else
+
+	// no window system of the other platforms is supplied with such pictures
+	return false;
+
+#endif // NL_OS_WINDOWS
+}
+
+#ifdef NL_OS_WINDOWS
+
+// --------------------------------------------------
+void CDriverGL::endMinimizedPictureFrame()
+{
+	// The frame that ends is in the frame buffer object that stands for the window, and that one is bound,
+	// as long as no texture is the render target (none is at the swap of an ordinary frame)
+	if (_win == EmptyWindow || _RenderTargetFBO || _TextureTarget)
+		return;
+
+	// It is read back the way the frame of a window is, and handed over, when a picture is due
+	if (m_MinimizedPicture.isPictureDue())
+	{
+		NLMISC::TTicks readStart = NLMISC::CTime::getPerformanceTime();
+		CBitmap picture;
+		getBuffer(picture);
+		m_MinimizedPicture.setPicture(_win, picture, readStart);
+	}
+
+#ifndef USE_OPENGLES
+	// The window was restored while this frame was drawn (picture mode is only left after the swap): the
+	// frame is copied to the back buffer of the window, so that the swap shows it. Where the driver cannot
+	// copy between frame buffers, or the window came back at another size, the window gets its first frame
+	// with the next swap
+	if (!IsIconic(_win) && _Extensions.FrameBufferBlit
+		&& _CurrentMode.Width == m_MinimizedPictureWidth && _CurrentMode.Height == m_MinimizedPictureHeight)
+	{
+		// (the copy goes by the scissor, which setupScissor then puts back)
+		glDisable(GL_SCISSOR_TEST);
+		nglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, m_WindowFrameBuffer);
+		nglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+		nglBlitFramebufferEXT(0, 0, (GLint)m_MinimizedPictureWidth, (GLint)m_MinimizedPictureHeight,
+			0, 0, (GLint)m_MinimizedPictureWidth, (GLint)m_MinimizedPictureHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_WindowFrameBuffer);
+		setupScissor(_CurrScissor);
+	}
+#endif // USE_OPENGLES
+}
+
+// --------------------------------------------------
+void CDriverGL::updateMinimizedPictureMode()
+{
+	// The desktop compositor is told when the last picture is out of date, and the mode follows what it asks
+	// for: entered with its first request, left when it has stopped asking, when the window was restored and
+	// when the pictures are no longer supplied
+	bool wanted = _win != EmptyWindow && m_MinimizedPicture.endFrame(_win);
+	if (wanted && !m_MinimizedPictureMode)
+	{
+		// no frame can be read back without the mode: the window gets the pictures of the compositor again
+		if (!enterMinimizedPictureMode())
+			m_MinimizedPicture.setSupplied(_win, false);
+	}
+	else if (wanted && m_MinimizedPictureMode)
+	{
+		// the window was shown at another size and minimized again since the mode was entered: the frame
+		// buffer object is made again at the size the window has now
+		uint32 width, height;
+		m_MinimizedPicture.getWindowSize(width, height);
+		if (width != m_MinimizedPictureWidth || height != m_MinimizedPictureHeight)
+		{
+			leaveMinimizedPictureMode();
+			if (!enterMinimizedPictureMode())
+				m_MinimizedPicture.setSupplied(_win, false);
+		}
+	}
+	else if (!wanted && m_MinimizedPictureMode)
+	{
+		leaveMinimizedPictureMode();
+	}
+}
+
+// --------------------------------------------------
+bool CDriverGL::enterMinimizedPictureMode()
+{
+#ifndef USE_OPENGLES
+
+	uint32 width, height;
+	m_MinimizedPicture.getWindowSize(width, height);
+
+	// A frame buffer object of the size the window had before it was minimized, with what the frame buffer of
+	// the window has: the colors, and a depth and a stencil buffer
+	GLuint frameBuffer = 0;
+	nglGenFramebuffersEXT(1, &frameBuffer);
+	nglGenRenderbuffersEXT(1, &m_MinimizedPictureColorBuffer);
+	nglGenRenderbuffersEXT(1, &m_MinimizedPictureDepthStencilBuffer);
+	nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_MinimizedPictureColorBuffer);
+	nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, (GLsizei)width, (GLsizei)height);
+	nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_MinimizedPictureDepthStencilBuffer);
+	nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, (GLsizei)width, (GLsizei)height);
+	nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, frameBuffer);
+	nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, m_MinimizedPictureColorBuffer);
+	nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_MinimizedPictureDepthStencilBuffer);
+	nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_MinimizedPictureDepthStencilBuffer);
+
+	GLenum status = (GLenum)nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+	{
+		nlwarning("3D: The picture of the minimized window is not supplied: the frame buffer object of %ux%u to draw the frames into is not complete (status 0x%x)", width, height, (uint)status);
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		nglDeleteFramebuffersEXT(1, &frameBuffer);
+		nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureColorBuffer);
+		nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureDepthStencilBuffer);
+		m_MinimizedPictureColorBuffer = 0;
+		m_MinimizedPictureDepthStencilBuffer = 0;
+		// a texture that is the render target is bound again
+		if (_RenderTargetFBO)
+			activeFrameBufferObject(_RenderTargetFBO.getPtr());
+		return false;
+	}
+
+	// What new render buffers hold is undefined, and a frame does not have to draw over all of the window, nor
+	// to clear its stencil buffer: the three buffers start cleared. A clear goes by the scissor, which is set
+	// again below, and by the write masks, which are those of the defaults that swapBuffers sets after this
+	GLboolean colorMask[4];
+	glGetBooleanv(GL_COLOR_WRITEMASK, colorMask);
+	glDisable(GL_SCISSOR_TEST);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	_DriverGLStates.enableZWrite(true);
+	_DriverGLStates.stencilMask(std::numeric_limits<GLuint>::max());
+	glClearColor(0.f, 0.f, 0.f, 0.f);
+	glClearDepth(1.0);
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glColorMask(colorMask[0], colorMask[1], colorMask[2], colorMask[3]);
+
+	// From here it stands for the frame buffer of the window, and is left bound as that; a texture that is the
+	// render target is bound again, and binds it when it is left
+	m_MinimizedPictureMode = true;
+	m_MinimizedPictureWidth = width;
+	m_MinimizedPictureHeight = height;
+	m_WindowFrameBuffer = frameBuffer;
+	if (_RenderTargetFBO)
+		activeFrameBufferObject(_RenderTargetFBO.getPtr());
+
+	// the viewport and the scissor go by the size of the window, which has changed
+	setupViewport(_CurrViewport);
+	setupScissor(_CurrScissor);
+
+	nldebug("3D: Minimized window: picture mode, the frames are drawn into a frame buffer object of %ux%u", width, height);
+	return true;
+
+#else
+
+	return false;
+
+#endif // USE_OPENGLES
+}
+
+// --------------------------------------------------
+void CDriverGL::leaveMinimizedPictureMode()
+{
+#ifndef USE_OPENGLES
+
+	GLuint frameBuffer = m_WindowFrameBuffer;
+	m_MinimizedPictureMode = false;
+	m_WindowFrameBuffer = 0;
+
+	// The frame buffer of the window is bound again, unless a texture is the render target, which binds it
+	// when it is left
+	if (!_RenderTargetFBO)
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	nglDeleteFramebuffersEXT(1, &frameBuffer);
+	nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureColorBuffer);
+	nglDeleteRenderbuffersEXT(1, &m_MinimizedPictureDepthStencilBuffer);
+	m_MinimizedPictureColorBuffer = 0;
+	m_MinimizedPictureDepthStencilBuffer = 0;
+
+	// the viewport and the scissor go by the size of the window, which has changed
+	setupViewport(_CurrViewport);
+	setupScissor(_CurrScissor);
+
+	nldebug("3D: Minimized window: picture mode is left");
+
+#endif // USE_OPENGLES
+}
+
+#endif // NL_OS_WINDOWS
 
 // ***************************************************************************
 bool CDriverGL::supportMonitorColorProperties () const

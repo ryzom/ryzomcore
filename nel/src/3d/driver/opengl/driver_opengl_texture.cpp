@@ -303,6 +303,9 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 		if (!InitFBO)
 		{
 			nglDeleteFramebuffersEXT(1, &FBOId);
+			// (the frame buffer object was bound, and with it gone the frame buffer of the window is: said
+			// here, as it may be another one than 0, see CDriverGL::getWindowFrameBuffer)
+			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _Driver->getWindowFrameBuffer());
 
 			if (AttachDepthStencil)
 			{
@@ -330,7 +333,8 @@ bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
 	}
 	else
 	{
-		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		// the frame buffer of the window, or what stands for it (see CDriverGL::getWindowFrameBuffer)
+		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _Driver->getWindowFrameBuffer());
 	}
 
 	return true;

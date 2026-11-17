@@ -247,6 +247,38 @@ public:
 
 
 
+	/// \name Picture of the minimized window
+	/** A window system may show a picture of a window where the user picks among the windows (the thumbnail of
+	 *  a taskbar, and the full-size preview shown from it). Of a minimized window it has the last picture from
+	 *  before the window was minimized, unless pictures of it are supplied. The driver supplies them out of
+	 *  the ordinary frames of the application, when the application asks for it
+	 *  (setMinimizedWindowPictureSupplied): the application goes on drawing its frames while its window is
+	 *  minimized, and has nothing else to do.
+	 *
+	 *  While the window system shows a picture of the minimized window, the driver is in its picture mode:
+	 *  getWindowSize gives the size the window had before it was minimized, also with a driver whose minimized
+	 *  window has no area, the frames are drawn as they are for the window when it is shown, and at the swap
+	 *  the driver reads the frame back and hands it to the window system. The mode is entered and left at the
+	 *  end of a frame (swapBuffers). isWindowMinimized goes on answering true. A minimized window nobody looks
+	 *  at is not in picture mode. See IDriver for the details, and for where no picture is supplied.
+	 */
+	// @{
+	/** The pictures of the minimized window are supplied by the driver, out of the frames the application
+	 *  draws (true), or left to the window system again (false, the state a driver starts in). To call once
+	 *  the display is set. An application that asks for it keeps drawing its frames while its window is
+	 *  minimized: the window system shows no picture of its own meanwhile.
+	 */
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) = 0;
+
+	/** Return true while the driver is in picture mode: the window is minimized, the window system shows a
+	 *  picture of it, and the frames the application draws are read back for it. The application may go by
+	 *  this for the rate of its frames; it changes at the end of a frame (swapBuffers) only.
+	 */
+	virtual bool			isMinimizedWindowPictureWanted() const = 0;
+	// @}
+
+
+
 	/// \name Buffers.
 	// @{
 	/// This clear only the RGBA back buffer

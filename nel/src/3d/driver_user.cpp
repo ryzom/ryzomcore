@@ -435,6 +435,22 @@ nlWindow		CDriverUser::getDisplay ()
 	return _Driver->getDisplay ();
 }
 
+// ***************************************************************************
+void			CDriverUser::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->setMinimizedWindowPictureSupplied(supplied);
+}
+
+// ***************************************************************************
+bool			CDriverUser::isMinimizedWindowPictureWanted() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->isMinimizedWindowPictureWanted();
+}
+
 
 
 // ***************************************************************************

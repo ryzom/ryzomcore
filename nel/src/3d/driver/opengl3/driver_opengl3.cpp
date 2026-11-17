@@ -210,6 +210,16 @@ CDriverGL3::CDriverGL3()
 
 #endif // NL_OS_UNIX
 
+#ifdef NL_OS_WINDOWS
+	m_MinimizedPictureMode = false;
+	m_MinimizedPictureWidth = 0;
+	m_MinimizedPictureHeight = 0;
+	m_MinimizedPictureColorBuffer = 0;
+	m_MinimizedPictureDepthStencilBuffer = 0;
+#endif // NL_OS_WINDOWS
+
+	m_WindowFrameBuffer = 0;
+
 	_ColorDepth = ColorDepth32;
 
 	_DefaultCursor = EmptyCursor;
@@ -712,7 +722,8 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-			_DriverGLStates.forceBindFramebuffer(0);
+			// the frame buffer of the window, or what stands for it (see getWindowFrameBuffer)
+			_DriverGLStates.forceBindFramebuffer(m_WindowFrameBuffer);
 			return true;
 		}
 	}
@@ -849,7 +860,16 @@ bool CDriverGL3::swapBuffers()
 
 #if defined(NL_OS_WINDOWS)
 
+	// In the picture mode of a minimized window the frame that ends was drawn into the frame buffer object
+	// that stands for the window: it is the picture of the window, when the desktop compositor waits for one
+	if (m_MinimizedPictureMode)
+		endMinimizedPictureFrame();
+
 	SwapBuffers(_hDC);
+
+	// Between two frames: picture mode is entered or left, for the frame to come
+	if (m_MinimizedPictureMode || m_MinimizedPicture.isSupplied())
+		updateMinimizedPictureMode();
 
 #elif defined(NL_OS_MAC)
 

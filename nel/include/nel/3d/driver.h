@@ -319,6 +319,55 @@ public:
 
 
 
+	/// \name Picture of the minimized window
+	/** A window system may show a picture of a window where the user picks among the windows (the thumbnail of
+	 *  a taskbar, and the full-size preview shown from it). Of a minimized window it has the last picture from
+	 *  before the window was minimized, as nothing of the window is shown, unless pictures of it are supplied.
+	 *  The driver supplies them out of the ordinary frames of the application, when the application asks for
+	 *  it (setMinimizedWindowPictureSupplied): the application goes on drawing its frames while its window is
+	 *  minimized, and has nothing else to do.
+	 *
+	 *  When the window system asks for a picture of the minimized window, the driver enters its picture mode
+	 *  at the end of the frame (swapBuffers), and stays in it for as long as pictures are asked for, and half
+	 *  a second more. In picture mode the frames are drawn so that the driver can read them back: getWindowSize
+	 *  gives the size the window had before it was minimized, also with a driver whose minimized window has
+	 *  no area, and what is drawn into the frame buffer of the window is kept by the driver. Whatever goes by
+	 *  the size of the window (the viewports, the texts, an interface, the render targets of the effects) is
+	 *  drawn as it is for the window when it is shown. At the swap the driver reads the frame back and hands
+	 *  it to the window system, scaled down to what was asked for. isWindowMinimized goes on answering true.
+	 *
+	 *  The driver has the window system ask again a tenth of a second after a picture, and it only asks while
+	 *  it shows the picture: a minimized window nobody looks at is not in picture mode, and its frames are
+	 *  what they are without this (with some drivers nothing is drawn of them). A request the window system
+	 *  makes by itself is answered with the next frame drawn in picture mode, a tenth of a second after the
+	 *  last picture at the earliest.
+	 *
+	 *  No picture is supplied where the window system has none of this, while the driver has no window, and
+	 *  as long as the application has not asked for it. A window the application handed to the driver is
+	 *  supplied like one the driver made, as far as the messages of that window reach the driver
+	 *  (getWindowProc). No picture is supplied either where the driver cannot read the frames back: without
+	 *  frame buffer objects (OpenGL), with a back buffer that cannot be locked, which is the case with
+	 *  multisampling, and of a fullscreen window, whose device is lost while it is minimized (Direct3D). The
+	 *  window then keeps the pictures of the window system; this is said once in the log, except for the
+	 *  fullscreen window, which is never supplied.
+	 */
+	// @{
+	/** The pictures of the minimized window are supplied by the driver, out of the frames the application
+	 *  draws (true), or left to the window system again (false, the state a driver starts in). To call once
+	 *  the display is set. An application that asks for it keeps drawing its frames while its window is
+	 *  minimized: the window system shows no picture of its own meanwhile.
+	 */
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) = 0;
+
+	/** Return true while the driver is in picture mode: the window is minimized, the window system shows a
+	 *  picture of it, and the frames the application draws are read back for it. The application may go by
+	 *  this for the rate of its frames; it changes at the end of a frame (swapBuffers) only.
+	 */
+	virtual bool			isMinimizedWindowPictureWanted() const = 0;
+	// @}
+
+
+
 	/// \name Framebuffer operations
 	// @{
 	/// Clear the current target surface pixels. The function ignores the viewport settings but uses the scissor.

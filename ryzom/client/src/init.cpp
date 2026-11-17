@@ -1263,6 +1263,11 @@ void prelogInit()
 		if (saveDetectedMode)
 			ClientCfg.saveConfigFile();
 
+		// While the window is minimized and the desktop shows a picture of it (the thumbnail of the taskbar, the
+		// full-size preview shown from it), the driver takes that picture from the frames the client draws: every
+		// loop of the client goes on drawing while the window is minimized, at the rate it has then
+		Driver->setMinimizedWindowPictureSupplied(true);
+
 		// Enable or disable VSync
 		if (ClientCfg.WaitVBL)
 			Driver->setSwapVBLInterval(1);

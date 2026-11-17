@@ -35,6 +35,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/win_event_emitter.h"
+#include "nel/misc/win_minimized_picture.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/driver.h"
@@ -861,6 +862,8 @@ public:
 	virtual bool			activate();
 	virtual bool			isActive ();
 	virtual bool			isWindowMinimized() const;
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
+	virtual bool			isMinimizedWindowPictureWanted() const;
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
 	// Windows interface
@@ -2368,6 +2371,15 @@ private:
 	bool					_Maximized;
 	bool					_WindowFocus;
 	bool					_HandlePossibleSizeChangeNextSize;
+	// The pictures of the minimized window that the driver supplies to the desktop compositor, out of the
+	// frames in the back buffer
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// The desktop compositor shows a picture of the minimized window (see isMinimizedWindowPictureWanted)
+	bool					m_MinimizedPictureMode;
+	// It was said in the log that the back buffer cannot be read
+	bool					m_MinimizedPictureUnreadableReported;
+	// At the swap: the frame in the back buffer is handed over as a picture, when one is due
+	void					takeMinimizedPicture();
 	GfxMode					_CurrentMode;
 	uint					_Interval;
 	bool					_FullScreen;

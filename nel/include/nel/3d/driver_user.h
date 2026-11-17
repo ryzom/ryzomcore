@@ -184,6 +184,15 @@ public:
 	// @}
 
 
+	/// \name Picture of the minimized window
+	// @{
+	/// The driver supplies the pictures of the minimized window out of the frames drawn, or no longer
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) NL_OVERRIDE;
+	/// Return true while the frames of the minimized window are read back for the window system
+	virtual bool			isMinimizedWindowPictureWanted() const NL_OVERRIDE;
+	// @}
+
+
 	/// \name Buffers.
 	// @{
 	/// This clear only the RGBA back buffer

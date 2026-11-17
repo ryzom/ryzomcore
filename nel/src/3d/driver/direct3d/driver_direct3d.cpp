@@ -197,6 +197,8 @@ CDriverD3D::CDriverD3D()
 	_CurrentShader = NULL;
 	_BackBuffer = NULL;
 	m_ZeroAreaRenderTargetReported = false;
+	m_MinimizedPictureMode = false;
+	m_MinimizedPictureUnreadableReported = false;
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
 	_WindowFocus = true;
@@ -1167,6 +1169,17 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 {
 	H_AUTO_D3D(D3DWndProc);
 
+	// The pictures of the minimized window: the window declares that it supplies them when it is minimized, until
+	// it is restored, and the requests of the desktop compositor are recorded, for swapBuffers. The driver keeps
+	// the size the window had before it was minimized (see handlePossibleSizeChange).
+	// A fullscreen device is lost for as long as its window is minimized, and nothing is drawn with it: no picture
+	// can be supplied then. That minimize is not passed on, and the window keeps the pictures of the compositor
+	if (driver != NULL && hWnd == driver->_HWnd
+		&& !(driver->_FullScreen && message == WM_SIZE && wParam == SIZE_MINIMIZED))
+	{
+		driver->m_MinimizedPicture.processMessage(hWnd, message, wParam, lParam, driver->_CurrentMode.Width, driver->_CurrentMode.Height);
+	}
+
 	// Check this message in parents
 
 	if ((message == WM_SIZE) || (message == WM_EXITSIZEMOVE) || (message == WM_MOVE))
@@ -1882,6 +1895,11 @@ bool CDriverD3D::release()
 		std::vector<NLMISC::CBitmap> bitmaps;
 		setWindowIcon(bitmaps);
 
+		// a window that lives on (one that was handed to the driver) has its pictures from the desktop
+		// compositor again
+		m_MinimizedPicture.release(_HWnd);
+		m_MinimizedPictureMode = false;
+
 		if (_DestroyWindow)
 			DestroyWindow (_HWnd);
 		_HWnd = NULL;
@@ -1965,6 +1983,50 @@ bool CDriverD3D::isWindowMinimized() const
 {
 	// the driver keeps the size the window had before it was minimized, so that getWindowSize does not tell
 	return _HWnd != NULL && IsIconic(_HWnd) != FALSE;
+}
+
+// ***************************************************************************
+void CDriverD3D::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	m_MinimizedPicture.setSupplied(_HWnd, supplied);
+}
+
+// ***************************************************************************
+bool CDriverD3D::isMinimizedWindowPictureWanted() const
+{
+	return m_MinimizedPictureMode;
+}
+
+// ***************************************************************************
+void CDriverD3D::takeMinimizedPicture()
+{
+	// The back buffer keeps the size the window had before it was minimized, and the frames are drawn into it
+	// as for a window that is shown: the frame that ends is read from it when a picture is due
+
+	if (_HWnd == NULL || !m_MinimizedPicture.isPictureDue())
+		return;
+
+	// nothing was drawn with a lost device: the picture waits for a frame
+	if (_Lost)
+		return;
+
+	// The back buffer can only be locked without multisampling (see the presentation flags set for the
+	// device): with it there is no frame to read, and the window gets the pictures of the compositor again
+	if (_CurrentMode.AntiAlias != -1)
+	{
+		if (!m_MinimizedPictureUnreadableReported)
+		{
+			m_MinimizedPictureUnreadableReported = true;
+			nlinfo("3D: The picture of the minimized window is not available with antialiasing: the back buffer cannot be read");
+		}
+		m_MinimizedPicture.setSupplied(_HWnd, false);
+		return;
+	}
+
+	NLMISC::TTicks readStart = NLMISC::CTime::getPerformanceTime();
+	NLMISC::CBitmap picture;
+	getBuffer(picture);
+	m_MinimizedPicture.setPicture(_HWnd, picture, readStart);
 }
 
 // ***************************************************************************
@@ -2112,6 +2174,10 @@ bool CDriverD3D::swapBuffers()
 	// todo hulud volatile
 	//_DeviceInterface->SetStreamSource(0, _VolatileVertexBufferRAM[1]->VertexBuffer, 0, 12);
 
+	// The frame that ends is the picture of the minimized window, when the desktop compositor waits for one
+	if (m_MinimizedPicture.isSupplied())
+		takeMinimizedPicture();
+
 	// End now
 	if (!endScene())
 	{
@@ -2137,6 +2203,13 @@ bool CDriverD3D::swapBuffers()
 
 	// Check window size
 	handlePossibleSizeChange ();
+
+	// The end of the frame for the pictures of the minimized window: the desktop compositor is told when the
+	// last one is out of date, and whether it shows a picture is known for the next frame
+	if (m_MinimizedPicture.isSupplied())
+		m_MinimizedPictureMode = _HWnd != NULL && m_MinimizedPicture.endFrame(_HWnd);
+	else
+		m_MinimizedPictureMode = false;
 
 	// Reset the profiling counter.
 	_PrimitiveProfileIn.reset();

@@ -93,6 +93,10 @@
 #include "unix_event_emitter.h"
 #endif // NL_OS_UNIX
 
+#ifdef NL_OS_WINDOWS
+#include "nel/misc/win_minimized_picture.h"
+#endif // NL_OS_WINDOWS
+
 // For optimisation consideration, allow 256 lightmaps at max.
 #define	NL3D_DRV_MAX_LIGHTMAP		256
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
@@ -738,6 +742,14 @@ public:
 
 	virtual bool			isWindowMinimized() const NL_OVERRIDE;
 
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) NL_OVERRIDE;
+	virtual bool			isMinimizedWindowPictureWanted() const NL_OVERRIDE;
+
+	/// The frame buffer that takes what is drawn for the window, bound while no texture is the render target:
+	/// the frame buffer of the window (0), or in picture mode the one the driver draws the frames of the
+	/// minimized window into (see setMinimizedWindowPictureSupplied)
+	GLuint					getWindowFrameBuffer() const { return m_WindowFrameBuffer; }
+
 	virtual uint8			getBitPerPixel () NL_OVERRIDE;
 
 	virtual void			showCursor (bool b) NL_OVERRIDE;
@@ -958,6 +970,29 @@ private:
 	sint32						_DecorationWidth;
 	sint32						_DecorationHeight;
 
+#ifdef NL_OS_WINDOWS
+	// The pictures of the minimized window that the driver supplies to the desktop compositor, out of the
+	// frames the application draws
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// Picture mode: the window is minimized and the desktop compositor shows a picture of it. The frames are
+	// drawn into a frame buffer object of the driver's own, of the size the window had before it was minimized
+	// (m_WindowFrameBuffer is that object, and getWindowSize gives that size), and read back from it at the
+	// swap. Entered and left at the end of a frame only (see updateMinimizedPictureMode)
+	bool						m_MinimizedPictureMode;
+	uint32						m_MinimizedPictureWidth;
+	uint32						m_MinimizedPictureHeight;
+	// The render buffers of that frame buffer object: the colors, and the depth and stencil in one
+	GLuint						m_MinimizedPictureColorBuffer;
+	GLuint						m_MinimizedPictureDepthStencilBuffer;
+	// At the swap in picture mode: the frame that ends is handed over as a picture when one is due, and is
+	// copied to the window when the window was restored while it was drawn
+	void						endMinimizedPictureFrame();
+	// After the swap: picture mode is entered or left for the next frame
+	void						updateMinimizedPictureMode();
+	bool						enterMinimizedPictureMode();
+	void						leaveMinimizedPictureMode();
+#endif // NL_OS_WINDOWS
+
 	// cursors
 	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };
 
@@ -1162,6 +1197,10 @@ private:
 
 	// Current FBO render target
 	CSmartPtr<ITexture>		_RenderTargetFBO;
+
+	// The frame buffer that is bound while no texture is the render target (see getWindowFrameBuffer): 0, the
+	// frame buffer of the window, but in the picture mode of a minimized window
+	GLuint					m_WindowFrameBuffer;
 
 	// A render target without area was refused and reported (setRenderTarget reports it once)
 	bool					m_ZeroAreaRenderTargetReported;
