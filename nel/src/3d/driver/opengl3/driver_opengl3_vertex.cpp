@@ -292,7 +292,7 @@ GLenum CDriverGL3::vertexBufferUsageGL3(CVertexBuffer::TBufferUsage usage)
 		return GL_STATIC_DRAW;
 	case CVertexBuffer::SmallStream:
 	case CVertexBuffer::FullStream:
-		return GL_STATIC_DRAW; // These are currently implemented as triple buffered rather than a strict "use once" ring buffer
+		return GL_STATIC_DRAW; // Per-buffer mode: a ring of buffers, as FullRewrite. In stream mode these usages have no GL buffer of their own.
 	default:
 		nlerror("Invalid buffer usage");
 		return GL_DYNAMIC_DRAW;

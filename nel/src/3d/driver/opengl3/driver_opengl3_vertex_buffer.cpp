@@ -379,7 +379,8 @@ void CVertexBufferGL3::enable()
 void CVertexBufferGL3::disable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_disable)
-	if (m_Driver->_CurrentVertexBufferGL != nullptr)
+	// (a vertex buffer that dies while another one is the active one leaves that one active)
+	if (m_Driver->_CurrentVertexBufferGL == this)
 	{
 		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}
@@ -719,7 +720,7 @@ void CVertexBufferAMDPinned::enable()
 void CVertexBufferAMDPinned::disable()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_disable)
-	if (m_Driver->_CurrentVertexBufferGL != nullptr)
+	if (m_Driver->_CurrentVertexBufferGL == this)
 	{
 		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}
@@ -792,36 +793,30 @@ void *CVertexBufferStreamGL3::lock()
 		return m_VertexPtr;
 	}
 
-	// A new range. The one before is left to the draws that read it; and where the
-	// stream has given it to other data, there is nothing to go on with.
-	// When the range is only too small, what was written goes along: the old range
-	// is held while the stream makes room for the new one.
-	const bool grow = valid && !m_Drawn;
-	const uint8 *oldPtr = grow ? stream.lock(m_Handle) : nullptr;
-	CStreamHandleGL3 handle = stream.reserve(size);
-	if (stream.isValid(handle))
-	{
-		m_VertexPtr = stream.lock(handle);
-		m_RangeLocked = true;
-		if (grow)
-			memcpy(m_VertexPtr, oldPtr, m_Handle.Size);
-	}
-	if (grow)
-		stream.unlock(m_Handle);
-
-	if (!stream.isValid(handle))
+	// A new range, with undefined contents. The one before is left to the draws that
+	// read it; and where the stream has given it to other data, there is nothing to
+	// go on with. A range that is only too small, because the vertex buffer has more
+	// vertices now, is left as well: its vertices are not carried over, which would
+	// take a read of memory that is mapped for writing. With local memory the engine
+	// writes every vertex at each of its locks here; without, it does not keep the
+	// vertices itself when the growth passes the capacity.
+	//
+	// The attribute pointers of the active vertex buffer are on the range it had when
+	// activeVertexBuffer was called: a draw reads the new range after the next call.
+	m_Handle = stream.reserve(size);
+	m_Drawn = false;
+	if (!stream.isValid(m_Handle))
 	{
 		// The stream has logged why. The caller gets memory to write to all the same,
 		// and the vertex buffer has no vertices to draw until a lock works.
-		m_Handle = CStreamHandleGL3();
 		m_DummyVB.resize(size);
 		m_VertexPtr = &m_DummyVB[0];
 		m_RangeLocked = false;
 		return m_VertexPtr;
 	}
 
-	m_Handle = handle;
-	m_Drawn = false;
+	m_VertexPtr = stream.lock(m_Handle);
+	m_RangeLocked = true;
 	return m_VertexPtr;
 }
 
@@ -875,7 +870,7 @@ void CVertexBufferStreamGL3::disable()
 {
 	H_AUTO_OGL(CVertexBufferStreamGL3_disable);
 
-	if (m_Driver->_CurrentVertexBufferGL != nullptr)
+	if (m_Driver->_CurrentVertexBufferGL == this)
 	{
 		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}

@@ -156,8 +156,10 @@ public:
 	CStreamHandleGL3 reserve(uint32 size);
 
 	/**
-	 * The memory of the range of a valid handle, to write to: it is memory of
-	 * the mapped GL buffer, and reading from it is slow. Until unlock() the
+	 * The memory of the range of a valid handle, to write to. It is memory of
+	 * the GL buffer, which is mapped for writing only: GL does not define what
+	 * a read through the pointer returns, and where it works it is slow. The
+	 * stream itself never reads it. Until unlock() the
 	 * stream keeps the chunk as it is, whatever else it needs room for, so
 	 * that the pointer stays good and the handle valid. The range may be
 	 * locked again later to write more, as long as the handle is valid and no
@@ -209,7 +211,7 @@ public:
 	struct CStats
 	{
 		uint32 Writes; // ranges reserved, by write() and by reserve()
-		uint64 Bytes; // bytes copied by write(), and the sizes of the ranges that were locked
+		uint64 Bytes; // bytes copied by write(); what is written through lock() is not known to the stream
 		uint64 Reserved; // bytes the head went forward by: the ranges, the gaps before them for the alignment, and what was left of a chunk when the head moved on
 		uint32 Reuses; // chunks written again in place
 		uint32 Evacuations; // chunks held by kept handles that had them made stale

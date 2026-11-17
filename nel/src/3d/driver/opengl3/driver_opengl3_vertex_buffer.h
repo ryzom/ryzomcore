@@ -204,17 +204,19 @@ private:
  * range of the vertex stream of the driver (CStreamBufferGL3), the object has
  * no GL buffer of its own.
  *
- *  Lock: when the vertices have been drawn since the range was reserved, or
- *    the stream has given the range to other data, the lock reserves a new
+ *  Lock: when the vertices have been drawn since the range was reserved, when
+ *    the stream has given the range to other data, or when the vertex buffer
+ *    has more vertices than the range has room for, the lock reserves a new
  *    range of getNumVertices() * getVertexSize() bytes, with undefined
- *    contents, and returns its memory. That is memory of the mapped GL buffer:
- *    made for writing, slow to read. Locks without a draw between them return
- *    the same memory with what was written before; when the vertex buffer has
- *    more vertices by then, the range moves and its contents are copied.
- *    A lock costs no GL call.
+ *    contents, and returns its memory. Else, for locks without a draw between
+ *    them, it returns the same memory with what was written before.
+ *    The memory is that of the GL buffer, mapped for writing only: it is to be
+ *    written, not read. A lock costs no GL call.
  *
- *  Draw: the attribute pointers are set to the offset of the range in the
- *    buffer of its chunk, and every draw marks the chunk as used by the frame.
+ *  Draw: activeVertexBuffer sets the attribute pointers to the offset of the
+ *    range in the buffer of its chunk, and every draw marks the chunk as used
+ *    by the frame. A lock between activeVertexBuffer and a draw that moves the
+ *    vertex buffer to a new range is not seen by that draw.
  *
  *  Contents: the stream gives a chunk to other data once the frames that wrote
  *    it have finished on the GPU. A vertex buffer of these usages is to be

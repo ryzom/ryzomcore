@@ -508,9 +508,6 @@ void CStreamBufferGL3::unlock(const CStreamHandleGL3 &handle)
 
 	// What was written through the pointer was written up to now
 	markWritten(chunk);
-#if NL3D_GL3_STREAM_STATS
-	m_Stats.Bytes += handle.Size;
-#endif
 }
 
 // ***************************************************************************

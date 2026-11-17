@@ -998,13 +998,24 @@ bool CDriverGL3::swapBuffers()
 
 #if NL3D_GL3_STREAM_STATS
 // --------------------------------------------------
-static void displayOneStreamStats(const char *name, CStreamBufferGL3 &stream, float perFrame)
+static void displayOneStreamStats(const char *name, CStreamBufferGL3 &stream, float perFrame, bool copies)
 {
 	CStreamBufferGL3::CStats stats = stream.fetchStats();
-	nlinfo("3D: %s stream, per frame: %.1f writes, %.0f bytes copied, %.0f bytes reserved; "
-	       "%u chunks, %u written again in place, %u freed of kept handles, %u discarded",
-	    name, (float)stats.Writes * perFrame, (float)stats.Bytes * perFrame, (float)stats.Reserved * perFrame,
-	    stream.getChunkCount(), stats.Reuses, stats.Evacuations, stats.Discards);
+	if (copies)
+	{
+		nlinfo("3D: %s stream, per frame: %.1f writes, %.0f bytes copied, %.0f bytes reserved; "
+		       "%u chunks, %u written again in place, %u freed of kept handles, %u discarded",
+		    name, (float)stats.Writes * perFrame, (float)stats.Bytes * perFrame, (float)stats.Reserved * perFrame,
+		    stream.getChunkCount(), stats.Reuses, stats.Evacuations, stats.Discards);
+	}
+	else
+	{
+		// The ranges are written by their owners through lock(): the stream knows what it reserved for them, not what they wrote
+		nlinfo("3D: %s stream, per frame: %.1f reservations, %.0f bytes reserved; "
+		       "%u chunks, %u written again in place, %u freed of kept handles, %u discarded",
+		    name, (float)stats.Writes * perFrame, (float)stats.Reserved * perFrame,
+		    stream.getChunkCount(), stats.Reuses, stats.Evacuations, stats.Discards);
+	}
 }
 
 // --------------------------------------------------
@@ -1023,9 +1034,9 @@ void CDriverGL3::displayStreamStats()
 	    (float)_StreamStats.MaterialWritten * perFrame);
 	if (_StreamMode)
 	{
-		displayOneStreamStats("uniform", _UniformStream, perFrame);
-		displayOneStreamStats("index", _IndexStream, perFrame);
-		displayOneStreamStats("vertex", _VertexStream, perFrame);
+		displayOneStreamStats("uniform", _UniformStream, perFrame, true);
+		displayOneStreamStats("index", _IndexStream, perFrame, true);
+		displayOneStreamStats("vertex", _VertexStream, perFrame, false);
 	}
 	else
 	{
