@@ -444,27 +444,11 @@ void			CDriverUser::setMinimizedWindowPictureSupplied(bool supplied)
 }
 
 // ***************************************************************************
-bool			CDriverUser::isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview)
+bool			CDriverUser::isMinimizedWindowPictureWanted() const
 {
 	NL3D_HAUTO_UI_DRIVER;
 
-	return _Driver->isMinimizedWindowPictureWanted(maxWidth, maxHeight, preview);
-}
-
-// ***************************************************************************
-bool			CDriverUser::beginMinimizedWindowPicture(bool &intoRenderTarget)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->beginMinimizedWindowPicture(intoRenderTarget);
-}
-
-// ***************************************************************************
-void			CDriverUser::endMinimizedWindowPicture(const CBitmap &picture)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->endMinimizedWindowPicture(picture);
+	return _Driver->isMinimizedWindowPictureWanted();
 }
 
 

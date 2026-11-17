@@ -222,11 +222,15 @@ CDriverGL::CDriverGL()
 #endif // NL_OS_UNIX
 
 #ifdef NL_OS_WINDOWS
-	m_MinimizedPictureFrame = false;
-	m_MinimizedPictureOldWidth = 0;
-	m_MinimizedPictureOldHeight = 0;
+	m_MinimizedPictureMode = false;
+	m_MinimizedPictureWidth = 0;
+	m_MinimizedPictureHeight = 0;
+	m_MinimizedPictureColorBuffer = 0;
+	m_MinimizedPictureDepthStencilBuffer = 0;
 	m_MinimizedPictureUnsupportedReported = false;
 #endif // NL_OS_WINDOWS
+
+	m_WindowFrameBuffer = 0;
 
 	_ColorDepth = ColorDepth32;
 
@@ -731,7 +735,8 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			// the frame buffer of the window, or what stands for it (see getWindowFrameBuffer)
+			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_WindowFrameBuffer);
 			return true;
 		}
 	}
@@ -942,6 +947,13 @@ bool CDriverGL::swapBuffers()
 		if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
 	}
 
+#ifdef NL_OS_WINDOWS
+	// In the picture mode of a minimized window the frame that ends was drawn into the frame buffer object
+	// that stands for the window: it is the picture of the window, when the desktop compositor waits for one
+	if (m_MinimizedPictureMode)
+		endMinimizedPictureFrame();
+#endif // NL_OS_WINDOWS
+
 #ifdef USE_OPENGLES
 
 	eglSwapBuffers (_EglDisplay, _EglSurface);
@@ -958,6 +970,12 @@ bool CDriverGL::swapBuffers()
 
 	glXSwapBuffers(_dpy, _win);
 
+#endif // NL_OS_WINDOWS
+
+#ifdef NL_OS_WINDOWS
+	// Between two frames: picture mode is entered or left, for the frame to come
+	if (m_MinimizedPictureMode || m_MinimizedPicture.isSupplied())
+		updateMinimizedPictureMode();
 #endif // NL_OS_WINDOWS
 
 #ifndef USE_OPENGLES

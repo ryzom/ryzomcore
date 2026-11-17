@@ -2205,8 +2205,10 @@ void CClientConfig::writeWindowPos ()
 		Driver->getWindowPos(x, y);
 		Driver->getWindowSize(width, height);
 
-		// Are we in window mode ? A minimized window has an empty size, and Windows moves it off the screen.
-		if (ClientCfg.Windowed && width != 0 && height != 0 /* && !isWindowMaximized() */)
+		// Are we in window mode ? Windows moves a minimized window off the screen. With some drivers it has an
+		// empty size then; where it keeps its size, or has it back while the desktop shows a picture of it (see
+		// UDriver::setMinimizedWindowPictureSupplied), the driver tells that it is minimized.
+		if (ClientCfg.Windowed && width != 0 && height != 0 && !Driver->isWindowMinimized() /* && !isWindowMaximized() */)
 		{
 			// Save windows position. width/height are saved when leaving ingame.
 			writeInt("PositionX", x);

@@ -863,9 +863,7 @@ public:
 	virtual bool			isActive ();
 	virtual bool			isWindowMinimized() const;
 	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
-	virtual bool			isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview);
-	virtual bool			beginMinimizedWindowPicture(bool &intoRenderTarget);
-	virtual void			endMinimizedWindowPicture(const NLMISC::CBitmap &picture);
+	virtual bool			isMinimizedWindowPictureWanted() const;
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
 	// Windows interface
@@ -2373,8 +2371,15 @@ private:
 	bool					_Maximized;
 	bool					_WindowFocus;
 	bool					_HandlePossibleSizeChangeNextSize;
-	// The pictures of the minimized window that the application supplies to the desktop compositor
+	// The pictures of the minimized window that the driver supplies to the desktop compositor, out of the
+	// frames in the back buffer
 	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// The desktop compositor shows a picture of the minimized window (see isMinimizedWindowPictureWanted)
+	bool					m_MinimizedPictureMode;
+	// It was said in the log that the back buffer cannot be read
+	bool					m_MinimizedPictureUnreadableReported;
+	// At the swap: the frame in the back buffer is handed over as a picture, when one is due
+	void					takeMinimizedPicture();
 	GfxMode					_CurrentMode;
 	uint					_Interval;
 	bool					_FullScreen;
