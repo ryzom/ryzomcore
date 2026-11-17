@@ -299,6 +299,8 @@ public:
 	// Verex buffer hard ?
 	IVertexBufferGL3		*_VBHard;
 	CDriverGL3			*_DriverGL;
+	// The lock that is held was asked for reading only (the engine calls for its outermost lock)
+	bool				_ReadOnlyLock;
 
 	// From IVBDrvInfos
 	virtual ~CVBDrvInfosGL3() NL_OVERRIDE;
@@ -1978,6 +1980,8 @@ private:
 		uint64 IndexStreamDrawBytes; // Bytes of those indices
 		uint32 IndexObjectUploads; // Times that an index buffer gave its GL buffer its indices
 		uint64 IndexObjectUploadBytes; // Bytes of those
+		uint32 ShadowUploads; // Times that a vertex buffer with a shadow copy gave its GL buffer vertices
+		uint64 ShadowUploadBytes; // Bytes of those
 		NLMISC::TTime LastTime;
 	} _StreamStats;
 	void displayStreamStats();

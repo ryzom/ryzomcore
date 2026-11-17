@@ -89,6 +89,10 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB);
 
+	m_ReadLockDirtyRanges = 0;
+	m_ReadLockSum = 0;
+	m_ReadLockWriteWarned = false;
+
 	// Allocate shadow buffer for CpuReadWrite and PartialWrite (CPU reads/writes go here)
 	if (preferred == CVertexBuffer::CpuReadWrite || preferred == CVertexBuffer::PartialWrite)
 		m_ShadowData.resize(size, 0);
@@ -365,6 +369,92 @@ void CVertexBufferGL3::unlock(uint /* startVert */,uint /* endVert */)
 
 // ***************************************************************************
 
+#if NL3D_GL3_STATE_CHECKS
+namespace /* anonymous */ {
+
+// A sum over memory that changes when a byte of it does, for all but contrived changes
+uint32 sumOfBytes(const std::vector<uint8> &bytes)
+{
+	uint32 sum = 0;
+	const size_t words = bytes.size() / sizeof(uint32);
+	for (size_t i = 0; i < words; ++i)
+	{
+		uint32 word;
+		memcpy(&word, &bytes[i * sizeof(uint32)], sizeof(uint32));
+		sum = ((sum << 5) | (sum >> 27)) ^ word;
+	}
+	for (size_t i = words * sizeof(uint32); i < bytes.size(); ++i)
+		sum = ((sum << 5) | (sum >> 27)) ^ bytes[i];
+	return sum;
+}
+
+} /* anonymous namespace */
+#endif
+
+void *CVertexBufferGL3::lockRead()
+{
+	H_AUTO_OGL(CVertexBufferGL3_lockRead);
+
+	void *ptr = lock();
+
+	// A lock of the shadow copy for reading leaves the copy as it is, so the unlock has
+	// nothing to give to GL. The driver is told of the outermost lock of a vertex buffer
+	// only: a lock for writing that is taken inside this one is not seen. What tells of
+	// it is noted here, for the unlock.
+	if (!m_ShadowData.empty())
+	{
+		m_ReadLockDirtyRanges = VB->getDirtyRanges().size();
+#if NL3D_GL3_STATE_CHECKS
+		m_ReadLockSum = sumOfBytes(m_ShadowData);
+#endif
+	}
+
+	return ptr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferGL3::unlockRead()
+{
+	H_AUTO_OGL(CVertexBufferGL3_unlockRead);
+
+	// Without a shadow copy the lock was a map of the GL buffer, to be undone as any other
+	if (m_ShadowData.empty())
+	{
+		unlock();
+		return;
+	}
+
+	// The shadow copy was written under the lock for reading after all, when a range of
+	// the vertex buffer was reported as changed meanwhile
+	bool written = VB->getDirtyRanges().size() != m_ReadLockDirtyRanges;
+#if NL3D_GL3_STATE_CHECKS
+	if (!written && sumOfBytes(m_ShadowData) != m_ReadLockSum)
+	{
+		written = true;
+		if (!m_ReadLockWriteWarned)
+		{
+			m_ReadLockWriteWarned = true;
+			nlwarning("3D: the vertex buffer '%s' was written under a lock for reading. The driver is told of the outermost lock only: "
+			          "without NL3D_GL3_STATE_CHECKS such a write is not drawn before the next lock for writing",
+			    VB->getName().c_str());
+		}
+	}
+#endif
+	if (written)
+	{
+		// as a lock for writing
+		unlock();
+		return;
+	}
+
+	// Nothing to upload: what m_ShadowDirty and the dirty ranges say of earlier writes, and
+	// of an upload that is still to come (the first one, the one after a lost buffer), stays
+	m_VertexPtr = nullptr;
+}
+
+// ***************************************************************************
+
 void CVertexBufferGL3::enable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_enable)
@@ -431,6 +521,10 @@ void CVertexBufferGL3::flush()
 		// No explicit dirty ranges: full orphan+upload
 		m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 		nglBufferData(GL_ARRAY_BUFFER, size, &m_ShadowData[0], fullUploadHint);
+#if NL3D_GL3_STREAM_STATS
+		++m_Driver->_StreamStats.ShadowUploads;
+		m_Driver->_StreamStats.ShadowUploadBytes += size;
+#endif
 	}
 	else
 	{
@@ -476,6 +570,10 @@ void CVertexBufferGL3::flush()
 			// Too much dirty: full orphan+upload from CPU, data persists for many frames
 			m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 			nglBufferData(GL_ARRAY_BUFFER, size, &m_ShadowData[0], fullUploadHint);
+#if NL3D_GL3_STREAM_STATS
+			++m_Driver->_StreamStats.ShadowUploads;
+			m_Driver->_StreamStats.ShadowUploadBytes += size;
+#endif
 		}
 		else
 		{
@@ -514,6 +612,10 @@ void CVertexBufferGL3::flush()
 
 			nglBindBuffer(GL_COPY_READ_BUFFER, 0);
 			nglBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+#if NL3D_GL3_STREAM_STATS
+			++m_Driver->_StreamStats.ShadowUploads;
+			m_Driver->_StreamStats.ShadowUploadBytes += totalDirty;
+#endif
 		}
 	}
 

@@ -31,8 +31,10 @@
 //   the ones that the draw brings up to date (CDriverGL3::checkUniformBlocksCovered),
 //   and at link time the uniform blocks of a program are counted;
 // - a chunk of a stream buffer is filled with a pattern before it is written again
-//   in place, so that a draw from a stale handle shows.
-// The first two log a warning, once per kind of finding. 1 in debug builds, 0 in
+//   in place, so that a draw from a stale handle shows;
+// - the shadow copy of a vertex buffer is compared before and after a lock for reading
+//   (CVertexBufferGL3::unlockRead), which finds a write under such a lock.
+// All but the pattern log a warning, once per kind of finding or per buffer. 1 in debug builds, 0 in
 // release builds; set it to 1 here to have the checks in a release build.
 #ifndef NL3D_GL3_STATE_CHECKS
 #ifdef NL_DEBUG

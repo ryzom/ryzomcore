@@ -60,6 +60,7 @@ CVBDrvInfosGL3::CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBu
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGL)
 	_DriverGL = drv;
 	_VBHard = nullptr;
+	_ReadOnlyLock = false;
 }
 
 // ***************************************************************************
@@ -84,17 +85,28 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 }
 
 // ***************************************************************************
-uint8 *CVBDrvInfosGL3::lock (uint /* first */, uint /* last */, bool /* readOnly */)
+uint8 *CVBDrvInfosGL3::lock(uint /* first */, uint /* last */, bool readOnly)
 {
 	H_AUTO_OGL(CVBDrvInfosGL_lock)
-	return (uint8*)_VBHard->lock ();
+	// A lock for reading is told apart: a vertex buffer with a shadow copy then has nothing
+	// to upload after it. For the other classes it is a lock as any other.
+	_ReadOnlyLock = readOnly;
+	return (uint8 *)(readOnly ? _VBHard->lockRead() : _VBHard->lock());
 }
 
 // ***************************************************************************
 void CVBDrvInfosGL3::unlock (uint first, uint last)
 {
 	H_AUTO_OGL(CVBDrvInfosGL_unlock)
-	_VBHard->unlock(first, last);
+	if (_ReadOnlyLock)
+	{
+		_ReadOnlyLock = false;
+		_VBHard->unlockRead();
+	}
+	else
+	{
+		_VBHard->unlock(first, last);
+	}
 }
 
 // ***************************************************************************
