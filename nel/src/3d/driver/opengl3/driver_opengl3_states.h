@@ -24,6 +24,13 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/vertex_buffer.h"
 
+// Debug builds compare the bindings of the state cache with those of GL once per frame
+// (CDriverGLStates3::checkBindings). Not under OpenGL ES 3: the driver has not loaded
+// the queries there.
+#if defined(NL_DEBUG) && !defined(USE_OPENGLES3)
+#define NL3D_GLSTATE_CHECK_BINDINGS
+#endif
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -60,7 +67,8 @@ namespace NLDRIVERGL3 {
  * on its own. So an object whose name the cache may have is reported to the
  * cache when it is deleted (arrayBufferDeleted, elementArrayBufferDeleted,
  * textureDeleted, uniformBufferDeleted), since GL takes it out of its bindings
- * and may give the name to another object.
+ * and may give the name to another object. Debug builds read the bindings
+ * back from GL once per frame and log what differs (checkBindings).
  */
 class CDriverGLStates3
 {
@@ -96,6 +104,19 @@ public:
 	 * own subsystem).
 	 */
 	void forceDefaults();
+
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+	/**
+	 * Read back from GL the bindings that the cache keeps for the life of the context
+	 * (program, program pipeline, vertex array object, array and element array buffer,
+	 * the attributes, the active texture unit and the texture of each unit, the uniform
+	 * buffer bindings), and log a warning with the cached and the actual value for the
+	 * first mismatch of each kind. What the cache does not know (an attribute whose
+	 * buffer was deleted, a unit that never had a texture) is not compared.
+	 * Leaves GL and the cache as they are. To call once per frame.
+	 */
+	void checkBindings();
+#endif
 
 	/// @}
 
@@ -439,6 +460,13 @@ private:
 	GLintptr m_CurUniformBufferOffset[MaxUBOBindings];
 	GLsizeiptr m_CurUniformBufferSize[MaxUBOBindings]; // 0 when the whole buffer is bound
 	GLuint m_CurPixelUnpackBuffer;
+
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+	/// True when a mismatch of this kind is to be logged: the first one since init()
+	bool warnBinding(uint kind);
+	uint32 m_BindingCheckWarned; // one bit per kind of mismatch that the log has
+	bool m_ProgramPipelineUsed; // a pipeline was bound, so GL has the query of its binding
+#endif
 };
 
 } // NLDRIVERGL3

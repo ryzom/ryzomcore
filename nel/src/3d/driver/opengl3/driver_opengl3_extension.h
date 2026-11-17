@@ -445,6 +445,8 @@ extern PFNGLUNIFORMMATRIX2FVPROC						nglUniformMatrix2fv;
 extern PFNGLUNIFORMMATRIX3FVPROC						nglUniformMatrix3fv;
 extern PFNGLUNIFORMMATRIX4FVPROC						nglUniformMatrix4fv;*/
 extern PFNGLVERTEXATTRIBPOINTERPROC						nglVertexAttribPointer;
+extern PFNGLGETVERTEXATTRIBIVPROC						nglGetVertexAttribiv;
+extern PFNGLGETVERTEXATTRIBPOINTERVPROC					nglGetVertexAttribPointerv;
 
 extern PFNGLGENVERTEXARRAYSPROC							nglGenVertexArrays;
 extern PFNGLDELETEVERTEXARRAYSPROC						nglDeleteVertexArrays;
@@ -453,6 +455,7 @@ extern PFNGLBINDVERTEXARRAYPROC							nglBindVertexArray;
 extern PFNGLBINDBUFFERPROC								nglBindBuffer;
 extern PFNGLBINDBUFFERBASEPROC							nglBindBufferBase;
 extern PFNGLBINDBUFFERRANGEPROC							nglBindBufferRange;
+extern PFNGLGETINTEGERI_VPROC							nglGetIntegeri_v;
 extern PFNGLGETUNIFORMBLOCKINDEXPROC					nglGetUniformBlockIndex;
 extern PFNGLUNIFORMBLOCKBINDINGPROC						nglUniformBlockBinding;
 extern PFNGLDELETEBUFFERSPROC							nglDeleteBuffers;
