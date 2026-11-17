@@ -33,6 +33,25 @@ namespace NL3D
 // --------------------------------------------------
 
 bool CIndexBuffer::SerialOldPreferredMemory = false;
+
+// ***************************************************************************
+
+namespace /* anonymous */ {
+
+/** True when the indices of an index buffer are to be read from the driver: the buffer is
+ * resident and has no local memory, so that its locks go to the driver, and the driver
+ * side is in RAM, which a lock for reading needs. The copy of the index buffer itself
+ * (_NonResidentIndexes) is then not the one that is read and written, and it is freed
+ * for every usage but Immutable (see setLocation).
+ * False for a buffer that is not resident, which has its indices in its own copy.
+ */
+inline bool indexesAreInDriver(const CIndexBuffer &ib)
+{
+	return ib.isResident() && !ib.getKeepLocalMemory() && ib.getLocation() == CIndexBuffer::RAMResident;
+}
+
+} /* anonymous namespace */
+
 // ***************************************************************************
 // IIBDrvInfos
 // ***************************************************************************
@@ -132,7 +151,23 @@ CIndexBuffer	&CIndexBuffer::operator=(const CIndexBuffer &vb)
 	_InternalFlags = vb._InternalFlags;
 	_NbIndexes = vb._NbIndexes;
 	_Capacity = vb._Capacity;
-	_NonResidentIndexes = vb._NonResidentIndexes;
+	if (indexesAreInDriver(vb))
+	{
+		// The source has its indices in the driver: they are read through a lock, from the
+		// first index on, as many as it has. What is behind them up to the capacity is zero.
+		_NonResidentIndexes.clear();
+		_NonResidentIndexes.resize(vb._Capacity * vb.getIndexNumBytes(), 0);
+		if (vb._NbIndexes)
+		{
+			CIndexBufferRead iba;
+			vb.lock(iba);
+			memcpy(&(_NonResidentIndexes[0]), iba.getPtr(), vb._NbIndexes * vb.getIndexNumBytes());
+		}
+	}
+	else
+	{
+		_NonResidentIndexes = vb._NonResidentIndexes;
+	}
 	_BufferUsage = vb._BufferUsage;
 	_KeepLocalMemory = vb._KeepLocalMemory;
 	_DirtyTracking = false;
@@ -320,9 +355,26 @@ void CIndexBuffer::invalidateRange(uint first, uint last)
 void CIndexBuffer::buildSerialVector(std::vector<uint32> &dest) const
 {
 	dest.resize(getNumIndexes());
+
+	// The indices: the copy of this index buffer, or, when they are in the driver, what a
+	// lock gives, from the first index on
+	CIndexBufferRead iba;
+	const void *indexes;
+	if (indexesAreInDriver(*this))
+	{
+		if (!getNumIndexes())
+			return;
+		lock(iba);
+		indexes = iba.getPtr();
+	}
+	else
+	{
+		indexes = &_NonResidentIndexes[0];
+	}
+
 	if (_Format == Indices16)
 	{
-		const uint16 *src = (const uint16 *) &_NonResidentIndexes[0];
+		const uint16 *src = (const uint16 *)indexes;
 		// convert to 32 bits
 		for(uint k = 0; k < getNumIndexes(); ++k)
 		{
@@ -332,7 +384,7 @@ void CIndexBuffer::buildSerialVector(std::vector<uint32> &dest) const
 	else
 	{
 		// direct copy
-		memcpy(&dest[0], &_NonResidentIndexes[0], sizeof(uint32) * getNumIndexes());
+		memcpy(&dest[0], indexes, sizeof(uint32) * getNumIndexes());
 	}
 }
 
@@ -373,6 +425,11 @@ void CIndexBuffer::serial(NLMISC::IStream &f)
 	  */
 
 	sint ver = f.serialVersion(SerialOldPreferredMemory ? 2 : 3);
+
+	// A resident index buffer that is read into leaves the driver first. At the end of
+	// the read it would take back the indices that the driver has, over the ones read.
+	if (f.isReading() && isResident())
+		restoreNonResidentMemory();
 
 	// Primitive block?
 	if (ver < 1)
