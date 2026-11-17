@@ -35,6 +35,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/win_event_emitter.h"
+#include "nel/misc/win_minimized_picture.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/driver.h"
@@ -861,6 +862,10 @@ public:
 	virtual bool			activate();
 	virtual bool			isActive ();
 	virtual bool			isWindowMinimized() const;
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
+	virtual bool			isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview);
+	virtual bool			beginMinimizedWindowPicture(bool &intoRenderTarget);
+	virtual void			endMinimizedWindowPicture(const NLMISC::CBitmap &picture);
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
 	// Windows interface
@@ -2368,6 +2373,8 @@ private:
 	bool					_Maximized;
 	bool					_WindowFocus;
 	bool					_HandlePossibleSizeChangeNextSize;
+	// The pictures of the minimized window that the application supplies to the desktop compositor
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
 	GfxMode					_CurrentMode;
 	uint					_Interval;
 	bool					_FullScreen;

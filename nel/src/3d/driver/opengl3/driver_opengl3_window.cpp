@@ -81,6 +81,20 @@ bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARA
 	if (!driver)
 		return false;
 
+	if (hWnd == driver->_win)
+	{
+		// A change of the size of the window ends the frame that is being drawn for a picture of the minimized
+		// window, if any: the size the driver has is the one of the window again, for what follows
+		if (message == WM_SIZE)
+			driver->endMinimizedPictureFrame();
+
+		// The pictures of the minimized window: the window declares that it supplies them when it is minimized,
+		// until it is restored, and the requests of the desktop compositor are taken. The size the window had
+		// before it was minimized is the one the driver has before this message (the client area of a minimized
+		// window is empty)
+		driver->m_MinimizedPicture.processMessage(hWnd, message, wParam, lParam, driver->_CurrentMode.Width, driver->_CurrentMode.Height);
+	}
+
 	if (message == WM_SIZE)
 	{
 		if (driver->_CurrentMode.Windowed)
@@ -1793,6 +1807,10 @@ bool CDriverGL3::destroyWindow()
 
 #ifdef NL_OS_WINDOWS
 
+	// a window that lives on (one of the application) has its pictures from the desktop compositor again
+	endMinimizedPictureFrame();
+	m_MinimizedPicture.release(_win);
+
 	// don't destroy window if it hasn't been created by our driver
 	if (_win && _DestroyWindow)
 		DestroyWindow(_win);
@@ -3066,6 +3084,103 @@ bool CDriverGL3::isWindowMinimized() const
 
 	return res;
 }
+
+// --------------------------------------------------
+void CDriverGL3::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	H_AUTO_OGL(CDriverGL3_setMinimizedWindowPictureSupplied)
+
+#ifdef NL_OS_WINDOWS
+
+	if (!supplied)
+		endMinimizedPictureFrame();
+	m_MinimizedPicture.setSupplied(_win, supplied);
+
+#endif // NL_OS_WINDOWS
+}
+
+// --------------------------------------------------
+bool CDriverGL3::isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview)
+{
+	H_AUTO_OGL(CDriverGL3_isMinimizedWindowPictureWanted)
+
+#ifdef NL_OS_WINDOWS
+
+	return _win != EmptyWindow && m_MinimizedPicture.isPictureWanted(_win, maxWidth, maxHeight, preview);
+
+#else
+
+	// no window system of the other platforms is supplied with such pictures
+	return false;
+
+#endif // NL_OS_WINDOWS
+}
+
+// --------------------------------------------------
+bool CDriverGL3::beginMinimizedWindowPicture(bool &intoRenderTarget)
+{
+	H_AUTO_OGL(CDriverGL3_beginMinimizedWindowPicture)
+
+	intoRenderTarget = false;
+
+#ifdef NL_OS_WINDOWS
+
+	uint32 maxWidth, maxHeight;
+	bool preview;
+	if (!isMinimizedWindowPictureWanted(maxWidth, maxHeight, preview))
+		return false;
+
+	// Nothing that is drawn into the frame buffer of a minimized window can be read back, and the client area
+	// of the window is empty: the frame is drawn into a render target, and for as long as it is drawn the size
+	// of the window is the one it had before it was minimized
+	intoRenderTarget = true;
+	if (!m_MinimizedPictureFrame)
+	{
+		uint32 width, height;
+		m_MinimizedPicture.getWindowSize(width, height);
+		m_MinimizedPictureFrame = true;
+		m_MinimizedPictureOldWidth = _CurrentMode.Width;
+		m_MinimizedPictureOldHeight = _CurrentMode.Height;
+		_CurrentMode.Width = (uint16)width;
+		_CurrentMode.Height = (uint16)height;
+	}
+	return true;
+
+#else
+
+	return false;
+
+#endif // NL_OS_WINDOWS
+}
+
+// --------------------------------------------------
+void CDriverGL3::endMinimizedWindowPicture(const NLMISC::CBitmap &picture)
+{
+	H_AUTO_OGL(CDriverGL3_endMinimizedWindowPicture)
+
+#ifdef NL_OS_WINDOWS
+
+	endMinimizedPictureFrame();
+	if (_win != EmptyWindow)
+		m_MinimizedPicture.setPicture(_win, picture);
+
+#endif // NL_OS_WINDOWS
+}
+
+#ifdef NL_OS_WINDOWS
+
+// --------------------------------------------------
+void CDriverGL3::endMinimizedPictureFrame()
+{
+	if (m_MinimizedPictureFrame)
+	{
+		m_MinimizedPictureFrame = false;
+		_CurrentMode.Width = m_MinimizedPictureOldWidth;
+		_CurrentMode.Height = m_MinimizedPictureOldHeight;
+	}
+}
+
+#endif // NL_OS_WINDOWS
 
 // ***************************************************************************
 bool CDriverGL3::supportMonitorColorProperties () const

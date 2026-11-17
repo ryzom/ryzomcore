@@ -33,6 +33,7 @@
 #include "nel/misc/displayer.h"
 #include "nel/misc/value_smoother.h"
 #include "nel/misc/geom_ext.h"
+#include "nel/misc/bitmap.h"
 // Net
 #include "nel/net/module_manager.h"
 // 3D Interface.
@@ -811,6 +812,39 @@ void doRenderScene(bool wantTraversals, bool keepTraversals)
 
 
 // ***************************************************************************
+// The frame of the game that is read back for the picture the desktop shows of the minimized window (the thumbnail
+// of the taskbar, and the full-size preview shown from it). Empty outside of the frame it is taken in
+static CBitmap s_MinimizedWindowPicture;
+
+// Begin a frame that is drawn for a picture of the minimized window, when the desktop wants one. Returns false
+// when the frame is an ordinary one, which is every frame of a window that is not minimized and nearly every
+// frame of one that is: the driver wants a picture only while the desktop shows one, and no more than about ten
+// times a second.
+// With intoRenderTarget set, the frame buffer of the minimized window takes no picture, and the whole frame has
+// to go into the default render target, to be read from it (see UDriver::beginMinimizedWindowPicture).
+static bool beginMinimizedWindowPicture(bool &intoRenderTarget)
+{
+	intoRenderTarget = false;
+	if (!Driver->isWindowMinimized())
+		return false;
+
+	// (asked on every frame of a minimized window: this is also where the driver tells the desktop that the last
+	// picture is out of date)
+	uint32 maxWidth, maxHeight;
+	bool preview;
+	if (!Driver->isMinimizedWindowPictureWanted(maxWidth, maxHeight, preview))
+		return false;
+
+	// The first frames after a loading are not shown (the camera turns around to load what surrounds the
+	// character), and nothing is drawn for a lost device: the picture waits for a frame that would be shown
+	if (FirstFrame || SkipFrame != 0 || Driver->isLost())
+		return false;
+
+	return Driver->beginMinimizedWindowPicture(intoRenderTarget);
+}
+
+
+// ***************************************************************************
 class CMusicFader
 {
 public:
@@ -1104,6 +1138,11 @@ bool mainLoop()
 
 	bool musicTriggerAutoPlay = true;
 
+	// From here to the end of the game loop, the frames of the game supply the picture the desktop shows of the
+	// window while it is minimized (see beginMinimizedWindowPicture). The loops before and after the game, and the
+	// Far TP loop, draw no such frame: there the desktop keeps the picture it has
+	Driver->setMinimizedWindowPictureSupplied(true);
+
 	// Main loop. If the window is no more Active -> Exit.
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
@@ -1252,6 +1291,9 @@ bool mainLoop()
 		// INITIALIZE THE FRAME //
 		//////////////////////////
 		CInterfaceManager *pIMinstance;
+		// This frame is drawn for a picture of the minimized window, and has to go into a render target for it
+		bool minimizedPicture = false;
+		bool minimizedPictureIntoRenderTarget = false;
 		{
 
 			if (ClientCfg.IsInvalidated)
@@ -1272,6 +1314,11 @@ bool mainLoop()
 
 			// Grab Inputs.
 			CInputHandlerManager::getInstance()->pumpEvents();
+
+			// While the window is minimized, the desktop may want a picture of it: this frame is then drawn for
+			// that picture, as a frame of the window at the size it had before it was minimized. Asked after the
+			// events, which bring the requests, and before anything takes the size of the window for the frame
+			minimizedPicture = beginMinimizedWindowPicture(minimizedPictureIntoRenderTarget);
 
 			CLandscapePolyDrawer::getInstance().deletePolygons();
 			CDecalRenderList::getInstance().clearRenderList();
@@ -1741,10 +1788,12 @@ bool mainLoop()
 			//////////////////////////
 
 			bool stereoRenderTarget = StereoDisplay->beginRenderTarget();
-			if (!stereoRenderTarget && haveEffects && !defaultRenderTarget && StereoDisplay->wantClear())
+			if (!stereoRenderTarget && (haveEffects || minimizedPictureIntoRenderTarget) && !defaultRenderTarget && StereoDisplay->wantClear())
 			{
 				// No effect render target is made for a window without area (minimized, or resized down to its
-				// title bar): the frame has no effects then, there is no picture to apply them to
+				// title bar): the frame has no effects then, there is no picture to apply them to.
+				// A frame for a picture of the minimized window goes into this render target also without
+				// effects, where it cannot be read from the frame buffer of the window
 				defaultRenderTarget = Driver->beginDefaultRenderTarget();
 				if (!defaultRenderTarget)
 					haveEffects = false;
@@ -2344,10 +2393,42 @@ bool mainLoop()
 		if (!ClientCfg.Light && Render)
 			Scene->endWaterReflectionPasses();
 
+		// The picture of the minimized window is read from this frame, unless a loading took place within it:
+		// the frame is then the first one of a new place, which is not shown
+		bool minimizedPictureDrawn = minimizedPicture && !FirstFrame;
+
+		// Where the frame went into the render target for the picture, the render target has the whole frame now,
+		// the scene, the effects and the interface, and is read while it is set
+		if (minimizedPictureDrawn && minimizedPictureIntoRenderTarget && defaultRenderTarget)
+			Driver->getBuffer(s_MinimizedWindowPicture);
+
 		if (defaultRenderTarget)
 		{
 			// draw final result to backbuffer
 			Driver->endDefaultRenderTarget(Scene);
+		}
+
+		if (minimizedPicture)
+		{
+			// Where the minimized window keeps its frame buffer, the frame is in it now and is read from there,
+			// as for a screenshot
+			if (minimizedPictureDrawn && !minimizedPictureIntoRenderTarget && !Driver->isLost())
+				Driver->getBuffer(s_MinimizedWindowPicture);
+
+			// The driver scales the picture and hands it to the desktop, and the size of the window is the one of
+			// the minimized window again. A bitmap that was left empty tells it that this frame gave no picture:
+			// the desktop goes on waiting, for a later frame
+			Driver->endMinimizedWindowPicture(s_MinimizedWindowPicture);
+			s_MinimizedWindowPicture.reset();
+
+			// A frame that had to go into the default render target and went to the render targets of a stereo
+			// display has no picture, and neither has the next one: the game supplies none, and the desktop
+			// has its own picture of the window again
+			if (minimizedPictureIntoRenderTarget && !defaultRenderTarget)
+			{
+				nlinfo("No picture of the minimized window is supplied: the frame does not go into the default render target (stereo display)");
+				Driver->setMinimizedWindowPictureSupplied(false);
+			}
 		}
 
 		// Draw to screen.
@@ -2594,8 +2675,12 @@ bool mainLoop()
 		if(LoginSM.getCurrentState() == CLoginStateMachine::st_enter_far_tp_main_loop)
 		{
 			CLuaManager::getInstance().executeLuaScript("game:onFarTpStart()");
+			// The Far TP loop draws no frame of the game: the desktop keeps the picture it has of a minimized
+			// window meanwhile
+			Driver->setMinimizedWindowPictureSupplied(false);
 			// Will loop the network until the end of the relogging process
 			FarTP.farTPmainLoop();
+			Driver->setMinimizedWindowPictureSupplied(true);
 
 			if( FarTP.isReselectingChar() )
 			{
@@ -2685,6 +2770,9 @@ bool mainLoop()
 		///////////////
 
 	} // end of main loop
+
+	// no frame of the game is drawn from here on: a minimized window has its picture from the desktop again
+	Driver->setMinimizedWindowPictureSupplied(false);
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CLuaManager::getInstance().getLuaState())

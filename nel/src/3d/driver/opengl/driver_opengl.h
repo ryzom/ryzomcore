@@ -69,6 +69,7 @@
 
 #ifdef NL_OS_WINDOWS
 #include "nel/misc/win_event_emitter.h"
+#include "nel/misc/win_minimized_picture.h"
 #elif defined(NL_OS_MAC)
 #include "mac/cocoa_event_emitter.h"
 #elif defined (NL_OS_UNIX)
@@ -531,6 +532,11 @@ public:
 
 	virtual bool			isWindowMinimized() const;
 
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
+	virtual bool			isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview);
+	virtual bool			beginMinimizedWindowPicture(bool &intoRenderTarget);
+	virtual void			endMinimizedWindowPicture(const NLMISC::CBitmap &picture);
+
 	virtual uint8			getBitPerPixel ();
 
 	virtual void			showCursor (bool b);
@@ -838,6 +844,18 @@ private:
 	static uint					_Registered;
 	DEVMODE						_OldScreenMode;
 	NLMISC::CEventEmitterMulti	_EventEmitter; // this can contains a win emitter and eventually a direct input emitter
+
+	// The pictures of the minimized window that the application supplies to the desktop compositor
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// A frame is being drawn for such a picture (beginMinimizedWindowPicture): _CurrentMode has the size the
+	// window had before it was minimized, and the size it has without that frame is kept here
+	bool						m_MinimizedPictureFrame;
+	uint16						m_MinimizedPictureOldWidth;
+	uint16						m_MinimizedPictureOldHeight;
+	// It was said in the log that the pictures cannot be supplied without frame buffer objects
+	bool						m_MinimizedPictureUnsupportedReported;
+	// _CurrentMode gets the size of the minimized window back, when a frame is being drawn for a picture
+	void						endMinimizedPictureFrame();
 
 #elif defined(NL_OS_MAC)
 

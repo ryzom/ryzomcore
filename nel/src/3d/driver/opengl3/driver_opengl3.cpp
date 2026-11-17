@@ -210,6 +210,12 @@ CDriverGL3::CDriverGL3()
 
 #endif // NL_OS_UNIX
 
+#ifdef NL_OS_WINDOWS
+	m_MinimizedPictureFrame = false;
+	m_MinimizedPictureOldWidth = 0;
+	m_MinimizedPictureOldHeight = 0;
+#endif // NL_OS_WINDOWS
+
 	_ColorDepth = ColorDepth32;
 
 	_DefaultCursor = EmptyCursor;
