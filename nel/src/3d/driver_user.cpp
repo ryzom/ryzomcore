@@ -435,6 +435,38 @@ nlWindow		CDriverUser::getDisplay ()
 	return _Driver->getDisplay ();
 }
 
+// ***************************************************************************
+void			CDriverUser::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->setMinimizedWindowPictureSupplied(supplied);
+}
+
+// ***************************************************************************
+bool			CDriverUser::isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->isMinimizedWindowPictureWanted(maxWidth, maxHeight, preview);
+}
+
+// ***************************************************************************
+bool			CDriverUser::beginMinimizedWindowPicture(bool &intoRenderTarget)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->beginMinimizedWindowPicture(intoRenderTarget);
+}
+
+// ***************************************************************************
+void			CDriverUser::endMinimizedWindowPicture(const CBitmap &picture)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->endMinimizedWindowPicture(picture);
+}
+
 
 
 // ***************************************************************************

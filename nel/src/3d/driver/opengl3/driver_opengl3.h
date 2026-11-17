@@ -93,6 +93,10 @@
 #include "unix_event_emitter.h"
 #endif // NL_OS_UNIX
 
+#ifdef NL_OS_WINDOWS
+#include "nel/misc/win_minimized_picture.h"
+#endif // NL_OS_WINDOWS
+
 // For optimisation consideration, allow 256 lightmaps at max.
 #define	NL3D_DRV_MAX_LIGHTMAP		256
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
@@ -738,6 +742,11 @@ public:
 
 	virtual bool			isWindowMinimized() const NL_OVERRIDE;
 
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) NL_OVERRIDE;
+	virtual bool			isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview) NL_OVERRIDE;
+	virtual bool			beginMinimizedWindowPicture(bool &intoRenderTarget) NL_OVERRIDE;
+	virtual void			endMinimizedWindowPicture(const NLMISC::CBitmap &picture) NL_OVERRIDE;
+
 	virtual uint8			getBitPerPixel () NL_OVERRIDE;
 
 	virtual void			showCursor (bool b) NL_OVERRIDE;
@@ -957,6 +966,18 @@ private:
 
 	sint32						_DecorationWidth;
 	sint32						_DecorationHeight;
+
+#ifdef NL_OS_WINDOWS
+	// The pictures of the minimized window that the application supplies to the desktop compositor
+	NLMISC::CWinMinimizedPicture	m_MinimizedPicture;
+	// A frame is being drawn for such a picture (beginMinimizedWindowPicture): _CurrentMode has the size the
+	// window had before it was minimized, and the size it has without that frame is kept here
+	bool						m_MinimizedPictureFrame;
+	uint16						m_MinimizedPictureOldWidth;
+	uint16						m_MinimizedPictureOldHeight;
+	// _CurrentMode gets the size of the minimized window back, when a frame is being drawn for a picture
+	void						endMinimizedPictureFrame();
+#endif // NL_OS_WINDOWS
 
 	// cursors
 	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };

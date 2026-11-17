@@ -184,6 +184,19 @@ public:
 	// @}
 
 
+	/// \name Picture of the minimized window
+	// @{
+	/// The application supplies the pictures of its minimized window, or leaves them to the window system again
+	virtual void			setMinimizedWindowPictureSupplied(bool supplied) NL_OVERRIDE;
+	/// Return true when the window system waits for a picture of the minimized window
+	virtual bool			isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview) NL_OVERRIDE;
+	/// Begin the frame that is drawn for the picture of the minimized window, false when none is wanted
+	virtual bool			beginMinimizedWindowPicture(bool &intoRenderTarget) NL_OVERRIDE;
+	/// End the frame begun by beginMinimizedWindowPicture and hand over its picture
+	virtual void			endMinimizedWindowPicture(const CBitmap &picture) NL_OVERRIDE;
+	// @}
+
+
 	/// \name Buffers.
 	// @{
 	/// This clear only the RGBA back buffer

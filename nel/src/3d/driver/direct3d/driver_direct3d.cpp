@@ -1167,6 +1167,17 @@ void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPAR
 {
 	H_AUTO_D3D(D3DWndProc);
 
+	// The pictures of the minimized window: the window declares that it supplies them when it is minimized, until
+	// it is restored, and the requests of the desktop compositor are taken. The driver keeps the size the window
+	// had before it was minimized (see handlePossibleSizeChange).
+	// A fullscreen device is lost for as long as its window is minimized, and nothing is drawn with it: no picture
+	// can be supplied then. That minimize is not passed on, and the window keeps the pictures of the compositor
+	if (driver != NULL && hWnd == driver->_HWnd
+		&& !(driver->_FullScreen && message == WM_SIZE && wParam == SIZE_MINIMIZED))
+	{
+		driver->m_MinimizedPicture.processMessage(hWnd, message, wParam, lParam, driver->_CurrentMode.Width, driver->_CurrentMode.Height);
+	}
+
 	// Check this message in parents
 
 	if ((message == WM_SIZE) || (message == WM_EXITSIZEMOVE) || (message == WM_MOVE))
@@ -1882,6 +1893,10 @@ bool CDriverD3D::release()
 		std::vector<NLMISC::CBitmap> bitmaps;
 		setWindowIcon(bitmaps);
 
+		// a window that lives on (one that was handed to the driver) has its pictures from the desktop
+		// compositor again
+		m_MinimizedPicture.release(_HWnd);
+
 		if (_DestroyWindow)
 			DestroyWindow (_HWnd);
 		_HWnd = NULL;
@@ -1965,6 +1980,36 @@ bool CDriverD3D::isWindowMinimized() const
 {
 	// the driver keeps the size the window had before it was minimized, so that getWindowSize does not tell
 	return _HWnd != NULL && IsIconic(_HWnd) != FALSE;
+}
+
+// ***************************************************************************
+void CDriverD3D::setMinimizedWindowPictureSupplied(bool supplied)
+{
+	m_MinimizedPicture.setSupplied(_HWnd, supplied);
+}
+
+// ***************************************************************************
+bool CDriverD3D::isMinimizedWindowPictureWanted(uint32 &maxWidth, uint32 &maxHeight, bool &preview)
+{
+	return _HWnd != NULL && m_MinimizedPicture.isPictureWanted(_HWnd, maxWidth, maxHeight, preview);
+}
+
+// ***************************************************************************
+bool CDriverD3D::beginMinimizedWindowPicture(bool &intoRenderTarget)
+{
+	// The back buffer keeps the size the window had before it was minimized, and the frame is drawn into it as
+	// for a window that is shown: there is nothing to prepare, the picture is read from the back buffer
+	intoRenderTarget = false;
+	uint32 maxWidth, maxHeight;
+	bool preview;
+	return isMinimizedWindowPictureWanted(maxWidth, maxHeight, preview);
+}
+
+// ***************************************************************************
+void CDriverD3D::endMinimizedWindowPicture(const NLMISC::CBitmap &picture)
+{
+	if (_HWnd != NULL)
+		m_MinimizedPicture.setPicture(_HWnd, picture);
 }
 
 // ***************************************************************************
