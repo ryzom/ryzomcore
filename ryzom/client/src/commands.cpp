@@ -81,6 +81,7 @@
 #include "teleport.h"
 #include "nel/misc/cdb_leaf.h"
 #include "view.h"
+#include "motion/user_controls.h"
 #include "misc.h"
 #include "demo.h"
 #include "dummy_progress.h"
@@ -3944,6 +3945,50 @@ NLMISC_COMMAND(dist2back, "Change the distance to the back for a given sheet.", 
 NLMISC_COMMAND(dist2side, "Change the distance to the side for a given sheet.", "<form> <dist>")
 {
 	DIST_TO_COMMAND(dist2side, DistToSide);
+}
+
+//-----------------------------------------------
+// 'camera' : Show or set the direction and the distance of the camera, so that a view can be taken again exactly,
+// for screenshots and for measurements from the same point of view.
+//-----------------------------------------------
+NLMISC_COMMAND(camera, "Show or set the direction of the camera and its distance to the character, in the view from behind the character. Heading in degrees in the world: 0 looks east, 90 north. Pitch in degrees: 0 is level, positive looks up (up to 89). Distance in meters, at least the shortest distance of the view from behind; inside a building that forces the view from the eyes it is left as it is. The character keeps its facing.", "[<heading> <pitch> [<distance>]]")
+{
+	if (args.size() == 1 || args.size() > 3)
+		return false;
+	if (!UserEntity)
+	{
+		log.displayNL("The camera can be set in the game only");
+		return true;
+	}
+
+	if (args.size() >= 2)
+	{
+		float heading, pitch;
+		if (!fromString(args[0], heading) || !fromString(args[1], pitch) || !isValidDouble(heading) || !isValidDouble(pitch))
+			return false;
+		float distance = 0.f;
+		if (args.size() == 3 && (!fromString(args[2], distance) || !isValidDouble(distance) || distance < 0.f))
+			return false;
+
+		// The camera is placed at every frame from the facing of the character, the yaw the player added with the
+		// mouse, and the pitch of the head (CUserControls::commonSetView): the added yaw and the pitch are set here
+		UserControls.resetCameraDeltaYaw();
+		UserControls.appendCameraDeltaYaw(heading * (float)(Pi / 180.0) - UserEntity->frontYaw());
+		UserEntity->setHeadPitch(pitch * Pi / 180.0);
+
+		// As the mouse wheel: not inside a building that forces the view from the eyes. Never below the shortest
+		// distance of the view from behind, so that the same arguments always give the same view
+		if (args.size() == 3 && !UserEntity->forceIndoorFPV())
+			View.cameraDistance(std::max(distance, ClientCfg.CameraDistMin));
+	}
+
+	float heading = (UserEntity->frontYaw() + UserControls.getCameraDeltaYaw()) * (float)(180.0 / Pi);
+	heading = fmodf(fmodf(heading, 360.f) + 540.f, 360.f) - 180.f;
+	if (UserEntity->viewMode() == CUserEntity::FirstPV)
+		log.displayNL("Camera: heading %.1f, pitch %.1f, view from the eyes", heading, UserEntity->getHeadPitch() * 180.0 / Pi);
+	else
+		log.displayNL("Camera: heading %.1f, pitch %.1f, distance %.2f", heading, UserEntity->getHeadPitch() * 180.0 / Pi, ClientCfg.CameraDistance);
+	return true;
 }
 
 
