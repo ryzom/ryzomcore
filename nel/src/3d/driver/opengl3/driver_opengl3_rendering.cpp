@@ -112,6 +112,8 @@ bool CDriverGL3::streamIndices(uint32 firstIndex, uint32 count, CIndexRange &ran
 
 void CDriverGL3::drawIndices(GLenum mode, GLsizei count, GLenum type, const CIndexRange &range, uint32 offset)
 {
+	// The uniform buffer ranges of the draw
+	_DriverGLStates.flushUniformBufferBindings();
 	// With a buffer bound, the pointer of glDrawElements is the offset into it
 	_DriverGLStates.bindElementArrayBuffer(range.Buffer);
 	glDrawElements(mode, count, type, (const GLvoid *)(size_t)(range.Offset + offset));
@@ -278,7 +280,10 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 
 		// draw the primitives.
 		if (numPoints)
+		{
+			_DriverGLStates.flushUniformBufferBindings();
 			glDrawArrays(GL_POINTS, startIndex, numPoints);
+		}
 	}
 	// end multipass.
 	endMultiPass();
@@ -319,7 +324,10 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 
 		// draw the primitives.
 		if (numLines)
+		{
+			_DriverGLStates.flushUniformBufferBindings();
 			glDrawArrays(GL_LINES, startIndex << 1, numLines << 1);
+		}
 	}
 	// end multipass.
 	endMultiPass();
@@ -361,6 +369,7 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 		// draw the primitives.
 		if (numTris)
 		{
+			_DriverGLStates.flushUniformBufferBindings();
 			glDrawArrays(GL_TRIANGLES, startIndex*3, numTris*3);
 		}
 	}

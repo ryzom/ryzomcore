@@ -59,6 +59,14 @@ typedef void(APIENTRY *NEL_PFNGLBUFFERSTORAGEPROC)(GLenum target, GLsizeiptr siz
 
 #endif // NL_GL_ARB_buffer_storage
 
+// GL_ARB_multi_bind, in the core since OpenGL 4.4
+#ifndef NL_GL_ARB_multi_bind
+#define NL_GL_ARB_multi_bind 1
+
+typedef void(APIENTRY *NEL_PFNGLBINDBUFFERSRANGEPROC)(GLenum target, GLuint first, GLsizei count, const GLuint *buffers, const GLintptr *offsets, const GLsizeiptr *sizes);
+
+#endif // NL_GL_ARB_multi_bind
+
 #if defined(NL_OS_MAC)
 
 // Mac GL extensions

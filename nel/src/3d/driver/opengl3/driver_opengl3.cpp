@@ -619,6 +619,15 @@ bool CDriverGL3::setupDisplay()
 			nlinfo("3D: per-buffer mode, the uniform blocks, the indices of the draws and the stream vertex buffers have GL buffers of their own: %s", reason);
 	}
 
+	// The uniform buffer ranges that change for a draw go out in one call where the context
+	// has the command for it (see CDriverGLStates3::flushUniformBufferBindings)
+#if NL3D_GL3_MULTI_BIND && !defined(USE_OPENGLES3)
+	_DriverGLStates.enableMultiBind(_Extensions.ARBMultiBind);
+	nlinfo("3D: uniform buffer ranges are bound %s", _Extensions.ARBMultiBind ? "several in one call (glBindBuffersRange)" : "one per call, the context has no glBindBuffersRange (OpenGL 4.4 or GL_ARB_multi_bind)");
+#else
+	_DriverGLStates.enableMultiBind(false);
+#endif
+
 	nglGenBuffers(1, &_PixelUploadPBO);
 
 	if (m_UseMegaShaders)

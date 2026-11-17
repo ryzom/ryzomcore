@@ -48,6 +48,12 @@
 #define NL3D_GLSTATE_CHECK_BINDINGS
 #endif
 
+// 1: where the context has glBindBuffersRange (OpenGL 4.4 or GL_ARB_multi_bind), the
+// uniform buffer ranges that change for a draw are issued with one call when there is
+// more than one (CDriverGLStates3::flushUniformBufferBindings). 0: one glBindBufferRange
+// for each, for comparison. OpenGL ES 3 does not have the command.
+#define NL3D_GL3_MULTI_BIND 1
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -78,7 +84,7 @@ namespace NLDRIVERGL3 {
  * - Shader programs: glUseProgram(), glBindProgramPipeline()
  * - Buffer objects: glBindBuffer(GL_UNIFORM_BUFFER),
  *   glBindBufferBase(GL_UNIFORM_BUFFER), glBindBufferRange(GL_UNIFORM_BUFFER),
- *   glBindBuffer(GL_PIXEL_UNPACK_BUFFER)
+ *   glBindBuffersRange(GL_UNIFORM_BUFFER), glBindBuffer(GL_PIXEL_UNPACK_BUFFER)
  *
  * The bindings are kept for the life of the context: nothing issues one again
  * on its own. So an object whose name the cache may have is reported to the
@@ -130,7 +136,9 @@ public:
 	 * the attributes, the active texture unit and the texture of each unit, the uniform
 	 * buffer bindings), and log a warning with the cached and the actual value for the
 	 * first mismatch of each kind. What the cache does not know (an attribute whose
-	 * buffer was deleted, a unit that never had a texture) is not compared.
+	 * buffer was deleted, a unit that never had a texture) is not compared. The
+	 * uniform buffer ranges are compared as they were issued; one that is noted for
+	 * the next draw and not issued yet is not part of it.
 	 * Leaves GL and the cache as they are. To call once per frame.
 	 */
 	void checkBindings();
@@ -368,13 +376,35 @@ public:
 	void forceBindUniformBufferBase(GLuint binding, GLuint bufferId);
 	GLuint getCurrBoundUniformBufferBase(GLuint binding) const { nlassert(binding < MaxUBOBindings); return m_CurUniformBufferBase[binding]; }
 
-	/// glBindBufferRange(GL_UNIFORM_BUFFER, binding, bufferId, offset, size). Indexed binding points, a part of a buffer.
-	/// The offset is a multiple of GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT and the size is not zero.
+	/// A part of a buffer for an indexed binding point (glBindBufferRange). The offset is a
+	/// multiple of GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT and the size is not zero.
+	/// The call is not issued here: the range is noted as the one the binding point is to
+	/// have, and flushUniformBufferBindings() issues what differs from what GL has. A range
+	/// that is replaced before the flush costs nothing.
 	void bindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size);
+	/// glBindBufferRange(GL_UNIFORM_BUFFER, binding, bufferId, offset, size), at once.
 	void forceBindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size);
 
+	/**
+	 * Issue the ranges that bindUniformBufferRange() noted. To call before every draw
+	 * call: nothing else reads the indexed binding points.
+	 * One binding point that changes gets glBindBufferRange. Several get one
+	 * glBindBuffersRange where the context has it (enableMultiBind) and
+	 * NL3D_GL3_MULTI_BIND is 1: the call covers the binding points from the first to
+	 * the last that change, and gives the ones between them the range they have. That
+	 * needs every binding point of the span to have a range of a buffer; where one has
+	 * a whole buffer or none, the binding points are issued one by one.
+	 * glBindBufferRange sets the general binding point too and glBindBuffersRange does
+	 * not; the cache of the general binding point follows either.
+	 */
+	void flushUniformBufferBindings();
+
+	/// The context has glBindBuffersRange (CGlExtensions::ARBMultiBind)
+	void enableMultiBind(bool enable) { m_MultiBind = enable; }
+
 	/// To call when a buffer that may be bound to GL_UNIFORM_BUFFER gets deleted: GL sets
-	/// the bindings of a deleted buffer back to zero, and so does the cache. No GL call.
+	/// the bindings of a deleted buffer back to zero, and so does the cache, which also
+	/// drops a range of the buffer that is noted and not issued. No GL call.
 	void uniformBufferDeleted(GLuint id);
 
 	/// glBindBuffer(GL_PIXEL_UNPACK_BUFFER). For texture upload via PBO.
@@ -477,6 +507,13 @@ private:
 	GLuint m_CurUniformBufferBase[MaxUBOBindings];
 	GLintptr m_CurUniformBufferOffset[MaxUBOBindings];
 	GLsizeiptr m_CurUniformBufferSize[MaxUBOBindings]; // 0 when the whole buffer is bound
+	// What each indexed binding point is to have at the next draw. The same as what it
+	// has (m_CurUniformBuffer*), except for the binding points of m_UniformBufferDirty.
+	GLuint m_WantUniformBufferBase[MaxUBOBindings];
+	GLintptr m_WantUniformBufferOffset[MaxUBOBindings];
+	GLsizeiptr m_WantUniformBufferSize[MaxUBOBindings];
+	uint32 m_UniformBufferDirty; // One bit per indexed binding point that flushUniformBufferBindings() has a call to issue for
+	bool m_MultiBind; // The context has glBindBuffersRange
 	GLuint m_CurPixelUnpackBuffer;
 
 #ifdef NL3D_GLSTATE_CHECK_BINDINGS

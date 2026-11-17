@@ -116,7 +116,12 @@ CDriverGLStates3::CDriverGLStates3()
 		m_CurUniformBufferBase[i] = 0;
 		m_CurUniformBufferOffset[i] = 0;
 		m_CurUniformBufferSize[i] = 0;
+		m_WantUniformBufferBase[i] = 0;
+		m_WantUniformBufferOffset[i] = 0;
+		m_WantUniformBufferSize[i] = 0;
 	}
+	m_UniformBufferDirty = 0;
+	m_MultiBind = false;
 	m_CurPixelUnpackBuffer = 0;
 
 #ifdef NL3D_GLSTATE_CHECK_BINDINGS
@@ -161,7 +166,11 @@ void CDriverGLStates3::init()
 		m_CurUniformBufferBase[i] = 0;
 		m_CurUniformBufferOffset[i] = 0;
 		m_CurUniformBufferSize[i] = 0;
+		m_WantUniformBufferBase[i] = 0;
+		m_WantUniformBufferOffset[i] = 0;
+		m_WantUniformBufferSize[i] = 0;
 	}
+	m_UniformBufferDirty = 0;
 	m_CurPixelUnpackBuffer = 0;
 
 	// The viewport and the scissor rectangle of a new context are those of its window,
@@ -1039,6 +1048,11 @@ void CDriverGLStates3::forceBindUniformBufferBase(GLuint binding, GLuint bufferI
 	m_CurUniformBufferBase[binding] = bufferId;
 	m_CurUniformBufferOffset[binding] = 0;
 	m_CurUniformBufferSize[binding] = 0;
+	// the binding point has what it is to have: a range that was noted for it is dropped
+	m_WantUniformBufferBase[binding] = bufferId;
+	m_WantUniformBufferOffset[binding] = 0;
+	m_WantUniformBufferSize[binding] = 0;
+	m_UniformBufferDirty &= ~(1u << binding);
 	// the indexed bind commands bind the buffer to the general binding point as well
 	m_CurUniformBuffer = bufferId;
 }
@@ -1046,13 +1060,24 @@ void CDriverGLStates3::forceBindUniformBufferBase(GLuint binding, GLuint bufferI
 void CDriverGLStates3::bindUniformBufferBase(GLuint binding, GLuint bufferId)
 {
 	H_AUTO_OGL(CDriverGLStates3_bindUniformBufferBase)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
 	nlassert(binding < MaxUBOBindings);
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
 	if (bufferId != m_CurUniformBufferBase[binding] || m_CurUniformBufferSize[binding] != 0)
 #endif
 	{
 		forceBindUniformBufferBase(binding, bufferId);
 	}
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	else
+	{
+		// The binding point has the buffer already. A range that was noted for it since is
+		// dropped: the last one asked for is the one it is to have.
+		m_WantUniformBufferBase[binding] = bufferId;
+		m_WantUniformBufferOffset[binding] = 0;
+		m_WantUniformBufferSize[binding] = 0;
+		m_UniformBufferDirty &= ~(1u << binding);
+	}
+#endif
 }
 
 void CDriverGLStates3::forceBindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size)
@@ -1063,6 +1088,10 @@ void CDriverGLStates3::forceBindUniformBufferRange(GLuint binding, GLuint buffer
 	m_CurUniformBufferBase[binding] = bufferId;
 	m_CurUniformBufferOffset[binding] = offset;
 	m_CurUniformBufferSize[binding] = size;
+	m_WantUniformBufferBase[binding] = bufferId;
+	m_WantUniformBufferOffset[binding] = offset;
+	m_WantUniformBufferSize[binding] = size;
+	m_UniformBufferDirty &= ~(1u << binding);
 	// the indexed bind commands bind the buffer to the general binding point as well
 	m_CurUniformBuffer = bufferId;
 }
@@ -1070,14 +1099,75 @@ void CDriverGLStates3::forceBindUniformBufferRange(GLuint binding, GLuint buffer
 void CDriverGLStates3::bindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size)
 {
 	H_AUTO_OGL(CDriverGLStates3_bindUniformBufferRange)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
 	nlassert(binding < MaxUBOBindings);
+
+	// Noted, and issued by flushUniformBufferBindings() when it is not what the binding point has
+	m_WantUniformBufferBase[binding] = bufferId;
+	m_WantUniformBufferOffset[binding] = offset;
+	m_WantUniformBufferSize[binding] = size;
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
 	if (bufferId != m_CurUniformBufferBase[binding]
 	    || offset != m_CurUniformBufferOffset[binding]
 	    || size != m_CurUniformBufferSize[binding])
 #endif
 	{
-		forceBindUniformBufferRange(binding, bufferId, offset, size);
+		m_UniformBufferDirty |= (1u << binding);
+	}
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	else
+	{
+		m_UniformBufferDirty &= ~(1u << binding);
+	}
+#endif
+}
+
+void CDriverGLStates3::flushUniformBufferBindings()
+{
+	if (!m_UniformBufferDirty)
+		return;
+
+	H_AUTO_OGL(CDriverGLStates3_flushUniformBufferBindings)
+
+	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
+		if (!(m_UniformBufferDirty & (1u << i)))
+			continue;
+
+#if NL3D_GL3_MULTI_BIND && !defined(USE_OPENGLES3)
+		if (m_MultiBind)
+		{
+			// The binding points from this one to the last one that changes, as far as each
+			// of them is to have a range of a buffer: glBindBuffersRange takes no whole
+			// buffer, and for no buffer it wants a size all the same
+			uint last = i;
+			for (uint j = i; j < MaxUBOBindings; ++j)
+			{
+				if (!m_WantUniformBufferBase[j] || m_WantUniformBufferSize[j] <= 0)
+					break;
+				if (m_UniformBufferDirty & (1u << j))
+					last = j;
+			}
+			if (last > i)
+			{
+				// One call for them. The binding points between them that do not change are
+				// given the range they have. The general binding point stays as it is.
+				nglBindBuffersRange(GL_UNIFORM_BUFFER, i, (GLsizei)(last - i + 1),
+				    &m_WantUniformBufferBase[i], &m_WantUniformBufferOffset[i], &m_WantUniformBufferSize[i]);
+				for (uint j = i; j <= last; ++j)
+				{
+					m_CurUniformBufferBase[j] = m_WantUniformBufferBase[j];
+					m_CurUniformBufferOffset[j] = m_WantUniformBufferOffset[j];
+					m_CurUniformBufferSize[j] = m_WantUniformBufferSize[j];
+					m_UniformBufferDirty &= ~(1u << j);
+				}
+				i = last;
+				continue;
+			}
+		}
+#endif
+
+		// (clears the bit)
+		forceBindUniformBufferRange(i, m_WantUniformBufferBase[i], m_WantUniformBufferOffset[i], m_WantUniformBufferSize[i]);
 	}
 }
 
@@ -1095,6 +1185,15 @@ void CDriverGLStates3::uniformBufferDeleted(GLuint id)
 			m_CurUniformBufferBase[i] = 0;
 			m_CurUniformBufferOffset[i] = 0;
 			m_CurUniformBufferSize[i] = 0;
+		}
+		if (m_WantUniformBufferBase[i] == id)
+		{
+			// A range of the buffer that is noted for the binding point is not issued:
+			// the binding point keeps what it has
+			m_WantUniformBufferBase[i] = m_CurUniformBufferBase[i];
+			m_WantUniformBufferOffset[i] = m_CurUniformBufferOffset[i];
+			m_WantUniformBufferSize[i] = m_CurUniformBufferSize[i];
+			m_UniformBufferDirty &= ~(1u << i);
 		}
 	}
 }
