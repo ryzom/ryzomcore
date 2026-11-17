@@ -214,7 +214,10 @@ function RingAccessPoint:isAllowedSession(allowFreeTrial)
 	
 	local freeTrial = isPlayerFreeTrial()
 
-	-- (AllowFreeTrial is a boolean: the test against 0 it had was true for every session)
+	-- (AllowFreeTrial is a boolean: the test against 0 it had was true for every session. The session manager
+	-- makes no such test for the owner of a session, and the list does not say which session is the character's
+	-- own: a trial account is held back here from its own session when the scenario in it is not open to trial
+	-- accounts or has not started.)
 	return (not freeTrial or allowFreeTrial == true)
 end
 

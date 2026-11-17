@@ -2021,7 +2021,9 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 			// that nobody is in, which looks at the mode, never came.)
 			// The animation found can also be that of the animation session of the owner (getConnectedChars
 			// reaches it through getLinkedSessionId, as the stop would): that one is no test of this session and
-			// goes on, as it does for the stop of a test that nobody is in (onModuleUpdate).
+			// goes on, as it does for the stop of a test that nobody is in (onModuleUpdate). (The link is there
+			// for any animation session of the owner on this service: a test of this session that runs beside
+			// one is taken for it here and there, and is left running.)
 			bool testStarting = false;
 			if (animationSessionExist && getLinkedSessionId(sessionId).asInt() == 0)
 			{
@@ -2035,10 +2037,12 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 			else if (getAnimationModule()->isSessionStartingOrRunning(sessionId))
 			{
 				// The start of a test was accepted and its animation is not made yet (startScenario schedules
-				// it). The start is not taken back here: the scenario stays in test mode, so that the test is
-				// stopped when nobody is in the session any more, and the character that connects is in edition
-				// until it asks for the test, which puts it in the one that runs.
-				nlinfo("R2Ed: char %u connects to edit session %u while its test starts: the test goes on", charId, sessionId.asInt());
+				// it). The start is not taken back here and the mode of the scenario is left as it is: the test
+				// mode startScenario set, with which the test is stopped when nobody is in the session any more
+				// (unless the owner has an animation session, see above), or edition when a stop was asked for
+				// in the meantime. The character that connects is in edition until it asks for the test, which
+				// puts it in the one that runs.
+				nlinfo("R2Ed: char %u connects to edit session %u while a start of its test is pending: the start is left as it is", charId, sessionId.asInt());
 				testStarting = true;
 			}
 			else
