@@ -400,7 +400,7 @@ CClientConfig::CClientConfig()
 	FXAA				= true;
 
 	WeatherLightingEntities		= true;
-	WeatherLightingLandscape	= false;
+	WeatherLightingLandscape	= true;
 	WeatherLightningFlash		= true;
 
 	Bloom				= true;
