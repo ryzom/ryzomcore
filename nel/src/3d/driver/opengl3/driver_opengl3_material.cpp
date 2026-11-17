@@ -825,6 +825,7 @@ sint CDriverGL3::beginLightMapMultiPass()
 	{
 		matDrv->MaterialUBO.resize(neededSlots);
 		matDrv->MaterialUBOBlock.resize(neededSlots);
+		matDrv->MaterialUBOWritten.resize(neededSlots);
 		matDrv->MaterialUBOTouched.resize(neededSlots, false);
 	}
 

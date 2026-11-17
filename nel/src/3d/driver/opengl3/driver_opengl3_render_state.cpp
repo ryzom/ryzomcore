@@ -657,10 +657,21 @@ void CDriverGL3::uploadMaterialUBO()
 	// Slot 0 = base material (from setupMaterial/setupNormalPass).
 	// Slots 1..N = per-pass overrides (from setupLightMapPass, etc.).
 	uint slot = matDrv->MaterialUBOCurrent;
+	const CMaterialUBOData &data = matDrv->MaterialUBO[slot];
+
+	// A slot that was touched often has the bytes that its block has: a texture of the
+	// material was replaced and the same stages are in use, or a lightmap pass built
+	// the slot again as it built it for the draw before. The block is written only when
+	// a byte differs; a block that stays is bound where it is, which costs no GL call
+	// when the draw before used it. The struct has no padding that is not a member,
+	// so the slots can be compared as memory.
+	const bool changed = matDrv->MaterialUBOTouched[slot]
+	    && memcmp(&data, &matDrv->MaterialUBOWritten[slot], sizeof(CMaterialUBOData)) != 0;
 	if (useUniformBlock(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOBlock[slot],
-	        &matDrv->MaterialUBO[slot], sizeof(CMaterialUBOData), sizeof(CMaterialUBOData),
-	        matDrv->MaterialUBOTouched[slot]))
+	        &data, sizeof(CMaterialUBOData), sizeof(CMaterialUBOData), changed))
 	{
+		// Written because it changed, or because the block was stale
+		matDrv->MaterialUBOWritten[slot] = data;
 #if NL3D_GL3_STREAM_STATS
 		++_StreamStats.MaterialWritten;
 #endif

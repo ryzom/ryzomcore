@@ -438,7 +438,8 @@ public:
 	uint                           MaterialUBOCurrent;
 	std::vector<CMaterialUBOData>  MaterialUBO;
 	std::vector<CUniformBlockGL3>  MaterialUBOBlock;    // Where the driver has the slot; stale = not uploaded
-	std::vector<bool>	           MaterialUBOTouched;  // Needs re-upload
+	std::vector<CMaterialUBOData>  MaterialUBOWritten;  // The bytes that the block of the slot has, when it is not stale
+	std::vector<bool>	           MaterialUBOTouched;  // The slot may have changed since it was uploaded
 
 	// EMBM: true if any texenv stage uses OpRGB == EMBM. Updated when TEXENV is touched.
 	bool HasEMBM;
@@ -450,6 +451,7 @@ public:
 	{
 		MaterialUBO.resize(1);
 		MaterialUBOBlock.resize(1);
+		MaterialUBOWritten.resize(1);
 		MaterialUBOTouched.resize(1);
 		MaterialUBO[0].nlLightMapScale = 1.0f;
 	}
