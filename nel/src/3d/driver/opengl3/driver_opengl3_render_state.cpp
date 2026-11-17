@@ -344,28 +344,82 @@ void CDriverGL3::setClipPlane(uint index, const NLMISC::CPlane &plane)
 }
 
 // ***************************************************************************
-// Uniform blocks in the uniform stream
+// Uniform blocks, in the uniform stream or in a GL buffer each
 // ***************************************************************************
 
-bool CDriverGL3::useUniformBlock(GLuint binding, CStreamHandleGL3 &handle, const void *data, uint32 size, uint32 allocSize, bool write)
+bool CDriverGL3::useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const void *data, uint32 size, uint32 allocSize, bool write)
 {
 	H_AUTO_OGL(CDriverGL3_useUniformBlock)
 
-	// The stream gives the chunk of a handle to other data without telling, so a kept
-	// handle is asked for on every use, and the data written again when it is gone
 	bool written = false;
-	if (write || !_UniformStream.isValid(handle))
+
+	if (_StreamMode)
 	{
-		handle = _UniformStream.write(data, size, allocSize);
-		if (!_UniformStream.isValid(handle))
-			return false; // the stream has logged what failed; the binding point keeps what it has
-		written = true;
+		// The stream gives the chunk of a handle to other data without telling, so a kept
+		// handle is asked for on every use, and the data written again when it is gone
+		if (write || !_UniformStream.isValid(block.Handle))
+		{
+			block.Handle = _UniformStream.write(data, size, allocSize);
+			if (!_UniformStream.isValid(block.Handle))
+				return false; // the stream has logged what failed; the binding point keeps what it has
+			written = true;
+		}
+
+		// The chunk now belongs to the current frame, and the shader reads the range
+		GLuint buffer = _UniformStream.use(block.Handle);
+		_DriverGLStates.bindUniformBufferRange(binding, buffer, block.Handle.Offset, block.Handle.Size);
+		return written;
 	}
 
-	// The chunk now belongs to the current frame, and the shader reads the range
-	GLuint buffer = _UniformStream.use(handle);
-	_DriverGLStates.bindUniformBufferRange(binding, buffer, handle.Offset, handle.Size);
+	// Per-buffer mode: the block has a GL buffer of its own, which keeps its data until
+	// the next write. A write gives the buffer new storage, so that nothing waits for the
+	// draws that still read the old one.
+	if (write || !block.Buffer)
+	{
+		if (!block.Buffer)
+			nglGenBuffers(1, &block.Buffer);
+		_DriverGLStates.bindUniformBuffer(block.Buffer);
+		if (size == allocSize)
+		{
+			// the storage and the data in one call
+			nglBufferData(GL_UNIFORM_BUFFER, allocSize, data, GL_STREAM_DRAW);
+		}
+		else
+		{
+			// The block is larger than what is known of it: storage of the whole size, then the known part
+			nglBufferData(GL_UNIFORM_BUFFER, allocSize, nullptr, GL_STREAM_DRAW);
+			if (size)
+				nglBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+		}
+		written = true;
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.BufferWrites;
+		_StreamStats.BufferBytes += size;
+#endif
+	}
+
+	_DriverGLStates.bindUniformBufferBase(binding, block.Buffer);
 	return written;
+}
+
+bool CDriverGL3::isUniformBlockStale(const CUniformBlockGL3 &block) const
+{
+	return _StreamMode ? !_UniformStream.isValid(block.Handle) : block.Buffer == 0;
+}
+
+void CDriverGL3::releaseUniformBlock(CUniformBlockGL3 &block)
+{
+	H_AUTO_OGL(CDriverGL3_releaseUniformBlock)
+
+	if (block.Buffer)
+	{
+		// GL sets the bindings of a deleted buffer back to zero, the state cache follows
+		_DriverGLStates.uniformBufferDeleted(block.Buffer);
+		nglDeleteBuffers(1, &block.Buffer);
+		block.Buffer = 0;
+	}
+	// A range of the stream is not given back: the stream writes over it when its chunk comes round again
+	block.Handle = CStreamHandleGL3();
 }
 
 // ***************************************************************************
@@ -441,7 +495,7 @@ void CDriverGL3::uploadCameraUBO()
 {
 	H_AUTO_OGL(CDriverGL3_uploadCameraUBO)
 
-	useUniformBlock(NL_BUILTIN_CAMERA_BINDING, _CameraUBOHandle,
+	useUniformBlock(NL_BUILTIN_CAMERA_BINDING, _CameraUBOBlock,
 	    &_CameraUBOData, sizeof(CCameraUBOData), sizeof(CCameraUBOData), _CameraUBOUploadDirty);
 
 	_CameraUBOUploadDirty = false;
@@ -571,7 +625,7 @@ void CDriverGL3::uploadObjectUBO()
 	// then used again, which costs no write and no change of the binding. Every
 	// byte of the struct is set above, so the blocks can be compared as memory.
 	bool changed = memcmp(&data, &_ObjectUBOWritten, sizeof(CObjectUBOData)) != 0;
-	if (useUniformBlock(NL_BUILTIN_MODEL_BINDING, _ObjectUBOHandle,
+	if (useUniformBlock(NL_BUILTIN_MODEL_BINDING, _ObjectUBOBlock,
 	        &data, sizeof(CObjectUBOData), sizeof(CObjectUBOData), changed))
 	{
 		_ObjectUBOWritten = data;
@@ -603,10 +657,21 @@ void CDriverGL3::uploadMaterialUBO()
 	// Slot 0 = base material (from setupMaterial/setupNormalPass).
 	// Slots 1..N = per-pass overrides (from setupLightMapPass, etc.).
 	uint slot = matDrv->MaterialUBOCurrent;
-	if (useUniformBlock(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOHandle[slot],
-	        &matDrv->MaterialUBO[slot], sizeof(CMaterialUBOData), sizeof(CMaterialUBOData),
-	        matDrv->MaterialUBOTouched[slot]))
+	const CMaterialUBOData &data = matDrv->MaterialUBO[slot];
+
+	// A slot that was touched often has the bytes that its block has: a texture of the
+	// material was replaced and the same stages are in use, or a lightmap pass built
+	// the slot again as it built it for the draw before. The block is written only when
+	// a byte differs; a block that stays is bound where it is, which costs no GL call
+	// when the draw before used it. The struct has no padding that is not a member,
+	// so the slots can be compared as memory.
+	const bool changed = matDrv->MaterialUBOTouched[slot]
+	    && memcmp(&data, &matDrv->MaterialUBOWritten[slot], sizeof(CMaterialUBOData)) != 0;
+	if (useUniformBlock(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOBlock[slot],
+	        &data, sizeof(CMaterialUBOData), sizeof(CMaterialUBOData), changed))
 	{
+		// Written because it changed, or because the block was stale
+		matDrv->MaterialUBOWritten[slot] = data;
 #if NL3D_GL3_STREAM_STATS
 		++_StreamStats.MaterialWritten;
 #endif

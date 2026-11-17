@@ -47,7 +47,7 @@ namespace NLDRIVERGL3 {
  * - Depth range: glDepthRange()
  * - Clip planes: glEnable/glDisable(GL_CLIP_DISTANCE0..5)
  * - Vertex input: glEnableVertexAttribArray(), glDisableVertexAttribArray(),
- *   glBindBuffer(GL_ARRAY_BUFFER)
+ *   glBindBuffer(GL_ARRAY_BUFFER), glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)
  * - Textures: glActiveTexture(), glBindTexture()
  * - Framebuffer: glBindFramebuffer(GL_FRAMEBUFFER)
  * - Shader programs: glUseProgram(), glBindProgramPipeline()
@@ -224,10 +224,33 @@ public:
 	/// the default VAO will be rebound before modifying attrib state.
 	void enableVertexAttribArray(uint glIndex, bool enable);
 
-	/// glBindBuffer(GL_ARRAY_BUFFER). Context state, not per-VAO.
+	/// glVertexAttribPointer() for an attribute that reads from a buffer, on the default
+	/// VAO (see enableVertexAttribArray). The call is issued, with the buffer bound to
+	/// GL_ARRAY_BUFFER, when the attribute does not already read this buffer in this way.
+	void vertexAttribPointer(uint glIndex, GLuint buffer, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
+
+	/// glBindBuffer(GL_ARRAY_BUFFER). Context state, not per-VAO. Nothing draws from this
+	/// binding: it is what glVertexAttribPointer and the buffer commands on the target
+	/// take, and each of them binds the buffer it needs first.
 	void bindArrayBuffer(uint objectID);
 	void forceBindArrayBuffer(uint objectID);
 	uint getCurrBoundArrayBuffer() const { return m_CurrArrayBuffer; }
+
+	/// To call when a buffer that was bound to GL_ARRAY_BUFFER gets deleted: GL sets the
+	/// binding back to zero and takes the buffer out of the attributes of the bound vertex
+	/// array object, and the cache forgets it in both. No GL call.
+	void arrayBufferDeleted(uint objectID);
+
+	/// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER). State of the vertex array object: like the
+	/// attrib arrays it is kept for the default VAO, which is bound again when another one is.
+	void bindElementArrayBuffer(GLuint id);
+	void forceBindElementArrayBuffer(GLuint id);
+	GLuint getCurrBoundElementArrayBuffer() const { return m_CurElementArrayBuffer; }
+
+	/// To call when a buffer that may be bound to GL_ELEMENT_ARRAY_BUFFER gets deleted: GL
+	/// takes a deleted buffer out of the bound vertex array object, and the cache forgets
+	/// it. No GL call.
+	void elementArrayBufferDeleted(GLuint id);
 
 	/// @}
 
@@ -245,6 +268,11 @@ public:
 	/// Cache is keyed by both target and id per unit.
 	void bindTexture(GLenum target, GLuint id);
 	void forceBindTexture(GLenum target, GLuint id);
+	/// Whether bindTexture() would issue no call for this texture on the given unit
+	bool isTextureBound(uint stage, GLenum target, GLuint id) const;
+	/// To call when a texture gets deleted: GL sets the bindings of a deleted texture
+	/// back to zero, and so does the cache. No GL call.
+	void textureDeleted(GLuint id);
 	/** Unbind whatever texture is bound on the given unit (no-op when the
 	  * unit is already unbound). Uses this cache as the source of truth for
 	  * the actual GL binding, unlike the driver's higher-level per-stage
@@ -370,7 +398,18 @@ private:
 	GLuint m_DefaultVAO;
 	GLuint m_CurVAO;
 	bool m_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
+	struct CVertexAttribPointer
+	{
+		GLuint Buffer; // 0: not known, the next call is issued
+		GLint Size;
+		GLenum Type;
+		GLboolean Normalized;
+		GLsizei Stride;
+		const GLvoid *Pointer;
+	};
+	CVertexAttribPointer m_VertexAttribPointer[CVertexBuffer::NumValue]; // of the default VAO
 	uint m_CurrArrayBuffer;
+	GLuint m_CurElementArrayBuffer; // of the default VAO
 
 	// Texture state
 	uint m_CurrentActiveTexture;

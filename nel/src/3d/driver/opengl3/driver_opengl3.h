@@ -73,6 +73,7 @@
 #include "driver_opengl3_extension.h"
 #include "driver_opengl3_program.h"
 #include "driver_opengl3_stream_buffer.h"
+#include "driver_opengl3_uniform_buffer.h"
 
 
 #ifdef USE_OPENGLES3
@@ -114,6 +115,18 @@ using NLMISC::CVector;
 #define NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
 #define NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (16) // More chunks are only created when a single draw needs them
+
+// The stream that holds the indices of the draws
+#define NL3D_GL3_INDEX_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
+#define NL3D_GL3_INDEX_STREAM_ALIGNMENT (4) // A multiple of both index sizes, so that an index is never split over two words
+#define NL3D_GL3_INDEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
+#define NL3D_GL3_INDEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when a single render call needs them
+
+// The stream that holds the vertices of the SmallStream and FullStream vertex buffers
+#define NL3D_GL3_VERTEX_STREAM_CHUNK_SIZE (4 * 1024 * 1024) // Bytes per chunk
+#define NL3D_GL3_VERTEX_STREAM_ALIGNMENT (16) // The vertices of a vertex buffer start at a multiple of this
+#define NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
+#define NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when none can be given up
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
@@ -434,8 +447,9 @@ public:
 	// Material UBO staging area, with additional entries for multiple passes
 	uint                           MaterialUBOCurrent;
 	std::vector<CMaterialUBOData>  MaterialUBO;
-	std::vector<CStreamHandleGL3>  MaterialUBOHandle;   // Where the slot is in the uniform stream; not valid = not uploaded
-	std::vector<bool>	           MaterialUBOTouched;  // Needs re-upload
+	std::vector<CUniformBlockGL3>  MaterialUBOBlock;    // Where the driver has the slot; stale = not uploaded
+	std::vector<CMaterialUBOData>  MaterialUBOWritten;  // The bytes that the block of the slot has, when it is not stale
+	std::vector<bool>	           MaterialUBOTouched;  // The slot may have changed since it was uploaded
 
 	// EMBM: true if any texenv stage uses OpRGB == EMBM. Updated when TEXENV is touched.
 	bool HasEMBM;
@@ -446,10 +460,12 @@ public:
 		SetupMaterialTouched(0), SetupPass0Touched(0), MaterialUBOCurrent(0), HasEMBM(false), TexEnvMatDefault(false)
 	{
 		MaterialUBO.resize(1);
-		MaterialUBOHandle.resize(1);
+		MaterialUBOBlock.resize(1);
+		MaterialUBOWritten.resize(1);
 		MaterialUBOTouched.resize(1);
 		MaterialUBO[0].nlLightMapScale = 1.0f;
 	}
+	~CMaterialDrvInfosGL3() NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -1230,9 +1246,9 @@ private:
 	// Dedicated 1-light block for the lightmap dynamic light.
 	// During lightmap passes, this is bound to the light table binding point
 	// instead of the main light table block, avoiding pollution of _LightTable.
-	CStreamHandleGL3			_LightMapDynUBOHandle; // Where the block is in the uniform stream
+	CUniformBlockGL3			_LightMapDynUBOBlock;  // Where the driver has the block, always _MaxLightTableSize entries
 	CLightTableUBOEntry			_LightMapDynUBOEntry;  // Packed light data (staging)
-	CLightTableUBOEntry			_LightMapDynUBOWritten; // The light data that _LightMapDynUBOHandle holds
+	CLightTableUBOEntry			_LightMapDynUBOWritten; // The light data that _LightMapDynUBOBlock holds
 	bool						_LightMapDynUBODirty;  // Staged again, needs re-upload when the data differs
 	bool						_UseLightMapDynUBO;    // Bind this instead of main table
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
@@ -1247,7 +1263,7 @@ private:
 	std::vector<CLight>			_LightTable;
 
 	// Light UBO (shared by light table mode and non-table fallback)
-	CStreamHandleGL3			_LightTableUBOHandle; // Where the block is in the uniform stream, always _MaxLightTableSize entries
+	CUniformBlockGL3			_LightTableUBOBlock; // Where the driver has the block, always _MaxLightTableSize entries
 	bool						_LightTableDirty; // Light table entries changed
 	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
@@ -1261,7 +1277,7 @@ private:
 	uint						_NumPerPixelLights; // First N lights evaluated per-pixel in PP (0 = all VP)
 
 	// Camera/global state UBO (viewMatrix, fog, clipPlanes, pzbCameraPos)
-	CStreamHandleGL3			_CameraUBOHandle;       // Where the block is in the uniform stream
+	CUniformBlockGL3			_CameraUBOBlock;        // Where the driver has the block
 	bool						_CameraUBODirty;        // Driver state changed — need to re-stage _CameraUBOData
 	bool						_CameraUBOUploadDirty;  // Staged data changed — need to re-upload to GPU
 	CCameraUBOData				_CameraUBOData;         // Persistent staging area (single source of truth for fog etc.)
@@ -1435,12 +1451,68 @@ private:
 	CVertexBufferInfo		_LastVB;
 	CIndexBufferInfo		_LastIB;
 
-#ifdef USE_OPENGLES3
-	/// Scratch element buffer for WebGL 2.0 (client-side index arrays not supported)
-	GLuint					_ScratchElementBuffer;
-	GLsizeiptr				_ScratchElementBufferSize;
-	void					drawElementsWebGL(GLenum mode, GLsizei count, GLenum type, const void *indices);
-#endif
+	/// \name Indices of the draws
+	// A core profile and WebGL 2.0 have no client-side index arrays: glDrawElements reads
+	// the indices from a buffer. Every render call gives the indices it draws to the
+	// driver's buffers, once for all the passes of its material, and draws from there.
+	// @{
+	/** Where the driver has a piece of index data.
+	 * In stream mode (_StreamMode) it is a range of the index stream, which the stream may
+	 * give to other data. In per-buffer mode it is a GL buffer that holds nothing else.
+	 * Only useIndices and releaseIndexBlock know which of the two it is.
+	 */
+	struct CIndexBlock
+	{
+		CStreamHandleGL3 Handle; // stream mode
+		GLuint Buffer; // per-buffer mode; 0 until the first write
+
+		CIndexBlock()
+		    : Buffer(0)
+		{
+		}
+	};
+	/// What glDrawElements reads the indices of a draw from
+	struct CIndexRange
+	{
+		GLuint Buffer;
+		uint32 Offset;
+
+		CIndexRange()
+		    : Buffer(0)
+		    , Offset(0)
+		{
+		}
+	};
+	/// One glDrawElements of a render call that has several
+	struct CIndexDraw
+	{
+		uint32 Offset; // of the indices in the data of the call
+		GLsizei Count;
+		GLenum Type;
+	};
+	/// Stream mode: the indices of the draws are written into this stream
+	CStreamBufferGL3		_IndexStream;
+	/// The indices of the render call that is going on. In per-buffer mode this is the one
+	/// buffer that every render call gives new storage with its indices.
+	CIndexBlock				_ScratchIndices;
+	/// The index table of renderRawQuads, the same for every call: written again only when the driver no longer has it
+	CIndexBlock				_QuadIndices;
+	/// The quads of a renderRawQuads call that the table does not cover: their indices, and the draws
+	std::vector<uint8>		_QuadIndexData;
+	std::vector<CIndexDraw>	_QuadDraws;
+	/** The one way to get indices to the GPU for the draws of a render call: writes them when
+	 * asked to (write) or when the driver no longer has them, and tells where they are.
+	 * In stream mode, to call after _IndexStream.nextDraw(), which begins the render call.
+	 * \return false when the write failed, which the stream has logged: the render call then draws nothing
+	 */
+	bool					useIndices(CIndexBlock &block, const void *data, uint32 size, bool write, CIndexRange &range);
+	/// Begin a render call that draws count indices of the active index buffer from firstIndex on, and write them
+	bool					streamIndices(uint32 firstIndex, uint32 count, CIndexRange &range, GLenum &type);
+	/// glDrawElements with the indices at an offset from a range
+	void					drawIndices(GLenum mode, GLsizei count, GLenum type, const CIndexRange &range, uint32 offset = 0);
+	/// Delete the GL buffer of a piece of index data, if it has one
+	void					releaseIndexBlock(CIndexBlock &block);
+	// @}
 
 	/// Sets up the rendering parameters for the normal shader
 	void setupNormalMaterial();
@@ -1507,7 +1579,11 @@ private:
 	CPtrSet<IVertexBufferGL3>		_VertexBufferGLSet;
 	friend class					CVertexBufferGL3;
 	friend class					CVertexBufferAMDPinned;
+	friend class					CVertexBufferStreamGL3;
 	friend class					CVBDrvInfosGL3;
+
+	// Stream mode: the vertices of the SmallStream and FullStream vertex buffers are in ranges of this stream
+	CStreamBufferGL3				_VertexStream;
 
 	// The VertexBufferHardGL activated.
 	IVertexBufferGL3					*_CurrentVertexBufferGL;
@@ -1739,20 +1815,40 @@ private:
 	bool m_ProgramUsesMaterialUBO[NumTProgram];   // Program reads from NlMaterial UBO
 	CUniformBuffer *m_NelvpActiveUB;              // Non-null when active VP is nelvp-converted
 
-	// The uniform blocks are written into this stream, and bound as ranges of its buffers
+	/** How the driver gets the data that changes with the draws to the GPU, chosen once
+	 * when the display is set up.
+	 * Stream mode (true): the context has buffer storage with a persistent mapping. The
+	 * data is written into stream buffers (CStreamBufferGL3) and drawn from ranges of them.
+	 * Per-buffer mode (false): every owner of such data has a GL buffer of its own, which
+	 * gets new storage with the data for every write.
+	 * The code that uses the data does not know the mode: it goes through one function per
+	 * kind of data (useUniformBlock, useIndices), or gets the object that does it for its
+	 * mode (createVertexBufferGL).
+	 */
+	bool _StreamMode;
+
+	// Stream mode: the uniform blocks are written into this stream, and bound as ranges of its buffers
 	CStreamBufferGL3 _UniformStream;
-	/** The one way to use a block that is kept in the uniform stream: writes the data
-	 * when asked to (write) or when the handle has gone stale, marks the chunk as used
-	 * by the current frame, and binds the range to the binding point.
+	/** The one way to use a uniform block: writes the data when asked to (write) or when
+	 * the driver no longer has it, and binds it to the binding point.
 	 * size bytes of data are written, allocSize bytes are reserved and bound: the size
 	 * of the block as the shader declares it, never less.
+	 * In stream mode the block is a range of the uniform stream, which is asked whether it
+	 * still holds it, and told that the current frame uses it.
 	 * \return true when the data has been written
 	 */
-	bool useUniformBlock(GLuint binding, CStreamHandleGL3 &handle, const void *data, uint32 size, uint32 allocSize, bool write);
+	bool useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const void *data, uint32 size, uint32 allocSize, bool write);
+	/// True when useUniformBlock is going to write the block whatever it is asked: the driver does not have its data
+	bool isUniformBlockStale(const CUniformBlockGL3 &block) const;
 
+public:
+	/// For the owner of a uniform block that goes away: deletes the GL buffer of the block, if it has one
+	void releaseUniformBlock(CUniformBlockGL3 &block);
+
+private:
 	// Per-Object UBO (runtime state of currently bound program)
-	CStreamHandleGL3 _ObjectUBOHandle; // Where the last block is in the uniform stream
-	CObjectUBOData _ObjectUBOWritten; // The data that _ObjectUBOHandle holds
+	CUniformBlockGL3 _ObjectUBOBlock; // Where the driver has the last block
+	CObjectUBOData _ObjectUBOWritten; // The data that _ObjectUBOBlock holds
 	// GLuint  _OverrideMaterialUBOId; // Global buffer for per-pass material overrides (lightmap) — replaced by per-material UBO slots
 	void    uploadObjectUBO();
 	void    uploadMaterialUBO();
@@ -1767,9 +1863,13 @@ private:
 	struct CStreamStats
 	{
 		uint32 Frames;
-		uint32 ObjectWritten; // Object blocks written to the stream
+		uint32 ObjectWritten; // Object blocks written
 		uint32 ObjectSkipped; // Object blocks that were the same as the one before
-		uint32 MaterialWritten; // Material slots written to the stream
+		uint32 MaterialWritten; // Material slots written
+		uint32 BufferWrites; // Per-buffer mode: uniform blocks written, each to its GL buffer
+		uint64 BufferBytes; // Per-buffer mode: bytes of those writes
+		uint32 IndexBufferWrites; // Per-buffer mode: writes of indices to a GL buffer
+		uint64 IndexBufferBytes; // Per-buffer mode: bytes of those writes
 		NLMISC::TTime LastTime;
 	} _StreamStats;
 	void displayStreamStats();

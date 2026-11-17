@@ -27,28 +27,95 @@
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
-#ifdef USE_OPENGLES3
-// WebGL 2.0 does not support client-side index arrays.
-// Upload index data to a scratch element buffer before calling glDrawElements.
-void CDriverGL3::drawElementsWebGL(GLenum mode, GLsizei count, GLenum type, const void *indices)
-{
-	GLsizeiptr indexSize = (type == GL_UNSIGNED_SHORT) ? sizeof(uint16) : sizeof(uint32);
-	GLsizeiptr dataSize = count * indexSize;
+// ***************************************************************************
+// Indices of the draws, in the index stream or in a GL buffer
+// ***************************************************************************
 
-	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ScratchElementBuffer);
-	if (dataSize > _ScratchElementBufferSize)
+bool CDriverGL3::useIndices(CIndexBlock &block, const void *data, uint32 size, bool write, CIndexRange &range)
+{
+	H_AUTO_OGL(CDriverGL3_useIndices)
+
+	if (_StreamMode)
 	{
-		nglBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
-		_ScratchElementBufferSize = dataSize;
+		// The stream gives the chunk of a handle to other data without telling, so a kept
+		// handle is asked for on every use, and the indices written again when they are gone
+		if (write || !_IndexStream.isValid(block.Handle))
+		{
+			block.Handle = _IndexStream.write(data, size, size);
+			if (!_IndexStream.isValid(block.Handle))
+				return false; // the stream has logged what failed
+		}
+
+		// The chunk now belongs to the current frame and render call. The buffer and the
+		// offset stay right for the draws of the call, whatever the stream does with the
+		// handle while the call writes more indices.
+		range.Buffer = _IndexStream.use(block.Handle);
+		range.Offset = block.Handle.Offset;
+		return true;
+	}
+
+	// Per-buffer mode: the indices have a GL buffer to themselves, which keeps them until
+	// the next write. A write gives the buffer new storage with the indices in one call,
+	// so that nothing waits for the draws that still read the old storage.
+	if (write || !block.Buffer)
+	{
+		if (!block.Buffer)
+			nglGenBuffers(1, &block.Buffer);
+		_DriverGLStates.bindElementArrayBuffer(block.Buffer);
+		nglBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, write ? GL_STREAM_DRAW : GL_STATIC_DRAW);
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.IndexBufferWrites;
+		_StreamStats.IndexBufferBytes += size;
+#endif
+	}
+	range.Buffer = block.Buffer;
+	range.Offset = 0;
+	return true;
+}
+
+void CDriverGL3::releaseIndexBlock(CIndexBlock &block)
+{
+	H_AUTO_OGL(CDriverGL3_releaseIndexBlock)
+
+	if (block.Buffer)
+	{
+		// GL takes a deleted buffer out of the bound vertex array object, the state cache follows
+		_DriverGLStates.elementArrayBufferDeleted(block.Buffer);
+		nglDeleteBuffers(1, &block.Buffer);
+		block.Buffer = 0;
+	}
+	block.Handle = CStreamHandleGL3();
+}
+
+bool CDriverGL3::streamIndices(uint32 firstIndex, uint32 count, CIndexRange &range, GLenum &type)
+{
+	H_AUTO_OGL(CDriverGL3_streamIndices)
+
+	// A new render call: the index stream no longer has to keep the indices of the one before
+	_IndexStream.nextDraw();
+
+	// The indices are written for this call only. Nothing is kept per index buffer:
+	// in stream mode a large body of indices that do not change would be written again
+	// every few frames, as the stream moves on.
+	if (_LastIB._Format == CIndexBuffer::Indices16)
+	{
+		type = GL_UNSIGNED_SHORT;
+		return useIndices(_ScratchIndices, ((const uint16 *)_LastIB._Values) + firstIndex, count * (uint32)sizeof(uint16), true, range);
 	}
 	else
 	{
-		nglBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+		nlassert(_LastIB._Format == CIndexBuffer::Indices32);
+		type = GL_UNSIGNED_INT;
+		return useIndices(_ScratchIndices, ((const uint32 *)_LastIB._Values) + firstIndex, count * (uint32)sizeof(uint32), true, range);
 	}
-	glDrawElements(mode, count, type, (const void *)0);
-	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
-#endif
+
+void CDriverGL3::drawIndices(GLenum mode, GLsizei count, GLenum type, const CIndexRange &range, uint32 offset)
+{
+	// With a buffer bound, the pointer of glDrawElements is the offset into it
+	_DriverGLStates.bindElementArrayBuffer(range.Buffer);
+	glDrawElements(mode, count, type, (const GLvoid *)(size_t)(range.Offset + offset));
+}
 
 // ***************************************************************************
 
@@ -61,6 +128,13 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 		return false;
 
 	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
+
+	// the indices, once for all passes
+	CIndexRange indices;
+	GLenum indexType = GL_UNSIGNED_SHORT;
+	if (nlines && !streamIndices(firstIndex, 2 * nlines, indices, indexType))
+		return false;
+
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -75,25 +149,7 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 
 		// draw the primitives.
 		if (nlines)
-		{
-			if (_LastIB._Format == CIndexBuffer::Indices16)
-			{
-#ifdef USE_OPENGLES3
-				drawElementsWebGL(GL_LINES,2*nlines,GL_UNSIGNED_SHORT,((uint16 *) _LastIB._Values)+firstIndex);
-#else
-				glDrawElements(GL_LINES,2*nlines,GL_UNSIGNED_SHORT,((uint16 *) _LastIB._Values)+firstIndex);
-#endif
-			}
-			else
-			{
-				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
-#ifdef USE_OPENGLES3
-				drawElementsWebGL(GL_LINES,2*nlines,GL_UNSIGNED_INT,((uint32 *) _LastIB._Values)+firstIndex);
-#else
-				glDrawElements(GL_LINES,2*nlines,GL_UNSIGNED_INT,((uint32 *) _LastIB._Values)+firstIndex);
-#endif
-			}
-		}
+			drawIndices(GL_LINES, 2 * nlines, indexType, indices);
 	}
 	// end multipass.
 	endMultiPass();
@@ -120,6 +176,12 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 
 	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 
+	// the indices, once for all passes
+	CIndexRange indices;
+	GLenum indexType = GL_UNSIGNED_SHORT;
+	if (ntris && !streamIndices(firstIndex, 3 * ntris, indices, indexType))
+		return false;
+
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -136,25 +198,7 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 
 		// draw the primitives.
 		if (ntris)
-		{
-			if (_LastIB._Format == CIndexBuffer::Indices16)
-			{
-#ifdef USE_OPENGLES3
-				drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstIndex);
-#else
-				glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstIndex);
-#endif
-			}
-			else
-			{
-				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
-#ifdef USE_OPENGLES3
-				drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstIndex);
-#else
-				glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstIndex);
-#endif
-			}
-		}
+			drawIndices(GL_TRIANGLES, 3 * ntris, indexType, indices);
 	}
 	// end multipass.
 	endMultiPass();
@@ -182,6 +226,9 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 
 	nlassert(ntris>0);
 
+	if (_LastIB._Values == nullptr)
+		return false;
+
 	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 	// Don't setup any material here.
 
@@ -190,23 +237,11 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 	// NO MULTIPASS HERE!!
 	// draw the primitives. (nb: ntris>0).
 
-	if (_LastIB._Format == CIndexBuffer::Indices16)
-	{
-#ifdef USE_OPENGLES3
-		drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstTri);
-#else
-		glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+firstTri);
-#endif
-	}
-	else
-	{
-		nlassert(_LastIB._Format == CIndexBuffer::Indices32);
-#ifdef USE_OPENGLES3
-		drawElementsWebGL(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstTri);
-#else
-		glDrawElements(GL_TRIANGLES,3*ntris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+firstTri);
-#endif
-	}
+	CIndexRange indices;
+	GLenum indexType = GL_UNSIGNED_SHORT;
+	if (!streamIndices(firstTri, 3 * ntris, indices, indexType))
+		return false;
+	drawIndices(GL_TRIANGLES, 3 * ntris, indexType, indices);
 
 	// Profiling.
 	_PrimitiveProfileIn.NTriangles+= ntris;
@@ -377,6 +412,88 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 		init = true;
 	}
 
+	// The indices of the call go to the driver's buffers before the passes, once for all of them
+	_IndexStream.nextDraw();
+
+	uint32 currIndex = startIndex;
+	uint32 numLeftQuads = numQuads;
+
+	// first batch of quads using the static setupped array
+	CIndexRange tableRange;
+	uint tableFirst = 0;
+	uint tableQuads = 0;
+	if (startIndex < QUAD_BATCH_SIZE)
+	{
+		// first quads (as pair of tri to have guaranteed orientation)
+		tableFirst = startIndex;
+		tableQuads = std::min(QUAD_BATCH_SIZE - startIndex, numQuads);
+		// The whole table, the same for every call: written when the driver does not have it
+		if (!useIndices(_QuadIndices, defaultIndices, sizeof(defaultIndices), false, tableRange))
+			return false;
+		numLeftQuads -= tableQuads;
+		currIndex += 4 * tableQuads;
+	}
+
+	// remaining quads: the indices of their batches are built one behind the other, and written at once
+	CIndexRange restRange;
+	_QuadDraws.clear();
+	_QuadIndexData.clear();
+	while (numLeftQuads)
+	{
+		// TODO : resetting vertex pointer would avoid the need to rebuild indices each times
+		uint32 numQuadsToDraw = std::min(numLeftQuads, QUAD_BATCH_SIZE);
+		CIndexDraw draw;
+		draw.Offset = (uint32)_QuadIndexData.size();
+		draw.Count = 6 * numQuadsToDraw;
+		if (4 * numQuadsToDraw + currIndex <= (1 << 16))
+		{
+			// indices fits on 16 bits
+			draw.Type = GL_UNSIGNED_SHORT;
+			// a whole number of 32 bit words, so that every batch starts at a multiple of its index size
+			_QuadIndexData.resize(draw.Offset + ((draw.Count * sizeof(uint16) + 3) & ~(size_t)3));
+			uint16 *curr = (uint16 *)&_QuadIndexData[draw.Offset];
+			uint16 *end = curr + 6 * numQuadsToDraw;
+			uint16 vertexIndex = (uint16) currIndex;
+			do
+			{
+				*curr++ = vertexIndex;
+				*curr++ = vertexIndex + 1;
+				*curr++ = vertexIndex + 2;
+				*curr++ = vertexIndex;
+				*curr++ = vertexIndex + 2;
+				*curr++ = vertexIndex + 3;
+				vertexIndex += 4;
+			}
+			while (curr != end);
+		}
+		else
+		{
+			// indices fits on 32 bits
+			draw.Type = GL_UNSIGNED_INT;
+			_QuadIndexData.resize(draw.Offset + draw.Count * sizeof(uint32));
+			uint32 *curr = (uint32 *)&_QuadIndexData[draw.Offset];
+			uint32 *end = curr + 6 * numQuadsToDraw;
+			uint32 vertexIndex = currIndex;
+			do
+			{
+				*curr++ = vertexIndex;
+				*curr++ = vertexIndex + 1;
+				*curr++ = vertexIndex + 2;
+				*curr++ = vertexIndex;
+				*curr++ = vertexIndex + 2;
+				*curr++ = vertexIndex + 3;
+				vertexIndex += 4;
+			}
+			while (curr != end);
+		}
+		_QuadDraws.push_back(draw);
+		numLeftQuads -= numQuadsToDraw;
+		currIndex += 4 * numQuadsToDraw;
+	}
+	if (!_QuadIndexData.empty()
+	    && !useIndices(_ScratchIndices, &_QuadIndexData[0], (uint32)_QuadIndexData.size(), true, restRange))
+		return false;
+
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -389,80 +506,11 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 		if (!setupPass(pass))
 			return false;
 
-		uint32 currIndex = startIndex;
-		uint32 numLeftQuads = numQuads;
-
-		// draw first batch of quads using the static setupped array
-		if (startIndex < QUAD_BATCH_SIZE)
-		{
-			// draw first quads (as pair of tri to have guaranteed orientation)
-			uint numQuadsToDraw = std::min(QUAD_BATCH_SIZE - startIndex, numQuads);
-#ifdef USE_OPENGLES3
-			drawElementsWebGL(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, defaultIndices + 6 * startIndex);
-#else
-			glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, defaultIndices + 6 * startIndex);
-#endif
-			numLeftQuads -= numQuadsToDraw;
-			currIndex += 4 * numQuadsToDraw;
-		}
-
-		// draw remaining quads
-		while (numLeftQuads)
-		{
-			// TODO : resetting vertex pointer would avoid the need to rebuild indices each times
-			uint32 numQuadsToDraw = std::min(numLeftQuads, QUAD_BATCH_SIZE);
-			// draw all quads
-			if (4 * numQuadsToDraw + currIndex <= (1 << 16))
-			{
-				// indices fits on 16 bits
-				GLshort indices[QUAD_BATCH_SIZE * 6];
-				GLshort *curr = indices;
-				GLshort *end = indices + 6 * numQuadsToDraw;
-				uint16 vertexIndex = (uint16) currIndex;
-				do
-				{
-					*curr++ = vertexIndex;
-					*curr++ = vertexIndex + 1;
-					*curr++ = vertexIndex + 2;
-					*curr++ = vertexIndex;
-					*curr++ = vertexIndex + 2;
-					*curr++ = vertexIndex + 3;
-					vertexIndex += 4;
-				}
-				while (curr != end);
-#ifdef USE_OPENGLES3
-				drawElementsWebGL(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, indices);
-#else
-				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, indices);
-#endif
-			}
-			else
-			{
-				// indices fits on 32 bits
-				GLint indices[QUAD_BATCH_SIZE];
-				GLint *curr = indices;
-				GLint *end = indices + 6 * numQuadsToDraw;
-				uint32 vertexIndex = currIndex;
-				do
-				{
-					*curr++ = vertexIndex;
-					*curr++ = vertexIndex + 1;
-					*curr++ = vertexIndex + 2;
-					*curr++ = vertexIndex;
-					*curr++ = vertexIndex + 2;
-					*curr++ = vertexIndex + 3;
-					vertexIndex += 4;
-				}
-				while (curr != end);
-#ifdef USE_OPENGLES3
-				drawElementsWebGL(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_INT, indices);
-#else
-				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_INT, indices);
-#endif
-			}
-			numLeftQuads -= numQuadsToDraw;
-			currIndex += 4 * numQuadsToDraw;
-		}
+		// draw the quads of the table, then the batches of the others
+		if (tableQuads)
+			drawIndices(GL_TRIANGLES, 6 * tableQuads, GL_UNSIGNED_SHORT, tableRange, 6 * tableFirst * (uint32)sizeof(GLshort));
+		for (size_t i = 0; i < _QuadDraws.size(); ++i)
+			drawIndices(GL_TRIANGLES, _QuadDraws[i].Count, _QuadDraws[i].Type, restRange, _QuadDraws[i].Offset);
 	}
 	// end multipass.
 	endMultiPass();

@@ -179,6 +179,10 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	// NB: must duplicate changes in activeVertexBufferHard()
 	uint32	flags;
 
+	// The draws that follow read this vertex buffer: the vertex stream no longer has
+	// to keep the vertices of the one that was active before
+	_VertexStream.nextDraw();
+
 	// setup
 	if (!setupVertexBuffer(VB))
 		return false;
@@ -242,7 +246,7 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 bool			CDriverGL3::supportVolatileVertexBuffer() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVolatileVertexBuffer)
-	return true; // Supported by GL_MAP_INVALIDATE_BUFFER_BIT
+	return true; // In stream mode by the vertex stream, in per-buffer mode by GL_MAP_INVALIDATE_BUFFER_BIT
 }
 
 
@@ -310,6 +314,11 @@ IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, 
 	{
 		result = new CVertexBufferAMDPinned(this, size, numVertices, preferred, vb);
 	}
+	else if (_StreamMode && (preferred == CVertexBuffer::SmallStream || preferred == CVertexBuffer::FullStream))
+	{
+		// The vertices are filled for every draw: they go into the vertex stream
+		result = new CVertexBufferStreamGL3(this, vb);
+	}
 	else
 	{
 		result = new CVertexBufferGL3(this, size, numVertices, preferred, vb);
@@ -336,6 +345,8 @@ void CDriverGL3::updateLostBuffers()
 				if (id)
 				{
 					nlassert(nglIsBuffer(id));
+					// GL takes the buffer out of its bindings, the state cache follows
+					_DriverGLStates.arrayBufferDeleted(id);
 					nglDeleteBuffers(1, &id);
 					(*it)->m_VertexObjectId[i] = 0;
 				}
@@ -454,8 +465,10 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 	uint32	flags= vb.VertexFormat;
 
 	nlctassert(CVertexBuffer::NumValue == sizeof(ARBVertexProgramMustNormalizeAttrib) / sizeof(ARBVertexProgramMustNormalizeAttrib[0]));
-	_DriverGLStates.bindArrayBuffer(vb.VertexObjectId);
 
+	// A vertex buffer that is made active again while the attributes still read it as
+	// it is (the instances of one mesh, one after the other) costs no GL call here:
+	// the state cache issues, per attribute, what differs from what the attribute has.
 	{
 		// For each value
 		for (uint value=0; value<CVertexBuffer::NumValue; value++)
@@ -477,7 +490,7 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 					{
 						mustNormalize = ARBVertexProgramMustNormalizeAttrib[value];
 					}
-					nglVertexAttribPointer(glIndex, NumCoordinatesType[type], GLType[ type ], mustNormalize, vb.VertexSize, vb.ValuePtr[value]);
+					_DriverGLStates.vertexAttribPointer(glIndex, vb.VertexObjectId, NumCoordinatesType[type], GLType[type], mustNormalize, vb.VertexSize, vb.ValuePtr[value]);
 				}
 				else
 				{
@@ -498,8 +511,11 @@ void		CDriverGL3::mapTextureStageToUV(uint stage, uint uvId)
 	if (VB.VertexFormat & (CVertexBuffer::TexCoord0Flag<<uvId))
 	{
 		CVertexBuffer::TType uvType = VB.Type[CVertexBuffer::TexCoord0 + uvId];
-		nglVertexAttribPointer(GLVertexAttribIndex[CVertexBuffer::TexCoord0 + stage], NumCoordinatesType[uvType], GLType[uvType], 
-			false, VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0 + uvId]);
+		// Through the state cache, which then knows what the attribute reads when the
+		// vertex buffer is set up again. The data is in the buffer of the vertex buffer,
+		// whatever is bound to GL_ARRAY_BUFFER by now.
+		_DriverGLStates.vertexAttribPointer(GLVertexAttribIndex[CVertexBuffer::TexCoord0 + stage], VB.VertexObjectId,
+		    NumCoordinatesType[uvType], GLType[uvType], GL_FALSE, VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0 + uvId]);
 	}
 }
 
@@ -520,7 +536,8 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 	nlassert(info);
 	nlassert(info->_VBHard);
 
-	ptr = (uint8*)info->_VBHard->getPointer();
+	// The pointers of the values are offsets into the buffer
+	ptr = (uint8 *)info->_VBHard->getArrayPointer();
 	VertexObjectId = info->_VBHard->getGLuint();
 
 	// Get value pointer

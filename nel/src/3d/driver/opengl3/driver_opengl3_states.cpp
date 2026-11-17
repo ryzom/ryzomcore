@@ -87,8 +87,12 @@ CDriverGLStates3::CDriverGLStates3()
 	m_DefaultVAO = 0;
 	m_CurVAO = 0;
 	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+	{
 		m_VertexAttribArrayEnabled[i] = false;
+		m_VertexAttribPointer[i].Buffer = 0;
+	}
 	m_CurrArrayBuffer = 0;
+	m_CurElementArrayBuffer = 0;
 
 	// Texture state
 	m_CurrentActiveTexture = 0;
@@ -126,6 +130,34 @@ void CDriverGLStates3::init()
 	nglGenVertexArrays(1, &m_DefaultVAO);
 	nglBindVertexArray(m_DefaultVAO);
 	m_CurVAO = m_DefaultVAO;
+
+	// The context is new, nothing is bound in it. What the cache has of a context
+	// before it is forgotten: a cached bind would skip the first bind of an object
+	// whose name the cache still has.
+	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+	{
+		m_VertexAttribArrayEnabled[i] = false;
+		m_VertexAttribPointer[i].Buffer = 0;
+	}
+	m_CurrArrayBuffer = 0;
+	m_CurElementArrayBuffer = 0;
+	m_CurrentActiveTexture = 0;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		m_CurTextureTarget[i] = 0;
+		m_CurTexture[i] = 0;
+	}
+	m_CurFramebuffer = 0;
+	m_CurProgram = 0;
+	m_CurProgramPipeline = 0;
+	m_CurUniformBuffer = 0;
+	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
+		m_CurUniformBufferBase[i] = 0;
+		m_CurUniformBufferOffset[i] = 0;
+		m_CurUniformBufferSize[i] = 0;
+	}
+	m_CurPixelUnpackBuffer = 0;
 }
 
 void CDriverGLStates3::release()
@@ -583,6 +615,82 @@ void CDriverGLStates3::bindArrayBuffer(uint objectID)
 	}
 }
 
+void CDriverGLStates3::arrayBufferDeleted(uint objectID)
+{
+	H_AUTO_OGL(CDriverGLStates3_arrayBufferDeleted)
+	if (!objectID)
+		return;
+	if (m_CurrArrayBuffer == objectID)
+		m_CurrArrayBuffer = 0;
+	// With another VAO bound, GL leaves the buffer in the attributes of the default VAO.
+	// The cache forgets it all the same: the name is free for another buffer, and the
+	// next call for the attribute is then issued, which is right in both cases.
+	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+	{
+		if (m_VertexAttribPointer[i].Buffer == objectID)
+			m_VertexAttribPointer[i].Buffer = 0;
+	}
+}
+
+void CDriverGLStates3::vertexAttribPointer(uint glIndex, GLuint buffer, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer)
+{
+	H_AUTO_OGL(CDriverGLStates3_vertexAttribPointer)
+	nlassert(glIndex < CVertexBuffer::NumValue);
+
+	// The cache is the one of the default VAO
+	if (m_CurVAO != m_DefaultVAO)
+		forceBindVertexArray(m_DefaultVAO);
+
+	CVertexAttribPointer &current = m_VertexAttribPointer[glIndex];
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (!buffer || current.Buffer != buffer || current.Pointer != pointer || current.Stride != stride
+	    || current.Type != type || current.Size != size || current.Normalized != normalized)
+#endif
+	{
+		// The attribute takes the buffer that is bound to GL_ARRAY_BUFFER at the call
+		bindArrayBuffer(buffer);
+		nglVertexAttribPointer(glIndex, size, type, normalized, stride, pointer);
+		current.Buffer = buffer;
+		current.Size = size;
+		current.Type = type;
+		current.Normalized = normalized;
+		current.Stride = stride;
+		current.Pointer = pointer;
+	}
+}
+
+void CDriverGLStates3::forceBindElementArrayBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_forceBindElementArrayBuffer)
+
+	// The binding belongs to the bound VAO, and the cache is the one of the default VAO
+	if (m_CurVAO != m_DefaultVAO)
+		forceBindVertexArray(m_DefaultVAO);
+
+	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+	m_CurElementArrayBuffer = id;
+}
+
+void CDriverGLStates3::bindElementArrayBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_bindElementArrayBuffer)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (id != m_CurElementArrayBuffer || m_CurVAO != m_DefaultVAO)
+#endif
+	{
+		forceBindElementArrayBuffer(id);
+	}
+}
+
+void CDriverGLStates3::elementArrayBufferDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_elementArrayBufferDeleted)
+	// With another VAO bound, GL leaves the buffer in the default VAO. The cache
+	// forgets it all the same: the next bind is then issued, which is right in both cases.
+	if (id && m_CurElementArrayBuffer == id)
+		m_CurElementArrayBuffer = 0;
+}
+
 // ===========================================================================
 // Texture state
 // ===========================================================================
@@ -615,6 +723,29 @@ void CDriverGLStates3::bindTexture(GLenum target, GLuint id)
 #endif
 	{
 		forceBindTexture(target, id);
+	}
+}
+
+bool CDriverGLStates3::isTextureBound(uint stage, GLenum target, GLuint id) const
+{
+	nlassert(stage < MaxTextureUnits);
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	return target == m_CurTextureTarget[stage] && id == m_CurTexture[stage];
+#else
+	return false;
+#endif
+}
+
+void CDriverGLStates3::textureDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_textureDeleted)
+	if (!id)
+		return;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		// The target stays: the unit has nothing bound to it
+		if (m_CurTexture[i] == id)
+			m_CurTexture[i] = 0;
 	}
 }
 

@@ -49,15 +49,36 @@ extern const char *GLSLMaterialHeader;   // NlMaterial UBO block (UsesMaterialUB
 
 void generateUniformBufferGLSL(std::stringstream &ss, const CUniformBufferFormat &ubf, sint binding);
 
+/**
+ * Where the driver has the data of one uniform block.
+ *
+ * In stream mode (CDriverGL3::_StreamMode) it is a range of the uniform stream,
+ * which the stream may give to other data: the handle then goes stale and the
+ * block is written again. In per-buffer mode it is a GL buffer that belongs to
+ * the block alone, with new storage for every write.
+ *
+ * Only CDriverGL3::useUniformBlock, isUniformBlockStale and releaseUniformBlock
+ * know which of the two it is.
+ */
+struct CUniformBlockGL3
+{
+	CStreamHandleGL3 Handle; // stream mode
+	GLuint Buffer; // per-buffer mode; 0 until the block is written for the first time
+
+	CUniformBlockGL3()
+	    : Buffer(0)
+	{
+	}
+};
+
 class CUBDrvInfosGL3 : public IUBDrvInfos
 {
 public:
 	CUBDrvInfosGL3(IDriver *drv, ItUBDrvInfoPtrList it, CUniformBuffer *ub);
 	virtual ~CUBDrvInfosGL3() NL_OVERRIDE;
 
-	/// Where the data of the uniform buffer is in the uniform stream of the driver.
-	/// Not valid before the first upload, and whenever the stream has given the range away.
-	CStreamHandleGL3 Handle;
+	/// Where the driver has the data of the uniform buffer
+	CUniformBlockGL3 Block;
 };
 
 } // NLDRIVERGL3
