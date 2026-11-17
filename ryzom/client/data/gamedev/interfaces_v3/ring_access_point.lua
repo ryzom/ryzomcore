@@ -314,10 +314,18 @@ end
 --***********************************************************************
 function RingAccessPoint:addLine(line)
 	self:getColumn("owner"):addChild(self:newTextLabel(line.Owner))
-	self:getColumn("title"):addChild(self:newTextLabel(line.Title))
-	
+	-- an edit session the character is invited to has no title of its own (the scenario in it is being written),
+	-- and no level and no scenario type: the line says what it is
+	if line.EditSession then
+		self:getColumn("title"):addChild(self:newTextLabel(i18n.get("uiRAP_EditSession")))
+	else
+		self:getColumn("title"):addChild(self:newTextLabel(line.Title))
+	end
+
 	local level = line.Level-1
-	if level >= 0 and level <= 5 then
+	if line.EditSession then
+		self:getColumn("level"):addChild(self:newNumberLabel("-"))
+	elseif level >= 0 and level <= 5 then
 		self:getColumn("level"):addChild(self:newNumberLabel(i18n.get("uiRAP_Level" .. tostring(level))))
 	else
 		self:getColumn("level"):addChild(self:newNumberLabel("?"))
@@ -331,7 +339,9 @@ function RingAccessPoint:addLine(line)
 	else
 		self:getColumn("language"):addChild(self:newCenteredTextLabel(line.Language))
 	end		
-	if self.ScenarioTypeToUtf8[line.ScenarioType] == nil then
+	if line.EditSession then
+		self:getColumn("scenario_type"):addChild(self:newTextLabel("-"))
+	elseif self.ScenarioTypeToUtf8[line.ScenarioType] == nil then
 		self:getColumn("scenario_type"):addChild(self:newTextLabel("?"))
 	else
 		self:getColumn("scenario_type"):addChild(self:newTextLabel(self.ScenarioTypeToUtf8[line.ScenarioType]))
@@ -624,7 +634,9 @@ function RingAccessPoint:onLineSessionTooltip()
 	
 	local activeLine = self.CurrActiveList[self:getSelectList():getElementIndex(getUICaller().parent) + 1]
 	local contextHelpText
-	if self:isInvited(activeLine.Flags) then
+	if activeLine.EditSession then
+		contextHelpText = i18n.get("uiRAP_HowToJoinEdit")
+	elseif self:isInvited(activeLine.Flags) then
 		contextHelpText = i18n.get("uiRAP_HowToJoin")
 	else
 		contextHelpText = i18n.get("uiRAP_HowToBeInvited")

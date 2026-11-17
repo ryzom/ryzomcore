@@ -1008,6 +1008,26 @@
 			</return>
 
 			<!-- __________________________________________________________ -->
+			<!-- getEditSessionList -->
+			<!-- __________________________________________________________ -->
+			<invoke name="getEditSessionList" msg="GESL">
+				<doc line="Ask for the list of the edit sessions of other characters"/>
+				<doc line="that the requesting character is invited to as an editor."/>
+
+				<param type="uint32"		name="charId"/>
+			</invoke>
+
+			<!-- __________________________________________________________ -->
+			<!-- Return edit session list -->
+			<!-- __________________________________________________________ -->
+			<return name="editSessionList" msg="ESL">
+				<doc line="Return the list of the edit sessions the character is invited to"/>
+
+				<param type="uint32"		name="charId"/>
+				<param type="std::vector &lt; TSessionDesc &gt;"	name="sessions" byref="true" serial="Cont"/>
+			</return>
+
+			<!-- __________________________________________________________ -->
 			<!-- getPlayerList -->
 			<!-- __________________________________________________________ -->
 			<invoke name="getCharList" msg="GCL">
