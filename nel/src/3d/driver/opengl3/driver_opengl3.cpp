@@ -915,8 +915,8 @@ bool CDriverGL3::swapBuffers()
 	}
 
 #ifdef NL3D_GLSTATE_CHECK_BINDINGS
-	// Debug builds: the bindings that the state cache carries from frame to frame, and
-	// that nothing issues again on its own, are compared with those of GL
+	// With NL3D_GL3_STATE_CHECKS: the bindings that the state cache carries from frame to
+	// frame, and that nothing issues again on its own, are compared with those of GL
 	_DriverGLStates.checkBindings();
 #endif
 

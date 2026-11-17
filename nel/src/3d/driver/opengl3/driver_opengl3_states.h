@@ -24,10 +24,27 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/vertex_buffer.h"
 
-// Debug builds compare the bindings of the state cache with those of GL once per frame
-// (CDriverGLStates3::checkBindings). Not under OpenGL ES 3: the driver has not loaded
-// the queries there.
-#if defined(NL_DEBUG) && !defined(USE_OPENGLES3)
+// The checks that the driver makes of its own state handling while it runs:
+// - once per frame, the bindings of the state cache are compared with those of GL
+//   (CDriverGLStates3::checkBindings);
+// - at every draw, the uniform blocks of the programs of the draw are compared with
+//   the ones that the draw brings up to date (CDriverGL3::checkUniformBlocksCovered),
+//   and at link time the uniform blocks of a program are counted;
+// - a chunk of a stream buffer is filled with a pattern before it is written again
+//   in place, so that a draw from a stale handle shows.
+// The first two log a warning, once per kind of finding. 1 in debug builds, 0 in
+// release builds; set it to 1 here to have the checks in a release build.
+#ifndef NL3D_GL3_STATE_CHECKS
+#ifdef NL_DEBUG
+#define NL3D_GL3_STATE_CHECKS 1
+#else
+#define NL3D_GL3_STATE_CHECKS 0
+#endif
+#endif
+
+// The comparison of the bindings is not under OpenGL ES 3: the driver has not loaded the
+// queries there
+#if NL3D_GL3_STATE_CHECKS && !defined(USE_OPENGLES3)
 #define NL3D_GLSTATE_CHECK_BINDINGS
 #endif
 
@@ -67,8 +84,9 @@ namespace NLDRIVERGL3 {
  * on its own. So an object whose name the cache may have is reported to the
  * cache when it is deleted (arrayBufferDeleted, elementArrayBufferDeleted,
  * textureDeleted, uniformBufferDeleted), since GL takes it out of its bindings
- * and may give the name to another object. Debug builds read the bindings
- * back from GL once per frame and log what differs (checkBindings).
+ * and may give the name to another object. With NL3D_GL3_STATE_CHECKS the
+ * bindings are read back from GL once per frame, and what differs is logged
+ * (checkBindings).
  */
 class CDriverGLStates3
 {

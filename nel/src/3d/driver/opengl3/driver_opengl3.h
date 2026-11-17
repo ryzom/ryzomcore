@@ -609,8 +609,8 @@ public:
 	bool					setupUniforms();
 	void					setupUniforms(TProgram program);
 	void					setupInitialUniforms(IProgram *program);
-#ifdef NL_DEBUG
-	/// Debug builds: warn once when a program of the draw has a uniform block that setupUniforms() leaves out for this draw
+#if NL3D_GL3_STATE_CHECKS
+	/// Warn once when a program of the draw has a uniform block that setupUniforms() leaves out for this draw
 	void					checkUniformBlocksCovered(IProgram *program);
 #endif
 
@@ -1966,7 +1966,7 @@ public:
 	GLuint getMaterialBlockIndex() const { return materialBlockIndex; }
 	void setMaterialBlockIndex(GLuint idx) { materialBlockIndex = idx; }
 
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 	// For CDriverGL3::checkUniformBlocksCovered
 	bool HasUserBlock; // The program has at least one of the user uniform blocks of its source
 	uint BlockCheckWarned; // One bit per uniform block that the check has reported for this program

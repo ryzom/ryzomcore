@@ -1594,7 +1594,7 @@ bool CDriverGL3::setupBuiltinPixelProgram(CPixelProgram *effectivePP)
 	return true;
 }
 
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 void CDriverGL3::checkUniformBlocksCovered(IProgram *program)
 {
 	if (!program)
@@ -1643,7 +1643,7 @@ void CDriverGL3::checkUniformBlocksCovered(IProgram *program)
 
 bool CDriverGL3::setupUniforms()
 {
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 	// Every uniform block that a program of this draw has is one that is brought up to date below
 	if (m_DriverShaderProgram)
 	{
@@ -2440,7 +2440,7 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 
 		// Resolve and bind user UBO blocks (VP/PP) — binding points set at link time
 		IProgram::CSource *src = program->source();
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 		GLint knownBlocks = 0;
 #endif
 		if (src)
@@ -2462,7 +2462,7 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 				if (blockIdx != GL_INVALID_INDEX)
 				{
 					nglUniformBlockBinding(id, blockIdx, s_UBBindingToGL[it->first]);
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 					drvInfo->HasUserBlock = true;
 					++knownBlocks;
 #endif
@@ -2470,7 +2470,7 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 			}
 		}
 
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 		// A uniform block of the program that is none of the above gets no binding point
 		// and no data: it reads whatever is at binding point 0
 		knownBlocks += (lightTableBlock != GL_INVALID_INDEX ? 1 : 0) + (cameraBlock != GL_INVALID_INDEX ? 1 : 0)
@@ -3054,7 +3054,7 @@ IProgramDrvInfos(drv, it)
 	cameraBlockIndex = GL_INVALID_INDEX;
 	objectBlockIndex = GL_INVALID_INDEX;
 	materialBlockIndex = GL_INVALID_INDEX;
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 	HasUserBlock = false;
 	BlockCheckWarned = 0;
 #endif

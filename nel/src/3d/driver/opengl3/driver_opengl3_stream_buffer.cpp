@@ -30,7 +30,7 @@ namespace /* anonymous */ {
 // A chunk that no frame has used for this many frames is deleted
 const uint64 s_UnusedFrames = 300;
 
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 // What a chunk is filled with before it is written again in place, so that a draw
 // from a stale handle shows instead of looking right by accident
 const int s_ReusePattern = 0xDD;
@@ -362,7 +362,7 @@ bool CStreamBufferGL3::nextChunk(uint32 size)
 		{
 			nextGeneration(chunk);
 			markWritten(chunk);
-#ifdef NL_DEBUG
+#if NL3D_GL3_STATE_CHECKS
 			if (chunk.Mapped)
 				memset(chunk.Mapped, s_ReusePattern, chunk.Size);
 #endif
