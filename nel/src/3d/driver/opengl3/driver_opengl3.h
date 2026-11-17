@@ -111,10 +111,16 @@ using NLMISC::CVector;
 #define NL3D_GL3_BUFFER_QUEUE_MAX (NL3D_GL3_FRAME_QUEUE_MAX + 1) // Additional buffer for current working
 #define NL3D_GL3_SYNC_IMMEDIATE 0 // Don't allow frame processing backlog if set to 1. Reduce input lag. Testing only
 
-// The stream that holds the uniform blocks (see CStreamBufferGL3)
-#define NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
+// The stream that holds the uniform blocks (see CStreamBufferGL3).
+// The size of a chunk sets how often the blocks that are kept across frames (materials,
+// camera, lights) are written again: each time the head moves on to another chunk, the
+// chunks that only such blocks still hold are freed of them, so a kept block is written
+// about once per two chunks that the stream fills. A chunk is to take many frames to
+// fill, also in a scene with many draws, where the object blocks alone are some hundred
+// bytes per draw.
+#define NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE (4 * 1024 * 1024) // Bytes per chunk
 #define NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
-#define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (16) // More chunks are only created when a single draw needs them
+#define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (8) // More chunks are only created when a single draw needs them
 
 // 1: in stream mode, entries that are added to the light table are written behind the ones
 // the block has, where it is (CDriverGL3::useLightTableBlock). 0: the whole table is written
