@@ -38,16 +38,20 @@ bool CIndexBuffer::SerialOldPreferredMemory = false;
 
 namespace /* anonymous */ {
 
-/** True when the indices of an index buffer are to be read from the driver: the buffer is
- * resident and has no local memory, so that its locks go to the driver, and the driver
- * side is in RAM, which a lock for reading needs. The copy of the index buffer itself
- * (_NonResidentIndexes) is then not the one that is read and written, and it is freed
- * for every usage but Immutable (see setLocation).
+/** True when the indices of an index buffer are to be read from the driver, and may be:
+ * - The buffer is resident and has no local memory, so that its locks go to the driver.
+ *   The copy of the index buffer itself (_NonResidentIndexes) is then not the one that
+ *   is read and written, and it is freed for every usage but Immutable (see setLocation).
+ * - The driver side is in RAM, which a lock for reading needs.
+ * - The usage is not SmallStream or FullStream. Their indices are good for the frame
+ *   they were written in, and a driver may give every lock of such a buffer new memory.
+ * This is the condition that setLocation takes the indices back by.
  * False for a buffer that is not resident, which has its indices in its own copy.
  */
 inline bool indexesAreInDriver(const CIndexBuffer &ib)
 {
-	return ib.isResident() && !ib.getKeepLocalMemory() && ib.getLocation() == CIndexBuffer::RAMResident;
+	return ib.isResident() && !ib.getKeepLocalMemory() && ib.getLocation() == CIndexBuffer::RAMResident
+	    && ib.getBufferUsage() != CIndexBuffer::SmallStream && ib.getBufferUsage() != CIndexBuffer::FullStream;
 }
 
 } /* anonymous namespace */
@@ -153,20 +157,36 @@ CIndexBuffer	&CIndexBuffer::operator=(const CIndexBuffer &vb)
 	_Capacity = vb._Capacity;
 	if (indexesAreInDriver(vb))
 	{
-		// The source has its indices in the driver: they are read through a lock, from the
-		// first index on, as many as it has. What is behind them up to the capacity is zero.
+		// The source has its indices in the driver: they are read through a lock for reading,
+		// from the first index on. The lock is taken over the capacity, which is what the
+		// driver side was given (setLocation) and holds, and the capacity is copied: as from
+		// a source that is not resident, and as setLocation takes the indices back.
+		// A source that its user holds locked has the range of that lock, and no other can
+		// be taken: the indices it has are copied, and what is behind them is zero.
 		_NonResidentIndexes.clear();
 		_NonResidentIndexes.resize(vb._Capacity * vb.getIndexNumBytes(), 0);
-		if (vb._NbIndexes)
+		const uint numIndexes = vb.isLocked() ? vb._NbIndexes : vb._Capacity;
+		if (numIndexes)
 		{
 			CIndexBufferRead iba;
-			vb.lock(iba);
-			memcpy(&(_NonResidentIndexes[0]), iba.getPtr(), vb._NbIndexes * vb.getIndexNumBytes());
+			if (vb.isLocked())
+				vb.lock(iba);
+			else
+				vb.lock(iba, 0, vb._Capacity);
+			memcpy(&(_NonResidentIndexes[0]), iba.getPtr(), numIndexes * vb.getIndexNumBytes());
 		}
 	}
 	else
 	{
 		_NonResidentIndexes = vb._NonResidentIndexes;
+
+		// A resident source that has neither a copy of its own nor indices that may be read
+		// (it is in AGP or VRAM and not Immutable, or of a stream usage)
+		if (vb.isResident() && !vb._KeepLocalMemory && vb._NbIndexes && vb._NonResidentIndexes.empty())
+		{
+			nlwarning("3D: the index buffer '%s' is copied without its indices: it is resident, and they are neither in a copy of its own nor in memory of the driver that may be read",
+			    vb._Name.c_str());
+		}
 	}
 	_BufferUsage = vb._BufferUsage;
 	_KeepLocalMemory = vb._KeepLocalMemory;
@@ -369,6 +389,10 @@ void CIndexBuffer::buildSerialVector(std::vector<uint32> &dest) const
 	}
 	else
 	{
+		// A resident buffer may have neither a copy of its own nor indices that may be read
+		// (it is in AGP or VRAM and not Immutable, or of a stream usage): nothing to give
+		nlassertex(!_NonResidentIndexes.empty() || !getNumIndexes(),
+		    ("The index buffer '%s' has no indices to give: it is resident, and they are neither in a copy of its own nor in memory of the driver that may be read", _Name.c_str()));
 		indexes = &_NonResidentIndexes[0];
 	}
 

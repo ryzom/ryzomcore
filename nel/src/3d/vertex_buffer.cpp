@@ -228,21 +228,39 @@ CVertexBuffer	&CVertexBuffer::operator=(const CVertexBuffer &vb)
 	_Capacity = vb._Capacity;
 	if (verticesAreInDriver(vb))
 	{
-		// The source has its vertices in the driver: they are read through a lock, from the
-		// first vertex on, as many as it has. What is behind them up to the capacity is zero.
+		// The source has its vertices in the driver: they are read through a lock for
+		// reading, from the first vertex on. The lock is taken over the capacity, which is
+		// what the driver side was made for and holds in every driver, and the capacity is
+		// copied: as from a source that is not resident, and as setLocation takes the
+		// vertices back.
 		_NonResidentVertices.clear();
 		_NonResidentVertices.resize(vb._Capacity * vb._VertexSize, 0);
-		if (vb._NbVerts && vb._VertexSize)
+		if (vb._Capacity && vb._VertexSize)
 		{
 			CVertexBufferRead vba;
-			vb.lock(vba);
+			vb.lock(vba, 0, vb._Capacity);
 			if (vb._LockedBuffer)
-				memcpy(&(_NonResidentVertices[0]), vb._LockedBuffer, vb._NbVerts * vb._VertexSize);
+			{
+				memcpy(&(_NonResidentVertices[0]), vb._LockedBuffer, vb._Capacity * vb._VertexSize);
+			}
+			else
+			{
+				nlwarning("3D: the vertex buffer '%s' is copied without its vertices: the driver gave no lock to read them",
+				    vb._Name.c_str());
+			}
 		}
 	}
 	else
 	{
 		_NonResidentVertices = vb._NonResidentVertices;
+
+		// A resident source that has neither a copy of its own nor vertices that may be read
+		// (it is in AGP or VRAM and not Immutable, or of a stream usage)
+		if (vb.isResident() && !vb._KeepLocalMemory && vb._NbVerts && vb._NonResidentVertices.empty())
+		{
+			nlwarning("3D: the vertex buffer '%s' is copied without its vertices: it is resident, and they are neither in a copy of its own nor in memory of the driver that may be read",
+			    vb._Name.c_str());
+		}
 	}
 	_VertexColorFormat = vb._VertexColorFormat;
 	_BufferUsage = vb._BufferUsage;
@@ -1061,6 +1079,12 @@ void		CVertexBuffer::serialSubset(NLMISC::IStream &f, uint vertexStart, uint ver
 	{
 		vertices = _NonResidentVertices.empty() ? nullptr : &(_NonResidentVertices[0]);
 	}
+
+	// No vertices where some are to be read or written: a resident buffer that has neither
+	// a copy of its own nor vertices that may be read (it is in AGP or VRAM and not
+	// Immutable, or of a stream usage), or a lock that the driver did not give
+	nlassertex(vertices || vertexStart >= vertexEnd,
+	    ("The vertex buffer '%s' has no vertices to read or write: they are neither in a copy of its own nor in memory of the driver that may be read", _Name.c_str()));
 
 	// Serial VBuffers components.
 	//============================
