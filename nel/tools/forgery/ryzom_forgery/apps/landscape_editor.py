@@ -737,7 +737,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# generated yet (land_export, not wired here -- land_composition
 		# chantier) -- one is as useless as the others without it in
 		# practice (Nuno 2026-09-09).
-		if pipeline_continent_name:
+		if pipeline_continent_name and ryzom_data_path and Path(ryzom_data_path).is_dir():
 			missing = []
 			if not pipeline_data_installer.is_installed("pipeline_continents", pipeline_continent_name):
 				missing.append(("pipeline_continents", pipeline_continent_name))
