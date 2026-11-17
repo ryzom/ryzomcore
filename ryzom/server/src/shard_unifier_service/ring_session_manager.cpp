@@ -1117,6 +1117,15 @@ restartLoop:
 
 				scenario = CScenario::load(_RingDb, scenarioId, __FILE__, __LINE__);
 				BOMB_IF(scenario == NULL, "Failed to load the scenario "<<scenarioId, return);
+
+				// Whether trial accounts may play the scenario is what the scenario service reads in the header of
+				// each start: the record follows the latest start (the update below stores it)
+				if (scenario->getAllowFreeTrial() != scenarioInfo.getTrialAllowed())
+				{
+					nlinfo("RSM : scenarioStarted : session %u starts the scenario %u, which is %s to trial accounts from now on",
+						sessionId.asInt(), scenario->getObjectId(), scenarioInfo.getTrialAllowed() ? "open" : "closed");
+					scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
+				}
 			}
 			else
 			{
@@ -1131,6 +1140,8 @@ restartLoop:
 				scenario->setOrientation(session->getOrientation());
 				scenario->setRRPTotal(0);
 				scenario->setTitle(session->getTitle());
+				// (the free trial checks of an invitation and of a join read it, and the session list shows it)
+				scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
 
 				scenario->create(_RingDb);
 			}
@@ -1272,6 +1283,9 @@ restartLoop:
 				scenario->setOrientation(session->getOrientation());
 				scenario->setRRPTotal(0);
 				scenario->setTitle(session->getTitle());
+				// (as scenarioStarted records it. A record that is there keeps what the latest start said: the info
+				// of an end is the one of the start of its session, which can be older.)
+				scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
 
 				scenario->create(_RingDb);
 			}

@@ -3128,6 +3128,8 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				missionTag.clear();
 				trialAllowed = false;
 			}
+			// The session manager records it with the scenario: it lets a trial account in the session only then
+			info.setTrialAllowed(trialAllowed);
 
 
 
@@ -4296,6 +4298,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 				TRunningScenarioInfo info;
 				info.getScenarioKey().clear();
 				info.setDMLess(true);
+				bool trialAllowed = false;
 				TScenarioHeaderSerializer::TValueType::const_iterator first(header.Value.begin()), last(header.Value.end());
 				for ( ; first != last; ++first)
 				{
@@ -4318,6 +4321,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					else if (first->first == "CreateBy" )	{ info.setScenarioAuthorName( first->second); }
 					else if (first->first == "Rules" ) { info.setDMLess(CScenarioValidator::normalizeRules(first->second) != "Mastered"); }
 					else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
+					else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
 					else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 				}
 
@@ -4325,7 +4329,10 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 				if ( !nevraxScenario )
 				{
 					missionTag.clear();
+					trialAllowed = false;
 				}
+				// (open to trial accounts as in createSession, and as the start of a trial character is checked above)
+				info.setTrialAllowed(trialAllowed);
 
 
 				// (a trial character's start of a scenario that is not open to trial accounts was refused above)
