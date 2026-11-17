@@ -2014,15 +2014,32 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 			}
 
 			//(*) Remove animation Session and kill AI Instance
-			// The test is stopped, and the scenario is back in edition for every editor of the session: the one
-			// that connects, after a client that was lost during the test or as an editor that joins the others,
-			// and those that were in the test, who are told that it ended. (With the mode alone set back to
-			// edition, the animation kept running behind an editor in edition, and the stop of a test that
-			// nobody is in, which looks at the mode, never came.)
-			if (animationSessionExist)
+			// A test of this session is stopped, and the scenario is back in edition for every editor of the
+			// session: the one that connects, after a client that was lost during the test or as an editor that
+			// joins the others, and those that were in the test, who are told that it ended. (With the mode alone
+			// set back to edition, the animation kept running behind an editor in edition, and the stop of a test
+			// that nobody is in, which looks at the mode, never came.)
+			// The animation found can also be that of the animation session of the owner (getConnectedChars
+			// reaches it through getLinkedSessionId, as the stop would): that one is no test of this session and
+			// goes on, as it does for the stop of a test that nobody is in (onModuleUpdate).
+			bool testStarting = false;
+			if (animationSessionExist && getLinkedSessionId(sessionId).asInt() == 0)
 			{
 				nlinfo("R2Ed: char %u connects to edit session %u while its test runs: the test is stopped", charId, sessionId.asInt());
 				stopTest(sessionId);
+			}
+			else if (animationSessionExist)
+			{
+				scenario->setMode(1);
+			}
+			else if (getAnimationModule()->isSessionStartingOrRunning(sessionId))
+			{
+				// The start of a test was accepted and its animation is not made yet (startScenario schedules
+				// it). The start is not taken back here: the scenario stays in test mode, so that the test is
+				// stopped when nobody is in the session any more, and the character that connects is in edition
+				// until it asks for the test, which puts it in the one that runs.
+				nlinfo("R2Ed: char %u connects to edit session %u while its test starts: the test goes on", charId, sessionId.asInt());
+				testStarting = true;
 			}
 			else
 			{
@@ -2031,7 +2048,7 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 
 
 			editSlotId = session->connectChar(charId, TUserRole::ur_editor);
-			clientConnectBody.Mode = scenario->getMode();
+			clientConnectBody.Mode = testStarting ? 1 : scenario->getMode();
 			clientConnectBody.InitialActIndex = scenario->getInitialActIndex();
 			clientConnectBody.EditSessionLink = TSessionId(0);
 
