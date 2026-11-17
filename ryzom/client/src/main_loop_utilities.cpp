@@ -328,7 +328,7 @@ void updateFromClientCfg()
 	if (ClientCfg.GPUSkinning != LastClientCfg.GPUSkinning)
 	{
 		if (Scene)
-			Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
+			Scene->enableGPUSkinning(ClientCfg.GPUSkinning && Driver->supportGPUSkinning());
 	}
 
 	// INTERFACE works

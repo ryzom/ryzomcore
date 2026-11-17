@@ -652,7 +652,9 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
-		Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
+		// (with a driver that has no GPU skinning the scene does without it, whatever the configuration says:
+		// the configuration is left as it is, for a driver that has it)
+		Scene->enableGPUSkinning(ClientCfg.GPUSkinning && Driver->supportGPUSkinning());
 		// separate group for mouse/target selection reticle
 		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
@@ -1775,11 +1777,8 @@ void initGPUSkinningConfigUI()
 	CCtrlBaseButton *button = dynamic_cast<CCtrlBaseButton *>(
 		CWidgetManager::getInstance()->getElementFromId(
 			"ui:interface:game_config:content:char:gpu_skinning:c"));
+	// A driver that has no GPU skinning freezes the checkbox. The value of the setting is left as it is in the
+	// configuration, for a driver that has it; the scene is given the setting together with the driver's answer.
 	if (button)
 		button->setFrozen(!supported);
-
-	if (!supported)
-	{
-		ClientCfg.writeBool("GPUSkinning", false);
-	}
 }
