@@ -31,7 +31,6 @@
 #include "entities.h"
 #include "sheet_manager.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/input_handler_manager.h"
 #include "continent_manager.h"
 #include "world_database_manager.h"
 #include "client_cfg.h"
@@ -1430,9 +1429,9 @@ void limitOutgameFrameRate()
 	// a sleep of the configuration (Sleep >= 0) is done by the loops themselves and is all there is
 	if (ClientCfg.Sleep < 0)
 	{
-		if (CViewRenderer::getInstance()->isMinimized() || !CInputHandlerManager::getInstance()->hasFocus())
+		if (isWindowMinimizedOrWithoutArea())
 		{
-			// nobody looks
+			// nothing of the window is shown
 			nlSleep(50);
 		}
 		else if (!ClientCfg.WaitVBL)
@@ -1446,6 +1445,11 @@ void limitOutgameFrameRate()
 	}
 
 	s_LastFrameEnd = CTime::getLocalTime();
+}
+
+bool isWindowMinimizedOrWithoutArea()
+{
+	return Driver->isWindowMinimized() || Driver->getWindowWidth() == 0 || Driver->getWindowHeight() == 0;
 }
 
 uint getCurrentColorDepth()
