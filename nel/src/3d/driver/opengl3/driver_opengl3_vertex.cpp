@@ -506,6 +506,11 @@ void		CDriverGL3::mapTextureStageToUV(uint stage, uint uvId)
 {
 	H_AUTO_OGL(CDriverGL3_mapTextureStageToUV)
 
+	// The attribute is set for the active vertex buffer, when it has its vertices: what
+	// is left of an earlier one may name a buffer that is deleted
+	if (!_CurrentVertexBufferGL || _CurrentVertexBufferGL->isInvalid())
+		return;
+
 	// Just call it for last VertexBuffer setuped... (hack)
 	CVertexBufferInfo &VB = _LastVB;	
 	if (VB.VertexFormat & (CVertexBuffer::TexCoord0Flag<<uvId))

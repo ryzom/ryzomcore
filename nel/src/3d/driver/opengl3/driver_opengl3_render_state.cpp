@@ -351,6 +351,8 @@ bool CDriverGL3::useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const 
 {
 	H_AUTO_OGL(CDriverGL3_useUniformBlock)
 
+	nlassert(size <= allocSize);
+
 	bool written = false;
 
 	if (_StreamMode)
@@ -377,7 +379,15 @@ bool CDriverGL3::useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const 
 	if (write || !block.Buffer)
 	{
 		if (!block.Buffer)
+		{
+			// a new name becomes a buffer with its first bind to the general target
 			nglGenBuffers(1, &block.Buffer);
+			_DriverGLStates.bindUniformBuffer(block.Buffer);
+		}
+		// The binding point first: the indexed bind sets the general binding too, so for
+		// a block that is not at its binding point the bind to the general target, which
+		// the write needs, costs no GL call
+		_DriverGLStates.bindUniformBufferBase(binding, block.Buffer);
 		_DriverGLStates.bindUniformBuffer(block.Buffer);
 		if (size == allocSize)
 		{
@@ -397,8 +407,10 @@ bool CDriverGL3::useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const 
 		_StreamStats.BufferBytes += size;
 #endif
 	}
-
-	_DriverGLStates.bindUniformBufferBase(binding, block.Buffer);
+	else
+	{
+		_DriverGLStates.bindUniformBufferBase(binding, block.Buffer);
+	}
 	return written;
 }
 

@@ -252,7 +252,17 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 	{
 		if (initFrameBufferObject(tex))
 		{
+			// The active unit loses the texture it has on this target, so the stage is no
+			// longer what the driver has noted for it: its next texture is bound for real.
+			// (setRenderTarget has cleared every stage before this; the picture mode of a
+			// minimized window binds a render target again with the stages in use.)
 			_Driver->_DriverGLStates.forceBindTexture(TextureMode, 0);
+			const uint unit = _Driver->_DriverGLStates.getActiveTexture();
+			if (unit < IDRV_PROGRAM_MAXSAMPLERS)
+			{
+				_Driver->_CurrentTexture[unit] = nullptr;
+				_Driver->_CurrentTextureInfoGL[unit] = nullptr;
+			}
 			_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
 		}
 		else

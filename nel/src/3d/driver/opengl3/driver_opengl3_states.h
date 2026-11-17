@@ -47,6 +47,7 @@ namespace NLDRIVERGL3 {
  * - Depth range: glDepthRange()
  * - Clip planes: glEnable/glDisable(GL_CLIP_DISTANCE0..5)
  * - Vertex input: glEnableVertexAttribArray(), glDisableVertexAttribArray(),
+ *   glVertexAttribPointer(), glBindVertexArray(),
  *   glBindBuffer(GL_ARRAY_BUFFER), glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)
  * - Textures: glActiveTexture(), glBindTexture()
  * - Framebuffer: glBindFramebuffer(GL_FRAMEBUFFER)
@@ -54,6 +55,12 @@ namespace NLDRIVERGL3 {
  * - Buffer objects: glBindBuffer(GL_UNIFORM_BUFFER),
  *   glBindBufferBase(GL_UNIFORM_BUFFER), glBindBufferRange(GL_UNIFORM_BUFFER),
  *   glBindBuffer(GL_PIXEL_UNPACK_BUFFER)
+ *
+ * The bindings are kept for the life of the context: nothing issues one again
+ * on its own. So an object whose name the cache may have is reported to the
+ * cache when it is deleted (arrayBufferDeleted, elementArrayBufferDeleted,
+ * textureDeleted, uniformBufferDeleted), since GL takes it out of its bindings
+ * and may give the name to another object.
  */
 class CDriverGLStates3
 {
@@ -236,9 +243,10 @@ public:
 	void forceBindArrayBuffer(uint objectID);
 	uint getCurrBoundArrayBuffer() const { return m_CurrArrayBuffer; }
 
-	/// To call when a buffer that was bound to GL_ARRAY_BUFFER gets deleted: GL sets the
-	/// binding back to zero and takes the buffer out of the attributes of the bound vertex
-	/// array object, and the cache forgets it in both. No GL call.
+	/// To call when a buffer that may be bound to GL_ARRAY_BUFFER gets deleted, which is
+	/// every buffer with vertices: GL sets the binding back to zero and takes the buffer
+	/// out of the attributes of the bound vertex array object, and the cache forgets it
+	/// in both. No GL call.
 	void arrayBufferDeleted(uint objectID);
 
 	/// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER). State of the vertex array object: like the

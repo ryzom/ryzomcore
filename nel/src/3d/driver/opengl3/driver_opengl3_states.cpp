@@ -158,6 +158,11 @@ void CDriverGLStates3::init()
 		m_CurUniformBufferSize[i] = 0;
 	}
 	m_CurPixelUnpackBuffer = 0;
+
+	// The viewport and the scissor rectangle of a new context are those of its window,
+	// not what the context before had last: the first of each is issued
+	m_CurViewportWidth = m_CurViewportHeight = -1;
+	m_CurScissorWidth = m_CurScissorHeight = -1;
 }
 
 void CDriverGLStates3::release()
@@ -698,7 +703,9 @@ void CDriverGLStates3::elementArrayBufferDeleted(GLuint id)
 void CDriverGLStates3::activeTexture(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates3_activeTexture)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
 	if (m_CurrentActiveTexture != stage)
+#endif
 	{
 		nglActiveTexture(GL_TEXTURE0 + stage);
 		m_CurrentActiveTexture = stage;
