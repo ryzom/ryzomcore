@@ -2403,9 +2403,11 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 #ifdef USE_OPENGLES3
 				// GLES 3.0: nglProgramUniform1i is a no-op (SSO not available).
 				// Use glUseProgram + glUniform1i instead.
-				nglUseProgram(id);
+				// Through the state cache, which is to know the program in use, and back to the one that was
+				const GLuint usedProgram = _DriverGLStates.getCurrUsedProgram();
+				_DriverGLStates.forceUseProgram(id);
 				glUniform1i(samplerIdx, i);
-				nglUseProgram(0);
+				_DriverGLStates.forceUseProgram(usedProgram);
 #else
 				nglProgramUniform1i(id, samplerIdx, i);
 #endif
@@ -2814,7 +2816,8 @@ bool CDriverGL3::setupUserLinkedPrograms(CVertexProgram *vpProg, CPixelProgram *
 		_DriverGLStates.forceBindProgramPipeline(0);
 		m_PPOBound = false;
 	}
-	_DriverGLStates.forceUseProgram(linkedProgId);
+	// Most draws use the program of the draw before
+	_DriverGLStates.useProgram(linkedProgId);
 
 	// Set shader program — getProgram/getProgramId will use this for both VP and PP
 	m_DriverShaderProgram = sp;
@@ -2995,7 +2998,8 @@ bool CDriverGL3::setupMegaLinkedPrograms()
 		_DriverGLStates.forceBindProgramPipeline(0);
 		m_PPOBound = false;
 	}
-	_DriverGLStates.forceUseProgram(linkedProgId);
+	// Most draws use the program of the draw before
+	_DriverGLStates.useProgram(linkedProgId);
 
 	// Set shader program — getProgram/getProgramId will use this for both VP and PP
 	m_DriverShaderProgram = sp;

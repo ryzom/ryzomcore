@@ -127,6 +127,31 @@ void CDriverGLStates3::init()
 	nglGenVertexArrays(1, &m_DefaultVAO);
 	nglBindVertexArray(m_DefaultVAO);
 	m_CurVAO = m_DefaultVAO;
+
+	// The context is new, nothing is bound in it. What the cache has of a context
+	// before it is forgotten: a cached bind would skip the first bind of an object
+	// whose name the cache still has.
+	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+		m_VertexAttribArrayEnabled[i] = false;
+	m_CurrArrayBuffer = 0;
+	m_CurElementArrayBuffer = 0;
+	m_CurrentActiveTexture = 0;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		m_CurTextureTarget[i] = 0;
+		m_CurTexture[i] = 0;
+	}
+	m_CurFramebuffer = 0;
+	m_CurProgram = 0;
+	m_CurProgramPipeline = 0;
+	m_CurUniformBuffer = 0;
+	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
+		m_CurUniformBufferBase[i] = 0;
+		m_CurUniformBufferOffset[i] = 0;
+		m_CurUniformBufferSize[i] = 0;
+	}
+	m_CurPixelUnpackBuffer = 0;
 }
 
 void CDriverGLStates3::release()
