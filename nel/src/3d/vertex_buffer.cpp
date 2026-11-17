@@ -39,6 +39,34 @@ bool CVertexBuffer::SerialOldPreferredMemory = false;
 
 // --------------------------------------------------
 
+namespace /* anonymous */ {
+
+/** True when the vertices of a vertex buffer are to be read from the driver, and may be:
+ * - The buffer is resident and has no local memory, so that its locks go to the driver.
+ *   The copy of the vertex buffer itself (_NonResidentVertices) is then not the one that
+ *   is read and written, and it is freed for every usage but Immutable (see setLocation).
+ * - The driver side is in RAM, which is what setLocation goes by when it takes the
+ *   vertices back. In the drivers that is memory that holds the vertices and may be
+ *   read: system memory, or the copy that a driver keeps beside its buffer. A buffer
+ *   that is resident in AGP or VRAM is locked through a mapping that is for writing,
+ *   and that may discard what the buffer has: it is not read.
+ * - The usage is not SmallStream or FullStream. Their vertices are good for the frame
+ *   they were written in, wherever a driver has them.
+ * False for a buffer that is not resident, which has its vertices in its own copy.
+ * Where this is false for a resident buffer that has no copy of its own left (a usage
+ * other than Immutable that a driver holds in AGP, or a stream usage), the vertices are
+ * not to be had: what reads them gets the empty copy, as it did.
+ */
+inline bool verticesAreInDriver(const CVertexBuffer &vb)
+{
+	return vb.isResident() && !vb.getKeepLocalMemory() && vb.getLocation() == CVertexBuffer::RAMResident
+	    && vb.getBufferUsage() != CVertexBuffer::SmallStream && vb.getBufferUsage() != CVertexBuffer::FullStream;
+}
+
+} /* anonymous namespace */
+
+// --------------------------------------------------
+
 const uint CVertexBuffer::SizeType[NumType]=
 {
 	1*sizeof(double),
@@ -198,7 +226,24 @@ CVertexBuffer	&CVertexBuffer::operator=(const CVertexBuffer &vb)
 	_InternalFlags = vb._InternalFlags;
 	_NbVerts = vb._NbVerts;
 	_Capacity = vb._Capacity;
-	_NonResidentVertices = vb._NonResidentVertices;
+	if (verticesAreInDriver(vb))
+	{
+		// The source has its vertices in the driver: they are read through a lock, from the
+		// first vertex on, as many as it has. What is behind them up to the capacity is zero.
+		_NonResidentVertices.clear();
+		_NonResidentVertices.resize(vb._Capacity * vb._VertexSize, 0);
+		if (vb._NbVerts && vb._VertexSize)
+		{
+			CVertexBufferRead vba;
+			vb.lock(vba);
+			if (vb._LockedBuffer)
+				memcpy(&(_NonResidentVertices[0]), vb._LockedBuffer, vb._NbVerts * vb._VertexSize);
+		}
+	}
+	else
+	{
+		_NonResidentVertices = vb._NonResidentVertices;
+	}
 	_VertexColorFormat = vb._VertexColorFormat;
 	_BufferUsage = vb._BufferUsage;
 	_KeepLocalMemory = vb._KeepLocalMemory;
@@ -232,14 +277,12 @@ void CVertexBuffer::copyVertices(CVertexBuffer &dest) const
 {
 	nlassert(_BufferUsage != SmallStream);
 	nlassert(_BufferUsage != FullStream);
-	// copy setup
+	// The setup and the vertices. The copy operator gives the vertices that this vertex
+	// buffer has itself, or the ones the driver has where they are there and may be read.
+	// They are not read through a lock for writing: for a buffer that a driver holds in
+	// AGP or VRAM that is a mapping that is not for reading.
 	dest = *this;
-	CVertexBufferReadWrite srcDatas;
-	const_cast<CVertexBuffer *>(this)->lock(srcDatas);
 	nlassert(dest.getLocation() == NotResident);
-	CVertexBufferReadWrite destDatas;
-	dest.lock(destDatas); // will be in vram
-	NLMISC::CFastMem::memcpy (destDatas.getVertexCoordPointer(), srcDatas.getVertexCoordPointer(), getVertexSize() * getNumVertices());
 }
 
 // --------------------------------------------------
@@ -998,6 +1041,26 @@ void		CVertexBuffer::serialSubset(NLMISC::IStream &f, uint vertexStart, uint ver
 	*/
 	sint ver = f.serialVersion(2);
 
+	// A resident vertex buffer that is read into leaves the driver first, which gives it
+	// its own copy back (with the vertices of a buffer in RAM, see setLocation): the
+	// vertices that are read go there. At the end of the read it would take the vertices
+	// that the driver has over the ones read, or have no copy to read into.
+	if (f.isReading() && isResident())
+		restoreNonResidentMemory();
+
+	// The vertices: the copy of this vertex buffer, or, to write a buffer that has them in
+	// the driver, what a lock for reading gives, from the first vertex on
+	CVertexBufferRead vba;
+	uint8 *vertices;
+	if (!f.isReading() && vertexStart < vertexEnd && verticesAreInDriver(*this))
+	{
+		lock(vba);
+		vertices = _LockedBuffer;
+	}
+	else
+	{
+		vertices = _NonResidentVertices.empty() ? nullptr : &(_NonResidentVertices[0]);
+	}
 
 	// Serial VBuffers components.
 	//============================
@@ -1012,7 +1075,7 @@ void		CVertexBuffer::serialSubset(NLMISC::IStream &f, uint vertexStart, uint ver
 			if (_Flags&(1<<value))
 			{
 				// Get the pointer on it
-				void *ptr=(void*)((&(*_NonResidentVertices.begin()))+id*_VertexSize+getValueOffEx ((TValue)value));
+				void *ptr = (void *)(vertices + id * _VertexSize + getValueOffEx((TValue)value));
 				f.serialBuffer ((uint8*)ptr, SizeType[_Type[value]]);
 			}
 		}
