@@ -449,9 +449,15 @@ private:
 	std::vector<uint8>				_DummyVB;
 	// Invalidate the buffer (when it is lost, or when a lock fails)
 	void							invalidate();
+	// Takes the object out of the list of the lost vertex buffers of its range, if it is in it
+	void							leaveLostVBList();
 public:
 	// for use by CVertexArrayRangeMapObjectATI
+	// Where this object is in the list of the lost vertex buffers of its range, while it is in it:
+	// from invalidate() until a lock gets its buffer again or the range empties the list
+	// (updateLostBuffers). The engine may destroy the object at any moment in between.
 	std::list<CVertexBufferHardGLMapObjectATI *>::iterator _IteratorInLostVBList;
+	bool						   _InLostVBList;
 	uint						   _VertexObjectId;
 	// tmp for debug
 	#ifdef NL_DEBUG
@@ -567,8 +573,16 @@ private:
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8>				_DummyVB;
 	// for use by CVertexArrayRangeARB
+	// Where this object is in the list of the lost vertex buffers of its range, while it is in it
+	// (see _InLostVBList)
 	std::list<CVertexBufferHardARB *>::iterator _IteratorInLostVBList;
+	// Takes the object out of that list, if it is in it
+	void							leaveLostVBList();
 public:
+	// The object is in the list of the lost vertex buffers of its range: from invalidate() until
+	// a lock gets its buffer again or the range empties the list (updateLostBuffers). The engine
+	// may destroy the object at any moment in between.
+	bool							_InLostVBList;
 	uint							_VertexObjectId;
 	// tmp for debug
 	#ifdef NL_DEBUG
