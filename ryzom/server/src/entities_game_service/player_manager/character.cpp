@@ -442,6 +442,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_PVPFlagTimeSettedOn = 0;
 	_PvPDatabaseCounter = 0;
 	_PVPFlag = false;
+	_EquipmentInspectionMode = 0;
 	_PVPRecentActionTime = 0;
 
 #ifdef RYZOM_FORGE

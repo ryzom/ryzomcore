@@ -1099,6 +1099,14 @@ void CInterfaceManager::initInGame()
 	// Interface config
 	loadInterfaceConfig();
 
+	// The inspection snapshot must not reappear after loading a saved UI layout.
+	// Use element lookup, as does the interface config restore code: this group
+	// need not be registered as a top-level window yet.
+	CGroupContainer *inspectWindow = dynamic_cast<CGroupContainer*>(
+		CWidgetManager::getInstance()->getElementFromId("ui:interface:player_inspect"));
+	if (inspectWindow)
+		inspectWindow->setActive(false);
+
 	//Load user landmarks
 	loadLandmarks();
 
@@ -1419,6 +1427,13 @@ void CInterfaceManager::uninitInGame0 ()
 	// Autosave of the interface in interface.cfg
 	if (_ConfigLoaded)
 	{
+		// Persist a closed transient inspection window, even when an older
+		// user XML override or UI layout still treats its active state as savable.
+		CGroupContainer *inspectWindow = dynamic_cast<CGroupContainer*>(
+			CWidgetManager::getInstance()->getElementFromId("ui:interface:player_inspect"));
+		if (inspectWindow)
+			inspectWindow->setActive(false);
+
 		saveConfig();
 
 		_ConfigLoaded = false;

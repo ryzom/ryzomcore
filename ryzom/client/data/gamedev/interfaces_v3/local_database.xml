@@ -214,6 +214,28 @@
 			</branch>
 		</branch>
 	</branch>
+	<!-- Independent, read-only snapshot: 19 worn slots and 2 hands. -->
+	<branch name="PLAYER_INSPECT">
+		<branch name="" count="21">
+			<leaf name="SHEET" type="I32" />
+			<leaf name="QUALITY" type="I10" />
+			<leaf name="QUANTITY" type="I10" />
+			<leaf name="USER_COLOR" type="I3" />
+			<leaf name="CHARAC_BUFFS" type="I8" />
+			<leaf name="LOCKED" type="I10" />
+			<leaf name="ACCESS" type="I8" />
+			<leaf name="WEIGHT" type="I16" />
+			<leaf name="NAMEID" type="I32" />
+			<leaf name="ENCHANT" type="I10" />
+			<leaf name="RM_CLASS_TYPE" type="I3" />
+			<leaf name="RM_FABER_STAT_TYPE" type="I5" />
+			<leaf name="PREREQUISIT_VALID" type="I1" />
+			<leaf name="PRICE" type="I32" />
+			<leaf name="RESALE_FLAG" type="I2" />
+			<leaf name="WORNED" type="I1" />
+			<leaf name="INFO_VERSION" type="I8" />
+		</branch>
+	</branch>
 	<!-- NB this is not a copy of the server db, but the concatenation of all ascensor pages -->
 	<branch name="ASCENSOR">
 		<branch name="" count="512">
