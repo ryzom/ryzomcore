@@ -176,6 +176,8 @@ public:
 	virtual bool			activate(void) NL_OVERRIDE;
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive() NL_OVERRIDE;
+	/// Return true while the window is minimized (iconified) by the window system.
+	virtual bool			isWindowMinimized() const NL_OVERRIDE;
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
 	virtual nlWindow		getDisplay () NL_OVERRIDE;
 

@@ -1430,7 +1430,7 @@ void limitOutgameFrameRate()
 	// a sleep of the configuration (Sleep >= 0) is done by the loops themselves and is all there is
 	if (ClientCfg.Sleep < 0)
 	{
-		if (CViewRenderer::getInstance()->isMinimized() || !CInputHandlerManager::getInstance()->hasFocus())
+		if (isWindowMinimizedOrWithoutArea() || !CInputHandlerManager::getInstance()->hasFocus())
 		{
 			// nobody looks
 			nlSleep(50);
@@ -1446,6 +1446,11 @@ void limitOutgameFrameRate()
 	}
 
 	s_LastFrameEnd = CTime::getLocalTime();
+}
+
+bool isWindowMinimizedOrWithoutArea()
+{
+	return Driver->isWindowMinimized() || Driver->getWindowWidth() == 0 || Driver->getWindowHeight() == 0;
 }
 
 uint getCurrentColorDepth()

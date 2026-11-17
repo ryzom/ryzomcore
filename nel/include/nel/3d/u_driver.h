@@ -232,6 +232,14 @@ public:
 	virtual bool			activate(void)=0;
 	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
 	virtual bool			isActive()=0;
+	/** Return true while the window is minimized (iconified) by the window system, whatever size getWindowSize
+	 *  reports then: with some drivers and window systems a minimized window keeps its size, with others it has
+	 *  no area. Return false when there is no window.
+	 *  The calling application may leave time to other applications when it is the case, as nothing of it is shown.
+	 *  The answer is for a window of the driver's own; for a window handed to the driver that is a part of another
+	 *  window, see IDriver::isWindowMinimized.
+	 */
+	virtual bool			isWindowMinimized() const = 0;
 
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
 	virtual nlWindow		getDisplay () = 0;
