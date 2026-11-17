@@ -211,6 +211,9 @@ PFNGLGETSYNCIVPROC								nglGetSynciv;
 // GL_ARB_buffer_storage
 NEL_PFNGLBUFFERSTORAGEPROC						nglBufferStorage;
 
+// GL_ARB_multi_bind
+NEL_PFNGLBINDBUFFERSRANGEPROC					nglBindBuffersRange;
+
 // GL_ARB_separate_shader_objects
 PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
 PFNGLACTIVESHADERPROGRAMPROC					nglActiveShaderProgram;
@@ -631,6 +634,22 @@ static bool setupARBBufferStorage(std::vector<const char *> &glext, sint version
 }
 
 // *********************************
+static bool setupARBMultiBind(std::vector<const char *> &glext, sint versionMajor, sint versionMinor)
+{
+	H_AUTO_OGL(setupARBMultiBind);
+
+	// In the core since OpenGL 4.4, an extension before that. A context without it is
+	// a normal case, so its absence is not a warning.
+	bool core = (versionMajor > 4) || (versionMajor == 4 && versionMinor >= 4);
+	if (!core && !checkExt2(glext, "GL_ARB_multi_bind"))
+		return false;
+
+	CHECK_ADDRESS(NEL_PFNGLBINDBUFFERSRANGEPROC, glBindBuffersRange);
+
+	return true;
+}
+
+// *********************************
 static bool	setupNVXGPUMemoryInfo(std::vector<const char *> &glext)
 {
 	H_AUTO_OGL(setupNVXGPUMemoryInfo);
@@ -730,6 +749,9 @@ bool	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_ARB_buffer_storage
 	ext.ARBBufferStorage = setupARBBufferStorage(glext, a, b);
+
+	// Check GL_ARB_multi_bind
+	ext.ARBMultiBind = setupARBMultiBind(glext, a, b);
 
 	// Memory info extensions
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);

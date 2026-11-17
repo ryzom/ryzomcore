@@ -111,16 +111,32 @@ using NLMISC::CVector;
 #define NL3D_GL3_BUFFER_QUEUE_MAX (NL3D_GL3_FRAME_QUEUE_MAX + 1) // Additional buffer for current working
 #define NL3D_GL3_SYNC_IMMEDIATE 0 // Don't allow frame processing backlog if set to 1. Reduce input lag. Testing only
 
-// The stream that holds the uniform blocks (see CStreamBufferGL3)
-#define NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
+// The stream that holds the uniform blocks (see CStreamBufferGL3).
+// The size of a chunk sets how often the blocks that are kept across frames (materials,
+// camera, lights) are written again: each time the head moves on to another chunk, the
+// chunks that only such blocks still hold are freed of them, so a kept block is written
+// about once per two chunks that the stream fills. A chunk is to take many frames to
+// fill, also in a scene with many draws, where the object blocks alone are some hundred
+// bytes per draw.
+#define NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE (4 * 1024 * 1024) // Bytes per chunk
 #define NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
-#define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (16) // More chunks are only created when a single draw needs them
+#define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (8) // More chunks are only created when a single draw needs them
+
+// 1: in stream mode, entries that are added to the light table are written behind the ones
+// the block has, where it is (CDriverGL3::useLightTableBlock). 0: the whole table is written
+// to a new range of the full size of the block whenever it has more entries, for comparison.
+#define NL3D_GL3_LIGHT_TABLE_IN_PLACE 1
 
 // The stream that holds the indices of the draws
 #define NL3D_GL3_INDEX_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
 #define NL3D_GL3_INDEX_STREAM_ALIGNMENT (4) // A multiple of both index sizes, so that an index is never split over two words
 #define NL3D_GL3_INDEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_INDEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when a single render call needs them
+
+// 1: an index buffer whose indices stay from one frame to the next gets a GL buffer of its
+// own, and is drawn from it (CIBDrvInfosGL3). 0: the indices of every render call go through
+// the index stream, or in per-buffer mode to the scratch element buffer, for comparison.
+#define NL3D_GL3_INDEX_BUFFER_OBJECTS 1
 
 // The stream that holds the vertices of the SmallStream and FullStream vertex buffers
 #define NL3D_GL3_VERTEX_STREAM_CHUNK_SIZE (4 * 1024 * 1024) // Bytes per chunk
@@ -283,11 +299,69 @@ public:
 	// Verex buffer hard ?
 	IVertexBufferGL3		*_VBHard;
 	CDriverGL3			*_DriverGL;
+	// The lock that is held was asked for reading only (the engine calls for its outermost lock)
+	bool				_ReadOnlyLock;
 
 	// From IVBDrvInfos
 	virtual ~CVBDrvInfosGL3() NL_OVERRIDE;
 	virtual uint8	*lock (uint first, uint last, bool readOnly) NL_OVERRIDE;
 	virtual void	unlock (uint first, uint last) NL_OVERRIDE;
+};
+
+// ***************************************************************************
+/**
+ * The driver side of an index buffer that has a GL buffer of its own: every index
+ * buffer of another usage than SmallStream and FullStream, without local memory.
+ * (The stream usages are written for every draw and go through the index stream. An
+ * index buffer with local memory is copied to the driver by the engine at every
+ * activation, changed or not, and is drawn through the index stream as well.)
+ *
+ * Once an index buffer is resident, the engine frees its own copy of the indices
+ * (unless the usage is Immutable) and reads and writes them through lock(). They
+ * are in m_Shadow, in main memory: a lock touches no GL memory and costs no GL
+ * call. The index buffer is RAM resident for the engine, which is what allows it to
+ * read them, and what makes it take them back when this object goes.
+ *
+ * The GL buffer gets the indices when the index buffer is made active
+ * (activeIndexBuffer), with one glBufferData, which gives it new storage:
+ * - per-buffer mode: whenever they were written since it got them;
+ * - stream mode: when they were written since, and not in the current frame.
+ *   Indices that are written in the frame they are drawn in are drawn through
+ *   the index stream, which costs a copy of the indices that are drawn and no GL
+ *   call. An index buffer that is filled again every frame so never has a GL
+ *   buffer; one that stays is given one in the second frame it is drawn in.
+ * A render call draws from the GL buffer when it has the indices as they are, and
+ * through the index stream when not (useDrawIndices), also when the indices were
+ * written between activeIndexBuffer and the render call.
+ */
+class CIBDrvInfosGL3 : public IIBDrvInfos
+{
+public:
+	CIBDrvInfosGL3(CDriverGL3 *drv, ItIBDrvInfoPtrList it, CIndexBuffer *ib);
+
+	// From IIBDrvInfos
+	virtual ~CIBDrvInfosGL3() NL_OVERRIDE;
+	/// The indices from the first one on, whatever the range that is asked for
+	virtual void *lock(uint first, uint last, bool readOnly) NL_OVERRIDE;
+	virtual void unlock(uint first, uint last) NL_OVERRIDE;
+
+	/// To call when the index buffer is made active, with the number of indices it has: gives the GL buffer the indices when it is time to (see above)
+	void activate(uint numIndexes);
+	/// True when the GL buffer has the first end bytes of the indices as they are
+	bool inBuffer(uint32 end) const { return !m_Dirty && end <= m_UploadedBytes; }
+	GLuint getBuffer() const { return m_Buffer; }
+	/// The indices, for a draw that goes through the index stream
+	const void *getIndices() const { return m_Shadow.empty() ? nullptr : &m_Shadow[0]; }
+
+private:
+	CDriverGL3 *m_Driver;
+	std::vector<uint8> m_Shadow; // The indices: capacity times the size of an index
+	GLuint m_Buffer; // 0 until the indices are given to GL for the first time
+	uint32 m_UploadedBytes; // How many bytes of m_Shadow the GL buffer was given
+	uint32 m_Uploads; // How many times it was given them
+	uint64 m_WriteFrame; // The frame in which m_Shadow was last written
+	bool m_Dirty; // m_Shadow was written since the GL buffer was given it
+	bool m_WriteLock; // The lock that is held is one for writing
 };
 
 // ***************************************************************************
@@ -502,9 +576,13 @@ class	CIndexBufferInfo
 public:
 	const void				*_Values;
 	CIndexBuffer::TFormat    _Format;
+	// The driver side of the index buffer when it has a GL buffer of its own, else null.
+	// _Values is then the copy of the indices that it keeps.
+	CIBDrvInfosGL3			*_Info;
 
 	CIndexBufferInfo ();
 	void					setupIndexBuffer(CIndexBuffer &vb);
+	void					setupIndexBuffer(CIBDrvInfosGL3 *info, CIndexBuffer::TFormat format);
 };
 
 class CGLSLShaderGenerator;
@@ -1268,7 +1346,11 @@ private:
 	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
+	CLightTableUBOEntry			_LightTableUBOWritten[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // The entries that _LightTableUBOBlock holds, when the driver still has the block
+	uint						_LightTableUBOWrittenCount; // How many of them
 	void						uploadLightTableUBO();
+	/// Bring _LightTableUBOBlock to the given entries, writing no more than differs (see the function), and bind it
+	void						useLightTableBlock(const CLightTableUBOEntry *entries, uint count, uint32 blockSize);
 
 	// Per-object light table selection (set by setLights, used by setupUniforms)
 	sint16						_LightTableObjIndices[MaxLight];
@@ -1508,6 +1590,12 @@ private:
 	bool					useIndices(CIndexBlock &block, const void *data, uint32 size, bool write, CIndexRange &range);
 	/// Begin a render call that draws count indices of the active index buffer from firstIndex on, and write them
 	bool					streamIndices(uint32 firstIndex, uint32 count, CIndexRange &range, GLenum &type);
+	/** Where a render call draws count indices of the active index buffer from, firstIndex on:
+	 * the GL buffer of the index buffer, when it has one that has the indices as they are,
+	 * else a range that they are written to now (streamIndices).
+	 * \return false when that write failed: the render call then draws nothing
+	 */
+	bool					useDrawIndices(uint32 firstIndex, uint32 count, CIndexRange &range, GLenum &type);
 	/// glDrawElements with the indices at an offset from a range
 	void					drawIndices(GLenum mode, GLsizei count, GLenum type, const CIndexRange &range, uint32 offset = 0);
 	/// Delete the GL buffer of a piece of index data, if it has one
@@ -1581,6 +1669,7 @@ private:
 	friend class					CVertexBufferAMDPinned;
 	friend class					CVertexBufferStreamGL3;
 	friend class					CVBDrvInfosGL3;
+	friend class					CIBDrvInfosGL3;
 
 	// Stream mode: the vertices of the SmallStream and FullStream vertex buffers are in ranges of this stream
 	CStreamBufferGL3				_VertexStream;
@@ -1866,10 +1955,33 @@ private:
 		uint32 ObjectWritten; // Object blocks written
 		uint32 ObjectSkipped; // Object blocks that were the same as the one before
 		uint32 MaterialWritten; // Material slots written
+		// Stream mode: the writes of each kind of uniform block, and the bytes that were
+		// reserved for them (the size of the block; the stream adds what the alignment takes)
+		enum TBlockKind
+		{
+			BlockCamera = 0,
+			BlockLightTable,
+			BlockLightMapLight,
+			BlockObject,
+			BlockMaterial,
+			BlockUser,
+			BlockKindCount
+		};
+		uint32 BlockWrites[BlockKindCount];
+		uint64 BlockReserved[BlockKindCount];
+		uint32 LightTableAppends; // Stream mode: times that entries were added to the light table where it is
+		uint64 LightTableAppendBytes; // Bytes of those entries
 		uint32 BufferWrites; // Per-buffer mode: uniform blocks written, each to its GL buffer
 		uint64 BufferBytes; // Per-buffer mode: bytes of those writes
 		uint32 IndexBufferWrites; // Per-buffer mode: writes of indices to a GL buffer
 		uint64 IndexBufferBytes; // Per-buffer mode: bytes of those writes
+		uint32 IndexObjectDraws; // Render calls that drew from the GL buffer of their index buffer
+		uint32 IndexStreamDraws; // Render calls that had the indices of their index buffer written for them
+		uint64 IndexStreamDrawBytes; // Bytes of those indices
+		uint32 IndexObjectUploads; // Times that an index buffer gave its GL buffer its indices
+		uint64 IndexObjectUploadBytes; // Bytes of those
+		uint32 ShadowUploads; // Times that a vertex buffer with a shadow copy gave its GL buffer vertices
+		uint64 ShadowUploadBytes; // Bytes of those
 		NLMISC::TTime LastTime;
 	} _StreamStats;
 	void displayStreamStats();

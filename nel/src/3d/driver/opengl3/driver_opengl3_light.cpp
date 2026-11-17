@@ -461,33 +461,103 @@ void CDriverGL3::uploadLightTableUBO()
 		if (count > maxLights)
 			count = maxLights;
 
-		// An empty table is not uploaded, the block keeps the lights it has. A block
-		// that the driver does not have is reserved all the same, to have something to bind.
-		const bool write = stale || (_LightTableDirty && count > 0);
-		if (write)
+		if (stale || _LightTableDirty)
 		{
 			for (sint i = 0; i < count; ++i)
 				packLightToEntry(_LightTableUBOStaging[i], _LightTable[i]);
+			useLightTableBlock(_LightTableUBOStaging, (uint)count, blockSize);
 		}
-		// Always ensure correct binding (may have been stolen by lightmap UBO)
-		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock,
-		    _LightTableUBOStaging, (uint32)(count * sizeof(CLightTableUBOEntry)), blockSize, write);
+		else
+		{
+			// Always ensure correct binding (may have been stolen by lightmap UBO)
+			useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock, nullptr, 0, blockSize, false);
+		}
 		_LightTableDirty = false;
 	}
 	else
 	{
 		// Non-table mode: upload _UserLight[0..MaxLight-1] as the first 8 entries of the block
-		CLightTableUBOEntry entries[MaxLight];
-		const bool write = stale || _UserLightUBODirty;
-		if (write)
+		if (stale || _UserLightUBODirty)
 		{
+			CLightTableUBOEntry entries[MaxLight];
 			for (uint i = 0; i < MaxLight; ++i)
 				packLightToEntry(entries[i], _UserLight[i]);
+			useLightTableBlock(entries, MaxLight, blockSize);
 		}
-		// Always ensure correct binding (may have been stolen by lightmap UBO)
-		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock,
-		    entries, (uint32)(MaxLight * sizeof(CLightTableUBOEntry)), blockSize, write);
+		else
+		{
+			// Always ensure correct binding (may have been stolen by lightmap UBO)
+			useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock, nullptr, 0, blockSize, false);
+		}
 		_UserLightUBODirty = false;
+	}
+}
+
+// ***************************************************************************
+void CDriverGL3::useLightTableBlock(const CLightTableUBOEntry *entries, uint count, uint32 blockSize)
+{
+	H_AUTO_OGL(CDriverGL3_useLightTableBlock)
+
+	const uint32 entrySize = (uint32)sizeof(CLightTableUBOEntry);
+
+	// The block has _LightTableUBOWrittenCount entries, with the bytes of
+	// _LightTableUBOWritten, unless the driver no longer has it. Three cases:
+	// - An entry that the block has is to change: the whole table is written, to a new
+	//   range of the uniform stream. The draws that were issued read the entries as
+	//   they were.
+	// - The entries that the block has stay and there are more now, which is what the
+	//   render traversal does when it meets a light it has not met yet: the new entries
+	//   are written behind the others, where the block is. The block was reserved with
+	//   room for the whole table, so this takes no new range and changes no binding.
+	//   It is a write to a range that issued draws are bound to, and it is right because
+	//   none of them reads the bytes that are written: a draw reads the table through the
+	//   light indices of its object block, those were below the number of entries the
+	//   table had when the draw was issued (setLights refuses others, and the lightmap
+	//   light has a block of its own), and that number is never above the number of
+	//   entries the block has had since it got this range.
+	// - The table has the entries of the block, or the first of them: nothing is written.
+	//   An entry that is in the block and no longer in the table costs nothing; when the
+	//   table grows again with other lights than the block has there, that is the first
+	//   case.
+	// An empty table writes nothing either, the block keeps the lights it has.
+	bool write = isUniformBlockStale(_LightTableUBOBlock);
+	if (!write)
+	{
+		const uint common = std::min(count, _LightTableUBOWrittenCount);
+		if (common && memcmp(entries, _LightTableUBOWritten, common * entrySize) != 0)
+		{
+			write = true;
+		}
+		else if (count > _LightTableUBOWrittenCount)
+		{
+#if NL3D_GL3_LIGHT_TABLE_IN_PLACE
+			if (_StreamMode)
+			{
+				const uint first = _LightTableUBOWrittenCount;
+				_UniformStream.writePart(_LightTableUBOBlock.Handle, first * entrySize, entries + first, (count - first) * entrySize);
+				memcpy(_LightTableUBOWritten + first, entries + first, (count - first) * entrySize);
+				_LightTableUBOWrittenCount = count;
+#if NL3D_GL3_STREAM_STATS
+				++_StreamStats.LightTableAppends;
+				_StreamStats.LightTableAppendBytes += (count - first) * entrySize;
+#endif
+			}
+			else
+#endif
+			{
+				// Per-buffer mode: a write gives the buffer of the block new storage with the
+				// whole table, so that nothing waits for the draws that read the old one
+				write = true;
+			}
+		}
+	}
+
+	// A block that the driver does not have is reserved also for an empty table, to have something to bind
+	if (useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock, entries, count * entrySize, blockSize, write))
+	{
+		if (count)
+			memcpy(_LightTableUBOWritten, entries, count * entrySize);
+		_LightTableUBOWrittenCount = count;
 	}
 }
 

@@ -56,6 +56,8 @@ struct	CGlExtensions
 	// glBufferStorage, from OpenGL 4.4 or GL_ARB_buffer_storage. Never set under OpenGL ES,
 	// where the functions are linked and this one is not part of ES 3.0.
 	bool	ARBBufferStorage;
+	// glBindBuffersRange, from OpenGL 4.4 or GL_ARB_multi_bind. Never set under OpenGL ES.
+	bool	ARBMultiBind;
 
 	// Extensions to get memory info
 	bool	NVXGPUMemoryInfo;
@@ -100,6 +102,7 @@ public:
 		EXTTextureFilterAnisotropicMaximum = 0.f;
 		AMDPinnedMemory = false;
 		ARBBufferStorage = false;
+		ARBMultiBind = false;
 
 		NVXGPUMemoryInfo = false;
 		ATIMeminfo = false;
@@ -138,6 +141,7 @@ public:
 		result += "\n  Buffers: ";
 		result += AMDPinnedMemory ? "AMDPinnedMemory " : "";
 		result += ARBBufferStorage ? "ARBBufferStorage " : "";
+		result += ARBMultiBind ? "ARBMultiBind " : "";
 
 		result += "\n  Memory info: ";
 		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";
@@ -526,6 +530,9 @@ extern PFNGLGETSYNCIVPROC								nglGetSynciv;
 
 // GL_ARB_buffer_storage
 extern NEL_PFNGLBUFFERSTORAGEPROC						nglBufferStorage;
+
+// GL_ARB_multi_bind
+extern NEL_PFNGLBINDBUFFERSRANGEPROC					nglBindBuffersRange;
 
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;

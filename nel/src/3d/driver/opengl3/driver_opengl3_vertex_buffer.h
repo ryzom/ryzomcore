@@ -58,6 +58,11 @@ public:
 	virtual void setFrameInFlight(uint64 swapBufferCounter) = 0;
 	virtual void flush() {} // Upload shadow data to GL buffer if dirty
 
+	/// A lock that the caller only reads through, and its unlock. They are lock() and unlock(),
+	/// unless a class has less to do for a read (CVertexBufferGL3 with a shadow copy).
+	virtual void *lockRead() { return lock(); }
+	virtual void unlockRead() { unlock(); }
+
 	/// What glVertexAttribPointer gets for the first byte of the first vertex, with the buffer of getGLuint() bound: the offset of the vertices in that buffer
 	virtual void *getArrayPointer() { return getPointer(); }
 
@@ -133,6 +138,8 @@ public:
 	virtual GLuint getGLuint() NL_OVERRIDE;
 	virtual void setFrameInFlight(uint64 swapBufferCounter) NL_OVERRIDE;
 	virtual void flush() NL_OVERRIDE;
+	virtual void *lockRead() NL_OVERRIDE;
+	virtual void unlockRead() NL_OVERRIDE;
 	// @}
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
@@ -148,6 +155,11 @@ private:
 	std::vector<uint8> m_ShadowData;
 	bool m_ShadowDirty;
 	bool m_InitialUploadDone; // First flush uses creation hint, subsequent full flushes use GL_DYNAMIC_DRAW
+
+	// A lock for reading of the shadow copy (lockRead): what tells at the unlock that it was written all the same
+	size_t m_ReadLockDirtyRanges; // The number of dirty ranges of the vertex buffer at the lock
+	uint32 m_ReadLockSum; // With NL3D_GL3_STATE_CHECKS: a sum over the shadow copy at the lock
+	bool m_ReadLockWriteWarned; // The log has the line about a write under a lock for reading
 
 	// Scratch buffer for coalescing dirty ranges during flush (avoids reallocation)
 	std::vector<CVertexBuffer::CDirtyRange> m_MergedRanges;

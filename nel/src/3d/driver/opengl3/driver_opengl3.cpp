@@ -339,6 +339,7 @@ CDriverGL3::CDriverGL3()
 	_UseLightMapDynUBO = false;
 	_LightTableMode= false;
 	_LightTableDirty = false;
+	_LightTableUBOWrittenCount = 0;
 	_UserLightUBODirty = true;
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
 	_CameraUBODirty = true;
@@ -617,6 +618,21 @@ bool CDriverGL3::setupDisplay()
 		else
 			nlinfo("3D: per-buffer mode, the uniform blocks, the indices of the draws and the stream vertex buffers have GL buffers of their own: %s", reason);
 	}
+
+	// The uniform buffer ranges that change for a draw go out in one call where the context
+	// has the command for it (see CDriverGLStates3::flushUniformBufferBindings)
+#if NL3D_GL3_MULTI_BIND && !defined(USE_OPENGLES3)
+	_DriverGLStates.enableMultiBind(_Extensions.ARBMultiBind);
+	// (ranges are only bound in stream mode)
+	if (_StreamMode)
+		nlinfo("3D: uniform buffer ranges are bound %s", _Extensions.ARBMultiBind ? "several in one call (glBindBuffersRange)" : "one per call, the context has no glBindBuffersRange (OpenGL 4.4 or GL_ARB_multi_bind)");
+#else
+	_DriverGLStates.enableMultiBind(false);
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+		nlinfo("3D: uniform buffer ranges are bound one per call, NL3D_GL3_MULTI_BIND is 0");
+#endif
+#endif
 
 	nglGenBuffers(1, &_PixelUploadPBO);
 
@@ -1035,6 +1051,16 @@ void CDriverGL3::displayStreamStats()
 	if (_StreamMode)
 	{
 		displayOneStreamStats("uniform", _UniformStream, perFrame, true);
+		nlinfo("3D: uniform stream by kind of block, per frame, writes / bytes reserved: camera %.1f / %.0f, light table %.1f / %.0f, "
+		       "lightmap light %.1f / %.0f, object %.1f / %.0f, material %.1f / %.0f, user %.1f / %.0f; "
+		       "light table entries added in place: %.1f times, %.0f bytes",
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockCamera] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockCamera] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightTable] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightTable] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightMapLight] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightMapLight] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockObject] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockObject] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockMaterial] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockMaterial] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockUser] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockUser] * perFrame,
+		    (float)_StreamStats.LightTableAppends * perFrame, (float)_StreamStats.LightTableAppendBytes * perFrame);
 		displayOneStreamStats("index", _IndexStream, perFrame, true);
 		displayOneStreamStats("vertex", _VertexStream, perFrame, false);
 	}
@@ -1044,6 +1070,15 @@ void CDriverGL3::displayStreamStats()
 		    (float)_StreamStats.BufferWrites * perFrame, (float)_StreamStats.BufferBytes * perFrame,
 		    (float)_StreamStats.IndexBufferWrites * perFrame, (float)_StreamStats.IndexBufferBytes * perFrame);
 	}
+
+	// Both modes: where the indices of the render calls with an index buffer came from
+	nlinfo("3D: index buffers, per frame: %.1f render calls drawn from the GL buffer of their index buffer, "
+	       "%.1f with their indices written for them (%.0f bytes); %.1f times an index buffer gave its GL buffer its indices (%.0f bytes); "
+	       "vertex buffers with a shadow copy, per frame: %.1f uploads (%.0f bytes)",
+	    (float)_StreamStats.IndexObjectDraws * perFrame,
+	    (float)_StreamStats.IndexStreamDraws * perFrame, (float)_StreamStats.IndexStreamDrawBytes * perFrame,
+	    (float)_StreamStats.IndexObjectUploads * perFrame, (float)_StreamStats.IndexObjectUploadBytes * perFrame,
+	    (float)_StreamStats.ShadowUploads * perFrame, (float)_StreamStats.ShadowUploadBytes * perFrame);
 
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
 	_StreamStats.LastTime = now;

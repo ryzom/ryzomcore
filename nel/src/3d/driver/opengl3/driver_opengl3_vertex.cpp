@@ -60,6 +60,7 @@ CVBDrvInfosGL3::CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBu
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGL)
 	_DriverGL = drv;
 	_VBHard = nullptr;
+	_ReadOnlyLock = false;
 }
 
 // ***************************************************************************
@@ -84,17 +85,28 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 }
 
 // ***************************************************************************
-uint8 *CVBDrvInfosGL3::lock (uint /* first */, uint /* last */, bool /* readOnly */)
+uint8 *CVBDrvInfosGL3::lock(uint /* first */, uint /* last */, bool readOnly)
 {
 	H_AUTO_OGL(CVBDrvInfosGL_lock)
-	return (uint8*)_VBHard->lock ();
+	// A lock for reading is told apart: a vertex buffer with a shadow copy then has nothing
+	// to upload after it. For the other classes it is a lock as any other.
+	_ReadOnlyLock = readOnly;
+	return (uint8 *)(readOnly ? _VBHard->lockRead() : _VBHard->lock());
 }
 
 // ***************************************************************************
 void CVBDrvInfosGL3::unlock (uint first, uint last)
 {
 	H_AUTO_OGL(CVBDrvInfosGL_unlock)
-	_VBHard->unlock(first, last);
+	if (_ReadOnlyLock)
+	{
+		_ReadOnlyLock = false;
+		_VBHard->unlockRead();
+	}
+	else
+	{
+		_VBHard->unlock(first, last);
+	}
 }
 
 // ***************************************************************************
@@ -232,8 +244,165 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 {
 	H_AUTO_OGL(CDriverGL3_activeIndexBuffer)
+
+#if NL3D_GL3_INDEX_BUFFER_OBJECTS
+	// An index buffer that is not written for every draw has a driver side with a GL
+	// buffer (see CIBDrvInfosGL3 for which, and why not the others). One that is locked
+	// by its user at this moment is left as it is found, and drawn from the memory of
+	// the lock.
+	const CIndexBuffer::TBufferUsage usage = IB.getBufferUsage();
+	if (usage != CIndexBuffer::SmallStream && usage != CIndexBuffer::FullStream
+	    && !IB.getKeepLocalMemory() && IB.capacity() != 0 && !IB.isLocked())
+	{
+		const bool touched = (IB.getTouchFlags() & (CIndexBuffer::TouchedReserve | CIndexBuffer::TouchedIndexFormat)) != 0;
+		CIBDrvInfosGL3 *info = static_cast<CIBDrvInfosGL3 *>(static_cast<IIBDrvInfos *>(IB.DrvInfos));
+		if (touched || !info)
+		{
+			// Another capacity or format: the driver side is made again
+			if (IB.DrvInfos)
+				delete IB.DrvInfos;
+
+			// In the list of the driver, so that it is deleted when the driver is released
+			ItIBDrvInfoPtrList it = _IBDrvInfos.insert(_IBDrvInfos.end(), (NL3D::IIBDrvInfos *)nullptr);
+			info = new CIBDrvInfosGL3(this, it, &IB);
+			*it = info;
+			IB.DrvInfos = info;
+
+			// The engine copies its indices to the driver side through a lock, and frees
+			// its own copy unless the usage is Immutable. RAM resident: the engine may then
+			// read the indices through a lock, and takes them back when the driver side goes.
+			IB.setLocation(CIndexBuffer::RAMResident);
+		}
+
+		info->activate(IB.getNumIndexes());
+		_LastIB.setupIndexBuffer(info, IB.getFormat());
+		return true;
+	}
+#endif
+
 	_LastIB.setupIndexBuffer(IB);
 	return true;
+}
+
+// ***************************************************************************
+// ***************************************************************************
+// CIBDrvInfosGL3
+// ***************************************************************************
+// ***************************************************************************
+
+// ***************************************************************************
+CIBDrvInfosGL3::CIBDrvInfosGL3(CDriverGL3 *drv, ItIBDrvInfoPtrList it, CIndexBuffer *ib)
+    : IIBDrvInfos(drv, it, ib)
+    , m_Driver(drv)
+    , m_Buffer(0)
+    , m_UploadedBytes(0)
+    , m_Uploads(0)
+    , m_WriteFrame(0)
+    , m_Dirty(true)
+    , m_WriteLock(false)
+{
+	H_AUTO_OGL(CIBDrvInfosGL3_CIBDrvInfosGL3);
+
+	m_Shadow.resize(ib->capacity() * ib->getIndexNumBytes());
+}
+
+// ***************************************************************************
+CIBDrvInfosGL3::~CIBDrvInfosGL3()
+{
+	H_AUTO_OGL(CIBDrvInfosGL3_CIBDrvInfosGL3Dtor);
+
+	// The engine takes its indices back, through a lock of this object
+	if (IndexBufferPtr)
+	{
+		IndexBufferPtr->setLocation(CIndexBuffer::NotResident);
+		IndexBufferPtr = nullptr;
+	}
+
+	// The driver draws no more from the indices of this object. It has the copy of them
+	// also without this object, when the index buffer was locked while it was made active.
+	if (m_Driver->_LastIB._Info == this || (m_Driver->_LastIB._Values && m_Driver->_LastIB._Values == getIndices()))
+	{
+		m_Driver->_LastIB._Info = nullptr;
+		m_Driver->_LastIB._Values = nullptr;
+	}
+
+	if (m_Buffer)
+	{
+		// GL takes a deleted buffer out of the bound vertex array object, the state cache follows
+		m_Driver->_DriverGLStates.elementArrayBufferDeleted(m_Buffer);
+		nglDeleteBuffers(1, &m_Buffer);
+		m_Buffer = 0;
+	}
+}
+
+// ***************************************************************************
+void *CIBDrvInfosGL3::lock(uint /* first */, uint /* last */, bool readOnly)
+{
+	H_AUTO_OGL(CIBDrvInfosGL3_lock);
+
+	// From a lock for writing on, the GL buffer does not have the indices as they are: a
+	// render call that is issued while the lock is held draws the indices from the copy
+	m_WriteLock = !readOnly;
+	if (m_WriteLock)
+		m_Dirty = true;
+	return m_Shadow.empty() ? nullptr : &m_Shadow[0];
+}
+
+// ***************************************************************************
+void CIBDrvInfosGL3::unlock(uint /* first */, uint /* last */)
+{
+	H_AUTO_OGL(CIBDrvInfosGL3_unlock);
+
+	if (m_WriteLock)
+	{
+		// The GL buffer no longer has the indices as they are
+		m_WriteLock = false;
+		m_Dirty = true;
+		m_WriteFrame = m_Driver->_SwapBufferCounter;
+	}
+}
+
+// ***************************************************************************
+void CIBDrvInfosGL3::activate(uint numIndexes)
+{
+	H_AUTO_OGL(CIBDrvInfosGL3_activate);
+
+	const uint32 needed = std::min((uint32)(numIndexes * getIndexNumBytes()), (uint32)m_Shadow.size());
+
+	// More indices are in use than the GL buffer was given
+	if (needed > m_UploadedBytes)
+		m_Dirty = true;
+
+	if (!m_Dirty || !needed)
+		return;
+
+	// Stream mode: indices that were written in this frame are likely to be written in
+	// the next one too. They are drawn through the index stream, and the GL buffer waits
+	// for indices that stay.
+	if (m_Driver->_StreamMode && m_WriteFrame == m_Driver->_SwapBufferCounter)
+		return;
+
+	// By the usage the first time. An index buffer that gives its indices again changes them now and then.
+	GLenum hint = GL_DYNAMIC_DRAW;
+	if (!m_Uploads)
+	{
+		const CIndexBuffer::TBufferUsage usage = IndexBufferPtr->getBufferUsage();
+		if (usage == CIndexBuffer::Immutable || usage == CIndexBuffer::CpuReadWrite)
+			hint = GL_STATIC_DRAW;
+	}
+
+	// New storage with the indices: nothing waits for the draws that read the old one
+	if (!m_Buffer)
+		nglGenBuffers(1, &m_Buffer);
+	m_Driver->_DriverGLStates.bindElementArrayBuffer(m_Buffer);
+	nglBufferData(GL_ELEMENT_ARRAY_BUFFER, needed, &m_Shadow[0], hint);
+	m_UploadedBytes = needed;
+	m_Dirty = false;
+	++m_Uploads;
+#if NL3D_GL3_STREAM_STATS
+	++m_Driver->_StreamStats.IndexObjectUploads;
+	m_Driver->_StreamStats.IndexObjectUploadBytes += needed;
+#endif
 }
 
 // ***************************************************************************
@@ -582,6 +751,8 @@ CIndexBufferInfo::CIndexBufferInfo()
 {
 	H_AUTO_OGL(CIndexBufferInfo_CIndexBufferInfo)
 	_Values = nullptr;
+	_Format = CIndexBuffer::Indices16;
+	_Info = nullptr;
 }
 
 // ***************************************************************************
@@ -593,6 +764,17 @@ void CIndexBufferInfo::setupIndexBuffer(CIndexBuffer &ib)
 	ib.lock (access);
 	_Values = access.getPtr();
 	_Format = access.getFormat();
+	_Info = nullptr;
+}
+
+// ***************************************************************************
+
+void CIndexBufferInfo::setupIndexBuffer(CIBDrvInfosGL3 *info, CIndexBuffer::TFormat format)
+{
+	H_AUTO_OGL(CIndexBufferInfo_setupIndexBuffer);
+	_Values = info->getIndices();
+	_Format = format;
+	_Info = info;
 }
 
 // ***************************************************************************
