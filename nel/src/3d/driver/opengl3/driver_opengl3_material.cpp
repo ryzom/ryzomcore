@@ -30,21 +30,6 @@
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
-CMaterialDrvInfosGL3::~CMaterialDrvInfosGL3()
-{
-	CDriverGL3 *drv = static_cast<CDriverGL3 *>(getDriver());
-	for (int i = 0; i < (int)MaterialUBOId.size(); ++i)
-	{
-		if (MaterialUBOId[i])
-		{
-			if (drv->_DriverGLStates.getCurrBoundUniformBufferBase(NL_BUILTIN_MATERIAL_BINDING) == MaterialUBOId[i])
-				drv->_DriverGLStates.forceBindUniformBufferBase(NL_BUILTIN_MATERIAL_BINDING, 0);
-			nglDeleteBuffers(1, &MaterialUBOId[i]);
-			MaterialUBOId[i] = 0;
-		}
-	}
-}
-
 // Water fragment program GLSL source (4 variants via #defines)
 static const char *WaterFPGLSL_Header = "#version 330\n"
                                         "#extension GL_ARB_separate_shader_objects : enable\n";
@@ -831,7 +816,7 @@ sint CDriverGL3::beginLightMapMultiPass()
 	if (matDrv->MaterialUBO.size() < neededSlots)
 	{
 		matDrv->MaterialUBO.resize(neededSlots);
-		matDrv->MaterialUBOId.resize(neededSlots, 0);
+		matDrv->MaterialUBOHandle.resize(neededSlots);
 		matDrv->MaterialUBOTouched.resize(neededSlots, false);
 	}
 

@@ -22,6 +22,8 @@
 #include <nel/3d/uniform_buffer_format.h>
 #include <nel/3d/uniform_buffer.h>
 
+#include "driver_opengl3_stream_buffer.h"
+
 #define NL3D_GL3_UNIFORM_BUFFER_DEBUG 1
 
 namespace NL3D {
@@ -53,13 +55,9 @@ public:
 	CUBDrvInfosGL3(IDriver *drv, ItUBDrvInfoPtrList it, CUniformBuffer *ub);
 	virtual ~CUBDrvInfosGL3() NL_OVERRIDE;
 
-	GLuint getBufferId() const { return _BufferId; }
-	sint getCapacity() const { return _Capacity; }
-	void setCapacity(sint cap) { _Capacity = cap; }
-
-private:
-	GLuint _BufferId;
-	sint _Capacity;
+	/// Where the data of the uniform buffer is in the uniform stream of the driver.
+	/// Not valid before the first upload, and whenever the stream has given the range away.
+	CStreamHandleGL3 Handle;
 };
 
 } // NLDRIVERGL3

@@ -1290,6 +1290,10 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 
 bool CDriverGL3::setupBuiltinPrograms()
 {
+	// A new draw: every uniform block it reads is written or looked up below, so the
+	// uniform stream no longer has to keep the blocks of the draw before it
+	_UniformStream.nextDraw();
+
 	// Bind and flush the nelvp constant UBO if the active VP is a converted nelvp program.
 	flushNelvpUserVP();
 

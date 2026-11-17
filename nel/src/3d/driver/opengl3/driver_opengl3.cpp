@@ -337,20 +337,16 @@ CDriverGL3::CDriverGL3()
 
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
-	_LightMapDynUBOId = 0;
 	memset(&_LightMapDynUBOEntry, 0, sizeof(_LightMapDynUBOEntry));
+	memset(&_LightMapDynUBOWritten, 0, sizeof(_LightMapDynUBOWritten));
 	_LightMapDynUBODirty = false;
 	_UseLightMapDynUBO = false;
 	_LightTableMode= false;
-	_LightTableUBOId = 0;
 	_LightTableDirty = false;
 	_UserLightUBODirty = true;
-	_LightTableUBOCapacity = 0;
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
-	_CameraUBOId = 0;
 	_CameraUBODirty = true;
 	_CameraUBOUploadDirty = false;
-	_CameraUBOCapacity = 0;
 	_LightTableObjCount = 0;
 	_NumPerPixelLights = 0;
 	for (uint i = 0; i < MaxLight; ++i)
@@ -411,15 +407,14 @@ CDriverGL3::CDriverGL3()
 	memset(m_ProgramUsesObjectUBO, 0, sizeof(m_ProgramUsesObjectUBO));
 	memset(m_ProgramUsesMaterialUBO, 0, sizeof(m_ProgramUsesMaterialUBO));
 	m_NelvpActiveUB = nullptr;
-	_ObjectUBOId = 0;
-	_ObjectUBOCapacity = 0;
+	memset(&_ObjectUBOWritten, 0, sizeof(_ObjectUBOWritten));
 	// _OverrideMaterialUBOId = 0; // Replaced by per-material UBO slots
 	for (sint i = 0; i < UBBindingCount; ++i)
-	{
 		_BoundUserUB[i] = nullptr;
-		_UserUBBoundId[i] = 0;
-	}
 	memset(&_LightMapUBOOverride, 0, sizeof(_LightMapUBOOverride));
+#if NL3D_GL3_STREAM_STATS
+	memset(&_StreamStats, 0, sizeof(_StreamStats));
+#endif
 }
 
 // ***************************************************************************
@@ -570,12 +565,30 @@ bool CDriverGL3::setupDisplay()
 	if (!initProgramPipeline())
 		nlerror("Failed to create Pipeline Object");
 
-	// Create UBOs
-	nglGenBuffers(1, &_LightTableUBOId);
-	nglGenBuffers(1, &_LightMapDynUBOId);
-	nglGenBuffers(1, &_CameraUBOId);
-	nglGenBuffers(1, &_ObjectUBOId);
-	// nglGenBuffers(1, &_OverrideMaterialUBOId); // Replaced by per-material UBO slots
+	// The uniform blocks have no GL buffer of their own: each one is a range of the
+	// uniform stream, written when it changes and bound with its offset.
+	// WebGL 2.0 requires a bound range to be at least as large as the corresponding
+	// uniform block in the shader. So every block reserves its full declared size
+	// when it is written, also when only a part of it has data (see useUniformBlock).
+	{
+		// The offset of a range bound to a uniform block is a multiple of this
+		GLint uniformAlignment = 0;
+		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformAlignment);
+		if (uniformAlignment < 1)
+		{
+			nlwarning("3D: GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT is %d, 256 is used, the largest value an implementation may ask for", (int)uniformAlignment);
+			uniformAlignment = 256;
+		}
+		if (!_UniformStream.init(&_DriverGLStates, "uniform", GL_UNIFORM_BUFFER,
+		        NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE, (uint32)uniformAlignment,
+		        NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS, NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS,
+		        _Extensions.ARBBufferStorage, _SwapBufferCounter, _SwapBufferInFlight))
+		{
+			nlwarning("3D: Failed to create the buffer for the uniform blocks");
+			throw EBadDisplay("Failed to create the buffer for the uniform blocks");
+		}
+	}
+
 	nglGenBuffers(1, &_PixelUploadPBO);
 
 #ifdef USE_OPENGLES3
@@ -583,31 +596,6 @@ bool CDriverGL3::setupDisplay()
 	// Create a scratch element buffer for uploading index data before draw calls.
 	nglGenBuffers(1, &_ScratchElementBuffer);
 #endif
-
-	// Pre-allocate UBOs to their full declared sizes.
-	// WebGL 2.0 requires bound UBOs to be at least as large as the
-	// corresponding uniform block in the shader, even before first use.
-	{
-		// NlLightTable: _MaxLightTableSize × NlLightInfo (96 bytes each)
-		_DriverGLStates.forceBindUniformBuffer(_LightTableUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, _MaxLightTableSize * sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
-		_LightTableUBOCapacity = _MaxLightTableSize;
-
-		// NlLightTable binding for lightmap dynamic UBO (1 entry)
-		_DriverGLStates.forceBindUniformBuffer(_LightMapDynUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
-
-		// NlCamera UBO
-		_DriverGLStates.forceBindUniformBuffer(_CameraUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CCameraUBOData), nullptr, GL_STREAM_DRAW);
-		_CameraUBOCapacity = sizeof(CCameraUBOData);
-
-		// NlModel (object) UBO
-		_DriverGLStates.forceBindUniformBuffer(_ObjectUBOId);
-		nglBufferData(GL_UNIFORM_BUFFER, sizeof(CObjectUBOData), nullptr, GL_STREAM_DRAW);
-
-		_DriverGLStates.forceBindUniformBuffer(0);
-	}
 
 	if (m_UseMegaShaders)
 	{
@@ -967,8 +955,40 @@ bool CDriverGL3::swapBuffers()
 	nldebug("Swap buffer: %u, in flight: %u", (unsigned int)_SwapBufferCounter, (unsigned int)_SwapBufferInFlight);
 #endif
 
+	// The stream goes on to the new frame, and learns which frames the GPU has finished:
+	// their chunks can be written again
+	_UniformStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+#if NL3D_GL3_STREAM_STATS
+	displayStreamStats();
+#endif
+
 	return true;
 }
+
+#if NL3D_GL3_STREAM_STATS
+// --------------------------------------------------
+void CDriverGL3::displayStreamStats()
+{
+	++_StreamStats.Frames;
+	NLMISC::TTime now = NLMISC::CTime::getLocalTime();
+	if (now - _StreamStats.LastTime < 1000)
+		return;
+
+	// Per frame, over the frames since the last line
+	CStreamBufferGL3::CStats uniform = _UniformStream.fetchStats();
+	float perFrame = 1.0f / (float)_StreamStats.Frames;
+	nlinfo("3D: stream stats over %u frames, per frame: uniform stream %.1f writes, %.0f bytes; object blocks %.1f written, %.1f skipped; material blocks %.1f written. "
+	       "Uniform stream: %u chunks, %u written again in place, %u freed of kept blocks, %u discarded",
+	    _StreamStats.Frames,
+	    (float)uniform.Writes * perFrame, (float)uniform.Bytes * perFrame,
+	    (float)_StreamStats.ObjectWritten * perFrame, (float)_StreamStats.ObjectSkipped * perFrame,
+	    (float)_StreamStats.MaterialWritten * perFrame,
+	    _UniformStream.getChunkCount(), uniform.Reuses, uniform.Evacuations, uniform.Discards);
+
+	memset(&_StreamStats, 0, sizeof(_StreamStats));
+	_StreamStats.LastTime = now;
+}
+#endif
 
 // --------------------------------------------------
 bool CDriverGL3::release()
@@ -1009,27 +1029,8 @@ bool CDriverGL3::release()
 		delete it->PixelProgram;
 	m_PPBuiltinCache.clear();
 
-	// Delete UBOs
-	if (_LightTableUBOId)
-	{
-		nglDeleteBuffers(1, &_LightTableUBOId);
-		_LightTableUBOId = 0;
-	}
-	if (_LightMapDynUBOId)
-	{
-		nglDeleteBuffers(1, &_LightMapDynUBOId);
-		_LightMapDynUBOId = 0;
-	}
-	if (_CameraUBOId)
-	{
-		nglDeleteBuffers(1, &_CameraUBOId);
-		_CameraUBOId = 0;
-	}
-	if (_ObjectUBOId)
-	{
-		nglDeleteBuffers(1, &_ObjectUBOId);
-		_ObjectUBOId = 0;
-	}
+	// Delete the buffers of the uniform blocks. The handles into the stream go stale with them.
+	_UniformStream.release();
 	// Replaced by per-material UBO slots
 	// if (_OverrideMaterialUBOId)
 	// {
