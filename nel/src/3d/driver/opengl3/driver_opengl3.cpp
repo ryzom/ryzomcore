@@ -623,9 +623,15 @@ bool CDriverGL3::setupDisplay()
 	// has the command for it (see CDriverGLStates3::flushUniformBufferBindings)
 #if NL3D_GL3_MULTI_BIND && !defined(USE_OPENGLES3)
 	_DriverGLStates.enableMultiBind(_Extensions.ARBMultiBind);
-	nlinfo("3D: uniform buffer ranges are bound %s", _Extensions.ARBMultiBind ? "several in one call (glBindBuffersRange)" : "one per call, the context has no glBindBuffersRange (OpenGL 4.4 or GL_ARB_multi_bind)");
+	// (ranges are only bound in stream mode)
+	if (_StreamMode)
+		nlinfo("3D: uniform buffer ranges are bound %s", _Extensions.ARBMultiBind ? "several in one call (glBindBuffersRange)" : "one per call, the context has no glBindBuffersRange (OpenGL 4.4 or GL_ARB_multi_bind)");
 #else
 	_DriverGLStates.enableMultiBind(false);
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+		nlinfo("3D: uniform buffer ranges are bound one per call, NL3D_GL3_MULTI_BIND is 0");
+#endif
 #endif
 
 	nglGenBuffers(1, &_PixelUploadPBO);

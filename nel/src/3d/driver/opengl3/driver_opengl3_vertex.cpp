@@ -306,8 +306,9 @@ CIBDrvInfosGL3::~CIBDrvInfosGL3()
 		IndexBufferPtr = nullptr;
 	}
 
-	// The driver draws no more from the indices of this object
-	if (m_Driver->_LastIB._Info == this)
+	// The driver draws no more from the indices of this object. It has the copy of them
+	// also without this object, when the index buffer was locked while it was made active.
+	if (m_Driver->_LastIB._Info == this || (m_Driver->_LastIB._Values && m_Driver->_LastIB._Values == getIndices()))
 	{
 		m_Driver->_LastIB._Info = nullptr;
 		m_Driver->_LastIB._Values = nullptr;
@@ -327,7 +328,11 @@ void *CIBDrvInfosGL3::lock(uint /* first */, uint /* last */, bool readOnly)
 {
 	H_AUTO_OGL(CIBDrvInfosGL3_lock);
 
+	// From a lock for writing on, the GL buffer does not have the indices as they are: a
+	// render call that is issued while the lock is held draws the indices from the copy
 	m_WriteLock = !readOnly;
+	if (m_WriteLock)
+		m_Dirty = true;
 	return m_Shadow.empty() ? nullptr : &m_Shadow[0];
 }
 
