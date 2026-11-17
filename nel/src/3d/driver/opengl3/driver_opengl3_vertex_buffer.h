@@ -90,7 +90,8 @@ protected:
  * GL Core vertex buffer — upload strategy by TBufferUsage:
  *
  *  FullStream / SmallStream, in per-buffer mode only (in stream mode they are
- *  CVertexBufferStreamGL3, below), and FullRewrite in per-buffer mode:
+ *  CVertexBufferStreamGL3, below), and FullRewrite where its storage does not
+ *  stay mapped (per-buffer mode, or NL3D_GL3_PERSISTENT_VERTEX_BUFFERS 0):
  *    Round-robin ring of NL3D_GL3_BUFFER_QUEUE_MAX GL buffers.
  *    A lock moves on to the next buffer when the current one has been drawn
  *    since its last lock; locks without a draw between them get the same
@@ -98,12 +99,13 @@ protected:
  *    MAP_INVALIDATE_BUFFER_BIT, otherwise it maps unsynchronized.  No shadow.
  *    GL hint: GL_STATIC_DRAW.
  *
- *  UnsynchronizedWrite in per-buffer mode:
+ *  UnsynchronizedWrite where its storage does not stay mapped (the same two
+ *  cases):
  *    Single GL buffer, mapped unsynchronized: the caller keeps its writes off
  *    what the GPU still reads.  No shadow.  GL hint: GL_STATIC_DRAW.
  *
- *  FullRewrite / UnsynchronizedWrite in stream mode, with
- *  NL3D_GL3_PERSISTENT_VERTEX_BUFFERS:
+ *  FullRewrite / UnsynchronizedWrite in stream mode with
+ *  NL3D_GL3_PERSISTENT_VERTEX_BUFFERS 1:
  *    Buffer storage that is mapped for writing when it is created, and stays
  *    mapped. A lock returns the memory of the mapping and costs no GL call,
  *    an unlock has nothing to do. GL allows drawing from such a buffer while
@@ -183,6 +185,8 @@ private:
 	void deleteBuffer(GLsizei slot);
 	/// Deletes all the GL buffers
 	void deleteBuffers();
+	/// Takes the object out of the list of the lost vertex buffers of the driver, if it is in it
+	void leaveLostVBList();
 #if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
 	/// Gives a place in the ring a GL buffer with storage that stays mapped. False when GL has none: the place is then without a buffer
 	bool createPersistentBuffer(GLsizei slot);
@@ -217,8 +221,11 @@ private:
 
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8> m_DummyVB;
-	// for use by CVertexArrayRange
+	// Where this object is in the list of the lost vertex buffers of the driver, while it is in it.
+	// It is in it from invalidate() until a lock gets its buffers again or the driver empties
+	// the list (updateLostBuffers); the engine may destroy the object at any moment in between.
 	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
+	bool m_InLostVBList;
 
 	// The ring of GL buffers: the places below m_RingSize are in use
 	GLuint m_VertexObjectId[NL3D_GL3_VERTEX_BUFFER_RING_MAX];

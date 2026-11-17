@@ -1932,7 +1932,8 @@ private:
 	 */
 	bool _StreamMode;
 
-	// The log has the line about storage that stays mapped that a vertex buffer could not get (see CVertexBufferGL3)
+	// The log has the line about storage that stays mapped that a vertex buffer could not get
+	// (see CVertexBufferGL3). Once for as long as the display lasts.
 	bool _VertexStorageFailureWarned;
 
 	// Stream mode: the uniform blocks are written into this stream, and bound as ranges of its buffers
