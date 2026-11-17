@@ -1115,9 +1115,10 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		}
 		// b. Load part of the texture case.
 		//==================================
-		// Uses a PBO (Pixel Buffer Object) for async upload. Each rect is orphaned+mapped into
-		// the PBO, then glTexSubImage2D reads from the PBO asynchronously via DMA, avoiding
-		// pipeline stalls that occur with raw CPU pointer uploads.
+		// Uses a PBO (Pixel Buffer Object) for async upload. The pixels of each rect are
+		// copied into buffer memory (which buffer: see below), then glTexSubImage2D reads
+		// from the buffer asynchronously via DMA, avoiding pipeline stalls that occur with
+		// raw CPU pointer uploads.
 		// NOTE: WebGL 2.0 / GLES 3.0 does not support glMapBufferRange on GL_PIXEL_UNPACK_BUFFER,
 		// so we use direct glTexSubImage2D uploads instead.
 		else if (mustLoadPart && !gltext->Compressed)
@@ -1270,8 +1271,27 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 #else
-				// Bind PBO for async upload
-				_DriverGLStates.forceBindPixelUnpackBuffer(_PixelUploadPBO);
+				// The pixels of a rectangle are copied row by row into buffer memory, packed,
+				// and GL reads them from the buffer, which is bound as the pixel unpack buffer
+				// for the upload: the pointer of the upload is then an offset into it.
+				// In stream mode that memory is a range of the pixel stream, which stays
+				// mapped: the copy costs no GL call, and nothing on the way returns a value
+				// that the calling thread would have to wait for. GL reads the range when it
+				// executes the upload, which may be after this function has returned: the
+				// stream is told that the frame uses the chunk, and does not write it again
+				// before the GPU has finished the frame.
+				// Else, and for a rectangle that the stream does not take, the buffer of the
+				// driver gets new storage for the rectangle and is mapped for the copy.
+#if NL3D_GL3_TEXTURE_UPLOAD_STREAM
+				const bool pixelStream = _StreamMode;
+#else
+				const bool pixelStream = false;
+#endif
+
+				// The pixels are packed in the buffer. Transient upload state — see note in setupTexture().
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 
 				// For all rect, update the texture/mipmap.
 				//===============================================
@@ -1310,28 +1330,61 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							statBytes += (uint64)rectBytes;
 #endif
 
-							// Orphan PBO (driver allocates fresh storage, no sync needed)
-							nglBufferData(GL_PIXEL_UNPACK_BUFFER, rectBytes, nullptr, GL_STREAM_DRAW);
+							const uint8 *src = (const uint8 *)ptr + y0 * w * pixelSize + x0 * pixelSize;
+							const sint srcStride = w * pixelSize;
+							const sint dstStride = rectW * pixelSize;
 
-							// Map and copy rect rows into packed PBO
-							void *pboPtr = nglMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, rectBytes,
-								GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-							if (pboPtr)
+							// Where the pixels are in the buffer that is bound for the upload
+							size_t bufferOffset = 0;
+							bool inStream = false;
+
+							// A rectangle of more bytes than a chunk of the stream goes the other way
+							if (pixelStream && (uint32)rectBytes <= NL3D_GL3_PIXEL_STREAM_CHUNK_SIZE)
 							{
-								uint8 *src = (uint8 *)ptr + y0 * w * pixelSize + x0 * pixelSize;
-								sint srcStride = w * pixelSize;
-								sint dstStride = rectW * pixelSize;
-								for (sint row = 0; row < rectH; ++row)
-									memcpy((uint8 *)pboPtr + row * dstStride, src + row * srcStride, dstStride);
-								nglUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+								// When the stream is at its limit it may give up the chunks that only
+								// the uploads before this one read: they are issued
+								_PixelStream.nextDraw();
+								CStreamHandleGL3 handle = _PixelStream.reserve((uint32)rectBytes);
+								// (a stream that has no storage for the range has logged it)
+								if (_PixelStream.isValid(handle))
+								{
+									uint8 *dst = _PixelStream.lock(handle);
+									for (sint row = 0; row < rectH; ++row)
+										memcpy(dst + row * dstStride, src + row * srcStride, dstStride);
+									_PixelStream.unlock(handle);
+									_DriverGLStates.bindPixelUnpackBuffer(_PixelStream.use(handle));
+									bufferOffset = handle.Offset;
+									inStream = true;
+								}
 							}
 
-							// Async upload from PBO (data is packed, no row padding).
-						// Transient upload state — see note in setupTexture().
-							glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-							glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-							glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-							glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, nullptr);
+							if (!inStream)
+							{
+								_DriverGLStates.bindPixelUnpackBuffer(_PixelUploadPBO);
+
+								// Orphan PBO (driver allocates fresh storage, no sync needed)
+								nglBufferData(GL_PIXEL_UNPACK_BUFFER, rectBytes, nullptr, GL_STREAM_DRAW);
+
+								// Map and copy rect rows into packed PBO
+								void *pboPtr = nglMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, rectBytes,
+								    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+								if (pboPtr)
+								{
+									for (sint row = 0; row < rectH; ++row)
+										memcpy((uint8 *)pboPtr + row * dstStride, src + row * srcStride, dstStride);
+									nglUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+								}
+							}
+
+#if NL3D_GL3_STREAM_STATS
+							if (inStream)
+								++_StreamStats.TexturePartStreamRects;
+							else if (pixelStream)
+								++_StreamStats.TexturePartRefusedRects;
+#endif
+
+							// Async upload from the buffer (data is packed, no row padding)
+							glTexSubImage2D(GL_TEXTURE_2D, i, x0, y0, rectW, rectH, glSrcFmt, glSrcType, (const GLvoid *)bufferOffset);
 						}
 
 					next_mipmap:
@@ -1345,8 +1398,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					}
 				}
 
-				// Unbind PBO, reset transient pixel store state
-				_DriverGLStates.forceBindPixelUnpackBuffer(0);
+				// Nothing stays bound as the pixel unpack buffer: GL would take the pixels of
+				// the next upload from memory out of it. Reset transient pixel store state.
+				_DriverGLStates.bindPixelUnpackBuffer(0);
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);

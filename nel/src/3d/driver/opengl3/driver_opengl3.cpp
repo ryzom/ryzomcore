@@ -610,13 +610,24 @@ bool CDriverGL3::setupDisplay()
 			    && _VertexStream.init(&_DriverGLStates, "vertex", GL_ARRAY_BUFFER,
 			        NL3D_GL3_VERTEX_STREAM_CHUNK_SIZE, NL3D_GL3_VERTEX_STREAM_ALIGNMENT,
 			        NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS, NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS,
-			        _SwapBufferCounter, _SwapBufferInFlight);
+			        _SwapBufferCounter, _SwapBufferInFlight)
+#if NL3D_GL3_TEXTURE_UPLOAD_STREAM
+			    && _PixelStream.init(&_DriverGLStates, "pixel", GL_PIXEL_UNPACK_BUFFER,
+			        NL3D_GL3_PIXEL_STREAM_CHUNK_SIZE, NL3D_GL3_PIXEL_STREAM_ALIGNMENT,
+			        NL3D_GL3_PIXEL_STREAM_MIN_CHUNKS, NL3D_GL3_PIXEL_STREAM_MAX_CHUNKS,
+			        _SwapBufferCounter, _SwapBufferInFlight)
+#endif
+			    ;
 			if (!_StreamMode)
 			{
 				_UniformStream.release();
 				_IndexStream.release();
 				_VertexStream.release();
+				_PixelStream.release();
 			}
+			// The first chunk of the pixel stream is bound where GL takes the pixels of
+			// uploads from: nothing stays bound there
+			_DriverGLStates.bindPixelUnpackBuffer(0);
 			reason = "a stream buffer could not be created";
 		}
 #endif
@@ -649,6 +660,18 @@ bool CDriverGL3::setupDisplay()
 		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages have storage that stays mapped");
 #else
 		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages are mapped for every lock, NL3D_GL3_PERSISTENT_VERTEX_BUFFERS is 0");
+#endif
+	}
+#endif
+
+	// The rectangles of the textures that are updated in part (see setupTextureEx)
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+	{
+#if NL3D_GL3_TEXTURE_UPLOAD_STREAM
+		nlinfo("3D: the pixels of the rectangles of textures that are updated in part are written into a stream buffer");
+#else
+		nlinfo("3D: the pixels of the rectangles of textures that are updated in part go through a buffer that is mapped for each, NL3D_GL3_TEXTURE_UPLOAD_STREAM is 0");
 #endif
 	}
 #endif
@@ -1024,6 +1047,7 @@ bool CDriverGL3::swapBuffers()
 	_UniformStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 	_IndexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 	_VertexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+	_PixelStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 #if NL3D_GL3_STREAM_STATS
 	displayStreamStats();
 #endif
@@ -1092,6 +1116,8 @@ void CDriverGL3::displayStreamStats()
 		    (float)_StreamStats.LightTableAppends * perFrame, (float)_StreamStats.LightTableAppendBytes * perFrame);
 		displayOneStreamStats("index", _IndexStream, perFrame, true);
 		displayOneStreamStats("vertex", _VertexStream, perFrame, false);
+		if (_PixelStream.isInitialized())
+			displayOneStreamStats("pixel", _PixelStream, perFrame, false);
 	}
 	else
 	{
@@ -1123,9 +1149,11 @@ void CDriverGL3::displayStreamStats()
 
 	// Both modes: the pixels of textures that were given to GL, by the three ways they get there
 	nlinfo("3D: texture uploads, per frame: %.1f whole textures in setupTextureEx (%.0f bytes); "
-	       "%.1f textures in part, in %.1f rectangles of a mipmap (%.0f bytes); %.1f calls of uploadTexture (%.0f bytes)",
+	       "%.1f textures in part, in %.1f rectangles of a mipmap (%.0f bytes), of which %.1f read from the pixel stream "
+	       "and %.1f that it did not take (more bytes than a chunk, or no storage); %.1f calls of uploadTexture (%.0f bytes)",
 	    (float)_StreamStats.TextureWholeUploads * perFrame, (float)_StreamStats.TextureWholeBytes * perFrame,
 	    (float)_StreamStats.TexturePartUploads * perFrame, (float)_StreamStats.TexturePartRects * perFrame, (float)_StreamStats.TexturePartBytes * perFrame,
+	    (float)_StreamStats.TexturePartStreamRects * perFrame, (float)_StreamStats.TexturePartRefusedRects * perFrame,
 	    (float)_StreamStats.TextureDirectUploads * perFrame, (float)_StreamStats.TextureDirectBytes * perFrame);
 	if (!_TextureUploadStats.empty())
 	{
@@ -1226,6 +1254,7 @@ bool CDriverGL3::release()
 	// The vertex buffers that have their vertices in the vertex stream are destroyed
 	// below. Their ranges go stale here, and they have nothing of their own to delete.
 	_VertexStream.release();
+	_PixelStream.release();
 	// Replaced by per-material UBO slots
 	// if (_OverrideMaterialUBOId)
 	// {

@@ -65,8 +65,10 @@ struct CStreamHandleGL3
 /**
  * Buffer memory for data that is written once and drawn from soon after. The
  * driver keeps its uniform blocks in one, the indices of its draws in another,
- * and the vertices of the vertex buffers that are filled for every draw in a
- * third.
+ * the vertices of the vertex buffers that are filled for every draw in a
+ * third, and the pixels of the rectangles of textures that are updated in part
+ * in a fourth. (What is said of draws below holds for an upload of pixels from
+ * a range as well: GL reads the range when it executes the command.)
  *
  * A stream is a ring of chunks, a chunk is one GL buffer. A write takes the
  * next free bytes of the head chunk. Nothing is ever written over a range that

@@ -410,9 +410,15 @@ public:
 	void uniformBufferDeleted(GLuint id);
 
 	/// glBindBuffer(GL_PIXEL_UNPACK_BUFFER). For texture upload via PBO.
+	/// While a buffer is bound here, GL takes the pixels of every texture upload from it,
+	/// and the pointer of the upload for an offset into it: whoever binds one binds 0
+	/// again before anything else uploads.
 	void bindPixelUnpackBuffer(GLuint id);
 	void forceBindPixelUnpackBuffer(GLuint id);
 	GLuint getCurrBoundPixelUnpackBuffer() const { return m_CurPixelUnpackBuffer; }
+	/// To call when a buffer that may be bound to GL_PIXEL_UNPACK_BUFFER gets deleted: GL
+	/// sets the binding of a deleted buffer back to zero, and so does the cache. No GL call.
+	void pixelUnpackBufferDeleted(GLuint id);
 
 	/// @}
 

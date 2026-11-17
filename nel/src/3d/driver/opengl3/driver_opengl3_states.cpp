@@ -274,7 +274,8 @@ enum TBindingCheck
 	BindingCheckActiveTexture,
 	BindingCheckTexture,
 	BindingCheckUniformBuffer,
-	BindingCheckUniformBufferIndexed
+	BindingCheckUniformBufferIndexed,
+	BindingCheckPixelUnpackBuffer
 };
 
 } /* anonymous namespace */
@@ -416,6 +417,14 @@ void CDriverGLStates3::checkBindings()
 			    (uint)buffer, (uint)start, (uint)size);
 		}
 	}
+
+	// --- Pixel unpack buffer
+	// Nothing is to be left bound here between two uploads: GL would take the pixels of
+	// the uploads from memory out of the buffer
+	value = 0;
+	glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &value);
+	if (((GLuint)value != m_CurPixelUnpackBuffer || value != 0) && warnBinding(BindingCheckPixelUnpackBuffer))
+		nlwarning("3D: state cache: the pixel unpack buffer is %u in the cache and %u in GL, and is to be 0 at the end of a frame", (uint)m_CurPixelUnpackBuffer, (uint)value);
 }
 
 #endif // NL3D_GLSTATE_CHECK_BINDINGS
@@ -1214,6 +1223,13 @@ void CDriverGLStates3::bindPixelUnpackBuffer(GLuint id)
 	{
 		forceBindPixelUnpackBuffer(id);
 	}
+}
+
+void CDriverGLStates3::pixelUnpackBufferDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_pixelUnpackBufferDeleted)
+	if (id && m_CurPixelUnpackBuffer == id)
+		m_CurPixelUnpackBuffer = 0;
 }
 
 } // NLDRIVERGL3
