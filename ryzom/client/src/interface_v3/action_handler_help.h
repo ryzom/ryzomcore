@@ -150,8 +150,10 @@ private:
 		bool			KeepMode;
 		// The button for KeepMode. Button state == KeepMode
 		CCtrlBaseButtonPtr	KeepButton;
+		// The chat link that opened this window (0 if none)
+		uint64			ChatLinkId;
 	public:
-		CInfoWindow() {KeepMode= false;}
+		CInfoWindow() : ChatLinkId(0) {KeepMode= false;}
 		virtual void	infoReceived();
 		virtual void	missionInfoReceived(const CPrerequisitInfos &infos);
 	};
