@@ -1119,7 +1119,9 @@ restartLoop:
 				BOMB_IF(scenario == NULL, "Failed to load the scenario "<<scenarioId, return);
 
 				// Whether trial accounts may play the scenario is what the scenario service reads in the header of
-				// each start: the record follows the latest start (the update below stores it)
+				// each start: the record follows the latest start (the update below stores it). The record is one
+				// per scenario key, and the checks of an invitation and of a join read it through the log of their
+				// session: two sessions that run the same key are both judged by the later start.
 				if (scenario->getAllowFreeTrial() != scenarioInfo.getTrialAllowed())
 				{
 					nlinfo("RSM : scenarioStarted : session %u starts the scenario %u, which is %s to trial accounts from now on",
