@@ -162,6 +162,13 @@ uint	CDriverGL3::getMaxLightTableSize() const
 void	CDriverGL3::enableLightTableMode(bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_enableLightTableMode)
+	if (_LightTableMode != enable)
+	{
+		// The two modes share one light block, which holds the lights of the mode
+		// that wrote it last: the mode that begins writes its own
+		_LightTableDirty = true;
+		_UserLightUBODirty = true;
+	}
 	_LightTableMode = enable;
 }
 
@@ -419,83 +426,69 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 	}
 }
 
-static void uploadLightUBOData(CDriverGLStates3 &glStates, const CLightTableUBOEntry *entries, sint count, GLuint uboId, sint &uboCapacity)
-{
-	GLsizeiptr dataSize = count * sizeof(CLightTableUBOEntry);
-	glStates.forceBindUniformBuffer(uboId);
-
-	if (count > uboCapacity)
-	{
-		// Grow buffer
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, entries, GL_STREAM_DRAW);
-		uboCapacity = count;
-	}
-	else
-	{
-		// Orphan + rewrite (avoids GPU sync)
-		nglBufferData(GL_UNIFORM_BUFFER, uboCapacity * sizeof(CLightTableUBOEntry), nullptr, GL_STREAM_DRAW);
-		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, entries);
-	}
-
-	glStates.forceBindUniformBuffer(0);
-}
-
 void CDriverGL3::uploadLightTableUBO()
 {
 	H_AUTO_OGL(CDriverGL3_uploadLightTableUBO)
 
-	// During lightmap passes, bind the dedicated 1-light UBO instead of the main table.
+	// The shader declares the light table with _MaxLightTableSize entries, so a range
+	// of that size is reserved and bound whatever the number of entries that are
+	// written. The entries behind the written ones hold undefined bytes; the shaders
+	// read the table through the light indices of the object, which name written entries.
+	const uint32 blockSize = (uint32)(_MaxLightTableSize * sizeof(CLightTableUBOEntry));
+
+	// During lightmap passes, bind the dedicated 1-light block instead of the main table.
 	if (_UseLightMapDynUBO)
 	{
-		if (_LightMapDynUBODirty)
-		{
-			_DriverGLStates.forceBindUniformBuffer(_LightMapDynUBOId);
-			nglBufferData(GL_UNIFORM_BUFFER, sizeof(CLightTableUBOEntry),
-			    &_LightMapDynUBOEntry, GL_STREAM_DRAW);
-			_DriverGLStates.forceBindUniformBuffer(0);
-			_LightMapDynUBODirty = false;
-		}
-		_DriverGLStates.bindUniformBufferBase(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightMapDynUBOId);
+		// The light is staged again for every lightmapped draw, and seldom differs
+		// from the one before: only a light that changed is written
+		bool changed = _LightMapDynUBODirty
+		    && memcmp(&_LightMapDynUBOEntry, &_LightMapDynUBOWritten, sizeof(CLightTableUBOEntry)) != 0;
+		if (useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightMapDynUBOBlock,
+		        &_LightMapDynUBOEntry, sizeof(CLightTableUBOEntry), blockSize, changed))
+			_LightMapDynUBOWritten = _LightMapDynUBOEntry;
+		_LightMapDynUBODirty = false;
 		return;
 	}
 
-	if (!_LightTableUBOId)
-		return;
+	// A block that the driver no longer has is written again from the lights as they are now
+	const bool stale = isUniformBlockStale(_LightTableUBOBlock);
 
 	if (_LightTableMode)
 	{
 		// Light table mode: upload from _LightTable[]
-		if (_LightTableDirty)
-		{
-			sint count = (sint)_LightTable.size();
-			const sint maxLights = _MaxLightTableSize;
-			if (count > maxLights)
-				count = maxLights;
+		sint count = (sint)_LightTable.size();
+		const sint maxLights = _MaxLightTableSize;
+		if (count > maxLights)
+			count = maxLights;
 
-			if (count > 0)
-			{
-				for (sint i = 0; i < count; ++i)
-					packLightToEntry(_LightTableUBOStaging[i], _LightTable[i]);
-				uploadLightUBOData(_DriverGLStates, _LightTableUBOStaging, count, _LightTableUBOId, _LightTableUBOCapacity);
-			}
-			_LightTableDirty = false;
+		// An empty table is not uploaded, the block keeps the lights it has. A block
+		// that the driver does not have is reserved all the same, to have something to bind.
+		const bool write = stale || (_LightTableDirty && count > 0);
+		if (write)
+		{
+			for (sint i = 0; i < count; ++i)
+				packLightToEntry(_LightTableUBOStaging[i], _LightTable[i]);
 		}
+		// Always ensure correct binding (may have been stolen by lightmap UBO)
+		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock,
+		    _LightTableUBOStaging, (uint32)(count * sizeof(CLightTableUBOEntry)), blockSize, write);
+		_LightTableDirty = false;
 	}
 	else
 	{
-		// Non-table mode: upload _UserLight[0..MaxLight-1] as a small 8-entry UBO
-		if (_UserLightUBODirty)
+		// Non-table mode: upload _UserLight[0..MaxLight-1] as the first 8 entries of the block
+		CLightTableUBOEntry entries[MaxLight];
+		const bool write = stale || _UserLightUBODirty;
+		if (write)
 		{
-			CLightTableUBOEntry entries[MaxLight];
 			for (uint i = 0; i < MaxLight; ++i)
 				packLightToEntry(entries[i], _UserLight[i]);
-			uploadLightUBOData(_DriverGLStates, entries, MaxLight, _LightTableUBOId, _LightTableUBOCapacity);
-			_UserLightUBODirty = false;
 		}
+		// Always ensure correct binding (may have been stolen by lightmap UBO)
+		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock,
+		    entries, (uint32)(MaxLight * sizeof(CLightTableUBOEntry)), blockSize, write);
+		_UserLightUBODirty = false;
 	}
-
-	// Always ensure correct binding (may have been stolen by lightmap UBO)
-	_DriverGLStates.bindUniformBufferBase(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOId);
 }
 
 } // NLDRIVERGL3

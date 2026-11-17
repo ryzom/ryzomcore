@@ -344,6 +344,97 @@ void CDriverGL3::setClipPlane(uint index, const NLMISC::CPlane &plane)
 }
 
 // ***************************************************************************
+// Uniform blocks, in the uniform stream or in a GL buffer each
+// ***************************************************************************
+
+bool CDriverGL3::useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const void *data, uint32 size, uint32 allocSize, bool write)
+{
+	H_AUTO_OGL(CDriverGL3_useUniformBlock)
+
+	nlassert(size <= allocSize);
+
+	bool written = false;
+
+	if (_StreamMode)
+	{
+		// The stream gives the chunk of a handle to other data without telling, so a kept
+		// handle is asked for on every use, and the data written again when it is gone
+		if (write || !_UniformStream.isValid(block.Handle))
+		{
+			block.Handle = _UniformStream.write(data, size, allocSize);
+			if (!_UniformStream.isValid(block.Handle))
+				return false; // the stream has logged what failed; the binding point keeps what it has
+			written = true;
+		}
+
+		// The chunk now belongs to the current frame, and the shader reads the range
+		GLuint buffer = _UniformStream.use(block.Handle);
+		_DriverGLStates.bindUniformBufferRange(binding, buffer, block.Handle.Offset, block.Handle.Size);
+		return written;
+	}
+
+	// Per-buffer mode: the block has a GL buffer of its own, which keeps its data until
+	// the next write. A write gives the buffer new storage, so that nothing waits for the
+	// draws that still read the old one.
+	if (write || !block.Buffer)
+	{
+		if (!block.Buffer)
+		{
+			// a new name becomes a buffer with its first bind to the general target
+			nglGenBuffers(1, &block.Buffer);
+			_DriverGLStates.bindUniformBuffer(block.Buffer);
+		}
+		// The binding point first: the indexed bind sets the general binding too, so for
+		// a block that is not at its binding point the bind to the general target, which
+		// the write needs, costs no GL call
+		_DriverGLStates.bindUniformBufferBase(binding, block.Buffer);
+		_DriverGLStates.bindUniformBuffer(block.Buffer);
+		if (size == allocSize)
+		{
+			// the storage and the data in one call
+			nglBufferData(GL_UNIFORM_BUFFER, allocSize, data, GL_STREAM_DRAW);
+		}
+		else
+		{
+			// The block is larger than what is known of it: storage of the whole size, then the known part
+			nglBufferData(GL_UNIFORM_BUFFER, allocSize, nullptr, GL_STREAM_DRAW);
+			if (size)
+				nglBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+		}
+		written = true;
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.BufferWrites;
+		_StreamStats.BufferBytes += size;
+#endif
+	}
+	else
+	{
+		_DriverGLStates.bindUniformBufferBase(binding, block.Buffer);
+	}
+	return written;
+}
+
+bool CDriverGL3::isUniformBlockStale(const CUniformBlockGL3 &block) const
+{
+	return _StreamMode ? !_UniformStream.isValid(block.Handle) : block.Buffer == 0;
+}
+
+void CDriverGL3::releaseUniformBlock(CUniformBlockGL3 &block)
+{
+	H_AUTO_OGL(CDriverGL3_releaseUniformBlock)
+
+	if (block.Buffer)
+	{
+		// GL sets the bindings of a deleted buffer back to zero, the state cache follows
+		_DriverGLStates.uniformBufferDeleted(block.Buffer);
+		nglDeleteBuffers(1, &block.Buffer);
+		block.Buffer = 0;
+	}
+	// A range of the stream is not given back: the stream writes over it when its chunk comes round again
+	block.Handle = CStreamHandleGL3();
+}
+
+// ***************************************************************************
 // Camera UBO
 // ***************************************************************************
 
@@ -416,25 +507,8 @@ void CDriverGL3::uploadCameraUBO()
 {
 	H_AUTO_OGL(CDriverGL3_uploadCameraUBO)
 
-	if (!_CameraUBOId || !_CameraUBOUploadDirty)
-		return;
-
-	const GLsizeiptr dataSize = sizeof(CCameraUBOData);
-	_DriverGLStates.forceBindUniformBuffer(_CameraUBOId);
-
-	if (_CameraUBOCapacity < (sint)dataSize)
-	{
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, &_CameraUBOData, GL_STREAM_DRAW);
-		_CameraUBOCapacity = (sint)dataSize;
-	}
-	else
-	{
-		nglBufferData(GL_UNIFORM_BUFFER, _CameraUBOCapacity, nullptr, GL_STREAM_DRAW);
-		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, &_CameraUBOData);
-	}
-
-	_DriverGLStates.forceBindUniformBuffer(0);
-	_DriverGLStates.forceBindUniformBufferBase(NL_BUILTIN_CAMERA_BINDING, _CameraUBOId);
+	useUniformBlock(NL_BUILTIN_CAMERA_BINDING, _CameraUBOBlock,
+	    &_CameraUBOData, sizeof(CCameraUBOData), sizeof(CCameraUBOData), _CameraUBOUploadDirty);
 
 	_CameraUBOUploadDirty = false;
 }
@@ -446,9 +520,6 @@ void CDriverGL3::uploadCameraUBO()
 void CDriverGL3::uploadObjectUBO()
 {
 	H_AUTO_OGL(CDriverGL3_uploadObjectUBO)
-
-	if (!_ObjectUBOId)
-		return;
 
 	CMaterial &mat = *_CurrentMaterial;
 	CMaterialDrvInfosGL3 *matDrv = static_cast<CMaterialDrvInfosGL3 *>((IMaterialDrvInfos *)(mat._MatDrvInfo));
@@ -561,24 +632,25 @@ void CDriverGL3::uploadObjectUBO()
 	data.fogEnabled = m_VPBuiltinCurrent.Fog ? 1 : 0;
 	data._pad[0] = 0;
 
-	// Upload
-	const GLsizeiptr dataSize = sizeof(CObjectUBOData);
-	_DriverGLStates.forceBindUniformBuffer(_ObjectUBOId);
-
-	if (_ObjectUBOCapacity < (sint)dataSize)
+	// Upload. Draws that follow each other often have the same block (the passes of
+	// a material, interface draws with one matrix): the block of the draw before is
+	// then used again, which costs no write and no change of the binding. Every
+	// byte of the struct is set above, so the blocks can be compared as memory.
+	bool changed = memcmp(&data, &_ObjectUBOWritten, sizeof(CObjectUBOData)) != 0;
+	if (useUniformBlock(NL_BUILTIN_MODEL_BINDING, _ObjectUBOBlock,
+	        &data, sizeof(CObjectUBOData), sizeof(CObjectUBOData), changed))
 	{
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, &data, GL_STREAM_DRAW);
-		_ObjectUBOCapacity = (sint)dataSize;
+		_ObjectUBOWritten = data;
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.ObjectWritten;
+#endif
 	}
+#if NL3D_GL3_STREAM_STATS
 	else
 	{
-		// Orphan + rewrite
-		nglBufferData(GL_UNIFORM_BUFFER, _ObjectUBOCapacity, nullptr, GL_STREAM_DRAW);
-		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, &data);
+		++_StreamStats.ObjectSkipped;
 	}
-
-	_DriverGLStates.forceBindUniformBuffer(0);
-	_DriverGLStates.forceBindUniformBufferBase(NL_BUILTIN_MODEL_BINDING, _ObjectUBOId);
+#endif
 }
 
 // ***************************************************************************
@@ -597,19 +669,26 @@ void CDriverGL3::uploadMaterialUBO()
 	// Slot 0 = base material (from setupMaterial/setupNormalPass).
 	// Slots 1..N = per-pass overrides (from setupLightMapPass, etc.).
 	uint slot = matDrv->MaterialUBOCurrent;
-	if (matDrv->MaterialUBOTouched[slot])
+	const CMaterialUBOData &data = matDrv->MaterialUBO[slot];
+
+	// A slot that was touched often has the bytes that its block has: a texture of the
+	// material was replaced and the same stages are in use, or a lightmap pass built
+	// the slot again as it built it for the draw before. The block is written only when
+	// a byte differs; a block that stays is bound where it is, which costs no GL call
+	// when the draw before used it. The struct has no padding that is not a member,
+	// so the slots can be compared as memory.
+	const bool changed = matDrv->MaterialUBOTouched[slot]
+	    && memcmp(&data, &matDrv->MaterialUBOWritten[slot], sizeof(CMaterialUBOData)) != 0;
+	if (useUniformBlock(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOBlock[slot],
+	        &data, sizeof(CMaterialUBOData), sizeof(CMaterialUBOData), changed))
 	{
-		if (!matDrv->MaterialUBOId[slot])
-			nglGenBuffers(1, &matDrv->MaterialUBOId[slot]);
-
-		const GLsizeiptr dataSize = sizeof(CMaterialUBOData);
-		_DriverGLStates.forceBindUniformBuffer(matDrv->MaterialUBOId[slot]);
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, &matDrv->MaterialUBO[slot], GL_STREAM_DRAW);
-		_DriverGLStates.forceBindUniformBuffer(0);
-		matDrv->MaterialUBOTouched[slot] = false;
+		// Written because it changed, or because the block was stale
+		matDrv->MaterialUBOWritten[slot] = data;
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.MaterialWritten;
+#endif
 	}
-
-	_DriverGLStates.bindUniformBufferBase(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOId[slot]);
+	matDrv->MaterialUBOTouched[slot] = false;
 }
 
 } // NLDRIVERGL3

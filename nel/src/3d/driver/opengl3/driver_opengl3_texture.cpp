@@ -75,7 +75,8 @@ CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CD
 CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 {
 	H_AUTO_OGL(CTextureDrvInfosGL3_CTextureDrvInfosGLDtor)
-	// The id is auto deleted here.
+	// The id is auto deleted here. GL takes the texture out of the units it is bound to, the state cache follows.
+	_Driver->_DriverGLStates.textureDeleted(ID);
 	glDeleteTextures(1,&ID);
 
 	// release profiling texture mem.
@@ -251,7 +252,17 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 	{
 		if (initFrameBufferObject(tex))
 		{
+			// The active unit loses the texture it has on this target, so the stage is no
+			// longer what the driver has noted for it: its next texture is bound for real.
+			// (setRenderTarget has cleared every stage before this; the picture mode of a
+			// minimized window binds a render target again with the stages in use.)
 			_Driver->_DriverGLStates.forceBindTexture(TextureMode, 0);
+			const uint unit = _Driver->_DriverGLStates.getActiveTexture();
+			if (unit < IDRV_PROGRAM_MAXSAMPLERS)
+			{
+				_Driver->_CurrentTexture[unit] = nullptr;
+				_Driver->_CurrentTextureInfoGL[unit] = nullptr;
+			}
 			_Driver->_DriverGLStates.forceBindFramebuffer(FBOId);
 		}
 		else
@@ -1480,7 +1491,9 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 	H_AUTO_OGL(activateTexture)
 	if (_CurrentTexture[stage] != tex)
 	{
-		_DriverGLStates.activeTexture(stage);
+		// The unit is made the active one below, and only when something is set on it:
+		// a stage that gets no texture, or the one that GL still has on its unit from
+		// before the stage was unused, costs no GL call.
 		if (tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
@@ -1509,8 +1522,13 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 					// Cache setup.
 					_CurrentTextureInfoGL[stage] = gltext;
 
-					// setup this texture
-					_DriverGLStates.forceBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+					// setup this texture: bound when the unit does not have it, or to change a parameter of it below
+					if (gltext->MagFilter != tex->getMagFilter() || gltext->MinFilter != tex->getMinFilter()
+					    || !_DriverGLStates.isTextureBound(stage, GL_TEXTURE_CUBE_MAP, gltext->ID))
+					{
+						_DriverGLStates.activeTexture(stage);
+						_DriverGLStates.bindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+					}
 
 					// Change parameters of texture, if necessary.
 					//============================================
@@ -1543,9 +1561,14 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 					// Cache setup.
 					_CurrentTextureInfoGL[stage]= gltext;
 
-					// setup this texture
-					_DriverGLStates.forceBindTexture(gltext->TextureMode, gltext->ID);
-
+					// setup this texture: bound when the unit does not have it, or to change a parameter of it below
+					if (gltext->WrapS != tex->getWrapS() || gltext->WrapT != tex->getWrapT()
+					    || gltext->MagFilter != tex->getMagFilter() || gltext->MinFilter != tex->getMinFilter()
+					    || !_DriverGLStates.isTextureBound(stage, gltext->TextureMode, gltext->ID))
+					{
+						_DriverGLStates.activeTexture(stage);
+						_DriverGLStates.bindTexture(gltext->TextureMode, gltext->ID);
+					}
 
 					// Change parameters of texture, if necessary.
 					//============================================

@@ -3239,7 +3239,7 @@ bool CDriverGL3::enterMinimizedPictureMode()
 		const GLfloat clearColor[] = { 0.f, 0.f, 0.f, 0.f };
 		const GLfloat clearDepth = 1.f;
 		const GLint clearStencil = 0;
-		glDisable(GL_SCISSOR_TEST);
+		_DriverGLStates.enableScissorTest(false);
 		_DriverGLStates.colorMask(true, true, true, true);
 		_DriverGLStates.enableZWrite(true);
 		_DriverGLStates.stencilMask(std::numeric_limits<GLuint>::max());

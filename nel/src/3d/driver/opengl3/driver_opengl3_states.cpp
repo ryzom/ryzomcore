@@ -87,8 +87,12 @@ CDriverGLStates3::CDriverGLStates3()
 	m_DefaultVAO = 0;
 	m_CurVAO = 0;
 	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+	{
 		m_VertexAttribArrayEnabled[i] = false;
+		m_VertexAttribPointer[i].Buffer = 0;
+	}
 	m_CurrArrayBuffer = 0;
+	m_CurElementArrayBuffer = 0;
 
 	// Texture state
 	m_CurrentActiveTexture = 0;
@@ -108,8 +112,17 @@ CDriverGLStates3::CDriverGLStates3()
 	// Buffer objects
 	m_CurUniformBuffer = 0;
 	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
 		m_CurUniformBufferBase[i] = 0;
+		m_CurUniformBufferOffset[i] = 0;
+		m_CurUniformBufferSize[i] = 0;
+	}
 	m_CurPixelUnpackBuffer = 0;
+
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+	m_BindingCheckWarned = 0;
+	m_ProgramPipelineUsed = false;
+#endif
 }
 
 void CDriverGLStates3::init()
@@ -122,6 +135,44 @@ void CDriverGLStates3::init()
 	nglGenVertexArrays(1, &m_DefaultVAO);
 	nglBindVertexArray(m_DefaultVAO);
 	m_CurVAO = m_DefaultVAO;
+
+	// The context is new, nothing is bound in it. What the cache has of a context
+	// before it is forgotten: a cached bind would skip the first bind of an object
+	// whose name the cache still has.
+	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+	{
+		m_VertexAttribArrayEnabled[i] = false;
+		m_VertexAttribPointer[i].Buffer = 0;
+	}
+	m_CurrArrayBuffer = 0;
+	m_CurElementArrayBuffer = 0;
+	m_CurrentActiveTexture = 0;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		m_CurTextureTarget[i] = 0;
+		m_CurTexture[i] = 0;
+	}
+	m_CurFramebuffer = 0;
+	m_CurProgram = 0;
+	m_CurProgramPipeline = 0;
+	m_CurUniformBuffer = 0;
+	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
+		m_CurUniformBufferBase[i] = 0;
+		m_CurUniformBufferOffset[i] = 0;
+		m_CurUniformBufferSize[i] = 0;
+	}
+	m_CurPixelUnpackBuffer = 0;
+
+	// The viewport and the scissor rectangle of a new context are those of its window,
+	// not what the context before had last: the first of each is issued
+	m_CurViewportWidth = m_CurViewportHeight = -1;
+	m_CurScissorWidth = m_CurScissorHeight = -1;
+
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+	m_BindingCheckWarned = 0;
+	m_ProgramPipelineUsed = false;
+#endif
 }
 
 void CDriverGLStates3::release()
@@ -194,6 +245,171 @@ void CDriverGLStates3::forceDefaults()
 	}
 
 }
+
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+
+namespace /* anonymous */ {
+
+// The kinds of mismatch that checkBindings() tells apart, one bit each
+enum TBindingCheck
+{
+	BindingCheckProgram = 0,
+	BindingCheckProgramPipeline,
+	BindingCheckVertexArray,
+	BindingCheckArrayBuffer,
+	BindingCheckElementArrayBuffer,
+	BindingCheckAttribEnabled,
+	BindingCheckAttribBuffer,
+	BindingCheckAttribFormat,
+	BindingCheckAttribPointer,
+	BindingCheckActiveTexture,
+	BindingCheckTexture,
+	BindingCheckUniformBuffer,
+	BindingCheckUniformBufferIndexed
+};
+
+} /* anonymous namespace */
+
+bool CDriverGLStates3::warnBinding(uint kind)
+{
+	if (m_BindingCheckWarned & (1 << kind))
+		return false;
+	m_BindingCheckWarned |= (1 << kind);
+	return true;
+}
+
+void CDriverGLStates3::checkBindings()
+{
+	H_AUTO_OGL(CDriverGLStates3_checkBindings)
+
+	GLint value = 0;
+
+	// --- Programs
+	glGetIntegerv(GL_CURRENT_PROGRAM, &value);
+	if ((GLuint)value != m_CurProgram && warnBinding(BindingCheckProgram))
+		nlwarning("3D: state cache: the program in use is %u in the cache and %u in GL", (uint)m_CurProgram, (uint)value);
+
+	// (a context without program pipelines does not have the query)
+	if (m_ProgramPipelineUsed)
+	{
+		value = 0;
+		glGetIntegerv(GL_PROGRAM_PIPELINE_BINDING, &value);
+		if ((GLuint)value != m_CurProgramPipeline && warnBinding(BindingCheckProgramPipeline))
+			nlwarning("3D: state cache: the program pipeline is %u in the cache and %u in GL", (uint)m_CurProgramPipeline, (uint)value);
+	}
+
+	// --- Vertex input
+	GLint vertexArray = 0;
+	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vertexArray);
+	if ((GLuint)vertexArray != m_CurVAO && warnBinding(BindingCheckVertexArray))
+		nlwarning("3D: state cache: the vertex array object is %u in the cache and %u in GL", (uint)m_CurVAO, (uint)vertexArray);
+
+	value = 0;
+	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &value);
+	if ((GLuint)value != m_CurrArrayBuffer && warnBinding(BindingCheckArrayBuffer))
+		nlwarning("3D: state cache: the array buffer is %u in the cache and %u in GL", (uint)m_CurrArrayBuffer, (uint)value);
+
+	// The element array buffer and the attributes are state of the vertex array object,
+	// and the cache has those of the default one
+	if ((GLuint)vertexArray == m_DefaultVAO)
+	{
+		value = 0;
+		glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &value);
+		if ((GLuint)value != m_CurElementArrayBuffer && warnBinding(BindingCheckElementArrayBuffer))
+			nlwarning("3D: state cache: the element array buffer is %u in the cache and %u in GL", (uint)m_CurElementArrayBuffer, (uint)value);
+
+		for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+		{
+			value = 0;
+			nglGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &value);
+			if ((value != 0) != m_VertexAttribArrayEnabled[i] && warnBinding(BindingCheckAttribEnabled))
+				nlwarning("3D: state cache: the array of attribute %u is %s in the cache and %s in GL", i,
+				    m_VertexAttribArrayEnabled[i] ? "enabled" : "disabled", value ? "enabled" : "disabled");
+
+			// An attribute that no draw reads, or whose buffer the cache does not know (it was deleted), is not compared
+			const CVertexAttribPointer &cached = m_VertexAttribPointer[i];
+			if (!m_VertexAttribArrayEnabled[i] || !cached.Buffer)
+				continue;
+
+			value = 0;
+			nglGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &value);
+			if ((GLuint)value != cached.Buffer && warnBinding(BindingCheckAttribBuffer))
+				nlwarning("3D: state cache: attribute %u reads buffer %u in the cache and buffer %u in GL", i, (uint)cached.Buffer, (uint)value);
+
+			GLint size = 0, type = 0, normalized = 0, stride = 0;
+			nglGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
+			nglGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &type);
+			nglGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &normalized);
+			nglGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
+			if ((size != cached.Size || (GLenum)type != cached.Type || (normalized != 0) != (cached.Normalized != 0) || stride != cached.Stride)
+			    && warnBinding(BindingCheckAttribFormat))
+			{
+				nlwarning("3D: state cache: attribute %u has size %d, type 0x%x, normalized %d, stride %d in the cache and size %d, type 0x%x, normalized %d, stride %d in GL",
+				    i, (sint)cached.Size, (uint)cached.Type, (sint)(cached.Normalized != 0), (sint)cached.Stride,
+				    (sint)size, (uint)type, (sint)(normalized != 0), (sint)stride);
+			}
+
+			GLvoid *pointer = nullptr;
+			nglGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer);
+			if (pointer != cached.Pointer && warnBinding(BindingCheckAttribPointer))
+				nlwarning("3D: state cache: attribute %u starts at offset %p in the cache and at offset %p in GL", i, cached.Pointer, pointer);
+		}
+	}
+
+	// --- Textures
+	GLint activeTexture = GL_TEXTURE0;
+	glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTexture);
+	if ((uint)(activeTexture - GL_TEXTURE0) != m_CurrentActiveTexture && warnBinding(BindingCheckActiveTexture))
+		nlwarning("3D: state cache: the active texture unit is %u in the cache and %u in GL", m_CurrentActiveTexture, (uint)(activeTexture - GL_TEXTURE0));
+
+	// The binding of a unit can only be asked of the active unit. A unit that never
+	// had a texture has no target in the cache and is not compared.
+	bool unitChanged = false;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		GLenum query;
+		switch (m_CurTextureTarget[i])
+		{
+		case GL_TEXTURE_2D: query = GL_TEXTURE_BINDING_2D; break;
+		case GL_TEXTURE_CUBE_MAP: query = GL_TEXTURE_BINDING_CUBE_MAP; break;
+		case GL_TEXTURE_RECTANGLE: query = GL_TEXTURE_BINDING_RECTANGLE; break;
+		default: continue;
+		}
+		nglActiveTexture(GL_TEXTURE0 + i);
+		unitChanged = true;
+		value = 0;
+		glGetIntegerv(query, &value);
+		if ((GLuint)value != m_CurTexture[i] && warnBinding(BindingCheckTexture))
+			nlwarning("3D: state cache: unit %u has texture %u on target 0x%x in the cache and texture %u in GL", i, (uint)m_CurTexture[i], (uint)m_CurTextureTarget[i], (uint)value);
+	}
+	// back to the unit that GL had, which is the one of the cache unless the line above was logged
+	if (unitChanged)
+		nglActiveTexture((GLenum)activeTexture);
+
+	// --- Uniform buffers
+	value = 0;
+	glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &value);
+	if ((GLuint)value != m_CurUniformBuffer && warnBinding(BindingCheckUniformBuffer))
+		nlwarning("3D: state cache: the uniform buffer is %u in the cache and %u in GL", (uint)m_CurUniformBuffer, (uint)value);
+
+	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
+		// (start and size are 0 for a buffer that is bound whole)
+		GLint buffer = 0, start = 0, size = 0;
+		nglGetIntegeri_v(GL_UNIFORM_BUFFER_BINDING, i, &buffer);
+		nglGetIntegeri_v(GL_UNIFORM_BUFFER_START, i, &start);
+		nglGetIntegeri_v(GL_UNIFORM_BUFFER_SIZE, i, &size);
+		if (((GLuint)buffer != m_CurUniformBufferBase[i] || (GLintptr)start != m_CurUniformBufferOffset[i] || (GLsizeiptr)size != m_CurUniformBufferSize[i])
+		    && warnBinding(BindingCheckUniformBufferIndexed))
+		{
+			nlwarning("3D: state cache: uniform buffer binding %u has buffer %u, offset %u, size %u in the cache and buffer %u, offset %u, size %u in GL",
+			    i, (uint)m_CurUniformBufferBase[i], (uint)m_CurUniformBufferOffset[i], (uint)m_CurUniformBufferSize[i],
+			    (uint)buffer, (uint)start, (uint)size);
+		}
+	}
+}
+
+#endif // NL3D_GLSTATE_CHECK_BINDINGS
 
 // ===========================================================================
 // ===========================================================================
@@ -579,6 +795,82 @@ void CDriverGLStates3::bindArrayBuffer(uint objectID)
 	}
 }
 
+void CDriverGLStates3::arrayBufferDeleted(uint objectID)
+{
+	H_AUTO_OGL(CDriverGLStates3_arrayBufferDeleted)
+	if (!objectID)
+		return;
+	if (m_CurrArrayBuffer == objectID)
+		m_CurrArrayBuffer = 0;
+	// With another VAO bound, GL leaves the buffer in the attributes of the default VAO.
+	// The cache forgets it all the same: the name is free for another buffer, and the
+	// next call for the attribute is then issued, which is right in both cases.
+	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+	{
+		if (m_VertexAttribPointer[i].Buffer == objectID)
+			m_VertexAttribPointer[i].Buffer = 0;
+	}
+}
+
+void CDriverGLStates3::vertexAttribPointer(uint glIndex, GLuint buffer, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer)
+{
+	H_AUTO_OGL(CDriverGLStates3_vertexAttribPointer)
+	nlassert(glIndex < CVertexBuffer::NumValue);
+
+	// The cache is the one of the default VAO
+	if (m_CurVAO != m_DefaultVAO)
+		forceBindVertexArray(m_DefaultVAO);
+
+	CVertexAttribPointer &current = m_VertexAttribPointer[glIndex];
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (!buffer || current.Buffer != buffer || current.Pointer != pointer || current.Stride != stride
+	    || current.Type != type || current.Size != size || current.Normalized != normalized)
+#endif
+	{
+		// The attribute takes the buffer that is bound to GL_ARRAY_BUFFER at the call
+		bindArrayBuffer(buffer);
+		nglVertexAttribPointer(glIndex, size, type, normalized, stride, pointer);
+		current.Buffer = buffer;
+		current.Size = size;
+		current.Type = type;
+		current.Normalized = normalized;
+		current.Stride = stride;
+		current.Pointer = pointer;
+	}
+}
+
+void CDriverGLStates3::forceBindElementArrayBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_forceBindElementArrayBuffer)
+
+	// The binding belongs to the bound VAO, and the cache is the one of the default VAO
+	if (m_CurVAO != m_DefaultVAO)
+		forceBindVertexArray(m_DefaultVAO);
+
+	nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+	m_CurElementArrayBuffer = id;
+}
+
+void CDriverGLStates3::bindElementArrayBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_bindElementArrayBuffer)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (id != m_CurElementArrayBuffer || m_CurVAO != m_DefaultVAO)
+#endif
+	{
+		forceBindElementArrayBuffer(id);
+	}
+}
+
+void CDriverGLStates3::elementArrayBufferDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_elementArrayBufferDeleted)
+	// With another VAO bound, GL leaves the buffer in the default VAO. The cache
+	// forgets it all the same: the next bind is then issued, which is right in both cases.
+	if (id && m_CurElementArrayBuffer == id)
+		m_CurElementArrayBuffer = 0;
+}
+
 // ===========================================================================
 // Texture state
 // ===========================================================================
@@ -586,7 +878,9 @@ void CDriverGLStates3::bindArrayBuffer(uint objectID)
 void CDriverGLStates3::activeTexture(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates3_activeTexture)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
 	if (m_CurrentActiveTexture != stage)
+#endif
 	{
 		nglActiveTexture(GL_TEXTURE0 + stage);
 		m_CurrentActiveTexture = stage;
@@ -611,6 +905,29 @@ void CDriverGLStates3::bindTexture(GLenum target, GLuint id)
 #endif
 	{
 		forceBindTexture(target, id);
+	}
+}
+
+bool CDriverGLStates3::isTextureBound(uint stage, GLenum target, GLuint id) const
+{
+	nlassert(stage < MaxTextureUnits);
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	return target == m_CurTextureTarget[stage] && id == m_CurTexture[stage];
+#else
+	return false;
+#endif
+}
+
+void CDriverGLStates3::textureDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_textureDeleted)
+	if (!id)
+		return;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		// The target stays: the unit has nothing bound to it
+		if (m_CurTexture[i] == id)
+			m_CurTexture[i] = 0;
 	}
 }
 
@@ -675,6 +992,10 @@ void CDriverGLStates3::forceBindProgramPipeline(GLuint id)
 	H_AUTO_OGL(CDriverGLStates3_forceBindProgramPipeline)
 	nglBindProgramPipeline(id);
 	m_CurProgramPipeline = id;
+#ifdef NL3D_GLSTATE_CHECK_BINDINGS
+	if (id)
+		m_ProgramPipelineUsed = true;
+#endif
 }
 
 void CDriverGLStates3::bindProgramPipeline(GLuint id)
@@ -699,12 +1020,27 @@ void CDriverGLStates3::forceBindUniformBuffer(GLuint id)
 	m_CurUniformBuffer = id;
 }
 
+void CDriverGLStates3::bindUniformBuffer(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_bindUniformBuffer)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if (id != m_CurUniformBuffer)
+#endif
+	{
+		forceBindUniformBuffer(id);
+	}
+}
+
 void CDriverGLStates3::forceBindUniformBufferBase(GLuint binding, GLuint bufferId)
 {
 	H_AUTO_OGL(CDriverGLStates3_forceBindUniformBufferBase)
 	nglBindBufferBase(GL_UNIFORM_BUFFER, binding, bufferId);
 	nlassert(binding < MaxUBOBindings);
 	m_CurUniformBufferBase[binding] = bufferId;
+	m_CurUniformBufferOffset[binding] = 0;
+	m_CurUniformBufferSize[binding] = 0;
+	// the indexed bind commands bind the buffer to the general binding point as well
+	m_CurUniformBuffer = bufferId;
 }
 
 void CDriverGLStates3::bindUniformBufferBase(GLuint binding, GLuint bufferId)
@@ -712,10 +1048,54 @@ void CDriverGLStates3::bindUniformBufferBase(GLuint binding, GLuint bufferId)
 	H_AUTO_OGL(CDriverGLStates3_bindUniformBufferBase)
 #ifndef NL3D_GLSTATE_DISABLE_CACHE
 	nlassert(binding < MaxUBOBindings);
-	if (bufferId != m_CurUniformBufferBase[binding])
+	if (bufferId != m_CurUniformBufferBase[binding] || m_CurUniformBufferSize[binding] != 0)
 #endif
 	{
 		forceBindUniformBufferBase(binding, bufferId);
+	}
+}
+
+void CDriverGLStates3::forceBindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size)
+{
+	H_AUTO_OGL(CDriverGLStates3_forceBindUniformBufferRange)
+	nglBindBufferRange(GL_UNIFORM_BUFFER, binding, bufferId, offset, size);
+	nlassert(binding < MaxUBOBindings);
+	m_CurUniformBufferBase[binding] = bufferId;
+	m_CurUniformBufferOffset[binding] = offset;
+	m_CurUniformBufferSize[binding] = size;
+	// the indexed bind commands bind the buffer to the general binding point as well
+	m_CurUniformBuffer = bufferId;
+}
+
+void CDriverGLStates3::bindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size)
+{
+	H_AUTO_OGL(CDriverGLStates3_bindUniformBufferRange)
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	nlassert(binding < MaxUBOBindings);
+	if (bufferId != m_CurUniformBufferBase[binding]
+	    || offset != m_CurUniformBufferOffset[binding]
+	    || size != m_CurUniformBufferSize[binding])
+#endif
+	{
+		forceBindUniformBufferRange(binding, bufferId, offset, size);
+	}
+}
+
+void CDriverGLStates3::uniformBufferDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_uniformBufferDeleted)
+	if (!id)
+		return;
+	if (m_CurUniformBuffer == id)
+		m_CurUniformBuffer = 0;
+	for (uint i = 0; i < MaxUBOBindings; ++i)
+	{
+		if (m_CurUniformBufferBase[i] == id)
+		{
+			m_CurUniformBufferBase[i] = 0;
+			m_CurUniformBufferOffset[i] = 0;
+			m_CurUniformBufferSize[i] = 0;
+		}
 	}
 }
 

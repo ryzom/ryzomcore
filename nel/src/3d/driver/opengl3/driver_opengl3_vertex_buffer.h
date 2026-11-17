@@ -23,6 +23,8 @@
 
 #include "nel/misc/types_nl.h"
 
+#include "driver_opengl3_stream_buffer.h"
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -36,7 +38,12 @@ class CVertexBufferGL3;
 class IVertexBufferGL3
 {
 public:
-	enum TVBType { GL3, AMDPinned };
+	enum TVBType
+	{
+		GL3,
+		AMDPinned,
+		Stream
+	};
 
 	IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType vbType);
 	virtual	~IVertexBufferGL3();
@@ -51,8 +58,11 @@ public:
 	virtual void setFrameInFlight(uint64 swapBufferCounter) = 0;
 	virtual void flush() {} // Upload shadow data to GL buffer if dirty
 
+	/// What glVertexAttribPointer gets for the first byte of the first vertex, with the buffer of getGLuint() bound: the offset of the vertices in that buffer
+	virtual void *getArrayPointer() { return getPointer(); }
+
 	// test if buffer content is invalid. If so, no rendering should occurs (rendering should silently fail)
-	inline bool isInvalid() { return m_Invalid; }
+	virtual bool isInvalid() { return m_Invalid; }
 
 public:
 	CVertexBuffer *VB;
@@ -66,16 +76,18 @@ protected:
 /*
  * GL Core vertex buffer — upload strategy by TBufferUsage:
  *
- *  FullStream / SmallStream:
+ *  FullStream / SmallStream, in per-buffer mode only (in stream mode they are
+ *  CVertexBufferStreamGL3, below), and FullRewrite in both modes:
  *    Round-robin ring of NL3D_GL3_BUFFER_QUEUE_MAX GL buffers.
- *    Lock picks the next free buffer; if still in-flight, orphans via
- *    MAP_INVALIDATE_BUFFER_BIT, otherwise maps unsynchronized.  No shadow.
- *    GL hint: GL_STREAM_DRAW.
+ *    A lock moves on to the next buffer when the current one has been drawn
+ *    since its last lock; locks without a draw between them get the same
+ *    buffer. If the buffer is still in-flight, the lock orphans it via
+ *    MAP_INVALIDATE_BUFFER_BIT, otherwise it maps unsynchronized.  No shadow.
+ *    GL hint: GL_STATIC_DRAW.
  *
- *  FullRewrite:
- *    Single GL buffer. Lock always orphans (MAP_INVALIDATE_BUFFER_BIT),
- *    so it never stalls even if the GPU is still reading the old contents.
- *    No shadow.  GL hint: GL_DYNAMIC_DRAW.
+ *  UnsynchronizedWrite:
+ *    Single GL buffer, mapped unsynchronized: the caller keeps its writes off
+ *    what the GPU still reads.  No shadow.  GL hint: GL_STATIC_DRAW.
  *
  *  CpuReadWrite / PartialWrite:
  *    Single GL buffer + CPU shadow (m_ShadowData). Lock/unlock are pure-CPU
@@ -188,45 +200,60 @@ private:
 };
 
 /*
-// Follows design of D3D::CVolatileVertexBuffer
-// A large buffer from which sequentially is allocated
-// Must have one instance per in-flight frame (count NL3D_GL3_BUFFER_QUEUE_MAX)
-// OR use different strategy; fix the sizes of the volatile storage buffers; and synchronize to next buffer whenever end of buffer is reached
-class CVolatileBufferStorageGL3
+ * FullStream / SmallStream vertex buffer in stream mode: the vertices are in a
+ * range of the vertex stream of the driver (CStreamBufferGL3), the object has
+ * no GL buffer of its own.
+ *
+ *  Lock: when the vertices have been drawn since the range was reserved, when
+ *    the stream has given the range to other data, or when the vertex buffer
+ *    has more vertices than the range has room for, the lock reserves a new
+ *    range of getNumVertices() * getVertexSize() bytes, with undefined
+ *    contents, and returns its memory. Else, for locks without a draw between
+ *    them, it returns the same memory with what was written before.
+ *    The memory is that of the GL buffer, mapped for writing only: it is to be
+ *    written, not read. A lock costs no GL call.
+ *
+ *  Draw: activeVertexBuffer sets the attribute pointers to the offset of the
+ *    range in the buffer of its chunk, and every draw marks the chunk as used
+ *    by the frame. A lock between activeVertexBuffer and a draw that moves the
+ *    vertex buffer to a new range is not seen by that draw.
+ *
+ *  Contents: the stream gives a chunk to other data once the frames that wrote
+ *    it have finished on the GPU. A vertex buffer of these usages is to be
+ *    filled in every frame it is drawn in; one with local memory is filled
+ *    from it at every activeVertexBuffer. A vertex buffer that is drawn with
+ *    vertices that are gone is not drawn, and says so in the log once.
+ */
+class CVertexBufferStreamGL3 : public IVertexBufferGL3
 {
 public:
-	CVolatileBufferGL3();
-	~CVolatileBufferGL3();
+	CVertexBufferStreamGL3(CDriverGL3 *drv, CVertexBuffer *vb);
+	virtual ~CVertexBufferStreamGL3() NL_OVERRIDE;
 
-	// Initialize
-	//  location: Either FullStream or SmallStream
-	void init(CVertexBuffer::TLocation location, GLsizei size, GLsizei maxSize, CDriverGL3 *driver);
-	void release();
-
-	// Runtime buffer access, no-blocking lock.
-	void *lock(uint size, uint stride, uint &offset);
-	void unlock();
-
-	void reset();
+	/// \name Implementation
+	// @{
+	virtual void *lock() NL_OVERRIDE;
+	virtual void unlock() NL_OVERRIDE;
+	virtual void unlock(uint startVert, uint endVert) NL_OVERRIDE;
+	virtual void *getPointer() NL_OVERRIDE;
+	virtual void enable() NL_OVERRIDE;
+	virtual void disable() NL_OVERRIDE;
+	virtual GLuint getGLuint() NL_OVERRIDE;
+	virtual void setFrameInFlight(uint64 swapBufferCounter) NL_OVERRIDE;
+	virtual void *getArrayPointer() NL_OVERRIDE;
+	virtual bool isInvalid() NL_OVERRIDE;
+	// @}
 
 private:
-	CDriverGL3 *m_Driver;
-	GLuint *m_BufferObjectId;
-	GLsizei m_Size;
-	GLsizei m_MaxSize;
-	GLsizei m_CurrentOffset;
-	bool Locked;
-	CVertexBuffer::TLocation m_Location;
+	CStreamHandleGL3 m_Handle; // the range that has the vertices
+	uint8 *m_VertexPtr; // what lock() returned; null when not locked
+	bool m_RangeLocked; // the lock is one of the range, and not of m_DummyVB
+	bool m_Drawn; // the range has been drawn since it was reserved
+	bool m_LostWarned; // the log has the line about vertices that are gone
 
+	// What a lock returns when the stream has no range for it. The vertices written there are not drawn.
+	std::vector<uint8> m_DummyVB;
 };
-
-// Buffer which makes use of driver provided CVolatileBufferStorageGL3 for storage backing
-class CVolatileBufferGL3 : public IVertexBufferGL3
-{
-	virtual void getBufferObject(GLuint &buffer, GLintptr &offset) const; // Use glBindBufferRange instead of glBindBuffer
-	// Or don't expose this, and expose a bind function targeting the right target...
-};
-*/
 
 } // NLDRIVERGL3
 } // NL3D

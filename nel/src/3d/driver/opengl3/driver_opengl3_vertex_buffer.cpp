@@ -108,7 +108,6 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 	{
 		drv->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
 		nglBufferData(GL_ARRAY_BUFFER, size, nullptr, drv->vertexBufferUsageGL3(preferred));
-		drv->_DriverGLStates.forceBindArrayBuffer(0);
 	}
 }
 
@@ -117,23 +116,15 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 CVertexBufferGL3::~CVertexBufferGL3()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
-	if (m_Driver && m_VertexObjectId)
-	{
-		GLsizei nbBuff = vbgl3BufferForType(m_MemType);
-		for (GLsizei i = 0; i < nbBuff; ++i)
-		{
-			if (m_Driver->_DriverGLStates.getCurrBoundArrayBuffer() == m_VertexObjectId[i])
-			{
-				m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
-			}
-		}
-	}
 	for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
 	{
 		if (m_VertexObjectId[i])
 		{
 			GLuint id = m_VertexObjectId[i];
 			nlassert(nglIsBuffer(id));
+			// GL takes the buffer out of its bindings, the state cache follows
+			if (m_Driver)
+				m_Driver->_DriverGLStates.arrayBufferDeleted(id);
 			nglDeleteBuffers(1, &id);
 		}
 	}
@@ -198,10 +189,11 @@ void *CVertexBufferGL3::lock()
 		{
 			m_Driver->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
 			nglBufferData(GL_ARRAY_BUFFER, size, nullptr, m_Driver->vertexBufferUsageGL3(m_MemType));
-			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 			if (glGetError() != GL_NO_ERROR)
 			{
 				m_Driver->incrementResetCounter();
+				for (GLsizei j = 0; j < nbBuff; ++j)
+					m_Driver->_DriverGLStates.arrayBufferDeleted(m_VertexObjectId[j]);
 				nglDeleteBuffers(nbBuff, m_VertexObjectId);
 				for (GLsizei j = 0; j < nbBuff; ++j)
 					m_VertexObjectId[j] = 0;
@@ -305,7 +297,7 @@ void *CVertexBufferGL3::lock()
 	#ifdef NL_DEBUG
 		// Vertex array range tracking removed in GL3 driver
 	#endif
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
+	// The buffer stays bound: the unlock binds it, and nothing reads the binding in between
 	// Lock Profile?
 	if (m_Driver->_VBHardProfiling)
 	{
@@ -349,7 +341,6 @@ void CVertexBufferGL3::unlock()
 		afterLock= CTime::getPerformanceTime();
 		m_Driver->appendVBHardLockProfile(afterLock-beforeLock, VB);
 	}
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 	if (!unmapOk)
 	{
 		invalidate();
@@ -388,7 +379,8 @@ void CVertexBufferGL3::enable()
 void CVertexBufferGL3::disable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_disable)
-	if (m_Driver->_CurrentVertexBufferGL != nullptr)
+	// (a vertex buffer that dies while another one is the active one leaves that one active)
+	if (m_Driver->_CurrentVertexBufferGL == this)
 	{
 		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}
@@ -439,7 +431,6 @@ void CVertexBufferGL3::flush()
 		// No explicit dirty ranges: full orphan+upload
 		m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 		nglBufferData(GL_ARRAY_BUFFER, size, &m_ShadowData[0], fullUploadHint);
-		m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 	}
 	else
 	{
@@ -485,7 +476,6 @@ void CVertexBufferGL3::flush()
 			// Too much dirty: full orphan+upload from CPU, data persists for many frames
 			m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId[m_CurrentIndex]);
 			nglBufferData(GL_ARRAY_BUFFER, size, &m_ShadowData[0], fullUploadHint);
-			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 		}
 		else
 		{
@@ -591,17 +581,13 @@ CVertexBufferAMDPinned::CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint 
 CVertexBufferAMDPinned::~CVertexBufferAMDPinned()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_CVertexBufferAMDPinnedDtor)
-	if (m_Driver && m_VertexObjectId)
-	{
-		if (m_Driver->_DriverGLStates.getCurrBoundArrayBuffer() == m_VertexObjectId)
-		{
-			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
-		}
-	}
 	if (m_VertexObjectId)
 	{
 		GLuint id = (GLuint)m_VertexObjectId;
 		nlassert(nglIsBuffer(id));
+		// GL takes the buffer out of its bindings, the state cache follows
+		if (m_Driver)
+			m_Driver->_DriverGLStates.arrayBufferDeleted(id);
 		nglDeleteBuffers(1, &id);
 	}
 	delete[] static_cast<char *>(m_VertexPtrAllocated);
@@ -653,7 +639,6 @@ void *CVertexBufferAMDPinned::lock()
 #endif
 		break;
 	}
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 	nlassert(m_VertexPtr);
 
 	// May actually return a different virtual address on some systems
@@ -691,7 +676,6 @@ void CVertexBufferAMDPinned::unlock()
 	// Unlock
 	m_Driver->_DriverGLStates.bindArrayBuffer(m_VertexObjectId);
 	nglUnmapBuffer(GL_ARRAY_BUFFER);
-	m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 
 	// Profiling
 	if (m_Driver->_VBHardProfiling)
@@ -736,7 +720,7 @@ void CVertexBufferAMDPinned::enable()
 void CVertexBufferAMDPinned::disable()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_disable)
-	if (m_Driver->_CurrentVertexBufferGL != nullptr)
+	if (m_Driver->_CurrentVertexBufferGL == this)
 	{
 		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}
@@ -758,6 +742,194 @@ void CVertexBufferAMDPinned::setFrameInFlight(uint64 swapBufferCounter)
 	H_AUTO_OGL(CVertexBufferAMDPinned_setFrameInFlight);
 
 	m_FrameInFlight = swapBufferCounter;
+}
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
+CVertexBufferStreamGL3::CVertexBufferStreamGL3(CDriverGL3 *drv, CVertexBuffer *vb)
+    : IVertexBufferGL3(drv, vb, IVertexBufferGL3::Stream)
+    , m_VertexPtr(nullptr)
+    , m_RangeLocked(false)
+    , m_Drawn(false)
+    , m_LostWarned(false)
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_CVertexBufferStreamGL3);
+}
+
+// ***************************************************************************
+
+CVertexBufferStreamGL3::~CVertexBufferStreamGL3()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_CVertexBufferStreamGL3Dtor);
+
+	// The range is not given back: the stream writes over it when its chunk comes round again
+	if (m_RangeLocked)
+		m_Driver->_VertexStream.unlock(m_Handle);
+}
+
+// ***************************************************************************
+
+void *CVertexBufferStreamGL3::lock()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_lock);
+
+	if (m_VertexPtr) return m_VertexPtr; // already locked
+
+	CStreamBufferGL3 &stream = m_Driver->_VertexStream;
+
+	uint32 size = VB->getNumVertices() * VB->getVertexSize();
+	if (!size)
+		size = 1; // a range has a size
+
+	const bool valid = stream.isValid(m_Handle);
+	if (valid && !m_Drawn && size <= m_Handle.Size)
+	{
+		// Nothing has drawn the vertices since they were written, so nothing reads the
+		// range: the caller goes on writing where it was
+		m_VertexPtr = stream.lock(m_Handle);
+		m_RangeLocked = true;
+		return m_VertexPtr;
+	}
+
+	// A new range, with undefined contents. The one before is left to the draws that
+	// read it; and where the stream has given it to other data, there is nothing to
+	// go on with. A range that is only too small, because the vertex buffer has more
+	// vertices now, is left as well: its vertices are not carried over, which would
+	// take a read of memory that is mapped for writing. With local memory the engine
+	// writes every vertex at each of its locks here; without, it does not keep the
+	// vertices itself when the growth passes the capacity.
+	//
+	// The attribute pointers of the active vertex buffer are on the range it had when
+	// activeVertexBuffer was called: a draw reads the new range after the next call.
+	m_Handle = stream.reserve(size);
+	m_Drawn = false;
+	if (!stream.isValid(m_Handle))
+	{
+		// The stream has logged why. The caller gets memory to write to all the same,
+		// and the vertex buffer has no vertices to draw until a lock works.
+		m_DummyVB.resize(size);
+		m_VertexPtr = &m_DummyVB[0];
+		m_RangeLocked = false;
+		return m_VertexPtr;
+	}
+
+	m_VertexPtr = stream.lock(m_Handle);
+	m_RangeLocked = true;
+	return m_VertexPtr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::unlock()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_unlock);
+
+	if (m_RangeLocked)
+	{
+		m_Driver->_VertexStream.unlock(m_Handle);
+		m_RangeLocked = false;
+	}
+	m_VertexPtr = nullptr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::unlock(uint /* startVert */, uint /* endVert */)
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_unlock);
+
+	unlock();
+}
+
+// ***************************************************************************
+
+void *CVertexBufferStreamGL3::getPointer()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_getPointer);
+
+	return m_VertexPtr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::enable()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_enable);
+
+	if (m_Driver->_CurrentVertexBufferGL != this)
+	{
+		m_Driver->_CurrentVertexBufferGL = this;
+	}
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::disable()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_disable);
+
+	if (m_Driver->_CurrentVertexBufferGL == this)
+	{
+		m_Driver->_CurrentVertexBufferGL = nullptr;
+	}
+}
+
+// ***************************************************************************
+
+GLuint CVertexBufferStreamGL3::getGLuint()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_getGLuint);
+
+	// Asked for when the vertex buffer is made the active one: from here on the draws
+	// may read the range, and the stream is told that the frame and the draw use it
+	CStreamBufferGL3 &stream = m_Driver->_VertexStream;
+	return stream.isValid(m_Handle) ? stream.use(m_Handle) : 0;
+}
+
+// ***************************************************************************
+
+void *CVertexBufferStreamGL3::getArrayPointer()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_getArrayPointer);
+
+	return (void *)(size_t)m_Handle.Offset;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::setFrameInFlight(uint64 /* swapBufferCounter */)
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_setFrameInFlight);
+
+	// A draw has read the range: the next lock is to get another one, and the
+	// chunk is not to be written again before the GPU has finished this frame
+	m_Drawn = true;
+	CStreamBufferGL3 &stream = m_Driver->_VertexStream;
+	if (stream.isValid(m_Handle))
+		stream.use(m_Handle);
+}
+
+// ***************************************************************************
+
+bool CVertexBufferStreamGL3::isInvalid()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_isInvalid);
+
+	if (m_Driver->_VertexStream.isValid(m_Handle))
+		return false;
+
+	// The stream has given the range to other data, or no lock has worked. Nothing
+	// is drawn, where garbage would be.
+	if (!m_LostWarned)
+	{
+		m_LostWarned = true;
+		nlwarning("3D: the vertex buffer '%s' is to be drawn with vertices that the driver no longer has, and is not drawn. "
+		          "A vertex buffer of the stream usages without local memory is to be filled in every frame it is drawn in",
+		    VB->getName().c_str());
+	}
+	return true;
 }
 
 // ***************************************************************************

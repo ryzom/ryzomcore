@@ -604,15 +604,18 @@ bool CDriverGL::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQuad
 		// setup the pass.
 		setupPass(pass);
 
+		// startIndex is the first vertex of the first quad (IDriver::renderRawQuads)
 		uint32 currIndex = startIndex;
 		uint32 numLeftQuads = numQuads;
 
-		// draw first batch of quads using the static setupped array
-		if (startIndex < QUAD_BATCH_SIZE)
+		// draw first batch of quads using the static setupped array, which has quad k at vertex 4 * k:
+		// it serves a first vertex that is a multiple of 4
+		const uint32 startQuad = startIndex / 4;
+		if ((startIndex & 3) == 0 && startQuad < QUAD_BATCH_SIZE)
 		{
 			// draw first quads (as pair of tri to have guaranteed orientation)
-			uint numQuadsToDraw = std::min(QUAD_BATCH_SIZE - startIndex, numQuads);
-			glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, defaultIndices + 6 * startIndex);
+			uint numQuadsToDraw = std::min(QUAD_BATCH_SIZE - startQuad, numQuads);
+			glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, defaultIndices + 6 * startQuad);
 			numLeftQuads -= numQuadsToDraw;
 			currIndex += 4 * numQuadsToDraw;
 		}
