@@ -443,15 +443,15 @@ void CDriverGL3::uploadLightTableUBO()
 		// from the one before: only a light that changed is written
 		bool changed = _LightMapDynUBODirty
 		    && memcmp(&_LightMapDynUBOEntry, &_LightMapDynUBOWritten, sizeof(CLightTableUBOEntry)) != 0;
-		if (useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightMapDynUBOHandle,
+		if (useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightMapDynUBOBlock,
 		        &_LightMapDynUBOEntry, sizeof(CLightTableUBOEntry), blockSize, changed))
 			_LightMapDynUBOWritten = _LightMapDynUBOEntry;
 		_LightMapDynUBODirty = false;
 		return;
 	}
 
-	// A block that the stream no longer holds is written again from the lights as they are now
-	const bool stale = !_UniformStream.isValid(_LightTableUBOHandle);
+	// A block that the driver no longer has is written again from the lights as they are now
+	const bool stale = isUniformBlockStale(_LightTableUBOBlock);
 
 	if (_LightTableMode)
 	{
@@ -462,7 +462,7 @@ void CDriverGL3::uploadLightTableUBO()
 			count = maxLights;
 
 		// An empty table is not uploaded, the block keeps the lights it has. A block
-		// that is not in the stream is reserved all the same, to have a range to bind.
+		// that the driver does not have is reserved all the same, to have something to bind.
 		const bool write = stale || (_LightTableDirty && count > 0);
 		if (write)
 		{
@@ -470,7 +470,7 @@ void CDriverGL3::uploadLightTableUBO()
 				packLightToEntry(_LightTableUBOStaging[i], _LightTable[i]);
 		}
 		// Always ensure correct binding (may have been stolen by lightmap UBO)
-		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOHandle,
+		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock,
 		    _LightTableUBOStaging, (uint32)(count * sizeof(CLightTableUBOEntry)), blockSize, write);
 		_LightTableDirty = false;
 	}
@@ -485,7 +485,7 @@ void CDriverGL3::uploadLightTableUBO()
 				packLightToEntry(entries[i], _UserLight[i]);
 		}
 		// Always ensure correct binding (may have been stolen by lightmap UBO)
-		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOHandle,
+		useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock,
 		    entries, (uint32)(MaxLight * sizeof(CLightTableUBOEntry)), blockSize, write);
 		_UserLightUBODirty = false;
 	}

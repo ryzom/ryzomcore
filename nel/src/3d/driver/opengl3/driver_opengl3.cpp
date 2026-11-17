@@ -319,6 +319,7 @@ CDriverGL3::CDriverGL3()
 	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)
 		_SwapBufferSync[i] = nullptr;
 	_PixelUploadPBO = 0;
+	_StreamMode = false;
 
 #ifdef USE_OPENGLES3
 	_ScratchElementBuffer = 0;
@@ -555,28 +556,46 @@ bool CDriverGL3::setupDisplay()
 	if (!initProgramPipeline())
 		nlerror("Failed to create Pipeline Object");
 
-	// The uniform blocks have no GL buffer of their own: each one is a range of the
-	// uniform stream, written when it changes and bound with its offset.
-	// WebGL 2.0 requires a bound range to be at least as large as the corresponding
-	// uniform block in the shader. So every block reserves its full declared size
-	// when it is written, also when only a part of it has data (see useUniformBlock).
+	// Stream mode or per-buffer mode (see _StreamMode), for as long as the display lasts.
+	// Stream mode needs buffer storage with a persistent mapping: a write into a stream
+	// buffer is then a memory copy. Without it, every owner of data keeps a GL buffer.
+	// In both modes a uniform block is bound with its full declared size, also when only
+	// a part of it has data (see useUniformBlock): WebGL 2.0 requires what is bound to
+	// be at least as large as the corresponding uniform block in the shader.
+	_StreamMode = false;
 	{
-		// The offset of a range bound to a uniform block is a multiple of this
-		GLint uniformAlignment = 0;
-		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformAlignment);
-		if (uniformAlignment < 1)
+		const char *reason;
+#if defined(USE_OPENGLES3)
+		reason = "OpenGL ES 3.0 has no buffer storage";
+#elif defined(NL3D_GL3_STREAM_FORCE_PER_BUFFER)
+		reason = "NL3D_GL3_STREAM_FORCE_PER_BUFFER is defined";
+#else
+		if (!_Extensions.ARBBufferStorage)
 		{
-			nlwarning("3D: GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT is %d, 256 is used, the largest value an implementation may ask for", (int)uniformAlignment);
-			uniformAlignment = 256;
+			reason = "the context has no buffer storage (OpenGL 4.4 or GL_ARB_buffer_storage)";
 		}
-		if (!_UniformStream.init(&_DriverGLStates, "uniform", GL_UNIFORM_BUFFER,
-		        NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE, (uint32)uniformAlignment,
-		        NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS, NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS,
-		        _Extensions.ARBBufferStorage, _SwapBufferCounter, _SwapBufferInFlight))
+		else
 		{
-			nlwarning("3D: Failed to create the buffer for the uniform blocks");
-			throw EBadDisplay("Failed to create the buffer for the uniform blocks");
+			// The offset of a range bound to a uniform block is a multiple of this
+			GLint uniformAlignment = 0;
+			glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformAlignment);
+			if (uniformAlignment < 1)
+			{
+				nlwarning("3D: GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT is %d, 256 is used, the largest value an implementation may ask for", (int)uniformAlignment);
+				uniformAlignment = 256;
+			}
+			// A stream that cannot be created has logged why
+			_StreamMode = _UniformStream.init(&_DriverGLStates, "uniform", GL_UNIFORM_BUFFER,
+			    NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE, (uint32)uniformAlignment,
+			    NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS, NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS,
+			    _SwapBufferCounter, _SwapBufferInFlight);
+			reason = "a stream buffer could not be created";
 		}
+#endif
+		if (_StreamMode)
+			nlinfo("3D: stream mode, the uniform blocks are written into stream buffers");
+		else
+			nlinfo("3D: per-buffer mode, every uniform block has a GL buffer of its own: %s", reason);
 	}
 
 	nglGenBuffers(1, &_PixelUploadPBO);
@@ -935,8 +954,8 @@ bool CDriverGL3::swapBuffers()
 	nldebug("Swap buffer: %u, in flight: %u", (unsigned int)_SwapBufferCounter, (unsigned int)_SwapBufferInFlight);
 #endif
 
-	// The stream goes on to the new frame, and learns which frames the GPU has finished:
-	// their chunks can be written again
+	// A stream goes on to the new frame, and learns which frames the GPU has finished:
+	// their chunks can be written again. Nothing to do for a stream that is not in use.
 	_UniformStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 #if NL3D_GL3_STREAM_STATS
 	displayStreamStats();
@@ -947,6 +966,16 @@ bool CDriverGL3::swapBuffers()
 
 #if NL3D_GL3_STREAM_STATS
 // --------------------------------------------------
+static void displayOneStreamStats(const char *name, CStreamBufferGL3 &stream, float perFrame)
+{
+	CStreamBufferGL3::CStats stats = stream.fetchStats();
+	nlinfo("3D: %s stream, per frame: %.1f writes, %.0f bytes copied, %.0f bytes reserved; "
+	       "%u chunks, %u written again in place, %u freed of kept handles, %u discarded",
+	    name, (float)stats.Writes * perFrame, (float)stats.Bytes * perFrame, (float)stats.Reserved * perFrame,
+	    stream.getChunkCount(), stats.Reuses, stats.Evacuations, stats.Discards);
+}
+
+// --------------------------------------------------
 void CDriverGL3::displayStreamStats()
 {
 	++_StreamStats.Frames;
@@ -954,16 +983,21 @@ void CDriverGL3::displayStreamStats()
 	if (now - _StreamStats.LastTime < 1000)
 		return;
 
-	// Per frame, over the frames since the last line
-	CStreamBufferGL3::CStats uniform = _UniformStream.fetchStats();
+	// Per frame, over the frames since the last lines
 	float perFrame = 1.0f / (float)_StreamStats.Frames;
-	nlinfo("3D: stream stats over %u frames, per frame: uniform stream %.1f writes, %.0f bytes copied, %.0f bytes reserved; object blocks %.1f written, %.1f skipped; material blocks %.1f written. "
-	       "Uniform stream: %u chunks, %u written again in place, %u freed of kept blocks, %u discarded",
+	nlinfo("3D: stream stats over %u frames, per frame: object blocks %.1f written, %.1f skipped; material blocks %.1f written",
 	    _StreamStats.Frames,
-	    (float)uniform.Writes * perFrame, (float)uniform.Bytes * perFrame, (float)uniform.Reserved * perFrame,
 	    (float)_StreamStats.ObjectWritten * perFrame, (float)_StreamStats.ObjectSkipped * perFrame,
-	    (float)_StreamStats.MaterialWritten * perFrame,
-	    _UniformStream.getChunkCount(), uniform.Reuses, uniform.Evacuations, uniform.Discards);
+	    (float)_StreamStats.MaterialWritten * perFrame);
+	if (_StreamMode)
+	{
+		displayOneStreamStats("uniform", _UniformStream, perFrame);
+	}
+	else
+	{
+		nlinfo("3D: uniform blocks in GL buffers, per frame: %.1f writes, %.0f bytes",
+		    (float)_StreamStats.BufferWrites * perFrame, (float)_StreamStats.BufferBytes * perFrame);
+	}
 
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
 	_StreamStats.LastTime = now;
@@ -1009,7 +1043,13 @@ bool CDriverGL3::release()
 		delete it->PixelProgram;
 	m_PPBuiltinCache.clear();
 
-	// Delete the buffers of the uniform blocks. The handles into the stream go stale with them.
+	// Delete the buffers of the uniform blocks: the ones of the blocks of the driver in
+	// per-buffer mode, the stream in stream mode. The handles into the stream go stale
+	// with it. The blocks of the materials and of the uniform buffers go with their owners.
+	releaseUniformBlock(_CameraUBOBlock);
+	releaseUniformBlock(_LightTableUBOBlock);
+	releaseUniformBlock(_LightMapDynUBOBlock);
+	releaseUniformBlock(_ObjectUBOBlock);
 	_UniformStream.release();
 	// Replaced by per-material UBO slots
 	// if (_OverrideMaterialUBOId)

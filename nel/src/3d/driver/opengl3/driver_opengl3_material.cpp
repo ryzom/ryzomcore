@@ -30,6 +30,14 @@
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
+CMaterialDrvInfosGL3::~CMaterialDrvInfosGL3()
+{
+	// In per-buffer mode every slot that was drawn with has a GL buffer
+	CDriverGL3 *drv = static_cast<CDriverGL3 *>(getDriver());
+	for (size_t i = 0; i < MaterialUBOBlock.size(); ++i)
+		drv->releaseUniformBlock(MaterialUBOBlock[i]);
+}
+
 // Water fragment program GLSL source (4 variants via #defines)
 static const char *WaterFPGLSL_Header = "#version 330\n"
                                         "#extension GL_ARB_separate_shader_objects : enable\n";
@@ -816,7 +824,7 @@ sint CDriverGL3::beginLightMapMultiPass()
 	if (matDrv->MaterialUBO.size() < neededSlots)
 	{
 		matDrv->MaterialUBO.resize(neededSlots);
-		matDrv->MaterialUBOHandle.resize(neededSlots);
+		matDrv->MaterialUBOBlock.resize(neededSlots);
 		matDrv->MaterialUBOTouched.resize(neededSlots, false);
 	}
 

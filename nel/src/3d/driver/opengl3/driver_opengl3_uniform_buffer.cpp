@@ -213,8 +213,8 @@ CUBDrvInfosGL3::CUBDrvInfosGL3(IDriver *drv, ItUBDrvInfoPtrList it, CUniformBuff
 
 CUBDrvInfosGL3::~CUBDrvInfosGL3()
 {
-	// The range in the uniform stream is not given back: the stream writes over it
-	// when its chunk comes round again
+	// In per-buffer mode the data has a GL buffer
+	static_cast<CDriverGL3 *>(m_Driver)->releaseUniformBlock(Block);
 }
 
 // ***************************************************************************
@@ -288,11 +288,11 @@ void CDriverGL3::flushUserUBOs()
 			continue;
 		}
 
-		// Upload if the data is dirty or no longer in the stream, and bind the range.
-		// A buffer that has never been locked has no data yet: its range is reserved,
+		// Upload if the data is dirty or the driver no longer has it, and bind it.
+		// A buffer that has never been locked has no data yet: its size is reserved,
 		// to have the size of the block bound.
 		const void *data = ub->data();
-		useUniformBlock(s_UBBindingToGL[i], info->Handle, data, data ? (uint32)dataSize : 0, (uint32)dataSize, ub->Touched);
+		useUniformBlock(s_UBBindingToGL[i], info->Block, data, data ? (uint32)dataSize : 0, (uint32)dataSize, ub->Touched);
 		ub->Touched = false;
 	}
 }

@@ -27,9 +27,9 @@
 // counts once per second.
 #define NL3D_GL3_STREAM_STATS 0
 
-// Define to keep the streams off the faster ways to write, for testing:
-// 1 maps the range of every write, 2 writes with glBufferSubData.
-// #define NL3D_GL3_STREAM_FORCE_TIER 1
+// Define to make the driver work without streams where it could have them,
+// with a GL buffer per owner (see CDriverGL3::_StreamMode), for testing.
+// #define NL3D_GL3_STREAM_FORCE_PER_BUFFER
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
@@ -95,13 +95,11 @@ struct CStreamHandleGL3
  * that does not change is thus written again every few frames when a chunk
  * fills within a frame or two, and seldom when little is written.
  *
- * How a write gets into the GL buffer is chosen once, in init():
- *  - TierPersistent: the chunk has immutable storage (glBufferStorage) and
- *    stays mapped for its whole life. A write is a memory copy;
- *  - TierRangeMap: the range is mapped for the write and unmapped after it.
- *    GL does not allow drawing from a buffer that is mapped without the
- *    persistent bit, so the mapping cannot be kept;
- *  - TierSubData: glBufferSubData, where buffers cannot really be mapped.
+ * A chunk has immutable storage (glBufferStorage) and stays mapped for its
+ * whole life, with the persistent bit, which makes GL allow draws from a
+ * mapped buffer, and the coherent bit. A write is a memory copy and costs no
+ * GL call. A context that cannot do this has no streams: init() fails, and the
+ * driver keeps a GL buffer per owner of data instead.
  *
  * One stream serves one binding target, which init() is given together with
  * the alignment of the ranges. Its buffers are never bound to another target.
@@ -109,18 +107,12 @@ struct CStreamHandleGL3
 class CStreamBufferGL3
 {
 public:
-	enum TTier
-	{
-		TierPersistent = 0,
-		TierRangeMap = 1,
-		TierSubData = 2
-	};
-
 	CStreamBufferGL3();
 	~CStreamBufferGL3();
 
 	/**
-	 * Create the first chunk. Needs the GL context and the loaded GL functions.
+	 * Create the first chunk. Needs the GL context, and glBufferStorage loaded
+	 * (CGlExtensions::ARBBufferStorage).
 	 * \param states the state cache of the driver, which the stream binds its buffers through
 	 * \param name what the stream holds, for the log
 	 * \param target the binding target of the buffers
@@ -128,28 +120,26 @@ public:
 	 * \param alignment every range starts at a multiple of this
 	 * \param minChunks unused chunks are deleted down to this number
 	 * \param maxChunks more chunks than this are only created when one draw needs them
-	 * \param bufferStorage glBufferStorage is available (CGlExtensions::ARBBufferStorage)
 	 * \param frame the current frame, IDriver::getSwapBufferCounter()
 	 * \param frameInFlight the oldest frame the GPU has not finished, IDriver::getSwapBufferInFlight()
-	 * \return false when no chunk can be created in any tier; the log says why
+	 * \return false when the chunk cannot be created and mapped; a warning in the log says why
 	 */
 	bool init(CDriverGLStates3 *states, const char *name, GLenum target, uint32 chunkSize, uint32 alignment,
-	    uint minChunks, uint maxChunks, bool bufferStorage, uint64 frame, uint64 frameInFlight);
+	    uint minChunks, uint maxChunks, uint64 frame, uint64 frameInFlight);
 
 	/// Unmap and delete the chunks. To call while the GL context is still current.
 	void release();
 
 	bool isInitialized() const { return m_Initialized; }
-	TTier getTier() const { return m_Tier; }
 	uint getChunkCount() const { return (uint)m_Ring.size(); }
 
 	/**
 	 * Reserve a range of allocSize bytes and copy size bytes of data to its start.
 	 * allocSize is larger than size for a block of which only the first part is
 	 * known; the rest of the range then holds undefined bytes. size may be 0.
-	 * \return the handle of the range. It is not valid when the write failed.
-	 * The stream logs a failure as a warning once, and again when the call that
-	 * failed has worked in between.
+	 * \return the handle of the range. It is not valid when the write failed,
+	 * which is when a chunk cannot get storage. The stream logs that as a warning
+	 * once, and again when a chunk got storage in between.
 	 */
 	CStreamHandleGL3 write(const void *data, uint32 size, uint32 allocSize);
 
@@ -225,7 +215,7 @@ private:
 	struct CChunk
 	{
 		GLuint Buffer; // 0 when the chunk has no storage
-		uint8 *Mapped; // the whole buffer, in the persistent tier only
+		uint8 *Mapped; // the whole buffer, mapped for writing as long as the chunk has storage
 		uint32 Size;
 		uint32 Generation; // changes whenever the handles of the chunk go stale; never 0 once the chunk has storage
 		uint64 LastFrame; // last frame that wrote to the chunk or drew from it
@@ -257,8 +247,6 @@ private:
 	/// Unmap and delete the GL buffer of a chunk
 	void destroyStorage(CChunk &chunk);
 	void releaseChunks();
-	/// A map and unmap of the head chunk, to know at init that the range map tier works
-	bool testRangeMap();
 	void nextGeneration(CChunk &chunk);
 	/// The chunk can be written again in place: the GPU has finished every frame that used it
 	inline bool isRetired(const CChunk &chunk) const { return !chunk.Buffer || chunk.LastFrame < m_FrameInFlight; }
@@ -275,13 +263,10 @@ private:
 	CDriverGLStates3 *m_States;
 	std::string m_Name;
 	GLenum m_Target;
-	TTier m_Tier;
 	bool m_Initialized;
 	bool m_OverLimitWarned;
-	// A failure has been logged and the same call has not worked since:
-	// creating the storage of a chunk, mapping and unmapping a range
+	// A failure to create the storage of a chunk has been logged, and no chunk got storage since
 	bool m_StorageFailureWarned;
-	bool m_MapFailureWarned;
 
 	uint32 m_ChunkSize;
 	uint32 m_Alignment;

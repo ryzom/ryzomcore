@@ -73,6 +73,7 @@
 #include "driver_opengl3_extension.h"
 #include "driver_opengl3_program.h"
 #include "driver_opengl3_stream_buffer.h"
+#include "driver_opengl3_uniform_buffer.h"
 
 
 #ifdef USE_OPENGLES3
@@ -430,7 +431,7 @@ public:
 	// Material UBO staging area, with additional entries for multiple passes
 	uint                           MaterialUBOCurrent;
 	std::vector<CMaterialUBOData>  MaterialUBO;
-	std::vector<CStreamHandleGL3>  MaterialUBOHandle;   // Where the slot is in the uniform stream; not valid = not uploaded
+	std::vector<CUniformBlockGL3>  MaterialUBOBlock;    // Where the driver has the slot; stale = not uploaded
 	std::vector<bool>	           MaterialUBOTouched;  // Needs re-upload
 
 	// EMBM: true if any texenv stage uses OpRGB == EMBM. Updated when TEXENV is touched.
@@ -442,10 +443,11 @@ public:
 		SetupMaterialTouched(0), SetupPass0Touched(0), MaterialUBOCurrent(0), HasEMBM(false), TexEnvMatDefault(false)
 	{
 		MaterialUBO.resize(1);
-		MaterialUBOHandle.resize(1);
+		MaterialUBOBlock.resize(1);
 		MaterialUBOTouched.resize(1);
 		MaterialUBO[0].nlLightMapScale = 1.0f;
 	}
+	~CMaterialDrvInfosGL3() NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -1191,9 +1193,9 @@ private:
 	// Dedicated 1-light block for the lightmap dynamic light.
 	// During lightmap passes, this is bound to the light table binding point
 	// instead of the main light table block, avoiding pollution of _LightTable.
-	CStreamHandleGL3			_LightMapDynUBOHandle; // Where the block is in the uniform stream
+	CUniformBlockGL3			_LightMapDynUBOBlock;  // Where the driver has the block, always _MaxLightTableSize entries
 	CLightTableUBOEntry			_LightMapDynUBOEntry;  // Packed light data (staging)
-	CLightTableUBOEntry			_LightMapDynUBOWritten; // The light data that _LightMapDynUBOHandle holds
+	CLightTableUBOEntry			_LightMapDynUBOWritten; // The light data that _LightMapDynUBOBlock holds
 	bool						_LightMapDynUBODirty;  // Staged again, needs re-upload when the data differs
 	bool						_UseLightMapDynUBO;    // Bind this instead of main table
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
@@ -1208,7 +1210,7 @@ private:
 	std::vector<CLight>			_LightTable;
 
 	// Light UBO (shared by light table mode and non-table fallback)
-	CStreamHandleGL3			_LightTableUBOHandle; // Where the block is in the uniform stream, always _MaxLightTableSize entries
+	CUniformBlockGL3			_LightTableUBOBlock; // Where the driver has the block, always _MaxLightTableSize entries
 	bool						_LightTableDirty; // Light table entries changed
 	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
@@ -1222,7 +1224,7 @@ private:
 	uint						_NumPerPixelLights; // First N lights evaluated per-pixel in PP (0 = all VP)
 
 	// Camera/global state UBO (viewMatrix, fog, clipPlanes, pzbCameraPos)
-	CStreamHandleGL3			_CameraUBOHandle;       // Where the block is in the uniform stream
+	CUniformBlockGL3			_CameraUBOBlock;        // Where the driver has the block
 	bool						_CameraUBODirty;        // Driver state changed — need to re-stage _CameraUBOData
 	bool						_CameraUBOUploadDirty;  // Staged data changed — need to re-upload to GPU
 	CCameraUBOData				_CameraUBOData;         // Persistent staging area (single source of truth for fog etc.)
@@ -1700,20 +1702,39 @@ private:
 	bool m_ProgramUsesMaterialUBO[NumTProgram];   // Program reads from NlMaterial UBO
 	CUniformBuffer *m_NelvpActiveUB;              // Non-null when active VP is nelvp-converted
 
-	// The uniform blocks are written into this stream, and bound as ranges of its buffers
+	/** How the driver gets the data that changes with the draws to the GPU, chosen once
+	 * when the display is set up.
+	 * Stream mode (true): the context has buffer storage with a persistent mapping. The
+	 * data is written into stream buffers (CStreamBufferGL3) and drawn from ranges of them.
+	 * Per-buffer mode (false): every owner of such data has a GL buffer of its own, which
+	 * gets new storage with the data for every write.
+	 * The code that uses the data does not know the mode: it goes through one function per
+	 * kind of data (useUniformBlock).
+	 */
+	bool _StreamMode;
+
+	// Stream mode: the uniform blocks are written into this stream, and bound as ranges of its buffers
 	CStreamBufferGL3 _UniformStream;
-	/** The one way to use a block that is kept in the uniform stream: writes the data
-	 * when asked to (write) or when the handle has gone stale, marks the chunk as used
-	 * by the current frame, and binds the range to the binding point.
+	/** The one way to use a uniform block: writes the data when asked to (write) or when
+	 * the driver no longer has it, and binds it to the binding point.
 	 * size bytes of data are written, allocSize bytes are reserved and bound: the size
 	 * of the block as the shader declares it, never less.
+	 * In stream mode the block is a range of the uniform stream, which is asked whether it
+	 * still holds it, and told that the current frame uses it.
 	 * \return true when the data has been written
 	 */
-	bool useUniformBlock(GLuint binding, CStreamHandleGL3 &handle, const void *data, uint32 size, uint32 allocSize, bool write);
+	bool useUniformBlock(GLuint binding, CUniformBlockGL3 &block, const void *data, uint32 size, uint32 allocSize, bool write);
+	/// True when useUniformBlock is going to write the block whatever it is asked: the driver does not have its data
+	bool isUniformBlockStale(const CUniformBlockGL3 &block) const;
 
+public:
+	/// For the owner of a uniform block that goes away: deletes the GL buffer of the block, if it has one
+	void releaseUniformBlock(CUniformBlockGL3 &block);
+
+private:
 	// Per-Object UBO (runtime state of currently bound program)
-	CStreamHandleGL3 _ObjectUBOHandle; // Where the last block is in the uniform stream
-	CObjectUBOData _ObjectUBOWritten; // The data that _ObjectUBOHandle holds
+	CUniformBlockGL3 _ObjectUBOBlock; // Where the driver has the last block
+	CObjectUBOData _ObjectUBOWritten; // The data that _ObjectUBOBlock holds
 	// GLuint  _OverrideMaterialUBOId; // Global buffer for per-pass material overrides (lightmap) — replaced by per-material UBO slots
 	void    uploadObjectUBO();
 	void    uploadMaterialUBO();
@@ -1728,9 +1749,11 @@ private:
 	struct CStreamStats
 	{
 		uint32 Frames;
-		uint32 ObjectWritten; // Object blocks written to the stream
+		uint32 ObjectWritten; // Object blocks written
 		uint32 ObjectSkipped; // Object blocks that were the same as the one before
-		uint32 MaterialWritten; // Material slots written to the stream
+		uint32 MaterialWritten; // Material slots written
+		uint32 BufferWrites; // Per-buffer mode: uniform blocks written, each to its GL buffer
+		uint64 BufferBytes; // Per-buffer mode: bytes of those writes
 		NLMISC::TTime LastTime;
 	} _StreamStats;
 	void displayStreamStats();
