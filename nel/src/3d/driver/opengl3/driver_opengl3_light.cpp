@@ -164,9 +164,10 @@ void	CDriverGL3::enableLightTableMode(bool enable)
 	H_AUTO_OGL(CDriverGL3_enableLightTableMode)
 	if (_LightTableMode != enable)
 	{
-		// The two modes share one light block, which holds the lights of the mode
-		// that wrote it last: the mode that begins writes its own
-		_LightTableDirty = true;
+		// Each mode has a light block of its own, which keeps its lights while the other
+		// mode draws. The table mode sets user lights and their enable states for every
+		// object (setLights): the block of the user lights is compared with them when
+		// the mode without a table draws again.
 		_UserLightUBODirty = true;
 	}
 	_LightTableMode = enable;
@@ -200,6 +201,11 @@ void	CDriverGL3::setLights(
 	NLMISC::CRGBA ambient)
 {
 	H_AUTO_OGL(CDriverGL3_setLights)
+
+	// The user lights and their enable states are set below. In the table mode, which
+	// this call belongs to, nothing reads the mark; a caller in the other mode gets the
+	// block of the user lights brought up to date for it.
+	_UserLightUBODirty = true;
 
 	// Clear all lights
 	for (uint i = 0; i < MaxLight; ++i)
@@ -450,9 +456,9 @@ void CDriverGL3::uploadLightTableUBO()
 		return;
 	}
 
-	// A block that the driver no longer has is written again from the lights as they are now
-	const bool stale = isUniformBlockStale(_LightTableUBOBlock);
-
+	// The block of the mode of the draw is bound: the binding point has the block of the
+	// other mode, or the one of the lightmap light, when one of those drew last. A block
+	// that the driver no longer has is written again from the lights as they are now.
 	if (_LightTableMode)
 	{
 		// Light table mode: upload from _LightTable[]
@@ -461,47 +467,58 @@ void CDriverGL3::uploadLightTableUBO()
 		if (count > maxLights)
 			count = maxLights;
 
-		if (stale || _LightTableDirty)
+		if (_LightTableDirty || isUniformBlockStale(_LightTableUBOBlock))
 		{
 			for (sint i = 0; i < count; ++i)
 				packLightToEntry(_LightTableUBOStaging[i], _LightTable[i]);
-			useLightTableBlock(_LightTableUBOStaging, (uint)count, blockSize);
+			useLightTableBlock(_LightTableUBOBlock, _LightTableUBOWritten, _LightTableUBOWrittenCount,
+			    _LightTableUBOStaging, (uint)count, blockSize);
 		}
 		else
 		{
-			// Always ensure correct binding (may have been stolen by lightmap UBO)
 			useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock, nullptr, 0, blockSize, false);
 		}
 		_LightTableDirty = false;
 	}
 	else
 	{
-		// Non-table mode: upload _UserLight[0..MaxLight-1] as the first 8 entries of the block
-		if (stale || _UserLightUBODirty)
+		// Non-table mode: the user lights as the first MaxLight entries of their block
+		if (_UserLightUBODirty || isUniformBlockStale(_UserLightUBOBlock))
 		{
+			// The object block of a draw names the lights that are enabled, and the shaders
+			// read no other entry. The entry of a light that is not enabled is zero, whatever
+			// the light was set to last (setLights of the table mode sets user lights for
+			// every object it draws): the block is not written again for a light that no
+			// draw reads.
 			CLightTableUBOEntry entries[MaxLight];
 			for (uint i = 0; i < MaxLight; ++i)
-				packLightToEntry(entries[i], _UserLight[i]);
-			useLightTableBlock(entries, MaxLight, blockSize);
+			{
+				if (_LightEnable[i])
+					packLightToEntry(entries[i], _UserLight[i]);
+				else
+					memset(&entries[i], 0, sizeof(CLightTableUBOEntry));
+			}
+			useLightTableBlock(_UserLightUBOBlock, _UserLightUBOWritten, _UserLightUBOWrittenCount,
+			    entries, MaxLight, blockSize);
 		}
 		else
 		{
-			// Always ensure correct binding (may have been stolen by lightmap UBO)
-			useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock, nullptr, 0, blockSize, false);
+			useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _UserLightUBOBlock, nullptr, 0, blockSize, false);
 		}
 		_UserLightUBODirty = false;
 	}
 }
 
 // ***************************************************************************
-void CDriverGL3::useLightTableBlock(const CLightTableUBOEntry *entries, uint count, uint32 blockSize)
+void CDriverGL3::useLightTableBlock(CUniformBlockGL3 &block, CLightTableUBOEntry *written, uint &writtenCount,
+    const CLightTableUBOEntry *entries, uint count, uint32 blockSize)
 {
 	H_AUTO_OGL(CDriverGL3_useLightTableBlock)
 
 	const uint32 entrySize = (uint32)sizeof(CLightTableUBOEntry);
 
-	// The block has _LightTableUBOWrittenCount entries, with the bytes of
-	// _LightTableUBOWritten, unless the driver no longer has it. Three cases:
+	// The block has writtenCount entries, with the bytes of written, unless the driver
+	// no longer has it. Three cases:
 	// - An entry that the block has is to change: the whole table is written, to a new
 	//   range of the uniform stream. The draws that were issued read the entries as
 	//   they were.
@@ -512,31 +529,33 @@ void CDriverGL3::useLightTableBlock(const CLightTableUBOEntry *entries, uint cou
 	//   It is a write to a range that issued draws are bound to, and it is right because
 	//   none of them reads the bytes that are written: a draw reads the table through the
 	//   light indices of its object block, those were below the number of entries the
-	//   table had when the draw was issued (setLights refuses others, and the lightmap
-	//   light has a block of its own), and that number is never above the number of
-	//   entries the block has had since it got this range.
+	//   table had when the draw was issued (setLights refuses others; the lightmap light
+	//   and the mode without a table have blocks of their own), and that number is never
+	//   above the number of entries the block has had since it got this range.
 	// - The table has the entries of the block, or the first of them: nothing is written.
 	//   An entry that is in the block and no longer in the table costs nothing; when the
 	//   table grows again with other lights than the block has there, that is the first
 	//   case.
 	// An empty table writes nothing either, the block keeps the lights it has.
-	bool write = isUniformBlockStale(_LightTableUBOBlock);
+	// The block of the user lights always has the same number of entries: it is the
+	// first case or the third.
+	bool write = isUniformBlockStale(block);
 	if (!write)
 	{
-		const uint common = std::min(count, _LightTableUBOWrittenCount);
-		if (common && memcmp(entries, _LightTableUBOWritten, common * entrySize) != 0)
+		const uint common = std::min(count, writtenCount);
+		if (common && memcmp(entries, written, common * entrySize) != 0)
 		{
 			write = true;
 		}
-		else if (count > _LightTableUBOWrittenCount)
+		else if (count > writtenCount)
 		{
 #if NL3D_GL3_LIGHT_TABLE_IN_PLACE
 			if (_StreamMode)
 			{
-				const uint first = _LightTableUBOWrittenCount;
-				_UniformStream.writePart(_LightTableUBOBlock.Handle, first * entrySize, entries + first, (count - first) * entrySize);
-				memcpy(_LightTableUBOWritten + first, entries + first, (count - first) * entrySize);
-				_LightTableUBOWrittenCount = count;
+				const uint first = writtenCount;
+				_UniformStream.writePart(block.Handle, first * entrySize, entries + first, (count - first) * entrySize);
+				memcpy(written + first, entries + first, (count - first) * entrySize);
+				writtenCount = count;
 #if NL3D_GL3_STREAM_STATS
 				++_StreamStats.LightTableAppends;
 				_StreamStats.LightTableAppendBytes += (count - first) * entrySize;
@@ -553,11 +572,11 @@ void CDriverGL3::useLightTableBlock(const CLightTableUBOEntry *entries, uint cou
 	}
 
 	// A block that the driver does not have is reserved also for an empty table, to have something to bind
-	if (useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, _LightTableUBOBlock, entries, count * entrySize, blockSize, write))
+	if (useUniformBlock(NL_BUILTIN_LIGHT_TABLE_BINDING, block, entries, count * entrySize, blockSize, write))
 	{
 		if (count)
-			memcpy(_LightTableUBOWritten, entries, count * entrySize);
-		_LightTableUBOWrittenCount = count;
+			memcpy(written, entries, count * entrySize);
+		writtenCount = count;
 	}
 }
 

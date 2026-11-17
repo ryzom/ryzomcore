@@ -330,6 +330,7 @@ CDriverGL3::CDriverGL3()
 		_SwapBufferSync[i] = nullptr;
 	_PixelUploadPBO = 0;
 	_StreamMode = false;
+	_VertexStorageFailureWarned = false;
 
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
@@ -340,6 +341,7 @@ CDriverGL3::CDriverGL3()
 	_LightTableMode= false;
 	_LightTableDirty = false;
 	_LightTableUBOWrittenCount = 0;
+	_UserLightUBOWrittenCount = 0;
 	_UserLightUBODirty = true;
 	_MaxLightTableSize = NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY;
 	_CameraUBODirty = true;
@@ -569,6 +571,7 @@ bool CDriverGL3::setupDisplay()
 	// a part of it has data (see useUniformBlock): WebGL 2.0 requires what is bound to
 	// be at least as large as the corresponding uniform block in the shader.
 	_StreamMode = false;
+	_VertexStorageFailureWarned = false;
 	{
 		const char *reason;
 #if defined(USE_OPENGLES3)
@@ -632,6 +635,18 @@ bool CDriverGL3::setupDisplay()
 	if (_StreamMode)
 		nlinfo("3D: uniform buffer ranges are bound one per call, NL3D_GL3_MULTI_BIND is 0");
 #endif
+#endif
+
+	// The vertex buffers that are written where they are drawn from (see CVertexBufferGL3)
+#ifndef USE_OPENGLES3
+	if (_StreamMode)
+	{
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS
+		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages have storage that stays mapped");
+#else
+		nlinfo("3D: the vertex buffers of the FullRewrite and UnsynchronizedWrite usages are mapped for every lock, NL3D_GL3_PERSISTENT_VERTEX_BUFFERS is 0");
+#endif
+	}
 #endif
 
 	nglGenBuffers(1, &_PixelUploadPBO);
@@ -1052,10 +1067,11 @@ void CDriverGL3::displayStreamStats()
 	{
 		displayOneStreamStats("uniform", _UniformStream, perFrame, true);
 		nlinfo("3D: uniform stream by kind of block, per frame, writes / bytes reserved: camera %.1f / %.0f, light table %.1f / %.0f, "
-		       "lightmap light %.1f / %.0f, object %.1f / %.0f, material %.1f / %.0f, user %.1f / %.0f; "
+		       "user lights %.1f / %.0f, lightmap light %.1f / %.0f, object %.1f / %.0f, material %.1f / %.0f, user %.1f / %.0f; "
 		       "light table entries added in place: %.1f times, %.0f bytes",
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockCamera] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockCamera] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightTable] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightTable] * perFrame,
+		    (float)_StreamStats.BlockWrites[CStreamStats::BlockUserLights] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockUserLights] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockLightMapLight] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockLightMapLight] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockObject] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockObject] * perFrame,
 		    (float)_StreamStats.BlockWrites[CStreamStats::BlockMaterial] * perFrame, (float)_StreamStats.BlockReserved[CStreamStats::BlockMaterial] * perFrame,
@@ -1079,6 +1095,18 @@ void CDriverGL3::displayStreamStats()
 	    (float)_StreamStats.IndexStreamDraws * perFrame, (float)_StreamStats.IndexStreamDrawBytes * perFrame,
 	    (float)_StreamStats.IndexObjectUploads * perFrame, (float)_StreamStats.IndexObjectUploadBytes * perFrame,
 	    (float)_StreamStats.ShadowUploads * perFrame, (float)_StreamStats.ShadowUploadBytes * perFrame);
+
+	// Both modes: what the locks of the vertex buffers without a shadow copy cost. (The
+	// SmallStream and FullStream ones have a GL buffer of their own in per-buffer mode only.)
+	nlinfo("3D: vertex buffer locks, per frame: %.1f of storage that stays mapped, without a GL call; with a map of the GL buffer: "
+	       "%.1f Immutable, %.1f FullRewrite, %.1f UnsynchronizedWrite, %.1f SmallStream and FullStream; "
+	       "rings of FullRewrite vertex buffers with storage that stays mapped: %u buffers added, %u given new storage at the limit of the ring",
+	    (float)_StreamStats.VertexLocksPersistent * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::Immutable] * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::FullRewrite] * perFrame,
+	    (float)_StreamStats.VertexLocksMapped[CVertexBuffer::UnsynchronizedWrite] * perFrame,
+	    (float)(_StreamStats.VertexLocksMapped[CVertexBuffer::SmallStream] + _StreamStats.VertexLocksMapped[CVertexBuffer::FullStream]) * perFrame,
+	    _StreamStats.VertexRingAdds, _StreamStats.VertexRingDiscards);
 
 	memset(&_StreamStats, 0, sizeof(_StreamStats));
 	_StreamStats.LastTime = now;
@@ -1130,6 +1158,7 @@ bool CDriverGL3::release()
 	// buffers go with their owners.
 	releaseUniformBlock(_CameraUBOBlock);
 	releaseUniformBlock(_LightTableUBOBlock);
+	releaseUniformBlock(_UserLightUBOBlock);
 	releaseUniformBlock(_LightMapDynUBOBlock);
 	releaseUniformBlock(_ObjectUBOBlock);
 	releaseIndexBlock(_ScratchIndices);

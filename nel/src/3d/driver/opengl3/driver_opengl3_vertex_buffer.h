@@ -30,6 +30,14 @@ namespace NLDRIVERGL3 {
 
 #define NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG 0
 
+// The most GL buffers a CVertexBufferGL3 has. Storage that stays mapped is buffer storage,
+// which OpenGL ES 3.0 does not have.
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
+#define NL3D_GL3_VERTEX_BUFFER_RING_MAX NL3D_GL3_PERSISTENT_RING_MAX
+#else
+#define NL3D_GL3_VERTEX_BUFFER_RING_MAX NL3D_GL3_BUFFER_QUEUE_MAX
+#endif
+
 class CDriverGL3;
 class IVertexBufferGL3;
 class CVertexBufferInfo;
@@ -82,7 +90,8 @@ protected:
  * GL Core vertex buffer — upload strategy by TBufferUsage:
  *
  *  FullStream / SmallStream, in per-buffer mode only (in stream mode they are
- *  CVertexBufferStreamGL3, below), and FullRewrite in both modes:
+ *  CVertexBufferStreamGL3, below), and FullRewrite where its storage does not
+ *  stay mapped (per-buffer mode, or NL3D_GL3_PERSISTENT_VERTEX_BUFFERS 0):
  *    Round-robin ring of NL3D_GL3_BUFFER_QUEUE_MAX GL buffers.
  *    A lock moves on to the next buffer when the current one has been drawn
  *    since its last lock; locks without a draw between them get the same
@@ -90,9 +99,32 @@ protected:
  *    MAP_INVALIDATE_BUFFER_BIT, otherwise it maps unsynchronized.  No shadow.
  *    GL hint: GL_STATIC_DRAW.
  *
- *  UnsynchronizedWrite:
+ *  UnsynchronizedWrite where its storage does not stay mapped (the same two
+ *  cases):
  *    Single GL buffer, mapped unsynchronized: the caller keeps its writes off
  *    what the GPU still reads.  No shadow.  GL hint: GL_STATIC_DRAW.
+ *
+ *  FullRewrite / UnsynchronizedWrite in stream mode with
+ *  NL3D_GL3_PERSISTENT_VERTEX_BUFFERS 1:
+ *    Buffer storage that is mapped for writing when it is created, and stays
+ *    mapped. A lock returns the memory of the mapping and costs no GL call,
+ *    an unlock has nothing to do. GL allows drawing from such a buffer while
+ *    it is mapped, and the draws see what was written before them. The memory
+ *    is to be written, not read.  No shadow.
+ *
+ *    UnsynchronizedWrite: one buffer. The caller keeps its writes off what
+ *    the GPU still reads.
+ *
+ *    FullRewrite: a ring that starts with one buffer. A lock without a draw
+ *    since the lock before gets the same buffer, with what was written there.
+ *    A lock after a draw leaves the buffer to the draws and goes on to the
+ *    one that was drawn longest ago, the next of the ring, with what was
+ *    written there some locks ago: the caller writes all its vertices. When
+ *    the GPU has not finished the frame that drew that one, none of the ring
+ *    is free: the ring gets one more buffer, up to
+ *    NL3D_GL3_PERSISTENT_RING_MAX. At the limit that buffer is deleted and
+ *    made again, which costs the GL calls a map costs. A vertex buffer that
+ *    is locked and drawn once per frame ends with two or three buffers.
  *
  *  CpuReadWrite / PartialWrite:
  *    Single GL buffer + CPU shadow (m_ShadowData). Lock/unlock are pure-CPU
@@ -140,6 +172,7 @@ public:
 	virtual void flush() NL_OVERRIDE;
 	virtual void *lockRead() NL_OVERRIDE;
 	virtual void unlockRead() NL_OVERRIDE;
+	virtual void *getArrayPointer() NL_OVERRIDE;
 	// @}
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
@@ -148,8 +181,27 @@ public:
 private:
 	friend class CDriverGL3;
 
+	/// Deletes the GL buffer of a place in the ring, if it has one
+	void deleteBuffer(GLsizei slot);
+	/// Deletes all the GL buffers
+	void deleteBuffers();
+	/// Takes the object out of the list of the lost vertex buffers of the driver, if it is in it
+	void leaveLostVBList();
+#if NL3D_GL3_PERSISTENT_VERTEX_BUFFERS && !defined(USE_OPENGLES3)
+	/// Gives a place in the ring a GL buffer with storage that stays mapped. False when GL has none: the place is then without a buffer
+	bool createPersistentBuffer(GLsizei slot);
+	/// The lock of a vertex buffer with such storage
+	void *lockPersistent();
+#endif
+
 	CVertexBuffer::TBufferUsage m_MemType;
 	void *m_VertexPtr; // pointer on current datas. Null if not locked
+	uint m_Size; // The bytes of each GL buffer: those of the capacity of the vertex buffer when this object was made
+
+	// The storage of the GL buffers stays mapped (see the comment of the class)
+	bool m_Persistent;
+	// The memory of each of them then. Null where there is no buffer
+	void *m_Mapping[NL3D_GL3_VERTEX_BUFFER_RING_MAX];
 
 	// Shadow buffer for CpuReadWrite/PartialWrite: CPU reads/writes go here, uploaded to GL at draw time
 	std::vector<uint8> m_ShadowData;
@@ -169,13 +221,18 @@ private:
 
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8> m_DummyVB;
-	// for use by CVertexArrayRange
+	// Where this object is in the list of the lost vertex buffers of the driver, while it is in it.
+	// It is in it from invalidate() until a lock gets its buffers again or the driver empties
+	// the list (updateLostBuffers); the engine may destroy the object at any moment in between.
 	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
+	bool m_InLostVBList;
 
-	GLuint m_VertexObjectId[NL3D_GL3_BUFFER_QUEUE_MAX];
-	uint64 m_FrameInFlight[NL3D_GL3_BUFFER_QUEUE_MAX];
-	GLsizei m_CurrentIndex;
-	bool m_CurrentInFlight;
+	// The ring of GL buffers: the places below m_RingSize are in use
+	GLuint m_VertexObjectId[NL3D_GL3_VERTEX_BUFFER_RING_MAX];
+	uint64 m_FrameInFlight[NL3D_GL3_VERTEX_BUFFER_RING_MAX]; // The last frame that drew from each
+	GLsizei m_RingSize;
+	GLsizei m_CurrentIndex; // The one that the locks write and the draws read
+	bool m_CurrentInFlight; // It has been drawn since its last lock
 
 #if NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG
 	uint32 m_ReuseCount;
