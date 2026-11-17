@@ -155,7 +155,7 @@ private:
 	void callRingPlayerInfoMethod(const char *name, int numArg, int numResult);
 	void callScenarioScoresMethod(const char *name, int numArg, int numResult);
 
-	/// Fill the window of the Ring terminal: the animation sessions, then the edit sessions the character is invited to
+	/// Fill the window of the Ring terminal with the animation sessions and the edit sessions the character is invited to (its script sorts them)
 	void fill(const std::vector <RSMGR::TSessionDesc > &sessions, const std::vector <RSMGR::TSessionDesc > &editSessions);
 	/// The two lists as the session browser service last sent them (it answers each with a message of its own)
 	std::vector <RSMGR::TSessionDesc > _LastSessions;

@@ -339,7 +339,7 @@ void CSessionBrowserImpl::tellCharacterInvited(const std::string &charName, bool
 {
 	// The invited player gets a tell: it says that the session is in the list of the Ring terminals, and its
 	// tag makes the list of his terminal ask for the sessions again (CInterfaceChatDisplayer::displayTell).
-	// The terminals list the edit sessions a character is invited to below the animation sessions: the editor
+	// The terminals list the edit sessions a character is invited to with the animation sessions: the editor
 	// invited into one is told so with a text of its own.
 	ChatMngr.tell(charName, CI18N::get(animationSession ? "uiRingInviteNotification" : "uiRingInviteEditNotification"));
 	CInterfaceManager::getInstance()->displaySystemInfo("@{6F6F}" + charName + " @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
@@ -482,9 +482,10 @@ void CSessionBrowserImpl::on_CSessionBrowserServerWebClient_Disconnection(NLNET:
 void CSessionBrowserImpl::on_sessionList(NLNET::TSockId /* from */, uint32 /* charId */, const std::vector <RSMGR::TSessionDesc > &sessions)
 {
 	nldebug("SB: on_sessionList");
-	// The window shows the animation sessions and, below them, the edit sessions the character is invited to
-	// (on_editSessionList). The two lists are asked for together and answered one after the other: the window
-	// is filled when each arrives, with the other list as it was last received.
+	// The window shows the animation sessions and the edit sessions the character is invited to
+	// (on_editSessionList); its script sorts the lines, and an edit session is among the sessions the character
+	// is invited to. The two lists are asked for together and answered one after the other: the window is
+	// filled when each arrives, with the other list as it was last received.
 	_LastSessions = sessions;
 	fill(_LastSessions, _LastEditSessions);
 }
