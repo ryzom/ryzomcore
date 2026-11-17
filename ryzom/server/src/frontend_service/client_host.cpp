@@ -256,8 +256,8 @@ void CClientHost::displayClientProperties( bool full, bool allProps, bool sortBy
 	if ( _EntityIndex.isValid())
 	{
 		CMirrorPropValueRO<uint16> availableImpulseBitsize( TheDataset, _EntityIndex, DSFirstPropertyAvailableImpulseBitSize );
-		log->displayNL( "Bit bandwidth usage feeding client at %d Hz: %d bps (max 13312), current throttle %d; including impulsion %d, database throttle %d",
-			freq, _BitBandwidthUsageAvg*freq, getCurrentThrottle()*freq, _BitImpulsionUsageAvg*freq, availableImpulseBitsize*freq );
+		log->displayNL( "Bit bandwidth usage feeding client at %d Hz: %d bps (nominal %d), current throttle %d; including impulsion %d, database throttle %d",
+			freq, _BitBandwidthUsageAvg*freq, _MaxOutboxSizeInBit*freq, getCurrentThrottle()*freq, _BitImpulsionUsageAvg*freq, availableImpulseBitsize*freq );
 
 		// Impulsion stats
 		log->displayNL( "Nb messages in impulse queues: %u %u %u", ImpulseEncoder.queueSize(0), ImpulseEncoder.queueSize(1), ImpulseEncoder.queueSize(2) );
