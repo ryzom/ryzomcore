@@ -59,6 +59,8 @@ CStreamBufferGL3::CStreamBufferGL3()
     , m_Tier(TierSubData)
     , m_Initialized(false)
     , m_OverLimitWarned(false)
+    , m_StorageFailureWarned(false)
+    , m_MapFailureWarned(false)
     , m_ChunkSize(0)
     , m_Alignment(1)
     , m_MinChunks(1)
@@ -91,9 +93,12 @@ bool CStreamBufferGL3::init(CDriverGLStates3 *states, const char *name, GLenum t
 
 	// Chunks that still have a buffer here were not released: they belong to a display
 	// that failed to set up, and their context is not the current one. They are
-	// forgotten without a GL call.
+	// forgotten without a GL call. The state cache forgets them too: the new context
+	// hands out the same buffer names, and a bind of one of them is not to be skipped.
 	for (size_t i = 0; i < m_Chunks.size(); ++i)
 	{
+		if (m_Chunks[i].Buffer)
+			bufferDeleted(m_Chunks[i].Buffer);
 		m_Chunks[i].Buffer = 0;
 		m_Chunks[i].Mapped = nullptr;
 	}
@@ -129,6 +134,9 @@ bool CStreamBufferGL3::init(CDriverGLStates3 *states, const char *name, GLenum t
 	for (; tier <= TierSubData; ++tier)
 	{
 		m_Tier = (TTier)tier;
+		// every tier logs why it fails
+		m_StorageFailureWarned = false;
+		m_MapFailureWarned = false;
 		if (insertChunk(m_ChunkSize) && (m_Tier != TierRangeMap || testRangeMap()))
 			break;
 		releaseChunks();
@@ -176,19 +184,29 @@ void CStreamBufferGL3::releaseChunks()
 
 void CStreamBufferGL3::bindBuffer(GLuint buffer)
 {
-	switch (m_Target)
-	{
-	case GL_UNIFORM_BUFFER:
+	// Any other target is bound directly, which is right for the targets that the state cache does not track
+	if (m_Target == GL_UNIFORM_BUFFER)
 		m_States->bindUniformBuffer(buffer);
-		break;
-	case GL_ARRAY_BUFFER:
-		m_States->bindArrayBuffer(buffer);
-		break;
-	default:
-		// not tracked by the state cache
+	else
 		nglBindBuffer(m_Target, buffer);
-		break;
-	}
+}
+
+void CStreamBufferGL3::bufferDeleted(GLuint buffer)
+{
+	// GL sets the bindings of a deleted buffer back to zero, the state cache follows
+	if (m_Target == GL_UNIFORM_BUFFER)
+		m_States->uniformBufferDeleted(buffer);
+}
+
+bool CStreamBufferGL3::warnFailure(bool &warned)
+{
+	// A chunk that cannot get storage is tried again at every write that needs
+	// it, which can be every block of every draw: the log gets one line for it,
+	// and the next one when the same call has worked in between
+	if (warned)
+		return false;
+	warned = true;
+	return true;
 }
 
 void CStreamBufferGL3::nextGeneration(CChunk &chunk)
@@ -197,6 +215,14 @@ void CStreamBufferGL3::nextGeneration(CChunk &chunk)
 	++chunk.Generation;
 	if (!chunk.Generation)
 		++chunk.Generation;
+}
+
+void CStreamBufferGL3::markWritten(CChunk &chunk)
+{
+	chunk.LastFrame = m_Frame;
+	chunk.LastWriteFrame = m_Frame;
+	chunk.LastDraw = m_Draw;
+	chunk.Evacuated = false;
 }
 
 void CStreamBufferGL3::destroyStorage(CChunk &chunk)
@@ -209,11 +235,7 @@ void CStreamBufferGL3::destroyStorage(CChunk &chunk)
 			nglUnmapBuffer(m_Target);
 			chunk.Mapped = nullptr;
 		}
-		// GL sets the bindings of a deleted buffer back to zero, the state cache follows
-		if (m_Target == GL_UNIFORM_BUFFER)
-			m_States->uniformBufferDeleted(chunk.Buffer);
-		else if (m_Target == GL_ARRAY_BUFFER && m_States->getCurrBoundArrayBuffer() == chunk.Buffer)
-			m_States->forceBindArrayBuffer(0);
+		bufferDeleted(chunk.Buffer);
 		nglDeleteBuffers(1, &chunk.Buffer);
 		chunk.Buffer = 0;
 	}
@@ -224,9 +246,7 @@ void CStreamBufferGL3::destroyStorage(CChunk &chunk)
 bool CStreamBufferGL3::createStorage(CChunk &chunk, uint32 size)
 {
 	nextGeneration(chunk);
-	chunk.LastFrame = m_Frame;
-	chunk.LastWriteFrame = m_Frame;
-	chunk.LastDraw = m_Draw;
+	markWritten(chunk);
 
 #ifndef USE_OPENGLES3
 	if (m_Tier == TierPersistent)
@@ -243,11 +263,13 @@ bool CStreamBufferGL3::createStorage(CChunk &chunk, uint32 size)
 		chunk.Mapped = static_cast<uint8 *>(nglMapBufferRange(m_Target, 0, size, flags));
 		if (!chunk.Mapped)
 		{
-			nlwarning("3D: the %s stream cannot create and map a buffer of %u bytes with glBufferStorage", m_Name.c_str(), size);
+			if (warnFailure(m_StorageFailureWarned))
+				nlwarning("3D: the %s stream cannot create and map a buffer of %u bytes with glBufferStorage", m_Name.c_str(), size);
 			destroyStorage(chunk);
 			return false;
 		}
 		chunk.Size = size;
+		m_StorageFailureWarned = false;
 		return true;
 	}
 #endif
@@ -262,11 +284,13 @@ bool CStreamBufferGL3::createStorage(CChunk &chunk, uint32 size)
 	nglGetBufferParameteriv(m_Target, GL_BUFFER_SIZE, &realSize);
 	if (realSize != (GLint)size)
 	{
-		nlwarning("3D: the %s stream cannot create a buffer of %u bytes with glBufferData", m_Name.c_str(), size);
+		if (warnFailure(m_StorageFailureWarned))
+			nlwarning("3D: the %s stream cannot create a buffer of %u bytes with glBufferData", m_Name.c_str(), size);
 		destroyStorage(chunk);
 		return false;
 	}
 	chunk.Size = size;
+	m_StorageFailureWarned = false;
 	return true;
 }
 
@@ -359,9 +383,11 @@ bool CStreamBufferGL3::nextChunk(uint32 size)
 		{
 			retiredPos = pos;
 		}
-		else if (chunk.LastWriteFrame < m_FrameInFlight)
+		else if (chunk.LastWriteFrame < m_FrameInFlight && !chunk.Evacuated)
 		{
+			// Once is enough: nothing is written to the chunk before it is the head again
 			nextGeneration(chunk);
+			chunk.Evacuated = true;
 #if NL3D_GL3_STREAM_STATS
 			++m_Stats.Evacuations;
 #endif
@@ -374,9 +400,7 @@ bool CStreamBufferGL3::nextChunk(uint32 size)
 		if (chunk.Size >= size)
 		{
 			nextGeneration(chunk);
-			chunk.LastFrame = m_Frame;
-			chunk.LastWriteFrame = m_Frame;
-			chunk.LastDraw = m_Draw;
+			markWritten(chunk);
 #ifdef NL_DEBUG
 			if (chunk.Mapped)
 				memset(chunk.Mapped, s_ReusePattern, chunk.Size);
@@ -433,20 +457,25 @@ bool CStreamBufferGL3::nextChunk(uint32 size)
 
 // ***************************************************************************
 
-CStreamHandleGL3 CStreamBufferGL3::write(const void *data, uint32 size, uint32 allocSize, uint32 alignment)
+CStreamHandleGL3 CStreamBufferGL3::write(const void *data, uint32 size, uint32 allocSize)
 {
 	H_AUTO_OGL(CStreamBufferGL3_write)
 
 	nlassert(m_Initialized);
 	nlassert(allocSize && size <= allocSize);
 
-	if (!alignment)
-		alignment = m_Alignment;
-
-	uint32 offset = alignOffset(m_HeadOffset, alignment);
+	uint32 offset = alignOffset(m_HeadOffset, m_Alignment);
 	CChunk *chunk = &m_Chunks[m_Ring[m_Head]];
+#if NL3D_GL3_STREAM_STATS
+	// The range and the gap that the alignment leaves before it
+	uint64 reserved = (uint64)(offset - m_HeadOffset) + allocSize;
+#endif
 	if (offset > chunk->Size || allocSize > chunk->Size - offset)
 	{
+#if NL3D_GL3_STREAM_STATS
+		// The range and what is left of the chunk that the head leaves
+		reserved = (uint64)(chunk->Size > m_HeadOffset ? chunk->Size - m_HeadOffset : 0) + allocSize;
+#endif
 		if (!nextChunk(allocSize))
 			return CStreamHandleGL3();
 		chunk = &m_Chunks[m_Ring[m_Head]];
@@ -467,17 +496,20 @@ CStreamHandleGL3 CStreamBufferGL3::write(const void *data, uint32 size, uint32 a
 			    GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 			if (!ptr)
 			{
-				nlwarning("3D: the %s stream cannot map %u bytes at offset %u of a chunk", m_Name.c_str(), size, offset);
+				if (warnFailure(m_MapFailureWarned))
+					nlwarning("3D: the %s stream cannot map %u bytes at offset %u of a chunk", m_Name.c_str(), size, offset);
 				return CStreamHandleGL3();
 			}
 			memcpy(ptr, data, size);
 			if (!nglUnmapBuffer(m_Target))
 			{
 				// GL has lost the content of the whole buffer: every range in it is to be written again
-				nlwarning("3D: a chunk of the %s stream lost its content while it was mapped", m_Name.c_str());
+				if (warnFailure(m_MapFailureWarned))
+					nlwarning("3D: a chunk of the %s stream lost its content while it was mapped", m_Name.c_str());
 				nextGeneration(*chunk);
 				return CStreamHandleGL3();
 			}
+			m_MapFailureWarned = false;
 			break;
 		}
 		case TierSubData:
@@ -488,13 +520,12 @@ CStreamHandleGL3 CStreamBufferGL3::write(const void *data, uint32 size, uint32 a
 	}
 
 	m_HeadOffset = offset + allocSize;
-	chunk->LastFrame = m_Frame;
-	chunk->LastWriteFrame = m_Frame;
-	chunk->LastDraw = m_Draw;
+	markWritten(*chunk);
 
 #if NL3D_GL3_STREAM_STATS
 	++m_Stats.Writes;
 	m_Stats.Bytes += size;
+	m_Stats.Reserved += reserved;
 #endif
 
 	CStreamHandleGL3 handle;

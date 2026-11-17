@@ -957,10 +957,10 @@ void CDriverGL3::displayStreamStats()
 	// Per frame, over the frames since the last line
 	CStreamBufferGL3::CStats uniform = _UniformStream.fetchStats();
 	float perFrame = 1.0f / (float)_StreamStats.Frames;
-	nlinfo("3D: stream stats over %u frames, per frame: uniform stream %.1f writes, %.0f bytes; object blocks %.1f written, %.1f skipped; material blocks %.1f written. "
+	nlinfo("3D: stream stats over %u frames, per frame: uniform stream %.1f writes, %.0f bytes copied, %.0f bytes reserved; object blocks %.1f written, %.1f skipped; material blocks %.1f written. "
 	       "Uniform stream: %u chunks, %u written again in place, %u freed of kept blocks, %u discarded",
 	    _StreamStats.Frames,
-	    (float)uniform.Writes * perFrame, (float)uniform.Bytes * perFrame,
+	    (float)uniform.Writes * perFrame, (float)uniform.Bytes * perFrame, (float)uniform.Reserved * perFrame,
 	    (float)_StreamStats.ObjectWritten * perFrame, (float)_StreamStats.ObjectSkipped * perFrame,
 	    (float)_StreamStats.MaterialWritten * perFrame,
 	    _UniformStream.getChunkCount(), uniform.Reuses, uniform.Evacuations, uniform.Discards);
