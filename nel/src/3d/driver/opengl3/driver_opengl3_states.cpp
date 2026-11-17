@@ -726,6 +726,29 @@ void CDriverGLStates3::bindTexture(GLenum target, GLuint id)
 	}
 }
 
+bool CDriverGLStates3::isTextureBound(uint stage, GLenum target, GLuint id) const
+{
+	nlassert(stage < MaxTextureUnits);
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	return target == m_CurTextureTarget[stage] && id == m_CurTexture[stage];
+#else
+	return false;
+#endif
+}
+
+void CDriverGLStates3::textureDeleted(GLuint id)
+{
+	H_AUTO_OGL(CDriverGLStates3_textureDeleted)
+	if (!id)
+		return;
+	for (uint i = 0; i < MaxTextureUnits; ++i)
+	{
+		// The target stays: the unit has nothing bound to it
+		if (m_CurTexture[i] == id)
+			m_CurTexture[i] = 0;
+	}
+}
+
 void CDriverGLStates3::unbindTexture(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates3_unbindTexture)
