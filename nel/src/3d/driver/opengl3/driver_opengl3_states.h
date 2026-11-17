@@ -52,7 +52,7 @@ namespace NLDRIVERGL3 {
  * - Framebuffer: glBindFramebuffer(GL_FRAMEBUFFER)
  * - Shader programs: glUseProgram(), glBindProgramPipeline()
  * - Buffer objects: glBindBuffer(GL_UNIFORM_BUFFER),
- *   glBindBufferBase(GL_UNIFORM_BUFFER),
+ *   glBindBufferBase(GL_UNIFORM_BUFFER), glBindBufferRange(GL_UNIFORM_BUFFER),
  *   glBindBuffer(GL_PIXEL_UNPACK_BUFFER)
  */
 class CDriverGLStates3
@@ -283,13 +283,24 @@ public:
 	/// @{
 
 	/// glBindBuffer(GL_UNIFORM_BUFFER). For data upload; not an indexed binding point.
+	/// glBindBufferBase and glBindBufferRange set this general binding too, and the cache follows them.
+	void bindUniformBuffer(GLuint id);
 	void forceBindUniformBuffer(GLuint id); // TODO: Not needed here in state, see pixel and some other upload bindings
 	GLuint getCurrBoundUniformBuffer() const { return m_CurUniformBuffer; }
 
-	/// glBindBufferBase(GL_UNIFORM_BUFFER, binding, bufferId). Indexed binding points.
+	/// glBindBufferBase(GL_UNIFORM_BUFFER, binding, bufferId). Indexed binding points, the whole buffer.
 	void bindUniformBufferBase(GLuint binding, GLuint bufferId);
 	void forceBindUniformBufferBase(GLuint binding, GLuint bufferId);
 	GLuint getCurrBoundUniformBufferBase(GLuint binding) const { nlassert(binding < MaxUBOBindings); return m_CurUniformBufferBase[binding]; }
+
+	/// glBindBufferRange(GL_UNIFORM_BUFFER, binding, bufferId, offset, size). Indexed binding points, a part of a buffer.
+	/// The offset is a multiple of GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT and the size is not zero.
+	void bindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size);
+	void forceBindUniformBufferRange(GLuint binding, GLuint bufferId, GLintptr offset, GLsizeiptr size);
+
+	/// To call when a buffer that may be bound to GL_UNIFORM_BUFFER gets deleted: GL sets
+	/// the bindings of a deleted buffer back to zero, and so does the cache. No GL call.
+	void uniformBufferDeleted(GLuint id);
 
 	/// glBindBuffer(GL_PIXEL_UNPACK_BUFFER). For texture upload via PBO.
 	void bindPixelUnpackBuffer(GLuint id);
@@ -378,6 +389,8 @@ private:
 	GLuint m_CurUniformBuffer;
 	enum { MaxUBOBindings = 8 };
 	GLuint m_CurUniformBufferBase[MaxUBOBindings];
+	GLintptr m_CurUniformBufferOffset[MaxUBOBindings];
+	GLsizeiptr m_CurUniformBufferSize[MaxUBOBindings]; // 0 when the whole buffer is bound
 	GLuint m_CurPixelUnpackBuffer;
 };
 

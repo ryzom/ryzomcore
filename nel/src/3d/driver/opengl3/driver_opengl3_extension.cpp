@@ -137,6 +137,7 @@ PFNGLBINDVERTEXARRAYPROC						nglBindVertexArray;
 
 PFNGLBINDBUFFERPROC								nglBindBuffer;
 PFNGLBINDBUFFERBASEPROC							nglBindBufferBase;
+PFNGLBINDBUFFERRANGEPROC						nglBindBufferRange;
 PFNGLGETUNIFORMBLOCKINDEXPROC					nglGetUniformBlockIndex;
 PFNGLUNIFORMBLOCKBINDINGPROC					nglUniformBlockBinding;
 PFNGLDELETEBUFFERSPROC							nglDeleteBuffers;
@@ -203,6 +204,9 @@ PFNGLCLIENTWAITSYNCPROC							nglClientWaitSync;
 PFNGLWAITSYNCPROC								nglWaitSync;
 PFNGLGETINTEGER64VPROC							nglGetInteger64v;
 PFNGLGETSYNCIVPROC								nglGetSynciv;
+
+// GL_ARB_buffer_storage
+NEL_PFNGLBUFFERSTORAGEPROC						nglBufferStorage;
 
 // GL_ARB_separate_shader_objects
 PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
@@ -456,6 +460,7 @@ static bool setupGLCore(std::vector<const char *> &glext)
 
 	CHECK_ADDRESS(PFNGLBINDBUFFERPROC, glBindBuffer);
 	CHECK_ADDRESS(PFNGLBINDBUFFERBASEPROC, glBindBufferBase);
+	CHECK_ADDRESS(PFNGLBINDBUFFERRANGEPROC, glBindBufferRange);
 	CHECK_ADDRESS(PFNGLGETUNIFORMBLOCKINDEXPROC, glGetUniformBlockIndex);
 	CHECK_ADDRESS(PFNGLUNIFORMBLOCKBINDINGPROC, glUniformBlockBinding);
 	CHECK_ADDRESS(PFNGLDELETEBUFFERSPROC, glDeleteBuffers);
@@ -604,6 +609,22 @@ static bool setupAMDPinnedMemory(std::vector<const char *> &glext)
 }
 
 // *********************************
+static bool setupARBBufferStorage(std::vector<const char *> &glext, sint versionMajor, sint versionMinor)
+{
+	H_AUTO_OGL(setupARBBufferStorage);
+
+	// In the core since OpenGL 4.4, an extension before that. A context without it is
+	// a normal case, so its absence is not a warning.
+	bool core = (versionMajor > 4) || (versionMajor == 4 && versionMinor >= 4);
+	if (!core && !checkExt2(glext, "GL_ARB_buffer_storage"))
+		return false;
+
+	CHECK_ADDRESS(NEL_PFNGLBUFFERSTORAGEPROC, glBufferStorage);
+
+	return true;
+}
+
+// *********************************
 static bool	setupNVXGPUMemoryInfo(std::vector<const char *> &glext)
 {
 	H_AUTO_OGL(setupNVXGPUMemoryInfo);
@@ -700,6 +721,9 @@ bool	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_AMD_pinned_memory
 	ext.AMDPinnedMemory = false; // setupAMDPinnedMemory(glext); // TODO: Proper frame sync check
+
+	// Check GL_ARB_buffer_storage
+	ext.ARBBufferStorage = setupARBBufferStorage(glext, a, b);
 
 	// Memory info extensions
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);

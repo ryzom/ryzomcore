@@ -44,6 +44,21 @@ extern "C" {
 #define WGL_COVERAGE_SAMPLES_NV            0x2042
 #define WGL_COLOR_SAMPLES_NV               0x20B9
 
+// GL_ARB_buffer_storage, in the core since OpenGL 4.4
+#ifndef NL_GL_ARB_buffer_storage
+#define NL_GL_ARB_buffer_storage 1
+
+#ifndef GL_MAP_PERSISTENT_BIT
+#define GL_MAP_PERSISTENT_BIT              0x0040
+#define GL_MAP_COHERENT_BIT                0x0080
+#define GL_DYNAMIC_STORAGE_BIT             0x0100
+#define GL_CLIENT_STORAGE_BIT              0x0200
+#endif
+
+typedef void(APIENTRY *NEL_PFNGLBUFFERSTORAGEPROC)(GLenum target, GLsizeiptr size, const void *data, GLbitfield flags);
+
+#endif // NL_GL_ARB_buffer_storage
+
 #if defined(NL_OS_MAC)
 
 // Mac GL extensions

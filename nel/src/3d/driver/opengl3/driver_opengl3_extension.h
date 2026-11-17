@@ -53,6 +53,9 @@ struct	CGlExtensions
 	bool	EXTTextureFilterAnisotropic;
 	float	EXTTextureFilterAnisotropicMaximum;
 	bool	AMDPinnedMemory;
+	// glBufferStorage, from OpenGL 4.4 or GL_ARB_buffer_storage. Never set under OpenGL ES,
+	// where the functions are linked and this one is not part of ES 3.0.
+	bool	ARBBufferStorage;
 
 	// Extensions to get memory info
 	bool	NVXGPUMemoryInfo;
@@ -96,6 +99,7 @@ public:
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 0.f;
 		AMDPinnedMemory = false;
+		ARBBufferStorage = false;
 
 		NVXGPUMemoryInfo = false;
 		ATIMeminfo = false;
@@ -133,6 +137,7 @@ public:
 
 		result += "\n  Buffers: ";
 		result += AMDPinnedMemory ? "AMDPinnedMemory " : "";
+		result += ARBBufferStorage ? "ARBBufferStorage " : "";
 
 		result += "\n  Memory info: ";
 		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";
@@ -238,6 +243,7 @@ namespace NLDRIVERGL3 {
 
 #define nglBindBuffer glBindBuffer
 #define nglBindBufferBase glBindBufferBase
+#define nglBindBufferRange glBindBufferRange
 #define nglGetUniformBlockIndex glGetUniformBlockIndex
 #define nglUniformBlockBinding glUniformBlockBinding
 #define nglDeleteBuffers glDeleteBuffers
@@ -254,6 +260,7 @@ namespace NLDRIVERGL3 {
 #define nglMapBufferRange glMapBufferRange
 #define nglFlushMappedBufferRange glFlushMappedBufferRange
 #define nglCopyBufferSubData glCopyBufferSubData
+// glBufferStorage not available in GLES 3.0
 
 #define nglGenQueries glGenQueries
 #define nglDeleteQueries glDeleteQueries
@@ -445,6 +452,7 @@ extern PFNGLBINDVERTEXARRAYPROC							nglBindVertexArray;
 
 extern PFNGLBINDBUFFERPROC								nglBindBuffer;
 extern PFNGLBINDBUFFERBASEPROC							nglBindBufferBase;
+extern PFNGLBINDBUFFERRANGEPROC							nglBindBufferRange;
 extern PFNGLGETUNIFORMBLOCKINDEXPROC					nglGetUniformBlockIndex;
 extern PFNGLUNIFORMBLOCKBINDINGPROC						nglUniformBlockBinding;
 extern PFNGLDELETEBUFFERSPROC							nglDeleteBuffers;
@@ -512,6 +520,9 @@ extern PFNGLCLIENTWAITSYNCPROC							nglClientWaitSync;
 extern PFNGLWAITSYNCPROC								nglWaitSync;
 extern PFNGLGETINTEGER64VPROC							nglGetInteger64v;
 extern PFNGLGETSYNCIVPROC								nglGetSynciv;
+
+// GL_ARB_buffer_storage
+extern NEL_PFNGLBUFFERSTORAGEPROC						nglBufferStorage;
 
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
