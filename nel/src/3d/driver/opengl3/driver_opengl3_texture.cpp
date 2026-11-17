@@ -1145,13 +1145,14 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				if (glSrcFmt == GL_RGBA && tex.getPixelFormat() != CBitmap::RGBA)
 					tex.convertToType(CBitmap::RGBA);
 #endif
+				// The mipmaps that are built here are released behind the uploads, which
+				// read their pixels
+				bool builtMipMaps = false;
 				if (tex.mipMapOn())
 				{
-					bool hadMipMap = tex.getMipMapCount() > 1;
+					builtMipMaps = tex.getMipMapCount() <= 1;
 					tex.buildMipMaps();
 					nMipMaps = tex.getMipMapCount();
-					if (!hadMipMap)
-						tex.releaseMipMaps();
 				}
 				else
 					nMipMaps = 1;
@@ -1288,7 +1289,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				const bool pixelStream = false;
 #endif
 
-				// The pixels are packed in the buffer. Transient upload state — see note in setupTexture().
+				// The pixels are packed in the buffer. Transient upload state, set back below.
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
@@ -1324,6 +1325,10 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						{
 							sint pixelSize = (sint)(tex.getPixels(i).size() / (w * h));
 							sint rectBytes = rectW * rectH * pixelSize;
+
+							// A mipmap that the texture has no pixels for has nothing to give to GL
+							if (rectBytes <= 0)
+								goto next_mipmap;
 
 #if NL3D_GL3_STREAM_STATS
 							++_StreamStats.TexturePartRects;
@@ -1405,6 +1410,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 #endif
+
+				if (builtMipMaps)
+					tex.releaseMipMaps();
 
 #if NL3D_GL3_STREAM_STATS
 				++_StreamStats.TexturePartUploads;
