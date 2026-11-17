@@ -72,6 +72,7 @@
 #include "driver_opengl3_states.h"
 #include "driver_opengl3_extension.h"
 #include "driver_opengl3_program.h"
+#include "driver_opengl3_stream_buffer.h"
 
 
 #ifdef USE_OPENGLES3
@@ -104,6 +105,11 @@ using NLMISC::CVector;
 #define NL3D_GL3_FRAME_QUEUE_MAX (2) // Maximum is three frames processing (2 frames backlog + current frame)
 #define NL3D_GL3_BUFFER_QUEUE_MAX (NL3D_GL3_FRAME_QUEUE_MAX + 1) // Additional buffer for current working
 #define NL3D_GL3_SYNC_IMMEDIATE 0 // Don't allow frame processing backlog if set to 1. Reduce input lag. Testing only
+
+// The stream that holds the uniform blocks (see CStreamBufferGL3)
+#define NL3D_GL3_UNIFORM_STREAM_CHUNK_SIZE (1024 * 1024) // Bytes per chunk
+#define NL3D_GL3_UNIFORM_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
+#define NL3D_GL3_UNIFORM_STREAM_MAX_CHUNKS (16) // More chunks are only created when a single draw needs them
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
@@ -424,7 +430,7 @@ public:
 	// Material UBO staging area, with additional entries for multiple passes
 	uint                           MaterialUBOCurrent;
 	std::vector<CMaterialUBOData>  MaterialUBO;
-	std::vector<GLuint>	           MaterialUBOId;       // 0 = not uploaded
+	std::vector<CStreamHandleGL3>  MaterialUBOHandle;   // Where the slot is in the uniform stream; not valid = not uploaded
 	std::vector<bool>	           MaterialUBOTouched;  // Needs re-upload
 
 	// EMBM: true if any texenv stage uses OpRGB == EMBM. Updated when TEXENV is touched.
@@ -436,11 +442,10 @@ public:
 		SetupMaterialTouched(0), SetupPass0Touched(0), MaterialUBOCurrent(0), HasEMBM(false), TexEnvMatDefault(false)
 	{
 		MaterialUBO.resize(1);
-		MaterialUBOId.resize(1);
+		MaterialUBOHandle.resize(1);
 		MaterialUBOTouched.resize(1);
 		MaterialUBO[0].nlLightMapScale = 1.0f;
 	}
-	~CMaterialDrvInfosGL3() NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -1179,12 +1184,13 @@ private:
 	CLight						_LightMapDynamicLight;
 	bool						_LightMapDynamicLightEnabled;
 	bool						_LightMapDynamicLightDirty;
-	// Dedicated 1-light UBO for the lightmap dynamic light.
+	// Dedicated 1-light block for the lightmap dynamic light.
 	// During lightmap passes, this is bound to the light table binding point
-	// instead of the main _LightTableUBOId, avoiding pollution of _LightTable.
-	GLuint						_LightMapDynUBOId;
+	// instead of the main light table block, avoiding pollution of _LightTable.
+	CStreamHandleGL3			_LightMapDynUBOHandle; // Where the block is in the uniform stream
 	CLightTableUBOEntry			_LightMapDynUBOEntry;  // Packed light data (staging)
-	bool						_LightMapDynUBODirty;  // Needs re-upload
+	CLightTableUBOEntry			_LightMapDynUBOWritten; // The light data that _LightMapDynUBOHandle holds
+	bool						_LightMapDynUBODirty;  // Staged again, needs re-upload when the data differs
 	bool						_UseLightMapDynUBO;    // Bind this instead of main table
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
 	CLight						_UserLight0;
@@ -1198,10 +1204,9 @@ private:
 	std::vector<CLight>			_LightTable;
 
 	// Light UBO (shared by light table mode and non-table fallback)
-	GLuint						_LightTableUBOId;
+	CStreamHandleGL3			_LightTableUBOHandle; // Where the block is in the uniform stream, always _MaxLightTableSize entries
 	bool						_LightTableDirty; // Light table entries changed
 	bool						_UserLightUBODirty; // _UserLight[] changed (for non-table UBO mode)
-	sint						_LightTableUBOCapacity; // Current GPU buffer capacity (entries)
 	sint						_MaxLightTableSize; // Runtime maximum (reduced on ANGLE/D3D11)
 	CLightTableUBOEntry			_LightTableUBOStaging[NL_OPENGL3_MAX_LIGHT_TABLE_CAPACITY]; // Persistent staging buffer (avoids per-frame heap alloc)
 	void						uploadLightTableUBO();
@@ -1213,13 +1218,12 @@ private:
 	uint						_NumPerPixelLights; // First N lights evaluated per-pixel in PP (0 = all VP)
 
 	// Camera/global state UBO (viewMatrix, fog, clipPlanes, pzbCameraPos)
-	GLuint						_CameraUBOId;
+	CStreamHandleGL3			_CameraUBOHandle;       // Where the block is in the uniform stream
 	bool						_CameraUBODirty;        // Driver state changed — need to re-stage _CameraUBOData
 	bool						_CameraUBOUploadDirty;  // Staged data changed — need to re-upload to GPU
-	sint						_CameraUBOCapacity;     // Current GPU buffer capacity (bytes)
 	CCameraUBOData				_CameraUBOData;         // Persistent staging area (single source of truth for fog etc.)
 	void						stageCameraUBO();       // Populate _CameraUBOData from driver state
-	void						uploadCameraUBO();      // Upload _CameraUBOData to GPU if upload dirty
+	void						uploadCameraUBO();      // Upload _CameraUBOData to GPU if upload dirty or stale, and bind it
 
 	// Clip planes (in eye space, pre-transformed for shader)
 	enum { MaxClipPlanes = 6 };
@@ -1692,17 +1696,41 @@ private:
 	bool m_ProgramUsesMaterialUBO[NumTProgram];   // Program reads from NlMaterial UBO
 	CUniformBuffer *m_NelvpActiveUB;              // Non-null when active VP is nelvp-converted
 
+	// The uniform blocks are written into this stream, and bound as ranges of its buffers
+	CStreamBufferGL3 _UniformStream;
+	/** The one way to use a block that is kept in the uniform stream: writes the data
+	 * when asked to (write) or when the handle has gone stale, marks the chunk as used
+	 * by the current frame, and binds the range to the binding point.
+	 * size bytes of data are written, allocSize bytes are reserved and bound: the size
+	 * of the block as the shader declares it, never less.
+	 * \return true when the data has been written
+	 */
+	bool useUniformBlock(GLuint binding, CStreamHandleGL3 &handle, const void *data, uint32 size, uint32 allocSize, bool write);
+
 	// Per-Object UBO (runtime state of currently bound program)
-	GLuint  _ObjectUBOId;           // Global GL buffer
-	sint    _ObjectUBOCapacity;     // Current GPU buffer capacity (bytes)
+	CStreamHandleGL3 _ObjectUBOHandle; // Where the last block is in the uniform stream
+	CObjectUBOData _ObjectUBOWritten; // The data that _ObjectUBOHandle holds
 	// GLuint  _OverrideMaterialUBOId; // Global buffer for per-pass material overrides (lightmap) — replaced by per-material UBO slots
 	void    uploadObjectUBO();
 	void    uploadMaterialUBO();
 
 	// User UBO bindings (deferred upload — flushed in setupUniforms)
+	// What is at each GL binding point is known by _DriverGLStates
 	NLMISC::CRefPtr<CUniformBuffer> _BoundUserUB[UBBindingCount]; // NULL = unbound, auto-nullifies on deletion
-	GLuint           _UserUBBoundId[UBBindingCount];  // GL buffer ID currently at each GL binding point (0 = unbound)
 	void    flushUserUBOs();
+
+#if NL3D_GL3_STREAM_STATS
+	// Counts since the last log line
+	struct CStreamStats
+	{
+		uint32 Frames;
+		uint32 ObjectWritten; // Object blocks written to the stream
+		uint32 ObjectSkipped; // Object blocks that were the same as the one before
+		uint32 MaterialWritten; // Material slots written to the stream
+		NLMISC::TTime LastTime;
+	} _StreamStats;
+	void displayStreamStats();
+#endif
 
 	// Lightmap object UBO override (staged by setupLightMapPass, read by setupBuiltinPrograms in setupPass)
 	// Material-level fields (diffuse, specular, lightmapscale, constants) moved to per-material UBO slots.

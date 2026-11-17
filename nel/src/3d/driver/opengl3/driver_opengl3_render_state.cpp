@@ -344,6 +344,31 @@ void CDriverGL3::setClipPlane(uint index, const NLMISC::CPlane &plane)
 }
 
 // ***************************************************************************
+// Uniform blocks in the uniform stream
+// ***************************************************************************
+
+bool CDriverGL3::useUniformBlock(GLuint binding, CStreamHandleGL3 &handle, const void *data, uint32 size, uint32 allocSize, bool write)
+{
+	H_AUTO_OGL(CDriverGL3_useUniformBlock)
+
+	// The stream gives the chunk of a handle to other data without telling, so a kept
+	// handle is asked for on every use, and the data written again when it is gone
+	bool written = false;
+	if (write || !_UniformStream.isValid(handle))
+	{
+		handle = _UniformStream.write(data, size, allocSize);
+		if (!_UniformStream.isValid(handle))
+			return false; // the stream has logged what failed; the binding point keeps what it has
+		written = true;
+	}
+
+	// The chunk now belongs to the current frame, and the shader reads the range
+	GLuint buffer = _UniformStream.use(handle);
+	_DriverGLStates.bindUniformBufferRange(binding, buffer, handle.Offset, handle.Size);
+	return written;
+}
+
+// ***************************************************************************
 // Camera UBO
 // ***************************************************************************
 
@@ -416,25 +441,8 @@ void CDriverGL3::uploadCameraUBO()
 {
 	H_AUTO_OGL(CDriverGL3_uploadCameraUBO)
 
-	if (!_CameraUBOId || !_CameraUBOUploadDirty)
-		return;
-
-	const GLsizeiptr dataSize = sizeof(CCameraUBOData);
-	_DriverGLStates.forceBindUniformBuffer(_CameraUBOId);
-
-	if (_CameraUBOCapacity < (sint)dataSize)
-	{
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, &_CameraUBOData, GL_STREAM_DRAW);
-		_CameraUBOCapacity = (sint)dataSize;
-	}
-	else
-	{
-		nglBufferData(GL_UNIFORM_BUFFER, _CameraUBOCapacity, nullptr, GL_STREAM_DRAW);
-		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, &_CameraUBOData);
-	}
-
-	_DriverGLStates.forceBindUniformBuffer(0);
-	_DriverGLStates.forceBindUniformBufferBase(NL_BUILTIN_CAMERA_BINDING, _CameraUBOId);
+	useUniformBlock(NL_BUILTIN_CAMERA_BINDING, _CameraUBOHandle,
+	    &_CameraUBOData, sizeof(CCameraUBOData), sizeof(CCameraUBOData), _CameraUBOUploadDirty);
 
 	_CameraUBOUploadDirty = false;
 }
@@ -446,9 +454,6 @@ void CDriverGL3::uploadCameraUBO()
 void CDriverGL3::uploadObjectUBO()
 {
 	H_AUTO_OGL(CDriverGL3_uploadObjectUBO)
-
-	if (!_ObjectUBOId)
-		return;
 
 	CMaterial &mat = *_CurrentMaterial;
 	CMaterialDrvInfosGL3 *matDrv = static_cast<CMaterialDrvInfosGL3 *>((IMaterialDrvInfos *)(mat._MatDrvInfo));
@@ -561,24 +566,25 @@ void CDriverGL3::uploadObjectUBO()
 	data.fogEnabled = m_VPBuiltinCurrent.Fog ? 1 : 0;
 	data._pad[0] = 0;
 
-	// Upload
-	const GLsizeiptr dataSize = sizeof(CObjectUBOData);
-	_DriverGLStates.forceBindUniformBuffer(_ObjectUBOId);
-
-	if (_ObjectUBOCapacity < (sint)dataSize)
+	// Upload. Draws that follow each other often have the same block (the passes of
+	// a material, interface draws with one matrix): the block of the draw before is
+	// then used again, which costs no write and no change of the binding. Every
+	// byte of the struct is set above, so the blocks can be compared as memory.
+	bool changed = memcmp(&data, &_ObjectUBOWritten, sizeof(CObjectUBOData)) != 0;
+	if (useUniformBlock(NL_BUILTIN_MODEL_BINDING, _ObjectUBOHandle,
+	        &data, sizeof(CObjectUBOData), sizeof(CObjectUBOData), changed))
 	{
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, &data, GL_STREAM_DRAW);
-		_ObjectUBOCapacity = (sint)dataSize;
+		_ObjectUBOWritten = data;
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.ObjectWritten;
+#endif
 	}
+#if NL3D_GL3_STREAM_STATS
 	else
 	{
-		// Orphan + rewrite
-		nglBufferData(GL_UNIFORM_BUFFER, _ObjectUBOCapacity, nullptr, GL_STREAM_DRAW);
-		nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, &data);
+		++_StreamStats.ObjectSkipped;
 	}
-
-	_DriverGLStates.forceBindUniformBuffer(0);
-	_DriverGLStates.forceBindUniformBufferBase(NL_BUILTIN_MODEL_BINDING, _ObjectUBOId);
+#endif
 }
 
 // ***************************************************************************
@@ -597,19 +603,15 @@ void CDriverGL3::uploadMaterialUBO()
 	// Slot 0 = base material (from setupMaterial/setupNormalPass).
 	// Slots 1..N = per-pass overrides (from setupLightMapPass, etc.).
 	uint slot = matDrv->MaterialUBOCurrent;
-	if (matDrv->MaterialUBOTouched[slot])
+	if (useUniformBlock(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOHandle[slot],
+	        &matDrv->MaterialUBO[slot], sizeof(CMaterialUBOData), sizeof(CMaterialUBOData),
+	        matDrv->MaterialUBOTouched[slot]))
 	{
-		if (!matDrv->MaterialUBOId[slot])
-			nglGenBuffers(1, &matDrv->MaterialUBOId[slot]);
-
-		const GLsizeiptr dataSize = sizeof(CMaterialUBOData);
-		_DriverGLStates.forceBindUniformBuffer(matDrv->MaterialUBOId[slot]);
-		nglBufferData(GL_UNIFORM_BUFFER, dataSize, &matDrv->MaterialUBO[slot], GL_STREAM_DRAW);
-		_DriverGLStates.forceBindUniformBuffer(0);
-		matDrv->MaterialUBOTouched[slot] = false;
+#if NL3D_GL3_STREAM_STATS
+		++_StreamStats.MaterialWritten;
+#endif
 	}
-
-	_DriverGLStates.bindUniformBufferBase(NL_BUILTIN_MATERIAL_BINDING, matDrv->MaterialUBOId[slot]);
+	matDrv->MaterialUBOTouched[slot] = false;
 }
 
 } // NLDRIVERGL3

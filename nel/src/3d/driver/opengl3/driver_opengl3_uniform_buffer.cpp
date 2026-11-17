@@ -208,32 +208,18 @@ void generateUniformBufferGLSL(std::stringstream &ss, const CUniformBufferFormat
 
 CUBDrvInfosGL3::CUBDrvInfosGL3(IDriver *drv, ItUBDrvInfoPtrList it, CUniformBuffer *ub)
 	: IUBDrvInfos(drv, it, ub)
-	, _BufferId(0)
-	, _Capacity(0)
 {
-	nglGenBuffers(1, &_BufferId);
 }
 
 CUBDrvInfosGL3::~CUBDrvInfosGL3()
 {
-	if (_BufferId)
-		nglDeleteBuffers(1, &_BufferId);
+	// The range in the uniform stream is not given back: the stream writes over it
+	// when its chunk comes round again
 }
 
 // ***************************************************************************
 // CDriverGL3::bindUniformBuffer
 // ***************************************************************************
-
-static GLenum usageHintToGL(CUniformBuffer::TUsageHint hint)
-{
-	switch (hint)
-	{
-	case CUniformBuffer::StreamDraw:  return GL_STREAM_DRAW;
-	case CUniformBuffer::DynamicDraw: return GL_DYNAMIC_DRAW;
-	case CUniformBuffer::StaticDraw:  return GL_STATIC_DRAW;
-	default:                          return GL_STREAM_DRAW;
-	}
-}
 
 static const sint s_UBBindingToGL[] = {
 	NL_USER_VERTEX_PROGRAM_BINDING,  // UBBindingVertexProgram
@@ -251,12 +237,8 @@ bool CDriverGL3::bindUniformBuffer(TUBBinding binding, CUniformBuffer *ub)
 
 	if (!ub)
 	{
-		// Immediate unbind — avoid dangling pointer if buffer is released before next flush
-		if (_UserUBBoundId[binding])
-		{
-			_DriverGLStates.forceBindUniformBufferBase(s_UBBindingToGL[binding], 0);
-			_UserUBBoundId[binding] = 0;
-		}
+		// Immediate unbind: the binding point does not keep the data of a buffer that is no longer bound
+		_DriverGLStates.bindUniformBufferBase(s_UBBindingToGL[binding], 0);
 	}
 	return true;
 }
@@ -264,6 +246,9 @@ bool CDriverGL3::bindUniformBuffer(TUBBinding binding, CUniformBuffer *ub)
 // ***************************************************************************
 // CDriverGL3::flushUserUBOs
 // ***************************************************************************
+
+// The warning about a uniform buffer without content is logged once, not per draw
+static bool s_EmptyUserUBWarned = false;
 
 void CDriverGL3::flushUserUBOs()
 {
@@ -273,12 +258,9 @@ void CDriverGL3::flushUserUBOs()
 
 		if (!ub)
 		{
-			// Detect auto-nullification: CRefPtr cleared it behind our back
-			if (_UserUBBoundId[i])
-			{
-				_DriverGLStates.forceBindUniformBufferBase(s_UBBindingToGL[i], 0);
-				_UserUBBoundId[i] = 0;
-			}
+			// Detect auto-nullification: CRefPtr cleared it behind our back.
+			// The state cache knows whether the binding point has something.
+			_DriverGLStates.bindUniformBufferBase(s_UBBindingToGL[i], 0);
 			continue;
 		}
 
@@ -293,37 +275,25 @@ void CDriverGL3::flushUserUBOs()
 
 		CUBDrvInfosGL3 *info = static_cast<CUBDrvInfosGL3 *>((IUBDrvInfos *)ub->DrvInfos);
 
-		// Upload if data dirty
-		if (ub->Touched)
+		// A buffer without a format has no block that a shader can read
+		sint dataSize = ub->Format.size();
+		if (dataSize <= 0)
 		{
-			sint dataSize = ub->Format.size();
-			GLenum usage = usageHintToGL(ub->UsageHint);
-
-			_DriverGLStates.forceBindUniformBuffer(info->getBufferId());
-
-			if (info->getCapacity() < dataSize)
+			if (!s_EmptyUserUBWarned)
 			{
-				// Allocate or grow
-				nglBufferData(GL_UNIFORM_BUFFER, dataSize, ub->data(), usage);
-				info->setCapacity(dataSize);
+				nlwarning("3D: a uniform buffer without content is bound to binding %d, nothing is bound for it", i);
+				s_EmptyUserUBWarned = true;
 			}
-			else
-			{
-				// Orphan + rewrite (same size)
-				nglBufferData(GL_UNIFORM_BUFFER, dataSize, nullptr, usage);
-				nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, ub->data());
-			}
-
-			ub->Touched = false;
+			_DriverGLStates.bindUniformBufferBase(s_UBBindingToGL[i], 0);
+			continue;
 		}
 
-		// Bind to indexed binding point only when GL buffer ID changed
-		GLuint bufId = info->getBufferId();
-		if (_UserUBBoundId[i] != bufId)
-		{
-			_DriverGLStates.forceBindUniformBufferBase(s_UBBindingToGL[i], bufId);
-			_UserUBBoundId[i] = bufId;
-		}
+		// Upload if the data is dirty or no longer in the stream, and bind the range.
+		// A buffer that has never been locked has no data yet: its range is reserved,
+		// to have the size of the block bound.
+		const void *data = ub->data();
+		useUniformBlock(s_UBBindingToGL[i], info->Handle, data, data ? (uint32)dataSize : 0, (uint32)dataSize, ub->Touched);
+		ub->Touched = false;
 	}
 }
 
