@@ -2014,11 +2014,36 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 			}
 
 			//(*) Remove animation Session and kill AI Instance
-			if (animationSessionExist)
+			// A test of this session is stopped, and the scenario is back in edition for every editor of the
+			// session: the one that connects, after a client that was lost during the test or as an editor that
+			// joins the others, and those that were in the test, who are told that it ended. (With the mode alone
+			// set back to edition, the animation kept running behind an editor in edition, and the stop of a test
+			// that nobody is in, which looks at the mode, never came.)
+			// The animation found can also be that of the animation session of the owner (getConnectedChars
+			// reaches it through getLinkedSessionId, as the stop would): that one is no test of this session and
+			// goes on, as it does for the stop of a test that nobody is in (onModuleUpdate). (The link is there
+			// for any animation session of the owner on this service: a test of this session that runs beside
+			// one is taken for it here and there, and is left running.)
+			bool testStarting = false;
+			if (animationSessionExist && getLinkedSessionId(sessionId).asInt() == 0)
 			{
-
-			//	stopTest(sessionId);
+				nlinfo("R2Ed: char %u connects to edit session %u while its test runs: the test is stopped", charId, sessionId.asInt());
+				stopTest(sessionId);
+			}
+			else if (animationSessionExist)
+			{
 				scenario->setMode(1);
+			}
+			else if (getAnimationModule()->isSessionStartingOrRunning(sessionId))
+			{
+				// The start of a test was accepted and its animation is not made yet (startScenario schedules
+				// it). The start is not taken back here and the mode of the scenario is left as it is: the test
+				// mode startScenario set, with which the test is stopped when nobody is in the session any more
+				// (unless the owner has an animation session, see above), or edition when a stop was asked for
+				// in the meantime. The character that connects is in edition until it asks for the test, which
+				// puts it in the one that runs.
+				nlinfo("R2Ed: char %u connects to edit session %u while a start of its test is pending: the start is left as it is", charId, sessionId.asInt());
+				testStarting = true;
 			}
 			else
 			{
@@ -2027,7 +2052,7 @@ void CServerEditionModule::onMapConnectionAskedImpl( NLNET::IModuleProxy * clien
 
 
 			editSlotId = session->connectChar(charId, TUserRole::ur_editor);
-			clientConnectBody.Mode = scenario->getMode();
+			clientConnectBody.Mode = testStarting ? 1 : scenario->getMode();
 			clientConnectBody.InitialActIndex = scenario->getInitialActIndex();
 			clientConnectBody.EditSessionLink = TSessionId(0);
 
@@ -3128,6 +3153,8 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				missionTag.clear();
 				trialAllowed = false;
 			}
+			// The session manager records it with the scenario: it lets a trial account in the session only then
+			info.setTrialAllowed(trialAllowed);
 
 
 
@@ -4296,6 +4323,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 				TRunningScenarioInfo info;
 				info.getScenarioKey().clear();
 				info.setDMLess(true);
+				bool trialAllowed = false;
 				TScenarioHeaderSerializer::TValueType::const_iterator first(header.Value.begin()), last(header.Value.end());
 				for ( ; first != last; ++first)
 				{
@@ -4318,6 +4346,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					else if (first->first == "CreateBy" )	{ info.setScenarioAuthorName( first->second); }
 					else if (first->first == "Rules" ) { info.setDMLess(CScenarioValidator::normalizeRules(first->second) != "Mastered"); }
 					else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
+					else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
 					else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 				}
 
@@ -4325,7 +4354,10 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 				if ( !nevraxScenario )
 				{
 					missionTag.clear();
+					trialAllowed = false;
 				}
+				// (open to trial accounts as in createSession, and as the start of a trial character is checked above)
+				info.setTrialAllowed(trialAllowed);
 
 
 				// (a trial character's start of a scenario that is not open to trial accounts was refused above)

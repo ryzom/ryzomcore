@@ -52,11 +52,17 @@ function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 	$st = new RSMGR_TSessionType;
 	$st->fromString($sessionType);
 	// mirror the defaults the client uses when scheduling from the game
-	// (far_tp.cpp for st_edit, connection.cpp for st_anim)
+	// (far_tp.cpp for st_edit, connection.cpp for st_anim). The rule type
+	// is rt_strict for both: an animation session scheduled here is a
+	// mastered one, its owner is invited in it as animator
+	// (inviteOwnerInSession), as the client invites the owner of an
+	// rt_strict session. The owner of an rt_liberal session is a player.
 	$ruleType = new RSMGR_TRuleType;
-	$ruleType->fromString($sessionType == "st_edit" ? "rt_strict" : "rt_liberal");
+	$ruleType->fromString("rt_strict");
 	$duration = new RSMGR_TEstimatedDuration;
 	$duration->fromString($sessionType == "st_edit" ? "et_long" : "et_medium");
+	// (the session manager stores the animation mode that goes with the
+	// rule type, am_dm for rt_strict, whatever is sent here)
 	$animMode = new RSMGR_TAnimMode;
 	$animMode->fromString("am_dm");
 	$orientation = new RSMGR_TSessionOrientation;

@@ -955,6 +955,105 @@ public:
 		sessionList(from, charId, sessionDescs);
 	}
 
+	// Ask for the list of the edit sessions of other characters
+	// that the requesting character is invited to as an editor.
+	virtual void on_getEditSessionList(NLNET::TSockId from, uint32 charId)
+	{
+		nldebug("on_getEditSessionList : getting the edit sessions char %u is invited to", charId);
+		CHECK_AUTH_WITH_CHARID(from, charId);
+
+		// The edit session of another character is listed for the editors its owner invited: the session is open,
+		// the character has an editor's participation in it and is kicked from none of its participations in it,
+		// which is what the session manager asks of the join (_joinSessionCommon). The edit session of the
+		// character itself is not listed: its owner enters it with the editor button, which also opens it again
+		// when it is closed. The filters of an animation session (newcomer, race, religion, guild, shard, level)
+		// are not for an edit session: the invitation is the access.
+		CSString query;
+		//                      0                1                   2                  3
+		query << "SELECT sessions.session_id, sessions.title, sessions.description, start_date,";
+		//                 4             5                   6                  7                   8
+		query << " sessions.lang, sessions.anim_mode, sessions.level, sessions.orientation, char_name,";
+		//                    9
+		query << " home_mainland_session_id";
+		query << " FROM sessions LEFT JOIN characters ON sessions.owner = char_id";
+		query << " WHERE session_type = 'st_edit'";
+		query << " AND state = 'ss_open'";
+		query << " AND sessions.owner <> " << charId;
+		query << " AND EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
+		query << " AND session_participant.char_id = " << charId << " AND session_participant.kicked = 0";
+		query << " AND session_participant.status IN ('sps_edit_invited', 'sps_editing'))";
+		query << " AND NOT EXISTS (SELECT * FROM session_participant WHERE session_participant.session_id = sessions.session_id";
+		query << " AND session_participant.char_id = " << charId << " AND session_participant.kicked <> 0)";
+
+		BOMB_IF(!_RingDB.query(query), "getEditSessionList : error executing request in database", editSessionList(from, charId, vector<TSessionDesc>()); return);
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
+
+		vector<TSessionDesc> sessionDescs;
+		sessionDescs.resize(result->getNumRows());
+		for (uint i = 0; i < result->getNumRows(); ++i)
+		{
+			result->fetchRow();
+			TSessionDesc &sd = sessionDescs[i];
+			uint32 sessionNum;
+			uint32 homeSessionId;
+			uint32 startDate;
+			string s;
+
+			result->getField(0, sessionNum);
+			sd.setSessionId(TSessionId(sessionNum));
+			result->getField(9, homeSessionId);
+			result->getField(8, s);
+			sd.setOwnerName(CShardNames::getInstance().makeFullName(s, homeSessionId));
+			result->getField(1, s);
+			sd.setTitle(s);
+			result->getField(2, s);
+			sd.setDescription(s);
+			result->getDateField(3, startDate);
+			sd.setLaunchDate(startDate);
+			result->getField(4, s);
+			sd.setLanguage(s);
+			// (what the session was scheduled with: an edit session has no use for these three)
+			result->getField(5, s);
+			sd.setAnimMode(TAnimMode(s));
+			result->getField(6, s);
+			sd.setSessionLevel(TSessionLevel(s));
+			result->getField(7, s);
+			sd.setOrientation(TSessionOrientation(s));
+
+			sd.setRequesterCharInvited(true);
+			sd.setRequesterCharKicked(false);
+			// the session manager holds a free trial account back from an animation session only
+			sd.setAllowFreeTrial(true);
+			sd.setNbRating(0);
+			sd.setRateFun(0);
+			sd.setRateDifficulty(0);
+			sd.setRateAccessibility(0);
+			sd.setRateOriginality(0);
+			sd.setRateDirection(0);
+			sd.setScenarioRRPTotal(0);
+			sd.setNbConnectedPlayer(0);
+		}
+
+		// the number of characters in each session (a request of its own, as for the animation sessions: the
+		// result of the list is read to its end first)
+		for (uint i = 0; i < sessionDescs.size(); ++i)
+		{
+			CSString countQuery;
+			countQuery << "SELECT COUNT(*) FROM ring_users";
+			countQuery << " WHERE current_status='cs_online'";
+			countQuery << " AND current_session=" << sessionDescs[i].getSessionId();
+			BOMB_IF(!_RingDB.query(countQuery), "getEditSessionList : error executing the count request in database", editSessionList(from, charId, vector<TSessionDesc>()); return);
+			CUniquePtr<CStoreResult> countResult(_RingDB.storeResult());
+			BOMB_IF(countResult->getNumRows() < 1, "getEditSessionList : the count request has no result", editSessionList(from, charId, vector<TSessionDesc>()); return);
+			uint32 nbPlayers;
+			countResult->fetchRow();
+			countResult->getField(0, nbPlayers);
+			sessionDescs[i].setNbConnectedPlayer(nbPlayers);
+		}
+
+		editSessionList(from, charId, sessionDescs);
+	}
+
 	// Ask for the list of players that are available
 	// for the requesting session.
 	virtual void on_getCharList(NLNET::TSockId from, uint32 charId, TSessionId sessionId)

@@ -5409,6 +5409,7 @@ namespace RSMGR
 			{
 				{	"AUTH",	CSessionBrowserServerWebItf::cb_authenticate	},
 				{	"GSL",	CSessionBrowserServerWebItf::cb_getSessionList	},
+				{	"GESL",	CSessionBrowserServerWebItf::cb_getEditSessionList	},
 				{	"GCL",	CSessionBrowserServerWebItf::cb_getCharList	},
 				{	"ICBN",	CSessionBrowserServerWebItf::cb_inviteCharacterByName	},
 				{	"GMSR",	CSessionBrowserServerWebItf::cb_getMyRatings	},
@@ -5522,6 +5523,20 @@ namespace RSMGR
 			nldebug("CSessionBrowserServerWeb::sessionList called");
 #endif
 			NLNET::CMessage message("SL");
+			nlWrite(message, serial, charId);
+			nlWrite(message, serialCont, const_cast < std::vector < TSessionDesc >& > (sessions));
+
+			_CallbackServer->send(message, dest);
+		}
+		// Return the list of the edit sessions the character is invited to
+
+		void editSessionList(NLNET::TSockId dest, uint32 charId, const std::vector < TSessionDesc > &sessions)
+		{
+			H_AUTO(editSessionList_editSessionList);
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWeb::editSessionList called");
+#endif
+			NLNET::CMessage message("ESL");
 			nlWrite(message, serial, charId);
 			nlWrite(message, serialCont, const_cast < std::vector < TSessionDesc >& > (sessions));
 
@@ -5680,6 +5695,31 @@ namespace RSMGR
 
 
 			callback->on_getSessionList(from, charId);
+
+		}
+
+		static void cb_getEditSessionList (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+			H_AUTO(getEditSessionList_on_getEditSessionList);
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWeb::cb_getEditSessionList received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
+
+			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			nlRead(message, serial, charId);
+
+
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWeb::cb_getEditSessionList : calling on_getEditSessionList");
+#endif
+
+
+			callback->on_getEditSessionList(from, charId);
 
 		}
 
@@ -5911,6 +5951,10 @@ namespace RSMGR
 		// for the requesting character.
 		virtual void on_getSessionList(NLNET::TSockId from, uint32 charId) =0;
 
+		// Ask for the list of the edit sessions of other characters
+		// that the requesting character is invited to as an editor.
+		virtual void on_getEditSessionList(NLNET::TSockId from, uint32 charId) =0;
+
 		// Ask for the list of player characters that are available
 		// for the requesting session.
 		virtual void on_getCharList(NLNET::TSockId from, uint32 charId, TSessionId sessionId) =0;
@@ -5973,6 +6017,7 @@ namespace RSMGR
 			static NLNET::TCallbackItem callbackArray[] =
 			{
 				{	"SL",	CSessionBrowserServerWebClientItf::cb_sessionList	},
+				{	"ESL",	CSessionBrowserServerWebClientItf::cb_editSessionList	},
 				{	"CL",	CSessionBrowserServerWebClientItf::cb_charList	},
 				{	"PR",	CSessionBrowserServerWebClientItf::cb_playerRatings	},
 				{	"SAS",	CSessionBrowserServerWebClientItf::cb_sessionAverageScores	},
@@ -6004,6 +6049,7 @@ namespace RSMGR
 			if (!initialized)
 			{
 			messageNames.insert(std::make_pair(std::string("on_sessionList"), std::string("SL")));
+			messageNames.insert(std::make_pair(std::string("on_editSessionList"), std::string("ESL")));
 			messageNames.insert(std::make_pair(std::string("on_charList"), std::string("CL")));
 			messageNames.insert(std::make_pair(std::string("on_playerRatings"), std::string("PR")));
 			messageNames.insert(std::make_pair(std::string("on_sessionAverageScores"), std::string("SAS")));
@@ -6098,6 +6144,19 @@ namespace RSMGR
 			nldebug("CSessionBrowserServerWebClient::getSessionList called");
 #endif
 			NLNET::CMessage message("GSL");
+			nlWrite(message, serial, charId);
+
+			_CallbackClient->send(message);
+		}
+		// Ask for the list of the edit sessions of other characters
+		// that the requesting character is invited to as an editor.
+
+		void getEditSessionList(uint32 charId)
+		{
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWebClient::getEditSessionList called");
+#endif
+			NLNET::CMessage message("GESL");
 			nlWrite(message, serial, charId);
 
 			_CallbackClient->send(message);
@@ -6243,6 +6302,30 @@ namespace RSMGR
 #endif
 
 			callback->on_sessionList(from, charId, sessions);
+		}
+
+		static void cb_editSessionList (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
+		{
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWebClient::cb_editSessionList received from class '%s'", typeid(netbase).name());
+#endif
+			ICallbackClientAdaptor *adaptor = static_cast< ICallbackClientAdaptor *>(netbase.getUserData());
+
+			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
+
+			if (callback  == nullptr)
+				return;
+			uint32	charId;
+			std::vector < TSessionDesc >	sessions;
+			nlRead(message, serial, charId);
+			nlRead(message, serialCont, sessions);
+
+
+#ifdef NL_DEBUG
+			nldebug("CSessionBrowserServerWebClient::cb_editSessionList : calling on_editSessionList");
+#endif
+
+			callback->on_editSessionList(from, charId, sessions);
 		}
 
 		static void cb_charList (NLNET::CMessage &message, NLNET::TSockId from, NLNET::CCallbackNetBase &netbase)
@@ -6434,6 +6517,9 @@ namespace RSMGR
 
 		// Return the list of available session
 		virtual void on_sessionList(NLNET::TSockId from, uint32 charId, const std::vector < TSessionDesc > &sessions) =0;
+
+		// Return the list of the edit sessions the character is invited to
+		virtual void on_editSessionList(NLNET::TSockId from, uint32 charId, const std::vector < TSessionDesc > &sessions) =0;
 
 		// Return the list of player characters in the session
 		virtual void on_charList(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::vector < TCharDesc > &characters) =0;

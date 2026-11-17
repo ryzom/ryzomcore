@@ -57,6 +57,7 @@ public:
 	virtual void on_getShardsResult(NLNET::TSockId from, uint32 userId, const std::string &result) NL_OVERRIDE;
 	virtual void on_CSessionBrowserServerWebClient_Disconnection(NLNET::TSockId from) NL_OVERRIDE;
 	virtual void on_sessionList(NLNET::TSockId from, uint32 charId, const std::vector < RSMGR::TSessionDesc > &sessions) NL_OVERRIDE;
+	virtual void on_editSessionList(NLNET::TSockId from, uint32 charId, const std::vector < RSMGR::TSessionDesc > &sessions) NL_OVERRIDE;
 	virtual void on_charList(NLNET::TSockId from, uint32 charId, TSessionId sessionId, const std::vector < RSMGR::TCharDesc > &charDescs) NL_OVERRIDE;
 	virtual void on_playerRatings(NLNET::TSockId from, uint32 charId, bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection) NL_OVERRIDE;
 	virtual void on_ringRatings(NLNET::TSockId from, uint32 charId, uint32 authorRating, uint32 AMRating, uint32 masterlessRating) NL_OVERRIDE;
@@ -84,8 +85,9 @@ public:
 	  */
 	TInviteResult inviteCharacterByNameAndTellRefusal(const std::string &charName, NLGUI::CCtrlBase *caller);
 
-	/** An invitation that is granted is told: a line of system info for the player, and for the character invited
-	  * into an animation session a tell that says where the session is found.
+	/** An invitation that is granted is told: a line of system info for the player, and for the invited character
+	  * a tell that says where the session is found (the list of a Ring terminal, for an animation session and for
+	  * an edit session, each with its text).
 	  */
 	void tellCharacterInvited(const std::string &charName, bool animationSession);
 
@@ -153,7 +155,11 @@ private:
 	void callRingPlayerInfoMethod(const char *name, int numArg, int numResult);
 	void callScenarioScoresMethod(const char *name, int numArg, int numResult);
 
-	void fill(const std::vector <RSMGR::TSessionDesc > &sessions);
+	/// Fill the window of the Ring terminal with the animation sessions and the edit sessions the character is invited to (its script sorts them)
+	void fill(const std::vector <RSMGR::TSessionDesc > &sessions, const std::vector <RSMGR::TSessionDesc > &editSessions);
+	/// The two lists as the session browser service last sent them (it answers each with a message of its own)
+	std::vector <RSMGR::TSessionDesc > _LastSessions;
+	std::vector <RSMGR::TSessionDesc > _LastEditSessions;
 	void charsFill(const std::vector <RSMGR::TCharDesc > &chars);
 	void ringStatsFill();
 	void playerRatingFill(bool scenarioRated, uint32 rateFun, uint32 rateDifficulty, uint32 rateAccessibility, uint32 rateOriginality, uint32 rateDirection);

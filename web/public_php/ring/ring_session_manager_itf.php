@@ -1603,6 +1603,19 @@
 
 		}
 
+		function getEditSessionList($charId)
+		{
+			$msg = new CMessage;
+			$msg->setName("GESL");
+
+
+			$msg->serialUint32($charId);
+	
+			return parent::sendMessage($msg);
+
+
+		}
+
 		function getCharList($charId, $sessionId)
 		{
 			$msg = new CMessage;
@@ -1724,6 +1737,9 @@
 			case "SL":
 				$this->sessionList_skel($message);
 				break;
+			case "ESL":
+				$this->editSessionList_skel($message);
+				break;
 			case "CL":
 				$this->charList_skel($message);
 				break;
@@ -1756,6 +1772,14 @@
 				$message->serialUint32($sessions);
 	
 			$this->sessionList($charId, $sessions);
+		}
+
+		function editSessionList_skel(&$message)
+		{
+			$message->serialUint32($charId);
+				$message->serialUint32($sessions);
+	
+			$this->editSessionList($charId, $sessions);
 		}
 
 		function charList_skel(&$message)
@@ -1833,6 +1857,12 @@
 		// Return the list of available session
 
 		function sessionList($charId, $sessions)
+		{
+		}
+
+		// Return the list of the edit sessions the character is invited to
+
+		function editSessionList($charId, $sessions)
 		{
 		}
 

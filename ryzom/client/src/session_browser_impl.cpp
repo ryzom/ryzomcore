@@ -130,6 +130,10 @@ int CSessionBrowserImpl::luaGetRingSessionList(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getRingSessionList", 0);
 	CSessionBrowserImpl::getInstance().getRingRatings(getCharId());
 	CSessionBrowserImpl::getInstance().getSessionList(getCharId());
+	// The edit sessions the character is invited to are asked for with a request of their own, which a session
+	// browser service older than the request leaves without an answer: the window then lists the animation
+	// sessions only, as it did.
+	CSessionBrowserImpl::getInstance().getEditSessionList(getCharId());
 	return 0;
 }
 
@@ -286,6 +290,10 @@ int CSessionBrowserImpl::luaGetScenarioSavePath(CLuaState &ls)
 void CSessionBrowserImpl::on_connectionFailed()
 {
 	nldebug("SB: on_connectionFailed");
+	// (the lists last received are those of a connection that is gone: the next one may be to a service that
+	// does not answer the request for the edit sessions)
+	_LastSessions.clear();
+	_LastEditSessions.clear();
 	callRingAccessPointMethod("onConnectionFailed", 0, 0);
 }
 
@@ -329,12 +337,11 @@ bool CSessionBrowserImpl::inviteCharacterByNameAndWait(const std::string &charNa
 // ****************************************************************************
 void CSessionBrowserImpl::tellCharacterInvited(const std::string &charName, bool animationSession)
 {
-	// The player invited into an animation session gets a tell: it says that the session is in the list of
-	// the Ring terminals, and its tag makes the list of his terminal ask for the sessions again
-	// (CInterfaceChatDisplayer::displayTell). An edit session is in no terminal: the editor invited into
-	// one gets no tell that would send him there.
-	if (animationSession)
-		ChatMngr.tell(charName, CI18N::get("uiRingInviteNotification"));
+	// The invited player gets a tell: it says that the session is in the list of the Ring terminals, and its
+	// tag makes the list of his terminal ask for the sessions again (CInterfaceChatDisplayer::displayTell).
+	// The terminals list the edit sessions a character is invited to with the animation sessions: the editor
+	// invited into one is told so with a text of its own.
+	ChatMngr.tell(charName, CI18N::get(animationSession ? "uiRingInviteNotification" : "uiRingInviteEditNotification"));
 	CInterfaceManager::getInstance()->displaySystemInfo("@{6F6F}" + charName + " @{FFFF}" + CI18N::get("uiRingInvitationSent"), "BC");
 }
 
@@ -466,6 +473,8 @@ void CSessionBrowserImpl::on_getShardsResult(NLNET::TSockId /* from */, uint32 /
 void CSessionBrowserImpl::on_CSessionBrowserServerWebClient_Disconnection(NLNET::TSockId /* from */)
 {
 	nldebug("SB: on_CSessionBrowserServerWebClient_Disconnection");
+	_LastSessions.clear();
+	_LastEditSessions.clear();
 	callRingAccessPointMethod("onDisconnection", 0, 0);
 }
 
@@ -473,11 +482,24 @@ void CSessionBrowserImpl::on_CSessionBrowserServerWebClient_Disconnection(NLNET:
 void CSessionBrowserImpl::on_sessionList(NLNET::TSockId /* from */, uint32 /* charId */, const std::vector <RSMGR::TSessionDesc > &sessions)
 {
 	nldebug("SB: on_sessionList");
-	fill(sessions);
+	// The window shows the animation sessions and the edit sessions the character is invited to
+	// (on_editSessionList); its script sorts the lines, and an edit session is among the sessions the character
+	// is invited to. The two lists are asked for together and answered one after the other: the window is
+	// filled when each arrives, with the other list as it was last received.
+	_LastSessions = sessions;
+	fill(_LastSessions, _LastEditSessions);
 }
 
 // ****************************************************************************
-void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &sessions)
+void CSessionBrowserImpl::on_editSessionList(NLNET::TSockId /* from */, uint32 /* charId */, const std::vector <RSMGR::TSessionDesc > &sessions)
+{
+	nldebug("SB: on_editSessionList");
+	_LastEditSessions = sessions;
+	fill(_LastSessions, _LastEditSessions);
+}
+
+// ****************************************************************************
+void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &sessions, const std::vector <RSMGR::TSessionDesc > &editSessions)
 {
 	// build datas & send to lua
 	nlassert(_Lua);
@@ -485,9 +507,12 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop());
 		_Lua->newTable();
-		for (uint k = 0; k < sessions.size(); ++k)
+		const uint count = (uint)(sessions.size() + editSessions.size());
+		for (uint k = 0; k < count; ++k)
 		{
-			const RSMGR::TSessionDesc &sd = sessions[k];
+			// the animation sessions, then the edit sessions the character is invited to
+			const bool editSession = k >= sessions.size();
+			const RSMGR::TSessionDesc &sd = editSession ? editSessions[k - sessions.size()] : sessions[k];
 			_Lua->newTable();
 			CLuaObject session(*_Lua);
 			session.setValue("Id",					sd.getSessionId().asInt());
@@ -497,12 +522,14 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 			session.setValue("Level",				(uint32) sd.getSessionLevel().getValue());
 			session.setValue("Language",			sd.getLanguage());
 
-			uint flags = (sd.getAnimMode().getValue() == RSMGR::TAnimMode::am_dm ? (uint) 1 : 0) |
+			// (an edit session has no animator: the animation mode it was scheduled with says nothing)
+			uint flags = (!editSession && sd.getAnimMode().getValue() == RSMGR::TAnimMode::am_dm ? (uint) 1 : 0) |
 						 (sd.getRequesterCharInvited()                           ? (uint) 2 : 0);
 			if(sd.getRequesterCharKicked())
 				flags = (uint) 4;
 
 			session.setValue("Flags",				flags);
+			session.setValue("EditSession",			editSession);
 			session.setValue("PlayerCount",			sd.getNbConnectedPlayer());
 			session.setValue("AllowFreeTrial",		sd.getAllowFreeTrial());
 
@@ -632,7 +659,7 @@ void CSessionBrowserImpl::testFill()
 	sessions.push_back(buildSession(516, "_titi'", "Titi's scenario", "Un peu de RP", 5, 4, "en", refTime - 2000000, true, true));
 	sessions.push_back(buildSession(517, "_bob4", "Yubo's back", "Chasse aux yubos", 5, 10, "fr", refTime - 3000000, true, true));
 	sessions.push_back(buildSession(519, "_nico4", "Nico test", "Scenario de test de nico", 5, 3, "en", refTime - 5000000, true, true));
-	fill(sessions);
+	fill(sessions, std::vector <RSMGR::TSessionDesc >());
 }
 
 // ****************************************************************************

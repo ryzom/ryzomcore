@@ -258,6 +258,8 @@ namespace R2
 		bool	_DMLess;
 		//
 		std::string	_MissionTag;
+		// True for a scenario that trial accounts may play (its header says NevraxScenario and TrialAllowed)
+		bool	_TrialAllowed;
 	public:
 		//
 		const NLMISC::CHashKeyMD5 &getScenarioKey() const
@@ -364,6 +366,16 @@ namespace R2
 		{
 				_MissionTag = value;
 		}
+		// True for a scenario that trial accounts may play (its header says NevraxScenario and TrialAllowed)
+		bool getTrialAllowed() const
+		{
+			return _TrialAllowed;
+		}
+
+		void setTrialAllowed(bool value)
+		{
+				_TrialAllowed = value;
+		}
 
 		bool operator == (const TRunningScenarioInfo &other) const
 		{
@@ -374,13 +386,17 @@ namespace R2
 				&& _ScenarioAuthorName == other._ScenarioAuthorName
 				&& _SessionAnimatorCharId == other._SessionAnimatorCharId
 				&& _DMLess == other._DMLess
-				&& _MissionTag == other._MissionTag;
+				&& _MissionTag == other._MissionTag
+				&& _TrialAllowed == other._TrialAllowed;
 		}
 
 
 		// constructor
 		TRunningScenarioInfo()
 		{
+			// Default initialisation
+			_TrialAllowed = false;
+
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -393,6 +409,7 @@ namespace R2
 			s.serial(_SessionAnimatorCharId);
 			s.serial(_DMLess);
 			s.serial(_MissionTag);
+			s.serial(_TrialAllowed);
 		}
 
 

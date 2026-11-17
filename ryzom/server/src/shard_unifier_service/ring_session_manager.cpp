@@ -1117,6 +1117,17 @@ restartLoop:
 
 				scenario = CScenario::load(_RingDb, scenarioId, __FILE__, __LINE__);
 				BOMB_IF(scenario == NULL, "Failed to load the scenario "<<scenarioId, return);
+
+				// Whether trial accounts may play the scenario is what the scenario service reads in the header of
+				// each start: the record follows the latest start (the update below stores it). The record is one
+				// per scenario key, and the checks of an invitation and of a join read it through the log of their
+				// session: two sessions that run the same key are both judged by the later start.
+				if (scenario->getAllowFreeTrial() != scenarioInfo.getTrialAllowed())
+				{
+					nlinfo("RSM : scenarioStarted : session %u starts the scenario %u, which is %s to trial accounts from now on",
+						sessionId.asInt(), scenario->getObjectId(), scenarioInfo.getTrialAllowed() ? "open" : "closed");
+					scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
+				}
 			}
 			else
 			{
@@ -1131,6 +1142,8 @@ restartLoop:
 				scenario->setOrientation(session->getOrientation());
 				scenario->setRRPTotal(0);
 				scenario->setTitle(session->getTitle());
+				// (the free trial checks of an invitation and of a join read it, and the session list shows it)
+				scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
 
 				scenario->create(_RingDb);
 			}
@@ -1272,6 +1285,9 @@ restartLoop:
 				scenario->setOrientation(session->getOrientation());
 				scenario->setRRPTotal(0);
 				scenario->setTitle(session->getTitle());
+				// (as scenarioStarted records it. A record that is there keeps what the latest start said: the info
+				// of an end is the one of the start of its session, which can be older.)
+				scenario->setAllowFreeTrial(scenarioInfo.getTrialAllowed());
 
 				scenario->create(_RingDb);
 			}
@@ -1844,7 +1860,11 @@ endOfWelcomeUserResult:
 			session->setEstimatedDuration(ed);
 			session->setFinalDuration(0);
 			session->setFolderId(0);
-			session->setAnimMode(animMode);
+			// The animation mode follows the rule type: a mastered session (rt_strict) is one an animator runs, a
+			// masterless one (rt_liberal) runs by itself. The animMode of the request is not stored: the client and
+			// the ring web pages send am_dm with every session, whatever its rules, so it says nothing, and the
+			// session list would show every session as one with an animator.
+			session->setAnimMode(TAnimMode(rt == TRuleType::rt_liberal ? TAnimMode::am_autonomous : TAnimMode::am_dm));
 			session->setRaceFilter(raceFilter);
 			session->setReligionFilter(religionFilter);
 			session->setGuildFilter(guildFilter);
