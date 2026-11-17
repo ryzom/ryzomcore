@@ -162,6 +162,13 @@ uint	CDriverGL3::getMaxLightTableSize() const
 void	CDriverGL3::enableLightTableMode(bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_enableLightTableMode)
+	if (_LightTableMode != enable)
+	{
+		// The two modes share one light block, which holds the lights of the mode
+		// that wrote it last: the mode that begins writes its own
+		_LightTableDirty = true;
+		_UserLightUBODirty = true;
+	}
 	_LightTableMode = enable;
 }
 

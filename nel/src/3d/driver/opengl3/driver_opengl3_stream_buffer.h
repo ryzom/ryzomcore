@@ -63,8 +63,8 @@ struct CStreamHandleGL3
 };
 
 /**
- * Buffer memory for data that is written once and drawn from soon after:
- * uniform blocks, and vertices and indices that change every frame.
+ * Buffer memory for data that is written once and drawn from soon after. The
+ * driver keeps its uniform blocks in one.
  *
  * A stream is a ring of chunks, a chunk is one GL buffer. A write takes the
  * next free bytes of the head chunk. Nothing is ever written over a range that
@@ -103,9 +103,8 @@ struct CStreamHandleGL3
  *    persistent bit, so the mapping cannot be kept;
  *  - TierSubData: glBufferSubData, where buffers cannot really be mapped.
  *
- * One stream serves one binding target. A buffer of a stream is never bound
- * to another target (WebGL does not allow a buffer to hold both indices and
- * other data).
+ * One stream serves one binding target, which init() is given together with
+ * the alignment of the ranges. Its buffers are never bound to another target.
  */
 class CStreamBufferGL3
 {
@@ -124,9 +123,9 @@ public:
 	 * Create the first chunk. Needs the GL context and the loaded GL functions.
 	 * \param states the state cache of the driver, which the stream binds its buffers through
 	 * \param name what the stream holds, for the log
-	 * \param target the binding target of the buffers (GL_UNIFORM_BUFFER, ...)
+	 * \param target the binding target of the buffers
 	 * \param chunkSize size of a chunk in bytes; a larger write gets a chunk of its own size
-	 * \param alignment every range starts at a multiple of this, unless the write asks for another alignment
+	 * \param alignment every range starts at a multiple of this
 	 * \param minChunks unused chunks are deleted down to this number
 	 * \param maxChunks more chunks than this are only created when one draw needs them
 	 * \param bufferStorage glBufferStorage is available (CGlExtensions::ARBBufferStorage)
@@ -148,11 +147,11 @@ public:
 	 * Reserve a range of allocSize bytes and copy size bytes of data to its start.
 	 * allocSize is larger than size for a block of which only the first part is
 	 * known; the rest of the range then holds undefined bytes. size may be 0.
-	 * \param alignment 0 for the alignment of the stream
-	 * \return the handle of the range. It is not valid when the write failed,
-	 * which the stream has logged as a warning.
+	 * \return the handle of the range. It is not valid when the write failed.
+	 * The stream logs a failure as a warning once, and again when the call that
+	 * failed has worked in between.
 	 */
-	CStreamHandleGL3 write(const void *data, uint32 size, uint32 allocSize, uint32 alignment = 0);
+	CStreamHandleGL3 write(const void *data, uint32 size, uint32 allocSize);
 
 	/// True while the handle may be used: its range still holds what was written
 	/// to it, and the stream has not asked for the data to be written elsewhere.
@@ -197,13 +196,15 @@ public:
 	{
 		uint32 Writes; // calls of write()
 		uint64 Bytes; // bytes copied
+		uint64 Reserved; // bytes the head went forward by: the ranges, the gaps before them for the alignment, and what was left of a chunk when the head moved on
 		uint32 Reuses; // chunks written again in place
-		uint32 Evacuations; // times a chunk held by kept handles had them made stale
+		uint32 Evacuations; // chunks held by kept handles that had them made stale
 		uint32 Discards; // chunks that got new storage because the GPU was not done with them
 
 		CStats()
 		    : Writes(0)
 		    , Bytes(0)
+		    , Reserved(0)
 		    , Reuses(0)
 		    , Evacuations(0)
 		    , Discards(0)
@@ -230,6 +231,7 @@ private:
 		uint64 LastFrame; // last frame that wrote to the chunk or drew from it
 		uint64 LastWriteFrame; // last frame that wrote to the chunk
 		uint64 LastDraw; // last draw that wrote to the chunk or drew from it, see nextDraw()
+		bool Evacuated; // the handles kept on the chunk were made stale, and nothing was written to it since
 
 		CChunk()
 		    : Buffer(0)
@@ -239,6 +241,7 @@ private:
 		    , LastFrame(0)
 		    , LastWriteFrame(0)
 		    , LastDraw(0)
+		    , Evacuated(false)
 		{
 		}
 	};
@@ -259,8 +262,14 @@ private:
 	void nextGeneration(CChunk &chunk);
 	/// The chunk can be written again in place: the GPU has finished every frame that used it
 	inline bool isRetired(const CChunk &chunk) const { return !chunk.Buffer || chunk.LastFrame < m_FrameInFlight; }
-	/// Bind a buffer to the target of the stream, through the state cache where it tracks the target
+	/// Bind a buffer to the target of the stream
 	void bindBuffer(GLuint buffer);
+	/// Tell the state cache that a buffer of the stream is gone
+	void bufferDeleted(GLuint buffer);
+	/// True when a failure is to be logged: the first one, and the first one after the flag was cleared
+	bool warnFailure(bool &warned);
+	/// Mark a chunk as written to by the current frame and the current draw
+	void markWritten(CChunk &chunk);
 
 private:
 	CDriverGLStates3 *m_States;
@@ -269,6 +278,10 @@ private:
 	TTier m_Tier;
 	bool m_Initialized;
 	bool m_OverLimitWarned;
+	// A failure has been logged and the same call has not worked since:
+	// creating the storage of a chunk, mapping and unmapping a range
+	bool m_StorageFailureWarned;
+	bool m_MapFailureWarned;
 
 	uint32 m_ChunkSize;
 	uint32 m_Alignment;

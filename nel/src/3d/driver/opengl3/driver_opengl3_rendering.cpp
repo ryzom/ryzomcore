@@ -176,7 +176,9 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 {
 	H_AUTO_OGL(CDriverGL3_renderSimpleTriangles);
 
-	setupBuiltinPrograms();
+	// Without its programs and uniform blocks set up, the draw would read what an earlier draw left bound
+	if (!setupBuiltinPrograms())
+		return false;
 
 	nlassert(ntris>0);
 
