@@ -431,8 +431,9 @@ public:
 	// @}
 
    /**	setup ptrs allocated by createVBHard()
+	 *	\param size the bytes the buffer object was created with: those of the capacity of the vertex buffer
 	 */
-	void					initGL(CVertexArrayRangeMapObjectATI *var, uint vertexObjectID);
+	void					initGL(CVertexArrayRangeMapObjectATI *var, uint vertexObjectID, uint size);
 
 
 public:
@@ -445,6 +446,9 @@ public:
 private:
 	void						   *_VertexPtr; // pointer on current datas. Null if not locked
 	CVertexArrayRangeMapObjectATI  *_VertexArrayRange;
+	// The bytes of the buffer object: those of the capacity of the vertex buffer when this object was made.
+	// The engine writes up to that many through a lock, whatever the number of vertices in use.
+	uint							_Size;
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8>				_DummyVB;
 	// Invalidate the buffer (when it is lost, or when a lock fails)
@@ -545,8 +549,9 @@ public:
 	// @}
 
    /**	setup ptrs allocated by createVBHard()
+	 *	\param size the bytes the buffer object was created with: those of the capacity of the vertex buffer
 	 */
-	void					initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TBufferUsage memType);
+	void					initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TBufferUsage memType, uint size);
 
 
 public:
@@ -565,6 +570,9 @@ private:
 	CVertexArrayRangeARB			*_VertexArrayRange;
 	CVertexBuffer::TBufferUsage		_MemType;
 	void							*_VertexPtr; // pointer on current datas. Null if not locked
+	// The bytes of the buffer object: those of the capacity of the vertex buffer when this object was made.
+	// The engine writes up to that many through a lock, whatever the number of vertices in use.
+	uint							_Size;
 #ifdef USE_OPENGLES
 	uint8							*_Buffer;
 	uint32							_BufferSize;
