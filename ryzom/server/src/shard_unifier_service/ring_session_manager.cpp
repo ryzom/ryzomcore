@@ -3673,13 +3673,36 @@ endOfWelcomeUserResult:
 					}
 				}
 
+				// The kick holds for the account: a character is kept out as well while another character of its
+				// account is kicked from the session (the ids of the characters of an account are the sixteen that
+				// follow its user id shifted by four bits). It is tested here, at the join, and nowhere written: the
+				// participations of the other characters stay as they are, so the list of the session shows the
+				// kick on the character that was kicked and says nothing about which characters share its account,
+				// and an invitation of one of them is taken as any other.
+				if (!kicked)
+				{
+					CSString kickQuery;
+					kickQuery << "SELECT COUNT(*) FROM session_participant WHERE session_id = " << sessionId.asInt();
+					kickQuery << " AND kicked <> 0 AND char_id >= " << (userId << 4) << " AND char_id <= " << ((userId << 4) + 15);
+					BOMB_IF(!_RingDb.query(kickQuery), "RSM : joinSession : failed to look for the kicks of the account of char " << charId << " in session " << sessionId,
+					    joinSessionResult(from, charId >> 4, sessionId, 11, "Database error", TSessionPartStatus::invalid_val); return);
+					CUniquePtr<MSW::CStoreResult> kickResult(_RingDb.storeResult());
+					uint32 nbKicks = 0;
+					if (kickResult->getNumRows() == 1)
+					{
+						kickResult->fetchRow();
+						kickResult->getField(0, nbKicks);
+					}
+					kicked = nbKicks > 0;
+				}
+
 				// A character that was kicked from the session stays out of it until it is unkicked. The session
 				// server lets in whoever is announced to it, so this is the place that refuses: without it a kick
 				// lasts until the character asks to join again. The owner of a session is never kicked from it, and
 				// an account that enters any session by its privilege is not held back by a kick either.
 				if (kicked && session->getOwnerId() != charId && !hasSessionAccessPrivilege(userId))
 				{
-					nlinfo("RSM : char %u asks to join session %u, from which it was kicked: refused", charId, sessionId.asInt());
+					nlinfo("RSM : char %u asks to join session %u, from which it or another character of its account was kicked: refused", charId, sessionId.asInt());
 					joinSessionResult(from, charId >> 4, sessionId, 21, "Character is kicked from the session", TSessionPartStatus::invalid_val);
 					return;
 				}
