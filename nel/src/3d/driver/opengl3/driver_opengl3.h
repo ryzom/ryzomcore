@@ -589,6 +589,10 @@ public:
 	bool					setupUniforms();
 	void					setupUniforms(TProgram program);
 	void					setupInitialUniforms(IProgram *program);
+#ifdef NL_DEBUG
+	/// Debug builds: warn once when a program of the draw has a uniform block that setupUniforms() leaves out for this draw
+	void					checkUniformBlocksCovered(IProgram *program);
+#endif
 
 	void					generateBuiltinVertexProgram();
 	void					enableFogVP(bool enable);
@@ -1822,6 +1826,12 @@ public:
 	void setObjectBlockIndex(GLuint idx) { objectBlockIndex = idx; }
 	GLuint getMaterialBlockIndex() const { return materialBlockIndex; }
 	void setMaterialBlockIndex(GLuint idx) { materialBlockIndex = idx; }
+
+#ifdef NL_DEBUG
+	// For CDriverGL3::checkUniformBlocksCovered
+	bool HasUserBlock; // The program has at least one of the user uniform blocks of its source
+	uint BlockCheckWarned; // One bit per uniform block that the check has reported for this program
+#endif
 
 	// Linked program cache for user VP + mega PP combinations
 	// Indexed by [fogOrPpl][cube][specular][clip] (clip = hwClip|ppClip,

@@ -1594,8 +1594,68 @@ bool CDriverGL3::setupBuiltinPixelProgram(CPixelProgram *effectivePP)
 	return true;
 }
 
+#ifdef NL_DEBUG
+void CDriverGL3::checkUniformBlocksCovered(IProgram *program)
+{
+	if (!program)
+		return;
+	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>((IProgramDrvInfos *)program->m_DrvInfo);
+	if (!drvInfo)
+		return;
+
+	// The uniform blocks live in a stream that writes over a range once the draws
+	// that were given it have finished. A block that a program has, and that
+	// setupUniforms() does not write or look up for the draw, stays bound to the
+	// range of an earlier draw and reads what the stream put there since.
+	// These are the conditions of setupUniforms(), block by block.
+	const bool builtin = !(m_ProgramNoUniforms[VertexProgram] || m_ProgramNoBuiltinUniforms[VertexProgram])
+	    || !(m_ProgramNoUniforms[PixelProgram] || m_ProgramNoBuiltinUniforms[PixelProgram]);
+	const bool covered[] = {
+		builtin && (m_ProgramUsesLightTableUBO[VertexProgram] || m_ProgramUsesLightTableUBO[PixelProgram]),
+		builtin && (m_ProgramUsesCameraUBO[VertexProgram] || m_ProgramUsesCameraUBO[PixelProgram]),
+		builtin && (m_ProgramUsesObjectUBO[VertexProgram] || m_ProgramUsesObjectUBO[PixelProgram]),
+		builtin && (m_ProgramUsesMaterialUBO[VertexProgram] || m_ProgramUsesMaterialUBO[PixelProgram]),
+		!m_ProgramNoUniforms[VertexProgram] || !m_ProgramNoUniforms[PixelProgram],
+	};
+	// What the linked program has, as setupInitialUniforms() found it
+	const bool present[] = {
+		drvInfo->getLightTableBlockIndex() != GL_INVALID_INDEX,
+		drvInfo->getCameraBlockIndex() != GL_INVALID_INDEX,
+		drvInfo->getObjectBlockIndex() != GL_INVALID_INDEX,
+		drvInfo->getMaterialBlockIndex() != GL_INVALID_INDEX,
+		drvInfo->HasUserBlock,
+	};
+	static const char *const s_BlockName[] = { "NlLightTable", "NlCamera", "NlModel", "NlMaterial", "of a user uniform buffer" };
+
+	for (uint i = 0; i < sizeof(present) / sizeof(present[0]); ++i)
+	{
+		if (present[i] && !covered[i] && !(drvInfo->BlockCheckWarned & (1 << i)))
+		{
+			// Once per program and block
+			drvInfo->BlockCheckWarned |= (1 << i);
+			IProgram::CSource *src = program->source();
+			nlwarning("GL3: program '%s' has the uniform block %s, and the flags of the programs of this draw do not have it written: the draw reads what an earlier draw left bound",
+			    src ? src->DisplayName.c_str() : "?", s_BlockName[i]);
+		}
+	}
+}
+#endif
+
 bool CDriverGL3::setupUniforms()
 {
+#ifdef NL_DEBUG
+	// Every uniform block that a program of this draw has is one that is brought up to date below
+	if (m_DriverShaderProgram)
+	{
+		checkUniformBlocksCovered(m_DriverShaderProgram);
+	}
+	else
+	{
+		checkUniformBlocksCovered(m_DriverVertexProgram);
+		checkUniformBlocksCovered(m_DriverPixelProgram);
+	}
+#endif
+
 	// Stage camera data (fog, view matrix, clip planes) when dirty.
 	// Both UBO upload and SSO individual uniforms read from _CameraUBOData.
 	if (_CameraUBODirty)
@@ -2378,6 +2438,9 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 
 		// Resolve and bind user UBO blocks (VP/PP) — binding points set at link time
 		IProgram::CSource *src = program->source();
+#ifdef NL_DEBUG
+		GLint knownBlocks = 0;
+#endif
 		if (src)
 		{
 			static const sint s_UBBindingToGL[] = {
@@ -2395,9 +2458,29 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 					: ubf.Name;
 				GLuint blockIdx = nglGetUniformBlockIndex(id, blockName.c_str());
 				if (blockIdx != GL_INVALID_INDEX)
+				{
 					nglUniformBlockBinding(id, blockIdx, s_UBBindingToGL[it->first]);
+#ifdef NL_DEBUG
+					drvInfo->HasUserBlock = true;
+					++knownBlocks;
+#endif
+				}
 			}
 		}
+
+#ifdef NL_DEBUG
+		// A uniform block of the program that is none of the above gets no binding point
+		// and no data: it reads whatever is at binding point 0
+		knownBlocks += (lightTableBlock != GL_INVALID_INDEX ? 1 : 0) + (cameraBlock != GL_INVALID_INDEX ? 1 : 0)
+		    + (objectBlock != GL_INVALID_INDEX ? 1 : 0) + (materialBlock != GL_INVALID_INDEX ? 1 : 0);
+		GLint activeBlocks = 0;
+		nglGetProgramiv(id, GL_ACTIVE_UNIFORM_BLOCKS, &activeBlocks);
+		if (activeBlocks > knownBlocks)
+		{
+			nlwarning("GL3: program '%s' has %d uniform blocks, of which %d are neither builtin blocks nor uniform buffers of its source: nothing writes or binds them",
+			    src ? src->DisplayName.c_str() : "?", (int)activeBlocks, (int)(activeBlocks - knownBlocks));
+		}
+#endif
 	}
 }
 
@@ -2967,6 +3050,10 @@ IProgramDrvInfos(drv, it)
 	cameraBlockIndex = GL_INVALID_INDEX;
 	objectBlockIndex = GL_INVALID_INDEX;
 	materialBlockIndex = GL_INVALID_INDEX;
+#ifdef NL_DEBUG
+	HasUserBlock = false;
+	BlockCheckWarned = 0;
+#endif
 	isNelvpConverted = false;
 	isInsertProgram = false;
 }
