@@ -588,19 +588,24 @@ bool CDriverGL3::setupDisplay()
 			    && _IndexStream.init(&_DriverGLStates, "index", GL_ELEMENT_ARRAY_BUFFER,
 			        NL3D_GL3_INDEX_STREAM_CHUNK_SIZE, NL3D_GL3_INDEX_STREAM_ALIGNMENT,
 			        NL3D_GL3_INDEX_STREAM_MIN_CHUNKS, NL3D_GL3_INDEX_STREAM_MAX_CHUNKS,
+			        _SwapBufferCounter, _SwapBufferInFlight)
+			    && _VertexStream.init(&_DriverGLStates, "vertex", GL_ARRAY_BUFFER,
+			        NL3D_GL3_VERTEX_STREAM_CHUNK_SIZE, NL3D_GL3_VERTEX_STREAM_ALIGNMENT,
+			        NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS, NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS,
 			        _SwapBufferCounter, _SwapBufferInFlight);
 			if (!_StreamMode)
 			{
 				_UniformStream.release();
 				_IndexStream.release();
+				_VertexStream.release();
 			}
 			reason = "a stream buffer could not be created";
 		}
 #endif
 		if (_StreamMode)
-			nlinfo("3D: stream mode, the uniform blocks and the indices of the draws are written into stream buffers");
+			nlinfo("3D: stream mode, the uniform blocks, the indices of the draws and the vertices of the stream vertex buffers are written into stream buffers");
 		else
-			nlinfo("3D: per-buffer mode, every uniform block has a GL buffer of its own and the indices of the draws have one: %s", reason);
+			nlinfo("3D: per-buffer mode, the uniform blocks, the indices of the draws and the stream vertex buffers have GL buffers of their own: %s", reason);
 	}
 
 	nglGenBuffers(1, &_PixelUploadPBO);
@@ -957,6 +962,7 @@ bool CDriverGL3::swapBuffers()
 	// their chunks can be written again. Nothing to do for a stream that is not in use.
 	_UniformStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 	_IndexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
+	_VertexStream.frameSwapped(_SwapBufferCounter, _SwapBufferInFlight);
 #if NL3D_GL3_STREAM_STATS
 	displayStreamStats();
 #endif
@@ -993,6 +999,7 @@ void CDriverGL3::displayStreamStats()
 	{
 		displayOneStreamStats("uniform", _UniformStream, perFrame);
 		displayOneStreamStats("index", _IndexStream, perFrame);
+		displayOneStreamStats("vertex", _VertexStream, perFrame);
 	}
 	else
 	{
@@ -1057,6 +1064,9 @@ bool CDriverGL3::release()
 	releaseIndexBlock(_QuadIndices);
 	_UniformStream.release();
 	_IndexStream.release();
+	// The vertex buffers that have their vertices in the vertex stream are destroyed
+	// below. Their ranges go stale here, and they have nothing of their own to delete.
+	_VertexStream.release();
 	// Replaced by per-material UBO slots
 	// if (_OverrideMaterialUBOId)
 	// {

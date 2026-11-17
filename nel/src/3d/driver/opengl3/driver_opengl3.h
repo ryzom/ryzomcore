@@ -118,6 +118,12 @@ using NLMISC::CVector;
 #define NL3D_GL3_INDEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
 #define NL3D_GL3_INDEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when a single render call needs them
 
+// The stream that holds the vertices of the SmallStream and FullStream vertex buffers
+#define NL3D_GL3_VERTEX_STREAM_CHUNK_SIZE (4 * 1024 * 1024) // Bytes per chunk
+#define NL3D_GL3_VERTEX_STREAM_ALIGNMENT (16) // The vertices of a vertex buffer start at a multiple of this
+#define NL3D_GL3_VERTEX_STREAM_MIN_CHUNKS (2) // Unused chunks are deleted down to this number
+#define NL3D_GL3_VERTEX_STREAM_MAX_CHUNKS (32) // More chunks are only created when none can be given up
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -1534,7 +1540,11 @@ private:
 	CPtrSet<IVertexBufferGL3>		_VertexBufferGLSet;
 	friend class					CVertexBufferGL3;
 	friend class					CVertexBufferAMDPinned;
+	friend class					CVertexBufferStreamGL3;
 	friend class					CVBDrvInfosGL3;
+
+	// Stream mode: the vertices of the SmallStream and FullStream vertex buffers are in ranges of this stream
+	CStreamBufferGL3				_VertexStream;
 
 	// The VertexBufferHardGL activated.
 	IVertexBufferGL3					*_CurrentVertexBufferGL;
@@ -1773,7 +1783,8 @@ private:
 	 * Per-buffer mode (false): every owner of such data has a GL buffer of its own, which
 	 * gets new storage with the data for every write.
 	 * The code that uses the data does not know the mode: it goes through one function per
-	 * kind of data (useUniformBlock, useIndices).
+	 * kind of data (useUniformBlock, useIndices), or gets the object that does it for its
+	 * mode (createVertexBufferGL).
 	 */
 	bool _StreamMode;
 

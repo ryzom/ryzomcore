@@ -179,6 +179,10 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	// NB: must duplicate changes in activeVertexBufferHard()
 	uint32	flags;
 
+	// The draws that follow read this vertex buffer: the vertex stream no longer has
+	// to keep the vertices of the one that was active before
+	_VertexStream.nextDraw();
+
 	// setup
 	if (!setupVertexBuffer(VB))
 		return false;
@@ -242,7 +246,7 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 bool			CDriverGL3::supportVolatileVertexBuffer() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVolatileVertexBuffer)
-	return true; // Supported by GL_MAP_INVALIDATE_BUFFER_BIT
+	return true; // In stream mode by the vertex stream, in per-buffer mode by GL_MAP_INVALIDATE_BUFFER_BIT
 }
 
 
@@ -309,6 +313,11 @@ IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, 
 		))
 	{
 		result = new CVertexBufferAMDPinned(this, size, numVertices, preferred, vb);
+	}
+	else if (_StreamMode && (preferred == CVertexBuffer::SmallStream || preferred == CVertexBuffer::FullStream))
+	{
+		// The vertices are filled for every draw: they go into the vertex stream
+		result = new CVertexBufferStreamGL3(this, vb);
 	}
 	else
 	{
@@ -527,7 +536,8 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 	nlassert(info);
 	nlassert(info->_VBHard);
 
-	ptr = (uint8*)info->_VBHard->getPointer();
+	// The pointers of the values are offsets into the buffer
+	ptr = (uint8 *)info->_VBHard->getArrayPointer();
 	VertexObjectId = info->_VBHard->getGLuint();
 
 	// Get value pointer

@@ -747,6 +747,200 @@ void CVertexBufferAMDPinned::setFrameInFlight(uint64 swapBufferCounter)
 // ***************************************************************************
 // ***************************************************************************
 
+CVertexBufferStreamGL3::CVertexBufferStreamGL3(CDriverGL3 *drv, CVertexBuffer *vb)
+    : IVertexBufferGL3(drv, vb, IVertexBufferGL3::Stream)
+    , m_VertexPtr(nullptr)
+    , m_RangeLocked(false)
+    , m_Drawn(false)
+    , m_LostWarned(false)
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_CVertexBufferStreamGL3);
+}
+
+// ***************************************************************************
+
+CVertexBufferStreamGL3::~CVertexBufferStreamGL3()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_CVertexBufferStreamGL3Dtor);
+
+	// The range is not given back: the stream writes over it when its chunk comes round again
+	if (m_RangeLocked)
+		m_Driver->_VertexStream.unlock(m_Handle);
+}
+
+// ***************************************************************************
+
+void *CVertexBufferStreamGL3::lock()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_lock);
+
+	if (m_VertexPtr) return m_VertexPtr; // already locked
+
+	CStreamBufferGL3 &stream = m_Driver->_VertexStream;
+
+	uint32 size = VB->getNumVertices() * VB->getVertexSize();
+	if (!size)
+		size = 1; // a range has a size
+
+	const bool valid = stream.isValid(m_Handle);
+	if (valid && !m_Drawn && size <= m_Handle.Size)
+	{
+		// Nothing has drawn the vertices since they were written, so nothing reads the
+		// range: the caller goes on writing where it was
+		m_VertexPtr = stream.lock(m_Handle);
+		m_RangeLocked = true;
+		return m_VertexPtr;
+	}
+
+	// A new range. The one before is left to the draws that read it; and where the
+	// stream has given it to other data, there is nothing to go on with.
+	// When the range is only too small, what was written goes along: the old range
+	// is held while the stream makes room for the new one.
+	const bool grow = valid && !m_Drawn;
+	const uint8 *oldPtr = grow ? stream.lock(m_Handle) : nullptr;
+	CStreamHandleGL3 handle = stream.reserve(size);
+	if (stream.isValid(handle))
+	{
+		m_VertexPtr = stream.lock(handle);
+		m_RangeLocked = true;
+		if (grow)
+			memcpy(m_VertexPtr, oldPtr, m_Handle.Size);
+	}
+	if (grow)
+		stream.unlock(m_Handle);
+
+	if (!stream.isValid(handle))
+	{
+		// The stream has logged why. The caller gets memory to write to all the same,
+		// and the vertex buffer has no vertices to draw until a lock works.
+		m_Handle = CStreamHandleGL3();
+		m_DummyVB.resize(size);
+		m_VertexPtr = &m_DummyVB[0];
+		m_RangeLocked = false;
+		return m_VertexPtr;
+	}
+
+	m_Handle = handle;
+	m_Drawn = false;
+	return m_VertexPtr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::unlock()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_unlock);
+
+	if (m_RangeLocked)
+	{
+		m_Driver->_VertexStream.unlock(m_Handle);
+		m_RangeLocked = false;
+	}
+	m_VertexPtr = nullptr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::unlock(uint /* startVert */, uint /* endVert */)
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_unlock);
+
+	unlock();
+}
+
+// ***************************************************************************
+
+void *CVertexBufferStreamGL3::getPointer()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_getPointer);
+
+	return m_VertexPtr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::enable()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_enable);
+
+	if (m_Driver->_CurrentVertexBufferGL != this)
+	{
+		m_Driver->_CurrentVertexBufferGL = this;
+	}
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::disable()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_disable);
+
+	if (m_Driver->_CurrentVertexBufferGL != nullptr)
+	{
+		m_Driver->_CurrentVertexBufferGL = nullptr;
+	}
+}
+
+// ***************************************************************************
+
+GLuint CVertexBufferStreamGL3::getGLuint()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_getGLuint);
+
+	// Asked for when the vertex buffer is made the active one: from here on the draws
+	// may read the range, and the stream is told that the frame and the draw use it
+	CStreamBufferGL3 &stream = m_Driver->_VertexStream;
+	return stream.isValid(m_Handle) ? stream.use(m_Handle) : 0;
+}
+
+// ***************************************************************************
+
+void *CVertexBufferStreamGL3::getArrayPointer()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_getArrayPointer);
+
+	return (void *)(size_t)m_Handle.Offset;
+}
+
+// ***************************************************************************
+
+void CVertexBufferStreamGL3::setFrameInFlight(uint64 /* swapBufferCounter */)
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_setFrameInFlight);
+
+	// A draw has read the range: the next lock is to get another one, and the
+	// chunk is not to be written again before the GPU has finished this frame
+	m_Drawn = true;
+	CStreamBufferGL3 &stream = m_Driver->_VertexStream;
+	if (stream.isValid(m_Handle))
+		stream.use(m_Handle);
+}
+
+// ***************************************************************************
+
+bool CVertexBufferStreamGL3::isInvalid()
+{
+	H_AUTO_OGL(CVertexBufferStreamGL3_isInvalid);
+
+	if (m_Driver->_VertexStream.isValid(m_Handle))
+		return false;
+
+	// The stream has given the range to other data, or no lock has worked. Nothing
+	// is drawn, where garbage would be.
+	if (!m_LostWarned)
+	{
+		m_LostWarned = true;
+		nlwarning("3D: the vertex buffer '%s' is to be drawn with vertices that the driver no longer has, and is not drawn. "
+		          "A vertex buffer of the stream usages without local memory is to be filled in every frame it is drawn in",
+		    VB->getName().c_str());
+	}
+	return true;
+}
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
 } // NLDRIVERGL3
 } // NL3D
 

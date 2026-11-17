@@ -64,8 +64,9 @@ struct CStreamHandleGL3
 
 /**
  * Buffer memory for data that is written once and drawn from soon after. The
- * driver keeps its uniform blocks in one, and the indices of its draws in
- * another.
+ * driver keeps its uniform blocks in one, the indices of its draws in another,
+ * and the vertices of the vertex buffers that are filled for every draw in a
+ * third.
  *
  * A stream is a ring of chunks, a chunk is one GL buffer. A write takes the
  * next free bytes of the head chunk. Nothing is ever written over a range that
@@ -78,11 +79,14 @@ struct CStreamHandleGL3
  *    that the oldest chunk that the current draw does not use. It gets new
  *    storage (the storage the GPU still reads from stays alive in GL until it
  *    is done with it). This is what keeps the stream at its limit in a program
- *    that renders without ever swapping buffers, where no frame ever finishes;
+ *    that renders without ever swapping buffers, where no frame ever finishes.
+ *    A range in a chunk of the current frame that was written for a draw that
+ *    is still to come is gone with it; the stream says so in the log, once;
  *  - else, when the current draw uses every chunk, a new chunk past the limit,
  *    with a warning.
  * A chunk that nothing has used for a few hundred frames is deleted, down to
- * a minimum number of chunks.
+ * a minimum number of chunks. A chunk with a range that is being written
+ * through lock() is left alone by all of this.
  *
  * Each of these steps gives the chunk a new generation, which is how a handle
  * of an earlier write finds out that its data is gone.
@@ -144,6 +148,25 @@ public:
 	 */
 	CStreamHandleGL3 write(const void *data, uint32 size, uint32 allocSize);
 
+	/**
+	 * Reserve a range of size bytes for a caller that writes it through lock().
+	 * The range holds undefined bytes.
+	 * \return the handle of the range, not valid when the reservation failed (see write)
+	 */
+	CStreamHandleGL3 reserve(uint32 size);
+
+	/**
+	 * The memory of the range of a valid handle, to write to: it is memory of
+	 * the mapped GL buffer, and reading from it is slow. Until unlock() the
+	 * stream keeps the chunk as it is, whatever else it needs room for, so
+	 * that the pointer stays good and the handle valid. The range may be
+	 * locked again later to write more, as long as the handle is valid and no
+	 * draw has read the range: a draw may still be reading it otherwise.
+	 */
+	uint8 *lock(const CStreamHandleGL3 &handle);
+	/// The end of a lock(). The handle may have gone stale only through release().
+	void unlock(const CStreamHandleGL3 &handle);
+
 	/// True while the handle may be used: its range still holds what was written
 	/// to it, and the stream has not asked for the data to be written elsewhere.
 	inline bool isValid(const CStreamHandleGL3 &handle) const
@@ -185,8 +208,8 @@ public:
 #if NL3D_GL3_STREAM_STATS
 	struct CStats
 	{
-		uint32 Writes; // calls of write()
-		uint64 Bytes; // bytes copied
+		uint32 Writes; // ranges reserved, by write() and by reserve()
+		uint64 Bytes; // bytes copied by write(), and the sizes of the ranges that were locked
 		uint64 Reserved; // bytes the head went forward by: the ranges, the gaps before them for the alignment, and what was left of a chunk when the head moved on
 		uint32 Reuses; // chunks written again in place
 		uint32 Evacuations; // chunks held by kept handles that had them made stale
@@ -223,6 +246,7 @@ private:
 		uint64 LastWriteFrame; // last frame that wrote to the chunk
 		uint64 LastDraw; // last draw that wrote to the chunk or drew from it, see nextDraw()
 		bool Evacuated; // the handles kept on the chunk were made stale, and nothing was written to it since
+		uint32 Locks; // ranges of the chunk that are being written through lock()
 
 		CChunk()
 		    : Buffer(0)
@@ -233,6 +257,7 @@ private:
 		    , LastWriteFrame(0)
 		    , LastDraw(0)
 		    , Evacuated(false)
+		    , Locks(0)
 		{
 		}
 	};
@@ -249,8 +274,8 @@ private:
 	void destroyStorage(CChunk &chunk);
 	void releaseChunks();
 	void nextGeneration(CChunk &chunk);
-	/// The chunk can be written again in place: the GPU has finished every frame that used it
-	inline bool isRetired(const CChunk &chunk) const { return !chunk.Buffer || chunk.LastFrame < m_FrameInFlight; }
+	/// The chunk can be written again in place: the GPU has finished every frame that used it, and nothing is writing to it
+	inline bool isRetired(const CChunk &chunk) const { return !chunk.Locks && (!chunk.Buffer || chunk.LastFrame < m_FrameInFlight); }
 	/// Bind a buffer to the target of the stream
 	void bindBuffer(GLuint buffer);
 	/// Tell the state cache that a buffer of the stream is gone
@@ -266,6 +291,8 @@ private:
 	GLenum m_Target;
 	bool m_Initialized;
 	bool m_OverLimitWarned;
+	// The log has the line about a chunk of the current frame that got new storage at the limit
+	bool m_FrameLimitWarned;
 	// A failure to create the storage of a chunk has been logged, and no chunk got storage since
 	bool m_StorageFailureWarned;
 
