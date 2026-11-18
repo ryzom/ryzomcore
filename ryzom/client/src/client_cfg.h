@@ -179,6 +179,8 @@ struct CClientConfig
 	/// QUIC
 	bool			QuicConnection;
 	bool			QuicCertValidation;
+	/// Offer protocol level ryzomcore/4.2, with which the frontend sends some classes of messages on QUIC streams
+	bool			QuicStreams;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;

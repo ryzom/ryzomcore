@@ -34,6 +34,7 @@
 #include "game_share/action_disconnection.h"
 #include "game_share/action_position.h"
 #include "game_share/action_sync.h"
+#include "game_share/stream_record.h"
 #include "game_share/action_association.h"
 #include "game_share/action_dummy.h"
 #include "game_share/action_login.h"
@@ -2285,6 +2286,50 @@ void	CNetworkConnection::sendNormalMessage()
 
 bool	CNetworkConnection::stateConnected()
 {
+	bool stateBroke = receiveConnectedDatagrams();
+
+	// The messages on the streams come after those of the datagrams of this update, and only in this state, as the
+	// impulses: in the other states they wait in their stream, which loses nothing
+	if (_ConnectionState == Connected)
+		dispatchStreamRecords();
+
+	return stateBroke;
+}
+
+void CNetworkConnection::dispatchStreamRecords()
+{
+	if (!m_UseQuic || !m_QuicConnection.streams())
+		return;
+
+	// The classes in their order: the strings first, which the messages of the other classes refer to.
+	// One message is taken out at a time and nothing of the stream is held while its handler runs: a handler may call
+	// update() again (the progress bar of a teleport does), which then goes on with the next message of the class.
+	for (uint streamClass = 0; streamClass < (uint)CLFECOMMON::NbStreamClasses; ++streamClass)
+	{
+		while (_ConnectionState == Connected)
+		{
+			CBitMemStream msgin(true);
+			CQuicConnection::TStreamRecord res = m_QuicConnection.receiveStreamRecord(streamClass, msgin);
+			if (res == CQuicConnection::NoStreamRecord)
+				break;
+			if (res == CQuicConnection::StreamError)
+			{
+				// Messages are missing for good (the reason is in the log)
+				nlwarning("CNET[%p]: a stream of the QUIC connection cannot be read any further, disconnecting", this);
+				disconnect();
+				return;
+			}
+
+			statsReceive(msgin.length());
+			++_TotalMessages;
+			if (_ImpulseCallback != nullptr)
+				_ImpulseCallback(msgin, _LastReceivedNumber, _ImpulseArg);
+		}
+	}
+}
+
+bool	CNetworkConnection::receiveConnectedDatagrams()
+{
 	// if receives System PROBE
 	//    immediate state Probe
 	// else if receives Normal
@@ -3228,6 +3273,9 @@ void CNetworkConnection::resetSession()
 {
 	// Through limbo mode the connection is kept, still quitting: its packet numbers go on (see stateQuit)
 	TPacketNumber sendNumber = _CurrentSendNumber;
+
+	// and so do its streams, which may still carry messages of the session that ends (a new connection has new ones)
+	m_QuicConnection.endStreamSession();
 
 	// Reset data
 	_ImpulseDecoder.reset();

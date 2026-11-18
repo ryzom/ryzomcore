@@ -857,6 +857,12 @@ private:
 	void						receiveNormalMessage(NLMISC::CBitMemStream &msgin);
 	void						sendNormalMessage();
 	bool						stateConnected();
+	// clang-format off
+	/// Receive the datagrams in the Connected state, returns true if the state changed
+	bool						receiveConnectedDatagrams();
+	/// Give the messages that arrived on the streams of a QUIC connection to the impulse callback (Connected state)
+	void						dispatchStreamRecords();
+	// clang-format on
 	CLFECOMMON::TPacketNumber	_LastReceivedAck;
 	uint						_NormalPacketsReceived;
 

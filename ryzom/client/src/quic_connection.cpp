@@ -26,6 +26,8 @@
 #include "config.h"
 #include "client_cfg.h"
 
+#include "game_share/stream_record.h"
+
 #ifdef NL_MSQUIC_AVAILABLE
 #include <msquic.h>
 
@@ -40,8 +42,20 @@
 
 using namespace NLMISC;
 using namespace NLNET;
+using namespace CLFECOMMON;
 
 namespace /* anonymous */ {
+
+// Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
+// 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
+// 4.2: Adds 4 unidirectional streams from the server to the client, one per class of messages (see game_share/stream_record.h), for the long and the ordered ones (keep bandwidth from client restricted)
+// 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
+const CStringView s_ProtocolName42 = "ryzomcore/4.2";
+const CStringView s_ProtocolName41 = "ryzomcore/4.1";
+
+/// What the client lets the server have in flight on one stream. MsQuic gives credit back as the data is read, which
+/// the stream callback does at once, and raises the window by itself for a server that fills it.
+const uint32 s_StreamRecvWindow = 256 * 1024; // (a power of two)
 
 /// Name and code of a QUIC status, for logs and error messages
 std::string quicStatusText(QUIC_STATUS status)
@@ -165,7 +179,10 @@ public:
 		, Established(false)
 		, TransportStatus(0)
 		, PeerShutdown(false)
+		, StreamsNegotiated(false)
 	{
+		for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+			Streams[i].Impl = this;
 	}
 
 	CQuicConnection *Self;
@@ -208,11 +225,46 @@ public:
 	CAtomicInt TransportStatus; // Status of a shutdown initiated by the transport, set by the callback thread
 	CAtomicBool PeerShutdown; // Set by the callback thread when the server shuts the connection down
 
+	// The stream of one class of messages (protocol level ryzomcore/4.2)
+	struct CStream
+	{
+		CStream()
+		    : Impl(NULL)
+		    , IncomingWrites(0)
+		    , IncomingReads(0)
+		    , Ended(false)
+		    , PendingBoundaries(0)
+		    , Failed(false)
+		{
+		}
+
+		CQuicConnectionImpl *Impl; // (immutable)
+
+		// The bytes received and not yet taken by the main thread (under StreamMutex).
+		// Filled by the stream callback (any thread), emptied by receiveStreamRecord (main thread only).
+		std::vector<uint8> Incoming;
+		CAtomicInt IncomingWrites; // (any thread)
+		int IncomingReads; // If IncomingReads == IncomingWrites, Incoming has nothing new (main thread only)
+		CAtomicBool Ended; // Set by the callback thread when the server ends the stream, which it never does
+
+		CStreamRecordReader Reader; // The bytes taken, cut into records (main thread only)
+		uint32 PendingBoundaries; // Sessions that ended whose mark has not been read yet (main thread only)
+		bool Failed; // The stream cannot be read any further (main thread only)
+	};
+	CStream Streams[NbStreamClasses];
+	CMutex StreamMutex;
+	CAtomicBool StreamsNegotiated; // Set by the callback thread when the connection is of protocol level 4.2
+
 	static QUIC_STATUS
 #ifdef _Function_class_
 	    _Function_class_(QUIC_CONNECTION_CALLBACK)
 #endif
 	        connectionCallback(HQUIC connection, void *context, QUIC_CONNECTION_EVENT *ev);
+	static QUIC_STATUS
+#ifdef _Function_class_
+	    _Function_class_(QUIC_STREAM_CALLBACK)
+#endif
+	        streamCallback(HQUIC stream, void *context, QUIC_STREAM_EVENT *ev);
 
 	void init(); // Delayed init
 	void update();
@@ -220,6 +272,7 @@ public:
 	void shutdown();
 	void close();
 	void release();
+	void clearStreams(); // Nothing received, no session ended (main thread only)
 
 	/// Record why the connection could not be established (main thread only)
 	void setFailure(CQuicConnection::TFailure failure, const std::string &text)
@@ -323,6 +376,10 @@ void CQuicConnectionImpl::connect()
 		fifo->clear();
 	}
 
+	// A new connection has new streams
+	m->StreamsNegotiated.store(false);
+	clearStreams();
+
 	if (!MsQuic)
 	{
 		nlwarning("QUIC API not available");
@@ -336,17 +393,18 @@ void CQuicConnectionImpl::connect()
 		return;
 	}
 
-	// Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
-	// 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
-	// 4.2?: Add up to 4 unidirectional streams from the server to client to send long impulses (keep bandwidth from client restricted) (DB_INIT, STRING, STRING_MANAGER, MODULE_GATEWAY)
-	// 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
-	static const CStringView protocolName41 = "ryzomcore/4.1";
-	static const QUIC_BUFFER alpn = { (uint32)protocolName41.size(), (uint8 *)protocolName41.data() };
+	// The protocol levels offered (see s_ProtocolName42), of which the server takes the first one of its own list.
+	// A level is a configured behaviour: a connection of level 4.1 gets everything in datagrams, as before.
+	static const QUIC_BUFFER alpn[2] = {
+		{ (uint32)s_ProtocolName42.size(), (uint8 *)s_ProtocolName42.data() },
+		{ (uint32)s_ProtocolName41.size(), (uint8 *)s_ProtocolName41.data() },
+	};
 
 	// Configuration, initialized in start, but destroyed on release only (may attempt more than once)
 	QUIC_STATUS status = QUIC_STATUS_SUCCESS;
 	if (!m->Configuration)
 	{
+		const bool offerStreams = ClientCfg.QuicStreams;
 		QUIC_SETTINGS settings = { 0 };
 		settings.DatagramReceiveEnabled = TRUE;
 		settings.IsSet.DatagramReceiveEnabled = TRUE;
@@ -354,15 +412,22 @@ void CQuicConnectionImpl::connect()
 		settings.IsSet.MigrationEnabled = TRUE;
 		settings.PeerBidiStreamCount = 0;
 		settings.IsSet.PeerBidiStreamCount = TRUE;
-		settings.PeerUnidiStreamCount = 0; // TODO: Configured from msg.xml
+		// The streams of level 4.2 are a constant of the level, not read from msg.xml: a server that opens more of them
+		// ends the connection (MsQuic refuses the stream)
+		settings.PeerUnidiStreamCount = offerStreams ? (uint16)NbStreamClasses : 0;
 		settings.IsSet.PeerUnidiStreamCount = TRUE;
+		if (offerStreams)
+		{
+			settings.StreamRecvWindowUnidiDefault = s_StreamRecvWindow;
+			settings.IsSet.StreamRecvWindowUnidiDefault = TRUE;
+		}
 		// settings.SendBufferingEnabled = TRUE;
 		// settings.IsSet.SendBufferingEnabled = TRUE;
 		// settings.GreaseQuicBitEnabled = TRUE;
 		// settings.IsSet.GreaseQuicBitEnabled = TRUE;
 		settings.MinimumMtu = 576;
 		settings.IsSet.MinimumMtu = TRUE;
-		status = MsQuic->ConfigurationOpen(m->Registration, &alpn, 1, &settings, sizeof(settings), NULL, &m->Configuration);
+		status = MsQuic->ConfigurationOpen(m->Registration, offerStreams ? &alpn[0] : &alpn[1], offerStreams ? 2 : 1, &settings, sizeof(settings), NULL, &m->Configuration);
 		if (QUIC_FAILED(status))
 		{
 			close();
@@ -574,6 +639,7 @@ void CQuicConnectionImpl::release()
 	}
 
 	m->SendBuffer.clear();
+	clearStreams();
 
 	// Close configuration
 	if (m->Configuration)
@@ -604,6 +670,22 @@ void CQuicConnection::release()
 	update();
 }
 
+void CQuicConnectionImpl::clearStreams()
+{
+	CQuicConnectionImpl *const m = this;
+	CAutoMutex<> lock(m->StreamMutex);
+	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	{
+		CStream &stream = m->Streams[i];
+		std::vector<uint8>().swap(stream.Incoming);
+		stream.IncomingReads = stream.IncomingWrites;
+		stream.Ended.store(false);
+		stream.Reader.clear();
+		stream.PendingBoundaries = 0;
+		stream.Failed = false;
+	}
+}
+
 CQuicConnection::TState CQuicConnection::state() const
 {
 	return m->State;
@@ -625,8 +707,10 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	switch (ev->Type)
 	{
 	case QUIC_CONNECTION_EVENT_CONNECTED: {
+		CStringView negotiatedAlpn((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength);
+		m->StreamsNegotiated.store(negotiatedAlpn == s_ProtocolName42); // Before the flag, which releases it
 		m->ConnectedFlag.clear();
-		nlinfo("Connected over QUIC protocol with ALPN '%s'", nlsvc(CStringView((const char *)ev->CONNECTED.NegotiatedAlpn, ev->CONNECTED.NegotiatedAlpnLength)));
+		nlinfo("Connected over QUIC protocol with ALPN '%s'", nlsvc(negotiatedAlpn));
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	}
@@ -691,12 +775,40 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 	case QUIC_CONNECTION_EVENT_IDEAL_PROCESSOR_CHANGED:
 	case QUIC_CONNECTION_EVENT_RESUMED:
 	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:
-	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // TODO: Match with msg.xml
+	case QUIC_CONNECTION_EVENT_STREAMS_AVAILABLE: // The client opens no stream
 	case QUIC_CONNECTION_EVENT_RESUMPTION_TICKET_RECEIVED:
 		// Don't care
 		status = QUIC_STATUS_SUCCESS;
 		break;
-	case QUIC_CONNECTION_EVENT_PEER_STREAM_STARTED:
+	case QUIC_CONNECTION_EVENT_PEER_STREAM_STARTED: {
+		// The server opens the stream of a class of messages. The stream id says which class it is.
+		HQUIC stream = ev->PEER_STREAM_STARTED.Stream;
+		QUIC_UINT62 streamId = 0;
+		uint32 streamIdSize = sizeof(streamId);
+		TStreamClass streamClass = NoStreamClass;
+		if ((ev->PEER_STREAM_STARTED.Flags & QUIC_STREAM_OPEN_FLAG_UNIDIRECTIONAL)
+		    && QUIC_SUCCEEDED(MsQuic->GetParam(stream, QUIC_PARAM_STREAM_ID, &streamIdSize, &streamId)))
+		{
+			streamClass = streamClassOfId(streamId);
+		}
+		if (streamClass == NoStreamClass)
+		{
+			// MsQuic lets the server open no other stream than those four, so this is not reached.
+			// The stream is refused, MsQuic closes it.
+			if (INelContext::isContextInitialised())
+			{
+				nlwarning("The server opened QUIC stream %" NL_I64 "u, which is the stream of no class of messages", (uint64)streamId);
+			}
+			break;
+		}
+		MsQuic->SetCallbackHandler(stream, (void *)CQuicConnectionImpl::streamCallback, (void *)&m->Streams[streamClass]);
+		if (INelContext::isContextInitialised())
+		{
+			nlinfo("The server opened the QUIC stream of the messages of class '%s'", streamClassName(streamClass));
+		}
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	}
 	case QUIC_CONNECTION_EVENT_PEER_NEEDS_STREAMS:
 	default:
 		// Not supported
@@ -704,6 +816,46 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		break;
 	}
 	return status;
+}
+
+QUIC_STATUS
+#ifdef _Function_class_
+_Function_class_(QUIC_STREAM_CALLBACK)
+#endif
+    CQuicConnectionImpl::streamCallback(HQUIC stream, void *context, QUIC_STREAM_EVENT *ev)
+{
+	CStream &s = *(CStream *)context;
+	CQuicConnectionImpl *const m = s.Impl;
+	switch (ev->Type)
+	{
+	case QUIC_STREAM_EVENT_RECEIVE: {
+		{
+			CAutoMutex<> lock(m->StreamMutex);
+			for (uint32 i = 0; i < ev->RECEIVE.BufferCount; ++i)
+			{
+				const QUIC_BUFFER &buffer = ev->RECEIVE.Buffers[i];
+				s.Incoming.insert(s.Incoming.end(), buffer.Buffer, buffer.Buffer + buffer.Length);
+			}
+		}
+		if (ev->RECEIVE.Flags & QUIC_RECEIVE_FLAG_FIN)
+			s.Ended.store(true); // Before the count, which releases it
+		++s.IncomingWrites;
+		// All of it is taken: MsQuic gives the server the credit back
+		return QUIC_STATUS_SUCCESS;
+	}
+	case QUIC_STREAM_EVENT_PEER_SEND_SHUTDOWN:
+	case QUIC_STREAM_EVENT_PEER_SEND_ABORTED:
+		// The server keeps its streams open for as long as the connection: without one of them, messages are missing
+		s.Ended.store(true); // Before the count, which releases it
+		++s.IncomingWrites;
+		return QUIC_STATUS_SUCCESS;
+	case QUIC_STREAM_EVENT_SHUTDOWN_COMPLETE:
+		// The stream was accepted, so its handle is the client's to close, which is allowed from this event
+		MsQuic->StreamClose(stream);
+		return QUIC_STATUS_SUCCESS;
+	default:
+		return QUIC_STATUS_SUCCESS;
+	}
 }
 
 // bool CQuicConnection::sendDatagram(const uint8 *buffer, uint32 size)
@@ -789,6 +941,81 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 		return true;
 	}
 	return false;
+}
+
+bool CQuicConnection::streams() const
+{
+	return m->StreamsNegotiated.load();
+}
+
+void CQuicConnection::endStreamSession()
+{
+	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+		++m->Streams[i].PendingBoundaries;
+}
+
+CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamClass, NLMISC::CBitMemStream &msgin)
+{
+	nlassert(streamClass < (uint)NbStreamClasses);
+	CQuicConnectionImpl::CStream &s = m->Streams[streamClass];
+
+	if (!m->ReceiveEnable)
+		return NoStreamRecord;
+	if (s.Failed)
+		return StreamError;
+
+	// Take what has arrived
+	int writes = s.IncomingWrites;
+	if (writes != s.IncomingReads)
+	{
+		CAutoMutex<> lock(m->StreamMutex);
+		if (!s.Incoming.empty())
+		{
+			s.Reader.push(&s.Incoming[0], (uint32)s.Incoming.size());
+			if (s.Incoming.capacity() > 1024 * 1024)
+				std::vector<uint8>().swap(s.Incoming); // the memory of a large record is given back
+			else
+				s.Incoming.clear();
+		}
+		s.IncomingReads = writes; // Update value (not a real counter)
+	}
+
+	for (;;)
+	{
+		const uint8 *data;
+		uint32 length;
+		switch (s.Reader.next(data, length, StreamRecordClientMaxBytes))
+		{
+		case CStreamRecordReader::Record:
+			if (s.PendingBoundaries != 0)
+				continue; // Of a session that has ended
+			msgin.clear();
+			memcpy(msgin.bufferToFill(length), data, length);
+			return StreamRecord;
+		case CStreamRecordReader::Boundary:
+			if (s.PendingBoundaries != 0)
+				--s.PendingBoundaries;
+			else
+				nlwarning("The stream of the messages of class '%s' marks the end of a session that the client did not end", streamClassName((TStreamClass)streamClass));
+			continue;
+		case CStreamRecordReader::BadLength:
+			s.Failed = true;
+			if (length != 0)
+				nlwarning("The stream of the messages of class '%s' announces a message of %u bytes, more than the %u a client accepts: the stream cannot be read any further", streamClassName((TStreamClass)streamClass), length, StreamRecordClientMaxBytes);
+			else
+				nlwarning("The stream of the messages of class '%s' has a message length that does not end: the stream cannot be read any further", streamClassName((TStreamClass)streamClass));
+			return StreamError;
+		case CStreamRecordReader::NoRecord:
+		default:
+			if (s.Ended.load())
+			{
+				s.Failed = true;
+				nlwarning("The server ended the stream of the messages of class '%s' (%u bytes of an incomplete message left)", streamClassName((TStreamClass)streamClass), s.Reader.bufferedBytes());
+				return StreamError;
+			}
+			return NoStreamRecord;
+		}
+	}
 }
 
 bool CQuicConnection::isSupported() const
@@ -889,6 +1116,20 @@ bool CQuicConnection::datagramAvailable() const
 bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 {
 	return false;
+}
+
+bool CQuicConnection::streams() const
+{
+	return false;
+}
+
+void CQuicConnection::endStreamSession()
+{
+}
+
+CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamClass, NLMISC::CBitMemStream &msgin)
+{
+	return NoStreamRecord;
 }
 
 bool CQuicConnection::isSupported() const
