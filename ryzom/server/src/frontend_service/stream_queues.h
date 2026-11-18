@@ -25,8 +25,8 @@
 
 #include "game_share/stream_record.h"
 
-/// One record of a stream (game_share/stream_record.h): the length, then the message. A message that goes to several
-/// clients is one record in the queues of all of them.
+/// One record of a stream (game_share/stream_record.h): the length, then the message. The queues of several clients
+/// can hold the same record, for a message that goes to all of them (so far each gets a record of its own).
 typedef std::shared_ptr<const std::vector<uint8>> TStreamRecord;
 
 /// The record of a message (length above 0 and at most CLFECOMMON::StreamRecordLengthMax)

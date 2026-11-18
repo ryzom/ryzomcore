@@ -120,7 +120,7 @@ CVariable<bool>		VerboseFEStatsTime("fs", "VerboseFEStatsTime", "Verbose FESTATS
 
 // clang-format off
 // Messages on QUIC streams (protocol level ryzomcore/4.2, see game_share/stream_record.h)
-CVariable<uint32>	StreamRecordMaxBytes("fs", "StreamRecordMaxBytes", "Largest message a service may send on a QUIC stream; the client it is for is disconnected for a larger one, which cannot be left out", 4*1024*1024, 0, true);
+CVariable<uint32>	StreamRecordMaxBytes("fs", "StreamRecordMaxBytes", "Largest message a service may send on a QUIC stream (at most the 16 MiB a client accepts); the client it is for is disconnected for a larger one, which cannot be left out", 4*1024*1024, 0, true);
 CVariable<uint32>	StreamRecordMaxBytesChat("fs", "StreamRecordMaxBytesChat", "Largest message of the chat class on a QUIC stream; a larger one is dropped", 8192, 0, true);
 CVariable<uint32>	StreamMaxQueuedBytes("fs", "StreamMaxQueuedBytes", "Bytes of messages that may wait for the QUIC streams of one client, above which it is disconnected", 8*1024*1024, 0, true);
 // clang-format on
@@ -388,7 +388,8 @@ static void queueStreamRecord( CClientHost *client, uint8 streamClass, const uin
 
 	const char *className = CLFECOMMON::streamClassName( (CLFECOMMON::TStreamClass)streamClass );
 	bool isChat = ( streamClass == CLFECOMMON::StreamChat );
-	uint32 maxLength = std::min( isChat ? StreamRecordMaxBytesChat.get() : StreamRecordMaxBytes.get(), CLFECOMMON::StreamRecordLengthMax );
+	// (never above what a client accepts, whatever the configuration says: the client would disconnect on it)
+	uint32 maxLength = std::min( isChat ? StreamRecordMaxBytesChat.get() : StreamRecordMaxBytes.get(), CLFECOMMON::StreamRecordClientMaxBytes );
 	if ( length > maxLength )
 	{
 		if ( isChat )
@@ -433,6 +434,10 @@ void sendImpulsion( TClientId clientid, CMessage& msgin, uint8 channel, const ch
 {
 	uint32 bytelen;
 	msgin.serial( bytelen ); // sent with serialBufferWithSize(), the following is the buffer
+
+	// The message is read in place below. A length that goes past the end of the service's message is fatal, as it
+	// always was (CActionGeneric::setFromMessage)
+	nlassert( (uint64)msgin.getPos() + bytelen <= msgin.length() );
 
 	// On a connection of protocol level ryzomcore/4.2, the messages of a stream class go on their stream
 	{

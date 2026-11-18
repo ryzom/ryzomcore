@@ -114,6 +114,9 @@ public:
 	// Protocol level ryzomcore/4.2 is offered (QuicStreams when the configuration was opened)
 	bool OfferStreams = false;
 
+	// The library refused QUIC_PARAM_CONN_NETWORK_STATISTICS (said once)
+	NLMISC::CAtomicBool NoNetworkStatistics = false;
+
 	// Some salt for generating the token address
 	uint64 SaltA0 = (((uint64)std::random_device()()) << 32) | std::random_device()();
 	uint64 SaltA1 = (((uint64)std::random_device()()) << 32) | std::random_device()();
@@ -865,19 +868,31 @@ void CQuicTransceiverImpl::updateStreamStats(CQuicUserContext *user, HQUIC conne
 {
 	CQuicTransceiverImpl *m = this;
 
+	// What the main thread took out of the queues before this point; MsQuic may not count all of it yet, which errs
+	// on the careful side (read first, so that nothing taken later is thought to be counted)
+	int grantedCount = user->StreamGrantedCount.load();
+
 	// Inside a callback of the connection or of one of its streams, these are copies without a round trip to its thread
 #ifdef QUIC_PARAM_CONN_NETWORK_STATISTICS
-	QUIC_NETWORK_STATISTICS stats = {};
-	uint32 statsSize = sizeof(stats);
-	if (QUIC_SUCCEEDED(MsQuic->GetParam(connection, QUIC_PARAM_CONN_NETWORK_STATISTICS, &statsSize, &stats)))
+	if (!NoNetworkStatistics.load(NLMISC::TMemoryOrderRelaxed))
 	{
-		user->StatCongestionWindow.store((int)std::min(stats.CongestionWindow, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
-		user->StatRtt.store((int)std::min(stats.SmoothedRTT, (uint64)INT_MAX), NLMISC::TMemoryOrderRelaxed);
-		user->StatBytesInFlight.store((int)std::min(stats.BytesInFlight, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
-		user->StatValid = true;
+		QUIC_NETWORK_STATISTICS stats = {};
+		uint32 statsSize = sizeof(stats);
+		QUIC_STATUS status = MsQuic->GetParam(connection, QUIC_PARAM_CONN_NETWORK_STATISTICS, &statsSize, &stats);
+		if (QUIC_SUCCEEDED(status))
+		{
+			user->StatCongestionWindow.store((int)std::min(stats.CongestionWindow, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
+			user->StatRtt.store((int)std::min(stats.SmoothedRTT, (uint64)INT_MAX), NLMISC::TMemoryOrderRelaxed);
+			user->StatBytesInFlight.store((int)std::min(stats.BytesInFlight, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
+			user->StatGrantedCount.store(grantedCount, NLMISC::TMemoryOrderRelaxed);
+			user->StatValid = true;
+			return;
+		}
+		// The library is older than the headers the frontend was built with (the parameter came with MsQuic 2.5)
+		if (!NoNetworkStatistics.exchange(true))
+			nlwarning("This MsQuic library does not tell the bytes in flight of a connection (status 0x%x): the room the QUIC streams leave to the datagrams is worked out from what the frontend gave to the streams alone", status);
 	}
-#else
-	// An MsQuic that does not tell the bytes in flight: the frontend goes by what it gave to the streams
+#endif
 	QUIC_STATISTICS_V2 stats = {};
 	uint32 statsSize = sizeof(stats);
 	if (QUIC_SUCCEEDED(MsQuic->GetParam(connection, QUIC_PARAM_CONN_STATISTICS_V2, &statsSize, &stats)))
@@ -886,7 +901,6 @@ void CQuicTransceiverImpl::updateStreamStats(CQuicUserContext *user, HQUIC conne
 		user->StatRtt.store((int)std::min(stats.Rtt, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
 		user->StatValid = true;
 	}
-#endif
 }
 
 QUIC_STATUS
@@ -1113,8 +1127,10 @@ bool CQuicTransceiverImpl::openStreams(CQuicUserContext *user)
 		QUIC_STATUS status = MsQuic->StreamOpen((HQUIC)user->Connection, QUIC_STREAM_OPEN_FLAG_UNIDIRECTIONAL, CQuicTransceiverImpl::streamCallback, (void *)&user->StreamContexts[i], &stream);
 		if (QUIC_FAILED(status))
 		{
-			if (status == QUIC_STATUS_ABORTED)
-				user->ShuttingDown = true; // The client has closed the connection, the event that tells so comes after
+			// The streams are opened on a connection that has connected, so these two say that it has closed, by the
+			// client or by the transport: the event that tells so comes after
+			if (status == QUIC_STATUS_ABORTED || status == QUIC_STATUS_INVALID_STATE)
+				user->ShuttingDown = true;
 			else if (!user->ShuttingDown)
 				nlwarning("MsQuic->StreamOpen failed with status 0x%x", status);
 			return false;
@@ -1162,8 +1178,10 @@ void CQuicTransceiver::sendStream(CQuicUserContext *user, uint8 streamClass, CQu
 			QUIC_STATUS status = MsQuic->StreamSend((HQUIC)user->StreamHandles[streamClass], (QUIC_BUFFER *)(&send->Buffer), 1, QUIC_SEND_FLAG_NONE, (void *)send);
 			if (!QUIC_FAILED(status))
 				return; // The block is MsQuic's until it completes it (streamCallback)
+			// Aborted: the connection is closing, or the client refused the stream, and then the event of that has
+			// stored the fault already (QuicStreamAbortedByPeer)
 			if (status == QUIC_STATUS_ABORTED)
-				user->ShuttingDown = true; // The connection is closing (a stream alone is not closed by either side)
+				user->ShuttingDown = true;
 			else if (!user->ShuttingDown)
 				nlwarning("MsQuic->StreamSend failed with status 0x%x", status);
 			fault = QuicStreamSendFailed;
@@ -1271,11 +1289,6 @@ void CQuicTransceiver::sendStream(CQuicUserContext *user, uint8 streamClass, CQu
 }
 
 #endif
-
-bool CQuicTransceiver::streamsEnabled()
-{
-	return QuicStreams.get();
-}
 
 CQuicStreamSend *CQuicTransceiver::createStreamSend(uint32 length)
 {

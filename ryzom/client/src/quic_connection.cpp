@@ -964,9 +964,10 @@ CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamC
 	if (s.Failed)
 		return StreamError;
 
-	// Take what has arrived
+	// Take what has arrived (the end of the stream is looked at first: what came before it is then taken below)
+	const bool ended = s.Ended.load();
 	int writes = s.IncomingWrites;
-	if (writes != s.IncomingReads)
+	if (ended || writes != s.IncomingReads)
 	{
 		CAutoMutex<> lock(m->StreamMutex);
 		if (!s.Incoming.empty())
@@ -1007,7 +1008,7 @@ CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamC
 			return StreamError;
 		case CStreamRecordReader::NoRecord:
 		default:
-			if (s.Ended.load())
+			if (ended)
 			{
 				s.Failed = true;
 				nlwarning("The server ended the stream of the messages of class '%s' (%u bytes of an incomplete message left)", streamClassName((TStreamClass)streamClass), s.Reader.bufferedBytes());

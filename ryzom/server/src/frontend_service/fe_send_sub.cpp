@@ -68,9 +68,8 @@ uint64 s_StreamBytesGranted = 0;
 /// datagrams: the next datagram must never wait for the window.
 /// The window is taken by the datagrams in flight (one per cycle within the round trip time) and by what was given to
 /// the streams and is not acknowledged yet, with the headers of its packets (about 4%). That is counted from the
-/// frontend's own numbers, which include what this thread gave since MsQuic was last asked. If MsQuic then said that
-/// more was in flight than that (datagrams whose acknowledgement is late, data sent again after a loss), its number
-/// counts.
+/// frontend's own numbers. If MsQuic said that more was in flight when it was last asked (datagrams whose
+/// acknowledgement is late, data sent again after a loss), its number counts, with what was given to the streams since.
 uint32 streamAllowance(CQuicUserContext *user)
 {
 	if (!user->StatValid)
@@ -82,7 +81,12 @@ uint32 streamAllowance(CQuicUserContext *user)
 	sint64 datagramsInFlight = ((rttMs + tickMs - 1) / tickMs + 1) * s_DatagramPacketBytes;
 	sint64 outstanding = user->StreamOutstanding.load();
 	sint64 inFlight = datagramsInFlight + outstanding + outstanding / 25;
-	inFlight = std::max(inFlight, (sint64)user->StatBytesInFlight.load(NLMISC::TMemoryOrderRelaxed));
+	sint64 bytesInFlight = user->StatBytesInFlight.load(NLMISC::TMemoryOrderRelaxed);
+	if (bytesInFlight >= 0)
+	{
+		sint64 grantedSince = (uint32)user->StreamGrantedCount.load() - (uint32)user->StatGrantedCount.load(NLMISC::TMemoryOrderRelaxed);
+		inFlight = std::max(inFlight, bytesInFlight + grantedSince + grantedSince / 25);
+	}
 	sint64 room = congestionWindow - inFlight - s_DatagramPacketBytes;
 	return (uint32)std::min(std::max(room, (sint64)0), s_StreamBytesPerTick);
 }
@@ -404,6 +408,7 @@ void	CFeSendSub::grantStreams()
 			queues.take((CLFECOMMON::TStreamClass)streamClass, send->Data, size);
 			// Counted here and not when it is sent, so that the next cycle knows of it whenever the flush runs
 			user->StreamOutstanding.fetchAdd((int)size);
+			user->StreamGrantedCount.fetchAdd((int)size);
 			m_FillingStreamPosts->push_back(CStreamPost(user, (uint8)streamClass, send));
 			allowance -= size;
 			s_StreamBytesGranted += size;

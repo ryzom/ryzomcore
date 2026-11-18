@@ -198,6 +198,11 @@ public:
 	NLMISC::CAtomicInt StatCongestionWindow = 0; // bytes
 	NLMISC::CAtomicInt StatRtt = 0; // microseconds
 	NLMISC::CAtomicInt StatBytesInFlight = -1; // bytes sent and not acknowledged, -1 if this MsQuic does not tell
+	NLMISC::CAtomicInt StatGrantedCount = 0; // StreamGrantedCount when MsQuic was asked
+
+	// Bytes taken out of the queues since the connection opened, modulo 2^32 (added by the main thread): with
+	// StatGrantedCount, what was taken since MsQuic was last asked, which its bytes in flight do not count yet
+	NLMISC::CAtomicInt StreamGrantedCount = 0;
 
 	// Handles of the streams, in the order of the classes, null until opened and once taken out to be closed (under
 	// ConnectionMutex; opened and used by whoever flushes: the send thread, or the main thread when it flushes itself)
@@ -368,9 +373,6 @@ public:
 
 	/// Shutdown a connection
 	void shutdown(CQuicUserContext *user);
-
-	/// Protocol level ryzomcore/4.2 is offered to the clients (QuicStreams)
-	static bool streamsEnabled();
 
 	/// Allocate a block of bytes for a stream
 	static CQuicStreamSend *createStreamSend(uint32 length);
