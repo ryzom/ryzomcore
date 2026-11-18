@@ -426,6 +426,14 @@ bool			CDriverUser::isWindowMinimized() const
 	return _Driver->isWindowMinimized();
 }
 
+// ***************************************************************************
+void			CDriverUser::restoreWindow()
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->restoreWindow();
+}
+
 
 // ***************************************************************************
 nlWindow		CDriverUser::getDisplay ()

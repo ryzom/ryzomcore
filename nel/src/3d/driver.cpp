@@ -46,7 +46,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x76; // picture of the minimized window
+const uint32 IDriver::InterfaceVersion = 0x77; // restoreWindow
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

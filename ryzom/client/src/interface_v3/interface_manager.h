@@ -129,6 +129,9 @@ public:
 	/// Singleton method : Get the unique interface loader instance
 	static CInterfaceManager* getInstance();
 
+	/// Whether the instance exists, for code that must not create it
+	static bool hasInstance() { return _Instance != nullptr; }
+
 	/// Destroy singleton
 	static void destroy ();
 
