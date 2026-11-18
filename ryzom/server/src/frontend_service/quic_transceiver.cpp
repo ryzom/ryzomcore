@@ -835,11 +835,15 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_DATAGRAM_SEND_STATE_CHANGED:
-		// Canceled when it was still queued at shutdown, or no longer fits, and then it is never sent
+		// Canceled when it was still queued at shutdown, no longer fits, or could not be written at once on a
+		// connection with streams (see sendDatagramSwap), and then it is never sent
 		if ((ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_SENT
 		        || ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_CANCELED)
 		    && (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)user->SentCount.load())
 		{
+			// A datagram that was not sent while the connection is up: the allowance of the streams is cut on it
+			if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_CANCELED && user->Streams && !user->ShuttingDown)
+				user->SendBusyDrops.fetchAdd(1);
 			user->SendBusy.clear(); // release
 		}
 		// Once per datagram, while its packet is being built (which this snapshot does not count yet)
@@ -1103,8 +1107,18 @@ bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemS
 		user->SendQuicBuffer.Buffer = (uint8 *)user->SendBuffer.buffer();
 		user->SendQuicBuffer.Length = user->SendBuffer.length();
 		// On a connection with streams, the datagram is handled before the stream data that waits in the connection's
-		// queue of work (in a packet, MsQuic puts the datagram before stream data anyway)
-		QUIC_SEND_FLAGS flags = user->Streams ? QUIC_SEND_FLAG_PRIORITY_WORK : QUIC_SEND_FLAG_NONE;
+		// queue of work (in a packet, MsQuic puts the datagram before stream data anyway). And a datagram that cannot
+		// be written at once, because the congestion window is full or the path is being validated, is dropped: it
+		// would go out late, with a state that is old by then, and the datagram of the next cycle would find this one
+		// still waiting and not be sent at all. The protocol of the game takes a lost datagram in its stride.
+		QUIC_SEND_FLAGS flags = QUIC_SEND_FLAG_NONE;
+		if (user->Streams)
+		{
+			flags = QUIC_SEND_FLAG_PRIORITY_WORK;
+#ifdef QUIC_PARAM_CONN_NETWORK_STATISTICS // (headers of MsQuic 2.5 and later, which is where the flag below came)
+			flags |= QUIC_SEND_FLAG_CANCEL_ON_BLOCKED;
+#endif
+		}
 		QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, (QUIC_BUFFER *)(&user->SendQuicBuffer), 1, flags, (void *)(ptrdiff_t)user->SentCount.load());
 		if (QUIC_FAILED(status))
 		{

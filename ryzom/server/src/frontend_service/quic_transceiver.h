@@ -221,8 +221,8 @@ public:
 	NLMISC::CAtomicInt StatGrantedCount = 0; // StreamGrantedCount when MsQuic was asked
 	NLMISC::CAtomicInt StatCongestionEvents = 0; // times the connection saw congestion (loss or marks), since it opened
 
-	// Datagrams of the frontend that were not sent because the one before had not left yet (counted where they are
-	// sent; the main thread cuts the allowance of the streams on it)
+	// Datagrams of the frontend that were not sent: MsQuic could not write them at once and dropped them, or the one
+	// before had not left yet (counted where that happens; the main thread cuts the allowance of the streams on it)
 	NLMISC::CAtomicInt SendBusyDrops = 0;
 
 	// The client is reached over another path, of which the allowance of the streams knows nothing yet (set on the
