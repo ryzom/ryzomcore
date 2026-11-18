@@ -334,7 +334,7 @@ public:
 	 * The signature of a msg.xml, which the frontend sends to its clients for them to compare with that of their own
 	 * file: the MD5 of the file without what declares the stream classes (see removeStreamClasses), so that a
 	 * frontend can declare a class, or move a message to one, without the files of its clients having to follow. A
-	 * file that declares none has the signature it always had, the MD5 of the whole file.
+	 * file that has nothing of the kind has the signature it always had, the MD5 of the whole file.
 	 * removeCarriageReturns: of the file without its carriage returns as well (a client compares with both).
 	 * The hash is all zero if the file cannot be read.
 	 */
@@ -348,6 +348,14 @@ public:
 	 * attribute after one space.
 	 */
 	static void					removeStreamClasses(std::vector<uint8> &text);
+
+	/**
+	 * Check that a msg.xml declares its stream classes the way removeStreamClasses takes them out. Returns what is
+	 * not written that way, one line of text per fault (none if the file cannot be read): a `stream_class` element
+	 * or a `stream` attribute that would stay in the signature, which clients without it would then not match; a
+	 * line that would be left out of the signature with something else on it.
+	 */
+	static std::vector<std::string>	checkStreamClassesText(const std::string &filename);
 
 	/**
 	 * Get the class of the message node, which says on which stream of protocol level ryzomcore/4.2 the frontend

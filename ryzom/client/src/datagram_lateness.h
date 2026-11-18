@@ -27,7 +27,7 @@
  * two clocks. The smallest difference of the last 40 seconds stands for a datagram that was not held up anywhere; how
  * far a datagram is above it is how late it is: the time it waited in a queue, at the frontend or on the way, for one
  * because the frontend sends more stream data than the path takes. The client reports that in the datagrams it sends,
- * for the frontend to slow its streams down by (which it does not do yet: it shows the report in displayStreamStats).
+ * and the frontend cuts what it sends on the streams of the connection by it (CStreamAllowance in the frontend).
  *
  * The smallest difference is kept per 10 seconds, for four such periods, so that it follows a path that gets longer
  * and clocks that drift apart. All of it is counted modulo 2^16 milliseconds.

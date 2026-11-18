@@ -1563,6 +1563,15 @@ void CFrontEndService::init()
 			// The messages of such a node would go by impulse, in another order than their class is meant to keep
 			nlerror( "The stream classes of '%s' are not right (see the warnings above): the frontend cannot tell how to send the messages of the nodes that name them", pathXmlMsg.c_str() );
 		}
+		// The signature of the file that goes to the clients leaves the stream classes out, if they are written the
+		// way it expects them
+		{
+			std::vector<std::string> problems = CGenericXmlMsgHeaderManager::checkStreamClassesText( "msg.xml" );
+			for ( uint i = 0; i < problems.size(); ++i )
+				nlwarning( "msg.xml: %s", problems[i].c_str() );
+			if ( !problems.empty() )
+				nlwarning( "The stream classes of msg.xml are not written as its comment says: the signature of the file that the clients compare with their own is not that of the file without them, and clients whose file differs in them get the notice that it is invalid" );
+		}
 		// The classes of messages that go on QUIC streams, for clients of protocol level ryzomcore/4.2
 		CQuicTransceiver::setStreamClasses( GenericXmlMsgHeaderMngr.getStreamClasses() );
 		{

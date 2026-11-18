@@ -195,6 +195,96 @@ void	CGenericXmlMsgHeaderManager::removeStreamClasses(std::vector<uint8> &text)
 	text.swap(out);
 }
 
+// what a msg.xml declares of stream classes in another way than removeStreamClasses takes out
+std::vector<std::string>	CGenericXmlMsgHeaderManager::checkStreamClassesText(const string &filename)
+{
+	std::vector<std::string> problems;
+
+	CIFile file;
+	if (!file.open(CPath::lookup(filename, false)))
+		return problems;
+	std::vector<uint8> text(file.getFileSize());
+	if (!text.empty())
+		file.serialBuffer(&text[0], (uint)text.size());
+
+	// Line by line. The lines that are left out of the signature may hold one element, or the text of the comment,
+	// and nothing else. On the other lines, a stream attribute has to be written exactly as it is taken out (one
+	// space, stream="..."), and no stream_class element may be.
+	bool inComment = false;
+	uint lineNumber = 0;
+	size_t pos = 0;
+	while (pos < text.size())
+	{
+		size_t end = pos;
+		while (end < text.size() && text[end] != '\n')
+			++end;
+		const std::string whole((const char *)&text[pos], end - pos);
+		pos = end < text.size() ? end + 1 : end;
+		++lineNumber;
+
+		// without the indentation, the carriage return and the spaces at the end
+		size_t first = whole.find_first_not_of(" \t");
+		size_t last = whole.find_last_not_of(" \t\r");
+		const std::string line = first == std::string::npos ? std::string() : whole.substr(first, last - first + 1);
+
+		bool leftOut = false;
+		if (!inComment && line.compare(0, 17, "<!-- stream_class") == 0)
+			inComment = true;
+		if (inComment)
+		{
+			leftOut = true;
+			size_t close = line.find("-->");
+			if (close != std::string::npos)
+			{
+				inComment = false;
+				if (close + 3 != line.size())
+					problems.push_back(toString("line %u: something follows the end of the stream_class comment on its line, and is left out of the signature with it", lineNumber));
+			}
+		}
+		else if (line.compare(0, 13, "<stream_class") == 0)
+		{
+			leftOut = true;
+			const bool oneElement = line.size() >= 2 && line.compare(line.size() - 2, 2, "/>") == 0 && line.find('<', 1) == std::string::npos && line.find('>') == line.size() - 1;
+			if (!oneElement)
+				problems.push_back(toString("line %u: a stream_class element is not alone on its line as <stream_class name=\"...\" />, and what else is on the line is left out of the signature with it", lineNumber));
+		}
+		if (leftOut)
+			continue;
+
+		bool inQuotes = false;
+		for (size_t i = 0; i < whole.size(); ++i)
+		{
+			const char c = whole[i];
+			if (c == '"')
+				inQuotes = !inQuotes;
+			if (inQuotes)
+				continue;
+			if (whole.compare(i, 13, "<stream_class") == 0)
+			{
+				problems.push_back(toString("line %u: a stream_class element does not start its line, and stays in the signature", lineNumber));
+				continue;
+			}
+			if (whole.compare(i, 6, "stream") != 0)
+				continue;
+			// An attribute of that name: white space (or the start of the line) before it, '=' after it
+			const bool nameStarts = (i == 0) || whole[i - 1] == ' ' || whole[i - 1] == '\t';
+			size_t j = i + 6;
+			while (j < whole.size() && (whole[j] == ' ' || whole[j] == '\t'))
+				++j;
+			if (!nameStarts || j >= whole.size() || whole[j] != '=')
+				continue;
+			// As it is taken out: one space after something that is no white space, and ="
+			const bool written = i >= 2 && whole[i - 1] == ' ' && whole[i - 2] != ' ' && whole[i - 2] != '\t' && whole.compare(i + 6, 2, "=\"") == 0;
+			if (!written)
+				problems.push_back(toString("line %u: a stream attribute is not written as one space and stream=\"...\" on the line of its element, and it or its white space stays in the signature", lineNumber));
+		}
+	}
+	if (inComment)
+		problems.push_back("the stream_class comment does not end");
+
+	return problems;
+}
+
 // the signature of a msg.xml
 NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getSignature(const string &filename, bool removeCarriageReturns)
 {
