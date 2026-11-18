@@ -161,8 +161,11 @@ public:
 			if (quicUser)
 			{
 				quicUser->ClientHost = this;
-				// (the allowance of its streams follows the numbers of this host's datagrams from here)
+				// (the allowance of its streams follows the numbers of this host's datagrams from here, and a report
+				// of the session before is not of them)
 				quicUser->StreamAllowance.newSession();
+				quicUser->QueueDelayReportsSeen = quicUser->QueueDelayReports;
+				quicUser->QueueDelayKnown = false;
 			}
 		}
 

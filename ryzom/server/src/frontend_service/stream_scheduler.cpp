@@ -20,13 +20,13 @@
 #include <algorithm>
 
 CStreamSchedulerConfig::CStreamSchedulerConfig()
-    : TickSeconds(0.1)
-    , TotalOutgoingBandwidth(5000000)
+    : TotalOutgoingBandwidth(5000000)
     , StreamBurstBytes(0)
     , StreamMinBytesPerTick(200)
     , StreamMaxBytesPerTick(65536)
     , StreamMinChunk(4096)
     , QueueDelayTarget(20)
+    , TickSeconds(0.1)
     , DatagramPacketBytes(560)
     , ReportDatagrams(3)
     , IdleSecondsToStartUp(10.0)
@@ -235,35 +235,74 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 }
 
 CStreamAllowance::CStreamAllowance()
-    : m_Allowance(0)
+    : m_CurrentNumber(0)
+    , m_Allowance(0)
     , m_StartUp(true)
     , m_Started(false)
     , m_LastChangeNumber(0)
     , m_CongestionEvents(0)
     , m_SendBusyDrops(0)
-    , m_GrantedSinceChange(0)
-    , m_GateGranted(0)
-    , m_GateAllowed(0)
     , m_CyclesWithoutReport(0)
     , m_IdleCycles(0)
     , m_IdleCyclesToStartUp(0)
-    , m_Recovering(false)
-    , m_LastChangeWasCut(false)
+    , m_InRecovery(false)
+    , m_RecoveryLateness(0)
+    , m_IgnoreEvents(false)
 {
+	for (uint i = 0; i < (uint)NbCycles; ++i)
+		m_Cycles[i].Valid = false;
 }
 
 void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 {
 	m_Allowance = config.StreamMinChunk;
 	m_StartUp = true;
-	m_Started = false;
-	m_GrantedSinceChange = 0;
-	m_GateGranted = 0;
-	m_GateAllowed = 0;
-	m_CyclesWithoutReport = 0;
+	m_InRecovery = false;
 	m_IdleCycles = 0;
-	m_Recovering = false;
-	m_LastChangeWasCut = false;
+	// What the connection sees while its new path is validated (datagrams that cannot go yet) is not of the streams
+	m_IgnoreEvents = true;
+	newSession();
+}
+
+void CStreamAllowance::newSession()
+{
+	m_Started = false;
+	m_CyclesWithoutReport = 0;
+	for (uint i = 0; i < (uint)NbCycles; ++i)
+		m_Cycles[i].Valid = false;
+}
+
+uint64 CStreamAllowance::grantedIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	uint64 granted = 0;
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (cycle.Valid && cycle.Number == number)
+			granted += cycle.Granted;
+	}
+	return granted;
+}
+
+bool CStreamAllowance::heldIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (!cycle.Valid || cycle.Number != number || !cycle.Held)
+			return false;
+	}
+	return true;
+}
+
+void CStreamAllowance::cut(uint32 sendNumber, bool late, uint32 lateness)
+{
+	m_Allowance = m_Allowance / 2; // (held above the minimum by the caller)
+	m_StartUp = false;
+	m_LastChangeNumber = sendNumber;
+	m_InRecovery = true;
+	m_RecoveryLateness = late ? lateness : 0xFFFFFFFF;
+	m_IgnoreEvents = true;
 }
 
 void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops)
@@ -277,6 +316,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		m_CongestionEvents = congestionEvents;
 		m_SendBusyDrops = sendBusyDrops;
 	}
+	m_CurrentNumber = sendNumber;
 
 	// (for granted(), which counts the idle cycles)
 	m_IdleCyclesToStartUp = (uint32)std::max(1.0, config.IdleSecondsToStartUp / std::max(config.TickSeconds, 0.001));
@@ -289,90 +329,99 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 	else if (m_CyclesWithoutReport < 1000)
 		++m_CyclesWithoutReport;
 
-	// One change per report that covers only datagrams sent after the change before. A report of lateness after the
-	// allowance was raised does not wait for that: it says that several datagrams in a row were late, the last of
-	// them sent after the raise, and every cycle that the allowance stays as it is makes the queue longer.
-	const sint32 datagramsSinceChange = (sint32)(reportNumber - m_LastChangeNumber);
-	const bool lateAfterRaise = !m_LastChangeWasCut && lateness > config.QueueDelayTarget && datagramsSinceChange >= 1;
-	if (newReport && (lateAfterRaise || datagramsSinceChange >= (sint32)std::max(config.ReportDatagrams, (uint32)1)))
+	if (newReport)
 	{
+		const uint32 reportDatagrams = std::max(config.ReportDatagrams, (uint32)1);
+		const sint32 sinceChange = (sint32)(reportNumber - m_LastChangeNumber);
+		// The report covers only datagrams that were sent after the last change
+		const bool covers = sinceChange >= (sint32)reportDatagrams;
 		const bool late = lateness > config.QueueDelayTarget;
-		bool congestion = congestionEvents != m_CongestionEvents;
-		bool dropped = sendBusyDrops != m_SendBusyDrops;
-		m_CongestionEvents = congestionEvents;
-		m_SendBusyDrops = sendBusyDrops;
-		bool recovering = false;
-		if (m_Recovering)
-		{
-			// The first report after a cut: a loss that was found since then is of what was sent before the cut,
-			// which the cut answered already, so it does not cut again; nor is this the report to grow on.
-			// Lateness still counts, it is of the datagrams after the cut.
-			recovering = congestion || dropped;
-			congestion = false;
-			dropped = false;
-			m_Recovering = false;
-		}
 
-		bool changed = false;
-		if (recovering && !late)
+		// Congestion and datagrams not sent, since the last report that covered: counted once, with such a report
+		bool events = false;
+		bool eventsIgnored = false;
+		if (covers)
 		{
-			// nothing this time
-		}
-		else if (late || congestion || dropped)
-		{
-			// Without stream data since the last change, the streams are not what holds up the datagrams
-			if (m_GrantedSinceChange != 0)
+			events = (congestionEvents != m_CongestionEvents) || (sendBusyDrops != m_SendBusyDrops);
+			m_CongestionEvents = congestionEvents;
+			m_SendBusyDrops = sendBusyDrops;
+			if (m_IgnoreEvents)
 			{
-				m_Allowance = m_Allowance / 2;
-				m_StartUp = false;
-				m_Recovering = true;
-				m_LastChangeWasCut = true;
-				changed = true;
+				eventsIgnored = events;
+				events = false;
+				m_IgnoreEvents = false;
 			}
 		}
-		else if (mayRaise && m_GateAllowed != 0 && m_GateGranted * 10 >= m_GateAllowed * 9)
+
+		bool doCut = false;
+		if (late)
 		{
-			// The allowance is what held the client back since the last report (else nothing says that its path
-			// takes more)
+			if (m_InRecovery)
+			{
+				// After a cut: the queue that stood then drains, and the lateness comes down with it. Lateness that
+				// does not come down, on datagrams that were all sent after the cut, is more than that queue.
+				if (covers)
+				{
+					if (lateness < m_RecoveryLateness)
+						m_RecoveryLateness = lateness;
+					else
+						doCut = true;
+				}
+			}
+			else if (sinceChange >= 1 && grantedIn(reportNumber - CutCycles, reportNumber - 1) >= config.DatagramPacketBytes)
+			{
+				// Stream data went out shortly before the datagrams that are late, a packet of it or more (less
+				// cannot hold a datagram up). After a raise this does not wait for a report on datagrams of after
+				// it only: the last of them is, and every cycle at the raised allowance makes the queue longer.
+				doCut = true;
+			}
+		}
+		else if (covers)
+		{
+			m_InRecovery = false;
+		}
+
+		// Congestion or a datagram not sent while stream data was going out
+		if (!doCut && events && grantedIn(sendNumber - CutCycles, sendNumber - 1) >= config.DatagramPacketBytes)
+			doCut = true;
+
+		if (doCut)
+		{
+			cut(sendNumber, late, lateness);
+		}
+		else if (covers && !late && !events && !eventsIgnored && mayRaise && heldIn(reportNumber - reportDatagrams, reportNumber - 1))
+		{
+			// The datagrams of the report were all sent behind cycles in which the client was held at this allowance,
+			// and none of them is late
 			if (m_StartUp && lateness * 2 < config.QueueDelayTarget)
 			{
-				m_Allowance = (uint32)std::min((uint64)m_Allowance * 5 / 4, (uint64)config.StreamMaxBytesPerTick);
+				// (a quarter of a small allowance is less than the step of an allowance that grows by packets)
+				m_Allowance = (uint32)std::min((uint64)m_Allowance + std::max(m_Allowance / 4, config.DatagramPacketBytes), (uint64)config.StreamMaxBytesPerTick);
 			}
 			else
 			{
 				m_StartUp = false;
 				m_Allowance = (uint32)std::min((uint64)m_Allowance + config.DatagramPacketBytes, (uint64)config.StreamMaxBytesPerTick);
 			}
-			m_LastChangeWasCut = false;
-			changed = true;
-		}
-
-		// Each report is judged by the cycles since the one before
-		m_GateGranted = 0;
-		m_GateAllowed = 0;
-		if (changed)
-		{
 			m_LastChangeNumber = sendNumber;
-			m_GrantedSinceChange = 0;
 		}
 	}
 
-	// Between the minimum every client gets and the most one gets; never 0, which it could not grow from (unless the
-	// most is 0, which stops the streams)
+	// Between the minimum every client gets and the most one gets, and not 0 (unless the most is 0, which stops the
+	// streams)
 	const uint32 floor = std::max(std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), (uint32)1);
 	m_Allowance = std::min(std::max(m_Allowance, floor), config.StreamMaxBytesPerTick);
 }
 
 void CStreamAllowance::granted(uint32 bytes, bool wantedMore)
 {
-	// After long enough without stream data, the allowance looks for its level again, from where it stands
+	// After long enough without stream data, an allowance that was cut grows by quarters again, from where it stands
 	if (bytes == 0 && !wantedMore)
 	{
 		if (m_IdleCycles < m_IdleCyclesToStartUp && ++m_IdleCycles == m_IdleCyclesToStartUp)
 		{
 			m_StartUp = true;
-			m_Recovering = false;
-			m_LastChangeWasCut = false;
+			m_InRecovery = false;
 		}
 	}
 	else
@@ -380,12 +429,12 @@ void CStreamAllowance::granted(uint32 bytes, bool wantedMore)
 		m_IdleCycles = 0;
 	}
 
-	m_GrantedSinceChange += bytes;
-	if (wantedMore)
-	{
-		m_GateGranted += bytes;
-		m_GateAllowed += m_Allowance;
-	}
+	// What this cycle gave, behind its datagram
+	CCycle &cycle = m_Cycles[m_CurrentNumber % NbCycles];
+	cycle.Number = m_CurrentNumber;
+	cycle.Granted = bytes;
+	cycle.Held = wantedMore && (uint64)bytes * 10 >= (uint64)m_Allowance * 9;
+	cycle.Valid = true;
 }
 
 /* end of file */
