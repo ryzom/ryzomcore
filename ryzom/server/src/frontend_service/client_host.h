@@ -191,6 +191,11 @@ public:
 	/// Prepare a clean system header
 	void				setupSystemHeader( TOutBox& outbox, uint8 code);
 
+	// clang-format off
+	/// On a connection of protocol level ryzomcore/4.2, add the fields of the level to a header, after its system bit
+	void				setupLatenessHeader( TOutBox& outbox );
+	// clang-format on
+
 	/// Compute host stats
 	void				computeHostStats( const TReceivedMessage& msgin, uint32 currentcounter, bool updateAcknowledge );
 

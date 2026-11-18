@@ -41,6 +41,12 @@
  * A record of length 0 is no message (a message is never empty, it starts with its name bits). It marks the end of a
  * session on a connection that is kept for the next session: the frontend sends one in every stream when the session
  * ends, and the client drops the records it reads before it.
+ *
+ * The datagrams of the level carry what the frontend needs to keep the streams from holding them up:
+ * - Every datagram of the frontend has, after its number (32 bits) and its system bit, the time the frontend sent it
+ *   (16 bits: its clock in milliseconds, modulo 2^16) and one bit that says that the path to the client changed.
+ * - Every normal (not system) datagram of the client has, after its acknowledgement bits, how late the datagrams of
+ *   the frontend arrive (8 bits: milliseconds, at most 255; see CDatagramLateness in the client).
  */
 
 namespace CLFECOMMON {
@@ -66,6 +72,10 @@ inline uint8 streamClassOfId(uint64 streamId)
 		return NoStreamClass;
 	return (uint8)(streamId >> 2);
 }
+
+/// Where the send time is in a datagram of the frontend, in bits from its start, and how many bits it is
+const uint DatagramSendTimeBitPos = 33;
+const uint DatagramSendTimeBits = 16;
 
 /// Most bytes the length of a record takes
 const uint StreamRecordLengthMaxBytes = 4;

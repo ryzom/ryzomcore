@@ -470,6 +470,10 @@ inline void	CFeSendSub::CSendBuffer::sendOutBox( NLNET::CUdpSock *datasock )
 	{
 		if (QuicUser.get())
 		{
+			// Protocol level ryzomcore/4.2: the time the datagram is sent goes in the room its header has for it
+			// (CClientHost::setupLatenessHeader)
+			if (QuicUser->Streams)
+				OutBox.poke((uint32)(uint16)CTime::getLocalTime(), CLFECOMMON::DatagramSendTimeBitPos, CLFECOMMON::DatagramSendTimeBits);
 			QuicUser->Transceiver->sendDatagramSwap(QuicUser.get(), OutBox);
 		}
 		else

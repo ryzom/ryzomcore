@@ -2019,10 +2019,11 @@ NLMISC_COMMAND( displayStreamStats, "Display the QUIC streams of the clients of 
 		std::string waiting;
 		for ( uint c = 0; c < CQuicTransceiver::streamClassCount(); ++c )
 			waiting += toString( " %s %u", CQuicTransceiver::streamClassName( c ), user->StreamQueues.pendingBytes( c ) );
+		std::string lateness = user->QueueDelayKnown ? toString( "datagrams %u ms late", (uint)user->QueueDelay ) : std::string( "datagram lateness not reported yet" );
 		if ( user->StatValid )
-			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window %d, in flight %d, round trip %d ms; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), user->StatCongestionWindow.load(), user->StatBytesInFlight.load(), user->StatRtt.load() / 1000, CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
+			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window %d, in flight %d, round trip %d ms; %s; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), user->StatCongestionWindow.load(), user->StatBytesInFlight.load(), user->StatRtt.load() / 1000, lateness.c_str(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
 		else
-			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window not known yet; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
+			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window not known yet; %s; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), lateness.c_str(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
 	}
 	log.displayNL( "%u of %u clients have QUIC streams; %" NL_I64 "u bytes were given to the streams since the service started", nbStreamClients, (uint)clientMap.size(), getStreamBytesGranted() );
 	return true;

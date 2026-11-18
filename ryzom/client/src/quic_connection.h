@@ -123,6 +123,10 @@ public:
 	/// Receive a datagram
 	bool receiveDatagram(NLMISC::CBitMemStream &msgin);
 
+	/// When the datagram that receiveDatagram() gave last arrived from the network: NLMISC::CTime::getLocalTime() in
+	/// milliseconds, the low 32 bits (the main thread may take it much later)
+	uint32 lastDatagramArrivalTime() const;
+
 	/// The connection is of protocol level ryzomcore/4.2: the server sends some classes of messages on streams instead
 	/// of in the datagrams, up to CLFECOMMON::StreamClassMax streams, numbered in the order it opens them. Which
 	/// messages are on which stream is the server's choice.

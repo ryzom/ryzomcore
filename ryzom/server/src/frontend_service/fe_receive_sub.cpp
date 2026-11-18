@@ -1489,6 +1489,18 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 		Msgin.serialAndLog1( sendnumberack );
 		Msgin.serialAndLog1( ackbitmask );
 
+		// A client of protocol level ryzomcore/4.2 reports how late the datagrams reach it (CDatagramLateness in the
+		// client), as of the datagram it acknowledges here
+		if ( clienthost->QuicUser.get() != NULL && clienthost->QuicUser->Streams )
+		{
+			uint8 queueDelay = 0;
+			Msgin.serial( queueDelay );
+			CQuicUserContext *user = clienthost->QuicUser.get();
+			user->QueueDelay = queueDelay;
+			user->QueueDelayAck = sendnumberack;
+			user->QueueDelayKnown = true;
+		}
+
 		/*if (receivednumber < 1000)
 			nlinfo("FSRCV-DBG: received normal packet %d (%s) from client %d %s, Ack=%d AckBitMask=%08X", receivednumber, systemMode ? "SYSTEM" : "NORMAL", clienthost ? clienthost->clientId() : -1, clienthost ? clienthost->eId().toString().c_str() : "<Unknown>", sendnumberack, ackbitmask);*/
 

@@ -192,6 +192,17 @@ public:
 	// The connection is shutting down (set on the connection thread): what fails from then on is no fault
 	NLMISC::CAtomicBool ShuttingDown = false;
 
+	// Datagrams still to send with the bit that says the path to the client changed (set on the connection thread when
+	// the address of the client changes, counted down by the main thread): the client then measures the lateness of
+	// its datagrams against the new path alone
+	NLMISC::CAtomicInt PathChangedDatagrams = 0;
+
+	// What the client last reported: how late the datagrams reach it, in milliseconds (at most 255), and the number of
+	// the datagram it had received last then (service main thread only)
+	bool QueueDelayKnown = false;
+	uint8 QueueDelay = 0;
+	uint32 QueueDelayAck = 0;
+
 	// What MsQuic last said about the path, for the room the streams may take in the congestion window
 	// (stored on the connection thread, read by the main thread; each value on its own, they need not match exactly)
 	NLMISC::CAtomicBool StatValid = false;

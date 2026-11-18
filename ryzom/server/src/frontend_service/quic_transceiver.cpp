@@ -847,8 +847,12 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 			m->updateStreamStats(user, connection);
 		status = QUIC_STATUS_SUCCESS;
 		break;
-	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
+		// The client is reached over another path (it changed network): the next datagrams tell it
+		user->PathChangedDatagrams.store(5);
+		status = QUIC_STATUS_SUCCESS;
+		break;
+	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
 	case QUIC_CONNECTION_EVENT_IDEAL_PROCESSOR_CHANGED:
 	case QUIC_CONNECTION_EVENT_RESUMED:
 	case QUIC_CONNECTION_EVENT_PEER_CERTIFICATE_RECEIVED:

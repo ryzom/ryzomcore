@@ -180,6 +180,7 @@ public:
 		, TransportStatus(0)
 		, PeerShutdown(false)
 		, StreamsNegotiated(false)
+		, LastDatagramArrival(0)
 	{
 		for (uint i = 0; i < StreamClassMax; ++i)
 			Streams[i].Impl = this;
@@ -196,7 +197,7 @@ public:
 	TDesiredStateChange DesiredStateChange;
 	CInetHost DesiredAddr;
 
-	// This is the FIFO buffer for all datagrams that are received.
+	// This is the FIFO buffer for all datagrams that are received, each after the time it arrived (uint32).
 	// It is filled by the receive callback (any thread), and emptied by the receiveDatagram call (main thread only).
 	CSynchronizedFIFO Buffer; // (any thread)
 	CAtomicInt BufferWrites; // (any thread)
@@ -254,6 +255,8 @@ public:
 	CStream Streams[StreamClassMax]; // by stream number, whether or not the server has opened it
 	CMutex StreamMutex;
 	CAtomicBool StreamsNegotiated; // Set by the callback thread when the connection is of protocol level 4.2
+
+	uint32 LastDatagramArrival; // When the last datagram given by receiveDatagram arrived (main thread only)
 
 	static QUIC_STATUS
 #ifdef _Function_class_
@@ -931,6 +934,10 @@ bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 		uint8 *buffer;
 		uint32 size;
 		fifo->front(buffer, size);
+		nlassert(size >= sizeof(m->LastDatagramArrival));
+		memcpy(&m->LastDatagramArrival, buffer, sizeof(m->LastDatagramArrival));
+		buffer += sizeof(m->LastDatagramArrival);
+		size -= sizeof(m->LastDatagramArrival);
 		msgin.clear();
 		memcpy(msgin.bufferToFill(size), buffer, size);
 		fifo->pop();
@@ -1043,10 +1050,18 @@ const NLNET::CInetHost &CQuicConnection::address() const
 void CQuicConnectionImpl::datagramReceived(const uint8 *buffer, uint32 length)
 {
 	CQuicConnectionImpl *const m = this;
+	// Taken here, on the thread that gets the datagram from the network: the main thread may read it tens of
+	// milliseconds later, which says nothing about the network
+	uint32 arrival = (uint32)CTime::getLocalTime();
 	CFifoAccessor access(&m->Buffer); // This block is mutex'd now
 	CBufFIFO *fifo = &access.value();
-	fifo->push(buffer, length);
+	fifo->push((const uint8 *)&arrival, sizeof(arrival), buffer, length);
 	++m->BufferWrites;
+}
+
+uint32 CQuicConnection::lastDatagramArrivalTime() const
+{
+	return m->LastDatagramArrival;
 }
 
 #else
@@ -1118,6 +1133,11 @@ bool CQuicConnection::datagramAvailable() const
 bool CQuicConnection::receiveDatagram(NLMISC::CBitMemStream &msgin)
 {
 	return false;
+}
+
+uint32 CQuicConnection::lastDatagramArrivalTime() const
+{
+	return 0;
 }
 
 bool CQuicConnection::streams() const

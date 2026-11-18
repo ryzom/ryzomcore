@@ -41,6 +41,7 @@
 #include <nel/misc/md5.h>
 
 #include "quic_connection.h"
+#include "datagram_lateness.h"
 #include "time_client.h"
 #include "game_share/entity_types.h"
 #include "property_decoder.h"
@@ -586,6 +587,9 @@ protected:
 
 	/// The QUIC connection to the frontend
 	CQuicConnection				m_QuicConnection;
+
+	/// How late the datagrams of the frontend arrive (protocol level ryzomcore/4.2), which the client reports
+	CDatagramLateness			m_DatagramLateness;
 	
 	/// Whether to use QUIC or not
 	bool						m_UseQuic;

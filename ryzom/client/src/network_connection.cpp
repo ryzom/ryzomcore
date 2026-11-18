@@ -692,6 +692,7 @@ bool	CNetworkConnection::connect(string &result)
 			_FrontendHost.setPort(_FrontendHost.port() - 5000); // Same trick as SBS, just use a port offset
 			nlinfo("Connecting to QUIC at port %d instead", _FrontendHost.port());
 			m_QuicConnection.connect(_FrontendHost);
+			m_DatagramLateness.reset();
 		}
 		else
 		{
@@ -2230,6 +2231,13 @@ void	CNetworkConnection::sendNormalMessage()
 	message.serial (_LastReceivedNumber);
 	message.serial (_AckBitMask);
 
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		// Protocol level ryzomcore/4.2: how late the datagrams of the frontend arrive, for it to slow its streams down
+		uint8 lateness = m_DatagramLateness.report();
+		message.serial (lateness);
+	}
+
 	uint			numPacked = 0;
 
 	// pack each block
@@ -2670,6 +2678,17 @@ bool	CNetworkConnection::decodeHeader(CBitMemStream &msgin, bool checkMessageNum
 
 	msgin.serial (_CurrentReceivedNumber);
 	msgin.serial (_SystemMode);
+
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		// Protocol level ryzomcore/4.2: when the frontend sent the datagram, and whether the path changed (see
+		// game_share/stream_record.h). With when it arrived, that tells how late it is.
+		uint16 sendTime = 0;
+		bool pathChanged = false;
+		msgin.serial (sendTime);
+		msgin.serial (pathChanged);
+		m_DatagramLateness.add(sendTime, m_QuicConnection.lastDatagramArrivalTime(), pathChanged);
+	}
 
 	if ((sint)_CurrentReceivedNumber > (sint)_LastReceivedPacketInBothModes && checkMessageNumber)
 	{

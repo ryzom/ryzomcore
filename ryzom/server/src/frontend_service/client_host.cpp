@@ -90,6 +90,7 @@ void CClientHost::setupOutBox( TOutBox& outbox )
 	// b. System bit
 	bool	systemMode = false;
 	outbox.serialBitAndLog( systemMode );
+	setupLatenessHeader( outbox );
 
 	// b. Add the latest receive number belonging to the destination client
 	outbox.serialAndLog1( _ReceiveNumber );
@@ -116,9 +117,36 @@ void	CClientHost::setupSystemHeader( TOutBox& outbox, uint8 code)
 	// b. System bit
 	bool	systemMode = true;
 	outbox.serialBitAndLog( systemMode );
+	setupLatenessHeader( outbox );
 
 	// c. System message code
 	outbox.serialAndLog1( code );
+}
+
+
+/*
+ * On a connection of protocol level ryzomcore/4.2, add the fields of the level to a header
+ */
+void	CClientHost::setupLatenessHeader( TOutBox& outbox )
+{
+	CQuicUserContext *user = QuicUser.get();
+	if ( user == NULL || !user->Streams )
+		return;
+
+	// When the datagram is sent, for the client to tell how late it arrives. Room is left here, and the time is
+	// written where the datagram is sent, right before it goes (CFeSendSub::CSendBuffer::sendOutBox): the flush runs
+	// later than this, and not always as much later.
+	nlassert( (uint)outbox.getPosInBit() == CLFECOMMON::DatagramSendTimeBitPos );
+	outbox.reserveBits( CLFECOMMON::DatagramSendTimeBits );
+
+	// The path to the client changed
+	bool pathChanged = false;
+	if ( user->PathChangedDatagrams.load( NLMISC::TMemoryOrderRelaxed ) > 0 )
+	{
+		user->PathChangedDatagrams.fetchAdd( -1 );
+		pathChanged = true;
+	}
+	outbox.serialBit( pathChanged );
 }
 
 
