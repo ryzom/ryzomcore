@@ -153,7 +153,8 @@ void CFeSendSub::init( NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory 
 	m_FillingStreamPosts = &m_StreamPosts1;
 	m_FlushingStreamPosts = &m_StreamPosts2;
 
-	_MsgXmlMD5 = NLMISC::getMD5("msg.xml");
+	// (without what declares the stream classes: the clients need not have those to have the same file)
+	_MsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", false);
 	_DatabaseXmlMD5 = NLMISC::getMD5("database.xml");
 
 	/*_TotalBandwidth = totalbandwith; // initialized by setTotalBandwidth() and setClientBandwitdth()

@@ -1,11 +1,12 @@
 <client_messages_description>
-  <!--
+  <!-- stream_class:
     The classes of messages that the frontend sends on QUIC streams instead of in the datagrams, to the clients of
     protocol level ryzomcore/4.2. Each class is one stream, in this order, of which a client allows 16. A branch or a
-    leaf below takes a class with stream="name" (a leaf has that of its branch unless it names another). Only the
-    frontend acts on this: a class can be added, or a message moved, without a new client program or protocol level.
-    The clients still need this file as the frontend has it, as for any change to it: the frontend sends them its
-    signature (CheckXMLSignature).
+    leaf below takes a class with stream="name" (a leaf has that of its branch unless it names another).
+    Only the frontend acts on this, and the signature of this file that the frontend sends to the clients leaves it
+    out: a class can be added, or a message moved, in the frontend's file alone. For that, write it as it is written
+    here: this comment starts with "stream_class", each stream_class element is on a line of its own, and a stream
+    attribute follows one space.
     The messages of one class keep their order. In one update the client handles the streams in this order, so what
     the other classes refer to comes first.
   -->

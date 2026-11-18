@@ -433,11 +433,13 @@ void	CNetworkConnection::init(const string &cookie, const string &addr)
 	_NextClientTickToReplay = 0;
 #endif
 
+	// The signature of msg.xml leaves out what declares the stream classes of a frontend, on both sides: this file
+	// and the frontend's need not agree on those (see CGenericXmlMsgHeaderManager::getSignature)
 	// If the server run on window, those are the one to test
-	_AltMsgXmlMD5 = NLMISC::getMD5("msg.xml");
+	_AltMsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", false);
 	_AltDatabaseXmlMD5 = NLMISC::getMD5("database.xml");
 	// If the server run on UNIX, those are the one to test
-	_MsgXmlMD5 = getTextMD5("msg.xml");
+	_MsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", true);
 	_DatabaseXmlMD5 = getTextMD5("database.xml");
 }
 

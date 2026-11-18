@@ -25,7 +25,11 @@
 #include "generic_xml_msg_mngr.h"
 #include "stream_record.h"
 
+#include "nel/misc/file.h"
+#include "nel/misc/path.h"
+
 #include <algorithm>
+#include <cstring>
 #include "nel/misc/file.h"
 #include "nel/misc/xml_auto_ptr.h"
 
@@ -104,6 +108,115 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 
 	// create root node from root xml node
 	_Root = new CNode(read.getRootNode(), 0, CLFECOMMON::NoStreamClass, _StreamClasses, _StreamClassError);
+}
+
+// the text of a msg.xml without what declares the stream classes
+void	CGenericXmlMsgHeaderManager::removeStreamClasses(std::vector<uint8> &text)
+{
+	static const char declaration[] = "<stream_class";
+	static const char commentStart[] = "<!-- stream_class";
+	static const char commentEnd[] = "-->";
+	static const char attribute[] = " stream=\"";
+	const size_t declarationSize = sizeof(declaration) - 1;
+	const size_t commentStartSize = sizeof(commentStart) - 1;
+	const size_t commentEndSize = sizeof(commentEnd) - 1;
+	const size_t attributeSize = sizeof(attribute) - 1;
+
+	std::vector<uint8> out;
+	out.reserve(text.size());
+	bool inComment = false;
+	size_t pos = 0;
+	while (pos < text.size())
+	{
+		// One line, with its end
+		size_t end = pos;
+		while (end < text.size() && text[end] != '\n')
+			++end;
+		if (end < text.size())
+			++end;
+		const uint8 *line = &text[pos];
+		const size_t size = end - pos;
+		pos = end;
+
+		// What the line starts with, after its indentation
+		size_t first = 0;
+		while (first < size && (line[first] == ' ' || line[first] == '\t'))
+			++first;
+		const size_t left = size - first;
+
+		bool removeLine = false;
+		if (inComment)
+		{
+			removeLine = true;
+		}
+		else if (left >= commentStartSize && !memcmp(line + first, commentStart, commentStartSize))
+		{
+			inComment = true;
+			removeLine = true;
+		}
+		else if (left >= declarationSize && !memcmp(line + first, declaration, declarationSize))
+		{
+			removeLine = true;
+		}
+		if (inComment)
+		{
+			// The comment ends on the line that has its end
+			for (size_t i = first; i + commentEndSize <= size; ++i)
+			{
+				if (!memcmp(line + i, commentEnd, commentEndSize))
+				{
+					inComment = false;
+					break;
+				}
+			}
+		}
+		if (removeLine)
+			continue;
+
+		// The line without its stream attributes
+		size_t i = 0;
+		while (i < size)
+		{
+			if (size - i >= attributeSize && !memcmp(line + i, attribute, attributeSize))
+			{
+				size_t close = i + attributeSize;
+				while (close < size && line[close] != '"' && line[close] != '\n')
+					++close;
+				if (close < size && line[close] == '"')
+				{
+					i = close + 1;
+					continue;
+				}
+			}
+			out.push_back(line[i]);
+			++i;
+		}
+	}
+	text.swap(out);
+}
+
+// the signature of a msg.xml
+NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getSignature(const string &filename, bool removeCarriageReturns)
+{
+	NLMISC::CHashKeyMD5 signature;
+	signature.clear();
+
+	CIFile file;
+	if (!file.open(CPath::lookup(filename, false)))
+	{
+		nlwarning("Cannot open '%s' for its signature", filename.c_str());
+		return signature;
+	}
+	std::vector<uint8> text(file.getFileSize());
+	if (!text.empty())
+		file.serialBuffer(&text[0], (uint)text.size());
+
+	removeStreamClasses(text);
+	if (removeCarriageReturns)
+		text.erase(std::remove(text.begin(), text.end(), (uint8)'\r'), text.end());
+
+	static const uint8 nothing = 0;
+	return NLMISC::getMD5(text.empty() ? &nothing : &text[0], (uint32)text.size());
 }
 
 // set callback

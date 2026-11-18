@@ -28,6 +28,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/string_view.h"
+#include "nel/misc/md5.h"
 
 #include <string>
 #include <vector>
@@ -329,6 +330,25 @@ public:
 	bool					nodeUsesCycle(CNodeId &nodeId)				{ return nodeId._Node->UseCycle; }
 
 	// clang-format off
+	/**
+	 * The signature of a msg.xml, which the frontend sends to its clients for them to compare with that of their own
+	 * file: the MD5 of the file without what declares the stream classes (see removeStreamClasses), so that a
+	 * frontend can declare a class, or move a message to one, without the files of its clients having to follow. A
+	 * file that declares none has the signature it always had, the MD5 of the whole file.
+	 * removeCarriageReturns: of the file without its carriage returns as well (a client compares with both).
+	 * The hash is all zero if the file cannot be read.
+	 */
+	static NLMISC::CHashKeyMD5	getSignature(const std::string &filename, bool removeCarriageReturns);
+
+	/**
+	 * Remove from the text of a msg.xml what declares the stream classes: the lines of the `stream_class` elements,
+	 * the comment in front of them (from a line that starts with `<!-- stream_class` to the line that ends it), and
+	 * the `stream` attributes of the nodes, each with the one space in front of it. What is left is the file as it
+	 * was before, byte for byte, provided they were written that way: each element on a line of its own, each
+	 * attribute after one space.
+	 */
+	static void					removeStreamClasses(std::vector<uint8> &text);
+
 	/**
 	 * Get the class of the message node, which says on which stream of protocol level ryzomcore/4.2 the frontend
 	 * sends the message: an index in getStreamClasses(), or CLFECOMMON::NoStreamClass for a message that goes by
