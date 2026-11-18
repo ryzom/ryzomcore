@@ -3780,6 +3780,7 @@ void CDriverGL::restoreWindow()
 #elif defined(NL_OS_MAC)
 
 	[[(NSView *)_win window] deminiaturize:nil];
+	[NSApp activateIgnoringOtherApps:YES];
 
 #elif defined (NL_OS_UNIX)
 
