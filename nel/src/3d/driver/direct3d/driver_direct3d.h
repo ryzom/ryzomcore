@@ -862,6 +862,7 @@ public:
 	virtual bool			activate();
 	virtual bool			isActive ();
 	virtual bool			isWindowMinimized() const;
+	virtual void			restoreWindow();
 	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
 	virtual bool			isMinimizedWindowPictureWanted() const;
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);

@@ -1986,6 +1986,19 @@ bool CDriverD3D::isWindowMinimized() const
 }
 
 // ***************************************************************************
+void CDriverD3D::restoreWindow()
+{
+	// only a window of the driver's own, and only when it is minimized
+	if (_HWnd == NULL || !_DestroyWindow || !isWindowMinimized())
+		return;
+
+	ShowWindow(_HWnd, SW_RESTORE);
+	// the system decides whether a program may take the foreground; where it does not let it, the button of
+	// the window flashes in the task bar
+	SetForegroundWindow(_HWnd);
+}
+
+// ***************************************************************************
 void CDriverD3D::setMinimizedWindowPictureSupplied(bool supplied)
 {
 	m_MinimizedPicture.setSupplied(_HWnd, supplied);

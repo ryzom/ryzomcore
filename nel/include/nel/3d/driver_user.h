@@ -178,6 +178,8 @@ public:
 	virtual bool			isActive() NL_OVERRIDE;
 	/// Return true while the window is minimized (iconified) by the window system.
 	virtual bool			isWindowMinimized() const NL_OVERRIDE;
+	/// Restore the window when it is minimized, and ask the window system to bring it in front.
+	virtual void			restoreWindow() NL_OVERRIDE;
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
 	virtual nlWindow		getDisplay () NL_OVERRIDE;
 

@@ -3762,6 +3762,50 @@ bool CDriverGL::isWindowMinimized() const
 }
 
 // --------------------------------------------------
+void CDriverGL::restoreWindow()
+{
+	H_AUTO_OGL(CDriverGL_restoreWindow)
+
+	// only a window of the driver's own, and only when it is minimized
+	if (_win == EmptyWindow || !_DestroyWindow || !isWindowMinimized())
+		return;
+
+#ifdef NL_OS_WINDOWS
+
+	ShowWindow(_win, SW_RESTORE);
+	// the system decides whether a program may take the foreground; where it does not let it, the button of
+	// the window flashes in the task bar
+	SetForegroundWindow(_win);
+
+#elif defined(NL_OS_MAC)
+
+	[[(NSView *)_win window] deminiaturize:nil];
+
+#elif defined (NL_OS_UNIX)
+
+	// A client maps its window to leave the iconic state. A window manager that keeps a minimized window mapped
+	// has nothing to do for that request, so it is also asked to activate the window, which shows it.
+	XMapRaised(_dpy, _win);
+
+	XEvent xev;
+	memset(&xev, 0, sizeof(xev));
+	xev.xclient.type = ClientMessage;
+	xev.xclient.window = _win;
+	xev.xclient.message_type = XInternAtom(_dpy, "_NET_ACTIVE_WINDOW", False);
+	xev.xclient.format = 32;
+	xev.xclient.data.l[0] = 1; // 1 for Application, 2 for Page or Taskbar, 0 for old source
+	xev.xclient.data.l[1] = CurrentTime;
+	xev.xclient.data.l[2] = 0;
+	if (!XSendEvent(_dpy, XDefaultRootWindow(_dpy), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev))
+	{
+		nlwarning("3D: Failed to ask the window manager to activate the window");
+	}
+	XFlush(_dpy);
+
+#endif // NL_OS_UNIX
+}
+
+// --------------------------------------------------
 void CDriverGL::setMinimizedWindowPictureSupplied(bool supplied)
 {
 	H_AUTO_OGL(CDriverGL_setMinimizedWindowPictureSupplied)
