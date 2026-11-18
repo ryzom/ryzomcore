@@ -132,25 +132,20 @@ struct CEndSessionState
 static CEndSessionState *s_EndSessionState = nullptr;
 
 // The state of the process. It is made at the first use and stays for as long as the process: the other copies of
-// this file keep its address. Without a NeL context there is only this copy of the file.
+// this file keep its address. It is always the one of the NeL context, also for an application that has made no
+// context yet (INelContext::getInstance makes it then): a copy of this file that kept a state of its own, because it
+// was used before there was a context, would not be found by a driver library loaded later.
 static CEndSessionState *getEndSessionState()
 {
 	if (s_EndSessionState == nullptr)
 	{
-		if (INelContext::isContextInitialised())
-		{
-			static const char *const name = "NLMISC::CSystemUtils::EndSessionState";
-			INelContext &context = INelContext::getInstance();
-			s_EndSessionState = (CEndSessionState *)context.getSingletonPointer(name);
-			if (s_EndSessionState == nullptr)
-			{
-				s_EndSessionState = new CEndSessionState();
-				context.setSingletonPointer(name, s_EndSessionState);
-			}
-		}
-		else
+		static const char *const name = "NLMISC::CSystemUtils::EndSessionState";
+		INelContext &context = INelContext::getInstance();
+		s_EndSessionState = (CEndSessionState *)context.getSingletonPointer(name);
+		if (s_EndSessionState == nullptr)
 		{
 			s_EndSessionState = new CEndSessionState();
+			context.setSingletonPointer(name, s_EndSessionState);
 		}
 	}
 	return s_EndSessionState;
