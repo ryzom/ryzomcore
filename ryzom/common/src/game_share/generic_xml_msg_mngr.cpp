@@ -23,6 +23,7 @@
 #include "stdpch.h"
 
 #include "generic_xml_msg_mngr.h"
+#include "stream_record.h"
 #include "nel/misc/file.h"
 #include "nel/misc/xml_auto_ptr.h"
 
@@ -43,6 +44,7 @@ using namespace NLMISC;
 CGenericXmlMsgHeaderManager::CGenericXmlMsgHeaderManager()
 {
 	_Root = nullptr;
+	_UnknownStreamClass = false;
 }
 
 // Destructor
@@ -69,7 +71,8 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 	read.init (file);
 
 	// create root node from root xml node
-	_Root = new CNode(read.getRootNode(), 0);
+	_UnknownStreamClass = false;
+	_Root = new CNode(read.getRootNode(), 0, CLFECOMMON::NoStreamClass, _UnknownStreamClass);
 }
 
 // set callback
@@ -195,7 +198,12 @@ void	CGenericXmlMsgHeaderManager::popNameAndDescriptionFromStream(string &result
 /*
  * Constructor
  */
-CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Value(value), UseCycle(false), NbBits(0), Callback(nullptr)
+CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, bool &unknownStreamClass)
+    : Value(value)
+    , UseCycle(false)
+    , NbBits(0)
+    , Callback(nullptr)
+    , StreamClass(parentStreamClass)
 {
 	UserData[0] = 0;
 	UserData[1] = 0;
@@ -207,6 +215,18 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Va
 	if (name)
 	{
 		Name = (const char*)name;
+	}
+
+	// The class of the node, which the nodes below it have too unless they name another
+	CXMLAutoPtr stream(xmlGetProp(xmlNode, (xmlChar *)"stream"));
+	if (stream)
+	{
+		StreamClass = (uint8)CLFECOMMON::streamClassFromName((const char *)stream);
+		if (StreamClass == CLFECOMMON::NoStreamClass)
+		{
+			nlwarning("Unknown stream class '%s' in node '%s'", (const char *)stream, Name.c_str());
+			unknownStreamClass = true;
+		}
 	}
 
 	uint32		childValue = 0;
@@ -330,7 +350,7 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Va
 			if (!strcmp((const char*)xmlChild->name, "branch") || !strcmp((const char*)xmlChild->name, "leaf"))
 			{
 				// create a node from the child xml node
-				CNode	*child = new CNode(xmlChild, childValue);
+				CNode	*child = new CNode(xmlChild, childValue, StreamClass, unknownStreamClass);
 
 				// check node doesn't exist yet in parent
 				if (NodesByName.find(child->Name) == NodesByName.end())

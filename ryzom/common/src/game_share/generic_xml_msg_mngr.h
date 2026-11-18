@@ -328,6 +328,19 @@ public:
 	 */
 	bool					nodeUsesCycle(CNodeId &nodeId)				{ return nodeId._Node->UseCycle; }
 
+	// clang-format off
+	/**
+	 * Get the class of the message node (CLFECOMMON::TStreamClass), which says on which stream of protocol level
+	 * ryzomcore/4.2 the frontend sends the message. CLFECOMMON::NoStreamClass for a message that goes by impulse.
+	 */
+	uint8					getNodeStreamClass(CNodeId &nodeId)			{ return nodeId._Node->StreamClass; }
+
+	/**
+	 * A `stream` attribute of the file names no class (each one was logged). The frontend stops on that.
+	 */
+	bool					hasUnknownStreamClass() const				{ return _UnknownStreamClass; }
+	// clang-format on
+
 	/**
 	 * Set node user data
 	 */
@@ -362,9 +375,13 @@ protected:
 		TMessageFormat		Format;
 		uint				NbBits;
 		TMsgHeaderCallback	Callback;
+		// clang-format off
+		/// CLFECOMMON::TStreamClass, from the `stream` attribute of the node or else of the branch it is in
+		uint8				StreamClass;
 
-		/// Constructor
-		CNode(xmlNodePtr xmlNode, uint32 value);
+		/// Constructor (unknownStreamClass is set if a `stream` attribute in the node or below names no class)
+		CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, bool &unknownStreamClass);
+		// clang-format on
 
 		/// Destructor
 		~CNode();
@@ -500,6 +517,9 @@ protected:
 protected:
 	CNode	*_Root;
 
+	// clang-format off
+	bool	_UnknownStreamClass;
+	// clang-format on
 };
 
 
