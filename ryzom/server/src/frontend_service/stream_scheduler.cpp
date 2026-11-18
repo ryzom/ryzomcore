@@ -29,6 +29,7 @@ CStreamSchedulerConfig::CStreamSchedulerConfig()
     , QueueDelayTarget(20)
     , DatagramPacketBytes(560)
     , ReportDatagrams(3)
+    , IdleSecondsToStartUp(10.0)
 {
 }
 
@@ -244,6 +245,8 @@ CStreamAllowance::CStreamAllowance()
     , m_GateGranted(0)
     , m_GateAllowed(0)
     , m_CyclesWithoutReport(0)
+    , m_IdleCycles(0)
+    , m_IdleCyclesToStartUp(0)
     , m_Recovering(false)
     , m_LastChangeWasCut(false)
 {
@@ -258,6 +261,7 @@ void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 	m_GateGranted = 0;
 	m_GateAllowed = 0;
 	m_CyclesWithoutReport = 0;
+	m_IdleCycles = 0;
 	m_Recovering = false;
 	m_LastChangeWasCut = false;
 }
@@ -273,6 +277,9 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		m_CongestionEvents = congestionEvents;
 		m_SendBusyDrops = sendBusyDrops;
 	}
+
+	// (for granted(), which counts the idle cycles)
+	m_IdleCyclesToStartUp = (uint32)std::max(1.0, config.IdleSecondsToStartUp / std::max(config.TickSeconds, 0.001));
 
 	// A client that has not reported for a while (its main thread is busy: a loading screen) says nothing about what
 	// its path takes now: its next report may cut the allowance, not raise it
@@ -358,6 +365,21 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 
 void CStreamAllowance::granted(uint32 bytes, bool wantedMore)
 {
+	// After long enough without stream data, the allowance looks for its level again, from where it stands
+	if (bytes == 0 && !wantedMore)
+	{
+		if (m_IdleCycles < m_IdleCyclesToStartUp && ++m_IdleCycles == m_IdleCyclesToStartUp)
+		{
+			m_StartUp = true;
+			m_Recovering = false;
+			m_LastChangeWasCut = false;
+		}
+	}
+	else
+	{
+		m_IdleCycles = 0;
+	}
+
 	m_GrantedSinceChange += bytes;
 	if (wantedMore)
 	{

@@ -58,6 +58,8 @@ struct CStreamSchedulerConfig
 	/// How many datagrams the lateness that a client reports covers (it reports the smallest of its last ones): a
 	/// report says what a change of the allowance did once it covers only datagrams that were sent after the change
 	uint32 ReportDatagrams;
+	/// Seconds without stream data for a client after which its allowance looks for its level again, from where it is
+	double IdleSecondsToStartUp;
 };
 
 /**
@@ -181,6 +183,10 @@ private:
  *
  * Cycles in which the client had nothing more to send than it got say nothing about its path: they count neither for
  * nor against growth, so a client that was idle grows as one that starts.
+ *
+ * Once it was cut, an allowance grows by packets only, which is slow. After IdleSecondsToStartUp without stream data
+ * it grows by quarters again, from where it stands: what cut it is long over, and what the client is sent next (a
+ * scenario, hours after its login) should not crawl for it. The next sign of lateness ends that as it ends the first.
  */
 class CStreamAllowance
 {
@@ -222,6 +228,9 @@ private:
 	uint64 m_GateGranted;
 	uint64 m_GateAllowed;
 	uint32 m_CyclesWithoutReport;
+	/// Cycles in a row without stream data for the client, and how many of them make it look for its level again
+	uint32 m_IdleCycles;
+	uint32 m_IdleCyclesToStartUp;
 	/// The allowance was just cut: congestion seen up to the next report belongs to what was sent before the cut
 	bool m_Recovering;
 	/// The last change was a cut (after a raise, a report of lateness is acted on at once)
