@@ -70,6 +70,14 @@
 #include "nel/misc/file.h"
 #endif
 
+// The signals that end a session are handled where the event emitters of the drivers poll for them
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+#define NL_END_SESSION_SIGNALS 1
+#include <signal.h>
+#include <string.h>
+#include <time.h>
+#endif
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -83,6 +91,95 @@ static const uint32 KeyMaxLength = 1024;
 namespace NLMISC {
 
 nlWindow CSystemUtils::s_window = EmptyWindow;
+
+static CSystemUtils::TEndSessionCallback s_EndSessionCallback = nullptr;
+
+#ifdef NL_END_SESSION_SIGNALS
+
+static const int s_EndSessionSignals[] = { SIGTERM, SIGHUP };
+static const uint s_EndSessionSignalCount = sizeof(s_EndSessionSignals) / sizeof(s_EndSessionSignals[0]);
+static struct sigaction s_PreviousEndSessionActions[s_EndSessionSignalCount];
+static bool s_EndSessionActionSet[s_EndSessionSignalCount];
+static volatile sig_atomic_t s_EndSessionSignaled = 0;
+// only the handler reads and writes it, and the signals it handles are blocked while it runs
+static time_t s_EndSessionSignalTime = 0;
+// how long a signal may wait for pollEndSession before the next one ends the process
+static const time_t s_EndSessionPollTimeout = 5;
+
+static void endSessionSignalHandler(int sig)
+{
+	// (signal, raise and time are safe in a signal handler)
+	if (s_EndSessionSignaled && time(nullptr) - s_EndSessionSignalTime >= s_EndSessionPollTimeout)
+	{
+		// nobody polls: the application hangs, or it does not pump its events. The signal ends the process as it
+		// does without a handler, once the handler has returned and the signal is no longer blocked.
+		signal(sig, SIG_DFL);
+		raise(sig);
+		return;
+	}
+	if (!s_EndSessionSignaled)
+	{
+		s_EndSessionSignalTime = time(nullptr);
+		s_EndSessionSignaled = 1;
+	}
+}
+
+#endif // NL_END_SESSION_SIGNALS
+
+void CSystemUtils::setEndSessionCallback(TEndSessionCallback callback)
+{
+	s_EndSessionCallback = callback;
+
+#ifdef NL_END_SESSION_SIGNALS
+	for (uint i = 0; i < s_EndSessionSignalCount; ++i)
+	{
+		if (callback != nullptr && !s_EndSessionActionSet[i])
+		{
+			// a signal that whoever started the process had it ignore (nohup) stays ignored
+			struct sigaction previous;
+			if (sigaction(s_EndSessionSignals[i], nullptr, &previous) != 0 || previous.sa_handler == SIG_IGN)
+				continue;
+
+			struct sigaction action;
+			memset(&action, 0, sizeof(action));
+			action.sa_handler = endSessionSignalHandler;
+			// a system call that the signal interrupts is started again; the signals of the list wait for each other
+			action.sa_flags = SA_RESTART;
+			sigemptyset(&action.sa_mask);
+			for (uint j = 0; j < s_EndSessionSignalCount; ++j)
+				sigaddset(&action.sa_mask, s_EndSessionSignals[j]);
+			if (sigaction(s_EndSessionSignals[i], &action, &s_PreviousEndSessionActions[i]) == 0)
+				s_EndSessionActionSet[i] = true;
+			else
+				nlwarning("Cannot handle signal %d to end the session", s_EndSessionSignals[i]);
+		}
+		else if (callback == nullptr && s_EndSessionActionSet[i])
+		{
+			sigaction(s_EndSessionSignals[i], &s_PreviousEndSessionActions[i], nullptr);
+			s_EndSessionActionSet[i] = false;
+		}
+	}
+	if (callback == nullptr)
+		s_EndSessionSignaled = 0;
+#endif // NL_END_SESSION_SIGNALS
+}
+
+void CSystemUtils::endSession()
+{
+	if (s_EndSessionCallback != nullptr)
+		s_EndSessionCallback();
+}
+
+void CSystemUtils::pollEndSession()
+{
+#ifdef NL_END_SESSION_SIGNALS
+	if (s_EndSessionSignaled)
+	{
+		s_EndSessionSignaled = 0;
+		endSession();
+	}
+#endif // NL_END_SESSION_SIGNALS
+}
 
 #ifdef NL_OS_WINDOWS
 static bool s_mustUninit = false;

@@ -104,6 +104,10 @@
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
 
+#ifndef NL_OS_WINDOWS
+#include <unistd.h>
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -555,6 +559,55 @@ void releaseOutGame()
 	ContinentMngr.reset();
 }
 
+// ***************************************************************************
+// The session of the user ends: the system shuts down or restarts, or the user logs off. The client quits at
+// once: it asks nothing and does not wait for the server to let the character leave (the character stays in the
+// world for as long as the server keeps one whose client is gone, as after any loss of the connection). The
+// system leaves a few seconds and then ends the process anyway, so nothing is released: the server is told, what
+// a quit saves is saved, and the process ends.
+// Called from inside the pump of the window events (CSystemUtils::setEndSessionCallback), at any time between
+// the creation of the driver and release().
+void quitAtEndOfSession()
+{
+	static bool s_Quitting = false;
+	if (s_Quitting)
+		return;
+	s_Quitting = true;
+
+	nlinfo("The session of the user ends, the client quits at once");
+
+	// The server is told first: the message leaves while the files are written
+	NetMngr.disconnect();
+
+	if (CInterfaceManager::hasInstance() && CInterfaceManager::getInstance()->isInGame())
+	{
+		// what the end of the main loop saves: the size of the window, the keys and the interface
+		if (Driver)
+			saveIngameResolution();
+		CInterfaceManager::getInstance()->uninitInGame0();
+#ifdef RYZOM_FORGE
+		CItemGroupManager::getInstance()->uninit();
+#endif
+	}
+
+	// what release() saves: the position of the window and the camera, in client.cfg when it is saved at all
+	ClientCfg.release();
+
+	// restore screensaver state
+	CSystemUtils::enableScreensaver(LastScreenSaverEnabled);
+
+	// quit properly crash info
+	extern void quitCrashReport();
+	quitCrashReport();
+
+	// End the process without the destructors of the static objects, which expect what release() released
+#ifdef NL_OS_WINDOWS
+	TerminateProcess(GetCurrentProcess(), EXIT_SUCCESS);
+#else
+	_exit(EXIT_SUCCESS);
+#endif
+}
+
 void releaseStereoDisplayDevice()
 {
 	if (StereoDisplay)
@@ -586,6 +639,9 @@ void release()
 	}
 	
 	setCrashCallback(nullptr);
+
+	// from here the client is releasing what quitAtEndOfSession would save from
+	CSystemUtils::setEndSessionCallback(nullptr);
 
 #ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();

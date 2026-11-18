@@ -32,6 +32,8 @@ void releaseMainLoop(bool closeConnection);
 void release();
 // Release all.
 void releaseOutGame();
+// The session of the user ends (shutdown, restart, log off): save, tell the server and end the process at once
+void quitAtEndOfSession();
 
 
 

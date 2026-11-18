@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "nel/misc/debug.h"
+#include "nel/misc/system_utils.h"
 #include "nel/misc/utf_string_view.h"
 
 
@@ -231,6 +232,10 @@ void CUnixEventEmitter::lostIM()
 
 void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 {
+	// A signal that ends the session (the system shuts down, the user logs off) is told to the application here,
+	// where a window system that sends a message for it would deliver it
+	NLMISC::CSystemUtils::pollEndSession();
+
 	while (XPending(_dpy))
 	{
 		XEvent	Event;

@@ -85,6 +85,31 @@ public:
 	static bool detectWindowedApplication();
 
 	static sint getTotalVideoMemory();
+
+	/// A function that is called when the session of the user ends, see setEndSessionCallback
+	typedef void (*TEndSessionCallback)();
+
+	/** Set the function that is called when the session of the user ends: the system shuts down or restarts, or
+	 *  the user logs off. nullptr removes it. The system does not wait for the application then, it ends the
+	 *  process after a few seconds: the function asks nothing, saves what must be saved, and returns or ends the
+	 *  process itself. It is called in the thread that pumps the events of the window, from inside the pump.
+	 *  - Windows: at WM_ENDSESSION of a window whose messages a CWinEventEmitter processes. The system may end
+	 *    the process as soon as the function returns.
+	 *  - Unix with X11: after SIGTERM or SIGHUP (unless the signal is ignored when the function is set), at the
+	 *    next pollEndSession, which the event emitters of the drivers call when they are pumped. An application
+	 *    that sets a function and has no such emitter calls pollEndSession itself. The process goes on when the
+	 *    function returns. A signal that comes when another one has waited five seconds for a poll ends the
+	 *    process as it would without a function.
+	 *  - Elsewhere the function is not called.
+	 */
+	static void setEndSessionCallback(TEndSessionCallback callback);
+
+	/// The session of the user ends: call the function set with setEndSessionCallback, if any. For the code that
+	/// receives the notice of the system.
+	static void endSession();
+
+	/// Call endSession when a signal that ends the session came since the last call, see setEndSessionCallback.
+	static void pollEndSession();
 };
 
 } // NLMISC
