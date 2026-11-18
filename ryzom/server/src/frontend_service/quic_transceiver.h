@@ -385,8 +385,9 @@ public:
 	/// Shutdown a connection
 	void shutdown(CQuicUserContext *user);
 
-	/// The classes of messages that go on streams, in the order of their streams (those msg.xml declares). Set once,
-	/// before the frontend takes clients: a connection of protocol level ryzomcore/4.2 gets one stream per class.
+	/// The classes of messages that go on streams, in the order of their streams (those msg.xml declares): a connection
+	/// of protocol level ryzomcore/4.2 gets one stream per class. Set once, when the service starts, before its first
+	/// cycle: nothing reads them before a message is queued for a stream, which the cycles do.
 	static void setStreamClasses(const std::vector<std::string> &names);
 
 	/// How many classes there are (at most CLFECOMMON::StreamClassMax)

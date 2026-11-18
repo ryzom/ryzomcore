@@ -27,7 +27,7 @@
  * two clocks. The smallest difference of the last 40 seconds stands for a datagram that was not held up anywhere; how
  * far a datagram is above it is how late it is: the time it waited in a queue, at the frontend or on the way, for one
  * because the frontend sends more stream data than the path takes. The client reports that in the datagrams it sends,
- * and the frontend slows the streams down by it.
+ * for the frontend to slow its streams down by (which it does not do yet: it shows the report in displayStreamStats).
  *
  * The smallest difference is kept per 10 seconds, for four such periods, so that it follows a path that gets longer
  * and clocks that drift apart. All of it is counted modulo 2^16 milliseconds.
@@ -45,6 +45,7 @@ public:
 	{
 		clearBase();
 		m_Started = false;
+		m_PeriodStart = 0;
 		m_NbLast = 0;
 		m_NextLast = 0;
 	}
@@ -134,12 +135,12 @@ private:
 		NbLast = 3
 	};
 
+	/// Forget the differences of before: the next datagram is the measure
 	void clearBase()
 	{
 		for (uint i = 0; i < (uint)NbPeriods; ++i)
 			m_Valid[i] = false;
 		m_Current = 0;
-		m_Started = false;
 	}
 
 	bool m_Valid[NbPeriods];

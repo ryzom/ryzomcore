@@ -2233,7 +2233,8 @@ void	CNetworkConnection::sendNormalMessage()
 
 	if (m_UseQuic && m_QuicConnection.streams())
 	{
-		// Protocol level ryzomcore/4.2: how late the datagrams of the frontend arrive, for it to slow its streams down
+		// Protocol level ryzomcore/4.2: how late the datagrams of the frontend arrive, which is what its stream data
+		// must not make worse
 		uint8 lateness = m_DatagramLateness.report();
 		message.serial (lateness);
 	}

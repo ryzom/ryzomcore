@@ -1053,9 +1053,25 @@ void CQuicConnectionImpl::datagramReceived(const uint8 *buffer, uint32 length)
 	// Taken here, on the thread that gets the datagram from the network: the main thread may read it tens of
 	// milliseconds later, which says nothing about the network
 	uint32 arrival = (uint32)CTime::getLocalTime();
+
+	// One entry: the time, then the datagram. (Not the push of CBufFIFO that takes two buffers: it throws when the
+	// FIFO is large, and nothing may be thrown out of a callback of MsQuic.)
+	uint8 stackEntry[2048];
+	std::vector<uint8> heapEntry;
+	uint8 *entry = stackEntry;
+	const uint32 entrySize = (uint32)sizeof(arrival) + length;
+	if (entrySize > sizeof(stackEntry))
+	{
+		heapEntry.resize(entrySize);
+		entry = &heapEntry[0];
+	}
+	memcpy(entry, &arrival, sizeof(arrival));
+	if (length != 0)
+		memcpy(entry + sizeof(arrival), buffer, length);
+
 	CFifoAccessor access(&m->Buffer); // This block is mutex'd now
 	CBufFIFO *fifo = &access.value();
-	fifo->push((const uint8 *)&arrival, sizeof(arrival), buffer, length);
+	fifo->push(entry, entrySize);
 	++m->BufferWrites;
 }
 

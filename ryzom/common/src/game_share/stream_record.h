@@ -28,8 +28,9 @@
  * The classes are the frontend's own. Its msg.xml declares them (`stream_class` elements, in the order of their
  * streams) and says which messages belong to each (the `stream` attribute of a branch or a leaf). The client knows
  * none of that: it lets the frontend open up to StreamClassMax streams and treats them all alike, so a frontend can
- * add a class, or move a message to another class or back to the datagrams, without a new protocol level. The level
- * fixes the framing below, the mark of the end of a session, and StreamClassMax.
+ * add a class, or move a message to another class or back to the datagrams, without a new client program or protocol
+ * level (the client's copy of msg.xml has to follow, as for any change to that file: the frontend sends its signature
+ * to the clients). The level fixes the framing below, the mark of the end of a session, and StreamClassMax.
  *
  * The messages of one stream reach their handlers in the order the frontend sent them. In one update, the client
  * goes through the streams in the order the frontend opened them, so what the messages of other streams refer to
