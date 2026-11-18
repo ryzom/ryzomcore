@@ -225,6 +225,10 @@ public:
 	// before had not left yet (counted where that happens; the main thread cuts the allowance of the streams on it)
 	NLMISC::CAtomicInt SendBusyDrops = 0;
 
+	// Datagrams in a row that MsQuic dropped because it could not write them at once (connection thread): after a few,
+	// the next one waits for room instead (see CQuicTransceiver::sendDatagramSwap)
+	NLMISC::CAtomicInt DatagramCancels = 0;
+
 	// The client is reached over another path, of which the allowance of the streams knows nothing yet (set on the
 	// connection thread, taken by the main thread)
 	NLMISC::CAtomicBool PathChanged = false;

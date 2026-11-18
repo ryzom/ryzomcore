@@ -842,8 +842,18 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		    && (ptrdiff_t)ev->DATAGRAM_SEND_STATE_CHANGED.ClientContext == (ptrdiff_t)user->SentCount.load())
 		{
 			// A datagram that was not sent while the connection is up: the allowance of the streams is cut on it
-			if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_CANCELED && user->Streams && !user->ShuttingDown)
-				user->SendBusyDrops.fetchAdd(1);
+			if (ev->DATAGRAM_SEND_STATE_CHANGED.State == QUIC_DATAGRAM_SEND_CANCELED)
+			{
+				if (user->Streams && !user->ShuttingDown)
+				{
+					user->SendBusyDrops.fetchAdd(1);
+					user->DatagramCancels.fetchAdd(1);
+				}
+			}
+			else
+			{
+				user->DatagramCancels.store(0, NLMISC::TMemoryOrderRelaxed);
+			}
 			user->SendBusy.clear(); // release
 		}
 		// Once per datagram, while its packet is being built (which this snapshot does not count yet)
@@ -1111,12 +1121,16 @@ bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemS
 		// be written at once, because the congestion window is full or the path is being validated, is dropped: it
 		// would go out late, with a state that is old by then, and the datagram of the next cycle would find this one
 		// still waiting and not be sent at all. The protocol of the game takes a lost datagram in its stride.
+		// Not more than three in a row, though: when the window has collapsed with stream data still to send again
+		// inside MsQuic, that data takes every bit of room for several round trips, and each datagram would be dropped
+		// in turn. The fourth waits, and is written first when room comes, as all of them were before this flag.
 		QUIC_SEND_FLAGS flags = QUIC_SEND_FLAG_NONE;
 		if (user->Streams)
 		{
 			flags = QUIC_SEND_FLAG_PRIORITY_WORK;
-#ifdef QUIC_PARAM_CONN_NETWORK_STATISTICS // (headers of MsQuic 2.5 and later, which is where the flag below came)
-			flags |= QUIC_SEND_FLAG_CANCEL_ON_BLOCKED;
+#ifdef QUIC_PARAM_CONN_NETWORK_STATISTICS // (a header that has this has the flag below: 2.6.3 has both, 2.4.8 neither)
+			if (user->DatagramCancels.load(NLMISC::TMemoryOrderRelaxed) < 3)
+				flags |= QUIC_SEND_FLAG_CANCEL_ON_BLOCKED;
 #endif
 		}
 		QUIC_STATUS status = MsQuic->DatagramSend((HQUIC)user->Connection, (QUIC_BUFFER *)(&user->SendQuicBuffer), 1, flags, (void *)(ptrdiff_t)user->SentCount.load());
