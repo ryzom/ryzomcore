@@ -1499,6 +1499,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			user->QueueDelay = queueDelay;
 			user->QueueDelayAck = sendnumberack;
 			user->QueueDelayKnown = true;
+			++user->QueueDelayReports;
 		}
 
 		/*if (receivednumber < 1000)

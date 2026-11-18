@@ -117,7 +117,12 @@ public:
 		//_OutputBits(0),
 		_SendCounter(0),
 		_NbActions(0),
-		_NbImpulseActions(0)
+		_NbImpulseActions(0),
+		m_FillingStreamPosts(NULL),
+		m_FlushingStreamPosts(NULL),
+		m_StreamLastTime(0),
+		m_StreamLastEgress(0),
+		m_StreamStarted(false)
 		{}
 
 	/// Init
@@ -191,8 +196,11 @@ public:
 
 	// clang-format off
 	/// Take out of the stream queues of the QUIC connections what each may send this cycle (after the datagrams are
-	/// filled, before the swap; only if there are clients)
+	/// filled, before the swap, every cycle)
 	void					grantStreams();
+
+	/// What shares the frontend's budget among the streams (for statistics)
+	const CStreamScheduler	&streamScheduler() const { return m_StreamScheduler; }
 	// clang-format on
 
 	/// Swap send buffers
@@ -255,6 +263,13 @@ private:
 	/// send buffers: what was taken out of a queue is sent whether or not the connection sends a datagram.
 	TStreamPosts			m_StreamPosts1, m_StreamPosts2;
 	TStreamPosts			*m_FillingStreamPosts, *m_FlushingStreamPosts;
+
+	/// The budget of the frontend for all it sends, and the turns of the clients (main thread)
+	CStreamScheduler		m_StreamScheduler;
+	std::vector<CStreamScheduler::CEntry> m_StreamEntries;
+	NLMISC::TTime			m_StreamLastTime;
+	uint64					m_StreamLastEgress;
+	bool					m_StreamStarted;
 	// clang-format on
 
 	/// MD5 hash keys of msg.xml and database.xml

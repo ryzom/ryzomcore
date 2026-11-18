@@ -218,10 +218,8 @@ void fillPrioritizedActionsToSend()
 void grantStreamsToSend()
 {
 	H_AUTO(GrantStreams);
-	if ( ! CFrontEndService::instance()->receiveSub()->clientMap().empty() )
-	{
-		CFrontEndService::instance()->sendSub()->grantStreams();
-	}
+	// (also without clients: the budget of the frontend is kept every cycle)
+	CFrontEndService::instance()->sendSub()->grantStreams();
 }
 
 
@@ -907,6 +905,8 @@ void cfcbPriorityMode( CConfigFile::CVar& var )
 
 
 //
+// Deprecated and unused: the total per cycle was never applied (CFeSendSub::setTotalBandwidth only keeps it).
+// TotalOutgoingBandwidth, in bytes per second, is the budget of the frontend (see CFeSendSub::grantStreams).
 void cfcbTotalBandwidth( CConfigFile::CVar& var )
 {
 	uint32 tb = var.asInt();
@@ -2020,12 +2020,17 @@ NLMISC_COMMAND( displayStreamStats, "Display the QUIC streams of the clients of 
 		for ( uint c = 0; c < CQuicTransceiver::streamClassCount(); ++c )
 			waiting += toString( " %s %u", CQuicTransceiver::streamClassName( c ), user->StreamQueues.pendingBytes( c ) );
 		std::string lateness = user->QueueDelayKnown ? toString( "datagrams %u ms late", (uint)user->QueueDelay ) : std::string( "datagram lateness not reported yet" );
+		lateness += toString( "; allowance %u%s, got %u in the last cycle; %d datagrams not sent", user->StreamAllowance.allowance(), user->StreamAllowance.startUp() ? " (starting)" : "", user->StreamLastGrant, user->SendBusyDrops.load() );
 		if ( user->StatValid )
 			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window %d, in flight %d, round trip %d ms; %s; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), user->StatCongestionWindow.load(), user->StatBytesInFlight.load(), user->StatRtt.load() / 1000, lateness.c_str(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
 		else
 			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window not known yet; %s; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), lateness.c_str(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
 	}
 	log.displayNL( "%u of %u clients have QUIC streams; %" NL_I64 "u bytes were given to the streams since the service started", nbStreamClients, (uint)clientMap.size(), getStreamBytesGranted() );
+	const CStreamScheduler &scheduler = CFrontEndService::instance()->sendSub()->streamScheduler();
+	log.displayNL( "Budget: %" NL_I64 "d bytes left after the last cycle; in that cycle %" NL_I64 "d were left for the streams beyond the datagrams, %" NL_I64 "u were given (%" NL_I64 "u as minimums) and %" NL_I64 "d stayed unused; %u clients waited for a turn, %u got some of theirs; round %u, in its cycle %u",
+		scheduler.tokens(), scheduler.lastPool(), scheduler.lastGranted(), scheduler.lastGrantedMinimum(), scheduler.lastPoolLeft(), scheduler.lastWaiting(), scheduler.lastServed(), scheduler.round(), scheduler.roundTicks() );
+	log.displayNL( "Cycles in which the datagrams alone were above TotalOutgoingBandwidth: %" NL_I64 "u; in which the minimums of the streams pushed it above: %" NL_I64 "u", scheduler.overshootDatagrams(), scheduler.overshootMinimums() );
 	return true;
 }
 

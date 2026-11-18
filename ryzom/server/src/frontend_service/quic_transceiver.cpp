@@ -848,8 +848,10 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_PEER_ADDRESS_CHANGED:
-		// The client is reached over another path (it changed network): the next datagrams tell it
+		// The client is reached over another path (it changed network): the next datagrams tell it, and the allowance
+		// of its streams starts over
 		user->PathChangedDatagrams.store(5);
+		user->PathChanged = true;
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_LOCAL_ADDRESS_CHANGED:
@@ -879,7 +881,10 @@ void CQuicTransceiverImpl::updateStreamStats(CQuicUserContext *user, HQUIC conne
 	// on the careful side (read first, so that nothing taken later is thought to be counted)
 	int grantedCount = user->StreamGrantedCount.load();
 
-	// Inside a callback of the connection or of one of its streams, these are copies without a round trip to its thread
+	// Inside a callback of the connection or of one of its streams, these are copies without a round trip to its thread.
+	// The window, the round trip time and the bytes in flight; then the count of congestion events, which only the
+	// older statistics have (they have the first two as well, for a library without the newer ones).
+	bool networkStatistics = false;
 #ifdef QUIC_PARAM_CONN_NETWORK_STATISTICS
 	if (!NoNetworkStatistics.load(NLMISC::TMemoryOrderRelaxed))
 	{
@@ -893,10 +898,10 @@ void CQuicTransceiverImpl::updateStreamStats(CQuicUserContext *user, HQUIC conne
 			user->StatBytesInFlight.store((int)std::min(stats.BytesInFlight, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
 			user->StatGrantedCount.store(grantedCount, NLMISC::TMemoryOrderRelaxed);
 			user->StatValid = true;
-			return;
+			networkStatistics = true;
 		}
 		// The library is older than the headers the frontend was built with (the parameter came with MsQuic 2.5)
-		if (!NoNetworkStatistics.exchange(true))
+		else if (!NoNetworkStatistics.exchange(true))
 			nlwarning("This MsQuic library does not tell the bytes in flight of a connection (status 0x%x): the room the QUIC streams leave to the datagrams is worked out from what the frontend gave to the streams alone", status);
 	}
 #endif
@@ -904,6 +909,9 @@ void CQuicTransceiverImpl::updateStreamStats(CQuicUserContext *user, HQUIC conne
 	uint32 statsSize = sizeof(stats);
 	if (QUIC_SUCCEEDED(MsQuic->GetParam(connection, QUIC_PARAM_CONN_STATISTICS_V2, &statsSize, &stats)))
 	{
+		user->StatCongestionEvents.store((int)(stats.SendCongestionCount + stats.SendEcnCongestionCount), NLMISC::TMemoryOrderRelaxed);
+		if (networkStatistics)
+			return;
 		user->StatCongestionWindow.store((int)std::min(stats.SendCongestionWindow, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
 		user->StatRtt.store((int)std::min(stats.Rtt, (uint32)INT_MAX), NLMISC::TMemoryOrderRelaxed);
 		user->StatValid = true;
@@ -1073,7 +1081,8 @@ bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemS
 	{
 		if (user->SendBusy.testAndSet())
 		{
-			// Already busy
+			// Already busy: the datagram of the cycle before has not left, this one is not sent
+			user->SendBusyDrops.fetchAdd(1);
 			return false;
 		}
 
@@ -1326,6 +1335,42 @@ CQuicStreamSend *CQuicTransceiver::createStreamSend(uint32 length)
 void CQuicTransceiver::destroyStreamSend(CQuicStreamSend *send)
 {
 	free(send);
+}
+
+bool CQuicTransceiver::egressBytes(uint64 &bytes)
+{
+#ifdef NL_MSQUIC_AVAILABLE
+	// The counters are those of the process: any transceiver's library handle will do
+	const QUIC_API_TABLE *api = null;
+	{
+		CSynchronized<std::vector<CQuicTransceiver *>>::CAccessor transceivers(&s_QuicTransceivers);
+		for (CQuicTransceiver *transceiver : transceivers.value())
+		{
+			if (transceiver->m->Api)
+			{
+				api = transceiver->m->Api;
+				break;
+			}
+		}
+		if (api)
+		{
+			// (asked while the list is held: a transceiver closes its library handle only once it is off the list)
+			uint64 counters[QUIC_PERF_COUNTER_MAX] = {};
+			uint32 size = sizeof(counters);
+			QUIC_STATUS status = api->GetParam(null, QUIC_PARAM_GLOBAL_PERF_COUNTERS, &size, counters);
+			if (QUIC_SUCCEEDED(status) || status == QUIC_STATUS_BUFFER_TOO_SMALL)
+			{
+				// What MsQuic counts is the payload of its UDP datagrams. The headers of UDP and IP are counted as
+				// IPv6 (48 bytes), and a flush that goes out in several batches counts its datagrams more than
+				// once: both err to the side of sending less than the budget.
+				bytes = counters[QUIC_PERF_COUNTER_UDP_SEND_BYTES] + 48 * counters[QUIC_PERF_COUNTER_UDP_SEND];
+				return true;
+			}
+		}
+	}
+#endif
+	bytes = 0;
+	return false;
 }
 
 const char *CQuicTransceiver::streamFaultName(int fault)

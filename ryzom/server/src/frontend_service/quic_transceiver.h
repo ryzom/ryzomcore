@@ -31,6 +31,7 @@
 
 #include "fe_receive_task.h"
 #include "stream_queues.h"
+#include "stream_scheduler.h"
 
 /*
 
@@ -182,6 +183,12 @@ public:
 	// The records that wait for the streams (service main thread only)
 	CStreamQueues StreamQueues;
 
+	// What the path to the client takes of stream data per cycle, and where the client is in the turns of the frontend
+	// (service main thread only, see CFeSendSub::grantStreams)
+	CStreamAllowance StreamAllowance;
+	CStreamSchedulerClient StreamTurn;
+	uint32 StreamLastGrant = 0; // bytes it got in the last cycle
+
 	// Bytes taken out of the queues that MsQuic has not completed yet, which is when they were acknowledged
 	// (added by the main thread when it takes them, subtracted on the connection thread, or where a block is dropped)
 	NLMISC::CAtomicInt StreamOutstanding = 0;
@@ -202,6 +209,8 @@ public:
 	bool QueueDelayKnown = false;
 	uint8 QueueDelay = 0;
 	uint32 QueueDelayAck = 0;
+	uint32 QueueDelayReports = 0; // how many reports came, and how many of them the allowance has seen
+	uint32 QueueDelayReportsSeen = 0;
 
 	// What MsQuic last said about the path, for the room the streams may take in the congestion window
 	// (stored on the connection thread, read by the main thread; each value on its own, they need not match exactly)
@@ -210,6 +219,15 @@ public:
 	NLMISC::CAtomicInt StatRtt = 0; // microseconds
 	NLMISC::CAtomicInt StatBytesInFlight = -1; // bytes sent and not acknowledged, -1 if this MsQuic does not tell
 	NLMISC::CAtomicInt StatGrantedCount = 0; // StreamGrantedCount when MsQuic was asked
+	NLMISC::CAtomicInt StatCongestionEvents = 0; // times the connection saw congestion (loss or marks), since it opened
+
+	// Datagrams of the frontend that were not sent because the one before had not left yet (counted where they are
+	// sent; the main thread cuts the allowance of the streams on it)
+	NLMISC::CAtomicInt SendBusyDrops = 0;
+
+	// The client is reached over another path, of which the allowance of the streams knows nothing yet (set on the
+	// connection thread, taken by the main thread)
+	NLMISC::CAtomicBool PathChanged = false;
 
 	// Bytes taken out of the queues since the connection opened, modulo 2^32 (added by the main thread): with
 	// StatGrantedCount, what was taken since MsQuic was last asked, which its bytes in flight do not count yet
@@ -409,6 +427,11 @@ public:
 
 	/// Name of a fault, for logs
 	static const char *streamFaultName(int fault);
+
+	/// Bytes that MsQuic has sent since the process started, for all connections and with all that QUIC adds
+	/// (acknowledgements, data sent again, handshakes), and the UDP and IP headers of its packets counted as IPv6.
+	/// False if there is no MsQuic to ask.
+	static bool egressBytes(uint64 &bytes);
 
 private:
 	friend CQuicTransceiverImpl;

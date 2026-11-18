@@ -38,6 +38,7 @@
 #include "frontend_service.h"
 #include "prio_sub.h"
 #include "fe_stat.h"
+#include "stream_scheduler.h"
 
 #include "game_share/system_message.h"
 
@@ -50,31 +51,42 @@ uint SendCounterRatio = 0;
 uint SendCounterDelay = 1000;
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
-CVariable<uint32> StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle a QUIC connection may send on its streams before the frontend knows its congestion window", 200, 0, true);
+// clang-format off
+// The budget of the frontend and the allowances of the clients, for the QUIC streams (see stream_scheduler.h)
+CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left", 5000000, 0, true);
+CVariable<uint32>	StreamBurstBytes("fs", "StreamBurstBytes", "Bytes the frontend may run ahead of or behind TotalOutgoingBandwidth (0: what it may send in one cycle)", 0, 0, true);
+CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth", 200, 0, true);
+CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);
+CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 4096, 0, true);
+CVariable<uint32>	QueueDelayTarget("fs", "QueueDelayTarget", "Milliseconds the datagrams may reach a client late before the frontend sends it less on its QUIC streams", 20, 0, true);
+// clang-format on
 
 namespace /* anonymous */ {
-
-/// Bytes per cycle a connection may send on its streams when its congestion window has the room.
-/// A fixed value for now: it becomes the allowance that follows how late the datagrams reach the client.
-const sint64 s_StreamBytesPerTick = 1500;
 
 /// Bytes of a QUIC packet with a full datagram (the datagram and the packet around it)
 const sint64 s_DatagramPacketBytes = 560;
 
+/// What goes on the wire with a datagram besides its bytes: the QUIC packet around it (5 bytes of header, 4 of packet
+/// number, 3 of frame, 16 of tag) and the headers of UDP and IP, counted as IPv6; for a UDP client those headers alone
+const uint64 s_QuicDatagramOverhead = 76;
+const uint64 s_UdpDatagramOverhead = 48;
+
 /// Bytes granted to the streams since the service started (see displayStreamStats)
 uint64 s_StreamBytesGranted = 0;
 
-/// Bytes the streams of a connection may take this cycle, which is what its congestion window leaves beside its
-/// datagrams: the next datagram must never wait for the window.
+/// Bytes sent to the UDP clients since the service started, with their headers (the flush counts them)
+NLMISC::CAtomicInt s_UdpEgressBytes;
+uint64 s_UdpEgressTotal = 0; // as the main thread last read it, without the wrap of the counter
+uint32 s_UdpEgressLast = 0;
+
+/// Bytes the streams of a connection may take this cycle as far as its congestion window goes, which is what the
+/// window leaves beside its datagrams: the next datagram must never wait for the window.
 /// The window is taken by the datagrams in flight (one per cycle within the round trip time) and by what was given to
 /// the streams and is not acknowledged yet, with the headers of its packets (about 4%). That is counted from the
 /// frontend's own numbers. If MsQuic said that more was in flight when it was last asked (datagrams whose
 /// acknowledgement is late, data sent again after a loss), its number counts, with what was given to the streams since.
-uint32 streamAllowance(CQuicUserContext *user)
+uint32 streamWindowRoom(CQuicUserContext *user, uint32 maxBytes)
 {
-	if (!user->StatValid)
-		return StreamMinBytesPerTick.get();
-
 	sint64 congestionWindow = user->StatCongestionWindow.load(NLMISC::TMemoryOrderRelaxed);
 	sint64 rttMs = ((sint64)user->StatRtt.load(NLMISC::TMemoryOrderRelaxed) + 999) / 1000;
 	sint64 tickMs = std::max((sint64)1, (sint64)(CTickEventHandler::getGameTimeStep() * 1000.0));
@@ -88,7 +100,7 @@ uint32 streamAllowance(CQuicUserContext *user)
 		inFlight = std::max(inFlight, bytesInFlight + grantedSince + grantedSince / 25);
 	}
 	sint64 room = congestionWindow - inFlight - s_DatagramPacketBytes;
-	return (uint32)std::min(std::max(room, (sint64)0), s_StreamBytesPerTick);
+	return (uint32)std::min(std::max(room, (sint64)0), (sint64)maxBytes);
 }
 
 } /* anonymous namespace */
@@ -366,14 +378,55 @@ void	CFeSendSub::grantStreams()
 {
 	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
 
-	THostMap::iterator icm;
-	for (icm = _ClientMap->begin(); icm != _ClientMap->end(); ++icm)
+	CStreamSchedulerConfig config;
+	config.TickSeconds = std::max(0.001, (double)CTickEventHandler::getGameTimeStep());
+	config.TotalOutgoingBandwidth = TotalOutgoingBandwidth.get();
+	config.StreamBurstBytes = StreamBurstBytes.get();
+	config.StreamMinBytesPerTick = StreamMinBytesPerTick.get();
+	config.StreamMaxBytesPerTick = StreamMaxBytesPerTick.get();
+	config.StreamMinChunk = StreamMinChunk.get();
+	config.QueueDelayTarget = QueueDelayTarget.get();
+	config.DatagramPacketBytes = (uint32)s_DatagramPacketBytes;
+
+	// What the frontend sent since the last cycle, all of it: what MsQuic counts for the process, and the datagrams of
+	// the UDP clients
+	uint32 udpEgress = (uint32)s_UdpEgressBytes.load();
+	s_UdpEgressTotal += (uint32)(udpEgress - s_UdpEgressLast);
+	s_UdpEgressLast = udpEgress;
+	uint64 quicEgress = 0;
+	CQuicTransceiver::egressBytes(quicEgress);
+	const uint64 egress = quicEgress + s_UdpEgressTotal;
+	const TTime now = CTime::getLocalTime();
+	uint64 measuredEgress = 0;
+	double elapsedSeconds = config.TickSeconds;
+	if (m_StreamStarted)
 	{
-		CClientHost *client = GETCLIENTA(icm);
+		measuredEgress = egress >= m_StreamLastEgress ? egress - m_StreamLastEgress : 0;
+		elapsedSeconds = (double)(now - m_StreamLastTime) / 1000.0;
+	}
+	m_StreamStarted = true;
+	m_StreamLastEgress = egress;
+	m_StreamLastTime = now;
+
+	// The datagrams of this cycle, as they will go on the wire, and the clients that can get stream data, by
+	// ascending id
+	uint64 datagramBytes = 0;
+	m_StreamEntries.clear();
+	for (size_t id = 0; id < _ClientIdCont.size(); ++id)
+	{
+		CClientHost *client = _ClientIdCont[id];
+		if (client == NULL || client->isDisconnected())
+			continue;
+
+		const CSendBuffer &sendBuffer = (*_CurrentFillingBuffers)[id];
+		if (sendBuffer.SBState && sendBuffer.OutBox.length() != 0)
+			datagramBytes += sendBuffer.OutBox.length() + (client->QuicUser.get() ? s_QuicDatagramOverhead : s_UdpDatagramOverhead);
+
 		CQuicUserContext *user = client->QuicUser.get();
 		if (!user || !user->Streams)
 			continue;
 		CStreamQueues &queues = user->StreamQueues;
+		user->StreamLastGrant = 0;
 
 		// A fault of the streams, found where they are opened, where data is sent on them, or by MsQuic: bytes that
 		// were taken out of the queues did not go out, and a stream with a hole is of no use
@@ -390,19 +443,51 @@ void	CFeSendSub::grantStreams()
 			}
 			continue;
 		}
-
-		// The messages of the streams are impulses, which a client handles in its connected state only: as the
-		// impulses do, they wait for it
-		if (queues.Refusing || client->ConnectionState != CClientHost::Connected || queues.pendingBytes() == 0)
+		if (queues.Refusing)
 			continue;
 
-		// The classes in their order (only one class has messages so far, they get shares of the allowance once
-		// there are more)
-		uint32 allowance = streamAllowance(user);
+		// What the path to the client takes: its allowance follows how late it says its datagrams arrive
+		if (user->PathChanged.exchange(false))
+			user->StreamAllowance.reset(config);
+		const bool newReport = user->QueueDelayReports != user->QueueDelayReportsSeen;
+		user->QueueDelayReportsSeen = user->QueueDelayReports;
+		user->StreamAllowance.update(config, newReport, user->QueueDelay, user->QueueDelayAck, client->sendNumber(),
+		    (uint32)user->StatCongestionEvents.load(NLMISC::TMemoryOrderRelaxed), (uint32)user->SendBusyDrops.load(NLMISC::TMemoryOrderRelaxed));
+
+		CStreamScheduler::CEntry entry;
+		entry.Client = &user->StreamTurn;
+		entry.Id = (uint32)id;
+		entry.Pending = queues.pendingBytes();
+		// The messages of the streams are impulses, which a client handles in its connected state only: as the
+		// impulses do, they wait for it. Until the frontend knows the congestion window, the minimum is all it gives.
+		if (client->ConnectionState != CClientHost::Connected)
+			entry.Window = 0;
+		else if (!user->StatValid)
+			entry.Window = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
+		else
+			entry.Window = std::min(user->StreamAllowance.allowance(), streamWindowRoom(user, config.StreamMaxBytesPerTick));
+		m_StreamEntries.push_back(entry);
+	}
+
+	// The budget is kept every cycle, also when no client has streams: what was sent is taken off it
+	m_StreamScheduler.schedule(config, elapsedSeconds, measuredEgress, datagramBytes, m_StreamEntries);
+
+	for (size_t i = 0; i < m_StreamEntries.size(); ++i)
+	{
+		const CStreamScheduler::CEntry &entry = m_StreamEntries[i];
+		CClientHost *client = _ClientIdCont[entry.Id];
+		CQuicUserContext *user = client->QuicUser.get();
+		CStreamQueues &queues = user->StreamQueues;
+		user->StreamAllowance.granted(entry.Grant);
+		user->StreamLastGrant = entry.Grant;
+
+		// The classes in their order (only one class has messages so far, they get shares of the grant once there
+		// are more)
+		uint32 left = entry.Grant;
 		const uint nbClasses = CQuicTransceiver::streamClassCount();
-		for (uint streamClass = 0; streamClass < nbClasses && allowance != 0; ++streamClass)
+		for (uint streamClass = 0; streamClass < nbClasses && left != 0; ++streamClass)
 		{
-			uint32 size = std::min(allowance, queues.pendingBytes(streamClass));
+			uint32 size = std::min(left, queues.pendingBytes(streamClass));
 			if (size == 0)
 				continue;
 			CQuicStreamSend *send = CQuicTransceiver::createStreamSend(size);
@@ -411,7 +496,7 @@ void	CFeSendSub::grantStreams()
 			user->StreamOutstanding.fetchAdd((int)size);
 			user->StreamGrantedCount.fetchAdd((int)size);
 			m_FillingStreamPosts->push_back(CStreamPost(user, (uint8)streamClass, send));
-			allowance -= size;
+			left -= size;
 			s_StreamBytesGranted += size;
 		}
 	}
@@ -479,6 +564,7 @@ inline void	CFeSendSub::CSendBuffer::sendOutBox( NLNET::CUdpSock *datasock )
 		else
 		{
 			sendUDP(datasock, OutBox.buffer(), OutBox.length(), &DestAddress);
+			s_UdpEgressBytes.fetchAdd((int)(OutBox.length() + s_UdpDatagramOverhead));
 			//nlinfo( "Sent %u bytes to %s", OutBox.length(), DestAddress.asString().c_str() );
 		}
 	}
