@@ -565,8 +565,9 @@ void releaseOutGame()
 // world for as long as the server keeps one whose client is gone, as after any loss of the connection). The
 // system leaves a few seconds and then ends the process anyway, so nothing is released: the server is told, what
 // a quit saves is saved, and the process ends.
-// Called from inside the pump of the window events (CSystemUtils::setEndSessionCallback), at any time between
-// the creation of the driver and release().
+// Called in the main thread whenever it takes the messages of the window (CSystemUtils::setEndSessionCallback):
+// in the pump of the events, and on Windows also in a message box or in a call that waits for a window, at any
+// time between the creation of the driver and release().
 void quitAtEndOfSession()
 {
 	static bool s_Quitting = false;
@@ -576,7 +577,8 @@ void quitAtEndOfSession()
 
 	nlinfo("The session of the user ends, the client quits at once");
 
-	// The server is told first: the message leaves while the files are written
+	// The server is told first, so that the message has the time of the saves to leave. It is not waited for: a
+	// server that does not get it notices that the client is silent, as it did when the system ended the client.
 	NetMngr.disconnect();
 
 	if (CInterfaceManager::hasInstance() && CInterfaceManager::getInstance()->isInGame())
@@ -585,6 +587,9 @@ void quitAtEndOfSession()
 		if (Driver)
 			saveIngameResolution();
 		CInterfaceManager::getInstance()->uninitInGame0();
+		// (in the Ring editor those two are saved by the editor, when it is released)
+		if (ClientCfg.R2EDEnabled)
+			R2::getEditor().saveConfigWithoutRelease();
 #ifdef RYZOM_FORGE
 		CItemGroupManager::getInstance()->uninit();
 #endif
@@ -640,7 +645,9 @@ void release()
 	
 	setCrashCallback(nullptr);
 
-	// from here the client is releasing what quitAtEndOfSession would save from
+	// From here the client releases what quitAtEndOfSession saves from. A signal to end the session that came
+	// since the last pump is served first, as the end of the function would pass it on.
+	CSystemUtils::pollEndSession();
 	CSystemUtils::setEndSessionCallback(nullptr);
 
 #ifdef RYZOM_BG_DOWNLOADER
