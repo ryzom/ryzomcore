@@ -531,6 +531,7 @@ public:
 	virtual bool			isActive ();
 
 	virtual bool			isWindowMinimized() const;
+	virtual void			restoreWindow();
 
 	virtual void			setMinimizedWindowPictureSupplied(bool supplied);
 	virtual bool			isMinimizedWindowPictureWanted() const;

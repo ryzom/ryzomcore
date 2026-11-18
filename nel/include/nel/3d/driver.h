@@ -225,6 +225,12 @@ public:
 	 */
 	virtual bool			isWindowMinimized() const = 0;
 
+	/** Restore the window when it is minimized, and ask the window system to bring it in front, as its task bar
+	 *  does. Nothing happens when the window is not minimized, when there is none, or when it is not the
+	 *  driver's own.
+	 */
+	virtual void			restoreWindow() = 0;
+
 
 
 	/** Return the driver reset counter.

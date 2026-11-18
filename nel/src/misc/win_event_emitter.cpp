@@ -24,6 +24,7 @@
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/win_event_emitter.h"
 #include "nel/misc/event_server.h"
+#include "nel/misc/system_utils.h"
 #include "nel/misc/utf_string_view.h"
 
 #ifdef NL_OS_WINDOWS
@@ -321,6 +322,14 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_CLOSE:
 		server->postEvent (new CEventCloseWindow (this));
 		return true;
+	case WM_ENDSESSION:
+		// The session of the user ends (the system shuts down or restarts, the user logs off, or an installer
+		// closes the applications whose files it replaces), after WM_QUERYENDSESSION, which DefWindowProc
+		// answers with a yes. The system may end the process as soon as this message is answered, so the
+		// application is told now and not with an event, which would only be dispatched at the next pump.
+		if (wParam)
+			CSystemUtils::endSession();
+		break;
 	case WM_DISPLAYCHANGE:
 		server->postEvent (new CEventDisplayChange (LOWORD(lParam), HIWORD(lParam), (uint)wParam, this));
 		break;

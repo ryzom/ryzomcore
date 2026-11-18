@@ -59,6 +59,7 @@
 
 // Client
 #include "init.h"
+#include "release.h"
 #include "input.h"
 #include "client_cfg.h"			// Configuration of the client.
 #include "global.h"				// ClientInstanceSuffix
@@ -1277,6 +1278,9 @@ void prelogInit()
 		// initialize system utils class
 		CSystemUtils::init();
 		CSystemUtils::setWindow(Driver->getDisplay());
+
+		// when the system shuts down or the user logs off, the client quits at once
+		CSystemUtils::setEndSessionCallback(quitAtEndOfSession);
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
 

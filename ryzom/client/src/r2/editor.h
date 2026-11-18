@@ -211,6 +211,10 @@ public:
 	// Release what's need to be released depending on the configuration
 	void autoConfigRelease(bool serverIsRingSession);
 
+	// Save what release() saves (the keys and the interface of the current mode) and release nothing, for a
+	// client that ends without releasing
+	void saveConfigWithoutRelease();
+
 	// initialisation of modules & gw
 	void initModules(bool connectDMC);
 	void releaseModules();

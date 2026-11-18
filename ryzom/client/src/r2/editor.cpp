@@ -432,6 +432,17 @@ void CEditor::autoConfigRelease(bool serverIsRingSession)
 }
 
 // *********************************************************************************************************
+void CEditor::saveConfigWithoutRelease()
+{
+	CHECK_EDITOR
+	// as release(): nothing when the editor is not initialized, or while it is being reset
+	if (_Mode == NotInitialized || !_SerializeUIConfig)
+		return;
+	saveCurrentKeySet();
+	saveUIConfig();
+}
+
+// *********************************************************************************************************
 void CEditor::initModules(bool connectDMC)
 {
 	//H_AUTO(R2_CEditor_initModules)

@@ -104,6 +104,10 @@
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
 
+#ifndef NL_OS_WINDOWS
+#include <unistd.h>
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -555,6 +559,60 @@ void releaseOutGame()
 	ContinentMngr.reset();
 }
 
+// ***************************************************************************
+// The session of the user ends: the system shuts down or restarts, or the user logs off. The client quits at
+// once: it asks nothing and does not wait for the server to let the character leave (the character stays in the
+// world for as long as the server keeps one whose client is gone, as after any loss of the connection). The
+// system leaves a few seconds and then ends the process anyway, so nothing is released: the server is told, what
+// a quit saves is saved, and the process ends.
+// Called in the main thread whenever it takes the messages of the window (CSystemUtils::setEndSessionCallback):
+// in the pump of the events, and on Windows also in a message box or in a call that waits for a window, at any
+// time between the creation of the driver and release().
+void quitAtEndOfSession()
+{
+	static bool s_Quitting = false;
+	if (s_Quitting)
+		return;
+	s_Quitting = true;
+
+	nlinfo("The session of the user ends, the client quits at once");
+
+	// The server is told first, so that the message has the time of the saves to leave. It is not waited for: a
+	// server that does not get it notices that the client is silent, as it did when the system ended the client.
+	NetMngr.disconnect();
+
+	if (CInterfaceManager::hasInstance() && CInterfaceManager::getInstance()->isInGame())
+	{
+		// what the end of the main loop saves: the size of the window, the keys and the interface
+		if (Driver)
+			saveIngameResolution();
+		CInterfaceManager::getInstance()->uninitInGame0();
+		// (in the Ring editor those two are saved by the editor, when it is released)
+		if (ClientCfg.R2EDEnabled)
+			R2::getEditor().saveConfigWithoutRelease();
+#ifdef RYZOM_FORGE
+		CItemGroupManager::getInstance()->uninit();
+#endif
+	}
+
+	// what release() saves: the position of the window and the camera, in client.cfg when it is saved at all
+	ClientCfg.release();
+
+	// restore screensaver state
+	CSystemUtils::enableScreensaver(LastScreenSaverEnabled);
+
+	// quit properly crash info
+	extern void quitCrashReport();
+	quitCrashReport();
+
+	// End the process without the destructors of the static objects, which expect what release() released
+#ifdef NL_OS_WINDOWS
+	TerminateProcess(GetCurrentProcess(), EXIT_SUCCESS);
+#else
+	_exit(EXIT_SUCCESS);
+#endif
+}
+
 void releaseStereoDisplayDevice()
 {
 	if (StereoDisplay)
@@ -586,6 +644,11 @@ void release()
 	}
 	
 	setCrashCallback(nullptr);
+
+	// From here the client releases what quitAtEndOfSession saves from. A signal to end the session that came
+	// since the last pump is served first, as the end of the function would pass it on.
+	CSystemUtils::pollEndSession();
+	CSystemUtils::setEndSessionCallback(nullptr);
 
 #ifdef RYZOM_BG_DOWNLOADER
 	CBGDownloaderAccess::getInstance().release();

@@ -240,6 +240,12 @@ public:
 	 *  window, see IDriver::isWindowMinimized.
 	 */
 	virtual bool			isWindowMinimized() const = 0;
+	/** Restore the window when it is minimized, and ask the window system to bring it in front, as its task bar
+	 *  does: for an application that answers in its window to something it was asked while minimized (to
+	 *  confirm that it may close, for example). Nothing happens when the window is not minimized, when there
+	 *  is none, or when it is not the driver's own.
+	 */
+	virtual void			restoreWindow() = 0;
 
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
 	virtual nlWindow		getDisplay () = 0;

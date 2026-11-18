@@ -19,6 +19,7 @@
 
 #include "stdmisc.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/app_context.h"
 #include "nel/misc/utf_string_view.h"
 
 #ifdef __EMSCRIPTEN__
@@ -70,6 +71,14 @@
 #include "nel/misc/file.h"
 #endif
 
+// The signals that end a session are handled where the event emitters of the drivers poll for them
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && !defined(__EMSCRIPTEN__)
+#define NL_END_SESSION_SIGNALS 1
+#include <signal.h>
+#include <string.h>
+#include <unistd.h>
+#endif
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -83,6 +92,178 @@ static const uint32 KeyMaxLength = 1024;
 namespace NLMISC {
 
 nlWindow CSystemUtils::s_window = EmptyWindow;
+
+#ifdef NL_END_SESSION_SIGNALS
+static const int s_EndSessionSignals[] = { SIGTERM, SIGHUP };
+static const uint s_EndSessionSignalCount = sizeof(s_EndSessionSignals) / sizeof(s_EndSessionSignals[0]);
+// how long a signal waits for pollEndSession before it ends the process, in seconds
+static const unsigned int s_EndSessionPollTimeout = 5;
+#endif
+
+// What the end of the session needs to know. The application sets the function, and the event emitter of a driver
+// calls it. With NeL linked statically, the application and each driver library have a copy of this file and of its
+// static variables, so the state is one object that the NeL context of the application holds for all of them.
+struct CEndSessionState
+{
+	CEndSessionState()
+	    : Callback(nullptr)
+	{
+#ifdef NL_END_SESSION_SIGNALS
+		for (uint i = 0; i < s_EndSessionSignalCount; ++i)
+			ActionSet[i] = false;
+		AlarmActionSet = false;
+		Signaled = 0;
+#endif
+	}
+
+	CSystemUtils::TEndSessionCallback Callback;
+
+#ifdef NL_END_SESSION_SIGNALS
+	struct sigaction PreviousActions[s_EndSessionSignalCount];
+	bool ActionSet[s_EndSessionSignalCount];
+	struct sigaction PreviousAlarmAction;
+	bool AlarmActionSet;
+	// the signal that waits for pollEndSession, 0 when none does
+	volatile sig_atomic_t Signaled;
+#endif
+};
+
+// The state as this copy of the file found it (the signal handlers use it, where nothing may be looked up)
+static CEndSessionState *s_EndSessionState = nullptr;
+
+// The state of the process. It is made at the first use and stays for as long as the process: the other copies of
+// this file keep its address. It is always the one of the NeL context, also for an application that has made no
+// context yet (INelContext::getInstance makes it then): a copy of this file that kept a state of its own, because it
+// was used before there was a context, would not be found by a driver library loaded later.
+static CEndSessionState *getEndSessionState()
+{
+	if (s_EndSessionState == nullptr)
+	{
+		static const char *const name = "NLMISC::CSystemUtils::EndSessionState";
+		INelContext &context = INelContext::getInstance();
+		s_EndSessionState = (CEndSessionState *)context.getSingletonPointer(name);
+		if (s_EndSessionState == nullptr)
+		{
+			s_EndSessionState = new CEndSessionState();
+			context.setSingletonPointer(name, s_EndSessionState);
+		}
+	}
+	return s_EndSessionState;
+}
+
+#ifdef NL_END_SESSION_SIGNALS
+
+// (alarm, signal and raise are safe in a signal handler; s_EndSessionState is set before a handler is)
+static void endSessionSignalHandler(int sig)
+{
+	// a signal that comes while another one waits adds nothing: the first one has its alarm
+	if (!s_EndSessionState->Signaled)
+	{
+		s_EndSessionState->Signaled = sig;
+		alarm(s_EndSessionPollTimeout);
+	}
+}
+
+static void endSessionAlarmHandler(int /* sig */)
+{
+	// Nobody polled in time: the application hangs, or it does not pump its events. The signal that waited ends
+	// the process as it does without a handler.
+	const int sig = s_EndSessionState->Signaled;
+	if (sig)
+	{
+		signal(sig, SIG_DFL);
+		raise(sig);
+	}
+}
+
+#endif // NL_END_SESSION_SIGNALS
+
+void CSystemUtils::setEndSessionCallback(TEndSessionCallback callback)
+{
+	CEndSessionState *state = getEndSessionState();
+	state->Callback = callback;
+
+#ifdef NL_END_SESSION_SIGNALS
+	if (callback != nullptr && !state->AlarmActionSet)
+	{
+		struct sigaction action;
+		memset(&action, 0, sizeof(action));
+		action.sa_handler = endSessionAlarmHandler;
+		action.sa_flags = SA_RESTART;
+		sigemptyset(&action.sa_mask);
+		if (sigaction(SIGALRM, &action, &state->PreviousAlarmAction) == 0)
+			state->AlarmActionSet = true;
+		else
+			nlwarning("Cannot handle the alarm signal: a signal that ends the session waits for the next poll without a limit");
+	}
+	for (uint i = 0; i < s_EndSessionSignalCount; ++i)
+	{
+		if (callback != nullptr && !state->ActionSet[i])
+		{
+			// a signal that whoever started the process had it ignore (nohup) stays ignored
+			struct sigaction previous;
+			if (sigaction(s_EndSessionSignals[i], nullptr, &previous) != 0 || previous.sa_handler == SIG_IGN)
+				continue;
+
+			struct sigaction action;
+			memset(&action, 0, sizeof(action));
+			action.sa_handler = endSessionSignalHandler;
+			// a system call that the signal interrupts is started again; the signals of the list wait for each other
+			action.sa_flags = SA_RESTART;
+			sigemptyset(&action.sa_mask);
+			for (uint j = 0; j < s_EndSessionSignalCount; ++j)
+				sigaddset(&action.sa_mask, s_EndSessionSignals[j]);
+			if (sigaction(s_EndSessionSignals[i], &action, &state->PreviousActions[i]) == 0)
+				state->ActionSet[i] = true;
+			else
+				nlwarning("Cannot handle signal %d to end the session", s_EndSessionSignals[i]);
+		}
+		else if (callback == nullptr && state->ActionSet[i])
+		{
+			sigaction(s_EndSessionSignals[i], &state->PreviousActions[i], nullptr);
+			state->ActionSet[i] = false;
+		}
+	}
+	if (callback == nullptr)
+	{
+		const int waiting = state->Signaled;
+		if (waiting)
+		{
+			alarm(0);
+			state->Signaled = 0;
+		}
+		if (state->AlarmActionSet)
+		{
+			sigaction(SIGALRM, &state->PreviousAlarmAction, nullptr);
+			state->AlarmActionSet = false;
+		}
+		// a signal that still waited for a poll is not lost: it is raised again, for the action it has now
+		if (waiting)
+			raise(waiting);
+	}
+#endif // NL_END_SESSION_SIGNALS
+}
+
+void CSystemUtils::endSession()
+{
+	CEndSessionState *state = getEndSessionState();
+	if (state->Callback != nullptr)
+		state->Callback();
+}
+
+void CSystemUtils::pollEndSession()
+{
+#ifdef NL_END_SESSION_SIGNALS
+	CEndSessionState *state = getEndSessionState();
+	if (state->Signaled)
+	{
+		// polled in time: the alarm of the signal is taken back
+		alarm(0);
+		state->Signaled = 0;
+		endSession();
+	}
+#endif // NL_END_SESSION_SIGNALS
+}
 
 #ifdef NL_OS_WINDOWS
 static bool s_mustUninit = false;

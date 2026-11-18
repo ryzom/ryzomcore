@@ -865,6 +865,7 @@ public:
 	virtual bool			isActive () NL_OVERRIDE;
 
 	virtual bool			isWindowMinimized() const NL_OVERRIDE;
+	virtual void			restoreWindow() NL_OVERRIDE;
 
 	virtual void			setMinimizedWindowPictureSupplied(bool supplied) NL_OVERRIDE;
 	virtual bool			isMinimizedWindowPictureWanted() const NL_OVERRIDE;

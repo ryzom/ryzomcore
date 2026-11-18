@@ -197,6 +197,11 @@ void CEventsListener::operator()(const CEvent& event)
 		}
 		else
 		{
+			// A minimized window can be asked to close as well (from the task bar). The quit dialog is drawn in
+			// the window, where nobody would see the question, so the window is restored first.
+			// (out of game this branch has no dialog to show, see above)
+			if (CInterfaceManager::getInstance()->isInGame() && Driver != nullptr && Driver->isWindowMinimized())
+				Driver->restoreWindow();
 			CAHManager::getInstance()->runActionHandler("enter_modal", nullptr, "group=ui:interface:quit_dialog");
 		}
 	}
