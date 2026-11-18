@@ -77,7 +77,7 @@ CVariable<bool> QuicStreams("fs", "QuicStreams", "Offer protocol level ryzomcore
 
 // Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
 // 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
-// 4.2: Adds 4 unidirectional streams from the server to the client, one per class of messages (see game_share/stream_record.h), for the long and the ordered ones (keep bandwidth from client restricted)
+// 4.2: Adds unidirectional streams from the server to the client, one per class of messages the server has (see game_share/stream_record.h), for the long and the ordered ones (keep bandwidth from client restricted)
 // 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
 const CStringView s_ProtocolName42 = "ryzomcore/4.2";
 const CStringView s_ProtocolName41 = "ryzomcore/4.1";
@@ -91,6 +91,9 @@ CAtomicInt s_EcnCapableConnections;
 #ifdef FE_DEBUG_QUIC
 CAtomicInt s_UserContextCount;
 #endif
+
+// The classes of messages that go on streams (see CQuicTransceiver::setStreamClasses), read by all threads once set
+std::vector<std::string> s_StreamClasses;
 
 CSynchronized<std::vector<CQuicTransceiver *>> s_QuicTransceivers;
 
@@ -608,7 +611,7 @@ CQuicUserContext::CQuicUserContext()
 #ifdef FE_DEBUG_QUIC
 	nldebug("Create QUIC user context, total %i", (int)(++s_UserContextCount));
 #endif
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	for (uint i = 0; i < StreamClassMax; ++i)
 	{
 		StreamContexts[i].User = this;
 		StreamContexts[i].StreamClass = (uint8)i;
@@ -645,10 +648,10 @@ void CQuicTransceiverImpl::closeConnection(CQuicUserContext *user)
 
 	// Once the connection is taken out, nobody opens or uses a stream of it any more (see sendStream)
 	void *connection = takeConnection(user);
-	void *streams[NbStreamClasses];
+	void *streams[StreamClassMax];
 	{
 		std::unique_lock<std::mutex> connectionLock(user->ConnectionMutex);
-		for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+		for (uint i = 0; i < StreamClassMax; ++i)
 		{
 			streams[i] = user->StreamHandles[i];
 			user->StreamHandles[i] = null;
@@ -657,7 +660,7 @@ void CQuicTransceiverImpl::closeConnection(CQuicUserContext *user)
 
 	// Closing waits for the callbacks, which complete (as canceled) the blocks that were still to be sent: not under
 	// the lock. The streams go before their connection.
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	for (uint i = 0; i < StreamClassMax; ++i)
 	{
 		if (streams[i])
 			MsQuic->StreamClose((HQUIC)streams[i]);
@@ -917,16 +920,16 @@ _Function_class_(QUIC_STREAM_CALLBACK)
 	case QUIC_STREAM_EVENT_START_COMPLETE:
 		if (QUIC_FAILED(ev->START_COMPLETE.Status))
 		{
-			// For one, the client allows fewer streams than the protocol level has
+			// For one, the client allows fewer streams than the protocol level says
 			if (!user->ShuttingDown)
 			{
-				nlwarning("The QUIC stream of the messages of class '%s' could not be started (status 0x%x)", streamClassName((TStreamClass)streamContext->StreamClass), (uint32)ev->START_COMPLETE.Status);
+				nlwarning("The QUIC stream of the messages of class '%s' could not be started (status 0x%x)", CQuicTransceiver::streamClassName(streamContext->StreamClass), (uint32)ev->START_COMPLETE.Status);
 				user->StreamFault.store(QuicStreamOpenFailed);
 			}
 		}
-		else if (ev->START_COMPLETE.ID != streamIdOfClass((TStreamClass)streamContext->StreamClass))
+		else if (ev->START_COMPLETE.ID != streamIdOfClass(streamContext->StreamClass))
 		{
-			nlwarning("The QUIC stream of the messages of class '%s' got id %" NL_I64 "u instead of %" NL_I64 "u", streamClassName((TStreamClass)streamContext->StreamClass), (uint64)ev->START_COMPLETE.ID, streamIdOfClass((TStreamClass)streamContext->StreamClass));
+			nlwarning("The QUIC stream of the messages of class '%s' got id %" NL_I64 "u instead of %" NL_I64 "u", CQuicTransceiver::streamClassName(streamContext->StreamClass), (uint64)ev->START_COMPLETE.ID, streamIdOfClass(streamContext->StreamClass));
 			user->StreamFault.store(QuicStreamWrongId);
 		}
 		break;
@@ -947,7 +950,7 @@ _Function_class_(QUIC_STREAM_CALLBACK)
 		// A client of this protocol level reads its streams to the end of the connection
 		if (!user->ShuttingDown)
 		{
-			nlwarning("FEHACK: The client refused the QUIC stream of the messages of class '%s' (error code %" NL_I64 "u)", streamClassName((TStreamClass)streamContext->StreamClass), (uint64)ev->PEER_RECEIVE_ABORTED.ErrorCode);
+			nlwarning("FEHACK: The client refused the QUIC stream of the messages of class '%s' (error code %" NL_I64 "u)", CQuicTransceiver::streamClassName(streamContext->StreamClass), (uint64)ev->PEER_RECEIVE_ABORTED.ErrorCode);
 			user->StreamFault.store(QuicStreamAbortedByPeer);
 		}
 		break;
@@ -1118,10 +1121,11 @@ bool CQuicTransceiverImpl::openStreams(CQuicUserContext *user)
 {
 	CQuicTransceiverImpl *m = this;
 
-	// All of them at once and in the order of the classes, which gives each the stream id of its class. A stream is
-	// announced to the client at once, and fails to start if the client does not allow it.
+	// One per class the frontend has, all at once and in the order of the classes, which gives each the stream id of
+	// its class. A stream is announced to the client at once, and fails to start if the client does not allow it.
 	user->StreamsOpened = true;
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	const uint nbClasses = CQuicTransceiver::streamClassCount();
+	for (uint i = 0; i < nbClasses; ++i)
 	{
 		HQUIC stream = null;
 		QUIC_STATUS status = MsQuic->StreamOpen((HQUIC)user->Connection, QUIC_STREAM_OPEN_FLAG_UNIDIRECTIONAL, CQuicTransceiverImpl::streamCallback, (void *)&user->StreamContexts[i], &stream);
@@ -1151,7 +1155,7 @@ bool CQuicTransceiverImpl::openStreams(CQuicUserContext *user)
 
 void CQuicTransceiver::sendStream(CQuicUserContext *user, uint8 streamClass, CQuicStreamSend *send)
 {
-	nlassert(streamClass < (uint8)NbStreamClasses);
+	nlassert(streamClass < StreamClassMax);
 	int fault = QuicStreamNoFault;
 	{
 		// The handles may be taken out to be closed (closeConnection) while this thread sends
@@ -1289,6 +1293,22 @@ void CQuicTransceiver::sendStream(CQuicUserContext *user, uint8 streamClass, CQu
 }
 
 #endif
+
+void CQuicTransceiver::setStreamClasses(const std::vector<std::string> &names)
+{
+	nlassert(names.size() <= StreamClassMax);
+	s_StreamClasses = names;
+}
+
+uint CQuicTransceiver::streamClassCount()
+{
+	return (uint)s_StreamClasses.size();
+}
+
+const char *CQuicTransceiver::streamClassName(uint streamClass)
+{
+	return streamClass < s_StreamClasses.size() ? s_StreamClasses[streamClass].c_str() : "unknown";
+}
 
 CQuicStreamSend *CQuicTransceiver::createStreamSend(uint32 length)
 {

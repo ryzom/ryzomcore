@@ -24,6 +24,8 @@
 
 #include "generic_xml_msg_mngr.h"
 #include "stream_record.h"
+
+#include <algorithm>
 #include "nel/misc/file.h"
 #include "nel/misc/xml_auto_ptr.h"
 
@@ -44,7 +46,7 @@ using namespace NLMISC;
 CGenericXmlMsgHeaderManager::CGenericXmlMsgHeaderManager()
 {
 	_Root = nullptr;
-	_UnknownStreamClass = false;
+	_StreamClassError = false;
 }
 
 // Destructor
@@ -70,9 +72,38 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 	CIXml read;
 	read.init (file);
 
+	// The classes of messages that go on streams, which the nodes then refer to by name
+	_StreamClasses.clear();
+	_StreamClassError = false;
+	for (xmlNodePtr xmlChild = read.getRootNode()->children; xmlChild != nullptr; xmlChild = xmlChild->next)
+	{
+		if (strcmp((const char *)xmlChild->name, "stream_class") != 0)
+			continue;
+		CXMLAutoPtr name(xmlGetProp(xmlChild, (xmlChar *)"name"));
+		std::string className = name ? (const char *)name : "";
+		if (className.empty())
+		{
+			nlwarning("A stream_class element of '%s' has no name", filename.c_str());
+			_StreamClassError = true;
+		}
+		else if (std::find(_StreamClasses.begin(), _StreamClasses.end(), className) != _StreamClasses.end())
+		{
+			nlwarning("'%s' declares the stream class '%s' twice", filename.c_str(), className.c_str());
+			_StreamClassError = true;
+		}
+		else if (_StreamClasses.size() >= CLFECOMMON::StreamClassMax)
+		{
+			nlwarning("'%s' declares more than %u stream classes, '%s' is one too many", filename.c_str(), CLFECOMMON::StreamClassMax, className.c_str());
+			_StreamClassError = true;
+		}
+		else
+		{
+			_StreamClasses.push_back(className);
+		}
+	}
+
 	// create root node from root xml node
-	_UnknownStreamClass = false;
-	_Root = new CNode(read.getRootNode(), 0, CLFECOMMON::NoStreamClass, _UnknownStreamClass);
+	_Root = new CNode(read.getRootNode(), 0, CLFECOMMON::NoStreamClass, _StreamClasses, _StreamClassError);
 }
 
 // set callback
@@ -198,7 +229,7 @@ void	CGenericXmlMsgHeaderManager::popNameAndDescriptionFromStream(string &result
 /*
  * Constructor
  */
-CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, bool &unknownStreamClass)
+CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, const std::vector<std::string> &streamClasses, bool &streamClassError)
     : Value(value)
     , UseCycle(false)
     , NbBits(0)
@@ -221,11 +252,16 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value, uint
 	CXMLAutoPtr stream(xmlGetProp(xmlNode, (xmlChar *)"stream"));
 	if (stream)
 	{
-		StreamClass = (uint8)CLFECOMMON::streamClassFromName((const char *)stream);
-		if (StreamClass == CLFECOMMON::NoStreamClass)
+		std::vector<std::string>::const_iterator it = std::find(streamClasses.begin(), streamClasses.end(), std::string((const char *)stream));
+		if (it != streamClasses.end())
 		{
-			nlwarning("Unknown stream class '%s' in node '%s'", (const char *)stream, Name.c_str());
-			unknownStreamClass = true;
+			StreamClass = (uint8)(it - streamClasses.begin());
+		}
+		else
+		{
+			nlwarning("Node '%s' names the stream class '%s', which is not declared (a stream_class element)", Name.c_str(), (const char *)stream);
+			StreamClass = CLFECOMMON::NoStreamClass;
+			streamClassError = true;
 		}
 	}
 
@@ -350,7 +386,7 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value, uint
 			if (!strcmp((const char*)xmlChild->name, "branch") || !strcmp((const char*)xmlChild->name, "leaf"))
 			{
 				// create a node from the child xml node
-				CNode	*child = new CNode(xmlChild, childValue, StreamClass, unknownStreamClass);
+				CNode	*child = new CNode(xmlChild, childValue, StreamClass, streamClasses, streamClassError);
 
 				// check node doesn't exist yet in parent
 				if (NodesByName.find(child->Name) == NodesByName.end())

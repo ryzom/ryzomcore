@@ -51,18 +51,21 @@ CStreamQueues::CStreamQueues()
 {
 }
 
-void CStreamQueues::push(TStreamClass streamClass, const TStreamRecord &record)
+void CStreamQueues::push(uint streamClass, const TStreamRecord &record)
 {
-	nlassert((uint)streamClass < (uint)NbStreamClasses);
+	nlassert(streamClass < StreamClassMax);
+	if (m_Queues.size() <= streamClass)
+		m_Queues.resize(streamClass + 1);
 	CQueue &queue = m_Queues[streamClass];
 	queue.Records.push_back(record);
 	queue.PendingBytes += (uint32)record->size();
 	m_PendingBytes += (uint32)record->size();
 }
 
-uint32 CStreamQueues::take(TStreamClass streamClass, uint8 *dst, uint32 maxBytes)
+uint32 CStreamQueues::take(uint streamClass, uint8 *dst, uint32 maxBytes)
 {
-	nlassert((uint)streamClass < (uint)NbStreamClasses);
+	if (streamClass >= m_Queues.size())
+		return 0;
 	CQueue &queue = m_Queues[streamClass];
 	uint32 taken = 0;
 	while (taken < maxBytes && !queue.Records.empty())
@@ -83,9 +86,12 @@ uint32 CStreamQueues::take(TStreamClass streamClass, uint8 *dst, uint32 maxBytes
 	return taken;
 }
 
-void CStreamQueues::endSession()
+void CStreamQueues::endSession(uint nbClasses)
 {
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	nlassert(nbClasses <= StreamClassMax);
+	if (m_Queues.size() < nbClasses)
+		m_Queues.resize(nbClasses);
+	for (uint i = 0; i < (uint)m_Queues.size(); ++i)
 	{
 		CQueue &queue = m_Queues[i];
 
@@ -107,19 +113,13 @@ void CStreamQueues::endSession()
 		m_PendingBytes -= queue.PendingBytes - keptBytes;
 		queue.PendingBytes = keptBytes;
 
-		push((TStreamClass)i, boundaryRecord());
+		push(i, boundaryRecord());
 	}
 }
 
 void CStreamQueues::clear()
 {
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
-	{
-		CQueue &queue = m_Queues[i];
-		std::deque<TStreamRecord>().swap(queue.Records);
-		queue.FrontOffset = 0;
-		queue.PendingBytes = 0;
-	}
+	std::vector<CQueue>().swap(m_Queues);
 	m_PendingBytes = 0;
 }
 

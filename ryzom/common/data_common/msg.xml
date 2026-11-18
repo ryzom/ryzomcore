@@ -1,4 +1,13 @@
 <client_messages_description>
+  <!--
+    The classes of messages that the frontend sends on QUIC streams instead of in the datagrams, to the clients of
+    protocol level ryzomcore/4.2. Each class is one stream, in this order, of which a client allows 16. A branch or a
+    leaf below takes a class with stream="name" (a leaf has that of its branch unless it names another). Only the
+    frontend reads this: a class can be added, or a message moved, without a change to the clients.
+    The messages of one class keep their order. In one update the client handles the streams in this order, so what
+    the other classes refer to comes first.
+  -->
+  <stream_class name="strings" />
   <branch name="TARGET">
     <leaf name="PARTY" />
     <leaf name="INVENTORY" />

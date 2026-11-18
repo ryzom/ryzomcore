@@ -123,17 +123,18 @@ public:
 	/// Receive a datagram
 	bool receiveDatagram(NLMISC::CBitMemStream &msgin);
 
-	/// The connection is of protocol level ryzomcore/4.2: the server sends some classes of messages on streams, one
-	/// stream per class (CLFECOMMON::TStreamClass), instead of in the datagrams
+	/// The connection is of protocol level ryzomcore/4.2: the server sends some classes of messages on streams instead
+	/// of in the datagrams, up to CLFECOMMON::StreamClassMax streams, numbered in the order it opens them. Which
+	/// messages are on which stream is the server's choice.
 	bool streams() const;
 
 	/// The session ends and the connection is kept for the next one (limbo mode). The streams may still carry messages
 	/// of the session that ends: they are dropped, up to the mark the frontend puts in each stream when it ends it.
 	void endStreamSession();
 
-	/// Take the next message of a class out of its stream, in the order the server sent them (main thread only).
-	/// msgin is an input stream.
-	TStreamRecord receiveStreamRecord(uint streamClass, NLMISC::CBitMemStream &msgin);
+	/// Take the next message out of a stream, in the order the server sent them on it (main thread only).
+	/// streamNumber is below CLFECOMMON::StreamClassMax, msgin is an input stream.
+	TStreamRecord receiveStreamRecord(uint streamNumber, NLMISC::CBitMemStream &msgin);
 
 	/// Check if quick is supported
 	bool isSupported() const;

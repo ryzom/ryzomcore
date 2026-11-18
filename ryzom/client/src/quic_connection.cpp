@@ -48,7 +48,7 @@ namespace /* anonymous */ {
 
 // Protocol feature levels, corresponds to Ryzom Core release versions, keep datagram-only support to give users and server owners the option to keep bandwidth restricted
 // 4.1: Only datagram support (restricted bandwidth, same behaviour as UDP)
-// 4.2: Adds 4 unidirectional streams from the server to the client, one per class of messages (see game_share/stream_record.h), for the long and the ordered ones (keep bandwidth from client restricted)
+// 4.2: Adds unidirectional streams from the server to the client, one per class of messages the server has (see game_share/stream_record.h), for the long and the ordered ones (keep bandwidth from client restricted)
 // 4.3?: Add a single bidirectional stream opened by the client for the scenario editor gateway (more efficient MODULE_GATEWAY replacement)
 const CStringView s_ProtocolName42 = "ryzomcore/4.2";
 const CStringView s_ProtocolName41 = "ryzomcore/4.1";
@@ -181,7 +181,7 @@ public:
 		, PeerShutdown(false)
 		, StreamsNegotiated(false)
 	{
-		for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+		for (uint i = 0; i < StreamClassMax; ++i)
 			Streams[i].Impl = this;
 	}
 
@@ -225,7 +225,7 @@ public:
 	CAtomicInt TransportStatus; // Status of a shutdown initiated by the transport, set by the callback thread
 	CAtomicBool PeerShutdown; // Set by the callback thread when the server shuts the connection down
 
-	// The stream of one class of messages (protocol level ryzomcore/4.2)
+	// One of the streams the server can open (protocol level ryzomcore/4.2)
 	struct CStream
 	{
 		CStream()
@@ -251,7 +251,7 @@ public:
 		uint32 PendingBoundaries; // Sessions that ended whose mark has not been read yet (main thread only)
 		bool Failed; // The stream cannot be read any further (main thread only)
 	};
-	CStream Streams[NbStreamClasses];
+	CStream Streams[StreamClassMax]; // by stream number, whether or not the server has opened it
 	CMutex StreamMutex;
 	CAtomicBool StreamsNegotiated; // Set by the callback thread when the connection is of protocol level 4.2
 
@@ -412,9 +412,9 @@ void CQuicConnectionImpl::connect()
 		settings.IsSet.MigrationEnabled = TRUE;
 		settings.PeerBidiStreamCount = 0;
 		settings.IsSet.PeerBidiStreamCount = TRUE;
-		// The streams of level 4.2 are a constant of the level, not read from msg.xml: a server that opens more of them
-		// ends the connection (MsQuic refuses the stream)
-		settings.PeerUnidiStreamCount = offerStreams ? (uint16)NbStreamClasses : 0;
+		// How many streams a server of level 4.2 may open is a constant of the level; how many it opens and what for
+		// is its own choice. A server that opens more ends the connection (MsQuic refuses the stream).
+		settings.PeerUnidiStreamCount = offerStreams ? (uint16)StreamClassMax : 0;
 		settings.IsSet.PeerUnidiStreamCount = TRUE;
 		if (offerStreams)
 		{
@@ -674,7 +674,7 @@ void CQuicConnectionImpl::clearStreams()
 {
 	CQuicConnectionImpl *const m = this;
 	CAutoMutex<> lock(m->StreamMutex);
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	for (uint i = 0; i < StreamClassMax; ++i)
 	{
 		CStream &stream = m->Streams[i];
 		std::vector<uint8>().swap(stream.Incoming);
@@ -781,30 +781,30 @@ _Function_class_(QUIC_CONNECTION_CALLBACK)
 		status = QUIC_STATUS_SUCCESS;
 		break;
 	case QUIC_CONNECTION_EVENT_PEER_STREAM_STARTED: {
-		// The server opens the stream of a class of messages. The stream id says which class it is.
+		// The server opens a stream for a class of its messages. The stream id gives the number of the stream.
 		HQUIC stream = ev->PEER_STREAM_STARTED.Stream;
 		QUIC_UINT62 streamId = 0;
 		uint32 streamIdSize = sizeof(streamId);
-		TStreamClass streamClass = NoStreamClass;
+		uint8 streamNumber = NoStreamClass;
 		if ((ev->PEER_STREAM_STARTED.Flags & QUIC_STREAM_OPEN_FLAG_UNIDIRECTIONAL)
 		    && QUIC_SUCCEEDED(MsQuic->GetParam(stream, QUIC_PARAM_STREAM_ID, &streamIdSize, &streamId)))
 		{
-			streamClass = streamClassOfId(streamId);
+			streamNumber = streamClassOfId(streamId);
 		}
-		if (streamClass == NoStreamClass)
+		if (streamNumber == NoStreamClass)
 		{
-			// MsQuic lets the server open no other stream than those four, so this is not reached.
+			// MsQuic lets the server open no other stream than those the client allows, so this is not reached.
 			// The stream is refused, MsQuic closes it.
 			if (INelContext::isContextInitialised())
 			{
-				nlwarning("The server opened QUIC stream %" NL_I64 "u, which is the stream of no class of messages", (uint64)streamId);
+				nlwarning("The server opened QUIC stream %" NL_I64 "u, which is none of the streams of messages", (uint64)streamId);
 			}
 			break;
 		}
-		MsQuic->SetCallbackHandler(stream, (void *)CQuicConnectionImpl::streamCallback, (void *)&m->Streams[streamClass]);
+		MsQuic->SetCallbackHandler(stream, (void *)CQuicConnectionImpl::streamCallback, (void *)&m->Streams[streamNumber]);
 		if (INelContext::isContextInitialised())
 		{
-			nlinfo("The server opened the QUIC stream of the messages of class '%s'", streamClassName(streamClass));
+			nlinfo("The server opened QUIC stream %u for messages", (uint)streamNumber);
 		}
 		status = QUIC_STATUS_SUCCESS;
 		break;
@@ -950,14 +950,15 @@ bool CQuicConnection::streams() const
 
 void CQuicConnection::endStreamSession()
 {
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
+	// The server marks the end in every stream it has, whenever it opens them (the others never carry anything)
+	for (uint i = 0; i < StreamClassMax; ++i)
 		++m->Streams[i].PendingBoundaries;
 }
 
-CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamClass, NLMISC::CBitMemStream &msgin)
+CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamNumber, NLMISC::CBitMemStream &msgin)
 {
-	nlassert(streamClass < (uint)NbStreamClasses);
-	CQuicConnectionImpl::CStream &s = m->Streams[streamClass];
+	nlassert(streamNumber < StreamClassMax);
+	CQuicConnectionImpl::CStream &s = m->Streams[streamNumber];
 
 	if (!m->ReceiveEnable)
 		return NoStreamRecord;
@@ -997,21 +998,21 @@ CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamC
 			if (s.PendingBoundaries != 0)
 				--s.PendingBoundaries;
 			else
-				nlwarning("The stream of the messages of class '%s' marks the end of a session that the client did not end", streamClassName((TStreamClass)streamClass));
+				nlwarning("QUIC stream %u marks the end of a session that the client did not end", streamNumber);
 			continue;
 		case CStreamRecordReader::BadLength:
 			s.Failed = true;
 			if (length != 0)
-				nlwarning("The stream of the messages of class '%s' announces a message of %u bytes, more than the %u a client accepts: the stream cannot be read any further", streamClassName((TStreamClass)streamClass), length, StreamRecordClientMaxBytes);
+				nlwarning("QUIC stream %u announces a message of %u bytes, more than the %u a client accepts: the stream cannot be read any further", streamNumber, length, StreamRecordClientMaxBytes);
 			else
-				nlwarning("The stream of the messages of class '%s' has a message length that does not end: the stream cannot be read any further", streamClassName((TStreamClass)streamClass));
+				nlwarning("QUIC stream %u has a message length that does not end: the stream cannot be read any further", streamNumber);
 			return StreamError;
 		case CStreamRecordReader::NoRecord:
 		default:
 			if (ended)
 			{
 				s.Failed = true;
-				nlwarning("The server ended the stream of the messages of class '%s' (%u bytes of an incomplete message left)", streamClassName((TStreamClass)streamClass), s.Reader.bufferedBytes());
+				nlwarning("The server ended QUIC stream %u (%u bytes of an incomplete message left)", streamNumber, s.Reader.bufferedBytes());
 				return StreamError;
 			}
 			return NoStreamRecord;
@@ -1128,7 +1129,7 @@ void CQuicConnection::endStreamSession()
 {
 }
 
-CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamClass, NLMISC::CBitMemStream &msgin)
+CQuicConnection::TStreamRecord CQuicConnection::receiveStreamRecord(uint streamNumber, NLMISC::CBitMemStream &msgin)
 {
 	return NoStreamRecord;
 }

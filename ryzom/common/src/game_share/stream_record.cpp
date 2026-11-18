@@ -21,34 +21,6 @@
 
 namespace CLFECOMMON {
 
-namespace /* anonymous */ {
-
-const char *const s_StreamClassNames[NbStreamClasses] = {
-	"strings",
-	"chat",
-	"login",
-	"gateway",
-};
-
-} /* anonymous namespace */
-
-const char *streamClassName(TStreamClass streamClass)
-{
-	if ((uint)streamClass >= (uint)NbStreamClasses)
-		return nullptr;
-	return s_StreamClassNames[streamClass];
-}
-
-TStreamClass streamClassFromName(const char *name)
-{
-	for (uint i = 0; i < (uint)NbStreamClasses; ++i)
-	{
-		if (!strcmp(name, s_StreamClassNames[i]))
-			return (TStreamClass)i;
-	}
-	return NoStreamClass;
-}
-
 uint writeStreamRecordLength(uint8 *dst, uint32 length)
 {
 	nlassert(length <= StreamRecordLengthMax);

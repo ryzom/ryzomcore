@@ -91,7 +91,7 @@ struct CQuicStreamSend
 struct CQuicStreamContext
 {
 	CQuicUserContext *User;
-	uint8 StreamClass; // CLFECOMMON::TStreamClass
+	uint8 StreamClass; // number of the class of messages
 };
 
 /// Why the streams of a connection are of no use any more. Bytes that were taken out of the queues can then not be
@@ -206,9 +206,9 @@ public:
 
 	// Handles of the streams, in the order of the classes, null until opened and once taken out to be closed (under
 	// ConnectionMutex; opened and used by whoever flushes: the send thread, or the main thread when it flushes itself)
-	void *StreamHandles[CLFECOMMON::NbStreamClasses] = {};
+	void *StreamHandles[CLFECOMMON::StreamClassMax] = {};
 	bool StreamsOpened = false;
-	CQuicStreamContext StreamContexts[CLFECOMMON::NbStreamClasses];
+	CQuicStreamContext StreamContexts[CLFECOMMON::StreamClassMax];
 
 	// @}
 
@@ -373,6 +373,16 @@ public:
 
 	/// Shutdown a connection
 	void shutdown(CQuicUserContext *user);
+
+	/// The classes of messages that go on streams, in the order of their streams (those msg.xml declares). Set once,
+	/// before the frontend takes clients: a connection of protocol level ryzomcore/4.2 gets one stream per class.
+	static void setStreamClasses(const std::vector<std::string> &names);
+
+	/// How many classes there are (at most CLFECOMMON::StreamClassMax)
+	static uint streamClassCount();
+
+	/// Name of a class, for logs
+	static const char *streamClassName(uint streamClass);
 
 	/// Allocate a block of bytes for a stream
 	static CQuicStreamSend *createStreamSend(uint32 length);

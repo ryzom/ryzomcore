@@ -23,9 +23,17 @@
 
 /*
  * Protocol level ryzomcore/4.2: besides its datagrams, the frontend sends some classes of messages on reliable QUIC
- * streams, one unidirectional stream per class, opened by the frontend. The classes and their order, and with them the
- * stream ids, are constants of the protocol level. msg.xml says which messages belong to a class (the `stream`
- * attribute of a branch or a leaf); only the frontend reads that.
+ * streams, one unidirectional stream per class, opened by the frontend.
+ *
+ * The classes are the frontend's own. Its msg.xml declares them (`stream_class` elements, in the order of their
+ * streams) and says which messages belong to each (the `stream` attribute of a branch or a leaf). The client knows
+ * none of that: it lets the frontend open up to StreamClassMax streams and treats them all alike, so a frontend can
+ * add a class, or move a message to another class or back to the datagrams, without a new protocol level. The level
+ * fixes the framing below, the mark of the end of a session, and StreamClassMax.
+ *
+ * The messages of one stream reach their handlers in the order the frontend sent them. In one update, the client
+ * goes through the streams in the order the frontend opened them, so what the messages of other streams refer to
+ * (the strings) belongs in the first class.
  *
  * A stream is a sequence of records. A record is a length (unsigned LEB128, at most 4 bytes) followed by that many
  * bytes, which are the message as an impulse carries it: the message name bits of msg.xml, then the fields.
@@ -37,35 +45,26 @@
 
 namespace CLFECOMMON {
 
-/// Message classes of protocol level ryzomcore/4.2, in the order the frontend opens their streams
-enum TStreamClass
-{
-	StreamStrings = 0,
-	StreamChat,
-	StreamLogin,
-	StreamGateway,
-	NbStreamClasses,
-	NoStreamClass = 0xFF
-};
+/// Most streams a client of protocol level ryzomcore/4.2 lets the frontend open, which is the most classes of
+/// messages a frontend can have. A class is known by its number, from 0, in the order the frontend declares them.
+const uint StreamClassMax = 16;
 
-/// Name of a class in msg.xml, nullptr if it is none
-const char *streamClassName(TStreamClass streamClass);
+/// The number of no class: a message that goes by impulse, a stream that is not one of a class
+const uint8 NoStreamClass = 0xFF;
 
-/// Class of a name of msg.xml, NoStreamClass if no class has that name
-TStreamClass streamClassFromName(const char *name);
-
-/// QUIC stream id of a class: the unidirectional streams a server opens are 3, 7, 11, 15, in the order it opens them
-inline uint64 streamIdOfClass(TStreamClass streamClass)
+/// QUIC stream id of a class: the unidirectional streams a server opens are 3, 7, 11, 15 and so on, in the order it
+/// opens them
+inline uint64 streamIdOfClass(uint streamClass)
 {
 	return 3 + 4 * (uint64)streamClass;
 }
 
 /// Class of a QUIC stream id, NoStreamClass if it is not the stream of a class
-inline TStreamClass streamClassOfId(uint64 streamId)
+inline uint8 streamClassOfId(uint64 streamId)
 {
-	if ((streamId & 3) != 3 || (streamId >> 2) >= (uint64)NbStreamClasses)
+	if ((streamId & 3) != 3 || (streamId >> 2) >= (uint64)StreamClassMax)
 		return NoStreamClass;
-	return (TStreamClass)(streamId >> 2);
+	return (uint8)(streamId >> 2);
 }
 
 /// Most bytes the length of a record takes

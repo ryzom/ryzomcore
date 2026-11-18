@@ -330,15 +330,22 @@ public:
 
 	// clang-format off
 	/**
-	 * Get the class of the message node (CLFECOMMON::TStreamClass), which says on which stream of protocol level
-	 * ryzomcore/4.2 the frontend sends the message. CLFECOMMON::NoStreamClass for a message that goes by impulse.
+	 * Get the class of the message node, which says on which stream of protocol level ryzomcore/4.2 the frontend
+	 * sends the message: an index in getStreamClasses(), or CLFECOMMON::NoStreamClass for a message that goes by
+	 * impulse. See game_share/stream_record.h.
 	 */
 	uint8					getNodeStreamClass(CNodeId &nodeId)			{ return nodeId._Node->StreamClass; }
 
 	/**
-	 * A `stream` attribute of the file names no class (each one was logged). The frontend stops on that.
+	 * The classes the file declares (its `stream_class` elements), by name, in the order of their streams
 	 */
-	bool					hasUnknownStreamClass() const				{ return _UnknownStreamClass; }
+	const std::vector<std::string>	&getStreamClasses() const			{ return _StreamClasses; }
+
+	/**
+	 * The file declares a class twice or without a name, declares more classes than a client allows streams, or has
+	 * a `stream` attribute that names no class (each fault was logged). The frontend stops on that.
+	 */
+	bool					hasStreamClassError() const					{ return _StreamClassError; }
 	// clang-format on
 
 	/**
@@ -376,11 +383,12 @@ protected:
 		uint				NbBits;
 		TMsgHeaderCallback	Callback;
 		// clang-format off
-		/// CLFECOMMON::TStreamClass, from the `stream` attribute of the node or else of the branch it is in
+		/// The class of the `stream` attribute of the node, or else that of the branch it is in (an index in
+		/// streamClasses, or CLFECOMMON::NoStreamClass)
 		uint8				StreamClass;
 
-		/// Constructor (unknownStreamClass is set if a `stream` attribute in the node or below names no class)
-		CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, bool &unknownStreamClass);
+		/// Constructor (streamClassError is set if a `stream` attribute in the node or below names no class)
+		CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, const std::vector<std::string> &streamClasses, bool &streamClassError);
 		// clang-format on
 
 		/// Destructor
@@ -518,7 +526,8 @@ protected:
 	CNode	*_Root;
 
 	// clang-format off
-	bool	_UnknownStreamClass;
+	std::vector<std::string>	_StreamClasses;
+	bool	_StreamClassError;
 	// clang-format on
 };
 

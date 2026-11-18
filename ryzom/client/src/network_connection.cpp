@@ -2301,15 +2301,16 @@ void CNetworkConnection::dispatchStreamRecords()
 	if (!m_UseQuic || !m_QuicConnection.streams())
 		return;
 
-	// The classes in their order: the strings first, which the messages of the other classes refer to.
+	// The streams in the order the server opened them: it puts first what the messages of the others refer to (the
+	// strings). The server need not have opened them all.
 	// One message is taken out at a time and nothing of the stream is held while its handler runs: a handler may call
-	// update() again (the progress bar of a teleport does), which then goes on with the next message of the class.
-	for (uint streamClass = 0; streamClass < (uint)CLFECOMMON::NbStreamClasses; ++streamClass)
+	// update() again (the progress bar of a teleport does), which then goes on with the next message of the stream.
+	for (uint streamNumber = 0; streamNumber < CLFECOMMON::StreamClassMax; ++streamNumber)
 	{
 		while (_ConnectionState == Connected)
 		{
 			CBitMemStream msgin(true);
-			CQuicConnection::TStreamRecord res = m_QuicConnection.receiveStreamRecord(streamClass, msgin);
+			CQuicConnection::TStreamRecord res = m_QuicConnection.receiveStreamRecord(streamNumber, msgin);
 			if (res == CQuicConnection::NoStreamRecord)
 				break;
 			if (res == CQuicConnection::StreamError)

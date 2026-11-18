@@ -806,7 +806,7 @@ void CFeReceiveSub::removeClientFromMap(CClientHost *client, bool closeQuicConne
 		{
 			// The connection is kept for the next session (limbo mode), and its streams with it: what they have not
 			// begun of this session is dropped, and they mark where it ends
-			client->QuicUser->StreamQueues.endSession();
+			client->QuicUser->StreamQueues.endSession(CQuicTransceiver::streamClassCount());
 		}
 		client->QuicUser = nullptr;
 	}

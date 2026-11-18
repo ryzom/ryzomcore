@@ -399,13 +399,14 @@ void	CFeSendSub::grantStreams()
 		// The classes in their order (only one class has messages so far, they get shares of the allowance once
 		// there are more)
 		uint32 allowance = streamAllowance(user);
-		for (uint streamClass = 0; streamClass < (uint)CLFECOMMON::NbStreamClasses && allowance != 0; ++streamClass)
+		const uint nbClasses = CQuicTransceiver::streamClassCount();
+		for (uint streamClass = 0; streamClass < nbClasses && allowance != 0; ++streamClass)
 		{
-			uint32 size = std::min(allowance, queues.pendingBytes((CLFECOMMON::TStreamClass)streamClass));
+			uint32 size = std::min(allowance, queues.pendingBytes(streamClass));
 			if (size == 0)
 				continue;
 			CQuicStreamSend *send = CQuicTransceiver::createStreamSend(size);
-			queues.take((CLFECOMMON::TStreamClass)streamClass, send->Data, size);
+			queues.take(streamClass, send->Data, size);
 			// Counted here and not when it is sent, so that the next cycle knows of it whenever the flush runs
 			user->StreamOutstanding.fetchAdd((int)size);
 			user->StreamGrantedCount.fetchAdd((int)size);
