@@ -118,6 +118,13 @@ CVariable<uint32>	DelayBeforeUPDAlert("FS", "DelayBeforeUPDAlert", "Delay (in s)
 
 CVariable<bool>		VerboseFEStatsTime("fs", "VerboseFEStatsTime", "Verbose FESTATS and FETIME", false, 0, true);
 
+// clang-format off
+// Messages on QUIC streams (protocol level ryzomcore/4.2, see game_share/stream_record.h)
+CVariable<uint32>	StreamRecordMaxBytes("fs", "StreamRecordMaxBytes", "Largest message a service may send on a QUIC stream; the client it is for is disconnected for a larger one, which cannot be left out", 4*1024*1024, 0, true);
+CVariable<uint32>	StreamRecordMaxBytesChat("fs", "StreamRecordMaxBytesChat", "Largest message of the chat class on a QUIC stream; a larger one is dropped", 8192, 0, true);
+CVariable<uint32>	StreamMaxQueuedBytes("fs", "StreamMaxQueuedBytes", "Bytes of messages that may wait for the QUIC streams of one client, above which it is disconnected", 8*1024*1024, 0, true);
+// clang-format on
+
 std::string	getPatchingAddress()
 {
 	std::string	la;
@@ -204,6 +211,17 @@ void fillPrioritizedActionsToSend()
 	if ( ! CFrontEndService::instance()->receiveSub()->clientMap().empty() )
 	{
 		CFrontEndService::instance()->sendSub()->fillPrioritizedActions();
+	}
+}
+
+
+// Take out of the stream queues what the QUIC connections may send this cycle
+void grantStreamsToSend()
+{
+	H_AUTO(GrantStreams);
+	if ( ! CFrontEndService::instance()->receiveSub()->clientMap().empty() )
+	{
+		CFrontEndService::instance()->sendSub()->grantStreams();
 	}
 }
 
@@ -307,6 +325,107 @@ void readIncomingData()
  **************************/
 
 
+// clang-format off
+
+/*
+ * The name of a message for a client (msg.xml), for logs
+ */
+static std::string nameOfClientMessage( const uint8 *message, uint32 length )
+{
+	std::string name;
+	CBitMemStream bms( true );
+	bms.fill( message, std::min( length, (uint32)16 ) ); // the name bits are at the start
+	try
+	{
+		GenericXmlMsgHeaderMngr.popNameFromStream( name, bms );
+	}
+	catch (const EStream &)
+	{
+	}
+	return name.empty() ? std::string("unknown") : name;
+}
+
+
+/*
+ * The class of a message for a client (CLFECOMMON::TStreamClass): on a connection of protocol level ryzomcore/4.2, a
+ * message of a class goes on the QUIC stream of that class. NoStreamClass for a message that goes by impulse.
+ */
+static uint8 streamClassOfClientMessage( const uint8 *message, uint32 length )
+{
+	CBitMemStream bms( true );
+	bms.fill( message, std::min( length, (uint32)16 ) ); // the name bits are at the start
+	try
+	{
+		CGenericXmlMsgHeaderManager::CNodeId node = GenericXmlMsgHeaderMngr.getNodeId( bms );
+		if ( node.isValid() )
+			return GenericXmlMsgHeaderMngr.getNodeStreamClass( node );
+	}
+	catch (const EStream &)
+	{
+		// no message of msg.xml: it goes the way it always went
+	}
+	return CLFECOMMON::NoStreamClass;
+}
+
+
+/*
+ * Queue a message for the stream of its class, on a connection of protocol level ryzomcore/4.2.
+ * Such a message never goes by impulse on such a connection: the stream keeps the order of its class.
+ */
+static void queueStreamRecord( CClientHost *client, uint8 streamClass, const uint8 *message, uint32 length, const char *extendedMsg )
+{
+	CQuicUserContext *user = client->QuicUser.get();
+	CStreamQueues &queues = user->StreamQueues;
+	if ( queues.Refusing )
+		return; // the client is being disconnected for a fault of its streams
+
+	if ( length == 0 )
+	{
+		// (a message starts with its name bits, and an empty record would mark the end of the session)
+		nlwarning( "Empty message for client %u (uid %u) %s, dropped", (uint)client->clientId(), client->Uid, extendedMsg );
+		return;
+	}
+
+	const char *className = CLFECOMMON::streamClassName( (CLFECOMMON::TStreamClass)streamClass );
+	bool isChat = ( streamClass == CLFECOMMON::StreamChat );
+	uint32 maxLength = std::min( isChat ? StreamRecordMaxBytesChat.get() : StreamRecordMaxBytes.get(), CLFECOMMON::StreamRecordLengthMax );
+	if ( length > maxLength )
+	{
+		if ( isChat )
+		{
+			// Chat lines do not depend on each other
+			nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is above the %u bytes of a message of class '%s', dropped",
+				nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, maxLength, className );
+			return;
+		}
+		// Without it the client would miss something for good (a string, a part of its database, a message of its
+		// module gateway), so it cannot go on
+		nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is above the %u bytes of a message of class '%s': the client is disconnected",
+			nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, maxLength, className );
+		queues.Refusing = true;
+		queues.clear();
+		CFrontEndService::instance()->receiveSub()->disconnectClient( client );
+		return;
+	}
+
+	if ( queues.pendingBytes() + length > StreamMaxQueuedBytes.get() )
+	{
+		// The services send more than the connection takes: a path slower than what they send, or a client that does
+		// not acknowledge or does not read (then nothing completes, and all of the window is on its way)
+		nlwarning( "%u bytes of messages wait for the QUIC streams of client %u (uid %u), %d more are sent and not acknowledged, and %s of %u bytes %s (class '%s') goes above the limit of %u: the client is disconnected",
+			queues.pendingBytes(), (uint)client->clientId(), client->Uid, user->StreamOutstanding.load(), nameOfClientMessage( message, length ).c_str(), length, extendedMsg, className, StreamMaxQueuedBytes.get() );
+		queues.Refusing = true;
+		queues.clear();
+		CFrontEndService::instance()->receiveSub()->disconnectClient( client );
+		return;
+	}
+
+	queues.push( (CLFECOMMON::TStreamClass)streamClass, makeStreamRecord( message, length ) );
+}
+
+// clang-format on
+
+
 /*
  * Send an impulsion message to a destination client (warning: channel is "level", in fact)
  */
@@ -314,6 +433,22 @@ void sendImpulsion( TClientId clientid, CMessage& msgin, uint8 channel, const ch
 {
 	uint32 bytelen;
 	msgin.serial( bytelen ); // sent with serialBufferWithSize(), the following is the buffer
+
+	// On a connection of protocol level ryzomcore/4.2, the messages of a stream class go on their stream
+	{
+		TClientIdCont &cont = CFrontEndService::instance()->receiveSub()->clientIdCont();
+		CClientHost *client = ( clientid < cont.size() ) ? cont[clientid] : NULL;
+		if ( client != NULL && client->QuicUser.get() != NULL && client->QuicUser->Streams )
+		{
+			const uint8 *message = msgin.buffer() + msgin.getPos();
+			uint8 streamClass = streamClassOfClientMessage( message, bytelen );
+			if ( streamClass != CLFECOMMON::NoStreamClass )
+			{
+				queueStreamRecord( client, streamClass, message, bytelen, extendedMsg );
+				return;
+			}
+		}
+	}
 
 	CActionGeneric *ag = (CActionGeneric *)CActionFactory::getInstance()->create( INVALID_SLOT, ACTION_GENERIC_CODE );
 	ag->setFromMessage( msgin, bytelen );
@@ -1242,6 +1377,7 @@ inline void	CFrontEndService::onTick()
 			updatePriorities();
 			prepareHeadersAndFillImpulses();
 			fillPrioritizedActionsToSend();
+			grantStreamsToSend();
 			swapSendBuffers(); // waits for the end of flushMessagesToSend using the boolean FlushInProgress (with addWait there would be a deadlock at the beginning)
 
 			// The send thread and its task only exist with UseSendThread
@@ -1425,6 +1561,11 @@ void CFrontEndService::init()
 		nlinfo( "Initializing XML message manager..." );
 		const string& pathXmlMsg = CPath::lookup( "msg.xml" );
 		GenericXmlMsgHeaderMngr.init( pathXmlMsg );
+		if ( GenericXmlMsgHeaderMngr.hasUnknownStreamClass() )
+		{
+			// The messages of that node would go by impulse, in another order than its class is meant to keep
+			nlerror( "A `stream` attribute in '%s' names no class of messages (see the warnings above): the frontend cannot tell how to send the messages of that node", pathXmlMsg.c_str() );
+		}
 		initImpulsionId();
 		initImpulsionUid();
 
@@ -1854,6 +1995,33 @@ NLMISC_COMMAND( monitorClient, "Set the client id to monitor", "<clientid>" )
 	return true;
 }
 
+
+extern uint64 getStreamBytesGranted();
+
+NLMISC_COMMAND( displayStreamStats, "Display the QUIC streams of the clients of protocol level ryzomcore/4.2: what waits for each class, and the congestion window of the connection", "" )
+{
+	if (args.size() != 0) return false;
+
+	uint nbStreamClients = 0;
+	THostMap &clientMap = CFrontEndService::instance()->receiveSub()->clientMap();
+	for ( THostMap::iterator ihm = clientMap.begin(); ihm != clientMap.end(); ++ihm )
+	{
+		CClientHost *client = GETCLIENTA(ihm);
+		CQuicUserContext *user = client->QuicUser.get();
+		if ( user == NULL || !user->Streams )
+			continue;
+		++nbStreamClients;
+		std::string waiting;
+		for ( uint c = 0; c < (uint)CLFECOMMON::NbStreamClasses; ++c )
+			waiting += toString( " %s %u", CLFECOMMON::streamClassName( (CLFECOMMON::TStreamClass)c ), user->StreamQueues.pendingBytes( (CLFECOMMON::TStreamClass)c ) );
+		if ( user->StatValid )
+			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window %d, in flight %d, round trip %d ms; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), user->StatCongestionWindow.load(), user->StatBytesInFlight.load(), user->StatRtt.load() / 1000, CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
+		else
+			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window not known yet; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
+	}
+	log.displayNL( "%u of %u clients have QUIC streams; %" NL_I64 "u bytes were given to the streams since the service started", nbStreamClients, (uint)clientMap.size(), getStreamBytesGranted() );
+	return true;
+}
 
 NLMISC_COMMAND( disconnectClient, "Disconnect a client", "<clientid>" )
 {

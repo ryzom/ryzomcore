@@ -315,7 +315,7 @@
     <leaf name="REMOVE_COMPASS_BOT" description="Same for bots. Params name, bot_dataseetid" />
   </branch>
   <!-- String Manager related message -->
-  <branch name="STRING_MANAGER">
+  <branch name="STRING_MANAGER" stream="strings">
     <leaf name="SET_LANGUAGE" description="The client send the language code to use for this session." />
     <leaf name="PHRASE_SEND" description="The IOS send the prepared phrase to the client." />
     <leaf name="STRING_RQ" description="the client ask the string manager for an unknow string" />

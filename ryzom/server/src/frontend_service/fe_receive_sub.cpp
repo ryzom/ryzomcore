@@ -721,7 +721,10 @@ void CFeReceiveSub::removeLimboClient(std::map<TUid, CLimboClient>::iterator ilc
 		CLoginServer::clientDisconnected(lc.Uid);
 
 	if (lc.QuicUser.get())
+	{
 		lc.QuicUser->Transceiver->shutdown(lc.QuicUser.get());
+		lc.QuicUser->StreamQueues.clear();
+	}
 
 	LimboClients.erase(ilc);
 }
@@ -795,7 +798,16 @@ void CFeReceiveSub::removeClientFromMap(CClientHost *client, bool closeQuicConne
 			client->QuicUser->ClientHost = nullptr;
 		}
 		if (closeQuicConnection)
+		{
 			client->QuicUser->Transceiver->shutdown(client->QuicUser.get());
+			client->QuicUser->StreamQueues.clear();
+		}
+		else
+		{
+			// The connection is kept for the next session (limbo mode), and its streams with it: what they have not
+			// begun of this session is dropped, and they mark where it ends
+			client->QuicUser->StreamQueues.endSession();
+		}
 		client->QuicUser = nullptr;
 	}
 }
@@ -1814,11 +1826,24 @@ void CFeReceiveSub::countRejectedMessage( CClientHost *client, TBadMessageFormat
 		nlwarning("FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
 		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), client->RejectedMessages, (uint)((now - client->RejectedMessagesSince) / 1000), getBadMessageString(bmft).c_str());
 
-		// as when a service asks for the disconnection (cbDisconnectClient)
-		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
-		client->ImpulseEncoder.add(act, 0);
-		addToRemoveList(client->clientId());
+		disconnectClient(client);
 	}
+}
+
+
+/*
+ * Disconnect a client for a fault
+ */
+void CFeReceiveSub::disconnectClient( CClientHost *client )
+{
+	// Removing it again would push its removal back
+	if (isInRemoveList(client->clientId()))
+		return;
+
+	// as when a service asks for the disconnection (cbDisconnectClient)
+	CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+	client->ImpulseEncoder.add(act, 0);
+	addToRemoveList(client->clientId());
 }
 
 

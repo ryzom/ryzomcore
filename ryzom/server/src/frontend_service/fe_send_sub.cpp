@@ -50,6 +50,50 @@ uint SendCounterRatio = 0;
 uint SendCounterDelay = 1000;
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
+CVariable<uint32> StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle a QUIC connection may send on its streams before the frontend knows its congestion window", 200, 0, true);
+
+namespace /* anonymous */ {
+
+/// Bytes per cycle a connection may send on its streams when its congestion window has the room.
+/// A fixed value for now: it becomes the allowance that follows how late the datagrams reach the client.
+const sint64 s_StreamBytesPerTick = 1500;
+
+/// Bytes of a QUIC packet with a full datagram (the datagram and the packet around it)
+const sint64 s_DatagramPacketBytes = 560;
+
+/// Bytes granted to the streams since the service started (see displayStreamStats)
+uint64 s_StreamBytesGranted = 0;
+
+/// Bytes the streams of a connection may take this cycle, which is what its congestion window leaves beside its
+/// datagrams: the next datagram must never wait for the window.
+/// The window is taken by the datagrams in flight (one per cycle within the round trip time) and by what was given to
+/// the streams and is not acknowledged yet, with the headers of its packets (about 4%). That is counted from the
+/// frontend's own numbers, which include what this thread gave since MsQuic was last asked. If MsQuic then said that
+/// more was in flight than that (datagrams whose acknowledgement is late, data sent again after a loss), its number
+/// counts.
+uint32 streamAllowance(CQuicUserContext *user)
+{
+	if (!user->StatValid)
+		return StreamMinBytesPerTick.get();
+
+	sint64 congestionWindow = user->StatCongestionWindow.load(NLMISC::TMemoryOrderRelaxed);
+	sint64 rttMs = ((sint64)user->StatRtt.load(NLMISC::TMemoryOrderRelaxed) + 999) / 1000;
+	sint64 tickMs = std::max((sint64)1, (sint64)(CTickEventHandler::getGameTimeStep() * 1000.0));
+	sint64 datagramsInFlight = ((rttMs + tickMs - 1) / tickMs + 1) * s_DatagramPacketBytes;
+	sint64 outstanding = user->StreamOutstanding.load();
+	sint64 inFlight = datagramsInFlight + outstanding + outstanding / 25;
+	inFlight = std::max(inFlight, (sint64)user->StatBytesInFlight.load(NLMISC::TMemoryOrderRelaxed));
+	sint64 room = congestionWindow - inFlight - s_DatagramPacketBytes;
+	return (uint32)std::min(std::max(room, (sint64)0), s_StreamBytesPerTick);
+}
+
+} /* anonymous namespace */
+
+uint64 getStreamBytesGranted()
+{
+	return s_StreamBytesGranted;
+}
+
 
 
 /*
@@ -69,12 +113,27 @@ void CFeSendSub::init( NLNET::CUdpSock *datasock, THostMap *clientmap, CHistory 
 	_SendBuffers2.resize( MaxNbClients+1 );
 	_CurrentFillingBuffers = &_SendBuffers1;
 	_CurrentFlushingBuffers = &_SendBuffers2;
+	m_FillingStreamPosts = &m_StreamPosts1;
+	m_FlushingStreamPosts = &m_StreamPosts2;
 
 	_MsgXmlMD5 = NLMISC::getMD5("msg.xml");
 	_DatabaseXmlMD5 = NLMISC::getMD5("database.xml");
 
 	/*_TotalBandwidth = totalbandwith; // initialized by setTotalBandwidth() and setClientBandwitdth()
 	_ClientBandwidth = clientbandwith; */
+}
+
+
+/*
+ * Destructor
+ */
+CFeSendSub::~CFeSendSub()
+{
+	// What was never flushed
+	for (TStreamPosts::iterator it = m_StreamPosts1.begin(); it != m_StreamPosts1.end(); ++it)
+		CQuicTransceiver::destroyStreamSend(it->Send);
+	for (TStreamPosts::iterator it = m_StreamPosts2.begin(); it != m_StreamPosts2.end(); ++it)
+		CQuicTransceiver::destroyStreamSend(it->Send);
 }
 
 
@@ -297,6 +356,63 @@ void	CFeSendSub::fillPrioritizedActions()
 
 
 /*
+ * Take out of the stream queues of the QUIC connections what each may send this cycle
+ */
+void	CFeSendSub::grantStreams()
+{
+	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
+
+	THostMap::iterator icm;
+	for (icm = _ClientMap->begin(); icm != _ClientMap->end(); ++icm)
+	{
+		CClientHost *client = GETCLIENTA(icm);
+		CQuicUserContext *user = client->QuicUser.get();
+		if (!user || !user->Streams)
+			continue;
+		CStreamQueues &queues = user->StreamQueues;
+
+		// A fault of the streams, found where they are opened, where data is sent on them, or by MsQuic: bytes that
+		// were taken out of the queues did not go out, and a stream with a hole is of no use
+		int fault = user->StreamFault.load(NLMISC::TMemoryOrderRelaxed);
+		if (fault != QuicStreamNoFault)
+		{
+			if (!queues.Refusing)
+			{
+				nlwarning("FESEND: client %u (uid %u, %s) is disconnected, %s: messages of its QUIC streams are lost",
+				    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), CQuicTransceiver::streamFaultName(fault));
+				queues.Refusing = true;
+				queues.clear();
+				receiveSub->disconnectClient(client);
+			}
+			continue;
+		}
+
+		// The messages of the streams are impulses, which a client handles in its connected state only: as the
+		// impulses do, they wait for it
+		if (queues.Refusing || client->ConnectionState != CClientHost::Connected || queues.pendingBytes() == 0)
+			continue;
+
+		// The classes in their order (only one class has messages so far, they get shares of the allowance once
+		// there are more)
+		uint32 allowance = streamAllowance(user);
+		for (uint streamClass = 0; streamClass < (uint)CLFECOMMON::NbStreamClasses && allowance != 0; ++streamClass)
+		{
+			uint32 size = std::min(allowance, queues.pendingBytes((CLFECOMMON::TStreamClass)streamClass));
+			if (size == 0)
+				continue;
+			CQuicStreamSend *send = CQuicTransceiver::createStreamSend(size);
+			queues.take((CLFECOMMON::TStreamClass)streamClass, send->Data, size);
+			// Counted here and not when it is sent, so that the next cycle knows of it whenever the flush runs
+			user->StreamOutstanding.fetchAdd((int)size);
+			m_FillingStreamPosts->push_back(CStreamPost(user, (uint8)streamClass, send));
+			allowance -= size;
+			s_StreamBytesGranted += size;
+		}
+	}
+}
+
+
+/*
  * Swap read buffers
  */
 void CFeSendSub::swapSendBuffers()
@@ -333,6 +449,9 @@ void CFeSendSub::swapSendBuffers()
 		_CurrentFillingBuffers = &_SendBuffers1;
 		_CurrentFlushingBuffers = &_SendBuffers2;
 	}
+
+	// and the stream data with them (the flush emptied its list)
+	std::swap(m_FillingStreamPosts, m_FlushingStreamPosts);
 }
 
 
@@ -400,6 +519,14 @@ void	CFeSendSub::flushMessages()
 			}
 		}
 	}
+
+	// Second pass, after the datagrams of all the connections: the stream data of this cycle. It is sent whether or not
+	// its connection sent a datagram, and the list is emptied, so that a flush outside of the cycle sends nothing twice.
+	for (TStreamPosts::iterator isp = m_FlushingStreamPosts->begin(); isp != m_FlushingStreamPosts->end(); ++isp)
+	{
+		isp->User->Transceiver->sendStream(isp->User.get(), isp->StreamClass, isp->Send);
+	}
+	m_FlushingStreamPosts->clear();
 
 #ifdef MEASURE_SENDING
 	TTicks after = CTime::getPerformanceTime();
