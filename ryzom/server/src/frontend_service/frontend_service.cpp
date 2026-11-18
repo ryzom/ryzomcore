@@ -2028,7 +2028,7 @@ NLMISC_COMMAND( displayStreamStats, "Display the QUIC streams of the clients of 
 	}
 	log.displayNL( "%u of %u clients have QUIC streams; %" NL_I64 "u bytes were given to the streams since the service started", nbStreamClients, (uint)clientMap.size(), getStreamBytesGranted() );
 	const CStreamScheduler &scheduler = CFrontEndService::instance()->sendSub()->streamScheduler();
-	log.displayNL( "Budget: %" NL_I64 "d bytes left after the last cycle; in that cycle %" NL_I64 "d were left for the streams beyond the datagrams, %" NL_I64 "u were given (%" NL_I64 "u as minimums) and %" NL_I64 "d stayed unused; %u clients waited for a turn, %u got some of theirs; round %u, in its cycle %u",
+	log.displayNL( "Budget: the last cycle could send %" NL_I64 "d bytes in all; its datagrams left %" NL_I64 "d of them for the streams, of which %" NL_I64 "u were given (%" NL_I64 "u as minimums) and %" NL_I64 "d stayed unused; %u clients waited for a turn, %u got some of theirs; round %u, in its cycle %u",
 		scheduler.tokens(), scheduler.lastPool(), scheduler.lastGranted(), scheduler.lastGrantedMinimum(), scheduler.lastPoolLeft(), scheduler.lastWaiting(), scheduler.lastServed(), scheduler.round(), scheduler.roundTicks() );
 	log.displayNL( "Cycles in which the datagrams alone were above TotalOutgoingBandwidth: %" NL_I64 "u; in which the minimums of the streams pushed it above: %" NL_I64 "u", scheduler.overshootDatagrams(), scheduler.overshootMinimums() );
 	return true;

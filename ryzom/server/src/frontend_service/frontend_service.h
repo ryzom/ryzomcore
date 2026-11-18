@@ -168,6 +168,9 @@ public:
 	/// Set game cycle ratio
 	void			setGameCycleRatio( sint gcratio ) { _GCRatio = gcratio; _GCCount = 0; }
 
+	/// The frontend sends to its clients once every that many game cycles
+	sint			gameCycleRatio() const { return _GCRatio; }
+
 	/// Callback called when a cookie become acceptable (a new player as logged
 	/// in and will connect here soon).
 	static void		newCookieCallback(const NLNET::CLoginCookie &cookie);

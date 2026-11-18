@@ -89,7 +89,7 @@ uint32 streamWindowRoom(CQuicUserContext *user, uint32 maxBytes)
 {
 	sint64 congestionWindow = user->StatCongestionWindow.load(NLMISC::TMemoryOrderRelaxed);
 	sint64 rttMs = ((sint64)user->StatRtt.load(NLMISC::TMemoryOrderRelaxed) + 999) / 1000;
-	sint64 tickMs = std::max((sint64)1, (sint64)(CTickEventHandler::getGameTimeStep() * 1000.0));
+	sint64 tickMs = std::max((sint64)1, (sint64)(CTickEventHandler::getGameTimeStep() * 1000.0) * std::max((sint)1, CFrontEndService::instance()->gameCycleRatio()));
 	sint64 datagramsInFlight = ((rttMs + tickMs - 1) / tickMs + 1) * s_DatagramPacketBytes;
 	sint64 outstanding = user->StreamOutstanding.load();
 	sint64 inFlight = datagramsInFlight + outstanding + outstanding / 25;
@@ -101,6 +101,27 @@ uint32 streamWindowRoom(CQuicUserContext *user, uint32 maxBytes)
 	}
 	sint64 room = congestionWindow - inFlight - s_DatagramPacketBytes;
 	return (uint32)std::min(std::max(room, (sint64)0), (sint64)maxBytes);
+}
+
+/// Say so once when the settings of the streams cannot be meant (at start, and when one is changed)
+void checkStreamConfig(const CStreamSchedulerConfig &config)
+{
+	static bool s_Checked = false;
+	static CStreamSchedulerConfig s_Last;
+	if (s_Checked && config.TotalOutgoingBandwidth == s_Last.TotalOutgoingBandwidth && config.StreamMinBytesPerTick == s_Last.StreamMinBytesPerTick
+	    && config.StreamMaxBytesPerTick == s_Last.StreamMaxBytesPerTick && config.StreamMinChunk == s_Last.StreamMinChunk)
+		return;
+	s_Checked = true;
+	s_Last = config;
+
+	if (config.StreamMaxBytesPerTick == 0)
+		nlwarning("StreamMaxBytesPerTick is 0: nothing is sent on the QUIC streams, and a client is disconnected once StreamMaxQueuedBytes of messages wait for it");
+	else if (config.StreamMinBytesPerTick > config.StreamMaxBytesPerTick)
+		nlwarning("StreamMinBytesPerTick (%u) is above StreamMaxBytesPerTick (%u): every client gets %u bytes per cycle on its QUIC streams whatever TotalOutgoingBandwidth leaves", config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick, config.StreamMaxBytesPerTick);
+	if (config.TotalOutgoingBandwidth == 0)
+		nlwarning("TotalOutgoingBandwidth is 0, which is no budget at all, not an unlimited one: the QUIC streams get StreamMinBytesPerTick per client and cycle and nothing else");
+	if (config.StreamMinChunk == 0)
+		nlwarning("StreamMinChunk is 0: when TotalOutgoingBandwidth is short, the turns of the clients on their QUIC streams can be of no bytes at all");
 }
 
 } /* anonymous namespace */
@@ -379,7 +400,7 @@ void	CFeSendSub::grantStreams()
 	CFeReceiveSub *receiveSub = CFrontEndService::instance()->receiveSub();
 
 	CStreamSchedulerConfig config;
-	config.TickSeconds = std::max(0.001, (double)CTickEventHandler::getGameTimeStep());
+	config.TickSeconds = std::max(0.001, (double)CTickEventHandler::getGameTimeStep() * std::max((sint)1, CFrontEndService::instance()->gameCycleRatio()));
 	config.TotalOutgoingBandwidth = TotalOutgoingBandwidth.get();
 	config.StreamBurstBytes = StreamBurstBytes.get();
 	config.StreamMinBytesPerTick = StreamMinBytesPerTick.get();
@@ -387,6 +408,7 @@ void	CFeSendSub::grantStreams()
 	config.StreamMinChunk = StreamMinChunk.get();
 	config.QueueDelayTarget = QueueDelayTarget.get();
 	config.DatagramPacketBytes = (uint32)s_DatagramPacketBytes;
+	checkStreamConfig(config);
 
 	// What the frontend sent since the last cycle, all of it: what MsQuic counts for the process, and the datagrams of
 	// the UDP clients
@@ -478,7 +500,7 @@ void	CFeSendSub::grantStreams()
 		CClientHost *client = _ClientIdCont[entry.Id];
 		CQuicUserContext *user = client->QuicUser.get();
 		CStreamQueues &queues = user->StreamQueues;
-		user->StreamAllowance.granted(entry.Grant);
+		user->StreamAllowance.granted(entry.Grant, entry.Pending > entry.Grant);
 		user->StreamLastGrant = entry.Grant;
 
 		// The classes in their order (only one class has messages so far, they get shares of the grant once there

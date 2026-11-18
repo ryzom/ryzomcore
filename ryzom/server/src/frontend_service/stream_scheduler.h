@@ -55,6 +55,9 @@ struct CStreamSchedulerConfig
 	uint32 QueueDelayTarget;
 	/// Bytes of a QUIC packet with a full datagram, by which an allowance grows once it has found its level
 	uint32 DatagramPacketBytes;
+	/// How many datagrams the lateness that a client reports covers (it reports the smallest of its last ones): a
+	/// report says what a change of the allowance did once it covers only datagrams that were sent after the change
+	uint32 ReportDatagrams;
 };
 
 /**
@@ -123,7 +126,8 @@ public:
 
 	/// \name What the last cycle did, for statistics
 	// @{
-	/// Bytes the frontend may still send, after the last cycle (below 0: it ran ahead of its budget)
+	/// Bytes the last cycle could send in all, datagrams and streams (what was sent before it is taken off, what it
+	/// sent itself is not yet)
 	sint64 tokens() const { return m_Tokens; }
 	/// What the budget left for the streams in the last cycle, before the minimums (can be below 0)
 	sint64 lastPool() const { return m_LastPool; }
@@ -168,11 +172,15 @@ private:
 /**
  * What the path to one client takes of stream data per cycle without holding up its datagrams.
  *
- * It starts at StreamMinChunk and grows while the client reports that its datagrams arrive on time and the client
- * uses what it is allowed: by a quarter at a time at first, then by one packet at a time. It is halved when the
+ * It starts at StreamMinChunk and grows while the client reports that its datagrams arrive on time and the allowance
+ * is what holds the client back: by a quarter at a time at first, then by one packet at a time. It is halved when the
  * datagrams arrive late, when the connection sees congestion, or when a datagram could not be sent because the one
- * before had not left. It changes at most once per report on a datagram that was sent after the change before, so
- * that each change is judged by its own effect.
+ * before had not left, provided stream data went to the client since the last change (else the streams are not the
+ * cause). It changes at most once per report that covers only datagrams sent after the change before, so that each
+ * change is judged by its own effect.
+ *
+ * Cycles in which the client had nothing more to send than it got say nothing about its path: they count neither for
+ * nor against growth, so a client that was idle grows as one that starts.
  */
 class CStreamAllowance
 {
@@ -189,8 +197,11 @@ public:
 	/// congestionEvents, sendBusyDrops: counters of the connection since it opened.
 	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops);
 
-	/// Once per cycle, after the scheduler: what the client got
-	void granted(uint32 bytes);
+	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that
+	void granted(uint32 bytes, bool wantedMore);
+
+	/// A new session starts on the connection: its datagrams may be numbered from another point
+	void newSession() { m_Started = false; }
 
 	/// Bytes per cycle
 	uint32 allowance() const { return m_Allowance; }
@@ -204,9 +215,17 @@ private:
 	uint32 m_LastChangeNumber;
 	uint32 m_CongestionEvents;
 	uint32 m_SendBusyDrops;
+	/// Bytes the client got since the last change
 	uint64 m_GrantedSinceChange;
-	uint64 m_AllowedSinceChange;
+	/// Since the last report that was looked at, in the cycles in which the client wanted more than it got: what it
+	/// got, and what its allowance let it have
+	uint64 m_GateGranted;
+	uint64 m_GateAllowed;
 	uint32 m_CyclesWithoutReport;
+	/// The allowance was just cut: congestion seen up to the next report belongs to what was sent before the cut
+	bool m_Recovering;
+	/// The last change was a cut (after a raise, a report of lateness is acted on at once)
+	bool m_LastChangeWasCut;
 };
 
 #endif // NL_STREAM_SCHEDULER_H

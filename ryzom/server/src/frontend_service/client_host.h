@@ -161,6 +161,8 @@ public:
 			if (quicUser)
 			{
 				quicUser->ClientHost = this;
+				// (the allowance of its streams follows the numbers of this host's datagrams from here)
+				quicUser->StreamAllowance.newSession();
 			}
 		}
 

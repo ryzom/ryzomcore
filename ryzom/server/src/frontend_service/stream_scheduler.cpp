@@ -28,6 +28,7 @@ CStreamSchedulerConfig::CStreamSchedulerConfig()
     , StreamMinChunk(4096)
     , QueueDelayTarget(20)
     , DatagramPacketBytes(560)
+    , ReportDatagrams(3)
 {
 }
 
@@ -122,7 +123,10 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 	const size_t nbWaiting = m_Waiting.size();
 	if (nbWaiting == 0)
 	{
+		// Nobody waits for a turn: the round is over, and with it the turns that a client's own path had cut short
 		m_RoundDone = true;
+		for (size_t i = 0; i < entries.size(); ++i)
+			entries[i].Client->TurnLeft = 0;
 	}
 	else if (pool > 0)
 	{
@@ -237,8 +241,11 @@ CStreamAllowance::CStreamAllowance()
     , m_CongestionEvents(0)
     , m_SendBusyDrops(0)
     , m_GrantedSinceChange(0)
-    , m_AllowedSinceChange(0)
+    , m_GateGranted(0)
+    , m_GateAllowed(0)
     , m_CyclesWithoutReport(0)
+    , m_Recovering(false)
+    , m_LastChangeWasCut(false)
 {
 }
 
@@ -248,8 +255,11 @@ void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 	m_StartUp = true;
 	m_Started = false;
 	m_GrantedSinceChange = 0;
-	m_AllowedSinceChange = 0;
+	m_GateGranted = 0;
+	m_GateAllowed = 0;
 	m_CyclesWithoutReport = 0;
+	m_Recovering = false;
+	m_LastChangeWasCut = false;
 }
 
 void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops)
@@ -272,22 +282,51 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 	else if (m_CyclesWithoutReport < 1000)
 		++m_CyclesWithoutReport;
 
-	// One change per report on a datagram that was sent after the change before
-	if (newReport && (sint32)(reportNumber - m_LastChangeNumber) > 0)
+	// One change per report that covers only datagrams sent after the change before. A report of lateness after the
+	// allowance was raised does not wait for that: it says that several datagrams in a row were late, the last of
+	// them sent after the raise, and every cycle that the allowance stays as it is makes the queue longer.
+	const sint32 datagramsSinceChange = (sint32)(reportNumber - m_LastChangeNumber);
+	const bool lateAfterRaise = !m_LastChangeWasCut && lateness > config.QueueDelayTarget && datagramsSinceChange >= 1;
+	if (newReport && (lateAfterRaise || datagramsSinceChange >= (sint32)std::max(config.ReportDatagrams, (uint32)1)))
 	{
 		const bool late = lateness > config.QueueDelayTarget;
-		const bool congestion = congestionEvents != m_CongestionEvents;
-		const bool dropped = sendBusyDrops != m_SendBusyDrops;
-		bool changed = false;
-		if (late || congestion || dropped)
+		bool congestion = congestionEvents != m_CongestionEvents;
+		bool dropped = sendBusyDrops != m_SendBusyDrops;
+		m_CongestionEvents = congestionEvents;
+		m_SendBusyDrops = sendBusyDrops;
+		bool recovering = false;
+		if (m_Recovering)
 		{
-			m_Allowance = m_Allowance / 2;
-			m_StartUp = false;
-			changed = true;
+			// The first report after a cut: a loss that was found since then is of what was sent before the cut,
+			// which the cut answered already, so it does not cut again; nor is this the report to grow on.
+			// Lateness still counts, it is of the datagrams after the cut.
+			recovering = congestion || dropped;
+			congestion = false;
+			dropped = false;
+			m_Recovering = false;
 		}
-		else if (mayRaise && m_AllowedSinceChange != 0 && m_GrantedSinceChange * 10 >= m_AllowedSinceChange * 9)
+
+		bool changed = false;
+		if (recovering && !late)
 		{
-			// The client used what it was allowed (else nothing says that its path takes more)
+			// nothing this time
+		}
+		else if (late || congestion || dropped)
+		{
+			// Without stream data since the last change, the streams are not what holds up the datagrams
+			if (m_GrantedSinceChange != 0)
+			{
+				m_Allowance = m_Allowance / 2;
+				m_StartUp = false;
+				m_Recovering = true;
+				m_LastChangeWasCut = true;
+				changed = true;
+			}
+		}
+		else if (mayRaise && m_GateAllowed != 0 && m_GateGranted * 10 >= m_GateAllowed * 9)
+		{
+			// The allowance is what held the client back since the last report (else nothing says that its path
+			// takes more)
 			if (m_StartUp && lateness * 2 < config.QueueDelayTarget)
 			{
 				m_Allowance = (uint32)std::min((uint64)m_Allowance * 5 / 4, (uint64)config.StreamMaxBytesPerTick);
@@ -297,25 +336,34 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 				m_StartUp = false;
 				m_Allowance = (uint32)std::min((uint64)m_Allowance + config.DatagramPacketBytes, (uint64)config.StreamMaxBytesPerTick);
 			}
+			m_LastChangeWasCut = false;
 			changed = true;
 		}
+
+		// Each report is judged by the cycles since the one before
+		m_GateGranted = 0;
+		m_GateAllowed = 0;
 		if (changed)
 		{
 			m_LastChangeNumber = sendNumber;
-			m_CongestionEvents = congestionEvents;
-			m_SendBusyDrops = sendBusyDrops;
 			m_GrantedSinceChange = 0;
-			m_AllowedSinceChange = 0;
 		}
 	}
 
-	m_Allowance = std::max(std::min(m_Allowance, config.StreamMaxBytesPerTick), std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick));
+	// Between the minimum every client gets and the most one gets; never 0, which it could not grow from (unless the
+	// most is 0, which stops the streams)
+	const uint32 floor = std::max(std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), (uint32)1);
+	m_Allowance = std::min(std::max(m_Allowance, floor), config.StreamMaxBytesPerTick);
 }
 
-void CStreamAllowance::granted(uint32 bytes)
+void CStreamAllowance::granted(uint32 bytes, bool wantedMore)
 {
 	m_GrantedSinceChange += bytes;
-	m_AllowedSinceChange += m_Allowance;
+	if (wantedMore)
+	{
+		m_GateGranted += bytes;
+		m_GateAllowed += m_Allowance;
+	}
 }
 
 /* end of file */

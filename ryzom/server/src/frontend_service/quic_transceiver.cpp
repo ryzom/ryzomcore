@@ -1354,11 +1354,11 @@ bool CQuicTransceiver::egressBytes(uint64 &bytes)
 		}
 		if (api)
 		{
-			// (asked while the list is held: a transceiver closes its library handle only once it is off the list)
+			// (asked while the list is held: a transceiver holds it while it closes its library handle)
 			uint64 counters[QUIC_PERF_COUNTER_MAX] = {};
 			uint32 size = sizeof(counters);
 			QUIC_STATUS status = api->GetParam(null, QUIC_PARAM_GLOBAL_PERF_COUNTERS, &size, counters);
-			if (QUIC_SUCCEEDED(status) || status == QUIC_STATUS_BUFFER_TOO_SMALL)
+			if (QUIC_SUCCEEDED(status))
 			{
 				// What MsQuic counts is the payload of its UDP datagrams. The headers of UDP and IP are counted as
 				// IPv6 (48 bytes), and a flush that goes out in several batches counts its datagrams more than
