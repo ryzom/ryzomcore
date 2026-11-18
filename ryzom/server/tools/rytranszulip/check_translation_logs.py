@@ -9,7 +9,11 @@ medium = {}
 all_total = 0
 for lang in ("fr", "de", "en", "es", "ru"):
 	translations = {}
-	with open(".translator_"+lang+".out") as f:
+	filename = ".translator_"+lang+".out"
+	if not os.path.isfile(filename):
+		print(f"{filename} not found, skipped")
+		continue
+	with open(filename, encoding="utf-8", errors="replace") as f:
 		translations = f.read().split("\n")
 
 
@@ -18,13 +22,16 @@ for lang in ("fr", "de", "en", "es", "ru"):
 	start = False
 	for tr in translations:
 		sline = tr.split(" ", 3)
-		if len(sline) > 2:
+		if len(sline) > 3:
 			sline = sline[3].split("|")
-			if sline[0] == "DEEPL":
+			if len(sline) > 2 and sline[0] == "DEEPL":
 				print(sline)
 				channel = sline[1].split(" ", 1)
 				channel = channel[0]
-				chars = int(sline[2])
+				try:
+					chars = int(sline[2])
+				except ValueError:
+					continue
 				if not channel in channels:
 					channels[channel] = chars
 					cont_messages[channel] = 1

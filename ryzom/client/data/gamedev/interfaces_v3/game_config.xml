@@ -694,6 +694,12 @@
                   params="game:configShowOne('landmark_colors')"
                   fontsize="10"
                   y_decal="-1" />
+            <node id="mapco"
+                  name="uiMapTitle"
+                  handler="lua"
+                  params="game:configShowOne('map_options')"
+                  fontsize="10"
+                  y_decal="-1" />
             <node id="help"
                   name="uimHelp"
                   handler="lua"
@@ -3501,6 +3507,43 @@
             x="-8"
             y="0" />
       <!-- *** -->
+      <group id="map_options"
+             active="false"
+             posparent="crop"
+             posref="TM TM"
+             x="0"
+             y="-8"
+             sizeref="w"
+             child_resize_h="true"
+             child_resize_hmargin="4"
+             w="-4"
+             max_sizeparent="crop"
+             max_sizeref="h"
+             max_h="-4">
+        <view style="sgc_title"
+              type="text"
+              id="hmap"
+              posref="TM TM"
+              x="0"
+              y="0"
+              hardtext="uiMapTitle" />
+        <instance template="tgcw_checkbox"
+                  id="map_auto_zoom"
+                  text="uiMapAutoZoom"
+                  tooltip="uittMapAutoZoom"
+                  posref="TL TL"
+                  x="0"
+                  y="-20" />
+      </group>
+      <ctrl style="skin_scroll"
+            id="sb_map_options"
+            align="T"
+            target="map_options"
+            posparent="crop"
+            posref="TL TR"
+            x="-8"
+            y="0" />
+      <!-- *** -->
       <group id="help"
              active="false"
              posparent="crop"
@@ -4699,6 +4742,11 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:ENTITY:CONTEXT_HELP"
+               realtime="true" />
+        <param ui="map_options:map_auto_zoom:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:MAP:AUTO_ZOOM"
                realtime="true" />
       </ddx>
     </group>

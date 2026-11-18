@@ -3495,6 +3495,14 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		// read entire DDS header.
 		uint32 size = 0;
 		f.serial(size); // size in Bytes of header(without "DDS")
+
+		// size comes from the file, the header must at least hold the width and height (index 3)
+		if (size < 16 || size > 1024)
+		{
+			nlwarning("Invalid DDS header size %u", size);
+			return;
+		}
+
 		uint32 * _DDSSurfaceDesc = new uint32[size];
 		_DDSSurfaceDesc[0]= size;
 
@@ -3622,6 +3630,13 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 						// size of a block
 						f.serial(blockSize);
 						NLMISC_BSWAP16(blockSize);
+
+						// the size includes its own 2 bytes, a smaller value would seek backward forever
+						if (blockSize < 2)
+						{
+							nlwarning("Invalid JPG block size %u", blockSize);
+							break;
+						}
 
 						// frame marker (which contains image width and height)
 						if (blockMarker2 >= 0xc0 && blockMarker2 <= 0xc3)

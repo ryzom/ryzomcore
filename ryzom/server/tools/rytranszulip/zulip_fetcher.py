@@ -25,7 +25,7 @@ import sys
 import json
 import re
 import requests
-from time import time
+from time import time, sleep
 
 from zulip_service import ZulipService, RyzomMessage
 from quote_bridge import QuoteNotForwarded, extract_quote
@@ -41,16 +41,36 @@ class ZulipFetcher(ZulipService):
 		self.scriptfile = __file__
 		#self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
 		self.stats = {"messages": 0}
-		self.admin_id = self.zulip.get_profile()["user_id"]
+		self.admin_id = None
+		while self.admin_id is None:
+			profile = self.zulip.get_profile()
+			if isinstance(profile, dict) and "user_id" in profile:
+				self.admin_id = profile["user_id"]
+			else:
+				print("Error fetching Zulip profile, retrying...", profile)
+				sleep(1)
 		self.last_update_guilds = 0
 		self.shard = host = self.config["shard"]["name"]
 		self.guilds_prefixes = {"atys": "0x00165", "gingo": "0x002f5"}
 		self.pending_quote_key = "Chat-Zulip-Quote-Pending-"+self.name
 
 	def ingestZulipMessage(self, msg, source_lang=None):
+		if not isinstance(msg, dict):
+			print(f"Invalid Zulip message: {msg!r}")
+			return
+		missing = [key for key in ("id", "content", "sender_full_name", "display_recipient", "type") if key not in msg]
+		if missing:
+			print(f"Zulip message {msg.get('id')} without {', '.join(missing)}, skipped")
+			return
+		if not isinstance(msg["content"], str) or not msg["content"]:
+			print(f"Zulip message {msg['id']} with empty content, skipped")
+			return
+
 		def get_original(message_id):
 			result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET",
 				request={"apply_markdown": False})
+			if not isinstance(result, dict):
+				return None
 			if result.get("result") != "success" and self.retryError(result):
 				raise requests.exceptions.ConnectionError("Cannot fetch quoted message "+str(message_id))
 			return result.get("message") if result.get("result") == "success" else None
@@ -67,6 +87,9 @@ class ZulipFetcher(ZulipService):
 		# by the "!" downstream (DeepL typographic spacing, link conversion, etc.)
 		message = re.sub(r"!(\[[^\]]*]\([^)]+\))", r"\1", message)
 		sender = msg["sender_full_name"]
+		if not sender:
+			print(f"Zulip message {msg['id']} without sender name, skipped")
+			return
 		chat = {"zulip_id": msg["id"]}
 		if quoted_zulip_id is not None:
 			chat["quote_id"] = self.getChatMessageId(quoted_zulip_id)
@@ -75,22 +98,30 @@ class ZulipFetcher(ZulipService):
 			chat["external_id"] += ":edit:"+str(msg["last_edit_timestamp"])
 		dest = msg["display_recipient"]
 		if msg["type"] == "private":
-			if len(dest) == 2:
+			if isinstance(dest, list) and len(dest) == 2:
 				channel = "player"
-				if dest[0]["id"] == msg["sender_id"]:
-					channel_id = dest[1]["full_name"].lower()
-				else:
-					channel_id = dest[0]["full_name"].lower()
+				recipient = dest[1] if dest[0].get("id") == msg.get("sender_id") else dest[0]
+				channel_id = recipient.get("full_name")
+				if not channel_id:
+					print(f"Zulip private message {msg['id']} without recipient name, skipped")
+					return
+				channel_id = channel_id.lower()
 
 				message = RyzomMessage("zulip", sender, channel, "tell:"+channel_id, "wk", "*", message, source_message_id=msg["id"], chat=chat)
 				return self.addRyzomMessage(message)
 		else:
-			stream_id = msg["stream_id"]
-			stream = self.zulip.call_endpoint(url=f"streams/{stream_id}", method="GET")
-			if stream["result"] == "error":
-				print(f"Error stream {stream_id}", stream["msg"])
+			stream_id = msg.get("stream_id")
+			if stream_id is None:
+				print(f"Zulip stream message {msg['id']} without stream_id, skipped")
 				return
-			if stream["stream"]["creator_id"] != self.admin_id: # or msg["subject"] != "general chat":
+			stream = self.zulip.call_endpoint(url=f"streams/{stream_id}", method="GET")
+			if not isinstance(stream, dict) or stream.get("result") != "success" or "stream" not in stream:
+				print(f"Error stream {stream_id}", stream.get("msg") if isinstance(stream, dict) else stream)
+				return
+			if stream["stream"].get("creator_id") != self.admin_id: # or msg["subject"] != "general chat":
+				return
+			if not isinstance(dest, str) or not dest:
+				print(f"Zulip stream message {msg['id']} without stream name, skipped")
 				return
 			channel = dest.lower()
 			if channel[0] == u"🔰":
@@ -99,6 +130,9 @@ class ZulipFetcher(ZulipService):
 					gid = gid[1][:-1]
 				else:
 					gid = ""
+				if self.shard not in self.guilds_prefixes:
+					print(f"No guild prefix for shard {self.shard}, message {msg['id']} skipped")
+					return
 				channel_id = "guild:("+self.guilds_prefixes[self.shard]+gid+":09:00:00)"
 			elif channel[0] == u"💠":
 				channel_id = "dyn:FACTION_RF"
@@ -159,9 +193,12 @@ class ZulipFetcher(ZulipService):
 		return bool(self.client.get(key))
 
 	def checkMessages(self, event):
-		msg = event["message"]
-		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
+		if event.get("local_message_id") == "ryzom-ig":
 			return False
+		msg = event.get("message")
+		if msg is None:
+			print(f"Message event {event.get('id')} without message, skipped")
+			return
 		return self.ingestZulipMessage(msg)
 
 	def checkUpdatedMessage(self, event):
@@ -174,14 +211,17 @@ class ZulipFetcher(ZulipService):
 		if event.get("user_id") == self.admin_id:
 			return False
 
-		message_id = event["message_id"]
+		message_id = event.get("message_id")
+		if message_id is None:
+			print(f"Update event {event.get('id')} without message_id, skipped")
+			return
 		if "message" in event:
 			result = {"result": "success", "message": event["message"]}
 		else:
 			result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET",
 				request={"apply_markdown": False})
-		if result["result"] == "error":
-			print(f"Error fetching edited message {message_id}", result["msg"])
+		if not isinstance(result, dict) or result.get("result") != "success" or "message" not in result:
+			print(f"Error fetching edited message {message_id}", result.get("msg") if isinstance(result, dict) else result)
 			return False
 
 		# Reuse the original message's language, so a re-translation isn't
@@ -209,13 +249,13 @@ class ZulipFetcher(ZulipService):
 			source_message_id=event["message_id"], chat={"reaction": reaction}))
 
 	def dispatchEvent(self, event):
-		event_type = event["type"]
+		event_type = event.get("type")
 		if event_type == "reaction":
 			return self.checkReaction(event)
 		if event_type == "message":
-			message_id = event["message"]["id"]
+			message_id = (event.get("message") or {}).get("id")
 		elif event_type == "update_message":
-			message_id = event["message_id"]
+			message_id = event.get("message_id")
 		else:
 			return
 		try:

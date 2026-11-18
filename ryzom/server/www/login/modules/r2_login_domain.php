@@ -43,6 +43,7 @@ class ServerDomain {
 				$error .= 'El servidor va a reiniciar. El equipo de Ryzom está revisando cuidadosamente el servidor y preparándolo para ti!'."\n";
 		} else if ($status == 'ds_restricted') {
 			if (
+				defined("ACCESS_WHEN_LOCK_USERS") && 
 				!in_array($User->uid, explode(' ', ACCESS_WHEN_LOCK_USERS)) &&
 				strstr($User->priv, ':DEV:') == false
 				&& 	strstr($User->priv, ':SGM:') == false

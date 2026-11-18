@@ -1726,6 +1726,10 @@ void CCharacter::itemInvToExchange(uint32 invSrc, uint32 invSlot, uint32 exchang
 // ****************************************************************************
 void CCharacter::itemExchangeToBag(uint32 exchangeSlot)
 {
+	// check exchange slot sent by the client
+	if (exchangeSlot >= CExchangeView::NbExchangeSlots)
+		return;
+
 	// check exchange integrity
 	bool exchangeWithBot;
 

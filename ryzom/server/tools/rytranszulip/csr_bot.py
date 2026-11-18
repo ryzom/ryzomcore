@@ -13,6 +13,7 @@
 # Base class for Ryzom <-> Deepl <-> Zulip system
 #
 
+import time
 import configparser
 import mysql.connector
 import zulip
@@ -38,29 +39,38 @@ class DB:
 		except mysql.connector.Error as err:
 			print(f"Connection error: '{err}'")
 
-	def query(self, sql, values=()):
+	def ensureConnection(self):
 		try:
+			if self.db is None:
+				raise mysql.connector.Error("No database connection")
 			self.db.ping(reconnect=True, attempts=3, delay=1)
 		except mysql.connector.Error:
 			self.connect()
-		cursor = self.db.cursor()
+		return self.db is not None
+
+	def query(self, sql, values=()):
+		"""Return all rows, or None on error"""
+		if not self.ensureConnection():
+			return None
 		try:
+			cursor = self.db.cursor()
 			cursor.execute(sql, values)
+			return cursor.fetchall()
 		except mysql.connector.Error as err:
 			print("Error", err)
-		return cursor
+		return None
 
 	def exec(self, sql, values=()):
+		if not self.ensureConnection():
+			return False
 		try:
-			self.db.ping(reconnect=True, attempts=3, delay=1)
-		except mysql.connector.Error:
-			self.connect()
-		cursor = self.db.cursor()
-		try:
+			cursor = self.db.cursor()
 			cursor.execute(sql, values)
+			self.db.commit()
 		except mysql.connector.Error as err:
 			print("Error", err)
-		self.db.commit()
+			return False
+		return True
 
 class CsrBot():
 
@@ -104,9 +114,13 @@ class CsrBot():
 			result = self.zulip.send_message(request)
 		except Exception as e:
 			print("Error sending message", e)
-		if result["result"] == "success":
-			return result["id"]
-		if result["result"] == "error":
+			return None
+		if not isinstance(result, dict):
+			return None
+		if result.get("result") == "success":
+			return result.get("id")
+		if result.get("result") == "error":
+			print("Error sending message", result.get("msg", ""))
 			return -1
 		return None
 
@@ -118,10 +132,14 @@ class CsrBot():
 		try:
 			result = self.zulip.add_reaction(request)
 		except Exception as e:
-			print("Error sending message", e)
-		if result["result"] == "success":
+			print("Error sending reaction", e)
+			return None
+		if not isinstance(result, dict):
+			return None
+		if result.get("result") == "success":
 			return message_id
-		if result["result"] == "error":
+		if result.get("result") == "error":
+			print("Error sending reaction", result.get("msg", ""))
 			return -1
 		return None
 
@@ -134,11 +152,19 @@ class CsrBot():
 		char_name = args[0]
 		new_name = args[1]
 
-		char = self.db_ring.query("SELECT last_played_date FROM characters WHERE char_name = %s LIMIT 1", (char_name,)).fetchall()
+		char = self.db_ring.query("SELECT last_played_date FROM characters WHERE char_name = %s LIMIT 1", (char_name,))
+		if char is None:
+			self.reply += ":warning: Database error, try again later"
+			return "wrong_way"
 		if char:
-			char2 = self.db_ring.query("SELECT last_played_date FROM characters WHERE char_name = %s LIMIT 1", (new_name,)).fetchall()
+			char2 = self.db_ring.query("SELECT last_played_date FROM characters WHERE char_name = %s LIMIT 1", (new_name,))
+			if char2 is None:
+				self.reply += ":warning: Database error, try again later"
+				return "wrong_way"
 			if not char2:
-				self.db_webig.exec("INSERT INTO player_login_commands (`agent`, `player`, `command`) VALUES (%s, %s, %s)", (sender, char_name, "rnm "+new_name))
+				if not self.db_webig.exec("INSERT INTO player_login_commands (`agent`, `player`, `command`) VALUES (%s, %s, %s)", (sender, char_name, "rnm "+new_name)):
+					self.reply += ":warning: Database error, rename not registered"
+					return "wrong_way"
 				self.send_message("🚨 CSR Logs", "📯 Commands", "@**"+sender+"** ask for a rename of player **"+char_name+"** to "+new_name+" at connection!")
 			else:
 				self.reply += ":warning: The name **"+new_name+"** already used, player need choose another"
@@ -151,11 +177,17 @@ class CsrBot():
 
 
 	def checkMessages(self, event):
-		message = event["message"]
+		message = event.get("message")
+		if not isinstance(message, dict):
+			return
+		missing = [key for key in ("id", "display_recipient", "subject", "content", "sender_email") if key not in message]
+		if missing:
+			print(f"Zulip message {message.get('id')} without {', '.join(missing)}, skipped")
+			return
 		channel = message["display_recipient"]
 		topic = message["subject"]
-		content = message["content"].strip()
-		sender = message["sender_email"].split("@")[0]
+		content = (message["content"] or "").strip()
+		sender = (message["sender_email"] or "").split("@")[0]
 		if len(content) >= 2 and content[0] == "/":
 			args = content[1:].split(" ")
 			command = args[0]
@@ -176,7 +208,7 @@ class CsrBot():
 					if args:
 						if hasattr(self, "call_"+args[0]):
 							func = getattr(self, "call_"+args[0])
-							self.reply += "```quote\n"+func.__doc__+"\n```"
+							self.reply += "```quote\n"+(func.__doc__ or "")+"\n```"
 							skip = True
 						else:
 							self.reply += ":warning: Command **"+args[0]+"** not found\n"

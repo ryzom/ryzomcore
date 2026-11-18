@@ -2791,6 +2791,15 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		_PhysScores._PhysicalScores[i].RegenerateTickUpdate = CTickEventHandler::getGameCycle();
 	}
 
+	applyCurrentSpeed();
+} // applyRegenAndClipCurrentValue //
+
+//---------------------------------------------------
+// CCharacter::applyCurrentSpeed
+// Compute the current walk/run speed (forced to 0 while sitting, AFK, stunned or rooted)
+//---------------------------------------------------
+void CCharacter::applyCurrentSpeed()
+{
 	// restore value without weight malus
 	_PhysScores.SpeedVariationModifier -= _LastAppliedWeightMalus;
 
@@ -2848,7 +2857,8 @@ void CCharacter::applyRegenAndClipCurrentValue()
 	// while stunned/root/mezzed etc speed is forced to 0
 	float oldCurrentSpeed;
 
-	if (_Mode().Mode != MBEHAV::SIT && canEntityMove() && !PlayerManager.isRootedByGM(_Id))
+	if (_Mode().Mode != MBEHAV::SIT && !_ContextualProperty.directAccessForStructMembers().afk() && canEntityMove()
+		&& !PlayerManager.isRootedByGM(_Id))
 	{
 		float pcSpeed = 1.0f + speedVariationModifier / 100.0f;
 		oldCurrentSpeed = _PhysScores.CurrentWalkSpeed;
@@ -2889,7 +2899,7 @@ void CCharacter::applyRegenAndClipCurrentValue()
 		//		_PropertyDatabase.setProp( "USER:SPEED_FACTOR", sint64(0) );
 		CBankAccessor_PLR::getUSER().setSPEED_FACTOR(_PropertyDatabase, 0);
 	}
-} // applyRegenAndClipCurrentValue //
+} // applyCurrentSpeed //
 
 //---------------------------------------------------
 // Process static actions (like harvest, faber...)
@@ -9488,6 +9498,114 @@ bool CCharacter::checkCreateParams(
 		}
 	}
 
+	// the race comes from the client: refuse it if no race sheet matches (setStartStatistics needs a valid one)
+	if (people_sheet == CSheetId::Unknown)
+	{
+		createCharErrorMsg.People = false;
+		returnValue = false;
+		egs_chinfo("<CCharacter::checkCreateParams> People %u is refused because no race sheet matches",
+				   (uint)createCharMsg.People);
+	}
+
+	// visual properties come from the client: refuse values that do not fit the visual property bit fields
+	// (see SPropVisualA/B/C). The ranges follow the bit widths, not the gameplay limits.
+	{
+		struct CRange
+		{
+			static bool ok(sint8 value, sint8 maxValue) { return value >= 0 && value <= maxValue; }
+		};
+
+		bool visualOk = true;
+
+		if (!CRange::ok(createCharMsg.HairType, 127))
+		{
+			createCharErrorMsg.HairType = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.HairColor, 7))
+		{
+			createCharErrorMsg.HairColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritHeight, 15))
+		{
+			createCharErrorMsg.GabaritHeight = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritTorsoWidth, 15) || !CRange::ok(createCharMsg.GabaritBreastSize, 15))
+		{
+			createCharErrorMsg.GabaritTorsoWidth = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritArmsWidth, 15))
+		{
+			createCharErrorMsg.GabaritArmsWidth = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritLegsWidth, 15))
+		{
+			createCharErrorMsg.GabaritLegsWidth = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.JacketColor, 7))
+		{
+			createCharErrorMsg.JacketColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.TrousersColor, 7))
+		{
+			createCharErrorMsg.TrousersColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.HatColor, 7))
+		{
+			createCharErrorMsg.HatColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.ArmsColor, 7))
+		{
+			createCharErrorMsg.ArmsColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.HandsColor, 7))
+		{
+			createCharErrorMsg.HandsColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.FeetColor, 7))
+		{
+			createCharErrorMsg.FeetColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.MorphTarget1, 7) || !CRange::ok(createCharMsg.MorphTarget2, 7)
+				|| !CRange::ok(createCharMsg.MorphTarget3, 7) || !CRange::ok(createCharMsg.MorphTarget4, 7)
+				|| !CRange::ok(createCharMsg.MorphTarget5, 7) || !CRange::ok(createCharMsg.MorphTarget6, 7)
+				|| !CRange::ok(createCharMsg.MorphTarget7, 7) || !CRange::ok(createCharMsg.MorphTarget8, 7)
+				|| !CRange::ok(createCharMsg.EyesColor, 7) || !CRange::ok(createCharMsg.Tattoo, 127))
+		{
+			createCharErrorMsg.FacialMorphDetail = false;
+			visualOk = false;
+		}
+
+		if (!visualOk)
+		{
+			returnValue = false;
+			egs_chinfo("<CCharacter::checkCreateParams> Visual properties refused because out of range");
+		}
+	}
+
 	// Summ role point distribution
 	uint8 sum = createCharMsg.NbPointFighter + createCharMsg.NbPointCaster + createCharMsg.NbPointCrafter
 				+ createCharMsg.NbPointHarvester;
@@ -11359,11 +11477,11 @@ void CCharacter::buyPhraseByIndex(uint8 botChatIndex, uint16 knownPhraseIndex)
 	if (_CurrentBotChatType == BOTCHATTYPE::GuildRoleMaster)
 		ok = false; // todo
 
-	// buy the phrase
-	CTradePhrase &phrase = _CurrentPhrasesTradeList[botChatIndex];
+	// buy the phrase (botChatIndex comes from the client: only index the list if it is in range)
+	CTradePhrase *pPhrase = ok ? &_CurrentPhrasesTradeList[botChatIndex] : NULL;
 
 	if (ok)
-		ok = buyRolemasterPhrase(phrase.SheetId, knownPhraseIndex, false);
+		ok = buyRolemasterPhrase(pPhrase->SheetId, knownPhraseIndex, false);
 
 	// send the result to client if he tries to learn it in the ActionBook
 	if (knownPhraseIndex != 0)
@@ -11389,7 +11507,7 @@ void CCharacter::buyPhraseByIndex(uint8 botChatIndex, uint16 knownPhraseIndex)
 	if (ok)
 	{
 		// mark phrase as deleted (NB: already no more appear in the trade list, since hidden client-side)
-		phrase.SheetId = CSheetId::Unknown;
+		pPhrase->SheetId = CSheetId::Unknown;
 		CCreature* bot = CreatureManager.getCreature(_CurrentInterlocutor);
 
 		if (bot == NULL)
@@ -11656,6 +11774,12 @@ void CCharacter::sellItem(INVENTORIES::TInventory inv, uint32 slot, uint32 quant
 		fame = 0;
 
 	CInventoryPtr child = _Inventory[inv];
+
+	if (child == NULL)
+	{
+		nlwarning("<CCharacter:-:sellItem> inventory %u is NULL", (uint)inv);
+		return;
+	}
 
 	if (child->getSlotCount() > slot && child->getItem(slot) != NULL)
 	{
@@ -14168,7 +14292,7 @@ void CCharacter::abandonMission(uint8 indexClient)
 			{
 				templ = CMissionManager::getInstance()->getTemplate(mission->getTemplateId());
 
-				if (templ->Tags.NoList) // skip invisible missions
+				if (templ == NULL || templ->Tags.NoList) // skip invalid or invisible missions
 					continue;
 			}
 
@@ -14203,14 +14327,18 @@ void CCharacter::abandonMission(uint8 indexClient)
 		CCharacter::sendDynamicSystemMessage(_EntityRowId, "ABANDON_MISSION");
 	}
 
-	vector<string> params  = getCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK");
-	if (params.size() >= 1)
+	// the template can be missing for a finished mission
+	if (templ != NULL)
 	{
-		if (mission->getFinished() && mission->getMissionSuccess())
-			validateDynamicMissionStep(params[0]+"&result=FINABD");
-		else
-			validateDynamicMissionStep(params[0]+"&result=ABD");
-		setCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK", "");
+		vector<string> params  = getCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK");
+		if (params.size() >= 1)
+		{
+			if (mission->getFinished() && mission->getMissionSuccess())
+				validateDynamicMissionStep(params[0]+"&result=FINABD");
+			else
+				validateDynamicMissionStep(params[0]+"&result=ABD");
+			setCustomMissionParams(toUpper(templ->getMissionName())+"_CALLBACK", "");
+		}
 	}
 
 	removeMission(mission->getTemplateId(), mr_abandon);
@@ -19209,6 +19337,12 @@ void CCharacter::onDisconnection(bool bCrashed)
 //----------------------------------------------------------------------------
 void CCharacter::setAfkState(bool isAfk)
 {
+	// can't go afk while mounted
+	if (isAfk && _Mode.getValue().isMountMode())
+	{
+		return;
+	}
+
 	if (_ContextualProperty.directAccessForStructMembers().afk() != isAfk)
 	{
 		_ContextualProperty.directAccessForStructMembers().afk(isAfk);
@@ -19225,6 +19359,9 @@ void CCharacter::setAfkState(bool isAfk)
 				setMode(MBEHAV::NORMAL);
 			}
 		}
+
+		// speed is forced to 0 while afk: update it now instead of waiting for the next tickUpdate
+		applyCurrentSpeed();
 	}
 }
 
@@ -24395,7 +24532,7 @@ void CCharacter::sendNpcMissionGiverIconDesc(const std::vector<uint32> &npcKeys)
 		// Check if the NPC qualifies for mission availability
 		CCreature* creature = CreatureManager.getCreature(npcEntityId);
 
-		if (creature->getMissionVector().empty() /*||(!creature->isMissionGiverIconDisplayable())*/)
+		if (creature == NULL || creature->getMissionVector().empty() /*||(!creature->isMissionGiverIconDisplayable())*/)
 		{
 			state = NPC_ICON::NotAMissionGiver;
 			bms.serial(state);

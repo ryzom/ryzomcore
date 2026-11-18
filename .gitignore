@@ -287,6 +287,8 @@ setup.ini
 *.tmp
 *.out
 
+setup.ini
+ryzom/server/www/login/server_open_status
 .claude/
 .agentcom/
 
@@ -294,3 +296,5 @@ setup.ini
 imgui.ini
 
 
+# Crash reports downloaded from Zulip
+ryzom/tools/crash_reports/crash_*.md

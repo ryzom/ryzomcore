@@ -36,6 +36,9 @@ class Translator(RyzomService):
 		self.version = "1.2"
 		self.scriptfile = __file__
 		self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
+		if len(sys.argv) < 2:
+			print("Usage: translator.py <lang>")
+			sys.exit(1)
 		self.dst_lang = sys.argv[1]
 		self.stats = {"messages": 0, "translated_messages": 0}
 		self.last_deep_error = ""
@@ -72,7 +75,8 @@ class Translator(RyzomService):
 		return final_text
 
 	def translateWithDeepl(self, m):
-		client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
+		if not m.text:
+			return (None, 0)
 		marker_prefix = "RTZMENTION"+uuid.uuid4().hex
 		dst_lang = self.dst_lang.upper()
 		marker_count = 0
@@ -95,15 +99,18 @@ class Translator(RyzomService):
 				tag_handling = "xml",
 				ignore_tags = "x",
 				)
+			if not result or not getattr(result, "text", None):
+				return (None, 0)
 			translated = result.text.replace("<x>", "").replace("</x>", "")
 			if any(translated.count(marker) != 1 for marker, token in protected_mentions):
 				self.last_deep_error = "DeepL did not preserve a protected mention"
 				return (None, 0)
 			for marker, token in protected_mentions:
 				translated = translated.replace(marker, token, 1)
-			return (translated, result.billed_characters)
+			return (translated, getattr(result, "billed_characters", 0))
 
 		try:
+			client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
 			parts = m.chat.get("parts") if m.chat else None
 			if parts:
 				if "".join(part[1] for part in parts) != m.text:
@@ -121,11 +128,10 @@ class Translator(RyzomService):
 				m.chat["translation_parts"] = translated_parts
 				return ("".join(visible_parts), billed)
 			return translatePart(m.text)
-		except deepl.DeepLException as e:
+		except Exception as e:
 			self.last_deep_error = repr(e)
 			print("DeepL Error..."+repr(e))
 			return (None, 0)
-
 
 	def checkMessages(self):
 		last_id = self.getLastChatID()
@@ -135,8 +141,9 @@ class Translator(RyzomService):
 				self.stats["messages"] += 1
 				if message.translated_lang == "WK" and message.channel != "player":
 					if message.source_lang != self.dst_lang:
-						if message.langs == "*" or self.dst_lang in message.langs.split("-"):
-							translation, billed_characters = self.translateWithDeepl(message)
+						if message.langs == "*" or self.dst_lang in (message.langs or "").split("-"):
+							translated = self.translateWithDeepl(message)
+							translation = translated[0] if translated else None
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"
