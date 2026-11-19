@@ -17,6 +17,7 @@
   <stream_class name="strings" />
   <stream_class name="chat" drop_above="8192" />
   <stream_class name="login" />
+  <stream_class name="gateway" />
   <branch name="TARGET">
     <leaf name="PARTY" />
     <leaf name="INVENTORY" />
@@ -491,7 +492,7 @@
     <leaf name="BUILD" sendto="EGS" format="" description="client has built a totem" />
     <leaf name="DUMMY" description="stupid server....." />
   </branch>
-  <branch name="MODULE_GATEWAY">
+  <branch name="MODULE_GATEWAY" stream="gateway">
     <leaf name="FEOPEN" description="The fe gateway route is open" />
     <leaf name="GATEWAY_MSG" description="the fe module gateway transport send a message to the client transport peer" />
     <leaf name="FECLOSE" description="The fe gateway route is closed" />

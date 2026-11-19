@@ -214,10 +214,13 @@ TEST(MsgXmlStreams, ClassesOfTheNodes)
 		CGenericXmlMsgHeaderManager mngr;
 		mngr.init(RYZOM_MSG_XML);
 		CHECK(!mngr.hasStreamClassError());
-		ASSERT_EQ(mngr.getStreamClasses().size(), (size_t)3);
-		CHECK(mngr.getStreamClasses()[0] == "strings" && mngr.getStreamClasses()[1] == "chat" && mngr.getStreamClasses()[2] == "login");
-		ASSERT_EQ(mngr.getStreamClassDropAbove().size(), (size_t)3);
-		CHECK(mngr.getStreamClassDropAbove()[0] == 0 && mngr.getStreamClassDropAbove()[1] == 8192 && mngr.getStreamClassDropAbove()[2] == 0);
+		ASSERT_EQ(mngr.getStreamClasses().size(), (size_t)4);
+		CHECK(mngr.getStreamClasses()[0] == "strings" && mngr.getStreamClasses()[1] == "chat" && mngr.getStreamClasses()[2] == "login" && mngr.getStreamClasses()[3] == "gateway");
+		ASSERT_EQ(mngr.getStreamClassDropAbove().size(), (size_t)4);
+		CHECK(mngr.getStreamClassDropAbove()[0] == 0 && mngr.getStreamClassDropAbove()[1] == 8192 && mngr.getStreamClassDropAbove()[2] == 0 && mngr.getStreamClassDropAbove()[3] == 0);
+		CHECK(classOf(mngr, "MODULE_GATEWAY:FEOPEN") == 3);
+		CHECK(classOf(mngr, "MODULE_GATEWAY:GATEWAY_MSG") == 3);
+		CHECK(classOf(mngr, "MODULE_GATEWAY:FECLOSE") == 3);
 		CHECK(classOf(mngr, "STRING:CHAT") == 1);
 		CHECK(classOf(mngr, "STRING:CHAT2") == 1);
 		CHECK(classOf(mngr, "STRING:TELL") == 1);
@@ -239,7 +242,6 @@ TEST(MsgXmlStreams, ClassesOfTheNodes)
 		CHECK(classOf(mngr, "STRING_MANAGER:STRING_RESP") == 0);
 		CHECK(classOf(mngr, "STRING_MANAGER:RELOAD_CACHE") == 0);
 		CHECK(classOf(mngr, "CONNECTION:USER_CHARS") == CLFECOMMON::NoStreamClass);
-		CHECK(classOf(mngr, "MODULE_GATEWAY:GATEWAY_MSG") == CLFECOMMON::NoStreamClass);
 		CHECK(classOf(mngr, "TARGET:PARTY") == CLFECOMMON::NoStreamClass); // the first node of the file
 	}
 
