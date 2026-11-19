@@ -144,6 +144,28 @@ public:
 
 	CStreamScheduler();
 
+	/// Once per cycle, before schedule(). Of the clients whose report on the lateness of their datagrams arrived since
+	/// the last cycle: how many there are, and how many of them say their datagrams are late (above QueueDelayTarget).
+	///
+	/// The datagrams of half the clients late at once is not the doing of the path of each of them: it is what they
+	/// share, the link of the frontend (or something behind it, in the data centre), which carries less than
+	/// TotalOutgoingBandwidth says. Nothing else tells the frontend, and the allowances cannot help: what one client
+	/// gives up goes to the next. So the frontend then holds itself to less than its budget: to 85% of what it sends
+	/// (not to less than its datagrams, which go whatever the budget), again after as many cycles as a report takes
+	/// to show it, and when the datagrams are on time again for a second it goes back up by 1% of the budget per
+	/// second. While it holds itself to less, the minimum of StreamMinBytesPerTick is given out of the budget like the
+	/// rest, to as many clients as it reaches, in turns: on a link that has no room, every byte of stream data is in
+	/// front of somebody's datagram.
+	void reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late);
+	/// The last reports() found the datagrams of half the clients late: a client is not held to account for it
+	bool sharedLateness() const { return m_SharedLateness; }
+	/// Bytes per second the frontend holds itself to now (TotalOutgoingBandwidth or less)
+	uint32 budget(const CStreamSchedulerConfig &config) const { return (uint32)((double)config.TotalOutgoingBandwidth * m_BudgetShare); }
+	/// The part of TotalOutgoingBandwidth that is (1: all of it)
+	double budgetShare() const { return m_BudgetShare; }
+	/// How often it took its budget down
+	uint64 budgetCuts() const { return m_BudgetCuts; }
+
 	/// One cycle. elapsedSeconds: since the cycle before. measuredEgress: bytes the frontend sent since then, all of
 	/// them. datagramBytes: bytes of the datagrams of this cycle, with what QUIC and the network add to them.
 	/// entries: every client that could get stream data, by ascending id; their Grant is set.
@@ -173,8 +195,29 @@ public:
 	// @}
 
 private:
+	enum
+	{
+		/// Fewer clients than this that report do not tell a shared link from paths of their own
+		SharedMinReporting = 8,
+		/// Cycles between two cuts of the budget: what a report takes to show the cut before
+		SharedCutCycles = 6,
+		/// Cycles without lateness before the budget goes up again
+		SharedCleanCycles = 10
+	};
+
 	sint64 m_Tokens;
 	bool m_Started;
+	/// The part of TotalOutgoingBandwidth the frontend holds itself to
+	double m_BudgetShare;
+	bool m_SharedLateness;
+	uint32 m_SharedCyclesSinceCut;
+	uint32 m_SharedCleanCycles;
+	uint64 m_BudgetCuts;
+	/// Bytes per second it sent lately, as measured, and of its datagrams in the last cycle
+	double m_EgressRate;
+	double m_DatagramRate;
+	/// Where the minimums start in a cycle that has not enough for all (an id)
+	uint32 m_MinimumCursor;
 	uint32 m_Round;
 	bool m_RoundDone;
 	uint32 m_Cursor;
@@ -234,7 +277,9 @@ public:
 	/// reportNumber: the number of the frontend's datagram the client had received last when it reported.
 	/// sendNumber: the number of the frontend's datagram of this cycle.
 	/// congestionEvents, sendBusyDrops: counters of the connection since it opened.
-	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops);
+	/// sharedLateness: the datagrams of half the clients are late (CStreamScheduler::sharedLateness), which is not
+	/// this client's doing: its allowance is not cut for what it reports or loses meanwhile, and not raised.
+	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness = false);
 
 	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that
 	void granted(uint32 bytes, bool wantedMore);

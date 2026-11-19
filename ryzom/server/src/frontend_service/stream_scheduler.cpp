@@ -50,6 +50,14 @@ uint32 streamWindowRoom(const CStreamSchedulerConfig &config, const CStreamWindo
 CStreamScheduler::CStreamScheduler()
     : m_Tokens(0)
     , m_Started(false)
+    , m_BudgetShare(1.0)
+    , m_SharedLateness(false)
+    , m_SharedCyclesSinceCut(1000)
+    , m_SharedCleanCycles(0)
+    , m_BudgetCuts(0)
+    , m_EgressRate(0)
+    , m_DatagramRate(0)
+    , m_MinimumCursor(0)
     , m_Round(1)
     , m_RoundDone(false)
     , m_Cursor(0)
@@ -65,6 +73,44 @@ CStreamScheduler::CStreamScheduler()
 {
 }
 
+void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late)
+{
+	if (m_SharedCyclesSinceCut < 1000)
+		++m_SharedCyclesSinceCut;
+	m_SharedLateness = false;
+
+	// (too few to tell: as if nothing were late, so that a budget that was taken down comes back)
+	if (reporting < (uint32)SharedMinReporting)
+		late = 0;
+
+	if (reporting != 0 && late * 2 >= reporting)
+	{
+		m_SharedLateness = true;
+		m_SharedCleanCycles = 0;
+		if (m_SharedCyclesSinceCut >= (uint32)SharedCutCycles)
+		{
+			// Under what it sends, which can be well under what it holds itself to when the streams have little to do
+			double share = m_BudgetShare;
+			double floor = 0.0;
+			if (config.TotalOutgoingBandwidth != 0)
+			{
+				share = std::min(share, m_EgressRate / (double)config.TotalOutgoingBandwidth);
+				floor = m_DatagramRate / (double)config.TotalOutgoingBandwidth;
+			}
+			m_BudgetShare = std::min(m_BudgetShare, std::max(share * 0.85, floor));
+			m_SharedCyclesSinceCut = 0;
+			++m_BudgetCuts;
+		}
+	}
+	else if (late * 10 <= reporting)
+	{
+		if (m_SharedCleanCycles < 1000)
+			++m_SharedCleanCycles;
+		if (m_SharedCleanCycles >= (uint32)SharedCleanCycles)
+			m_BudgetShare = std::min(1.0, m_BudgetShare + 0.01 * config.TickSeconds);
+	}
+}
+
 void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double elapsedSeconds, uint64 measuredEgress, uint64 datagramBytes, std::vector<CEntry> &entries)
 {
 	const uint32 minBytes = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
@@ -76,14 +122,19 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 	// of a later one it is more than the link takes in that one, where it waits in front of the datagrams that
 	// follow. Then this cycle's share is added, by the time that passed, so that a cycle that comes late has all of
 	// it.
-	const sint64 tickBudget = (sint64)((double)config.TotalOutgoingBandwidth * config.TickSeconds);
+	// (the budget is what reports() left of TotalOutgoingBandwidth)
+	const double bandwidth = (double)config.TotalOutgoingBandwidth * m_BudgetShare;
+	const sint64 tickBudget = (sint64)(bandwidth * config.TickSeconds);
 	const double elapsed = std::min(std::max(elapsedSeconds, 0.0), 2.0 * config.TickSeconds);
 	if (!m_Started)
 	{
 		m_Started = true;
 		m_Tokens = 0;
 	}
-	m_Tokens = std::min(std::max(m_Tokens - (sint64)measuredEgress, -tickBudget), (sint64)0) + (sint64)((double)config.TotalOutgoingBandwidth * elapsed);
+	m_Tokens = std::min(std::max(m_Tokens - (sint64)measuredEgress, -tickBudget), (sint64)0) + (sint64)(bandwidth * elapsed);
+	m_DatagramRate = (double)datagramBytes / std::max(config.TickSeconds, 0.001);
+	if (elapsedSeconds > 0.0)
+		m_EgressRate += ((double)measuredEgress / std::max(elapsedSeconds, 0.5 * config.TickSeconds) - m_EgressRate) * 0.25;
 
 	// What is left for the streams once this cycle's datagrams are out
 	sint64 pool = m_Tokens - (sint64)datagramBytes;
@@ -113,12 +164,28 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 
 	// 1. The minimum, for every client with stream data that its own path lets through. It is given even when the
 	// budget has nothing left: a client is never without progress because others are served.
+	// (Unless the frontend holds itself to less than its budget because its link has no room: then the minimums come
+	// out of what is left like everything else, from where they stopped the cycle before.)
 	uint64 grantedMinimum = 0;
-	for (size_t i = 0; i < entries.size(); ++i)
+	const bool linkIsShort = m_BudgetShare < 1.0;
+	size_t firstMinimum = 0;
+	if (linkIsShort)
 	{
-		CEntry &entry = entries[i];
+		while (firstMinimum < entries.size() && entries[firstMinimum].Id < m_MinimumCursor)
+			++firstMinimum;
+		if (firstMinimum == entries.size())
+			firstMinimum = 0;
+	}
+	for (size_t n = 0; n < entries.size(); ++n)
+	{
+		CEntry &entry = entries[(firstMinimum + n) % entries.size()];
 		if (entry.Pending != 0 && entry.Window != 0)
 		{
+			if (linkIsShort && pool <= 0)
+			{
+				m_MinimumCursor = entry.Id;
+				break;
+			}
 			entry.Grant = std::min(minBytes, std::min(entry.Pending, entry.Window));
 			pool -= entry.Grant;
 			grantedMinimum += entry.Grant;
@@ -344,7 +411,7 @@ void CStreamAllowance::cut(uint32 sendNumber)
 	m_IgnoreEvents = true;
 }
 
-void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops)
+void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness)
 {
 	if (!m_Started)
 	{
@@ -408,7 +475,14 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		// is what the allowance is after the cut. A client that used less than that is not held up by its stream
 		// data, whatever makes its datagrams late or its connection lose packets, and its allowance stays.
 		bool doCut = false;
-		if (late)
+		if (sharedLateness)
+		{
+			// What is late or lost now is of the link all the clients share, where the frontend answers for all of
+			// them: nothing of it is held against this client, and nothing is made of it either
+			events = false;
+			eventsIgnored = true;
+		}
+		else if (late)
 		{
 			if (m_InRecovery)
 			{

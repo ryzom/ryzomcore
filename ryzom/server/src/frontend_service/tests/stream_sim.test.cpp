@@ -445,6 +445,73 @@ TEST(StreamSim, OwnLinkOfTheFrontend)
 	}
 }
 
+// The frontend's link carries less than its budget says, which nothing tells it but the datagrams of all its clients
+// arriving late at once. It then holds itself to less, and the datagrams are as they are on a frontend without
+// streams behind the same link: that is the measure, case by case.
+TEST(StreamSim, LinkThatCarriesLessThanTheBudget)
+{
+	double mean, udpMean;
+	uint32 worst, missing, udpWorst, udpMissing;
+	{
+		SCOPED_TRACE("a fifth less, all the time");
+		CRun run("uplink-short");
+		CRun idle("uplink-idle");
+		run.Sim->latenessBetween(15.0, 60.0, mean, worst, missing);
+		EXPECT_LE(mean, idle.Sim->latenessPercentile(0.5) * 1.25 + 8.0); // (the link is slower by a quarter)
+		EXPECT_LE(worst, 100u);
+		EXPECT_EQ(missing, 0u);
+		EXPECT_LT(run.Sim->budgetMin(), 2000000u);
+		// (and the streams still get what the link has left: more than half of it)
+		EXPECT_GE(run.Sim->meanEgressPerSecond(), 1700000.0);
+	}
+	{
+		SCOPED_TRACE("down to 1.5 MB/s for 20 s");
+		CRun run("uplink-dip");
+		CRun udp("uplink-dip-udp");
+		// Once it has found the level, a few seconds in
+		run.Sim->latenessBetween(28.0, 40.0, mean, worst, missing);
+		udp.Sim->latenessBetween(28.0, 40.0, udpMean, udpWorst, udpMissing);
+		EXPECT_LE(mean, udpMean + 3.0);
+		EXPECT_LE(worst, udpWorst + 10);
+		EXPECT_EQ(missing, 0u);
+		// On the way there
+		run.Sim->latenessBetween(20.0, 28.0, mean, worst, missing);
+		EXPECT_LE(mean, 90.0);
+		EXPECT_LE(missing, 1500u); // (of 24000)
+		// And after it
+		run.Sim->latenessBetween(42.0, 60.0, mean, worst, missing);
+		udp.Sim->latenessBetween(42.0, 60.0, udpMean, udpWorst, udpMissing);
+		EXPECT_LE(mean, udpMean + 3.0);
+		EXPECT_LE(worst, udpWorst + 10);
+		EXPECT_EQ(missing, 0u);
+		EXPECT_LT(run.Sim->budgetMin(), 1500000u);
+		EXPECT_GT(run.Sim->budgetEnd(), run.Sim->budgetMin() + 300000u);
+		EXPECT_LE(run.Sim->scheduler().budgetCuts(), (uint64)12);
+	}
+	{
+		SCOPED_TRACE("less than the datagrams alone take");
+		CRun run("uplink-starved");
+		CRun udp("uplink-starved-udp");
+		run.Sim->latenessBetween(28.0, 40.0, mean, worst, missing);
+		udp.Sim->latenessBetween(28.0, 40.0, udpMean, udpWorst, udpMissing);
+		EXPECT_LE(mean, udpMean + 10.0);
+		EXPECT_LE(missing, udpMissing + udpMissing / 10 + 50);
+		run.Sim->latenessBetween(45.0, 60.0, mean, worst, missing);
+		udp.Sim->latenessBetween(45.0, 60.0, udpMean, udpWorst, udpMissing);
+		EXPECT_LE(mean, udpMean + 3.0);
+		EXPECT_LE(missing, udpMissing + 20);
+	}
+	{
+		SCOPED_TRACE("a link that carries the budget");
+		const char *names[] = { "uplink-streams", "uplink-streams-90", "uplink-wave", "wave", "wave-tight" };
+		for (size_t n = 0; n < sizeof(names) / sizeof(names[0]); ++n)
+		{
+			CRun run(names[n]);
+			EXPECT_EQ(run.Sim->scheduler().budgetCuts(), (uint64)0) << names[n];
+		}
+	}
+}
+
 } /* anonymous namespace */
 
 /* end of file */

@@ -420,6 +420,8 @@ void	CFeSendSub::grantStreams()
 	// The datagrams of this cycle, as they will go on the wire, and the clients that can get stream data, by
 	// ascending id
 	uint64 datagramBytes = 0;
+	uint32 reporting = 0, reportingLate = 0;
+	const bool sharedLateness = m_StreamScheduler.sharedLateness(); // (as of the cycle before)
 	m_StreamEntries.clear();
 	for (size_t id = 0; id < _ClientIdCont.size(); ++id)
 	{
@@ -460,8 +462,14 @@ void	CFeSendSub::grantStreams()
 			user->StreamAllowance.reset(config);
 		const bool newReport = user->QueueDelayReports != user->QueueDelayReportsSeen;
 		user->QueueDelayReportsSeen = user->QueueDelayReports;
+		if (newReport)
+		{
+			++reporting;
+			if (user->QueueDelay > config.QueueDelayTarget)
+				++reportingLate;
+		}
 		user->StreamAllowance.update(config, newReport, user->QueueDelay, user->QueueDelayAck, client->sendNumber(),
-		    (uint32)user->StatCongestionEvents.load(NLMISC::TMemoryOrderRelaxed), (uint32)user->SendBusyDrops.load(NLMISC::TMemoryOrderRelaxed));
+		    (uint32)user->StatCongestionEvents.load(NLMISC::TMemoryOrderRelaxed), (uint32)user->SendBusyDrops.load(NLMISC::TMemoryOrderRelaxed), sharedLateness);
 
 		CStreamScheduler::CEntry entry;
 		entry.Client = &user->StreamTurn;
@@ -478,7 +486,19 @@ void	CFeSendSub::grantStreams()
 		m_StreamEntries.push_back(entry);
 	}
 
-	// The budget is kept every cycle, also when no client has streams: what was sent is taken off it
+	// The budget is kept every cycle, also when no client has streams: what was sent is taken off it. It is less than
+	// TotalOutgoingBandwidth while the datagrams of half the clients are late at once.
+	m_StreamScheduler.reports(config, reporting, reportingLate);
+	const bool budgetShort = m_StreamScheduler.budgetShare() < 1.0;
+	if (budgetShort != m_StreamBudgetShort)
+	{
+		m_StreamBudgetShort = budgetShort;
+		if (budgetShort)
+			nlwarning("FESEND: the datagrams of %u of the %u clients that report it arrive late at once: the link of the frontend carries less than TotalOutgoingBandwidth (%u bytes per second). The QUIC streams are held to less until it carries that again",
+			    reportingLate, reporting, config.TotalOutgoingBandwidth);
+		else
+			nlinfo("FESEND: the QUIC streams have all of TotalOutgoingBandwidth (%u bytes per second) again", config.TotalOutgoingBandwidth);
+	}
 	m_StreamScheduler.schedule(config, elapsedSeconds, measuredEgress, datagramBytes, m_StreamEntries);
 
 	for (size_t i = 0; i < m_StreamEntries.size(); ++i)

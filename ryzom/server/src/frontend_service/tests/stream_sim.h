@@ -286,6 +286,9 @@ public:
 	uint32 clientsDone() const;
 	/// Packets its own link dropped
 	uint32 uplinkDrops() const { return m_UplinkDrops; }
+	/// The least it held itself to, in bytes per second, and what it holds itself to at the end
+	uint32 budgetMin() const { return m_BudgetMin; }
+	uint32 budgetEnd() const { return m_Scheduler.budget(m_Config.Scheduler); }
 	/// Over all the clients: the most a datagram was late, and what this share of the datagrams stayed at or under
 	uint32 maxLateness() const;
 	uint32 latenessPercentile(double share) const;
@@ -357,6 +360,7 @@ private:
 	TTime m_EgressSecondStart;
 	uint64 m_MaxEgressPerSecond;
 	double m_UplinkRate;
+	uint32 m_BudgetMin;
 	TTime m_UplinkLastDeparture;
 	uint32 m_UplinkDrops;
 

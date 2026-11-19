@@ -122,7 +122,8 @@ public:
 		m_FlushingStreamPosts(NULL),
 		m_StreamLastTime(0),
 		m_StreamLastEgress(0),
-		m_StreamStarted(false)
+		m_StreamStarted(false),
+		m_StreamBudgetShort(false)
 		{}
 
 	/// Init
@@ -270,6 +271,8 @@ private:
 	NLMISC::TTime			m_StreamLastTime;
 	uint64					m_StreamLastEgress;
 	bool					m_StreamStarted;
+	/// The frontend holds its streams to less than TotalOutgoingBandwidth (for the log)
+	bool					m_StreamBudgetShort;
 	// clang-format on
 
 	/// MD5 hash keys of msg.xml and database.xml

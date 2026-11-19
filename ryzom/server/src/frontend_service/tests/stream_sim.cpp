@@ -294,6 +294,7 @@ CSim::CSim(const CSimConfig &config)
     , m_EgressSecondStart(0)
     , m_MaxEgressPerSecond(0)
     , m_UplinkRate(config.UplinkBytesPerSecond)
+    , m_BudgetMin(0xFFFFFFFF)
     , m_UplinkLastDeparture(0)
     , m_UplinkDrops(0)
 {
@@ -978,6 +979,8 @@ void CSim::tick()
 	m_LastTick = m_Now;
 
 	uint64 datagramBytes = 0;
+	uint32 reporting = 0, reportingLate = 0;
+	const bool sharedLateness = m_Scheduler.sharedLateness(); // (as of the cycle before)
 	m_Entries.clear();
 	for (size_t i = 0; i < m_Clients.size(); ++i)
 	{
@@ -1052,7 +1055,13 @@ void CSim::tick()
 		}
 		const bool newReport = c.Reports != c.ReportsSeen;
 		c.ReportsSeen = c.Reports;
-		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.StatCongestionEvents, c.SendBusyDrops);
+		if (newReport)
+		{
+			++reporting;
+			if (c.QueueDelay > config.QueueDelayTarget)
+				++reportingLate;
+		}
+		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.StatCongestionEvents, c.SendBusyDrops, sharedLateness);
 		const uint32 allowance = c.Allowance.allowance();
 		if (c.LastAllowance != 0)
 		{
@@ -1091,7 +1100,9 @@ void CSim::tick()
 		m_Entries.push_back(entry);
 	}
 
+	m_Scheduler.reports(config, reporting, reportingLate);
 	m_Scheduler.schedule(config, elapsed, measured, datagramBytes, m_Entries);
+	m_BudgetMin = std::min(m_BudgetMin, m_Scheduler.budget(config));
 
 	// The trace of one client, before this cycle sends
 	if (m_Config.TraceClient < m_Clients.size())

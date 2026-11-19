@@ -169,13 +169,13 @@ void apply(const COptions &options, CSimConfig &config, double &seconds)
 /// because the one before waited, and the most in a row that did not arrive. Records: how many arrived, and how long
 /// they took in seconds (mean, worst); clients that got all of theirs. Allowance: lowest, highest, highest at the end,
 /// times it went down and up. Transport: times a window was cut, packets lost. Frontend: kilobytes per second it sent
-/// over the run and in its busiest second.
+/// over the run and in its busiest second, how often it took its budget down, and the least it held itself to.
 void printSummaryHeader()
 {
-	printf("%-18s %4s | %5s %5s %5s %6s %5s %5s %5s %5s %4s | %6s %6s %6s %4s | %6s %6s %6s %5s %5s | %5s %5s | %7s %7s\n",
+	printf("%-18s %4s | %5s %5s %5s %6s %5s %5s %5s %5s %4s | %6s %6s %6s %4s | %6s %6s %6s %5s %5s | %5s %5s | %7s %7s %5s %7s\n",
 	    "case", "cl", "late", "p99", "max", ">20ms", "rep", "lost", "drop", "unsnt", "gap",
 	    "rec", "mean s", "max s", "done",
-	    "al.min", "al.max", "al.end", "cuts", "rais", "cong", "pkt.l", "kB/s", "peak");
+	    "al.min", "al.max", "al.end", "cuts", "rais", "cong", "pkt.l", "kB/s", "peak", "b.cut", "b.min");
 }
 
 void printSummary(const std::string &name, const CSim &sim)
@@ -209,13 +209,14 @@ void printSummary(const std::string &name, const CSim &sim)
 		congestion += r.CongestionEvents;
 		packetsLost += r.PacketsLost;
 	}
-	printf("%-18s %4u | %5.1f %5u %5u %6u %5u %5u %5u %5u %4u | %6u %6.2f %6.2f %4u | %6u %6u %6u %5u %5u | %5u %5u | %7.1f %7.1f\n",
+	printf("%-18s %4u | %5.1f %5u %5u %6u %5u %5u %5u %5u %4u | %6u %6.2f %6.2f %4u | %6u %6u %6u %5u %5u | %5u %5u | %7.1f %7.1f %5u %7.1f\n",
 	    name.c_str(), nb,
 	    lateCount ? lateSum / (double)lateCount : 0.0, sim.latenessPercentile(0.99), sim.maxLateness(), lateAbove, reported,
 	    lost, cancelled, notSent, gap,
 	    (uint32)records, records ? recordSum / (double)records : 0.0, recordMax, sim.clientsDone(),
 	    allowanceMin, allowanceMax, allowanceEnd, cuts, raises, congestion, packetsLost,
-	    sim.meanEgressPerSecond() / 1000.0, (double)sim.maxEgressPerSecond() / 1000.0);
+	    sim.meanEgressPerSecond() / 1000.0, (double)sim.maxEgressPerSecond() / 1000.0,
+	    (uint32)sim.scheduler().budgetCuts(), (double)sim.budgetMin() / 1000.0);
 }
 
 void printTrace(const CSim &sim, const COptions &options)

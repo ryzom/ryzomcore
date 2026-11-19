@@ -908,6 +908,143 @@ TEST(StreamAllowance, NoSecondCutForWhatWasSentBeforeTheFirst)
 	EXPECT_EQ(allowance.allowance(), afterCut);
 }
 
+// A frontend with clients that always have more to send, and what its clients report
+struct CBudgetRun
+{
+	CStreamSchedulerConfig Config;
+	CStreamScheduler Scheduler;
+	std::vector<CStreamSchedulerClient> Clients;
+	std::vector<uint32> TimesServed;
+	uint64 DatagramBytes; // per cycle
+	uint64 LastSent;
+	uint64 LastGranted;
+
+	explicit CBudgetRun(uint n)
+	    : Clients(n)
+	    , TimesServed(n, 0)
+	    , DatagramBytes(0)
+	    , LastSent(0)
+	    , LastGranted(0)
+	{
+	}
+
+	void cycle(uint32 reporting, uint32 late)
+	{
+		std::vector<CStreamScheduler::CEntry> entries(Clients.size());
+		for (size_t i = 0; i < Clients.size(); ++i)
+		{
+			entries[i].Client = &Clients[i];
+			entries[i].Id = (uint32)i;
+			entries[i].Pending = 1000000;
+			entries[i].Window = 65536;
+		}
+		Scheduler.reports(Config, reporting, late);
+		Scheduler.schedule(Config, Config.TickSeconds, LastSent, DatagramBytes, entries);
+		LastGranted = 0;
+		for (size_t i = 0; i < Clients.size(); ++i)
+		{
+			LastGranted += entries[i].Grant;
+			if (entries[i].Grant != 0)
+				++TimesServed[i];
+		}
+		LastSent = DatagramBytes + LastGranted;
+	}
+};
+
+// The datagrams of half the clients late at once: the link of the frontend carries less than its budget says, and
+// the frontend holds itself to less
+TEST(StreamScheduler, SharedLatenessTakesTheBudgetDown)
+{
+	CBudgetRun run(20);
+	run.Config.TotalOutgoingBandwidth = 1000000; // 100 KB per cycle
+	run.DatagramBytes = 40000;
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(20, 0);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+	EXPECT_GT(run.LastGranted, (uint64)50000);
+
+	// Some of them late is of their own paths
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(20, 9);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+
+	// Too few that report do not tell
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(7, 7);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+
+	// Half of them: down to 85% of what it sends, and again when the cut has had time to show
+	run.cycle(20, 10);
+	EXPECT_TRUE(run.Scheduler.sharedLateness());
+	const uint32 first = run.Scheduler.budget(run.Config);
+	EXPECT_GT(first, 800000u);
+	EXPECT_LT(first, 870000u);
+	for (uint t = 0; t < 5; ++t)
+		run.cycle(20, 10);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), first);
+	run.cycle(20, 10);
+	EXPECT_LT(run.Scheduler.budget(run.Config), first);
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)2);
+
+	// For as long as it lasts: not under what the datagrams take, which go whatever the budget, and then the streams
+	// get nothing, their minimums included
+	for (uint t = 0; t < 300; ++t)
+		run.cycle(20, 20);
+	EXPECT_GE(run.Scheduler.budget(run.Config), 400000u);
+	EXPECT_LE(run.Scheduler.budget(run.Config), 401000u);
+	EXPECT_EQ(run.LastGranted, (uint64)0);
+
+	// On time again: after a second it comes back, by 1% of the budget per second
+	for (uint t = 0; t < 9; ++t)
+		run.cycle(20, 0);
+	EXPECT_LE(run.Scheduler.budget(run.Config), 401000u);
+	for (uint t = 0; t < 101; ++t)
+		run.cycle(20, 1);
+	EXPECT_GT(run.Scheduler.budget(run.Config), 495000u);
+	EXPECT_LT(run.Scheduler.budget(run.Config), 505000u);
+	// (what there is goes to the clients in turns, the minimums too: nobody is left out)
+	std::fill(run.TimesServed.begin(), run.TimesServed.end(), 0);
+	for (uint t = 0; t < 100; ++t)
+		run.cycle(20, 1);
+	for (size_t i = 0; i < run.TimesServed.size(); ++i)
+		EXPECT_GT(run.TimesServed[i], 10u) << "client " << i;
+	EXPECT_LE(run.LastSent, (uint64)run.Scheduler.budget(run.Config) / 10 + 4096);
+	for (uint t = 0; t < 5000 && run.Scheduler.budget(run.Config) < 1000000u; ++t)
+		run.cycle(20, 0);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	EXPECT_LT(run.Scheduler.budgetCuts(), (uint64)60);
+}
+
+// While the datagrams of half the clients are late, that is not held against any one of them
+TEST(StreamAllowance, SharedLatenessIsNotTheClientsDoing)
+{
+	CStreamSchedulerConfig config;
+	for (uint shared = 0; shared < 2; ++shared)
+	{
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		uint32 number = 100;
+		for (uint i = 0; i < 10; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			allowance.granted(allowance.allowance(), true);
+		}
+		const uint32 before = allowance.allowance();
+		for (uint i = 0; i < 10; ++i, ++number)
+		{
+			allowance.update(config, true, 150, number - 2, number, i, i, shared != 0);
+			allowance.granted(allowance.allowance(), true);
+		}
+		if (shared)
+			EXPECT_EQ(allowance.allowance(), before);
+		else
+			EXPECT_LT(allowance.allowance(), before);
+	}
+}
+
 } /* anonymous namespace */
 
 /* end of file */
