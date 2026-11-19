@@ -222,6 +222,8 @@ struct CClientResult
 	/// Times the transport cut its congestion window, and packets it lost
 	uint32 CongestionEvents;
 	uint32 PacketsLost;
+	/// What the frontend takes for the noise of its path at the end, in milliseconds
+	uint32 NoiseEnd;
 	/// Times the frontend took it for lagging and probed it, and whether it gave it up
 	uint32 Probes;
 	bool Gone;

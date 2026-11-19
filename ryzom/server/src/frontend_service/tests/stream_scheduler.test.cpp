@@ -1080,6 +1080,82 @@ TEST(StreamAllowance, LossAloneDoesNotCut)
 	EXPECT_GT(allowance.allowance(), before);
 }
 
+// What a client reports while it gets no stream data is the noise of its path and of its clock, and lateness is
+// counted from there
+TEST(StreamAllowance, NoiseOfThePathIsNotLateness)
+{
+	CStreamSchedulerConfig config;
+	CStreamAllowance allowance;
+	allowance.reset(config);
+	uint32 number = 100;
+	// No stream data, and reports of up to 30 ms
+	for (uint i = 0; i < 30; ++i, ++number)
+	{
+		allowance.update(config, true, i % 31, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 29u);
+
+	// Stream data at the allowance, and reports within the target of that: no cut, and the allowance grows by
+	// quarters where the reports are next to the noise
+	const uint32 start = allowance.allowance();
+	for (uint i = 0; i < 12; ++i, ++number)
+	{
+		allowance.update(config, true, 30, number - 2, number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	EXPECT_GE(allowance.allowance(), start + start / 4);
+	EXPECT_TRUE(allowance.startUp());
+	// (the first of those reports were on datagrams of before the stream data and count as noise; the others do not)
+	EXPECT_EQ(allowance.noise(), 30u);
+	uint32 before = allowance.allowance();
+	for (uint i = 0; i < 12; ++i, ++number)
+	{
+		allowance.update(config, true, 45, number - 2, number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	EXPECT_GE(allowance.allowance(), before);
+
+	// More than the target above it: a cut
+	before = allowance.allowance();
+	for (uint i = 0; i < 4; ++i, ++number)
+	{
+		allowance.update(config, true, 55, number - 2, number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	EXPECT_LT(allowance.allowance(), before);
+
+	// What counts as noise has a limit, and a new path starts without any
+	for (uint i = 0; i < 40; ++i, ++number)
+	{
+		allowance.update(config, true, 900, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 100u);
+	allowance.reset(config);
+	EXPECT_EQ(allowance.noise(), 0u);
+
+	// It is the most of the last two stretches of such reports: jitter that is gone is forgotten after them
+	for (uint i = 0; i < 100; ++i, ++number)
+	{
+		allowance.update(config, true, 35, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 35u);
+	for (uint i = 0; i < 100; ++i, ++number)
+	{
+		allowance.update(config, true, 2, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 35u);
+	for (uint i = 0; i < 150; ++i, ++number)
+	{
+		allowance.update(config, true, 2, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 2u);
+}
+
 } /* anonymous namespace */
 
 /* end of file */

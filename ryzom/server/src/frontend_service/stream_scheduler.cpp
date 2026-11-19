@@ -324,6 +324,9 @@ CStreamAllowance::CStreamAllowance()
     , m_Started(false)
     , m_LastChangeNumber(0)
     , m_LastChangeWasCut(false)
+    , m_NoiseNow(0)
+    , m_NoiseBefore(0)
+    , m_NoiseCount(0)
     , m_CongestionEvents(0)
     , m_SendBusyDrops(0)
     , m_CyclesWithoutReport(0)
@@ -342,6 +345,9 @@ CStreamAllowance::CStreamAllowance()
 
 void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 {
+	m_NoiseNow = 0;
+	m_NoiseBefore = 0;
+	m_NoiseCount = 0;
 	m_Allowance = config.StreamMinChunk;
 	m_StartUp = true;
 	m_InRecovery = false;
@@ -362,6 +368,19 @@ void CStreamAllowance::newSession()
 	m_ReportJudged = false;
 	for (uint i = 0; i < (uint)NbCycles; ++i)
 		m_Cycles[i].Valid = false;
+}
+
+bool CStreamAllowance::grantedIn(uint32 firstNumber, uint32 lastNumber) const
+{
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		firstNumber = lastNumber - ((uint32)NbCycles - 1);
+	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (cycle.Valid && cycle.Number == number && cycle.Granted != 0)
+			return true;
+	}
+	return false;
 }
 
 bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
@@ -453,7 +472,24 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		const sint32 sinceChange = (sint32)(reportNumber - m_LastChangeNumber);
 		// The report covers only datagrams that were sent after the last change
 		const bool covers = sinceChange >= (sint32)reportDatagrams;
-		const bool late = lateness > config.QueueDelayTarget;
+
+		// What the client reports when it got no stream data for a while is not of the streams: the jitter of its
+		// path, a clock that gains on the frontend's. It is the most of those reports, over the stretch of them that
+		// runs and the one before, and lateness is counted from there: the streams may add QueueDelayTarget to what
+		// the path does by itself.
+		if (!sharedLateness && !grantedIn(reportNumber - CutCycles - reportDatagrams, reportNumber - 1))
+		{
+			m_NoiseNow = std::max(m_NoiseNow, std::min(lateness, (uint32)NoiseMax));
+			if (++m_NoiseCount >= (uint32)NoiseReports)
+			{
+				m_NoiseBefore = m_NoiseNow;
+				m_NoiseNow = 0;
+				m_NoiseCount = 0;
+			}
+		}
+		const uint32 noise = std::max(m_NoiseNow, m_NoiseBefore);
+		const uint32 above = lateness > noise ? lateness - noise : 0;
+		const bool late = above > config.QueueDelayTarget;
 
 		// Congestion and datagrams not sent, since the last report that covered: counted once, with such a report
 		bool events = false;
@@ -529,7 +565,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		{
 			// The datagrams of the report were all sent behind cycles in which the client was held at this allowance,
 			// and none of them is late
-			if (m_StartUp && lateness * 5 <= config.QueueDelayTarget)
+			if (m_StartUp && above * 5 <= config.QueueDelayTarget)
 			{
 				// By a quarter while nothing shows at all. (A quarter of a small allowance is less than the step
 				// of an allowance that grows by packets.)

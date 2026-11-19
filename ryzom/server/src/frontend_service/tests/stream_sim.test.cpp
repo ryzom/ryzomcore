@@ -22,10 +22,6 @@
 // Known and wanted better, each with a test that holds it where it is:
 // - A backlog on a new connection overshoots the path once before the allowance finds its level, which makes the
 //   datagrams up to 140 ms late for half a second (BacklogFindsThePath).
-// - Jitter of more than the lateness the frontend allows reads as lateness often enough to keep the allowance down
-//   (JitterAboveTheTarget).
-// - A client whose clock runs fast reports lateness that is not there, which holds the growth by quarters back
-//   (ClockThatRunsFast).
 // - A client that stops reporting while a raise is not judged yet keeps it until the frontend probes it, and again
 //   each time it is back from the probes (StalledClientDuringStartUp).
 
@@ -214,9 +210,10 @@ TEST(StreamSim, MessagesNowAndThen)
 	}
 }
 
-// Jitter of twice the lateness the frontend allows: the smallest of three datagrams is above it one time in eight,
-// and the allowance is cut for it again and again. The messages arrive, in seconds where they take 0.6 s without the
-// jitter. (Wanted better; see the top of the file.)
+// Jitter of twice the lateness the frontend allows. The smallest of three datagrams is above the target one time in
+// eight, with or without stream data: the frontend learns that from the reports that come without stream data before
+// them, and counts lateness from there. The messages arrive as they do without the jitter, and a backlog gets what the
+// path takes, with the streams adding no more than the target to what the jitter does.
 TEST(StreamSim, JitterAboveTheTarget)
 {
 	{
@@ -225,17 +222,26 @@ TEST(StreamSim, JitterAboveTheTarget)
 		const CClientResult &r = run.client();
 		expectAllDatagrams(r);
 		expectAllRecords(r);
+		EXPECT_EQ(r.Cuts, 0u);
 		EXPECT_LE(r.maxLateness(), 45u); // (40 ms of it is the jitter)
-		EXPECT_LT(r.maxRecordSeconds(), 4.0);
-		EXPECT_GE(r.AllowanceMin, 256u);
+		EXPECT_LT(r.maxRecordSeconds(), 1.0);
+		EXPECT_GE(r.NoiseEnd, 20u);
+		EXPECT_LE(r.NoiseEnd, 40u);
 	}
 	{
 		SCOPED_TRACE("backlog");
 		CRun run("backlog-wifi");
 		const CClientResult &r = run.client();
 		expectAllDatagrams(r);
-		EXPECT_LE(r.maxLateness(), 45u);
-		EXPECT_GE(r.StreamBytesArrived, (uint64)3000000); // (of 6 MB in a minute: 15 MB is what the path takes)
+		expectAllRecords(r);
+		EXPECT_LE(r.maxLateness(), 85u);
+		EXPECT_LE(r.Cuts, 6u);
+		EXPECT_LT(r.maxRecordSeconds(), 42.0); // (32 s without the jitter)
+	}
+	{
+		// (a path without jitter has no noise, and is judged as before)
+		CRun run("backlog");
+		EXPECT_LE(run.client().NoiseEnd, 2u);
 	}
 }
 
@@ -266,18 +272,20 @@ TEST(StreamSim, LossesWithStreamData)
 }
 
 // A client whose clock gains 150 parts in a million on the frontend's: what it measures against its best datagrams of
-// the last 40 s is 6 ms too much, more than a raise by a quarter allows, and the login takes a second longer.
-// (Wanted better; see the top of the file.)
+// the last 40 s is 6 ms too much, all the time. That is noise of the same kind, and the login is as fast as with a
+// clock that keeps time.
 TEST(StreamSim, ClockThatRunsFast)
 {
 	CRun run("login-drift");
+	CRun reference("login");
 	const CClientResult &r = run.client();
 	expectAllDatagrams(r);
 	expectAllRecords(r);
 	EXPECT_EQ(r.maxLateness(), 0u);
 	EXPECT_LE(r.ReportedMax, 8u);
+	EXPECT_GE(r.NoiseEnd, 3u);
 	EXPECT_EQ(r.Cuts, 0u);
-	EXPECT_LT(r.maxRecordSeconds(), 5.5);
+	EXPECT_LE(r.maxRecordSeconds(), reference.client().maxRecordSeconds() + 0.15);
 }
 
 // The path lets nothing through for 4 s: the frontend probes the client, the transport probes the path, and both

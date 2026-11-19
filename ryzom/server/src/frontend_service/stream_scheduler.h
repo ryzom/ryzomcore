@@ -262,6 +262,10 @@ private:
  * takes the room of the stream data with it, and a loss is not always congestion. A report that comes with it is no
  * reason for a raise.
  *
+ * Lateness is counted from what the client reports when it gets no stream data: the jitter of its path and a clock
+ * that gains on the frontend's read as lateness all the time, and are not of the streams. The streams may add
+ * QueueDelayTarget to that.
+ *
  * What this cannot tell apart: datagrams that are late for another reason, while the client does use its allowance.
  * The allowance is then cut as if the streams were the cause, down to the minimum if it lasts.
  *
@@ -294,6 +298,9 @@ public:
 
 	/// Bytes per cycle
 	uint32 allowance() const { return m_Allowance; }
+	/// The lateness, in milliseconds, that this client reports when it gets no stream data: what its path and its
+	/// clock do by themselves (jitter, a clock that runs fast). Lateness is counted from there.
+	uint32 noise() const { return std::max(m_NoiseNow, m_NoiseBefore); }
 	/// Growing by quarters
 	bool startUp() const { return m_StartUp; }
 
@@ -303,7 +310,10 @@ private:
 		/// Cycles kept, which is how old a report can be and still be judged
 		NbCycles = 32,
 		/// Cycles before a datagram in which stream data can have held it up
-		CutCycles = 10
+		CutCycles = 10,
+		/// Reports without stream data before them that make a stretch of the noise, and the most that counts as noise
+		NoiseReports = 150,
+		NoiseMax = 100
 	};
 
 	struct CCycle
@@ -314,6 +324,8 @@ private:
 		bool Valid;
 	};
 
+	/// One of the cycles of these numbers gave the client stream data
+	bool grantedIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// One of the cycles of these numbers gave the client more than half of the allowance as it is now.
 	/// (The numbers come from the client: only the cycles that are kept are looked at, however far apart they are.)
 	bool usedHalfIn(uint32 firstNumber, uint32 lastNumber) const;
@@ -333,6 +345,11 @@ private:
 	/// The number of the datagram of the cycle of the last change: the datagrams after it show what the change did
 	uint32 m_LastChangeNumber;
 	bool m_LastChangeWasCut;
+	/// The most lateness reported on datagrams with no stream data in the cycles before them: in the stretch of such
+	/// reports that runs, and in the one before it
+	uint32 m_NoiseNow;
+	uint32 m_NoiseBefore;
+	uint32 m_NoiseCount;
 	/// The counters of the connection as of the last report that was judged for them
 	uint32 m_CongestionEvents;
 	uint32 m_SendBusyDrops;

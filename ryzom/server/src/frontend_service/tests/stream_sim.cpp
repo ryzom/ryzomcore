@@ -112,6 +112,7 @@ CClientResult::CClientResult()
     , Raises(0)
     , CongestionEvents(0)
     , PacketsLost(0)
+    , NoiseEnd(0)
     , Probes(0)
     , Gone(false)
 {
@@ -577,7 +578,10 @@ void CSim::run(double seconds)
 	m_Now = end;
 	m_MaxEgressPerSecond = std::max(m_MaxEgressPerSecond, m_EgressThisSecond);
 	for (size_t i = 0; i < m_Clients.size(); ++i)
+	{
 		m_Clients[i]->Result.AllowanceEnd = m_Clients[i]->Allowance.allowance();
+		m_Clients[i]->Result.NoiseEnd = m_Clients[i]->Allowance.noise();
+	}
 }
 
 void CSim::datagramFate(CClient &c, uint32 datagramNumber, sint32 fate)
