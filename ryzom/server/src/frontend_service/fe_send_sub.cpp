@@ -53,7 +53,7 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
 // clang-format off
 // The budget of the frontend and the allowances of the clients, for the QUIC streams (see stream_scheduler.h)
-CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left", 5000000, 0, true);
+CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left. Keep it a tenth or more under what the link of the frontend carries, or what waits at the link makes every datagram late", 5000000, 0, true);
 CVariable<uint32>	StreamBurstBytes("fs", "StreamBurstBytes", "Bytes the frontend may run ahead of or behind TotalOutgoingBandwidth (0: what it may send in one cycle)", 0, 0, true);
 CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth", 200, 0, true);
 CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);

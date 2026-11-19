@@ -155,15 +155,15 @@ void apply(const COptions &options, CSimConfig &config, double &seconds)
 }
 
 /// A line per case. Datagrams: how late they were in milliseconds over all the clients (mean, all but the worst
-/// hundredth, the worst), the most a client reported, how many were lost on the way, dropped by the transport, not sent
+/// hundredth, the worst), how many were more than 20 ms late, the most a client reported, how many were lost on the way, dropped by the transport, not sent
 /// because the one before waited, and the most in a row that did not arrive. Records: how many arrived, and how long
 /// they took in seconds (mean, worst); clients that got all of theirs. Allowance: lowest, highest, highest at the end,
 /// times it went down and up. Transport: times a window was cut, packets lost. Frontend: kilobytes per second it sent
 /// over the run and in its busiest second.
 void printSummaryHeader()
 {
-	printf("%-18s %4s | %5s %5s %5s %5s %5s %5s %5s %4s | %6s %6s %6s %4s | %6s %6s %6s %5s %5s | %5s %5s | %7s %7s\n",
-	    "case", "cl", "late", "p99", "max", "rep", "lost", "drop", "unsnt", "gap",
+	printf("%-18s %4s | %5s %5s %5s %5s %5s %5s %5s %5s %4s | %6s %6s %6s %4s | %6s %6s %6s %5s %5s | %5s %5s | %7s %7s\n",
+	    "case", "cl", "late", "p99", "max", ">20ms", "rep", "lost", "drop", "unsnt", "gap",
 	    "rec", "mean s", "max s", "done",
 	    "al.min", "al.max", "al.end", "cuts", "rais", "cong", "pkt.l", "kB/s", "peak");
 }
@@ -175,11 +175,13 @@ void printSummary(const std::string &name, const CSim &sim)
 	uint32 lost = 0, cancelled = 0, notSent = 0, gap = 0, reported = 0, cuts = 0, raises = 0, congestion = 0, packetsLost = 0;
 	uint32 allowanceMin = 0xFFFFFFFF, allowanceMax = 0, allowanceEnd = 0;
 	uint64 lateCount = 0, records = 0;
+	uint32 lateAbove = 0;
 	for (uint32 i = 0; i < nb; ++i)
 	{
 		const CClientResult &r = sim.client(i);
 		lateSum += r.meanLateness() * (double)r.Lateness.size();
 		lateCount += r.Lateness.size();
+		lateAbove += r.lateAbove(20);
 		lost += r.DatagramsLost;
 		cancelled += r.DatagramsCancelled;
 		notSent += r.DatagramsNotSent;
@@ -197,9 +199,9 @@ void printSummary(const std::string &name, const CSim &sim)
 		congestion += r.CongestionEvents;
 		packetsLost += r.PacketsLost;
 	}
-	printf("%-18s %4u | %5.1f %5u %5u %5u %5u %5u %5u %4u | %6u %6.2f %6.2f %4u | %6u %6u %6u %5u %5u | %5u %5u | %7.1f %7.1f\n",
+	printf("%-18s %4u | %5.1f %5u %5u %5u %5u %5u %5u %5u %4u | %6u %6.2f %6.2f %4u | %6u %6u %6u %5u %5u | %5u %5u | %7.1f %7.1f\n",
 	    name.c_str(), nb,
-	    lateCount ? lateSum / (double)lateCount : 0.0, sim.latenessPercentile(0.99), sim.maxLateness(), reported,
+	    lateCount ? lateSum / (double)lateCount : 0.0, sim.latenessPercentile(0.99), sim.maxLateness(), lateAbove, reported,
 	    lost, cancelled, notSent, gap,
 	    (uint32)records, records ? recordSum / (double)records : 0.0, recordMax, sim.clientsDone(),
 	    allowanceMin, allowanceMax, allowanceEnd, cuts, raises, congestion, packetsLost,
