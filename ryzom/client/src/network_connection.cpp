@@ -1126,6 +1126,17 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 
 
 // sends system login cookie
+CNetworkConnection::TTransport CNetworkConnection::transport() const
+{
+	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Disconnect)
+		return TransportNone;
+	if (!m_UseQuic)
+		return TransportUdp;
+	if (m_QuicConnection.state() != CQuicConnection::Connected)
+		return TransportNone;
+	return m_QuicConnection.streams() ? TransportQuicStreams : TransportQuicDatagrams;
+}
+
 void	CNetworkConnection::sendSystemLogin()
 {
 	CBitMemStream	message;
@@ -1145,6 +1156,13 @@ void	CNetworkConnection::sendSystemLogin()
 		message.serial(fakeCookie);
 	}
 	message.serial( ClientCfg.LanguageCode );
+
+	// On protocol level ryzomcore/4.2: what the player says the connection carries (0: nothing said)
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		uint32 connectionRate = ClientCfg.ConnectionRate;
+		message.serial(connectionRate);
+	}
 
 	// Try to send login, and handle the case when a firewall blocks the sending
 	uint32 length = message.length();

@@ -2040,6 +2040,7 @@ NLMISC_COMMAND( displayStreamStats, "Display the QUIC streams of the clients of 
 	log.displayNL( "Budget: the last cycle could send %" NL_I64 "d bytes in all; its datagrams left %" NL_I64 "d of them for the streams, of which %" NL_I64 "u were given (%" NL_I64 "u as minimums) and %" NL_I64 "d stayed unused; %u clients waited for a turn, %u got some of theirs; round %u, in its cycle %u",
 		scheduler.tokens(), scheduler.lastPool(), scheduler.lastGranted(), scheduler.lastGrantedMinimum(), scheduler.lastPoolLeft(), scheduler.lastWaiting(), scheduler.lastServed(), scheduler.round(), scheduler.roundTicks() );
 	log.displayNL( "Cycles in which the datagrams alone were above TotalOutgoingBandwidth: %" NL_I64 "u; in which the minimums of the streams pushed it above: %" NL_I64 "u", scheduler.overshootDatagrams(), scheduler.overshootMinimums() );
+	log.displayNL( "(A client that said what its connection carries has that after its lateness, in bytes per second.)" );
 	log.displayNL( "The frontend holds itself to %u%% of TotalOutgoingBandwidth now; it took its budget down %" NL_I64 "u times because the datagrams of half the clients were late at once", (uint)(scheduler.budgetShare() * 100.0 + 0.5), scheduler.budgetCuts() );
 	return true;
 }

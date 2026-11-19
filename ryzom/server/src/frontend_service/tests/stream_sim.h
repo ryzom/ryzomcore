@@ -105,6 +105,8 @@ struct CClientConfig
 	double SendPhaseMs;
 	/// How much faster than the frontend's its clock runs, in parts per million
 	double ClockDriftPpm;
+	/// What it says its connection carries, in bytes per second (0: nothing)
+	uint32 DeclaredRate;
 	/// Stretches of seconds, from and to, in which the client sends none (its transport still acknowledges)
 	std::vector<std::pair<double, double> > Stalls;
 };

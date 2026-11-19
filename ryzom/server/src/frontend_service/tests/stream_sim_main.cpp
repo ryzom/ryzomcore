@@ -50,6 +50,7 @@ void usage()
 	       "  --buffer MS     what the bottleneck holds\n"
 	       "  --jitter MS     --loss SHARE\n"
 	       "  --drift PPM     how much faster than the frontend's the client's clock runs\n"
+	       "  --said BITS     what the client says its connection carries, in bits per second\n"
 	       "  --datagram N    bytes of the frontend's datagram\n"
 	       "  --uplink N      bytes per second of the frontend's own link (0: none)\n"
 	       "  --budget N      TotalOutgoingBandwidth\n"
@@ -87,6 +88,7 @@ struct COptions
 	    , Stretches(0)
 	    , Drift(0)
 	    , HasDrift(false)
+	    , Said(-1)
 	{
 	}
 
@@ -107,6 +109,7 @@ struct COptions
 	double Stretches;
 	double Drift;
 	bool HasDrift;
+	double Said;
 };
 
 void applyPath(const COptions &options, CPathConfig &path)
@@ -132,6 +135,8 @@ void apply(const COptions &options, CSimConfig &config, double &seconds)
 			config.Clients[i].DatagramBytes = options.Datagram;
 		if (options.HasDrift)
 			config.Clients[i].ClockDriftPpm = options.Drift;
+		if (options.Said >= 0)
+			config.Clients[i].DeclaredRate = (uint32)(options.Said / 8.0);
 	}
 	for (size_t i = 0; i < config.PathChanges.size(); ++i)
 	{
@@ -343,6 +348,8 @@ int main(int argc, char **argv)
 				options.Chunk = (uint32)number;
 			else if (arg == "--stretches")
 				options.Stretches = number;
+			else if (arg == "--said")
+				options.Said = number;
 			else if (arg == "--drift")
 			{
 				options.Drift = number;

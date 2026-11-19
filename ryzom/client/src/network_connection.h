@@ -528,6 +528,16 @@ public:
 		return m_QuicConnection;
 	}
 
+	/// What the connection to the frontend is made of
+	enum TTransport
+	{
+		TransportNone, ///< there is no connection
+		TransportUdp, ///< UDP, not encrypted
+		TransportQuicDatagrams, ///< QUIC, datagrams only (protocol level ryzomcore/4.1)
+		TransportQuicStreams ///< QUIC, datagrams and streams (protocol level ryzomcore/4.2)
+	};
+	TTransport					transport() const;
+
 	/// Get userId
 	uint32						getUserId()
 	{

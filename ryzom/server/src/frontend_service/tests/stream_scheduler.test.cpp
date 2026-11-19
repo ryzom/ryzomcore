@@ -1201,6 +1201,65 @@ TEST(StreamAllowance, CutWhereSomethingElseHoldsTheClient)
 	}
 }
 
+// What the client says its connection carries: the allowance starts at half of it and stays under nine tenths of it
+TEST(StreamAllowance, WhatTheClientSaysItsConnectionCarries)
+{
+	CStreamSchedulerConfig config;
+	{
+		// 2 Mbit/s: 25000 bytes per cycle
+		CStreamAllowance allowance;
+		allowance.declare(250000);
+		allowance.reset(config);
+		uint32 number = 100;
+		allowance.update(config, false, 0, 0, number, 0, 0);
+		EXPECT_EQ(allowance.allowance(), 12500u);
+		for (uint i = 0; i < 100; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			allowance.granted(allowance.allowance(), true);
+			EXPECT_LE(allowance.allowance(), 22500u);
+		}
+		EXPECT_EQ(allowance.allowance(), 22500u);
+		// Lateness still cuts it
+		allowance.update(config, true, 100, number - 2, number, 0, 0);
+		EXPECT_EQ(allowance.allowance(), 11250u);
+	}
+	{
+		// A modem: 700 bytes per cycle. Not under the minimum that every client gets
+		CStreamAllowance allowance;
+		allowance.declare(7000);
+		allowance.reset(config);
+		allowance.update(config, false, 0, 0, 100, 0, 0);
+		EXPECT_EQ(allowance.allowance(), 350u);
+		allowance.declare(1000);
+		allowance.reset(config);
+		allowance.update(config, false, 0, 0, 101, 0, 0);
+		EXPECT_EQ(allowance.allowance(), config.StreamMinBytesPerTick);
+	}
+	{
+		// A fast one: it starts at four times what a connection starts with, and the most a client gets holds
+		CStreamAllowance allowance;
+		allowance.declare(100000000);
+		allowance.reset(config);
+		uint32 number = 100;
+		allowance.update(config, false, 0, 0, number, 0, 0);
+		EXPECT_EQ(allowance.allowance(), config.StreamMinChunk * 4);
+		for (uint i = 0; i < 100; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			allowance.granted(allowance.allowance(), true);
+		}
+		EXPECT_EQ(allowance.allowance(), config.StreamMaxBytesPerTick);
+	}
+	{
+		// Nothing said: as it was
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		allowance.update(config, false, 0, 0, 100, 0, 0);
+		EXPECT_EQ(allowance.allowance(), config.StreamMinChunk);
+	}
+}
+
 } /* anonymous namespace */
 
 /* end of file */

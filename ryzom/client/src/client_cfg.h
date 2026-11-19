@@ -181,6 +181,9 @@ struct CClientConfig
 	bool			QuicCertValidation;
 	/// Offer protocol level ryzomcore/4.2, with which the frontend sends some classes of messages on QUIC streams
 	bool			QuicStreams;
+	/// What the player's connection carries towards the client, in bits per second (0: not said, the frontend finds
+	/// out). Told to the frontend at login on protocol level ryzomcore/4.2, which starts and keeps its streams under it.
+	uint32			ConnectionRate;
 	/// Login.
 	bool			DisplayAccountButtons;
 	string			CreateAccountURL;

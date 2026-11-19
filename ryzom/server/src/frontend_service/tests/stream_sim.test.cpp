@@ -147,6 +147,50 @@ TEST(StreamSim, LoginOnAModem)
 	EXPECT_LE(mean, 260.0);
 }
 
+// A client that says what its connection carries. The frontend does not have to pass what the path takes to find
+// it: on a modem the first seconds are as the rest, and a backlog at 2 Mbit/s goes through with no datagram late and
+// no cut at all. A client that says more than it has is treated as one that says nothing.
+TEST(StreamSim, ClientThatSaysWhatItsConnectionCarries)
+{
+	{
+		SCOPED_TRACE("modem");
+		CRun run("login-modem-said");
+		const CClientResult &r = run.client();
+		expectAllDatagrams(r);
+		expectAllRecords(r);
+		EXPECT_EQ(r.CongestionEvents, 0u);
+		EXPECT_LE(r.maxLateness(), 150u);
+		EXPECT_LE(r.meanLateness(), 10.0);
+		EXPECT_LT(r.maxRecordSeconds(), 70.0);
+		double mean;
+		uint32 worst, missing;
+		run.Sim->latenessBetween(0.0, 20.0, mean, worst, missing);
+		EXPECT_LE(mean, 25.0);
+	}
+	{
+		SCOPED_TRACE("2 Mbit/s");
+		CRun run("backlog-said");
+		CRun reference("backlog");
+		const CClientResult &r = run.client();
+		expectAllDatagrams(r);
+		expectAllRecords(r);
+		EXPECT_LE(r.maxLateness(), 5u);
+		EXPECT_EQ(r.Cuts, 0u);
+		EXPECT_LT(r.maxRecordSeconds(), reference.client().maxRecordSeconds());
+	}
+	{
+		SCOPED_TRACE("2 Mbit/s, says 16");
+		CRun run("backlog-said-more");
+		CRun reference("backlog");
+		const CClientResult &r = run.client();
+		expectAllDatagrams(r);
+		expectAllRecords(r);
+		EXPECT_LE(r.maxLateness(), reference.client().maxLateness() + 20);
+		EXPECT_LE(r.lateAbove(20), reference.client().lateAbove(20) + 5);
+		EXPECT_LT(r.maxRecordSeconds(), reference.client().maxRecordSeconds() + 3.0);
+	}
+}
+
 // Megabytes for one client: the allowance finds what the path takes and stays near it
 TEST(StreamSim, BacklogFindsThePath)
 {

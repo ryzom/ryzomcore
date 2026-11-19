@@ -1082,6 +1082,15 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			string languageId;
 			Msgin.serial(languageId);
 
+			// A client of protocol level ryzomcore/4.2 says what its connection carries towards it, in bits per second
+			// (0: it does not say), as its player set it. The allowance of its streams starts and stays under that.
+			if (_CurrentInMsg->QuicUser != NULL && _CurrentInMsg->QuicUser->Streams)
+			{
+				uint32 connectionRate = 0;
+				Msgin.serial(connectionRate);
+				_CurrentInMsg->QuicUser->StreamAllowance.declare(connectionRate / 8);
+			}
+
 			string userName = "NotSet";
 			string userPriv;
 			string userExtended;

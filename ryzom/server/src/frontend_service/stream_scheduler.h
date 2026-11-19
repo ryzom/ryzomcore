@@ -292,6 +292,14 @@ public:
 	/// Start over, for a new connection or a new path
 	void reset(const CStreamSchedulerConfig &config);
 
+	/// What the client says its connection carries towards it, in bytes per second (0: it does not say, and the
+	/// frontend finds out). Told when the client logs in. The allowance then starts at half of that (not above
+	/// four times StreamMinChunk) and stays under nine tenths of it: it does not have to pass what the path takes to
+	/// find it. It is the client's word about its own path: lateness and the rest still cut an allowance that is
+	/// under it, and a client that says more than it has gets what it would get without saying anything.
+	void declare(uint32 bytesPerSecond);
+	uint32 declared() const { return m_Declared; }
+
 	/// Once per cycle, before the scheduler.
 	/// newReport: the client reported its lateness since the last call; lateness: the report, in milliseconds;
 	/// reportNumber: the number of the frontend's datagram the client had received last when it reported.
@@ -367,6 +375,11 @@ private:
 	CCycle m_Cycles[NbCycles];
 	uint32 m_CurrentNumber;
 
+	/// What a connection starts with, and the most the client's word allows
+	uint32 startAllowance(const CStreamSchedulerConfig &config) const;
+	uint32 ceiling(const CStreamSchedulerConfig &config) const;
+
+	uint32 m_Declared;
 	uint32 m_Allowance;
 	bool m_StartUp;
 	bool m_Started;

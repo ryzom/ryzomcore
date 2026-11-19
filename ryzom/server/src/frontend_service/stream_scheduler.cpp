@@ -319,6 +319,7 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 
 CStreamAllowance::CStreamAllowance()
     : m_CurrentNumber(0)
+    , m_Declared(0)
     , m_Allowance(0)
     , m_StartUp(true)
     , m_Started(false)
@@ -343,12 +344,33 @@ CStreamAllowance::CStreamAllowance()
 		m_Cycles[i].Valid = false;
 }
 
+void CStreamAllowance::declare(uint32 bytesPerSecond)
+{
+	m_Declared = bytesPerSecond;
+}
+
+uint32 CStreamAllowance::startAllowance(const CStreamSchedulerConfig &config) const
+{
+	if (m_Declared == 0)
+		return config.StreamMinChunk;
+	const double perCycle = (double)m_Declared * config.TickSeconds;
+	return (uint32)std::min(perCycle / 2.0, (double)config.StreamMinChunk * 4.0);
+}
+
+uint32 CStreamAllowance::ceiling(const CStreamSchedulerConfig &config) const
+{
+	if (m_Declared == 0)
+		return config.StreamMaxBytesPerTick;
+	const double perCycle = (double)m_Declared * config.TickSeconds * 0.9;
+	return (uint32)std::min(perCycle, (double)config.StreamMaxBytesPerTick);
+}
+
 void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 {
 	m_NoiseNow = 0;
 	m_NoiseBefore = 0;
 	m_NoiseCount = 0;
-	m_Allowance = config.StreamMinChunk;
+	m_Allowance = startAllowance(config);
 	m_StartUp = true;
 	m_InRecovery = false;
 	m_IdleCycles = 0;
@@ -497,7 +519,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 	{
 		m_Started = true;
 		if (m_Allowance == 0)
-			m_Allowance = config.StreamMinChunk;
+			m_Allowance = startAllowance(config);
 		m_LastChangeNumber = sendNumber;
 		m_CongestionEvents = congestionEvents;
 		m_SendBusyDrops = sendBusyDrops;
@@ -651,8 +673,9 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 
 	// Between the minimum every client gets and the most one gets, and not 0 (unless the most is 0, which stops the
 	// streams)
+	// (and under what the client says its connection carries, where that is above the minimum)
 	const uint32 floor = std::max(std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), (uint32)1);
-	m_Allowance = std::min(std::max(m_Allowance, floor), config.StreamMaxBytesPerTick);
+	m_Allowance = std::min(std::max(std::min(m_Allowance, ceiling(config)), floor), config.StreamMaxBytesPerTick);
 }
 
 void CStreamAllowance::followWindow(const CStreamSchedulerConfig &config, uint32 sendNumber)
@@ -710,7 +733,11 @@ void CStreamAllowance::granted(uint32 bytes, bool wantedMore, bool windowLimited
 	CCycle &cycle = m_Cycles[m_CurrentNumber % NbCycles];
 	cycle.Number = m_CurrentNumber;
 	cycle.Granted = bytes;
-	cycle.Held = wantedMore && (uint64)bytes * 10 >= (uint64)m_Allowance * 9;
+	// (Four fifths of it count as all of it: MsQuic keeps a congestion window under twice what was in flight, and a
+	// block of stream data is outstanding until all of it is acknowledged, so that every other cycle the window has
+	// room for a little less than the allowance. Were that not "held", the allowance could not grow, what is in
+	// flight could not either, and the window would stay where it is.)
+	cycle.Held = wantedMore && (uint64)bytes * 10 >= (uint64)m_Allowance * 8;
 	cycle.Wanted = wantedMore && bytes != 0;
 	cycle.Backlog = wantedMore || bytes != 0;
 	cycle.WindowLimited = windowLimited && wantedMore;

@@ -82,6 +82,7 @@ CClientConfig::CClientConfig()
     , SendPeriodMs(100)
     , SendPhaseMs(37)
     , ClockDriftPpm(0)
+    , DeclaredRate(0)
 {
 }
 
@@ -371,6 +372,7 @@ CSim::CSim(const CSimConfig &config)
 		c->LastReceivedNumber = 0;
 		c->AnyReceived = false;
 		c->StreamPushed = 0;
+		c->Allowance.declare(c->Config.DeclaredRate);
 		c->Allowance.reset(m_Config.Scheduler);
 		m_Clients.push_back(c);
 		post(us(c->Config.SendPhaseMs), EventClientSends, i);
@@ -1221,6 +1223,9 @@ const CScenario s_Scenarios[] = {
 	{ "login-1mbit", "the same at 1 Mbit/s" },
 	{ "login-5mbit", "the same at 5 Mbit/s" },
 	{ "login-fast", "the same at 100 Mbit/s" },
+	{ "login-modem-said", "the same with a client that says its connection carries 56 kbit/s" },
+	{ "backlog-said", "one client at 2 Mbit/s that says so, 6 MB at once" },
+	{ "backlog-said-more", "one client at 2 Mbit/s that says it has 16 Mbit/s, 6 MB at once" },
 	{ "login-far", "the same at 2 Mbit/s with 100 ms each way" },
 	{ "login-modem", "the same at 56 kbit/s with 75 ms each way, datagrams of 120 bytes, a bottleneck that holds a second" },
 	{ "backlog", "one client at 2 Mbit/s, 6 MB at once" },
@@ -1302,11 +1307,22 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 		oneClient(config, path(100, 5, 50));
 		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 180));
 	}
-	else if (name == "login-modem")
+	else if (name == "backlog-said" || name == "backlog-said-more")
+	{
+		CClientConfig client;
+		client.Path = path(2, 20, 250);
+		client.DeclaredRate = name == "backlog-said" ? 250000 : 2000000;
+		config.Clients.push_back(client);
+		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 4000));
+		seconds = 60;
+	}
+	else if (name == "login-modem" || name == "login-modem-said")
 	{
 		CClientConfig client;
 		client.Path = path(0.056, 75, 1000);
 		client.DatagramBytes = 120;
+		if (name == "login-modem-said")
+			client.DeclaredRate = 7000;
 		config.Clients.push_back(client);
 		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 180));
 		seconds = 120;
