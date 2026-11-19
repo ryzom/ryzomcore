@@ -47,7 +47,7 @@
  * - Every datagram of the frontend has, after its number (32 bits) and its system bit, the time the frontend sent it
  *   (16 bits: its clock in milliseconds, modulo 2^16) and one bit that says that the path to the client changed.
  * - Every normal (not system) datagram of the client has, after its acknowledgement bits, how late the datagrams of
- *   the frontend arrive (8 bits: milliseconds, at most 255; see CDatagramLateness in the client).
+ *   the frontend arrive (8 bits, see encodeDatagramLateness below and CDatagramLateness in the client).
  */
 
 namespace CLFECOMMON {
@@ -77,6 +77,24 @@ inline uint8 streamClassOfId(uint64 streamId)
 /// Where the send time is in a datagram of the frontend, in bits from its start, and how many bits it is
 const uint DatagramSendTimeBitPos = 33;
 const uint DatagramSendTimeBits = 16;
+
+/// How late the datagrams of the frontend arrive, as the client reports it in one byte: to the millisecond up to 127,
+/// which is where the frontend decides, and in steps of 8 ms from there to a little over a second, so that the
+/// frontend still sees a deep queue get shorter.
+const uint32 DatagramLatenessMax = 128 + 127 * 8;
+
+inline uint8 encodeDatagramLateness(uint32 milliseconds)
+{
+	if (milliseconds < 128)
+		return (uint8)milliseconds;
+	const uint32 steps = (milliseconds - 128) / 8;
+	return (uint8)(128 + (steps > 127 ? 127 : steps));
+}
+
+inline uint32 decodeDatagramLateness(uint8 value)
+{
+	return value < 128 ? (uint32)value : 128 + ((uint32)value - 128) * 8;
+}
 
 /// Most bytes the length of a record takes
 const uint StreamRecordLengthMaxBytes = 4;

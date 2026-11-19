@@ -96,9 +96,9 @@ public:
 				base = m_Smallest[i];
 		}
 
-		// How late it is, in milliseconds, held to one byte
+		// How late it is, in milliseconds (held to two seconds: more than the report can say)
 		uint16 late = (uint16)(difference - base);
-		m_Last[m_NextLast] = (uint8)(late > 255 ? 255 : late);
+		m_Last[m_NextLast] = (uint16)(late > MaxMs ? MaxMs : late);
 		m_NextLast = (m_NextLast + 1) % NbLast;
 		if (m_NbLast < (uint)NbLast)
 			++m_NbLast;
@@ -106,11 +106,11 @@ public:
 
 	/// What the client reports: the smallest lateness of the last three datagrams, in milliseconds. One datagram that
 	/// is late alone says little (wireless links do that all the time); a queue holds up several in a row.
-	uint8 report() const
+	uint32 report() const
 	{
 		if (m_NbLast == 0)
 			return 0;
-		uint8 smallest = 255;
+		uint32 smallest = MaxMs;
 		for (uint i = 0; i < m_NbLast; ++i)
 		{
 			if (m_Last[i] < smallest)
@@ -120,7 +120,7 @@ public:
 	}
 
 	/// The lateness of the last datagram, in milliseconds (0 if none arrived)
-	uint8 last() const
+	uint32 last() const
 	{
 		if (m_NbLast == 0)
 			return 0;
@@ -132,7 +132,8 @@ private:
 	{
 		NbPeriods = 4,
 		PeriodMs = 10000,
-		NbLast = 3
+		NbLast = 3,
+		MaxMs = 2000
 	};
 
 	/// Forget the differences of before: the next datagram is the measure
@@ -149,7 +150,7 @@ private:
 	bool m_Started;
 	uint32 m_PeriodStart;
 
-	uint8 m_Last[NbLast];
+	uint16 m_Last[NbLast];
 	uint m_NbLast;
 	uint m_NextLast;
 };

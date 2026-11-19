@@ -2237,7 +2237,7 @@ void	CNetworkConnection::sendNormalMessage()
 	{
 		// Protocol level ryzomcore/4.2: how late the datagrams of the frontend arrive, which is what its stream data
 		// must not make worse
-		uint8 lateness = m_DatagramLateness.report();
+		uint8 lateness = CLFECOMMON::encodeDatagramLateness(m_DatagramLateness.report());
 		message.serial (lateness);
 	}
 

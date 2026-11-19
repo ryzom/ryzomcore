@@ -1496,7 +1496,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			uint8 queueDelay = 0;
 			Msgin.serial( queueDelay );
 			CQuicUserContext *user = clienthost->QuicUser.get();
-			user->QueueDelay = queueDelay;
+			user->QueueDelay = (uint16)CLFECOMMON::decodeDatagramLateness(queueDelay);
 			user->QueueDelayAck = sendnumberack;
 			user->QueueDelayKnown = true;
 			++user->QueueDelayReports;
