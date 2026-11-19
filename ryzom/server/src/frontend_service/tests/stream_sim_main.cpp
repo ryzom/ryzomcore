@@ -39,6 +39,7 @@ void usage()
 	       "Simulates the QUIC streams of the frontend service in made-up time. Without a case: all of them.\n"
 	       "  --list          the cases\n"
 	       "  --trace         the cycles of one client instead of the summary\n"
+	       "  --stretches S   after the summary, the datagrams of every S seconds: late on average, at worst, missing\n"
 	       "  --client N      which client (the summary of a case with many clients is of all of them)\n"
 	       "  --from S --to S the seconds of the trace\n"
 	       "  --seconds S     how long to run\n"
@@ -82,6 +83,7 @@ struct COptions
 	    , Chunk(0)
 	    , NoCancel(false)
 	    , NoPacing(false)
+	    , Stretches(0)
 	{
 	}
 
@@ -99,6 +101,7 @@ struct COptions
 	uint32 Chunk;
 	bool NoCancel;
 	bool NoPacing;
+	double Stretches;
 };
 
 void applyPath(const COptions &options, CPathConfig &path)
@@ -323,6 +326,8 @@ int main(int argc, char **argv)
 				options.Min = (sint32)number;
 			else if (arg == "--chunk")
 				options.Chunk = (uint32)number;
+			else if (arg == "--stretches")
+				options.Stretches = number;
 			else
 			{
 				printf("Unknown option %s\n", arg.c_str());
@@ -357,7 +362,19 @@ int main(int argc, char **argv)
 			printTrace(sim, options);
 		}
 		else
+		{
 			printSummary(names[k], sim);
+			if (options.Stretches > 0)
+			{
+				for (double from = 0; from < seconds; from += options.Stretches)
+				{
+					double mean;
+					uint32 worst, missing;
+					sim.latenessBetween(from, from + options.Stretches, mean, worst, missing);
+					printf("    %5.0f s to %5.0f s: %6.1f ms late on average, %4u at worst, %5u missing\n", from, std::min(from + options.Stretches, seconds), mean, worst, missing);
+				}
+			}
+		}
 	}
 	return 0;
 }

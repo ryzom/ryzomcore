@@ -134,6 +134,20 @@ struct CPathChange
 	bool NewAddress;
 };
 
+/// The frontend's own link carries another amount from a time on (congestion in the data centre, say), which
+/// nothing tells the frontend
+struct CUplinkChange
+{
+	CUplinkChange(double atSeconds, double bytesPerSecond)
+	    : AtSeconds(atSeconds)
+	    , BytesPerSecond(bytesPerSecond)
+	{
+	}
+
+	double AtSeconds;
+	double BytesPerSecond;
+};
+
 struct CSimConfig
 {
 	CSimConfig();
@@ -155,6 +169,7 @@ struct CSimConfig
 	std::vector<CClientConfig> Clients;
 	std::vector<CTraffic> Traffic;
 	std::vector<CPathChange> PathChanges;
+	std::vector<CUplinkChange> UplinkChanges;
 };
 
 /// What happened to one client
@@ -173,6 +188,10 @@ struct CClientResult
 	uint32 LongestGap;
 	/// How late each datagram that arrived was, in milliseconds: its time on the way above what the empty path takes
 	std::vector<uint32> Lateness;
+	/// When the frontend wrote each of those, in seconds
+	std::vector<float> LatenessAt;
+	/// When it wrote each datagram that did not arrive (lost, dropped or not sent)
+	std::vector<float> MissingAt;
 	/// The most the client reported to the frontend, in milliseconds (it measures against its best datagrams of the
 	/// last tens of seconds, so a lateness that never changes is not in it)
 	uint32 ReportedMax;
@@ -251,6 +270,9 @@ public:
 	/// Over all the clients: the most a datagram was late, and what this share of the datagrams stayed at or under
 	uint32 maxLateness() const;
 	uint32 latenessPercentile(double share) const;
+	/// The same of the datagrams the frontend wrote in a stretch of seconds, with how many of them did not arrive
+	/// (the lateness of each is counted from what the path takes when all of it is empty at the rates of the start)
+	void latenessBetween(double fromSeconds, double toSeconds, double &mean, uint32 &worst, uint32 &missing) const;
 	const CStreamScheduler &scheduler() const { return m_Scheduler; }
 	// @}
 
@@ -279,7 +301,8 @@ private:
 		EventReportArrives,
 		EventTraffic,
 		EventPathChange,
-		EventPacing
+		EventPacing,
+		EventUplinkChange
 	};
 
 	void post(TTime time, uint32 type, uint32 client, uint64 a = 0, uint64 b = 0);
@@ -314,6 +337,7 @@ private:
 	TTime m_EgressSecondStart;
 	uint64 m_MaxEgressPerSecond;
 	uint32 m_TickCount;
+	double m_UplinkRate;
 	TTime m_UplinkLastDeparture;
 	uint32 m_UplinkDrops;
 

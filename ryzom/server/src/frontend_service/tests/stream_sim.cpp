@@ -266,6 +266,7 @@ CSim::CSim(const CSimConfig &config)
     , m_EgressSecondStart(0)
     , m_MaxEgressPerSecond(0)
     , m_TickCount(0)
+    , m_UplinkRate(config.UplinkBytesPerSecond)
     , m_UplinkLastDeparture(0)
     , m_UplinkDrops(0)
     , m_TraceFirstNumber(1)
@@ -343,6 +344,8 @@ CSim::CSim(const CSimConfig &config)
 		if (change.Client < m_Clients.size())
 			post((TTime)(change.AtSeconds * 1e6), EventPathChange, change.Client, i);
 	}
+	for (size_t i = 0; i < m_Config.UplinkChanges.size(); ++i)
+		post((TTime)(m_Config.UplinkChanges[i].AtSeconds * 1e6), EventUplinkChange, 0, i);
 	post(0, EventTick, 0);
 }
 
@@ -393,6 +396,33 @@ uint32 CSim::latenessPercentile(double share) const
 	return all[std::min(index, all.size() - 1)];
 }
 
+void CSim::latenessBetween(double fromSeconds, double toSeconds, double &mean, uint32 &worst, uint32 &missing) const
+{
+	double sum = 0;
+	uint64 count = 0;
+	worst = 0;
+	missing = 0;
+	for (size_t i = 0; i < m_Clients.size(); ++i)
+	{
+		const CClientResult &r = m_Clients[i]->Result;
+		for (size_t k = 0; k < r.Lateness.size(); ++k)
+		{
+			if (r.LatenessAt[k] >= fromSeconds && r.LatenessAt[k] < toSeconds)
+			{
+				sum += (double)r.Lateness[k];
+				++count;
+				worst = std::max(worst, r.Lateness[k]);
+			}
+		}
+		for (size_t k = 0; k < r.MissingAt.size(); ++k)
+		{
+			if (r.MissingAt[k] >= fromSeconds && r.MissingAt[k] < toSeconds)
+				++missing;
+		}
+	}
+	mean = count ? sum / (double)count : 0.0;
+}
+
 void CSim::post(TTime time, uint32 type, uint32 client, uint64 a, uint64 b)
 {
 	CEvent event;
@@ -440,6 +470,10 @@ void CSim::run(double seconds)
 		case EventPacing:
 			c.PacingTimer = false;
 			flush(c);
+			break;
+		case EventUplinkChange:
+			// (what waits at the link leaves it as it was worked out when it was sent)
+			m_UplinkRate = m_Config.UplinkChanges[(size_t)event.A].BytesPerSecond;
 			break;
 		case EventReportArrives:
 			// (the frontend reads it at its next cycle)
@@ -544,7 +578,7 @@ uint32 CSim::sendPacket(CClient &c, bool withDatagram, uint64 streamOffset, uint
 	// The frontend's own link: the packet leaves it behind all that was sent before it, to whichever client
 	TTime enter = m_Now;
 	bool dropped = false;
-	if (m_Config.UplinkBytesPerSecond > 0)
+	if (m_UplinkRate > 0)
 	{
 		const TTime start = std::max(m_Now, m_UplinkLastDeparture);
 		if (start - m_Now > us(m_Config.UplinkBufferMs))
@@ -554,7 +588,7 @@ uint32 CSim::sendPacket(CClient &c, bool withDatagram, uint64 streamOffset, uint
 		}
 		else
 		{
-			enter = start + (TTime)((double)wire / m_Config.UplinkBytesPerSecond * 1e6);
+			enter = start + (TTime)((double)wire / m_UplinkRate * 1e6);
 			m_UplinkLastDeparture = enter;
 		}
 	}
@@ -668,6 +702,7 @@ void CSim::flush(CClient &c)
 		++c.SendBusyDrops;
 		++c.DatagramCancels;
 		++c.Result.DatagramsCancelled;
+		c.Result.MissingAt.push_back((float)((double)m_Now / 1e6));
 		datagramFate(c, c.PendingNumber, CTickTrace::DatagramCancelled);
 	}
 }
@@ -698,9 +733,22 @@ void CSim::packetArrives(CClient &c, uint64 number)
 		const TTime late = std::max((TTime)0, m_Now - p.DatagramPostTime - unloaded);
 		const uint32 lateMs = (uint32)(late / 1000);
 		c.Result.Lateness.push_back(lateMs);
+		c.Result.LatenessAt.push_back((float)((double)p.DatagramPostTime / 1e6));
 		++c.Result.DatagramsArrived;
 		if (p.Lost)
-			--c.Result.DatagramsLost; // (the transport took it for lost too early)
+		{
+			// (the transport took it for lost too early)
+			--c.Result.DatagramsLost;
+			const float at = (float)((double)p.DatagramPostTime / 1e6);
+			for (size_t k = c.Result.MissingAt.size(); k-- != 0;)
+			{
+				if (c.Result.MissingAt[k] == at)
+				{
+					c.Result.MissingAt.erase(c.Result.MissingAt.begin() + k);
+					break;
+				}
+			}
+		}
 		datagramFate(c, p.DatagramNumber, (sint32)lateMs);
 	}
 
@@ -729,6 +777,7 @@ void CSim::packetLost(CClient &c, uint64 number)
 	if (p.HasDatagram)
 	{
 		++c.Result.DatagramsLost;
+		c.Result.MissingAt.push_back((float)((double)p.DatagramPostTime / 1e6));
 		datagramFate(c, p.DatagramNumber, CTickTrace::DatagramLost);
 	}
 	if (p.StreamLength != 0 && p.StreamOffset + p.StreamLength > c.StreamAcked)
@@ -846,6 +895,8 @@ void CSim::tick()
 				}
 			}
 			c.LastProgress = m_Now;
+			// (what waited for the window goes now)
+			flush(c);
 		}
 
 		// The datagram of this cycle
@@ -927,6 +978,7 @@ void CSim::tick()
 			// The one before has not left: this one is not sent
 			++c.SendBusyDrops;
 			++c.Result.DatagramsNotSent;
+			c.Result.MissingAt.push_back((float)((double)m_Now / 1e6));
 			datagramFate(c, c.SendNumber, CTickTrace::DatagramNotSent);
 			continue;
 		}
@@ -1012,6 +1064,11 @@ const CScenario s_Scenarios[] = {
 	{ "uplink-udp", "300 clients, no stream data, behind a link that their datagrams alone fill" },
 	{ "uplink-streams", "300 clients with 1 MB each, a frontend that may send 2.5 MB/s behind a link of 2.5 MB/s" },
 	{ "uplink-streams-90", "the same with a frontend that may send 90% of what its link carries" },
+	{ "uplink-short", "the same with a link that carries 2 MB/s, a fifth less than the frontend may send" },
+	{ "uplink-dip", "the same with a link of 2.5 MB/s that carries 1.5 MB/s from 20 s to 40 s" },
+	{ "uplink-dip-udp", "the dip without stream data: what it does to the datagrams alone, which take 1.13 MB/s" },
+	{ "uplink-starved", "a link that carries 1 MB/s from 20 s to 40 s, less than the datagrams alone, with stream data" },
+	{ "uplink-starved-udp", "the same without stream data" },
 	{ "uplink-wave", "300 clients behind that link without stream data until 10 s, then 1 MB each at once" },
 };
 
@@ -1153,7 +1210,9 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 		// datagrams fill its link, where the last client gets its datagram a cycle late.
 		const uint32 nbClients = 300;
 		const bool wave = name == "uplink-wave";
-		const bool streams = name == "uplink-streams" || name == "uplink-streams-90" || wave;
+		const bool dip = name == "uplink-dip" || name == "uplink-dip-udp";
+		const bool starved = name == "uplink-starved" || name == "uplink-starved-udp";
+		const bool streams = name == "uplink-streams" || name == "uplink-streams-90" || wave || name == "uplink-short" || name == "uplink-dip" || name == "uplink-starved";
 		for (uint32 i = 0; i < nbClients; ++i)
 		{
 			CClientConfig client;
@@ -1170,6 +1229,13 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 			config.UplinkBytesPerSecond = (double)(nbClients * (config.Clients[0].DatagramBytes + s_PacketOverhead + s_WireOverhead)) / config.Scheduler.TickSeconds;
 		else if (name == "uplink-streams-90")
 			config.Scheduler.TotalOutgoingBandwidth = 2250000;
+		else if (name == "uplink-short")
+			config.UplinkBytesPerSecond = 2000000;
+		if (dip || starved)
+		{
+			config.UplinkChanges.push_back(CUplinkChange(20.0, dip ? 1500000 : 1000000));
+			config.UplinkChanges.push_back(CUplinkChange(40.0, 2500000));
+		}
 		seconds = 60;
 	}
 	return true;
