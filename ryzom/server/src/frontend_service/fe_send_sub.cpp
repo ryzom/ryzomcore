@@ -93,7 +93,8 @@ CStreamWindowState streamWindowState(CQuicUserContext *user)
 	return state;
 }
 
-/// Say so once when the settings of the streams cannot be meant (at start, and when one is changed)
+/// At start, and when one of the settings is changed: say what outgoing bandwidth the clients of the frontend need
+/// for sure, and say so when the settings of the streams cannot be meant
 void checkStreamConfig(const CStreamSchedulerConfig &config, uint32 maxClients, uint32 streamDatagramBytes, uint32 otherDatagramBytes)
 {
 	static bool s_Checked = false;
@@ -101,6 +102,7 @@ void checkStreamConfig(const CStreamSchedulerConfig &config, uint32 maxClients, 
 	static uint32 s_LastMaxClients = 0, s_LastStreamDatagramBytes = 0, s_LastOtherDatagramBytes = 0;
 	if (s_Checked && config.TotalOutgoingBandwidth == s_Last.TotalOutgoingBandwidth && config.StreamMinBytesPerTick == s_Last.StreamMinBytesPerTick
 	    && config.StreamMaxBytesPerTick == s_Last.StreamMaxBytesPerTick && config.StreamMinChunk == s_Last.StreamMinChunk
+	    && config.TickSeconds == s_Last.TickSeconds
 	    && maxClients == s_LastMaxClients && streamDatagramBytes == s_LastStreamDatagramBytes && otherDatagramBytes == s_LastOtherDatagramBytes)
 		return;
 	s_Checked = true;
@@ -119,12 +121,22 @@ void checkStreamConfig(const CStreamSchedulerConfig &config, uint32 maxClients, 
 	const uint64 minimums = (uint64)((double)maxClients * (double)std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick) * perSecond + 0.5);
 	const uint64 guaranteed = datagrams + minimums;
 	const uint64 withoutStreams = (uint64)((double)maxClients * (double)(otherDatagramBytes + s_QuicDatagramOverhead) * perSecond + 0.5);
-	nlinfo("FESEND: ClientLimit (%u) clients need %" NL_I64 "u bytes per second (%.1f Mbit/s) of outgoing bandwidth that the link carries for sure: %" NL_I64 "u for their datagrams (%u bytes a cycle each with what the network adds) and %" NL_I64 "u for the minimums of their QUIC streams (StreamMinBytesPerTick, %u, when all of them have stream data waiting). With all of them on UDP or on QUIC without streams it is %" NL_I64 "u (%.1f Mbit/s; %u bytes a cycle each). That goes whatever the budget; TotalOutgoingBandwidth, %u, is the most the frontend sends when the link has more",
-	    maxClients, guaranteed, (double)guaranteed * 8.0 / 1000000.0, datagrams, (uint32)(streamDatagramBytes + s_QuicDatagramOverhead), minimums,
-	    std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), withoutStreams, (double)withoutStreams * 8.0 / 1000000.0,
-	    (uint32)(otherDatagramBytes + s_QuicDatagramOverhead), config.TotalOutgoingBandwidth);
+	// Those are the datagrams at their nominal size, which is what a client gets on average. One datagram may be half
+	// as large again while the average of its client is under the nominal size (CClientHost::getCurrentThrottle),
+	// and that can be many clients for minutes: a crowd in one place, after a quiet hour.
+	const uint64 datagramsAtMost = (uint64)((double)maxClients * (double)(streamDatagramBytes * 3 / 2 + s_QuicDatagramOverhead) * perSecond + 0.5);
+	const uint64 withoutStreamsAtMost = (uint64)((double)maxClients * (double)(otherDatagramBytes * 3 / 2 + s_QuicDatagramOverhead) * perSecond + 0.5);
+	const uint32 minBytes = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
+	nlinfo("FESEND: ClientLimit (%u) clients on QUIC streams need %" NL_I64 "u bytes per second (%.1f Mbit/s) of outgoing bandwidth that the link carries for sure: %" NL_I64 "u for their datagrams at their nominal size (%u bytes a cycle each with what the network adds) and %" NL_I64 "u for the minimums of their streams (StreamMinBytesPerTick, %u, when all of them have stream data waiting)",
+	    maxClients, guaranteed, (double)guaranteed * 8.0 / 1000000.0, datagrams, (uint32)(streamDatagramBytes + s_QuicDatagramOverhead), minimums, minBytes);
+	nlinfo("FESEND: a datagram may be half as large again as its nominal size while the average of its client is under it, and with many clients at that at once (a crowd in one place) they need up to %" NL_I64 "u bytes per second (%.1f Mbit/s)",
+	    datagramsAtMost + minimums, (double)(datagramsAtMost + minimums) * 8.0 / 1000000.0);
+	nlinfo("FESEND: with all the clients on UDP or on QUIC without streams it is %" NL_I64 "u bytes per second (%.1f Mbit/s; %u bytes a cycle each), and up to %" NL_I64 "u (%.1f Mbit/s)",
+	    withoutStreams, (double)withoutStreams * 8.0 / 1000000.0, (uint32)(otherDatagramBytes + s_QuicDatagramOverhead), withoutStreamsAtMost, (double)withoutStreamsAtMost * 8.0 / 1000000.0);
+	nlinfo("FESEND: all of that goes whatever the budget; TotalOutgoingBandwidth, %u bytes per second (%.1f Mbit/s), is the most the frontend sends when the link has more",
+	    config.TotalOutgoingBandwidth, (double)config.TotalOutgoingBandwidth * 8.0 / 1000000.0);
 	if (std::max(guaranteed, withoutStreams) > config.TotalOutgoingBandwidth)
-		nlwarning("FESEND: what ClientLimit (%u) clients are guaranteed, %" NL_I64 "u bytes per second, is above TotalOutgoingBandwidth (%u): with that many clients the frontend sends more than it is said it may",
+		nlwarning("FESEND: what ClientLimit (%u) clients are guaranteed with datagrams of their nominal size, %" NL_I64 "u bytes per second, is above TotalOutgoingBandwidth (%u): with that many clients the frontend sends more than it is said it may",
 		    maxClients, std::max(guaranteed, withoutStreams), config.TotalOutgoingBandwidth);
 
 	if (config.StreamMaxBytesPerTick == 0)
