@@ -351,9 +351,10 @@ public:
 
 	/**
 	 * Check that a msg.xml declares its stream classes the way removeStreamClasses takes them out. Returns what is
-	 * not written that way, one line of text per fault (none if the file cannot be read): a `stream_class` element
-	 * or a `stream` attribute that would stay in the signature, which clients without it would then not match; a
-	 * line that would be left out of the signature with something else on it.
+	 * not written that way, one line of text per fault (none if the file cannot be read): a `stream_class` element,
+	 * a `stream` attribute, or a comment that speaks of `stream_class`, that would stay in the signature, which
+	 * clients without it would then not match; a line that would be left out of the signature with something else
+	 * on it.
 	 */
 	static std::vector<std::string>	checkStreamClassesText(const std::string &filename);
 

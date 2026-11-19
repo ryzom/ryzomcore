@@ -1124,6 +1124,8 @@ bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemS
 		// Not more than three in a row, though: when the window has collapsed with stream data still to send again
 		// inside MsQuic, that data takes every bit of room for several round trips, and each datagram would be dropped
 		// in turn. The fourth waits, and is written first when room comes, as all of them were before this flag.
+		// (While it waits, the datagrams of the next cycles are not sent, as before the flag too: when room takes
+		// longer than a cycle to come, the client gets the one that waited, late, and then the fresh ones again.)
 		QUIC_SEND_FLAGS flags = QUIC_SEND_FLAG_NONE;
 		if (user->Streams)
 		{

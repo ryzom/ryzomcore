@@ -207,80 +207,146 @@ std::vector<std::string>	CGenericXmlMsgHeaderManager::checkStreamClassesText(con
 	if (!text.empty())
 		file.serialBuffer(&text[0], (uint)text.size());
 
-	// Line by line. The lines that are left out of the signature may hold one element, or the text of the comment,
-	// and nothing else. On the other lines, a stream attribute has to be written exactly as it is taken out (one
-	// space, stream="..."), and no stream_class element may be.
-	bool inComment = false;
-	uint lineNumber = 0;
-	size_t pos = 0;
-	while (pos < text.size())
+	// The file is gone through as XML text: comments, and tags with their quoted values. A comment or an element of
+	// the stream classes has to be on lines of its own, as removeStreamClasses takes whole lines out; a stream
+	// attribute has to be written exactly as it is taken out.
+	const size_t size = text.size();
+	const char *chars = size ? (const char *)&text[0] : "";
+	struct CLocal
 	{
-		size_t end = pos;
-		while (end < text.size() && text[end] != '\n')
-			++end;
-		const std::string whole((const char *)&text[pos], end - pos);
-		pos = end < text.size() ? end + 1 : end;
-		++lineNumber;
-
-		// without the indentation, the carriage return and the spaces at the end
-		size_t first = whole.find_first_not_of(" \t");
-		size_t last = whole.find_last_not_of(" \t\r");
-		const std::string line = first == std::string::npos ? std::string() : whole.substr(first, last - first + 1);
-
-		bool leftOut = false;
-		if (!inComment && line.compare(0, 17, "<!-- stream_class") == 0)
-			inComment = true;
-		if (inComment)
+		static bool isSpace(char c) { return c == ' ' || c == '\t'; }
+		static bool isWhite(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
+		static bool startsWith(const char *chars, size_t size, size_t at, const char *what)
 		{
-			leftOut = true;
-			size_t close = line.find("-->");
-			if (close != std::string::npos)
-			{
-				inComment = false;
-				if (close + 3 != line.size())
-					problems.push_back(toString("line %u: something follows the end of the stream_class comment on its line, and is left out of the signature with it", lineNumber));
-			}
+			const size_t length = strlen(what);
+			return size - at >= length && !memcmp(chars + at, what, length);
 		}
-		else if (line.compare(0, 13, "<stream_class") == 0)
+		static uint lineOf(const char *chars, size_t at)
 		{
-			leftOut = true;
-			const bool oneElement = line.size() >= 2 && line.compare(line.size() - 2, 2, "/>") == 0 && line.find('<', 1) == std::string::npos && line.find('>') == line.size() - 1;
-			if (!oneElement)
-				problems.push_back(toString("line %u: a stream_class element is not alone on its line as <stream_class name=\"...\" />, and what else is on the line is left out of the signature with it", lineNumber));
-		}
-		if (leftOut)
-			continue;
-
-		bool inQuotes = false;
-		for (size_t i = 0; i < whole.size(); ++i)
-		{
-			const char c = whole[i];
-			if (c == '"')
-				inQuotes = !inQuotes;
-			if (inQuotes)
-				continue;
-			if (whole.compare(i, 13, "<stream_class") == 0)
+			uint line = 1;
+			for (size_t i = 0; i < at; ++i)
 			{
-				problems.push_back(toString("line %u: a stream_class element does not start its line, and stays in the signature", lineNumber));
-				continue;
+				if (chars[i] == '\n')
+					++line;
 			}
-			if (whole.compare(i, 6, "stream") != 0)
-				continue;
-			// An attribute of that name: white space (or the start of the line) before it, '=' after it
-			const bool nameStarts = (i == 0) || whole[i - 1] == ' ' || whole[i - 1] == '\t';
-			size_t j = i + 6;
-			while (j < whole.size() && (whole[j] == ' ' || whole[j] == '\t'))
-				++j;
-			if (!nameStarts || j >= whole.size() || whole[j] != '=')
-				continue;
-			// As it is taken out: one space after something that is no white space, and ="
-			const bool written = i >= 2 && whole[i - 1] == ' ' && whole[i - 2] != ' ' && whole[i - 2] != '\t' && whole.compare(i + 6, 2, "=\"") == 0;
-			if (!written)
-				problems.push_back(toString("line %u: a stream attribute is not written as one space and stream=\"...\" on the line of its element, and it or its white space stays in the signature", lineNumber));
+			return line;
+		}
+		/// Only spaces and tabs between the start of the line and at
+		static bool startsLine(const char *chars, size_t at)
+		{
+			while (at != 0 && isSpace(chars[at - 1]))
+				--at;
+			return at == 0 || chars[at - 1] == '\n';
+		}
+		/// Only spaces, tabs and a carriage return between at and the end of the line
+		static bool endsLine(const char *chars, size_t size, size_t at)
+		{
+			while (at < size && (isSpace(chars[at]) || chars[at] == '\r'))
+				++at;
+			return at == size || chars[at] == '\n';
+		}
+	};
+
+	size_t i = 0;
+	while (i < size)
+	{
+		if (CLocal::startsWith(chars, size, i, "<!--"))
+		{
+			size_t end = i + 4;
+			while (end < size && !CLocal::startsWith(chars, size, end, "-->"))
+				++end;
+			if (end >= size)
+			{
+				problems.push_back(toString("line %u: a comment does not end", CLocal::lineOf(chars, i)));
+				break;
+			}
+			if (CLocal::startsWith(chars, size, i, "<!-- stream_class") && CLocal::startsLine(chars, i))
+			{
+				if (!CLocal::endsLine(chars, size, end + 3))
+					problems.push_back(toString("line %u: something follows the end of the stream_class comment on its line, and is left out of the signature with it", CLocal::lineOf(chars, end)));
+			}
+			else if (std::string(chars + i, end - i).find("stream_class") != std::string::npos)
+			{
+				problems.push_back(toString("line %u: a comment that speaks of stream_class does not start its line with <!-- stream_class, and stays in the signature", CLocal::lineOf(chars, i)));
+			}
+			i = end + 3;
+		}
+		else if (chars[i] == '<')
+		{
+			// The tag, to the '>' that is not in a quoted value
+			size_t end = i + 1;
+			char quote = 0;
+			while (end < size && (quote != 0 || chars[end] != '>'))
+			{
+				if (quote != 0)
+				{
+					if (chars[end] == quote)
+						quote = 0;
+				}
+				else if (chars[end] == '"' || chars[end] == '\'')
+				{
+					quote = chars[end];
+				}
+				++end;
+			}
+			if (end >= size)
+				break; // (not XML: the parser has said so)
+
+			size_t nameEnd = i + 1;
+			while (nameEnd < end && !CLocal::isWhite(chars[nameEnd]) && chars[nameEnd] != '/')
+				++nameEnd;
+			const std::string name(chars + i + 1, nameEnd - (i + 1));
+			if (name == "stream_class")
+			{
+				const bool oneLine = std::string(chars + i, end - i).find('\n') == std::string::npos;
+				if (!CLocal::startsLine(chars, i) || !oneLine || chars[end - 1] != '/' || !CLocal::endsLine(chars, size, end + 1))
+					problems.push_back(toString("line %u: a stream_class element is not alone on its line as <stream_class name=\"...\" />: it stays in the signature, or what else is on its line is left out with it", CLocal::lineOf(chars, i)));
+			}
+			else
+			{
+				// The attributes named stream
+				quote = 0;
+				for (size_t k = nameEnd; k < end; ++k)
+				{
+					if (quote != 0)
+					{
+						if (chars[k] == quote)
+							quote = 0;
+						continue;
+					}
+					if (chars[k] == '"' || chars[k] == '\'')
+					{
+						quote = chars[k];
+						continue;
+					}
+					if (!CLocal::isWhite(chars[k - 1]) || !CLocal::startsWith(chars, end, k, "stream"))
+						continue;
+					size_t equals = k + 6;
+					while (equals < end && CLocal::isWhite(chars[equals]))
+						++equals;
+					if (equals >= end || chars[equals] != '=')
+						continue; // (another name that starts with it)
+					// As it is taken out: one space behind something that is no white space, stream=", and the value
+					// closed on the same line
+					bool written = chars[k - 1] == ' ' && k >= 2 && !CLocal::isWhite(chars[k - 2]) && CLocal::startsWith(chars, end, k, "stream=\"");
+					if (written)
+					{
+						size_t close = k + 8;
+						while (close < end && chars[close] != '"' && chars[close] != '\n')
+							++close;
+						written = close < end && chars[close] == '"';
+					}
+					if (!written)
+						problems.push_back(toString("line %u: a stream attribute is not written as one space and stream=\"...\" on the line of its element: it, or white space of it, stays in the signature", CLocal::lineOf(chars, k)));
+				}
+			}
+			i = end + 1;
+		}
+		else
+		{
+			++i;
 		}
 	}
-	if (inComment)
-		problems.push_back("the stream_class comment does not end");
 
 	return problems;
 }

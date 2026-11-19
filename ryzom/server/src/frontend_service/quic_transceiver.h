@@ -204,10 +204,11 @@ public:
 	// its datagrams against the new path alone
 	NLMISC::CAtomicInt PathChangedDatagrams = 0;
 
-	// What the client last reported: how late the datagrams reach it, in milliseconds (at most 255), and the number of
-	// the datagram it had received last then (service main thread only)
+	// What the client last reported: how late the datagrams reach it, in milliseconds (decoded, at most
+	// CLFECOMMON::DatagramLatenessMax), and the number of the datagram it had received last then (service main thread
+	// only)
 	bool QueueDelayKnown = false;
-	uint8 QueueDelay = 0;
+	uint16 QueueDelay = 0;
 	uint32 QueueDelayAck = 0;
 	uint32 QueueDelayReports = 0; // how many reports came, and how many of them the allowance has seen
 	uint32 QueueDelayReportsSeen = 0;
@@ -221,8 +222,9 @@ public:
 	NLMISC::CAtomicInt StatGrantedCount = 0; // StreamGrantedCount when MsQuic was asked
 	NLMISC::CAtomicInt StatCongestionEvents = 0; // times the connection saw congestion (loss or marks), since it opened
 
-	// Datagrams of the frontend that were not sent: MsQuic could not write them at once and dropped them, or the one
-	// before had not left yet (counted where that happens; the main thread cuts the allowance of the streams on it)
+	// Datagrams of the frontend that were not sent: MsQuic dropped them (it could not write them at once, or they no
+	// longer fit), or the one before had not left yet (counted where that happens; the main thread cuts the allowance
+	// of the streams on it)
 	NLMISC::CAtomicInt SendBusyDrops = 0;
 
 	// Datagrams in a row that MsQuic dropped because it could not write them at once (connection thread): after a few,
