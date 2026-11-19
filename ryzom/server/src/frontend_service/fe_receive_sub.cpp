@@ -721,7 +721,10 @@ void CFeReceiveSub::removeLimboClient(std::map<TUid, CLimboClient>::iterator ilc
 		CLoginServer::clientDisconnected(lc.Uid);
 
 	if (lc.QuicUser.get())
+	{
 		lc.QuicUser->Transceiver->shutdown(lc.QuicUser.get());
+		lc.QuicUser->StreamQueues.clear();
+	}
 
 	LimboClients.erase(ilc);
 }
@@ -795,7 +798,16 @@ void CFeReceiveSub::removeClientFromMap(CClientHost *client, bool closeQuicConne
 			client->QuicUser->ClientHost = nullptr;
 		}
 		if (closeQuicConnection)
+		{
 			client->QuicUser->Transceiver->shutdown(client->QuicUser.get());
+			client->QuicUser->StreamQueues.clear();
+		}
+		else if (client->QuicUser->Streams)
+		{
+			// The connection is kept for the next session (limbo mode), and its streams with it: what they have not
+			// begun of this session is dropped, and they mark where it ends
+			client->QuicUser->StreamQueues.endSession(CQuicTransceiver::streamClassCount());
+		}
 		client->QuicUser = nullptr;
 	}
 }
@@ -1069,6 +1081,15 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			// Read before the cookie is checked: a valid cookie is used up, and the welcome service told
 			string languageId;
 			Msgin.serial(languageId);
+
+			// A client of protocol level ryzomcore/4.2 says what its connection carries towards it, in bits per second
+			// (0: it does not say), as its player set it. The allowance of its streams starts and stays under that.
+			if (_CurrentInMsg->QuicUser != NULL && _CurrentInMsg->QuicUser->Streams)
+			{
+				uint32 connectionRate = 0;
+				Msgin.serial(connectionRate);
+				_CurrentInMsg->QuicUser->StreamAllowance.declare(connectionRate / 8);
+			}
 
 			string userName = "NotSet";
 			string userPriv;
@@ -1477,6 +1498,19 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 		Msgin.serialAndLog1( sendnumberack );
 		Msgin.serialAndLog1( ackbitmask );
 
+		// A client of protocol level ryzomcore/4.2 reports how late the datagrams reach it (CDatagramLateness in the
+		// client), as of the datagram it acknowledges here
+		if ( clienthost->QuicUser.get() != NULL && clienthost->QuicUser->Streams )
+		{
+			uint8 queueDelay = 0;
+			Msgin.serial( queueDelay );
+			CQuicUserContext *user = clienthost->QuicUser.get();
+			user->QueueDelay = (uint16)CLFECOMMON::decodeDatagramLateness(queueDelay);
+			user->QueueDelayAck = sendnumberack;
+			user->QueueDelayKnown = true;
+			++user->QueueDelayReports;
+		}
+
 		/*if (receivednumber < 1000)
 			nlinfo("FSRCV-DBG: received normal packet %d (%s) from client %d %s, Ack=%d AckBitMask=%08X", receivednumber, systemMode ? "SYSTEM" : "NORMAL", clienthost ? clienthost->clientId() : -1, clienthost ? clienthost->eId().toString().c_str() : "<Unknown>", sendnumberack, ackbitmask);*/
 
@@ -1814,11 +1848,24 @@ void CFeReceiveSub::countRejectedMessage( CClientHost *client, TBadMessageFormat
 		nlwarning("FEHACK: client %u (uid %u, %s) sent %u rejected messages within %u s, the last for%s disconnected",
 		    (uint)client->clientId(), client->Uid, client->address().asString().c_str(), client->RejectedMessages, (uint)((now - client->RejectedMessagesSince) / 1000), getBadMessageString(bmft).c_str());
 
-		// as when a service asks for the disconnection (cbDisconnectClient)
-		CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
-		client->ImpulseEncoder.add(act, 0);
-		addToRemoveList(client->clientId());
+		disconnectClient(client);
 	}
+}
+
+
+/*
+ * Disconnect a client for a fault
+ */
+void CFeReceiveSub::disconnectClient( CClientHost *client )
+{
+	// Removing it again would push its removal back
+	if (isInRemoveList(client->clientId()))
+		return;
+
+	// as when a service asks for the disconnection (cbDisconnectClient)
+	CActionDisconnection *act = (CActionDisconnection*)(CActionFactory::getInstance()->create(INVALID_SLOT, ACTION_DISCONNECTION_CODE));
+	client->ImpulseEncoder.add(act, 0);
+	addToRemoveList(client->clientId());
 }
 
 

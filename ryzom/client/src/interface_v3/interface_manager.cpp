@@ -143,6 +143,9 @@ using namespace NLGUI;
 
 #include "group_html_webig.h"
 
+// The build options that are interface feature flags (NL_MSQUIC_AVAILABLE). Last, to keep its macros out of the headers
+#include "config.h"
+
 using namespace NLMISC;
 
 namespace NLGUI
@@ -483,6 +486,9 @@ CInterfaceManager::CInterfaceManager()
 	// build options that the interface depends on, so that it only uses what this client has
 #ifdef RYZOM_BG_DOWNLOADER
 	parser->addFeatureFlag("bg_downloader");
+#endif
+#ifdef NL_MSQUIC_AVAILABLE
+	parser->addFeatureFlag("quic");
 #endif
 
 	parser->setSetupOptionsCallback( this );

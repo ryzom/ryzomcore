@@ -4014,6 +4014,30 @@ bool CNetManager::update()
 				if (node)
 					node->setValue32((sint32)getConnectionQuality());
 			}
+
+			if (!m_ConnectionTransportLeaf)
+				m_ConnectionTransportLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_TRANSPORT", false);
+
+			if (m_ConnectionTransportLeaf)
+			{
+				// the values the interface has for them (config.xml, and the texts of the network page in game_config.xml)
+				sint32 connectionTransport = 0; // not connected
+				switch (transport())
+				{
+				case TransportUdp:
+					connectionTransport = 1;
+					break;
+				case TransportQuicDatagrams:
+					connectionTransport = 2;
+					break;
+				case TransportQuicStreams:
+					connectionTransport = 3;
+					break;
+				default:
+					break;
+				}
+				m_ConnectionTransportLeaf->setValue32(connectionTransport);
+			}
 		}
 	}
 

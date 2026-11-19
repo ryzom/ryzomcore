@@ -83,6 +83,9 @@ void sendImpulsion( TClientId clientid, NLNET::CMessage& msgin, uint8 channel, c
 /**
  * CFrontEndService, based on IService5
  */
+/// What ClientBandwidth counts for the headers of UDP, IP and Ethernet in the bytes it gives a datagram
+extern const uint32 UDP_IP_ETH_HEADER_SIZE;
+
 class CFrontEndService : public NLNET::IService, public NLMISC::ICommandsHandler
 {
 public:
@@ -145,7 +148,7 @@ public:
 	void			onTick();
 
 	/// returns the number of bit that the level can manage (biggest action it can manage)
-	uint			getImpulseMaxBitSize(uint level) { return CImpulseEncoder::maxBitSize (level); }
+	uint			getImpulseMaxBitSize(uint level) { return MaxImpulseBitSizes[level]; }
 
 	/// Send an impulse to a given client (0<=level<=3)
 	void			addImpulseToClient(TClientId client, CLFECOMMON::CActionImpulsion *action, uint level);
@@ -167,6 +170,9 @@ public:
 
 	/// Set game cycle ratio
 	void			setGameCycleRatio( sint gcratio ) { _GCRatio = gcratio; _GCCount = 0; }
+
+	/// The frontend sends to its clients once every that many game cycles
+	sint			gameCycleRatio() const { return _GCRatio; }
 
 	/// Callback called when a cookie become acceptable (a new player as logged
 	/// in and will connect here soon).

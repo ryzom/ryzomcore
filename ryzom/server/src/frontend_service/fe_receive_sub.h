@@ -158,6 +158,12 @@ public:
 	/// Add to the list of clients which will be removed by addr at the three cycles later (leaving the time to send an impulsion to the client)
 	void				addToRemoveList( TClientId clientid ) { _ClientsToRemove.push_back( std::make_pair(clientid,3) ); }
 
+	// clang-format off
+	/// Disconnect a client for a fault: it is told to disconnect, and removed a few cycles later (see addToRemoveList).
+	/// Nothing is done for a client that is already being removed.
+	void				disconnectClient( CClientHost *client );
+	// clang-format on
+
 	/// Remove from the list of clients
 	void				removeFromRemoveList( TClientId clientid );
 

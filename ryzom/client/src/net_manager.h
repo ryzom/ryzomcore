@@ -143,6 +143,7 @@ protected:
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_PacketLostLeaf;
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ServerStateLeaf;
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ConnectionQualityLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ConnectionTransportLeaf;
 };
 
 

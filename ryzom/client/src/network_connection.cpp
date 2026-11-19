@@ -34,6 +34,7 @@
 #include "game_share/action_disconnection.h"
 #include "game_share/action_position.h"
 #include "game_share/action_sync.h"
+#include "game_share/stream_record.h"
 #include "game_share/action_association.h"
 #include "game_share/action_dummy.h"
 #include "game_share/action_login.h"
@@ -432,11 +433,13 @@ void	CNetworkConnection::init(const string &cookie, const string &addr)
 	_NextClientTickToReplay = 0;
 #endif
 
+	// The signature of msg.xml leaves out what declares the stream classes of a frontend, on both sides: this file
+	// and the frontend's need not agree on those (see CGenericXmlMsgHeaderManager::getSignature)
 	// If the server run on window, those are the one to test
-	_AltMsgXmlMD5 = NLMISC::getMD5("msg.xml");
+	_AltMsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", false);
 	_AltDatabaseXmlMD5 = NLMISC::getMD5("database.xml");
 	// If the server run on UNIX, those are the one to test
-	_MsgXmlMD5 = getTextMD5("msg.xml");
+	_MsgXmlMD5 = CGenericXmlMsgHeaderManager::getSignature("msg.xml", true);
 	_DatabaseXmlMD5 = getTextMD5("database.xml");
 }
 
@@ -691,6 +694,7 @@ bool	CNetworkConnection::connect(string &result)
 			_FrontendHost.setPort(_FrontendHost.port() - 5000); // Same trick as SBS, just use a port offset
 			nlinfo("Connecting to QUIC at port %d instead", _FrontendHost.port());
 			m_QuicConnection.connect(_FrontendHost);
+			m_DatagramLateness.reset();
 		}
 		else
 		{
@@ -1121,6 +1125,19 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 //
 
 
+CNetworkConnection::TTransport CNetworkConnection::transport() const
+{
+	// (while it logs in, the frontend has not answered yet)
+	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Authenticate
+	    || _ConnectionState == Login || _ConnectionState == Disconnect)
+		return TransportNone;
+	if (!m_UseQuic)
+		return TransportUdp;
+	if (m_QuicConnection.state() != CQuicConnection::Connected)
+		return TransportNone;
+	return m_QuicConnection.streams() ? TransportQuicStreams : TransportQuicDatagrams;
+}
+
 // sends system login cookie
 void	CNetworkConnection::sendSystemLogin()
 {
@@ -1141,6 +1158,13 @@ void	CNetworkConnection::sendSystemLogin()
 		message.serial(fakeCookie);
 	}
 	message.serial( ClientCfg.LanguageCode );
+
+	// On protocol level ryzomcore/4.2: what the player says the connection carries (0: nothing said)
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		uint32 connectionRate = ClientCfg.ConnectionRate;
+		message.serial(connectionRate);
+	}
 
 	// Try to send login, and handle the case when a firewall blocks the sending
 	uint32 length = message.length();
@@ -2229,6 +2253,14 @@ void	CNetworkConnection::sendNormalMessage()
 	message.serial (_LastReceivedNumber);
 	message.serial (_AckBitMask);
 
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		// Protocol level ryzomcore/4.2: how late the datagrams of the frontend arrive, which is what its stream data
+		// must not make worse
+		uint8 lateness = CLFECOMMON::encodeDatagramLateness(m_DatagramLateness.report());
+		message.serial (lateness);
+	}
+
 	uint			numPacked = 0;
 
 	// pack each block
@@ -2284,6 +2316,51 @@ void	CNetworkConnection::sendNormalMessage()
 }
 
 bool	CNetworkConnection::stateConnected()
+{
+	bool stateBroke = receiveConnectedDatagrams();
+
+	// The messages on the streams come after those of the datagrams of this update, and only in this state, as the
+	// impulses: in the other states they wait in their stream, which loses nothing
+	if (_ConnectionState == Connected)
+		dispatchStreamRecords();
+
+	return stateBroke;
+}
+
+void CNetworkConnection::dispatchStreamRecords()
+{
+	if (!m_UseQuic || !m_QuicConnection.streams())
+		return;
+
+	// The streams in the order the server opened them: it puts first what the messages of the others refer to (the
+	// strings). The server need not have opened them all.
+	// One message is taken out at a time and nothing of the stream is held while its handler runs: a handler may call
+	// update() again (the progress bar of a teleport does), which then goes on with the next message of the stream.
+	for (uint streamNumber = 0; streamNumber < CLFECOMMON::StreamClassMax; ++streamNumber)
+	{
+		while (_ConnectionState == Connected)
+		{
+			CBitMemStream msgin(true);
+			CQuicConnection::TStreamRecord res = m_QuicConnection.receiveStreamRecord(streamNumber, msgin);
+			if (res == CQuicConnection::NoStreamRecord)
+				break;
+			if (res == CQuicConnection::StreamError)
+			{
+				// Messages are missing for good (the reason is in the log)
+				nlwarning("CNET[%p]: a stream of the QUIC connection cannot be read any further, disconnecting", this);
+				disconnect();
+				return;
+			}
+
+			statsReceive(msgin.length());
+			++_TotalMessages;
+			if (_ImpulseCallback != nullptr)
+				_ImpulseCallback(msgin, _LastReceivedNumber, _ImpulseArg);
+		}
+	}
+}
+
+bool	CNetworkConnection::receiveConnectedDatagrams()
 {
 	// if receives System PROBE
 	//    immediate state Probe
@@ -2624,6 +2701,17 @@ bool	CNetworkConnection::decodeHeader(CBitMemStream &msgin, bool checkMessageNum
 
 	msgin.serial (_CurrentReceivedNumber);
 	msgin.serial (_SystemMode);
+
+	if (m_UseQuic && m_QuicConnection.streams())
+	{
+		// Protocol level ryzomcore/4.2: when the frontend sent the datagram, and whether the path changed (see
+		// game_share/stream_record.h). With when it arrived, that tells how late it is.
+		uint16 sendTime = 0;
+		bool pathChanged = false;
+		msgin.serial (sendTime);
+		msgin.serial (pathChanged);
+		m_DatagramLateness.add(sendTime, m_QuicConnection.lastDatagramArrivalTime(), pathChanged);
+	}
 
 	if ((sint)_CurrentReceivedNumber > (sint)_LastReceivedPacketInBothModes && checkMessageNumber)
 	{
@@ -3228,6 +3316,9 @@ void CNetworkConnection::resetSession()
 {
 	// Through limbo mode the connection is kept, still quitting: its packet numbers go on (see stateQuit)
 	TPacketNumber sendNumber = _CurrentSendNumber;
+
+	// and so do its streams, which may still carry messages of the session that ends (a new connection has new ones)
+	m_QuicConnection.endStreamSession();
 
 	// Reset data
 	_ImpulseDecoder.reset();

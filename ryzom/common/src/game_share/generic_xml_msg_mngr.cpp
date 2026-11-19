@@ -23,6 +23,13 @@
 #include "stdpch.h"
 
 #include "generic_xml_msg_mngr.h"
+#include "stream_record.h"
+
+#include "nel/misc/file.h"
+#include "nel/misc/path.h"
+
+#include <algorithm>
+#include <cstring>
 #include "nel/misc/file.h"
 #include "nel/misc/xml_auto_ptr.h"
 
@@ -43,6 +50,7 @@ using namespace NLMISC;
 CGenericXmlMsgHeaderManager::CGenericXmlMsgHeaderManager()
 {
 	_Root = nullptr;
+	_StreamClassError = false;
 }
 
 // Destructor
@@ -68,8 +76,316 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 	CIXml read;
 	read.init (file);
 
+	// The classes of messages that go on streams, which the nodes then refer to by name
+	_StreamClasses.clear();
+	_StreamClassDropAbove.clear();
+	_StreamClassError = false;
+	for (xmlNodePtr xmlChild = read.getRootNode()->children; xmlChild != nullptr; xmlChild = xmlChild->next)
+	{
+		if (strcmp((const char *)xmlChild->name, "stream_class") != 0)
+			continue;
+		CXMLAutoPtr name(xmlGetProp(xmlChild, (xmlChar *)"name"));
+		std::string className = name ? (const char *)name : "";
+		if (className.empty())
+		{
+			nlwarning("A stream_class element of '%s' has no name", filename.c_str());
+			_StreamClassError = true;
+		}
+		else if (std::find(_StreamClasses.begin(), _StreamClasses.end(), className) != _StreamClasses.end())
+		{
+			nlwarning("'%s' declares the stream class '%s' twice", filename.c_str(), className.c_str());
+			_StreamClassError = true;
+		}
+		else if (_StreamClasses.size() >= CLFECOMMON::StreamClassMax)
+		{
+			nlwarning("'%s' declares more than %u stream classes, '%s' is one too many", filename.c_str(), CLFECOMMON::StreamClassMax, className.c_str());
+			_StreamClassError = true;
+		}
+		else
+		{
+			// A class whose messages do not depend on each other says above how many bytes one of them is left out
+			uint32 dropAbove = 0;
+			CXMLAutoPtr drop(xmlGetProp(xmlChild, (xmlChar *)"drop_above"));
+			const std::string dropText = drop ? (const char *)drop : "";
+			const bool dropDigits = !dropText.empty() && dropText.size() <= 9 && dropText.find_first_not_of("0123456789") == std::string::npos;
+			if (drop && (!dropDigits || !NLMISC::fromString(dropText, dropAbove) || dropAbove == 0))
+			{
+				nlwarning("The stream class '%s' of '%s' has drop_above=\"%s\", which is not a number of bytes", className.c_str(), filename.c_str(), (const char *)drop);
+				_StreamClassError = true;
+				dropAbove = 0;
+			}
+			_StreamClasses.push_back(className);
+			_StreamClassDropAbove.push_back(dropAbove);
+		}
+	}
+
 	// create root node from root xml node
-	_Root = new CNode(read.getRootNode(), 0);
+	_Root = new CNode(read.getRootNode(), 0, CLFECOMMON::NoStreamClass, _StreamClasses, _StreamClassError);
+}
+
+// the text of a msg.xml without what declares the stream classes
+void	CGenericXmlMsgHeaderManager::removeStreamClasses(std::vector<uint8> &text)
+{
+	static const char declaration[] = "<stream_class";
+	static const char commentStart[] = "<!-- stream_class";
+	static const char commentEnd[] = "-->";
+	static const char attribute[] = " stream=\"";
+	const size_t declarationSize = sizeof(declaration) - 1;
+	const size_t commentStartSize = sizeof(commentStart) - 1;
+	const size_t commentEndSize = sizeof(commentEnd) - 1;
+	const size_t attributeSize = sizeof(attribute) - 1;
+
+	std::vector<uint8> out;
+	out.reserve(text.size());
+	bool inComment = false;
+	size_t pos = 0;
+	while (pos < text.size())
+	{
+		// One line, with its end
+		size_t end = pos;
+		while (end < text.size() && text[end] != '\n')
+			++end;
+		if (end < text.size())
+			++end;
+		const uint8 *line = &text[pos];
+		const size_t size = end - pos;
+		pos = end;
+
+		// What the line starts with, after its indentation
+		size_t first = 0;
+		while (first < size && (line[first] == ' ' || line[first] == '\t'))
+			++first;
+		const size_t left = size - first;
+
+		bool removeLine = false;
+		if (inComment)
+		{
+			removeLine = true;
+		}
+		else if (left >= commentStartSize && !memcmp(line + first, commentStart, commentStartSize))
+		{
+			inComment = true;
+			removeLine = true;
+		}
+		else if (left >= declarationSize && !memcmp(line + first, declaration, declarationSize))
+		{
+			removeLine = true;
+		}
+		if (inComment)
+		{
+			// The comment ends on the line that has its end
+			for (size_t i = first; i + commentEndSize <= size; ++i)
+			{
+				if (!memcmp(line + i, commentEnd, commentEndSize))
+				{
+					inComment = false;
+					break;
+				}
+			}
+		}
+		if (removeLine)
+			continue;
+
+		// The line without its stream attributes
+		size_t i = 0;
+		while (i < size)
+		{
+			if (size - i >= attributeSize && !memcmp(line + i, attribute, attributeSize))
+			{
+				size_t close = i + attributeSize;
+				while (close < size && line[close] != '"' && line[close] != '\n')
+					++close;
+				if (close < size && line[close] == '"')
+				{
+					i = close + 1;
+					continue;
+				}
+			}
+			out.push_back(line[i]);
+			++i;
+		}
+	}
+	text.swap(out);
+}
+
+// what a msg.xml declares of stream classes in another way than removeStreamClasses takes out
+std::vector<std::string>	CGenericXmlMsgHeaderManager::checkStreamClassesText(const string &filename)
+{
+	std::vector<std::string> problems;
+
+	CIFile file;
+	if (!file.open(CPath::lookup(filename, false)))
+		return problems;
+	std::vector<uint8> text(file.getFileSize());
+	if (!text.empty())
+		file.serialBuffer(&text[0], (uint)text.size());
+
+	// The file is gone through as XML text: comments, and tags with their quoted values. A comment or an element of
+	// the stream classes has to be on lines of its own, as removeStreamClasses takes whole lines out; a stream
+	// attribute has to be written exactly as it is taken out.
+	const size_t size = text.size();
+	const char *chars = size ? (const char *)&text[0] : "";
+	struct CLocal
+	{
+		static bool isSpace(char c) { return c == ' ' || c == '\t'; }
+		static bool isWhite(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
+		static bool startsWith(const char *chars, size_t size, size_t at, const char *what)
+		{
+			const size_t length = strlen(what);
+			return size - at >= length && !memcmp(chars + at, what, length);
+		}
+		static uint lineOf(const char *chars, size_t at)
+		{
+			uint line = 1;
+			for (size_t i = 0; i < at; ++i)
+			{
+				if (chars[i] == '\n')
+					++line;
+			}
+			return line;
+		}
+		/// Only spaces and tabs between the start of the line and at
+		static bool startsLine(const char *chars, size_t at)
+		{
+			while (at != 0 && isSpace(chars[at - 1]))
+				--at;
+			return at == 0 || chars[at - 1] == '\n';
+		}
+		/// Only spaces, tabs and a carriage return between at and the end of the line
+		static bool endsLine(const char *chars, size_t size, size_t at)
+		{
+			while (at < size && (isSpace(chars[at]) || chars[at] == '\r'))
+				++at;
+			return at == size || chars[at] == '\n';
+		}
+	};
+
+	size_t i = 0;
+	while (i < size)
+	{
+		if (CLocal::startsWith(chars, size, i, "<!--"))
+		{
+			size_t end = i + 4;
+			while (end < size && !CLocal::startsWith(chars, size, end, "-->"))
+				++end;
+			if (end >= size)
+			{
+				problems.push_back(toString("line %u: a comment does not end", CLocal::lineOf(chars, i)));
+				break;
+			}
+			if (CLocal::startsWith(chars, size, i, "<!-- stream_class") && CLocal::startsLine(chars, i))
+			{
+				if (!CLocal::endsLine(chars, size, end + 3))
+					problems.push_back(toString("line %u: something follows the end of the stream_class comment on its line, and is left out of the signature with it", CLocal::lineOf(chars, end)));
+			}
+			else if (std::string(chars + i, end - i).find("stream_class") != std::string::npos)
+			{
+				problems.push_back(toString("line %u: a comment that speaks of stream_class does not start its line with <!-- stream_class, and stays in the signature", CLocal::lineOf(chars, i)));
+			}
+			i = end + 3;
+		}
+		else if (chars[i] == '<')
+		{
+			// The tag, to the '>' that is not in a quoted value
+			size_t end = i + 1;
+			char quote = 0;
+			while (end < size && (quote != 0 || chars[end] != '>'))
+			{
+				if (quote != 0)
+				{
+					if (chars[end] == quote)
+						quote = 0;
+				}
+				else if (chars[end] == '"' || chars[end] == '\'')
+				{
+					quote = chars[end];
+				}
+				++end;
+			}
+			if (end >= size)
+				break; // (not XML: the parser has said so)
+
+			size_t nameEnd = i + 1;
+			while (nameEnd < end && !CLocal::isWhite(chars[nameEnd]) && chars[nameEnd] != '/')
+				++nameEnd;
+			const std::string name(chars + i + 1, nameEnd - (i + 1));
+			if (name == "stream_class")
+			{
+				const bool oneLine = std::string(chars + i, end - i).find('\n') == std::string::npos;
+				if (!CLocal::startsLine(chars, i) || !oneLine || chars[end - 1] != '/' || !CLocal::endsLine(chars, size, end + 1))
+					problems.push_back(toString("line %u: a stream_class element is not alone on its line as <stream_class name=\"...\" />: it stays in the signature, or what else is on its line is left out with it", CLocal::lineOf(chars, i)));
+			}
+			else
+			{
+				// The attributes named stream
+				quote = 0;
+				for (size_t k = nameEnd; k < end; ++k)
+				{
+					if (quote != 0)
+					{
+						if (chars[k] == quote)
+							quote = 0;
+						continue;
+					}
+					if (chars[k] == '"' || chars[k] == '\'')
+					{
+						quote = chars[k];
+						continue;
+					}
+					if (!CLocal::isWhite(chars[k - 1]) || !CLocal::startsWith(chars, end, k, "stream"))
+						continue;
+					size_t equals = k + 6;
+					while (equals < end && CLocal::isWhite(chars[equals]))
+						++equals;
+					if (equals >= end || chars[equals] != '=')
+						continue; // (another name that starts with it)
+					// As it is taken out: one space behind something that is no white space, stream=", and the value
+					// closed on the same line
+					bool written = chars[k - 1] == ' ' && k >= 2 && !CLocal::isWhite(chars[k - 2]) && CLocal::startsWith(chars, end, k, "stream=\"");
+					if (written)
+					{
+						size_t close = k + 8;
+						while (close < end && chars[close] != '"' && chars[close] != '\n')
+							++close;
+						written = close < end && chars[close] == '"';
+					}
+					if (!written)
+						problems.push_back(toString("line %u: a stream attribute is not written as one space and stream=\"...\" on the line of its element: it, or white space of it, stays in the signature", CLocal::lineOf(chars, k)));
+				}
+			}
+			i = end + 1;
+		}
+		else
+		{
+			++i;
+		}
+	}
+
+	return problems;
+}
+
+// the signature of a msg.xml
+NLMISC::CHashKeyMD5	CGenericXmlMsgHeaderManager::getSignature(const string &filename, bool removeCarriageReturns)
+{
+	NLMISC::CHashKeyMD5 signature;
+	signature.clear();
+
+	CIFile file;
+	if (!file.open(CPath::lookup(filename, false)))
+	{
+		nlwarning("Cannot open '%s' for its signature", filename.c_str());
+		return signature;
+	}
+	std::vector<uint8> text(file.getFileSize());
+	if (!text.empty())
+		file.serialBuffer(&text[0], (uint)text.size());
+
+	removeStreamClasses(text);
+	if (removeCarriageReturns)
+		text.erase(std::remove(text.begin(), text.end(), (uint8)'\r'), text.end());
+
+	static const uint8 nothing = 0;
+	return NLMISC::getMD5(text.empty() ? &nothing : &text[0], (uint32)text.size());
 }
 
 // set callback
@@ -195,7 +511,12 @@ void	CGenericXmlMsgHeaderManager::popNameAndDescriptionFromStream(string &result
 /*
  * Constructor
  */
-CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Value(value), UseCycle(false), NbBits(0), Callback(nullptr)
+CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value, uint8 parentStreamClass, const std::vector<std::string> &streamClasses, bool &streamClassError)
+    : Value(value)
+    , UseCycle(false)
+    , NbBits(0)
+    , Callback(nullptr)
+    , StreamClass(parentStreamClass)
 {
 	UserData[0] = 0;
 	UserData[1] = 0;
@@ -207,6 +528,23 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Va
 	if (name)
 	{
 		Name = (const char*)name;
+	}
+
+	// The class of the node, which the nodes below it have too unless they name another
+	CXMLAutoPtr stream(xmlGetProp(xmlNode, (xmlChar *)"stream"));
+	if (stream)
+	{
+		std::vector<std::string>::const_iterator it = std::find(streamClasses.begin(), streamClasses.end(), std::string((const char *)stream));
+		if (it != streamClasses.end())
+		{
+			StreamClass = (uint8)(it - streamClasses.begin());
+		}
+		else
+		{
+			nlwarning("Node '%s' names the stream class '%s', which is not declared (a stream_class element)", Name.c_str(), (const char *)stream);
+			StreamClass = CLFECOMMON::NoStreamClass;
+			streamClassError = true;
+		}
 	}
 
 	uint32		childValue = 0;
@@ -330,7 +668,7 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Va
 			if (!strcmp((const char*)xmlChild->name, "branch") || !strcmp((const char*)xmlChild->name, "leaf"))
 			{
 				// create a node from the child xml node
-				CNode	*child = new CNode(xmlChild, childValue);
+				CNode	*child = new CNode(xmlChild, childValue, StreamClass, streamClasses, streamClassError);
 
 				// check node doesn't exist yet in parent
 				if (NodesByName.find(child->Name) == NodesByName.end())
