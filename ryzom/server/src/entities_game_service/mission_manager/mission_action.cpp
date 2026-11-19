@@ -1543,7 +1543,10 @@ class CMissionActionLearnAction : public IMissionAction
 				}
 				else
 				{
-					STRING_MANAGER::TParam p(STRING_MANAGER::bot, _Npc);
+					// the bot is named by its entity id and its alias: an alias given to the constructor would be read as
+					// a number (its Time field), and the bot would have no name
+					STRING_MANAGER::TParam p(STRING_MANAGER::bot);
+					p.setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId(_Npc), _Npc);
 					params.push_back(p);
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(), 
 						toString("MIS_RECV_ACTION_NPC_%u", _ActionSheets.size()), 
@@ -1688,7 +1691,10 @@ class CMissionActionLearnBrick : public IMissionAction
 				}
 				else
 				{
-					STRING_MANAGER::TParam p(STRING_MANAGER::bot, _Npc);
+					// the bot is named by its entity id and its alias: an alias given to the constructor would be read as
+					// a number (its Time field), and the bot would have no name
+					STRING_MANAGER::TParam p(STRING_MANAGER::bot);
+					p.setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId(_Npc), _Npc);
 					params.push_back(p);
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(), 
 						toString("MIS_RECV_BRICK_NPC_%u", _BrickSheets.size()), 
@@ -1833,7 +1839,10 @@ class CMissionActionUnlearnBrick : public IMissionAction
 				}
 				else
 				{
-					STRING_MANAGER::TParam p(STRING_MANAGER::bot, _Npc);
+					// the bot is named by its entity id and its alias: an alias given to the constructor would be read as
+					// a number (its Time field), and the bot would have no name
+					STRING_MANAGER::TParam p(STRING_MANAGER::bot);
+					p.setEIdAIAlias(CAIAliasTranslator::getInstance()->getEntityId(_Npc), _Npc);
 					params.push_back(p);
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(), 
 						toString("MIS_REMV_BRICK_NPC_%u", _BrickSheets.size()), 
