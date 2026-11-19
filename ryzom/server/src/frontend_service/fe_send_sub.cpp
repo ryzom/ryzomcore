@@ -79,28 +79,16 @@ NLMISC::CAtomicInt s_UdpEgressBytes;
 uint64 s_UdpEgressTotal = 0; // as the main thread last read it, without the wrap of the counter
 uint32 s_UdpEgressLast = 0;
 
-/// Bytes the streams of a connection may take this cycle as far as its congestion window goes, which is what the
-/// window leaves beside its datagrams: the next datagram must never wait for the window.
-/// The window is taken by the datagrams in flight (one per cycle within the round trip time) and by what was given to
-/// the streams and is not acknowledged yet, with the headers of its packets (about 4%). That is counted from the
-/// frontend's own numbers. If MsQuic said that more was in flight when it was last asked (datagrams whose
-/// acknowledgement is late, data sent again after a loss), its number counts, with what was given to the streams since.
-uint32 streamWindowRoom(CQuicUserContext *user, uint32 maxBytes)
+/// What MsQuic last said of a connection and what the frontend gave it since, for streamWindowRoom
+CStreamWindowState streamWindowState(CQuicUserContext *user)
 {
-	sint64 congestionWindow = user->StatCongestionWindow.load(NLMISC::TMemoryOrderRelaxed);
-	sint64 rttMs = ((sint64)user->StatRtt.load(NLMISC::TMemoryOrderRelaxed) + 999) / 1000;
-	sint64 tickMs = std::max((sint64)1, (sint64)(CTickEventHandler::getGameTimeStep() * 1000.0) * std::max((sint)1, CFrontEndService::instance()->gameCycleRatio()));
-	sint64 datagramsInFlight = ((rttMs + tickMs - 1) / tickMs + 1) * s_DatagramPacketBytes;
-	sint64 outstanding = user->StreamOutstanding.load();
-	sint64 inFlight = datagramsInFlight + outstanding + outstanding / 25;
-	sint64 bytesInFlight = user->StatBytesInFlight.load(NLMISC::TMemoryOrderRelaxed);
-	if (bytesInFlight >= 0)
-	{
-		sint64 grantedSince = (uint32)user->StreamGrantedCount.load() - (uint32)user->StatGrantedCount.load(NLMISC::TMemoryOrderRelaxed);
-		inFlight = std::max(inFlight, bytesInFlight + grantedSince + grantedSince / 25);
-	}
-	sint64 room = congestionWindow - inFlight - s_DatagramPacketBytes;
-	return (uint32)std::min(std::max(room, (sint64)0), (sint64)maxBytes);
+	CStreamWindowState state;
+	state.CongestionWindow = user->StatCongestionWindow.load(NLMISC::TMemoryOrderRelaxed);
+	state.RttMicroseconds = user->StatRtt.load(NLMISC::TMemoryOrderRelaxed);
+	state.BytesInFlight = user->StatBytesInFlight.load(NLMISC::TMemoryOrderRelaxed);
+	state.Outstanding = user->StreamOutstanding.load();
+	state.GrantedSinceSnapshot = (uint32)user->StreamGrantedCount.load() - (uint32)user->StatGrantedCount.load(NLMISC::TMemoryOrderRelaxed);
+	return state;
 }
 
 /// Say so once when the settings of the streams cannot be meant (at start, and when one is changed)
@@ -488,7 +476,7 @@ void	CFeSendSub::grantStreams()
 		else if (!user->StatValid)
 			entry.Window = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
 		else
-			entry.Window = std::min(user->StreamAllowance.allowance(), streamWindowRoom(user, config.StreamMaxBytesPerTick));
+			entry.Window = std::min(user->StreamAllowance.allowance(), streamWindowRoom(config, streamWindowState(user)));
 		m_StreamEntries.push_back(entry);
 	}
 

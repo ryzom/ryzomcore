@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
+// (this file and stream_queues.cpp are a library of their own, which the tests link too: no stdpch.h)
 #include "stream_scheduler.h"
+
+#include "nel/misc/debug.h"
 
 #include <algorithm>
 
@@ -31,6 +33,19 @@ CStreamSchedulerConfig::CStreamSchedulerConfig()
     , ReportDatagrams(3)
     , IdleSecondsToStartUp(10.0)
 {
+}
+
+uint32 streamWindowRoom(const CStreamSchedulerConfig &config, const CStreamWindowState &state)
+{
+	const sint64 packet = (sint64)config.DatagramPacketBytes;
+	const sint64 rttMs = (state.RttMicroseconds + 999) / 1000;
+	const sint64 tickMs = std::max((sint64)1, (sint64)(config.TickSeconds * 1000.0));
+	const sint64 datagramsInFlight = ((rttMs + tickMs - 1) / tickMs + 1) * packet;
+	sint64 inFlight = datagramsInFlight + state.Outstanding + state.Outstanding / 25;
+	if (state.BytesInFlight >= 0)
+		inFlight = std::max(inFlight, state.BytesInFlight + state.GrantedSinceSnapshot + state.GrantedSinceSnapshot / 25);
+	const sint64 room = state.CongestionWindow - inFlight - packet;
+	return (uint32)std::min(std::max(room, (sint64)0), (sint64)config.StreamMaxBytesPerTick);
 }
 
 CStreamScheduler::CStreamScheduler()

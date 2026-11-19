@@ -41,7 +41,7 @@
 #include <nel/misc/md5.h>
 
 #include "quic_connection.h"
-#include "datagram_lateness.h"
+#include "game_share/datagram_lateness.h"
 #include "time_client.h"
 #include "game_share/entity_types.h"
 #include "property_decoder.h"

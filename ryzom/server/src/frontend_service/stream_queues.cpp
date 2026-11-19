@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
+// (this file and stream_scheduler.cpp are a library of their own, which the tests link too: no stdpch.h)
 #include "stream_queues.h"
+
+#include "nel/misc/debug.h"
 
 #include <algorithm>
 #include <cstring>

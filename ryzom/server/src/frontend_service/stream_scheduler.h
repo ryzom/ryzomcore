@@ -62,6 +62,31 @@ struct CStreamSchedulerConfig
 	double IdleSecondsToStartUp;
 };
 
+/// What the transport says of one connection, for streamWindowRoom
+struct CStreamWindowState
+{
+	/// Its congestion window, in bytes
+	sint64 CongestionWindow;
+	/// Its round trip time, in microseconds
+	sint64 RttMicroseconds;
+	/// Bytes it had sent and not got acknowledged when it was last asked, -1 if it does not tell
+	sint64 BytesInFlight;
+	/// Bytes of stream data given to it that it has not completed (acknowledged) yet
+	sint64 Outstanding;
+	/// Of those, the bytes given since it was last asked
+	sint64 GrantedSinceSnapshot;
+};
+
+/**
+ * Bytes the streams of a connection may take this cycle as far as its congestion window goes, which is what the window
+ * leaves beside its datagrams: the next datagram must never wait for the window.
+ * The window is taken by the datagrams in flight (one per cycle within the round trip time) and by what was given to
+ * the streams and is not acknowledged yet, with the headers of its packets (about 4%). That is counted from the
+ * frontend's own numbers. If the transport said that more was in flight when it was last asked (datagrams whose
+ * acknowledgement is late, data sent again after a loss), its number counts, with what was given to the streams since.
+ */
+uint32 streamWindowRoom(const CStreamSchedulerConfig &config, const CStreamWindowState &state);
+
 /**
  * What the scheduler remembers of one client between cycles. It belongs to the connection.
  */

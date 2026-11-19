@@ -14,13 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CL_DATAGRAM_LATENESS_H
-#define CL_DATAGRAM_LATENESS_H
+#ifndef RY_DATAGRAM_LATENESS_H
+#define RY_DATAGRAM_LATENESS_H
 
 #include "nel/misc/types_nl.h"
 
 /**
  * How late the datagrams of the frontend reach the client, on a connection of protocol level ryzomcore/4.2.
+ * The client measures it; it is here, with the rest of what the level defines (stream_record.h), because what the
+ * frontend does with the report depends on how exactly it is made.
  *
  * The frontend writes in each datagram when it sent it (its own clock in milliseconds, the low 16 bits). The
  * difference with the time of arrival on the client's clock is the travel time plus the unknown offset between the
@@ -155,6 +157,6 @@ private:
 	uint m_NextLast;
 };
 
-#endif // CL_DATAGRAM_LATENESS_H
+#endif // RY_DATAGRAM_LATENESS_H
 
 /* end of file */
