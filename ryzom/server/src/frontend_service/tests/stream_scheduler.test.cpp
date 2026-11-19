@@ -933,7 +933,8 @@ struct CBudgetRun
 	{
 	}
 
-	void cycle(uint32 reporting, uint32 late)
+	/// reporting, late: of all the clients; quietReporting, quietLate: of those of them that get no stream data
+	void cycle(uint32 reporting, uint32 late, uint32 quietReporting = 0, uint32 quietLate = 0)
 	{
 		std::vector<CStreamScheduler::CEntry> entries(Clients.size());
 		for (size_t i = 0; i < Clients.size(); ++i)
@@ -943,7 +944,7 @@ struct CBudgetRun
 			entries[i].Pending = 1000000;
 			entries[i].Window = 65536;
 		}
-		Scheduler.reports(Config, reporting, late);
+		Scheduler.reports(Config, reporting, late, quietReporting, quietLate);
 		Scheduler.schedule(Config, Config.TickSeconds, LastSent, DatagramBytes, entries);
 		LastGranted = 0;
 		for (size_t i = 0; i < Clients.size(); ++i)
@@ -957,76 +958,101 @@ struct CBudgetRun
 };
 
 // The datagrams of half the clients late at once: the link of the frontend carries less than its budget says, and
-// the frontend holds itself to less
+// the frontend holds itself to less. The clients that get no stream data decide, where there are enough of them.
 TEST(StreamScheduler, SharedLatenessTakesTheBudgetDown)
 {
 	CBudgetRun run(20);
 	run.Config.TotalOutgoingBandwidth = 1000000; // 100 KB per cycle
 	run.DatagramBytes = 40000;
 	for (uint t = 0; t < 50; ++t)
-		run.cycle(20, 0);
+		run.cycle(40, 0, 20, 0);
 	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 	EXPECT_FALSE(run.Scheduler.sharedLateness());
 	EXPECT_GT(run.LastGranted, (uint64)50000);
 
 	// Some of them late is of their own paths
 	for (uint t = 0; t < 50; ++t)
-		run.cycle(20, 9);
+		run.cycle(40, 18, 20, 9);
 	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 	EXPECT_FALSE(run.Scheduler.sharedLateness());
 
-	// Too few that report do not tell
+	// All those that get stream data late, and none of those that get none: that is of the stream data, a wave of
+	// logins, however many they are
 	for (uint t = 0; t < 50; ++t)
-		run.cycle(7, 7);
+		run.cycle(40, 20, 20, 0);
 	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 	EXPECT_FALSE(run.Scheduler.sharedLateness());
 
-	// Half of them: down to 85% of what it sends, and again when the cut has had time to show
-	run.cycle(20, 10);
+	// Half of those that get none: down to 85% of what it sends, at once, and again when the cut has had time to show
+	run.cycle(40, 20, 20, 10);
 	EXPECT_TRUE(run.Scheduler.sharedLateness());
 	const uint32 first = run.Scheduler.budget(run.Config);
 	EXPECT_GT(first, 800000u);
 	EXPECT_LT(first, 870000u);
 	for (uint t = 0; t < 5; ++t)
-		run.cycle(20, 10);
+		run.cycle(40, 20, 20, 10);
 	EXPECT_EQ(run.Scheduler.budget(run.Config), first);
-	run.cycle(20, 10);
+	run.cycle(40, 20, 20, 10);
 	EXPECT_LT(run.Scheduler.budget(run.Config), first);
 	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)2);
 
-	// For as long as it lasts: not under what the datagrams take, which go whatever the budget, and then the streams
-	// get nothing, their minimums included
+	// For as long as it lasts: not under what the clients are guaranteed, which goes whatever the budget: their
+	// datagrams and the minimums of their streams. The streams get those and nothing else: what a client cannot play
+	// without goes on
+	std::fill(run.TimesServed.begin(), run.TimesServed.end(), 0);
 	for (uint t = 0; t < 300; ++t)
-		run.cycle(20, 20);
-	EXPECT_GE(run.Scheduler.budget(run.Config), 400000u);
-	EXPECT_LE(run.Scheduler.budget(run.Config), 401000u);
-	EXPECT_EQ(run.LastGranted, (uint64)0);
+		run.cycle(40, 40, 20, 20);
+	EXPECT_GE(run.Scheduler.budget(run.Config), 440000u);
+	EXPECT_LE(run.Scheduler.budget(run.Config), 441000u);
+	EXPECT_EQ(run.LastGranted, (uint64)(20 * run.Config.StreamMinBytesPerTick));
+	for (size_t i = 0; i < run.TimesServed.size(); ++i)
+		EXPECT_EQ(run.TimesServed[i], 300u) << "client " << i;
 
 	// On time again: after a second it comes back, by 1% of the budget per second
 	for (uint t = 0; t < 9; ++t)
-		run.cycle(20, 0);
-	EXPECT_LE(run.Scheduler.budget(run.Config), 401000u);
+		run.cycle(40, 0, 20, 0);
+	EXPECT_LE(run.Scheduler.budget(run.Config), 441000u);
 	for (uint t = 0; t < 101; ++t)
-		run.cycle(20, 1);
-	EXPECT_GT(run.Scheduler.budget(run.Config), 495000u);
-	EXPECT_LT(run.Scheduler.budget(run.Config), 505000u);
-	// (what there is goes to the clients in turns, the minimums too: nobody is left out)
-	std::fill(run.TimesServed.begin(), run.TimesServed.end(), 0);
-	for (uint t = 0; t < 100; ++t)
-		run.cycle(20, 1);
-	uint32 least = 0xFFFFFFFF, most = 0;
-	for (size_t i = 0; i < run.TimesServed.size(); ++i)
-	{
-		least = std::min(least, run.TimesServed[i]);
-		most = std::max(most, run.TimesServed[i]);
-	}
-	EXPECT_GT(least, 10u);
-	EXPECT_LE(most, least + 3);
-	EXPECT_LE(run.LastSent, (uint64)run.Scheduler.budget(run.Config) / 10 + 4096);
+		run.cycle(40, 2, 20, 1);
+	EXPECT_GT(run.Scheduler.budget(run.Config), 535000u);
+	EXPECT_LT(run.Scheduler.budget(run.Config), 545000u);
 	for (uint t = 0; t < 5000 && run.Scheduler.budget(run.Config) < 1000000u; ++t)
-		run.cycle(20, 0);
+		run.cycle(40, 0, 20, 0);
 	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 	EXPECT_LT(run.Scheduler.budgetCuts(), (uint64)60);
+}
+
+// Where too few clients get no stream data to tell (everybody has a backlog), half of all of them late counts once
+// it has lasted two seconds: the start of the allowances of a wave of logins does not, a link that carries less does
+TEST(StreamScheduler, SharedLatenessWithoutQuietClients)
+{
+	CBudgetRun run(20);
+	run.Config.TotalOutgoingBandwidth = 1000000;
+	run.DatagramBytes = 40000;
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(20, 0);
+	// too few that report do not tell at all
+	for (uint t = 0; t < 100; ++t)
+		run.cycle(7, 7);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	// a second of it, again and again
+	for (uint n = 0; n < 20; ++n)
+	{
+		for (uint t = 0; t < 10; ++t)
+			run.cycle(20, 20);
+		for (uint t = 0; t < 10; ++t)
+			run.cycle(20, 0);
+	}
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)0);
+	// it lasts
+	for (uint t = 0; t < 19; ++t)
+		run.cycle(20, 12);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	run.cycle(20, 12);
+	EXPECT_TRUE(run.Scheduler.sharedLateness());
+	EXPECT_LT(run.Scheduler.budget(run.Config), 870000u);
 }
 
 // After the budget was taken down, the clients that stay late are fewer than half: it comes back. (The caller counts
@@ -1038,7 +1064,7 @@ TEST(StreamScheduler, AMinorityDoesNotHoldTheBudgetDown)
 	run.DatagramBytes = 40000;
 	for (uint t = 0; t < 50; ++t)
 		run.cycle(20, 0);
-	for (uint t = 0; t < 30; ++t)
+	for (uint t = 0; t < 60; ++t)
 		run.cycle(20, 12);
 	const uint32 down = run.Scheduler.budget(run.Config);
 	EXPECT_LT(down, 700000u);

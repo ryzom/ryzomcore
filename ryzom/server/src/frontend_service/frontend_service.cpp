@@ -395,28 +395,30 @@ static void queueStreamRecord( CClientHost *client, uint8 streamClass, const uin
 	if ( fate == DropStreamRecord )
 	{
 		// A class of messages that do not depend on each other (chat): this one is left out and the rest goes on
-		nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is left out: a message of class '%s' may be %u bytes, and %u bytes wait for the client of the %u that may",
-			nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, className, dropAbove, queues.pendingBytes(), StreamMaxQueuedBytes.get() );
+		if ( length > dropAbove || length > maxLength )
+			nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is left out: a message of class '%s' may be %u bytes",
+				nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, className, std::min( dropAbove, maxLength ) );
+		else
+			nlwarning( "Message %s of %u bytes for client %u (uid %u) %s (class '%s') is left out: %u bytes of messages wait for the QUIC streams of the client, %d more are sent and not acknowledged, and the limit is %u",
+				nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, className, queues.pendingBytes(), user->StreamOutstanding.load(), StreamMaxQueuedBytes.get() );
 		return;
 	}
-	if ( length > maxLength )
+	if ( fate == RefuseStreamRecord )
 	{
-		// Without it the client would miss something for good (a string, a part of its database, a message of its
-		// module gateway), so it cannot go on
-		nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is above the %u bytes of a message of class '%s': the client is disconnected",
-			nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, maxLength, className );
-		queues.Refusing = true;
-		queues.clear();
-		CFrontEndService::instance()->receiveSub()->disconnectClient( client );
-		return;
-	}
-
-	if ( queues.pendingBytes() + length > StreamMaxQueuedBytes.get() )
-	{
-		// The services send more than the connection takes: a path slower than what they send, or a client that does
-		// not acknowledge or does not read (then nothing completes, and all of the window is on its way)
-		nlwarning( "%u bytes of messages wait for the QUIC streams of client %u (uid %u), %d more are sent and not acknowledged, and %s of %u bytes %s (class '%s') goes above the limit of %u: the client is disconnected",
-			queues.pendingBytes(), (uint)client->clientId(), client->Uid, user->StreamOutstanding.load(), nameOfClientMessage( message, length ).c_str(), length, extendedMsg, className, StreamMaxQueuedBytes.get() );
+		if ( length > maxLength )
+		{
+			// Without it the client would miss something for good (a string, a part of its database, a message of its
+			// module gateway), so it cannot go on
+			nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is above the %u bytes of a message of class '%s': the client is disconnected",
+				nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, maxLength, className );
+		}
+		else
+		{
+			// The services send more than the connection takes: a path slower than what they send, or a client that
+			// does not acknowledge or does not read (then nothing completes, and all of the window is on its way)
+			nlwarning( "%u bytes of messages wait for the QUIC streams of client %u (uid %u), %d more are sent and not acknowledged, and %s of %u bytes %s (class '%s') goes above the limit of %u: the client is disconnected",
+				queues.pendingBytes(), (uint)client->clientId(), client->Uid, user->StreamOutstanding.load(), nameOfClientMessage( message, length ).c_str(), length, extendedMsg, className, StreamMaxQueuedBytes.get() );
+		}
 		queues.Refusing = true;
 		queues.clear();
 		CFrontEndService::instance()->receiveSub()->disconnectClient( client );

@@ -106,7 +106,9 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 			// A class whose messages do not depend on each other says above how many bytes one of them is left out
 			uint32 dropAbove = 0;
 			CXMLAutoPtr drop(xmlGetProp(xmlChild, (xmlChar *)"drop_above"));
-			if (drop && (!NLMISC::fromString(std::string((const char *)drop), dropAbove) || dropAbove == 0))
+			const std::string dropText = drop ? (const char *)drop : "";
+			const bool dropDigits = !dropText.empty() && dropText.size() <= 9 && dropText.find_first_not_of("0123456789") == std::string::npos;
+			if (drop && (!dropDigits || !NLMISC::fromString(dropText, dropAbove) || dropAbove == 0))
 			{
 				nlwarning("The stream class '%s' of '%s' has drop_above=\"%s\", which is not a number of bytes", className.c_str(), filename.c_str(), (const char *)drop);
 				_StreamClassError = true;

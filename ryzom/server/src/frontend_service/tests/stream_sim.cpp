@@ -988,7 +988,7 @@ void CSim::tick()
 	m_LastTick = m_Now;
 
 	// Whose datagrams are late, as CFeSendSub::grantStreams counts them
-	uint32 reporting = 0, reportingLate = 0;
+	uint32 reporting = 0, reportingLate = 0, quietReporting = 0, quietLate = 0;
 	for (size_t i = 0; i < m_Clients.size(); ++i)
 	{
 		const CClient &c = *m_Clients[i];
@@ -996,11 +996,18 @@ void CSim::tick()
 			continue;
 		if (c.Reports == c.ReportsSeen && !c.Allowance.reportsLately())
 			continue;
+		const bool late = c.Allowance.isLate(config, c.QueueDelay);
 		++reporting;
-		if (c.Allowance.isLate(config, c.QueueDelay))
+		if (late)
 			++reportingLate;
+		if (c.Allowance.quietLately())
+		{
+			++quietReporting;
+			if (late)
+				++quietLate;
+		}
 	}
-	m_Scheduler.reports(config, reporting, reportingLate);
+	m_Scheduler.reports(config, reporting, reportingLate, quietReporting, quietLate);
 	const bool sharedLateness = m_Scheduler.sharedLateness();
 
 	uint64 datagramBytes = 0;
@@ -1078,7 +1085,7 @@ void CSim::tick()
 		}
 		const bool newReport = c.Reports != c.ReportsSeen;
 		c.ReportsSeen = c.Reports;
-		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.StatCongestionEvents, c.SendBusyDrops, sharedLateness);
+		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.StatCongestionEvents, c.SendBusyDrops, sharedLateness, m_Scheduler.budgetShare() < 1.0);
 		const uint32 allowance = c.Allowance.allowance();
 		if (c.LastAllowance != 0)
 		{
@@ -1259,10 +1266,11 @@ const CScenario s_Scenarios[] = {
 	{ "uplink-udp", "300 clients, no stream data, behind a link that their datagrams alone fill" },
 	{ "uplink-streams", "300 clients with 1 MB each, a frontend that may send 2.5 MB/s behind a link of 2.5 MB/s" },
 	{ "uplink-streams-90", "the same with a frontend that may send 90% of what its link carries" },
-	{ "uplink-short", "the same with a link that carries 2 MB/s, a fifth less than the frontend may send" },
-	{ "uplink-dip", "the same with a link of 2.5 MB/s that carries 1.5 MB/s from 20 s to 40 s" },
+	{ "uplink-short", "300 clients, 200 of them with 1 MB each, behind a link that carries 2 MB/s, a fifth less than the frontend may send" },
+	{ "uplink-dip", "the same with a link of 2.5 MB/s that carries 2 MB/s from 20 s to 40 s" },
+	{ "uplink-dip-all", "the dip with stream data for all 300: nobody without any to tell the link from the paths" },
 	{ "uplink-dip-udp", "the dip without stream data: what it does to the datagrams alone, which take 1.13 MB/s" },
-	{ "uplink-starved", "a link that carries 1 MB/s from 20 s to 40 s, less than the datagrams alone, with stream data" },
+	{ "uplink-starved", "a link that carries 1 MB/s from 20 s to 40 s, less than the datagrams alone, with stream data: not what a frontend is set up for" },
 	{ "uplink-starved-udp", "the same without stream data" },
 	{ "uplink-wave", "300 clients behind that link without stream data until 10 s, then 1 MB each at once" },
 };
@@ -1471,16 +1479,18 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 		// datagrams fill its link, where the last client gets its datagram a cycle late.
 		const uint32 nbClients = 300;
 		const bool wave = name == "uplink-wave";
-		const bool dip = name == "uplink-dip" || name == "uplink-dip-udp";
+		const bool dip = name == "uplink-dip" || name == "uplink-dip-udp" || name == "uplink-dip-all";
+		// (in these a third of the clients gets no stream data, as most clients of a frontend do at any time)
+		const bool someQuiet = name == "uplink-short" || name == "uplink-dip" || name == "uplink-starved";
 		const bool starved = name == "uplink-starved" || name == "uplink-starved-udp";
-		const bool streams = name == "uplink-streams" || name == "uplink-streams-90" || wave || name == "uplink-short" || name == "uplink-dip" || name == "uplink-starved";
+		const bool streams = name == "uplink-streams" || name == "uplink-streams-90" || wave || name == "uplink-short" || name == "uplink-dip" || name == "uplink-dip-all" || name == "uplink-starved";
 		for (uint32 i = 0; i < nbClients; ++i)
 		{
 			CClientConfig client;
 			client.Path = path(2.0 + (double)(i % 19), 10.0 + (double)(i % 7) * 10.0, 250);
 			client.SendPhaseMs = (double)(i % 100);
 			config.Clients.push_back(client);
-			if (streams)
+			if (streams && !(someQuiet && i % 3 == 0))
 				config.Traffic.push_back(CTraffic(i, wave ? 10.0 : 1.0, 1500, 700));
 		}
 		config.TraceClient = nbClients - 1;
@@ -1494,7 +1504,7 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 			config.UplinkBytesPerSecond = 2000000;
 		if (dip || starved)
 		{
-			config.UplinkChanges.push_back(CUplinkChange(20.0, dip ? 1500000 : 1000000));
+			config.UplinkChanges.push_back(CUplinkChange(20.0, dip ? 2000000 : 1000000));
 			config.UplinkChanges.push_back(CUplinkChange(40.0, 2500000));
 		}
 		seconds = 60;

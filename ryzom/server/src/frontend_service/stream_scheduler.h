@@ -151,13 +151,19 @@ public:
 	/// share, the link of the frontend (or something behind it, in the data centre), which carries less than
 	/// TotalOutgoingBandwidth says. Nothing else tells the frontend, and the allowances cannot help: what one client
 	/// gives up goes to the next. So the frontend then holds itself to less than its budget: to 85% of what it sends
-	/// (not to less than its datagrams, which go whatever the budget), again after as many cycles as a report takes
+	/// (not to less than what its clients are guaranteed, see below), again after as many cycles as a report takes
 	/// to show it, and after a second of cycles without it, it goes back up by 1% of the budget per second.
 	/// The caller counts each client once, by its last report of the last cycles (CStreamAllowance::reportsLately,
-	/// isLate): taking the budget down, or holding it down, takes half of the clients that report. While it holds itself to less, the minimum of StreamMinBytesPerTick is given out of the budget like the
-	/// rest, to as many clients as it reaches, in turns: on a link that has no room, every byte of stream data is in
-	/// front of somebody's datagram.
-	void reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late);
+	/// isLate): taking the budget down, or holding it down, takes half of the clients that report.
+	/// It is never held to less than what its clients are guaranteed, which goes whatever the budget: their datagrams
+	/// and the minimums of their streams (StreamMinBytesPerTick). The streams carry what a client cannot play without
+	/// (its database at login, chat), which went in the datagrams before there were streams. A frontend takes as many
+	/// clients (ClientLimit) as its link carries of that for sure, which is less than TotalOutgoingBandwidth.
+	/// quietReporting, quietLate: the same of those of them that got next to no stream data lately
+	/// (CStreamAllowance::quietLately). Where there are eight of those or more, they decide: their datagrams are late
+	/// for nothing of their own. Where there are fewer, half of all counts once it has lasted two seconds: in a wave
+	/// of logins everybody's allowance passes what its own path takes at about the same time, for half a second.
+	void reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late, uint32 quietReporting, uint32 quietLate);
 	/// The last reports() found the datagrams of half the clients late: a client is not held to account for it
 	bool sharedLateness() const { return m_SharedLateness; }
 	/// Bytes per second the frontend holds itself to now (TotalOutgoingBandwidth or less)
@@ -203,7 +209,9 @@ private:
 		/// Cycles between two cuts of the budget: what a report takes to show the cut before
 		SharedCutCycles = 6,
 		/// Cycles without lateness before the budget goes up again
-		SharedCleanCycles = 10
+		SharedCleanCycles = 10,
+		/// Cycles that half of all the clients have to be late in a row, where too few get no stream data to tell
+		SharedLastingCycles = 20
 	};
 
 	sint64 m_Tokens;
@@ -213,12 +221,12 @@ private:
 	bool m_SharedLateness;
 	uint32 m_SharedCyclesSinceCut;
 	uint32 m_SharedCleanCycles;
+	uint32 m_SharedLateCycles;
 	uint64 m_BudgetCuts;
 	/// Bytes per second it sent lately, as measured, and of its datagrams in the last cycle
 	double m_EgressRate;
 	double m_DatagramRate;
-	/// Where the minimums start in a cycle that has not enough for all (an id)
-	uint32 m_MinimumCursor;
+	double m_MinimumRate;
 	uint32 m_Round;
 	bool m_RoundDone;
 	uint32 m_Cursor;
@@ -309,7 +317,9 @@ public:
 	/// congestionEvents, sendBusyDrops: counters of the connection since it opened.
 	/// sharedLateness: the datagrams of half the clients are late (CStreamScheduler::sharedLateness), which is not
 	/// this client's doing: its allowance is not cut for what it reports or loses meanwhile, and not raised.
-	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness = false);
+	/// linkInDoubt: the frontend holds itself to less than its budget because of it. What a client reports meanwhile
+	/// is not taken for the noise of its path.
+	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness = false, bool linkInDoubt = false);
 
 	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that.
 	/// windowLimited: what it got is all that the congestion window of its connection had room for, and less than
@@ -322,13 +332,17 @@ public:
 
 	/// Bytes per cycle
 	uint32 allowance() const { return m_Allowance; }
+	/// Its last report was on datagrams with next to no stream data in the cycles before them
+	bool quietLately() const { return m_QuietLately; }
 	/// The client reported the lateness of its datagrams in one of the last cycles (as of the last update())
 	bool reportsLately() const { return m_Started && m_CyclesWithoutReport < (uint32)ReportCycles; }
-	/// A report of this lateness is late for this client: more than QueueDelayTarget above the noise of its path
+	/// A report of this lateness is late for this client, for the count of the clients whose datagrams are late
+	/// (CStreamScheduler::reports): more than QueueDelayTarget above the noise of its path as it was settled before the
+	/// stretch of reports that runs. (Not the noise of that stretch too: a queue that grows slowly at the frontend's
+	/// link would be learned by every client that gets no stream data as it grows, and nobody would ever be late.)
 	bool isLate(const CStreamSchedulerConfig &config, uint32 lateness) const
 	{
-		const uint32 floor = noise();
-		return lateness > floor && lateness - floor > config.QueueDelayTarget;
+		return lateness > m_NoiseBefore && lateness - m_NoiseBefore > config.QueueDelayTarget;
 	}
 	/// The lateness, in milliseconds, that this client reports when it gets no stream data: what its path and its
 	/// clock do by themselves (jitter, a clock that runs fast). Lateness is counted from there.
@@ -366,7 +380,8 @@ private:
 		bool Valid;
 	};
 
-	/// In one of the cycles of these numbers the client got stream data or had some waiting
+	/// In the cycles of these numbers the client got more than next to no stream data, or had some waiting that
+	/// could not go
 	bool busyIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// One of the cycles of these numbers gave the client more than half of the allowance as it is now.
 	/// (The numbers come from the client: only the cycles that are kept are looked at, however far apart they are.)
@@ -406,6 +421,7 @@ private:
 	uint32 m_NoiseBefore;
 	uint32 m_NoiseCount;
 	uint32 m_NoiseCycles;
+	bool m_QuietLately;
 	/// The counters of the connection as of the last report that was judged for them
 	uint32 m_CongestionEvents;
 	uint32 m_SendBusyDrops;

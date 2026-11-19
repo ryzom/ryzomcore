@@ -113,8 +113,9 @@ enum TStreamRecordFate
 TStreamRecordFate streamRecordFate(uint32 length, uint32 dropAbove, uint32 maxLength, uint32 waiting, uint32 maxWaiting);
 
 /// The weights of the classes for CStreamQueues::share, out of what an operator writes: "name=weight" for some of
-/// the classes, with spaces between them (StreamClassWeights of the frontend service). A class that is not named has
-/// 1, and so has one with a weight of 0. faults gets a text for each part that is not that, or names no class.
+/// the classes, with white space between them (StreamClassWeights of the frontend service). A class that is not
+/// named has 1, and so has one with a weight of 0. faults gets a text for each part that is not that, names no
+/// class, names one a second time or gives it 0.
 void parseStreamClassWeights(const std::string &text, const std::vector<std::string> &classNames, std::vector<uint32> &weights, std::vector<std::string> &faults);
 
 #endif // NL_STREAM_QUEUES_H

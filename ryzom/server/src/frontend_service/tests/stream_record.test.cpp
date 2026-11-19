@@ -463,7 +463,7 @@ TEST(StreamQueues, ClassesShareAGrant)
 	std::vector<uint32> shares;
 	std::vector<uint8> scratch(70000);
 
-	// All three have more than they get: 2 to 1 to 2, to the byte over many cycles of an odd size
+	// All three have more than they get: 2 to 1 to 2 over many cycles of an odd size
 	{
 		CStreamQueues queues;
 		for (uint c = 0; c < 3; ++c)
@@ -542,6 +542,9 @@ TEST(StreamQueues, WhatBecomesOfARecord)
 	EXPECT_EQ(streamRecordFate(maxLength + 1, 8192, maxLength, 0, maxWaiting), DropStreamRecord);
 	EXPECT_EQ(streamRecordFate(100, 8192, maxLength, maxWaiting - 99, maxWaiting), DropStreamRecord);
 	EXPECT_EQ(streamRecordFate(100, 8192, maxLength, 0xFFFFFFF0u, maxWaiting), DropStreamRecord);
+	// (and with the most a message may be set under what the class says: left out all the same, not the client)
+	EXPECT_EQ(streamRecordFate(5000, 8192, 4096, 0, maxWaiting), DropStreamRecord);
+	EXPECT_EQ(streamRecordFate(4096, 8192, 4096, 0, maxWaiting), QueueStreamRecord);
 }
 
 TEST(StreamQueues, ClassWeightsAsWritten)
@@ -562,6 +565,15 @@ TEST(StreamQueues, ClassWeightsAsWritten)
 	EXPECT_TRUE(faults.empty());
 	parseStreamClassWeights("login=0  strings login=x =4", names, weights, faults);
 	EXPECT_EQ(weights[0], 1u);
+	EXPECT_EQ(weights[1], 1u);
+	EXPECT_EQ(faults.size(), (size_t)4); // (a weight of 0 is said too)
+	// tabs between them; a number with something behind it, a comma, a class named twice
+	parseStreamClassWeights("strings=3\tlogin=4", names, weights, faults);
+	EXPECT_EQ(weights[0], 3u);
+	EXPECT_EQ(weights[1], 4u);
+	EXPECT_TRUE(faults.empty());
+	parseStreamClassWeights("strings=2x login=4, strings=5 strings=6", names, weights, faults);
+	EXPECT_EQ(weights[0], 5u);
 	EXPECT_EQ(weights[1], 1u);
 	EXPECT_EQ(faults.size(), (size_t)3);
 }

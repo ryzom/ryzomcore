@@ -217,7 +217,7 @@ TEST(MsgXmlStreams, ClassesOfTheNodes)
 		ASSERT_EQ(mngr.getStreamClasses().size(), (size_t)4);
 		CHECK(mngr.getStreamClasses()[0] == "strings" && mngr.getStreamClasses()[1] == "chat" && mngr.getStreamClasses()[2] == "login" && mngr.getStreamClasses()[3] == "gateway");
 		ASSERT_EQ(mngr.getStreamClassDropAbove().size(), (size_t)4);
-		CHECK(mngr.getStreamClassDropAbove()[0] == 0 && mngr.getStreamClassDropAbove()[1] == 8192 && mngr.getStreamClassDropAbove()[2] == 0 && mngr.getStreamClassDropAbove()[3] == 0);
+		CHECK(mngr.getStreamClassDropAbove()[0] == 0 && mngr.getStreamClassDropAbove()[1] == 65536 && mngr.getStreamClassDropAbove()[2] == 0 && mngr.getStreamClassDropAbove()[3] == 0);
 		CHECK(classOf(mngr, "MODULE_GATEWAY:FEOPEN") == 3);
 		CHECK(classOf(mngr, "MODULE_GATEWAY:GATEWAY_MSG") == 3);
 		CHECK(classOf(mngr, "MODULE_GATEWAY:FECLOSE") == 3);

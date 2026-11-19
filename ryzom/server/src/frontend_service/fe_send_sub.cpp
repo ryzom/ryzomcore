@@ -54,7 +54,7 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 // clang-format off
 // The budget of the frontend and the allowances of the clients, for the QUIC streams (see stream_scheduler.h)
 CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left. Not more than the link of the frontend carries: what the link cannot take in a cycle waits in front of the datagrams of the next", 5000000, 0, true);
-CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth (but out of what is left, in turns, while the frontend holds itself to less because the datagrams of half its clients arrive late)", 200, 0, true);
+CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth and whatever the frontend holds itself to: with the datagram it is what a client is guaranteed, and ClientLimit is how many clients the link carries of that for sure", 200, 0, true);
 CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);
 CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 8192, 0, true);
 CVariable<std::string>	StreamClassWeights("fs", "StreamClassWeights", "How a client's stream data of one cycle is shared between its classes that have some waiting, as name=weight with spaces between; a class that is not named has 1", "strings=2 chat=1 login=2 gateway=2", 0, true);
@@ -92,15 +92,33 @@ CStreamWindowState streamWindowState(CQuicUserContext *user)
 }
 
 /// Say so once when the settings of the streams cannot be meant (at start, and when one is changed)
-void checkStreamConfig(const CStreamSchedulerConfig &config)
+void checkStreamConfig(const CStreamSchedulerConfig &config, uint32 maxClients, uint32 datagramBytesPerCycle)
 {
 	static bool s_Checked = false;
 	static CStreamSchedulerConfig s_Last;
+	static uint32 s_LastMaxClients = 0, s_LastDatagramBytes = 0;
 	if (s_Checked && config.TotalOutgoingBandwidth == s_Last.TotalOutgoingBandwidth && config.StreamMinBytesPerTick == s_Last.StreamMinBytesPerTick
-	    && config.StreamMaxBytesPerTick == s_Last.StreamMaxBytesPerTick && config.StreamMinChunk == s_Last.StreamMinChunk)
+	    && config.StreamMaxBytesPerTick == s_Last.StreamMaxBytesPerTick && config.StreamMinChunk == s_Last.StreamMinChunk
+	    && maxClients == s_LastMaxClients && datagramBytesPerCycle == s_LastDatagramBytes)
 		return;
 	s_Checked = true;
 	s_Last = config;
+	s_LastMaxClients = maxClients;
+	s_LastDatagramBytes = datagramBytesPerCycle;
+
+	// What the clients are guaranteed, with as many of them as the frontend takes: their datagrams, and the minimums
+	// of their streams when all of them have stream data waiting. That goes whatever the budget, so the link has to
+	// carry it for sure.
+	const double perSecond = 1.0 / std::max(config.TickSeconds, 0.001);
+	const uint64 datagrams = (uint64)((double)maxClients * (double)(datagramBytesPerCycle + s_QuicDatagramOverhead) * perSecond);
+	const uint64 minimums = (uint64)((double)maxClients * (double)std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick) * perSecond);
+	const uint64 guaranteed = datagrams + minimums;
+	nlinfo("FESEND: ClientLimit (%u) clients need %" NL_I64 "u bytes per second (%.1f Mbit/s) of outgoing bandwidth that the link carries for sure: %" NL_I64 "u for their datagrams (%u bytes a cycle each with what the network adds) and %" NL_I64 "u for the minimums of their QUIC streams (StreamMinBytesPerTick, %u, when all of them have stream data waiting). That goes whatever the budget; TotalOutgoingBandwidth, %u, is the most the frontend sends when the link has more",
+	    maxClients, guaranteed, (double)guaranteed * 8.0 / 1000000.0, datagrams, (uint32)(datagramBytesPerCycle + s_QuicDatagramOverhead), minimums,
+	    std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), config.TotalOutgoingBandwidth);
+	if (guaranteed > config.TotalOutgoingBandwidth)
+		nlwarning("FESEND: what ClientLimit (%u) clients are guaranteed, %" NL_I64 "u bytes per second, is above TotalOutgoingBandwidth (%u): with that many clients the frontend sends more than it is said it may",
+		    maxClients, guaranteed, config.TotalOutgoingBandwidth);
 
 	if (config.StreamMaxBytesPerTick == 0)
 		nlwarning("StreamMaxBytesPerTick is 0: nothing is sent on the QUIC streams, and a client is disconnected once StreamMaxQueuedBytes of messages wait for it");
@@ -396,7 +414,7 @@ void	CFeSendSub::grantStreams()
 	config.StreamMinChunk = StreamMinChunk.get();
 	config.QueueDelayTarget = QueueDelayTarget.get();
 	config.DatagramPacketBytes = (uint32)s_DatagramPacketBytes;
-	checkStreamConfig(config);
+	checkStreamConfig(config, MaxNbClients, clientBandwidth() / 8);
 
 	// What the frontend sent since the last cycle, all of it: what MsQuic counts for the process, and the datagrams of
 	// the UDP clients
@@ -422,7 +440,7 @@ void	CFeSendSub::grantStreams()
 	// ascending id
 	// Whose datagrams arrive late, of the clients that say: each client once, by its last report of the last cycles,
 	// however often it reports. Half of them late at once is the link they share (CStreamScheduler::reports).
-	uint32 reporting = 0, reportingLate = 0;
+	uint32 reporting = 0, reportingLate = 0, quietReporting = 0, quietLate = 0;
 	for (size_t id = 0; id < _ClientIdCont.size(); ++id)
 	{
 		CClientHost *client = _ClientIdCont[id];
@@ -433,11 +451,18 @@ void	CFeSendSub::grantStreams()
 			continue;
 		if (user->QueueDelayReports == user->QueueDelayReportsSeen && !user->StreamAllowance.reportsLately())
 			continue;
+		const bool late = user->StreamAllowance.isLate(config, user->QueueDelay);
 		++reporting;
-		if (user->StreamAllowance.isLate(config, user->QueueDelay))
+		if (late)
 			++reportingLate;
+		if (user->StreamAllowance.quietLately())
+		{
+			++quietReporting;
+			if (late)
+				++quietLate;
+		}
 	}
-	m_StreamScheduler.reports(config, reporting, reportingLate);
+	m_StreamScheduler.reports(config, reporting, reportingLate, quietReporting, quietLate);
 	const bool sharedLateness = m_StreamScheduler.sharedLateness();
 	const bool budgetShort = m_StreamScheduler.budgetShare() < 1.0;
 	if (budgetShort != m_StreamBudgetShort)
@@ -460,9 +485,8 @@ void	CFeSendSub::grantStreams()
 			classNames[i] = CQuicTransceiver::streamClassName(i);
 		std::vector<std::string> faults;
 		parseStreamClassWeights(m_StreamClassWeightsText, classNames, m_StreamClassWeights, faults);
-		// (a class that msg.xml does not have yet may well be named: the default names the four of the design)
 		for (size_t i = 0; i < faults.size(); ++i)
-			nlinfo("FESEND: StreamClassWeights: %s", faults[i].c_str());
+			nlwarning("FESEND: StreamClassWeights: %s", faults[i].c_str());
 	}
 
 	uint64 datagramBytes = 0;
@@ -507,7 +531,7 @@ void	CFeSendSub::grantStreams()
 		const bool newReport = user->QueueDelayReports != user->QueueDelayReportsSeen;
 		user->QueueDelayReportsSeen = user->QueueDelayReports;
 		user->StreamAllowance.update(config, newReport, user->QueueDelay, user->QueueDelayAck, client->sendNumber(),
-		    (uint32)user->StatCongestionEvents.load(NLMISC::TMemoryOrderRelaxed), (uint32)user->SendBusyDrops.load(NLMISC::TMemoryOrderRelaxed), sharedLateness);
+		    (uint32)user->StatCongestionEvents.load(NLMISC::TMemoryOrderRelaxed), (uint32)user->SendBusyDrops.load(NLMISC::TMemoryOrderRelaxed), sharedLateness, budgetShort);
 
 		CStreamScheduler::CEntry entry;
 		entry.Client = &user->StreamTurn;

@@ -526,8 +526,11 @@ TEST(StreamSim, OwnLinkOfTheFrontend)
 }
 
 // The frontend's link carries less than its budget says, which nothing tells it but the datagrams of all its clients
-// arriving late at once. It then holds itself to less, and the datagrams are as they are on a frontend without
-// streams behind the same link: that is the measure, case by case.
+// arriving late at once, those of the clients that get no stream data among them. It then holds itself to less, and
+// the datagrams are as they are on a frontend without streams behind the same link: that is the measure, case by
+// case. It never holds itself to less than what its clients are guaranteed (their datagrams and the minimums of their
+// streams): a frontend takes as many clients as its link carries of that for sure, and the cases stay within it,
+// but the last.
 TEST(StreamSim, LinkThatCarriesLessThanTheBudget)
 {
 	double mean, udpMean;
@@ -564,7 +567,8 @@ TEST(StreamSim, LinkThatCarriesLessThanTheBudget)
 		EXPECT_LE(mean, udpMean + 3.0);
 		EXPECT_LE(worst, udpWorst + 10);
 		EXPECT_EQ(missing, 0u);
-		EXPECT_LT(run.Sim->budgetMin(), 1500000u);
+		EXPECT_LT(run.Sim->budgetMin(), 2000000u);
+		EXPECT_GE(run.Sim->budgetMin(), 1500000u); // (what the clients are guaranteed: 1.13 MB/s of datagrams and 0.4 of minimums)
 		EXPECT_GT(run.Sim->budgetEnd(), run.Sim->budgetMin() + 300000u);
 		EXPECT_LE(run.Sim->scheduler().budgetCuts(), (uint64)12);
 		// The link was the trouble, not the path of any client: next to none of them has less of an allowance for it
@@ -578,17 +582,27 @@ TEST(StreamSim, LinkThatCarriesLessThanTheBudget)
 		EXPECT_LE(lowered, run.Sim->clientCount() / 20);
 	}
 	{
+		// (not what a frontend is set up for: the link does not carry what the clients are guaranteed. Nothing can be
+		// asked of it but that it is over when the link is back)
 		SCOPED_TRACE("less than the datagrams alone take");
 		CRun run("uplink-starved");
 		CRun udp("uplink-starved-udp");
-		run.Sim->latenessBetween(28.0, 40.0, mean, worst, missing);
-		udp.Sim->latenessBetween(28.0, 40.0, udpMean, udpWorst, udpMissing);
-		EXPECT_LE(mean, udpMean + 10.0);
-		EXPECT_LE(missing, udpMissing + udpMissing / 10 + 50);
 		run.Sim->latenessBetween(45.0, 60.0, mean, worst, missing);
 		udp.Sim->latenessBetween(45.0, 60.0, udpMean, udpWorst, udpMissing);
 		EXPECT_LE(mean, udpMean + 3.0);
-		EXPECT_LE(missing, udpMissing + 20);
+		EXPECT_LE(missing, udpMissing + 40);
+	}
+	{
+		// Stream data for every client: nobody without any to tell the link from the paths, so it takes two seconds
+		// of half of them late before the frontend acts, and from there it is as above
+		SCOPED_TRACE("stream data for all");
+		CRun run("uplink-dip-all");
+		CRun udp("uplink-dip-udp");
+		run.Sim->latenessBetween(30.0, 40.0, mean, worst, missing);
+		udp.Sim->latenessBetween(30.0, 40.0, udpMean, udpWorst, udpMissing);
+		EXPECT_LE(mean, udpMean + 3.0);
+		EXPECT_LE(worst, udpWorst + 10);
+		EXPECT_EQ(missing, 0u);
 	}
 	{
 		SCOPED_TRACE("a link that carries the budget");

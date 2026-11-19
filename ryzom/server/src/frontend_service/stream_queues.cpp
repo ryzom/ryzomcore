@@ -20,7 +20,6 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/string_common.h"
 #include "nel/misc/common.h"
-#include "nel/misc/algo.h"
 
 #include <algorithm>
 #include <cstring>
@@ -191,16 +190,15 @@ void CStreamQueues::share(uint32 bytes, const std::vector<uint32> &weights, std:
 
 TStreamRecordFate streamRecordFate(uint32 length, uint32 dropAbove, uint32 maxLength, uint32 waiting, uint32 maxWaiting)
 {
+	// A message that may be left out is, whatever it is that it does not fit; another one cannot be
+	const TStreamRecordFate noRoom = dropAbove != 0 ? DropStreamRecord : RefuseStreamRecord;
 	if (dropAbove != 0 && length > dropAbove)
 		return DropStreamRecord;
 	if (length > maxLength)
-		return RefuseStreamRecord;
+		return noRoom;
+	// (more waits than the connection takes)
 	if ((uint64)waiting + length > maxWaiting)
-	{
-		// More waits than the connection takes. A message that may be left out is, and the rest stays in order;
-		// another one cannot be
-		return dropAbove != 0 ? DropStreamRecord : RefuseStreamRecord;
-	}
+		return noRoom;
 	return QueueStreamRecord;
 }
 
@@ -208,16 +206,33 @@ void parseStreamClassWeights(const std::string &text, const std::vector<std::str
 {
 	weights.assign(classNames.size(), 1);
 	faults.clear();
-	std::vector<std::string> parts;
-	NLMISC::splitString(text, " ", parts);
-	for (size_t i = 0; i < parts.size(); ++i)
+	std::vector<bool> named(classNames.size(), false);
+	// The parts, with white space between them
+	size_t pos = 0;
+	while (pos < text.size())
 	{
-		const std::string &part = parts[i];
-		if (part.empty())
-			continue;
+		while (pos < text.size() && (text[pos] == ' ' || text[pos] == '\t' || text[pos] == '\r' || text[pos] == '\n'))
+			++pos;
+		size_t end = pos;
+		while (end < text.size() && text[end] != ' ' && text[end] != '\t' && text[end] != '\r' && text[end] != '\n')
+			++end;
+		if (end == pos)
+			break;
+		const std::string part = text.substr(pos, end - pos);
+		pos = end;
+
+		// name=digits, and nothing else
 		const std::string::size_type equals = part.find('=');
+		bool wellFormed = equals != std::string::npos && equals != 0 && equals + 1 < part.size() && part.size() - equals - 1 <= 6;
 		uint32 weight = 0;
-		if (equals == std::string::npos || equals == 0 || !NLMISC::fromString(part.substr(equals + 1), weight))
+		for (size_t k = equals + 1; wellFormed && k < part.size(); ++k)
+		{
+			if (part[k] < '0' || part[k] > '9')
+				wellFormed = false;
+			else
+				weight = weight * 10 + (uint32)(part[k] - '0');
+		}
+		if (!wellFormed)
 		{
 			faults.push_back(NLMISC::toString("'%s' is not a class and its weight, as in strings=2", part.c_str()));
 			continue;
@@ -231,6 +246,14 @@ void parseStreamClassWeights(const std::string &text, const std::vector<std::str
 			faults.push_back(NLMISC::toString("'%s' is not a stream class of msg.xml", name.c_str()));
 			continue;
 		}
+		if (named[c])
+		{
+			faults.push_back(NLMISC::toString("the class '%s' has two weights, the first of which counts", name.c_str()));
+			continue;
+		}
+		named[c] = true;
+		if (weight == 0)
+			faults.push_back(NLMISC::toString("the class '%s' has a weight of 0, which counts as 1: a class cannot be left without a part", name.c_str()));
 		weights[c] = weight != 0 ? weight : 1;
 	}
 }

@@ -54,10 +54,11 @@ CStreamScheduler::CStreamScheduler()
     , m_SharedLateness(false)
     , m_SharedCyclesSinceCut(1000)
     , m_SharedCleanCycles(0)
+    , m_SharedLateCycles(0)
     , m_BudgetCuts(0)
     , m_EgressRate(0)
     , m_DatagramRate(0)
-    , m_MinimumCursor(0)
+    , m_MinimumRate(0)
     , m_Round(1)
     , m_RoundDone(false)
     , m_Cursor(0)
@@ -73,13 +74,33 @@ CStreamScheduler::CStreamScheduler()
 {
 }
 
-void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late)
+void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late, uint32 quietReporting, uint32 quietLate)
 {
 	if (m_SharedCyclesSinceCut < 1000)
 		++m_SharedCyclesSinceCut;
 
-	// (too few to tell: as if nothing were late, so that a budget that was taken down comes back)
-	m_SharedLateness = reporting >= (uint32)SharedMinReporting && late * 2 >= reporting;
+	// The clients that get no stream data say it best: their datagrams are late for what they share with the others
+	// and for nothing of their own. Where there are too few of them (a wave of logins: everybody gets stream data, and
+	// everybody's allowance passes what its own path takes at about the same time), half of all the clients late
+	// counts only once it has lasted two seconds, which the start of an allowance does not.
+	bool sharedNow;
+	if (quietReporting >= (uint32)SharedMinReporting)
+	{
+		sharedNow = quietLate * 2 >= quietReporting;
+		m_SharedLateCycles = sharedNow ? (uint32)SharedLastingCycles : 0;
+	}
+	else
+	{
+		const bool halfLate = reporting >= (uint32)SharedMinReporting && late * 2 >= reporting;
+		if (!halfLate)
+			m_SharedLateCycles = 0;
+		else if (m_SharedLateCycles < (uint32)SharedLastingCycles)
+			++m_SharedLateCycles;
+		// (once the frontend holds itself back, it knows what it looks at: no waiting for it to last again)
+		sharedNow = halfLate && (m_SharedLateCycles >= (uint32)SharedLastingCycles || m_BudgetShare < 1.0);
+	}
+
+	m_SharedLateness = sharedNow;
 	if (m_SharedLateness)
 	{
 		m_SharedCleanCycles = 0;
@@ -87,7 +108,9 @@ void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 repo
 		{
 			// Under what it sends, which can be well under what it holds itself to when the streams have little to do
 			const double share = std::min(m_BudgetShare, m_EgressRate / (double)config.TotalOutgoingBandwidth);
-			const double floor = m_DatagramRate / (double)config.TotalOutgoingBandwidth;
+			// Not under what its clients are guaranteed, which goes whatever the budget: their datagrams and the
+			// minimums of their streams. A frontend takes as many clients as its link carries of that for sure.
+			const double floor = (m_DatagramRate + m_MinimumRate) / (double)config.TotalOutgoingBandwidth;
 			m_BudgetShare = std::min(m_BudgetShare, std::max(share * 0.85, floor));
 			m_SharedCyclesSinceCut = 0;
 			++m_BudgetCuts;
@@ -132,9 +155,9 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 	// What is left for the streams once this cycle's datagrams are out
 	sint64 pool = m_Tokens - (sint64)datagramBytes;
 	m_LastPool = pool;
-	// (counted against what a whole cycle may send: a cycle that comes right behind a late one has next to no budget
-	// of its own, and its datagrams are not "above the budget" for that)
-	if ((sint64)datagramBytes > tickBudget)
+	// (counted against what a whole cycle may send by TotalOutgoingBandwidth: a cycle that comes right behind a late
+	// one has next to no budget of its own, and a budget that is held down is not what the counter is about)
+	if ((sint64)datagramBytes > (sint64)((double)config.TotalOutgoingBandwidth * config.TickSeconds))
 		++m_OvershootDatagrams;
 
 	// A client whose stream data starts now joins the round after the one that runs (when none runs, that is this
@@ -159,34 +182,19 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 
 	// 1. The minimum, for every client with stream data that its own path lets through. It is given even when the
 	// budget has nothing left: a client is never without progress because others are served.
-	// (Unless the frontend holds itself to less than its budget because its link has no room: then the minimums come
-	// out of what is left like everything else, from where they stopped the cycle before.)
 	uint64 grantedMinimum = 0;
-	const bool linkIsShort = m_BudgetShare < 1.0;
-	size_t firstMinimum = 0;
-	if (linkIsShort)
+	for (size_t i = 0; i < entries.size(); ++i)
 	{
-		while (firstMinimum < entries.size() && entries[firstMinimum].Id < m_MinimumCursor)
-			++firstMinimum;
-		if (firstMinimum == entries.size())
-			firstMinimum = 0;
-	}
-	for (size_t n = 0; n < entries.size(); ++n)
-	{
-		CEntry &entry = entries[(firstMinimum + n) % entries.size()];
+		CEntry &entry = entries[i];
 		if (entry.Pending != 0 && entry.Window != 0)
 		{
-			if (linkIsShort && pool <= 0)
-			{
-				m_MinimumCursor = entry.Id;
-				break;
-			}
 			entry.Grant = std::min(minBytes, std::min(entry.Pending, entry.Window));
 			pool -= entry.Grant;
 			grantedMinimum += entry.Grant;
 		}
 	}
-	if ((sint64)datagramBytes <= tickBudget && (sint64)(datagramBytes + grantedMinimum) > tickBudget)
+	const sint64 fullBudget = (sint64)((double)config.TotalOutgoingBandwidth * config.TickSeconds);
+	if ((sint64)datagramBytes <= fullBudget && (sint64)(datagramBytes + grantedMinimum) > fullBudget)
 		++m_OvershootMinimums;
 
 	// 2. The turns of this round: the clients that wait for more and did not have their turn yet
@@ -307,6 +315,7 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 
 	m_LastPoolLeft = pool;
 	m_LastGrantedMinimum = grantedMinimum;
+	m_MinimumRate = (double)grantedMinimum / std::max(config.TickSeconds, 0.001);
 	m_LastGranted = grantedMinimum + grantedTurns;
 	m_LastWaiting = (uint32)nbWaiting;
 	m_LastServed = served;
@@ -324,6 +333,7 @@ CStreamAllowance::CStreamAllowance()
     , m_NoiseBefore(0)
     , m_NoiseCount(0)
     , m_NoiseCycles(0)
+    , m_QuietLately(false)
     , m_CongestionEvents(0)
     , m_SendBusyDrops(0)
     , m_CyclesWithoutReport(0)
@@ -393,13 +403,19 @@ bool CStreamAllowance::busyIn(uint32 firstNumber, uint32 lastNumber) const
 {
 	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
 		firstNumber = lastNumber - ((uint32)NbCycles - 1);
+	uint64 sum = 0;
 	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
 	{
 		const CCycle &cycle = m_Cycles[number % NbCycles];
-		if (cycle.Valid && cycle.Number == number && (cycle.Granted != 0 || cycle.Backlog))
+		if (!cycle.Valid || cycle.Number != number)
+			continue;
+		// (stream data that waits and does not go: the window of the connection is full of what went before)
+		if (cycle.Backlog && cycle.Granted == 0)
 			return true;
+		sum += cycle.Granted;
 	}
-	return false;
+	// A string now and then is not what makes datagrams late: an eighth of what one cycle may give, in all of them
+	return sum > std::max(m_Allowance / 8, (uint32)64);
 }
 
 bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
@@ -507,7 +523,7 @@ void CStreamAllowance::cut(uint32 sendNumber, uint32 allowance)
 	m_IgnoreEvents = true;
 }
 
-void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness)
+void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness, bool linkInDoubt)
 {
 	if (!m_Started)
 	{
@@ -564,8 +580,10 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		// path, a clock that gains on the frontend's. It is the most of those reports, over the stretch of them that
 		// runs and the one before, and lateness is counted from there: the streams may add QueueDelayTarget to what
 		// the path does by itself. (No stream data means none waiting either: a client that gets nothing because the
-		// congestion window of its connection is full still has its stream data on the way, and in the way.)
-		if (!sharedLateness && !busyIn(reportNumber - QuietCycles - reportDatagrams, reportNumber - 1))
+		// congestion window of its connection is full still has its stream data on the way, and in the way. And it
+		// means next to none, not none: a client that plays gets a line of chat or a string every other second.)
+		m_QuietLately = !busyIn(reportNumber - QuietCycles - reportDatagrams, reportNumber - 1);
+		if (!sharedLateness && !linkInDoubt && m_QuietLately)
 		{
 			m_NoiseNow = std::max(m_NoiseNow, std::min(lateness, (uint32)NoiseMax));
 			if (++m_NoiseCount >= (uint32)NoiseReports)

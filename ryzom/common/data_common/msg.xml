@@ -15,7 +15,7 @@
     the client instead.
   -->
   <stream_class name="strings" />
-  <stream_class name="chat" drop_above="8192" />
+  <stream_class name="chat" drop_above="65536" />
   <stream_class name="login" />
   <stream_class name="gateway" />
   <branch name="TARGET">
