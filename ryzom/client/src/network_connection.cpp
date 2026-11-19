@@ -1125,10 +1125,11 @@ bool	CNetworkConnection::buildStream( CBitMemStream &msgin )
 //
 
 
-// sends system login cookie
 CNetworkConnection::TTransport CNetworkConnection::transport() const
 {
-	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Disconnect)
+	// (while it logs in, the frontend has not answered yet)
+	if (_ConnectionState == NotInitialised || _ConnectionState == NotConnected || _ConnectionState == Authenticate
+	    || _ConnectionState == Login || _ConnectionState == Disconnect)
 		return TransportNone;
 	if (!m_UseQuic)
 		return TransportUdp;
@@ -1137,6 +1138,7 @@ CNetworkConnection::TTransport CNetworkConnection::transport() const
 	return m_QuicConnection.streams() ? TransportQuicStreams : TransportQuicDatagrams;
 }
 
+// sends system login cookie
 void	CNetworkConnection::sendSystemLogin()
 {
 	CBitMemStream	message;
