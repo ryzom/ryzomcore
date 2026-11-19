@@ -260,6 +260,7 @@ struct CSim::CClient
 	bool Gone;
 	bool WritesDatagram;
 	uint32 CycleDatagramBytes;
+	bool WindowLimited;
 	// The transport: when the path of a new address is validated
 	TTime ValidatedAt;
 	// The client's transport: the packet whose acknowledgement it holds back
@@ -362,6 +363,7 @@ CSim::CSim(const CSimConfig &config)
 		c->Gone = false;
 		c->WritesDatagram = false;
 		c->CycleDatagramBytes = 0;
+		c->WindowLimited = false;
 		c->ValidatedAt = 0;
 		c->AckWaiting = false;
 		c->AckWaitingNumber = 0;
@@ -1082,6 +1084,7 @@ void CSim::tick()
 		entry.Client = &c.Turn;
 		entry.Id = (uint32)i;
 		entry.Pending = c.Queues.pendingBytes();
+		c.WindowLimited = false;
 		if (c.Probe)
 		{
 			// (stream data waits for the connected state, as the impulses do)
@@ -1099,7 +1102,9 @@ void CSim::tick()
 			state.BytesInFlight = c.StatBytesInFlight;
 			state.Outstanding = (sint64)c.Outstanding;
 			state.GrantedSinceSnapshot = (uint32)(c.GrantedCount - c.StatGrantedCount);
-			entry.Window = std::min(allowance, streamWindowRoom(config, state));
+			const uint32 room = streamWindowRoom(config, state);
+			c.WindowLimited = room < allowance;
+			entry.Window = std::min(allowance, room);
 		}
 		m_Entries.push_back(entry);
 	}
@@ -1167,7 +1172,7 @@ void CSim::tick()
 	{
 		const CStreamScheduler::CEntry &entry = m_Entries[i];
 		CClient &c = *m_Clients[entry.Id];
-		c.Allowance.granted(entry.Grant, entry.Pending > entry.Grant);
+		c.Allowance.granted(entry.Grant, entry.Pending > entry.Grant, c.WindowLimited);
 		if (entry.Grant == 0)
 			continue;
 		if (m_Scratch.size() < entry.Grant)

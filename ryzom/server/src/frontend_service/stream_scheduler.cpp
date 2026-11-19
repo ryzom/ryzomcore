@@ -25,7 +25,7 @@ CStreamSchedulerConfig::CStreamSchedulerConfig()
     : TotalOutgoingBandwidth(5000000)
     , StreamMinBytesPerTick(200)
     , StreamMaxBytesPerTick(65536)
-    , StreamMinChunk(4096)
+    , StreamMinChunk(8192)
     , QueueDelayTarget(20)
     , TickSeconds(0.1)
     , DatagramPacketBytes(560)
@@ -646,13 +646,51 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		}
 	}
 
+	if (!sharedLateness && !m_InRecovery)
+		followWindow(config, sendNumber);
+
 	// Between the minimum every client gets and the most one gets, and not 0 (unless the most is 0, which stops the
 	// streams)
 	const uint32 floor = std::max(std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick), (uint32)1);
 	m_Allowance = std::min(std::max(m_Allowance, floor), config.StreamMaxBytesPerTick);
 }
 
-void CStreamAllowance::granted(uint32 bytes, bool wantedMore)
+void CStreamAllowance::followWindow(const CStreamSchedulerConfig &config, uint32 sendNumber)
+{
+	// The last cycles: the client had stream data waiting in all of them, and in most of them it was the congestion
+	// window that had less room than the allowance
+	uint64 sum = 0;
+	uint32 limited = 0;
+	uint32 given = 0;
+	for (uint32 number = sendNumber - (uint32)FollowCycles; number != sendNumber; ++number)
+	{
+		const CCycle &cycle = m_Cycles[number % NbCycles];
+		if (!cycle.Valid || cycle.Number != number || !cycle.Backlog)
+			return;
+		sum += cycle.Granted;
+		if (cycle.WindowLimited)
+			++limited;
+		if (cycle.Granted != 0)
+			++given;
+	}
+	if (limited * 2 < (uint32)FollowCycles)
+		return;
+	// (A window that lets nothing through, or one block in all that time, is not a measure of the path: the path is
+	// gone or the connection is busy with what it lost. That is for the cuts.)
+	if (given < 2)
+		return;
+	const uint64 perCycle = sum / (uint32)FollowCycles;
+	if (perCycle + perCycle / 2 >= m_Allowance)
+		return;
+	// (what gets through can be nothing for a moment: not under a quarter of the allowance at once, and not under
+	// the minimum, which the caller sees to)
+	m_Allowance = (uint32)std::max(perCycle + perCycle / 4, (uint64)(m_Allowance / 4));
+	m_StartUp = true;
+	m_LastChangeNumber = sendNumber;
+	m_LastChangeWasCut = false;
+}
+
+void CStreamAllowance::granted(uint32 bytes, bool wantedMore, bool windowLimited)
 {
 	// After long enough without stream data, an allowance that was cut grows by quarters again, from where it stands
 	if (bytes == 0 && !wantedMore)
@@ -675,6 +713,7 @@ void CStreamAllowance::granted(uint32 bytes, bool wantedMore)
 	cycle.Held = wantedMore && (uint64)bytes * 10 >= (uint64)m_Allowance * 9;
 	cycle.Wanted = wantedMore && bytes != 0;
 	cycle.Backlog = wantedMore || bytes != 0;
+	cycle.WindowLimited = windowLimited && wantedMore;
 	cycle.Valid = true;
 }
 

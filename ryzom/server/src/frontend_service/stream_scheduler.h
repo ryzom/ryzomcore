@@ -267,6 +267,13 @@ private:
  * takes the room of the stream data with it, and a loss is not always congestion. A report that comes with it is no
  * reason for a raise.
  *
+ * An allowance says how much stream data a cycle may give at once. Where the congestion window of the connection is
+ * what holds a client back, cycle after cycle, the allowance is no longer that: the window then lets a block through
+ * every few cycles, as large as the window, and the datagrams behind it are late while those between are on time,
+ * which the client's smallest of three does not show. So an allowance of more than one and a half times what got
+ * through per cycle, over ten such cycles, comes down to one and a quarter times that, and looks for its level again
+ * from there.
+ *
  * Lateness is counted from what the client reports when it gets no stream data: the jitter of its path and a clock
  * that gains on the frontend's read as lateness all the time, and are not of the streams. The streams may add
  * QueueDelayTarget to that.
@@ -294,8 +301,9 @@ public:
 	/// this client's doing: its allowance is not cut for what it reports or loses meanwhile, and not raised.
 	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness = false);
 
-	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that
-	void granted(uint32 bytes, bool wantedMore);
+	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that.
+	/// windowLimited: the congestion window of its connection left it less room this cycle than its allowance.
+	void granted(uint32 bytes, bool wantedMore, bool windowLimited = false);
 
 	/// A new session starts on the connection: its datagrams may be numbered from another point, and what was kept
 	/// by number is of no use. The caller drops a report of the session before as well.
@@ -318,6 +326,8 @@ private:
 		CutCycles = 10,
 		/// Cycles before a datagram without any stream data, given or waiting, for its lateness to be of the path alone
 		QuietCycles = 20,
+		/// Cycles over which the allowance is compared with what the congestion window let through
+		FollowCycles = 10,
 		/// Reports without stream data before them that make a stretch of the noise, and the most that counts as noise
 		NoiseReports = 150,
 		NoiseMax = 100
@@ -330,6 +340,7 @@ private:
 		bool Held; // the client got all of its allowance and had more to send
 		bool Wanted; // it got stream data and had more to send
 		bool Backlog; // it had stream data to send, whether it got any or not
+		bool WindowLimited; // and the congestion window of its connection had less room for it than its allowance
 		bool Valid;
 	};
 
@@ -347,6 +358,8 @@ private:
 	uint32 heldBackGrantIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// In one of the cycles of these numbers the client had stream data waiting and got none
 	bool waitingIn(uint32 firstNumber, uint32 lastNumber) const;
+	/// Bring an allowance that the congestion window keeps the client far under down to what gets through
+	void followWindow(const CStreamSchedulerConfig &config, uint32 sendNumber);
 	/// What the allowance is cut to for the stream data of the cycles of these numbers (0: not at all)
 	uint32 cutFor(uint32 firstNumber, uint32 lastNumber) const;
 	void cut(uint32 sendNumber, uint32 allowance);

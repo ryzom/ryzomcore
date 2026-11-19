@@ -56,7 +56,7 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left. Not more than the link of the frontend carries: what the link cannot take in a cycle waits in front of the datagrams of the next", 5000000, 0, true);
 CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth", 200, 0, true);
 CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);
-CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 4096, 0, true);
+CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 8192, 0, true);
 CVariable<uint32>	QueueDelayTarget("fs", "QueueDelayTarget", "Milliseconds the datagrams may reach a client late before the frontend sends it less on its QUIC streams", 20, 0, true);
 // clang-format on
 
@@ -477,12 +477,17 @@ void	CFeSendSub::grantStreams()
 		entry.Pending = queues.pendingBytes();
 		// The messages of the streams are impulses, which a client handles in its connected state only: as the
 		// impulses do, they wait for it. Until the frontend knows the congestion window, the minimum is all it gives.
+		user->StreamWindowLimited = false;
 		if (client->ConnectionState != CClientHost::Connected)
 			entry.Window = 0;
 		else if (!user->StatValid)
 			entry.Window = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
 		else
-			entry.Window = std::min(user->StreamAllowance.allowance(), streamWindowRoom(config, streamWindowState(user)));
+		{
+			const uint32 room = streamWindowRoom(config, streamWindowState(user));
+			user->StreamWindowLimited = room < user->StreamAllowance.allowance();
+			entry.Window = std::min(user->StreamAllowance.allowance(), room);
+		}
 		m_StreamEntries.push_back(entry);
 	}
 
@@ -507,7 +512,7 @@ void	CFeSendSub::grantStreams()
 		CClientHost *client = _ClientIdCont[entry.Id];
 		CQuicUserContext *user = client->QuicUser.get();
 		CStreamQueues &queues = user->StreamQueues;
-		user->StreamAllowance.granted(entry.Grant, entry.Pending > entry.Grant);
+		user->StreamAllowance.granted(entry.Grant, entry.Pending > entry.Grant, user->StreamWindowLimited);
 		user->StreamLastGrant = entry.Grant;
 
 		// The classes in their order (only one class has messages so far, they get shares of the grant once there

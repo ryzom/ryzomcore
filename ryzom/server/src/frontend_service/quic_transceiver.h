@@ -210,6 +210,8 @@ public:
 	bool QueueDelayKnown = false;
 	uint16 QueueDelay = 0;
 	uint32 QueueDelayAck = 0;
+	/// The congestion window left the streams less room in this cycle than the allowance (CFeSendSub::grantStreams)
+	bool StreamWindowLimited = false;
 	uint32 QueueDelayReports = 0; // how many reports came, and how many of them the allowance has seen
 	uint32 QueueDelayReportsSeen = 0;
 
