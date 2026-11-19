@@ -1999,6 +1999,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 <variable type="bool" entry="UI:VARIABLES:CONNECTION_QUALITY" />
 
+<!-- What the connection to the server goes over: 0 not connected, 1 UDP, 2 QUIC datagrams, 3 QUIC datagrams and streams (CNetManager::update) -->
+<variable type="sint32" entry="UI:VARIABLES:CONNECTION_TRANSPORT" value="0" />
+
 <!-- ***************************** -->
 <!-- *  COMMON DEFINE COLORS     * -->
 <!-- ***************************** -->
