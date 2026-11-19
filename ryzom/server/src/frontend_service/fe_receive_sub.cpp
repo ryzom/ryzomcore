@@ -1087,18 +1087,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			if (_CurrentInMsg->QuicUser != NULL && _CurrentInMsg->QuicUser->Streams)
 			{
 				uint32 connectionRate = 0;
-				try
-				{
-					Msgin.serial(connectionRate);
-				}
-				catch (const EStreamOverflow &)
-				{
-					// The login of a client of an earlier build of this protocol level ends before it. That is told,
-					// and the login goes on as with nothing said
-					nlwarning("FERECV: Login of %s on protocol level ryzomcore/4.2 without what its connection carries: the client is of an older build of that level than this frontend",
-					    _CurrentInMsg->AddrFrom.asString().c_str());
-					connectionRate = 0;
-				}
+				Msgin.serial(connectionRate);
 				_CurrentInMsg->QuicUser->StreamAllowance.declare(connectionRate / 8);
 			}
 
