@@ -39,7 +39,6 @@ struct CStreamSchedulerConfig
 {
 	CStreamSchedulerConfig();
 
-	/// Seconds between two cycles
 	/// Bytes per second the frontend may send in all: datagrams, streams, and what QUIC adds
 	uint32 TotalOutgoingBandwidth;
 	/// How far the frontend may run ahead of or behind that, in bytes (0: what one cycle may send)
@@ -182,15 +181,19 @@ private:
  *
  * It is raised when a report shows no lateness for datagrams that were all sent while the client was held at the
  * allowance (it got all of it and had more to send), after the last change: by a quarter at first (but not by less
- * than a packet), by a packet once it was cut. One cycle at the allowance, or datagrams sent before it, are no
- * evidence that the path takes more.
+ * than a packet), and only while the report shows next to no lateness at all; by a packet once it was cut. One cycle
+ * at the allowance, or datagrams sent before it, are no evidence that the path takes more.
  *
- * It is halved when a report shows lateness and stream data went to the client shortly before the datagrams it
- * covers; and when the connection saw congestion, or a datagram could not be sent, while stream data was going to the
- * client. Without stream data (less than a packet of it) the streams are not the cause, and nothing is cut. After a raise, lateness cuts at
- * once. After a cut, the queue that stood at the cut takes time to drain: lateness that comes down is that queue and
- * does not cut again, lateness that does not come down does; and the congestion seen up to the first report on
- * datagrams of after the cut is of what was sent before it.
+ * It is halved when a report shows lateness, or the connection saw congestion or could not send a datagram, and the
+ * client used its allowance shortly before: one of the last cycles gave it more than half of it, which is as much as
+ * a cut takes away. A client that uses less is not held up by its stream data, and a cut would change nothing for
+ * it: its allowance stays, whatever happens to its datagrams. After a cut, the queue that stood at the cut takes time
+ * to drain: the reports on datagrams of after the cut are compared with each other, lateness that comes down is that
+ * queue and does not cut again, lateness that does not come down does; and the congestion seen up to the first of
+ * those reports is of what was sent before the cut.
+ *
+ * What this cannot tell apart: datagrams that are late for another reason, while the client does use its allowance.
+ * The allowance is then cut as if the streams were the cause, down to the minimum if it lasts.
  *
  * After IdleSecondsToStartUp without stream data, an allowance that was cut grows by quarters again, from where it
  * stands, until the next cut.
@@ -239,11 +242,11 @@ private:
 		bool Valid;
 	};
 
-	/// Bytes of stream data given in the cycles of these numbers
-	uint64 grantedIn(uint32 firstNumber, uint32 lastNumber) const;
+	/// One of the cycles of these numbers gave the client more than half of the allowance as it is now
+	bool usedHalfIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// The client was held at the allowance in every cycle of these numbers
 	bool heldIn(uint32 firstNumber, uint32 lastNumber) const;
-	void cut(uint32 sendNumber, bool late, uint32 lateness);
+	void cut(uint32 sendNumber);
 
 	CCycle m_Cycles[NbCycles];
 	uint32 m_CurrentNumber;
@@ -261,12 +264,17 @@ private:
 	uint32 m_IdleCycles;
 	uint32 m_IdleCyclesToStartUp;
 	/// The allowance was cut and the lateness has not been back under the target since: the smallest lateness
-	/// reported since the cut, which a report must stay under for the queue to count as draining
+	/// reported on datagrams of after the cut, which a report must stay under for the queue to count as draining
 	bool m_InRecovery;
 	uint32 m_RecoveryLateness;
 	/// Congestion and datagrams not sent are not counted until the first report on datagrams of after the last cut
 	/// or reset: they are of what was sent before the cut, or of the validation of the new path
 	bool m_IgnoreEvents;
+	/// Cycles left after a reset in which they are not counted either (a validation can take longer than a report)
+	uint32 m_SettleCycles;
+	/// The number of the last report that was judged
+	bool m_ReportJudged;
+	uint32 m_LastReportNumber;
 };
 
 #endif // NL_STREAM_SCHEDULER_H

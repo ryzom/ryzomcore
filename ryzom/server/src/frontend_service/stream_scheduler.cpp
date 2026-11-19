@@ -248,6 +248,9 @@ CStreamAllowance::CStreamAllowance()
     , m_InRecovery(false)
     , m_RecoveryLateness(0)
     , m_IgnoreEvents(false)
+    , m_SettleCycles(0)
+    , m_ReportJudged(false)
+    , m_LastReportNumber(0)
 {
 	for (uint i = 0; i < (uint)NbCycles; ++i)
 		m_Cycles[i].Valid = false;
@@ -259,8 +262,10 @@ void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 	m_StartUp = true;
 	m_InRecovery = false;
 	m_IdleCycles = 0;
-	// What the connection sees while its new path is validated (datagrams that cannot go yet) is not of the streams
+	// What the connection sees while its new path is validated (datagrams that cannot go yet) is not of the streams:
+	// not until the first report on datagrams of after this, and not in the first seconds
 	m_IgnoreEvents = true;
+	m_SettleCycles = (uint32)std::max(1.0, 3.0 / std::max(config.TickSeconds, 0.001));
 	newSession();
 }
 
@@ -268,20 +273,21 @@ void CStreamAllowance::newSession()
 {
 	m_Started = false;
 	m_CyclesWithoutReport = 0;
+	m_InRecovery = false;
+	m_ReportJudged = false;
 	for (uint i = 0; i < (uint)NbCycles; ++i)
 		m_Cycles[i].Valid = false;
 }
 
-uint64 CStreamAllowance::grantedIn(uint32 firstNumber, uint32 lastNumber) const
+bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
 {
-	uint64 granted = 0;
 	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
 	{
 		const CCycle &cycle = m_Cycles[number % NbCycles];
-		if (cycle.Valid && cycle.Number == number)
-			granted += cycle.Granted;
+		if (cycle.Valid && cycle.Number == number && (uint64)cycle.Granted * 2 > m_Allowance)
+			return true;
 	}
-	return granted;
+	return false;
 }
 
 bool CStreamAllowance::heldIn(uint32 firstNumber, uint32 lastNumber) const
@@ -295,13 +301,13 @@ bool CStreamAllowance::heldIn(uint32 firstNumber, uint32 lastNumber) const
 	return true;
 }
 
-void CStreamAllowance::cut(uint32 sendNumber, bool late, uint32 lateness)
+void CStreamAllowance::cut(uint32 sendNumber)
 {
 	m_Allowance = m_Allowance / 2; // (held above the minimum by the caller)
 	m_StartUp = false;
 	m_LastChangeNumber = sendNumber;
 	m_InRecovery = true;
-	m_RecoveryLateness = late ? lateness : 0xFFFFFFFF;
+	m_RecoveryLateness = 0xFFFFFFFF; // (the first report on datagrams of after the cut sets it)
 	m_IgnoreEvents = true;
 }
 
@@ -329,8 +335,16 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 	else if (m_CyclesWithoutReport < 1000)
 		++m_CyclesWithoutReport;
 
-	if (newReport)
+	// (the cycles after a new path in which what the connection sees is not counted)
+	if (m_SettleCycles != 0)
+		--m_SettleCycles;
+
+	// A report is judged once: a client that got no new datagram reports the same again
+	if (newReport && (!m_ReportJudged || reportNumber != m_LastReportNumber))
 	{
+		m_ReportJudged = true;
+		m_LastReportNumber = reportNumber;
+
 		const uint32 reportDatagrams = std::max(config.ReportDatagrams, (uint32)1);
 		const sint32 sinceChange = (sint32)(reportNumber - m_LastChangeNumber);
 		// The report covers only datagrams that were sent after the last change
@@ -345,7 +359,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 			events = (congestionEvents != m_CongestionEvents) || (sendBusyDrops != m_SendBusyDrops);
 			m_CongestionEvents = congestionEvents;
 			m_SendBusyDrops = sendBusyDrops;
-			if (m_IgnoreEvents)
+			if (m_IgnoreEvents || m_SettleCycles != 0)
 			{
 				eventsIgnored = events;
 				events = false;
@@ -353,26 +367,31 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 			}
 		}
 
+		// A cut only helps where it takes something away: where a cycle gave more than half the allowance, which
+		// is what the allowance is after the cut. A client that used less than that is not held up by its stream
+		// data, whatever makes its datagrams late or its connection lose packets, and its allowance stays.
 		bool doCut = false;
 		if (late)
 		{
 			if (m_InRecovery)
 			{
-				// After a cut: the queue that stood then drains, and the lateness comes down with it. Lateness that
-				// does not come down, on datagrams that were all sent after the cut, is more than that queue.
+				// After a cut: the queue that stood then drains, and the lateness comes down with it. The reports
+				// on datagrams that were all sent after the cut are compared with each other (the report that
+				// caused the cut was of datagrams from before the queue was at its longest): lateness that does
+				// not come down, with stream data still going out, is more than that queue.
 				if (covers)
 				{
 					if (lateness < m_RecoveryLateness)
 						m_RecoveryLateness = lateness;
-					else
+					else if (usedHalfIn(m_LastChangeNumber, reportNumber - 1))
 						doCut = true;
 				}
 			}
-			else if (sinceChange >= 1 && grantedIn(reportNumber - CutCycles, reportNumber - 1) >= config.DatagramPacketBytes)
+			else if (usedHalfIn(reportNumber - CutCycles, reportNumber - 1))
 			{
-				// Stream data went out shortly before the datagrams that are late, a packet of it or more (less
-				// cannot hold a datagram up). After a raise this does not wait for a report on datagrams of after
-				// it only: the last of them is, and every cycle at the raised allowance makes the queue longer.
+				// Stream data went out shortly before the datagrams that are late. This does not wait for a report
+				// on datagrams of after the last raise only: every cycle at an allowance that is too high makes the
+				// queue longer.
 				doCut = true;
 			}
 		}
@@ -382,20 +401,21 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		}
 
 		// Congestion or a datagram not sent while stream data was going out
-		if (!doCut && events && grantedIn(sendNumber - CutCycles, sendNumber - 1) >= config.DatagramPacketBytes)
+		if (!doCut && events && usedHalfIn(sendNumber - CutCycles, sendNumber - 1))
 			doCut = true;
 
 		if (doCut)
 		{
-			cut(sendNumber, late, lateness);
+			cut(sendNumber);
 		}
 		else if (covers && !late && !events && !eventsIgnored && mayRaise && heldIn(reportNumber - reportDatagrams, reportNumber - 1))
 		{
 			// The datagrams of the report were all sent behind cycles in which the client was held at this allowance,
 			// and none of them is late
-			if (m_StartUp && lateness * 2 < config.QueueDelayTarget)
+			if (m_StartUp && lateness * 5 <= config.QueueDelayTarget)
 			{
-				// (a quarter of a small allowance is less than the step of an allowance that grows by packets)
+				// By a quarter while nothing shows at all. (A quarter of a small allowance is less than the step
+				// of an allowance that grows by packets.)
 				m_Allowance = (uint32)std::min((uint64)m_Allowance + std::max(m_Allowance / 4, config.DatagramPacketBytes), (uint64)config.StreamMaxBytesPerTick);
 			}
 			else
