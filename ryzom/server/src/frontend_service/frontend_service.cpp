@@ -2030,6 +2030,10 @@ NLMISC_COMMAND( displayStreamStats, "Display the QUIC streams of the clients of 
 			waiting += toString( " %s %u", CQuicTransceiver::streamClassName( c ), user->StreamQueues.pendingBytes( c ) );
 		std::string lateness = user->QueueDelayKnown ? toString( "datagrams %u ms late", (uint)user->QueueDelay ) : std::string( "datagram lateness not reported yet" );
 		lateness += toString( "; allowance %u%s, got %u in the last cycle; %d datagrams not sent", user->StreamAllowance.allowance(), user->StreamAllowance.startUp() ? " (starting)" : "", user->StreamLastGrant, user->SendBusyDrops.load() );
+		if ( user->StreamAllowance.declared() != 0 )
+			lateness += toString( "; says its connection carries %u bytes per second", user->StreamAllowance.declared() );
+		if ( user->StreamAllowance.noise() != 0 )
+			lateness += toString( "; %u ms of that are its path's own", user->StreamAllowance.noise() );
 		if ( user->StatValid )
 			log.displayNL( "Client %u (uid %u): waiting%s; sent and not acknowledged %d; congestion window %d, in flight %d, round trip %d ms; %s; %s", (uint)client->clientId(), client->Uid, waiting.c_str(), user->StreamOutstanding.load(), user->StatCongestionWindow.load(), user->StatBytesInFlight.load(), user->StatRtt.load() / 1000, lateness.c_str(), CQuicTransceiver::streamFaultName( user->StreamFault.load() ) );
 		else

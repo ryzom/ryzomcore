@@ -132,7 +132,9 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 	// What is left for the streams once this cycle's datagrams are out
 	sint64 pool = m_Tokens - (sint64)datagramBytes;
 	m_LastPool = pool;
-	if (pool < 0)
+	// (counted against what a whole cycle may send: a cycle that comes right behind a late one has next to no budget
+	// of its own, and its datagrams are not "above the budget" for that)
+	if ((sint64)datagramBytes > tickBudget)
 		++m_OvershootDatagrams;
 
 	// A client whose stream data starts now joins the round after the one that runs (when none runs, that is this
@@ -184,7 +186,7 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 			grantedMinimum += entry.Grant;
 		}
 	}
-	if (m_LastPool >= 0 && pool < 0)
+	if ((sint64)datagramBytes <= tickBudget && (sint64)(datagramBytes + grantedMinimum) > tickBudget)
 		++m_OvershootMinimums;
 
 	// 2. The turns of this round: the clients that wait for more and did not have their turn yet

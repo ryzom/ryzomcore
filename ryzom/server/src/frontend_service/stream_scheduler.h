@@ -190,7 +190,7 @@ public:
 	/// The round that runs, and how many cycles it has run
 	uint32 round() const { return m_Round; }
 	uint32 roundTicks() const { return m_RoundTicks; }
-	/// Cycles in which the datagrams alone were above the budget, and in which the minimums pushed it above
+	/// Cycles in which the datagrams alone were above what a cycle may send, and in which the minimums pushed it above
 	uint64 overshootDatagrams() const { return m_OvershootDatagrams; }
 	uint64 overshootMinimums() const { return m_OvershootMinimums; }
 	// @}
