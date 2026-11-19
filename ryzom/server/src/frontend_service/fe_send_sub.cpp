@@ -110,8 +110,9 @@ void checkStreamConfig(const CStreamSchedulerConfig &config, uint32 maxClients, 
 	// of their streams when all of them have stream data waiting. That goes whatever the budget, so the link has to
 	// carry it for sure.
 	const double perSecond = 1.0 / std::max(config.TickSeconds, 0.001);
-	const uint64 datagrams = (uint64)((double)maxClients * (double)(datagramBytesPerCycle + s_QuicDatagramOverhead) * perSecond);
-	const uint64 minimums = (uint64)((double)maxClients * (double)std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick) * perSecond);
+	// (rounded: a cycle of a tenth of a second is not exactly that as a number)
+	const uint64 datagrams = (uint64)((double)maxClients * (double)(datagramBytesPerCycle + s_QuicDatagramOverhead) * perSecond + 0.5);
+	const uint64 minimums = (uint64)((double)maxClients * (double)std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick) * perSecond + 0.5);
 	const uint64 guaranteed = datagrams + minimums;
 	nlinfo("FESEND: ClientLimit (%u) clients need %" NL_I64 "u bytes per second (%.1f Mbit/s) of outgoing bandwidth that the link carries for sure: %" NL_I64 "u for their datagrams (%u bytes a cycle each with what the network adds) and %" NL_I64 "u for the minimums of their QUIC streams (StreamMinBytesPerTick, %u, when all of them have stream data waiting). That goes whatever the budget; TotalOutgoingBandwidth, %u, is the most the frontend sends when the link has more",
 	    maxClients, guaranteed, (double)guaranteed * 8.0 / 1000000.0, datagrams, (uint32)(datagramBytesPerCycle + s_QuicDatagramOverhead), minimums,
