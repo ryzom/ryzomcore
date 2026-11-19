@@ -161,8 +161,9 @@ public:
 	/// clients (ClientLimit) as its link carries of that for sure, which is less than TotalOutgoingBandwidth.
 	/// quietReporting, quietLate: the same of those of them that got next to no stream data lately
 	/// (CStreamAllowance::quietLately). Where there are eight of those or more, they decide: their datagrams are late
-	/// for nothing of their own. Where there are fewer, half of all counts once it has lasted two seconds: in a wave
-	/// of logins everybody's allowance passes what its own path takes at about the same time, for half a second.
+	/// for nothing of their own. Half of them late counts with a quarter of all late, since a link that all share is
+	/// late for all. Where there are fewer, half of all counts once it has lasted two seconds: in a wave of logins
+	/// everybody's allowance passes what its own path takes at about the same time, for half a second.
 	void reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late, uint32 quietReporting, uint32 quietLate);
 	/// The last reports() found the datagrams of half the clients late: a client is not held to account for it
 	bool sharedLateness() const { return m_SharedLateness; }
@@ -317,8 +318,8 @@ public:
 	/// congestionEvents, sendBusyDrops: counters of the connection since it opened.
 	/// sharedLateness: the datagrams of half the clients are late (CStreamScheduler::sharedLateness), which is not
 	/// this client's doing: its allowance is not cut for what it reports or loses meanwhile, and not raised.
-	/// linkInDoubt: the frontend holds itself to less than its budget because of it. What a client reports meanwhile
-	/// is not taken for the noise of its path.
+	/// linkInDoubt: the frontend holds itself to less than its budget because of it. The noise of the path of a
+	/// client stays as it is known meanwhile, nothing learned and nothing forgotten.
 	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness = false, bool linkInDoubt = false);
 
 	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that.

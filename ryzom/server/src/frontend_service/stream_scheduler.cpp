@@ -83,10 +83,13 @@ void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 repo
 	// and for nothing of their own. Where there are too few of them (a wave of logins: everybody gets stream data, and
 	// everybody's allowance passes what its own path takes at about the same time), half of all the clients late
 	// counts only once it has lasted two seconds, which the start of an allowance does not.
+	// What the link of the frontend does, it does to all of them: half of the quiet ones late counts with a quarter
+	// of all the clients late. (A few clients behind one line at home, at the character selection, are half of the
+	// quiet ones of a small shard.)
 	bool sharedNow;
 	if (quietReporting >= (uint32)SharedMinReporting)
 	{
-		sharedNow = quietLate * 2 >= quietReporting;
+		sharedNow = quietLate * 2 >= quietReporting && late * 4 >= reporting;
 		m_SharedLateCycles = sharedNow ? (uint32)SharedLastingCycles : 0;
 	}
 	else
@@ -111,9 +114,12 @@ void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 repo
 			// Not under what its clients are guaranteed, which goes whatever the budget: their datagrams and the
 			// minimums of their streams. A frontend takes as many clients as its link carries of that for sure.
 			const double floor = (m_DatagramRate + m_MinimumRate) / (double)config.TotalOutgoingBandwidth;
-			m_BudgetShare = std::min(m_BudgetShare, std::max(share * 0.85, floor));
+			const double cut = std::min(m_BudgetShare, std::max(share * 0.85, floor));
+			// (at the floor nothing is cut)
+			if (cut < m_BudgetShare)
+				++m_BudgetCuts;
+			m_BudgetShare = cut;
 			m_SharedCyclesSinceCut = 0;
-			++m_BudgetCuts;
 		}
 	}
 	else
@@ -414,8 +420,9 @@ bool CStreamAllowance::busyIn(uint32 firstNumber, uint32 lastNumber) const
 			return true;
 		sum += cycle.Granted;
 	}
-	// A string now and then is not what makes datagrams late: an eighth of what one cycle may give, in all of them
-	return sum > std::max(m_Allowance / 8, (uint32)64);
+	// A string now and then is not what makes datagrams late: an eighth of what one cycle may give, in all of them,
+	// and a line of chat in any case, however low the allowance
+	return sum > std::max(m_Allowance / 8, (uint32)600);
 }
 
 bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
@@ -549,7 +556,11 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 
 	// A client that always has a little stream data never reports without any: what was learned of its path then
 	// does not stay for ever (a bad second would count as its noise from then on), it goes after two minutes at most
-	if (++m_NoiseCycles >= (uint32)NoiseCycles)
+	// While the frontend holds itself back for its link, the noise that is known stays as it is: nothing is learned
+	// (a queue at that link that comes and goes under the target would be learned by everybody, stretch after
+	// stretch), and nothing is forgotten (a link that carries less than the budget for an evening would leave every
+	// path with jitter without its noise, and each report of it a reason for a cut).
+	if (!linkInDoubt && ++m_NoiseCycles >= (uint32)NoiseCycles)
 	{
 		m_NoiseBefore = m_NoiseNow;
 		m_NoiseNow = 0;

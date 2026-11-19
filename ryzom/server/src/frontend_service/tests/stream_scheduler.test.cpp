@@ -1076,6 +1076,59 @@ TEST(StreamScheduler, AMinorityDoesNotHoldTheBudgetDown)
 	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 }
 
+// What the link of the frontend does, it does to all the clients: half of the quiet ones late, with next to none of
+// the others, is something those few share (one line at home), and the budget stays
+TEST(StreamScheduler, QuietClientsDecideWithAQuarterOfAll)
+{
+	CBudgetRun run(20);
+	run.Config.TotalOutgoingBandwidth = 1000000;
+	run.DatagramBytes = 40000;
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(40, 0, 10, 0);
+	for (uint t = 0; t < 300; ++t)
+		run.cycle(40, 5, 10, 5);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)0);
+	// with a quarter of all: at once
+	run.cycle(40, 10, 10, 5);
+	EXPECT_TRUE(run.Scheduler.sharedLateness());
+	EXPECT_LT(run.Scheduler.budget(run.Config), 870000u);
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)1);
+}
+
+// Without quiet clients, half of all late has to last two seconds before the budget goes down. Once it is down, the
+// frontend knows what it looks at: the next time counts at once, until the budget is whole again.
+TEST(StreamScheduler, NoWaitingWhileTheBudgetIsDown)
+{
+	CBudgetRun run(20);
+	run.Config.TotalOutgoingBandwidth = 1000000;
+	run.DatagramBytes = 40000;
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(20, 0);
+	for (uint t = 0; t < 20; ++t)
+		run.cycle(20, 12);
+	EXPECT_TRUE(run.Scheduler.sharedLateness());
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)1);
+	const uint32 down = run.Scheduler.budget(run.Config);
+	EXPECT_LT(down, 870000u);
+	// on time for half a second, and late again: no two seconds this time
+	for (uint t = 0; t < 5; ++t)
+		run.cycle(20, 0);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+	run.cycle(20, 12);
+	EXPECT_TRUE(run.Scheduler.sharedLateness());
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)2);
+	EXPECT_LT(run.Scheduler.budget(run.Config), down);
+	// whole again: it has to last again
+	for (uint t = 0; t < 5000 && run.Scheduler.budget(run.Config) < 1000000u; ++t)
+		run.cycle(20, 0);
+	ASSERT_EQ(run.Scheduler.budget(run.Config), 1000000u);
+	run.cycle(20, 12);
+	EXPECT_FALSE(run.Scheduler.sharedLateness());
+	EXPECT_EQ(run.Scheduler.budgetCuts(), (uint64)2);
+}
+
 // While the datagrams of half the clients are late, that is not held against any one of them
 TEST(StreamAllowance, SharedLatenessIsNotTheClientsDoing)
 {
@@ -1207,6 +1260,183 @@ TEST(StreamAllowance, NoiseOfThePathIsNotLateness)
 		allowance.granted(0, false);
 	}
 	EXPECT_EQ(allowance.noise(), 2u);
+}
+
+// For the count of the clients whose datagrams are late, the noise is that of the stretches that are done: what the
+// running stretch sees can be the queue at the frontend's link as it grows, which every client would learn
+TEST(StreamAllowance, LateForTheCountIsAboveTheNoiseThatWasSettled)
+{
+	CStreamSchedulerConfig config;
+	CStreamAllowance allowance;
+	allowance.reset(config);
+	uint32 number = 100;
+	for (uint i = 0; i < 149; ++i, ++number)
+	{
+		allowance.update(config, true, i % 6, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	// before a stretch is done, every report above the target is late
+	EXPECT_EQ(allowance.noise(), 5u);
+	EXPECT_TRUE(allowance.isLate(config, 24));
+	allowance.update(config, true, 5, number - 2, number, 0, 0);
+	allowance.granted(0, false);
+	++number;
+	EXPECT_FALSE(allowance.isLate(config, 25));
+	EXPECT_TRUE(allowance.isLate(config, 26));
+	// reports of 40 in the stretch that runs: noise for the client's own allowance, and late all the same
+	for (uint i = 0; i < 100; ++i, ++number)
+	{
+		allowance.update(config, true, 40, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 40u);
+	EXPECT_TRUE(allowance.isLate(config, 40));
+	// that stretch done: it is what the path does
+	for (uint i = 0; i < 50; ++i, ++number)
+	{
+		allowance.update(config, true, 40, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_FALSE(allowance.isLate(config, 40));
+	EXPECT_TRUE(allowance.isLate(config, 61));
+	// a new path: from nothing again
+	allowance.reset(config);
+	EXPECT_TRUE(allowance.isLate(config, 21));
+}
+
+// While the frontend holds itself back for its link, the noise of a path stays as it is known: nothing learned,
+// nothing forgotten, however long it lasts
+TEST(StreamAllowance, NoiseStaysWhileTheFrontendHoldsItselfBack)
+{
+	CStreamSchedulerConfig config;
+	CStreamAllowance allowance;
+	allowance.reset(config);
+	uint32 number = 100;
+	for (uint i = 0; i < 150; ++i, ++number)
+	{
+		allowance.update(config, true, i % 31, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 30u);
+	// three minutes of it, with reports of 45: the queue at the link, on top of the path
+	for (uint i = 0; i < 1800; ++i, ++number)
+	{
+		allowance.update(config, true, 45, number - 2, number, 0, 0, false, true);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 30u);
+	EXPECT_FALSE(allowance.isLate(config, 45));
+	EXPECT_TRUE(allowance.isLate(config, 51));
+	// stream data now: within the target above the noise, no cut
+	const uint32 before = allowance.allowance();
+	for (uint i = 0; i < 12; ++i, ++number)
+	{
+		allowance.update(config, true, 45, number - 2, number, 0, 0, false, true);
+		allowance.granted(allowance.allowance(), true);
+	}
+	EXPECT_GE(allowance.allowance(), before);
+	// the budget whole again: learning as before
+	for (uint i = 0; i < 40; ++i, ++number)
+	{
+		allowance.update(config, true, 2, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	for (uint i = 0; i < 300; ++i, ++number)
+	{
+		allowance.update(config, true, 2, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.noise(), 2u);
+
+	// A client that connects meanwhile learns nothing either, and what it reports is late from the target on
+	CStreamAllowance newcomer;
+	newcomer.reset(config);
+	number = 100;
+	for (uint i = 0; i < 700; ++i, ++number)
+	{
+		newcomer.update(config, true, i % 41, number - 2, number, 0, 0, false, true);
+		newcomer.granted(0, false);
+	}
+	EXPECT_EQ(newcomer.noise(), 0u);
+	EXPECT_TRUE(newcomer.isLate(config, 21));
+	// (nor does any client in the cycles in which the datagrams of half the clients are late)
+	CStreamAllowance other;
+	other.reset(config);
+	number = 100;
+	for (uint i = 0; i < 150; ++i, ++number)
+	{
+		other.update(config, true, 70, number - 2, number, 0, 0, true, false);
+		other.granted(0, false);
+	}
+	EXPECT_EQ(other.noise(), 0u);
+}
+
+// "Next to no stream data" is an eighth of the allowance in the cycles before a report, and not less than a line of
+// chat: a client whose allowance was cut low still learns the noise of its path while it plays
+TEST(StreamAllowance, ALineOfChatIsNextToNoStreamData)
+{
+	CStreamSchedulerConfig config;
+	// (23 cycles count for a report: 20 and the 3 datagrams it is on)
+	{
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		ASSERT_EQ(allowance.allowance(), 8192u);
+		uint32 number = 100;
+		for (uint i = 0; i < 60; ++i, ++number)
+		{
+			allowance.update(config, true, 30, number - 2, number, 0, 0);
+			allowance.granted(40, false); // 920 in 23 cycles, under 1024
+		}
+		EXPECT_TRUE(allowance.quietLately());
+		EXPECT_EQ(allowance.noise(), 30u);
+	}
+	{
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		uint32 number = 100;
+		for (uint i = 0; i < 60; ++i, ++number)
+		{
+			allowance.update(config, true, 30, number - 2, number, 0, 0);
+			allowance.granted(60, false); // 1380
+		}
+		EXPECT_FALSE(allowance.quietLately());
+		// (the first reports were on datagrams of before the stream data)
+		EXPECT_EQ(allowance.noise(), 30u);
+		for (uint i = 0; i < 1300; ++i, ++number)
+		{
+			allowance.update(config, true, 30, number - 2, number, 0, 0);
+			allowance.granted(60, false);
+		}
+		EXPECT_EQ(allowance.noise(), 0u);
+	}
+	// A low allowance: an eighth of it would be 50 bytes, and a line of 300 every two seconds too much
+	config.StreamMinChunk = 400;
+	{
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		ASSERT_EQ(allowance.allowance(), 400u);
+		uint32 number = 100;
+		for (uint i = 0; i < 200; ++i, ++number)
+		{
+			allowance.update(config, true, 30, number - 2, number, 0, 0);
+			allowance.granted(i % 20 == 0 ? 300 : 0, false);
+			if (i > 30)
+				EXPECT_TRUE(allowance.quietLately()) << "cycle " << i;
+		}
+		EXPECT_EQ(allowance.noise(), 30u);
+		EXPECT_FALSE(allowance.isLate(config, 50));
+	}
+	{
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		uint32 number = 100;
+		for (uint i = 0; i < 60; ++i, ++number)
+		{
+			allowance.update(config, true, 30, number - 2, number, 0, 0);
+			allowance.granted(40, false); // 920, above 600
+		}
+		EXPECT_FALSE(allowance.quietLately());
+	}
 }
 
 // An allowance far above what the path takes, with the congestion window of the connection holding the client back:

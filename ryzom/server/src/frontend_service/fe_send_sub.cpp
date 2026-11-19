@@ -483,8 +483,8 @@ void	CFeSendSub::grantStreams()
 	{
 		m_StreamBudgetShort = budgetShort;
 		if (budgetShort)
-			nlwarning("FESEND: the datagrams of %u of the %u clients that report it arrive late at once, which is taken for the link of the frontend carrying less than TotalOutgoingBandwidth (%u bytes per second): the QUIC streams are held to less until it carries that again",
-			    reportingLate, reporting, config.TotalOutgoingBandwidth);
+			nlwarning("FESEND: the datagrams of %u of the %u clients that report it arrive late at once (%u of the %u of them that get next to no stream data), which is taken for the link of the frontend carrying less than TotalOutgoingBandwidth (%u bytes per second): the QUIC streams are held to less until it carries that again",
+			    reportingLate, reporting, quietLate, quietReporting, config.TotalOutgoingBandwidth);
 		else
 			nlinfo("FESEND: the QUIC streams have all of TotalOutgoingBandwidth (%u bytes per second) again", config.TotalOutgoingBandwidth);
 	}
