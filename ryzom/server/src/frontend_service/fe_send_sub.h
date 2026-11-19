@@ -145,6 +145,9 @@ public:
 	}
 
 	uint32 clientBandwidth() const { return _ClientBitBandwidth; }
+
+	/// The same for a client whose connection has QUIC streams (StreamClientBandwidth), in bits
+	uint32 streamClientBandwidth() const;
 	
 	uint32 totalBandwidth() const { return _TotalBitBandwidth; }
 

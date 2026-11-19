@@ -330,15 +330,18 @@ public:
 	/// Return the cardinal direction from the player to the seen entity
 	const char *		getDirection( CEntity *seenEntity, const TEntityIndex& seenEntityIndex ) const;
 
-	/// Initialize the client bandwidth (calls setClientBandwidth)
+	/// Initialize the client bandwidth (calls setClientBandwidth) and the sizes of its impulsion channels: those of
+	/// a client whose connection has QUIC streams, or those of the others
 	void				initClientBandwidth();
+	/// The connection of the client has QUIC streams (protocol level ryzomcore/4.2)
+	bool				hasStreams() const;
 
 	/// Change the client bandwidth (set the nomimal size)
 	void				setClientBandwidth( sint32 cbw )
 	{
 		_MaxOutboxSizeInBit = cbw;
 		_BitBandwidthUsageAvg = _MaxOutboxSizeInBit;
-		_BitImpulsionUsageAvg = MaxImpulseBitSizes[2];
+		_BitImpulsionUsageAvg = (sint32)ImpulseEncoder.maxBitSize(2);
 		_ImpulsionPrevRemainingActions = 0;
 	}
 

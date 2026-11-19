@@ -22,7 +22,7 @@
 #include <algorithm>
 
 CStreamSchedulerConfig::CStreamSchedulerConfig()
-    : TotalOutgoingBandwidth(5000000)
+    : TotalOutgoingBandwidth(10000000)
     , StreamMinBytesPerTick(200)
     , StreamMaxBytesPerTick(65536)
     , StreamMinChunk(8192)

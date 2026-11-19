@@ -54,6 +54,8 @@ typedef void	(*TImpulseReceivedCallback)(CClientHost *, CLFECOMMON::CAction *);
 // CActionFactory header + CActionGeneric header + 1/8 (the follow bit)
 const sint IMPULSE_ACTION_HEADER_BITSIZE = 4*8 + 4*8 + 1;
 extern uint MaxImpulseBitSizes [3];
+/// The same for a client whose connection has QUIC streams (StreamImpulsionByteSize0 to 2)
+extern uint MaxStreamImpulseBitSizes [3];
 
 
 class CClientImpulseStat
@@ -213,6 +215,9 @@ private:
 
 	CClientHost						*_ClientHost;
 
+	/// MaxImpulseBitSizes or MaxStreamImpulseBitSizes
+	const uint						*_MaxBitSizes;
+
 	//uint							_MaxBitSizes[4];
 
 	std::vector<uint8>				_QueuedImpulses;
@@ -239,7 +244,11 @@ public:
 	~CImpulseEncoder();
 
 	/// Return the number of bits that the specified level can manage (biggest action it can manage) (no bound check)
-	static uint						maxBitSize( uint level ) { return MaxImpulseBitSizes[level]; }
+	uint							maxBitSize( uint level ) const { return _MaxBitSizes[level]; }
+
+	/// The client's connection has QUIC streams, or not (the default): its impulsion channels have the sizes of
+	/// StreamImpulsionByteSize0 to 2, or of ImpulsionByteSize0 to 2. To call before anything is queued.
+	void							setStreams( bool streams );
 
 	/// Return the number of bits that can be sent at most using all levels
 	static uint						maxBitSizeTotal() { return MaxImpulseBitSizes[0]+MaxImpulseBitSizes[1]+MaxImpulseBitSizes[2] - - (IMPULSE_ACTION_HEADER_BITSIZE*3/8); }

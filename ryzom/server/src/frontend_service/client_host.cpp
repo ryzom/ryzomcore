@@ -164,7 +164,17 @@ void CClientHost::setReceiveTimeNow()
  */
 void CClientHost::initClientBandwidth()
 {
-	setClientBandwidth( CFrontEndService::instance()->sendSub()->clientBandwidth() );
+	// A client with streams gets its large messages on them. Its datagrams and their impulsion channels are of the
+	// sizes for such clients, which a shard that gives the others more (BandwidthRatio) has no reason to raise.
+	const bool streams = hasStreams();
+	ImpulseEncoder.setStreams( streams );
+	CFeSendSub *sendSub = CFrontEndService::instance()->sendSub();
+	setClientBandwidth( streams ? sendSub->streamClientBandwidth() : sendSub->clientBandwidth() );
+}
+
+bool CClientHost::hasStreams() const
+{
+	return QuicUser.get() != NULL && QuicUser->Streams;
 }
 
 
