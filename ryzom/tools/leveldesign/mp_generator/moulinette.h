@@ -114,11 +114,23 @@ CraftPart craftParts[NumMPCraftParts];
 // .creature files list
 map<string, string>	creatureFiles;
 
+// The raw material assignment files that exist (_<creature>_mp.creature), by file name without extension
+map<string, string>	assignmentFiles;
+
+// The raw materials assigned to each creature in this run, in order, by creature file name without extension
+map<string, vector<CSString> >	creatureAssignments;
+
 // generated names for each item
 CSortedStringSet itemNames;
 
 // Items list to generate for each creature code
 map<CSString, ListeCreatureMP> itemsAGenerer;
+
+// The creature model name of each creature code of creature_models.csv, by code in lower case
+map<CSString, CSString> creatureModelNames;
+
+// The creature codes ("chd") whose raw materials were generated, each needs its parent sheet (_mchd.sitem)
+set<CSString> generatedCreatureCodes;
 
 // MP Family list
 class CMPFamily
@@ -140,7 +152,8 @@ CSString ITEM_MP_FAMILY_TYP;
 CSString ITEM_MP_GROUPE_TYP;
 CSString ITEM_MP_PARAM_DFN;
 CSString MP_DIRECTORY;
-CSString DEPOSIT_MPS; 
+CSString DEPOSIT_MPS;
+CSString CREATURE_PATH;
 CSString RAW_MATERIAL_ASSIGN;
 CSString IC_FAMILIES_FORAGE_SOURCE;
 
