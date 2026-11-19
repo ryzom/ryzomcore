@@ -19,6 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
+#include <string>
+
 #include <deque>
 #include <memory>
 #include <vector>
@@ -59,6 +61,13 @@ public:
 	/// Take the next bytes of a class out, at most maxBytes of them. Returns how many were written to dst.
 	uint32 take(uint streamClass, uint8 *dst, uint32 maxBytes);
 
+	/// Share what a client gets in a cycle between its classes: each class with bytes waiting gets a part by its
+	/// weight (weights[class]; 1 without one), and what a class does not need goes to the others. shares gets a value
+	/// per class; they add up to bytes, or to all that waits if that is less. Whatever the sizes of the records and of
+	/// the grants, the classes get their parts: a class cannot be starved by another, and a large record in one class
+	/// does not hold the others up.
+	void share(uint32 bytes, const std::vector<uint32> &weights, std::vector<uint32> &shares);
+
 	/// The session on the connection ends and the connection is kept: the records of which nothing was taken yet are
 	/// dropped, a record that was begun stays (the stream cannot be cut inside a record), and each of the nbClasses
 	/// classes of the frontend gets the record that marks the end of the session, before which the client drops what
@@ -86,7 +95,13 @@ private:
 
 	std::vector<CQueue> m_Queues; // by class, as far as one was used
 	uint32 m_PendingBytes;
+	uint32 m_ShareCursor; // the class that gets the first of the bytes a division leaves over
 };
+
+/// The weights of the classes for CStreamQueues::share, out of what an operator writes: "name=weight" for some of
+/// the classes, with spaces between them (StreamClassWeights of the frontend service). A class that is not named has
+/// 1, and so has one with a weight of 0. faults gets a text for each part that is not that, or names no class.
+void parseStreamClassWeights(const std::string &text, const std::vector<std::string> &classNames, std::vector<uint32> &weights, std::vector<std::string> &faults);
 
 #endif // NL_STREAM_QUEUES_H
 

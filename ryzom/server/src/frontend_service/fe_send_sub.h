@@ -268,6 +268,11 @@ private:
 	/// The budget of the frontend for all it sends, and the turns of the clients (main thread)
 	CStreamScheduler		m_StreamScheduler;
 	std::vector<CStreamScheduler::CEntry> m_StreamEntries;
+	/// What each class of a client gets of its grant (scratch), and the weights of the classes with the text of
+	/// StreamClassWeights that they were read from
+	std::vector<uint32>		m_StreamShares;
+	std::vector<uint32>		m_StreamClassWeights;
+	std::string				m_StreamClassWeightsText;
 	NLMISC::TTime			m_StreamLastTime;
 	uint64					m_StreamLastEgress;
 	bool					m_StreamStarted;

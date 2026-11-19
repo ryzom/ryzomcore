@@ -57,6 +57,7 @@ CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes 
 CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth (but out of what is left, in turns, while the frontend holds itself to less because the datagrams of half its clients arrive late)", 200, 0, true);
 CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);
 CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 8192, 0, true);
+CVariable<std::string>	StreamClassWeights("fs", "StreamClassWeights", "How a client's stream data of one cycle is shared between its classes that have some waiting, as name=weight with spaces between; a class that is not named has 1", "strings=2 chat=1 login=2 gateway=2", 0, true);
 CVariable<uint32>	QueueDelayTarget("fs", "QueueDelayTarget", "Milliseconds the datagrams may reach a client late before the frontend sends it less on its QUIC streams", 20, 0, true);
 // clang-format on
 
@@ -449,6 +450,21 @@ void	CFeSendSub::grantStreams()
 			nlinfo("FESEND: the QUIC streams have all of TotalOutgoingBandwidth (%u bytes per second) again", config.TotalOutgoingBandwidth);
 	}
 
+	// The weights of the classes, when they or the classes change
+	const uint nbClasses = CQuicTransceiver::streamClassCount();
+	if (m_StreamClassWeights.size() != nbClasses || m_StreamClassWeightsText != StreamClassWeights.get())
+	{
+		m_StreamClassWeightsText = StreamClassWeights.get();
+		std::vector<std::string> classNames(nbClasses);
+		for (uint i = 0; i < nbClasses; ++i)
+			classNames[i] = CQuicTransceiver::streamClassName(i);
+		std::vector<std::string> faults;
+		parseStreamClassWeights(m_StreamClassWeightsText, classNames, m_StreamClassWeights, faults);
+		// (a class that msg.xml does not have yet may well be named: the default names the four of the design)
+		for (size_t i = 0; i < faults.size(); ++i)
+			nlinfo("FESEND: StreamClassWeights: %s", faults[i].c_str());
+	}
+
 	uint64 datagramBytes = 0;
 	m_StreamEntries.clear();
 	for (size_t id = 0; id < _ClientIdCont.size(); ++id)
@@ -527,13 +543,11 @@ void	CFeSendSub::grantStreams()
 		user->StreamAllowance.granted(entry.Grant, entry.Pending > entry.Grant, user->StreamWindowLimited && entry.Grant == entry.Window);
 		user->StreamLastGrant = entry.Grant;
 
-		// The classes in their order (only one class has messages so far, they get shares of the grant once there
-		// are more)
-		uint32 left = entry.Grant;
-		const uint nbClasses = CQuicTransceiver::streamClassCount();
-		for (uint streamClass = 0; streamClass < nbClasses && left != 0; ++streamClass)
+		// Each class its part of the grant
+		queues.share(entry.Grant, m_StreamClassWeights, m_StreamShares);
+		for (uint streamClass = 0; streamClass < nbClasses && streamClass < m_StreamShares.size(); ++streamClass)
 		{
-			uint32 size = std::min(left, queues.pendingBytes(streamClass));
+			uint32 size = m_StreamShares[streamClass];
 			if (size == 0)
 				continue;
 			CQuicStreamSend *send = CQuicTransceiver::createStreamSend(size);
@@ -542,7 +556,6 @@ void	CFeSendSub::grantStreams()
 			user->StreamOutstanding.fetchAdd((int)size);
 			user->StreamGrantedCount.fetchAdd((int)size);
 			m_FillingStreamPosts->push_back(CStreamPost(user, (uint8)streamClass, send));
-			left -= size;
 			s_StreamBytesGranted += size;
 		}
 	}

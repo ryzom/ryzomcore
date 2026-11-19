@@ -18,6 +18,9 @@
 #include "stream_queues.h"
 
 #include "nel/misc/debug.h"
+#include "nel/misc/string_common.h"
+#include "nel/misc/common.h"
+#include "nel/misc/algo.h"
 
 #include <algorithm>
 #include <cstring>
@@ -50,6 +53,7 @@ const TStreamRecord &boundaryRecord()
 CStreamQueues::CStreamQueues()
     : Refusing(false)
     , m_PendingBytes(0)
+    , m_ShareCursor(0)
 {
 }
 
@@ -116,6 +120,103 @@ void CStreamQueues::endSession(uint nbClasses)
 		queue.PendingBytes = keptBytes;
 
 		push(i, boundaryRecord());
+	}
+}
+
+void CStreamQueues::share(uint32 bytes, const std::vector<uint32> &weights, std::vector<uint32> &shares)
+{
+	const size_t nbClasses = m_Queues.size();
+	shares.assign(nbClasses, 0);
+	uint32 left = std::min(bytes, m_PendingBytes);
+	while (left != 0)
+	{
+		// The classes that still want some, and their weights
+		uint64 sumWeights = 0;
+		for (size_t c = 0; c < nbClasses; ++c)
+		{
+			if (m_Queues[c].PendingBytes > shares[c])
+				sumWeights += (c < weights.size() && weights[c] != 0) ? weights[c] : 1;
+		}
+		if (sumWeights == 0)
+			break;
+
+		// A class that wants no more than its part has it, and what it leaves is shared again
+		bool satisfied = false;
+		uint32 given = 0;
+		for (size_t c = 0; c < nbClasses; ++c)
+		{
+			const uint32 want = m_Queues[c].PendingBytes - shares[c];
+			if (want == 0)
+				continue;
+			const uint32 weight = (c < weights.size() && weights[c] != 0) ? weights[c] : 1;
+			const uint32 part = (uint32)((uint64)left * weight / sumWeights);
+			if (part >= want)
+			{
+				shares[c] += want;
+				given += want;
+				satisfied = true;
+			}
+		}
+		if (satisfied)
+		{
+			left -= given;
+			continue;
+		}
+
+		// All of them want more than their part: each gets it, and the bytes that the division leaves over go one by
+		// one from where they started the last time
+		for (size_t c = 0; c < nbClasses; ++c)
+		{
+			if (m_Queues[c].PendingBytes <= shares[c])
+				continue;
+			const uint32 weight = (c < weights.size() && weights[c] != 0) ? weights[c] : 1;
+			const uint32 part = (uint32)((uint64)left * weight / sumWeights);
+			shares[c] += part;
+			given += part;
+		}
+		left -= given;
+		for (size_t n = 0; n < nbClasses && left != 0; ++n)
+		{
+			const size_t c = (m_ShareCursor + n) % nbClasses;
+			if (m_Queues[c].PendingBytes > shares[c])
+			{
+				++shares[c];
+				--left;
+			}
+		}
+		m_ShareCursor = (uint32)((m_ShareCursor + 1) % nbClasses);
+		break;
+	}
+}
+
+void parseStreamClassWeights(const std::string &text, const std::vector<std::string> &classNames, std::vector<uint32> &weights, std::vector<std::string> &faults)
+{
+	weights.assign(classNames.size(), 1);
+	faults.clear();
+	std::vector<std::string> parts;
+	NLMISC::splitString(text, " ", parts);
+	for (size_t i = 0; i < parts.size(); ++i)
+	{
+		const std::string &part = parts[i];
+		if (part.empty())
+			continue;
+		const std::string::size_type equals = part.find('=');
+		uint32 weight = 0;
+		if (equals == std::string::npos || equals == 0 || !NLMISC::fromString(part.substr(equals + 1), weight))
+		{
+			faults.push_back(NLMISC::toString("'%s' is not a class and its weight, as in strings=2", part.c_str()));
+			continue;
+		}
+		const std::string name = part.substr(0, equals);
+		size_t c = 0;
+		while (c < classNames.size() && classNames[c] != name)
+			++c;
+		if (c == classNames.size())
+		{
+			faults.push_back(NLMISC::toString("'%s' is not a stream class of msg.xml", name.c_str()));
+			continue;
+		}
+		weights[c] = weight != 0 ? weight : 1;
 	}
 }
 

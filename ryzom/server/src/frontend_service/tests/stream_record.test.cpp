@@ -451,6 +451,103 @@ TEST(StreamQueues, SessionEnd)
 	sessionEnd(1010); // inside the second record
 }
 
+// What a client gets in a cycle is shared between its classes by their weights, whatever the sizes of the records
+TEST(StreamQueues, ClassesShareAGrant)
+{
+	std::vector<uint8> big = message(200000, 1);
+	std::vector<uint8> small = message(40, 2);
+	std::vector<uint32> weights;
+	weights.push_back(2); // strings
+	weights.push_back(1); // chat
+	weights.push_back(2); // login
+	std::vector<uint32> shares;
+	std::vector<uint8> scratch(70000);
+
+	// All three have more than they get: 2 to 1 to 2, to the byte over many cycles of an odd size
+	{
+		CStreamQueues queues;
+		for (uint c = 0; c < 3; ++c)
+			queues.push(c, makeStreamRecord(&big[0], (uint32)big.size()));
+		uint64 total[3] = { 0, 0, 0 };
+		for (uint t = 0; t < 1000; ++t)
+		{
+			queues.share(101, weights, shares);
+			ASSERT_EQ(shares.size(), (size_t)3);
+			EXPECT_EQ(shares[0] + shares[1] + shares[2], 101u);
+			for (uint c = 0; c < 3; ++c)
+			{
+				EXPECT_EQ(queues.take(c, &scratch[0], shares[c]), shares[c]);
+				total[c] += shares[c];
+			}
+		}
+		EXPECT_NEAR((double)total[0], 101000.0 * 2 / 5, 400.0);
+		EXPECT_NEAR((double)total[1], 101000.0 * 1 / 5, 400.0);
+		EXPECT_NEAR((double)total[2], 101000.0 * 2 / 5, 400.0);
+	}
+
+	// A class that wants less than its part leaves the rest to the others, and one that has nothing gets nothing
+	{
+		CStreamQueues queues;
+		queues.push(0, makeStreamRecord(&big[0], (uint32)big.size()));
+		queues.push(1, makeStreamRecord(&small[0], (uint32)small.size()));
+		queues.share(1000, weights, shares);
+		const uint32 smallRecord = queues.pendingBytes(1);
+		ASSERT_GE(shares.size(), (size_t)2);
+		EXPECT_EQ(shares[1], smallRecord);
+		EXPECT_EQ(shares[0], 1000 - smallRecord);
+		if (shares.size() > 2)
+			EXPECT_EQ(shares[2], 0u);
+	}
+
+	// More than all that waits: all of it
+	{
+		CStreamQueues queues;
+		queues.push(0, makeStreamRecord(&small[0], (uint32)small.size()));
+		queues.push(2, makeStreamRecord(&small[0], (uint32)small.size()));
+		const uint32 pending = queues.pendingBytes();
+		queues.share(60000, weights, shares);
+		ASSERT_EQ(shares.size(), (size_t)3);
+		EXPECT_EQ(shares[0] + shares[1] + shares[2], pending);
+		EXPECT_EQ(shares[0], queues.pendingBytes(0));
+		EXPECT_EQ(shares[2], queues.pendingBytes(2));
+	}
+
+	// Without weights every class has 1; nothing waits, nothing is shared
+	{
+		CStreamQueues queues;
+		queues.share(500, std::vector<uint32>(), shares);
+		EXPECT_TRUE(shares.empty());
+		for (uint c = 0; c < 2; ++c)
+			queues.push(c, makeStreamRecord(&big[0], (uint32)big.size()));
+		queues.share(500, std::vector<uint32>(), shares);
+		ASSERT_EQ(shares.size(), (size_t)2);
+		EXPECT_EQ(shares[0], 250u);
+		EXPECT_EQ(shares[1], 250u);
+	}
+}
+
+TEST(StreamQueues, ClassWeightsAsWritten)
+{
+	std::vector<std::string> names;
+	names.push_back("strings");
+	names.push_back("login");
+	std::vector<uint32> weights;
+	std::vector<std::string> faults;
+	parseStreamClassWeights("strings=2 chat=1 login=3 gateway=2", names, weights, faults);
+	ASSERT_EQ(weights.size(), (size_t)2);
+	EXPECT_EQ(weights[0], 2u);
+	EXPECT_EQ(weights[1], 3u);
+	EXPECT_EQ(faults.size(), (size_t)2); // (two classes that this msg.xml does not have)
+	parseStreamClassWeights("", names, weights, faults);
+	EXPECT_EQ(weights[0], 1u);
+	EXPECT_EQ(weights[1], 1u);
+	EXPECT_TRUE(faults.empty());
+	parseStreamClassWeights("login=0  strings login=x =4", names, weights, faults);
+	EXPECT_EQ(weights[0], 1u);
+	EXPECT_EQ(weights[1], 1u);
+	EXPECT_EQ(faults.size(), (size_t)3);
+}
+
 } /* anonymous namespace */
 
 /* end of file */
