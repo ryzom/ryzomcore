@@ -190,7 +190,11 @@ public:
 	/// instanciate a charge mission
 	void instanciateChargeMission(TAIAlias  alias, TAIAlias giver, CGuild * guild );
 	/// instanciate a mission for a specific player 
-	void instanciateMission(CCharacter* user,TAIAlias alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission = CAIAliasTranslator::Invalid);
+	/// false if the mission was not given (prerequisites, a full journal...); a mission that was given can have ended
+	/// already, by its first actions
+	bool instanciateMission(CCharacter* user,TAIAlias alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission = CAIAliasTranslator::Invalid);
+	/// a mission loaded with its character is an instance of its template again, and holds its mono mission again
+	void instanciateLoadedMission(CMission * mission);
 	/// deinstanciate a mission From this manager. It doesnt delete it, nor does it remove it from a character
 	void deInstanciateMission(CMission * mission);
 	/// tell the system that a mission was done for the first time

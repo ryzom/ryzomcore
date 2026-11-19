@@ -173,8 +173,9 @@ public:
 	/// update taker compass. return the number of entries
 	uint updateCompass(CCharacter & user, const std::string & dbPrefix );
 
-	/// apply the consequences of a crash to this mission
-	void applyCrashHandler(bool EGSCrash, const std::string & AIInstanceName );
+	/// apply the consequences of a crash to this mission: a restart of this service (EGSCrash), or the crash of the AI
+	/// service that had the AI instances named
+	void applyCrashHandler(bool EGSCrash, const std::vector<std::string> & AIInstanceNames );
 	
 	/// apply the consequences of a player reconnection
 	void applyPlayerReconnectHandler();

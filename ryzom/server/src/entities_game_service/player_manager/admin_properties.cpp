@@ -22,6 +22,10 @@
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "team_manager/team_manager.h"
+#include "guild_manager/guild_manager.h"
+#include "guild_manager/guild.h"
+#include "mission_manager/mission_team.h"
+#include "mission_manager/mission_guild.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -80,33 +84,47 @@ void CAdminProperties::updateCSRJournal( CCharacter * user, CMission * mission,u
 
 CMission* CAdminProperties::getMission(uint indexInJournal) const
 {
-/*
 	if (!_Data) return NULL;
 
 	CCharacter *user = PlayerManager.getChar(_Data->MissionUser);
 	if (!user)
 		return NULL;
 
-	CMission *mission = NULL;
-	if (indexInJournal < user->getMissions().size())
-		return (CMission*)user->getMissions()[indexInJournal];
-
+	// The solo missions come first, by their entry in the journal. The entries of the group journal follow: those of
+	// the team, then those of the guild (the journal entry of a guild mission counts from the end of the team's).
+	if (indexInJournal < MaxSoloMissionCount)
+	{
+		for (map<TAIAlias, CMission *>::iterator it = user->getMissionsBegin(); it != user->getMissionsEnd(); ++it)
+		{
+			if ((*it).second->getClientIndex() == indexInJournal)
+				return (*it).second;
+		}
+		return NULL;
+	}
 
 	indexInJournal -= MaxSoloMissionCount;
-	CTeam * team = TeamManager.getTeam( user->getTeamId() );
-	if (team)
+	if (indexInJournal < MaxGroupMissionCount)
 	{
-		if ( indexInJournal < team->getMissions().size() )
-			return (CMission*) team->getMissions()[indexInJournal];
+		CTeam *team = TeamManager.getRealTeam(user->getTeamId());
+		if (team)
+		{
+			for (uint i = 0; i < team->getMissions().size(); i++)
+			{
+				if (team->getMissions()[i]->getClientIndex() == indexInJournal)
+					return team->getMissions()[i];
+			}
+		}
+		return NULL;
 	}
 
-	indexInJournal-= ( MaxGroupMissionCount);
-	CGuild * guild = user->getGuild();
-	if (guild )
+	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(user->getGuildId());
+	if (guild)
 	{
-		if ( indexInJournal < guild->getMissions().size() )
-			return(CMission*) guild->getMissions()[indexInJournal];
+		for (uint i = 0; i < guild->getMissions().size(); i++)
+		{
+			if (guild->getMissions()[i]->getClientIndex() == indexInJournal)
+				return guild->getMissions()[i];
+		}
 	}
-*/
 	return NULL;
 }

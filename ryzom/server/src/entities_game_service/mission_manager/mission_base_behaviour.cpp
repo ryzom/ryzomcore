@@ -98,6 +98,7 @@ void CMissionBaseBehaviour::onLoad()
 void CMissionBaseBehaviour::putInGame()
 {
 	nlassert( _Mission );
+	CMissionManager::getInstance()->instanciateLoadedMission(_Mission);
 	if ( _Mission->getEndDate() != 0 )
 	{
 		CMissionManager::getInstance()->addTimedMission(_Mission);
@@ -1597,7 +1598,7 @@ void CMissionBaseBehaviour::applyPlayerReconnectHandler()
 }
 
 // ****************************************************************************
-void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::string & AIInstanceName )
+void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::vector<std::string> & AIInstanceNames )
 {
 	if ( _Mission->getFinished() )
 		return;
@@ -1608,7 +1609,12 @@ void CMissionBaseBehaviour::applyCrashHandler(bool EGSCrash, const std::string &
 	std::list< CMissionEvent* > eventList;
 	if( index < templ->CrashHandlers.size() )
 	{
-		if ( EGSCrash || ( std::find( templ->CrashHandlers[index].AIInstances.begin(), templ->CrashHandlers[index].AIInstances.end(), AIInstanceName ) != templ->CrashHandlers[index].AIInstances.end() ) )
+		// the handler is for a restart of this service, and for the crash of a service with one of its AI instances
+		const std::vector<std::string> &handled = templ->CrashHandlers[index].AIInstances;
+		bool apply = EGSCrash;
+		for ( uint i = 0; !apply && i < AIInstanceNames.size(); i++ )
+			apply = std::find( handled.begin(), handled.end(), AIInstanceNames[i] ) != handled.end();
+		if ( apply )
 		{
 			for ( uint i = 0; getProcessingState() == CMissionBaseBehaviour::Normal && i< templ->CrashHandlers[index].Actions.size() ; i++ )
 				templ->CrashHandlers[index].Actions[i]->launch(_Mission,eventList);

@@ -755,7 +755,7 @@ static uint8 getFreeGroupMissionClientIndex( const std::vector<TMission*> &missi
 	return first;
 }
 
-void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission)
+bool CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAlias giver, std::list< CMissionEvent * > & eventList, TAIAlias mainMission)
 {
 	nlassert(user);
 
@@ -766,7 +766,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	if ( !templ )
 	{
 		MISDBG("%s ERROR instanciateMission : invalid mission template can't get template from alias", sDebugPrefix.c_str());
-		return;
+		return false;
 	}
 	sDebugPrefix += ",'" + templ->getMissionName() + "' instanciateMission :";
 	MISDBG("%s begin", sDebugPrefix.c_str());
@@ -774,7 +774,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	if ( templ->testPrerequisits(user, true) != MISSION_DESC::PreReqSuccess )
 	{
 		MISDBG("%s test prerequisits fails", sDebugPrefix.c_str());
-		return;
+		return false;
 	}
 
 	CMission* inst;
@@ -784,13 +784,13 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		if ( !templ->Tags.NoList && user->getMissionsCount() >= MaxSoloMissionCount )
 		{
 			CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_SOLO_REACHED" );
-			return;
+			return false;
 		}
 		CMissionSolo * soloMission = EGS_PD_CAST<CMissionSolo*>( EGSPD::CMissionSoloPD::create( templ->Alias ) );
 		if ( !soloMission )
 		{
 			MISDBG("%s could not create solo mission", sDebugPrefix.c_str());
-			return;
+			return false;
 		}
 
 		soloMission->onCreation( giver );
@@ -837,14 +837,14 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 			if ( !templ->Tags.NoList && team->getMissions().size() >= MaxGroupMissionCount )
 			{
 				CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_GROUP_REACHED" );
-				return;
+				return false;
 			}
 
 			CMissionTeam * teamMission = EGS_PD_CAST<CMissionTeam*>( EGSPD::CMissionTeamPD::create( templ->Alias ) );
 			if ( !teamMission )
 			{
 				MISDBG("%s could not create team mission", sDebugPrefix.c_str());
-				return;
+				return false;
 			}
 			teamMission->onCreation( giver );
 			teamMission->setTeam( user->getTeamId() );
@@ -866,7 +866,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		else
 		{
 			MISDBG("%s invalid team %d", sDebugPrefix.c_str(), user->getTeamId());
-			return;
+			return false;
 		}
 	}
 	else if ( templ->Type  == MISSION_DESC::Guild )
@@ -876,7 +876,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		if ( !user->getModuleParent().getModule( module ) )
 		{
 			MISDBG("%s user not in a guild", sDebugPrefix.c_str());
-			return;
+			return false;
 		}
 		/* /// This is already checked in the prerequisites 
 		if (!module->pickMission( templ->Alias ))
@@ -889,19 +889,19 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 		if (!guild)
 		{
 			nlwarning( "<MISSIONS>cant find guild ID : %d", user->getGuildId() );
-			return;
+			return false;
 		}
 		if ( !templ->Tags.NoList && guild->getMissions().size() >= MaxGuildMissionCount)
 		{
 			CCharacter::sendDynamicSystemMessage(user->getId(), "MISSION_MAX_GUILD_REACHED" );
-			return;
+			return false;
 		}
 
 		CMissionGuild * guildMission = EGS_PD_CAST<CMissionGuild*>( EGSPD::CMissionGuildPD::create( templ->Alias ) );
 		if ( !guildMission )
 		{
 			MISDBG("%s could not create guild mission", sDebugPrefix.c_str());
-			return;
+			return false;
 		}
 		guildMission->onCreation( giver );
 		guildMission->setGuild(user->getGuildId());
@@ -954,7 +954,7 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	else
 	{
 		MISDBG("%s unimplemented mission type %u", sDebugPrefix.c_str(), templ->Type);
-		return;
+		return false;
 	}
 	inst->setGiver( giver );
 	inst->setMainMissionTemplateId(mainMission);
@@ -962,7 +962,28 @@ void CMissionManager::instanciateMission(CCharacter* user,TAIAlias  alias, TAIAl
 	STL_ALLOC_TEST
 	initInstanciatedMission(inst, eventList);
 	MISDBG("%s end (ok)", sDebugPrefix.c_str());
+	return true;
 }// CMissionManager::instanciateMission
+
+void CMissionManager::instanciateLoadedMission(CMission * mission)
+{
+	nlassert(mission);
+	CMissionTemplate * templ = getTemplate( mission->getTemplateId() );
+	if ( !templ || templ->isInstance(mission) )
+		return;
+	// a mission that is finished and still in the journal is no instance: it left them when it ended (setSuccessFlag,
+	// setFailureFlag)
+	if ( mission->getFinished() )
+		return;
+
+	// The destructor of its character took the mission out of the instances of its template and out of the mono missions
+	// (deInstanciateMission), as it left the other lists that putInGame puts it back in. A message of the AI, the end
+	// of a parent mission and a mission done once only reach the instances of a template, and a mono mission cannot be
+	// taken while its template has one. The mono timer goes on from where it was.
+	templ->Instances.push_back(mission);
+	if ( mission->getMonoEndDate() != 0 )
+		addMonoMission(mission);
+}// CMissionManager::instanciateLoadedMission
 
 void CMissionManager::deInstanciateMission(CMission * mission)
 {
@@ -997,7 +1018,9 @@ void CMissionManager::deInstanciateMission(CMission * mission)
 	{
 		removeTimedMission(mission);
 	}
-	if ( mission->getMonoEndDate() )
+	// a mission removed when its character is loaded (updateSavedMissions) is not in game yet: it is not a mono mission
+	// that runs
+	if ( mission->getMonoEndDate() && templ && templ->isInstance(mission) )
 	{
 		removeMonoMission(mission);
 	}
@@ -2132,8 +2155,9 @@ void CMissionManager::addCrashHandlingMissions( CMission & mission )
 
 void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 {
-	string name;
-	if (CWorldInstances::instance().getAIInstanceNameFromeServiceId(aiServiceId,name))
+	// a service can have several AI instances: a crash handler is for any of them
+	vector<string> names;
+	if (CWorldInstances::instance().getAIInstanceNamesFromServiceId(aiServiceId, names))
 	{
 		// A crash handler can fail its mission. That removes the mission and the ones it stops from
 		// _CrashHandlingMissions (removeCrashHandlingMissions moves the last one into its place) and can delete them: go
@@ -2142,7 +2166,7 @@ void CMissionManager::applyAICrashConsequences( NLNET::TServiceId aiServiceId )
 		for (uint i = 0; i < missions.size(); i++)
 		{
 			if (missions[i] && std::find(_CrashHandlingMissions.begin(), _CrashHandlingMissions.end(), missions[i]) != _CrashHandlingMissions.end())
-				missions[i]->applyCrashHandler(false, name);
+				missions[i]->applyCrashHandler(false, names);
 		}
 	}
 	else

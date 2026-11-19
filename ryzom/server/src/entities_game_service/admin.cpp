@@ -4155,7 +4155,8 @@ NLMISC_COMMAND( failMission, "force mission failure", "<CSR id><mission idx>" )
 	uint index;
 	NLMISC::fromString(args[1], index);
 	CMission * mission = c->getAdminProperties().getMission(index);
-	if ( !mission )
+	// a mission that is finished and still in the journal has nothing left to fail
+	if ( !mission || mission->getFinished() )
 	{
 		CCharacter::sendDynamicSystemMessage( c->getEntityRowId(), "CSR_BAD_MISSION" );
 		return true;
@@ -4174,18 +4175,29 @@ NLMISC_COMMAND( progressMission, "force mission progression", "<CSR id><mission 
 	uint index;
 	NLMISC::fromString(args[1], index);
 	CMission * mission = c->getAdminProperties().getMission(index);
-	if ( !mission )
+	if ( !mission || mission->getFinished() )
 	{
 		CCharacter::sendDynamicSystemMessage( c->getEntityRowId(), "CSR_BAD_MISSION" );
 		return true;
 	}
 	CCharacter * user = mission->getMainEntity();
+	if ( !user )
+	{
+		CCharacter::sendDynamicSystemMessage( c->getEntityRowId(), "CSR_BAD_MISSION" );
+		return true;
+	}
 	uint repeat = 1;
 	if ( args.size() == 3 )
 		NLMISC::fromString(args[2], repeat);
+	// The event is for this mission: without its alias, the first mission of the character that has an active step
+	// takes it. A step that ends the mission removes it: the event is then no longer taken.
+	const TAIAlias alias = mission->getTemplateId();
 	CMissionEventDebug event;
 	for ( uint i = 0; i < repeat; i++ )
-		user->processMissionEvent(event);
+	{
+		if ( !user->processMissionEvent(event, alias) )
+			break;
+	}
 	return true;
 }
 

@@ -13643,7 +13643,7 @@ void CCharacter::updateSavedMissions()
 				continue;
 			// we reload the missions : there was a crash before
 			if (bLaunchCrashHandler)
-				mission->applyCrashHandler(true, std::string());
+				mission->applyCrashHandler(true, std::vector<std::string>());
 			else
 				mission->applyPlayerReconnectHandler();
 		}

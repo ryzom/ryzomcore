@@ -600,13 +600,24 @@ NLMISC_COMMAND(addMission,"Add mission to character","<character_id> <Mission gi
 	c->setAfkState(false);
 	
 	std::list< CMissionEvent* > eventList;
-	CMissionManager::getInstance()->instanciateMission(c, missionAlias,	giverAlias, eventList);
+	bool added = CMissionManager::getInstance()->instanciateMission(c, missionAlias, giverAlias, eventList);
 	c->processMissionEventList( eventList,true, CAIAliasTranslator::Invalid );
 
-	log.displayNL("Mission '%s' \t(alias %10u)  added to character %s",
-		CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
-		missionAlias, 
-		args[0].c_str());
+	// the mission is not given when the character does not meet its prerequisites, or has a full journal
+	if (added)
+	{
+		log.displayNL("Mission '%s' \t(alias %10u)  added to character %s",
+		    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
+		    missionAlias,
+		    args[0].c_str());
+	}
+	else
+	{
+		log.displayNL("Mission '%s' \t(alias %10u)  NOT added to character %s: the mission is unknown, or the character cannot take it (the mission log says why with VerboseMissions)",
+		    CAIAliasTranslator::getInstance()->getMissionNameFromUniqueId(missionAlias).c_str(),
+		    missionAlias,
+		    args[0].c_str());
+	}
 
 	return true;
 }
