@@ -23,6 +23,8 @@
 #include "nel/misc/algo.h"
 #include "nel/misc/common.h"
 
+#include <algorithm>
+
 TRMItem currentDocItem;
 CRMData SortableData;
 
@@ -31,6 +33,23 @@ CRMData SortableData;
 CSString	FamilyTypContent;
 CSString	GroupTypContent;
 CSString	WKContent;
+
+
+// Stop the run: past this point the generated data would be wrong
+static void fail( const std::string &message )
+{
+	nlwarning( "%s", message.c_str() );
+	fprintf( stderr, "ERROR: %s\n", message.c_str() );
+	exit( 1 );
+}
+
+
+// Write a generated file, or stop the run
+static void writeFile( const CSString &content, const std::string &fileName )
+{
+	if ( !content.writeToFile( fileName ) )
+		fail( toString( "Cannot write %s", fileName.c_str() ) );
+}
 
 
 // Assign a new raw mat to a creature
@@ -44,51 +63,144 @@ void AssignerMP( const CSString& creatureName, const CSString& materialName )
 	}
 	else
 	{
-		// lecture du fichier d'assignement
-		CSString fileName = toString( "%s//_%s_mp.creature", RAW_MATERIAL_ASSIGN.c_str(), creatureName.c_str() ); 
-		CSString data;
-
-		// create file if not exists
-		if(!CFile::fileExists(fileName))
-		{
-			CSString	str;
-			str = "<?xml version=\"1.0\"?>\r\n";
-			str+= "<FORM Version=\"0.0\" State=\"modified\">\r\n";
-			str+= "  <STRUCT>\r\n";
-			str+= "    <STRUCT Name=\"Harvest\">\r\n";
-			str+= "    </STRUCT>\r\n";
-			str+= "  </STRUCT>\r\n";
-			str+= "  <STRUCT/>\r\n";
-			str+= "  <STRUCT/>\r\n";
-			str+= "  <STRUCT/>\r\n";
-			str+= "  <STRUCT/>\r\n";
-			str+= "</FORM>\r\n";
-			str.writeToFile( fileName );
-		}
-
-		// lecture
-		data.readFromFile( fileName );
-
-		if ( !data.contains( materialName.c_str() ) )
-		{	
-			// look for first number of unused raw mat
-			CSString str = data;
-			int nb= 0;
-			while ( str.contains( "Name=\"MP" ) )
-			{
-				str = str.splitFrom( "Name=\"MP" );
-				nb = str.firstWord().atoi();
-			}
-
-			// insert new raw mat
-			str = "      <STRUCT Name=\"MP";
-			str += toString( "%d\">\r\n        <ATOM Name=\"AssociatedItem\"", nb+1 );
-			str += toString( " Value=\"%s\"/>\r\n      </STRUCT>\r\n    </STRUCT>\r\n  </STRUCT>\r\n", materialName.c_str() );
-			
-			data = data.replace( "    </STRUCT>\r\n  </STRUCT>\r\n", str.c_str() );
-			data.writeToFile( fileName );
-		}
+		// kept until all families are done, the files are written once by SaveAssignments()
+		vector<CSString> &materials = creatureAssignments[creatureName];
+		if ( std::find( materials.begin(), materials.end(), materialName ) == materials.end() )
+			materials.push_back( materialName );
 	}
+}
+
+
+// Find the raw material assignment files that exist, wherever they are below RAW_MATERIAL_ASSIGN
+void LoadAssignmentFiles()
+{
+	printf( "-- REGISTERING RAW MATERIAL ASSIGNMENT FILES --\n" );
+	if ( !CFile::isDirectory( RAW_MATERIAL_ASSIGN ) )
+		return;
+
+	vector<string> files;
+	CPath::getPathContent( RAW_MATERIAL_ASSIGN, true, false, true, files );
+	for ( uint i=0; i<files.size(); ++i )
+	{
+		if ( CFile::getExtension( files[i] ) == "creature" )
+			assignmentFiles[ CFile::getFilenameWithoutExtension( files[i] ) ] = files[i];
+	}
+}
+
+
+// A placeholder raw material: the system materials the creature sheet generator gives a creature until its own are assigned
+static bool isPlaceholderMaterial( const CSString &materialEntry )
+{
+	return materialEntry.contains( "Value=\"system_mp" );
+}
+
+
+// Write the raw materials assigned in this run into the creatures' assignment files. Entries already in a file stay,
+// except the placeholders, which give way to the materials of the creature.
+void SaveAssignments()
+{
+	printf( "-- SAVING RAW MATERIAL ASSIGNMENTS --\n" );
+	uint nbCreated = 0, nbChanged = 0, nbPlaceholders = 0;
+	// the files are written once all of them have been read and checked
+	vector<pair<string, CSString> > toWrite;
+
+	for ( map<string, vector<CSString> >::const_iterator it = creatureAssignments.begin(); it != creatureAssignments.end(); ++it )
+	{
+		const string baseName = "_" + it->first + "_mp";
+		CSString fileName;
+		CSString data;
+		bool created = false;
+		map<string, string>::const_iterator itFile = assignmentFiles.find( baseName );
+		if ( itFile != assignmentFiles.end() )
+		{
+			fileName = itFile->second;
+			if ( !data.readFromFile( fileName ) )
+				fail( toString( "Cannot read the raw material assignment file %s", fileName.c_str() ) );
+		}
+		else
+		{
+			fileName = RAW_MATERIAL_ASSIGN + baseName + ".creature";
+			data = "<?xml version=\"1.0\"?>\n";
+			data += "<FORM Version=\"0.0\" State=\"modified\">\n";
+			data += "  <STRUCT>\n";
+			data += "    <STRUCT Name=\"Harvest\">\n";
+			data += "    </STRUCT>\n";
+			data += "  </STRUCT>\n";
+			data += "  <STRUCT/>\n";
+			data += "  <STRUCT/>\n";
+			data += "  <STRUCT/>\n";
+			data += "  <STRUCT/>\n";
+			data += "</FORM>\n";
+			created = true;
+		}
+
+		// the Harvest struct, from its line to the line that closes it (both at the indentation the tools write)
+		const string text = data;
+		const string eol = data.contains( "\r\n" ) ? "\r\n" : "\n";
+		const string harvestOpen = "\n    <STRUCT Name=\"Harvest\">" + eol;
+		const string harvestClose = "\n    </STRUCT>" + eol;
+		const string::size_type begin = text.find( harvestOpen );
+		const string::size_type end = begin == string::npos ? string::npos : text.find( harvestClose, begin + harvestOpen.size() - 1 );
+		if ( end == string::npos )
+			fail( toString( "The raw material assignment file %s has no Harvest struct in the form this tool writes", fileName.c_str() ) );
+
+		// the entries already there, each from its "<STRUCT Name="MPn">" line to its "</STRUCT>" line
+		const string entryOpen = "      <STRUCT Name=\"MP";
+		const string entryClose = "\n      </STRUCT>" + eol;
+		vector<CSString> entries; // each entry from the quote after its number
+		bool placeholderDropped = false;
+		string::size_type pos = begin + harvestOpen.size();
+		while ( pos < end + 1 )
+		{
+			const string::size_type entryEnd = text.find( entryClose, pos );
+			if ( text.compare( pos, entryOpen.size(), entryOpen ) != 0 || entryEnd == string::npos || entryEnd > end )
+				fail( toString( "The raw material assignment file %s has a Harvest struct this tool does not read", fileName.c_str() ) );
+			const string entry = text.substr( pos, entryEnd + entryClose.size() - pos );
+			const CSString rest = entry.substr( entry.find( '"', entryOpen.size() ) );
+			if ( isPlaceholderMaterial( rest ) )
+				placeholderDropped = true;
+			else
+				entries.push_back( rest );
+			pos = entryEnd + entryClose.size();
+		}
+
+		bool changed = created || placeholderDropped;
+		for ( uint i=0; i<it->second.size(); ++i )
+		{
+			const string valueAttr = "Value=\"" + it->second[i] + "\"";
+			bool present = false;
+			for ( uint j=0; j<entries.size() && !present; ++j )
+				present = entries[j].contains( valueAttr.c_str() );
+			if ( !present )
+			{
+				entries.push_back( "\">" + eol + "        <ATOM Name=\"AssociatedItem\" " + valueAttr + "/>" + eol + "      </STRUCT>" + eol );
+				changed = true;
+			}
+		}
+		if ( !changed )
+			continue;
+
+		// the creature sheets have room for ten (_creature_harvest.dfn, MP1 to MP10)
+		if ( entries.size() > 10 )
+			fail( toString( "%s would get %u raw materials, a creature has room for 10", fileName.c_str(), (uint)entries.size() ) );
+
+		string harvest;
+		for ( uint i=0; i<entries.size(); ++i )
+			harvest += entryOpen + toString( "%u", i + 1 ) + entries[i];
+
+		toWrite.push_back( make_pair( string( fileName ), CSString( text.substr( 0, begin + harvestOpen.size() ) + harvest + text.substr( end + 1 ) ) ) );
+		++nbChanged;
+		if ( created )
+			++nbCreated;
+		if ( placeholderDropped )
+			++nbPlaceholders;
+	}
+
+	for ( uint i=0; i<toWrite.size(); ++i )
+		writeFile( toWrite[i].second, toWrite[i].first );
+
+	printf( "    %u creatures, %u assignment files written (%u new), %u placeholders replaced\n",
+		(uint)creatureAssignments.size(), nbChanged, nbCreated, nbPlaceholders );
 }
 
 
@@ -150,12 +262,9 @@ void LoadCraftParts()
 void LoadCreatureFiles()
 {
 	printf( "-- REGISTERING CREATURE FILES --\n" );
-	CSString inputSheetPath = LEVEL_DESIGN_PATH + "leveldesign/Game_elem/Creature/Fauna/bestiary";
-	CPath::addSearchPath( inputSheetPath, true, false );
-
 	vector<string> files;
 	// on parcours les fichiers dans le repertoire
-	CPath::getPathContent ( inputSheetPath, true, false, true, files );
+	CPath::getPathContent ( CREATURE_PATH, true, false, true, files );
 
 	for (uint32 i=0; i<files.size(); ++i)
 	{
@@ -212,6 +321,9 @@ void InitCreatureMP()
 					nom = ligneM.firstWord();
 					ligneN.clear();
 				}
+
+				if ( !code.empty() )
+					creatureModelNames[ code.toLower() ] = nom;
 
 				// save items to generate for each new creature name found
 				for ( char eco='a'; eco<='z'; eco++ )
@@ -426,9 +538,8 @@ int GetNumeroMP( const CSString& nomMP )
 	int res;
 
 	// *** Get the family number, and add it to faimly.typ if not already done
-	// look for raw mat existence in item_mp_family.typ file
-	sprintf( buffer, "%s\" Value=\"", nomMP.c_str() );
-	result = FamilyTypContent.splitFrom( buffer );
+	// look for raw mat existence in item_mp_family.typ file (the whole label, a name may end another one)
+	result = FamilyTypContent.splitFrom( toString( "Label=\"%s\" Value=\"", nomMP.c_str() ).c_str() );
 
 	// if yes, return raw mat number
 	if ( !result.empty() )
@@ -445,9 +556,12 @@ int GetNumeroMP( const CSString& nomMP )
 		res = result.atoi() + 1;
 
 		// add new raw mat in file item_mp_family.typ
-		sprintf( buffer, "  <DEFINITION Label=\"%s\" Value=\"%d\"/>\n<LOG>", nomMP.c_str(), res );
-		FamilyTypContent= FamilyTypContent.replace( "<LOG>", buffer );
-		FamilyTypContent.writeToFile( ITEM_MP_FAMILY_TYP );
+		if ( !FamilyTypContent.contains( "<LOG>" ) )
+			fail( toString( "%s has no <LOG> line to add the family %s before", ITEM_MP_FAMILY_TYP.c_str(), nomMP.c_str() ) );
+		const string eol = FamilyTypContent.contains( "\r\n" ) ? "\r\n" : "\n";
+		FamilyTypContent= FamilyTypContent.replace( "<LOG>", toString( "  <DEFINITION Label=\"%s\" Value=\"%d\"/>%s<LOG>", nomMP.c_str(), res, eol.c_str() ).c_str() );
+		writeFile( FamilyTypContent, ITEM_MP_FAMILY_TYP );
+		printf( "    New family %d : %s, added to %s\n", res, nomMP.c_str(), ITEM_MP_FAMILY_TYP.c_str() );
 	}
 
 	// *** Add the text in wk.uxt (if not done)
@@ -457,10 +571,14 @@ int GetNumeroMP( const CSString& nomMP )
 	// if not found
 	if ( !WKContent.contains(buffer) && !WKContent.contains(buffer2) )
 	{
-		// add it at end
-		sprintf( buffer, "mpfam%d\t\t\t[%s]\n\r\nmpgroup0", res, nomMP.c_str() );
-		WKContent= WKContent.replace( "\r\nmpgroup0", buffer );
-		WKContent.writeToFile( WK_UXT );
+		// add it after the last family, before the blank line and the first group
+		const string eol = WKContent.contains( "\r\n" ) ? "\r\n" : "\n";
+		const string anchor = eol + "mpgroup0";
+		if ( !WKContent.contains( anchor.c_str() ) )
+			fail( toString( "%s has no mpgroup0 line to add the family %s before", WK_UXT.c_str(), nomMP.c_str() ) );
+		WKContent= WKContent.replace( anchor.c_str(), ( toString( "mpfam%d\t\t\t[%s]", res, nomMP.c_str() ) + eol + anchor ).c_str() );
+		writeFile( WKContent, WK_UXT );
+		printf( "    New family %d : %s, added to %s\n", res, nomMP.c_str(), WK_UXT.c_str() );
 	}
 
 	return res;
@@ -476,9 +594,8 @@ int GetNumeroGroupe( const CSString& groupe )
 	int res;
 
 	// *** Get the group number, and add it to group.typ if not already done
-	// look for group existence in item_mp_group.typ file
-	sprintf( buffer, "%s\" Value=\"", groupe.c_str() );
-	result = GroupTypContent.splitFrom( buffer );
+	// look for group existence in item_mp_group.typ file (the whole label, a name may end another one)
+	result = GroupTypContent.splitFrom( toString( "Label=\"%s\" Value=\"", groupe.c_str() ).c_str() );
 
 	// if yes, return its group number
 	if ( !result.empty() )
@@ -495,9 +612,12 @@ int GetNumeroGroupe( const CSString& groupe )
 		res = result.atoi() + 1;
 
 		// add new raw mat in file item_mp_group.typ
-		sprintf( buffer, "<DEFINITION Label=\"%s\" Value=\"%d\"/>\n<LOG>", groupe.c_str(), res );
-		GroupTypContent= GroupTypContent.replace( "<LOG>", buffer );
-		GroupTypContent.writeToFile( ITEM_MP_GROUPE_TYP );
+		if ( !GroupTypContent.contains( "<LOG>" ) )
+			fail( toString( "%s has no <LOG> line to add the group %s before", ITEM_MP_GROUPE_TYP.c_str(), groupe.c_str() ) );
+		const string eol = GroupTypContent.contains( "\r\n" ) ? "\r\n" : "\n";
+		GroupTypContent= GroupTypContent.replace( "<LOG>", toString( "<DEFINITION Label=\"%s\" Value=\"%d\"/>%s<LOG>", groupe.c_str(), res, eol.c_str() ).c_str() );
+		writeFile( GroupTypContent, ITEM_MP_GROUPE_TYP );
+		printf( "    New group %d : %s, added to %s\n", res, groupe.c_str(), ITEM_MP_GROUPE_TYP.c_str() );
 	}
 
 
@@ -508,10 +628,14 @@ int GetNumeroGroupe( const CSString& groupe )
 	// if not found
 	if ( !WKContent.contains(buffer) && !WKContent.contains(buffer2) )
 	{
-		// add it at end
-		sprintf( buffer, "mpgroup%d\t\t\t[%s]\n\r\nmpSource", res, groupe.c_str() );
-		WKContent= WKContent.replace( "\r\nmpSource", buffer );
-		WKContent.writeToFile( WK_UXT );
+		// add it after the last group, before the blank line and the source
+		const string eol = WKContent.contains( "\r\n" ) ? "\r\n" : "\n";
+		const string anchor = eol + "mpSource";
+		if ( !WKContent.contains( anchor.c_str() ) )
+			fail( toString( "%s has no mpSource line to add the group %s before", WK_UXT.c_str(), groupe.c_str() ) );
+		WKContent= WKContent.replace( anchor.c_str(), ( toString( "mpgroup%d\t\t\t[%s]", res, groupe.c_str() ) + eol + anchor ).c_str() );
+		writeFile( WKContent, WK_UXT );
+		printf( "    New group %d : %s, added to %s\n", res, groupe.c_str(), WK_UXT.c_str() );
 	}
 
 	return res;
@@ -530,7 +654,7 @@ void CreateParentSItem( int numMP,
 	CSString outputFileName;
 
 	// output filename
-	outputFileName = toString( "%s_parent\\_m%04d.sitem", MP_DIRECTORY.c_str(), numMP );
+	outputFileName = toString( "%s_parent/_m%04d.sitem", MP_DIRECTORY.c_str(), numMP );
 
 	// xml header
 	output = "<?xml version=\"1.0\"?>\n<FORM Version=\"0.0\" State=\"modified\">\n";
@@ -579,7 +703,7 @@ void CreateParentSItem( int numMP,
 	output += "  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
 
 	// final write
-	output.writeToFile( outputFileName );
+	writeFile( output, outputFileName );
 
 }
 
@@ -812,10 +936,11 @@ void CreateSheet( int numMP, const CSString& nomMP,
 	// if a creature code, add it its parent
 	if ( creature )
 	{
-		output += "  <PARENT Filename=\"_m"; 
+		output += "  <PARENT Filename=\"_m";
 		output += code;
 		output += ".sitem\"/>\n";
 		creature = true;
+		generatedCreatureCodes.insert( code );
 	}
 
 	output += "  <STRUCT>\n";
@@ -904,7 +1029,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 
 	output += "\"/>\n    </STRUCT>\n  </STRUCT>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
 
-	output.writeToFile( toString( "%s%s\\%s", MP_DIRECTORY.c_str(), directory.c_str(), outputFileName.c_str() ) );
+	writeFile( output, toString( "%s%s/%s", MP_DIRECTORY.c_str(), directory.c_str(), outputFileName.c_str() ) );
 
 	// Generate names
 	if ( !specialItem )
@@ -1164,6 +1289,9 @@ void NewMP( CSString& ligne )
 	stat = ligne.splitTo( ";", true );
 	craftStats.color = stat.firstWord().atoi();
 
+	// JewelProt, a column of the table that this generator does not use
+	ligne.splitTo( ";", true );
+
 	stat = ligne.splitTo( ";", true );
 	specialOnly = stat.firstWord().contains( "x" );
 	
@@ -1215,8 +1343,12 @@ void NewMP( CSString& ligne )
 		// on enregistre les items se trouvant dans les deposits
 		if ( loc.left(1) == "D" )
 		{
-			CSString output;
-			output.writeToFile( toString( "%s%s_%d.mp", DEPOSIT_MPS.c_str(), nomMP.toLower().replace( " ", "_" ).c_str(), numMP ) );
+			// an empty file, its name is what the World Editor lists for the "mps" of a deposit
+			const string fileName = toString( "%s%s_%d.mp", DEPOSIT_MPS.c_str(), nomMP.toLower().replace( " ", "_" ).c_str(), numMP );
+			FILE *file = nlfopen( fileName, "wb" );
+			if ( file == NULL )
+				fail( toString( "Cannot write %s", fileName.c_str() ) );
+			fclose( file );
 		}
 
 		overlay = nomMP.firstWord().toUpper().left(6);
@@ -1275,7 +1407,10 @@ void CreatePrimitiveNecklace()
 	output += "      <ATOM Name=\"StatEnergy\" Value=\"0\"/>\n";
 	output += "    </STRUCT>\n  </STRUCT>\n  <STRUCT/>\n  <STRUCT/>\n";
 	output += "  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
-	output.writeToFile( toString( "%scommon\\m0696ixxcc01.sitem", MP_DIRECTORY.c_str() ) );
+	writeFile( output, toString( "%scommon/m0696ixxcc01.sitem", MP_DIRECTORY.c_str() ) );
+
+	// and its family, which rm_fam_prop.csv does not have
+	CreateParentSItem( 696, "Invasion Reward", "Undefined", false, "PA_pendant.tga", "" );
 	
 	itemNames.insert( "m0696ixxcc01	Primitive Necklace	a	the	Primitive Necklaces		the" );
 
@@ -1286,50 +1421,39 @@ void CreatePrimitiveNecklace()
 void ItemNamesSave()
 {
 	printf( "-- SAVING ITEM NAMES --\n");
-	CSString data, output;
+	CSString data;
+	if ( !data.readFromFile( ITEM_WORDS_WK ) )
+		fail( toString( "Cannot read %s", ITEM_WORDS_WK.c_str() ) );
+	const string eol = data.contains( "\r\n" ) ? "\r\n" : "\n";
 
-	FILE *file = nlfopen( ITEM_WORDS_WK, "rb" );
-
-	char c;
-	if (fread(&c, 1, 1, file) != 1)
+	// the names of this run that the file does not have yet, by item id
+	string newNames;
+	uint nbNew = 0;
+	for ( CSortedStringSet::const_iterator it = itemNames.begin(); it != itemNames.end(); ++it )
 	{
-		nlwarning("Unable to read 1 byte from %s", ITEM_WORDS_WK.c_str());
+		const CSString id = (*it).splitTo( '\t' );
+		if ( !data.contains( ( "\n" + id + "\t" ).c_str() ) )
+		{
+			newNames += (*it) + eol;
+			++nbNew;
+		}
+	}
+	if ( nbNew == 0 )
+	{
+		printf( "    %u names, all already in %s\n", (uint)itemNames.size(), ITEM_WORDS_WK.c_str() );
 		return;
 	}
 
-	while ( !feof( file ) )
-	{
-		data += toString( "%c", c );
-		if (fread(&c, 1, 1, file) != 1)
-		{
-			nlwarning("Unable to read 1 byte from %s", ITEM_WORDS_WK.c_str());
-			return;
-		}
-	}
-
-	fclose( file );
-
-	data.splitTo( "i", true );
-	output = "i";
-	output += data.splitTo( "prospector", true );
-
-	CSortedStringSet::const_iterator it = itemNames.begin();
-
-	while ( it != itemNames.end() )
-	{
-		if ( !output.contains( (*it).left(5).c_str() ) )
-		{
-			output += (*it);
-			output += "\r\n";
-		}
-		it++;
-	}
-
-	output += "p";
-
-	output += data;
-
-	output.writeToFile( ITEM_WORDS_WK.c_str() );
+	// in front of the prospector items, which follow the raw materials in the file
+	const string anchor = eol + "prospector";
+	const string text = data;
+	const string::size_type pos = text.find( anchor );
+	if ( pos == string::npos )
+		fail( toString( "%s has no prospector line to add the raw material names before", ITEM_WORDS_WK.c_str() ) );
+	data = CSString( text.substr( 0, pos + eol.size() ) + newNames + text.substr( pos + eol.size() ) );
+	if ( !data.writeToFile( ITEM_WORDS_WK ) )
+		fail( toString( "Cannot write %s", ITEM_WORDS_WK.c_str() ) );
+	printf( "    %u new names added to %s\n", nbNew, ITEM_WORDS_WK.c_str() );
 }
 
 
@@ -1337,28 +1461,36 @@ void ItemNamesSave()
 void LoadCustomizedProperties()
 {
 	CSString data, name, prop, val;
-	
+
 	printf( "-- REGISTERING CUSTOMIZED PROPERTIES --\n" );
-	
+
 	data.readFromFile( "raw_material_generation.cfg" );
-	data = data.splitFrom( "{\r\n\t" );
 	CPath::addSearchPath( MP_DIRECTORY, true, false );
 
-	while ( data.contains( "};" ) )
+	// the quoted strings between "CustomizedProperties = {" and "};", three per property: sheet, property, value
+	const string list = data.splitFrom( "CustomizedProperties" ).splitFrom( "{" ).splitTo( "};" );
+	vector<CSString> values;
+	for ( string::size_type pos = list.find( '"' ); pos != string::npos; pos = list.find( '"', pos ) )
 	{
-		name = data.splitTo( ",", true ).replace( "\"", "" );
-		prop = data.splitTo( ",", true ).replace( "\"", "" ).replace( " ", "" );
+		const string::size_type close = list.find( '"', pos + 1 );
+		if ( close == string::npos )
+			fail( "raw_material_generation.cfg has a string with no closing quote in CustomizedProperties" );
+		values.push_back( list.substr( pos + 1, close - pos - 1 ) );
+		pos = close + 1;
+	}
+	if ( values.size() % 3 != 0 )
+		fail( "raw_material_generation.cfg must give three strings per entry of CustomizedProperties: sheet, property, value" );
 
-		val = data.splitTo( ",", true ).replace( "\"", "" ).replace( " ", "" );
-		if ( val.contains( "\r\n" ) )
-			val = val.splitTo( "\r\n", true );
+	for ( uint i=0; i<values.size(); i+=3 )
+	{
+		name = values[i];
+		prop = values[i+1].replace( " ", "" );
+		val = values[i+2].replace( " ", "" );
 
 		TRMItem item;
 		item.push( DtName, name );
 		item.push( DtCustomizedProperties, prop );
 		SortableData.updateItemAppend( item, DtName );
-		
-		data.splitTo( "\t", true );
 
 		CSString fileName, str, output;
 		fileName = CPath::lookup( name, false, false, true );
@@ -1379,7 +1511,7 @@ void LoadCustomizedProperties()
 				if ( !str.contains( output.c_str() ) )
 				{
 					str = str.replace( "<STRUCT>", output.c_str() );
-					str.writeToFile( fileName );
+					writeFile( str, fileName );
 				}
 			}
 			else
@@ -1392,11 +1524,70 @@ void LoadCustomizedProperties()
 				if ( !str.contains( toString( "%s\" Value=\"%s\"/>\n", prop.c_str(), val.c_str() ).c_str() ) )
 				{
 					str = str.replace( toString( "    <STRUCT Name=\"%s\">\n", zone.c_str() ).c_str(), output.c_str() );
-					str.writeToFile( fileName );
+					writeFile( str, fileName );
 				}
 			}
 		}
+		else
+		{
+			nlwarning( "raw_material_generation.cfg sets %s on %s, which this run did not generate and which is not in %s", prop.c_str(), name.c_str(), MP_DIRECTORY.c_str() );
+		}
 	}
+}
+
+
+// Write the parent sheets the generated raw materials name: one per ecosystem (_mc.sitem to _mp.sitem) and one per
+// creature model (_mchd.sitem, its icon overlay the model name of creature_models.csv as the deposit families have it)
+void SaveParentSItems()
+{
+	printf( "-- SAVING ECOSYSTEM AND CREATURE MODEL PARENTS --\n" );
+
+	struct CEcosystemParent { char Eco; const char *Ecosystem; const char *Background; };
+	static const CEcosystemParent ecosystemParents[] = {
+		{ 'c', "Common", "BK_generic.tga" },
+		{ 'd', "Desert", "BK_fyros.tga" },
+		{ 'f', "Forest", "BK_matis.tga" },
+		{ 'j', "Jungle", "BK_zorai.tga" },
+		{ 'l', "Lacustre", "BK_tryker.tga" },
+		{ 'p', "PrimeRoots", "BK_primes.tga" },
+	};
+	for ( uint i=0; i<sizeof(ecosystemParents)/sizeof(ecosystemParents[0]); ++i )
+	{
+		CSString output = "<?xml version=\"1.0\"?>\n<FORM Version=\"0.0\" State=\"modified\">\n";
+		output += "  <STRUCT>\n";
+		output += "    <STRUCT Name=\"basics\">\n";
+		output += "      <ATOM Name=\"family\" Value=\"raw material (mp)\"/>\n";
+		output += "      <ATOM Name=\"stackable\" Value=\"99\"/>\n";
+		output += "      <ATOM Name=\"Saleable\" Value=\"false\"/>\n";
+		output += "    </STRUCT>\n";
+		output += "    <STRUCT Name=\"mp\">\n";
+		output += toString( "      <ATOM Name=\"Ecosystem\" Value=\"%s\"/>\n", ecosystemParents[i].Ecosystem );
+		output += "      <ATOM Name=\"Category\" Value=\"Faber\"/>\n";
+		output += "    </STRUCT>\n";
+		output += "    <STRUCT Name=\"3d\">\n";
+		output += toString( "      <ATOM Name=\"icon background\" Value=\"%s\"/>\n", ecosystemParents[i].Background );
+		output += "    </STRUCT>\n";
+		output += "  </STRUCT>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
+		if ( !output.writeToFile( toString( "%s_parent/_m%c.sitem", MP_DIRECTORY.c_str(), ecosystemParents[i].Eco ) ) )
+			fail( toString( "Cannot write the parent sheet of the ecosystem %s", ecosystemParents[i].Ecosystem ) );
+	}
+
+	for ( set<CSString>::const_iterator it = generatedCreatureCodes.begin(); it != generatedCreatureCodes.end(); ++it )
+	{
+		// "chd": c, then the code of creature_models.csv
+		map<CSString, CSString>::const_iterator itName = creatureModelNames.find( (*it).substr( 1 ) );
+		if ( itName == creatureModelNames.end() || itName->second.empty() )
+			fail( toString( "creature_models.csv has no name for the creature code of %s", (*it).c_str() ) );
+		CSString output = "<?xml version=\"1.0\"?>\n<FORM Version=\"0.0\" State=\"modified\">\n";
+		output += "  <STRUCT>\n";
+		output += "    <STRUCT Name=\"3d\">\n";
+		output += toString( "      <ATOM Name=\"text overlay\" Value=\"%s\"/>\n", itName->second.toUpper().left( 6 ).c_str() );
+		output += "    </STRUCT>\n";
+		output += "  </STRUCT>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n  <STRUCT/>\n</FORM>\n";
+		if ( !output.writeToFile( toString( "%s_parent/_m%s.sitem", MP_DIRECTORY.c_str(), (*it).c_str() ) ) )
+			fail( toString( "Cannot write the parent sheet of the creature code %s", (*it).c_str() ) );
+	}
+	printf( "    6 ecosystems, %u creature models\n", (uint)generatedCreatureCodes.size() );
 }
 
 // Generate _ic_families.forage_source()
@@ -1411,10 +1602,49 @@ void	SaveFamiliesForageSource()
 	output+= "    <STRUCT>\n";
 	output+= "    <ARRAY Name=\"Icons\">\n";
 
-	for ( uint i=0; i!=MPFamilies.size(); ++i )
+	// the icons in the file now, for the families that this run does not generate (they are in item_mp_family.typ
+	// but not in rm_fam_prop.csv): the array is indexed by family number, so those keep their place and their icon
+	vector<string> previousIcons;
 	{
-		output+= toString("      <ATOM Value=\"%s\"/>\n", MPFamilies[i].Icon.c_str());
+		CSString previous;
+		previous.readFromFile( IC_FAMILIES_FORAGE_SOURCE );
+		const string text = previous.splitFrom( "<ARRAY Name=\"Icons\">" ).splitTo( "</ARRAY>" );
+		// each atom of the array is an icon, "<ATOM Value="..."/>", or "<ATOM/>" when it is empty
+		const string atom = "<ATOM";
+		const string value = "Value=\"";
+		for ( string::size_type pos = text.find( atom ); pos != string::npos; pos = text.find( atom, pos ) )
+		{
+			const string::size_type end = text.find( '>', pos );
+			if ( end == string::npos )
+				fail( toString( "%s has an icon atom with no end", IC_FAMILIES_FORAGE_SOURCE.c_str() ) );
+			const string element = text.substr( pos, end - pos );
+			const string::size_type v = element.find( value );
+			if ( v == string::npos )
+			{
+				previousIcons.push_back( string() );
+			}
+			else
+			{
+				const string::size_type close = element.find( '"', v + value.size() );
+				if ( close == string::npos )
+					fail( toString( "%s has an icon with no closing quote", IC_FAMILIES_FORAGE_SOURCE.c_str() ) );
+				previousIcons.push_back( element.substr( v + value.size(), close - v - value.size() ) );
+			}
+			pos = end + 1;
+		}
 	}
+
+	const uint nbIcons = (uint)std::max( MPFamilies.size(), previousIcons.size() );
+	uint nbKept = 0;
+	for ( uint i=0; i!=nbIcons; ++i )
+	{
+		const bool generated = i < MPFamilies.size() && !MPFamilies[i].Name.empty();
+		if ( !generated && i < previousIcons.size() && !previousIcons[i].empty() )
+			++nbKept;
+		const string icon = generated ? string( MPFamilies[i].Icon ) : ( i < previousIcons.size() ? previousIcons[i] : string() );
+		output+= toString("      <ATOM Value=\"%s\"/>\n", icon.c_str());
+	}
+	printf( "    %u icons, %u of families this run does not generate kept\n", nbIcons, nbKept );
 
     output+= "    </ARRAY>\n";
 	output+= "  </STRUCT>\n";
@@ -1425,7 +1655,7 @@ void	SaveFamiliesForageSource()
 	output+= "  <LOG></LOG>\n";
 	output+= "</FORM>\n";
 
-	output.writeToFile( IC_FAMILIES_FORAGE_SOURCE.c_str() );
+	writeFile( output, IC_FAMILIES_FORAGE_SOURCE );
 }
 
 
@@ -1434,7 +1664,7 @@ void GenerateDoc()
 {
 	CProducedDocHtml			MainDoc;
 	CFile::createDirectory("doc");
-	MainDoc.open( "doc\\rm.html", "Raw materials by generation order", true );
+	MainDoc.open( "doc/rm.html", "Raw materials by generation order", true );
 	MainDoc.write( "<table cellpadding=\"1\" cellspacing=\"1\" border=\"0\"><tbody>\n" );
 	MainDoc.write( "<tr>" );
 	for ( uint32 c=0; c!=DtNbCols; ++c )
@@ -1452,7 +1682,7 @@ void GenerateDoc()
 	CProducedDocHtml			AltDocs[DtNbCols];
 	for ( uint32 c=0; c!=DtNbCols; ++c )
 	{
-		AltDocs[c].open( "doc\\rm_" + string(DataColStr[c]) + ".html", "Raw materials by " + string(DataColStr[c]), true );
+		AltDocs[c].open( "doc/rm_" + string(DataColStr[c]) + ".html", "Raw materials by " + string(DataColStr[c]), true );
 		AltDocs[c].write( "<table cellpadding=\"1\" cellspacing=\"1\" border=\"0\"><tbody>\n" );
 		AltDocs[c].write( "<tr>" );
 		for ( uint32 cc=0; cc!=DtNbCols; ++cc )
@@ -1477,6 +1707,16 @@ void GenerateDoc()
 }
 
 
+// A folder of raw_material_generation.cfg (Key = "path"), with forward slashes and a final one
+static CSString cfgPath( const CSString &cfg, const char *key )
+{
+	const CSString value = cfg.splitFrom( toString( "%s = \"", key ).c_str() ).splitTo( "\"" );
+	if ( value.empty() )
+		fail( toString( "raw_material_generation.cfg gives no %s", key ) );
+	return CPath::standardizePath( value, true );
+}
+
+
 // Initialize directories from raw_material_generation.cfg
 void SetupDirectories()
 {
@@ -1491,23 +1731,44 @@ void SetupDirectories()
 	data.readFromFile( "raw_material_generation.cfg" );
 
 	// beurk :s Use CConfigFile instead
-	LEVEL_DESIGN_PATH = data.splitFrom( "LevelDesignPath = \"").splitTo( "\"" );
-	TRANSLATION_PATH = data.splitFrom( "TranslationPath = \"" ).splitTo( "\"" );
+	LEVEL_DESIGN_PATH = cfgPath( data, "LevelDesignPath" );
+	TRANSLATION_PATH = cfgPath( data, "TranslationPath" );
+	CREATURE_PATH = cfgPath( data, "CreaturePath" );
+	RAW_MATERIAL_ASSIGN = cfgPath( data, "RawMaterialAssignmentPath" );
 
-	printf( "Level Design Path : %s\nTranslation Path : %s\n\n", LEVEL_DESIGN_PATH.c_str(), TRANSLATION_PATH.c_str() );
-	
-	ITEM_MP_FAMILY_TYP = LEVEL_DESIGN_PATH + "leveldesign\\DFN\\game_elem\\_item\\item_mp_family.typ";
-	ITEM_MP_GROUPE_TYP = LEVEL_DESIGN_PATH + "leveldesign\\DFN\\game_elem\\_item\\item_mp_group.typ";
-	ITEM_MP_PARAM_DFN = LEVEL_DESIGN_PATH + "leveldesign\\DFN\\game_elem\\_item\\_item_mp_param.dfn";
-	MP_DIRECTORY = LEVEL_DESIGN_PATH + "leveldesign\\game_element\\sitem\\raw_material\\";
-	DEPOSIT_MPS = LEVEL_DESIGN_PATH + "leveldesign\\game_element\\deposit_system\\mps\\"; 
+	printf( "Level Design Path : %s\nTranslation Path : %s\nCreature Path : %s\nRaw Material Assignment Path : %s\n\n",
+		LEVEL_DESIGN_PATH.c_str(), TRANSLATION_PATH.c_str(), CREATURE_PATH.c_str(), RAW_MATERIAL_ASSIGN.c_str() );
 
-	RAW_MATERIAL_ASSIGN = LEVEL_DESIGN_PATH + "leveldesign\\Game_elem\\Creature\\raw_material_assignment\\";
+	ITEM_MP_FAMILY_TYP = LEVEL_DESIGN_PATH + "DFN/game_elem/_item/item_mp_family.typ";
+	ITEM_MP_GROUPE_TYP = LEVEL_DESIGN_PATH + "DFN/game_elem/_item/item_mp_group.typ";
+	ITEM_MP_PARAM_DFN = LEVEL_DESIGN_PATH + "DFN/game_elem/_item/_item_mp_param.dfn";
+	MP_DIRECTORY = LEVEL_DESIGN_PATH + "game_element/sitem/raw_material/";
+	DEPOSIT_MPS = LEVEL_DESIGN_PATH + "game_element/deposit_system/mps/";
 
-	IC_FAMILIES_FORAGE_SOURCE = LEVEL_DESIGN_PATH + "leveldesign\\game_element\\forage_source\\_ic_families.forage_source";
-	
-	WK_UXT = TRANSLATION_PATH + "work\\wk.uxt";
-	ITEM_WORDS_WK = TRANSLATION_PATH + "work\\item_words_wk.txt";
+	IC_FAMILIES_FORAGE_SOURCE = LEVEL_DESIGN_PATH + "game_element/forage_source/_ic_families.forage_source";
+
+	WK_UXT = TRANSLATION_PATH + "work/wk.uxt";
+	ITEM_WORDS_WK = TRANSLATION_PATH + "work/item_words_wk.txt";
+
+	// what is read must be there
+	const CSString inputs[] = { ITEM_MP_FAMILY_TYP, ITEM_MP_GROUPE_TYP, ITEM_MP_PARAM_DFN, WK_UXT, ITEM_WORDS_WK };
+	for ( uint i=0; i<sizeof(inputs)/sizeof(inputs[0]); ++i )
+	{
+		if ( !CFile::fileExists( inputs[i] ) )
+			fail( toString( "%s not found, check the paths of raw_material_generation.cfg", inputs[i].c_str() ) );
+	}
+	if ( !CFile::isDirectory( CREATURE_PATH ) )
+		fail( toString( "The creature folder %s (CreaturePath of raw_material_generation.cfg) not found", CREATURE_PATH.c_str() ) );
+
+	// and what is written gets its folders
+	const CSString outputs[] = { MP_DIRECTORY + "_parent/", MP_DIRECTORY + "common/", MP_DIRECTORY + "desert/",
+		MP_DIRECTORY + "forest/", MP_DIRECTORY + "jungle/", MP_DIRECTORY + "lacustre/", MP_DIRECTORY + "prime_roots/",
+		DEPOSIT_MPS, RAW_MATERIAL_ASSIGN, CFile::getPath( IC_FAMILIES_FORAGE_SOURCE ) };
+	for ( uint i=0; i<sizeof(outputs)/sizeof(outputs[0]); ++i )
+	{
+		if ( !CFile::isDirectory( outputs[i] ) && !CFile::createDirectoryTree( outputs[i] ) )
+			fail( toString( "Cannot create the folder %s", outputs[i].c_str() ) );
+	}
 }
 
 
@@ -1535,13 +1796,15 @@ void LoadFamillesMP()
 
 	fileData.readFromFile( "rm_fam_prop.csv" );
 
+	// the lines without their carriage returns: one left at the end would be read as a special item of the family
+	fileData = fileData.replace( "\r", "" );
 	ligne = fileData.splitTo( "\n", true );
 
 	while ( !ligne.empty() )
 	{
-		NewMP( ligne );	
+		NewMP( ligne );
 		ligne = fileData.splitTo( "\n", true );
-	} 
+	}
 
 	// we manually add Primitive Necklace because it's not specified in raw mats list
 	CreatePrimitiveNecklace();
@@ -1560,10 +1823,16 @@ int main( int argc, char* argv[] )
 
 	LoadCreatureFiles();
 
+	LoadAssignmentFiles();
+
 	InitCreatureMP();
 
 	LoadFamillesMP();
-	
+
+	SaveAssignments();
+
+	SaveParentSItems();
+
 	ItemNamesSave();
 
 	LoadCustomizedProperties();
