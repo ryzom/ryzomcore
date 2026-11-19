@@ -1156,6 +1156,51 @@ TEST(StreamAllowance, NoiseOfThePathIsNotLateness)
 	EXPECT_EQ(allowance.noise(), 2u);
 }
 
+// An allowance far above what the path takes, with the congestion window of the connection holding the client back:
+// half of the allowance would take nothing away, and no cycle of the last ten gave half of it. It is cut all the same,
+// for what the client got or for what is still on its way.
+TEST(StreamAllowance, CutWhereSomethingElseHoldsTheClient)
+{
+	CStreamSchedulerConfig config;
+	for (uint variant = 0; variant < 3; ++variant)
+	{
+		SCOPED_TRACE(variant);
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		uint32 number = 100;
+		for (uint i = 0; i < 60; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			allowance.granted(allowance.allowance(), true);
+		}
+		ASSERT_GT(allowance.allowance(), 40000u);
+
+		// Twelve cycles in which the client has stream data waiting and gets: nothing (its window is full of what it
+		// got before); a tenth of its allowance or so; or, without more waiting, a little
+		for (uint i = 0; i < 12; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			if (variant == 0)
+				allowance.granted(0, true);
+			else if (variant == 1)
+				allowance.granted(4000, true);
+			else
+				allowance.granted(300, false);
+		}
+		// (what was still owed a raise at the start of them got it)
+		const uint32 before = allowance.allowance();
+
+		// Its datagrams are late
+		allowance.update(config, true, 150, number - 2, number, 0, 0);
+		if (variant == 0)
+			EXPECT_EQ(allowance.allowance(), before / 2); // for what is on its way: it did use its allowance then
+		else if (variant == 1)
+			EXPECT_EQ(allowance.allowance(), before / 4); // towards what it gets, a quarter at once
+		else
+			EXPECT_EQ(allowance.allowance(), before); // a trickle is not what holds its datagrams up
+	}
+}
+
 } /* anonymous namespace */
 
 /* end of file */

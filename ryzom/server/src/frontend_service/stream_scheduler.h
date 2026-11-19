@@ -252,8 +252,12 @@ private:
  *
  * It is halved when a report shows lateness, or the connection could not send a datagram, and the client used its
  * allowance shortly before: one of the last cycles gave it more than half of it, which is as much as
- * a cut takes away. A client that uses less is not held up by its stream data, and a cut would change nothing for
- * it: its allowance stays, whatever happens to its datagrams. After a cut, the queue that stood at the cut takes time
+ * a cut takes away. A client that got less than that though it had more to send is held by something else (its
+ * congestion window, the budget of the frontend), with an allowance far above what its path takes: that allowance
+ * goes to half of what the client did get, which is where a cut takes something away. If it got nothing at all
+ * lately with stream data waiting, its congestion window is full of what it got before, and the cut is for that. A
+ * client that had no more to send than the little it got is not held up by its stream data, and a cut would change nothing for it: its allowance
+ * stays, whatever happens to its datagrams. After a cut, the queue that stood at the cut takes time
  * to drain: the reports on datagrams of after the cut are compared with each other, lateness that comes down is that
  * queue and does not cut again, lateness that does not come down does; and the datagrams not sent up to the first of
  * those reports are of what was sent before the cut.
@@ -311,6 +315,8 @@ private:
 		NbCycles = 32,
 		/// Cycles before a datagram in which stream data can have held it up
 		CutCycles = 10,
+		/// Cycles before a datagram without any stream data, given or waiting, for its lateness to be of the path alone
+		QuietCycles = 20,
 		/// Reports without stream data before them that make a stretch of the noise, and the most that counts as noise
 		NoiseReports = 150,
 		NoiseMax = 100
@@ -321,11 +327,13 @@ private:
 		uint32 Number; // of the datagram of the cycle
 		uint32 Granted; // bytes of stream data given after that datagram
 		bool Held; // the client got all of its allowance and had more to send
+		bool Wanted; // it got stream data and had more to send
+		bool Backlog; // it had stream data to send, whether it got any or not
 		bool Valid;
 	};
 
-	/// One of the cycles of these numbers gave the client stream data
-	bool grantedIn(uint32 firstNumber, uint32 lastNumber) const;
+	/// In one of the cycles of these numbers the client got stream data or had some waiting
+	bool busyIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// One of the cycles of these numbers gave the client more than half of the allowance as it is now.
 	/// (The numbers come from the client: only the cycles that are kept are looked at, however far apart they are.)
 	bool usedHalfIn(uint32 firstNumber, uint32 lastNumber) const;
@@ -334,7 +342,13 @@ private:
 	/// The first of the cycles before a datagram whose stream data a cut can be for: CutCycles before it, and not
 	/// before the last cut, which was for the cycles before it
 	uint32 firstCutCycle(uint32 number) const;
-	void cut(uint32 sendNumber);
+	/// The most that one of the cycles of these numbers gave the client while it had more to send (0: none did)
+	uint32 heldBackGrantIn(uint32 firstNumber, uint32 lastNumber) const;
+	/// In one of the cycles of these numbers the client had stream data waiting and got none
+	bool waitingIn(uint32 firstNumber, uint32 lastNumber) const;
+	/// What the allowance is cut to for the stream data of the cycles of these numbers (0: not at all)
+	uint32 cutFor(uint32 firstNumber, uint32 lastNumber) const;
+	void cut(uint32 sendNumber, uint32 allowance);
 
 	CCycle m_Cycles[NbCycles];
 	uint32 m_CurrentNumber;
