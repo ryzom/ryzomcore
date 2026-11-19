@@ -14,6 +14,7 @@
 # Base class for Ryzom <-> Deepl <-> Zulip system
 #
 
+import json
 import re
 import time
 import traceback
@@ -25,7 +26,30 @@ from ryzom_service import RyzomService, RyzomMessage
 NETWORK_ERRORS = (requests.exceptions.Timeout, requests.exceptions.SSLError, requests.exceptions.ConnectionError)
 EVENT_TYPES = ["message", "update_message", "reaction"]
 
+# Ids of the groups and of the folder used by the in-game channels of the Zulip instance
+OWNER_GROUP=10
+PLAYER_GROUP=73
+INGAME_FOLDER_ID=2
+
 class ZulipClient(zulip.Client):
+	
+	def addIngameSubscription(self, name, principals = None):
+		# Subscribing creates the channel when it doesn't exist yet
+		options = {"principals": principals} if principals else {}
+		return self.add_subscriptions(
+			streams = [{"name": name}],
+			invite_only = True,
+			history_public_to_subscribers = False,
+			topics_policy = json.dumps("empty_topic_only"),
+			message_retention_days = "7",
+			can_add_subscribers_group = OWNER_GROUP,
+			can_remove_subscribers_group = OWNER_GROUP,
+			can_send_message_group = PLAYER_GROUP,
+			send_new_subscription_messages = False,
+			folder_id = INGAME_FOLDER_ID,
+			**options,
+		)
+
 	def doRegister(self, event_types, narrow, **kwargs):
 		while True:
 			if event_types is None:
