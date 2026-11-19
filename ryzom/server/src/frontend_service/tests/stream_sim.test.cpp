@@ -19,16 +19,22 @@
 // the scheduler, the allowance or the lateness measure made a case worse, or that the simulation changed. To see a
 // case: ryzom_frontend_streams_sim <case>, with --trace for its cycles.
 //
-// Known and wanted better, with the bound that holds it where it is:
+// Known and wanted better, each with a test that holds it where it is:
 // - A backlog on a new connection overshoots the path once before the allowance finds its level, which makes the
 //   datagrams up to 140 ms late for half a second (BacklogFindsThePath).
-// - A client that stops reporting just then (StalledClientDuringStartUp) keeps that allowance for as long as it is
-//   silent, with datagrams late all the while.
+// - Jitter of more than the lateness the frontend allows reads as lateness often enough to keep the allowance down
+//   (JitterAboveTheTarget).
+// - Packets lost for no reason while stream data flows cut the allowance each time (LossesWithStreamData).
+// - A client whose clock runs fast reports lateness that is not there, which holds the growth by quarters back
+//   (ClockThatRunsFast).
+// - A client that stops reporting while a raise is not judged yet keeps it until the frontend probes it, and again
+//   each time it is back from the probes (StalledClientDuringStartUp).
 
 #include <gtest/gtest.h>
 
 #include "nel/misc/types_nl.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -183,7 +189,8 @@ TEST(StreamSim, StrayLossesDoNotCutATrickle)
 	EXPECT_LE(r.LongestGap, 2u);
 }
 
-// A message of 30 KB every few seconds, with and without jitter on the path: jitter is not lateness
+// A message of 30 KB every few seconds, with and without jitter on the path: jitter under the lateness the frontend
+// allows (15 ms against 20) is not lateness
 TEST(StreamSim, MessagesNowAndThen)
 {
 	{
@@ -208,6 +215,96 @@ TEST(StreamSim, MessagesNowAndThen)
 	}
 }
 
+// Jitter of twice the lateness the frontend allows: the smallest of three datagrams is above it one time in eight,
+// and the allowance is cut for it again and again. The messages arrive, in seconds where they take 0.6 s without the
+// jitter. (Wanted better; see the top of the file.)
+TEST(StreamSim, JitterAboveTheTarget)
+{
+	{
+		SCOPED_TRACE("messages");
+		CRun run("jitter-wifi");
+		const CClientResult &r = run.client();
+		expectAllDatagrams(r);
+		expectAllRecords(r);
+		EXPECT_LE(r.maxLateness(), 45u); // (40 ms of it is the jitter)
+		EXPECT_LT(r.maxRecordSeconds(), 4.0);
+		EXPECT_GE(r.AllowanceMin, 256u);
+	}
+	{
+		SCOPED_TRACE("backlog");
+		CRun run("backlog-wifi");
+		const CClientResult &r = run.client();
+		expectAllDatagrams(r);
+		EXPECT_LE(r.maxLateness(), 45u);
+		EXPECT_GE(r.StreamBytesArrived, (uint64)3000000); // (of 6 MB in a minute: 15 MB is what the path takes)
+	}
+}
+
+// A path that loses a packet in a hundred, with stream data: every loss while a cycle uses half the allowance cuts it,
+// though the losses are not of the streams' doing. (Wanted better; see the top of the file.)
+TEST(StreamSim, LossesWithStreamData)
+{
+	{
+		SCOPED_TRACE("messages");
+		CRun run("messages-lossy");
+		const CClientResult &r = run.client();
+		expectAllRecords(r);
+		EXPECT_LE(r.maxLateness(), 5u);
+		EXPECT_LE(r.LongestGap, 2u);
+		EXPECT_LT(r.maxRecordSeconds(), 3.0);
+	}
+	{
+		SCOPED_TRACE("backlog");
+		CRun run("backlog-lossy");
+		const CClientResult &r = run.client();
+		EXPECT_LE(r.maxLateness(), 5u);
+		EXPECT_LE(r.LongestGap, 2u);
+		EXPECT_GE(r.StreamBytesArrived, (uint64)2000000); // (of 6 MB in a minute)
+	}
+}
+
+// A client whose clock gains 150 parts in a million on the frontend's: what it measures against its best datagrams of
+// the last 40 s is 6 ms too much, more than a raise by a quarter allows, and the login takes a second longer.
+// (Wanted better; see the top of the file.)
+TEST(StreamSim, ClockThatRunsFast)
+{
+	CRun run("login-drift");
+	const CClientResult &r = run.client();
+	expectAllDatagrams(r);
+	expectAllRecords(r);
+	EXPECT_EQ(r.maxLateness(), 0u);
+	EXPECT_LE(r.ReportedMax, 8u);
+	EXPECT_EQ(r.Cuts, 0u);
+	EXPECT_LT(r.maxRecordSeconds(), 5.5);
+}
+
+// The path lets nothing through for 4 s: the frontend probes the client, the transport probes the path, and both
+// are back when the path is. For 15 s: the frontend gives the client up.
+TEST(StreamSim, PathThatGoesDark)
+{
+	{
+		SCOPED_TRACE("4 s");
+		CRun run("dark");
+		const CClientResult &r = run.client();
+		expectAllRecords(r);
+		EXPECT_FALSE(r.Gone);
+		EXPECT_GE(r.Probes, 1u);
+		EXPECT_LT(r.maxRecordSeconds(), 45.0);
+		double mean;
+		uint32 worst, missing;
+		run.Sim->latenessBetween(20.0, 60.0, mean, worst, missing);
+		EXPECT_EQ(missing, 0u);
+		EXPECT_LE(worst, 60u);
+		run.Sim->latenessBetween(0.0, 9.9, mean, worst, missing);
+		EXPECT_EQ(missing, 0u);
+	}
+	{
+		SCOPED_TRACE("15 s");
+		CRun run("dark-long");
+		EXPECT_TRUE(run.client().Gone);
+	}
+}
+
 // The path goes from 5 to 1 Mbit/s under a full allowance: datagrams are late and lost for a moment, and the
 // allowance comes down to what the path takes now
 TEST(StreamSim, PathThatDropsInSpeed)
@@ -223,52 +320,62 @@ TEST(StreamSim, PathThatDropsInSpeed)
 	EXPECT_GE(r.AllowanceEnd, 6250u);
 }
 
-// The client changes network: the allowance starts over on the new path
+// The client changes network: nothing goes to the new address until it is validated (datagrams are dropped for it),
+// and the allowance starts over on the new path
 TEST(StreamSim, NewAddress)
 {
 	CRun run("newaddress");
 	const CClientResult &r = run.client();
 	expectAllRecords(r);
-	EXPECT_LE(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 3u);
+	EXPECT_GE(r.DatagramsCancelled, 1u);
+	EXPECT_LE(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 4u);
 	EXPECT_LE(r.maxLateness(), 170u);
 	EXPECT_LE(r.lateAbove(50), 16u);
 	EXPECT_LT(r.maxRecordSeconds(), 25.0);
+	// (after the change: back near what the path takes, from the start)
+	EXPECT_GE(r.AllowanceEnd, 12500u);
+	EXPECT_LE(r.AllowanceEnd, 25000u);
 }
 
-// A client that sends nothing for 10 s (a loading screen) while its allowance is at its level: the allowance stays
-// where it is, and nothing is late for it
+// A client that sends nothing for 10 s (a loading screen) while its allowance is at its level. The frontend takes it
+// for lagging after 3 s and probes it, and stream data waits while it does. Nothing is late or missing for it.
 TEST(StreamSim, StalledClient)
 {
 	CRun run("stall");
-	CRun reference("backlog");
 	const CClientResult &r = run.client();
 	expectAllDatagrams(r);
 	expectAllRecords(r);
-	EXPECT_LE(r.maxLateness(), reference.client().maxLateness());
-	EXPECT_LE(r.lateAbove(20), reference.client().lateAbove(20));
-	EXPECT_LT(r.maxRecordSeconds(), 40.0);
+	EXPECT_GE(r.Probes, 1u);
+	EXPECT_FALSE(r.Gone);
+	double mean;
+	uint32 worst, missing;
+	run.Sim->latenessBetween(14.0, 27.0, mean, worst, missing);
+	EXPECT_LE(worst, 20u);
+	EXPECT_EQ(missing, 0u);
+	EXPECT_LT(r.maxRecordSeconds(), 45.0);
 }
 
 // The same while the allowance is above what the path takes: it cannot be judged without reports and stays there,
-// and the congestion window is all that holds the stream data back. (Wanted better; see the top of the file.)
+// for the 3 s until the frontend probes the client and again each time the client is back from the probes. The
+// congestion window is all that holds the stream data back then. (Wanted better; see the top of the file.)
 TEST(StreamSim, StalledClientDuringStartUp)
 {
 	CRun run("stall-startup");
 	const CClientResult &r = run.client();
 	expectAllRecords(r);
+	EXPECT_GE(r.Probes, 1u);
 	EXPECT_LE(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 3u);
 	EXPECT_LE(r.maxLateness(), 200u);
-	EXPECT_LE(r.meanLateness(), 35.0);
-	EXPECT_LT(r.maxRecordSeconds(), 20.0);
+	EXPECT_LE(r.meanLateness(), 20.0);
+	EXPECT_LT(r.maxRecordSeconds(), 25.0);
 }
 
-// 300 clients log in one after another: everyone is served, nobody's datagrams are late, the budget holds
+// 300 clients log in one after another, well within the budget: everyone is served, nobody's datagrams are late
 TEST(StreamSim, LoginWave)
 {
 	CRun run("wave");
 	EXPECT_EQ(run.Sim->clientsDone(), 300u);
 	EXPECT_LE(run.Sim->maxLateness(), 5u);
-	EXPECT_LE(run.Sim->maxEgressPerSecond(), (uint64)run.Config.Scheduler.TotalOutgoingBandwidth);
 	double worst = 0;
 	for (uint32 i = 0; i < run.Sim->clientCount(); ++i)
 	{

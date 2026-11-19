@@ -41,20 +41,31 @@
  *
  * What is a model:
  * - The frontend around them: a cycle every 100 ms that reads the reports of the clients, writes a datagram per client,
- *   asks the classes above, and sends the datagrams and then the stream data, as CFeSendSub does.
+ *   asks the classes above, and sends the datagrams and then the stream data, as CFeSendSub does. It knows of the
+ *   transport what the service knows: the statistics as they were when its last datagram was written or its last
+ *   block of stream data was all acknowledged, and blocks as outstanding until all of them is. A client that sent
+ *   nothing for 3 s gets a probe every 300 ms and no stream data, comes back two seconds later if it can be reached,
+ *   and is gone after 10 s (CFrontEndService::monitorClients; the exchange of probes and SYNC itself is not played).
  * - The transport, in place of MsQuic 2.6 with its default settings: packets of at most an MTU with the datagram
  *   first and stream data behind it; a congestion window (slow start, a cut to 0.7 on a loss, growth of a packet per
  *   window after it, never above twice what was in flight); a packet written whole as long as the window has any
  *   room; pacing by its rule (what a flush may send grows with the time since the last one, by twice the window per
  *   round trip in slow start and 1.25 times after it, and what is left goes on a millisecond later); a loss found
  *   three packets later or after a time without acknowledgement; stream data sent again; a datagram that was sent so
- *   dropped at the end of a flush that did not write it; one datagram waiting at a time. Its window grows as Reno's,
- *   not as CUBIC's; no ECN, no probes, an acknowledgement per packet without delay.
+ *   dropped at the end of a flush that did not write it; one datagram waiting at a time; on a new address nothing
+ *   until the path is validated, a round trip later. The client acknowledges every second packet at once and a lone
+ *   one after 25 ms. After a time without any acknowledgement the frontend's transport sends a probe, and
+ *   again after twice as long. Its window grows as Reno's, not as CUBIC's; no ECN, no persistent congestion, no
+ *   packets of acknowledgements only from the frontend, no flow control.
  * - The frontend's own link, if one is set: all its packets leave through it in the order they were sent, at its rate.
  * - The path to each client: a bottleneck of a given rate with a queue of a given size that drops what does not fit,
  *   a delay each way, jitter, random loss. The way back is not congested.
- * - The client: it acknowledges what arrives, measures the lateness of the datagrams, and sends a datagram of its own
- *   with its report every 100 ms, except while its main thread is busy (a loading screen).
+ * - The client: it acknowledges what arrives, measures the lateness of the datagrams on a clock that can run fast or
+ *   slow, and sends a datagram of its own with its report every 100 ms, except while its main thread is busy (a
+ *   loading screen).
+ *
+ * Not in it at all: other traffic at a client's bottleneck, bottlenecks that mark or drop by delay, cycles of the
+ * frontend that come late, clients of protocol level 4.1 or on UDP beside the others.
  *
  * The transport is a model of MsQuic, not MsQuic: it makes changes to the classes comparable and shows faults in
  * their logic, and its numbers stand for a real path only as far as it was compared with one.
@@ -92,6 +103,8 @@ struct CClientConfig
 	/// When the client sends its own datagrams: every so many milliseconds, from this many after the start
 	double SendPeriodMs;
 	double SendPhaseMs;
+	/// How much faster than the frontend's its clock runs, in parts per million
+	double ClockDriftPpm;
 	/// Stretches of seconds, from and to, in which the client sends none (its transport still acknowledges)
 	std::vector<std::pair<double, double> > Stalls;
 };
@@ -209,6 +222,9 @@ struct CClientResult
 	/// Times the transport cut its congestion window, and packets it lost
 	uint32 CongestionEvents;
 	uint32 PacketsLost;
+	/// Times the frontend took it for lagging and probed it, and whether it gave it up
+	uint32 Probes;
+	bool Gone;
 
 	uint32 maxLateness() const;
 	double meanLateness() const;
@@ -225,6 +241,8 @@ struct CTickTrace
 	double Seconds;
 	uint32 Allowance;
 	bool StartUp;
+	/// The frontend probes it
+	bool Probe;
 	uint32 Window;
 	uint32 Grant;
 	uint32 Pending;
@@ -241,7 +259,8 @@ struct CTickTrace
 		DatagramLost = -1,
 		DatagramCancelled = -2,
 		DatagramNotSent = -3,
-		DatagramOnItsWay = -4
+		DatagramOnItsWay = -4,
+		NoDatagram = -5
 	};
 };
 
@@ -302,7 +321,8 @@ private:
 		EventTraffic,
 		EventPathChange,
 		EventPacing,
-		EventUplinkChange
+		EventUplinkChange,
+		EventAckTimer
 	};
 
 	void post(TTime time, uint32 type, uint32 client, uint64 a = 0, uint64 b = 0);
@@ -312,7 +332,7 @@ private:
 	void flush(CClient &client);
 	uint32 sendPacket(CClient &client, bool withDatagram, uint64 streamOffset, uint32 streamLength);
 	void packetArrives(CClient &client, uint64 number);
-	void ackArrives(CClient &client, uint64 number);
+	void ackArrives(CClient &client, uint64 number, TTime ackDelay);
 	void packetLost(CClient &client, uint64 number);
 	void findLosses(CClient &client, uint64 ackedNumber);
 	void clientSends(CClient &client);
@@ -336,13 +356,13 @@ private:
 	uint64 m_EgressThisSecond;
 	TTime m_EgressSecondStart;
 	uint64 m_MaxEgressPerSecond;
-	uint32 m_TickCount;
 	double m_UplinkRate;
 	TTime m_UplinkLastDeparture;
 	uint32 m_UplinkDrops;
 
 	std::vector<CTickTrace> m_Trace;
-	uint32 m_TraceFirstNumber;
+	/// The row of the cycle of each datagram of the traced client
+	std::map<uint32, size_t> m_TraceRows;
 };
 
 /// The named cases, for the tests and for the program that prints them. False if there is none of that name.

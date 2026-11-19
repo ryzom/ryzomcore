@@ -17,7 +17,6 @@
 #include "stream_sim.h"
 
 #include <algorithm>
-#include <cstring>
 
 namespace STREAM_SIM {
 
@@ -26,11 +25,19 @@ namespace /* anonymous */ {
 /// Bytes of a packet at most, and what a packet has besides its datagram and stream data (header, packet number, frame
 /// headers, tag)
 const uint32 s_Mtu = 1200;
-const uint32 s_PacketOverhead = 30;
+const uint32 s_PacketOverhead = 28;
 /// The headers of UDP and IP, as the frontend counts them for what it sends (IPv6)
 const uint32 s_WireOverhead = 48;
 /// What the frontend counts for a datagram on the wire besides its bytes (CFeSendSub)
-const uint32 s_QuicDatagramOverhead = 76;
+const uint32 s_QuicDatagramOverhead = s_PacketOverhead + s_WireOverhead;
+/// The frontend takes a client that sent nothing for so long for lagging, probes it (a small datagram every third
+/// cycle), has it back after so long if it answers, and gives it up after so long without anything from it
+const TTime s_ClientLagTime = 3000000;
+const TTime s_ProbeTime = 2000000;
+const TTime s_ClientTimeOut = 10000000;
+const uint32 s_ProbeBytes = 12;
+/// The client's transport holds the acknowledgement of a lone packet back for so long
+const TTime s_AckDelay = 25000;
 /// The congestion window at the start, and the least it is cut to
 const double s_InitialWindow = 10.0 * s_Mtu;
 const double s_MinWindow = 2.0 * s_Mtu;
@@ -74,6 +81,7 @@ CClientConfig::CClientConfig()
     : DatagramBytes(300)
     , SendPeriodMs(100)
     , SendPhaseMs(37)
+    , ClockDriftPpm(0)
 {
 }
 
@@ -104,6 +112,8 @@ CClientResult::CClientResult()
     , Raises(0)
     , CongestionEvents(0)
     , PacketsLost(0)
+    , Probes(0)
+    , Gone(false)
 {
 }
 
@@ -166,6 +176,7 @@ struct CSim::CClient
 		TTime DatagramPostTime;
 		uint64 StreamOffset;
 		uint32 StreamLength;
+		TTime Unloaded; // what its datagram takes on the way when nothing else is on it
 		bool WillArrive; // (it was not dropped on the way)
 		bool Arrived;
 		bool Done; // acknowledged, or taken for lost
@@ -196,6 +207,7 @@ struct CSim::CClient
 	bool HasRtt;
 	uint64 RecoveryStart;
 	TTime LastProgress;
+	TTime ProbeTimeout;
 	TTime LastFlush;
 	bool FlushValid;
 	sint64 LastSendAllowance;
@@ -226,7 +238,6 @@ struct CSim::CClient
 	sint64 StatBytesInFlight;
 	uint32 StatGrantedCount;
 	uint32 GrantedCount;
-	bool QueueDelayKnown;
 	uint32 QueueDelay;
 	uint32 QueueDelayAck;
 	uint32 Reports;
@@ -237,6 +248,23 @@ struct CSim::CClient
 	bool PathChanged;
 	uint32 PathChangedDatagrams;
 	uint32 LastAllowance;
+	uint32 StatCongestionEvents;
+	// The blocks of stream data it gave the transport that are not all acknowledged: where each ends, and its size
+	std::deque<std::pair<uint64, uint32> > Blocks;
+	uint64 Outstanding;
+	TTime LastReceive;
+	bool Probe;
+	TTime ProbeUntil;
+	uint32 ProbeCycle;
+	bool Gone;
+	bool WritesDatagram;
+	uint32 CycleDatagramBytes;
+	// The transport: when the path of a new address is validated
+	TTime ValidatedAt;
+	// The client's transport: the packet whose acknowledgement it holds back
+	bool AckWaiting;
+	uint64 AckWaitingNumber;
+	TTime AckWaitingSince;
 
 	// The client
 	CDatagramLateness Lateness;
@@ -265,11 +293,9 @@ CSim::CSim(const CSimConfig &config)
     , m_EgressThisSecond(0)
     , m_EgressSecondStart(0)
     , m_MaxEgressPerSecond(0)
-    , m_TickCount(0)
     , m_UplinkRate(config.UplinkBytesPerSecond)
     , m_UplinkLastDeparture(0)
     , m_UplinkDrops(0)
-    , m_TraceFirstNumber(1)
 {
 	for (uint32 i = 0; i < (uint32)m_Config.Clients.size(); ++i)
 	{
@@ -292,6 +318,7 @@ CSim::CSim(const CSimConfig &config)
 		c->HasRtt = false;
 		c->RecoveryStart = 0;
 		c->LastProgress = 0;
+		c->ProbeTimeout = 500000;
 		c->LastFlush = 0;
 		c->FlushValid = false;
 		c->LastSendAllowance = 0;
@@ -314,7 +341,6 @@ CSim::CSim(const CSimConfig &config)
 		c->StatBytesInFlight = -1;
 		c->StatGrantedCount = 0;
 		c->GrantedCount = 0;
-		c->QueueDelayKnown = false;
 		c->QueueDelay = 0;
 		c->QueueDelayAck = 0;
 		c->Reports = 0;
@@ -325,6 +351,19 @@ CSim::CSim(const CSimConfig &config)
 		c->PathChanged = false;
 		c->PathChangedDatagrams = 0;
 		c->LastAllowance = 0;
+		c->StatCongestionEvents = 0;
+		c->Outstanding = 0;
+		c->LastReceive = 0;
+		c->Probe = false;
+		c->ProbeUntil = 0;
+		c->ProbeCycle = 0;
+		c->Gone = false;
+		c->WritesDatagram = false;
+		c->CycleDatagramBytes = 0;
+		c->ValidatedAt = 0;
+		c->AckWaiting = false;
+		c->AckWaitingNumber = 0;
+		c->AckWaitingSince = 0;
 		c->LastReceivedNumber = 0;
 		c->AnyReceived = false;
 		c->StreamPushed = 0;
@@ -452,17 +491,34 @@ void CSim::run(double seconds)
 		const CEvent event = m_Events.top();
 		m_Events.pop();
 		m_Now = event.Time;
-		CClient &c = *m_Clients[event.Client < m_Clients.size() ? event.Client : 0];
+		if (event.Type == EventTick)
+		{
+			tick();
+			continue;
+		}
+		if (event.Type == EventUplinkChange)
+		{
+			// (what waits at the link leaves it as it was worked out when it was sent)
+			m_UplinkRate = m_Config.UplinkChanges[(size_t)event.A].BytesPerSecond;
+			continue;
+		}
+		if (event.Client >= m_Clients.size())
+			continue;
+		CClient &c = *m_Clients[event.Client];
 		switch (event.Type)
 		{
-		case EventTick:
-			tick();
-			break;
 		case EventPacketArrives:
 			packetArrives(c, event.A);
 			break;
 		case EventAckArrives:
-			ackArrives(c, event.A);
+			ackArrives(c, event.A, (TTime)event.B);
+			break;
+		case EventAckTimer:
+			if (c.AckWaiting && c.AckWaitingNumber == event.A)
+			{
+				c.AckWaiting = false;
+				post(m_Now + us(c.Path.DelayMs), EventAckArrives, c.Index, event.A, (uint64)(m_Now - c.AckWaitingSince));
+			}
 			break;
 		case EventClientSends:
 			clientSends(c);
@@ -471,15 +527,11 @@ void CSim::run(double seconds)
 			c.PacingTimer = false;
 			flush(c);
 			break;
-		case EventUplinkChange:
-			// (what waits at the link leaves it as it was worked out when it was sent)
-			m_UplinkRate = m_Config.UplinkChanges[(size_t)event.A].BytesPerSecond;
-			break;
 		case EventReportArrives:
 			// (the frontend reads it at its next cycle)
 			c.QueueDelay = CLFECOMMON::decodeDatagramLateness((uint8)event.B);
 			c.QueueDelayAck = (uint32)event.A;
-			c.QueueDelayKnown = true;
+			c.LastReceive = m_Now;
 			++c.Reports;
 			break;
 		case EventTraffic: {
@@ -504,9 +556,14 @@ void CSim::run(double seconds)
 			c.Path = change.Path;
 			if (change.NewAddress)
 			{
-				// The transport starts over with its window on a new address, and tells the frontend
+				// The transport starts over on a new address (window, round trip time), sends nothing there until
+				// the path is validated, and tells the frontend
 				c.Cwnd = s_InitialWindow;
 				c.Ssthresh = 1e18;
+				c.BytesInFlightMax = (uint64)(s_InitialWindow / 2);
+				c.Srtt = 333000;
+				c.ValidatedAt = m_Now + 2 * us(c.Path.DelayMs) + 2000;
+				post(c.ValidatedAt, EventPacing, c.Index);
 				c.PathChanged = true;
 				c.PathChangedDatagrams = 5;
 			}
@@ -524,16 +581,18 @@ void CSim::run(double seconds)
 
 void CSim::datagramFate(CClient &c, uint32 datagramNumber, sint32 fate)
 {
-	if (c.Index != m_Config.TraceClient || datagramNumber < m_TraceFirstNumber)
+	if (c.Index != m_Config.TraceClient)
 		return;
-	const size_t index = datagramNumber - m_TraceFirstNumber;
-	if (index < m_Trace.size())
-		m_Trace[index].Datagram = fate;
+	std::map<uint32, size_t>::const_iterator it = m_TraceRows.find(datagramNumber);
+	if (it != m_TraceRows.end())
+		m_Trace[it->second].Datagram = fate;
 }
 
 void CSim::snapshot(CClient &c)
 {
-	// What the frontend reads from MsQuic when a datagram is written and when stream data is acknowledged
+	// What the frontend reads from MsQuic when a datagram is written and when a block of stream data is acknowledged
+	// to its end (CQuicTransceiver::updateStreamStats)
+	c.StatCongestionEvents = c.CongestionEvents;
 	c.StatCwnd = (sint64)c.Cwnd;
 	c.StatRtt = c.Srtt;
 	c.StatBytesInFlight = (sint64)c.BytesInFlight;
@@ -557,6 +616,14 @@ uint32 CSim::sendPacket(CClient &c, bool withDatagram, uint64 streamOffset, uint
 	p.Arrived = false;
 	p.Done = false;
 	p.Lost = false;
+	p.Unloaded = 0;
+	if (withDatagram)
+	{
+		const double alone = (double)(s_PacketOverhead + c.PendingBytes);
+		p.Unloaded = us(c.Path.DelayMs) + (TTime)(alone / c.Path.RateBytesPerSecond * 1e6);
+		if (m_Config.UplinkBytesPerSecond > 0)
+			p.Unloaded += (TTime)((alone + (double)s_WireOverhead) / m_Config.UplinkBytesPerSecond * 1e6);
+	}
 
 	if (c.BytesInFlight == 0)
 		c.LastProgress = m_Now;
@@ -634,7 +701,9 @@ void CSim::flush(CClient &c)
 
 	// What may be sent now: what the congestion window leaves, and with pacing no more than the time since the last
 	// flush allows on top of what that one left (MsQuic: CubicCongestionControlGetSendAllowance)
-	sint64 allowance = std::max((sint64)0, (sint64)c.Cwnd - (sint64)c.BytesInFlight);
+	// (On a new address nothing goes until the path is validated.)
+	const bool validated = m_Now >= c.ValidatedAt;
+	sint64 allowance = validated ? std::max((sint64)0, (sint64)c.Cwnd - (sint64)c.BytesInFlight) : 0;
 	if (allowance > 0 && m_Config.Pacing && c.FlushValid && c.HasRtt && c.Srtt >= 1000)
 	{
 		const double estimated = c.Cwnd < c.Ssthresh ? std::min(2.0 * c.Cwnd, c.Ssthresh) : 1.25 * c.Cwnd;
@@ -653,7 +722,7 @@ void CSim::flush(CClient &c)
 		if (allowance <= 0)
 		{
 			// The window has room and the pacing does not: it goes on a millisecond later
-			if ((sint64)c.Cwnd > (sint64)c.BytesInFlight && !c.PacingTimer)
+			if (validated && (sint64)c.Cwnd > (sint64)c.BytesInFlight && !c.PacingTimer)
 			{
 				c.PacingTimer = true;
 				post(m_Now + 1000, EventPacing, c.Index);
@@ -717,7 +786,8 @@ void CSim::packetArrives(CClient &c, uint64 number)
 	if (p.HasDatagram)
 	{
 		// The client: when it arrived, on its own clock in milliseconds
-		c.Lateness.add(p.DatagramSendTime, (uint32)(m_Now / 1000) + 123456789u, p.DatagramPathChanged);
+		const uint32 clientClock = (uint32)((double)m_Now * (1.0 + c.Config.ClockDriftPpm * 1e-6) / 1000.0) + 123456789u;
+		c.Lateness.add(p.DatagramSendTime, clientClock, p.DatagramPathChanged);
 		if (!c.AnyReceived || p.DatagramNumber > c.LastReceivedNumber)
 		{
 			if (p.DatagramNumber > c.LastReceivedNumber + 1)
@@ -726,11 +796,9 @@ void CSim::packetArrives(CClient &c, uint64 number)
 		}
 		c.AnyReceived = true;
 
-		// How late it is in truth: its time on the way above what the path takes when it is empty
-		TTime unloaded = us(c.Path.DelayMs) + (TTime)((double)p.Size / c.Path.RateBytesPerSecond * 1e6);
-		if (m_Config.UplinkBytesPerSecond > 0)
-			unloaded += (TTime)((double)(p.Size + s_WireOverhead) / m_Config.UplinkBytesPerSecond * 1e6);
-		const TTime late = std::max((TTime)0, m_Now - p.DatagramPostTime - unloaded);
+		// How late it is in truth: its time on the way above what the path, as it was when it was sent, takes for it
+		// alone
+		const TTime late = std::max((TTime)0, m_Now - p.DatagramPostTime - p.Unloaded);
 		const uint32 lateMs = (uint32)(late / 1000);
 		c.Result.Lateness.push_back(lateMs);
 		c.Result.LatenessAt.push_back((float)((double)p.DatagramPostTime / 1e6));
@@ -763,8 +831,20 @@ void CSim::packetArrives(CClient &c, uint64 number)
 		}
 	}
 
-	// It acknowledges every packet
-	post(m_Now + us(c.Path.DelayMs), EventAckArrives, c.Index, number);
+	// The client's transport acknowledges every second packet at once, and a lone one after a while
+	if (c.AckWaiting)
+	{
+		c.AckWaiting = false;
+		post(m_Now + us(c.Path.DelayMs), EventAckArrives, c.Index, c.AckWaitingNumber, (uint64)(m_Now - c.AckWaitingSince));
+		post(m_Now + us(c.Path.DelayMs), EventAckArrives, c.Index, number, 0);
+	}
+	else
+	{
+		c.AckWaiting = true;
+		c.AckWaitingNumber = number;
+		c.AckWaitingSince = m_Now;
+		post(m_Now + s_AckDelay, EventAckTimer, c.Index, number);
+	}
 }
 
 void CSim::packetLost(CClient &c, uint64 number)
@@ -799,44 +879,61 @@ void CSim::findLosses(CClient &c, uint64 ackedNumber)
 	if (!c.AnyAcked || ackedNumber > c.LargestAcked)
 		c.LargestAcked = ackedNumber;
 	c.AnyAcked = true;
+	// A packet of before the last one acknowledged is lost when more than three packets were sent between them, or
+	// when it was sent more than a round trip and an eighth ago
+	const TTime timeThreshold = c.Srtt + c.Srtt / 8;
 	for (size_t i = 0; i < c.Sent.size(); ++i)
 	{
 		CClient::CPacket &p = c.Sent[i];
-		if (p.Number + s_LossPackets > c.LargestAcked)
+		if (p.Number >= c.LargestAcked)
 			break;
-		if (!p.Done)
+		if (!p.Done && (p.Number + s_LossPackets < c.LargestAcked || p.SendTime + timeThreshold <= m_Now))
 			packetLost(c, p.Number);
 	}
 }
 
-void CSim::ackArrives(CClient &c, uint64 number)
+void CSim::ackArrives(CClient &c, uint64 number, TTime ackDelay)
 {
 	if (!c.has(number))
 		return;
 	CClient::CPacket &p = c.packet(number);
 	c.LastProgress = m_Now;
+	c.ProbeTimeout = std::max((TTime)200000, 2 * c.Srtt + s_AckDelay);
 	if (!p.Done)
 	{
 		p.Done = true;
 		c.BytesInFlight -= p.Size;
 
-		const TTime sample = m_Now - p.SendTime;
+		// (the client says how long it held the acknowledgement back, which is not of the round trip)
+		const TTime sample = std::max((TTime)1, m_Now - p.SendTime - ackDelay);
 		c.Srtt = c.HasRtt ? (7 * c.Srtt + sample) / 8 : sample;
 		c.HasRtt = true;
 
-		// Slow start, then a packet per window; never above twice what was in flight
-		if (c.Cwnd < c.Ssthresh)
-			c.Cwnd += p.Size;
-		else
-			c.Cwnd += (double)s_Mtu * (double)p.Size / c.Cwnd;
+		// Slow start, then a packet per window, not for the packets of before the last cut; never above twice what
+		// was in flight
+		if (number >= c.RecoveryStart)
+		{
+			if (c.Cwnd < c.Ssthresh)
+				c.Cwnd += p.Size;
+			else
+				c.Cwnd += (double)s_Mtu * (double)p.Size / c.Cwnd;
+		}
 		c.Cwnd = std::min(c.Cwnd, std::max(2.0 * (double)c.BytesInFlightMax, s_InitialWindow));
 	}
 	if (p.StreamLength != 0)
 	{
-		// (a packet that was taken for lost and arrived all the same still acknowledges its stream data)
-		const uint64 before = c.StreamAcked;
+		// (a packet that was taken for lost and arrived all the same still acknowledges its stream data, as long as
+		// it is remembered)
 		addRange(c.AckedRanges, c.StreamAcked, p.StreamOffset, p.StreamLength);
-		if (c.StreamAcked != before)
+		// The frontend hears of it block by block: one is outstanding until all of it is acknowledged
+		bool completed = false;
+		while (!c.Blocks.empty() && c.Blocks.front().first <= c.StreamAcked)
+		{
+			c.Outstanding -= c.Blocks.front().second;
+			c.Blocks.pop_front();
+			completed = true;
+		}
+		if (completed)
 			snapshot(c);
 	}
 
@@ -863,6 +960,9 @@ void CSim::clientSends(CClient &c)
 	}
 	if (!c.AnyReceived)
 		return;
+	// (on a path that lets nothing through, nothing gets back either)
+	if (c.Path.LossRate >= 1.0)
+		return;
 	// Its datagram, with the number of the last one it got and its report in its byte
 	c.Result.ReportedMax = std::max(c.Result.ReportedMax, CLFECOMMON::decodeDatagramLateness(CLFECOMMON::encodeDatagramLateness(c.Lateness.report())));
 	post(m_Now + us(c.Path.DelayMs), EventReportArrives, c.Index, c.LastReceivedNumber, CLFECOMMON::encodeDatagramLateness(c.Lateness.report()));
@@ -883,26 +983,66 @@ void CSim::tick()
 	{
 		CClient &c = *m_Clients[i];
 
-		// The transport: nothing acknowledged for long with packets in flight, the oldest is taken for lost
-		if (c.BytesInFlight != 0 && m_Now - c.LastProgress > std::max((TTime)500000, 4 * c.Srtt))
+		// The transport: nothing acknowledged for a while with packets in flight. It sends a probe, a packet that goes
+		// whatever the window says, and waits twice as long for the next one. The acknowledgement of a probe shows
+		// what of before it was lost.
+		if (c.BytesInFlight != 0 && m_Now - c.LastProgress > c.ProbeTimeout)
 		{
-			for (size_t k = 0; k < c.Sent.size(); ++k)
-			{
-				if (!c.Sent[k].Done)
-				{
-					packetLost(c, c.Sent[k].Number);
-					break;
-				}
-			}
+			sendPacket(c, false, 0, 0);
+			c.ProbeTimeout = std::min(c.ProbeTimeout * 2, (TTime)8000000);
 			c.LastProgress = m_Now;
-			// (what waited for the window goes now)
-			flush(c);
 		}
 
-		// The datagram of this cycle
-		++c.SendNumber;
-		++c.Result.DatagramsWritten;
-		datagramBytes += c.Config.DatagramBytes + s_QuicDatagramOverhead;
+		// A client that is gone gets nothing any more
+		if (c.Gone)
+		{
+			c.WritesDatagram = false;
+			CStreamScheduler::CEntry gone;
+			gone.Client = &c.Turn;
+			gone.Id = (uint32)i;
+			m_Entries.push_back(gone);
+			continue;
+		}
+
+		// The state of the client, as CFrontEndService::monitorClients keeps it
+		if (!c.Probe)
+		{
+			if (m_Now - c.LastReceive > s_ClientLagTime)
+			{
+				c.Probe = true;
+				c.ProbeUntil = m_Now + s_ProbeTime;
+				c.ProbeCycle = 0;
+				++c.Result.Probes;
+			}
+		}
+		else if (m_Now >= c.ProbeUntil && c.Path.LossRate < 1.0)
+		{
+			// (it answered the probes)
+			c.Probe = false;
+			c.LastReceive = m_Now;
+		}
+		else if (m_Now - c.LastReceive > s_ClientTimeOut)
+		{
+			c.Gone = true;
+			c.Result.Gone = true;
+			c.Queues.clear();
+			c.WritesDatagram = false;
+			CStreamScheduler::CEntry gone;
+			gone.Client = &c.Turn;
+			gone.Id = (uint32)i;
+			m_Entries.push_back(gone);
+			continue;
+		}
+
+		// The datagram of this cycle; for a client that is probed, a probe every third cycle
+		c.WritesDatagram = !c.Probe || (c.ProbeCycle++ % 3) == 0;
+		if (c.WritesDatagram)
+		{
+			++c.SendNumber;
+			++c.Result.DatagramsWritten;
+			c.CycleDatagramBytes = c.Probe ? s_ProbeBytes : c.Config.DatagramBytes;
+			datagramBytes += c.CycleDatagramBytes + s_QuicDatagramOverhead;
+		}
 
 		// The allowance of the connection, as CFeSendSub::grantStreams asks it
 		if (c.PathChanged)
@@ -912,7 +1052,7 @@ void CSim::tick()
 		}
 		const bool newReport = c.Reports != c.ReportsSeen;
 		c.ReportsSeen = c.Reports;
-		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.CongestionEvents, c.SendBusyDrops);
+		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.StatCongestionEvents, c.SendBusyDrops);
 		const uint32 allowance = c.Allowance.allowance();
 		if (c.LastAllowance != 0)
 		{
@@ -929,7 +1069,12 @@ void CSim::tick()
 		entry.Client = &c.Turn;
 		entry.Id = (uint32)i;
 		entry.Pending = c.Queues.pendingBytes();
-		if (!c.StatValid)
+		if (c.Probe)
+		{
+			// (stream data waits for the connected state, as the impulses do)
+			entry.Window = 0;
+		}
+		else if (!c.StatValid)
 		{
 			entry.Window = std::min(config.StreamMinBytesPerTick, config.StreamMaxBytesPerTick);
 		}
@@ -939,7 +1084,7 @@ void CSim::tick()
 			state.CongestionWindow = c.StatCwnd;
 			state.RttMicroseconds = c.StatRtt;
 			state.BytesInFlight = c.StatBytesInFlight;
-			state.Outstanding = (sint64)(c.StreamPosted - c.StreamAcked);
+			state.Outstanding = (sint64)c.Outstanding;
 			state.GrantedSinceSnapshot = (uint32)(c.GrantedCount - c.StatGrantedCount);
 			entry.Window = std::min(allowance, streamWindowRoom(config, state));
 		}
@@ -957,15 +1102,18 @@ void CSim::tick()
 		t.Seconds = (double)m_Now / 1e6;
 		t.Allowance = c.Allowance.allowance();
 		t.StartUp = c.Allowance.startUp();
+		t.Probe = c.Probe;
 		t.Window = entry.Window;
 		t.Grant = entry.Grant;
 		t.Pending = entry.Pending;
-		t.Outstanding = (uint32)(c.StreamPosted - c.StreamAcked);
+		t.Outstanding = (uint32)c.Outstanding;
 		t.CongestionWindow = (uint32)c.Cwnd;
 		t.BytesInFlight = (uint32)c.BytesInFlight;
 		t.RttMs = (uint32)(c.Srtt / 1000);
 		t.Reported = c.QueueDelay;
-		t.Datagram = CTickTrace::DatagramOnItsWay;
+		t.Datagram = c.WritesDatagram ? (sint32)CTickTrace::DatagramOnItsWay : (sint32)CTickTrace::NoDatagram;
+		if (c.WritesDatagram)
+			m_TraceRows[c.SendNumber] = m_Trace.size();
 		m_Trace.push_back(t);
 	}
 
@@ -973,6 +1121,8 @@ void CSim::tick()
 	for (size_t i = 0; i < m_Clients.size(); ++i)
 	{
 		CClient &c = *m_Clients[i];
+		if (!c.WritesDatagram)
+			continue;
 		if (c.DatagramPending)
 		{
 			// The one before has not left: this one is not sent
@@ -984,7 +1134,7 @@ void CSim::tick()
 		}
 		c.DatagramPending = true;
 		c.PendingNumber = c.SendNumber;
-		c.PendingBytes = c.Config.DatagramBytes;
+		c.PendingBytes = c.CycleDatagramBytes;
 		c.PendingCancel = m_Config.CancelOnBlocked && c.DatagramCancels < 3;
 		c.PendingSendTime = (uint16)(m_Now / 1000);
 		c.PendingPathChanged = false;
@@ -1010,10 +1160,14 @@ void CSim::tick()
 		const uint32 taken = c.Queues.take(0, &m_Scratch[0], entry.Grant);
 		c.StreamPosted += taken;
 		c.GrantedCount += taken;
+		if (taken != 0)
+		{
+			c.Blocks.push_back(std::make_pair(c.StreamPosted, taken));
+			c.Outstanding += taken;
+		}
 		flush(c);
 	}
 
-	++m_TickCount;
 	post(m_Now + (TTime)(config.TickSeconds * 1e6), EventTick, 0);
 }
 
@@ -1053,10 +1207,17 @@ const CScenario s_Scenarios[] = {
 	{ "backlog-shallow", "one client at 2 Mbit/s whose bottleneck holds 30 ms, 6 MB at once" },
 	{ "trickle", "one client at 2 Mbit/s that loses a packet in a hundred, a string of 300 bytes twice a second" },
 	{ "messages", "one client at 1 Mbit/s, a message of 30 KB every 3 s" },
+	{ "messages-lossy", "the same on a path that loses a packet in a hundred" },
 	{ "jitter", "one client at 2 Mbit/s with up to 15 ms of jitter, a message of 30 KB every 3 s" },
+	{ "jitter-wifi", "the same with up to 40 ms of jitter, twice the lateness the frontend allows" },
+	{ "backlog-wifi", "one client at 2 Mbit/s with up to 40 ms of jitter, 6 MB at once" },
+	{ "backlog-lossy", "one client at 2 Mbit/s that loses a packet in a hundred, 6 MB at once" },
+	{ "login-drift", "one client at 2 Mbit/s whose clock runs 150 parts per million fast, 270 KB after 45 s" },
+	{ "dark", "one client at 2 Mbit/s whose path lets nothing through for 4 s in the middle of 6 MB" },
+	{ "dark-long", "the same for 15 s: the frontend gives the client up" },
 	{ "pathdrop", "one client whose path goes from 5 to 1 Mbit/s in the middle of 6 MB" },
 	{ "newaddress", "one client at 2 Mbit/s that changes network in the middle of 3 MB" },
-	{ "stall", "one client at 2 Mbit/s that sends nothing for 10 s in the middle of 6 MB" },
+	{ "stall", "one client at 2 Mbit/s that sends nothing for 10 s in the middle of 6 MB (a loading screen): the frontend probes it" },
 	{ "stall-startup", "the same from 4 s after the start of 3 MB, while its allowance still looks for its level" },
 	{ "wave", "300 clients on paths of 1 to 20 Mbit/s, 60 KB each, one more every 50 ms" },
 	{ "wave-tight", "the same with a frontend that may send 500 KB per second in all" },
@@ -1156,6 +1317,52 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 		oneClient(config, path(1, 20, 250));
 		config.Traffic.push_back(CTraffic(0, 1.0, 30000, 40, 3.0));
 		seconds = 125;
+	}
+	else if (name == "messages-lossy")
+	{
+		CPathConfig p = path(1, 20, 250);
+		p.LossRate = 0.01;
+		oneClient(config, p);
+		config.Traffic.push_back(CTraffic(0, 1.0, 30000, 40, 3.0));
+		seconds = 125;
+	}
+	else if (name == "jitter-wifi")
+	{
+		CPathConfig p = path(2, 20, 250);
+		p.JitterMs = 40;
+		oneClient(config, p);
+		config.Traffic.push_back(CTraffic(0, 1.0, 30000, 40, 3.0));
+		seconds = 125;
+	}
+	else if (name == "backlog-wifi" || name == "backlog-lossy")
+	{
+		CPathConfig p = path(2, 20, 250);
+		if (name == "backlog-wifi")
+			p.JitterMs = 40;
+		else
+			p.LossRate = 0.01;
+		oneClient(config, p);
+		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 4000));
+		seconds = 60;
+	}
+	else if (name == "login-drift")
+	{
+		CClientConfig client;
+		client.Path = path(2, 20, 250);
+		client.ClockDriftPpm = 150;
+		config.Clients.push_back(client);
+		config.Traffic.push_back(CTraffic(0, 45.0, 1500, 180));
+		seconds = 60;
+	}
+	else if (name == "dark" || name == "dark-long")
+	{
+		oneClient(config, path(2, 20, 250));
+		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 4000));
+		CPathConfig nothing = path(2, 20, 250);
+		nothing.LossRate = 1.0;
+		config.PathChanges.push_back(CPathChange(0, 10.0, nothing, false));
+		config.PathChanges.push_back(CPathChange(0, name == "dark" ? 14.0 : 25.0, path(2, 20, 250), false));
+		seconds = 60;
 	}
 	else if (name == "jitter")
 	{

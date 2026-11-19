@@ -20,10 +20,10 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/app_context.h"
 #include "nel/misc/debug.h"
+#include "nel/misc/string_common.h"
 
+#include <algorithm>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <string>
 #include <vector>
 
@@ -49,6 +49,7 @@ void usage()
 	       "  --delay MS      delay each way\n"
 	       "  --buffer MS     what the bottleneck holds\n"
 	       "  --jitter MS     --loss SHARE\n"
+	       "  --drift PPM     how much faster than the frontend's the client's clock runs\n"
 	       "  --datagram N    bytes of the frontend's datagram\n"
 	       "  --uplink N      bytes per second of the frontend's own link (0: none)\n"
 	       "  --budget N      TotalOutgoingBandwidth\n"
@@ -84,6 +85,8 @@ struct COptions
 	    , NoCancel(false)
 	    , NoPacing(false)
 	    , Stretches(0)
+	    , Drift(0)
+	    , HasDrift(false)
 	{
 	}
 
@@ -102,6 +105,8 @@ struct COptions
 	bool NoCancel;
 	bool NoPacing;
 	double Stretches;
+	double Drift;
+	bool HasDrift;
 };
 
 void applyPath(const COptions &options, CPathConfig &path)
@@ -125,6 +130,8 @@ void apply(const COptions &options, CSimConfig &config, double &seconds)
 		applyPath(options, config.Clients[i].Path);
 		if (options.Datagram)
 			config.Clients[i].DatagramBytes = options.Datagram;
+		if (options.HasDrift)
+			config.Clients[i].ClockDriftPpm = options.Drift;
 	}
 	for (size_t i = 0; i < config.PathChanges.size(); ++i)
 	{
@@ -221,28 +228,30 @@ void printTrace(const CSim &sim, const COptions &options)
 		const CTickTrace &t = trace[i];
 		if (t.Seconds < options.From || t.Seconds > options.To)
 			continue;
-		char datagram[32];
+		std::string datagram;
 		switch (t.Datagram)
 		{
 		case CTickTrace::DatagramLost:
-			strcpy(datagram, "lost");
+			datagram = "lost";
 			break;
 		case CTickTrace::DatagramCancelled:
-			strcpy(datagram, "cancelled");
+			datagram = "cancelled";
 			break;
 		case CTickTrace::DatagramNotSent:
-			strcpy(datagram, "not sent");
+			datagram = "not sent";
 			break;
 		case CTickTrace::DatagramOnItsWay:
-			strcpy(datagram, "-");
+			datagram = "-";
+			break;
+		case CTickTrace::NoDatagram:
 			break;
 		default:
-			sprintf(datagram, "%d", t.Datagram);
+			datagram = NLMISC::toString("%d", t.Datagram);
 			break;
 		}
 		printf("%8.1f %7u %2s %7u %7u %8u %8u %8u %8u %5u %5u %s\n",
-		    t.Seconds, t.Allowance, t.StartUp ? "su" : "", t.Window, t.Grant, t.Pending, t.Outstanding,
-		    t.CongestionWindow, t.BytesInFlight, t.RttMs, t.Reported, datagram);
+		    t.Seconds, t.Allowance, t.Probe ? "pr" : (t.StartUp ? "su" : ""), t.Window, t.Grant, t.Pending, t.Outstanding,
+		    t.CongestionWindow, t.BytesInFlight, t.RttMs, t.Reported, datagram.c_str());
 	}
 }
 
@@ -291,7 +300,12 @@ int main(int argc, char **argv)
 				return 2;
 			}
 			++i;
-			const double number = atof(value);
+			double number = 0;
+			if (!NLMISC::fromString(std::string(value), number))
+			{
+				printf("%s wants a number, not %s\n", arg.c_str(), value);
+				return 2;
+			}
 			if (arg == "--client")
 				options.Client = (sint32)number;
 			else if (arg == "--from")
@@ -328,6 +342,11 @@ int main(int argc, char **argv)
 				options.Chunk = (uint32)number;
 			else if (arg == "--stretches")
 				options.Stretches = number;
+			else if (arg == "--drift")
+			{
+				options.Drift = number;
+				options.HasDrift = true;
+			}
 			else
 			{
 				printf("Unknown option %s\n", arg.c_str());
