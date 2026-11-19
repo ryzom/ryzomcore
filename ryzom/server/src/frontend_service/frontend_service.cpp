@@ -463,7 +463,15 @@ void sendImpulsion( TClientId clientid, CMessage& msgin, uint8 channel, const ch
 	ag->setFromMessage( msgin, bytelen );
 	ag->AllowExceedingMaxSize = forceSingleShot;
 	sint32 impulseBitSize = (sint32)CActionFactory::getInstance ()->size( ag );
-	sint32 maxImpulseBitSize = CFrontEndService::instance()->getImpulseMaxBitSize( channel );
+	// What fits a channel is what fits the channel of this client: one whose connection has QUIC streams has sizes of
+	// its own (StreamImpulsionByteSize0 to 2). An action cut for larger channels than the client has never leaves its
+	// queue, and holds everything behind it.
+	sint32 maxImpulseBitSize = (sint32)CFrontEndService::instance()->getImpulseMaxBitSize( channel );
+	{
+		TClientIdCont &clients = CFrontEndService::instance()->receiveSub()->clientIdCont();
+		if ( clientid < clients.size() && clients[clientid] != NULL )
+			maxImpulseBitSize = (sint32)clients[clientid]->ImpulseEncoder.maxBitSize( channel );
+	}
 	if ( forceSingleShot || (impulseBitSize < maxImpulseBitSize) )
 	{
 		// Simple impulsion

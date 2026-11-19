@@ -250,9 +250,6 @@ public:
 	/// StreamImpulsionByteSize0 to 2, or of ImpulsionByteSize0 to 2. To call before anything is queued.
 	void							setStreams( bool streams );
 
-	/// Return the number of bits that can be sent at most using all levels
-	static uint						maxBitSizeTotal() { return MaxImpulseBitSizes[0]+MaxImpulseBitSizes[1]+MaxImpulseBitSizes[2] - - (IMPULSE_ACTION_HEADER_BITSIZE*3/8); }
-
 	///
 	void							setClientHost(CClientHost *clientHost) { _ClientHost = clientHost; }
 
