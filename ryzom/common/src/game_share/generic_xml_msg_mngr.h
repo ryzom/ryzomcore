@@ -371,8 +371,17 @@ public:
 	const std::vector<std::string>	&getStreamClasses() const			{ return _StreamClasses; }
 
 	/**
-	 * The file declares a class twice or without a name, declares more classes than a client allows streams, or has
-	 * a `stream` attribute that names no class (each fault was logged). The frontend stops on that.
+	 * For each of those classes, the bytes above which a message of the class is left out instead of sent (its
+	 * `drop_above` attribute), or 0 for a class of which no message can be left out. The messages of such a class do
+	 * not depend on each other (chat lines); in the others a message that is missing leaves the client without
+	 * something for good.
+	 */
+	const std::vector<uint32>	&getStreamClassDropAbove() const			{ return _StreamClassDropAbove; }
+
+	/**
+	 * The file declares a class twice, without a name or with a `drop_above` that is no number, declares more classes
+	 * than a client allows streams, or has a `stream` attribute that names no class (each fault was logged). The
+	 * frontend stops on that.
 	 */
 	bool					hasStreamClassError() const					{ return _StreamClassError; }
 	// clang-format on
@@ -556,6 +565,7 @@ protected:
 
 	// clang-format off
 	std::vector<std::string>	_StreamClasses;
+	std::vector<uint32>	_StreamClassDropAbove;
 	bool	_StreamClassError;
 	// clang-format on
 };

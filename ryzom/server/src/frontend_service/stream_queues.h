@@ -98,6 +98,20 @@ private:
 	uint32 m_ShareCursor; // the class that gets the first of the bytes a division leaves over
 };
 
+/// What becomes of a message for a stream
+enum TStreamRecordFate
+{
+	QueueStreamRecord,
+	/// It is left out: its class says so for a message of this size (chat), and the others of the class do not need it
+	DropStreamRecord,
+	/// It cannot be sent and cannot be left out: the client would miss something for good, and is disconnected
+	RefuseStreamRecord
+};
+
+/// length: of the message. dropAbove: what its class says (0: nothing is left out). maxLength: the most a message
+/// on a stream may be. waiting: bytes that wait for the client already; maxWaiting: the most that may.
+TStreamRecordFate streamRecordFate(uint32 length, uint32 dropAbove, uint32 maxLength, uint32 waiting, uint32 maxWaiting);
+
 /// The weights of the classes for CStreamQueues::share, out of what an operator writes: "name=weight" for some of
 /// the classes, with spaces between them (StreamClassWeights of the frontend service). A class that is not named has
 /// 1, and so has one with a weight of 0. faults gets a text for each part that is not that, or names no class.

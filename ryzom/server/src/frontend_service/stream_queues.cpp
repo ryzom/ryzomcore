@@ -189,6 +189,21 @@ void CStreamQueues::share(uint32 bytes, const std::vector<uint32> &weights, std:
 	}
 }
 
+TStreamRecordFate streamRecordFate(uint32 length, uint32 dropAbove, uint32 maxLength, uint32 waiting, uint32 maxWaiting)
+{
+	if (dropAbove != 0 && length > dropAbove)
+		return DropStreamRecord;
+	if (length > maxLength)
+		return RefuseStreamRecord;
+	if ((uint64)waiting + length > maxWaiting)
+	{
+		// More waits than the connection takes. A message that may be left out is, and the rest stays in order;
+		// another one cannot be
+		return dropAbove != 0 ? DropStreamRecord : RefuseStreamRecord;
+	}
+	return QueueStreamRecord;
+}
+
 void parseStreamClassWeights(const std::string &text, const std::vector<std::string> &classNames, std::vector<uint32> &weights, std::vector<std::string> &faults)
 {
 	weights.assign(classNames.size(), 1);

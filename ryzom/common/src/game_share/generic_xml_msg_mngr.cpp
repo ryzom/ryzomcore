@@ -78,6 +78,7 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 
 	// The classes of messages that go on streams, which the nodes then refer to by name
 	_StreamClasses.clear();
+	_StreamClassDropAbove.clear();
 	_StreamClassError = false;
 	for (xmlNodePtr xmlChild = read.getRootNode()->children; xmlChild != nullptr; xmlChild = xmlChild->next)
 	{
@@ -102,7 +103,17 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 		}
 		else
 		{
+			// A class whose messages do not depend on each other says above how many bytes one of them is left out
+			uint32 dropAbove = 0;
+			CXMLAutoPtr drop(xmlGetProp(xmlChild, (xmlChar *)"drop_above"));
+			if (drop && (!NLMISC::fromString(std::string((const char *)drop), dropAbove) || dropAbove == 0))
+			{
+				nlwarning("The stream class '%s' of '%s' has drop_above=\"%s\", which is not a number of bytes", className.c_str(), filename.c_str(), (const char *)drop);
+				_StreamClassError = true;
+				dropAbove = 0;
+			}
 			_StreamClasses.push_back(className);
+			_StreamClassDropAbove.push_back(dropAbove);
 		}
 	}
 

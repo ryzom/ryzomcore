@@ -370,6 +370,9 @@ static uint8 streamClassOfClientMessage( const uint8 *message, uint32 length )
  * Queue a message for the stream of its class, on a connection of protocol level ryzomcore/4.2.
  * Such a message never goes by impulse on such a connection: the stream keeps the order of its class.
  */
+/// For each stream class of msg.xml, the bytes above which a message of it is left out (0: never)
+static std::vector<uint32> s_StreamClassDropAbove;
+
 static void queueStreamRecord( CClientHost *client, uint8 streamClass, const uint8 *message, uint32 length, const char *extendedMsg )
 {
 	CQuicUserContext *user = client->QuicUser.get();
@@ -387,6 +390,15 @@ static void queueStreamRecord( CClientHost *client, uint8 streamClass, const uin
 	const char *className = CQuicTransceiver::streamClassName( streamClass );
 	// (never above what a client accepts, whatever the configuration says: the client would disconnect on it)
 	uint32 maxLength = std::min( StreamRecordMaxBytes.get(), CLFECOMMON::StreamRecordClientMaxBytes );
+	const uint32 dropAbove = streamClass < s_StreamClassDropAbove.size() ? s_StreamClassDropAbove[streamClass] : 0;
+	const TStreamRecordFate fate = streamRecordFate( length, dropAbove, maxLength, queues.pendingBytes(), StreamMaxQueuedBytes.get() );
+	if ( fate == DropStreamRecord )
+	{
+		// A class of messages that do not depend on each other (chat): this one is left out and the rest goes on
+		nlwarning( "Message %s of %u bytes for client %u (uid %u) %s is left out: a message of class '%s' may be %u bytes, and %u bytes wait for the client of the %u that may",
+			nameOfClientMessage( message, length ).c_str(), length, (uint)client->clientId(), client->Uid, extendedMsg, className, dropAbove, queues.pendingBytes(), StreamMaxQueuedBytes.get() );
+		return;
+	}
 	if ( length > maxLength )
 	{
 		// Without it the client would miss something for good (a string, a part of its database, a message of its
@@ -1574,6 +1586,7 @@ void CFrontEndService::init()
 		}
 		// The classes of messages that go on QUIC streams, for clients of protocol level ryzomcore/4.2
 		CQuicTransceiver::setStreamClasses( GenericXmlMsgHeaderMngr.getStreamClasses() );
+		s_StreamClassDropAbove = GenericXmlMsgHeaderMngr.getStreamClassDropAbove();
 		{
 			std::string classNames;
 			for ( uint c = 0; c < CQuicTransceiver::streamClassCount(); ++c )

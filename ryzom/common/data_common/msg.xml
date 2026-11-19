@@ -9,8 +9,13 @@
     attribute follows one space.
     The messages of one class keep their order. In one update the client handles the streams in this order, so what
     the other classes refer to comes first.
+    A class with drop_above="bytes" is one whose messages do not depend on each other: a message of more bytes than
+    that is left out, with a warning of the frontend, and so is one that finds too much waiting for its client. In
+    the other classes a missing message leaves the client without something for good, and the frontend disconnects
+    the client instead.
   -->
   <stream_class name="strings" />
+  <stream_class name="chat" drop_above="8192" />
   <stream_class name="login" />
   <branch name="TARGET">
     <leaf name="PARTY" />
@@ -101,7 +106,7 @@
     <leaf name="FLYING_TEXT_ISE" description="add a flying text to an entity (u32 entity, u32 rgba, u8 effect, s32 param)" />
     <leaf name="FLYING_TEXT" description="add a flying text to an entity (u32 entity, u8 type)" />
   </branch>
-  <branch name="STRING">
+  <branch name="STRING" stream="chat">
     <leaf name="TELL" sendto="IOS" format="s uc" description="the client sends a tell to the character $e : $s" />
     <leaf name="FAR_TELL" description="the client receive a far tell from a player on another shard" />
     <leaf name="CHAT" sendto="IOS" format="uc" description="the client sends the chat message : $s" />

@@ -526,6 +526,24 @@ TEST(StreamQueues, ClassesShareAGrant)
 	}
 }
 
+// A message that is too large, or that finds too much waiting: left out where its class allows, else the client goes
+TEST(StreamQueues, WhatBecomesOfARecord)
+{
+	const uint32 maxLength = 4 * 1024 * 1024, maxWaiting = 8 * 1024 * 1024;
+	// a class of which nothing can be left out
+	EXPECT_EQ(streamRecordFate(100, 0, maxLength, 0, maxWaiting), QueueStreamRecord);
+	EXPECT_EQ(streamRecordFate(maxLength, 0, maxLength, 0, maxWaiting), QueueStreamRecord);
+	EXPECT_EQ(streamRecordFate(maxLength + 1, 0, maxLength, 0, maxWaiting), RefuseStreamRecord);
+	EXPECT_EQ(streamRecordFate(100, 0, maxLength, maxWaiting - 100, maxWaiting), QueueStreamRecord);
+	EXPECT_EQ(streamRecordFate(100, 0, maxLength, maxWaiting - 99, maxWaiting), RefuseStreamRecord);
+	// chat
+	EXPECT_EQ(streamRecordFate(8192, 8192, maxLength, 0, maxWaiting), QueueStreamRecord);
+	EXPECT_EQ(streamRecordFate(8193, 8192, maxLength, 0, maxWaiting), DropStreamRecord);
+	EXPECT_EQ(streamRecordFate(maxLength + 1, 8192, maxLength, 0, maxWaiting), DropStreamRecord);
+	EXPECT_EQ(streamRecordFate(100, 8192, maxLength, maxWaiting - 99, maxWaiting), DropStreamRecord);
+	EXPECT_EQ(streamRecordFate(100, 8192, maxLength, 0xFFFFFFF0u, maxWaiting), DropStreamRecord);
+}
+
 TEST(StreamQueues, ClassWeightsAsWritten)
 {
 	std::vector<std::string> names;
