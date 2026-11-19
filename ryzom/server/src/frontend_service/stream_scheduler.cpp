@@ -635,8 +635,11 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 			}
 			else
 			{
+				// By a packet, and by an eighth where that is less: a packet per cycle is 45 kbit/s, which is most of
+				// what a slow path takes at all
 				m_StartUp = false;
-				m_Allowance = (uint32)std::min((uint64)m_Allowance + config.DatagramPacketBytes, (uint64)config.StreamMaxBytesPerTick);
+				const uint32 step = std::min(config.DatagramPacketBytes, std::max(m_Allowance / 8, (uint32)32));
+				m_Allowance = (uint32)std::min((uint64)m_Allowance + step, (uint64)config.StreamMaxBytesPerTick);
 			}
 			m_LastChangeNumber = sendNumber;
 			m_LastChangeWasCut = false;

@@ -247,7 +247,8 @@ private:
  *
  * It is raised when a report shows no lateness for datagrams that were all sent while the client was held at the
  * allowance (it got all of it and had more to send), after the last change: by a quarter at first (but not by less
- * than a packet), and only while the report shows next to no lateness at all; by a packet once it was cut. One cycle
+ * than a packet), and only while the report shows next to no lateness at all; by a packet once it was cut (by an
+ * eighth where a packet is more than that, on a slow path). One cycle
  * at the allowance, or datagrams sent before it, are no evidence that the path takes more.
  *
  * It is halved when a report shows lateness, or the connection could not send a datagram, and the client used its

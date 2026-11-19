@@ -1217,6 +1217,7 @@ const CScenario s_Scenarios[] = {
 	{ "login-5mbit", "the same at 5 Mbit/s" },
 	{ "login-fast", "the same at 100 Mbit/s" },
 	{ "login-far", "the same at 2 Mbit/s with 100 ms each way" },
+	{ "login-modem", "the same at 56 kbit/s with 75 ms each way, datagrams of 120 bytes, a bottleneck that holds a second" },
 	{ "backlog", "one client at 2 Mbit/s, 6 MB at once" },
 	{ "backlog-1mbit", "one client at 1 Mbit/s, 3 MB at once" },
 	{ "backlog-shallow", "one client at 2 Mbit/s whose bottleneck holds 30 ms, 6 MB at once" },
@@ -1295,6 +1296,15 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 	{
 		oneClient(config, path(100, 5, 50));
 		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 180));
+	}
+	else if (name == "login-modem")
+	{
+		CClientConfig client;
+		client.Path = path(0.056, 75, 1000);
+		client.DatagramBytes = 120;
+		config.Clients.push_back(client);
+		config.Traffic.push_back(CTraffic(0, 1.0, 1500, 180));
+		seconds = 120;
 	}
 	else if (name == "login-far")
 	{

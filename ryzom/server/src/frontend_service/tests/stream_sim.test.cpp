@@ -125,6 +125,28 @@ TEST(StreamSim, LoginOnASlowPath)
 	EXPECT_LE(r.AllowanceEnd, 12500u); // (what the path takes in a cycle)
 }
 
+// A modem: 7 KB per second, of which the datagrams take two. The allowance starts far above that and takes its first
+// seconds to come down, with the datagrams late by what the bottleneck holds; from there it moves by eighths, not by
+// packets (a packet per cycle is most of the path), and the datagrams are on time while the login goes through at
+// what the path has left.
+TEST(StreamSim, LoginOnAModem)
+{
+	CRun run("login-modem");
+	const CClientResult &r = run.client();
+	expectAllRecords(r);
+	EXPECT_LE(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 3u);
+	EXPECT_LT(r.maxRecordSeconds(), 70.0); // (270 KB: 54 s at what the path has left)
+	double mean;
+	uint32 worst, missing;
+	run.Sim->latenessBetween(20.0, 120.0, mean, worst, missing);
+	EXPECT_LE(mean, 15.0);
+	EXPECT_LE(worst, 150u);
+	EXPECT_EQ(missing, 0u);
+	// (wanted better: the start)
+	run.Sim->latenessBetween(0.0, 20.0, mean, worst, missing);
+	EXPECT_LE(mean, 260.0);
+}
+
 // Megabytes for one client: the allowance finds what the path takes and stays near it
 TEST(StreamSim, BacklogFindsThePath)
 {
