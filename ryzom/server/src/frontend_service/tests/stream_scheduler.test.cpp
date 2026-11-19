@@ -454,7 +454,7 @@ TEST(StreamAllowance, IdleStretches)
 		CPathSim path(1000000);
 		for (uint t = 0; t < 40; ++t)
 			path.tick(100000000);
-		++path.CongestionEvents;
+		++path.SendBusyDrops;
 		for (uint t = 0; t < 6; ++t)
 			path.tick(100000000);
 		CHECK(!path.Allowance.startUp());
@@ -492,7 +492,7 @@ TEST(StreamAllowance, IdleStretches)
 		path.Config.StreamMinBytesPerTick = 0;
 		for (uint t = 0; t < 200; ++t)
 		{
-			++path.CongestionEvents;
+			++path.SendBusyDrops;
 			path.tick(100000000);
 		}
 		CHECK(path.Allowance.allowance() >= 1 && path.Allowance.allowance() < 100);
@@ -697,7 +697,7 @@ TEST(StreamAllowance, EvidenceForRaisesAndCuts)
 		path.Config.StreamMinBytesPerTick = 0;
 		for (uint t = 0; t < 400; ++t)
 		{
-			++path.CongestionEvents;
+			++path.SendBusyDrops;
 			path.tick(100000000);
 		}
 		const uint32 low = path.Allowance.allowance();
@@ -793,7 +793,8 @@ TEST(StreamAllowance, GrowthCutsAndBounds)
 		CHECK(path.Allowance.allowance() > allowance);
 	}
 
-	// Congestion, and a datagram that could not be sent, each halve it once
+	// A datagram that could not be sent halves it once. Congestion that the connection saw does not: its congestion
+	// window answers for a loss, which takes the room for stream data with it, and a loss is not always congestion.
 	{
 		CPathSim path(1000000);
 		for (uint t = 0; t < 40; ++t)
@@ -802,21 +803,25 @@ TEST(StreamAllowance, GrowthCutsAndBounds)
 		path.CongestionEvents = 1;
 		for (uint t = 0; t < 3; ++t) // (the next report on a datagram sent after the last change is at most that far)
 			path.tick(100000000);
-		CHECK(path.Allowance.allowance() == allowance / 2);
-		CHECK(!path.Allowance.startUp());
+		CHECK(path.Allowance.allowance() >= allowance);
+		for (uint t = 0; t < 20; ++t)
+			path.tick(100000000);
+		allowance = path.Allowance.allowance();
+		path.SendBusyDrops = 3;
+		// (with the next report on datagrams that were all sent after the last change, which is a few cycles away
+		// while the allowance still grows)
+		for (uint t = 0; t < 8 && path.Allowance.allowance() == allowance; ++t)
+			path.tick(100000000);
+		EXPECT_EQ(path.Allowance.allowance(), allowance / 2);
+		EXPECT_FALSE(path.Allowance.startUp());
 		for (uint t = 0; t < 20; ++t)
 			path.tick(100000000);
 		CHECK(path.Allowance.allowance() > allowance / 2); // and it grows again, by packets
-		allowance = path.Allowance.allowance();
-		path.SendBusyDrops = 3;
-		for (uint t = 0; t < 3; ++t)
-			path.tick(100000000);
-		CHECK(path.Allowance.allowance() == allowance / 2);
 
 		// never below the minimum
 		for (uint t = 0; t < 100; ++t)
 		{
-			++path.CongestionEvents;
+			++path.SendBusyDrops;
 			path.tick(100000000);
 		}
 		CHECK(path.Allowance.allowance() == path.Config.StreamMinBytesPerTick);
@@ -1043,6 +1048,36 @@ TEST(StreamAllowance, SharedLatenessIsNotTheClientsDoing)
 		else
 			EXPECT_LT(allowance.allowance(), before);
 	}
+}
+
+// Congestion that the connection saw is not a reason to raise the allowance on the report that comes with it, and
+// not one to cut it either, however much stream data went out
+TEST(StreamAllowance, LossAloneDoesNotCut)
+{
+	CStreamSchedulerConfig config;
+	CStreamAllowance allowance;
+	allowance.reset(config);
+	uint32 number = 100;
+	// (past the cycles after a reset in which nothing of the kind counts anyway)
+	for (uint i = 0; i < 40; ++i, ++number)
+	{
+		allowance.update(config, true, 10, number - 2, number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	const uint32 before = allowance.allowance();
+	for (uint i = 0; i < 40; ++i, ++number)
+	{
+		allowance.update(config, true, 0, number - 2, number, 1 + i, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	EXPECT_EQ(allowance.allowance(), before);
+	// Without it the allowance goes up again
+	for (uint i = 0; i < 10; ++i, ++number)
+	{
+		allowance.update(config, true, 0, number - 2, number, 40, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	EXPECT_GT(allowance.allowance(), before);
 }
 
 } /* anonymous namespace */

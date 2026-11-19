@@ -250,13 +250,17 @@ private:
  * than a packet), and only while the report shows next to no lateness at all; by a packet once it was cut. One cycle
  * at the allowance, or datagrams sent before it, are no evidence that the path takes more.
  *
- * It is halved when a report shows lateness, or the connection saw congestion or could not send a datagram, and the
- * client used its allowance shortly before: one of the last cycles gave it more than half of it, which is as much as
+ * It is halved when a report shows lateness, or the connection could not send a datagram, and the client used its
+ * allowance shortly before: one of the last cycles gave it more than half of it, which is as much as
  * a cut takes away. A client that uses less is not held up by its stream data, and a cut would change nothing for
  * it: its allowance stays, whatever happens to its datagrams. After a cut, the queue that stood at the cut takes time
  * to drain: the reports on datagrams of after the cut are compared with each other, lateness that comes down is that
- * queue and does not cut again, lateness that does not come down does; and the congestion seen up to the first of
- * those reports is of what was sent before the cut.
+ * queue and does not cut again, lateness that does not come down does; and the datagrams not sent up to the first of
+ * those reports are of what was sent before the cut.
+ *
+ * Congestion that the connection saw (a packet lost) does not cut it: the congestion window answers for that, which
+ * takes the room of the stream data with it, and a loss is not always congestion. A report that comes with it is no
+ * reason for a raise.
  *
  * What this cannot tell apart: datagrams that are late for another reason, while the client does use its allowance.
  * The allowance is then cut as if the streams were the cause, down to the minimum if it lasts.

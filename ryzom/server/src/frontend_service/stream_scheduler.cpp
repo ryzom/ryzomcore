@@ -460,12 +460,18 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		bool eventsIgnored = false;
 		if (covers)
 		{
-			events = (congestionEvents != m_CongestionEvents) || (sendBusyDrops != m_SendBusyDrops);
+			// A datagram that was not sent is held against the stream data. Congestion that the connection saw is
+			// not: its congestion window answers for a loss, which takes the room of the stream data with it (the
+			// window room), and a loss is not always congestion. It only is no time for a raise.
+			events = (sendBusyDrops != m_SendBusyDrops);
+			const bool lossOnly = !events && congestionEvents != m_CongestionEvents;
 			m_CongestionEvents = congestionEvents;
 			m_SendBusyDrops = sendBusyDrops;
+			if (lossOnly)
+				eventsIgnored = true;
 			if (m_IgnoreEvents || m_SettleCycles != 0)
 			{
-				eventsIgnored = events;
+				eventsIgnored = eventsIgnored || events;
 				events = false;
 				m_IgnoreEvents = false;
 			}
@@ -511,7 +517,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 			m_InRecovery = false;
 		}
 
-		// Congestion or a datagram not sent while stream data was going out
+		// A datagram not sent while stream data was going out
 		if (!doCut && events && usedHalfIn(firstCutCycle(sendNumber), sendNumber - 1))
 			doCut = true;
 

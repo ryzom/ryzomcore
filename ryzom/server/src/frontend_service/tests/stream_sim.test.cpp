@@ -24,7 +24,6 @@
 //   datagrams up to 140 ms late for half a second (BacklogFindsThePath).
 // - Jitter of more than the lateness the frontend allows reads as lateness often enough to keep the allowance down
 //   (JitterAboveTheTarget).
-// - Packets lost for no reason while stream data flows cut the allowance each time (LossesWithStreamData).
 // - A client whose clock runs fast reports lateness that is not there, which holds the growth by quarters back
 //   (ClockThatRunsFast).
 // - A client that stops reporting while a raise is not judged yet keeps it until the frontend probes it, and again
@@ -240,8 +239,9 @@ TEST(StreamSim, JitterAboveTheTarget)
 	}
 }
 
-// A path that loses a packet in a hundred, with stream data: every loss while a cycle uses half the allowance cuts it,
-// though the losses are not of the streams' doing. (Wanted better; see the top of the file.)
+// A path that loses a packet in a hundred, with stream data: the losses are not the doing of the streams, the
+// congestion window of the connection answers for them, and the allowance is not cut for them. (It is not raised on a
+// report that comes with one either, so a backlog gets less than the path takes.)
 TEST(StreamSim, LossesWithStreamData)
 {
 	{
@@ -249,17 +249,19 @@ TEST(StreamSim, LossesWithStreamData)
 		CRun run("messages-lossy");
 		const CClientResult &r = run.client();
 		expectAllRecords(r);
-		EXPECT_LE(r.maxLateness(), 5u);
+		EXPECT_EQ(r.Cuts, 0u);
+		EXPECT_LE(r.maxLateness(), 10u);
 		EXPECT_LE(r.LongestGap, 2u);
-		EXPECT_LT(r.maxRecordSeconds(), 3.0);
+		EXPECT_LT(r.maxRecordSeconds(), 1.2);
 	}
 	{
 		SCOPED_TRACE("backlog");
 		CRun run("backlog-lossy");
 		const CClientResult &r = run.client();
+		EXPECT_EQ(r.Cuts, 0u);
 		EXPECT_LE(r.maxLateness(), 5u);
 		EXPECT_LE(r.LongestGap, 2u);
-		EXPECT_GE(r.StreamBytesArrived, (uint64)2000000); // (of 6 MB in a minute)
+		EXPECT_GE(r.StreamBytesArrived, (uint64)4500000); // (of 6 MB in a minute)
 	}
 }
 
@@ -316,7 +318,7 @@ TEST(StreamSim, PathThatDropsInSpeed)
 	EXPECT_LE(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 20u);
 	EXPECT_LE(r.maxLateness(), 260u); // (the bottleneck holds 250 ms)
 	EXPECT_LE(r.lateAbove(50), 60u);
-	EXPECT_LE(r.AllowanceEnd, 12500u);
+	EXPECT_LE(r.AllowanceEnd, 13500u); // (12500 is what the path takes now)
 	EXPECT_GE(r.AllowanceEnd, 6250u);
 }
 
