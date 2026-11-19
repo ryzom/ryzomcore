@@ -1014,13 +1014,40 @@ TEST(StreamScheduler, SharedLatenessTakesTheBudgetDown)
 	std::fill(run.TimesServed.begin(), run.TimesServed.end(), 0);
 	for (uint t = 0; t < 100; ++t)
 		run.cycle(20, 1);
+	uint32 least = 0xFFFFFFFF, most = 0;
 	for (size_t i = 0; i < run.TimesServed.size(); ++i)
-		EXPECT_GT(run.TimesServed[i], 10u) << "client " << i;
+	{
+		least = std::min(least, run.TimesServed[i]);
+		most = std::max(most, run.TimesServed[i]);
+	}
+	EXPECT_GT(least, 10u);
+	EXPECT_LE(most, least + 3);
 	EXPECT_LE(run.LastSent, (uint64)run.Scheduler.budget(run.Config) / 10 + 4096);
 	for (uint t = 0; t < 5000 && run.Scheduler.budget(run.Config) < 1000000u; ++t)
 		run.cycle(20, 0);
 	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 	EXPECT_LT(run.Scheduler.budgetCuts(), (uint64)60);
+}
+
+// After the budget was taken down, the clients that stay late are fewer than half: it comes back. (The caller counts
+// each client once, so a few of them cannot be more than that by reporting often.)
+TEST(StreamScheduler, AMinorityDoesNotHoldTheBudgetDown)
+{
+	CBudgetRun run(20);
+	run.Config.TotalOutgoingBandwidth = 1000000;
+	run.DatagramBytes = 40000;
+	for (uint t = 0; t < 50; ++t)
+		run.cycle(20, 0);
+	for (uint t = 0; t < 30; ++t)
+		run.cycle(20, 12);
+	const uint32 down = run.Scheduler.budget(run.Config);
+	EXPECT_LT(down, 700000u);
+	const uint64 cuts = run.Scheduler.budgetCuts();
+	// 9 of 20 late from here on, for five minutes
+	for (uint t = 0; t < 3000; ++t)
+		run.cycle(20, 9);
+	EXPECT_EQ(run.Scheduler.budgetCuts(), cuts);
+	EXPECT_EQ(run.Scheduler.budget(run.Config), 1000000u);
 }
 
 // While the datagrams of half the clients are late, that is not held against any one of them
@@ -1157,9 +1184,57 @@ TEST(StreamAllowance, NoiseOfThePathIsNotLateness)
 }
 
 // An allowance far above what the path takes, with the congestion window of the connection holding the client back:
-// half of the allowance would take nothing away, and no cycle of the last ten gave half of it. It is cut all the same,
-// for what the client got or for what is still on its way.
-TEST(StreamAllowance, CutWhereSomethingElseHoldsTheClient)
+// half of the allowance would take nothing away, and no cycle of the last ten gave half of it. It is cut all the same.
+// A client that gets little because the budget of the frontend is short, or that has no more to send, is not.
+TEST(StreamAllowance, CutWhereItsWindowHoldsTheClient)
+{
+	CStreamSchedulerConfig config;
+	for (uint variant = 0; variant < 4; ++variant)
+	{
+		SCOPED_TRACE(variant);
+		CStreamAllowance allowance;
+		allowance.reset(config);
+		uint32 number = 100;
+		for (uint i = 0; i < 60; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			allowance.granted(allowance.allowance(), true);
+		}
+		ASSERT_GT(allowance.allowance(), 40000u);
+
+		// Twelve cycles in which the client has stream data waiting and gets: nothing, its window being full of what
+		// it got before; 4000 bytes, which is all its window has room for; 4000 bytes, which is all the budget of the
+		// frontend has for it; or, without more waiting, a little
+		for (uint i = 0; i < 12; ++i, ++number)
+		{
+			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			if (variant == 0)
+				allowance.granted(0, true, true);
+			else if (variant == 1)
+				allowance.granted(4000, true, true);
+			else if (variant == 2)
+				allowance.granted(4000, true, false);
+			else
+				allowance.granted(300, false, false);
+		}
+		// (what was still owed a raise at the start of them got it, and with the window as the limit for ten cycles
+		// the allowance has come down towards what got through)
+		const uint32 before = allowance.allowance();
+
+		// Its datagrams are late
+		allowance.update(config, true, 150, number - 2, number, 0, 0);
+		if (variant == 0)
+			EXPECT_EQ(allowance.allowance(), before / 2); // for what is on its way: it did use its allowance then
+		else if (variant == 1)
+			EXPECT_EQ(allowance.allowance(), before / 4);
+		else
+			EXPECT_EQ(allowance.allowance(), before); // not of its path, or a trickle
+	}
+}
+
+// Where the congestion window is what limits a client, the allowance comes down to what gets through; where the
+// budget of the frontend is, it stays: that is not of the client's path
+TEST(StreamAllowance, FollowsItsWindowAndNotTheBudget)
 {
 	CStreamSchedulerConfig config;
 	for (uint variant = 0; variant < 3; ++variant)
@@ -1173,31 +1248,32 @@ TEST(StreamAllowance, CutWhereSomethingElseHoldsTheClient)
 			allowance.update(config, true, 0, number - 2, number, 0, 0);
 			allowance.granted(allowance.allowance(), true);
 		}
-		ASSERT_GT(allowance.allowance(), 40000u);
-
-		// Twelve cycles in which the client has stream data waiting and gets: nothing (its window is full of what it
-		// got before); a tenth of its allowance or so; or, without more waiting, a little
-		for (uint i = 0; i < 12; ++i, ++number)
+		const uint32 high = allowance.allowance();
+		ASSERT_GT(high, 40000u);
+		uint32 lowest = high;
+		for (uint i = 0; i < 40; ++i, ++number)
 		{
 			allowance.update(config, true, 0, number - 2, number, 0, 0);
+			lowest = std::min(lowest, allowance.allowance());
 			if (variant == 0)
-				allowance.granted(0, true);
+				allowance.granted(i % 3 == 0 ? 12000 : 0, true, true); // a block every third cycle: 4000 per cycle
 			else if (variant == 1)
-				allowance.granted(4000, true);
+				allowance.granted(200, true, false); // the minimum, of a frontend whose budget is short
 			else
-				allowance.granted(300, false);
+				allowance.granted(i % 2 == 0 ? 12000 : 0, true, i % 2 != 0); // limited every other cycle only
 		}
-		// (what was still owed a raise at the start of them got it)
-		const uint32 before = allowance.allowance();
-
-		// Its datagrams are late
-		allowance.update(config, true, 150, number - 2, number, 0, 0);
 		if (variant == 0)
-			EXPECT_EQ(allowance.allowance(), before / 2); // for what is on its way: it did use its allowance then
-		else if (variant == 1)
-			EXPECT_EQ(allowance.allowance(), before / 4); // towards what it gets, a quarter at once
+		{
+			// one and a quarter times what got through in ten cycles (three or four blocks), a quarter of itself at
+			// most at once
+			EXPECT_LE(allowance.allowance(), 6000u);
+			EXPECT_GE(allowance.allowance(), 4500u);
+			EXPECT_FALSE(allowance.startUp());
+		}
 		else
-			EXPECT_EQ(allowance.allowance(), before); // a trickle is not what holds its datagrams up
+		{
+			EXPECT_GE(lowest, high);
+		}
 	}
 }
 

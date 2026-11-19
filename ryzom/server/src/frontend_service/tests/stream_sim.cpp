@@ -373,7 +373,6 @@ CSim::CSim(const CSimConfig &config)
 		c->AnyReceived = false;
 		c->StreamPushed = 0;
 		c->Allowance.declare(c->Config.DeclaredRate);
-		c->Allowance.reset(m_Config.Scheduler);
 		m_Clients.push_back(c);
 		post(us(c->Config.SendPhaseMs), EventClientSends, i);
 	}
@@ -534,10 +533,12 @@ void CSim::run(double seconds)
 			flush(c);
 			break;
 		case EventReportArrives:
-			// (the frontend reads it at its next cycle)
+			// (the frontend reads it at its next cycle; of a client it probes it takes no report)
+			c.LastReceive = m_Now;
+			if (c.Probe)
+				break;
 			c.QueueDelay = CLFECOMMON::decodeDatagramLateness((uint8)event.B);
 			c.QueueDelayAck = (uint32)event.A;
-			c.LastReceive = m_Now;
 			++c.Reports;
 			break;
 		case EventTraffic: {
@@ -986,9 +987,23 @@ void CSim::tick()
 	m_Ticked = true;
 	m_LastTick = m_Now;
 
-	uint64 datagramBytes = 0;
+	// Whose datagrams are late, as CFeSendSub::grantStreams counts them
 	uint32 reporting = 0, reportingLate = 0;
-	const bool sharedLateness = m_Scheduler.sharedLateness(); // (as of the cycle before)
+	for (size_t i = 0; i < m_Clients.size(); ++i)
+	{
+		const CClient &c = *m_Clients[i];
+		if (c.Gone || c.Probe || c.Reports == 0)
+			continue;
+		if (c.Reports == c.ReportsSeen && !c.Allowance.reportsLately())
+			continue;
+		++reporting;
+		if (c.Allowance.isLate(config, c.QueueDelay))
+			++reportingLate;
+	}
+	m_Scheduler.reports(config, reporting, reportingLate);
+	const bool sharedLateness = m_Scheduler.sharedLateness();
+
+	uint64 datagramBytes = 0;
 	m_Entries.clear();
 	for (size_t i = 0; i < m_Clients.size(); ++i)
 	{
@@ -1063,12 +1078,6 @@ void CSim::tick()
 		}
 		const bool newReport = c.Reports != c.ReportsSeen;
 		c.ReportsSeen = c.Reports;
-		if (newReport)
-		{
-			++reporting;
-			if (c.QueueDelay > config.QueueDelayTarget)
-				++reportingLate;
-		}
 		c.Allowance.update(config, newReport, c.QueueDelay, c.QueueDelayAck, c.SendNumber, c.StatCongestionEvents, c.SendBusyDrops, sharedLateness);
 		const uint32 allowance = c.Allowance.allowance();
 		if (c.LastAllowance != 0)
@@ -1111,7 +1120,6 @@ void CSim::tick()
 		m_Entries.push_back(entry);
 	}
 
-	m_Scheduler.reports(config, reporting, reportingLate);
 	m_Scheduler.schedule(config, elapsed, measured, datagramBytes, m_Entries);
 	m_BudgetMin = std::min(m_BudgetMin, m_Scheduler.budget(config));
 
@@ -1174,7 +1182,7 @@ void CSim::tick()
 	{
 		const CStreamScheduler::CEntry &entry = m_Entries[i];
 		CClient &c = *m_Clients[entry.Id];
-		c.Allowance.granted(entry.Grant, entry.Pending > entry.Grant, c.WindowLimited);
+		c.Allowance.granted(entry.Grant, entry.Pending > entry.Grant, c.WindowLimited && entry.Grant == entry.Window);
 		if (entry.Grant == 0)
 			continue;
 		if (m_Scratch.size() < entry.Grant)

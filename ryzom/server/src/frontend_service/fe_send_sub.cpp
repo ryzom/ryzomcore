@@ -54,7 +54,7 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 // clang-format off
 // The budget of the frontend and the allowances of the clients, for the QUIC streams (see stream_scheduler.h)
 CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left. Not more than the link of the frontend carries: what the link cannot take in a cycle waits in front of the datagrams of the next", 5000000, 0, true);
-CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth", 200, 0, true);
+CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth (but out of what is left, in turns, while the frontend holds itself to less because the datagrams of half its clients arrive late)", 200, 0, true);
 CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);
 CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 8192, 0, true);
 CVariable<uint32>	QueueDelayTarget("fs", "QueueDelayTarget", "Milliseconds the datagrams may reach a client late before the frontend sends it less on its QUIC streams", 20, 0, true);
@@ -419,9 +419,37 @@ void	CFeSendSub::grantStreams()
 
 	// The datagrams of this cycle, as they will go on the wire, and the clients that can get stream data, by
 	// ascending id
-	uint64 datagramBytes = 0;
+	// Whose datagrams arrive late, of the clients that say: each client once, by its last report of the last cycles,
+	// however often it reports. Half of them late at once is the link they share (CStreamScheduler::reports).
 	uint32 reporting = 0, reportingLate = 0;
-	const bool sharedLateness = m_StreamScheduler.sharedLateness(); // (as of the cycle before)
+	for (size_t id = 0; id < _ClientIdCont.size(); ++id)
+	{
+		CClientHost *client = _ClientIdCont[id];
+		if (client == NULL || client->isDisconnected() || client->ConnectionState != CClientHost::Connected)
+			continue;
+		CQuicUserContext *user = client->QuicUser.get();
+		if (!user || !user->Streams || !user->QueueDelayKnown)
+			continue;
+		if (user->QueueDelayReports == user->QueueDelayReportsSeen && !user->StreamAllowance.reportsLately())
+			continue;
+		++reporting;
+		if (user->StreamAllowance.isLate(config, user->QueueDelay))
+			++reportingLate;
+	}
+	m_StreamScheduler.reports(config, reporting, reportingLate);
+	const bool sharedLateness = m_StreamScheduler.sharedLateness();
+	const bool budgetShort = m_StreamScheduler.budgetShare() < 1.0;
+	if (budgetShort != m_StreamBudgetShort)
+	{
+		m_StreamBudgetShort = budgetShort;
+		if (budgetShort)
+			nlwarning("FESEND: the datagrams of %u of the %u clients that report it arrive late at once, which is taken for the link of the frontend carrying less than TotalOutgoingBandwidth (%u bytes per second): the QUIC streams are held to less until it carries that again",
+			    reportingLate, reporting, config.TotalOutgoingBandwidth);
+		else
+			nlinfo("FESEND: the QUIC streams have all of TotalOutgoingBandwidth (%u bytes per second) again", config.TotalOutgoingBandwidth);
+	}
+
+	uint64 datagramBytes = 0;
 	m_StreamEntries.clear();
 	for (size_t id = 0; id < _ClientIdCont.size(); ++id)
 	{
@@ -462,12 +490,6 @@ void	CFeSendSub::grantStreams()
 			user->StreamAllowance.reset(config);
 		const bool newReport = user->QueueDelayReports != user->QueueDelayReportsSeen;
 		user->QueueDelayReportsSeen = user->QueueDelayReports;
-		if (newReport)
-		{
-			++reporting;
-			if (user->QueueDelay > config.QueueDelayTarget)
-				++reportingLate;
-		}
 		user->StreamAllowance.update(config, newReport, user->QueueDelay, user->QueueDelayAck, client->sendNumber(),
 		    (uint32)user->StatCongestionEvents.load(NLMISC::TMemoryOrderRelaxed), (uint32)user->SendBusyDrops.load(NLMISC::TMemoryOrderRelaxed), sharedLateness);
 
@@ -493,17 +515,6 @@ void	CFeSendSub::grantStreams()
 
 	// The budget is kept every cycle, also when no client has streams: what was sent is taken off it. It is less than
 	// TotalOutgoingBandwidth while the datagrams of half the clients are late at once.
-	m_StreamScheduler.reports(config, reporting, reportingLate);
-	const bool budgetShort = m_StreamScheduler.budgetShare() < 1.0;
-	if (budgetShort != m_StreamBudgetShort)
-	{
-		m_StreamBudgetShort = budgetShort;
-		if (budgetShort)
-			nlwarning("FESEND: the datagrams of %u of the %u clients that report it arrive late at once: the link of the frontend carries less than TotalOutgoingBandwidth (%u bytes per second). The QUIC streams are held to less until it carries that again",
-			    reportingLate, reporting, config.TotalOutgoingBandwidth);
-		else
-			nlinfo("FESEND: the QUIC streams have all of TotalOutgoingBandwidth (%u bytes per second) again", config.TotalOutgoingBandwidth);
-	}
 	m_StreamScheduler.schedule(config, elapsedSeconds, measuredEgress, datagramBytes, m_StreamEntries);
 
 	for (size_t i = 0; i < m_StreamEntries.size(); ++i)
@@ -512,7 +523,8 @@ void	CFeSendSub::grantStreams()
 		CClientHost *client = _ClientIdCont[entry.Id];
 		CQuicUserContext *user = client->QuicUser.get();
 		CStreamQueues &queues = user->StreamQueues;
-		user->StreamAllowance.granted(entry.Grant, entry.Pending > entry.Grant, user->StreamWindowLimited);
+		// (limited by its congestion window: that had less room than the allowance, and the client got all of it)
+		user->StreamAllowance.granted(entry.Grant, entry.Pending > entry.Grant, user->StreamWindowLimited && entry.Grant == entry.Window);
 		user->StreamLastGrant = entry.Grant;
 
 		// The classes in their order (only one class has messages so far, they get shares of the grant once there

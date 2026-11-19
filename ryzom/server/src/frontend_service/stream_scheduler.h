@@ -152,8 +152,9 @@ public:
 	/// TotalOutgoingBandwidth says. Nothing else tells the frontend, and the allowances cannot help: what one client
 	/// gives up goes to the next. So the frontend then holds itself to less than its budget: to 85% of what it sends
 	/// (not to less than its datagrams, which go whatever the budget), again after as many cycles as a report takes
-	/// to show it, and when the datagrams are on time again for a second it goes back up by 1% of the budget per
-	/// second. While it holds itself to less, the minimum of StreamMinBytesPerTick is given out of the budget like the
+	/// to show it, and after a second of cycles without it, it goes back up by 1% of the budget per second.
+	/// The caller counts each client once, by its last report of the last cycles (CStreamAllowance::reportsLately,
+	/// isLate): taking the budget down, or holding it down, takes half of the clients that report. While it holds itself to less, the minimum of StreamMinBytesPerTick is given out of the budget like the
 	/// rest, to as many clients as it reaches, in turns: on a link that has no room, every byte of stream data is in
 	/// front of somebody's datagram.
 	void reports(const CStreamSchedulerConfig &config, uint32 reporting, uint32 late);
@@ -253,11 +254,11 @@ private:
  *
  * It is halved when a report shows lateness, or the connection could not send a datagram, and the client used its
  * allowance shortly before: one of the last cycles gave it more than half of it, which is as much as
- * a cut takes away. A client that got less than that though it had more to send is held by something else (its
- * congestion window, the budget of the frontend), with an allowance far above what its path takes: that allowance
- * goes to half of what the client did get, which is where a cut takes something away. If it got nothing at all
- * lately with stream data waiting, its congestion window is full of what it got before, and the cut is for that. A
- * client that had no more to send than the little it got is not held up by its stream data, and a cut would change nothing for it: its allowance
+ * a cut takes away. A client that got less than that because its congestion window had no room for more has an
+ * allowance far above what its path takes: that allowance goes to a quarter. If it got nothing at all lately with
+ * stream data waiting and no room in its window, the window is full of what it got before, and the cut is for that.
+ * A client that got little because the budget of the frontend is short, or that had no more to send than the little
+ * it got, is not held up by its stream data, and a cut would change nothing for it: its allowance
  * stays, whatever happens to its datagrams. After a cut, the queue that stood at the cut takes time
  * to drain: the reports on datagrams of after the cut are compared with each other, lateness that comes down is that
  * queue and does not cut again, lateness that does not come down does; and the datagrams not sent up to the first of
@@ -271,8 +272,8 @@ private:
  * what holds a client back, cycle after cycle, the allowance is no longer that: the window then lets a block through
  * every few cycles, as large as the window, and the datagrams behind it are late while those between are on time,
  * which the client's smallest of three does not show. So an allowance of more than one and a half times what got
- * through per cycle, over ten such cycles, comes down to one and a quarter times that, and looks for its level again
- * from there.
+ * through per cycle, over ten cycles of which the window limited eight, comes down to one and a quarter times that
+ * (to a quarter of itself at most at once, and not again before ten cycles have passed since).
  *
  * Lateness is counted from what the client reports when it gets no stream data: the jitter of its path and a clock
  * that gains on the frontend's read as lateness all the time, and are not of the streams. The streams may add
@@ -296,7 +297,8 @@ public:
 	/// frontend finds out). Told when the client logs in. The allowance then starts at half of that (not above
 	/// four times StreamMinChunk) and stays under nine tenths of it: it does not have to pass what the path takes to
 	/// find it. It is the client's word about its own path: lateness and the rest still cut an allowance that is
-	/// under it, and a client that says more than it has gets what it would get without saying anything.
+	/// under it. A client that says more than it has starts higher than its path takes, which is its own datagrams
+	/// late until the allowance has come down.
 	void declare(uint32 bytesPerSecond);
 	uint32 declared() const { return m_Declared; }
 
@@ -310,7 +312,8 @@ public:
 	void update(const CStreamSchedulerConfig &config, bool newReport, uint32 lateness, uint32 reportNumber, uint32 sendNumber, uint32 congestionEvents, uint32 sendBusyDrops, bool sharedLateness = false);
 
 	/// Once per cycle, after the scheduler: what the client got, and whether more waited for it than that.
-	/// windowLimited: the congestion window of its connection left it less room this cycle than its allowance.
+	/// windowLimited: what it got is all that the congestion window of its connection had room for, and less than
+	/// its allowance. (Not: it got less because the budget of the frontend was short.)
 	void granted(uint32 bytes, bool wantedMore, bool windowLimited = false);
 
 	/// A new session starts on the connection: its datagrams may be numbered from another point, and what was kept
@@ -319,6 +322,14 @@ public:
 
 	/// Bytes per cycle
 	uint32 allowance() const { return m_Allowance; }
+	/// The client reported the lateness of its datagrams in one of the last cycles (as of the last update())
+	bool reportsLately() const { return m_Started && m_CyclesWithoutReport < (uint32)ReportCycles; }
+	/// A report of this lateness is late for this client: more than QueueDelayTarget above the noise of its path
+	bool isLate(const CStreamSchedulerConfig &config, uint32 lateness) const
+	{
+		const uint32 floor = noise();
+		return lateness > floor && lateness - floor > config.QueueDelayTarget;
+	}
 	/// The lateness, in milliseconds, that this client reports when it gets no stream data: what its path and its
 	/// clock do by themselves (jitter, a clock that runs fast). Lateness is counted from there.
 	uint32 noise() const { return std::max(m_NoiseNow, m_NoiseBefore); }
@@ -336,9 +347,13 @@ private:
 		QuietCycles = 20,
 		/// Cycles over which the allowance is compared with what the congestion window let through
 		FollowCycles = 10,
-		/// Reports without stream data before them that make a stretch of the noise, and the most that counts as noise
+		/// Reports without stream data before them that make a stretch of the noise, the cycles after which a
+		/// stretch ends in any case, and the most that counts as noise
 		NoiseReports = 150,
-		NoiseMax = 100
+		NoiseCycles = 600,
+		NoiseMax = 100,
+		/// Cycles without a report after which a client does not count as one that reports
+		ReportCycles = 5
 	};
 
 	struct CCycle
@@ -346,9 +361,8 @@ private:
 		uint32 Number; // of the datagram of the cycle
 		uint32 Granted; // bytes of stream data given after that datagram
 		bool Held; // the client got all of its allowance and had more to send
-		bool Wanted; // it got stream data and had more to send
 		bool Backlog; // it had stream data to send, whether it got any or not
-		bool WindowLimited; // and the congestion window of its connection had less room for it than its allowance
+		bool WindowLimited; // and what it got was all that the congestion window of its connection had room for
 		bool Valid;
 	};
 
@@ -362,9 +376,9 @@ private:
 	/// The first of the cycles before a datagram whose stream data a cut can be for: CutCycles before it, and not
 	/// before the last cut, which was for the cycles before it
 	uint32 firstCutCycle(uint32 number) const;
-	/// The most that one of the cycles of these numbers gave the client while it had more to send (0: none did)
+	/// The most that one of the cycles of these numbers gave the client while its congestion window held it (0: none)
 	uint32 heldBackGrantIn(uint32 firstNumber, uint32 lastNumber) const;
-	/// In one of the cycles of these numbers the client had stream data waiting and got none
+	/// In one of the cycles of these numbers the client had stream data waiting and its congestion window no room
 	bool waitingIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// Bring an allowance that the congestion window keeps the client far under down to what gets through
 	void followWindow(const CStreamSchedulerConfig &config, uint32 sendNumber);
@@ -391,6 +405,7 @@ private:
 	uint32 m_NoiseNow;
 	uint32 m_NoiseBefore;
 	uint32 m_NoiseCount;
+	uint32 m_NoiseCycles;
 	/// The counters of the connection as of the last report that was judged for them
 	uint32 m_CongestionEvents;
 	uint32 m_SendBusyDrops;

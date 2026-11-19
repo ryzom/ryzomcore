@@ -77,33 +77,26 @@ void CStreamScheduler::reports(const CStreamSchedulerConfig &config, uint32 repo
 {
 	if (m_SharedCyclesSinceCut < 1000)
 		++m_SharedCyclesSinceCut;
-	m_SharedLateness = false;
 
 	// (too few to tell: as if nothing were late, so that a budget that was taken down comes back)
-	if (reporting < (uint32)SharedMinReporting)
-		late = 0;
-
-	if (reporting != 0 && late * 2 >= reporting)
+	m_SharedLateness = reporting >= (uint32)SharedMinReporting && late * 2 >= reporting;
+	if (m_SharedLateness)
 	{
-		m_SharedLateness = true;
 		m_SharedCleanCycles = 0;
-		if (m_SharedCyclesSinceCut >= (uint32)SharedCutCycles)
+		if (m_SharedCyclesSinceCut >= (uint32)SharedCutCycles && config.TotalOutgoingBandwidth != 0 && m_EgressRate > 0.0)
 		{
 			// Under what it sends, which can be well under what it holds itself to when the streams have little to do
-			double share = m_BudgetShare;
-			double floor = 0.0;
-			if (config.TotalOutgoingBandwidth != 0)
-			{
-				share = std::min(share, m_EgressRate / (double)config.TotalOutgoingBandwidth);
-				floor = m_DatagramRate / (double)config.TotalOutgoingBandwidth;
-			}
+			const double share = std::min(m_BudgetShare, m_EgressRate / (double)config.TotalOutgoingBandwidth);
+			const double floor = m_DatagramRate / (double)config.TotalOutgoingBandwidth;
 			m_BudgetShare = std::min(m_BudgetShare, std::max(share * 0.85, floor));
 			m_SharedCyclesSinceCut = 0;
 			++m_BudgetCuts;
 		}
 	}
-	else if (late * 10 <= reporting)
+	else
 	{
+		// Back up after a second of cycles in a row without it. (Not "with next to nobody late": the clients that
+		// would have to stay late to hold the budget down are then as many as those that can take it down.)
 		if (m_SharedCleanCycles < 1000)
 			++m_SharedCleanCycles;
 		if (m_SharedCleanCycles >= (uint32)SharedCleanCycles)
@@ -328,6 +321,7 @@ CStreamAllowance::CStreamAllowance()
     , m_NoiseNow(0)
     , m_NoiseBefore(0)
     , m_NoiseCount(0)
+    , m_NoiseCycles(0)
     , m_CongestionEvents(0)
     , m_SendBusyDrops(0)
     , m_CyclesWithoutReport(0)
@@ -370,6 +364,7 @@ void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 	m_NoiseNow = 0;
 	m_NoiseBefore = 0;
 	m_NoiseCount = 0;
+	m_NoiseCycles = 0;
 	m_Allowance = startAllowance(config);
 	m_StartUp = true;
 	m_InRecovery = false;
@@ -449,7 +444,7 @@ uint32 CStreamAllowance::heldBackGrantIn(uint32 firstNumber, uint32 lastNumber) 
 	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
 	{
 		const CCycle &cycle = m_Cycles[number % NbCycles];
-		if (cycle.Valid && cycle.Number == number && cycle.Wanted && cycle.Granted > most)
+		if (cycle.Valid && cycle.Number == number && cycle.WindowLimited && cycle.Granted > most)
 			most = cycle.Granted;
 	}
 	return most;
@@ -460,14 +455,12 @@ uint32 CStreamAllowance::cutFor(uint32 firstNumber, uint32 lastNumber) const
 	// The client used its allowance: half of it
 	if (usedHalfIn(firstNumber, lastNumber))
 		return std::max(m_Allowance / 2, (uint32)1);
-	// It got less than half of it though it had more to send: something else holds it (the congestion window of its
-	// connection, the budget of the frontend), the allowance is far above what its path takes, and half of the
-	// allowance would take nothing away. Half of what it did get does.
-	// (Not under a quarter of the allowance at once: what it got can be next to nothing for a moment, after an outage,
-	// and lateness that lasts cuts again.)
-	const uint32 got = heldBackGrantIn(firstNumber, lastNumber);
-	if (got != 0)
-		return std::max(std::max(got / 2, m_Allowance / 4), (uint32)1);
+	// It got less than half of it though it had more to send, because the congestion window of its connection had no
+	// room for more: the allowance is far above what its path takes, and half of it would take nothing away. It
+	// goes to a quarter; lateness that lasts cuts again. (A client that got little because the budget of the
+	// frontend is short is not meant: that is not of its path.)
+	if (heldBackGrantIn(firstNumber, lastNumber) != 0)
+		return std::max(m_Allowance / 4, (uint32)1);
 	// It got nothing in those cycles though stream data waited for it: the congestion window of its connection is
 	// full of what it got before them, which is still on its way and in the way. The cut is for that, as far back as
 	// the cycles are kept, and not further than the last cut, which was for what came before it.
@@ -480,9 +473,8 @@ uint32 CStreamAllowance::cutFor(uint32 firstNumber, uint32 lastNumber) const
 		{
 			if (usedHalfIn(far, lastNumber))
 				return std::max(m_Allowance / 2, (uint32)1);
-			const uint32 before = heldBackGrantIn(far, lastNumber);
-			if (before != 0)
-				return std::max(std::max(before / 2, m_Allowance / 4), (uint32)1);
+			if (heldBackGrantIn(far, lastNumber) != 0)
+				return std::max(m_Allowance / 4, (uint32)1);
 		}
 	}
 	// It had no more to send than it got, and that was little: its stream data is not what holds its datagrams up
@@ -496,7 +488,7 @@ bool CStreamAllowance::waitingIn(uint32 firstNumber, uint32 lastNumber) const
 	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
 	{
 		const CCycle &cycle = m_Cycles[number % NbCycles];
-		if (cycle.Valid && cycle.Number == number && cycle.Backlog && cycle.Granted == 0)
+		if (cycle.Valid && cycle.Number == number && cycle.WindowLimited && cycle.Granted == 0)
 			return true;
 	}
 	return false;
@@ -535,7 +527,17 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 
 	// A client that has not reported for a while (its main thread is busy: a loading screen) says nothing about what
 	// its path takes now: its next report may cut the allowance, not raise it
-	const bool mayRaise = m_CyclesWithoutReport < 5;
+	const bool mayRaise = m_CyclesWithoutReport < (uint32)ReportCycles;
+
+	// A client that always has a little stream data never reports without any: what was learned of its path then
+	// does not stay for ever (a bad second would count as its noise from then on), it goes after two minutes at most
+	if (++m_NoiseCycles >= (uint32)NoiseCycles)
+	{
+		m_NoiseBefore = m_NoiseNow;
+		m_NoiseNow = 0;
+		m_NoiseCount = 0;
+		m_NoiseCycles = 0;
+	}
 	if (newReport)
 		m_CyclesWithoutReport = 0;
 	else if (m_CyclesWithoutReport < 1000)
@@ -569,6 +571,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 				m_NoiseBefore = m_NoiseNow;
 				m_NoiseNow = 0;
 				m_NoiseCount = 0;
+				m_NoiseCycles = 0;
 			}
 		}
 		const uint32 noise = std::max(m_NoiseNow, m_NoiseBefore);
@@ -680,6 +683,10 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 
 void CStreamAllowance::followWindow(const CStreamSchedulerConfig &config, uint32 sendNumber)
 {
+	// Not before the cycles that are looked at are all of after the last change
+	if (m_Started && (sint32)(sendNumber - m_LastChangeNumber) < (sint32)FollowCycles)
+		return;
+
 	// The last cycles: the client had stream data waiting in all of them, and in most of them it was the congestion
 	// window that had less room than the allowance
 	uint64 sum = 0;
@@ -696,7 +703,8 @@ void CStreamAllowance::followWindow(const CStreamSchedulerConfig &config, uint32
 		if (cycle.Granted != 0)
 			++given;
 	}
-	if (limited * 2 < (uint32)FollowCycles)
+	// (four in five: a window in slow start on a long path is short of room every other cycle for a while)
+	if (limited * 5 < (uint32)FollowCycles * 4)
 		return;
 	// (A window that lets nothing through, or one block in all that time, is not a measure of the path: the path is
 	// gone or the connection is busy with what it lost. That is for the cuts.)
@@ -708,7 +716,7 @@ void CStreamAllowance::followWindow(const CStreamSchedulerConfig &config, uint32
 	// (what gets through can be nothing for a moment: not under a quarter of the allowance at once, and not under
 	// the minimum, which the caller sees to)
 	m_Allowance = (uint32)std::max(perCycle + perCycle / 4, (uint64)(m_Allowance / 4));
-	m_StartUp = true;
+	m_StartUp = false;
 	m_LastChangeNumber = sendNumber;
 	m_LastChangeWasCut = false;
 }
@@ -738,7 +746,6 @@ void CStreamAllowance::granted(uint32 bytes, bool wantedMore, bool windowLimited
 	// room for a little less than the allowance. Were that not "held", the allowance could not grow, what is in
 	// flight could not either, and the window would stay where it is.)
 	cycle.Held = wantedMore && (uint64)bytes * 10 >= (uint64)m_Allowance * 8;
-	cycle.Wanted = wantedMore && bytes != 0;
 	cycle.Backlog = wantedMore || bytes != 0;
 	cycle.WindowLimited = windowLimited && wantedMore;
 	cycle.Valid = true;

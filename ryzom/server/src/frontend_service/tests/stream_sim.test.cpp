@@ -136,10 +136,11 @@ TEST(StreamSim, LoginOnAModem)
 	expectAllRecords(r);
 	EXPECT_LE(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 3u);
 	EXPECT_LT(r.maxRecordSeconds(), 70.0); // (270 KB: 54 s at what the path has left)
+	// (the stretch of the login from its 20th second on, not the idle time after it)
 	double mean;
 	uint32 worst, missing;
-	run.Sim->latenessBetween(20.0, 120.0, mean, worst, missing);
-	EXPECT_LE(mean, 15.0);
+	run.Sim->latenessBetween(20.0, 55.0, mean, worst, missing);
+	EXPECT_LE(mean, 30.0);
 	EXPECT_LE(worst, 150u);
 	EXPECT_EQ(missing, 0u);
 	// (wanted better: the start)
@@ -566,6 +567,15 @@ TEST(StreamSim, LinkThatCarriesLessThanTheBudget)
 		EXPECT_LT(run.Sim->budgetMin(), 1500000u);
 		EXPECT_GT(run.Sim->budgetEnd(), run.Sim->budgetMin() + 300000u);
 		EXPECT_LE(run.Sim->scheduler().budgetCuts(), (uint64)12);
+		// The link was the trouble, not the path of any client: next to none of them has less of an allowance for it
+		// when it is over
+		uint32 lowered = 0;
+		for (uint32 i = 0; i < run.Sim->clientCount(); ++i)
+		{
+			if (run.client(i).AllowanceEnd < run.Config.Scheduler.StreamMinChunk)
+				++lowered;
+		}
+		EXPECT_LE(lowered, run.Sim->clientCount() / 20);
 	}
 	{
 		SCOPED_TRACE("less than the datagrams alone take");
