@@ -214,13 +214,22 @@ TEST(MsgXmlStreams, ClassesOfTheNodes)
 		CGenericXmlMsgHeaderManager mngr;
 		mngr.init(RYZOM_MSG_XML);
 		CHECK(!mngr.hasStreamClassError());
-		CHECK(mngr.getStreamClasses().size() == 1 && mngr.getStreamClasses()[0] == "strings");
+		CHECK(mngr.getStreamClasses().size() == 2 && mngr.getStreamClasses()[0] == "strings" && mngr.getStreamClasses()[1] == "login");
+		CHECK(classOf(mngr, "DB_INIT:PLR") == 1);
+		CHECK(classOf(mngr, "DB_INIT:INV") == 1);
+		CHECK(classOf(mngr, "DB_GROUP:UPDATE_BANK") == 1);
+		CHECK(classOf(mngr, "DB_GROUP:INIT_BANK") == 1);
+		CHECK(classOf(mngr, "DB_GROUP:RESET_BANK") == 1);
+		CHECK(classOf(mngr, "ENCYCLOPEDIA:INIT") == 1);
+		CHECK(classOf(mngr, "ENCYCLOPEDIA:UPDATE") == 1);
+		CHECK(classOf(mngr, "PHRASE:DOWNLOAD") == 1);
+		CHECK(classOf(mngr, "PHRASE:LEARN") == CLFECOMMON::NoStreamClass);
+		CHECK(classOf(mngr, "DB_UPD_PLR") == CLFECOMMON::NoStreamClass);
 		CHECK(classOf(mngr, "STRING_MANAGER:PHRASE_SEND") == 0);
 		CHECK(classOf(mngr, "STRING_MANAGER:STRING_RESP") == 0);
 		CHECK(classOf(mngr, "STRING_MANAGER:RELOAD_CACHE") == 0);
 		CHECK(classOf(mngr, "STRING:CHAT") == CLFECOMMON::NoStreamClass);
 		CHECK(classOf(mngr, "STRING:DYN_STRING") == CLFECOMMON::NoStreamClass);
-		CHECK(classOf(mngr, "DB_INIT:PLR") == CLFECOMMON::NoStreamClass);
 		CHECK(classOf(mngr, "CONNECTION:USER_CHARS") == CLFECOMMON::NoStreamClass);
 		CHECK(classOf(mngr, "MODULE_GATEWAY:GATEWAY_MSG") == CLFECOMMON::NoStreamClass);
 		CHECK(classOf(mngr, "TARGET:PARTY") == CLFECOMMON::NoStreamClass); // the first node of the file

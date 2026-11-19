@@ -11,6 +11,7 @@
     the other classes refer to comes first.
   -->
   <stream_class name="strings" />
+  <stream_class name="login" />
   <branch name="TARGET">
     <leaf name="PARTY" />
     <leaf name="INVENTORY" />
@@ -46,11 +47,11 @@
   </branch>
   <leaf name="DB_UPD_PLR" />
   <leaf name="DB_UPD_INV" description="EGS sends an inventory update to the client" />
-  <branch name="DB_INIT">
+  <branch name="DB_INIT" stream="login">
     <leaf name="PLR" />
     <leaf name="INV" />
   </branch>
-  <branch name="DB_GROUP">
+  <branch name="DB_GROUP" stream="login">
     <leaf name="UPDATE_BANK" />
     <leaf name="INIT_BANK" />
     <leaf name="RESET_BANK" />
@@ -403,7 +404,7 @@
     <leaf name="EXECUTE_FABER" />
     <!-- FaberPlanSheetId u32/ MemoryTypeId u8/ MemorySlotId u8 / vector<CItemFaberMsg> listOfMpSelectedForFaber -->
     <!-- Impulse ServerToClient -->
-    <leaf name="DOWNLOAD" />
+    <leaf name="DOWNLOAD" stream="login" />
     <!-- the server upload all Known Phrases and All Memorized Phrases to the client: vector<CSPhraseSlot> / vector<CSPhraseMemorySlot> -->
     <!-- BotChat -->
     <leaf name="BUY" sendto="EGS" format="u8 u16" description="the client buy a botChat phrase (indexInBotChat, phraseId)" />
@@ -467,7 +468,7 @@
     <leaf name="POP_FACTION_WAR" format="u8 u8" description="a faction ends" />
     <leaf name="FACTION_WARS" description="a faction ends" />
   </branch>
-  <branch name="ENCYCLOPEDIA">
+  <branch name="ENCYCLOPEDIA" stream="login">
     <leaf name="UPDATE" description="server update the encyclopedia (see msg_encyclopedia.cpp in game_share for the message format)" />
     <leaf name="INIT" description="server sends the whole encyclopedia to the client" />
   </branch>
