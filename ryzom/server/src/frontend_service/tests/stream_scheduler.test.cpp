@@ -117,7 +117,8 @@ static double jain(const std::vector<uint64> &values)
 	return squares == 0 ? 1.0 : sum * sum / (values.size() * squares);
 }
 
-// Many clients with a lasting backlog: the frontend sends its budget, no more, and shares it evenly
+// Many clients with a lasting backlog: the frontend sends its budget, no more, and shares it evenly. (Not all of it:
+// the last cycle of a round has fewer clients to serve than it could, and what it leaves is not saved up.)
 TEST(StreamScheduler, KeepsTheBudgetAndSharesEvenly)
 {
 	CSim sim(200);
@@ -129,7 +130,7 @@ TEST(StreamScheduler, KeepsTheBudgetAndSharesEvenly)
 		sim.tick();
 	const double perTick = (double)sim.SentTotal / sim.Ticks;
 	printf("budget: %.0f bytes per cycle of 500000, fairness %.4f, round %u\n", perTick, jain(sim.Total), sim.Scheduler.round());
-	CHECK(perTick > 500000 * 0.98 && perTick < 500000 * 1.02);
+	CHECK(perTick > 500000 * 0.96 && perTick <= 500000);
 	CHECK(jain(sim.Total) > 0.99);
 	CHECK(sim.MinimumAlways);
 	CHECK(sim.Scheduler.round() > 10);
@@ -260,7 +261,7 @@ TEST(StreamScheduler, SlowAndFastClientsGetAsMuch)
 	const double perTick = (double)sim.SentTotal / sim.Ticks;
 	printf("slow and fast: %.0f and %.0f bytes per cycle each, %.0f of 150000 in all\n", slow, fast, perTick);
 	CHECK(slow > fast * 0.9 && slow < fast * 1.1);
-	CHECK(perTick > 150000 * 0.97 && perTick < 150000 * 1.03);
+	CHECK(perTick > 150000 * 0.94 && perTick <= 150000);
 }
 
 // Datagrams above the budget: the streams get their minimums and nothing else, and it is counted
@@ -277,7 +278,7 @@ TEST(StreamScheduler, DatagramsAboveTheBudget)
 	CHECK(sim.MinimumAlways);
 	CHECK(sim.Scheduler.overshootDatagrams() >= 49);
 
-	// A frontend that sent far above its budget owes no more than the burst: it is back within a few cycles
+	// A frontend that sent far above its budget owes no more than a cycle of it: it is back within a few cycles
 	CSim debt(10);
 	debt.Config.TotalOutgoingBandwidth = 1000000; // 100 KB per cycle
 	for (uint i = 0; i < 10; ++i)

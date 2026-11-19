@@ -297,8 +297,9 @@ TEST(StreamSim, LoginWaveAboveTheBudget)
 
 // The frontend's own link. It sends the datagrams of all its clients at once and its link spreads them over the
 // cycle by their place in that order: a frontend without streams whose datagrams fill its link has the last of them
-// a cycle late. That is the measure: with stream data up to a budget of nine tenths of the link, the datagrams are
-// no later than they are without any, and far from that.
+// a cycle late. That is the measure. With stream data up to a budget of all that the link carries, the datagrams stay
+// under it, and near where they are without any stream data: the frontend sends no more in a cycle than the link
+// takes in one, whatever it did not send before.
 TEST(StreamSim, OwnLinkOfTheFrontend)
 {
 	CRun udp("uplink-udp");
@@ -311,15 +312,30 @@ TEST(StreamSim, OwnLinkOfTheFrontend)
 	CRun idle("uplink-idle");
 	EXPECT_LT(idle.Sim->maxLateness(), 50u);
 
-	CRun streams("uplink-streams-90");
-	EXPECT_EQ(streams.Sim->uplinkDrops(), 0u);
-	EXPECT_LE(streams.Sim->latenessPercentile(0.5), idle.Sim->latenessPercentile(0.5) + 3);
-	EXPECT_LE(streams.Sim->latenessPercentile(0.99), idle.Sim->latenessPercentile(0.99) + 15);
-	EXPECT_LE(streams.Sim->latenessPercentile(0.99), udp.Sim->latenessPercentile(0.99));
-	EXPECT_LE(streams.Sim->maxEgressPerSecond(), (uint64)(streams.Config.UplinkBytesPerSecond * 1.01));
-	EXPECT_GE(streams.Sim->meanEgressPerSecond(), 0.95 * (double)streams.Config.Scheduler.TotalOutgoingBandwidth);
-	for (uint32 i = 0; i < streams.Sim->clientCount(); ++i)
-		EXPECT_EQ(streams.client(i).DatagramsLost + streams.client(i).DatagramsCancelled + streams.client(i).DatagramsNotSent, 0u) << "client " << i;
+	const char *names[] = { "uplink-streams-90", "uplink-streams", "uplink-wave" };
+	for (size_t n = 0; n < sizeof(names) / sizeof(names[0]); ++n)
+	{
+		SCOPED_TRACE(names[n]);
+		const bool full = n != 0;
+		CRun streams(names[n]);
+		EXPECT_EQ(streams.Sim->uplinkDrops(), 0u);
+		EXPECT_LE(streams.Sim->maxLateness(), idle.Sim->maxLateness() + (full ? 20u : 5u));
+		EXPECT_LT(streams.Sim->maxLateness(), udp.Sim->latenessPercentile(0.75));
+		EXPECT_LE(streams.Sim->latenessPercentile(0.5), idle.Sim->latenessPercentile(0.5) + (full ? 12u : 3u));
+		EXPECT_LE(streams.Sim->maxEgressPerSecond(), (uint64)(streams.Config.UplinkBytesPerSecond * 1.03));
+		uint32 cuts = 0;
+		for (uint32 i = 0; i < streams.Sim->clientCount(); ++i)
+		{
+			const CClientResult &r = streams.client(i);
+			EXPECT_EQ(r.DatagramsLost + r.DatagramsCancelled + r.DatagramsNotSent, 0u) << "client " << i;
+			EXPECT_EQ(r.CongestionEvents, 0u) << "client " << i;
+			cuts += r.Cuts;
+		}
+		// (no client is held back for what waits at the frontend's link, which is none of its doing)
+		EXPECT_EQ(cuts, 0u);
+		if (n != 2)
+			EXPECT_GE(streams.Sim->meanEgressPerSecond(), 0.95 * (double)streams.Config.Scheduler.TotalOutgoingBandwidth);
+	}
 }
 
 } /* anonymous namespace */

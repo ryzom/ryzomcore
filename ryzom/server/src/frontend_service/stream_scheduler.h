@@ -41,8 +41,6 @@ struct CStreamSchedulerConfig
 
 	/// Bytes per second the frontend may send in all: datagrams, streams, and what QUIC adds
 	uint32 TotalOutgoingBandwidth;
-	/// How far the frontend may run ahead of or behind that, in bytes (0: what one cycle may send)
-	uint32 StreamBurstBytes;
 	/// Bytes per cycle every client with stream data gets, whatever the budget
 	uint32 StreamMinBytesPerTick;
 	/// Most bytes per cycle one client gets

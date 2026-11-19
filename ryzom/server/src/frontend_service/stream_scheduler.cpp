@@ -23,7 +23,6 @@
 
 CStreamSchedulerConfig::CStreamSchedulerConfig()
     : TotalOutgoingBandwidth(5000000)
-    , StreamBurstBytes(0)
     , StreamMinBytesPerTick(200)
     , StreamMaxBytesPerTick(65536)
     , StreamMinChunk(4096)
@@ -72,17 +71,19 @@ void CStreamScheduler::schedule(const CStreamSchedulerConfig &config, double ela
 	const uint32 maxBytes = config.StreamMaxBytesPerTick;
 
 	// The budget. What was really sent since the last cycle is taken off, whatever it was (datagrams, stream data,
-	// what was sent again, acknowledgements): the frontend owes what it sent above its budget and may not save up
-	// more than the burst. Then this cycle's share is added, so that a cycle that comes late does not lose it.
+	// what was sent again, acknowledgements). The frontend owes what it sent above its budget, up to what one cycle
+	// may send. It saves nothing up: what a cycle did not send cannot be sent in that cycle any more, and sent on top
+	// of a later one it is more than the link takes in that one, where it waits in front of the datagrams that
+	// follow. Then this cycle's share is added, by the time that passed, so that a cycle that comes late has all of
+	// it.
 	const sint64 tickBudget = (sint64)((double)config.TotalOutgoingBandwidth * config.TickSeconds);
-	const sint64 burst = config.StreamBurstBytes != 0 ? (sint64)config.StreamBurstBytes : tickBudget;
 	const double elapsed = std::min(std::max(elapsedSeconds, 0.0), 2.0 * config.TickSeconds);
 	if (!m_Started)
 	{
 		m_Started = true;
 		m_Tokens = 0;
 	}
-	m_Tokens = std::min(std::max(m_Tokens - (sint64)measuredEgress, -burst), burst) + (sint64)((double)config.TotalOutgoingBandwidth * elapsed);
+	m_Tokens = std::min(std::max(m_Tokens - (sint64)measuredEgress, -tickBudget), (sint64)0) + (sint64)((double)config.TotalOutgoingBandwidth * elapsed);
 
 	// What is left for the streams once this cycle's datagrams are out
 	sint64 pool = m_Tokens - (sint64)datagramBytes;

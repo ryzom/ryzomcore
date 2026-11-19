@@ -53,8 +53,7 @@ extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
 // clang-format off
 // The budget of the frontend and the allowances of the clients, for the QUIC streams (see stream_scheduler.h)
-CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left. Keep it a tenth or more under what the link of the frontend carries, or what waits at the link makes every datagram late", 5000000, 0, true);
-CVariable<uint32>	StreamBurstBytes("fs", "StreamBurstBytes", "Bytes the frontend may run ahead of or behind TotalOutgoingBandwidth (0: what it may send in one cycle)", 0, 0, true);
+CVariable<uint32>	TotalOutgoingBandwidth("fs", "TotalOutgoingBandwidth", "Bytes per second the frontend may send in all, to all clients: the datagrams, which always go, and the QUIC streams, which share what is left. Not more than the link of the frontend carries: what the link cannot take in a cycle waits in front of the datagrams of the next", 5000000, 0, true);
 CVariable<uint32>	StreamMinBytesPerTick("fs", "StreamMinBytesPerTick", "Bytes per cycle every client with data for its QUIC streams gets, whatever is left of TotalOutgoingBandwidth", 200, 0, true);
 CVariable<uint32>	StreamMaxBytesPerTick("fs", "StreamMaxBytesPerTick", "Most bytes per cycle one client gets on its QUIC streams", 65536, 0, true);
 CVariable<uint32>	StreamMinChunk("fs", "StreamMinChunk", "Smallest turn of a client on its QUIC streams when the frontend's budget is short, and the bytes per cycle a connection starts with", 4096, 0, true);
@@ -391,7 +390,6 @@ void	CFeSendSub::grantStreams()
 	CStreamSchedulerConfig config;
 	config.TickSeconds = std::max(0.001, (double)CTickEventHandler::getGameTimeStep() * std::max((sint)1, CFrontEndService::instance()->gameCycleRatio()));
 	config.TotalOutgoingBandwidth = TotalOutgoingBandwidth.get();
-	config.StreamBurstBytes = StreamBurstBytes.get();
 	config.StreamMinBytesPerTick = StreamMinBytesPerTick.get();
 	config.StreamMaxBytesPerTick = StreamMaxBytesPerTick.get();
 	config.StreamMinChunk = StreamMinChunk.get();

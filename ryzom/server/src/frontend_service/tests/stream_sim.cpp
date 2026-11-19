@@ -1012,6 +1012,7 @@ const CScenario s_Scenarios[] = {
 	{ "uplink-udp", "300 clients, no stream data, behind a link that their datagrams alone fill" },
 	{ "uplink-streams", "300 clients with 1 MB each, a frontend that may send 2.5 MB/s behind a link of 2.5 MB/s" },
 	{ "uplink-streams-90", "the same with a frontend that may send 90% of what its link carries" },
+	{ "uplink-wave", "300 clients behind that link without stream data until 10 s, then 1 MB each at once" },
 };
 
 } /* anonymous namespace */
@@ -1151,7 +1152,8 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 		// their place in that order. uplink-udp is the measure for the others: a frontend without streams whose
 		// datagrams fill its link, where the last client gets its datagram a cycle late.
 		const uint32 nbClients = 300;
-		const bool streams = name == "uplink-streams" || name == "uplink-streams-90";
+		const bool wave = name == "uplink-wave";
+		const bool streams = name == "uplink-streams" || name == "uplink-streams-90" || wave;
 		for (uint32 i = 0; i < nbClients; ++i)
 		{
 			CClientConfig client;
@@ -1159,7 +1161,7 @@ bool makeScenario(const std::string &name, CSimConfig &config, double &seconds, 
 			client.SendPhaseMs = (double)(i % 100);
 			config.Clients.push_back(client);
 			if (streams)
-				config.Traffic.push_back(CTraffic(i, 1.0, 1500, 700));
+				config.Traffic.push_back(CTraffic(i, wave ? 10.0 : 1.0, 1500, 700));
 		}
 		config.TraceClient = nbClients - 1;
 		config.Scheduler.TotalOutgoingBandwidth = 2500000;
