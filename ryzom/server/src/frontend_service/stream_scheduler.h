@@ -265,10 +265,14 @@ private:
 		bool Valid;
 	};
 
-	/// One of the cycles of these numbers gave the client more than half of the allowance as it is now
+	/// One of the cycles of these numbers gave the client more than half of the allowance as it is now.
+	/// (The numbers come from the client: only the cycles that are kept are looked at, however far apart they are.)
 	bool usedHalfIn(uint32 firstNumber, uint32 lastNumber) const;
 	/// The client was held at the allowance in every cycle of these numbers
 	bool heldIn(uint32 firstNumber, uint32 lastNumber) const;
+	/// The first of the cycles before a datagram whose stream data a cut can be for: CutCycles before it, and not
+	/// before the last cut, which was for the cycles before it
+	uint32 firstCutCycle(uint32 number) const;
 	void cut(uint32 sendNumber);
 
 	CCycle m_Cycles[NbCycles];
@@ -279,6 +283,7 @@ private:
 	bool m_Started;
 	/// The number of the datagram of the cycle of the last change: the datagrams after it show what the change did
 	uint32 m_LastChangeNumber;
+	bool m_LastChangeWasCut;
 	/// The counters of the connection as of the last report that was judged for them
 	uint32 m_CongestionEvents;
 	uint32 m_SendBusyDrops;

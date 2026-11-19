@@ -23,6 +23,7 @@
 
 #include "nel/misc/types_nl.h"
 
+#include <chrono>
 #include <cstdio>
 #include <cmath>
 #include <vector>
@@ -823,6 +824,88 @@ TEST(StreamAllowance, GrowthCutsAndBounds)
 		path.Allowance.reset(path.Config);
 		CHECK(path.Allowance.allowance() == path.Config.StreamMinChunk && path.Allowance.startUp());
 	}
+}
+
+// The number of the datagram a report is on is the client's word. One far ahead of what the frontend sent made the
+// allowance look through two thousand million cycles, on the main thread of the service.
+TEST(StreamAllowance, ReportOnADatagramThatWasNotSent)
+{
+	CStreamSchedulerConfig config;
+	CStreamAllowance allowance;
+	allowance.reset(config);
+	uint32 number = 100;
+	// Stream data at the allowance, and reports without lateness on the datagram of two cycles before
+	for (uint i = 0; i < 10; ++i, ++number)
+	{
+		allowance.update(config, true, 0, number - 2, number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	// The datagrams are late: a cut, and then reports that stay late with no stream data any more
+	const uint32 before = allowance.allowance();
+	allowance.update(config, true, 1144, number - 2, number, 0, 0);
+	allowance.granted(0, false);
+	++number;
+	const uint32 afterCut = allowance.allowance();
+	EXPECT_LT(afterCut, before);
+	for (uint i = 0; i < 6; ++i, ++number)
+	{
+		allowance.update(config, true, 1144, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.allowance(), afterCut);
+
+	const std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	const uint32 wild[] = { 0x7FFFFFF0u, 0x40000000u, 0x80000000u, 0xC0000000u, 33u, 1000u };
+	for (size_t i = 0; i < sizeof(wild) / sizeof(wild[0]); ++i, ++number)
+	{
+		// (ahead of what was sent, and as far behind it)
+		allowance.update(config, true, 1144, number + wild[i], number, 0, 0);
+		allowance.granted(0, false);
+		++number;
+		allowance.update(config, true, 1144, number - wild[i], number, 0, 0);
+		allowance.granted(0, false);
+		++number;
+		allowance.update(config, true, 0, number + wild[i], number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+	EXPECT_LT(seconds, 0.2);
+	// (none of them was a reason to raise it either)
+	EXPECT_LE(allowance.allowance(), afterCut);
+}
+
+// A cut is for the stream data of the cycles before it. Lateness that comes back after it, with no stream data since,
+// is not a reason to cut again for those same cycles.
+TEST(StreamAllowance, NoSecondCutForWhatWasSentBeforeTheFirst)
+{
+	CStreamSchedulerConfig config;
+	CStreamAllowance allowance;
+	allowance.reset(config);
+	uint32 number = 100;
+	for (uint i = 0; i < 6; ++i, ++number)
+	{
+		allowance.update(config, true, 0, number - 2, number, 0, 0);
+		allowance.granted(allowance.allowance(), true);
+	}
+	const uint32 before = allowance.allowance();
+	allowance.update(config, true, 30, number - 2, number, 0, 0);
+	allowance.granted(0, false);
+	++number;
+	const uint32 afterCut = allowance.allowance();
+	EXPECT_LT(afterCut, before);
+	// The lateness goes away on the datagrams of after the cut: that episode is over
+	for (uint i = 0; i < 5; ++i, ++number)
+	{
+		allowance.update(config, true, 0, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	// Late again, for something else: the client got no stream data since the cut
+	for (uint i = 0; i < 4; ++i, ++number)
+	{
+		allowance.update(config, true, 30, number - 2, number, 0, 0);
+		allowance.granted(0, false);
+	}
+	EXPECT_EQ(allowance.allowance(), afterCut);
 }
 
 } /* anonymous namespace */

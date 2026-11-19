@@ -256,6 +256,7 @@ CStreamAllowance::CStreamAllowance()
     , m_StartUp(true)
     , m_Started(false)
     , m_LastChangeNumber(0)
+    , m_LastChangeWasCut(false)
     , m_CongestionEvents(0)
     , m_SendBusyDrops(0)
     , m_CyclesWithoutReport(0)
@@ -288,6 +289,7 @@ void CStreamAllowance::reset(const CStreamSchedulerConfig &config)
 void CStreamAllowance::newSession()
 {
 	m_Started = false;
+	m_LastChangeWasCut = false;
 	m_CyclesWithoutReport = 0;
 	m_InRecovery = false;
 	m_ReportJudged = false;
@@ -297,6 +299,9 @@ void CStreamAllowance::newSession()
 
 bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
 {
+	// (cycles further back than those that are kept cannot be found)
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		firstNumber = lastNumber - ((uint32)NbCycles - 1);
 	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
 	{
 		const CCycle &cycle = m_Cycles[number % NbCycles];
@@ -308,6 +313,9 @@ bool CStreamAllowance::usedHalfIn(uint32 firstNumber, uint32 lastNumber) const
 
 bool CStreamAllowance::heldIn(uint32 firstNumber, uint32 lastNumber) const
 {
+	// (more cycles than are kept: some of them are not known to have been held)
+	if ((sint32)(lastNumber - firstNumber) >= (sint32)NbCycles)
+		return false;
 	for (uint32 number = firstNumber; (sint32)(lastNumber - number) >= 0; ++number)
 	{
 		const CCycle &cycle = m_Cycles[number % NbCycles];
@@ -317,11 +325,20 @@ bool CStreamAllowance::heldIn(uint32 firstNumber, uint32 lastNumber) const
 	return true;
 }
 
+uint32 CStreamAllowance::firstCutCycle(uint32 number) const
+{
+	const uint32 first = number - (uint32)CutCycles;
+	if (m_LastChangeWasCut && (sint32)(m_LastChangeNumber - first) > 0)
+		return m_LastChangeNumber;
+	return first;
+}
+
 void CStreamAllowance::cut(uint32 sendNumber)
 {
 	m_Allowance = m_Allowance / 2; // (held above the minimum by the caller)
 	m_StartUp = false;
 	m_LastChangeNumber = sendNumber;
+	m_LastChangeWasCut = true;
 	m_InRecovery = true;
 	m_RecoveryLateness = 0xFFFFFFFF; // (the first report on datagrams of after the cut sets it)
 	m_IgnoreEvents = true;
@@ -339,6 +356,10 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		m_SendBusyDrops = sendBusyDrops;
 	}
 	m_CurrentNumber = sendNumber;
+
+	// A report on a datagram that was not sent yet is no report: the number is the client's word
+	if (newReport && (sint32)(sendNumber - reportNumber) < 0)
+		newReport = false;
 
 	// (for granted(), which counts the idle cycles)
 	m_IdleCyclesToStartUp = (uint32)std::max(1.0, config.IdleSecondsToStartUp / std::max(config.TickSeconds, 0.001));
@@ -403,7 +424,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 						doCut = true;
 				}
 			}
-			else if (usedHalfIn(reportNumber - CutCycles, reportNumber - 1))
+			else if (usedHalfIn(firstCutCycle(reportNumber), reportNumber - 1))
 			{
 				// Stream data went out shortly before the datagrams that are late. This does not wait for a report
 				// on datagrams of after the last raise only: every cycle at an allowance that is too high makes the
@@ -417,7 +438,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 		}
 
 		// Congestion or a datagram not sent while stream data was going out
-		if (!doCut && events && usedHalfIn(sendNumber - CutCycles, sendNumber - 1))
+		if (!doCut && events && usedHalfIn(firstCutCycle(sendNumber), sendNumber - 1))
 			doCut = true;
 
 		if (doCut)
@@ -440,6 +461,7 @@ void CStreamAllowance::update(const CStreamSchedulerConfig &config, bool newRepo
 				m_Allowance = (uint32)std::min((uint64)m_Allowance + config.DatagramPacketBytes, (uint64)config.StreamMaxBytesPerTick);
 			}
 			m_LastChangeNumber = sendNumber;
+			m_LastChangeWasCut = false;
 		}
 	}
 
