@@ -45,6 +45,7 @@
 #endif
 
 #define NL_REPORT_POST_URL_ENVVAR "NL_REPORT_POST_URL"
+#define NL_REPORT_TOOL_ENVVAR "NL_REPORT_TOOL"
 #ifdef NL_OS_WINDOWS
 #define NL_CRASH_REPORT_TOOL "crash_report.exe"
 #else
@@ -69,6 +70,33 @@ void setReportPostUrl(const char *postUrl)
 	SetEnvironmentVariableA(NL_REPORT_POST_URL_ENVVAR, postUrl);
 #else
 	setenv(NL_REPORT_POST_URL_ENVVAR, postUrl, 1);
+#endif
+}
+
+void setReportToolEnabled(bool enabled)
+{
+#ifdef NL_OS_WINDOWS
+	if (enabled)
+		SetEnvironmentVariableA(NL_REPORT_TOOL_ENVVAR, nullptr);
+	else
+		SetEnvironmentVariableA(NL_REPORT_TOOL_ENVVAR, "0");
+#else
+	if (enabled)
+		unsetenv(NL_REPORT_TOOL_ENVVAR);
+	else
+		setenv(NL_REPORT_TOOL_ENVVAR, "0", 1);
+#endif
+}
+
+bool isReportToolEnabled()
+{
+#ifdef NL_OS_WINDOWS
+	char buf[4];
+	DWORD res = GetEnvironmentVariableA(NL_REPORT_TOOL_ENVVAR, buf, sizeof(buf));
+	return !(res == 1 && buf[0] == '0');
+#else
+	const char *res = getenv(NL_REPORT_TOOL_ENVVAR);
+	return !(res != nullptr && res[0] == '0' && res[1] == '\0');
 #endif
 }
 
@@ -206,7 +234,7 @@ TReportResult report(const std::string &title, const std::string &subject, const
 	if (((INelContext::isContextInitialised()
 		&& INelContext::getInstance().isWindowedApplication())
 		|| CSystemUtils::detectWindowedApplication())
-		&& !reportTool.empty())
+		&& !reportTool.empty() && isReportToolEnabled())
 	{
 		std::string params;
 		std::vector<std::string> arguments;

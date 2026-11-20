@@ -1463,6 +1463,13 @@ void CCtrlEndpoint::runRunCommandMethod(CCtrlCall &call)
 		call.fail("command is required");
 		return;
 	}
+	// a whole command line as the name would run nothing: with a dot in it, it reads as an object of commands that is
+	// not there, which NeL counts as success
+	if (command.find_first_of(" \t") != std::string::npos)
+	{
+		call.fail("command is the name of the command only; its arguments go in args");
+		return;
+	}
 	std::vector<std::string> args;
 	const CJsonValue &list = call.getArgs().get("args");
 	for (uint i = 0; i < list.size(); ++i)

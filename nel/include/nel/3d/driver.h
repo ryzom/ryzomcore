@@ -281,6 +281,7 @@ public:
 	/// for a window on a virtual desktop that is not shown, as activating it switches the screen to that desktop. Such
 	/// a window stays in a window: a full screen mode still changes the display of the monitor.
 	void					setWindowActivation(bool activate) { _WindowActivation = activate; }
+	bool					getWindowActivation() const { return _WindowActivation; }
 
 	/// return the current screen mode (if we are in windowed, return the screen mode behind the window)
 	virtual bool			getCurrentScreenMode(GfxMode &mode) = 0;

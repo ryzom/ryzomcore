@@ -1359,6 +1359,18 @@ void			CDriverUser::drawWiredQuad (float xcenter, float ycenter, float radius, C
 UDriver::TMessageBoxId	CDriverUser::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
 
+	// a window that is not activated has no message box either: it would take the focus on the desktop shown, or switch
+	// the screen to the desktop of the window (setWindowActivation). The message goes to the log, with the answer
+	// that changes nothing.
+	if (!_Driver->getWindowActivation())
+	{
+		static const TMessageBoxId s_Answers[] = { okId, cancelId, noId, ignoreId, cancelId, cancelId };
+		static const char *const s_Names[] = { "ok", "cancel", "no", "ignore", "cancel", "cancel" };
+		uint answer = (uint)type < sizeof(s_Answers) / sizeof(s_Answers[0]) ? (uint)type : 0;
+		nlwarning("Message box '%s', not shown as the window is not activated, answered %s: %s", title ? title : "", s_Names[answer], message ? message : "");
+		return s_Answers[answer];
+	}
+
 	IDriver::TMessageBoxId		dret;
 	IDriver::TMessageBoxType	dtype= (IDriver::TMessageBoxType)(uint32)type;
 	IDriver::TMessageBoxIcon	dicon= (IDriver::TMessageBoxIcon)(uint32)icon;

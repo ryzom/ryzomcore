@@ -207,7 +207,8 @@ public:
 
 	/// Whether the driver activates its window when it shows it, restores it or sets its mode (true by default). False
 	/// for a window on a virtual desktop that is not shown, as activating it switches the screen to that desktop (Windows).
-	/// Such a window stays in a window: a full screen mode still changes the display of the monitor.
+	/// Such a window stays in a window: a full screen mode still changes the display of the monitor. Its message boxes
+	/// (systemMessageBox) are not shown either: they go to the log, with the answer that changes nothing.
 	virtual void			setWindowActivation(bool activate)=0;
 
 	/* Pass in dialog box mode. After having called this method, you can use normal GUI.

@@ -59,6 +59,12 @@ TReportResult report(const std::string &title, const std::string &subject, const
 /// Set the Url of the web service used to post crash reports to. String is copied
 void setReportPostUrl(const char *postUrl);
 
+/// Whether report() starts the crash report tool, a window of its own, for an application with windows (true by
+/// default). Off, a report is the file in the log directory only: for an application whose windows must not show on
+/// the desktop shown. Kept in the environment, as the report post url is, so that the modules of the process share it.
+void setReportToolEnabled(bool enabled);
+bool isReportToolEnabled();
+
 } // NLMISC
 
 #endif // NL_REPORT_H
