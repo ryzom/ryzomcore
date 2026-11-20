@@ -469,6 +469,13 @@ void	CGenericXmlMsgHeaderManager::execute(CBitMemStream &strm)
 //
 bool	CGenericXmlMsgHeaderManager::pushNameToStream(const string &msgName, CBitMemStream &strm)
 {
+	// check root
+	if (_Root == nullptr)
+	{
+		nlwarning("Can't push message name '%s', Root not properly initialized.", msgName.c_str());
+		return false;
+	}
+
 	bool res = (_Root->select(msgName.c_str(), strm) != nullptr);
 
 	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName.c_str());
@@ -479,6 +486,13 @@ bool	CGenericXmlMsgHeaderManager::pushNameToStream(const string &msgName, CBitMe
 //
 bool	CGenericXmlMsgHeaderManager::pushNameToStream(const char *msgName, CBitMemStream &strm)
 {
+	// check root
+	if (_Root == nullptr)
+	{
+		nlwarning("Can't push message name '%s', Root not properly initialized.", msgName);
+		return false;
+	}
+
 	bool res = (_Root->select(msgName, strm) != nullptr);
 
 	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName);

@@ -474,7 +474,7 @@ void CClientChatManager::processTellString(NLMISC::CBitMemStream& bms, IChatDisp
 	// display
 	string	ucstr;
 	buildTellSentence(senderStr, chatMsg.Content.toUtf8(), ucstr);
-	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, senderStr);
+	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, senderStr, chatMsg.Content.toUtf8());
 }
 
 // ***************************************************************************
@@ -490,7 +490,7 @@ void CClientChatManager::processFarTellString(NLMISC::CBitMemStream& bms, IChatD
 	// display
 	string	ucstr;
 	buildTellSentence(farTellMsg.SenderName.toUtf8(), farTellMsg.Text.toUtf8(), ucstr);
-	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, farTellMsg.SenderName.toUtf8());
+	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, farTellMsg.SenderName.toUtf8(), farTellMsg.Text.toUtf8());
 }
 
 
@@ -560,7 +560,7 @@ void CClientChatManager::processTellString2(NLMISC::CBitMemStream& bms, IChatDis
 	// display
 	string	ucstr;
 	buildTellSentence(senderStr, rawMessage, ucstr);
-	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, senderStr);
+	chatDisplayer.displayTell(/*chatMsg.CompressedIndex, */ucstr, senderStr, rawMessage);
 }
 
 
@@ -681,7 +681,7 @@ void CClientChatManager::flushBuffer(IChatDisplayer &chatDisplayer)
 
 				// display
 				if(itMsg->DisplayAsTell)
-					chatDisplayer.displayTell(/*itMsg->CompressedIndex, */ucstr, sender);
+					chatDisplayer.displayTell(/*itMsg->CompressedIndex, */ucstr, sender, content);
 				else
 					chatDisplayer.displayChat(itMsg->CompressedIndex, ucstr, content, type, itMsg->DynChatChanID, sender);
 

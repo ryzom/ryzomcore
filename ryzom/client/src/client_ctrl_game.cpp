@@ -28,11 +28,14 @@
 
 #include "nel/gui/action_handler.h"
 #include "nel/gui/group_html.h"
+#include "nel/gui/reflect.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/misc/cdb_branch.h"
 #include "nel/misc/cdb_leaf.h"
+#include "nel/misc/common.h"
 #include "nel/misc/sheet_id.h"
 
+#include "game_share/slot_equipment.h"
 #include "nel/gui/db_manager.h"
 #include "r2/editor.h"
 #include "string_manager_client.h"
@@ -47,6 +50,41 @@ using namespace NLGUI;
 namespace ClientCtrl {
 
 namespace {
+
+// the bound of the world coordinates the methods take: a value beyond it is a mistake of the caller
+const double s_MaxCoordinate = 1e6;
+// the links web.page gives at most
+const uint s_MaxLinks = 1000;
+
+/// Reads a number of the arguments into value: absent or null leaves value as it is; false with the call failed when
+/// it is not a number, not finite, or beyond limit either way
+bool readNumber(CCtrlCall &call, const char *name, double limit, double &value)
+{
+	const CJsonValue &arg = call.getArgs().get(name);
+	if (arg.isNull())
+		return true;
+	if (!arg.isNumber() || !isValidDouble(arg.getNumber()) || fabs(arg.getNumber()) > limit)
+	{
+		call.fail(toString("%s is a number from %g to %g", name, -limit, limit));
+		return false;
+	}
+	value = arg.getNumber();
+	return true;
+}
+
+/// Whether every number in a value is finite: the editor sends what it is given to the server as it is
+bool finiteNumbers(const CJsonValue &value)
+{
+	if (value.isNumber())
+		return isValidDouble(value.getNumber()) != 0.0;
+	for (uint i = 0; i < value.items().size(); ++i)
+		if (!finiteNumbers(value.items()[i]))
+			return false;
+	for (uint i = 0; i < value.members().size(); ++i)
+		if (!finiteNumbers(value.members()[i].second))
+			return false;
+	return true;
+}
 
 // *** the browser ***
 
@@ -76,6 +114,21 @@ void allHtml(std::vector<CGroupHTML *> &out, bool activeOnly)
 	}
 }
 
+/// The title of a browser view, as the interface reads it: getTitle is not public, the reflected property title is
+std::string htmlTitle(CGroupHTML *html)
+{
+	// a missing property is warned about by getReflectedProperty
+	const CReflectedProperty *prop = html->getReflectedProperty("title");
+	if (prop == nullptr)
+		return std::string();
+	if (prop->Type != CReflectedProperty::String)
+	{
+		nlwarning("CTRL: the reflected property title of %s is not a string", html->getReflectedClassName());
+		return std::string();
+	}
+	return (html->*(prop->GetMethod.GetString))();
+}
+
 CGroupHTML *findHtmlById(CCtrlCall &call)
 {
 	const std::string &id = call.getArgs().get("id").getString();
@@ -98,7 +151,7 @@ void methodWebList(CCtrlCall &call)
 		CJsonValue o = CJsonValue::object();
 		o.set("id", html->getId());
 		o.set("url", html->getURL());
-		o.set("title", html->getProperty("title"));
+		o.set("title", htmlTitle(html));
 		o.set("loading", html->isBrowsing());
 		o.set("shown", html->isActiveThroughParents());
 		list.push(o);
@@ -106,9 +159,12 @@ void methodWebList(CCtrlCall &call)
 	call.reply(CJsonValue::object().set("views", list));
 }
 
-/// The text of HTML without its tags, scripts and styles, with the common entities, and its links
-void htmlText(const std::string &html, std::string &text, CJsonValue &links)
+/// The text of HTML without its tags, scripts and styles, with the common entities, and its links (at most s_MaxLinks,
+/// linksTruncated beyond)
+void htmlText(const std::string &html, std::string &text, CJsonValue &links, bool &linksTruncated)
 {
+	// the tags are compared in lower case: the document is lowered once, the original gives the text and the addresses
+	std::string lower = toLowerAscii(html);
 	std::string::size_type i = 0;
 	std::string linkHref;
 	std::string linkText;
@@ -121,18 +177,23 @@ void htmlText(const std::string &html, std::string &text, CJsonValue &links)
 			std::string::size_type end = html.find('>', i);
 			if (end == std::string::npos)
 				break;
-			std::string tag = toLowerAscii(html.substr(i + 1, end - i - 1));
-			std::string name = tag.substr(0, tag.find_first_of(" \t\r\n/"));
-			if (name == "script" || name == "style")
+			std::string tag = lower.substr(i + 1, end - i - 1);
+			bool closing = !tag.empty() && tag[0] == '/';
+			std::string::size_type nameStart = closing ? 1 : 0;
+			std::string::size_type nameEnd = tag.find_first_of(" \t\r\n/", nameStart);
+			std::string name = tag.substr(nameStart, nameEnd == std::string::npos ? std::string::npos : nameEnd - nameStart);
+			if (!closing && (name == "script" || name == "style"))
 			{
-				std::string::size_type close = toLowerAscii(html).find("</" + name, end);
-				i = close == std::string::npos ? html.size() : html.find('>', close) + 1;
+				// to the end of the element; a document cut before it ends there
+				std::string::size_type close = lower.find("</" + name, end);
+				std::string::size_type closeEnd = close == std::string::npos ? std::string::npos : html.find('>', close);
+				i = closeEnd == std::string::npos ? html.size() : closeEnd + 1;
 				continue;
 			}
-			if (name == "a")
+			if (!closing && name == "a")
 			{
 				std::string::size_type h = tag.find("href=");
-				if (h != std::string::npos)
+				if (h != std::string::npos && h + 5 < tag.size())
 				{
 					// the original case of the address, from the same place in the tag
 					std::string rawTag = html.substr(i + 1, end - i - 1);
@@ -144,12 +205,16 @@ void htmlText(const std::string &html, std::string &text, CJsonValue &links)
 					inLink = true;
 				}
 			}
-			else if (tag == "/a" && inLink)
+			else if (closing && name == "a" && inLink)
 			{
-				links.push(CJsonValue::object().set("href", linkHref).set("text", trim(linkText)));
+				if (links.size() < s_MaxLinks)
+					links.push(CJsonValue::object().set("href", linkHref).set("text", trim(linkText)));
+				else
+					linksTruncated = true;
 				inLink = false;
 			}
-			if (name == "br" || name == "p" || name == "/p" || name == "div" || name == "/div" || name == "tr" || name == "li" || name == "h1" || name == "h2" || name == "h3")
+			// a line break, and one at either end of a block
+			if (name == "br" || name == "p" || name == "div" || name == "tr" || name == "li" || name == "h1" || name == "h2" || name == "h3")
 				text += '\n';
 			i = end + 1;
 			continue;
@@ -186,11 +251,16 @@ void methodWebPage(CCtrlCall &call)
 		return;
 	std::string source = html->getHTML();
 	std::string format = call.getArgs().get("format").getString("text");
+	if (format != "text" && format != "html")
+	{
+		call.fail("format is text or html");
+		return;
+	}
 	size_t maxBytes = (size_t)std::max((sint64)256, std::min((sint64)4 * 1024 * 1024, call.getArgs().get("max_bytes").getInt(64 * 1024)));
 	CJsonValue r = CJsonValue::object();
 	r.set("id", html->getId());
 	r.set("url", html->getURL());
-	r.set("title", html->getProperty("title"));
+	r.set("title", htmlTitle(html));
 	r.set("loading", html->isBrowsing());
 	std::string body;
 	if (format == "html")
@@ -200,7 +270,10 @@ void methodWebPage(CCtrlCall &call)
 	else
 	{
 		CJsonValue links = CJsonValue::array();
-		htmlText(source, body, links);
+		bool linksTruncated = false;
+		htmlText(source, body, links, linksTruncated);
+		if (linksTruncated)
+			r.set("links_truncated", toString("the first %u links", s_MaxLinks));
 		// the blank lines a layout leaves
 		std::string compact;
 		uint blank = 0;
@@ -279,6 +352,36 @@ std::string dynString(uint32 id, bool &arrived)
 	return text;
 }
 
+/// The item of a slot (its SHEET, QUANTITY... below base) into o; false for an empty slot
+bool itemJson(const std::string &base, CJsonValue &o)
+{
+	uint32 sheet = (uint32)leafValue(base + ":SHEET");
+	if (sheet == 0)
+		return false;
+	CSheetId id(sheet);
+	o.set("sheet", id.toString());
+	const char *localized = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(id);
+	if (localized != nullptr)
+		o.set("name", localized);
+	o.set("quantity", leafValue(base + ":QUANTITY"));
+	o.set("quality", leafValue(base + ":QUALITY"));
+	if (leafValue(base + ":LOCKED") != 0)
+		o.set("locked", leafValue(base + ":LOCKED"));
+	return true;
+}
+
+/// Whether a node of an inventory is an item slot: those are numbered, the other nodes (SESSION, the TM_ team members
+/// of the share) are not
+bool isSlotName(const std::string &name)
+{
+	if (name.empty())
+		return false;
+	for (uint i = 0; i < name.size(); ++i)
+		if (name[i] < '0' || name[i] > '9')
+			return false;
+	return true;
+}
+
 void methodInventory(CCtrlCall &call)
 {
 	if (!requireInGame(call))
@@ -293,10 +396,14 @@ void methodInventory(CCtrlCall &call)
 		call.fail("inventory is bag, equip, hand, pack_animal0 to 3, room, temp, share or guild");
 		return;
 	}
-	CCDBNodeBranch *branch = dynamic_cast<CCDBNodeBranch *>(CDBManager::getInstance()->getDB()->getNode(ICDBNode::CTextId("SERVER:INVENTORY:" + name), false));
+	// the guild's is in the guild's bank, the others in the character's
+	std::string path = name == "GUILD" ? std::string("SERVER:GUILD:INVENTORY") : "SERVER:INVENTORY:" + name;
+	// the hands and the equipment hold where the item is in the bag, not the item
+	bool inBag = name == "EQUIP" || name == "HAND";
+	CCDBNodeBranch *branch = dynamic_cast<CCDBNodeBranch *>(CDBManager::getInstance()->getDB()->getNode(ICDBNode::CTextId(path), false));
 	if (branch == nullptr)
 	{
-		call.fail("there is no SERVER:INVENTORY:" + name);
+		call.fail("there is no " + path);
 		return;
 	}
 	CJsonValue items = CJsonValue::array();
@@ -304,43 +411,49 @@ void methodInventory(CCtrlCall &call)
 	for (uint i = 0; i < branch->getNbNodes(); ++i)
 	{
 		ICDBNode *slot = branch->getNode((uint16)i);
-		if (slot == nullptr || slot->isLeaf())
+		if (slot == nullptr || slot->isLeaf() || !isSlotName(*slot->getName()))
 			continue;
 		++slots;
-		std::string base = "SERVER:INVENTORY:" + name + ":" + *slot->getName();
-		uint32 sheet = (uint32)leafValue(base + ":SHEET");
-		if (sheet == 0)
-			continue;
-		CSheetId id(sheet);
+		std::string base = path + ":" + *slot->getName();
 		CJsonValue o = CJsonValue::object();
 		o.set("slot", *slot->getName());
-		o.set("sheet", id.toString());
-		const char *localized = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(id);
-		if (localized != nullptr)
-			o.set("name", localized);
-		o.set("quantity", leafValue(base + ":QUANTITY"));
-		o.set("quality", leafValue(base + ":QUALITY"));
-		if (leafValue(base + ":LOCKED") != 0)
-			o.set("locked", leafValue(base + ":LOCKED"));
+		if (inBag)
+		{
+			// 0 for nothing, otherwise the bag slot plus one
+			sint64 index = leafValue(base + ":INDEX_IN_BAG");
+			if (index <= 0)
+				continue;
+			uint place = 0;
+			fromString(*slot->getName(), place);
+			if (name == "HAND")
+				o.set("place", place == 0 ? "right" : "left");
+			else if (place < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT)
+				o.set("place", toLowerAscii(SLOT_EQUIPMENT::toString((SLOT_EQUIPMENT::TSlotEquipment)place)));
+			o.set("bag_slot", index - 1);
+			// the bag slot can be empty while the bag is on its way
+			itemJson(toString("SERVER:INVENTORY:BAG:%u", (uint)(index - 1)), o);
+		}
+		else if (!itemJson(base, o))
+		{
+			continue;
+		}
 		items.push(o);
 	}
 	CJsonValue r = CJsonValue::object();
 	r.set("inventory", toLowerAscii(name));
 	r.set("slots", slots);
 	r.set("items", items);
-	r.set("database", "SERVER:INVENTORY:" + name + ":<slot>; ui.drag moves items between the slots of the windows");
+	r.set("database", path + (inBag ? ":<slot>:INDEX_IN_BAG, the bag slot plus one (0: nothing); ui.drag moves items between the slots of the windows" : ":<slot>; ui.drag moves items between the slots of the windows"));
 	call.reply(r);
 }
 
-void methodMissions(CCtrlCall &call)
+/// The missions of a journal (the character's SERVER:MISSIONS, the group's SERVER:GROUP:MISSIONS) into list, with the
+/// journal index the CSR commands take: firstIndex and on
+void listMissions(const char *journal, uint firstIndex, const char *journalName, CJsonValue &list, bool &allArrived)
 {
-	if (!requireInGame(call))
-		return;
-	CJsonValue list = CJsonValue::array();
-	bool allArrived = true;
 	for (uint i = 0; i < 64; ++i)
 	{
-		std::string base = toString("SERVER:MISSIONS:%u", i);
+		std::string base = toString("%s:%u", journal, i);
 		if (leaf(base + ":TITLE") == nullptr)
 			break;
 		uint32 titleId = (uint32)leafValue(base + ":TITLE");
@@ -348,10 +461,14 @@ void methodMissions(CCtrlCall &call)
 			continue;
 		bool arrived;
 		CJsonValue m = CJsonValue::object();
-		m.set("index", i);
+		m.set("index", firstIndex + i);
+		m.set("journal", journalName);
 		m.set("title", dynString(titleId, arrived));
 		allArrived = allArrived && arrived;
-		m.set("finished", leafValue(base + ":FINISHED"));
+		// 0 under way, 1 succeeded, 2 failed
+		sint64 finished = leafValue(base + ":FINISHED");
+		m.set("finished", finished);
+		m.set("state", finished == 0 ? "under_way" : (finished == 1 ? "succeeded" : (finished == 2 ? "failed" : "unknown")));
 		uint32 detailId = (uint32)leafValue(base + ":DETAIL_TEXT");
 		if (detailId != 0)
 		{
@@ -386,6 +503,7 @@ void methodMissions(CCtrlCall &call)
 				continue;
 			CJsonValue o = CJsonValue::object();
 			o.set("title", dynString(targetTitle, arrived));
+			allArrived = allArrived && arrived;
 			o.set("x", leafValue(target + ":X") / 1000.0);
 			o.set("y", leafValue(target + ":Y") / 1000.0);
 			targets.push(o);
@@ -394,9 +512,21 @@ void methodMissions(CCtrlCall &call)
 			m.set("compass_targets", targets);
 		list.push(m);
 	}
+}
+
+void methodMissions(CCtrlCall &call)
+{
+	if (!requireInGame(call))
+		return;
+	CJsonValue list = CJsonValue::array();
+	bool allArrived = true;
+	// the group's journal, the team's missions and then the guild's, comes after the character's 15 entries (commands.cpp
+	// setMission, CAdminProperties::getMission)
+	listMissions("SERVER:MISSIONS", 0, "character", list, allArrived);
+	listMissions("SERVER:GROUP:MISSIONS", 15, "group", list, allArrived);
 	CJsonValue r = CJsonValue::object();
 	r.set("missions", list);
-	r.set("note", "index is the journal index the CSR commands take (failMission, progressMission)");
+	r.set("note", "index is the journal index the CSR commands take (failMission, progressMission): 0 to 14 the character's, 15 and on the group's (the team's missions, then the guild's)");
 	if (!allArrived)
 		r.set("strings_arrived", false);
 	call.reply(r);
@@ -498,6 +628,11 @@ void methodRingSet(CCtrlCall &call)
 {
 	if (!requireEditor(call))
 		return;
+	if (!finiteNumbers(call.getArgs().get("value")))
+	{
+		call.fail("value is not a finite number");
+		return;
+	}
 	CJsonValue args = CJsonValue::array();
 	args.push(call.getArgs().get("id"));
 	args.push(call.getArgs().get("property"));
@@ -515,6 +650,11 @@ void methodRingCreate(CCtrlCall &call)
 {
 	if (!requireEditor(call))
 		return;
+	if (!finiteNumbers(call.getArgs().get("values")))
+	{
+		call.fail("values holds a number that is not finite");
+		return;
+	}
 	CJsonValue args = CJsonValue::array();
 	args.push(CJsonValue(call.getArgs().get("class").getString()));
 	args.push(CJsonValue(call.getArgs().get("base").getString()));
@@ -618,13 +758,16 @@ void methodRingMove(CCtrlCall &call)
 {
 	if (!requireEditor(call))
 		return;
+	double x = 0, y = 0;
+	if (!readNumber(call, "x", s_MaxCoordinate, x) || !readNumber(call, "y", s_MaxCoordinate, y))
+		return;
 	CJsonValue args = CJsonValue::array();
 	args.push(call.getArgs().get("id"));
 	args.push(call.getArgs().get("parent"));
 	args.push(call.getArgs().get("property").isString() ? call.getArgs().get("property") : CJsonValue("Components"));
 	args.push(CJsonValue((sint64)call.getArgs().get("position").getInt(-1)));
-	args.push(call.getArgs().get("x"));
-	args.push(call.getArgs().get("y"));
+	args.push(call.getArgs().get("x").isNull() ? CJsonValue() : CJsonValue(x));
+	args.push(call.getArgs().get("y").isNull() ? CJsonValue() : CJsonValue(y));
 	ringLua(call,
 	    "local id, parent, prop, pos, x, y = ...\n"
 	    "local inst = r2:getInstanceFromId(id)\n"
@@ -673,8 +816,8 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	endpoint.addMethod(new CCtrlFunctionMethod("web.list", "The in-game browser views: id, URL, title, whether a page is loading, whether it is shown. all includes the hidden ones.",
 	    CCtrlSchema().boolean("all", "Also the views that are not shown."), true, methodWebList));
 	endpoint.addMethod(new CCtrlFunctionMethod("web.page",
-	    "The page of a browser view: as text with its links (href and text), or as HTML. max_bytes bounds it (64 KB by default) and truncated says so. Links with ah: or lua: run interface actions; "
-	    "click them in the view (ui.tree with contains, then ui.click) rather than browsing them.",
+	    "The page of a browser view: as text with its links (href and text, the first 1000; links_truncated says when there are more), or as HTML. max_bytes bounds it (64 KB by default) and "
+	    "truncated says so. Links with ah: or lua: run interface actions; click them in the view (ui.tree with contains, then ui.click) rather than browsing them.",
 	    CCtrlSchema()
 	        .str("id", "The view, as web.list gives it.", true)
 	        .choice("format", "text|html", "text with links (the default) or html.")
@@ -685,10 +828,13 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	endpoint.addMethod(new CCtrlFunctionMethod("web.back", "Goes back in a browser view, or reloads it with refresh.",
 	    CCtrlSchema().str("id", "The view.", true).boolean("refresh", "Reload instead."), false, methodWebBack));
 	endpoint.addMethod(new CCtrlFunctionMethod("inventory.list",
-	    "The items of an inventory, from the database the server fills: slot, sheet, name, quantity, quality. Equip, move and drop by ui.drag between the slots of the windows, or by their action handlers.",
+	    "The items of an inventory, from the database the server fills: slot, sheet, name, quantity, quality. equip and hand hold where the item is in the bag: their items have place and "
+	    "bag_slot, and the item of that bag slot. guild is the guild's bank. Equip, move and drop by ui.drag between the slots of the windows, or by their action handlers.",
 	    CCtrlSchema().choice("inventory", "bag|equip|hand|pack_animal0|pack_animal1|pack_animal2|pack_animal3|room|temp|share|guild", "Which (bag by default)."), true, methodInventory));
 	endpoint.addMethod(new CCtrlFunctionMethod("missions.list",
-	    "The journal: each mission with its index (the one CSR commands take), title, detail, finished state, goals and compass targets. strings_arrived false means some text is on its way: ask again.",
+	    "The journal, the character's missions (journal 'character', index 0 to 14) and the group's, the team's missions and then the guild's (journal 'group', index 15 and on): each with its "
+	    "index (the one CSR commands take), title, detail, finished (0 under way, 1 succeeded, 2 failed; state says it in words), goals and compass targets. strings_arrived false means some "
+	    "text is on its way: ask again.",
 	    CCtrlSchema(), true, methodMissions));
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.state", "The scenario editor: its mode (edition, test, dm, animation...), the scenario and current act, the selection, and whether undo and redo can run.",
 	    CCtrlSchema(), true, methodRingState));

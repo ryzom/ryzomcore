@@ -65,6 +65,9 @@ public:
 	void flushStringCache();
 
 	bool getString(uint32 stringId, std::string &result);
+	/// The text of a string id the shard has sent, as getString gives it, or false when it has not arrived; unlike
+	/// getString it never asks the shard for it
+	bool getReceivedString(uint32 stringId, std::string &result) const;
 	void waitString(uint32 stringId, const IStringWaiterRemover *premover, std::string *result);
 	void waitString(uint32 stringId, IStringWaitCallback *pcallback);
 	bool getDynString(uint32 dynStringId, std::string &result);

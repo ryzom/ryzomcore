@@ -15,8 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // The data methods of the control endpoint: db.get, db.list, db.set, db.watch, strings.get,
-// strings.ui, client.window, client.perf. The database is the client's (SERVER: what the server
-// sends, UI: and LOCAL: the interface's own); as for Lua, the server branches are read-only.
+// strings.request, strings.ui, client.window, client.desktop, client.perf. The database is the
+// client's (SERVER: what the server sends, UI: and LOCAL: the interface's own); db.set writes what
+// Lua may write: not SERVER:, and of LOCAL: only LOCAL:R2.
 
 #include "stdpch.h"
 
@@ -29,14 +30,18 @@
 #include "nel/gui/view_renderer.h"
 #include "nel/misc/cdb_branch.h"
 #include "nel/misc/cdb_leaf.h"
+#include "nel/misc/common.h"
 #include "nel/misc/i18n.h"
 #include "nel/misc/system_utils.h"
 
 #include "client_cfg.h"
 #include "global.h"
 #include "interface_v3/input_handler_manager.h"
+#include "net_manager.h"
 #include "string_manager_client.h"
 #include "window_desktop.h"
+
+#include <set>
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -47,6 +52,42 @@ using namespace NLMISC;
 namespace ClientCtrl {
 
 namespace {
+
+// the integers a double holds exactly: the 64-bit values beyond them (sheet ids, entity ids) travel as text
+const sint64 s_MaxExactInteger = SINT64_CONSTANT(9007199254740992);
+
+/// Reads a number of the arguments into value: absent or null leaves value as it is; false with the call failed when
+/// it is not a number, not finite, or beyond limit either way
+bool readNumber(CCtrlCall &call, const char *name, double limit, double &value)
+{
+	const CJsonValue &arg = call.getArgs().get(name);
+	if (arg.isNull())
+		return true;
+	if (!arg.isNumber() || !isValidDouble(arg.getNumber()) || fabs(arg.getNumber()) > limit)
+	{
+		call.fail(toString("%s is a number from %g to %g", name, -limit, limit));
+		return false;
+	}
+	value = arg.getNumber();
+	return true;
+}
+
+/// An integer: a whole number a double holds exactly, or the decimal text of any 64-bit value. The text must read
+/// back as it was written, so that trailing characters, fractions and overflows do not pass.
+bool readInteger(const CJsonValue &value, sint64 &result)
+{
+	if (value.isNumber())
+	{
+		double v = value.getNumber();
+		if (!isValidDouble(v) || floor(v) != v || fabs(v) > (double)s_MaxExactInteger)
+			return false;
+		result = (sint64)v;
+		return true;
+	}
+	if (value.isString())
+		return fromString(value.getString(), result) && toString("%" NL_I64 "d", result) == value.getString();
+	return false;
+}
 
 ICDBNode *findNode(const std::string &path)
 {
@@ -59,14 +100,19 @@ ICDBNode *findNode(const std::string &path)
 	return root->getNode(id, false);
 }
 
+/// The value of a leaf into o, and as text when a double would not hold it exactly
+void setLeafValue(CJsonValue &o, const CCDBNodeLeaf *leaf)
+{
+	sint64 v = leaf->getValue64();
+	o.set("value", v);
+	if (v > s_MaxExactInteger || v < -s_MaxExactInteger)
+		o.set("value_text", toString("%" NL_I64 "d", v));
+}
+
 CJsonValue leafJson(const CCDBNodeLeaf *leaf)
 {
 	CJsonValue o = CJsonValue::object();
-	sint64 v = leaf->getValue64();
-	// the 64-bit values (sheet ids, entity ids) are exact as text
-	o.set("value", v);
-	if (v > 9007199254740992LL || v < -9007199254740992LL)
-		o.set("value_text", toString("%" NL_I64 "d", v));
+	setLeafValue(o, leaf);
 	return o;
 }
 
@@ -95,15 +141,9 @@ void listBranch(CCDBNodeBranch *branch, const std::string &path, uint depth, uin
 		else
 		{
 			CCDBNodeBranch *sub = static_cast<CCDBNodeBranch *>(node);
-			if (depth + 1 >= maxDepth)
-			{
-				out.push(CJsonValue::object().set("path", child).set("branch", (uint32)sub->getNbNodes()));
-			}
-			else
-			{
-				out.push(CJsonValue::object().set("path", child).set("branch", (uint32)sub->getNbNodes()));
+			out.push(CJsonValue::object().set("path", child).set("branch", (uint32)sub->getNbNodes()));
+			if (depth + 1 < maxDepth)
 				listBranch(sub, child, depth + 1, maxDepth, budget, truncated, out);
-			}
 		}
 	}
 }
@@ -151,9 +191,11 @@ void methodList(CCtrlCall &call)
 void methodSet(CCtrlCall &call)
 {
 	const std::string &path = call.getArgs().get("path").getString();
-	if (startsWithCaseInsensitiveAscii(path, "SERVER:"))
+	// Lua's rule (CLuaIHMRyzom::setDbProp): the server's branches are the server's, and LOCAL: the client's own code's,
+	// but for LOCAL:R2, the scenario editor's
+	if (startsWithCaseInsensitiveAscii(path, "SERVER:") || (startsWithCaseInsensitiveAscii(path, "LOCAL:") && !startsWithCaseInsensitiveAscii(path, "LOCAL:R2")))
 	{
-		call.fail("the server branches are read-only, as they are for Lua: the server owns them");
+		call.fail("SERVER: and LOCAL: are not written, as for Lua: the server and the client's own code own them (LOCAL:R2 is written)");
 		return;
 	}
 	ICDBNode *node = findNode(path);
@@ -162,19 +204,11 @@ void methodSet(CCtrlCall &call)
 		call.fail(toString(node == nullptr ? "no database leaf '%s'" : "'%s' is a branch", path.c_str()));
 		return;
 	}
-	const CJsonValue &value = call.getArgs().get("value");
 	sint64 v;
-	if (value.isString())
+	if (!readInteger(call.getArgs().get("value"), v))
 	{
-		if (!fromString(value.getString(), v))
-		{
-			call.fail("value is a number, or its text");
-			return;
-		}
-	}
-	else
-	{
-		v = value.getInt(0);
+		call.fail("value is an integer: a whole number, or its decimal text (for a value beyond 2^53)");
+		return;
 	}
 	static_cast<CCDBNodeLeaf *>(node)->setValue64(v);
 	CJsonValue r = leafJson(static_cast<CCDBNodeLeaf *>(node));
@@ -182,28 +216,67 @@ void methodSet(CCtrlCall &call)
 	call.reply(r);
 }
 
-/// A watched node: the changes of its leaves are events, each with the leaf that changed
+// the watches there can be at once, the leaves one can cover, and the db events a second: the events go to the
+// ring that all events share, and a busy branch must not push the chat and the state out of it
+const uint s_MaxWatches = 64;
+const uint s_MaxWatchedLeaves = 4096;
+const uint s_MaxDbEventsPerSecond = 100;
+
+TTime s_DbEventSecond = 0;
+uint s_DbEventCount = 0;
+uint s_DbEventsDropped = 0;
+
+/// A watched node: the changes of its leaves are events, each with the leaf that changed, while a connection watches it
 class CWatch : public ICDBNode::IPropertyObserver
 {
 public:
 	std::string Path;
 	ICDBNode *Node;
+	// the connections that watch it; with none, the observer is off its node, or on a node that no path reaches
+	std::set<uint32> Owners;
+
+	CWatch()
+	    : Node(nullptr)
+	{
+	}
+
 	virtual void update(ICDBNode *node) NL_OVERRIDE
 	{
+		if (Owners.empty())
+			return;
+		TTime now = CTime::getLocalTime();
+		if (now - s_DbEventSecond >= 1000)
+		{
+			s_DbEventSecond = now;
+			s_DbEventCount = 0;
+		}
+		if (s_DbEventCount >= s_MaxDbEventsPerSecond)
+		{
+			++s_DbEventsDropped;
+			return;
+		}
+		++s_DbEventCount;
 		CCDBNodeLeaf *leaf = dynamic_cast<CCDBNodeLeaf *>(node);
 		CJsonValue e = CJsonValue::object();
 		e.set("path", node != nullptr ? node->getFullName() : Path);
 		if (node != nullptr && node != Node)
 			e.set("watch", Path);
 		if (leaf != nullptr)
-			e.set("value", leaf->getValue64());
+			setLeafValue(e, leaf);
+		if (s_DbEventsDropped > 0)
+		{
+			e.set("dropped_before", s_DbEventsDropped);
+			s_DbEventsDropped = 0;
+		}
 		addEvent("db", e);
 	}
 };
 
-std::map<std::string, CWatch *> s_Watches;
-// the observers are reference counted by the nodes too: these keep them alive whatever the nodes do
-std::vector<NLMISC::CSmartPtr<CWatch>> s_WatchObjects;
+typedef NLMISC::CSmartPtr<CWatch> TWatchPtr;
+// the observers by path, kept as long as the client runs: the leaves hold plain pointers to their observers, and the
+// leaves below a watched branch are not followed one by one, so none is left pointing at a deleted observer. A path
+// watched again takes its observer back.
+std::map<std::string, TWatchPtr> s_Watches;
 
 /// Takes an observer off a node and everything below it: a branch's own removal stops at the first child without it
 void removeWatch(ICDBNode *node, CWatch *watch)
@@ -220,66 +293,162 @@ void removeWatch(ICDBNode *node, CWatch *watch)
 			removeWatch(branch->getNode((uint16)i), watch);
 }
 
+/// The leaves below a node, counted up to limit + 1
+uint countLeaves(ICDBNode *node, uint limit)
+{
+	if (node->isLeaf())
+		return 1;
+	CCDBNodeBranch *branch = static_cast<CCDBNodeBranch *>(node);
+	uint count = 0;
+	for (uint i = 0; i < branch->getNbNodes() && count <= limit; ++i)
+		if (branch->getNode((uint16)i) != nullptr)
+			count += countLeaves(branch->getNode((uint16)i), limit - count);
+	return count;
+}
+
+/// The last connection of a watch is gone: the observer comes off the node of its path, if there is one (a node
+/// taken down took its observers with it)
+void unwatch(CWatch *watch)
+{
+	ICDBNode *node = findNode(watch->Path);
+	if (node != nullptr)
+		removeWatch(node, watch);
+	watch->Node = nullptr;
+}
+
 void methodWatch(CCtrlCall &call)
 {
 	const std::string &path = call.getArgs().get("path").getString();
-	bool stop = call.getArgs().get("stop").getBool(false);
-	ICDBNode *node = findNode(path);
-	std::map<std::string, CWatch *>::iterator it = s_Watches.find(path);
-	if (stop)
+	uint32 connection = call.getConnection();
+	std::map<std::string, TWatchPtr>::iterator it = s_Watches.find(path);
+	if (call.getArgs().get("stop").getBool(false))
 	{
-		// the node of the watch, if it is still there: a node taken down took its observers with it
-		if (it != s_Watches.end() && node != nullptr && node == it->second->Node)
-			removeWatch(node, it->second);
-		if (it != s_Watches.end())
-			s_Watches.erase(it);
+		if (it == s_Watches.end() || it->second->Owners.erase(connection) == 0)
+		{
+			call.fail(toString("this connection does not watch '%s'", path.c_str()));
+			return;
+		}
+		if (it->second->Owners.empty())
+			unwatch(it->second);
 		call.reply(CJsonValue::object().set("path", path).set("watched", false));
 		return;
 	}
+	ICDBNode *node = findNode(path);
 	if (node == nullptr)
 	{
 		call.fail(toString("no database node '%s'", path.c_str()));
 		return;
 	}
-	// a node of that path made again since (the UI branch at each login), maybe at the same address, needs the
-	// observer again: it is taken off first, so a node that still has it does not get it twice
-	if (it != s_Watches.end() && it->second->Node == node)
+	if (path.empty())
 	{
-		removeWatch(node, it->second);
-		ICDBNode::CTextId id;
-		node->addObserver(it->second, id);
+		call.fail("the root: every change of the database would be an event; watch a branch or a leaf");
+		return;
+	}
+	if (countLeaves(node, s_MaxWatchedLeaves) > s_MaxWatchedLeaves)
+	{
+		call.fail(toString("'%s' has more than %u leaves, the most a watch covers: watch a branch below it", path.c_str(), s_MaxWatchedLeaves));
+		return;
+	}
+	bool active = it != s_Watches.end() && !it->second->Owners.empty();
+	if (!active)
+	{
+		uint watched = 0;
+		for (std::map<std::string, TWatchPtr>::const_iterator w = s_Watches.begin(); w != s_Watches.end(); ++w)
+			if (!w->second->Owners.empty())
+				++watched;
+		if (watched >= s_MaxWatches)
+		{
+			call.fail(toString("%u nodes are watched, the most there can be: stop a watch first", watched));
+			return;
+		}
+	}
+	CWatch *watch;
+	if (it != s_Watches.end())
+	{
+		watch = it->second;
 	}
 	else
 	{
-		CWatch *watch = new CWatch();
+		watch = new CWatch();
 		watch->Path = path;
-		watch->Node = node;
-		s_WatchObjects.push_back(watch);
-		ICDBNode::CTextId id;
-		node->addObserver(watch, id);
 		s_Watches[path] = watch;
 	}
-	call.reply(CJsonValue::object().set("path", path).set("watched", true).set("events", "db events with the path and value of the leaf that changed, through ctrl.events (kinds db)"));
+	// a node of that path made again since (the UI branch at each login), maybe at the same address, needs the
+	// observer again: it is taken off first, so a node that still has it does not get it twice
+	removeWatch(node, watch);
+	ICDBNode::CTextId id;
+	node->addObserver(watch, id);
+	watch->Node = node;
+	watch->Owners.insert(connection);
+	call.reply(CJsonValue::object()
+	        .set("path", path)
+	        .set("watched", true)
+	        .set("events", "db events with the path and value of the leaf that changed, through ctrl.events (kinds db), until this connection stops the watch or closes"));
+}
+
+/// The id of the string methods: false with the call failed unless it is an integer that a string id can be
+bool readStringId(CCtrlCall &call, uint32 &id)
+{
+	sint64 v;
+	if (!readInteger(call.getArgs().get("id"), v) || v < 0 || v > 0xFFFFFFFF)
+	{
+		call.fail("id is a string id: an integer from 0 to 4294967295");
+		return false;
+	}
+	id = (uint32)v;
+	return true;
+}
+
+/// The strings come from the shard: in local mode none does, and the string manager makes up placeholders
+bool requireShardStrings(CCtrlCall &call)
+{
+	if (!ClientCfg.Local)
+		return true;
+	call.fail("the client runs in local mode, where no shard sends strings: no string id has a text");
+	return false;
 }
 
 void methodString(CCtrlCall &call)
 {
-	sint64 id = call.getArgs().get("id").getInt(-1);
-	if (id < 0)
-	{
-		call.fail("id is required");
+	uint32 id;
+	if (!readStringId(call, id) || !requireShardStrings(call))
 		return;
-	}
 	bool dynamic = call.getArgs().get("dynamic").getBool(false);
 	std::string text;
-	bool arrived = dynamic ? STRING_MANAGER::CStringManagerClient::instance()->getDynString((uint32)id, text) : STRING_MANAGER::CStringManagerClient::instance()->getString((uint32)id, text);
+	// what the client has, and nothing asked of the shard: a static string the client never asked for stays unknown
+	// (strings.request asks). A dynamic string comes from the shard with what uses it, and the client asks for its
+	// parts itself as it arrives, so getDynString asks for nothing the client has not asked for already.
+	bool arrived = dynamic ? STRING_MANAGER::CStringManagerClient::instance()->getDynString(id, text) : STRING_MANAGER::CStringManagerClient::instance()->getReceivedString(id, text);
 	CJsonValue r = CJsonValue::object();
 	r.set("id", id);
 	r.set("dynamic", dynamic);
 	r.set("arrived", arrived);
 	r.set("text", text);
 	if (!arrived)
-		r.set("note", "asked of the server now; ask again in a moment");
+		r.set("note", dynamic ? "not complete yet, or no dynamic string the shard sent: the shard sends one with what uses it" : "not received: the client has not asked for it, or the answer is on its way; strings.request asks the shard");
+	call.reply(r);
+}
+
+void methodStringRequest(CCtrlCall &call)
+{
+	uint32 id;
+	if (!readStringId(call, id) || !requireShardStrings(call))
+		return;
+	// the request goes through the connection to the shard, there from the character selection on
+	if (NetMngr.getConnectionState() != CNetworkConnection::Connected)
+	{
+		call.fail(toString("the client is not connected to a shard (the connection is %s): strings can be asked for from the character selection on", NetMngr.getConnectionStateCStr()));
+		return;
+	}
+	std::string text;
+	bool arrived = STRING_MANAGER::CStringManagerClient::instance()->getString(id, text);
+	CJsonValue r = CJsonValue::object();
+	r.set("id", id);
+	r.set("arrived", arrived);
+	if (arrived)
+		r.set("text", text);
+	else
+		r.set("next", "asked of the shard, once (an id asked for already is not asked again): strings.get gives the text when it has arrived");
 	call.reply(r);
 }
 
@@ -353,7 +522,13 @@ void methodWindow(CCtrlCall &call)
 void methodDesktop(CCtrlCall &call)
 {
 	const CJsonValue &value = call.getArgs().get("desktop");
-	std::string desktop = value.isString() ? value.getString() : (value.isNumber() ? toString("%d", (sint)value.getInt(0)) : std::string());
+	sint64 asked = 0;
+	if (value.isNumber() && (!readInteger(value, asked) || asked < 1 || asked > 1000))
+	{
+		call.fail("desktop: a number counts from 1, for the first desktop");
+		return;
+	}
+	std::string desktop = value.isString() ? value.getString() : (value.isNumber() ? toString("%d", (sint)asked) : std::string());
 	if (desktop.empty())
 	{
 		call.fail("desktop: a virtual desktop by its number (1 for the first one) or the name it was given in the task view");
@@ -393,10 +568,13 @@ public:
 
 void methodPerf(CCtrlCall &call)
 {
+	double seconds = 2.0;
+	if (!readNumber(call, "seconds", 1e6, seconds))
+		return;
 	CPerfData *data = new CPerfData();
 	data->FirstFrame = getEndpoint() != nullptr ? getEndpoint()->getFrame() : 0;
 	data->Start = CTime::getLocalTime();
-	data->Duration = (TTime)(std::max(0.2, std::min(60.0, call.getArgs().get("seconds").getNumber(2.0))) * 1000.0);
+	data->Duration = (TTime)(std::max(0.2, std::min(60.0, seconds)) * 1000.0);
 	call.setData(data);
 }
 
@@ -417,10 +595,19 @@ void pollPerf(CCtrlCall &call)
 
 } // anonymous namespace
 
+void dataConnectionClosed(uint32 connection)
+{
+	for (std::map<std::string, TWatchPtr>::iterator it = s_Watches.begin(); it != s_Watches.end(); ++it)
+		if (it->second->Owners.erase(connection) != 0 && it->second->Owners.empty())
+			unwatch(it->second);
+}
+
 void releaseDataMethods()
 {
-	// the observers stay on their nodes until the database goes; they only add events, and the endpoint is gone
-	s_Watches.clear();
+	// the observers stay on their nodes, and alive, until the client exits: the database may be gone already, and with
+	// no connection left they add nothing
+	for (std::map<std::string, TWatchPtr>::iterator it = s_Watches.begin(); it != s_Watches.end(); ++it)
+		it->second->Owners.clear();
 }
 
 void registerDataMethods(CCtrlEndpoint &endpoint)
@@ -430,13 +617,21 @@ void registerDataMethods(CCtrlEndpoint &endpoint)
 	endpoint.addMethod(new CCtrlFunctionMethod("db.list", "The nodes of a branch of the client database: leaves with their values, branches with their size, to a depth.",
 	    CCtrlSchema().str("path", "The branch (the root when empty).").integer("depth", "Levels to go down (1 by default).").integer("max", "At most this many nodes (500 by default)."), true,
 	    methodList));
-	endpoint.addMethod(new CCtrlFunctionMethod("db.set", "Sets a leaf of the UI or LOCAL branches; the server branches are read-only, as for Lua.",
-	    CCtrlSchema().str("path", "The leaf.", true).any("value", "A number, or its text for 64-bit values.", true), false, methodSet));
-	endpoint.addMethod(new CCtrlFunctionMethod("db.watch", "Watches a leaf or branch: each change is a db event with its path and value (ctrl.events, kinds db). stop ends it.",
-	    CCtrlSchema().str("path", "The node.", true).boolean("stop", "Stop watching it."), true, methodWatch));
+	endpoint.addMethod(new CCtrlFunctionMethod("db.set", "Sets a leaf of the database where Lua may: not SERVER:, and of LOCAL: only LOCAL:R2; UI: and the others are written.",
+	    CCtrlSchema().str("path", "The leaf.", true).any("value", "An integer: a whole number, or its decimal text for a value beyond 2^53.", true), false, methodSet));
+	endpoint.addMethod(new CCtrlFunctionMethod("db.watch",
+	    "Watches a leaf or branch for this connection: each change is a db event with its path and value (ctrl.events, kinds db), until stop or until the connection closes. "
+	    "Not the root, at most 4096 leaves a watch and 64 watches; at most 100 db events a second, and dropped_before counts those left out. A branch the client makes again "
+	    "(the UI branch at each login) needs db.watch again.",
+	    CCtrlSchema().str("path", "The node.", true).boolean("stop", "Stop watching it."), false, methodWatch));
 	endpoint.addMethod(new CCtrlFunctionMethod("strings.get",
-	    "A string of the string manager by id (a static string, or a dynamic one with dynamic): its text and whether it has arrived from the server yet.",
+	    "A string the client has, by id (a static string, or a dynamic one with dynamic): its text and whether it has arrived from the shard. It asks the shard for nothing: "
+	    "strings.request asks for a static string.",
 	    CCtrlSchema().integer("id", "The string id.", true).boolean("dynamic", "A dynamic string id."), true, methodString));
+	endpoint.addMethod(new CCtrlFunctionMethod("strings.request",
+	    "Asks the shard for a static string by id, as the client does for a string it shows, and gives its text if the client has it already; strings.get reads it once it has arrived. "
+	    "A dynamic string cannot be asked for: the shard sends it with what uses it.",
+	    CCtrlSchema().integer("id", "The string id.", true), false, methodStringRequest));
 	endpoint.addMethod(new CCtrlFunctionMethod("strings.ui", "A text of the interface by its key (uiXxx) in the current language, and whether the key has a translation.",
 	    CCtrlSchema().str("key", "The key.", true), true, methodUiString));
 	endpoint.addMethod(new CCtrlFunctionMethod("client.window",

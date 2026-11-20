@@ -16,9 +16,9 @@
 
 // The network methods of the control endpoint: net.record and net.stats. The record is of impulses,
 // the messages of msg.xml: received where impulseCallBack hands them to their handlers, sent where
-// CNetManager::push takes them (the position of the character, POSITION, among them). The rest of the traffic,
-// the actions the connection sends itself (targets, pickups), visual properties and acknowledgements, is not in
-// it. In local mode nothing is sent.
+// CNetManager::push queues them for the next packet (the position of the character, POSITION, among them). The
+// rest of the traffic, the actions the connection sends itself (targets, pickups), visual properties and
+// acknowledgements, is not in it. In local mode nothing is sent or received, so nothing is recorded.
 
 #include "stdpch.h"
 
@@ -120,7 +120,8 @@ void methodRecord(CCtrlCall &call)
 	r.set("first_idx", s_Record.empty() ? s_NextIdx : s_Record.front().Idx);
 	r.set("next_idx", end > begin ? picked[end - 1]->Idx + 1 : s_NextIdx);
 	r.set("truncated", truncated);
-	r.set("covers", "impulses of msg.xml only: the actions the connection sends itself (targets, pickups), visual properties and acknowledgements are not recorded");
+	r.set("covers", "impulses of msg.xml only, out when queued for the next packet: the actions the connection sends itself (targets, pickups), visual properties and acknowledgements are not "
+	                "recorded, and in local mode nothing is");
 	call.reply(r);
 }
 
@@ -196,7 +197,8 @@ void registerNetMethods(CCtrlEndpoint &endpoint)
 {
 	endpoint.addMethod(new CCtrlFunctionMethod("net.record",
 	    "The impulses received and sent (the messages of msg.xml), newest last: index, time, direction, name, size, server tick. Filter by a word of the name and the direction; from_idx continues. "
-	    "The actions the connection sends itself (targets, pickups), visual properties and acknowledgements are not impulses and are not in it.",
+	    "out is a message queued for the next packet to the shard, not yet a packet sent. The actions the connection sends itself (targets, pickups), visual properties and acknowledgements "
+	    "are not impulses and are not in it. In local mode there is no traffic and nothing is recorded.",
 	    CCtrlSchema()
 	        .integer("from_idx", "First index, inclusive.")
 	        .str("contains", "Only names containing this (STRING_MANAGER, CONNECTION...).")

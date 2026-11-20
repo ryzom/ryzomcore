@@ -376,6 +376,32 @@ restartLoop4:
 
 
 
+	bool CStringManagerClient::getReceivedString(uint32 stringId, string &result) const
+	{
+		TStringsContainer::const_iterator it(_ReceivedStrings.find(stringId));
+		if (it == _ReceivedStrings.end())
+		{
+			result.clear();
+			return false;
+		}
+		// as getString gives a string that has arrived
+		if (ClientCfg.DebugStringManager)
+		{
+			result = toString("<STR %u>", stringId) + it->second;
+		}
+		else
+		{
+			result = it->second;
+			if (result.size() > 9 && result.substr(0, 9) == "<missing:")
+			{
+				map<string, string>::const_iterator itds = _DynStrings.find(result.substr(9, result.size() - 10));
+				if (itds != _DynStrings.end())
+					result = itds->second;
+			}
+		}
+		return true;
+	}
+
 	bool CStringManagerClient::getString(uint32 stringId, string &result)
 	{
 		H_AUTO( CStringManagerClient_getString )

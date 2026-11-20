@@ -24,6 +24,11 @@
 
 #ifdef RYZOM_HAS_CLIENT_CTRL
 
+#include "nel/gui/db_manager.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/ucstring.h"
+
+#include "client_cfg.h"
 #include "client_chat_manager.h"
 #include "string_manager_client.h"
 
@@ -43,20 +48,35 @@ void methodSend(CCtrlCall &call)
 {
 	if (!requireInGame(call))
 		return;
+	if (ClientCfg.Local)
+	{
+		call.fail("the client runs in local mode: there is no shard to send a line to");
+		return;
+	}
 	const CJsonValue &args = call.getArgs();
-	const std::string &channel = args.get("channel").getString("say");
+	const std::string channel = args.get("channel").getString("say");
 	const std::string &text = args.get("text").getString();
 	if (text.empty())
 	{
 		call.fail("text is required");
 		return;
 	}
-	if (!text.empty() && text[0] == '/')
+	if (text[0] == '/')
 	{
 		// a chat command would run as one: that is run_command's business, with its arguments as a list
 		call.fail("the text starts with '/': it would run as a command; use run_command for commands, or start the text otherwise");
 		return;
 	}
+	// the client cuts a longer line to what the shard takes: it is refused here rather than sent cut
+	uint length = (uint)ucstring(text).size();
+	if (length > (uint)CChatGroup::MaxClientTextLength)
+	{
+		call.fail(toString("the text is %u UTF-16 units long, and the shard takes at most %u: split it", length, (uint)CChatGroup::MaxClientTextLength));
+		return;
+	}
+	// the chat window's own sending (CChatTargetFilter::msgEntered) leaves the chat mode on the channel
+	static const char *const s_ModeNote = "the chat mode of the client is now this channel, as the chat window would leave it; the line comes back as a chat event once the shard sends it";
+	const char *note = s_ModeNote;
 	CJsonValue r = CJsonValue::object();
 	r.set("channel", channel);
 	if (channel == "tell")
@@ -67,12 +87,27 @@ void methodSend(CCtrlCall &call)
 			call.fail("to is required for a tell");
 			return;
 		}
+		// as the client cuts it
+		if (to.size() > 255)
+		{
+			call.fail("to is longer than a player name can be");
+			return;
+		}
 		ChatMngr.tell(to, text);
 		r.set("to", to);
+		note = "the shard does not send a tell back: no chat event follows it, and the client's tell window does not show it";
 	}
 	else if (channel == "team")
 	{
+		// without a team the client sends nothing (CClientChatManager::chat)
+		CCDBNodeLeaf *present = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT", false);
+		if (present == nullptr || !present->getValueBool())
+		{
+			call.fail("the character is in no team: the client sends no team line then");
+			return;
+		}
 		ChatMngr.chat(text, true);
+		note = "the line comes back as a chat event of the team once the shard sends it; the chat mode of the client stays as it was";
 	}
 	else if (channel == "dyn")
 	{
@@ -89,18 +124,23 @@ void methodSend(CCtrlCall &call)
 	}
 	else
 	{
-		CChatGroup::TGroupType group = CChatGroup::stringToGroupType(channel);
-		if (group == CChatGroup::nbChatMode || group == CChatGroup::tell || group == CChatGroup::system || group == CChatGroup::player)
+		// the channels the chat window writes to; the others of the chat groups (around, civilization, territory, the
+		// dynamic ones by type) are not sent to by a player this way
+		static const char *const s_Channels[] = { "say", "shout", "region", "universe", "guild" };
+		bool known = false;
+		for (uint i = 0; i < sizeof(s_Channels) / sizeof(s_Channels[0]) && !known; ++i)
+			known = channel == s_Channels[i];
+		if (!known)
 		{
 			call.fail("channel is say, shout, region, universe, guild, team, tell (with to) or dyn (with index)");
 			return;
 		}
-		ChatMngr.setChatMode(group);
+		ChatMngr.setChatMode(CChatGroup::stringToGroupType(channel));
 		ChatMngr.chat(text);
 	}
 	r.set("text", text);
 	r.set("sent", getCtrlTimeMs());
-	r.set("note", "the chat mode of the client is now this channel, as the chat window would leave it; the line comes back as a chat event once the server sends it");
+	r.set("note", note);
 	call.reply(r);
 }
 
@@ -117,6 +157,7 @@ void methodChannels(CCtrlCall &call)
 		c.set("id", id.toString());
 		uint32 nameId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
 		std::string name;
+		// a dynamic string: the client asks for its parts itself as it arrives, so this asks the shard for nothing
 		bool arrived = nameId == 0 || STRING_MANAGER::CStringManagerClient::instance()->getDynString(nameId, name);
 		c.set("name", name);
 		if (!arrived)
@@ -140,7 +181,8 @@ void registerChatMethods(CCtrlEndpoint &endpoint)
 {
 	endpoint.addMethod(new CCtrlFunctionMethod("chat.send",
 	    "Sends a line to a chat channel without the chat box: say (around), shout, region, universe, guild, team, tell (to a player), or dyn (a dynamic channel by index, such as a DM or Ring channel). "
-	    "A text starting with '/' is refused: commands go through run_command. The line comes back as a chat event.",
+	    "A text starting with '/' is refused: commands go through run_command; so is a text longer than the shard takes (255 UTF-16 units), a team line without a team, and anything in local "
+	    "mode. A line to a channel comes back as a chat event; a tell does not, and the tell window does not show it.",
 	    CCtrlSchema()
 	        .choice("channel", "say|shout|region|universe|guild|team|tell|dyn", "The channel (say by default).")
 	        .str("text", "The line.", true)

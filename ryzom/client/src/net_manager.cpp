@@ -644,7 +644,7 @@ class CInterfaceChatDisplayer : public CClientChatManager::IChatDisplayer
 {
 public:
 	virtual void displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0) NL_OVERRIDE;
-	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName) NL_OVERRIDE;
+	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName, const std::string &rawMessage) NL_OVERRIDE;
 	virtual void clearChannel(CChatGroup::TGroupType mode, uint32 dynChatDbIndex) NL_OVERRIDE;
 
 private:
@@ -967,10 +967,11 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 
 
 // display a tell from network to interface
-void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName)
+void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName, const std::string &rawMessage)
 {
+	// as for the other channels, the text the sender wrote, not the sentence built around it
 	if (ClientCtrl::isActive())
-		ClientCtrl::addEvent("chat", NLMISC::CJsonValue::object().set("channel", "tell").set("sender", senderName).set("text", ucstr));
+		ClientCtrl::addEvent("chat", NLMISC::CJsonValue::object().set("channel", "tell").set("sender", senderName).set("text", rawMessage));
 
 
 	string finalString = ucstr;
@@ -4347,7 +4348,7 @@ NLMISC_COMMAND(localTell, "Temp : simulate a tell in local mode", "<people_name>
 		}
 	}
 //	TDataSetIndex dsi = INVALID_DATASET_ROW;
-	InterfaceChatDisplayer.displayTell(/*dsi, */msg, player);
+	InterfaceChatDisplayer.displayTell(/*dsi, */msg, player, msg);
 	return true;
 }
 
