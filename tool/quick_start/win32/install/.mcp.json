@@ -2,7 +2,11 @@
   "mcpServers": {
     "servdash": {
       "command": "cmd",
-      "args": ["/c", "_servdash_mcp.bat"]
+      "args": ["/c", ".\\_servdash_mcp.bat"]
+    },
+    "client": {
+      "command": "cmd",
+      "args": ["/c", ".\\_client_mcp.bat"]
     }
   }
 }

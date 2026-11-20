@@ -34,6 +34,12 @@ box reached over SSH. One of them must be built, there is no fallback.
 `.mcp.json` in the root registers `_servdash_mcp.bat` with Claude Code: the Model Context Protocol
 server of the chosen dashboard tool, over every dashboard running for the user, so an agent can
 start a shard from its ini, watch the logs, run service commands and stop it again.
+The client launchers (client_dev.bat, client_dev_live.bat and their debug ones) start the client
+with a control endpoint, named after the directory of the client and its instance there:
+client_dev, then client_devb for a second one, as their logs are client.log and clientb.log (the
+debug launchers start their client in the same directories, under the same names).
+`.mcp.json` also registers `_client_mcp.bat`, nel_mcp, the Model Context Protocol server over every
+such client, so an agent can follow the state and the log of a client, run its commands and drive it.
 
 Toolchains come from three scans: `find_vstudio.py` for the Visual Studio installations of the
 native drive, `find_gcc.py` for GCC on the host and in every Docker image under `docker/`, and
