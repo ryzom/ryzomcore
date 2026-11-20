@@ -4113,15 +4113,19 @@ NLMISC_COMMAND( monitorMissions, "monitor a player missions", "<CSR id><player n
 		return true;
 	}
 
-	// target missions must not be monitored
-	if ( target->getMonitoringCSR() != TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) )
+	// target missions must not be monitored (by a CSR that is in game: one that left the game without its destructor,
+	// as a corrupted character does, leaves its row behind)
+	if ( PlayerManager.getChar( target->getMonitoringCSR() ) != NULL )
 	{
 		CCharacter::sendDynamicSystemMessage( c->getEntityRowId() , "CSR_MISSION_MONITORED" );
 		return true;
 	}
+	// a CSR monitors one character at a time
+	CAdminProperties::stopMonitoringMissions( *c );
 	target->setMonitoringCSR( c->getEntityRowId() );
 	c->getAdminProperties().setMissionMonitoredUser( target->getEntityRowId() );
 
+	// the solo missions of the target go into the journal of the CSR too
 	for ( map<TAIAlias, CMission*>::iterator it = target->getMissionsBegin(); it != target->getMissionsEnd(); ++it )
 	{
 		(*it).second->updateUsersJournalEntry();
@@ -4136,12 +4140,7 @@ NLMISC_COMMAND( stopMonitorMissions, "monitor a player missions", "<CSR id>" )
 		return false;
 	GET_CHARACTER;
 
-	CCharacter * target = PlayerManager.getChar( c->getAdminProperties().getMissionMonitoredUser() );
-	c->getAdminProperties().setMissionMonitoredUser( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW) );
-	if ( target )
-		target->setMonitoringCSR( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
-
-	/// todo mission
+	CAdminProperties::stopMonitoringMissions( *c );
 	return true;
 }
 

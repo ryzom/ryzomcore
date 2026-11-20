@@ -42,10 +42,15 @@ void CMissionSolo::updateUsersJournalEntry()
 		return;
 	}
 	updateUserJournalEntry( *user, "" );
+
+	// the CSR that monitors the missions of the character has them in its own journal, at the same entries
+	CCharacter * csr = PlayerManager.getChar( user->getMonitoringCSR() );
+	if ( csr )
+		updateUserJournalEntry( *csr, "", true );
 }
 
 void CMissionSolo::clearUsersJournalEntry()
-{	
+{
 	// a mission hidden from the journal has no entry (0xFF)
 	if ( _ClientIndex == 0xFF )
 		return;
@@ -53,37 +58,37 @@ void CMissionSolo::clearUsersJournalEntry()
 	CCharacter * user = PlayerManager.getChar( _Taker );
 	if ( user )
 	{
-		CBankAccessor_PLR::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TYPE",_ClientIndex), 0);
-		missionItem.setTYPE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:ICON",_ClientIndex), 0);
-		missionItem.setICON(user->_PropertyDatabase, CSheetId::Unknown);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TITLE",_ClientIndex), 0);
-		missionItem.setTITLE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:DETAIL_TEXT",_ClientIndex), 0);
-		missionItem.setDETAIL_TEXT(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:END_DATE",_ClientIndex), 0 );
-		missionItem.setEND_DATE(user->_PropertyDatabase, 0);
-//		user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:BEGIN_DATE",_ClientIndex), 0 );
-		missionItem.setBEGIN_DATE(user->_PropertyDatabase, 0);
-		// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
-		missionItem.setSLEEP(user->_PropertyDatabase, 0);
-		for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
-		{
-			CBankAccessor_PLR::TMISSIONS::TArray::TTARGET &targetItem = CBankAccessor_PLR::getMISSIONS().getArray(_ClientIndex).getTARGET(i);
+		clearJournalEntry( *user, _ClientIndex );
 
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:TITLE",_ClientIndex,i), 0);
-			targetItem.setTITLE(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:X",_ClientIndex,i), 0);
-			targetItem.setX(user->_PropertyDatabase, 0);
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:TARGET%u:Y",_ClientIndex,i), 0);
-			targetItem.setY(user->_PropertyDatabase, 0);
-		}
-		for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
-		{
-//			user->_PropertyDatabase.setProp( NLMISC::toString( "MISSIONS:%u:GOALS:%u:TEXT",_ClientIndex,i), 0);
-			missionItem.getGOALS().getArray(i).setTEXT(user->_PropertyDatabase, 0);
-		}	
+		// the CSR that monitors the missions of the character has them in its own journal, at the same entries
+		CCharacter * csr = PlayerManager.getChar( user->getMonitoringCSR() );
+		if ( csr )
+			clearJournalEntry( *csr, _ClientIndex );
+	}
+}
+
+//----------------------------------------------------------------------------
+void CMissionSolo::clearJournalEntry( CCharacter & user, uint8 clientIndex )
+{
+	CBankAccessor_PLR::TMISSIONS::TArray &missionItem = CBankAccessor_PLR::getMISSIONS().getArray(clientIndex);
+	missionItem.setTYPE(user._PropertyDatabase, 0);
+	missionItem.setICON(user._PropertyDatabase, CSheetId::Unknown);
+	missionItem.setTITLE(user._PropertyDatabase, 0);
+	missionItem.setDETAIL_TEXT(user._PropertyDatabase, 0);
+	missionItem.setEND_DATE(user._PropertyDatabase, 0);
+	missionItem.setBEGIN_DATE(user._PropertyDatabase, 0);
+	// the mission queue sets SLEEP but does not reset it when the mission leaves the queue
+	missionItem.setSLEEP(user._PropertyDatabase, 0);
+	for (uint i = 0; i < NB_JOURNAL_COORDS; i++)
+	{
+		CBankAccessor_PLR::TMISSIONS::TArray::TTARGET &targetItem = missionItem.getTARGET(i);
+		targetItem.setTITLE(user._PropertyDatabase, 0);
+		targetItem.setX(user._PropertyDatabase, 0);
+		targetItem.setY(user._PropertyDatabase, 0);
+	}
+	for (uint i = 0; i < NB_STEP_PER_MISSION; i++)
+	{
+		missionItem.getGOALS().getArray(i).setTEXT(user._PropertyDatabase, 0);
 	}
 }
 

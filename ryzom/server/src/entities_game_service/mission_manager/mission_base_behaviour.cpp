@@ -1134,16 +1134,16 @@ void CMissionBaseBehaviour::clearGroupJournalEntry(CCharacter &user, uint8 clien
 	}
 }
 
-void CMissionBaseBehaviour::updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix )
+void CMissionBaseBehaviour::updateUserJournalEntry( CCharacter & user, const std::string & dbPrefix, bool monitoring )
 {
 	if (dbPrefix == "GROUP:")
-		_updateUserJournalEntry( user, CBankAccessor_PLR::getGROUP().getMISSIONS());
+		_updateUserJournalEntry( user, CBankAccessor_PLR::getGROUP().getMISSIONS(), monitoring);
 	else
-		_updateUserJournalEntry( user, CBankAccessor_PLR::getMISSIONS());
+		_updateUserJournalEntry( user, CBankAccessor_PLR::getMISSIONS(), monitoring);
 }
 
 template <class DBType>
-void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &missionDb)
+void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &missionDb, bool monitoring)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
 	if( !templ )
@@ -1156,7 +1156,9 @@ void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &
 	if (_ClientIndex == 0xFF) // There must be a valid journal entry !!!
 		return;
 
-	user.updateTarget();
+	// the mission options of the bot that the user has as its target: not those of a CSR, who has no part in the mission
+	if ( !monitoring )
+		user.updateTarget();
 
 	const CEntityId & giverId = CAIAliasTranslator::getInstance()->getEntityId(_Mission->getGiver());
 	if ( giverId == CEntityId::Unknown )
@@ -1398,7 +1400,9 @@ void CMissionBaseBehaviour::_updateUserJournalEntry( CCharacter & user, DBType &
 	}
 
 //	uint nbEntry = updateCompass(user,dbPrefix);
-	uint nbEntry = _updateCompass(user, missionDb);
+	// A CSR has no compass for the mission: the name of a target is sent when it changes, to the one user whose compass
+	// is updated then, and the compass is kept up to date for the characters of the mission only
+	uint nbEntry = monitoring ? 0 : _updateCompass(user, missionDb);
 	for ( uint i = nbEntry ; i < NB_JOURNAL_COORDS; i++ )
 	{
 		missionEntry.getTARGET(i).setX(user._PropertyDatabase, 0);

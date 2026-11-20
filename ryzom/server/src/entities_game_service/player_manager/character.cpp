@@ -2817,12 +2817,14 @@ CCharacter::~CCharacter()
 	// remove CSR special properties
 	if ( getEnterFlag() )
 	{
-		CCharacter * user = PlayerManager.getChar( _MonitoringCSR );
+		// the CSR that monitors the missions of this character monitors none anymore
+		CCharacter * csr = PlayerManager.getChar( _MonitoringCSR );
+		if ( csr )
+			CAdminProperties::stopMonitoringMissions( *csr );
+		// the character whose missions this CSR monitors can be monitored again
+		CCharacter * user = PlayerManager.getChar( _AdminProperties->getMissionMonitoredUser() );
 		if ( user )
 			user->setMonitoringCSR( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
-		user = PlayerManager.getChar( _AdminProperties->getMissionMonitoredUser() );
-		if ( user )
-			user->getAdminProperties().setMissionMonitoredUser( TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW ) );
 		for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); ++it )
 		{
 			CMissionManager::getInstance()->deInstanciateMission( (*it).second );
@@ -12631,6 +12633,9 @@ void CCharacter::addMission(CMissionSolo * mission)
 {
 	_Missions->setMissions( mission );
 	TMissionHistory &mh = _MissionHistories[mission->getTemplateId()];
+	// The journal of a CSR that monitors the missions of a character has the missions of that character: it has to be
+	// its own again for a mission of its own
+	CAdminProperties::stopMonitoringMissions( *this );
 	// store the date.
 	mission->updateUsersJournalEntry();
 }

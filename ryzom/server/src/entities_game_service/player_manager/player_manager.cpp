@@ -2584,7 +2584,6 @@ NLMISC_COMMAND(setPriv,"set a privilege to a user using his user id, must be in 
 		CCharacter *c = p->getActiveCharacter();
 		if (c)
 		{
-			c->getAdminProperties().init();
 			if (p->havePriv(NeverAggroPriv))
 			{
 				c->setGodMode( true );
