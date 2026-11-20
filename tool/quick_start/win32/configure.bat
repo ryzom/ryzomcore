@@ -61,6 +61,9 @@ xcopy %RC_ROOT%\code\tool\quick_start\win32\install\*.bat %RC_ROOT%\ /Y
 rem the Model Context Protocol registration for Claude Code, next to the launcher it names
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\.mcp.json %RC_ROOT%\ /Y
 if %errorlevel% neq 0 pause
+rem and the Claude Code agents that go with it: the driver of a client whose content is not trusted
+xcopy %RC_ROOT%\code\tool\quick_start\win32\install\.claude %RC_ROOT%\.claude\ /E /I /Y
+if %errorlevel% neq 0 pause
 mkdir %RC_ROOT%\redist > nul 2> nul
 xcopy %RC_ROOT%\code\tool\quick_start\win32\install\redist\*.bat %RC_ROOT%\redist\ /Y
 if %errorlevel% neq 0 pause

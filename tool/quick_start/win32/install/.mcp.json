@@ -7,6 +7,10 @@
     "client": {
       "command": "cmd",
       "args": ["/c", ".\\_client_mcp.bat"]
+    },
+    "client_untrusted": {
+      "command": "cmd",
+      "args": ["/c", ".\\_client_mcp.bat", "--untrusted-only"]
     }
   }
 }

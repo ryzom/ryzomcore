@@ -47,7 +47,7 @@
     "Web": "pipeline/shard_dev/web"
   },
   "DebuggerArguments": {
-    "ryzom_client": "--ctrl-listen=client_dev#"
+    "ryzom_client": "--ctrl-listen=client_dev# --ctrl-trusted"
   },
   "WorkingDirs": {
     "crash_report": "pipeline/client_dev",
