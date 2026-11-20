@@ -87,6 +87,7 @@
 #include "main_loop.h"
 
 #include "misc.h"
+#include "client_ctrl.h"
 
 
 ////////////////
@@ -322,6 +323,7 @@ static	CSoundGlobalMenu	SoundGlobalMenu;
 // ------------------------------------------------------------------------------------------------
 bool connection (const string &cookie, const string &fsaddr)
 {
+	ClientCtrl::setPhase("connecting");
 
 	NLMISC::TTime connStart = ryzomGetLocalTime();
 	NLMISC::TTime connLast = connStart;
@@ -455,6 +457,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		switch (InterfaceState)
 		{
 			case AUTO_LOGIN:
+				ClientCtrl::setPhase("connecting");
 				InterfaceState = autoLogin (cookie, fsaddr, firstConnection);
 				break;
 
@@ -475,6 +478,8 @@ bool connection (const string &cookie, const string &fsaddr)
 		}
 	}
 
+	if (InterfaceState == GOGOGO_IN_THE_GAME)
+		ClientCtrl::setPhase("entering_game");
 	firstConnection = false;
 
 	// Restore user UI scaling
@@ -508,6 +513,7 @@ bool connection (const string &cookie, const string &fsaddr)
 // ------------------------------------------------------------------------------------------------
 bool reconnection()
 {
+	ClientCtrl::setPhase("connecting");
 
 	game_exit = false;
 
@@ -615,6 +621,8 @@ bool reconnection()
 		}
 		InterfaceState = globalMenu();
 	}
+	if (InterfaceState == GOGOGO_IN_THE_GAME)
+		ClientCtrl::setPhase("entering_game");
 
 	// Restore user UI scaling
 	CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
@@ -1071,6 +1079,7 @@ void updatePatcherPriorityBasedOnCharacters()
 // ------------------------------------------------------------------------------------------------
 TInterfaceState globalMenu()
 {
+	ClientCtrl::setPhase("character_selection");
 	CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_CharacterSelection, "login_step_character_selection"));
 
 #ifdef RYZOM_BG_DOWNLOADER
@@ -1220,6 +1229,7 @@ TInterfaceState globalMenu()
 #endif
 
 		// Display
+		ClientCtrl::beforeSwap();
 		Driver->swapBuffers();
 
 		// This screen needs no more frames than a display shows
@@ -1296,13 +1306,17 @@ TInterfaceState globalMenu()
 							if (i == CharacterSummaries.size())
 							{
 								Driver->systemMessageBox("You have no character for the current user.\nClient will exit.", "Char loading error", UDriver::okType, UDriver::exclamationIcon);
+								ClientCtrl::setExitReason("the account has no character, and the client was started to play one");
 								exit(-1);
 							}
 							else
 							{
 								UDriver::TMessageBoxId ret = Driver->systemMessageBox("The pre-selected character doesn't exist.\nDo you want to use the first available character instead ?", "Char loading error", UDriver::yesNoType, UDriver::warningIcon);
 								if (ret == UDriver::noId)
+								{
+									ClientCtrl::setExitReason("the character the client was started to play does not exist, and the user chose to quit");
 									exit(-1);
+								}
 								else
 									charSelect = i;
 							}
@@ -1757,6 +1771,8 @@ public:
 			if (ClientCfg.SaveConfig)
 				ClientCfg.saveConfigFile();
 		}
+		if (PlayerSelectedSlot < CharacterSummaries.size())
+			ClientCtrl::setIdentity("character", CharacterSummaries[PlayerSelectedSlot].Name.toUtf8());
 
 
 		/*

@@ -153,6 +153,7 @@
 #include "main_loop_debug.h"
 #include "main_loop_temp.h"
 #include "main_loop_utilities.h"
+#include "client_ctrl.h"
 
 
 ///////////
@@ -1005,6 +1006,7 @@ bool mainLoop()
 	paying_account_already_request = false;
 	game_exit_after_paying_account_request = false;
 	FarTP.setMainLoopEntered();
+	ClientCtrl::setPhase("in_game");
 
 	nlinfo ("Starting main loop...", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);
 
@@ -1108,6 +1110,8 @@ bool mainLoop()
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
 	{
+		// in the game: also after a far TP or a return to the character selection that came back into this loop
+		ClientCtrl::setPhase("in_game");
 		// If an action handler execute. NB: MUST BE DONE BEFORE ANY THING ELSE PROFILE CRASH!!!!!!!!!!!!!!!!!
 		testLaunchProfile();
 
@@ -1973,6 +1977,9 @@ bool mainLoop()
 
 			} /* if (StereoDisplay->wantInterface3D()) */
 
+			// a picture of the scene without the interface, for a control tool (--ctrl-listen)
+			ClientCtrl::sceneRendered();
+
 			if (StereoDisplay->wantInterface2D())
 			{
 				// Render in 2D Mode to display 2D Interfaces and 2D texts.
@@ -2420,6 +2427,7 @@ bool mainLoop()
 				R2::getEditor().updateBeforeSwapBuffer();
 			}
 
+			ClientCtrl::beforeSwap();
 			Driver->swapBuffers();
 
 			if(Profiling)
@@ -2686,6 +2694,8 @@ bool mainLoop()
 
 	} // end of main loop
 
+	ClientCtrl::setPhase("leaving_game");
+
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	if (CLuaManager::getInstance().getLuaState())
 	{
@@ -2742,6 +2752,7 @@ bool mainLoop()
 			// Display the background
 			drawLoadingBitmap (0);
 			// Display to screen.
+			ClientCtrl::beforeSwap();
 			Driver->swapBuffers();
 //	} while(ryzomGetLocalTime () < endTime);
 

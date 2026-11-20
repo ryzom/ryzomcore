@@ -259,6 +259,11 @@ IF(WITH_RYZOM_CLIENT)
     ENDIF()
   ENDIF()
 
+  IF(WITH_RYZOM_CLIENT_CTRL)
+    # the control endpoint is in every build that is not final; a final one has it only with this
+    TARGET_COMPILE_DEFINITIONS(ryzom_client PRIVATE RYZOM_CLIENT_CTRL=1)
+  ENDIF()
+
   IF(WITH_RYZOM_CLIENT_UAC)
     IF(CMAKE_GENERATOR MATCHES "Visual Studio")
       SET_PROPERTY(TARGET ryzom_client PROPERTY LINK_FLAGS_RELEASE "/level='requireAdministrator'")

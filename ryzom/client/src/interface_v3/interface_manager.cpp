@@ -118,6 +118,8 @@
 #include "../npc_icon.h"
 
 #include "nel/gui/lua_helper.h"
+#include "../client_ctrl.h"
+#include "nel/misc/json.h"
 using namespace NLGUI;
 #include "nel/gui/lua_ihm.h"
 #include "nel/web/curl_certificates.h"
@@ -978,6 +980,7 @@ void badXMLParseMessageBox()
 																		NL3D::UDriver::exclamationIcon);
 	if (ret == NL3D::UDriver::yesId)
 	{
+		ClientCtrl::setExitReason("the interface XML did not load, and the user chose to quit");
 		extern void quitCrashReport ();
 		quitCrashReport ();
 		exit (EXIT_FAILURE);
@@ -2516,6 +2519,9 @@ void CInterfaceManager::processServerIDString()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const string &text, const string &masterGroup, TCaseMode caseMode)
 {
+	// a box that takes the input until it is closed: a control tool learns of it at once
+	ClientCtrl::addEvent("message_box", NLMISC::CJsonValue::object().set("group", masterGroup + ":" + msgBoxGroup).set("text", text));
+
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
 	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));
 
@@ -2654,6 +2660,8 @@ NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 // ***************************************************************************
 void CInterfaceManager::displaySystemInfo(const string &str, const string &cat)
 {
+	// a control tool reads the system messages, and a command it runs gets those it shows
+	ClientCtrl::showSystemInfo(cat, str);
 	CClientConfig::SSysInfoParam::TMode mode = CClientConfig::SSysInfoParam::Normal;
 	CRGBA color = CRGBA::White;
 

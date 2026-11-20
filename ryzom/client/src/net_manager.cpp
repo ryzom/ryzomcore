@@ -88,6 +88,8 @@
 #include "game_share/r2_types.h"
 #include "npc_icon.h"
 #include "interface_v3/action_handler_base.h"
+#include "client_ctrl.h"
+#include "nel/misc/json.h"
 
 // Std.
 #include <vector>
@@ -678,6 +680,18 @@ void CInterfaceChatDisplayer::colorizeSender(string &text, const string &senderN
 // display a chat from network to interface
 void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer)
 {
+	// the line for a control tool (--ctrl-listen), as it arrived
+	if (ClientCtrl::isActive())
+	{
+		NLMISC::CJsonValue e = NLMISC::CJsonValue::object();
+		e.set("channel", mode == CChatGroup::dyn_chat ? std::string("dyn") : CChatGroup::groupTypeToString(mode));
+		if (mode == CChatGroup::dyn_chat)
+			e.set("dyn_id", dynChatId.toString());
+		e.set("sender", senderName);
+		e.set("text", rawMessage);
+		ClientCtrl::addEvent("chat", e);
+	}
+
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string finalString;
 	string stringCategory = getStringCategory(ucstr, finalString);
@@ -955,6 +969,9 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 // display a tell from network to interface
 void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName)
 {
+	if (ClientCtrl::isActive())
+		ClientCtrl::addEvent("chat", NLMISC::CJsonValue::object().set("channel", "tell").set("sender", senderName).set("text", ucstr));
+
 
 	string finalString = ucstr;
 
@@ -3805,6 +3822,8 @@ void initializeNetwork()
 //-----------------------------------------------
 void impulseCallBack(NLMISC::CBitMemStream &impulse, sint32 packet, void *arg)
 {
+	// the record of a control tool (--ctrl-listen): every impulse received passes here
+	ClientCtrl::netImpulse(false, impulse);
 	GenericMsgHeaderMngr.execute(impulse);
 }
 
@@ -4071,6 +4090,8 @@ void CNetManager::push(NLMISC::CBitMemStream &msg)
 
 	if (PermanentlyBanned) return;
 
+	// the record of a control tool (--ctrl-listen): every impulse sent passes here
+	ClientCtrl::netImpulse(true, msg);
 	CNetworkConnection::push(msg);
 }
 

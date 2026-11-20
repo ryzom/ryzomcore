@@ -1,0 +1,737 @@
+// Ryzom - MMORPG Framework <https://wiki.ryzom.dev/>
+// Copyright (C) 2026  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+// The game methods of the control endpoint: the in-game browser (web.list, web.page, web.browse,
+// web.back), the inventories and the journal (inventory.list, missions.list), and the Ring scenario
+// editor (ring.state, ring.tree, ring.set, ring.create, ring.erase, ring.move, ring.undo, ring.redo,
+// ring.select). The Ring methods go through the editor's own requests, so they reach the server and
+// the co-editors as the editor's buttons do.
+
+#include "stdpch.h"
+
+#include "client_ctrl_methods.h"
+
+#ifdef RYZOM_HAS_CLIENT_CTRL
+
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_html.h"
+#include "nel/gui/widget_manager.h"
+#include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/sheet_id.h"
+
+#include "nel/gui/db_manager.h"
+#include "r2/editor.h"
+#include "string_manager_client.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
+using namespace NLMISC;
+using namespace NLGUI;
+
+namespace ClientCtrl {
+
+namespace {
+
+// *** the browser ***
+
+void findHtml(CInterfaceGroup *group, std::vector<CGroupHTML *> &out)
+{
+	if (group == nullptr)
+		return;
+	if (CGroupHTML *html = dynamic_cast<CGroupHTML *>(group))
+		out.push_back(html);
+	const std::vector<CInterfaceGroup *> &groups = group->getGroups();
+	for (uint i = 0; i < groups.size(); ++i)
+		findHtml(groups[i], out);
+}
+
+void allHtml(std::vector<CGroupHTML *> &out, bool activeOnly)
+{
+	std::vector<CWidgetManager::SMasterGroup> &masters = CWidgetManager::getInstance()->getAllMasterGroup();
+	for (uint m = 0; m < masters.size(); ++m)
+	{
+		if (masters[m].Group == nullptr)
+			continue;
+		std::vector<CGroupHTML *> found;
+		findHtml(masters[m].Group, found);
+		for (uint i = 0; i < found.size(); ++i)
+			if (!activeOnly || found[i]->isActiveThroughParents())
+				out.push_back(found[i]);
+	}
+}
+
+CGroupHTML *findHtmlById(CCtrlCall &call)
+{
+	const std::string &id = call.getArgs().get("id").getString();
+	CGroupHTML *html = dynamic_cast<CGroupHTML *>(CWidgetManager::getInstance()->getElementFromId(id));
+	if (html == nullptr)
+		call.fail(toString("'%s' is not a browser view; web.list lists them", id.c_str()));
+	return html;
+}
+
+void methodWebList(CCtrlCall &call)
+{
+	if (!requireInterface(call))
+		return;
+	std::vector<CGroupHTML *> views;
+	allHtml(views, !call.getArgs().get("all").getBool(false));
+	CJsonValue list = CJsonValue::array();
+	for (uint i = 0; i < views.size(); ++i)
+	{
+		CGroupHTML *html = views[i];
+		CJsonValue o = CJsonValue::object();
+		o.set("id", html->getId());
+		o.set("url", html->getURL());
+		o.set("title", html->getProperty("title"));
+		o.set("loading", html->isBrowsing());
+		o.set("shown", html->isActiveThroughParents());
+		list.push(o);
+	}
+	call.reply(CJsonValue::object().set("views", list));
+}
+
+/// The text of HTML without its tags, scripts and styles, with the common entities, and its links
+void htmlText(const std::string &html, std::string &text, CJsonValue &links)
+{
+	std::string::size_type i = 0;
+	std::string linkHref;
+	std::string linkText;
+	bool inLink = false;
+	while (i < html.size())
+	{
+		char c = html[i];
+		if (c == '<')
+		{
+			std::string::size_type end = html.find('>', i);
+			if (end == std::string::npos)
+				break;
+			std::string tag = toLowerAscii(html.substr(i + 1, end - i - 1));
+			std::string name = tag.substr(0, tag.find_first_of(" \t\r\n/"));
+			if (name == "script" || name == "style")
+			{
+				std::string::size_type close = toLowerAscii(html).find("</" + name, end);
+				i = close == std::string::npos ? html.size() : html.find('>', close) + 1;
+				continue;
+			}
+			if (name == "a")
+			{
+				std::string::size_type h = tag.find("href=");
+				if (h != std::string::npos)
+				{
+					// the original case of the address, from the same place in the tag
+					std::string rawTag = html.substr(i + 1, end - i - 1);
+					char quote = rawTag[h + 5];
+					std::string::size_type start = h + 5 + ((quote == '"' || quote == '\'') ? 1 : 0);
+					std::string::size_type stop = (quote == '"' || quote == '\'') ? rawTag.find(quote, start) : rawTag.find_first_of(" >", start);
+					linkHref = rawTag.substr(start, stop == std::string::npos ? std::string::npos : stop - start);
+					linkText.clear();
+					inLink = true;
+				}
+			}
+			else if (tag == "/a" && inLink)
+			{
+				links.push(CJsonValue::object().set("href", linkHref).set("text", trim(linkText)));
+				inLink = false;
+			}
+			if (name == "br" || name == "p" || name == "/p" || name == "div" || name == "/div" || name == "tr" || name == "li" || name == "h1" || name == "h2" || name == "h3")
+				text += '\n';
+			i = end + 1;
+			continue;
+		}
+		std::string piece(1, c);
+		if (c == '&')
+		{
+			std::string::size_type semi = html.find(';', i);
+			if (semi != std::string::npos && semi - i < 8)
+			{
+				std::string entity = html.substr(i, semi - i + 1);
+				piece = entity == "&amp;" ? "&" : entity == "&lt;" ? "<"
+				    : entity == "&gt;"                             ? ">"
+				    : entity == "&quot;"                           ? "\""
+				    : entity == "&nbsp;"                           ? " "
+				    : entity == "&#39;"                            ? "'"
+				                                                   : entity;
+				i = semi;
+			}
+		}
+		text += piece;
+		if (inLink)
+			linkText += piece;
+		++i;
+	}
+}
+
+void methodWebPage(CCtrlCall &call)
+{
+	if (!requireInterface(call))
+		return;
+	CGroupHTML *html = findHtmlById(call);
+	if (html == nullptr)
+		return;
+	std::string source = html->getHTML();
+	std::string format = call.getArgs().get("format").getString("text");
+	size_t maxBytes = (size_t)std::max((sint64)256, std::min((sint64)4 * 1024 * 1024, call.getArgs().get("max_bytes").getInt(64 * 1024)));
+	CJsonValue r = CJsonValue::object();
+	r.set("id", html->getId());
+	r.set("url", html->getURL());
+	r.set("title", html->getProperty("title"));
+	r.set("loading", html->isBrowsing());
+	std::string body;
+	if (format == "html")
+	{
+		body = source;
+	}
+	else
+	{
+		CJsonValue links = CJsonValue::array();
+		htmlText(source, body, links);
+		// the blank lines a layout leaves
+		std::string compact;
+		uint blank = 0;
+		std::vector<std::string> lines;
+		explode(body, std::string("\n"), lines, false);
+		for (uint i = 0; i < lines.size(); ++i)
+		{
+			std::string line = trim(lines[i]);
+			if (line.empty() && ++blank > 1)
+				continue;
+			if (!line.empty())
+				blank = 0;
+			compact += line + "\n";
+		}
+		body = compact;
+		r.set("links", links);
+	}
+	r.set("bytes", (uint64)body.size());
+	if (body.size() > maxBytes)
+	{
+		body.resize(maxBytes);
+		r.set("truncated", toString("the first %u bytes: max_bytes gives more", (uint)maxBytes));
+	}
+	r.set(format == "html" ? "html" : "text", body);
+	call.reply(r);
+}
+
+void methodWebBrowse(CCtrlCall &call)
+{
+	if (!requireInterface(call))
+		return;
+	CGroupHTML *html = findHtmlById(call);
+	if (html == nullptr)
+		return;
+	const std::string &url = call.getArgs().get("url").getString();
+	if (url.empty())
+	{
+		call.fail("url is required");
+		return;
+	}
+	html->browse(url.c_str());
+	call.reply(CJsonValue::object().set("id", html->getId()).set("url", url).set("next", "web.list says when it is no longer loading"));
+}
+
+void methodWebBack(CCtrlCall &call)
+{
+	if (!requireInterface(call))
+		return;
+	CGroupHTML *html = findHtmlById(call);
+	if (html == nullptr)
+		return;
+	if (call.getArgs().get("refresh").getBool(false))
+		html->refresh();
+	else
+		html->browseUndo();
+	call.reply(CJsonValue::object().set("id", html->getId()));
+}
+
+// *** inventories and journal ***
+
+CCDBNodeLeaf *leaf(const std::string &path)
+{
+	return CDBManager::getInstance()->getDbProp(path, false);
+}
+
+sint64 leafValue(const std::string &path, sint64 defaultValue = 0)
+{
+	CCDBNodeLeaf *l = leaf(path);
+	return l != nullptr ? l->getValue64() : defaultValue;
+}
+
+std::string dynString(uint32 id, bool &arrived)
+{
+	std::string text;
+	arrived = id == 0 || STRING_MANAGER::CStringManagerClient::instance()->getDynString(id, text);
+	return text;
+}
+
+void methodInventory(CCtrlCall &call)
+{
+	if (!requireInGame(call))
+		return;
+	std::string name = toUpperAscii(call.getArgs().get("inventory").getString("bag"));
+	static const char *const s_Known[] = { "BAG", "EQUIP", "HAND", "PACK_ANIMAL0", "PACK_ANIMAL1", "PACK_ANIMAL2", "PACK_ANIMAL3", "ROOM", "TEMP", "SHARE", "GUILD" };
+	bool known = false;
+	for (uint i = 0; i < sizeof(s_Known) / sizeof(s_Known[0]); ++i)
+		known = known || name == s_Known[i];
+	if (!known)
+	{
+		call.fail("inventory is bag, equip, hand, pack_animal0 to 3, room, temp, share or guild");
+		return;
+	}
+	CCDBNodeBranch *branch = dynamic_cast<CCDBNodeBranch *>(CDBManager::getInstance()->getDB()->getNode(ICDBNode::CTextId("SERVER:INVENTORY:" + name), false));
+	if (branch == nullptr)
+	{
+		call.fail("there is no SERVER:INVENTORY:" + name);
+		return;
+	}
+	CJsonValue items = CJsonValue::array();
+	uint slots = 0;
+	for (uint i = 0; i < branch->getNbNodes(); ++i)
+	{
+		ICDBNode *slot = branch->getNode((uint16)i);
+		if (slot == nullptr || slot->isLeaf())
+			continue;
+		++slots;
+		std::string base = "SERVER:INVENTORY:" + name + ":" + *slot->getName();
+		uint32 sheet = (uint32)leafValue(base + ":SHEET");
+		if (sheet == 0)
+			continue;
+		CSheetId id(sheet);
+		CJsonValue o = CJsonValue::object();
+		o.set("slot", *slot->getName());
+		o.set("sheet", id.toString());
+		const char *localized = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(id);
+		if (localized != nullptr)
+			o.set("name", localized);
+		o.set("quantity", leafValue(base + ":QUANTITY"));
+		o.set("quality", leafValue(base + ":QUALITY"));
+		if (leafValue(base + ":LOCKED") != 0)
+			o.set("locked", leafValue(base + ":LOCKED"));
+		items.push(o);
+	}
+	CJsonValue r = CJsonValue::object();
+	r.set("inventory", toLowerAscii(name));
+	r.set("slots", slots);
+	r.set("items", items);
+	r.set("database", "SERVER:INVENTORY:" + name + ":<slot>; ui.drag moves items between the slots of the windows");
+	call.reply(r);
+}
+
+void methodMissions(CCtrlCall &call)
+{
+	if (!requireInGame(call))
+		return;
+	CJsonValue list = CJsonValue::array();
+	bool allArrived = true;
+	for (uint i = 0; i < 64; ++i)
+	{
+		std::string base = toString("SERVER:MISSIONS:%u", i);
+		if (leaf(base + ":TITLE") == nullptr)
+			break;
+		uint32 titleId = (uint32)leafValue(base + ":TITLE");
+		if (titleId == 0)
+			continue;
+		bool arrived;
+		CJsonValue m = CJsonValue::object();
+		m.set("index", i);
+		m.set("title", dynString(titleId, arrived));
+		allArrived = allArrived && arrived;
+		m.set("finished", leafValue(base + ":FINISHED"));
+		uint32 detailId = (uint32)leafValue(base + ":DETAIL_TEXT");
+		if (detailId != 0)
+		{
+			m.set("detail", dynString(detailId, arrived));
+			allArrived = allArrived && arrived;
+		}
+		CJsonValue goals = CJsonValue::array();
+		for (uint g = 0; g < 32; ++g)
+		{
+			std::string goal = toString("%s:GOALS:%u", base.c_str(), g);
+			if (leaf(goal + ":TEXT") == nullptr)
+				break;
+			uint32 textId = (uint32)leafValue(goal + ":TEXT");
+			if (textId == 0)
+				continue;
+			CJsonValue o = CJsonValue::object();
+			o.set("text", dynString(textId, arrived));
+			allArrived = allArrived && arrived;
+			if (leaf(goal + ":NPC_ALIAS") != nullptr)
+				o.set("npc_alias", leafValue(goal + ":NPC_ALIAS"));
+			goals.push(o);
+		}
+		m.set("goals", goals);
+		CJsonValue targets = CJsonValue::array();
+		for (uint t = 0; t < 8; ++t)
+		{
+			std::string target = toString("%s:TARGET%u", base.c_str(), t);
+			if (leaf(target + ":TITLE") == nullptr)
+				break;
+			uint32 targetTitle = (uint32)leafValue(target + ":TITLE");
+			if (targetTitle == 0)
+				continue;
+			CJsonValue o = CJsonValue::object();
+			o.set("title", dynString(targetTitle, arrived));
+			o.set("x", leafValue(target + ":X") / 1000.0);
+			o.set("y", leafValue(target + ":Y") / 1000.0);
+			targets.push(o);
+		}
+		if (targets.size() > 0)
+			m.set("compass_targets", targets);
+		list.push(m);
+	}
+	CJsonValue r = CJsonValue::object();
+	r.set("missions", list);
+	r.set("note", "index is the journal index the CSR commands take (failMission, progressMission)");
+	if (!allArrived)
+		r.set("strings_arrived", false);
+	call.reply(r);
+}
+
+// *** the Ring scenario editor ***
+
+bool requireEditor(CCtrlCall &call)
+{
+	if (!R2::getEditor().isInitialized() || R2::getEditor().getMode() == R2::CEditor::NotInitialized)
+	{
+		call.fail("the scenario editor is not running");
+		return false;
+	}
+	return true;
+}
+
+/// Runs a Lua chunk of the editor's methods and answers with its first result. The chunk bounds what it returns
+/// itself (ring.tree has depth and max); the conversion only stops a runaway one, and says so.
+void ringLua(CCtrlCall &call, const char *code, const CJsonValue &args)
+{
+	CJsonValue results;
+	std::string error;
+	bool truncated = false;
+	if (!runLua(code, args, 40, 200000, results, error, &truncated))
+	{
+		call.fail(error);
+		return;
+	}
+	CJsonValue r = results.at(0);
+	if (truncated && r.isObject())
+		r.set("conversion_truncated", "the result was larger than the conversion takes: narrow it");
+	call.reply(r);
+}
+
+const char *const s_RingState = "local r = {}\n"
+                                "r.can_undo = r2:canUndo()\n"
+                                "r.can_redo = r2:canRedo()\n"
+                                "r.selected = r2:getSelectedInstanceId()\n"
+                                "if r2.Scenario then\n"
+                                "  r.scenario = r2.Scenario.InstanceId\n"
+                                "  local act = r2.Scenario:getCurrentAct()\n"
+                                "  if act then r.current_act = act.InstanceId r.current_act_name = act.Name end\n"
+                                "  r.acts = r2.Scenario.Acts.Size\n"
+                                "end\n"
+                                "return r\n";
+
+const char *const s_RingTree = "local id, maxDepth, maxItems = ...\n"
+                               "local root = r2.Scenario\n"
+                               "if id and id ~= '' then root = r2:getInstanceFromId(id) end\n"
+                               "if not root then error('no instance ' .. tostring(id)) end\n"
+                               "local count = 0\n"
+                               "local function walk(node, depth)\n"
+                               "  count = count + 1\n"
+                               "  if count > maxItems then return '<truncated>' end\n"
+                               "  if not r2.isTable(node) then return node end\n"
+                               "  if depth >= maxDepth then return { InstanceId = node.InstanceId, Class = node.Class, Name = node.Name, more = 'deeper than depth' } end\n"
+                               "  local out = {}\n"
+                               "  for k, v in specPairs(node) do\n"
+                               "    if r2.isTable(v) then out[k] = walk(v, depth + 1) else out[k] = v end\n"
+                               "  end\n"
+                               "  return out\n"
+                               "end\n"
+                               "local tree = walk(root, 0)\n"
+                               "return { tree = tree, items = count, truncated = count > maxItems }\n";
+
+void methodRingState(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	CJsonValue results;
+	std::string error;
+	if (!runLua(s_RingState, args, 4, 1000, results, error))
+	{
+		call.fail(error);
+		return;
+	}
+	CJsonValue r = results.at(0);
+	static const char *const s_Modes[] = { "not_initialized", "edition", "going_to_test", "going_to_edition", "test", "dm", "animation_loading", "animation_waiting_for_loading",
+		"animation_dm", "animation_play", "animation_going_to_dm", "animation_going_to_play" };
+	uint mode = (uint)R2::getEditor().getMode();
+	r.set("mode", mode < sizeof(s_Modes) / sizeof(s_Modes[0]) ? s_Modes[mode] : "unknown");
+	call.reply(r);
+}
+
+void methodRingTree(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(call.getArgs().get("id").getString());
+	args.push(CJsonValue((sint64)std::max((sint64)1, std::min((sint64)30, call.getArgs().get("depth").getInt(4)))));
+	args.push(CJsonValue((sint64)std::max((sint64)10, std::min((sint64)100000, call.getArgs().get("max").getInt(3000)))));
+	ringLua(call, s_RingTree, args);
+}
+
+void methodRingSet(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(call.getArgs().get("id"));
+	args.push(call.getArgs().get("property"));
+	args.push(call.getArgs().get("value"));
+	ringLua(call,
+	    "local id, prop, value = ...\n"
+	    "if not r2:getInstanceFromId(id) then error('no instance ' .. tostring(id)) end\n"
+	    "r2.requestNewAction('Set ' .. tostring(prop))\n"
+	    "r2.requestSetNode(id, prop, value)\n"
+	    "return { id = id, property = prop, requested = true }\n",
+	    args);
+}
+
+void methodRingCreate(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(CJsonValue(call.getArgs().get("class").getString()));
+	args.push(CJsonValue(call.getArgs().get("base").getString()));
+	args.push(CJsonValue(call.getArgs().get("parent").getString()));
+	args.push(call.getArgs().get("property").isString() ? call.getArgs().get("property") : CJsonValue("Components"));
+	args.push(CJsonValue((sint64)call.getArgs().get("position").getInt(-1)));
+	args.push(call.getArgs().get("values").isObject() ? call.getArgs().get("values") : CJsonValue::object());
+	// an entity of the scenario is made as the palette tool makes it (CToolCreateEntity): the class the palette
+	// element names (a creature's is NpcCreature or NpcPlant), Base the element, the element's name; without a base
+	// the editor cannot display it
+	ringLua(call,
+	    "local class, base, parent, prop, pos, values = ...\n"
+	    "local botObject = string.sub(base, 1, 27) == 'palette.entities.botobjects'\n"
+	    "local parentId = parent\n"
+	    "if parentId == '' then\n"
+	    "  local act = botObject and r2.Scenario:getBaseAct() or r2.Scenario:getCurrentAct()\n"
+	    "  parentId = act.Features[0].InstanceId\n"
+	    "end\n"
+	    "if not r2:getInstanceFromId(parentId) then error('no parent instance ' .. tostring(parentId)) end\n"
+	    "if base ~= '' then\n"
+	    "  local act, baseAct = r2.Scenario:getCurrentAct(), r2.Scenario:getBaseAct()\n"
+	    "  if botObject then\n"
+	    "    if r2.getMaxStaticObjects() - baseAct:getLocalStaticCost() - (act ~= baseAct and act:getLocalStaticCost() or 0) < 1 then error('no room left for an object in the scenario') end\n"
+	    "  elseif r2.getMaxNpcs() - baseAct:getLocalCost() - (act ~= baseAct and act:getLocalCost() or 0) < 1 then\n"
+	    "    error('no room left for an entity in the scenario')\n"
+	    "  end\n"
+	    "end\n"
+	    "if base ~= '' then\n"
+	    "  if not r2.isInPalette(base) then error('no palette element ' .. base .. '; ring.palette lists them') end\n"
+	    "  local elt = r2.getPaletteElement(base)\n"
+	    "  if class == '' then\n"
+	    "    class = (elt and elt.Class) or 'Npc'\n"
+	    "    if string.sub(base, 1, 26) == 'palette.entities.creatures' then\n"
+	    "      class = 'NpcCreature'\n"
+	    "      if elt and elt.SheetClient and r2:isNPCPlant(elt.SheetClient) then class = 'NpcPlant' end\n"
+	    "    end\n"
+	    "  end\n"
+	    "  if class == 'NpcCustom' then error('a custom NPC takes its look from an entity it is cloned from; use another palette element') end\n"
+	    "elseif class == '' or class == 'Npc' or class == 'NpcCreature' or class == 'NpcPlant' or class == 'NpcCustom' then\n"
+	    "  error('an entity needs base, a palette element id (ring.palette lists them): the editor never makes one without')\n"
+	    "end\n"
+	    "local inst = r2.newComponent(class)\n"
+	    "if not inst then error('no component class ' .. tostring(class)) end\n"
+	    "if base ~= '' then\n"
+	    "  inst.Base = base\n"
+	    "  inst.Name = r2.PaletteIdToTranslation[base] or class\n"
+	    "  -- as the palette names them: a creature keeps its name, the others get a number\n"
+	    "  if string.sub(base, 1, 26) ~= 'palette.entities.creatures' then inst.Name = r2:genInstanceName(inst.Name) end\n"
+	    "end\n"
+	    "for k, v in pairs(values) do\n"
+	    "  if k == 'Position' and type(v) == 'table' then inst.Position.x = v.x inst.Position.y = v.y inst.Position.z = v.z or 0\n"
+	    "  else inst[k] = v end\n"
+	    "end\n"
+	    "r2.requestNewAction('Create ' .. tostring(inst.Name or class))\n"
+	    "r2.requestInsertNode(parentId, prop, pos, '', inst)\n"
+	    "return { id = inst.InstanceId, class = class, base = base, parent = parentId, property = prop, requested = true }\n",
+	    args);
+}
+
+void methodRingPalette(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(CJsonValue(toLowerAscii(call.getArgs().get("contains").getString())));
+	args.push(CJsonValue(call.getArgs().get("prefix").getString()));
+	args.push(CJsonValue((sint64)std::max((sint64)1, std::min((sint64)2000, call.getArgs().get("max").getInt(100)))));
+	ringLua(call,
+	    "local contains, prefix, max = ...\n"
+	    "local ids = {}\n"
+	    "for id, name in pairs(r2.PaletteIdToTranslation) do\n"
+	    "  local text = tostring(name)\n"
+	    "  if (prefix == '' or string.sub(id, 1, string.len(prefix)) == prefix)\n"
+	    "    and (contains == '' or string.find(string.lower(id .. ' ' .. text), contains, 1, true)) then\n"
+	    "    table.insert(ids, id)\n"
+	    "  end\n"
+	    "end\n"
+	    "table.sort(ids)\n"
+	    "local out = {}\n"
+	    "for i = 1, math.min(#ids, max) do out[i] = { id = ids[i], name = tostring(r2.PaletteIdToTranslation[ids[i]]) } end\n"
+	    "return { elements = out, count = #ids, truncated = #ids > max }\n",
+	    args);
+}
+
+void methodRingErase(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(call.getArgs().get("id"));
+	ringLua(call,
+	    "local id = ...\n"
+	    "if not r2:getInstanceFromId(id) then error('no instance ' .. tostring(id)) end\n"
+	    "r2.requestNewAction('Delete ' .. tostring(id))\n"
+	    "r2.requestEraseNode(id, '', -1)\n"
+	    "return { id = id, requested = true }\n",
+	    args);
+}
+
+void methodRingMove(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(call.getArgs().get("id"));
+	args.push(call.getArgs().get("parent"));
+	args.push(call.getArgs().get("property").isString() ? call.getArgs().get("property") : CJsonValue("Components"));
+	args.push(CJsonValue((sint64)call.getArgs().get("position").getInt(-1)));
+	args.push(call.getArgs().get("x"));
+	args.push(call.getArgs().get("y"));
+	ringLua(call,
+	    "local id, parent, prop, pos, x, y = ...\n"
+	    "local inst = r2:getInstanceFromId(id)\n"
+	    "if not inst then error('no instance ' .. tostring(id)) end\n"
+	    "if x and y then\n"
+	    "  r2.requestNewAction('Move ' .. tostring(id))\n"
+	    "  r2.requestSetNode(inst.Position.InstanceId, 'x', x)\n"
+	    "  r2.requestSetNode(inst.Position.InstanceId, 'y', y)\n"
+	    "  return { id = id, x = x, y = y, requested = true }\n"
+	    "end\n"
+	    "if not parent or parent == '' then error('parent, or x and y, is required') end\n"
+	    "r2.requestNewAction('Move ' .. tostring(id))\n"
+	    "r2.requestMoveNode(id, '', -1, parent, prop, pos)\n"
+	    "return { id = id, parent = parent, property = prop, requested = true }\n",
+	    args);
+}
+
+void methodRingUndo(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	bool redo = call.getArgs().get("redo").getBool(false);
+	CAHManager::getInstance()->runActionHandler(redo ? "r2ed_redo" : "r2ed_undo", nullptr, std::string());
+	CJsonValue args = CJsonValue::array();
+	ringLua(call, "return { can_undo = r2:canUndo(), can_redo = r2:canRedo() }\n", args);
+}
+
+void methodRingSelect(CCtrlCall &call)
+{
+	if (!requireEditor(call))
+		return;
+	CJsonValue args = CJsonValue::array();
+	args.push(call.getArgs().get("id"));
+	ringLua(call,
+	    "local id = ...\n"
+	    "if id ~= '' and not r2:getInstanceFromId(id) then error('no instance ' .. tostring(id)) end\n"
+	    "r2:setSelectedInstanceId(id)\n"
+	    "return { selected = r2:getSelectedInstanceId() }\n",
+	    args);
+}
+
+} // anonymous namespace
+
+void registerGameMethods(CCtrlEndpoint &endpoint)
+{
+	endpoint.addMethod(new CCtrlFunctionMethod("web.list", "The in-game browser views: id, URL, title, whether a page is loading, whether it is shown. all includes the hidden ones.",
+	    CCtrlSchema().boolean("all", "Also the views that are not shown."), true, methodWebList));
+	endpoint.addMethod(new CCtrlFunctionMethod("web.page",
+	    "The page of a browser view: as text with its links (href and text), or as HTML. max_bytes bounds it (64 KB by default) and truncated says so. Links with ah: or lua: run interface actions; "
+	    "click them in the view (ui.tree with contains, then ui.click) rather than browsing them.",
+	    CCtrlSchema()
+	        .str("id", "The view, as web.list gives it.", true)
+	        .choice("format", "text|html", "text with links (the default) or html.")
+	        .integer("max_bytes", "At most this much text."),
+	    true, methodWebPage));
+	endpoint.addMethod(new CCtrlFunctionMethod("web.browse", "Opens an address in a browser view, as following a link does.",
+	    CCtrlSchema().str("id", "The view.", true).str("url", "The address.", true), false, methodWebBrowse));
+	endpoint.addMethod(new CCtrlFunctionMethod("web.back", "Goes back in a browser view, or reloads it with refresh.",
+	    CCtrlSchema().str("id", "The view.", true).boolean("refresh", "Reload instead."), false, methodWebBack));
+	endpoint.addMethod(new CCtrlFunctionMethod("inventory.list",
+	    "The items of an inventory, from the database the server fills: slot, sheet, name, quantity, quality. Equip, move and drop by ui.drag between the slots of the windows, or by their action handlers.",
+	    CCtrlSchema().choice("inventory", "bag|equip|hand|pack_animal0|pack_animal1|pack_animal2|pack_animal3|room|temp|share|guild", "Which (bag by default)."), true, methodInventory));
+	endpoint.addMethod(new CCtrlFunctionMethod("missions.list",
+	    "The journal: each mission with its index (the one CSR commands take), title, detail, finished state, goals and compass targets. strings_arrived false means some text is on its way: ask again.",
+	    CCtrlSchema(), true, methodMissions));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.state", "The scenario editor: its mode (edition, test, dm, animation...), the scenario and current act, the selection, and whether undo and redo can run.",
+	    CCtrlSchema(), true, methodRingState));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.tree",
+	    "The scenario tree, or the tree below an instance (id): every property of every instance, with InstanceId and Class; arrays of the editor count from 0. depth (4 by default) and max (3000 items) bound it.",
+	    CCtrlSchema().str("id", "An instance id (the scenario by default).").integer("depth", "Levels to follow (4 by default).").integer("max", "Items at most (3000 by default)."), true,
+	    methodRingTree));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.set", "Sets a property of an instance through the editor's request, as its property windows do: it reaches the server and the co-editors, and can be undone.",
+	    CCtrlSchema().str("id", "The instance id.", true).str("property", "The property name.", true).any("value", "The value: a string or a number.", true), false, methodRingSet));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.palette",
+	    "The elements of the editor's palette (NPCs, creatures, objects): id and name, filtered by a word or an id prefix such as palette.entities.creatures. ring.create takes the id as base.",
+	    CCtrlSchema().str("contains", "Only ids or names containing this.").str("prefix", "Only ids starting with this.").integer("max", "At most this many (100 by default)."), true,
+	    methodRingPalette));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.create",
+	    "Creates an instance in the scenario through the editor's request, as its tools do: an entity (an NPC, a creature, an object) from a palette element (base, as ring.palette lists them), "
+	    "the way the palette makes it; other components by class (Region, Road, a feature...). values sets properties first (Name, Position {x, y, z}, Angle...). It goes below a parent (the current "
+	    "act's features by default). Returns its instance id.",
+	    CCtrlSchema()
+	        .str("base", "A palette element id, for an entity.")
+	        .str("class", "The class: for a component that is not an entity, or to override the palette's.")
+	        .str("parent", "The parent instance id.")
+	        .str("property", "The property of the parent it goes in (Components by default).")
+	        .integer("position", "Where in it (-1, the end, by default).")
+	        .object("values", "Properties to set on it first."),
+	    false, methodRingCreate));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.erase", "Deletes an instance through the editor's request.", CCtrlSchema().str("id", "The instance id.", true), false, methodRingErase));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.move", "Moves an instance to x, y in the world, or below another parent, through the editor's requests.",
+	    CCtrlSchema()
+	        .str("id", "The instance id.", true)
+	        .number("x", "World x.")
+	        .number("y", "World y.")
+	        .str("parent", "Or a new parent instance id.")
+	        .str("property", "Its property (Components by default).")
+	        .integer("position", "Where in it (-1 by default)."),
+	    false, methodRingMove));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.undo", "Undoes the last editing action, or redoes with redo, as the editor's buttons do; returns whether more can be undone and redone.",
+	    CCtrlSchema().boolean("redo", "Redo instead."), false, methodRingUndo));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.select", "Selects an instance in the editor, or none with an empty id.", CCtrlSchema().str("id", "The instance id.", true), false,
+	    methodRingSelect));
+}
+
+} // ClientCtrl
+
+#endif // RYZOM_HAS_CLIENT_CTRL
+
+/* End of client_ctrl_game.cpp */

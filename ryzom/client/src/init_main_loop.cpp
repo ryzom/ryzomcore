@@ -112,6 +112,7 @@
 #include "landscape_poly_drawer.h"
 #include "session_browser_impl.h"
 #include "nel/gui/lua_manager.h"
+#include "client_ctrl.h"
 
 
 // ProgressBar steps in init main loop
@@ -461,9 +462,11 @@ static void initWeather()
 //---------------------------------------------------
 void initMainLoop()
 {
+	ClientCtrl::setPhase("entering_game");
 	StartInitTime = NLMISC::CTime::getLocalTime();
 
 	Driver->clearBuffers(CRGBA::Black);
+	ClientCtrl::beforeSwap();
 	Driver->swapBuffers();
 	CNiceInputAuto niceInputs;
 	bool WantStartupProfiling = false;

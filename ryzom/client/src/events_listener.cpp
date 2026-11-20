@@ -34,6 +34,7 @@
 #include "interface_v3/action_handler_base.h"
 #include "global.h"
 #include "item_group_manager.h"
+#include "client_ctrl.h"
 
 using namespace NLMISC;
 
@@ -140,6 +141,9 @@ void CEventsListener::operator()(const CEvent& event)
 	// Window closed.
 	if(event == EventDestroyWindowId)
 	{
+		// the endpoint goes first: nothing it serves may run on what the release takes down
+		ClientCtrl::release("the window was closed");
+
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
 #ifdef RYZOM_FORGE

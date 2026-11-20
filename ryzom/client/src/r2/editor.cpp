@@ -119,6 +119,7 @@
 #include "../session_browser_impl.h"
 #include "../far_tp.h"
 #include "nel/gui/lua_manager.h"
+#include "../client_ctrl.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -1938,6 +1939,7 @@ void CEditor::waitScenarioScreen()
 
 
 		// Display
+		ClientCtrl::beforeSwap();
 		Driver->swapBuffers();
 		// (a screen of the interface alone, as the login and character selection screens: paced as they are)
 		limitOutgameFrameRate();

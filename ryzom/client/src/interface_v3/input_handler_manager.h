@@ -126,7 +126,8 @@ public:
 	void	recoverMousePos() { _RecoverFocusLost = true; }
 
 
-	bool hasFocus() const { return _Focus; }
+	// the window has the focus, or a control tool drives the client (--ctrl-listen): its input counts as focused
+	bool hasFocus() const;
 
 private:
 

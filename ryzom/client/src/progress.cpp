@@ -39,6 +39,7 @@
 #include "bg_downloader_access.h"
 #include "nel/misc/system_utils.h"
 #include "nel/3d/stereo_hmd.h"
+#include "client_ctrl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -438,7 +439,10 @@ void CProgress::internalProgress (float value)
 	Driver->EventServer.addListener(EventMouseDownId,	this);
 
 	// Update messages
-	CInputHandlerManager::getInstance()->pumpEventsNoIM();
+	{
+		ClientCtrl::CLoadingScope loading(_ProgressMessage, value);
+		CInputHandlerManager::getInstance()->pumpEventsNoIM();
+	}
 
 	Driver->EventServer.removeListener(EventMouseDownId,	this);
 
@@ -446,6 +450,8 @@ void CProgress::internalProgress (float value)
 	bool activeDriver =  Driver->isActive();
 	if ((UseEscapeDuringLoading && Driver->AsyncListener.isKeyPushed (KeyESCAPE)) || !activeDriver)
 	{
+		// the endpoint goes first: nothing it serves may run on what the release takes down
+		ClientCtrl::release(activeDriver ? "Escape on a loading screen (a development build quits there)" : "the window was closed on a loading screen");
 		// Release the application
 		releaseMainLoop(true);
 		release();
@@ -464,6 +470,7 @@ void CProgress::internalProgress (float value)
 	CBGDownloaderAccess::getInstance().update();
 #endif
 	// Display to screen.
+	ClientCtrl::beforeSwap();
 	Driver->swapBuffers();
 
 	// \todo GUIGUI : Remove this when possible.

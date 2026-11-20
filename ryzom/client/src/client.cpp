@@ -58,6 +58,7 @@
 #include "far_tp.h"
 #include "user_agent.h"
 #include "global.h"
+#include "client_ctrl.h"
 
 #ifdef RZ_USE_STEAM
 #include "steam_client.h"
@@ -189,6 +190,7 @@ int main(int argc, char **argv)
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
 	Args.addAdditionalArg("slot", "Char slot to use", true, false);
+	ClientCtrl::addArgs(Args);
 
 #ifdef TEST_CRASH_COUNTER
 	Args.addArg("", "crash", "", "Crash client before init");
@@ -375,6 +377,9 @@ int main(int argc, char **argv)
 	// initialize log
 	initLog();
 
+	// the control endpoint, when asked for: it serves the log from here on
+	ClientCtrl::start(Args);
+
 	if (profileDirectoryReason)
 	{
 		nlinfo("The client files (client.cfg, logs, saves) are in '%s' and not in the startup directory '%s': %s",
@@ -418,6 +423,7 @@ int main(int argc, char **argv)
 			//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
 
+			ClientCtrl::release("the login screen was left");
 			release();
 
 			// delete all logs and displayers when we're not using logs macros anymore
@@ -507,6 +513,8 @@ int main(int argc, char **argv)
 #endif // TEST_CRASH_COUNTER
 
 	// Final release
+	// the endpoint goes first: nothing it serves may run on what the release takes down
+	ClientCtrl::release("the client quit", true);
 	RYZOM_TRY("Releasing")
 		release();
 	RYZOM_CATCH("Releasing")

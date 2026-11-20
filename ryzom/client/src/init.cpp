@@ -106,6 +106,7 @@
 #include "login_progress_post_thread.h"
 
 #include "browse_faq.h"
+#include "client_ctrl.h"
 
 // XMLLib
 #include <libxml/xmlmemory.h>
@@ -335,6 +336,7 @@ void ExitClientError (const char *format, ...)
 {
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
+	ClientCtrl::setExitReason(std::string("an error the client stops for: ") + str);
 
 	// Driver ?
 	if (Driver)
@@ -562,6 +564,7 @@ void checkDriverVersion()
 					if (ClientQuestion (message))
 					{
 						openURL(driversURL[i]);
+						ClientCtrl::setExitReason("the display driver is too old, and the user chose to update it");
 						extern void quitCrashReport ();
 						quitCrashReport ();
 						exit (EXIT_FAILURE);
@@ -1384,6 +1387,7 @@ void prelogInit()
 				if (ClientQuestion (CI18N::get ("agp_trouble")))
 				{
 					openDoc ("client_troubles.html");
+					ClientCtrl::setExitReason("a known trouble of the graphics card, and the user chose to read about it");
 					extern void quitCrashReport ();
 					quitCrashReport ();
 					exit (EXIT_FAILURE);
@@ -1633,6 +1637,7 @@ void	initBotObjectSelection()
 void postlogInit()
 {
 	Driver->clearBuffers(CRGBA::Black);
+	ClientCtrl::beforeSwap();
 	Driver->swapBuffers();
 	CNiceInputAuto niceInputs;
 	string nmsg;

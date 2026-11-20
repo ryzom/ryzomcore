@@ -103,6 +103,7 @@
 #include "item_group_manager.h"
 #include "nel/gui/http_cache.h"
 #include "nel/gui/http_hsts.h"
+#include "client_ctrl.h"
 
 #ifndef NL_OS_WINDOWS
 #include <unistd.h>
@@ -399,6 +400,7 @@ void	releaseMainLoopReselect()
 // Btw the 2 methods should have strong similarities
 void releaseMainLoop(bool closeConnection)
 {
+	ClientCtrl::setPhase("leaving_game");
 	ProgressBar.release();
 
 	// Release R2 editor if applicable
@@ -604,6 +606,10 @@ void quitAtEndOfSession()
 	// quit properly crash info
 	extern void quitCrashReport();
 	quitCrashReport();
+
+	// the process ends without atexit: the endpoint writes its reason now, after the message to the server and
+	// the saves, which the time the system leaves is for
+	ClientCtrl::release("the session of the user ended (log off or shutdown)");
 
 	// End the process without the destructors of the static objects, which expect what release() released
 #ifdef NL_OS_WINDOWS

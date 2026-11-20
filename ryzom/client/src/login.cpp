@@ -69,6 +69,7 @@
 #include "user_agent.h"
 
 #include "main_loop_debug.h"
+#include "client_ctrl.h"
 
 void ConnectToShard();
 
@@ -469,6 +470,7 @@ void loginMainLoop()
 			nlSleep(ClientCfg.Sleep);
 		}
 		// Display
+		ClientCtrl::beforeSwap();
 		Driver->swapBuffers();
 
 		// This screen needs no more frames than a display shows
@@ -950,6 +952,7 @@ void initAltLogin()
 bool login()
 {
 	CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_LoginScreen, "login_step_login_screen"));
+	ClientCtrl::setPhase("login");
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
@@ -3214,6 +3217,7 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	LoginSM.pushEvent(CLoginStateMachine::ev_mainland_patch);
 	loginMainLoop(); // patch is handled in the login mainloop
 	// there should have been a reboot there, so quit if something went wrong...
+	ClientCtrl::release("the mainland patch did not restart the client");
 	release();
 	exit(0);
 }

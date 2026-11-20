@@ -37,6 +37,7 @@
 #include "../release.h"
 
 #include "../r2/editor.h"
+#include "../client_ctrl.h"
 
 
 ///////////
@@ -261,7 +262,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 		}
 	}
 	// **** Event Mouse
-	else if(CWidgetManager::getInstance()->getPointer() && _Focus /* && CWidgetManager::getInstance()->isMouseHandlingEnabled() */ &&
+	else if(CWidgetManager::getInstance()->getPointer() && hasFocus() /* && CWidgetManager::getInstance()->isMouseHandlingEnabled() */ &&
 			( event == EventMouseMoveId ||
 			  event == EventMouseDownId ||
 			  event == EventMouseUpId ||
@@ -543,6 +544,12 @@ bool CInputHandlerManager::readInputConfigFile(const std::string & fileName)
 
 
 // ***************************************************************************
+bool CInputHandlerManager::hasFocus() const
+{
+	return _Focus || ClientCtrl::isDriven();
+}
+
+// ***************************************************************************
 void	CInputHandlerManager::pumpEvents()
 {
 	H_AUTO_USE ( RZ_Client_Pump_Events )
@@ -554,6 +561,10 @@ void	CInputHandlerManager::pumpEvents()
 
 	// pump the filtered ones
 	FilteredEventServer.pump();
+
+	// the calls of a control tool (--ctrl-listen), after the pump: never from inside a listener,
+	// since the event server asserts on a pump within a pump
+	ClientCtrl::update(true);
 }
 
 
@@ -573,6 +584,9 @@ void	CInputHandlerManager::pumpEventsNoIM()
 
 	// reset
 	_SkipInterfaceManager= false;
+
+	// the calls of a control tool (--ctrl-listen); a loading screen has no interface to act on
+	ClientCtrl::update(false);
 }
 
 

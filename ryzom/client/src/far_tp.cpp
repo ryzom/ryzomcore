@@ -51,6 +51,7 @@
 #include "login_progress_post_thread.h"
 #include "interface_v3/action_handler_base.h"
 #include "item_group_manager.h"
+#include "client_ctrl.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -1588,6 +1589,7 @@ void CFarTP::exitIfFailed()
 	extern void quitCrashReport();
 	quitCrashReport();
 	NLMISC::NL3D_BlockMemoryAssertOnPurge = false;
+	ClientCtrl::setExitReason("a far teleport failed: " + m_FailureMessage);
 	exit(EXIT_FAILURE);
 }
 
