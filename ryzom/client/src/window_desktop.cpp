@@ -20,6 +20,7 @@
 
 #include "nel/3d/u_driver.h"
 #include "nel/misc/cmd_args.h"
+#include "nel/misc/report.h"
 #include "nel/misc/system_utils.h"
 
 using namespace NLMISC;
@@ -53,6 +54,11 @@ void init(const CCmdArgs &args)
 	std::vector<std::string> values = args.getLongArg("desktop");
 	s_IsRequested = true;
 	s_Requested = values.empty() ? std::string() : values.front();
+	// a crash leaves its report file, without the window of the report tool on the desktop shown, nor the one of the
+	// error reporting of the system or of a debugger
+	setReportToolEnabled(false);
+	SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #else
 	(void)args;
 #endif
@@ -67,6 +73,19 @@ void setRequested(const std::string &desktop)
 {
 	s_IsRequested = true;
 	s_Requested = desktop;
+	setReportToolEnabled(false);
+#ifdef NL_OS_WINDOWS
+	SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+}
+
+bool mayOpen(const std::string &what)
+{
+	if (!s_IsRequested)
+		return true;
+	nlwarning("The client does not start %s, which would show on the desktop shown: the client is on another virtual desktop (--desktop)", what.c_str());
+	return false;
 }
 
 const std::string &getRequested()

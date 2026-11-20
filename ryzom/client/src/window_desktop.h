@@ -49,6 +49,12 @@ const std::string &getRequested();
 /// is never activated from then on, and stays out of a full screen mode
 void setRequested(const std::string &desktop);
 
+/// Whether the client may start a program with a window of its own (a browser, the configurator, a report tool):
+/// not on another desktop, where it would show on the desktop shown and take the focus. False then, with a warning
+/// in the log that names what was not started. The dialogs of the client and its message boxes go to the log there
+/// too, and a crash leaves its report file without the report tool.
+bool mayOpen(const std::string &what);
+
 /// Shows the window of the client on the desktop of the option, without activating it. The system moves a window
 /// there a moment after it is shown, and it is on the desktop shown until then: it is shown off the screen, and put
 /// in its place once it is there. When the desktop cannot be had, it shows on the desktop shown, still without

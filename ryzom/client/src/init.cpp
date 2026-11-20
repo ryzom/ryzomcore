@@ -348,7 +348,11 @@ void ExitClientError (const char *format, ...)
 
 #ifdef NL_OS_WINDOWS
 	CurrentErrorMessage = NLMISC::utf8ToWide(str);
-	DialogBox(HInstance, MAKEINTRESOURCE(IDD_ERROR_HELP_MESSAGE_BOX), NULL, ExitClientErrorDialogProc);
+	// on another virtual desktop the dialog would show on the desktop shown: the log has the message (WindowDesktop)
+	if (WindowDesktop::isRequested())
+		nlwarning("The client stops for an error, not shown in a dialog on the desktop shown: %s", str);
+	else
+		DialogBox(HInstance, MAKEINTRESOURCE(IDD_ERROR_HELP_MESSAGE_BOX), NULL, ExitClientErrorDialogProc);
 	/*
 		MessageBoxW (NULL, nlUtf8ToWide(str.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONERROR);
 	*/
@@ -376,6 +380,12 @@ void ExitClientError (const char *format, ...)
 void ClientInfo (const std::string &message)
 {
 #ifdef NL_OS_WINDOWS
+	// on another virtual desktop the box would show on the desktop shown: the log has the message (WindowDesktop)
+	if (WindowDesktop::isRequested())
+	{
+		nlwarning("A message for the user, not shown on the desktop shown: %s", message.c_str());
+		return;
+	}
 	MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONINFORMATION);
 #endif
 }
@@ -384,6 +394,13 @@ void ClientInfo (const std::string &message)
 bool ClientQuestion (const std::string &message)
 {
 #ifdef NL_OS_WINDOWS
+	// on another virtual desktop the box would show on the desktop shown: the log has the question, answered no
+	// (WindowDesktop)
+	if (WindowDesktop::isRequested())
+	{
+		nlwarning("A question for the user, not shown on the desktop shown, answered no: %s", message.c_str());
+		return false;
+	}
 	return MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_YESNO|MB_ICONQUESTION) != IDNO;
 #else
 	return false;

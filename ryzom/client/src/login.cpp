@@ -70,6 +70,7 @@
 
 #include "main_loop_debug.h"
 #include "client_ctrl.h"
+#include "window_desktop.h"
 
 void ConnectToShard();
 
@@ -1331,7 +1332,11 @@ class CAHOnGameConfiguration : public IActionHandler
 
 		static string Configurator = "ryzom_configuration_rd.exe";
 
-		if (CFile::fileExists (Configurator))
+		if (!CFile::fileExists (Configurator))
+		{
+			nlwarning("<CAHOnGameConfiguration::execute> can't find ryzom configurator : %s",Configurator.c_str());
+		}
+		else if (WindowDesktop::mayOpen("the configurator"))
 		{
 			// launch the ryzom configurator
 			launchProgram(Configurator, "");
@@ -1339,10 +1344,6 @@ class CAHOnGameConfiguration : public IActionHandler
 			loginOK = false;
 
 			LoginSM.pushEvent(CLoginStateMachine::ev_quit);
-		}
-		else
-		{
-			nlwarning("<CAHOnGameConfiguration::execute> can't find ryzom configurator : %s",Configurator.c_str());
 		}
 	}
 };
@@ -1935,9 +1936,12 @@ class CAHOpenURL : public IActionHandler
 				url += LoginCustomParameters;
 		}
 
-		openURL(url);
+		if (WindowDesktop::mayOpen("a browser for " + url))
+		{
+			openURL(url);
 
-		nlinfo("openURL %s", url.c_str());
+			nlinfo("openURL %s", url.c_str());
+		}
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenURL, "open_url");

@@ -1070,6 +1070,37 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			additionalParams = "--profile " + Args.getLongArg("profile").front();
 		}
 
+		// a client with a control endpoint, or on another virtual desktop, comes back the same way
+		if (Args.haveLongArg("ctrl-listen"))
+		{
+			std::vector<std::string> values = Args.getLongArg("ctrl-listen");
+			std::string name = values.empty() ? std::string() : values.front();
+			// the characters of an endpoint name, and the '#' of the instance: nothing the script would read otherwise
+			// without a name the client takes the next argument for one, the login: the default name is written out
+			if (name.empty())
+				name = "client#";
+			if (name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.#") == std::string::npos)
+				additionalParams += std::string(additionalParams.empty() ? "" : " ") + "--ctrl-listen=" + name;
+			else
+				nlwarning("The client restarted after the patch has no control endpoint: '%s' is not a name for one", name.c_str());
+		}
+#ifdef NL_OS_WINDOWS
+		if (Args.haveLongArg("desktop"))
+		{
+			std::vector<std::string> values = Args.getLongArg("desktop");
+			std::string desktop = values.empty() ? std::string() : values.front();
+			// quoted for the batch file, which reads a % as one of its variables and has no way to quote a quote; an
+			// empty one, no desktop, is left out, as the client would take the next argument, the login, for it
+			if (desktop.empty())
+				nlwarning("The client restarted after the patch shows on the desktop shown: --desktop names no desktop");
+			else if (desktop.find_first_of("\"%") == std::string::npos)
+				additionalParams += std::string(additionalParams.empty() ? "" : " ") + "\"--desktop=" + desktop + "\"";
+			else
+				nlwarning("The client restarted after the patch shows on the desktop shown: the virtual desktop '%s' has a character the update script cannot pass on",
+				    desktop.c_str());
+		}
+#endif
+
 #ifdef NL_OS_WINDOWS
 		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
 		contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";

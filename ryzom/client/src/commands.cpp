@@ -77,6 +77,7 @@
 #include "continent.h"
 #include "ig_client.h"
 #include "commands.h"
+#include "window_desktop.h"
 #include "entities.h"
 #include "teleport.h"
 #include "nel/misc/cdb_leaf.h"
@@ -901,6 +902,8 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 
 	nlinfo ("Calling for bug report : '%s %s'", brn.c_str(), sys.c_str());
 
+	if (!WindowDesktop::mayOpen("the bug report tool"))
+		return true;
 	launchProgram(brn, sys);
 
 	// give some cpu to the launched application
@@ -5929,6 +5932,9 @@ NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 	if (args.size () != 1)
 		return false;
 
+	// refused on another desktop: the command did not do what it was asked
+	if (!WindowDesktop::mayOpen("a browser for " + args[0]))
+		return false;
 	return openURL(args[0]);
 }
 

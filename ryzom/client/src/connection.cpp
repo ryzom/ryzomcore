@@ -88,6 +88,7 @@
 
 #include "misc.h"
 #include "client_ctrl.h"
+#include "window_desktop.h"
 
 
 ////////////////
@@ -1314,7 +1315,10 @@ TInterfaceState globalMenu()
 								UDriver::TMessageBoxId ret = Driver->systemMessageBox("The pre-selected character doesn't exist.\nDo you want to use the first available character instead ?", "Char loading error", UDriver::yesNoType, UDriver::warningIcon);
 								if (ret == UDriver::noId)
 								{
-									ClientCtrl::setExitReason("the character the client was started to play does not exist, and the user chose to quit");
+									// on another virtual desktop nobody was asked: the question went to the log (WindowDesktop)
+									ClientCtrl::setExitReason(WindowDesktop::isRequested()
+									        ? "the character the client was started to play does not exist (on another virtual desktop the client asks nobody to take another one)"
+									        : "the character the client was started to play does not exist, and the user chose to quit");
 									exit(-1);
 								}
 								else
