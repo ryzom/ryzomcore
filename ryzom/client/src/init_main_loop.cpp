@@ -486,6 +486,10 @@ void initMainLoop()
 	NLMISC::TTime initLast = initStart;
 	NLMISC::TTime initCurrent = initLast;
 
+	// The loading began before the character selection (connection, reconnection): the keys that were pushed there are
+	// not keys of the loading that goes on here (see beginLoading)
+	Driver->AsyncListener.reset();
+
 	// Progress bar for init_main_loop()
 	ProgressBar.reset (BAR_STEP_INIT_MAIN_LOOP);
 	string nmsg;
@@ -1505,6 +1509,11 @@ void initMainLoop()
 	// disable woopra stats
 	//startStatThread();
 
+	// Escape quits the client during the loading that ends here only. In game the progress bar is also asked without a
+	// loading that sets this (the landscape zones of a larger view distance, a teleport of the Ring editor that runs
+	// without a shard), and there an Escape that was pushed in game is not a wish to quit
+	UseEscapeDuringLoading = false;
+
 }// initMainLoop //
 
 
@@ -1632,6 +1641,11 @@ void loadBackgroundBitmap (TBackground background)
 
 void beginLoading (TBackground background)
 {
+	// A key that was pushed stays pushed for the async listener until its state is asked, and in game nothing asks for
+	// Escape or Shift: without this, an Escape of long before quits the client (CProgress::internalProgress, where
+	// UseEscapeDuringLoading allows it), and a Shift and an Escape of long before cancel a teleport that can be cancelled
+	Driver->AsyncListener.reset();
+
 	LoadingContinent = nullptr;
 	if (!LoadingBackgroundBG.empty())
 	{
