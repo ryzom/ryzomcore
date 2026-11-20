@@ -516,7 +516,8 @@ void loginMainLoop()
 						if (!windowBlinkDone)
 						{
 							bgDownloader.hideDownloader();
-							ShowWindow (hWnd, SW_RESTORE);
+							// not activated on another virtual desktop (WindowDesktop)
+							ShowWindow (hWnd, WindowDesktop::isRequested() ? SW_SHOWNOACTIVATE : SW_RESTORE);
 							windowBlinkDone = true;
 						}
 
@@ -3221,7 +3222,6 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	LoginSM.pushEvent(CLoginStateMachine::ev_mainland_patch);
 	loginMainLoop(); // patch is handled in the login mainloop
 	// there should have been a reboot there, so quit if something went wrong...
-	ClientCtrl::release("the mainland patch did not restart the client");
 	release();
 	exit(0);
 }

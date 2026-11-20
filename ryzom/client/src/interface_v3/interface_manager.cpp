@@ -2520,7 +2520,8 @@ void CInterfaceManager::processServerIDString()
 void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const string &text, const string &masterGroup, TCaseMode caseMode)
 {
 	// a box that takes the input until it is closed: a control tool learns of it at once
-	ClientCtrl::addEvent("message_box", NLMISC::CJsonValue::object().set("group", masterGroup + ":" + msgBoxGroup).set("text", text));
+	if (ClientCtrl::isActive())
+		ClientCtrl::addEvent("message_box", NLMISC::CJsonValue::object().set("group", masterGroup + ":" + msgBoxGroup).set("text", text));
 
 	CInterfaceGroup *group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup));
 	CViewText		*viewText= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(masterGroup+":" + msgBoxGroup + ":text"));

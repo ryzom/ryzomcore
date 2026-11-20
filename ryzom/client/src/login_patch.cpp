@@ -1074,11 +1074,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (Args.haveLongArg("ctrl-listen"))
 		{
 			std::vector<std::string> values = Args.getLongArg("ctrl-listen");
+			// a client without a name for its endpoint stopped at its start (ClientCtrl::start)
 			std::string name = values.empty() ? std::string() : values.front();
 			// the characters of an endpoint name, and the '#' of the instance: nothing the script would read otherwise
-			// without a name the client takes the next argument for one, the login: the default name is written out
-			if (name.empty())
-				name = "client#";
 			if (name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.#") == std::string::npos)
 				additionalParams += std::string(additionalParams.empty() ? "" : " ") + "--ctrl-listen=" + name;
 			else
@@ -1087,13 +1085,16 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 #ifdef NL_OS_WINDOWS
 		if (Args.haveLongArg("desktop"))
 		{
+			// a client without a desktop that is there stopped before it showed its window (WindowDesktop::showWindow)
 			std::vector<std::string> values = Args.getLongArg("desktop");
 			std::string desktop = values.empty() ? std::string() : values.front();
-			// quoted for the batch file, which reads a % as one of its variables and has no way to quote a quote; an
-			// empty one, no desktop, is left out, as the client would take the next argument, the login, for it
-			if (desktop.empty())
-				nlwarning("The client restarted after the patch shows on the desktop shown: --desktop names no desktop");
-			else if (desktop.find_first_of("\"%") == std::string::npos)
+			// quoted for the batch file, which reads a % as one of its variables, has no way to quote a quote and reads
+			// its characters in the code page of the console; a backslash before the closing quote would quote it for
+			// the client
+			bool passable = desktop.empty() || desktop[desktop.size() - 1] != '\\';
+			for (std::string::size_type i = 0; i < desktop.size() && passable; ++i)
+				passable = desktop[i] != '"' && desktop[i] != '%' && (unsigned char)desktop[i] < 0x80;
+			if (passable)
 				additionalParams += std::string(additionalParams.empty() ? "" : " ") + "\"--desktop=" + desktop + "\"";
 			else
 				nlwarning("The client restarted after the patch shows on the desktop shown: the virtual desktop '%s' has a character the update script cannot pass on",

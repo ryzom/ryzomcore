@@ -60,10 +60,14 @@ std::string s_ExitReason;
 std::string s_RequestedExitReason;
 uint64 s_Frame = 0;
 bool s_InterfaceAvailable = false;
+// in update(): an update that comes then is one of a call that pumps the events
+bool s_Updating = false;
 // the loading screens being drawn, innermost last
 uint s_LoadingDepth = 0;
 std::string s_LoadingMessage;
 float s_LoadingValue = 0.f;
+// the text of a dialog of the system that holds the main thread (CDialogScope)
+std::string s_Dialog;
 // the system messages of the method being run (CShownScope)
 std::vector<std::string> *s_Shown = nullptr;
 
@@ -160,10 +164,16 @@ std::string computeState(CJsonValue &detail)
 				detail.set("ring_mode", mode);
 		}
 	}
+	if (!s_Dialog.empty())
+		detail.set("dialog", s_Dialog);
 	if (!s_ExitReason.empty())
 	{
 		state = "quitting";
 		detail.set("exit_reason", s_ExitReason);
+	}
+	else if (!s_Dialog.empty())
+	{
+		state = "dialog";
 	}
 	else if (s_LoadingDepth > 0)
 	{
@@ -176,9 +186,11 @@ std::string computeState(CJsonValue &detail)
 
 /// Whether the client stays in a state until the player or a tool acts: a wait for another state that ends up there
 /// is over. The login screens that the client passes through on its own (an automatic login, a patch check, the
-/// connection) are not, as are the loadings and the far TP.
+/// connection) are not, as are the loadings and the far TP. A dialog of the system waits for the user, wherever it is.
 bool isSettled(const std::string &state)
 {
+	if (state == "dialog")
+		return true;
 	if (state == "starting" || state == "loading" || state == "connecting" || state == "entering_game" || state == "leaving_game" || state == "far_tp"
 	    || state == "quitting")
 		return false;
@@ -203,17 +215,36 @@ bool isSettled(const std::string &state)
 	return true;
 }
 
+/// Gives the endpoint the state of the client now: a tool reads it from the channel thread, also while the main thread
+/// does not come back to an update
+void publishState()
+{
+	CJsonValue detail;
+	std::string state = computeState(detail);
+	s_Endpoint->setState(state, detail, isSettled(state));
+}
+
 void atExitRelease()
 {
 	// exit() from somewhere in the client: the reason set last, or none
 	release(s_ExitReason.empty() ? std::string("exit() without a reason given") : s_ExitReason);
 }
 
+/// The endpoint was asked for on the command line, and whoever asked waits for it: the client does not run without
+/// it. The log has the error for a tool, the dialog of the error for the user (the log, on another virtual desktop).
+void stopForError(const std::string &message)
+{
+	nlwarning("CTRL: %s", message.c_str());
+	ExitClientError("%s", message.c_str());
+}
+
 } // anonymous namespace
 
 void addArgs(CCmdArgs &args)
 {
-	args.addArg("", "ctrl-listen", "name",
+	// the name is given with '=' only: the arguments after the option are the login and the password, which would be
+	// taken for the name otherwise
+	args.addLongArgWithEquals("ctrl-listen", "name",
 	    "Listen on a local pipe for a control tool on this machine (nel_mcp), under this name; a '#' in it stands for the instance of the client in its directory (nothing for the "
 	    "first one, then b, c... as in clientb.log). Whoever opens it acts as you: it runs Lua and commands in this client");
 }
@@ -223,13 +254,15 @@ void start(const CCmdArgs &args)
 	if (!args.haveLongArg("ctrl-listen"))
 		return;
 	std::vector<std::string> values = args.getLongArg("ctrl-listen");
-	std::string name = values.empty() ? std::string() : values.front();
+	if (values.empty())
+	{
+		stopForError("--ctrl-listen needs a name: --ctrl-listen=<name>");
+		// ExitClientError() calls exit(), the code after it is never reached
+		return;
+	}
 	// a launcher that may start several clients from one directory names each after its instance: client_dev#
 	// gives client_dev, then client_devb... as their logs are client.log, clientb.log
-	if (name.empty())
-		name = "client" + ClientInstanceSuffix;
-	else
-		name = strFindReplaceAll(name, std::string("#"), ClientInstanceSuffix);
+	std::string name = strFindReplaceAll(values.front(), std::string("#"), ClientInstanceSuffix);
 
 	CJsonValue identity = CJsonValue::object();
 	identity.set("program", CPath::standardizePath(args.getProgramPath(), true) + args.getProgramName());
@@ -249,10 +282,12 @@ void start(const CCmdArgs &args)
 	std::string error;
 	if (!s_Endpoint->start(name, identity, error))
 	{
-		// asked for on the command line, so whoever asked waits for it: say so loudly, and run without it
-		nlwarning("CTRL: the control endpoint '%s' could not start: %s", name.c_str(), error.c_str());
 		delete s_Endpoint;
 		s_Endpoint = nullptr;
+		stopForError(toString("The control endpoint '%s' (--ctrl-listen) could not start: %s. The client does not run without the endpoint it was asked for: start it "
+		                      "with another name (--ctrl-listen=<name>) or without the option",
+		    name.c_str(), error.c_str()));
+		// ExitClientError() calls exit(), the code after it is never reached
 		return;
 	}
 	registerMethods(*s_Endpoint);
@@ -279,15 +314,20 @@ void update(bool interfaceAvailable)
 {
 	if (s_Endpoint == nullptr)
 		return;
+	// a call that runs into a loading is pumped again from inside it: once that pump is over, the call goes on with the
+	// interface of its own update
+	bool nested = s_Updating;
+	bool interfaceBefore = s_InterfaceAvailable;
+	s_Updating = true;
 	s_InterfaceAvailable = interfaceAvailable;
-	CJsonValue detail;
-	std::string state = computeState(detail);
-	bool settled = isSettled(state);
-	s_Endpoint->setState(state, detail, settled);
+	publishState();
 	if (interfaceAvailable)
 		trackWindows();
 	// a loading screen pumps deep in other code: only what reads runs there, the rest waits for the loop
 	s_Endpoint->update(interfaceAvailable);
+	s_Updating = nested;
+	if (nested)
+		s_InterfaceAvailable = interfaceBefore;
 }
 
 bool isInterfaceAvailable()
@@ -312,7 +352,12 @@ void sceneRendered()
 
 void setPhase(const char *phase)
 {
+	// the main loop sets its phase at every frame: only a change counts, and only with the endpoint
+	if (s_Endpoint == nullptr || s_Phase == phase)
+		return;
 	s_Phase = phase;
+	// the state follows at once, as the next update can be far (a loading that does not pump)
+	publishState();
 }
 
 const std::string &getPhase()
@@ -327,6 +372,8 @@ void setExitReason(const std::string &reason)
 	{
 		s_Endpoint->setExitReason(reason);
 		s_Endpoint->addEvent("exit", CJsonValue::object().set("reason", reason));
+		// the client is about to exit, most often without another update
+		publishState();
 	}
 }
 
@@ -382,7 +429,11 @@ void setIdentity(const std::string &key, const std::string &value)
 }
 
 CLoadingScope::CLoadingScope(const std::string &message, float value)
+    : m_Counted(s_Endpoint != nullptr)
 {
+	// nobody reads it without the endpoint: the message is not copied at every progress call
+	if (!m_Counted)
+		return;
 	++s_LoadingDepth;
 	s_LoadingMessage = message;
 	s_LoadingValue = value;
@@ -390,7 +441,28 @@ CLoadingScope::CLoadingScope(const std::string &message, float value)
 
 CLoadingScope::~CLoadingScope()
 {
-	--s_LoadingDepth;
+	if (m_Counted)
+		--s_LoadingDepth;
+}
+
+CDialogScope::CDialogScope(const std::string &text)
+    : m_Shown(s_Endpoint != nullptr)
+{
+	if (!m_Shown)
+		return;
+	m_Previous = s_Dialog;
+	s_Dialog = text;
+	s_Endpoint->addEvent("dialog", CJsonValue::object().set("text", text));
+	// no update comes until the user closes it
+	publishState();
+}
+
+CDialogScope::~CDialogScope()
+{
+	if (!m_Shown || s_Endpoint == nullptr)
+		return;
+	s_Dialog = m_Previous;
+	publishState();
 }
 
 } // ClientCtrl

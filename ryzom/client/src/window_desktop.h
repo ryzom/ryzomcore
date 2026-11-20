@@ -34,9 +34,10 @@ class UDriver;
 /// desktop while the first one stays free. There is no splash screen then.
 namespace WindowDesktop {
 
+/// Declares --desktop=<desktop>, on every system
 void addArgs(NLMISC::CCmdArgs &args);
 
-/// Reads the option
+/// Reads the option; outside Windows the client stops for it, as there are no virtual desktops to show on
 void init(const NLMISC::CCmdArgs &args);
 
 /// Whether the option asks for a desktop: the window of the client is then never activated, and stays in a window
@@ -57,8 +58,9 @@ bool mayOpen(const std::string &what);
 
 /// Shows the window of the client on the desktop of the option, without activating it. The system moves a window
 /// there a moment after it is shown, and it is on the desktop shown until then: it is shown off the screen, and put
-/// in its place once it is there. When the desktop cannot be had, it shows on the desktop shown, still without
-/// taking the focus, and the log says why.
+/// in its place once it is there. A desktop that is not there (or none given) stops the client with the error,
+/// before the window is shown. When the system does not move the window to a desktop that is there, it shows on the
+/// desktop shown, still without taking the focus, and the log says why.
 void showWindow(NL3D::UDriver *driver);
 
 }

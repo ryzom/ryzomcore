@@ -31,6 +31,7 @@
 #include "nel/misc/big_file.h"
 //
 #include "game_share/bg_downloader_msg.h"
+#include "window_desktop.h"
 
 
 #ifdef NL_OS_WINDOWS
@@ -429,6 +430,11 @@ void CBGDownloaderAccess::CDownloadCoTask::createDownloaderProcess()
 	}
 	if (!manualLaunch)
 	{
+		// its window would show on the desktop shown (WindowDesktop)
+		if (!WindowDesktop::mayOpen("the background downloader"))
+		{
+			throw EDownloadException(CI18N::get("uiBGD_LaunchError"));
+		}
 		BOOL ok = NLMISC::launchProgram(BGDownloaderName, Parent->_CommandLine);
 		if (!ok)
 		{

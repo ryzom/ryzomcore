@@ -23,6 +23,8 @@
 #include "nel/misc/report.h"
 #include "nel/misc/system_utils.h"
 
+#include "init.h"
+
 using namespace NLMISC;
 
 namespace WindowDesktop {
@@ -32,35 +34,43 @@ namespace {
 bool s_IsRequested = false;
 std::string s_Requested;
 
+/// A crash leaves its report file, without the window of the report tool on the desktop shown, nor the one of the
+/// error reporting of the system or of a debugger
+void keepCrashesOffDesktopShown()
+{
+	setReportToolEnabled(false);
+#ifdef NL_OS_WINDOWS
+	SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
+#ifndef NL_COMP_MINGW
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+#endif
+}
+
 }
 
 void addArgs(CCmdArgs &args)
 {
-#ifdef NL_OS_WINDOWS
-	args.addArg("", "desktop", "desktop",
-	    "Show the client on this virtual desktop, by its number (1 for the first one) or the name it was given in the task view; it is shown there without taking "
-	    "the focus, and the desktop shown stays as it is");
-#else
-	(void)args;
-#endif
+	// known everywhere, so that it is refused where there are no virtual desktops and is never taken for a login; its
+	// value is given with '=' only, as the login and the password follow the options
+	args.addLongArgWithEquals("desktop", "desktop",
+	    "Show the client on this virtual desktop (Windows), by its number (1 for the first one) or the name it was given in the task view; it is shown there "
+	    "without taking the focus, and the desktop shown stays as it is");
 }
 
 void init(const CCmdArgs &args)
 {
-#ifdef NL_OS_WINDOWS
 	if (!args.haveLongArg("desktop"))
 		return;
-	// an empty one is asked for as well: it is no desktop, and the log says so
+#ifdef NL_OS_WINDOWS
+	// an empty one is asked for as well: it is no desktop, and the client stops for it once its log is there
+	// (showWindow)
 	std::vector<std::string> values = args.getLongArg("desktop");
 	s_IsRequested = true;
 	s_Requested = values.empty() ? std::string() : values.front();
-	// a crash leaves its report file, without the window of the report tool on the desktop shown, nor the one of the
-	// error reporting of the system or of a debugger
-	setReportToolEnabled(false);
-	SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
-	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+	keepCrashesOffDesktopShown();
 #else
-	(void)args;
+	ExitClientError("%s", "The client cannot show on another virtual desktop (--desktop): virtual desktops are handled on Windows only");
 #endif
 }
 
@@ -73,11 +83,7 @@ void setRequested(const std::string &desktop)
 {
 	s_IsRequested = true;
 	s_Requested = desktop;
-	setReportToolEnabled(false);
-#ifdef NL_OS_WINDOWS
-	SetErrorMode(SetErrorMode(0) | SEM_NOGPFAULTERRORBOX | SEM_FAILCRITICALERRORS);
-	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
-#endif
+	keepCrashesOffDesktopShown();
 }
 
 bool mayOpen(const std::string &what)
@@ -97,14 +103,23 @@ void showWindow(NL3D::UDriver *driver)
 {
 #ifdef NL_OS_WINDOWS
 	HWND window = (HWND)driver->getDisplay();
+	// the client was asked to stay off the desktop shown: without the desktop it stops, before its window is shown
+	if (s_Requested.empty())
+	{
+		ExitClientError("%s",
+		    "The client cannot show its window on another virtual desktop: --desktop names none. Give its number (1 for the first one) or the name it was given in the task "
+		    "view: --desktop=<desktop>");
+		// ExitClientError() calls exit(), the code after it is never reached
+		return;
+	}
 	uint number = 0;
 	std::string error;
-	// a desktop that is not there: nothing to wait for. Another refusal may only be that the window is not shown yet.
+	// a desktop that is not there, or no virtual desktops at all: nothing to wait for. Another refusal may only be that
+	// the window is not shown yet.
 	if (!CSystemUtils::moveWindowToDesktop(window, s_Requested, number, error) && number == 0)
 	{
-		nlwarning("The client cannot show its window on the virtual desktop '%s' (--desktop): %s. It shows it on the desktop shown, without taking the focus",
-		    s_Requested.c_str(), error.c_str());
-		driver->showWindow(true);
+		ExitClientError("The client cannot show its window on the virtual desktop it was asked for (--desktop): %s", error.c_str());
+		// ExitClientError() calls exit(), the code after it is never reached
 		return;
 	}
 	// off the screen, beyond the monitors on the right, until the system has moved it

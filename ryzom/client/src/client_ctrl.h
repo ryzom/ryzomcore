@@ -20,9 +20,11 @@
 #include "nel/misc/types_nl.h"
 
 #include <string>
+#include <vector>
 
 namespace NLMISC {
 class CBitMemStream;
+class CEvent;
 class CCmdArgs;
 class CCtrlEndpoint;
 class CJsonValue;
@@ -38,6 +40,13 @@ class CJsonValue;
  * WITH_RYZOM_CLIENT_CTRL, and only the command line switches it on: not client.cfg, which is
  * re-read while the client runs and comes with patches, nor a variable or a command, which
  * the server (REMOTE_ADMIN) and Lua (runCommand) can reach. Without it, these do nothing.
+ *
+ * What it cannot reach: calls run on the main thread, from the event pumps. A dialog of the system
+ * (a message box, the error the client stops for) holds the main thread until the user closes it;
+ * meanwhile only the channel thread answers, and the state is dialog with its text (--desktop
+ * sends these to the log instead). A wait that pumps without the interface (a loading, a far TP)
+ * runs only the methods that read; one that does not pump runs none, and only ending the process
+ * stops a client stuck there.
  */
 #if !FINAL_VERSION || defined(RYZOM_CLIENT_CTRL)
 #define RYZOM_HAS_CLIENT_CTRL 1
@@ -47,9 +56,10 @@ namespace ClientCtrl {
 
 #ifdef RYZOM_HAS_CLIENT_CTRL
 
-/// Declares --ctrl-listen
+/// Declares --ctrl-listen=<name>, its name given with '=' only
 void addArgs(NLMISC::CCmdArgs &args);
-/// Starts the endpoint when the command line asks for it; after the log is set up
+/// Starts the endpoint when the command line asks for it; after the log is set up. The client stops with the error
+/// when it cannot: whoever asked for the endpoint waits for it.
 void start(const NLMISC::CCmdArgs &args);
 bool isActive();
 /// A tool holds the lease of the endpoint: the client takes its input as if it had the focus, and is not
@@ -90,7 +100,32 @@ class CLoadingScope
 public:
 	CLoadingScope(const std::string &message, float value);
 	~CLoadingScope();
+
+private:
+	bool m_Counted;
 };
+
+/// Around a dialog of the system that holds the main thread until the user closes it (a message box, the error the
+/// client stops for): the state is dialog, with its text, and an event says so, as no call runs meanwhile
+class CDialogScope
+{
+public:
+	CDialogScope(const std::string &text);
+	~CDialogScope();
+
+private:
+	std::string m_Previous;
+	bool m_Shown;
+};
+
+// The hooks of CInputHandlerManager for the input of a control tool (client_ctrl_input.cpp)
+
+/// (pumpEvents, before the pump) The input to post now, for the pump that follows: the event server owns it from then on
+void takeInput(std::vector<NLMISC::CEvent *> &events);
+/// (pumpEventsNoIM) A pump without the interface: the input that waits is dropped, apart from releases, and its calls fail
+void dropInputForLoading();
+/// (the listener of CInputHandlerManager) How an event that takeInput gave was handled
+void inputHandled(const NLMISC::CEvent &event, bool byInterface);
 
 #else
 
@@ -116,6 +151,16 @@ class CLoadingScope
 public:
 	CLoadingScope(const std::string &, float) { }
 };
+
+class CDialogScope
+{
+public:
+	CDialogScope(const std::string &) { }
+};
+
+inline void takeInput(std::vector<NLMISC::CEvent *> &) { }
+inline void dropInputForLoading() { }
+inline void inputHandled(const NLMISC::CEvent &, bool) { }
 
 #endif
 

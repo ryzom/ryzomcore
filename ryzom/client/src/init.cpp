@@ -337,7 +337,7 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 void ExitClientError (const char *format, ...)
 {
 	char *str;
-	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
+	NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
 	ClientCtrl::setExitReason(std::string("an error the client stops for: ") + str);
 
 	// Driver ?
@@ -352,7 +352,11 @@ void ExitClientError (const char *format, ...)
 	if (WindowDesktop::isRequested())
 		nlwarning("The client stops for an error, not shown in a dialog on the desktop shown: %s", str);
 	else
+	{
+		// a control tool sees the dialog in the state of the client while it waits for the user
+		ClientCtrl::CDialogScope dialog(str);
 		DialogBox(HInstance, MAKEINTRESOURCE(IDD_ERROR_HELP_MESSAGE_BOX), NULL, ExitClientErrorDialogProc);
+	}
 	/*
 		MessageBoxW (NULL, nlUtf8ToWide(str.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONERROR);
 	*/
@@ -386,6 +390,7 @@ void ClientInfo (const std::string &message)
 		nlwarning("A message for the user, not shown on the desktop shown: %s", message.c_str());
 		return;
 	}
+	ClientCtrl::CDialogScope dialog(message);
 	MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_OK|MB_ICONINFORMATION);
 #endif
 }
@@ -401,6 +406,7 @@ bool ClientQuestion (const std::string &message)
 		nlwarning("A question for the user, not shown on the desktop shown, answered no: %s", message.c_str());
 		return false;
 	}
+	ClientCtrl::CDialogScope dialog(message);
 	return MessageBoxW(NULL, nlUtf8ToWide(message.c_str()), nlUtf8ToWide(CI18N::get("TheSagaOfRyzom").c_str()), MB_YESNO|MB_ICONQUESTION) != IDNO;
 #else
 	return false;

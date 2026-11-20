@@ -81,10 +81,18 @@ bool requireNoModal(CCtrlCall &call)
 
 bool requireInGame(CCtrlCall &call)
 {
-	if (UserEntity != nullptr && FarTP.isIngame() && !FarTP.isFarTPInProgress())
-		return true;
-	call.fail("the character is not in the game");
-	return false;
+	if (UserEntity == nullptr || !FarTP.isIngame() || FarTP.isFarTPInProgress())
+	{
+		call.fail("the character is not in the game");
+		return false;
+	}
+	// a loading in the game (a teleport) pumps from the middle of changing the world: nothing of it is read there
+	if (!isInterfaceAvailable())
+	{
+		call.fail("the character is in a loading (a teleport, a wait for the server); wait for the state to change");
+		return false;
+	}
+	return true;
 }
 
 } // ClientCtrl

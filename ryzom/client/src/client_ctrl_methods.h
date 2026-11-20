@@ -24,6 +24,10 @@
 #include "nel/misc/ctrl_endpoint.h"
 #include "nel/misc/json.h"
 
+namespace NLGUI {
+class CInterfaceElement;
+}
+
 namespace ClientCtrl {
 
 /// The methods of the client, by group; each group adds its own
@@ -73,8 +77,29 @@ void pollAfterPump(NLMISC::CCtrlCall &call);
 
 /// Fails the call and returns false when the interface does not handle events in this phase
 bool requireInterface(NLMISC::CCtrlCall &call);
-/// Fails the call and returns false when the character is not in the game
+/// Fails the call and returns false when the character is not in the game, or is in a loading there (the update of a
+/// loading screen, which has no interface)
 bool requireInGame(NLMISC::CCtrlCall &call);
+
+/// The database watches of a connection that closed are dropped (client_ctrl_data.cpp)
+void dataConnectionClosed(uint32 connection);
+
+/// A method whose arguments are checked against its schema before it runs: an argument the schema does not have, one
+/// of another type (a number that is not finite, a string out of its choices), or a required one missing fails the call
+/// (client_ctrl_input.cpp)
+NLMISC::ICtrlMethod *newMethod(const std::string &name, const std::string &description, const NLMISC::CJsonValue &schema, bool readOnly,
+    NLMISC::CCtrlFunctionMethod::TFunction callFunction, NLMISC::CCtrlFunctionMethod::TFunction pollFunction = nullptr,
+    NLMISC::CCtrlFunctionMethod::TFunction cancelFunction = nullptr);
+/// As finishAfterPump, for input aimed at an element: the call fails when the interface did not take its press
+void finishAfterPumpOnElement(NLMISC::CCtrlCall &call, const NLMISC::CJsonValue &result);
+/// Drops the input that postMouse and postKey gathered for a call that fails before it is finished
+void discardInput();
+
+/// The element of an id, or null; an id that is not there is the tool's question, not a fault of the interface, so it
+/// leaves no warning behind (client_ctrl_ui.cpp)
+NLGUI::CInterfaceElement *findElement(const std::string &id);
+/// Whether an element is drawn: it and every parent up to its master group are active
+bool isShown(const NLGUI::CInterfaceElement *e);
 /// Fails the call and returns false while a modal window takes the input, which a button behind it would not get
 bool requireNoModal(NLMISC::CCtrlCall &call);
 

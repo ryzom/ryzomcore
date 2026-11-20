@@ -156,7 +156,7 @@ INT_PTR CALLBACK MyDialogProc(
 HWND SlashScreen = NULL;
 HINSTANCE HInstance;
 
-int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR /* cmdline */, int /* nCmdShow */)
 #else
 int main(int argc, char **argv)
 #endif
@@ -202,7 +202,9 @@ int main(int argc, char **argv)
 
 	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 #ifdef NL_OS_WINDOWS
-	if (!Args.parse(cmdline)) return 1;
+	// the command line as the system has it, in UTF-8: the one of WinMain is in the code page of the system, without
+	// the characters that page does not have (the name of a virtual desktop, a login, a path)
+	if (!Args.parseCommandLine()) return 1;
 #else
 	if (!Args.parse(argc, argv)) return 1;
 #endif
