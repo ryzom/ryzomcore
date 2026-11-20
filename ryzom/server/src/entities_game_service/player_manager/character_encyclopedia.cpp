@@ -43,9 +43,33 @@ NL_INSTANCE_COUNTER_IMPL(CCharacterEncyclopedia);
 // methods CCharacterEncyclopedia
 //-----------------------------------------------------------------------------
 
-CCharacterEncyclopedia::CCharacterEncyclopedia(CCharacter &c) : _Char(c)
+CCharacterEncyclopedia::CCharacterEncyclopedia(CCharacter &c) : _Char(c), _SentToClient(false)
 {
 	init();
+}
+
+//-----------------------------------------------------------------------------
+
+/// The mission of the rite (0) or of a task (1 and up) of a thema, NULL if there is none
+static CMissionTemplate *getRiteTaskTemplate(const CStaticEncycloThema &thema, uint32 riteTask)
+{
+	if (riteTask > thema.Tasks.size())
+		return NULL;
+	const string &name = riteTask == 0 ? thema.Rite : thema.Tasks[riteTask - 1];
+	return CMissionManager::getInstance()->getTemplate(CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName(name));
+}
+
+/// The bot that the encyclopedia names for a mission, and the id of its name. false while they cannot be given: the
+/// bot is not there (the AI service is down or starts, the missions were just built again), or it has no name yet.
+static bool getEncyclopediaNpc(const CMissionTemplate &templ, TDataSetRow &giver, uint32 &npcName)
+{
+	npcName = 0;
+	giver = TheDataset.getDataSetRow(CAIAliasTranslator::getInstance()->findEntityId(templ.EncycloNPC));
+	if (giver.isNull())
+		return false;
+	CMirrorPropValueRO<TYPE_NAME_STRING_ID> nameId(TheDataset, giver, DSPropertyNAME_STRING_ID);
+	npcName = nameId;
+	return npcName != 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -249,6 +273,7 @@ void CCharacterEncyclopedia::sendEncycloToClient()
 	}
 
 	PlayerManager.sendImpulseToClient(_Char.getId(), "ENCYCLOPEDIA:INIT", msgToClient);
+	_SentToClient = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -312,7 +337,7 @@ bool CCharacterEncyclopedia::checkIfAlbumCompleted(uint32 nAlbum)
 
 //-----------------------------------------------------------------------------
 
-void CCharacterEncyclopedia::sendAlbumMessage(uint32 nAlbum, uint32 nThema)
+void CCharacterEncyclopedia::sendAlbumMessage(uint32 nAlbum, uint32 nThema, bool warnBotAway)
 {
 	CEncyclopediaUpdateMsg msgToClient;
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
@@ -331,7 +356,7 @@ void CCharacterEncyclopedia::sendAlbumMessage(uint32 nAlbum, uint32 nThema)
 		msgToClient.Album.RewardBrick = pSAlb->RewardBrick.asInt();
 
 	CEncyMsgThema t;
-	makeThemaMessage(t, nAlbum, nThema);
+	makeThemaMessage(t, nAlbum, nThema, warnBotAway);
 
 	msgToClient.Album.Themas.push_back(t);
 
@@ -340,7 +365,7 @@ void CCharacterEncyclopedia::sendAlbumMessage(uint32 nAlbum, uint32 nThema)
 
 //-----------------------------------------------------------------------------
 
-void CCharacterEncyclopedia::makeThemaMessage(CEncyMsgThema &t, uint32 nAlbum, uint32 nThema)
+void CCharacterEncyclopedia::makeThemaMessage(CEncyMsgThema &t, uint32 nAlbum, uint32 nThema, bool warnBotAway)
 {
 	const CStaticEncyclo &rSE = CSheets::getEncyclopedia();
 	// nThema is from 0 because this method is internally used
@@ -369,37 +394,61 @@ void CCharacterEncyclopedia::makeThemaMessage(CEncyMsgThema &t, uint32 nAlbum, u
 	t.NbTask = pSThm->Tasks.size()+1;
 	t.RiteTaskStatePacked = rECThm.RiteTaskStatePacked;
 	
-	CAIAliasTranslator *pAIAT = CAIAliasTranslator::getInstance();
-	CMissionManager *pMM = CMissionManager::getInstance();
-	// For the moment update all tasks and rite	
+	// For the moment update all tasks and rite
 	for (uint32 i = 0; i < t.NbTask; ++i)
 	{
 		if (rECThm.getTaskState((uint8)i) != 0)
 		{
-			CMissionTemplate *pMT = NULL;
-			if (i == 0)
-				pMT = pMM->getTemplate( pAIAT->getMissionUniqueIdFromName(pSThm->Rite) );
-			else
-				pMT = pMM->getTemplate( pAIAT->getMissionUniqueIdFromName(pSThm->Tasks[i-1]) );
-			
+			CMissionTemplate *pMT = getRiteTaskTemplate(*pSThm, i);
 			if (pMT == NULL) continue;
-			TDataSetRow rGiver = TheDataset.getDataSetRow(pAIAT->getEntityId(pMT->EncycloNPC));
-			
-			if (rGiver.isNull())
+
+			// Without the bot (the AI service is down, or starts), or before the bot has its name, the character has no
+			// name of the bot: the thema is sent again when the bot has it (botNameChanged)
+			TDataSetRow rGiver;
+			uint32 nNPCname;
+			const bool npcThere = getEncyclopediaNpc(*pMT, rGiver, nNPCname);
+			if (rGiver.isNull() && warnBotAway)
 			{
-				nlwarning("Missing NPC alias : %d", pMT->EncycloNPC);
+				const string &missionName = i == 0 ? pSThm->Rite : pSThm->Tasks[i - 1];
+				nlwarning("ENCYCLOPEDIA: the bot %u of the mission '%s' is not there, character %s has no name of it until it is", pMT->EncycloNPC, missionName.c_str(), _Char.getId().toString().c_str());
 			}
-			else
-			{
-				if (rECThm.RiteTaskNameCache[i] == 0)
-					rECThm.RiteTaskNameCache[i] = pMT->sendTitleText(_Char.getEntityRowId(), rGiver);
-				
-				t.TaskName[i] = rECThm.RiteTaskNameCache[i];
-				
-				CMirrorPropValue<TYPE_NAME_STRING_ID> nameId( TheDataset, rGiver, DSPropertyNAME_STRING_ID );
-				uint32 nNPCname = nameId;
-				t.TaskNPCName[i] = nNPCname;
-			}
+
+			// The title is made once, when the bot has its name, which the title can use. A title that the character has
+			// is kept while its bot is away.
+			if (rECThm.RiteTaskNameCache[i] == 0 && npcThere)
+				rECThm.RiteTaskNameCache[i] = pMT->sendTitleText(_Char.getEntityRowId(), rGiver);
+			t.TaskName[i] = rECThm.RiteTaskNameCache[i];
+			t.TaskNPCName[i] = nNPCname;
 		}
-	}	
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void CCharacterEncyclopedia::botNameChanged(uint32 nAlbum, uint32 nThema, uint8 riteTasks)
+{
+	// The whole encyclopedia, when it is sent to the client that comes into the game, has the name
+	if (!_SentToClient)
+		return;
+
+	// nThema is from 1, as in the mission templates
+	if (nAlbum >= _EncyCharAlbums.size() || nThema == 0 || nThema > _EncyCharAlbums[nAlbum].Themas.size())
+		return;
+	nThema = nThema - 1;
+	CEncyCharThema &rECThm = _EncyCharAlbums[nAlbum].Themas[nThema];
+	if (rECThm.ThemaState == 0)
+		return;
+
+	// only for the rite and the tasks that the character has; their titles can have the name of the bot in them
+	bool send = false;
+	for (uint8 i = 0; i < 8; ++i)
+	{
+		if ((riteTasks & (1 << i)) != 0 && rECThm.getTaskState(i) != 0)
+		{
+			rECThm.RiteTaskNameCache[i] = 0;
+			send = true;
+		}
+	}
+	if (send)
+		sendAlbumMessage(nAlbum, nThema, false);
 }

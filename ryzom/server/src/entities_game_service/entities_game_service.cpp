@@ -392,6 +392,22 @@ void processMirrorUpdates()
 			}
 		}
 		TheDataset.endChangedValuesForProp();
+
+		// Name (the input output service gives a bot its name a little after the bot is there, and another name when
+		// the bot is renamed): the encyclopedia of the characters shows the name of the bot of a rite or task
+		TheDataset.beginChangedValuesForProp( DSPropertyNAME_STRING_ID );
+		while( (entityIndex = TheDataset.getNextChangedValueForProp()) != LAST_CHANGED )
+		{
+			if ( !TheDataset.isAccessible( entityIndex ) )
+				continue;
+			const CEntityId &entityId = TheDataset.getEntityId( entityIndex );
+			if ( entityId.getType() != RYZOMID::npc && entityId.getType() != RYZOMID::creature )
+				continue;
+			CCreature * creature = CreatureManager.getCreature( entityId );
+			if ( creature )
+				creature->sendEncyclopediaNpcName();
+		}
+		TheDataset.endChangedValuesForProp();
 	}
 }
 

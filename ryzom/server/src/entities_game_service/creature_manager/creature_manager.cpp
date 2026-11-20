@@ -146,6 +146,11 @@ void CGenNpcDescMsgImp::callback (const std::string &serviceName, NLNET::TServic
 		creature->setBotDescription( *this );
 		CAIAliasTranslator::getInstance()->updateAssociation(_Alias,Eid);
 
+		// The name of the bot can be there before its description: the characters that have an encyclopedia mission of
+		// the bot in their encyclopedia get the name now (it is found by the alias, set just above). When the name comes
+		// after the description, the change of the name does it (processMirrorUpdates).
+		creature->sendEncyclopediaNpcName();
+
 		if (_BuildingBot)
 			COutpostManager::getInstance().onBuildingSpawned(creature);
 	}

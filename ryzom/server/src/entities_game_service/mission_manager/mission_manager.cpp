@@ -240,6 +240,15 @@ void CMissionManager::init()
 {
 	nlassert(_Instance == NULL);
 	_Instance = new CMissionManager();
+
+	// The bots that are there already, when reloadMissions builds the missions again, are the encyclopedia NPC of their
+	// missions again: the AI service describes a bot when it spawns, not a second time
+	const TMapCreatures &creatures = CreatureManager.getCreature();
+	for (TMapCreatures::const_iterator it = creatures.begin(); it != creatures.end(); ++it)
+	{
+		if ((*it).second != NULL)
+			(*it).second->setEncyclopediaNpcOfMissions();
+	}
 }// CMissionManager init
 
 

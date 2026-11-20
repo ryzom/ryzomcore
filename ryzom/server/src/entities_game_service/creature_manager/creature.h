@@ -263,6 +263,16 @@ public:
 	 */
 	inline const std::vector< uint32 >& getMissionVector() const { return _MissionsProposed; }
 
+	/// The encyclopedia missions that the bot proposes name it as their NPC: the encyclopedia of a character shows the
+	/// name of that bot and the title that the mission has from it. The mission templates forget it when they are built
+	/// again (reloadMissions).
+	void setEncyclopediaNpcOfMissions() const;
+
+	/// The bot has its name, or another name: the characters in game that have one of its encyclopedia missions in their
+	/// encyclopedia are sent the thema again, as it shows the name of the bot. Nothing is sent while the bot has no name,
+	/// nor for the name that was sent already: the AI service describes a bot again whenever its chat changes.
+	void sendEncyclopediaNpcName();
+
 	// return Non Null CMerchant ptr
 	NLMISC::CSmartPtr<CMerchant>& getMerchantPtr();
 
@@ -568,6 +578,7 @@ private:
 	std::string						_WebPage;					// Web Page accessible from the NPC
 	std::string						_WebPageName;				// Web Page Name (if any)
 	std::vector< uint32 >			_MissionsProposed;			// Mission ids proposed by NPC
+	uint32							_EncyclopediaNpcNameSent;	// Id of the name that sendEncyclopediaNpcName sent last, 0 before
 	std::vector< uint32 >			_BotChatCategory;			// vector of active selector of bot chat category
 	std::vector< uint32 >			_RmShopSelector;			// Rm shop selector (ie: for rm ecosystem list)
 	std::vector< uint32 >			_OriginShopSelector;		// Item Origin shop selector (ie: for item by species list)
