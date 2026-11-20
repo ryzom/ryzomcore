@@ -21,11 +21,14 @@
 #include "nel/misc/common.h"
 #include "nel/misc/debug.h"
 
+#include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <clocale>
 #include <cstring>
+#include <map>
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -36,6 +39,9 @@ namespace NLMISC {
 namespace {
 
 const uint s_MaxDepth = 256;
+
+// an object gets an index of its keys from this many members on; below, a scan is faster
+const uint s_IndexFrom = 16;
 
 void appendUtf8(std::string &out, uint32 code)
 {
@@ -104,9 +110,37 @@ uint utf8SequenceLength(const std::string &s, std::string::size_type i)
 	return len;
 }
 
+/// The value of four hex digits at a position, false when they are not that
+bool readHex4(const std::string &text, std::string::size_type pos, uint32 &code)
+{
+	if (pos + 4 > text.size())
+		return false;
+	code = 0;
+	for (uint i = 0; i < 4; ++i)
+	{
+		char c = text[pos + i];
+		code <<= 4;
+		if (c >= '0' && c <= '9')
+			code |= (uint32)(c - '0');
+		else if (c >= 'a' && c <= 'f')
+			code |= (uint32)(c - 'a' + 10);
+		else if (c >= 'A' && c <= 'F')
+			code |= (uint32)(c - 'A' + 10);
+		else
+			return false;
+	}
+	return true;
+}
+
 } // anonymous namespace
 
-/// Recursive descent over the text; the depth is bounded so a hostile text cannot exhaust the stack
+struct CJsonValue::CMemberIndex
+{
+	std::map<std::string, uint> Positions;
+};
+
+/// Recursive descent over the text; the depth is bounded so a hostile text cannot exhaust the stack. Values are
+/// parsed in their place in the result, so nothing is copied on the way up.
 class CJsonParser
 {
 public:
@@ -164,6 +198,7 @@ private:
 		return true;
 	}
 
+	/// Parses a value into out, which is null
 	bool parseValue(CJsonValue &out, uint depth)
 	{
 		if (depth > s_MaxDepth)
@@ -174,23 +209,20 @@ private:
 		switch (c)
 		{
 		case 'n':
-			out = CJsonValue();
 			return literal("null");
 		case 't':
-			out = CJsonValue(true);
+			out.m_Type = CJsonValue::Bool;
+			out.m_Bool = true;
 			return literal("true");
 		case 'f':
-			out = CJsonValue(false);
+			out.m_Type = CJsonValue::Bool;
+			out.m_Bool = false;
 			return literal("false");
-		case '"': {
-			std::string s;
-			if (!parseString(s))
-				return false;
-			out = CJsonValue(s);
-			return true;
-		}
+		case '"':
+			out.m_Type = CJsonValue::String;
+			return parseString(out.m_String);
 		case '[': {
-			out = CJsonValue::array();
+			out.m_Type = CJsonValue::Array;
 			++m_Pos;
 			skipSpace();
 			if (m_Pos < m_Text.size() && m_Text[m_Pos] == ']')
@@ -221,7 +253,7 @@ private:
 			}
 		}
 		case '{': {
-			out = CJsonValue::object();
+			out.m_Type = CJsonValue::Object;
 			++m_Pos;
 			skipSpace();
 			if (m_Pos < m_Text.size() && m_Text[m_Pos] == '}')
@@ -229,12 +261,13 @@ private:
 				++m_Pos;
 				return true;
 			}
+			std::string key;
 			for (;;)
 			{
 				skipSpace();
 				if (m_Pos >= m_Text.size() || m_Text[m_Pos] != '"')
 					return fail("expected a member name");
-				std::string key;
+				key.clear();
 				if (!parseString(key))
 					return false;
 				skipSpace();
@@ -242,11 +275,11 @@ private:
 					return fail("expected ':'");
 				++m_Pos;
 				skipSpace();
-				CJsonValue value;
+				// a repeated name keeps the last value, in the place of the first, as most readers do
+				CJsonValue &value = out.member(key);
+				CJsonValue().swap(value);
 				if (!parseValue(value, depth + 1))
 					return false;
-				// a repeated name keeps the last value, as most readers do
-				out.set(key, value);
 				skipSpace();
 				if (m_Pos >= m_Text.size())
 					return fail("unexpected end in an object");
@@ -309,7 +342,16 @@ private:
 			if (dot != std::string::npos)
 				number.replace(dot, 1, point);
 		}
-		out = CJsonValue(strtod(number.c_str(), nullptr));
+		double value = strtod(number.c_str(), nullptr);
+		// what overflows a double is refused: an infinity would reach the code as a number, and JSON has none.
+		// What underflows reads as 0 or a denormal, which is a number.
+		if (value > DBL_MAX || value < -DBL_MAX)
+		{
+			m_Pos = start;
+			return fail("number out of the range of a double");
+		}
+		out.m_Type = CJsonValue::Number;
+		out.m_Number = value;
 		return true;
 	}
 
@@ -317,30 +359,24 @@ private:
 	{
 		if (m_Pos + 4 > m_Text.size())
 			return fail("unexpected end in an escape");
-		code = 0;
-		for (uint i = 0; i < 4; ++i)
-		{
-			char c = m_Text[m_Pos + i];
-			code <<= 4;
-			if (c >= '0' && c <= '9')
-				code |= (uint32)(c - '0');
-			else if (c >= 'a' && c <= 'f')
-				code |= (uint32)(c - 'a' + 10);
-			else if (c >= 'A' && c <= 'F')
-				code |= (uint32)(c - 'A' + 10);
-			else
-				return fail("invalid \\u escape");
-		}
+		if (!readHex4(m_Text, m_Pos, code))
+			return fail("invalid \\u escape");
 		m_Pos += 4;
 		return true;
 	}
 
+	/// Appends to out the string at the opening quote
 	bool parseString(std::string &out)
 	{
-		// at the opening quote
 		++m_Pos;
 		for (;;)
 		{
+			// the plain run up to the next quote, escape or control character, in one append
+			std::string::size_type run = m_Pos;
+			while (run < m_Text.size() && m_Text[run] != '"' && m_Text[run] != '\\' && (uint8)m_Text[run] >= 0x20)
+				++run;
+			out.append(m_Text, m_Pos, run - m_Pos);
+			m_Pos = run;
 			if (m_Pos >= m_Text.size())
 				return fail("unexpected end in a string");
 			char c = m_Text[m_Pos];
@@ -349,14 +385,8 @@ private:
 				++m_Pos;
 				return true;
 			}
-			if ((uint8)c < 0x20)
-				return fail("control character in a string");
 			if (c != '\\')
-			{
-				out += c;
-				++m_Pos;
-				continue;
-			}
+				return fail("control character in a string");
 			++m_Pos;
 			if (m_Pos >= m_Text.size())
 				return fail("unexpected end in an escape");
@@ -377,20 +407,24 @@ private:
 					return false;
 				if (code >= 0xD800 && code <= 0xDBFF)
 				{
-					// a high surrogate needs its low half
+					// a high surrogate with its low half is one character
 					uint32 low;
-					if (m_Pos + 2 > m_Text.size() || m_Text[m_Pos] != '\\' || m_Text[m_Pos + 1] != 'u')
-						return fail("unpaired surrogate");
-					m_Pos += 2;
-					if (!parseHex4(low))
-						return false;
-					if (low < 0xDC00 || low > 0xDFFF)
-						return fail("unpaired surrogate");
-					code = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
+					if (m_Pos + 6 <= m_Text.size() && m_Text[m_Pos] == '\\' && m_Text[m_Pos + 1] == 'u' && readHex4(m_Text, m_Pos + 2, low) && low >= 0xDC00
+					    && low <= 0xDFFF)
+					{
+						m_Pos += 6;
+						code = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
+					}
+					else
+					{
+						// without it the half is no character: U+FFFD, as the writer does for bytes that are not
+						// UTF-8, so a message with one is still read and answered; what follows is read as itself
+						code = 0xFFFD;
+					}
 				}
 				else if (code >= 0xDC00 && code <= 0xDFFF)
 				{
-					return fail("unpaired surrogate");
+					code = 0xFFFD;
 				}
 				appendUtf8(out, code);
 				break;
@@ -408,6 +442,7 @@ CJsonValue::CJsonValue()
     : m_Type(Null)
     , m_Bool(false)
     , m_Number(0.0)
+    , m_Index(nullptr)
 {
 }
 
@@ -415,6 +450,7 @@ CJsonValue::CJsonValue(bool value)
     : m_Type(Bool)
     , m_Bool(value)
     , m_Number(0.0)
+    , m_Index(nullptr)
 {
 }
 
@@ -422,6 +458,7 @@ CJsonValue::CJsonValue(sint32 value)
     : m_Type(Number)
     , m_Bool(false)
     , m_Number((double)value)
+    , m_Index(nullptr)
 {
 }
 
@@ -429,6 +466,7 @@ CJsonValue::CJsonValue(uint32 value)
     : m_Type(Number)
     , m_Bool(false)
     , m_Number((double)value)
+    , m_Index(nullptr)
 {
 }
 
@@ -436,6 +474,7 @@ CJsonValue::CJsonValue(sint64 value)
     : m_Type(Number)
     , m_Bool(false)
     , m_Number((double)value)
+    , m_Index(nullptr)
 {
 }
 
@@ -443,6 +482,7 @@ CJsonValue::CJsonValue(uint64 value)
     : m_Type(Number)
     , m_Bool(false)
     , m_Number((double)value)
+    , m_Index(nullptr)
 {
 }
 
@@ -450,6 +490,7 @@ CJsonValue::CJsonValue(double value)
     : m_Type(Number)
     , m_Bool(false)
     , m_Number(value)
+    , m_Index(nullptr)
 {
 }
 
@@ -458,6 +499,7 @@ CJsonValue::CJsonValue(const std::string &value)
     , m_Bool(false)
     , m_Number(0.0)
     , m_String(value)
+    , m_Index(nullptr)
 {
 }
 
@@ -466,7 +508,71 @@ CJsonValue::CJsonValue(const char *value)
     , m_Bool(false)
     , m_Number(0.0)
     , m_String(value ? value : "")
+    , m_Index(nullptr)
 {
+}
+
+CJsonValue::CJsonValue(const CJsonValue &other)
+    : m_Type(other.m_Type)
+    , m_Bool(other.m_Bool)
+    , m_Number(other.m_Number)
+    , m_String(other.m_String)
+    , m_Items(other.m_Items)
+    , m_Members(other.m_Members)
+    , m_Index(other.m_Index != nullptr ? new CMemberIndex(*other.m_Index) : nullptr)
+{
+}
+
+CJsonValue &CJsonValue::operator=(const CJsonValue &other)
+{
+	// a copy first: other may be a part of this value
+	if (this != &other)
+	{
+		CJsonValue copy(other);
+		swap(copy);
+	}
+	return *this;
+}
+
+#ifdef NL_CPP11
+CJsonValue::CJsonValue(CJsonValue &&other) noexcept
+    : m_Type(other.m_Type)
+    , m_Bool(other.m_Bool)
+    , m_Number(other.m_Number)
+    , m_String(std::move(other.m_String))
+    , m_Items(std::move(other.m_Items))
+    , m_Members(std::move(other.m_Members))
+    , m_Index(other.m_Index)
+{
+	other.m_Type = Null;
+	other.m_String.clear();
+	other.m_Items.clear();
+	other.m_Members.clear();
+	other.m_Index = nullptr;
+}
+
+CJsonValue &CJsonValue::operator=(CJsonValue &&other) noexcept
+{
+	// what this held goes away with other
+	swap(other);
+	return *this;
+}
+#endif
+
+CJsonValue::~CJsonValue()
+{
+	delete m_Index;
+}
+
+void CJsonValue::swap(CJsonValue &other)
+{
+	std::swap(m_Type, other.m_Type);
+	std::swap(m_Bool, other.m_Bool);
+	std::swap(m_Number, other.m_Number);
+	m_String.swap(other.m_String);
+	m_Items.swap(other.m_Items);
+	m_Members.swap(other.m_Members);
+	std::swap(m_Index, other.m_Index);
 }
 
 CJsonValue CJsonValue::array()
@@ -551,29 +657,46 @@ CJsonValue &CJsonValue::push(const CJsonValue &value)
 	return m_Items.back();
 }
 
+sint32 CJsonValue::findMember(const std::string &key) const
+{
+	if (m_Index != nullptr)
+	{
+		std::map<std::string, uint>::const_iterator it = m_Index->Positions.find(key);
+		return it == m_Index->Positions.end() ? -1 : (sint32)it->second;
+	}
+	for (uint i = 0; i < m_Members.size(); ++i)
+		if (m_Members[i].first == key)
+			return (sint32)i;
+	return -1;
+}
+
+void CJsonValue::buildIndex()
+{
+	CMemberIndex *index = new CMemberIndex();
+	for (uint i = 0; i < m_Members.size(); ++i)
+		index->Positions.insert(std::make_pair(m_Members[i].first, i));
+	delete m_Index;
+	m_Index = index;
+}
+
 bool CJsonValue::has(const std::string &key) const
 {
-	if (m_Type != Object)
-		return false;
-	for (TMembers::const_iterator it = m_Members.begin(); it != m_Members.end(); ++it)
-		if (it->first == key)
-			return true;
-	return false;
+	return m_Type == Object && findMember(key) >= 0;
 }
 
 const CJsonValue &CJsonValue::get(const std::string &key) const
 {
 	if (m_Type != Object)
 		return null();
-	for (TMembers::const_iterator it = m_Members.begin(); it != m_Members.end(); ++it)
-		if (it->first == key)
-			return it->second;
-	return null();
+	sint32 pos = findMember(key);
+	return pos < 0 ? null() : m_Members[pos].second;
 }
 
 CJsonValue &CJsonValue::set(const std::string &key, const CJsonValue &value)
 {
-	member(key) = value;
+	// a copy first: value may be a member of this object, which adding a member moves
+	CJsonValue copy(value);
+	member(key).swap(copy);
 	return *this;
 }
 
@@ -582,10 +705,14 @@ CJsonValue &CJsonValue::member(const std::string &key)
 	if (m_Type == Null)
 		m_Type = Object;
 	nlassert(m_Type == Object);
-	for (TMembers::iterator it = m_Members.begin(); it != m_Members.end(); ++it)
-		if (it->first == key)
-			return it->second;
-	m_Members.push_back(std::make_pair(key, CJsonValue()));
+	sint32 pos = findMember(key);
+	if (pos >= 0)
+		return m_Members[pos].second;
+	m_Members.push_back(TMember(key, CJsonValue()));
+	if (m_Index != nullptr)
+		m_Index->Positions.insert(std::make_pair(key, (uint)m_Members.size() - 1));
+	else if (m_Members.size() >= s_IndexFrom)
+		buildIndex();
 	return m_Members.back().second;
 }
 
@@ -593,15 +720,19 @@ bool CJsonValue::erase(const std::string &key)
 {
 	if (m_Type != Object)
 		return false;
-	for (TMembers::iterator it = m_Members.begin(); it != m_Members.end(); ++it)
+	sint32 pos = findMember(key);
+	if (pos < 0)
+		return false;
+	m_Members.erase(m_Members.begin() + pos);
+	if (m_Index != nullptr)
 	{
-		if (it->first == key)
-		{
-			m_Members.erase(it);
-			return true;
-		}
+		// the members after it move down by one
+		m_Index->Positions.erase(key);
+		for (std::map<std::string, uint>::iterator it = m_Index->Positions.begin(); it != m_Index->Positions.end(); ++it)
+			if (it->second > (uint)pos)
+				--it->second;
 	}
-	return false;
+	return true;
 }
 
 // *** text ***
@@ -676,7 +807,7 @@ void CJsonValue::write(std::string &out) const
 		break;
 	case Number: {
 		// JSON has no NaN or infinity
-		if (m_Number != m_Number || m_Number > 1.7976931348623157e308 || m_Number < -1.7976931348623157e308)
+		if (m_Number != m_Number || m_Number > DBL_MAX || m_Number < -DBL_MAX)
 		{
 			out += "null";
 			break;
@@ -738,14 +869,15 @@ void CJsonValue::write(std::string &out) const
 
 bool CJsonValue::parse(const std::string &text, std::string &error)
 {
+	// into a value of its own, since text may be a part of this one
 	CJsonValue result;
 	CJsonParser parser(text);
 	if (!parser.parseDocument(result, error))
 	{
-		*this = CJsonValue();
+		CJsonValue().swap(*this);
 		return false;
 	}
-	*this = result;
+	swap(result);
 	return true;
 }
 
