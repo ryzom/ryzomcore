@@ -792,6 +792,18 @@ void methodSetText(CCtrlCall &call)
 		return;
 	}
 	const std::string &text = call.getArgs().get("text").getString();
+	const bool submit = call.getArgs().get("submit").getBool(false);
+	// Enter goes to the box that has the keyboard focus, which a click on it gives. It is taken before the text is
+	// written, as a player clicks before typing: a box may reset what it holds when it takes the focus (the main chat
+	// does, the first time in game), and Enter would then send nothing.
+	CWidgetManager *wm = CWidgetManager::getInstance();
+	if (submit && wm->getCaptureKeyboard() != edit)
+		wm->setCaptureKeyboard(edit);
+	if (submit && wm->getCaptureKeyboard() != edit)
+	{
+		call.fail(toString("'%s' did not take the keyboard focus: nothing was written nor submitted", id.c_str()));
+		return;
+	}
 	// as a paste: the box keeps what its entry type, max_num_chars and max_num_bytes let through, then its change
 	// handler runs, as for a typed character
 	if (CGroupEditBoxBase::getCurrSelection() == edit)
@@ -806,19 +818,21 @@ void methodSetText(CCtrlCall &call)
 	setInput(r, edit);
 	if (edit->getInputString() != text)
 		r.set("filtered", "the box did not take all of the text: its entry type or its length limit left some out");
-	if (!call.getArgs().get("submit").getBool(false))
+	if (!submit)
 	{
 		r.set("submitted", false);
 		call.reply(r);
 		return;
 	}
-	// Enter goes to the box that has the keyboard focus, which a click on it gives
-	CWidgetManager *wm = CWidgetManager::getInstance();
-	if (wm->getCaptureKeyboard() != edit)
-		wm->setCaptureKeyboard(edit);
+	// the focus is still the box's, and the box still holds the text: its change handler may have done anything
 	if (wm->getCaptureKeyboard() != edit)
 	{
-		call.fail(toString("'%s' did not take the keyboard focus: nothing was submitted", id.c_str()), r);
+		call.fail(toString("'%s' lost the keyboard focus while its text was written: nothing was submitted", id.c_str()), r);
+		return;
+	}
+	if (edit->getInputString().empty() && !text.empty())
+	{
+		call.fail(toString("'%s' holds no text once written: nothing was submitted", id.c_str()), r);
 		return;
 	}
 	// a top window with an Enter handler of its own takes Enter, unless the box is in it (CWidgetManager::handleKeyboardEvent)
