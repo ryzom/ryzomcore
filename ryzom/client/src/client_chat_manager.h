@@ -194,6 +194,10 @@ public :
 	 */
 	void tell( const std::string& receiver, const std::string& str );
 	bool tell(const std::string &receiver, const CChatMessageRequest &request);
+	/** Send a plain tell as a shared message: the server sends the sender his own line back, with the message id.
+	 * \return false where that way does not exist (offline, a server without shared messages): send and show it the old way
+	 */
+	bool tellShared(const std::string &receiver, const std::string &text);
 
 	/** Get the last name of the people with which a 'tell' has been done, then move that name at the start of the list
 	  */
