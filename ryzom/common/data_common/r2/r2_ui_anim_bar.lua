@@ -20,10 +20,8 @@ function r2.ui.AnimBar:update()
 	self:getButton("r2ed_anim_test_mode").active = testModeAvailable
 	self:getButton("r2ed_anim_dm_mode").active = (r2.Mode == "Test")		
    local actReceived = (isDm and (r2.AnimGlobals.Acts ~= nil or config.Local == 1))
-   debugInfo(tostring(actReceived))
 	self:getButton("r2ed_anim_acts").active = actReceived
    local triggerReceived = (isDm and (r2.AnimGlobals.UserTriggers ~= nil or config.Local == 1))
-   debugInfo(tostring(triggerReceived))
 	self:getButton("r2ed_anim_triggers").active = triggerReceived
 	self:getButton("r2ed_anim_weather").active = (isDm)
 	self:getButton("r2ed_anim_dm_gift").active = r2:isCurrentSelectionPlayer()
