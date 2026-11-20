@@ -31,6 +31,7 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/dynloadlib.h"
+#include "nel/misc/report.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
@@ -251,13 +252,24 @@ CDriverD3D::CDriverD3D()
 		nlwarning ("Can't create the direct 3d 9 object.");
 
 #ifdef NL_OS_WINDOWS
-		sint val = MessageBoxA(NULL,
-			"Your DirectX version is too old. You need to install the latest one.\r\n\r\n"
-			"Pressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\n"
-			"Press Cancel will just quit the game.\r\n", "NeL Error", MB_OKCANCEL);
-		if (val == IDOK)
+		// No box nor browser for a program whose windows must not show on the desktop shown: setWindowActivation()
+		// tells the driver so once it has a window, and before that the sign is the crash report tool that the
+		// program switched off (setReportToolEnabled, kept in the environment for all the modules of the process).
+		if (!isReportToolEnabled())
 		{
-			openURL("https://www.microsoft.com/en-us/download/details.aspx?id=35");
+			nlwarning("The DirectX of this system is too old, or missing: the program quits without its message box, as its windows must not show on the desktop shown");
+		}
+		else
+		{
+			sint val = MessageBoxA(NULL,
+			    "Your DirectX version is too old. You need to install the latest one.\r\n\r\n"
+			    "Pressing OK will quit the game and automatically open your browser to download the latest version of DirectX.\r\n"
+			    "Press Cancel will just quit the game.\r\n",
+			    "NeL Error", MB_OKCANCEL);
+			if (val == IDOK)
+			{
+				openURL("https://www.microsoft.com/en-us/download/details.aspx?id=35");
+			}
 		}
 #endif
 		exit(EXIT_FAILURE);
@@ -1994,7 +2006,12 @@ void CDriverD3D::restoreWindow()
 
 	if (!_WindowActivation)
 	{
-		// restored without being activated (setWindowActivation)
+		// Restored without being activated (setWindowActivation). Windows maximizes a window only by activating it
+		// (SW_SHOWMAXIMIZED): one that was maximized before it was minimized comes back at its normal size.
+		WINDOWPLACEMENT placement;
+		placement.length = sizeof(placement);
+		if (GetWindowPlacement(_HWnd, &placement) && (placement.flags & WPF_RESTORETOMAXIMIZED) != 0)
+			nlinfo("The window comes back at its normal size, not maximized as before it was minimized: it is not activated (setWindowActivation), and Windows maximizes a window only by activating it");
 		ShowWindow(_HWnd, SW_SHOWNOACTIVATE);
 		return;
 	}
@@ -2718,17 +2735,21 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 			return false;
 	}
 
+	// a window that is not activated (setWindowActivation) and not shown yet stays hidden, and showWindow() shows it
+	const bool visible = _WindowActivation || IsWindowVisible(_HWnd);
+	const LONG visibleStyle = visible ? WS_VISIBLE : 0;
+
 	// set the mode
 	if( mode.Windowed )
 	{
 		// Set windowed-mode style
-		SetWindowLongW( _HWnd, GWL_STYLE, D3D_WINDOWED_STYLE|WS_VISIBLE);
+		SetWindowLongW(_HWnd, GWL_STYLE, D3D_WINDOWED_STYLE | visibleStyle);
 		_FullScreen = false;
 	}
 	else
 	{
 		// Set fullscreen-mode style
-		SetWindowLongW( _HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE|WS_VISIBLE);
+		SetWindowLongW(_HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE | visibleStyle);
 		_FullScreen = true;
 	}
 
@@ -2750,7 +2771,7 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 
 			// without activation (setWindowActivation) the window is neither activated nor brought to the front, and one
 			// not shown yet is left for showWindow()
-			UINT showFlags = _WindowActivation ? SWP_SHOWWINDOW : (SWP_NOACTIVATE | SWP_NOZORDER | (IsWindowVisible(_HWnd) ? SWP_SHOWWINDOW : 0));
+			UINT showFlags = _WindowActivation ? SWP_SHOWWINDOW : (SWP_NOACTIVATE | SWP_NOZORDER | (visible ? SWP_SHOWWINDOW : 0));
 			SetWindowPos( _HWnd, HWND_NOTOPMOST,
 				std::max ((int)WndRect.left, 0), std::max ((int)WndRect.top, 0),
 						  ( WndRect.right - WndRect.left ),

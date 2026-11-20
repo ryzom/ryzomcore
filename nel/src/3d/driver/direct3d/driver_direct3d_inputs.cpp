@@ -362,6 +362,10 @@ void CDriverD3D::setMousePos(float x, float y)
 	if (_HWnd == EmptyWindow || !_WindowFocus)
 		return;
 
+	// a window behind another one, on another virtual desktop or not activated leaves the pointer where the user has it
+	if (!mayMoveSystemCursor())
+		return;
+
 	// convert position size from float to pixels
 	sint x1 = (sint)((float)_CurrentMode.Width*x);
 	sint y1 = (sint)((float)_CurrentMode.Height*(1.0f-y));
@@ -442,6 +446,13 @@ bool CDriverD3D::isSystemCursorInClientArea()
 	}
 
 	return true;
+}
+
+// ***************************************************************************
+bool CDriverD3D::mayMoveSystemCursor()
+{
+	// the window of a host application (a NeL view in an editor) is in the foreground with its top level window
+	return _WindowActivation && _HWnd != EmptyWindow && GetAncestor(_HWnd, GA_ROOT) == GetForegroundWindow();
 }
 
 // ***************************************************************************

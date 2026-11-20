@@ -2038,9 +2038,10 @@ bool CDriverGL3::setMode(const GfxMode& mode)
 	cursorPos.x = 0;
 	cursorPos.y = 0;
 
-	BOOL cursorPosOk = isSystemCursorInClientArea()
-		&& GetCursorPos(&cursorPos)
-		&& ScreenToClient(_win, &cursorPos);
+	BOOL cursorPosOk = mayMoveSystemCursor()
+	    && isSystemCursorInClientArea()
+	    && GetCursorPos(&cursorPos)
+	    && ScreenToClient(_win, &cursorPos);
 	sint curX = (sint)cursorPos.x * (sint)mode.Width;
 	sint curY = (sint)cursorPos.y * (sint)mode.Height;
 #endif
@@ -2620,12 +2621,13 @@ void CDriverGL3::setWindowPos(sint32 x, sint32 y)
 
 	// save relative cursor
 	POINT cursorPos;
-	BOOL cursorPosOk = isSystemCursorInClientArea()
-		&& GetCursorPos(&cursorPos)
-		&& ScreenToClient(_win, &cursorPos);
+	BOOL cursorPosOk = mayMoveSystemCursor()
+	    && isSystemCursorInClientArea()
+	    && GetCursorPos(&cursorPos)
+	    && ScreenToClient(_win, &cursorPos);
 
-	// the position neither activates the window nor brings it to the front, as the Direct3D driver does
-	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	// without activation (setWindowActivation) the position neither activates the window nor brings it to the front
+	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOSIZE | (_WindowActivation ? 0 : SWP_NOZORDER | SWP_NOACTIVATE));
 
 	if (cursorPosOk)
 	{
@@ -3120,7 +3122,12 @@ void CDriverGL3::restoreWindow()
 
 	if (!_WindowActivation)
 	{
-		// restored without being activated (setWindowActivation)
+		// Restored without being activated (setWindowActivation). Windows maximizes a window only by activating it
+		// (SW_SHOWMAXIMIZED): one that was maximized before it was minimized comes back at its normal size.
+		WINDOWPLACEMENT placement;
+		placement.length = sizeof(placement);
+		if (GetWindowPlacement(_win, &placement) && (placement.flags & WPF_RESTORETOMAXIMIZED) != 0)
+			nlinfo("The window comes back at its normal size, not maximized as before it was minimized: it is not activated (setWindowActivation), and Windows maximizes a window only by activating it");
 		ShowWindow(_win, SW_SHOWNOACTIVATE);
 		return;
 	}

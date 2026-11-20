@@ -518,6 +518,10 @@ void CDriverGL3::setMousePos(float x, float y)
 
 #ifdef NL_OS_WINDOWS
 
+	// a window behind another one, on another virtual desktop or not activated leaves the pointer where the user has it
+	if (!mayMoveSystemCursor())
+		return;
+
 	// NeL window coordinate to MSWindows coordinates
 	POINT pt;
 	pt.x = x1;
@@ -655,6 +659,17 @@ bool CDriverGL3::isSystemCursorInClientArea()
 	}
 
 	return true;
+}
+
+// ***************************************************************************
+bool CDriverGL3::mayMoveSystemCursor()
+{
+#ifdef NL_OS_WINDOWS
+	// the window of a host application (a NeL view in an editor) is in the foreground with its top level window
+	return _WindowActivation && _win != EmptyWindow && GetAncestor(_win, GA_ROOT) == GetForegroundWindow();
+#else
+	return true;
+#endif
 }
 
 // ***************************************************************************

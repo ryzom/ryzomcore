@@ -2800,6 +2800,10 @@ public:
 	// (displayed in software when DirectInput is used)
 	bool isSystemCursorInClientArea();
 
+	// Whether the driver may move the system cursor, which is the user's: only for a window that is activated
+	// (setWindowActivation) and in the foreground
+	bool mayMoveSystemCursor();
+
 	// Check if RGBA cursors are supported
 	bool isAlphaBlendedCursorSupported();
 
