@@ -23,6 +23,10 @@
 #include "stdmisc.h"
 #include "nel/misc/cmd_args.h"
 
+#ifdef NL_OS_WINDOWS
+#include <shellapi.h>
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -62,6 +66,21 @@ void CCmdArgs::addArg(const std::string &shortName, const std::string &longName,
 	arg.onlyOnce = onlyOnce;
 	arg.found = false;
 	arg.required = false;
+	arg.valueOnlyWithEquals = false;
+
+	addArg(arg);
+}
+
+void CCmdArgs::addLongArgWithEquals(const std::string &longName, const std::string &helpName, const std::string &helpDescription, bool onlyOnce)
+{
+	TArg arg;
+	arg.longName = longName;
+	arg.helpName = helpName;
+	arg.helpDescription = helpDescription;
+	arg.onlyOnce = onlyOnce;
+	arg.found = false;
+	arg.required = false;
+	arg.valueOnlyWithEquals = true;
 
 	addArg(arg);
 }
@@ -74,6 +93,7 @@ void CCmdArgs::addAdditionalArg(const std::string &helpName, const std::string &
 	arg.onlyOnce = onlyOnce;
 	arg.found = false;
 	arg.required = required;
+	arg.valueOnlyWithEquals = false;
 
 	addArg(arg);
 }
@@ -216,6 +236,39 @@ bool CCmdArgs::parse(const std::string &args)
 	return parse(argv);
 }
 
+#ifdef NL_OS_WINDOWS
+bool CCmdArgs::parseCommandLine()
+{
+	int argc = 0;
+	LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (wargv == NULL || argc < 1)
+	{
+		if (wargv != NULL)
+			LocalFree(wargv);
+		printf("Error: the command line of the process cannot be read: %s\n", formatErrorMessage(getLastError()).c_str());
+		return false;
+	}
+
+	std::vector<std::string> argv;
+
+	// the program is the executable with its full path, as parse(const std::string &) has it: the command line names it
+	// as it was started, maybe without its path or its extension
+	wchar_t str[4096];
+	uint len = GetModuleFileNameW(NULL, str, 4096);
+	if (len && len < 4096)
+		argv.push_back(wideToUtf8(str));
+	else
+		argv.push_back(wideToUtf8(wargv[0]));
+
+	for (int i = 1; i < argc; ++i)
+		argv.push_back(wideToUtf8(wargv[i]));
+
+	LocalFree(wargv);
+
+	return parse(argv);
+}
+#endif
+
 bool CCmdArgs::parse(int argc, char **argv)
 {
 	// convert C strings to STL strings
@@ -313,8 +366,8 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 				// another argument is required
 				if (!arg.helpName.empty())
 				{
-					// if the value hasn't be specified by =
-					if (value.empty() && i+1 < argc)
+					// if the value hasn't be specified by =, and may be given without it
+					if (value.empty() && !arg.valueOnlyWithEquals && i + 1 < argc)
 					{
 						// take next argument
 						value = argv[++i];
@@ -456,7 +509,12 @@ void CCmdArgs::displayHelp()
 		// display long argument
 		if (!arg.longName.empty())
 		{
-			if (!arg.helpName.empty())
+			if (arg.valueOnlyWithEquals)
+			{
+				// the only syntax of an argument whose value is given with =, --arg=<value>
+				syntaxes.push_back(toString("--%s=<%s>", arg.longName.c_str(), arg.helpName.c_str()));
+			}
+			else if (!arg.helpName.empty())
 			{
 				// display first syntax for long argument, --arg <value>
 				syntaxes.push_back(toString("--%s <%s>", arg.longName.c_str(), arg.helpName.c_str()));

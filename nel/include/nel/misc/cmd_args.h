@@ -42,6 +42,7 @@ public:
 		std::string helpDescription; // description of argument in help. Eg: Specifies the directory where to write generated files
 		bool onlyOnce; // only one argument of this type is used, if several are provided, only the last one is kept
 		bool required; // at least one argument of this type must be provided
+		bool valueOnlyWithEquals; // the value is only given with =, as --output=dir: the next argument is never taken for it
 
 		bool found; // all values for this argument
 		std::vector<std::string> values; // all values for this argument
@@ -60,6 +61,10 @@ public:
 	/// onlyOnce can be set to false, if we allows to use this argument more than once
 	void addArg(const std::string &shortName, const std::string &longName, const std::string &helpName, const std::string &helpDescription, bool onlyOnce = true);
 
+	/// Add a long argument whose value is only given with =, as --print=value. The argument after it is never taken
+	/// for the value: --print alone has none, and the arguments that follow keep their places (a login stays the login).
+	void addLongArgWithEquals(const std::string &longName, const std::string &helpName, const std::string &helpDescription, bool onlyOnce = true);
+
 	/// Add a additional argument to arguments list.
 	/// helpName is the name that will be displayed in help if it's a required argument
 	/// helpDescription is the description of the argument that will be displayed in help
@@ -75,6 +80,13 @@ public:
 
 	/// Parse the command linefrom a std::vector<std::string> and process default arguments.
 	bool parse(const std::vector<std::string> &args);
+
+#ifdef NL_OS_WINDOWS
+	/// Parse the command line of the process as the system has it (GetCommandLineW), in UTF-8 and split as the C runtime
+	/// splits argv, and process default arguments; the program is the full path of the executable. For WinMain, whose
+	/// command line is in the code page of the system and has lost the characters that page does not have.
+	bool parseCommandLine();
+#endif
 
 	/// Returns arguments of the program pass from the user to the program using parameters (ie: "myprog param1 param2")
 	const TArgs& getArgs() const { return _Args; }
@@ -93,7 +105,7 @@ public:
 	bool haveLongArg(const std::string &argName) const;
 
 	/// returns values associated with the given named argument
-	/// both "--toto=xxx" and "--toto xxx" are acceptable
+	/// both "--toto=xxx" and "--toto xxx" are acceptable, only "--toto=xxx" for an argument added by addLongArgWithEquals
 	/// quotes round arguments are stripped
 	std::vector<std::string> getLongArg(const std::string &argName) const;
 
