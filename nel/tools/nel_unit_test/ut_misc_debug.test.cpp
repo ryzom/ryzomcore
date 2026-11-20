@@ -18,6 +18,8 @@
 
 #include <atomic>
 #include <chrono>
+#include <exception>
+#include <functional>
 #include <future>
 #include <string>
 #include <thread>
@@ -333,6 +335,97 @@ TEST_F(CUTMiscDebugTest, logGainsItsFirstDisplayerDuringAMessage)
 
 	ASSERT_TRUE(logFromAnotherThread(log));
 	ASSERT_EQ(displayer->count(), 2);
+	delete log;
+	delete displayer;
+}
+
+namespace
+{
+
+class CPositionDisplayer : public NLMISC::IDisplayer
+{
+public:
+	CPositionDisplayer()
+	    : NLMISC::IDisplayer("UT_POSITION")
+	{
+	}
+	std::string lines() const { return m_Lines; }
+
+protected:
+	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo &args, const char *message) NL_OVERRIDE
+	{
+		m_Lines += NLMISC::toString("%s:%d %s", args.FileName ? args.FileName : "-", args.Line, message);
+	}
+
+private:
+	std::string m_Lines;
+};
+
+// a getter that warns while it falls back to a default, as the Ring editor's entity sheet does
+int loggedOnTheSameLog(NLMISC::CLog *log)
+{
+	NLMISC::CSetLogPosition(log, 2, "inner.cpp").log()->displayNL("inner");
+	return 1;
+}
+
+// Runs f on another thread and waits for it at most a few seconds, so that a log mutex that cannot be entered again
+// fails the test instead of hanging it (std::mutex throws with MSVC and blocks with libstdc++). On a timeout the
+// thread stays blocked: what it uses is then leaked on purpose.
+bool runOnAnotherThread(const std::function<void()> &f)
+{
+	std::packaged_task<void()> task(f);
+	std::future<void> done = task.get_future();
+	std::thread(std::move(task)).detach();
+	if (done.wait_for(std::chrono::seconds(5)) != std::future_status::ready)
+		return false;
+	try
+	{
+		done.get();
+	}
+	catch (const std::exception &)
+	{
+		return false;
+	}
+	return true;
+}
+
+}
+
+TEST_F(CUTMiscDebugTest, logMessageWhoseArgumentLogsOnTheSameLog)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CPositionDisplayer *displayer = new CPositionDisplayer();
+	log->addDisplayer(displayer);
+
+	// the position is set, with the log's mutex held, before the argument is evaluated (by a named object: within the
+	// call of the log macros that order is only fixed from C++17 on). The inner message enters the mutex again from
+	// the same thread, and the outer one keeps its own position.
+	ASSERT_TRUE(runOnAnotherThread([log]() {
+		NLMISC::CSetLogPosition position(log, 1, "outer.cpp");
+		position.log()->displayNL("outer %d", loggedOnTheSameLog(log));
+	}));
+	ASSERT_EQ(displayer->lines(), std::string("inner.cpp:2 inner\nouter.cpp:1 outer 1\n"));
+
+	// released as many times as it was taken
+	ASSERT_TRUE(logFromAnotherThread(log));
+	delete log;
+	delete displayer;
+}
+
+TEST_F(CUTMiscDebugTest, logMessageInTheMiddleOfALineOfTheSameLog)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CPositionDisplayer *displayer = new CPositionDisplayer();
+	log->addDisplayer(displayer);
+
+	// a line begun and ended in one expression, as nlassertex does, with a message logged between the two: that one
+	// is a line of its own, and the begun line stays whole with its position
+	ASSERT_TRUE(runOnAnotherThread([log]() {
+		NLMISC::CSetLogPosition(log, 1, "outer.cpp").log()->display("begun "), log->displayNL("ended %d", loggedOnTheSameLog(log));
+	}));
+	ASSERT_EQ(displayer->lines(), std::string("inner.cpp:2 inner\nouter.cpp:1 begun ended 1\n"));
+
+	ASSERT_TRUE(logFromAnotherThread(log));
 	delete log;
 	delete displayer;
 }

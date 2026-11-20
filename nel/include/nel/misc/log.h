@@ -25,6 +25,8 @@
 
 #include <string>
 #include <list>
+#include <utility>
+#include <vector>
 
 
 namespace NLMISC
@@ -211,11 +213,19 @@ public:
 private:
 	friend class CSetLogPosition;
 	
-	/// If !noDisplayer(), sets line and file parameters, enters the mutex and returns true; otherwise returns false.
-	bool setPosition (sint line, const char *fileName, const char *funcName = nullptr);
+	/// The position of a message: CSetLogPosition keeps the one the log had before its message.
+	struct CPosition
+	{
+		const char *FileName;
+		sint Line;
+		const char *FuncName;
+	};
 
-	/// Symetric to setPosition(): releases the mutex. Call it once for each setPosition() that returned true, and only then (CSetLogPosition does).
-	void unsetPosition();
+	/// If !noDisplayer(), enters the mutex, keeps the position the log had in previous, sets line and file parameters and returns true; otherwise returns false.
+	bool setPosition(sint line, const char *fileName, const char *funcName, CPosition &previous);
+
+	/// Symetric to setPosition(): gives the log the position it had back and releases the mutex. Call it once for each setPosition() that returned true, and only then (CSetLogPosition does).
+	void unsetPosition(const CPosition &previous);
 
 protected:
 	/// Returns true if the string must be logged, according to the current filter
@@ -234,7 +244,9 @@ protected:
 
 	CDisplayers							 _BypassFilterDisplayers;	// these displayers always log info (by pass filter system)
 
-	CMutex								 _Mutex;
+	// recursive: the arguments of a message are evaluated while the mutex is held (from setPosition() on), and one
+	// that logs on this log too (a getter that warns) enters it again from the same thread
+	CRecursiveMutex						 _Mutex;
 
 	uint32								 _PosSet;
 
@@ -252,6 +264,10 @@ protected:
 
 	std::string							 TempString;
 	TDisplayInfo						 TempArgs;
+
+	// the lines begun (display() without a new line, as nlassertex does) by the messages that a message logged
+	// while their arguments are evaluated interrupted, the innermost last
+	std::vector<std::pair<std::string, TDisplayInfo> > m_Interrupted;
 
 };
 

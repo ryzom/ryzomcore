@@ -109,12 +109,51 @@ void CLog::setProcessName (const std::string &processName)
 	*_ProcessName = CFile::getFilename(processName);
 }
 
-bool CLog::setPosition (sint line, const char *fileName, const char *funcName)
+namespace
+{
+
+/// Exchanges two display infos, without allocating
+void swapDisplayInfo(CLog::TDisplayInfo &a, CLog::TDisplayInfo &b)
+{
+	std::swap(a.Date, b.Date);
+	std::swap(a.LogType, b.LogType);
+	a.ProcessName.swap(b.ProcessName);
+	std::swap(a.ThreadId, b.ThreadId);
+	std::swap(a.FileName, b.FileName);
+	std::swap(a.Line, b.Line);
+	std::swap(a.FuncName, b.FuncName);
+	a.CallstackAndLog.swap(b.CallstackAndLog);
+}
+
+}
+
+bool CLog::setPosition(sint line, const char *fileName, const char *funcName, CPosition &previous)
 {
 	if ( !noDisplayer() )
 	{
 		_Mutex.enter();
 		_PosSet++;
+		// a message logged while the arguments of another one are evaluated comes here with that one's position,
+		// and maybe a line it began: that line waits until this message is done
+		if (_PosSet > 1)
+		{
+			// the one step that can fail (no memory left): the mutex is not left held then
+			try
+			{
+				m_Interrupted.push_back(std::pair<std::string, TDisplayInfo>());
+			}
+			catch (...)
+			{
+				_PosSet--;
+				_Mutex.leave();
+				throw;
+			}
+			m_Interrupted.back().first.swap(TempString);
+			swapDisplayInfo(m_Interrupted.back().second, TempArgs);
+		}
+		previous.FileName = _FileName;
+		previous.Line = _Line;
+		previous.FuncName = _FuncName;
 		_FileName = fileName;
 		_Line = line;
 		_FuncName = funcName;
@@ -126,13 +165,23 @@ bool CLog::setPosition (sint line, const char *fileName, const char *funcName)
 /// Symetric to setPosition(): called by CSetLogPosition when its setPosition() took the mutex, whatever the
 /// displayers are by then (one may have been removed while the message was displayed). No nlassert here: it
 /// would log again while this log's mutex is held.
-void CLog::unsetPosition()
+void CLog::unsetPosition(const CPosition &previous)
 {
 	if ( _PosSet > 0 )
 	{
-		_FileName = nullptr;
-		_Line = -1;
-		_FuncName = nullptr;
+		// a message logged in the middle of another one: a line it left unfinished ends here, and the other one
+		// gets its own line back
+		if (_PosSet > 1)
+		{
+			if (!TempString.empty())
+				displayString("\n");
+			TempString.swap(m_Interrupted.back().first);
+			swapDisplayInfo(TempArgs, m_Interrupted.back().second);
+			m_Interrupted.pop_back();
+		}
+		_FileName = previous.FileName;
+		_Line = previous.Line;
+		_FuncName = previous.FuncName;
 		_PosSet--;
 		_Mutex.leave(); // needs setPosition() to have been called
 	}

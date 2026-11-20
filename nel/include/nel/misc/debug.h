@@ -196,18 +196,21 @@ struct CSetLogPosition
 {
 private:
 	CLog *m_Log;
+	// the position the log had before: set when a message is logged while the arguments of another one are
+	// evaluated, and given back to that one when this message is done (setPosition() writes it, before m_Locked)
+	CLog::CPosition m_Previous;
 	// whether setPosition() took the log's mutex, which a log without displayer does not: only that is released,
 	// whatever the displayers are when the message is done
 	bool m_Locked;
 
 public:
-	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName = nullptr) : m_Log(log), m_Locked(log->setPosition(line, fileName, funcName))
+	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName = nullptr) : m_Log(log), m_Locked(log->setPosition(line, fileName, funcName, m_Previous))
 	{
 	};
 	inline ~CSetLogPosition()
 	{
 		if (m_Locked)
-			m_Log->unsetPosition();
+			m_Log->unsetPosition(m_Previous);
 	}
 
 	CLog *log() const { return m_Log; }
