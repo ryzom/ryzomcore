@@ -107,6 +107,7 @@
 
 #include "browse_faq.h"
 #include "client_ctrl.h"
+#include "window_desktop.h"
 
 // XMLLib
 #include <libxml/xmlmemory.h>
@@ -311,8 +312,9 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 				{
 					if (Driver)
 					{
+						// on another virtual desktop the next window is not activated either (WindowDesktop)
 						HWND wnd = Driver->getDisplay();
-						ShowWindow(wnd, SW_MINIMIZE);
+						ShowWindow(wnd, WindowDesktop::isRequested() ? SW_SHOWMINNOACTIVE : SW_MINIMIZE);
 					}
 					browseFAQ(ClientCfg.ConfigFile);
 					EndDialog(hwndDlg, IDOK);
@@ -1244,6 +1246,19 @@ void prelogInit()
 			// override mode TODO
 		}
 
+		// a client on another virtual desktop (--desktop) never activates its window, as that would switch the screen
+		// to that desktop, and runs in a window: a full screen mode would take the monitor of the desktop shown
+		if (WindowDesktop::isRequested())
+		{
+			Driver->setWindowActivation(false);
+			if (!mode.Windowed)
+			{
+				nlwarning("The client runs in a window on the virtual desktop '%s' (--desktop): a full screen mode would take the monitor of the desktop shown",
+				    WindowDesktop::getRequested().c_str());
+				mode.Windowed = true;
+			}
+		}
+
 		// Set the mode of the window.
 		if (!Driver->setDisplay (mode, false))
 		{
@@ -1367,8 +1382,11 @@ void prelogInit()
 		if (ClientCfg.Windowed)
 			Driver->setWindowPos(ClientCfg.PositionX, ClientCfg.PositionY);
 
-		// Show the window
-		Driver->showWindow();
+		// Show the window, on the virtual desktop of --desktop without being activated (WindowDesktop)
+		if (WindowDesktop::isRequested())
+			WindowDesktop::showWindow(Driver);
+		else
+			Driver->showWindow();
 
 		// for background downloader : store this window handle in shared memory for later access
 		// (we use SendMessage to communicate with the background downloader)

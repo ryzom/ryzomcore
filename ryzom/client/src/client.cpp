@@ -59,6 +59,7 @@
 #include "user_agent.h"
 #include "global.h"
 #include "client_ctrl.h"
+#include "window_desktop.h"
 
 #ifdef RZ_USE_STEAM
 #include "steam_client.h"
@@ -191,6 +192,7 @@ int main(int argc, char **argv)
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
 	Args.addAdditionalArg("slot", "Char slot to use", true, false);
 	ClientCtrl::addArgs(Args);
+	WindowDesktop::addArgs(Args);
 
 #ifdef TEST_CRASH_COUNTER
 	Args.addArg("", "crash", "", "Crash client before init");
@@ -204,6 +206,7 @@ int main(int argc, char **argv)
 #else
 	if (!Args.parse(argc, argv)) return 1;
 #endif
+	WindowDesktop::init(Args);
 
 	// no shard id in ring mode
 	std::string sLoginShardId;
@@ -346,13 +349,18 @@ int main(int argc, char **argv)
 	int height = bitmap->bmHeight;
 
 	// Look the command line to see if we have a cookie and a addr
-	SlashScreen = CreateDialog (hInstance, MAKEINTRESOURCE(IDD_SLASH_SCREEN), NULL, MyDialogProc);
-	RECT rect;
-	RECT rectDesktop;
-	GetWindowRect (SlashScreen, &rect);
-	GetWindowRect (GetDesktopWindow (), &rectDesktop);
-	SetWindowPos (SlashScreen, HWND_TOP, (rectDesktop.right-rectDesktop.left-width)/2, (rectDesktop.bottom-rectDesktop.top-height)/2, width, height, 0);
-	ShowWindow (SlashScreen, SW_SHOW);
+	// A client on another virtual desktop (--desktop) has no splash screen: the system would show it on the desktop
+	// shown for a moment before it moves it there (WindowDesktop)
+	if (!WindowDesktop::isRequested())
+	{
+		SlashScreen = CreateDialog (hInstance, MAKEINTRESOURCE(IDD_SLASH_SCREEN), NULL, MyDialogProc);
+		RECT rect;
+		RECT rectDesktop;
+		GetWindowRect (SlashScreen, &rect);
+		GetWindowRect (GetDesktopWindow (), &rectDesktop);
+		SetWindowPos (SlashScreen, HWND_TOP, (rectDesktop.right-rectDesktop.left-width)/2, (rectDesktop.bottom-rectDesktop.top-height)/2, width, height, 0);
+		ShowWindow (SlashScreen, SW_SHOW);
+	}
 
 	pump ();
 

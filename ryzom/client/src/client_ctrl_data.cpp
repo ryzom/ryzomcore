@@ -30,11 +30,13 @@
 #include "nel/misc/cdb_branch.h"
 #include "nel/misc/cdb_leaf.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/system_utils.h"
 
 #include "client_cfg.h"
 #include "global.h"
 #include "interface_v3/input_handler_manager.h"
 #include "string_manager_client.h"
+#include "window_desktop.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -292,6 +294,36 @@ void methodUiString(CCtrlCall &call)
 	call.reply(r);
 }
 
+/// The virtual desktops of the session, the one shown and the one the window is on (Windows)
+void reportDesktop(CJsonValue &r)
+{
+#ifdef NL_OS_WINDOWS
+	std::vector<std::string> names;
+	uint shown = 0;
+	std::string error;
+	if (!CSystemUtils::getVirtualDesktops(names, shown, error))
+	{
+		r.set("desktops_error", error);
+		return;
+	}
+	CJsonValue list = CJsonValue::array();
+	for (uint i = 0; i < names.size(); ++i)
+		list.push(CJsonValue::object().set("number", i + 1).set("name", names[i]));
+	r.set("desktops", list);
+	r.set("shown_desktop", shown);
+	uint number = 0;
+	if (CSystemUtils::getWindowDesktop(Driver->getDisplay(), number, error))
+		r.set("desktop", number);
+	else
+		r.set("desktop_error", error);
+	r.set("on_shown_desktop", number != 0 && number == shown);
+	if (WindowDesktop::isRequested())
+		r.set("desktop_option", WindowDesktop::getRequested());
+#else
+	(void)r;
+#endif
+}
+
 void methodWindow(CCtrlCall &call)
 {
 	uint32 width = 0, height = 0;
@@ -303,13 +335,50 @@ void methodWindow(CCtrlCall &call)
 	r.set("height", height);
 	r.set("ui_scale", uiWidth > 0 ? floor((double)width / uiWidth * 1000.0 + 0.5) / 1000.0 : 1.0);
 	r.set("interface_scale_setting", ClientCfg.InterfaceScale);
-	r.set("fullscreen", !ClientCfg.Windowed);
+	// the mode of the window, and the one of the configuration (a client on another desktop stays in a window)
+	NL3D::UDriver::CMode screenMode;
+	if (Driver->getCurrentScreenMode(screenMode))
+		r.set("fullscreen", !screenMode.Windowed);
+	r.set("fullscreen_setting", !ClientCfg.Windowed);
 	r.set("minimized", Driver->isWindowMinimized());
 	r.set("focus", CInputHandlerManager::getInstance()->hasFocus());
 	r.set("driven", isDriven());
 	static const char *const s_Drivers[] = { "auto", "opengl", "direct3d", "opengles", "opengl3" };
 	uint driver = (uint)ClientCfg.Driver3D;
 	r.set("driver", driver < sizeof(s_Drivers) / sizeof(s_Drivers[0]) ? s_Drivers[driver] : "unknown");
+	reportDesktop(r);
+	call.reply(r);
+}
+
+void methodDesktop(CCtrlCall &call)
+{
+	const CJsonValue &value = call.getArgs().get("desktop");
+	std::string desktop = value.isString() ? value.getString() : (value.isNumber() ? toString("%d", (sint)value.getInt(0)) : std::string());
+	if (desktop.empty())
+	{
+		call.fail("desktop: a virtual desktop by its number (1 for the first one) or the name it was given in the task view");
+		return;
+	}
+	NL3D::UDriver::CMode mode;
+	if (Driver->getCurrentScreenMode(mode) && !mode.Windowed)
+	{
+		call.fail("the client is in a full screen mode, which would take the monitor of the desktop shown: put it in a window first");
+		return;
+	}
+	std::string error;
+	uint number = 0;
+	if (!CSystemUtils::moveWindowToDesktop(Driver->getDisplay(), desktop, number, error))
+	{
+		call.fail(error);
+		return;
+	}
+	// never activated from then on, as activating it on a desktop that is not shown would switch the screen there,
+	// and kept out of a full screen mode
+	Driver->setWindowActivation(false);
+	WindowDesktop::setRequested(desktop);
+	CJsonValue r = CJsonValue::object();
+	r.set("moved", true);
+	reportDesktop(r);
 	call.reply(r);
 }
 
@@ -370,8 +439,14 @@ void registerDataMethods(CCtrlEndpoint &endpoint)
 	    CCtrlSchema().integer("id", "The string id.", true).boolean("dynamic", "A dynamic string id."), true, methodString));
 	endpoint.addMethod(new CCtrlFunctionMethod("strings.ui", "A text of the interface by its key (uiXxx) in the current language, and whether the key has a translation.",
 	    CCtrlSchema().str("key", "The key.", true), true, methodUiString));
-	endpoint.addMethod(new CCtrlFunctionMethod("client.window", "The window: size in pixels, UI scale, fullscreen, minimized, focus, whether a tool drives it, and the driver.", CCtrlSchema(), true,
-	    methodWindow));
+	endpoint.addMethod(new CCtrlFunctionMethod("client.window",
+	    "The window: size in pixels, UI scale, fullscreen, minimized, focus, whether a tool drives it, the driver, and on Windows the virtual desktops (numbered from 1), "
+	    "the one shown and the one the window is on.",
+	    CCtrlSchema(), true, methodWindow));
+	endpoint.addMethod(new CCtrlFunctionMethod("client.desktop",
+	    "Moves the window to another virtual desktop (Windows), by its number (1 for the first one) or the name it was given in the task view. It is not activated, "
+	    "and the desktop shown stays as it is; a client on a desktop that is not shown goes on running, and a tool that drives it counts as its focus.",
+	    CCtrlSchema().any("desktop", "The desktop: a number, or a name.", true), false, methodDesktop));
 	endpoint.addMethod(new CCtrlFunctionMethod("client.perf", "The frame rate over a few seconds: frames, fps, mean frame time.",
 	    CCtrlSchema().number("seconds", "How long to count (2 by default, 60 at most)."), true, methodPerf, pollPerf));
 }

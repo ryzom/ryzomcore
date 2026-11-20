@@ -61,6 +61,7 @@
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form_loader.h"
+#include "window_desktop.h"
 
 ///////////
 // USING //
@@ -1361,6 +1362,13 @@ void getWindowSizeLeavingFullscreen(uint16 &width, uint16 &height)
 void setVideoMode(const UDriver::CMode &mode)
 {
 	UDriver::CMode oldMode, newMode = mode;
+	// a client on another virtual desktop stays in a window: a full screen mode would take the monitor of the desktop
+	// shown (WindowDesktop)
+	if (WindowDesktop::isRequested() && !newMode.Windowed)
+	{
+		nlwarning("The client stays in a window on the virtual desktop '%s': a full screen mode would take the monitor of the desktop shown", WindowDesktop::getRequested().c_str());
+		newMode.Windowed = true;
+	}
 	oldMode.Windowed = true; // getCurrentScreenMode may fail if first init ...
 	Driver->getCurrentScreenMode(oldMode);
 	bool wasMaximized = isWindowMaximized();

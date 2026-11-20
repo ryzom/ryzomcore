@@ -3748,6 +3748,7 @@ REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tool
 #include "../entities.h"
 #include "people_interraction.h"
 #include "../net_manager.h"
+#include "../window_desktop.h"
 
 // ***************************************************************************
 class CAHMilkoKick: public IActionHandler
@@ -4052,8 +4053,9 @@ public:
 			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 			if (Driver)
 			{
+				// on another virtual desktop the next window is not activated either (WindowDesktop)
 				HWND wnd = (HWND) Driver->getDisplay();
-				ShowWindow(wnd, SW_MINIMIZE);
+				ShowWindow(wnd, WindowDesktop::isRequested() ? SW_SHOWMINNOACTIVE : SW_MINIMIZE);
 			}
 		#endif
 		browseFAQ(ClientCfg.ConfigFile);
