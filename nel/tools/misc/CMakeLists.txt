@@ -3,6 +3,12 @@ IF(WITH_QT5)
   ADD_SUBDIRECTORY(crash_report)
 ENDIF()
 
+# the MCP front of control endpoints: with the tools, and beside a client that has its endpoint (any build that
+# is not final, or a final one with WITH_RYZOM_CLIENT_CTRL)
+IF(WITH_NEL_TOOLS OR (WITH_RYZOM_CLIENT AND (NOT FINAL_VERSION OR WITH_RYZOM_CLIENT_CTRL)))
+  ADD_SUBDIRECTORY(nel_mcp)
+ENDIF()
+
 IF(WITH_NEL_TOOLS)
   ADD_SUBDIRECTORY(bnp_make)
   ADD_SUBDIRECTORY(snp_make)
