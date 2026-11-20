@@ -28,6 +28,7 @@
 
 #include "client_ctrl_methods.h"
 #include "connection.h"
+#include "interface_v3/interface_manager.h"
 #include "game_share/character_summary.h"
 #include "game_share/people_pd.h"
 #include "far_tp.h"
@@ -246,13 +247,28 @@ void addArgs(CCmdArgs &args)
 	// taken for the name otherwise
 	args.addLongArgWithEquals("ctrl-listen", "name",
 	    "Listen on a local pipe for a control tool on this machine (nel_mcp), under this name; a '#' in it stands for the instance of the client in its directory (nothing for the "
-	    "first one, then b, c... as in clientb.log). Whoever opens it acts as you: it runs Lua and commands in this client");
+	    "first one, then b, c... as in clientb.log). Whoever opens it acts as you in this client, and with --ctrl-trusted it runs Lua and commands in it too");
+	// only the command line says it, as for --ctrl-listen: what the client shows cannot vouch for itself
+	args.addArg("", "ctrl-trusted", "",
+	    "Everything this client will show comes from trusted authors (a local shard with your own accounts), so a control tool may run Lua, action handlers, commands and database "
+	    "writes in it; without it the client's content counts as untrusted and those methods are refused");
 }
 
 void start(const CCmdArgs &args)
 {
-	if (!args.haveLongArg("ctrl-listen"))
+	// a flag: --ctrl-trusted=0 would still be the flag, which is not what it says
+	if (!args.getLongArg("ctrl-trusted").empty())
+	{
+		stopForError("--ctrl-trusted takes no value: give it alone for a client whose content is trusted, or leave it out");
+		// ExitClientError() calls exit(), the code after it is never reached
 		return;
+	}
+	if (!args.haveLongArg("ctrl-listen"))
+	{
+		if (args.haveLongArg("ctrl-trusted"))
+			nlwarning("CTRL: --ctrl-trusted does nothing without the control endpoint: give --ctrl-listen=<name> too");
+		return;
+	}
 	std::vector<std::string> values = args.getLongArg("ctrl-listen");
 	if (values.empty())
 	{
@@ -279,6 +295,9 @@ void start(const CCmdArgs &args)
 		identity.set("account", LoginLogin);
 
 	s_Endpoint = new CCtrlEndpoint();
+	// what the client shows is written by the players and web pages of its shard unless the command line vouches for
+	// them: the endpoint refuses its privileged methods then
+	s_Endpoint->setTrusted(args.haveLongArg("ctrl-trusted"));
 	std::string error;
 	if (!s_Endpoint->start(name, identity, error))
 	{
@@ -303,6 +322,30 @@ bool isActive()
 bool isDriven()
 {
 	return s_Endpoint != nullptr && s_Endpoint->isLeaseHeld();
+}
+
+bool isDrivenUntrusted()
+{
+	return s_Endpoint != nullptr && !s_Endpoint->isTrusted() && s_Endpoint->isLeaseHeld();
+}
+
+bool refuseTypedCommand(const std::string &commandLine)
+{
+	if (!isDrivenUntrusted())
+		return false;
+	// the name as the chat reads it: up to the first space, or between quotes
+	std::string name = commandLine.substr(0, commandLine.find(' '));
+	if (!commandLine.empty() && commandLine[0] == '"')
+	{
+		std::string::size_type end = commandLine.find('"', 1);
+		if (end != std::string::npos)
+			name = commandLine.substr(1, end - 1);
+	}
+	nlwarning("CTRL: the command '%s' typed into the interface is not run: a control tool holds the lease of this client, whose content is not trusted (started without "
+	          "--ctrl-trusted)",
+	    name.c_str());
+	CInterfaceManager::getInstance()->displaySystemInfo(name + ": not run while a control tool drives this client, whose content is not trusted");
+	return true;
 }
 
 CCtrlEndpoint *getEndpoint()

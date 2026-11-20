@@ -26,6 +26,7 @@
 #include "nel/gui/group_list.h"
 #include "nel/gui/view_bitmap.h"
 #include "interface_manager.h"
+#include "../client_ctrl.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/group_editbox.h"
 #include "../client_chat_manager.h"
@@ -909,7 +910,8 @@ class CHandlerContactEntry : public IActionHandler
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = nullptr; // no CChatWindow instance there ..
 			std::string str = text.substr(1);
-			NLMISC::ICommand::execute( str, g_log );
+			if (!ClientCtrl::refuseTypedCommand(str))
+				NLMISC::ICommand::execute( str, g_log );
 			pEB->setInputString (std::string());
 			return;
 		}

@@ -552,7 +552,8 @@ bool runLua(const std::string &code, const CJsonValue &args, uint maxDepth, uint
 
 void registerScriptMethods(CCtrlEndpoint &endpoint)
 {
-	endpoint.addMethod(newMethod("lua.run",
+	// any script and any action handler: privileged, so they run only in a client whose content is trusted
+	ICtrlMethod *luaRun = newMethod("lua.run",
 	    "Runs a Lua chunk of any length in the interface's Lua state, with args as its ..., and returns what it returns (tables as JSON, max_depth and max_items bound them, "
 	    "the returns themselves counted; a key that is not a string is written as Lua writes it, [1]), or the error with a traceback; also the system messages it showed. "
 	    "It has what the interface's Lua has: getUI, getDbProp, runAH, r2, and with AllowDebugLua the host libraries. It stops with an error once timeout_ms has passed "
@@ -563,8 +564,10 @@ void registerScriptMethods(CCtrlEndpoint &endpoint)
 	        .integer("max_depth", "How deep tables are followed, 1 to 32 (6 by default).")
 	        .integer("max_items", "How many values at most in all, 1 to 100000 (2000 by default).")
 	        .integer("timeout_ms", "The longest the chunk may run, 1 to 600000 ms (10000 by default)."),
-	    false, methodLuaRun, nullptr, nullptr));
-	endpoint.addMethod(newMethod("ah.run",
+	    false, methodLuaRun, nullptr, nullptr);
+	luaRun->setPrivileged(true);
+	endpoint.addMethod(luaRun);
+	ICtrlMethod *ahRun = newMethod("ah.run",
 	    "Runs an action handler by name with its parameters, as the interface does when a control fires it; caller names the control it acts on when it needs one. Returns the system messages it showed. "
 	    "This runs the handler directly, in whatever screen the client shows: it passes over whatever covers the control, unlike a click, and a handler of another screen acts on "
 	    "elements that are not shown.",
@@ -572,7 +575,9 @@ void registerScriptMethods(CCtrlEndpoint &endpoint)
 	        .str("name", "The action handler, as ah.list names it.", true)
 	        .str("params", "Its parameters, in the interface's syntax (name=value|name=value).")
 	        .str("caller", "The id of the control that fires it (ui:interface:...)."),
-	    false, methodAhRun, nullptr, nullptr));
+	    false, methodAhRun, nullptr, nullptr);
+	ahRun->setPrivileged(true);
+	endpoint.addMethod(ahRun);
 	endpoint.addMethod(newMethod("ah.list", "The action handlers of the interface, filtered by prefix or a word of the name.",
 	    CCtrlSchema().str("prefix", "Only names starting with this.").str("contains", "Only names containing this (case-insensitive)."), true, methodAhList, nullptr, nullptr));
 }

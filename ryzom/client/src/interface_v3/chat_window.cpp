@@ -41,6 +41,7 @@
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
+#include "../client_ctrl.h"
 //
 #include "../session_browser_impl.h"
 
@@ -1317,7 +1318,13 @@ public:
 				}
 			}
 
-			if ( NLMISC::ICommand::exists( cmd ) )
+			// a control tool that drives a client whose content is not trusted may type what it read there: the command
+			// would do what the privileged methods of the endpoint are refused for
+			if (ClientCtrl::refuseTypedCommand(cmdWithArgs))
+			{
+				// the warning and the system message say why
+			}
+			else if ( NLMISC::ICommand::exists( cmd ) )
 			{
 				NLMISC::ICommand::execute( cmdWithArgs, g_log );
 			}

@@ -35,11 +35,18 @@ class CJsonValue;
  * listens on a local pipe, and a tool on this machine (the MCP front, nel_mcp) drives and
  * inspects it through it. See nel/misc/ctrl_endpoint.h for the channel and who can open it.
  *
- * Whoever opens the endpoint acts as the user: it runs Lua with what the interface's Lua state
- * has, and commands. So it exists only in builds that are not final, or with the build option
- * WITH_RYZOM_CLIENT_CTRL, and only the command line switches it on: not client.cfg, which is
- * re-read while the client runs and comes with patches, nor a variable or a command, which
- * the server (REMOTE_ADMIN) and Lua (runCommand) can reach. Without it, these do nothing.
+ * Whoever opens the endpoint acts as the user, and with --ctrl-trusted it also runs Lua with what
+ * the interface's Lua state has, action handlers, commands and database writes. So it exists only
+ * in builds that are not final, or with the build option WITH_RYZOM_CLIENT_CTRL, and only the
+ * command line switches it on: not client.cfg, which is re-read while the client runs and comes
+ * with patches, nor a variable or a command, which the server (REMOTE_ADMIN) and Lua (runCommand)
+ * can reach. Without it, these do nothing.
+ *
+ * Trust: what the client shows is written by the players and web pages of its shard, and a tool
+ * that drives it reads it. Without --ctrl-trusted (only the command line gives it, for a local
+ * shard with one's own accounts) the endpoint refuses its privileged methods, and while a tool
+ * holds the lease no command typed into the interface runs (refuseTypedCommand), as a command is
+ * what those methods would give.
  *
  * What it cannot reach: calls run on the main thread, from the event pumps. A dialog of the system
  * (a message box, the error the client stops for) holds the main thread until the user closes it;
@@ -56,7 +63,7 @@ namespace ClientCtrl {
 
 #ifdef RYZOM_HAS_CLIENT_CTRL
 
-/// Declares --ctrl-listen=<name>, its name given with '=' only
+/// Declares --ctrl-listen=<name>, its name given with '=' only, and the flag --ctrl-trusted
 void addArgs(NLMISC::CCmdArgs &args);
 /// Starts the endpoint when the command line asks for it; after the log is set up. The client stops with the error
 /// when it cannot: whoever asked for the endpoint waits for it.
@@ -65,6 +72,13 @@ bool isActive();
 /// A tool holds the lease of the endpoint: the client takes its input as if it had the focus, and is not
 /// paced for the lack of it (a client on a desktop that is not shown never has the focus)
 bool isDriven();
+/// A tool holds the lease of an endpoint whose content is not trusted (no --ctrl-trusted): what the tool sends may
+/// come from what it read, so no command typed into the interface runs meanwhile
+bool isDrivenUntrusted();
+/// Every place the interface runs a command typed into it (the chat, a contact's chat, the macro talk action, the debug
+/// console) asks this first: while isDrivenUntrusted(), the command is not run, the log has a warning that names it,
+/// and a system message says why. True when it is refused.
+bool refuseTypedCommand(const std::string &commandLine);
 NLMISC::CCtrlEndpoint *getEndpoint();
 
 /// Serves the calls, from the event pump of every loop of the client, after the events are pumped.
@@ -133,6 +147,8 @@ inline void addArgs(NLMISC::CCmdArgs &) { }
 inline void start(const NLMISC::CCmdArgs &) { }
 inline bool isActive() { return false; }
 inline bool isDriven() { return false; }
+inline bool isDrivenUntrusted() { return false; }
+inline bool refuseTypedCommand(const std::string &) { return false; }
 inline NLMISC::CCtrlEndpoint *getEndpoint() { return nullptr; }
 inline void update(bool) { }
 inline bool isInterfaceAvailable() { return true; }

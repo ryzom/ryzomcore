@@ -617,8 +617,12 @@ void registerDataMethods(CCtrlEndpoint &endpoint)
 	endpoint.addMethod(new CCtrlFunctionMethod("db.list", "The nodes of a branch of the client database: leaves with their values, branches with their size, to a depth.",
 	    CCtrlSchema().str("path", "The branch (the root when empty).").integer("depth", "Levels to go down (1 by default).").integer("max", "At most this many nodes (500 by default)."), true,
 	    methodList));
-	endpoint.addMethod(new CCtrlFunctionMethod("db.set", "Sets a leaf of the database where Lua may: not SERVER:, and of LOCAL: only LOCAL:R2; UI: and the others are written.",
-	    CCtrlSchema().str("path", "The leaf.", true).any("value", "An integer: a whole number, or its decimal text for a value beyond 2^53.", true), false, methodSet));
+	// a raw write, past whatever the interface checks before it writes: privileged, so it runs only in a client whose
+	// content is trusted
+	ICtrlMethod *dbSet = new CCtrlFunctionMethod("db.set", "Sets a leaf of the database where Lua may: not SERVER:, and of LOCAL: only LOCAL:R2; UI: and the others are written.",
+	    CCtrlSchema().str("path", "The leaf.", true).any("value", "An integer: a whole number, or its decimal text for a value beyond 2^53.", true), false, methodSet);
+	dbSet->setPrivileged(true);
+	endpoint.addMethod(dbSet);
 	endpoint.addMethod(new CCtrlFunctionMethod("db.watch",
 	    "Watches a leaf or branch for this connection: each change is a db event with its path and value (ctrl.events, kinds db), until stop or until the connection closes. "
 	    "Not the root, at most 4096 leaves a watch and 64 watches; at most 100 db events a second, and dropped_before counts those left out. A branch the client makes again "

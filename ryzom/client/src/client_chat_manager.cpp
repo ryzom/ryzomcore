@@ -48,6 +48,7 @@
 #include "interface_v3/skill_manager.h"
 
 #include "misc.h"
+#include "client_ctrl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -1367,7 +1368,13 @@ class CHandlerTalk : public IActionHandler
 					}
 				}
 
-				if ( NLMISC::ICommand::exists( cmd ) )
+				// as in the chat box (CHandlerChatBoxEntry): no command while a control tool drives a client whose content is
+				// not trusted; a macro's talk action brings typed text here
+				if (ClientCtrl::refuseTypedCommand(cmdWithArgs))
+				{
+					// the warning and the system message say why
+				}
+				else if ( NLMISC::ICommand::exists( cmd ) )
 				{
 					NLMISC::ICommand::execute( cmdWithArgs, g_log );
 				} 

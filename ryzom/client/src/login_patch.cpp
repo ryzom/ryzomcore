@@ -1082,6 +1082,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			else
 				nlwarning("The client restarted after the patch has no control endpoint: '%s' is not a name for one", name.c_str());
 		}
+		// and with the trust of its content, which only the command line gives (ClientCtrl::start)
+		if (Args.haveLongArg("ctrl-trusted"))
+			additionalParams += std::string(additionalParams.empty() ? "" : " ") + "--ctrl-trusted";
 #ifdef NL_OS_WINDOWS
 		if (Args.haveLongArg("desktop"))
 		{

@@ -844,14 +844,19 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	    methodRingTree));
 	// the editor sends its requests to the server, which applies them and sends the change back to every editor
 	static const char *const s_RingRequest = " The server applies the request a moment later, and ring.tree shows it from then on; a quit right after it can lose it.";
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.set",
+	// ring.set, ring.create, ring.erase and ring.move make their requests past the checks of the editor's windows and
+	// tools (any property, class or value, an instance the tools would not delete or move, any parent): privileged, so
+	// they run only in a client whose content is trusted. The co-editors get what they request.
+	ICtrlMethod *ringSet = new CCtrlFunctionMethod("ring.set",
 	    std::string("Sets a property of an instance through the editor's request, as its property windows do: it reaches the server and the co-editors, and can be undone.") + s_RingRequest,
-	    CCtrlSchema().str("id", "The instance id.", true).str("property", "The property name.", true).any("value", "The value: a string or a number.", true), false, methodRingSet));
+	    CCtrlSchema().str("id", "The instance id.", true).str("property", "The property name.", true).any("value", "The value: a string or a number.", true), false, methodRingSet);
+	ringSet->setPrivileged(true);
+	endpoint.addMethod(ringSet);
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.palette",
 	    "The elements of the editor's palette (NPCs, creatures, objects): id and name, filtered by a word or an id prefix such as palette.entities.creatures. ring.create takes the id as base.",
 	    CCtrlSchema().str("contains", "Only ids or names containing this.").str("prefix", "Only ids starting with this.").integer("max", "At most this many (100 by default)."), true,
 	    methodRingPalette));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.create",
+	ICtrlMethod *ringCreate = new CCtrlFunctionMethod("ring.create",
 	    "Creates an instance in the scenario through the editor's request, as its tools do: an entity (an NPC, a creature, an object) from a palette element (base, as ring.palette lists them), "
 	    "the way the palette makes it; other components by class (Region, Road, a feature...). values sets properties first (Name, Position {x, y, z}, Angle...). It goes below a parent (the current "
 	    "act's features by default). Returns its instance id."
@@ -863,10 +868,14 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	        .str("property", "The property of the parent it goes in (Components by default).")
 	        .integer("position", "Where in it (-1, the end, by default).")
 	        .object("values", "Properties to set on it first."),
-	    false, methodRingCreate));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.erase", std::string("Deletes an instance through the editor's request.") + s_RingRequest, CCtrlSchema().str("id", "The instance id.", true), false,
-	    methodRingErase));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.move", std::string("Moves an instance to x, y in the world, or below another parent, through the editor's requests.") + s_RingRequest,
+	    false, methodRingCreate);
+	ringCreate->setPrivileged(true);
+	endpoint.addMethod(ringCreate);
+	ICtrlMethod *ringErase = new CCtrlFunctionMethod("ring.erase", std::string("Deletes an instance through the editor's request.") + s_RingRequest,
+	    CCtrlSchema().str("id", "The instance id.", true), false, methodRingErase);
+	ringErase->setPrivileged(true);
+	endpoint.addMethod(ringErase);
+	ICtrlMethod *ringMove = new CCtrlFunctionMethod("ring.move", std::string("Moves an instance to x, y in the world, or below another parent, through the editor's requests.") + s_RingRequest,
 	    CCtrlSchema()
 	        .str("id", "The instance id.", true)
 	        .number("x", "World x.")
@@ -874,7 +883,9 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	        .str("parent", "Or a new parent instance id.")
 	        .str("property", "Its property (Components by default).")
 	        .integer("position", "Where in it (-1 by default)."),
-	    false, methodRingMove));
+	    false, methodRingMove);
+	ringMove->setPrivileged(true);
+	endpoint.addMethod(ringMove);
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.undo", "Undoes the last editing action, or redoes with redo, as the editor's buttons do; returns whether more can be undone and redone.",
 	    CCtrlSchema().boolean("redo", "Redo instead."), false, methodRingUndo));
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.select", "Selects an instance in the editor, or none with an empty id.", CCtrlSchema().str("id", "The instance id.", true), false,
