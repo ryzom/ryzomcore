@@ -2410,9 +2410,10 @@ namespace NLGUI
 		// Manage complex "Enter"
 		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN && !eventDesc.getKeyCtrl() )
 		{
-			// If the  top window has Enter AH
+			// If the  top window has Enter AH. A window that is not shown stays in the list of its priority (a modal
+			// that was closed, the release notes of the login screen that were never opened): it takes no key.
 			CInterfaceGroup	*tw= getTopWindow();
-			if(tw && !tw->getAHOnEnter().empty())
+			if(tw && tw->getActive() && !tw->getAHOnEnter().empty())
 			{
 				// if the captured keyboard is in this Modal window, then must handle him in priority
 				if( getCaptureKeyboard() && getCaptureKeyboard()->getRootWindow()==tw)
