@@ -46,6 +46,9 @@
     "Jom": "bin",
     "Web": "pipeline/shard_dev/web"
   },
+  "DebuggerArguments": {
+    "ryzom_client": "--ctrl-listen=client_dev#"
+  },
   "WorkingDirs": {
     "crash_report": "pipeline/client_dev",
     "ryzom_client": "pipeline/client_dev",

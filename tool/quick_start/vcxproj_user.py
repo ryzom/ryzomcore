@@ -1,7 +1,8 @@
 
 # A little magic to generate nice .vcxproj.user files to make debugging easy peasy
 
-import sys, os, pathlib
+import sys, os, pathlib, re
+from xml.sax.saxutils import escape
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from quick_start.common import *
@@ -20,6 +21,31 @@ if qtPluginDir and len(qtPluginDir) > 0:
 		envPath = envPath + "\n"
 	envPath = envPath + "QT_PLUGIN_PATH=" + qtPluginDir
 
+# The command line arguments of the debugger for a project (DebuggerArguments of the configuration), such as the
+# control endpoint of the client
+def DebuggerArguments(din):
+	return NeLConfig.get("DebuggerArguments", {}).get(din, "")
+
+# A .user file written before a project had debugger arguments gets them, unless it has its own: the file is the
+# user's then, and is left as it is
+def AddDebuggerArguments(userPath, arguments):
+	fi = open(userPath, "r")
+	content = fi.read()
+	fi.close()
+	if "<LocalDebuggerCommandArguments>" in content:
+		if not arguments in content:
+			print("Note: " + userPath + " has debugger arguments of its own, without " + arguments)
+		return
+	line = "    <LocalDebuggerCommandArguments>" + escape(arguments) + "</LocalDebuggerCommandArguments>\n"
+	updated, count = re.subn(r"(<PropertyGroup Condition=\"[^\"]*\">\n)", lambda m: m.group(1) + line, content)
+	if count == 0:
+		print("Note: " + userPath + " has no configuration to add the debugger arguments " + arguments + " to")
+		return
+	fo = open(userPath, "w")
+	fo.write(updated)
+	fo.close()
+	print("Added the debugger arguments " + arguments + " to " + userPath)
+
 def RecurseDir(dir):
 	for di in os.listdir(dir):
 		if di.startswith("."):
@@ -29,6 +55,9 @@ def RecurseDir(dir):
 		dia = os.path.join(dir, di)
 		if os.path.isfile(dia):
 			if di.endswith(".vcxproj"):
+				arguments = DebuggerArguments(di[:-len(".vcxproj")])
+				if arguments and os.path.isfile(dia + ".user"):
+					AddDebuggerArguments(dia + ".user", arguments)
 				if not os.path.isfile(dia + ".user"):
 					fi = open(dia, "r")
 					line = fi.readline()
@@ -49,6 +78,8 @@ def RecurseDir(dir):
 						fo.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
 						fo.write("<Project ToolsVersion=\"Current\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n")
 						fo.write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Debug|x64'\">\n")
+						if arguments:
+							fo.write("    <LocalDebuggerCommandArguments>" + escape(arguments) + "</LocalDebuggerCommandArguments>\n")
 						if workingDir:
 							fo.write("    <LocalDebuggerWorkingDirectory>")
 							fo.write(workingDir)
@@ -59,6 +90,8 @@ def RecurseDir(dir):
 							fo.write("\n$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>\n")
 						fo.write("  </PropertyGroup>\n")
 						fo.write("  <PropertyGroup Condition=\"'$(Configuration)|$(Platform)'=='Release|x64'\">\n")
+						if arguments:
+							fo.write("    <LocalDebuggerCommandArguments>" + escape(arguments) + "</LocalDebuggerCommandArguments>\n")
 						if workingDir:
 							fo.write("    <LocalDebuggerWorkingDirectory>")
 							fo.write(workingDir)
