@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// The Lua and action handler methods of the control endpoint: lua.run, ah.run, ah.list
+// The Lua and action handler methods of the control endpoint: lua.run, ah.run, ah.list. A chunk runs on the main
+// thread with a bound on its time: a count hook raises an error once its timeout_ms has passed, so a loop that never
+// ends stops the chunk, not the client.
 
 #include "stdpch.h"
 
@@ -40,6 +42,20 @@ using namespace NLGUI;
 namespace ClientCtrl {
 
 namespace {
+
+// the bound of a run: 10 s by default, 10 minutes at most
+const sint64 s_DefaultTimeoutMs = 10000;
+const sint64 s_MaxTimeoutMs = 600000;
+// the instructions between two looks at the clock
+const int s_HookCount = 10000;
+// the nesting of the tables made of args
+const uint s_MaxArgsDepth = 32;
+
+// the run the count hook bounds
+bool s_LuaBounded = false;
+TTime s_LuaDeadline = 0;
+uint s_LuaTimeoutMs = 0;
+bool s_LuaTimedOut = false;
 
 // *** Lua values as JSON ***
 
@@ -145,11 +161,22 @@ struct CLuaToJson
 				lua_pushvalue(L, -2);
 				std::string key;
 				int keyType = lua_type(L, -1);
-				if (keyType == LUA_TSTRING || keyType == LUA_TNUMBER)
+				if (keyType == LUA_TSTRING)
 				{
 					size_t len = 0;
 					const char *s = lua_tolstring(L, -1, &len);
 					key.assign(s, len);
+				}
+				else if (keyType == LUA_TNUMBER)
+				{
+					// as Lua writes a key that is not a string, apart from the string "1"
+					size_t len = 0;
+					const char *s = lua_tolstring(L, -1, &len);
+					key = "[" + std::string(s, len) + "]";
+				}
+				else if (keyType == LUA_TBOOLEAN)
+				{
+					key = lua_toboolean(L, -1) != 0 ? "[true]" : "[false]";
 				}
 				else
 				{
@@ -165,13 +192,27 @@ struct CLuaToJson
 	}
 };
 
-void pushJson(lua_State *L, const CJsonValue &value, uint depth)
+/// The deepest nesting of a JSON value that starts at depth
+uint jsonDepth(const CJsonValue &value, uint depth)
 {
-	if (depth > 32)
+	uint deepest = depth;
+	if (value.isArray())
 	{
-		lua_pushnil(L);
-		return;
+		for (uint i = 0; i < value.size(); ++i)
+			deepest = std::max(deepest, jsonDepth(value.at(i), depth + 1));
 	}
+	else if (value.isObject())
+	{
+		const CJsonValue::TMembers &members = value.members();
+		for (uint i = 0; i < members.size(); ++i)
+			deepest = std::max(deepest, jsonDepth(members[i].second, depth + 1));
+	}
+	return deepest;
+}
+
+/// A JSON value as a Lua value; runChunk checks the nesting first
+void pushJson(lua_State *L, const CJsonValue &value)
+{
 	switch (value.getType())
 	{
 	case CJsonValue::Bool:
@@ -194,7 +235,7 @@ void pushJson(lua_State *L, const CJsonValue &value, uint depth)
 		lua_newtable(L);
 		for (uint i = 0; i < value.size(); ++i)
 		{
-			pushJson(L, value.at(i), depth + 1);
+			pushJson(L, value.at(i));
 			lua_rawseti(L, -2, (int)i + 1);
 		}
 		break;
@@ -204,7 +245,7 @@ void pushJson(lua_State *L, const CJsonValue &value, uint depth)
 		for (uint i = 0; i < members.size(); ++i)
 		{
 			lua_pushlstring(L, members[i].first.data(), members[i].first.size());
-			pushJson(L, members[i].second, depth + 1);
+			pushJson(L, members[i].second);
 			lua_rawset(L, -3);
 		}
 		break;
@@ -246,6 +287,125 @@ int luaTraceback(lua_State *L)
 	return 1;
 }
 
+/// The count hook of a run: once the deadline has passed it raises an error, again at every count, so a chunk that
+/// catches it stops at the next count outside its pcall. A coroutine that outlives its run keeps the hook (a thread
+/// gets the hook of the one that made it) and drops it at its next count.
+void luaDeadlineHook(lua_State *L, lua_Debug * /* ar */)
+{
+	if (!s_LuaBounded)
+	{
+		lua_sethook(L, nullptr, 0, 0);
+		return;
+	}
+	if (CTime::getLocalTime() < s_LuaDeadline)
+		return;
+	s_LuaTimedOut = true;
+	luaL_error(L, "the chunk ran longer than timeout_ms (%d ms) and was stopped", (int)s_LuaTimeoutMs);
+}
+
+/// What a run of a chunk gives
+struct CLuaRun
+{
+	CJsonValue Results;
+	std::string Error;
+	bool Truncated;
+	bool TimedOut;
+
+	CLuaRun()
+	    : Truncated(false)
+	    , TimedOut(false)
+	{
+	}
+};
+
+/// Runs a chunk in the interface's Lua state, with the items of args as its ..., at most timeoutMs, and converts what it
+/// returns: tables followed to maxDepth, maxItems values in all, the returns themselves counted
+bool runChunk(const std::string &code, const CJsonValue &args, uint maxDepth, uint maxItems, uint timeoutMs, CLuaRun &run)
+{
+	run.Results = CJsonValue::array();
+	CLuaState *state = CLuaManager::getInstance().getLuaState();
+	if (state == nullptr)
+	{
+		run.Error = "there is no interface Lua state yet";
+		return false;
+	}
+	if (jsonDepth(args, 0) > s_MaxArgsDepth + 1)
+	{
+		run.Error = toString("args nest deeper than %u levels", s_MaxArgsDepth);
+		return false;
+	}
+	lua_State *L = state->getStatePointer();
+	// room for the handler, the chunk, the arguments and their nested tables (two slots a level)
+	if (!lua_checkstack(L, (int)args.size() + 2 * (int)s_MaxArgsDepth + 8))
+	{
+		run.Error = "the Lua stack has no room for the call";
+		return false;
+	}
+	int top = lua_gettop(L);
+	lua_pushcfunction(L, luaTraceback);
+	int handler = top + 1;
+	if (loadText(L, code) != 0)
+	{
+		run.Error = std::string("the chunk does not compile: ") + (lua_tostring(L, -1) != nullptr ? lua_tostring(L, -1) : "?");
+		lua_settop(L, top);
+		return false;
+	}
+	for (uint i = 0; i < args.size(); ++i)
+		pushJson(L, args.at(i));
+
+	// the count hook in the place of the state's own for the run, which gets it back after
+	lua_Hook previousHook = lua_gethook(L);
+	int previousMask = lua_gethookmask(L);
+	int previousCount = lua_gethookcount(L);
+	bool previousBounded = s_LuaBounded;
+	TTime previousDeadline = s_LuaDeadline;
+	uint previousTimeout = s_LuaTimeoutMs;
+	s_LuaBounded = true;
+	s_LuaDeadline = CTime::getLocalTime() + timeoutMs;
+	s_LuaTimeoutMs = timeoutMs;
+	s_LuaTimedOut = false;
+	lua_sethook(L, luaDeadlineHook, LUA_MASKCOUNT, s_HookCount);
+	int status = lua_pcall(L, (int)args.size(), LUA_MULTRET, handler);
+	lua_sethook(L, previousHook, previousMask, previousCount);
+	run.TimedOut = s_LuaTimedOut;
+	s_LuaBounded = previousBounded;
+	s_LuaDeadline = previousDeadline;
+	s_LuaTimeoutMs = previousTimeout;
+	if (status != 0)
+	{
+		run.Error = lua_tostring(L, -1) != nullptr ? lua_tostring(L, -1) : "?";
+		lua_settop(L, top);
+		return false;
+	}
+
+	CLuaToJson converter;
+	converter.L = L;
+	converter.MaxDepth = maxDepth;
+	converter.Budget = maxItems;
+	converter.Truncated = false;
+	int resultTop = lua_gettop(L);
+	// the conversion walks the tables with a few slots a level
+	if (!lua_checkstack(L, (int)maxDepth * 4 + 8))
+	{
+		lua_settop(L, top);
+		run.Error = "the Lua stack has no room to read the results";
+		return false;
+	}
+	for (int i = handler + 1; i <= resultTop; ++i)
+	{
+		if (converter.Budget == 0)
+		{
+			converter.Truncated = true;
+			break;
+		}
+		--converter.Budget;
+		run.Results.push(converter.convert(i, 0));
+	}
+	lua_settop(L, top);
+	run.Truncated = converter.Truncated;
+	return true;
+}
+
 CJsonValue shownToJson(const std::vector<std::string> &shown)
 {
 	CJsonValue list = CJsonValue::array();
@@ -256,86 +416,66 @@ CJsonValue shownToJson(const std::vector<std::string> &shown)
 
 void methodLuaRun(CCtrlCall &call)
 {
-	CLuaState *state = CLuaManager::getInstance().getLuaState();
-	if (state == nullptr)
-	{
-		call.fail("there is no interface Lua state yet");
-		return;
-	}
-	lua_State *L = state->getStatePointer();
-	const std::string &code = call.getArgs().get("code").getString();
+	const CJsonValue &a = call.getArgs();
+	const std::string &code = a.get("code").getString();
 	if (code.empty())
 	{
-		call.fail("code is required");
+		call.fail("code is empty");
 		return;
 	}
-
-	const CJsonValue &args = call.getArgs().get("args");
-	// room for the handler, the chunk, the arguments and their nested tables (two slots a level, 32 levels at most)
-	if (!lua_checkstack(L, (int)args.size() + 72))
+	const CJsonValue &args = a.get("args");
+	if (!args.isNull() && !args.isArray())
 	{
-		call.fail("the Lua stack has no room for the call");
+		call.fail("args is a JSON array: its items are the chunk's ...");
 		return;
 	}
-	int top = lua_gettop(L);
-	lua_pushcfunction(L, luaTraceback);
-	int handler = top + 1;
-	int loaded = loadText(L, code);
-	if (loaded != 0)
+	sint64 maxDepth = a.get("max_depth").getInt(6);
+	sint64 maxItems = a.get("max_items").getInt(2000);
+	sint64 timeoutMs = a.get("timeout_ms").getInt(s_DefaultTimeoutMs);
+	if (maxDepth < 1 || maxDepth > 32)
 	{
-		std::string error = lua_tostring(L, -1) != nullptr ? lua_tostring(L, -1) : "?";
-		lua_settop(L, top);
-		call.fail("the chunk does not compile: " + error);
+		call.fail("max_depth is 1 to 32");
 		return;
 	}
-	// the arguments are the chunk's ...
-	for (uint i = 0; i < args.size(); ++i)
-		pushJson(L, args.at(i), 0);
-
+	if (maxItems < 1 || maxItems > 100000)
+	{
+		call.fail("max_items is 1 to 100000");
+		return;
+	}
+	if (timeoutMs < 1 || timeoutMs > s_MaxTimeoutMs)
+	{
+		call.fail(toString("timeout_ms is 1 to %u", (uint)s_MaxTimeoutMs));
+		return;
+	}
 	std::vector<std::string> shown;
-	int status;
+	CLuaRun run;
+	bool ok;
 	{
 		CShownScope scope(shown);
-		status = lua_pcall(L, (int)args.size(), LUA_MULTRET, handler);
+		ok = runChunk(code, args, (uint)maxDepth, (uint)maxItems, (uint)timeoutMs, run);
 	}
-	if (status != 0)
+	if (!ok)
 	{
-		std::string error = lua_tostring(L, -1) != nullptr ? lua_tostring(L, -1) : "?";
-		lua_settop(L, top);
 		CJsonValue details = CJsonValue::object();
 		details.set("shown", shownToJson(shown));
-		call.fail(error, details);
+		if (run.TimedOut)
+			details.set("timed_out", true);
+		call.fail(run.Error, details);
 		return;
 	}
-
-	CLuaToJson converter;
-	converter.L = L;
-	converter.MaxDepth = (uint)std::max((sint64)1, std::min((sint64)32, call.getArgs().get("max_depth").getInt(6)));
-	converter.Budget = (uint)std::max((sint64)1, std::min((sint64)100000, call.getArgs().get("max_items").getInt(2000)));
-	converter.Truncated = false;
-	CJsonValue results = CJsonValue::array();
-	int resultTop = lua_gettop(L);
-	// the conversion walks the tables with a few slots a level
-	if (!lua_checkstack(L, (int)converter.MaxDepth * 4 + 8))
-	{
-		lua_settop(L, top);
-		call.fail("the Lua stack has no room to read the results");
-		return;
-	}
-	for (int i = handler + 1; i <= resultTop; ++i)
-		results.push(converter.convert(i, 0));
-	lua_settop(L, top);
-
 	CJsonValue r = CJsonValue::object();
-	r.set("results", results);
-	if (converter.Truncated)
-		r.set("truncated", "tables deeper than max_depth, cycles, or more items than max_items are left out");
+	r.set("results", run.Results);
+	r.set("truncated", run.Truncated);
+	if (run.Truncated)
+		r.set("note", "tables deeper than max_depth, cycles, or more values than max_items are left out");
 	r.set("shown", shownToJson(shown));
 	call.reply(r);
 }
 
 void methodAhRun(CCtrlCall &call)
 {
+	if (!requireInterface(call))
+		return;
 	const std::string &name = call.getArgs().get("name").getString();
 	const std::string &params = call.getArgs().get("params").getString();
 	CAHManager *manager = CAHManager::getInstance();
@@ -349,11 +489,16 @@ void methodAhRun(CCtrlCall &call)
 	const std::string &callerId = call.getArgs().get("caller").getString();
 	if (!callerId.empty())
 	{
-		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(callerId);
+		CInterfaceElement *element = findElement(callerId);
 		caller = dynamic_cast<CCtrlBase *>(element);
+		if (element == nullptr)
+		{
+			call.fail(toString("no interface element '%s'", callerId.c_str()));
+			return;
+		}
 		if (caller == nullptr)
 		{
-			call.fail(toString(element == nullptr ? "no interface element '%s'" : "'%s' is not a control", callerId.c_str()));
+			call.fail(toString("'%s' is not a control", callerId.c_str()));
 			return;
 		}
 	}
@@ -393,77 +538,43 @@ void methodAhList(CCtrlCall &call)
 
 bool runLua(const std::string &code, const CJsonValue &args, uint maxDepth, uint maxItems, CJsonValue &results, std::string &error, bool *truncated)
 {
-	CLuaState *state = CLuaManager::getInstance().getLuaState();
-	if (state == nullptr)
+	CLuaRun run;
+	if (!runChunk(code, args, maxDepth, maxItems, (uint)s_DefaultTimeoutMs, run))
 	{
-		error = "there is no interface Lua state yet";
+		error = run.Error;
 		return false;
 	}
-	lua_State *L = state->getStatePointer();
-	if (!lua_checkstack(L, (int)args.size() + 72))
-	{
-		error = "the Lua stack has no room for the call";
-		return false;
-	}
-	int top = lua_gettop(L);
-	lua_pushcfunction(L, luaTraceback);
-	int handler = top + 1;
-	if (loadText(L, code) != 0)
-	{
-		error = std::string("the chunk does not compile: ") + (lua_tostring(L, -1) != nullptr ? lua_tostring(L, -1) : "?");
-		lua_settop(L, top);
-		return false;
-	}
-	for (uint i = 0; i < args.size(); ++i)
-		pushJson(L, args.at(i), 0);
-	if (lua_pcall(L, (int)args.size(), LUA_MULTRET, handler) != 0)
-	{
-		error = lua_tostring(L, -1) != nullptr ? lua_tostring(L, -1) : "?";
-		lua_settop(L, top);
-		return false;
-	}
-	CLuaToJson converter;
-	converter.L = L;
-	converter.MaxDepth = maxDepth;
-	converter.Budget = maxItems;
-	converter.Truncated = false;
-	results = CJsonValue::array();
-	int resultTop = lua_gettop(L);
-	if (!lua_checkstack(L, (int)maxDepth * 4 + 8))
-	{
-		lua_settop(L, top);
-		error = "the Lua stack has no room to read the results";
-		return false;
-	}
-	for (int i = handler + 1; i <= resultTop; ++i)
-		results.push(converter.convert(i, 0));
-	lua_settop(L, top);
+	results = run.Results;
 	if (truncated != nullptr)
-		*truncated = converter.Truncated;
+		*truncated = run.Truncated;
 	return true;
 }
 
 void registerScriptMethods(CCtrlEndpoint &endpoint)
 {
-	endpoint.addMethod(new CCtrlFunctionMethod("lua.run",
-	    "Runs a Lua chunk of any length in the interface's Lua state, with args as its ..., and returns what it returns (tables as JSON, max_depth and max_items bound them), "
-	    "or the error with a traceback; also the system messages it showed. It has what the interface's Lua has: getUI, getDbProp, runAH, r2, and with AllowDebugLua the host libraries.",
+	endpoint.addMethod(newMethod("lua.run",
+	    "Runs a Lua chunk of any length in the interface's Lua state, with args as its ..., and returns what it returns (tables as JSON, max_depth and max_items bound them, "
+	    "the returns themselves counted; a key that is not a string is written as Lua writes it, [1]), or the error with a traceback; also the system messages it showed. "
+	    "It has what the interface's Lua has: getUI, getDbProp, runAH, r2, and with AllowDebugLua the host libraries. It stops with an error once timeout_ms has passed "
+	    "(10 s by default); a call into C++ that does not return is not stopped.",
 	    CCtrlSchema()
 	        .str("code", "The Lua chunk; 'return x' gives x back.", true)
-	        .any("args", "A JSON array; its items are the chunk's ... (objects become tables).")
-	        .integer("max_depth", "How deep tables are followed (6 by default).")
-	        .integer("max_items", "How many table items at most in all (2000 by default)."),
-	    false, methodLuaRun));
-	endpoint.addMethod(new CCtrlFunctionMethod("ah.run",
+	        .any("args", "A JSON array; its items are the chunk's ... (objects become tables), nested 32 levels at most.")
+	        .integer("max_depth", "How deep tables are followed, 1 to 32 (6 by default).")
+	        .integer("max_items", "How many values at most in all, 1 to 100000 (2000 by default).")
+	        .integer("timeout_ms", "The longest the chunk may run, 1 to 600000 ms (10000 by default)."),
+	    false, methodLuaRun, nullptr, nullptr));
+	endpoint.addMethod(newMethod("ah.run",
 	    "Runs an action handler by name with its parameters, as the interface does when a control fires it; caller names the control it acts on when it needs one. Returns the system messages it showed. "
-	    "This runs the handler directly: it passes over whatever covers the control, unlike a click.",
+	    "This runs the handler directly, in whatever screen the client shows: it passes over whatever covers the control, unlike a click, and a handler of another screen acts on "
+	    "elements that are not shown.",
 	    CCtrlSchema()
 	        .str("name", "The action handler, as ah.list names it.", true)
 	        .str("params", "Its parameters, in the interface's syntax (name=value|name=value).")
 	        .str("caller", "The id of the control that fires it (ui:interface:...)."),
-	    false, methodAhRun));
-	endpoint.addMethod(new CCtrlFunctionMethod("ah.list", "The action handlers of the interface, filtered by prefix or a word of the name.",
-	    CCtrlSchema().str("prefix", "Only names starting with this.").str("contains", "Only names containing this (case-insensitive)."), true, methodAhList));
+	    false, methodAhRun, nullptr, nullptr));
+	endpoint.addMethod(newMethod("ah.list", "The action handlers of the interface, filtered by prefix or a word of the name.",
+	    CCtrlSchema().str("prefix", "Only names starting with this.").str("contains", "Only names containing this (case-insensitive)."), true, methodAhList, nullptr, nullptr));
 }
 
 } // ClientCtrl

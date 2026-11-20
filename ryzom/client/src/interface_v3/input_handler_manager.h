@@ -26,6 +26,7 @@
 #include "nel/misc/event_server.h"
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include "nel/gui/event_descriptor.h"
 #include "nel/gui/input_handler.h"
@@ -107,11 +108,13 @@ public:
 
 	/** Pump The Events of The setuped EventServer (ie Driver->EventServer).
 	 *	Then pump the filtered ones
+	 *	The input of a control tool (--ctrl-listen) is posted at the start of this pump only.
 	 */
 	void	pumpEvents();
 
 	/** Same as pumpEvents() but the messages are not processed by the InterfaceManager, but directly
 	 *	posted to FilteredEventServer
+	 *	The input of a control tool that waits is dropped here, apart from its releases, as it was meant for the interface.
 	 */
 	void	pumpEventsNoIM();
 
@@ -155,6 +158,10 @@ private:
 	bool					_Focus;
 	bool					_SkipInterfaceManager;
 	bool					_RecoverFocusLost;
+
+	// the events of a control tool (--ctrl-listen) in the pump that posted them: they pass the focus test, and leave
+	// the mouse capture of the window alone
+	std::set<const NLMISC::CEvent *> m_Injected;
 
 	// CComboKey
 	class	CComboKey

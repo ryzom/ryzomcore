@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// The interface methods of the control endpoint: ui.windows, ui.tree, ui.get, ui.at, ui.click,
-// ui.hover, ui.drag, ui.wheel, ui.set_text. Elements go by their id (ui:interface:...). Rectangles and
-// points are window pixels from the top left, the pixels of input.mouse and of screen.grab; the
-// interface's own units are the pixels divided by ui_scale. A click by id goes through the mouse,
-// at the centre of the element, after checking that the element is what the mouse would find there:
-// a click that passes a modal window, or another window over the element, fails with what covers it.
+// The interface methods of the control endpoint: ui.windows, ui.tree, ui.get, ui.at, ui.click, ui.hover, ui.drag,
+// ui.wheel, ui.set_text. Elements go by their id (ui:interface:...). Rectangles and points are window pixels from the
+// top left, the pixels of input.mouse and of screen.grab; the interface's own units are the pixels divided by ui_scale.
+// A click by id goes through the mouse, at the centre of the element, after checking that the press there goes to the
+// element as the widget manager would give it: to the deepest control that takes captures in the window under the
+// point. A click that a modal window keeps, or that another window or control over the element would take, fails with
+// what takes it. The password of a password box is never given back, only its length.
 
 #include "stdpch.h"
 
@@ -28,8 +29,10 @@
 #ifdef RYZOM_HAS_CLIENT_CTRL
 
 #include "nel/3d/u_driver.h"
+#include "nel/gui/action_handler.h"
 #include "nel/gui/ctrl_base.h"
 #include "nel/gui/ctrl_base_button.h"
+#include "nel/gui/ctrl_draggable.h"
 #include "nel/gui/ctrl_text_button.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
@@ -40,6 +43,8 @@
 
 #include "global.h"
 
+#include <cmath>
+
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
 #endif
@@ -48,6 +53,33 @@ using namespace NLMISC;
 using namespace NLGUI;
 
 namespace ClientCtrl {
+
+// findElement and isShown, declared in client_ctrl_methods.h: CWidgetManager::getElementFromId would log an id that is not
+// there, and keep it
+
+CInterfaceElement *findElement(const std::string &id)
+{
+	if (id.empty())
+		return nullptr;
+	std::vector<CWidgetManager::SMasterGroup> &groups = CWidgetManager::getInstance()->getAllMasterGroup();
+	for (uint m = 0; m < groups.size(); ++m)
+	{
+		if (groups[m].Group == nullptr)
+			continue;
+		CInterfaceElement *e = groups[m].Group->getElement(id);
+		if (e != nullptr)
+			return e;
+	}
+	return nullptr;
+}
+
+bool isShown(const CInterfaceElement *e)
+{
+	for (; e != nullptr; e = e->getParent())
+		if (!e->getActive())
+			return false;
+	return true;
+}
 
 namespace {
 
@@ -68,27 +100,49 @@ struct CUiScale
 			Scale = 1.0;
 	}
 
+	bool hasArea() const { return WindowWidth > 0 && WindowHeight > 0 && UiWidth > 0 && UiHeight > 0; }
+
 	CJsonValue rect(const CInterfaceElement *e) const
 	{
 		// the interface counts from the bottom left
 		CJsonValue r = CJsonValue::object();
-		r.set("x", floor(e->getXReal() * Scale + 0.5));
-		r.set("y", floor(WindowHeight - (e->getYReal() + e->getHReal()) * Scale + 0.5));
-		r.set("width", floor(e->getWReal() * Scale + 0.5));
-		r.set("height", floor(e->getHReal() * Scale + 0.5));
+		r.set("x", std::floor(e->getXReal() * Scale + 0.5));
+		r.set("y", std::floor(WindowHeight - (e->getYReal() + e->getHReal()) * Scale + 0.5));
+		r.set("width", std::floor(e->getWReal() * Scale + 0.5));
+		r.set("height", std::floor(e->getHReal() * Scale + 0.5));
 		return r;
 	}
 
+	/// The interface point the pointer goes to for a window pixel, as the client computes it from the event postMouse
+	/// posts: the position in 0..1 as a float, times the interface size, rounded (CWidgetManager::handleMouseMoveEvent)
 	void toUi(double px, double py, sint32 &ux, sint32 &uy) const
 	{
-		ux = (sint32)floor(px / Scale);
-		uy = (sint32)floor((WindowHeight - py) / Scale);
+		float x = (float)(px / (double)WindowWidth);
+		float y = (float)(1.0 - py / (double)WindowHeight);
+		ux = (sint32)std::floor(x * UiWidth + 0.5f);
+		uy = (sint32)std::floor(y * UiHeight + 0.5f);
+	}
+
+	/// The window pixel that toUi takes back to an interface point
+	void toWindow(sint32 ux, sint32 uy, double &px, double &py) const
+	{
+		px = (double)ux * WindowWidth / UiWidth;
+		py = WindowHeight - (double)uy * WindowHeight / UiHeight;
+	}
+
+	/// The interface point at the centre of an element, inside it by the rule of CInterfaceElement::isIn: x in
+	/// [x, x + w), y in (y, y + h]
+	void centreUi(const CInterfaceElement *e, sint32 &ux, sint32 &uy) const
+	{
+		ux = e->getXReal() + e->getWReal() / 2;
+		uy = e->getYReal() + (e->getHReal() + 1) / 2;
 	}
 
 	void centre(const CInterfaceElement *e, double &px, double &py) const
 	{
-		px = (e->getXReal() + e->getWReal() * 0.5) * Scale;
-		py = WindowHeight - (e->getYReal() + e->getHReal() * 0.5) * Scale;
+		sint32 ux, uy;
+		centreUi(e, ux, uy);
+		toWindow(ux, uy, px, py);
 	}
 };
 
@@ -97,8 +151,29 @@ CJsonValue scaleJson(const CUiScale &s)
 	CJsonValue r = CJsonValue::object();
 	r.set("window", CJsonValue::object().set("width", s.WindowWidth).set("height", s.WindowHeight));
 	r.set("interface", CJsonValue::object().set("width", s.UiWidth).set("height", s.UiHeight));
-	r.set("ui_scale", floor(s.Scale * 1000.0 + 0.5) / 1000.0);
+	r.set("ui_scale", std::floor(s.Scale * 1000.0 + 0.5) / 1000.0);
 	return r;
+}
+
+bool isPasswordBox(const CGroupEditBox *edit)
+{
+	return edit->getProperty("enter_type") == "password";
+}
+
+/// What an edit box holds: its text, or only the length of a password
+void setInput(CJsonValue &o, const CGroupEditBox *edit)
+{
+	if (isPasswordBox(edit))
+	{
+		o.set("password", true);
+		o.set("input_length", (uint32)edit->getInputStringRef().size());
+	}
+	else
+	{
+		o.set("input", edit->getInputString());
+	}
+	if (edit->getFrozen())
+		o.set("frozen", true);
 }
 
 /// What a tool needs to know of an element, without its children
@@ -109,14 +184,14 @@ CJsonValue elementJson(const CInterfaceElement *e, const CUiScale &scale)
 	o.set("type", const_cast<CInterfaceElement *>(e)->getClassName());
 	o.set("rect", scale.rect(e));
 	o.set("active", e->getActive());
-	if (!e->isActiveThroughParents())
+	if (e->getActive() && !isShown(e))
 		o.set("hidden_by_parent", true);
 	if (const CViewText *text = dynamic_cast<const CViewText *>(e))
 		o.set("text", text->getText());
 	if (const CCtrlTextButton *button = dynamic_cast<const CCtrlTextButton *>(e))
 		o.set("text", button->getText());
 	if (const CGroupEditBox *edit = dynamic_cast<const CGroupEditBox *>(e))
-		o.set("input", edit->getInputString());
+		setInput(o, edit);
 	if (const CGroupContainer *container = dynamic_cast<const CGroupContainer *>(e))
 		o.set("title", container->getTitle());
 	if (const CCtrlBase *ctrl = dynamic_cast<const CCtrlBase *>(e))
@@ -139,6 +214,8 @@ CJsonValue elementJson(const CInterfaceElement *e, const CUiScale &scale)
 		if (!right.empty())
 			o.set("onclick_r", right);
 		o.set("pushed", button->getPushed());
+		if (button->getFrozen())
+			o.set("frozen", true);
 	}
 	return o;
 }
@@ -162,6 +239,8 @@ struct CTreeWalk
 			Truncated = true;
 			return false;
 		}
+		// the slot of this element is taken before its children are walked, and given back when the filter leaves it out
+		--Budget;
 		CJsonValue node = elementJson(e, *Scale);
 		bool matches = Contains.empty() || toLowerAscii(e->getId()).find(Contains) != std::string::npos
 		    || toLowerAscii(node.get("text").getString()).find(Contains) != std::string::npos;
@@ -193,8 +272,10 @@ struct CTreeWalk
 			}
 		}
 		if (!matches)
+		{
+			++Budget;
 			return false;
-		--Budget;
+		}
 		out.push(node);
 		return true;
 	}
@@ -248,19 +329,32 @@ void methodTree(CCtrlCall &call)
 {
 	if (!requireInterface(call))
 		return;
+	const CJsonValue &args = call.getArgs();
+	sint64 depth = args.get("depth").getInt(4);
+	sint64 max = args.get("max").getInt(400);
+	if (depth < 0 || depth > 64)
+	{
+		call.fail("depth is 0 to 64");
+		return;
+	}
+	if (max < 1 || max > 5000)
+	{
+		call.fail("max is 1 to 5000");
+		return;
+	}
 	CUiScale scale;
 	CTreeWalk walk;
 	walk.Scale = &scale;
-	walk.MaxDepth = (uint)std::max((sint64)0, std::min((sint64)64, call.getArgs().get("depth").getInt(4)));
-	walk.Budget = (uint)std::max((sint64)1, std::min((sint64)5000, call.getArgs().get("max").getInt(400)));
-	walk.ActiveOnly = call.getArgs().get("active_only").getBool(true);
-	walk.Contains = toLowerAscii(call.getArgs().get("contains").getString());
+	walk.MaxDepth = (uint)depth;
+	walk.Budget = (uint)max;
+	walk.ActiveOnly = args.get("active_only").getBool(true);
+	walk.Contains = toLowerAscii(args.get("contains").getString());
 	walk.Truncated = false;
 	CJsonValue nodes = CJsonValue::array();
-	const std::string &id = call.getArgs().get("id").getString();
+	const std::string &id = args.get("id").getString();
 	if (!id.empty())
 	{
-		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId(id);
+		CInterfaceElement *e = findElement(id);
 		if (e == nullptr)
 		{
 			call.fail(toString("no interface element '%s'", id.c_str()));
@@ -270,7 +364,7 @@ void methodTree(CCtrlCall &call)
 	}
 	else
 	{
-		// the active windows of the active master groups, front to back
+		// the active windows of the active master groups, front to back, each at depth 0 as the root of a tree is
 		std::vector<CWidgetManager::SMasterGroup> &groups = CWidgetManager::getInstance()->getAllMasterGroup();
 		for (uint m = 0; m < groups.size(); ++m)
 		{
@@ -280,7 +374,7 @@ void methodTree(CCtrlCall &call)
 			{
 				const std::list<CInterfaceGroup *> &list = groups[m].PrioritizedWindows[p - 1];
 				for (std::list<CInterfaceGroup *>::const_reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
-					walk.walk(*it, 1, nodes);
+					walk.walk(*it, 0, nodes);
 			}
 		}
 	}
@@ -297,7 +391,7 @@ void methodGet(CCtrlCall &call)
 	if (!requireInterface(call))
 		return;
 	const std::string &id = call.getArgs().get("id").getString();
-	CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId(id);
+	CInterfaceElement *e = findElement(id);
 	if (e == nullptr)
 	{
 		call.fail(toString("no interface element '%s'", id.c_str()));
@@ -318,45 +412,6 @@ void methodGet(CCtrlCall &call)
 	call.reply(r);
 }
 
-/// The front-most controls and groups at a window pixel, as the mouse would find them
-void underPoint(double px, double py, std::vector<CCtrlBase *> &ctrls, std::vector<CInterfaceGroup *> &groups)
-{
-	CUiScale scale;
-	sint32 ux, uy;
-	scale.toUi(px, py, ux, uy);
-	CWidgetManager::getInstance()->getCtrlsUnder(ux, uy, ctrls);
-	CWidgetManager::getInstance()->getGroupsUnder(ux, uy, groups);
-}
-
-void methodAt(CCtrlCall &call)
-{
-	if (!requireInterface(call))
-		return;
-	double px = call.getArgs().get("x").getNumber(-1), py = call.getArgs().get("y").getNumber(-1);
-	if (px < 0 || py < 0)
-	{
-		call.fail("x and y are required, in window pixels");
-		return;
-	}
-	std::vector<CCtrlBase *> ctrls;
-	std::vector<CInterfaceGroup *> groups;
-	underPoint(px, py, ctrls, groups);
-	CUiScale scale;
-	CJsonValue c = CJsonValue::array();
-	for (uint i = 0; i < ctrls.size(); ++i)
-		c.push(elementJson(ctrls[i], scale));
-	CJsonValue g = CJsonValue::array();
-	for (uint i = 0; i < groups.size(); ++i)
-		g.push(CJsonValue(groups[i]->getId()));
-	CJsonValue r = CJsonValue::object();
-	r.set("controls", c);
-	r.set("groups", g);
-	CInterfaceGroup *modal = CWidgetManager::getInstance()->getModalWindow();
-	if (modal != nullptr)
-		r.set("modal", modal->getId());
-	call.reply(r);
-}
-
 /// Whether one element is the other or inside it
 bool within(const CInterfaceElement *e, const CInterfaceElement *ancestor)
 {
@@ -366,131 +421,315 @@ bool within(const CInterfaceElement *e, const CInterfaceElement *ancestor)
 	return false;
 }
 
-/// The point of an element where the mouse acts on it; false with the call failed when the mouse would not reach it
-bool reachElement(CCtrlCall &call, const std::string &idArg, double &px, double &py)
+/// What a press of the mouse at an interface point goes to, by the rule of CWidgetManager::handleMouseEvent: in the
+/// window under the point, the deepest control that takes captures, the last drawn on a tie
+struct CHit
+{
+	CInterfaceGroup *Window;
+	CCtrlBase *Control;
+	/// A modal window that keeps the press, or one the press closes first (exit_click_out)
+	CInterfaceGroup *Modal;
+	bool ClosesModal;
+
+	CHit()
+	    : Window(nullptr)
+	    , Control(nullptr)
+	    , Modal(nullptr)
+	    , ClosesModal(false)
+	{
+	}
+};
+
+CHit hitAt(sint32 ux, sint32 uy)
+{
+	CWidgetManager *wm = CWidgetManager::getInstance();
+	CHit hit;
+	hit.Window = wm->getWindowUnder(ux, uy);
+	if (wm->hasModal())
+	{
+		CWidgetManager::SModalWndInfo &modal = wm->getModal();
+		CInterfaceGroup *modalWindow = modal.ModalWindow;
+		if (modalWindow != nullptr && hit.Window != modalWindow)
+		{
+			hit.Modal = modalWindow;
+			if (!modal.ModalExitClickOut)
+			{
+				hit.Window = nullptr;
+				return hit;
+			}
+			// the press closes the modal window, then goes on to what is under the point
+			hit.ClosesModal = true;
+		}
+	}
+	// no control takes a press while a sheet is dragged
+	if (hit.Window == nullptr || CCtrlDraggable::getDraggedSheet() != nullptr)
+		return hit;
+	std::vector<CCtrlBase *> ctrls;
+	wm->getCtrlsUnder(ux, uy, ctrls);
+	uint32 deepest = 0;
+	for (sint i = (sint)ctrls.size() - 1; i >= 0; --i)
+	{
+		CCtrlBase *ctrl = ctrls[i];
+		if (ctrl == nullptr || !ctrl->isCapturable() || !ctrl->isInGroup(hit.Window))
+			continue;
+		uint32 depth = ctrl->getDepth(hit.Window);
+		if (depth > deepest)
+		{
+			deepest = depth;
+			hit.Control = ctrl;
+		}
+	}
+	return hit;
+}
+
+/// Whether a press goes to an element: to it or to a control inside it; for a view, also to the control that holds it
+/// (the text of a button); for a group or a view under the point, also to its window when no control takes the press
+bool reaches(const CHit &hit, CInterfaceElement *e, sint32 ux, sint32 uy)
+{
+	if (hit.Window == nullptr)
+		return false;
+	bool isControl = dynamic_cast<CCtrlBase *>(e) != nullptr;
+	bool isGroup = dynamic_cast<CInterfaceGroup *>(e) != nullptr;
+	if (hit.Control != nullptr)
+		return within(hit.Control, e) || (!isControl && within(e, hit.Control));
+	return (isGroup || !isControl) && within(e, hit.Window) && e->isIn(ux, uy);
+}
+
+/// Where the mouse acts on an element
+struct CReach
+{
+	double X, Y;
+	/// What takes the press there: a control, or the window
+	std::string Target;
+	/// The modal window the press closes first, exit_click_out
+	std::string ClosesModal;
+};
+
+/// The point of an element where the mouse acts on it; false with the call failed when the press would not go to it
+bool reachElement(CCtrlCall &call, const std::string &idArg, CReach &reach)
 {
 	const std::string &id = call.getArgs().get(idArg).getString();
-	CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId(id);
+	CInterfaceElement *e = findElement(id);
 	if (e == nullptr)
 	{
 		call.fail(toString("no interface element '%s'", id.c_str()));
 		return false;
 	}
-	if (!e->isActiveThroughParents())
+	if (!isShown(e))
 	{
 		call.fail(toString("'%s' is not shown (it or a parent is not active)", id.c_str()));
 		return false;
 	}
+	if (!CWidgetManager::getInstance()->isMouseHandlingEnabled())
+	{
+		call.fail("the interface does not handle the mouse now");
+		return false;
+	}
 	CUiScale scale;
+	if (!scale.hasArea())
+	{
+		call.fail("the window has no area (minimized?)");
+		return false;
+	}
+	double px, py;
 	scale.centre(e, px, py);
 	// an offset from the centre, in pixels, for an element whose centre is not where it takes clicks
 	px += call.getArgs().get("dx").getNumber(0);
 	py += call.getArgs().get("dy").getNumber(0);
 	if (px < 0 || py < 0 || px >= scale.WindowWidth || py >= scale.WindowHeight)
 	{
-		call.fail(toString("the centre of '%s' is outside the window", id.c_str()));
+		call.fail(toString("the point of '%s' is outside the window", id.c_str()));
 		return false;
 	}
-	std::vector<CCtrlBase *> ctrls;
-	std::vector<CInterfaceGroup *> groups;
-	underPoint(px, py, ctrls, groups);
-	// the mouse finds the control under it; a group (a list, a window) takes what is in it
-	bool reached = false;
-	for (uint i = 0; i < ctrls.size() && !reached; ++i)
-		reached = within(ctrls[i], e) || within(e, ctrls[i]);
-	if (!reached && dynamic_cast<CCtrlBase *>(e) == nullptr)
-		for (uint i = 0; i < groups.size() && !reached; ++i)
-			reached = within(groups[i], e);
-	if (!reached)
+	sint32 ux, uy;
+	scale.toUi(px, py, ux, uy);
+	CHit hit = hitAt(ux, uy);
+	if (!reaches(hit, e, ux, uy))
 	{
-		CJsonValue covering = CJsonValue::array();
-		for (uint i = 0; i < ctrls.size(); ++i)
-			covering.push(CJsonValue(ctrls[i]->getId()));
-		if (ctrls.empty())
-			for (uint i = 0; i < groups.size() && i < 3; ++i)
-				covering.push(CJsonValue(groups[i]->getId()));
 		CJsonValue details = CJsonValue::object();
-		details.set("under_the_point", covering);
 		details.set("x", px);
 		details.set("y", py);
-		CInterfaceGroup *modal = CWidgetManager::getInstance()->getModalWindow();
-		if (modal != nullptr)
-			details.set("modal", modal->getId());
-		call.fail(toString("the mouse would not reach '%s' at its centre: something else is there (a modal window, another window, or nothing that takes clicks)", id.c_str()), details);
+		if (hit.Window == nullptr && hit.Modal != nullptr)
+		{
+			details.set("modal", hit.Modal->getId());
+			call.fail("a modal window takes the input: " + hit.Modal->getId() + "; close it first (ui.tree shows its buttons, ui.click presses one)", details);
+			return false;
+		}
+		if (hit.Control != nullptr)
+			details.set("takes_the_press", hit.Control->getId());
+		else if (hit.Window != nullptr)
+			details.set("takes_the_press", hit.Window->getId());
+		call.fail(toString("the mouse would not reach '%s' at that point: %s takes the press there", id.c_str(),
+		              hit.Control != nullptr ? "another control" : (hit.Window != nullptr ? "a window without a control there" : "nothing of the interface")),
+		    details);
 		return false;
 	}
+	if (const CCtrlBaseButton *button = dynamic_cast<const CCtrlBaseButton *>(hit.Control))
+	{
+		if (button->getFrozen())
+		{
+			call.fail(toString("'%s' is frozen: the button takes no click now", button->getId().c_str()), CJsonValue::object().set("frozen", true));
+			return false;
+		}
+	}
+	reach.X = px;
+	reach.Y = py;
+	reach.Target = hit.Control != nullptr ? hit.Control->getId() : hit.Window->getId();
+	reach.ClosesModal = hit.ClosesModal ? hit.Modal->getId() : std::string();
 	return true;
+}
+
+void setReach(CJsonValue &r, const CReach &reach)
+{
+	r.set("x", reach.X);
+	r.set("y", reach.Y);
+	r.set("target", reach.Target);
+	if (!reach.ClosesModal.empty())
+		r.set("closes_modal", reach.ClosesModal);
+}
+
+void methodAt(CCtrlCall &call)
+{
+	if (!requireInterface(call))
+		return;
+	double px = call.getArgs().get("x").getNumber(), py = call.getArgs().get("y").getNumber();
+	CUiScale scale;
+	if (!scale.hasArea())
+	{
+		call.fail("the window has no area (minimized?)");
+		return;
+	}
+	if (px < 0 || py < 0 || px >= scale.WindowWidth || py >= scale.WindowHeight)
+	{
+		call.fail(toString("%.0f, %.0f is outside the client area, which is %ux%u", px, py, scale.WindowWidth, scale.WindowHeight));
+		return;
+	}
+	sint32 ux, uy;
+	scale.toUi(px, py, ux, uy);
+	std::vector<CCtrlBase *> ctrls;
+	std::vector<CInterfaceGroup *> groups;
+	CWidgetManager::getInstance()->getCtrlsUnder(ux, uy, ctrls);
+	CWidgetManager::getInstance()->getGroupsUnder(ux, uy, groups);
+	// the controls come in the order they are drawn: the front-most is the last
+	CJsonValue c = CJsonValue::array();
+	for (uint i = (uint)ctrls.size(); i > 0; --i)
+		c.push(elementJson(ctrls[i - 1], scale));
+	CJsonValue g = CJsonValue::array();
+	for (uint i = 0; i < groups.size(); ++i)
+		g.push(CJsonValue(groups[i]->getId()));
+	CJsonValue r = CJsonValue::object();
+	r.set("controls", c);
+	r.set("groups", g);
+	CHit hit = hitAt(ux, uy);
+	if (hit.Control != nullptr)
+		r.set("press_goes_to", hit.Control->getId());
+	else if (hit.Window != nullptr)
+		r.set("press_goes_to", hit.Window->getId());
+	else
+		r.set("press_goes_to", CJsonValue());
+	if (hit.Modal != nullptr)
+		r.set(hit.ClosesModal ? "closes_modal" : "modal", hit.Modal->getId());
+	call.reply(r);
 }
 
 void methodClick(CCtrlCall &call)
 {
 	if (!requireInterface(call))
 		return;
-	double px, py;
-	if (!reachElement(call, "id", px, py))
+	CReach reach;
+	if (!reachElement(call, "id", reach))
 		return;
 	std::string action = call.getArgs().get("double").getBool(false) ? "double_click" : "click";
 	std::string error;
-	if (!postMouse(action, px, py, call.getArgs().get("button").getString("left"), call.getArgs(), 0, error))
+	if (!postMouse(action, reach.X, reach.Y, call.getArgs().get("button").getString("left"), call.getArgs(), 0, error))
 	{
+		discardInput();
 		call.fail(error);
 		return;
 	}
 	CJsonValue r = CJsonValue::object();
 	r.set("id", call.getArgs().get("id"));
-	r.set("x", px);
-	r.set("y", py);
+	setReach(r, reach);
 	r.set("action", action);
-	finishAfterPump(call, r);
+	finishAfterPumpOnElement(call, r);
 }
 
 void methodHover(CCtrlCall &call)
 {
 	if (!requireInterface(call))
 		return;
-	double px, py;
-	if (!reachElement(call, "id", px, py))
+	CReach reach;
+	if (!reachElement(call, "id", reach))
 		return;
 	std::string error;
-	postMouse("move", px, py, "left", call.getArgs(), 0, error);
-	finishAfterPump(call, CJsonValue::object().set("id", call.getArgs().get("id")).set("x", px).set("y", py));
+	if (!postMouse("move", reach.X, reach.Y, "left", call.getArgs(), 0, error))
+	{
+		discardInput();
+		call.fail(error);
+		return;
+	}
+	CJsonValue r = CJsonValue::object();
+	r.set("id", call.getArgs().get("id"));
+	setReach(r, reach);
+	finishAfterPump(call, r);
 }
 
 void methodWheel(CCtrlCall &call)
 {
 	if (!requireInterface(call))
 		return;
-	double px, py;
-	if (!reachElement(call, "id", px, py))
-		return;
-	sint steps = (sint)call.getArgs().get("steps").getInt(-1);
-	std::string error;
-	if (steps == 0 || !postMouse("wheel", px, py, "left", call.getArgs(), steps, error))
+	sint64 steps = call.getArgs().get("steps").getInt(-1);
+	if (steps == 0 || steps > 100 || steps < -100)
 	{
-		call.fail(error.empty() ? "steps is not 0: positive up, negative down" : error);
+		call.fail("steps is 1 to 100 up, or -1 to -100 down");
 		return;
 	}
-	finishAfterPump(call, CJsonValue::object().set("id", call.getArgs().get("id")).set("steps", steps));
+	CReach reach;
+	if (!reachElement(call, "id", reach))
+		return;
+	std::string error;
+	if (!postMouse("wheel", reach.X, reach.Y, "left", CJsonValue::object(), (sint)steps, error))
+	{
+		discardInput();
+		call.fail(error);
+		return;
+	}
+	CJsonValue r = CJsonValue::object();
+	r.set("id", call.getArgs().get("id"));
+	setReach(r, reach);
+	r.set("steps", (sint32)steps);
+	finishAfterPumpOnElement(call, r);
 }
 
 void methodDrag(CCtrlCall &call)
 {
 	if (!requireInterface(call))
 		return;
-	double fx, fy;
-	if (!reachElement(call, "from", fx, fy))
+	CReach from;
+	if (!reachElement(call, "from", from))
 		return;
 	double tx, ty;
+	CUiScale scale;
 	if (call.getArgs().get("to").isString())
 	{
-		// the target only needs to be where the drop lands; what covers it is the drop's business
-		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId(call.getArgs().get("to").getString());
-		if (e == nullptr)
+		if (!call.getArgs().get("x").isNull() || !call.getArgs().get("y").isNull())
 		{
-			call.fail("no interface element '" + call.getArgs().get("to").getString() + "'");
+			call.fail("to (an element id) or x and y (window pixels): not both");
 			return;
 		}
-		CUiScale scale;
+		// the target only needs to be where the drop lands; what covers it is the drop's business
+		const std::string &to = call.getArgs().get("to").getString();
+		CInterfaceElement *e = findElement(to);
+		if (e == nullptr)
+		{
+			call.fail(toString("no interface element '%s'", to.c_str()));
+			return;
+		}
+		if (!isShown(e))
+		{
+			call.fail(toString("'%s' is not shown (it or a parent is not active)", to.c_str()));
+			return;
+		}
 		scale.centre(e, tx, ty);
 	}
 	else if (call.getArgs().get("x").isNumber() && call.getArgs().get("y").isNumber())
@@ -504,23 +743,32 @@ void methodDrag(CCtrlCall &call)
 		return;
 	}
 	// the drop must be in the window, or the button would stay held
-	CUiScale scale;
 	if (tx < 0 || ty < 0 || tx >= scale.WindowWidth || ty >= scale.WindowHeight)
 	{
 		call.fail(toString("the drop point %.0f, %.0f is outside the client area, which is %ux%u", tx, ty, scale.WindowWidth, scale.WindowHeight));
 		return;
 	}
 	std::string error;
-	// press, move in steps as a hand does (a drag starts after a few pixels), release
-	bool ok = postMouse("down", fx, fy, "left", call.getArgs(), 0, error);
+	// press, move in steps as a hand does (a drag starts after a few pixels), release; the modifiers stay down through it
+	bool ok = postMouse("down", from.X, from.Y, "left", call.getArgs(), 0, error);
 	for (uint i = 1; i <= 8 && ok; ++i)
-		ok = postMouse("move_held", fx + (tx - fx) * i / 8.0, fy + (ty - fy) * i / 8.0, "left", call.getArgs(), 0, error);
-	if (!postMouse("up", ok ? tx : fx, ok ? ty : fy, "left", call.getArgs(), 0, error) || !ok)
+		ok = postMouse("move_held", from.X + (tx - from.X) * i / 8.0, from.Y + (ty - from.Y) * i / 8.0, "left", call.getArgs(), 0, error);
+	if (ok)
+		ok = postMouse("up", tx, ty, "left", call.getArgs(), 0, error);
+	if (!ok)
 	{
+		discardInput();
 		call.fail(error);
 		return;
 	}
-	finishAfterPump(call, CJsonValue::object().set("from", call.getArgs().get("from")).set("x", tx).set("y", ty));
+	CJsonValue r = CJsonValue::object();
+	r.set("from", call.getArgs().get("from"));
+	r.set("target", from.Target);
+	if (!from.ClosesModal.empty())
+		r.set("closes_modal", from.ClosesModal);
+	r.set("x", tx);
+	r.set("y", ty);
+	finishAfterPumpOnElement(call, r);
 }
 
 void methodSetText(CCtrlCall &call)
@@ -528,22 +776,67 @@ void methodSetText(CCtrlCall &call)
 	if (!requireInterface(call))
 		return;
 	const std::string &id = call.getArgs().get("id").getString();
-	CGroupEditBox *edit = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getElementFromId(id));
+	CGroupEditBox *edit = dynamic_cast<CGroupEditBox *>(findElement(id));
 	if (edit == nullptr)
 	{
 		call.fail(toString("'%s' is not an edit box (the id of a CGroupEditBox, often ending in :eb)", id.c_str()));
 		return;
 	}
-	edit->setInputString(call.getArgs().get("text").getString());
-	bool submit = call.getArgs().get("submit").getBool(false);
-	if (submit)
+	// the box as a player reaches it: shown, under the mouse, not behind a modal window
+	CReach reach;
+	if (!reachElement(call, "id", reach))
+		return;
+	if (edit->getFrozen())
 	{
-		// Enter in the box, as a player would press it there
-		CWidgetManager::getInstance()->setCaptureKeyboard(edit);
-		std::string error;
-		postKey("KeyRETURN", error);
+		call.fail(toString("'%s' is frozen: it takes no text now", id.c_str()));
+		return;
 	}
-	finishAfterPump(call, CJsonValue::object().set("id", id).set("input", edit->getInputString()).set("submitted", submit));
+	const std::string &text = call.getArgs().get("text").getString();
+	// as a paste: the box keeps what its entry type, max_num_chars and max_num_bytes let through, then its change
+	// handler runs, as for a typed character
+	if (CGroupEditBoxBase::getCurrSelection() == edit)
+		CGroupEditBoxBase::disableSelection();
+	edit->setInputString(std::string());
+	edit->writeString(text, true, true);
+	std::string onChange = edit->getProperty("onchange");
+	if (!onChange.empty())
+		CAHManager::getInstance()->runActionHandler(onChange, edit, edit->getProperty("onchange_params"));
+	CJsonValue r = CJsonValue::object();
+	r.set("id", id);
+	setInput(r, edit);
+	if (edit->getInputString() != text)
+		r.set("filtered", "the box did not take all of the text: its entry type or its length limit left some out");
+	if (!call.getArgs().get("submit").getBool(false))
+	{
+		r.set("submitted", false);
+		call.reply(r);
+		return;
+	}
+	// Enter goes to the box that has the keyboard focus, which a click on it gives
+	CWidgetManager *wm = CWidgetManager::getInstance();
+	if (wm->getCaptureKeyboard() != edit)
+		wm->setCaptureKeyboard(edit);
+	if (wm->getCaptureKeyboard() != edit)
+	{
+		call.fail(toString("'%s' did not take the keyboard focus: nothing was submitted", id.c_str()), r);
+		return;
+	}
+	// a top window with an Enter handler of its own takes Enter, unless the box is in it (CWidgetManager::handleKeyboardEvent)
+	CInterfaceGroup *top = wm->getTopWindow();
+	if (top != nullptr && top->getActive() && !top->getAHOnEnter().empty() && edit->getRootWindow() != top)
+	{
+		call.fail(toString("Enter would go to the handler of the top window '%s', not to the box: nothing was submitted", top->getId().c_str()), r);
+		return;
+	}
+	std::string error;
+	if (!postKey("KeyRETURN", error))
+	{
+		discardInput();
+		call.fail(error);
+		return;
+	}
+	r.set("submitted", true);
+	finishAfterPump(call, r);
 }
 
 } // anonymous namespace
@@ -559,7 +852,7 @@ TTime s_LastWindowLook = 0;
 
 void trackWindows()
 {
-	// four looks a second: a window that opens is known within a frame or so, without a walk at every frame
+	// four looks a second: a window that opens is known within a quarter of a second, without a walk at every frame
 	TTime now = CTime::getLocalTime();
 	if (now - s_LastWindowLook < 250)
 		return;
@@ -617,47 +910,66 @@ void trackWindows()
 
 void registerUiMethods(CCtrlEndpoint &endpoint)
 {
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.windows",
+	endpoint.addMethod(newMethod("ui.windows",
 	    "The open windows, front to back per master group (ui:interface in the game, ui:login and ui:outgame before), with their id, type, rectangle in window pixels and title; "
 	    "the modal window, which takes all input while open; and what has the keyboard focus. all includes the hidden ones. A window that opens or closes, and the modal window, are also window events: get_events with kinds window and wait_seconds waits for one.",
-	    CCtrlSchema().boolean("all", "Also the windows that are not active."), true, methodWindows));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.tree",
-	    "The element tree of a window or element (id), or of every open window: id, type, rectangle in window pixels, active, text, edit box input, tooltip, the action handler of a button. "
-	    "depth bounds it (4 by default), contains keeps the elements whose id or text has the word and the path to them, max caps it (truncated says when).",
+	    CCtrlSchema().boolean("all", "Also the windows that are not active."), true, methodWindows, nullptr, nullptr));
+	endpoint.addMethod(newMethod("ui.tree",
+	    "The element tree of a window or element (id), or of every open window: id, type, rectangle in window pixels, active, text, edit box input (only the length of a password), "
+	    "tooltip, the action handler of a button, frozen. depth bounds it below the root, or below each window (4 by default), contains keeps the elements whose id or text "
+	    "has the word and the path to them, max caps it (truncated says when).",
 	    CCtrlSchema()
 	        .str("id", "The root element, ui:interface:... (every open window by default).")
-	        .integer("depth", "How many levels below the root (4 by default).")
+	        .integer("depth", "How many levels below the root or each window, 0 to 64 (4 by default).")
 	        .str("contains", "Only the elements whose id or text contains this (case-insensitive), with their parents.")
 	        .boolean("active_only", "Only the active elements (the default).")
-	        .integer("max", "At most this many elements (400 by default)."),
-	    true, methodTree));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.get", "One element: what ui.tree gives for it, its parent, and the properties asked for (any XML property of its type: text, onclick_l, x, posref, color...).",
-	    CCtrlSchema().str("id", "The element.", true).strings("properties", "The property names."), true, methodGet));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.at", "What the mouse would find at a window pixel: the controls, front-most first, and the groups.",
-	    CCtrlSchema().number("x", "Window pixels from the left.", true).number("y", "Window pixels from the top.", true), true, methodAt));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.click",
-	    "Clicks an element by id with the mouse, at its centre (dx, dy move the point), after checking that the mouse would reach it there; it fails with what covers it otherwise. "
-	    "Answers once the client has handled the click.",
+	        .integer("max", "At most this many elements, 1 to 5000 (400 by default)."),
+	    true, methodTree, nullptr, nullptr));
+	endpoint.addMethod(newMethod("ui.get",
+	    "One element: what ui.tree gives for it, its parent, and the properties asked for (any XML property of its type: text, onclick_l, x, posref, color...); a name its type "
+	    "does not have gives an empty value and a warning in the log.",
+	    CCtrlSchema().str("id", "The element.", true).strings("properties", "The property names."), true, methodGet, nullptr, nullptr));
+	endpoint.addMethod(newMethod("ui.at",
+	    "What the mouse would find at a window pixel: the controls there, front-most first, the groups, outermost first, and what a press there goes to (press_goes_to), as "
+	    "ui.click checks it.",
+	    CCtrlSchema().number("x", "Window pixels from the left.", true).number("y", "Window pixels from the top.", true), true, methodAt, nullptr, nullptr));
+	endpoint.addMethod(newMethod("ui.click",
+	    "Clicks an element by id with the mouse, at its centre (dx, dy move the point), after checking that the press there goes to it as the interface gives it (to the deepest "
+	    "control that takes clicks in the window under the point); it fails with what takes the press otherwise, and for a frozen button. target says what takes it; closes_modal "
+	    "a modal window that a click outside closes first. Answers once the client has handled the click; it fails when the interface did not take it (an interface animation "
+	    "holds the buttons while a screen changes). Input sent just before a loading screen is dropped there, and the call fails.",
 	    CCtrlSchema()
 	        .str("id", "The element.", true)
-	        .choice("button", "left|right|middle", "The button (left by default).")
+	        .choice("button", "left|right", "The button (left by default); the middle one goes to the game: input.mouse.")
 	        .boolean("double", "A double click.")
 	        .number("dx", "Pixels right of the centre.")
 	        .number("dy", "Pixels below the centre.")
 	        .boolean("ctrl", "With Ctrl held.")
-	        .boolean("shift", "With Shift held."),
-	    false, methodClick, pollAfterPump));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.hover", "Moves the mouse over an element, for its tooltip or its hover state.",
-	    CCtrlSchema().str("id", "The element.", true).number("dx", "Pixels right of the centre.").number("dy", "Pixels below the centre."), false, methodHover, pollAfterPump));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.wheel", "Turns the mouse wheel over an element: a list or a scroll area scrolls.",
-	    CCtrlSchema().str("id", "The element.", true).integer("steps", "Notches, positive up, negative down (-1 by default)."), false, methodWheel, pollAfterPump));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.drag",
-	    "Drags an element with the left button to another element (to) or to a window pixel (x, y), as a hand does: press, move in steps, release. For items to slots and actions to the bar.",
-	    CCtrlSchema().str("from", "The element to drag.", true).str("to", "The element to drop on.").number("x", "Or the window pixel to drop at.").number("y", "Its y."), false, methodDrag,
-	    pollAfterPump));
-	endpoint.addMethod(new CCtrlFunctionMethod("ui.set_text",
-	    "Sets the text of an edit box, and with submit presses Enter in it, as typing and Enter would. Answers once the client has handled it.",
-	    CCtrlSchema().str("id", "The edit box (often ...:eb).", true).str("text", "The text.", true).boolean("submit", "Press Enter in it after."), false, methodSetText, pollAfterPump));
+	        .boolean("shift", "With Shift held.")
+	        .boolean("alt", "With Alt held."),
+	    false, methodClick, pollAfterPump, nullptr));
+	endpoint.addMethod(newMethod("ui.hover", "Moves the mouse over an element, for its tooltip or its hover state, after the same check as ui.click.",
+	    CCtrlSchema().str("id", "The element.", true).number("dx", "Pixels right of the centre.").number("dy", "Pixels below the centre."), false, methodHover, pollAfterPump, nullptr));
+	endpoint.addMethod(newMethod("ui.wheel", "Turns the mouse wheel over an element, after the same check as ui.click: a list or a scroll area scrolls.",
+	    CCtrlSchema().str("id", "The element.", true).integer("steps", "Notches, 1 to 100 up, -1 to -100 down (-1 by default)."), false, methodWheel, pollAfterPump, nullptr));
+	endpoint.addMethod(newMethod("ui.drag",
+	    "Drags an element with the left button to another element (to) or to a window pixel (x, y), as a hand does: press, move in steps, release, with ctrl, shift and alt "
+	    "held through it (ctrl drops one of a stack, shift all of it). The press goes through the check of ui.click. For items to slots and actions to the bar.",
+	    CCtrlSchema()
+	        .str("from", "The element to drag.", true)
+	        .str("to", "The element to drop on.")
+	        .number("x", "Or the window pixel to drop at.")
+	        .number("y", "Its y.")
+	        .boolean("ctrl", "With Ctrl held.")
+	        .boolean("shift", "With Shift held.")
+	        .boolean("alt", "With Alt held."),
+	    false, methodDrag, pollAfterPump, nullptr));
+	endpoint.addMethod(newMethod("ui.set_text",
+	    "Sets the text of an edit box as a paste does, not key by key: the box keeps what its entry type and length limits let through (filtered says when it left some out), "
+	    "and its change handler runs. The box must be shown and reachable as for ui.click, and not frozen. With submit, the box gets the keyboard focus as a click gives it and "
+	    "Enter is pressed in it; submitted says so, and the call answers once the client has handled Enter. A password box gives back only its length.",
+	    CCtrlSchema().str("id", "The edit box (often ...:eb).", true).str("text", "The text; empty clears the box.", true).boolean("submit", "Press Enter in it after."), false,
+	    methodSetText, pollAfterPump, nullptr));
 }
 
 } // ClientCtrl
