@@ -760,6 +760,24 @@ struct IVirtualDesktopManagerNel : public IUnknown
 // gave one
 const wchar_t *s_VirtualDesktopsKey = L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops";
 
+// the error when that key has no list of desktops
+const char *s_NoVirtualDesktopsError = "Explorer lists no virtual desktops for this session (HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops): "
+                                       "it does once the session has a second one, made in the task view (Win+Ctrl+D)";
+
+/// A library of the system, by its full path in the directory of the system rather than by the search order; null
+/// when it cannot be loaded
+HMODULE loadSystemLibrary(const wchar_t *name)
+{
+	wchar_t path[MAX_PATH];
+	const UINT length = GetSystemDirectoryW(path, MAX_PATH);
+	const size_t nameLength = wcslen(name);
+	if (length == 0 || length + 1 + nameLength + 1 > MAX_PATH)
+		return nullptr;
+	path[length] = L'\\';
+	memcpy(path + length + 1, name, (nameLength + 1) * sizeof(wchar_t));
+	return LoadLibraryW(path);
+}
+
 bool readDesktopIds(const wchar_t *value, std::vector<GUID> &ids, const std::wstring &keyPath = s_VirtualDesktopsKey)
 {
 	ids.clear();
@@ -881,8 +899,7 @@ bool CSystemUtils::getVirtualDesktops(std::vector<std::string> &names, uint &sho
 	std::vector<GUID> ids;
 	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
 	{
-		error = "Explorer lists no virtual desktops for this session (HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops): "
-		        "it does once the session has a second one, made in the task view (Win+Ctrl+D)";
+		error = s_NoVirtualDesktopsError;
 		return false;
 	}
 	for (uint i = 0; i < ids.size(); ++i)
@@ -904,7 +921,7 @@ bool CSystemUtils::moveWindowToDesktop(nlWindow window, const std::string &deskt
 	std::vector<GUID> ids;
 	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
 	{
-		error = "the session has a single virtual desktop: make another one in the task view (Win+Ctrl+D)";
+		error = s_NoVirtualDesktopsError;
 		return false;
 	}
 	if (desktop.empty())
@@ -976,30 +993,46 @@ bool CSystemUtils::moveWindowToDesktop(nlWindow window, const std::string &deskt
 bool CSystemUtils::waitForWindowDesktop(nlWindow window, uint number, uint timeout, std::string &error)
 {
 #ifdef NL_OS_WINDOWS
-	// DwmGetWindowAttribute(DWMWA_CLOAKED), of Windows 8 and later: the system hides a window of another desktop so
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = s_NoVirtualDesktopsError;
+		return false;
+	}
+	GUID current;
+	bool targetShown = readShownDesktopId(current) && desktopNumber(ids, current) == number;
+
+	// DwmGetWindowAttribute(DWMWA_CLOAKED), of Windows 8 and later: the system cloaks a window of a desktop that is
+	// not shown, which hides it from the screen, and the wait is for that as well. Without it the desktop is enough.
 	typedef HRESULT(WINAPI * TDwmGetWindowAttribute)(HWND, DWORD, PVOID, DWORD);
-	HMODULE dwm = LoadLibraryA("dwmapi.dll");
+	HMODULE dwm = loadSystemLibrary(L"dwmapi.dll");
 	TDwmGetWindowAttribute getAttribute = nullptr;
 	if (dwm)
 		getAttribute = (TDwmGetWindowAttribute)GetProcAddress(dwm, "DwmGetWindowAttribute");
 	const DWORD cloakedAttribute = 14;
 
-	std::vector<GUID> ids;
-	readDesktopIds(L"VirtualDesktopIDs", ids);
-	GUID current;
-	bool targetShown = readShownDesktopId(current) && desktopNumber(ids, current) == number;
-
 	bool there = false;
+	// what the system answered last, for the error of a wait that ends without the window there
+	HRESULT lastResult = S_OK;
+	uint lastNumber = 0;
 	CVirtualDesktopManager manager;
 	IVirtualDesktopManagerNel *m = manager.get(error);
 	TTicks start = CTime::getPerformanceTime();
 	while (m)
 	{
 		GUID id;
-		if (SUCCEEDED(m->GetWindowDesktopId((HWND)window, &id)) && desktopNumber(ids, id) == number)
+		lastResult = m->GetWindowDesktopId((HWND)window, &id);
+		lastNumber = SUCCEEDED(lastResult) ? desktopNumber(ids, id) : 0;
+		if (lastNumber == number)
 		{
+			if (targetShown || !getAttribute)
+			{
+				there = true;
+				break;
+			}
 			DWORD cloaked = 0;
-			if (targetShown || !getAttribute || (SUCCEEDED(getAttribute((HWND)window, cloakedAttribute, &cloaked, sizeof(cloaked))) && cloaked != 0))
+			lastResult = getAttribute((HWND)window, cloakedAttribute, &cloaked, sizeof(cloaked));
+			if (SUCCEEDED(lastResult) && cloaked != 0)
 			{
 				there = true;
 				break;
@@ -1007,7 +1040,12 @@ bool CSystemUtils::waitForWindowDesktop(nlWindow window, uint number, uint timeo
 		}
 		if (CTime::ticksToSecond(CTime::getPerformanceTime() - start) * 1000.0 >= timeout)
 		{
-			error = toString("the window was not on virtual desktop %u, hidden from the desktop shown, after %u ms", number, timeout);
+			if (FAILED(lastResult))
+				error = toString("the window was not on virtual desktop %u, hidden from the desktop shown, after %u ms: the system answered 0x%08x", number, timeout, (uint)lastResult);
+			else if (lastNumber != number)
+				error = toString("the window was not on virtual desktop %u, hidden from the desktop shown, after %u ms: it was on desktop %u (0 for none of the list)", number, timeout, lastNumber);
+			else
+				error = toString("the window was on virtual desktop %u after %u ms, and still not hidden from the desktop shown", number, timeout);
 			break;
 		}
 		MSG msg;
@@ -1049,7 +1087,12 @@ bool CSystemUtils::getWindowDesktop(nlWindow window, uint &number, std::string &
 		return false;
 	}
 	std::vector<GUID> ids;
-	readDesktopIds(L"VirtualDesktopIDs", ids);
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = s_NoVirtualDesktopsError;
+		return false;
+	}
+	// an id that is not in the list: the window is on every desktop
 	number = desktopNumber(ids, id);
 	return true;
 #else

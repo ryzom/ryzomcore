@@ -28,6 +28,7 @@
 #include <nel/misc/displayer.h>
 #include <nel/misc/dynloadlib.h>
 #include <nel/misc/log.h>
+#include <nel/misc/report.h>
 
 #if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 #include <fstream>
@@ -430,6 +431,118 @@ TEST_F(CUTMiscDebugTest, logMessageInTheMiddleOfALineOfTheSameLog)
 	delete displayer;
 }
 
+namespace
+{
+
+// a message that begins a line and leaves it unfinished, and what the displayer has once that message is done
+int leftUnfinished(NLMISC::CLog *log, CPositionDisplayer *displayer, std::string &displayedWhenDone)
+{
+	NLMISC::CSetLogPosition(log, 2, "inner.cpp").log()->display("unfinished");
+	displayedWhenDone = displayer->lines();
+	return 1;
+}
+
+}
+
+TEST_F(CUTMiscDebugTest, logMessageThatLeavesItsLineUnfinishedInTheMiddleOfAnother)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CPositionDisplayer *displayer = new CPositionDisplayer();
+	log->addDisplayer(displayer);
+
+	// the unfinished line ends with its message, and goes to the displayers before the next line of the log: not
+	// at the end of its message, which is the destructor of CSetLogPosition
+	std::string *displayedWhenDone = new std::string("not run");
+	ASSERT_TRUE(runOnAnotherThread([log, displayer, displayedWhenDone]() {
+		NLMISC::CSetLogPosition position(log, 1, "outer.cpp");
+		position.log()->displayNL("outer %d", leftUnfinished(log, displayer, *displayedWhenDone));
+	}));
+	ASSERT_EQ(*displayedWhenDone, std::string());
+	ASSERT_EQ(displayer->lines(), std::string("inner.cpp:2 unfinished\nouter.cpp:1 outer 1\n"));
+
+	ASSERT_TRUE(logFromAnotherThread(log));
+	delete displayedWhenDone;
+	delete log;
+	delete displayer;
+}
+
+namespace
+{
+
+// A displayer that sends what it displays with code that logs, on a log of its choice: as a chat displayer whose
+// sending warns
+class CLoggingDisplayer : public NLMISC::IDisplayer
+{
+public:
+	CLoggingDisplayer()
+	    : NLMISC::IDisplayer("UT_LOGGING")
+	    , m_Log(nullptr)
+	    , m_Count(0)
+	{
+	}
+	void setLog(NLMISC::CLog *log) { m_Log = log; }
+	int count() const { return m_Count; }
+
+protected:
+	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo & /* args */, const char * /* message */) NL_OVERRIDE
+	{
+		++m_Count;
+		NLMISC::CSetLogPosition(m_Log, 3, "sending.cpp").log()->displayNL("logged while sending");
+	}
+
+private:
+	NLMISC::CLog *m_Log;
+	std::atomic<int> m_Count;
+};
+
+}
+
+TEST_F(CUTMiscDebugTest, displayerThatLogsOnItsOwnLog)
+{
+	NLMISC::CLog *log = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CLoggingDisplayer *logging = new CLoggingDisplayer();
+	logging->setLog(log);
+	CPositionDisplayer *position = new CPositionDisplayer();
+	log->addDisplayer(logging);
+	log->addDisplayer(position);
+
+	// the message the displayer logs comes back to it on the same thread: it does not display that one (its mutex
+	// would throw or block there), and the other displayer of the log does
+	ASSERT_TRUE(runOnAnotherThread([log]() { NLMISC::CSetLogPosition(log, 1, "outer.cpp").log()->displayNL("outer"); }));
+	ASSERT_EQ(logging->count(), 1);
+	ASSERT_EQ(position->lines(), std::string("sending.cpp:3 logged while sending\nouter.cpp:1 outer\n"));
+
+	// and the displayer displays the messages of other threads afterwards
+	ASSERT_TRUE(logFromAnotherThread(log));
+	ASSERT_EQ(logging->count(), 2);
+	delete log;
+	delete logging;
+	delete position;
+}
+
+TEST_F(CUTMiscDebugTest, displayersThatLogOnTheLogsOfEachOther)
+{
+	NLMISC::CLog *first = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	NLMISC::CLog *second = new NLMISC::CLog(NLMISC::CLog::LOG_INFO);
+	CLoggingDisplayer *toSecond = new CLoggingDisplayer();
+	toSecond->setLog(second);
+	CLoggingDisplayer *toFirst = new CLoggingDisplayer();
+	toFirst->setLog(first);
+	first->addDisplayer(toSecond);
+	second->addDisplayer(toFirst);
+
+	// each one displays once: the message that comes back to the first one is not displayed by it again, so this
+	// ends, where a mutex that let the thread in would recurse without end
+	ASSERT_TRUE(runOnAnotherThread([first]() { NLMISC::CSetLogPosition(first, 1, "outer.cpp").log()->displayNL("outer"); }));
+	ASSERT_EQ(toSecond->count(), 1);
+	ASSERT_EQ(toFirst->count(), 1);
+
+	delete first;
+	delete second;
+	delete toSecond;
+	delete toFirst;
+}
+
 #if defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)
 
 // Crash signals: a child process logs a line, ends with a signal, and the parent looks at what the handler wrote.
@@ -626,6 +739,16 @@ static void crashWithALogFileThatIsNotThere()
 	crashWithAFault();
 }
 
+static void fatalErrorWithoutTheReportTool()
+{
+	// the message box displayer of an application that has switched the report tool off: nothing asks whether to go
+	// on, and the fatal error ends the program once its report is written, in every build
+	unsetenv("NEL_IGNORE_ASSERT");
+	NLMISC::setReportToolEnabled(false);
+	// through the error log and its message box displayer, which NeL sets up: the abort comes after every displayer
+	nlerror("a fatal error without the report tool");
+}
+
 TEST_F(CUTMiscDebugTest, crashSignalWritesAReportAndStillEndsTheProcess)
 {
 	std::string report;
@@ -694,6 +817,16 @@ TEST_F(CUTMiscDebugTest, crashReportSaysWhenItsLogFileCannotBeOpened)
 	std::string report;
 	ASSERT_EQ(crashInChild(crashWithALogFileThatIsNotThere, report), SIGSEGV);
 	EXPECT_NE(report.find("not_there.log cannot be opened"), std::string::npos) << report;
+}
+
+TEST_F(CUTMiscDebugTest, fatalErrorWithoutTheReportToolAbortsAfterItsReport)
+{
+	// one report, the one of the error: the abort that follows it is reported already
+	std::string report;
+	uint reportCount = 0;
+	ASSERT_EQ(crashInChild(fatalErrorWithoutTheReportTool, report, &reportCount), SIGABRT);
+	EXPECT_EQ(reportCount, 1u);
+	EXPECT_NE(report.find("a fatal error without the report tool"), std::string::npos) << report;
 }
 
 #endif // defined(NL_OS_UNIX) && !defined(__EMSCRIPTEN__)

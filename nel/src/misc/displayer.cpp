@@ -106,6 +106,7 @@ IDisplayer::IDisplayer(const char *displayerName)
 {
 	_Mutex = new CMutex (string(displayerName)+"DISP");
 	DisplayerName = displayerName;
+	m_DisplayingThread = 0;
 }
 
 IDisplayer::~IDisplayer()
@@ -115,12 +116,47 @@ IDisplayer::~IDisplayer()
 	delete _Mutex;
 }
 
+namespace
+{
+
+/// The mutex of a displayer and the thread in its doDisplay(), for one display: released however doDisplay() ends
+class CDisplayingThread
+{
+public:
+	CDisplayingThread(CMutex &mutex, volatile size_t &displayingThread, size_t thread)
+	    : m_Mutex(mutex)
+	    , m_DisplayingThread(displayingThread)
+	{
+		m_Mutex.enter();
+		m_DisplayingThread = thread;
+	}
+	~CDisplayingThread()
+	{
+		m_DisplayingThread = 0;
+		m_Mutex.leave();
+	}
+
+private:
+	CMutex &m_Mutex;
+	volatile size_t &m_DisplayingThread;
+};
+
+}
+
 /*
  * Display the string where it does.
  */
 void IDisplayer::display ( const CLog::TDisplayInfo& args, const char *message )
 {
-	_Mutex->enter();
+	// A message that doDisplay() logs (a displayer that sends its lines with code that logs) reaches this displayer
+	// again on the same thread, from inside doDisplay(): this displayer does not display that one, and the other
+	// displayers of its log do. The mutex would throw or block there, and one that let the thread in would recurse
+	// without end. The id there is this thread's only while this thread is in doDisplay(): the test needs no lock.
+	const size_t thread = getThreadId();
+	if (m_DisplayingThread == thread)
+		return;
+
+	CDisplayingThread displaying(*_Mutex, m_DisplayingThread, thread);
 	try
 	{
 		doDisplay( args, message );
@@ -129,7 +165,6 @@ void IDisplayer::display ( const CLog::TDisplayInfo& args, const char *message )
 	{
 		// silence
 	}
-	_Mutex->leave();
 }
 
 
@@ -615,7 +650,10 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	str += message;
 
-	CSystemUtils::copyTextToClipboard(str);
+	// the clipboard is the user's: an application whose windows must not show on the desktop shown
+	// (setReportToolEnabled) leaves it as it is
+	if (isReportToolEnabled())
+		CSystemUtils::copyTextToClipboard(str);
 
 	// create the string on the screen
 	needSpace = false;
@@ -712,10 +750,15 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		// Check the envvar NEL_IGNORE_ASSERT
 		if (getenv ("NEL_IGNORE_ASSERT") == nullptr)
 		{
+			// A fatal error ends the program, in every build, unless the report tool asked and the answer was to go on.
+			// The answer of a report without the tool (none, switched off, or an application without windows), or
+			// of a tool that gave none, is the default one: to abort, once the report file is written.
+			const TReportResult defaultResult = args.LogType == CLog::LOG_ERROR ? ReportAbort : NL_REPORT_DEFAULT;
+
 			// yoyo: allow only to send the crash report once. Because users usually click ignore,
 			// which create noise into list of bugs (once a player crash, it will surely continues to do it).
 			TReportResult reportResult = report(args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)),
-				subject, body, NL_REPORT_SYNCHRONOUS, !isCrashAlreadyReported(), NL_REPORT_DEFAULT);
+			    subject, body, NL_REPORT_SYNCHRONOUS, !isCrashAlreadyReported(), defaultResult);
 
 			switch (reportResult)
 			{
@@ -726,6 +769,13 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 				INelContext::getInstance().setDebugNeedAssert(true);
 				break;
 			case ReportAbort:
+				// a fatal error ends the program in nlFatalError or nlError, once the displayers after this one (the
+				// log file of the application, a dashboard) have the line too
+				if (args.LogType == CLog::LOG_ERROR)
+				{
+					INelContext::getInstance().setAbortAfterError(true);
+					break;
+				}
 #		ifdef NL_OS_WINDOWS
 #		ifndef NL_COMP_MINGW
 				// disable the Windows popup telling that the application aborted and disable the dr watson report.

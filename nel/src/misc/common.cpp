@@ -1110,6 +1110,36 @@ bool abortProgram(uint32 pid)
 
 #ifdef NL_OS_WINDOWS
 
+// The environment of a program that this process starts: the one of this process, without the variables that are
+// about this process only. NEL_SE_TRANS says that this process translates structured exceptions already
+// (createDebug), and the child does that for itself, so that nlassert and nlstop show their reason and call stack.
+// NL_REPORT_TOOL keeps the crash report tool of this process off (setReportToolEnabled), and a child decides that
+// for itself too. A block of the Unicode form (CREATE_UNICODE_ENVIRONMENT); false when the environment cannot be read.
+static bool getChildEnvironment(std::vector<wchar_t> &block)
+{
+	static const wchar_t *const s_Excluded[] = { L"NEL_SE_TRANS=", L"NL_REPORT_TOOL=" };
+
+	block.clear();
+	wchar_t *environment = GetEnvironmentStringsW();
+	if (environment == NULL)
+		return false;
+	for (const wchar_t *entry = environment; *entry != L'\0'; entry += wcslen(entry) + 1)
+	{
+		bool excluded = false;
+		for (uint i = 0; i < sizeof(s_Excluded) / sizeof(s_Excluded[0]) && !excluded; ++i)
+			excluded = _wcsnicmp(entry, s_Excluded[i], wcslen(s_Excluded[i])) == 0;
+		if (!excluded)
+			block.insert(block.end(), entry, entry + wcslen(entry) + 1);
+	}
+	FreeEnvironmentStringsW(environment);
+
+	// the block ends with an empty entry, and a block without entries is that one
+	if (block.empty())
+		block.push_back(L'\0');
+	block.push_back(L'\0');
+	return true;
+}
+
 static bool createProcess(const std::string &programName, const std::string &arguments, bool log, PROCESS_INFORMATION &pi)
 {
 	STARTUPINFOW si;
@@ -1118,13 +1148,15 @@ static bool createProcess(const std::string &programName, const std::string &arg
 
 	si.cb = sizeof(si);
 
-	// Enable nlassert/nlstop to display the error reason & callstack
-	const char *SE_TRANSLATOR_IN_MAIN_MODULE = "NEL_SE_TRANS";
-
-	char envBuf[2];
-	if (GetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2) != 0)
+	std::vector<wchar_t> environment;
+	if (!getChildEnvironment(environment))
 	{
-		SetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, NULL);
+		if (log)
+		{
+			sint lastError = getLastError();
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s': the environment of this process cannot be read for it, err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
+		}
+		return false;
 	}
 
 	// The first parameter of CreateProcess names one file and is not searched for. It is used for a
@@ -1145,8 +1177,9 @@ static bool createProcess(const std::string &programName, const std::string &arg
 	// CreateProcess may modify the command line in place
 	std::wstring wArgs = utf8ToWide(args);
 
-	// or 0 for a window
-	BOOL res = CreateProcessW(useApplicationName ? wProgramName.c_str() : NULL, &wArgs[0], NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
+	// or 0 for a window. The child has the default error mode, not the one of this process (SetErrorMode), whose
+	// error boxes this process may have turned off for itself only.
+	BOOL res = CreateProcessW(useApplicationName ? wProgramName.c_str() : NULL, &wArgs[0], NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, &environment[0], NULL /* current dir */, &si, &pi);
 
 	if (!res)
 	{

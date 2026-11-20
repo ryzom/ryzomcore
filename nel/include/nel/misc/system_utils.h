@@ -137,7 +137,7 @@ public:
 	static bool waitForWindowDesktop(nlWindow window, uint number, uint timeout, std::string &error);
 
 	/// The number of the virtual desktop a window of this process is on: 0 before the window was first shown, or
-	/// for a window on every desktop.
+	/// for a window on every desktop. False with the error when the system does not tell, or lists no desktops.
 	static bool getWindowDesktop(nlWindow window, uint &number, std::string &error);
 };
 

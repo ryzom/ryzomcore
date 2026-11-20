@@ -20,7 +20,9 @@
 
 #include "stdmisc.h"
 
+#include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sstream>
 
 #include "nel/misc/common.h"
@@ -203,10 +205,14 @@ TReportResult report(const std::string &title, const std::string &subject, const
 
 		if (!f)
 		{
-#if NL_DEBUG_REPORT
+			// A report without its file: the reason goes to the log, and the report itself to the standard error
+			// output, as the handler of crash signals does with its own. A fatal error may end the program right
+			// after this.
+			const int reason = errno;
+			fprintf(stderr, "NeL: cannot create the report file '%s' (%s), the report follows here\n%s\n", reportPath.c_str(), strerror(reason), body.c_str());
+			fflush(stderr);
 			if (INelContext::isContextInitialised())
-				nldebug("Failed to write report log to '%s'", reportPath.c_str());
-#endif
+				nlwarning("Cannot create the report file '%s' (%s): the report went to the standard error output only", reportPath.c_str(), strerror(reason));
 			reportPath.clear();
 		}
 		else

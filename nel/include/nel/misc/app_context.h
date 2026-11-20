@@ -87,6 +87,10 @@ namespace NLMISC
 		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer) =0;
 		virtual bool getDebugNeedAssert() =0;
 		virtual void setDebugNeedAssert(bool needAssert) =0;
+		/// A fatal error whose report answered abort (or asked nobody): nlFatalError and nlError end the program once
+		/// every displayer of the error log has the line
+		virtual bool getAbortAfterError() =0;
+		virtual void setAbortAfterError(bool abortAfterError) =0;
 		virtual bool getNoAssert() =0;
 		virtual void setNoAssert(bool noAssert) =0;
 		virtual bool getAlreadyCreateSharedAmongThreads() =0;
@@ -133,6 +137,8 @@ namespace NLMISC
 		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer) NL_OVERRIDE;
 		virtual bool getDebugNeedAssert() NL_OVERRIDE;
 		virtual void setDebugNeedAssert(bool needAssert) NL_OVERRIDE;
+		virtual bool getAbortAfterError() NL_OVERRIDE;
+		virtual void setAbortAfterError(bool abortAfterError) NL_OVERRIDE;
 		virtual bool getNoAssert() NL_OVERRIDE;
 		virtual void setNoAssert(bool noAssert) NL_OVERRIDE;
 		virtual bool getAlreadyCreateSharedAmongThreads() NL_OVERRIDE;
@@ -153,6 +159,7 @@ namespace NLMISC
 		CMemDisplayer *DefaultMemDisplayer;
 		CMsgBoxDisplayer *DefaultMsgBoxDisplayer;
 		bool DebugNeedAssert;
+		bool AbortAfterError;
 		bool NoAssert;
 		bool AlreadyCreateSharedAmongThreads;
 		bool WindowedApplication;
@@ -188,6 +195,8 @@ namespace NLMISC
 		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer) NL_OVERRIDE;
 		virtual bool getDebugNeedAssert() NL_OVERRIDE;
 		virtual void setDebugNeedAssert(bool needAssert) NL_OVERRIDE;
+		virtual bool getAbortAfterError() NL_OVERRIDE;
+		virtual void setAbortAfterError(bool abortAfterError) NL_OVERRIDE;
 		virtual bool getNoAssert() NL_OVERRIDE;
 		virtual void setNoAssert(bool noAssert) NL_OVERRIDE;
 		virtual bool getAlreadyCreateSharedAmongThreads() NL_OVERRIDE;

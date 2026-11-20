@@ -212,6 +212,19 @@ void setAssert (bool assert)
 	INelContext::getInstance().setNoAssert(!assert);
 }
 
+// The report of a fatal error answered abort, or asked nobody (CMsgBoxDisplayer): every displayer of the error log has
+// the line now, and the program ends
+static void abortAfterError()
+{
+	if (!INelContext::getInstance().getAbortAfterError())
+		return;
+#if defined(NL_OS_WINDOWS) && !defined(NL_COMP_MINGW)
+	// no popup of the system telling that the application aborted, nor its error report
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
+	abort();
+}
+
 void nlFatalError (const char *format, ...)
 {
 	char *str;
@@ -223,6 +236,7 @@ void nlFatalError (const char *format, ...)
 
 	// the error is reported: the breakpoint or the abort that ends the program is no crash to report again
 	markEndOfProgramReported();
+	abortAfterError();
 
 	if (INelContext::getInstance().getDebugNeedAssert())
 			NLMISC_BREAKPOINT;
@@ -245,6 +259,7 @@ void nlError (const char *format, ...)
 
 	// the error is reported: the breakpoint or the abort that ends the program is no crash to report again
 	markEndOfProgramReported();
+	abortAfterError();
 
 	if (INelContext::getInstance().getDebugNeedAssert())
 		NLMISC_BREAKPOINT;
@@ -1059,8 +1074,9 @@ static void exceptionTranslator(unsigned, EXCEPTION_POINTERS *pexp)
 // Crash signals
 //
 // A crash (SIGSEGV, SIGBUS, SIGFPE, SIGILL, or an abort that nothing reported) writes a report to the log
-// directory, shows it in crash_report when the application has a window, and then ends the process the way the
-// signal does without the handler (with its core dump, if the system keeps them).
+// directory, shows it in crash_report when the application has a window and the tool is on (setReportToolEnabled),
+// and then ends the process the way the signal does without the handler (with its core dump, if the system keeps
+// them).
 //
 // The handler runs in a process that is broken: the heap or a lock may be in any state. It allocates nothing,
 // takes no lock of NeL and uses no stream: what it needs is prepared in these static buffers before, and it
@@ -1423,8 +1439,9 @@ static void writeCrashSignalReport(int sig, siginfo_t *info)
 	crashWrite(STDERR_FILENO, reportPath);
 	crashWrite(STDERR_FILENO, "'\n");
 
-	// the report window, for an application that has windows itself
-	if (s_CrashToolPath[0] == '\0' || !INelContext::isContextInitialised() || !INelContext::getInstance().isWindowedApplication())
+	// the report window, for an application that has windows itself and has not switched the tool off
+	// (setReportToolEnabled, a variable of the environment that isReportToolEnabled reads with getenv)
+	if (s_CrashToolPath[0] == '\0' || !INelContext::isContextInitialised() || !INelContext::getInstance().isWindowedApplication() || !isReportToolEnabled())
 		return;
 
 	static char s_Title[256 + 32];

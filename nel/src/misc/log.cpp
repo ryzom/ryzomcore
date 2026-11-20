@@ -59,7 +59,9 @@ CLog::CLog(const CLog &other)
 	_Displayers = other._Displayers;
 	_BypassFilterDisplayers = other._BypassFilterDisplayers;
 	// _Mutex = other._Mutex;
-	_PosSet = other._PosSet;
+	// no message is in progress on the copy, whose mutex is its own and not held: a message of the other log, and the
+	// lines it interrupted or left unfinished, stay with that log
+	_PosSet = 0;
 	_NegativeFilter = other._NegativeFilter;
 	_PositiveFilter = other._PositiveFilter;
 	TempString = other.TempString;
@@ -137,9 +139,12 @@ bool CLog::setPosition(sint line, const char *fileName, const char *funcName, CP
 		// and maybe a line it began: that line waits until this message is done
 		if (_PosSet > 1)
 		{
-			// the one step that can fail (no memory left): the mutex is not left held then
+			// the steps that can fail (no memory left): the mutex is not left held then
 			try
 			{
+				// room for the line that this message, or one it interrupts, may leave unfinished: unsetPosition()
+				// keeps it there without allocating
+				m_Unfinished.reserve(m_Unfinished.size() + _PosSet - 1);
 				m_Interrupted.push_back(std::pair<std::string, TDisplayInfo>());
 			}
 			catch (...)
@@ -169,12 +174,18 @@ void CLog::unsetPosition(const CPosition &previous)
 {
 	if ( _PosSet > 0 )
 	{
-		// a message logged in the middle of another one: a line it left unfinished ends here, and the other one
-		// gets its own line back
+		// a message logged in the middle of another one: a line it left unfinished ends with it, and the other one
+		// gets its own line back. That line goes to the displayers before the next line of this log
+		// (displayUnfinished), not from here: this is the end of a message, in the destructor of CSetLogPosition,
+		// maybe while an exception unwinds. setPosition() made room for it.
 		if (_PosSet > 1)
 		{
 			if (!TempString.empty())
-				displayString("\n");
+			{
+				m_Unfinished.push_back(std::pair<std::string, TDisplayInfo>());
+				m_Unfinished.back().first.swap(TempString);
+				swapDisplayInfo(m_Unfinished.back().second, TempArgs);
+			}
 			TempString.swap(m_Interrupted.back().first);
 			swapDisplayInfo(TempArgs, m_Interrupted.back().second);
 			m_Interrupted.pop_back();
@@ -184,6 +195,37 @@ void CLog::unsetPosition(const CPosition &previous)
 		_FuncName = previous.FuncName;
 		_PosSet--;
 		_Mutex.leave(); // needs setPosition() to have been called
+	}
+}
+
+void CLog::displayUnfinished()
+{
+	if (m_Unfinished.empty())
+		return;
+
+	// the line this log has begun waits meanwhile, as the one of an interrupted message does
+	std::vector<std::pair<std::string, TDisplayInfo> > lines;
+	lines.swap(m_Unfinished);
+	std::string begun;
+	begun.swap(TempString);
+	TDisplayInfo begunArgs;
+	swapDisplayInfo(begunArgs, TempArgs);
+
+	for (size_t i = 0; i < lines.size(); ++i)
+	{
+		TempString.swap(lines[i].first);
+		swapDisplayInfo(TempArgs, lines[i].second);
+		displayString("\n");
+	}
+
+	TempString.swap(begun);
+	swapDisplayInfo(TempArgs, begunArgs);
+
+	// the room setPosition() made goes back to the log, unless a displayer left an unfinished line there meanwhile
+	if (m_Unfinished.empty())
+	{
+		lines.clear();
+		lines.swap(m_Unfinished);
 	}
 }
 
@@ -197,6 +239,8 @@ void CLog::addDisplayer (IDisplayer *displayer, bool bypassFilter)
 		return;
 	}
 
+	// the lists change under the mutex of the log, which a message holds while it goes through them
+	CAutoMutex<CRecursiveMutex> lock(_Mutex);
 	if (bypassFilter)
 	{
 		CDisplayers::iterator idi = std::find (_BypassFilterDisplayers.begin (), _BypassFilterDisplayers.end (), displayer);
@@ -231,6 +275,8 @@ void CLog::removeDisplayer (IDisplayer *displayer)
 		return;
 	}
 
+	// the lists change under the mutex of the log, which a message holds while it goes through them
+	CAutoMutex<CRecursiveMutex> lock(_Mutex);
 	CDisplayers::iterator idi = std::find (_Displayers.begin (), _Displayers.end (), displayer);
 	if (idi != _Displayers.end ())
 	{
@@ -253,6 +299,8 @@ void CLog::removeDisplayer (const char *displayerName)
 		return;
 	}
 
+	// the lists change under the mutex of the log, which a message holds while it goes through them
+	CAutoMutex<CRecursiveMutex> lock(_Mutex);
 	CDisplayers::iterator idi;
 	for (idi = _Displayers.begin (); idi != _Displayers.end ();)
 	{
@@ -287,6 +335,8 @@ IDisplayer *CLog::getDisplayer (const char *displayerName)
 		return nullptr;
 	}
 
+	// the lists change under the mutex of the log, which a message holds while it goes through them
+	CAutoMutex<CRecursiveMutex> lock(_Mutex);
 	CDisplayers::iterator idi;
 	for (idi = _Displayers.begin (); idi != _Displayers.end (); idi++)
 	{
@@ -310,6 +360,8 @@ IDisplayer *CLog::getDisplayer (const char *displayerName)
  */
 bool CLog::attached(IDisplayer *displayer) const
 {
+	// the lists change under the mutex of the log, which a message holds while it goes through them
+	CAutoMutex<CRecursiveMutex> lock(_Mutex);
 	return (find( _Displayers.begin(), _Displayers.end(), displayer ) != _Displayers.end()) ||
 			(find( _BypassFilterDisplayers.begin(), _BypassFilterDisplayers.end(), displayer ) != _BypassFilterDisplayers.end());
 }
@@ -321,6 +373,7 @@ void CLog::displayString (const char *str)
 	TDisplayInfo localargs, *args = nullptr;
 
 	setDefaultProcessName ();
+	displayUnfinished();
 
 	if(strchr(str,'\n') == nullptr)
 	{
@@ -443,6 +496,7 @@ void CLog::displayRawString (const char *str)
 	TDisplayInfo localargs, *args = nullptr;
 
 	setDefaultProcessName ();
+	displayUnfinished();
 
 	if(strchr(str,'\n') == nullptr)
 	{

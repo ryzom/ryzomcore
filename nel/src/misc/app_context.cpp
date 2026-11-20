@@ -120,6 +120,7 @@ CApplicationContext::CApplicationContext()
 	DefaultMemDisplayer = nullptr;
 	DefaultMsgBoxDisplayer = nullptr;
 	DebugNeedAssert = false;
+	AbortAfterError = false;
 	NoAssert = false;
 	AlreadyCreateSharedAmongThreads = false;
 	WindowedApplication = false;
@@ -250,6 +251,16 @@ bool CApplicationContext::getDebugNeedAssert()
 void CApplicationContext::setDebugNeedAssert(bool needAssert)
 {
 	DebugNeedAssert = needAssert;
+}
+
+bool CApplicationContext::getAbortAfterError()
+{
+	return AbortAfterError;
+}
+
+void CApplicationContext::setAbortAfterError(bool abortAfterError)
+{
+	AbortAfterError = abortAfterError;
 }
 
 bool CApplicationContext::getNoAssert()
@@ -440,6 +451,18 @@ void CLibraryContext::setDebugNeedAssert(bool needAssert)
 
 	// just forward the call
 	_ApplicationContext->setDebugNeedAssert(needAssert);
+}
+
+bool CLibraryContext::getAbortAfterError()
+{
+	// just forward the call
+	return _ApplicationContext->getAbortAfterError();
+}
+
+void CLibraryContext::setAbortAfterError(bool abortAfterError)
+{
+	// just forward the call
+	_ApplicationContext->setAbortAfterError(abortAfterError);
 }
 
 bool CLibraryContext::getNoAssert()

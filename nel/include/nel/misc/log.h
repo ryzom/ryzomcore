@@ -246,7 +246,7 @@ protected:
 
 	// recursive: the arguments of a message are evaluated while the mutex is held (from setPosition() on), and one
 	// that logs on this log too (a getter that warns) enters it again from the same thread
-	CRecursiveMutex						 _Mutex;
+	mutable CRecursiveMutex				 _Mutex;
 
 	uint32								 _PosSet;
 
@@ -268,6 +268,13 @@ protected:
 	// the lines begun (display() without a new line, as nlassertex does) by the messages that a message logged
 	// while their arguments are evaluated interrupted, the innermost last
 	std::vector<std::pair<std::string, TDisplayInfo> > m_Interrupted;
+
+	// the lines that messages logged in the middle of another one began and did not end: each ends with its
+	// message, and goes to the displayers before the next line of this log, as unsetPosition() calls no displayer
+	std::vector<std::pair<std::string, TDisplayInfo> > m_Unfinished;
+
+	/// Displays the lines of m_Unfinished, each with a new line
+	void displayUnfinished();
 
 };
 
