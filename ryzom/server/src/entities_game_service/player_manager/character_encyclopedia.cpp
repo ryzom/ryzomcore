@@ -425,19 +425,19 @@ void CCharacterEncyclopedia::makeThemaMessage(CEncyMsgThema &t, uint32 nAlbum, u
 
 //-----------------------------------------------------------------------------
 
-void CCharacterEncyclopedia::botNameChanged(uint32 nAlbum, uint32 nThema, uint8 riteTasks)
+bool CCharacterEncyclopedia::botNameChanged(uint32 nAlbum, uint32 nThema, uint8 riteTasks)
 {
 	// The whole encyclopedia, when it is sent to the client that comes into the game, has the name
 	if (!_SentToClient)
-		return;
+		return false;
 
 	// nThema is from 1, as in the mission templates
 	if (nAlbum >= _EncyCharAlbums.size() || nThema == 0 || nThema > _EncyCharAlbums[nAlbum].Themas.size())
-		return;
+		return false;
 	nThema = nThema - 1;
 	CEncyCharThema &rECThm = _EncyCharAlbums[nAlbum].Themas[nThema];
 	if (rECThm.ThemaState == 0)
-		return;
+		return false;
 
 	// only for the rite and the tasks that the character has; their titles can have the name of the bot in them
 	bool send = false;
@@ -451,4 +451,5 @@ void CCharacterEncyclopedia::botNameChanged(uint32 nAlbum, uint32 nThema, uint8 
 	}
 	if (send)
 		sendAlbumMessage(nAlbum, nThema, false);
+	return send;
 }

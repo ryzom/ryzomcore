@@ -66,8 +66,8 @@ public:
 
 	// The bot of the rite (bit 0 of riteTasks) or of tasks (bits 1 and up) of a thema (from 1) has its name, or has
 	// another name: the thema is sent again if the character has one of them in its encyclopedia, their titles made
-	// again. Nothing is sent before the client has the whole encyclopedia, which has the name then.
-	void botNameChanged(uint32 nAlbum, uint32 nThema, uint8 riteTasks);
+	// again. Nothing is sent before the client has the whole encyclopedia, which has the name then. true if it was sent.
+	bool botNameChanged(uint32 nAlbum, uint32 nThema, uint8 riteTasks);
 	
 	// return true if all ritual tasks of a thema are done (we do not test the rite of course)
 	bool isAllTaskDone(uint32 nAlbum, uint32 nThema);

@@ -939,6 +939,7 @@ void CCreature::sendEncyclopediaNpcName()
 		return;
 	_EncyclopediaNpcNameSent = nameId();
 
+	uint sent = 0;
 	const CPlayerManager::TMapPlayers &players = PlayerManager.getPlayers();
 	for (CPlayerManager::TMapPlayers::const_iterator itPlayer = players.begin(); itPlayer != players.end(); ++itPlayer)
 	{
@@ -948,8 +949,12 @@ void CCreature::sendEncyclopediaNpcName()
 		if (character == NULL || !character->getEnterFlag())
 			continue;
 		for (map<pair<uint32, uint32>, uint8>::const_iterator it = themas.begin(); it != themas.end(); ++it)
-			character->getEncyclopedia().botNameChanged((*it).first.first, (*it).first.second, (*it).second);
+		{
+			if (character->getEncyclopedia().botNameChanged((*it).first.first, (*it).first.second, (*it).second))
+				++sent;
+		}
 	}
+	nldebug("ENCYCLOPEDIA: the bot %u has the name %u, %u themas of characters in game were sent again", _AIAlias, _EncyclopediaNpcNameSent, sent);
 }
 
 //---------------------------------------------------
