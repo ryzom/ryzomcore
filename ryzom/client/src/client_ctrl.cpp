@@ -20,6 +20,7 @@
 
 #ifdef RYZOM_HAS_CLIENT_CTRL
 
+#include "nel/misc/algo.h"
 #include "nel/misc/cmd_args.h"
 #include "nel/misc/ctrl_endpoint.h"
 #include "nel/misc/json.h"
@@ -213,7 +214,8 @@ void atExitRelease()
 void addArgs(CCmdArgs &args)
 {
 	args.addArg("", "ctrl-listen", "name",
-	    "Listen on a local pipe for a control tool on this machine (nel_mcp), under this name. Whoever opens it acts as you: it runs Lua and commands in this client");
+	    "Listen on a local pipe for a control tool on this machine (nel_mcp), under this name; a '#' in it stands for the instance of the client in its directory (nothing for the "
+	    "first one, then b, c... as in clientb.log). Whoever opens it acts as you: it runs Lua and commands in this client");
 }
 
 void start(const CCmdArgs &args)
@@ -222,8 +224,12 @@ void start(const CCmdArgs &args)
 		return;
 	std::vector<std::string> values = args.getLongArg("ctrl-listen");
 	std::string name = values.empty() ? std::string() : values.front();
+	// a launcher that may start several clients from one directory names each after its instance: client_dev#
+	// gives client_dev, then client_devb... as their logs are client.log, clientb.log
 	if (name.empty())
 		name = "client" + ClientInstanceSuffix;
+	else
+		name = strFindReplaceAll(name, std::string("#"), ClientInstanceSuffix);
 
 	CJsonValue identity = CJsonValue::object();
 	identity.set("program", CPath::standardizePath(args.getProgramPath(), true) + args.getProgramName());

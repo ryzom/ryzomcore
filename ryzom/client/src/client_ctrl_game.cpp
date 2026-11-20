@@ -696,7 +696,10 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	    "The scenario tree, or the tree below an instance (id): every property of every instance, with InstanceId and Class; arrays of the editor count from 0. depth (4 by default) and max (3000 items) bound it.",
 	    CCtrlSchema().str("id", "An instance id (the scenario by default).").integer("depth", "Levels to follow (4 by default).").integer("max", "Items at most (3000 by default)."), true,
 	    methodRingTree));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.set", "Sets a property of an instance through the editor's request, as its property windows do: it reaches the server and the co-editors, and can be undone.",
+	// the editor sends its requests to the server, which applies them and sends the change back to every editor
+	static const char *const s_RingRequest = " The server applies the request a moment later, and ring.tree shows it from then on; a quit right after it can lose it.";
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.set",
+	    std::string("Sets a property of an instance through the editor's request, as its property windows do: it reaches the server and the co-editors, and can be undone.") + s_RingRequest,
 	    CCtrlSchema().str("id", "The instance id.", true).str("property", "The property name.", true).any("value", "The value: a string or a number.", true), false, methodRingSet));
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.palette",
 	    "The elements of the editor's palette (NPCs, creatures, objects): id and name, filtered by a word or an id prefix such as palette.entities.creatures. ring.create takes the id as base.",
@@ -705,7 +708,8 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	endpoint.addMethod(new CCtrlFunctionMethod("ring.create",
 	    "Creates an instance in the scenario through the editor's request, as its tools do: an entity (an NPC, a creature, an object) from a palette element (base, as ring.palette lists them), "
 	    "the way the palette makes it; other components by class (Region, Road, a feature...). values sets properties first (Name, Position {x, y, z}, Angle...). It goes below a parent (the current "
-	    "act's features by default). Returns its instance id.",
+	    "act's features by default). Returns its instance id."
+	        + std::string(s_RingRequest),
 	    CCtrlSchema()
 	        .str("base", "A palette element id, for an entity.")
 	        .str("class", "The class: for a component that is not an entity, or to override the palette's.")
@@ -714,8 +718,9 @@ void registerGameMethods(CCtrlEndpoint &endpoint)
 	        .integer("position", "Where in it (-1, the end, by default).")
 	        .object("values", "Properties to set on it first."),
 	    false, methodRingCreate));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.erase", "Deletes an instance through the editor's request.", CCtrlSchema().str("id", "The instance id.", true), false, methodRingErase));
-	endpoint.addMethod(new CCtrlFunctionMethod("ring.move", "Moves an instance to x, y in the world, or below another parent, through the editor's requests.",
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.erase", std::string("Deletes an instance through the editor's request.") + s_RingRequest, CCtrlSchema().str("id", "The instance id.", true), false,
+	    methodRingErase));
+	endpoint.addMethod(new CCtrlFunctionMethod("ring.move", std::string("Moves an instance to x, y in the world, or below another parent, through the editor's requests.") + s_RingRequest,
 	    CCtrlSchema()
 	        .str("id", "The instance id.", true)
 	        .number("x", "World x.")
