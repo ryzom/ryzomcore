@@ -64,6 +64,10 @@ public:
 	/// remove an item from exchange
 	bool removeItemFromExchange(uint32 exchangeSlot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY);
 
+	/// remove the items the character can no longer take from their inventory (pack animal, player room, guild)
+	/// \return true if an item was removed
+	bool removeInaccessibleItems();
+
 	/// validate exchange
 	/// \param givenItems : if not NULL, return the given items
 	void validateExchange(std::vector<CGameItemPtr> * givenItems);
@@ -89,6 +93,9 @@ public:
 private:
 	/// helper: used to update client when an exchange slot changes
 	void updateExchangeSlot(uint32 exchangeSlot);
+
+	/// return true if the character can take the item of this inventory slot to give it
+	bool canAccessInventory(INVENTORIES::TInventory invSrc, uint32 invSlot);
 
 	/// return true if item is a pet animal ticket
 	bool isPetTicket(ITEM_TYPE::TItemType itemType) const;

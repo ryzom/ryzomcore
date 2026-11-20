@@ -11771,6 +11771,13 @@ void CCharacter::sellItem(INVENTORIES::TInventory inv, uint32 slot, uint32 quant
 		return;
 	}
 
+	// handling, equipment and hotbar only refer to items of the bag: sold from there, the item would stay in the bag too
+	if (child->isRefInventory())
+	{
+		nlwarning("<CCharacter:-:sellItem> character %s tries to sell through reference inventory %u", _Id.toString().c_str(), (uint)inv);
+		return;
+	}
+
 	if (child->getSlotCount() > slot && child->getItem(slot) != NULL)
 	{
 		CSheetId sheet;
@@ -11868,7 +11875,8 @@ void CCharacter::sellItem(INVENTORIES::TInventory inv, uint32 slot, uint32 quant
 			}
 		}
 
-		if (item->getRefInventory() == _Inventory[INVENTORIES::equipment])
+		// worn, held or on the hotbar
+		if (item->getRefInventory() != NULL)
 		{
 			nlwarning("<CCharacter sellItem> character %s try to sell an equipped item %s, must not permited by client",
 					  _Id.toString().c_str(), sheet.toString().c_str());
@@ -13309,6 +13317,14 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 			return;
 		}
 
+		// same rule as for an exchange with a player, see validateExchange()
+		if (_ExchangeView->removeInaccessibleItems())
+		{
+			invalidateExchange();
+			checkBotGift();
+			return;
+		}
+
 		removeExchangeItems(vect, exchangePlayerPets);
 
 		if (mission)
@@ -13405,6 +13421,16 @@ bool CCharacter::validateExchange()
 	{
 		nlwarning("CCharacter::validateExchange : unknown character %s", _CurrentInterlocutor.toString().c_str());
 		abortExchange();
+		return false;
+	}
+
+	// an item of a pack animal, a room or a guild inventory can only be given while its owner has access to it
+	bool removed = _ExchangeView->removeInaccessibleItems();
+	removed = interlocutor->_ExchangeView->removeInaccessibleItems() || removed;
+
+	if (removed)
+	{
+		invalidateExchange();
 		return false;
 	}
 

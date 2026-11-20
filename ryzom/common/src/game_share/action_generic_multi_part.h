@@ -48,18 +48,7 @@ public:
 		message.serial (Number);
 		message.serial (Part);
 		message.serial (NbBlock);
-
-		uint32	size;
-		message.serial(size);
-// The following test removed by Sadge because it appears to be pointless and prevents ^2 testing to continue as required
-//		if ( size > 512 )
-//		{
-//			throw NLMISC::EInvalidDataStream();
-//		}
-
-		PartCont.resize(size);
-		if (size > 0)
-			message.serialBuffer(&(PartCont[0]), size);
+		message.serialCont (PartCont);
 	}
 
 	/** Returns the size of this action when it will be send to the UDP connection:

@@ -775,6 +775,16 @@ namespace CHARSYNC
 			TSessionId sessionId;
 			CShardNames::getInstance().parseRelativeName(charInfo.getHomeSessionId(), charInfo.getCharName(), charName, sessionId);
 
+			// only a name the name manager accepts goes into the database
+			if (_NameManager.isNameUsable(charName, userId, uint8(charIndex), charInfo.getHomeSessionId()) != CHARSYNC::TCharacterNameResult::cnr_ok)
+			{
+				nlwarning("CharacterSync::addCharacter : character %u use name '%s' (parsed from '%s') that is not usable, character will not be added",
+					charId,
+					charName.c_str(),
+					charInfo.getCharName().c_str());
+				return;
+			}
+
 			// load the user
 			CRingUserPtr ru = CRingUser::load(_RingDB, userId, __FILE__, __LINE__);
 			if (ru == NULL)
@@ -851,7 +861,7 @@ namespace CHARSYNC
 			breakable
 			{
 				// first, create an erase series
-				string query = "INSERT INTO mfs_erased_mail_series (erased_char_id, erased_char_name, erase_date) VALUES("+toString(charId)+", '"+character->getCharName()+"', '"+MSW::encodeDate(CTime::getSecondsSince1970())+"')";
+				string query = "INSERT INTO mfs_erased_mail_series (erased_char_id, erased_char_name, erase_date) VALUES("+toString(charId)+", '"+MSW::escapeString(character->getCharName(), _RingDB)+"', '"+MSW::encodeDate(CTime::getSecondsSince1970())+"')";
 				DROP_IF(!_RingDB.query(query), "ERROR : failed to create an mail erase series", break;);
 
 				uint32 eraseSeries = _RingDB.getLastGeneratedId();

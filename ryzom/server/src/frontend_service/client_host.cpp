@@ -451,6 +451,13 @@ void				CClientHost::setEntityIndex( const TEntityIndex& ei )
 
 void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, CClientHost *client)
 {
+	// the part numbers come from the client and index the tables below
+	if (agmp->NbBlock == 0 || agmp->Part >= agmp->NbBlock || (NbBlock != 0xFFFFFFFF && NbBlock != agmp->NbBlock))
+	{
+		nlwarning( "Received invalid multipart action from client %d (part %hu of %hu)", client->clientId(), agmp->Part, agmp->NbBlock );
+		return;
+	}
+
 	if (NbBlock == 0xFFFFFFFF)
 	{
 		// new GenericMultiPart
@@ -463,9 +470,6 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 		for (uint i = 0; i < NbBlock; i++)
 			BlockReceived[i] = false;
 	}
-	
-	nlassert (NbBlock == agmp->NbBlock);
-	nlassert (NbBlock > agmp->Part);
 
 	// check if the block was already received
 	if (BlockReceived[agmp->Part])
@@ -488,6 +492,9 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 
 		for (uint i = 0; i < Temp.size (); i++)
 		{
+			if (Temp[i].empty())
+				continue;
+
 			memcpy (ptr, &(Temp[i][0]), Temp[i].size());
 			ptr += Temp[i].size();
 		}
