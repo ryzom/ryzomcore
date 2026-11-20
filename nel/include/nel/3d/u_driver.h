@@ -205,6 +205,11 @@ public:
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show = true)=0;
 
+	/// Whether the driver activates its window when it shows it, restores it or sets its mode (true by default). False
+	/// for a window on a virtual desktop that is not shown, as activating it switches the screen to that desktop (Windows).
+	/// Such a window stays in a window: a full screen mode still changes the display of the monitor.
+	virtual void			setWindowActivation(bool activate)=0;
+
 	/* Pass in dialog box mode. After having called this method, you can use normal GUI.
 	 * In fullscreen under direct3d, the main 3d window is minimized.
 	 *

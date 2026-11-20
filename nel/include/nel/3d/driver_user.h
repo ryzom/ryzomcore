@@ -168,6 +168,7 @@ public:
 
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show) NL_OVERRIDE;
+	virtual void			setWindowActivation(bool activate) NL_OVERRIDE;
 
 	/// Release the window.
 	virtual	void			release() NL_OVERRIDE;

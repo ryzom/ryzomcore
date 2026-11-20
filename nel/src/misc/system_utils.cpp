@@ -21,6 +21,8 @@
 #include "nel/misc/system_utils.h"
 #include "nel/misc/app_context.h"
 #include "nel/misc/utf_string_view.h"
+#include "nel/misc/common.h"
+#include "nel/misc/string_common.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -736,6 +738,326 @@ BOOL WINAPI DDEnumCallbackEx(GUID FAR* lpGUID, LPSTR lpDriverDescription, LPSTR 
 }
 
 #endif
+
+#ifdef NL_OS_WINDOWS
+
+namespace
+{
+
+// IVirtualDesktopManager of shobjidl.h (Windows 10 SDK), declared here for the SDKs before it
+const GUID s_ClsidVirtualDesktopManager = { 0xaa509086, 0x5ca9, 0x4c25, { 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a } };
+const IID s_IidVirtualDesktopManager = { 0xa5cd92ff, 0x29be, 0x454c, { 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b } };
+
+struct IVirtualDesktopManagerNel : public IUnknown
+{
+	virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(HWND topLevelWindow, BOOL *onCurrentDesktop) = 0;
+	virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(HWND topLevelWindow, GUID *desktopId) = 0;
+	virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(HWND topLevelWindow, REFGUID desktopId) = 0;
+};
+
+// Explorer keeps the virtual desktops of the session in this key, and no API lists them: VirtualDesktopIDs holds
+// their ids in the order of the task view, CurrentVirtualDesktop the one shown, Desktops\{id} Name the name the user
+// gave one
+const wchar_t *s_VirtualDesktopsKey = L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops";
+
+bool readDesktopIds(const wchar_t *value, std::vector<GUID> &ids, const std::wstring &keyPath = s_VirtualDesktopsKey)
+{
+	ids.clear();
+	HKEY key;
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, keyPath.c_str(), 0, KEY_READ, &key) != ERROR_SUCCESS)
+		return false;
+	DWORD type = 0;
+	DWORD size = 0;
+	if (RegQueryValueExW(key, value, nullptr, &type, nullptr, &size) == ERROR_SUCCESS && type == REG_BINARY && size >= sizeof(GUID))
+	{
+		std::vector<BYTE> data(size);
+		if (RegQueryValueExW(key, value, nullptr, &type, &data[0], &size) == ERROR_SUCCESS)
+		{
+			for (DWORD i = 0; i + sizeof(GUID) <= size; i += sizeof(GUID))
+			{
+				GUID id;
+				memcpy(&id, &data[i], sizeof(GUID));
+				ids.push_back(id);
+			}
+		}
+	}
+	RegCloseKey(key);
+	return !ids.empty();
+}
+
+std::string desktopName(const GUID &id)
+{
+	wchar_t idText[64];
+	if (StringFromGUID2(id, idText, 64) == 0)
+		return std::string();
+	std::wstring path = std::wstring(s_VirtualDesktopsKey) + L"\\Desktops\\" + idText;
+	HKEY key;
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, path.c_str(), 0, KEY_READ, &key) != ERROR_SUCCESS)
+		return std::string();
+	std::string name;
+	wchar_t text[256];
+	DWORD type = 0;
+	DWORD size = sizeof(text) - sizeof(wchar_t);
+	if (RegQueryValueExW(key, L"Name", nullptr, &type, (BYTE *)text, &size) == ERROR_SUCCESS && type == REG_SZ)
+	{
+		text[size / sizeof(wchar_t)] = 0;
+		name = wideToUtf8(text);
+	}
+	RegCloseKey(key);
+	return name;
+}
+
+/// The id of the desktop shown: Windows 11 keeps it with the others, Windows 10 under the session of the user
+bool readShownDesktopId(GUID &id)
+{
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"CurrentVirtualDesktop", ids))
+	{
+		// loaded by name, as the SDKs of old compilers declare it for some Windows versions only
+		typedef BOOL(WINAPI * TProcessIdToSessionId)(DWORD, DWORD *);
+		TProcessIdToSessionId processIdToSessionId = (TProcessIdToSessionId)GetProcAddress(GetModuleHandleA("kernel32.dll"), "ProcessIdToSessionId");
+		DWORD session = 0;
+		if (!processIdToSessionId || !processIdToSessionId(GetCurrentProcessId(), &session))
+			return false;
+		std::wstring path = utf8ToWide(toString("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\SessionInfo\\%u\\VirtualDesktops", (uint)session));
+		if (!readDesktopIds(L"CurrentVirtualDesktop", ids, path))
+			return false;
+	}
+	id = ids[0];
+	return true;
+}
+
+uint desktopNumber(const std::vector<GUID> &ids, const GUID &id)
+{
+	for (uint i = 0; i < ids.size(); ++i)
+	{
+		if (IsEqualGUID(ids[i], id))
+			return i + 1;
+	}
+	return 0;
+}
+
+/// COM on this thread for the time of a call, and the virtual desktop manager
+class CVirtualDesktopManager
+{
+public:
+	CVirtualDesktopManager()
+	    : m_Manager(nullptr)
+	    , m_Uninit(false)
+	{
+		// a thread of another apartment already (RPC_E_CHANGED_MODE) can create it as well
+		m_Uninit = SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
+		m_Result = CoCreateInstance(s_ClsidVirtualDesktopManager, nullptr, CLSCTX_ALL, s_IidVirtualDesktopManager, (void **)&m_Manager);
+	}
+	~CVirtualDesktopManager()
+	{
+		if (m_Manager)
+			m_Manager->Release();
+		if (m_Uninit)
+			CoUninitialize();
+	}
+	IVirtualDesktopManagerNel *get(std::string &error)
+	{
+		if (!m_Manager)
+			error = toString("this Windows has no virtual desktop manager (Windows 10 and later have one): 0x%08x", (uint)m_Result);
+		return m_Manager;
+	}
+
+private:
+	IVirtualDesktopManagerNel *m_Manager;
+	HRESULT m_Result;
+	bool m_Uninit;
+};
+
+}
+
+#endif // NL_OS_WINDOWS
+
+bool CSystemUtils::getVirtualDesktops(std::vector<std::string> &names, uint &shown, std::string &error)
+{
+	names.clear();
+	shown = 0;
+#ifdef NL_OS_WINDOWS
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = "Explorer lists no virtual desktops for this session (HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VirtualDesktops): "
+		        "it does once the session has a second one, made in the task view (Win+Ctrl+D)";
+		return false;
+	}
+	for (uint i = 0; i < ids.size(); ++i)
+		names.push_back(desktopName(ids[i]));
+	GUID current;
+	if (readShownDesktopId(current))
+		shown = desktopNumber(ids, current);
+	return true;
+#else
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
+
+bool CSystemUtils::moveWindowToDesktop(nlWindow window, const std::string &desktop, uint &number, std::string &error)
+{
+	number = 0;
+#ifdef NL_OS_WINDOWS
+	std::vector<GUID> ids;
+	if (!readDesktopIds(L"VirtualDesktopIDs", ids))
+	{
+		error = "the session has a single virtual desktop: make another one in the task view (Win+Ctrl+D)";
+		return false;
+	}
+	if (desktop.empty())
+	{
+		error = "no virtual desktop given: its number (1 for the first one) or the name it was given in the task view";
+		return false;
+	}
+	uint index = (uint)ids.size();
+	uint given = 0;
+	if (desktop.find_first_not_of("0123456789") == std::string::npos && fromString(desktop, given))
+	{
+		if (given < 1 || given > ids.size())
+		{
+			error = toString("there is no virtual desktop %u: the session has %u", given, (uint)ids.size());
+			return false;
+		}
+		index = given - 1;
+	}
+	else
+	{
+		for (uint i = 0; i < ids.size() && index == ids.size(); ++i)
+		{
+			if (desktopName(ids[i]) == desktop)
+				index = i;
+		}
+		if (index == ids.size())
+		{
+			error = toString("no virtual desktop is named '%s' (the session has %u; a desktop is named once it is renamed in the task view, and a number gives one by its place)",
+			    desktop.c_str(), (uint)ids.size());
+			return false;
+		}
+	}
+	// known from here on, also when the move then fails
+	number = index + 1;
+	// the system does not keep a desktop for a tool window: the move succeeds, and the window shows on the desktop shown
+	LONG_PTR exStyle = GetWindowLongPtrW((HWND)window, GWL_EXSTYLE);
+	if ((exStyle & WS_EX_TOOLWINDOW) != 0 && (exStyle & WS_EX_APPWINDOW) == 0)
+	{
+		error = "a tool window (WS_EX_TOOLWINDOW) has no virtual desktop of its own and shows on the desktop shown: give it WS_EX_APPWINDOW as well";
+		return false;
+	}
+	CVirtualDesktopManager manager;
+	IVirtualDesktopManagerNel *m = manager.get(error);
+	if (!m)
+		return false;
+	// a window on that desktop already is left as it is
+	GUID on;
+	if (SUCCEEDED(m->GetWindowDesktopId((HWND)window, &on)) && IsEqualGUID(on, ids[index]))
+	{
+		number = index + 1;
+		return true;
+	}
+	HRESULT hr = m->MoveWindowToDesktop((HWND)window, ids[index]);
+	if (FAILED(hr))
+	{
+		error = toString("moving the window to virtual desktop %u failed: 0x%08x", index + 1, (uint)hr);
+		return false;
+	}
+	number = index + 1;
+	return true;
+#else
+	(void)window;
+	(void)desktop;
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
+
+bool CSystemUtils::waitForWindowDesktop(nlWindow window, uint number, uint timeout, std::string &error)
+{
+#ifdef NL_OS_WINDOWS
+	// DwmGetWindowAttribute(DWMWA_CLOAKED), of Windows 8 and later: the system hides a window of another desktop so
+	typedef HRESULT(WINAPI * TDwmGetWindowAttribute)(HWND, DWORD, PVOID, DWORD);
+	HMODULE dwm = LoadLibraryA("dwmapi.dll");
+	TDwmGetWindowAttribute getAttribute = nullptr;
+	if (dwm)
+		getAttribute = (TDwmGetWindowAttribute)GetProcAddress(dwm, "DwmGetWindowAttribute");
+	const DWORD cloakedAttribute = 14;
+
+	std::vector<GUID> ids;
+	readDesktopIds(L"VirtualDesktopIDs", ids);
+	GUID current;
+	bool targetShown = readShownDesktopId(current) && desktopNumber(ids, current) == number;
+
+	bool there = false;
+	CVirtualDesktopManager manager;
+	IVirtualDesktopManagerNel *m = manager.get(error);
+	TTicks start = CTime::getPerformanceTime();
+	while (m)
+	{
+		GUID id;
+		if (SUCCEEDED(m->GetWindowDesktopId((HWND)window, &id)) && desktopNumber(ids, id) == number)
+		{
+			DWORD cloaked = 0;
+			if (targetShown || !getAttribute || (SUCCEEDED(getAttribute((HWND)window, cloakedAttribute, &cloaked, sizeof(cloaked))) && cloaked != 0))
+			{
+				there = true;
+				break;
+			}
+		}
+		if (CTime::ticksToSecond(CTime::getPerformanceTime() - start) * 1000.0 >= timeout)
+		{
+			error = toString("the window was not on virtual desktop %u, hidden from the desktop shown, after %u ms", number, timeout);
+			break;
+		}
+		MSG msg;
+		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+		}
+		Sleep(5);
+	}
+	if (dwm)
+		FreeLibrary(dwm);
+	return there;
+#else
+	(void)window;
+	(void)number;
+	(void)timeout;
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
+
+bool CSystemUtils::getWindowDesktop(nlWindow window, uint &number, std::string &error)
+{
+	number = 0;
+#ifdef NL_OS_WINDOWS
+	CVirtualDesktopManager manager;
+	IVirtualDesktopManagerNel *m = manager.get(error);
+	if (!m)
+		return false;
+	GUID id;
+	HRESULT hr = m->GetWindowDesktopId((HWND)window, &id);
+	// TYPE_E_ELEMENTNOTFOUND: a window that was never shown yet
+	if (hr == TYPE_E_ELEMENTNOTFOUND)
+		return true;
+	if (FAILED(hr))
+	{
+		error = toString("the virtual desktop of the window is not known: 0x%08x", (uint)hr);
+		return false;
+	}
+	std::vector<GUID> ids;
+	readDesktopIds(L"VirtualDesktopIDs", ids);
+	number = desktopNumber(ids, id);
+	return true;
+#else
+	(void)window;
+	error = "virtual desktops are handled on Windows only";
+	return false;
+#endif
+}
 
 sint CSystemUtils::getTotalVideoMemory()
 {

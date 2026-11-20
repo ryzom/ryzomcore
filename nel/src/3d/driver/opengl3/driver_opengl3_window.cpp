@@ -2624,7 +2624,8 @@ void CDriverGL3::setWindowPos(sint32 x, sint32 y)
 		&& GetCursorPos(&cursorPos)
 		&& ScreenToClient(_win, &cursorPos);
 
-	SetWindowPos(_win, NULL, x, y, 0, 0, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_NOSIZE);
+	// the position neither activates the window nor brings it to the front, as the Direct3D driver does
+	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 
 	if (cursorPosOk)
 	{
@@ -2675,7 +2676,12 @@ void CDriverGL3::showWindow(bool show)
 
 #ifdef NL_OS_WINDOWS
 
-	ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
+	// without activation: shown with SetWindowPos, as the first ShowWindow of a process can take the show state the
+	// process was started with instead
+	if (show && !_WindowActivation)
+		SetWindowPos(_win, NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+	else
+		ShowWindow (_win, show ? SW_SHOW:SW_HIDE);
 
 #elif defined(NL_OS_MAC)
 
@@ -3112,6 +3118,12 @@ void CDriverGL3::restoreWindow()
 
 #elif defined(NL_OS_WINDOWS)
 
+	if (!_WindowActivation)
+	{
+		// restored without being activated (setWindowActivation)
+		ShowWindow(_win, SW_SHOWNOACTIVATE);
+		return;
+	}
 	ShowWindow(_win, SW_RESTORE);
 	// the system decides whether a program may take the foreground; where it does not let it, the button of
 	// the window flashes in the task bar

@@ -23,6 +23,9 @@
 #include "types_nl.h"
 #include "ucstring.h"
 
+#include <string>
+#include <vector>
+
 namespace NLMISC
 {
 
@@ -113,6 +116,29 @@ public:
 
 	/// Call endSession when a signal that ends the session came since the last call, see setEndSessionCallback.
 	static void pollEndSession();
+
+	/// The virtual desktops of the session (Windows 10 and later), in the order of the task view: the name the user
+	/// gave each one, empty for a desktop that has its default name ("Desktop 2"...), and the number of the one shown
+	/// (0 when unknown). False with the error elsewhere.
+	static bool getVirtualDesktops(std::vector<std::string> &names, uint &shown, std::string &error);
+
+	/// Moves a window of this process to a virtual desktop of the session: desktop is its number (1 for the first one)
+	/// or the name the user gave it, and number gets its number once the desktop is known, also when the move then
+	/// fails (0 when there is no such desktop: the move cannot work later either). A window not shown yet goes there a moment after it
+	/// is shown, and is on the desktop shown until then (see waitForWindowDesktop). Show it without activating it, as
+	/// activating a window on a desktop that is not shown switches the screen to that desktop. A tool window has no
+	/// desktop of its own: it needs WS_EX_APPWINDOW as well.
+	static bool moveWindowToDesktop(nlWindow window, const std::string &desktop, uint &number, std::string &error);
+
+	/// Waits until a window of this process, moved to virtual desktop number and shown, is there and, when that desktop
+	/// is not the one shown, hidden from the screen by the system: timeout milliseconds at most. The messages of this
+	/// thread are handled meanwhile, as the system may need the window to answer. Show the window off the screen and
+	/// wait here before putting it in its place, and it never appears on the desktop shown.
+	static bool waitForWindowDesktop(nlWindow window, uint number, uint timeout, std::string &error);
+
+	/// The number of the virtual desktop a window of this process is on: 0 before the window was first shown, or
+	/// for a window on every desktop.
+	static bool getWindowDesktop(nlWindow window, uint &number, std::string &error);
 };
 
 } // NLMISC

@@ -375,6 +375,13 @@ void CDriverUser::showWindow(bool show)
 }
 
 // ***************************************************************************
+void CDriverUser::setWindowActivation(bool activate)
+{
+	NL3D_HAUTO_UI_DRIVER;
+	_Driver->setWindowActivation(activate);
+}
+
+// ***************************************************************************
 void			CDriverUser::release()
 {
 	NL3D_HAUTO_UI_DRIVER;

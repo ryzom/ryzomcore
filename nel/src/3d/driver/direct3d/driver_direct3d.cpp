@@ -1992,6 +1992,12 @@ void CDriverD3D::restoreWindow()
 	if (_HWnd == NULL || !_DestroyWindow || !isWindowMinimized())
 		return;
 
+	if (!_WindowActivation)
+	{
+		// restored without being activated (setWindowActivation)
+		ShowWindow(_HWnd, SW_SHOWNOACTIVATE);
+		return;
+	}
 	ShowWindow(_HWnd, SW_RESTORE);
 	// the system decides whether a program may take the foreground; where it does not let it, the button of
 	// the window flashes in the task bar
@@ -2599,7 +2605,12 @@ void CDriverD3D::setWindowPos(sint32 x, sint32 y)
 // ***************************************************************************
 void CDriverD3D::showWindow(bool show)
 {
-	ShowWindow (_HWnd, show ? SW_SHOW:SW_HIDE);
+	// without activation: shown with SetWindowPos, as the first ShowWindow of a process can take the show state the
+	// process was started with instead
+	if (show && !_WindowActivation)
+		SetWindowPos(_HWnd, NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+	else
+		ShowWindow (_HWnd, show ? SW_SHOW:SW_HIDE);
 }
 
 // ***************************************************************************
@@ -2737,11 +2748,14 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 			WndRect.bottom=_WindowY+_CurrentMode.Height;
 			AdjustWindowRect(&WndRect, GetWindowLongW (_HWnd, GWL_STYLE), FALSE);
 
+			// without activation (setWindowActivation) the window is neither activated nor brought to the front, and one
+			// not shown yet is left for showWindow()
+			UINT showFlags = _WindowActivation ? SWP_SHOWWINDOW : (SWP_NOACTIVATE | SWP_NOZORDER | (IsWindowVisible(_HWnd) ? SWP_SHOWWINDOW : 0));
 			SetWindowPos( _HWnd, HWND_NOTOPMOST,
 				std::max ((int)WndRect.left, 0), std::max ((int)WndRect.top, 0),
 						  ( WndRect.right - WndRect.left ),
 						  ( WndRect.bottom - WndRect.top ),
-						  SWP_NOMOVE | SWP_SHOWWINDOW );
+						  SWP_NOMOVE | showFlags );
 		}
 		return true;
 	}

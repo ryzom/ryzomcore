@@ -46,7 +46,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x77; // restoreWindow
+const uint32 IDriver::InterfaceVersion = 0x78; // setWindowActivation
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
@@ -54,6 +54,7 @@ IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
 	_PolygonMode= Filled;
 	_StaticMemoryToVRAM=true;
 	_ResetCounter=0;
+	_WindowActivation = true;
 }
 
 // ***************************************************************************

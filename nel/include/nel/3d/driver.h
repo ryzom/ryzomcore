@@ -194,6 +194,9 @@ protected:
 
 	uint					_ResetCounter;
 
+	// see setWindowActivation()
+	bool					_WindowActivation;
+
 public:
 							IDriver();
 	virtual					~IDriver();
@@ -273,6 +276,11 @@ public:
 	virtual void			setWindowPos(sint32 x, sint32 y) = 0;
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show) = 0;
+
+	/// Whether the driver activates its window when it shows it, restores it or sets its mode (true by default). False
+	/// for a window on a virtual desktop that is not shown, as activating it switches the screen to that desktop. Such
+	/// a window stays in a window: a full screen mode still changes the display of the monitor.
+	void					setWindowActivation(bool activate) { _WindowActivation = activate; }
 
 	/// return the current screen mode (if we are in windowed, return the screen mode behind the window)
 	virtual bool			getCurrentScreenMode(GfxMode &mode) = 0;
