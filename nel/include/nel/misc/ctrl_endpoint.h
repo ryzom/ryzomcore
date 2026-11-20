@@ -57,7 +57,8 @@ public:
 	void reply(const CJsonValue &result);
 	/// Answers with an error, and optionally what is known about it
 	void fail(const std::string &message, const CJsonValue &details = CJsonValue());
-	/// Binary data that goes with the result; returns the reference to put in the result
+	/// Binary data that goes with the result; returns the reference to put in the result. The data of a call is
+	/// bounded (64 MB in all): an attachment beyond it fails the call, and the result given after is not sent.
 	CJsonValue attach(const std::string &contentType, const std::string &bytes);
 	bool isDone() const { return m_Done; }
 
@@ -65,6 +66,8 @@ public:
 	ICtrlCallData *getData() const { return m_Data; }
 
 	~CCtrlCall();
+
+	typedef std::pair<std::string, std::string> TAttachment;
 
 private:
 	friend class CCtrlEndpoint;
@@ -81,14 +84,16 @@ private:
 	bool m_Error;
 	CJsonValue m_Result;
 	std::string m_Message;
-	std::vector<std::pair<std::string, std::string>> m_Attachments;
+	std::vector<TAttachment> m_Attachments;
+	size_t m_AttachmentBytes;
 	ICtrlCallData *m_Data;
 };
 
 /**
  * A method of an endpoint. Methods are reachable from the endpoint only: they are not
  * commands, and nothing else (the command registry, a script, the server) can call them.
- * They run on the main thread, in CCtrlEndpoint::update.
+ * They run on the main thread, in CCtrlEndpoint::update. What a method throws is not caught: a crash in a method
+ * is a crash of the process, with its report. A method fails a call with CCtrlCall::fail.
  */
 class ICtrlMethod
 {
@@ -167,8 +172,9 @@ private:
  * What it serves:
  * - Its built-in methods, answered by the channel thread, so they work while the main thread is
  *   busy or hung: ctrl.identity, ctrl.state, ctrl.wait_state, ctrl.log, ctrl.events, ctrl.methods,
- *   ctrl.lease.
- * - The log lines of the process, indexed from 1 since the process started, in a ring held by a
+ *   ctrl.lease. Each connection has its own queue of answers, so a tool that does not read stalls
+ *   nobody else; one that takes none of its answers for 10 s is closed.
+ * - The log lines of the process, indexed from 1 since the endpoint started, in a ring held by a
  *   byte budget. A read below the ring says which index is the first one still held.
  * - Events, a second ring of the same kind: what the process reports with addEvent, and the
  *   changes of its state.
@@ -176,7 +182,10 @@ private:
  *   registry, all run by the main thread in update().
  *
  * The lease: a method that is not read-only needs it. A connection that calls one takes the lease
- * when nobody holds it; the lease is released when that connection closes or gives it back.
+ * when nobody holds it; the lease is released when that connection closes or gives it back, which
+ * it cannot while such a call of its own is not answered.
+ *
+ * One endpoint a process: the log of the process goes to one ring.
  *
  * MT = main thread, CT = channel thread, AT = any thread.
  */
@@ -184,12 +193,15 @@ class CCtrlEndpoint
 {
 public:
 	CCtrlEndpoint();
+	/// Not from inside update(): a method does not delete the endpoint that runs it
 	~CCtrlEndpoint();
 
 	/// (MT) Listens and writes the record; identity holds what the record and the hello carry
 	/// (program, build, log, ...). False with the error when it cannot; the record then says why.
 	bool start(const std::string &name, const CJsonValue &identity, std::string &error);
-	/// (MT) Writes the reason into the record, closes the connections and stops listening
+	/// (MT) Writes the reason into the record, answers every call that has no answer yet with it (open calls are
+	/// cancelled first), closes the connections and stops listening. From a method (inside update()), the stop is
+	/// finished as update() returns.
 	void stop(const std::string &exitReason);
 	bool isStarted() const { return m_Started; }
 	const std::string &getName() const { return m_Name; }
@@ -205,7 +217,8 @@ public:
 	/// (MT) Runs the calls that arrived and polls those still open. Re-entrant calls (a method
 	/// that pumps the events of the process) return at once and leave the calls queued.
 	/// allowControl false, for a pump deep in other code (a loading screen): only read-only methods
-	/// run, the others wait for an update that allows them.
+	/// run and are polled, the others wait for an update that allows them, and so do the calls of their
+	/// connection that come after them: the calls of a connection run in the order they came.
 	void update(bool allowControl = true);
 	/// (MT) The state the process is in, with what goes with it; a change is an event too. settled false for a
 	/// state the process only passes through (a loading): a wait that is not for it does not end in it
@@ -239,6 +252,13 @@ private:
 	CCtrlEndpoint &operator=(const CCtrlEndpoint &);
 
 	void writeRecord(const std::string &state);
+	/// Removes the records of processes that are gone, but the last one of each name
+	void pruneRecords(const std::string &dir);
+	/// The rest of stop(): the open calls are cancelled and answered, then the channel closes. update() calls it as
+	/// it returns when a method stopped the endpoint.
+	void finishStop();
+	/// Gives the answer of a call to the channel thread
+	void postAnswer(CCtrlCall &call);
 	void runCommandsMethod(CCtrlCall &call);
 	void runRunCommandMethod(CCtrlCall &call);
 

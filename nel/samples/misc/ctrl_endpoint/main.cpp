@@ -53,8 +53,14 @@ public:
 
 void methodFrames(CCtrlCall &call)
 {
+	sint64 frames = call.getArgs().get("frames").getInt(10);
+	if (frames < 0 || frames > 100000)
+	{
+		call.fail("frames is 0 to 100000");
+		return;
+	}
 	CFramesData *data = new CFramesData();
-	data->Until = s_Frame + (uint64)call.getArgs().get("frames").getInt(10);
+	data->Until = s_Frame + (uint64)frames;
 	call.setData(data);
 }
 
@@ -68,7 +74,13 @@ void pollFrames(CCtrlCall &call)
 void methodImage(CCtrlCall &call)
 {
 	// a gradient, as a grab would give one
-	uint size = (uint)call.getArgs().get("size").getInt(64);
+	sint64 asked = call.getArgs().get("size").getInt(64);
+	if (asked < 1 || asked > 2048)
+	{
+		call.fail("size is 1 to 2048");
+		return;
+	}
+	uint size = (uint)asked;
 	CBitmap bitmap;
 	bitmap.resize(size, size, CBitmap::RGBA);
 	CObjectVector<uint8> &pixels = bitmap.getPixels();
@@ -119,8 +131,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	endpoint.addMethod(new CCtrlFunctionMethod("sample.add", "Adds a value to the counter.", CCtrlSchema().integer("value", "What to add (1 by default)."), false, methodAdd));
-	endpoint.addMethod(new CCtrlFunctionMethod("sample.frames", "Answers after a number of frames.", CCtrlSchema().integer("frames", "How many (10 by default)."), true, methodFrames, pollFrames));
-	endpoint.addMethod(new CCtrlFunctionMethod("sample.image", "A gradient as a PNG image.", CCtrlSchema().integer("size", "Its width and height (64 by default)."), true, methodImage));
+	endpoint.addMethod(new CCtrlFunctionMethod("sample.frames", "Answers after a number of frames.", CCtrlSchema().integer("frames", "How many, 0 to 100000 (10 by default)."), true, methodFrames, pollFrames));
+	endpoint.addMethod(new CCtrlFunctionMethod("sample.image", "A gradient as a PNG image.", CCtrlSchema().integer("size", "Its width and height, 1 to 2048 (64 by default)."), true, methodImage));
 	endpoint.addMethod(new CCtrlFunctionMethod("sample.quit", "Quits the program.", CCtrlSchema(), false, methodQuit));
 
 	// the main loop: a frame every 16 ms, the calls served once per frame

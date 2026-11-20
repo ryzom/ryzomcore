@@ -25,7 +25,6 @@
 #include "nel/misc/displayer.h"
 #include "nel/misc/local_pipe.h"
 #include "nel/misc/log.h"
-#include "nel/misc/mem_displayer.h"
 #include "nel/misc/mutex.h"
 #include "nel/misc/path.h"
 #include "nel/misc/thread.h"
@@ -34,7 +33,9 @@
 #include <set>
 
 #ifndef NL_OS_WINDOWS
+#include <sys/stat.h>
 #include <sys/time.h>
+#include <unistd.h>
 #endif
 
 #ifdef DEBUG_NEW
@@ -50,17 +51,41 @@ const size_t s_LogBudget = 16 * 1024 * 1024;
 const size_t s_EventBudget = 4 * 1024 * 1024;
 // a Lua chunk or a long list of arguments fits; nothing a tool sends is larger
 const size_t s_MaxInLine = 8 * 1024 * 1024;
-// a reader that does not read for this long is dropped, so the channel thread never stalls on it
-const uint s_WriteTimeoutMs = 10000;
+// every connection has its own queue of answers, written without waiting: a reader that takes none of it for this
+// long, or lets it grow past the size after it, is closed, and nobody else waits on it meanwhile
+const TTime s_StallTimeoutMs = 10000;
+const size_t s_MaxQueuedBytes = 128 * 1024 * 1024;
+// the last answers when the endpoint stops: a reader that does not take them at once does not hold up the exit
+const TTime s_FinalFlushMs = 500;
+// the data that goes with one answer, at most
+const size_t s_MaxAttachmentBytes = 64 * 1024 * 1024;
 const uint s_TickMs = 5;
 const sint64 s_DefaultWaitMs = 30000;
 const sint64 s_MaxWaitMs = 600000;
 const uint s_DefaultMaxLines = 200;
 const uint s_MaxLines = 5000;
+// what the tools may have going at once: connections, and per connection calls not answered yet with the size of
+// their arguments, and waits
+const uint s_MaxConnections = 32;
+const uint s_MaxPendingCalls = 64;
+const size_t s_MaxPendingBytes = 32 * 1024 * 1024;
+const uint s_MaxWaiters = 32;
+// a peer that sends this many messages of no known type is out of step, and closed
+const uint s_MaxUnknownMessages = 100;
+const size_t s_MaxIdLength = 128;
+const size_t s_MaxNameLength = 128;
+// what ctrl.run_command keeps of the output of a command
+const uint s_MaxCommandLines = 5000;
+const size_t s_MaxCommandBytes = 4 * 1024 * 1024;
 
 sint64 argInt(const CJsonValue &args, const char *name, sint64 defaultValue)
 {
 	return args.get(name).getInt(defaultValue);
+}
+
+std::string indexText(uint64 index)
+{
+	return toString("%" NL_I64 "u", index);
 }
 
 /// Whether the text holds the needle, ignoring the case of ASCII letters; the needle is lower case already.
@@ -111,6 +136,7 @@ CCtrlCall::CCtrlCall()
     , m_StartTime(0)
     , m_Done(false)
     , m_Error(false)
+    , m_AttachmentBytes(0)
     , m_Data(nullptr)
 {
 }
@@ -146,9 +172,22 @@ void CCtrlCall::fail(const std::string &message, const CJsonValue &details)
 
 CJsonValue CCtrlCall::attach(const std::string &contentType, const std::string &bytes)
 {
-	m_Attachments.push_back(std::make_pair(contentType, bytes));
+	if (m_Done)
+		return CJsonValue();
+	if (bytes.size() > s_MaxAttachmentBytes - m_AttachmentBytes)
+	{
+		// nothing of it goes out: the answer is the error
+		uint total = (uint)((m_AttachmentBytes + bytes.size()) / (1024 * 1024));
+		m_Attachments.clear();
+		m_AttachmentBytes = 0;
+		fail(toString("the data of the answer would be %u MB, more than the %u MB an answer carries", total, (uint)(s_MaxAttachmentBytes / (1024 * 1024))));
+		return CJsonValue();
+	}
+	m_Attachments.push_back(TAttachment(contentType, std::string()));
+	m_Attachments.back().second = bytes;
+	m_AttachmentBytes += bytes.size();
 	CJsonValue ref = CJsonValue::object();
-	ref.set("data", toString("%s.%u", m_Id.c_str(), (uint)m_Attachments.size()));
+	ref.set("data", m_Id + toString(".%u", (uint)m_Attachments.size()));
 	ref.set("type", contentType);
 	ref.set("bytes", (uint64)bytes.size());
 	return ref;
@@ -302,14 +341,29 @@ struct CEventLine
 	std::string Data; // JSON text
 };
 
+/// A call for the main thread
 struct CInCall
 {
 	uint32 Connection;
 	std::string Id;
 	std::string Method;
 	CJsonValue Args;
+
+	CInCall()
+	    : Connection(0)
+	{
+	}
+
+	void swap(CInCall &other)
+	{
+		std::swap(Connection, other.Connection);
+		Id.swap(other.Id);
+		Method.swap(other.Method);
+		Args.swap(other.Args);
+	}
 };
 
+/// An answer of the main thread, with its data
 struct COutMessage
 {
 	uint32 Connection;
@@ -317,8 +371,27 @@ struct COutMessage
 	bool Error;
 	std::string Message;
 	std::string Json;
-	std::vector<std::pair<std::string, std::string>> Attachments;
+	std::vector<CCtrlCall::TAttachment> Attachments;
+
+	COutMessage()
+	    : Connection(0)
+	    , Error(false)
+	{
+	}
+
+	void swap(COutMessage &other)
+	{
+		std::swap(Connection, other.Connection);
+		Id.swap(other.Id);
+		std::swap(Error, other.Error);
+		Message.swap(other.Message);
+		Json.swap(other.Json);
+		Attachments.swap(other.Attachments);
+	}
 };
+
+// connection and call id
+typedef std::pair<uint32, std::string> TCallRef;
 
 struct CMethodInfo
 {
@@ -327,6 +400,14 @@ struct CMethodInfo
 	CJsonValue Schema;
 	bool ReadOnly;
 	bool BuiltIn;
+};
+
+/// A call of a connection that went to the main thread and has no answer yet
+struct CPendingCall
+{
+	bool Control;
+	size_t Bytes;
+	bool CancelSent;
 };
 
 struct CConnection
@@ -338,12 +419,21 @@ struct CConnection
 	// the next event index when its last call to the main thread was queued: a wait that follows that call
 	// watches the events from there, so a refusal the call itself brought (a message box) is not missed
 	uint64 LastCallEvent;
+	// by id, its calls the main thread has not answered yet; how many of them need the lease, and the size of their
+	// arguments
+	std::map<std::string, CPendingCall> Pending;
+	uint ControlPending;
+	size_t PendingBytes;
+	uint UnknownMessages;
 
 	CConnection()
 	    : Id(0)
 	    , Pipe(nullptr)
 	    , Reader(s_MaxInLine, 0)
 	    , LastCallEvent(0)
+	    , ControlPending(0)
+	    , PendingBytes(0)
+	    , UnknownMessages(0)
 	{
 	}
 };
@@ -358,7 +448,7 @@ struct CWaiter
 	TTime Start;
 	// the next index of the ring at the last scan that found nothing; 0 before the first
 	uint64 Seen;
-	// what the first scan said of a from_idx the ring no longer held
+	// what a scan said of indexes the ring no longer held
 	std::string Missed;
 	// a wait for a state: where it started, the state seen last and since when, the first event it watches, and
 	// the next one it has not looked at yet
@@ -382,84 +472,297 @@ struct CWaiter
 	}
 };
 
+/// The state as it was at one moment, read under the lock and turned into JSON after
+struct CStateCopy
+{
+	std::string State;
+	std::string Detail;
+	bool Settled;
+	uint64 Since;
+	uint64 Frame;
+	TTime LastUpdate;
+
+	CStateCopy()
+	    : Settled(true)
+	    , Since(0)
+	    , Frame(0)
+	    , LastUpdate(0)
+	{
+	}
+};
+
+/// What a query of a ring selected: copies of the lines, taken under the lock of the ring, and where the selection
+/// stands; the JSON is built after, without the lock
+template <class T>
+struct CSelection
+{
+	std::vector<T> Picked;
+	uint64 First;
+	uint64 NextIdx;
+	uint64 Newest;
+	bool Truncated;
+	std::string Missed;
+
+	CSelection()
+	    : First(0)
+	    , NextIdx(0)
+	    , Newest(0)
+	    , Truncated(false)
+	{
+	}
+};
+
+bool matchesState(const CJsonValue &args, const std::string &state)
+{
+	bool match = false;
+	if (args.get("state").isString())
+		match = state == args.get("state").getString();
+	const CJsonValue &states = args.get("states");
+	for (uint i = 0; i < states.size(); ++i)
+		match = match || state == states.at(i).getString();
+	if (args.get("not").isString())
+		match = match || (state != args.get("not").getString() && !args.has("state") && !args.has("states"));
+	return match;
+}
+
+CJsonValue stateJson(const CStateCopy &copy)
+{
+	CJsonValue s = CJsonValue::object();
+	s.set("state", copy.State);
+	CJsonValue detail;
+	std::string error;
+	if (!copy.Detail.empty() && detail.parse(copy.Detail, error))
+		s.set("detail", detail);
+	s.set("since", copy.Since);
+	s.set("frame", copy.Frame);
+	TTime now = CTime::getLocalTime();
+	sint64 idle = copy.LastUpdate == 0 ? -1 : (sint64)(now - copy.LastUpdate);
+	s.set("main_thread_idle_ms", idle);
+	// a frame of a client is far below this; a main thread that does not come back is stuck in something
+	std::string mainThread = "running";
+	if (idle < 0)
+		mainThread = "not started";
+	else if (idle > 2000)
+		mainThread = toString("busy for %u s in ", (uint)(idle / 1000)) + copy.State;
+	s.set("main_thread", mainThread);
+	return s;
+}
+
+CJsonValue toJson(const CLogLine &l)
+{
+	CJsonValue o = CJsonValue::object();
+	o.set("idx", l.Idx);
+	o.set("time", l.Time);
+	o.set("level", l.Level);
+	o.set("text", l.Text);
+	if (!l.Origin.empty())
+		o.set("origin", l.Origin);
+	return o;
+}
+
+CJsonValue toJson(const CEventLine &e)
+{
+	CJsonValue o = CJsonValue::object();
+	o.set("idx", e.Idx);
+	o.set("time", e.Time);
+	o.set("kind", e.Kind);
+	CJsonValue data;
+	std::string error;
+	if (data.parse(e.Data, error))
+		o.set("data", data);
+	return o;
+}
+
+template <class T>
+CJsonValue selectionJson(const CSelection<T> &selection, const char *listName)
+{
+	CJsonValue r = CJsonValue::object();
+	r.set("first_idx", selection.First);
+	r.set("next_idx", selection.NextIdx);
+	r.set("newest_idx", selection.Newest);
+	if (!selection.Missed.empty())
+		r.set("missed", selection.Missed);
+	r.set("truncated", selection.Truncated);
+	CJsonValue list = CJsonValue::array();
+	for (size_t i = 0; i < selection.Picked.size(); ++i)
+		list.push(toJson(selection.Picked[i]));
+	r.set(listName, list);
+	return r;
+}
+
+struct CLogPredicate
+{
+	std::set<std::string> Levels;
+	std::string Contains;
+	bool operator()(const CLogLine &l) const
+	{
+		if (!Levels.empty() && Levels.find(l.Level) == Levels.end())
+			return false;
+		if (!Contains.empty() && !containsLowerAscii(l.Text, Contains))
+			return false;
+		return true;
+	}
+};
+
+struct CEventPredicate
+{
+	std::set<std::string> Kinds;
+	std::string Contains;
+	bool operator()(const CEventLine &e) const
+	{
+		if (!Kinds.empty() && Kinds.find(e.Kind) == Kinds.end())
+			return false;
+		if (!Contains.empty() && !containsLowerAscii(e.Data, Contains))
+			return false;
+		return true;
+	}
+};
+
+/// The lines of a ring a query selects; T has Idx and Time. The ring is locked by the caller.
+template <class T, class TPredicate>
+void selectLines(const std::deque<T> &ring, uint64 next, const CJsonValue &args, const TPredicate &pred, CSelection<T> &selection)
+{
+	uint64 first = ring.empty() ? next : ring.front().Idx;
+	sint64 last = argInt(args, "last", -1);
+	bool hasFrom = args.has("from_idx");
+	uint64 from = hasFrom ? (uint64)std::max((sint64)0, argInt(args, "from_idx", 0)) : 0;
+	uint64 to = args.has("to_idx") ? (uint64)std::max((sint64)0, argInt(args, "to_idx", 0)) : (uint64)-1;
+	sint64 fromTime = argInt(args, "from_time", 0);
+	sint64 toTime = argInt(args, "to_time", 0);
+	uint maxLines = (uint)std::min((sint64)s_MaxLines, std::max((sint64)1, argInt(args, "max", s_DefaultMaxLines)));
+	if (!hasFrom && last < 0 && fromTime == 0)
+		last = 100;
+
+	std::vector<const T *> picked;
+	size_t startPos = 0;
+	if (hasFrom && from > first)
+		startPos = (size_t)std::min((uint64)ring.size(), from - first);
+	for (size_t i = startPos; i < ring.size(); ++i)
+	{
+		const T &e = ring[i];
+		if (e.Idx > to)
+			break;
+		if (fromTime != 0 && e.Time < (uint64)fromTime)
+			continue;
+		if (toTime != 0 && e.Time > (uint64)toTime)
+			continue;
+		if (!pred(e))
+			continue;
+		picked.push_back(&e);
+	}
+	bool truncated = false;
+	size_t begin = 0, end = picked.size();
+	if (last >= 0 && picked.size() > (size_t)last)
+	{
+		begin = picked.size() - (size_t)last;
+		truncated = true;
+	}
+	if (end - begin > maxLines)
+	{
+		// paging forward from an index keeps the oldest, everything else the newest
+		if (hasFrom && last < 0)
+			end = begin + maxLines;
+		else
+			begin = end - maxLines;
+		truncated = true;
+	}
+	// with nothing picked, the scan went to the end of the selection: a reader that continues starts there
+	uint64 scanEnd = to == (uint64)-1 ? next : std::min(to + 1, next);
+	selection.First = first;
+	selection.NextIdx = end > begin ? picked[end - 1]->Idx + 1 : (hasFrom ? std::max(std::max(from, first), scanEnd) : next);
+	selection.Newest = next - 1;
+	selection.Truncated = truncated;
+	// indexes start at 1: from_idx 0 asks for everything since the start too
+	if (hasFrom && std::max(from, (uint64)1) < first)
+		selection.Missed = "from_idx " + indexText(from) + " is no longer held: the first index still held is " + indexText(first);
+	selection.Picked.reserve(end - begin);
+	for (size_t i = begin; i < end; ++i)
+		selection.Picked.push_back(*picked[i]);
+}
+
 } // anonymous namespace
 
 class CCtrlEndpoint::CImpl : public IRunnable
 {
 public:
-	CImpl(CCtrlEndpoint *owner)
-	    : Owner(owner)
-	    , Thread(nullptr)
-	    , Running(false)
-	    , LogNext(1)
-	    , LogBytes(0)
-	    , EventNext(1)
-	    , EventBytes(0)
-	    , StateSettled(true)
-	    , StateSince(0)
-	    , Frame(0)
-	    , LastUpdate(0)
-	    , NextConnection(1)
-	    , LeaseHolder(0)
-	    , LeaseHeld(false)
-	    , WriteTimeoutMs(s_WriteTimeoutMs)
+	CImpl()
+	    : m_Pid(0)
+	    , m_StartTime(0)
+	    , m_Thread(nullptr)
+	    , m_Running(false)
+	    , m_LogNext(1)
+	    , m_LogBytes(0)
+	    , m_EventNext(1)
+	    , m_EventBytes(0)
+	    , m_StateSettled(true)
+	    , m_StateSince(0)
+	    , m_Frame(0)
+	    , m_LastUpdate(0)
+	    , m_StopPending(false)
+	    , m_NextConnection(1)
+	    , m_RefusedWarned(false)
+	    , m_LeaseHolder(0)
+	    , m_LeaseHeld(false)
 	{
 	}
 
-	CCtrlEndpoint *Owner;
-	CLocalPipeListener Listener;
-	std::string RecordPath;
-	std::string EndpointPath;
-	uint32 Pid;
-	uint64 StartTime;
-	IThread *Thread;
-	volatile bool Running;
+	CLocalPipeListener m_Listener;
+	CCtrlNameLock m_NameLock;
+	std::string m_RecordPath;
+	std::string m_EndpointPath;
+	uint32 m_Pid;
+	uint64 m_StartTime;
+	IThread *m_Thread;
+	volatile bool m_Running;
 
 	// identity, as the hello and the record carry it
-	CMutex IdentityMutex;
-	CJsonValue Identity;
+	CMutex m_IdentityMutex;
+	CJsonValue m_Identity;
 
-	CMutex LogMutex;
-	std::deque<CLogLine> Log;
-	uint64 LogNext;
-	size_t LogBytes;
+	CMutex m_LogMutex;
+	std::deque<CLogLine> m_Log;
+	uint64 m_LogNext;
+	size_t m_LogBytes;
 
-	CMutex EventMutex;
-	std::deque<CEventLine> Events;
-	uint64 EventNext;
-	size_t EventBytes;
+	CMutex m_EventMutex;
+	std::deque<CEventLine> m_Events;
+	uint64 m_EventNext;
+	size_t m_EventBytes;
 
-	CMutex StateMutex;
-	std::string State;
-	std::string StateDetail;
-	bool StateSettled;
-	uint64 StateSince;
-	uint64 Frame;
-	TTime LastUpdate;
+	CMutex m_StateMutex;
+	std::string m_State;
+	std::string m_StateDetail;
+	bool m_StateSettled;
+	uint64 m_StateSince;
+	uint64 m_Frame;
+	TTime m_LastUpdate;
 
-	CMutex MethodsMutex;
-	std::vector<CMethodInfo> Methods;
+	CMutex m_MethodsMutex;
+	std::vector<CMethodInfo> m_Methods;
 
-	CMutex InboxMutex;
-	std::vector<CInCall> Inbox;
-	std::vector<std::pair<uint32, std::string>> Cancels;
-	std::vector<uint32> Closed;
+	CMutex m_InboxMutex;
+	std::deque<CInCall> m_Inbox;
+	std::vector<TCallRef> m_Cancels;
+	std::vector<uint32> m_Closed;
+	// set when the endpoint stops: the answer of every call that comes after, and of the waits still open
+	std::string m_ExitMessage;
 
-	CMutex OutboxMutex;
-	std::vector<COutMessage> Outbox;
+	CMutex m_OutboxMutex;
+	std::deque<COutMessage> m_Outbox;
 
 	// (MT) the calls a partial update left for a full one
-	std::vector<CInCall> Deferred;
-	// (CT) how long a write may wait on a reader; short for the last answers when the endpoint stops
-	uint WriteTimeoutMs;
+	std::deque<CInCall> m_Deferred;
+	// (MT) stop() was called from a method: update() finishes it as it returns
+	bool m_StopPending;
 
 	// (CT)
-	std::map<uint32, CConnection *> Connections;
-	uint32 NextConnection;
-	std::vector<CWaiter> Waiters;
-	uint32 LeaseHolder;
+	std::map<uint32, CConnection *> m_Connections;
+	uint32 m_NextConnection;
+	bool m_RefusedWarned;
+	std::vector<CWaiter> m_Waiters;
+	uint32 m_LeaseHolder;
 	// (CT writes, AT reads) whether any connection holds it
-	volatile bool LeaseHeld;
+	volatile bool m_LeaseHeld;
 
 	virtual void getName(std::string &result) const NL_OVERRIDE
 	{
@@ -479,35 +782,32 @@ public:
 			origin = toString("%s:%d", CFile::getFilename(args.FileName).c_str(), args.Line);
 		// one entry per line, as the log file has them
 		const char *start = message;
-		CAutoMutex<CMutex> lock(LogMutex);
+		CAutoMutex<CMutex> lock(m_LogMutex);
 		for (;;)
 		{
 			const char *end = strchr(start, '\n');
 			size_t len = end ? (size_t)(end - start) : strlen(start);
 			if (len > 0 && start[len - 1] == '\r')
 				--len;
-			if (len > 0 || end == nullptr)
+			if (len > 0)
 			{
-				if (len > 0)
-				{
-					CLogLine line;
-					line.Idx = LogNext++;
-					line.Time = now;
-					line.Level = level;
-					line.Text.assign(start, len);
-					line.Origin = origin;
-					LogBytes += line.Text.size() + line.Origin.size() + 64;
-					Log.push_back(line);
-				}
+				CLogLine line;
+				line.Idx = m_LogNext++;
+				line.Time = now;
+				line.Level = level;
+				line.Text.assign(start, len);
+				line.Origin = origin;
+				m_LogBytes += line.Text.size() + line.Origin.size() + 64;
+				m_Log.push_back(line);
 			}
 			if (end == nullptr || end[1] == 0)
 				break;
 			start = end + 1;
 		}
-		while (LogBytes > s_LogBudget && !Log.empty())
+		while (m_LogBytes > s_LogBudget && !m_Log.empty())
 		{
-			LogBytes -= Log.front().Text.size() + Log.front().Origin.size() + 64;
-			Log.pop_front();
+			m_LogBytes -= m_Log.front().Text.size() + m_Log.front().Origin.size() + 64;
+			m_Log.pop_front();
 		}
 	}
 
@@ -517,63 +817,158 @@ public:
 		e.Time = getCtrlTimeMs();
 		e.Kind = kind;
 		e.Data = data.toString();
-		CAutoMutex<CMutex> lock(EventMutex);
-		e.Idx = EventNext++;
-		EventBytes += e.Kind.size() + e.Data.size() + 48;
-		Events.push_back(e);
-		while (EventBytes > s_EventBudget && !Events.empty())
+		CAutoMutex<CMutex> lock(m_EventMutex);
+		e.Idx = m_EventNext++;
+		m_EventBytes += e.Kind.size() + e.Data.size() + 48;
+		m_Events.push_back(e);
+		while (m_EventBytes > s_EventBudget && !m_Events.empty())
 		{
-			EventBytes -= Events.front().Kind.size() + Events.front().Data.size() + 48;
-			Events.pop_front();
+			m_EventBytes -= m_Events.front().Kind.size() + m_Events.front().Data.size() + 48;
+			m_Events.pop_front();
 		}
+	}
+
+	// *** state (AT) ***
+
+	CStateCopy readState()
+	{
+		CStateCopy s;
+		CAutoMutex<CMutex> lock(m_StateMutex);
+		s.State = m_State;
+		s.Detail = m_StateDetail;
+		s.Settled = m_StateSettled;
+		s.Since = m_StateSince;
+		s.Frame = m_Frame;
+		s.LastUpdate = m_LastUpdate;
+		return s;
+	}
+
+	/// What every answer carries: the frame, the clock and the state, so it lines up with the log
+	CJsonValue wrap(const CJsonValue &result)
+	{
+		uint64 frame;
+		std::string state;
+		{
+			CAutoMutex<CMutex> lock(m_StateMutex);
+			frame = m_Frame;
+			state = m_State;
+		}
+		CJsonValue o = CJsonValue::object();
+		o.set("result", result);
+		o.set("frame", frame);
+		o.set("time", getCtrlTimeMs());
+		o.set("state", state);
+		return o;
+	}
+
+	/// (MT) An answer for the channel thread to send; m is left empty
+	void postAnswer(COutMessage &m)
+	{
+		CAutoMutex<CMutex> lock(m_OutboxMutex);
+		m_Outbox.push_back(COutMessage());
+		m_Outbox.back().swap(m);
+	}
+
+	/// (MT) An error for a call that gets no other answer
+	void postError(uint32 connection, const std::string &id, const std::string &message)
+	{
+		COutMessage m;
+		m.Connection = connection;
+		m.Id = id;
+		m.Error = true;
+		m.Message = message;
+		m.Json = wrap(CJsonValue()).toString();
+		postAnswer(m);
 	}
 
 	// *** the thread ***
 
 	virtual void run() NL_OVERRIDE
 	{
-		while (Running)
+		while (m_Running)
 		{
 			bool busy = false;
 			acceptConnections();
-			for (std::map<uint32, CConnection *>::iterator it = Connections.begin(); it != Connections.end(); ++it)
+			for (std::map<uint32, CConnection *>::iterator it = m_Connections.begin(); it != m_Connections.end(); ++it)
 				busy = readConnection(*it->second) || busy;
-			busy = flushOutbox() || busy;
+			takeOutbox();
+			busy = flushConnections() || busy;
 			checkWaiters();
 			dropClosed();
 			if (!busy)
 				nlSleep(s_TickMs);
 		}
-		// the answers given meanwhile, the one to a quit method among them, then everyone is told by the pipe
-		// closing; a reader that does not take them at once does not hold up the exit
-		WriteTimeoutMs = 500;
-		flushOutbox();
-		for (std::map<uint32, CConnection *>::iterator it = Connections.begin(); it != Connections.end(); ++it)
+		// the answers given meanwhile, the one to a quit method among them, and why the waits end, then everyone is told
+		// by the pipe closing
+		takeOutbox();
+		std::string exitMessage;
+		{
+			CAutoMutex<CMutex> lock(m_InboxMutex);
+			exitMessage = m_ExitMessage;
+		}
+		for (uint i = 0; i < m_Waiters.size(); ++i)
+		{
+			std::map<uint32, CConnection *>::iterator it = m_Connections.find(m_Waiters[i].Connection);
+			if (it != m_Connections.end())
+				sendError(*it->second, m_Waiters[i].Id, exitMessage);
+		}
+		m_Waiters.clear();
+		TTime deadline = CTime::getLocalTime() + s_FinalFlushMs;
+		for (;;)
+		{
+			bool queued = false;
+			for (std::map<uint32, CConnection *>::iterator it = m_Connections.begin(); it != m_Connections.end(); ++it)
+			{
+				CLocalPipe *pipe = it->second->Pipe;
+				if (pipe->flush() && pipe->getQueuedBytes() > 0)
+					queued = true;
+			}
+			if (!queued || CTime::getLocalTime() >= deadline)
+				break;
+			nlSleep(1);
+		}
+		{
+			CAutoMutex<CMutex> lock(m_InboxMutex);
+			for (std::map<uint32, CConnection *>::iterator it = m_Connections.begin(); it != m_Connections.end(); ++it)
+				m_Closed.push_back(it->first);
+		}
+		for (std::map<uint32, CConnection *>::iterator it = m_Connections.begin(); it != m_Connections.end(); ++it)
 		{
 			delete it->second->Pipe;
 			delete it->second;
 		}
-		Connections.clear();
-		Waiters.clear();
+		m_Connections.clear();
+		m_Waiters.clear();
+		m_LeaseHolder = 0;
+		m_LeaseHeld = false;
 	}
 
 	void acceptConnections()
 	{
 		for (;;)
 		{
-			CLocalPipe *pipe = Listener.accept();
+			CLocalPipe *pipe = m_Listener.accept();
 			if (pipe == nullptr)
 				return;
+			if (m_Connections.size() >= s_MaxConnections)
+			{
+				if (!m_RefusedWarned)
+					nlwarning("CTRL: refused a connection: %u are open, the most this endpoint takes", (uint)m_Connections.size());
+				m_RefusedWarned = true;
+				delete pipe;
+				continue;
+			}
+			m_RefusedWarned = false;
 			CConnection *c = new CConnection();
-			c->Id = NextConnection++;
+			c->Id = m_NextConnection++;
 			c->Pipe = pipe;
 			c->Name = toString("connection %u", c->Id);
-			Connections[c->Id] = c;
+			m_Connections[c->Id] = c;
 			std::vector<std::string> fields;
 			fields.push_back("hello");
 			fields.push_back(toString("%u", CtrlProtocolVersion));
 			fields.push_back(helloIdentity(c->Id).toString());
-			sendLine(*c, joinCtrlLine(fields));
+			queueLine(*c, joinCtrlLine(fields));
 			nlinfo("CTRL: %s opened", c->Name.c_str());
 		}
 	}
@@ -582,20 +977,49 @@ public:
 	{
 		CJsonValue id;
 		{
-			CAutoMutex<CMutex> lock(IdentityMutex);
-			id = Identity;
+			CAutoMutex<CMutex> lock(m_IdentityMutex);
+			id = m_Identity;
 		}
 		id.set("connection", connection);
 		return id;
 	}
 
-	bool sendLine(CConnection &c, const std::string &line)
+	/// Queues a line for the peer; flushConnections() writes it as the peer reads
+	void queueLine(CConnection &c, const std::string &line)
 	{
-		if (c.Pipe == nullptr || !c.Pipe->isOpen())
-			return false;
+		if (!c.Pipe->isOpen())
+			return;
 		std::string data = line;
 		data += '\n';
-		return c.Pipe->write(data, WriteTimeoutMs);
+		c.Pipe->queueSwap(data);
+	}
+
+	/// Writes what each peer takes now; true when any took something
+	bool flushConnections()
+	{
+		bool busy = false;
+		for (std::map<uint32, CConnection *>::iterator it = m_Connections.begin(); it != m_Connections.end(); ++it)
+		{
+			CConnection &c = *it->second;
+			CLocalPipe &pipe = *c.Pipe;
+			size_t before = pipe.getQueuedBytes();
+			if (before == 0 || !pipe.flush())
+				continue;
+			size_t after = pipe.getQueuedBytes();
+			if (after < before)
+				busy = true;
+			if (after > s_MaxQueuedBytes)
+			{
+				nlwarning("CTRL: %s has %u MB of answers it did not read, closing it", c.Name.c_str(), (uint)(after / (1024 * 1024)));
+				pipe.close();
+			}
+			else if (after > 0 && pipe.getStalledMs() > s_StallTimeoutMs)
+			{
+				nlwarning("CTRL: %s took none of its answers for %u s, closing it", c.Name.c_str(), (uint)(pipe.getStalledMs() / 1000));
+				pipe.close();
+			}
+		}
+		return busy;
 	}
 
 	bool readConnection(CConnection &c)
@@ -623,7 +1047,7 @@ public:
 		fields.push_back("result");
 		fields.push_back(id);
 		fields.push_back(wrap(result).toString());
-		sendLine(c, joinCtrlLine(fields));
+		queueLine(c, joinCtrlLine(fields));
 	}
 
 	void sendError(CConnection &c, const std::string &id, const std::string &message, const CJsonValue &details = CJsonValue())
@@ -633,22 +1057,24 @@ public:
 		fields.push_back(id);
 		fields.push_back(message);
 		fields.push_back(wrap(details).toString());
-		sendLine(c, joinCtrlLine(fields));
+		queueLine(c, joinCtrlLine(fields));
 	}
 
-	/// What every answer carries: the frame, the clock and the state, so it lines up with the log
-	CJsonValue wrap(const CJsonValue &result)
+	bool hasWaiter(uint32 connection, const std::string &id, uint &count)
 	{
-		CJsonValue o = CJsonValue::object();
-		o.set("result", result);
-		CAutoMutex<CMutex> lock(StateMutex);
-		o.set("frame", Frame);
-		o.set("time", getCtrlTimeMs());
-		o.set("state", State);
-		return o;
+		bool found = false;
+		count = 0;
+		for (uint i = 0; i < m_Waiters.size(); ++i)
+		{
+			if (m_Waiters[i].Connection != connection)
+				continue;
+			++count;
+			found = found || m_Waiters[i].Id == id;
+		}
+		return found;
 	}
 
-	void handleMessage(CConnection &c, const CCtrlMessage &message)
+	void handleMessage(CConnection &c, CCtrlMessage &message)
 	{
 		const std::vector<std::string> &f = message.Fields;
 		if (message.IsData || f.empty())
@@ -657,40 +1083,65 @@ public:
 		{
 			// hello <version> <name>: the tool says who it is, so a lease holder has a name
 			if (f.size() >= 3 && !f[2].empty())
-				c.Name = toString("%s (connection %u)", f[2].c_str(), c.Id);
+			{
+				if (f[2].size() > s_MaxNameLength)
+					nlwarning("CTRL: %s gives a name of %u bytes, more than %u: it keeps its number", c.Name.c_str(), (uint)f[2].size(), (uint)s_MaxNameLength);
+				else
+					c.Name = f[2] + toString(" (connection %u)", c.Id);
+			}
 			return;
 		}
 		if (f[0] == "cancel")
 		{
 			if (f.size() < 2)
 				return;
-			for (uint i = 0; i < Waiters.size(); ++i)
+			for (uint i = 0; i < m_Waiters.size(); ++i)
 			{
-				if (Waiters[i].Connection == c.Id && Waiters[i].Id == f[1])
+				if (m_Waiters[i].Connection == c.Id && m_Waiters[i].Id == f[1])
 				{
 					sendError(c, f[1], "cancelled");
-					Waiters.erase(Waiters.begin() + i);
+					m_Waiters.erase(m_Waiters.begin() + i);
 					return;
 				}
 			}
-			CAutoMutex<CMutex> lock(InboxMutex);
-			Cancels.push_back(std::make_pair(c.Id, f[1]));
+			// a call of the main thread gets its answer from there; a cancel of a call that is not pending reaches nothing
+			std::map<std::string, CPendingCall>::iterator pending = c.Pending.find(f[1]);
+			if (pending == c.Pending.end() || pending->second.CancelSent)
+				return;
+			pending->second.CancelSent = true;
+			CAutoMutex<CMutex> lock(m_InboxMutex);
+			m_Cancels.push_back(TCallRef(c.Id, f[1]));
 			return;
 		}
 		if (f[0] != "call")
 		{
-			nldebug("CTRL: %s sent an unknown message type '%s'", c.Name.c_str(), f[0].c_str());
+			if (c.UnknownMessages == 0)
+			{
+				nldebug("CTRL: %s sent an unknown message type '%s'", c.Name.c_str(), f[0].substr(0, s_MaxNameLength).c_str());
+			}
+			if (++c.UnknownMessages >= s_MaxUnknownMessages)
+			{
+				nlwarning("CTRL: %s sent %u messages of no known type, closing it", c.Name.c_str(), c.UnknownMessages);
+				c.Pipe->close();
+			}
 			return;
 		}
-		if (f.size() < 3)
+		if (f.size() < 3 || f[1].size() > s_MaxIdLength)
 		{
-			sendError(c, f.size() > 1 ? f[1] : std::string(), "a call needs an id and a method");
+			sendError(c, f.size() > 1 && f[1].size() <= s_MaxIdLength ? f[1] : std::string(),
+			    toString("a call needs an id of %u bytes at most and a method", (uint)s_MaxIdLength));
 			return;
 		}
 		const std::string &id = f[1];
 		const std::string &method = f[2];
+		if (method.size() > s_MaxNameLength)
+		{
+			sendError(c, id, toString("a method name is %u bytes at most; ctrl.methods lists them", (uint)s_MaxNameLength));
+			return;
+		}
+		size_t argBytes = f.size() >= 4 ? f[3].size() : 0;
 		CJsonValue args = CJsonValue::object();
-		if (f.size() >= 4 && !f[3].empty())
+		if (argBytes > 0)
 		{
 			std::string error;
 			if (!args.parse(f[3], error))
@@ -713,70 +1164,106 @@ public:
 		bool readOnly = true;
 		bool found = false;
 		{
-			CAutoMutex<CMutex> lock(MethodsMutex);
-			for (uint i = 0; i < Methods.size(); ++i)
+			CAutoMutex<CMutex> lock(m_MethodsMutex);
+			for (uint i = 0; i < m_Methods.size(); ++i)
 			{
-				if (Methods[i].Name == method)
+				if (m_Methods[i].Name == method)
 				{
 					found = true;
-					readOnly = Methods[i].ReadOnly;
+					readOnly = m_Methods[i].ReadOnly;
 					break;
 				}
 			}
 		}
 		if (!found)
 		{
-			sendError(c, id, toString("no method '%s'; ctrl.methods lists them", method.c_str()));
+			sendError(c, id, "no method '" + method + "'; ctrl.methods lists them");
+			return;
+		}
+		uint waiters;
+		if (c.Pending.find(id) != c.Pending.end() || hasWaiter(c.Id, id, waiters))
+		{
+			sendError(c, id, "a call of this connection with the id '" + id + "' is not answered yet: an id is for one call at a time");
+			return;
+		}
+		if (c.Pending.size() >= s_MaxPendingCalls || c.PendingBytes + argBytes > s_MaxPendingBytes)
+		{
+			sendError(c, id,
+			    toString("%u calls of this connection (%u MB of arguments) are not answered yet, the most an endpoint takes: wait for their answers", (uint)c.Pending.size(),
+			        (uint)(c.PendingBytes / (1024 * 1024))));
 			return;
 		}
 		if (!readOnly && !takeLease(c, id))
 			return;
 
-		CInCall in;
-		in.Connection = c.Id;
-		in.Id = id;
-		in.Method = method;
-		in.Args = args;
-		c.LastCallEvent = ringNext(false);
-		CAutoMutex<CMutex> lock(InboxMutex);
-		Inbox.push_back(in);
+		// once the endpoint stops, nothing more reaches the main thread: the call is told why at once
+		std::string exitMessage;
+		uint64 eventNext = ringNext(false);
+		{
+			CAutoMutex<CMutex> lock(m_InboxMutex);
+			if (m_ExitMessage.empty())
+			{
+				m_Inbox.push_back(CInCall());
+				CInCall &in = m_Inbox.back();
+				in.Connection = c.Id;
+				in.Id = id;
+				in.Method = method;
+				in.Args.swap(args);
+			}
+			else
+			{
+				exitMessage = m_ExitMessage;
+			}
+		}
+		if (!exitMessage.empty())
+		{
+			sendError(c, id, exitMessage);
+			return;
+		}
+		CPendingCall pending;
+		pending.Control = !readOnly;
+		pending.Bytes = argBytes;
+		pending.CancelSent = false;
+		c.Pending[id] = pending;
+		if (!readOnly)
+			++c.ControlPending;
+		c.PendingBytes += argBytes;
+		c.LastCallEvent = eventNext;
+	}
+
+	/// The answer of a pending call is on its way: the call counts no more
+	void answered(CConnection &c, const std::string &id)
+	{
+		std::map<std::string, CPendingCall>::iterator it = c.Pending.find(id);
+		if (it == c.Pending.end())
+			return;
+		if (it->second.Control)
+			--c.ControlPending;
+		c.PendingBytes -= it->second.Bytes;
+		c.Pending.erase(it);
+	}
+
+	std::string connectionName(uint32 id)
+	{
+		std::map<uint32, CConnection *>::iterator it = m_Connections.find(id);
+		return it != m_Connections.end() ? it->second->Name : toString("connection %u", id);
 	}
 
 	bool takeLease(CConnection &c, const std::string &id)
 	{
-		if (LeaseHolder == 0 || LeaseHolder == c.Id)
+		if (m_LeaseHolder == 0 || m_LeaseHolder == c.Id)
 		{
-			if (LeaseHolder == 0)
+			if (m_LeaseHolder == 0)
 				nlinfo("CTRL: %s took the lease", c.Name.c_str());
-			LeaseHolder = c.Id;
-			LeaseHeld = true;
+			m_LeaseHolder = c.Id;
+			m_LeaseHeld = true;
 			return true;
 		}
-		std::map<uint32, CConnection *>::iterator it = Connections.find(LeaseHolder);
-		std::string holder = it != Connections.end() ? it->second->Name : toString("connection %u", LeaseHolder);
+		std::string holder = connectionName(m_LeaseHolder);
 		CJsonValue details = CJsonValue::object();
 		details.set("holder", holder);
-		sendError(c, id, toString("the lease is held by %s; only read-only methods are open to other connections", holder.c_str()), details);
+		sendError(c, id, "the lease is held by " + holder + "; only read-only methods are open to other connections", details);
 		return false;
-	}
-
-	CJsonValue stateSnapshot()
-	{
-		CJsonValue s = CJsonValue::object();
-		CAutoMutex<CMutex> lock(StateMutex);
-		s.set("state", State);
-		CJsonValue detail;
-		std::string error;
-		if (!StateDetail.empty() && detail.parse(StateDetail, error))
-			s.set("detail", detail);
-		s.set("since", StateSince);
-		s.set("frame", Frame);
-		TTime now = CTime::getLocalTime();
-		sint64 idle = LastUpdate == 0 ? -1 : (sint64)(now - LastUpdate);
-		s.set("main_thread_idle_ms", idle);
-		// a frame of a client is far below this; a main thread that does not come back is stuck in something
-		s.set("main_thread", idle < 0 ? "not started" : (idle > 2000 ? toString("busy for %u s in %s", (uint)(idle / 1000), State.c_str()) : std::string("running")));
-		return s;
 	}
 
 	bool handleBuiltIn(CConnection &c, const std::string &id, const std::string &method, const CJsonValue &args)
@@ -788,7 +1275,7 @@ public:
 		}
 		if (method == "ctrl.state")
 		{
-			sendResult(c, id, stateSnapshot());
+			sendResult(c, id, stateJson(readState()));
 			return true;
 		}
 		if (method == "ctrl.methods")
@@ -806,10 +1293,21 @@ public:
 			}
 			else if (action == "release")
 			{
-				if (LeaseHolder == c.Id)
+				if (m_LeaseHolder == c.Id)
 				{
-					LeaseHolder = 0;
-					LeaseHeld = false;
+					// those calls would go on driving the process while another connection drives it too
+					if (c.ControlPending > 0)
+					{
+						CJsonValue details = CJsonValue::object();
+						details.set("unanswered", c.ControlPending);
+						sendError(c, id,
+						    toString("%u calls of this connection that need the lease are not answered yet: wait for their answers or cancel them, then release it",
+						        c.ControlPending),
+						    details);
+						return true;
+					}
+					m_LeaseHolder = 0;
+					m_LeaseHeld = false;
 					nlinfo("CTRL: %s gave the lease back", c.Name.c_str());
 				}
 			}
@@ -819,14 +1317,24 @@ public:
 				return true;
 			}
 			CJsonValue r = CJsonValue::object();
-			std::map<uint32, CConnection *>::iterator it = Connections.find(LeaseHolder);
-			r.set("holder", LeaseHolder == 0 ? CJsonValue() : CJsonValue(it != Connections.end() ? it->second->Name : toString("connection %u", LeaseHolder)));
-			r.set("yours", LeaseHolder == c.Id);
+			r.set("holder", m_LeaseHolder == 0 ? CJsonValue() : CJsonValue(connectionName(m_LeaseHolder)));
+			r.set("yours", m_LeaseHolder == c.Id);
 			sendResult(c, id, r);
 			return true;
 		}
 		if (method == "ctrl.wait_state" || method == "ctrl.log" || method == "ctrl.events")
 		{
+			uint waiters;
+			if (hasWaiter(c.Id, id, waiters) || c.Pending.find(id) != c.Pending.end())
+			{
+				sendError(c, id, "a call of this connection with the id '" + id + "' is not answered yet: an id is for one call at a time");
+				return true;
+			}
+			if (waiters >= s_MaxWaiters)
+			{
+				sendError(c, id, toString("%u waits of this connection are open, the most an endpoint takes", waiters));
+				return true;
+			}
 			CWaiter w;
 			w.Connection = c.Id;
 			w.Id = id;
@@ -841,18 +1349,16 @@ public:
 			w.Deadline = w.Start + waitMs;
 			if (method == "ctrl.wait_state")
 			{
-				{
-					CAutoMutex<CMutex> lock(StateMutex);
-					w.StartState = State;
-					w.LastState = State;
-				}
+				CStateCopy state = readState();
+				w.StartState = state.State;
+				w.LastState = state.State;
 				// from since_idx, else from the last call of the connection, else from now
 				w.EventStart = w.Args.has("since_idx") ? (uint64)std::max((sint64)1, w.Args.get("since_idx").getInt(1))
 				                                       : (c.LastCallEvent != 0 ? c.LastCallEvent : ringNext(false));
 				w.EventScanned = w.EventStart;
 			}
 			if (!answerWaiter(c, w, waitMs == 0))
-				Waiters.push_back(w);
+				m_Waiters.push_back(w);
 			return true;
 		}
 		return false;
@@ -864,10 +1370,10 @@ public:
 		std::string contains = toLowerAscii(args.get("contains").getString());
 		bool schemas = args.get("schemas").getBool(false);
 		CJsonValue list = CJsonValue::array();
-		CAutoMutex<CMutex> lock(MethodsMutex);
-		for (uint i = 0; i < Methods.size(); ++i)
+		CAutoMutex<CMutex> lock(m_MethodsMutex);
+		for (uint i = 0; i < m_Methods.size(); ++i)
 		{
-			const CMethodInfo &m = Methods[i];
+			const CMethodInfo &m = m_Methods[i];
 			if (!prefix.empty() && m.Name.compare(0, prefix.size(), prefix) != 0)
 				continue;
 			if (!contains.empty() && toLowerAscii(m.Name + " " + m.Description).find(contains) == std::string::npos)
@@ -892,51 +1398,43 @@ public:
 		bool expired = final || now >= w.Deadline;
 		if (w.Method == "ctrl.wait_state")
 		{
-			CJsonValue snapshot = stateSnapshot();
-			const std::string &state = snapshot.get("state").getString();
-			bool match = false;
-			const CJsonValue &states = w.Args.get("states");
-			if (w.Args.get("state").isString())
-				match = state == w.Args.get("state").getString();
-			for (uint i = 0; i < states.size(); ++i)
-				match = match || state == states.at(i).getString();
-			if (w.Args.get("not").isString())
-				match = match || (state != w.Args.get("not").getString() && !w.Args.has("state") && !w.Args.has("states"));
+			// the state is copied, not turned into JSON, at every look; the JSON is made for the answer only
+			CStateCopy state = readState();
+			bool match = matchesState(w.Args, state.State);
 			std::string stoppedBy;
 			if (!match && !expired)
 			{
 				// what makes the state unreachable ends the wait: an event of the kinds watched (a message box that
 				// refuses, the exit), or a settled state the process went to instead and stays in
 				stoppedBy = stoppingEvent(w);
-				bool settled;
-				{
-					CAutoMutex<CMutex> lock(StateMutex);
-					settled = StateSettled;
-				}
-				if (state != w.StartState)
+				if (state.State != w.StartState)
 					w.Changed = true;
-				if (state != w.LastState || !settled)
+				if (state.State != w.LastState || !state.Settled)
 					w.SettledSince = now;
-				w.LastState = state;
+				w.LastState = state.State;
 				sint64 settleMs = (sint64)(w.Args.get("settle_seconds").getNumber(5.0) * 1000.0);
-				if (stoppedBy.empty() && w.Changed && settled && settleMs > 0 && (sint64)(now - w.SettledSince) >= settleMs)
-					stoppedBy = toString("the state went to %s instead and stayed there", state.c_str());
+				if (stoppedBy.empty() && w.Changed && state.Settled && settleMs > 0 && (sint64)(now - w.SettledSince) >= settleMs)
+					stoppedBy = "the state went to " + state.State + " instead and stayed there";
 				if (stoppedBy.empty())
 					return false;
 			}
+			CJsonValue snapshot = stateJson(state);
 			snapshot.set("matched", match);
 			if (!stoppedBy.empty())
 				snapshot.set("stopped", stoppedBy);
+			if (!w.Missed.empty())
+				snapshot.set("missed", w.Missed);
 			snapshot.set("waited_ms", (sint64)(now - w.Start));
 			sendResult(c, w.Id, snapshot);
 			return true;
 		}
 		// nothing new since the last look: no scan, the ring is not locked for long while the process logs
-		uint64 next = ringNext(w.Method == "ctrl.log");
+		bool log = w.Method == "ctrl.log";
+		uint64 next = ringNext(log);
 		if (w.Seen == next && !expired)
 			return false;
-		CJsonValue r = w.Method == "ctrl.log" ? queryLog(w.Args) : queryEvents(w.Args);
-		bool none = r.get(w.Method == "ctrl.log" ? "lines" : "events").size() == 0;
+		CJsonValue r = log ? queryLog(w.Args) : queryEvents(w.Args);
+		bool none = r.get(log ? "lines" : "events").size() == 0;
 		// a range that ends before the next line can get nothing more
 		bool closed = w.Args.has("to_idx") && (uint64)std::max((sint64)0, w.Args.get("to_idx").getInt(0)) < next;
 		if (none && !expired && !closed)
@@ -958,9 +1456,8 @@ public:
 		return true;
 	}
 
-	/// The first event since the wait began of the kinds that end it (message_box and exit by default)
-	/// The first event of the kinds that end the wait (message_box and exit by default) since it watches; each event
-	/// is looked at once
+	/// The first event of the kinds that end the wait (message_box and exit by default) since the one it watches
+	/// from; each event is looked at once. Events the ring dropped before they were looked at are said in Missed.
 	std::string stoppingEvent(CWaiter &w)
 	{
 		std::set<std::string> kinds;
@@ -981,18 +1478,21 @@ public:
 		}
 		if (kinds.empty())
 			return std::string();
-		CAutoMutex<CMutex> lock(EventMutex);
-		if (Events.empty())
-			return std::string();
-		uint64 first = Events.front().Idx;
-		size_t pos = w.EventScanned > first ? (size_t)std::min((uint64)Events.size(), w.EventScanned - first) : 0;
-		for (; pos < Events.size(); ++pos)
+		CAutoMutex<CMutex> lock(m_EventMutex);
+		uint64 first = m_Events.empty() ? m_EventNext : m_Events.front().Idx;
+		if (w.EventScanned < first)
 		{
-			const CEventLine &e = Events[pos];
-			if (kinds.find(e.Kind) != kinds.end())
-				return toString("event %u: %s %s", (uint)e.Idx, e.Kind.c_str(), e.Data.c_str());
+			if (w.Missed.empty())
+				w.Missed = "the events from " + indexText(w.EventScanned) + " on were no longer held: the watch starts at " + indexText(first);
+			w.EventScanned = first;
 		}
-		w.EventScanned = EventNext;
+		for (size_t pos = (size_t)std::min((uint64)m_Events.size(), w.EventScanned - first); pos < m_Events.size(); ++pos)
+		{
+			const CEventLine &e = m_Events[pos];
+			if (kinds.find(e.Kind) != kinds.end())
+				return "event " + indexText(e.Idx) + ": " + e.Kind + " " + e.Data;
+		}
+		w.EventScanned = m_EventNext;
 		return std::string();
 	}
 
@@ -1000,140 +1500,23 @@ public:
 	{
 		if (log)
 		{
-			CAutoMutex<CMutex> lock(LogMutex);
-			return LogNext;
+			CAutoMutex<CMutex> lock(m_LogMutex);
+			return m_LogNext;
 		}
-		CAutoMutex<CMutex> lock(EventMutex);
-		return EventNext;
+		CAutoMutex<CMutex> lock(m_EventMutex);
+		return m_EventNext;
 	}
 
 	void checkWaiters()
 	{
-		for (uint i = 0; i < Waiters.size();)
+		for (uint i = 0; i < m_Waiters.size();)
 		{
-			std::map<uint32, CConnection *>::iterator it = Connections.find(Waiters[i].Connection);
-			if (it == Connections.end() || !it->second->Pipe->isOpen() || answerWaiter(*it->second, Waiters[i], false))
-				Waiters.erase(Waiters.begin() + i);
+			std::map<uint32, CConnection *>::iterator it = m_Connections.find(m_Waiters[i].Connection);
+			if (it == m_Connections.end() || !it->second->Pipe->isOpen() || answerWaiter(*it->second, m_Waiters[i], false))
+				m_Waiters.erase(m_Waiters.begin() + i);
 			else
 				++i;
 		}
-	}
-
-	/// The lines of a ring a query selects; T has Idx and Time
-	template <class T, class TPredicate>
-	CJsonValue select(const std::deque<T> &ring, uint64 next, const CJsonValue &args, const TPredicate &pred, const char *listName)
-	{
-		uint64 first = ring.empty() ? next : ring.front().Idx;
-		sint64 last = argInt(args, "last", -1);
-		bool hasFrom = args.has("from_idx");
-		uint64 from = hasFrom ? (uint64)std::max((sint64)0, argInt(args, "from_idx", 0)) : 0;
-		uint64 to = args.has("to_idx") ? (uint64)std::max((sint64)0, argInt(args, "to_idx", 0)) : (uint64)-1;
-		sint64 fromTime = argInt(args, "from_time", 0);
-		sint64 toTime = argInt(args, "to_time", 0);
-		uint maxLines = (uint)std::min((sint64)s_MaxLines, std::max((sint64)1, argInt(args, "max", s_DefaultMaxLines)));
-		if (!hasFrom && last < 0 && fromTime == 0)
-			last = 100;
-
-		std::vector<const T *> picked;
-		size_t startPos = 0;
-		if (hasFrom && from > first)
-			startPos = (size_t)std::min((uint64)ring.size(), from - first);
-		for (size_t i = startPos; i < ring.size(); ++i)
-		{
-			const T &e = ring[i];
-			if (e.Idx > to)
-				break;
-			if (fromTime != 0 && e.Time < (uint64)fromTime)
-				continue;
-			if (toTime != 0 && e.Time > (uint64)toTime)
-				continue;
-			if (!pred(e))
-				continue;
-			picked.push_back(&e);
-		}
-		bool truncated = false;
-		size_t begin = 0, end = picked.size();
-		if (last >= 0 && picked.size() > (size_t)last)
-		{
-			begin = picked.size() - (size_t)last;
-			truncated = true;
-		}
-		if (end - begin > maxLines)
-		{
-			// paging forward from an index keeps the oldest, everything else the newest
-			if (hasFrom && last < 0)
-				end = begin + maxLines;
-			else
-				begin = end - maxLines;
-			truncated = true;
-		}
-		// with nothing picked, the scan went to the end of the selection: a reader that continues starts there
-		uint64 scanEnd = to == (uint64)-1 ? next : std::min(to + 1, next);
-		CJsonValue r = CJsonValue::object();
-		r.set("first_idx", first);
-		r.set("next_idx", end > begin ? picked[end - 1]->Idx + 1 : (hasFrom ? std::max(std::max(from, first), scanEnd) : next));
-		r.set("newest_idx", next - 1);
-		if (hasFrom && from < first && from > 0)
-			r.set("missed", toString("from_idx %u is no longer held: the first index still held is %u", (uint)from, (uint)first));
-		r.set("truncated", truncated);
-		CJsonValue list = CJsonValue::array();
-		for (size_t i = begin; i < end; ++i)
-			list.push(toJson(*picked[i]));
-		r.set(listName, list);
-		return r;
-	}
-
-	struct CLogPredicate
-	{
-		std::set<std::string> Levels;
-		std::string Contains;
-		bool operator()(const CLogLine &l) const
-		{
-			if (!Levels.empty() && Levels.find(l.Level) == Levels.end())
-				return false;
-			if (!Contains.empty() && !containsLowerAscii(l.Text, Contains))
-				return false;
-			return true;
-		}
-	};
-
-	struct CEventPredicate
-	{
-		std::set<std::string> Kinds;
-		std::string Contains;
-		bool operator()(const CEventLine &e) const
-		{
-			if (!Kinds.empty() && Kinds.find(e.Kind) == Kinds.end())
-				return false;
-			if (!Contains.empty() && !containsLowerAscii(e.Data, Contains))
-				return false;
-			return true;
-		}
-	};
-
-	static CJsonValue toJson(const CLogLine &l)
-	{
-		CJsonValue o = CJsonValue::object();
-		o.set("idx", l.Idx);
-		o.set("time", l.Time);
-		o.set("level", l.Level);
-		o.set("text", l.Text);
-		if (!l.Origin.empty())
-			o.set("origin", l.Origin);
-		return o;
-	}
-
-	static CJsonValue toJson(const CEventLine &e)
-	{
-		CJsonValue o = CJsonValue::object();
-		o.set("idx", e.Idx);
-		o.set("time", e.Time);
-		o.set("kind", e.Kind);
-		CJsonValue data;
-		std::string error;
-		if (data.parse(e.Data, error))
-			o.set("data", data);
-		return o;
 	}
 
 	CJsonValue queryLog(const CJsonValue &args)
@@ -1143,8 +1526,13 @@ public:
 		for (uint i = 0; i < levels.size(); ++i)
 			pred.Levels.insert(toUpperAscii(levels.at(i).getString()));
 		pred.Contains = toLowerAscii(args.get("contains").getString());
-		CAutoMutex<CMutex> lock(LogMutex);
-		return select(Log, LogNext, args, pred, "lines");
+		CSelection<CLogLine> selection;
+		{
+			// every thread that logs takes this lock: it is held for the scan and the copies only
+			CAutoMutex<CMutex> lock(m_LogMutex);
+			selectLines(m_Log, m_LogNext, args, pred, selection);
+		}
+		return selectionJson(selection, "lines");
 	}
 
 	CJsonValue queryEvents(const CJsonValue &args)
@@ -1154,34 +1542,42 @@ public:
 		for (uint i = 0; i < kinds.size(); ++i)
 			pred.Kinds.insert(kinds.at(i).getString());
 		pred.Contains = toLowerAscii(args.get("contains").getString());
-		CAutoMutex<CMutex> lock(EventMutex);
-		return select(Events, EventNext, args, pred, "events");
+		CSelection<CEventLine> selection;
+		{
+			CAutoMutex<CMutex> lock(m_EventMutex);
+			selectLines(m_Events, m_EventNext, args, pred, selection);
+		}
+		return selectionJson(selection, "events");
 	}
 
-	bool flushOutbox()
+	/// The answers of the main thread go to the queues of their connections, the data frames before the result
+	void takeOutbox()
 	{
-		std::vector<COutMessage> out;
+		std::deque<COutMessage> out;
 		{
-			CAutoMutex<CMutex> lock(OutboxMutex);
-			out.swap(Outbox);
+			CAutoMutex<CMutex> lock(m_OutboxMutex);
+			out.swap(m_Outbox);
 		}
-		for (uint i = 0; i < out.size(); ++i)
+		for (size_t i = 0; i < out.size(); ++i)
 		{
 			COutMessage &m = out[i];
-			std::map<uint32, CConnection *>::iterator it = Connections.find(m.Connection);
+			std::map<uint32, CConnection *>::iterator it = m_Connections.find(m.Connection);
 			// the connection went away meanwhile; nobody waits for the answer
-			if (it == Connections.end())
+			if (it == m_Connections.end())
 				continue;
 			CConnection &c = *it->second;
+			answered(c, m.Id);
+			if (!c.Pipe->isOpen())
+				continue;
 			for (uint k = 0; k < m.Attachments.size(); ++k)
 			{
 				std::vector<std::string> fields;
 				fields.push_back("data");
-				fields.push_back(toString("%s.%u", m.Id.c_str(), k + 1));
+				fields.push_back(m.Id + toString(".%u", k + 1));
 				fields.push_back(m.Attachments[k].first);
-				fields.push_back(toString("%u", (uint)m.Attachments[k].second.size()));
-				if (!sendLine(c, joinCtrlLine(fields)) || !c.Pipe->write(m.Attachments[k].second, WriteTimeoutMs))
-					break;
+				fields.push_back(indexText((uint64)m.Attachments[k].second.size()));
+				queueLine(c, joinCtrlLine(fields));
+				c.Pipe->queueSwap(m.Attachments[k].second);
 			}
 			std::vector<std::string> fields;
 			fields.push_back(m.Error ? "error" : "result");
@@ -1189,14 +1585,13 @@ public:
 			if (m.Error)
 				fields.push_back(m.Message);
 			fields.push_back(m.Json);
-			sendLine(c, joinCtrlLine(fields));
+			queueLine(c, joinCtrlLine(fields));
 		}
-		return !out.empty();
 	}
 
 	void dropClosed()
 	{
-		for (std::map<uint32, CConnection *>::iterator it = Connections.begin(); it != Connections.end();)
+		for (std::map<uint32, CConnection *>::iterator it = m_Connections.begin(); it != m_Connections.end();)
 		{
 			CConnection *c = it->second;
 			if (c->Pipe->isOpen())
@@ -1205,18 +1600,18 @@ public:
 				continue;
 			}
 			nlinfo("CTRL: %s closed", c->Name.c_str());
-			if (LeaseHolder == c->Id)
+			if (m_LeaseHolder == c->Id)
 			{
-				LeaseHolder = 0;
-				LeaseHeld = false;
+				m_LeaseHolder = 0;
+				m_LeaseHeld = false;
 			}
 			{
-				CAutoMutex<CMutex> lock(InboxMutex);
-				Closed.push_back(c->Id);
+				CAutoMutex<CMutex> lock(m_InboxMutex);
+				m_Closed.push_back(c->Id);
 			}
 			delete c->Pipe;
 			delete c;
-			Connections.erase(it++);
+			m_Connections.erase(it++);
 		}
 	}
 };
@@ -1224,10 +1619,12 @@ public:
 namespace {
 
 /**
- * The displayer on the logs of the process. A log's list of displayers has no lock, so taking one off while
- * other threads log is not safe: this one is put on once and stays, and an endpoint that stops only takes
- * itself off it, under its lock, after which no thread is still in that endpoint's ring. It is never deleted,
- * since a log may display through it until the process ends.
+ * The displayer on the logs of the process. A log changes its list of displayers under its mutex, which a message
+ * holds only while it is positioned (the log macros): a log written without a position goes through the list
+ * without it, so taking a displayer off while other threads log is still not safe. This one is put on once and
+ * stays, and an endpoint that stops only takes itself off it, under its lock, after which no thread is still in
+ * that endpoint's ring. It is never deleted, since a log may display through it until the process ends. It serves
+ * one endpoint at a time.
  */
 class CCtrlLogForwarder : public IDisplayer
 {
@@ -1238,10 +1635,27 @@ public:
 	{
 	}
 
-	void setTarget(CCtrlEndpoint::CImpl *target)
+	/// The logs go to the ring of this endpoint from now on; false when another endpoint has them
+	bool claim(CCtrlEndpoint::CImpl *target)
 	{
 		CAutoMutex<CMutex> lock(m_Mutex);
+		if (m_Target != nullptr && m_Target != target)
+			return false;
 		m_Target = target;
+		return true;
+	}
+
+	bool isClaimedByOther(CCtrlEndpoint::CImpl *target)
+	{
+		CAutoMutex<CMutex> lock(m_Mutex);
+		return m_Target != nullptr && m_Target != target;
+	}
+
+	void release(CCtrlEndpoint::CImpl *target)
+	{
+		CAutoMutex<CMutex> lock(m_Mutex);
+		if (m_Target == target)
+			m_Target = nullptr;
 	}
 
 protected:
@@ -1259,10 +1673,6 @@ private:
 
 CCtrlLogForwarder *s_LogForwarder = nullptr;
 
-} // anonymous namespace
-
-namespace {
-
 enum TMethodStep
 {
 	StepCall,
@@ -1270,113 +1680,18 @@ enum TMethodStep
 	StepCancel
 };
 
-/// Runs one step of a method: what it throws is the call's error, so one method cannot stop the others
+/// Runs one step of a method. Nothing is caught: what a method throws is a crash of the process with its report, as
+/// anywhere else on the main thread, and not an answer that leaves the process running after an unwind through code
+/// that was not written for one.
 void runMethodStep(ICtrlMethod *method, CCtrlCall &call, TMethodStep step)
 {
-	try
+	switch (step)
 	{
-		switch (step)
-		{
-		case StepCall: method->call(call); break;
-		case StepPoll: method->poll(call); break;
-		case StepCancel: method->cancel(call); break;
-		}
-	}
-	catch (const std::exception &e)
-	{
-		nlwarning("CTRL: the method '%s' threw: %s", method->getName().c_str(), e.what());
-		call.fail(toString("the method threw: %s", e.what()));
-	}
-	catch (...)
-	{
-		nlwarning("CTRL: the method '%s' threw an exception", method->getName().c_str());
-		call.fail("the method threw an exception");
+	case StepCall: method->call(call); break;
+	case StepPoll: method->poll(call); break;
+	case StepCancel: method->cancel(call); break;
 	}
 }
-
-} // anonymous namespace
-
-// *** CCtrlEndpoint ***
-
-CCtrlEndpoint::CCtrlEndpoint()
-    : m_Impl(new CImpl(this))
-    , m_Started(false)
-    , m_Frame(0)
-    , m_InUpdate(false)
-    , m_Capture(nullptr)
-    , m_CallingConnection(0)
-    , m_ConnectionClosed(nullptr)
-{
-	m_Impl->Pid = CCtrlRegistry::getCurrentProcessId();
-	m_Impl->StartTime = CCtrlRegistry::getProcessStartTime(m_Impl->Pid);
-
-	CMethodInfo info;
-	info.ReadOnly = true;
-	info.BuiltIn = true;
-	info.Name = "ctrl.identity";
-	info.Description = "Who this process is: name, process id and start time, program, build, log file, and what it adds (account, character).";
-	info.Schema = CCtrlSchema();
-	m_Impl->Methods.push_back(info);
-	info.Name = "ctrl.state";
-	info.Description = "The state of the process, with its detail, the frame, and whether the main thread is running or busy for how long in which state. Answered without the main thread.";
-	m_Impl->Methods.push_back(info);
-	info.Name = "ctrl.wait_state";
-	info.Description = "Waits until the state is one of those given (state or states), or differs from 'not', up to timeout_ms (30 s by default, 600 s at most). It ends early with matched false and "
-	                   "what stopped it when an event of the stop_on kinds comes (message_box and exit by default), or when the state left the one it had and stays in another settled state for "
-	                   "settle_seconds (5 by default; 0 waits on): what was to lead to the state did not.";
-	info.Schema = CCtrlSchema()
-	                  .str("state", "The state to wait for.")
-	                  .strings("states", "Any of these states.")
-	                  .str("not", "Wait until the state is no longer this one.")
-	                  .integer("timeout_ms", "How long to wait at most.")
-	                  .strings("stop_on", "Event kinds that end the wait (message_box and exit by default; an empty list for none).")
-	                  .integer("since_idx", "The first event index that counts (by default the events since the last call of this connection).")
-	                  .number("settle_seconds", "How long another settled state ends the wait (5 by default, 0 never).");
-	m_Impl->Methods.push_back(info);
-	info.Name = "ctrl.log";
-	info.Description = "Log lines of the process, indexed from 1 since it started, each with its time (ms since the epoch), level and text. Select by index (from_idx, to_idx), time (from_time, to_time) or the last N; filter by levels (INF, WRN, ERR, DBG, AST, STT) and a case-insensitive substring. From an index the oldest lines come first, up to max (200 by default); with wait_ms, waits for a first matching line. next_idx continues; missed says when the ring no longer holds from_idx.";
-	info.Schema = CCtrlSchema()
-	                  .integer("from_idx", "First index, inclusive.")
-	                  .integer("to_idx", "Last index, inclusive.")
-	                  .integer("from_time", "Earliest time, ms since the epoch.")
-	                  .integer("to_time", "Latest time, ms since the epoch.")
-	                  .integer("last", "The last N lines of the selection (100 when nothing else selects).")
-	                  .strings("levels", "Only these levels: INF, WRN, ERR, DBG, AST, STT.")
-	                  .str("contains", "Only lines containing this, case-insensitive.")
-	                  .integer("max", "At most this many lines (200 by default, 5000 at most).")
-	                  .integer("wait_ms", "Wait up to this long for a first line when none matches yet.");
-	m_Impl->Methods.push_back(info);
-	info.Name = "ctrl.events";
-	info.Description = "Events of the process, indexed like the log: state changes and what the process reports (kind and data). Same selection as ctrl.log, with kinds instead of levels; with wait_ms it is a long poll from from_idx.";
-	info.Schema = CCtrlSchema()
-	                  .integer("from_idx", "First index, inclusive.")
-	                  .integer("to_idx", "Last index, inclusive.")
-	                  .integer("last", "The last N events of the selection.")
-	                  .strings("kinds", "Only these kinds.")
-	                  .str("contains", "Only events whose data contains this, case-insensitive.")
-	                  .integer("max", "At most this many events (200 by default, 5000 at most).")
-	                  .integer("wait_ms", "Wait up to this long for a first event when none matches yet.");
-	m_Impl->Methods.push_back(info);
-	info.Name = "ctrl.methods";
-	info.Description = "The methods of this endpoint, filtered by name prefix or a word of the name or description; schemas only when asked.";
-	info.Schema = CCtrlSchema().str("prefix", "Only names starting with this.").str("contains", "Only methods whose name or description contains this.").boolean("schemas", "Include the argument schemas.");
-	m_Impl->Methods.push_back(info);
-	info.Name = "ctrl.lease";
-	info.Description = "The lease that methods which change something need: take, release, or status. A connection that calls such a method takes it when nobody holds it; it is released when that connection closes.";
-	info.Schema = CCtrlSchema().choice("action", "take|release|status", "What to do (status by default).");
-	m_Impl->Methods.push_back(info);
-}
-
-CCtrlEndpoint::~CCtrlEndpoint()
-{
-	if (m_Started)
-		stop(m_ExitReason.empty() ? std::string("the endpoint was destroyed") : m_ExitReason);
-	for (std::map<std::string, ICtrlMethod *>::iterator it = m_Methods.begin(); it != m_Methods.end(); ++it)
-		delete it->second;
-	delete m_Impl;
-}
-
-namespace {
 
 /// A built-in method that runs on the main thread, as a member of the endpoint
 class CEndpointMethod : public ICtrlMethod
@@ -1404,27 +1719,26 @@ private:
 class CCommandCollector : public ICommandRegistryListener
 {
 public:
-	std::string Prefix;
-	std::string Contains;
-	uint Limit;
-	uint Total;
-	CJsonValue List;
-
-	CCommandCollector()
-	    : Limit(300)
-	    , Total(0)
-	    , List(CJsonValue::array())
+	CCommandCollector(const std::string &prefix, const std::string &contains, uint limit)
+	    : m_Prefix(prefix)
+	    , m_Contains(contains)
+	    , m_Limit(limit)
+	    , m_Total(0)
+	    , m_List(CJsonValue::array())
 	{
 	}
 
+	const CJsonValue &getList() const { return m_List; }
+	uint getTotal() const { return m_Total; }
+
 	virtual void onCommandAdded(const std::string &name, TCommandEntryKind kind, const std::string &args, const std::string &help) NL_OVERRIDE
 	{
-		if (!Prefix.empty() && name.compare(0, Prefix.size(), Prefix) != 0)
+		if (!m_Prefix.empty() && name.compare(0, m_Prefix.size(), m_Prefix) != 0)
 			return;
-		if (!Contains.empty() && toLowerAscii(name + " " + help).find(Contains) == std::string::npos)
+		if (!m_Contains.empty() && toLowerAscii(name + " " + help).find(m_Contains) == std::string::npos)
 			return;
-		++Total;
-		if (List.size() >= Limit)
+		++m_Total;
+		if (m_List.size() >= m_Limit)
 			return;
 		CJsonValue e = CJsonValue::object();
 		e.set("name", name);
@@ -1433,25 +1747,191 @@ public:
 			e.set("args", args);
 		if (!help.empty())
 			e.set("help", help);
-		List.push(e);
+		m_List.push(e);
 	}
 
 	virtual void onCommandRemoved(const std::string & /* name */) NL_OVERRIDE { }
+
+private:
+	std::string m_Prefix;
+	std::string m_Contains;
+	uint m_Limit;
+	uint m_Total;
+	CJsonValue m_List;
 };
+
+/// What a command writes to its log, line by line, up to a count and a size; the lines beyond are counted only
+class CCommandOutput : public IDisplayer
+{
+public:
+	CCommandOutput()
+	    : IDisplayer("CTRL_COMMAND_OUTPUT")
+	    , m_Bytes(0)
+	    , m_Total(0)
+	{
+	}
+
+	const std::vector<std::string> &getLines() const { return m_Lines; }
+	uint getTotal() const { return m_Total; }
+
+protected:
+	virtual void doDisplay(const CLog::TDisplayInfo & /* args */, const char *message) NL_OVERRIDE
+	{
+		if (message == nullptr)
+			return;
+		++m_Total;
+		size_t length = strlen(message);
+		while (length > 0 && (message[length - 1] == '\n' || message[length - 1] == '\r'))
+			--length;
+		if (m_Lines.size() >= s_MaxCommandLines || length > s_MaxCommandBytes - m_Bytes)
+			return;
+		m_Bytes += length;
+		m_Lines.push_back(std::string(message, length));
+	}
+
+private:
+	std::vector<std::string> m_Lines;
+	size_t m_Bytes;
+	uint m_Total;
+};
+
+/// The record of a process that is gone
+struct CGoneRecord
+{
+	std::string Path;
+	std::string Name;
+	uint64 Updated;
+};
+
+/// The process of a running record of a name, 0 when none is known
+uint32 findRunningHolder(const std::string &dir, const std::string &name, const std::string &ownRecord)
+{
+	std::vector<std::string> records;
+	CCtrlRegistry::listRecords(dir, records);
+	for (uint i = 0; i < records.size(); ++i)
+	{
+		CJsonValue record;
+		std::string error;
+		if (records[i] == ownRecord || !CCtrlRegistry::readRecord(records[i], record, error) || record.get("name").getString() != name)
+			continue;
+		uint32 pid = (uint32)record.get("pid").getInt(0);
+		if (CCtrlRegistry::probeProcess(pid, (uint64)record.get("start_time").getInt(0)) == CCtrlRegistry::ProcessRunning)
+			return pid;
+	}
+	return 0;
+}
 
 } // anonymous namespace
 
+// *** CCtrlEndpoint ***
+
+CCtrlEndpoint::CCtrlEndpoint()
+    : m_Impl(new CImpl())
+    , m_Started(false)
+    , m_Frame(0)
+    , m_InUpdate(false)
+    , m_Capture(nullptr)
+    , m_CallingConnection(0)
+    , m_ConnectionClosed(nullptr)
+{
+	m_Impl->m_Pid = CCtrlRegistry::getCurrentProcessId();
+	m_Impl->m_StartTime = CCtrlRegistry::getProcessStartTime(m_Impl->m_Pid);
+
+	CMethodInfo info;
+	info.ReadOnly = true;
+	info.BuiltIn = true;
+	info.Name = "ctrl.identity";
+	info.Description = "Who this process is: name, process id and start time, program, build, log file, and what it adds (account, character).";
+	info.Schema = CCtrlSchema();
+	m_Impl->m_Methods.push_back(info);
+	info.Name = "ctrl.state";
+	info.Description = "The state of the process, with its detail, the frame, and whether the main thread is running or busy for how long in which state. Answered without the main thread.";
+	m_Impl->m_Methods.push_back(info);
+	info.Name = "ctrl.wait_state";
+	info.Description = "Waits until the state is one of those given (state or states), or differs from 'not', up to timeout_ms (30 s by default, 600 s at most). It ends early with matched false and "
+	                   "what stopped it when an event of the stop_on kinds comes (message_box and exit by default), or when the state left the one it had and stays in another settled state for "
+	                   "settle_seconds (5 by default; 0 waits on): what was to lead to the state did not. missed says when events it was to watch were no longer held.";
+	info.Schema = CCtrlSchema()
+	                  .str("state", "The state to wait for.")
+	                  .strings("states", "Any of these states.")
+	                  .str("not", "Wait until the state is no longer this one.")
+	                  .integer("timeout_ms", "How long to wait at most.")
+	                  .strings("stop_on", "Event kinds that end the wait (message_box and exit by default; an empty list for none).")
+	                  .integer("since_idx", "The first event index that counts (by default the events since the last call of this connection).")
+	                  .number("settle_seconds", "How long another settled state ends the wait (5 by default, 0 never).");
+	m_Impl->m_Methods.push_back(info);
+	info.Name = "ctrl.log";
+	info.Description = "Log lines of the process, indexed from 1 since the endpoint started, each with its time (ms since the epoch), level and text. Select by index (from_idx, to_idx), time "
+	                   "(from_time, to_time) or the last N; filter by levels (INF, WRN, ERR, DBG, AST, STT) and a case-insensitive substring. From an index the oldest lines come first, up to max "
+	                   "(200 by default); with wait_ms, waits for a first matching line. next_idx continues; missed says when the ring no longer holds from_idx.";
+	info.Schema = CCtrlSchema()
+	                  .integer("from_idx", "First index, inclusive.")
+	                  .integer("to_idx", "Last index, inclusive.")
+	                  .integer("from_time", "Earliest time, ms since the epoch.")
+	                  .integer("to_time", "Latest time, ms since the epoch.")
+	                  .integer("last", "The last N lines of the selection (100 when nothing else selects).")
+	                  .strings("levels", "Only these levels: INF, WRN, ERR, DBG, AST, STT.")
+	                  .str("contains", "Only lines containing this, case-insensitive.")
+	                  .integer("max", "At most this many lines (200 by default, 5000 at most).")
+	                  .integer("wait_ms", "Wait up to this long for a first line when none matches yet.");
+	m_Impl->m_Methods.push_back(info);
+	info.Name = "ctrl.events";
+	info.Description = "Events of the process, indexed like the log: state changes and what the process reports (kind and data). Same selection as ctrl.log, with kinds instead of levels; with "
+	                   "wait_ms it is a long poll from from_idx.";
+	info.Schema = CCtrlSchema()
+	                  .integer("from_idx", "First index, inclusive.")
+	                  .integer("to_idx", "Last index, inclusive.")
+	                  .integer("last", "The last N events of the selection.")
+	                  .strings("kinds", "Only these kinds.")
+	                  .str("contains", "Only events whose data contains this, case-insensitive.")
+	                  .integer("max", "At most this many events (200 by default, 5000 at most).")
+	                  .integer("wait_ms", "Wait up to this long for a first event when none matches yet.");
+	m_Impl->m_Methods.push_back(info);
+	info.Name = "ctrl.methods";
+	info.Description = "The methods of this endpoint, filtered by name prefix or a word of the name or description; schemas only when asked.";
+	info.Schema = CCtrlSchema().str("prefix", "Only names starting with this.").str("contains", "Only methods whose name or description contains this.").boolean("schemas", "Include the argument schemas.");
+	m_Impl->m_Methods.push_back(info);
+	info.Name = "ctrl.lease";
+	info.Description = "The lease that methods which change something need: take, release, or status. A connection that calls such a method takes it when nobody holds it; it is released when "
+	                   "that connection closes, or gives it back, which it cannot while a call of its own that needs the lease is not answered.";
+	info.Schema = CCtrlSchema().choice("action", "take|release|status", "What to do (status by default).");
+	m_Impl->m_Methods.push_back(info);
+
+	// the built-in methods of the main thread, there once for every start of the endpoint
+	addMethod(new CEndpointMethod(this, &CCtrlEndpoint::runCommandsMethod, "ctrl.commands",
+	    "The command table of the process: commands and variables with their argument syntax and help, named handler instances and their member commands (instance.command). Filter by "
+	    "prefix or a word of the name or help.",
+	    CCtrlSchema()
+	        .str("prefix", "Only names starting with this (case sensitive, as the commands are).")
+	        .str("contains", "Only entries whose name or help contains this (case-insensitive).")
+	        .integer("limit", "At most this many entries (300 by default)."),
+	    true));
+	addMethod(new CEndpointMethod(this, &CCtrlEndpoint::runRunCommandMethod, "ctrl.run_command",
+	    "Runs a command, or reads or sets a variable, of the command registry, with the arguments as a list: they reach the command as given, nothing is parsed. Returns whether it "
+	    "succeeded, what it wrote to its log (the first 5000 lines, 4 MB at most; truncated and output_lines say when there was more), and what it showed elsewhere meanwhile (the chat "
+	    "of a client).",
+	    CCtrlSchema().str("command", "The command or variable, instance.command for a member command.", true).strings("args", "The arguments, one per entry."), false));
+}
+
+CCtrlEndpoint::~CCtrlEndpoint()
+{
+	nlassertex(!m_InUpdate, ("CTRL: the endpoint '%s' is deleted from inside its update()", m_Name.c_str()));
+	if (m_Started)
+		stop(m_ExitReason.empty() ? std::string("the endpoint was destroyed") : m_ExitReason);
+	for (std::map<std::string, ICtrlMethod *>::iterator it = m_Methods.begin(); it != m_Methods.end(); ++it)
+		delete it->second;
+	delete m_Impl;
+}
+
 void CCtrlEndpoint::runCommandsMethod(CCtrlCall &call)
 {
-	CCommandCollector collector;
-	collector.Prefix = call.getArgs().get("prefix").getString();
-	collector.Contains = toLowerAscii(call.getArgs().get("contains").getString());
-	collector.Limit = (uint)std::max((sint64)1, call.getArgs().get("limit").getInt(300));
+	CCommandCollector collector(call.getArgs().get("prefix").getString(), toLowerAscii(call.getArgs().get("contains").getString()),
+	    (uint)std::max((sint64)1, call.getArgs().get("limit").getInt(300)));
 	CCommandRegistry::getInstance().listCommands(collector);
 	CJsonValue r = CJsonValue::object();
-	r.set("commands", collector.List);
-	r.set("total", collector.Total);
-	r.set("truncated", collector.Total > collector.List.size());
+	r.set("commands", collector.getList());
+	r.set("total", collector.getTotal());
+	r.set("truncated", collector.getTotal() > collector.getList().size());
 	call.reply(r);
 }
 
@@ -1481,8 +1961,7 @@ void CCtrlEndpoint::runRunCommandMethod(CCtrlCall &call)
 	// a private log around the command, as a remote admin command of a client has it: the lines
 	// of other threads meanwhile do not end up in the output
 	CLog log;
-	CLightMemDisplayer output;
-	output.setParam(100000);
+	CCommandOutput output;
 	log.addDisplayer(&output);
 	// and what it shows outside its log meanwhile; a command run from inside a command keeps the outer list
 	std::vector<std::string> shown;
@@ -1493,20 +1972,14 @@ void CCtrlEndpoint::runRunCommandMethod(CCtrlCall &call)
 	log.removeDisplayer(&output);
 
 	CJsonValue lines = CJsonValue::array();
-	const std::deque<std::string> &strings = output.lockStrings();
-	for (std::deque<std::string>::const_iterator it = strings.begin(); it != strings.end(); ++it)
-	{
-		std::string line = *it;
-		while (!line.empty() && (line[line.size() - 1] == '\n' || line[line.size() - 1] == '\r'))
-			line.erase(line.size() - 1);
-		lines.push(CJsonValue(line));
-	}
-	output.unlockStrings();
-
+	for (uint i = 0; i < output.getLines().size(); ++i)
+		lines.push(CJsonValue(output.getLines()[i]));
 	CJsonValue r = CJsonValue::object();
 	r.set("command", command);
 	r.set("ok", ok);
 	r.set("output", lines);
+	r.set("output_lines", output.getTotal());
+	r.set("truncated", output.getTotal() > output.getLines().size());
 	CJsonValue shownList = CJsonValue::array();
 	for (uint i = 0; i < shown.size(); ++i)
 		shownList.push(CJsonValue(shown[i]));
@@ -1519,7 +1992,13 @@ bool CCtrlEndpoint::start(const std::string &name, const CJsonValue &identity, s
 	nlassert(!m_Started);
 	if (!CCtrlRegistry::isValidName(name))
 	{
-		error = toString("'%s' is not a name for an endpoint: letters, digits, '_', '-' and '.', 64 at most", name.c_str());
+		error = "'" + name + "' is not a name for an endpoint: letters, digits, '_', '-' and '.', 64 at most";
+		return false;
+	}
+	// the log of the process goes to one ring
+	if (s_LogForwarder != nullptr && s_LogForwarder->isClaimedByOther(m_Impl))
+	{
+		error = "another endpoint of this process is started: a process has one";
 		return false;
 	}
 	m_Name = name;
@@ -1527,60 +2006,49 @@ bool CCtrlEndpoint::start(const std::string &name, const CJsonValue &identity, s
 	if (!CCtrlRegistry::getDirectory(dir, true, error))
 		return false;
 
-	m_Impl->RecordPath = CCtrlRegistry::recordPath(dir, name, m_Impl->Pid);
-	m_Impl->EndpointPath = CCtrlRegistry::endpointPath(dir, name, m_Impl->Pid);
+	m_Impl->m_RecordPath = CCtrlRegistry::recordPath(dir, name, m_Impl->m_Pid);
+	m_Impl->m_EndpointPath = CCtrlRegistry::endpointPath(dir, name, m_Impl->m_Pid);
 
 	CJsonValue id = identity.isObject() ? identity : CJsonValue::object();
 	id.set("name", name);
-	id.set("pid", m_Impl->Pid);
-	id.set("start_time", m_Impl->StartTime);
-	id.set("endpoint", m_Impl->EndpointPath);
+	id.set("pid", m_Impl->m_Pid);
+	id.set("start_time", m_Impl->m_StartTime);
+	id.set("endpoint", m_Impl->m_EndpointPath);
 	id.set("protocol", CtrlProtocolVersion);
 	{
-		CAutoMutex<CMutex> lock(m_Impl->IdentityMutex);
-		m_Impl->Identity = id;
+		CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
+		m_Impl->m_Identity = id;
+	}
+	{
+		CAutoMutex<CMutex> lock(m_Impl->m_InboxMutex);
+		m_Impl->m_ExitMessage.clear();
 	}
 
-	// another live process may use the name already: tools address endpoints by name
-	std::vector<std::string> records;
-	CCtrlRegistry::listRecords(dir, records);
-	for (uint i = 0; i < records.size(); ++i)
+	// tools address endpoints by name: the name is taken before the record says it is ours, and kept until stop()
+	if (!m_Impl->m_NameLock.lock(dir, name, error))
 	{
-		CJsonValue other;
-		std::string readError;
-		if (records[i] == m_Impl->RecordPath || !CCtrlRegistry::readRecord(records[i], other, readError))
-			continue;
-		if (other.get("name").getString() != name || other.get("state").getString() != "running")
-			continue;
-		uint32 pid = (uint32)other.get("pid").getInt(0);
-		uint64 started = (uint64)other.get("start_time").getInt(0);
-		if (pid != 0 && started != 0 && CCtrlRegistry::getProcessStartTime(pid) == started)
+		uint32 holder = findRunningHolder(dir, name, m_Impl->m_RecordPath);
+		if (holder != 0)
+			error += toString("; process %u has it", holder);
 		{
-			error = toString("the endpoint name '%s' is used by process %u", name.c_str(), pid);
-			m_Impl->Identity.set("error", error);
-			writeRecord("failed");
-			return false;
+			CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
+			m_Impl->m_Identity.set("error", error);
 		}
-	}
-
-	if (!m_Impl->Listener.listen(m_Impl->EndpointPath, error))
-	{
-		m_Impl->Identity.set("error", error);
 		writeRecord("failed");
 		return false;
 	}
+	pruneRecords(dir);
 
-	addMethod(new CEndpointMethod(this, &CCtrlEndpoint::runCommandsMethod, "ctrl.commands",
-	    "The command table of the process: commands and variables with their argument syntax and help, named handler instances and their member commands (instance.command). Filter by prefix or a word of the name or help.",
-	    CCtrlSchema()
-	        .str("prefix", "Only names starting with this (case sensitive, as the commands are).")
-	        .str("contains", "Only entries whose name or help contains this (case-insensitive).")
-	        .integer("limit", "At most this many entries (300 by default)."),
-	    true));
-	addMethod(new CEndpointMethod(this, &CCtrlEndpoint::runRunCommandMethod, "ctrl.run_command",
-	    "Runs a command, or reads or sets a variable, of the command registry, with the arguments as a list: they reach the command as given, nothing is parsed. Returns whether it succeeded, what it wrote to its log, and what it showed elsewhere meanwhile (the chat of a client).",
-	    CCtrlSchema().str("command", "The command or variable, instance.command for a member command.", true).strings("args", "The arguments, one per entry."),
-	    false));
+	if (!m_Impl->m_Listener.listen(m_Impl->m_EndpointPath, error))
+	{
+		{
+			CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
+			m_Impl->m_Identity.set("error", error);
+		}
+		writeRecord("failed");
+		m_Impl->m_NameLock.unlock();
+		return false;
+	}
 
 	// every log of the process, from here on
 	if (s_LogForwarder == nullptr)
@@ -1590,15 +2058,73 @@ bool CCtrlEndpoint::start(const std::string &name, const CJsonValue &identity, s
 	for (uint i = 0; i < sizeof(logs) / sizeof(logs[0]); ++i)
 		if (logs[i] != nullptr && !logs[i]->attached(s_LogForwarder))
 			logs[i]->addDisplayer(s_LogForwarder);
-	s_LogForwarder->setTarget(m_Impl);
+	s_LogForwarder->claim(m_Impl);
 
-	m_Impl->Running = true;
-	m_Impl->Thread = IThread::create(m_Impl);
-	m_Impl->Thread->start();
+	m_Impl->m_Running = true;
+	m_Impl->m_Thread = IThread::create(m_Impl);
+	m_Impl->m_Thread->start();
 	m_Started = true;
 	writeRecord("running");
-	nlinfo("CTRL: endpoint '%s' listens on '%s'; whoever opens it acts as this user", name.c_str(), m_Impl->EndpointPath.c_str());
+	nlinfo("CTRL: endpoint '%s' listens on '%s'; whoever opens it acts as this user", name.c_str(), m_Impl->m_EndpointPath.c_str());
 	return true;
+}
+
+void CCtrlEndpoint::pruneRecords(const std::string &dir)
+{
+	std::vector<CGoneRecord> gone;
+	std::vector<std::string> records;
+	CCtrlRegistry::listRecords(dir, records);
+	for (uint i = 0; i < records.size(); ++i)
+	{
+		if (records[i] == m_Impl->m_RecordPath)
+			continue;
+		CJsonValue record;
+		std::string error;
+		if (!CCtrlRegistry::readRecord(records[i], record, error))
+		{
+			nlwarning("CTRL: %s", error.c_str());
+			continue;
+		}
+		// a process the system says nothing about may run: its record stays
+		uint32 pid = (uint32)record.get("pid").getInt(0);
+		if (CCtrlRegistry::probeProcess(pid, (uint64)record.get("start_time").getInt(0)) != CCtrlRegistry::ProcessGone)
+			continue;
+		CGoneRecord g;
+		g.Path = records[i];
+		g.Name = record.get("name").getString();
+		g.Updated = (uint64)record.get("updated").getInt(0);
+		gone.push_back(g);
+#ifndef NL_OS_WINDOWS
+		// the socket a process that crashed left: the one its name and id give, nothing a record names
+		if (CCtrlRegistry::isValidName(g.Name))
+		{
+			std::string socketPath = CCtrlRegistry::endpointPath(dir, g.Name, pid);
+			struct stat st;
+			if (lstat(socketPath.c_str(), &st) == 0 && S_ISSOCK(st.st_mode) && ::unlink(socketPath.c_str()) != 0)
+				nlwarning("CTRL: cannot remove '%s', the socket of a process that ended", socketPath.c_str());
+		}
+#endif
+	}
+	// the record written last of each name stays, so why that process ended can still be read
+	std::map<std::string, uint> last;
+	for (uint i = 0; i < gone.size(); ++i)
+	{
+		std::map<std::string, uint>::iterator it = last.find(gone[i].Name);
+		if (it == last.end() || gone[i].Updated > gone[it->second].Updated)
+			last[gone[i].Name] = i;
+	}
+	uint removed = 0;
+	for (uint i = 0; i < gone.size(); ++i)
+	{
+		if (last[gone[i].Name] == i)
+			continue;
+		if (CFile::deleteFile(gone[i].Path))
+			++removed;
+		else
+			nlwarning("CTRL: cannot remove '%s', the record of a process that ended", gone[i].Path.c_str());
+	}
+	if (removed > 0)
+		nlinfo("CTRL: removed %u records of processes that ended from '%s'", removed, dir.c_str());
 }
 
 void CCtrlEndpoint::stop(const std::string &exitReason)
@@ -1608,55 +2134,122 @@ void CCtrlEndpoint::stop(const std::string &exitReason)
 	m_Started = false;
 	nlinfo("CTRL: endpoint '%s' stops: %s", m_Name.c_str(), exitReason.c_str());
 	{
-		CAutoMutex<CMutex> lock(m_Impl->IdentityMutex);
-		m_Impl->Identity.set("exit_reason", exitReason);
+		CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
+		m_Impl->m_Identity.set("exit_reason", exitReason);
 	}
 	writeRecord("exited");
 
-	m_Impl->Running = false;
-	if (m_Impl->Thread != nullptr)
+	// every call gets an answer before the connections close: those queued and deferred here, the open ones in
+	// finishStop(), and the channel thread those that come from now on and its waits
+	std::string message = "the process exits: " + exitReason;
+	std::deque<CInCall> queued;
 	{
-		m_Impl->Thread->wait();
-		delete m_Impl->Thread;
-		m_Impl->Thread = nullptr;
+		CAutoMutex<CMutex> lock(m_Impl->m_InboxMutex);
+		m_Impl->m_ExitMessage = message;
+		queued.swap(m_Impl->m_Inbox);
+		m_Impl->m_Cancels.clear();
 	}
-	m_Impl->Listener.close();
+	for (size_t i = 0; i < queued.size(); ++i)
+		m_Impl->postError(queued[i].Connection, queued[i].Id, message);
+	for (size_t i = 0; i < m_Impl->m_Deferred.size(); ++i)
+		m_Impl->postError(m_Impl->m_Deferred[i].Connection, m_Impl->m_Deferred[i].Id, message);
+	m_Impl->m_Deferred.clear();
+
+	// a method that stops the endpoint runs inside update(), which finishes the stop as it returns
+	if (m_InUpdate)
+	{
+		m_Impl->m_StopPending = true;
+		return;
+	}
+	finishStop();
+}
+
+void CCtrlEndpoint::finishStop()
+{
+	m_Impl->m_StopPending = false;
+	// the open calls are cancelled; what a method does not answer as it cancels is told why
+	std::vector<CCtrlCall *> open;
+	open.swap(m_Open);
+	for (uint i = 0; i < open.size(); ++i)
+	{
+		CCtrlCall *call = open[i];
+		if (!call->isDone())
+		{
+			std::map<std::string, ICtrlMethod *>::iterator it = m_Methods.find(call->getMethod());
+			m_CallingConnection = call->getConnection();
+			if (it != m_Methods.end())
+				runMethodStep(it->second, *call, StepCancel);
+			m_CallingConnection = 0;
+			call->fail(m_Impl->m_ExitMessage);
+		}
+		postAnswer(*call);
+		delete call;
+	}
+
+	// the channel thread sends the last answers, then closes the connections
+	m_Impl->m_Running = false;
+	if (m_Impl->m_Thread != nullptr)
+	{
+		m_Impl->m_Thread->wait();
+		delete m_Impl->m_Thread;
+		m_Impl->m_Thread = nullptr;
+	}
+	m_Impl->m_Listener.close();
+	m_Impl->m_NameLock.unlock();
 
 	// the forwarder stays on the logs; once it no longer points here, no thread is in the ring
-	s_LogForwarder->setTarget(nullptr);
-	m_Impl->Deferred.clear();
+	s_LogForwarder->release(m_Impl);
 
-	for (uint i = 0; i < m_Open.size(); ++i)
+	std::vector<uint32> closedList;
 	{
-		std::map<std::string, ICtrlMethod *>::iterator it = m_Methods.find(m_Open[i]->getMethod());
-		if (it != m_Methods.end())
-			runMethodStep(it->second, *m_Open[i], StepCancel);
-		delete m_Open[i];
+		CAutoMutex<CMutex> lock(m_Impl->m_InboxMutex);
+		m_Impl->m_Inbox.clear();
+		m_Impl->m_Cancels.clear();
+		closedList.swap(m_Impl->m_Closed);
 	}
-	m_Open.clear();
+	{
+		CAutoMutex<CMutex> lock(m_Impl->m_OutboxMutex);
+		m_Impl->m_Outbox.clear();
+	}
+	m_Impl->m_Deferred.clear();
+	if (m_ConnectionClosed != nullptr)
+		for (uint i = 0; i < closedList.size(); ++i)
+			m_ConnectionClosed(closedList[i]);
+}
+
+void CCtrlEndpoint::postAnswer(CCtrlCall &call)
+{
+	COutMessage m;
+	m.Connection = call.m_Connection;
+	m.Id = call.m_Id;
+	m.Error = call.m_Error;
+	m.Message = call.m_Message;
+	m.Json = m_Impl->wrap(call.m_Result).toString();
+	m.Attachments.swap(call.m_Attachments);
+	m_Impl->postAnswer(m);
 }
 
 void CCtrlEndpoint::writeRecord(const std::string &state)
 {
 	CJsonValue record;
 	{
-		CAutoMutex<CMutex> lock(m_Impl->IdentityMutex);
-		record = m_Impl->Identity;
+		CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
+		record = m_Impl->m_Identity;
 	}
 	record.set("state", state);
 	record.set("updated", getCtrlTimeMs());
 	std::string error;
-	if (!CCtrlRegistry::writeRecord(m_Impl->RecordPath, record, error))
+	if (!CCtrlRegistry::writeRecord(m_Impl->m_RecordPath, record, error))
 		nlwarning("CTRL: %s", error.c_str());
 }
 
 void CCtrlEndpoint::setIdentity(const std::string &key, const CJsonValue &value)
 {
 	{
-		CAutoMutex<CMutex> lock(m_Impl->IdentityMutex);
-		if (m_Impl->Identity.get(key).toString() == value.toString())
+		CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
+		if (m_Impl->m_Identity.get(key).toString() == value.toString())
 			return;
-		m_Impl->Identity.set(key, value);
+		m_Impl->m_Identity.set(key, value);
 	}
 	if (m_Started)
 		writeRecord("running");
@@ -1679,8 +2272,8 @@ void CCtrlEndpoint::addMethod(ICtrlMethod *method)
 	info.Schema = method->getSchema();
 	info.ReadOnly = method->isReadOnly();
 	info.BuiltIn = false;
-	CAutoMutex<CMutex> lock(m_Impl->MethodsMutex);
-	m_Impl->Methods.push_back(info);
+	CAutoMutex<CMutex> lock(m_Impl->m_MethodsMutex);
+	m_Impl->m_Methods.push_back(info);
 }
 
 void CCtrlEndpoint::setState(const std::string &state, const CJsonValue &detail, bool settled)
@@ -1688,16 +2281,16 @@ void CCtrlEndpoint::setState(const std::string &state, const CJsonValue &detail,
 	std::string detailText = detail.isNull() ? std::string() : detail.toString();
 	std::string previous;
 	{
-		CAutoMutex<CMutex> lock(m_Impl->StateMutex);
-		m_Impl->StateSettled = settled;
-		if (m_Impl->State == state && m_Impl->StateDetail == detailText)
+		CAutoMutex<CMutex> lock(m_Impl->m_StateMutex);
+		m_Impl->m_StateSettled = settled;
+		if (m_Impl->m_State == state && m_Impl->m_StateDetail == detailText)
 			return;
-		previous = m_Impl->State;
+		previous = m_Impl->m_State;
 		bool changed = previous != state;
-		m_Impl->State = state;
-		m_Impl->StateDetail = detailText;
+		m_Impl->m_State = state;
+		m_Impl->m_StateDetail = detailText;
 		if (changed)
-			m_Impl->StateSince = getCtrlTimeMs();
+			m_Impl->m_StateSince = getCtrlTimeMs();
 		if (!changed)
 			return;
 	}
@@ -1721,7 +2314,7 @@ void CCtrlEndpoint::addEvent(const std::string &kind, const CJsonValue &data)
 
 void CCtrlEndpoint::captureOutput(const std::string &line)
 {
-	if (m_Capture != nullptr && !line.empty())
+	if (m_Capture != nullptr && !line.empty() && m_Capture->size() < s_MaxCommandLines)
 		m_Capture->push_back(line);
 }
 
@@ -1732,7 +2325,7 @@ uint32 CCtrlEndpoint::getCallingConnection() const
 
 bool CCtrlEndpoint::isLeaseHeld() const
 {
-	return m_Started && m_Impl->LeaseHeld;
+	return m_Started && m_Impl->m_LeaseHeld;
 }
 
 void CCtrlEndpoint::setConnectionClosedCallback(TConnectionClosed callback)
@@ -1757,7 +2350,13 @@ private:
 	bool &m_Flag;
 };
 
-COutMessage cancelledMessage(CCtrlEndpoint::CImpl *impl, uint32 connection, const std::string &id);
+bool isCancelled(const std::vector<TCallRef> &cancels, uint32 connection, const std::string &id)
+{
+	for (uint k = 0; k < cancels.size(); ++k)
+		if (cancels[k].first == connection && cancels[k].second == id)
+			return true;
+	return false;
+}
 
 } // anonymous namespace
 
@@ -1767,41 +2366,41 @@ void CCtrlEndpoint::update(bool allowControl)
 		return;
 	// the main thread is alive, also when a method pumps the events of the process and lands here again
 	{
-		CAutoMutex<CMutex> lock(m_Impl->StateMutex);
-		m_Impl->Frame = m_Frame;
-		m_Impl->LastUpdate = CTime::getLocalTime();
+		CAutoMutex<CMutex> lock(m_Impl->m_StateMutex);
+		m_Impl->m_Frame = m_Frame;
+		m_Impl->m_LastUpdate = CTime::getLocalTime();
 	}
 	if (m_InUpdate)
 		return;
 	CUpdateGuard guard(m_InUpdate);
 
 	// the calls that waited for an update that lets them run come first, in the order they came
-	std::vector<CInCall> inbox;
-	inbox.swap(m_Impl->Deferred);
-	std::vector<std::pair<uint32, std::string>> cancels;
+	std::deque<CInCall> inbox;
+	inbox.swap(m_Impl->m_Deferred);
+	std::vector<TCallRef> cancels;
 	std::vector<uint32> closedList;
 	{
-		CAutoMutex<CMutex> lock(m_Impl->InboxMutex);
-		inbox.insert(inbox.end(), m_Impl->Inbox.begin(), m_Impl->Inbox.end());
-		m_Impl->Inbox.clear();
-		cancels.swap(m_Impl->Cancels);
-		closedList.swap(m_Impl->Closed);
+		CAutoMutex<CMutex> lock(m_Impl->m_InboxMutex);
+		while (!m_Impl->m_Inbox.empty())
+		{
+			inbox.push_back(CInCall());
+			inbox.back().swap(m_Impl->m_Inbox.front());
+			m_Impl->m_Inbox.pop_front();
+		}
+		cancels.swap(m_Impl->m_Cancels);
+		closedList.swap(m_Impl->m_Closed);
 	}
 	// every call of a connection that closed is dropped in this update, queued, deferred or open: none is left
 	// for a later one, so the ids are not kept
 	std::set<uint32> closed(closedList.begin(), closedList.end());
 
-	std::vector<COutMessage> out;
-
-	// calls of a connection that closed, and calls cancelled, are dropped: those still queued too
-	for (uint i = 0; i < m_Open.size();)
+	// calls of a connection that closed, and calls cancelled, are dropped: those still queued too. A method that stops
+	// the endpoint ends the update, and the stop is finished as it returns.
+	for (uint i = 0; i < m_Open.size() && m_Started;)
 	{
 		CCtrlCall *call = m_Open[i];
 		bool gone = closed.find(call->getConnection()) != closed.end();
-		bool cancelled = false;
-		for (uint k = 0; k < cancels.size() && !cancelled; ++k)
-			cancelled = cancels[k].first == call->getConnection() && cancels[k].second == call->getId();
-		if (!gone && !cancelled)
+		if (!gone && !isCancelled(cancels, call->getConnection(), call->getId()))
 		{
 			++i;
 			continue;
@@ -1812,56 +2411,80 @@ void CCtrlEndpoint::update(bool allowControl)
 			runMethodStep(method->second, *call, StepCancel);
 		m_CallingConnection = 0;
 		if (!gone)
-			out.push_back(cancelledMessage(m_Impl, call->getConnection(), call->getId()));
+			m_Impl->postError(call->getConnection(), call->getId(), "cancelled");
 		delete call;
 		m_Open.erase(m_Open.begin() + i);
 	}
 
-	// the calls open since an earlier update are polled; those that start now are not, call() just ran
+	// the calls open since an earlier update are polled; those that start now are not, call() just ran. A pump deep in
+	// other code (a loading screen) runs what only reads; the rest waits for the next full update, and so does every
+	// later call of a connection that has one waiting, so the calls of a connection run in the order they came.
 	size_t polled = m_Open.size();
-	for (uint i = 0; i < inbox.size(); ++i)
+	std::set<uint32> held;
+	size_t next = 0;
+	for (; next < inbox.size() && m_Started; ++next)
 	{
-		const CInCall &in = inbox[i];
+		CInCall &in = inbox[next];
 		if (closed.find(in.Connection) != closed.end())
 			continue;
-		bool cancelled = false;
-		for (uint k = 0; k < cancels.size() && !cancelled; ++k)
-			cancelled = cancels[k].first == in.Connection && cancels[k].second == in.Id;
-		if (cancelled)
+		if (isCancelled(cancels, in.Connection, in.Id))
 		{
-			out.push_back(cancelledMessage(m_Impl, in.Connection, in.Id));
+			m_Impl->postError(in.Connection, in.Id, "cancelled");
 			continue;
 		}
 		std::map<std::string, ICtrlMethod *>::iterator it = m_Methods.find(in.Method);
 		if (it == m_Methods.end())
-			continue;
-		// a pump deep in other code (a loading screen) runs what only reads; the rest waits for the next full update
-		if (!allowControl && !it->second->isReadOnly())
 		{
-			m_Impl->Deferred.push_back(in);
+			// the channel thread checks the name against the same table; the call is answered all the same
+			m_Impl->postError(in.Connection, in.Id, "no method '" + in.Method + "' on the main thread");
+			continue;
+		}
+		if (!allowControl && (!it->second->isReadOnly() || held.find(in.Connection) != held.end()))
+		{
+			held.insert(in.Connection);
+			m_Impl->m_Deferred.push_back(CInCall());
+			m_Impl->m_Deferred.back().swap(in);
 			continue;
 		}
 		CCtrlCall *call = new CCtrlCall();
 		call->m_Connection = in.Connection;
-		call->m_Id = in.Id;
-		call->m_Method = in.Method;
-		call->m_Args = in.Args;
+		call->m_Id.swap(in.Id);
+		call->m_Method.swap(in.Method);
+		call->m_Args.swap(in.Args);
 		call->m_StartTime = CTime::getLocalTime();
-		m_CallingConnection = in.Connection;
+		m_CallingConnection = call->m_Connection;
 		runMethodStep(it->second, *call, StepCall);
 		m_CallingConnection = 0;
-		m_Open.push_back(call);
+		if (call->isDone())
+		{
+			postAnswer(*call);
+			delete call;
+		}
+		else
+		{
+			m_Open.push_back(call);
+		}
 	}
+	// stopped by a method: the calls it did not reach are told why
+	for (; next < inbox.size(); ++next)
+		if (closed.find(inbox[next].Connection) == closed.end())
+			m_Impl->postError(inbox[next].Connection, inbox[next].Id, m_Impl->m_ExitMessage);
 
 	// the open calls: an answered one goes out
-	for (uint i = 0; i < m_Open.size();)
+	for (uint i = 0; i < m_Open.size() && m_Started;)
 	{
 		CCtrlCall *call = m_Open[i];
 		if (!call->isDone() && i < polled)
 		{
-			m_CallingConnection = call->getConnection();
-			runMethodStep(m_Methods[call->getMethod()], *call, StepPoll);
-			m_CallingConnection = 0;
+			// a pump deep in other code polls what only reads: a poll of the others may act (turn the character in a
+			// loading), or answer for an input the loading took
+			std::map<std::string, ICtrlMethod *>::iterator method = m_Methods.find(call->getMethod());
+			if (method != m_Methods.end() && (allowControl || method->second->isReadOnly()))
+			{
+				m_CallingConnection = call->getConnection();
+				runMethodStep(method->second, *call, StepPoll);
+				m_CallingConnection = 0;
+			}
 		}
 		if (!call->isDone())
 		{
@@ -1870,44 +2493,19 @@ void CCtrlEndpoint::update(bool allowControl)
 		}
 		if (i < polled)
 			--polled;
-		COutMessage m;
-		m.Connection = call->getConnection();
-		m.Id = call->getId();
-		m.Error = call->m_Error;
-		m.Message = call->m_Message;
-		m.Json = m_Impl->wrap(call->m_Result).toString();
-		m.Attachments.swap(call->m_Attachments);
-		out.push_back(m);
+		postAnswer(*call);
 		delete call;
 		m_Open.erase(m_Open.begin() + i);
-	}
-
-	if (!out.empty())
-	{
-		CAutoMutex<CMutex> lock(m_Impl->OutboxMutex);
-		m_Impl->Outbox.insert(m_Impl->Outbox.end(), out.begin(), out.end());
 	}
 
 	// the connections that closed, once their calls are gone
 	if (m_ConnectionClosed != nullptr)
 		for (uint i = 0; i < closedList.size(); ++i)
 			m_ConnectionClosed(closedList[i]);
+
+	if (m_Impl->m_StopPending)
+		finishStop();
 }
-
-namespace {
-
-COutMessage cancelledMessage(CCtrlEndpoint::CImpl *impl, uint32 connection, const std::string &id)
-{
-	COutMessage m;
-	m.Connection = connection;
-	m.Id = id;
-	m.Error = true;
-	m.Message = "cancelled";
-	m.Json = impl->wrap(CJsonValue()).toString();
-	return m;
-}
-
-} // anonymous namespace
 
 } // NLMISC
 

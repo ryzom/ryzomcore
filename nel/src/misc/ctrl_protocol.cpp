@@ -26,12 +26,18 @@
 #ifndef NL_OS_WINDOWS
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef NL_OS_MAC
 #include <sys/sysctl.h>
 #endif
+#endif
+
+#if defined(NL_OS_WINDOWS) && !defined(PROCESS_QUERY_LIMITED_INFORMATION)
+// declared for Vista and later only; a 32-bit build targets an older version
+#define PROCESS_QUERY_LIMITED_INFORMATION 0x1000
 #endif
 
 #ifdef DEBUG_NEW
@@ -116,7 +122,9 @@ std::string joinCtrlLine(const std::vector<std::string> &fields)
 // *** messages ***
 
 CCtrlMessageReader::CCtrlMessageReader(size_t maxLine, size_t maxData)
-    : m_MaxLine(maxLine)
+    : m_Pos(0)
+    , m_Scanned(0)
+    , m_MaxLine(maxLine)
     , m_MaxData(maxData)
     , m_InData(false)
     , m_DataLength(0)
@@ -126,58 +134,90 @@ CCtrlMessageReader::CCtrlMessageReader(size_t maxLine, size_t maxData)
 void CCtrlMessageReader::clear()
 {
 	m_Buffer.clear();
+	m_Pos = 0;
+	m_Scanned = 0;
 	m_InData = false;
 	m_DataLength = 0;
 	m_DataFields.clear();
 }
 
+void CCtrlMessageReader::compact()
+{
+	if (m_Pos == 0)
+		return;
+	m_Buffer.erase(0, m_Pos);
+	m_Scanned = m_Scanned > m_Pos ? m_Scanned - m_Pos : 0;
+	m_Pos = 0;
+}
+
 bool CCtrlMessageReader::next(CCtrlMessage &message, std::string &error)
 {
 	error.clear();
-	if (m_InData)
+	// what was taken goes once it is most of the buffer; the move is then no longer than what was taken
+	if (m_Pos > 64 * 1024 && m_Pos * 2 > m_Buffer.size())
+		compact();
+	for (;;)
 	{
-		if (m_Buffer.size() < m_DataLength)
-			return false;
-		message.Fields = m_DataFields;
-		message.IsData = true;
-		message.Data.assign(m_Buffer, 0, m_DataLength);
-		m_Buffer.erase(0, m_DataLength);
-		m_InData = false;
-		m_DataFields.clear();
-		return true;
-	}
-
-	std::string::size_type pos = m_Buffer.find('\n');
-	if (pos == std::string::npos)
-	{
-		if (m_Buffer.size() > m_MaxLine)
-			error = toString("a line longer than %u bytes", (uint)m_MaxLine);
-		return false;
-	}
-	std::string line = m_Buffer.substr(0, pos);
-	m_Buffer.erase(0, pos + 1);
-	if (!line.empty() && line[line.size() - 1] == '\r')
-		line.erase(line.size() - 1);
-
-	std::vector<std::string> fields;
-	splitCtrlLine(line, fields);
-	if (fields.size() >= 4 && fields[0] == "data")
-	{
-		uint64 length = 0;
-		if (!fromString(fields[3], length) || length > m_MaxData)
+		if (m_InData)
 		{
-			error = toString("a data frame of '%s' bytes, %u at most", fields[3].c_str(), (uint)m_MaxData);
+			if (m_Buffer.size() - m_Pos < m_DataLength)
+			{
+				compact();
+				return false;
+			}
+			message.Fields.swap(m_DataFields);
+			m_DataFields.clear();
+			message.IsData = true;
+			message.Data.assign(m_Buffer, m_Pos, m_DataLength);
+			m_Pos += m_DataLength;
+			m_Scanned = m_Pos;
+			m_InData = false;
+			return true;
+		}
+
+		std::string::size_type end = m_Buffer.find('\n', std::max(m_Pos, m_Scanned));
+		if (end == std::string::npos)
+		{
+			m_Scanned = m_Buffer.size();
+			if (m_Buffer.size() - m_Pos > m_MaxLine)
+				error = toString("a line longer than %u bytes", (uint)m_MaxLine);
+			compact();
 			return false;
 		}
-		m_InData = true;
-		m_DataLength = (size_t)length;
-		m_DataFields = fields;
-		return next(message, error);
+		size_t length = end - m_Pos;
+		if (length > m_MaxLine)
+		{
+			error = toString("a line longer than %u bytes", (uint)m_MaxLine);
+			return false;
+		}
+		if (length > 0 && m_Buffer[end - 1] == '\r')
+			--length;
+		std::string line(m_Buffer, m_Pos, length);
+		m_Pos = end + 1;
+		m_Scanned = m_Pos;
+		if (line.empty())
+			continue;
+
+		std::vector<std::string> fields;
+		splitCtrlLine(line, fields);
+		if (fields.size() >= 4 && fields[0] == "data")
+		{
+			uint64 dataLength = 0;
+			if (!fromString(fields[3], dataLength) || dataLength > m_MaxData)
+			{
+				error = toString("a data frame of '%s' bytes, %u at most", fields[3].c_str(), (uint)m_MaxData);
+				return false;
+			}
+			m_InData = true;
+			m_DataLength = (size_t)dataLength;
+			m_DataFields.swap(fields);
+			continue;
+		}
+		message.Fields.swap(fields);
+		message.IsData = false;
+		message.Data.clear();
+		return true;
 	}
-	message.Fields.swap(fields);
-	message.IsData = false;
-	message.Data.clear();
-	return true;
 }
 
 // *** registry ***
@@ -340,62 +380,192 @@ uint32 CCtrlRegistry::getCurrentProcessId()
 #endif
 }
 
-uint64 CCtrlRegistry::getProcessStartTime(uint32 pid)
+namespace {
+
+/// When a process started (see getProcessStartTime), with running; gone when no process has the id or it exited,
+/// unknown when the system does not say
+CCtrlRegistry::TProcessState readProcessStart(uint32 pid, uint64 &start)
 {
+	start = 0;
 #ifdef NL_OS_WINDOWS
 	HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, (DWORD)pid);
 	if (process == NULL)
-		return 0;
-	// a handle can still be opened on a process that exited while others hold one
+	{
+		// the error for an id no process has; any other (no right to look) says nothing of the process
+		return GetLastError() == ERROR_INVALID_PARAMETER ? CCtrlRegistry::ProcessGone : CCtrlRegistry::ProcessUnknown;
+	}
 	DWORD exitCode = 0;
 	FILETIME creation, exitTime, kernel, user;
-	uint64 result = 0;
-	if (GetExitCodeProcess(process, &exitCode) && exitCode == STILL_ACTIVE && GetProcessTimes(process, &creation, &exitTime, &kernel, &user))
+	CCtrlRegistry::TProcessState state = CCtrlRegistry::ProcessUnknown;
+	if (GetExitCodeProcess(process, &exitCode) && GetProcessTimes(process, &creation, &exitTime, &kernel, &user))
 	{
-		uint64 ticks = ((uint64)creation.dwHighDateTime << 32) | creation.dwLowDateTime;
-		// 100 ns since 1601 to ms since 1970
-		result = (ticks - 116444736000000000ULL) / 10000;
+		// a handle can still be opened on a process that exited while others hold one
+		if (exitCode != STILL_ACTIVE)
+		{
+			state = CCtrlRegistry::ProcessGone;
+		}
+		else
+		{
+			uint64 ticks = ((uint64)creation.dwHighDateTime << 32) | creation.dwLowDateTime;
+			// 100 ns since 1601 to ms since 1970
+			start = (ticks - 116444736000000000ULL) / 10000;
+			state = CCtrlRegistry::ProcessRunning;
+		}
 	}
 	CloseHandle(process);
-	return result;
+	return state;
 #elif defined(NL_OS_MAC)
 	int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, (int)pid };
 	struct kinfo_proc info;
 	size_t size = sizeof(info);
 	memset(&info, 0, sizeof(info));
-	if (sysctl(mib, 4, &info, &size, NULL, 0) != 0 || size == 0)
-		return 0;
-	if (info.kp_proc.p_stat == SZOMB)
-		return 0;
-	return (uint64)info.kp_proc.p_starttime.tv_sec * 1000 + (uint64)info.kp_proc.p_starttime.tv_usec / 1000;
+	if (sysctl(mib, 4, &info, &size, NULL, 0) != 0)
+		return CCtrlRegistry::ProcessUnknown;
+	// no process of that id: an empty answer
+	if (size == 0 || info.kp_proc.p_stat == SZOMB)
+		return CCtrlRegistry::ProcessGone;
+	start = (uint64)info.kp_proc.p_starttime.tv_sec * 1000 + (uint64)info.kp_proc.p_starttime.tv_usec / 1000;
+	return CCtrlRegistry::ProcessRunning;
 #else
 	// field 22 of /proc/<pid>/stat is the start in clock ticks after the boot
-	FILE *f = fopen(toString("/proc/%u/stat", pid).c_str(), "r");
+	FILE *f = nlfopen(toString("/proc/%u/stat", pid), "r");
 	if (f == nullptr)
-		return 0;
+		return errno == ENOENT ? CCtrlRegistry::ProcessGone : CCtrlRegistry::ProcessUnknown;
 	char buffer[1024];
 	size_t n = fread(buffer, 1, sizeof(buffer) - 1, f);
 	fclose(f);
 	buffer[n] = 0;
 	// the command name is in parentheses and may hold anything, so the fields start after the last one
-	char *p = strrchr(buffer, ')');
-	if (p == nullptr)
-		return 0;
+	const char *p = strrchr(buffer, ')');
+	if (p == nullptr || p[1] == 0)
+		return CCtrlRegistry::ProcessUnknown;
 	std::vector<std::string> fields;
-	explode(std::string(p + 2), std::string(" "), fields, true);
+	explode(std::string(p + 1), std::string(" "), fields, true);
 	// fields[0] is field 3, the state
-	if (fields.size() < 20 || fields[0] == "Z" || fields[0] == "X")
-		return 0;
+	if (fields.size() < 20)
+		return CCtrlRegistry::ProcessUnknown;
+	if (fields[0] == "Z" || fields[0] == "X")
+		return CCtrlRegistry::ProcessGone;
 	uint64 startTicks = 0;
 	if (!fromString(fields[19], startTicks))
-		return 0;
+		return CCtrlRegistry::ProcessUnknown;
 	long ticksPerSecond = sysconf(_SC_CLK_TCK);
 	if (ticksPerSecond <= 0)
-		return 0;
+		return CCtrlRegistry::ProcessUnknown;
 	// in ms after the boot, not after the epoch: the boot time of /proc/stat moves when the clock is set (an NTP
 	// step, a resumed virtual machine), and a running process would then look like another one. The registry is
 	// in XDG_RUNTIME_DIR, which does not outlive the boot.
-	return startTicks * 1000 / (uint64)ticksPerSecond + 1;
+	start = startTicks * 1000 / (uint64)ticksPerSecond + 1;
+	return CCtrlRegistry::ProcessRunning;
+#endif
+}
+
+} // anonymous namespace
+
+uint64 CCtrlRegistry::getProcessStartTime(uint32 pid)
+{
+	uint64 start = 0;
+	return readProcessStart(pid, start) == ProcessRunning ? start : 0;
+}
+
+CCtrlRegistry::TProcessState CCtrlRegistry::probeProcess(uint32 pid, uint64 startTime)
+{
+	uint64 start = 0;
+	TProcessState state = readProcessStart(pid, start);
+	if (state != ProcessRunning)
+		return state;
+	// a record without its start time cannot tell its process from another one of the same id
+	if (startTime == 0)
+		return ProcessUnknown;
+	return start == startTime ? ProcessRunning : ProcessGone;
+}
+
+// *** name lock ***
+
+CCtrlNameLock::CCtrlNameLock()
+#ifdef NL_OS_WINDOWS
+    : m_Handle(INVALID_HANDLE_VALUE)
+#else
+    : m_File(-1)
+#endif
+{
+}
+
+CCtrlNameLock::~CCtrlNameLock()
+{
+	unlock();
+}
+
+bool CCtrlNameLock::lock(const std::string &dir, const std::string &name, std::string &error)
+{
+	unlock();
+	std::string path = CPath::standardizePath(dir) + name + ".lock";
+#ifdef NL_OS_WINDOWS
+	// open with no sharing: a second open fails while this one is held, and the file goes when the last handle does
+	HANDLE h = CreateFileW(nlUtf8ToWide(path), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_DELETE_ON_CLOSE, NULL);
+	if (h == INVALID_HANDLE_VALUE)
+	{
+		int code = getLastError();
+		if (code == ERROR_SHARING_VIOLATION)
+			error = toString("the endpoint name '%s' is held by another process (its lock '%s' is open)", name.c_str(), path.c_str());
+		else
+			error = toString("cannot take the lock '%s' of the endpoint name: %s", path.c_str(), formatErrorMessage(code).c_str());
+		return false;
+	}
+	m_Handle = h;
+#else
+	int fd = open(path.c_str(), O_RDWR | O_CREAT, 0600);
+	if (fd < 0)
+	{
+		error = toString("cannot open the lock '%s' of the endpoint name: %s", path.c_str(), formatErrorMessage(getLastError()).c_str());
+		return false;
+	}
+	// a process this one starts must not hold the name
+	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD, 0) | FD_CLOEXEC);
+	int result;
+	do
+	{
+		result = flock(fd, LOCK_EX | LOCK_NB);
+	} while (result != 0 && errno == EINTR);
+	if (result != 0)
+	{
+		int code = errno;
+		::close(fd);
+		if (code == EWOULDBLOCK)
+			error = toString("the endpoint name '%s' is held by another process (its lock '%s' is locked)", name.c_str(), path.c_str());
+		else
+			error = toString("cannot lock '%s' for the endpoint name: %s", path.c_str(), formatErrorMessage(code).c_str());
+		return false;
+	}
+	// the file stays: removing it would let a process that opened it before lock a file nobody else sees
+	m_File = fd;
+#endif
+	return true;
+}
+
+void CCtrlNameLock::unlock()
+{
+#ifdef NL_OS_WINDOWS
+	if (m_Handle != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle((HANDLE)m_Handle);
+		m_Handle = INVALID_HANDLE_VALUE;
+	}
+#else
+	if (m_File >= 0)
+	{
+		::close(m_File);
+		m_File = -1;
+	}
+#endif
+}
+
+bool CCtrlNameLock::isLocked() const
+{
+#ifdef NL_OS_WINDOWS
+	return m_Handle != INVALID_HANDLE_VALUE;
+#else
+	return m_File >= 0;
 #endif
 }
 

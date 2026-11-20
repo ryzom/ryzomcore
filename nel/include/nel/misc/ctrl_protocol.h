@@ -41,7 +41,8 @@ namespace NLMISC {
  * Messages of version 3:
  *   endpoint to tool: hello <version> <identity json>, result <id> <json>, error <id> <message> [<json>]
  *     and data frames, each sent before the result that names it ({"data": <id>, ...})
- *   tool to endpoint: call <id> <method> <arguments json>, cancel <id>
+ *   tool to endpoint: hello <version> <tool name>, call <id> <method> <arguments json>, cancel <id>
+ * An empty line is no message.
  */
 const uint CtrlProtocolVersion = 3;
 
@@ -65,13 +66,14 @@ struct CCtrlMessage
 	}
 };
 
-/// Cuts the bytes that arrive into messages
+/// Cuts the bytes that arrive into messages; empty lines are skipped
 class CCtrlMessageReader
 {
 public:
 	CCtrlMessageReader(size_t maxLine, size_t maxData);
 
-	/// Where the bytes that arrived go
+	/// Where the bytes that arrived are appended. The messages next() took may still be at its front: next() drops
+	/// them once per batch, so a buffer of many short lines is cut in one pass.
 	std::string &buffer() { return m_Buffer; }
 
 	/// The next complete message; false when more bytes are needed or on error, with the error set.
@@ -81,7 +83,13 @@ public:
 	void clear();
 
 private:
+	/// Drops what next() took from the front of the buffer
+	void compact();
+
 	std::string m_Buffer;
+	// where the next message starts, and how far the line that has not ended yet was looked through
+	size_t m_Pos;
+	size_t m_Scanned;
 	size_t m_MaxLine;
 	size_t m_MaxData;
 	// a data frame whose header is read, waiting for its bytes
@@ -97,11 +105,20 @@ private:
  * There is no other location: without the variable there is no registry, and the error says so.
  *
  * A record: name, pid, start_time (see getProcessStartTime), endpoint (path), protocol, program,
- * cwd, build, log, state ("running", "exited", "failed"), exit_reason, error.
+ * cwd, build, log, state ("running", "exited", "failed"), exit_reason, error, updated (ms since the epoch).
+ * An endpoint that starts removes the records of processes that are gone, but the last one of each name,
+ * so why that one ended can still be read.
  */
 class CCtrlRegistry
 {
 public:
+	enum TProcessState
+	{
+		ProcessRunning,
+		ProcessGone,
+		ProcessUnknown
+	};
+
 	/// The folder, created when asked; false with the error when it cannot be had
 	static bool getDirectory(std::string &dir, bool create, std::string &error);
 	static std::string recordPath(const std::string &dir, const std::string &name, uint32 pid);
@@ -119,7 +136,38 @@ public:
 	/// on Windows and macOS, ms since the boot on Linux (a clock that is set does not move it). 0 when the
 	/// process does not run or cannot be read. Compare it for equality only.
 	static uint64 getProcessStartTime(uint32 pid);
+	/// Whether the process of a record runs: gone when no process has the id, or the one that has it started at
+	/// another time than startTime; unknown when the system does not say (an error, no right to look), which is
+	/// never a reason to take its record for a dead one
+	static TProcessState probeProcess(uint32 pid, uint64 startTime);
 	static uint32 getCurrentProcessId();
+};
+
+/**
+ * The name of an endpoint, held by one process at a time: the lock file <name>.lock in the registry folder,
+ * held open (Windows) or locked (elsewhere) by the process that has the name. The system lets go of it when
+ * the process ends, whatever way it ends, so a crash leaves no name taken.
+ */
+class CCtrlNameLock
+{
+public:
+	CCtrlNameLock();
+	~CCtrlNameLock();
+
+	/// False with the error when another process holds the name, or when there can be no lock
+	bool lock(const std::string &dir, const std::string &name, std::string &error);
+	void unlock();
+	bool isLocked() const;
+
+private:
+	CCtrlNameLock(const CCtrlNameLock &);
+	CCtrlNameLock &operator=(const CCtrlNameLock &);
+
+#ifdef NL_OS_WINDOWS
+	void *m_Handle;
+#else
+	int m_File;
+#endif
 };
 
 } // NLMISC
