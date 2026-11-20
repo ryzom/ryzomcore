@@ -87,16 +87,17 @@ namespace NLMISC
 		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer) =0;
 		virtual bool getDebugNeedAssert() =0;
 		virtual void setDebugNeedAssert(bool needAssert) =0;
-		/// A fatal error whose report answered abort (or asked nobody): nlFatalError and nlError end the program once
-		/// every displayer of the error log has the line
-		virtual bool getAbortAfterError() =0;
-		virtual void setAbortAfterError(bool abortAfterError) =0;
 		virtual bool getNoAssert() =0;
 		virtual void setNoAssert(bool noAssert) =0;
 		virtual bool getAlreadyCreateSharedAmongThreads() =0;
 		virtual void setAlreadyCreateSharedAmongThreads(bool b) =0;
 		virtual bool isWindowedApplication() = 0;
 		virtual void setWindowedApplication(bool b = true) = 0;
+		/// A fatal error whose report answered abort (or asked nobody): nlFatalError and nlError end the program once
+		/// every displayer of the error log has the line. Last in the interface, so that a module built before it (a
+		/// driver) still finds every other method in its place.
+		virtual bool getAbortAfterError() =0;
+		virtual void setAbortAfterError(bool abortAfterError) =0;
 		//@}
 	protected:
 		/// Called by derived class to finalize initialisation of context
