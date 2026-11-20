@@ -18,6 +18,7 @@
 #define NL_SOCKET_DISPLAYER_H
 
 #include "command.h"
+#include "local_pipe.h"
 #include "types_nl.h"
 #include "time_nl.h"
 #include "window_displayer.h"
@@ -89,9 +90,6 @@ private:
 	void flushDone();
 	void replay();
 
-	static std::string escapeField(const std::string &value);
-	static std::string unescapeField(const std::string &value);
-
 	struct CCommandEntry
 	{
 		std::string Name;
@@ -128,12 +126,7 @@ private:
 	bool m_Connected;
 	bool m_PathWarned;
 	TTime m_LastConnectAttempt;
-#ifdef NL_OS_WINDOWS
-	void *m_Pipe;
-	void *m_Event;
-#else
-	int m_Socket;
-#endif
+	CLocalPipe m_Pipe;
 };
 
 } // NLMISC

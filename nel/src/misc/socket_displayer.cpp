@@ -19,17 +19,8 @@
 #include "nel/misc/socket_displayer.h"
 
 #include "nel/misc/common.h"
+#include "nel/misc/ctrl_protocol.h"
 #include "nel/misc/debug.h"
-#include "nel/misc/string_common.h"
-
-#ifndef NL_OS_WINDOWS
-#include <errno.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
-#endif
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -54,18 +45,9 @@ CSocketDisplayer::CSocketDisplayer(const std::string &path, const char *displaye
     , m_Connected(false)
     , m_PathWarned(false)
     , m_LastConnectAttempt(0)
-#ifdef NL_OS_WINDOWS
-    , m_Pipe(INVALID_HANDLE_VALUE)
-    , m_Event(NULL)
-#else
-    , m_Socket(-1)
-#endif
 {
 	// the dashboard renders the lines, it does not need the carriage returns
 	needSlashR = false;
-#ifdef NL_OS_WINDOWS
-	m_Event = CreateEventW(NULL, TRUE, FALSE, NULL);
-#endif
 	// the commands registered so far, then every change as it happens
 	CCommandRegistry::getInstance().listCommands(*this);
 	CCommandRegistry::getInstance().addListener(this);
@@ -79,10 +61,6 @@ CSocketDisplayer::~CSocketDisplayer()
 	if (_Thread != nullptr)
 		_Thread->wait();
 	disconnect();
-#ifdef NL_OS_WINDOWS
-	if (m_Event != NULL)
-		CloseHandle((HANDLE)m_Event);
-#endif
 }
 
 void CSocketDisplayer::setTitleBar(const std::string &titleBar)
@@ -155,40 +133,16 @@ void CSocketDisplayer::display_main()
 
 bool CSocketDisplayer::connectToDashboard()
 {
-#ifdef NL_OS_WINDOWS
-	if (m_Event == NULL)
-		return false;
-	// overlapped, so a dashboard that stops reading cannot block this thread, and with it the service exit
-	HANDLE h = CreateFileW(nlUtf8ToWide(m_Path), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
-	if (h == INVALID_HANDLE_VALUE)
-		return false;
-	m_Pipe = h;
-#else
-	sockaddr_un addr;
-	memset(&addr, 0, sizeof(addr));
-	addr.sun_family = AF_UNIX;
-	if (m_Path.size() >= sizeof(addr.sun_path))
+	std::string error;
+	// a path that can never work is said once; a dashboard that is away is expected
+	if (!m_PathWarned && !CLocalPipe::checkPath(m_Path, error))
 	{
-		if (!m_PathWarned)
-		{
-			m_PathWarned = true;
-			nlwarning("Control socket path '%s' is too long for a Unix domain socket", m_Path.c_str());
-		}
-		return false;
+		m_PathWarned = true;
+		nlwarning("Control socket: %s", error.c_str());
 	}
-	strcpy(addr.sun_path, m_Path.c_str());
-
-	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd < 0)
+	// the pipe never blocks this thread on a dashboard that stops reading, and with it the service exit
+	if (!m_Pipe.connect(m_Path, error))
 		return false;
-	if (connect(fd, (const sockaddr *)&addr, sizeof(addr)) != 0)
-	{
-		close(fd);
-		return false;
-	}
-	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-	m_Socket = fd;
-#endif
 
 	m_Connected = true;
 	m_InBuffer.clear();
@@ -202,13 +156,7 @@ void CSocketDisplayer::disconnect()
 	if (!m_Connected)
 		return;
 	m_Connected = false;
-#ifdef NL_OS_WINDOWS
-	CloseHandle((HANDLE)m_Pipe);
-	m_Pipe = INVALID_HANDLE_VALUE;
-#else
-	close(m_Socket);
-	m_Socket = -1;
-#endif
+	m_Pipe.close();
 	m_InBuffer.clear();
 	// the dashboard went away; it is expected to come back and get a replay
 	nldebug("Disconnected from the control socket '%s'", m_Path.c_str());
@@ -221,65 +169,11 @@ bool CSocketDisplayer::sendLine(const std::string &line)
 
 	std::string data = line;
 	data += '\n';
-	const char *ptr = data.c_str();
-	size_t left = data.size();
-
-#ifdef NL_OS_WINDOWS
-	while (left > 0)
+	if (!m_Pipe.write(data, s_SendTimeoutMs))
 	{
-		OVERLAPPED overlapped;
-		memset(&overlapped, 0, sizeof(overlapped));
-		overlapped.hEvent = (HANDLE)m_Event;
-		ResetEvent(overlapped.hEvent);
-		DWORD written = 0;
-		if (!WriteFile((HANDLE)m_Pipe, ptr, (DWORD)left, &written, &overlapped))
-		{
-			if (GetLastError() != ERROR_IO_PENDING)
-			{
-				disconnect();
-				return false;
-			}
-			if (WaitForSingleObject(overlapped.hEvent, s_SendTimeoutMs) != WAIT_OBJECT_0)
-			{
-				// the dashboard is not reading; only this thread does I/O on the pipe, so CancelIo covers the write
-				CancelIo((HANDLE)m_Pipe);
-				GetOverlappedResult((HANDLE)m_Pipe, &overlapped, &written, TRUE);
-				disconnect();
-				return false;
-			}
-		}
-		// the byte count of an overlapped operation comes from here, also when it completed at once
-		if (!GetOverlappedResult((HANDLE)m_Pipe, &overlapped, &written, FALSE))
-		{
-			disconnect();
-			return false;
-		}
-		ptr += written;
-		left -= written;
+		disconnect();
+		return false;
 	}
-#else
-	while (left > 0)
-	{
-		ssize_t written = send(m_Socket, ptr, left, MSG_NOSIGNAL);
-		if (written < 0)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				// the dashboard is slow to read; wait a little before giving up on it
-				pollfd pfd;
-				pfd.fd = m_Socket;
-				pfd.events = POLLOUT;
-				pfd.revents = 0;
-				if (poll(&pfd, 1, (int)s_SendTimeoutMs) > 0 && (pfd.revents & POLLOUT))
-					continue;
-			}
-			disconnect();
-			return false;
-		}
-		ptr += written;
-		left -= written;
-	}
-#endif
 	return true;
 }
 
@@ -288,59 +182,11 @@ void CSocketDisplayer::pollIncoming()
 	if (!m_Connected)
 		return;
 
-	char buffer[4096];
-
-#ifdef NL_OS_WINDOWS
-	for (;;)
+	if (!m_Pipe.readAvailable(m_InBuffer, s_MaxLineSize * 4))
 	{
-		DWORD available = 0;
-		if (!PeekNamedPipe((HANDLE)m_Pipe, NULL, 0, NULL, &available, NULL))
-		{
-			disconnect();
-			return;
-		}
-		if (available == 0)
-			break;
-		// the bytes are there, so this read completes without waiting on the dashboard
-		OVERLAPPED overlapped;
-		memset(&overlapped, 0, sizeof(overlapped));
-		overlapped.hEvent = (HANDLE)m_Event;
-		ResetEvent(overlapped.hEvent);
-		DWORD read = 0;
-		if (!ReadFile((HANDLE)m_Pipe, buffer, (DWORD)std::min((size_t)available, sizeof(buffer)), &read, &overlapped))
-		{
-			if (GetLastError() != ERROR_IO_PENDING || !GetOverlappedResult((HANDLE)m_Pipe, &overlapped, &read, TRUE))
-			{
-				disconnect();
-				return;
-			}
-		}
-		if (read == 0)
-		{
-			disconnect();
-			return;
-		}
-		m_InBuffer.append(buffer, read);
+		disconnect();
+		return;
 	}
-#else
-	for (;;)
-	{
-		ssize_t read = recv(m_Socket, buffer, sizeof(buffer), 0);
-		if (read == 0)
-		{
-			disconnect();
-			return;
-		}
-		if (read < 0)
-		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			disconnect();
-			return;
-		}
-		m_InBuffer.append(buffer, read);
-	}
-#endif
 
 	std::string::size_type pos;
 	while ((pos = m_InBuffer.find('\n')) != std::string::npos)
@@ -369,7 +215,7 @@ void CSocketDisplayer::handleLine(const std::string &line)
 
 	if (type == "cmd")
 	{
-		std::string command = unescapeField(rest);
+		std::string command = unescapeCtrlField(rest);
 		if (command.empty())
 			return;
 		// executed by the main thread in CWindowDisplayer::update
@@ -385,7 +231,7 @@ void CSocketDisplayer::handleLine(const std::string &line)
 		for (;;)
 		{
 			std::string::size_type end = rest.find('\t', start);
-			std::string value = unescapeField(rest.substr(start, end == std::string::npos ? std::string::npos : end - start));
+			std::string value = unescapeCtrlField(rest.substr(start, end == std::string::npos ? std::string::npos : end - start));
 			if (field == 0)
 				command.Id = value;
 			else if (field == 1)
@@ -443,7 +289,7 @@ void CSocketDisplayer::flushDone()
 	if (!m_Connected)
 		return;
 	for (uint i = 0; i < done.size(); ++i)
-		sendLine(std::string("done\t") + escapeField(done[i].first) + "\t" + (done[i].second ? "1" : "0"));
+		sendLine(std::string("done\t") + escapeCtrlField(done[i].first) + "\t" + (done[i].second ? "1" : "0"));
 }
 
 void CSocketDisplayer::flushLog()
@@ -460,7 +306,7 @@ void CSocketDisplayer::flushLog()
 		while (m_History.size() > m_HistoryMax)
 			m_History.pop_front();
 		if (m_Connected)
-			sendLine(std::string("log\t") + toString("%06x", it->first & 0xFFFFFF) + "\t" + escapeField(it->second));
+			sendLine(std::string("log\t") + toString("%06x", it->first & 0xFFFFFF) + "\t" + escapeCtrlField(it->second));
 	}
 }
 
@@ -482,7 +328,7 @@ void CSocketDisplayer::flushLabels(bool all)
 	}
 	for (uint i = 0; i < pending.size(); ++i)
 	{
-		if (!sendLine(std::string("label\t") + toString("%u", pending[i].first) + "\t" + escapeField(pending[i].second)))
+		if (!sendLine(std::string("label\t") + toString("%u", pending[i].first) + "\t" + escapeCtrlField(pending[i].second)))
 			return;
 	}
 }
@@ -496,7 +342,7 @@ void CSocketDisplayer::flushTitle()
 	}
 	if (title == m_SentTitleBar)
 		return;
-	if (sendLine(std::string("title\t") + escapeField(title)))
+	if (sendLine(std::string("title\t") + escapeCtrlField(title)))
 		m_SentTitleBar = title;
 }
 
@@ -513,7 +359,7 @@ void CSocketDisplayer::replay()
 	}
 	for (std::list<std::pair<uint32, std::string> >::iterator it = m_History.begin(); it != m_History.end(); ++it)
 	{
-		if (!sendLine(std::string("log\t") + toString("%06x", it->first & 0xFFFFFF) + "\t" + escapeField(it->second)))
+		if (!sendLine(std::string("log\t") + toString("%06x", it->first & 0xFFFFFF) + "\t" + escapeCtrlField(it->second)))
 			return;
 	}
 }
@@ -564,56 +410,9 @@ void CSocketDisplayer::flushCommands()
 bool CSocketDisplayer::sendCommand(const CCommandEntry &entry)
 {
 	if (entry.Removed)
-		return sendLine(std::string("uncommand\t") + escapeField(entry.Name));
+		return sendLine(std::string("uncommand\t") + escapeCtrlField(entry.Name));
 	const char *kind = entry.Kind == HandlerEntryKind ? "o" : (entry.Kind == HandlerCommandEntryKind ? "m" : "c");
-	return sendLine(std::string("command\t") + escapeField(entry.Name) + "\t" + kind + "\t" + escapeField(entry.Args) + "\t" + escapeField(entry.Help));
-}
-
-// *** field escaping ***
-
-std::string CSocketDisplayer::escapeField(const std::string &value)
-{
-	std::string result;
-	result.reserve(value.size());
-	for (std::string::size_type i = 0; i < value.size(); ++i)
-	{
-		char c = value[i];
-		switch (c)
-		{
-		case '\\': result += "\\\\"; break;
-		case '\t': result += "\\t"; break;
-		case '\n': result += "\\n"; break;
-		case '\r': result += "\\r"; break;
-		default: result += c; break;
-		}
-	}
-	return result;
-}
-
-std::string CSocketDisplayer::unescapeField(const std::string &value)
-{
-	std::string result;
-	result.reserve(value.size());
-	for (std::string::size_type i = 0; i < value.size(); ++i)
-	{
-		char c = value[i];
-		if (c == '\\' && i + 1 < value.size())
-		{
-			++i;
-			switch (value[i])
-			{
-			case 't': result += '\t'; break;
-			case 'n': result += '\n'; break;
-			case 'r': result += '\r'; break;
-			default: result += value[i]; break;
-			}
-		}
-		else
-		{
-			result += c;
-		}
-	}
-	return result;
+	return sendLine(std::string("command\t") + escapeCtrlField(entry.Name) + "\t" + kind + "\t" + escapeCtrlField(entry.Args) + "\t" + escapeCtrlField(entry.Help));
 }
 
 } // NLMISC
