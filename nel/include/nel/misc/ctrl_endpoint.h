@@ -107,6 +107,12 @@ public:
 	const CJsonValue &getSchema() const { return m_Schema; }
 	bool isReadOnly() const { return m_ReadOnly; }
 
+	/// A privileged method makes the process do what its user cannot through its interface (arbitrary script, arbitrary
+	/// action handlers, commands, raw database writes): it runs only in an endpoint whose content is trusted (see
+	/// CCtrlEndpoint::setTrusted). Set before CCtrlEndpoint::addMethod, which takes it with the method.
+	void setPrivileged(bool privileged) { m_Privileged = privileged; }
+	bool isPrivileged() const { return m_Privileged; }
+
 	/// Starts a call: answer it, or leave it open, and poll() follows at every update until it is answered
 	virtual void call(CCtrlCall &call) = 0;
 	virtual void poll(CCtrlCall & /* call */) { }
@@ -118,6 +124,7 @@ private:
 	std::string m_Description;
 	CJsonValue m_Schema;
 	bool m_ReadOnly;
+	bool m_Privileged;
 };
 
 /// A method made of functions
@@ -185,6 +192,12 @@ private:
  * when nobody holds it; the lease is released when that connection closes or gives it back, which
  * it cannot while such a call of its own is not answered.
  *
+ * Trust: what a process shows may be written by others (the players and web pages of a shard), and
+ * a tool that reads it takes it in. The content of an endpoint is untrusted unless whoever started
+ * the process says otherwise (setTrusted, from its command line); an untrusted endpoint refuses the
+ * privileged methods (ICtrlMethod::setPrivileged), ctrl.run_command among them. The record and the
+ * hello say "trusted", so a tool knows how to take what the endpoint gives.
+ *
  * One endpoint a process: the log of the process goes to one ring.
  *
  * MT = main thread, CT = channel thread, AT = any thread.
@@ -195,6 +208,12 @@ public:
 	CCtrlEndpoint();
 	/// Not from inside update(): a method does not delete the endpoint that runs it
 	~CCtrlEndpoint();
+
+	/// (MT) Before start(): everything the process will show comes from trusted authors, so the privileged methods
+	/// run. Untrusted by default. The endpoint writes it into its record and its hello itself, whatever the identity
+	/// given to start() or setIdentity() holds.
+	void setTrusted(bool trusted);
+	bool isTrusted() const;
 
 	/// (MT) Listens and writes the record; identity holds what the record and the hello carry
 	/// (program, build, log, ...). False with the error when it cannot; the record then says why.

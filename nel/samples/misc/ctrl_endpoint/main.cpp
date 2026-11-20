@@ -124,6 +124,8 @@ int main(int argc, char **argv)
 	CCtrlEndpoint endpoint;
 	CJsonValue identity = CJsonValue::object();
 	identity.set("kind", "nl_sample_ctrl_endpoint");
+	// everything this sample shows is its own, so a tool may run its commands (sampleSay) through ctrl.run_command
+	endpoint.setTrusted(true);
 	std::string error;
 	if (!endpoint.start(name, identity, error))
 	{

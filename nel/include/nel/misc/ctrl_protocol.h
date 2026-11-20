@@ -32,19 +32,23 @@ namespace NLMISC {
  * Version 3 adds the endpoint a process listens on (CCtrlEndpoint), for tools that come and go:
  * calls with JSON arguments and results, log and event lines indexed by the process itself,
  * and data frames for binary results.
+ * Version 4 has the messages of version 3; the record and the hello of an endpoint say whether its
+ * content is trusted ("trusted", a boolean), and an endpoint whose content is not trusted refuses
+ * its privileged methods. A tool takes no endpoint of an earlier version, which has no such gate.
+ * The dashboard channel stays version 2.
  *
  * Framing, as in version 2: one message per line, fields separated by a tab, a backslash
  * escaping tab, newline, carriage return and backslash inside a field. A data frame is the line
  *   data <id> <content type> <length>
  * followed by exactly <length> raw bytes, then the next message.
  *
- * Messages of version 3:
+ * Messages of versions 3 and 4:
  *   endpoint to tool: hello <version> <identity json>, result <id> <json>, error <id> <message> [<json>]
  *     and data frames, each sent before the result that names it ({"data": <id>, ...})
  *   tool to endpoint: hello <version> <tool name>, call <id> <method> <arguments json>, cancel <id>
  * An empty line is no message.
  */
-const uint CtrlProtocolVersion = 3;
+const uint CtrlProtocolVersion = 4;
 
 std::string escapeCtrlField(const std::string &value);
 std::string unescapeCtrlField(const std::string &value);

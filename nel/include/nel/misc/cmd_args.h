@@ -107,6 +107,8 @@ public:
 	/// returns values associated with the given named argument
 	/// both "--toto=xxx" and "--toto xxx" are acceptable, only "--toto=xxx" for an argument added by addLongArgWithEquals
 	/// quotes round arguments are stripped
+	/// a flag (an argument without a help name) has the value given to it with '=', even an empty one, so a program
+	/// can refuse it: --flag=0 still counts as the flag for haveLongArg
 	std::vector<std::string> getLongArg(const std::string &argName) const;
 
 	/// return true if there are arguments that are required

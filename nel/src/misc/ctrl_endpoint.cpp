@@ -207,6 +207,7 @@ ICtrlMethod::ICtrlMethod(const std::string &name, const std::string &description
     , m_Description(description)
     , m_Schema(schema.isNull() ? CJsonValue(CCtrlSchema()) : schema)
     , m_ReadOnly(readOnly)
+    , m_Privileged(false)
 {
 }
 
@@ -399,6 +400,7 @@ struct CMethodInfo
 	std::string Description;
 	CJsonValue Schema;
 	bool ReadOnly;
+	bool Privileged;
 	bool BuiltIn;
 };
 
@@ -703,6 +705,7 @@ public:
 	    , m_RefusedWarned(false)
 	    , m_LeaseHolder(0)
 	    , m_LeaseHeld(false)
+	    , m_Trusted(false)
 	{
 	}
 
@@ -763,6 +766,8 @@ public:
 	uint32 m_LeaseHolder;
 	// (CT writes, AT reads) whether any connection holds it
 	volatile bool m_LeaseHeld;
+	// (MT writes before the thread starts, CT reads) whether the content of the process is trusted
+	bool m_Trusted;
 
 	virtual void getName(std::string &result) const NL_OVERRIDE
 	{
@@ -980,6 +985,8 @@ public:
 			CAutoMutex<CMutex> lock(m_IdentityMutex);
 			id = m_Identity;
 		}
+		// the endpoint's own, never what the identity of the process says
+		id.set("trusted", m_Trusted);
 		id.set("connection", connection);
 		return id;
 	}
@@ -1162,6 +1169,7 @@ public:
 			return;
 
 		bool readOnly = true;
+		bool privileged = false;
 		bool found = false;
 		{
 			CAutoMutex<CMutex> lock(m_MethodsMutex);
@@ -1171,6 +1179,7 @@ public:
 				{
 					found = true;
 					readOnly = m_Methods[i].ReadOnly;
+					privileged = m_Methods[i].Privileged;
 					break;
 				}
 			}
@@ -1178,6 +1187,13 @@ public:
 		if (!found)
 		{
 			sendError(c, id, "no method '" + method + "'; ctrl.methods lists them");
+			return;
+		}
+		// what the process shows was written by others, and what calls one of these methods may have read it: the call
+		// never reaches the main thread, nor takes the lease
+		if (privileged && !m_Trusted)
+		{
+			sendError(c, id, method + " runs only in a client started with --ctrl-trusted: the content of this one is not trusted");
 			return;
 		}
 		uint waiters;
@@ -1382,11 +1398,14 @@ public:
 			e.set("name", m.Name);
 			e.set("description", m.Description);
 			e.set("read_only", m.ReadOnly);
+			e.set("privileged", m.Privileged);
+			e.set("available", !m.Privileged || m_Trusted);
 			if (schemas)
 				e.set("schema", m.Schema);
 			list.push(e);
 		}
 		CJsonValue r = CJsonValue::object();
+		r.set("trusted", m_Trusted);
 		r.set("methods", list);
 		return r;
 	}
@@ -1839,6 +1858,7 @@ CCtrlEndpoint::CCtrlEndpoint()
 
 	CMethodInfo info;
 	info.ReadOnly = true;
+	info.Privileged = false;
 	info.BuiltIn = true;
 	info.Name = "ctrl.identity";
 	info.Description = "Who this process is: name, process id and start time, program, build, log file, and what it adds (account, character).";
@@ -1888,7 +1908,9 @@ CCtrlEndpoint::CCtrlEndpoint()
 	                  .integer("wait_ms", "Wait up to this long for a first event when none matches yet.");
 	m_Impl->m_Methods.push_back(info);
 	info.Name = "ctrl.methods";
-	info.Description = "The methods of this endpoint, filtered by name prefix or a word of the name or description; schemas only when asked.";
+	info.Description = "The methods of this endpoint, filtered by name prefix or a word of the name or description; schemas only when asked. Each says whether it is read-only, whether it "
+	                   "is privileged (Lua, action handlers, commands, database writes), and whether it is available: a privileged method runs only when the endpoint is trusted "
+	                   "(trusted in the answer; a client started with --ctrl-trusted).";
 	info.Schema = CCtrlSchema().str("prefix", "Only names starting with this.").str("contains", "Only methods whose name or description contains this.").boolean("schemas", "Include the argument schemas.");
 	m_Impl->m_Methods.push_back(info);
 	info.Name = "ctrl.lease";
@@ -1906,11 +1928,14 @@ CCtrlEndpoint::CCtrlEndpoint()
 	        .str("contains", "Only entries whose name or help contains this (case-insensitive).")
 	        .integer("limit", "At most this many entries (300 by default)."),
 	    true));
-	addMethod(new CEndpointMethod(this, &CCtrlEndpoint::runRunCommandMethod, "ctrl.run_command",
+	ICtrlMethod *runCommand = new CEndpointMethod(this, &CCtrlEndpoint::runRunCommandMethod, "ctrl.run_command",
 	    "Runs a command, or reads or sets a variable, of the command registry, with the arguments as a list: they reach the command as given, nothing is parsed. Returns whether it "
 	    "succeeded, what it wrote to its log (the first 5000 lines, 4 MB at most; truncated and output_lines say when there was more), and what it showed elsewhere meanwhile (the chat "
-	    "of a client).",
-	    CCtrlSchema().str("command", "The command or variable, instance.command for a member command.", true).strings("args", "The arguments, one per entry."), false));
+	    "of a client). Privileged: it runs only when the endpoint is trusted.",
+	    CCtrlSchema().str("command", "The command or variable, instance.command for a member command.", true).strings("args", "The arguments, one per entry."), false);
+	// a command can do whatever the process can
+	runCommand->setPrivileged(true);
+	addMethod(runCommand);
 }
 
 CCtrlEndpoint::~CCtrlEndpoint()
@@ -1985,6 +2010,18 @@ void CCtrlEndpoint::runRunCommandMethod(CCtrlCall &call)
 		shownList.push(CJsonValue(shown[i]));
 	r.set("shown", shownList);
 	call.reply(r);
+}
+
+void CCtrlEndpoint::setTrusted(bool trusted)
+{
+	// the channel thread reads it without a lock, and the record says it from the start
+	nlassertex(!m_Started, ("CTRL: the trust of the endpoint '%s' is set after its start", m_Name.c_str()));
+	m_Impl->m_Trusted = trusted;
+}
+
+bool CCtrlEndpoint::isTrusted() const
+{
+	return m_Impl->m_Trusted;
 }
 
 bool CCtrlEndpoint::start(const std::string &name, const CJsonValue &identity, std::string &error)
@@ -2236,6 +2273,8 @@ void CCtrlEndpoint::writeRecord(const std::string &state)
 		CAutoMutex<CMutex> lock(m_Impl->m_IdentityMutex);
 		record = m_Impl->m_Identity;
 	}
+	// the endpoint's own, never what the identity of the process says
+	record.set("trusted", m_Impl->m_Trusted);
 	record.set("state", state);
 	record.set("updated", getCtrlTimeMs());
 	std::string error;
@@ -2271,6 +2310,7 @@ void CCtrlEndpoint::addMethod(ICtrlMethod *method)
 	info.Description = method->getDescription();
 	info.Schema = method->getSchema();
 	info.ReadOnly = method->isReadOnly();
+	info.Privileged = method->isPrivileged();
 	info.BuiltIn = false;
 	CAutoMutex<CMutex> lock(m_Impl->m_MethodsMutex);
 	m_Impl->m_Methods.push_back(info);

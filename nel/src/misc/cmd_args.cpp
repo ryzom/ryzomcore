@@ -324,6 +324,8 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 			name = name.substr(useLongName ? 2:1);
 
 			std::string value;
+			// a value given with '=', even an empty one
+			bool withEquals = false;
 
 			if (useLongName)
 			{
@@ -335,6 +337,7 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 					// value is second part, name the first one
 					value = name.substr(pos+1);
 					name = name.substr(0, pos);
+					withEquals = true;
 				}
 			}
 			else if (name.length() > 1)
@@ -378,6 +381,12 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 					{
 						arg.values.push_back(value);
 					}
+				}
+				else if (withEquals)
+				{
+					// a flag takes no value: one given to it with '=' is kept, so the program can refuse it rather than
+					// read --flag=0 as the flag
+					arg.values.push_back(value);
 				}
 
 				break;
