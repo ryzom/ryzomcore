@@ -18,6 +18,7 @@
 #include "nel/net/module.h"
 #include "nel/net/module_manager.h"
 #include "nel/net/module_gateway.h"
+#include "client_ctrl.h"
 // client include
 #if !defined(RZ_CLIENT_DRONE)
 #  include "net_manager.h"
@@ -79,6 +80,8 @@ public:
 	// send a bit mem stream to the server
 	void sendRawMessage(CBitMemStream &message) const
 	{
+		// the record of a control tool counts it as CNetManager::push does for the other impulses
+		ClientCtrl::netImpulse(true, message);
 		NetConn->push(message);
 	}
 };
