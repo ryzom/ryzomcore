@@ -451,52 +451,62 @@ void				CClientHost::setEntityIndex( const TEntityIndex& ei )
 
 void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, CClientHost *client)
 {
+	// the part numbers come from the client: only parts of the running message are stored, the completion test counts them
+	if (agmp->NbBlock == 0 || agmp->Part >= agmp->NbBlock || (NbBlock != 0xFFFFFFFF && NbBlock != agmp->NbBlock))
+	{
+		// counted with the other malformed actions of the client, not logged part by part
+		CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedAction, client->Uid );
+		return;
+	}
+
 	if (NbBlock == 0xFFFFFFFF)
 	{
 		// new GenericMultiPart
 		NbBlock = agmp->NbBlock;
-		NbCurrentBlock = 0;
 		TempSize = 0;
 		Temp.clear();
-		Temp.resize(NbBlock);
-		BlockReceived.resize(NbBlock);
-		for (uint i = 0; i < NbBlock; i++)
-			BlockReceived[i] = false;
-	}
-	
-	if (NbBlock != agmp->NbBlock || agmp->Part >= NbBlock)
-	{
-		nlwarning("CGenericMultiPartTemp::set: invalid part from client %u (NbBlock=%u, Part=%u, expected NbBlock=%u), dropping",
-			client->Uid, agmp->NbBlock, agmp->Part, NbBlock);
-		return;
 	}
 
 	// check if the block was already received
-	if (BlockReceived[agmp->Part])
+	map<uint16, vector<uint8> >::iterator received = Temp.lower_bound(agmp->Part);
+	if (received != Temp.end() && received->first == agmp->Part)
 	{
 		return;
 	}
 
-	Temp[agmp->Part] = agmp->PartCont;
-	BlockReceived[agmp->Part] = true;
+	// one insertion, at the place just found: a part whose bytes could not be copied is not in the map at all
+	Temp.insert(received, make_pair(agmp->Part, agmp->PartCont));
 
-	NbCurrentBlock++;
 	TempSize += (uint32)agmp->PartCont.size();
 
-	if (NbCurrentBlock == NbBlock)
+	if (Temp.size() == NbBlock)
 	{
+		// from here on the number is free again and the parts are released, also when the message cannot be built
+		NbBlock = 0xFFFFFFFF;
+		map<uint16, vector<uint8> > parts;
+		parts.swap(Temp);
+
+		// bufferToFill(0) leaves the stream its default buffer, which the router would read as a message
+		if (TempSize == 0)
+		{
+			CFrontEndService::instance()->receiveSub()->rejectReceivedMessage( MalformedAction, client->Uid );
+			return;
+		}
+
 		// reform the total action
 		CBitMemStream bms(true);
 
 		uint8 *ptr = bms.bufferToFill (TempSize);
 
-		for (uint i = 0; i < Temp.size (); i++)
+		// the map gives the parts in the order of their numbers
+		for (map<uint16, vector<uint8> >::const_iterator it = parts.begin(); it != parts.end(); ++it)
 		{
-			memcpy (ptr, &(Temp[i][0]), Temp[i].size());
-			ptr += Temp[i].size();
-		}
+			if (it->second.empty())
+				continue;
 
-		NbBlock = 0xFFFFFFFF;
+			memcpy (ptr, &(it->second[0]), it->second.size());
+			ptr += it->second.size();
+		}
 
 		if ( client->eId().isUnknownId() )
 		{

@@ -318,10 +318,16 @@ void	CBitSet::serial(IStream &f)
 	if(f.isReading())
 	{
 		f.serial(sz);
-		resize(sz);
-
 		f.serialCont(array32);
-		for(sint i=0;i<(sint)sz;i++)
+
+		// Accept only what a writer produces: a size resize() can round up to whole words,
+		// and one word per 32 bits. Older streams lack the last partial word.
+		if(sz > (uint32)std::numeric_limits<sint>::max() - (NL_BITLEN-1)
+			|| (array32.size() != sz/32 && array32.size() != (sz+31)/32))
+			throw EInvalidDataStream(f);
+
+		resize(sz);
+		for(sint i=0;i<(sint)min(sz, (uint32)array32.size()*32);i++)
 		{
 			uint32	a=array32[i/32];
 			a&= 1<<(i&31);
@@ -333,7 +339,7 @@ void	CBitSet::serial(IStream &f)
 		sz= size();
 		f.serial(sz);
 
-		array32.resize(sz/32);
+		array32.resize((sz+31)/32);
 		fill_n(array32.begin(), array32.size(), 0);
 		for(sint i=0;i<(sint)sz;i++)
 		{

@@ -284,25 +284,10 @@ const std::string &CNameManager::getCommandHandlerName() const
 }
 
 //-----------------------------------------------------------------------------
-CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucNameIn, uint32 userId, uint8 charIndex, uint32 homeSessionId)
+CHARSYNC::TCharacterNameResult CNameManager::isNameUsable(const ucstring & ucName, uint32 userId, uint8 charIndex, uint32 homeSessionId)
 {
 	// WARNING: if you change validity checks here,
 	// please also change them in CEntityIdTranslator::isValidEntityName() (nel/misc/eid_translator.cpp)
-
-	// if the name contains a shard specification, remove it first
-	ucstring ucName;
-	ucstring::size_type pos = ucNameIn.find('(');
-	if (pos != ucstring::npos)
-	{
-		//only keep the simple name for the test
-		ucName = ucNameIn.substr(0, pos);
-	}
-	else
-	{
-		// test the whole input name
-		ucName = ucNameIn;
-	}
-		
 
 	// perform a first validity check on the name length
 	if (ucName.size() < 3)
