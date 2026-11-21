@@ -2604,10 +2604,18 @@ void	NLPACS::CGlobalRetriever::waitEndOfAsyncLoading()
 			// Finished loaded a lr, stream it into rbank
 			if (ite->Finished)
 			{
-				if (!ite->_Buffer.isReading())
-					ite->_Buffer.invert();
+				if (ite->Successful)
+				{
+					if (!ite->_Buffer.isReading())
+						ite->_Buffer.invert();
 
-				const_cast<CRetrieverBank*>(_RetrieverBank)->loadRetriever(ite->LrId, ite->_Buffer);
+					const_cast<CRetrieverBank*>(_RetrieverBank)->loadRetriever(ite->LrId, ite->_Buffer);
+				}
+				else
+				{
+					// the file could not be read (missing), the buffer is empty: loading it would throw EStreamOverflow
+					nlwarning("Retriever '%s' not loaded, file not found", ite->LoadFile.c_str());
+				}
 
 				ite->_Buffer.clear();
 
@@ -2685,6 +2693,7 @@ void	NLPACS::CGlobalRetriever::CLrLoader::run()
 	if (!f.open(CPath::lookup(LoadFile, false)))
 	{
 		nlwarning("Couldn't find file '%s' to load, retriever loading aborted", LoadFile.c_str());
+		CPath::requestFileCheck(LoadFile);
 		_Buffer.clear();
 		Finished = true;
 		return;
