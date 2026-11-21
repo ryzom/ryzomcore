@@ -30,12 +30,14 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/security_check.h"
+#include "game_share/animal_status.h"
 #include "server_share/log_item_gen.h"
 //egs
 #include "client_messages.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "player_manager/character.h"
+#include "player_manager/player_room.h"
 #include "entity_manager/entity_callbacks.h"
 #include "phrase_manager/phrase_manager_callbacks.h"
 #include "zone_manager.h"
@@ -175,6 +177,37 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 }
 
 
+// return true if a client message may use up (destroy, consume) an item of this inventory of the character
+static bool canUseUpItemOf( CCharacter *character, uint16 inventory, const char *callbackName )
+{
+	// guild items leave the guild inventory only through the guild item messages, which check rights and session
+	if (inventory == INVENTORIES::guild)
+	{
+		nlwarning("<%s> player Id %s tries to use up an item of the guild inventory", callbackName, character->getId().toString().c_str() );
+		return false;
+	}
+
+	// like for a move, the room inventory is only usable from inside the room
+	if (inventory == INVENTORIES::player_room && !character->getRoomInterface().canUseInventory(character, character))
+		return false;
+
+	// and a pack animal inventory only while the character has access to it: the flag the client reads and a sale tests
+	if (inventory >= INVENTORIES::pet_animal && inventory < INVENTORIES::max_pet_animal
+		&& (character->getPlayerPets()[inventory - INVENTORIES::pet_animal].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
+		return false;
+
+	// handling, equipment and hotbar only refer to items of the bag: used up from there, the last one of a stack stays in the bag
+	// (an unknown inventory id gives NULL here; destroyItem and enchantOrRechargeItem refuse it)
+	CInventoryPtr inv = character->getInventory( INVENTORIES::TInventory(inventory) );
+	if (inv != NULL && inv->isRefInventory())
+	{
+		nlwarning("<%s> player Id %s tries to use up an item through reference inventory %u", callbackName, character->getId().toString().c_str(), (uint)inventory );
+		return false;
+	}
+
+	return true;
+}
+
 //----------------------------
 //	cbItemDestroy
 //----------------------------
@@ -211,6 +244,9 @@ void cbClientItemDestroy( CMessage& msgin, const std::string &serviceName, NLNET
 		nlwarning("<cbItemDestroy> player Id %s not yet ready", user.toString().c_str() );
 		return;
 	}
+
+	if (!canUseUpItemOf(character, inventory, "cbItemDestroy"))
+		return;
 
 	character->setAfkState(false);
 	character->destroyItem( INVENTORIES::TInventory(inventory), slot, quantity, true );
@@ -374,6 +410,10 @@ void cbClientItemEnchant( CMessage& msgin, const std::string &serviceName, NLNET
 
 	// if player is dead or stunned don't reload or enchant
 	if (character->isDead() || character->isStunned())
+		return;
+
+	// the crystal or the recharge is used up
+	if (!canUseUpItemOf(character, inv, "cbClientItemEnchant"))
 		return;
 
 	character->enchantOrRechargeItem( (INVENTORIES::TInventory) inv, slot );

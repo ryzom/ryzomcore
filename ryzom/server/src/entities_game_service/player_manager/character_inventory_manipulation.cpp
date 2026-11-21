@@ -851,6 +851,13 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 		return;
 	}
 
+	// handling, equipment and hotbar only refer to items of the bag, they are filled and emptied by equipping
+	if (srcInv->isRefInventory() || dstInv->isRefInventory())
+	{
+		nlwarning("cannot move from inventory %u to inventory %u, a reference inventory", srcInvId, dstInvId);
+		return;
+	}
+
 	// check that slots are valid
 	if (srcSlot >= srcInv->getSlotCount())
 	{

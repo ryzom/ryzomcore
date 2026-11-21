@@ -320,9 +320,7 @@ public:
 
 		// create an input stream for dispatching
 		CMessage msg("", true);
-		uint32 len;
-		bms.serial(len);
-		bms.serialBuffer(msg.bufferToFill(len), len);
+		bms.serialMemStream(msg);
 		msg.readType();
 
 		// forward to gateway
