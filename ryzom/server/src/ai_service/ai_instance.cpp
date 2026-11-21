@@ -723,7 +723,16 @@ static float randomAngle()
 	return val;
 }
 
-CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look)
+// A place of an event bot: on the layer nearest to the height given with the group when there is one (the player's,
+// or a z given with the command), else on the layer the vertical pos rule auto takes
+static bool placeEventBot(bool heightKnown, sint32 height, RYAI_MAP_CRUNCH::CWorldPosition &wp, const CAIVector &pos)
+{
+	if (heightKnown)
+		return CWorldContainer::getWorldMap().setWorldPositionNearestHeight(height, wp, pos);
+	return CWorldContainer::getWorldMap().setWorldPosition(AITYPES::vp_auto, wp, pos);
+}
+
+CGroupNpc *CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const &sheetId, CAIVector const &pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look, bool heightKnown, sint32 height)
 {
 	if (!_EventNpcManager)
 		return NULL;
@@ -780,14 +789,13 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 					const double a = circleStart + 2.0 * NLMISC::Pi * i / nbBots;
 					rpos += CAIVector(cos(a) * circleRadius, sin(a) * circleRadius);
 					RYAI_MAP_CRUNCH::CWorldPosition wp;
-					if (!CWorldContainer::getWorldMap().setWorldPosition(AITYPES::vp_auto, wp, rpos))
+					if (!placeEventBot(heightKnown, height, wp, rpos))
 						rpos = pos;
 				}
 			}
 			// Spawn all randomly except if only 1 bot
 			else if (nbBots > 1)
 			{
-				RYAI_MAP_CRUNCH::CWorldMap const& worldMap = CWorldContainer::getWorldMap();
 				RYAI_MAP_CRUNCH::CWorldPosition	wp;
 				uint32 maxTries = 100;
 				do
@@ -795,8 +803,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 					rpos = pos;
 					rpos += randomPos(dispersionRadius);
 					--maxTries;
-				}
-				while (!worldMap.setWorldPosition(AITYPES::vp_auto, wp, rpos) && maxTries>0);
+				} while (!placeEventBot(heightKnown, height, wp, rpos) && maxTries > 0);
 				if (maxTries<=0)
 					rpos = pos;
 			}
@@ -808,6 +815,8 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 				angle = randomAngle();
 
 			bot->setStartPos(rpos.x().asDouble(),rpos.y().asDouble(), angle, AITYPES::vp_auto);
+			if (heightKnown)
+				bot->setStartHeight(height);
 		}
 	}
 
@@ -829,6 +838,8 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	else
 	{
 		NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> destZone = NLMISC::CSmartPtr<CNpcZonePlaceNoPrim>(new CNpcZonePlaceNoPrim());
+		if (heightKnown)
+			destZone->setHeight(height);
 		destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
 		spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 	}
@@ -962,7 +973,7 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	std::string look;
 	sint32 cell;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion == 2);
 	msgin.serial(instanceNumber);
 	msgin.serial(playerId);
 	msgin.serial(x);
@@ -976,10 +987,13 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(botsName);
 	msgin.serial(look);
 	msgin.serial(cell);
+	// whether z is the height of the ground at x, y (at the player's place, or given with the command)
+	bool heightKnown;
+	msgin.serial(heightKnown);
 	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{
-		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look);
+		CGroupNpc *npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x) / 1000.0, ((double)y) / 1000.0), dispersionRadius, spawnBots, ((double)orientation) / 1000.0, botsName, look, heightKnown, z);
 		if (npcGroup != NULL)
 		{
 			_PlayersLastCreatedNpcGroup[playerId] = npcGroup->getName();

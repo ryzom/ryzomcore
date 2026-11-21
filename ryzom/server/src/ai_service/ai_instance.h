@@ -223,7 +223,9 @@ public:
 			return NULL;
 	}
 
-	CGroupNpc* eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look);
+	/// heightKnown: height is the height in millimetres of the ground at pos (the player it spawns at, or a z given with
+	/// the command), and the bots stand on the layer nearest to it rather than on the upper one
+	CGroupNpc *eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const &sheetId, CAIVector const &pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look, bool heightKnown = false, sint32 height = 0);
 
 	/// create a new easter egg
 	CBotEasterEgg* createEasterEgg(uint32 easterEggId, NLMISC::CSheetId const& sheetId, std::string const& botName, double x, double y, double z, double heading, const std::string& look);

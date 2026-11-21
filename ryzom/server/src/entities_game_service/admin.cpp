@@ -5625,6 +5625,8 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		sint32 x = c->getX();
 		sint32 y = c->getY();
 		sint32 z = c->getZ();
+		// the group spawns at the player, at the player's height, unless x and y place it elsewhere without z
+		bool heightKnown = true;
 		sint32 orientation = 6666; // used to specify a random orientation
 
 		uint32 nbBots;
@@ -5676,19 +5678,29 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 				float userX;
 				NLMISC::fromString(command_args[6], userX);
 				x = (sint32)(userX * 1000.0);
+				heightKnown = false;
 			}
 
 			if (command_args[7] != "*") {
 				float userY;
 				NLMISC::fromString(command_args[7], userY);
 				y = (sint32)(userY * 1000.0);
+				heightKnown = false;
 			}
 		}
 
 		if (command_args.size() > 8)
 		{
 			if (command_args[8] != "*") {
-				NLMISC::fromString(command_args[8], z);
+				// in metres, as x and y
+				float userZ;
+				if (!NLMISC::fromString(command_args[8], userZ))
+				{
+					log.displayNL("ERR: z '%s' is not a number of metres", command_args[8].c_str());
+					return false;
+				}
+				z = (sint32)(userZ * 1000.0);
+				heightKnown = true;
 			}
 		}
 
@@ -5734,7 +5746,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		CEntityId playerId = c->getId();
 
 		CMessage msgout("EVENT_CREATE_NPC_GROUP");
-		uint32 messageVersion = 1;
+		uint32 messageVersion = 2;
 		msgout.serial(messageVersion);
 		msgout.serial(instanceNumber);
 		msgout.serial(playerId);
@@ -5749,6 +5761,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		msgout.serial(botsName);
 		msgout.serial(look);
 		msgout.serial(cell);
+		msgout.serial(heightKnown);
 		CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 	}
 
@@ -8216,7 +8229,7 @@ NLMISC_COMMAND(setOrganizationStatus, "set the organization status of a player",
 #endif
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [client_sheet] [inVIllage?inOutpost?inStable?inAtys?]")
+NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <nbBots> <sheet> [<dispersionRadius=10m>] [<spawnBots=true>] [<orientation=random|self|-360..360>] [<name>] [<x>] [<y>] [<z>] [<client_sheet>]; x, y and z in metres, * for the player's")
 {
 	if (args.size () < 3) return false;
 	GET_CHARACTER
@@ -8225,6 +8238,8 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 	sint32 x = c->getX();
 	sint32 y = c->getY();
 	sint32 z = c->getZ();
+	// the group spawns at the player, at the player's height, unless x and y place it elsewhere without z
+	bool heightKnown = true;
 	sint32 orientation = 6666; // used to specify a random orientation
 
 	uint32 nbBots;
@@ -8284,6 +8299,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 			float userX;
 			NLMISC::fromString(args[7], userX);
 			x = (sint32)(userX * 1000.0);
+			heightKnown = false;
 		}
 
 		if (args[8] != "*")
@@ -8291,13 +8307,22 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 			float userY;
 			NLMISC::fromString(args[8], userY);
 			y = (sint32)(userY * 1000.0);
+			heightKnown = false;
 		}
 	}
 
 	if (args.size() > 9)
 	{
 		if (args[9] != "*") {
-			NLMISC::fromString(args[9], z);
+			// in metres, as x and y
+			float userZ;
+			if (!NLMISC::fromString(args[9], userZ))
+			{
+				log.displayNL("ERR: z '%s' is not a number of metres", args[9].c_str());
+				return false;
+			}
+			z = (sint32)(userZ * 1000.0);
+			heightKnown = true;
 		}
 	}
 
@@ -8322,7 +8347,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 	CEntityId playerId = c->getId();
 
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
-	uint32 messageVersion = 1;
+	uint32 messageVersion = 2;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
 	msgout.serial(playerId);
@@ -8337,6 +8362,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<player eid> <
 	msgout.serial(botsName);
 	msgout.serial(look);
 	msgout.serial(cell);
+	msgout.serial(heightKnown);
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 
 	return true;
