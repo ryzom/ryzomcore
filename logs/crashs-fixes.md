@@ -1,5 +1,14 @@
 # Crash fixes
 
+## 2026-11-21 — 🐛 CItemGroup::CItem::equip: the item may have no item sheet
+
+Crash report 6628472 (`ACCESS_VIOLATION_READ` at `0x84`, `item_group_manager.cpp:136`, from
+`CItemGroupManager::equipGroup` <- `CHandlerItemGroupEquip` <- macro execution).
+`pCS->asItemSheet()` returns NULL when the control sheet is not an item, and its
+`EquipTime` was read without a test. `equip` now logs a warning and returns when the item
+sheet is NULL, before touching the inventory. The 0x84 offset matching `EquipTime` is a
+hypothesis (no crash log). Not compiled or tested.
+
 ## 2026-11-11 — 🐛 CCharacter3D::createInstance: delete the advantage fx before its parent instance
 
 Crash group `CParticleSystemModel::traverseClip` (3 reports, all in the character selection screen, `globalMenu` -> `CInterface3DScene::draw`). `AdvantageFx` is a Hrc son of the part instance (`parent(_Instances[i])`). `createInstance` deleted the instance first; `~CTransform` then `hrcUnlink`s its sons without relinking them to the scene root, so the fx became an orphan outside the Hrc graph, never refreshed, with a `_AncestorSkeletonModel` that became stale when the skeleton was later deleted by `setSkeleton`. If the new instance was not created (empty name, `none.shape`, failure), the function returned before the old fx was handled. The advantage fx is now deleted before the instance. Cause not proven (no crash log); not compiled or tested.
