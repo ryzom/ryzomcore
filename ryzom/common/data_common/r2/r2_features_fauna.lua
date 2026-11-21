@@ -468,6 +468,8 @@ component.createGhostComponents= function(this, act)
 		herd.InheritPos = 0
 		herd.Position.x = comp.Position.x
 		herd.Position.y = comp.Position.y
+		-- the herd stands at the feature's height (its creatures' z is relative to it)
+		herd.Position.z = comp.Position.z
 		r2.requestInsertGhostNode(act.InstanceId, "Features", -1, "", herd)
 	end
 end

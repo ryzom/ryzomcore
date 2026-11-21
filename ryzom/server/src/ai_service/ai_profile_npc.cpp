@@ -194,14 +194,19 @@ public:
 	{
 	public:
 		CBotPositionner(RYAI_MAP_CRUNCH::TAStarFlag flags);
-		CBotPositionner(TVerticalPos verticalPos, CAIPos position, RYAI_MAP_CRUNCH::TAStarFlag flag);
+		CBotPositionner(TVerticalPos verticalPos, CAIPos position, const RYAI_MAP_CRUNCH::CWorldPosition &startWorldPos, RYAI_MAP_CRUNCH::TAStarFlag flag);
 		virtual ~CBotPositionner();
 		void setBotAtDest(bool atDest = true);
 		bool isBotAtDest() const;
+		void goToStart();
 		
+		// clang-format off
 		CPathCont		_PathCont;
 		CAIPos			_Position;
 		TVerticalPos	_VerticalPos;
+		/// the start position on the layer of its height, not valid for a bot without one (CBotNpc::getStartWorldPos)
+		RYAI_MAP_CRUNCH::CWorldPosition	_StartWorldPos;
+		// clang-format on
 	private:
 		bool			_BotAtDest;
 	};
@@ -1897,7 +1902,7 @@ void	CGrpProfileFollowRoute::setCurrentValidPos	(TVerticalPos verticalPos)
 #if !FINAL_VERSION
 		nlassert(index < _Geometry->size());
 #endif
-		_PathCont.setDestination	(verticalPos, (*_Geometry)[index]);
+		_PathCont.setDestinationKeepingLayer(verticalPos, (*_Geometry)[index]);
 	}
 	
 	FOREACH(it, TBotFollowerMap, _NpcList)
@@ -2163,7 +2168,7 @@ void CGrpProfileStandOnVertices::setCurrentValidPos(CAIStatePositional *grpState
 	{
 		CBotPositionner	*botPos=(*it).second;
 		botPos->setBotAtDest(false);
-		botPos->_PathCont.setDestination(grpState->shape().getVerticalPos(), *grpState->shape().point(botPos->_GeomIndex));
+		botPos->_PathCont.setDestinationKeepingLayer(grpState->shape().getVerticalPos(), *grpState->shape().point(botPos->_GeomIndex));
 	}
 }
 
@@ -3143,15 +3148,24 @@ CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(RYAI_MAP_CRUNCH::
 {
 }
 
-CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(TVerticalPos verticalPos, CAIPos position, RYAI_MAP_CRUNCH::TAStarFlag	flag) 
+CGrpProfileStandAtStartPoint::CBotPositionner::CBotPositionner(TVerticalPos verticalPos, CAIPos position, const RYAI_MAP_CRUNCH::CWorldPosition &startWorldPos, RYAI_MAP_CRUNCH::TAStarFlag flag)
 : _PathCont(flag)
 , _Position(position)
 , _VerticalPos(verticalPos)
+, _StartWorldPos(startWorldPos)
 , _BotAtDest(false)
 {
-	_PathCont.setDestination(verticalPos, position);
+	goToStart();
 }
 		
+void CGrpProfileStandAtStartPoint::CBotPositionner::goToStart()
+{
+	if (_StartWorldPos.isValid())
+		_PathCont.setDestinationKeepingLayer(_VerticalPos, _StartWorldPos);
+	else
+		_PathCont.setDestination(_VerticalPos, _Position);
+}
+
 CGrpProfileStandAtStartPoint::CBotPositionner::~CBotPositionner()
 {
 }
@@ -3219,7 +3233,7 @@ void CGrpProfileStandAtStartPoint::addBot(CBot* bot)
 	nlassert(grp.getSpawnObj());
 #endif		
 	CAIStatePositional *grpState=NLMISC::safe_cast<CAIStatePositional *>(grp.getCAIState());		
-	_NpcList[bot]=new	CBotPositionner	(botNpc->getStartVerticalPos(), botNpc->getStartPos(), botNpc->getGroup().getAStarFlag());
+	_NpcList[bot] = new CBotPositionner(botNpc->getStartVerticalPos(), botNpc->getStartPos(), botNpc->getStartWorldPos(), botNpc->getGroup().getAStarFlag());
 
 	CSpawnBot	*const	sbot=bot->getSpawnObj();
 	if	(sbot)
@@ -3245,7 +3259,7 @@ void CGrpProfileStandAtStartPoint::setCurrentValidPos()
 	{
 		CBotPositionner	*botPos=(*it).second;
 		botPos->setBotAtDest(false);
-		botPos->_PathCont.setDestination(botPos->_VerticalPos, botPos->_Position);
+		botPos->goToStart();
 	}
 
 }
@@ -4171,7 +4185,7 @@ void CBotProfileMoveTo::beginProfile()
 {
 	PROFILE_LOG("bot", "move_to", "begin", "");
 	_LastPos = CAIVector(_Bot->pos());
-	_PathCont.setDestination(_VerticalPos, _Dest);
+	_PathCont.setDestinationKeepingLayer(_VerticalPos, _Dest);
 	_Status = CFollowPath::FOLLOWING;
 }
 

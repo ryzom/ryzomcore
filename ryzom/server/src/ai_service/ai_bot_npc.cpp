@@ -486,6 +486,8 @@ CBotNpc::~CBotNpc()
 
 void CBotNpc::calcSpawnPos(RYAI_MAP_CRUNCH::CWorldMap const& worldMap)
 {
+	// a place drawn from the state: the height given with the start position is not its height
+	m_HasStartHeight = false;
 	CAIStatePositional const* const state = static_cast<CAIStatePositional*>(grp().getStartState());
 	RYAI_MAP_CRUNCH::CWorldPosition	wp;
 	uint32 maxTries = 100;
@@ -1152,10 +1154,27 @@ void CBotNpc::setStartPos(double x, double y, float theta, AITYPES::TVerticalPos
 {
 	_StartPos = CAIPos(x, y, 0, theta);
 	_VerticalPos = verticalPos;
+	m_HasStartHeight = false;
+}
+
+void CBotNpc::setStartHeight(sint32 height)
+{
+	m_HasStartHeight = true;
+	m_StartHeight = height;
+}
+
+RYAI_MAP_CRUNCH::CWorldPosition CBotNpc::getStartWorldPos() const
+{
+	RYAI_MAP_CRUNCH::CWorldPosition pos;
+	if (m_HasStartHeight)
+		CWorldContainer::getWorldMap().setWorldPositionNearestHeight(m_StartHeight, pos, _StartPos);
+	return pos;
 }
 
 void CBotNpc::init()
 {
+	m_HasStartHeight = false;
+	m_StartHeight = 0;
 	_ChatProfile = NULL;
 	_MaxHitRangeForPC = -1.0f;
 //	_MissionIconFlags.IsMissionStepIconDisplayable = true;
@@ -1179,8 +1198,12 @@ void CBotNpc::getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& 
 	if (_StartPos.isNull())
 		calcSpawnPos(worldMap);
 	
-	if (isStuck() || IsRingShard)
+	if ((isStuck() || IsRingShard) && m_HasStartHeight)
+		worldMap.setWorldPositionNearestHeight(m_StartHeight, pos, _StartPos);
+	else if (isStuck() || IsRingShard)
 		worldMap.setWorldPosition(_VerticalPos, pos, _StartPos);
+	else if (m_HasStartHeight)
+		CWorldContainer::calcNearestWPosAtHeight(m_StartHeight, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
 	else
 		CWorldContainer::calcNearestWPosFromPosAnRadius(_VerticalPos, worldMap, pos, _StartPos, 10, 200, CWorldContainer::CPosValidatorDefault());
 	

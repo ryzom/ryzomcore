@@ -3124,6 +3124,10 @@ public:
 	bool setWorldPosition(sint32 z, CWorldPosition& wpos, CAIVector const& pos, CRootCell const* originCell = NULL) const;
 	// Double version isn't tested !!! Verify it's the same than above sint32 version !
 	bool setWorldPosition(double z, CWorldPosition& wpos, CAIVector const& pos, CRootCell const* originCell = NULL) const;
+	// The slot nearest to a height in millimetres, however far from it. A position given with the height of the ground
+	// it was placed on (one of a Ring scenario) stands on that layer, where a vertical pos rule takes the same layer
+	// whatever the height, and the version above refuses a slot more than 2 metres away.
+	bool setWorldPositionNearestHeight(sint32 z, CWorldPosition &wpos, CAIVector const &pos, CRootCell const *originCell = NULL) const;
 	
 	CTopology::TTopologyRef	getTopologyRef(CTopology::TTopologyId const& id) const;
 	

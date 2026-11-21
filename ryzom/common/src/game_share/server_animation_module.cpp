@@ -659,7 +659,7 @@ public:
 			if (attr && attr->isNumber()) {	point->Point.y = static_cast<float>(attr->toNumber()); 	}
 
 			attr = pt->getAttr("z");
-			if (attr && attr->isNumber()) {	point->Point.z = static_cast<float>(0.0); 	}
+			if (attr && attr->isNumber()) { point->Point.z = static_cast<float>(attr->toNumber()); }
 		}
 
 		attr = _Object->getAttr("Angle");
@@ -1542,6 +1542,8 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			state->addPropertyByName("ai_type", new CPropertyString("NPC_STATE_ROUTE"));	// AJM
 			state->addPropertyByName("ai_profile_params", new CPropertyStringArray());	// AJM
 			state->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
+			// the editor placed its points on the ground: their z is the height of the layer they are on
+			state->addPropertyByName("point_heights", new CPropertyString("true"));
 		}
 		else
 		{
@@ -1550,6 +1552,8 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			state->addPropertyByName("ai_type", new CPropertyString("NPC_STATE_ZONE"));	// AJM
 			state->addPropertyByName("ai_profile_params", new CPropertyStringArray());	// AJM
 			state->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
+			// the editor placed its points on the ground: their z is the height of the layer they are on
+			state->addPropertyByName("point_heights", new CPropertyString("true"));
 			state->addPropertyByName("keywords", new CPropertyStringArray());	// AJM
 		}
 
@@ -1685,6 +1689,8 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				npc_bot->addPropertyByName("class", new CPropertyString("npc_bot"));
 				npc_bot->addPropertyByName("ai_type", new CPropertyString("BOT_NPC"));	// AJM
 				npc_bot->addPropertyByName("vertical_pos", new CPropertyString("auto"));	// AJM
+				// the editor placed it on the ground: its z is the height of the layer it stands on
+				npc_bot->addPropertyByName("point_heights", new CPropertyString("true"));
 				std::string botname = objectNpc->toString("Name");
 				if (botname.length()==0)
 				{

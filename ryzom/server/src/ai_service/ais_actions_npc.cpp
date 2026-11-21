@@ -495,6 +495,27 @@ DEFINE_ACTION(ContextPositionalState,PATAT)
 	}
 }
 
+DEFINE_ACTION(ContextPositionalState, HEIGHTS)
+{
+	CAIStatePositional *state = dynamic_cast<CAIStatePositional *>(CWorkPtr::stateState());
+	if (state == NULL)
+		return;
+
+	// the heights in millimetres of the points of the PATH or PATAT that follows (a state of a Ring scenario)
+	std::vector<sint32> heights;
+	for (uint i = 0; i < args.size(); ++i)
+	{
+		sint32 height;
+		if (!args[i].get(height))
+		{
+			nlwarning("CAIStatePositional: height %u of '%s' is not a number, its points are placed by their vertical pos", i, state->getAliasFullName().c_str());
+			return;
+		}
+		heights.push_back(height);
+	}
+	state->shape().setNextHeights(heights);
+}
+
 //----------------------------------------------------------------------------
 // The NPC_STATE_CHAT context
 //----------------------------------------------------------------------------
@@ -1019,6 +1040,19 @@ DEFINE_ACTION(ContextNpcBot,STARTPOS)
 	bot->setStartPos(double(x)/1000.0, double(y)/1000.0, theta, TVerticalPos(verticalPos));
 }
 
+DEFINE_ACTION(ContextNpcBot, STARTHGT)
+{
+	CBotNpc *bot = CWorkPtr::botNpc();
+	if (bot == NULL)
+		return;
+
+	// the height of the start position in millimetres (a bot of a Ring scenario), after its STARTPOS
+	sint32 height;
+	if (!getArgs(args, name(), height))
+		return;
+
+	bot->setStartHeight(height);
+}
 
 //---------------------------------------------------------------------------------------
 // Control over verbose nature of logging
