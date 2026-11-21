@@ -48,7 +48,16 @@ public:
 		message.serial (Number);
 		message.serial (Part);
 		message.serial (NbBlock);
-		message.serialCont (PartCont);
+
+		// the length test of CBitMemStream::serialMemStream(), keeping the buffer this reused action already has
+		uint32	size;
+		message.serial(size);
+		if (size > message.length()-message.getPos())
+			throw NLMISC::EInvalidDataStream( "BMS: Trying to read a multipart action of %u bytes, past stream size", size );
+
+		PartCont.resize(size);
+		if (size > 0)
+			message.serialBuffer(&(PartCont[0]), size);
 	}
 
 	/** Returns the size of this action when it will be send to the UDP connection:

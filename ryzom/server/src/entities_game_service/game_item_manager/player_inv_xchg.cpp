@@ -22,6 +22,7 @@
 #include "player_inv_xchg.h"
 
 #include "game_share/slot_equipment.h"
+#include "game_share/animal_status.h"
 #include "player_manager/character.h"
 #include "player_manager/player_room.h"
 #include "guild_manager/guild_manager.h"
@@ -296,8 +297,9 @@ bool CExchangeView::canAccessInventory(INVENTORIES::TInventory invSrc, uint32 in
 	if (invSrc == INVENTORIES::player_room)
 		return c->getRoomInterface().canUseInventory(c, c);
 
+	// the flag the client reads and a sale tests; it also covers an animal in a stable the character has access to
 	if (invSrc >= INVENTORIES::pet_animal && invSrc < INVENTORIES::max_pet_animal)
-		return c->petInventoryDistance(invSrc - INVENTORIES::pet_animal);
+		return (c->getPlayerPets()[invSrc - INVENTORIES::pet_animal].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) != 0;
 
 	if (invSrc == INVENTORIES::guild)
 	{

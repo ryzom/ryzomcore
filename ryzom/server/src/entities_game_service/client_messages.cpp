@@ -30,6 +30,7 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/security_check.h"
+#include "game_share/animal_status.h"
 #include "server_share/log_item_gen.h"
 //egs
 #include "client_messages.h"
@@ -188,6 +189,11 @@ static bool canUseUpItemOf( CCharacter *character, uint16 inventory, const char 
 
 	// like for a move, the room inventory is only usable from inside the room
 	if (inventory == INVENTORIES::player_room && !character->getRoomInterface().canUseInventory(character, character))
+		return false;
+
+	// and a pack animal inventory only while the character has access to it: the flag the client reads and a sale tests
+	if (inventory >= INVENTORIES::pet_animal && inventory < INVENTORIES::max_pet_animal
+		&& (character->getPlayerPets()[inventory - INVENTORIES::pet_animal].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) == 0)
 		return false;
 
 	// handling, equipment and hotbar only refer to items of the bag: used up from there, the last one of a stack stays in the bag
