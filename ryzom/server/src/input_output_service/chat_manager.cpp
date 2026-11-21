@@ -86,6 +86,46 @@ static std::string quoteParticipant(std::string name)
 }
 
 //-----------------------------------------------
+//	tellName
+//
+//-----------------------------------------------
+static std::string tellName(const std::string &name, const std::string &other)
+{
+	// A Zulip user is the character of the same name on the bridge's shard: "~Name" in game and the
+	// bare name from the bridge, where the other side of the tell names the shard.
+	std::string result = quoteParticipant(name);
+	if (!result.empty() && result[0] == '~')
+		result.erase(0, 1);
+	const std::string partner = quoteParticipant(other);
+	const std::string::size_type shard = partner.find('(');
+	if (shard != std::string::npos && result.find('(') == std::string::npos)
+		result += partner.substr(shard);
+	return result;
+}
+
+//-----------------------------------------------
+//	isTellParticipant
+//
+//-----------------------------------------------
+static bool isTellParticipant(const CChatManager::CMessageHistoryEntry &original, const CEntityId &character,
+	const std::string &name)
+{
+	// Who sent or received the tell in game is known by id.
+	const bool inGame = character != CEntityId::Unknown;
+	if (inGame && (original.Message.SenderId == character ||
+		original.Receivers.find(character) != original.Receivers.end()))
+		return true;
+	const std::string sender = original.Message.SenderName.toUtf8();
+	const std::string receiver = original.Channel.substr(5);
+	// The name decides for a side without id: the Zulip user, somebody who is not in game. A character
+	// in game now cannot take the place of one that was in game then by having its name.
+	const bool senderKnown = inGame && original.Message.SenderId != CEntityId::Unknown;
+	// The sender's own line makes him a receiver too.
+	const bool receiverKnown = inGame && original.Receivers.size() > original.Receivers.count(original.Message.SenderId);
+	return (!senderKnown && name == tellName(sender, receiver)) || (!receiverKnown && name == tellName(receiver, sender));
+}
+
+//-----------------------------------------------
 //	newMessageId
 //
 //-----------------------------------------------
@@ -584,33 +624,15 @@ bool CChatManager::resolveQuote(CChatMessage &message, const std::string &channe
 		if (original->Channel.compare(0, 5, "tell:") != 0 || receiver.empty())
 			return false;
 		CCharacterInfos *target = IOS->getCharInfos(ucstring::makeFromUtf8(receiver));
-		if (target && original->Message.SenderId != target->EntityId &&
-			original->Receivers.find(target->EntityId) == original->Receivers.end())
+		CCharacterInfos *author = IOS->getCharInfos(sender);
+		// A message from the bridge needs its receiver in game.
+		if (!author && !target)
 			return false;
-		if (sender == CEntityId::Unknown)
-		{
-			if (!target)
-				return false;
-			const std::string currentSender = quoteParticipant(message.SenderName.toUtf8());
-			const std::string currentTarget = quoteParticipant(receiver);
-			const std::string sourceSender = quoteParticipant(original->Message.SenderName.toUtf8());
-			const std::string sourceTarget = quoteParticipant(original->Channel.substr(5));
-			if (currentSender.empty() || currentTarget.empty() ||
-				!((currentSender == sourceSender && currentTarget == sourceTarget) ||
-					(currentSender == sourceTarget && currentTarget == sourceSender)))
-				return false;
-		}
-		else
-		{
-			// Remote characters have no local infos, so require a server-resolved full name.
-			const bool qualifiedRemoteTarget = !target && receiver.find('(') != std::string::npos &&
-				receiver[receiver.size() - 1] == ')';
-			const std::string targetName = quoteParticipant(receiver);
-			if (!target && (!qualifiedRemoteTarget ||
-				(targetName != quoteParticipant(original->Message.SenderName.toUtf8()) &&
-				 targetName != quoteParticipant(original->Channel.substr(5)))))
-				return false;
-		}
+		if (!isTellParticipant(*original, sender,
+				tellName(author ? author->ShortName.toUtf8() : message.SenderName.toUtf8(), receiver)) ||
+			!isTellParticipant(*original, target ? target->EntityId : CEntityId::Unknown,
+				tellName(receiver, std::string())))
+			return false;
 	}
 	else if (original->Channel != channel && !(channel == "say" && original->Channel == "arround"))
 		return false;
@@ -652,6 +674,14 @@ bool CChatManager::canReceiveQuote(const std::string &messageId, const CEntityId
 	CMessageHistoryEntry *original = findMessage(messageId);
 	if (!original)
 		return false;
+	if (original->Dropped)
+		return original->Message.SenderId == receiver;
+	if (original->Channel.compare(0, 5, "tell:") == 0)
+	{
+		CCharacterInfos *infos = IOS->getCharInfos(receiver);
+		return isTellParticipant(*original, receiver,
+			infos ? tellName(infos->ShortName.toUtf8(), std::string()) : std::string());
+	}
 	if (original->Message.SenderId == receiver ||
 		original->Receivers.find(receiver) != original->Receivers.end())
 		return true;
@@ -695,13 +725,19 @@ void CChatManager::logSharedMessage(const CChatMessage &message, const std::stri
 			base64::encode(reaction.Emoji).c_str(), reaction.Remove ? "remove" : "add");
 		return;
 	}
+	// A dropped tell is quoted to nobody but its sender. Looked up before this message is remembered,
+	// which can push the quoted one out of the history.
+	const CMessageHistoryEntry *quoted = message.Quote.MessageId.empty() ? NULL : findMessage(message.Quote.MessageId);
+	const bool quoteDropped = quoted && quoted->Dropped;
 	CMessageHistoryEntry *entry = rememberMessage(message);
 	if (!entry || entry->Exported)
 		return;
+	const CChatMessageQuote noQuote;
+	const CChatMessageQuote &quote = quoteDropped ? noQuote : message.Quote;
 	entry->Channel = channel;
 	entry->Exported = true;
 	const std::string text = sharedMessageLogText(message).toUtf8();
-	const std::string quoteText = sharedMessageLogText(message.Quote.Parts, message.SourceLanguage).toUtf8();
+	const std::string quoteText = sharedMessageLogText(quote.Parts, message.SourceLanguage).toUtf8();
 	std::string parts;
 	const bool exportParts = message.Parts.size() != 1 || message.Parts[0].Type != CChatMessagePart::Text;
 	for (uint i = 0; i < message.Parts.size(); ++i)
@@ -717,7 +753,7 @@ void CChatManager::logSharedMessage(const CChatMessage &message, const std::stri
 		base64::encode(channel).c_str(), base64::encode(IOS->getRocketName(message.SenderName)).c_str(),
 		language.c_str(), message.AllowTranslation ? "*" : language.c_str(), message.MessageId.c_str(),
 		message.Timestamp, message.SenderId.toString().c_str(),
-		message.Quote.MessageId.c_str(), base64::encode(message.Quote.SenderName.toUtf8()).c_str(),
+		quote.MessageId.c_str(), base64::encode(quote.SenderName.toUtf8()).c_str(),
 		base64::encode(quoteText).c_str(), base64::encode(text).c_str(),
 		base64::encode(parts).c_str());
 }
@@ -3001,9 +3037,29 @@ bool CChatManager::bridgeReaction(const std::string &sender, const std::string &
 	// Same audience as the reacted message; bridged messages only use these channels.
 	const std::string &channel = entry->Channel;
 	CSharedMessageScope scope(_SharedMessage, message);
+	if (channel.compare(0, 5, "tell:") == 0)
+	{
+		// The players of the tell, whatever name its channel carries.
+		std::set<CEntityId> players = entry->Receivers;
+		players.insert(entry->Message.SenderId);
+		for (std::set<CEntityId>::const_iterator it = players.begin(); it != players.end(); ++it)
+			bridgeTell(sender, IOS->getCharInfos(*it), sharedMessageLogText(message));
+		return true;
+	}
 	sendFarChat(sender, sharedMessageLogText(message),
 		channel.compare(0, 4, "dyn:") == 0 ? channel.substr(4) : channel);
 	return true;
+}
+
+//-----------------------------------------------
+//	bridgeTell
+//
+//-----------------------------------------------
+void CChatManager::bridgeTell(const std::string &sender, const CCharacterInfos *receiver, const ucstring &text)
+{
+	// farTell expects the chat client of a character it finds.
+	if (receiver && _Clients.find(receiver->DataSetIndex) != _Clients.end())
+		farTell(CEntityId::Unknown, ucstring("~" + sender), false, receiver->ShortName, text);
 }
 
 //-----------------------------------------------
@@ -3060,8 +3116,8 @@ bool CChatManager::bridgeChat(const std::string &sender, const std::string &chan
 	}
 	else if (mode == CChatGroup::tell)
 	{
-		if (group != "tell" || separator == std::string::npos || separator + 1 == channel.size() ||
-			IOS->getCharInfos(ucstring::makeFromUtf8(channel.substr(separator + 1))) == NULL)
+		// A receiver who is not in game gets nothing, like for every tell.
+		if (group != "tell" || separator == std::string::npos || separator + 1 == channel.size())
 			return false;
 	}
 	else if ((mode != CChatGroup::say && mode != CChatGroup::shout) ||
@@ -3145,10 +3201,21 @@ bool CChatManager::bridgeChat(const std::string &sender, const std::string &chan
 		message.SenderName.fromUtf8(sender);
 		message.Timestamp = CTime::getSecondsSince1970();
 		message.SourceLanguage = sourceLanguage;
-		message.AllowTranslation = EnableDeepL && sourceLanguage != "wk";
+		// A tell is never translated. A channel message is shown to the players of its language,
+		// for "wk" to nobody, and the others get its translations.
+		message.AllowTranslation = EnableDeepL && mode != CChatGroup::tell;
 		CChatMessagePart original;
 		original.TextValue = text;
 		message.Parts.push_back(original);
+		if (mode != CChatGroup::tell && text.size() <= CHAT_MESSAGE::MaxTextLength)
+		{
+			// Bridge names are characters of this shard. Longer posts keep their mentions as text:
+			// the resolver and MaxMentions are sized for a game message.
+			CHAT_MESSAGE::stripNoBubble(message);
+			message.MentionHomeSessionId = IService::getInstance()->getShardId();
+			message.ResolveMentions = true;
+			resolveChatMentions(message);
+		}
 		message.Quote.MessageId = quoteId;
 		if (!resolveQuote(message, channel, CEntityId::Unknown,
 			mode == CChatGroup::tell ? channel.substr(separator + 1) : std::string()))
@@ -3160,6 +3227,17 @@ bool CChatManager::bridgeChat(const std::string &sender, const std::string &chan
 	serialized.serial(message);
 	if (serialized.length() > CHAT_MESSAGE::MaxSerializedSize)
 		return false;
+
+	if (mode == CChatGroup::tell && messageId.empty())
+	{
+		// The Zulip author's own character on the receiver's shard gets the line too, as a far tell
+		// from the receiver without message id.
+		const std::string receiver = channel.substr(separator + 1);
+		const std::string::size_type shard = receiver.find('(');
+		bridgeTell(receiver.substr(0, shard),
+			IOS->getCharInfos(ucstring::makeFromUtf8(sender + (shard == std::string::npos ? std::string() : receiver.substr(shard)))),
+			ucstring("\n@{FF0F}") + ucstring::makeFromUtf8(sender) + ucstring(": ") + text);
+	}
 
 	ucstring routed;
 	if (!targetLanguage.empty())
@@ -3608,7 +3686,7 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				TheDataset.getEntityId(sender).toString().c_str(),
 				sender.getIndex(),
 				receiver.c_str());
-			return false;
+			return dropTell(senderInfos->EntityId, receiverInfos->ShortName.toUtf8(), structuredMessage);
 		}
 		itCl = _Clients.find( receiverInfos->DataSetIndex );
 		if( itCl != _Clients.end() )
@@ -3619,7 +3697,7 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex(),
 					receiver.c_str());
-				return false;
+				return dropTell(senderInfos->EntityId, receiverInfos->ShortName.toUtf8(), structuredMessage);
 			}
 
 			// check if the sender is not in the ignore list of the receiver
@@ -3683,14 +3761,14 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				log_Chat_Tell(senderInfos->EntityId, receiverInfos->EntityId, ucstr.toUtf8());
 				return true;
 			}
-			return false;
+			return dropTell(senderInfos->EntityId, receiverInfos->ShortName.toUtf8(), structuredMessage);
 		}
 		else
 		{
 			nlwarning("<CChatManager::tell> client %s:%x is unknown",
 				TheDataset.getEntityId(receiverInfos->DataSetIndex).toString().c_str(),
 				receiverInfos->DataSetIndex.getIndex());
-			return false;
+			return dropTell(senderInfos->EntityId, receiverInfos->ShortName.toUtf8(), structuredMessage);
 		}
 	}
 	else
@@ -3705,7 +3783,7 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				nldebug("IOSCM: tell The player %s:%x is muted, can't tell a group chat",
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex());
-					return false;
+					return dropTell(senderInfos->EntityId, receiver, structuredMessage);
 			}
 
 			CChatGroup &chatGroup = _Groups[it->second];
@@ -3742,21 +3820,27 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex(),
 					receiver.c_str());
-				return false;
+				return dropTell(senderInfos->EntityId, receiverInfos->ShortName.toUtf8(), structuredMessage);
 			}
 			string senderName = senderInfos->Name.toString();
 			string::size_type p0 = senderName.find('(');
 			if (p0 != string::npos)
 				senderName = senderName.substr(0, p0);
 
-			if (structuredMessage)
+			if (_SharedMessage)
 			{
-				if (!IChatUnifierClient::getInstance()->sendFarTellShared(senderInfos->EntityId, senderInfos->HavePrivilege, ucstring(receiver), *_SharedMessage))
-					return false;
-				echoTellShared(senderInfos->EntityId, ucstring(receiver), *_SharedMessage);
+				// The bridge and the sender's own line get the receiver as typed, like the log line
+				// without metadata; the history keeps the full name. Logged first: the echo's history
+				// entry must not push a quoted message out before the log line has read it. Whether a
+				// reaction is logged depends on the reacted tell, tellShared knows.
+				if (!CHAT_MESSAGE::isReaction(*_SharedMessage))
+					logSharedMessage(*_SharedMessage, "tell:" + receiverIn, _SharedMessage->SourceLanguage);
+				if (structuredMessage)
+					echoTellShared(senderInfos->EntityId, ucstring(receiverIn), *_SharedMessage);
+				CMessageHistoryEntry *entry = rememberMessage(*_SharedMessage);
+				if (entry)
+					entry->Channel = "tell:" + receiver;
 			}
-			else if (_SharedMessage)
-				logSharedMessage(*_SharedMessage, "tell:" + receiver, _SharedMessage->SourceLanguage);
 			else
 				_Log.displayNL("tell:%s|%s|%d|%s|%s", receiverIn.c_str(), senderName.c_str(), 1, "*", ucstr.toUtf8().c_str() );
 			return true;
@@ -3779,7 +3863,11 @@ bool CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 bool CChatManager::tellShared(const TDataSetRow &sender, const std::string &receiver, const CChatMessage &message)
 {
 	CChatMessage prepared = message;
-	if (!prepareSharedMessage(sender, prepared, false, CChatGroup::tell))
+	// A plain tell sent this way keeps the meaning of its leading '>', as in prepareLegacyMessage.
+	const bool bypassTranslation = prepared.Quote.MessageId.empty() && prepared.Parts.size() == 1 &&
+		prepared.Parts[0].Type == CChatMessagePart::Text && !prepared.Parts[0].TextValue.empty() &&
+		prepared.Parts[0].TextValue[0] == '>';
+	if (!prepareSharedMessage(sender, prepared, bypassTranslation, CChatGroup::tell))
 		return false;
 	CCharacterInfos *senderInfos = IOS->getCharInfos(prepared.SenderId);
 	if (!senderInfos)
@@ -3788,8 +3876,25 @@ bool CChatManager::tellShared(const TDataSetRow &sender, const std::string &rece
 	if (!resolveQuote(prepared, "tell:" + target, prepared.SenderId, target) ||
 		!resolveReaction(prepared, "tell:" + target, prepared.SenderId, target) || !prepared.isValid())
 		return false;
+	// The reacted tell; a reaction does not enter the history, so it stays where it is.
+	const CMessageHistoryEntry *original = CHAT_MESSAGE::isReaction(prepared) ?
+		findMessage(prepared.Parts[0].ReactionValue.MessageId) : NULL;
+	if (original && original->Dropped)
+	{
+		// Nobody but its sender has a dropped tell, so nobody else gets a reaction on it.
+		echoTellShared(prepared.SenderId, ucstring(receiver), prepared);
+		return true;
+	}
 	CSharedMessageScope scope(_SharedMessage, prepared);
-	return tell(sender, receiver, sharedMessageLogText(prepared));
+	const bool delivered = tell(sender, receiver, sharedMessageLogText(prepared));
+	// A reaction follows the reacted tell to the bridge, wherever the character of that name is now.
+	if (!original || (!original->Exported && original->ExternalId.empty()) ||
+		_MutedUsers.find(prepared.SenderId) != _MutedUsers.end())
+		return delivered;
+	logSharedMessage(prepared, original->Channel, prepared.SourceLanguage);
+	if (!delivered)
+		echoTellShared(prepared.SenderId, ucstring(receiver), prepared);
+	return true;
 }
 
 //-----------------------------------------------
@@ -3823,6 +3928,28 @@ void CChatManager::echoTellShared(const NLMISC::CEntityId &senderCharId, const u
 		entry->Channel = "tell:" + receiver.toUtf8();
 		entry->Receivers.insert(senderInfos->EntityId);
 	}
+}
+
+//-----------------------------------------------
+//	dropTell
+//
+//-----------------------------------------------
+bool CChatManager::dropTell(const NLMISC::CEntityId &senderCharId, const std::string &receiver, bool structuredMessage)
+{
+	// A tell dropped without a word looks sent to its sender. A client that sent STRING:TELL has
+	// printed his line itself; for a shared tell the line comes from here, naming the receiver as
+	// the line of a delivered tell does. The history keeps the full name.
+	if (!structuredMessage)
+		return false;
+	const CCharacterInfos *infos = IOS->getCharInfos(ucstring::makeFromUtf8(receiver));
+	echoTellShared(senderCharId, infos ? infos->Name : ucstring::makeFromUtf8(receiver), *_SharedMessage);
+	CMessageHistoryEntry *entry = findMessage(_SharedMessage->MessageId);
+	if (entry)
+	{
+		entry->Channel = "tell:" + receiver;
+		entry->Dropped = true;
+	}
+	return true;
 }
 
 
@@ -3888,22 +4015,6 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 		}
 	}
 } // tell //
-
-//-----------------------------------------------
-//	farTellShared
-//
-//-----------------------------------------------
-void CChatManager::farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName,
-	bool havePrivilege, const ucstring &receiver, const CChatMessage &message)
-{
-	CMessageHistoryEntry *entry = rememberMessage(message);
-	if (entry)
-		entry->Channel = "tell:" + receiver.toUtf8();
-	CChatMessage resolved = message;
-	resolveChatMentions(resolved);
-	CSharedMessageScope scope(_SharedMessage, resolved);
-	farTell(senderCharId, senderName, havePrivilege, receiver, sharedMessageLogText(resolved));
-}
 
 /*
  * Display the list of clients

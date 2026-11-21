@@ -1689,7 +1689,9 @@ string CChatTextManager::getSelectedPlayerName() const
 	const string playerName = CEntityCL::removeTitleAndShardFromName(LastSelectedSender);
 	if (playerName.empty() || compareCaseInsensitive(playerName, UserEntity->getDisplayName()) == 0)
 		return string();
-	if (LastSelectedHasMessage && LastSelectedMessage.SenderId != CEntityId::Unknown)
+	// The sender id only speaks for the sender's name; the player's own tell line names the receiver.
+	if (LastSelectedHasMessage && LastSelectedMessage.SenderId != CEntityId::Unknown &&
+		compareCaseInsensitive(playerName, CEntityCL::removeTitleAndShardFromName(LastSelectedMessage.SenderName.toUtf8())) == 0)
 	{
 		if (LastSelectedMessage.SenderId.getType() != RYZOMID::player)
 			return string();

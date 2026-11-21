@@ -669,8 +669,8 @@ private:
 	// save the zoom of the current map / restore it after a map change (zoomIfUnknown: zoom on the player if never saved)
 	void saveMapZoom();
 	void restoreMapZoom(bool zoomIfUnknown);
-	// smallest (or largest) map of a continent that contains a world position, NULL if none
-	SMap *findMapAtPos(const std::string &continent, const NLMISC::CVector2f &pos, bool smallest) const;
+	// the most detailed (or the largest) map of a continent that contains a world position, NULL if none
+	SMap *findMapAtWorldPos(const std::string &continent, const NLMISC::CVector2f &worldPos, bool smallest) const;
 	// clamp offsets & change window size if necessary
 	//void fitWindow();
 	//

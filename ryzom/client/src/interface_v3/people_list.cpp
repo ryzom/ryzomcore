@@ -1224,7 +1224,9 @@ class CHandlerContactEntry : public IActionHandler
 				getChatTextMngr().finishQuoteSend(linkRequest.ClientRequestId, false);
 			return;
 		}
-		else
+		// The server sends the own line of a shared tell back
+		const bool ownLineSent = ChatMngr.tellShared(playerName, text);
+		if (!ownLineSent)
 			ChatMngr.tell(playerName, text);
 		pEB->setInputString (std::string());
 		if (gc)
@@ -1234,6 +1236,8 @@ class CHandlerContactEntry : public IActionHandler
 			{
 				gc->restorePosition();
 			}
+			if (ownLineSent)
+				return;
 
 			// Retrieve name of the container in the list
 			string ui_interface_free_chat = "ui:interface:free_chat";

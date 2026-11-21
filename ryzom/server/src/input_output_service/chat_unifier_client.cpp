@@ -116,16 +116,6 @@ public:
 		cuc.sendFarTell(this, senderCharId, havePrivilege, destName, text);
 	}
 
-	bool sendFarTellShared(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
-	{
-		if (_ChatUnifierServer == NULL)
-			return false;
-
-		CChatUnifierProxy cuc(_ChatUnifierServer);
-		cuc.sendFarTellShared(this, senderCharId, havePrivilege, destName, message);
-		return true;
-	}
-
 	void sendFarGuildChat(const ucstring &senderName, uint32 guildId, const ucstring &text)
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChat(_Peers.begin(), _Peers.end(), this, senderName, guildId, text);
@@ -241,14 +231,6 @@ public:
 		nldebug("IOSCU: recvFarTell : receiving a far tell from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
 		CChatManager &cm = IOS->getChatManager();
 		cm.farTell(senderCharId, senderName, havePrivilege, destName, text);
-	}
-
-	void recvFarTellShared(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName,
-		bool havePrivilege, const ucstring &destName, const CChatMessage &message)
-	{
-		nldebug("IOSCU: recvFarTellShared : receiving a far tell from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
-		CChatManager &cm = IOS->getChatManager();
-		cm.farTellShared(senderCharId, senderName, havePrivilege, destName, message);
 	}
 
 	// SU forward a guild chat message to the IOS

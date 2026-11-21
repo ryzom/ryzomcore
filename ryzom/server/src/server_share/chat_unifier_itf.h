@@ -230,8 +230,6 @@ namespace CHATUNI
 		
 		void sendFarTell_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
-		void sendFarTellShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
-
 		// declare one interceptor member of the skeleton
 		TInterceptor	_Interceptor;
 
@@ -246,8 +244,6 @@ namespace CHATUNI
 		// If IOS can't find the player localy, it forward
 		// the tell to the unifier
 		virtual void sendFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text) =0;
-		// IOS forward a shared tell message to the unifier
-		virtual void sendFarTellShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage) =0;
 
 
 	};
@@ -301,14 +297,9 @@ namespace CHATUNI
 		// If IOS can't find the player localy, it forward
 		// the tell to the unifier
 		void sendFarTell(NLNET::IModule *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text);
-		// IOS forward a shared tell message to the unifier
-		void sendFarTellShared(NLNET::IModule *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage);
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sendFarTell(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text);
-
-		// Message serializer. Return the message received in reference for easier integration
-		static const NLNET::CMessage &buildMessageFor_sendFarTellShared(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage);
 	
 
 
@@ -358,8 +349,6 @@ namespace CHATUNI
 
 		void recvFarTell_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
-		void recvFarTellShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
-
 		void farGuildChat_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void farGuildChatShared_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -392,8 +381,6 @@ namespace CHATUNI
 		virtual void recvFarTellFail(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &destName, TFailInfo failInfo) =0;
 		// SU send a far tell to the IOS hosting the addresse character
 		virtual void recvFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text) =0;
-		// SU sends a shared far tell to the IOS hosting the addressee character
-		virtual void recvFarTellShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage) =0;
 		// IOS forward a guild chat message to the IOS
 		virtual void farGuildChat(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &text) =0;
 		// IOS forwards a shared guild chat message to the IOS
@@ -465,8 +452,6 @@ namespace CHATUNI
 		void recvFarTellFail(NLNET::IModule *sender, const NLMISC::CEntityId &senderCharId, const ucstring &destName, TFailInfo failInfo);
 		// SU send a far tell to the IOS hosting the addresse character
 		void recvFarTell(NLNET::IModule *sender, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text);
-		// SU sends a shared far tell to the IOS hosting the addressee character
-		void recvFarTellShared(NLNET::IModule *sender, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage);
 		// IOS forward a guild chat message to the IOS
 		void farGuildChat(NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const ucstring &text);
 		// IOS forwards a shared guild chat message to the IOS
@@ -644,9 +629,6 @@ namespace CHATUNI
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_recvFarTell(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text);
 	
-		// Message serializer. Return the message received in reference for easier integration
-		static const NLNET::CMessage &buildMessageFor_recvFarTellShared(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage);
-
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_farGuildChat(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const ucstring &text);
 
