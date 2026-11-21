@@ -91,10 +91,11 @@ static NLMISC::CStringConversion<DMGTYPE::EDamageType>::CPair const sheetIdTable
 	
 	{ "enchant_weapon_rot.sbrick",			DMGTYPE::ROT },
 	{ "enchant_weapon_acid.sbrick",			DMGTYPE::ACID },
+	{ "enchant_weapon_cold.sbrick",			DMGTYPE::COLD },
 	{ "enchant_weapon_fire.sbrick",			DMGTYPE::FIRE },
 	{ "enchant_weapon_poison.sbrick",		DMGTYPE::POISON },
 	{ "enchant_weapon_electricity.sbrick",	DMGTYPE::ELECTRICITY },
-	{ "enchant_weapon_shock.sbrick",		DMGTYPE::SHOCK },
+	{ "enchant_weapon_shockwave.sbrick",	DMGTYPE::SHOCK },
 	
 	{ "enchant_weapon.sbrick",				DMGTYPE::UNDEFINED },
 };

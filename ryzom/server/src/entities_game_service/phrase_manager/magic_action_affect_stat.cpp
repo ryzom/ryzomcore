@@ -64,6 +64,13 @@ protected:
 			{
 			case TBrickParam::MA_END:
 				INFOLOG("MA_END Found: end of effect");
+				// only lowering the speed is implemented (CSLinkEffectDebuffStat applies the modifier alone): refuse
+				// the build, as validate accepts a phrase once any one of its actions validates
+				if (_Modifier >= 0)
+				{
+					nlwarning("<CMagicActionAffectStat addBrick> brick %s: a modifier of %d does not lower the speed, raising it is not implemented", _ActionBrickSheetId.toString().c_str(), _Modifier);
+					return false;
+				}
 				effectEnd = true;
 				return true;
 
@@ -115,7 +122,9 @@ protected:
 						nlwarning("<CMagicActionAffectStat addBrick> invalid skill %s", value.c_str() );
 						return false;
 					}
-					break;
+					// CSLinkEffectDebuffStat only changes the speed: a skill would give a spell without effect
+					nlwarning("<CMagicActionAffectStat addBrick> brick %s: stat type Skill is not implemented, only Speed is", brick.SheetId.toString().c_str());
+					return false;
 				case STAT_TYPES::Score:
 					_Stat = (uint) SCORES::toScore(value);
 					if ( _Stat == (uint) SCORES::unknown )
@@ -123,7 +132,9 @@ protected:
 						nlwarning("<CMagicActionAffectStat addBrick> invalid score %s", value.c_str() );
 						return false;
 					}
-					break;
+					// CSLinkEffectDebuffStat only changes the speed: a score would give a spell without effect
+					nlwarning("<CMagicActionAffectStat addBrick> brick %s: stat type Score is not implemented, only Speed is", brick.SheetId.toString().c_str());
+					return false;
 				case STAT_TYPES::Speed:
 					_Stat = 0;
 					break;
@@ -146,11 +157,13 @@ protected:
 	
 	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode) NL_OVERRIDE
 	{
-		if ( _Modifier < 0 || _Multiplier < 1.0f )
+		// only lowering the speed is implemented, the end of the effect checks it too (an effect without MA_END reaches here)
+		if (_Modifier >= 0)
 		{
-			_IsOffensive = true;
+			nlwarning("<CMagicActionAffectStat validate> brick %s: a modifier of %d does not lower the speed, raising it is not implemented", _ActionBrickSheetId.toString().c_str(), _Modifier);
+			return false;
 		}
-		
+
 		if (_IsOffensive)
 		{
 			if ( !PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(),phrase->getTargets()[0].getId(),ACTNATURE::OFFENSIVE_MAGIC, errorCode, true) )
@@ -179,7 +192,7 @@ protected:
 			return;
 		
 		/// apply success factor
-		_Modifier = uint32( _Modifier *  successFactor);
+		_Modifier = sint32(_Modifier * successFactor);
 		_Multiplier *= successFactor;
 	
 		// apply used item power factor on cost per update

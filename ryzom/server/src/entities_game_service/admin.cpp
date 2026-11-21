@@ -2182,19 +2182,37 @@ NLMISC_COMMAND (learnAllForagePhrases, "Learn all forage phrase, begin at specif
 	return true;
 }
 
-
-/*
 NLMISC_COMMAND (learnAllFaberPlans, "Specified player learns all faber plans", "<eid>")
 {
-	if (args.size () != 1) return false;
+	H_AUTO(learnAllFaberPlans);
+
+	if (args.size() != 1) return false;
 	GET_CHARACTER
 
-	c->learnAllFaberPlans();
-	log.displayNL ("%s learnt all faber plans", eid.toString().c_str());
+	uint nbLearnt = 0, nbKnown = 0;
+	const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
+	for (CAllRolemasterPhrases::const_iterator ip = phrases.begin(); ip != phrases.end(); ++ip)
+	{
+		const CStaticRolemasterPhrase &phrase = (*ip).second;
+		bool hasPlan = false;
+		for (uint i = 0; i < phrase.Bricks.size() && !hasPlan; ++i)
+		{
+			const CStaticBrick *brick = CSheets::getSBrickForm(phrase.Bricks[i]);
+			hasPlan = brick && brick->Family >= BRICK_FAMILIES::BeginFaberMandatory && brick->Family <= BRICK_FAMILIES::EndFaberMandatory;
+		}
+		if (!hasPlan)
+			continue;
+
+		// a plan teaches its bricks, it takes no place among the known phrases
+		if (c->learnPrebuiltPhrase((*ip).first, 0, false, true))
+			++nbLearnt;
+		else
+			++nbKnown;
+	}
+	log.displayNL("%s learnt %u faber plans, %u were known already", eid.toString().c_str(), nbLearnt, nbKnown);
 
 	return true;
 }
-*/
 
 /* Don't use this command, use Money variable instead (same syntax for example  "Money <eid> +10")
 NLMISC_COMMAND(giveMoney, "Give money to a player","<eid> <money>")

@@ -216,7 +216,7 @@ extern vector<CMainlandSummary>		Mainlands;
 CVariable<uint32>			SpawnedDeadMektoubDelay("egs","SpawnedDeadMektoubDelay", "nb tick before a dead mektoub despawn)", 2592000, 0, true );
 CVariable<bool>				ForceQuarteringRight("egs","ForceQuarteringRight", "Allow anyone to quarter a dead creature", false, 0, true );
 CVariable<bool>				AllowAnimalInventoryAccessFromAnyStable("egs", "AllowAnimalInventoryAccessFromAnyStable", "If true a player can access to his animal inventory (if the animal is inside a stable) from any stable over the world", true, 0, true );
-CVariable<uint32>			FreeTrialSkillLimit("egs", "FreeTrialSkillLimit", "Level limit for characters belonging to free trial accounts", 125,0,true);
+CVariable<uint32>			FreeTrialSkillLimit("egs", "FreeTrialSkillLimit", "Level limit for characters belonging to free trial accounts", 21,0,true);
 CVariable<uint32>			CraftFailureProbaMpLost("egs", "CraftFailureProbaMpLost", "Probability de destruction de chaque MP en cas d'echec du craft", 50,0,true);
 
 
@@ -9048,6 +9048,11 @@ void CCharacter::memorizeStartAction( const std::vector< CStaticRole::TMemorized
 		const CStaticRolemasterPhrase * phrase = CSheets::getSRolemasterPhrase( (*it).sentence );
 		if( phrase == 0 )
 		{
+			// sheet_id.bin keeps names that have no sheet any more, the starting role names one of them; the roles are
+			// applied again at every login (addCreationBricks), so each phrase is reported once
+			static std::set<NLMISC::CSheetId> s_ReportedMissingPhrases;
+			if (s_ReportedMissingPhrases.insert((*it).sentence).second)
+				nlwarning("Character %s: the starting role gives the phrase %s, which has no sheet (reported once)", _Id.toString().c_str(), (*it).sentence.toString().c_str());
 			index = getFirstFreeSlotInKnownPhrase();
 			continue;
 		}
@@ -9646,8 +9651,9 @@ void CCharacter::getPhrasesOfferedByBot(const CCreature &bot, vector<CTradePhras
 					}
 				}
 
-				// Exclude the phrase if it contains bricks that require a skill level or a brick that the player doesn't have
-				if ( raceOk && isPlayerAllowedToGetAllBricksFromPhrase( _Id, *phrase, _Skills._Skills, _KnownBricks, 250, bot.getRace(), false ) )
+				// Exclude the phrase if it contains bricks that require a skill level or a brick that the player doesn't have.
+				// The race filters above decide the civilisation of an explicit list, so no civilisation is passed.
+				if (raceOk && isPlayerAllowedToGetAllBricksFromPhrase(_Id, *phrase, _Skills._Skills, _KnownBricks, 250, EGSPD::CPeople::Common, false))
 				{
 					// add the phrase to the one he can sell to the player
 					phrases.push_back(CTradePhrase(phraseSheetId));
@@ -18128,37 +18134,31 @@ void CCharacter::checkCharacAndScoresValues()
 			return;
 	}
 
-	uint8 maxPhraseLvlValue[CHARACTERISTICS::NUM_CHARACTERISTICS];
+	sint32 upgradeSum[CHARACTERISTICS::NUM_CHARACTERISTICS];
 
 	for ( sint charac = 0 ; charac < (sint)CHARACTERISTICS::NUM_CHARACTERISTICS ; ++charac)
-		maxPhraseLvlValue[charac] = 0;
+		upgradeSum[charac] = 0;
 
 	{
-	H_AUTO(GetHigestLevelUpgradePhrase);
-	// get all charac highest level upgrade phrase
-	std::string phraseStr, code, txt;
-	uint8 lvl;
-	for (set<CSheetId>::const_iterator it = _BoughtPhrases.begin() ;  it != _BoughtPhrases.end() ; ++it)
-	{
-		// test bricks is a charac upgrade
-		phraseStr = (*it).toString();
-		if (phraseStr.find("abpp") != string::npos)
+		H_AUTO(SumCharacteristicUpgrades);
+		// the characteristic upgrades the known training bricks gave, as processTrainingBrick applied them
+		for (set<CSheetId>::const_iterator it = _KnownBricks.begin(); it != _KnownBricks.end(); ++it)
 		{
-			// phrase = abppXZZ.sphrase with X = characteristic code and ZZ = brick level (CharacteristicBrickStep*ZZ)
-			code = phraseStr.substr(4,1); //string( text[4] );
-			txt = phraseStr.substr(5,2);
-			NLMISC::fromString(txt, lvl);
+			const CStaticBrick *brick = CSheets::getSBrickForm(*it);
+			if (!brick || BRICK_FAMILIES::brickType(brick->Family) != BRICK_TYPE::TRAINING)
+				continue;
 
-			CHARACTERISTICS::TCharacteristics charac = CHARACTERISTICS::getCharacteristicFromCode(code);
-			if (charac < CHARACTERISTICS::NUM_CHARACTERISTICS)
+			for (uint i = 0; i < brick->Params.size(); ++i)
 			{
-				if (maxPhraseLvlValue[charac] < lvl)
-				{
-					maxPhraseLvlValue[charac] = lvl;
-				}
+				const TBrickParam::IId *param = brick->Params[i];
+				if (param->id() != TBrickParam::CHARAC_UPGRADE)
+					continue;
+
+				CHARACTERISTICS::TCharacteristics charac = CHARACTERISTICS::toCharacteristic(((CSBrickParamCharacUpgrade *)param)->Characteristic);
+				if (charac < CHARACTERISTICS::NUM_CHARACTERISTICS)
+					upgradeSum[charac] += (sint16)((CSBrickParamCharacUpgrade *)param)->Modifier;
 			}
 		}
-	}
 	}
 
 	{
@@ -18167,15 +18167,14 @@ void CCharacter::checkCharacAndScoresValues()
 	sint32 tvalue;
 	for ( sint charac = 0 ; charac < (sint)CHARACTERISTICS::NUM_CHARACTERISTICS ; ++charac)
 	{
-		// compute theoretical value
-		tvalue = _StartingCharacteristicValues[charac] + maxPhraseLvlValue[charac] * (sint32)CharacteristicBrickStep;
-		//TODO tvalue = StartCharacteristicsValue + maxPhraseLvlValue[charac] * (sint32)CharacteristicBrickStep;
+		// compute theoretical value, capped as changeCharacteristic caps it
+		tvalue = std::min(_StartingCharacteristicValues[charac] + upgradeSum[charac], (sint32)MaxCharacteristicValue);
 
 		// compare
 		if (_PhysCharacs._PhysicalCharacteristics[charac].Base != tvalue)
 		{
-			// Diagnostic only, nothing is corrected: the base characteristic is not the one the bought upgrades give
-			nlwarning("BADCHECK: character %s has a base %s of %d, its starting value %d and its highest bought upgrade (level %u, %d per level) give %d; the value is kept", _Id.toString().c_str(), CHARACTERISTICS::toString(charac).c_str(), _PhysCharacs._PhysicalCharacteristics[charac].Base, (sint32)_StartingCharacteristicValues[charac], (uint)maxPhraseLvlValue[charac], (sint32)CharacteristicBrickStep, tvalue);
+			// Diagnostic only, nothing is corrected: the base characteristic is not the one the known upgrades give
+			nlwarning("BADCHECK: character %s has a base %s of %d, its starting value %d and its known upgrades (%d) give %d; the value is kept", _Id.toString().c_str(), CHARACTERISTICS::toString(charac).c_str(), _PhysCharacs._PhysicalCharacteristics[charac].Base, (sint32)_StartingCharacteristicValues[charac], upgradeSum[charac], tvalue);
 
 //vl			_PhysCharacs._PhysicalCharacteristics[charac].Base = tvalue;
 //vl			_PhysCharacs._PhysicalCharacteristics[charac].Current = tvalue;

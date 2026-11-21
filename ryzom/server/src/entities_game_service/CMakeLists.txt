@@ -38,9 +38,7 @@ LIST(REMOVE_ITEM SRC_PHRASE_MANAGER
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_bleed_effect.h
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/combat_stun_effect.h
-			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_cure.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_debuff.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/magic_action_hot.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/slow_move_effect.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/phrase_manager/slow_move_effect.h)
 LIST(REMOVE_ITEM SRC_SHOP_TYPE

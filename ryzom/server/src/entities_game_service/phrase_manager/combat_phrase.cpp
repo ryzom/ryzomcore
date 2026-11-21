@@ -712,6 +712,7 @@ void CCombatPhrase::addBrick( const CStaticBrick &brick )
 			_OpeningNeededFlags[1] = BRICK_FLAGS::toBrickFlag(((CSBrickParamOpening3 *)param)->EventFlag2);
 			_OpeningNeededFlags[2] = BRICK_FLAGS::toBrickFlag(((CSBrickParamOpening3 *)param)->EventFlag3);
 			}
+			break;
 
 		case TBrickParam::BLEED_FACTOR:
 			{

@@ -134,13 +134,7 @@ void CConsumable::serial(NLMISC::IStream &f)
 			Family = FamiliesFromName[familyName];
 		}
 
-		// Params
-		Params.clear();
-		uint size = (uint)StringParams.size();
-		for (uint i = 0 ; i < size ; ++i)
-		{
-			addParam(StringParams[i], Params);
-		}
+		// Params are parsed by CStaticItem::serial, which knows the sheet to name in a warning
 	}
 	else
 	{
@@ -1155,7 +1149,7 @@ void loadConsumable(  NLGEORGES::UFormElm &root, CStaticItem *item, const NLMISC
 	const uint size = (uint)item->ConsumableItem->StringParams.size();
 	for (uint i = 0 ; i < size ; ++i)
 	{
-		addParam(item->ConsumableItem->StringParams[i], item->ConsumableItem->Params);
+		addParam(item->ConsumableItem->StringParams[i], item->ConsumableItem->Params, sheetId.toString());
 	}
 }
 
@@ -1369,6 +1363,10 @@ void CStaticItem::serial(NLMISC::IStream &f)
 		case ITEMFAMILY::CONSUMABLE:
 			ConsumableItem = new CConsumable;
 			ConsumableItem->serial(f);
+			// Params
+			ConsumableItem->Params.clear();
+			for (uint i = 0; i < ConsumableItem->StringParams.size(); ++i)
+				addParam(ConsumableItem->StringParams[i], ConsumableItem->Params, SheetId.toString());
 			break;
 
 		case ITEMFAMILY::XP_CATALYSER:
