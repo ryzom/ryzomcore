@@ -411,6 +411,7 @@ private:
 									  // power of 2
 		SMap				*_AutoMap;	// last map chosen from the player position by the map auto zoom
 		std::string			_AutoMapContinent;	// continent of the last teleport, to switch the map on a continent change
+		bool				_CenterOnPlayerPending;	// a teleport happened, center on the player once the map is loaded
 
 		TPolyButtonVect		_PolyButtons;
 

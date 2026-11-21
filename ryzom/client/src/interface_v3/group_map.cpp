@@ -490,6 +490,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	//
 	_IsIsland = false;
 	_AutoMap = NULL;
+	_CenterOnPlayerPending = false;
 	//
 	_PanStartDateInMs = 0;
 	_DeltaTimeBeforePanInMs = 0;
@@ -1159,6 +1160,12 @@ void CGroupMap::checkCoords()
 	{
 		loadMap();
 		invalidateCoords();
+	}
+	// a teleport while the map was closed centers it when it is shown again
+	if (_CenterOnPlayerPending && _MapTexW != 0 && _MapTexH != 0)
+	{
+		_CenterOnPlayerPending = false;
+		centerOnPlayer();
 	}
 	updateContinentInfo();
 
@@ -3165,11 +3172,14 @@ void CGroupMap::showPlayerMap()
 	{
 		const NLMISC::CVectorD &playerPosD = EntitiesMngr.entity(0)->pos();
 		NLMISC::CVector2f pos((float) playerPosD.x, (float) playerPosD.y);
-		// a map showing the player keeps its zoom, else go back to the player map with its own zoom
-		if (!_CurMap || !mapContains(*_CurMap, pos))
+		// go to the player map with its own zoom: with auto zoom the most detailed map
+		// (city) even when the continent map shows the player, without auto zoom a map
+		// showing the player is kept
+		bool autoZoom = isAutoZoomEnabled();
+		if (!_CurMap || autoZoom || !mapContains(*_CurMap, pos))
 		{
-			SMap *map = findMapAtPos(ContinentMngr.getCurrentContinentSelectName(), pos, isAutoZoomEnabled());
-			if (map)
+			SMap *map = findMapAtPos(ContinentMngr.getCurrentContinentSelectName(), pos, autoZoom);
+			if (map && map != _CurMap)
 			{
 				saveMapZoom();
 				setMap(map);
@@ -3239,6 +3249,10 @@ void CGroupMap::selectMapAfterTeleport(const std::string &continent, const NLMIS
 	bool newContinent = continent != _AutoMapContinent;
 	_AutoMapContinent = continent;
 
+	// the view goes back to the player after any teleport, also when the map stays
+	_CenterOnPlayerPending = true;
+	centerOnPlayer();
+
 	// without auto zoom the map only changes with the continent
 	if (!autoZoom && !newContinent && _CurMap && !_IsIsland) return;
 
@@ -3257,9 +3271,17 @@ void CGroupMap::selectMapAfterTeleport(const std::string &continent, const NLMIS
 		}
 	}
 	// no map for R2 continents, islands are found by updatePlayerPos()
-	if (!map) return;
+	if (!map || map == _CurMap)
+	{
+		if (map) _AutoMap = autoZoom ? map : NULL;
+		return;
+	}
 
+	// each map keeps its own zoom, setMap() alone shows the whole map
+	saveMapZoom();
 	setMap(map);
+	restoreMapZoom(true);
+	centerOnPlayer();
 	_AutoMap = autoZoom ? map : NULL;
 }
 
