@@ -200,6 +200,25 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 } // impulsionChatTeam //
 
 //-----------------------------------------------
+//	showTell
+//
+//-----------------------------------------------
+static void showTell(const CEntityId &sender, const string &receiver, const ucstring &str)
+{
+	if( ShowChat )
+	{
+		string senderName;
+		CCharacterInfos *ci = IOS->getCharInfos(sender);
+		if (ci == NULL)
+			senderName = sender.toString();
+		else
+			senderName = IOS->getRocketName(ci->Name);
+
+		nlinfo("<impulsionTell> TELL %s to %s: '%s'", senderName.c_str(), receiver.c_str(), str.toString().c_str());
+	}
+}
+
+//-----------------------------------------------
 //	cbChatShare
 //
 //-----------------------------------------------
@@ -255,6 +274,9 @@ void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceI
 		TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
 		if (group == CChatGroup::tell)
 		{
+			// A tell of plain text comes this way too and is traced like one sent as STRING:TELL
+			if (message.Parts.size() == 1 && message.Parts[0].Type == CChatMessagePart::Text)
+				showTell(sender, receiver, message.Parts[0].TextValue);
 			accepted = cm.tellShared(senderRow, receiver, message);
 		}
 		else
@@ -312,17 +334,7 @@ void cbImpulsionTell( CMessage& msgin, const string &serviceName, TServiceId ser
 	// Do a general filtering on client input
 	str = IOS->getChatManager().filterClientInput(str);
 
-	if( ShowChat )
-	{
-		string senderName;
-		CCharacterInfos *ci = IOS->getCharInfos(sender);
-		if (ci == NULL)
-			senderName = sender.toString();
-		else
-			senderName = IOS->getRocketName(ci->Name);
-
-		nlinfo("<impulsionTell> TELL %s to %s: '%s'", senderName.c_str(), receiver.c_str(), str.toString().c_str());
-	}
+	showTell(sender, receiver, str);
 	TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
 
 	IOS->getChatManager().tell( senderRow, receiver, str );

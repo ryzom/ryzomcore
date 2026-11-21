@@ -1009,8 +1009,9 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const s
 		colorizeSender(displayString, senderPart, prop.getRGBA());
 	}
 
+	// The player's own line is no incoming tell: no blinking, and "reply" keeps its target.
 	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */displayString, goodSenderName,
-		prop.getRGBA(), 2, &windowVisible, _SharedMessage);
+		prop.getRGBA(), _OwnTell ? 0 : 2, &windowVisible, _SharedMessage);
 	CInterfaceManager::getInstance()->log(finalString, CChatGroup::groupTypeToString(CChatGroup::tell));
 
 	// Open the free teller window
@@ -1018,7 +1019,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const s
 	if (pCGW != NULL)
 		pCGW->setActiveFreeTeller(goodSenderName);
 
-	if (windowVisible && !goodSenderName.empty())
+	if (windowVisible && !goodSenderName.empty() && !_OwnTell)
 		PeopleInterraction.LastSenderName = goodSenderName;
 }
 

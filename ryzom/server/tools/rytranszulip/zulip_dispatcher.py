@@ -27,6 +27,7 @@ import traceback
 import urllib.parse
 import urllib.request
 
+from pymemcache.exceptions import MemcacheIllegalInputError
 from zulip_service import ZulipService
 from quote_bridge import render_quote
 
@@ -120,7 +121,8 @@ class ZulipDispatcher(ZulipService):
 		}
 
 		try:
-			content = self.quotePrefix(m)+user[0].upper()+user[1:]+":"+(clean_text if clean_text is not None else "")
+			# The name stays first: the server reads the player from it
+			content = user[0].upper()+user[1:]+":"+self.quotePrefix(m)+(clean_text if clean_text is not None else "")
 			request["content"] = content
 			result = self.zulip.send_message(request)
 			if message_type == "stream" and isinstance(result, dict) and result.get("code") == "STREAM_DOES_NOT_EXIST":
@@ -145,34 +147,48 @@ class ZulipDispatcher(ZulipService):
 
 	def sendReaction(self, m):
 		reaction = m.chat["reaction"]
-		zulip_id = self.getChatZulipId(reaction["message_id"])
-		if not zulip_id:
-			return None
 		# The bot reacts once for all players who chose the same emoji.
 		key = "Chat-Reaction-"+reaction["message_id"]+"-"+reaction["emoji"]
-		players = set(self.client.get(key) or ())
+		try:
+			zulip_id = self.getChatZulipId(reaction["message_id"])
+			players = set(self.client.get(key) or ()) if zulip_id else None
+		except MemcacheIllegalInputError as e:
+			# An emoji name memcached takes no key from (blanks, non-ASCII) is no Zulip emoji either
+			print("Unusable reaction emoji", e)
+			return None
+		except Exception as e:
+			# memcached not reachable: tried again like a failed write
+			print("Error reading reaction", e)
+			return False
+		if not zulip_id:
+			return None
 		shown = bool(players)
 		if reaction["remove"]:
 			players.discard(m.sender)
 		else:
 			players.add(m.sender)
-		self.client.set(key, list(players), 24*60*60)
-		if shown == bool(players):
-			return True
-		request = {"message_id": int(zulip_id), "emoji_name": reaction["emoji"]}
+		if shown != bool(players):
+			request = {"message_id": int(zulip_id), "emoji_name": reaction["emoji"]}
+			try:
+				result = self.zulip.add_reaction(request) if players else self.zulip.remove_reaction(request)
+			except Exception as e:
+				print("Error sending reaction", e)
+				return False
+			if not isinstance(result, dict):
+				print("Error sending reaction, invalid response", result)
+				return None
+			# The answer when Zulip had applied the call and its reply was lost
+			applied = result.get("code") == ("REACTION_ALREADY_EXISTS" if players else "REACTION_DOES_NOT_EXIST")
+			if result.get("result") != "success" and not applied:
+				print("Error sending reaction", result.get("code", ""), result.get("msg", ""))
+				return False if self.retryError(result) else None
+			print(f"{'➕' if players else '➖'} {reaction['emoji']} on {zulip_id}")
+		# Stored last and confirmed, so a retry after a failed call or write sends the reaction again
 		try:
-			result = self.zulip.add_reaction(request) if players else self.zulip.remove_reaction(request)
+			return self.client.set(key, list(players), 24*60*60, noreply=False)
 		except Exception as e:
-			print("Error sending reaction", e)
+			print("Error storing reaction", e)
 			return False
-		if not isinstance(result, dict):
-			print("Error sending reaction, invalid response", result)
-			return None
-		if result.get("result") != "success":
-			print("Error sending reaction", result.get("code", ""), result.get("msg", ""))
-			return False if self.retryError(result) else None
-		print(f"{'➕' if players else '➖'} {reaction['emoji']} on {zulip_id}")
-		return True
 
 	def sendTranslation(self, message_id, m):
 		if message_id > 0 and m.translation and m.source_lang and m.translated_lang:
@@ -182,7 +198,7 @@ class ZulipDispatcher(ZulipService):
 				"message_id": message_id,
 			}
 			try:
-				request["content"] = (self.quotePrefix(m)+"<["+m.translated_lang+"]>"+flags.get(m.source_lang.lower(), "")+" "+
+				request["content"] = ("<["+m.translated_lang+"]>"+flags.get(m.source_lang.lower(), "")+" "+self.quotePrefix(m)+
 					(clean_translation if clean_translation is not None else ""))
 				result = self.zulip.update_message(request)
 			except (ValueError, TypeError, KeyError, IndexError, AttributeError) as e:

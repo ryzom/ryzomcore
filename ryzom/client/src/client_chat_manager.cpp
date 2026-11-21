@@ -51,6 +51,7 @@
 #include "interface_v3/skill_manager.h"
 
 #include "misc.h"
+#include "client_cfg.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -454,6 +455,26 @@ bool CClientChatManager::tell(const string &receiverIn, const CChatMessageReques
 }
 
 //-----------------------------------------------
+//	tellShared
+//
+//-----------------------------------------------
+bool CClientChatManager::tellShared(const string &receiver, const string &text)
+{
+	// A banned client does not show what the server sends, so its own line would be missing
+	if (ClientCfg.Local || PermanentlyBanned)
+		return false;
+	CChatMessageRequest request;
+	request.Text.fromUtf8(text);
+	if (request.Text.size() > CHAT_MESSAGE::MaxTextLength)
+	{
+		// Same limit as the plain tell, without cutting a surrogate pair in two
+		const bool splitsPair = (request.Text[CHAT_MESSAGE::MaxTextLength - 1] & 0xFC00) == 0xD800;
+		request.Text.resize(CHAT_MESSAGE::MaxTextLength - (splitsPair ? 1 : 0));
+	}
+	return tell(receiver, request);
+}
+
+//-----------------------------------------------
 //	updateTellList
 //
 //-----------------------------------------------
@@ -680,9 +701,18 @@ bool CClientChatManager::isChatMessageReady(const CChatMsgNode &chatMessage)
 		getDynamicChannelDbIndexFromId(chatMessage.DynChatChanID) < 0)
 		return false;
 
+	const CChatMessage &message = chatMessage.SharedMessage;
+	if (CHAT_MESSAGE::isReaction(message))
+	{
+		// A reaction waits for its message, which may still wait for an item name.
+		for (std::list<CChatMsgNode>::const_iterator it = _ChatBuffer.begin(); it != _ChatBuffer.end(); ++it)
+			if (it->UseSharedMessage && it->SharedMessage.MessageId == message.Parts[0].ReactionValue.MessageId)
+				return false;
+		return true;
+	}
+
 	// Shared items carry receiver string ids; wait until their names are known.
 	STRING_MANAGER::CStringManagerClient *stringManager = STRING_MANAGER::CStringManagerClient::instance();
-	const CChatMessage &message = chatMessage.SharedMessage;
 	const std::vector<CChatMessagePart> *partLists[] = { &message.Parts, &message.TranslatedParts, &message.Quote.Parts };
 	std::string value;
 	for (uint list = 0; list < 3; ++list)
@@ -724,7 +754,8 @@ void CClientChatManager::displayChatMessage(const CChatMsgNode &chatMessage, ICh
 	{
 		if (chatMessage.OwnTell)
 		{
-			prefix = CI18N::get("youTellPlayer");
+			// The chat log gets this prefix, with the marker the client's own tell lines always had
+			prefix = string(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "") + CI18N::get("youTellPlayer");
 			strFindReplace(prefix, "%name", CEntityCL::removeTitleAndShardFromName(chatMessage.Sender));
 			prefix += ": ";
 		}
@@ -1404,6 +1435,9 @@ class CHandlerTell : public IActionHandler
 			return;
 
 		if (receiver.empty() || message.empty())
+			return;
+
+		if (ChatMngr.tellShared(receiver, message))
 			return;
 
 		// Get the chat window (if any)

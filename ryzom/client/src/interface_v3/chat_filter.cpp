@@ -313,11 +313,12 @@ void CChatTargetFilter::msgEntered(const string &msg, CChatWindow *chatWindow)
 		// the target must be a player, make a tell on him
 		if (CHAT_SHARE::getCurrentRequest())
 			CHAT_SHARE::setCurrentRequestSent(ChatMngr.tell(_TargetPlayer, *CHAT_SHARE::getCurrentRequest()));
-		else
+		else if (!ChatMngr.tellShared(_TargetPlayer, msg))
+		{
 			ChatMngr.tell(_TargetPlayer, msg);
-		// direct output in the chat
-		if (!CHAT_SHARE::getCurrentRequest())
+			// direct output in the chat
 			chatWindow->displayLocalPlayerTell(_TargetPlayer, msg);
+		}
 	}
 	else
 	{

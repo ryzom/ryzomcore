@@ -2350,7 +2350,7 @@ void CGroupMap::setMap(SMap *map)
 		// whoever changed the map (player, link, teleport), the auto zoom
 		// only switches again when the player crosses a border from here
 		if (_MapMode == MapMode_Normal)
-			_AutoMap = findMapAtPos(ContinentMngr.getCurrentContinentSelectName(), playerPos, true);
+			_AutoMap = findMapAtWorldPos(ContinentMngr.getCurrentContinentSelectName(), playerPos, true);
 	}
 
 	loadMap();
@@ -3072,25 +3072,28 @@ void CGroupMap::captureChatPosition(CCtrlButton *button) const
 }
 
 //============================================================================================================
+SMap *CGroupMap::findMapAtWorldPos(const std::string &continent, const CVector2f &worldPos, bool smallest) const
+{
+	if (!_WorldSheet || continent.empty())
+		return NULL;
+
+	SMap *best = NULL;
+	for (uint i = 0; i < _WorldSheet->Maps.size(); ++i)
+	{
+		SMap &map = _WorldSheet->Maps[i];
+		if (map.ContinentName != continent || !mapContains(map, worldPos))
+			continue;
+		if (!best || (smallest ? mapArea(map) < mapArea(*best) : mapArea(map) > mapArea(*best)))
+			best = &map;
+	}
+	return best;
+}
+
+//============================================================================================================
 bool CGroupMap::showChatPosition(const CVector2f &worldPos, const std::string &continent,
 	const ucstring &title, CRGBA color)
 {
-	const SMap *best = NULL;
-	float bestArea = 0.f;
-	for (uint i = 0; i < _WorldSheet->Maps.size(); ++i)
-	{
-		const SMap &map = _WorldSheet->Maps[i];
-		if (map.ContinentName != continent ||
-			worldPos.x < std::min(map.MinX, map.MaxX) || worldPos.x > std::max(map.MinX, map.MaxX) ||
-			worldPos.y < std::min(map.MinY, map.MaxY) || worldPos.y > std::max(map.MinY, map.MaxY))
-			continue;
-		const float area = fabs((map.MaxX - map.MinX) * (map.MaxY - map.MinY));
-		if (!best || area < bestArea)
-		{
-			best = &map;
-			bestArea = area;
-		}
-	}
+	const SMap *best = findMapAtWorldPos(continent, worldPos, true);
 	if (!best || _MapMode != MapMode_Normal)
 		return false;
 
@@ -3184,22 +3187,6 @@ bool CGroupMap::isAutoZoomEnabled() const
 }
 
 //============================================================================================================
-SMap *CGroupMap::findMapAtPos(const std::string &continent, const NLMISC::CVector2f &pos, bool smallest) const
-{
-	if (!_WorldSheet || continent.empty()) return NULL;
-
-	SMap *found = NULL;
-	for (uint32 i = 0; i < _WorldSheet->Maps.size(); ++i)
-	{
-		SMap &map = _WorldSheet->Maps[i];
-		if (map.ContinentName != continent || !mapContains(map, pos)) continue;
-		if (!found || (smallest ? mapArea(map) < mapArea(*found) : mapArea(map) > mapArea(*found)))
-			found = &map;
-	}
-	return found;
-}
-
-//============================================================================================================
 void CGroupMap::updateAutoMap(const NLMISC::CVector2f &pos)
 {
 	if (!isAutoZoomEnabled())
@@ -3208,7 +3195,7 @@ void CGroupMap::updateAutoMap(const NLMISC::CVector2f &pos)
 		return;
 	}
 
-	SMap *map = findMapAtPos(ContinentMngr.getCurrentContinentSelectName(), pos, true);
+	SMap *map = findMapAtWorldPos(ContinentMngr.getCurrentContinentSelectName(), pos, true);
 	if (!map || map == _AutoMap) return;
 
 	// stay on the city map until the player is really out of it
@@ -3265,7 +3252,7 @@ void CGroupMap::showPlayerMap()
 		// a map showing the player keeps its zoom, else go back to the player map with its own zoom
 		if (!_CurMap || !mapContains(*_CurMap, pos))
 		{
-			SMap *map = findMapAtPos(ContinentMngr.getCurrentContinentSelectName(), pos, isAutoZoomEnabled());
+			SMap *map = findMapAtWorldPos(ContinentMngr.getCurrentContinentSelectName(), pos, isAutoZoomEnabled());
 			if (map)
 			{
 				saveMapZoom();
@@ -3340,7 +3327,7 @@ void CGroupMap::selectMapAfterTeleport(const std::string &continent, const NLMIS
 	if (!autoZoom && !newContinent && _CurMap && !_IsIsland) return;
 
 	// auto zoom: most detailed map (city), else the whole continent
-	SMap *map = findMapAtPos(continent, pos, autoZoom);
+	SMap *map = findMapAtWorldPos(continent, pos, autoZoom);
 	if (!map && _WorldSheet)
 	{
 		// not inside any map, take the first map of the continent

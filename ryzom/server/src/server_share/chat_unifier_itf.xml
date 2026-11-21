@@ -46,16 +46,6 @@
 			</method>
 
 			<!-- ========================================================== -->
-			<method name="sendFarTellShared" msg="CUSFTS">
-				<doc line="IOS forward a shared tell message to the unifier"/>
-
-				<param type="NLMISC::CEntityId" name="senderCharId" byref="true"/>
-				<param type="bool" name="havePrivilege"/>
-				<param type="ucstring" name="destName" byref="true"/>
-				<param type="CChatMessage" name="chatMessage" byref="true"/>
-			</method>
-
-			<!-- ========================================================== -->
 <!--			<method name="sendFarGuildChat" msg="CUSFGC">
 				<doc line="IOS forward a guild chat message to the unifier"/>
 
@@ -111,17 +101,6 @@
 				<param type="bool"			name="havePrivilege"/>
 				<param type="ucstring"		name="destName"		byref="true"/>
 				<param type="ucstring"		name="text"			byref="true"/>
-			</method>
-
-			<!-- ========================================================== -->
-			<method name="recvFarTellShared" msg="CURFTS">
-				<doc line="SU sends a shared far tell to the IOS hosting the addressee character"/>
-
-				<param type="NLMISC::CEntityId" name="senderCharId" byref="true"/>
-				<param type="ucstring" name="senderName" byref="true"/>
-				<param type="bool" name="havePrivilege"/>
-				<param type="ucstring" name="destName" byref="true"/>
-				<param type="CChatMessage" name="chatMessage" byref="true"/>
 			</method>
 
 			<!-- ========================================================== -->

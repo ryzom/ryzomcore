@@ -30,6 +30,18 @@ from pynel.admin_modules_itf import CAdminServiceWeb
 from ryzom_service import RyzomService, RyzomMessage
 
 CHAT_ACK_WAIT_SECONDS = 60
+# Where Zulip reads no mention matches first and stays as it is: a fenced block up to its closing line,
+# a backtick span, an indented line that is no list item, a link, a URL. Then a Zulip mention of one user
+# (not @**all** and the like) where the IOS reads @Name: after a boundary both know, ending where the IOS
+# ends the name.
+ZULIP_MENTION = re.compile(
+	r"(^[ \t]*(`{3,}|~{3,})[^\n]*(?:\n(?![ \t]*\2[ \t]*$)[^\n]*)*(?:\n[ \t]*\2[ \t]*$)?"
+	r"|(?<!`)(`+)(?!`).+?(?<!`)\3(?!`)"
+	r"|^(?: {4}|\t)(?![ \t]*(?:[-*+]|\d+\.) )[^\n]*"
+	r"|\[(?:[^\[\]\n]|\[[^\[\]\n]*\])*\]\([^)\n]*\)"
+	r"|https?://\S+)"
+	r"|(?<![^ \t\n\"'(\[])@\*\*(?!(?:all|everyone|channel|stream|topic)\*\*)([A-Za-z]+)\*\*"
+	r"(?=\)?\.?(?![A-Za-z0-9_.()-]|[^\x00-\x7f]))", re.DOTALL | re.MULTILINE)
 
 class IosDispatcher(RyzomService):
 
@@ -127,9 +139,17 @@ class IosDispatcher(RyzomService):
 		text = message.text if message.translated_lang == "WK" else message.translation
 		if not text:
 			return None
+		channel = chat.get("channel", message.channel_id)
+		if message.source == "zulip":
+			if message.channel == "player":
+				# The IOS knows a character by its full name
+				channel += self.domain
+			else:
+				# The IOS resolves @Name
+				text = ZULIP_MENTION.sub(lambda found: found.group(1) or "@"+found.group(4), text)
 		arguments = [
 			self.encodeChatText(message.sender),
-			self.encodeChatText(chat.get("channel", message.channel_id)),
+			self.encodeChatText(channel),
 			self.encodeChatText(chat.get("external_id", "")),
 			message_id or "-", chat.get("quote_id") or "-",
 			message.source_lang or "wk",

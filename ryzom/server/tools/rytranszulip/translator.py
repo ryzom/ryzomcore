@@ -86,9 +86,10 @@ class Translator(RyzomService):
 				nonlocal marker_count
 				marker = marker_prefix+str(marker_count)+"END"
 				marker_count += 1
-				protected_mentions.append((marker, match.group(2)))
-				return match.group(1)+"<x>"+marker+"</x>"
-			text = re.sub(r"(^|[ \t\n\"'\[(,:;!?])(@[A-Za-z0-9_.()\-\x80-\U0010ffff]+)",
+				protected_mentions.append((marker, match.group(0)))
+				return "<x>"+marker+"</x>"
+			# A Zulip mention after Zulip's boundaries, a game mention after the IOS's
+			text = re.sub(r"(?<![^\s'\"({\[/<])@_?\*\*[^*\n]+\*\*|(?<![^ \t\n\"'\[(,:;!?])@[A-Za-z0-9_.()\-\x80-\U0010ffff]+",
 				protectMention, value)
 			text = self.escapeQuotes(self.escapeImages(text), 8)
 			result = client.translate_text(

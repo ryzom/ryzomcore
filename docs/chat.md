@@ -10,7 +10,11 @@ Players can put items, actions, positions, map locations, landmarks and macros i
 4. The IOS (`cbChatShare`, `ryzom/server/src/input_output_service/messages.cpp`, and `CChatManager`) filters the text, resolves mentions, attaches the quote and sends the regular `CHAT` / `TELL` impulse. A `CChatMessageTrailer` is appended to that impulse; clients without support ignore the remaining bits. Item names are resolved per receiver before sending.
 5. The sender gets `STRING:CHAT_SHARE_RESULT` with its request id. The edit box is only cleared once the server accepted the message.
 
-Far tells to another shard go through the shard unifier as `sendFarTellShared` / `recvFarTellShared` (`chat_unifier_itf.xml`).
+A tell to a name that is not on the shard is not sent through the shard unifier. The IOS writes it to the chat log, with its links, quote or reaction, and the sender gets his own line back.
+
+A tell without links goes the same way, without request id (`CClientChatManager::tellShared`): the client does not print the sender's own line, the IOS sends it back with the message id, so reactions show on it and the sender can react to and quote his own tell. Offline, for a banned client and on a server without `STRING:CHAT_SHARE` (the client's `msg.xml` is the server's) the client sends `STRING:TELL` and prints the line itself as before.
+
+A tell the IOS drops without a word (muted sender or receiver, sender on the receiver's ignore list) still looks sent: the sender gets his own line, nobody else gets the tell, a reaction on it or a quote of it.
 
 ## Parts and references
 
@@ -45,7 +49,7 @@ A shared macro opens prefilled in the macro editor as a new macro. Commands the 
 
 ## Reactions
 
-A reaction is a message of its own with a single `Reaction` part, sent to the channel of the reacted message ("React" in the chat line menu, or a click on an emoji of the reaction row). The IOS accepts it where a quote of the same message would be accepted and does not keep it in its message history. Player reactions are logged as `chat_reaction` lines; the bridge adds or removes the matching Zulip reaction, once per emoji with the bot account, and Zulip reactions come back through the IOS command `bridgeReaction`. Clients do not display it as a chat line: they add or remove the sender in the reaction row below the reacted message, whose emoji tooltip lists the players. Reactions to messages no longer shown, and reactions sent before the client received the message, are not kept.
+A reaction is a message of its own with a single `Reaction` part, sent to the channel of the reacted message ("React" in the chat line menu, or a click on an emoji of the reaction row). The IOS accepts it where a quote of the same message would be accepted and does not keep it in its message history. Player reactions are logged as `chat_reaction` lines; the bridge adds or removes the matching Zulip reaction, once per emoji with the bot account, and Zulip reactions come back through the IOS command `bridgeReaction`. Clients do not display it as a chat line: they add or remove the sender in the reaction row below the reacted message, whose emoji tooltip lists the players. Reactions to messages no longer shown, and reactions sent before the client received the message, are not kept. A Zulip reaction that arrives before the IOS has acknowledged the message to the bridge is dropped.
 
 ## Chat window
 
@@ -55,7 +59,9 @@ A reaction is a message of its own with a single `Reaction` part, sent to the ch
 
 ## Zulip bridge
 
-The IOS logs shared messages with their parts (`chat_meta` lines), so `ryzom/server/tools/rytranszulip` can forward links and quotes to Zulip. `quote_bridge.py` validates quotes written in Zulip and renders game quotes there.
+The IOS logs shared messages with their parts (`chat_meta` lines), so `ryzom/server/tools/rytranszulip` can forward links and quotes to Zulip. `quote_bridge.py` validates quotes written in Zulip and renders game quotes there. A game message with a quote starts like every game message, with the player name (a translation with its language marker), followed by the quote block. A Zulip mention `@**Name**` in a channel message reaches the IOS as `@Name` and is resolved like a mention typed in game, as long as the text fits a game message (`CHAT_MESSAGE::MaxTextLength`); wildcard, silent and id-qualified mentions, mentions in code or links and direct messages are left as they are.
+
+In a tell, a Zulip user is the character of the same name: `~Name` in game, `name@ig.ryzom.com` in Zulip. The bridge adds its shard to the receiver of a direct message (`tell:name(Shard)`), and the IOS gives the Zulip author's own character a copy of it as a line from the receiver. A reaction on a tell goes to the players who have that line and, when the tell passed the bridge, to Zulip, whoever is in game by then; a quote or reaction on a tell is only accepted from its two participants.
 
 ## Translation keys
 

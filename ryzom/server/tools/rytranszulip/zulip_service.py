@@ -23,7 +23,8 @@ import requests
 
 from ryzom_service import RyzomService, RyzomMessage
 
-NETWORK_ERRORS = (requests.exceptions.Timeout, requests.exceptions.SSLError, requests.exceptions.ConnectionError)
+NETWORK_ERRORS = (requests.exceptions.Timeout, requests.exceptions.SSLError, requests.exceptions.ConnectionError,
+	requests.exceptions.ChunkedEncodingError)
 EVENT_TYPES = ["message", "update_message", "reaction"]
 
 # Ids of the groups and of the folder used by the in-game channels of the Zulip instance
