@@ -102,6 +102,12 @@ class ZulipDispatcher(ZulipService):
 
 		try:
 			result = self.zulip.send_message(request)
+			if message_type == "stream" and isinstance(result, dict) and result.get("code") == "STREAM_DOES_NOT_EXIST":
+				self.zulip.addIngameSubscription(channel)
+				result = self.zulip.send_message(request)
+		except (ValueError, TypeError, KeyError, IndexError, AttributeError) as e:
+			print("Invalid message", e)
+			return None
 		except Exception as e:
 			print("Error sending message", e)
 			return None
