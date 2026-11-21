@@ -25,6 +25,8 @@
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/group_list.h"
 #include "nel/gui/interface_group.h"
+#include "nel/gui/view_pointer_base.h"
+#include "nel/gui/view_renderer.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/misc/i18n.h"
 
@@ -212,11 +214,40 @@ bool CEmojiPicker::show()
 	CWidgetManager::getInstance()->setTopWindow(win);
 
 	win->updateCoords();
+	moveToPointer(win);
 	buildTabs();
 	_NeedFill = true;
 	CGroupEmojiGrid *grid = dynamic_cast<CGroupEmojiGrid *>(getGroupFromId(EMOJI_PICKER_GRID));
 	updateGrid(grid ? grid->getWReal() : 0);
 	return true;
+}
+
+//=================================================================================
+void CEmojiPicker::moveToPointer(CInterfaceGroup *win)
+{
+	// open where the player clicked (chat button or reaction menu), not at the last place
+	CViewPointerBase *pointer = CWidgetManager::getInstance()->getPointer();
+	if (!pointer)
+		return;
+
+	uint32 screenW, screenH;
+	CViewRenderer::getInstance()->getScreenSize(screenW, screenH);
+	sint32 w = win->getWReal();
+	sint32 h = win->getHReal();
+	sint32 mouseX = pointer->getX();
+	sint32 mouseY = pointer->getY();
+
+	// centered on the mouse, above it when there is room, else below it
+	sint32 x = mouseX - w / 2;
+	sint32 y = (mouseY + h <= (sint32)screenH) ? mouseY : mouseY - h;
+	clamp(x, (sint32)0, std::max((sint32)0, (sint32)screenW - w));
+	clamp(y, (sint32)0, std::max((sint32)0, (sint32)screenH - h));
+
+	// move by the difference, so it works whatever the posref of the window is
+	win->setX(win->getX() + x - win->getXReal());
+	win->setY(win->getY() + y - win->getYReal());
+	win->invalidateCoords();
+	win->updateCoords();
 }
 
 //=================================================================================
