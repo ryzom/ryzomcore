@@ -22,6 +22,7 @@
 
 		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Can't connect to database host:$DBHost user:$DBUserName");
 		mysql_select_db ($DBName) or die ("Can't access to the table dbname:$DBName");
+		$login = mysql_real_escape_string($login);
 		$query = "SELECT * FROM user where Login='$login'";
 		$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
 
@@ -36,6 +37,7 @@
 				}
 
 				// login doesn't exist, create it
+				$password = mysql_real_escape_string($password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
 				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
 
@@ -77,6 +79,7 @@
 			{
 				// check if the user can use this application
 
+			$clientApplication = mysql_real_escape_string($clientApplication);
 				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
 				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
 				if (mysql_num_rows ($result) == 0)
@@ -136,6 +139,9 @@
         $link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
         mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
 
+        $id = mysql_real_escape_string($id);
+        $clientApplication = mysql_real_escape_string($clientApplication);
+        $shardId = mysql_real_escape_string($shardId);
         $query = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND (ShardId='".$shardId."' OR ShardId='-1')";;
         $result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
 
@@ -156,6 +162,8 @@
 		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
 		mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
 		
+		$id = mysql_real_escape_string($id);
+		$clientApplication = mysql_real_escape_string($clientApplication);
 		$query = "SELECT * FROM user WHERE UId='".$id."'";
 		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
 
@@ -233,6 +241,7 @@
 		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
 		mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
 
+		$login = mysql_real_escape_string($login);
 		$query = "SELECT Password FROM user WHERE Login='$login'";
 		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
 

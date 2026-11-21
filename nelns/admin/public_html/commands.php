@@ -70,9 +70,9 @@
 
 	$query = "SELECT shard, server, name FROM service";
 
-	if ($filter_shard != "")	$where[] = "shard like '%$filter_shard%'";
-	if ($filter_server != "")	$where[] = "server like '%$filter_server%'";
-	if ($filter_service != "")	$where[] = "name like '%$filter_service%'";
+	if ($filter_shard != "")	$where[] = "shard like '%".sqlescape($filter_shard)."%'";
+	if ($filter_server != "")	$where[] = "server like '%".sqlescape($filter_server)."%'";
+	if ($filter_service != "")	$where[] = "name like '%".sqlescape($filter_service)."%'";
 	
 	if (count($where)>=1)
 		$query .= " WHERE ".join(" AND ", $where);

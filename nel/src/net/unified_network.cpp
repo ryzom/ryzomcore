@@ -396,7 +396,15 @@ void	uncbMsgProcessing(CMessage &msgin, TSockId from, CCallbackNetBase &/* netba
 
 				(*it).second.before();
 //				const std::string &cbName = itcb->first;
-				(*itcb).second (msgin, uc->ServiceName, sid);
+				try
+				{
+					(*itcb).second (msgin, uc->ServiceName, sid);
+				}
+				catch (const NLMISC::Exception &e)
+				{
+					nlwarning("HNETL5: Uncaught exception in callback '%s' from service '%s' (%hu): %s",
+						msgin.getName().c_str(), uc->ServiceName.c_str(), sid.get(), e.what());
+				}
 				(*it).second.after();
 
 				TTime after = CTime::getLocalTime();

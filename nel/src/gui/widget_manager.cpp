@@ -39,6 +39,7 @@
 #include "nel/gui/reflect_register.h"
 #include "nel/gui/editor_selection_watcher.h"
 #include "nel/misc/events.h"
+#include <algorithm>
 #include "nel/gui/root_group.h"
 
 #ifdef DEBUG_NEW
@@ -1082,12 +1083,13 @@ namespace NLGUI
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
 						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-						std::list<CInterfaceGroup*>::const_iterator itw;
-						for (itw = rList.begin(); itw!= rList.end();)
+						// checkCoords runs scripts (lua on_draw, action handlers) that may reorder, remove or destroy
+						// windows of this list, so iterate on a copy and check that each window is still in the list
+						std::vector<CInterfaceGroup*> windows(rList.begin(), rList.end());
+						for (size_t i = 0; i < windows.size(); ++i)
 						{
-							CInterfaceGroup *pIG = *itw;
-							itw++;	// since checkCoords invalidate the iterator, be sure we move to the next one before
-							if (pIG && pIG->getActive())
+							CInterfaceGroup *pIG = windows[i];
+							if (pIG && std::find(rList.begin(), rList.end(), pIG) != rList.end() && pIG->getActive())
 								pIG->checkCoords ();
 						}
 					}
@@ -1108,11 +1110,13 @@ namespace NLGUI
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
 						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-						std::list<CInterfaceGroup*>::const_iterator itw;
-						for (itw = rList.begin(); itw!= rList.end(); itw++)
+						// updateCoords may run handlers that reorder or remove windows of this list: iterate on a copy
+						// and check that each window is still in the list
+						std::vector<CInterfaceGroup*> windows(rList.begin(), rList.end());
+						for (size_t i = 0; i < windows.size(); ++i)
 						{
-							CInterfaceGroup *pIG = *itw;
-							if (!pIG)
+							CInterfaceGroup *pIG = windows[i];
+							if (!pIG || std::find(rList.begin(), rList.end(), pIG) == rList.end())
 								continue;
 							bool		updateCoordCalled= false;
 							// updateCoords the window only if the master group is his parent and if need it

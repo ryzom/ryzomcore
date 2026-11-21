@@ -85,6 +85,21 @@ sint			NbTicksInFuture = 0;
 sint			NbTicksInFuture2 = 0;
 
 CVariable<double>				SecuritySpeedFactor("gpms","SecuritySpeedFactor", "Security Margin For Player Speed", 1.0, 0, true);
+CVariable<double>				SpeedBudgetFloor("gpms", "SpeedBudgetFloor", "Player speed budget: seconds of motion (at the speed limit) always allowed, even for a player who has just started to move", 0.2, 0, true);
+CVariable<double>				SpeedBudgetMaxReserve("gpms", "SpeedBudgetMaxReserve", "Player speed budget: max seconds of motion (at the speed limit) that can be accumulated by a moving player", 2.0, 0, true);
+CVariable<double>				SpeedBudgetGrowth("gpms", "SpeedBudgetGrowth", "Player speed budget: seconds of reserve gained per second of accepted motion", 1.0, 0, true);
+CVariable<sint32>				SpeedBudgetStillMessages("gpms", "SpeedBudgetStillMessages", "Player speed budget: number of consecutive messages without motion after which the reserve is reset", 3, 0, true);
+
+CVariable<double>				SpeedRunLogMinSeconds("gpms", "SpeedRunLogMinSeconds", "Player speed: a run (time not standing still) longer than this many seconds is logged when its average speed is above the speed limit", 60.0, 0, true);
+
+CVariable<double>				SpeedBudgetStallThreshold("gpms", "SpeedBudgetStallThreshold", "Player speed budget: seconds a tick must be late (beyond the game time step) to be counted as a server stall", 0.05, 0, true);
+CVariable<double>				SpeedBudgetMaxStall("gpms", "SpeedBudgetMaxStall", "Player speed budget: max seconds of server stall that can raise the cap of the credit of a player", 5.0, 0, true);
+
+// real time (s) of the current game cycle, noted by CWorldPositionManager::update() at each tick
+static double					TickRealTime = 0.0;
+// total seconds of server stall seen so far: the sum of the lateness (beyond the game time step) of the ticks that were late more than SpeedBudgetStallThreshold.
+// The tick is global (tick service waits for the tocks of all services): a late tick is a stall of the whole server.
+static double					StallTotal = 0.0;
 CVariable<bool>					VerboseSpeedAbuse("gpms", "VerboseSpeedAbuse", "Allows GPMS to log speed abuses", false, 0, true);
 
 CGenericXmlMsgHeaderManager		GenericXmlMsgManager;
@@ -629,6 +644,18 @@ void CWorldPositionManager::update()
 {
 	STOP_IF(IsRingShard,"Illegal use of CWorldPositionManager on ring shard");
 	uint	i;
+
+	// note the real time of this tick and the stall of the server if this tick is late (see StallTotal)
+	{
+		const double	now = (double)CTime::getLocalTime() / 1000.0;
+		if (TickRealTime > 0.0)
+		{
+			const double	late = (now - TickRealTime) - CTickEventHandler::getGameTimeStep();
+			if (late > SpeedBudgetStallThreshold)
+				StallTotal += late;
+		}
+		TickRealTime = now;
+	}
 
 	// inc tick and set new Current World Image to ( _CurrentWorldImage % _NbDynamicWorldImages ) + 1
 	uint	currentWorldImage = ( _CurrentWorldImage % _NbDynamicWorldImages ) + 1;
@@ -2200,7 +2227,6 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	CVectorD							targetPos = CVectorD(x*0.001, y*0.001, z*0.001);
 	CVectorD							finalPos;
 
-	NLMISC::TGameCycle ticksSinceLastUpdate = tick - entity->Tick();
 
 	// Get master (player) entity (in case of a mount)
 	CWorldEntity	*master = entity;
@@ -2225,23 +2251,121 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 		}
 	}
 
-	// maxDist = speed(in mm/s)*0.001(to meter)*sec_per_ticks*num_ticks
-	//double								maxDist = speed()*0.001*CTickEventHandler::getGameTimeStep()*(tick-entity->Tick());
-	// maxDist = speed(in m/s)*sec_per_ticks*num_ticks
-	double	maxDist = limitSpeedToUse * SecuritySpeedFactor * CTickEventHandler::getGameTimeStep() * ticksSinceLastUpdate;
+	// Speed budget: the entity may only move as far as its credit allows. The credit (seconds of motion at the current speed limit)
+	// refills with the real time elapsed between two messages of the entity (never with the tick of the message, which the client
+	// estimates and which may be identical for several messages, nor with the tick of the GPMS, which stalls with the server).
+	// Its cap is a floor plus a reserve that grows while the entity moves and is reset when it stands still, so a lag burst of a
+	// running player passes but a jump of a standing one does not. The cap is raised by the server stall seen since the last message
+	// of the entity (a late tick is a stall of the whole server, not a silence of the client).
+	// A null speed limit (afk, sit) gives a null distance: no motion at all.
+	const double	reqNorm = sqrt(sqr(movVector.x) + sqr(movVector.y));
+	double			appliedNorm = reqNorm;
+	double			budgetDt = 0.0;
+	double			budgetSurplus = 0.0;
+	bool			budgetCycleChanged = false;
 
-	// Check player speed
-	// only consider (x,y) motion for speed and position correction
-	if (master->PlayerInfos != NULL /*&& master->PlayerInfos->CheckSpeed && CheckPlayerSpeed && fabs(movVector.x)+fabs(movVector.y) > maxDist*/)
+	if (master->PlayerInfos != NULL)
 	{
-		double movNorm = sqr(movVector.x)+sqr(movVector.y); // already done if (entity != master) but here is a rare overspeed case
+		const double						rate = limitSpeedToUse * SecuritySpeedFactor;	// m/s
+		CWorldEntity::CSpeedBudget			&budget = entity->SpeedBudget;
 
-		if (movNorm > sqr(maxDist))
+		// real time of the arrival of the message, and server stall seen now: the stall of the ticks already arrived plus the lateness of
+		// the tick that has not arrived yet (if it is late more than the threshold)
+		const double						nowReal = (double)CTime::getLocalTime() / 1000.0;
+		const NLMISC::TGameCycle			nowCycle = CTickEventHandler::getGameCycle();
+		double								ongoingStall = 0.0;
+		if (TickRealTime > 0.0)
 		{
-			if (movNorm > sqr(5 * SecuritySpeedFactor * CTickEventHandler::getGameTimeStep() * ticksSinceLastUpdate)) {
-				movVector *= (maxDist / sqrt(movNorm));
+			ongoingStall = (nowReal - TickRealTime) - CTickEventHandler::getGameTimeStep();
+			if (ongoingStall <= SpeedBudgetStallThreshold)
+				ongoingStall = 0.0;
+		}
+		const double						stallSeen = StallTotal + ongoingStall;
+
+		if (!budget.Valid)
+		{
+			// first message since the creation or a teleport
+			budget.Valid = true;
+			budget.Credit = SpeedBudgetFloor;
+			budget.MovedTime = 0.0;
+			budget.StillCount = 0;
+		}
+		else
+		{
+			budgetDt = std::max(0.0, nowReal - budget.LastTime);
+			budgetSurplus = std::min((double)SpeedBudgetMaxStall, std::max(0.0, stallSeen - budget.StallSeen));
+			budgetCycleChanged = (nowCycle != budget.LastCycle);
+		}
+		budget.LastTime = nowReal;
+		budget.StallSeen = stallSeen;
+		budget.LastCycle = nowCycle;
+
+		// refill, then cap the credit; the distance is credit * rate with the current limit (a player who sits has a null distance)
+		const double						cap = std::min((double)SpeedBudgetMaxReserve, SpeedBudgetFloor + budget.MovedTime) + budgetSurplus;
+		budget.Credit = std::min(budget.Credit + budgetDt, cap);
+
+		const double						allowed = budget.Credit * rate;
+
+		if (reqNorm > allowed)
+		{
+			// only (x,y) motion is limited, z is scaled with it as before
+			movVector *= (allowed / reqNorm);
+			appliedNorm = allowed;
+			budget.Credit = 0.0;
+			// the distance asked is then counted from a server position that did not follow the client: not a measure of its speed
+			budget.InRun = false;
+		}
+		else if (rate > 0.0)
+		{
+			budget.Credit -= reqNorm / rate;
+		}
+
+		if (reqNorm == 0.0)
+		{
+			// no motion at all (same position in mm as the server): after enough such messages the reserve is lost and the run ends.
+			// Only messages of a new game cycle count: a burst of stale messages of the same tick (lag) says nothing
+			// about how long the player stood still.
+			if (budgetCycleChanged && budget.StillCount < SpeedBudgetStillMessages)
+				++budget.StillCount;
+			if (budget.StillCount >= SpeedBudgetStillMessages)
+			{
+				budget.MovedTime = 0.0;
+
+				// average speed of the run, logged only for a long run above the speed limit
+				if (budget.InRun)
+				{
+					budget.InRun = false;
+					if (budget.RunTime >= SpeedRunLogMinSeconds && budget.RunAllowed > 0.0 && budget.RunDist > budget.RunAllowed)
+					{
+						nlinfo("SpeedRun %s time=%.0fs dist=%.0fm avgSpeed=%.3fm/s avgLimit=%.3fm/s over=%+.1f%%",
+							master->Id.toString().c_str(), budget.RunTime, budget.RunDist, budget.RunDist / budget.RunTime,
+							budget.RunAllowed / budget.RunTime, (budget.RunDist / budget.RunAllowed - 1.0) * 100.0);
+					}
+				}
 			}
 		}
+		else
+		{
+			if (appliedNorm > 0.0)
+			{
+				budget.StillCount = 0;
+				budget.MovedTime = std::min((double)SpeedBudgetMaxReserve, budget.MovedTime + budgetDt * SpeedBudgetGrowth);
+			}
+
+			// run statistics (what the client asks for, over real time); the first message of a run only starts it
+			if (!budget.InRun)
+			{
+				budget.InRun = true;
+				budget.RunTime = budget.RunDist = budget.RunAllowed = 0.0;
+			}
+			else
+			{
+				budget.RunTime += budgetDt;
+				budget.RunDist += reqNorm;
+				budget.RunAllowed += limitSpeedToUse * budgetDt;
+			}
+		}
+
 	}
 
 	if ((movVector.x != 0 || movVector.x != 0) && entity->Dead)
@@ -2534,6 +2658,9 @@ void CWorldPositionManager::teleport(CWorldEntity *entity, sint32 x, sint32 y, s
 		nlwarning("teleport(): entity is NULL");
 		return;
 	}
+
+	// a teleport (and control changes, which teleport) is a legit jump: restart the speed budget
+	entity->SpeedBudget.reset();
 
 	// check cell id is valid
 /*

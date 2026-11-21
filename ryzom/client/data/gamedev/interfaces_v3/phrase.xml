@@ -96,7 +96,8 @@
 	<group type="list_sheet_icon_phrase" nature="sphrase" id="#id" value="#dbentry" array="false"
 		posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0"
 		wspace="4" hspace="4" dragable="true" rowmax="32" lmargin="10" tmargin="2" bmargin="0"
-		onclick_r="open_help_auto" oncandrag="phrase_can_drag_castable"  auto_grayed="true" >
+		onclick_r="proc" params_r="memory_phrase_check" menu_r="ui:interface:cm_memory_phrase"
+		oncandrag="phrase_can_drag_castable" auto_grayed="true" >
 
 		<ctrl style="skin_scroll" id="scroll_row" posref="TL TL" target_stepy="26" />
 
@@ -112,7 +113,8 @@
 		child_resize_h="false"
 		posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0"
 		hspace="4" selection="false"
-		onclick_r="open_help_auto" oncandrag="phrase_can_drag_castable"
+		onclick_r="proc" params_r="memory_phrase_check" menu_r="ui:interface:cm_memory_phrase"
+		oncandrag="phrase_can_drag_castable"
 		xitem="2" yitem="-2" xtext="30" ytext="-2"
 		dragable="true" auto_grayed="true" gray_text_with_ctrl="true"
 		over_color="%bot_chat_sheet_selection_normal"

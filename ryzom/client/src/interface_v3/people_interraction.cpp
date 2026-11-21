@@ -28,7 +28,9 @@
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "action_handler_misc.h"
+#include "chat_link_ui.h"
 #include "chat_window.h"
+#include "chat_text_manager.h"
 #include "../entity_animation_manager.h"
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/group_menu.h"
@@ -94,6 +96,15 @@ static const sint PARTY_CHAT_SPAWN_DELTA = 20; // to avoid that all party chat a
  */
 static void displayVisibleSystemMsg(const std::string &msg, const string &cat = "CHK");
 
+static void sendChatEntry(const string &msg, bool isChatTeam = false)
+{
+	const CChatMessageRequest *request = CHAT_SHARE::getCurrentRequest();
+	if (request)
+		CHAT_SHARE::setCurrentRequestSent(ChatMngr.chat(*request, isChatTeam));
+	else
+		ChatMngr.chat(msg, isChatTeam);
+}
+
 
 //////////////////////////////
 // HANDLER FOR CHAT WINDOWS //
@@ -131,7 +142,7 @@ struct CAroundMeEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::arround);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -149,7 +160,7 @@ struct CRegionEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::region);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -167,7 +178,7 @@ struct CUniverseEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::universe);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -184,7 +195,7 @@ struct CGuildChatEntryHandler : public IChatWindowListener
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::guild);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -201,7 +212,7 @@ struct CTeamChatEntryHandler : public IChatWindowListener
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::team);
-			ChatMngr.chat(msg, true);
+			sendChatEntry(msg, true);
 		}
 	}
 };
@@ -251,7 +262,7 @@ public:
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::dyn_chat, ChatMngr.getDynamicChannelIdFromDbIndex(DbIndex));
-			ChatMngr.chat(msg);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -913,8 +924,16 @@ class CHandlerChatGroupFilter : public IActionHandler
 		if (!pCGW) return;
 		CCtrlTextButton *pUserBut = dynamic_cast<CCtrlTextButton*>(pCGW->getContainer()->getCtrl("content:but_user"));
 		CCtrlTextButton *pEmoteBut = dynamic_cast<CCtrlTextButton*>(pCGW->getContainer()->getCtrl("content:but_emote"));
+		CCtrlBase *pEmojiBut = pCGW->getContainer()->getCtrl("content:but_emoji");
 		CInterfaceGroup *pEditBox = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:ebw"));
 		CInterfaceGroup *pTextList = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:cb"));
+
+		sint32 emojiRoom = 0;
+		if (pEmojiBut)
+		{
+			pEmojiBut->updateCoords();
+			emojiRoom = pEmojiBut->getWReal() + 4;
+		}
 
 		// Target button choose the right filter
 
@@ -961,7 +980,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 
 				if (pEditBox != NULL)
 				{
-					pEditBox->setW(-pUserBut->getWReal()-pEmoteBut->getWReal()-8);
+					pEditBox->setW(-pUserBut->getWReal()-pEmoteBut->getWReal()-8-emojiRoom);
 					pEditBox->setX(pUserBut->getWReal()+4);
 				}
 
@@ -982,9 +1001,9 @@ class CHandlerChatGroupFilter : public IActionHandler
 			if (pEditBox != NULL)
 			{
 				if(pEmoteBut)
-					pEditBox->setW(-pEmoteBut->getWReal()-4);
+					pEditBox->setW(-pEmoteBut->getWReal()-4-emojiRoom);
 				else
-					pEditBox->setW(0);
+					pEditBox->setW(-emojiRoom);
 				pEditBox->setX(0);
 			}
 			if (pTextList != NULL) pTextList->setX(0);
@@ -992,7 +1011,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 
 		// if called from a tab button => force the tab ctrl button to have standard color
 		CCtrlTabButton	*pTabButton= dynamic_cast<CCtrlTabButton*>(pCaller);
-		if(pTabButton)
+		if(pTabButton && !getChatTextMngr().hasUnreadMention(pTabButton))
 		{
 			CRGBA	stdColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_normal").c_str());
 			pTabButton->setTextColorNormal(stdColor);

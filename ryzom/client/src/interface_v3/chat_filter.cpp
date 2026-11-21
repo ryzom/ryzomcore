@@ -23,6 +23,7 @@
 
 #include "stdpch.h"
 #include "chat_filter.h"
+#include "chat_link_ui.h"
 #include "../client_chat_manager.h"
 #include "people_list.h"
 #include "../client_cfg.h"
@@ -171,7 +172,8 @@ void CChatInputFilter::chatWindowRemoved(CChatWindow *cw)
 }
 
 //=============================================================================================================
-void CChatInputFilter::displayMessage(const string &msg, NLMISC::CRGBA col, uint numBlinks /*=0*/, bool *windowVisible)
+void CChatInputFilter::displayMessage(const string &msg, NLMISC::CRGBA col, uint numBlinks /*=0*/, bool *windowVisible,
+	const CChatMessage *sharedMessage, const string &senderName)
 {
 	bool windowVisibleTmp = false;
 	std::vector<CChatWindow *>::iterator it;
@@ -182,13 +184,15 @@ void CChatInputFilter::displayMessage(const string &msg, NLMISC::CRGBA col, uint
 	// If at least one window is visible, no need to make the window blink.
 	for(it = _ListeningWindows.begin(); it != _ListeningWindows.end(); ++it)
 	{
-		(*it)->displayMessage(msg, col, FilterType, DynamicChatDbIndex, windowVisibleTmp ? 0  : numBlinks, NULL);
+		(*it)->displayMessage(msg, col, FilterType, DynamicChatDbIndex, windowVisibleTmp ? 0  : numBlinks, NULL,
+			sharedMessage, senderName);
 	}
 	if (windowVisible) *windowVisible = windowVisibleTmp;
 }
 
 //=============================================================================================================
-void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */const string &msg, const string &sender, NLMISC::CRGBA col, uint numBlinks /*=0*/,bool *windowVisible /*=NULL*/)
+void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */const string &msg, const string &sender,
+	NLMISC::CRGBA col, uint numBlinks /*=0*/,bool *windowVisible /*=NULL*/, const CChatMessage *sharedMessage)
 {
 	string senderLwr = NLMISC::toLower(sender);
 
@@ -204,7 +208,7 @@ void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */cons
 			if (peopleIndex != -1)
 			{
 				// We found a player in this list
-				pPList->displayMessage(peopleIndex, msg, col, numBlinks);
+				pPList->displayMessage(peopleIndex, msg, col, numBlinks, sharedMessage);
 				if (windowVisible) *windowVisible = true;
 				return;
 			}
@@ -217,7 +221,7 @@ void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */cons
 	std::vector<CChatWindow *>::iterator peopleIt;
 	for(peopleIt = _ListeningWindows.begin(); peopleIt != _ListeningWindows.end(); ++peopleIt)
 	{
-		(*peopleIt)->displayTellMessage(msg, col,  sender);
+		(*peopleIt)->displayTellMessage(msg, col, sender, sharedMessage);
 	}
 	if (windowVisible) *windowVisible = true;
 }
@@ -307,9 +311,13 @@ void CChatTargetFilter::msgEntered(const string &msg, CChatWindow *chatWindow)
 	else if (!_TargetPlayer.empty())
 	{
 		// the target must be a player, make a tell on him
-		ChatMngr.tell(_TargetPlayer, msg);
+		if (CHAT_SHARE::getCurrentRequest())
+			CHAT_SHARE::setCurrentRequestSent(ChatMngr.tell(_TargetPlayer, *CHAT_SHARE::getCurrentRequest()));
+		else
+			ChatMngr.tell(_TargetPlayer, msg);
 		// direct output in the chat
-		chatWindow->displayLocalPlayerTell(_TargetPlayer, msg);
+		if (!CHAT_SHARE::getCurrentRequest())
+			chatWindow->displayLocalPlayerTell(_TargetPlayer, msg);
 	}
 	else
 	{
@@ -317,7 +325,10 @@ void CChatTargetFilter::msgEntered(const string &msg, CChatWindow *chatWindow)
 		 // this mode is cached so this should be ok
 		ChatMngr.setChatMode(_TargetGroup, ChatMngr.getDynamicChannelIdFromDbIndex(_TargetDynamicChannelDbIndex));
 		// send the string
-		ChatMngr.chat(msg, _TargetGroup == CChatGroup::team);
+		if (CHAT_SHARE::getCurrentRequest())
+			CHAT_SHARE::setCurrentRequestSent(ChatMngr.chat(*CHAT_SHARE::getCurrentRequest(), _TargetGroup == CChatGroup::team));
+		else
+			ChatMngr.chat(msg, _TargetGroup == CChatGroup::team);
 	}
 }
 
