@@ -305,6 +305,8 @@
 	<action handler="set" params="dblink=UI:SAVE:TRANSLATION:REGION:DISABLE|value=0" />
 
 	<action handler="set" params="dblink=UI:SAVE:CHAT:FONT_SIZE|value=10" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:EMOJI_MODE|value=2" />
+	<action handler="set" params="dblink=UI:SAVE:CHAT:EMOJI_SIZE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:MULTI_LINE_SPACE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:SHADOWED_TEXT|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:CHAT:COLORS:SPEAKER|value=makeRGB(220,220,50)" />
