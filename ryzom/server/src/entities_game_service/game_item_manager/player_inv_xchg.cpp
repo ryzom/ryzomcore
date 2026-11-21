@@ -22,7 +22,9 @@
 #include "player_inv_xchg.h"
 
 #include "game_share/slot_equipment.h"
+#include "game_share/animal_status.h"
 #include "player_manager/character.h"
+#include "player_manager/player_room.h"
 #include "guild_manager/guild_manager.h"
 #include "guild_manager/guild_member_module.h"
 
@@ -35,7 +37,6 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 
 const uint32 CExchangeView::NbExchangeSlots = 10;
-extern NLMISC::CVariable<uint32> GuildChestSlots;
 
 // ****************************************************************************
 CExchangeView::CExchangeView()
@@ -87,24 +88,12 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 		return false;
 
 
-	if (INVENTORIES::TInventory(invSrc) == INVENTORIES::guild)
-	{
-		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
-		if (!guild)
-			return false;
+	if (!canAccessInventory(INVENTORIES::TInventory(invSrc), invSlot))
+		return false;
 
-		CGuildMember* member = guild->getMemberFromEId(c->getId());
-		if (!member)
-			return false;
-
-		uint8 chest = floor((float)invSlot / (float)GuildChestSlots);
-
-		if (!guild->haveChestViewGrade(chest, member->getGrade()) || !guild->haveChestGetGrade(chest, member->getGrade()))
-		{
-			CCharacter::sendDynamicSystemMessage( c->getId(),"GUILD_ITEM_DONT_HAVE_RIGHTS" );
-			return false;
-		}
-	}
+	// an item that is worn, held or on the hotbar has to be taken off first
+	if (item->getRefInventory() != NULL)
+		return false;
 
 	// if it is an exchange between 2 players
 	// do not permit exchange of non dropable items, but pet animal ticket are NoDrop item but must ne exchangeable
@@ -284,6 +273,45 @@ bool CExchangeView::removeItemFromExchange(uint32 exchangeSlot, uint32 quantity)
 }
 
 // ****************************************************************************
+bool CExchangeView::removeInaccessibleItems()
+{
+	bool removed = false;
+	for (uint i = 0; i < NbExchangeSlots; i++)
+	{
+		if (_ExchangeSlots[i].InvSlot == INVENTORIES::INVALID_INVENTORY_SLOT
+			|| canAccessInventory(_ExchangeSlots[i].InvSrc, _ExchangeSlots[i].InvSlot))
+			continue;
+
+		removeItemFromExchange(i);
+		removed = true;
+	}
+
+	return removed;
+}
+
+// ****************************************************************************
+bool CExchangeView::canAccessInventory(INVENTORIES::TInventory invSrc, uint32 invSlot)
+{
+	CCharacter * c = getCharacter();
+
+	if (invSrc == INVENTORIES::player_room)
+		return c->getRoomInterface().canUseInventory(c, c);
+
+	// the flag the client reads and a sale tests; it also covers an animal in a stable the character has access to
+	if (invSrc >= INVENTORIES::pet_animal && invSrc < INVENTORIES::max_pet_animal)
+		return (c->getPlayerPets()[invSrc - INVENTORIES::pet_animal].AnimalStatus & ANIMAL_STATUS::InventoryAvailableFlag) != 0;
+
+	if (invSrc == INVENTORIES::guild)
+	{
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+		return guild != NULL && guild->canTakeItem(c, invSlot);
+	}
+
+	// handling, equipment and hotbar only refer to items of the bag: given from there, the item would stay in the bag too
+	return invSrc == INVENTORIES::bag;
+}
+
+// ****************************************************************************
 void CExchangeView::validateExchange(std::vector<CGameItemPtr> * givenItems)
 {
 	for (uint i = 0; i < _ExchangeSlots.size(); i++)
@@ -332,7 +360,10 @@ CGameItemPtr CExchangeView::getExchangeItem(uint32 exchangeSlot, uint32 * exchan
 	CGameItemPtr item = NULL;
 	if (!emptySlot)
 	{
-		item = getConstCharacter()->getInventory(invSrc)->getItem(invSlot);
+		// a character who lost its guild has no guild inventory anymore
+		CInventoryPtr inv = getConstCharacter()->getInventory(invSrc);
+		if (inv != NULL)
+			item = inv->getItem(invSlot);
 	}
 
 	return item;

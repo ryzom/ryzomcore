@@ -37,6 +37,7 @@
 
 #include <vector>
 #include <deque>
+#include <map>
 
 
 const uint32 FirstClientId = 1;
@@ -480,16 +481,15 @@ public:
  	{
  		CGenericMultiPartTemp () : NbBlock(0xFFFFFFFF) { }
  		uint32								NbBlock;
- 		uint32								NbCurrentBlock;
  		uint32								TempSize;
- 		std::vector<std::vector<uint8> >	Temp;
- 
- 		std::vector<bool>					BlockReceived;
+ 		/// the parts received so far by part number, so that the number of parts the client announces sizes nothing
+ 		std::map<uint16, std::vector<uint8> >	Temp;
  
  		void set (CLFECOMMON::CActionGenericMultiPart *agmp, CClientHost *client);
  	};
  
- 	std::vector<CGenericMultiPartTemp>	GenericMultiPartTemp;
+ 	/// one entry per message number up to the highest seen; a deque, so that a new number never copies the parts stored for the others
+ 	std::deque<CGenericMultiPartTemp>	GenericMultiPartTemp;
  	//@}
 
 	/// Quit Id

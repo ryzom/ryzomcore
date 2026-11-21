@@ -32,6 +32,7 @@
 #include "ut_misc_types.h"
 #include "ut_misc_string_common.h"
 #include "ut_misc_base64.h"
+#include "ut_misc_bit_set.h"
 // Add a line here when adding a new test CLASS
 
 struct CUTMisc : public Test::Suite
@@ -53,6 +54,7 @@ struct CUTMisc : public Test::Suite
 		add(std::auto_ptr<Test::Suite>(new CUTMiscTypes));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscStringCommon));
 		add(std::auto_ptr<Test::Suite>(new CUTMiscBase64));
+		add(std::auto_ptr<Test::Suite>(new CUTMiscBitSet));
 		// Add a line here when adding a new test CLASS
 	}
 };

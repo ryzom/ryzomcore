@@ -214,7 +214,7 @@ void CChatClient::setIgnoreList(const std::vector<uint32> &ignoreList)
 void CChatClient::filter( TFilter filterId )
 {
 	set<TFilter>::iterator itF = _Filters.find( filterId );
-	if( itF != _Filters.end() )
+	if( itF == _Filters.end() )
 	{
 		_Filters.insert( filterId );
 	}

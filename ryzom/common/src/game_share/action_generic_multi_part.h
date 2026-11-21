@@ -49,12 +49,11 @@ public:
 		message.serial (Part);
 		message.serial (NbBlock);
 
+		// the length test of CBitMemStream::serialMemStream(), keeping the buffer this reused action already has
 		uint32	size;
 		message.serial(size);
-		if ( size > 512 )
-		{
-			throw NLMISC::EInvalidDataStream();
-		}
+		if (size > message.length()-message.getPos())
+			throw NLMISC::EInvalidDataStream( "BMS: Trying to read a multipart action of %u bytes, past stream size", size );
 
 		PartCont.resize(size);
 		if (size > 0)
