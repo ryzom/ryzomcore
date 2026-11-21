@@ -391,6 +391,9 @@ public:
 	/// get the vertex buffer used by the mesh
 	const CVertexBuffer &getVertexBuffer() const { return _VBuffer ; }
 
+	/// get the skinning bone names, one per matrix id used by the mesh's skin weights (empty if not skinned)
+	const std::vector<std::string> &getBonesName() const { return _BonesName ; }
+
 	/// get the number of matrix block
 	uint getNbMatrixBlock() const { return (uint)_MatrixBlocks.size() ; }
 

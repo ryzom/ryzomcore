@@ -53,6 +53,8 @@
 #include "nel/3d/u_bone.h"
 #include "nel/3d/u_particle_system_instance.h"
 #include "nel/3d/u_point_light.h"
+#include "nel/3d/scene_user.h"
+#include "hairstyle_hat_clip.h"
 // game share
 #include "game_share/player_visual_properties.h"
 #include "game_share/gender.h"
@@ -122,6 +124,15 @@ CPlayerCL::~CPlayerCL()
 	{
 		if(Scene)
 			Scene->deletePointLight(_Light);
+	}
+
+	// The clipped hair instance owns a private (non-shape-bank) CMesh, unlike every other
+	// instance here: it must be explicitly deleted, it won't be cleaned up anywhere else.
+	if(!_ClippedHairInstance.empty())
+	{
+		if(Scene)
+			Scene->deleteInstance(_ClippedHairInstance);
+		_ClippedHairInstance = NULL;
 	}
 }
 
@@ -1042,6 +1053,15 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				{
 					equip(slot, tagInfos[0]);
 				}
+
+				// The tag resolved to a plain hairstyle (not flagged "H"): no hat this update, clear HAT_SLOT.
+				if (slot != SLOTTYPE::HAT_SLOT)
+					equip(SLOTTYPE::HAT_SLOT, "");
+			}
+			else
+			{
+				// No tag at all: nothing else equips HAT_SLOT, so it must be cleared explicitly here.
+				equip(SLOTTYPE::HAT_SLOT, "");
 			}
 		}
 		else
@@ -1056,6 +1076,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			_Face.Current = NULL;
 			_Face.CurrentName.clear();
 		}
+
+		// Note: the hat/hairstyle clip-instance update used to happen right here, but the
+		// skeleton isn't fully configured yet this early (see updateClippedHairInstance's
+		// own comment) -- it now runs from updateVisible() every frame instead.
+
 		// Now we have a skeleton, we can update VpB and VpC.
 		sint64 vB, vC;
 		string propName;
@@ -1080,6 +1105,85 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	else
 		nlwarning("PL::updateVPVpa:%d: Skeleton not allocated.", _Slot);
 }// updateVisualPropertyVpa //
+
+//-----------------------------------------------
+// updateVisible :
+// Per-frame update. Runs after the skeleton is fully configured for the frame (unlike
+// updateVisualPropertyVpa, a property-change callback that fires too early: scale not
+// yet applied, bone world matrices not yet computed).
+//-----------------------------------------------
+void CPlayerCL::updateVisible(const NLMISC::TTime &time, CEntityCL *target)
+{
+	CCharacterCL::updateVisible(time, target);
+	updateClippedHairInstance();
+}// updateVisible //
+
+//-----------------------------------------------
+// updateClippedHairInstance :
+// If both a hat and a hairstyle are equipped, swap the normal (shared) hairstyle instance
+// for a private one clipped against the hat's volume, so wide hairstyles no longer poke
+// through the hat. Falls back to the normal shared instance if either shape can't be
+// loaded/clipped (buildClippedHairstyleInstance then returns an empty UInstance).
+//-----------------------------------------------
+void CPlayerCL::updateClippedHairInstance()
+{
+	if (_Skeleton.empty())
+		return;
+
+	const string &hatShapeName = !_Instances[SLOTTYPE::HAT_SLOT].LoadingName.empty() ? _Instances[SLOTTYPE::HAT_SLOT].LoadingName : _Instances[SLOTTYPE::HAT_SLOT].CurrentName;
+	const string &hairShapeName = !_Instances[SLOTTYPE::HEAD_SLOT].LoadingName.empty() ? _Instances[SLOTTYPE::HEAD_SLOT].LoadingName : _Instances[SLOTTYPE::HEAD_SLOT].CurrentName;
+
+	if (!hatShapeName.empty() && !hairShapeName.empty())
+	{
+		string key = hairShapeName + "|" + hatShapeName;
+		if (_ClippedHairKey != key)
+		{
+			nlinfo("PL:updateClippedHairInstance:%d: building clipped hair instance '%s' under hat '%s'", _Slot, hairShapeName.c_str(), hatShapeName.c_str());
+			if (!_ClippedHairInstance.empty())
+				Scene->deleteInstance(_ClippedHairInstance);
+			_ClippedHairInstance = buildClippedHairstyleInstance(((CSceneUser *)Scene)->getScene(), _Skeleton, hairShapeName, hatShapeName);
+			_ClippedHairKey = key;
+			// Hairstyle materials use the "panoply" colour-slot system (race skin tone,
+			// user colour, hair colour, eye colour selecting into a shared multi-file
+			// texture) -- copying the CMaterial as-is is not enough, this needs the exact
+			// same CColorSlotManager::setInstanceSlot() call the normal equip path makes
+			// (CCharacterCL::applyColorSlot()). _Instances[HEAD_SLOT].AC{Skin,User,Hair,Eyes}
+			// already hold the last values that call used, applied here to the private
+			// instance too (that function takes an SInstanceCL, so its core call is
+			// replicated directly here instead, on our plain UInstance).
+			if (!_ClippedHairInstance.empty())
+			{
+				CColorSlotManager::TIntCouple array[4];
+				array[0].first = (uint)0; array[0].second = (uint)_Instances[SLOTTYPE::HEAD_SLOT].ACSkin;
+				array[1].first = (uint)1; array[1].second = (uint)_Instances[SLOTTYPE::HEAD_SLOT].ACUser;
+				array[2].first = (uint)2; array[2].second = (uint)_Instances[SLOTTYPE::HEAD_SLOT].ACHair;
+				array[3].first = (uint)3; array[3].second = (uint)_Instances[SLOTTYPE::HEAD_SLOT].ACEyes;
+				ColorSlotManager.setInstanceSlot(_ClippedHairInstance, array, 4);
+			}
+		}
+		if (!_ClippedHairInstance.empty())
+		{
+			_ClippedHairInstance.show();
+			// Current may not be resolved yet (still Loading, promoted later by the
+			// generic per-frame async-texture loop in entity_cl.cpp, not necessarily
+			// this same call) -- hide it now if already resolved, and make sure it
+			// comes up hidden whenever it does get promoted either way.
+			if (!_Instances[SLOTTYPE::HEAD_SLOT].Current.empty())
+				_Instances[SLOTTYPE::HEAD_SLOT].Current.hide();
+			_Instances[SLOTTYPE::HEAD_SLOT].KeepHiddenWhenLoaded = true;
+		}
+	}
+	else if (!_ClippedHairInstance.empty())
+	{
+		nlinfo("PL:updateClippedHairInstance:%d: releasing clipped hair instance, hat or hairstyle no longer both present", _Slot);
+		Scene->deleteInstance(_ClippedHairInstance);
+		_ClippedHairInstance = NULL;
+		_ClippedHairKey.clear();
+		_Instances[SLOTTYPE::HEAD_SLOT].KeepHiddenWhenLoaded = false;
+		if (!_Instances[SLOTTYPE::HEAD_SLOT].Current.empty())
+			_Instances[SLOTTYPE::HEAD_SLOT].Current.show();
+	}
+}// updateClippedHairInstance //
 
 //-----------------------------------------------
 // updateVisualPropertyVpb :

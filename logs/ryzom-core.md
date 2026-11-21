@@ -1,5 +1,34 @@
 # ryzom-core
 
+## 2026-09-22 — ✨ Clip hairstyle mesh against equipped hat volume (HAT_SLOT)
+
+`ajout_hat_slot__hair_clip_alpha.md`: wide hairstyles (`HEAD_SLOT`) visually poking
+through hats (`HAT_SLOT`, added separately in `ajout_hat_slot.md`) are now fixed by
+building, per character and only while both slots are occupied, a private (never
+shape-bank-shared) copy of the hairstyle mesh with the geometry inside the hat's volume
+actually cut away — a real geometric clip, computed once at equip time. New module
+`ryzom/client/src/hairstyle_hat_clip.{h,cpp}`; see `docs/hairstyle_hat_clip.md` for the
+full design (coordinate-space handling, the `<hatShapeName>_mask.shape` clipping-volume
+convention, the clipping algorithm, and known limitations).
+
+Driven from a new `CPlayerCL::updateVisible()` override (`player_cl.h`/`.cpp`), not from
+`updateVisualPropertyVpa()`: the latter runs before the character's skeleton is fully
+configured for the frame (bone world matrices still default/identity, character scale not
+yet reflected), which produced three distinct "skeleton not ready" symptoms during
+testing (unresolved bone matrices, halved-scale positions, and world-space coordinates
+imprecise enough to swamp the sub-centimeter containment test on a large continent) before
+landing on `updateVisible()` and an explicit recenter-on-the-bone-position step.
+
+Two small public accessors added to the engine, both previously missing: `CMeshGeom::
+getBonesName()` (`nel/include/nel/3d/mesh.h`) and `CMeshMRMSkinnedGeom::getLodGeomorphs()`
+(`nel/include/nel/3d/mesh_mrm_skinned.h`, though `getGeomorphs()` already existed there
+doing the same thing under a different name — worth deduplicating later, not done here).
+
+`entity_cl.cpp`'s `SInstanceCL::updateCurrentFromLoading()` gained two `(IA_AGENT_DEBUG)`-
+tagged log lines during testing (kept out of the final commit) to confirm
+`KeepHiddenWhenLoaded` — already-existing engine plumbing — was being respected correctly
+for hiding the normal (shared) hairstyle instance while a clipped one is active.
+
 ## 2026-09-16 — ✨ Add smoothing angle property to material
 
 Added `CMaterial::_SmoothingAngle` (float, sentinel `-1.0` = never set) on
