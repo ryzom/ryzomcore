@@ -877,6 +877,8 @@ private:
 	static int luaFindEmptyPlace(CLuaState &ls);
 	static int luaIsInIslandRect(CLuaState &ls); // test if pos is in the current island (not necessarily a valid pos, but inside the island rect)
 												 // takes x, y as entry, returns true on success
+	static int luaIsValidPos(CLuaState &ls); // whether the palette, drawing and move tools accept a position (CTool::isValid2DPos)
+	static int luaIsValidPoly(CLuaState &ls); // whether the palette tools accept the inside of a zone (CIslandCollision::isValidPoly)
 
 	static int luaGetCurrentIslandName(CLuaState &ls);
 
