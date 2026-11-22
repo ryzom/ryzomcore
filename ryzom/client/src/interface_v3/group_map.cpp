@@ -86,7 +86,8 @@ using namespace STRING_MANAGER;
 // /////// //
 // STATICS //
 // /////// //
-static CGroupMap   *LastClickedMap = nullptr;
+// the map whose menu asked for a new landmark; a CRefPtr, so that it nulls itself when the map is deleted under the dialog
+static NLMISC::CRefPtr<CGroupMap> LastClickedMap;
 // the landmark being renamed; a CRefPtr, so that it nulls itself when the button is deleted under the dialog
 static NLMISC::CRefPtr<CCtrlButton> LastSelectedLandMark;
 static bool		   UseUserPositionForLandMark = false;
@@ -3913,7 +3914,8 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// pop the rename dialog
 	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-	if (LastClickedMap->isInDeathMode()) return;
+	// the handler only makes sense from the menu of a map: there is no map when something else runs it
+	if (!LastClickedMap || LastClickedMap->isInDeathMode()) return;
 	LastSelectedLandMark = nullptr;
 	popupLandMarkNameDialog();
 }
@@ -4126,6 +4128,8 @@ class CAHMapTeleport : public IActionHandler
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		// the handler only makes sense from the menu of a map: there is no map when something else runs it
+		if (!clickedMap) return;
 		closeLandMarkNameDialog();
 		NLMISC::CVector2f pos = clickedMap->getRightClickLastPos();
 		clickedMap->mapToWorld(pos, pos);
