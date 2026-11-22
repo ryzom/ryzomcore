@@ -1916,8 +1916,9 @@ void CClientConfig::setValues()
 
 	READ_BOOL_DEV(DamageShieldEnabled)
 
-	// The Lua commands, the ah command and the development libraries of Lua: not in a final version
-	READ_BOOL_DEV(AllowDebugLua)
+	// The Lua commands, and in a client that is not a final version the ah command and the development libraries
+	// of Lua. Read by a final version too: it is off by default, a published client has it only if its player sets it.
+	READ_BOOL_FV(AllowDebugLua)
 	READ_BOOL_FV(DisplayLuaDebugInfo)
 
 	READ_BOOL_DEV(LuaDebugInfoGotoButtonEnabled)

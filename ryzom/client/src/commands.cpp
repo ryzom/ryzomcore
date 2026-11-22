@@ -5270,9 +5270,8 @@ NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 // ***************************************************************************
 // LUA
 // ***************************************************************************
-// The Lua commands are for development: a final version has neither them nor AllowDebugLua, which is only read
-// by a client that is not a final version
-#if !FINAL_VERSION
+// The Lua commands are in every client, and do nothing unless AllowDebugLua is set in its configuration: the
+// default configuration does not set it, so a client as it is published takes no Lua from its player
 const char	*LUADebugNotEnabledMsg= "Lua Commands are available only if you add 'AllowDebugLua= 1;' in your client.cfg";
 
 NLMISC_COMMAND(luaReload, "reload all .lua script files", "")
@@ -5378,6 +5377,10 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 }
 
 
+
+
+// GC allowed only in Dev version
+#if !FINAL_VERSION
 NLMISC_COMMAND(luaGC, "Force a garbage collector of lua", "")
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
