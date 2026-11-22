@@ -132,8 +132,15 @@ void CItemGroup::CItem::equip(uint32 &equipTime)
 		return;
 	}
 
+	const CItemSheet *itemSheet = pCS->asItemSheet();
+	if (!itemSheet)
+	{
+		nlwarning("<CItemGroup::CItem::equip> item %d has no item sheet", pCS->getSheetId());
+		return;
+	}
+
 	std::string srcPath = pCS->getSheet();
-	equipTime = std::max(equipTime, pCS->asItemSheet()->EquipTime);
+	equipTime = std::max(equipTime, itemSheet->EquipTime);
 	CInventoryManager::getInstance()->equip(srcPath, dstSlot.toDbPath());
 }
 
