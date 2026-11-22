@@ -92,6 +92,7 @@ namespace NLGUI
 			}
 		}
 		PrioritizedWindows[nPrio].push_back(pIG);
+		++WindowListChanges;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -105,6 +106,7 @@ namespace NLGUI
 				if ((*it) == pIG)
 				{
 					PrioritizedWindows[i].erase(it);
+					++WindowListChanges;
 					return;
 				}
 				it++;
@@ -157,6 +159,7 @@ namespace NLGUI
 				{
 					PrioritizedWindows[i].erase(it);
 					PrioritizedWindows[i].push_back(pIG);
+					++WindowListChanges;
 					LastTopWindowPriority= i;
 					return;
 				}
@@ -179,6 +182,7 @@ namespace NLGUI
 				{
 					PrioritizedWindows[i].erase(it);
 					PrioritizedWindows[i].push_front(pIG);
+					++WindowListChanges;
 					return;
 				}
 				it++;
@@ -186,6 +190,14 @@ namespace NLGUI
 		}
 		// todo hulud interface syntax error
 		nlwarning("window %s do not exist in a priority list", pIG->getId().c_str());
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CWidgetManager::SMasterGroup::isWindowStillListed(const std::list<CInterfaceGroup*> &rList, uint32 changes, CInterfaceGroup *pIG) const
+	{
+		if (WindowListChanges == changes)
+			return true;
+		return std::find(rList.begin(), rList.end(), pIG) != rList.end();
 	}
 
 	// ----------------------------------------------------------------------------
@@ -806,6 +818,9 @@ namespace NLGUI
 	// ***************************************************************************
 	void CWidgetManager::hideAllWindows()
 	{
+		// setActive puts a container at the back of its list and runs its on_deactive handler, which may move, remove or
+		// delete other windows: the list is walked through a copy, as in checkCoords()
+		std::vector<CInterfaceGroup*> windows;
 		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -814,11 +829,13 @@ namespace NLGUI
 				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 				{
 					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-					std::list<CInterfaceGroup*>::const_iterator itw;
-					for (itw = rList.begin(); itw!= rList.end();)
+					windows.assign(rList.begin(), rList.end());
+					const uint32 changes = rMG.WindowListChanges;
+					for (size_t iw = 0; iw < windows.size(); ++iw)
 					{
-						CInterfaceGroup *pIG = *itw;
-						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
+						CInterfaceGroup *pIG = windows[iw];
+						if (!rMG.isWindowStillListed(rList, changes, pIG))
+							continue;
 						pIG->setActive(false);
 					}
 				}
@@ -829,6 +846,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CWidgetManager::hideAllNonSavableWindows()
 	{
+		// the list is walked through a copy, see hideAllWindows()
+		std::vector<CInterfaceGroup*> windows;
 		for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -837,12 +856,14 @@ namespace NLGUI
 				for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 				{
 					std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-					std::list<CInterfaceGroup*>::const_iterator itw;
-					for (itw = rList.begin(); itw!= rList.end();)
+					windows.assign(rList.begin(), rList.end());
+					const uint32 changes = rMG.WindowListChanges;
+					for (size_t iw = 0; iw < windows.size(); ++iw)
 					{
-						CInterfaceGroup *pIG = *itw;
+						CInterfaceGroup *pIG = windows[iw];
+						if (!rMG.isWindowStillListed(rList, changes, pIG))
+							continue;
 						CGroupContainer *cont = dynamic_cast<CGroupContainer *>(pIG);
-						itw++;	// since setActive invalidate the iterator, be sure we move to the next one before
 						if (!cont || !cont->isSavable())
 						{
 							pIG->setActive(false);
@@ -1122,6 +1143,13 @@ namespace NLGUI
 
 		uint32 nMasterGroup;
 
+		// checkCoords and updateCoords of a window run scripts and action handlers, which may put a window on top,
+		// remove one or delete one (a deleted window leaves the lists, see removeRefOnGroup). That changes the list
+		// being walked, so both loops walk a copy of it, and skip a window that is no more in the list. This covers
+		// the other windows: a window that deletes itself from its own checkCoords or updateCoords still returns
+		// into its own deleted code.
+		std::vector<CInterfaceGroup*> windows;
+
 		{
 			H_AUTO ( RZ_Interface_checkCoords )
 
@@ -1134,11 +1162,13 @@ namespace NLGUI
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
 						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-						std::list<CInterfaceGroup*>::const_iterator itw;
-						for (itw = rList.begin(); itw!= rList.end();)
+						windows.assign(rList.begin(), rList.end());
+						const uint32 changes = rMG.WindowListChanges;
+						for (size_t iw = 0; iw < windows.size(); ++iw)
 						{
-							CInterfaceGroup *pIG = *itw;
-							itw++;	// since checkCoords invalidate the iterator, be sure we move to the next one before
+							CInterfaceGroup *pIG = windows[iw];
+							if (!rMG.isWindowStillListed(rList, changes, pIG))
+								continue;
 							if (pIG->getActive())
 								pIG->checkCoords ();
 						}
@@ -1160,24 +1190,27 @@ namespace NLGUI
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
 						std::list<CInterfaceGroup*> &rList = rMG.PrioritizedWindows[nPriority];
-						std::list<CInterfaceGroup*>::const_iterator itw;
-						for (itw = rList.begin(); itw!= rList.end(); itw++)
+						windows.assign(rList.begin(), rList.end());
+						const uint32 changes = rMG.WindowListChanges;
+						for (size_t iw = 0; iw < windows.size(); ++iw)
 						{
-							CInterfaceGroup *pIG = *itw;
+							CInterfaceGroup *pIG = windows[iw];
+							if (!rMG.isWindowStillListed(rList, changes, pIG))
+								continue;
 							bool		updateCoordCalled= false;
 							// updateCoords the window only if the master group is his parent and if need it
 							// do it until updateCoords() no more invalidate coordinates!!
 
 							// add deadlock counter to prevent endless loop (Issue #73: web browser long scroll lockup)
 							int deadlock = 10;
-							while (--deadlock > 0 && pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
+							while (--deadlock > 0 && rMG.isWindowStillListed(rList, changes, pIG) && pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
 							{
 								bRecomputeCtrlUnderPtr = true;
 								// Update as many pass wanted (3 time for complex resizing, 1 for scroll for example)
 								uint	numPass= pIG->getInvalidCoords();
 								// reset before updateCoords
 								pIG->resetInvalidCoords();
-								for(uint i=0;i<numPass;i++)
+								for(uint i=0;i<numPass && rMG.isWindowStillListed(rList, changes, pIG);i++)
 								{
 									pIG->updateCoords ();
 								}
@@ -1185,7 +1218,7 @@ namespace NLGUI
 							}
 							// If the group need to update pos each frame (eg: CGroupInScene),
 							// and updateCoords not called
-							if(pIG->getParent()==rMG.Group && !updateCoordCalled && pIG->isNeedFrameUpdatePos())
+							if(!updateCoordCalled && pIG->getParent()==rMG.Group && pIG->isNeedFrameUpdatePos())
 							{
 								// This Group will compute the delta to apply.
 								pIG->onFrameUpdateWindowPos(0,0);

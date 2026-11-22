@@ -117,10 +117,19 @@ namespace NLGUI
 			{
 				Group = nullptr;
 				LastTopWindowPriority = WIN_PRIORITY_NORMAL;
+				WindowListChanges = 0;
 			}
 
 			CInterfaceGroup *Group;
 			std::list< CInterfaceGroup* > PrioritizedWindows[ WIN_PRIORITY_MAX ];
+			// Counts the windows added to and removed from PrioritizedWindows, and those put on top or back, which leave
+			// their place in the list and enter it again (the sort of the world space list keeps every place and is not
+			// counted). A loop that calls code of the windows while it walks these lists compares it to know that a
+			// window may have left the list under it.
+			uint32 WindowListChanges;
+			// true if the window is in this list. For a loop that walks a copy of the list: changes is the value of
+			// WindowListChanges when the copy was made, the list is searched only if it changed since.
+			bool isWindowStillListed( const std::list< CInterfaceGroup* > &rList, uint32 changes, CInterfaceGroup *pIG ) const;
 
 			void addWindow( CInterfaceGroup *pIG, uint8 nPrio = WIN_PRIORITY_NORMAL );
 			void delWindow( CInterfaceGroup *pIG );
