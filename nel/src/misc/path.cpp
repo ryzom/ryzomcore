@@ -702,10 +702,26 @@ std::string CFileContainer::getCurrentPath ()
 {
 #ifdef NL_OS_WINDOWS
 	wchar_t buffer[1024];
-	return standardizePath(wideToUtf8(_wgetcwd(buffer, 1024)), false);
+
+	// no current directory: it was deleted, cannot be read, or its path is longer than the buffer
+	if (_wgetcwd(buffer, 1024) == nullptr)
+	{
+		nlwarning("PATH: Can't get the current directory: (errno %d) %s", errno, strerror(errno));
+		return std::string();
+	}
+
+	return standardizePath(wideToUtf8(buffer), false);
 #else
 	char buffer [1024];
-	return standardizePath(getcwd(buffer, 1024), false);
+
+	// no current directory: it was deleted, cannot be read, or its path is longer than the buffer
+	if (getcwd(buffer, 1024) == nullptr)
+	{
+		nlwarning("PATH: Can't get the current directory: (errno %d) %s", errno, strerror(errno));
+		return std::string();
+	}
+
+	return standardizePath(buffer, false);
 #endif
 }
 
