@@ -2137,12 +2137,14 @@ void CGroupMap::loadMap()
 			CLuaIHM::pushReflectableOnStack(*ls, this);
 			if (game.callMethodByNameNoThrow("onLoadMap", numArg, numResult))
 			{
-				if (ls->isString(1))
+				// the result is on top of the stack: index 1 is the first argument of the caller when this
+				// runs inside a call from Lua
+				if (ls->isString(-1))
 				{
-					if (!NLMISC::CPath::lookup(ls->toString(1), false, false).empty())
-						_MapTexture = ls->toString(1);
+					if (!NLMISC::CPath::lookup(ls->toString(-1), false, false).empty())
+						_MapTexture = ls->toString(-1);
 					else
-						nlwarning("Custom map texture not found '%s' for map '%s'", ls->toString(1), _MapTexture.c_str());
+						nlwarning("Custom map texture not found '%s' for map '%s'", ls->toString(-1), _MapTexture.c_str());
 				}
 			}
 		}
